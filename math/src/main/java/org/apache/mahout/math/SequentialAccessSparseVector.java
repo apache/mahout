@@ -17,10 +17,10 @@
 
 package org.apache.mahout.math;
 
+import com.google.common.collect.AbstractIterator;
 import org.apache.mahout.math.function.Functions;
 
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 /**
  * <p>
@@ -249,54 +249,36 @@ public class SequentialAccessSparseVector extends AbstractVector {
   }
 
 
-  private final class NonDefaultIterator implements Iterator<Element> {
+  private final class NonDefaultIterator extends AbstractIterator<Element> {
 
     private final NonDefaultElement element = new NonDefaultElement();
 
     @Override
-    public boolean hasNext() {
+    protected Element computeNext() {
       int numMappings = values.getNumMappings();
-      return numMappings > 0 && element.getNextOffset() < numMappings;
-    }
-
-    @Override
-    public Element next() {
-      if (!hasNext()) {
-        throw new NoSuchElementException();
+      if (numMappings <= 0 || element.getNextOffset() >= numMappings) {
+        return endOfData();
       }
       element.advanceOffset();
       return element;
     }
 
-    @Override
-    public void remove() {
-      throw new UnsupportedOperationException();
-    }
   }
 
-  private final class AllIterator implements Iterator<Element> {
+  private final class AllIterator extends AbstractIterator<Element> {
 
     private final AllElement element = new AllElement();
 
     @Override
-    public boolean hasNext() {
+    protected Element computeNext() {
       int numMappings = values.getNumMappings();
-      return numMappings > 0 && element.getNextIndex() <= values.getIndices()[numMappings - 1];
-    }
-
-    @Override
-    public Element next() {
-      if (!hasNext()) {
-        throw new NoSuchElementException();
+      if (numMappings <= 0 || element.getNextIndex() > values.getIndices()[numMappings - 1]) {
+        return endOfData();
       }
       element.advanceIndex();
       return element;
     }
 
-    @Override
-    public void remove() {
-      throw new UnsupportedOperationException();
-    }
   }
 
   private final class NonDefaultElement implements Element {

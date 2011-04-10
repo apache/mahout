@@ -23,6 +23,8 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 
+import com.google.common.base.Charsets;
+
 /**
  * Iterable representing the lines of a text file. It can produce an {@link Iterator} over those lines. This
  * assumes the text file's lines are delimited in a manner consistent with how {@link java.io.BufferedReader}
@@ -31,21 +33,19 @@ import java.util.Iterator;
  * This class will uncompress files that end in .zip or .gz accordingly, too.
  */
 public final class FileLineIterable implements Iterable<String> {
-  
-  private static final Charset UTF8 = Charset.forName("UTF-8");
-  
+
   private final InputStream is;
   private final Charset encoding;
   private final boolean skipFirstLine;
   
   /** Creates a  over a given file, assuming a UTF-8 encoding. */
   public FileLineIterable(File file) throws IOException {
-    this(file, UTF8, false);
+    this(file, Charsets.UTF_8, false);
   }
   
   /** Creates a  over a given file, assuming a UTF-8 encoding. */
   public FileLineIterable(File file, boolean skipFirstLine) throws IOException {
-    this(file, UTF8, skipFirstLine);
+    this(file, Charsets.UTF_8, skipFirstLine);
   }
   
   /** Creates a  over a given file, using the given encoding. */
@@ -54,11 +54,11 @@ public final class FileLineIterable implements Iterable<String> {
   }
   
   public FileLineIterable(InputStream is) {
-    this(is, UTF8, false);
+    this(is, Charsets.UTF_8, false);
   }
   
   public FileLineIterable(InputStream is, boolean skipFirstLine) {
-    this(is, UTF8, skipFirstLine);
+    this(is, Charsets.UTF_8, skipFirstLine);
   }
   
   public FileLineIterable(InputStream is, Charset encoding, boolean skipFirstLine) {

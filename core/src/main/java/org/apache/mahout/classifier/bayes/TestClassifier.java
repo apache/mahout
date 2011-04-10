@@ -275,9 +275,9 @@ public final class TestClassifier {
       
     }
     if (verbose) {
-      log.info("{}", totalStatistics.toString());
+      log.info("{}", totalStatistics);
     }
-    log.info(resultAnalyzer.summarize());
+    log.info("{}", resultAnalyzer);
   }
   
   public static void classifyParallel(BayesParameters params) throws IOException {

@@ -22,7 +22,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.google.common.base.Charsets;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -139,7 +139,7 @@ public final class ClusterDumper extends AbstractJob {
     if (this.outputFile == null) {
       writer = new OutputStreamWriter(System.out);
     } else {
-      writer = new OutputStreamWriter(new FileOutputStream(new File(this.outputFile)), Charset.forName("UTF-8"));
+      writer = new OutputStreamWriter(new FileOutputStream(new File(this.outputFile)), Charsets.UTF_8);
     }
     try {
       for (Cluster value :

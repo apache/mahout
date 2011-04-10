@@ -21,9 +21,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.Charset;
 import java.util.Iterator;
 
+import com.google.common.base.Charsets;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
 import org.apache.mahout.classifier.BayesFileFormatter;
@@ -48,7 +48,7 @@ public final class BayesFileFormatterTest extends MahoutTestCase {
     out = getTestTempDir("bayes/out");
     for (String word : WORDS) {
       File file = new File(input, word);
-      Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charset.forName("UTF-8"));
+      Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8);
       writer.write(word);
       writer.close();
     }
@@ -59,8 +59,7 @@ public final class BayesFileFormatterTest extends MahoutTestCase {
     Analyzer analyzer = new WhitespaceAnalyzer();
     File[] files = out.listFiles();
     assertEquals("files Size: " + files.length + " is not: " + 0, 0, files.length);
-    Charset charset = Charset.forName("UTF-8");
-    BayesFileFormatter.format("animal", analyzer, input, charset, out);
+    BayesFileFormatter.format("animal", analyzer, input, Charsets.UTF_8, out);
 
     files = out.listFiles();
     assertEquals("files Size: " + files.length + " is not: " + WORDS.length, files.length, WORDS.length);
@@ -79,8 +78,7 @@ public final class BayesFileFormatterTest extends MahoutTestCase {
     Analyzer analyzer = new WhitespaceAnalyzer();
     File[] files = out.listFiles();
     assertEquals("files Size: " + files.length + " is not: " + 0, 0, files.length);
-    Charset charset = Charset.forName("UTF-8");
-    BayesFileFormatter.collapse("animal", analyzer, input, charset, new File(out, "animal"));
+    BayesFileFormatter.collapse("animal", analyzer, input, Charsets.UTF_8, new File(out, "animal"));
     files = out.listFiles();
     assertEquals("files Size: " + files.length + " is not: " + 1, 1, files.length);
     int count = 0;

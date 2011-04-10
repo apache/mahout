@@ -26,14 +26,14 @@ public final class TestSamplingIterator extends MahoutTestCase {
 
   @Test
   public void testEmptyCase() {
-    assertFalse(new SamplingIterator<Integer>(Integers.iterator(0), 0.9999).hasNext());
-    assertFalse(new SamplingIterator<Integer>(Integers.iterator(0), 1).hasNext());
-    assertFalse(new SamplingIterator<Integer>(Integers.iterator(0), 2).hasNext());
+    assertFalse(new SamplingIterator<Integer>(new CountingIterator(0), 0.9999).hasNext());
+    assertFalse(new SamplingIterator<Integer>(new CountingIterator(0), 1).hasNext());
+    assertFalse(new SamplingIterator<Integer>(new CountingIterator(0), 2).hasNext());
   }
 
   @Test
   public void testSmallInput() {
-    Iterator<Integer> t = new SamplingIterator<Integer>(Integers.iterator(1), 0.9999);
+    Iterator<Integer> t = new SamplingIterator<Integer>(new CountingIterator(1), 0.9999);
     assertTrue(t.hasNext());
     assertEquals(0, t.next().intValue());
     assertFalse(t.hasNext());
@@ -41,13 +41,13 @@ public final class TestSamplingIterator extends MahoutTestCase {
 
   @Test
   public void testAbsurdSampleRate() {
-    Iterator<Integer> t = new SamplingIterator<Integer>(Integers.iterator(2), 0);
+    Iterator<Integer> t = new SamplingIterator<Integer>(new CountingIterator(2), 0);
     assertFalse(t.hasNext());
   }
 
   @Test
   public void testExactSizeMatch() {
-    Iterator<Integer> t = new SamplingIterator<Integer>(Integers.iterator(10), 1);
+    Iterator<Integer> t = new SamplingIterator<Integer>(new CountingIterator(10), 1);
     for (int i = 0; i < 10; i++) {
       assertTrue(t.hasNext());
       assertEquals(i, t.next().intValue());
@@ -58,7 +58,7 @@ public final class TestSamplingIterator extends MahoutTestCase {
   @Test
   public void testSample() {
     for (int i = 0; i < 100; i++) {
-      Iterator<Integer> t = new SamplingIterator<Integer>(Integers.iterator(1000), 0.1);
+      Iterator<Integer> t = new SamplingIterator<Integer>(new CountingIterator(1000), 0.1);
       int k = 0;
       while (t.hasNext()) {
         int v = t.next();

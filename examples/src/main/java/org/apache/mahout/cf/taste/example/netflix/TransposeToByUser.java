@@ -22,12 +22,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import org.apache.commons.cli2.OptionException;
 import org.apache.mahout.cf.taste.example.TasteOptionParser;
@@ -102,7 +102,7 @@ public final class TransposeToByUser {
   
   private static void appendStringsToFile(Iterable<String> strings, File file) throws IOException {
     PrintWriter outputStreamWriter =
-      new PrintWriter(new OutputStreamWriter(new FileOutputStream(file, true), Charset.forName("UTF-8")));
+      new PrintWriter(new OutputStreamWriter(new FileOutputStream(file, true), Charsets.UTF_8));
     try {
       for (String s : strings) {
         outputStreamWriter.println(s);

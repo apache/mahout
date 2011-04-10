@@ -24,8 +24,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 
+import com.google.common.collect.AbstractIterator;
 import org.apache.mahout.common.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,19 +35,15 @@ import org.slf4j.LoggerFactory;
  * While the same object will be returned from the iteration each time, it will be returned once for each row
  * of the result.
  */
-final class EachRowIterator implements Iterator<ResultSet>, Closeable {
+final class EachRowIterator extends AbstractIterator<ResultSet> implements Closeable {
 
   private static final Logger log = LoggerFactory.getLogger(EachRowIterator.class);
 
   private final Connection connection;
   private final PreparedStatement statement;
   private final ResultSet resultSet;
-  private boolean closed;
-  private boolean available;
 
   EachRowIterator(DataSource dataSource, String sqlQuery) throws SQLException {
-    available = false;
-    closed = false;
     try {
       connection = dataSource.getConnection();
       statement = connection.prepareStatement(sqlQuery, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -62,31 +58,18 @@ final class EachRowIterator implements Iterator<ResultSet>, Closeable {
   }
 
   @Override
-  public boolean hasNext() {
-    if (!available) {
-      if (closed) {
-        return false;
-      }
-      try {
-        available = resultSet.next();
-      } catch (SQLException sqle) {
+  protected ResultSet computeNext() {
+    try {
+      if (resultSet.next()) {
+        return resultSet;
+      } else {
         close();
-        throw new IllegalStateException(sqle);
+        return null;
       }
-      if (!available) {
-        close();
-      }
+    } catch (SQLException sqle) {
+      close();
+      throw new IllegalStateException(sqle);
     }
-    return available;
-  }
-
-  @Override
-  public ResultSet next() {
-    if (!hasNext()) {
-      throw new NoSuchElementException();
-    }
-    available = false;
-    return resultSet;
   }
 
   public void skip(int n) throws SQLException {
@@ -101,18 +84,10 @@ final class EachRowIterator implements Iterator<ResultSet>, Closeable {
     }
   }
 
-  /**
-   * @throws UnsupportedOperationException
-   */
-  @Override
-  public void remove() {
-    throw new UnsupportedOperationException();
-  }
-
   @Override
   public void close() {
-    closed = true;
     IOUtils.quietClose(resultSet, statement, connection);
+    endOfData();
   }
 
 }

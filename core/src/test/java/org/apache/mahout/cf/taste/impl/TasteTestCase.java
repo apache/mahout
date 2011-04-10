@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl;
 
+import com.google.common.base.Charsets;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
@@ -74,7 +75,7 @@ public abstract class TasteTestCase extends MahoutTestCase {
   }
 
   protected static void writeLines(File file, String... lines) throws FileNotFoundException {
-    PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), Charset.forName("UTF-8")));
+    PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8));
     try {
       for (String line : lines) {
         writer.println(line);

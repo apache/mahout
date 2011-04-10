@@ -18,8 +18,8 @@
 package org.apache.mahout.classifier.bayes;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 
+import com.google.common.base.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -44,7 +44,6 @@ public class XmlInputFormat extends TextInputFormat {
 
   public static final String START_TAG_KEY = "xmlinput.start";
   public static final String END_TAG_KEY = "xmlinput.end";
-  private static final Charset UTF8 = Charset.forName("UTF-8");
 
   @Override
   public RecordReader<LongWritable, Text> createRecordReader(InputSplit split, TaskAttemptContext context) {
@@ -73,8 +72,8 @@ public class XmlInputFormat extends TextInputFormat {
     private Text currentValue;
 
     public XmlRecordReader(FileSplit split, Configuration conf) throws IOException {
-      startTag = conf.get(START_TAG_KEY).getBytes(UTF8);
-      endTag = conf.get(END_TAG_KEY).getBytes(UTF8);
+      startTag = conf.get(START_TAG_KEY).getBytes(Charsets.UTF_8);
+      endTag = conf.get(END_TAG_KEY).getBytes(Charsets.UTF_8);
 
       // open the file and seek to the start of the split
       start = split.getStart();

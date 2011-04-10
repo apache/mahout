@@ -17,6 +17,7 @@
 
 package org.apache.mahout.utils.vectors;
 
+import com.google.common.base.Charsets;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -42,7 +43,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.Charset;
 
 /**
  * Can read in a {@link SequenceFile} of {@link Vector}s and dump
@@ -132,7 +132,7 @@ public final class VectorDumper {
         Writer writer;
         if (cmdLine.hasOption(outputOpt)) {
           writer = new OutputStreamWriter(
-              new FileOutputStream(new File(cmdLine.getValue(outputOpt).toString())), Charset.forName("UTF-8"));
+              new FileOutputStream(new File(cmdLine.getValue(outputOpt).toString())), Charsets.UTF_8);
         } else {
           writer = new OutputStreamWriter(System.out);
         }

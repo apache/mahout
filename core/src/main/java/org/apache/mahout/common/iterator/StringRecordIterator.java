@@ -18,26 +18,38 @@
 package org.apache.mahout.common.iterator;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import com.google.common.base.Function;
+import com.google.common.collect.ForwardingIterator;
+import com.google.common.collect.Iterators;
 import org.apache.mahout.common.Pair;
 
-public class StringRecordIterator extends TransformingIterator<String,Pair<List<String>,Long>> {
+public class StringRecordIterator extends ForwardingIterator<Pair<List<String>,Long>> {
   
   private static final Long ONE = 1L;
-  
+
   private final Pattern splitter;
-  
-  public StringRecordIterator(FileLineIterable iterable, String pattern) {
-    super(iterable.iterator());
+  private final Iterator<Pair<List<String>,Long>> delegate;
+
+  public StringRecordIterator(Iterable<String> stringIterator, String pattern) {
     this.splitter = Pattern.compile(pattern);
+    delegate = Iterators.transform(
+        stringIterator.iterator(),
+        new Function<String,Pair<List<String>,Long>>() {
+          @Override
+          public Pair<List<String>,Long> apply(String from) {
+            String[] items = splitter.split(from);
+            return new Pair<List<String>,Long>(Arrays.asList(items), ONE);
+          }
+        });
   }
 
   @Override
-  protected Pair<List<String>, Long> transform(String in) {
-    String[] items = splitter.split(in);
-    return new Pair<List<String>,Long>(Arrays.asList(items), ONE);
+  protected Iterator<Pair<List<String>,Long>> delegate() {
+    return delegate;
   }
-  
+
 }

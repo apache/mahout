@@ -23,8 +23,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.Charset;
 
+import com.google.common.base.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -58,7 +58,7 @@ class DisplaySpectralKMeans extends DisplayClustering {
       fs.mkdirs(output);
     }
     Writer writer = new OutputStreamWriter(
-        new FileOutputStream(new File(affinities.toString())), Charset.forName("UTF-8"));
+        new FileOutputStream(new File(affinities.toString())), Charsets.UTF_8);
     try {
       for (int i = 0; i < SAMPLE_DATA.size(); i++) {
         for (int j = 0; j < SAMPLE_DATA.size(); j++) {

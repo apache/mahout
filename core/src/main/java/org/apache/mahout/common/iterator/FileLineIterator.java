@@ -25,10 +25,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.NoSuchElementException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipInputStream;
 
+import com.google.common.base.Charsets;
+import com.google.common.collect.AbstractIterator;
 import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
 import org.apache.mahout.common.IOUtils;
 
@@ -38,13 +39,10 @@ import org.apache.mahout.common.IOUtils;
  * 
  * This class will uncompress files that end in .zip or .gz accordingly, too.
  */
-public final class FileLineIterator implements SkippingIterator<String>, Closeable {
-  
-  private static final Charset UTF8 = Charset.forName("UTF-8");
-  
+public final class FileLineIterator extends AbstractIterator<String> implements SkippingIterator<String>, Closeable {
+
   private final BufferedReader reader;
-  private String nextLine;
-  
+
   /**
    * Creates a  over a given file, assuming a UTF-8 encoding.
    * 
@@ -54,7 +52,7 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
    *           if the file cannot be read
    */
   public FileLineIterator(File file) throws IOException {
-    this(file, UTF8, false);
+    this(file, Charsets.UTF_8, false);
   }
   
   /**
@@ -66,7 +64,7 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
    *           if the file cannot be read
    */
   public FileLineIterator(File file, boolean skipFirstLine) throws IOException {
-    this(file, UTF8, skipFirstLine);
+    this(file, Charsets.UTF_8, skipFirstLine);
   }
   
   /**
@@ -82,11 +80,11 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
   }
   
   public FileLineIterator(InputStream is) throws IOException {
-    this(is, UTF8, false);
+    this(is, Charsets.UTF_8, false);
   }
   
   public FileLineIterator(InputStream is, boolean skipFirstLine) throws IOException {
-    this(is, UTF8, skipFirstLine);
+    this(is, Charsets.UTF_8, skipFirstLine);
   }
   
   public FileLineIterator(InputStream is, Charset encoding, boolean skipFirstLine) throws IOException {
@@ -94,7 +92,6 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
     if (skipFirstLine) {
       reader.readLine();
     }
-    nextLine = reader.readLine();
   }
   
   static InputStream getFileInputStream(File file) throws IOException {
@@ -108,48 +105,27 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
       return is;
     }
   }
-  
-  public String peek() {
-    return nextLine;
-  }
-  
+
   @Override
-  public boolean hasNext() {
-    return nextLine != null;
-  }
-  
-  @Override
-  public String next() {
-    if (nextLine == null) {
-      throw new NoSuchElementException();
-    }
-    String result = nextLine;
+  protected String computeNext() {
+    String line;
     try {
-      nextLine = reader.readLine();
+      line = reader.readLine();
     } catch (IOException ioe) {
-      // Tough situation. Best to consider us done:
       close();
-      throw new NoSuchElementException(ioe.toString());
+      throw new IllegalStateException(ioe);
     }
-    if (nextLine == null) {
-      close();
-    }
-    return result;
+    return line == null ? endOfData() : line;
   }
-  
-  /**
-   * @throws UnsupportedOperationException
-   */
-  @Override
-  public void remove() {
-    throw new UnsupportedOperationException();
-  }
+
   
   @Override
   public void skip(int n) {
     try {
-      for (int i = 0; i < n && nextLine != null; i++) {
-        nextLine = reader.readLine();
+      for (int i = 0; i < n; i++) {
+        if (reader.readLine() == null) {
+          break;
+        }
       }
     } catch (IOException ioe) {
       close();
@@ -158,7 +134,7 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
   
   @Override
   public void close() {
-    nextLine = null;
+    endOfData();
     IOUtils.quietClose(reader);
   }
   

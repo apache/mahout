@@ -1,3 +1,20 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.common.iterator.sequencefile;
 
 import java.io.IOException;
@@ -5,50 +22,33 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import com.google.common.base.Function;
+import com.google.common.collect.ForwardingIterator;
+import com.google.common.collect.Iterators;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.Writable;
-import org.apache.mahout.common.iterator.ArrayIterator;
-import org.apache.mahout.common.iterator.DelegatingIterator;
-import org.apache.mahout.common.iterator.IteratorsIterator;
-import org.apache.mahout.common.iterator.TransformingIterator;
 
 /**
  * Like {@link SequenceFileValueIterator}, but iterates not just over one sequence file, but many. The input path
  * may be specified as a directory of files to read, or as a glob pattern. The set of files may be optionally
  * restricted with a {@link PathFilter}.
  */
-public final class SequenceFileDirValueIterator<V extends Writable> extends DelegatingIterator<V> {
+public final class SequenceFileDirValueIterator<V extends Writable> extends ForwardingIterator<V> {
+
+  private final Iterator<V> delegate;
 
   public SequenceFileDirValueIterator(Path path,
                                       PathType pathType,
                                       PathFilter filter,
                                       Comparator<FileStatus> ordering,
-                                      boolean reuseKeyValueInstances,
-                                      Configuration conf)
-    throws IOException {
-    super(SequenceFileDirValueIterator.<V>buildDelegate(path,
-                                                        pathType,
-                                                        filter,
-                                                        ordering,
-                                                        reuseKeyValueInstances,
-                                                        conf));
-  }
-
-  private static <V extends Writable> Iterator<V> buildDelegate(
-      Path path,
-      PathType pathType,
-      PathFilter filter,
-      Comparator<FileStatus> ordering,
-      boolean reuseKeyValueInstances,
-      Configuration conf) throws IOException {
-
-    FileSystem fs = path.getFileSystem(conf);
-    path = path.makeQualified(fs);
+                                      final boolean reuseKeyValueInstances,
+                                      final Configuration conf) throws IOException {
     FileStatus[] statuses;
+    FileSystem fs = path.getFileSystem(conf);
     if (filter == null) {
       statuses = pathType == PathType.GLOB ? fs.globStatus(path) : fs.listStatus(path);
     } else {
@@ -57,34 +57,25 @@ public final class SequenceFileDirValueIterator<V extends Writable> extends Dele
     if (ordering != null) {
       Arrays.sort(statuses, ordering);
     }
-    Iterator<FileStatus> fileStatusIterator = new ArrayIterator<FileStatus>(statuses);
-    return new IteratorsIterator<V>(
-        new FileStatusToSFIterator<V>(fileStatusIterator, reuseKeyValueInstances, conf));
+    Iterator<FileStatus> fileStatusIterator = Iterators.forArray(statuses);
+    Iterator<Iterator<V>> fsIterators =
+        Iterators.transform(fileStatusIterator,
+                            new Function<FileStatus, Iterator<V>>() {
+                              @Override
+                              public Iterator<V> apply(FileStatus from) {
+                                try {
+                                  return new SequenceFileValueIterator<V>(from.getPath(), reuseKeyValueInstances, conf);
+                                } catch (IOException ioe) {
+                                  throw new IllegalStateException(ioe);
+                                }
+                              }
+                            });
+    delegate = Iterators.concat(fsIterators);
   }
 
-
-  private static class FileStatusToSFIterator<V extends Writable>
-    extends TransformingIterator<FileStatus,Iterator<V>> {
-
-    private final Configuration conf;
-    private final boolean reuseKeyValueInstances;
-
-    private FileStatusToSFIterator(Iterator<FileStatus> fileStatusIterator,
-                                   boolean reuseKeyValueInstances,
-                                   Configuration conf) {
-      super(fileStatusIterator);
-      this.reuseKeyValueInstances = reuseKeyValueInstances;
-      this.conf = conf;
-    }
-
-    @Override
-    protected Iterator<V> transform(FileStatus in) {
-      try {
-        return new SequenceFileValueIterator<V>(in.getPath(), reuseKeyValueInstances, conf);
-      } catch (IOException ioe) {
-        throw new IllegalStateException(ioe);
-      }
-    }
+  @Override
+  protected Iterator<V> delegate() {
+    return delegate;
   }
 
 }

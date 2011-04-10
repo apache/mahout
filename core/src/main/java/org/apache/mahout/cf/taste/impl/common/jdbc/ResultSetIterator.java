@@ -20,22 +20,35 @@ package org.apache.mahout.cf.taste.impl.common.jdbc;
 import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Iterator;
 
-import org.apache.mahout.common.iterator.TransformingIterator;
+import com.google.common.base.Function;
+import com.google.common.collect.ForwardingIterator;
+import com.google.common.collect.Iterators;
 
-public abstract class ResultSetIterator<T> extends TransformingIterator<ResultSet,T> {
+public abstract class ResultSetIterator<T> extends ForwardingIterator<T> {
+
+  private final Iterator<T> delegate;
+  private final EachRowIterator rowDelegate;
 
   protected ResultSetIterator(DataSource dataSource, String sqlQuery) throws SQLException {
-    super(new EachRowIterator(dataSource, sqlQuery));
+    this.rowDelegate = new EachRowIterator(dataSource, sqlQuery);
+    delegate = Iterators.transform(rowDelegate,
+                                   new Function<ResultSet, T>() {
+                                     @Override
+                                     public T apply(ResultSet from) {
+                                       try {
+                                         return parseElement(from);
+                                       } catch (SQLException sqle) {
+                                         throw new IllegalStateException(sqle);
+                                       }
+                                     }
+                                   });
   }
 
   @Override
-  protected final T transform(ResultSet in) {
-    try {
-      return parseElement(in);
-    } catch (SQLException sqle) {
-      throw new IllegalStateException(sqle);
-    }
+  protected Iterator<T> delegate() {
+    return delegate;
   }
 
   protected abstract T parseElement(ResultSet resultSet) throws SQLException;
@@ -43,7 +56,7 @@ public abstract class ResultSetIterator<T> extends TransformingIterator<ResultSe
   public void skip(int n) {
     if (n >= 1) {
       try {
-        ((EachRowIterator) getDelegate()).skip(n);
+        rowDelegate.skip(n);
       } catch (SQLException sqle) {
         throw new IllegalStateException(sqle);
       }

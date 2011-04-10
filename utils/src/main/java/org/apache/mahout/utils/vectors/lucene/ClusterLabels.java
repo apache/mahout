@@ -22,7 +22,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -31,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Charsets;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -105,7 +105,7 @@ public class ClusterLabels {
     if (this.output == null) {
       writer = new OutputStreamWriter(System.out);
     } else {
-      writer = new OutputStreamWriter(new FileOutputStream(new File(this.output)), Charset.forName("UTF-8"));
+      writer = new OutputStreamWriter(new FileOutputStream(new File(this.output)), Charsets.UTF_8);
     }
     try {
       for (Map.Entry<Integer, List<WeightedVectorWritable>> integerListEntry : clusterIdToPoints.entrySet()) {

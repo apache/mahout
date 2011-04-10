@@ -30,6 +30,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.base.Charsets;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -309,7 +310,7 @@ public final class BayesFileFormatter {
       } else {
         analyzer = new StandardAnalyzer(Version.LUCENE_30);
       }
-      Charset charset = Charset.forName("UTF-8");
+      Charset charset = Charsets.UTF_8;
       if (cmdLine.hasOption(charsetOpt)) {
         charset = Charset.forName((String) cmdLine.getValue(charsetOpt));
       }

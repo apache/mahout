@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
@@ -56,7 +57,7 @@ public final class PFPGrowthTest extends MahoutTestCase {
     File input = new File(inputDir, "test.txt");
     params.set(PFPGrowth.INPUT, input.getAbsolutePath());
     params.set(PFPGrowth.OUTPUT, outputDir.getAbsolutePath());
-    Writer writer = new OutputStreamWriter(new FileOutputStream(input), Charset.forName("UTF-8"));
+    Writer writer = new OutputStreamWriter(new FileOutputStream(input), Charsets.UTF_8);
     try {
       Collection<List<String>> transactions = new ArrayList<List<String>>();
       transactions.add(Arrays.asList("E", "A", "D", "B"));

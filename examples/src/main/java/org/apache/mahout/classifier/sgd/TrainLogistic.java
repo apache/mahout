@@ -17,6 +17,7 @@
 
 package org.apache.mahout.classifier.sgd;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import org.apache.commons.cli2.CommandLine;
@@ -39,7 +40,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Locale;
 
@@ -308,6 +308,6 @@ public final class TrainLogistic {
     } catch (IllegalArgumentException e) {
       in = new FileInputStream(new File(inputFile));
     }
-    return new BufferedReader(new InputStreamReader(in, Charset.forName("UTF-8")));
+    return new BufferedReader(new InputStreamReader(in, Charsets.UTF_8));
   }
 }

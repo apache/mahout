@@ -20,55 +20,37 @@ package org.apache.mahout.fpm.pfpgrowth;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.common.collect.AbstractIterator;
 import org.apache.mahout.common.Pair;
 
 /**
  * Iterates over multiple transaction trees to produce a single iterator of transactions
- * 
  */
-public final class MultiTransactionTreeIterator implements Iterator<List<Integer>> {
+public final class MultiTransactionTreeIterator extends AbstractIterator<List<Integer>> {
   
-  private Iterator<Pair<List<Integer>,Long>> pIterator;
-  
-  private Pair<List<Integer>,Long> currentPattern;
-  
+  private final Iterator<Pair<List<Integer>,Long>> pIterator;
+  private List<Integer> current;
+  private long currentMaxCount;
   private long currentCount;
   
   public MultiTransactionTreeIterator(Iterator<Pair<List<Integer>,Long>> iterator) {
     this.pIterator = iterator;
-    
-    if (pIterator.hasNext()) {
-      currentPattern = pIterator.next();
-      currentCount = 0;
-    } else {
-      pIterator = null;
-    }
-    
   }
-  
+
   @Override
-  public boolean hasNext() {
-    return pIterator != null;
-  }
-  
-  @Override
-  public List<Integer> next() {
-    List<Integer> returnable = currentPattern.getFirst();
-    currentCount++;
-    if (currentCount == currentPattern.getSecond()) {
+  protected List<Integer> computeNext() {
+    if (currentCount >= currentMaxCount) {
       if (pIterator.hasNext()) {
-        currentPattern = pIterator.next();
+        Pair<List<Integer>,Long> nextValue = pIterator.next();
+        current = nextValue.getFirst();
+        currentMaxCount = nextValue.getSecond();
         currentCount = 0;
       } else {
-        pIterator = null;
+        return endOfData();
       }
     }
-    return returnable;
-  }
-  
-  @Override
-  public void remove() {
-    throw new UnsupportedOperationException();
+    currentCount++;
+    return current;
   }
   
 }

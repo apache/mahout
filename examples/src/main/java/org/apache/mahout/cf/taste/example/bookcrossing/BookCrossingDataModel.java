@@ -23,9 +23,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
 import java.util.regex.Pattern;
 
+import com.google.common.base.Charsets;
 import org.apache.mahout.cf.taste.example.grouplens.GroupLensDataModel;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.common.iterator.FileLineIterable;
@@ -61,7 +61,7 @@ public final class BookCrossingDataModel extends FileDataModel {
     resultFile.delete();
     PrintWriter writer = null;
     try {
-      writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(resultFile), Charset.forName("UTF-8")));
+      writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(resultFile), Charsets.UTF_8));
       for (String line : new FileLineIterable(originalFile, true)) {
         // 0 ratings are basically "no rating", ignore them (thanks h.9000)
         if (line.endsWith("\"0\"")) {

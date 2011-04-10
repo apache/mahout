@@ -45,9 +45,7 @@ public final class DocumentProcessor {
   
   public static final String TOKENIZED_DOCUMENT_OUTPUT_FOLDER = "tokenized-documents";
   public static final String ANALYZER_CLASS = "analyzer.class";
-  
-  //public static final Charset CHARSET = Charset.forName("UTF-8");
-  
+
   /**
    * Cannot be initialized. Use the static functions
    */
@@ -69,7 +67,8 @@ public final class DocumentProcessor {
   public static void tokenizeDocuments(Path input,
                                        Class<? extends Analyzer> analyzerClass,
                                        Path output,
-                                       Configuration baseConf) throws IOException, InterruptedException, ClassNotFoundException {
+                                       Configuration baseConf)
+    throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration(baseConf);
     // this conf parameter needs to be set enable serialisation of conf values
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"

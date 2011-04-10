@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.CharBuffer;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 /**
  * Encodes text using a lucene style tokenizer.
@@ -118,66 +117,4 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
     }
   }
 
-  private static final class TokenStreamIterator implements Iterator<String> {
-    private final TokenStream tokenStream;
-    private String bufferedToken;
-
-    private TokenStreamIterator(TokenStream tokenStream) {
-      this.tokenStream = tokenStream;
-    }
-
-    /**
-     * Returns <tt>true</tt> if the iteration has more elements. (In other words, returns <tt>true</tt>
-     * if <tt>next</tt> would return an element rather than throwing an exception.)
-     *
-     * @return <tt>true</tt> if the iterator has more elements.
-     */
-    @Override
-    public boolean hasNext() {
-      if (bufferedToken == null) {
-        boolean r;
-        try {
-          r = tokenStream.incrementToken();
-        } catch (IOException e) {
-          throw new TokenizationException("IO error while tokenizing", e);
-        }
-        if (r) {
-          bufferedToken = tokenStream.getAttribute(TermAttribute.class).term();
-        }
-        return r;
-      } else {
-        return true;
-      }
-    }
-
-    /**
-     * Returns the next element in the iteration.
-     *
-     * @return the next element in the iteration.
-     * @throws NoSuchElementException iteration has no more elements.
-     */
-    @Override
-    public String next() {
-      if (bufferedToken != null) {
-        String r = bufferedToken;
-        bufferedToken = null;
-        return r;
-      } else if (hasNext()) {
-        return next();
-      } else {
-        throw new NoSuchElementException("Ran off end if token stream");
-      }
-    }
-
-    @Override
-    public void remove() {
-      throw new UnsupportedOperationException("Can't remove tokens");
-    }
-  }
-
-  private static final class TokenizationException extends RuntimeException {
-    private TokenizationException(String msg, Throwable cause) {
-      super(msg, cause);
-    }
-  }
 }

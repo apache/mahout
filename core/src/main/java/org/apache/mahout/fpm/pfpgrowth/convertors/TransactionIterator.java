@@ -21,36 +21,43 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Function;
+import com.google.common.collect.ForwardingIterator;
+import com.google.common.collect.Iterators;
 import org.apache.mahout.common.Pair;
-import org.apache.mahout.common.iterator.TransformingIterator;
 
 /**
  * Iterates over a Transaction and outputs the transaction integer id mapping and the support of the
  * transaction
  */
-public class TransactionIterator<T> extends TransformingIterator<Pair<List<T>,Long>,Pair<int[],Long>> {
+public class TransactionIterator<T> extends ForwardingIterator<Pair<int[],Long>> {
 
-  private final Map<T,Integer> attributeIdMapping;
   private final int[] transactionBuffer;
+  private final Iterator<Pair<int[],Long>> delegate;
   
-  public TransactionIterator(Iterator<Pair<List<T>,Long>> iterator, Map<T,Integer> attributeIdMapping) {
-    super(iterator);
-    this.attributeIdMapping = attributeIdMapping;
+  public TransactionIterator(Iterator<Pair<List<T>,Long>> transactions, final Map<T,Integer> attributeIdMapping) {
     transactionBuffer = new int[attributeIdMapping.size()];
+    delegate = Iterators.transform(
+        transactions,
+        new Function<Pair<List<T>,Long>, Pair<int[],Long>>() {
+          @Override
+          public Pair<int[],Long> apply(Pair<List<T>,Long> from) {
+            int index = 0;
+            for (T attribute : from.getFirst()) {
+              if (attributeIdMapping.containsKey(attribute)) {
+                transactionBuffer[index++] = attributeIdMapping.get(attribute);
+              }
+            }
+            int[] transactionList = new int[index];
+            System.arraycopy(transactionBuffer, 0, transactionList, 0, index);
+            return new Pair<int[],Long>(transactionList, from.getSecond());
+          }
+        });
   }
 
   @Override
-  protected Pair<int[],Long> transform(Pair<List<T>, Long> in) {
-    int index = 0;
-    for (T attribute : in.getFirst()) {
-      if (attributeIdMapping.containsKey(attribute)) {
-        transactionBuffer[index++] = attributeIdMapping.get(attribute);
-      }
-    }
-    int[] transactionList = new int[index];
-    System.arraycopy(transactionBuffer, 0, transactionList, 0, index);
-    return new Pair<int[],Long>(transactionList, in.getSecond());
+  protected Iterator<Pair<int[],Long>> delegate() {
+    return delegate;
   }
 
-  
 }

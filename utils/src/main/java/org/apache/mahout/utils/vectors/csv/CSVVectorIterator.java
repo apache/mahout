@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.vectors.csv;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,16 +15,16 @@ package org.apache.mahout.utils.vectors.csv;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.vectors.csv;
+
+import java.io.IOException;
+import java.io.Reader;
+
+import com.google.common.collect.AbstractIterator;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVStrategy;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
-
-import java.io.IOException;
-import java.io.Reader;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-
 
 /**
  * Iterates a CSV file and produces {@link org.apache.mahout.math.Vector}.
@@ -36,56 +35,34 @@ import java.util.NoSuchElementException;
  * <p/>
  * The Iterator is not thread-safe.
  */
-public class CSVVectorIterable implements Iterable<Vector> {
+public class CSVVectorIterator extends AbstractIterator<Vector> {
 
   private final CSVParser parser;
-  private String [] line;
 
-  public CSVVectorIterable(Reader reader) throws IOException {
+  public CSVVectorIterator(Reader reader) {
     parser = new CSVParser(reader);
-    line = parser.getLine();
   }
 
-  public CSVVectorIterable(Reader reader, CSVStrategy strategy) throws IOException {
+  public CSVVectorIterator(Reader reader, CSVStrategy strategy) {
     parser = new CSVParser(reader, strategy);
-    line = parser.getLine();
   }
 
   @Override
-  public Iterator<Vector> iterator() {
-    return new CSVIterator();
+  protected Vector computeNext() {
+    String[] line;
+    try {
+      line = parser.getLine();
+    } catch (IOException e) {
+      throw new IllegalStateException(e);
+    }
+    if (line == null) {
+      return endOfData();
+    }
+    Vector result = new DenseVector(line.length);
+    for (int i = 0; i < line.length; i++) {
+      result.setQuick(i, Double.parseDouble(line[i]));
+    }
+    return result;
   }
 
-  private class CSVIterator implements Iterator<Vector>{
-
-    @Override
-    public boolean hasNext() {
-      return line != null;
-    }
-
-    @Override
-    public Vector next() {
-
-      if (!hasNext()) {
-        throw new NoSuchElementException();
-      }
-
-      Vector result = new DenseVector(line.length);
-      for (int i = 0; i < line.length; i++) {
-        result.setQuick(i, Double.parseDouble(line[i]));
-      }
-      //move the line forward
-      try {
-        line = parser.getLine();
-      } catch (IOException e) {
-        throw new IllegalStateException(e);
-      }
-      return result;
-    }
-
-    @Override
-    public void remove() {
-      throw new UnsupportedOperationException();
-    }
-  }
 }

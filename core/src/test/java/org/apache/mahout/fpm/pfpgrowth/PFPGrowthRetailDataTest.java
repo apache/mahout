@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,6 +31,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.common.base.Charsets;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.Parameters;
@@ -62,7 +62,7 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
     File input = new File(inputDir, "test.txt");
     params.set(PFPGrowth.INPUT, input.getAbsolutePath());
     params.set(PFPGrowth.OUTPUT, outputDir.getAbsolutePath());
-    Writer writer = new OutputStreamWriter(new FileOutputStream(input), Charset.forName("UTF-8"));
+    Writer writer = new OutputStreamWriter(new FileOutputStream(input), Charsets.UTF_8);
     try {
       StringRecordIterator it = new StringRecordIterator(new FileLineIterable(Resources.getResource(
         "retail.dat").openStream()), "\\s+");

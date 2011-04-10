@@ -184,7 +184,7 @@ public class TestForest extends Configured implements Tool {
     classifier.run();
 
     if (analyze) {
-      log.info(classifier.getAnalyzer().summarize());
+      log.info("{}", classifier.getAnalyzer());
     }
   }
 
@@ -220,7 +220,7 @@ public class TestForest extends Configured implements Tool {
     log.info("Classification Time: {}", DFUtils.elapsedTime(time));
 
     if (analyzer != null) {
-      log.info(analyzer.summarize());
+      log.info("{}", analyzer);
     }
   }
 

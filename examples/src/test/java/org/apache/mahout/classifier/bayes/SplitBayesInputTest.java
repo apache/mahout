@@ -23,6 +23,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
+import com.google.common.base.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -54,7 +55,7 @@ public final class SplitBayesInputTest extends MahoutTestCase {
   
     countMap = new OpenObjectIntHashMap<String>();
     
-    charset = Charset.forName("UTF-8");
+    charset = Charsets.UTF_8;
     tempInputFile = getTestTempFilePath("bayesinputfile");
     tempTrainingDirectory = getTestTempDirPath("bayestrain");
     tempTestDirectory = getTestTempDirPath("bayestest");
@@ -79,7 +80,7 @@ public final class SplitBayesInputTest extends MahoutTestCase {
         
         writer = new BufferedWriter(
             new OutputStreamWriter(
-                fs.create(new Path(tempInputDirectory, currentLabel)), Charset.forName("UTF-8")));
+                fs.create(new Path(tempInputDirectory, currentLabel)), Charsets.UTF_8));
       }
       countMap.adjustOrPutValue(currentLabel, 1, 1);
       writer.write(currentLabel + '\t' + entry[1] + '\n');
@@ -89,7 +90,7 @@ public final class SplitBayesInputTest extends MahoutTestCase {
 
   private void writeSingleInputFile() throws IOException {
     BufferedWriter writer = new BufferedWriter(
-        new OutputStreamWriter(fs.create(tempInputFile), Charset.forName("UTF-8")));
+        new OutputStreamWriter(fs.create(tempInputFile), Charsets.UTF_8));
     for (String[] entry : ClassifierData.DATA) {
       writer.write(entry[0] + '\t' + entry[1] + '\n');
     }

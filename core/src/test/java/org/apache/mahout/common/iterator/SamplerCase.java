@@ -33,17 +33,17 @@ public abstract class SamplerCase extends MahoutTestCase {
 
   @Test
   public void testEmptyCase() {
-    assertFalse(createSampler(100, Integers.iterator(0)).hasNext());
+    assertFalse(createSampler(100, new CountingIterator(0)).hasNext());
   }
 
   @Test
   public void testSmallInput() {
-    Iterator<Integer> t = createSampler(10, Integers.iterator(1));
+    Iterator<Integer> t = createSampler(10, new CountingIterator(1));
     assertTrue(t.hasNext());
     assertEquals(0, t.next().intValue());
     assertFalse(t.hasNext());
 
-    t = createSampler(10, Integers.iterator(1));
+    t = createSampler(10, new CountingIterator(1));
     assertTrue(t.hasNext());
     assertEquals(0, t.next().intValue());
     assertFalse(t.hasNext());
@@ -51,13 +51,13 @@ public abstract class SamplerCase extends MahoutTestCase {
 
   @Test
   public void testAbsurdSize() {
-    Iterator<Integer> t = createSampler(0, Integers.iterator(2));
+    Iterator<Integer> t = createSampler(0, new CountingIterator(2));
     assertFalse(t.hasNext());
   }
 
   @Test
   public void testExactSizeMatch() {
-    Iterator<Integer> t = createSampler(10, Integers.iterator(10));
+    Iterator<Integer> t = createSampler(10, new CountingIterator(10));
     for (int i = 0; i < 10; i++) {
       assertTrue(t.hasNext());
       assertEquals(i, t.next().intValue());
@@ -67,11 +67,11 @@ public abstract class SamplerCase extends MahoutTestCase {
 
   @Test
   public void testSample() {
-    Iterator<Integer> source = Integers.iterator(100);
+    Iterator<Integer> source = new CountingIterator(100);
     Iterator<Integer> t = createSampler(15, source);
 
     // this is just a regression test, not a real test
-    List<Integer> expectedValues = Arrays.asList(16, 23, 2, 3, 32, 85, 6, 53, 8, 75, 15, 81, 12, 59, 14);
+    List<Integer> expectedValues = Arrays.asList(83, 56, 69, 96, 4, 59, 70, 7, 93, 52, 39, 11, 16, 67, 26);
     if (isSorted()) {
       Collections.sort(expectedValues);
     }

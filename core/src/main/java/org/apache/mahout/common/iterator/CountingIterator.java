@@ -15,26 +15,29 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.fpm.pfpgrowth.convertors.string;
+package org.apache.mahout.common.iterator;
 
-import java.util.Iterator;
-import java.util.List;
-
-import org.apache.mahout.common.StringTuple;
-import org.apache.mahout.common.iterator.TransformingIterator;
+import com.google.common.collect.AbstractIterator;
 
 /**
- * Iterate over the StringTuple as an iterator of <code>List&lt;String&gt;</code>
+ * Iterates over the integers from 0 through <code>to-1</code>.
  */
-public final class StringTupleIterator extends TransformingIterator<StringTuple,List<String>> {
+public final class CountingIterator extends AbstractIterator<Integer> {
 
-  public StringTupleIterator(Iterator<StringTuple> iterator) {
-    super(iterator);
+  private int count;
+  private final int to;
+
+  public CountingIterator(int to) {
+    this.to = to;
   }
 
   @Override
-  protected List<String> transform(StringTuple in) {
-    return in.getEntries();
+  protected Integer computeNext() {
+    if (count < to) {
+      return count++;
+    } else {
+      return endOfData();
+    }
   }
-  
+
 }

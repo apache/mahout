@@ -18,8 +18,8 @@
 package org.apache.mahout.math;
 
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 
+import com.google.common.collect.AbstractIterator;
 import org.apache.mahout.math.function.IntDoubleProcedure;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.map.OpenIntDoubleHashMap;
@@ -214,7 +214,7 @@ public class RandomAccessSparseVector extends AbstractVector {
     }
   }
 
-  private final class NonDefaultIterator implements Iterator<Element> {
+  private final class NonDefaultIterator extends AbstractIterator<Element> {
 
     private final RandomAccessElement element = new RandomAccessElement();
     private final IntArrayList indices = new IntArrayList();
@@ -225,28 +225,18 @@ public class RandomAccessSparseVector extends AbstractVector {
     }
 
     @Override
-    public boolean hasNext() {
-      return offset < indices.size();
-    }
-
-    @Override
-    public Element next() {
+    protected Element computeNext() {
       if (offset >= indices.size()) {
-        throw new NoSuchElementException();
-      } else {
-        element.index = indices.get(offset);
-        offset++;
-        return element;
+        return endOfData();
       }
+      element.index = indices.get(offset);
+      offset++;
+      return element;
     }
 
-    @Override
-    public void remove() {
-      throw new UnsupportedOperationException();
-    }
   }
 
-  private final class AllIterator implements Iterator<Element> {
+  private final class AllIterator extends AbstractIterator<Element> {
 
     private final RandomAccessElement element = new RandomAccessElement();
 
@@ -255,24 +245,15 @@ public class RandomAccessSparseVector extends AbstractVector {
     }
 
     @Override
-    public boolean hasNext() {
-      return element.index + 1 < size();
-    }
-
-    @Override
-    public Element next() {
-      if (element.index + 1 >= size()) {
-        throw new NoSuchElementException();
-      } else {
+    protected Element computeNext() {
+      if (element.index + 1 < size()) {
         element.index++;
         return element;
+      } else {
+        return endOfData();
       }
     }
 
-    @Override
-    public void remove() {
-      throw new UnsupportedOperationException();
-    }
   }
 
   private final class RandomAccessElement implements Element {

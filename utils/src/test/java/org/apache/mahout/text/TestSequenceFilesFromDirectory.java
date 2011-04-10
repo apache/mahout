@@ -19,11 +19,10 @@ package org.apache.mahout.text;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
+import com.google.common.base.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -37,7 +36,6 @@ import org.junit.Test;
 
 public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
 
-  private static final Charset UTF8 = Charset.forName("UTF-8");
   private static final String[][] DATA1 = {
       {"test1", "This is the first text."},
       {"test2", "This is the second text."},
@@ -71,7 +69,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     SequenceFilesFromDirectory.main(new String[] {"--input",
         inputDir.toString(), "--output", outputDir.toString(), "--chunkSize",
         "64", "--charset",
-        UTF8.displayName(Locale.ENGLISH), "--keyPrefix", prefix});
+        Charsets.UTF_8.name(), "--keyPrefix", prefix});
     
     // check output chunk files
     checkChunkFiles(conf, outputDir, DATA1, prefix, ParserType.TEXT);
@@ -100,7 +98,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     int keyColumn = 0;
     int valueColumn = 1;
     SequenceFilesFromCsvFilter.main(new String[] {"--input", inputDir.toString(),
-        "--output", outputDir.toString(), "--charset", UTF8.name(),
+        "--output", outputDir.toString(), "--charset", Charsets.UTF_8.name(),
         "--chunkSize", Integer.toString(chunkSizeInMB), "--keyPrefix", prefix,
         "--keyColumn", Integer.toString(keyColumn), "--valueColumn",
         Integer.toString(valueColumn)});
@@ -112,7 +110,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
   private static void createFilesFromArrays(Configuration conf, Path inputDir, String[][] data) throws IOException {
     FileSystem fs = FileSystem.get(conf);
     for (String[] aData : data) {
-      OutputStreamWriter osw = new OutputStreamWriter(fs.create(new Path(inputDir, aData[0])), UTF8);
+      OutputStreamWriter osw = new OutputStreamWriter(fs.create(new Path(inputDir, aData[0])), Charsets.UTF_8);
       osw.write(aData[1]);
       osw.close();
     }

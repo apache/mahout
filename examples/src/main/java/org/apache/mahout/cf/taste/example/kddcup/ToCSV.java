@@ -23,10 +23,10 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.Charset;
 import java.util.zip.GZIPOutputStream;
 
 
+import com.google.common.base.Charsets;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.common.Pair;
 
@@ -52,7 +52,7 @@ public final class ToCSV {
     }
 
     OutputStream outStream = new GZIPOutputStream(new FileOutputStream(outputFile));
-    Writer outWriter = new BufferedWriter(new OutputStreamWriter(outStream, Charset.forName("UTF-8")));
+    Writer outWriter = new BufferedWriter(new OutputStreamWriter(outStream, Charsets.UTF_8));
 
     for (Pair<PreferenceArray,long[]> user : new DataFileIterable(inputFile)) {
       PreferenceArray prefs = user.getFirst();

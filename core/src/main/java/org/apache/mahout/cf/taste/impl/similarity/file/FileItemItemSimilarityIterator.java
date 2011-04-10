@@ -17,33 +17,44 @@
 
 package org.apache.mahout.cf.taste.impl.similarity.file;
 
+import com.google.common.base.Function;
+import com.google.common.collect.ForwardingIterator;
+import com.google.common.collect.Iterators;
 import org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity;
 import org.apache.mahout.common.iterator.FileLineIterator;
-import org.apache.mahout.common.iterator.TransformingIterator;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.regex.Pattern;
 
 /**
  * a simple iterator using a {@link FileLineIterator} internally, parsing each
- * line into an {@link org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity.ItemItemSimilarity}
+ * line into an {@link GenericItemSimilarity.ItemItemSimilarity}.
  */
-final class FileItemItemSimilarityIterator
-  extends TransformingIterator<String,GenericItemSimilarity.ItemItemSimilarity> {
+final class FileItemItemSimilarityIterator extends ForwardingIterator<GenericItemSimilarity.ItemItemSimilarity> {
 
   private static final Pattern SEPARATOR = Pattern.compile("[,\t]");
 
+  private final Iterator<GenericItemSimilarity.ItemItemSimilarity> delegate;
+
   FileItemItemSimilarityIterator(File similaritiesFile) throws IOException {
-    super(new FileLineIterator(similaritiesFile));
+    delegate = Iterators.transform(
+        new FileLineIterator(similaritiesFile),
+        new Function<String, GenericItemSimilarity.ItemItemSimilarity>() {
+          @Override
+          public GenericItemSimilarity.ItemItemSimilarity apply(String from) {
+            String[] tokens = SEPARATOR.split(from);
+            return new GenericItemSimilarity.ItemItemSimilarity(Long.parseLong(tokens[0]),
+                                                                Long.parseLong(tokens[1]),
+                                                                Double.parseDouble(tokens[2]));
+          }
+        });
   }
 
   @Override
-  protected GenericItemSimilarity.ItemItemSimilarity transform(String in) {
-    String[] tokens = SEPARATOR.split(in);
-    return new GenericItemSimilarity.ItemItemSimilarity(Long.parseLong(tokens[0]),
-                                                        Long.parseLong(tokens[1]),
-                                                        Double.parseDouble(tokens[2]));
+  protected Iterator<GenericItemSimilarity.ItemItemSimilarity> delegate() {
+    return delegate;
   }
 
 }

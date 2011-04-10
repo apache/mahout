@@ -26,6 +26,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.common.base.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
@@ -213,7 +214,7 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
       }
     })[0];
     BufferedReader reader = new BufferedReader(
-        new InputStreamReader(new FileInputStream(outPart), Charset.forName("UTF-8")));
+        new InputStreamReader(new FileInputStream(outPart), Charsets.UTF_8));
 
     String line;
     int currentLine = 1;
@@ -310,7 +311,7 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
       }
     })[0];
     BufferedReader reader = new BufferedReader(
-        new InputStreamReader(new FileInputStream(outPart), Charset.forName("UTF-8")));
+        new InputStreamReader(new FileInputStream(outPart), Charsets.UTF_8));
 
     String line;
     int currentLine = 1;

@@ -46,7 +46,6 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.common.Summarizable;
 import org.apache.mahout.common.TimingStatistics;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.CosineDistanceMeasure;
@@ -65,7 +64,7 @@ import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class VectorBenchmarks implements Summarizable {
+public class VectorBenchmarks {
 
   private static final Logger log = LoggerFactory.getLogger(VectorBenchmarks.class);
   private static final Pattern TAB_PATTERN = Pattern.compile("\t");
@@ -784,7 +783,7 @@ public class VectorBenchmarks implements Summarizable {
       mark.closestCentroidBenchmark(new ManhattanDistanceMeasure());
       mark.closestCentroidBenchmark(new TanimotoDistanceMeasure());
       
-      log.info("\n{}", mark.summarize());
+      log.info("\n{}", mark);
     } catch (OptionException e) {
       CommandLineUtil.printHelp(group);
     }
@@ -792,7 +791,7 @@ public class VectorBenchmarks implements Summarizable {
   }
   
   @Override
-  public String summarize() {
+  public String toString() {
     int pad = 24;
     StringBuilder sb = new StringBuilder(1000);
     sb.append(StringUtils.rightPad("BenchMarks", pad));

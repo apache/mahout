@@ -21,7 +21,10 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterators;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.common.iterator.CountingIterator;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -49,36 +52,23 @@ public final class RandomVectorIterable implements Iterable<Vector> {
   
   @Override
   public Iterator<Vector> iterator() {
-    return new VectIterator();
+    return Iterators.transform(
+        new CountingIterator(numItems),
+        new Function<Integer, Vector>() {
+          private final Random random = RandomUtils.getRandom();
+          @Override
+          public Vector apply(Integer dummy) {
+            Vector result =
+                type == VectorType.SPARSE ? new RandomAccessSparseVector(numItems) : new DenseVector(numItems);
+            result.assign(new DoubleFunction(){
+              @Override
+              public double apply(double ignored) {
+                return random.nextDouble();
+              }
+            });
+            return result;
+          }
+        });
   }
-  
-  private class VectIterator implements Iterator<Vector>{
-    private int count;
-    private final Random random = RandomUtils.getRandom();
-    @Override
-    public boolean hasNext() {
-      return count < numItems;
-    }
-    
-    @Override
-    public Vector next() {
-      if (!hasNext()) {
-        throw new NoSuchElementException();
-      }
-      Vector result = type == VectorType.SPARSE ? new RandomAccessSparseVector(numItems) : new DenseVector(numItems);
-      result.assign(new DoubleFunction(){
-        @Override
-        public double apply(double arg1) {
-          return random.nextDouble();
-        }
-      });
-      count++;
-      return result;
-    }
-    
-    @Override
-    public void remove() {
-      throw new UnsupportedOperationException();
-    }
-  }
+
 }

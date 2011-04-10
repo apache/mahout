@@ -18,9 +18,9 @@
 package org.apache.mahout.common.iterator;
 
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.Random;
 
+import com.google.common.collect.AbstractIterator;
 import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
 import org.apache.mahout.common.RandomUtils;
 
@@ -28,43 +28,24 @@ import org.apache.mahout.common.RandomUtils;
  * Wraps an {@link Iterator} and returns only some subset of the elements that it would, as determined by a
  * iterator rate parameter.
  */
-public final class SamplingIterator<T> implements Iterator<T> {
+public final class SamplingIterator<T> extends AbstractIterator<T> {
   
   private static final Random RANDOM = RandomUtils.getRandom();
   
   private final Iterator<? extends T> delegate;
   private final double samplingRate;
-  private T next;
-  private boolean hasNext;
   
   public SamplingIterator(Iterator<? extends T> delegate, double samplingRate) {
     this.delegate = delegate;
     this.samplingRate = samplingRate;
-    this.hasNext = true;
-    doNext();
   }
-  
+
   @Override
-  public boolean hasNext() {
-    return hasNext;
-  }
-  
-  @Override
-  public T next() {
-    if (hasNext) {
-      T result = next;
-      doNext();
-      return result;
-    }
-    throw new NoSuchElementException();
-  }
-  
-  private void doNext() {
-    boolean found = false;
+  protected T computeNext() {
     if (delegate instanceof SkippingIterator<?>) {
       SkippingIterator<? extends T> skippingDelegate = (SkippingIterator<? extends T>) delegate;
       int toSkip = 0;
-      while (SamplingIterator.RANDOM.nextDouble() >= samplingRate) {
+      while (RANDOM.nextDouble() >= samplingRate) {
         toSkip++;
       }
       // Really, would be nicer to select value from geometric distribution, for small values of samplingRate
@@ -72,31 +53,19 @@ public final class SamplingIterator<T> implements Iterator<T> {
         skippingDelegate.skip(toSkip);
       }
       if (skippingDelegate.hasNext()) {
-        next = skippingDelegate.next();
-        found = true;
+        return skippingDelegate.next();
       }
     } else {
       while (delegate.hasNext()) {
         T delegateNext = delegate.next();
-        if (SamplingIterator.RANDOM.nextDouble() < samplingRate) {
-          next = delegateNext;
-          found = true;
-          break;
+        if (RANDOM.nextDouble() < samplingRate) {
+          return delegateNext;
         }
       }
     }
-    if (!found) {
-      hasNext = false;
-      next = null;
-    }
+    return endOfData();
   }
-  
-  /**
-   * @throws UnsupportedOperationException
-   */
-  @Override
-  public void remove() {
-    throw new UnsupportedOperationException();
-  }
+
+
   
 }

@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math.jet.random;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.io.CharStreams;
@@ -27,7 +28,6 @@ import org.apache.mahout.math.MahoutTestCase;
 import org.junit.Test;
 
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 
 public final class NegativeBinomialTest extends MahoutTestCase {
 
@@ -37,7 +37,7 @@ public final class NegativeBinomialTest extends MahoutTestCase {
   @Test
   public void testDistributionFunctions() throws Exception {
     InputSupplier<InputStreamReader> input =
-        Resources.newReaderSupplier(Resources.getResource("negative-binomial-test-data.csv"), Charset.forName("UTF-8"));
+        Resources.newReaderSupplier(Resources.getResource("negative-binomial-test-data.csv"), Charsets.UTF_8);
     boolean header = true;
     for (String line : CharStreams.readLines(input)) {
       if (header) {

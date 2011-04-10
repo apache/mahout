@@ -20,26 +20,26 @@ package org.apache.mahout.common.iterator.sequencefile;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 
+import com.google.common.collect.AbstractIterator;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ReflectionUtils;
+import org.apache.mahout.common.IOUtils;
 
 /**
  * <p>{@link Iterator} over a {@link SequenceFile}'s values only.</p>
  */
-public final class SequenceFileValueIterator<V extends Writable> implements Iterator<V>, Closeable {
+public final class SequenceFileValueIterator<V extends Writable> extends AbstractIterator<V> implements Closeable {
 
   private final SequenceFile.Reader reader;
   private final Configuration conf;
   private final Class<V> valueClass;
   private final Writable key;
   private V value;
-  private boolean available;
   private final boolean reuseKeyValueInstances;
 
   /**
@@ -54,7 +54,6 @@ public final class SequenceFileValueIterator<V extends Writable> implements Iter
     Class<? extends Writable> keyClass = (Class<? extends Writable>) reader.getKeyClass();
     key = ReflectionUtils.newInstance(keyClass, conf);
     valueClass = (Class<V>) reader.getValueClass();
-    available = false;
     this.reuseKeyValueInstances = reuseKeyValueInstances;
   }
 
@@ -63,54 +62,28 @@ public final class SequenceFileValueIterator<V extends Writable> implements Iter
   }
 
   @Override
-  public void close() throws IOException {
-    available = false;
+  public void close() {
     value = null;
-    reader.close();
+    IOUtils.quietClose(reader);
+    endOfData();
   }
 
   @Override
-  public boolean hasNext() {
-    if (!available) {
-      if (!reuseKeyValueInstances || value == null) {
-        value = ReflectionUtils.newInstance(valueClass, conf);
-      }
-      try {
-        available = reader.next(key, value);
-        if (!available) {
-          close();
-        }
-        return available;
-      } catch (IOException ioe) {
-        try {
-          close();
-        } catch (IOException ioe2) {
-          throw new IllegalStateException(ioe2);
-        }
-        throw new IllegalStateException(ioe);
-      }
+  protected V computeNext() {
+    if (!reuseKeyValueInstances || value == null) {
+      value = ReflectionUtils.newInstance(valueClass, conf);
     }
-    return available;
-  }
-
-  /**
-   * @throws IllegalStateException if path can't be read, or its key or value class can't be instantiated
-   */
-  @Override
-  public V next() {
-    if (!hasNext()) {
-      throw new NoSuchElementException();
+    try {
+      boolean available = reader.next(key, value);
+      if (!available) {
+        close();
+        return null;
+      }
+      return value;
+    } catch (IOException ioe) {
+      close();
+      throw new IllegalStateException(ioe);
     }
-    available = false;
-    return value;
-  }
-
-  /**
-   * @throws UnsupportedOperationException
-   */
-  @Override
-  public void remove() {
-    throw new UnsupportedOperationException();
   }
 
 }

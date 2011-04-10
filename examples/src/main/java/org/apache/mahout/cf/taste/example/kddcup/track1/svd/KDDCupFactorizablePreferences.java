@@ -17,13 +17,16 @@
 
 package org.apache.mahout.cf.taste.example.kddcup.track1.svd;
 
-import org.apache.mahout.cf.taste.example.kddcup.DataFileIterator;
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import org.apache.mahout.cf.taste.example.kddcup.DataFileIterable;
+import org.apache.mahout.cf.taste.impl.common.AbstractLongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.model.Preference;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
+import org.apache.mahout.common.Pair;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.Iterator;
 
 public class KDDCupFactorizablePreferences implements FactorizablePreferences {
 
@@ -45,16 +48,15 @@ public class KDDCupFactorizablePreferences implements FactorizablePreferences {
 
   @Override
   public Iterable<Preference> getPreferences() {
-    return new Iterable<Preference>() {
-      @Override
-      public Iterator<Preference> iterator() {
-        try {
-          return new DataFilePreferencesIterator(new DataFileIterator(dataFile));
-        } catch (IOException e) {
-          throw new IllegalStateException("Cannot iterate over datafile!", e);
-        }
-      }
-    };
+    Iterable<Iterable<Preference>> prefIterators =
+        Iterables.transform(new DataFileIterable(dataFile),
+                            new Function<Pair<PreferenceArray,long[]>,Iterable<Preference>>() {
+                              @Override
+                              public Iterable<Preference> apply(Pair<PreferenceArray,long[]> from) {
+                                return from.getFirst();
+                              }
+                            });
+    return Iterables.concat(prefIterators);
   }
 
   @Override
@@ -82,45 +84,12 @@ public class KDDCupFactorizablePreferences implements FactorizablePreferences {
     return 252800275;
   }
 
-  static class DataFilePreferencesIterator implements Iterator<Preference> {
-
-    private final DataFileIterator dataFileIterator;
-
-    Iterator<Preference> currentUserPrefsIterator;
-
-    public DataFilePreferencesIterator(DataFileIterator dataFileIterator) {
-      this.dataFileIterator = dataFileIterator;
-    }
-
-    @Override
-    public boolean hasNext() {
-      if (currentUserPrefsIterator != null && currentUserPrefsIterator.hasNext()) {
-        return true;
-      } else {
-        return dataFileIterator.hasNext();
-      }
-    }
-
-    @Override
-    public Preference next() {
-      if (currentUserPrefsIterator == null || !currentUserPrefsIterator.hasNext()) {
-        currentUserPrefsIterator = dataFileIterator.next().getFirst().iterator();
-      }
-      return currentUserPrefsIterator.next();
-    }
-
-    @Override
-    public void remove() {
-      throw new UnsupportedOperationException();
-    }
-  }
-
-  static class FixedSizeLongIterator implements LongPrimitiveIterator {
+  static class FixedSizeLongIterator extends AbstractLongPrimitiveIterator {
 
     private long currentValue;
     private final long maximum;
 
-    public FixedSizeLongIterator(long maximum) {
+    FixedSizeLongIterator(long maximum) {
       this.maximum = maximum;
       currentValue = 0;
     }
@@ -143,11 +112,6 @@ public class KDDCupFactorizablePreferences implements FactorizablePreferences {
     @Override
     public boolean hasNext() {
       return currentValue < maximum;
-    }
-
-    @Override
-    public Long next() {
-      return ++currentValue;
     }
 
     @Override

@@ -22,13 +22,11 @@ import java.text.NumberFormat;
 import java.util.Collection;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.mahout.common.Summarizable;
 
 /**
  * ResultAnalyzer captures the classification statistics and displays in a tabular manner
- * 
  */
-public class ResultAnalyzer implements Summarizable {
+public class ResultAnalyzer {
   
   private final ConfusionMatrix confusionMatrix;
   
@@ -72,11 +70,6 @@ public class ResultAnalyzer implements Summarizable {
   
   @Override
   public String toString() {
-    return "";
-  }
-  
-  @Override
-  public String summarize() {
     StringBuilder returnString = new StringBuilder();
     
     returnString.append("=======================================================\n");
@@ -97,7 +90,7 @@ public class ResultAnalyzer implements Summarizable {
       StringUtils.leftPad(Integer.toString(totalClassified), 10)).append('\n');
     returnString.append('\n');
     
-    returnString.append(confusionMatrix.summarize());
+    returnString.append(confusionMatrix);
     
     return returnString.toString();
   }

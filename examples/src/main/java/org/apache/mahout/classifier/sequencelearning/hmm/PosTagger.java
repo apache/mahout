@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -30,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import com.google.common.base.Charsets;
 import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.math.Matrix;
 import org.slf4j.Logger;
@@ -126,7 +126,7 @@ public final class PosTagger {
     List<Integer> hiddenSequence = new LinkedList<Integer>();
 
     BufferedReader input =
-        new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
+        new BufferedReader(new InputStreamReader(connection.getInputStream(), Charsets.UTF_8));
     try {
       String line;
       while ((line = input.readLine()) != null) {

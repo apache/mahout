@@ -20,8 +20,8 @@ package org.apache.mahout.common.iterator.sequencefile;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 
+import com.google.common.collect.AbstractIterator;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -29,6 +29,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ReflectionUtils;
+import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.common.Pair;
 
 /**
@@ -36,7 +37,7 @@ import org.apache.mahout.common.Pair;
  * containing key and value.</p>
  */
 public final class SequenceFileIterator<K extends Writable,V extends Writable>
-  implements Iterator<Pair<K,V>>, Closeable {
+  extends AbstractIterator<Pair<K,V>> implements Closeable {
 
   private final SequenceFile.Reader reader;
   private final Configuration conf;
@@ -45,7 +46,6 @@ public final class SequenceFileIterator<K extends Writable,V extends Writable>
   private final boolean noValue;
   private K key;
   private V value;
-  private boolean available;
   private final boolean reuseKeyValueInstances;
 
   /**
@@ -60,7 +60,6 @@ public final class SequenceFileIterator<K extends Writable,V extends Writable>
     this.conf = conf;
     keyClass = (Class<K>) reader.getKeyClass();
     valueClass = (Class<V>) reader.getValueClass();
-    available = false;
     noValue = NullWritable.class.equals(valueClass);
     this.reuseKeyValueInstances = reuseKeyValueInstances;
   }
@@ -74,62 +73,37 @@ public final class SequenceFileIterator<K extends Writable,V extends Writable>
   }
 
   @Override
-  public void close() throws IOException {
-    available = false;
+  public void close() {
     key = null;
     value = null;
-    reader.close();
+    IOUtils.quietClose(reader);
+    endOfData();
   }
 
   @Override
-  public boolean hasNext() {
-    if (!available) {
-      if (!reuseKeyValueInstances || value == null) {
-        key = ReflectionUtils.newInstance(keyClass, conf);
-        if (!noValue) {
-          value = ReflectionUtils.newInstance(valueClass, conf);
-        }
-      }
-      try {
-        if (noValue) {
-          available = reader.next(key);
-        } else {
-          available = reader.next(key, value);
-        }
-        if (!available) {
-          close();
-        }
-        return available;
-      } catch (IOException ioe) {
-        try {
-          close();
-        } catch (IOException ioe2) {
-          throw new IllegalStateException(ioe2);
-        }
-        throw new IllegalStateException(ioe);
+  protected Pair<K,V> computeNext() {
+    if (!reuseKeyValueInstances || value == null) {
+      key = ReflectionUtils.newInstance(keyClass, conf);
+      if (!noValue) {
+        value = ReflectionUtils.newInstance(valueClass, conf);
       }
     }
-    return available;
-  }
-
-  /**
-   * @throws IllegalStateException if path can't be read, or its key or value class can't be instantiated
-   */
-  @Override
-  public Pair<K,V> next() {
-    if (!hasNext()) {
-      throw new NoSuchElementException();
+    try {
+      boolean available;
+      if (noValue) {
+        available = reader.next(key);
+      } else {
+        available = reader.next(key, value);
+      }
+      if (!available) {
+        close();
+        return null;
+      }
+      return new Pair<K,V>(key, value);
+    } catch (IOException ioe) {
+      close();
+      throw new IllegalStateException(ioe);
     }
-    available = false;
-    return new Pair<K,V>(key, value);
-  }
-
-  /**
-   * @throws UnsupportedOperationException
-   */
-  @Override
-  public void remove() {
-    throw new UnsupportedOperationException();
   }
 
 }

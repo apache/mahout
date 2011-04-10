@@ -24,6 +24,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import com.google.common.base.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -52,7 +53,7 @@ public final class BayesClassifierSelfTest extends MahoutTestCase {
 
     File tempInputFile = getTestTempFile("bayesinput");
     BufferedWriter writer = new BufferedWriter(
-        new OutputStreamWriter(new FileOutputStream(tempInputFile), Charset.forName("UTF-8")));
+        new OutputStreamWriter(new FileOutputStream(tempInputFile), Charsets.UTF_8));
     for (String[] entry : ClassifierData.DATA) {
       writer.write(entry[0] + '\t' + entry[1] + '\n');
     }

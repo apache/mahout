@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -48,7 +47,6 @@ import org.apache.mahout.math.map.OpenObjectIntHashMap;
  * outputs the the Top K frequent Patterns for each group.
  * 
  */
-
 public class ParallelFPGrowthReducer extends Reducer<LongWritable,TransactionTree,Text,TopKStringPatterns> {
   
   private final List<String> featureReverseMap = new ArrayList<String>();
@@ -64,12 +62,9 @@ public class ParallelFPGrowthReducer extends Reducer<LongWritable,TransactionTre
   @Override
   protected void reduce(LongWritable key, Iterable<TransactionTree> values, Context context) throws IOException {
     TransactionTree cTree = new TransactionTree();
-    int nodes = 0;
     for (TransactionTree tr : values) {
-      Iterator<Pair<List<Integer>,Long>> it = tr.getIterator();
-      while (it.hasNext()) {
-        Pair<List<Integer>,Long> p = it.next();
-        nodes += cTree.addPattern(p.getFirst(), p.getSecond());
+      for (Pair<List<Integer>,Long> p : tr) {
+        cTree.addPattern(p.getFirst(), p.getSecond());
       }
     }
     
@@ -94,7 +89,7 @@ public class ParallelFPGrowthReducer extends Reducer<LongWritable,TransactionTre
     
     FPGrowth<Integer> fpGrowth = new FPGrowth<Integer>();
     fpGrowth.generateTopKFrequentPatterns(
-        cTree.getIterator(),
+        cTree.iterator(),
         localFList,
         minSupport,
         maxHeapSize,

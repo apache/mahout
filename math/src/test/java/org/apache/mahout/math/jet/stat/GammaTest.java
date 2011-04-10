@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math.jet.stat;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.io.CharStreams;
@@ -28,7 +29,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.util.Random;
 
 public final class GammaTest extends MahoutTestCase {
@@ -116,7 +116,7 @@ public final class GammaTest extends MahoutTestCase {
     Splitter onComma = Splitter.on(",").trimResults();
 
     InputSupplier<InputStreamReader> input =
-        Resources.newReaderSupplier(Resources.getResource("beta-test-data.csv"), Charset.forName("UTF-8"));
+        Resources.newReaderSupplier(Resources.getResource("beta-test-data.csv"), Charsets.UTF_8);
     boolean header = true;
     for (String line : CharStreams.readLines(input)) {
       if (header) {

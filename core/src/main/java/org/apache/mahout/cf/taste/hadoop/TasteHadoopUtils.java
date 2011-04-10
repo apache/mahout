@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
+import com.google.common.base.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -32,7 +33,6 @@ import org.apache.mahout.math.map.OpenIntLongHashMap;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.regex.Pattern;
 
 /**
@@ -85,7 +85,7 @@ public final class TasteHadoopUtils {
       in = fs.open(outputFile);
       ByteArrayOutputStream out = new ByteArrayOutputStream();
       IOUtils.copyBytes(in, out, conf);
-      return Integer.parseInt(new String(out.toByteArray(), Charset.forName("UTF-8")).trim());
+      return Integer.parseInt(new String(out.toByteArray(), Charsets.UTF_8).trim());
     } finally {
       IOUtils.closeStream(in);
     }

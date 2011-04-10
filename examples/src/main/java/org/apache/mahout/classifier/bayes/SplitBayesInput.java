@@ -25,6 +25,7 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.BitSet;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -116,7 +117,7 @@ public class SplitBayesInput {
   private int splitLocation = 100;
   private int testRandomSelectionSize = -1;
   private int testRandomSelectionPct = -1;
-  private Charset charset = Charset.forName("UTF-8");
+  private Charset charset = Charsets.UTF_8;
 
   private final FileSystem fs;
   private Path inputDirectory;

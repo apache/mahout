@@ -20,9 +20,9 @@ package org.apache.mahout.cf.taste.example.kddcup;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.AbstractIterator;
 import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
 import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
@@ -38,7 +38,9 @@ import org.apache.mahout.common.Pair;
  * <p>Timestamps in the data set are relative to some unknown point in time, for anonymity. They are assumed
  * to be relative to the epoch, time 0, or January 1 1970, for purposes here.</p>
  */
-public final class DataFileIterator implements SkippingIterator<Pair<PreferenceArray,long[]>>, Closeable {
+public final class DataFileIterator
+    extends AbstractIterator<Pair<PreferenceArray,long[]>>
+    implements SkippingIterator<Pair<PreferenceArray,long[]>>, Closeable {
 
   private static final Pattern COLON_PATTERN = Pattern.compile(":");
   private static final Pattern PIPE_PATTERN = Pattern.compile("\\|");
@@ -54,15 +56,10 @@ public final class DataFileIterator implements SkippingIterator<Pair<PreferenceA
   }
 
   @Override
-  public boolean hasNext() {
-    return lineIterator.hasNext();
-  }
+  protected Pair<PreferenceArray, long[]> computeNext() {
 
-  @Override
-  public Pair<PreferenceArray,long[]> next() {
-
-    if (!hasNext()) {
-      throw new NoSuchElementException();
+    if (!lineIterator.hasNext()) {
+      return endOfData();
     }
 
     String line = lineIterator.next();
@@ -113,14 +110,6 @@ public final class DataFileIterator implements SkippingIterator<Pair<PreferenceA
     return new Pair<PreferenceArray,long[]>(currentUserPrefs, timestamps);
   }
 
-  /**
-   * @throws UnsupportedOperationException
-   */
-  @Override
-  public void remove() {
-    throw new UnsupportedOperationException();
-  }
-
   @Override
   public void skip(int n) {
     for (int i = 0; i < n; i++) {
@@ -138,6 +127,7 @@ public final class DataFileIterator implements SkippingIterator<Pair<PreferenceA
 
   @Override
   public void close() {
+    endOfData();
     lineIterator.close();
   }
 

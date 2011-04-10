@@ -22,7 +22,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,6 +30,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
+import com.google.common.base.Charsets;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -229,7 +229,7 @@ public final class LDAPrintTopics {
     for (int i = 0; i < topWords.size(); ++i) {
       List<String> topK = topWords.get(i);
       Writer writer = new OutputStreamWriter(
-          new FileOutputStream(new File(output, "topic-" + i)), Charset.forName("UTF-8"));
+          new FileOutputStream(new File(output, "topic-" + i)), Charsets.UTF_8);
       try {
         writer.write("Topic " + i + '\n');
         writer.write("===========\n");

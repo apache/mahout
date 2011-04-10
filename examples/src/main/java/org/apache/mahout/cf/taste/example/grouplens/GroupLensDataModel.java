@@ -24,9 +24,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
 import java.util.regex.Pattern;
 
+import com.google.common.base.Charsets;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.common.IOUtils;
@@ -56,7 +56,7 @@ public final class GroupLensDataModel extends FileDataModel {
     }
     PrintWriter writer = null;
     try {
-      writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(resultFile), Charset.forName("UTF-8")));
+      writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(resultFile), Charsets.UTF_8));
       for (String line : new FileLineIterable(originalFile, false)) {
         int lastDelimiterStart = line.lastIndexOf(COLON_DELIMTER);
         if (lastDelimiterStart < 0) {

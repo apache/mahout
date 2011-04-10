@@ -25,6 +25,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Random;
 
+import com.google.common.base.Charsets;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -247,7 +248,7 @@ public final class Utils {
 
   private static void writeDataToFile(String[] sData, Path path) throws IOException {
     BufferedWriter output = new BufferedWriter(new OutputStreamWriter(
-        new FileOutputStream(path.toString()), Charset.forName("UTF-8")));
+        new FileOutputStream(path.toString()), Charsets.UTF_8));
     try {
       for (String line : sData) {
         output.write(line);

@@ -21,36 +21,48 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 
+import com.google.common.base.Function;
+import com.google.common.collect.ForwardingIterator;
+import com.google.common.collect.Iterators;
+
 /**
  * An iterator that copies the values in an underlying iterator by finding an appropriate copy constructor.
  */
-public final class CopyConstructorIterator<T> extends TransformingIterator<T,T> {
+public final class CopyConstructorIterator<T> extends ForwardingIterator<T> {
 
+  private final Iterator<T> delegate;
   private Constructor<T> constructor;
 
-  public CopyConstructorIterator(Iterator<? extends T> delegate) {
-    super(delegate);
+  public CopyConstructorIterator(Iterator<? extends T> copyFrom) {
+    this.delegate = Iterators.transform(
+        copyFrom,
+        new Function<T,T>() {
+          @Override
+          public T apply(T from) {
+            if (constructor == null) {
+              Class<T> elementClass = (Class<T>) from.getClass();
+              try {
+                constructor = elementClass.getConstructor(elementClass);
+              } catch (NoSuchMethodException e) {
+                throw new IllegalStateException(e);
+              }
+            }
+            try {
+              return constructor.newInstance(from);
+            } catch (InstantiationException e) {
+              throw new IllegalStateException(e);
+            } catch (IllegalAccessException e) {
+              throw new IllegalStateException(e);
+            } catch (InvocationTargetException e) {
+              throw new IllegalStateException(e);
+            }
+          }
+        });
   }
 
   @Override
-  protected T transform(T in) {
-    if (constructor == null) {
-      Class<T> elementClass = (Class<T>) in.getClass();
-      try {
-        constructor = elementClass.getConstructor(elementClass);
-      } catch (NoSuchMethodException e) {
-        throw new IllegalStateException(e);
-      }
-    }
-    try {
-      return constructor.newInstance(in);
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    } catch (InvocationTargetException e) {
-      throw new IllegalStateException(e);
-    }
+  protected Iterator<T> delegate() {
+    return delegate;
   }
 
 }

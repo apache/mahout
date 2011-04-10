@@ -20,7 +20,6 @@ package org.apache.mahout.fpm.pfpgrowth;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -41,21 +40,19 @@ public class ParallelFPGrowthMapper extends Mapper<LongWritable,TransactionTree,
   private final OpenIntLongHashMap gListInt = new OpenIntLongHashMap();
   
   @Override
-  protected void map(LongWritable offset, TransactionTree input, Context context) throws IOException,
-                                                                                 InterruptedException {
-    
-    Iterator<Pair<List<Integer>,Long>> it = input.getIterator();
-    while (it.hasNext()) {
-      Pair<List<Integer>,Long> pattern = it.next();
+  protected void map(LongWritable offset, TransactionTree input, Context context)
+    throws IOException, InterruptedException {
+
+    for (Pair<List<Integer>,Long> pattern : input) {
       Integer[] prunedItems = pattern.getFirst().toArray(new Integer[pattern.getFirst().size()]);
-      
+
       Collection<Long> groups = new HashSet<Long>();
       for (int j = prunedItems.length - 1; j >= 0; j--) { // generate group
         // dependent
         // shards
         Integer item = prunedItems[j];
         Long groupID = gListInt.get(item);
-        
+
         if (!groups.contains(groupID)) {
           Integer[] tempItems = new Integer[j + 1];
           System.arraycopy(prunedItems, 0, tempItems, 0, j + 1);

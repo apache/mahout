@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.vectors.csv;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,8 @@ package org.apache.mahout.utils.vectors.csv;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.vectors.csv;
+
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.utils.MahoutTestCase;
 import org.apache.mahout.utils.vectors.RandomVectorIterable;
@@ -26,8 +27,9 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Iterator;
 
-public class CSVVectorIterableTest extends MahoutTestCase {
+public class CSVVectorIteratorTest extends MahoutTestCase {
 
   @Test
   public void testCount() throws Exception {
@@ -43,10 +45,10 @@ public class CSVVectorIterableTest extends MahoutTestCase {
     Iterable<Vector> iter = new RandomVectorIterable(50);
     jwvw.write(iter);
     jwvw.close();
-    Iterable<Vector> csvIter = new CSVVectorIterable(new StringReader(sWriter.getBuffer().toString()));
+    Iterator<Vector> csvIter = new CSVVectorIterator(new StringReader(sWriter.getBuffer().toString()));
     int count = 0;
-    for (Vector vector : csvIter) {
-      //System.out.println("Vec: " + vector);
+    while (csvIter.hasNext()) {
+      csvIter.next();
       count++;
     }
     assertEquals(50, count);

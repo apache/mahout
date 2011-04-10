@@ -17,6 +17,8 @@
 
 package org.apache.mahout.math.hadoop;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterators;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -26,7 +28,6 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.common.Pair;
-import org.apache.mahout.common.iterator.TransformingIterator;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterator;
 import org.apache.mahout.math.CardinalityException;
@@ -118,7 +119,15 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
   @Override
   public Iterator<MatrixSlice> iterateAll() {
     try {
-      return new DistributedMatrixIterator(rowPath, conf);
+      return Iterators.transform(
+          new SequenceFileDirIterator<IntWritable,VectorWritable>(new Path(rowPath, "*"),
+                                                                  PathType.GLOB, null, null, true, conf),
+          new Function<Pair<IntWritable,VectorWritable>,MatrixSlice>() {
+            @Override
+            public MatrixSlice apply(Pair<IntWritable, VectorWritable> from) {
+              return new MatrixSlice(from.getSecond().get(), from.getFirst().get());
+            }
+          });
     } catch (IOException ioe) {
       throw new IllegalStateException(ioe);
     }
@@ -210,21 +219,6 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
   @Override
   public Iterator<MatrixSlice> iterator() {
     return iterateAll();
-  }
-
-  public static class DistributedMatrixIterator
-    extends TransformingIterator<Pair<IntWritable,VectorWritable>,MatrixSlice> {
-
-    public DistributedMatrixIterator(Path rowPath, Configuration conf) throws IOException {
-      super(new SequenceFileDirIterator<IntWritable,VectorWritable>(
-          new Path(rowPath, "*"), PathType.GLOB, null, null, true, conf));
-    }
-
-    @Override
-    protected MatrixSlice transform(Pair<IntWritable,VectorWritable> in) {
-      return new MatrixSlice(in.getSecond().get(), in.getFirst().get());
-    }
-
   }
 
   public static class MatrixEntryWritable implements WritableComparable<MatrixEntryWritable> {

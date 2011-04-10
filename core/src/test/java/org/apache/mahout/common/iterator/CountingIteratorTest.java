@@ -15,26 +15,30 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.fpm.pfpgrowth.convertors.integer;
+package org.apache.mahout.common.iterator;
 
 import java.util.Iterator;
-import java.util.List;
 
-import org.apache.mahout.common.IntegerTuple;
-import org.apache.mahout.common.iterator.TransformingIterator;
+import org.apache.mahout.common.MahoutTestCase;
+import org.junit.Test;
 
-/**
- * Iterates over an integer tuple and output it as a list
- */
-public final class IntegerTupleIterator extends TransformingIterator<IntegerTuple,List<Integer>> {
+public final class CountingIteratorTest extends MahoutTestCase {
 
-  public IntegerTupleIterator(Iterator<IntegerTuple> iterator) {
-    super(iterator);
+  @Test
+  public void testEmptyCase() {
+    assertFalse(new CountingIterator(0).hasNext());
   }
 
-  @Override
-  protected List<Integer> transform(IntegerTuple in) {
-    return in.getEntries();
+  @Test
+  public void testCount() {
+    Iterator<Integer> it = new CountingIterator(3);
+    assertTrue(it.hasNext());
+    assertEquals(0, (int) it.next());
+    assertTrue(it.hasNext());
+    assertEquals(1, (int) it.next());
+    assertTrue(it.hasNext());
+    assertEquals(2, (int) it.next());
+    assertFalse(it.hasNext());
   }
 
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -15,33 +15,33 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.common.iterator;
+package org.apache.mahout.vectorizer.encoders;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
+import java.io.IOException;
 
-import org.apache.mahout.common.MahoutTestCase;
-import org.junit.Test;
+import com.google.common.collect.AbstractIterator;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 
-public final class IteratorsIteratorTest extends MahoutTestCase {
+final class TokenStreamIterator extends AbstractIterator<String> {
 
-  @Test
-  public void testEmpty() {
-    assertFalse(new IteratorsIterator<Object>(Collections.<Iterator<Object>>emptyList()).hasNext());
+  private final TokenStream tokenStream;
+
+  TokenStreamIterator(TokenStream tokenStream) {
+    this.tokenStream = tokenStream;
   }
 
-  @Test
-  public void testSequences() {
-    Iterator<Integer> it = new IteratorsIterator<Integer>(Arrays.asList(
-      Integers.iterator(3), Integers.iterator(0), Integers.iterator(1)
-    ));
-    assertTrue(it.hasNext());
-    assertEquals(0, (int) it.next());
-    assertEquals(1, (int) it.next());
-    assertEquals(2, (int) it.next());
-    assertEquals(0, (int) it.next());
-    assertFalse(it.hasNext());
+  @Override
+  protected String computeNext() {
+    try {
+      if (tokenStream.incrementToken()) {
+        return tokenStream.getAttribute(TermAttribute.class).term();
+      } else {
+        return endOfData();
+      }
+    } catch (IOException e) {
+      throw new TokenizationException("IO error while tokenizing", e);
+    }
   }
 
 }

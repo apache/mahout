@@ -18,7 +18,6 @@
 package org.apache.mahout.fpm.pfpgrowth;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.hadoop.io.LongWritable;
@@ -29,24 +28,18 @@ import org.apache.mahout.common.Pair;
  *  takes each group of dependent transactions and\ compacts it in a
  * TransactionTree structure
  */
-
-public class ParallelFPGrowthCombiner extends
-    Reducer<LongWritable,TransactionTree,LongWritable,TransactionTree> {
+public class ParallelFPGrowthCombiner extends Reducer<LongWritable,TransactionTree,LongWritable,TransactionTree> {
   
   @Override
   protected void reduce(LongWritable key, Iterable<TransactionTree> values, Context context)
     throws IOException, InterruptedException {
     TransactionTree cTree = new TransactionTree();
     for (TransactionTree tr : values) {
-      Iterator<Pair<List<Integer>,Long>> it = tr.getIterator();
-      while (it.hasNext()) {
-        Pair<List<Integer>,Long> p = it.next();
+      for (Pair<List<Integer>,Long> p : tr) {
         cTree.addPattern(p.getFirst(), p.getSecond());
       }
     }
-    
     context.write(key, cTree.getCompressedTree());
-    
   }
   
 }

@@ -64,6 +64,7 @@ public final class TransactionTreeTest extends MahoutTestCase {
 
   @Test
   public void testTransactionTree() {
+    
     TransactionTree tree = new TransactionTree();
     int nodes = 0;
     int total = 0;
@@ -74,51 +75,46 @@ public final class TransactionTreeTest extends MahoutTestCase {
     }
 
     log.info("Input integers: {}", total);
-    log.info("Input data Size: P{", total * SIZE_INT / (double) MEGABYTE);
+    log.info("Input data Size: {}", total * SIZE_INT / (double) MEGABYTE);
     log.info("Nodes in Tree: {}", nodes);
     log.info("Size of Tree: {}", (nodes * SIZE_INT * NUM_OF_FPTREE_FIELDS + tree.childCount() * SIZE_INT)
         / (double) MEGABYTE);
+
     TransactionTree vtree = new TransactionTree();
-    Iterator<Pair<List<Integer>, Long>> it = tree.getIterator();
     StringBuilder sb = new StringBuilder();
     int count = 0;
     int items = 0;
+    Iterator<Pair<List<Integer>,Long>> it = tree.iterator();
     while (it.hasNext()) {
-      Pair<List<Integer>, Long> p = it.next();
+      Pair<List<Integer>,Long> p = it.next();
       vtree.addPattern(p.getFirst(), p.getSecond());
       items += p.getFirst().size();
       count++;
-      String s = p.toString();
-      sb.append(s);
-
+      sb.append(p);
     }
+
     log.info("Number of transaction integers: {}", items);
     log.info("Size of Transactions: {}", (items * SIZE_INT + count * SIZE_LONG) / (double) MEGABYTE);
     log.info("Number of Transactions: {}", count);
+
     tree.getCompressedTree();
-    it = vtree.getIterator();
+    it = vtree.iterator();
     StringBuilder sb1 = new StringBuilder();
     while (it.hasNext()) {
-      Pair<List<Integer>, Long> p = it.next();
-      String s = p.toString();
-      sb1.append(s);
-
+      sb1.append(it.next());
     }
     assertEquals(sb.toString(), sb1.toString());
 
     TransactionTree mtree = new TransactionTree();
-    MultiTransactionTreeIterator mt = new MultiTransactionTreeIterator(vtree.getIterator());
+    MultiTransactionTreeIterator mt = new MultiTransactionTreeIterator(vtree.iterator());
     while (mt.hasNext()) {
       mtree.addPattern(mt.next(), 1);
     }
 
-    it = mtree.getIterator();
+    it = mtree.iterator();
     StringBuilder sb2 = new StringBuilder();
     while (it.hasNext()) {
-      Pair<List<Integer>, Long> p = it.next();
-      String s = p.toString();
-      sb2.append(s);
-
+      sb2.append(it.next());
     }
     assertEquals(sb.toString(), sb2.toString());
   }

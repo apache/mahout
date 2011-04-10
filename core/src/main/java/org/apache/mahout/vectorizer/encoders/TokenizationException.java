@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -15,31 +15,12 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.common.iterator;
+package org.apache.mahout.vectorizer.encoders;
 
-import java.util.Iterator;
+final class TokenizationException extends RuntimeException {
 
-/**
- * <p>
- * An {@link Iterable} over no elements: always produces an {@link Iterator} which iterates over nothing.
- * </p>
- */
-public final class EmptyIterable<T> implements Iterable<T> {
-  
-  private final Iterator<T> iterator;
-  
-  public EmptyIterable() {
-    iterator = new EmptyIterator<T>();
+  TokenizationException(String msg, Throwable cause) {
+    super(msg, cause);
   }
-  
-  @Override
-  public Iterator<T> iterator() {
-    return iterator;
-  }
-  
-  @Override
-  public String toString() {
-    return "EmptyIterable[iterator:" + iterator + ']';
-  }
-  
+
 }

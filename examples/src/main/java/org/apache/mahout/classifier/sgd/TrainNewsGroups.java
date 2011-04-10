@@ -17,6 +17,7 @@
 
 package org.apache.mahout.classifier.sgd;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.ConcurrentHashMultiset;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Lists;
@@ -47,7 +48,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
-import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
@@ -285,7 +285,7 @@ public final class TrainNewsGroups {
     Multiset<String> words = ConcurrentHashMultiset.create();
 
     BufferedReader reader =
-        new BufferedReader(new InputStreamReader(new FileInputStream(file), Charset.forName("UTF-8")));
+        new BufferedReader(new InputStreamReader(new FileInputStream(file), Charsets.UTF_8));
     try {
       String line = reader.readLine();
       Reader dateString = new StringReader(DATE_FORMATS[leakType % 3].format(new Date(date)));

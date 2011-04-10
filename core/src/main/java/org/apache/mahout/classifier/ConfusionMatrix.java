@@ -23,7 +23,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.mahout.common.Summarizable;
 
 import com.google.common.base.Preconditions;
 
@@ -32,7 +31,7 @@ import com.google.common.base.Preconditions;
  * 
  * See http://en.wikipedia.org/wiki/Confusion_matrix for background
  */
-public class ConfusionMatrix implements Summarizable {
+public class ConfusionMatrix {
 
   private final Map<String,Integer> labelMap = new LinkedHashMap<String,Integer>();
   private final int[][] confusionMatrix;
@@ -129,7 +128,7 @@ public class ConfusionMatrix implements Summarizable {
   }
   
   @Override
-  public String summarize() {
+  public String toString() {
     StringBuilder returnString = new StringBuilder(200);
     returnString.append("=======================================================").append('\n');
     returnString.append("Confusion Matrix\n");

@@ -17,6 +17,7 @@
 
 package org.apache.mahout.classifier.sgd;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
@@ -38,7 +39,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Random;
 
@@ -91,7 +91,7 @@ public final class SimpleCsvExamples {
       }
     } else if ("--parse".equals(args[0])) {
       BufferedReader in = new BufferedReader(
-          new InputStreamReader(new FileInputStream(new File(args[1])), Charset.forName("UTF-8")));
+          new InputStreamReader(new FileInputStream(new File(args[1])), Charsets.UTF_8));
       try {
         String line = in.readLine();
         while (line != null) {

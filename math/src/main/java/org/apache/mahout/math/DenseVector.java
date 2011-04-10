@@ -19,8 +19,8 @@ package org.apache.mahout.math;
 
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 
+import com.google.common.collect.AbstractIterator;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.PlusMult;
 
@@ -262,45 +262,28 @@ public class DenseVector extends AbstractVector {
   }
 
 
-  private final class NonDefaultIterator implements Iterator<Element> {
+  private final class NonDefaultIterator extends AbstractIterator<Element> {
 
     private final DenseElement element = new DenseElement();
     private int index = 0;
 
-    private NonDefaultIterator() {
-      goToNext();
-    }
-
-    private void goToNext() {
+    @Override
+    protected Element computeNext() {
       while (index < size() && values[index] == 0.0) {
         index++;
       }
-    }
-
-    @Override
-    public boolean hasNext() {
-      return index < size();
-    }
-
-    @Override
-    public Element next() {
-      if (index >= size()) {
-        throw new NoSuchElementException();
-      } else {
+      if (index < size()) {
         element.index = index;
         index++;
-        goToNext();
         return element;
+      } else {
+        return endOfData();
       }
     }
 
-    @Override
-    public void remove() {
-      throw new UnsupportedOperationException();
-    }
   }
 
-  private final class AllIterator implements Iterator<Element> {
+  private final class AllIterator extends AbstractIterator<Element> {
 
     private final DenseElement element = new DenseElement();
 
@@ -309,24 +292,15 @@ public class DenseVector extends AbstractVector {
     }
 
     @Override
-    public boolean hasNext() {
-      return element.index + 1 < size();
-    }
-
-    @Override
-    public Element next() {
-      if (element.index + 1 >= size()) {
-        throw new NoSuchElementException();
-      } else {
+    protected Element computeNext() {
+      if (element.index + 1 < size()) {
         element.index++;
         return element;
+      } else {
+        return endOfData();
       }
     }
 
-    @Override
-    public void remove() {
-      throw new UnsupportedOperationException();
-    }
   }
 
   private final class DenseElement implements Element {
