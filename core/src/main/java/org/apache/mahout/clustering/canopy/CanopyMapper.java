@@ -26,27 +26,32 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.VectorWritable;
 
-class CanopyMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable> {
+class CanopyMapper extends
+    Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable> {
 
   private final Collection<Canopy> canopies = new ArrayList<Canopy>();
+
   private CanopyClusterer canopyClusterer;
 
   @Override
-  protected void map(WritableComparable<?> key, VectorWritable point, Context context)
-    throws IOException, InterruptedException {
+  protected void map(WritableComparable<?> key, VectorWritable point,
+      Context context) throws IOException, InterruptedException {
     canopyClusterer.addPointToCanopies(point.get(), canopies);
   }
 
   @Override
-  protected void setup(Context context) throws IOException, InterruptedException {
+  protected void setup(Context context) throws IOException,
+      InterruptedException {
     super.setup(context);
     canopyClusterer = new CanopyClusterer(context.getConfiguration());
   }
 
   @Override
-  protected void cleanup(Context context) throws IOException, InterruptedException {
+  protected void cleanup(Context context) throws IOException,
+      InterruptedException {
     for (Canopy canopy : canopies) {
-      context.write(new Text("centroid"), new VectorWritable(canopy.computeCentroid()));
+      context.write(new Text("centroid"), new VectorWritable(canopy
+          .computeCentroid()));
     }
     super.cleanup(context);
   }

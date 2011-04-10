@@ -57,13 +57,14 @@ public final class Job extends AbstractJob {
       Path output = new Path("output");
       Configuration conf = new Configuration();
       HadoopUtil.delete(conf, output);
-      new Job().run(conf, new Path("testdata"), output, new EuclideanDistanceMeasure(), 6, 0.5, 10);
+      new Job().run(conf, new Path("testdata"), output,
+          new EuclideanDistanceMeasure(), 6, 0.5, 10);
     }
   }
 
   @Override
-  public int run(String[] args)
-    throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, InterruptedException {
+  public int run(String[] args) throws IOException, ClassNotFoundException,
+      InstantiationException, IllegalAccessException, InterruptedException {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
@@ -85,8 +86,10 @@ public final class Job extends AbstractJob {
     if (measureClass == null) {
       measureClass = SquaredEuclideanDistanceMeasure.class.getName();
     }
-    double convergenceDelta = Double.parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
-    int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
+    double convergenceDelta = Double
+        .parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
+    int maxIterations = Integer
+        .parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.delete(getConf(), output);
     }
@@ -94,74 +97,76 @@ public final class Job extends AbstractJob {
     Class<?> cl = ccl.loadClass(measureClass);
     DistanceMeasure measure = (DistanceMeasure) cl.newInstance();
     if (hasOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)) {
-      int k = Integer.parseInt(getOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION));
+      int k = Integer
+          .parseInt(getOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION));
       run(getConf(), input, output, measure, k, convergenceDelta, maxIterations);
     } else {
       double t1 = Double.parseDouble(getOption(DefaultOptionCreator.T1_OPTION));
       double t2 = Double.parseDouble(getOption(DefaultOptionCreator.T2_OPTION));
-      run(getConf(), input, output, measure, t1, t2, convergenceDelta, maxIterations);
+      run(getConf(), input, output, measure, t1, t2, convergenceDelta,
+          maxIterations);
     }
     return 0;
   }
-  
+
   /**
-   * Run the kmeans clustering job on an input dataset using the given the number of clusters k and iteration
-   * parameters. All output data will be written to the output directory, which will be initially deleted if
-   * it exists. The clustered points will reside in the path <output>/clustered-points. By default, the job
-   * expects a file containing equal length space delimited data that resides in a directory named
+   * Run the kmeans clustering job on an input dataset using the given the
+   * number of clusters k and iteration parameters. All output data will be
+   * written to the output directory, which will be initially deleted if it
+   * exists. The clustered points will reside in the path
+   * <output>/clustered-points. By default, the job expects a file containing
+   * equal length space delimited data that resides in a directory named
    * "testdata", and writes output to a directory named "output".
-   * @param conf the Configuration to use
+   * 
+   * @param conf
+   *          the Configuration to use
    * @param input
    *          the String denoting the input directory path
    * @param output
    *          the String denoting the output directory path
    * @param measure
    *          the DistanceMeasure to use
-   * @param k 
+   * @param k
    *          the number of clusters in Kmeans
    * @param convergenceDelta
    *          the double convergence criteria for iterations
    * @param maxIterations
    *          the int maximum number of iterations
    */
-  public void run(Configuration conf,
-                  Path input,
-                  Path output,
-                  DistanceMeasure measure,
-                  int k,
-                  double convergenceDelta,
-                  int maxIterations)
-    throws IOException, InterruptedException, ClassNotFoundException {
-    Path directoryContainingConvertedInput = new Path(output, DIRECTORY_CONTAINING_CONVERTED_INPUT);
+  public void run(Configuration conf, Path input, Path output,
+      DistanceMeasure measure, int k, double convergenceDelta, int maxIterations)
+      throws IOException, InterruptedException, ClassNotFoundException {
+    Path directoryContainingConvertedInput = new Path(output,
+        DIRECTORY_CONTAINING_CONVERTED_INPUT);
     log.info("Preparing Input");
-    InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
+    InputDriver.runJob(input, directoryContainingConvertedInput,
+        "org.apache.mahout.math.RandomAccessSparseVector");
     log.info("Running random seed to get initial clusters");
     Path clusters = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);
-    clusters = RandomSeedGenerator.buildRandom(conf, directoryContainingConvertedInput, clusters, k, measure);
+    clusters = RandomSeedGenerator.buildRandom(conf,
+        directoryContainingConvertedInput, clusters, k, measure);
     log.info("Running KMeans");
-    KMeansDriver.run(conf,
-                     directoryContainingConvertedInput,
-                     clusters,
-                     output,
-                     measure,
-                     convergenceDelta,
-                     maxIterations,
-                     true,
-                     false);
+    KMeansDriver.run(conf, directoryContainingConvertedInput, clusters, output,
+        measure, convergenceDelta, maxIterations, true, false);
     // run ClusterDumper
-    ClusterDumper clusterDumper =
-        new ClusterDumper(finalClusterPath(conf, output, maxIterations), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
+        output, maxIterations), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
 
   /**
-   * Run the kmeans clustering job on an input dataset using the given distance measure, t1, t2 and iteration
-   * parameters. All output data will be written to the output directory, which will be initially deleted if
-   * it exists. The clustered points will reside in the path <output>/clustered-points. By default, the job
-   * expects the a file containing synthetic_control.data as obtained from
-   * http://archive.ics.uci.edu/ml/datasets/Synthetic+Control+Chart+Time+Series resides in a directory named
-   * "testdata", and writes output to a directory named "output".
-   * @param conf the Configuration to use
+   * Run the kmeans clustering job on an input dataset using the given distance
+   * measure, t1, t2 and iteration parameters. All output data will be written
+   * to the output directory, which will be initially deleted if it exists. The
+   * clustered points will reside in the path <output>/clustered-points. By
+   * default, the job expects the a file containing synthetic_control.data as
+   * obtained from
+   * http://archive.ics.uci.edu/ml/datasets/Synthetic+Control+Chart+Time+Series
+   * resides in a directory named "testdata", and writes output to a directory
+   * named "output".
+   * 
+   * @param conf
+   *          the Configuration to use
    * @param input
    *          the String denoting the input directory path
    * @param output
@@ -176,41 +181,39 @@ public final class Job extends AbstractJob {
    *          the double convergence criteria for iterations
    * @param maxIterations
    *          the int maximum number of iterations
+   * @throws IOException 
+   * @throws InterruptedException 
+   * @throws ClassNotFoundException 
+   * @throws IllegalAccessException
+   * @throws InstantiationException
    */
-  public void run(Configuration conf,
-                  Path input,
-                  Path output,
-                  DistanceMeasure measure,
-                  double t1,
-                  double t2,
-                  double convergenceDelta,
-                  int maxIterations)
-    throws IOException, InterruptedException, ClassNotFoundException {
-    Path directoryContainingConvertedInput = new Path(output, DIRECTORY_CONTAINING_CONVERTED_INPUT);
+  public void run(Configuration conf, Path input, Path output,
+      DistanceMeasure measure, double t1, double t2, double convergenceDelta,
+      int maxIterations) throws IOException, InterruptedException,
+      ClassNotFoundException, InstantiationException, IllegalAccessException {
+    Path directoryContainingConvertedInput = new Path(output,
+        DIRECTORY_CONTAINING_CONVERTED_INPUT);
     log.info("Preparing Input");
-    InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
+    InputDriver.runJob(input, directoryContainingConvertedInput,
+        "org.apache.mahout.math.RandomAccessSparseVector");
     log.info("Running Canopy to get initial clusters");
-    CanopyDriver.run(conf, directoryContainingConvertedInput, output, measure, t1, t2, false, false);
+    CanopyDriver.run(conf, directoryContainingConvertedInput, output, measure,
+        t1, t2, false, false);
     log.info("Running KMeans");
-    KMeansDriver.run(conf,
-                     directoryContainingConvertedInput,
-                     new Path(output, Cluster.INITIAL_CLUSTERS_DIR),
-                     output,
-                     measure,
-                     convergenceDelta,
-                     maxIterations,
-                     true,
-                     false);
+    KMeansDriver.run(conf, directoryContainingConvertedInput, new Path(output,
+        Cluster.INITIAL_CLUSTERS_DIR), output, measure, convergenceDelta,
+        maxIterations, true, false);
     // run ClusterDumper
-    ClusterDumper clusterDumper =
-        new ClusterDumper(finalClusterPath(conf, output, maxIterations), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
+        output, maxIterations), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
 
   /**
    * Return the path to the final iteration's clusters
    */
-  private static Path finalClusterPath(Configuration conf, Path output, int maxIterations) throws IOException {
+  private static Path finalClusterPath(Configuration conf, Path output,
+      int maxIterations) throws IOException {
     FileSystem fs = FileSystem.get(conf);
     for (int i = maxIterations; i >= 0; i--) {
       Path clusters = new Path(output, "clusters-" + i);

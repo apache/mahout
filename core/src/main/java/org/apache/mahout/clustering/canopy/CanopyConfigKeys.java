@@ -18,11 +18,18 @@
 package org.apache.mahout.clustering.canopy;
 
 public interface CanopyConfigKeys {
-  
+
   String T1_KEY = "org.apache.mahout.clustering.canopy.t1";
+
   String CANOPY_PATH_KEY = "org.apache.mahout.clustering.canopy.path";
+
   String T2_KEY = "org.apache.mahout.clustering.canopy.t2";
+
+  String T3_KEY = "org.apache.mahout.clustering.canopy.t3";
+
+  String T4_KEY = "org.apache.mahout.clustering.canopy.t4";
+
   // keys used by Driver, Mapper, Combiner & Reducer
   String DISTANCE_MEASURE_KEY = "org.apache.mahout.clustering.canopy.measure";
-  
+
 }

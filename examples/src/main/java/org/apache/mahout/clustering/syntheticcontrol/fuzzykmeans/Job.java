@@ -45,6 +45,7 @@ public final class Job extends AbstractJob {
   private static final Logger log = LoggerFactory.getLogger(Job.class);
 
   private static final String DIRECTORY_CONTAINING_CONVERTED_INPUT = "data";
+
   private static final String M_OPTION = FuzzyKMeansDriver.M_OPTION;
 
   private Job() {
@@ -59,17 +60,14 @@ public final class Job extends AbstractJob {
       Path output = new Path("output");
       Configuration conf = new Configuration();
       HadoopUtil.delete(conf, output);
-      new Job().run(conf,
-                    new Path("testdata"),
-                    output,
-                    new EuclideanDistanceMeasure(),
-                    80, 55, 10, (float) 2, 0.5);
+      new Job().run(conf, new Path("testdata"), output,
+          new EuclideanDistanceMeasure(), 80, 55, 10, (float) 2, 0.5);
     }
   }
 
   @Override
-  public int run(String[] args)
-    throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, InterruptedException {
+  public int run(String[] args) throws IOException, ClassNotFoundException,
+      InstantiationException, IllegalAccessException, InterruptedException {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
@@ -78,7 +76,8 @@ public final class Job extends AbstractJob {
     addOption(DefaultOptionCreator.overwriteOption().create());
     addOption(DefaultOptionCreator.t1Option().create());
     addOption(DefaultOptionCreator.t2Option().create());
-    addOption(M_OPTION, M_OPTION, "coefficient normalization factor, must be greater than 1", true);
+    addOption(M_OPTION, M_OPTION,
+        "coefficient normalization factor, must be greater than 1", true);
 
     Map<String, String> argMap = parseArguments(args);
     if (argMap == null) {
@@ -91,29 +90,36 @@ public final class Job extends AbstractJob {
     if (measureClass == null) {
       measureClass = SquaredEuclideanDistanceMeasure.class.getName();
     }
-    double convergenceDelta = Double.parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
-    int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
+    double convergenceDelta = Double
+        .parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
+    int maxIterations = Integer
+        .parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     float fuzziness = Float.parseFloat(getOption(M_OPTION));
 
-    addOption(new DefaultOptionBuilder().withLongName(M_OPTION).withRequired(true)
-        .withArgument(new ArgumentBuilder().withName(M_OPTION).withMinimum(1).withMaximum(1).create())
-        .withDescription("coefficient normalization factor, must be greater than 1").withShortName(M_OPTION)
-        .create());
+    addOption(new DefaultOptionBuilder().withLongName(M_OPTION).withRequired(
+        true).withArgument(
+        new ArgumentBuilder().withName(M_OPTION).withMinimum(1).withMaximum(1)
+            .create()).withDescription(
+        "coefficient normalization factor, must be greater than 1")
+        .withShortName(M_OPTION).create());
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.delete(getConf(), output);
     }
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    DistanceMeasure measure = ccl.loadClass(measureClass).asSubclass(DistanceMeasure.class).newInstance();
+    DistanceMeasure measure = ccl.loadClass(measureClass).asSubclass(
+        DistanceMeasure.class).newInstance();
     double t1 = Double.parseDouble(getOption(DefaultOptionCreator.T1_OPTION));
     double t2 = Double.parseDouble(getOption(DefaultOptionCreator.T2_OPTION));
-    run(getConf(), input, output, measure, t1, t2, maxIterations, fuzziness, convergenceDelta);
+    run(getConf(), input, output, measure, t1, t2, maxIterations, fuzziness,
+        convergenceDelta);
     return 0;
   }
 
   /**
    * Return the path to the final iteration's clusters
    */
-  private static Path finalClusterPath(Configuration conf, Path output, int maxIterations) throws IOException {
+  private static Path finalClusterPath(Configuration conf, Path output,
+      int maxIterations) throws IOException {
     FileSystem fs = FileSystem.get(conf);
     for (int i = maxIterations; i >= 0; i--) {
       Path clusters = new Path(output, "clusters-" + i);
@@ -125,12 +131,16 @@ public final class Job extends AbstractJob {
   }
 
   /**
-   * Run the kmeans clustering job on an input dataset using the given distance measure, t1, t2 and iteration
-   * parameters. All output data will be written to the output directory, which will be initially deleted if
-   * it exists. The clustered points will reside in the path <output>/clustered-points. By default, the job
-   * expects the a file containing synthetic_control.data as obtained from
-   * http://archive.ics.uci.edu/ml/datasets/Synthetic+Control+Chart+Time+Series resides in a directory named
-   * "testdata", and writes output to a directory named "output".
+   * Run the kmeans clustering job on an input dataset using the given distance
+   * measure, t1, t2 and iteration parameters. All output data will be written
+   * to the output directory, which will be initially deleted if it exists. The
+   * clustered points will reside in the path <output>/clustered-points. By
+   * default, the job expects the a file containing synthetic_control.data as
+   * obtained from
+   * http://archive.ics.uci.edu/ml/datasets/Synthetic+Control+Chart+Time+Series
+   * resides in a directory named "testdata", and writes output to a directory
+   * named "output".
+   * 
    * @param input
    *          the String denoting the input directory path
    * @param output
@@ -139,43 +149,37 @@ public final class Job extends AbstractJob {
    *          the canopy T1 threshold
    * @param t2
    *          the canopy T2 threshold
-   * @param maxIterations 
+   * @param maxIterations
    *          the int maximum number of iterations
-   * @param fuzziness 
+   * @param fuzziness
    *          the float "m" fuzziness coefficient
    * @param convergenceDelta
    *          the double convergence criteria for iterations
+   * @throws InterruptedException 
+   * @throws ClassNotFoundException 
+   * @throws IllegalAccessException
+   * @throws InstantiationException
    */
-  public void run(Configuration conf,
-                  Path input,
-                  Path output,
-                  DistanceMeasure measure,
-                  double t1,
-                  double t2,
-                  int maxIterations,
-                  float fuzziness,
-                  double convergenceDelta)
-    throws IOException, InterruptedException, ClassNotFoundException {
-    Path directoryContainingConvertedInput = new Path(output, DIRECTORY_CONTAINING_CONVERTED_INPUT);
+  public void run(Configuration conf, Path input, Path output,
+      DistanceMeasure measure, double t1, double t2, int maxIterations,
+      float fuzziness, double convergenceDelta) throws IOException,
+      InterruptedException, ClassNotFoundException, InstantiationException,
+      IllegalAccessException {
+    Path directoryContainingConvertedInput = new Path(output,
+        DIRECTORY_CONTAINING_CONVERTED_INPUT);
     log.info("Preparing Input");
-    InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
+    InputDriver.runJob(input, directoryContainingConvertedInput,
+        "org.apache.mahout.math.RandomAccessSparseVector");
     log.info("Running Canopy to get initial clusters");
-    CanopyDriver.run(new Configuration(), directoryContainingConvertedInput, output, measure, t1, t2, false, false);
+    CanopyDriver.run(new Configuration(), directoryContainingConvertedInput,
+        output, measure, t1, t2, false, false);
     log.info("Running FuzzyKMeans");
-    FuzzyKMeansDriver.run(directoryContainingConvertedInput,
-                          new Path(output, Cluster.INITIAL_CLUSTERS_DIR),
-                          output,
-                          measure,
-                          convergenceDelta,
-                          maxIterations,
-                          fuzziness,
-                          true,
-                          true,
-                          0.0,
-                          false);
+    FuzzyKMeansDriver.run(directoryContainingConvertedInput, new Path(output,
+        Cluster.INITIAL_CLUSTERS_DIR), output, measure, convergenceDelta,
+        maxIterations, fuzziness, true, true, 0.0, false);
     // run ClusterDumper
-    ClusterDumper clusterDumper =
-        new ClusterDumper(finalClusterPath(conf, output, maxIterations), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
+        output, maxIterations), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
 }

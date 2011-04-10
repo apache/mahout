@@ -56,12 +56,15 @@ public final class Job extends AbstractJob {
   }
 
   /**
-   * Run the canopy clustering job on an input dataset using the given distance measure, t1 and t2 parameters.
-   * All output data will be written to the output directory, which will be initially deleted if it exists.
-   * The clustered points will reside in the path <output>/clustered-points. By default, the job expects the a
-   * file containing synthetic_control.data as obtained from
-   * http://archive.ics.uci.edu/ml/datasets/Synthetic+Control+Chart+Time+Series resides in a directory named
-   * "testdata", and writes output to a directory named "output".
+   * Run the canopy clustering job on an input dataset using the given distance
+   * measure, t1 and t2 parameters. All output data will be written to the
+   * output directory, which will be initially deleted if it exists. The
+   * clustered points will reside in the path <output>/clustered-points. By
+   * default, the job expects the a file containing synthetic_control.data as
+   * obtained from
+   * http://archive.ics.uci.edu/ml/datasets/Synthetic+Control+Chart+Time+Series
+   * resides in a directory named "testdata", and writes output to a directory
+   * named "output".
    * 
    * @param input
    *          the String denoting the input directory path
@@ -73,15 +76,24 @@ public final class Job extends AbstractJob {
    *          the canopy T1 threshold
    * @param t2
    *          the canopy T2 threshold
+   * @throws IOException
+   * @throws InterruptedException
+   * @throws ClassNotFoundException
+   * @throws InstantiationException
+   * @throws IllegalAccessException
    */
-  private static void run(Path input, Path output, DistanceMeasure measure, double t1, double t2)
-    throws IOException, InterruptedException, ClassNotFoundException {
-    Path directoryContainingConvertedInput = new Path(output, DIRECTORY_CONTAINING_CONVERTED_INPUT);
-    InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
-    CanopyDriver.run(new Configuration(), directoryContainingConvertedInput, output, measure, t1, t2, true, false);
+  private static void run(Path input, Path output, DistanceMeasure measure,
+      double t1, double t2) throws IOException, InterruptedException,
+      ClassNotFoundException, InstantiationException, IllegalAccessException {
+    Path directoryContainingConvertedInput = new Path(output,
+        DIRECTORY_CONTAINING_CONVERTED_INPUT);
+    InputDriver.runJob(input, directoryContainingConvertedInput,
+        "org.apache.mahout.math.RandomAccessSparseVector");
+    CanopyDriver.run(new Configuration(), directoryContainingConvertedInput,
+        output, measure, t1, t2, true, false);
     // run ClusterDumper
-    ClusterDumper clusterDumper =
-        new ClusterDumper(new Path(output, "clusters-0"), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(new Path(output,
+        "clusters-0"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
 
@@ -109,7 +121,8 @@ public final class Job extends AbstractJob {
     double t1 = Double.parseDouble(getOption(DefaultOptionCreator.T1_OPTION));
     double t2 = Double.parseDouble(getOption(DefaultOptionCreator.T2_OPTION));
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    DistanceMeasure measure = (DistanceMeasure) ((Class<?>) ccl.loadClass(measureClass)).newInstance();
+    DistanceMeasure measure = (DistanceMeasure) ((Class<?>) ccl
+        .loadClass(measureClass)).newInstance();
 
     run(input, output, measure, t1, t2);
     return 0;

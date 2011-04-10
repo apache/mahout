@@ -29,11 +29,12 @@ import org.apache.mahout.math.VectorWritable;
 public class CanopyReducer extends Reducer<Text, VectorWritable, Text, Canopy> {
 
   private final Collection<Canopy> canopies = new ArrayList<Canopy>();
-  private CanopyClusterer canopyClusterer;
+
+  protected CanopyClusterer canopyClusterer;
 
   @Override
-  protected void reduce(Text arg0, Iterable<VectorWritable> values, Context context)
-    throws IOException, InterruptedException {
+  protected void reduce(Text arg0, Iterable<VectorWritable> values,
+      Context context) throws IOException, InterruptedException {
     for (VectorWritable value : values) {
       Vector point = value.get();
       canopyClusterer.addPointToCanopies(point, canopies);
@@ -45,9 +46,11 @@ public class CanopyReducer extends Reducer<Text, VectorWritable, Text, Canopy> {
   }
 
   @Override
-  protected void setup(Context context) throws IOException, InterruptedException {
+  protected void setup(Context context) throws IOException,
+      InterruptedException {
     super.setup(context);
     canopyClusterer = new CanopyClusterer(context.getConfiguration());
+    canopyClusterer.useT3T4();
   }
 
 }
