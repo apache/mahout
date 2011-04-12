@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.example.kddcup.track1.svd;
 
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
@@ -30,6 +31,7 @@ import org.apache.mahout.common.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.Random;
 
 /**
@@ -254,4 +256,10 @@ public class ParallelArraysSGDFactorizer implements Factorizer {
     values[posB] = tmpValue;
     cachedEstimates[posB] = tmpEstimate;
   }
+
+  @Override
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
+    // do nothing
+  }
+
 }
