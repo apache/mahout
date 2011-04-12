@@ -62,7 +62,8 @@ import java.util.Iterator;
  *
  */
 public class DistributedRowMatrix implements VectorIterable, Configurable {
-
+  public static final String REMOVE_TEMP_DIRS = "DistributedMatrix.remove.temp.dirs";
+  
   private static final Logger log = LoggerFactory.getLogger(DistributedRowMatrix.class);
 
   private final Path inputPath;
@@ -72,6 +73,7 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
   private Path outputTmpBasePath;
   private final int numRows;
   private final int numCols;
+  private boolean removeTempDirs;
 
   public DistributedRowMatrix(Path inputPathString,
                               Path outputTmpPathString,
@@ -81,6 +83,7 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
     this.outputTmpPath = outputTmpPathString;
     this.numRows = numRows;
     this.numCols = numCols;
+    this.removeTempDirs = false;
   }
 
   @Override
@@ -94,6 +97,7 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
     try {
       rowPath = FileSystem.get(conf).makeQualified(inputPath);
       outputTmpBasePath = FileSystem.get(conf).makeQualified(outputTmpPath);
+      removeTempDirs = conf.getBoolean(REMOVE_TEMP_DIRS, false);
     } catch (IOException ioe) {
       throw new IllegalStateException(ioe);
     }
@@ -186,14 +190,21 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
   public Vector times(Vector v) {
     try {
       Configuration initialConf = getConf() == null ? new Configuration() : getConf();
+      Path outputVectorTmpPath = new Path(outputTmpBasePath,
+                                          new Path(Long.toString(System.nanoTime())));
       Configuration conf =
           TimesSquaredJob.createTimesJobConf(initialConf, 
                                              v,
                                              numRows,
                                              rowPath,
-                                             new Path(outputTmpPath, Long.toString(System.nanoTime())));
+                                             outputVectorTmpPath);
       JobClient.runJob(new JobConf(conf));
-      return TimesSquaredJob.retrieveTimesSquaredOutputVector(conf);
+      Vector result = TimesSquaredJob.retrieveTimesSquaredOutputVector(conf);
+      if (removeTempDirs) {
+        FileSystem fs = outputVectorTmpPath.getFileSystem(conf);
+        fs.delete(outputVectorTmpPath, true);
+      }
+      return result;
     } catch (IOException ioe) {
       throw new IllegalStateException(ioe);
     }
@@ -203,14 +214,20 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
   public Vector timesSquared(Vector v) {
     try {
       Configuration initialConf = getConf() == null ? new Configuration() : getConf();
+      Path outputVectorTmpPath = new Path(outputTmpBasePath,
+               new Path(Long.toString(System.nanoTime())));
       Configuration conf =
           TimesSquaredJob.createTimesSquaredJobConf(initialConf,
                                                     v,
                                                     rowPath,
-                                                    new Path(outputTmpBasePath,
-                                                             new Path(Long.toString(System.nanoTime()))));
+                                                    outputVectorTmpPath);
       JobClient.runJob(new JobConf(conf));
-      return TimesSquaredJob.retrieveTimesSquaredOutputVector(conf);
+      Vector result = TimesSquaredJob.retrieveTimesSquaredOutputVector(conf);
+      if (removeTempDirs) {
+        FileSystem fs = outputVectorTmpPath.getFileSystem(conf);
+        fs.delete(outputVectorTmpPath, true);
+      }
+      return result;
     } catch (IOException ioe) {
       throw new IllegalStateException(ioe);
     }

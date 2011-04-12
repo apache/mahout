@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.ClusteringTestUtils;
@@ -200,12 +201,81 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     assertEquals(TEST_PROPERTY_VALUE, customTimesSquaredJobConf3.get(TEST_PROPERTY_KEY));
   }
   
+  @Test
+  public void testTimesVectorTempDirDeletion() throws Exception {
+    Configuration conf = new Configuration();
+    Vector v = new RandomAccessSparseVector(50);
+    v.assign(1.0);
+    DistributedRowMatrix dm = randomDistributedMatrix(100, 90, 50, 20, 1.0, false);
+
+    Path outputPath = dm.getOutputTempPath();
+    FileSystem fs = outputPath.getFileSystem(conf);
+
+    deleteContentsOfPath(conf, outputPath);
+
+    assertEquals(0, fs.listStatus(outputPath).length);
+
+    Vector result1 = dm.times(v);
+
+    assertEquals(1, fs.listStatus(outputPath).length);
+    
+    deleteContentsOfPath(conf, outputPath);
+    assertEquals(0, fs.listStatus(outputPath).length);
+    
+    conf.setBoolean(DistributedRowMatrix.REMOVE_TEMP_DIRS, true);
+    dm.setConf(conf);
+    
+    Vector result2 = dm.times(v);
+
+    assertEquals(0, fs.listStatus(outputPath).length);
+    assertEquals(0.0, result1.getDistanceSquared(result2), EPSILON);
+  }
+
+  @Test
+  public void testTimesSquaredVectorTempDirDeletion() throws Exception {
+    Configuration conf = new Configuration();
+    Vector v = new RandomAccessSparseVector(50);
+    v.assign(1.0);
+    DistributedRowMatrix dm = randomDistributedMatrix(100, 90, 50, 20, 1.0, false);
+
+    Path outputPath = dm.getOutputTempPath();
+    FileSystem fs = outputPath.getFileSystem(conf);
+
+    deleteContentsOfPath(conf, outputPath);
+
+    assertEquals(0, fs.listStatus(outputPath).length);
+
+    Vector result1 = dm.timesSquared(v);
+
+    assertEquals(1, fs.listStatus(outputPath).length);
+    
+    deleteContentsOfPath(conf, outputPath);
+    assertEquals(0, fs.listStatus(outputPath).length);
+    
+    conf.setBoolean(DistributedRowMatrix.REMOVE_TEMP_DIRS, true);
+    dm.setConf(conf);
+    
+    Vector result2 = dm.timesSquared(v);
+
+    assertEquals(0, fs.listStatus(outputPath).length);
+    assertEquals(0.0, result1.getDistanceSquared(result2), EPSILON);
+  }
+
   public Configuration createInitialConf() {
     Configuration initialConf = new Configuration();
     initialConf.set(TEST_PROPERTY_KEY, TEST_PROPERTY_VALUE);
     return initialConf;
   }
   
+  private void deleteContentsOfPath(Configuration conf, Path path) throws Exception {
+    FileSystem fs = path.getFileSystem(conf);
+    
+    FileStatus[] statuses = fs.listStatus(path);
+    for (FileStatus status : statuses) {
+      fs.delete(status.getPath(), true);
+    }    
+  }
+    
   public DistributedRowMatrix randomDistributedMatrix(int numRows,
                                                       int nonNullRows,
                                                       int numCols,
