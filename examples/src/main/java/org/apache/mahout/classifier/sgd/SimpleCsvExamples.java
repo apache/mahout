@@ -21,6 +21,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+import com.google.common.io.Files;
 import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
@@ -36,7 +37,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -90,8 +90,7 @@ public final class SimpleCsvExamples {
         IOUtils.quietClose(out);
       }
     } else if ("--parse".equals(args[0])) {
-      BufferedReader in = new BufferedReader(
-          new InputStreamReader(new FileInputStream(new File(args[1])), Charsets.UTF_8));
+      BufferedReader in = Files.newReader(new File(args[1]), Charsets.UTF_8);
       try {
         String line = in.readLine();
         while (line != null) {

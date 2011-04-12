@@ -19,12 +19,10 @@ package org.apache.mahout.classifier.bayes;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
 import java.util.List;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -52,8 +50,7 @@ public final class BayesClassifierSelfTest extends MahoutTestCase {
     super.setUp();
 
     File tempInputFile = getTestTempFile("bayesinput");
-    BufferedWriter writer = new BufferedWriter(
-        new OutputStreamWriter(new FileOutputStream(tempInputFile), Charsets.UTF_8));
+    BufferedWriter writer = Files.newWriter(tempInputFile, Charsets.UTF_8);
     for (String[] entry : ClassifierData.DATA) {
       writer.write(entry[0] + '\t' + entry[1] + '\n');
     }

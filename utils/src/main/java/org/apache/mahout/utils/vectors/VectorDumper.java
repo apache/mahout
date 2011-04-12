@@ -18,6 +18,7 @@
 package org.apache.mahout.utils.vectors;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -40,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
@@ -131,8 +131,7 @@ public final class VectorDumper {
         boolean transposeKeyValue = cmdLine.hasOption(vectorAsKeyOpt);
         Writer writer;
         if (cmdLine.hasOption(outputOpt)) {
-          writer = new OutputStreamWriter(
-              new FileOutputStream(new File(cmdLine.getValue(outputOpt).toString())), Charsets.UTF_8);
+          writer = Files.newWriter(new File(cmdLine.getValue(outputOpt).toString()), Charsets.UTF_8);
         } else {
           writer = new OutputStreamWriter(System.out);
         }

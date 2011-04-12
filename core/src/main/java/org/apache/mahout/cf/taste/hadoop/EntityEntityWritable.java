@@ -21,8 +21,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import com.google.common.primitives.Longs;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.Varint;
 
 /** A {@link WritableComparable} encapsulating two items. */
@@ -78,7 +78,7 @@ public final class EntityEntityWritable
   
   @Override
   public int hashCode() {
-    return RandomUtils.hashLong(aID) + 31 * RandomUtils.hashLong(bID);
+    return Longs.hashCode(aID) + 31 * Longs.hashCode(bID);
   }
   
   @Override

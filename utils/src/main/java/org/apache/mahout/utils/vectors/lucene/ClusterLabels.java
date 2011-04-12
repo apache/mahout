@@ -18,7 +18,6 @@
 package org.apache.mahout.utils.vectors.lucene;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -31,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -105,7 +105,7 @@ public class ClusterLabels {
     if (this.output == null) {
       writer = new OutputStreamWriter(System.out);
     } else {
-      writer = new OutputStreamWriter(new FileOutputStream(new File(this.output)), Charsets.UTF_8);
+      writer = Files.newWriter(new File(this.output), Charsets.UTF_8);
     }
     try {
       for (Map.Entry<Integer, List<WeightedVectorWritable>> integerListEntry : clusterIdToPoints.entrySet()) {

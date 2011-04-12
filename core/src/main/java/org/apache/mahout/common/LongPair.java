@@ -19,6 +19,8 @@ package org.apache.mahout.common;
 
 import java.io.Serializable;
 
+import com.google.common.primitives.Longs;
+
 /** A simple (ordered) pair of longs. */
 public final class LongPair implements Comparable<LongPair>, Serializable {
   
@@ -53,10 +55,10 @@ public final class LongPair implements Comparable<LongPair>, Serializable {
   
   @Override
   public int hashCode() {
-    int firstHash = RandomUtils.hashLong(first);
+    int firstHash = Longs.hashCode(first);
     // Flip top and bottom 16 bits; this makes the hash function probably different
     // for (a,b) versus (b,a)
-    return (firstHash >>> 16 | firstHash << 16) ^ RandomUtils.hashLong(second);
+    return (firstHash >>> 16 | firstHash << 16) ^ Longs.hashCode(second);
   }
   
   @Override

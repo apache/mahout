@@ -18,6 +18,7 @@
 package org.apache.mahout.classifier.sgd;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -244,7 +245,7 @@ public final class OnlineLogisticRegressionTest extends MahoutTestCase {
   private static Matrix readCsv(String resourceName) throws IOException {
     Splitter onCommas = Splitter.on(",").trimResults(CharMatcher.anyOf(" \""));
 
-    Readable isr = new InputStreamReader(Resources.getResource(resourceName).openStream());
+    Readable isr = new InputStreamReader(Resources.getResource(resourceName).openStream(), Charsets.UTF_8);
     List<String> data = CharStreams.readLines(isr);
     String first = data.get(0);
     data = data.subList(1, data.size());

@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -37,6 +36,7 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
+import org.apache.mahout.fpm.pfpgrowth.CountDescendingPairComparator;
 import org.apache.mahout.fpm.pfpgrowth.convertors.StatusUpdater;
 import org.apache.mahout.fpm.pfpgrowth.convertors.TopKPatternsOutputConverter;
 import org.apache.mahout.fpm.pfpgrowth.convertors.TransactionIterator;
@@ -78,13 +78,11 @@ public class FPGrowth<A extends Comparable<? super A>> {
   public final List<Pair<A,Long>> generateFList(Iterator<Pair<List<A>,Long>> transactions, int minSupport) {
 
     Map<A,MutableLong> attributeSupport = new HashMap<A,MutableLong>();
-    // int count = 0;
     while (transactions.hasNext()) {
       Pair<List<A>,Long> transaction = transactions.next();
       for (A attribute : transaction.getFirst()) {
         if (attributeSupport.containsKey(attribute)) {
           attributeSupport.get(attribute).add(transaction.getSecond().longValue());
-          // count++;
         } else {
           attributeSupport.put(attribute, new MutableLong(transaction.getSecond()));
         }
@@ -98,18 +96,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
       }
     }
 
-    Collections.sort(fList, new Comparator<Pair<A,Long>>() {
-
-      @Override
-      public int compare(Pair<A,Long> o1, Pair<A,Long> o2) {
-        int ret = o2.getSecond().compareTo(o1.getSecond());
-        if (ret != 0) {
-          return ret;
-        }
-        return o1.getFirst().compareTo(o2.getFirst());
-      }
-
-    });
+    Collections.sort(fList, new CountDescendingPairComparator<A,Long>());
 
     return fList;
   }

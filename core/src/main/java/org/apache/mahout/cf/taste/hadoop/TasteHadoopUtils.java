@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.hadoop;
 
 import com.google.common.base.Charsets;
+import com.google.common.primitives.Longs;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -57,7 +58,7 @@ public final class TasteHadoopUtils {
    * Maps a long to an int
    */
   public static int idToIndex(long id) {
-    return 0x7FFFFFFF & ((int) id ^ (int) (id >>> 32));
+    return 0x7FFFFFFF & Longs.hashCode(id);
   }
 
   /**

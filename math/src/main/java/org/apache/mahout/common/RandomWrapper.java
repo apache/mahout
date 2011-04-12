@@ -17,17 +17,17 @@
 
 package org.apache.mahout.common;
 
+import com.google.common.base.Charsets;
 import org.uncommons.maths.random.MersenneTwisterRNG;
 import org.uncommons.maths.random.RepeatableRNG;
 import org.uncommons.maths.random.SeedException;
 import org.uncommons.maths.random.SeedGenerator;
 
-import java.nio.charset.Charset;
 import java.util.Random;
 
 public final class RandomWrapper extends Random {
 
-  private static final byte[] STANDARD_SEED = "Mahout=Hadoop+ML".getBytes(Charset.forName("US-ASCII"));
+  private static final byte[] STANDARD_SEED = "Mahout=Hadoop+ML".getBytes(Charsets.US_ASCII);
   private static final SeedGenerator SEED_GENERATOR = new FastRandomSeedGenerator();
 
   private static boolean testSeed;

@@ -19,6 +19,7 @@ package org.apache.mahout.math;
 
 import java.util.Iterator;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.DoubleFunction;
 
@@ -553,8 +554,7 @@ public abstract class AbstractVector implements Vector {
     Iterator<Element> iter = iterateNonZero();
     while (iter.hasNext()) {
       Element ele = iter.next();
-      long v = Double.doubleToLongBits(ele.get());
-      result += ele.index() * (int) (v ^ (v >>> 32));
+      result += ele.index() * RandomUtils.hashDouble(ele.get());
     }
     return result;
   }

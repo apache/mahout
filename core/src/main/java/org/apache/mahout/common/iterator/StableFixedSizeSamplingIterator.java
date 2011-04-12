@@ -19,7 +19,6 @@ package org.apache.mahout.common.iterator;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -55,19 +54,14 @@ public class StableFixedSizeSamplingIterator<T> extends ForwardingIterator<T> {
       }
     }
 
-    Collections.sort(buf, new Comparator<Pair<Integer,T>>() {
-      @Override
-      public int compare(Pair<Integer,T> pair1, Pair<Integer,T> pair2) {
-        return pair1.getFirst().compareTo(pair2.getFirst());
-      }
-    });
+    Collections.sort(buf);
     delegate = Iterators.transform(buf.iterator(),
-                               new Function<Pair<Integer,T>,T>() {
-                                 @Override
-                                 public T apply(Pair<Integer,T> from) {
-                                   return from.getSecond();
-                                 }
-                               });
+                                   new Function<Pair<Integer,T>,T>() {
+                                     @Override
+                                     public T apply(Pair<Integer,T> from) {
+                                       return from.getSecond();
+                                     }
+                                   });
   }
 
   @Override

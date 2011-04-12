@@ -18,7 +18,6 @@
 package org.apache.mahout.utils.clustering;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -33,6 +32,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -139,7 +139,7 @@ public final class ClusterDumper extends AbstractJob {
     if (this.outputFile == null) {
       writer = new OutputStreamWriter(System.out);
     } else {
-      writer = new OutputStreamWriter(new FileOutputStream(new File(this.outputFile)), Charsets.UTF_8);
+      writer = Files.newWriter(new File(this.outputFile), Charsets.UTF_8);
     }
     try {
       for (Cluster value :

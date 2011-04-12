@@ -17,18 +17,17 @@
 
 package org.apache.mahout.cf.taste.impl.model;
 
-import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import java.util.Collection;
+
+import com.google.common.base.Charsets;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.model.IDMigrator;
 
 public abstract class AbstractIDMigrator implements IDMigrator {
-  
-  private static final Charset UTF8_CHARSET = Charset.forName("UTF8");
-  
+
   private final MessageDigest md5Digest;
   
   protected AbstractIDMigrator() {
@@ -46,7 +45,7 @@ public abstract class AbstractIDMigrator implements IDMigrator {
   protected final long hash(String value) {
     byte[] md5hash;
     synchronized (md5Digest) {
-      md5hash = md5Digest.digest(value.getBytes(UTF8_CHARSET));
+      md5hash = md5Digest.digest(value.getBytes(Charsets.UTF_8));
       md5Digest.reset();
     }
     long hash = 0L;

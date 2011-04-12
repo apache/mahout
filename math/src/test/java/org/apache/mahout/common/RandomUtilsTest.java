@@ -28,6 +28,22 @@ import java.util.Random;
 public final class RandomUtilsTest extends MahoutTestCase {
 
   @Test
+  public void testHashDouble() {
+    assertEquals(new Double(0.0).hashCode(), RandomUtils.hashDouble(0.0));
+    assertEquals(new Double(1.0).hashCode(), RandomUtils.hashDouble(1.0));
+    assertEquals(new Double(Double.POSITIVE_INFINITY).hashCode(), RandomUtils.hashDouble(Double.POSITIVE_INFINITY));
+    assertEquals(new Double(Double.NaN).hashCode(), RandomUtils.hashDouble(Double.NaN));
+  }
+
+  @Test
+  public void testHashFloat() {
+    assertEquals(new Float(0.0f).hashCode(), RandomUtils.hashFloat(0.0f));
+    assertEquals(new Float(1.0f).hashCode(), RandomUtils.hashFloat(1.0f));
+    assertEquals(new Float(Float.POSITIVE_INFINITY).hashCode(), RandomUtils.hashFloat(Float.POSITIVE_INFINITY));
+    assertEquals(new Float(Float.NaN).hashCode(), RandomUtils.hashFloat(Float.NaN));
+  }
+
+  @Test
   public void testIsNotPrime() {
     assertTrue(RandomUtils.isNotPrime(Integer.MIN_VALUE));
     assertTrue(RandomUtils.isNotPrime(-1));
@@ -81,33 +97,6 @@ public final class RandomUtilsTest extends MahoutTestCase {
       long back = RandomUtils.seedBytesToLong(bytes);
       assertEquals(l, back);
     }
-  }
-
-  @Test
-  public void testHashDouble() {
-    assertEquals(0, RandomUtils.hashDouble(0.0));
-    assertEquals(1072693248, RandomUtils.hashDouble(1.0));
-    assertEquals(2146959360, RandomUtils.hashDouble(Double.NaN));
-    assertEquals(2146435072, RandomUtils.hashDouble(Double.POSITIVE_INFINITY));
-  }
-
-  @Test
-  public void testHashFloat() {
-    assertEquals(0, RandomUtils.hashFloat(0.0f));
-    assertEquals(1065353216, RandomUtils.hashFloat(1.0f));
-    assertEquals(2143289344, RandomUtils.hashFloat(Float.NaN));
-    assertEquals(2139095040, RandomUtils.hashFloat(Float.POSITIVE_INFINITY));
-  }
-
-  @Test
-  public void testHashLong() {
-    assertEquals(0, RandomUtils.hashLong(-1L));
-    assertEquals(0, RandomUtils.hashLong(0L));
-    assertEquals(1, RandomUtils.hashLong(1L));
-    assertEquals(Integer.MAX_VALUE, RandomUtils.hashLong(Integer.MAX_VALUE));
-    assertEquals(Integer.MIN_VALUE, RandomUtils.hashLong((long) Integer.MAX_VALUE + 1L));
-    assertEquals(Integer.MIN_VALUE, RandomUtils.hashLong(Long.MAX_VALUE));
-    assertEquals(Integer.MIN_VALUE, RandomUtils.hashLong(Long.MIN_VALUE));
   }
 
 }

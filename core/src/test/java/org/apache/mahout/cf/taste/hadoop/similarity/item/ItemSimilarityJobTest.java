@@ -19,14 +19,12 @@ package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FilenameFilter;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
@@ -213,8 +211,7 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
         return name.startsWith("part-");
       }
     })[0];
-    BufferedReader reader = new BufferedReader(
-        new InputStreamReader(new FileInputStream(outPart), Charsets.UTF_8));
+    BufferedReader reader = Files.newReader(outPart, Charsets.UTF_8);
 
     String line;
     int currentLine = 1;
@@ -310,8 +307,7 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
         return name.startsWith("part-");
       }
     })[0];
-    BufferedReader reader = new BufferedReader(
-        new InputStreamReader(new FileInputStream(outPart), Charsets.UTF_8));
+    BufferedReader reader = Files.newReader(outPart, Charsets.UTF_8);
 
     String line;
     int currentLine = 1;

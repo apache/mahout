@@ -19,7 +19,6 @@ package org.apache.mahout.fpm.pfpgrowth;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -127,19 +126,8 @@ public final class PFPGrowth {
     int minSupport = Integer.valueOf(params.get(MIN_SUPPORT, "3"));
     Configuration conf = new Configuration();
 
-    PriorityQueue<Pair<String,Long>> queue = new PriorityQueue<Pair<String,Long>>(11,
-        new Comparator<Pair<String,Long>>() {
-          
-          @Override
-          public int compare(Pair<String,Long> o1, Pair<String,Long> o2) {
-            int ret = o2.getSecond().compareTo(o1.getSecond());
-            if (ret != 0) {
-              return ret;
-            }
-            return o1.getFirst().compareTo(o2.getFirst());
-          }
-          
-        });
+    PriorityQueue<Pair<String,Long>> queue =
+        new PriorityQueue<Pair<String,Long>>(11, new CountDescendingPairComparator<String,Long>());
 
     Path parallelCountingPath = new Path(params.get(OUTPUT), PARALLEL_COUNTING);
     Path filesPattern = new Path(parallelCountingPath, FILE_PATTERN);

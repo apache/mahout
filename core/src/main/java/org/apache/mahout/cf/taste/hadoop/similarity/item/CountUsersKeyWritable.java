@@ -17,10 +17,10 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
+import com.google.common.primitives.Longs;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
 import org.apache.hadoop.mapreduce.Partitioner;
-import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Varint;
 
@@ -71,7 +71,7 @@ public class CountUsersKeyWritable implements WritableComparable<CountUsersKeyWr
 
   @Override
   public int hashCode() {
-    return RandomUtils.hashLong(userID);
+    return Longs.hashCode(userID);
   }
 
   /**

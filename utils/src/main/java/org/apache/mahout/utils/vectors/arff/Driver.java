@@ -17,16 +17,14 @@
 
 package org.apache.mahout.utils.vectors.arff;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.Charset;
 import java.util.Map;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -130,8 +128,7 @@ public final class Driver {
         }
         log.info("Dictionary Output file: {}", dictOut);
         Map<String,Integer> labels = model.getLabelBindings();
-        Writer writer = new BufferedWriter(
-            new OutputStreamWriter(new FileOutputStream(dictOut), Charset.forName("UTF8")));
+        Writer writer = Files.newWriter(dictOut, Charsets.UTF_8);
         try {
           for (Map.Entry<String,Integer> entry : labels.entrySet()) {
             writer.write(entry.getKey());

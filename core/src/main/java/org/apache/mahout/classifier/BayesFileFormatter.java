@@ -19,11 +19,7 @@ package org.apache.mahout.classifier;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
@@ -31,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -75,7 +72,7 @@ public final class BayesFileFormatter {
    */
   public static void collapse(String label, Analyzer analyzer, File inputDir,
                               Charset charset, File outputFile) throws IOException {
-    Writer writer = new OutputStreamWriter(new FileOutputStream(outputFile), charset);
+    Writer writer = Files.newWriter(outputFile, charset);
     try {
       inputDir.listFiles(new FileProcessor(label, analyzer, charset, writer));
       // listFiles() is called here as a way to recursively visit files,
@@ -104,7 +101,7 @@ public final class BayesFileFormatter {
     if (input.isDirectory()) {
       input.listFiles(new FileProcessor(label, analyzer, charset, outDir));
     } else {
-      Writer writer = new OutputStreamWriter(new FileOutputStream(new File(outDir, input.getName())), charset);
+      Writer writer = Files.newWriter(new File(outDir, input.getName()), charset);
       try {
         writeFile(label, analyzer, input, charset, writer);
       } finally {
@@ -162,7 +159,7 @@ public final class BayesFileFormatter {
         Writer theWriter = null;
         try {
           if (writer == null) {
-            theWriter = new OutputStreamWriter(new FileOutputStream(new File(outputDir, file.getName())), charset);
+            theWriter = Files.newWriter(new File(outputDir, file.getName()), charset);
           } else {
             theWriter = writer;
           }
@@ -204,7 +201,7 @@ public final class BayesFileFormatter {
    */
   private static void writeFile(String label, Analyzer analyzer, File inFile,
                                 Charset charset, Writer writer) throws IOException {
-    Reader reader = new InputStreamReader(new FileInputStream(inFile), charset);
+    Reader reader = Files.newReader(inFile, charset);
     try {
       TokenStream ts = analyzer.tokenStream(label, reader);
       writer.write(label);

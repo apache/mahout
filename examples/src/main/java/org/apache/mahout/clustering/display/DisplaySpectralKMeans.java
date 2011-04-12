@@ -20,11 +20,10 @@ package org.apache.mahout.clustering.display;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -57,8 +56,7 @@ class DisplaySpectralKMeans extends DisplayClustering {
     if (!fs.exists(output)) {
       fs.mkdirs(output);
     }
-    Writer writer = new OutputStreamWriter(
-        new FileOutputStream(new File(affinities.toString())), Charsets.UTF_8);
+    Writer writer = Files.newWriter(new File(affinities.toString()), Charsets.UTF_8);
     try {
       for (int i = 0; i < SAMPLE_DATA.size(); i++) {
         for (int j = 0; j < SAMPLE_DATA.size(); j++) {

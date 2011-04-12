@@ -17,22 +17,22 @@
 
 package org.apache.mahout.cf.taste.web;
 
+import com.google.common.io.Files;
+import com.google.common.io.InputSupplier;
+import com.google.common.io.Resources;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
-import org.apache.mahout.common.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 
@@ -108,30 +108,19 @@ public abstract class RecommenderWrapper implements Recommender {
   public static File readResourceToTempFile(String resourceName) throws IOException {
     String absoluteResource = resourceName.startsWith("/") ? resourceName : '/' + resourceName;
     log.info("Loading resource {}", absoluteResource);
-    InputStream is = RecommenderWrapper.class.getResourceAsStream(absoluteResource);
-    if (is == null) {
+    InputSupplier<? extends InputStream> inSupplier;
+    try {
+      URL resourceURL = Resources.getResource(RecommenderWrapper.class, absoluteResource);
+      inSupplier = Resources.newInputStreamSupplier(resourceURL);
+    } catch (IllegalArgumentException iae) {
       File resourceFile = new File(resourceName);
       log.info("Falling back to load file {}", resourceFile.getAbsolutePath());
-      is = new FileInputStream(resourceFile);
+      inSupplier = Files.newInputStreamSupplier(resourceFile);
     }
-    try {
-      File tempFile = File.createTempFile("taste", null);
-      tempFile.deleteOnExit();
-      OutputStream os = new FileOutputStream(tempFile);
-      try {
-        int bytesRead;
-        byte[] buffer = new byte[32768];
-        while ((bytesRead = is.read(buffer)) > 0) {
-          os.write(buffer, 0, bytesRead);
-        }
-        os.flush();
-        return tempFile;
-      } finally {
-        IOUtils.quietClose(os);
-      }
-    } finally {
-      IOUtils.quietClose(is);
-    }
+    File tempFile = File.createTempFile("taste", null);
+    tempFile.deleteOnExit();
+    Files.copy(inSupplier, tempFile);
+    return tempFile;
   }
 
 }

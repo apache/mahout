@@ -225,9 +225,15 @@ public class EigenVerificationJob extends AbstractJob {
 
     Collections.sort(prunedEigenMeta, new Comparator<Map.Entry<MatrixSlice, EigenStatus>>() {
       @Override
-      public int compare(Map.Entry<MatrixSlice, EigenStatus> e1,
-          Map.Entry<MatrixSlice, EigenStatus> e2) {
-        return e1.getKey().index() - e2.getKey().index();
+      public int compare(Map.Entry<MatrixSlice,EigenStatus> e1, Map.Entry<MatrixSlice,EigenStatus> e2) {
+        int index1 = e1.getKey().index();
+        int index2 = e2.getKey().index();
+        if (index1 < index2) {
+          return -1;
+        } else if (index1 > index2) {
+          return 1;
+        }
+        return 0;
       }
     });
     return prunedEigenMeta;

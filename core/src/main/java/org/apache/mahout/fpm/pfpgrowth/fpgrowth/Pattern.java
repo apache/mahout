@@ -17,7 +17,7 @@
 
 package org.apache.mahout.fpm.pfpgrowth.fpgrowth;
 
-import org.apache.mahout.common.RandomUtils;
+import com.google.common.primitives.Longs;
 
 import java.util.Arrays;
 
@@ -139,7 +139,7 @@ public class Pattern implements Comparable<Pattern> {
       return hashCode;
     }
     int result = Arrays.hashCode(pattern);
-    result = 31 * result + RandomUtils.hashLong(support);
+    result = 31 * result + Longs.hashCode(support);
     result = 31 * result + length;
     hashCode = result;
     return result;

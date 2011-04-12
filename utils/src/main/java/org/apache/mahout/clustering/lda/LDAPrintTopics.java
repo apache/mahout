@@ -18,9 +18,7 @@
 package org.apache.mahout.clustering.lda;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +29,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -228,8 +227,7 @@ public final class LDAPrintTopics {
   private static void writeTopWords(List<List<String>> topWords, File output) throws IOException {
     for (int i = 0; i < topWords.size(); ++i) {
       List<String> topK = topWords.get(i);
-      Writer writer = new OutputStreamWriter(
-          new FileOutputStream(new File(output, "topic-" + i)), Charsets.UTF_8);
+      Writer writer = Files.newWriter(new File(output, "topic-" + i), Charsets.UTF_8);
       try {
         writer.write("Topic " + i + '\n');
         writer.write("===========\n");

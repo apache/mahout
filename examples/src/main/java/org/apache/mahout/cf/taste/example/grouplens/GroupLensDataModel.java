@@ -21,12 +21,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.URL;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+import com.google.common.io.InputSupplier;
+import com.google.common.io.Resources;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.common.IOUtils;
@@ -75,34 +78,22 @@ public final class GroupLensDataModel extends FileDataModel {
     }
     return resultFile;
   }
-  
+
   public static File readResourceToTempFile(String resourceName) throws IOException {
-    InputStream is = GroupLensRecommender.class.getResourceAsStream(resourceName);
-    if (is == null) {
-      // No resource found, try just using the file
-      return new File("src/main/java" + resourceName);
-    }
+    InputSupplier<? extends InputStream> inSupplier;
     try {
-      File tempFile = File.createTempFile("taste", null);
-      tempFile.deleteOnExit();
-      OutputStream os = new FileOutputStream(tempFile);
-      try {
-        int bytesRead;
-        byte[] buffer = new byte[32768];
-        while ((bytesRead = is.read(buffer)) > 0) {
-          os.write(buffer, 0, bytesRead);
-        }
-        os.flush();
-        return tempFile;
-      } finally {
-        IOUtils.quietClose(os);
-      }
-    } finally {
-      IOUtils.quietClose(is);
+      URL resourceURL = Resources.getResource(GroupLensRecommender.class, resourceName);
+      inSupplier = Resources.newInputStreamSupplier(resourceURL);
+    } catch (IllegalArgumentException iae) {
+      File resourceFile = new File("src/main/java" + resourceName);
+      inSupplier = Files.newInputStreamSupplier(resourceFile);
     }
+    File tempFile = File.createTempFile("taste", null);
+    tempFile.deleteOnExit();
+    Files.copy(inSupplier, tempFile);
+    return tempFile;
   }
-  
-  
+
   @Override
   public String toString() {
     return "GroupLensDataModel";

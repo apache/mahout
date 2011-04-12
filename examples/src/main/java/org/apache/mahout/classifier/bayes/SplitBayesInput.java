@@ -342,7 +342,7 @@ public class SplitBayesInput {
                  new Object[] {inputFile, testSplitSize, lineCount - testSplitSize});
       }
     }
-    
+
     BufferedReader reader = new BufferedReader(new InputStreamReader(fs.open(inputFile), charset));
     Writer trainingWriter = new OutputStreamWriter(fs.create(trainingOutputFile), charset);
     Writer testWriter     = new OutputStreamWriter(fs.create(testOutputFile), charset);

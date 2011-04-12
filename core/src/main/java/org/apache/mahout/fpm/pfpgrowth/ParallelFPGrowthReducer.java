@@ -20,7 +20,6 @@ package org.apache.mahout.fpm.pfpgrowth;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -73,18 +72,7 @@ public class ParallelFPGrowthReducer extends Reducer<LongWritable,TransactionTre
       
     }
     
-    Collections.sort(localFList, new Comparator<Pair<Integer,Long>>() {
-      
-      @Override
-      public int compare(Pair<Integer,Long> o1, Pair<Integer,Long> o2) {
-        int ret = o2.getSecond().compareTo(o1.getSecond());
-        if (ret != 0) {
-          return ret;
-        }
-        return o1.getFirst().compareTo(o2.getFirst());
-      }
-      
-    });
+    Collections.sort(localFList, new CountDescendingPairComparator<Integer,Long>());
     
     FPGrowth<Integer> fpGrowth = new FPGrowth<Integer>();
     fpGrowth.generateTopKFrequentPatterns(

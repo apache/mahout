@@ -63,14 +63,11 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
   
   /**
    * Copy constructor
-   * 
-   * @param other
    */
   public Gram(Gram other) {
     frequency = other.frequency;
     length = other.length;
-    bytes = new byte[length];
-    System.arraycopy(other.bytes, 0, bytes, 0, length);
+    bytes = other.bytes.clone();
   }
 
   /**

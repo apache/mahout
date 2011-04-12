@@ -18,12 +18,11 @@
 package org.apache.mahout.classifier.bayes;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Iterator;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
 import org.apache.mahout.classifier.BayesFileFormatter;
@@ -48,7 +47,7 @@ public final class BayesFileFormatterTest extends MahoutTestCase {
     out = getTestTempDir("bayes/out");
     for (String word : WORDS) {
       File file = new File(input, word);
-      Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8);
+      Writer writer = Files.newWriter(file, Charsets.UTF_8);
       writer.write(word);
       writer.close();
     }

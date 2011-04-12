@@ -18,6 +18,7 @@
 package org.apache.mahout.clustering.minhash;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -29,9 +30,7 @@ import org.apache.mahout.math.VectorWritable;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -100,8 +99,7 @@ public final class LastfmDataConverter {
     Map<String, Integer> featureIdxMap = new HashMap<String, Integer>();
     Map<String, List<Integer>> itemFeaturesMap = new HashMap<String, List<Integer>>();
     String msg = usedMemory() + "Converting data to internal vector format: ";
-    BufferedReader br = new BufferedReader(
-        new InputStreamReader(new FileInputStream(new File(inputFile)), Charsets.UTF_8));
+    BufferedReader br = Files.newReader(new File(inputFile), Charsets.UTF_8);
     try {
       System.out.print(msg);
       int prevPercentDone = 1;

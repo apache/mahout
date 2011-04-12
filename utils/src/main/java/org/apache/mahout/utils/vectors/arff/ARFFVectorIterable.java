@@ -19,9 +19,7 @@ package org.apache.mahout.utils.vectors.arff;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
@@ -32,6 +30,7 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import org.apache.mahout.math.Vector;
 
 /**
@@ -61,7 +60,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
   }
   
   public ARFFVectorIterable(File file, Charset encoding, ARFFModel model) throws IOException {
-    this(new InputStreamReader(new FileInputStream(file), encoding), model);
+    this(Files.newReader(file, encoding), model);
   }
   
   public ARFFVectorIterable(String arff, ARFFModel model) throws IOException {
@@ -137,7 +136,6 @@ public class ARFFVectorIterable implements Iterable<Vector> {
     }
     
   }
-  
   
   @Override
   public Iterator<Vector> iterator() {

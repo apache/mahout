@@ -18,11 +18,10 @@
 package org.apache.mahout.classifier;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import com.google.common.io.Files;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -156,8 +155,9 @@ public final class Classify {
     }
     
     log.info("Converting input document to proper format");
-    String[] document = BayesFileFormatter.readerToDocument(analyzer, new InputStreamReader(
-        new FileInputStream(docPath), Charset.forName(encoding)));
+
+    String[] document =
+        BayesFileFormatter.readerToDocument(analyzer,Files.newReader(docPath, Charset.forName(encoding)));
     StringBuilder line = new StringBuilder();
     for (String token : document) {
       line.append(token).append(' ');

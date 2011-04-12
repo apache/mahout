@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.WeakHashMap;
 
+import com.google.common.primitives.Longs;
+
 /**
  * <p>
  * The source of random stuff for the whole project. This lets us make all randomness in the project
@@ -87,17 +89,12 @@ public final class RandomUtils {
   
   /** @return what {@link Double#hashCode()} would return for the same value */
   public static int hashDouble(double value) {
-    long bits = Double.doubleToLongBits(value);
-    return (int) (bits ^ bits >>> 32);
+    return Longs.hashCode(Double.doubleToLongBits(value));
   }
 
   /** @return what {@link Float#hashCode()} would return for the same value */
   public static int hashFloat(float value) {
     return Float.floatToIntBits(value);
-  }
-  
-  public static int hashLong(long value) {
-    return (int) (value ^ value >>> 32);
   }
   
   /**

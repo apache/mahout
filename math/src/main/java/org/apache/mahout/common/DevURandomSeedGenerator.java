@@ -37,6 +37,9 @@
 
 package org.apache.mahout.common;
 
+import com.google.common.io.ByteStreams;
+import com.google.common.io.Closeables;
+import com.google.common.io.LimitInputStream;
 import org.uncommons.maths.random.SeedException;
 import org.uncommons.maths.random.SeedGenerator;
 
@@ -61,19 +64,10 @@ public final class DevURandomSeedGenerator implements SeedGenerator {
    */
   @Override
   public byte[] generateSeed(int length) throws SeedException {
-    FileInputStream file = null;
+    FileInputStream in = null;
     try {
-      file = new FileInputStream(DEV_URANDOM);
-      byte[] randomSeed = new byte[length];
-      int count = 0;
-      while (count < length) {
-        int bytesRead = file.read(randomSeed, count, length - count);
-        if (bytesRead == -1) {
-          throw new SeedException("EOF encountered reading random data.");
-        }
-        count += bytesRead;
-      }
-      return randomSeed;
+      in = new FileInputStream(DEV_URANDOM);
+      return ByteStreams.toByteArray(new LimitInputStream(in, length));
     } catch (IOException ex) {
       throw new SeedException("Failed reading from " + DEV_URANDOM.getName(), ex);
     } catch (SecurityException ex) {
@@ -81,13 +75,7 @@ public final class DevURandomSeedGenerator implements SeedGenerator {
       // an applet sandbox).
       throw new SeedException("SecurityManager prevented access to " + DEV_URANDOM.getName(), ex);
     } finally {
-      if (file != null) {
-        try {
-          file.close();
-        } catch (IOException ex) {
-          // Ignore.
-        }
-      }
+      Closeables.closeQuietly(in);
     }
   }
 

@@ -18,14 +18,13 @@
 package org.apache.mahout.df.data;
 
 import java.io.BufferedWriter;
-import java.io.FileOutputStream;
+import java.io.File;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Random;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -247,8 +246,7 @@ public final class Utils {
   }
 
   private static void writeDataToFile(String[] sData, Path path) throws IOException {
-    BufferedWriter output = new BufferedWriter(new OutputStreamWriter(
-        new FileOutputStream(path.toString()), Charsets.UTF_8));
+    BufferedWriter output = Files.newWriter(new File(path.toString()), Charsets.UTF_8);
     try {
       for (String line : sData) {
         output.write(line);
