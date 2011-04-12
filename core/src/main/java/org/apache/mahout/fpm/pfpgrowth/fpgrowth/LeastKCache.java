@@ -15,53 +15,46 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.common.cache;
+package org.apache.mahout.fpm.pfpgrowth.fpgrowth;
 
-import java.util.LinkedHashMap;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.PriorityQueue;
 
-public class LRUCache<K,V> implements Cache<K,V> {
+public class LeastKCache<K extends Comparable<? super K>,V> {
   
   private final int capacity;
+  private final Map<K,V> cache;
+  private final PriorityQueue<K> queue;
   
-  private final Map<K,V> lruCache;
-  
-  public LRUCache(final int capacity) {
-    
+  public LeastKCache(int capacity) {
     this.capacity = capacity;
-    
-    lruCache = new LinkedHashMap<K,V>((int) (capacity / 0.75f + 1), 0.75f, true) {
-      @Override
-      protected boolean removeEldestEntry(Map.Entry<K,V> eldest) {
-        return size() > capacity;
-      }
-    };
-    
+    cache = new HashMap<K,V>(capacity);
+    queue = new PriorityQueue<K>(capacity + 1, Collections.reverseOrder());
+  }
+
+  public final V get(K key) {
+    return cache.get(key);
   }
   
-  @Override
-  public long capacity() {
-    return capacity;
+  public final void set(K key, V value) {
+    if (!contains(key)) {
+      queue.add(key);
+    }
+    cache.put(key, value);
+    while (queue.size() > capacity) {
+      K k = queue.poll();
+      cache.remove(k);
+    }
   }
   
-  @Override
-  public V get(K key) {
-    return lruCache.get(key);
+  public final long size() {
+    return cache.size();
   }
   
-  @Override
-  public void set(K key, V value) {
-    lruCache.put(key, value);
-  }
-  
-  @Override
-  public long size() {
-    return lruCache.size();
-  }
-  
-  @Override
-  public boolean contains(K key) {
-    return lruCache.containsKey(key);
+  public final boolean contains(K key) {
+    return cache.containsKey(key);
   }
   
 }

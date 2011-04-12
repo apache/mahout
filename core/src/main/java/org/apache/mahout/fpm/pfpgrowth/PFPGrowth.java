@@ -74,8 +74,7 @@ public final class PFPGrowth {
   public static final String PARALLEL_COUNTING = "parallelcounting";  
   public static final String SORTED_OUTPUT = "sortedoutput";
   public static final String SPLIT_PATTERN = "splitPattern";
-  public static final String TREE_CACHE_SIZE = "treeCacheSize";
-  
+
   public static final Pattern SPLITTER = Pattern.compile("[ ,\t]*[,|\t][ ,\t]*");
   
   private static final Logger log = LoggerFactory.getLogger(PFPGrowth.class);

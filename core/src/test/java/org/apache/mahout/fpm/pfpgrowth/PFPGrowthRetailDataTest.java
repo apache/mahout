@@ -32,6 +32,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.Parameters;
@@ -56,13 +57,12 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
     params.set(PFPGrowth.MAX_HEAPSIZE, "10000");
     params.set(PFPGrowth.NUM_GROUPS, "50");
     params.set(PFPGrowth.ENCODING, "UTF-8");
-    params.set(PFPGrowth.TREE_CACHE_SIZE, "5");
     File inputDir = getTestTempDir("transactions");
     File outputDir = getTestTempDir("frequentpatterns");
     File input = new File(inputDir, "test.txt");
     params.set(PFPGrowth.INPUT, input.getAbsolutePath());
     params.set(PFPGrowth.OUTPUT, outputDir.getAbsolutePath());
-    Writer writer = new OutputStreamWriter(new FileOutputStream(input), Charsets.UTF_8);
+    Writer writer = Files.newWriter(input, Charsets.UTF_8);
     try {
       StringRecordIterator it = new StringRecordIterator(new FileLineIterable(Resources.getResource(
         "retail.dat").openStream()), "\\s+");

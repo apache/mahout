@@ -37,7 +37,6 @@ import org.apache.mahout.fpm.pfpgrowth.convertors.ContextWriteOutputCollector;
 import org.apache.mahout.fpm.pfpgrowth.convertors.integer.IntegerStringOutputConverter;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth;
-import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPTreeDepthCache;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.map.OpenLongObjectHashMap;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
@@ -129,7 +128,5 @@ public class ParallelFPGrowthReducer extends Reducer<LongWritable,TransactionTre
     }
     maxHeapSize = Integer.valueOf(params.get(PFPGrowth.MAX_HEAPSIZE, "50"));
     minSupport = Integer.valueOf(params.get(PFPGrowth.MIN_SUPPORT, "3"));
-    FPTreeDepthCache.setFirstLevelCacheSize(Integer.valueOf(params.get(PFPGrowth.TREE_CACHE_SIZE, Integer
-        .toString(FPTreeDepthCache.getFirstLevelCacheSize()))));
   }
 }

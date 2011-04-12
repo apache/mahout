@@ -20,51 +20,26 @@ package org.apache.mahout.fpm.pfpgrowth.fpgrowth;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.mahout.common.cache.LeastKCache;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Caches large FPTree {@link Object} for each level of the recursive
  * {@link FPGrowth} algorithm to reduce allocation overhead.
- * 
  */
 public class FPTreeDepthCache {
 
-  private static final Logger log = LoggerFactory.getLogger(FPTreeDepthCache.class);
-
-  private static int firstLevelCacheSize = 5;
-
-  private final LeastKCache<Integer,FPTree> firstLevelCache = new LeastKCache<Integer,FPTree>(firstLevelCacheSize);
-  
+  private final LeastKCache<Integer,FPTree> firstLevelCache = new LeastKCache<Integer,FPTree>(5);
   private int hits;
-  
   private int misses;
-  
   private final List<FPTree> treeCache = new ArrayList<FPTree>();
   
-  public FPTreeDepthCache() {
-    log.info("Initializing FPTreeCache with firstLevelCacheSize: {}",
-      firstLevelCacheSize);
-  }
-  
-  public static int getFirstLevelCacheSize() {
-    return firstLevelCacheSize;
-  }
-  
-  public static void setFirstLevelCacheSize(int firstLevelCacheSize) {
-    FPTreeDepthCache.firstLevelCacheSize = firstLevelCacheSize;
-  }
-  
-  public final FPTree getFirstLevelTree(int attr) {
-    Integer attribute = attr;
-    if (firstLevelCache.contains(attribute)) {
+  public final FPTree getFirstLevelTree(Integer attr) {
+    FPTree tree = firstLevelCache.get(attr);
+    if (tree != null) {
       hits++;
-      return firstLevelCache.get(attribute);
+      return tree;
     } else {
       misses++;
       FPTree conditionalTree = new FPTree();
-      firstLevelCache.set(attribute, conditionalTree);
+      firstLevelCache.set(attr, conditionalTree);
       return conditionalTree;
     }
   }
