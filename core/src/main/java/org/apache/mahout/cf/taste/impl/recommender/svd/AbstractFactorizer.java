@@ -17,9 +17,14 @@
 
 package org.apache.mahout.cf.taste.impl.recommender.svd;
 
+import java.util.Collection;
+import java.util.concurrent.Callable;
+
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
+import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
 
 /**
@@ -27,10 +32,25 @@ import org.apache.mahout.cf.taste.model.DataModel;
  */
 public abstract class AbstractFactorizer implements Factorizer {
 
-  private final FastByIDMap<Integer> userIDMapping;
-  private final FastByIDMap<Integer> itemIDMapping;
+  private final DataModel dataModel;
+  private FastByIDMap<Integer> userIDMapping;
+  private FastByIDMap<Integer> itemIDMapping;
+  private final RefreshHelper refreshHelper;
 
   protected AbstractFactorizer(DataModel dataModel) throws TasteException {
+    this.dataModel = dataModel;
+    buildMappings();
+    refreshHelper = new RefreshHelper(new Callable<Object>() {
+      @Override
+      public Object call() throws TasteException {
+        buildMappings();
+        return null;
+      }
+    });
+    refreshHelper.addDependency(dataModel);
+  }
+  
+  private void buildMappings() throws TasteException {
     userIDMapping = createIDMapping(dataModel.getNumUsers(), dataModel.getUserIDs());
     itemIDMapping = createIDMapping(dataModel.getNumItems(), dataModel.getItemIDs());
   }
@@ -40,11 +60,19 @@ public abstract class AbstractFactorizer implements Factorizer {
   }
 
   protected Integer userIndex(long userID) {
-    return userIDMapping.get(userID);
+    Integer userIndex = userIDMapping.get(userID);
+    if(userIndex == null) {
+      userIndex = userIDMapping.put(userID, userIDMapping.size());
+    }
+    return userIndex;
   }
 
   protected Integer itemIndex(long itemID) {
-    return itemIDMapping.get(itemID);
+    Integer itemIndex = itemIDMapping.get(itemID);
+    if(itemIndex == null) {
+      itemIndex = itemIDMapping.put(itemID, itemIDMapping.size());
+    }
+    return itemIndex;
   }
 
   private static FastByIDMap<Integer> createIDMapping(int size, LongPrimitiveIterator idIterator) {
@@ -55,4 +83,10 @@ public abstract class AbstractFactorizer implements Factorizer {
     }
     return mapping;
   }
+
+  @Override
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
+    refreshHelper.refresh(alreadyRefreshed);
+  }
+  
 }

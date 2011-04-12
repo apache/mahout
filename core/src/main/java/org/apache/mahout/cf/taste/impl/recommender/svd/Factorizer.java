@@ -17,12 +17,13 @@
 
 package org.apache.mahout.cf.taste.impl.recommender.svd;
 
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 
 /**
  * Implementation must be able to create a factorization of a rating matrix
  */
-public interface Factorizer {
+public interface Factorizer extends Refreshable {
 
   Factorization factorize() throws TasteException;
 

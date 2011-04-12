@@ -37,7 +37,6 @@ public final class ExpectationMaximizationSVDFactorizer extends AbstractFactoriz
 
   private static final Logger log = LoggerFactory.getLogger(ExpectationMaximizationSVDFactorizer.class);
 
-  private final Random random;
   private final double learningRate;
   /** Parameter used to prevent overfitting. 0.02 is a good value. */
   private final double preventOverfitting;
@@ -45,14 +44,15 @@ public final class ExpectationMaximizationSVDFactorizer extends AbstractFactoriz
   private final int numFeatures;
   /** number of iterations */
   private final int numIterations;
+  private final double randomNoise;
   /** user singular vectors */
-  private final double[][] leftVectors;
+  private double[][] leftVectors;
   /** item singular vectors */
-  private final double[][] rightVectors;
+  private double[][] rightVectors;
   private final DataModel dataModel;
-  private final List<SVDPreference> cachedPreferences;
-  private final double defaultValue;
-  private final double interval;
+  private List<SVDPreference> cachedPreferences;
+  private double defaultValue;
+  private double interval;
 
   public ExpectationMaximizationSVDFactorizer(DataModel dataModel,
                                               int numFeatures,
@@ -68,14 +68,19 @@ public final class ExpectationMaximizationSVDFactorizer extends AbstractFactoriz
                                               double randomNoise,
                                               int numIterations) throws TasteException {
     super(dataModel);
-    random = RandomUtils.getRandom();
     this.dataModel = dataModel;
     this.numFeatures = numFeatures;
     this.numIterations = numIterations;
 
     this.learningRate = learningRate;
     this.preventOverfitting = preventOverfitting;
+    this.randomNoise = randomNoise;
 
+  }
+
+  @Override
+  public Factorization factorize() throws TasteException {
+    Random random = RandomUtils.getRandom();
     leftVectors = new double[dataModel.getNumUsers()][numFeatures];
     rightVectors = new double[dataModel.getNumItems()][numFeatures];
 
@@ -94,10 +99,6 @@ public final class ExpectationMaximizationSVDFactorizer extends AbstractFactoriz
       }
     }
     cachedPreferences = new ArrayList<SVDPreference>(dataModel.getNumUsers());
-  }
-
-  @Override
-  public Factorization factorize() throws TasteException {
     cachePreferences();
     double rmse = (dataModel.getMaxPreference() - dataModel.getMinPreference());
     for (int ii = 0; ii < numFeatures; ii++) {

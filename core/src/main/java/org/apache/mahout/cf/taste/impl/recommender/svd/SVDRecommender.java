@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 public final class SVDRecommender extends AbstractRecommender {
 
   private Factorization factorization;
+  private final Factorizer factorizer;
   private final RefreshHelper refreshHelper;
 
   private static final Logger log = LoggerFactory.getLogger(SVDRecommender.class);
@@ -54,17 +55,23 @@ public final class SVDRecommender extends AbstractRecommender {
   public SVDRecommender(DataModel dataModel, Factorizer factorizer, CandidateItemsStrategy candidateItemsStrategy)
     throws TasteException {
     super(dataModel, candidateItemsStrategy);
-    factorization = factorizer.factorize();
+    this.factorizer = factorizer;
+    train();
     refreshHelper = new RefreshHelper(new Callable<Object>() {
       @Override
-      public Object call() {
-        // TODO: train again
+      public Object call() throws TasteException {
+        train();
         return null;
       }
     });
     refreshHelper.addDependency(getDataModel());
+    refreshHelper.addDependency(factorizer);
   }
 
+  private void train() throws TasteException {
+    factorization = factorizer.factorize();
+  }
+  
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException {
     Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
@@ -108,8 +115,12 @@ public final class SVDRecommender extends AbstractRecommender {
     }
   }
 
+  /**
+   * Refresh the data model and factorization.
+   */
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     refreshHelper.refresh(alreadyRefreshed);
   }
+  
 }
