@@ -163,7 +163,6 @@ public final class TimesSquaredJob {
     inputVectorPathWriter.close();
     URI ivpURI = inputVectorPath.toUri();
     DistributedCache.setCacheFiles(new URI[] {ivpURI}, conf);
-    fs.deleteOnExit(inputVectorPath);
 
     conf.set(INPUT_VECTOR, ivpURI.toString());
     conf.setBoolean(IS_SPARSE_OUTPUT, !(v instanceof DenseVector));
@@ -190,7 +189,6 @@ public final class TimesSquaredJob {
         new SequenceFileValueIterator<VectorWritable>(outputFile, true, conf);
     Vector vector = iterator.next().get();
     iterator.close();
-    fs.deleteOnExit(outputFile);
     return vector;
   }
 

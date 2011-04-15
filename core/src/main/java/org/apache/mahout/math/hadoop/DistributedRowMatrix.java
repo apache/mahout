@@ -62,7 +62,7 @@ import java.util.Iterator;
  *
  */
 public class DistributedRowMatrix implements VectorIterable, Configurable {
-  public static final String REMOVE_TEMP_DIRS = "DistributedMatrix.remove.temp.dirs";
+  public static final String KEEP_TEMP_FILES = "DistributedMatrix.keep.temp.files";
   
   private static final Logger log = LoggerFactory.getLogger(DistributedRowMatrix.class);
 
@@ -73,7 +73,7 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
   private Path outputTmpBasePath;
   private final int numRows;
   private final int numCols;
-  private boolean removeTempDirs;
+  private boolean keepTempFiles;
 
   public DistributedRowMatrix(Path inputPathString,
                               Path outputTmpPathString,
@@ -83,7 +83,7 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
     this.outputTmpPath = outputTmpPathString;
     this.numRows = numRows;
     this.numCols = numCols;
-    this.removeTempDirs = false;
+    this.keepTempFiles = false;
   }
 
   @Override
@@ -97,7 +97,7 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
     try {
       rowPath = FileSystem.get(conf).makeQualified(inputPath);
       outputTmpBasePath = FileSystem.get(conf).makeQualified(outputTmpPath);
-      removeTempDirs = conf.getBoolean(REMOVE_TEMP_DIRS, false);
+      keepTempFiles = conf.getBoolean(KEEP_TEMP_FILES, false);
     } catch (IOException ioe) {
       throw new IllegalStateException(ioe);
     }
@@ -200,7 +200,7 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
                                              outputVectorTmpPath);
       JobClient.runJob(new JobConf(conf));
       Vector result = TimesSquaredJob.retrieveTimesSquaredOutputVector(conf);
-      if (removeTempDirs) {
+      if (!keepTempFiles) {
         FileSystem fs = outputVectorTmpPath.getFileSystem(conf);
         fs.delete(outputVectorTmpPath, true);
       }
@@ -223,7 +223,7 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
                                                     outputVectorTmpPath);
       JobClient.runJob(new JobConf(conf));
       Vector result = TimesSquaredJob.retrieveTimesSquaredOutputVector(conf);
-      if (removeTempDirs) {
+      if (!keepTempFiles) {
         FileSystem fs = outputVectorTmpPath.getFileSystem(conf);
         fs.delete(outputVectorTmpPath, true);
       }

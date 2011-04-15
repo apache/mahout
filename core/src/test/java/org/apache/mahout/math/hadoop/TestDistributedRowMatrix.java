@@ -217,17 +217,24 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
 
     Vector result1 = dm.times(v);
 
-    assertEquals(1, fs.listStatus(outputPath).length);
+    assertEquals(0, fs.listStatus(outputPath).length);
     
     deleteContentsOfPath(conf, outputPath);
     assertEquals(0, fs.listStatus(outputPath).length);
     
-    conf.setBoolean(DistributedRowMatrix.REMOVE_TEMP_DIRS, true);
+    conf.setBoolean(DistributedRowMatrix.KEEP_TEMP_FILES, true);
     dm.setConf(conf);
     
     Vector result2 = dm.times(v);
 
-    assertEquals(0, fs.listStatus(outputPath).length);
+    FileStatus[] outputStatuses = fs.listStatus(outputPath);
+    assertEquals(1, outputStatuses.length);
+    Path outputTempPath = outputStatuses[0].getPath();
+    Path inputVectorPath = new Path(outputTempPath, TimesSquaredJob.INPUT_VECTOR);
+    Path outputVectorPath = new Path(outputTempPath, TimesSquaredJob.OUTPUT_VECTOR_FILENAME);
+    assertEquals(1, fs.listStatus(inputVectorPath).length);
+    assertEquals(1, fs.listStatus(outputVectorPath).length);
+
     assertEquals(0.0, result1.getDistanceSquared(result2), EPSILON);
   }
 
@@ -247,17 +254,24 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
 
     Vector result1 = dm.timesSquared(v);
 
-    assertEquals(1, fs.listStatus(outputPath).length);
+    assertEquals(0, fs.listStatus(outputPath).length);
     
     deleteContentsOfPath(conf, outputPath);
     assertEquals(0, fs.listStatus(outputPath).length);
     
-    conf.setBoolean(DistributedRowMatrix.REMOVE_TEMP_DIRS, true);
+    conf.setBoolean(DistributedRowMatrix.KEEP_TEMP_FILES, true);
     dm.setConf(conf);
     
     Vector result2 = dm.timesSquared(v);
 
-    assertEquals(0, fs.listStatus(outputPath).length);
+    FileStatus[] outputStatuses = fs.listStatus(outputPath);
+    assertEquals(1, outputStatuses.length);
+    Path outputTempPath = outputStatuses[0].getPath();
+    Path inputVectorPath = new Path(outputTempPath, TimesSquaredJob.INPUT_VECTOR);
+    Path outputVectorPath = new Path(outputTempPath, TimesSquaredJob.OUTPUT_VECTOR_FILENAME);
+    assertEquals(1, fs.listStatus(inputVectorPath).length);
+    assertEquals(1, fs.listStatus(outputVectorPath).length);
+    
     assertEquals(0.0, result1.getDistanceSquared(result2), EPSILON);
   }
 
