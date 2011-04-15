@@ -20,6 +20,7 @@ package org.apache.mahout.ga.watchmaker;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.hadoop.fs.Path;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
 /** Watchmaker compatible Fitness Evaluator that delegates the evaluation of the whole population to Mahout. */
@@ -34,7 +35,7 @@ public class MahoutFitnessEvaluator<T> extends STFitnessEvaluator<T> {
   @Override
   protected void evaluate(List<? extends T> population, List<Double> evaluations) {
     try {
-      MahoutEvaluator.evaluate(evaluator, population, evaluations);
+      MahoutEvaluator.evaluate(evaluator, population, evaluations, new Path("input"), new Path("output"));
     } catch (IOException e) {
       throw new IllegalStateException("Exception while evaluating the population", e);
     } catch (ClassNotFoundException e) {

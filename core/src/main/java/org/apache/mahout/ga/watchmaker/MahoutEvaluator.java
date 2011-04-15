@@ -41,7 +41,9 @@ import org.uncommons.watchmaker.framework.FitnessEvaluator;
  * storing the population into an input file, and loading the fitness from job outputs.
  */
 public final class MahoutEvaluator {
-  private MahoutEvaluator() { }
+
+  private MahoutEvaluator() {
+  }
   
   /**
    * Uses Mahout to evaluate every candidate from the input population using the given evaluator.
@@ -54,38 +56,29 @@ public final class MahoutEvaluator {
    *          <code>List&lt;Double&gt;</code> that contains the evaluated fitness for each candidate from the
    *          input population, sorted in the same order as the candidates.
    */
-  public static void evaluate(FitnessEvaluator<?> evaluator, Iterable<?> population, Collection<Double> evaluations)
-    throws IOException, ClassNotFoundException, InterruptedException {
+  public static void evaluate(FitnessEvaluator<?> evaluator,
+                              Iterable<?> population,
+                              Collection<Double> evaluations,
+                              Path input,
+                              Path output) throws IOException, ClassNotFoundException, InterruptedException {
+
     Job job = new Job();
     job.setJarByClass(MahoutEvaluator.class);
+
     Configuration conf = job.getConfiguration();
+
     FileSystem fs = FileSystem.get(conf);
-    Path inpath = prepareInput(fs, population);
-    Path outpath = new Path("output");
+    HadoopUtil.delete(conf, input);
+    HadoopUtil.delete(conf, output);
     
-    configureJob(job, conf, evaluator, inpath, outpath);
+    storePopulation(fs, new Path(input, "population"), population);
+
+    configureJob(job, conf, evaluator, input, output);
     job.waitForCompletion(true);
     
-    OutputUtils.importEvaluations(fs, conf, outpath, evaluations);
+    OutputUtils.importEvaluations(fs, conf, output, evaluations);
   }
-  
-  /**
-   * Create the input directory and stores the population in it.
-   * 
-   * @param fs
-   *          <code>FileSystem</code> to use
-   * @param population
-   *          population to store
-   * @return input <code>Path</code>
-   */
-  private static Path prepareInput(FileSystem fs, Iterable<?> population) throws IOException {
-    Path inpath = new Path(fs.getWorkingDirectory(), "input");
-    Configuration conf = fs.getConf();
-    HadoopUtil.delete(conf, inpath);
-    storePopulation(fs, new Path(inpath, "population"), population);
-    return inpath;
-  }
-  
+
   /**
    * Configure the job
    * 

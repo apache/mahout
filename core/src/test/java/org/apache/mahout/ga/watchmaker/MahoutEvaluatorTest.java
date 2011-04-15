@@ -32,16 +32,15 @@ import org.uncommons.watchmaker.framework.FitnessEvaluator;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Collection;
 
 public final class MahoutEvaluatorTest extends MahoutTestCase {
+
+  private static final int POPULATION_SIZE = 100;
 
   @Test
   public void testEvaluate() throws Exception {
     // candidate population
-    int populationSize = 100;
-    List<DummyCandidate> population = DummyCandidate
-        .generatePopulation(populationSize);
+    List<DummyCandidate> population = DummyCandidate.generatePopulation(POPULATION_SIZE);
 
     // fitness evaluator
     DummyEvaluator.clearEvaluations();
@@ -49,10 +48,13 @@ public final class MahoutEvaluatorTest extends MahoutTestCase {
 
     // run MahoutEvaluator
     List<Double> results = new ArrayList<Double>();
-    MahoutEvaluator.evaluate(evaluator, population, results);
+    Path input = getTestTempDirPath("input");
+    Path output = getTestTempDirPath("output");
+
+    MahoutEvaluator.evaluate(evaluator, population, results, input, output);
 
     // check results
-    assertEquals("Number of evaluations", populationSize, results.size());
+    assertEquals("Number of evaluations", POPULATION_SIZE, results.size());
     for (int index = 0; index < population.size(); index++) {
       DummyCandidate candidate = population.get(index);
       assertEquals("Evaluation of the candidate " + index,
@@ -62,40 +64,31 @@ public final class MahoutEvaluatorTest extends MahoutTestCase {
 
   @Test
   public void testStoreLoadPopulation() throws Exception {
-    int populationSize = 100;
+    List<DummyCandidate> population = DummyCandidate.generatePopulation(POPULATION_SIZE);
 
-    List<DummyCandidate> population = DummyCandidate
-        .generatePopulation(populationSize);
-
-    storeLoadPopulation(population);
-  }
-
-  private static void storeLoadPopulation(List<DummyCandidate> population)
-      throws IOException {
-    Path f = new Path("build/test.txt");
-    FileSystem fs = FileSystem.get(f.toUri(), new Configuration());
+    Path tempPath = getTestTempFilePath("test.txt");
+    FileSystem fs = tempPath.getFileSystem(new Configuration());
 
     // store the population
-    MahoutEvaluator.storePopulation(fs, f, population);
+    MahoutEvaluator.storePopulation(fs, tempPath, population);
 
     // load the population
-    List<DummyCandidate> inpop = new ArrayList<DummyCandidate>();
-    loadPopulation(fs, f, inpop);
+    List<DummyCandidate> inpop = loadPopulation(fs, tempPath);
 
     // check that the file contains the correct population
     assertEquals("Population size", population.size(), inpop.size());
     for (int index = 0; index < population.size(); index++) {
-      assertEquals("Bad candidate " + index, population.get(index), inpop
-          .get(index));
+      assertEquals("Bad candidate " + index, population.get(index), inpop.get(index));
     }
   }
 
-  private static void loadPopulation(FileSystem fs, Path f,
-                                     Collection<DummyCandidate> population) throws IOException {
+  private static List<DummyCandidate> loadPopulation(FileSystem fs, Path f) throws IOException {
+    List<DummyCandidate> population = new ArrayList<DummyCandidate>();
     FSDataInputStream in = fs.open(f);
     for (String line : new FileLineIterable(in)) {
       population.add(StringUtils.<DummyCandidate>fromString(line));
     }
+    return population;
   }
 
 }
