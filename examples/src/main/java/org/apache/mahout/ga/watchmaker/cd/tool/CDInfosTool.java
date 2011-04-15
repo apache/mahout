@@ -114,7 +114,7 @@ public final class CDInfosTool {
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
 
     // store the stringified descriptors
-    job.getConfiguration().set(ToolMapper.ATTRIBUTES, StringUtils.toString(descriptors.getChars()));
+    job.getConfiguration().set(ToolMapper.ATTRIBUTES, new String(descriptors.getChars()));
   }
 
   /**

@@ -72,10 +72,10 @@ public class ToolMapper extends Mapper<LongWritable, Text, LongWritable, Text> {
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    String descrs = context.getConfiguration().get(ATTRIBUTES);
+    String descriptors = context.getConfiguration().get(ATTRIBUTES);
 
-    if (descrs != null) {
-      configure(StringUtils.<char[]> fromString(descrs));
+    if (descriptors != null) {
+      configure(descriptors.toCharArray());
     }
   }
 

@@ -88,7 +88,7 @@ public final class DatasetSplit {
   }
 
   public void storeJobParameters(Configuration conf) {
-    conf.set(SEED, StringUtils.toString(seed));
+    conf.set(SEED, String.valueOf(seed));
     conf.set(THRESHOLD, Double.toString(threshold));
     conf.setBoolean(TRAINING, training);
   }
@@ -96,7 +96,7 @@ public final class DatasetSplit {
   static long getSeed(Configuration conf) {
     String seedstr = conf.get(SEED);
     Preconditions.checkArgument(seedstr != null, "Job parameter %s not found", SEED);
-    return StringUtils.<Long> fromString(seedstr);
+    return Long.parseLong(seedstr);
   }
 
   static double getThreshold(Configuration conf) {

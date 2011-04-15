@@ -56,7 +56,7 @@ public class ToolCombiner extends Reducer<LongWritable, Text, LongWritable, Text
     String descriptors = context.getConfiguration().get(ToolMapper.ATTRIBUTES);
 
     if (descriptors != null) {
-      configure(StringUtils.<char[]> fromString(descriptors));
+      configure(descriptors.toCharArray());
     }
   }
 
