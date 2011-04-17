@@ -32,7 +32,7 @@ public abstract class AbstractCandidateItemsStrategy implements CandidateItemsSt
 
   @Override
   public FastIDSet getCandidateItems(long userID, PreferenceArray preferencesFromUser, DataModel dataModel)
-      throws TasteException {
+    throws TasteException {
     return doGetCandidateItems(preferencesFromUser.getIDs(), dataModel);
   }
 

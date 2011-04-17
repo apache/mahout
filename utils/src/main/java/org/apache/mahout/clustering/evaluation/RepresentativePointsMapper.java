@@ -26,12 +26,12 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.mapred.OutputLogFilter;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.math.VectorWritable;
@@ -107,9 +107,11 @@ public class RepresentativePointsMapper
 
   public static Map<Integer, List<VectorWritable>> getRepresentativePoints(Configuration conf, Path statePath) {
     Map<Integer, List<VectorWritable>> representativePoints = new HashMap<Integer, List<VectorWritable>>();
-    for (Pair<IntWritable,VectorWritable> record :
-         new SequenceFileDirIterable<IntWritable,VectorWritable>(
-             statePath, PathType.LIST, new OutputLogFilter(), conf)) {
+    for (Pair<IntWritable,VectorWritable> record
+         : new SequenceFileDirIterable<IntWritable,VectorWritable>(statePath,
+                                                                   PathType.LIST,
+                                                                   PathFilters.logsCRCFilter(),
+                                                                   conf)) {
       int keyValue = record.getFirst().get();
       List<VectorWritable> repPoints = representativePoints.get(keyValue);
       if (repPoints == null) {

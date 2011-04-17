@@ -124,7 +124,7 @@ public class EigencutsSensitivityMapper extends
            * Functions.LOGARITHM.apply(Functions.POW.apply(eigenvalue, beta0) / 2));
     
     double secondhalf =
-        -Functions.POW.apply(((evi / Functions.SQRT.apply(diagi)) - (evj / Functions.SQRT.apply(diagj))), 2)
+        -Functions.POW.apply((evi / Functions.SQRT.apply(diagi)) - (evj / Functions.SQRT.apply(diagj)), 2)
         + (1.0 - eigenvalue) * ((Functions.POW.apply(evi, 2) / diagi) + (Functions.POW.apply(evj, 2) / diagj));
     
     return firsthalf * secondhalf;

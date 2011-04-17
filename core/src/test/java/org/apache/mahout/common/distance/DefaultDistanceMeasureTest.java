@@ -87,7 +87,7 @@ public abstract class DefaultDistanceMeasureTest extends MahoutTestCase {
     for (int a = 0; a < 4; a++) {
       for (int b = 0; b < 4; b++) {
         assertTrue("Distance between vectors less than zero: " 
-                   + distanceMatrix[a][b] + " = " + distanceMeasure.toString() + 
+                   + distanceMatrix[a][b] + " = " + distanceMeasure +
                    ".distance("+ vectors[a].asFormatString() + ", " 
                    + vectors[b].asFormatString() + ')',
                    distanceMatrix[a][b] >= 0);

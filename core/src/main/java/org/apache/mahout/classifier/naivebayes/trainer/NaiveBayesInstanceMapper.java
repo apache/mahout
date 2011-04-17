@@ -37,14 +37,13 @@ public class NaiveBayesInstanceMapper extends Mapper<Text, VectorWritable, IntWr
   private final OpenObjectIntHashMap<String> labelMap = new OpenObjectIntHashMap<String>();
   
   @Override
-  protected void map(Text key, VectorWritable value, Context context)
-    throws IOException, InterruptedException {
-    if (!labelMap.containsKey(key.toString())) {
+  protected void map(Text key, VectorWritable value, Context context) throws IOException, InterruptedException {
+    if (labelMap.containsKey(key.toString())) {
+      int label = labelMap.get(key.toString());
+      context.write(new IntWritable(label), value);
+    } else {
       context.getCounter("NaiveBayes", "Skipped instance: not in label list").increment(1);
-      return;
-    }  
-    int label = labelMap.get(key.toString());
-    context.write(new IntWritable(label), value);
+    }
   }
   
   @Override
@@ -57,8 +56,8 @@ public class NaiveBayesInstanceMapper extends Mapper<Text, VectorWritable, IntWr
     }
     Path labelMapFile = new Path(localFiles[0].getPath());
     // key is word value is id
-    for (Pair<Writable,IntWritable> record :
-         new SequenceFileIterable<Writable,IntWritable>(labelMapFile, true, conf)) {
+    for (Pair<Writable,IntWritable> record
+         : new SequenceFileIterable<Writable,IntWritable>(labelMapFile, true, conf)) {
       labelMap.put(record.getFirst().toString(), record.getSecond().get());
     }
   }

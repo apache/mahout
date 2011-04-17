@@ -100,8 +100,10 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   }
 
   public GenericItemBasedRecommender(DataModel dataModel, ItemSimilarity similarity) {
-    this(dataModel, similarity, AbstractRecommender.getDefaultCandidateItemsStrategy(),
-        getDefaultMostSimilarItemsCandidateItemsStrategy());
+    this(dataModel,
+         similarity,
+         AbstractRecommender.getDefaultCandidateItemsStrategy(),
+         getDefaultMostSimilarItemsCandidateItemsStrategy());
   }
 
   protected static MostSimilarItemsCandidateItemsStrategy getDefaultMostSimilarItemsCandidateItemsStrategy() {
@@ -203,7 +205,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
 
     DataModel model = getDataModel();
-    TopItems.Estimator<Long> estimator = new RecommendedBecauseEstimator(userID, itemID, similarity);
+    TopItems.Estimator<Long> estimator = new RecommendedBecauseEstimator(userID, itemID);
 
     PreferenceArray prefs = model.getPreferencesFromUser(userID);
     int size = prefs.length();
@@ -224,7 +226,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   }
   
   protected float doEstimatePreference(long userID, PreferenceArray preferencesFromUser, long itemID)
-      throws TasteException {
+    throws TasteException {
     double preference = 0.0;
     double totalSimilarity = 0.0;
     int count = 0;
@@ -353,12 +355,10 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     
     private final long userID;
     private final long recommendedItemID;
-    private final ItemSimilarity similarity;
-    
-    private RecommendedBecauseEstimator(long userID, long recommendedItemID, ItemSimilarity similarity) {
+
+    private RecommendedBecauseEstimator(long userID, long recommendedItemID) {
       this.userID = userID;
       this.recommendedItemID = recommendedItemID;
-      this.similarity = similarity;
     }
     
     @Override

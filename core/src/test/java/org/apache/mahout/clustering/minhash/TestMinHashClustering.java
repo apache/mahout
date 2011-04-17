@@ -147,7 +147,7 @@ public class TestMinHashClustering extends MahoutTestCase {
   public void testLinearMinHashMRJob() throws Exception {
     String[] args = makeArguments(2, 3, 20, 3, HashType.LINEAR.toString());
     int ret = ToolRunner.run(new Configuration(), new MinHashDriver(), args);
-    assertEquals("Minhash MR Job failed for " + HashType.LINEAR.toString(), 0, ret);
+    assertEquals("Minhash MR Job failed for " + HashType.LINEAR, 0, ret);
     verify(output, 0.2, "Hash Type: LINEAR");
   }
   
@@ -155,7 +155,7 @@ public class TestMinHashClustering extends MahoutTestCase {
   public void testPolynomialMinHashMRJob() throws Exception {
     String[] args = makeArguments(2, 3, 20, 3, HashType.POLYNOMIAL.toString());
     int ret = ToolRunner.run(new Configuration(), new MinHashDriver(), args);
-    assertEquals("Minhash MR Job failed for " + HashType.POLYNOMIAL.toString(), 0, ret);
+    assertEquals("Minhash MR Job failed for " + HashType.POLYNOMIAL, 0, ret);
     verify(output, 0.3, "Hash Type: POLYNOMIAL");
   }
   
@@ -163,7 +163,7 @@ public class TestMinHashClustering extends MahoutTestCase {
   public void testMurmurMinHashMRJob() throws Exception {
     String[] args = makeArguments(2, 3, 20, 4, HashType.MURMUR.toString());
     int ret = ToolRunner.run(new Configuration(), new MinHashDriver(), args);
-    assertEquals("Minhash MR Job failed for " + HashType.MURMUR.toString(), 0, ret);
+    assertEquals("Minhash MR Job failed for " + HashType.MURMUR, 0, ret);
     verify(output, 0.3, "Hash Type: MURMUR");
   }
   

@@ -320,7 +320,7 @@ public class DirichletDriver extends AbstractJob {
     FileOutputFormat.setOutputPath(job, stateOut);
 
     if (!job.waitForCompletion(true)) {
-      throw new InterruptedException("Dirichlet Iteration failed processing " + stateIn.toString());
+      throw new InterruptedException("Dirichlet Iteration failed processing " + stateIn);
     }
   }
 
@@ -389,9 +389,11 @@ public class DirichletDriver extends AbstractJob {
         newModel.configure(conf);
       }
       DirichletClusterer clusterer = new DirichletClusterer(state);
-      for (VectorWritable value :
-           new SequenceFileDirValueIterable<VectorWritable>(
-               input, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+      for (VectorWritable value
+           : new SequenceFileDirValueIterable<VectorWritable>(input,
+                                                              PathType.LIST,
+                                                              PathFilters.logsCRCFilter(),
+                                                              conf)) {
         clusterer.observe(newModels, value);
       }
       clusterer.updateModels(newModels);
@@ -511,7 +513,7 @@ public class DirichletDriver extends AbstractJob {
     FileOutputFormat.setOutputPath(job, output);
 
     if (!job.waitForCompletion(true)) {
-      throw new InterruptedException("Dirichlet Clustering failed processing " + stateIn.toString());
+      throw new InterruptedException("Dirichlet Clustering failed processing " + stateIn);
     }
   }
 }

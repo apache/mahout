@@ -123,8 +123,8 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
 
     Path dictionaryFile = new Path(localFiles[0].getPath());
     // key is word value is id
-    for (Pair<Writable,IntWritable> record :
-         new SequenceFileIterable<Writable,IntWritable>(dictionaryFile, true, conf)) {
+    for (Pair<Writable,IntWritable> record
+         : new SequenceFileIterable<Writable,IntWritable>(dictionaryFile, true, conf)) {
       dictionary.put(record.getFirst().toString(), record.getSecond().get());
     }
   }

@@ -86,9 +86,13 @@ public final class LDADriver extends AbstractJob {
     double[] logTotals = new double[numTopics];
     double ll = 0.0;
 
-    for (Pair<IntPairWritable,DoubleWritable> record :
-         new SequenceFileDirIterable<IntPairWritable, DoubleWritable>(
-             new Path(dir, "part-*"), PathType.GLOB, null, null, true, job)) {
+    for (Pair<IntPairWritable,DoubleWritable> record
+         : new SequenceFileDirIterable<IntPairWritable, DoubleWritable>(new Path(dir, "part-*"),
+                                                                        PathType.GLOB,
+                                                                        null,
+                                                                        null,
+                                                                        true,
+                                                                        job)) {
       IntPairWritable key = record.getFirst();
       DoubleWritable value = record.getSecond();
       int topic = key.getFirst();
@@ -263,7 +267,7 @@ public final class LDADriver extends AbstractJob {
     job.setJarByClass(LDADriver.class);
 
     if (!job.waitForCompletion(true)) {
-      throw new InterruptedException("LDA Iteration failed processing " + stateIn.toString());
+      throw new InterruptedException("LDA Iteration failed processing " + stateIn);
     }
     return findLL(stateOut, conf);
   }

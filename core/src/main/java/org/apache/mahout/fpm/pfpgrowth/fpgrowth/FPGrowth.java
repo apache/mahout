@@ -57,8 +57,8 @@ public class FPGrowth<A extends Comparable<? super A>> {
   public static List<Pair<String,TopKStringPatterns>> readFrequentPattern(Configuration conf, Path path) {
     List<Pair<String,TopKStringPatterns>> ret = new ArrayList<Pair<String,TopKStringPatterns>>();
     // key is feature value is count
-    for (Pair<Writable,TopKStringPatterns> record :
-         new SequenceFileIterable<Writable,TopKStringPatterns>(path, true, conf)) {
+    for (Pair<Writable,TopKStringPatterns> record
+         : new SequenceFileIterable<Writable,TopKStringPatterns>(path, true, conf)) {
       ret.add(new Pair<String,TopKStringPatterns>(record.getFirst().toString(),
                                                   new TopKStringPatterns(record.getSecond().getPatterns())));
     }

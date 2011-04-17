@@ -61,8 +61,8 @@ public class MeanShiftCanopyClusterMapper
     String statePath = conf.get(MeanShiftCanopyDriver.STATE_IN_KEY);
     List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
     Path path = new Path(statePath);
-    for (MeanShiftCanopy value :
-         new SequenceFileDirValueIterable<MeanShiftCanopy>(path, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+    for (MeanShiftCanopy value 
+         : new SequenceFileDirValueIterable<MeanShiftCanopy>(path, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
       canopies.add(value);
     }
     return canopies;

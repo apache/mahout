@@ -18,13 +18,11 @@
 package org.apache.mahout.utils.eval;
 
 import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -88,7 +86,7 @@ public class ParallelFactorizationEvaluator extends AbstractJob {
         "--itemFeatures", parsedArgs.get("--itemFeatures"),
         "--tempDir", tempDir.toString() });
 
-    Job estimationErrors = prepareJob(new Path(parsedArgs.get("--pairs") + "," + predictions.toString()), errors,
+    Job estimationErrors = prepareJob(new Path(parsedArgs.get("--pairs") + ',' + predictions), errors,
         TextInputFormat.class, PairsWithRatingMapper.class, IntPairWritable.class, DoubleWritable.class,
         ErrorReducer.class, DoubleWritable.class, NullWritable.class, SequenceFileOutputFormat.class);
     estimationErrors.waitForCompletion(true);

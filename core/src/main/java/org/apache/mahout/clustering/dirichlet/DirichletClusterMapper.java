@@ -65,9 +65,11 @@ public class DirichletClusterMapper
 
   protected static List<DirichletCluster> loadClusters(Configuration conf, Path stateIn) {
     List<DirichletCluster> clusters = new ArrayList<DirichletCluster>();
-    for (DirichletCluster value :
-         new SequenceFileDirValueIterable<DirichletCluster>(
-             stateIn, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+    for (DirichletCluster value
+         : new SequenceFileDirValueIterable<DirichletCluster>(stateIn,
+                                                              PathType.LIST,
+                                                              PathFilters.logsCRCFilter(),
+                                                              conf)) {
       clusters.add(value);
     }
     return clusters;

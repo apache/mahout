@@ -62,8 +62,8 @@ public class NaiveBayesThetaMapper extends Mapper<IntWritable, VectorWritable, T
     alphaI = conf.getFloat(NaiveBayesTrainer.ALPHA_I, 1.0f);
     Path weightFile = new Path(localFiles[0].getPath());
 
-    for (Pair<Text,VectorWritable> record :
-         new SequenceFileIterable<Text,VectorWritable>(weightFile, true, conf)) {
+    for (Pair<Text,VectorWritable> record
+         : new SequenceFileIterable<Text,VectorWritable>(weightFile, true, conf)) {
       Text key = record.getFirst();
       VectorWritable value = record.getSecond();
       if (key.toString().equals(BayesConstants.FEATURE_SUM)) {
@@ -78,8 +78,8 @@ public class NaiveBayesThetaMapper extends Mapper<IntWritable, VectorWritable, T
     Path labelMapFile = new Path(localFiles[1].getPath());
 
     // key is word value is id
-    for (Pair<Writable,IntWritable> record :
-         new SequenceFileIterable<Writable,IntWritable>(labelMapFile, true, conf)) {
+    for (Pair<Writable,IntWritable> record 
+         : new SequenceFileIterable<Writable,IntWritable>(labelMapFile, true, conf)) {
       labelMap.put(record.getFirst().toString(), record.getSecond().get());
     }
   }

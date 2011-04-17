@@ -245,7 +245,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     FileOutputFormat.setOutputPath(job, clustersOut);
 
     if (!job.waitForCompletion(true)) {
-      throw new InterruptedException("Fuzzy K-Means Iteration failed processing " + clustersIn.toString());
+      throw new InterruptedException("Fuzzy K-Means Iteration failed processing " + clustersIn);
     }
     FileSystem fs = FileSystem.get(clustersOut.toUri(), conf);
     return isConverged(clustersOut, conf, fs);
@@ -362,9 +362,11 @@ public class FuzzyKMeansDriver extends AbstractJob {
       log.info("Fuzzy k-Means Iteration: " + iteration);
       Configuration conf = new Configuration();
       FileSystem fs = FileSystem.get(input.toUri(), conf);
-      for (VectorWritable value :
-           new SequenceFileDirValueIterable<VectorWritable>(
-               input, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+      for (VectorWritable value
+           : new SequenceFileDirValueIterable<VectorWritable>(input,
+                                                              PathType.LIST,
+                                                              PathFilters.logsCRCFilter(),
+                                                              conf)) {
         clusterer.addPointToClusters(clusters,value.get());
       }
       converged = clusterer.testConvergence(clusters);
@@ -377,7 +379,8 @@ public class FuzzyKMeansDriver extends AbstractJob {
       try {
         for (SoftCluster cluster : clusters) {
           log.debug("Writing Cluster:{} center:{} numPoints:{} radius:{} to: {}",
-                    new Object[] { cluster.getId(),
+                    new Object[] {
+                        cluster.getId(),
                         AbstractCluster.formatVector(cluster.getCenter(), null),
                         cluster.getNumPoints(),
                         AbstractCluster.formatVector(cluster.getRadius(), null),
@@ -523,7 +526,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     job.setJarByClass(FuzzyKMeansDriver.class);
 
     if (!job.waitForCompletion(true)) {
-      throw new InterruptedException("Fuzzy K-Means Clustering failed processing " + clustersIn.toString());
+      throw new InterruptedException("Fuzzy K-Means Clustering failed processing " + clustersIn);
     }
   }
 

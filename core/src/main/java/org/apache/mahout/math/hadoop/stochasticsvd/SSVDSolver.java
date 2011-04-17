@@ -382,7 +382,7 @@ public class SSVDSolver {
 
   private static final Pattern OUTPUT_FILE_PATTERN = Pattern.compile("(\\w+)-(m|r)-(\\d+)(\\.\\w+)?");
 
-  static final Comparator<FileStatus> partitionComparator = new Comparator<FileStatus>() {
+  static final Comparator<FileStatus> PARTITION_COMPARATOR = new Comparator<FileStatus>() {
     private final Matcher matcher = OUTPUT_FILE_PATTERN.matcher("");
 
     @Override
@@ -430,7 +430,7 @@ public class SSVDSolver {
 
     // assume it is partitioned output, so we need to read them up
     // in order of partitions.
-    Arrays.sort(files, partitionComparator);
+    Arrays.sort(files, PARTITION_COMPARATOR);
 
     for (FileStatus fstat : files) {
       for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(fstat.getPath(), true, conf)) {
@@ -449,7 +449,8 @@ public class SSVDSolver {
   }
 
   public static UpperTriangular loadUpperTriangularMatrix(FileSystem fs,
-      Path glob, Configuration conf) throws IOException {
+                                                          Path glob,
+                                                          Configuration conf) throws IOException {
 
     FileStatus[] files = fs.globStatus(glob);
     if (files == null) {
@@ -458,7 +459,7 @@ public class SSVDSolver {
 
     // assume it is partitioned output, so we need to read them up
     // in order of partitions.
-    Arrays.sort(files, partitionComparator);
+    Arrays.sort(files, PARTITION_COMPARATOR);
 
     UpperTriangular result = null;
     for (FileStatus fstat : files) {

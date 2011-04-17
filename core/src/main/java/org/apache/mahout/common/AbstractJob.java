@@ -345,7 +345,7 @@ public abstract class AbstractJob extends Configured implements Tool {
     Preconditions.checkArgument(inputOption == null || inputPath != null,
         "No input specified or -Dmapred.input.dir must be provided to specify input directory");
     Preconditions.checkArgument(outputOption == null || outputPath != null,
-        "No output specified:  or -Dmapred.output.dir must be provided to specify output directory" );
+        "No output specified:  or -Dmapred.output.dir must be provided to specify output directory");
   }
 
   protected static void maybePut(Map<String, String> args, CommandLine cmdLine, Option... opt) {

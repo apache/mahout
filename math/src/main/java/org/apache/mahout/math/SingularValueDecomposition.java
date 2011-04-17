@@ -34,7 +34,7 @@ public class SingularValueDecomposition implements java.io.Serializable {
    */
   public SingularValueDecomposition(Matrix arg) {
     if (arg.numRows() < arg.numCols()) {
-      transpositionNeeded = true;		  		 
+      transpositionNeeded = true;
     }
     
     // Derived from LINPACK code.

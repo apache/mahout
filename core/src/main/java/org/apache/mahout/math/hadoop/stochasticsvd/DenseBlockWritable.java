@@ -22,21 +22,16 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import org.apache.hadoop.io.Writable;
-import org.apache.mahout.math.MatrixWritable;
 
 /**
- * Ad-hoc substitution for {@link MatrixWritable}. Perhaps more useful for
+ * <p></p>Ad-hoc substitution for {@link org.apache.mahout.math.MatrixWritable}. Perhaps more useful for
  * situations with mostly dense data (such as Q-blocks) but reduces GC by
- * reusing the same block memory between loads and writes.
- * <p>
+ * reusing the same block memory between loads and writes.</p>
  * 
- * in case of Q blocks, it doesn't even matter if they this data is dense cause
+ * <p></p>in case of Q blocks, it doesn't even matter if they this data is dense cause
  * we need to unpack it into dense for fast access in computations anyway and
  * even if it is not so dense the block compressor in sequence files will take
- * care of it for the serialized size.
- * <P>
- * 
- * 
+ * care of it for the serialized size.</p>
  */
 public class DenseBlockWritable implements Writable {
   private double[][] block;

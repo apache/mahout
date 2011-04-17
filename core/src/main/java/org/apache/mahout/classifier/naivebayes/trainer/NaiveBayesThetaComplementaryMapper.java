@@ -44,11 +44,10 @@ public class NaiveBayesThetaComplementaryMapper extends Mapper<IntWritable, Vect
   private Vector perLabelThetaNormalizer;
   private double alphaI = 1.0;
   private double vocabCount;
-  private double totalSum = 0.0;
+  private double totalSum;
   
   @Override
-  protected void map(IntWritable key, VectorWritable value, Context context)
-      throws IOException, InterruptedException {
+  protected void map(IntWritable key, VectorWritable value, Context context) throws IOException, InterruptedException {
     Vector vector = value.get();
     int label = key.get();
     double sigmaK = labelSum.get(label);
@@ -72,8 +71,8 @@ public class NaiveBayesThetaComplementaryMapper extends Mapper<IntWritable, Vect
     }
     alphaI = conf.getFloat(NaiveBayesTrainer.ALPHA_I, 1.0f);
     Path weightFile = new Path(localFiles[0].getPath());
-    for (Pair<Text,VectorWritable> record :
-         new SequenceFileIterable<Text,VectorWritable>(weightFile, true, conf)) {
+    for (Pair<Text,VectorWritable> record
+         : new SequenceFileIterable<Text,VectorWritable>(weightFile, true, conf)) {
       Text key = record.getFirst();
       VectorWritable value = record.getSecond();
       if (key.toString().equals(BayesConstants.FEATURE_SUM)) {
@@ -88,8 +87,8 @@ public class NaiveBayesThetaComplementaryMapper extends Mapper<IntWritable, Vect
 
     Path labelMapFile = new Path(localFiles[1].getPath());
     // key is word value is id
-    for (Pair<Writable,IntWritable> record :
-         new SequenceFileIterable<Writable,IntWritable>(labelMapFile, true, conf)) {
+    for (Pair<Writable,IntWritable> record 
+         : new SequenceFileIterable<Writable,IntWritable>(labelMapFile, true, conf)) {
       labelMap.put(record.getFirst().toString(), record.getSecond().get());
     }
   }

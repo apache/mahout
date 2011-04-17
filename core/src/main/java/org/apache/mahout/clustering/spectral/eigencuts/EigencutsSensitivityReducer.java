@@ -40,8 +40,8 @@ public class EigencutsSensitivityReducer extends
     throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();
     Vector v = new RandomAccessSparseVector(conf.getInt(EigencutsKeys.AFFINITY_DIMENSIONS, Integer.MAX_VALUE), 100);
-    double threshold = Double.parseDouble(conf.get(EigencutsKeys.TAU)) /
-      Double.parseDouble(conf.get(EigencutsKeys.DELTA));
+    double threshold = Double.parseDouble(conf.get(EigencutsKeys.TAU))
+        / Double.parseDouble(conf.get(EigencutsKeys.DELTA));
     
     for (EigencutsSensitivityNode n : arr) {
       if (n.getSensitivity() < threshold && n.getSensitivity() < v.getQuick(n.getColumn())) {

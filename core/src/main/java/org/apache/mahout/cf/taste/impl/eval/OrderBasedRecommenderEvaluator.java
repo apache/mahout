@@ -276,8 +276,8 @@ public final class OrderBasedRecommenderEvaluator {
   /**
    * vector Z is a list of distances between the correct value and the recommended value
    * Z[i] = position i of correct itemID - position of correct itemID in recommendation list
-   * 	can be positive or negative
-   * 	the smaller the better - means recommendations are closer
+   * can be positive or negative
+   * the smaller the better - means recommendations are closer
    * both are the same length, and both sample from the same set
    * 
    * destructive to items arrays - allows N log N instead of N^2 order

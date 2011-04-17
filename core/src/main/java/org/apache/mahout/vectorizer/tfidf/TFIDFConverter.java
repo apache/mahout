@@ -149,7 +149,8 @@ public final class TFIDFConverter {
     Path wordCountPath = new Path(output, WORDCOUNT_OUTPUT_FOLDER);
 
     startDFCounting(input, wordCountPath, baseConf);
-    Pair<Long[], List<Path>> datasetFeatures = createDictionaryChunks(wordCountPath, output, baseConf, chunkSizeInMegabytes);
+    Pair<Long[], List<Path>> datasetFeatures =
+        createDictionaryChunks(wordCountPath, output, baseConf, chunkSizeInMegabytes);
 
     int partialVectorIndex = 0;
     List<Path> partialVectorPaths = new ArrayList<Path>();
@@ -210,8 +211,13 @@ public final class TFIDFConverter {
     long featureCount = 0;
     long vectorCount = Long.MAX_VALUE;
     Path filesPattern = new Path(featureCountPath, OUTPUT_FILES_PATTERN);
-    for (Pair<IntWritable,LongWritable> record :
-         new SequenceFileDirIterable<IntWritable,LongWritable>(filesPattern, PathType.GLOB, null, null, true, conf)) {
+    for (Pair<IntWritable,LongWritable> record
+         : new SequenceFileDirIterable<IntWritable,LongWritable>(filesPattern,
+                                                                 PathType.GLOB,
+                                                                 null,
+                                                                 null,
+                                                                 true,
+                                                                 conf)) {
 
       if (currentChunkSize > chunkSizeLimit) {
         freqWriter.close();
@@ -236,7 +242,7 @@ public final class TFIDFConverter {
       featureCount = Math.max(key.get(), featureCount);
 
     }
-  featureCount++;
+    featureCount++;
     freqWriter.close();
     Long[] counts = {featureCount, vectorCount};
     return new Pair<Long[], List<Path>>(counts, chunkPaths);
@@ -323,7 +329,7 @@ public final class TFIDFConverter {
         + "org.apache.hadoop.io.serializer.WritableSerialization");
     
     Job job = new Job(conf);
-    job.setJobName("VectorTfIdf Document Frequency Count running over input: " + input.toString());
+    job.setJobName("VectorTfIdf Document Frequency Count running over input: " + input);
     job.setJarByClass(TFIDFConverter.class);
     
     job.setOutputKeyClass(IntWritable.class);

@@ -95,7 +95,8 @@ public class CsvRecordFactory implements RecordFactory {
   private final Map<String, String> typeMap;
   private List<String> variableNames;
   private boolean includeBiasTerm;
-  private static final String CANNOT_CONSTRUCT_CONVERTER = "Unable to construct type converter... shouldn't be possible";
+  private static final String CANNOT_CONSTRUCT_CONVERTER =
+      "Unable to construct type converter... shouldn't be possible";
 
   /**
    * Construct a parser for CSV lines that encodes the parsed data in vector form.

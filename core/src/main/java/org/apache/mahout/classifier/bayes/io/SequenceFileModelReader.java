@@ -53,8 +53,13 @@ public final class SequenceFileModelReader {
   
   public static void loadWeightMatrix(InMemoryBayesDatastore datastore, Path pathPattern, Configuration conf) {
     // the key is label,feature
-    for (Pair<StringTuple,DoubleWritable> record :
-         new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern, PathType.GLOB, null, null, true, conf)) {
+    for (Pair<StringTuple,DoubleWritable> record
+         : new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern,
+                                                                   PathType.GLOB,
+                                                                   null,
+                                                                   null,
+                                                                   true,
+                                                                   conf)) {
       StringTuple key = record.getFirst();
       DoubleWritable value = record.getSecond();
       datastore.loadFeatureWeight(key.stringAt(2), key.stringAt(1), value.get());
@@ -64,8 +69,13 @@ public final class SequenceFileModelReader {
   public static void loadFeatureWeights(InMemoryBayesDatastore datastore, Path pathPattern, Configuration conf) {
     // the key is either _label_ or label,feature
     long count = 0;
-    for (Pair<StringTuple,DoubleWritable> record :
-         new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern, PathType.GLOB, null, null, true, conf)) {
+    for (Pair<StringTuple,DoubleWritable> record
+         : new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern,
+                                                                   PathType.GLOB,
+                                                                   null,
+                                                                   null,
+                                                                   true,
+                                                                   conf)) {
       // Sum of weights for a Feature
       StringTuple key = record.getFirst();
       DoubleWritable value = record.getSecond();
@@ -80,8 +90,13 @@ public final class SequenceFileModelReader {
   
   public static void loadLabelWeights(InMemoryBayesDatastore datastore, Path pathPattern, Configuration conf) {
     long count = 0;
-    for (Pair<StringTuple,DoubleWritable> record :
-         new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern, PathType.GLOB, null, null, true, conf)) {
+    for (Pair<StringTuple,DoubleWritable> record
+         : new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern,
+                                                                   PathType.GLOB,
+                                                                   null,
+                                                                   null,
+                                                                   true,
+                                                                   conf)) {
       // Sum of weights in a Label
       StringTuple key = record.getFirst();
       DoubleWritable value = record.getSecond();
@@ -96,8 +111,13 @@ public final class SequenceFileModelReader {
   
   public static void loadThetaNormalizer(InMemoryBayesDatastore datastore, Path pathPattern, Configuration conf) {
     long count = 0;
-    for (Pair<StringTuple,DoubleWritable> record :
-         new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern, PathType.GLOB, null, null, true, conf)) {
+    for (Pair<StringTuple,DoubleWritable> record
+         : new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern,
+                                                                   PathType.GLOB,
+                                                                   null,
+                                                                   null,
+                                                                   true,
+                                                                   conf)) {
       StringTuple key = record.getFirst();
       DoubleWritable value = record.getSecond();
       // Sum of weights in a Label
@@ -112,8 +132,13 @@ public final class SequenceFileModelReader {
   
   public static void loadSumWeight(InMemoryBayesDatastore datastore, Path pathPattern, Configuration conf) {
     // the key is _label
-    for (Pair<StringTuple,DoubleWritable> record :
-         new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern, PathType.GLOB, null, null, true, conf)) {
+    for (Pair<StringTuple,DoubleWritable> record
+         : new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern,
+                                                                   PathType.GLOB,
+                                                                   null,
+                                                                   null,
+                                                                   true,
+                                                                   conf)) {
       StringTuple key = record.getFirst();
       DoubleWritable value = record.getSecond();
       if (key.stringAt(0).equals(BayesConstants.TOTAL_SUM)) {
@@ -127,8 +152,13 @@ public final class SequenceFileModelReader {
   public static Map<String,Double> readLabelSums(Path pathPattern, Configuration conf) {
     Map<String,Double> labelSum = new HashMap<String,Double>();
     // the key is either _label_ or label,feature
-    for (Pair<StringTuple,DoubleWritable> record :
-         new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern, PathType.GLOB, null, null, true, conf)) {
+    for (Pair<StringTuple,DoubleWritable> record
+         : new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern,
+                                                                   PathType.GLOB,
+                                                                   null,
+                                                                   null,
+                                                                   true,
+                                                                   conf)) {
       StringTuple key = record.getFirst();
       DoubleWritable value = record.getSecond();
       if (key.stringAt(0).equals(BayesConstants.LABEL_SUM)) {
@@ -142,8 +172,13 @@ public final class SequenceFileModelReader {
   public static Map<String,Double> readLabelDocumentCounts(Path pathPattern, Configuration conf) {
     Map<String,Double> labelDocumentCounts = new HashMap<String,Double>();
     // the key is either _label_ or label,feature
-    for (Pair<StringTuple,DoubleWritable> record :
-         new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern, PathType.GLOB, null, null, true, conf)) {
+    for (Pair<StringTuple,DoubleWritable> record
+         : new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern,
+                                                                   PathType.GLOB,
+                                                                   null,
+                                                                   null,
+                                                                   true,
+                                                                   conf)) {
       StringTuple key = record.getFirst();
       DoubleWritable value = record.getSecond();
       // Count of Documents in a Label
@@ -156,8 +191,13 @@ public final class SequenceFileModelReader {
   
   public static double readSigmaJSigmaK(Path pathPattern, Configuration conf) {
     Map<String,Double> weightSum = new HashMap<String,Double>();
-    for (Pair<StringTuple,DoubleWritable> record :
-         new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern, PathType.GLOB, null, null, true, conf)) {
+    for (Pair<StringTuple,DoubleWritable> record
+         : new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern,
+                                                                   PathType.GLOB,
+                                                                   null,
+                                                                   null,
+                                                                   true,
+                                                                   conf)) {
       StringTuple key = record.getFirst();
       DoubleWritable value = record.getSecond();
       if (weightSum.size() > 1) {
@@ -171,8 +211,13 @@ public final class SequenceFileModelReader {
   
   public static double readVocabCount(Path pathPattern, Configuration conf) {
     Map<String,Double> weightSum = new HashMap<String,Double>();
-    for (Pair<StringTuple,DoubleWritable> record :
-         new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern, PathType.GLOB, null, null, true, conf)) {
+    for (Pair<StringTuple,DoubleWritable> record
+         : new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern,
+                                                                   PathType.GLOB, 
+                                                                   null,
+                                                                   null,
+                                                                   true,
+                                                                   conf)) {
       if (weightSum.size() > 1) {
         throw new IllegalStateException("Incorrect vocabCount File");
       }

@@ -190,14 +190,22 @@ public class SpectralKMeansDriver extends AbstractJob {
                                                            new Path(output, Cluster.INITIAL_CLUSTERS_DIR),
                                                            clusters,
                                                            measure);
-    KMeansDriver.run(conf, Wt.getRowPath(), initialclusters, output, measure, convergenceDelta, maxIterations, true, false);
+    KMeansDriver.run(conf,
+                     Wt.getRowPath(),
+                     initialclusters,
+                     output,
+                     measure,
+                     convergenceDelta,
+                     maxIterations,
+                     true,
+                     false);
 
     // Read through the cluster assignments
     Path clusteredPointsPath = new Path(output, "clusteredPoints");
     Path inputPath = new Path(clusteredPointsPath, "part-m-00000");
     int id = 0;
-    for (Pair<IntWritable,WeightedVectorWritable> record :
-         new SequenceFileIterable<IntWritable, WeightedVectorWritable>(inputPath, conf)) {
+    for (Pair<IntWritable,WeightedVectorWritable> record 
+         : new SequenceFileIterable<IntWritable, WeightedVectorWritable>(inputPath, conf)) {
       log.info("{}: {}", id++, record.getFirst().get());
     }
 

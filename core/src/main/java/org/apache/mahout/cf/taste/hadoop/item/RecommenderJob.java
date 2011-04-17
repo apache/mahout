@@ -219,8 +219,8 @@ public final class RecommenderJob extends AbstractJob {
        * new DistributedRowMatrix(...).rowSimilarity(...) */
       try {
         ToolRunner.run(getConf(), new RowSimilarityJob(), new String[] {
-          "-Dmapred.input.dir=" + itemUserMatrixPath.toString(),
-          "-Dmapred.output.dir=" + similarityMatrixPath.toString(),
+          "-Dmapred.input.dir=" + itemUserMatrixPath,
+          "-Dmapred.output.dir=" + similarityMatrixPath,
           "--numberOfColumns", String.valueOf(numberOfUsers),
           "--similarityClassname", similarityClassname,
           "--maxSimilaritiesPerRow", String.valueOf(maxSimilaritiesPerItem + 1),

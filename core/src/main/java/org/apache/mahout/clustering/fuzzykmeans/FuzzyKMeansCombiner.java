@@ -28,7 +28,8 @@ public class FuzzyKMeansCombiner extends Reducer<Text, ClusterObservations, Text
   private FuzzyKMeansClusterer clusterer;
 
   @Override
-  protected void reduce(Text key, Iterable<ClusterObservations> values, Context context) throws IOException, InterruptedException {
+  protected void reduce(Text key, Iterable<ClusterObservations> values, Context context)
+    throws IOException, InterruptedException {
     SoftCluster cluster = new SoftCluster();
     for (ClusterObservations value : values) {
       if (value.getCombinerState() == 0) { // first time thru combiner

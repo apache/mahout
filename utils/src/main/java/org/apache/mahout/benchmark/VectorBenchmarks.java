@@ -707,8 +707,8 @@ public class VectorBenchmarks {
       abuilder.withName("nv").withMinimum(1).withMaximum(1).create()).withDescription(
       "Number of Vectors to create. Default: 100").withShortName("nv").create();
     Option numClustersOpt = obuilder.withLongName("numClusters").withRequired(false).withArgument(
-  	      abuilder.withName("vs").withMinimum(1).withMaximum(1).create()).withDescription(
-  	      "Number of Vectors to create. Default: 10").withShortName("vs").create();
+          abuilder.withName("vs").withMinimum(1).withMaximum(1).create()).withDescription(
+          "Number of Vectors to create. Default: 10").withShortName("vs").create();
     Option loopOpt = obuilder.withLongName("loop").withRequired(false).withArgument(
       abuilder.withName("loop").withMinimum(1).withMaximum(1).create()).withDescription(
       "Number of times to loop. Default: 200").withShortName("l").create();
@@ -741,7 +741,7 @@ public class VectorBenchmarks {
       
       int numClusters=25;
       if (cmdLine.hasOption(numClustersOpt)) {
-    	  numClusters = Integer.parseInt((String) cmdLine.getValue(numClustersOpt));          
+        numClusters = Integer.parseInt((String) cmdLine.getValue(numClustersOpt));
       }
 
       int sparsity = 1000;

@@ -53,11 +53,13 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * <p>MapReduce implementation of the factorization algorithm described in "Large-scale Parallel Collaborative Filtering for the Netﬂix Prize"
- * available at http://www.hpl.hp.com/personal/Robert_Schreiber/papers/2008%20AAIM%20Netflix/netflix_aaim08(submitted).pdf.</p>
+ * <p>MapReduce implementation of the factorization algorithm described in
+ * "Large-scale Parallel Collaborative Filtering for the Netﬂix Prize"
+ * available at
+ * http://www.hpl.hp.com/personal/Robert_Schreiber/papers/2008%20AAIM%20Netflix/netflix_aaim08(submitted).pdf.</p>
  *
- * <p>Implements a parallel algorithm that uses "Alternating-Least-Squares with Weighted-λ-Regularization" to factorize the
- * preference-matrix </p>
+ * <p>Implements a parallel algorithm that uses "Alternating-Least-Squares with Weighted-λ-Regularization"
+ * to factorize the preference-matrix </p>
  *
  * <p>Command line arguments specific to this class are:</p>
  *
@@ -143,14 +145,14 @@ public class ParallelALSFactorizationJob extends AbstractJob {
       extends Mapper<VarIntWritable,FeatureVectorWithRatingWritable,IntWritable,VectorWritable> {
     @Override
     protected void map(VarIntWritable key, FeatureVectorWithRatingWritable value, Context ctx) 
-        throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
       ctx.write(new IntWritable(key.get()), new VectorWritable(value.getFeatureVector()));
     }
   }
 
 
   private void iterate(int currentIteration, int numFeatures, double lambda)
-      throws IOException, ClassNotFoundException, InterruptedException {
+    throws IOException, ClassNotFoundException, InterruptedException {
     /* fix M, compute U */
     joinAndSolve(pathToM(currentIteration - 1), pathToItemRatings(), pathToU(currentIteration), numFeatures,
         lambda, currentIteration, STEP_ONE);
@@ -162,7 +164,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
   private void joinAndSolve(Path featureMatrix, Path ratingMatrix, Path outputPath, int numFeatures, double lambda,
       int currentIteration, String step) throws IOException, ClassNotFoundException, InterruptedException  {
 
-    Path joinPath = new Path(ratingMatrix.toString() + "," + featureMatrix.toString());
+    Path joinPath = new Path(ratingMatrix.toString() + ',' + featureMatrix);
     Path featureVectorWithRatingPath = joinAndSolvePath(currentIteration, step);
 
     Job joinToFeatureVectorWithRating = prepareJob(joinPath, featureVectorWithRatingPath, SequenceFileInputFormat.class,
@@ -207,7 +209,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     @Override
     protected void reduce(VarIntWritable id, Iterable<FeatureVectorWithRatingWritable> values, Context ctx)
-        throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
       Vector featureVector = null;
       Map<Integer,Float> ratings = new HashMap<Integer,Float>();
       for (FeatureVectorWithRatingWritable value : values) {
@@ -248,7 +250,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     @Override
     protected void reduce(IndexedVarIntWritable key, Iterable<FeatureVectorWithRatingWritable> values, Context ctx)
-        throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
       List<Vector> UorMColumns = new ArrayList<Vector>();
       Vector ratingVector = new RandomAccessSparseVector(Integer.MAX_VALUE);
       int n = 0;
@@ -286,7 +288,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     @Override
     protected void reduce(VarLongWritable itemID, Iterable<FloatWritable> ratings, Context ctx) 
-        throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
 
       RunningAverage averageRating = new FullRunningAverage();
       for (FloatWritable rating : ratings) {
@@ -306,7 +308,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
   }
 
   private Path joinAndSolvePath(int currentIteration, String step) {
-    return new Path(tempDir, "joinAndSolve-" + currentIteration + "-" + step);
+    return new Path(tempDir, "joinAndSolve-" + currentIteration + '-' + step);
   }
 
   private Path pathToM(int iteration) {

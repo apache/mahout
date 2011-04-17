@@ -67,9 +67,13 @@ public final class TasteHadoopUtils {
   public static OpenIntLongHashMap readItemIDIndexMap(String itemIDIndexPathStr, Configuration conf) {
     OpenIntLongHashMap indexItemIDMap = new OpenIntLongHashMap();
     Path itemIDIndexPath = new Path(itemIDIndexPathStr);
-    for (Pair<VarIntWritable,VarLongWritable> record :
-         new SequenceFileDirIterable<VarIntWritable,VarLongWritable>(
-             itemIDIndexPath, PathType.LIST, PathFilters.partFilter(), null, true, conf)) {
+    for (Pair<VarIntWritable,VarLongWritable> record
+         : new SequenceFileDirIterable<VarIntWritable,VarLongWritable>(itemIDIndexPath,
+                                                                       PathType.LIST,
+                                                                       PathFilters.partFilter(),
+                                                                       null,
+                                                                       true,
+                                                                       conf)) {
       indexItemIDMap.put(record.getFirst().get(), record.getSecond().get());
     }
     return indexItemIDMap;

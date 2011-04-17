@@ -77,12 +77,12 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
                      Matrix eigenVectors,
                      List<Double> eigenValues,
                      String outputEigenVectorPathString) throws IOException {
-	  DistributedRowMatrix matrix =
+    DistributedRowMatrix matrix =
         new DistributedRowMatrix(inputPath, outputTmpPath, numRows, numCols);
-	  matrix.setConf(new Configuration(originalConfig));
-	  setConf(originalConfig);
-	  solve(matrix, desiredRank, eigenVectors, eigenValues, isSymmetric);
-	  serializeOutput(eigenVectors, eigenValues, new Path(outputEigenVectorPathString));
+    matrix.setConf(new Configuration(originalConfig));
+    setConf(originalConfig);
+    solve(matrix, desiredRank, eigenVectors, eigenValues, isSymmetric);
+    serializeOutput(eigenVectors, eigenValues, new Path(outputEigenVectorPathString));
   }
 
   @Override
@@ -200,8 +200,8 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
     IntWritable iw = new IntWritable();
     for (int i = 0; i < numEigenVectors; i++) {
       // Persist eigenvectors sorted by eigenvalues in descending order
-      NamedVector v = new NamedVector(eigenVectors.getRow(numEigenVectors-1-i),
-          "eigenVector" + i + ", eigenvalue = " + eigenValues.get(numEigenVectors-1-i));
+      NamedVector v = new NamedVector(eigenVectors.getRow(numEigenVectors - 1 - i),
+          "eigenVector" + i + ", eigenvalue = " + eigenValues.get(numEigenVectors - 1 - i));
       Writable vw = new VectorWritable(v);
       iw.set(i);
       seqWriter.append(iw, vw);

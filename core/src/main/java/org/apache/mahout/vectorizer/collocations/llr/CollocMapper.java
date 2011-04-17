@@ -109,67 +109,57 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
       }
     } while (sf.incrementToken());
 
-    try {
-      final GramKey gramKey = new GramKey();
+    final GramKey gramKey = new GramKey();
 
-      ngrams.forEachPair(new ObjectIntProcedure<String>() {
-        @Override
-        public boolean apply(String term, int frequency) {
-          // obtain components, the leading (n-1)gram and the trailing unigram.
-          int i = term.lastIndexOf(' '); // TODO: fix for non-whitespace delimited languages.
-          if (i != -1) { // bigram, trigram etc
+    ngrams.forEachPair(new ObjectIntProcedure<String>() {
+      @Override
+      public boolean apply(String term, int frequency) {
+        // obtain components, the leading (n-1)gram and the trailing unigram.
+        int i = term.lastIndexOf(' '); // TODO: fix for non-whitespace delimited languages.
+        if (i != -1) { // bigram, trigram etc
 
-            try {
-              Gram ngram = new Gram(term, frequency, Gram.Type.NGRAM);
-              Gram head = new Gram(term.substring(0, i), frequency, Gram.Type.HEAD);
-              Gram tail = new Gram(term.substring(i + 1), frequency, Gram.Type.TAIL);
-
-              gramKey.set(head, EMPTY);
-              context.write(gramKey, head);
-
-              gramKey.set(head, ngram.getBytes());
-              context.write(gramKey, ngram);
-
-              gramKey.set(tail, EMPTY);
-              context.write(gramKey, tail);
-
-              gramKey.set(tail, ngram.getBytes());
-              context.write(gramKey, ngram);
-
-            } catch (IOException e) {
-              throw new IllegalStateException(e);
-            } catch (InterruptedException e) {
-              throw new IllegalStateException(e);
-            }
-          }
-          return true;
-        }
-      });
-
-      unigrams.forEachPair(new ObjectIntProcedure<String>() {
-        @Override
-        public boolean apply(String term, int frequency) {
           try {
-            Gram unigram = new Gram(term, frequency, Gram.Type.UNIGRAM);
-            gramKey.set(unigram, EMPTY);
-            context.write(gramKey, unigram);
+            Gram ngram = new Gram(term, frequency, Gram.Type.NGRAM);
+            Gram head = new Gram(term.substring(0, i), frequency, Gram.Type.HEAD);
+            Gram tail = new Gram(term.substring(i + 1), frequency, Gram.Type.TAIL);
+
+            gramKey.set(head, EMPTY);
+            context.write(gramKey, head);
+
+            gramKey.set(head, ngram.getBytes());
+            context.write(gramKey, ngram);
+
+            gramKey.set(tail, EMPTY);
+            context.write(gramKey, tail);
+
+            gramKey.set(tail, ngram.getBytes());
+            context.write(gramKey, ngram);
+
           } catch (IOException e) {
             throw new IllegalStateException(e);
           } catch (InterruptedException e) {
             throw new IllegalStateException(e);
           }
-          return true;
         }
-      });
-    } catch (IllegalStateException ise) {
-      // catch an re-throw original exceptions from the procedures.
-      if (ise.getCause() instanceof IOException) {
-        throw (IOException) ise.getCause();
-      } else {
-        // wasn't what was expected, so re-throw
-        throw ise;
+        return true;
       }
-    }
+    });
+
+    unigrams.forEachPair(new ObjectIntProcedure<String>() {
+      @Override
+      public boolean apply(String term, int frequency) {
+        try {
+          Gram unigram = new Gram(term, frequency, Gram.Type.UNIGRAM);
+          gramKey.set(unigram, EMPTY);
+          context.write(gramKey, unigram);
+        } catch (IOException e) {
+          throw new IllegalStateException(e);
+        } catch (InterruptedException e) {
+          throw new IllegalStateException(e);
+        }
+        return true;
+      }
+    });
 
     context.getCounter(Count.NGRAM_TOTAL).increment(count);
 

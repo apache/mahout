@@ -25,8 +25,8 @@ import org.apache.mahout.clustering.ClusterObservations;
 public class KMeansCombiner extends Reducer<Text, ClusterObservations, Text, ClusterObservations> {
 
   @Override
-  protected void reduce(Text key, Iterable<ClusterObservations> values, Context context) throws IOException, InterruptedException {
-
+  protected void reduce(Text key, Iterable<ClusterObservations> values, Context context)
+    throws IOException, InterruptedException {
     Cluster cluster = new Cluster();
     for (ClusterObservations value : values) {
       cluster.observe(value);

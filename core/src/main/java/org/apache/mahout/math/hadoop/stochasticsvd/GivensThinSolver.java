@@ -548,7 +548,7 @@ public class GivensThinSolver {
 
   }
 
-  private static class TriangularRowView extends AbstractVector {
+  private static final class TriangularRowView extends AbstractVector {
     private final UpperTriangular viewed;
     private int rowNum;
 
@@ -605,7 +605,7 @@ public class GivensThinSolver {
     }
 
     @Override
-    protected Matrix matrixLike(int rows, int columns) {
+    public Matrix matrixLike(int rows, int columns) {
       throw new UnsupportedOperationException();
     }
 

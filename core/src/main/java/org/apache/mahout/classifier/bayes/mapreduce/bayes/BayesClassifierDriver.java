@@ -88,8 +88,13 @@ public final class BayesClassifierDriver {
   public static ConfusionMatrix readResult(Path pathPattern, Configuration conf, Parameters params) {
     String defaultLabel = params.get("defaultCat");
     Map<String,Map<String,Integer>> confusionMatrix = new HashMap<String,Map<String,Integer>>();
-    for (Pair<StringTuple,DoubleWritable> record :
-         new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern, PathType.GLOB, null, null, true, conf)) {
+    for (Pair<StringTuple,DoubleWritable> record
+         : new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern,
+                                                                   PathType.GLOB,
+                                                                   null,
+                                                                   null,
+                                                                   true,
+                                                                   conf)) {
       StringTuple key = record.getFirst();
       DoubleWritable value = record.getSecond();
       String correctLabel = key.stringAt(1);

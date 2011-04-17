@@ -210,8 +210,8 @@ public final class DictionaryVectorizer {
     long currentChunkSize = 0;
     Path filesPattern = new Path(wordCountPath, OUTPUT_FILES_PATTERN);
     int i = 0;
-    for (Pair<Writable,Writable> record :
-         new SequenceFileDirIterable<Writable,Writable>(filesPattern, PathType.GLOB, null, null, true, conf)) {
+    for (Pair<Writable,Writable> record
+         : new SequenceFileDirIterable<Writable,Writable>(filesPattern, PathType.GLOB, null, null, true, conf)) {
       if (currentChunkSize > chunkSizeLimit) {
         dictWriter.close();
         chunkIndex++;
@@ -279,7 +279,7 @@ public final class DictionaryVectorizer {
     
     Job job = new Job(conf);
     job.setJobName("DictionaryVectorizer::MakePartialVectors: input-folder: " + input
-                    + ", dictionary-file: " + dictionaryFilePath.toString());
+                    + ", dictionary-file: " + dictionaryFilePath);
     job.setJarByClass(DictionaryVectorizer.class);
     
     job.setMapOutputKeyClass(Text.class);
@@ -316,7 +316,7 @@ public final class DictionaryVectorizer {
     
     Job job = new Job(conf);
     
-    job.setJobName("DictionaryVectorizer::WordCount: input-folder: " + input.toString());
+    job.setJobName("DictionaryVectorizer::WordCount: input-folder: " + input);
     job.setJarByClass(DictionaryVectorizer.class);
     
     job.setOutputKeyClass(Text.class);

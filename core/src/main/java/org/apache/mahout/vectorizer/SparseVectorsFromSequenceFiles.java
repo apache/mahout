@@ -135,7 +135,8 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
         .withOption(chunkSizeOpt).withOption(outputDirOpt).withOption(inputDirOpt).withOption(minDFOpt)
         .withOption(maxDFPercentOpt).withOption(weightOpt).withOption(powerOpt).withOption(minLLROpt)
         .withOption(numReduceTasksOpt).withOption(maxNGramSizeOpt).withOption(overwriteOutput)
-        .withOption(helpOpt).withOption(sequentialAccessVectorOpt).withOption(namedVectorOpt).withOption(logNormalizeOpt)
+        .withOption(helpOpt).withOption(sequentialAccessVectorOpt).withOption(namedVectorOpt)
+        .withOption(logNormalizeOpt)
         .create();
     try {
       Parser parser = new Parser();

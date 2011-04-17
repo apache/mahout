@@ -61,8 +61,7 @@ public class Omega {
     assert yRow.length == kp;
 
     Arrays.fill(yRow, 0);
-    if ((aRow instanceof SequentialAccessSparseVector)||
-        (aRow instanceof RandomAccessSparseVector)){
+    if ((aRow instanceof SequentialAccessSparseVector) || (aRow instanceof RandomAccessSparseVector)) {
       int j = 0;
       for (Element el : aRow) {
         accumDots(j, el.get(), yRow);

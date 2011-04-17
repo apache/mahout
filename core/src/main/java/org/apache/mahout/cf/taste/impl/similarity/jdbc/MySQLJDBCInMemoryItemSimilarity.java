@@ -25,10 +25,10 @@ import javax.sql.DataSource;
 public class MySQLJDBCInMemoryItemSimilarity extends AbstractJDBCInMemoryItemSimilarity {
 
   static final String DEFAULT_GET_ALL_ITEMSIMILARITIES_SQL =
-      "SELECT " + AbstractJDBCItemSimilarity.DEFAULT_ITEM_A_ID_COLUMN + ", " +
-        AbstractJDBCItemSimilarity.DEFAULT_ITEM_B_ID_COLUMN + ", " +
-        AbstractJDBCItemSimilarity.DEFAULT_SIMILARITY_COLUMN + " FROM " +
-        AbstractJDBCItemSimilarity.DEFAULT_SIMILARITY_TABLE;
+      "SELECT " + AbstractJDBCItemSimilarity.DEFAULT_ITEM_A_ID_COLUMN + ", "
+      + AbstractJDBCItemSimilarity.DEFAULT_ITEM_B_ID_COLUMN + ", "
+      + AbstractJDBCItemSimilarity.DEFAULT_SIMILARITY_COLUMN + " FROM "
+      + AbstractJDBCItemSimilarity.DEFAULT_SIMILARITY_TABLE;
 
 
   public MySQLJDBCInMemoryItemSimilarity() throws TasteException {

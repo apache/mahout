@@ -34,6 +34,7 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.HadoopUtil;
@@ -331,12 +332,12 @@ public final class TestMeanShift extends MahoutTestCase {
     long count = HadoopUtil.countRecords(outPart, conf);
     assertEquals("count", 3, count);
     outPart = new Path(output, "clusters-0/part-m-00000");
-	Iterator<?> iterator = new SequenceFileValueIterator<Writable>(outPart, true, conf);
-	// now test the initial clusters to ensure the type of their centers has been retained
-	while (iterator.hasNext()) {
-	  MeanShiftCanopy canopy = (MeanShiftCanopy) iterator.next();
-	  assertTrue(canopy.getCenter()instanceof DenseVector);
-	}
+    Iterator<?> iterator = new SequenceFileValueIterator<Writable>(outPart, true, conf);
+    // now test the initial clusters to ensure the type of their centers has been retained
+    while (iterator.hasNext()) {
+      Cluster canopy = (Cluster) iterator.next();
+      assertTrue(canopy.getCenter() instanceof DenseVector);
+    }
   }
 
   /**
@@ -356,7 +357,7 @@ public final class TestMeanShift extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(points, getTestTempFilePath("testdata/file2"), fs, conf);
     // now run the Job using the run() command. Other tests can continue to use runJob().
     Path output = getTestTempDirPath("output");
-    System.out.println("Output Path: " + output.toString());
+    System.out.println("Output Path: " + output);
     //MeanShiftCanopyDriver.runJob(input, output, EuclideanDistanceMeasure.class.getName(), 4, 1, 0.5, 10, false, false);
     String[] args = { optKey(DefaultOptionCreator.INPUT_OPTION), getTestTempDirPath("testdata").toString(),
         optKey(DefaultOptionCreator.OUTPUT_OPTION), output.toString(), optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION),

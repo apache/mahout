@@ -26,15 +26,11 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.common.StringTuple;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Can also be used as a local Combiner */
 public class BayesWeightSummerReducer extends MapReduceBase implements
     Reducer<StringTuple,DoubleWritable,StringTuple,DoubleWritable> {
-  
-  private static final Logger log = LoggerFactory.getLogger(BayesWeightSummerReducer.class);
-  
+
   @Override
   public void reduce(StringTuple key,
                      Iterator<DoubleWritable> values,

@@ -127,7 +127,7 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
   
   @Override
   protected float doEstimatePreference(long theUserID, PreferenceArray preferencesFromUser, long itemID)
-      throws TasteException {
+    throws TasteException {
     
     DataModel dataModel = getDataModel();
     int size = preferencesFromUser.length();

@@ -83,8 +83,8 @@ public final class RandomSeedGenerator {
         if (fileStatus.isDir()) {
           continue;
         }
-        for (Pair<Writable,VectorWritable> record :
-             new SequenceFileIterable<Writable,VectorWritable>(fileStatus.getPath(), true, conf)) {
+        for (Pair<Writable,VectorWritable> record
+             : new SequenceFileIterable<Writable,VectorWritable>(fileStatus.getPath(), true, conf)) {
           Writable key = record.getFirst();
           VectorWritable value = record.getSecond();
           Cluster newCluster = new Cluster(value.get(), nextClusterId++, measure);

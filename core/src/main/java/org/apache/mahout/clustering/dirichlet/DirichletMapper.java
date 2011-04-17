@@ -80,9 +80,11 @@ public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritabl
                                             int k) {
     DirichletState state = DirichletDriver.createState(description, k, alpha);
     Path path = new Path(statePath);
-    for (Pair<Writable,DirichletCluster> record :
-         new SequenceFileDirIterable<Writable,DirichletCluster>(
-             path, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+    for (Pair<Writable,DirichletCluster> record
+         : new SequenceFileDirIterable<Writable,DirichletCluster>(path,
+                                                                  PathType.LIST,
+                                                                  PathFilters.logsCRCFilter(),
+                                                                  conf)) {
       int index = Integer.parseInt(record.getFirst().toString());
       state.getClusters().set(index, record.getSecond());
     }

@@ -56,7 +56,7 @@ import org.apache.mahout.math.VectorWritable;
  * 
  * 
  */
-public class QJob {
+public final class QJob {
 
   public static final String PROP_OMEGA_SEED = "ssvd.omegaseed";
   public static final String PROP_K = "ssvd.k";

@@ -197,8 +197,8 @@ public final class ItemSimilarityJob extends AbstractJob {
     /* Once DistributedRowMatrix uses the hadoop 0.20 API, we should refactor this call to something like
      * new DistributedRowMatrix(...).rowSimilarity(...) */
     ToolRunner.run(getConf(), new RowSimilarityJob(), new String[] {
-      "-Dmapred.input.dir=" + itemUserMatrixPath.toString(),
-      "-Dmapred.output.dir=" + similarityMatrixPath.toString(),
+      "-Dmapred.input.dir=" + itemUserMatrixPath,
+      "-Dmapred.output.dir=" + similarityMatrixPath,
       "--numberOfColumns", String.valueOf(numberOfUsers),
       "--similarityClassname", similarityClassName,
       "--maxSimilaritiesPerRow", String.valueOf(maxSimilarItemsPerItem + 1),

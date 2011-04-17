@@ -151,7 +151,7 @@ public class FileDataModel extends AbstractDataModel {
    *          transposes user IDs and item IDs -- convenient for 'flipping' the data model this way
    * @param minReloadIntervalMS
    *  the minimum interval in milliseconds after which a full reload of the original datafile is done
-   * 	when refresh() is called
+   *  when refresh() is called
    * @see #FileDataModel(File)
    */
   public FileDataModel(File dataFile, boolean transpose, long minReloadIntervalMS) throws IOException {

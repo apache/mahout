@@ -54,7 +54,7 @@ import org.apache.mahout.math.hadoop.stochasticsvd.QJob.QJobKeyWritable;
  * Bt job. For details, see working notes in MAHOUT-376. 
  *
  */
-public class BtJob {
+public final class BtJob {
 
   public static final String OUTPUT_Q = "Q";
   public static final String OUTPUT_BT = "part";
@@ -76,7 +76,7 @@ public class BtJob {
     private final VectorWritable btValue = new VectorWritable();
     private int kp;
     private final VectorWritable qRowValue = new VectorWritable();
-    private int qCount; // debug
+    //private int qCount; // debug
 
     void loadNextQt() throws IOException {
       Writable key = new QJobKeyWritable();
@@ -114,7 +114,7 @@ public class BtJob {
       // // it doesn't matter if it overflows.
       // m_outputs.write( OUTPUT_Q, oKey, oV);
       // }
-      qCount++;
+      //qCount++;
     }
 
     @Override
@@ -151,8 +151,7 @@ public class BtJob {
       // make sure Qs are inheriting A row labels.
 
       Vector btRow = btValue.get();
-      if ((aRow instanceof SequentialAccessSparseVector) ||
-          (aRow instanceof RandomAccessSparseVector)) {
+      if ((aRow instanceof SequentialAccessSparseVector) || (aRow instanceof RandomAccessSparseVector)) {
         for (Vector.Element el : aRow) {
           double mul = el.get();
           for (int j = 0; j < kp; j++) {
@@ -200,7 +199,7 @@ public class BtJob {
         throw new IOException("Can't find R inputs ");
       }
 
-      Arrays.sort(rFiles, SSVDSolver.partitionComparator);
+      Arrays.sort(rFiles, SSVDSolver.PARTITION_COMPARATOR);
 
       int block = 0;
       for (FileStatus fstat : rFiles) {

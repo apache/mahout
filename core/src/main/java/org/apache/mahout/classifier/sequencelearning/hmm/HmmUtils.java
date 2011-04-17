@@ -169,14 +169,16 @@ public final class HmmUtils {
         "Error: Initial probability of state %d is negative", i);
       sum += model.getInitialProbabilities().get(i);
     }
-    Preconditions.checkArgument(Maths.approxEquals(sum, 1, 0.00001), "Error: Initial probabilities do not add up to 1");
+    Preconditions.checkArgument(Maths.approxEquals(sum, 1, 0.00001),
+                                "Error: Initial probabilities do not add up to 1");
     /*
      * The row size of the output matrix is equal to the number of the hidden
      * states. The column size is equal to the number of output states. Each
      * probability of the matrix is non-negative. The sum of each row is equal
      * to 1.
      */
-    Preconditions.checkArgument(model.getEmissionMatrix() != null, "Error: The output state matrix is not initialized!");
+    Preconditions.checkArgument(model.getEmissionMatrix() != null,
+                                "Error: The output state matrix is not initialized!");
     Preconditions.checkArgument(model.getEmissionMatrix().numRows() == model.getNrOfHiddenStates()
       && model.getEmissionMatrix().numCols() == model.getNrOfOutputStates(),
       "Error: The output state matrix is not of the form nrOfHiddenStates x nrOfOutputStates");

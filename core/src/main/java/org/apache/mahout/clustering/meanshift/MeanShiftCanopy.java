@@ -63,11 +63,11 @@ public class MeanShiftCanopy extends Cluster {
    * @param measure a DistanceMeasure
    * @return a MeanShiftCanopy
    */
-  public static MeanShiftCanopy initialCanopy(Vector point, int id, DistanceMeasure measure){
-	  MeanShiftCanopy result = new MeanShiftCanopy(point, id, measure);
-	  // overwrite center so original point type is retained 
-	  result.setCenter(point);
-	  return result;
+  public static MeanShiftCanopy initialCanopy(Vector point, int id, DistanceMeasure measure) {
+    MeanShiftCanopy result = new MeanShiftCanopy(point, id, measure);
+    // overwrite center so original point type is retained
+    result.setCenter(point);
+    return result;
   }
 
   /**

@@ -41,16 +41,15 @@ import org.apache.mahout.math.VectorWritable;
  * ).
  * 
  */
-public class BBtJob {
+public final class BBtJob {
 
   public static final String OUTPUT_BBT = "part";
 
   private BBtJob() {
   }
 
-  public static void run(Configuration conf, Path btPath, Path outputPath,
-      int numReduceTasks) throws IOException, ClassNotFoundException,
-      InterruptedException {
+  public static void run(Configuration conf, Path btPath, Path outputPath, int numReduceTasks)
+    throws IOException, ClassNotFoundException, InterruptedException {
 
     Job job = new Job(conf);
     job.setJobName("BBt-job");
@@ -73,8 +72,7 @@ public class BBtJob {
     // output
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     FileOutputFormat.setOutputPath(job, outputPath);
-    SequenceFileOutputFormat.setOutputCompressionType(job,
-        CompressionType.BLOCK);
+    SequenceFileOutputFormat.setOutputCompressionType(job, CompressionType.BLOCK);
     FileOutputFormat.setOutputCompressorClass(job, DefaultCodec.class);
     job.getConfiguration().set("mapreduce.output.basename", OUTPUT_BBT);
 
@@ -98,7 +96,7 @@ public class BBtJob {
 
     @Override
     protected void map(IntWritable key, VectorWritable value, Context context)
-        throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
       Vector btVec = value.get();
       int kp = btVec.size();
       if (bbtPartial == null) {
@@ -115,8 +113,7 @@ public class BBtJob {
     }
 
     @Override
-    protected void cleanup(Context context) throws IOException,
-        InterruptedException {
+    protected void cleanup(Context context) throws IOException, InterruptedException {
       if (bbtPartial != null) {
         iw.set(context.getTaskAttemptID().getTaskID().getId());
         vw.set(new DenseVector(bbtPartial.getData(), true));
@@ -126,14 +123,12 @@ public class BBtJob {
     }
   }
 
-  public static class BBtReducer extends
-      Reducer<IntWritable, VectorWritable, IntWritable, VectorWritable> {
+  public static class BBtReducer extends Reducer<IntWritable, VectorWritable, IntWritable, VectorWritable> {
 
     private double[] accum;
 
     @Override
-    protected void cleanup(Context context) throws IOException,
-        InterruptedException {
+    protected void cleanup(Context context) throws IOException, InterruptedException {
       try {
         if (accum != null) {
           context.write(new IntWritable(), new VectorWritable(new DenseVector(
@@ -145,8 +140,9 @@ public class BBtJob {
     }
 
     @Override
-    protected void reduce(IntWritable iw, Iterable<VectorWritable> ivw,
-        Context ctx) throws IOException, InterruptedException {
+    protected void reduce(IntWritable iw,
+                          Iterable<VectorWritable> ivw,
+                          Context ctx) throws IOException, InterruptedException {
       Iterator<VectorWritable> vwIter = ivw.iterator();
       Vector bbtPartial = vwIter.next().get();
       if (accum == null) {
@@ -156,7 +152,7 @@ public class BBtJob {
         for (int i = 0; i < accum.length; i++) {
           accum[i] += bbtPartial.getQuick(i);
         }
-      } while (vwIter.hasNext() && null != (bbtPartial = vwIter.next().get()));
+      } while (vwIter.hasNext() && (bbtPartial = vwIter.next().get()) != null);
     }
 
   }

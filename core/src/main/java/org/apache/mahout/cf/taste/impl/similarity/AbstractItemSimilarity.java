@@ -59,6 +59,6 @@ public abstract class AbstractItemSimilarity implements ItemSimilarity {
 
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
-     refreshHelper.refresh(alreadyRefreshed);
+    refreshHelper.refresh(alreadyRefreshed);
   }
 }

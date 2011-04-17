@@ -31,6 +31,6 @@ public interface CandidateItemsStrategy {
    * @return IDs of all items that could be recommended to the user
    */
   FastIDSet getCandidateItems(long userID, PreferenceArray preferencesFromUser, DataModel dataModel)
-      throws TasteException;
+    throws TasteException;
   
 }

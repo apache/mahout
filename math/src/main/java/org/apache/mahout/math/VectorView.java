@@ -153,7 +153,7 @@ public class VectorView extends AbstractVector {
 
   }
 
-  private class DecoratorElement implements Element {
+  private final class DecoratorElement implements Element {
 
     private final Element decorated;
 

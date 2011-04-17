@@ -65,8 +65,8 @@ public class NaiveBayesWeightsMapper extends Mapper<IntWritable, VectorWritable,
     Path labelMapFile = new Path(localFiles[0].getPath());
 
     // key is word value is id
-    for (Pair<Writable,IntWritable> record :
-         new SequenceFileIterable<Writable,IntWritable>(labelMapFile, true, conf)) {
+    for (Pair<Writable,IntWritable> record 
+         : new SequenceFileIterable<Writable,IntWritable>(labelMapFile, true, conf)) {
       labelMap.put(record.getFirst().toString(), record.getSecond().get());
     }
   }

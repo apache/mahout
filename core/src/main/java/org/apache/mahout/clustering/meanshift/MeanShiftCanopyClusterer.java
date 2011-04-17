@@ -172,7 +172,7 @@ public class MeanShiftCanopyClusterer {
       clusterer.mergeCanopy(new MeanShiftCanopy(point, nextCanopyId++, measure), canopies);
     }
     List<MeanShiftCanopy> newCanopies = canopies;
-    boolean[] converged = { false };
+    boolean[] converged = {false};
     for (int iter = 0; !converged[0] && iter < numIter; iter++) {
       newCanopies = clusterer.iterate(newCanopies, converged);
     }

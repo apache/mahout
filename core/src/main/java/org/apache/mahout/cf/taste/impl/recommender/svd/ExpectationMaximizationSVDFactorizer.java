@@ -92,18 +92,18 @@ public final class ExpectationMaximizationSVDFactorizer extends AbstractFactoriz
 
     for (int feature = 0; feature < numFeatures; feature++) {
       for (int userIndex = 0; userIndex < dataModel.getNumUsers(); userIndex++) {
-          leftVectors[userIndex][feature] = defaultValue + (random.nextDouble() - 0.5) * interval * randomNoise;
+        leftVectors[userIndex][feature] = defaultValue + (random.nextDouble() - 0.5) * interval * randomNoise;
       }
       for (int itemIndex = 0; itemIndex < dataModel.getNumItems(); itemIndex++) {
-          rightVectors[itemIndex][feature] = defaultValue + (random.nextDouble() - 0.5) * interval * randomNoise;
+        rightVectors[itemIndex][feature] = defaultValue + (random.nextDouble() - 0.5) * interval * randomNoise;
       }
     }
     cachedPreferences = new ArrayList<SVDPreference>(dataModel.getNumUsers());
     cachePreferences();
-    double rmse = (dataModel.getMaxPreference() - dataModel.getMinPreference());
+    double rmse = dataModel.getMaxPreference() - dataModel.getMinPreference();
     for (int ii = 0; ii < numFeatures; ii++) {
       Collections.shuffle(cachedPreferences, random);
-      for (int i = 0; (i < numIterations); i++) {
+      for (int i = 0; i < numIterations; i++) {
         double err = 0.0;
         for (SVDPreference pref : cachedPreferences) {
           int useridx = userIndex(pref.getUserID());

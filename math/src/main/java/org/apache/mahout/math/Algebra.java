@@ -54,10 +54,10 @@ public final class Algebra {
   /**
    * Compute Maximum Absolute Row Sum Norm of input Matrix m
    * http://mathworld.wolfram.com/MaximumAbsoluteRowSumNorm.html 
-   */	
+   */
   public static double getNorm(Matrix m) {
     double max = 0.0;
-    for (int i = 0; i < m.numRows(); i++) 	{
+    for (int i = 0; i < m.numRows(); i++) {
       int sum = 0;
       Vector cv = m.getRow(i);
       for (int j = 0; j < cv.size(); j++) {
@@ -68,6 +68,6 @@ public final class Algebra {
       }
     }
     return max;
-  }	
-  
+  }
+
 }

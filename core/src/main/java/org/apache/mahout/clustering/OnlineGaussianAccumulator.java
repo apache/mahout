@@ -25,7 +25,7 @@ import org.apache.mahout.math.function.SquareRootFunction;
  */
 public class OnlineGaussianAccumulator implements GaussianAccumulator {
 
-  private double sumWeight = 0.0;
+  private double sumWeight;
   private Vector mean;
   private Vector s;
   private Vector variance;

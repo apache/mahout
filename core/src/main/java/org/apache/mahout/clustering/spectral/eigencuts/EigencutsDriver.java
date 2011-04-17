@@ -132,7 +132,8 @@ public class EigencutsDriver extends AbstractJob {
       int overshoot = (int) ((double) eigenrank * OVERSHOOT_MULTIPLIER);
       List<Double> eigenValues = new ArrayList<Double>(overshoot);
       Matrix eigenVectors = new DenseMatrix(overshoot, eigenrank);
-      DistributedRowMatrix U = performEigenDecomposition(conf, L, eigenrank, overshoot, eigenValues, eigenVectors, outputCalc);
+      DistributedRowMatrix U =
+          performEigenDecomposition(conf, L, eigenrank, overshoot, eigenValues, eigenVectors, outputCalc);
       U.setConf(new Configuration(conf));
       eigenValues = eigenValues.subList(0, eigenrank);
 
@@ -154,7 +155,8 @@ public class EigencutsDriver extends AbstractJob {
       // how many cuts were made?
       if (numCuts > 0) {
         // recalculate A
-        A = new DistributedRowMatrix(input, new Path(outputTmp, Long.toString(System.nanoTime())), dimensions, dimensions);
+        A = new DistributedRowMatrix(input,
+                                     new Path(outputTmp, Long.toString(System.nanoTime())), dimensions, dimensions);
         A.setConf(new Configuration());
       }
     } while (numCuts > 0);

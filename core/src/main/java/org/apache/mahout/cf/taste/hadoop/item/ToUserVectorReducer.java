@@ -47,8 +47,8 @@ import org.apache.mahout.math.VectorWritable;
 public final class ToUserVectorReducer extends
     Reducer<VarLongWritable,VarLongWritable,VarLongWritable,VectorWritable> {
 
-  public static final String MIN_PREFERENCES_PER_USER = ToUserVectorReducer.class.getName() +
-      ".minPreferencesPerUser";
+  public static final String MIN_PREFERENCES_PER_USER = ToUserVectorReducer.class.getName() + ".minPreferencesPerUser";
+
   private int minPreferences;
 
   @Override

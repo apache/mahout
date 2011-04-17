@@ -183,7 +183,6 @@ public final class TimesSquaredJob {
 
   public static Vector retrieveTimesSquaredOutputVector(Configuration conf) throws IOException {
     Path outputPath = FileOutputFormat.getOutputPath(new JobConf(conf));
-    FileSystem fs = FileSystem.get(conf);
     Path outputFile = new Path(outputPath, "part-00000");
     SequenceFileValueIterator<VectorWritable> iterator =
         new SequenceFileValueIterator<VectorWritable>(outputFile, true, conf);

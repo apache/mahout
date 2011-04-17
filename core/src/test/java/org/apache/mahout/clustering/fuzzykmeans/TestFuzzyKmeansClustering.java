@@ -520,7 +520,7 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
         String clusterId = key.getIdentifier();
         List<SoftCluster> values = reducerWriter.getValue(new Text(clusterId));
         SoftCluster cluster = values.get(0);
-        System.out.println("ref= " + key.toString() + " cluster= " + cluster.toString());
+        System.out.println("ref= " + key.toString() + " cluster= " + cluster);
         cluster.computeParameters();
         assertEquals("key center: " + AbstractCluster.formatVector(key.getCenter(), null) + " does not equal cluster: "
             + AbstractCluster.formatVector(cluster.getCenter(), null), key.getCenter(), cluster.getCenter());

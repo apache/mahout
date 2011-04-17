@@ -149,39 +149,39 @@ public final class EigencutsAffinityCutsJob {
       }
       
       // do we zero out the values?
-      VertexWritable out_i = new VertexWritable();
-      VertexWritable out_j = new VertexWritable();
+      VertexWritable outI = new VertexWritable();
+      VertexWritable outJ = new VertexWritable();
       if (zero) {
         // increment the cut counter
         context.getCounter(CUTSCOUNTER.NUM_CUTS).increment(1);
         
         // we want the values to exist on the diagonal
-        out_i.setCol(i);
-        out_j.setCol(j);
+        outI.setCol(i);
+        outJ.setCol(j);
         
         // also, set the old values to zero
-        VertexWritable zero_i = new VertexWritable();
-        VertexWritable zero_j = new VertexWritable();
-        zero_i.setCol(j);
-        zero_i.setValue(0);
-        zero_j.setCol(i);
-        zero_j.setValue(0);
-        zero_i.setType("unimportant");
-        zero_j.setType("unimportant");
-        context.write(new Text(String.valueOf(i)), zero_i);
-        context.write(new Text(String.valueOf(j)), zero_j);
+        VertexWritable zeroI = new VertexWritable();
+        VertexWritable zeroJ = new VertexWritable();
+        zeroI.setCol(j);
+        zeroI.setValue(0);
+        zeroJ.setCol(i);
+        zeroJ.setValue(0);
+        zeroI.setType("unimportant");
+        zeroJ.setType("unimportant");
+        context.write(new Text(String.valueOf(i)), zeroI);
+        context.write(new Text(String.valueOf(j)), zeroJ);
       } else {
-        out_i.setCol(j);
-        out_j.setCol(i);
+        outI.setCol(j);
+        outJ.setCol(i);
       }
       
       // set the values and write them
-      out_i.setValue(k);
-      out_j.setValue(k);
-      out_i.setType("unimportant");
-      out_j.setType("unimportant");
-      context.write(new Text(String.valueOf(i)), out_i);
-      context.write(new Text(String.valueOf(j)), out_j);
+      outI.setValue(k);
+      outJ.setValue(k);
+      outI.setType("unimportant");
+      outJ.setType("unimportant");
+      context.write(new Text(String.valueOf(i)), outI);
+      context.write(new Text(String.valueOf(j)), outJ);
     }
   }
   

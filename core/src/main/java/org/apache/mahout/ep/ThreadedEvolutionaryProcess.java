@@ -128,7 +128,8 @@ public class ThreadedEvolutionaryProcess {
   
   @Override
   public String toString() {
-    return String.format(Locale.ENGLISH, "Launched %d function evaluations\nMaximum threading width was %d", processCount, maxTask);
+    return String.format(Locale.ENGLISH,
+                         "Launched %d function evaluations\nMaximum threading width was %d", processCount, maxTask);
   }
 
   public class EvalTask implements Callable<State<?, ?>> {

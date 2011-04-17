@@ -257,8 +257,10 @@ public class EigenVerificationJob extends AbstractJob {
       for (MatrixSlice slice : eigens) {
         eigenVectors.add(slice.vector());
       }
-      eigensToVerify = new SparseRowMatrix(new int[] { eigenVectors.size(), eigenVectors.get(0).size() }, eigenVectors
-          .toArray(new Vector[eigenVectors.size()]), true, true);
+      eigensToVerify = new SparseRowMatrix(new int[] {eigenVectors.size(), eigenVectors.get(0).size()},
+                                           eigenVectors.toArray(new Vector[eigenVectors.size()]),
+                                           true,
+                                           true);
 
     } else {
       eigensToVerify = eigens;

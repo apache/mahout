@@ -298,7 +298,8 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
 
   public void copyFrom(AbstractOnlineLogisticRegression other) {
     // number of categories we are classifying.  This should the number of rows of beta plus one.
-    Preconditions.checkArgument(numCategories == other.numCategories, "Can't copy unless number of target categories is the same");
+    Preconditions.checkArgument(numCategories == other.numCategories,
+                                "Can't copy unless number of target categories is the same");
 
     beta.assign(other.beta);
 

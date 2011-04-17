@@ -52,8 +52,8 @@ abstract class AbstractJDBCInMemoryItemSimilarity extends AbstractJDBCComponent 
     AbstractJDBCComponent.checkNotNullAndLog("getAllItemSimilaritiesSQL", getAllItemSimilaritiesSQL);
 
     if (!(dataSource instanceof ConnectionPoolDataSource)) {
-      log.warn("You are not using ConnectionPoolDataSource. Make sure your DataSource pools connections " +
-          "to the database itself, or database performance will be severely reduced.");
+      log.warn("You are not using ConnectionPoolDataSource. Make sure your DataSource pools connections "
+               + "to the database itself, or database performance will be severely reduced.");
     }
 
     this.dataSource = dataSource;
@@ -87,27 +87,37 @@ abstract class AbstractJDBCInMemoryItemSimilarity extends AbstractJDBCComponent 
   protected void reload() {
     if (reloadLock.tryLock()) {
       try {
-        delegate = new GenericItemSimilarity(new JDBCSimilaritiesIterable());
+        delegate = new GenericItemSimilarity(new JDBCSimilaritiesIterable(dataSource, getAllItemSimilaritiesSQL));
       } finally {
         reloadLock.unlock();
       }
     }
   }
 
-  private class JDBCSimilaritiesIterable implements Iterable<GenericItemSimilarity.ItemItemSimilarity> {
+  private static class JDBCSimilaritiesIterable implements Iterable<GenericItemSimilarity.ItemItemSimilarity> {
+
+    private final DataSource dataSource;
+    private final String getAllItemSimilaritiesSQL;
+
+    private JDBCSimilaritiesIterable(DataSource dataSource, String getAllItemSimilaritiesSQL) {
+      this.dataSource = dataSource;
+      this.getAllItemSimilaritiesSQL = getAllItemSimilaritiesSQL;
+    }
+
     @Override
     public Iterator<GenericItemSimilarity.ItemItemSimilarity> iterator() {
       try {
-        return new JDBCSimilaritiesIterator();
+        return new JDBCSimilaritiesIterator(dataSource, getAllItemSimilaritiesSQL);
       } catch (SQLException sqle) {
         throw new IllegalStateException(sqle);
       }
     }
   }
 
-  private class JDBCSimilaritiesIterator extends ResultSetIterator<GenericItemSimilarity.ItemItemSimilarity> {
+  private static final class JDBCSimilaritiesIterator
+      extends ResultSetIterator<GenericItemSimilarity.ItemItemSimilarity> {
 
-    private JDBCSimilaritiesIterator() throws SQLException {
+    private JDBCSimilaritiesIterator(DataSource dataSource, String getAllItemSimilaritiesSQL) throws SQLException {
       super(dataSource, getAllItemSimilaritiesSQL);
     }
 

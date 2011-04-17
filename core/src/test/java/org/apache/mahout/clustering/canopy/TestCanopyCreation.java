@@ -397,9 +397,10 @@ public final class TestCanopyCreation extends MahoutTestCase {
         "org.apache.mahout.common.distance.ManhattanDistanceMeasure");
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
-    DummyRecordWriter<IntWritable, WeightedVectorWritable> writer = new DummyRecordWriter<IntWritable, WeightedVectorWritable>();
-    Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable>.Context context = DummyRecordWriter
-        .build(mapper, conf, writer);
+    DummyRecordWriter<IntWritable, WeightedVectorWritable> writer =
+        new DummyRecordWriter<IntWritable, WeightedVectorWritable>();
+    Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable>.Context context =
+        DummyRecordWriter.build(mapper, conf, writer);
     mapper.setup(context);
 
     Collection<Canopy> canopies = new ArrayList<Canopy>();
@@ -645,7 +646,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     Reducer<Text, VectorWritable, Text, Canopy>.Context context = DummyRecordWriter
         .build(reducer, conf, writer, Text.class, VectorWritable.class);
     reducer.setup(context);
-    assertEquals(1.1, reducer.canopyClusterer.t1, EPSILON);
-    assertEquals(0.1, reducer.canopyClusterer.t2, EPSILON);
+    assertEquals(1.1, reducer.canopyClusterer.getT1(), EPSILON);
+    assertEquals(0.1, reducer.canopyClusterer.getT2(), EPSILON);
   }
 }

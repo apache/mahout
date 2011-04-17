@@ -31,10 +31,10 @@ final class MockContext extends Context {
 
   private final TreeID[] keys;
   private final MapredOutput[] values;
-  private int index ;
+  private int index;
 
-  MockContext(Mapper<?,?,?,?> mapper, Configuration conf, TaskAttemptID taskid,
-      int nbTrees) throws IOException, InterruptedException {
+  MockContext(Mapper<?,?,?,?> mapper, Configuration conf, TaskAttemptID taskid, int nbTrees)
+    throws IOException, InterruptedException {
     mapper.super(conf, taskid, null, null, null, null, null);
 
     keys = new TreeID[nbTrees];

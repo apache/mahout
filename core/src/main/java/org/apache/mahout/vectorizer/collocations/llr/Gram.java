@@ -139,7 +139,7 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
     try {
       return Text.decode(bytes, 1, length - 1);
     } catch (CharacterCodingException e) {
-      throw new IllegalStateException("Should not have happened " + e.toString()); 
+      throw new IllegalStateException("Should not have happened " + e);
     }
   }
 

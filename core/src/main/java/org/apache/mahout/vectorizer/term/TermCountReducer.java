@@ -32,7 +32,8 @@ public class TermCountReducer extends Reducer<Text, LongWritable, Text, LongWrit
   private int minSupport;
 
   @Override
-  protected void reduce(Text key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException {
+  protected void reduce(Text key, Iterable<LongWritable> values, Context context)
+    throws IOException, InterruptedException {
     long sum = 0;
     for (LongWritable value : values) {
       sum += value.get();
@@ -45,7 +46,8 @@ public class TermCountReducer extends Reducer<Text, LongWritable, Text, LongWrit
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    minSupport = context.getConfiguration().getInt(DictionaryVectorizer.MIN_SUPPORT, DictionaryVectorizer.DEFAULT_MIN_SUPPORT);
+    minSupport = context.getConfiguration().getInt(DictionaryVectorizer.MIN_SUPPORT,
+                                                   DictionaryVectorizer.DEFAULT_MIN_SUPPORT);
   }
 
 }

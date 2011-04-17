@@ -236,7 +236,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     FileOutputFormat.setOutputPath(job, output);
 
     if (!job.waitForCompletion(true)) {
-      throw new InterruptedException("Mean Shift createCanopyFromVectorsMR failed on input " + input.toString());
+      throw new InterruptedException("Mean Shift createCanopyFromVectorsMR failed on input " + input);
     }
   }
 
@@ -291,9 +291,11 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     List<MeanShiftCanopy> clusters = new ArrayList<MeanShiftCanopy>();
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(clustersIn.toUri(), conf);
-    for (MeanShiftCanopy value :
-         new SequenceFileDirValueIterable<MeanShiftCanopy>(
-             clustersIn, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+    for (MeanShiftCanopy value
+         : new SequenceFileDirValueIterable<MeanShiftCanopy>(clustersIn,
+                                                             PathType.LIST,
+                                                             PathFilters.logsCRCFilter(),
+                                                             conf)) {
       clusterer.mergeCanopy(value, clusters);
     }
     boolean[] converged = {false};
@@ -407,7 +409,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setJarByClass(MeanShiftCanopyDriver.class);
     if (!job.waitForCompletion(true)) {
-      throw new InterruptedException("Mean Shift Iteration failed on input " + input.toString());
+      throw new InterruptedException("Mean Shift Iteration failed on input " + input);
     }
   }
 
@@ -436,8 +438,11 @@ public class MeanShiftCanopyDriver extends AbstractJob {
   private static void clusterDataSeq(Path input, Path clustersIn, Path output) throws IOException {
     Collection<MeanShiftCanopy> clusters = new ArrayList<MeanShiftCanopy>();
     Configuration conf = new Configuration();
-    for (MeanShiftCanopy value :
-         new SequenceFileDirValueIterable<MeanShiftCanopy>(clustersIn, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+    for (MeanShiftCanopy value
+         : new SequenceFileDirValueIterable<MeanShiftCanopy>(clustersIn,
+                                                             PathType.LIST,
+                                                             PathFilters.logsCRCFilter(),
+                                                             conf)) {
       clusters.add(value);
     }
     // iterate over all points, assigning each to the closest canopy and outputting that clustering
@@ -451,8 +456,8 @@ public class MeanShiftCanopyDriver extends AbstractJob {
                                                            IntWritable.class,
                                                            WeightedVectorWritable.class);
       try {
-        for (Pair<Writable,MeanShiftCanopy> record :
-             new SequenceFileIterable<Writable,MeanShiftCanopy>(s.getPath(), conf)) {
+        for (Pair<Writable,MeanShiftCanopy> record
+             : new SequenceFileIterable<Writable,MeanShiftCanopy>(s.getPath(), conf)) {
           MeanShiftCanopy canopy = record.getSecond();
           MeanShiftCanopy closest = MeanShiftCanopyClusterer.findCoveringCanopy(canopy, clusters);
           writer.append(new IntWritable(closest.getId()), new WeightedVectorWritable(1, canopy.getCenter()));
@@ -484,7 +489,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     FileOutputFormat.setOutputPath(job, output);
 
     if (!job.waitForCompletion(true)) {
-      throw new InterruptedException("Mean Shift Clustering failed on clustersIn " + clustersIn.toString());
+      throw new InterruptedException("Mean Shift Clustering failed on clustersIn " + clustersIn);
     }
   }
 }

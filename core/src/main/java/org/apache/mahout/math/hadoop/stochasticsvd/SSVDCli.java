@@ -35,8 +35,6 @@ import org.apache.mahout.math.VectorWritable;
 
 /**
  * Mahout CLI adapter for SSVDSolver
- * 
- * 
  */
 public class SSVDCli extends AbstractJob {
 
@@ -82,8 +80,7 @@ public class SSVDCli extends AbstractJob {
       throw new IOException("No Hadoop configuration present");
     }
 
-    SSVDSolver solver = new SSVDSolver(conf, new Path[] { new Path(input) },
-        new Path(tempDir), r, k, p, reduceTasks);
+    SSVDSolver solver = new SSVDSolver(conf, new Path[] {new Path(input)}, new Path(tempDir), r, k, p, reduceTasks);
     solver.setMinSplitSize(minSplitSize);
     solver.setComputeU(computeU);
     solver.setComputeV(computeV);
@@ -99,8 +96,8 @@ public class SSVDCli extends AbstractJob {
     Path outPath = new Path(output);
     fs.mkdirs(outPath);
 
-    SequenceFile.Writer sigmaW = SequenceFile.createWriter(fs, conf, new Path(
-        outPath, "sigma"), NullWritable.class, VectorWritable.class);
+    SequenceFile.Writer sigmaW =
+        SequenceFile.createWriter(fs, conf, new Path(outPath, "sigma"), NullWritable.class, VectorWritable.class);
     try {
       Writable sValues = new VectorWritable(new DenseVector(
           Arrays.copyOf(solver.getSingularValues(), k), true));

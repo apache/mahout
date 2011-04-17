@@ -115,8 +115,8 @@ public class TFIDFPartialVectorReducer extends
 
     Path dictionaryFile = new Path(localFiles[0].getPath());
     // key is feature, value is the document frequency
-    for (Pair<IntWritable,LongWritable> record :
-         new SequenceFileIterable<IntWritable,LongWritable>(dictionaryFile, true, conf)) {
+    for (Pair<IntWritable,LongWritable> record 
+         : new SequenceFileIterable<IntWritable,LongWritable>(dictionaryFile, true, conf)) {
       dictionary.put(record.getFirst().get(), record.getSecond().get());
     }
   }

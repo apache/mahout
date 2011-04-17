@@ -72,8 +72,8 @@ public final class WeightedRunningAverageAndStdDev extends WeightedRunningAverag
   @Override
   public synchronized double getStandardDeviation() {
     double totalWeight = getTotalWeight();
-    return Math.sqrt((totalWeightedSquaredData * totalWeight - totalWeightedData * totalWeightedData) /
-        (totalWeight * totalWeight - totalSquaredWeight));
+    return Math.sqrt((totalWeightedSquaredData * totalWeight - totalWeightedData * totalWeightedData)
+                         / (totalWeight * totalWeight - totalSquaredWeight));
   }
   
   @Override

@@ -48,7 +48,7 @@ public class ContextWriteOutputCollector<IK extends Writable,IV extends Writable
   @Override
   public final void collect(K key, V value) throws IOException {
     try {
-      context.setStatus("Writing Top K patterns for: " + key.toString());
+      context.setStatus("Writing Top K patterns for: " + key);
       context.write(key, value);
     } catch (InterruptedException e) {
       log.error("{}", e);

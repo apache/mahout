@@ -17,9 +17,6 @@
 
 package org.apache.mahout.cf.taste.impl.common.jdbc;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;

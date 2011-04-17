@@ -104,7 +104,7 @@ public class KMeansDriver extends AbstractJob {
     boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
     boolean runSequential = getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(
         DefaultOptionCreator.SEQUENTIAL_METHOD);
-    if(getConf() == null) {
+    if (getConf() == null) {
       setConf(new Configuration());
     }
     run(getConf(), input, clusters, output, measure, convergenceDelta, maxIterations, runClustering, runSequential);
@@ -144,10 +144,10 @@ public class KMeansDriver extends AbstractJob {
     // iterate until the clusters converge
     String delta = Double.toString(convergenceDelta);
     if (log.isInfoEnabled()) {
-      log.info("Input: {} Clusters In: {} Out: {} Distance: {}", new Object[] { input, clustersIn, output,
-          measure.getClass().getName() });
+      log.info("Input: {} Clusters In: {} Out: {} Distance: {}",
+               new Object[] {input, clustersIn, output,measure.getClass().getName()});
       log.info("convergence: {} max Iterations: {} num Reduce Tasks: {} Input Vectors: {}",
-          new Object[] { convergenceDelta, maxIterations, VectorWritable.class.getName() });
+               new Object[] {convergenceDelta, maxIterations, VectorWritable.class.getName()});
     }
     Path clustersOut = buildClusters(conf, input, clustersIn, output, measure, maxIterations, delta, runSequential);
     if (runClustering) {
@@ -259,9 +259,11 @@ public class KMeansDriver extends AbstractJob {
     while (!converged && iteration <= maxIterations) {
       log.info("K-Means Iteration: " + iteration);
       FileSystem fs = FileSystem.get(input.toUri(), conf);
-      for (VectorWritable value :
-           new SequenceFileDirValueIterable<VectorWritable>(
-               input, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+      for (VectorWritable value
+           : new SequenceFileDirValueIterable<VectorWritable>(input,
+                                                              PathType.LIST,
+                                                              PathFilters.logsCRCFilter(),
+                                                              conf)) {
         clusterer.addPointToNearestCluster(value.get(), clusters);
       }
       converged = clusterer.testConvergence(clusters, Double.parseDouble(delta));
@@ -273,9 +275,13 @@ public class KMeansDriver extends AbstractJob {
                                                            Cluster.class);
       try {
         for (Cluster cluster : clusters) {
-          log.debug("Writing Cluster:{} center:{} numPoints:{} radius:{} to: {}", new Object[] { cluster.getId(),
-              AbstractCluster.formatVector(cluster.getCenter(), null), cluster.getNumPoints(),
-              AbstractCluster.formatVector(cluster.getRadius(), null), clustersOut.getName() });
+          log.debug("Writing Cluster:{} center:{} numPoints:{} radius:{} to: {}",
+                    new Object[] {
+                        cluster.getId(),
+                        AbstractCluster.formatVector(cluster.getCenter(), null),
+                        cluster.getNumPoints(),
+                        AbstractCluster.formatVector(cluster.getRadius(), null), clustersOut.getName()
+                    });
           writer.append(new Text(cluster.getIdentifier()), cluster);
         }
       } finally {
@@ -354,7 +360,7 @@ public class KMeansDriver extends AbstractJob {
     job.setJarByClass(KMeansDriver.class);
     HadoopUtil.delete(conf, clustersOut);
     if (!job.waitForCompletion(true)) {
-      throw new InterruptedException("K-Means Iteration failed processing " + clustersIn.toString());
+      throw new InterruptedException("K-Means Iteration failed processing " + clustersIn);
     }
     FileSystem fs = FileSystem.get(clustersOut.toUri(), conf);
 
@@ -409,7 +415,7 @@ public class KMeansDriver extends AbstractJob {
 
     if (log.isInfoEnabled()) {
       log.info("Running Clustering");
-      log.info("Input: {} Clusters In: {} Out: {} Distance: {}", new Object[] { input, clustersIn, output, measure });
+      log.info("Input: {} Clusters In: {} Out: {} Distance: {}", new Object[] {input, clustersIn, output, measure});
       log.info("convergence: {} Input Vectors: {}", convergenceDelta, VectorWritable.class.getName());
     }
     if (runSequential) {
@@ -478,7 +484,7 @@ public class KMeansDriver extends AbstractJob {
     job.setJarByClass(KMeansDriver.class);
 
     if (!job.waitForCompletion(true)) {
-      throw new InterruptedException("K-Means Clustering failed processing " + clustersIn.toString());
+      throw new InterruptedException("K-Means Clustering failed processing " + clustersIn);
     }
   }
 }

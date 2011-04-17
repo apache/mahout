@@ -140,8 +140,8 @@ public class NaiveBayesModel {
     int featureCount = 0;
     int labelCount = 0;
     // read feature sums and label sums
-    for (Pair<Text,VectorWritable> record :
-         new SequenceFileIterable<Text, VectorWritable>(sumVectorPath, true, conf)) {
+    for (Pair<Text,VectorWritable> record
+         : new SequenceFileIterable<Text, VectorWritable>(sumVectorPath, true, conf)) {
       Text key = record.getFirst();
       VectorWritable value = record.getSecond();
       if (key.toString().equals(BayesConstants.FEATURE_SUM)) {
@@ -157,8 +157,8 @@ public class NaiveBayesModel {
 
     // read the class matrix
     Matrix matrix = new SparseMatrix(new int[] {labelCount, featureCount});
-    for (Pair<IntWritable,VectorWritable> record :
-         new SequenceFileIterable<IntWritable,VectorWritable>(classVectorPath, true, conf)) {
+    for (Pair<IntWritable,VectorWritable> record
+         : new SequenceFileIterable<IntWritable,VectorWritable>(classVectorPath, true, conf)) {
       IntWritable label = record.getFirst();
       VectorWritable value = record.getSecond();
       matrix.assignRow(label.get(), value.get());
@@ -167,8 +167,8 @@ public class NaiveBayesModel {
     model.setWeightMatrix(matrix);
 
     // read theta normalizer
-    for (Pair<Text,VectorWritable> record :
-         new SequenceFileIterable<Text,VectorWritable>(thetaSumPath, true, conf)) {
+    for (Pair<Text,VectorWritable> record
+         : new SequenceFileIterable<Text,VectorWritable>(thetaSumPath, true, conf)) {
       Text key = record.getFirst();
       VectorWritable value = record.getSecond();
       if (key.toString().equals(BayesConstants.LABEL_THETA_NORMALIZER)) {

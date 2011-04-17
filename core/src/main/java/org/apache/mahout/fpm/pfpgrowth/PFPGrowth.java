@@ -131,8 +131,8 @@ public final class PFPGrowth {
 
     Path parallelCountingPath = new Path(params.get(OUTPUT), PARALLEL_COUNTING);
     Path filesPattern = new Path(parallelCountingPath, FILE_PATTERN);
-    for (Pair<Writable,LongWritable> record :
-         new SequenceFileDirIterable<Writable,LongWritable>(filesPattern, PathType.GLOB, null, null, true, conf)) {
+    for (Pair<Writable,LongWritable> record
+         : new SequenceFileDirIterable<Writable,LongWritable>(filesPattern, PathType.GLOB, null, null, true, conf)) {
       long value = record.getSecond().get();
       if (value >= minSupport) {
         queue.add(new Pair<String,Long>(record.getFirst().toString(), value));
@@ -171,9 +171,8 @@ public final class PFPGrowth {
    *          params should contain input and output locations as a string value, the additional parameters
    *          include minSupport(3), maxHeapSize(50), numGroups(1000)
    */
-  public static void runPFPGrowth(Parameters params) throws IOException,
-                                                    InterruptedException,
-                                                    ClassNotFoundException {
+  public static void runPFPGrowth(Parameters params)
+    throws IOException, InterruptedException, ClassNotFoundException {
     startParallelCounting(params);
     startGroupingItems(params);
     startTransactionSorting(params);
@@ -185,9 +184,8 @@ public final class PFPGrowth {
    * Run the aggregation Job to aggregate the different TopK patterns and group each Pattern by the features
    * present in it and thus calculate the final Top K frequent Patterns for each feature
    */
-  public static void startAggregating(Parameters params) throws IOException,
-                                                        InterruptedException,
-                                                        ClassNotFoundException {
+  public static void startAggregating(Parameters params)
+    throws IOException, InterruptedException, ClassNotFoundException {
     
     Configuration conf = new Configuration();
     params.set(F_LIST, "");
@@ -256,9 +254,8 @@ public final class PFPGrowth {
   /**
    * Count the frequencies of various features in parallel using Map/Reduce
    */
-  public static void startParallelCounting(Parameters params) throws IOException,
-                                                             InterruptedException,
-                                                             ClassNotFoundException {
+  public static void startParallelCounting(Parameters params)
+    throws IOException, InterruptedException, ClassNotFoundException {
     
     Configuration conf = new Configuration();
     conf.set(PFP_PARAMETERS, params.toString());
@@ -292,9 +289,8 @@ public final class PFPGrowth {
   /**
    * Run the Parallel FPGrowth Map/Reduce Job to calculate the Top K features of group dependent shards
    */
-  public static void startTransactionSorting(Parameters params) throws IOException,
-                                                               InterruptedException,
-                                                               ClassNotFoundException {
+  public static void startTransactionSorting(Parameters params)
+    throws IOException, InterruptedException, ClassNotFoundException {
     
     Configuration conf = new Configuration();
     String gList = params.get(G_LIST);
@@ -330,9 +326,8 @@ public final class PFPGrowth {
   /**
    * Run the Parallel FPGrowth Map/Reduce Job to calculate the Top K features of group dependent shards
    */
-  public static void startParallelFPGrowth(Parameters params) throws IOException,
-                                                             InterruptedException,
-                                                             ClassNotFoundException {
+  public static void startParallelFPGrowth(Parameters params)
+    throws IOException, InterruptedException, ClassNotFoundException {
     
     Configuration conf = new Configuration();
     conf.set(PFP_PARAMETERS, params.toString());

@@ -232,5 +232,5 @@ public final class AbstractJobTest extends MahoutTestCase {
         testInputPath, job.getInputPath().toString());
     assertEquals("output command-line option precedes property",
         testOutputPath, job.getOutputPath().toString());
-	}
+  }
 }

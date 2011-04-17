@@ -129,8 +129,7 @@ public class PredictionJob extends AbstractJob {
   public static class FeaturesMapper
       extends Mapper<IntWritable,VectorWritable,TaggedVarIntWritable,VectorWithIndexWritable> {
     @Override
-    protected void map(IntWritable id, VectorWritable features, Context ctx)
-        throws IOException, InterruptedException {
+    protected void map(IntWritable id, VectorWritable features, Context ctx) throws IOException, InterruptedException {
       ctx.write(new TaggedVarIntWritable(id.get(), true), new VectorWithIndexWritable(features.get()));
     }
   }
@@ -139,7 +138,7 @@ public class PredictionJob extends AbstractJob {
       extends Reducer<TaggedVarIntWritable,VectorWithIndexWritable,TaggedVarIntWritable,VectorWithIndexWritable> {
     @Override
     protected void reduce(TaggedVarIntWritable key, Iterable<VectorWithIndexWritable> values, Context ctx)
-        throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
       int itemIDIndex = key.get();
       Vector itemFeatures = null;
       for (VectorWithIndexWritable vectorWithIndexWritable : values) {
@@ -161,7 +160,7 @@ public class PredictionJob extends AbstractJob {
       extends Reducer<TaggedVarIntWritable,VectorWithIndexWritable,Text,NullWritable> {
     @Override
     protected void reduce(TaggedVarIntWritable key, Iterable<VectorWithIndexWritable> values, Context ctx)
-        throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
       Vector userFeatures = null;
       int userIDIndex = key.get();
       for (VectorWithIndexWritable vectorWithIndexWritable : values) {
@@ -174,7 +173,7 @@ public class PredictionJob extends AbstractJob {
           int itemIDIndex = vectorWithIndexWritable.getIDIndex();
           Vector itemFeatures = vectorWithIndexWritable.getVector();
           double estimatedPrediction = userFeatures.dot(itemFeatures);
-          ctx.write(new Text(userIDIndex + "," + itemIDIndex + "," + estimatedPrediction), NullWritable.get());
+          ctx.write(new Text(userIDIndex + "," + itemIDIndex + ',' + estimatedPrediction), NullWritable.get());
         }
       }
     }

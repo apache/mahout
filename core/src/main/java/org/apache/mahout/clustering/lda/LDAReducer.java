@@ -38,7 +38,8 @@ public class LDAReducer extends Reducer<IntPairWritable,DoubleWritable,IntPairWr
       double accum = 0.0;
       for (DoubleWritable vw : values) {
         double v = vw.get();
-        Preconditions.checkArgument(!Double.isNaN(v), "Found NaN for topic=(%d,%d)", topicWord.getFirst(), topicWord.getSecond());
+        Preconditions.checkArgument(!Double.isNaN(v),
+                                    "Found NaN for topic=(%d,%d)", topicWord.getFirst(), topicWord.getSecond());
         accum += v;
       }
       context.write(topicWord, new DoubleWritable(accum));
@@ -46,9 +47,11 @@ public class LDAReducer extends Reducer<IntPairWritable,DoubleWritable,IntPairWr
       double accum = Double.NEGATIVE_INFINITY;
       for (DoubleWritable vw : values) {
         double v = vw.get();
-        Preconditions.checkArgument(!Double.isNaN(v), "Found NaN for topic = (%d,%d)", topicWord.getFirst(), topicWord.getSecond());
+        Preconditions.checkArgument(!Double.isNaN(v),
+                                    "Found NaN for topic = (%d,%d)", topicWord.getFirst(), topicWord.getSecond());
         accum = LDAUtil.logSum(accum, v);
-        Preconditions.checkArgument(!Double.isNaN(accum), "Accumulated NaN for topic = (%d,%d)", topicWord.getFirst(), topicWord.getSecond());
+        Preconditions.checkArgument(!Double.isNaN(accum),
+                                    "Accumulated NaN for topic = (%d,%d)", topicWord.getFirst(), topicWord.getSecond());
       }
       context.write(topicWord, new DoubleWritable(accum));
     }

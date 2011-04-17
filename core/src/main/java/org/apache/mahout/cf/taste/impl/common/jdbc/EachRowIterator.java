@@ -23,7 +23,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Iterator;
 
 import com.google.common.collect.AbstractIterator;
 import org.apache.mahout.common.IOUtils;
@@ -31,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Provides an {@link Iterator} over the result of an SQL query, as an iteration over the {@link ResultSet}.
+ * Provides an {@link java.util.Iterator} over the result of an SQL query, as an iteration over the {@link ResultSet}.
  * While the same object will be returned from the iteration each time, it will be returned once for each row
  * of the result.
  */

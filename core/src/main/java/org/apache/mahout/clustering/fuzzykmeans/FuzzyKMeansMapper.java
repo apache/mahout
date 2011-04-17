@@ -40,7 +40,8 @@ public class FuzzyKMeansMapper extends Mapper<WritableComparable<?>,VectorWritab
   private FuzzyKMeansClusterer clusterer;
 
   @Override
-  protected void map(WritableComparable<?> key, VectorWritable point, Context context) throws IOException, InterruptedException {
+  protected void map(WritableComparable<?> key, VectorWritable point, Context context)
+    throws IOException, InterruptedException {
     clusterer.emitPointProbToCluster(point.get(), clusters, context);
   }
 

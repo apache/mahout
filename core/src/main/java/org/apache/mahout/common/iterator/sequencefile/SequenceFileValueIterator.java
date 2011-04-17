@@ -19,7 +19,6 @@ package org.apache.mahout.common.iterator.sequencefile;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Iterator;
 
 import com.google.common.collect.AbstractIterator;
 import org.apache.hadoop.conf.Configuration;
@@ -31,7 +30,7 @@ import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.mahout.common.IOUtils;
 
 /**
- * <p>{@link Iterator} over a {@link SequenceFile}'s values only.</p>
+ * <p>{@link java.util.Iterator} over a {@link SequenceFile}'s values only.</p>
  */
 public final class SequenceFileValueIterator<V extends Writable> extends AbstractIterator<V> implements Closeable {
 

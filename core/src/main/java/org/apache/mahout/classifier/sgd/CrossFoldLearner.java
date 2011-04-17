@@ -218,7 +218,8 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
     r.models.clear();
     for (OnlineLogisticRegression model : models) {
       model.close();
-      OnlineLogisticRegression newModel = new OnlineLogisticRegression(model.numCategories(), model.numFeatures(), model.prior);
+      OnlineLogisticRegression newModel =
+          new OnlineLogisticRegression(model.numCategories(), model.numFeatures(), model.prior);
       newModel.copyFrom(model);
       r.models.add(newModel);
     }
