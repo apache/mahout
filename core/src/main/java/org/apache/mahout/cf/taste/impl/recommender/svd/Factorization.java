@@ -17,6 +17,10 @@
 
 package org.apache.mahout.cf.taste.impl.recommender.svd;
 
+import java.util.Arrays;
+import java.util.Map;
+
+import com.google.common.base.Preconditions;
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
@@ -38,8 +42,8 @@ public class Factorization {
 
   public Factorization(FastByIDMap<Integer> userIDMapping, FastByIDMap<Integer> itemIDMapping, double[][] userFeatures,
       double[][] itemFeatures) {
-    this.userIDMapping = userIDMapping;
-    this.itemIDMapping = itemIDMapping;
+    this.userIDMapping = Preconditions.checkNotNull(userIDMapping);
+    this.itemIDMapping = Preconditions.checkNotNull(itemIDMapping);
     this.userFeatures = userFeatures;
     this.itemFeatures = itemFeatures;
   }
@@ -60,4 +64,41 @@ public class Factorization {
     return itemFeatures[index];
   }
 
+  public Iterable<Map.Entry<Long,Integer>> getUserIDMappings() {
+    return userIDMapping.entrySet();
+  }
+
+  public Iterable<Map.Entry<Long,Integer>> getItemIDMappings() {
+    return itemIDMapping.entrySet();
+  }
+
+  public int numFeatures() {
+    return userFeatures[0].length;
+  }
+
+  public int numUsers() {
+    return userIDMapping.size();
+  }
+
+  public int numItems() {
+    return itemIDMapping.size();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o instanceof Factorization) {
+      Factorization other = (Factorization) o;
+      return userIDMapping.equals(other.userIDMapping) && itemIDMapping.equals(other.itemIDMapping) &&
+          Arrays.deepEquals(userFeatures, other.userFeatures) && Arrays.deepEquals(itemFeatures, other.itemFeatures);
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    int hashCode = 31 * userIDMapping.hashCode() + itemIDMapping.hashCode();
+    hashCode = 31 * hashCode + Arrays.deepHashCode(userFeatures);
+    hashCode = 31 * hashCode + Arrays.deepHashCode(itemFeatures);
+    return hashCode;
+  }
 }
