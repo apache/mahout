@@ -114,7 +114,7 @@ public final class TrainLogistic {
       output.printf(Locale.ENGLISH, "%d\n", lmp.getNumFeatures());
       output.printf(Locale.ENGLISH, "%s ~ ", lmp.getTargetVariable());
       String sep = "";
-      for (String v : csv.getPredictors()) {
+      for (String v : csv.getTraceDictionary().keySet()) {
         double weight = predictorWeight(lr, 0, csv, v);
         if (weight != 0) {
           output.printf(Locale.ENGLISH, "%s%.3f*%s", sep, weight, v);
