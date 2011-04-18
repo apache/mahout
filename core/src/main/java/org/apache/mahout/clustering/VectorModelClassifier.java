@@ -31,6 +31,7 @@ import org.apache.mahout.math.function.TimesFunction;
  * This classifier works with any of the clustering Models. It is initialized with 
  * a list of compatible Models and thereafter it can classify any new Vector into
  * one or more of the Models based upon the pdf() function which each Model supports.
+ * @deprecated in favor of ClusterClassifier
  */
 public class VectorModelClassifier extends AbstractVectorClassifier {
 

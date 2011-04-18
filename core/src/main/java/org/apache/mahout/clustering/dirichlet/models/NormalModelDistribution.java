@@ -24,6 +24,7 @@ import org.apache.mahout.math.VectorWritable;
 /**
  * An implementation of the ModelDistribution interface suitable for testing the DirichletCluster algorithm.
  * Uses a Normal Distribution
+ * @deprecated Use GaussianClusterDistribution instead
  */
 public class NormalModelDistribution extends AbstractVectorModelDistribution {
   

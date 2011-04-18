@@ -32,6 +32,10 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.SquareRootFunction;
 
+/**
+ * 
+ *@deprecated use GaussianCluster instead
+ */
 public class NormalModel implements Cluster {
 
   private static final double SQRT2PI = Math.sqrt(2.0 * Math.PI);
@@ -142,7 +146,7 @@ public class NormalModel implements Cluster {
   }
 
   @Override
-  public int count() {
+  public long count() {
     return s0;
   }
 
@@ -197,7 +201,7 @@ public class NormalModel implements Cluster {
   }
 
   @Override
-  public int getNumPoints() {
+  public long getNumPoints() {
     return s0;
   }
 

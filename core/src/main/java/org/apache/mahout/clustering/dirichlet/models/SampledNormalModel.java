@@ -22,6 +22,10 @@ import java.util.Locale;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.math.Vector;
 
+/**
+ * 
+ *@deprecated Use GaussianCluster instead
+ */
 public class SampledNormalModel extends NormalModel {
   
   public SampledNormalModel() {

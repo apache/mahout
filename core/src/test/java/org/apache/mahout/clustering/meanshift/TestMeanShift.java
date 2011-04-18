@@ -293,8 +293,8 @@ public final class TestMeanShift extends MahoutTestCase {
       assertEquals("values", 1, values.size());
       MeanShiftCanopy reducerCanopy = values.get(0);
       assertEquals("ids", refCanopy.getId(), reducerCanopy.getId());
-      int refNumPoints = refCanopy.getNumPoints();
-      int reducerNumPoints = reducerCanopy.getNumPoints();
+      long refNumPoints = refCanopy.getNumPoints();
+      long reducerNumPoints = reducerCanopy.getNumPoints();
       assertEquals("numPoints", refNumPoints, reducerNumPoints);
       String refCenter = refCanopy.getCenter().asFormatString();
       String reducerCenter = reducerCanopy.getCenter().asFormatString();

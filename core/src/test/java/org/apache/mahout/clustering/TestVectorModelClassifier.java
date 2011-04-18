@@ -37,21 +37,25 @@ import org.apache.mahout.math.VectorWritable;
 import org.junit.Test;
 
 public final class TestVectorModelClassifier extends MahoutTestCase {
-
+  
   @Test
   public void testDMClusterClassification() {
     List<Model<VectorWritable>> models = new ArrayList<Model<VectorWritable>>();
     DistanceMeasure measure = new ManhattanDistanceMeasure();
-    models.add(new DistanceMeasureCluster(new DenseVector(2).assign(1), 0, measure));
+    models.add(new DistanceMeasureCluster(new DenseVector(2).assign(1), 0,
+        measure));
     models.add(new DistanceMeasureCluster(new DenseVector(2), 1, measure));
-    models.add(new DistanceMeasureCluster(new DenseVector(2).assign(-1), 2, measure));
+    models.add(new DistanceMeasureCluster(new DenseVector(2).assign(-1), 2,
+        measure));
     AbstractVectorClassifier classifier = new VectorModelClassifier(models);
     Vector pdf = classifier.classify(new DenseVector(2));
-    assertEquals("[0,0]", "[0.107, 0.787, 0.107]", AbstractCluster.formatVector(pdf, null));
+    assertEquals("[0,0]", "[0.107, 0.787, 0.107]",
+        AbstractCluster.formatVector(pdf, null));
     pdf = classifier.classify(new DenseVector(2).assign(2));
-    assertEquals("[2,2]", "[0.867, 0.117, 0.016]", AbstractCluster.formatVector(pdf, null));
+    assertEquals("[2,2]", "[0.867, 0.117, 0.016]",
+        AbstractCluster.formatVector(pdf, null));
   }
-
+  
   @Test
   public void testCanopyClassification() {
     List<Model<VectorWritable>> models = new ArrayList<Model<VectorWritable>>();
@@ -61,11 +65,13 @@ public final class TestVectorModelClassifier extends MahoutTestCase {
     models.add(new Canopy(new DenseVector(2).assign(-1), 2, measure));
     AbstractVectorClassifier classifier = new VectorModelClassifier(models);
     Vector pdf = classifier.classify(new DenseVector(2));
-    assertEquals("[0,0]", "[0.107, 0.787, 0.107]", AbstractCluster.formatVector(pdf, null));
+    assertEquals("[0,0]", "[0.107, 0.787, 0.107]",
+        AbstractCluster.formatVector(pdf, null));
     pdf = classifier.classify(new DenseVector(2).assign(2));
-    assertEquals("[2,2]", "[0.867, 0.117, 0.016]", AbstractCluster.formatVector(pdf, null));
+    assertEquals("[2,2]", "[0.867, 0.117, 0.016]",
+        AbstractCluster.formatVector(pdf, null));
   }
-
+  
   @Test
   public void testClusterClassification() {
     List<Model<VectorWritable>> models = new ArrayList<Model<VectorWritable>>();
@@ -75,11 +81,13 @@ public final class TestVectorModelClassifier extends MahoutTestCase {
     models.add(new Cluster(new DenseVector(2).assign(-1), 2, measure));
     AbstractVectorClassifier classifier = new VectorModelClassifier(models);
     Vector pdf = classifier.classify(new DenseVector(2));
-    assertEquals("[0,0]", "[0.107, 0.787, 0.107]", AbstractCluster.formatVector(pdf, null));
+    assertEquals("[0,0]", "[0.107, 0.787, 0.107]",
+        AbstractCluster.formatVector(pdf, null));
     pdf = classifier.classify(new DenseVector(2).assign(2));
-    assertEquals("[2,2]", "[0.867, 0.117, 0.016]", AbstractCluster.formatVector(pdf, null));
+    assertEquals("[2,2]", "[0.867, 0.117, 0.016]",
+        AbstractCluster.formatVector(pdf, null));
   }
-
+  
   @Test
   public void testMSCanopyClassification() {
     List<Model<VectorWritable>> models = new ArrayList<Model<VectorWritable>>();
@@ -91,10 +99,9 @@ public final class TestVectorModelClassifier extends MahoutTestCase {
     try {
       classifier.classify(new DenseVector(2));
       fail("Expected NotImplementedException");
-    } catch (NotImplementedException e) {
-    }
+    } catch (NotImplementedException e) {}
   }
-
+  
   @Test
   public void testSoftClusterClassification() {
     List<Model<VectorWritable>> models = new ArrayList<Model<VectorWritable>>();
@@ -104,35 +111,47 @@ public final class TestVectorModelClassifier extends MahoutTestCase {
     models.add(new SoftCluster(new DenseVector(2).assign(-1), 2, measure));
     AbstractVectorClassifier classifier = new VectorModelClassifier(models);
     Vector pdf = classifier.classify(new DenseVector(2));
-    assertEquals("[0,0]", "[0.000, 1.000, 0.000]", AbstractCluster.formatVector(pdf, null));
+    assertEquals("[0,0]", "[0.000, 1.000, 0.000]",
+        AbstractCluster.formatVector(pdf, null));
     pdf = classifier.classify(new DenseVector(2).assign(2));
-    assertEquals("[2,2]", "[0.735, 0.184, 0.082]", AbstractCluster.formatVector(pdf, null));
+    assertEquals("[2,2]", "[0.735, 0.184, 0.082]",
+        AbstractCluster.formatVector(pdf, null));
   }
-
+  
   @Test
   public void testGaussianClusterClassification() {
     List<Model<VectorWritable>> models = new ArrayList<Model<VectorWritable>>();
-    models.add(new GaussianCluster(new DenseVector(2).assign(1), new DenseVector(2).assign(1), 0));
-    models.add(new GaussianCluster(new DenseVector(2), new DenseVector(2).assign(1), 1));
-    models.add(new GaussianCluster(new DenseVector(2).assign(-1), new DenseVector(2).assign(1), 2));
+    models.add(new GaussianCluster(new DenseVector(2).assign(1),
+        new DenseVector(2).assign(1), 0));
+    models.add(new GaussianCluster(new DenseVector(2), new DenseVector(2)
+        .assign(1), 1));
+    models.add(new GaussianCluster(new DenseVector(2).assign(-1),
+        new DenseVector(2).assign(1), 2));
     AbstractVectorClassifier classifier = new VectorModelClassifier(models);
     Vector pdf = classifier.classify(new DenseVector(2));
-    assertEquals("[0,0]", "[0.274, 0.452, 0.274]", AbstractCluster.formatVector(pdf, null));
+    assertEquals("[0,0]", "[0.212, 0.576, 0.212]",
+        AbstractCluster.formatVector(pdf, null));
     pdf = classifier.classify(new DenseVector(2).assign(2));
-    assertEquals("[2,2]", "[0.806, 0.180, 0.015]", AbstractCluster.formatVector(pdf, null));
+    assertEquals("[2,2]", "[0.952, 0.047, 0.000]",
+        AbstractCluster.formatVector(pdf, null));
   }
-
+  
   @Test
   public void testASNClusterClassification() {
     List<Model<VectorWritable>> models = new ArrayList<Model<VectorWritable>>();
-    models.add(new AsymmetricSampledNormalModel(0, new DenseVector(2).assign(1), new DenseVector(2).assign(1)));
-    models.add(new AsymmetricSampledNormalModel(1, new DenseVector(2), new DenseVector(2).assign(1)));
-    models.add(new AsymmetricSampledNormalModel(2, new DenseVector(2).assign(-1), new DenseVector(2).assign(1)));
+    models.add(new AsymmetricSampledNormalModel(0,
+        new DenseVector(2).assign(1), new DenseVector(2).assign(1)));
+    models.add(new AsymmetricSampledNormalModel(1, new DenseVector(2),
+        new DenseVector(2).assign(1)));
+    models.add(new AsymmetricSampledNormalModel(2, new DenseVector(2)
+        .assign(-1), new DenseVector(2).assign(1)));
     AbstractVectorClassifier classifier = new VectorModelClassifier(models);
     Vector pdf = classifier.classify(new DenseVector(2));
-    assertEquals("[0,0]", "[0.212, 0.576, 0.212]", AbstractCluster.formatVector(pdf, null));
+    assertEquals("[0,0]", "[0.212, 0.576, 0.212]",
+        AbstractCluster.formatVector(pdf, null));
     pdf = classifier.classify(new DenseVector(2).assign(2));
-    assertEquals("[2,2]", "[0.952, 0.047, 0.000]", AbstractCluster.formatVector(pdf, null));
+    assertEquals("[2,2]", "[0.952, 0.047, 0.000]",
+        AbstractCluster.formatVector(pdf, null));
   }
-
+  
 }

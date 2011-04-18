@@ -24,6 +24,7 @@ import org.apache.mahout.math.VectorWritable;
 /**
  * An implementation of the ModelDistribution interface suitable for testing the DirichletCluster algorithm.
  * Uses a L1Distribution
+ * @deprecated Use DistanceMeasureClusterDistribution instead
  */
 public class L1ModelDistribution extends AbstractVectorModelDistribution {
   

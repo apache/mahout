@@ -24,43 +24,39 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 public class GaussianCluster extends AbstractCluster {
-
-  public GaussianCluster() {
-  }
-
+  
+  public GaussianCluster() {}
+  
   public GaussianCluster(Vector point, int id2) {
     super(point, id2);
   }
-
+  
   public GaussianCluster(Vector center, Vector radius, int id) {
     super(center, radius, id);
   }
-
+  
   @Override
   public String getIdentifier() {
     return "GC:" + getId();
   }
-
+  
   @Override
   public Model<VectorWritable> sampleFromPosterior() {
     return new GaussianCluster(getCenter(), getRadius(), getId());
   }
-
+  
   @Override
   public double pdf(VectorWritable vw) {
     Vector x = vw.get();
-    // return the average of the component pdfs
-    // TODO: is this reasonable? correct?
-    double pdf = 0;
+    // return the product of the component pdfs
+    // TODO: is this reasonable? correct? It seems to work in some cases.
+    double pdf = 1;
     for (int i = 0; i < x.size(); i++) {
-      double x2 = x.get(i);
-      double m = getCenter().get(i);
-      // small prior on s to avoid numeric instability when s==0
-      double s = getRadius().get(i) + 0.000001;
-      double dNorm = UncommonDistributions.dNorm(x2, m, s);
-      pdf += dNorm;
+      // small prior on stdDev to avoid numeric instability when stdDev==0
+      pdf *= UncommonDistributions.dNorm(x.getQuick(i),
+          getCenter().getQuick(i), getRadius().getQuick(i) + 0.000001);
     }
-    return pdf / x.size();
+    return pdf;
   }
-
+  
 }

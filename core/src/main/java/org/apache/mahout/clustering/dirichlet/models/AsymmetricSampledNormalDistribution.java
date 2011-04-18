@@ -26,6 +26,7 @@ import org.apache.mahout.math.VectorWritable;
  * An implementation of the ModelDistribution interface suitable for testing the DirichletCluster algorithm.
  * Uses a Normal Distribution to sample the prior model values. Model values have a vector standard deviation,
  * allowing assymetrical regions to be covered by a model.
+ * @deprecated use GaussianClusterDistribution instead
  */
 public class AsymmetricSampledNormalDistribution extends AbstractVectorModelDistribution {
   

@@ -61,7 +61,7 @@ public interface Cluster extends Model<VectorWritable>, Parametered {
    * Get an integer denoting the number of points observed by this cluster
    * @return an integer 
    */
-  int getNumPoints();
+  long getNumPoints();
   
   /**
    * Produce a custom, human-friendly, printable representation of the Cluster.

@@ -55,7 +55,7 @@ public interface Model<O> extends Writable {
    * 
    * @return an int
    */
-  int count();
+  long count();
 
   /**
    * @return a sample of my posterior model

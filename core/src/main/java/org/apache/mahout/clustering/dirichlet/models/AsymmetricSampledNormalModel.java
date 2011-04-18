@@ -32,6 +32,10 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.SquareRootFunction;
 
+/**
+ *
+ *@deprecated Use GaussianCluster instead
+ */
 public class AsymmetricSampledNormalModel implements Cluster {
 
   private int id;
@@ -137,7 +141,7 @@ public class AsymmetricSampledNormalModel implements Cluster {
   }
 
   @Override
-  public int count() {
+  public long count() {
     return s0;
   }
 
@@ -197,7 +201,7 @@ public class AsymmetricSampledNormalModel implements Cluster {
   }
 
   @Override
-  public int getNumPoints() {
+  public long getNumPoints() {
     return s0;
   }
 

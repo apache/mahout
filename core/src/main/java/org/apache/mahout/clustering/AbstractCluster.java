@@ -38,7 +38,7 @@ public abstract class AbstractCluster implements Cluster {
   // cluster persistent state
   private int id;
 
-  private int numPoints;
+  private long numPoints;
 
   private Vector center;
 
@@ -84,10 +84,10 @@ public abstract class AbstractCluster implements Cluster {
   }
 
   /**
-   * @param numPoints the numPoints to set
+   * @param l the numPoints to set
    */
-  protected void setNumPoints(int numPoints) {
-    this.numPoints = numPoints;
+  protected void setNumPoints(long l) {
+    this.numPoints = l;
   }
 
   /**
@@ -172,7 +172,7 @@ public abstract class AbstractCluster implements Cluster {
   }
 
   @Override
-  public int getNumPoints() {
+  public long getNumPoints() {
     return numPoints;
   }
 
@@ -199,7 +199,7 @@ public abstract class AbstractCluster implements Cluster {
   @Override
   public void readFields(DataInput in) throws IOException {
     this.id = in.readInt();
-    this.numPoints = in.readInt();
+    this.numPoints = in.readLong();
     VectorWritable temp = new VectorWritable();
     temp.readFields(in);
     this.center = temp.get();
@@ -210,7 +210,7 @@ public abstract class AbstractCluster implements Cluster {
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(id);
-    out.writeInt(numPoints);
+    out.writeLong(numPoints);
     VectorWritable.writeVector(out, center);
     VectorWritable.writeVector(out, radius);
   }
@@ -301,7 +301,7 @@ public abstract class AbstractCluster implements Cluster {
   }
 
   @Override
-  public int count() {
+  public long count() {
     return getNumPoints();
   }
 }

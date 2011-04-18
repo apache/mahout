@@ -178,7 +178,7 @@ public final class TestL1ModelClustering extends MahoutTestCase {
   private void printClusters(Model<VectorWritable>[] models, List<VectorWritable> samples, String[] docs) {
     for (int m = 0; m < models.length; m++) {
       Model<VectorWritable> model = models[m];
-      int count = model.count();
+      long count = model.count();
       if (count == 0) {
         continue;
       }
