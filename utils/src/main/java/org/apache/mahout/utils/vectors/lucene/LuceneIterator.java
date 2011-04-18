@@ -30,12 +30,16 @@ import org.apache.lucene.index.TermDocs;
 import org.apache.lucene.index.TermFreqVector;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An {@link Iterator} over {@link Vector}s that uses a Lucene index as the source for creating the
  * {@link Vector}s. The field used to create the vectors currently must have term vectors stored for it.
  */
 public final class LuceneIterator extends AbstractIterator<Vector> {
+
+  private static final Logger log = LoggerFactory.getLogger(LuceneIterator.class);
 
   private final IndexReader indexReader;
   private final String field;
@@ -82,7 +86,8 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
       int doc = termDocs.doc();
       TermFreqVector termFreqVector = indexReader.getTermFreqVector(doc, field);
       if (termFreqVector == null) {
-        throw new IllegalStateException("Field '" + field + "' does not have term vectors");
+        log.warn(indexReader.document(doc).get(idField) + " does not have a term vector for " + field);
+        computeNext();
       }
 
       indexReader.getTermFreqVector(doc, field, mapper);
