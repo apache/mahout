@@ -48,6 +48,8 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
   private final VectorMapper mapper;
   private final double normPower;
   private final TermDocs termDocs;
+  private int numErrorDocs;
+  private int maxErrorDocs;
 
   /**
    * Produce a LuceneIterable that can create the Vector plus normalize it.
@@ -63,9 +65,23 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
                         String field,
                         VectorMapper mapper,
                         double normPower) throws IOException {
+    this(indexReader, idField, field, mapper, normPower, 1.0);
+  }
+
+  /**
+   * @see #LuceneIterator(IndexReader, String, String, VectorMapper, double)
+   * @param maxPercentErrorDocs most documents that will be tolerated without a term freq vector. In [0,1].
+   */
+  public LuceneIterator(IndexReader indexReader,
+                        String idField,
+                        String field,
+                        VectorMapper mapper,
+                        double normPower,
+                        double maxPercentErrorDocs) throws IOException {
     // term docs(null) is a better way of iterating all the docs in Lucene
     Preconditions.checkArgument(normPower == LuceneIterable.NO_NORMALIZING || normPower >= 0,
                                 "If specified normPower must be nonnegative", normPower);
+    Preconditions.checkArgument(maxPercentErrorDocs >= 0.0 && maxPercentErrorDocs <= 1.0);
     idFieldSelector = new SetBasedFieldSelector(Collections.singleton(idField), Collections.<String>emptySet());
     this.indexReader = indexReader;
     this.idField = idField;
@@ -74,6 +90,8 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
     this.normPower = normPower;
     // term docs(null) is a better way of iterating all the docs in Lucene
     this.termDocs = indexReader.termDocs(null);
+    this.maxErrorDocs = (int) (maxPercentErrorDocs * indexReader.numDocs());
+    this.numErrorDocs = 0;
   }
 
   @Override
@@ -86,7 +104,11 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
       int doc = termDocs.doc();
       TermFreqVector termFreqVector = indexReader.getTermFreqVector(doc, field);
       if (termFreqVector == null) {
-        log.warn(indexReader.document(doc).get(idField) + " does not have a term vector for " + field);
+        if (++numErrorDocs >= maxErrorDocs) {
+          log.error("There are too many documents that do not have a term vector for {}", field);
+          throw new IllegalStateException("There are too many documents that do not have a term vector for " + field);
+        }
+        log.warn("{} does not have a term vector for {}", indexReader.document(doc).get(idField), field);
         computeNext();
       }
 
