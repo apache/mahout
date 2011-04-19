@@ -60,10 +60,8 @@ public class Omega {
 
     Arrays.fill(yRow, 0);
     if (!aRow.isDense()) {
-      int j = 0;
       for (Element el : aRow) {
-        accumDots(j, el.get(), yRow);
-        j++;
+        accumDots(el.index(), el.get(), yRow);
       }
 
     } else {
