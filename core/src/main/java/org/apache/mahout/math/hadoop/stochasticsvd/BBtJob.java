@@ -106,8 +106,7 @@ public final class BBtJob {
         // this approach should reduce GC churn rate
         double mul = btVec.getQuick(i);
         for (int j = i; j < kp; j++) {
-          bbtPartial.setQuick(i, j,
-                              bbtPartial.getQuick(i, j) + mul * btVec.getQuick(j));
+          bbtPartial.setQuick(i, j, bbtPartial.getQuick(i, j) + mul * btVec.getQuick(j));
         }
       }
     }

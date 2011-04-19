@@ -51,11 +51,17 @@ import org.apache.mahout.math.VectorWritable;
 
 /**
  * Compute first level of QHat-transpose blocks.
+ * <P>
  * 
- * See Mahout-376 woking notes for details.
+ * See Mahout-376 working notes for details.
+ * <P>
  * 
+ * Uses some of Hadoop deprecated api wherever newer api is not available.
+ * Hence, @SuppressWarnings("deprecation") for imports (MAHOUT-593).
+ * <P>
  * 
  */
+@SuppressWarnings("deprecation")
 public final class QJob {
 
   public static final String PROP_OMEGA_SEED = "ssvd.omegaseed";
@@ -68,8 +74,9 @@ public final class QJob {
 
   private QJob() {
   }
+
   // public static final String OUTPUT_Q="Q";
-  //public static final String OUTPUT_BT = "Bt";
+  // public static final String OUTPUT_BT = "Bt";
 
   public static class QJobKeyWritable implements WritableComparable<QJobKeyWritable> {
 
@@ -131,7 +138,7 @@ public final class QJob {
 
       value.setBlock(qt);
       getTempQw(context).append(tempKey, value); // this probably should be
-                                                     // a sparse row matrix,
+                                                 // a sparse row matrix,
       // but compressor should get it for disk and in memory we want it
       // dense anyway, sparse random implementations would be
       // a mostly a memory management disaster consisting of rehashes and GC
@@ -148,15 +155,22 @@ public final class QJob {
         // for efficiency in most cases. Sure mapper should be able to load
         // the entire split in memory -- and we don't require even that.
         value.setBlock(qSolver.getThinQtTilde());
-        outputs.getCollector(OUTPUT_QHAT, null).collect(key, value);
-        outputs.getCollector(OUTPUT_R, null).collect(
-            key,
-            new VectorWritable(new DenseVector(qSolver.getRTilde().getData(),
-                true)));
+        outputQHat(key, value);
+        outputR(key, new VectorWritable(new DenseVector(qSolver.getRTilde().getData(), true)));
 
       } else {
         secondPass(ctx);
       }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void outputQHat(Writable key, Writable value) throws IOException {
+      outputs.getCollector(OUTPUT_QHAT, null).collect(key, value);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void outputR(Writable key, Writable value) throws IOException {
+      outputs.getCollector(OUTPUT_R, null).collect(key, value);
     }
 
     private void secondPass(Context ctx) throws IOException {
@@ -166,9 +180,8 @@ public final class QJob {
       closeables.addFirst(tempQr);
       int qCnt = 0;
       while (tempQr.next(tempKey, value)) {
-        value.setBlock(GivensThinSolver.computeQtHat(value.getBlock(),
-                                                     qCnt,
-                                                     new CopyConstructorIterator<UpperTriangular>(rSubseq.iterator())));
+        value.setBlock(GivensThinSolver.computeQtHat(value.getBlock(), qCnt,
+            new CopyConstructorIterator<UpperTriangular>(rSubseq.iterator())));
         if (qCnt == 1) {
           // just merge r[0] <- r[1] so it doesn't have to repeat
           // in subsequent computeQHat iterators
@@ -176,22 +189,18 @@ public final class QJob {
         } else {
           qCnt++;
         }
-        outputs.getCollector(OUTPUT_QHAT, null).collect(key, value);
+        outputQHat(key, value);
       }
 
       assert rSubseq.size() == 1;
 
       // m_value.setR(m_rSubseq.get(0));
-      outputs.getCollector(OUTPUT_R, null).collect(
-          key,
-          new VectorWritable(new DenseVector(rSubseq.get(0).getData(),
-                                             true)));
+      outputR(key, new VectorWritable(new DenseVector(rSubseq.get(0).getData(), true)));
 
     }
 
     @Override
-    protected void map(Writable key, VectorWritable value, Context context)
-      throws IOException, InterruptedException {
+    protected void map(Writable key, VectorWritable value, Context context) throws IOException, InterruptedException {
       double[] yRow;
       if (yLookahead.size() == kp) {
         if (qSolver.isFull()) {
@@ -274,8 +283,7 @@ public final class QJob {
         String taskTmpDir = System.getProperty("java.io.tmpdir");
         FileSystem localFs = FileSystem.getLocal(context.getConfiguration());
         tempQPath = new Path(new Path(taskTmpDir), "q-temp.seq");
-        tempQw = SequenceFile.createWriter(localFs,
-            context.getConfiguration(), tempQPath, IntWritable.class,
+        tempQw = SequenceFile.createWriter(localFs, context.getConfiguration(), tempQPath, IntWritable.class,
             DenseBlockWritable.class, CompressionType.BLOCK);
         closeables.addFirst(tempQw);
         closeables.addFirst(new IOUtils.DeleteFileOnClose(new File(tempQPath.toString())));
@@ -295,11 +303,9 @@ public final class QJob {
                          int numReduceTasks) throws ClassNotFoundException, InterruptedException, IOException {
 
     JobConf oldApiJob = new JobConf(conf);
-    MultipleOutputs.addNamedOutput(oldApiJob, OUTPUT_QHAT,
-        org.apache.hadoop.mapred.SequenceFileOutputFormat.class,
+    MultipleOutputs.addNamedOutput(oldApiJob, OUTPUT_QHAT, org.apache.hadoop.mapred.SequenceFileOutputFormat.class,
         QJobKeyWritable.class, DenseBlockWritable.class);
-    MultipleOutputs.addNamedOutput(oldApiJob, OUTPUT_R,
-        org.apache.hadoop.mapred.SequenceFileOutputFormat.class,
+    MultipleOutputs.addNamedOutput(oldApiJob, OUTPUT_R, org.apache.hadoop.mapred.SequenceFileOutputFormat.class,
         QJobKeyWritable.class, VectorWritable.class);
 
     Job job = new Job(oldApiJob);
@@ -316,8 +322,7 @@ public final class QJob {
 
     FileOutputFormat.setCompressOutput(job, true);
     FileOutputFormat.setOutputCompressorClass(job, DefaultCodec.class);
-    SequenceFileOutputFormat.setOutputCompressionType(job,
-        CompressionType.BLOCK);
+    SequenceFileOutputFormat.setOutputCompressionType(job, CompressionType.BLOCK);
 
     job.setMapOutputKeyClass(QJobKeyWritable.class);
     job.setMapOutputValueClass(VectorWritable.class);
@@ -333,9 +338,8 @@ public final class QJob {
     job.getConfiguration().setInt(PROP_P, p);
 
     // number of reduce tasks doesn't matter. we don't actually
-    // send anything to reducers. in fact, the only reason
-    // we need to configure reduce step is so that combiners can fire.
-    // so reduce here is purely symbolic.
+    // send anything to reducers.
+    
     job.setNumReduceTasks(0 /* numReduceTasks */);
 
     job.submit();

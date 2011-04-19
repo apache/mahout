@@ -38,6 +38,7 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.SingularValueDecomposition;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.junit.Test;
 
@@ -50,7 +51,7 @@ import org.junit.Test;
  * value configured. 
  * 
  */
-public class LocalSSVDSolverTest extends MahoutTestCase {
+public class LocalSSVDSolverDenseTest extends MahoutTestCase {
 
   private static final double s_epsilon = 1.0E-10d;
 
@@ -80,7 +81,7 @@ public class LocalSSVDSolverTest extends MahoutTestCase {
 
     int n = 100;
     double[] row = new double[n];
-    DenseVector dv = new DenseVector(row, true);
+    Vector dv = new DenseVector(row, true);
     Writable vw = new VectorWritable(dv);
     IntWritable roww = new IntWritable();
 

@@ -20,8 +20,6 @@ package org.apache.mahout.math.hadoop.stochasticsvd;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
 
@@ -61,13 +59,13 @@ public class Omega {
     assert yRow.length == kp;
 
     Arrays.fill(yRow, 0);
-    if ((aRow instanceof SequentialAccessSparseVector) || (aRow instanceof RandomAccessSparseVector)) {
+    if (!aRow.isDense()) {
       int j = 0;
       for (Element el : aRow) {
         accumDots(j, el.get(), yRow);
         j++;
       }
-      
+
     } else {
       int n = aRow.size();
       for (int j = 0; j < n; j++) {
