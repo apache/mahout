@@ -207,6 +207,7 @@ public final class SimpleCsvExamples {
       int offset = buf.position();
       while (offset < buf.limit()) {
         int ch = buf.get();
+        offset = buf.position();
         switch (ch) {
           case '\n':
             r.length.add(offset - r.start.get(r.length.size()) - 1);
@@ -233,7 +234,7 @@ public final class SimpleCsvExamples {
         default:
           double r = 0;
           for (int i = 0; i < size; i++) {
-            r = 10 * r + base.get(offset + i);
+            r = 10 * r + base.get(offset + i) - '0';
           }
           return r;
       }
