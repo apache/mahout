@@ -35,9 +35,14 @@ public final class LuceneIterable implements Iterable<Vector> {
   private final String idField;
   private final VectorMapper mapper;
   private final double normPower;
+  private final double maxPercentErrorDocs;
 
   public LuceneIterable(IndexReader reader, String idField, String field, VectorMapper mapper) {
     this(reader, idField, field, mapper, NO_NORMALIZING);
+  }
+  
+  public LuceneIterable(IndexReader indexReader, String idField, String field, VectorMapper mapper, double normPower) {
+    this(indexReader, idField, field, mapper, normPower, 0);
   }
   
   /**
@@ -49,18 +54,19 @@ public final class LuceneIterable implements Iterable<Vector> {
    * @param mapper {@link VectorMapper} for creating {@link Vector}s from Lucene's TermVectors.
    * @param normPower the normalization value. Must be nonnegative, or {@link #NO_NORMALIZING}
    */
-  public LuceneIterable(IndexReader indexReader, String idField, String field, VectorMapper mapper, double normPower) {
+  public LuceneIterable(IndexReader indexReader, String idField, String field, VectorMapper mapper, double normPower, double maxPercentErrorDocs) {
     this.indexReader = indexReader;
     this.idField = idField;
     this.field = field;
     this.mapper = mapper;
     this.normPower = normPower;
+    this.maxPercentErrorDocs = maxPercentErrorDocs;
   }
   
   @Override
   public Iterator<Vector> iterator() {
     try {
-      return new LuceneIterator(indexReader, idField, field, mapper, normPower);
+      return new LuceneIterator(indexReader, idField, field, mapper, normPower, maxPercentErrorDocs);
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }

@@ -97,16 +97,81 @@ public final class LuceneIterableTest extends MahoutTestCase {
     iterator.next();
   }
 
+  @Test
+  public void testIterable_someNoiseTermVectors() throws IOException {
+    //get noise vectors
+    RAMDirectory directory = createTestIndex(Field.TermVector.YES, new RAMDirectory(), true, 0);
+    //get real vectors
+    createTestIndex(Field.TermVector.NO, directory, false, 5);
+      
+    IndexReader reader = IndexReader.open(directory, true);
+    Weight weight = new TFIDF();
+    TermInfo termInfo = new CachedTermInfo(reader, "content", 1, 100);
+    VectorMapper mapper = new TFDFMapper(reader, weight, termInfo);
+    
+    boolean exceptionThrown;
+    //0 percent tolerance
+    LuceneIterable iterable = new LuceneIterable(reader, "id", "content", mapper);
+    try {
+        Iterator<Vector> iterator = iterable.iterator();
+        while (iterator.hasNext()) {
+            iterator.next();
+        }
+        exceptionThrown = false;
+    }
+    catch(IllegalStateException ise) {
+        exceptionThrown = true;
+    }
+    assertTrue(exceptionThrown);
+    
+    //100 percent tolerance
+    iterable = new LuceneIterable(reader, "id", "content", mapper, -1, 1.0);
+    try {
+        Iterator<Vector> iterator = iterable.iterator();
+        while (iterator.hasNext()) {
+            iterator.next();
+        }
+        exceptionThrown = false;
+    }
+    catch(IllegalStateException ise) {
+        exceptionThrown = true;
+    }
+    assertFalse(exceptionThrown);
+    
+    //50 percent tolerance
+    iterable = new LuceneIterable(reader, "id", "content", mapper, -1, 0.5);
+    Iterator<Vector> iterator = iterable.iterator();
+    iterator.next();
+    iterator.next();
+    iterator.next();
+    iterator.next();
+    iterator.next();
+
+    try {
+        while (iterator.hasNext()) {
+            iterator.next();
+        }
+        exceptionThrown = false;
+    }
+    catch(IllegalStateException ise) {
+        exceptionThrown = true;
+    }
+    assertTrue(exceptionThrown);
+  }
+  
   private static RAMDirectory createTestIndex(Field.TermVector termVector) throws IOException {
-    RAMDirectory directory = new RAMDirectory();
+      return createTestIndex(termVector, new RAMDirectory(), true, 0);
+  }
+  
+  private static RAMDirectory createTestIndex(Field.TermVector termVector, RAMDirectory directory, boolean createNew, int startingId) throws IOException {
     IndexWriter writer = new IndexWriter(
         directory,
         new StandardAnalyzer(Version.LUCENE_30),
-        true,
+        createNew,
         IndexWriter.MaxFieldLength.UNLIMITED);
     for (int i = 0; i < LuceneIterableTest.DOCS.length; i++) {
       Document doc = new Document();
-      Fieldable id = new Field("id", "doc_" + i, Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS);
+      Fieldable id = new Field("id", "doc_" + (i + startingId), Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS);
       doc.add(id);
       //Store both position and offset information
       Fieldable text = new Field("content", DOCS[i], Field.Store.NO, Field.Index.ANALYZED, termVector);

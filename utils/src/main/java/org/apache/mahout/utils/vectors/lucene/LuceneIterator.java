@@ -30,6 +30,7 @@ import org.apache.lucene.index.TermDocs;
 import org.apache.lucene.index.TermFreqVector;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.utils.Bump125;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,8 +49,12 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
   private final VectorMapper mapper;
   private final double normPower;
   private final TermDocs termDocs;
-  private int numErrorDocs;
-  private int maxErrorDocs;
+
+  private int numErrorDocs = 0;
+  private int maxErrorDocs = 0;
+  private Bump125 bump = new Bump125();
+  private long nextLogRecord = bump.increment();
+  private int skippedErrorMessages = 0;
 
   /**
    * Produce a LuceneIterable that can create the Vector plus normalize it.
@@ -65,7 +70,7 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
                         String field,
                         VectorMapper mapper,
                         double normPower) throws IOException {
-    this(indexReader, idField, field, mapper, normPower, 1.0);
+    this(indexReader, idField, field, mapper, normPower, 0.0);
   }
 
   /**
@@ -91,7 +96,6 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
     // term docs(null) is a better way of iterating all the docs in Lucene
     this.termDocs = indexReader.termDocs(null);
     this.maxErrorDocs = (int) (maxPercentErrorDocs * indexReader.numDocs());
-    this.numErrorDocs = 0;
   }
 
   @Override
@@ -104,11 +108,22 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
       int doc = termDocs.doc();
       TermFreqVector termFreqVector = indexReader.getTermFreqVector(doc, field);
       if (termFreqVector == null) {
-        if (++numErrorDocs >= maxErrorDocs) {
+        numErrorDocs++;
+        if (numErrorDocs >= maxErrorDocs) {
           log.error("There are too many documents that do not have a term vector for {}", field);
           throw new IllegalStateException("There are too many documents that do not have a term vector for " + field);
         }
-        log.warn("{} does not have a term vector for {}", indexReader.document(doc).get(idField), field);
+        if (numErrorDocs >= nextLogRecord) {
+          if (skippedErrorMessages == 0) {
+            log.warn("{} does not have a term vector for {}", indexReader.document(doc).get(idField), field);
+          } else {
+            log.warn("{} documents do not have a term vector for {}", numErrorDocs, field);
+          }
+          nextLogRecord = bump.increment();
+          skippedErrorMessages = 0;
+        } else {
+          skippedErrorMessages++;
+        }
         computeNext();
       }
 
