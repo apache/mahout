@@ -136,9 +136,12 @@ public final class ClusterDumper extends AbstractJob {
     }
 
     Writer writer;
+    boolean shouldClose;
     if (this.outputFile == null) {
+      shouldClose = false;
       writer = new OutputStreamWriter(System.out);
     } else {
+      shouldClose = true;
       writer = Files.newWriter(new File(this.outputFile), Charsets.UTF_8);
     }
     try {
@@ -177,7 +180,9 @@ public final class ClusterDumper extends AbstractJob {
         }
       }
     } finally {
-      writer.close();
+      if (shouldClose) {
+        writer.close();
+      }
     }
   }
 
