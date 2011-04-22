@@ -18,7 +18,6 @@
 package org.apache.mahout.math.hadoop.stochasticsvd;
 
 import java.util.Arrays;
-import java.util.Random;
 
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
@@ -29,9 +28,9 @@ import org.apache.mahout.math.Vector.Element;
  */
 public class Omega {
 
+  private static final double UNIFORM_DIVISOR = Math.pow(2d, 64);
+
   private final long seed;
-  // TODO find way to make the test pass while using RandomUtils.getRandom()
-  private final Random rnd = new Random();
   private final int kp;
 
   public Omega(long seed, int k, int p) {
@@ -40,10 +39,25 @@ public class Omega {
 
   }
 
+  /**
+   * Get omega element at (x,y) uniformly distributed within [-1...1)
+   * 
+   * @param row
+   *          omega row
+   * @param column
+   *          omega column
+   * @return
+   */
+  public double getQuick(int row, int column) {
+    long hash = murmur64(row << Integer.SIZE | column, 8, seed);
+    double result = hash / UNIFORM_DIVISOR;
+    assert result >= -1d && result < 1d;
+    return result;
+  }
+
   public void accumDots(int aIndex, double aElement, double[] yRow) {
-    rnd.setSeed(getOmegaRowSeed(aIndex, seed, rnd));
     for (int i = 0; i < kp; i++) {
-      yRow[i] += rnd.nextGaussian() * aElement;
+      yRow[i] += getQuick(aIndex, i) * aElement;
     }
   }
 
@@ -60,6 +74,7 @@ public class Omega {
 
     Arrays.fill(yRow, 0);
     if (!aRow.isDense()) {
+      int j = 0;
       for (Element el : aRow) {
         accumDots(el.index(), el.get(), yRow);
       }
@@ -73,12 +88,40 @@ public class Omega {
 
   }
 
-  public long getOmegaRowSeed(int omegaRow, long omegaSeed, Random rnd) {
-    rnd.setSeed(omegaSeed);
-    long rowSeed = rnd.nextLong();
-    rnd.setSeed(rowSeed ^ omegaRow);
-    return rowSeed ^ rnd.nextLong();
+  /**
+   * Shortened version for data < 8 bytes packed into <code>len</code> lowest
+   * bytes of <code>val</code>.
+   * <P>
+   * 
+   * @param val
+   *          the value
+   * @param len
+   *          the length of data packed into this many low bytes of
+   *          <code>val</code>
+   * @param seed
+   *          the seed to use
+   * @return murmur hash
+   */
+  public static long murmur64(long val, int len, long seed) {
 
+    assert len > 0 && len <= 8;
+    long m = 0xc6a4a7935bd1e995L;
+    int r = 47;
+    long h = seed ^ (len * m);
+
+    long k = val;
+
+    k *= m;
+    k ^= k >>> r;
+    k *= m;
+
+    h ^= k;
+    h *= m;
+
+    h ^= h >>> r;
+    h *= m;
+    h ^= h >>> r;
+    return h;
   }
 
   public static long murmur64(byte[] val, int offset, int len, long seed) {
