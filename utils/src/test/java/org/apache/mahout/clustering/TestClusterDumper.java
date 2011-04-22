@@ -198,7 +198,6 @@ public final class TestClusterDumper extends MahoutTestCase {
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
-    assertTrue(true);
   }
 
   @Test
@@ -224,7 +223,6 @@ public final class TestClusterDumper extends MahoutTestCase {
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
-    assertTrue(true);
   }
 
   @Test
@@ -236,7 +234,6 @@ public final class TestClusterDumper extends MahoutTestCase {
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
-    assertTrue(true);
   }
 
   @Test
@@ -254,7 +251,6 @@ public final class TestClusterDumper extends MahoutTestCase {
     ClusterDumper clusterDumper =
         new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
-    assertTrue(true);
   }
 
   @Test
@@ -272,7 +268,6 @@ public final class TestClusterDumper extends MahoutTestCase {
     ClusterDumper clusterDumper =
         new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
-    assertTrue(true);
   }
 
   @Test
@@ -290,7 +285,6 @@ public final class TestClusterDumper extends MahoutTestCase {
     ClusterDumper clusterDumper =
         new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
-    assertTrue(true);
   }
 
   //@Test
@@ -349,7 +343,6 @@ public final class TestClusterDumper extends MahoutTestCase {
     ClusterDumper clusterDumper =
         new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
-    assertTrue(true);
   }
 
   //@Test
@@ -387,7 +380,6 @@ public final class TestClusterDumper extends MahoutTestCase {
     ClusterDumper clusterDumper =
         new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
-    assertTrue(true);
   }
 
   //@Test
@@ -427,6 +419,5 @@ public final class TestClusterDumper extends MahoutTestCase {
     ClusterDumper clusterDumper =
         new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
-    assertTrue(true);
   }
 }
