@@ -21,8 +21,9 @@ import org.apache.hadoop.io.Writable;
 import org.apache.mahout.math.VectorWritable;
 
 /**
- * A model is a probability distribution over observed data points and allows the probability of any data
- * point to be computed. All Models have a persistent representation and extend
+ * A model is a probability distribution over observed data points and allows
+ * the probability of any data point to be computed. All Models have a
+ * persistent representation and extend
  * WritablesampleFromPosterior(Model<VectorWritable>[])
  */
 public interface Model<O> extends Writable {
@@ -35,7 +36,7 @@ public interface Model<O> extends Writable {
    * @return the probability that x is in the receiver
    */
   double pdf(O x);
-
+  
   /**
    * Observe the given observation, retaining information about it
    * 
@@ -45,8 +46,18 @@ public interface Model<O> extends Writable {
   void observe(O x);
   
   /**
-   * Compute a new set of posterior parameters based upon the Observations that have been observed since my
-   * creation
+   * Observe the given observation, retaining information about it
+   * 
+   * @param x
+   *          an Observation from the posterior
+   * @param weight
+   *          a double weighting factor
+   */
+  void observe(O x, double weight);
+
+  /**
+   * Compute a new set of posterior parameters based upon the Observations that
+   * have been observed since my creation
    */
   void computeParameters();
   
@@ -56,10 +67,10 @@ public interface Model<O> extends Writable {
    * @return an int
    */
   long count();
-
+  
   /**
    * @return a sample of my posterior model
    */
   Model<VectorWritable> sampleFromPosterior();
-
+  
 }

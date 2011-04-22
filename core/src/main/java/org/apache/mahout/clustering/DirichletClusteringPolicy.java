@@ -18,6 +18,7 @@ package org.apache.mahout.clustering;
 
 import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
 import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 
 public class DirichletClusteringPolicy implements ClusteringPolicy {
@@ -39,8 +40,11 @@ public class DirichletClusteringPolicy implements ClusteringPolicy {
   // Total observed over all time
   private Vector totalCounts;
   
-  public int select(Vector pdfs) {
-    return UncommonDistributions.rMultinom(pdfs.times(mixture));
+  public Vector select(Vector probabilities) {
+    int rMultinom = UncommonDistributions.rMultinom(probabilities.times(mixture));
+    Vector weights = new SequentialAccessSparseVector(probabilities.size());
+    weights.set(rMultinom, 1.0);
+    return weights;
   }
   
   // update the total counts and then the mixture

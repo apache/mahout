@@ -163,4 +163,9 @@ public class DirichletCluster implements Cluster {
     return model.sampleFromPosterior();
   }
 
+  @Override
+  public void observe(VectorWritable x, double weight) {
+   throw new UnsupportedOperationException();
+  }
+
 }

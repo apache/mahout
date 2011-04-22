@@ -209,4 +209,9 @@ public class AsymmetricSampledNormalModel implements Cluster {
   public Vector getRadius() {
     return getStdDev();
   }
+
+  @Override
+  public void observe(VectorWritable x, double weight) {
+   throw new UnsupportedOperationException();
+  }
 }

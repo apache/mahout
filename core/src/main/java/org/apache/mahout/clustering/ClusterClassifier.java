@@ -134,6 +134,20 @@ public class ClusterClassifier extends AbstractVectorClassifier implements
     getModels().get(actual).observe(new VectorWritable(instance));
   }
   
+  /**
+   * Train the models given an additional weight. Unique to ClusterClassifier
+   * 
+   * @param actual
+   *          the int index of a model
+   * @param data
+   *          a data Vector
+   * @param weight
+   *          a double weighting factor
+   */
+  public void train(int actual, Vector data, double weight) {
+    getModels().get(actual).observe(new VectorWritable(data), weight);
+  }
+  
   public void train(long trackingKey, String groupKey, int actual,
       Vector instance) {
     getModels().get(actual).observe(new VectorWritable(instance));

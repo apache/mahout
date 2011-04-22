@@ -27,11 +27,11 @@ public interface ClusteringPolicy {
   /**
    * Return the index of the most appropriate model
    * 
-   * @param pdfs
+   * @param probabilities
    *          a Vector of pdfs
-   * @return an int index
+   * @return a Vector of weights
    */
-  public abstract int select(Vector pdfs);
+  public abstract Vector select(Vector probabilities);
   
   /**
    * Update the policy with the given classifier

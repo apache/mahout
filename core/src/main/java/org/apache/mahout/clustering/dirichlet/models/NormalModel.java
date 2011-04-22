@@ -209,4 +209,9 @@ public class NormalModel implements Cluster {
   public Vector getRadius() {
     return mean.like().assign(getStdDev());
   }
+
+  @Override
+  public void observe(VectorWritable x, double weight) {
+   throw new UnsupportedOperationException();
+  }
 }

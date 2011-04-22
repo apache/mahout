@@ -16,6 +16,7 @@
  */
 package org.apache.mahout.clustering;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.mahout.math.Vector;
@@ -43,28 +44,32 @@ public class ClusterIterator {
    * 
    * @param data
    *          a List<Vector> of input vectors
-   * @param prior
-   *          the prior-trained ClusterClassifier
+   * @param classifier
+   *          a prior ClusterClassifier
    * @param numIterations
    *          the int number of iterations to perform
    * @return the posterior ClusterClassifier
    */
-  public ClusterClassifier iterate(List<Vector> data, ClusterClassifier prior,
-      int numIterations) {
+  public ClusterClassifier iterate(List<Vector> data,
+      ClusterClassifier classifier, int numIterations) {
     for (int iteration = 1; iteration <= numIterations; iteration++) {
       for (Vector vector : data) {
         // classification yields probabilities
-        Vector pdfs = prior.classify(vector);
-        // policy selects a model given those probabilities
-        int selected = policy.select(pdfs);
+        Vector probabilities = classifier.classify(vector);
+        // policy selects weights for models given those probabilities
+        Vector weights = policy.select(probabilities);
         // training causes all models to observe data
-        prior.train(selected, vector);
+        for (Iterator<Vector.Element> it = weights.iterateNonZero(); it
+            .hasNext();) {
+          int index = it.next().index();
+          classifier.train(index, vector, weights.get(index));
+        }
       }
       // compute the posterior models
-      prior.close();
+      classifier.close();
       // update the policy
-      policy.update(prior);
+      policy.update(classifier);
     }
-    return prior;
+    return classifier;
   }
 }

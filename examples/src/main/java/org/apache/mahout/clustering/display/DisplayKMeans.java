@@ -75,7 +75,7 @@ class DisplayKMeans extends DisplayClustering {
       }
       List<Cluster> initialClusters = new ArrayList<Cluster>();
       int id = 0;
-      int numClusters = 3;
+      int numClusters = 4;
       for (Vector point : points) {
         if (initialClusters.size() < Math.min(numClusters, points.size())) {
           initialClusters.add(new org.apache.mahout.clustering.kmeans.Cluster(

@@ -16,33 +16,33 @@
  */
 package org.apache.mahout.clustering;
 
-import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 
 /**
- * This is a simple maximum likelihood clustering policy, suitable for k-means
+ * This is a probability-weighted clustering policy, suitable for fuzzy k-means
  * clustering
  * 
  */
-public class KMeansClusteringPolicy implements ClusteringPolicy {
-  
+public class FuzzyKMeansClusteringPolicy implements ClusteringPolicy {
+    
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * org.apache.mahout.clustering.ClusteringPolicy#update(org.apache.mahout.
+   * clustering.ClusterClassifier)
+   */
+  @Override
+  public void update(ClusterClassifier posterior) {
+    // nothing to do here
+  }
+
   /* (non-Javadoc)
    * @see org.apache.mahout.clustering.ClusteringPolicy#select(org.apache.mahout.math.Vector)
    */
   @Override
   public Vector select(Vector probabilities) {
-    int maxValueIndex = probabilities.maxValueIndex();
-    Vector weights = new SequentialAccessSparseVector(probabilities.size());
-    weights.set(maxValueIndex, 1.0);
-    return weights;
-  }
-  
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.ClusteringPolicy#update(org.apache.mahout.clustering.ClusterClassifier)
-   */
-  @Override
-  public void update(ClusterClassifier posterior) {
-    // nothing to do here
+    return probabilities;
   }
   
 }

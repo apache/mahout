@@ -34,26 +34,25 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.SquareRootFunction;
 
 public abstract class AbstractCluster implements Cluster {
-
+  
   // cluster persistent state
   private int id;
-
+  
   private long numPoints;
-
+  
   private Vector center;
-
+  
   private Vector radius;
-
-  protected AbstractCluster() {
-  }
-
+  
+  protected AbstractCluster() {}
+  
   protected AbstractCluster(Vector point, int id2) {
     this.numPoints = 0;
     this.center = new RandomAccessSparseVector(point);
     this.radius = point.like();
     this.id = id2;
   }
-
+  
   protected AbstractCluster(Vector center2, Vector radius2, int id2) {
     this.numPoints = 0;
     this.center = new RandomAccessSparseVector(center2);
@@ -75,63 +74,67 @@ public abstract class AbstractCluster implements Cluster {
   public void createParameters(String prefix, Configuration jobConf) {
     // nothing to do
   }
-
+  
   /**
-   * @param id the id to set
+   * @param id
+   *          the id to set
    */
   protected void setId(int id) {
     this.id = id;
   }
-
+  
   /**
-   * @param l the numPoints to set
+   * @param l
+   *          the numPoints to set
    */
   protected void setNumPoints(long l) {
     this.numPoints = l;
   }
-
+  
   /**
-   * @param center the center to set
+   * @param center
+   *          the center to set
    */
   protected void setCenter(Vector center) {
     this.center = center;
   }
-
+  
   /**
-   * @param radius the radius to set
+   * @param radius
+   *          the radius to set
    */
   protected void setRadius(Vector radius) {
     this.radius = radius;
   }
-
+  
   // the observation statistics, initialized by the first observation
   private double s0;
-
+  
   private Vector s1;
-
+  
   private Vector s2;
-
+  
   /**
    * @return the s0
    */
   protected double getS0() {
     return s0;
   }
-
+  
   /**
    * @return the s1
    */
   protected Vector getS1() {
     return s1;
   }
-
+  
   /**
    * @return the s2
    */
   protected Vector getS2() {
     return s2;
   }
-
+  
   public void observe(ClusterObservations observations) {
     s0 += observations.getS0();
     if (s1 == null) {
@@ -145,41 +148,61 @@ public abstract class AbstractCluster implements Cluster {
       observations.getS2().addTo(s2);
     }
   }
-
+  
   @Override
   public void observe(VectorWritable x) {
     observe(x.get());
   }
-
+  
+  @Override
+  public void observe(VectorWritable x, double weight) {
+    observe(x.get(), weight);
+  }
+  
   public void observe(Vector x, double weight) {
-    s0 += weight;
-    Vector weightedX = x.times(weight);
-    if (s1 == null) {
-      s1 = weightedX;
+    if (weight == 1.0) {
+      observe(x);
     } else {
-      weightedX.addTo(s1);
+      s0 += weight;
+      Vector weightedX = x.times(weight);
+      if (s1 == null) {
+        s1 = weightedX;
+      } else {
+        weightedX.addTo(s1);
+      }
+      Vector x2 = x.times(x).times(weight);
+      if (s2 == null) {
+        s2 = x2;
+      } else {
+        x2.addTo(s2);
+      }
     }
-    Vector x2 = x.times(x).times(weight);
+  }
+  
+  public void observe(Vector x) {
+    s0 += 1;
+    if (s1 == null) {
+      s1 = x.clone();
+    } else {
+      x.addTo(s1);
+    }
+    Vector x2 = x.times(x);
     if (s2 == null) {
       s2 = x2;
     } else {
       x2.addTo(s2);
     }
   }
-
-  public void observe(Vector x) {
-    observe(x, 1.0);
-  }
-
+  
   @Override
   public long getNumPoints() {
     return numPoints;
   }
-
+  
   public ClusterObservations getObservations() {
     return new ClusterObservations(s0, s1, s2);
   }
-
+  
   @Override
   public void computeParameters() {
     if (s0 == 0) {
@@ -189,13 +212,14 @@ public abstract class AbstractCluster implements Cluster {
     center = s1.divide(s0);
     // compute the component stds
     if (s0 > 1) {
-      radius = s2.times(s0).minus(s1.times(s1)).assign(new SquareRootFunction()).divide(s0);
-    } 
+      radius = s2.times(s0).minus(s1.times(s1))
+          .assign(new SquareRootFunction()).divide(s0);
+    }
     s0 = 0;
     s1 = null;
     s2 = null;
   }
-
+  
   @Override
   public void readFields(DataInput in) throws IOException {
     this.id = in.readInt();
@@ -206,7 +230,7 @@ public abstract class AbstractCluster implements Cluster {
     temp.readFields(in);
     this.radius = temp.get();
   }
-
+  
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(id);
@@ -214,7 +238,7 @@ public abstract class AbstractCluster implements Cluster {
     VectorWritable.writeVector(out, center);
     VectorWritable.writeVector(out, radius);
   }
-
+  
   @Override
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder(50);
@@ -228,24 +252,24 @@ public abstract class AbstractCluster implements Cluster {
     buf.append('}');
     return buf.toString();
   }
-
+  
   public abstract String getIdentifier();
-
+  
   @Override
   public Vector getCenter() {
     return center;
   }
-
+  
   @Override
   public int getId() {
     return id;
   }
-
+  
   @Override
   public Vector getRadius() {
     return radius;
   }
-
+  
   /**
    * Compute the centroid by averaging the pointTotals
    * 
@@ -254,10 +278,10 @@ public abstract class AbstractCluster implements Cluster {
   public Vector computeCentroid() {
     return s0 == 0 ? getCenter() : s1.divide(s0);
   }
-
+  
   /**
-   * Return a human-readable formatted string representation of the vector, not intended to be complete nor
-   * usable as an input/output representation
+   * Return a human-readable formatted string representation of the vector, not
+   * intended to be complete nor usable as an input/output representation
    */
   public static String formatVector(Vector v, String[] bindings) {
     StringBuilder buf = new StringBuilder();
@@ -299,7 +323,7 @@ public abstract class AbstractCluster implements Cluster {
     buf.append(']');
     return buf.toString();
   }
-
+  
   @Override
   public long count() {
     return getNumPoints();

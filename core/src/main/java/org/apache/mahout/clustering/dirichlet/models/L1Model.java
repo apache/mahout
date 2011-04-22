@@ -150,4 +150,9 @@ public class L1Model implements Cluster {
     return null;
   }
 
+  @Override
+  public void observe(VectorWritable x, double weight) {
+   throw new UnsupportedOperationException();
+  }
+
 }

@@ -19,33 +19,44 @@ package org.apache.mahout.clustering.display;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.clustering.ClusterClassifier;
+import org.apache.mahout.clustering.ClusterIterator;
+import org.apache.mahout.clustering.ClusteringPolicy;
+import org.apache.mahout.clustering.FuzzyKMeansClusteringPolicy;
 import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
+import org.apache.mahout.clustering.fuzzykmeans.SoftCluster;
 import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 class DisplayFuzzyKMeans extends DisplayClustering {
-
+  
   DisplayFuzzyKMeans() {
     initialize();
-    this.setTitle("Fuzzy k-Means Clusters (>" + (int) (significance * 100) + "% of population)");
+    this.setTitle("Fuzzy k-Means Clusters (>" + (int) (significance * 100)
+        + "% of population)");
   }
-
+  
   // Override the paint() method
   @Override
   public void paint(Graphics g) {
     plotSampleData((Graphics2D) g);
     plotClusters((Graphics2D) g);
   }
-
+  
   public static void main(String[] args) throws Exception {
     DistanceMeasure measure = new ManhattanDistanceMeasure();
-
+    
     Path samples = new Path("samples");
     Path output = new Path("output");
     Configuration conf = new Configuration();
@@ -53,58 +64,40 @@ class DisplayFuzzyKMeans extends DisplayClustering {
     HadoopUtil.delete(conf, output);
     RandomUtils.useTestSeed();
     DisplayClustering.generateSamples();
-    //boolean b = true;
-    //if (b) {
-    writeSampleData(samples);
-    Path clusters = RandomSeedGenerator.buildRandom(conf, samples, new Path(output, "clusters-0"), 3, measure);
-    double threshold = 0.001;
-    int numIterations = 10;
-    int m = 3;
-    FuzzyKMeansDriver.run(samples,
-                            clusters,
-                            output,
-                            measure,
-                            threshold,
-                            numIterations,
-                            m,
-                            true,
-                            true,
-                            threshold,
-                            true);
-
-    loadClusters(output);
-    //} else {
-    //  List<Vector> points = new ArrayList<Vector>();
-    //  for (VectorWritable sample : SAMPLE_DATA) {
-    //    points.add((Vector) sample.get());
-    //  }
-    //  int id = 0;
-    //  List<SoftCluster> initialClusters = new ArrayList<SoftCluster>();
-    //  int numClusters = 3;
-    //  for (Vector point : points) {
-    //    if (initialClusters.size() < Math.min(numClusters, points.size())) {
-    //      initialClusters.add(new SoftCluster(point, id++));
-    //    } else {
-    //     break;
-    //    }
-    //  }
-    //  List<List<SoftCluster>> results = FuzzyKMeansClusterer.clusterPoints(points,
-    //                                                                       initialClusters,
-    //                                                                       measure,
-    //                                                                       threshold,
-    //                                                                       m,
-    //                                                                       numIterations);
-    //  for (List<SoftCluster> models : results) {
-    //    List<org.apache.mahout.clustering.Cluster> clusters = new ArrayList<org.apache.mahout.clustering.Cluster>();
-    //    for (SoftCluster cluster : models) {
-    //      org.apache.mahout.clustering.Cluster cluster2 = (org.apache.mahout.clustering.Cluster) cluster;
-    //      if (isSignificant(cluster2)) {
-    //        clusters.add(cluster2);
-    //      }
-    //    }
-    //    CLUSTERS.add(clusters);
-    //  }
-    //}
+    boolean b = false;
+    if (b) {
+      writeSampleData(samples);
+      Path clusters = RandomSeedGenerator.buildRandom(conf, samples, new Path(
+          output, "clusters-0"), 3, measure);
+      double threshold = 0.001;
+      int numIterations = 10;
+      int m = 3;
+      FuzzyKMeansDriver.run(samples, clusters, output, measure, threshold,
+          numIterations, m, true, true, threshold, true);
+      
+      loadClusters(output);
+    } else {
+      List<Vector> points = new ArrayList<Vector>();
+      for (VectorWritable sample : SAMPLE_DATA) {
+        points.add(sample.get());
+      }
+      List<Cluster> initialClusters = new ArrayList<Cluster>();
+      int id = 0;
+      int numClusters = 4;
+      for (Vector point : points) {
+        if (initialClusters.size() < Math.min(numClusters, points.size())) {
+          initialClusters.add(new SoftCluster(point, id++, measure));
+        } else {
+          break;
+        }
+      }
+      
+      ClusterClassifier prior = new ClusterClassifier(initialClusters);
+      ClusteringPolicy policy = new FuzzyKMeansClusteringPolicy();
+      ClusterClassifier posterior = new ClusterIterator(policy).iterate(points,
+          prior, 10);
+      CLUSTERS.add(posterior.getModels());
+    }
     new DisplayFuzzyKMeans();
   }
 }

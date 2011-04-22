@@ -123,8 +123,8 @@ public class DisplayDirichlet extends DisplayClustering {
     
     RandomUtils.useTestSeed();
     generateSamples();
-    int numIterations = 40;
-    int numClusters = 40;
+    int numIterations = 20;
+    int numClusters = 10;
     int alpha0 = 1;
     int thin = 3;
     int burnin = 5;
