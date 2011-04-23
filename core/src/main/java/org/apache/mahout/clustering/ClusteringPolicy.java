@@ -31,7 +31,7 @@ public interface ClusteringPolicy {
    *          a Vector of pdfs
    * @return a Vector of weights
    */
-  public abstract Vector select(Vector probabilities);
+  Vector select(Vector probabilities);
   
   /**
    * Update the policy with the given classifier
@@ -39,6 +39,6 @@ public interface ClusteringPolicy {
    * @param posterior
    *          a ClusterClassifier
    */
-  public abstract void update(ClusterClassifier posterior);
+  void update(ClusterClassifier posterior);
   
 }

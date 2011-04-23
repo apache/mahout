@@ -39,11 +39,11 @@ import java.util.Iterator;
 public final class LuceneIterableTest extends MahoutTestCase {
 
   private static final String [] DOCS = {
-                                         "The quick red fox jumped over the lazy brown dogs.",
-                                         "Mary had a little lamb whose fleece was white as snow.",
-                                         "Moby Dick is a story of a whale and a man obsessed.",
-                                         "The robber wore a black fleece jacket and a baseball cap.",
-                                         "The English Springer Spaniel is the best of all dogs."
+      "The quick red fox jumped over the lazy brown dogs.",
+      "Mary had a little lamb whose fleece was white as snow.",
+      "Moby Dick is a story of a whale and a man obsessed.",
+      "The robber wore a black fleece jacket and a baseball cap.",
+      "The English Springer Spaniel is the best of all dogs."
   };
 
   private RAMDirectory directory;
@@ -163,7 +163,10 @@ public final class LuceneIterableTest extends MahoutTestCase {
       return createTestIndex(termVector, new RAMDirectory(), true, 0);
   }
   
-  private static RAMDirectory createTestIndex(Field.TermVector termVector, RAMDirectory directory, boolean createNew, int startingId) throws IOException {
+  private static RAMDirectory createTestIndex(Field.TermVector termVector,
+                                              RAMDirectory directory,
+                                              boolean createNew,
+                                              int startingId) throws IOException {
     IndexWriter writer = new IndexWriter(
         directory,
         new StandardAnalyzer(Version.LUCENE_30),

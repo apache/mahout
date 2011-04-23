@@ -110,7 +110,9 @@ public class DisplayDirichlet extends DisplayClustering {
       ClusterClassifier posterior = iterator.iterate(points, prior, 5);
       List<Cluster> models2 = posterior.getModels();
       for (Iterator<Cluster> it = models2.iterator(); it.hasNext();) {
-        if (!isSignificant(it.next())) it.remove();
+        if (!isSignificant(it.next())) {
+          it.remove();
+        }
       }
       CLUSTERS.add(models2);
     }

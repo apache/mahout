@@ -52,7 +52,7 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
 
   private int numErrorDocs = 0;
   private int maxErrorDocs = 0;
-  private Bump125 bump = new Bump125();
+  private final Bump125 bump = new Bump125();
   private long nextLogRecord = bump.increment();
   private int skippedErrorMessages = 0;
 

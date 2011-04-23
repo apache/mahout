@@ -32,11 +32,10 @@ import org.apache.mahout.math.Vector;
 public class ClusterIterator {
   
   public ClusterIterator(ClusteringPolicy policy) {
-    super();
     this.policy = policy;
   }
   
-  private ClusteringPolicy policy;
+  private final ClusteringPolicy policy;
   
   /**
    * Iterate over data using a prior-trained ClusterClassifier, for a number of
@@ -51,7 +50,8 @@ public class ClusterIterator {
    * @return the posterior ClusterClassifier
    */
   public ClusterClassifier iterate(List<Vector> data,
-      ClusterClassifier classifier, int numIterations) {
+                                   ClusterClassifier classifier,
+                                   int numIterations) {
     for (int iteration = 1; iteration <= numIterations; iteration++) {
       for (Vector vector : data) {
         // classification yields probabilities
@@ -59,8 +59,7 @@ public class ClusterIterator {
         // policy selects weights for models given those probabilities
         Vector weights = policy.select(probabilities);
         // training causes all models to observe data
-        for (Iterator<Vector.Element> it = weights.iterateNonZero(); it
-            .hasNext();) {
+        for (Iterator<Vector.Element> it = weights.iterateNonZero(); it.hasNext();) {
           int index = it.next().index();
           classifier.train(index, vector, weights.get(index));
         }

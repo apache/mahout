@@ -24,7 +24,6 @@ import org.apache.mahout.math.Vector;
 public class DirichletClusteringPolicy implements ClusteringPolicy {
   
   public DirichletClusteringPolicy(int k, double alpha0) {
-    super();
     this.totalCounts = new DenseVector(k);
     this.alpha0 = alpha0;
     this.mixture = UncommonDistributions.rDirichlet(totalCounts, alpha0);
@@ -35,11 +34,12 @@ public class DirichletClusteringPolicy implements ClusteringPolicy {
   private Vector mixture;
   
   // Alpha_0 primes the Dirichlet distribution
-  private double alpha0;
+  private final double alpha0;
   
   // Total observed over all time
-  private Vector totalCounts;
+  private final Vector totalCounts;
   
+  @Override
   public Vector select(Vector probabilities) {
     int rMultinom = UncommonDistributions.rMultinom(probabilities.times(mixture));
     Vector weights = new SequentialAccessSparseVector(probabilities.size());
@@ -48,6 +48,7 @@ public class DirichletClusteringPolicy implements ClusteringPolicy {
   }
   
   // update the total counts and then the mixture
+  @Override
   public void update(ClusterClassifier prior) {
     for (int i = 0; i < totalCounts.size(); i++) {
       long nObserved = prior.getModels().get(i).getNumPoints();

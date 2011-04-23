@@ -42,8 +42,7 @@ import org.apache.mahout.math.function.TimesFunction;
  * asking the actual model to observe the vector and closing the classifier
  * causes all the models to computeParameters.
  */
-public class ClusterClassifier extends AbstractVectorClassifier implements
-    OnlineLearner, Writable {
+public class ClusterClassifier extends AbstractVectorClassifier implements OnlineLearner, Writable {
   
   private List<Cluster> models;
   
@@ -65,11 +64,11 @@ public class ClusterClassifier extends AbstractVectorClassifier implements
   
   @Override
   public Vector classify(Vector instance) {
-    Vector pdfs = new DenseVector(getModels().size());
-    if (getModels().get(0) instanceof SoftCluster) {
+    Vector pdfs = new DenseVector(models.size());
+    if (models.get(0) instanceof SoftCluster) {
       Collection<SoftCluster> clusters = new ArrayList<SoftCluster>();
       List<Double> distances = new ArrayList<Double>();
-      for (Cluster model : getModels()) {
+      for (Cluster model : models) {
         SoftCluster sc = (SoftCluster) model;
         clusters.add(sc);
         distances.add(sc.getMeasure().distance(instance, sc.getCenter()));
@@ -77,7 +76,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements
       return new FuzzyKMeansClusterer().computePi(clusters, distances);
     } else {
       int i = 0;
-      for (Cluster model : getModels()) {
+      for (Cluster model : models) {
         pdfs.set(i++, model.pdf(new VectorWritable(instance)));
       }
       return pdfs.assign(new TimesFunction(), 1.0 / pdfs.zSum());
@@ -86,9 +85,9 @@ public class ClusterClassifier extends AbstractVectorClassifier implements
   
   @Override
   public double classifyScalar(Vector instance) {
-    if (getModels().size() == 2) {
-      double pdf0 = getModels().get(0).pdf(new VectorWritable(instance));
-      double pdf1 = getModels().get(1).pdf(new VectorWritable(instance));
+    if (models.size() == 2) {
+      double pdf0 = models.get(0).pdf(new VectorWritable(instance));
+      double pdf1 = models.get(1).pdf(new VectorWritable(instance));
       return pdf0 / (pdf0 + pdf1);
     }
     throw new IllegalStateException();
@@ -96,17 +95,19 @@ public class ClusterClassifier extends AbstractVectorClassifier implements
   
   @Override
   public int numCategories() {
-    return getModels().size();
+    return models.size();
   }
   
+  @Override
   public void write(DataOutput out) throws IOException {
-    out.writeInt(getModels().size());
+    out.writeInt(models.size());
     out.writeUTF(modelClass);
-    for (Cluster cluster : getModels()) {
+    for (Cluster cluster : models) {
       cluster.write(out);
     }
   }
   
+  @Override
   public void readFields(DataInput in) throws IOException {
     int size = in.readInt();
     modelClass = in.readUTF();
@@ -119,7 +120,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements
       for (int i = 0; i < size; i++) {
         Cluster element = factory.newInstance();
         element.readFields(in);
-        getModels().add(element);
+        models.add(element);
       }
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
@@ -130,8 +131,9 @@ public class ClusterClassifier extends AbstractVectorClassifier implements
     }
   }
   
+  @Override
   public void train(int actual, Vector instance) {
-    getModels().get(actual).observe(new VectorWritable(instance));
+    models.get(actual).observe(new VectorWritable(instance));
   }
   
   /**
@@ -145,20 +147,22 @@ public class ClusterClassifier extends AbstractVectorClassifier implements
    *          a double weighting factor
    */
   public void train(int actual, Vector data, double weight) {
-    getModels().get(actual).observe(new VectorWritable(data), weight);
+    models.get(actual).observe(new VectorWritable(data), weight);
   }
   
-  public void train(long trackingKey, String groupKey, int actual,
-      Vector instance) {
-    getModels().get(actual).observe(new VectorWritable(instance));
+  @Override
+  public void train(long trackingKey, String groupKey, int actual, Vector instance) {
+    models.get(actual).observe(new VectorWritable(instance));
   }
   
+  @Override
   public void train(long trackingKey, int actual, Vector instance) {
-    getModels().get(actual).observe(new VectorWritable(instance));
+    models.get(actual).observe(new VectorWritable(instance));
   }
   
+  @Override
   public void close() {
-    for (Cluster cluster : getModels()) {
+    for (Cluster cluster : models) {
       cluster.computeParameters();
     }
   }
