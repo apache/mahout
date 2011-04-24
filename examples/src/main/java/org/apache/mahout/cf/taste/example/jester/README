@@ -1,5 +1,5 @@
 Code works with Jester data set, which is not included in this distribution but is downloadable from
-http://www.ieor.berkeley.edu/~goldberg/jester-data/
+http://eigentaste.berkeley.edu/dataset/
 
 Note that the code here works on data set 1, after being converted to CSV format.
 

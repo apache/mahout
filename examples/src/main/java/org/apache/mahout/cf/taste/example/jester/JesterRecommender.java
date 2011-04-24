@@ -30,8 +30,8 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 
 /**
- * A simple {@link org.apache.mahout.cf.taste.recommender.Recommender} implemented for the Book Crossing demo.
- * See the <a href="http://www.informatik.uni-freiburg.de/~cziegler/BX/">Book Crossing site</a>.
+ * A simple {@link Recommender} implemented for the Jester Online Joke Recommender data set demo.
+ * See the <a href="http://eigentaste.berkeley.edu/dataset/">Jester site</a>.
  */
 public final class JesterRecommender implements Recommender {
   
