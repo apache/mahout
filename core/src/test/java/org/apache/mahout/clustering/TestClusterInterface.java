@@ -19,10 +19,6 @@ package org.apache.mahout.clustering;
 
 import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.dirichlet.DirichletCluster;
-import org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalModel;
-import org.apache.mahout.clustering.dirichlet.models.L1Model;
-import org.apache.mahout.clustering.dirichlet.models.NormalModel;
-import org.apache.mahout.clustering.dirichlet.models.SampledNormalModel;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.DistanceMeasure;
@@ -36,72 +32,6 @@ import org.junit.Test;
 public final class TestClusterInterface extends MahoutTestCase {
 
   private static final DistanceMeasure measure = new ManhattanDistanceMeasure();
-
-  @Test
-  public void testDirichletNormalModel() {
-    double[] d = { 1.1, 2.2, 3.3 };
-    Vector m = new DenseVector(d);
-    Cluster model = new NormalModel(5, m, 0.75);
-    String format = model.asFormatString(null);
-    assertEquals("nm{n=0 m=[1.100, 2.200, 3.300] sd=0.75}", format);
-  }
-
-  @Test
-  public void testDirichletSampledNormalModel() {
-    double[] d = { 1.1, 2.2, 3.3 };
-    Vector m = new DenseVector(d);
-    Cluster model = new SampledNormalModel(5, m, 0.75);
-    String format = model.asFormatString(null);
-    assertEquals("snm{n=0 m=[1.100, 2.200, 3.300] sd=0.75}", format);
-  }
-
-  @Test
-  public void testDirichletASNormalModel() {
-    double[] d = { 1.1, 2.2, 3.3 };
-    Vector m = new DenseVector(d);
-    Cluster model = new AsymmetricSampledNormalModel(5, m, m);
-    String format = model.asFormatString(null);
-    assertEquals("asnm{n=0 m=[1.100, 2.200, 3.300] sd=[1.100, 2.200, 3.300]}", format);
-  }
-
-  @Test
-  public void testDirichletL1Model() {
-    double[] d = { 1.1, 2.2, 3.3 };
-    Vector m = new DenseVector(d);
-    Cluster model = new L1Model(5, m);
-    String format = model.asFormatString(null);
-    assertEquals("l1m{n=0 c=[1.100, 2.200, 3.300]}", format);
-  }
-
-  @Test
-  public void testDirichletNormalModelClusterAsFormatString() {
-    double[] d = { 1.1, 2.2, 3.3 };
-    Vector m = new DenseVector(d);
-    NormalModel model = new NormalModel(5, m, 0.75);
-    Cluster cluster = new DirichletCluster(model, 35.0);
-    String format = cluster.asFormatString(null);
-    assertEquals("C-5: nm{n=0 m=[1.100, 2.200, 3.300] sd=0.75}", format);
-  }
-
-  @Test
-  public void testDirichletAsymmetricSampledNormalModelClusterAsFormatString() {
-    double[] d = { 1.1, 2.2, 3.3 };
-    Vector m = new DenseVector(d);
-    AsymmetricSampledNormalModel model = new AsymmetricSampledNormalModel(5, m, m);
-    Cluster cluster = new DirichletCluster(model, 35.0);
-    String format = cluster.asFormatString(null);
-    assertEquals("C-5: asnm{n=0 m=[1.100, 2.200, 3.300] sd=[1.100, 2.200, 3.300]}", format);
-  }
-
-  @Test
-  public void testDirichletL1ModelClusterAsFormatString() {
-    double[] d = { 1.1, 2.2, 3.3 };
-    Vector m = new DenseVector(d);
-    L1Model model = new L1Model(5, m);
-    Cluster cluster = new DirichletCluster(model, 35.0);
-    String format = cluster.asFormatString(null);
-    assertEquals("C-5: l1m{n=0 c=[1.100, 2.200, 3.300]}", format);
-  }
 
   @Test
   public void testCanopyAsFormatString() {

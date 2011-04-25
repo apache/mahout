@@ -23,7 +23,6 @@ import java.util.List;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.clustering.canopy.Canopy;
-import org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalModel;
 import org.apache.mahout.clustering.dirichlet.models.GaussianCluster;
 import org.apache.mahout.clustering.fuzzykmeans.SoftCluster;
 import org.apache.mahout.clustering.kmeans.Cluster;
@@ -127,24 +126,6 @@ public final class TestVectorModelClassifier extends MahoutTestCase {
         .assign(1), 1));
     models.add(new GaussianCluster(new DenseVector(2).assign(-1),
         new DenseVector(2).assign(1), 2));
-    AbstractVectorClassifier classifier = new VectorModelClassifier(models);
-    Vector pdf = classifier.classify(new DenseVector(2));
-    assertEquals("[0,0]", "[0.212, 0.576, 0.212]",
-        AbstractCluster.formatVector(pdf, null));
-    pdf = classifier.classify(new DenseVector(2).assign(2));
-    assertEquals("[2,2]", "[0.952, 0.047, 0.000]",
-        AbstractCluster.formatVector(pdf, null));
-  }
-  
-  @Test
-  public void testASNClusterClassification() {
-    List<Model<VectorWritable>> models = new ArrayList<Model<VectorWritable>>();
-    models.add(new AsymmetricSampledNormalModel(0,
-        new DenseVector(2).assign(1), new DenseVector(2).assign(1)));
-    models.add(new AsymmetricSampledNormalModel(1, new DenseVector(2),
-        new DenseVector(2).assign(1)));
-    models.add(new AsymmetricSampledNormalModel(2, new DenseVector(2)
-        .assign(-1), new DenseVector(2).assign(1)));
     AbstractVectorClassifier classifier = new VectorModelClassifier(models);
     Vector pdf = classifier.classify(new DenseVector(2));
     assertEquals("[0,0]", "[0.212, 0.576, 0.212]",

@@ -21,11 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.mahout.clustering.Cluster;
-import org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalDistribution;
 import org.apache.mahout.clustering.dirichlet.models.DistanceMeasureClusterDistribution;
 import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
-import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
-import org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.VectorWritable;
@@ -96,97 +93,7 @@ public final class TestDirichletClustering extends MahoutTestCase {
     generateSamples(30, 0, 1, 0.1);
 
     DirichletClusterer dc = new DirichletClusterer(sampleData,
-                                                   new NormalModelDistribution(new VectorWritable(new DenseVector(2))),
-                                                   1.0,
-                                                   10,
-                                                   1,
-                                                   0);
-    List<Cluster[]> result = dc.cluster(30);
-    printResults(result, 2);
-    assertNotNull(result);
-  }
-
-  @Test
-  public void testDirichletCluster100s() {
-    System.out.println("testDirichletCluster100s");
-    generateSamples(40, 1, 1, 3);
-    generateSamples(30, 1, 0, 0.1);
-    generateSamples(30, 0, 1, 0.1);
-
-    DirichletClusterer dc = new DirichletClusterer(sampleData,
-                                                   new SampledNormalDistribution(new VectorWritable(new DenseVector(2))),
-                                                   1.0,
-                                                   10,
-                                                   1,
-                                                   0);
-    List<Cluster[]> result = dc.cluster(30);
-    printResults(result, 2);
-    assertNotNull(result);
-  }
-
-  @Test
-  public void testDirichletCluster100as() {
-    System.out.println("testDirichletCluster100as");
-    generateSamples(40, 1, 1, 3);
-    generateSamples(30, 1, 0, 0.1);
-    generateSamples(30, 0, 1, 0.1);
-
-    DirichletClusterer dc = new DirichletClusterer(sampleData,
-                                                   new AsymmetricSampledNormalDistribution(new VectorWritable(new DenseVector(2))),
-                                                   1.0,
-                                                   10,
-                                                   1,
-                                                   0);
-    List<Cluster[]> result = dc.cluster(30);
-    printResults(result, 2);
-    assertNotNull(result);
-  }
-
-  @Test
-  public void testDirichletCluster100C3() {
-    System.out.println("testDirichletCluster100");
-    generateSamples(40, 1, 1, 3, 3);
-    generateSamples(30, 1, 0, 0.1, 3);
-    generateSamples(30, 0, 1, 0.1, 3);
-
-    DirichletClusterer dc = new DirichletClusterer(sampleData,
-                                                   new NormalModelDistribution(new VectorWritable(new DenseVector(3))),
-                                                   1.0,
-                                                   10,
-                                                   1,
-                                                   0);
-    List<Cluster[]> result = dc.cluster(30);
-    printResults(result, 2);
-    assertNotNull(result);
-  }
-
-  @Test
-  public void testDirichletCluster100sC3() {
-    System.out.println("testDirichletCluster100s");
-    generateSamples(40, 1, 1, 3, 3);
-    generateSamples(30, 1, 0, 0.1, 3);
-    generateSamples(30, 0, 1, 0.1, 3);
-
-    DirichletClusterer dc = new DirichletClusterer(sampleData,
-                                                   new SampledNormalDistribution(new VectorWritable(new DenseVector(3))),
-                                                   1.0,
-                                                   10,
-                                                   1,
-                                                   0);
-    List<Cluster[]> result = dc.cluster(30);
-    printResults(result, 2);
-    assertNotNull(result);
-  }
-
-  @Test
-  public void testDirichletCluster100asC3() {
-    System.out.println("testDirichletCluster100as");
-    generateSamples(40, 1, 1, 3, 3);
-    generateSamples(30, 1, 0, 0.1, 3);
-    generateSamples(30, 0, 1, 0.1, 3);
-
-    DirichletClusterer dc = new DirichletClusterer(sampleData,
-                                                   new AsymmetricSampledNormalDistribution(new VectorWritable(new DenseVector(3))),
+                                                   new GaussianClusterDistribution(new VectorWritable(new DenseVector(2))),
                                                    1.0,
                                                    10,
                                                    1,

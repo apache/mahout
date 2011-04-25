@@ -35,7 +35,7 @@ import org.apache.lucene.util.Version;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.Model;
 import org.apache.mahout.clustering.dirichlet.models.DistanceMeasureClusterDistribution;
-import org.apache.mahout.clustering.dirichlet.models.L1ModelDistribution;
+import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.utils.MahoutTestCase;
@@ -206,7 +206,8 @@ public final class TestL1ModelClustering extends MahoutTestCase {
   @Test
   public void testDocs() throws Exception {
     getSampleData(DOCS);
-    DirichletClusterer dc = new DirichletClusterer(sampleData, new L1ModelDistribution(sampleData.get(0)), 1.0, 15, 1, 0);
+    DirichletClusterer dc =
+        new DirichletClusterer(sampleData, new GaussianClusterDistribution(sampleData.get(0)), 1.0, 15, 1, 0);
     List<Cluster[]> result = dc.cluster(10);
     assertNotNull(result);
     printSamples(result, 0);
@@ -231,7 +232,8 @@ public final class TestL1ModelClustering extends MahoutTestCase {
   @Test
   public void testDocs2() throws Exception {
     getSampleData(DOCS2);
-    DirichletClusterer dc = new DirichletClusterer(sampleData, new L1ModelDistribution(sampleData.get(0)), 1.0, 15, 1, 0);
+    DirichletClusterer dc =
+        new DirichletClusterer(sampleData, new GaussianClusterDistribution(sampleData.get(0)), 1.0, 15, 1, 0);
     List<Cluster[]> result = dc.cluster(10);
     assertNotNull(result);
     printSamples(result, 0);

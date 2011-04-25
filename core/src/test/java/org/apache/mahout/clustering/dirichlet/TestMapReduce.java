@@ -38,13 +38,10 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.Model;
-import org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalModel;
 import org.apache.mahout.clustering.dirichlet.models.DistanceMeasureClusterDistribution;
 import org.apache.mahout.clustering.dirichlet.models.DistributionDescription;
-import org.apache.mahout.clustering.dirichlet.models.NormalModel;
-import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
-import org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution;
-import org.apache.mahout.clustering.dirichlet.models.SampledNormalModel;
+import org.apache.mahout.clustering.dirichlet.models.GaussianCluster;
+import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
 import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -127,7 +124,7 @@ public final class TestMapReduce extends MahoutTestCase {
   public void testMapper() throws Exception {
     generateSamples(10, 0, 0, 1);
     DirichletState state =
-        new DirichletState(new NormalModelDistribution(new VectorWritable(new DenseVector(2))), 5, 1);
+        new DirichletState(new GaussianClusterDistribution(new VectorWritable(new DenseVector(2))), 5, 1);
     DirichletMapper mapper = new DirichletMapper();
     mapper.setup(state);
 
@@ -150,7 +147,7 @@ public final class TestMapReduce extends MahoutTestCase {
     generateSamples(100, 0, 2, 1);
     generateSamples(100, 2, 2, 1);
     DirichletState state =
-        new DirichletState(new SampledNormalDistribution(new VectorWritable(new DenseVector(2))), 20, 1);
+        new DirichletState(new GaussianClusterDistribution(new VectorWritable(new DenseVector(2))), 20, 1);
     DirichletMapper mapper = new DirichletMapper();
     mapper.setup(state);
 
@@ -182,7 +179,7 @@ public final class TestMapReduce extends MahoutTestCase {
     generateSamples(100, 0, 2, 1);
     generateSamples(100, 2, 2, 1);
     DirichletState state =
-        new DirichletState(new SampledNormalDistribution(new VectorWritable(new DenseVector(2))), 20, 1.0);
+        new DirichletState(new GaussianClusterDistribution(new VectorWritable(new DenseVector(2))), 20, 1.0);
 
     Collection<Model<VectorWritable>[]> models = new ArrayList<Model<VectorWritable>[]>();
 
@@ -254,7 +251,7 @@ public final class TestMapReduce extends MahoutTestCase {
     // Now run the driver using the run() method. Others can use runJob() as before
     Integer maxIterations = 5;
     DistributionDescription description =
-        new DistributionDescription(SampledNormalDistribution.class.getName(),
+        new DistributionDescription(GaussianClusterDistribution.class.getName(),
                                     DenseVector.class.getName(),
                                     null,
                                     2);
@@ -294,7 +291,7 @@ public final class TestMapReduce extends MahoutTestCase {
     // Now run the driver using the run() method. Others can use runJob() as before
     Integer maxIterations = 5;
     DistributionDescription description =
-        new DistributionDescription(SampledNormalDistribution.class.getName(),
+        new DistributionDescription(GaussianClusterDistribution.class.getName(),
                                     DenseVector.class.getName(),
                                     null,
                                     2);
@@ -327,7 +324,7 @@ public final class TestMapReduce extends MahoutTestCase {
     // Now run the driver
     int maxIterations = 3;
     DistributionDescription description =
-        new DistributionDescription(SampledNormalDistribution.class.getName(),
+        new DistributionDescription(GaussianClusterDistribution.class.getName(),
                                     DenseVector.class.getName(),
                                     null,
                                     2);
@@ -511,61 +508,6 @@ public final class TestMapReduce extends MahoutTestCase {
     sampleData = new ArrayList<VectorWritable>();
     generateSamples(500, 2, 2, 1);
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data4.txt"), fs, conf);
-  }
-
-  @Test
-  public void testNormalModelWritableSerialization() throws Exception {
-    double[] m = { 1.1, 2.2, 3.3 };
-    Writable model = new NormalModel(5, new DenseVector(m), 3.3);
-    DataOutputBuffer out = new DataOutputBuffer();
-    model.write(out);
-    Writable model2 = new NormalModel();
-    DataInputBuffer in = new DataInputBuffer();
-    in.reset(out.getData(), out.getLength());
-    model2.readFields(in);
-    assertEquals("models", model.toString(), model2.toString());
-  }
-
-  @Test
-  public void testSampledNormalModelWritableSerialization() throws Exception {
-    double[] m = { 1.1, 2.2, 3.3 };
-    Writable model = new SampledNormalModel(5, new DenseVector(m), 3.3);
-    DataOutputBuffer out = new DataOutputBuffer();
-    model.write(out);
-    Writable model2 = new SampledNormalModel();
-    DataInputBuffer in = new DataInputBuffer();
-    in.reset(out.getData(), out.getLength());
-    model2.readFields(in);
-    assertEquals("models", model.toString(), model2.toString());
-  }
-
-  @Test
-  public void testAsymmetricSampledNormalModelWritableSerialization() throws Exception {
-    double[] m = { 1.1, 2.2, 3.3 };
-    double[] s = { 3.3, 4.4, 5.5 };
-    Writable model = new AsymmetricSampledNormalModel(5, new DenseVector(m), new DenseVector(s));
-    DataOutputBuffer out = new DataOutputBuffer();
-    model.write(out);
-    Writable model2 = new AsymmetricSampledNormalModel();
-    DataInputBuffer in = new DataInputBuffer();
-    in.reset(out.getData(), out.getLength());
-    model2.readFields(in);
-    assertEquals("models", model.toString(), model2.toString());
-  }
-
-  @Test
-  public void testClusterWritableSerialization() throws Exception {
-    double[] m = { 1.1, 2.2, 3.3 };
-    DirichletCluster cluster = new DirichletCluster(new NormalModel(5, new DenseVector(m), 4), 10);
-    DataOutputBuffer out = new DataOutputBuffer();
-    cluster.write(out);
-    DirichletCluster cluster2 = new DirichletCluster();
-    DataInputBuffer in = new DataInputBuffer();
-    in.reset(out.getData(), out.getLength());
-    cluster2.readFields(in);
-    assertEquals("count", cluster.getTotalCount(), cluster2.getTotalCount(), EPSILON);
-    assertNotNull("model null", cluster2.getModel());
-    assertEquals("model", cluster.getModel().toString(), cluster2.getModel().toString());
   }
 
 }

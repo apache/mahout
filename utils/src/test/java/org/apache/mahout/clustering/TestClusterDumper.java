@@ -35,7 +35,6 @@ import org.apache.mahout.clustering.dirichlet.DirichletDriver;
 import org.apache.mahout.clustering.dirichlet.models.DistanceMeasureClusterDistribution;
 import org.apache.mahout.clustering.dirichlet.models.DistributionDescription;
 import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
-import org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution;
 import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
@@ -233,23 +232,6 @@ public final class TestClusterDumper extends MahoutTestCase {
     new MeanShiftCanopyDriver().run(conf, getTestTempDirPath("testdata"), output, measure, 0.5, 0.01, 0.05, 10, false, true, true);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
-    clusterDumper.printClusters(termDictionary);
-  }
-
-  @Test
-  public void testDirichlet() throws Exception {
-    Path output = getTestTempDirPath("output");
-    NamedVector prototype = (NamedVector) sampleData.get(0).get();
-    DistributionDescription description =
-        new DistributionDescription(SampledNormalDistribution.class.getName(),
-                                    RandomAccessSparseVector.class.getName(),
-                                    null,
-                                    prototype.getDelegate().size());
-    Configuration conf = new Configuration();
-    DirichletDriver.run(conf, getTestTempDirPath("testdata"), output, description, 15, 10, 1.0, true, true, 0, true);
-    // run ClusterDumper
-    ClusterDumper clusterDumper =
-        new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
 

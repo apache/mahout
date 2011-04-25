@@ -36,7 +36,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.dirichlet.models.DistributionDescription;
-import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
+import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -78,8 +78,8 @@ public class DirichletDriver extends AbstractJob {
     addOption(ALPHA_OPTION, "a0", "The alpha0 value for the DirichletDistribution. Defaults to 1.0", "1.0");
     addOption(MODEL_DISTRIBUTION_CLASS_OPTION,
               "md",
-              "The ModelDistribution class name. Defaults to NormalModelDistribution",
-              NormalModelDistribution.class.getName());
+              "The ModelDistribution class name. Defaults to GaussianClusterDistribution",
+              GaussianClusterDistribution.class.getName());
     addOption(MODEL_PROTOTYPE_CLASS_OPTION,
               "mp",
               "The ModelDistribution prototype Vector class name. Defaults to RandomAccessSparseVector",

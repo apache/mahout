@@ -29,7 +29,6 @@ import org.apache.mahout.clustering.conversion.InputDriver;
 import org.apache.mahout.clustering.dirichlet.DirichletDriver;
 import org.apache.mahout.clustering.dirichlet.models.DistributionDescription;
 import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
-import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -78,8 +77,8 @@ public final class Job extends AbstractJob {
     addOption(new DefaultOptionBuilder().withLongName(DirichletDriver.MODEL_DISTRIBUTION_CLASS_OPTION)
         .withRequired(false).withShortName("md").withArgument(new ArgumentBuilder()
             .withName(DirichletDriver.MODEL_DISTRIBUTION_CLASS_OPTION)
-            .withDefault(NormalModelDistribution.class.getName()).withMinimum(1).withMaximum(1).create())
-        .withDescription("The ModelDistribution class name. " + "Defaults to NormalModelDistribution").create());
+            .withDefault(GaussianClusterDistribution.class.getName()).withMinimum(1).withMaximum(1).create())
+        .withDescription("The ModelDistribution class name. Defaults to GaussianClusterDistribution").create());
     addOption(new DefaultOptionBuilder().withLongName(DirichletDriver.MODEL_PROTOTYPE_CLASS_OPTION).withRequired(false)
         .withShortName("mp").withArgument(new ArgumentBuilder().withName("prototypeClass")
             .withDefault(RandomAccessSparseVector.class.getName()).withMinimum(1).withMaximum(1).create())
