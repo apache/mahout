@@ -629,7 +629,7 @@
       <!-- most of this profile lives in other places, like distribution -->
       <id>release.prepare</id>
       <properties>
-        <maven.test.skip>true</maven.test.skip>
+        <skipTests>true</skipTests>
         <pmd.skip>true</pmd.skip>
         <checkstyle.skip>true</checkstyle.skip>
       </properties>
@@ -637,7 +637,7 @@
     <profile>
       <id>release</id>
       <properties>
-        <maven.test.skip>true</maven.test.skip>
+        <skipTests>true</skipTests>
         <pmd.skip>true</pmd.skip>
         <checkstyle.skip>true</checkstyle.skip>
       </properties>
