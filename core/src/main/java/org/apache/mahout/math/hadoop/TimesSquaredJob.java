@@ -165,7 +165,7 @@ public final class TimesSquaredJob {
     DistributedCache.setCacheFiles(new URI[] {ivpURI}, conf);
 
     conf.set(INPUT_VECTOR, ivpURI.toString());
-    conf.setBoolean(IS_SPARSE_OUTPUT, !(v instanceof DenseVector));
+    conf.setBoolean(IS_SPARSE_OUTPUT, !(v.isDense()));
     conf.setInt(OUTPUT_VECTOR_DIMENSION, outputVectorDim);
     FileInputFormat.addInputPath(conf, matrixInputPath);
     conf.setInputFormat(SequenceFileInputFormat.class);
@@ -211,9 +211,6 @@ public final class TimesSquaredJob {
         inputVector = iterator.next().get();
         iterator.close();
 
-        if (!(inputVector instanceof SequentialAccessSparseVector || inputVector instanceof DenseVector)) {
-          inputVector = new SequentialAccessSparseVector(inputVector);
-        }
         int outDim = conf.getInt(OUTPUT_VECTOR_DIMENSION, Integer.MAX_VALUE);
         outputVector = conf.getBoolean(IS_SPARSE_OUTPUT, false)
                      ? new RandomAccessSparseVector(outDim, 10)

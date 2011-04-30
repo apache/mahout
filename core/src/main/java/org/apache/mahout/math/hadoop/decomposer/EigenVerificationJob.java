@@ -111,7 +111,8 @@ public class EigenVerificationJob extends AbstractJob {
            getOutputPath(),
            argMap.get("--inMemory") != null,
            Double.parseDouble(argMap.get("--maxError")),
-           Double.parseDouble(argMap.get("--minEigenvalue")), Integer.parseInt(argMap.get("--maxEigens")));
+           Double.parseDouble(argMap.get("--minEigenvalue")),
+           Integer.parseInt(argMap.get("--maxEigens")));
     return 0;
   }
 
@@ -151,8 +152,8 @@ public class EigenVerificationJob extends AbstractJob {
 
     eigenVerifier = new SimpleEigenVerifier();
 
-    //VectorIterable pairwiseInnerProducts = computePairwiseInnerProducts();
-    computePairwiseInnerProducts();
+    // we don't currently verify orthonormality here.
+    // VectorIterable pairwiseInnerProducts = computePairwiseInnerProducts();
 
     Map<MatrixSlice, EigenStatus> eigenMetaData = verifyEigens();
 
@@ -174,6 +175,7 @@ public class EigenVerificationJob extends AbstractJob {
     addOption("inMemory", "mem", "Buffer eigen matrix into memory (if you have enough!)", "false");
     addOption("maxError", "err", "Maximum acceptable error", "0.05");
     addOption("minEigenvalue", "mev", "Minimum eigenvalue to keep the vector for", "0.0");
+    addOption("maxEigens", "max", "Maximum number of eigenvectors to keep (0 means all)", "0");
 
     return parseArguments(args);
   }
