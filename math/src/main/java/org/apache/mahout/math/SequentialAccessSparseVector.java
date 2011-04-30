@@ -20,6 +20,7 @@ package org.apache.mahout.math;
 import com.google.common.collect.AbstractIterator;
 import org.apache.mahout.math.function.Functions;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -63,11 +64,40 @@ public class SequentialAccessSparseVector extends AbstractVector {
 
   public SequentialAccessSparseVector(Vector other) {
     this(other.size(), other.getNumNondefaultElements());
+    
+    if (!other.isSequentialAccess()) {
+      // If the incoming Vector to copy is random, then adding items
+      // from the Iterator can degrade performance dramatically if 
+      // the number of elements is large as this Vector tries to stay
+      // in order as items are added, so it's better to sort the other
+      // Vector's elements by index and then add them to this
+      copySortedRandomAccessSparseVector(other);
+    } else {
+      Iterator<Element> it = other.iterateNonZero();
+      Element e;
+      while (it.hasNext() && (e = it.next()) != null) {
+        set(e.index(), e.get());
+      }
+    }    
+  }
+
+  // Sorts a RandomAccessSparseVectors Elements before adding them to this
+  private int copySortedRandomAccessSparseVector(Vector other) {
+    int elementCount = other.getNumNondefaultElements();
+    OrderedElement[] sortableElements = new OrderedElement[elementCount];
     Iterator<Element> it = other.iterateNonZero();
     Element e;
+    int s=0;
     while (it.hasNext() && (e = it.next()) != null) {
-      set(e.index(), e.get());
+      sortableElements[s++] = new OrderedElement(e.index(), e.get());
     }
+    Arrays.sort(sortableElements);
+    for (int i = 0; i < sortableElements.length; i++) {
+      values.getIndices()[i] = sortableElements[i].index;
+      values.getValues()[i] = sortableElements[i].value;
+    }
+    values = new OrderedIntDoubleMapping(values.getIndices(), values.getValues(), elementCount);
+    return elementCount;
   }
 
   public SequentialAccessSparseVector(SequentialAccessSparseVector other, boolean shallowCopy) {
@@ -188,7 +218,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
     if (this == x) {
       return dotSelf();
     }
-    
+
     if (x instanceof SequentialAccessSparseVector) {
       // For sparse SeqAccVectors. do dot product without lookup in a linear fashion
       Iterator<Element> myIter = iterateNonZero();
@@ -220,7 +250,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
       }
       return result;
     } else { // seq.rand. seq.dense
-      double result = 0.0;      
+      double result = 0.0;
       Iterator<Element> iter = iterateNonZero();
       while (iter.hasNext()) {
         Element element = iter.next();
@@ -305,7 +335,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
 
     @Override
     public void set(double value) {
-      lengthSquared = -1;      
+      lengthSquared = -1;
       values.getValues()[offset] = value;
     }
   }
@@ -341,13 +371,31 @@ public class SequentialAccessSparseVector extends AbstractVector {
 
     @Override
     public void set(double value) {
-      lengthSquared = -1;      
+      lengthSquared = -1;
       if (index == values.getIndices()[nextOffset]) {
         values.getValues()[nextOffset] = value;
       } else {
         // Yes, this works; the offset into indices of the new value's index will still be nextOffset
         values.set(index, value);
       }
+    }
+  }
+
+  // Comparable Element for sorting Elements by index
+  private static final class OrderedElement implements Comparable<OrderedElement> {
+    private final int index;
+    private final double value;
+    
+    OrderedElement(int index, double value) {
+      this.index = index;
+      this.value = value;
+    }
+    
+    @Override
+    public int compareTo(final OrderedElement that) {
+      // both indexes are positive, and neither can be Integer.MAX_VALUE (otherwise there would be
+      // an array somewhere with Integer.MAX_VALUE + 1 elements)
+      return this.index - that.index;
     }
   }
   

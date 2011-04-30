@@ -131,11 +131,12 @@ public class MatrixMultiplicationJob extends AbstractJob {
       Vector outFrag = firstIsOutFrag ? ((VectorWritable)v.get(0)).get() : ((VectorWritable)v.get(1)).get();
       Vector multiplier = firstIsOutFrag ? ((VectorWritable)v.get(1)).get() : ((VectorWritable)v.get(0)).get();
 
+      VectorWritable outVector = new VectorWritable();
       Iterator<Vector.Element> it = multiplier.iterateNonZero();
       while (it.hasNext()) {
         Vector.Element e = it.next();
         row.set(e.index());
-        VectorWritable outVector = new VectorWritable(outFrag.times(e.get()));
+        outVector.set(outFrag.times(e.get()));
         out.collect(row, outVector);
       }
     }

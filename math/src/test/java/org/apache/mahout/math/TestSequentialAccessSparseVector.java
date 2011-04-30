@@ -39,6 +39,4 @@ public final class TestSequentialAccessSparseVector extends AbstractTestVector {
 
     assertEquals("dot2", -0.666666667, v.dot(w), EPSILON);
   }
-
-
 }
