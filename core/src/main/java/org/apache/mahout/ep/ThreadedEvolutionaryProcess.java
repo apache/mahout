@@ -108,7 +108,7 @@ public class ThreadedEvolutionaryProcess {
 
       int k = 0;
       while (pending.size() + working.size() < threadCount) {
-        State<?, ?> tmp = parents[(k++) % parentDepth];
+        State<?,?> tmp = parents[k++ % parentDepth];
         pending.add(tmp.mutate());
       }
     } while (System.currentTimeMillis() - t0 < timeLimit);

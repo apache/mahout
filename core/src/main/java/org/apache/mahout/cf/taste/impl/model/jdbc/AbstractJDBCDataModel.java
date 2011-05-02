@@ -327,7 +327,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       List<Preference> currentPrefs = new ArrayList<Preference>();
       while (rs.next()) {
         long nextUserID = getLongColumn(rs, 1);
-        if ((currentUserID != null) && !currentUserID.equals(nextUserID) && !currentPrefs.isEmpty()) {
+        if (currentUserID != null && !currentUserID.equals(nextUserID) && !currentPrefs.isEmpty()) {
           result.put(currentUserID, new GenericUserPreferenceArray(currentPrefs));
           currentPrefs.clear();
         }
@@ -373,7 +373,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       FastIDSet currentItemIDs = new FastIDSet(2);
       while (rs.next()) {
         long nextUserID = getLongColumn(rs, 1);
-        if (currentUserIDSet && (currentUserID != nextUserID) && !currentItemIDs.isEmpty()) {
+        if (currentUserIDSet && currentUserID != nextUserID && !currentItemIDs.isEmpty()) {
           result.put(currentUserID, currentItemIDs);
           currentItemIDs = new FastIDSet(2);
         }
@@ -747,7 +747,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
    * An {@link java.util.Iterator} which returns items from a {@link ResultSet}. This is a useful way to
    * iterate over all user data since it does not require all data to be read into memory at once. It does
    * however require that the DB connection be held open. Note that this class will only release database
-   * resources after {@link #hasNext()} has been called and has returned <code>false</code>; callers should
+   * resources after {@link #hasNext()} has been called and has returned {@code false}; callers should
    * make sure to "drain" the entire set of data to avoid tying up database resources.
    * </p>
    */

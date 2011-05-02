@@ -59,7 +59,7 @@ public final class TopItems {
     double lowestTopValue = Double.NEGATIVE_INFINITY;
     while (possibleItemIDs.hasNext()) {
       long itemID = possibleItemIDs.next();
-      if ((rescorer == null) || !rescorer.isFiltered(itemID)) {
+      if (rescorer == null || !rescorer.isFiltered(itemID)) {
         double preference;
         try {
           preference = estimator.estimate(itemID);
@@ -67,7 +67,7 @@ public final class TopItems {
           continue;
         }
         double rescoredPref = rescorer == null ? preference : rescorer.rescore(itemID, preference);
-        if (!Double.isNaN(rescoredPref) && (!full || (rescoredPref > lowestTopValue))) {
+        if (!Double.isNaN(rescoredPref) && (!full || rescoredPref > lowestTopValue)) {
           topItems.add(new GenericRecommendedItem(itemID, (float) rescoredPref));
           if (full) {
             topItems.poll();
@@ -98,7 +98,7 @@ public final class TopItems {
     double lowestTopValue = Double.NEGATIVE_INFINITY;
     while (allUserIDs.hasNext()) {
       long userID = allUserIDs.next();
-      if ((rescorer != null) && rescorer.isFiltered(userID)) {
+      if (rescorer != null && rescorer.isFiltered(userID)) {
         continue;
       }
       double similarity;
@@ -108,7 +108,7 @@ public final class TopItems {
         continue;
       }
       double rescoredSimilarity = rescorer == null ? similarity : rescorer.rescore(userID, similarity);
-      if (!Double.isNaN(rescoredSimilarity) && (!full || (rescoredSimilarity > lowestTopValue))) {
+      if (!Double.isNaN(rescoredSimilarity) && (!full || rescoredSimilarity > lowestTopValue)) {
         topUsers.add(new SimilarUser(userID, similarity));
         if (full) {
           topUsers.poll();
@@ -153,7 +153,7 @@ public final class TopItems {
     while (allSimilarities.hasNext()) {
       GenericItemSimilarity.ItemItemSimilarity similarity = allSimilarities.next();
       double value = similarity.getValue();
-      if (!Double.isNaN(value) && (!full || (value > lowestTopValue))) {
+      if (!Double.isNaN(value) && (!full || value > lowestTopValue)) {
         topSimilarities.add(similarity);
         if (full) {
           topSimilarities.poll();
@@ -185,7 +185,7 @@ public final class TopItems {
     while (allSimilarities.hasNext()) {
       GenericUserSimilarity.UserUserSimilarity similarity = allSimilarities.next();
       double value = similarity.getValue();
-      if (!Double.isNaN(value) && (!full || (value > lowestTopValue))) {
+      if (!Double.isNaN(value) && (!full || value > lowestTopValue)) {
         topSimilarities.add(similarity);
         if (full) {
           topSimilarities.poll();

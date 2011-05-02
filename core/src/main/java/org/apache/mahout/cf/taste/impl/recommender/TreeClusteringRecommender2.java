@@ -91,7 +91,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
    * @param numClusters
    *          desired number of clusters to create
    * @throws IllegalArgumentException
-   *           if arguments are <code>null</code>, or <code>numClusters</code> is less than 2
+   *           if arguments are {@code null}, or {@code numClusters} is less than 2
    */
   public TreeClusteringRecommender2(DataModel dataModel, ClusterSimilarity clusterSimilarity, int numClusters)
     throws TasteException {
@@ -116,22 +116,22 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
   
   /**
    * @param dataModel
-   *          {@link org.apache.mahout.cf.taste.model.DataModel} which provides users
+   *          {@link DataModel} which provides users
    * @param clusterSimilarity
-   *          {@link org.apache.mahout.cf.taste.impl.recommender.ClusterSimilarity} used to compute cluster
+   *          {@link ClusterSimilarity} used to compute cluster
    *          similarity
    * @param clusteringThreshold
    *          clustering similarity threshold; clusters will be aggregated into larger clusters until the next
    *          two nearest clusters' similarity drops below this threshold
    * @throws IllegalArgumentException
-   *           if arguments are <code>null</code>, or <code>clusteringThreshold</code> is {@link Double#NaN}
+   *           if arguments are {@code null}, or {@code clusteringThreshold} is {@link Double#NaN}
    */
   public TreeClusteringRecommender2(DataModel dataModel,
                                     ClusterSimilarity clusterSimilarity,
                                     double clusteringThreshold) throws TasteException {
     super(dataModel);
     Preconditions.checkArgument(clusterSimilarity != null, "clusterSimilarity is null");
-    Preconditions.checkArgument(!(Double.isNaN(clusteringThreshold)), "clusteringThreshold must not be NaN");
+    Preconditions.checkArgument(!Double.isNaN(clusteringThreshold), "clusteringThreshold must not be NaN");
     this.clusterSimilarity = clusterSimilarity;
     this.numClusters = Integer.MIN_VALUE;
     this.clusteringThreshold = clusteringThreshold;
@@ -166,11 +166,11 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
     // And that the rescorer doesn't "reject".
     for (RecommendedItem recommendedItem : recommended) {
       long itemID = recommendedItem.getItemID();
-      if ((rescorer != null) && rescorer.isFiltered(itemID)) {
+      if (rescorer != null && rescorer.isFiltered(itemID)) {
         continue;
       }
-      if ((dataModel.getPreferenceValue(userID, itemID) == null)
-          && ((rescorer == null) || !Double.isNaN(rescorer.rescore(itemID, recommendedItem.getValue())))) {
+      if (dataModel.getPreferenceValue(userID, itemID) == null
+          && (rescorer == null || !Double.isNaN(rescorer.rescore(itemID, recommendedItem.getValue())))) {
         rescored.add(recommendedItem);
       }
     }
@@ -308,14 +308,14 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
     
     while (!queue.isEmpty()) {
       
-      if (!clusteringByThreshold && (clusters.size() <= numClusters)) {
+      if (!clusteringByThreshold && clusters.size() <= numClusters) {
         done = true;
         break;
       }
       
       ClusterClusterPair top = queue.remove(0);
       
-      if (clusteringByThreshold && (top.getSimilarity() < clusteringThreshold)) {
+      if (clusteringByThreshold && top.getSimilarity() < clusteringThreshold) {
         done = true;
         break;
       }
@@ -330,10 +330,10 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
       while (clusterIterator.hasNext() && !(removed1 && removed2)) {
         FastIDSet current = clusterIterator.next();
         // Yes, use == here
-        if (!removed1 && (cluster1 == current)) {
+        if (!removed1 && cluster1 == current) {
           clusterIterator.remove();
           removed1 = true;
-        } else if (!removed2 && (cluster2 == current)) {
+        } else if (!removed2 && cluster2 == current) {
           clusterIterator.remove();
           removed2 = true;
         }
@@ -345,7 +345,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
         ClusterClusterPair pair = queueIterator.next();
         FastIDSet pair1 = pair.getCluster1();
         FastIDSet pair2 = pair.getCluster2();
-        if ((pair1 == cluster1) || (pair1 == cluster2) || (pair2 == cluster1) || (pair2 == cluster2)) {
+        if (pair1 == cluster1 || pair1 == cluster2 || pair2 == cluster1 || pair2 == cluster2) {
           queueIterator.remove();
         }
       }

@@ -24,9 +24,9 @@ package org.apache.mahout.cf.taste.recommender;
  * the results according to application-specific logic before returning recommendations. For example, an
  * application may want to boost the score of items in a certain category just for one request.
  * </p>
- * 
+ *
  * <p>
- * A  can also exclude a thing from consideration entirely by returning <code>true</code> from
+ * A  can also exclude a thing from consideration entirely by returning {@code true} from
  * {@link #isFiltered(Object)}.
  * </p>
  */
@@ -42,11 +42,11 @@ public interface Rescorer<T> {
   double rescore(T thing, double originalScore);
   
   /**
-   * Returns <code>true</code> to exclude the given thing.
-   * 
+   * Returns {@code true} to exclude the given thing.
+   *
    * @param thing
    *          the thing to filter
-   * @return <code>true</code> to exclude, <code>false</code> otherwise
+   * @return {@code true} to exclude, {@code false} otherwise
    */
   boolean isFiltered(T thing);
 }

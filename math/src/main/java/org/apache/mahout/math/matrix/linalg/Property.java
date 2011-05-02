@@ -84,7 +84,7 @@ public final class Property {
       double x = a.getQuick(i);
       double diff = Math.abs(value - x);
       if (Double.isNaN(diff) && (Double.isNaN(value) && Double.isNaN(x) || value == x)) {
-        diff = 0;
+        diff = 0.0;
       }
       if (diff > epsilon) {
         return false;
@@ -121,10 +121,10 @@ public final class Property {
       double x = a.getQuick(i);
       double value = b.getQuick(i);
       double diff = Math.abs(value - x);
-      if (Double.isNaN(diff) && ((Double.isNaN(value) && Double.isNaN(x)) || value == x)) {
-        diff = 0;
+      if (Double.isNaN(diff) && (Double.isNaN(value) && Double.isNaN(x) || value == x)) {
+        diff = 0.0;
       }
-      if (!(diff <= epsilon)) {
+      if (diff > epsilon) {
         return false;
       }
     }
@@ -155,9 +155,9 @@ public final class Property {
         double x = a.getQuick(row, column);
         double diff = Math.abs(value - x);
         if (Double.isNaN(diff) && (Double.isNaN(value) && Double.isNaN(x) || value == x)) {
-          diff = 0;
+          diff = 0.0;
         }
-        if (!(diff <= epsilon)) {
+        if (diff > epsilon) {
           return false;
         }
       }
@@ -196,8 +196,8 @@ public final class Property {
         double x = a.getQuick(row, column);
         double value = b.getQuick(row, column);
         double diff = Math.abs(value - x);
-        if (Double.isNaN(diff) && ((Double.isNaN(value) && Double.isNaN(x)) || value == x)) {
-          diff = 0;
+        if (Double.isNaN(diff) && (Double.isNaN(value) && Double.isNaN(x) || value == x)) {
+          diff = 0.0;
         }
         if (diff > epsilon) {
           return false;

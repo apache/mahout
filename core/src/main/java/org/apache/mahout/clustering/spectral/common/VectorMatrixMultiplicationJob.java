@@ -40,9 +40,9 @@ import org.apache.mahout.math.hadoop.DistributedRowMatrix;
  * <p>This class handles the three-way multiplication of the digonal matrix
  * and the Markov transition matrix inherent in the Eigencuts algorithm.
  * The equation takes the form:</p>
- * 
- * <code>W = D^(1/2) * M * D^(1/2)</code>
- * 
+ *
+ * {@code W = D^(1/2) * M * D^(1/2)}
+ *
  * <p>Since the diagonal matrix D has only n non-zero elements, it is represented
  * as a dense vector in this job, rather than a full n-by-n matrix. This job
  * performs the multiplications and returns the new DRM.

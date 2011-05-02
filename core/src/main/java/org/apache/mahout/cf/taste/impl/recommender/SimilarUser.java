@@ -49,7 +49,7 @@ public final class SimilarUser implements Comparable<SimilarUser> {
       return false;
     }
     SimilarUser other = (SimilarUser) o;
-    return (userID == other.getUserID()) && (similarity == other.getSimilarity());
+    return userID == other.getUserID() && similarity == other.getSimilarity();
   }
   
   @Override

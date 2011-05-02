@@ -18,7 +18,6 @@
 package org.apache.mahout.utils.eval;
 
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
@@ -71,9 +70,9 @@ public class DatasetSplitter extends AbstractJob {
     addInputOption();
     addOutputOption();
     addOption("trainingPercentage", "t", "percentage of the data to use as training set (default: " +
-        DEFAULT_TRAINING_PERCENTAGE + ")", String.valueOf(DEFAULT_TRAINING_PERCENTAGE));
+        DEFAULT_TRAINING_PERCENTAGE + ')', String.valueOf(DEFAULT_TRAINING_PERCENTAGE));
     addOption("probePercentage", "p", "percentage of the data to use as probe set (default: " +
-        DEFAULT_PROBE_PERCENTAGE +")", String.valueOf(DEFAULT_PROBE_PERCENTAGE));
+        DEFAULT_PROBE_PERCENTAGE + ')', String.valueOf(DEFAULT_PROBE_PERCENTAGE));
 
     Map<String, String> parsedArgs = parseArguments(args);
     double trainingPercentage = Double.parseDouble(parsedArgs.get("--trainingPercentage"));

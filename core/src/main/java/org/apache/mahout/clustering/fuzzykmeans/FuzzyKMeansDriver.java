@@ -197,7 +197,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
    * @param input
    *          the directory pathname for input points
    * @param clustersIn
-   *          the directory pathname for iniput clusters
+   *          the directory pathname for input clusters
    * @param clustersOut
    *          the directory pathname for output clusters
    * @param measureClass
@@ -409,7 +409,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     int iteration = 1;
 
     // iterate until the clusters converge
-    while (!converged && (iteration <= maxIterations)) {
+    while (!converged && iteration <= maxIterations) {
       log.info("Fuzzy K-Means Iteration {}", iteration);
 
       // point the output to a new directory per iteration

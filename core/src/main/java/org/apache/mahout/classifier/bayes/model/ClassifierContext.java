@@ -63,8 +63,8 @@ public class ClassifierContext {
   }
   
   /**
-   * Classify the document and return the top <code>numResults</code>
-   * 
+   * Classify the document and return the top {@code numResults}
+   *
    * @param document
    *          The document to classify
    * @param defaultCategory
@@ -72,7 +72,7 @@ public class ClassifierContext {
    * @param numResults
    *          The maximum number of results to return, ranked by score. Ties are broken by comparing the
    *          category
-   * @return A Collection of {@link org.apache.mahout.classifier.ClassifierResult}s.
+   * @return A Collection of {@link ClassifierResult}s.
    * @throws InvalidDatastoreException
    */
   public ClassifierResult[] classifyDocument(String[] document,

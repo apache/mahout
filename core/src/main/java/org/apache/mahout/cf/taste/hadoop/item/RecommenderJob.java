@@ -58,7 +58,7 @@ import java.util.regex.Pattern;
 /**
  * <p>Runs a completely distributed recommender job as a series of mapreduces.</p>
  *
- * <p>Preferences in the input file should look like <code>userID,itemID[,preferencevalue]</code></p>
+ * <p>Preferences in the input file should look like {@code userID,itemID[,preferencevalue]}</p>
  *
  * <p>
  * Preference value is optional to accommodate applications that have no notion of a preference value (that is, the user
@@ -66,8 +66,8 @@ import java.util.regex.Pattern;
  * </p>
  *
  * <p>
- * The preference value is assumed to be parseable as a <code>double</code>. The user IDs and item IDs are
- * parsed as <code>long</code>s.
+ * The preference value is assumed to be parseable as a {@code double}. The user IDs and item IDs are
+ * parsed as {@code long}s.
  * </p>
  *
  * <p>Command line arguments specific to this class are:</p>
@@ -76,7 +76,7 @@ import java.util.regex.Pattern;
  * <li>-Dmapred.input.dir=(path): Directory containing one or more text files with the preference data</li>
  * <li>-Dmapred.output.dir=(path): output path where recommender output should go</li>
  * <li>--similarityClassname (classname): Name of distributed similarity class to instantiate or a predefined similarity
- *  from {@link org.apache.mahout.math.hadoop.similarity.SimilarityType}</li>
+ *  from {@link SimilarityType}</li>
  * <li>--usersFile (path): only compute recommendations for user IDs contained in this file (optional)</li>
  * <li>--itemsFile (path): only include item IDs from this file in the recommendations (optional)</li>
  * <li>--filterFile (path): file containing comma-separated userID,itemID pairs. Used to exclude the item from the

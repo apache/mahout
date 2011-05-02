@@ -396,7 +396,7 @@ public final class EigenvalueDecomposition implements Serializable {
             break;
           }
           if (Math.abs(H[m][m - 1]) * (Math.abs(q) + Math.abs(r))
-              < eps * (Math.abs(p) * (Math.abs(H[m - 1][m - 1]) + Math.abs(z) + Math.abs(H[m + 1][m + 1])))) {
+              < eps * Math.abs(p) * (Math.abs(H[m - 1][m - 1]) + Math.abs(z) + Math.abs(H[m + 1][m + 1]))) {
             break;
           }
           m--;
@@ -536,7 +536,7 @@ public final class EigenvalueDecomposition implements Serializable {
             // Overflow control
 
             t = Math.abs(H[i][n]);
-            if ((eps * t) * t > 1) {
+            if (eps * t * t > 1) {
               for (int j = i; j <= n; j++) {
                 H[j][n] /= t;
               }
@@ -594,7 +594,7 @@ public final class EigenvalueDecomposition implements Serializable {
               cdiv(x * r - z * ra + q * sa, x * s - z * sa - q * ra, vr, vi);
               H[i][n - 1] = cdivr;
               H[i][n] = cdivi;
-              if (Math.abs(x) > (Math.abs(z) + Math.abs(q))) {
+              if (Math.abs(x) > Math.abs(z) + Math.abs(q)) {
                 H[i + 1][n - 1] = (-ra - w * H[i][n - 1] + q * H[i][n]) / x;
                 H[i + 1][n] = (-sa - w * H[i][n] - q * H[i][n - 1]) / x;
               } else {
@@ -607,7 +607,7 @@ public final class EigenvalueDecomposition implements Serializable {
             // Overflow control
 
             t = Math.max(Math.abs(H[i][n - 1]), Math.abs(H[i][n]));
-            if ((eps * t) * t > 1) {
+            if (eps * t * t > 1) {
               for (int j = i; j <= n; j++) {
                 H[j][n - 1] /= t;
                 H[j][n] /= t;
@@ -721,7 +721,7 @@ public final class EigenvalueDecomposition implements Serializable {
             g += ort[i] * V[i][j];
           }
           // Double division avoids possible underflow
-          g = (g / ort[m]) / H[m][m - 1];
+          g = g / ort[m] / H[m][m - 1];
           for (int i = m; i <= high; i++) {
             V[i][j] += g * ort[i];
           }

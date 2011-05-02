@@ -82,7 +82,7 @@ public final class RandomUtils {
   public static long seedBytesToLong(byte[] seed) {
     long result = 0L;
     for (int i = 0; i < 8; i++) {
-      result |= (seed[i] & 0xFFL) << (8 * (7 - i));
+      result |= (seed[i] & 0xFFL) << (long) (8 * (7 - i));
     }
     return result;
   }
@@ -135,7 +135,7 @@ public final class RandomUtils {
     return n;
   }
   
-  /** @return <code>true</code> iff n is not a prime */
+  /** @return {@code true} iff n is not a prime */
   public static boolean isNotPrime(int n) {
     if (n < 2 || (n & 0x1) == 0) { // < 2 or even
       return n != 2;

@@ -49,6 +49,7 @@ public class BayesClassifierMapper extends MapReduceBase implements
     Mapper<Text,Text,StringTuple,DoubleWritable> {
   
   private static final Logger log = LoggerFactory.getLogger(BayesClassifierMapper.class);
+  private static final DoubleWritable ONE = new DoubleWritable(1.0);
   
   private int gramSize = 1;
   
@@ -70,25 +71,24 @@ public class BayesClassifierMapper extends MapReduceBase implements
    */
   @Override
   public void map(Text key, Text value,
-                  OutputCollector<StringTuple,DoubleWritable> output, Reporter reporter) throws IOException {
-    String label = key.toString();
-    
+                  OutputCollector<StringTuple,DoubleWritable> output,
+                  Reporter reporter) throws IOException {
     List<String> ngrams = new NGrams(value.toString(), gramSize).generateNGramsWithoutLabel();
     
     try {
       ClassifierResult result = classifier.classifyDocument(ngrams.toArray(new String[ngrams.size()]),
         defaultCategory);
       
-      String correctLabel = label;
+      String correctLabel = key.toString();
       String classifiedLabel = result.getLabel();
       
       StringTuple outputTuple = new StringTuple(BayesConstants.CLASSIFIER_TUPLE);
       outputTuple.add(correctLabel);
       outputTuple.add(classifiedLabel);
       
-      output.collect(outputTuple, new DoubleWritable(1.0));
+      output.collect(outputTuple, ONE);
     } catch (InvalidDatastoreException e) {
-      throw new IOException(e.toString());
+      throw new IOException(e);
     }
   }
   
@@ -101,12 +101,12 @@ public class BayesClassifierMapper extends MapReduceBase implements
       Algorithm algorithm;
       Datastore datastore;
       
-      if (params.get("dataSource").equals("hdfs")) {
-        if (params.get("classifierType").equalsIgnoreCase("bayes")) {
+      if ("hdfs".equals(params.get("dataSource"))) {
+        if ("bayes".equalsIgnoreCase(params.get("classifierType"))) {
           log.info("Testing Bayes Classifier");
           algorithm = new BayesAlgorithm();
           datastore = new InMemoryBayesDatastore(params);
-        } else if (params.get("classifierType").equalsIgnoreCase("cbayes")) {
+        } else if ("cbayes".equalsIgnoreCase(params.get("classifierType"))) {
           log.info("Testing Complementary Bayes Classifier");
           algorithm = new CBayesAlgorithm();
           datastore = new InMemoryBayesDatastore(params);

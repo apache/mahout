@@ -84,12 +84,12 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
     seed = Builder.getRandomSeed(conf);
     isSingleSeed = isSingleSeed(conf);
     
-    if ((rng != null) && (seed != null)) {
+    if (rng != null && seed != null) {
       log.warn("getSplits() was called more than once and the 'seed' is set, "
                                 + "this can lead to no-repeatable behavior");
     }
     
-    rng = (seed == null) || isSingleSeed ? null : RandomUtils.getRandom(seed);
+    rng = seed == null || isSingleSeed ? null : RandomUtils.getRandom(seed);
     
     int id = 0;
     

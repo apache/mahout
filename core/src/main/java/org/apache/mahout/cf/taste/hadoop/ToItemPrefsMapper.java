@@ -19,20 +19,19 @@ package org.apache.mahout.cf.taste.hadoop;
 
 /**
  * <h1>Input</h1>
- * 
+ *
  * <p>
  * Intended for use with {@link org.apache.hadoop.mapreduce.lib.input.TextInputFormat};
  * accepts line number / line pairs as
  * {@link org.apache.hadoop.io.LongWritable}/{@link org.apache.hadoop.io.Text} pairs.
  * </p>
- * 
+ *
  * <p>
- * Each line is assumed to be of the form <code>userID,itemID,preference</code>, or
- * <code>userID,itemID</code>.</p>
+ * Each line is assumed to be of the form {@code userID,itemID,preference}, or {@code userID,itemID}.
  * </p>
- * 
+ *
  * <h1>Output</h1>
- * 
+ *
  * <p>
  * Outputs the user ID as a {@link org.apache.mahout.math.VarLongWritable} mapped to the item ID and preference as a
  * {@link EntityPrefWritable}.

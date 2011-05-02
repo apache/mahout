@@ -31,8 +31,9 @@ import com.google.common.base.Preconditions;
 
 /**
  * <p>
- * Generic Mapper class for fitness evaluation. Works with the following : <code>&lt;key, candidate, key,
- * fitness&gt;</code>, where :
+ * Generic Mapper class for fitness evaluation. Works with the following :
+ * {@code <key, candidate, key, fitness>}
+ * , where :
  * </p>
  * key: position of the current candidate in the input file. <br>
  * candidate: candidate solution to evaluate. <br>

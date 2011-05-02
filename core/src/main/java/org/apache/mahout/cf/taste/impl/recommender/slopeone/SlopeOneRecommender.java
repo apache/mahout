@@ -76,19 +76,19 @@ public final class SlopeOneRecommender extends AbstractRecommender {
    * <p>
    * Creates a  based on the given {@link DataModel}.
    * </p>
-   * 
+   *
    * <p>
-   * If <code>weighted</code> is set, acts as a weighted slope one recommender. This implementation also
+   * If {@code weighted} is set, acts as a weighted slope one recommender. This implementation also
    * includes an experimental "standard deviation" weighting which weights item-item ratings diffs with lower
    * standard deviation more highly, on the theory that they are more reliable.
    * </p>
-   * 
+   *
    * @param weighting
    *          if {@link Weighting#WEIGHTED}, acts as a weighted slope one recommender
    * @param stdDevWeighting
    *          use optional standard deviation weighting of diffs
    * @throws IllegalArgumentException
-   *           if <code>diffStorage</code> is null, or stdDevWeighted is set when weighted is not set
+   *           if {@code diffStorage} is null, or stdDevWeighted is set when weighted is not set
    */
   public SlopeOneRecommender(DataModel dataModel,
                              Weighting weighting,

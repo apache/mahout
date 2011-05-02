@@ -86,13 +86,13 @@ public class CategoricalNode extends Node {
     if (this == obj) {
       return true;
     }
-    if ((obj == null) || !(obj instanceof CategoricalNode)) {
+    if (obj == null || !(obj instanceof CategoricalNode)) {
       return false;
     }
     
     CategoricalNode node = (CategoricalNode) obj;
     
-    return (attr == node.attr) && Arrays.equals(values, node.values) && Arrays.equals(childs, node.childs);
+    return attr == node.attr && Arrays.equals(values, node.values) && Arrays.equals(childs, node.childs);
   }
   
   @Override

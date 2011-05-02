@@ -26,7 +26,6 @@ import com.google.common.base.Preconditions;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.mahout.common.StringUtils;
 
 /**
  * Combines attribute description strings into a String.<br>

@@ -66,24 +66,24 @@ public final class MemoryDiffStorage implements DiffStorage {
   
   /**
    * <p>
-   * See {@link org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender} for the meaning of
-   * <code>stdDevWeighted</code>. <code>maxEntries</code> controls the maximum number of
+   * See {@link SlopeOneRecommender} for the meaning of
+   * {@code stdDevWeighted}. {@code maxEntries} controls the maximum number of
    * item-item average preference differences that will be tracked internally. After the limit is reached, if
    * a new item-item pair is observed in the data it will be ignored. This is recommended for large datasets.
-   * The first <code>maxEntries</code> item-item pairs observed in the data are tracked. Assuming that item
+   * The first {@code maxEntries} item-item pairs observed in the data are tracked. Assuming that item
    * ratings are reasonably distributed among users, this should only ignore item-item pairs that are very
    * infrequently co-rated by a user. The intuition is that data on these infrequently co-rated item-item
    * pairs is less reliable and should be the first that is ignored. This parameter can be used to limit the
    * memory requirements of {@link SlopeOneRecommender}, which otherwise grow as the square of the number of
    * items that exist in the {@link DataModel}. Memory requirements can reach gigabytes with only about 10000
    * items, so this may be necessary on larger datasets.
-   * 
+   *
    * @param stdDevWeighted
-   *          see {@link org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender}
+   *          see {@link SlopeOneRecommender}
    * @param maxEntries
    *          maximum number of item-item average preference differences to track internally
    * @throws IllegalArgumentException
-   *           if <code>maxEntries</code> is not positive or <code>dataModel</code> is null
+   *           if {@code maxEntries} is not positive or {@code dataModel} is null
    */
   public MemoryDiffStorage(DataModel dataModel,
                            Weighting stdDevWeighted,
@@ -371,7 +371,7 @@ public final class MemoryDiffStorage implements DiffStorage {
         // This is a performance-critical block
         long itemIDB = userPreferences.getItemID(j);
         RunningAverage average = aMap.get(itemIDB);
-        if ((average == null) && (averageCount < maxEntries)) {
+        if (average == null && averageCount < maxEntries) {
           average = buildRunningAverage();
           aMap.put(itemIDB, average);
           averageCount++;

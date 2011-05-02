@@ -64,13 +64,13 @@ public class Instance {
     if (this == obj) {
       return true;
     }
-    if ((obj == null) || !(obj instanceof Instance)) {
+    if (obj == null || !(obj instanceof Instance)) {
       return false;
     }
     
     Instance instance = (Instance) obj;
     
-    return (id == instance.id) && (label == instance.label) && attrs.equals(instance.attrs);
+    return id == instance.id && label == instance.label && attrs.equals(instance.attrs);
     
   }
   

@@ -20,7 +20,6 @@ package org.apache.mahout.df.node;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.StringTokenizer;
 
 import org.apache.mahout.df.data.Instance;
 
@@ -51,18 +50,6 @@ public class Leaf extends Node {
     return 1;
   }
   
-  /**
-   * Extract a Leaf Node
-   * 
-   * @param tokenizer
-   * @return the extracted Leaf Node
-   */
-  static Leaf parse(StringTokenizer tokenizer) {
-    int label = Integer.parseInt(tokenizer.nextToken());
-    
-    return new Leaf(label);
-  }
-  
   @Override
   protected Type getType() {
     return Type.LEAF;
@@ -73,7 +60,7 @@ public class Leaf extends Node {
     if (this == obj) {
       return true;
     }
-    if ((obj == null) || !(obj instanceof Leaf)) {
+    if (obj == null || !(obj instanceof Leaf)) {
       return false;
     }
     

@@ -111,7 +111,7 @@ public class Gamma extends AbstractContinousDistribution {
           }
         } else {                                // Step 3. Case gds > 1
           gds = -Math.log((b - p) / alpha);
-          if (Math.log(randomGenerator.nextDouble()) <= ((alpha - 1.0) * Math.log(gds))) {
+          if (Math.log(randomGenerator.nextDouble()) <= (alpha - 1.0) * Math.log(gds)) {
             return gds / rate;
           }
         }
@@ -214,8 +214,8 @@ public class Gamma extends AbstractContinousDistribution {
           e = -Math.log(randomGenerator.nextDouble());
           u = randomGenerator.nextDouble();
           u = u + u - 1.0;
-          sign_u = (u > 0) ? 1.0 : -1.0;
-          t = b + (e * si) * sign_u;
+          sign_u = u > 0 ? 1.0 : -1.0;
+          t = b + e * si * sign_u;
         } while (t <= -0.71874483771719); // Step 9. Rejection of t
         v = t / (s + s);                  // Step 10. New q(t)
         if (Math.abs(v) > 0.25) {

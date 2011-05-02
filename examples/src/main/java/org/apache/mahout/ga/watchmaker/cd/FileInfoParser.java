@@ -19,11 +19,12 @@ package org.apache.mahout.ga.watchmaker.cd;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Scanner;
-import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 import com.google.common.base.Preconditions;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -34,26 +35,24 @@ import org.apache.hadoop.fs.Path;
  * Initializes a DataSet using a special format file.<br>
  * The file contains for each attribute one of the following:<br>
  * <ul>
- * <li><code>IGNORED</code><br>
+ * <li>{@code IGNORED}<br>
  * if the attribute is ignored</li>
- * <li><code>LABEL, val1, val2, ...</code><br>
+ * <li>{@code LABEL, val1, val2, ...}<br>
  * if the attribute is the label, and its possible values</li>
- * <li><code>CATEGORICAL, val1, val2, ...</code><br>
+ * <li>{@code CATEGORICAL, val1, val2, ...}<br>
  * if the attribute is nominal, and its possible values</li>
- * <li><code>NUMERICAL, min, max</code><br>
+ * <li>{@code NUMERICAL, min, max}<br>
  * if the attribute is numerical, and its min and max values</li>
  * </ul>
  */
 public final class FileInfoParser {
   
   public static final String IGNORED_TOKEN = "IGNORED";
-  
   public static final String LABEL_TOKEN = "LABEL";
-  
   public static final String NOMINAL_TOKEN = "CATEGORICAL";
-  
   public static final String NUMERICAL_TOKEN = "NUMERICAL";
-  
+  private static final Pattern COMMA_SPACE = Pattern.compile("[, ]");
+
   private FileInfoParser() { }
   
   /**
@@ -79,17 +78,17 @@ public final class FileInfoParser {
     
     while (reader.hasNextLine()) {
       String line = reader.nextLine();
-      StringTokenizer tokenizer = new StringTokenizer(line, ", ");
-      String token = nextToken(tokenizer);
+      Iterator<String> tokens = Arrays.asList(COMMA_SPACE.split(line)).iterator();
+      String token = tokens.next();
       if (IGNORED_TOKEN.equals(token)) {
         ignored.add(index);
       } else if (LABEL_TOKEN.equals(token)) {
         labelIndex = index;
-        attributes.add(parseNominal(tokenizer));
+        attributes.add(parseNominal(tokens));
       } else if (NOMINAL_TOKEN.equals(token)) {
-        attributes.add(parseNominal(tokenizer));
+        attributes.add(parseNominal(tokens));
       } else if (NUMERICAL_TOKEN.equals(token)) {
-        attributes.add(parseNumerical(tokenizer));
+        attributes.add(parseNumerical(tokens));
       } else {
         throw new IllegalArgumentException("Unknown token (" + token
                                            + ") encountered while parsing the info file");
@@ -122,10 +121,10 @@ public final class FileInfoParser {
   /**
    * Parse a nominal attribute.
    */
-  private static NominalAttr parseNominal(StringTokenizer tokenizer) {
+  private static NominalAttr parseNominal(Iterator<String> tokens) {
     Collection<String> vlist = new ArrayList<String>();
-    while (tokenizer.hasMoreTokens()) {
-      vlist.add(nextToken(tokenizer));
+    while (tokens.hasNext()) {
+      vlist.add(tokens.next());
     }
     
     String[] values = new String[vlist.size()];
@@ -137,35 +136,11 @@ public final class FileInfoParser {
   /**
    * Parse a numerical attribute.
    */
-  private static NumericalAttr parseNumerical(StringTokenizer tokenizer) {
-    double min = nextDouble(tokenizer);
-    double max = nextDouble(tokenizer);
+  private static NumericalAttr parseNumerical(Iterator<String> tokens) {
+    double min = Double.parseDouble(tokens.next());
+    double max = Double.parseDouble(tokens.next());
     Preconditions.checkArgument(min <= max, "min > max");
     return new NumericalAttr(min, max);
-  }
-  
-  private static double nextDouble(StringTokenizer tokenizer) {
-    String token = nextToken(tokenizer);
-    double value;
-    
-    try {
-      value = Double.parseDouble(token);
-    } catch (NumberFormatException e) {
-      throw new IllegalArgumentException("Exception while parsing info file", e);
-    }
-    
-    return value;
-  }
-  
-  private static String nextToken(StringTokenizer tokenizer) {
-    String token;
-    try {
-      token = tokenizer.nextToken();
-    } catch (NoSuchElementException e) {
-      throw new IllegalArgumentException("Exception while parsing info file", e);
-    }
-    
-    return token;
   }
   
 }

@@ -40,8 +40,9 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * factorizes the rating matrix using "Alternating-Least-Squares with Weighted-λ-Regularization" as described in
- * the paper "Large-scale Collaborative Filtering for the Netflix Prize" available at
- * {@see http://www.hpl.hp.com/personal/Robert_Schreiber/papers/2008%20AAIM%20Netflix/netflix_aaim08(submitted).pdf}
+ * the paper
+ * <a href="http://www.hpl.hp.com/personal/Robert_Schreiber/papers/2008%20AAIM%20Netflix/netflix_aaim08(submitted).pdf">
+ * "Large-scale Collaborative Filtering for the Netflix Prize"</a>
  */
 public class ALSWRFactorizer extends AbstractFactorizer {
 

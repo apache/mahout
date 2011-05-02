@@ -99,8 +99,8 @@ public class LDAInference {
     int iteration = 0;
     
     boolean converged = false;
-    double oldLL = 1;
-    while (!converged && (iteration < MAX_ITER)) {
+    double oldLL = 1.0;
+    while (!converged && iteration < MAX_ITER) {
       nextGamma.assign(state.getTopicSmoothing()); // nG := alpha, for all topics
       
       int mapping = 0;
@@ -129,7 +129,7 @@ public class LDAInference {
       
       double ll = computeLikelihood(wordCounts, map, phi, gamma, digammaGamma);
       // isNotNaNAssertion(ll);
-      converged = (oldLL < 0) && ((oldLL - ll) / oldLL < E_STEP_CONVERGENCE);
+      converged = oldLL < 0.0 && (oldLL - ll) / oldLL < E_STEP_CONVERGENCE;
       
       oldLL = ll;
       iteration++;
@@ -256,26 +256,5 @@ public class LDAInference {
         + f * (-1.0 / 132.0 + f * (691.0 / 32760.0 + f * (-1.0 / 12.0 + f * 3617.0 / 8160.0)))))));
     return r + Math.log(x) - 0.5 / x + t;
   }
-  
-  /*
-  private void assertions(int word, Vector digammaGamma, double phiTotal, int k) {
-    assert !Double.isNaN(phiTotal);
-    assert !Double.isNaN(state.logProbWordGivenTopic(word, k));
-    assert !Double.isInfinite(state.logProbWordGivenTopic(word, k));
-    assert !Double.isNaN(digammaGamma.getQuick(k));
-  }
-  
-  private void likelihoodAssertion(int w, int k, double llPart) {
-    assert state.logProbWordGivenTopic(w, k) < 0;
-    assert !Double.isNaN(llPart);
-  }
 
-  private void isLessThanOrEqualsZero(double ll) {
-    assert ll <= 0;
-  }
-
-  private void isNotNaNAssertion(double ll) {
-    assert !Double.isNaN(ll) : state.topicSmoothing + " " + state.numTopics;
-  }
-  */
 }

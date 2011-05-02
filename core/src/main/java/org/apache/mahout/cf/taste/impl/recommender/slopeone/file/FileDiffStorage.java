@@ -126,7 +126,7 @@ public final class FileDiffStorage implements DiffStorage {
   
   private long processLine(String line, char delimiter, long averageCount) {
 
-    if ((line.length() == 0) || (line.charAt(0) == COMMENT_CHAR)) {
+    if (line.length() == 0 || line.charAt(0) == COMMENT_CHAR) {
       return averageCount;
     }
     
@@ -151,7 +151,7 @@ public final class FileDiffStorage implements DiffStorage {
       averageDiffs.put(itemID1, level1Map);
     }
     RunningAverage average = level1Map.get(itemID2);
-    if ((average == null) && (averageCount < maxEntries)) {
+    if (average == null && averageCount < maxEntries) {
       average = new FullRunningAverage();
       level1Map.put(itemID2, average);
       averageCount++;

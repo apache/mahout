@@ -159,9 +159,9 @@ public final class FPGrowthDriver {
       params.set("output", outputDir.toString());
       
       String classificationMethod = (String) cmdLine.getValue(methodOpt);
-      if (classificationMethod.equalsIgnoreCase("sequential")) {
+      if ("sequential".equalsIgnoreCase(classificationMethod)) {
         runFPGrowth(params);
-      } else if (classificationMethod.equalsIgnoreCase("mapreduce")) {
+      } else if ("mapreduce".equalsIgnoreCase(classificationMethod)) {
         Configuration conf = new Configuration();
         HadoopUtil.delete(conf, outputDir);
         PFPGrowth.runPFPGrowth(params);

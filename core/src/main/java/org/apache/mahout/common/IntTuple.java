@@ -52,10 +52,7 @@ public final class IntTuple implements WritableComparable<IntTuple> {
   }
   
   /**
-   * add an entry to the end of the list
-   * 
-   * @param entry
-   * @return true if the items get added
+   * Add an entry to the end of the list
    */
   public void add(int entry) {
     tuple.add(entry);
@@ -64,8 +61,7 @@ public final class IntTuple implements WritableComparable<IntTuple> {
   /**
    * Fetches the string at the given location
    * 
-   * @param index
-   * @return Integer value at the given location in the tuple list
+   * @return int value at the given location in the tuple list
    */
   public int at(int index) {
     return tuple.get(index);
@@ -74,8 +70,6 @@ public final class IntTuple implements WritableComparable<IntTuple> {
   /**
    * Replaces the string at the given index with the given newInteger
    * 
-   * @param index
-   * @param newInteger
    * @return The previous value at that location
    */
   public int replaceAt(int index, int newInteger) {

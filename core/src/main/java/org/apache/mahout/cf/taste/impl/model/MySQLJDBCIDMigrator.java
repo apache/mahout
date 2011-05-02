@@ -23,18 +23,18 @@ import javax.sql.DataSource;
  * <p>
  * An implementation for MySQL. The following statement would create a table suitable for use with this class:
  * </p>
- * 
+ *
  * <p>
- * 
+ *
  * <pre>
  * CREATE TABLE taste_id_migration (
  *   long_id BIGINT NOT NULL PRIMARY KEY,
  *   string_id VARCHAR(255) NOT NULL UNIQUE
  * )
  * </pre>
- * 
+ *
  * </p>
- * 
+ *
  * <p>
  * Separately, note that in a MySQL database, the following function calls will convert a string value into a
  * numeric value in the same way that the standard implementations in this package do. This may be useful in
@@ -43,9 +43,9 @@ import javax.sql.DataSource;
  * column values to appropriate numeric values -- though this should be viewed as a temporary arrangement
  * since it will impact performance:
  * </p>
- * 
+ *
  * <p>
- * <code>cast(conv(substring(md5([column name]),1,16),16,10) as signed)</code>
+ * {@code cast(conv(substring(md5([column name]), 1, 16),16,10) as signed)}
  * </p>
  */
 public final class MySQLJDBCIDMigrator extends AbstractJDBCIDMigrator {

@@ -37,8 +37,8 @@ import org.apache.mahout.math.function.Functions;
  * <p>Given a DistributedRowMatrix, this job normalizes each row to unit
  * vector length. If the input is a matrix U, and the output is a matrix
  * W, the job follows:</p>
- * 
- * <p><code>v_ij = u_ij / sqrt(sum_j(u_ij * u_ij))</code></p>
+ *
+ * <p>{@code v_ij = u_ij / sqrt(sum_j(u_ij * u_ij))}</p>
  */
 public final class UnitVectorizerJob {
 

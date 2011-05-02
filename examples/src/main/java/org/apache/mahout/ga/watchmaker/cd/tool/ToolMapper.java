@@ -19,15 +19,13 @@ package org.apache.mahout.ga.watchmaker.cd.tool;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 import com.google.common.base.Preconditions;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.mahout.common.StringUtils;
 
 /**
  * Extract the attribute values from a dataline. Skip ignored attributes<br>
@@ -43,19 +41,18 @@ import org.apache.mahout.common.StringUtils;
  * <li>Text : attribute value</li>
  * </ul>
  * 
- * See Descriptors, for more informations about the job parameter
+ * See Descriptors, for more information about the job parameter
  */
 public class ToolMapper extends Mapper<LongWritable, Text, LongWritable, Text> {
 
   public static final String ATTRIBUTES = "cdtool.attributes";
-
-  private final List<String> attributes = new ArrayList<String>();
+  private static final Pattern COMMA = Pattern.compile(",");
 
   private Descriptors descriptors;
 
   @Override
   protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-    extractAttributes(value, attributes);
+    List<String> attributes = extractAttributes(value);
     Preconditions.checkArgument(attributes.size() == descriptors.size(),
         "Attributes number should be equal to the descriptors's array length");
 
@@ -88,12 +85,11 @@ public class ToolMapper extends Mapper<LongWritable, Text, LongWritable, Text> {
    * Extract attribute values from the input Text. The attributes are separated by a colon ','. Skips ignored
    * attributes.
    */
-  static void extractAttributes(Text value, Collection<String> attributes) {
-    StringTokenizer tokenizer = new StringTokenizer(value.toString(), ",");
-
-    attributes.clear();
-    while (tokenizer.hasMoreTokens()) {
-      attributes.add(tokenizer.nextToken().trim());
+  static List<String> extractAttributes(Text value) {
+    List<String> result = new ArrayList<String>();
+    for (String token : COMMA.split(value.toString())) {
+      result.add(token.trim());
     }
+    return result;
   }
 }

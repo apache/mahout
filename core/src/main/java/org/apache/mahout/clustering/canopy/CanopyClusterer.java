@@ -163,7 +163,7 @@ public class CanopyClusterer {
         log.debug("Added point: {} to canopy: {}", AbstractCluster.formatVector(point, null), canopy.getIdentifier());
         canopy.observe(point);
       }
-      pointStronglyBound = pointStronglyBound || (dist < t2);
+      pointStronglyBound = pointStronglyBound || dist < t2;
     }
     if (!pointStronglyBound) {
       log.debug("Created new Canopy:{} at center:{}", nextCanopyId, AbstractCluster.formatVector(point, null));

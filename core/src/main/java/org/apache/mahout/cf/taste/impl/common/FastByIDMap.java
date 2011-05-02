@@ -96,7 +96,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     int jump = 1 + theHashCode % (hashSize - 2);
     int index = theHashCode % hashSize;
     long currentKey = keys[index];
-    while ((currentKey != NULL) && (key != currentKey)) {
+    while (currentKey != NULL && key != currentKey) {
       if (index < jump) {
         index += hashSize - jump;
       } else {
@@ -117,7 +117,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     int jump = 1 + theHashCode % (hashSize - 2);
     int index = theHashCode % hashSize;
     long currentKey = keys[index];
-    while ((currentKey != NULL) && (currentKey != REMOVED) && (key != currentKey)) { // Different
+    while (currentKey != NULL && currentKey != REMOVED && key != currentKey) { // Different
                                                                                                              // here
       if (index < jump) {
         index += hashSize - jump;
@@ -149,7 +149,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
   }
   
   public boolean containsKey(long key) {
-    return (key != NULL) && (key != REMOVED) && (keys[find(key)] != NULL);
+    return key != NULL && key != REMOVED && keys[find(key)] != NULL;
   }
   
   public boolean containsValue(Object value) {
@@ -157,7 +157,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
       return false;
     }
     for (V theValue : values) {
-      if ((theValue != null) && value.equals(theValue)) {
+      if (theValue != null && value.equals(theValue)) {
         return true;
       }
     }
@@ -188,7 +188,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
       return oldValue;
     } else {
       // If size is limited,
-      if (countingAccesses && (numEntries >= maxSize)) {
+      if (countingAccesses && numEntries >= maxSize) {
         // and we're too large, clear some old-ish entry
         clearStaleEntry(index);
       }
@@ -212,7 +212,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
           index--;
         }
         currentKey = keys[index];
-      } while ((currentKey == NULL) || (currentKey == REMOVED));
+      } while (currentKey == NULL || currentKey == REMOVED);
       if (recentlyAccessed.get(index)) {
         recentlyAccessed.clear(index);
       } else {
@@ -226,7 +226,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
   }
   
   public V remove(long key) {
-    if ((key == NULL) || (key == REMOVED)) {
+    if (key == NULL || key == REMOVED) {
       return null;
     }
     int index = find(key);
@@ -286,7 +286,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     int length = oldKeys.length;
     for (int i = 0; i < length; i++) {
       long key = oldKeys[i];
-      if ((key != NULL) && (key != REMOVED)) {
+      if (key != NULL && key != REMOVED) {
         put(key, oldValues[i]);
       }
     }
@@ -327,7 +327,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     result.append('{');
     for (int i = 0; i < keys.length; i++) {
       long key = keys[i];
-      if ((key != NULL) && (key != REMOVED)) {
+      if (key != NULL && key != REMOVED) {
         result.append(key).append('=').append(values[i]).append(',');
       }
     }
@@ -426,7 +426,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     
     private void goToNext() {
       int length = values.length;
-      while ((position < length) && (values[position] == null)) {
+      while (position < length && values[position] == null) {
         position++;
       }
     }
@@ -546,7 +546,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
       
       private void goToNext() {
         int length = values.length;
-        while ((position < length) && (values[position] == null)) {
+        while (position < length && values[position] == null) {
           position++;
         }
       }

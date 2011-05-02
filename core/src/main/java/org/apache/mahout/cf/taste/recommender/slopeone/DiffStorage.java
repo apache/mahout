@@ -37,7 +37,7 @@ public interface DiffStorage extends Refreshable {
   
   /**
    * @return {@link RunningAverage} encapsulating the average difference in preferences between items
-   *         corresponding to <code>itemID1</code> and <code>itemID2</code>, in that direction; that is, it's
+   *         corresponding to {@code itemID1} and {@code itemID2}, in that direction; that is, it's
    *         the average of item 2's preferences minus item 1's preferences
    */
   RunningAverage getDiff(long itemID1, long itemID2) throws TasteException;

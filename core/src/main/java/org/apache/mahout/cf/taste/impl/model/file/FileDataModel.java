@@ -54,7 +54,7 @@ import com.google.common.base.Preconditions;
  * optional timestamp. Commas or tabs delimit fields:
  * </p>
  *
- * <p><code>userID,itemID[,preference[,timestamp]]</code></p>
+ * <p>{@code userID,itemID[,preference[,timestamp]]}</p>
  *
  * <p>
  * Preference value is optional to accommodate applications that have no notion of a
@@ -63,18 +63,18 @@ import com.google.common.base.Preconditions;
  * </p>
  *
  * <p>
- * The preference value is assumed to be parseable as a <code>double</code>. The user IDs and item IDs are
- * read parsed as <code>long</code>s. The timestamp, if present, is assumed to be parseable as a
- * <code>long</code>, though this can be overridden via {@link #readTimestampFromString(String)}.
+ * The preference value is assumed to be parseable as a {@code double}. The user IDs and item IDs are
+ * read parsed as {@code long}s. The timestamp, if present, is assumed to be parseable as a
+ * {@code long}, though this can be overridden via {@link #readTimestampFromString(String)}.
  * The preference value may be empty, to indicate "no preference value", but cannot be empty. That is,
  * this is legal:
  * </p>
  *
- * <p><code>123,456,,129050099059</code></p>
+ * <p>{@code 123,456,,129050099059}</p>
  *
  * <p>But this isn't:</p>
  *
- * <p><code>123,456,129050099059</code></p>
+ * <p>{@code 123,456,129050099059}</p>
  *
  * <p>
  * It is also acceptable for the lines to contain additional fields. Fields beyond the third will be ignored.
@@ -170,7 +170,7 @@ public class FileDataModel extends AbstractDataModel {
 
     FileLineIterator iterator = new FileLineIterator(dataFile, false);
     String firstLine = iterator.peek();
-    while ((firstLine.length() == 0) || (firstLine.charAt(0) == COMMENT_CHAR)) {
+    while (firstLine.length() == 0 || firstLine.charAt(0) == COMMENT_CHAR) {
       iterator.next();
       firstLine = iterator.peek();
     }
@@ -214,7 +214,7 @@ public class FileDataModel extends AbstractDataModel {
     long newLastModified = dataFile.lastModified();
     long newLastUpdateFileModified = readLastUpdateFileModified();
 
-    boolean loadFreshData = (delegate == null) || (newLastModified > lastModified + minReloadIntervalMS);
+    boolean loadFreshData = delegate == null || newLastModified > lastModified + minReloadIntervalMS;
 
     long oldLastUpdateFileModifieid = lastUpdateFileModified;
     lastModified = newLastModified;
@@ -691,8 +691,8 @@ public class FileDataModel extends AbstractDataModel {
 
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
-    if ((dataFile.lastModified() > lastModified + minReloadIntervalMS)
-        || (readLastUpdateFileModified() > lastUpdateFileModified + minReloadIntervalMS)) {
+    if (dataFile.lastModified() > lastModified + minReloadIntervalMS
+        || readLastUpdateFileModified() > lastUpdateFileModified + minReloadIntervalMS) {
       log.debug("File has changed; reloading...");
       reload();
     }

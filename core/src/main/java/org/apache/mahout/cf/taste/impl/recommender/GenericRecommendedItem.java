@@ -69,8 +69,8 @@ public final class GenericRecommendedItem implements RecommendedItem, Serializab
     if (!(o instanceof GenericRecommendedItem)) {
       return false;
     }
-    GenericRecommendedItem other = (GenericRecommendedItem) o;
-    return (itemID == other.getItemID()) && (value == other.getValue());
+    RecommendedItem other = (RecommendedItem) o;
+    return itemID == other.getItemID() && value == other.getValue();
   }
   
 }

@@ -181,9 +181,9 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
 
   /* Cribbed from o.a.hadoop.io.Text:
    * Sets the capacity of this object to <em>at least</em>
-   * <code>len</code> bytes. If the current buffer is longer,
+   * {@code len} bytes. If the current buffer is longer,
    * then the capacity and existing content of the buffer are
-   * unchanged. If <code>len</code> is larger
+   * unchanged. If {@code len} is larger
    * than the current capacity, this object's capacity is
    * increased to match.
    * @param len the number of bytes we need

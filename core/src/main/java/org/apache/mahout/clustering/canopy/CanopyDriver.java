@@ -20,7 +20,6 @@ package org.apache.mahout.clustering.canopy;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -74,8 +73,7 @@ public class CanopyDriver extends AbstractJob {
     addOption(DefaultOptionCreator.clusteringOption().create());
     addOption(DefaultOptionCreator.methodOption().create());
 
-    Map<String, String> argMap = parseArguments(args);
-    if (argMap == null) {
+    if (parseArguments(args) == null) {
       return -1;
     }
 

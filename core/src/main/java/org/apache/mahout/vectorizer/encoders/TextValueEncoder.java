@@ -81,8 +81,6 @@ public class TextValueEncoder extends FeatureVectorEncoder {
 
   /**
    * Adds all of the tokens that we counted up to a vector.
-   * @param weight  The weight
-   * @param data
    */
   public void flush(double weight, Vector data) {
     for (String word : counts.elementSet()) {
@@ -110,8 +108,6 @@ public class TextValueEncoder extends FeatureVectorEncoder {
    * Tokenizes a string using the simplest method.  This should be over-ridden for more subtle
    * tokenization.
    * @see LuceneTextValueEncoder
-   * @param originalForm
-   * @return
    */
   protected Iterable<String> tokenize(CharSequence originalForm) {
     return onNonWord.split(originalForm);

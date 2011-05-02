@@ -32,11 +32,11 @@ import org.slf4j.LoggerFactory;
  * <p>Handles reading the files representing the affinity matrix. Since the affinity
  * matrix is representative of a graph, each line in all the files should
  * take the form:</p>
- * 
- * <code>i,j,value</code>
- * 
- * <p>where <code>i</code> and <code>j</code> are the <code>i</code>th and
- * <code>j</code> data points in the entire set, and <code>value</code> 
+ *
+ * {@code i,j,value}
+ *
+ * <p>where {@code i} and {@code j} are the {@code i}th and
+ * {@code j} data points in the entire set, and {@code value}
  * represents some measurement of their relative absolute magnitudes. This
  * is, simply, a method for representing a graph textually.
  */

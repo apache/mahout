@@ -40,7 +40,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
   /**
    * @param n neighborhood size; capped at the number of users in the data model
    * @throws IllegalArgumentException
-   *           if n &lt; 1, or userSimilarity or dataModel are <code>null</code>
+   *           if {@code n < 1}, or userSimilarity or dataModel are {@code null}
    */
   public NearestNUserNeighborhood(int n, UserSimilarity userSimilarity, DataModel dataModel) throws TasteException {
     this(n, Double.NEGATIVE_INFINITY, userSimilarity, dataModel, 1.0);
@@ -50,7 +50,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
    * @param n neighborhood size; capped at the number of users in the data model
    * @param minSimilarity minimal similarity required for neighbors
    * @throws IllegalArgumentException
-   *           if n &lt; 1, or userSimilarity or dataModel are <code>null</code>
+   *           if {@code n < 1}, or userSimilarity or dataModel are {@code null}
    */
   public NearestNUserNeighborhood(int n,
                                   double minSimilarity,
@@ -65,8 +65,8 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
    * @param samplingRate percentage of users to consider when building neighborhood -- decrease to trade quality for
    *   performance
    * @throws IllegalArgumentException
-   *           if n &lt; 1 or samplingRate is NaN or not in (0,1], or userSimilarity or dataModel are
-   *           <code>null</code>
+   *           if {@code n < 1} or samplingRate is NaN or not in (0,1], or userSimilarity or dataModel are
+   *           {@code null}
    */
   public NearestNUserNeighborhood(int n,
                                   double minSimilarity,

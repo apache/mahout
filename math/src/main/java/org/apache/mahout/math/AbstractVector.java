@@ -271,7 +271,7 @@ public abstract class AbstractVector implements Vector {
       double value = e.get();
       d += value * (value - 2.0 * randomlyAccessed.getQuick(e.index()));
     }
-    assert d > -1.0e-9; // round-off errors should never be too far off!
+    //assert d > -1.0e-9; // round-off errors should never be too far off!
     return Math.abs(d);
   }
 

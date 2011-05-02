@@ -35,12 +35,12 @@ import java.util.Collection;
 import java.util.Random;
 
 /**
- * {@link org.apache.mahout.cf.taste.impl.recommender.svd.Factorizer} based on Simon Funk's famous article "Netflix Update: Try this at home"
- * {@see http://sifter.org/~simon/journal/20061211.html}.
+ * {@link Factorizer} based on Simon Funk's famous article <a href="http://sifter.org/~simon/journal/20061211.html">
+ * "Netflix Update: Try this at home"</a>.
  *
- * Attempts to be as memory efficient as possible, only iterating once through the {@link FactorizablePreferences} or {@link DataModel} while
- * copying everything to primitive arrays. Learning works in place on these datastructures after that.
- *
+ * Attempts to be as memory efficient as possible, only iterating once through the
+ * {@link FactorizablePreferences} or {@link DataModel} while copying everything to primitive arrays.
+ * Learning works in place on these datastructures after that.
  */
 public class ParallelArraysSGDFactorizer implements Factorizer {
 
@@ -149,8 +149,8 @@ public class ParallelArraysSGDFactorizer implements Factorizer {
     log.info("Average preference value is {}", averagePreference);
 
     double prefInterval = factorizablePreferences.getMaxPreference() - factorizablePreferences.getMinPreference();
-    defaultValue = Math.sqrt((averagePreference - (prefInterval * 0.1)) / numFeatures);
-    interval = (prefInterval * 0.1) / numFeatures;
+    defaultValue = Math.sqrt((averagePreference - prefInterval * 0.1) / numFeatures);
+    interval = prefInterval * 0.1 / numFeatures;
 
     userFeatures = new double[numUsers][numFeatures];
     itemFeatures = new double[numItems][numFeatures];
@@ -173,11 +173,11 @@ public class ParallelArraysSGDFactorizer implements Factorizer {
       shufflePreferences();
      log.info("Starting training of feature {} ...", feature);
       for (int currentIteration = 0; currentIteration < numIterations; currentIteration++) {
-        if (currentIteration != (numIterations - 1)) {
-          trainingIteration(feature);
-        } else {
+        if (currentIteration == numIterations - 1) {
           double rmse = trainingIterationWithRmse(feature);
           log.info("Finished training feature {} with RMSE {}", feature, rmse);
+        } else {
+          trainingIteration(feature);
         }
       }
       if (feature < numFeatures - 1) {
@@ -202,7 +202,7 @@ public class ParallelArraysSGDFactorizer implements Factorizer {
     double rmse = 0;
     for (int index = 0; index < userIndexes.length; index++) {
       double error = train(userIndexes[index], itemIndexes[index], feature, values[index], cachedEstimates[index]);
-      rmse += (error * error);
+      rmse += error * error;
     }
     return Math.sqrt(rmse / (double) userIndexes.length);
   }
@@ -211,7 +211,7 @@ public class ParallelArraysSGDFactorizer implements Factorizer {
     double sum = cachedEstimate;
     sum += userFeatures[userIndex][feature] * itemFeatures[itemIndex][feature];
     if (trailing) {
-      sum += (numFeatures - feature - 1) * ((defaultValue + interval) * (defaultValue + interval));
+      sum += (numFeatures - feature - 1) * (defaultValue + interval) * (defaultValue + interval);
       if (sum > maxPreference) {
         sum = maxPreference;
       } else if (sum < minPreference) {

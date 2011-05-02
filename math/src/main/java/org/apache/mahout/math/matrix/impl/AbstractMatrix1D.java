@@ -10,7 +10,7 @@ package org.apache.mahout.math.matrix.impl;
 
 /**
  Abstract base class for 1-d matrices (aka <i>vectors</i>) holding objects or primitive data types such as
- <code>int</code>, <code>double</code>, etc.
+ {@code int}, {@code double}, etc.
  First see the <a href="package-summary.html">package summary</a> and javadoc
  <a href="package-tree.html">tree view</a> to get the broad picture.
  <p>

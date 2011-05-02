@@ -104,7 +104,7 @@ public final class Probability {
    * @param p the probability of success (must be in <tt>(0.0,1.0)</tt>).
    */
   public static double negativeBinomial(int k, int n, double p) {
-    if ((p < 0.0) || (p > 1.0)) {
+    if (p < 0.0 || p > 1.0) {
       throw new IllegalArgumentException();
     }
     if (k < 0) {

@@ -116,7 +116,7 @@ public class TestForest extends Configured implements Tool {
       String dataName = cmdLine.getValue(inputOpt).toString();
       String datasetName = cmdLine.getValue(datasetOpt).toString();
       String modelName = cmdLine.getValue(modelOpt).toString();
-      String outputName = (cmdLine.hasOption(outputOpt)) ? cmdLine.getValue(outputOpt).toString() : null;
+      String outputName = cmdLine.hasOption(outputOpt) ? cmdLine.getValue(outputOpt).toString() : null;
       analyze = cmdLine.hasOption(analyzeOpt);
       useMapreduce = cmdLine.hasOption(mrOpt);
 
@@ -230,7 +230,7 @@ public class TestForest extends Configured implements Tool {
 
     for (Path path : infiles) {
       log.info("Classifying : " + path);
-      Path outfile = (outPath != null) ? new Path(outPath, path.getName()).suffix(".out") : null;
+      Path outfile = outPath != null ? new Path(outPath, path.getName()).suffix(".out") : null;
       testFile(path, outfile, converter, forest, dataset, analyzer, rng);
     }
   }

@@ -38,10 +38,10 @@ class NominalAttr implements Attribute {
   }
   
   /**
-   * Converts a string value of a nominal attribute to an <code>int</code>.
+   * Converts a string value of a nominal attribute to an {@code int}.
    *
    * @param value
-   * @return an <code>int</code> representing the value
+   * @return an {@code int} representing the value
    * @throws IllegalArgumentException if the value is not found.
    */
   public int valueIndex(String value) {

@@ -73,7 +73,7 @@ public class Auc {
     Preconditions.checkArgument(trueValue == 0 || trueValue == 1, "True value must be 0 or 1");
     hasScore = true;
 
-    int predictedClass = (score > threshold) ? 1 : 0;
+    int predictedClass = score > threshold ? 1 : 0;
     confusion.set(trueValue, predictedClass, confusion.get(trueValue, predictedClass) + 1);
 
     samples++;
@@ -209,7 +209,7 @@ public class Auc {
     if (!hasScore) {
       // find a constant score that would optimize log-likelihood, but use a dash of Bayesian
       // conservatism to avoid dividing by zero or taking log(0)
-      double p = (0.5 + confusion.get(1, 1)) / (1 + (confusion.get(0, 0) + confusion.get(1, 1)));
+      double p = (0.5 + confusion.get(1, 1)) / (1 + confusion.get(0, 0) + confusion.get(1, 1));
       entropy.set(0, 0, confusion.get(0, 0) * Math.log(1 - p));
       entropy.set(0, 1, confusion.get(0, 1) * Math.log(p));
       entropy.set(1, 0, confusion.get(1, 0) * Math.log(1 - p));

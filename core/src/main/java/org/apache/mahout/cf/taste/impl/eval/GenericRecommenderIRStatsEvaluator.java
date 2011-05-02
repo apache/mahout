@@ -51,8 +51,8 @@ import com.google.common.base.Preconditions;
 
 /**
  * <p>
- * For each user, these implementation determine the top <code>n</code> preferences, then evaluate the IR
- * statistics based on a {@link DataModel} that does not have these values. This number <code>n</code> is the
+ * For each user, these implementation determine the top {@code n} preferences, then evaluate the IR
+ * statistics based on a {@link DataModel} that does not have these values. This number {@code n} is the
  * "at" value, as in "precision at 5". For example, this would mean precision evaluated by removing the top 5
  * preferences for a user and then finding the percentage of those 5 items included in the top 5
  * recommendations for that user.
@@ -124,7 +124,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
 
       prefs.sortByValueReversed();
 
-      for (int i = 0; (i < size) && (relevantItemIDs.size() < at); i++) {
+      for (int i = 0; i < size && relevantItemIDs.size() < at; i++) {
         if (prefs.getValue(i) >= theRelevanceThreshold) {
           relevantItemIDs.add(prefs.getItemID(i));
         }

@@ -36,19 +36,19 @@ import com.google.common.base.Preconditions;
  * This is an optimized {@link Map} implementation, based on algorithms described in Knuth's "Art of Computer
  * Programming", Vol. 3, p. 529.
  * </p>
- * 
+ *
  * <p>
  * It should be faster than {@link java.util.HashMap} in some cases, but not all. Its main feature is a
  * "max size" and the ability to transparently, efficiently and semi-intelligently evict old entries when max
  * size is exceeded.
  * </p>
- * 
+ *
  * <p>
  * This class is not a bit thread-safe.
  * </p>
- * 
+ *
  * <p>
- * This implementation does not allow <code>null</code> as a key or value.
+ * This implementation does not allow {@code null} as a key or value.
  * </p>
  */
 public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
@@ -113,7 +113,7 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
     int jump = 1 + theHashCode % (hashSize - 2);
     int index = theHashCode % hashSize;
     K currentKey = keys[index];
-    while ((currentKey != null) && ((currentKey == REMOVED) || !key.equals(currentKey))) {
+    while (currentKey != null && (currentKey == REMOVED || !key.equals(currentKey))) {
       if (index < jump) {
         index += hashSize - jump;
       } else {
@@ -148,7 +148,7 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
   
   @Override
   public boolean containsKey(Object key) {
-    return (key != null) && (keys[find(key)] != null);
+    return key != null && keys[find(key)] != null;
   }
   
   @Override
@@ -157,7 +157,7 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
       return false;
     }
     for (V theValue : values) {
-      if ((theValue != null) && value.equals(theValue)) {
+      if (theValue != null && value.equals(theValue)) {
         return true;
       }
     }
@@ -170,7 +170,7 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
    */
   @Override
   public V put(K key, V value) {
-    if ((key == null) || (value == null)) {
+    if (key == null || value == null) {
       throw new NullPointerException();
     }
     // If less than half the slots are open, let's clear it up
@@ -187,7 +187,7 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
     int index = find(key);
     if (keys[index] == null) {
       // If size is limited,
-      if (countingAccesses && (numEntries >= maxSize)) {
+      if (countingAccesses && numEntries >= maxSize) {
         // and we're too large, clear some old-ish entry
         clearStaleEntry(index);
       }
@@ -213,7 +213,7 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
           index--;
         }
         currentKey = keys[index];
-      } while ((currentKey == null) || (currentKey == REMOVED));
+      } while (currentKey == null || currentKey == REMOVED);
       if (recentlyAccessed.get(index)) {
         recentlyAccessed.clear(index);
       } else {
@@ -302,7 +302,7 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
     int length = oldKeys.length;
     for (int i = 0; i < length; i++) {
       K key = oldKeys[i];
-      if ((key != null) && (key != REMOVED)) {
+      if (key != null && key != REMOVED) {
         put(key, oldValues[i]);
       }
     }
@@ -402,7 +402,7 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
     result.append('{');
     for (int i = 0; i < keys.length; i++) {
       K key = keys[i];
-      if ((key != null) && (key != REMOVED)) {
+      if (key != null && key != REMOVED) {
         result.append(key).append('=').append(values[i]).append(',');
       }
     }
@@ -512,7 +512,7 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
       
       private void goToNext() {
         int length = values.length;
-        while ((position < length) && (values[position] == null)) {
+        while (position < length && values[position] == null) {
           position++;
         }
       }
@@ -600,7 +600,7 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
       
       private void goToNext() {
         int length = values.length;
-        while ((position < length) && (values[position] == null)) {
+        while (position < length && values[position] == null) {
           position++;
         }
       }
@@ -688,7 +688,7 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
       
       private void goToNext() {
         int length = values.length;
-        while ((position < length) && (values[position] == null)) {
+        while (position < length && values[position] == null) {
           position++;
         }
       }

@@ -49,7 +49,6 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.common.CommandLineUtil;
-import org.apache.mahout.common.StringUtils;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.ga.watchmaker.OutputUtils;
@@ -70,10 +69,10 @@ public final class CDInfosTool {
 
   /**
    * Uses Mahout to gather the information about a dataset.
-   * 
+   *
    * @param descriptors about the available attributes
    * @param inpath input path (the dataset)
-   * @param descriptions <code>List&lt;String&gt;</code> that contains the
+   * @param descriptions {@code List<String>} that contains the
    *        generated descriptions for each non ignored attribute
    */
   public static void gatherInfos(Descriptors descriptors, Path inpath, Path output, Collection<String> descriptions)
@@ -93,10 +92,10 @@ public final class CDInfosTool {
 
   /**
    * Configure the job
-   * 
+   *
    * @param descriptors attributes's descriptors
-   * @param inpath input <code>Path</code>
-   * @param outpath output <code>Path</code>
+   * @param inpath input {@code Path}
+   * @param outpath output {@code Path}
    */
   private static void configureJob(Job job, Descriptors descriptors, Path inpath, Path outpath) throws IOException {
     FileInputFormat.setInputPaths(job, inpath);
@@ -119,10 +118,10 @@ public final class CDInfosTool {
 
   /**
    * Reads back the descriptions.
-   * 
+   *
    * @param fs file system
    * @param conf job configuration
-   * @param outpath output <code>Path</code>
+   * @param outpath output {@code Path}
    * @param descriptions List of attribute's descriptions
    */
   private static void importDescriptions(FileSystem fs,

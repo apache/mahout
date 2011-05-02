@@ -47,6 +47,9 @@ public class Track1SVDRunner {
 
   private static final Logger log = LoggerFactory.getLogger(Track1SVDRunner.class);
 
+  private Track1SVDRunner() {
+  }
+
   public static void main(String[] args) throws Exception {
 
     if (args.length != 2) {

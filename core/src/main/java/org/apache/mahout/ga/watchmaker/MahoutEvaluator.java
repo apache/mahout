@@ -47,13 +47,13 @@ public final class MahoutEvaluator {
   
   /**
    * Uses Mahout to evaluate every candidate from the input population using the given evaluator.
-   * 
+   *
    * @param evaluator
    *          FitnessEvaluator to use
    * @param population
    *          input population
    * @param evaluations
-   *          <code>List&lt;Double&gt;</code> that contains the evaluated fitness for each candidate from the
+   *          {@code List<Double>} that contains the evaluated fitness for each candidate from the
    *          input population, sorted in the same order as the candidates.
    */
   public static void evaluate(FitnessEvaluator<?> evaluator,
@@ -81,13 +81,13 @@ public final class MahoutEvaluator {
 
   /**
    * Configure the job
-   * 
+   *
    * @param evaluator
    *          FitnessEvaluator passed to the mapper
    * @param inpath
-   *          input <code>Path</code>
+   *          input {@code Path}
    * @param outpath
-   *          output <code>Path</code>
+   *          output {@code Path}
    */
   private static void configureJob(Job job,
                                    Configuration conf,

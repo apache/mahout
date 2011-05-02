@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -114,9 +115,9 @@ public final class TrainNewsGroups {
 
   private static final String[] LEAK_LABELS = {"none", "month-year", "day-month-year"};
   private static final SimpleDateFormat[] DATE_FORMATS = {
-    new SimpleDateFormat(""),
-    new SimpleDateFormat("MMM-yyyy"),
-    new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss")
+    new SimpleDateFormat("", Locale.ENGLISH),
+    new SimpleDateFormat("MMM-yyyy", Locale.ENGLISH),
+    new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss", Locale.ENGLISH)
   };
 
   private static final Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_30);
@@ -291,7 +292,7 @@ public final class TrainNewsGroups {
       while (line != null && line.length() > 0) {
         boolean countHeader = (
           line.startsWith("From:") || line.startsWith("Subject:") ||
-            line.startsWith("Keywords:") || line.startsWith("Summary:")) && (leakType < 6);
+            line.startsWith("Keywords:") || line.startsWith("Summary:")) && leakType < 6;
         do {
           Reader in = new StringReader(line);
           if (countHeader) {

@@ -62,7 +62,7 @@ public final class LastfmDataConverter {
 
   private static String usedMemory() {
     Runtime runtime = Runtime.getRuntime();
-    return "Used Memory: [" + ((runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024)) + " MB] ";
+    return "Used Memory: [" + (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024) + " MB] ";
   }
 
   /* Get the feature from the parsed record */
@@ -92,7 +92,6 @@ public final class LastfmDataConverter {
    *          Lastfm dataset file on the local file system.
    * @param dataSet
    *          Type of dataset - 360K Users or 1K Users
-   * @return
    */
   public static Map<String, List<Integer>> convertToItemFeatures(String inputFile, Lastfm dataSet) throws IOException {
     long totalRecords = dataSet.totalRecords;
@@ -125,7 +124,7 @@ public final class LastfmDataConverter {
         features.add(featureIdx);
         parsedRecords++;
         // Update the progress
-        percentDone = (parsedRecords * 100.0) / totalRecords;
+        percentDone = parsedRecords * 100.0 / totalRecords;
         msg = usedMemory() + "Converting data to internal vector format: ";
         if (percentDone > prevPercentDone) {
           System.out.print('\r' + msg + percentDone + '%');
@@ -173,9 +172,9 @@ public final class LastfmDataConverter {
         featuresWritable.set(featureVector);
         writer.append(itemWritable, featuresWritable);
         // Update the progress
-        double percentDone = ((++doneRecords) * 100.0) / totalRecords;
+        double percentDone = ++doneRecords * 100.0 / totalRecords;
         if (percentDone > prevPercentDone) {
-          System.out.print('\r' + msg + percentDone + "% " + ((percentDone >= 100) ? "Completed\n" : ""));
+          System.out.print('\r' + msg + percentDone + "% " + (percentDone >= 100 ? "Completed\n" : ""));
           prevPercentDone++;
         }
       }

@@ -69,9 +69,9 @@ public abstract class AbstractRecommender implements Recommender {
    * <p>
    * Default implementation which just calls {@link DataModel#setPreference(long, long, float)}.
    * </p>
-   * 
+   *
    * @throws IllegalArgumentException
-   *           if userID or itemID is <code>null</code>, or if value is {@link Double#NaN}
+   *           if userID or itemID is {@code null}, or if value is {@link Double#NaN}
    */
   @Override
   public void setPreference(long userID, long itemID, float value) throws TasteException {
@@ -84,9 +84,9 @@ public abstract class AbstractRecommender implements Recommender {
    * <p>
    * Default implementation which just calls {@link DataModel#removePreference(long, long)} (Object, Object)}.
    * </p>
-   * 
+   *
    * @throws IllegalArgumentException
-   *           if userID or itemID is <code>null</code>
+   *           if userID or itemID is {@code null}
    */
   @Override
   public void removePreference(long userID, long itemID) throws TasteException {

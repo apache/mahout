@@ -39,11 +39,11 @@ import org.apache.mahout.math.VarLongWritable;
  * {@link org.apache.mahout.cf.taste.recommender.Recommender} instances on Hadoop,
  * where each instance is a normal non-distributed implementation.
  * </p>
- * 
+ *
  * <p>This class configures and runs a {@link RecommenderReducer} using Hadoop.</p>
- * 
+ *
  * <p>Command line arguments specific to this class are:</p>
- * 
+ *
  * <ol>
  * <li>-Dmapred.input.dir=(path): Location of a data model file containing preference data, suitable for use with
  * {@link org.apache.mahout.cf.taste.impl.model.file.FileDataModel}</li>
@@ -60,38 +60,38 @@ import org.apache.mahout.math.VarLongWritable;
  *
  * <p>Note that because of how Hadoop parses arguments, all "-D" arguments must appear before all other
  * arguments.</p>
- * 
+ *
  * <p>
  * For example, to get started trying this out, set up Hadoop in a pseudo-distributed manner:
  * http://hadoop.apache.org/common/docs/current/quickstart.html You can stop at the point where it instructs
  * you to copy files into HDFS.
  * </p>
- * 
+ *
  * <p>
- * Assume your preference data file is <code>input.csv</code>. You will also need to create a file containing
- * all user IDs to write recommendations for, as something like <code>users.txt</code>. Place this input on
+ * Assume your preference data file is {@code input.csv}. You will also need to create a file containing
+ * all user IDs to write recommendations for, as something like {@code users.txt}. Place this input on
  * HDFS like so:
  * </p>
- * 
+ *
  * {@code hadoop fs -put input.csv input/input.csv; hadoop fs -put users.txt input/users.txt * }
- * 
+ *
  * <p>
- * Build Mahout code with <code>mvn package</code> in the core/ directory. Locate
- * <code>target/mahout-core-X.Y-SNAPSHOT.job</code>. This is a JAR file; copy it out to a convenient location
- * and name it <code>recommender.jar</code>.
+ * Build Mahout code with {@code mvn package} in the core/ directory. Locate
+ * {@code target/mahout-core-X.Y-SNAPSHOT.job}. This is a JAR file; copy it out to a convenient location
+ * and name it {@code recommender.jar}.
  * </p>
- * 
+ *
  * <p>
  * Now add your own custom recommender code and dependencies. Your IDE produced compiled .class files
  * somewhere and they need to be packaged up as well:
  * </p>
- * 
+ *
  * {@code jar uf recommender.jar -C (your classes directory) . * }
- * 
+ *
  * <p>
  * And launch:
  * </p>
- * 
+ *
  * {@code hadoop jar recommender.jar \
  *   org.apache.mahout.cf.taste.hadoop.pseudo.RecommenderJob \
  *   -Dmapred.input.dir=input/users.csv \

@@ -32,10 +32,10 @@ import org.apache.mahout.common.Pair;
 
 /**
  * <p>This class converts a KDD Cup input file into a compressed CSV format. The output format is
- * <code>userID,itemID,score,timestamp</code>. It can optionally restrict its output to exclude
+ * {@code userID,itemID,score,timestamp}. It can optionally restrict its output to exclude
  * score and/or timestamp.</p>
  *
- * <p>Run as: <code>ToCSV (input file) (output file) [num columns to output]</p>
+ * <p>Run as: {@code ToCSV (input file) (output file) [num columns to output]}</p>
  */
 public final class ToCSV {
 

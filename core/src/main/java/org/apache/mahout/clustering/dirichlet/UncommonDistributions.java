@@ -55,7 +55,7 @@ public final class UncommonDistributions {
         x = k * Math.exp(y);
         double z = u * v * v;
         double r = b + c * y - x;
-        if ((r >= 4.5 * z - cheng) || (r >= Math.log(z))) {
+        if (r >= 4.5 * z - cheng || r >= Math.log(z)) {
           accept = true;
         }
       } while (!accept);
@@ -205,7 +205,7 @@ public final class UncommonDistributions {
     double total = probabilities.zSum();
     int cardinality = probabilities.size();
     Vector result = new DenseVector(cardinality);
-    for (int i = 0; (total > 0) && (i < cardinality); i++) {
+    for (int i = 0; total > 0 && i < cardinality; i++) {
       double p = probabilities.get(i);
       int ki = rBinomial(size, p / total);
       total -= p;
@@ -216,7 +216,7 @@ public final class UncommonDistributions {
   }
   
   /**
-   * Returns an integer sampled according to this distribution. Takes time proprotional to np + 1. (Reference:
+   * Returns an integer sampled according to this distribution. Takes time proportional to np + 1. (Reference:
    * Non-Uniform Random Variate Generation, Devroye http://cgm.cs.mcgill.ca/~luc/rnbookindex.html) Second
    * time-waiting algorithm.
    */

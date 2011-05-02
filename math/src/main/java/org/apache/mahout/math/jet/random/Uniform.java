@@ -103,14 +103,14 @@ public class Uniform extends AbstractContinousDistribution {
 
     // first the most likely and also the fastest case.
     if (from >= 0 && to < Long.MAX_VALUE) {
-      return from + (long) (nextDoubleFromTo(0.0, to - from + 1));
+      return from + (long) nextDoubleFromTo(0.0, to - from + 1);
     }
 
     // would we get a numeric overflow?
     // if not, we can still handle the case rather efficient.
-    double diff = ((double) to) - (double) from + 1.0;
+    double diff = (double) to - (double) from + 1.0;
     if (diff <= Long.MAX_VALUE) {
-      return from + (long) (nextDoubleFromTo(0.0, diff));
+      return from + (long) nextDoubleFromTo(0.0, diff);
     }
 
     // now the pathologic boundary cases.

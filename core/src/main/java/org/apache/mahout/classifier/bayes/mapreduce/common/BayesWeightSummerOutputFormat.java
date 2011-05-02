@@ -52,7 +52,7 @@ public class BayesWeightSummerOutputFormat extends MultipleOutputFormat<Writable
   protected String generateFileNameForKeyValue(WritableComparable<?> k, Writable v, String name) {
     StringTuple key = (StringTuple) k;
     
-    if ((key.length() == 1) && key.stringAt(0).equals(BayesConstants.TOTAL_SUM)) {
+    if (key.length() == 1 && key.stringAt(0).equals(BayesConstants.TOTAL_SUM)) {
       return "Sigma_kSigma_j/" + name;
     } else {
       if (key.stringAt(0).equals(BayesConstants.FEATURE_SUM)) {

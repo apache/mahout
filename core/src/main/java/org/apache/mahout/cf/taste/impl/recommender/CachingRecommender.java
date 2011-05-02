@@ -110,7 +110,7 @@ public final class CachingRecommender implements Recommender {
     setCurrentRescorer(rescorer);
 
     Recommendations recommendations = recommendationCache.get(userID);
-    if ((recommendations.getItems().size() < howMany) && !recommendations.isNoMoreRecommendableItems()) {
+    if (recommendations.getItems().size() < howMany && !recommendations.isNoMoreRecommendableItems()) {
       clear(userID);
       recommendations = recommendationCache.get(userID);
       if (recommendations.getItems().size() < howMany) {

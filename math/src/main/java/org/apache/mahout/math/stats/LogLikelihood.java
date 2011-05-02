@@ -110,7 +110,7 @@ public final class LogLikelihood {
   public static double rootLogLikelihoodRatio(int k11, int k12, int k21, int k22) {
     double llr = logLikelihoodRatio(k11, k12, k21, k22);
     double sqrt = Math.sqrt(llr);
-    if (((double) k11 / (k11 + k12)) < ((double) k21 / (k21 + k22))) {
+    if ((double) k11 / (k11 + k12) < (double) k21 / (k21 + k22)) {
       sqrt = -sqrt;
     }
     return sqrt;

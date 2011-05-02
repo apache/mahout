@@ -64,7 +64,7 @@ public class EigencutsSensitivityMapper extends
     // first, does this particular eigenvector even pass the required threshold?
     double eigenvalue = Math.abs(eigenvalues.get(row.get()));
     double betak = -Functions.LOGARITHM.apply(2) / Functions.LOGARITHM.apply(eigenvalue);
-    if (eigenvalue >= 1.0 || betak <= (epsilon * beta0)) {
+    if (eigenvalue >= 1.0 || betak <= epsilon * beta0) {
       // doesn't pass the threshold! quit
       return;
     }
@@ -124,8 +124,8 @@ public class EigencutsSensitivityMapper extends
            * Functions.LOGARITHM.apply(Functions.POW.apply(eigenvalue, beta0) / 2));
     
     double secondhalf =
-        -Functions.POW.apply((evi / Functions.SQRT.apply(diagi)) - (evj / Functions.SQRT.apply(diagj)), 2)
-        + (1.0 - eigenvalue) * ((Functions.POW.apply(evi, 2) / diagi) + (Functions.POW.apply(evj, 2) / diagj));
+        -Functions.POW.apply(evi / Functions.SQRT.apply(diagi) - evj / Functions.SQRT.apply(diagj), 2)
+        + (1.0 - eigenvalue) * (Functions.POW.apply(evi, 2) / diagi + Functions.POW.apply(evj, 2) / diagj);
     
     return firsthalf * secondhalf;
   }

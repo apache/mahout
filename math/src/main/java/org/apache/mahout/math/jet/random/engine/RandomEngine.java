@@ -75,7 +75,7 @@ public abstract class RandomEngine implements DoubleFunction, IntFunction {
   }
 
   /**
-   * @return a 64 bit uniformly distributed random number in the open unit interval <code>(0.0,1.0)</code> (excluding
+   * @return a 64 bit uniformly distributed random number in the open unit interval {@code (0.0,1.0)} (excluding
    * 0.0 and 1.0).
    */
   public double nextDouble() {
@@ -109,7 +109,7 @@ public abstract class RandomEngine implements DoubleFunction, IntFunction {
   }
 
   /**
-   * @return a 32 bit uniformly distributed random number in the open unit interval <code>(0.0f,1.0f)</code> (excluding
+   * @return a 32 bit uniformly distributed random number in the open unit interval {@code (0.0f, 1.0f)} (excluding
    * 0.0f and 1.0f).
    */
   public float nextFloat() {
@@ -138,12 +138,11 @@ public abstract class RandomEngine implements DoubleFunction, IntFunction {
    */
   public long nextLong() {
     // concatenate two 32-bit strings into one 64-bit string
-    return ((nextInt() & 0xFFFFFFFFL) << 32)
-        | ((nextInt() & 0xFFFFFFFFL));
+    return ((nextInt() & 0xFFFFFFFFL) << 32) | (nextInt() & 0xFFFFFFFFL);
   }
 
   /**
-   * @return a 32 bit uniformly distributed random number in the open unit interval <code>(0.0,1.0)</code> (excluding
+   * @return a 32 bit uniformly distributed random number in the open unit interval {@code (0.0, 1.0)} (excluding
    * 0.0 and 1.0).
    */
   public double raw() {

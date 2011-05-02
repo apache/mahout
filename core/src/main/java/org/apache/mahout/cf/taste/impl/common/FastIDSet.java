@@ -70,7 +70,7 @@ public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> 
     int jump = 1 + theHashCode % (hashSize - 2);
     int index = theHashCode % hashSize;
     long currentKey = keys[index];
-    while ((currentKey != NULL) && (key != currentKey)) { // note: true when currentKey == REMOVED
+    while (currentKey != NULL && key != currentKey) { // note: true when currentKey == REMOVED
       if (index < jump) {
         index += hashSize - jump;
       } else {
@@ -91,8 +91,7 @@ public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> 
     int jump = 1 + theHashCode % (hashSize - 2);
     int index = theHashCode % hashSize;
     long currentKey = keys[index];
-    while ((currentKey != NULL) && (currentKey != REMOVED) && (key != currentKey)) { // Different
-                                                                                                         // here
+    while (currentKey != NULL && currentKey != REMOVED && key != currentKey) { // Different here
       if (index < jump) {
         index += hashSize - jump;
       } else {
@@ -112,7 +111,7 @@ public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> 
   }
   
   public boolean contains(long key) {
-    return (key != NULL) && (key != REMOVED) && (keys[find(key)] != NULL);
+    return key != NULL && key != REMOVED && keys[find(key)] != NULL;
   }
   
   public boolean add(long key) {
@@ -150,7 +149,7 @@ public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> 
   public long[] toArray() {
     long[] result = new long[numEntries];
     for (int i = 0, position = 0; i < result.length; i++) {
-      while ((keys[position] == NULL) || (keys[position] == REMOVED)) {
+      while (keys[position] == NULL || keys[position] == REMOVED) {
         position++;
       }
       result[i] = keys[position++];
@@ -159,7 +158,7 @@ public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> 
   }
   
   public boolean remove(long key) {
-    if ((key == NULL) || (key == REMOVED)) {
+    if (key == NULL || key == REMOVED) {
       return false;
     }
     int index = find(key);
@@ -185,7 +184,7 @@ public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> 
   public boolean addAll(FastIDSet c) {
     boolean changed = false;
     for (long k : c.keys) {
-      if ((k != NULL) && (k != REMOVED) && add(k)) {
+      if (k != NULL && k != REMOVED && add(k)) {
         changed = true;
       }
     }
@@ -205,7 +204,7 @@ public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> 
   public boolean removeAll(FastIDSet c) {
     boolean changed = false;
     for (long k : c.keys) {
-      if ((k != NULL) && (k != REMOVED) && remove(k)) {
+      if (k != NULL && k != REMOVED && remove(k)) {
         changed = true;
       }
     }
@@ -216,7 +215,7 @@ public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> 
     boolean changed = false;
     for (int i = 0; i < keys.length; i++) {
       long k = keys[i];
-      if ((k != NULL) && (k != REMOVED) && !c.contains(k)) {
+      if (k != NULL && k != REMOVED && !c.contains(k)) {
         keys[i] = REMOVED;
         numEntries--;
         changed = true;
@@ -251,7 +250,7 @@ public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> 
     int length = oldKeys.length;
     for (int i = 0; i < length; i++) {
       long key = oldKeys[i];
-      if ((key != NULL) && (key != REMOVED)) {
+      if (key != NULL && key != REMOVED) {
         add(key);
       }
     }
@@ -267,7 +266,7 @@ public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> 
   public int intersectionSize(FastIDSet other) {
     int count = 0;
     for (long key : other.keys) {
-      if ((key != NULL) && (key != REMOVED) && (keys[find(key)] != NULL)) {
+      if (key != NULL && key != REMOVED && keys[find(key)] != NULL) {
         count++;
       }
     }
@@ -351,7 +350,7 @@ public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> 
     StringBuilder result = new StringBuilder();
     result.append('[');
     for (long key : keys) {
-      if ((key != NULL) && (key != REMOVED)) {
+      if (key != NULL && key != REMOVED) {
         result.append(key).append(',');
       }
     }
@@ -391,8 +390,8 @@ public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> 
     
     private void goToNext() {
       int length = keys.length;
-      while ((position < length)
-             && ((keys[position] == NULL) || (keys[position] == REMOVED))) {
+      while (position < length
+             && (keys[position] == NULL || keys[position] == REMOVED)) {
         position++;
       }
     }

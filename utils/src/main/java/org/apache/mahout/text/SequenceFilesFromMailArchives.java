@@ -202,7 +202,7 @@ public final class SequenceFilesFromMailArchives {
               } else {
                 // first empty line we see after reading the message Id
                 // indicates that we are in the body ...
-                inBody = (nextLine.length() == 0);
+                inBody = nextLine.length() == 0;
               }
             }
           } else {

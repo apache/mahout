@@ -28,11 +28,11 @@ import java.util.Iterator;
  * instead the caller supplies the instance with an implementation of {@link Retriever} which can load the
  * value for a given key.
  * </p>
- * 
+ *
  * <p>
- * The cache does not support <code>null</code> keys.
+ * The cache does not support {@code null} keys.
  * </p>
- * 
+ *
  * <p>
  * Thanks to Amila Jayasooriya for helping evaluate performance of the rewrite of this class, as part of a
  * Google Summer of Code 2007 project.

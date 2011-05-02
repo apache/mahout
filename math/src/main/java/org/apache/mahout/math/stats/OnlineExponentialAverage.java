@@ -21,11 +21,12 @@ package org.apache.mahout.math.stats;
  * Computes an online average that is exponentially weighted toward recent time-embedded samples.
  */
 public class OnlineExponentialAverage {
+
   private final double alpha;
-  private double lastT = 0;
-  private double s = 0;
-  private double w = 0;
-  private double T = 0;
+  private double lastT;
+  private double s;
+  private double w;
+  private double t;
 
   /**
    * Creates an averager that has a specified time constant for discounting old data. The time
@@ -46,8 +47,8 @@ public class OnlineExponentialAverage {
   public void add(double t, double x) {
     double pi = Math.exp(-(t - lastT) / alpha);
     s = x + pi * s;
-    w = 1 + pi * w;
-    T = (t - lastT) + pi * T;
+    w = 1.0 + pi * w;
+    this.t = t - lastT + pi * this.t;
     lastT = t;
   }
 
@@ -56,6 +57,6 @@ public class OnlineExponentialAverage {
   }
 
   public double meanRate() {
-    return s / T;
+    return s / t;
   }
 }

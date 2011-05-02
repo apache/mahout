@@ -55,11 +55,11 @@ public final class CDMahoutEvaluator {
   /**
    * Uses Mahout to evaluate the classification rules using the given evaluator.
    * The input path contains the dataset
-   * 
+   *
    * @param rules classification rules to evaluate
    * @param target label value to evaluate the rules for
    * @param inpath input path (the dataset)
-   * @param evaluations <code>List&lt;CDFitness&gt;</code> that contains the
+   * @param evaluations {@code List<CDFitness>} that contains the
    *        evaluated fitness for each candidate from the input population,
    *        sorted in the same order as the candidates.
    * @param split DatasetSplit used to separate training and testing input
@@ -115,11 +115,11 @@ public final class CDMahoutEvaluator {
 
   /**
    * Use all the dataset for training.
-   * 
+   *
    * @param rules classification rules to evaluate
    * @param target label value to evaluate the rules for
    * @param inpath input path (the dataset)
-   * @param evaluations <code>List&lt;CDFitness&gt;</code> that contains the
+   * @param evaluations {@code List<CDFitness>} that contains the
    *        evaluated fitness for each candidate from the input population,
    *        sorted in the same order as the candidates.
    */
@@ -134,12 +134,12 @@ public final class CDMahoutEvaluator {
 
   /**
    * Configure the job
-   * 
+   *
    * @param job Job to configure
    * @param rules classification rules to evaluate
    * @param target label value to evaluate the rules for
    * @param inpath input path (the dataset)
-   * @param outpath output <code>Path</code>
+   * @param outpath output {@code Path}
    * @param split DatasetSplit used to separate training and testing input
    */
   private static void configureJob(Job job,
@@ -173,11 +173,11 @@ public final class CDMahoutEvaluator {
 
   /**
    * Reads back the evaluations.
-   * 
+   *
    * @param fs File System
    * @param conf Job configuration
-   * @param outpath output <code>Path</code>
-   * @param evaluations <code>List&lt;Fitness&gt;</code> that contains the
+   * @param outpath output {@code Path}
+   * @param evaluations {@code List<Fitness>} that contains the
    *        evaluated fitness for each candidate from the input population,
    *        sorted in the same order as the candidates.
    */

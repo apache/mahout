@@ -62,13 +62,13 @@ public final class InverseUserFrequency implements PreferenceTransform {
    * <p>
    * Creates a  transformation. Computations use the given log base.
    * </p>
-   * 
+   *
    * @param dataModel
    *          {@link DataModel} from which to calculate user frequencies
    * @param logBase
    *          calculation logarithm base
    * @throws IllegalArgumentException
-   *           if dataModel is <code>null</code> or logBase is {@link Double#NaN} or &lt;= 1.0
+   *           if dataModel is {@code null} or logBase is {@link Double#NaN} or &lt;= 1.0
    */
   public InverseUserFrequency(DataModel dataModel, double logBase) throws TasteException {
     Preconditions.checkArgument(dataModel != null, "dataModel is null");

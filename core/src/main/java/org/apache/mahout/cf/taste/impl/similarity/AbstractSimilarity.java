@@ -138,7 +138,7 @@ abstract class AbstractSimilarity extends AbstractItemSimilarity implements User
     int xLength = xPrefs.length();
     int yLength = yPrefs.length();
     
-    if ((xLength == 0) || (yLength == 0)) {
+    if (xLength == 0 || yLength == 0) {
       return Double.NaN;
     }
     
@@ -268,7 +268,7 @@ abstract class AbstractSimilarity extends AbstractItemSimilarity implements User
     int xLength = xPrefs.length();
     int yLength = yPrefs.length();
     
-    if ((xLength == 0) || (yLength == 0)) {
+    if (xLength == 0 || yLength == 0) {
       return Double.NaN;
     }
     

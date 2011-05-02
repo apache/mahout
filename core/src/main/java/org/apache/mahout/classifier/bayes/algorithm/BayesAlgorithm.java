@@ -89,15 +89,13 @@ public class BayesAlgorithm implements Algorithm {
   
   @Override
   public double featureWeight(Datastore datastore, String label, String feature) throws InvalidDatastoreException {
-    
     double result = datastore.getWeight("weight", feature, label);
     double vocabCount = datastore.getWeight("sumWeight", "vocabCount");
     double sumLabelWeight = datastore.getWeight("labelWeight", label);
     double numerator = result + datastore.getWeight("params", "alpha_i");
     double denominator = sumLabelWeight + vocabCount;
     double weight = Math.log(numerator / denominator);
-    result = -weight;
-    return result;
+    return -weight;
   }
   
   @Override

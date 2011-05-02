@@ -20,7 +20,7 @@ package org.apache.mahout.common.iterator;
 import com.google.common.collect.AbstractIterator;
 
 /**
- * Iterates over the integers from 0 through <code>to-1</code>.
+ * Iterates over the integers from 0 through {@code to-1}.
  */
 public final class CountingIterator extends AbstractIterator<Integer> {
 

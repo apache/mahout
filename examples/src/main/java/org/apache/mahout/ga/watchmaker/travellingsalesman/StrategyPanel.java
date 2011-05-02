@@ -49,10 +49,10 @@ import org.uncommons.watchmaker.framework.selection.TruncationSelection;
 
 /**
  * Panel for configuring a route-finding strategy for the travelling salesman problem.
- * 
+ *
  * <br>
  * The original code is from <b>the Watchmaker project</b> (https://watchmaker.dev.java.net/).<br>
- * The <code>EvolutionPanel</code> has been modified to add a "distributed (mahout)" JCheckBox.
+ * The {@code EvolutionPanel} has been modified to add a "distributed (mahout)" JCheckBox.
  */
 final class StrategyPanel extends JPanel {
   

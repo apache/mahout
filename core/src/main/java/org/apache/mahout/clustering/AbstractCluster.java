@@ -295,7 +295,7 @@ public abstract class AbstractCluster implements Cluster {
       nzero++;
     }
     // if vector is sparse or if we have bindings, use sparse notation
-    if ((nzero < v.size()) || (bindings != null)) {
+    if (nzero < v.size() || bindings != null) {
       buf.append('[');
       for (int i = 0; i < v.size(); i++) {
         double elem = v.get(i);
@@ -303,7 +303,7 @@ public abstract class AbstractCluster implements Cluster {
           continue;
         }
         String label;
-        if ((bindings != null) && ((label = bindings[i]) != null)) {
+        if (bindings != null && (label = bindings[i]) != null) {
           buf.append(label).append(':');
         } else {
           buf.append(i).append(':');

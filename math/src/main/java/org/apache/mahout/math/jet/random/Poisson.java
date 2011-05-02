@@ -114,7 +114,7 @@ public final class Poisson extends AbstractDiscreteDistribution {
         p0 = p;
         //for (k=pp.length; --k >=0; ) pp[k] = 0;
       }
-      m = (theMean > 1.0) ? (int) theMean : 1;
+      m = theMean > 1.0 ? (int) theMean : 1;
       while (true) {
         double u = gen.nextDouble();
         int k = 0;
@@ -122,7 +122,7 @@ public final class Poisson extends AbstractDiscreteDistribution {
           return k;
         }
         if (llll != 0) {              // Step T. Table comparison
-          int i = (u > 0.458) ? Math.min(llll, m) : 1;
+          int i = u > 0.458 ? Math.min(llll, m) : 1;
           for (k = i; k <= llll; k++) {
             if (u <= pp[k]) {
               return k;

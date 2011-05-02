@@ -212,11 +212,11 @@ public class RandomSampler {
    * @param n               the total number of elements to choose (must be &gt;= 0).
    * @param N               the interval to choose random numbers from is <tt>[low,low+N-1]</tt>.
    * @param count           the number of elements to be filled into <tt>values</tt> by this call (must be &gt;= 0 and
-*                        &lt;=<tt>n</tt>). Normally, you will set <tt>count=n</tt>.
+   *                        &lt;=<tt>n</tt>). Normally, you will set <tt>count=n</tt>.
    * @param low             the interval to choose random numbers from is <tt>[low,low+N-1]</tt>. Hint: If
-*                        <tt>low==0</tt>, then draws random numbers from the interval <tt>[0,N-1]</tt>.
+   *                        <tt>low==0</tt>, then draws random numbers from the interval <tt>[0,N-1]</tt>.
    * @param values          the array into which the random numbers are to be filled; must have a length <tt>&gt;=
-*                        count+fromIndex</tt>.
+   *                        count+fromIndex</tt>.
    * @param fromIndex       the first index within <tt>values</tt> to be filled with numbers (inclusive).
    * @param randomGenerator a random number generator.
    */
@@ -268,7 +268,7 @@ public class RandomSampler {
 
         //step D3: Accept?
         double y1 = Math.exp(Math.log(U * Nreal / qu1real) * nmin1inv);
-        Vprime = y1 * (-X / Nreal + 1.0) * (qu1real / (negSreal + qu1real));
+        Vprime = y1 * (-X / Nreal + 1.0) * qu1real / (negSreal + qu1real);
         if (Vprime <= 1.0) {
           break;
         } //break inner loop
@@ -286,7 +286,7 @@ public class RandomSampler {
         }
         double y2 = 1.0;
         for (long t = N - 1; t >= limit; t--) {
-          y2 = (y2 * top) / bottom;
+          y2 *= top / bottom;
           top--;
           bottom--;
         }
@@ -311,7 +311,7 @@ public class RandomSampler {
       chosen++;
 
       N -= S + 1;
-      Nreal = negSreal + (-1.0 + Nreal);
+      Nreal = negSreal - 1.0 + Nreal;
       n--;
       nreal--;
       ninv = nmin1inv;
@@ -412,11 +412,11 @@ public class RandomSampler {
    * @param n               the total number of elements to choose (must be &gt;= 0).
    * @param N               the interval to choose random numbers from is <tt>[low,low+N-1]</tt>.
    * @param count           the number of elements to be filled into <tt>values</tt> by this call (must be &gt;= 0 and
-*                        &lt;=<tt>n</tt>). Normally, you will set <tt>count=n</tt>.
+   *                        &lt;=<tt>n</tt>). Normally, you will set <tt>count=n</tt>.
    * @param low             the interval to choose random numbers from is <tt>[low,low+N-1]</tt>. Hint: If
-*                        <tt>low==0</tt>, then draws random numbers from the interval <tt>[0,N-1]</tt>.
+   *                        <tt>low==0</tt>, then draws random numbers from the interval <tt>[0,N-1]</tt>.
    * @param values          the array into which the random numbers are to be filled; must have a length <tt>&gt;=
-*                        count+fromIndex</tt>.
+   *                        count+fromIndex</tt>.
    * @param fromIndex       the first index within <tt>values</tt> to be filled with numbers (inclusive).
    * @param randomGenerator a random number generator.
    */
@@ -435,7 +435,7 @@ public class RandomSampler {
         S++;
         top--;
         Nreal--;
-        quot = (quot * top) / Nreal;
+        quot *= top / Nreal;
       }
       chosen += S + 1;
       values[fromIndex++] = chosen;
@@ -464,11 +464,11 @@ public class RandomSampler {
    * @param n               the total number of elements to choose (must be &gt;= 0).
    * @param N               the interval to choose random numbers from is <tt>[low,low+N-1]</tt>.
    * @param count           the number of elements to be filled into <tt>values</tt> by this call (must be &gt;= 0 and
-*                        &lt;=<tt>n</tt>). Normally, you will set <tt>count=n</tt>.
+   *                        &lt;=<tt>n</tt>). Normally, you will set <tt>count=n</tt>.
    * @param low             the interval to choose random numbers from is <tt>[low,low+N-1]</tt>. Hint: If
-*                        <tt>low==0</tt>, then draws random numbers from the interval <tt>[0,N-1]</tt>.
+   *                        <tt>low==0</tt>, then draws random numbers from the interval <tt>[0,N-1]</tt>.
    * @param values          the array into which the random numbers are to be filled; must have a length <tt>&gt;=
-*                        count+fromIndex</tt>.
+   *                        count+fromIndex</tt>.
    * @param fromIndex       the first index within <tt>values</tt> to be filled with numbers (inclusive).
    * @param randomGenerator a random number generator.
    */
@@ -506,7 +506,7 @@ public class RandomSampler {
 
         //step D3: Accept?
         double y1 = Math.exp(Math.log(U * Nreal / qu1real) * nmin1inv);
-        vprime = y1 * (-X / Nreal + 1.0) * (qu1real / (negSreal + qu1real));
+        vprime = y1 * (-X / Nreal + 1.0) * qu1real / (negSreal + qu1real);
         if (vprime <= 1.0) {
           break;
         } //break inner loop
@@ -524,7 +524,7 @@ public class RandomSampler {
         }
         double y2 = 1.0;
         for (long t = N - 1; t >= limit; t--) {
-          y2 = (y2 * top) / bottom;
+          y2 *= top / bottom;
           top--;
           bottom--;
         }
@@ -550,7 +550,7 @@ public class RandomSampler {
       count--;
 
       N -= S + 1;
-      Nreal = negSreal + (-1.0 + Nreal);
+      Nreal = negSreal - 1.0 + Nreal;
       n--;
       nreal--;
       ninv = nmin1inv;

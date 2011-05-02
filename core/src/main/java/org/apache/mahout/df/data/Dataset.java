@@ -235,7 +235,7 @@ public class Dataset implements Writable {
     if (this == obj) {
       return true;
     }
-    if ((obj == null) || !(obj instanceof Dataset)) {
+    if (obj == null || !(obj instanceof Dataset)) {
       return false;
     }
     
@@ -255,7 +255,7 @@ public class Dataset implements Writable {
       }
     }
     
-    return (labelId == dataset.labelId) && (nbInstances == dataset.nbInstances);
+    return labelId == dataset.labelId && nbInstances == dataset.nbInstances;
   }
   
   @Override

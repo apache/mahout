@@ -59,10 +59,10 @@ public final class GenericJDBCDataModel extends AbstractJDBCDataModel {
 
   /**
    * <p>
-   * Specifies all SQL queries in a {@link Properties} object. See the <code>*_KEY</code> constants in this
+   * Specifies all SQL queries in a {@link Properties} object. See the {@code *_KEY} constants in this
    * class (e.g. {@link #GET_USER_SQL_KEY}) for a list of all keys which must map to a value in this object.
    * </p>
-   * 
+   *
    * @param props
    *          {@link Properties} object containing values
    * @throws TasteException
@@ -89,11 +89,11 @@ public final class GenericJDBCDataModel extends AbstractJDBCDataModel {
   
   /**
    * <p>
-   * See {@link #GenericJDBCDataModel(java.util.Properties)}. This constructor reads values from a file
+   * See {@link #GenericJDBCDataModel(Properties)}. This constructor reads values from a file
    * instead, as if with {@link Properties#load(InputStream)}. So, the file should be in standard Java
-   * properties file format -- containing <code>key=value</code> pairs, one per line.
+   * properties file format -- containing {@code key=value} pairs, one per line.
    * </p>
-   * 
+   *
    * @param propertiesFile
    *          properties file
    * @throws TasteException

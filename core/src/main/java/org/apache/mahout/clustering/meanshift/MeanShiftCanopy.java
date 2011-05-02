@@ -142,7 +142,7 @@ public class MeanShiftCanopy extends Cluster {
     result.setCenter(this.getCenter());
     result.setRadius(this.getRadius());
     result.setNumPoints(this.getNumPoints());
-    result.boundPoints = this.boundPoints;
+    result.setBoundPoints(boundPoints);
     return result;
   }
 

@@ -105,14 +105,14 @@ public final class IOUtils {
   
   /**
    * make sure to close all sources, log all of the problems occurred, clear
-   * <code>closeables</code> (to prevent repeating close attempts), re-throw the
+   * {@code closeables} (to prevent repeating close attempts), re-throw the
    * last one at the end. Helps resource scope management (e.g. compositions of
    * {@link Closeable}s objects)
    * <P>
    * <p/>
    * Typical pattern:
    * <p/>
-   * 
+   *
    * <pre>
    *   LinkedList<Closeable> closeables = new LinkedList<Closeable>();
    *   try {
@@ -126,13 +126,11 @@ public final class IOUtils {
    *      IOUtils.close(closeables);
    *   }
    * </pre>
-   * 
+   *
    * @param closeables
    *          must be a modifiable collection of {@link Closeable}s
    * @throws IOException
    *           the last exception (if any) of all closed resources
-   * 
-   * 
    */
   public static void close(Collection<? extends Closeable> closeables)
     throws IOException {

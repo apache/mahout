@@ -190,11 +190,10 @@ public final class GenericItemSimilarity implements ItemSimilarity {
   /**
    * <p>
    * Returns the similarity between two items. Note that similarity is assumed to be symmetric, that
-   * <code>itemSimilarity(item1, item2) == itemSimilarity(item2, item1)</code>, and that
-   * <code>itemSimilarity(item1,
-   * item1) == 1.0</code> for all items.
+   * {@code itemSimilarity(item1, item2) == itemSimilarity(item2, item1)}, and that
+   * {@code itemSimilarity(item1,item1) == 1.0} for all items.
    * </p>
-   * 
+   *
    * @param itemID1
    *          first item
    * @param itemID2
@@ -298,8 +297,9 @@ public final class GenericItemSimilarity implements ItemSimilarity {
         return false;
       }
       ItemItemSimilarity otherSimilarity = (ItemItemSimilarity) other;
-      return (otherSimilarity.getItemID1() == itemID1) && (otherSimilarity.getItemID2() == itemID2)
-             && (otherSimilarity.getValue() == value);
+      return otherSimilarity.getItemID1() == itemID1
+          && otherSimilarity.getItemID2() == itemID2
+          && otherSimilarity.getValue() == value;
     }
     
     @Override

@@ -303,7 +303,7 @@ public class KMeansDriver extends AbstractJob {
 
     boolean converged = false;
     int iteration = 1;
-    while (!converged && (iteration <= maxIterations)) {
+    while (!converged && iteration <= maxIterations) {
       log.info("K-Means Iteration {}", iteration);
       // point the output to a new directory per iteration
       Path clustersOut = new Path(output, AbstractCluster.CLUSTERS_DIR + iteration);

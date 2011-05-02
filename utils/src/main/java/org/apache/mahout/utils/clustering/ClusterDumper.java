@@ -282,7 +282,7 @@ public final class ClusterDumper extends AbstractJob {
 
     Collection<Pair<String, Double>> topTerms = new LinkedList<Pair<String, Double>>();
 
-    for (int i = 0; (i < vectorTerms.size()) && (i < numTerms); i++) {
+    for (int i = 0; i < vectorTerms.size() && i < numTerms; i++) {
       int index = vectorTerms.get(i).index;
       String dictTerm = dictionary[index];
       if (dictTerm == null) {

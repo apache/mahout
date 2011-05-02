@@ -24,11 +24,10 @@ import org.apache.mahout.math.Vector.Element;
 
 /**
  * simplistic implementation for Omega matrix in Stochastic SVD method
- * 
  */
 public class Omega {
 
-  private static final double UNIFORM_DIVISOR = Math.pow(2d, 64);
+  private static final double UNIFORM_DIVISOR = Math.pow(2.0, 64);
 
   private final long seed;
   private final int kp;
@@ -36,22 +35,18 @@ public class Omega {
   public Omega(long seed, int k, int p) {
     this.seed = seed;
     kp = k + p;
-
   }
 
   /**
    * Get omega element at (x,y) uniformly distributed within [-1...1)
    * 
-   * @param row
-   *          omega row
-   * @param column
-   *          omega column
-   * @return
+   * @param row omega row
+   * @param column omega column
    */
   public double getQuick(int row, int column) {
-    long hash = murmur64(row << Integer.SIZE | column, 8, seed);
+    long hash = murmur64((long) row << Integer.SIZE | column, 8, seed);
     double result = hash / UNIFORM_DIVISOR;
-    assert result >= -1d && result < 1d;
+    //assert result >= -1.0 && result < 1.0;
     return result;
   }
 
@@ -70,48 +65,44 @@ public class Omega {
    *          row of matrix Y (result) must be pre-allocated to size of (k+p)
    */
   public void computeYRow(Vector aRow, double[] yRow) {
-    assert yRow.length == kp;
-
-    Arrays.fill(yRow, 0);
-    if (!aRow.isDense()) {
-      int j = 0;
-      for (Element el : aRow) {
-        accumDots(el.index(), el.get(), yRow);
-      }
-
-    } else {
+    //assert yRow.length == kp;
+    Arrays.fill(yRow, 0.0);
+    if (aRow.isDense()) {
       int n = aRow.size();
       for (int j = 0; j < n; j++) {
         accumDots(j, aRow.getQuick(j), yRow);
+      }
+    } else {
+      for (Element el : aRow) {
+        accumDots(el.index(), el.get(), yRow);
       }
     }
 
   }
 
   /**
-   * Shortened version for data < 8 bytes packed into <code>len</code> lowest
-   * bytes of <code>val</code>.
-   * <P>
-   * 
+   * Shortened version for data < 8 bytes packed into {@code len} lowest
+   * bytes of {@code val}.
+   *
    * @param val
    *          the value
    * @param len
    *          the length of data packed into this many low bytes of
-   *          <code>val</code>
+   *          {@code val}
    * @param seed
    *          the seed to use
    * @return murmur hash
    */
   public static long murmur64(long val, int len, long seed) {
 
-    assert len > 0 && len <= 8;
+    //assert len > 0 && len <= 8;
     long m = 0xc6a4a7935bd1e995L;
-    int r = 47;
-    long h = seed ^ (len * m);
+    long h = seed ^ len * m;
 
     long k = val;
 
     k *= m;
+    int r = 47;
     k ^= k >>> r;
     k *= m;
 
@@ -148,9 +139,10 @@ public class Omega {
 
     if (offset < len) {
       long k = 0;
-      for (; offset < len; offset++) {
+      while (offset < len) {
         k <<= 8;
         k |= val[offset] & 0xff;
+        offset++;
       }
       h ^= k;
       h *= m;

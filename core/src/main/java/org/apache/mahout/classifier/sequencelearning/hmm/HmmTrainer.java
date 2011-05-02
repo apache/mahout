@@ -55,7 +55,7 @@ public final class HmmTrainer {
                                          int nrOfOutputStates, int[] observedSequence, int[] hiddenSequence,
                                          double pseudoCount) {
     // make sure the pseudo count is not zero
-    pseudoCount = (pseudoCount == 0) ? Double.MIN_VALUE : pseudoCount;
+    pseudoCount = pseudoCount == 0 ? Double.MIN_VALUE : pseudoCount;
 
     // initialize the parameters
     DenseMatrix transitionMatrix = new DenseMatrix(nrOfHiddenStates, nrOfHiddenStates);
@@ -138,7 +138,7 @@ public final class HmmTrainer {
                                                  Collection<int[]> observedSequences, double pseudoCount) {
 
     // make sure the pseudo count is not zero
-    pseudoCount = (pseudoCount == 0) ? Double.MIN_VALUE : pseudoCount;
+    pseudoCount = pseudoCount == 0 ? Double.MIN_VALUE : pseudoCount;
 
     // initialize parameters
     DenseMatrix transitionMatrix = new DenseMatrix(nrOfHiddenStates,
@@ -218,7 +218,7 @@ public final class HmmTrainer {
                                       int maxIterations, boolean scaled) {
 
     // make sure the pseudo count is not zero
-    pseudoCount = (pseudoCount == 0) ? Double.MIN_VALUE : pseudoCount;
+    pseudoCount = pseudoCount == 0 ? Double.MIN_VALUE : pseudoCount;
 
     // allocate space for iteration models
     HmmModel lastIteration;

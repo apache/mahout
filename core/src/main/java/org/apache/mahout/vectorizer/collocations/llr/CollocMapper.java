@@ -99,8 +99,8 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
     OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<String>(value.getEntries().size());
 
     do {
-      String term = (sf.getAttribute(TermAttribute.class)).term();
-      String type = (sf.getAttribute(TypeAttribute.class)).type();
+      String term = sf.getAttribute(TermAttribute.class).term();
+      String type = sf.getAttribute(TypeAttribute.class).type();
       if ("shingle".equals(type)) {
         count++;
         ngrams.adjustOrPutValue(term, 1, 1);

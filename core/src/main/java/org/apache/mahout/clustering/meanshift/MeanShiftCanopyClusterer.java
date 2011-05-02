@@ -96,7 +96,7 @@ public class MeanShiftCanopyClusterer {
       if (norm < t1) {
         aCanopy.touch(canopy);
       }
-      if (norm < t2 && ((closestCoveringCanopy == null) || (norm < closestNorm))) {
+      if (norm < t2 && (closestCoveringCanopy == null || norm < closestNorm)) {
         closestNorm = norm;
         closestCoveringCanopy = canopy;
       }
@@ -176,8 +176,7 @@ public class MeanShiftCanopyClusterer {
     for (int iter = 0; !converged[0] && iter < numIter; iter++) {
       newCanopies = clusterer.iterate(newCanopies, converged);
     }
-    canopies = newCanopies;
-    return canopies;
+    return newCanopies;
   }
 
   protected List<MeanShiftCanopy> iterate(Iterable<MeanShiftCanopy> canopies, boolean[] converged) {
@@ -199,7 +198,6 @@ public class MeanShiftCanopyClusterer {
           log.info("Duplicate bound point: {} in Canopy: {}", v, canopy.asFormatString(null));
         } else {
           coveredPoints.add(v);
-          //System.out.println("Added bound point: " + v + " to Canopy: " + canopy.asFormatString(null));
         }
       }
     }

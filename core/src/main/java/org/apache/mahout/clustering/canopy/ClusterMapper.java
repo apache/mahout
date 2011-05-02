@@ -36,8 +36,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 public class ClusterMapper
-    extends
-    Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable> {
+    extends Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable> {
 
   private CanopyClusterer canopyClusterer;
 
@@ -58,8 +57,7 @@ public class ClusterMapper
   }
 
   @Override
-  protected void setup(Context context) throws IOException,
-      InterruptedException {
+  protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
 
     canopyClusterer = new CanopyClusterer(context.getConfiguration());
@@ -71,8 +69,7 @@ public class ClusterMapper
     if (clustersIn != null && clustersIn.length() > 0) {
       Path clusterPath = new Path(clustersIn, "*");
       FileSystem fs = clusterPath.getFileSystem(conf);
-      Path[] paths = FileUtil.stat2Paths(fs.globStatus(clusterPath, PathFilters
-          .partFilter()));
+      Path[] paths = FileUtil.stat2Paths(fs.globStatus(clusterPath, PathFilters.partFilter()));
       for (FileStatus file : fs.listStatus(paths, PathFilters.partFilter())) {
         for (Canopy value : new SequenceFileValueIterable<Canopy>(file
             .getPath(), conf)) {

@@ -98,7 +98,7 @@ public class SingularValueDecomposition implements java.io.Serializable {
         s[k] = -s[k];
       }
       for (int j = k + 1; j < n; j++) {
-        if ((k < nct) && (s[k] != 0.0)) {
+        if (k < nct && s[k] != 0.0) {
           
           // Apply the transformation.
           
@@ -117,7 +117,7 @@ public class SingularValueDecomposition implements java.io.Serializable {
         
         e[j] = a[k][j];
       }
-      if (wantu && (k < nct)) {
+      if (wantu && k < nct) {
         
         // Place the transformation in U for subsequent back
         // multiplication.
@@ -145,7 +145,7 @@ public class SingularValueDecomposition implements java.io.Serializable {
           e[k + 1] += 1.0;
         }
         e[k] = -e[k];
-        if ((k + 1 < m) && (e[k] != 0.0)) {
+        if (k + 1 < m && e[k] != 0.0) {
           
           // Apply the transformation.
           
@@ -231,7 +231,7 @@ public class SingularValueDecomposition implements java.io.Serializable {
     
     if (wantv) {
       for (int k = n - 1; k >= 0; k--) {
-        if ((k < nrt) && (e[k] != 0.0)) {
+        if (k < nrt && e[k] != 0.0) {
           for (int j = k + 1; j < nu; j++) {
             double t = 0;
             for (int i = k + 1; i < n; i++) {
@@ -372,9 +372,9 @@ public class SingularValueDecomposition implements java.io.Serializable {
           double sk = s[k] / scale;
           double ek = e[k] / scale;
           double b = ((spm1 + sp) * (spm1 - sp) + epm1 * epm1) / 2.0;
-          double c = (sp * epm1) * (sp * epm1);
+          double c = sp * epm1 * sp * epm1;
           double shift = 0.0;
-          if ((b != 0.0) || (c != 0.0)) {
+          if (b != 0.0 || c != 0.0) {
             shift = Math.sqrt(b * b + c);
             if (b < 0.0) {
               shift = -shift;
@@ -412,7 +412,7 @@ public class SingularValueDecomposition implements java.io.Serializable {
             s[j + 1] = -sn * e[j] + cs * s[j + 1];
             g = sn * e[j + 1];
             e[j + 1] = cs * e[j + 1];
-            if (wantu && (j < m - 1)) {
+            if (wantu && j < m - 1) {
               for (int i = 0; i < m; i++) {
                 t = cs * u[i][j] + sn * u[i][j + 1];
                 u[i][j + 1] = -sn * u[i][j] + cs * u[i][j + 1];
@@ -449,14 +449,14 @@ public class SingularValueDecomposition implements java.io.Serializable {
             double t = s[k];
             s[k] = s[k + 1];
             s[k + 1] = t;
-            if (wantv && (k < n - 1)) {
+            if (wantv && k < n - 1) {
               for (int i = 0; i < n; i++) {
                 t = v[i][k + 1];
                 v[i][k + 1] = v[i][k];
                 v[i][k] = t;
               }
             }
-            if (wantu && (k < m - 1)) {
+            if (wantu && k < m - 1) {
               for (int i = 0; i < m; i++) {
                 t = u[i][k + 1];
                 u[i][k + 1] = u[i][k];
@@ -582,7 +582,7 @@ public class SingularValueDecomposition implements java.io.Serializable {
     Matrix j = new DenseMatrix(s.length,s.length);
     Matrix vMat = new DenseMatrix(this.v);
     for (int i = 0; i < s.length; i++) {
-      j.set(i, i, (s[i] >= minSingularValue) ? 1 / (s[i] * s[i]) : 0.0);
+      j.set(i, i, s[i] >= minSingularValue ? 1 / (s[i] * s[i]) : 0.0);
     }
     return vMat.times(j).times(vMat.transpose());
   }

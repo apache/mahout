@@ -320,12 +320,12 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D implements Cloneab
   }
 
   /**
-   * Compares this object against the specified object. The result is <code>true</code> if and only if the argument is
-   * not <code>null</code> and is at least a <code>DoubleMatrix1D</code> object that has the same sizes as the receiver
+   * Compares this object against the specified object. The result is {@code true} if and only if the argument is
+   * not {@code null} and is at least a {@code DoubleMatrix1D} object that has the same sizes as the receiver
    * and has exactly the same values at the same indexes.
    *
    * @param obj the object to compare with.
-   * @return <code>true</code> if the objects are the same; <code>false</code> otherwise.
+   * @return {@code true} if the objects are the same; {@code false} otherwise.
    */
   public boolean equals(Object obj) {
     if (this == obj) {
@@ -591,7 +591,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D implements Cloneab
   }
 
   /**
-   * Constructs and returns a new view equal to the receiver. The view is a shallow clone. Calls <code>clone()</code>
+   * Constructs and returns a new view equal to the receiver. The view is a shallow clone. Calls {@code clone()}
    * and casts the result. <p> <b>Note that the view is not a deep copy.</b> The returned matrix is backed by this
    * matrix, so changes in the returned matrix are reflected in this matrix, and vice-versa. <p> Use {@link #copy()} to
    * construct an independent deep copy rather than a new view.
@@ -623,7 +623,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D implements Cloneab
    * @throws IndexOutOfBoundsException if <tt>index<0 || width<0 || index+width>size()</tt>.
    */
   public DoubleMatrix1D viewPart(int index, int width) {
-    return (DoubleMatrix1D) (view().vPart(index, width));
+    return (DoubleMatrix1D) view().vPart(index, width);
   }
 
   /**
@@ -707,14 +707,14 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D implements Cloneab
     int s = nonZeroIndexes.size();
 
     // skip to start
-    while ((index < s) && nonZeroIndexElements[index] < from) {
+    while (index < s && nonZeroIndexElements[index] < from) {
       index++;
     }
 
     // now the sparse dot product
     int i;
     double sum = 0;
-    while ((--length >= 0) && (index < s) && ((i = nonZeroIndexElements[index]) < tail)) {
+    while (--length >= 0 && index < s && (i = nonZeroIndexElements[index]) < tail) {
       sum += getQuick(i) * y.getQuick(i);
       index++;
     }

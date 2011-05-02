@@ -52,7 +52,7 @@ public class BayesTfIdfOutputFormat extends MultipleOutputFormat<WritableCompara
   protected String generateFileNameForKeyValue(WritableComparable<?> k, Writable v, String name) {
     StringTuple key = (StringTuple) k;
     
-    if ((key.length() == 1) && key.stringAt(0).equals(BayesConstants.FEATURE_SET_SIZE)) {
+    if (key.length() == 1 && key.stringAt(0).equals(BayesConstants.FEATURE_SET_SIZE)) {
       return "trainer-vocabCount/" + name;
     } else {
       return "trainer-tfIdf/" + name;

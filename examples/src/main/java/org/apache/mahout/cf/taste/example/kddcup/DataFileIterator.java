@@ -32,7 +32,7 @@ import org.apache.mahout.common.Pair;
 /**
  * <p>An {@link java.util.Iterator} which iterates over any of the KDD Cup's rating files. These include the files
  * {train,test,validation}Idx{1,2}}.txt. See http://kddcup.yahoo.com/. Each element in the iteration corresponds
- * to one user's ratings as a {@link PreferenceArray} and corresponding timestamps as a parallel {@link long[]}
+ * to one user's ratings as a {@link PreferenceArray} and corresponding timestamps as a parallel {@code long}
  * array.</p>
  *
  * <p>Timestamps in the data set are relative to some unknown point in time, for anonymity. They are assumed

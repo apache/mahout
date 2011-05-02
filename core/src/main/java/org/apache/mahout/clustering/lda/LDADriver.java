@@ -163,7 +163,7 @@ public final class LDADriver extends AbstractJob {
     double oldLL = Double.NEGATIVE_INFINITY;
     boolean converged = false;
 
-    for (int iteration = 1; ((maxIterations < 1) || (iteration <= maxIterations)) && !converged; iteration++) {
+    for (int iteration = 1; (maxIterations < 1 || iteration <= maxIterations) && !converged; iteration++) {
       log.info("LDA Iteration {}", iteration);
       // point the output to a new directory per iteration
       Path stateOut = new Path(output, "state-" + iteration);
@@ -175,7 +175,7 @@ public final class LDADriver extends AbstractJob {
       log.info("(Old LL: {})", oldLL);
       log.info("(Rel Change: {})", relChange);
 
-      converged = (iteration > 3) && (relChange < OVERALL_CONVERGENCE);
+      converged = iteration > 3 && relChange < OVERALL_CONVERGENCE;
       stateIn = stateOut;
       oldLL = ll;
     }

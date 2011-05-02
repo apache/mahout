@@ -115,7 +115,7 @@ public class SSVDSolver {
    * create new SSVD solver. Required parameters are passed to constructor to
    * ensure they are set. Optional parameters can be set using setters .
    * <P>
-   * 
+   *
    * @param conf
    *          hadoop configuration
    * @param inputPath
@@ -125,7 +125,7 @@ public class SSVDSolver {
    *          Output path containing U, V and singular values vector files.
    * @param ablockRows
    *          The vertical hight of a q-block (bigger value require more memory
-   *          in mappers+ perhaps larger <code>minSplitSize</code> values
+   *          in mappers+ perhaps larger {@code minSplitSize} values
    * @param k
    *          desired rank
    * @param p

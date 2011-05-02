@@ -488,7 +488,7 @@ public class GivensThinSolver {
 
       double norm = ei.norm(2);
 
-      if (Math.abs(1 - norm) < epsilon) {
+      if (Math.abs(1.0 - norm) < epsilon) {
         rank++;
       } else if (Math.abs(norm) > epsilon) {
         return false; // not a rank deficiency, either
@@ -497,13 +497,12 @@ public class GivensThinSolver {
       for (int j = 0; j <= i; j++) {
         Vector ej = new DenseVector(qt[j], true);
         double dot = ei.dot(ej);
-        if (!(Math.abs((i == j && rank > j ? 1 : 0) - dot) < epsilon)) {
+        if (!(Math.abs((i == j && rank > j ? 1.0 : 0.0) - dot) < epsilon)) {
           return false;
         }
       }
     }
-    return (!insufficientRank && rank == n) || (insufficientRank && rank < n);
-
+    return insufficientRank ? rank < n : rank == n;
   }
 
   public static boolean isOrthonormalBlocked(Iterable<double[][]> qtHats,
@@ -544,8 +543,7 @@ public class GivensThinSolver {
         }
       }
     }
-    return (!insufficientRank && rank == n) || (insufficientRank && rank < n);
-
+    return insufficientRank ? rank < n : rank == n;
   }
 
   private static final class TriangularRowView extends AbstractVector {

@@ -224,7 +224,7 @@ public abstract class Builder {
   public static Path getDistributedCacheFile(Configuration conf, int index) throws IOException {
     URI[] files = DistributedCache.getCacheFiles(conf);
     
-    if ((files == null) || (files.length <= index)) {
+    if (files == null || files.length <= index) {
       throw new IOException("path not found in the DistributedCache");
     }
     

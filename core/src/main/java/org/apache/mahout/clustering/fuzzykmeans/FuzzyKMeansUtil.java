@@ -54,7 +54,7 @@ final class FuzzyKMeansUtil {
       result.add(fs.makeQualified(match.getPath()));
     }
 
-    // iterate thru the result path list
+    // iterate through the result path list
     for (Path path : result) {
       for (Writable value : new SequenceFileValueIterable<Writable>(path, conf)) {
         Class<? extends Writable> valueClass = value.getClass();

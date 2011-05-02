@@ -58,10 +58,7 @@ public interface ItemSimilarity extends Refreshable {
   double[] itemSimilarities(long itemID1, long[] itemID2s) throws TasteException;
 
   /**
-   * <p>return all ids of item similar in no particular order</p>
-   * @param itemID
-   * @return
-   * @throws TasteException
+   * @return all IDs of similar items, in no particular order
    */
   long[] allSimilarItemIDs(long itemID) throws TasteException;
 }

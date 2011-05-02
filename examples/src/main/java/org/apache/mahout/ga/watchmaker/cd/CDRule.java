@@ -24,21 +24,19 @@ import org.uncommons.maths.binary.BitString;
 
 /**
  * Binary classification rule of the form:
- * 
+ *
  * <pre>
  * if (condition1 &amp;&amp; condition2 &amp;&amp; ... ) then
  *   class = 1
  * else
  *   class = 0
  * </pre>
- * 
+ *
  * where conditioni = (wi): attributi oi vi <br>
  * <ul>
  * <li>wi is the weight of the condition: <br>
- * <code>
- * if (wi &lt; a given threshold) then conditioni is not taken into
- * consideration
- * </code></li>
+ * {@code if (wi < a given threshold) then conditioni is not taken into consideration}
+ * </li>
  * <li>oi is an operator ('&lt;' or '&gt;=')</li>
  * </ul>
  */

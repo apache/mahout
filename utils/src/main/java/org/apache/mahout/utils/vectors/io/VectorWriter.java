@@ -41,7 +41,7 @@ public interface VectorWriter extends Closeable {
   void write(Vector vector) throws IOException;
   
   /**
-   * Write the first <code>maxDocs</code> to the output.
+   * Write the first {@code maxDocs} to the output.
    * @param iterable The {@link Iterable} to loop over
    * @param maxDocs the maximum number of docs to write
    * @return The number of docs written

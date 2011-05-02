@@ -77,7 +77,7 @@ final class EachRowIterator extends AbstractIterator<ResultSet> implements Close
     } catch (SQLException sqle) {
       // Can't use relative on MySQL Connector/J; try advancing manually
       int i = 0;
-      while ((i < n) && resultSet.next()) {
+      while (i < n && resultSet.next()) {
         i++;
       }
     }

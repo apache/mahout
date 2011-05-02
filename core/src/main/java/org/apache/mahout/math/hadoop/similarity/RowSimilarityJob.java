@@ -330,7 +330,7 @@ public class RowSimilarityJob extends AbstractJob {
   }
 
   /**
-   * collects all {@link DistributedRowMatrix.MatrixEntryWritable} for each column and creates a {@link VectorWritable}
+   * collects all MatrixEntryWritable for each column and creates a {@link VectorWritable}
    */
   public static class EntriesToVectorsReducer
       extends Reducer<SimilarityMatrixEntryKey, DistributedRowMatrix.MatrixEntryWritable,IntWritable,VectorWritable> {

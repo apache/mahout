@@ -52,7 +52,7 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
     int xLength = xPrefs.length();
     int yLength = yPrefs.length();
     
-    if ((xLength <= 1) || (yLength <= 1)) {
+    if (xLength <= 1 || yLength <= 1) {
       return Double.NaN;
     }
     

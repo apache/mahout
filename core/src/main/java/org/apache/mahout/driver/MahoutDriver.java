@@ -111,7 +111,7 @@ public final class MahoutDriver {
       addClass(programDriver, keyString, mainClasses.getProperty(keyString));
     }
 
-    if (args.length < 1 || args[0] == null || args[0].equals("-h") || args[0].equals("--help")) {
+    if (args.length < 1 || args[0] == null || "-h".equals(args[0]) || "--help".equals(args[0])) {
       programDriver.driver(args);
     }
 

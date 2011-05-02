@@ -75,7 +75,7 @@ public class KMeansClusterer {
       if (KMeansClusterer.log.isDebugEnabled()) {
         log.debug("{} Cluster: {}", distance, cluster.getId());
       }
-      if ((distance < nearestDistance) || (nearestCluster == null)) {
+      if (distance < nearestDistance || nearestCluster == null) {
         nearestCluster = cluster;
         nearestDistance = distance;
       }
@@ -124,7 +124,7 @@ public class KMeansClusterer {
     for (AbstractCluster cluster : clusters) {
       Vector clusterCenter = cluster.getCenter();
       double distance = measure.distance(clusterCenter.getLengthSquared(), clusterCenter, vector);
-      if ((distance < nearestDistance) || (nearestCluster == null)) {
+      if (distance < nearestDistance || nearestCluster == null) {
         nearestCluster = cluster;
         nearestDistance = distance;
       }
@@ -151,7 +151,7 @@ public class KMeansClusterer {
       if (log.isDebugEnabled()) {
         log.debug("{} Cluster: {}", distance, cluster.getId());
       }
-      if ((distance < nearestDistance) || (nearestCluster == null)) {
+      if (distance < nearestDistance || nearestCluster == null) {
         nearestCluster = cluster;
         nearestDistance = distance;
       }

@@ -77,8 +77,7 @@ import org.slf4j.LoggerFactory;
  * the {@link #setTestRandomSelectionSize(int)} or
  * {@link #setTestRandomSelectionPct(int)} methods, each choosing a fixed test
  * set size or percentage of the input set size as described above. The
- * {@link org.apache.mahout.math.jet.random.sampling.RandomSampler
- * RandomSampler} class from <code>mahout-math</code> is used to create a sample
+ * {@link RandomSampler} class from {@code mahout-math} is used to create a sample
  * of the appropriate size.</li>
  * </ul>
  * <p>
@@ -304,7 +303,7 @@ public class SplitBayesInput {
       testSplitSize = this.testRandomSelectionSize;
       
       if (testRandomSelectionPct > 0) {
-        testSplitSize = Math.round(lineCount * (testRandomSelectionPct / 100.0f));
+        testSplitSize = Math.round(lineCount * testRandomSelectionPct / 100.0f);
       }
       log.info("{} test split size is {} based on random selection percentage {}",
                new Object[] {inputFile.getName(), testSplitSize, testRandomSelectionPct});
@@ -316,7 +315,7 @@ public class SplitBayesInput {
       }
     } else {
       if (testSplitPct > 0) { // calculate split size based on percentage
-        testSplitSize = Math.round(lineCount * (testSplitPct / 100.0f));
+        testSplitSize = Math.round(lineCount * testSplitPct / 100.0f);
         log.info("{} test split size is {} based on percentage {}",
                  new Object[] {inputFile.getName(), testSplitSize, testSplitPct});
       } else {
@@ -324,7 +323,7 @@ public class SplitBayesInput {
       }
       
       if (splitLocation > 0) { // calculate start of split based on percentage
-        testSplitStart =  Math.round(lineCount * (splitLocation / 100.0f));
+        testSplitStart =  Math.round(lineCount * splitLocation / 100.0f);
         if (lineCount - testSplitStart < testSplitSize) {
           // adjust split start downwards based on split size.
           testSplitStart = lineCount - testSplitSize;
@@ -336,7 +335,7 @@ public class SplitBayesInput {
       if (testSplitStart < 0) {
         throw new IllegalArgumentException("test split size for " + inputFile + " is too large, it would produce an "
             + "empty training set from the initial set of " + lineCount + " examples");
-      } else if ((lineCount - testSplitSize) < testSplitSize) {
+      } else if (lineCount - testSplitSize < testSplitSize) {
         log.warn("Test set size for {} may be too large, {} is larger than the number of "
                  + "lines remaining in the training set: {}",
                  new Object[] {inputFile, testSplitSize, lineCount - testSplitSize});
@@ -518,13 +517,13 @@ public class SplitBayesInput {
   public void validate() throws IOException {
     Preconditions.checkArgument(testSplitSize >= 1 || testSplitSize == -1,
                                 "Invalid testSplitSize", testSplitSize);
-    Preconditions.checkArgument((splitLocation >= 0 && splitLocation <= 100) || splitLocation == -1,
+    Preconditions.checkArgument(splitLocation >= 0 && splitLocation <= 100 || splitLocation == -1,
                                 "Invalid splitLocation percentage", splitLocation);
-    Preconditions.checkArgument((testSplitPct >= 0 && testSplitPct <= 100) || testSplitPct == -1,
+    Preconditions.checkArgument(testSplitPct >= 0 && testSplitPct <= 100 || testSplitPct == -1,
                                 "Invalid testSplitPct percentage", testSplitPct);
-    Preconditions.checkArgument((splitLocation >= 0 && splitLocation <= 100) || splitLocation == -1,
+    Preconditions.checkArgument(splitLocation >= 0 && splitLocation <= 100 || splitLocation == -1,
                                 "Invalid splitLocation percentage", splitLocation);
-    Preconditions.checkArgument((testRandomSelectionPct >= 0 && testRandomSelectionPct <= 100)
+    Preconditions.checkArgument(testRandomSelectionPct >= 0 && testRandomSelectionPct <= 100
                                 || testRandomSelectionPct == -1,
                                 "Invalid testRandomSelectionPct percentage", testRandomSelectionPct);
 
@@ -558,17 +557,17 @@ public class SplitBayesInput {
   }
   
   /**
-   * Count the lines in the file specified as returned by <code>BufferedReader.readLine()</code>
-   * 
-   * @param inputFile 
+   * Count the lines in the file specified as returned by {@code BufferedReader.readLine()}
+   *
+   * @param inputFile
    *   the file whose lines will be counted
-   *   
+   *
    * @param charset
    *   the charset of the file to read
-   *   
+   *
    * @return the number of lines in the input file.
-   * 
-   * @throws IOException 
+   *
+   * @throws IOException
    *   if there is a problem opening or reading the file.
    */
   public static int countLines(FileSystem fs, Path inputFile, Charset charset) throws IOException {

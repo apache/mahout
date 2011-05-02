@@ -60,7 +60,7 @@ public final class NonNegativeQuadraticOptimizer implements Optimizer {
         
         // find active variables - those that are pinned due to
         // nonnegativity constraints; set respective ri's to zero
-        if ((x[n] < EPSILON) && (rn < 0.0)) {
+        if (x[n] < EPSILON && rn < 0.0) {
           rn = 0.0;
         } else {
           // max step size numerator

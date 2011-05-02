@@ -37,7 +37,7 @@ public interface RecommenderEvaluator {
    * rather a {@link RecommenderBuilder} which can build the
    * {@link org.apache.mahout.cf.taste.recommender.Recommender} to test on top of a given {@link DataModel}.
    * </p>
-   * 
+   *
    * <p>
    * Implementations will take a certain percentage of the preferences supplied by the given {@link DataModel}
    * as "training data". This is typically most of the data, like 90%. This data is used to produce
@@ -47,18 +47,18 @@ public interface RecommenderEvaluator {
    * recommendatinos, and for each user, the remaining preferences are compared against the user's real
    * preferences.
    * </p>
-   * 
+   *
    * <p>
    * For large datasets, it may be desirable to only evaluate based on a small percentage of the data.
-   * <code>evaluationPercentage</code> controls how many of the {@link DataModel}'s users are used in
+   * {@code evaluationPercentage} controls how many of the {@link DataModel}'s users are used in
    * evaluation.
    * </p>
-   * 
+   *
    * <p>
-   * To be clear, <code>trainingPercentage</code> and <code>evaluationPercentage</code> are not related. They
+   * To be clear, {@code trainingPercentage} and {@code evaluationPercentage} are not related. They
    * do not need to add up to 1.0, for example.
    * </p>
-   * 
+   *
    * @param recommenderBuilder
    *          object that can build a {@link org.apache.mahout.cf.taste.recommender.Recommender} to test
    * @param dataModelBuilder

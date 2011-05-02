@@ -78,7 +78,7 @@ public final class SimpleCsvExamples {
     }
     long t0 = System.currentTimeMillis();
     Vector v = new DenseVector(1000);
-    if (args[0].equals("--generate")) {
+    if ("--generate".equals(args[0])) {
       PrintWriter out = new PrintWriter(new File(args[2]));
       try {
         int n = Integer.parseInt(args[1]);
@@ -241,8 +241,7 @@ public final class SimpleCsvExamples {
     }
   }
 
-  private static final
-  class FastLineReader implements Closeable {
+  private static final class FastLineReader implements Closeable {
     private final InputStream in;
     private final ByteBuffer buf = ByteBuffer.allocate(100000);
 

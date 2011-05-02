@@ -36,11 +36,11 @@ public interface IDRescorer {
   double rescore(long id, double originalScore);
   
   /**
-   * Returns <code>true</code> to exclude the given thing.
-   * 
+   * Returns {@code true} to exclude the given thing.
+   *
    * @param id
    *          ID of thing (user, item, etc.) to rescore
-   * @return <code>true</code> to exclude, <code>false</code> otherwise
+   * @return {@code true} to exclude, {@code false} otherwise
    */
   boolean isFiltered(long id);
   

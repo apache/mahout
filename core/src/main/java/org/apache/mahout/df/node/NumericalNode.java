@@ -77,14 +77,13 @@ public class NumericalNode extends Node {
     if (this == obj) {
       return true;
     }
-    if ((obj == null) || !(obj instanceof NumericalNode)) {
+    if (obj == null || !(obj instanceof NumericalNode)) {
       return false;
     }
     
     NumericalNode node = (NumericalNode) obj;
     
-    return (attr == node.attr) && (split == node.split) && loChild.equals(node.loChild)
-           && hiChild.equals(node.hiChild);
+    return attr == node.attr && split == node.split && loChild.equals(node.loChild) && hiChild.equals(node.hiChild);
   }
   
   @Override

@@ -27,7 +27,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * {@see http://www.hpl.hp.com/personal/Robert_Schreiber/papers/2008%20AAIM%20Netflix/netflix_aaim08(submitted).pdf}
+ * See <a href="http://www.hpl.hp.com/personal/Robert_Schreiber/papers/2008%20AAIM%20Netflix/netflix_aaim08(submitted).pdf">
+ * this paper.</a>
  */
 public class AlternateLeastSquaresSolver {
 

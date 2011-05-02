@@ -52,18 +52,18 @@ public interface Algorithm {
                                     String defaultCategory) throws InvalidDatastoreException;
   
   /**
-   * Classify the document and return the top <code>numResults</code>
-   * 
+   * Classify the document and return the top {@code numResults}
+   *
    * @param document
    *          The document to classify
    * @param datastore
-   *          The {@link org.apache.mahout.classifier.bayes.interfaces.Datastore} (InMemory)
+   *          The {@link Datastore} (InMemory)
    * @param defaultCategory
    *          The default category to assign
    * @param numResults
    *          The maximum number of results to return, ranked by score. Ties are broken by comparing the
    *          category
-   * @return A Collection of {@link org.apache.mahout.classifier.ClassifierResult}s.
+   * @return A Collection of {@link ClassifierResult}s.
    * @throws InvalidDatastoreException
    */
   ClassifierResult[] classifyDocument(String[] document,

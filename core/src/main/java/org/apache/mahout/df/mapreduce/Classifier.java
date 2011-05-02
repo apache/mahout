@@ -212,7 +212,7 @@ public class Classifier {
 
       URI[] files = DistributedCache.getCacheFiles(conf);
 
-      if ((files == null) || (files.length < 2)) {
+      if (files == null || files.length < 2) {
         throw new IOException("not enough paths in the DistributedCache");
       }
 

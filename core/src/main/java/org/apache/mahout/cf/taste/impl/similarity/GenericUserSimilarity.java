@@ -182,8 +182,9 @@ public final class GenericUserSimilarity implements UserSimilarity {
         return false;
       }
       UserUserSimilarity otherSimilarity = (UserUserSimilarity) other;
-      return (otherSimilarity.getUserID1() == userID1) && (otherSimilarity.getUserID2() == userID2)
-             && (otherSimilarity.getValue() == value);
+      return otherSimilarity.getUserID1() == userID1
+          && otherSimilarity.getUserID2() == userID2
+          && otherSimilarity.getValue() == value;
     }
     
     @Override

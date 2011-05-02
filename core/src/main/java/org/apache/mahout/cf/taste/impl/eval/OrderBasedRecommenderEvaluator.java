@@ -39,11 +39,14 @@ public final class OrderBasedRecommenderEvaluator {
 
   private static final Logger log = LoggerFactory.getLogger(OrderBasedRecommenderEvaluator.class);
 
-  public void evaluate(Recommender recommender1,
-                       Recommender recommender2,
-                       int samples,
-                       RunningAverage tracker,
-                       String tag) throws TasteException {
+  private OrderBasedRecommenderEvaluator() {
+  }
+
+  public static void evaluate(Recommender recommender1,
+                              Recommender recommender2,
+                              int samples,
+                              RunningAverage tracker,
+                              String tag) throws TasteException {
     printHeader();
     LongPrimitiveIterator users = recommender1.getDataModel().getUserIDs();
 
@@ -67,11 +70,11 @@ public final class OrderBasedRecommenderEvaluator {
     }
   }
 
-  public void evaluate(Recommender recommender,
-                       DataModel model,
-                       int samples,
-                       RunningAverage tracker,
-                       String tag) throws TasteException {
+  public static void evaluate(Recommender recommender,
+                              DataModel model,
+                              int samples,
+                              RunningAverage tracker,
+                              String tag) throws TasteException {
     printHeader();
     LongPrimitiveIterator users = recommender.getDataModel().getUserIDs();
     while (users.hasNext()) {
@@ -95,11 +98,11 @@ public final class OrderBasedRecommenderEvaluator {
     }
   }
 
-  public void evaluate(DataModel model1,
-                       DataModel model2,
-                       int samples,
-                       RunningAverage tracker,
-                       String tag) throws TasteException {
+  public static void evaluate(DataModel model1,
+                              DataModel model2,
+                              int samples,
+                              RunningAverage tracker,
+                              String tag) throws TasteException {
     printHeader();
     LongPrimitiveIterator users = model1.getUserIDs();
     while (users.hasNext()) {
@@ -213,12 +216,12 @@ public final class OrderBasedRecommenderEvaluator {
    * The one contract is that all measures are 0 for an exact match and an
    * increasing positive number as differences increase.
    */
-  private double scoreCommonSubset(String tag,
-                                   long userID,
-                                   int samples,
-                                   int subset,
-                                   Long[] itemsL,
-                                   Long[] itemsR) {
+  private static double scoreCommonSubset(String tag,
+                                          long userID,
+                                          int samples,
+                                          int subset,
+                                          Long[] itemsL,
+                                          Long[] itemsR) {
     int[] vectorZ = new int[subset];
     int[] vectorZabs = new int[subset];
 
@@ -264,7 +267,7 @@ public final class OrderBasedRecommenderEvaluator {
    * 
    * The Standard Wilcoxon is not used because it requires a lookup table.
    */
-  double normalWilcoxon(int[] vectorZ, int[] vectorZabs) {
+  static double normalWilcoxon(int[] vectorZ, int[] vectorZabs) {
     int nitems = vectorZ.length;
 
     double[] ranks = new double[nitems];
@@ -329,14 +332,14 @@ public final class OrderBasedRecommenderEvaluator {
       int score = vectorZabs[i];
       for (int j = 0; j < nitems; j++) {
         if (score == sorted[j]) {
-          rank += (j + 1) - zeros;
+          rank += j + 1 - zeros;
           count++;
         } else if (score < sorted[j]) {
           break;
         }
       }
       if (vectorZ[i] != 0) {
-        ranks[i] = (rank / count) * ((vectorZ[i] < 0) ? -1 : 1);  // better be at least 1
+        ranks[i] = (rank / count) * (vectorZ[i] < 0 ? -1 : 1);  // better be at least 1
         ranksAbs[i] = Math.abs(ranks[i]);
       }
     }
@@ -377,7 +380,7 @@ public final class OrderBasedRecommenderEvaluator {
    * Do bubble sort and return number of swaps needed to match preference lists.
    * Sort itemsR using itemsL as the reference order.
    */
-  long sort(Long[] itemsL, Long[] itemsR) {
+  static long sort(Long[] itemsL, Long[] itemsR) {
     int length = itemsL.length;
     if (length < 2) {
       return 0;
@@ -409,11 +412,11 @@ public final class OrderBasedRecommenderEvaluator {
           // do not swap anything already in place
           int jump = 1;
           if (reference[j] == sortable[j]) {
-            while ((j + jump < length) && reference[j + jump] == sortable[j + jump]) {
+            while (j + jump < length && reference[j + jump] == sortable[j + jump]) {
               jump++;
             }
           }
-          if ((j + jump < length) && !(reference[j] == sortable[j] && reference[j + jump] == sortable[j + jump])) {
+          if (j + jump < length && !(reference[j] == sortable[j] && reference[j + jump] == sortable[j + jump])) {
             long tmp = sortable[j];
             sortable[j] = sortable[j + 1];
             sortable[j + 1] = tmp;

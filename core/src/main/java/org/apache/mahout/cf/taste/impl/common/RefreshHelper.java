@@ -91,11 +91,11 @@ public final class RefreshHelper implements Refreshable {
   }
   
   /**
-   * Creates a new and empty {@link Collection} if the method parameter is <code>null</code>.
-   * 
+   * Creates a new and empty {@link Collection} if the method parameter is {@code null}.
+   *
    * @param currentAlreadyRefreshed
    *          {@link Refreshable}s to refresh later on
-   * @return an empty {@link Collection} if the method param was <code>null</code> or the unmodified method
+   * @return an empty {@link Collection} if the method param was {@code null} or the unmodified method
    *         param.
    */
   public static Collection<Refreshable> buildRefreshed(Collection<Refreshable> currentAlreadyRefreshed) {

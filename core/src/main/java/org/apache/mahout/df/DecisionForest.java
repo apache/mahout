@@ -153,7 +153,7 @@ public class DecisionForest implements Writable {
     
     DecisionForest rf = (DecisionForest) obj;
     
-    return (trees.size() == rf.getTrees().size()) && trees.containsAll(rf.getTrees());
+    return trees.size() == rf.getTrees().size() && trees.containsAll(rf.getTrees());
   }
   
   @Override

@@ -50,7 +50,7 @@ public class FuzzyKMeansClusterMapper
     clusterer = new FuzzyKMeansClusterer(conf);
 
     String clusterPath = conf.get(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY);
-    if ((clusterPath != null) && (clusterPath.length() > 0)) {
+    if (clusterPath != null && clusterPath.length() > 0) {
       FuzzyKMeansUtil.configureWithClusterInfo(new Path(clusterPath), clusters);
     }
 

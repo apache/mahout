@@ -18,21 +18,21 @@
 package org.apache.mahout.cf.taste.impl.common;
 
 /**
- * Adds notion of iterating over <code>long</code> primitives in the style of an {@link java.util.Iterator} -- as
+ * Adds notion of iterating over {@code long} primitives in the style of an {@link java.util.Iterator} -- as
  * opposed to iterating over {@link Long}. Implementations of this interface however also implement
  * {@link java.util.Iterator} and {@link Iterable} over {@link Long} for convenience.
  */
 public interface LongPrimitiveIterator extends SkippingIterator<Long> {
   
   /**
-   * @return next <code>long</code> in iteration
+   * @return next {@code long} in iteration
    * @throws java.util.NoSuchElementException
    *           if no more elements exist in the iteration
    */
   long nextLong();
   
   /**
-   * @return next <code>long</code> in iteration without advancing iteration
+   * @return next {@code long} in iteration without advancing iteration
    */
   long peek();
   

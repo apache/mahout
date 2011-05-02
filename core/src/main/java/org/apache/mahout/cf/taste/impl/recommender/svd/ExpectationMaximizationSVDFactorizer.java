@@ -87,8 +87,8 @@ public final class ExpectationMaximizationSVDFactorizer extends AbstractFactoriz
     double average = getAveragePreference();
 
     double prefInterval = dataModel.getMaxPreference() - dataModel.getMinPreference();
-    defaultValue = Math.sqrt((average - (prefInterval * 0.1)) / numFeatures);
-    interval = (prefInterval * 0.1) / numFeatures;
+    defaultValue = Math.sqrt((average - prefInterval * 0.1) / numFeatures);
+    interval = prefInterval * 0.1 / numFeatures;
 
     for (int feature = 0; feature < numFeatures; feature++) {
       for (int userIndex = 0; userIndex < dataModel.getNumUsers(); userIndex++) {
@@ -155,7 +155,7 @@ public final class ExpectationMaximizationSVDFactorizer extends AbstractFactoriz
     double sum = pref.getCache();
     sum += leftVectors[i][f] * rightVectors[j][f];
     if (trailing) {
-      sum += (numFeatures - f - 1) * ((defaultValue + interval) * (defaultValue + interval));
+      sum += (numFeatures - f - 1) * (defaultValue + interval) * (defaultValue + interval);
       if (sum > maxPreference) {
         sum = maxPreference;
       } else if (sum < minPreference) {

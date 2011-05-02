@@ -54,15 +54,15 @@ public final class CaseAmplification implements SimilarityTransform {
    * Transforms one similarity value. This implementation is such that it's possible to define this
    * transformation on one value in isolation. The "thing" parameters are therefore unused.
    * </p>
-   * 
+   *
    * @param id1
    *          unused
    * @param id2
    *          unused
    * @param value
    *          similarity to transform
-   * @return <code>value<sup>factor</sup></code> if value is nonnegative;
-   *         <code>-value<sup>-factor</sup></code> otherwise
+   * @return {@code value<sup>factor</sup>} if value is nonnegative;
+   *         {@code -value<sup>-factor</sup>} otherwise
    */
   @Override
   public double transformSimilarity(long id1, long id2, double value) {

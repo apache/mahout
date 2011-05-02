@@ -28,7 +28,7 @@ import org.apache.mahout.cf.taste.impl.model.jdbc.AbstractJDBCDataModel;
  * operations that are needed on the preference data in the database. It assumes the database has a schema
  * like:
  * </p>
- * 
+ *
  * <table>
  * <tr>
  * <th>item_id_a</th>
@@ -59,19 +59,19 @@ import org.apache.mahout.cf.taste.impl.model.jdbc.AbstractJDBCDataModel;
  * <td>1</td>
  * </tr>
  * </table>
- * 
+ *
  * <p>
- * <code>item_id_a</code> and <code>item_id_b</code> should have types compatible with the long primitive
- * type. <code>average_diff</code> and <code>standard_deviation</code> must be compatible with
- * <code>float</code> and <code>count</code> must be compatible with <code>int</code>.
+ * {@code item_id_a} and {@code item_id_b} should have types compatible with the long primitive
+ * type. {@code average_diff} and {@code standard_deviation} must be compatible with
+ * {@code float} and {@code count} must be compatible with {@code int}.
  * </p>
- * 
+ *
  * <p>
  * The following command sets up a suitable table in MySQL:
  * </p>
- * 
+ *
  * <p>
- * 
+ *
  * <pre>
  * CREATE TABLE taste_slopeone_diffs (
  *   item_id_a BIGINT NOT NULL,
@@ -84,7 +84,7 @@ import org.apache.mahout.cf.taste.impl.model.jdbc.AbstractJDBCDataModel;
  *   INDEX (item_id_b)
  * )
  * </pre>
- * 
+ *
  * </p>
  */
 public final class MySQLJDBCDiffStorage extends AbstractJDBCDiffStorage {

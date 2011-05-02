@@ -794,8 +794,8 @@ public final class Functions {
   }
 
   /**
-   * Constructs a function that returns a new uniform random number in the open unit interval <code>(0.0,1.0)</code>
-   * (excluding 0.0 and 1.0). Currently the engine is {@link org.apache.mahout.math.jet.random.engine.MersenneTwister} and is
+   * Constructs a function that returns a new uniform random number in the open unit interval {@code (0.0,1.0)}
+   * (excluding 0.0 and 1.0). Currently the engine is {@link MersenneTwister} and is
    * seeded with the current time. <p> Note that any random engine derived from {@link
    * org.apache.mahout.math.jet.random.engine.RandomEngine} and any random distribution derived from {@link
    * org.apache.mahout.math.jet.random.AbstractDistribution} are function objects, because they implement the proper

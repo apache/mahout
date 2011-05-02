@@ -289,7 +289,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     @Override
     public double estimate(Long itemID) throws TasteException {
       LongPair pair = new LongPair(toItemID, itemID);
-      if ((rescorer != null) && rescorer.isFiltered(pair)) {
+      if (rescorer != null && rescorer.isFiltered(pair)) {
         return Double.NaN;
       }
       double originalEstimate = similarity.itemSimilarity(toItemID, itemID);
@@ -335,7 +335,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
       for (int i = 0; i < toItemIDs.length; i++) {
         long toItemID = toItemIDs[i];
         LongPair pair = new LongPair(toItemID, itemID);
-        if ((rescorer != null) && rescorer.isFiltered(pair)) {
+        if (rescorer != null && rescorer.isFiltered(pair)) {
           continue;
         }
         double estimate = similarities[i];

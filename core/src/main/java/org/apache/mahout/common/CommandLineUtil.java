@@ -19,6 +19,7 @@ package org.apache.mahout.common;
 
 import java.io.PrintWriter;
 
+import org.apache.commons.cli.Options;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.OptionException;
 import org.apache.commons.cli2.util.HelpFormatter;
@@ -36,14 +37,14 @@ public final class CommandLineUtil {
   }
  
   /**
-   * Print the options supported by <code>GenericOptionsParser</code>.
+   * Print the options supported by {@code GenericOptionsParser}.
    * In addition to the options supported by the job, passed in as the
    * group parameter.
    *
    * @param group job-specific command-line options.
    */
   public static void printHelpWithGenericOptions(Group group) {
-    org.apache.commons.cli.Options ops = new org.apache.commons.cli.Options();
+    Options ops = new Options();
     new GenericOptionsParser(new Configuration(), ops, new String[0]);
     org.apache.commons.cli.HelpFormatter fmt = new org.apache.commons.cli.HelpFormatter();
     fmt.printHelp("<command> [Generic Options] [Job-Specific Options]", 
@@ -61,7 +62,7 @@ public final class CommandLineUtil {
   }
 
   public static void printHelpWithGenericOptions(Group group, OptionException oe) {
-    org.apache.commons.cli.Options ops = new org.apache.commons.cli.Options();
+    Options ops = new Options();
     new GenericOptionsParser(new Configuration(), ops, new String[0]);
     org.apache.commons.cli.HelpFormatter fmt = new org.apache.commons.cli.HelpFormatter();
     fmt.printHelp("<command> [Generic Options] [Job-Specific Options]",

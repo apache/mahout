@@ -38,8 +38,8 @@ import com.google.common.base.Preconditions;
  * </p>
  *
  * <p>
- * The similarity value is assumed to be parseable as a <code>double</code> having a value between -1 and 1. The
- * item IDs are parsed as <code>long</code>s. Similarities are symmetric so for a pair of items you do not have to
+ * The similarity value is assumed to be parseable as a {@code double} having a value between -1 and 1. The
+ * item IDs are parsed as {@code long}s. Similarities are symmetric so for a pair of items you do not have to
  * include 2 lines in the file.
  * </p>
  *

@@ -283,7 +283,7 @@ public class HebbianSolver {
     if (DEBUG && currentPseudoEigen.norm(2) > 0) {
       for (int i = 0; i < state.getNumEigensProcessed(); i++) {
         Vector previousEigen = previousEigens.getRow(i);
-        log.info("dot with previous: {}", (previousEigen.dot(currentPseudoEigen)) / currentPseudoEigen.norm(2));
+        log.info("dot with previous: {}", previousEigen.dot(currentPseudoEigen) / currentPseudoEigen.norm(2));
       }
     }
     /*

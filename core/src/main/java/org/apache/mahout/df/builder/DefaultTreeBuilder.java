@@ -91,7 +91,7 @@ public class DefaultTreeBuilder implements TreeBuilder {
     Split best = null;
     for (int attr : attributes) {
       Split split = igSplit.computeSplit(data, attr);
-      if ((best == null) || (best.getIg() < split.getIg())) {
+      if (best == null || best.getIg() < split.getIg()) {
         best = split;
       }
     }

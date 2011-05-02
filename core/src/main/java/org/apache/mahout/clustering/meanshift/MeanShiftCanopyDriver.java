@@ -143,17 +143,17 @@ public class MeanShiftCanopyDriver extends AbstractJob {
    *          true if the input points are to be clustered once the iterations complete
    * @param runSequential if true run in sequential execution mode
    */
-  public void run(Configuration conf,
-                  Path input,
-                  Path output,
-                  DistanceMeasure measure,
-                  double t1,
-                  double t2,
-                  double convergenceDelta,
-                  int maxIterations,
-                  boolean inputIsCanopies,
-                  boolean runClustering,
-                  boolean runSequential)
+  public static void run(Configuration conf,
+                         Path input,
+                         Path output,
+                         DistanceMeasure measure,
+                         double t1,
+                         double t2,
+                         double convergenceDelta,
+                         int maxIterations,
+                         boolean inputIsCanopies,
+                         boolean runClustering,
+                         boolean runSequential)
     throws IOException, InterruptedException, ClassNotFoundException {
     Path clustersIn = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);
     if (inputIsCanopies) {
@@ -260,15 +260,15 @@ public class MeanShiftCanopyDriver extends AbstractJob {
    *          an int number of iterations
    * @param runSequential if true run in sequential execution mode
    */
-  public Path buildClusters(Configuration conf,
-                            Path clustersIn,
-                            Path output,
-                            DistanceMeasure measure,
-                            double t1,
-                            double t2,
-                            double convergenceDelta,
-                            int maxIterations,
-                            boolean runSequential)
+  public static Path buildClusters(Configuration conf,
+                                   Path clustersIn,
+                                   Path output,
+                                   DistanceMeasure measure,
+                                   double t1,
+                                   double t2,
+                                   double convergenceDelta,
+                                   int maxIterations,
+                                   boolean runSequential)
     throws IOException, InterruptedException, ClassNotFoundException {
     if (runSequential) {
       return buildClustersSeq(clustersIn, output, measure, t1, t2, convergenceDelta, maxIterations);
@@ -345,7 +345,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     // iterate until the clusters converge
     boolean converged = false;
     int iteration = 1;
-    while (!converged && (iteration <= maxIterations)) {
+    while (!converged && iteration <= maxIterations) {
       log.info("Mean Shift Iteration {}", iteration);
       // point the output to a new directory per iteration
       Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);

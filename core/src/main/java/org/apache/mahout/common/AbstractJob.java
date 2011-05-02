@@ -102,7 +102,7 @@ public abstract class AbstractJob extends Configured implements Tool {
 
   /** Returns the input path established by a call to {@link #parseArguments(String[])}.
    *  The source of the path may be an input option added using {@link #addInputOption()}
-   *  or it may be the value of the <code>mapred.input.dir</code> configuration
+   *  or it may be the value of the {@code mapred.input.dir} configuration
    *  property. 
    */
   protected Path getInputPath() {
@@ -111,7 +111,7 @@ public abstract class AbstractJob extends Configured implements Tool {
 
   /** Returns the output path established by a call to {@link #parseArguments(String[])}.
    *  The source of the path may be an output option added using {@link #addOutputOption()}
-   *  or it may be the value of the <code>mapred.input.dir</code> configuration
+   *  or it may be the value of the {@code mapred.input.dir} configuration
    *  property. 
    */
   protected Path getOutputPath() {
@@ -119,8 +119,7 @@ public abstract class AbstractJob extends Configured implements Tool {
   }
 
   /** Add an option with no argument whose presence can be checked for using
-   *  <code>containsKey<code> method on the map returned by 
-   *  {@link #parseArguments(String[])};
+   *  {@code containsKey} method on the map returned by {@link #parseArguments(String[])};
    */
   protected void addFlag(String name, String shortName, String description) {
     options.add(buildOption(name, shortName, description, false, false, null));
@@ -159,8 +158,8 @@ public abstract class AbstractJob extends Configured implements Tool {
 
   /** Add an arbitrary option to the set of options this job will parse when
    *  {@link #parseArguments(String[])} is called. If this option has no
-   *  argument, use <code>containsKey</code> on the map returned by 
-   *  <code>parseArguments</code> to check for its presence. Otherwise, the
+   *  argument, use {@code containsKey} on the map returned by
+   *  {@code parseArguments} to check for its presence. Otherwise, the
    *  string value of the option will be placed in the map using a key
    *  equal to this options long name preceded by '--'.
    * @return the option added.
@@ -227,19 +226,19 @@ public abstract class AbstractJob extends Configured implements Tool {
   }
 
   /** Parse the arguments specified based on the options defined using the 
-   *  various <code>addOption</code> methods. If -h is specified or an 
+   *  various {@code addOption} methods. If -h is specified or an
    *  exception is encountered print help and return null. Has the 
    *  side effect of setting inputPath and outputPath 
-   *  if <code>addInputOption</code> or <code>addOutputOption</code> 
-   *  or <code>mapred.input.dir</code> or <code>mapred.output.dir</code>
+   *  if {@code addInputOption} or {@code addOutputOption}
+   *  or {@code mapred.input.dir} or {@code mapred.output.dir}
    *  are present in the Configuration.
-   * 
-   * @return a Map<String,Sting> containing options and their argument values.
-   *  The presence of a flag can be tested using <code>containsKey</code>, while
-   *  argument values can be retrieved using <code>get(optionName)</code>. The
+   *
+   * @return a {@code Map<String,String>} containing options and their argument values.
+   *  The presence of a flag can be tested using {@code containsKey}, while
+   *  argument values can be retrieved using {@code get(optionName)}. The
    *  names used for keys are the option name parameter prefixed by '--'.
-   *  
-   * 
+   *
+   *
    */
   public Map<String, String> parseArguments(String[] args) {
 
@@ -311,18 +310,18 @@ public abstract class AbstractJob extends Configured implements Tool {
   }
 
   /** Obtain input and output directories from command-line options or hadoop
-   *  properties. If <code>addInputOption</code> or <code>addOutputOption</code>
-   *  has been called, this method will throw an <code>OptionException</code> if
+   *  properties. If {@code addInputOption} or {@code addOutputOption}
+   *  has been called, this method will throw an {@code OptionException} if
    *  no source (command-line or property) for that value is present. 
-   *  Otherwise, <code>inputPath</code> or <code>outputPath<code> will be 
+   *  Otherwise, {@code inputPath} or {@code outputPath} will be
    *  non-null only if specified as a hadoop property. Command-line options
    *  take precedence over hadoop properties.
-   * 
+   *
    * @param cmdLine
    * @throws IllegalArgumentException if either inputOption is present,
-   *   and neither <code>--input</code> nor <code>-Dmapred.input dir</code> are 
-   *   specified or outputOption is present and neither <code>--output</code> 
-   *   nor <code>-Dmapred.output.dir</code> are specified.
+   *   and neither {@code --input} nor {@code -Dmapred.input dir} are
+   *   specified or outputOption is present and neither {@code --output}
+   *   nor {@code -Dmapred.output.dir} are specified.
    */
   protected void parseDirectories(CommandLine cmdLine) {
 
@@ -357,7 +356,7 @@ public abstract class AbstractJob extends Configured implements Tool {
 
         // nulls are ok, for cases where options are simple flags.
         Object vo = cmdLine.getValue(o);
-        String value = (vo == null) ? null : vo.toString();
+        String value = vo == null ? null : vo.toString();
         args.put(o.getPreferredName(), value);
       }
     }

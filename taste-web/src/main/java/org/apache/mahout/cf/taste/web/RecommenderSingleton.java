@@ -22,7 +22,7 @@ import org.apache.mahout.cf.taste.recommender.Recommender;
 
 /**
  * <p>A singleton which holds an instance of a {@link Recommender}. This is used to share
- * a {@link Recommender} between {@link RecommenderServlet} and <code>RecommenderService.jws</code>.</p>
+ * a {@link Recommender} between {@link RecommenderServlet} and {@code RecommenderService.jws}.</p>
  */
 public final class RecommenderSingleton {
 

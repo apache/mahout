@@ -52,7 +52,7 @@ public final class GenericBooleanPrefUserBasedRecommender extends GenericUserBas
     boolean foundAPref = false;
     for (long userID : theNeighborhood) {
       // See GenericItemBasedRecommender.doEstimatePreference() too
-      if ((userID != theUserID) && (dataModel.getPreferenceValue(userID, itemID) != null)) {
+      if (userID != theUserID && dataModel.getPreferenceValue(userID, itemID) != null) {
         foundAPref = true;
         totalSimilarity += similarity.userSimilarity(theUserID, userID);
       }

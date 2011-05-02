@@ -60,7 +60,7 @@ public class KMeansClusterMapper
       measure.configure(conf);
       
       String clusterPath = conf.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
-      if ((clusterPath != null) && (clusterPath.length() > 0)) {
+      if (clusterPath != null && clusterPath.length() > 0) {
         KMeansUtil.configureWithClusterInfo(conf, new Path(clusterPath), clusters);
         if (clusters.isEmpty()) {
           throw new IllegalStateException("No clusters found. Check your -c path.");

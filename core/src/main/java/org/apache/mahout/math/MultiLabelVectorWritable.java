@@ -82,7 +82,7 @@ public final class MultiLabelVectorWritable implements Writable {
   }
 
   public static void write(DataOutput out, SequentialAccessSparseVector ssv, int[] labels) throws IOException {
-    (new MultiLabelVectorWritable(ssv, labels)).write(out);
+    new MultiLabelVectorWritable(ssv, labels).write(out);
   }
 
 }

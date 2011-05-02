@@ -32,7 +32,7 @@ public class FuzzyKMeansCombiner extends Reducer<Text, ClusterObservations, Text
     throws IOException, InterruptedException {
     SoftCluster cluster = new SoftCluster();
     for (ClusterObservations value : values) {
-      if (value.getCombinerState() == 0) { // first time thru combiner
+      if (value.getCombinerState() == 0) { // first time through combiner
         cluster.observe(value.getS1(), Math.pow(value.getS0(), clusterer.getM()));
       } else {
         cluster.observe(value);

@@ -28,7 +28,7 @@ import org.apache.mahout.math.Vector;
  */
 public class Canopy extends DistanceMeasureCluster {
   
-  /** Used for deserializaztion as a writable */
+  /** Used for deserialization as a writable */
   public Canopy() { }
   
   /**

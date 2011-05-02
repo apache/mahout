@@ -29,7 +29,7 @@ import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
  * assumes that there is a {@link DataSource} available under the JNDI name
  * "jdbc/taste", which gives access to a database with a "taste_preferences" table with the following schema:
  * </p>
- * 
+ *
  * <table>
  * <tr>
  * <th>user_id</th>
@@ -57,15 +57,15 @@ import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
  * <td>0.3</td>
  * </tr>
  * </table>
- * 
+ *
  * <p>
- * <code>preference</code> must have a type compatible with the Java <code>float</code> type.
- * <code>user_id</code> and <code>item_id</code> should be compatible with long type (BIGINT). For example,
+ * {@code preference} must have a type compatible with the Java {@code float} type.
+ * {@code user_id} and {@code item_id} should be compatible with long type (BIGINT). For example,
  * the following command sets up a suitable table in MySQL, complete with primary key and indexes:
  * </p>
- * 
+ *
  * <p>
- * 
+ *
  * <pre>
  * CREATE TABLE taste_preferences (
  *   user_id BIGINT NOT NULL,
@@ -76,30 +76,30 @@ import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
  *   INDEX (item_id)
  * )
  * </pre>
- * 
+ *
  * </p>
  *
- * <p>The table may optionally have a <code>timestamp</code> column whose type is compatible with Java
- * <code>long</code>.</p>
- * 
+ * <p>The table may optionally have a {@code timestamp} column whose type is compatible with Java
+ * {@code long}.</p>
+ *
  * <h3>Performance Notes</h3>
- * 
+ *
  * <p>
  * See the notes in {@link AbstractJDBCDataModel} regarding using connection pooling. It's pretty vital to
  * performance.
  * </p>
- * 
+ *
  * <p>
  * Some experimentation suggests that MySQL's InnoDB engine is faster than MyISAM for these kinds of
  * applications. While MyISAM is the default and, I believe, generally considered the lighter-weight and
  * faster of the two engines, my guess is the row-level locking of InnoDB helps here. Your mileage may vary.
  * </p>
- * 
+ *
  * <p>
  * Here are some key settings that can be tuned for MySQL, and suggested size for a data set of around 1
  * million elements:
  * </p>
- * 
+ *
  * <ul>
  * <li>innodb_buffer_pool_size=64M</li>
  * <li>myisam_sort_buffer_size=64M</li>
@@ -108,11 +108,11 @@ import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
  * <li>query_cache_type=1</li>
  * <li>query_cache_size=64M</li>
  * </ul>
- * 
+ *
  * <p>
  * Also consider setting some parameters on the MySQL Connector/J driver:
  * </p>
- * 
+ *
  * <pre>
  * cachePreparedStatements = true
  * cachePrepStmts = true
@@ -120,7 +120,7 @@ import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
  * alwaysSendSetIsolation = false
  * elideSetAutoCommits = true
  * </pre>
- * 
+ *
  * <p>
  * Thanks to Amila Jayasooriya for contributing MySQL notes above as part of Google Summer of Code 2007.
  * </p>

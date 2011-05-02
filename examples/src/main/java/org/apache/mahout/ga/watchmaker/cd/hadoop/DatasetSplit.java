@@ -30,7 +30,6 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.RandomWrapper;
-import org.apache.mahout.common.StringUtils;
 
 /**
  * Separate the input data into a training and testing set.
@@ -197,8 +196,7 @@ public final class DatasetSplit {
    */
   public static class DatasetTextInputFormat extends TextInputFormat {
     @Override
-    public RecordReader<LongWritable, Text> createRecordReader(InputSplit split,
-                                                               TaskAttemptContext context) {
+    public RecordReader<LongWritable, Text> createRecordReader(InputSplit split, TaskAttemptContext context) {
       return new RndLineRecordReader(super.createRecordReader(split, context), context.getConfiguration());
     }
   }

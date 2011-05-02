@@ -51,7 +51,7 @@ public class SSVDPrototype {
 
   public SSVDPrototype(long seed, int kp, int r) {
     this.kp = kp;
-    omega = new Omega(seed, kp / 2, kp - (kp / 2));
+    omega = new Omega(seed, kp / 2, kp - kp / 2);
     yRow = new double[kp];
     // m_yRowV = new DenseVector(m_yRow,true);
     this.r = r;

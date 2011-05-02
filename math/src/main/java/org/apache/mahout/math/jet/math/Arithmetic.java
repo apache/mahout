@@ -270,7 +270,7 @@ public final class Arithmetic {
     long b = 1;
     double binomial = 1;
     for (long i = k; i-- > 0;) {
-      binomial *= ((double) (a++)) / (b++);
+      binomial *= (double) a++ / b++;
     }
     return binomial;
   }

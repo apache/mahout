@@ -115,7 +115,7 @@ public final class SVDRecommender extends AbstractRecommender {
     refreshHelper.addDependency(factorizer);
   }
 
-  protected static PersistenceStrategy getDefaultPersistenceStrategy() {
+  static PersistenceStrategy getDefaultPersistenceStrategy() {
     return new NoPersistenceStrategy();
   }
 

@@ -41,7 +41,7 @@ public final class LastfmClusterEvaluator {
   /* Calculate used JVM memory */
   private static String usedMemory() {
     Runtime runtime = Runtime.getRuntime();
-    return "Used Memory: [" + ((runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024)) + " MB] ";
+    return "Used Memory: [" + (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024) + " MB] ";
   }
 
   /**
@@ -63,7 +63,7 @@ public final class LastfmClusterEvaluator {
 
     first.addAll(second);
     double unionSize = first.size();
-    return (unionSize == 0) ? 0.0 : (intersectSize / unionSize);
+    return unionSize == 0 ? 0.0 : intersectSize / unionSize;
   }
 
   /**
@@ -114,7 +114,7 @@ public final class LastfmClusterEvaluator {
             List<Integer> listenerVector2 = listenerVectors.get(j);
             double similarity = computeSimilarity(listenerVector1,
                 listenerVector2);
-            similarListeners += (similarity >= threshold) ? 1 : 0;
+            similarListeners += similarity >= threshold ? 1 : 0;
           }
         }
         listenerVectors.clear();
@@ -134,7 +134,7 @@ public final class LastfmClusterEvaluator {
     System.out.println(" (B) All listeners: " + allListeners);
     NumberFormat format = NumberFormat.getInstance();
     format.setMaximumFractionDigits(2);
-    double precision = ((double) similarListeners / allListeners) * 100.0;
+    double precision = (double) similarListeners / allListeners * 100.0;
     System.out.println(" Average cluster precision: A/B = " + format.format(precision));
   }
 

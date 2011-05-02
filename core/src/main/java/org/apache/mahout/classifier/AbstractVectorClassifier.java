@@ -62,7 +62,7 @@ public abstract class AbstractVectorClassifier {
 
   /**
    * Classifies a vector in the special case of a binary classifier where
-   * <code>classify(Vector)</code> would return a vector with only one element.  As such,
+   * {@link #classify(Vector)} would return a vector with only one element.  As such,
    * using this method can void the allocation of a vector.
    * @param instance   The feature vector to be classified.
    * @return The score for category 1.

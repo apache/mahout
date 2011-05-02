@@ -181,9 +181,9 @@ public final class TestClassifier {
       params.set("alpha_i", alphaI);
       params.set("testDirPath", testDirPath);
       
-      if (classificationMethod.equalsIgnoreCase("sequential")) {
+      if ("sequential".equalsIgnoreCase(classificationMethod)) {
         classifySequential(params);
-      } else if (classificationMethod.equalsIgnoreCase("mapreduce")) {
+      } else if ("mapreduce".equalsIgnoreCase(classificationMethod)) {
         classifyParallel(params);
       }
     } catch (OptionException e) {
@@ -205,12 +205,12 @@ public final class TestClassifier {
     Algorithm algorithm;
     Datastore datastore;
     
-    if (params.get("dataSource").equals("hdfs")) {
-      if (params.get("classifierType").equalsIgnoreCase("bayes")) {
+    if ("hdfs".equals(params.get("dataSource"))) {
+      if ("bayes".equalsIgnoreCase(params.get("classifierType"))) {
         log.info("Testing Bayes Classifier");
         algorithm = new BayesAlgorithm();
         datastore = new InMemoryBayesDatastore(params);
-      } else if (params.get("classifierType").equalsIgnoreCase("cbayes")) {
+      } else if ("cbayes".equalsIgnoreCase(params.get("classifierType"))) {
         log.info("Testing Complementary Bayes Classifier");
         algorithm = new CBayesAlgorithm();
         datastore = new InMemoryBayesDatastore(params);

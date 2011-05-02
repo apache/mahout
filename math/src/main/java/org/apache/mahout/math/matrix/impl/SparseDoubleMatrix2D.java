@@ -454,7 +454,7 @@ public final class SparseDoubleMatrix2D extends DoubleMatrix2D {
   @Override
   public DoubleMatrix2D zMult(DoubleMatrix2D B, DoubleMatrix2D C, final double alpha, double beta,
                               final boolean transposeA, boolean transposeB) {
-    if (!(this.isNoView)) {
+    if (!this.isNoView) {
       return super.zMult(B, C, alpha, beta, transposeA, transposeB);
     }
     if (transposeB) {
@@ -467,7 +467,7 @@ public final class SparseDoubleMatrix2D extends DoubleMatrix2D {
       n = rows;
     }
     int p = B.columns;
-    boolean ignore = (C == null);
+    boolean ignore = C == null;
     if (C == null) {
       C = new DenseDoubleMatrix2D(m, p);
     }

@@ -74,7 +74,7 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
       ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.getEntries().iterator()), maxNGramSize);
 
       do {
-        String term = (sf.getAttribute(TermAttribute.class)).term();
+        String term = sf.getAttribute(TermAttribute.class).term();
         if (term.length() > 0 && dictionary.containsKey(term)) { // ngram
           int termId = dictionary.get(term);
           vector.setQuick(termId, vector.getQuick(termId) + 1);

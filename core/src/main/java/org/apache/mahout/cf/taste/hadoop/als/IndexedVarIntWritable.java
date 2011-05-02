@@ -96,7 +96,7 @@ public class IndexedVarIntWritable implements WritableComparable<IndexedVarIntWr
     }
 
     protected static int compare(int a, int b) {
-      return (a == b) ? 0 : (a < b) ? -1 : 1;
+      return a == b ? 0 : a < b ? -1 : 1;
     }
   }
 

@@ -241,7 +241,7 @@ public final class HmmUtils {
         nextID = model.getHiddenStateID(nextState);
       }
       // if the ID is -1, use the default value
-      encoded[i] = (nextID < 0) ? defaultValue : nextID;
+      encoded[i] = nextID < 0 ? defaultValue : nextID;
     }
     return encoded;
   }

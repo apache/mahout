@@ -124,7 +124,7 @@ public class PartialBuilder extends Builder {
     int numMaps = partitions.length;
     
     // call the second step in order to complete the oob predictions
-    if ((callback != null) && (numMaps > 1) && isStep2(conf)) {
+    if (callback != null && numMaps > 1 && isStep2(conf)) {
       log.info("*****************************");
       log.info("Second Step");
       log.info("*****************************");
@@ -157,7 +157,7 @@ public class PartialBuilder extends Builder {
                                       TreeID[] keys,
                                       Node[] trees,
                                       PredictionCallback callback) throws IOException {
-    Preconditions.checkArgument((keys == null && trees == null) || (keys != null && trees != null),
+    Preconditions.checkArgument(keys == null && trees == null || keys != null && trees != null,
         "if keys is null, trees should also be null");
     Preconditions.checkArgument(keys == null || keys.length == trees.length, "keys.length != trees.length");
 

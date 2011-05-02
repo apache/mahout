@@ -227,7 +227,7 @@ public class DirichletClusterer {
     }
 
     // periodically add models to the cluster samples after the burn-in period
-    if ((iteration >= burnin) && (iteration % thin == 0)) {
+    if (iteration >= burnin && iteration % thin == 0) {
       clusterSamples.add(newModels);
     }
     // update the state from the new models

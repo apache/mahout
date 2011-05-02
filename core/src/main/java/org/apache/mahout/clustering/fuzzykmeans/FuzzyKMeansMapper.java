@@ -54,7 +54,7 @@ public class FuzzyKMeansMapper extends Mapper<WritableComparable<?>,VectorWritab
     log.info("In Mapper Configure:");
     
     String clusterPath = job.get(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY);
-    if ((clusterPath != null) && (clusterPath.length() > 0)) {
+    if (clusterPath != null && clusterPath.length() > 0) {
       FuzzyKMeansUtil.configureWithClusterInfo(new Path(clusterPath), clusters);
     }
     

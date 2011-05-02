@@ -36,33 +36,33 @@ import com.google.common.base.Preconditions;
  * doesn't really exist yet in your actual {@link DataModel}. For example maybe you wish to recommend DVDs to
  * a user who has browsed a few titles on your DVD store site, but, the user is not yet registered.
  * </p>
- * 
+ *
  * <p>
  * This enables you to temporarily add a temporary user to an existing {@link DataModel} in a way that
  * recommenders can then produce recommendations anyway. To do so, wrap your real implementation in this
  * class:
  * </p>
- * 
+ *
  * <p>
- * 
+ *
  * <pre>
  * DataModel realModel = ...;
  * DataModel plusModel = new PlusAnonymousUserDataModel(realModel);
  * ...
  * ItemSimilarity similarity = new LogLikelihoodSimilarity(realModel); // not plusModel
  * </pre>
- * 
+ *
  * </p>
- * 
+ *
  * <p>
- * But, you may continue to use <code>realModel</code> as input to other components. To recommend, first construct and
+ * But, you may continue to use {@code realModel} as input to other components. To recommend, first construct and
  * set the temporary user information on the model and then simply call the recommender. The
- * <code>synchronized</code> block exists to remind you that this is of course not thread-safe. Only one set
+ * {@code synchronized} block exists to remind you that this is of course not thread-safe. Only one set
  * of temp data can be inserted into the model and used at one time.
  * </p>
- * 
+ *
  * <p>
- * 
+ *
  * <pre>
  * Recommender recommender = ...;
  * ...
@@ -73,7 +73,7 @@ import com.google.common.base.Preconditions;
  *   plusModel.setTempPrefs(null);
  * }
  * </pre>
- * 
+ *
  * </p>
  */
 public final class PlusAnonymousUserDataModel implements DataModel {
@@ -115,7 +115,7 @@ public final class PlusAnonymousUserDataModel implements DataModel {
   public PreferenceArray getPreferencesFromUser(long userID) throws TasteException {
     if (userID == TEMP_USER_ID) {
       if (tempPrefs == null) {
-        throw new NoSuchUserException(userID);
+        throw new NoSuchUserException(TEMP_USER_ID);
       }
       return tempPrefs;
     }
@@ -126,7 +126,7 @@ public final class PlusAnonymousUserDataModel implements DataModel {
   public FastIDSet getItemIDsFromUser(long userID) throws TasteException {
     if (userID == TEMP_USER_ID) {
       if (tempPrefs == null) {
-        throw new NoSuchUserException(userID);
+        throw new NoSuchUserException(TEMP_USER_ID);
       }
       return prefItemIDs;
     }
@@ -177,7 +177,7 @@ public final class PlusAnonymousUserDataModel implements DataModel {
   public Float getPreferenceValue(long userID, long itemID) throws TasteException {
     if (userID == TEMP_USER_ID) {
       if (tempPrefs == null) {
-        throw new NoSuchUserException(userID);
+        throw new NoSuchUserException(TEMP_USER_ID);
       }
       for (int i = 0; i < tempPrefs.length(); i++) {
         if (tempPrefs.getItemID(i) == itemID) {
@@ -193,7 +193,7 @@ public final class PlusAnonymousUserDataModel implements DataModel {
   public Long getPreferenceTime(long userID, long itemID) throws TasteException {
     if (userID == TEMP_USER_ID) {
       if (tempPrefs == null) {
-        throw new NoSuchUserException(userID);
+        throw new NoSuchUserException(TEMP_USER_ID);
       }
       return null;
     }
@@ -236,7 +236,7 @@ public final class PlusAnonymousUserDataModel implements DataModel {
   public void setPreference(long userID, long itemID, float value) throws TasteException {
     if (userID == TEMP_USER_ID) {
       if (tempPrefs == null) {
-        throw new NoSuchUserException(userID);
+        throw new NoSuchUserException(TEMP_USER_ID);
       }
       throw new UnsupportedOperationException();
     }
@@ -247,7 +247,7 @@ public final class PlusAnonymousUserDataModel implements DataModel {
   public void removePreference(long userID, long itemID) throws TasteException {
     if (userID == TEMP_USER_ID) {
       if (tempPrefs == null) {
-        throw new NoSuchUserException(userID);
+        throw new NoSuchUserException(TEMP_USER_ID);
       }
       throw new UnsupportedOperationException();
     }

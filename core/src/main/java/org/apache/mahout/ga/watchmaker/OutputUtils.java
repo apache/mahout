@@ -34,17 +34,15 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 public final class OutputUtils {
   
   private OutputUtils() {
-  // do nothing
+    // do nothing
   }
   
   /**
-   * Lists all files in the output <code>Path</code>
-   * 
-   * @param fs
-   *          <code>FileSystem</code> to use
-   * @param outpath
-   *          output <code>Path</code>
-   * @return <code>Path</code> array
+   * Lists all files in the output {@code Path}
+   *
+   * @param fs {@code FileSystem} to use
+   * @param outpath output {@code Path}
+   * @return {@code Path} array
    */
   public static Path[] listOutputFiles(FileSystem fs, Path outpath) throws IOException {
     FileStatus[] status = fs.listStatus(outpath);
@@ -63,11 +61,9 @@ public final class OutputUtils {
   
   /**
    * Reads back the evaluations.
-   * 
-   * @param outpath
-   *          output <code>Path</code>
-   * @param evaluations
-   *          List of evaluations
+   *
+   * @param outpath output {@code Path}
+   * @param evaluations List of evaluations
    */
   public static void importEvaluations(FileSystem fs,
                                        Configuration conf,

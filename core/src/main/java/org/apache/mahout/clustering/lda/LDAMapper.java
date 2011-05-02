@@ -78,7 +78,6 @@ public class LDAMapper extends Mapper<WritableComparable<?>,VectorWritable,IntPa
     for (int k = 0; k < state.getNumTopics(); ++k) {
       IntPairWritable kw = new IntPairWritable(k, LDADriver.TOPIC_SUM_KEY);
       v.set(logTotals[k]);
-      assert !Double.isNaN(v.get());
       context.write(kw, v);
     }
     IntPairWritable llk = new IntPairWritable(LDADriver.LOG_LIKELIHOOD_KEY, LDADriver.LOG_LIKELIHOOD_KEY);

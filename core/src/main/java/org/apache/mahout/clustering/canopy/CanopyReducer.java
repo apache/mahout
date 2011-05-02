@@ -30,7 +30,7 @@ public class CanopyReducer extends Reducer<Text, VectorWritable, Text, Canopy> {
 
   private final Collection<Canopy> canopies = new ArrayList<Canopy>();
 
-  protected CanopyClusterer canopyClusterer;
+  private CanopyClusterer canopyClusterer;
 
   @Override
   protected void reduce(Text arg0, Iterable<VectorWritable> values,

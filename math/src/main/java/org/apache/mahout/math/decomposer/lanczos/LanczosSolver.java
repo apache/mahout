@@ -216,11 +216,11 @@ public class LanczosSolver {
     if (!times.containsKey(section)) {
       times.put(section, 0L);
     }
-    times.put(section, times.get(section) + (System.nanoTime() - startTimes.get(section)));
+    times.put(section, times.get(section) + System.nanoTime() - startTimes.get(section));
   }
 
   public double getTimeMillis(TimingSection section) {
-    return ((double) times.get(section)) / NANOS_IN_MILLI;
+    return (double) times.get(section) / NANOS_IN_MILLI;
   }
 
 }

@@ -27,9 +27,9 @@ import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
  */
 public interface Datastore {
   /**
-   * Gets a double value from the Matrix pointed to by the <code>matrixName</code> from its cell pointed to by
-   * the <code>row</code> and <code>column</code> string
-   * 
+   * Gets a double value from the Matrix pointed to by the {@code matrixName} from its cell pointed to by
+   * the {@code row} and {@code column} string
+   *
    * @param matrixName
    * @param row
    * @param column
@@ -39,9 +39,9 @@ public interface Datastore {
   double getWeight(String matrixName, String row, String column) throws InvalidDatastoreException;
   
   /**
-   * Gets a double value from the Vector pointed to by the <code>vectorName</code> from its cell pointed to by
-   * the <code>index</code>
-   * 
+   * Gets a double value from the Vector pointed to by the {@code vectorName} from its cell pointed to by
+   * the {@code index}
+   *
    * @param vectorName
    * @param index
    * @return double value
@@ -50,8 +50,8 @@ public interface Datastore {
   double getWeight(String vectorName, String index) throws InvalidDatastoreException;
   
   /**
-   * get the keySet of a given Matrix/Vector as given by <code>name</code>
-   * 
+   * get the keySet of a given Matrix/Vector as given by {@code name}
+   *
    * @param name
    * @return Collection of keys of Matrix/Vector
    * @throws InvalidDatastoreException

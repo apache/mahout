@@ -104,9 +104,7 @@ public class CBayesAlgorithm implements Algorithm {
     
     double weight = Math.log(numerator / denominator);
     
-    result = weight / thetaNormalizer;
-    
-    return result;
+    return weight / thetaNormalizer;
   }
   
   @Override

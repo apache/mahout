@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * <p>Runs "track 2" of the KDD Cup competition using whatever recommender is inside {@link Track2Recommender}
  * and attempts to output the result in the correct contest format.</p>
  *
- * <p>Run as: <code>Track2Runner [track 2 data file directory] [output file]</code></p>
+ * <p>Run as: {@code Track2Runner [track 2 data file directory] [output file]}</p>
  */
 public final class Track2Runner {
 

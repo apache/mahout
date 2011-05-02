@@ -317,7 +317,7 @@ public class HmmModel implements Cloneable {
       return -1;
     }
     Integer tmp = (Integer) hiddenStateNames.get(name);
-    return (tmp == null) ? -1 : tmp;
+    return tmp == null ? -1 : tmp;
   }
 
   /**
@@ -386,7 +386,7 @@ public class HmmModel implements Cloneable {
       return -1;
     }
     Integer tmp = (Integer) outputStateNames.get(name);
-    return (tmp == null) ? -1 : tmp;
+    return tmp == null ? -1 : tmp;
   }
 
 }

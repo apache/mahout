@@ -85,7 +85,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
    * @param numClusters
    *          desired number of clusters to create
    * @throws IllegalArgumentException
-   *           if arguments are <code>null</code>, or <code>numClusters</code> is less than 2
+   *           if arguments are {@code null}, or {@code numClusters} is less than 2
    */
   public TreeClusteringRecommender(DataModel dataModel, ClusterSimilarity clusterSimilarity, int numClusters)
     throws TasteException {
@@ -103,7 +103,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
    *          percentage of all cluster-cluster pairs to consider when finding next-most-similar clusters.
    *          Decreasing this value from 1.0 can increase performance at the cost of accuracy
    * @throws IllegalArgumentException
-   *           if arguments are <code>null</code>, or <code>numClusters</code> is less than 2, or samplingRate
+   *           if arguments are {@code null}, or {@code numClusters} is less than 2, or samplingRate
    *           is {@link Double#NaN} or nonpositive or greater than 1.0
    */
   public TreeClusteringRecommender(DataModel dataModel,
@@ -141,7 +141,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
    *          clustering similarity threshold; clusters will be aggregated into larger clusters until the next
    *          two nearest clusters' similarity drops below this threshold
    * @throws IllegalArgumentException
-   *           if arguments are <code>null</code>, or <code>clusteringThreshold</code> is {@link Double#NaN}
+   *           if arguments are {@code null}, or {@code clusteringThreshold} is {@link Double#NaN}
    */
   public TreeClusteringRecommender(DataModel dataModel,
                                    ClusterSimilarity clusterSimilarity,
@@ -161,7 +161,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
    *          percentage of all cluster-cluster pairs to consider when finding next-most-similar clusters.
    *          Decreasing this value from 1.0 can increase performance at the cost of accuracy
    * @throws IllegalArgumentException
-   *           if arguments are <code>null</code>, or <code>clusteringThreshold</code> is {@link Double#NaN},
+   *           if arguments are {@code null}, or {@code clusteringThreshold} is {@link Double#NaN},
    *           or samplingRate is {@link Double#NaN} or nonpositive or greater than 1.0
    */
   public TreeClusteringRecommender(DataModel dataModel,
@@ -207,11 +207,11 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     // And that the rescorer doesn't "reject".
     for (RecommendedItem recommendedItem : recommended) {
       long itemID = recommendedItem.getItemID();
-      if ((rescorer != null) && rescorer.isFiltered(itemID)) {
+      if (rescorer != null && rescorer.isFiltered(itemID)) {
         continue;
       }
-      if ((dataModel.getPreferenceValue(userID, itemID) == null)
-          && ((rescorer == null) || !Double.isNaN(rescorer.rescore(itemID, recommendedItem.getValue())))) {
+      if (dataModel.getPreferenceValue(userID, itemID) == null
+          && (rescorer == null || !Double.isNaN(rescorer.rescore(itemID, recommendedItem.getValue())))) {
         rescored.add(recommendedItem);
       }
     }
@@ -324,10 +324,10 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     for (int i = 0; i < size; i++) {
       FastIDSet cluster1 = clusters.get(i);
       for (int j = i + 1; j < size; j++) {
-        if ((samplingRate >= 1.0) || (RANDOM.nextDouble() < samplingRate)) {
+        if (samplingRate >= 1.0 || RANDOM.nextDouble() < samplingRate) {
           FastIDSet cluster2 = clusters.get(j);
           double similarity = clusterSimilarity.getSimilarity(cluster1, cluster2);
-          if (!Double.isNaN(similarity) && (similarity > bestSimilarity)) {
+          if (!Double.isNaN(similarity) && similarity > bestSimilarity) {
             bestSimilarity = similarity;
             nearestPair = new Pair<FastIDSet,FastIDSet>(cluster1, cluster2);
           }

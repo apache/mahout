@@ -45,7 +45,7 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
    *          data model
    * @throws IllegalArgumentException
    *           if threshold is {@link Double#NaN}, or if samplingRate is not positive and less than or equal
-   *           to 1.0, or if userSimilarity or dataModel are <code>null</code>
+   *           to 1.0, or if userSimilarity or dataModel are {@code null}
    */
   public ThresholdUserNeighborhood(double threshold, UserSimilarity userSimilarity, DataModel dataModel) {
     this(threshold, userSimilarity, dataModel, 1.0);
@@ -63,7 +63,7 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
    *          performance
    * @throws IllegalArgumentException
    *           if threshold or samplingRate is {@link Double#NaN}, or if samplingRate is not positive and less
-   *           than or equal to 1.0, or if userSimilarity or dataModel are <code>null</code>
+   *           than or equal to 1.0, or if userSimilarity or dataModel are {@code null}
    */
   public ThresholdUserNeighborhood(double threshold,
                                    UserSimilarity userSimilarity,
@@ -87,7 +87,7 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
       long otherUserID = usersIterable.next();
       if (userID != otherUserID) {
         double theSimilarity = userSimilarityImpl.userSimilarity(userID, otherUserID);
-        if (!Double.isNaN(theSimilarity) && (theSimilarity >= threshold)) {
+        if (!Double.isNaN(theSimilarity) && theSimilarity >= threshold) {
           neighborhood.add(otherUserID);
         }
       }

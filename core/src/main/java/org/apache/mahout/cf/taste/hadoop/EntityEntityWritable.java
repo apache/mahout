@@ -85,7 +85,7 @@ public final class EntityEntityWritable
   public boolean equals(Object o) {
     if (o instanceof EntityEntityWritable) {
       EntityEntityWritable that = (EntityEntityWritable) o;
-      return (aID == that.getAID()) && (bID == that.getBID());
+      return aID == that.getAID() && bID == that.getBID();
     }
     return false;
   }
