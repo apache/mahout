@@ -646,7 +646,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     Reducer<Text, VectorWritable, Text, Canopy>.Context context = DummyRecordWriter
         .build(reducer, conf, writer, Text.class, VectorWritable.class);
     reducer.setup(context);
-    assertEquals(1.1, reducer.canopyClusterer.getT1(), EPSILON);
-    assertEquals(0.1, reducer.canopyClusterer.getT2(), EPSILON);
+    assertEquals(1.1, reducer.getCanopyClusterer().getT1(), EPSILON);
+    assertEquals(0.1, reducer.getCanopyClusterer().getT2(), EPSILON);
   }
 }

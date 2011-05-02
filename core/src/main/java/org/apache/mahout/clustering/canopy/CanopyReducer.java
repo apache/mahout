@@ -32,6 +32,10 @@ public class CanopyReducer extends Reducer<Text, VectorWritable, Text, Canopy> {
 
   private CanopyClusterer canopyClusterer;
 
+  CanopyClusterer getCanopyClusterer() {
+    return canopyClusterer;
+  }
+
   @Override
   protected void reduce(Text arg0, Iterable<VectorWritable> values,
       Context context) throws IOException, InterruptedException {
