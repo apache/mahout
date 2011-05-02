@@ -19,14 +19,13 @@ package org.apache.mahout.ga.watchmaker.cd;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
-import java.util.regex.Pattern;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -51,7 +50,7 @@ public final class FileInfoParser {
   public static final String LABEL_TOKEN = "LABEL";
   public static final String NOMINAL_TOKEN = "CATEGORICAL";
   public static final String NUMERICAL_TOKEN = "NUMERICAL";
-  private static final Pattern COMMA_SPACE = Pattern.compile("[, ]");
+  private static final Splitter COMMA = Splitter.on(',').trimResults();
 
   private FileInfoParser() { }
   
@@ -78,7 +77,7 @@ public final class FileInfoParser {
     
     while (reader.hasNextLine()) {
       String line = reader.nextLine();
-      Iterator<String> tokens = Arrays.asList(COMMA_SPACE.split(line)).iterator();
+      Iterator<String> tokens = COMMA.split(line).iterator();
       String token = tokens.next();
       if (IGNORED_TOKEN.equals(token)) {
         ignored.add(index);
