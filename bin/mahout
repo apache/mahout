@@ -212,7 +212,7 @@ else
     echo "ERROR: Could not find mahout-examples-*.job in $MAHOUT_HOME or $MAHOUT_HOME/examples/target, please run 'mvn install' to create the .job file"
     exit 1
   else
-    export HADOOP_CLASSPATH=$MAHOUT_CONF_DIR:${HADOOP_CLASSPATH}
+    export HADOOP_CLASSPATH=$MAHOUT_CONF_DIR:${HADOOP_CLASSPATH}:$CLASSPATH
     if [ "$1" = "hadoop" ]; then
       exec "$HADOOP_HOME/bin/$@"
     else
