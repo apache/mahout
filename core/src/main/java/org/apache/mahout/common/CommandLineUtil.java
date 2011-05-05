@@ -73,7 +73,7 @@ public final class CommandLineUtil {
     formatter.setGroup(group);
     formatter.setPrintWriter(pw);
     formatter.setException(oe);
-    formatter.printHelp();
+    formatter.print();
     pw.flush();
   }
 
