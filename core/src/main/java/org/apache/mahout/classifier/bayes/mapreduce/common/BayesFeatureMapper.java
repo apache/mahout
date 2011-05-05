@@ -18,7 +18,6 @@
 package org.apache.mahout.classifier.bayes.mapreduce.common;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.regex.Pattern;
 
 import com.google.common.collect.Iterators;
@@ -30,11 +29,11 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.shingle.ShingleFilter;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.common.StringTuple;
+import org.apache.mahout.common.lucene.IteratorTokenStream;
 import org.apache.mahout.math.function.ObjectIntProcedure;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 import org.slf4j.Logger;
@@ -177,26 +176,5 @@ public class BayesFeatureMapper extends MapReduceBase implements Mapper<Text,Tex
       log.warn(ex.toString(), ex);
     }
   }
-  
-  /** Used to emit tokens from an input string array in the style of TokenStream */
-  public static class IteratorTokenStream extends TokenStream {
-    private final TermAttribute termAtt;
-    private final Iterator<String> iterator;
-    
-    public IteratorTokenStream(Iterator<String> iterator) {
-      this.iterator = iterator;
-      this.termAtt = addAttribute(TermAttribute.class);
-    }
-    
-    @Override
-    public boolean incrementToken() throws IOException {
-      if (iterator.hasNext()) {
-        clearAttributes();
-        termAtt.setTermBuffer(iterator.next());
-        return true;
-      } else {
-        return false;
-      }
-    }
-  }
+
 }

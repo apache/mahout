@@ -19,7 +19,9 @@ package org.apache.mahout.vectorizer.encoders;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.tokenattributes.TermAttribute;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.mahout.common.lucene.TokenStreamIterator;
+
 
 import java.io.IOException;
 import java.io.Reader;
@@ -48,7 +50,7 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
   @Override
   protected Iterable<String> tokenize(CharSequence originalForm) {
     TokenStream ts = analyzer.tokenStream(getName(), new CharSequenceReader(originalForm));
-    ts.addAttribute(TermAttribute.class);
+    ts.addAttribute(CharTermAttribute.class);
     return new LuceneTokenIterable(ts);
   }
 

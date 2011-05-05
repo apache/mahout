@@ -157,13 +157,14 @@
       <artifactId>mahout-utils</artifactId>
     </dependency>
 
-
-    <!-- A Lucene wikipedia tokenizer/analyzer -->
     <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-wikipedia</artifactId>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-benchmark</artifactId>
     </dependency>
-
+    <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-analyzers</artifactId>
+     </dependency>
 
     <dependency>
       <groupId>org.uncommons.watchmaker</groupId>

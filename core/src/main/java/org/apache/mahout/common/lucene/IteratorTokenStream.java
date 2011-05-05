@@ -1,4 +1,5 @@
-/*
+package org.apache.mahout.common.lucene;
+/**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -15,33 +16,32 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.vectorizer.encoders;
+
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+
 
 import java.io.IOException;
+import java.util.Iterator;
 
-import com.google.common.collect.AbstractIterator;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.tokenattributes.TermAttribute;
+/** Used to emit tokens from an input string array in the style of TokenStream */
+public final class IteratorTokenStream extends TokenStream {
+  private final CharTermAttribute termAtt;
+  private final Iterator<String> iterator;
 
-final class TokenStreamIterator extends AbstractIterator<String> {
-
-  private final TokenStream tokenStream;
-
-  TokenStreamIterator(TokenStream tokenStream) {
-    this.tokenStream = tokenStream;
+  public IteratorTokenStream(Iterator<String> iterator) {
+    this.iterator = iterator;
+    this.termAtt = addAttribute(CharTermAttribute.class);
   }
 
   @Override
-  protected String computeNext() {
-    try {
-      if (tokenStream.incrementToken()) {
-        return tokenStream.getAttribute(TermAttribute.class).term();
-      } else {
-        return endOfData();
-      }
-    } catch (IOException e) {
-      throw new TokenizationException("IO error while tokenizing", e);
+  public boolean incrementToken() throws IOException {
+    if (iterator.hasNext()) {
+      clearAttributes();
+      termAtt.append(iterator.next());
+      return true;
+    } else {
+      return false;
     }
   }
-
 }

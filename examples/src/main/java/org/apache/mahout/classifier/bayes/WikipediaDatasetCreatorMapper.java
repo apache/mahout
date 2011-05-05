@@ -35,7 +35,8 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.tokenattributes.TermAttribute;
+
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.mahout.analysis.WikipediaAnalyzer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,9 +68,9 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
       document = StringEscapeUtils.unescapeHtml(WikipediaDatasetCreatorMapper.CLOSE_TEXT_TAG_PATTERN.matcher(
           WikipediaDatasetCreatorMapper.OPEN_TEXT_TAG_PATTERN.matcher(document).replaceFirst("")).replaceAll(""));
       TokenStream stream = analyzer.tokenStream(catMatch, new StringReader(document));
-      TermAttribute termAtt = stream.addAttribute(TermAttribute.class);
+      CharTermAttribute termAtt = stream.addAttribute(CharTermAttribute.class);
       while (stream.incrementToken()) {
-        contents.append(termAtt.termBuffer(), 0, termAtt.termLength()).append(' ');
+        contents.append(termAtt.buffer(), 0, termAtt.length()).append(' ');
       }
       context.write(
           new Text(WikipediaDatasetCreatorMapper.SPACE_NON_ALPHA_PATTERN.matcher(catMatch).replaceAll("_")),

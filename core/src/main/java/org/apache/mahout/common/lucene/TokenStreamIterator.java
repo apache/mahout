@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -14,30 +14,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.mahout.vectorizer;
 
-import org.apache.lucene.analysis.Analyzer;
+package org.apache.mahout.common.lucene;
+
+import com.google.common.collect.AbstractIterator;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.util.Version;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 
-import java.io.Reader;
+import java.io.IOException;
 
 /**
- *  A subclass of the Lucene StandardAnalyzer that provides a no-argument constructor. 
- *  Used as the default analyzer in many cases where an analyzer is instantiated by
- *  class name by calling a no-arg constructor.
+ * Provide an Iterator for the tokens in a TokenStream.
  */
-public final class DefaultAnalyzer extends Analyzer {
+//TODO: consider using the char/byte arrays instead of strings, esp. when we upgrade to Lucene 4.0
+public final class TokenStreamIterator extends AbstractIterator<String> {
 
-  private StandardAnalyzer stdAnalyzer = new StandardAnalyzer(Version.LUCENE_31);
+  private final TokenStream tokenStream;
 
-  public DefaultAnalyzer() {
-    super();
+  public TokenStreamIterator(TokenStream tokenStream) {
+    this.tokenStream = tokenStream;
   }
 
   @Override
-  public TokenStream tokenStream(String fieldName, Reader reader) {
-    return stdAnalyzer.tokenStream(fieldName, reader);
+  protected String computeNext() {
+    try {
+      if (tokenStream.incrementToken()) {
+        return tokenStream.getAttribute(CharTermAttribute.class).toString();
+      } else {
+        return endOfData();
+      }
+    } catch (IOException e) {
+      throw new RuntimeException("IO error while tokenizing", e);
+    }
   }
+
 }

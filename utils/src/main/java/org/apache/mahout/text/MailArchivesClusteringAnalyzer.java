@@ -30,7 +30,8 @@ import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
-import org.apache.lucene.analysis.tokenattributes.TermAttribute;
+
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.util.Version;
 
 /**
@@ -38,7 +39,7 @@ import org.apache.lucene.util.Version;
  * for clustering the ASF Mail Archives using an extended set of
  * stop words, excluding non-alpha-numeric tokens, and porter stemming.
  */
-public class MailArchivesClusteringAnalyzer extends Analyzer {
+public final class MailArchivesClusteringAnalyzer extends Analyzer {
   
   // extended set of stop words composed of common mail terms like "hi",
   // HTML tags, and Java keywords asmany of the messages in the archives
@@ -103,7 +104,7 @@ public class MailArchivesClusteringAnalyzer extends Analyzer {
   private final CharArraySet stopSet;
 
   public MailArchivesClusteringAnalyzer() {
-    stopSet = (CharArraySet)StopFilter.makeStopSet(Arrays.asList(STOP_WORDS));
+    stopSet = (CharArraySet)StopFilter.makeStopSet(Version.LUCENE_31, Arrays.asList(STOP_WORDS));
     /*
     Collection<String> tmp = new java.util.TreeSet<String>();
     for (Object entry : stopSet) {
@@ -118,13 +119,13 @@ public class MailArchivesClusteringAnalyzer extends Analyzer {
 
   @Override
   public TokenStream tokenStream(String fieldName, java.io.Reader reader) {
-    @SuppressWarnings("deprecation")
-    TokenStream result = new StandardTokenizer(Version.LUCENE_CURRENT, reader);
-    result = new StandardFilter(result);
-    result = new LowerCaseFilter(result);
+
+    TokenStream result = new StandardTokenizer(Version.LUCENE_31, reader);
+    result = new StandardFilter(Version.LUCENE_31, result);
+    result = new LowerCaseFilter(Version.LUCENE_31, result);
     result = new ASCIIFoldingFilter(result);
     result = new AlphaNumericMaxLengthFilter(result);
-    result = new StopFilter(false, result, stopSet);
+    result = new StopFilter(Version.LUCENE_31, result, stopSet);
     return new PorterStemFilter(result);
   }
 
@@ -132,13 +133,13 @@ public class MailArchivesClusteringAnalyzer extends Analyzer {
    * Matches alpha-numeric tokens between 2 and 40 chars long.
    */
   static class AlphaNumericMaxLengthFilter extends TokenFilter {
-    private final TermAttribute termAtt;
+    private final CharTermAttribute termAtt;
     private final char[] output = new char[28];
     private final Matcher matcher;
 
     AlphaNumericMaxLengthFilter(TokenStream in) {
       super(in);
-      termAtt = addAttribute(TermAttribute.class);
+      termAtt = addAttribute(CharTermAttribute.class);
       matcher = alphaNumeric.matcher("foo");
     }
 
@@ -146,9 +147,9 @@ public class MailArchivesClusteringAnalyzer extends Analyzer {
     public final boolean incrementToken() throws IOException {
       // return the first alpha-numeric token between 2 and 40 length
       while (input.incrementToken()) {
-        int length = termAtt.termLength();
+        int length = termAtt.length();
         if (length >= 2 && length <= 28) {
-          char[] buf = termAtt.termBuffer();
+          char[] buf = termAtt.buffer();
           int at = 0;
           for (int c=0; c < length; c++) {
             char ch = buf[c];
@@ -159,7 +160,8 @@ public class MailArchivesClusteringAnalyzer extends Analyzer {
           String term = new String(output, 0, at);
           matcher.reset(term);
           if (matcher.matches() && !term.startsWith("a0")) {
-            termAtt.setTermBuffer(term);
+            termAtt.setEmpty();
+            termAtt.append(term);
             return true;
           }
         }

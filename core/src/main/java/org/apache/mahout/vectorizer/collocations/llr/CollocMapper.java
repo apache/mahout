@@ -17,24 +17,23 @@
 
 package org.apache.mahout.vectorizer.collocations.llr;
 
-import java.io.IOException;
-import java.util.Iterator;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.shingle.ShingleFilter;
-import org.apache.lucene.analysis.tokenattributes.TermAttribute;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.mahout.common.StringTuple;
+import org.apache.mahout.common.lucene.IteratorTokenStream;
 import org.apache.mahout.math.function.ObjectIntProcedure;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 /**
- * Pass 1 of the Collocation discovery job which generated ngrams and emits ngrams an their component n-1grams. 
+ * Pass 1 of the Collocation discovery job which generated ngrams and emits ngrams an their component n-1grams.
  * Input is a SequeceFile<Text,StringTuple>, where the key is a document id and the value is the tokenized documents.
  * <p/>
  */
@@ -62,31 +61,30 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
    * Receives a token stream which gets passed through a Lucene ShingleFilter. The ShingleFilter delivers ngrams of
    * the appropriate size which are then decomposed into head and tail subgrams which are collected in the
    * following manner
-   * 
+   * <p/>
    * <pre>
    * k:head_key,           v:head_subgram
    * k:head_key,ngram_key, v:ngram
    * k:tail_key,           v:tail_subgram
    * k:tail_key,ngram_key, v:ngram
    * </pre>
-   * 
+   * <p/>
    * The 'head' or 'tail' prefix is used to specify whether the subgram in question is the head or tail of the
    * ngram. In this implementation the head of the ngram is a (n-1)gram, and the tail is a (1)gram.
    * <p/>
-   * For example, given 'click and clack' and an ngram length of 3: 
+   * For example, given 'click and clack' and an ngram length of 3:
    * <pre>
    * k: head_'click and'                         v:head_'click and'
    * k: head_'click and',ngram_'click and clack' v:ngram_'click and clack'
    * k: tail_'clack',                            v:tail_'clack'
    * k: tail_'clack',ngram_'click and clack'     v:ngram_'click and clack'
    * </pre>
-   * 
+   * <p/>
    * Also counts the total number of ngrams encountered and adds it to the counter
    * CollocDriver.Count.NGRAM_TOTAL
    * </p>
-   * 
-   * @throws IOException
-   *           if there's a problem with the ShingleFilter reading data or the collector collecting output.
+   *
+   * @throws IOException if there's a problem with the ShingleFilter reading data or the collector collecting output.
    */
   @Override
   protected void map(Text key, StringTuple value, final Context context) throws IOException, InterruptedException {
@@ -95,11 +93,11 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
     int count = 0; // ngram count
 
     OpenObjectIntHashMap<String> ngrams =
-        new OpenObjectIntHashMap<String>(value.getEntries().size() * (maxShingleSize - 1));
+            new OpenObjectIntHashMap<String>(value.getEntries().size() * (maxShingleSize - 1));
     OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<String>(value.getEntries().size());
 
     do {
-      String term = sf.getAttribute(TermAttribute.class).term();
+      String term = sf.getAttribute(CharTermAttribute.class).toString();
       String type = sf.getAttribute(TypeAttribute.class).type();
       if ("shingle".equals(type)) {
         count++;
@@ -181,26 +179,4 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
     }
   }
 
-  /** Used to emit tokens from an input string array in the style of TokenStream */
-  public static class IteratorTokenStream extends TokenStream {
-    private final TermAttribute termAtt;
-
-    private final Iterator<String> iterator;
-
-    public IteratorTokenStream(Iterator<String> iterator) {
-      this.iterator = iterator;
-      this.termAtt = addAttribute(TermAttribute.class);
-    }
-
-    @Override
-    public boolean incrementToken() throws IOException {
-      if (iterator.hasNext()) {
-        clearAttributes();
-        termAtt.setTermBuffer(iterator.next());
-        return true;
-      } else {
-        return false;
-      }
-    }
-  }
 }

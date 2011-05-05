@@ -28,7 +28,8 @@ import com.google.common.io.Files;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.analysis.tokenattributes.TermAttribute;
+
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.util.Version;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.ep.State;
@@ -319,9 +320,9 @@ public final class TrainNewsGroups {
 
   private static void countWords(Analyzer analyzer, Collection<String> words, Reader in) throws IOException {
     TokenStream ts = analyzer.tokenStream("text", in);
-    ts.addAttribute(TermAttribute.class);
+    ts.addAttribute(CharTermAttribute.class);
     while (ts.incrementToken()) {
-      String s = ts.getAttribute(TermAttribute.class).term();
+      String s = ts.getAttribute(CharTermAttribute.class).toString();
       words.add(s);
     }
     overallCounts.addAll(words);

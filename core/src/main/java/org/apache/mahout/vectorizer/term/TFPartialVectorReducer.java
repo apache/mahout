@@ -17,10 +17,6 @@
 
 package org.apache.mahout.vectorizer.term;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Iterator;
-
 import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
@@ -30,19 +26,23 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.lucene.analysis.shingle.ShingleFilter;
-import org.apache.lucene.analysis.tokenattributes.TermAttribute;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
+import org.apache.mahout.common.lucene.IteratorTokenStream;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
-import org.apache.mahout.vectorizer.collocations.llr.CollocMapper.IteratorTokenStream;
-import org.apache.mahout.vectorizer.common.PartialVectorMerger;
 import org.apache.mahout.vectorizer.DictionaryVectorizer;
+import org.apache.mahout.vectorizer.common.PartialVectorMerger;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.Iterator;
 
 /**
  * Converts a document in to a sparse vector
@@ -56,12 +56,12 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
   private boolean sequentialAccess;
 
   private boolean namedVector;
-  
+
   private int maxNGramSize = 1;
 
   @Override
   protected void reduce(Text key, Iterable<StringTuple> values, Context context)
-    throws IOException, InterruptedException {
+          throws IOException, InterruptedException {
     Iterator<StringTuple> it = values.iterator();
     if (!it.hasNext()) {
       return;
@@ -74,7 +74,7 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
       ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.getEntries().iterator()), maxNGramSize);
 
       do {
-        String term = sf.getAttribute(TermAttribute.class).term();
+        String term = (sf.getAttribute(CharTermAttribute.class)).toString();
         if (term.length() > 0 && dictionary.containsKey(term)) { // ngram
           int termId = dictionary.get(term);
           vector.setQuick(termId, vector.getQuick(termId) + 1);
@@ -94,11 +94,11 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
     if (sequentialAccess) {
       vector = new SequentialAccessSparseVector(vector);
     }
-    
+
     if (namedVector) {
       vector = new NamedVector(vector, key.toString());
     }
-    
+
     // if the vector has no nonZero entries (nothing in the dictionary), let's not waste space sending it to disk.
     if (vector.getNumNondefaultElements() > 0) {
       VectorWritable vectorWritable = new VectorWritable(vector);
@@ -114,8 +114,8 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
     Configuration conf = context.getConfiguration();
     URI[] localFiles = DistributedCache.getCacheFiles(conf);
     Preconditions.checkArgument(localFiles != null && localFiles.length >= 1,
-        "missing paths from the DistributedCache");
-    
+            "missing paths from the DistributedCache");
+
     dimension = conf.getInt(PartialVectorMerger.DIMENSION, Integer.MAX_VALUE);
     sequentialAccess = conf.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
     namedVector = conf.getBoolean(PartialVectorMerger.NAMED_VECTOR, false);
@@ -123,8 +123,8 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
 
     Path dictionaryFile = new Path(localFiles[0].getPath());
     // key is word value is id
-    for (Pair<Writable,IntWritable> record
-         : new SequenceFileIterable<Writable,IntWritable>(dictionaryFile, true, conf)) {
+    for (Pair<Writable, IntWritable> record
+            : new SequenceFileIterable<Writable, IntWritable>(dictionaryFile, true, conf)) {
       dictionary.put(record.getFirst().toString(), record.getSecond().get());
     }
   }

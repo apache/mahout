@@ -24,7 +24,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.tokenattributes.TermAttribute;
+
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.vectorizer.DefaultAnalyzer;
 import org.apache.mahout.vectorizer.DocumentProcessor;
@@ -39,11 +40,11 @@ public class SequenceFileTokenizerMapper extends Mapper<Text, Text, Text, String
   @Override
   protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
     TokenStream stream = analyzer.tokenStream(key.toString(), new StringReader(value.toString()));
-    TermAttribute termAtt = stream.addAttribute(TermAttribute.class);
+    CharTermAttribute termAtt = stream.addAttribute(CharTermAttribute.class);
     StringTuple document = new StringTuple();
     while (stream.incrementToken()) {
-      if (termAtt.termLength() > 0) {
-        document.add(new String(termAtt.termBuffer(), 0, termAtt.termLength()));
+      if (termAtt.length() > 0) {
+        document.add(new String(termAtt.buffer(), 0, termAtt.length()));
       }
     }
     context.write(key, document);

@@ -18,8 +18,9 @@ package org.apache.mahout.text;
 
 import java.io.StringReader;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 
+
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.mahout.utils.MahoutTestCase;
 import org.junit.Test;
 
@@ -45,15 +46,16 @@ public class MailArchivesClusteringAnalyzerTest extends MahoutTestCase {
     // order matters too
     String[] expectedTokens = {
         "test", "mahout", "scalabl", "machin", "learn", "librari", "weve", "ad",
-        "stopword", "apach", "hadoop", "provid", "foundat", "scalabl"
+        "stopword", "apache_hadoop","provid", "foundat", "scalabl"
     };
         
     TokenStream tokenStream = analyzer.tokenStream("test", reader);
     assertNotNull(tokenStream);    
-    TermAttribute termAtt = tokenStream.addAttribute(TermAttribute.class);
-    int e = -1;
-    while (tokenStream.incrementToken()) {
-      assertEquals(expectedTokens[++e], termAtt.term());
-    } 
+    CharTermAttribute termAtt = tokenStream.addAttribute(CharTermAttribute.class);
+    int e = 0;
+    while (tokenStream.incrementToken() && e < expectedTokens.length) {
+      assertEquals(expectedTokens[e++], termAtt.toString());
+    }
+    assertEquals(e, expectedTokens.length);
   }
 }

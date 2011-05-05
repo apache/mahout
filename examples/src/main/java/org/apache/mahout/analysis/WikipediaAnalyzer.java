@@ -26,14 +26,16 @@ import org.apache.lucene.analysis.StopAnalyzer;
 import org.apache.lucene.analysis.StopFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardFilter;
-import org.apache.lucene.wikipedia.analysis.WikipediaTokenizer;
+import org.apache.lucene.analysis.wikipedia.WikipediaTokenizer;
+import org.apache.lucene.util.Version;
+
 
 public class WikipediaAnalyzer extends Analyzer {
  
   private final CharArraySet stopSet;
   
   public WikipediaAnalyzer() {
-    stopSet = (CharArraySet) StopFilter.makeStopSet(
+    stopSet = (CharArraySet) StopFilter.makeStopSet(Version.LUCENE_31,
         StopAnalyzer.ENGLISH_STOP_WORDS_SET.toArray(new String[StopAnalyzer.ENGLISH_STOP_WORDS_SET.size()]));
   }
   
@@ -44,9 +46,9 @@ public class WikipediaAnalyzer extends Analyzer {
   @Override
   public TokenStream tokenStream(String fieldName, Reader reader) {
     TokenStream result = new WikipediaTokenizer(reader);
-    result = new StandardFilter(result);
-    result = new LowerCaseFilter(result);
-    result = new StopFilter(true, result, stopSet);
+    result = new StandardFilter(Version.LUCENE_31, result);
+    result = new LowerCaseFilter(Version.LUCENE_31, result);
+    result = new StopFilter(Version.LUCENE_31, result, stopSet);
     return result;
   }
 }
