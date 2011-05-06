@@ -25,17 +25,24 @@ import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.SparseRowMatrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorIterable;
+import org.apache.mahout.math.decomposer.lanczos.LanczosState;
 import org.apache.mahout.math.function.Functions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public abstract class SolverTest extends MahoutTestCase {
+  private static Logger log = LoggerFactory.getLogger(SolverTest.class);
 
   public static void assertOrthonormal(Matrix eigens) {
     assertOrthonormal(eigens, 1.0e-6);
   }
 
   public static void assertOrthonormal(Matrix currentEigens, double errorMargin) {
+    List<String> nonOrthogonals = new ArrayList<String>();
     for (int i = 0; i < currentEigens.numRows(); i++) {
       Vector ei = currentEigens.getRow(i);
       for (int j = 0; j <= i; j++) {
@@ -47,9 +54,38 @@ public abstract class SolverTest extends MahoutTestCase {
         if (i == j) {
           assertTrue("not norm 1 : " + dot + " (eigen #" + i + ')', (Math.abs(1 - dot) < errorMargin));
         } else {
-          assertTrue("not orthogonal : " + dot + " (eigens " + i + ", " + j + ')', Math.abs(dot) < errorMargin);
+          if(Math.abs(dot) > errorMargin) {
+            log.info("not orthogonal : " + dot + " (eigens " + i + ", " + j + ')', Math.abs(dot) < errorMargin);
+            nonOrthogonals.add("(" + i + "," + j + ")");
+          }
         }
       }
+      log.info(nonOrthogonals.size() + ": " + nonOrthogonals.toString());
+    }
+  }
+
+  public static void assertOrthonormal(LanczosState state) {
+    double errorMargin = 1e-5;
+    List<String> nonOrthogonals = new ArrayList<String>();
+    for (int i = 0; i < state.getIterationNumber(); i++) {
+      Vector ei = state.getRightSingularVector(i);
+      for (int j = 0; j <= i; j++) {
+        Vector ej = state.getRightSingularVector(j);
+        if (ei.norm(2) == 0 || ej.norm(2) == 0) {
+          continue;
+        }
+        double dot = ei.dot(ej);
+        if (i == j) {
+          assertTrue("not norm 1 : " + dot + " (eigen #" + i + ')', (Math.abs(1 - dot) < errorMargin));
+        } else {
+          if(Math.abs(dot) > errorMargin) {
+            log.info("not orthogonal : " + dot + " (eigens " + i + ", " + j + ')', Math.abs(dot) < errorMargin);
+            nonOrthogonals.add("(" + i + "," + j + ")");
+          }
+        }
+      }
+      if(!nonOrthogonals.isEmpty())
+        log.info(nonOrthogonals.size() + ": " + nonOrthogonals.toString());
     }
   }
 
@@ -64,15 +100,21 @@ public abstract class SolverTest extends MahoutTestCase {
                                  boolean isSymmetric) {
     for (int i = 0; i < numEigensToCheck; i++) {
       Vector e = eigens.getRow(i);
-      if (e.getLengthSquared() == 0) {
-        continue;
-      }
-      Vector afterMultiply = isSymmetric ? corpus.times(e) : corpus.timesSquared(e);
-      double dot = afterMultiply.dot(e);
-      double afterNorm = afterMultiply.getLengthSquared();
-      double error = 1 - Math.abs(dot / Math.sqrt(afterNorm * e.getLengthSquared()));
-      assertTrue("Error margin: {" + error + " too high! (for eigen " + i + ')', Math.abs(error) < errorMargin);
+      assertEigen(i, e, corpus, errorMargin, isSymmetric);
     }
+  }
+
+  public static void assertEigen(int i, Vector e, VectorIterable corpus, double errorMargin,
+      boolean isSymmetric) {
+    if (e.getLengthSquared() == 0) {
+      return;
+    }
+    Vector afterMultiply = isSymmetric ? corpus.times(e) : corpus.timesSquared(e);
+    double dot = afterMultiply.dot(e);
+    double afterNorm = afterMultiply.getLengthSquared();
+    double error = 1 - Math.abs(dot / Math.sqrt(afterNorm * e.getLengthSquared()));
+    log.info("the eigen-error: {} for eigen {}", error, i);
+    assertTrue("Error: {" + error + " too high! (for eigen " + i + ')', Math.abs(error) < errorMargin);
   }
 
   /**
@@ -122,14 +164,7 @@ public abstract class SolverTest extends MahoutTestCase {
       matrix.assignRow(row, v);
     }
     if(symmetric) {
-      //if(true) {
-        return matrix.times(matrix.transpose());
-      //}
-      //for(int i = 0; i < numRows; i++) {
-      //  for(int j = 0; j < i; j++) {
-      //    matrix.set(j, i, matrix.get(i, j));
-      //  }
-      //}
+      return matrix.times(matrix.transpose());
     }
     return matrix;
   }

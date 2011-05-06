@@ -26,21 +26,18 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
-import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorIterable;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.decomposer.lanczos.LanczosSolver;
+import org.apache.mahout.math.decomposer.lanczos.LanczosState;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class DistributedLanczosSolver extends LanczosSolver implements Tool {
@@ -57,32 +54,50 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
    * For the distributed case, the best guess at a useful initialization state for Lanczos we'll chose to be
    * uniform over all input dimensions, L_2 normalized.
    */
-  @Override
-  protected Vector getInitialVector(VectorIterable corpus) {
+  public Vector getInitialVector(VectorIterable corpus) {
     Vector initialVector = new DenseVector(corpus.numCols());
     initialVector.assign(1.0 / Math.sqrt(corpus.numCols()));
     return initialVector;
   }
-  
+
+  public LanczosState runJob(Configuration originalConfig,
+                             LanczosState state,
+                             int desiredRank,
+                             boolean isSymmetric,
+                             String outputEigenVectorPathString) throws IOException {
+    ((DistributedRowMatrix)state.getCorpus()).setConf(new Configuration(originalConfig));
+    setConf(originalConfig);
+    solve(state, desiredRank, isSymmetric);
+    serializeOutput(state, new Path(outputEigenVectorPathString));
+    return state;
+  }
+
   /**
    * Factored-out LanczosSolver for the purpose of invoking it programmatically
    */
-  public void runJob(Configuration originalConfig,
-                     Path inputPath,
-                     Path outputTmpPath,
-                     int numRows,
-                     int numCols,
-                     boolean isSymmetric,
-                     int desiredRank,
-                     Matrix eigenVectors,
-                     List<Double> eigenValues,
-                     String outputEigenVectorPathString) throws IOException {
-    DistributedRowMatrix matrix =
-        new DistributedRowMatrix(inputPath, outputTmpPath, numRows, numCols);
+  public LanczosState runJob(Configuration originalConfig,
+                             Path inputPath,
+                             Path outputTmpPath,
+                             int numRows,
+                             int numCols,
+                             boolean isSymmetric,
+                             int desiredRank,
+                             String outputEigenVectorPathString) throws IOException {
+    DistributedRowMatrix matrix = new DistributedRowMatrix(inputPath, outputTmpPath, numRows, numCols);
     matrix.setConf(new Configuration(originalConfig));
+    LanczosState state = new LanczosState(matrix, numCols, desiredRank, getInitialVector(matrix));
+    return runJob(originalConfig, state, desiredRank, isSymmetric, outputEigenVectorPathString);
+  }
+
+  public void runJob(Configuration originalConfig,
+                     LanczosState state,
+                     int numCols,
+                     int desiredRank,
+                     boolean isSymmetric,
+                     String outputEigenVectorPathString) throws IOException {
     setConf(originalConfig);
-    solve(matrix, desiredRank, eigenVectors, eigenValues, isSymmetric);
-    serializeOutput(eigenVectors, eigenValues, new Path(outputEigenVectorPathString));
+    solve(state, desiredRank, isSymmetric);
+    serializeOutput(state, new Path(outputEigenVectorPathString));
   }
 
   @Override
@@ -90,6 +105,8 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
     Path inputPath = new Path(parsedArgs.get("--input"));
     Path outputPath = new Path(parsedArgs.get("--output"));
     Path outputTmpPath = new Path(parsedArgs.get("--tempDir"));
+    Path workingDirPath = parsedArgs.get("--workingDir") != null
+                        ? new Path(parsedArgs.get("--workingDir")) : null;
     int numRows = Integer.parseInt(parsedArgs.get("--numRows"));
     int numCols = Integer.parseInt(parsedArgs.get("--numCols"));
     boolean isSymmetric = Boolean.parseBoolean(parsedArgs.get("--symmetric"));
@@ -103,6 +120,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
       return run(inputPath,
                  outputPath,
                  outputTmpPath,
+                 workingDirPath,
                  numRows,
                  numCols,
                  isSymmetric,
@@ -111,7 +129,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
                  minEigenvalue,
                  inMemory);
     }
-    return run(inputPath, outputPath, outputTmpPath, numRows, numCols, isSymmetric, desiredRank);
+    return run(inputPath, outputPath, outputTmpPath, workingDirPath, numRows, numCols, isSymmetric, desiredRank);
   }
 
   /**
@@ -132,6 +150,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
   public int run(Path inputPath,
                  Path outputPath,
                  Path outputTmpPath,
+                 Path workingDirPath,
                  int numRows,
                  int numCols,
                  boolean isSymmetric,
@@ -139,7 +158,8 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
                  double maxError,
                  double minEigenvalue,
                  boolean inMemory) throws Exception {
-    int result = run(inputPath, outputPath, outputTmpPath, numRows, numCols, isSymmetric, desiredRank);
+    int result = run(inputPath, outputPath, outputTmpPath, workingDirPath, numRows, numCols,
+        isSymmetric, desiredRank);
     if (result != 0) {
       return result;
     }
@@ -169,29 +189,37 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
   public int run(Path inputPath,
                  Path outputPath,
                  Path outputTmpPath,
+                 Path workingDirPath,
                  int numRows,
                  int numCols,
                  boolean isSymmetric,
                  int desiredRank) throws Exception {
-    Matrix eigenVectors = new DenseMatrix(desiredRank, numCols);
-    List<Double> eigenValues = new ArrayList<Double>();
-
     DistributedRowMatrix matrix = new DistributedRowMatrix(inputPath, outputTmpPath, numRows, numCols);
     matrix.setConf(new Configuration(getConf() != null ? getConf() : new Configuration()));
-    solve(matrix, desiredRank, eigenVectors, eigenValues, isSymmetric);
+
+    LanczosState state;
+    if(workingDirPath == null) {
+      state = new LanczosState(matrix, numCols, desiredRank, getInitialVector(matrix));
+    } else {
+      HdfsBackedLanczosState hState =
+          new HdfsBackedLanczosState(matrix, numCols, desiredRank, getInitialVector(matrix),
+              workingDirPath);
+      hState.setConf(matrix.getConf());
+      state = hState;
+    }
+    solve(state, desiredRank, isSymmetric);
 
     Path outputEigenVectorPath = new Path(outputPath, RAW_EIGENVECTORS);
-    serializeOutput(eigenVectors, eigenValues, outputEigenVectorPath);
+    serializeOutput(state, outputEigenVectorPath);
     return 0;
   }
 
   /**
-   * @param eigenVectors The eigenvectors to be serialized
-   * @param eigenValues The eigenvalues to be serialized
+   * @param state The final LanczosState to be serialized
    * @param outputPath The path (relative to the current Configuration's FileSystem) to save the output to.
    */
-  public void serializeOutput(Matrix eigenVectors, List<Double> eigenValues, Path outputPath) throws IOException {
-    int numEigenVectors = eigenVectors.numRows();
+  public void serializeOutput(LanczosState state, Path outputPath) throws IOException {
+    int numEigenVectors = state.getIterationNumber();
     log.info("Persisting {} eigenVectors and eigenValues to: {}", numEigenVectors, outputPath); 
     Configuration conf = getConf() != null ? getConf() : new Configuration();
     FileSystem fs = FileSystem.get(conf);
@@ -199,9 +227,9 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
         new SequenceFile.Writer(fs, conf, outputPath, IntWritable.class, VectorWritable.class);
     IntWritable iw = new IntWritable();
     for (int i = 0; i < numEigenVectors; i++) {
-      // Persist eigenvectors sorted by eigenvalues in descending order
-      NamedVector v = new NamedVector(eigenVectors.getRow(numEigenVectors - 1 - i),
-          "eigenVector" + i + ", eigenvalue = " + eigenValues.get(numEigenVectors - 1 - i));
+      // Persist eigenvectors sorted by eigenvalues in descending order\
+      NamedVector v = new NamedVector(state.getRightSingularVector(numEigenVectors - 1 - i),
+          "eigenVector" + i + ", eigenvalue = " + state.getSingularValue(numEigenVectors - 1 - i));
       Writable vw = new VectorWritable(v);
       iw.set(i);
       seqWriter.append(iw, vw);
@@ -247,6 +275,8 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
       addOption("rank", "r", "Desired decomposition rank (note: only roughly 1/4 to 1/3 "
           + "of these will have the top portion of the spectrum)");
       addOption("symmetric", "sym", "Is the input matrix square and symmetric?");
+      addOption("workingDir", "wd", "Working directory path to store Lanczos basis vectors "
+                                    + "(to be used on restarts, and to avoid too much RAM usage)");
       // options required to run cleansvd job
       addOption("cleansvd", "cl", "Run the EigenVerificationJob to clean the eigenvectors after SVD", false);
       addOption("maxError", "err", "Maximum acceptable error", "0.05");

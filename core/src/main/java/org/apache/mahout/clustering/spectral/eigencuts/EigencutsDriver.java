@@ -17,12 +17,6 @@
 
 package org.apache.mahout.clustering.spectral.eigencuts;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
@@ -32,14 +26,19 @@ import org.apache.mahout.clustering.spectral.common.VectorMatrixMultiplicationJo
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
-import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.decomposer.lanczos.LanczosState;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 import org.apache.mahout.math.hadoop.decomposer.DistributedLanczosSolver;
 import org.apache.mahout.math.hadoop.decomposer.EigenVerificationJob;
 import org.apache.mahout.math.stats.OnlineSummarizer;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class EigencutsDriver extends AbstractJob {
 
@@ -130,12 +129,15 @@ public class EigencutsDriver extends AbstractJob {
 
       // eigendecomposition (step 3)
       int overshoot = (int) ((double) eigenrank * OVERSHOOT_MULTIPLIER);
-      List<Double> eigenValues = new ArrayList<Double>(overshoot);
-      Matrix eigenVectors = new DenseMatrix(overshoot, eigenrank);
-      DistributedRowMatrix U =
-          performEigenDecomposition(conf, L, eigenrank, overshoot, eigenValues, eigenVectors, outputCalc);
+      LanczosState state = new LanczosState(L, overshoot, eigenrank,
+          new DistributedLanczosSolver().getInitialVector(L));
+
+      DistributedRowMatrix U = performEigenDecomposition(conf, L, state, eigenrank, overshoot, outputCalc);
       U.setConf(new Configuration(conf));
-      eigenValues = eigenValues.subList(0, eigenrank);
+      List<Double> eigenValues = new ArrayList<Double>();
+      for(int i=0; i<eigenrank; i++) {
+        eigenValues.set(i, state.getSingularValue(i));
+      }
 
       // here's where things get interesting: steps 4, 5, and 6 are unique
       // to this algorithm, and depending on the final output, steps 1-3
@@ -171,21 +173,16 @@ public class EigencutsDriver extends AbstractJob {
    */
   public static DistributedRowMatrix performEigenDecomposition(Configuration conf,
                                                                DistributedRowMatrix input,
+                                                               LanczosState state,
                                                                int numEigenVectors,
                                                                int overshoot,
-                                                               List<Double> eigenValues,
-                                                               Matrix eigenVectors, Path tmp) throws IOException {
+                                                               Path tmp) throws IOException {
     DistributedLanczosSolver solver = new DistributedLanczosSolver();
     Path seqFiles = new Path(tmp, "eigendecomp-" + (System.nanoTime() & 0xFF));
     solver.runJob(conf,
-                  input.getRowPath(),
-                  new Path(tmp, "lanczos-" + (System.nanoTime() & 0xFF)),
-                  input.numRows(),
-                  input.numCols(),
-                  true,
+                  state,
                   overshoot,
-                  eigenVectors,
-                  eigenValues,
+                  true,
                   seqFiles.toString());
 
     // now run the verifier to trim down the number of eigenvectors

@@ -17,11 +17,6 @@
 
 package org.apache.mahout.clustering.spectral.kmeans;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -40,14 +35,16 @@ import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
-import org.apache.mahout.math.DenseMatrix;
-import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.decomposer.lanczos.LanczosState;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 import org.apache.mahout.math.hadoop.decomposer.DistributedLanczosSolver;
 import org.apache.mahout.math.hadoop.decomposer.EigenVerificationJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * Implementation of the EigenCuts spectral clustering algorithm.
@@ -152,19 +149,13 @@ public class SpectralKMeansDriver extends AbstractJob {
     // upon verification, we have to aim to overshoot and then discard
     // unnecessary vectors later
     int overshoot = (int) ((double) clusters * OVERSHOOT_MULTIPLIER);
-    List<Double> eigenValues = new ArrayList<Double>(overshoot);
-    Matrix eigenVectors = new DenseMatrix(overshoot, numDims);
     DistributedLanczosSolver solver = new DistributedLanczosSolver();
+    LanczosState state = new LanczosState(L, overshoot, numDims, solver.getInitialVector(L));
     Path lanczosSeqFiles = new Path(outputCalc, "eigenvectors-" + (System.nanoTime() & 0xFF));
     solver.runJob(conf,
-                  L.getRowPath(),
-                  new Path(outputTmp, "lanczos-" + (System.nanoTime() & 0xFF)),
-                  L.numRows(),
-                  L.numCols(),
-                  true,
+                  state,
                   overshoot,
-                  eigenVectors,
-                  eigenValues,
+                  true,
                   lanczosSeqFiles.toString());
 
     // perform a verification

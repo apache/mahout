@@ -75,15 +75,23 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
   private final int numCols;
   private boolean keepTempFiles;
 
-  public DistributedRowMatrix(Path inputPathString,
-                              Path outputTmpPathString,
+  public DistributedRowMatrix(Path inputPath,
+                              Path outputTmpPath,
                               int numRows,
                               int numCols) {
-    this.inputPath = inputPathString;
-    this.outputTmpPath = outputTmpPathString;
+    this(inputPath, outputTmpPath, numRows, numCols, false);
+  }
+
+  public DistributedRowMatrix(Path inputPath,
+                              Path outputTmpPath,
+                              int numRows,
+                              int numCols,
+                              boolean keepTempFiles) {
+    this.inputPath = inputPath;
+    this.outputTmpPath = outputTmpPath;
     this.numRows = numRows;
     this.numCols = numCols;
-    this.keepTempFiles = false;
+    this.keepTempFiles = keepTempFiles;
   }
 
   @Override

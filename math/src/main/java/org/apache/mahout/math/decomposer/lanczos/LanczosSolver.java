@@ -18,24 +18,18 @@
 package org.apache.mahout.math.decomposer.lanczos;
 
 
-import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.MatrixSlice;
-import org.apache.mahout.math.SparseRowMatrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorIterable;
 import org.apache.mahout.math.function.DoubleFunction;
-import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.PlusMult;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
-import org.apache.mahout.math.matrix.impl.DenseDoubleMatrix2D;
 import org.apache.mahout.math.matrix.linalg.EigenvalueDecomposition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -68,7 +62,6 @@ public class LanczosSolver {
   private static final Logger log = LoggerFactory.getLogger(LanczosSolver.class);
 
   public static final double SAFE_MAX = 1.0e150;
-  private static final double NANOS_IN_MILLI = 1.0e6;
 
   public enum TimingSection {
     ITERATE, ORTHOGANLIZE, TRIDIAG_DECOMP, FINAL_EIGEN_CREATE
@@ -76,7 +69,6 @@ public class LanczosSolver {
 
   private final Map<TimingSection, Long> startTimes = new EnumMap<TimingSection, Long>(TimingSection.class);
   private final Map<TimingSection, Long> times = new EnumMap<TimingSection, Long>(TimingSection.class);
-  private double scaleFactor;
 
   private static final class Scale implements DoubleFunction {
     private final double d;
@@ -91,47 +83,49 @@ public class LanczosSolver {
     }
   }
 
-  public void solve(VectorIterable corpus,
-                    int desiredRank,
-                    Matrix eigenVectors,
-                    List<Double> eigenValues) {
-    solve(corpus, desiredRank, eigenVectors, eigenValues, false);
+  public void solve(LanczosState state,
+                    int desiredRank) {
+    solve(state, desiredRank, false);
   }
 
-  public void solve(VectorIterable corpus,
+  public void solve(LanczosState state,
                     int desiredRank,
-                    Matrix eigenVectors,
-                    List<Double> eigenValues,
                     boolean isSymmetric) {
-    log.info("Finding {} singular vectors of matrix with {} rows, via Lanczos", desiredRank, corpus.numRows());
-    Vector currentVector = getInitialVector(corpus);
-    Vector previousVector = new DenseVector(currentVector.size());
-    Matrix basis = new SparseRowMatrix(new int[]{desiredRank, corpus.numCols()});
-    basis.assignRow(0, currentVector);
+    VectorIterable corpus = state.getCorpus();
+    log.info("Finding {} singular vectors of matrix with {} rows, via Lanczos",
+        desiredRank, corpus.numRows());
+    int i = state.getIterationNumber();
+    Vector currentVector = state.getBasisVector(i - 1);
+    Vector previousVector = state.getBasisVector(i - 2);
     double beta = 0;
-    DoubleMatrix2D triDiag = new DenseDoubleMatrix2D(desiredRank, desiredRank);
-    for (int i = 1; i < desiredRank; i++) {
+    Matrix triDiag = state.getDiagonalMatrix();
+    while (i < desiredRank) {
       startTime(TimingSection.ITERATE);
       Vector nextVector = isSymmetric ? corpus.times(currentVector) : corpus.timesSquared(currentVector);
       log.info("{} passes through the corpus so far...", i);
-      calculateScaleFactor(nextVector);
-      nextVector.assign(new Scale(1.0 / scaleFactor));
-      nextVector.assign(previousVector, new PlusMult(-beta));
+      if(state.getScaleFactor() <= 0) {
+        state.setScaleFactor(calculateScaleFactor(nextVector));
+      }
+      nextVector.assign(new Scale(1.0 / state.getScaleFactor()));
+      if(previousVector != null) {
+        nextVector.assign(previousVector, new PlusMult(-beta));
+      }
       // now orthogonalize
       double alpha = currentVector.dot(nextVector);
       nextVector.assign(currentVector, new PlusMult(-alpha));
       endTime(TimingSection.ITERATE);
       startTime(TimingSection.ORTHOGANLIZE);
-      orthoganalizeAgainstAllButLast(nextVector, basis);
+      orthoganalizeAgainstAllButLast(nextVector, state);
       endTime(TimingSection.ORTHOGANLIZE);
       // and normalize
       beta = nextVector.norm(2);
       if (outOfRange(beta) || outOfRange(alpha)) {
-        log.warn("Lanczos parameters out of range: alpha = {}, beta = {}.  Bailing out early!", alpha, beta);
+        log.warn("Lanczos parameters out of range: alpha = {}, beta = {}.  Bailing out early!",
+            alpha, beta);
         break;
       }
       nextVector.assign(new Scale(1 / beta));
-      basis.assignRow(i, nextVector);
+      state.setBasisVector(i, nextVector);
       previousVector = currentVector;
       currentVector = nextVector;
       // save the projections and norms!
@@ -140,6 +134,7 @@ public class LanczosSolver {
         triDiag.set(i - 1, i, beta);
         triDiag.set(i, i - 1, beta);
       }
+      state.setIterationNumber(++i);
     }
     startTime(TimingSection.TRIDIAG_DECOMP);
 
@@ -151,61 +146,49 @@ public class LanczosSolver {
     DoubleMatrix1D eigenVals = decomp.getRealEigenvalues();
     endTime(TimingSection.TRIDIAG_DECOMP);
     startTime(TimingSection.FINAL_EIGEN_CREATE);
-
-    for (int i = 0; i < basis.numRows(); i++) {
-      Vector realEigen = new DenseVector(corpus.numCols());
+    for (int row = 0; row < i; row++) {
+      Vector realEigen = null;
       // the eigenvectors live as columns of V, in reverse order.  Weird but true.
-      DoubleMatrix1D ejCol = eigenVects.viewColumn(basis.numRows() - i - 1);
-      for (int j = 0; j < ejCol.size(); j++) {
-        double d = ejCol.getQuick(j);
-        realEigen.assign(basis.getRow(j), new PlusMult(d));
+      DoubleMatrix1D ejCol = eigenVects.viewColumn(i - row - 1);
+      int size = ejCol.size();
+      for (int j = 0; j < size; j++) {
+        double d = ejCol.get(j);
+        Vector rowJ = state.getBasisVector(j);
+        if(realEigen == null) {
+          realEigen = rowJ.like();
+        }
+        realEigen.assign(rowJ, new PlusMult(d));
       }
       realEigen = realEigen.normalize();
-      eigenVectors.assignRow(i, realEigen);
-      double e = Math.sqrt(eigenVals.get(i) * scaleFactor);
-      log.info("Eigenvector {} found with eigenvalue {}", i, e);
-      eigenValues.add(e);
+      state.setRightSingularVector(row, realEigen);
+      double e = eigenVals.get(row) * state.getScaleFactor();
+      if(!isSymmetric) {
+        e = Math.sqrt(e);
+      }
+      log.info("Eigenvector {} found with eigenvalue {}", row, e);
+      state.setSingularValue(row, e);
     }
     log.info("LanczosSolver finished.");
     endTime(TimingSection.FINAL_EIGEN_CREATE);
   }
 
-  protected void calculateScaleFactor(Vector nextVector) {
-    if (scaleFactor == 0.0) {
-      scaleFactor = nextVector.norm(2);
-    }
+  protected double calculateScaleFactor(Vector nextVector) {
+    return nextVector.norm(2);
   }
 
   private static boolean outOfRange(double d) {
     return Double.isNaN(d) || d > SAFE_MAX || -d > SAFE_MAX;
   }
 
-  private static void orthoganalizeAgainstAllButLast(Vector nextVector, Matrix basis) {
-    for (int i = 0; i < basis.numRows() - 1; i++) {
+  protected void orthoganalizeAgainstAllButLast(Vector nextVector, LanczosState state) {
+    for (int i = 0; i < state.getIterationNumber(); i++) {
+      Vector basisVector = state.getBasisVector(i);
       double alpha;
-      if (basis.getRow(i) == null || (alpha = nextVector.dot(basis.getRow(i))) == 0.0) {
+      if (basisVector == null || (alpha = nextVector.dot(basisVector)) == 0.0) {
         continue;
       }
-      nextVector.assign(basis.getRow(i), new PlusMult(-alpha));
+      nextVector.assign(basisVector, new PlusMult(-alpha));
     }
-  }
-
-  protected Vector getInitialVector(VectorIterable corpus) {
-    Vector v = null;
-    for (MatrixSlice slice : corpus) {
-      Vector vector;
-      if (slice == null || (vector = slice.vector()) == null || vector.getLengthSquared() == 0) {
-        continue;
-      }
-      scaleFactor += vector.getLengthSquared();
-      if (v == null) {
-        v = new DenseVector(vector.size()).plus(vector);
-      } else {
-        v.assign(vector, Functions.PLUS);
-      }
-    }
-    v.assign(Functions.div(v.norm(2)));
-    return v;
   }
 
   private void startTime(TimingSection section) {
@@ -217,10 +200,6 @@ public class LanczosSolver {
       times.put(section, 0L);
     }
     times.put(section, times.get(section) + System.nanoTime() - startTimes.get(section));
-  }
-
-  public double getTimeMillis(TimingSection section) {
-    return (double) times.get(section) / NANOS_IN_MILLI;
   }
 
 }

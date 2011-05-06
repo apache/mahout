@@ -17,11 +17,6 @@
 
 package org.apache.mahout.math.hadoop;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -36,6 +31,11 @@ import org.apache.mahout.math.VectorIterable;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.decomposer.SolverTest;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public final class TestDistributedRowMatrix extends MahoutTestCase {
   public static final String TEST_PROPERTY_KEY = "test.property.key";
@@ -299,6 +299,16 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     return randomDistributedMatrix(numRows, nonNullRows, numCols, entriesPerRow, entryMean, isSymmetric, "testdata");
   }
 
+  public DistributedRowMatrix randomDenseHierarchicalDistributedMatrix(int numRows,
+                                                                       int numCols,
+                                                                       boolean isSymmetric,
+                                                                       String baseTmpDirSuffix)
+    throws IOException {
+    Path baseTmpDirPath = getTestTempDirPath(baseTmpDirSuffix);
+    Matrix c = SolverTest.randomHierarchicalMatrix(numRows, numCols, isSymmetric);
+    return saveToFs(c, baseTmpDirPath);
+  }
+
   public DistributedRowMatrix randomDistributedMatrix(int numRows,
                                                       int nonNullRows,
                                                       int numCols,
@@ -311,8 +321,11 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     if(isSymmetric) {
       c = c.times(c.transpose());
     }
-    final Matrix m = c;
-    Configuration conf = new Configuration();
+    return saveToFs(c, baseTmpDirPath);
+  }
+
+  private static DistributedRowMatrix saveToFs(final Matrix m, Path baseTmpDirPath) throws IOException {
+        Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
 
     ClusteringTestUtils.writePointsToFile(new Iterable<VectorWritable>() {
