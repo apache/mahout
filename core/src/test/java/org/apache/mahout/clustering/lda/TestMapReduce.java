@@ -93,12 +93,12 @@ public final class TestMapReduce extends MahoutTestCase {
   @Test
   public void testMapper() throws Exception {
     LDAState state = generateRandomState(100,NUM_TOPICS);
-    LDAMapper mapper = new LDAMapper();
+    LDAWordTopicMapper mapper = new LDAWordTopicMapper();
     mapper.configure(state);
     for(int i = 0; i < NUM_TESTS; ++i) {
       RandomAccessSparseVector v = generateRandomDoc(100,0.3);
       int myNumWords = numNonZero(v);
-      LDAMapper.Context mock = EasyMock.createMock(LDAMapper.Context.class);
+      LDAWordTopicMapper.Context mock = EasyMock.createMock(LDAWordTopicMapper.Context.class);
 
       mock.write(EasyMock.isA(IntPairWritable.class), EasyMock.isA(DoubleWritable.class));
       EasyMock.expectLastCall().times(myNumWords * NUM_TOPICS + NUM_TOPICS + 1);

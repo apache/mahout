@@ -43,8 +43,8 @@ public class LDAInference {
   }
   
   /**
-   * An estimate of the probabilitys for each document. Gamma(k) is the probability of seeing topic k in the
-   * document, phi(k,w) is the probability of topic k generating w in this document.
+   * An estimate of the probabilities for each document. Gamma(k) is the probability of seeing topic k in the
+   * document, phi(k,w) is the (log) probability of topic k generating w in this document.
    */
   public static class InferredDocument {
     
@@ -137,7 +137,11 @@ public class LDAInference {
     
     return new InferredDocument(wordCounts, gamma, map, phi, oldLL);
   }
-  
+
+  /**
+   * @param gamma
+   * @return a vector whose entries are digamma(oldEntry) - digamma(gamma.zSum())
+   */
   private Vector digammaGamma(Vector gamma) {
     // digamma is expensive, precompute
     Vector digammaGamma = digamma(gamma);
@@ -156,7 +160,21 @@ public class LDAInference {
       phi.assign(0);
     }
   }
-  
+
+  /**
+   * diGamma(x) = gamma'(x)/gamma(x)
+   * logGamma(x) = log(gamma(x))
+   *
+   * ll = log(gamma(smooth*numTop) / smooth^numTop) +
+   *   sum_{i < numTop} (smooth - g[i])*(digamma(g[i]) - digamma(|g|)) + log(gamma(g[i])
+   * Computes the log likelihood of the wordCounts vector, given \phi, \gamma, and \digamma(gamma)
+   * @param wordCounts
+   * @param map
+   * @param phi
+   * @param gamma
+   * @param digammaGamma
+   * @return
+   */
   private double computeLikelihood(Vector wordCounts, int[] map, Matrix phi, Vector gamma, Vector digammaGamma) {
     double ll = 0.0;
     

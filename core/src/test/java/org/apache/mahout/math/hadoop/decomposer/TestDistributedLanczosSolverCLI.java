@@ -33,8 +33,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Arrays;
 
 public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
   private static final Logger log = LoggerFactory.getLogger(TestDistributedLanczosSolverCLI.class);

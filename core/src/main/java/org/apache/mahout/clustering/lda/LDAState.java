@@ -25,7 +25,7 @@ public class LDAState {
   private final double topicSmoothing;
   private final Matrix topicWordProbabilities; // log p(w|t) for topic=1..nTopics
   private final double[] logTotals; // log \sum p(w|t) for topic=1..nTopics
-  private final double logLikelihood; // log \sum p(w|t) for topic=1..nTopics
+  private double logLikelihood; // log \sum p(w|t) for topic=1..nTopics
   
   public LDAState(int numTopics,
                   int numWords,
@@ -42,8 +42,12 @@ public class LDAState {
   }
   
   public double logProbWordGivenTopic(int word, int topic) {
-    double logProb = topicWordProbabilities.getQuick(topic, word);
+    double logProb = topicWordProbabilities.get(topic, word);
     return logProb == Double.NEGATIVE_INFINITY ? -100.0 : logProb - logTotals[topic];
+  }
+
+  public double getLogTotal(int topic) {
+    return logTotals[topic];
   }
 
   public int getNumTopics() {
@@ -60,6 +64,18 @@ public class LDAState {
 
   public double getLogLikelihood() {
     return logLikelihood;
+  }
+
+  public void updateLogProbGivenTopic(int word, int topic, double logProbGivenTopic) {
+    topicWordProbabilities.set(topic, word, LDAUtil.logSum(logProbGivenTopic, topicWordProbabilities.getQuick(topic, word)));
+  }
+
+  public void updateLogTotals(int topic, double logTotal) {
+    logTotals[topic] = LDAUtil.logSum(logTotals[topic], logTotal);
+  }
+
+  public void setLogLikelihood(double logLikelihood) {
+    this.logLikelihood = logLikelihood;
   }
 
 }
