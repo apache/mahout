@@ -39,8 +39,10 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.clustering.ClusterClassifier;
 import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
@@ -297,4 +299,26 @@ public class DisplayClustering extends Frame {
   protected static boolean isSignificant(Cluster cluster) {
     return (double) cluster.getNumPoints() / SAMPLE_DATA.size() > significance;
   }
+
+  protected static ClusterClassifier readClassifier(Configuration config, Path path)
+      throws IOException {
+        Writable key;
+        SequenceFile.Reader reader = new SequenceFile.Reader(
+            FileSystem.get(config), path, config);
+        key = new Text();
+        ClusterClassifier classifierOut = new ClusterClassifier();
+        reader.next(key, classifierOut);
+        reader.close();
+        return classifierOut;
+      }
+
+  protected static void writeClassifier(ClusterClassifier classifier, Configuration config, Path path)
+      throws IOException {
+        SequenceFile.Writer writer = new SequenceFile.Writer(
+            FileSystem.get(config), config, path, Text.class,
+            ClusterClassifier.class);
+        Writable key = new Text("test");
+        writer.append(key, classifier);
+        writer.close();
+      }
 }

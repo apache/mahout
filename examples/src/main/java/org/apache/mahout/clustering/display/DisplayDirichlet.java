@@ -19,10 +19,12 @@ package org.apache.mahout.clustering.display;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusterClassifier;
 import org.apache.mahout.clustering.ClusterIterator;
@@ -34,7 +36,6 @@ import org.apache.mahout.clustering.dirichlet.DirichletClusterer;
 import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,44 +78,63 @@ public class DisplayDirichlet extends DisplayClustering {
   
   protected static void generateResults(
       ModelDistribution<VectorWritable> modelDist, int numClusters,
-      int numIterations, double alpha0, int thin, int burnin) {
-    boolean b = false;
-    if (b) {
-      DirichletClusterer dc = new DirichletClusterer(SAMPLE_DATA, modelDist,
-          alpha0, numClusters, thin, burnin);
-      List<Cluster[]> result = dc.cluster(numIterations);
-      printModels(result, burnin);
-      for (Cluster[] models : result) {
-        List<Cluster> clusters = new ArrayList<Cluster>();
-        for (Cluster cluster : models) {
-          if (isSignificant(cluster)) {
-            clusters.add(cluster);
-          }
-        }
-        CLUSTERS.add(clusters);
-      }
+      int numIterations, double alpha0, int thin, int burnin)
+      throws IOException {
+    boolean runClusterer = false;
+    if (runClusterer) {
+      runSequentialDirichletClusterer(modelDist, numClusters, numIterations, alpha0,
+          thin, burnin);
     } else {
-      List<Vector> points = new ArrayList<Vector>();
-      for (VectorWritable sample : SAMPLE_DATA) {
-        points.add(sample.get());
-      }
-      ClusteringPolicy policy = new DirichletClusteringPolicy(numClusters,
-          numIterations);
-      List<Cluster> models = new ArrayList<Cluster>();
-      for (Model<VectorWritable> cluster : modelDist
-          .sampleFromPrior(numClusters)) {
-        models.add((Cluster) cluster);
-      }
-      ClusterClassifier prior = new ClusterClassifier(models);
-      ClusterIterator iterator = new ClusterIterator(policy);
-      ClusterClassifier posterior = iterator.iterate(points, prior, 5);
-      List<Cluster> models2 = posterior.getModels();
-      for (Iterator<Cluster> it = models2.iterator(); it.hasNext();) {
-        if (!isSignificant(it.next())) {
-          it.remove();
+      runSequentialDirichletClassifier(modelDist, numClusters, numIterations);
+    }
+  }
+  
+  private static void runSequentialDirichletClassifier(
+      ModelDistribution<VectorWritable> modelDist, int numClusters,
+      int numIterations) throws IOException {
+    List<Cluster> models = new ArrayList<Cluster>();
+    for (Model<VectorWritable> cluster : modelDist.sampleFromPrior(numClusters)) {
+      models.add((Cluster) cluster);
+    }
+    ClusterClassifier prior = new ClusterClassifier(models);
+    Path samples = new Path("samples");
+    Path output = new Path("output");
+    Path priorClassifier = new Path(output, "clusters-0");
+    Configuration conf = new Configuration();
+    writeClassifier(prior, conf, priorClassifier);
+    
+    ClusteringPolicy policy = new DirichletClusteringPolicy(numClusters,
+        numIterations);
+    new ClusterIterator(policy).iterate(samples, priorClassifier, output,
+        numIterations);
+    for (int i = 1; i <= numIterations; i++) {
+      ClusterClassifier posterior = readClassifier(conf, new Path(output,
+          "classifier-" + i));
+      List<Cluster> clusters = new ArrayList<Cluster>();    
+      for (Cluster cluster : posterior.getModels()) {
+        if (isSignificant(cluster)) {
+          clusters.add(cluster);
         }
       }
-      CLUSTERS.add(models2);
+      CLUSTERS.add(clusters);
+    }
+  }
+  
+  private static void runSequentialDirichletClusterer(
+      ModelDistribution<VectorWritable> modelDist, int numClusters,
+      int numIterations, double alpha0, int thin, int burnin) {
+    DirichletClusterer dc = new DirichletClusterer(SAMPLE_DATA, modelDist,
+        alpha0, numClusters, thin, burnin);
+    List<Cluster[]> result = dc.cluster(numIterations);
+    printModels(result, burnin);
+    for (Cluster[] models : result) {
+      List<Cluster> clusters = new ArrayList<Cluster>();
+      for (Cluster cluster : models) {
+        if (isSignificant(cluster)) {
+          clusters.add(cluster);
+        }
+      }
+      CLUSTERS.add(clusters);
     }
   }
   
