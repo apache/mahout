@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Arrays;
 
 public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
@@ -110,8 +110,7 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
   
     Path cleanEigenvectors = new Path(output, EigenVerificationJob.CLEAN_EIGENVECTORS);
     Matrix eigenVectors = new DenseMatrix(30, corpus.numCols());
-    Configuration conf = new Configuration();
-    List<Double> eigenvalues = new ArrayList<Double>();
+    Collection<Double> eigenvalues = new ArrayList<Double>();
 
     output = getTestTempDirPath("output2");
     tmp = getTestTempDirPath("tmp2");
@@ -128,8 +127,8 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
     new DistributedLanczosSolver().new DistributedLanczosSolverJob().run(args);
     Path cleanEigenvectors2 = new Path(output, EigenVerificationJob.CLEAN_EIGENVECTORS);
     Matrix eigenVectors2 = new DenseMatrix(35, corpus.numCols());
-    conf = new Configuration();
-    List<Double> newEigenValues = new ArrayList<Double>();
+    Configuration conf = new Configuration();
+    Collection<Double> newEigenValues = new ArrayList<Double>();
 
     int i = 0;
     for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(cleanEigenvectors, conf)) {
@@ -152,7 +151,7 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
       i++;
     }
 
-    List<Integer> oldEigensFound = new ArrayList<Integer>();
+    Collection<Integer> oldEigensFound = new ArrayList<Integer>();
     for(int row = 0; row < eigenVectors.numRows(); row++) {
       Vector oldEigen = eigenVectors.getRow(row);
       if(oldEigen == null) {
@@ -170,7 +169,7 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
     }
     assertEquals("the number of new eigenvectors", 30, i);
 
-    List<Double> oldEigenValuesNotFound = new ArrayList<Double>();
+    Collection<Double> oldEigenValuesNotFound = new ArrayList<Double>();
     for(double d : eigenvalues) {
       boolean found = false;
       for(double newD : newEigenValues) {
@@ -183,7 +182,7 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
       }
     }
     assertEquals("number of old eigenvalues not found: "
-                 + Arrays.toString(oldEigenValuesNotFound.toArray(new Double[0])),
+                 + Arrays.toString(oldEigenValuesNotFound.toArray(new Double[oldEigenValuesNotFound.size()])),
                 0, oldEigenValuesNotFound.size());
     assertEquals("did not find enough old eigenvectors", 16, oldEigensFound.size());
   }

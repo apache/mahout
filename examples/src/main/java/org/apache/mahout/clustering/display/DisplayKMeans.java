@@ -21,6 +21,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -39,13 +40,10 @@ import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.Vector;
 
 class DisplayKMeans extends DisplayClustering {
-  
-  // static List<List<Cluster>> result;
-  
+
   DisplayKMeans() {
     initialize();
-    this.setTitle("k-Means Clusters (>" + (int) (significance * 100)
-        + "% of population)");
+    this.setTitle("k-Means Clusters (>" + (int) (significance * 100) + "% of population)");
   }
   
   public static void main(String[] args) throws Exception {
@@ -53,8 +51,6 @@ class DisplayKMeans extends DisplayClustering {
     Path samples = new Path("samples");
     Path output = new Path("output");
     Configuration conf = new Configuration();
-    int numClusters = 3;
-    int maxIterations = 10;
     HadoopUtil.delete(conf, samples);
     HadoopUtil.delete(conf, output);
     
@@ -63,19 +59,21 @@ class DisplayKMeans extends DisplayClustering {
     writeSampleData(samples);
     boolean runClusterer = false;
     if (runClusterer) {
-      runSequentialKMeansClusterer(conf, samples, output, measure, numClusters,
-          maxIterations);
+      int numClusters = 3;
+      runSequentialKMeansClusterer(conf, samples, output, measure, numClusters);
     } else {
-      runSequentialKMeansClassifier(conf, samples, output, measure,
-          numClusters, maxIterations);
+      int maxIterations = 10;
+      runSequentialKMeansClassifier(conf, samples, output, measure, maxIterations);
     }
     new DisplayKMeans();
   }
   
   private static void runSequentialKMeansClassifier(Configuration conf,
-      Path samples, Path output, DistanceMeasure measure, int numClusters,
-      int maxIterations) throws IOException {
-    List<Vector> points = new ArrayList<Vector>();
+                                                    Path samples,
+                                                    Path output,
+                                                    DistanceMeasure measure,
+                                                    int numClusters) throws IOException {
+    Collection<Vector> points = new ArrayList<Vector>();
     for (int i = 0; i < numClusters; i++) {
       points.add(SAMPLE_DATA.get(i).get());
     }
@@ -91,18 +89,19 @@ class DisplayKMeans extends DisplayClustering {
     
     int maxIter = 10;
     ClusteringPolicy policy = new KMeansClusteringPolicy();
-    new ClusterIterator(policy).iterate(samples, priorClassifier, output,
-        maxIter);
+    new ClusterIterator(policy).iterate(samples, priorClassifier, output, maxIter);
     for (int i = 1; i <= maxIter; i++) {
-      ClusterClassifier posterior = readClassifier(conf, new Path(output,
-          "classifier-" + i));
+      ClusterClassifier posterior = readClassifier(conf, new Path(output, "classifier-" + i));
       CLUSTERS.add(posterior.getModels());
     }
   }
   
-  private static void runSequentialKMeansClusterer(Configuration conf, Path samples,
-      Path output, DistanceMeasure measure, int numClusters, int maxIterations)
-      throws IOException, InterruptedException, ClassNotFoundException {
+  private static void runSequentialKMeansClusterer(Configuration conf,
+                                                   Path samples,
+                                                   Path output,
+                                                   DistanceMeasure measure,
+                                                   int maxIterations)
+    throws IOException, InterruptedException, ClassNotFoundException {
     Path clusters = RandomSeedGenerator.buildRandom(conf, samples, new Path(
         output, "clusters-0"), 3, measure);
     double distanceThreshold = 0.001;

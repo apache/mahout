@@ -1,3 +1,20 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.clustering.lda;
 
 import org.apache.hadoop.conf.Configuration;
@@ -8,9 +25,9 @@ import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
 
-public class LDADocumentTopicMapper extends Mapper<WritableComparable<?>,VectorWritable,WritableComparable<?>,VectorWritable> {
+public class LDADocumentTopicMapper
+    extends Mapper<WritableComparable<?>,VectorWritable,WritableComparable<?>,VectorWritable> {
 
-  private LDAState state;
   private LDAInference infer;
 
   @Override
@@ -19,9 +36,8 @@ public class LDADocumentTopicMapper extends Mapper<WritableComparable<?>,VectorW
                      Context context) throws IOException, InterruptedException {
 
     Vector wordCounts = wordCountsWritable.get();
-    LDAInference.InferredDocument doc;
     try {
-      doc = infer.infer(wordCounts);
+      LDAInference.InferredDocument doc = infer.infer(wordCounts);
       context.write(key, new VectorWritable(doc.getGamma().normalize(1)));
     } catch (ArrayIndexOutOfBoundsException e1) {
       throw new IllegalStateException(
@@ -32,17 +48,12 @@ public class LDADocumentTopicMapper extends Mapper<WritableComparable<?>,VectorW
   }
 
   public void configure(LDAState myState) {
-    this.state = myState;
-    this.infer = new LDAInference(state);
+    this.infer = new LDAInference(myState);
   }
 
   public void configure(Configuration job) {
-    try {
-      LDAState myState = LDADriver.createState(job);
-      configure(myState);
-    } catch (IOException e) {
-      throw new IllegalStateException("Error creating LDA State!", e);
-    }
+    LDAState myState = LDADriver.createState(job);
+    configure(myState);
   }
 
   @Override

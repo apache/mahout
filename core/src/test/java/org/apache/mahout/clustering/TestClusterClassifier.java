@@ -43,7 +43,7 @@ import org.junit.Test;
 
 public final class TestClusterClassifier extends MahoutTestCase {
   
-  private ClusterClassifier newDMClassifier() {
+  private static ClusterClassifier newDMClassifier() {
     List<Cluster> models = new ArrayList<Cluster>();
     DistanceMeasure measure = new ManhattanDistanceMeasure();
     models.add(new DistanceMeasureCluster(new DenseVector(2).assign(1), 0,
@@ -51,11 +51,10 @@ public final class TestClusterClassifier extends MahoutTestCase {
     models.add(new DistanceMeasureCluster(new DenseVector(2), 1, measure));
     models.add(new DistanceMeasureCluster(new DenseVector(2).assign(-1), 2,
         measure));
-    ClusterClassifier classifier = new ClusterClassifier(models);
-    return classifier;
+    return new ClusterClassifier(models);
   }
   
-  private ClusterClassifier newClusterClassifier() {
+  private static ClusterClassifier newClusterClassifier() {
     List<Cluster> models = new ArrayList<Cluster>();
     DistanceMeasure measure = new ManhattanDistanceMeasure();
     models.add(new org.apache.mahout.clustering.kmeans.Cluster(new DenseVector(
@@ -64,21 +63,19 @@ public final class TestClusterClassifier extends MahoutTestCase {
         2), 1, measure));
     models.add(new org.apache.mahout.clustering.kmeans.Cluster(new DenseVector(
         2).assign(-1), 2, measure));
-    ClusterClassifier classifier = new ClusterClassifier(models);
-    return classifier;
+    return new ClusterClassifier(models);
   }
   
-  private ClusterClassifier newSoftClusterClassifier() {
+  private static ClusterClassifier newSoftClusterClassifier() {
     List<Cluster> models = new ArrayList<Cluster>();
     DistanceMeasure measure = new ManhattanDistanceMeasure();
     models.add(new SoftCluster(new DenseVector(2).assign(1), 0, measure));
     models.add(new SoftCluster(new DenseVector(2), 1, measure));
     models.add(new SoftCluster(new DenseVector(2).assign(-1), 2, measure));
-    ClusterClassifier classifier = new ClusterClassifier(models);
-    return classifier;
+    return new ClusterClassifier(models);
   }
   
-  private ClusterClassifier newGaussianClassifier() {
+  private static ClusterClassifier newGaussianClassifier() {
     List<Cluster> models = new ArrayList<Cluster>();
     models.add(new GaussianCluster(new DenseVector(2).assign(1),
         new DenseVector(2).assign(1), 0));
@@ -86,8 +83,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
         .assign(1), 1));
     models.add(new GaussianCluster(new DenseVector(2).assign(-1),
         new DenseVector(2).assign(1), 2));
-    ClusterClassifier classifier = new ClusterClassifier(models);
-    return classifier;
+    return new ClusterClassifier(models);
   }
   
   private ClusterClassifier writeAndRead(ClusterClassifier classifier)
@@ -99,8 +95,10 @@ public final class TestClusterClassifier extends MahoutTestCase {
     return readClassifier(config, path, fs);
   }
   
-  private void writeClassifier(ClusterClassifier classifier,
-      Configuration config, Path path, FileSystem fs) throws IOException {
+  private static void writeClassifier(ClusterClassifier classifier,
+                                      Configuration config,
+                                      Path path,
+                                      FileSystem fs) throws IOException {
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, config, path,
         Text.class, ClusterClassifier.class);
     Writable key = new Text("test");
@@ -108,11 +106,11 @@ public final class TestClusterClassifier extends MahoutTestCase {
     writer.close();
   }
   
-  private ClusterClassifier readClassifier(Configuration config, Path path,
-      FileSystem fs) throws IOException {
-    Writable key;
+  private static ClusterClassifier readClassifier(Configuration config,
+                                                  Path path,
+                                                  FileSystem fs) throws IOException {
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, config);
-    key = new Text();
+    Writable key = new Text();
     ClusterClassifier classifierOut = new ClusterClassifier();
     reader.next(key, classifierOut);
     reader.close();

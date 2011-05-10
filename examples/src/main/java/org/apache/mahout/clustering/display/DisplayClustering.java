@@ -300,25 +300,21 @@ public class DisplayClustering extends Frame {
     return (double) cluster.getNumPoints() / SAMPLE_DATA.size() > significance;
   }
 
-  protected static ClusterClassifier readClassifier(Configuration config, Path path)
-      throws IOException {
-        Writable key;
-        SequenceFile.Reader reader = new SequenceFile.Reader(
-            FileSystem.get(config), path, config);
-        key = new Text();
-        ClusterClassifier classifierOut = new ClusterClassifier();
-        reader.next(key, classifierOut);
-        reader.close();
-        return classifierOut;
-      }
+  protected static ClusterClassifier readClassifier(Configuration config, Path path) throws IOException {
+    SequenceFile.Reader reader = new SequenceFile.Reader(FileSystem.get(config), path, config);
+    Writable key = new Text();
+    ClusterClassifier classifierOut = new ClusterClassifier();
+    reader.next(key, classifierOut);
+    reader.close();
+    return classifierOut;
+  }
 
   protected static void writeClassifier(ClusterClassifier classifier, Configuration config, Path path)
-      throws IOException {
-        SequenceFile.Writer writer = new SequenceFile.Writer(
-            FileSystem.get(config), config, path, Text.class,
-            ClusterClassifier.class);
-        Writable key = new Text("test");
-        writer.append(key, classifier);
-        writer.close();
-      }
+    throws IOException {
+    SequenceFile.Writer writer =
+        new SequenceFile.Writer(FileSystem.get(config), config, path, Text.class, ClusterClassifier.class);
+    Writable key = new Text("test");
+    writer.append(key, classifier);
+    writer.close();
+  }
 }

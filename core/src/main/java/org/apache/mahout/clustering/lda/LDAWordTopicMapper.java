@@ -23,7 +23,6 @@ import java.util.Iterator;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.common.IntPairWritable;
@@ -94,12 +93,8 @@ public class LDAWordTopicMapper extends Mapper<WritableComparable<?>,VectorWrita
   }
   
   public void configure(Configuration job) {
-    try {
-      LDAState myState = LDADriver.createState(job);
-      configure(myState);
-    } catch (IOException e) {
-      throw new IllegalStateException("Error creating LDA State!", e);
-    }
+    LDAState myState = LDADriver.createState(job);
+    configure(myState);
   }
   
   @Override
