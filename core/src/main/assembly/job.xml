@@ -10,12 +10,11 @@
   <includeBaseDirectory>false</includeBaseDirectory>
   <dependencySets>
     <dependencySet>
-      <unpack>false</unpack>
+      <unpack>true</unpack>
       <scope>runtime</scope>
-      <outputDirectory>lib</outputDirectory>
+      <outputDirectory>/</outputDirectory>
       <excludes>
         <exclude>org.apache.hadoop:hadoop-core</exclude>
-        <exclude>org.apache.mahout:mahout-core</exclude>
       </excludes>
     </dependencySet>
   </dependencySets>
