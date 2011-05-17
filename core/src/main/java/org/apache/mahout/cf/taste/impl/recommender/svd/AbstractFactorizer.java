@@ -62,7 +62,8 @@ public abstract class AbstractFactorizer implements Factorizer {
   protected Integer userIndex(long userID) {
     Integer userIndex = userIDMapping.get(userID);
     if (userIndex == null) {
-      userIndex = userIDMapping.put(userID, userIDMapping.size());
+      userIndex = userIDMapping.size();
+      userIDMapping.put(userID, userIndex);
     }
     return userIndex;
   }
@@ -70,7 +71,8 @@ public abstract class AbstractFactorizer implements Factorizer {
   protected Integer itemIndex(long itemID) {
     Integer itemIndex = itemIDMapping.get(itemID);
     if (itemIndex == null) {
-      itemIndex = itemIDMapping.put(itemID, itemIDMapping.size());
+      itemIndex = itemIDMapping.size();
+      itemIDMapping.put(itemID, itemIndex);
     }
     return itemIndex;
   }
