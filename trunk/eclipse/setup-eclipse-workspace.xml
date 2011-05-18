@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one or more
+ contributor license agreements.  See the NOTICE file distributed with
+ this work for additional information regarding copyright ownership.
+ The ASF licenses this file to You under the Apache License, Version 2.0
+ (the "License"); you may not use this file except in compliance with
+ the License.  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<!--
+  This is an ANT build.xml file that automates setting up an eclipse workspace. Ironic, eh?
+
+  Input properties: 
+    eclipse.workspace.dir == the workspace
+-->
+<project>
+    <target name="main">
+        <property name="full.eclipse.workspace" location="${eclipse.workspace.dir}"/>
+        <mkdir dir="${full.eclipse.workspace}"/>
+        <property name="checkstyle-dir" value="${full.eclipse.workspace}/.metadata/.plugins/net.sf.eclipsecs.core"/>
+        <property name="checkstyle.url" location="../etc/mahout-checkstyle.xml"/>
+        <mkdir dir="${full.eclipse.workspace}/.metadata/.plugins/org.eclipse.core.runtime/.settings"/>
+        <mkdir dir="${checkstyle-dir}"/>
+        <mkdir dir="${full.eclipse.workspace}/.metadata/.plugins/net.sourceforge.pmd.eclipse"/>
+        <copy file="${checkstyle.url}" tofile="${full.eclipse.workspace}/checkstyle.xml"/>
+        <property name="template.checkstyle.url" location="template.checkstyle-config.xml"/>
+        <copy file="${template.checkstyle.url}" tofile="${eclipse.workspace.dir}/template.checkstyle-config.xml"/>
+        <property name="addcheckstyle.url" location="addcheckstyle.xsl"/>
+        <copy file="${addcheckstyle.url}" tofile="${eclipse.workspace.dir}/addcheckstyle.xsl"/>
+        <!-- Add checkstyle config -->
+        <copy file="${eclipse.workspace.dir}/template.checkstyle-config.xml" tofile="${checkstyle-dir}/checkstyle-config.xml" overwrite="no">
+            <filterset>
+                <filter token="CHECKSTYLE_CONFIG_FILE" value="${full.eclipse.workspace}/checkstyle.xml"/>
+                <filter token="APACHE_HEADER_FILE" value="${full.eclipse.workspace}/apache-header.txt"/>
+            </filterset>
+        </copy>
+        <xslt style="${eclipse.workspace.dir}/addcheckstyle.xsl" in="${checkstyle-dir}/checkstyle-config.xml" out="${checkstyle-dir}/checkstyle-config.xml.new">
+            <param name="checkstyleconfig" expression="${full.eclipse.workspace}/checkstyle.xml"/>
+        </xslt>
+        <copy file="${checkstyle-dir}/checkstyle-config.xml.new" tofile="${checkstyle-dir}/checkstyle-config.xml" overwrite="yes"/>
+        <!-- set UTF-8 -->
+        <propertyfile file="${full.eclipse.workspace}/.metadata/.plugins/org.eclipse.core.runtime/.settings/org.eclipse.core.resources.prefs">
+            <entry key="version" value="1"/>
+            <entry key="eclipse.preferences.version" value="1"/>
+            <entry key="encoding" value="UTF-8"/>
+        </propertyfile>
+        <!-- Add warning flags that we want -->
+        <propertyfile file="${full.eclipse.workspace}/.metadata/.plugins/org.eclipse.core.runtime/.settings/org.eclipse.jdt.core.prefs">
+            <entry key="org.eclipse.jdt.core.compiler.problem.missingSerialVersion" value="ignore"/>
+            <entry key="org.eclipse.jdt.core.compiler.problem.unusedImport" value="ignore"/>
+            <entry key="org.eclipse.jdt.core.compiler.problem.annotationSuperInterface" value="ignore"/>
+            <entry key="org.eclipse.jdt.core.compiler.problem.rawTypeReference" value="ignore"/>
+        </propertyfile>
+        <!-- Add code format rules -->
+        <property name="cleanup.url" location="MahoutCleanUp.xml"/>
+        <copy file="${cleanup.url}" tofile="${eclipse.workspace.dir}/MahoutCleanUp.xml"/>
+        <property name="codeformat.url" location="Eclipse-Lucene-Codestyle.xml"/>
+        <copy file="${codeformat.url}" tofile="${eclipse.workspace.dir}/Eclipse-Lucene-Codestyle.xml"/>
+        <property name="codetemplates.url" location="codetemplates.xml"/>
+        <property name="xmltemplates.url" location="xmltemplates.xml"/>
+        <copy file="${codetemplates.url}" tofile="${eclipse.workspace.dir}/codetemplates.xml"/>
+        <copy file="${xmltemplates.url}" tofile="${eclipse.workspace.dir}/xmltemplates.xml"/>
+        <loadfile property="eclipse.code.cleanup" srcFile="${eclipse.workspace.dir}/MahoutCleanUp.xml"/>
+        <loadfile property="eclipse.code.templates" srcFile="${eclipse.workspace.dir}/codetemplates.xml"/>
+        <loadfile property="eclipse.xml.templates" srcFile="${eclipse.workspace.dir}/xmltemplates.xml"/>
+        <propertyfile file="${full.eclipse.workspace}/.metadata/.plugins/org.eclipse.core.runtime/.settings/org.eclipse.jdt.ui.prefs">
+            <entry key="cleanup_profile" value="_BASIS"/>
+            <entry key="org.eclipse.jdt.ui.cleanupprofiles" value="${eclipse.code.cleanup}"/>
+            <entry key="org.eclipse.jdt.ui.text.custom_code_templates" value="${eclipse.code.templates}"/>
+            <!-- Add import order -->
+            <entry key="org.eclipse.jdt.ui.importorder" value="java;javax;org.w3c;org.xml;junit;com"/>
+            <!-- Sort order -->
+            <entry key="org.eclipse.jdt.ui.visibility.order" value="B,R,D,V,"/>
+            <entry key="outlinesortoption" value="T,SF,F,SI,I,C,SM,M,"/>
+            <entry key="org.eclipse.jdt.ui.enable.visibility.order" value="true"/>
+        </propertyfile>
+        <propertyfile file="${full.eclipse.workspace}/.metadata/.plugins/org.eclipse.core.runtime/.settings/org.eclipse.wst.xml.ui.prefs">
+            <entry key="eclipse.preferences.version" value="1"/>
+            <entry key="org.eclipse.wst.sse.ui.custom_templates" value="${eclipse.xml.templates}"/>
+        </propertyfile>
+    </target>
+</project>

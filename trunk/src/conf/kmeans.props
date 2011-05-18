@@ -1,0 +1,12 @@
+# The following parameters must be specified
+#i|input = /path/to/input
+#c|clusters = /path/to/initial/clusters
+#o|output = /path/to/output
+#x|max = <the maximum number of iterations to attempt>
+
+# The following parameters all have default values if not specified
+#ow|overwrite = <clear output directory if present>
+#cl|clustering = <cluster points if present>
+#dm|distance = <distance measure class name. Default: SquaredEuclideanDistanceMeasure>
+#cd|convergenceDelta = <the convergence threshold. Default: 0.5>
+#r|numReduce = <the number of reduce tasks to launch. Default: 1>

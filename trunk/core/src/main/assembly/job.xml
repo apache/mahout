@@ -1,0 +1,37 @@
+<assembly
+  xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0
+    http://maven.apache.org/xsd/assembly-1.1.0.xsd">
+  <id>job</id>
+  <formats>
+   <format>jar</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <dependencySets>
+    <dependencySet>
+      <unpack>true</unpack>
+      <scope>runtime</scope>
+      <outputDirectory>/</outputDirectory>
+      <excludes>
+        <exclude>org.apache.hadoop:hadoop-core</exclude>
+      </excludes>
+    </dependencySet>
+  </dependencySets>
+  <fileSets>
+    <fileSet>
+      <directory>${basedir}/target/classes</directory>
+      <outputDirectory>/</outputDirectory>
+      <excludes>
+        <exclude>*.jar</exclude>
+      </excludes>
+    </fileSet>
+    <fileSet>
+      <directory>${basedir}/target/classes</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>driver.classes.default.props</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+</assembly>

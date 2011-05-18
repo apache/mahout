@@ -1,0 +1,14 @@
+# The following parameters must be specified
+#i|input = /path/to/input
+#o|output = /path/to/output
+
+# The following parameters all have default values if not specified
+#n|numRecommendations = <Number of recommendations per user. Default: 10>
+#u|usersFile = <File of users to recommend for. Default: null>
+#i|itemsFile = <File of items to recommend for. Default: null>
+#f|filterFile = <File containing comma-separated userID,itemID pairs. Used to exclude the item from the recommendations for that user. Default: null>
+#b|booleanData = <Treat input as without pref values. Default: false>
+#mp|maxPrefsPerUser = <Maximum number of preferences considered per user in final recommendation phase. Default: 10>
+#m|maxSimilaritiesPerItem = <Maximum number of similarities considered per item. Default: 100>
+#mo|maxCooccurrencesPerItem = <try to cap the number of cooccurrences per item to this number. Default: 100>
+#s|similarityClassname = <Name of distributed similarity class to instantiate. Default: org.apache.mahout.math.hadoop.similarity.vector.DistributedCooccurrenceVectorSimilarity>

@@ -1,0 +1,19 @@
+# The following parameters must be specified
+#i|input = /path/to/input
+#o|output = /path/to/output
+#x|maxIter = <number of iterations>
+#k|k = <number of models>
+
+# The following parameters all have default values if not specified
+#ow|overwrite = <clear output directory if present>
+#m|alpha = <Dirichlet alpha_0 value. Default: 1.0>
+#md|modelDistClass = <model distribution class name. Default: NormalModelDistribution>
+#mp|modelPrototypeClass = <vector class name for models. Default: RandomAccessSparseVector>
+#r|maxRed = <number of reducers. Default: 1>
+#cl|clustering = <cluster points if present>
+#e|emitMostLikely = <emit most likely cluster if clustering. Default: true>
+#t|threshold = <threshold if clustering and not emitMostLikely. Default: 0.0>
+
+
+
+

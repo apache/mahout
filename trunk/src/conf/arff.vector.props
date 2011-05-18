@@ -1,0 +1,9 @@
+# The following parameters must be specified
+#d|input = /path/to/input
+#o|output = /path/to/output
+#t|dictOut =  /path/to/dictionaryFileOrDirectory
+
+# The following parameters all have default values if not specified
+#m|max = <Max number of vectors to output. Defaults to Long.MAX_VALUE>
+#e|outputWriter <Defaults to 'seq' for SequenceFileVectorWriter>
+#l|delimiter <Delimiter for outputing the dictionary. Defaults to '\t'>

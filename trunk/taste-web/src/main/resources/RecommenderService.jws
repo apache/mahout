@@ -1,0 +1,74 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Yes, no package statement. Since this JWS file is deployed at the server
+// root, it needs to not be in a package in order for Axis to find its generated
+// class file properly
+
+import org.apache.mahout.cf.taste.recommender.RecommendedItem;
+import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.apache.mahout.cf.taste.web.RecommenderSingleton;
+
+import java.util.List;
+
+/**
+ * <p>A JWS file which exposes a {@link Recommender} as a web service via Axis.
+ * This service needs to be deployed alongside <code>RecommenderServlet</code>.</p>
+ *
+ * <p>This class exposes a subset of the {@link Recommender} API. In particular it
+ * does not support {@link Recommender#getDataModel()}
+ * or {@link Recommender#recommend(long, int, org.apache.mahout.cf.taste.recommender.IDRescorer)}
+ * since these involve data types which can't be transmitted in a web service.</p>
+ */
+public final class RecommenderService {
+
+	private final Recommender recommender;
+
+	public RecommenderService() {
+		// Assuming that this has already been initialized by RecommenderServlet
+		recommender = RecommenderSingleton.getInstance().getRecommender();
+	}
+
+	public String[][] recommend(long userID, int howMany) throws Exception {
+		List<RecommendedItem> recommendations = recommender.recommend(userID, howMany);
+		String[][] itemIDsAndPrefs = new String[recommendations.size()][2];
+		int i = 0;
+		for (RecommendedItem item : recommendations) {
+			itemIDsAndPrefs[i][0] = String.valueOf(item.getValue());
+			itemIDsAndPrefs[i][1] = String.valueOf(item.getItemID());
+			i++;
+		}
+		return itemIDsAndPrefs;
+	}
+
+	public double estimatePreference(long userID, long itemID) throws Exception {
+		return recommender.estimatePreference(userID, itemID);
+	}
+
+	public void setPreference(long userID, long itemID, float value) throws Exception {
+		recommender.setPreference(userID, itemID, value);
+	}
+
+	public void removePreference(long userID, long itemID) throws Exception {
+		recommender.removePreference(userID, itemID);
+	}
+
+	public void refresh() throws Exception {
+	  recommender.refresh(null);
+	}
+
+}

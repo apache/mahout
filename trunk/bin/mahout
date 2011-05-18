@@ -1,0 +1,222 @@
+#!/bin/bash
+# 
+# The Mahout command script
+#
+# Environment Variables
+#
+#   MAHOUT_JAVA_HOME   The java implementation to use.  Overrides JAVA_HOME.
+#
+#   MAHOUT_HEAPSIZE    The maximum amount of heap to use, in MB. 
+#                      Default is 1000.
+#
+#   HADOOP_CONF_DIR  The location of a hadoop config directory 
+#
+#   MAHOUT_OPTS        Extra Java runtime options.
+#
+#   MAHOUT_CONF_DIR    The location of the program short-name to class name
+#                      mappings and the default properties files
+#                      defaults to "$MAHOUT_HOME/src/conf"
+#
+#   MAHOUT_LOCAL       set to anything other than an empty string to force
+#                      mahout to run locally even if
+#                      HADOOP_CONF_DIR and HADOOP_HOME are set
+#
+#   MAHOUT_CORE        set to anything other than an empty string to force
+#                      mahout to run in developer 'core' mode, just as if the
+#                      -core option was presented on the command-line
+# Commane-line Options
+#
+#   -core              -core is used to switch into 'developer mode' when
+#                      running mahout locally. If specified, the classes
+#                      from the 'target/classes' directories in each project
+#                      are used. Otherwise classes will be retrived from
+#                      jars in the binary releas collection or *-job.jar files
+#                      found in build directories. When running on hadoop
+#                      the job files will always be used.
+
+#
+#/**
+# * Licensed to the Apache Software Foundation (ASF) under one or more
+# * contributor license agreements.  See the NOTICE file distributed with
+# * this work for additional information regarding copyright ownership.
+# * The ASF licenses this file to You under the Apache License, Version 2.0
+# * (the "License"); you may not use this file except in compliance with
+# * the License.  You may obtain a copy of the License at
+# *
+# *     http://www.apache.org/licenses/LICENSE-2.0
+# *
+# * Unless required by applicable law or agreed to in writing, software
+# * distributed under the License is distributed on an "AS IS" BASIS,
+# * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# * See the License for the specific language governing permissions and
+# * limitations under the License.
+# */
+
+cygwin=false
+case "`uname`" in
+CYGWIN*) cygwin=true;;
+esac
+
+# resolve links - $0 may be a softlink
+THIS="$0"
+while [ -h "$THIS" ]; do
+  ls=`ls -ld "$THIS"`
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '.*/.*' > /dev/null; then
+    THIS="$link"
+  else
+    THIS=`dirname "$THIS"`/"$link"
+  fi
+done
+
+IS_CORE=0
+if [ "$1" == "-core" ] ; then
+  IS_CORE=1
+  shift
+fi
+
+if [ "$MAHOUT_CORE" != "" ]; then
+  IS_CORE=1
+fi
+
+# some directories
+THIS_DIR=`dirname "$THIS"`
+MAHOUT_HOME=`cd "$THIS_DIR/.." ; pwd`
+
+# some Java parameters
+if [ "$MAHOUT_JAVA_HOME" != "" ]; then
+  #echo "run java in $MAHOUT_JAVA_HOME"
+  JAVA_HOME=$MAHOUT_JAVA_HOME
+fi
+  
+if [ "$JAVA_HOME" = "" ]; then
+  echo "Error: JAVA_HOME is not set."
+  exit 1
+fi
+
+JAVA=$JAVA_HOME/bin/java
+JAVA_HEAP_MAX=-Xmx1000m 
+
+# check envvars which might override default args
+if [ "$MAHOUT_HEAPSIZE" != "" ]; then
+  #echo "run with heapsize $MAHOUT_HEAPSIZE"
+  JAVA_HEAP_MAX="-Xmx""$MAHOUT_HEAPSIZE""m"
+  #echo $JAVA_HEAP_MAX
+fi
+
+if [ "x$MAHOUT_CONF_DIR" = "x" ]; then
+  MAHOUT_CONF_DIR=$MAHOUT_HOME/src/conf
+fi
+
+# CLASSPATH initially contains $MAHOUT_CONF_DIR, or defaults to $MAHOUT_HOME/src/conf
+CLASSPATH=${CLASSPATH}:$MAHOUT_CONF_DIR
+CLASSPATH=${CLASSPATH}:$HADOOP_CONF_DIR
+CLASSPATH=${CLASSPATH}:$JAVA_HOME/lib/tools.jar
+
+# so that filenames w/ spaces are handled correctly in loops below
+IFS=
+
+if [ $IS_CORE == 0 ] 
+then
+  # add release dependencies to CLASSPATH
+  for f in $MAHOUT_HOME/mahout-*.jar; do
+    CLASSPATH=${CLASSPATH}:$f;
+  done
+
+  # add dev targets if they exist
+  for f in $MAHOUT_HOME/*/target/mahout-*-job.jar; do
+    CLASSPATH=${CLASSPATH}:$f;
+  done
+
+  # add release dependencies to CLASSPATH
+  for f in $MAHOUT_HOME/lib/*.jar; do
+    CLASSPATH=${CLASSPATH}:$f;
+  done
+else
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/math/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/core/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/utils/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/examples/target/classes
+  #CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/core/src/main/resources
+fi
+
+# add development dependencies to CLASSPATH
+for f in $MAHOUT_HOME/examples/target/dependency/*.jar; do
+  CLASSPATH=${CLASSPATH}:$f;
+done
+
+
+# cygwin path translation
+if $cygwin; then
+  CLASSPATH=`cygpath -p -w "$CLASSPATH"`
+fi
+
+# restore ordinary behaviour
+unset IFS
+
+# default log directory & file
+if [ "$MAHOUT_LOG_DIR" = "" ]; then
+  MAHOUT_LOG_DIR="$MAHOUT_HOME/logs"
+fi
+if [ "$MAHOUT_LOGFILE" = "" ]; then
+  MAHOUT_LOGFILE='mahout.log'
+fi
+
+#Fix log path under cygwin
+if $cygwin; then
+  MAHOUT_LOG_DIR=`cygpath -p -w "$MAHOUT_LOG_DIR"`
+fi
+
+MAHOUT_OPTS="$MAHOUT_OPTS -Dhadoop.log.dir=$MAHOUT_LOG_DIR"
+MAHOUT_OPTS="$MAHOUT_OPTS -Dhadoop.log.file=$MAHOUT_LOGFILE"
+
+if [ "x$JAVA_LIBRARY_PATH" != "x" ]; then
+  MAHOUT_OPTS="$MAHOUT_OPTS -Djava.library.path=$JAVA_LIBRARY_PATH"
+fi
+
+CLASS=org.apache.mahout.driver.MahoutDriver
+
+for f in $MAHOUT_HOME/examples/target/mahout-examples-*-job.jar; do
+  if [ -e "$f" ]; then
+    MAHOUT_JOB=$f
+  fi
+done
+
+if [ "$MAHOUT_JOB" = "" ]; then
+  for f in $MAHOUT_HOME/mahout-examples-*-job.jar; do
+    if [ -e "$f" ]; then
+      MAHOUT_JOB=$f
+    fi
+  done
+fi
+
+# run it
+
+if [ "$HADOOP_HOME" = "" ] || [ "$MAHOUT_LOCAL" != "" ] ; then
+  if [ "$HADOOP_HOME" = "" ] ; then
+    echo "no HADOOP_HOME set, running locally"
+  elif [ "$MAHOUT_LOCAL" != "" ] ; then
+    echo "MAHOUT_LOCAL is set, running locally"
+  fi
+  exec "$JAVA" $JAVA_HEAP_MAX $MAHOUT_OPTS -classpath "$CLASSPATH" $CLASS "$@"
+else
+  echo "Running on hadoop, using HADOOP_HOME=$HADOOP_HOME"
+  if [ "$HADOOP_CONF_DIR" = "" ] ; then
+    HADOOP_CONF_DIR=$HADOOP_HOME/src/conf
+    echo "No HADOOP_CONF_DIR set, using $HADOOP_HOME/src/conf "
+  else
+    echo "HADOOP_CONF_DIR=$HADOOP_CONF_DIR"
+  fi
+	
+  if [ "$MAHOUT_JOB" = "" ] ; then
+    echo "ERROR: Could not find mahout-examples-*.job in $MAHOUT_HOME or $MAHOUT_HOME/examples/target, please run 'mvn install' to create the .job file"
+    exit 1
+  else
+    export HADOOP_CLASSPATH=$MAHOUT_CONF_DIR:${HADOOP_CLASSPATH}:$CLASSPATH
+    if [ "$1" = "hadoop" ]; then
+      exec "$HADOOP_HOME/bin/$@"
+    else
+      exec "$HADOOP_HOME/bin/hadoop" jar $MAHOUT_JOB $CLASS "$@"
+    fi
+  fi
+fi

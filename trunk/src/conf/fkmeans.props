@@ -1,0 +1,16 @@
+# The following parameters must be specified
+#i|input = /path/to/input
+#c|clusters = /path/to/initial/clusters
+#o|output = /path/to/output
+#m|m = <the coefficient normalization factor > 1.0>
+#x|max = <the maximum number of iterations to attempt>
+
+# The following parameters all have default values if not specified
+#ow|overwrite = <clear output directory if present>
+#dm|distance = <distance measure class name. Default: SquaredEuclideanDistanceMeasure>
+#cd|convergenceDelta = <the convergence threshold. Default: 0.5>
+#u|numMap <the number of mapper tasks to launch. Default: 10>
+#r|numReduce = <the number of reduce tasks to launch. Default: 2>
+#cl|clustering = <cluster points if present>
+#e|emitMostLikely = <emit most likely cluster if clustering. Default: true>
+#t|threshold = <threshold if clustering and not emitMostLikely. Default: 0.0>

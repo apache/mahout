@@ -1,0 +1,13 @@
+# The following parameters must be specified
+#i|input = /path/to/input
+#o|output = /path/to/output
+#t1|t1 = <T1 threshold value>
+#t2|t2 = <T2 threshold value >
+#cd|convergenceDelta = <the convergence threshold to halt iteration>
+#x|maxIter = <the maximum number of iterations to attempt>
+
+# The following parameters all have default values if not specified
+#ow|overwrite = <clear output directory if present>
+#cl|clustering = <cluster points if present>
+#ic|inputIsCanopies = <if present, input directory contains MeanShiftCanopies (vs.VectorWritable)>
+#dm|distanceMeasure = <distance measure class name. Default: SquaredEuclideanDistanceMeasure>
