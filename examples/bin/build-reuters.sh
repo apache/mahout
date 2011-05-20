@@ -21,6 +21,7 @@
 #
 # To run:  change into the mahout directory and type:
 #  examples/bin/build-reuters.sh
+# or run from the examples/bin directory directly.
 
 if [ "$1" = "-ni" ]; then
   clustertype=kmeans
@@ -53,7 +54,7 @@ cd ../..
 
 ./bin/mahout org.apache.lucene.benchmark.utils.ExtractReuters \
   ./examples/bin/work/reuters-sgm/ \
-  ./examples/bin/work/reuters-out/ \
+  ./examples/bin/work/reuters-out \
 && \
 ./bin/mahout seqdirectory \
   -i ./examples/bin/work/reuters-out/ \
