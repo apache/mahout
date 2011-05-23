@@ -20,6 +20,7 @@ package org.apache.mahout.text;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IOUtils;
 import org.apache.mahout.common.iterator.FileLineIterable;
 
 import java.io.IOException;
@@ -43,16 +44,21 @@ public final class PrefixAdditionFilter extends SequenceFilesFromDirectoryFilter
                     new PrefixAdditionFilter(conf, prefix + Path.SEPARATOR + current.getName(),
                         options, writer));
     } else {
-      InputStream in = fs.open(fst.getPath());
+      InputStream in = null;
+      try {
+        in = fs.open(fst.getPath());
 
-      StringBuilder file = new StringBuilder();
-      for (String aFit : new FileLineIterable(in, charset, false)) {
-        file.append(aFit).append('\n');
+        StringBuilder file = new StringBuilder();
+        for (String aFit : new FileLineIterable(in, charset, false)) {
+          file.append(aFit).append('\n');
+        }
+        String name = current.getName().equals(fst.getPath().getName())
+            ? current.getName()
+            : current.getName() + Path.SEPARATOR + fst.getPath().getName();
+        writer.write(prefix + Path.SEPARATOR + name, file.toString());
+      } finally {
+        IOUtils.closeStream(in);
       }
-      String name = current.getName().equals(fst.getPath().getName())
-          ? current.getName()
-          : current.getName() + Path.SEPARATOR + fst.getPath().getName();
-      writer.write(prefix + Path.SEPARATOR + name, file.toString());
     }
   }
 }

@@ -1,1 +1,0 @@
-Please see the file src/main/appended-resources/META-INF/NOTICE
