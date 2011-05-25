@@ -37,7 +37,7 @@ import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class DisplayMeanShift extends DisplayClustering {
+public class DisplayMeanShift extends DisplayClustering {
 
   private static final Logger log = LoggerFactory.getLogger(DisplayMeanShift.class);
 

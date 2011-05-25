@@ -36,7 +36,7 @@ import org.apache.mahout.math.DenseVector;
  * Java desktop graphics class that runs canopy clustering and displays the results.
  * This class generates random data and clusters it.
  */
-class DisplayCanopy extends DisplayClustering {
+public class DisplayCanopy extends DisplayClustering {
 
   DisplayCanopy() {
     initialize();

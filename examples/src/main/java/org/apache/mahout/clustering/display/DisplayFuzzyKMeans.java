@@ -40,7 +40,7 @@ import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.Vector;
 
-class DisplayFuzzyKMeans extends DisplayClustering {
+public class DisplayFuzzyKMeans extends DisplayClustering {
   
   DisplayFuzzyKMeans() {
     initialize();
