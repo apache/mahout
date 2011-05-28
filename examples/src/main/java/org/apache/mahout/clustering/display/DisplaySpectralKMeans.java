@@ -33,7 +33,7 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 
-class DisplaySpectralKMeans extends DisplayClustering {
+public class DisplaySpectralKMeans extends DisplayClustering {
 
   DisplaySpectralKMeans() {
     initialize();

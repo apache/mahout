@@ -39,7 +39,7 @@ import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.Vector;
 
-class DisplayKMeans extends DisplayClustering {
+public class DisplayKMeans extends DisplayClustering {
 
   DisplayKMeans() {
     initialize();

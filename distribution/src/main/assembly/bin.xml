@@ -11,7 +11,7 @@
 
   <fileSets>
     <fileSet>
-      <directory>../examples/target/dependency</directory>
+      <directory>${project.basedir}/../examples/target/dependency</directory>
       <includes>
         <include>*.jar</include>
       </includes>
@@ -21,111 +21,106 @@
       <outputDirectory>lib</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>../examples/target/dependency</directory>
+      <directory>${project.basedir}/../examples/target/dependency</directory>
       <includes>
         <include>mahout-collections*.jar</include>
       </includes>
       <outputDirectory>lib</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>../math/target</directory>
+      <directory>${project.basedir}/../math/target</directory>
       <includes>
         <include>mahout-*.jar</include>
       </includes>
       <excludes>
- 	<exclude>*sources.jar</exclude>
- 	<exclude>*javadoc.jar</exclude>
- 	<exclude>*tests.jar</exclude>
+        <exclude>*sources.jar</exclude>
+        <exclude>*javadoc.jar</exclude>
+        <exclude>*tests.jar</exclude>
       </excludes>
       <outputDirectory/>
     </fileSet>
     <fileSet>
-      <directory>../core/target</directory>
-      <includes>
-        <include>mahout-*.job</include>
-        <include>mahout-*.jar</include>
-      </includes>
-      <excludes>
- 	<exclude>*sources.jar</exclude>
- 	<exclude>*javadoc.jar</exclude>
- 	<exclude>*tests.jar</exclude>
-      </excludes>
-      <outputDirectory/>
-    </fileSet>
-    <fileSet>
-      <directory>../utils/target</directory>
+      <directory>${project.basedir}/../core/target</directory>
       <includes>
         <include>mahout-*.job</include>
         <include>mahout-*.jar</include>
       </includes>
       <excludes>
- 	<exclude>*sources.jar</exclude>
- 	<exclude>*javadoc.jar</exclude>
- 	<exclude>*tests.jar</exclude>
+        <exclude>*sources.jar</exclude>
+        <exclude>*javadoc.jar</exclude>
+        <exclude>*tests.jar</exclude>
       </excludes>
       <outputDirectory/>
     </fileSet>
     <fileSet>
-      <directory>../examples/target</directory>
+      <directory>${project.basedir}/../utils/target</directory>
+      <includes>
+        <include>mahout-*.job</include>
+        <include>mahout-*.jar</include>
+      </includes>
+      <excludes>
+        <exclude>*sources.jar</exclude>
+        <exclude>*javadoc.jar</exclude>
+        <exclude>*tests.jar</exclude>
+      </excludes>
+      <outputDirectory/>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../examples/target</directory>
       <includes>
         <include>mahout-*.jar</include>
         <include>mahout-*.job</include>
       </includes>
       <excludes>
- 	<exclude>*sources.jar</exclude>
- 	<exclude>*javadoc.jar</exclude>
- 	<exclude>*tests.jar</exclude>
+        <exclude>*sources.jar</exclude>
+        <exclude>*javadoc.jar</exclude>
+        <exclude>*tests.jar</exclude>
       </excludes>
       <outputDirectory/>
     </fileSet>
     <fileSet>
-      <directory>../taste-web/target</directory>
+      <directory>${project.basedir}/../taste-web/target</directory>
       <includes>
         <include>mahout-*.war</include>
       </includes>
       <outputDirectory/>
     </fileSet>
     <fileSet>
-      <directory>../collections/target/apidocs</directory>
+      <directory>${project.basedir}/../collections/target/apidocs</directory>
       <outputDirectory>docs/mahout-collections</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>../math/target/apidocs</directory>
+      <directory>${project.basedir}/../math/target/apidocs</directory>
       <outputDirectory>docs/mahout-math</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>../core/target/apidocs</directory>
+      <directory>${project.basedir}/../core/target/apidocs</directory>
       <outputDirectory>docs/mahout-core</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>../utils/target/apidocs</directory>
+      <directory>${project.basedir}/../utils/target/apidocs</directory>
       <outputDirectory>docs/mahout-utils</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>../examples/target/apidocs</directory>
+      <directory>${project.basedir}/../examples/target/apidocs</directory>
       <outputDirectory>docs/mahout-examples</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory></directory>
+      <directory>${project.basedir}/..</directory>
       <outputDirectory/>
+      <useDefaultExcludes>true</useDefaultExcludes>
       <includes>
-        <include>../README*</include>
-        <include>../LICENSE*</include>
-        <include>../NOTICE*</include>
-        <include>KEYS</include>
+        <include>**/README*</include>
+        <include>**/LICENSE*</include>
+        <include>**/NOTICE*</include>
+        <include>**/*.properties</include>
       </includes>
-      <fileMode>0644</fileMode>
+      <excludes>
+        <exclude>target/**</exclude>
+      </excludes>
     </fileSet>
     <fileSet>
-      <directory>src/main/assembly</directory>
-      <outputDirectory>lib</outputDirectory>
-      <includes>
-        <include>*-LICENSE.txt</include>
-      </includes>
-      <fileMode>0644</fileMode>
-    </fileSet>
-    <fileSet>
-      <directory>../bin</directory>
+      <directory>${project.basedir}/../bin</directory>
       <outputDirectory>bin</outputDirectory>
       <includes>
         <include>mahout</include>
@@ -133,12 +128,12 @@
       <fileMode>0755</fileMode>
     </fileSet>
     <fileSet>
-      <directory>../src/conf</directory>
+      <directory>${project.basedir}/../src/conf</directory>
       <outputDirectory>conf</outputDirectory>
       <fileMode>0644</fileMode>
     </fileSet>
     <fileSet>
-      <directory>../examples/bin</directory>
+      <directory>${project.basedir}/../examples/bin</directory>
       <outputDirectory>examples/bin</outputDirectory>
       <fileMode>0755</fileMode>
       <excludes>
