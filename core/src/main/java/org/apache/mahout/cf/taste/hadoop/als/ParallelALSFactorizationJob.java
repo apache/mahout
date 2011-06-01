@@ -275,7 +275,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
       extends Reducer<VarLongWritable,FloatWritable,VarIntWritable,FeatureVectorWithRatingWritable> {
 
     private int numFeatures;
-    private static final Random random = RandomUtils.getRandom();
+    private final Random random = RandomUtils.getRandom();
 
     @Override
     protected void setup(Context ctx) throws IOException, InterruptedException {

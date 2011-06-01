@@ -65,8 +65,8 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   private static final Logger log = LoggerFactory.getLogger(TreeClusteringRecommender.class);
   
   private static final FastIDSet[] NO_CLUSTERS = new FastIDSet[0];
-  private static final Random RANDOM = RandomUtils.getRandom();
-  
+
+  private final Random random;
   private final ClusterSimilarity clusterSimilarity;
   private final int numClusters;
   private final double clusteringThreshold;
@@ -115,6 +115,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     Preconditions.checkArgument(numClusters >= 2, "numClusters must be at least 2");
     Preconditions.checkArgument(samplingRate > 0.0 && samplingRate <= 1.0,
       "samplingRate is invalid: %f", samplingRate);
+    random = RandomUtils.getRandom();
     this.clusterSimilarity = clusterSimilarity;
     this.numClusters = numClusters;
     this.clusteringThreshold = Double.NaN;
@@ -172,6 +173,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     Preconditions.checkArgument(clusterSimilarity != null, "clusterSimilarity is null");
     Preconditions.checkArgument(!Double.isNaN(clusteringThreshold), "clusteringThreshold must not be NaN");
     Preconditions.checkArgument(samplingRate > 0.0 && samplingRate <= 1.0, "samplingRate is invalid: %f", samplingRate);
+    random = RandomUtils.getRandom();
     this.clusterSimilarity = clusterSimilarity;
     this.numClusters = Integer.MIN_VALUE;
     this.clusteringThreshold = clusteringThreshold;
@@ -324,7 +326,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     for (int i = 0; i < size; i++) {
       FastIDSet cluster1 = clusters.get(i);
       for (int j = i + 1; j < size; j++) {
-        if (samplingRate >= 1.0 || RANDOM.nextDouble() < samplingRate) {
+        if (samplingRate >= 1.0 || random.nextDouble() < samplingRate) {
           FastIDSet cluster2 = clusters.get(j);
           double similarity = clusterSimilarity.getSimilarity(cluster1, cluster2);
           if (!Double.isNaN(similarity) && similarity > bestSimilarity) {

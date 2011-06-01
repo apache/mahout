@@ -83,9 +83,7 @@ public final class RandomWrapper extends Random {
     // Since this will be called by the java.util.Random() constructor before we construct
     // the delegate... and because we don't actually care about the result of this for our
     // purpose:
-    if (random != null) {
-      random.setSeed(seed);
-    }
+    random = new MersenneTwisterRNG(RandomUtils.longSeedtoBytes(seed));
   }
 
   @Override
