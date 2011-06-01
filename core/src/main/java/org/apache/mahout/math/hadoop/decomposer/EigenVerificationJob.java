@@ -163,7 +163,7 @@ public class EigenVerificationJob extends AbstractJob {
     return 0;
   }
 
-  private Map<String, String> handleArgs(String[] args) {
+  private Map<String, String> handleArgs(String[] args) throws IOException {
     addOutputOption();
     addOption("eigenInput",
               "ei",

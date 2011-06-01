@@ -19,6 +19,7 @@
 
 package org.apache.mahout.common;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,7 +43,7 @@ public final class AbstractJobTest extends MahoutTestCase {
       public AbstractJob getJob() {
         return new AbstractJob() {
           @Override
-          public int run(String[] args) {
+          public int run(String[] args) throws IOException {
             addFlag("testFlag", "t", "a simple test flag");
             
             Map<String,String> argMap = parseArguments(args);
@@ -73,14 +74,14 @@ public final class AbstractJobTest extends MahoutTestCase {
       public AbstractJob getJob() {
         return new AbstractJob() {
           @Override
-          public int run(String[] args) {
+          public int run(String[] args) throws IOException {
             this.addOption(DefaultOptionCreator.overwriteOption().create());
             this.addOption("option", "o", "option");
             this.addOption("required", "r", "required", true /* required */);
             this.addOption("notRequired", "nr", "not required", false /* not required */);
             this.addOption("hasDefault", "hd", "option w/ default", "defaultValue");
-            
-            
+
+
             Map<String,String> argMap = parseArguments(args);
             if (argMap == null) {
               return -1;
@@ -158,7 +159,7 @@ public final class AbstractJobTest extends MahoutTestCase {
       public AbstractJob getJob() {
         return new AbstractJob() {
           @Override
-          public int run(String[] args) {
+          public int run(String[] args) throws IOException {
             addInputOption();
             addOutputOption();
             

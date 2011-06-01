@@ -17,6 +17,7 @@
 
 package org.apache.mahout.common;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 
 import org.apache.commons.cli.Options;
@@ -43,7 +44,7 @@ public final class CommandLineUtil {
    *
    * @param group job-specific command-line options.
    */
-  public static void printHelpWithGenericOptions(Group group) {
+  public static void printHelpWithGenericOptions(Group group) throws IOException {
     Options ops = new Options();
     new GenericOptionsParser(new Configuration(), ops, new String[0]);
     org.apache.commons.cli.HelpFormatter fmt = new org.apache.commons.cli.HelpFormatter();
@@ -61,7 +62,7 @@ public final class CommandLineUtil {
     pw.flush();
   }
 
-  public static void printHelpWithGenericOptions(Group group, OptionException oe) {
+  public static void printHelpWithGenericOptions(Group group, OptionException oe) throws IOException {
     Options ops = new Options();
     new GenericOptionsParser(new Configuration(), ops, new String[0]);
     org.apache.commons.cli.HelpFormatter fmt = new org.apache.commons.cli.HelpFormatter();

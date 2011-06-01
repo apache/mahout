@@ -240,7 +240,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    *
    *
    */
-  public Map<String, String> parseArguments(String[] args) {
+  public Map<String, String> parseArguments(String[] args) throws IOException {
 
     Option helpOpt = addOption(DefaultOptionCreator.helpOption());
     addOption("tempDir", null, "Intermediate output directory", "temp");
