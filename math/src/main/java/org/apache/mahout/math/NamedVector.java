@@ -36,7 +36,7 @@ public class NamedVector implements Vector {
   }
 
   public NamedVector(Vector delegate, String name) {
-    if (delegate == null) {
+    if (delegate == null || name == null) {
       throw new IllegalArgumentException();
     }
     this.delegate = delegate;
