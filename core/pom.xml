@@ -143,6 +143,11 @@
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-core</artifactId>
     </dependency>
+    <!-- Adding manually since Hadoop actually needs it: -->
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-mapper-asl</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>commons-dbcp</groupId>

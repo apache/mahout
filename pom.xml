@@ -265,6 +265,12 @@
           </exclusion>
         </exclusions>
       </dependency>
+      <!-- Adding manually since Hadoop actually needs it: -->
+      <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-mapper-asl</artifactId>
+        <version>1.4.2</version>
+      </dependency>
       
       <dependency>
         <groupId>commons-dbcp</groupId>
