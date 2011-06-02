@@ -17,10 +17,12 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.cf.taste.common.TopK;
 import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
 import org.apache.mahout.math.Vector;
@@ -28,12 +30,7 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
 
 public final class MostSimilarItemPairsMapper
     extends Mapper<IntWritable,VectorWritable,EntityEntityWritable,DoubleWritable> {
@@ -44,12 +41,10 @@ public final class MostSimilarItemPairsMapper
   @Override
   protected void setup(Context ctx) {
     Configuration conf = ctx.getConfiguration();
-    //String itemIDIndexPathStr = conf.get(ItemSimilarityJob.ITEM_ID_INDEX_PATH_STR);
     maxSimilarItemsPerItem = conf.getInt(ItemSimilarityJob.MAX_SIMILARITIES_PER_ITEM, -1);
-    if (maxSimilarItemsPerItem < 1) {
-      throw new IllegalStateException("maxSimilarItemsPerItem was not correctly set!");
-    }
     indexItemIDMap = TasteHadoopUtils.readItemIDIndexMap(conf.get(ItemSimilarityJob.ITEM_ID_INDEX_PATH_STR), conf);
+
+    Preconditions.checkArgument(maxSimilarItemsPerItem > 0, "maxSimilarItemsPerItem was not correctly set!");
   }
 
   @Override
@@ -58,40 +53,28 @@ public final class MostSimilarItemPairsMapper
 
     int itemIDIndex = itemIDIndexWritable.get();
 
-    Queue<SimilarItem> topMostSimilarItems = new PriorityQueue<SimilarItem>(maxSimilarItemsPerItem + 1,
-        Collections.reverseOrder(SimilarItem.COMPARE_BY_SIMILARITY));
+    TopK<SimilarItem> topKMostSimilarItems =
+        new TopK<SimilarItem>(maxSimilarItemsPerItem, SimilarItem.COMPARE_BY_SIMILARITY);
 
     Iterator<Vector.Element> similarityVectorIterator = similarityVector.get().iterateNonZero();
 
     while (similarityVectorIterator.hasNext()) {
       Vector.Element element = similarityVectorIterator.next();
-      int index = element.index();
-      double value = element.get();
       /* ignore self similarities */
-      if (index != itemIDIndex) {
-        if (topMostSimilarItems.size() < maxSimilarItemsPerItem) {
-          topMostSimilarItems.add(new SimilarItem(indexItemIDMap.get(index), value));
-        } else if (value > topMostSimilarItems.peek().getSimilarity()) {
-          topMostSimilarItems.add(new SimilarItem(indexItemIDMap.get(index), value));
-          topMostSimilarItems.poll();
-        }
+      if (element.index() != itemIDIndex) {
+        topKMostSimilarItems.offer(new SimilarItem(indexItemIDMap.get(element.index()), element.get()));
       }
     }
 
-    if (!topMostSimilarItems.isEmpty()) {
-      List<SimilarItem> mostSimilarItems = new ArrayList<SimilarItem>(topMostSimilarItems.size());
-      mostSimilarItems.addAll(topMostSimilarItems);
-      Collections.sort(mostSimilarItems, SimilarItem.COMPARE_BY_SIMILARITY);
-
-      long itemID = indexItemIDMap.get(itemIDIndex);
-      for (SimilarItem similarItem : mostSimilarItems) {
-        long otherItemID = similarItem.getItemID();
-        if (itemID < otherItemID) {
-          ctx.write(new EntityEntityWritable(itemID, otherItemID), new DoubleWritable(similarItem.getSimilarity()));
-        } else {
-          ctx.write(new EntityEntityWritable(otherItemID, itemID), new DoubleWritable(similarItem.getSimilarity()));
-        }
+    long itemID = indexItemIDMap.get(itemIDIndex);
+    for (SimilarItem similarItem : topKMostSimilarItems.retrieve()) {
+      long otherItemID = similarItem.getItemID();
+      if (itemID < otherItemID) {
+        ctx.write(new EntityEntityWritable(itemID, otherItemID), new DoubleWritable(similarItem.getSimilarity()));
+      } else {
+        ctx.write(new EntityEntityWritable(otherItemID, itemID), new DoubleWritable(similarItem.getSimilarity()));
       }
     }
+
   }
 }

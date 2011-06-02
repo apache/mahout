@@ -32,8 +32,7 @@ public class WinnowTrainer extends LinearTrainer {
   /** Promotion step to multiply weights with on update. */
   private final double promotionStep;
   
-  public WinnowTrainer(int dimension, double promotionStep,
-                       double threshold, double init, double initBias) {
+  public WinnowTrainer(int dimension, double promotionStep, double threshold, double init, double initBias) {
     super(dimension, threshold, init, initBias);
     this.promotionStep = promotionStep;
   }

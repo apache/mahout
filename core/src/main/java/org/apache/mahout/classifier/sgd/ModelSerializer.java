@@ -17,6 +17,7 @@
 
 package org.apache.mahout.classifier.sgd;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.io.Writable;
 
 import java.io.DataInputStream;
@@ -39,7 +40,7 @@ public final class ModelSerializer {
     try {
       PolymorphicWritable.write(out, model);
     } finally {
-      out.close();
+      Closeables.close(out, false);
     }
   }
 
@@ -48,7 +49,7 @@ public final class ModelSerializer {
     try {
       PolymorphicWritable.write(out, model);
     } finally {
-      out.close();
+      Closeables.close(out, false);
     }
   }
 
@@ -57,7 +58,7 @@ public final class ModelSerializer {
     try {
       PolymorphicWritable.write(out, model);
     } finally {
-      out.close();
+      Closeables.close(out, false);
     }
   }
 
@@ -66,7 +67,7 @@ public final class ModelSerializer {
     try {
       return PolymorphicWritable.read(dataIn, clazz);
     } finally {
-      dataIn.close();
+      Closeables.close(in, false);
     }
   }
 

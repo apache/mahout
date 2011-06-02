@@ -20,6 +20,7 @@ package org.apache.mahout.classifier.naivebayes.trainer;
 import java.io.IOException;
 import java.net.URI;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.Path;
@@ -56,9 +57,9 @@ public class NaiveBayesThetaMapper extends Mapper<IntWritable, VectorWritable, T
     super.setup(context);
     Configuration conf = context.getConfiguration();
     URI[] localFiles = DistributedCache.getCacheFiles(conf);
-    if (localFiles == null || localFiles.length < 2) {
-      throw new IllegalArgumentException("missing paths from the DistributedCache");
-    }
+    Preconditions.checkArgument(localFiles != null && localFiles.length >= 2,
+        "missing paths from the DistributedCache");
+
     alphaI = conf.getFloat(NaiveBayesTrainer.ALPHA_I, 1.0f);
     Path weightFile = new Path(localFiles[0].getPath());
 

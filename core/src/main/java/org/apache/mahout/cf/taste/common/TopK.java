@@ -15,20 +15,31 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop.similarity.item;
+package org.apache.mahout.cf.taste.common;
 
-import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
 
-import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
+/**
+ * this class will preserve the k maximum elements of all elements it has been offered
+ */
+public class TopK<T> extends FixedSizePriorityQueue<T> {
 
-public class MostSimilarItemPairsReducer
-    extends Reducer<EntityEntityWritable,DoubleWritable,EntityEntityWritable,DoubleWritable> {
+  public TopK(int k, Comparator<? super T> comparator) {
+    super(k, comparator);
+  }
 
   @Override
-  protected void reduce(EntityEntityWritable itemIDPair, Iterable<DoubleWritable> values, Context ctx)
-      throws IOException, InterruptedException {
-    ctx.write(itemIDPair, values.iterator().next());
+  protected Comparator<? super T> queueingComparator(Comparator<? super T> stdComparator) {
+    return stdComparator;
+  }
+
+  @Override
+  protected Comparator<? super T> sortingComparator(Comparator<? super T> stdComparator) {
+    return Collections.reverseOrder(stdComparator);
+  }
+
+  public T smallestGreat() {
+    return peek();
   }
 }

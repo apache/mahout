@@ -17,6 +17,7 @@
 
 package org.apache.mahout.classifier.naivebayes;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -184,40 +185,15 @@ public class NaiveBayesModel {
       return; // empty models are valid
     }
 
-    if (model.getAlphaI() <= 0) {
-      throw new IllegalArgumentException(
-          "Error: AlphaI has to be greater than 0!");
-    }
-
-    if (model.getVocabCount() <= 0) {
-      throw new IllegalArgumentException(
-          "Error: The vocab count has to be greater than 0!");
-    }
-
-    if (model.getVocabCount() <= 0) {
-      throw new IllegalArgumentException(
-          "Error: The vocab count has to be greater than 0!");
-    }
-    
-    if (model.getTotalSum() <= 0) {
-      throw new IllegalArgumentException(
-          "Error: The vocab count has to be greater than 0!");
-    }    
-
-    if (model.getLabelSum() == null || model.getLabelSum().getNumNondefaultElements() <= 0) {
-      throw new IllegalArgumentException(
-          "Error: The number of labels has to be greater than 0 or defined!");
-    }  
-    
-    if (model.getPerlabelThetaNormalizer() == null
-        || model.getPerlabelThetaNormalizer().getNumNondefaultElements() <= 0) {
-      throw new IllegalArgumentException(
-          "Error: The number of theta normalizers has to be greater than 0 or defined!");
-    }
-    
-    if (model.getFeatureSum() == null || model.getFeatureSum().getNumNondefaultElements() <= 0) {
-      throw new IllegalArgumentException(
-          "Error: The number of features has to be greater than 0 or defined!");
-    }
+    Preconditions.checkArgument(model.getAlphaI() > 0, "Error: AlphaI has to be greater than 0!");
+    Preconditions.checkArgument(model.getVocabCount() > 0, "Error: The vocab count has to be greater than 0!");
+    Preconditions.checkArgument(model.getTotalSum() > 0, "Error: The vocab count has to be greater than 0!");
+    Preconditions.checkArgument(model.getLabelSum() != null && model.getLabelSum().getNumNondefaultElements() > 0,
+        "Error: The number of labels has to be greater than 0 and defined!");
+    Preconditions.checkArgument(model.getPerlabelThetaNormalizer() != null &&
+        model.getPerlabelThetaNormalizer().getNumNondefaultElements() > 0,
+        "Error: The number of theta normalizers has to be greater than 0 or defined!");
+    Preconditions.checkArgument(model.getFeatureSum() != null && model.getFeatureSum().getNumNondefaultElements() > 0,
+        "Error: The number of features has to be greater than 0 or defined!");
   }
 }

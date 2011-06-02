@@ -24,6 +24,11 @@ import java.nio.charset.Charset;
 import java.util.Iterator;
 
 import com.google.common.base.Charsets;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
+import org.apache.mahout.common.HadoopUtil;
 
 /**
  * Iterable representing the lines of a text file. It can produce an {@link Iterator} over those lines. This
@@ -42,7 +47,7 @@ public final class FileLineIterable implements Iterable<String> {
   public FileLineIterable(File file) throws IOException {
     this(file, Charsets.UTF_8, false);
   }
-  
+
   /** Creates a  over a given file, assuming a UTF-8 encoding. */
   public FileLineIterable(File file, boolean skipFirstLine) throws IOException {
     this(file, Charsets.UTF_8, skipFirstLine);
@@ -52,7 +57,7 @@ public final class FileLineIterable implements Iterable<String> {
   public FileLineIterable(File file, Charset encoding, boolean skipFirstLine) throws IOException {
     this(FileLineIterator.getFileInputStream(file), encoding, skipFirstLine);
   }
-  
+
   public FileLineIterable(InputStream is) {
     this(is, Charsets.UTF_8, false);
   }

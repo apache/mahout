@@ -19,6 +19,7 @@ package org.apache.mahout.clustering;
 import java.io.IOException;
 import java.util.Iterator;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -124,11 +125,13 @@ public class ClusterIterator {
   private static void writeClassifier(ClusterClassifier classifier, Path outPath, String k) throws IOException {
     Configuration config = new Configuration();
     FileSystem fs = FileSystem.get(outPath.toUri(), config);
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, config, outPath,
-        Text.class, ClusterClassifier.class);
-    Writable key = new Text(k);
-    writer.append(key, classifier);
-    writer.close();
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs, config, outPath, Text.class, ClusterClassifier.class);
+    try {
+      Writable key = new Text(k);
+      writer.append(key, classifier);
+    } finally {
+      Closeables.close(writer, false);
+    }
   }
   
   private static ClusterClassifier readClassifier(Path inPath) throws IOException {
@@ -137,8 +140,11 @@ public class ClusterIterator {
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, inPath, config);
     Writable key = new Text();
     ClusterClassifier classifierOut = new ClusterClassifier();
-    reader.next(key, classifierOut);
-    reader.close();
+    try {
+      reader.next(key, classifierOut);
+    } finally {
+      Closeables.close(reader, false);
+    }
     return classifierOut;
   }
 }

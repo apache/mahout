@@ -34,6 +34,7 @@ import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputFormat;
@@ -42,6 +43,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
@@ -91,6 +93,9 @@ public abstract class AbstractJob extends Configured implements Tool {
   /** output path, populated by {@link #parseArguments(String[]) */
   private Path outputPath;
 
+  /** temp path, populated by {@link #parseArguments(String[]) */
+  private Path tempPath;
+
   private Map<String, String> argMap;
 
   /** internal list of options that have been added */
@@ -116,6 +121,14 @@ public abstract class AbstractJob extends Configured implements Tool {
    */
   protected Path getOutputPath() {
     return outputPath;
+  }
+
+  protected Path getTempPath() {
+    return tempPath;
+  }
+
+  protected Path getTempPath(String directory) {
+    return new Path(tempPath, directory);
   }
 
   /** Add an option with no argument whose presence can be checked for using
@@ -284,6 +297,8 @@ public abstract class AbstractJob extends Configured implements Tool {
     argMap = new TreeMap<String, String>();
     maybePut(argMap, cmdLine, this.options.toArray(new Option[this.options.size()]));
 
+    this.tempPath = new Path(argMap.get("--tempDir").toString());
+
     log.info("Command line arguments: {}", argMap);
     return argMap;
   }
@@ -431,6 +446,22 @@ public abstract class AbstractJob extends Configured implements Tool {
     name.append('-').append(mapper.getSimpleName());
     name.append('-').append(reducer.getSimpleName());
     return name.toString();
+  }
+
+  /**
+   * necessary to make this job (having a combined input path) work on Amazon S3, hopefully this is obsolete when MultipleInputs is available
+   * again
+   *
+   * @param job
+   * @param referencePath
+   * @param inputPathOne
+   * @param inputPathTwo
+   * @throws IOException
+   */
+  public void setS3SafeCombinedInputPath(Job job, Path referencePath, Path inputPathOne, Path inputPathTwo)
+      throws IOException {
+    FileSystem fs = FileSystem.get(referencePath.toUri(), job.getConfiguration());
+    FileInputFormat.setInputPaths(job, inputPathOne.makeQualified(fs), inputPathTwo.makeQualified(fs));
   }
 
 }

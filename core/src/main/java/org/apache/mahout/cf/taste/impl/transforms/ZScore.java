@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.impl.transforms;
 
 import java.util.Collection;
 
+import com.google.common.base.Preconditions;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.Cache;
@@ -50,7 +51,7 @@ public final class ZScore implements PreferenceTransform {
   private final Cache<Long,RunningAverageAndStdDev> meanAndStdevs;
   
   public ZScore(DataModel dataModel) {
-    this.dataModel = dataModel;
+    this.dataModel = Preconditions.checkNotNull(dataModel);
     this.meanAndStdevs = new Cache<Long,RunningAverageAndStdDev>(new MeanStdevRetriever());
     refresh(null);
   }

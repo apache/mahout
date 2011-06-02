@@ -38,7 +38,7 @@ public final class PolymorphicWritable<T> {
 
   public static <T extends Writable> T read(DataInput dataInput, Class<? extends T> clazz) throws IOException {
     String className = dataInput.readUTF();
-    T r = null;
+    T r;
     try {
       r = Class.forName(className).asSubclass(clazz).newInstance();
     } catch (InstantiationException e) {

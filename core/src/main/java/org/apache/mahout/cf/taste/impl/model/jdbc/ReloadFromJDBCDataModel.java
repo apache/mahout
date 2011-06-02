@@ -48,8 +48,7 @@ public final class ReloadFromJDBCDataModel implements DataModel {
   private final RefreshHelper refreshHelper;
 
   public ReloadFromJDBCDataModel(JDBCDataModel delegate) throws TasteException {
-    Preconditions.checkNotNull(delegate, "Delegate cannot be null");
-    this.delegate = delegate;
+    this.delegate = Preconditions.checkNotNull(delegate);
     refreshHelper = new RefreshHelper(new Callable<Void>() {
       @Override
       public Void call() {

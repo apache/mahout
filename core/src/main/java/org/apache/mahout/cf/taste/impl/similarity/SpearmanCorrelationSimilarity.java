@@ -41,8 +41,7 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
   private final DataModel dataModel;
   
   public SpearmanCorrelationSimilarity(DataModel dataModel) {
-    Preconditions.checkArgument(dataModel != null, "dataModel is null");
-    this.dataModel = dataModel;
+    this.dataModel = Preconditions.checkNotNull(dataModel);
   }
   
   @Override

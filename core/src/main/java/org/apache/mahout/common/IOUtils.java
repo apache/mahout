@@ -27,6 +27,7 @@ import java.sql.Statement;
 import java.util.Collection;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.Closeables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,13 +45,7 @@ public final class IOUtils {
   public static void quietClose(Closeable... closeables) {
     Preconditions.checkNotNull(closeables, "Closables cannot be null");
     for (Closeable closeable : closeables) {
-      if (closeable != null) {
-        try {
-          closeable.close();
-        } catch (IOException ioe) {
-          log.warn("Unexpected exception while closing; continuing", ioe);
-        }
-      }
+      Closeables.closeQuietly(closeable);
     }
   }
   

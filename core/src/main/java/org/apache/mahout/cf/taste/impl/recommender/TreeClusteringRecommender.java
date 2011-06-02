@@ -111,12 +111,11 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
                                    int numClusters,
                                    double samplingRate) throws TasteException {
     super(dataModel);
-    Preconditions.checkArgument(clusterSimilarity != null, "clusterSimilarity is null");
     Preconditions.checkArgument(numClusters >= 2, "numClusters must be at least 2");
     Preconditions.checkArgument(samplingRate > 0.0 && samplingRate <= 1.0,
       "samplingRate is invalid: %f", samplingRate);
     random = RandomUtils.getRandom();
-    this.clusterSimilarity = clusterSimilarity;
+    this.clusterSimilarity = Preconditions.checkNotNull(clusterSimilarity);
     this.numClusters = numClusters;
     this.clusteringThreshold = Double.NaN;
     this.clusteringByThreshold = false;
@@ -170,11 +169,10 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
                                    double clusteringThreshold,
                                    double samplingRate) throws TasteException {
     super(dataModel);
-    Preconditions.checkArgument(clusterSimilarity != null, "clusterSimilarity is null");
     Preconditions.checkArgument(!Double.isNaN(clusteringThreshold), "clusteringThreshold must not be NaN");
     Preconditions.checkArgument(samplingRate > 0.0 && samplingRate <= 1.0, "samplingRate is invalid: %f", samplingRate);
     random = RandomUtils.getRandom();
-    this.clusterSimilarity = clusterSimilarity;
+    this.clusterSimilarity = Preconditions.checkNotNull(clusterSimilarity);
     this.numClusters = Integer.MIN_VALUE;
     this.clusteringThreshold = clusteringThreshold;
     this.clusteringByThreshold = true;

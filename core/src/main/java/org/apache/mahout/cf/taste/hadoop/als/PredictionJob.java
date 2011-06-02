@@ -82,6 +82,7 @@ public class PredictionJob extends AbstractJob {
 
     Path pairsJoinedWithItemFeatures = new Path(tempDirPath, "pairsJoinedWithItemFeatures");
 
+    /* joins here could spare more than 50% of their M/R cycles when MultipleInputs is available again */
     Job convertPairs = prepareJob(pairs, convertedPairs, TextInputFormat.class, PairsMapper.class,
         TaggedVarIntWritable.class, VectorWithIndexWritable.class, Reducer.class, TaggedVarIntWritable.class,
         VectorWithIndexWritable.class, SequenceFileOutputFormat.class);

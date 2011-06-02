@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.hadoop;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.cf.taste.common.MinK;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -26,9 +27,8 @@ import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 import org.apache.mahout.math.map.OpenIntIntHashMap;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
-import java.util.PriorityQueue;
 
 
 /**
@@ -93,19 +93,20 @@ public class MaybePruneRowsMapper
       return vector;
     }
 
-    PriorityQueue<Integer> smallCounts = new PriorityQueue<Integer>(maxCooccurrences + 1, Collections.reverseOrder());
+    MinK<Integer> smallCounts = new MinK<Integer>(maxCooccurrences, new Comparator<Integer>() {
+        @Override
+        public int compare(Integer one, Integer two) {
+          return one.compareTo(two);
+        }
+      });
+
     Iterator<Vector.Element> it = vector.iterateNonZero();
     while (it.hasNext()) {
       int count = indexCounts.get(it.next().index());
-      if (smallCounts.size() < maxCooccurrences) {
-        smallCounts.add(count);
-      } else if (count < smallCounts.peek()) {
-        smallCounts.add(count);
-        smallCounts.poll();
-      }
+      smallCounts.offer(count);
     }
 
-    int greatestSmallCount = smallCounts.peek();
+    int greatestSmallCount = smallCounts.greatestSmall();
     if (greatestSmallCount > 0) {
       Iterator<Vector.Element> it2 = vector.iterateNonZero();
       while (it2.hasNext()) {

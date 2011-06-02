@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.hadoop.als;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.FloatWritable;
@@ -91,9 +92,9 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     addInputOption();
     addOutputOption();
-    addOption("lambda", "l", "", true);
-    addOption("numFeatures", "f", "", true);
-    addOption("numIterations", "i", "", true);
+    addOption("lambda", "l", "regularization parameter", true);
+    addOption("numFeatures", "f", "dimension of the feature space", true);
+    addOption("numIterations", "i", "number of iterations", true);
 
     Map<String,String> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
@@ -152,7 +153,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
 
   private void iterate(int currentIteration, int numFeatures, double lambda)
-    throws IOException, ClassNotFoundException, InterruptedException {
+      throws IOException, ClassNotFoundException, InterruptedException {
     /* fix M, compute U */
     joinAndSolve(pathToM(currentIteration - 1), pathToItemRatings(), pathToU(currentIteration), numFeatures,
         lambda, currentIteration, STEP_ONE);
@@ -177,7 +178,6 @@ public class ParallelALSFactorizationJob extends AbstractJob {
         IndexedVarIntWritable.class, FeatureVectorWithRatingWritable.class, SolvingReducer.class, VarIntWritable.class,
         FeatureVectorWithRatingWritable.class, SequenceFileOutputFormat.class);
     Configuration solveConf = solve.getConfiguration();
-    solve.setPartitionerClass(HashPartitioner.class);
     solve.setGroupingComparatorClass(IndexedVarIntWritable.GroupingComparator.class);
     solveConf.setInt(NUM_FEATURES, numFeatures);
     solveConf.set(LAMBDA, String.valueOf(lambda));
@@ -242,10 +242,9 @@ public class ParallelALSFactorizationJob extends AbstractJob {
       super.setup(ctx);
       lambda = Double.parseDouble(ctx.getConfiguration().get(LAMBDA));
       numFeatures = ctx.getConfiguration().getInt(NUM_FEATURES, -1);
-      if (numFeatures < 1) {
-        throw new IllegalStateException("numFeatures was not set correctly!");
-      }
       solver = new AlternateLeastSquaresSolver();
+
+      Preconditions.checkArgument(numFeatures > 0, "numFeatures was not set correctly!");
     }
 
     @Override
@@ -281,14 +280,13 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     protected void setup(Context ctx) throws IOException, InterruptedException {
       super.setup(ctx);
       numFeatures = ctx.getConfiguration().getInt(NUM_FEATURES, -1);
-      if (numFeatures < 1) {
-        throw new IllegalStateException("numFeatures was not set correctly!");
-      }
+
+      Preconditions.checkArgument(numFeatures > 0, "numFeatures was not set correctly!");
     }
 
     @Override
     protected void reduce(VarLongWritable itemID, Iterable<FloatWritable> ratings, Context ctx) 
-      throws IOException, InterruptedException {
+        throws IOException, InterruptedException {
 
       RunningAverage averageRating = new FullRunningAverage();
       for (FloatWritable rating : ratings) {

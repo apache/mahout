@@ -27,7 +27,8 @@ import org.apache.mahout.math.Vector.Element;
  * Class implementing the Naive Bayes Classifier Algorithm
  * 
  */
-public abstract class AbstractNaiveBayesClassifier extends AbstractVectorClassifier { 
+public abstract class AbstractNaiveBayesClassifier extends AbstractVectorClassifier {
+
   private final NaiveBayesModel model;
   
   protected AbstractNaiveBayesClassifier(NaiveBayesModel model) {
@@ -44,8 +45,7 @@ public abstract class AbstractNaiveBayesClassifier extends AbstractVectorClassif
     double result = 0.0;
     Iterator<Element> it = instance.iterateNonZero();
     while (it.hasNext()) {
-      Element e = it.next();
-      result +=  getScoreForLabelFeature(label, e.index());
+      result +=  getScoreForLabelFeature(label, it.next().index());
     }
     return result;
   }

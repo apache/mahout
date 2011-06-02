@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import com.google.common.base.Preconditions;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -60,6 +61,9 @@ public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrate
    * @param userItemCountMultiplier
    */
   public SamplingCandidateItemsStrategy(int defaultMaxPrefsPerItemConsidered, int userItemCountMultiplier) {
+    Preconditions.checkArgument(defaultMaxPrefsPerItemConsidered > 0, "defaultMaxPrefsPerItemConsidered must be " +
+        "greater zero");
+    Preconditions.checkArgument(userItemCountMultiplier > 0, "userItemCountMultiplier must be greater zero");
     this.defaultMaxPrefsPerItemConsidered = defaultMaxPrefsPerItemConsidered;
     this.userItemCountMultiplier = userItemCountMultiplier;
   }

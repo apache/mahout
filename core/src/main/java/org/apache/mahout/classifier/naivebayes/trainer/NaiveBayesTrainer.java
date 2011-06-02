@@ -59,7 +59,7 @@ public final class NaiveBayesTrainer {
                                       int numReducers,
                                       float alphaI,
                                       boolean trainComplementary)
-    throws IOException, InterruptedException, ClassNotFoundException {
+      throws IOException, InterruptedException, ClassNotFoundException {
     conf.setFloat(ALPHA_I, alphaI);
     Path labelMapPath = createLabelMapFile(inputLabels, conf, new Path(output, LABEL_MAP));
     Path classVectorPath =  new Path(output, CLASS_VECTORS);

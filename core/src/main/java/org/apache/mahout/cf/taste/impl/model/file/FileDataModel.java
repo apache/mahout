@@ -155,7 +155,7 @@ public class FileDataModel extends AbstractDataModel {
    * @see #FileDataModel(File)
    */
   public FileDataModel(File dataFile, boolean transpose, long minReloadIntervalMS) throws IOException {
-    Preconditions.checkArgument(dataFile != null, "dataFile is null");
+    this.dataFile = Preconditions.checkNotNull(dataFile.getAbsoluteFile());
     if (!dataFile.exists() || dataFile.isDirectory()) {
       throw new FileNotFoundException(dataFile.toString());
     }
@@ -164,7 +164,6 @@ public class FileDataModel extends AbstractDataModel {
 
     log.info("Creating FileDataModel for file {}", dataFile);
 
-    this.dataFile = dataFile.getAbsoluteFile();
     this.lastModified = dataFile.lastModified();
     this.lastUpdateFileModified = readLastUpdateFileModified();
 

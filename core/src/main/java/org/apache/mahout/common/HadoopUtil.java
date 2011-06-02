@@ -18,6 +18,7 @@
 package org.apache.mahout.common;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Iterator;
 
@@ -60,6 +61,11 @@ public final class HadoopUtil {
       count++;
     }
     return count;
+  }
+
+  public static InputStream openStream(Path path, Configuration conf) throws IOException {
+    FileSystem fs = FileSystem.get(path.toUri(), conf);
+    return fs.open(path.makeQualified(fs));
   }
 
 }

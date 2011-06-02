@@ -32,10 +32,10 @@ public final class PreferredItemsNeighborhoodCandidateItemsStrategy extends Abst
   protected FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel) throws TasteException {
     FastIDSet possibleItemsIDs = new FastIDSet();
     for (long itemID : preferredItemIDs) {
-      PreferenceArray prefs2 = dataModel.getPreferencesForItem(itemID);
-      int size2 = prefs2.length();
-      for (int j = 0; j < size2; j++) {
-        possibleItemsIDs.addAll(dataModel.getItemIDsFromUser(prefs2.getUserID(j)));
+      PreferenceArray itemPreferences = dataModel.getPreferencesForItem(itemID);
+      int numUsersPreferringItem = itemPreferences.length();
+      for (int index = 0; index < numUsersPreferringItem; index++) {
+        possibleItemsIDs.addAll(dataModel.getItemIDsFromUser(itemPreferences.getUserID(index)));
       }
     }
     possibleItemsIDs.removeAll(preferredItemIDs);

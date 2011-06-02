@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -17,18 +17,19 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
+import com.google.common.collect.Iterables;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.mahout.math.VarLongWritable;
+
 import java.io.IOException;
 
-import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
-
-public class MostSimilarItemPairsReducer
-    extends Reducer<EntityEntityWritable,DoubleWritable,EntityEntityWritable,DoubleWritable> {
+public class CountUsersCombiner
+    extends Reducer<CountUsersKeyWritable,VarLongWritable,CountUsersKeyWritable,VarLongWritable> {
 
   @Override
-  protected void reduce(EntityEntityWritable itemIDPair, Iterable<DoubleWritable> values, Context ctx)
+  protected void reduce(CountUsersKeyWritable key, Iterable<VarLongWritable> values, Context ctx)
       throws IOException, InterruptedException {
-    ctx.write(itemIDPair, values.iterator().next());
+    /* we only need to see one tuple per user */
+    ctx.write(key, Iterables.get(values, 0));
   }
 }

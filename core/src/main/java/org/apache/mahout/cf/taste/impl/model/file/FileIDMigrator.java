@@ -62,14 +62,13 @@ public class FileIDMigrator extends AbstractIDMigrator {
 
   public FileIDMigrator(File dataFile, long minReloadIntervalMS) throws FileNotFoundException {
     longToString = new FastByIDMap<String>(100);
-    Preconditions.checkArgument(dataFile != null, "dataFile is null");
+    this.dataFile = Preconditions.checkNotNull(dataFile);
     if (!dataFile.exists() || dataFile.isDirectory()) {
       throw new FileNotFoundException(dataFile.toString());
     }
 
     log.info("Creating FileReadonlyIDMigrator for file {}", dataFile);
 
-    this.dataFile = dataFile;
     this.reloadLock = new ReentrantLock();
     this.lastModified = dataFile.lastModified();
     this.minReloadIntervalMS = minReloadIntervalMS;

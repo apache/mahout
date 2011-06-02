@@ -39,8 +39,7 @@ public final class LongPrimitiveArrayIterator implements LongPrimitiveIterator {
    *          array to iterate over
    */
   public LongPrimitiveArrayIterator(long[] array) {
-    Preconditions.checkArgument(array != null, "array is null");
-    this.array = array; // yeah, not going to copy the array here, for performance
+    this.array = Preconditions.checkNotNull(array); // yeah, not going to copy the array here, for performance
     this.position = 0;
     this.max = array.length;
   }

@@ -20,6 +20,7 @@ package org.apache.mahout.classifier.naivebayes.trainer;
 import java.io.IOException;
 import java.net.URI;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.Path;
@@ -51,9 +52,8 @@ public class NaiveBayesInstanceMapper extends Mapper<Text, VectorWritable, IntWr
     super.setup(context);
     Configuration conf = context.getConfiguration();
     URI[] localFiles = DistributedCache.getCacheFiles(conf);
-    if (localFiles == null || localFiles.length < 1) {
-      throw new IllegalArgumentException("missing paths from the DistributedCache");
-    }
+    Preconditions.checkArgument(localFiles != null && localFiles.length >= 1,
+        "missing paths from the DistributedCache");
     Path labelMapFile = new Path(localFiles[0].getPath());
     // key is word value is id
     for (Pair<Writable,IntWritable> record

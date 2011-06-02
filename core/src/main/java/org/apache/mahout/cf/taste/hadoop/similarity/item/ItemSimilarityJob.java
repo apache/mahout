@@ -123,13 +123,12 @@ public final class ItemSimilarityJob extends AbstractJob {
 
     Path inputPath = getInputPath();
     Path outputPath = getOutputPath();
-    Path tempDirPath = new Path(parsedArgs.get("--tempDir"));
 
-    Path itemIDIndexPath = new Path(tempDirPath, "itemIDIndex");
-    Path countUsersPath = new Path(tempDirPath, "countUsers");
-    Path userVectorPath = new Path(tempDirPath, "userVectors");
-    Path itemUserMatrixPath = new Path(tempDirPath, "itemUserMatrix");
-    Path similarityMatrixPath = new Path(tempDirPath, "similarityMatrix");
+    Path itemIDIndexPath = getTempPath("itemIDIndex");
+    Path countUsersPath = getTempPath("countUsers");
+    Path userVectorPath = getTempPath("userVectors");
+    Path itemUserMatrixPath = getTempPath("itemUserMatrix");
+    Path similarityMatrixPath = getTempPath("similarityMatrix");
 
     AtomicInteger currentPhase = new AtomicInteger();
 
@@ -171,6 +170,7 @@ public final class ItemSimilarityJob extends AbstractJob {
                                   VarIntWritable.class,
                                   NullWritable.class,
                                   TextOutputFormat.class);
+      countUsers.setCombinerClass(CountUsersCombiner.class);
       countUsers.setPartitionerClass(CountUsersKeyWritable.CountUsersPartitioner.class);
       countUsers.setGroupingComparatorClass(CountUsersKeyWritable.CountUsersGroupComparator.class);
       countUsers.waitForCompletion(true);
@@ -202,7 +202,7 @@ public final class ItemSimilarityJob extends AbstractJob {
       "--numberOfColumns", String.valueOf(numberOfUsers),
       "--similarityClassname", similarityClassName,
       "--maxSimilaritiesPerRow", String.valueOf(maxSimilarItemsPerItem + 1),
-      "--tempDir", tempDirPath.toString() });
+      "--tempDir", getTempPath().toString() });
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
       Job mostSimilarItems = prepareJob(similarityMatrixPath,

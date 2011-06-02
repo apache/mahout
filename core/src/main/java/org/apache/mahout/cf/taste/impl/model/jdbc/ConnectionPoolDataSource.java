@@ -42,7 +42,7 @@ public final class ConnectionPoolDataSource implements DataSource {
   private final DataSource delegate;
   
   public ConnectionPoolDataSource(DataSource underlyingDataSource) {
-    Preconditions.checkArgument(underlyingDataSource != null, "underlyingDataSource is null");
+    Preconditions.checkNotNull(underlyingDataSource);
     ConnectionFactory connectionFactory = new ConfiguringConnectionFactory(underlyingDataSource);
     GenericObjectPool objectPool = new GenericObjectPool();
     objectPool.setTestOnBorrow(false);

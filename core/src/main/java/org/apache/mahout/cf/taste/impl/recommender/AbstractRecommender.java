@@ -39,10 +39,8 @@ public abstract class AbstractRecommender implements Recommender {
   private final CandidateItemsStrategy candidateItemsStrategy;
   
   protected AbstractRecommender(DataModel dataModel, CandidateItemsStrategy candidateItemsStrategy) {
-    Preconditions.checkArgument(dataModel != null, "dataModel is null");
-
-    this.dataModel = dataModel;
-    this.candidateItemsStrategy = candidateItemsStrategy;
+    this.dataModel = Preconditions.checkNotNull(dataModel);
+    this.candidateItemsStrategy = Preconditions.checkNotNull(candidateItemsStrategy);
   }
 
   protected AbstractRecommender(DataModel dataModel) {

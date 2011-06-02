@@ -71,9 +71,8 @@ public final class InverseUserFrequency implements PreferenceTransform {
    *           if dataModel is {@code null} or logBase is {@link Double#NaN} or &lt;= 1.0
    */
   public InverseUserFrequency(DataModel dataModel, double logBase) throws TasteException {
-    Preconditions.checkArgument(dataModel != null, "dataModel is null");
     Preconditions.checkArgument(logBase > 1.0, "logBase should be > 1.0");
-    this.dataModel = dataModel;
+    this.dataModel = Preconditions.checkNotNull(dataModel);
     this.logBase = logBase;
     this.iufFactors = new FastByIDMap<Double>();
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
