@@ -207,11 +207,6 @@
       <artifactId>slf4j-jcl</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>net.java.dev.jets3t</groupId>
-      <artifactId>jets3t</artifactId>
-    </dependency>
-
   </dependencies>
 
   <profiles>
