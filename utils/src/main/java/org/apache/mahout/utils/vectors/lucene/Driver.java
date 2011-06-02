@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
 import com.google.common.io.Files;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -52,9 +53,70 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class Driver {
+
   private static final Logger log = LoggerFactory.getLogger(Driver.class);
 
-  private Driver() { }
+  private String luceneDir;
+  private String outFile;
+  private String field;
+  private String idField;
+  private String dictOut;
+  private String weightType = "tfidf";
+  private String delimiter = "\t";
+  private double norm = LuceneIterable.NO_NORMALIZING;
+  private long maxDocs = Long.MAX_VALUE;
+  private int minDf = 1;
+  private int maxDFPercent = 99;
+  private double maxPercentErrorDocs = 0.0;
+
+  public void dumpVectors() throws IOException {
+
+    File file = new File(luceneDir);
+    Preconditions.checkArgument(file.isDirectory(),
+                                "Lucene directory: " + file.getAbsolutePath()
+                                    + " does not exist or is not a directory");
+    Preconditions.checkArgument(maxDocs >= 0, "maxDocs must be >= 0");
+    Preconditions.checkArgument(minDf >= 1, "minDf must be >= 1");
+    Preconditions.checkArgument(maxDFPercent <= 99, "maxDFPercent must be <= 99");
+
+    Directory dir = FSDirectory.open(file);
+    IndexReader reader = IndexReader.open(dir, true);
+
+    Weight weight;
+    if ("tf".equalsIgnoreCase(weightType)) {
+      weight = new TF();
+    } else if ("tfidf".equalsIgnoreCase(weightType)) {
+      weight = new TFIDF();
+    } else {
+      throw new IllegalArgumentException("Weight type " + weightType + " is not supported");
+    }
+
+    TermInfo termInfo = new CachedTermInfo(reader, field, minDf, maxDFPercent);
+    VectorMapper mapper = new TFDFMapper(reader, weight, termInfo);
+
+    LuceneIterable iterable;
+    if (norm == LuceneIterable.NO_NORMALIZING) {
+      iterable = new LuceneIterable(reader, idField, field, mapper, LuceneIterable.NO_NORMALIZING, maxPercentErrorDocs);
+    } else {
+      iterable = new LuceneIterable(reader, idField, field, mapper, norm, maxPercentErrorDocs);
+    }
+
+    log.info("Output File: {}", outFile);
+
+    VectorWriter vectorWriter = getSeqFileWriter(outFile);
+
+    long numDocs = vectorWriter.write(iterable, maxDocs);
+    vectorWriter.close();
+    log.info("Wrote: {} vectors", numDocs);
+
+    File dictOutFile = new File(dictOut);
+    log.info("Dictionary Output file: {}", dictOutFile);
+    Writer writer = Files.newWriter(dictOutFile, Charsets.UTF_8);
+    DelimitedTermInfoWriter tiWriter = new DelimitedTermInfoWriter(writer, delimiter, field);
+    tiWriter.write(termInfo);
+    tiWriter.close();
+    writer.close();
+  }
 
   public static void main(String[] args) throws IOException {
 
@@ -63,60 +125,66 @@ public final class Driver {
     GroupBuilder gbuilder = new GroupBuilder();
 
     Option inputOpt = obuilder.withLongName("dir").withRequired(true).withArgument(
-      abuilder.withName("dir").withMinimum(1).withMaximum(1).create())
+        abuilder.withName("dir").withMinimum(1).withMaximum(1).create())
         .withDescription("The Lucene directory").withShortName("d").create();
 
     Option outputOpt = obuilder.withLongName("output").withRequired(true).withArgument(
-      abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription("The output file")
+        abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription("The output file")
         .withShortName("o").create();
 
     Option fieldOpt = obuilder.withLongName("field").withRequired(true).withArgument(
-      abuilder.withName("field").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The field in the index").withShortName("f").create();
+        abuilder.withName("field").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The field in the index").withShortName("f").create();
 
     Option idFieldOpt = obuilder.withLongName("idField").withRequired(false).withArgument(
-      abuilder.withName("idField").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The field in the index containing the index.  If null, then the Lucene internal doc "
-          + "id is used which is prone to error if the underlying index changes").withShortName("i").create();
+        abuilder.withName("idField").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The field in the index containing the index.  If null, then the Lucene internal doc "
+            + "id is used which is prone to error if the underlying index changes").withShortName("i").create();
 
     Option dictOutOpt = obuilder.withLongName("dictOut").withRequired(true).withArgument(
-      abuilder.withName("dictOut").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The output of the dictionary").withShortName("t").create();
+        abuilder.withName("dictOut").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The output of the dictionary").withShortName("t").create();
 
     Option weightOpt = obuilder.withLongName("weight").withRequired(false).withArgument(
-      abuilder.withName("weight").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The kind of weight to use. Currently TF or TFIDF").withShortName("w").create();
+        abuilder.withName("weight").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The kind of weight to use. Currently TF or TFIDF").withShortName("w").create();
 
     Option delimiterOpt = obuilder.withLongName("delimiter").withRequired(false).withArgument(
-      abuilder.withName("delimiter").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The delimiter for outputting the dictionary").withShortName("l").create();
+        abuilder.withName("delimiter").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The delimiter for outputting the dictionary").withShortName("l").create();
 
     Option powerOpt = obuilder.withLongName("norm").withRequired(false).withArgument(
-      abuilder.withName("norm").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The norm to use, expressed as either a double or \"INF\" if you want to use the Infinite norm.  "
-          + "Must be greater or equal to 0.  The default is not to normalize").withShortName("n").create();
+        abuilder.withName("norm").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The norm to use, expressed as either a double or \"INF\" if you want to use the Infinite norm.  "
+            + "Must be greater or equal to 0.  The default is not to normalize").withShortName("n").create();
 
     Option maxOpt = obuilder.withLongName("max").withRequired(false).withArgument(
-      abuilder.withName("max").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The maximum number of vectors to output.  If not specified, then it will loop over all docs")
+        abuilder.withName("max").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The maximum number of vectors to output.  If not specified, then it will loop over all docs")
         .withShortName("m").create();
 
     Option minDFOpt = obuilder.withLongName("minDF").withRequired(false).withArgument(
-      abuilder.withName("minDF").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The minimum document frequency.  Default is 1").withShortName("md").create();
+        abuilder.withName("minDF").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The minimum document frequency.  Default is 1").withShortName("md").create();
 
     Option maxDFPercentOpt = obuilder.withLongName("maxDFPercent").withRequired(false).withArgument(
-      abuilder.withName("maxDFPercent").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The max percentage of docs for the DF.  Can be used to remove really high frequency terms."
-          + "  Expressed as an integer between 0 and 100. Default is 99.").withShortName("x").create();
+        abuilder.withName("maxDFPercent").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The max percentage of docs for the DF.  Can be used to remove really high frequency terms."
+            + "  Expressed as an integer between 0 and 100. Default is 99.").withShortName("x").create();
+
+    Option maxPercentErrorDocsOpt = obuilder.withLongName("maxPercentErrorDocs").withRequired(false).withArgument(
+        abuilder.withName("maxPercentErrorDocs").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The max percentage of docs that can have a null term vector. These are noise document and can occur if the " +
+            "analyzer used strips out all terms in the target field. This percentage is expressed as a value between 0 and 1. " +
+            "The default is 0.").withShortName("err").create();
 
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
         .create();
 
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(idFieldOpt).withOption(
-      outputOpt).withOption(delimiterOpt).withOption(helpOpt).withOption(fieldOpt).withOption(maxOpt)
+        outputOpt).withOption(delimiterOpt).withOption(helpOpt).withOption(fieldOpt).withOption(maxOpt)
         .withOption(dictOutOpt).withOption(powerOpt).withOption(maxDFPercentOpt)
-        .withOption(weightOpt).withOption(minDFOpt).create();
+        .withOption(weightOpt).withOption(minDFOpt).withOption(maxPercentErrorDocsOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -124,99 +192,57 @@ public final class Driver {
       CommandLine cmdLine = parser.parse(args);
 
       if (cmdLine.hasOption(helpOpt)) {
-        
+
         CommandLineUtil.printHelp(group);
         return;
       }
-      // Springify all this
+
       if (cmdLine.hasOption(inputOpt)) { // Lucene case
-        File file = new File(cmdLine.getValue(inputOpt).toString());
-        if (!file.isDirectory()) {
-          throw new IllegalArgumentException("Lucene directory: " + file.getAbsolutePath()
-              +  " does not exist or is not a directory");
-        }
+        Driver luceneDriver = new Driver();
+        luceneDriver.setLuceneDir(cmdLine.getValue(inputOpt).toString());
 
-        long maxDocs = Long.MAX_VALUE;
         if (cmdLine.hasOption(maxOpt)) {
-          maxDocs = Long.parseLong(cmdLine.getValue(maxOpt).toString());
-        }
-        if (maxDocs < 0) {
-          throw new IllegalArgumentException("maxDocs must be >= 0");
+          luceneDriver.setMaxDocs(Long.parseLong(cmdLine.getValue(maxOpt).toString()));
         }
 
-        Directory dir = FSDirectory.open(file);
-        IndexReader reader = IndexReader.open(dir, true);
-
-        Weight weight;
         if (cmdLine.hasOption(weightOpt)) {
-          String wString = cmdLine.getValue(weightOpt).toString();
-          if ("tf".equalsIgnoreCase(wString)) {
-            weight = new TF();
-          } else if ("tfidf".equalsIgnoreCase(wString)) {
-            weight = new TFIDF();
-          } else {
-            throw new OptionException(weightOpt);
-          }
-        } else {
-          weight = new TFIDF();
+          luceneDriver.setWeightType(cmdLine.getValue(weightOpt).toString());
         }
 
-        String field = cmdLine.getValue(fieldOpt).toString();
+        luceneDriver.setField(cmdLine.getValue(fieldOpt).toString());
 
-        int minDf = 1;
         if (cmdLine.hasOption(minDFOpt)) {
-          minDf = Integer.parseInt(cmdLine.getValue(minDFOpt).toString());
+          luceneDriver.setMinDf(Integer.parseInt(cmdLine.getValue(minDFOpt).toString()));
         }
 
-        int maxDFPercent = 99;
         if (cmdLine.hasOption(maxDFPercentOpt)) {
-          maxDFPercent = Integer.parseInt(cmdLine.getValue(maxDFPercentOpt).toString());
+          luceneDriver.setMaxDFPercent(Integer.parseInt(cmdLine.getValue(maxDFPercentOpt).toString()));
         }
 
-        TermInfo termInfo = new CachedTermInfo(reader, field, minDf, maxDFPercent);
-        VectorMapper mapper = new TFDFMapper(reader, weight, termInfo);
-
-        double norm = LuceneIterable.NO_NORMALIZING;
         if (cmdLine.hasOption(powerOpt)) {
           String power = cmdLine.getValue(powerOpt).toString();
           if ("INF".equals(power)) {
-            norm = Double.POSITIVE_INFINITY;
+            luceneDriver.setNorm(Double.POSITIVE_INFINITY);
           } else {
-            norm = Double.parseDouble(power);
+            luceneDriver.setNorm(Double.parseDouble(power));
           }
         }
 
-        String idField = null;
         if (cmdLine.hasOption(idFieldOpt)) {
-          idField = cmdLine.getValue(idFieldOpt).toString();
+          luceneDriver.setIdField(cmdLine.getValue(idFieldOpt).toString());
         }
 
-        LuceneIterable iterable;
-        if (norm == LuceneIterable.NO_NORMALIZING) {
-          iterable = new LuceneIterable(reader, idField, field, mapper, LuceneIterable.NO_NORMALIZING);
-        } else {
-          iterable = new LuceneIterable(reader, idField, field, mapper, norm);
+        if (cmdLine.hasOption(maxPercentErrorDocsOpt)) {
+          luceneDriver.setMaxPercentErrorDocs(Double.parseDouble(cmdLine.getValue(maxPercentErrorDocsOpt).toString()));
         }
 
-        String outFile = cmdLine.getValue(outputOpt).toString();
-        log.info("Output File: {}", outFile);
+        luceneDriver.setOutFile(cmdLine.getValue(outputOpt).toString());
 
-        VectorWriter vectorWriter = getSeqFileWriter(outFile);
+        luceneDriver.setDelimiter(cmdLine.hasOption(delimiterOpt) ? cmdLine.getValue(delimiterOpt).toString() : "\t");
 
-        long numDocs = vectorWriter.write(iterable, maxDocs);
-        vectorWriter.close();
-        log.info("Wrote: {} vectors", numDocs);
+        luceneDriver.setDictOut(cmdLine.getValue(dictOutOpt).toString());
 
-        String delimiter = cmdLine.hasOption(delimiterOpt) ? cmdLine.getValue(delimiterOpt).toString() : "\t";
-        
-        File dictOutFile = new File(cmdLine.getValue(dictOutOpt).toString());
-        log.info("Dictionary Output file: {}", dictOutFile);
-        Writer writer = Files.newWriter(dictOutFile, Charsets.UTF_8);
-        DelimitedTermInfoWriter tiWriter = new DelimitedTermInfoWriter(writer, delimiter, field);
-        tiWriter.write(termInfo);
-        tiWriter.close();
-        writer.close();
-
+        luceneDriver.dumpVectors();
       }
     } catch (OptionException e) {
       log.error("Exception", e);
@@ -231,9 +257,56 @@ public final class Driver {
     // TODO: Make this parameter driven
 
     SequenceFile.Writer seqWriter = SequenceFile.createWriter(fs, conf, path, LongWritable.class,
-      VectorWritable.class);
+                                                              VectorWritable.class);
 
     return new SequenceFileVectorWriter(seqWriter);
   }
 
+  public void setLuceneDir(String luceneDir) {
+    this.luceneDir = luceneDir;
+  }
+
+  public void setMaxDocs(long maxDocs) {
+    this.maxDocs = maxDocs;
+  }
+
+  public void setWeightType(String weightType) {
+    this.weightType = weightType;
+  }
+
+  public void setField(String field) {
+    this.field = field;
+  }
+
+  public void setMinDf(int minDf) {
+    this.minDf = minDf;
+  }
+
+  public void setMaxDFPercent(int maxDFPercent) {
+    this.maxDFPercent = maxDFPercent;
+  }
+
+  public void setNorm(double norm) {
+    this.norm = norm;
+  }
+
+  public void setIdField(String idField) {
+    this.idField = idField;
+  }
+
+  public void setOutFile(String outFile) {
+    this.outFile = outFile;
+  }
+
+  public void setDelimiter(String delimiter) {
+    this.delimiter = delimiter;
+  }
+
+  public void setDictOut(String dictOut) {
+    this.dictOut = dictOut;
+  }
+
+  public void setMaxPercentErrorDocs(double maxPercentErrorDocs) {
+    this.maxPercentErrorDocs = maxPercentErrorDocs;
+  }
 }

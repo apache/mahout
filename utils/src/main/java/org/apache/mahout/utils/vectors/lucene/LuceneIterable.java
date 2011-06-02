@@ -53,6 +53,7 @@ public final class LuceneIterable implements Iterable<Vector> {
    * @param field  field to use for the Vector
    * @param mapper {@link VectorMapper} for creating {@link Vector}s from Lucene's TermVectors.
    * @param normPower the normalization value. Must be nonnegative, or {@link #NO_NORMALIZING}
+   * @param maxPercentErrorDocs the percentage of documents in the lucene index that can have a null term vector
    */
   public LuceneIterable(IndexReader indexReader,
                         String idField,
