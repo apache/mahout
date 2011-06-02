@@ -138,7 +138,7 @@
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
       </dependency>
-      
+
       <dependency>
         <artifactId>mahout-buildtools</artifactId>
         <groupId>${project.groupId}</groupId>
@@ -308,12 +308,6 @@
       </dependency>
       
       <dependency>
-        <groupId>commons-collections</groupId>
-        <artifactId>commons-collections</artifactId>
-        <version>3.2.1</version>
-      </dependency>
-
-      <dependency>
         <groupId>org.uncommons.watchmaker</groupId>
         <artifactId>watchmaker-framework</artifactId>
         <version>0.6.2</version>
@@ -333,7 +327,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>r03</version>
+        <version>r09</version>
       </dependency>
       
       <dependency>

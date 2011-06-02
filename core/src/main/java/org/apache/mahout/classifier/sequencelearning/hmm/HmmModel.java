@@ -20,8 +20,8 @@ package org.apache.mahout.classifier.sequencelearning.hmm;
 import java.util.Map;
 import java.util.Random;
 
-import org.apache.commons.collections.BidiMap;
-import org.apache.commons.collections.bidimap.TreeBidiMap;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
@@ -33,6 +33,47 @@ import org.apache.mahout.math.Vector;
  */
 public class HmmModel implements Cloneable {
 
+  /** Bi-directional Map for storing the observed state names */
+  private BiMap<String,Integer> outputStateNames;
+
+  /** Bi-Directional Map for storing the hidden state names */
+  private BiMap<String,Integer> hiddenStateNames;
+
+  /* Number of hidden states */
+  private int nrOfHiddenStates;
+
+  /** Number of output states */
+  private int nrOfOutputStates;
+
+  /**
+   * Transition matrix containing the transition probabilities between hidden
+   * states. TransitionMatrix(i,j) is the probability that we change from hidden
+   * state i to hidden state j In general: P(h(t+1)=h_j | h(t) = h_i) =
+   * transitionMatrix(i,j) Since we have to make sure that each hidden state can
+   * be "left", the following normalization condition has to hold:
+   * sum(transitionMatrix(i,j),j=1..hiddenStates) = 1
+   */
+  private Matrix transitionMatrix;
+
+  /**
+   * Output matrix containing the probabilities that we observe a given output
+   * state given a hidden state. outputMatrix(i,j) is the probability that we
+   * observe output state j if we are in hidden state i Formally: P(o(t)=o_j |
+   * h(t)=h_i) = outputMatrix(i,j) Since we always have an observation for each
+   * hidden state, the following normalization condition has to hold:
+   * sum(outputMatrix(i,j),j=1..outputStates) = 1
+   */
+  private Matrix emissionMatrix;
+
+  /**
+   * Vector containing the initial hidden state probabilities. That is
+   * P(h(0)=h_i) = initialProbabilities(i). Since we are dealing with
+   * probabilities the following normalization condition has to hold:
+   * sum(initialProbabilities(i),i=1..hiddenStates) = 1
+   */
+  private Vector initialProbabilities;
+
+
   /**
    * Get a copy of this model
    */
@@ -41,10 +82,10 @@ public class HmmModel implements Cloneable {
     super.clone();
     HmmModel model = new HmmModel(transitionMatrix.clone(), emissionMatrix.clone(), initialProbabilities.clone());
     if (hiddenStateNames != null) {
-      model.hiddenStateNames = new TreeBidiMap(hiddenStateNames);
+      model.hiddenStateNames = HashBiMap.create(hiddenStateNames);
     }
     if (outputStateNames != null) {
-      model.outputStateNames = new TreeBidiMap(outputStateNames);
+      model.outputStateNames = HashBiMap.create(outputStateNames);
     }
     return model;
   }
@@ -169,11 +210,6 @@ public class HmmModel implements Cloneable {
   }
 
   /**
-   * Number of hidden states
-   */
-  private int nrOfHiddenStates;
-
-  /**
    * Getter Method for the number of hidden states
    *
    * @return Number of hidden states
@@ -181,11 +217,6 @@ public class HmmModel implements Cloneable {
   public int getNrOfHiddenStates() {
     return nrOfHiddenStates;
   }
-
-  /**
-   * Number of output states
-   */
-  private int nrOfOutputStates;
 
   /**
    * Getter Method for the number of output states
@@ -197,16 +228,6 @@ public class HmmModel implements Cloneable {
   }
 
   /**
-   * Transition matrix containing the transition probabilities between hidden
-   * states. TransitionMatrix(i,j) is the probability that we change from hidden
-   * state i to hidden state j In general: P(h(t+1)=h_j | h(t) = h_i) =
-   * transitionMatrix(i,j) Since we have to make sure that each hidden state can
-   * be "left", the following normalization condition has to hold:
-   * sum(transitionMatrix(i,j),j=1..hiddenStates) = 1
-   */
-  private Matrix transitionMatrix;
-
-  /**
    * Getter function to get the hidden state transition matrix
    *
    * @return returns the model's transition matrix.
@@ -214,16 +235,6 @@ public class HmmModel implements Cloneable {
   public Matrix getTransitionMatrix() {
     return transitionMatrix;
   }
-
-  /**
-   * Output matrix containing the probabilities that we observe a given output
-   * state given a hidden state. outputMatrix(i,j) is the probability that we
-   * observe output state j if we are in hidden state i Formally: P(o(t)=o_j |
-   * h(t)=h_i) = outputMatrix(i,j) Since we always have an observation for each
-   * hidden state, the following normalization condition has to hold:
-   * sum(outputMatrix(i,j),j=1..outputStates) = 1
-   */
-  private Matrix emissionMatrix;
 
   /**
    * Getter function to get the output state probability matrix
@@ -235,14 +246,6 @@ public class HmmModel implements Cloneable {
   }
 
   /**
-   * Vector containing the initial hidden state probabilities. That is
-   * P(h(0)=h_i) = initialProbabilities(i). Since we are dealing with
-   * probabilities the following normalization condition has to hold:
-   * sum(initialProbabilities(i),i=1..hiddenStates) = 1
-   */
-  private Vector initialProbabilities;
-
-  /**
    * Getter function to return the vector of initial hidden state probabilities
    *
    * @return returns the model's init probabilities.
@@ -252,17 +255,12 @@ public class HmmModel implements Cloneable {
   }
 
   /**
-   * Bi-Directional Map for storing the hidden state names
-   */
-  private BidiMap hiddenStateNames;
-
-  /**
    * Getter method for the hidden state Names map
    *
    * @return hidden state names.
    */
   public Map<String, Integer> getHiddenStateNames() {
-    return (Map<String, Integer>) hiddenStateNames;
+    return hiddenStateNames;
   }
 
   /**
@@ -273,7 +271,7 @@ public class HmmModel implements Cloneable {
    */
   public void registerHiddenStateNames(String[] stateNames) {
     if (stateNames != null) {
-      hiddenStateNames = new TreeBidiMap();
+      hiddenStateNames = HashBiMap.create();
       for (int i = 0; i < stateNames.length; ++i) {
         hiddenStateNames.put(stateNames[i], i);
       }
@@ -287,7 +285,7 @@ public class HmmModel implements Cloneable {
    */
   public void registerHiddenStateNames(Map<String, Integer> stateNames) {
     if (stateNames != null) {
-      hiddenStateNames = new TreeBidiMap(stateNames);
+      hiddenStateNames = HashBiMap.create(stateNames);
     }
   }
 
@@ -302,7 +300,7 @@ public class HmmModel implements Cloneable {
     if (hiddenStateNames == null) {
       return null;
     }
-    return (String) hiddenStateNames.getKey(id);
+    return hiddenStateNames.inverse().get(id);
   }
 
   /**
@@ -316,14 +314,9 @@ public class HmmModel implements Cloneable {
     if (hiddenStateNames == null) {
       return -1;
     }
-    Integer tmp = (Integer) hiddenStateNames.get(name);
+    Integer tmp = hiddenStateNames.get(name);
     return tmp == null ? -1 : tmp;
   }
-
-  /**
-   * Bi-directional Map for storing the observed state names
-   */
-  private BidiMap outputStateNames;
 
   /**
    * Getter method for the output state Names map
@@ -331,7 +324,7 @@ public class HmmModel implements Cloneable {
    * @return names of output states.
    */
   public Map<String, Integer> getOutputStateNames() {
-    return (Map<String, Integer>) outputStateNames;
+    return outputStateNames;
   }
 
   /**
@@ -342,7 +335,7 @@ public class HmmModel implements Cloneable {
    */
   public void registerOutputStateNames(String[] stateNames) {
     if (stateNames != null) {
-      outputStateNames = new TreeBidiMap();
+      outputStateNames = HashBiMap.create();
       for (int i = 0; i < stateNames.length; ++i) {
         outputStateNames.put(stateNames[i], i);
       }
@@ -356,7 +349,7 @@ public class HmmModel implements Cloneable {
    */
   public void registerOutputStateNames(Map<String, Integer> stateNames) {
     if (stateNames != null) {
-      outputStateNames = new TreeBidiMap(stateNames);
+      outputStateNames = HashBiMap.create(stateNames);
     }
   }
 
@@ -371,7 +364,7 @@ public class HmmModel implements Cloneable {
     if (outputStateNames == null) {
       return null;
     }
-    return (String) outputStateNames.getKey(id);
+    return outputStateNames.inverse().get(id);
   }
 
   /**
@@ -385,7 +378,7 @@ public class HmmModel implements Cloneable {
     if (outputStateNames == null) {
       return -1;
     }
-    Integer tmp = (Integer) outputStateNames.get(name);
+    Integer tmp = outputStateNames.get(name);
     return tmp == null ? -1 : tmp;
   }
 
