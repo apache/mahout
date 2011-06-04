@@ -113,7 +113,7 @@ public class OnlineSummarizer {
 
   private void sort() {
     if (!sorted && starter != null) {
-      starter.sortFromTo(0, 99);
+      starter.sort();
       sorted = true;
     }
   }
