@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -212,7 +213,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
           writer.append(new Text(), MeanShiftCanopy.initialCanopy(value.get(), id++, measure));
         }
       } finally {
-        writer.close();
+        Closeables.closeQuietly(writer);
       }
     }
   }
@@ -322,7 +323,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
           writer.append(new Text(cluster.getIdentifier()), cluster);
         }
       } finally {
-        writer.close();
+        Closeables.closeQuietly(writer);
       }
       clustersIn = clustersOut;
       iteration++;
@@ -463,7 +464,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
           writer.append(new IntWritable(closest.getId()), new WeightedVectorWritable(1, canopy.getCenter()));
         }
       } finally {
-        writer.close();
+        Closeables.closeQuietly(writer);
       }
     }
   }

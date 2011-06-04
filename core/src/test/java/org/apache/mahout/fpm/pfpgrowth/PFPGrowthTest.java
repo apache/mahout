@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.common.MahoutTestCase;
@@ -74,7 +75,7 @@ public final class PFPGrowthTest extends MahoutTestCase {
         writer.write("\n");
       }
     } finally {
-      writer.close();
+      Closeables.closeQuietly(writer);
     }
     
   }

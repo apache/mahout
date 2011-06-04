@@ -17,6 +17,7 @@
 
 package org.apache.mahout.utils.vectors.csv;
 
+import com.google.common.io.Closeables;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.utils.MahoutTestCase;
 import org.apache.mahout.utils.vectors.RandomVectorIterable;
@@ -35,16 +36,19 @@ public class CSVVectorIteratorTest extends MahoutTestCase {
   public void testCount() throws Exception {
 
     StringWriter sWriter = new StringWriter();
-    TextualVectorWriter jwvw = new TextualVectorWriter(sWriter) {
+    TextualVectorWriter writer = new TextualVectorWriter(sWriter) {
       @Override
       public void write(Vector vector) throws IOException {
         String vecStr = VectorHelper.vectorToCSVString(vector, false);
         getWriter().write(vecStr);
       }
     };
-    Iterable<Vector> iter = new RandomVectorIterable(50);
-    jwvw.write(iter);
-    jwvw.close();
+    try {
+      Iterable<Vector> iter = new RandomVectorIterable(50);
+      writer.write(iter);
+    } finally {
+      Closeables.closeQuietly(writer);
+    }
     Iterator<Vector> csvIter = new CSVVectorIterator(new StringReader(sWriter.getBuffer().toString()));
     int count = 0;
     while (csvIter.hasNext()) {

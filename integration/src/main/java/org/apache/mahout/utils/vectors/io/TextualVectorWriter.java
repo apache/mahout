@@ -20,6 +20,7 @@ package org.apache.mahout.utils.vectors.io;
 import java.io.IOException;
 import java.io.Writer;
 
+import com.google.common.io.Closeables;
 import org.apache.mahout.math.Vector;
 
 /**
@@ -64,7 +65,6 @@ public class TextualVectorWriter implements VectorWriter {
 
   @Override
   public void close() throws IOException {
-    writer.flush();
-    writer.close();
+    Closeables.closeQuietly(writer);
   }
 }

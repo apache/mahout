@@ -27,6 +27,7 @@ import java.util.zip.GZIPOutputStream;
 
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Closeables;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.common.Pair;
 
@@ -54,26 +55,28 @@ public final class ToCSV {
     OutputStream outStream = new GZIPOutputStream(new FileOutputStream(outputFile));
     Writer outWriter = new BufferedWriter(new OutputStreamWriter(outStream, Charsets.UTF_8));
 
-    for (Pair<PreferenceArray,long[]> user : new DataFileIterable(inputFile)) {
-      PreferenceArray prefs = user.getFirst();
-      long[] timestamps = user.getSecond();
-      for (int i = 0; i < prefs.length(); i++) {
-        outWriter.write(String.valueOf(prefs.getUserID(i)));
-        outWriter.write(',');
-        outWriter.write(String.valueOf(prefs.getItemID(i)));
-        if (columnsToOutput > 2) {
+    try {
+      for (Pair<PreferenceArray,long[]> user : new DataFileIterable(inputFile)) {
+        PreferenceArray prefs = user.getFirst();
+        long[] timestamps = user.getSecond();
+        for (int i = 0; i < prefs.length(); i++) {
+          outWriter.write(String.valueOf(prefs.getUserID(i)));
           outWriter.write(',');
-          outWriter.write(String.valueOf(prefs.getValue(i)));
+          outWriter.write(String.valueOf(prefs.getItemID(i)));
+          if (columnsToOutput > 2) {
+            outWriter.write(',');
+            outWriter.write(String.valueOf(prefs.getValue(i)));
+          }
+          if (columnsToOutput > 3) {
+            outWriter.write(',');
+            outWriter.write(String.valueOf(timestamps[i]));
+          }
+          outWriter.write('\n');
         }
-        if (columnsToOutput > 3) {
-          outWriter.write(',');
-          outWriter.write(String.valueOf(timestamps[i]));
-        }
-        outWriter.write('\n');
       }
+    } finally {
+      Closeables.closeQuietly(outWriter);
     }
-    outWriter.flush();
-    outWriter.close();
   }
 
 }

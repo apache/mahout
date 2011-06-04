@@ -18,6 +18,7 @@
 package org.apache.mahout.vectorizer.term;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.Path;
@@ -72,17 +73,19 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
 
     if (maxNGramSize >= 2) {
       ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.getEntries().iterator()), maxNGramSize);
+      try {
+        do {
+          String term = (sf.getAttribute(CharTermAttribute.class)).toString();
+          if (term.length() > 0 && dictionary.containsKey(term)) { // ngram
+            int termId = dictionary.get(term);
+            vector.setQuick(termId, vector.getQuick(termId) + 1);
+          }
+        } while (sf.incrementToken());
 
-      do {
-        String term = (sf.getAttribute(CharTermAttribute.class)).toString();
-        if (term.length() > 0 && dictionary.containsKey(term)) { // ngram
-          int termId = dictionary.get(term);
-          vector.setQuick(termId, vector.getQuick(termId) + 1);
-        }
-      } while (sf.incrementToken());
-
-      sf.end();
-      sf.close();
+        sf.end();
+      } finally {
+        Closeables.closeQuietly(sf);
+      }
     } else {
       for (String term : value.getEntries()) {
         if (term.length() > 0 && dictionary.containsKey(term)) { // unigram

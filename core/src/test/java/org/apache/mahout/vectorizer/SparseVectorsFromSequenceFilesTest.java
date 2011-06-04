@@ -20,6 +20,7 @@ package org.apache.mahout.vectorizer;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -47,11 +48,14 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, inputPath, Text.class, Text.class);
 
     RandomDocumentGenerator gen = new RandomDocumentGenerator();
-    
-    for (int i = 0; i < NUM_DOCS; i++) {
-      writer.append(new Text("Document::ID::" + i), new Text(gen.getRandomDocument()));
+
+    try {
+      for (int i = 0; i < NUM_DOCS; i++) {
+        writer.append(new Text("Document::ID::" + i), new Text(gen.getRandomDocument()));
+      }
+    } finally {
+      Closeables.closeQuietly(writer);
     }
-    writer.close();
   }
   
   

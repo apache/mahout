@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 
 import com.google.common.collect.AbstractIterator;
+import com.google.common.io.Closeables;
 import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
 import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
@@ -128,7 +129,7 @@ public final class DataFileIterator
   @Override
   public void close() {
     endOfData();
-    lineIterator.close();
+    Closeables.closeQuietly(lineIterator);
   }
 
   /**

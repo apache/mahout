@@ -29,6 +29,7 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -311,7 +312,7 @@ public class SSVDSolver {
       }
 
       closeables.remove(uHatWriter);
-      uHatWriter.close();
+      Closeables.closeQuietly(uHatWriter);
 
       SequenceFile.Writer svWriter = SequenceFile.createWriter(fs, conf,
           svPath = new Path(svPath, "svalues.seq"), IntWritable.class,
@@ -323,7 +324,7 @@ public class SSVDSolver {
       svWriter.append(iw, vw);
 
       closeables.remove(svWriter);
-      svWriter.close();
+      Closeables.closeQuietly(svWriter);
 
       UJob ujob = null;
       if (computeU) {
@@ -374,7 +375,7 @@ public class SSVDSolver {
       try {
         return r.getKeyClass().asSubclass(Writable.class);
       } finally {
-        r.close();
+        Closeables.closeQuietly(r);
       }
     }
     throw new IOException("Unable to open input files to determine input label type.");

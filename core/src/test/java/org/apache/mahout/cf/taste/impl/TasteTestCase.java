@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.impl;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Closeables;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
@@ -80,7 +81,7 @@ public abstract class TasteTestCase extends MahoutTestCase {
         writer.println(line);
       }
     } finally {
-      writer.close();
+      Closeables.closeQuietly(writer);
     }
   }
 }

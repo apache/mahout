@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Collection;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -130,7 +131,7 @@ public final class MahoutEvaluator {
         writer.newLine();
       }
     } finally {
-      writer.close();
+      Closeables.closeQuietly(writer);
     }
   }
   

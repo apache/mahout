@@ -17,6 +17,7 @@
 
 package org.apache.mahout.vectorizer.collocations.llr;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -90,79 +91,82 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
   protected void map(Text key, StringTuple value, final Context context) throws IOException, InterruptedException {
 
     ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.getEntries().iterator()), maxShingleSize);
-    int count = 0; // ngram count
 
-    OpenObjectIntHashMap<String> ngrams =
-            new OpenObjectIntHashMap<String>(value.getEntries().size() * (maxShingleSize - 1));
-    OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<String>(value.getEntries().size());
+    try {
+      int count = 0; // ngram count
 
-    do {
-      String term = sf.getAttribute(CharTermAttribute.class).toString();
-      String type = sf.getAttribute(TypeAttribute.class).type();
-      if ("shingle".equals(type)) {
-        count++;
-        ngrams.adjustOrPutValue(term, 1, 1);
-      } else if (emitUnigrams && term.length() > 0) { // unigram
-        unigrams.adjustOrPutValue(term, 1, 1);
-      }
-    } while (sf.incrementToken());
+      OpenObjectIntHashMap<String> ngrams =
+              new OpenObjectIntHashMap<String>(value.getEntries().size() * (maxShingleSize - 1));
+      OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<String>(value.getEntries().size());
 
-    final GramKey gramKey = new GramKey();
+      do {
+        String term = sf.getAttribute(CharTermAttribute.class).toString();
+        String type = sf.getAttribute(TypeAttribute.class).type();
+        if ("shingle".equals(type)) {
+          count++;
+          ngrams.adjustOrPutValue(term, 1, 1);
+        } else if (emitUnigrams && term.length() > 0) { // unigram
+          unigrams.adjustOrPutValue(term, 1, 1);
+        }
+      } while (sf.incrementToken());
 
-    ngrams.forEachPair(new ObjectIntProcedure<String>() {
-      @Override
-      public boolean apply(String term, int frequency) {
-        // obtain components, the leading (n-1)gram and the trailing unigram.
-        int i = term.lastIndexOf(' '); // TODO: fix for non-whitespace delimited languages.
-        if (i != -1) { // bigram, trigram etc
+      final GramKey gramKey = new GramKey();
 
+      ngrams.forEachPair(new ObjectIntProcedure<String>() {
+        @Override
+        public boolean apply(String term, int frequency) {
+          // obtain components, the leading (n-1)gram and the trailing unigram.
+          int i = term.lastIndexOf(' '); // TODO: fix for non-whitespace delimited languages.
+          if (i != -1) { // bigram, trigram etc
+
+            try {
+              Gram ngram = new Gram(term, frequency, Gram.Type.NGRAM);
+              Gram head = new Gram(term.substring(0, i), frequency, Gram.Type.HEAD);
+              Gram tail = new Gram(term.substring(i + 1), frequency, Gram.Type.TAIL);
+
+              gramKey.set(head, EMPTY);
+              context.write(gramKey, head);
+
+              gramKey.set(head, ngram.getBytes());
+              context.write(gramKey, ngram);
+
+              gramKey.set(tail, EMPTY);
+              context.write(gramKey, tail);
+
+              gramKey.set(tail, ngram.getBytes());
+              context.write(gramKey, ngram);
+
+            } catch (IOException e) {
+              throw new IllegalStateException(e);
+            } catch (InterruptedException e) {
+              throw new IllegalStateException(e);
+            }
+          }
+          return true;
+        }
+      });
+
+      unigrams.forEachPair(new ObjectIntProcedure<String>() {
+        @Override
+        public boolean apply(String term, int frequency) {
           try {
-            Gram ngram = new Gram(term, frequency, Gram.Type.NGRAM);
-            Gram head = new Gram(term.substring(0, i), frequency, Gram.Type.HEAD);
-            Gram tail = new Gram(term.substring(i + 1), frequency, Gram.Type.TAIL);
-
-            gramKey.set(head, EMPTY);
-            context.write(gramKey, head);
-
-            gramKey.set(head, ngram.getBytes());
-            context.write(gramKey, ngram);
-
-            gramKey.set(tail, EMPTY);
-            context.write(gramKey, tail);
-
-            gramKey.set(tail, ngram.getBytes());
-            context.write(gramKey, ngram);
-
+            Gram unigram = new Gram(term, frequency, Gram.Type.UNIGRAM);
+            gramKey.set(unigram, EMPTY);
+            context.write(gramKey, unigram);
           } catch (IOException e) {
             throw new IllegalStateException(e);
           } catch (InterruptedException e) {
             throw new IllegalStateException(e);
           }
+          return true;
         }
-        return true;
-      }
-    });
+      });
 
-    unigrams.forEachPair(new ObjectIntProcedure<String>() {
-      @Override
-      public boolean apply(String term, int frequency) {
-        try {
-          Gram unigram = new Gram(term, frequency, Gram.Type.UNIGRAM);
-          gramKey.set(unigram, EMPTY);
-          context.write(gramKey, unigram);
-        } catch (IOException e) {
-          throw new IllegalStateException(e);
-        } catch (InterruptedException e) {
-          throw new IllegalStateException(e);
-        }
-        return true;
-      }
-    });
-
-    context.getCounter(Count.NGRAM_TOTAL).increment(count);
-
-    sf.end();
-    sf.close();
+      context.getCounter(Count.NGRAM_TOTAL).increment(count);
+      sf.end();
+    } finally {
+      Closeables.closeQuietly(sf);
+    }
   }
 
   @Override

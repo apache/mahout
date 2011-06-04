@@ -23,6 +23,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Random;
 
+import com.google.common.io.Closeables;
 import junit.framework.Assert;
 
 import org.apache.hadoop.conf.Configuration;
@@ -93,7 +94,7 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
       w.append(roww, vw);
     }
     closeables.remove(w);
-    w.close();
+    Closeables.closeQuietly(w);
 
     FileSystem fs = FileSystem.get(conf);
 

@@ -18,6 +18,7 @@ package org.apache.mahout.df.mapreduce.partial;
 
 import java.io.IOException;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -96,7 +97,7 @@ public final class InterResults {
         throw new IllegalStateException("loaded less keys/trees than expected");
       }
     } finally {
-      in.close();
+      Closeables.closeQuietly(in);
     }
 
     return numInstances;
@@ -126,19 +127,21 @@ public final class InterResults {
     int numMaps = sizes.length;
     
     FSDataOutputStream out = fs.create(forestPath);
-    
-    // write partitions' sizes
-    for (int p = 0; p < numMaps; p++) {
-      out.writeInt(sizes[p]);
+
+    try {
+      // write partitions' sizes
+      for (int p = 0; p < numMaps; p++) {
+        out.writeInt(sizes[p]);
+      }
+
+      // write the data
+      for (int index = 0; index < numTrees; index++) {
+        keys[index].write(out);
+        trees[index].write(out);
+      }
+    } finally {
+      Closeables.closeQuietly(out);
     }
-    
-    // write the data
-    for (int index = 0; index < numTrees; index++) {
-      keys[index].write(out);
-      trees[index].write(out);
-    }
-    
-    out.close();
   }
   
 }

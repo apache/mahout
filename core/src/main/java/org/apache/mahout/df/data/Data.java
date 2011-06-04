@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -295,12 +296,14 @@ public class Data implements Cloneable {
     DataConverter converter = new DataConverter(dataset);
     
     int index = 0;
-    
-    while (iterator.hasNext()) {
-      labels[index++] = converter.convert(0, iterator.next()).getLabel();
+
+    try {
+      while (iterator.hasNext()) {
+        labels[index++] = converter.convert(0, iterator.next()).getLabel();
+      }
+    } finally {
+      Closeables.closeQuietly(iterator);
     }
-    
-    iterator.close();
     
     return labels;
   }

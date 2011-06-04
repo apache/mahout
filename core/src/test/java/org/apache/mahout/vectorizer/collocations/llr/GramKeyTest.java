@@ -23,6 +23,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.util.Arrays;
 
+import com.google.common.io.Closeables;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
@@ -80,17 +81,23 @@ public final class GramKeyTest extends MahoutTestCase {
     
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
     DataOutputStream out = new DataOutputStream(bout);
-    
-    two.write(out);
-    out.close();
+
+    try {
+      two.write(out);
+    } finally {
+      Closeables.closeQuietly(out);
+    }
     
     byte[] b = bout.toByteArray();
     
     ByteArrayInputStream bin = new ByteArrayInputStream(b);
     DataInputStream din = new DataInputStream(bin);
-    
-    one.readFields(din);
-    din.close();
+
+    try {
+      one.readFields(din);
+    } finally {
+      Closeables.closeQuietly(din);
+    }
 
     assertTrue(Arrays.equals(two.getBytes(), one.getBytes()));
     assertEquals(Gram.Type.UNIGRAM, one.getType());

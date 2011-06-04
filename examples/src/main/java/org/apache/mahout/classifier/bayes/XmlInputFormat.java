@@ -20,6 +20,7 @@ package org.apache.mahout.classifier.bayes;
 import java.io.IOException;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -102,7 +103,7 @@ public class XmlInputFormat extends TextInputFormat {
 
     @Override
     public void close() throws IOException {
-      fsin.close();
+      Closeables.closeQuietly(fsin);
     }
 
     @Override

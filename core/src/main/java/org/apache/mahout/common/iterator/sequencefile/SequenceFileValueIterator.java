@@ -21,6 +21,7 @@ import java.io.Closeable;
 import java.io.IOException;
 
 import com.google.common.collect.AbstractIterator;
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -63,7 +64,7 @@ public final class SequenceFileValueIterator<V extends Writable> extends Abstrac
   @Override
   public void close() {
     value = null;
-    IOUtils.quietClose(reader);
+    Closeables.closeQuietly(reader);
     endOfData();
   }
 

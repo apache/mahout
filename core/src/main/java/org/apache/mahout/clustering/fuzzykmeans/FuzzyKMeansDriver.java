@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -389,7 +390,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
           writer.append(new Text(cluster.getIdentifier()), cluster);
         }
       } finally {
-        writer.close();
+        Closeables.closeQuietly(writer);
       }
       clustersIn = clustersOut;
       iteration++;
@@ -486,7 +487,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
           clusterer.emitPointToClusters(value, clusters, writer);
         }
       } finally {
-        writer.close();
+        Closeables.closeQuietly(writer);
       }
     }
 
@@ -554,12 +555,14 @@ public class FuzzyKMeansDriver extends AbstractJob {
     boolean converged = true;
 
     for (Path path : result) {
-      SequenceFileValueIterator<SoftCluster> iterator =
-          new SequenceFileValueIterator<SoftCluster>(path, true, conf);
-      while (converged && iterator.hasNext()) {
-        converged = iterator.next().isConverged();
+      SequenceFileValueIterator<SoftCluster> iterator = new SequenceFileValueIterator<SoftCluster>(path, true, conf);
+      try {
+        while (converged && iterator.hasNext()) {
+          converged = iterator.next().isConverged();
+        }
+      } finally {
+        Closeables.closeQuietly(iterator);
       }
-      iterator.close();
     }
 
     return converged;

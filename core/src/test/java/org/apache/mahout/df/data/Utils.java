@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -252,9 +253,8 @@ public final class Utils {
         output.write(line);
         output.write('\n');
       }
-      output.flush();
     } finally {
-      output.close();
+      Closeables.closeQuietly(output);
     }
   
   }
@@ -286,7 +286,7 @@ public final class Utils {
     try {
       dataset.write(out);
     } finally {
-      out.close();
+      Closeables.closeQuietly(out);
     }
   
     return datasetPath;

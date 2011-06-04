@@ -24,6 +24,7 @@ import java.io.Writer;
 import java.util.Map;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -137,7 +138,7 @@ public final class Driver {
             writer.write('\n');
           }
         } finally {
-          writer.close();
+          Closeables.closeQuietly(writer);
         }
       }
       
@@ -159,7 +160,7 @@ public final class Driver {
       long numDocs = vectorWriter.write(iteratable, maxDocs);
       log.info("Wrote: {} vectors", numDocs);
     } finally {
-      vectorWriter.close();
+      Closeables.closeQuietly(vectorWriter);
     }
   }
   

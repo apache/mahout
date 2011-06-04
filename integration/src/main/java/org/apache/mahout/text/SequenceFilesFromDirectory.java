@@ -23,6 +23,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -61,20 +62,24 @@ public class SequenceFilesFromDirectory extends AbstractJob {
            NoSuchMethodException, ClassNotFoundException {
     FileSystem fs = FileSystem.get(conf);
     ChunkedWriter writer = new ChunkedWriter(conf, Integer.parseInt(options.get(CHUNK_SIZE_OPTION[0])), output);
-    
-    SequenceFilesFromDirectoryFilter pathFilter;
 
-    String fileFilterClassName = options.get(FILE_FILTER_CLASS_OPTION[0]);
-    if (PrefixAdditionFilter.class.getName().equals(fileFilterClassName)) {
-      pathFilter = new PrefixAdditionFilter(conf, keyPrefix, options, writer);
-    } else {
-      Class<? extends SequenceFilesFromDirectoryFilter> pathFilterClass = Class.forName(fileFilterClassName).asSubclass(SequenceFilesFromDirectoryFilter.class);
-      Constructor<? extends SequenceFilesFromDirectoryFilter> constructor =
-          pathFilterClass.getConstructor(Configuration.class, String.class, Map.class, ChunkedWriter.class);
-      pathFilter = constructor.newInstance(conf, keyPrefix, options, writer);
+    try {
+      SequenceFilesFromDirectoryFilter pathFilter;
+
+      String fileFilterClassName = options.get(FILE_FILTER_CLASS_OPTION[0]);
+      if (PrefixAdditionFilter.class.getName().equals(fileFilterClassName)) {
+        pathFilter = new PrefixAdditionFilter(conf, keyPrefix, options, writer);
+      } else {
+        Class<? extends SequenceFilesFromDirectoryFilter> pathFilterClass =
+            Class.forName(fileFilterClassName).asSubclass(SequenceFilesFromDirectoryFilter.class);
+        Constructor<? extends SequenceFilesFromDirectoryFilter> constructor =
+            pathFilterClass.getConstructor(Configuration.class, String.class, Map.class, ChunkedWriter.class);
+        pathFilter = constructor.newInstance(conf, keyPrefix, options, writer);
+      }
+      fs.listStatus(input, pathFilter);
+    } finally {
+      Closeables.closeQuietly(writer);
     }
-    fs.listStatus(input, pathFilter);
-    writer.close();
   }
   
   public static void main(String[] args) throws Exception {

@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.io.Closeables;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -102,8 +103,11 @@ public final class TestClusterClassifier extends MahoutTestCase {
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, config, path,
         Text.class, ClusterClassifier.class);
     Writable key = new Text("test");
-    writer.append(key, classifier);
-    writer.close();
+    try {
+      writer.append(key, classifier);
+    } finally {
+      Closeables.closeQuietly(writer);
+    }
   }
   
   private static ClusterClassifier readClassifier(Configuration config,
@@ -112,8 +116,11 @@ public final class TestClusterClassifier extends MahoutTestCase {
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, config);
     Writable key = new Text();
     ClusterClassifier classifierOut = new ClusterClassifier();
-    reader.next(key, classifierOut);
-    reader.close();
+    try {
+      reader.next(key, classifierOut);
+    } finally {
+      Closeables.closeQuietly(reader);
+    }
     return classifierOut;
   }
   

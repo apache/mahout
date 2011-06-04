@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import com.google.common.io.Closeables;
 import org.apache.mahout.cf.taste.example.kddcup.DataFileIterable;
 import org.apache.mahout.cf.taste.example.kddcup.KDDCupDataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
@@ -81,18 +82,20 @@ public final class Track2Runner {
     start = end;
 
     OutputStream out = new BufferedOutputStream(new FileOutputStream(new File(args[1])));
-    long lastUserID = Long.MIN_VALUE;
-    for (Future<UserResult> future : futures) {
-      UserResult result = future.get();
-      long userID = result.getUserID();
-      if (userID <= lastUserID) {
-        throw new IllegalStateException();
+    try {
+      long lastUserID = Long.MIN_VALUE;
+      for (Future<UserResult> future : futures) {
+        UserResult result = future.get();
+        long userID = result.getUserID();
+        if (userID <= lastUserID) {
+          throw new IllegalStateException();
+        }
+        lastUserID = userID;
+        out.write(result.getResultBytes());
       }
-      lastUserID = userID;
-      out.write(result.getResultBytes());
+    } finally {
+      Closeables.closeQuietly(out);
     }
-    out.flush();
-    out.close();
 
     end = System.currentTimeMillis();
     log.info("Wrote output in {}s", (end - start) / 1000);

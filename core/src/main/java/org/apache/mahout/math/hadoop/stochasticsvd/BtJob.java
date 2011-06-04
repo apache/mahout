@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -122,9 +123,7 @@ public final class BtJob {
 
     @Override
     protected void cleanup(Context context) throws IOException, InterruptedException {
-      if (qInput != null) {
-        qInput.close();
-      }
+      Closeables.closeQuietly(qInput);
       if (outputs != null) {
         outputs.close();
       }
@@ -217,7 +216,7 @@ public final class BtJob {
         try {
           rValue = iterator.next();
         } finally {
-          iterator.close();
+          Closeables.closeQuietly(iterator);
         }
         if (block < blockNum && block > 0) {
           GivensThinSolver.mergeR(mRs.get(0), new UpperTriangular(rValue.get()));

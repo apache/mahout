@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.Closeables;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -280,13 +281,12 @@ public class Dataset implements Writable {
    */
   public static Dataset load(Configuration conf, Path path) throws IOException {
     FileSystem fs = path.getFileSystem(conf);
-    
     FSDataInputStream input = fs.open(path);
-    
-    Dataset dataset = read(input);
-    input.close();
-    
-    return dataset;
+    try {
+      return read(input);
+    } finally {
+      Closeables.closeQuietly(input);
+    }
   }
   
   public static Dataset read(DataInput in) throws IOException {

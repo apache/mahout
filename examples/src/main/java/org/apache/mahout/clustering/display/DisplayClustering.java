@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -243,7 +244,7 @@ public class DisplayClustering extends Frame {
         writer.append(new Text(), vw);
       }
     } finally {
-      writer.close();
+      Closeables.closeQuietly(writer);
     }
   }
 
@@ -302,19 +303,25 @@ public class DisplayClustering extends Frame {
 
   protected static ClusterClassifier readClassifier(Configuration config, Path path) throws IOException {
     SequenceFile.Reader reader = new SequenceFile.Reader(FileSystem.get(config), path, config);
-    Writable key = new Text();
-    ClusterClassifier classifierOut = new ClusterClassifier();
-    reader.next(key, classifierOut);
-    reader.close();
-    return classifierOut;
+    try {
+      Writable key = new Text();
+      ClusterClassifier classifierOut = new ClusterClassifier();
+      reader.next(key, classifierOut);
+      return classifierOut;
+    } finally {
+      Closeables.closeQuietly(reader);
+    }
   }
 
   protected static void writeClassifier(ClusterClassifier classifier, Configuration config, Path path)
     throws IOException {
     SequenceFile.Writer writer =
         new SequenceFile.Writer(FileSystem.get(config), config, path, Text.class, ClusterClassifier.class);
-    Writable key = new Text("test");
-    writer.append(key, classifier);
-    writer.close();
+    try {
+      Writable key = new Text("test");
+      writer.append(key, classifier);
+    } finally {
+      Closeables.closeQuietly(writer);
+    }
   }
 }

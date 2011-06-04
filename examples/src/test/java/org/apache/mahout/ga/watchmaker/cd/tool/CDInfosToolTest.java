@@ -17,6 +17,7 @@
 
 package org.apache.mahout.ga.watchmaker.cd.tool;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -117,15 +118,17 @@ public final class CDInfosToolTest extends MahoutTestCase {
       FSDataOutputStream out = fs.create(new Path(input, "file." + floop));
       BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
 
-      // make sure we have enough room to allow all nominal values to appear in the data
-      int nblines = rng.nextInt(200) + MAX_NOMINAL_VALUES;
+      try {
+        // make sure we have enough room to allow all nominal values to appear in the data
+        int nblines = rng.nextInt(200) + MAX_NOMINAL_VALUES;
 
-      for (int line = 0; line < nblines; line++) {
-        writer.write(randomLine(descriptors, descriptions, appeared));
-        writer.newLine();
+        for (int line = 0; line < nblines; line++) {
+          writer.write(randomLine(descriptors, descriptions, appeared));
+          writer.newLine();
+        }
+      } finally {
+        Closeables.closeQuietly(writer);
       }
-
-      writer.close();
     }
   }
 

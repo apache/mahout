@@ -20,6 +20,7 @@ package org.apache.mahout.clustering.dirichlet;
 import java.io.IOException;
 import java.util.List;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -278,8 +279,11 @@ public class DirichletDriver extends AbstractJob {
     for (int i = 0; i < numModels; i++) {
       Path path = new Path(stateOut, "part-" + i);
       SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, Text.class, DirichletCluster.class);
-      writer.append(new Text(Integer.toString(i)), state.getClusters().get(i));
-      writer.close();
+      try {
+        writer.append(new Text(Integer.toString(i)), state.getClusters().get(i));
+      } finally {
+        Closeables.closeQuietly(writer);
+      }
     }
   }
 
@@ -485,7 +489,7 @@ public class DirichletDriver extends AbstractJob {
           clusterer.emitPointToClusters(value, clusters, writer);
         }
       } finally {
-        writer.close();
+        Closeables.closeQuietly(writer);
       }
     }
 

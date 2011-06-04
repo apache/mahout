@@ -22,6 +22,7 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.Arrays;
 
+import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -245,30 +246,33 @@ public class TestForest extends Configured implements Tool {
     }
 
     FSDataInputStream input = dataFS.open(inPath);
-    Scanner scanner = new Scanner(input);
+    try {
+      Scanner scanner = new Scanner(input);
 
-    while (scanner.hasNextLine()) {
-      String line = scanner.nextLine();
-      if (line.isEmpty()) {
-        continue; // skip empty lines
+      while (scanner.hasNextLine()) {
+        String line = scanner.nextLine();
+        if (line.isEmpty()) {
+          continue; // skip empty lines
+        }
+
+        Instance instance = converter.convert(0, line);
+        int prediction = forest.classify(rng, instance);
+
+        if (outputPath != null) {
+          ofile.writeChars(Integer.toString(prediction)); // write the prediction
+          ofile.writeChar('\n');
+        }
+
+        if (analyzer != null) {
+          analyzer.addInstance(dataset.getLabel(instance.getLabel()),
+                               new ClassifierResult(dataset.getLabel(prediction), 1.0));
+        }
       }
 
-      Instance instance = converter.convert(0, line);
-      int prediction = forest.classify(rng, instance);
-
-      if (outputPath != null) {
-        ofile.writeChars(Integer.toString(prediction)); // write the prediction
-        ofile.writeChar('\n');
-      }
-
-      if (analyzer != null) {
-        analyzer.addInstance(dataset.getLabel(instance.getLabel()),
-                             new ClassifierResult(dataset.getLabel(prediction), 1.0));
-      }
+      scanner.close();
+    } finally {
+      Closeables.closeQuietly(input);
     }
-
-    scanner.close();
-    input.close();
   }
 
   public static void main(String[] args) throws Exception {

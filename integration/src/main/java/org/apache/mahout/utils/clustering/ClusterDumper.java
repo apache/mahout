@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -181,7 +182,7 @@ public final class ClusterDumper extends AbstractJob {
       }
     } finally {
       if (shouldClose) {
-        writer.close();
+        Closeables.closeQuietly(writer);
       }
     }
   }

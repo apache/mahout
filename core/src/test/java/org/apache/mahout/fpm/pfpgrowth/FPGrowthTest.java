@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -61,6 +62,7 @@ public final class FPGrowthTest extends MahoutTestCase {
 
     SequenceFile.Writer writer =
         new SequenceFile.Writer(fs, conf, path, Text.class, TopKStringPatterns.class);
+    try {
     fp.generateTopKFrequentPatterns(
         transactions.iterator(),
         fp.generateFList(transactions.iterator(), 3),
@@ -69,7 +71,9 @@ public final class FPGrowthTest extends MahoutTestCase {
         new HashSet<String>(),
         new StringOutputConverter(new SequenceFileOutputCollector<Text,TopKStringPatterns>(writer)),
         new ContextStatusUpdater(null));
-    writer.close();
+    } finally {
+      Closeables.closeQuietly(writer);
+    }
 
     List<Pair<String, TopKStringPatterns>> frequentPatterns = FPGrowth.readFrequentPattern(conf, path);
     assertEquals(
@@ -101,15 +105,18 @@ public final class FPGrowthTest extends MahoutTestCase {
     System.out.println(fp.generateFList(transactions.iterator(), 2));
     SequenceFile.Writer writer =
         new SequenceFile.Writer(fs, conf, path, Text.class, TopKStringPatterns.class);
-    fp.generateTopKFrequentPatterns(
-        transactions.iterator(),
-        fp.generateFList(transactions.iterator(), 2),
-        2,
-        100,
-        new HashSet<String>(),
-        new StringOutputConverter(new SequenceFileOutputCollector<Text,TopKStringPatterns>(writer)),
-        new ContextStatusUpdater(null));
-    writer.close();
+    try {
+      fp.generateTopKFrequentPatterns(
+          transactions.iterator(),
+          fp.generateFList(transactions.iterator(), 2),
+          2,
+          100,
+          new HashSet<String>(),
+          new StringOutputConverter(new SequenceFileOutputCollector<Text,TopKStringPatterns>(writer)),
+          new ContextStatusUpdater(null));
+    } finally {
+      Closeables.closeQuietly(writer);
+    }
 
     List<Pair<String, TopKStringPatterns>> frequentPatterns = FPGrowth.readFrequentPattern(conf, path);
     assertEquals(
@@ -136,15 +143,18 @@ public final class FPGrowthTest extends MahoutTestCase {
     System.out.println(fp.generateFList(transactions.iterator(), 2));
     SequenceFile.Writer writer =
         new SequenceFile.Writer(fs, conf, path, Text.class, TopKStringPatterns.class);
-    fp.generateTopKFrequentPatterns(
-        transactions.iterator(),
-        fp.generateFList(transactions.iterator(), 2),
-        2,
-        100,
-        new HashSet<String>(),
-        new StringOutputConverter(new SequenceFileOutputCollector<Text,TopKStringPatterns>(writer)),
-        new ContextStatusUpdater(null));
-    writer.close();
+    try {
+      fp.generateTopKFrequentPatterns(
+          transactions.iterator(),
+          fp.generateFList(transactions.iterator(), 2),
+          2,
+          100,
+          new HashSet<String>(),
+          new StringOutputConverter(new SequenceFileOutputCollector<Text,TopKStringPatterns>(writer)),
+          new ContextStatusUpdater(null));
+    } finally {
+      Closeables.closeQuietly(writer);
+    }
 
     List<Pair<String, TopKStringPatterns>> frequentPatterns = FPGrowth.readFrequentPattern(conf, path);
     assertEquals(

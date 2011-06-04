@@ -22,6 +22,7 @@ import java.io.Writer;
 import java.util.Iterator;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
@@ -48,8 +49,11 @@ public final class BayesFileFormatterTest extends MahoutTestCase {
     for (String word : WORDS) {
       File file = new File(input, word);
       Writer writer = Files.newWriter(file, Charsets.UTF_8);
+      try {
       writer.write(word);
-      writer.close();
+      } finally {
+        Closeables.closeQuietly(writer);
+      }
     }
   }
 

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -103,12 +104,15 @@ public final class RandomSeedGenerator {
           }
         }
       }
-      
-      for (int i = 0; i < k; i++) {
-        writer.append(chosenTexts.get(i), chosenClusters.get(i));
+
+      try {
+        for (int i = 0; i < k; i++) {
+          writer.append(chosenTexts.get(i), chosenClusters.get(i));
+        }
+        log.info("Wrote {} vectors to {}", k, outFile);
+      } finally {
+        Closeables.closeQuietly(writer);
       }
-      log.info("Wrote {} vectors to {}", k, outFile);
-      writer.close();
     }
     
     return outFile;

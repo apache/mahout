@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.Writer;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -64,7 +65,7 @@ public class DisplaySpectralKMeans extends DisplayClustering {
         }
       }
     } finally {
-      writer.close();
+      Closeables.closeQuietly(writer);
     }
     int maxIter = 10;
     double convergenceDelta = 0.001;

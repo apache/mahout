@@ -18,6 +18,7 @@
 package org.apache.mahout.classifier.sgd;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.Closeables;
 
 import java.io.BufferedReader;
 
@@ -39,7 +40,7 @@ public final class PrintResourceOrFile {
         System.out.println(line);
       }
     } finally {
-      in.close();
+      Closeables.closeQuietly(in);
     }
   }
 }

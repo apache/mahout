@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
+import com.google.common.io.Closeables;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -104,16 +105,19 @@ public final class TestL1ModelClustering extends MahoutTestCase {
                                          new StandardAnalyzer(Version.LUCENE_30),
                                          true,
                                          IndexWriter.MaxFieldLength.UNLIMITED);
-    for (int i = 0; i < docs2.length; i++) {
-      Document doc = new Document();
-      Fieldable id = new Field("id", "doc_" + i, Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS);
-      doc.add(id);
-      // Store both position and offset information
-      Fieldable text = new Field("content", docs2[i], Field.Store.NO, Field.Index.ANALYZED, Field.TermVector.YES);
-      doc.add(text);
-      writer.addDocument(doc);
+    try {
+      for (int i = 0; i < docs2.length; i++) {
+        Document doc = new Document();
+        Fieldable id = new Field("id", "doc_" + i, Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS);
+        doc.add(id);
+        // Store both position and offset information
+        Fieldable text = new Field("content", docs2[i], Field.Store.NO, Field.Index.ANALYZED, Field.TermVector.YES);
+        doc.add(text);
+        writer.addDocument(doc);
+      }
+    } finally {
+      Closeables.closeQuietly(writer);
     }
-    writer.close();
     IndexReader reader = IndexReader.open(directory, true);
     Weight weight = new TFIDF();
     TermInfo termInfo = new CachedTermInfo(reader, "content", 1, 100);

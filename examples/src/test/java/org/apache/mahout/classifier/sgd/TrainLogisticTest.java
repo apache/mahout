@@ -20,6 +20,7 @@ package org.apache.mahout.classifier.sgd;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import com.google.common.io.Closeables;
 import com.google.common.io.Resources;
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.examples.MahoutTestCase;
@@ -76,12 +77,15 @@ public class TrainLogisticTest extends MahoutTestCase {
 
     // test saved model
     InputStream in = new FileInputStream(new File(outputFile));
-    LogisticModelParameters lmpOut = LogisticModelParameters.loadFrom(in);
-    in.close();
-    CsvRecordFactory csvOut = lmpOut.getCsvRecordFactory();
-    csvOut.firstLine(data.get(0));
-    OnlineLogisticRegression lrOut = lmpOut.createRegression();
-    verifyModel(lmpOut, csvOut, data, lrOut, expectedValues);
+    try {
+      LogisticModelParameters lmpOut = LogisticModelParameters.loadFrom(in);
+      CsvRecordFactory csvOut = lmpOut.getCsvRecordFactory();
+      csvOut.firstLine(data.get(0));
+      OnlineLogisticRegression lrOut = lmpOut.createRegression();
+      verifyModel(lmpOut, csvOut, data, lrOut, expectedValues);
+    } finally {
+      Closeables.closeQuietly(in);
+    }
 
     String output = runMain(RunLogistic.class, new String[]{
         "--input", "donut.csv",
@@ -148,15 +152,17 @@ public class TrainLogisticTest extends MahoutTestCase {
     ByteArrayOutputStream trainOutput = new ByteArrayOutputStream();
     PrintStream printStream = new PrintStream(trainOutput);
 
-    Field outputField = clazz.getDeclaredField("output");
-    Method main = clazz.getMethod("main", args.getClass());
+    try {
+      Field outputField = clazz.getDeclaredField("output");
+      Method main = clazz.getMethod("main", args.getClass());
 
-    outputField.set(null, printStream);
-    Object[] argList = {args};
-    main.invoke(null, argList);
-    printStream.close();
-
-    return new String(trainOutput.toByteArray(), Charsets.UTF_8);
+      outputField.set(null, printStream);
+      Object[] argList = {args};
+      main.invoke(null, argList);
+      return new String(trainOutput.toByteArray(), Charsets.UTF_8);
+    } finally {
+      Closeables.closeQuietly(printStream);
+    }
   }
 
   private static void verifyModel(LogisticModelParameters lmp,

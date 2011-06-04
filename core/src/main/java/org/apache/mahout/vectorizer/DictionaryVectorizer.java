@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
@@ -206,30 +207,33 @@ public final class DictionaryVectorizer {
     chunkPaths.add(chunkPath);
     
     SequenceFile.Writer dictWriter = new SequenceFile.Writer(fs, conf, chunkPath, Text.class, IntWritable.class);
-    
-    long currentChunkSize = 0;
-    Path filesPattern = new Path(wordCountPath, OUTPUT_FILES_PATTERN);
-    int i = 0;
-    for (Pair<Writable,Writable> record
-         : new SequenceFileDirIterable<Writable,Writable>(filesPattern, PathType.GLOB, null, null, true, conf)) {
-      if (currentChunkSize > chunkSizeLimit) {
-        dictWriter.close();
-        chunkIndex++;
 
-        chunkPath = new Path(dictionaryPathBase, DICTIONARY_FILE + chunkIndex);
-        chunkPaths.add(chunkPath);
+    try {
+      long currentChunkSize = 0;
+      Path filesPattern = new Path(wordCountPath, OUTPUT_FILES_PATTERN);
+      int i = 0;
+      for (Pair<Writable,Writable> record
+           : new SequenceFileDirIterable<Writable,Writable>(filesPattern, PathType.GLOB, null, null, true, conf)) {
+        if (currentChunkSize > chunkSizeLimit) {
+          Closeables.closeQuietly(dictWriter);
+          chunkIndex++;
 
-        dictWriter = new SequenceFile.Writer(fs, conf, chunkPath, Text.class, IntWritable.class);
-        currentChunkSize = 0;
+          chunkPath = new Path(dictionaryPathBase, DICTIONARY_FILE + chunkIndex);
+          chunkPaths.add(chunkPath);
+
+          dictWriter = new SequenceFile.Writer(fs, conf, chunkPath, Text.class, IntWritable.class);
+          currentChunkSize = 0;
+        }
+
+        Writable key = record.getFirst();
+        int fieldSize = DICTIONARY_BYTE_OVERHEAD + key.toString().length() * 2 + Integer.SIZE / 8;
+        currentChunkSize += fieldSize;
+        dictWriter.append(key, new IntWritable(i++));
       }
-
-      Writable key = record.getFirst();
-      int fieldSize = DICTIONARY_BYTE_OVERHEAD + key.toString().length() * 2 + Integer.SIZE / 8;
-      currentChunkSize += fieldSize;
-      dictWriter.append(key, new IntWritable(i++));
+      maxTermDimension[0] = i;
+    } finally {
+      Closeables.closeQuietly(dictWriter);
     }
-    maxTermDimension[0] = i;
-    dictWriter.close();
     
     return chunkPaths;
   }

@@ -25,6 +25,7 @@ import java.nio.charset.Charset;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -63,11 +64,13 @@ public final class SequenceFilesFromMailArchives {
                                   int chunkSizeInMB,
                                   Charset charset) throws IOException {
     ChunkedWriter writer = createNewChunkedWriter(chunkSizeInMB, outputDir);
-    PrefixAdditionFilter filter = new PrefixAdditionFilter(prefix, writer, charset);
-    parentDir.listFiles(filter);
-    writer.close();
-    
-    log.info("Parsed "+filter.getMessageCount()+" messages from "+parentDir.getAbsolutePath());
+    try {
+      PrefixAdditionFilter filter = new PrefixAdditionFilter(prefix, writer, charset);
+      parentDir.listFiles(filter);
+      log.info("Parsed "+filter.getMessageCount()+" messages from "+parentDir.getAbsolutePath());
+    } finally {
+      Closeables.closeQuietly(writer);
+    }
   }
   
   public static class ChunkedWriter implements Closeable {
@@ -97,7 +100,7 @@ public final class SequenceFilesFromMailArchives {
     
     public void write(String key, String value) throws IOException {
       if (currentChunkSize > maxChunkSizeInBytes) {
-        writer.close();
+        Closeables.closeQuietly(writer);
         log.info("Chunk size ("+currentChunkSize+") reached MAX; creating new chunk "+(currentChunkID+1));
         writer = SequenceFile.createWriter(fs, conf, getPath(currentChunkID++), Text.class, Text.class, SequenceFile.CompressionType.BLOCK);
         currentChunkSize = 0;        
@@ -111,7 +114,7 @@ public final class SequenceFilesFromMailArchives {
     
     @Override
     public void close() throws IOException {
-      writer.close();
+      Closeables.closeQuietly(writer);
     }
   }
   

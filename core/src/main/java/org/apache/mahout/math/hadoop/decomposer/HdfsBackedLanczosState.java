@@ -1,5 +1,6 @@
 package org.apache.mahout.math.hadoop.decomposer;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -131,9 +132,7 @@ public class HdfsBackedLanczosState extends LanczosState implements Configurable
           IntWritable.class, VectorWritable.class);
       writer.append(new IntWritable(key), new VectorWritable(vector));
     } finally {
-      if(writer != null) {
-        writer.close();
-      }
+      Closeables.closeQuietly(writer);
     }
   }
 

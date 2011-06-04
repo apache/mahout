@@ -20,6 +20,7 @@ package org.apache.mahout.classifier.naivebayes.trainer;
 import java.io.IOException;
 import java.net.URI;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
@@ -202,11 +203,14 @@ public final class NaiveBayesTrainer {
     
     SequenceFile.Writer dictWriter = new SequenceFile.Writer(fs, conf, labelMapPath, Text.class, IntWritable.class);
     int i = 0;
-    for (String label : labels) {
-      Writable key = new Text(label);
-      dictWriter.append(key, new IntWritable(i++));
+    try {
+      for (String label : labels) {
+        Writable key = new Text(label);
+        dictWriter.append(key, new IntWritable(i++));
+      }
+    } finally {
+      Closeables.closeQuietly(dictWriter);
     }
-    dictWriter.close();
     return labelMapPath;
   }
 }

@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -110,19 +111,25 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
   private static void createFilesFromArrays(Configuration conf, Path inputDir, String[][] data) throws IOException {
     FileSystem fs = FileSystem.get(conf);
     for (String[] aData : data) {
-      OutputStreamWriter osw = new OutputStreamWriter(fs.create(new Path(inputDir, aData[0])), Charsets.UTF_8);
-      osw.write(aData[1]);
-      osw.close();
+      OutputStreamWriter writer = new OutputStreamWriter(fs.create(new Path(inputDir, aData[0])), Charsets.UTF_8);
+      try {
+        writer.write(aData[1]);
+      } finally {
+        Closeables.closeQuietly(writer);
+      }
     }
   }
 
   private static void createTsvFilesFromArrays(Configuration conf, Path inputDir, String[][] data) throws IOException {
     FileSystem fs = FileSystem.get(conf);
-    OutputStreamWriter osw = new OutputStreamWriter(fs.create(new Path(inputDir, "inputTsvFile")));
-    for (String[] aData : data) {
-      osw.write(aData[0] + '\t' + aData[1] + '\n');
+    OutputStreamWriter writer = new OutputStreamWriter(fs.create(new Path(inputDir, "inputTsvFile")));
+    try {
+      for (String[] aData : data) {
+        writer.write(aData[0] + '\t' + aData[1] + '\n');
+      }
+    } finally {
+      Closeables.closeQuietly(writer);
     }
-    osw.close();
   }
 
   private static void checkChunkFiles(Configuration conf,
@@ -149,14 +156,17 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
 
     // read a chunk to check content
     SequenceFileIterator<Text,Text> iterator = new SequenceFileIterator<Text,Text>(fstats[0].getPath(), true, conf);
-    for (String[] datum : data) {
-      assertTrue(iterator.hasNext());
-      Pair<Text,Text> record = iterator.next();
-      String retrievedData = fileToData.get(record.getFirst().toString().trim());
-      assertNotNull(retrievedData);
-      assertEquals(retrievedData, record.getSecond().toString().trim());
+    try {
+      for (String[] datum : data) {
+        assertTrue(iterator.hasNext());
+        Pair<Text,Text> record = iterator.next();
+        String retrievedData = fileToData.get(record.getFirst().toString().trim());
+        assertNotNull(retrievedData);
+        assertEquals(retrievedData, record.getSecond().toString().trim());
+      }
+    } finally {
+      Closeables.closeQuietly(iterator);
     }
-    iterator.close();
   }
   
   /**

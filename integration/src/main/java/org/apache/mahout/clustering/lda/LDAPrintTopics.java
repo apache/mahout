@@ -17,6 +17,7 @@
 
 package org.apache.mahout.clustering.lda;
 
+import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -183,24 +184,31 @@ public final class LDAPrintTopics {
     throws IOException {
     for (int i = 0; i < topWords.size(); ++i) {
       PriorityQueue<StringDoublePair> topK = topWords.get(i);
-      PrintWriter out;
-      if(outputDir != null) {
-        out = new PrintWriter(new File(outputDir, "topic_" + i));
-      } else {
-        out = new PrintWriter(System.out);
-        out.println("Topic " + i);
-        out.println("===========");
+      PrintWriter out = null;
+      boolean printingToSystemOut = false;
+      try {
+        if (outputDir != null) {
+          out = new PrintWriter(new File(outputDir, "topic_" + i));
+        } else {
+          out = new PrintWriter(System.out);
+          printingToSystemOut = true;
+          out.println("Topic " + i);
+          out.println("===========");
+        }
+        List<StringDoublePair> topKasList = new ArrayList<StringDoublePair>(topK.size());
+        for(StringDoublePair wordWithScore : topK) {
+          topKasList.add(wordWithScore);
+        }
+        Collections.sort(topKasList, Collections.reverseOrder());
+        for(StringDoublePair wordWithScore : topKasList) {
+          out.println(wordWithScore.word + " [p(" + wordWithScore.word + "|topic_" + i +") = "
+           + wordWithScore.score);
+        }
+      } finally {
+        if (!printingToSystemOut) {
+          Closeables.closeQuietly(out);
+        }
       }
-      List<StringDoublePair> topKasList = new ArrayList<StringDoublePair>(topK.size());
-      for(StringDoublePair wordWithScore : topK) {
-        topKasList.add(wordWithScore);
-      }
-      Collections.sort(topKasList, Collections.reverseOrder());
-      for(StringDoublePair wordWithScore : topKasList) {
-        out.println(wordWithScore.word + " [p(" + wordWithScore.word + "|topic_" + i +") = "
-         + wordWithScore.score);
-      }
-      out.close();
     }
   }
   

@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math.hadoop.decomposer;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -189,30 +190,33 @@ public class EigenVerificationJob extends AbstractJob {
     Path path = new Path(outPath, CLEAN_EIGENVECTORS);
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
-    IntWritable iw = new IntWritable();
-    int numEigensWritten = 0;
-    for (Map.Entry<MatrixSlice, EigenStatus> pruneSlice : prunedEigenMeta) {
-      MatrixSlice s = pruneSlice.getKey();
-      EigenStatus meta = pruneSlice.getValue();
-      EigenVector ev = new EigenVector(s.vector(),
-                                       meta.getEigenValue(),
-                                       Math.abs(1 - meta.getCosAngle()),
-                                       s.index());
-      log.info("appending {} to {}", ev, path);
-      Writable vw = new VectorWritable(ev);
-      iw.set(s.index());
-      seqWriter.append(iw, vw);
+    try {
+      IntWritable iw = new IntWritable();
+      int numEigensWritten = 0;
+      for (Map.Entry<MatrixSlice, EigenStatus> pruneSlice : prunedEigenMeta) {
+        MatrixSlice s = pruneSlice.getKey();
+        EigenStatus meta = pruneSlice.getValue();
+        EigenVector ev = new EigenVector(s.vector(),
+                                         meta.getEigenValue(),
+                                         Math.abs(1 - meta.getCosAngle()),
+                                         s.index());
+        log.info("appending {} to {}", ev, path);
+        Writable vw = new VectorWritable(ev);
+        iw.set(s.index());
+        seqWriter.append(iw, vw);
 
-      // increment the number of eigenvectors written and see if we've
-      // reached our specified limit, or if we wish to write all eigenvectors
-      // (latter is built-in, since numEigensWritten will always be > 0
-      numEigensWritten++;
-      if (numEigensWritten == maxEigensToKeep) {
-        log.info("{} of the {} total eigens have been written", maxEigensToKeep, prunedEigenMeta.size());
-        break;
+        // increment the number of eigenvectors written and see if we've
+        // reached our specified limit, or if we wish to write all eigenvectors
+        // (latter is built-in, since numEigensWritten will always be > 0
+        numEigensWritten++;
+        if (numEigensWritten == maxEigensToKeep) {
+          log.info("{} of the {} total eigens have been written", maxEigensToKeep, prunedEigenMeta.size());
+          break;
+        }
       }
+    } finally {
+      Closeables.closeQuietly(seqWriter);
     }
-    seqWriter.close();
     cleanedEigensPath = path;
   }
 

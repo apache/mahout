@@ -19,6 +19,7 @@ package org.apache.mahout.vectorizer;
 
 import java.io.IOException;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -57,12 +58,15 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
     inputPath = getTestTempFilePath("documents/docs.file");
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, inputPath, Text.class, Text.class);
 
-    RandomDocumentGenerator gen = new RandomDocumentGenerator();
-    
-    for (int i = 0; i < NUM_DOCS; i++) {
-      writer.append(new Text("Document::ID::" + i), new Text(gen.getRandomDocument()));
+    try {
+      RandomDocumentGenerator gen = new RandomDocumentGenerator();
+
+      for (int i = 0; i < NUM_DOCS; i++) {
+        writer.append(new Text("Document::ID::" + i), new Text(gen.getRandomDocument()));
+      }
+    } finally {
+      Closeables.closeQuietly(writer);
     }
-    writer.close();
   }
   
   @Test

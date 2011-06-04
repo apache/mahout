@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
@@ -207,45 +208,48 @@ public final class TFIDFConverter {
     SequenceFile.Writer freqWriter =
       new SequenceFile.Writer(fs, conf, chunkPath, IntWritable.class, LongWritable.class);
 
-    long currentChunkSize = 0;
-    long featureCount = 0;
-    long vectorCount = Long.MAX_VALUE;
-    Path filesPattern = new Path(featureCountPath, OUTPUT_FILES_PATTERN);
-    for (Pair<IntWritable,LongWritable> record
-         : new SequenceFileDirIterable<IntWritable,LongWritable>(filesPattern,
-                                                                 PathType.GLOB,
-                                                                 null,
-                                                                 null,
-                                                                 true,
-                                                                 conf)) {
+    try {
+      long currentChunkSize = 0;
+      long featureCount = 0;
+      long vectorCount = Long.MAX_VALUE;
+      Path filesPattern = new Path(featureCountPath, OUTPUT_FILES_PATTERN);
+      for (Pair<IntWritable,LongWritable> record
+           : new SequenceFileDirIterable<IntWritable,LongWritable>(filesPattern,
+                                                                   PathType.GLOB,
+                                                                   null,
+                                                                   null,
+                                                                   true,
+                                                                   conf)) {
 
-      if (currentChunkSize > chunkSizeLimit) {
-        freqWriter.close();
-        chunkIndex++;
+        if (currentChunkSize > chunkSizeLimit) {
+          Closeables.closeQuietly(freqWriter);
+          chunkIndex++;
 
-        chunkPath = new Path(dictionaryPathBase, FREQUENCY_FILE + chunkIndex);
-        chunkPaths.add(chunkPath);
+          chunkPath = new Path(dictionaryPathBase, FREQUENCY_FILE + chunkIndex);
+          chunkPaths.add(chunkPath);
 
-        freqWriter = new SequenceFile.Writer(fs, conf, chunkPath, IntWritable.class, LongWritable.class);
-        currentChunkSize = 0;
+          freqWriter = new SequenceFile.Writer(fs, conf, chunkPath, IntWritable.class, LongWritable.class);
+          currentChunkSize = 0;
+        }
+
+        int fieldSize = SEQUENCEFILE_BYTE_OVERHEAD + Integer.SIZE / 8 + Long.SIZE / 8;
+        currentChunkSize += fieldSize;
+        IntWritable key = record.getFirst();
+        LongWritable value = record.getSecond();
+        if (key.get() >= 0) {
+          freqWriter.append(key, value);
+        } else if (key.get() == -1) {
+          vectorCount = value.get();
+        }
+        featureCount = Math.max(key.get(), featureCount);
+
       }
-
-      int fieldSize = SEQUENCEFILE_BYTE_OVERHEAD + Integer.SIZE / 8 + Long.SIZE / 8;
-      currentChunkSize += fieldSize;
-      IntWritable key = record.getFirst();
-      LongWritable value = record.getSecond();
-      if (key.get() >= 0) {
-        freqWriter.append(key, value);
-      } else if (key.get() == -1) {
-        vectorCount = value.get();
-      }
-      featureCount = Math.max(key.get(), featureCount);
-
+      featureCount++;
+      Long[] counts = {featureCount, vectorCount};
+      return new Pair<Long[], List<Path>>(counts, chunkPaths);
+    } finally {
+      Closeables.closeQuietly(freqWriter);
     }
-    featureCount++;
-    freqWriter.close();
-    Long[] counts = {featureCount, vectorCount};
-    return new Pair<Long[], List<Path>>(counts, chunkPaths);
   }
 
   /**

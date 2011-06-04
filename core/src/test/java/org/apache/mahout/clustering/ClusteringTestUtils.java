@@ -17,6 +17,7 @@
 
 package org.apache.mahout.clustering;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -50,10 +51,13 @@ public final class ClusteringTestUtils {
                                                          intWritable ? IntWritable.class : LongWritable.class,
                                                          VectorWritable.class);
     int recNum = 0;
-    for (VectorWritable point : points) {
-      writer.append(intWritable ? new IntWritable(recNum++) : new LongWritable(recNum++), point);
+    try {
+      for (VectorWritable point : points) {
+        writer.append(intWritable ? new IntWritable(recNum++) : new LongWritable(recNum++), point);
+      }
+    } finally {
+      Closeables.closeQuietly(writer);
     }
-    writer.close();
   }
 
 }

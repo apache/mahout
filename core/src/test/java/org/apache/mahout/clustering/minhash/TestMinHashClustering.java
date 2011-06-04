@@ -16,6 +16,7 @@
  */
 package org.apache.mahout.clustering.minhash;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -71,11 +72,14 @@ public class TestMinHashClustering extends MahoutTestCase {
     output = new Path(getTestTempDirPath(), "output");
     Path pointFile = new Path(input, "file1");
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, pointFile, Text.class, VectorWritable.class);
-    int id = 0;
-    for (VectorWritable point : points) {
-      writer.append(new Text("Id-" + id++), point);
+    try {
+      int id = 0;
+      for (VectorWritable point : points) {
+        writer.append(new Text("Id-" + id++), point);
+      }
+    } finally {
+      Closeables.closeQuietly(writer);
     }
-    writer.close();
   }
   
   private String[] makeArguments(int minClusterSize,

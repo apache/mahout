@@ -20,6 +20,7 @@ package org.apache.mahout.clustering.spectral.common;
 import java.io.IOException;
 import java.net.URI;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
@@ -66,9 +67,12 @@ public final class VectorCache {
     // set up the writer
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, output, 
         IntWritable.class, VectorWritable.class);
-    writer.append(key, new VectorWritable(vector));
-    writer.close();
-    
+    try {
+      writer.append(key, new VectorWritable(vector));
+    } finally {
+      Closeables.closeQuietly(writer);
+    }
+
     if (deleteOnExit) {
       fs.deleteOnExit(output);
     }
@@ -99,8 +103,10 @@ public final class VectorCache {
   public static Vector load(Configuration conf, Path input) throws IOException {
     SequenceFileValueIterator<VectorWritable> iterator =
         new SequenceFileValueIterator<VectorWritable>(input, true, conf);
-    VectorWritable vectorWritable = iterator.next();
-    iterator.close();
-    return vectorWritable.get();
+    try {
+      return iterator.next().get();
+    } finally {
+      Closeables.closeQuietly(iterator);
+    }
   }
 }

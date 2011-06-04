@@ -41,8 +41,11 @@ public final class ModelSerializerTest extends MahoutTestCase {
   private static <T extends Writable> T roundTrip(T m, Class<T> clazz) throws IOException {
     ByteArrayOutputStream buf = new ByteArrayOutputStream(1000);
     DataOutputStream dos = new DataOutputStream(buf);
-    PolymorphicWritable.write(dos, m);
-    dos.close();
+    try {
+      PolymorphicWritable.write(dos, m);
+    } finally {
+      dos.close();
+    }
 
     return PolymorphicWritable.read(new DataInputStream(new ByteArrayInputStream(buf.toByteArray())), clazz);
   }

@@ -27,6 +27,7 @@ import java.util.Locale;
 import java.util.Scanner;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -201,7 +202,7 @@ public final class CDInfosTool {
         writer.newLine();
       }
     } finally {
-      writer.close();
+      Closeables.closeQuietly(writer);
     }
   }
 

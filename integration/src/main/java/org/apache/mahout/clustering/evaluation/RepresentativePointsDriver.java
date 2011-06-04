@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -121,11 +122,14 @@ public final class RepresentativePointsDriver extends AbstractJob {
       Path inPart = part.getPath();
       Path path = new Path(output, inPart.getName());
       SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
-      for (Cluster value : new SequenceFileValueIterable<Cluster>(inPart, true, conf)) {
-        log.debug("C-{}: {}", value.getId(), AbstractCluster.formatVector(value.getCenter(), null));
-        writer.append(new IntWritable(value.getId()), new VectorWritable(value.getCenter()));
+      try {
+        for (Cluster value : new SequenceFileValueIterable<Cluster>(inPart, true, conf)) {
+          log.debug("C-{}: {}", value.getId(), AbstractCluster.formatVector(value.getCenter(), null));
+          writer.append(new IntWritable(value.getId()), new VectorWritable(value.getCenter()));
+        }
+      } finally {
+        Closeables.closeQuietly(writer);
       }
-      writer.close();
     }
   }
 
@@ -184,7 +188,7 @@ public final class RepresentativePointsDriver extends AbstractJob {
         }
       }
     } finally {
-      writer.close();
+      Closeables.closeQuietly(writer);
     }
     writer = new SequenceFile.Writer(fs, conf,
         new Path(stateOut, "part-m-" + part++), IntWritable.class, VectorWritable.class);
@@ -193,7 +197,7 @@ public final class RepresentativePointsDriver extends AbstractJob {
         writer.append(new IntWritable(entry.getKey()), new VectorWritable(entry.getValue().getVector()));
       }
     } finally {
-      writer.close();
+      Closeables.closeQuietly(writer);
     }
   }
 

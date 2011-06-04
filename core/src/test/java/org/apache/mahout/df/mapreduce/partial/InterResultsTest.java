@@ -18,6 +18,7 @@ package org.apache.mahout.df.mapreduce.partial;
 
 import java.util.Random;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -155,7 +156,7 @@ public final class InterResultsTest extends MahoutTestCase {
         assertEquals("index: " + index, trees[index], value);
       }
     } finally {
-      in.close();
+      Closeables.closeQuietly(in);
     }
   }
 

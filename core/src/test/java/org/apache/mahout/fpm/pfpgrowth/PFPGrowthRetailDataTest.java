@@ -30,6 +30,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
@@ -81,7 +82,7 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
       }
       
     } finally {
-      writer.close();
+      Closeables.closeQuietly(writer);
     }
   }
   

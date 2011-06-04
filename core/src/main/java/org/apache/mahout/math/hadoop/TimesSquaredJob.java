@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math.hadoop;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
@@ -160,7 +161,7 @@ public final class TimesSquaredJob {
             conf, inputVectorPath, NullWritable.class, VectorWritable.class);
     Writable inputVW = new VectorWritable(v);
     inputVectorPathWriter.append(NullWritable.get(), inputVW);
-    inputVectorPathWriter.close();
+    Closeables.close(inputVectorPathWriter, false);
     URI ivpURI = inputVectorPath.toUri();
     DistributedCache.setCacheFiles(new URI[] {ivpURI}, conf);
 
@@ -186,9 +187,11 @@ public final class TimesSquaredJob {
     Path outputFile = new Path(outputPath, "part-00000");
     SequenceFileValueIterator<VectorWritable> iterator =
         new SequenceFileValueIterator<VectorWritable>(outputFile, true, conf);
-    Vector vector = iterator.next().get();
-    iterator.close();
-    return vector;
+    try {
+      return iterator.next().get();
+    } finally {
+      Closeables.closeQuietly(iterator);
+    }
   }
 
   public static class TimesSquaredMapper<T extends WritableComparable> extends MapReduceBase
@@ -208,8 +211,11 @@ public final class TimesSquaredJob {
 
         SequenceFileValueIterator<VectorWritable> iterator =
             new SequenceFileValueIterator<VectorWritable>(inputVectorPath, true, conf);
-        inputVector = iterator.next().get();
-        iterator.close();
+        try {
+          inputVector = iterator.next().get();
+        } finally {
+          Closeables.closeQuietly(iterator);
+        }
 
         int outDim = conf.getInt(OUTPUT_VECTOR_DIMENSION, Integer.MAX_VALUE);
         outputVector = conf.getBoolean(IS_SPARSE_OUTPUT, false)

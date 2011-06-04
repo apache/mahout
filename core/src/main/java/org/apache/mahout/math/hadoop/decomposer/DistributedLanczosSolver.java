@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math.hadoop.decomposer;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -225,16 +226,19 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer seqWriter =
         new SequenceFile.Writer(fs, conf, outputPath, IntWritable.class, VectorWritable.class);
-    IntWritable iw = new IntWritable();
-    for (int i = 0; i < numEigenVectors; i++) {
-      // Persist eigenvectors sorted by eigenvalues in descending order\
-      NamedVector v = new NamedVector(state.getRightSingularVector(numEigenVectors - 1 - i),
-          "eigenVector" + i + ", eigenvalue = " + state.getSingularValue(numEigenVectors - 1 - i));
-      Writable vw = new VectorWritable(v);
-      iw.set(i);
-      seqWriter.append(iw, vw);
+    try {
+      IntWritable iw = new IntWritable();
+      for (int i = 0; i < numEigenVectors; i++) {
+        // Persist eigenvectors sorted by eigenvalues in descending order\
+        NamedVector v = new NamedVector(state.getRightSingularVector(numEigenVectors - 1 - i),
+            "eigenVector" + i + ", eigenvalue = " + state.getSingularValue(numEigenVectors - 1 - i));
+        Writable vw = new VectorWritable(v);
+        iw.set(i);
+        seqWriter.append(iw, vw);
+      }
+    } finally {
+      Closeables.closeQuietly(seqWriter);
     }
-    seqWriter.close();
   }
 
   @Override

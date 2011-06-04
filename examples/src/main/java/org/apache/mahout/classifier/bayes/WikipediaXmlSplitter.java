@@ -26,6 +26,7 @@ import java.net.URI;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -195,7 +196,7 @@ public final class WikipediaXmlSplitter {
           try {
             chunkWriter.write(content.toString(), 0, content.length());
           } finally {
-            chunkWriter.close();
+            Closeables.closeQuietly(chunkWriter);
           }
           if (filenumber >= numChunks) {
             break;

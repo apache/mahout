@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -79,7 +80,7 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
         try {
           inverseCovarianceMatrix.readFields(in);
         } finally {
-          in.close();
+          Closeables.closeQuietly(in);
         }
         this.inverseCovarianceMatrix = inverseCovarianceMatrix.get();
       }
@@ -94,7 +95,7 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
         try {
           meanVector.readFields(in);
         } finally {
-          in.close();
+          Closeables.closeQuietly(in);
         }
         this.meanVector = meanVector.get();
       }

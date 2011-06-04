@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Random;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -138,7 +139,7 @@ public final class DatasetSplit {
 
     @Override
     public void close() throws IOException {
-      reader.close();
+      Closeables.closeQuietly(reader);
     }
 
     @Override

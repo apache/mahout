@@ -18,6 +18,7 @@
 package org.apache.mahout.utils.vectors;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -180,7 +181,7 @@ public final class VectorDumper {
             }
           }
         } finally {
-          writer.close();
+          Closeables.closeQuietly(writer);
         }
 
       }

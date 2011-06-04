@@ -130,7 +130,7 @@ public class ClusterIterator {
       Writable key = new Text(k);
       writer.append(key, classifier);
     } finally {
-      Closeables.close(writer, false);
+      Closeables.closeQuietly(writer);
     }
   }
   
@@ -143,7 +143,7 @@ public class ClusterIterator {
     try {
       reader.next(key, classifierOut);
     } finally {
-      Closeables.close(reader, false);
+      Closeables.closeQuietly(reader);
     }
     return classifierOut;
   }

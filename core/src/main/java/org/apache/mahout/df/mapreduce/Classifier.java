@@ -17,6 +17,7 @@
 
 package org.apache.mahout.df.mapreduce;
 
+import com.google.common.io.Closeables;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
@@ -178,7 +179,7 @@ public class Classifier {
           }
         }
       } finally {
-        ofile.close();
+        Closeables.closeQuietly(ofile);
       }
     }
 

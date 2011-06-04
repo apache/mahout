@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 
+import com.google.common.io.Closeables;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -70,10 +71,13 @@ public final class PartialBuilderTest extends MahoutTestCase {
     Writer writer = SequenceFile.createWriter(fs, conf, outputFile,
         TreeID.class, MapredOutput.class);
 
-    for (int index = 0; index < NUM_TREES; index++) {
-      writer.append(keys[index], values[index]);
+    try {
+      for (int index = 0; index < NUM_TREES; index++) {
+        writer.append(keys[index], values[index]);
+      }
+    } finally {
+      Closeables.closeQuietly(writer);
     }
-    writer.close();
 
     // load the output and make sure its valid
     TreeID[] newKeys = new TreeID[NUM_TREES];

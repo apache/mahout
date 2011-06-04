@@ -22,13 +22,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.DataInputBuffer;
-import org.apache.hadoop.io.DataOutputBuffer;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.RecordWriter;
@@ -40,7 +38,6 @@ import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.Model;
 import org.apache.mahout.clustering.dirichlet.models.DistanceMeasureClusterDistribution;
 import org.apache.mahout.clustering.dirichlet.models.DistributionDescription;
-import org.apache.mahout.clustering.dirichlet.models.GaussianCluster;
 import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
 import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.MahoutTestCase;
@@ -380,7 +377,7 @@ public final class TestMapReduce extends MahoutTestCase {
     try {
       inverseCovarianceMatrix.write(out);
     } finally {
-      out.close();
+      Closeables.closeQuietly(out);
     }
 
     Path meanVectorFile = new Path(getTestTempDirPath("mahalanobis"), "MahalanobisDistanceMeasureMeanVectorFile");
@@ -391,7 +388,7 @@ public final class TestMapReduce extends MahoutTestCase {
     try {
       meanVectorWritable.write(out);
     } finally {
-      out.close();
+      Closeables.closeQuietly(out);
     }
 
     conf.set("MahalanobisDistanceMeasure.maxtrixClass", MatrixWritable.class.getName());
@@ -453,7 +450,7 @@ public final class TestMapReduce extends MahoutTestCase {
     try {
       inverseCovarianceMatrix.write(out);
     } finally {
-      out.close();
+      Closeables.closeQuietly(out);
     }
 
     Path meanVectorFile = new Path(getTestTempDirPath("mahalanobis"), "MahalanobisDistanceMeasureMeanVectorFile");
@@ -464,7 +461,7 @@ public final class TestMapReduce extends MahoutTestCase {
     try {
       meanVectorWritable.write(out);
     } finally {
-      out.close();
+      Closeables.closeQuietly(out);
     }
 
     conf.set("MahalanobisDistanceMeasure.maxtrixClass", MatrixWritable.class.getName());

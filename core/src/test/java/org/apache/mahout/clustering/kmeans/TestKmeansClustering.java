@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -375,16 +376,18 @@ public final class TestKmeansClustering extends MahoutTestCase {
       Path path = new Path(clustersPath, "part-00000");
       FileSystem fs = FileSystem.get(path.toUri(), conf);
       SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, Text.class, Cluster.class);
+      try {
+        for (int i = 0; i < k + 1; i++) {
+          Vector vec = points.get(i).get();
 
-      for (int i = 0; i < k + 1; i++) {
-        Vector vec = points.get(i).get();
-
-        Cluster cluster = new Cluster(vec, i, measure);
-        // add the center so the centroid will be correct upon output
-        cluster.observe(cluster.getCenter(), 1);
-        writer.append(new Text(cluster.getIdentifier()), cluster);
+          Cluster cluster = new Cluster(vec, i, measure);
+          // add the center so the centroid will be correct upon output
+          cluster.observe(cluster.getCenter(), 1);
+          writer.append(new Text(cluster.getIdentifier()), cluster);
+        }
+      } finally {
+        Closeables.closeQuietly(writer);
       }
-      writer.close();
       // now run the Job
       Path outputPath = getTestTempDirPath("output");
       //KMeansDriver.runJob(pointsPath, clustersPath, outputPath, EuclideanDistanceMeasure.class.getName(), 0.001, 10, k + 1, true);
@@ -429,15 +432,18 @@ public final class TestKmeansClustering extends MahoutTestCase {
       FileSystem fs = FileSystem.get(path.toUri(), conf);
       SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, Text.class, Cluster.class);
 
-      for (int i = 0; i < k + 1; i++) {
-        Vector vec = points.get(i).get();
+      try {
+        for (int i = 0; i < k + 1; i++) {
+          Vector vec = points.get(i).get();
 
-        Cluster cluster = new Cluster(vec, i, measure);
-        // add the center so the centroid will be correct upon output
-        cluster.observe(cluster.getCenter(), 1);
-        writer.append(new Text(cluster.getIdentifier()), cluster);
+          Cluster cluster = new Cluster(vec, i, measure);
+          // add the center so the centroid will be correct upon output
+          cluster.observe(cluster.getCenter(), 1);
+          writer.append(new Text(cluster.getIdentifier()), cluster);
+        }
+      } finally {
+        Closeables.closeQuietly(writer);
       }
-      writer.close();
       // now run the Job
       Path outputPath = getTestTempDirPath("output");
       //KMeansDriver.runJob(pointsPath, clustersPath, outputPath, EuclideanDistanceMeasure.class.getName(), 0.001, 10, k + 1, true);

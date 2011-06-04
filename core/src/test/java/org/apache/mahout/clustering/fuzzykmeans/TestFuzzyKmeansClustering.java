@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -193,19 +194,18 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
                                                            new Path(clustersPath, "part-00000"),
                                                            Text.class,
                                                            SoftCluster.class);
-      for (int i = 0; i < k + 1; i++) {
-        Vector vec = tweakValue(points.get(i).get());
-
-        SoftCluster cluster = new SoftCluster(vec, i, measure);
-        // add the center so the centroid will be correct upon output
-        cluster.observe(cluster.getCenter(), 1);
-        /*
-         * writer.write(cluster.getIdentifier() + '\t' + SoftCluster.formatCluster(cluster) + '\n');
-         */
-        writer.append(new Text(cluster.getIdentifier()), cluster);
-
+      try {
+        for (int i = 0; i < k + 1; i++) {
+          Vector vec = tweakValue(points.get(i).get());
+          SoftCluster cluster = new SoftCluster(vec, i, measure);
+          /* add the center so the centroid will be correct upon output */
+          cluster.observe(cluster.getCenter(), 1);
+          // writer.write(cluster.getIdentifier() + '\t' + SoftCluster.formatCluster(cluster) + '\n');
+          writer.append(new Text(cluster.getIdentifier()), cluster);
+        }
+      } finally {
+        Closeables.closeQuietly(writer);
       }
-      writer.close();
 
       // now run the Job using the run() command line options.
       Path output = getTestTempDirPath("output");
@@ -265,19 +265,20 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
                                                            new Path(clustersPath, "part-00000"),
                                                            Text.class,
                                                            SoftCluster.class);
-      for (int i = 0; i < k + 1; i++) {
-        Vector vec = tweakValue(points.get(i).get());
+      try {
+        for (int i = 0; i < k + 1; i++) {
+          Vector vec = tweakValue(points.get(i).get());
 
-        SoftCluster cluster = new SoftCluster(vec, i, measure);
-        // add the center so the centroid will be correct upon output
-        cluster.observe(cluster.getCenter(), 1);
-        /*
-         * writer.write(cluster.getIdentifier() + '\t' + SoftCluster.formatCluster(cluster) + '\n');
-         */
-        writer.append(new Text(cluster.getIdentifier()), cluster);
+          SoftCluster cluster = new SoftCluster(vec, i, measure);
+          /* add the center so the centroid will be correct upon output */
+          cluster.observe(cluster.getCenter(), 1);
+          // writer.write(cluster.getIdentifier() + '\t' + SoftCluster.formatCluster(cluster) + '\n');
+          writer.append(new Text(cluster.getIdentifier()), cluster);
 
+        }
+      } finally {
+        Closeables.closeQuietly(writer);
       }
-      writer.close();
 
       // now run the Job using the run() command line options.
       Path output = getTestTempDirPath("output");

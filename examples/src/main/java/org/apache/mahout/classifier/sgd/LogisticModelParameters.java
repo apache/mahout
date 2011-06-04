@@ -19,6 +19,7 @@ package org.apache.mahout.classifier.sgd;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import com.google.common.io.Closeables;
 import org.apache.hadoop.io.Writable;
 
 import java.io.DataInput;
@@ -117,7 +118,7 @@ public class LogisticModelParameters implements Writable {
     try {
       return loadFrom(input);
     } finally {
-      input.close();
+      Closeables.closeQuietly(input);
     }
   }
 

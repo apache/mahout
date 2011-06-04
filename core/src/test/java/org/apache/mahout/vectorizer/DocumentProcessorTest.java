@@ -17,6 +17,7 @@
 
 package org.apache.mahout.vectorizer;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -44,13 +45,16 @@ public class DocumentProcessorTest extends MahoutTestCase {
 
     String documentId1 = "123";
     String text1 = "A test for the document processor";
-
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, configuration, input, Text.class, Text.class);
-    writer.append(new Text(documentId1), new Text(text1));
     String documentId2 = "456";
     String text2 = "and another one";
-    writer.append(new Text(documentId2), new Text(text2));
-    writer.close();
+
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs, configuration, input, Text.class, Text.class);
+    try {
+      writer.append(new Text(documentId1), new Text(text1));
+      writer.append(new Text(documentId2), new Text(text2));
+    } finally {
+      Closeables.closeQuietly(writer);
+    }
 
     DocumentProcessor.tokenizeDocuments(input, DefaultAnalyzer.class, output, configuration);
 

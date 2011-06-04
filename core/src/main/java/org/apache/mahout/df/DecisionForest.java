@@ -24,6 +24,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.DataInput;
 
+import com.google.common.io.Closeables;
 import org.apache.mahout.df.callback.PredictionCallback;
 import org.apache.mahout.df.data.Data;
 import org.apache.mahout.df.data.DataUtils;
@@ -208,7 +209,7 @@ public class DecisionForest implements Writable {
           forest.readFields(dataInput);
         }
       } finally {
-        dataInput.close();
+        Closeables.closeQuietly(dataInput);
       }
     }
 

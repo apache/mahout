@@ -23,6 +23,7 @@ import java.io.Writer;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
+import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -104,18 +105,22 @@ public final class Driver {
     log.info("Output File: {}", outFile);
 
     VectorWriter vectorWriter = getSeqFileWriter(outFile);
-
-    long numDocs = vectorWriter.write(iterable, maxDocs);
-    vectorWriter.close();
-    log.info("Wrote: {} vectors", numDocs);
+    try {
+      long numDocs = vectorWriter.write(iterable, maxDocs);
+      log.info("Wrote: {} vectors", numDocs);
+    } finally {
+      Closeables.closeQuietly(vectorWriter);
+    }
 
     File dictOutFile = new File(dictOut);
     log.info("Dictionary Output file: {}", dictOutFile);
     Writer writer = Files.newWriter(dictOutFile, Charsets.UTF_8);
     DelimitedTermInfoWriter tiWriter = new DelimitedTermInfoWriter(writer, delimiter, field);
-    tiWriter.write(termInfo);
-    tiWriter.close();
-    writer.close();
+    try {
+      tiWriter.write(termInfo);
+    } finally {
+      Closeables.closeQuietly(tiWriter);
+    }
   }
 
   public static void main(String[] args) throws IOException {

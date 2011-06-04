@@ -23,6 +23,7 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.Scanner;
 
+import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -188,7 +189,7 @@ public final class UDistrib {
     // close all the files.
     scanner.close();
     for (FSDataOutputStream file : files) {
-      file.close();
+      Closeables.closeQuietly(file);
     }
     
     // merge all output files

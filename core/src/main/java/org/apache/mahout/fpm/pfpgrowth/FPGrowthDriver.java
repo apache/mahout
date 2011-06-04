@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -191,18 +192,21 @@ public final class FPGrowthDriver {
     
     FPGrowth<String> fp = new FPGrowth<String>();
     Collection<String> features = new HashSet<String>();
-    
-    fp.generateTopKFrequentPatterns(
-        new StringRecordIterator(new FileLineIterable(new File(input), encoding, false), pattern),
-        fp.generateFList(
-            new StringRecordIterator(new FileLineIterable(new File(input), encoding, false), pattern),
-            minSupport),
-        minSupport,
-        maxHeapSize,
-        features,
-        new StringOutputConverter(new SequenceFileOutputCollector<Text,TopKStringPatterns>(writer)),
-        new ContextStatusUpdater(null));
-    writer.close();
+
+    try {
+      fp.generateTopKFrequentPatterns(
+          new StringRecordIterator(new FileLineIterable(new File(input), encoding, false), pattern),
+          fp.generateFList(
+              new StringRecordIterator(new FileLineIterable(new File(input), encoding, false), pattern),
+              minSupport),
+          minSupport,
+          maxHeapSize,
+          features,
+          new StringOutputConverter(new SequenceFileOutputCollector<Text,TopKStringPatterns>(writer)),
+          new ContextStatusUpdater(null));
+    } finally {
+      Closeables.closeQuietly(writer);
+    }
     
     List<Pair<String,TopKStringPatterns>> frequentPatterns = FPGrowth.readFrequentPattern(conf, path);
     for (Pair<String,TopKStringPatterns> entry : frequentPatterns) {

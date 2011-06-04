@@ -17,6 +17,7 @@
 
 package org.apache.mahout.utils.vectors;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -53,23 +54,26 @@ public class RowIdJob extends AbstractJob {
                                                                  matrixPath,
                                                                  IntWritable.class,
                                                                  VectorWritable.class);
-    IntWritable docId = new IntWritable();
-    int i = 0;
-    int numCols = 0;
-    for (Pair<Text,VectorWritable> record :
+    try {
+      IntWritable docId = new IntWritable();
+      int i = 0;
+      int numCols = 0;
+      for (Pair<Text,VectorWritable> record :
          new SequenceFileDirIterable<Text,VectorWritable>(inputPath, PathType.LIST, null, null, true, conf)) {
-      VectorWritable value = record.getSecond();
-      docId.set(i);
-      indexWriter.append(docId, record.getFirst());
-      matrixWriter.append(docId, value);
-      i++;
-      numCols = value.get().size();
-    }
+        VectorWritable value = record.getSecond();
+        docId.set(i);
+        indexWriter.append(docId, record.getFirst());
+        matrixWriter.append(docId, value);
+        i++;
+        numCols = value.get().size();
+      }
 
-    matrixWriter.close();
-    indexWriter.close();
-    log.info("Wrote out matrix with {} rows and {} columns to {}", new Object[] { i, numCols, matrixPath });
-    return 0;
+      log.info("Wrote out matrix with {} rows and {} columns to {}", new Object[] { i, numCols, matrixPath });
+      return 0;
+    } finally {
+      Closeables.closeQuietly(indexWriter);
+      Closeables.closeQuietly(matrixWriter);
+    }
   }
 
   public static void main(String[] args) throws Exception {

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
 
+import com.google.common.io.Closeables;
 import org.apache.mahout.utils.vectors.TermEntry;
 import org.apache.mahout.utils.vectors.TermInfo;
 
@@ -42,22 +43,23 @@ public class DelimitedTermInfoWriter implements TermInfoWriter {
   public void write(TermInfo ti) throws IOException {
     
     Iterator<TermEntry> entIter = ti.getAllEntries();
-    
-    writer.write(String.valueOf(ti.totalTerms(field)));
-    writer.write('\n');
-    writer.write("#term" + delimiter + "doc freq" + delimiter + "idx");
-    writer.write('\n');
-    while (entIter.hasNext()) {
-      TermEntry entry = entIter.next();
-      writer.write(entry.getTerm());
-      writer.write(delimiter);
-      writer.write(String.valueOf(entry.getDocFreq()));
-      writer.write(delimiter);
-      writer.write(String.valueOf(entry.getTermIdx()));
+    try {
+      writer.write(String.valueOf(ti.totalTerms(field)));
       writer.write('\n');
+      writer.write("#term" + delimiter + "doc freq" + delimiter + "idx");
+      writer.write('\n');
+      while (entIter.hasNext()) {
+        TermEntry entry = entIter.next();
+        writer.write(entry.getTerm());
+        writer.write(delimiter);
+        writer.write(String.valueOf(entry.getDocFreq()));
+        writer.write(delimiter);
+        writer.write(String.valueOf(entry.getTermIdx()));
+        writer.write('\n');
+      }
+    } finally {
+      Closeables.closeQuietly(writer);
     }
-    writer.flush();
-    writer.close();
   }
   
   /**

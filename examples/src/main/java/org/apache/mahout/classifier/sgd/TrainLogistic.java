@@ -19,6 +19,7 @@ package org.apache.mahout.classifier.sgd;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
+import com.google.common.io.Closeables;
 import com.google.common.io.Resources;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -70,45 +71,47 @@ public final class TrainLogistic {
       OnlineLogisticRegression lr = lmp.createRegression();
       for (int pass = 0; pass < passes; pass++) {
         BufferedReader in = open(inputFile);
+        try {
+          // read variable names
+          csv.firstLine(in.readLine());
 
-        // read variable names
-        csv.firstLine(in.readLine());
+          String line = in.readLine();
+          while (line != null) {
+            // for each new line, get target and predictors
+            Vector input = new RandomAccessSparseVector(lmp.getNumFeatures());
+            int targetValue = csv.processLine(line, input);
 
-        String line = in.readLine();
-        while (line != null) {
-          // for each new line, get target and predictors
-          Vector input = new RandomAccessSparseVector(lmp.getNumFeatures());
-          int targetValue = csv.processLine(line, input);
-
-          // check performance while this is still news
-          double logP = lr.logLikelihood(targetValue, input);
-          if (!Double.isInfinite(logP)) {
-            if (samples < 20) {
-              logPEstimate = (samples * logPEstimate + logP) / (samples + 1);
-            } else {
-              logPEstimate = 0.95 * logPEstimate + 0.05 * logP;
+            // check performance while this is still news
+            double logP = lr.logLikelihood(targetValue, input);
+            if (!Double.isInfinite(logP)) {
+              if (samples < 20) {
+                logPEstimate = (samples * logPEstimate + logP) / (samples + 1);
+              } else {
+                logPEstimate = 0.95 * logPEstimate + 0.05 * logP;
+              }
+              samples++;
             }
-            samples++;
-          }
-          double p = lr.classifyScalar(input);
-          if (scores) {
-            output.printf(Locale.ENGLISH, "%10d %2d %10.2f %2.4f %10.4f %10.4f\n",
-              samples, targetValue, lr.currentLearningRate(), p, logP, logPEstimate);
-          }
+            double p = lr.classifyScalar(input);
+            if (scores) {
+              output.printf(Locale.ENGLISH, "%10d %2d %10.2f %2.4f %10.4f %10.4f\n",
+                samples, targetValue, lr.currentLearningRate(), p, logP, logPEstimate);
+            }
 
-          // now update model
-          lr.train(targetValue, input);
+            // now update model
+            lr.train(targetValue, input);
 
-          line = in.readLine();
+            line = in.readLine();
+          }
+        } finally {
+          Closeables.closeQuietly(in);
         }
-        in.close();
       }
 
       OutputStream modelOutput = new FileOutputStream(outputFile);
       try {
         lmp.saveTo(modelOutput);
       } finally {
-        modelOutput.close();
+        Closeables.closeQuietly(modelOutput);
       }
       
       output.printf(Locale.ENGLISH, "%d\n", lmp.getNumFeatures());

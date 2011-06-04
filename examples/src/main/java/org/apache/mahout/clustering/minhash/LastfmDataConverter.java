@@ -18,6 +18,7 @@
 package org.apache.mahout.clustering.minhash;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -135,7 +136,7 @@ public final class LastfmDataConverter {
       msg = usedMemory() + "Converting data to internal vector format: ";
       System.out.print('\r' + msg + percentDone + "% Completed\n");
     } finally {
-      br.close();
+      Closeables.closeQuietly(br);
     }
     return itemFeaturesMap;
   }
@@ -179,7 +180,7 @@ public final class LastfmDataConverter {
         }
       }
     } finally {
-      writer.close();
+      Closeables.closeQuietly(writer);
     }
     return true;
   }

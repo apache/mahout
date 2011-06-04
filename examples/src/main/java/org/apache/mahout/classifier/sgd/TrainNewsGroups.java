@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Ordering;
+import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -306,7 +307,7 @@ public final class TrainNewsGroups {
         countWords(analyzer, words, reader);
       }
     } finally {
-      reader.close();
+      Closeables.closeQuietly(reader);
     }
 
     Vector v = new RandomAccessSparseVector(FEATURES);

@@ -22,6 +22,7 @@ import java.io.File;
 import java.util.List;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -51,10 +52,13 @@ public final class BayesClassifierSelfTest extends MahoutTestCase {
 
     File tempInputFile = getTestTempFile("bayesinput");
     BufferedWriter writer = Files.newWriter(tempInputFile, Charsets.UTF_8);
-    for (String[] entry : ClassifierData.DATA) {
-      writer.write(entry[0] + '\t' + entry[1] + '\n');
+    try {
+      for (String[] entry : ClassifierData.DATA) {
+        writer.write(entry[0] + '\t' + entry[1] + '\n');
+      }
+    } finally {
+      Closeables.closeQuietly(writer);
     }
-    writer.close();
 
     Path input = getTestTempFilePath("bayesinput");
     Configuration conf = new Configuration();

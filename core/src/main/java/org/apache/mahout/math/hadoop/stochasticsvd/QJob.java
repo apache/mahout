@@ -27,6 +27,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -262,7 +263,7 @@ public final class QJob {
           flushSolver(context);
           assert tempQw != null;
           closeables.remove(tempQw);
-          tempQw.close();
+          Closeables.closeQuietly(tempQw);
         }
         flushQBlocks(context);
 

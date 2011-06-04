@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.google.common.io.Closeables;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.TermEnum;
@@ -40,24 +41,27 @@ public class CachedTermInfo implements TermInfo {
   public CachedTermInfo(IndexReader reader, String field, int minDf, int maxDfPercent) throws IOException {
     this.field = field;
     TermEnum te = reader.terms(new Term(field, ""));
-    int numDocs = reader.numDocs();
-    double percent = numDocs * maxDfPercent / 100.0;
-    //Should we use a linked hash map so that we know terms are in order?
-    termEntries = new LinkedHashMap<String, TermEntry>();
-    int count = 0;
-    do {
-      Term term = te.term();
-      if (term == null || !term.field().equals(field)) {
-        break;
-      }
-      int df = te.docFreq();
-      if (df < minDf || df > percent) {
-        continue;
-      }
-      TermEntry entry = new TermEntry(term.text(), count++, df);
-      termEntries.put(entry.getTerm(), entry);
-    } while (te.next());
-    te.close();
+    try {
+      int numDocs = reader.numDocs();
+      double percent = numDocs * maxDfPercent / 100.0;
+      //Should we use a linked hash map so that we know terms are in order?
+      termEntries = new LinkedHashMap<String, TermEntry>();
+      int count = 0;
+      do {
+        Term term = te.term();
+        if (term == null || !term.field().equals(field)) {
+          break;
+        }
+        int df = te.docFreq();
+        if (df < minDf || df > percent) {
+          continue;
+        }
+        TermEntry entry = new TermEntry(term.text(), count++, df);
+        termEntries.put(entry.getTerm(), entry);
+      } while (te.next());
+    } finally {
+      Closeables.closeQuietly(te);
+    }
   }
   
   @Override

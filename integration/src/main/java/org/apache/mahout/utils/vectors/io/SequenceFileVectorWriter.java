@@ -19,6 +19,7 @@ package org.apache.mahout.utils.vectors.io;
 
 import java.io.IOException;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.math.Vector;
@@ -65,9 +66,7 @@ public class SequenceFileVectorWriter implements VectorWriter {
   
   @Override
   public void close() throws IOException {
-    if (writer != null) {
-      writer.close();
-    }
+    Closeables.closeQuietly(writer);
   }
   
   public SequenceFile.Writer getWriter() {

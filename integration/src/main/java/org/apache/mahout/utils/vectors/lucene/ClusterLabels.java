@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -134,7 +135,7 @@ public class ClusterLabels {
         }
       }
     } finally {
-      writer.close();
+      Closeables.closeQuietly(writer);
     }
   }
 
@@ -180,32 +181,36 @@ public class ClusterLabels {
      */
 
     TermEnum te = reader.terms(new Term(contentField, ""));
-    int count = 0;
-
     Map<String, TermEntry> termEntryMap = new LinkedHashMap<String, TermEntry>();
-    do {
-      Term term = te.term();
-      if (term == null || !term.field().equals(contentField)) {
-        break;
-      }
-      OpenBitSet termBitset = new OpenBitSet(reader.maxDoc());
 
-      // Generate bitset for the term
-      TermDocs termDocs = reader.termDocs(term);
+    try {
+      int count = 0;
 
-      while (termDocs.next()) {
-        termBitset.set(termDocs.doc());
-      }
+      do {
+        Term term = te.term();
+        if (term == null || !term.field().equals(contentField)) {
+          break;
+        }
+        OpenBitSet termBitset = new OpenBitSet(reader.maxDoc());
 
-      // AND the term's bitset with cluster doc bitset to get the term's in-cluster frequency.
-      // This modifies the termBitset, but that's fine as we are not using it anywhere else.
-      termBitset.and(clusterDocBitset);
-      int inclusterDF = (int) termBitset.cardinality();
+        // Generate bitset for the term
+        TermDocs termDocs = reader.termDocs(term);
 
-      TermEntry entry = new TermEntry(term.text(), count++, inclusterDF);
-      termEntryMap.put(entry.getTerm(), entry);
-    } while (te.next());
-    te.close();
+        while (termDocs.next()) {
+          termBitset.set(termDocs.doc());
+        }
+
+        // AND the term's bitset with cluster doc bitset to get the term's in-cluster frequency.
+        // This modifies the termBitset, but that's fine as we are not using it anywhere else.
+        termBitset.and(clusterDocBitset);
+        int inclusterDF = (int) termBitset.cardinality();
+
+        TermEntry entry = new TermEntry(term.text(), count++, inclusterDF);
+        termEntryMap.put(entry.getTerm(), entry);
+      } while (te.next());
+    } finally {
+      Closeables.closeQuietly(te);
+    }
 
     List<TermInfoClusterInOut> clusteredTermInfo = new LinkedList<TermInfoClusterInOut>();
 
@@ -223,7 +228,7 @@ public class ClusterLabels {
 
     Collections.sort(clusteredTermInfo);
     // Cleanup
-    reader.close();
+    Closeables.closeQuietly(reader);
     termEntryMap.clear();
 
     return clusteredTermInfo.subList(0, Math.min(clusteredTermInfo.size(), maxLabels));

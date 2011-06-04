@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -104,7 +105,7 @@ public class SSVDCli extends AbstractJob {
       sigmaW.append(NullWritable.get(), sValues);
 
     } finally {
-      sigmaW.close();
+      Closeables.closeQuietly(sigmaW);
     }
 
     if (computeU) {

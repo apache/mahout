@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.util.ProgramDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -202,7 +203,7 @@ public final class MahoutDriver {
         log.warn("Error while loading {}", resource, ioe);
         // Continue
       } finally {
-        propsStream.close();
+        Closeables.closeQuietly(propsStream);
       }
     }
     return null;

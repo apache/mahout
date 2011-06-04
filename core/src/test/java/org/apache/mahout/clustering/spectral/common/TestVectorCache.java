@@ -19,6 +19,7 @@ package org.apache.mahout.clustering.spectral.common;
 
 import java.net.URI;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
@@ -51,11 +52,13 @@ public class TestVectorCache extends MahoutTestCase {
     // can we read it from here?
     SequenceFileValueIterator<VectorWritable> iterator =
         new SequenceFileValueIterator<VectorWritable>(path, true, conf);
-    VectorWritable old = iterator.next();
-    iterator.close();
-    
-    // test if the values are identical
-    assertEquals("Saved vector is identical to original", old.get(), value);
+    try {
+      VectorWritable old = iterator.next();
+      // test if the values are identical
+      assertEquals("Saved vector is identical to original", old.get(), value);
+    } finally {
+      Closeables.closeQuietly(iterator);
+    }
   }
   
   @Test
@@ -73,9 +76,12 @@ public class TestVectorCache extends MahoutTestCase {
     HadoopUtil.delete(conf, path);
     DistributedCache.setCacheFiles(new URI[] {path.toUri()}, conf);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
-    writer.append(key, new VectorWritable(value));
-    writer.close();
-    
+    try {
+      writer.append(key, new VectorWritable(value));
+    } finally {
+      Closeables.closeQuietly(writer);
+    }
+
     // load it
     Vector result = VectorCache.load(conf);
     

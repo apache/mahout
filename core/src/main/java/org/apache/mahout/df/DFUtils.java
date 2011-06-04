@@ -21,6 +21,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -138,7 +139,10 @@ public final class DFUtils {
     FileSystem fs = path.getFileSystem(conf);
 
     FSDataOutputStream out = fs.create(path);
-    writable.write(out);
-    out.close();
+    try {
+      writable.write(out);
+    } finally {
+      Closeables.closeQuietly(out);
+    }
   }
 }

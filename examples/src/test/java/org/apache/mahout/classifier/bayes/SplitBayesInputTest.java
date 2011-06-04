@@ -24,6 +24,7 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -89,12 +90,14 @@ public final class SplitBayesInputTest extends MahoutTestCase {
   }
 
   private void writeSingleInputFile() throws IOException {
-    BufferedWriter writer = new BufferedWriter(
-        new OutputStreamWriter(fs.create(tempInputFile), Charsets.UTF_8));
-    for (String[] entry : ClassifierData.DATA) {
-      writer.write(entry[0] + '\t' + entry[1] + '\n');
+    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fs.create(tempInputFile), Charsets.UTF_8));
+    try {
+      for (String[] entry : ClassifierData.DATA) {
+        writer.write(entry[0] + '\t' + entry[1] + '\n');
+      }
+    } finally {
+      Closeables.closeQuietly(writer);
     }
-    writer.close();
   }
 
   @Test

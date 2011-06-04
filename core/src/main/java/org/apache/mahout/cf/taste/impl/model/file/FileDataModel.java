@@ -28,6 +28,7 @@ import java.util.TreeMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 
+import com.google.common.io.Closeables;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
@@ -173,7 +174,7 @@ public class FileDataModel extends AbstractDataModel {
       iterator.next();
       firstLine = iterator.peek();
     }
-    iterator.close();
+    Closeables.closeQuietly(iterator);
 
     delimiter = determineDelimiter(firstLine);
     delimiterPattern = Pattern.compile(String.valueOf(delimiter));

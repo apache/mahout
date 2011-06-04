@@ -22,6 +22,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -119,7 +120,7 @@ public final class SequenceFileDumper {
             writer.append("Count: ").append(String.valueOf(count)).append('\n');
           }
         } finally {
-          writer.close();
+          Closeables.closeQuietly(writer);
         }
       }
       

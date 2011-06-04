@@ -17,6 +17,7 @@
 
 package org.apache.mahout.utils.vectors.lucene;
 
+import com.google.common.io.Closeables;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -172,16 +173,20 @@ public final class LuceneIterableTest extends MahoutTestCase {
         new StandardAnalyzer(Version.LUCENE_30),
         createNew,
         IndexWriter.MaxFieldLength.UNLIMITED);
-    for (int i = 0; i < LuceneIterableTest.DOCS.length; i++) {
-      Document doc = new Document();
-      Fieldable id = new Field("id", "doc_" + (i + startingId), Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS);
-      doc.add(id);
-      //Store both position and offset information
-      Fieldable text = new Field("content", DOCS[i], Field.Store.NO, Field.Index.ANALYZED, termVector);
-      doc.add(text);
-      writer.addDocument(doc);
+    try {
+      for (int i = 0; i < LuceneIterableTest.DOCS.length; i++) {
+        Document doc = new Document();
+        Fieldable id = new Field("id", "doc_" + (i + startingId), Field.Store.YES,
+            Field.Index.NOT_ANALYZED_NO_NORMS);
+        doc.add(id);
+        //Store both position and offset information
+        Fieldable text = new Field("content", DOCS[i], Field.Store.NO, Field.Index.ANALYZED, termVector);
+        doc.add(text);
+        writer.addDocument(doc);
+      }
+    } finally {
+      Closeables.closeQuietly(writer);
     }
-    writer.close();
     return directory;
   }
 }

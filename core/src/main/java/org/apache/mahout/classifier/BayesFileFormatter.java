@@ -17,16 +17,13 @@
 
 package org.apache.mahout.classifier;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -78,7 +75,7 @@ public final class BayesFileFormatter {
       // listFiles() is called here as a way to recursively visit files,
       // actually
     } finally {
-      IOUtils.quietClose(writer);
+      Closeables.closeQuietly(writer);
     }
   }
   
@@ -105,7 +102,7 @@ public final class BayesFileFormatter {
       try {
         writeFile(label, analyzer, input, charset, writer);
       } finally {
-        IOUtils.quietClose(writer);
+        Closeables.closeQuietly(writer);
       }
     }
   }
@@ -173,7 +170,7 @@ public final class BayesFileFormatter {
           throw new IllegalStateException(e);
         } finally {
           if (writer == null) {
-            IOUtils.quietClose(theWriter);
+            Closeables.closeQuietly(theWriter);
           }
         }
       } else {
@@ -215,7 +212,7 @@ public final class BayesFileFormatter {
         writer.write(' ');
       }
     } finally {
-      IOUtils.quietClose(reader);
+      Closeables.closeQuietly(reader);
     }
   }
   

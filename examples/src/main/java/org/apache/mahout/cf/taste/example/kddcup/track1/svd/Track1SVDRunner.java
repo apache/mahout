@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.example.kddcup.track1.svd;
 
+import com.google.common.io.Closeables;
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.example.kddcup.DataFileIterable;
@@ -116,8 +117,7 @@ public class Track1SVDRunner {
         }
       }
     } finally {
-      out.flush();
-      out.close();
+      Closeables.closeQuietly(out);
     }
     log.info("wrote estimates to {}, done.", resultFile.getAbsolutePath());
   }

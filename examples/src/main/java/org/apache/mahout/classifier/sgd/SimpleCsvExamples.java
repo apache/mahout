@@ -21,6 +21,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.common.RandomUtils;
@@ -275,7 +276,7 @@ public final class SimpleCsvExamples {
 
     @Override
     public void close() throws IOException {
-      in.close();
+      Closeables.closeQuietly(in);
     }
   }
 }

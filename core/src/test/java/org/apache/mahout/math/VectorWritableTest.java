@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.io.Writable;
 import org.junit.Test;
 
@@ -66,7 +67,7 @@ public final class VectorWritableTest extends MahoutTestCase {
     try {
       toWrite.write(dos);
     } finally {
-      dos.close();
+      Closeables.closeQuietly(dos);
     }
 
     ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
@@ -74,7 +75,7 @@ public final class VectorWritableTest extends MahoutTestCase {
     try {
       toRead.readFields(dis);
     } finally {
-      dis.close();
+      Closeables.closeQuietly(dis);
     }
   }
 

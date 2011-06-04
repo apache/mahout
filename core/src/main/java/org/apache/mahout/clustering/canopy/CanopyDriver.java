@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -294,7 +295,7 @@ public class CanopyDriver extends AbstractJob {
         writer.append(new Text(canopy.getIdentifier()), canopy);
       }
     } finally {
-      writer.close();
+      Closeables.closeQuietly(writer);
     }
     return canopyOutputDir;
   }
@@ -415,8 +416,8 @@ public class CanopyDriver extends AbstractJob {
               .newInstance();
         }
       } finally {
-        reader.close();
-        writer.close();
+        Closeables.closeQuietly(reader);
+        Closeables.closeQuietly(writer);;
       }
     }
   }

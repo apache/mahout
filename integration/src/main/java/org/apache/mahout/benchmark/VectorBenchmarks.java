@@ -29,6 +29,7 @@ import java.util.Random;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
+import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -288,45 +289,54 @@ public class VectorBenchmarks {
 
     Writable one = new IntWritable(0);
     VectorWritable vec = new VectorWritable();
-    
     TimingStatistics stats = new TimingStatistics();
-    for (int l = 0; l < loop; l++) {
-      for (int i = 0; i < numVectors; i++) {
-        TimingStatistics.Call call = stats.newCall();
-        vec.set(vectors[0][i]);
-        writer.append(one, vec);
-        call.end();
+
+    try {
+      for (int l = 0; l < loop; l++) {
+        for (int i = 0; i < numVectors; i++) {
+          TimingStatistics.Call call = stats.newCall();
+          vec.set(vectors[0][i]);
+          writer.append(one, vec);
+          call.end();
+        }
       }
+    } finally {
+      Closeables.closeQuietly(writer);
     }
-    writer.close();
     printStats(stats, "Serialize", "DenseVector");
     
     writer = new SequenceFile.Writer(fs, conf,
       new Path("/tmp/randsparse-vector"), IntWritable.class, VectorWritable.class);
     stats = new TimingStatistics();
-    for (int l = 0; l < loop; l++) {
-      for (int i = 0; i < numVectors; i++) {
-        TimingStatistics.Call call = stats.newCall();
-        vec.set(vectors[1][i]);
-        writer.append(one, vec);
-        call.end();
+    try {
+      for (int l = 0; l < loop; l++) {
+        for (int i = 0; i < numVectors; i++) {
+          TimingStatistics.Call call = stats.newCall();
+          vec.set(vectors[1][i]);
+          writer.append(one, vec);
+          call.end();
+        }
       }
+    } finally {
+      Closeables.closeQuietly(writer);
     }
-    writer.close();
     printStats(stats, "Serialize", "RandSparseVector");
     
     writer = new SequenceFile.Writer(fs, conf,
       new Path("/tmp/seqsparse-vector"), IntWritable.class, VectorWritable.class);
     stats = new TimingStatistics();
-    for (int l = 0; l < loop; l++) {
-      for (int i = 0; i < numVectors; i++) {
-        TimingStatistics.Call call = stats.newCall();
-        vec.set(vectors[2][i]);
-        writer.append(one, vec);
-        call.end();
+    try {
+      for (int l = 0; l < loop; l++) {
+        for (int i = 0; i < numVectors; i++) {
+          TimingStatistics.Call call = stats.newCall();
+          vec.set(vectors[2][i]);
+          writer.append(one, vec);
+          call.end();
+        }
       }
+    } finally {
+      Closeables.closeQuietly(writer);
     }
-    writer.close();
     printStats(stats, "Serialize", "SeqSparseVector");
     
   }
