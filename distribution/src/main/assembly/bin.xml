@@ -53,7 +53,7 @@
       <outputDirectory/>
     </fileSet>
     <fileSet>
-      <directory>${project.basedir}/../utils/target</directory>
+      <directory>${project.basedir}/../integration/target</directory>
       <includes>
         <include>mahout-*.job</include>
         <include>mahout-*.jar</include>
@@ -79,13 +79,6 @@
       <outputDirectory/>
     </fileSet>
     <fileSet>
-      <directory>${project.basedir}/../taste-web/target</directory>
-      <includes>
-        <include>mahout-*.war</include>
-      </includes>
-      <outputDirectory/>
-    </fileSet>
-    <fileSet>
       <directory>${project.basedir}/../collections/target/apidocs</directory>
       <outputDirectory>docs/mahout-collections</outputDirectory>
     </fileSet>
@@ -98,8 +91,8 @@
       <outputDirectory>docs/mahout-core</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>${project.basedir}/../utils/target/apidocs</directory>
-      <outputDirectory>docs/mahout-utils</outputDirectory>
+      <directory>${project.basedir}/../integration/target/apidocs</directory>
+      <outputDirectory>docs/mahout-integration</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>${project.basedir}/../examples/target/apidocs</directory>

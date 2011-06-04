@@ -154,7 +154,7 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-utils</artifactId>
+      <artifactId>mahout-integration</artifactId>
     </dependency>
 
     <dependency>

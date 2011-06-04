@@ -94,7 +94,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-utils</artifactId>
+      <artifactId>mahout-integration</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -106,12 +106,6 @@
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-examples</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-taste-webapp</artifactId>
-      <version>${project.version}</version>
-      <type>war</type>
     </dependency>
   </dependencies>
 </project>

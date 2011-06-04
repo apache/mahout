@@ -20,7 +20,6 @@ package org.apache.mahout.cf.taste.impl.similarity.jdbc;
 import javax.sql.DataSource;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
 
 /**
  * <p>
@@ -81,7 +80,7 @@ public final class MySQLJDBCItemSimilarity extends AbstractJDBCItemSimilarity {
   }
   
   public MySQLJDBCItemSimilarity(String dataSourceName) throws TasteException {
-    this(AbstractJDBCComponent.lookupDataSource(dataSourceName));
+    this(lookupDataSource(dataSourceName));
   }
   
   public MySQLJDBCItemSimilarity(DataSource dataSource) {

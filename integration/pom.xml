@@ -18,6 +18,7 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -27,9 +28,10 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-utils</artifactId>
-  <name>Mahout Utilities</name>
-  <description>Utilities for preparing content into formats for Mahout.</description>
+  <artifactId>mahout-integration</artifactId>
+  <name>Mahout Integration</name>
+  <description>Optional components of Mahout which generally support interaction with third party systems,
+    formats, APIs, etc.</description>
 
   <packaging>jar</packaging>
 
@@ -105,17 +107,33 @@
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
-    
+
     <!-- 3rd party -->
+
+    <dependency>
+      <groupId>commons-dbcp</groupId>
+      <artifactId>commons-dbcp</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-pool</groupId>
+      <artifactId>commons-pool</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-commons-csv</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -129,18 +147,21 @@
     </dependency>
 
     <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-core</artifactId>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymockclassextension</artifactId>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>

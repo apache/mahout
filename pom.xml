@@ -134,7 +134,7 @@
       </dependency>
       
       <dependency>
-        <artifactId>mahout-utils</artifactId>
+        <artifactId>mahout-integration</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
       </dependency>
@@ -334,12 +334,6 @@
         <groupId>org.apache.mahout.commons</groupId>
         <artifactId>commons-cli</artifactId>
         <version>2.0-mahout</version>
-      </dependency>
-
-      <dependency>
-        <groupId>axis</groupId>
-        <artifactId>axis</artifactId>
-        <version>1.4</version>
       </dependency>
 
       <dependency>
@@ -588,9 +582,8 @@
     <module>eclipse</module>
     <module>math</module>
     <module>core</module>
-    <module>taste-web</module>
+    <module>integration</module>
     <module>examples</module>
-    <module>utils</module>
     <module>distribution</module>
   </modules>
   <profiles>

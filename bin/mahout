@@ -135,7 +135,7 @@ then
 else
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/math/target/classes
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/core/target/classes
-  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/utils/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/integration/target/classes
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/examples/target/classes
   #CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/core/src/main/resources
 fi

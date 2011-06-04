@@ -7,9 +7,8 @@ core/target/*
 math/target/*
 examples/target/*
 buildtools/target/*
-utils/target/*
+integration/target/*
 eclipse/target/*
-taste-web/target/*
 .settings/
 buildtools/.settings/
 core/.settings/
@@ -23,5 +22,4 @@ examples/.settings/
 foo
 math-tests/
 math/.settings/
-taste-web/.settings/
-utils/.settings/
+integration/.settings/
