@@ -82,4 +82,9 @@ class WeightedOccurrence implements Writable, Cloneable {
   public boolean equals(Object other) {
     return other instanceof WeightedOccurrence && row == ((WeightedOccurrence) other).row;
   }
+  
+  @Override
+  public String toString() {
+    return row + ":" + value + "(" + weight + ")";
+  }
 }

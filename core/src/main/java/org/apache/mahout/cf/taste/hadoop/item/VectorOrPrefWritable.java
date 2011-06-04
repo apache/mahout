@@ -97,4 +97,8 @@ public final class VectorOrPrefWritable implements Writable {
     }
   }
 
+  @Override
+  public String toString() {
+    return vector == null ? userID + ":" + value : vector.toString();
+  }
 }

@@ -319,6 +319,10 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
       col = in.readInt();
       val = in.readDouble();
     }
+    
+    @Override
+    public String toString() {
+      return "(" + row + "," + col + "):" + val;
+    }
   }
-
 }

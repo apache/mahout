@@ -86,6 +86,11 @@ public class SimilarityMatrixEntryKey implements WritableComparable<SimilarityMa
     return other instanceof SimilarityMatrixEntryKey && row == ((SimilarityMatrixEntryKey) other).row;
   }
 
+  @Override
+  public String toString() {
+    return row + ":" + value;
+  }
+  
   public static class SimilarityMatrixEntryKeyComparator extends WritableComparator implements Serializable {
 
     protected SimilarityMatrixEntryKeyComparator() {

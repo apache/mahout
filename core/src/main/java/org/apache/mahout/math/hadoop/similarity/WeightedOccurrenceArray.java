@@ -17,6 +17,8 @@
 
 package org.apache.mahout.math.hadoop.similarity;
 
+import java.util.Arrays;
+
 import org.apache.hadoop.io.ArrayWritable;
 
 /**
@@ -35,5 +37,10 @@ class WeightedOccurrenceArray extends ArrayWritable {
 
   public WeightedOccurrence[] getWeightedOccurrences() {
     return (WeightedOccurrence[]) toArray();
+  }
+  
+  @Override
+  public String toString() {
+    return Arrays.toString(getWeightedOccurrences());
   }
 }
