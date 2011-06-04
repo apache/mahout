@@ -17,7 +17,11 @@
 
 package org.apache.mahout.clustering;
 
-import com.google.common.io.Closeables;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -45,6 +49,8 @@ import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
+import org.apache.mahout.common.kernel.IKernelProfile;
+import org.apache.mahout.common.kernel.TriangularKernelProfile;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.NamedVector;
@@ -66,13 +72,10 @@ import org.apache.mahout.vectorizer.Weight;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import com.google.common.io.Closeables;
 
 public final class TestClusterDumper extends MahoutTestCase {
-
+  
   private static final String[] DOCS = {
       "The quick red fox jumped over the lazy brown dogs.",
       "The quick brown fox jumped over the lazy red dogs.",
@@ -88,13 +91,12 @@ public final class TestClusterDumper extends MahoutTestCase {
       "The robber wore a black fleece jacket and a baseball cap.",
       "The robber wore a red fleece jacket and a baseball cap.",
       "The robber wore a white fleece jacket and a baseball cap.",
-      "The English Springer Spaniel is the best of all dogs."
-  };
-
+      "The English Springer Spaniel is the best of all dogs."};
+  
   private List<VectorWritable> sampleData;
-
+  
   private String[] termDictionary;
-
+  
   @Override
   @Before
   public void setUp() throws Exception {
@@ -103,23 +105,24 @@ public final class TestClusterDumper extends MahoutTestCase {
     FileSystem fs = FileSystem.get(conf);
     // Create test data
     getSampleData(DOCS);
-    ClusteringTestUtils.writePointsToFile(sampleData, true, getTestTempFilePath("testdata/file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(sampleData, true,
+        getTestTempFilePath("testdata/file1"), fs, conf);
   }
-
+  
   private void getSampleData(String[] docs2) throws IOException {
     sampleData = new ArrayList<VectorWritable>();
     RAMDirectory directory = new RAMDirectory();
-    IndexWriter writer = new IndexWriter(directory,
-                                         new StandardAnalyzer(Version.LUCENE_31),
-                                         true,
-                                         IndexWriter.MaxFieldLength.UNLIMITED);
+    IndexWriter writer = new IndexWriter(directory, new StandardAnalyzer(
+        Version.LUCENE_31), true, IndexWriter.MaxFieldLength.UNLIMITED);
     try {
       for (int i = 0; i < docs2.length; i++) {
         Document doc = new Document();
-        Fieldable id = new Field("id", "doc_" + i, Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS);
+        Fieldable id = new Field("id", "doc_" + i, Field.Store.YES,
+            Field.Index.NOT_ANALYZED_NO_NORMS);
         doc.add(id);
         // Store both position and offset information
-        Fieldable text = new Field("content", docs2[i], Field.Store.NO, Field.Index.ANALYZED, Field.TermVector.YES);
+        Fieldable text = new Field("content", docs2[i], Field.Store.NO,
+            Field.Index.ANALYZED, Field.TermVector.YES);
         doc.add(text);
         writer.addDocument(doc);
       }
@@ -129,7 +132,7 @@ public final class TestClusterDumper extends MahoutTestCase {
     IndexReader reader = IndexReader.open(directory, true);
     Weight weight = new TFIDF();
     TermInfo termInfo = new CachedTermInfo(reader, "content", 1, 100);
-
+    
     int numTerms = 0;
     for (Iterator<TermEntry> it = termInfo.getAllEntries(); it.hasNext();) {
       it.next();
@@ -144,29 +147,33 @@ public final class TestClusterDumper extends MahoutTestCase {
       i++;
     }
     VectorMapper mapper = new TFDFMapper(reader, weight, termInfo);
-    Iterable<Vector> iterable = new LuceneIterable(reader, "id", "content", mapper);
-
+    Iterable<Vector> iterable = new LuceneIterable(reader, "id", "content",
+        mapper);
+    
     i = 0;
     for (Vector vector : iterable) {
       assertNotNull(vector);
       NamedVector namedVector;
       if (vector instanceof NamedVector) {
-        //rename it for testing purposes
-        namedVector = new NamedVector(((NamedVector) vector).getDelegate(), "P(" + i + ')');
-
+        // rename it for testing purposes
+        namedVector = new NamedVector(((NamedVector) vector).getDelegate(),
+            "P(" + i + ')');
+        
       } else {
         namedVector = new NamedVector(vector, "P(" + i + ')');
       }
-      System.out.println(AbstractCluster.formatVector(namedVector, termDictionary));
+      System.out.println(AbstractCluster.formatVector(namedVector,
+          termDictionary));
       sampleData.add(new VectorWritable(namedVector));
       i++;
     }
   }
-
+  
   /**
    * Return the path to the final iteration's clusters
    */
-  private static Path finalClusterPath(Configuration conf, Path output, int maxIterations) throws IOException {
+  private static Path finalClusterPath(Configuration conf, Path output,
+      int maxIterations) throws IOException {
     FileSystem fs = FileSystem.get(conf);
     for (int i = maxIterations; i >= 0; i--) {
       Path clusters = new Path(output, "clusters-" + i);
@@ -176,104 +183,106 @@ public final class TestClusterDumper extends MahoutTestCase {
     }
     return null;
   }
-
+  
   @Test
   public void testCanopy() throws Exception { // now run the Job
     DistanceMeasure measure = new EuclideanDistanceMeasure();
-
+    
     Path output = getTestTempDirPath("output");
-    CanopyDriver.run(new Configuration(), getTestTempDirPath("testdata"), output, measure, 8, 4, true, true);
+    CanopyDriver.run(new Configuration(), getTestTempDirPath("testdata"),
+        output, measure, 8, 4, true, true);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-0"), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(new Path(output,
+        "clusters-0"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
     assertTrue(true);
   }
-
+  
   @Test
   public void testKmeans() throws Exception {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     // now run the Canopy job to prime kMeans canopies
     Path output = getTestTempDirPath("output");
     Configuration conf = new Configuration();
-    CanopyDriver.run(conf, getTestTempDirPath("testdata"), output, measure, 8, 4, false, true);
+    CanopyDriver.run(conf, getTestTempDirPath("testdata"), output, measure, 8,
+        4, false, true);
     // now run the KMeans job
-    KMeansDriver.run(conf, getTestTempDirPath("testdata"), new Path(output, "clusters-0"), output, measure, 0.001, 10, true, false);
+    KMeansDriver.run(conf, getTestTempDirPath("testdata"), new Path(output,
+        "clusters-0"), output, measure, 0.001, 10, true, false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
+        output, 10), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
-
+  
   @Test
   public void testFuzzyKmeans() throws Exception {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     // now run the Canopy job to prime kMeans canopies
     Path output = getTestTempDirPath("output");
     Configuration conf = new Configuration();
-    CanopyDriver.run(conf, getTestTempDirPath("testdata"), output, measure, 8, 4, false, true);
+    CanopyDriver.run(conf, getTestTempDirPath("testdata"), output, measure, 8,
+        4, false, true);
     // now run the Fuzzy KMeans job
-    FuzzyKMeansDriver.run(conf,
-                          getTestTempDirPath("testdata"),
-                          new Path(output, "clusters-0"),
-                          output,
-                          measure,
-                          0.001,
-                          10,
-                          ((float) 1.1),
-                          true,
-                          true,
-                          0,
-                          true);
+    FuzzyKMeansDriver.run(conf, getTestTempDirPath("testdata"), new Path(
+        output, "clusters-0"), output, measure, 0.001, 10, ((float) 1.1), true,
+        true, 0, true);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
+        output, 10), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
-
+  
   @Test
   public void testMeanShift() throws Exception {
     DistanceMeasure measure = new CosineDistanceMeasure();
+    IKernelProfile kernelProfile = new TriangularKernelProfile();
     Path output = getTestTempDirPath("output");
     Configuration conf = new Configuration();
-    new MeanShiftCanopyDriver().run(conf, getTestTempDirPath("testdata"), output, measure, 0.5, 0.01, 0.05, 10, false, true, true);
+    MeanShiftCanopyDriver.run(conf, getTestTempDirPath("testdata"), output,
+        measure, kernelProfile, 0.5, 0.01, 0.05, 10, false, true, true);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
+        output, 10), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
-
+  
   @Test
   public void testDirichlet2() throws Exception {
     Path output = getTestTempDirPath("output");
     NamedVector prototype = (NamedVector) sampleData.get(0).get();
-    DistributionDescription description =
-        new DistributionDescription(GaussianClusterDistribution.class.getName(),
-                                    RandomAccessSparseVector.class.getName(),
-                                    null,
-                                    prototype.getDelegate().size());
+    DistributionDescription description = new DistributionDescription(
+        GaussianClusterDistribution.class.getName(),
+        RandomAccessSparseVector.class.getName(), null, prototype.getDelegate()
+            .size());
     Configuration conf = new Configuration();
-    DirichletDriver.run(conf, getTestTempDirPath("testdata"), output, description, 15, 10, 1.0, true, true, 0, true);
+    DirichletDriver.run(conf, getTestTempDirPath("testdata"), output,
+        description, 15, 10, 1.0, true, true, 0, true);
     // run ClusterDumper
-    ClusterDumper clusterDumper =
-        new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
+        output, 10), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
-
+  
   @Test
   public void testDirichlet3() throws Exception {
     Path output = getTestTempDirPath("output");
     NamedVector prototype = (NamedVector) sampleData.get(0).get();
-    DistributionDescription description =
-        new DistributionDescription(DistanceMeasureClusterDistribution.class.getName(),
-                                    RandomAccessSparseVector.class.getName(),
-                                    ManhattanDistanceMeasure.class.getName(),
-                                    prototype.getDelegate().size());
+    DistributionDescription description = new DistributionDescription(
+        DistanceMeasureClusterDistribution.class.getName(),
+        RandomAccessSparseVector.class.getName(),
+        ManhattanDistanceMeasure.class.getName(), prototype.getDelegate()
+            .size());
     Configuration conf = new Configuration();
-    DirichletDriver.run(conf, getTestTempDirPath("testdata"), output, description, 15, 10, 1.0, true, true, 0, true);
+    DirichletDriver.run(conf, getTestTempDirPath("testdata"), output,
+        description, 15, 10, 1.0, true, true, 0, true);
     // run ClusterDumper
-    ClusterDumper clusterDumper =
-        new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
+        output, 10), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
-
-  //@Test
+  
+  // @Test
   public void testKmeansSVD() throws Exception {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     Path output = getTestTempDirPath("output");
@@ -284,10 +293,11 @@ public final class TestClusterDumper extends MahoutTestCase {
     Path testData = getTestTempDirPath("testdata");
     int sampleDimension = sampleData.get(0).get().size();
     int desiredRank = 15;
-    solver.run(testData, output, tmp, null, sampleData.size(), sampleDimension, false, desiredRank,
-        0.5, 0.0, true);
-    Path cleanEigenvectors = new Path(output, EigenVerificationJob.CLEAN_EIGENVECTORS);
-
+    solver.run(testData, output, tmp, null, sampleData.size(), sampleDimension,
+        false, desiredRank, 0.5, 0.0, true);
+    Path cleanEigenvectors = new Path(output,
+        EigenVerificationJob.CLEAN_EIGENVECTORS);
+    
     // build in-memory data matrix A
     Matrix a = new DenseMatrix(sampleData.size(), sampleDimension);
     int i = 0;
@@ -297,23 +307,25 @@ public final class TestClusterDumper extends MahoutTestCase {
     // extract the eigenvectors into P
     Matrix p = new DenseMatrix(39, desiredRank - 1);
     FileSystem fs = FileSystem.get(cleanEigenvectors.toUri(), conf);
-
+    
     i = 0;
-    for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(cleanEigenvectors, conf)) {
+    for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(
+        cleanEigenvectors, conf)) {
       Vector v = value.get();
       p.assignColumn(i, v);
       i++;
     }
     // sData = A P
     Matrix sData = a.times(p);
-
+    
     // now write sData back to file system so clustering can run against it
     Path svdData = new Path(output, "svddata");
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, svdData, IntWritable.class, VectorWritable.class);
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, svdData,
+        IntWritable.class, VectorWritable.class);
     try {
       IntWritable key = new IntWritable();
       VectorWritable value = new VectorWritable();
-
+      
       for (int row = 0; row < sData.numRows(); row++) {
         key.set(row);
         value.set(sData.getRow(row));
@@ -325,14 +337,15 @@ public final class TestClusterDumper extends MahoutTestCase {
     // now run the Canopy job to prime kMeans canopies
     CanopyDriver.run(conf, svdData, output, measure, 8, 4, false, true);
     // now run the KMeans job
-    KMeansDriver.run(svdData, new Path(output, "clusters-0"), output, measure, 0.001, 10, true, true);
+    KMeansDriver.run(svdData, new Path(output, "clusters-0"), output, measure,
+        0.001, 10, true, true);
     // run ClusterDumper
-    ClusterDumper clusterDumper =
-        new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
+        output, 10), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
-
-  //@Test
+  
+  // @Test
   public void testKmeansDSVD() throws Exception {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     Path output = getTestTempDirPath("output");
@@ -346,30 +359,34 @@ public final class TestClusterDumper extends MahoutTestCase {
     int desiredRank = 13;
     solver.run(testData, output, tmp, null, sampleData.size(), sampleDimension,
         false, desiredRank, 0.5, 0.0, false);
-
-    Path cleanEigenvectors = new Path(output, EigenVerificationJob.CLEAN_EIGENVECTORS);
-
+    
+    Path cleanEigenvectors = new Path(output,
+        EigenVerificationJob.CLEAN_EIGENVECTORS);
+    
     // now multiply the testdata matrix and the eigenvector matrix
-    DistributedRowMatrix svdT = new DistributedRowMatrix(cleanEigenvectors, tmp,
-        desiredRank, sampleDimension);
+    DistributedRowMatrix svdT = new DistributedRowMatrix(cleanEigenvectors,
+        tmp, desiredRank, sampleDimension);
     Configuration conf = new Configuration(config);
     svdT.setConf(conf);
-    DistributedRowMatrix a = new DistributedRowMatrix(testData, tmp, sampleData.size(), sampleDimension);
+    DistributedRowMatrix a = new DistributedRowMatrix(testData, tmp,
+        sampleData.size(), sampleDimension);
     a.setConf(conf);
     DistributedRowMatrix sData = a.transpose().times(svdT.transpose());
     sData.setConf(conf);
-
+    
     // now run the Canopy job to prime kMeans canopies
-    CanopyDriver.run(conf, sData.getRowPath(), output, measure, 8, 4, false, true);
+    CanopyDriver.run(conf, sData.getRowPath(), output, measure, 8, 4, false,
+        true);
     // now run the KMeans job
-    KMeansDriver.run(sData.getRowPath(), new Path(output, "clusters-0"), output, measure, 0.001, 10, true, true);
+    KMeansDriver.run(sData.getRowPath(), new Path(output, "clusters-0"),
+        output, measure, 0.001, 10, true, true);
     // run ClusterDumper
-    ClusterDumper clusterDumper =
-        new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
+        output, 10), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
-
-  //@Test
+  
+  // @Test
   public void testKmeansDSVD2() throws Exception {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     Path output = getTestTempDirPath("output");
@@ -381,30 +398,35 @@ public final class TestClusterDumper extends MahoutTestCase {
     int sampleDimension = sampleData.get(0).get().size();
     // call EigenVerificationJob separately
     int desiredRank = 13;
-    solver.run(testData, output, tmp, null, sampleData.size(), sampleDimension, false, desiredRank);
-    Path rawEigenvectors = new Path(output, DistributedLanczosSolver.RAW_EIGENVECTORS);
+    solver.run(testData, output, tmp, null, sampleData.size(), sampleDimension,
+        false, desiredRank);
+    Path rawEigenvectors = new Path(output,
+        DistributedLanczosSolver.RAW_EIGENVECTORS);
     Configuration conf = new Configuration(config);
-    new EigenVerificationJob().run(testData, rawEigenvectors, output, tmp, 0.5, 0.0, true, conf);
-    Path cleanEigenvectors = new Path(output, EigenVerificationJob.CLEAN_EIGENVECTORS);
-
+    new EigenVerificationJob().run(testData, rawEigenvectors, output, tmp, 0.5,
+        0.0, true, conf);
+    Path cleanEigenvectors = new Path(output,
+        EigenVerificationJob.CLEAN_EIGENVECTORS);
+    
     // now multiply the testdata matrix and the eigenvector matrix
-    DistributedRowMatrix svdT = new DistributedRowMatrix(cleanEigenvectors, tmp, desiredRank,
-        sampleDimension);
+    DistributedRowMatrix svdT = new DistributedRowMatrix(cleanEigenvectors,
+        tmp, desiredRank, sampleDimension);
     svdT.setConf(conf);
-    DistributedRowMatrix a = new DistributedRowMatrix(testData, tmp, sampleData.size(),
-        sampleDimension);
+    DistributedRowMatrix a = new DistributedRowMatrix(testData, tmp,
+        sampleData.size(), sampleDimension);
     a.setConf(conf);
     DistributedRowMatrix sData = a.transpose().times(svdT.transpose());
     sData.setConf(conf);
-
+    
     // now run the Canopy job to prime kMeans canopies
-    CanopyDriver.run(conf, sData.getRowPath(), output, measure, 8, 4, false, true);
+    CanopyDriver.run(conf, sData.getRowPath(), output, measure, 8, 4, false,
+        true);
     // now run the KMeans job
-    KMeansDriver.run(sData.getRowPath(), new Path(output, "clusters-0"), output, measure,
-        0.001, 10, true, true);
+    KMeansDriver.run(sData.getRowPath(), new Path(output, "clusters-0"),
+        output, measure, 0.001, 10, true, true);
     // run ClusterDumper
-    ClusterDumper clusterDumper =
-        new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
+        output, 10), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
 }

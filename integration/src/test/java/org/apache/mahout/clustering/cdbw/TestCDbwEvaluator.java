@@ -44,6 +44,8 @@ import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
+import org.apache.mahout.common.kernel.IKernelProfile;
+import org.apache.mahout.common.kernel.TriangularKernelProfile;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -53,28 +55,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class TestCDbwEvaluator extends MahoutTestCase {
-
-  private static final double[][] REFERENCE = { { 1, 1 }, { 2, 1 }, { 1, 2 }, { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 4 }, { 4, 5 },
-      { 5, 5 } };
-
-  private static final Logger log = LoggerFactory.getLogger(TestClusterEvaluator.class);
-
-  private Map<Integer, List<VectorWritable>> representativePoints;
-
+  
+  private static final double[][] REFERENCE = { {1, 1}, {2, 1}, {1, 2}, {2, 2},
+      {3, 3}, {4, 4}, {5, 4}, {4, 5}, {5, 5}};
+  
+  private static final Logger log = LoggerFactory
+      .getLogger(TestClusterEvaluator.class);
+  
+  private Map<Integer,List<VectorWritable>> representativePoints;
+  
   private List<Cluster> clusters;
-
+  
   private Configuration conf;
-
+  
   private FileSystem fs;
-
+  
   private final Collection<VectorWritable> sampleData = new ArrayList<VectorWritable>();
-
+  
   private List<VectorWritable> referenceData = new ArrayList<VectorWritable>();
-
+  
   private Path testdata;
-
+  
   private Path output;
-
+  
   @Override
   @Before
   public void setUp() throws Exception {
@@ -88,31 +91,44 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     // generate larger test data set for the clustering tests to chew on
     generateSamples();
   }
-
+  
   /**
-   * Initialize synthetic data using 4 clusters dC units from origin having 4 representative points dP from each center
-   * @param dC a double cluster center offset
-   * @param dP a double representative point offset
-   * @param measure the DistanceMeasure
+   * Initialize synthetic data using 4 clusters dC units from origin having 4
+   * representative points dP from each center
+   * 
+   * @param dC
+   *          a double cluster center offset
+   * @param dP
+   *          a double representative point offset
+   * @param measure
+   *          the DistanceMeasure
    */
   private void initData(double dC, double dP, DistanceMeasure measure) {
     clusters = new ArrayList<Cluster>();
-    clusters.add(new Canopy(new DenseVector(new double[] { -dC, -dC }), 1, measure));
-    clusters.add(new Canopy(new DenseVector(new double[] { -dC, dC }), 3, measure));
-    clusters.add(new Canopy(new DenseVector(new double[] { dC, dC }), 5, measure));
-    clusters.add(new Canopy(new DenseVector(new double[] { dC, -dC }), 7, measure));
-    representativePoints = new HashMap<Integer, List<VectorWritable>>();
+    clusters.add(new Canopy(new DenseVector(new double[] {-dC, -dC}), 1,
+        measure));
+    clusters
+        .add(new Canopy(new DenseVector(new double[] {-dC, dC}), 3, measure));
+    clusters
+        .add(new Canopy(new DenseVector(new double[] {dC, dC}), 5, measure));
+    clusters
+        .add(new Canopy(new DenseVector(new double[] {dC, -dC}), 7, measure));
+    representativePoints = new HashMap<Integer,List<VectorWritable>>();
     for (Cluster cluster : clusters) {
       List<VectorWritable> points = new ArrayList<VectorWritable>();
       representativePoints.put(cluster.getId(), points);
       points.add(new VectorWritable(cluster.getCenter().clone()));
-      points.add(new VectorWritable(cluster.getCenter().plus(new DenseVector(new double[] { dP, dP }))));
-      points.add(new VectorWritable(cluster.getCenter().plus(new DenseVector(new double[] { dP, -dP }))));
-      points.add(new VectorWritable(cluster.getCenter().plus(new DenseVector(new double[] { -dP, -dP }))));
-      points.add(new VectorWritable(cluster.getCenter().plus(new DenseVector(new double[] { -dP, dP }))));
+      points.add(new VectorWritable(cluster.getCenter().plus(
+          new DenseVector(new double[] {dP, dP}))));
+      points.add(new VectorWritable(cluster.getCenter().plus(
+          new DenseVector(new double[] {dP, -dP}))));
+      points.add(new VectorWritable(cluster.getCenter().plus(
+          new DenseVector(new double[] {-dP, -dP}))));
+      points.add(new VectorWritable(cluster.getCenter().plus(
+          new DenseVector(new double[] {-dP, dP}))));
     }
   }
-
+  
   /**
    * Generate random samples and add them to the sampleData
    * 
@@ -124,241 +140,307 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
    *          double y-value of the sample mean
    * @param sd
    *          double standard deviation of the samples
-   * @throws Exception 
+   * @throws Exception
    */
   private void generateSamples(int num, double mx, double my, double sd) {
-    log.info("Generating {} samples m=[{}, {}] sd={}", new Object[] { num, mx, my, sd });
+    log.info("Generating {} samples m=[{}, {}] sd={}", new Object[] {num, mx,
+        my, sd});
     for (int i = 0; i < num; i++) {
-      sampleData.add(new VectorWritable(new DenseVector(new double[] { UncommonDistributions.rNorm(mx, sd),
-          UncommonDistributions.rNorm(my, sd) })));
+      sampleData.add(new VectorWritable(new DenseVector(new double[] {
+          UncommonDistributions.rNorm(mx, sd),
+          UncommonDistributions.rNorm(my, sd)})));
     }
   }
-
+  
   private void generateSamples() {
     generateSamples(500, 1, 1, 3);
     generateSamples(300, 1, 0, 0.5);
     generateSamples(300, 0, 2, 0.1);
   }
-
+  
   @Test
   public void testCDbw0() throws IOException {
-    ClusteringTestUtils.writePointsToFile(referenceData, getTestTempFilePath("testdata/file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(referenceData,
+        getTestTempFilePath("testdata/file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.25, measure);
-    CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
-    assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(), EPSILON);
-    assertEquals("separation", 20.485281374238568, evaluator.separation(), EPSILON);
-    assertEquals("intra cluster density", 0.8, evaluator.intraClusterDensity(), EPSILON);
+    CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters,
+        measure);
+    assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(),
+        EPSILON);
+    assertEquals("separation", 20.485281374238568, evaluator.separation(),
+        EPSILON);
+    assertEquals("intra cluster density", 0.8, evaluator.intraClusterDensity(),
+        EPSILON);
     assertEquals("CDbw", 16.388225099390855, evaluator.getCDbw(), EPSILON);
   }
-
+  
   @Test
   public void testCDbw1() throws IOException {
-    ClusteringTestUtils.writePointsToFile(referenceData, getTestTempFilePath("testdata/file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(referenceData,
+        getTestTempFilePath("testdata/file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.5, measure);
-    CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
-    assertEquals("inter cluster density", 1.2, evaluator.interClusterDensity(), EPSILON);
-    assertEquals("separation", 6.207661022496537, evaluator.separation(), EPSILON);
-    assertEquals("intra cluster density", 0.4, evaluator.intraClusterDensity(), EPSILON);
+    CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters,
+        measure);
+    assertEquals("inter cluster density", 1.2, evaluator.interClusterDensity(),
+        EPSILON);
+    assertEquals("separation", 6.207661022496537, evaluator.separation(),
+        EPSILON);
+    assertEquals("intra cluster density", 0.4, evaluator.intraClusterDensity(),
+        EPSILON);
     assertEquals("CDbw", 2.483064408998615, evaluator.getCDbw(), EPSILON);
   }
-
+  
   @Test
   public void testCDbw2() throws IOException {
-    ClusteringTestUtils.writePointsToFile(referenceData, getTestTempFilePath("testdata/file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(referenceData,
+        getTestTempFilePath("testdata/file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.75, measure);
-    CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
-    assertEquals("inter cluster density", 0.682842712474619, evaluator.interClusterDensity(), EPSILON);
-    assertEquals("separation", 4.0576740025245694, evaluator.separation(), EPSILON);
-    assertEquals("intra cluster density", 0.26666666666666666, evaluator.intraClusterDensity(), EPSILON);
+    CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters,
+        measure);
+    assertEquals("inter cluster density", 0.682842712474619,
+        evaluator.interClusterDensity(), EPSILON);
+    assertEquals("separation", 4.0576740025245694, evaluator.separation(),
+        EPSILON);
+    assertEquals("intra cluster density", 0.26666666666666666,
+        evaluator.intraClusterDensity(), EPSILON);
     assertEquals("CDbw", 1.0820464006732184, evaluator.getCDbw(), EPSILON);
   }
-
+  
   @Test
   public void testEmptyCluster() throws IOException {
-    ClusteringTestUtils.writePointsToFile(referenceData, getTestTempFilePath("testdata/file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(referenceData,
+        getTestTempFilePath("testdata/file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.25, measure);
-    Canopy cluster = new Canopy(new DenseVector(new double[] { 10, 10 }), 19, measure);
+    Canopy cluster = new Canopy(new DenseVector(new double[] {10, 10}), 19,
+        measure);
     clusters.add(cluster);
     List<VectorWritable> points = new ArrayList<VectorWritable>();
     representativePoints.put(cluster.getId(), points);
-    CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
-    assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(), EPSILON);
-    assertEquals("separation", 20.485281374238568, evaluator.separation(), EPSILON);
-    assertEquals("intra cluster density", 0.8, evaluator.intraClusterDensity(), EPSILON);
+    CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters,
+        measure);
+    assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(),
+        EPSILON);
+    assertEquals("separation", 20.485281374238568, evaluator.separation(),
+        EPSILON);
+    assertEquals("intra cluster density", 0.8, evaluator.intraClusterDensity(),
+        EPSILON);
     assertEquals("CDbw", 16.388225099390855, evaluator.getCDbw(), EPSILON);
   }
-
+  
   @Test
   public void testSingleValueCluster() throws IOException {
-    ClusteringTestUtils.writePointsToFile(referenceData, getTestTempFilePath("testdata/file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(referenceData,
+        getTestTempFilePath("testdata/file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.25, measure);
-    Canopy cluster = new Canopy(new DenseVector(new double[] { 0, 0 }), 19, measure);
+    Canopy cluster = new Canopy(new DenseVector(new double[] {0, 0}), 19,
+        measure);
     clusters.add(cluster);
     List<VectorWritable> points = new ArrayList<VectorWritable>();
-    points.add(new VectorWritable(cluster.getCenter().plus(new DenseVector(new double[] { 1, 1 }))));
+    points.add(new VectorWritable(cluster.getCenter().plus(
+        new DenseVector(new double[] {1, 1}))));
     representativePoints.put(cluster.getId(), points);
-    CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
-    assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(), EPSILON);
-    assertEquals("separation", 20.485281374238568, evaluator.separation(), EPSILON);
-    assertEquals("intra cluster density", 0.8, evaluator.intraClusterDensity(), EPSILON);
+    CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters,
+        measure);
+    assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(),
+        EPSILON);
+    assertEquals("separation", 20.485281374238568, evaluator.separation(),
+        EPSILON);
+    assertEquals("intra cluster density", 0.8, evaluator.intraClusterDensity(),
+        EPSILON);
     assertEquals("CDbw", 16.388225099390855, evaluator.getCDbw(), EPSILON);
   }
-
+  
   /**
-   * Representative points extraction will duplicate the cluster center if the cluster has no 
-   * assigned points. These clusters should be ignored like empty clusters above
-   * @throws IOException 
+   * Representative points extraction will duplicate the cluster center if the
+   * cluster has no assigned points. These clusters should be ignored like empty
+   * clusters above
+   * 
+   * @throws IOException
    */
   @Test
   public void testAllSameValueCluster() throws IOException {
-    ClusteringTestUtils.writePointsToFile(referenceData, getTestTempFilePath("testdata/file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(referenceData,
+        getTestTempFilePath("testdata/file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.25, measure);
-    Canopy cluster = new Canopy(new DenseVector(new double[] { 0, 0 }), 19, measure);
+    Canopy cluster = new Canopy(new DenseVector(new double[] {0, 0}), 19,
+        measure);
     clusters.add(cluster);
     List<VectorWritable> points = new ArrayList<VectorWritable>();
     points.add(new VectorWritable(cluster.getCenter()));
     points.add(new VectorWritable(cluster.getCenter()));
     points.add(new VectorWritable(cluster.getCenter()));
     representativePoints.put(cluster.getId(), points);
-    CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
-    assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(), EPSILON);
-    assertEquals("separation", 20.485281374238568, evaluator.separation(), EPSILON);
-    assertEquals("intra cluster density", 0.8, evaluator.intraClusterDensity(), EPSILON);
+    CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters,
+        measure);
+    assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(),
+        EPSILON);
+    assertEquals("separation", 20.485281374238568, evaluator.separation(),
+        EPSILON);
+    assertEquals("intra cluster density", 0.8, evaluator.intraClusterDensity(),
+        EPSILON);
     assertEquals("CDbw", 16.388225099390855, evaluator.getCDbw(), EPSILON);
   }
-
+  
   /**
-   * Clustering can produce very, very tight clusters that can cause the std calculation to fail.
-   * These clusters should be processed correctly.
-   * @throws IOException 
+   * Clustering can produce very, very tight clusters that can cause the std
+   * calculation to fail. These clusters should be processed correctly.
+   * 
+   * @throws IOException
    */
   @Test
   public void testAlmostSameValueCluster() throws IOException {
-    ClusteringTestUtils.writePointsToFile(referenceData, getTestTempFilePath("testdata/file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(referenceData,
+        getTestTempFilePath("testdata/file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.25, measure);
-    Canopy cluster = new Canopy(new DenseVector(new double[] { 0, 0 }), 19, measure);
+    Canopy cluster = new Canopy(new DenseVector(new double[] {0, 0}), 19,
+        measure);
     clusters.add(cluster);
     List<VectorWritable> points = new ArrayList<VectorWritable>();
-    Vector delta = new DenseVector(new double[] { 0, Double.MIN_NORMAL });
+    Vector delta = new DenseVector(new double[] {0, Double.MIN_NORMAL});
     points.add(new VectorWritable(delta.clone()));
     points.add(new VectorWritable(delta.clone()));
     points.add(new VectorWritable(delta.clone()));
     points.add(new VectorWritable(delta.clone()));
     points.add(new VectorWritable(delta.clone()));
     representativePoints.put(cluster.getId(), points);
-    CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
-    assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(), EPSILON);
-    assertEquals("separation", 28.970562748477143, evaluator.separation(), EPSILON);
-    assertEquals("intra cluster density", 1.8, evaluator.intraClusterDensity(), EPSILON);
+    CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters,
+        measure);
+    assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(),
+        EPSILON);
+    assertEquals("separation", 28.970562748477143, evaluator.separation(),
+        EPSILON);
+    assertEquals("intra cluster density", 1.8, evaluator.intraClusterDensity(),
+        EPSILON);
     assertEquals("CDbw", 52.147012947258865, evaluator.getCDbw(), EPSILON);
   }
-
+  
   @Test
   public void testCanopy() throws Exception {
-    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("testdata/file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(sampleData,
+        getTestTempFilePath("testdata/file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
-    CanopyDriver.run(new Configuration(), testdata, output, measure, 3.1, 2.1, true, true);
+    CanopyDriver.run(new Configuration(), testdata, output, measure, 3.1, 2.1,
+        true, true);
     int numIterations = 10;
     Path clustersIn = new Path(output, "clusters-0");
-    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations, true);
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(output,
+        "clusteredPoints"), output, measure, numIterations, true);
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
-    //printRepPoints(numIterations);
+    // printRepPoints(numIterations);
     // now print out the Results
     System.out.println("Canopy CDbw = " + evaluator.getCDbw());
-    System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
-    System.out.println("Inter-cluster density = " + evaluator.interClusterDensity());
+    System.out.println("Intra-cluster density = "
+        + evaluator.intraClusterDensity());
+    System.out.println("Inter-cluster density = "
+        + evaluator.interClusterDensity());
     System.out.println("Separation = " + evaluator.separation());
   }
-
+  
   @Test
   public void testKmeans() throws Exception {
-    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("testdata/file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(sampleData,
+        getTestTempFilePath("testdata/file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     // now run the Canopy job to prime kMeans canopies
-    CanopyDriver.run(new Configuration(), testdata, output, measure, 3.1, 2.1, false, true);
+    CanopyDriver.run(new Configuration(), testdata, output, measure, 3.1, 2.1,
+        false, true);
     // now run the KMeans job
-    KMeansDriver.run(testdata, new Path(output, "clusters-0"), output, measure, 0.001, 10, true, true);
+    KMeansDriver.run(testdata, new Path(output, "clusters-0"), output, measure,
+        0.001, 10, true, true);
     int numIterations = 10;
     Path clustersIn = new Path(output, "clusters-2");
-    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations, true);
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(output,
+        "clusteredPoints"), output, measure, numIterations, true);
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
-    //printRepPoints(numIterations);
+    // printRepPoints(numIterations);
     // now print out the Results
     System.out.println("K-Means CDbw = " + evaluator.getCDbw());
-    System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
-    System.out.println("Inter-cluster density = " + evaluator.interClusterDensity());
+    System.out.println("Intra-cluster density = "
+        + evaluator.intraClusterDensity());
+    System.out.println("Inter-cluster density = "
+        + evaluator.interClusterDensity());
     System.out.println("Separation = " + evaluator.separation());
   }
-
+  
   @Test
   public void testFuzzyKmeans() throws Exception {
-    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("testdata/file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(sampleData,
+        getTestTempFilePath("testdata/file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     // now run the Canopy job to prime kMeans canopies
-    CanopyDriver.run(new Configuration(), testdata, output, measure, 3.1, 2.1, false, true);
+    CanopyDriver.run(new Configuration(), testdata, output, measure, 3.1, 2.1,
+        false, true);
     // now run the KMeans job
-    FuzzyKMeansDriver.run(testdata, new Path(output, "clusters-0"), output, measure, 0.001, 10, 2, true, true, 0, true);
+    FuzzyKMeansDriver.run(testdata, new Path(output, "clusters-0"), output,
+        measure, 0.001, 10, 2, true, true, 0, true);
     int numIterations = 10;
     Path clustersIn = new Path(output, "clusters-4");
-    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations, true);
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(output,
+        "clusteredPoints"), output, measure, numIterations, true);
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
-    //printRepPoints(numIterations);
+    // printRepPoints(numIterations);
     // now print out the Results
     System.out.println("Fuzzy K-Means CDbw = " + evaluator.getCDbw());
-    System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
-    System.out.println("Inter-cluster density = " + evaluator.interClusterDensity());
+    System.out.println("Intra-cluster density = "
+        + evaluator.intraClusterDensity());
+    System.out.println("Inter-cluster density = "
+        + evaluator.interClusterDensity());
     System.out.println("Separation = " + evaluator.separation());
   }
-
+  
   @Test
   public void testMeanShift() throws Exception {
-    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("testdata/file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(sampleData,
+        getTestTempFilePath("testdata/file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
-    new MeanShiftCanopyDriver().run(conf, testdata, output, measure, 2.1, 1.0, 0.001, 10, false, true, true);
+    IKernelProfile kernelProfile = new TriangularKernelProfile();
+    MeanShiftCanopyDriver.run(conf, testdata, output, measure, kernelProfile,
+        2.1, 1.0, 0.001, 10, false, true, true);
     int numIterations = 10;
     Path clustersIn = new Path(output, "clusters-2");
-    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations, true);
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(output,
+        "clusteredPoints"), output, measure, numIterations, true);
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
-    //printRepPoints(numIterations);
+    // printRepPoints(numIterations);
     // now print out the Results
     System.out.println("Mean Shift CDbw = " + evaluator.getCDbw());
-    System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
-    System.out.println("Inter-cluster density = " + evaluator.interClusterDensity());
+    System.out.println("Intra-cluster density = "
+        + evaluator.intraClusterDensity());
+    System.out.println("Inter-cluster density = "
+        + evaluator.interClusterDensity());
     System.out.println("Separation = " + evaluator.separation());
   }
-
+  
   @Test
   public void testDirichlet() throws Exception {
-    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("testdata/file1"), fs, conf);
-    DistributionDescription description =
-        new DistributionDescription(GaussianClusterDistribution.class.getName(),
-                                    DenseVector.class.getName(),
-                                    null,
-                                    2);
-    DirichletDriver.run(testdata, output, description, 15, 5, 1.0, true, true, 0, true);
+    ClusteringTestUtils.writePointsToFile(sampleData,
+        getTestTempFilePath("testdata/file1"), fs, conf);
+    DistributionDescription description = new DistributionDescription(
+        GaussianClusterDistribution.class.getName(),
+        DenseVector.class.getName(), null, 2);
+    DirichletDriver.run(testdata, output, description, 15, 5, 1.0, true, true,
+        0, true);
     int numIterations = 10;
     Path clustersIn = new Path(output, "clusters-0");
-    RepresentativePointsDriver.run(conf,
-                                   clustersIn,
-                                   new Path(output, "clusteredPoints"),
-                                   output,
-                                   new EuclideanDistanceMeasure(),
-                                   numIterations,
-                                   true);
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(output,
+        "clusteredPoints"), output, new EuclideanDistanceMeasure(),
+        numIterations, true);
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
-    //printRepPoints(numIterations);
+    // printRepPoints(numIterations);
     // now print out the Results
     System.out.println("Dirichlet CDbw = " + evaluator.getCDbw());
-    System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
-    System.out.println("Inter-cluster density = " + evaluator.interClusterDensity());
+    System.out.println("Intra-cluster density = "
+        + evaluator.intraClusterDensity());
+    System.out.println("Inter-cluster density = "
+        + evaluator.interClusterDensity());
     System.out.println("Separation = " + evaluator.separation());
   }
-
+  
 }

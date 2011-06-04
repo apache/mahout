@@ -29,27 +29,31 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.list.IntArrayList;
 
 /**
- * This class models a canopy as a center point, the number of points that are contained within it according
- * to the application of some distance metric, and a point total which is the sum of all the points and is
- * used to compute the centroid when needed.
+ * This class models a canopy as a center point, the number of points that are
+ * contained within it according to the application of some distance metric, and
+ * a point total which is the sum of all the points and is used to compute the
+ * centroid when needed.
  */
 public class MeanShiftCanopy extends Cluster {
-
-  // TODO: this is still problematic from a scalability perspective, but how else to encode membership?
+  
+  // TODO: this is still problematic from a scalability perspective, but how
+  // else to encode membership?
   private IntArrayList boundPoints = new IntArrayList();
-
+  
   /**
    * Used for Writable
    */
-  public MeanShiftCanopy() {
-  }
-
+  public MeanShiftCanopy() {}
+  
   /**
    * Create a new Canopy containing the given point
    * 
-   * @param point   a Vector
-   * @param id      an int canopy id
-   * @param measure a DistanceMeasure
+   * @param point
+   *          a Vector
+   * @param id
+   *          an int canopy id
+   * @param measure
+   *          a DistanceMeasure
    */
   public MeanShiftCanopy(Vector point, int id, DistanceMeasure measure) {
     super(point, id, measure);
@@ -57,19 +61,25 @@ public class MeanShiftCanopy extends Cluster {
   }
   
   /**
-   * Create an initial Canopy, retaining the original type of the given point (e.g. NamedVector)
-   * @param point a Vector
-   * @param id an int
-   * @param measure a DistanceMeasure
+   * Create an initial Canopy, retaining the original type of the given point
+   * (e.g. NamedVector)
+   * 
+   * @param point
+   *          a Vector
+   * @param id
+   *          an int
+   * @param measure
+   *          a DistanceMeasure
    * @return a MeanShiftCanopy
    */
-  public static MeanShiftCanopy initialCanopy(Vector point, int id, DistanceMeasure measure) {
+  public static MeanShiftCanopy initialCanopy(Vector point, int id,
+      DistanceMeasure measure) {
     MeanShiftCanopy result = new MeanShiftCanopy(point, id, measure);
     // overwrite center so original point type is retained
     result.setCenter(point);
     return result;
   }
-
+  
   /**
    * Create a new Canopy containing the given point, id and bound points
    * 
@@ -82,7 +92,8 @@ public class MeanShiftCanopy extends Cluster {
    * @param converged
    *          true if the canopy has converged
    */
-  MeanShiftCanopy(Vector point, int id, IntArrayList boundPoints, boolean converged) {
+  MeanShiftCanopy(Vector point, int id, IntArrayList boundPoints,
+      boolean converged) {
     this.setId(id);
     this.setCenter(point);
     this.setRadius(point.like());
@@ -90,11 +101,11 @@ public class MeanShiftCanopy extends Cluster {
     this.boundPoints = boundPoints;
     setConverged(converged);
   }
-
+  
   public IntArrayList getBoundPoints() {
     return boundPoints;
   }
-
+  
   /**
    * The receiver overlaps the given canopy. Add my bound points to it.
    * 
@@ -104,18 +115,21 @@ public class MeanShiftCanopy extends Cluster {
   void merge(MeanShiftCanopy canopy) {
     boundPoints.addAllOf(canopy.boundPoints);
   }
-
+  
   /**
-   * The receiver touches the given canopy. Add respective centers.
+   * The receiver touches the given canopy. Add respective centers with the
+   * given weights.
    * 
    * @param canopy
    *          an existing MeanShiftCanopy
+   * @param the
+   *          double weight of the touching
    */
-  void touch(MeanShiftCanopy canopy) {
-    canopy.observe(getCenter(), boundPoints.size());
-    observe(canopy.getCenter(), canopy.boundPoints.size());
+  void touch(MeanShiftCanopy canopy, double weight) {
+    canopy.observe(getCenter(), weight * ((double) boundPoints.size()));
+    observe(canopy.getCenter(), weight * ((double) canopy.boundPoints.size()));
   }
-
+  
   @Override
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
@@ -125,7 +139,7 @@ public class MeanShiftCanopy extends Cluster {
       this.boundPoints.add(in.readInt());
     }
   }
-
+  
   @Override
   public void write(DataOutput out) throws IOException {
     super.write(out);
@@ -134,7 +148,7 @@ public class MeanShiftCanopy extends Cluster {
       out.writeInt(v);
     }
   }
-
+  
   public MeanShiftCanopy shallowCopy() {
     MeanShiftCanopy result = new MeanShiftCanopy();
     result.setMeasure(this.getMeasure());
@@ -145,25 +159,26 @@ public class MeanShiftCanopy extends Cluster {
     result.setBoundPoints(boundPoints);
     return result;
   }
-
+  
   @Override
   public String asFormatString() {
     return toString();
   }
-
+  
   public void setBoundPoints(IntArrayList boundPoints) {
     this.boundPoints = boundPoints;
   }
-
+  
   @Override
   public String getIdentifier() {
     return (isConverged() ? "MSV-" : "MSC-") + getId();
   }
-
+  
   @Override
   public double pdf(VectorWritable vw) {
-    // MSCanopy membership is explicit via membership in boundPoints. Can't compute pdf for Arbitrary point
+    // MSCanopy membership is explicit via membership in boundPoints. Can't
+    // compute pdf for Arbitrary point
     throw new NotImplementedException();
   }
-
+  
 }

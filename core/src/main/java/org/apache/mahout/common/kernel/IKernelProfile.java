@@ -14,17 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.mahout.common.kernel;
 
-package org.apache.mahout.clustering.meanshift;
-
-public interface MeanShiftCanopyConfigKeys {
+public interface IKernelProfile {
+  /**
+   * Returns the calculated value of the kernel
+   * 
+   * @param distance
+   *          a double
+   * @param h
+   *          a double
+   * @return a double
+   */
+  public double calculateValue(double distance, double h);
   
-  // keys used by Driver, Mapper, Combiner & Reducer
-  String DISTANCE_MEASURE_KEY = "org.apache.mahout.clustering.canopy.measure";
-  String KERNEL_PROFILE_KEY = "org.apache.mahout.clustering.canopy.kernelprofile";
-  String T1_KEY = "org.apache.mahout.clustering.canopy.t1";
-  String T2_KEY = "org.apache.mahout.clustering.canopy.t2";
-  String CONTROL_PATH_KEY = "org.apache.mahout.clustering.control.path";
-  String CLUSTER_CONVERGENCE_KEY = "org.apache.mahout.clustering.canopy.convergence";
-  
+  /**
+   * Returns the calculated dervative value of the kernel
+   * 
+   * @param distance
+   *          a double
+   * @param h
+   *          a double
+   * @return a double
+   */
+  public double calculateDerivativeValue(double distance, double h);
 }

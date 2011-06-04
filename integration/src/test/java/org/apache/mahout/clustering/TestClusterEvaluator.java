@@ -47,6 +47,8 @@ import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
+import org.apache.mahout.common.kernel.IKernelProfile;
+import org.apache.mahout.common.kernel.TriangularKernelProfile;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.VectorWritable;
 import org.junit.Before;
@@ -55,28 +57,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class TestClusterEvaluator extends MahoutTestCase {
-
-  private static final double[][] REFERENCE = { { 1, 1 }, { 2, 1 }, { 1, 2 }, { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 4 }, { 4, 5 },
-      { 5, 5 } };
-
+  
+  private static final double[][] REFERENCE = { {1, 1}, {2, 1}, {1, 2}, {2, 2},
+      {3, 3}, {4, 4}, {5, 4}, {4, 5}, {5, 5}};
+  
   private List<VectorWritable> referenceData = new ArrayList<VectorWritable>();
-
+  
   private final List<VectorWritable> sampleData = new ArrayList<VectorWritable>();
-
-  private Map<Integer, List<VectorWritable>> representativePoints;
-
+  
+  private Map<Integer,List<VectorWritable>> representativePoints;
+  
   private List<Cluster> clusters;
-
-  private static final Logger log = LoggerFactory.getLogger(TestClusterEvaluator.class);
-
+  
+  private static final Logger log = LoggerFactory
+      .getLogger(TestClusterEvaluator.class);
+  
   private Configuration conf;
-
+  
   private FileSystem fs;
-
+  
   private Path testdata;
-
+  
   private Path output;
-
+  
   @Override
   @Before
   public void setUp() throws Exception {
@@ -90,7 +93,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     // generate larger test data set for the clustering tests to chew on
     generateSamples();
   }
-
+  
   /**
    * Generate random samples and add them to the sampleData
    * 
@@ -104,256 +107,324 @@ public final class TestClusterEvaluator extends MahoutTestCase {
    *          double standard deviation of the samples
    */
   private void generateSamples(int num, double mx, double my, double sd) {
-    log.info("Generating {} samples m=[{}, {}] sd={}", new Object[] { num, mx, my, sd });
+    log.info("Generating {} samples m=[{}, {}] sd={}", new Object[] {num, mx,
+        my, sd});
     for (int i = 0; i < num; i++) {
-      sampleData.add(new VectorWritable(new DenseVector(new double[] { UncommonDistributions.rNorm(mx, sd),
-          UncommonDistributions.rNorm(my, sd) })));
+      sampleData.add(new VectorWritable(new DenseVector(new double[] {
+          UncommonDistributions.rNorm(mx, sd),
+          UncommonDistributions.rNorm(my, sd)})));
     }
   }
-
+  
   private void generateSamples() {
     generateSamples(500, 1, 1, 3);
     generateSamples(300, 1, 0, 0.5);
     generateSamples(300, 0, 2, 0.1);
   }
-
+  
   private void printRepPoints(int numIterations) throws IOException {
     for (int i = 0; i <= numIterations; i++) {
-      Path out = new Path(getTestTempDirPath("output"), "representativePoints-" + i);
+      Path out = new Path(getTestTempDirPath("output"), "representativePoints-"
+          + i);
       System.out.println("Representative Points for iteration " + i);
       Configuration conf = new Configuration();
-      for (Pair<IntWritable,VectorWritable> record :
-           new SequenceFileDirIterable<IntWritable,VectorWritable>(
-               out, PathType.LIST, PathFilters.logsCRCFilter(), null, true, conf)) {
-        System.out.println("\tC-" + record.getFirst().get()
-                           + ": " + AbstractCluster.formatVector(record.getSecond().get(), null));
+      for (Pair<IntWritable,VectorWritable> record : new SequenceFileDirIterable<IntWritable,VectorWritable>(
+          out, PathType.LIST, PathFilters.logsCRCFilter(), null, true, conf)) {
+        System.out.println("\tC-" + record.getFirst().get() + ": "
+            + AbstractCluster.formatVector(record.getSecond().get(), null));
       }
     }
   }
-
+  
   /**
-   * Initialize synthetic data using 4 clusters dC units from origin having 4 representative points dP from each center
-   * @param dC a double cluster center offset
-   * @param dP a double representative point offset
-   * @param measure the DistanceMeasure
+   * Initialize synthetic data using 4 clusters dC units from origin having 4
+   * representative points dP from each center
+   * 
+   * @param dC
+   *          a double cluster center offset
+   * @param dP
+   *          a double representative point offset
+   * @param measure
+   *          the DistanceMeasure
    */
   private void initData(double dC, double dP, DistanceMeasure measure) {
     clusters = new ArrayList<Cluster>();
-    clusters.add(new Canopy(new DenseVector(new double[] { -dC, -dC }), 1, measure));
-    clusters.add(new Canopy(new DenseVector(new double[] { -dC, dC }), 3, measure));
-    clusters.add(new Canopy(new DenseVector(new double[] { dC, dC }), 5, measure));
-    clusters.add(new Canopy(new DenseVector(new double[] { dC, -dC }), 7, measure));
-    representativePoints = new HashMap<Integer, List<VectorWritable>>();
+    clusters.add(new Canopy(new DenseVector(new double[] {-dC, -dC}), 1,
+        measure));
+    clusters
+        .add(new Canopy(new DenseVector(new double[] {-dC, dC}), 3, measure));
+    clusters
+        .add(new Canopy(new DenseVector(new double[] {dC, dC}), 5, measure));
+    clusters
+        .add(new Canopy(new DenseVector(new double[] {dC, -dC}), 7, measure));
+    representativePoints = new HashMap<Integer,List<VectorWritable>>();
     for (Cluster cluster : clusters) {
       List<VectorWritable> points = new ArrayList<VectorWritable>();
       representativePoints.put(cluster.getId(), points);
       points.add(new VectorWritable(cluster.getCenter().clone()));
-      points.add(new VectorWritable(cluster.getCenter().plus(new DenseVector(new double[] { dP, dP }))));
-      points.add(new VectorWritable(cluster.getCenter().plus(new DenseVector(new double[] { dP, -dP }))));
-      points.add(new VectorWritable(cluster.getCenter().plus(new DenseVector(new double[] { -dP, -dP }))));
-      points.add(new VectorWritable(cluster.getCenter().plus(new DenseVector(new double[] { -dP, dP }))));
+      points.add(new VectorWritable(cluster.getCenter().plus(
+          new DenseVector(new double[] {dP, dP}))));
+      points.add(new VectorWritable(cluster.getCenter().plus(
+          new DenseVector(new double[] {dP, -dP}))));
+      points.add(new VectorWritable(cluster.getCenter().plus(
+          new DenseVector(new double[] {-dP, -dP}))));
+      points.add(new VectorWritable(cluster.getCenter().plus(
+          new DenseVector(new double[] {-dP, dP}))));
     }
   }
-
+  
   @Test
   public void testRepresentativePoints() throws Exception {
-    ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata, "file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata,
+        "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     Configuration conf = new Configuration();
     // run using MR reference point calculation
     CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, true, true);
     int numIterations = 2;
     Path clustersIn = new Path(output, "clusters-0");
-    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations, false);
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(output,
+        "clusteredPoints"), output, measure, numIterations, false);
     printRepPoints(numIterations);
     ClusterEvaluator evaluatorMR = new ClusterEvaluator(conf, clustersIn);
     // now run again using sequential reference point calculation
     HadoopUtil.delete(conf, output);
     CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, true, true);
-    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations, true);
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(output,
+        "clusteredPoints"), output, measure, numIterations, true);
     printRepPoints(numIterations);
     ClusterEvaluator evaluatorSeq = new ClusterEvaluator(conf, clustersIn);
     // compare results
-    assertEquals("InterCluster Density", evaluatorMR.interClusterDensity(), evaluatorSeq.interClusterDensity(), EPSILON);
-    assertEquals("IntraCluster Density", evaluatorMR.intraClusterDensity(), evaluatorSeq.intraClusterDensity(), EPSILON);
+    assertEquals("InterCluster Density", evaluatorMR.interClusterDensity(),
+        evaluatorSeq.interClusterDensity(), EPSILON);
+    assertEquals("IntraCluster Density", evaluatorMR.intraClusterDensity(),
+        evaluatorSeq.intraClusterDensity(), EPSILON);
   }
-
+  
   @Test
   public void testCluster0() throws IOException {
-    ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata, "file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata,
+        "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.25, measure);
-    ClusterEvaluator evaluator = new ClusterEvaluator(representativePoints, clusters, measure);
-    assertEquals("inter cluster density", 0.33333333333333315, evaluator.interClusterDensity(), EPSILON);
-    assertEquals("intra cluster density", 0.3656854249492381, evaluator.intraClusterDensity(), EPSILON);
+    ClusterEvaluator evaluator = new ClusterEvaluator(representativePoints,
+        clusters, measure);
+    assertEquals("inter cluster density", 0.33333333333333315,
+        evaluator.interClusterDensity(), EPSILON);
+    assertEquals("intra cluster density", 0.3656854249492381,
+        evaluator.intraClusterDensity(), EPSILON);
   }
-
+  
   @Test
   public void testCluster1() throws IOException {
-    ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata, "file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata,
+        "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.5, measure);
-    ClusterEvaluator evaluator = new ClusterEvaluator(representativePoints, clusters, measure);
-    assertEquals("inter cluster density", 0.33333333333333315, evaluator.interClusterDensity(), EPSILON);
-    assertEquals("intra cluster density", 0.3656854249492381, evaluator.intraClusterDensity(), EPSILON);
+    ClusterEvaluator evaluator = new ClusterEvaluator(representativePoints,
+        clusters, measure);
+    assertEquals("inter cluster density", 0.33333333333333315,
+        evaluator.interClusterDensity(), EPSILON);
+    assertEquals("intra cluster density", 0.3656854249492381,
+        evaluator.intraClusterDensity(), EPSILON);
   }
-
+  
   @Test
   public void testCluster2() throws IOException {
-    ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata, "file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata,
+        "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.75, measure);
-    ClusterEvaluator evaluator = new ClusterEvaluator(representativePoints, clusters, measure);
-    assertEquals("inter cluster density", 0.33333333333333315, evaluator.interClusterDensity(), EPSILON);
-    assertEquals("intra cluster density", 0.3656854249492381, evaluator.intraClusterDensity(), EPSILON);
+    ClusterEvaluator evaluator = new ClusterEvaluator(representativePoints,
+        clusters, measure);
+    assertEquals("inter cluster density", 0.33333333333333315,
+        evaluator.interClusterDensity(), EPSILON);
+    assertEquals("intra cluster density", 0.3656854249492381,
+        evaluator.intraClusterDensity(), EPSILON);
   }
-
+  
   @Test
   public void testEmptyCluster() throws IOException {
-    ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata, "file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata,
+        "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.25, measure);
-    Canopy cluster = new Canopy(new DenseVector(new double[] { 10, 10 }), 19, measure);
+    Canopy cluster = new Canopy(new DenseVector(new double[] {10, 10}), 19,
+        measure);
     clusters.add(cluster);
     List<VectorWritable> points = new ArrayList<VectorWritable>();
     representativePoints.put(cluster.getId(), points);
-    ClusterEvaluator evaluator = new ClusterEvaluator(representativePoints, clusters, measure);
-    assertEquals("inter cluster density", 0.33333333333333315, evaluator.interClusterDensity(), EPSILON);
-    assertEquals("intra cluster density", 0.3656854249492381, evaluator.intraClusterDensity(), EPSILON);
+    ClusterEvaluator evaluator = new ClusterEvaluator(representativePoints,
+        clusters, measure);
+    assertEquals("inter cluster density", 0.33333333333333315,
+        evaluator.interClusterDensity(), EPSILON);
+    assertEquals("intra cluster density", 0.3656854249492381,
+        evaluator.intraClusterDensity(), EPSILON);
   }
-
+  
   @Test
   public void testSingleValueCluster() throws IOException {
-    ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata, "file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata,
+        "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.25, measure);
-    Canopy cluster = new Canopy(new DenseVector(new double[] { 0, 0 }), 19, measure);
+    Canopy cluster = new Canopy(new DenseVector(new double[] {0, 0}), 19,
+        measure);
     clusters.add(cluster);
     List<VectorWritable> points = new ArrayList<VectorWritable>();
-    points.add(new VectorWritable(cluster.getCenter().plus(new DenseVector(new double[] { 1, 1 }))));
+    points.add(new VectorWritable(cluster.getCenter().plus(
+        new DenseVector(new double[] {1, 1}))));
     representativePoints.put(cluster.getId(), points);
-    ClusterEvaluator evaluator = new ClusterEvaluator(representativePoints, clusters, measure);
-    assertEquals("inter cluster density", 0.33333333333333315, evaluator.interClusterDensity(), EPSILON);
-    assertEquals("intra cluster density", 0.3656854249492381, evaluator.intraClusterDensity(), EPSILON);
+    ClusterEvaluator evaluator = new ClusterEvaluator(representativePoints,
+        clusters, measure);
+    assertEquals("inter cluster density", 0.33333333333333315,
+        evaluator.interClusterDensity(), EPSILON);
+    assertEquals("intra cluster density", 0.3656854249492381,
+        evaluator.intraClusterDensity(), EPSILON);
   }
-
+  
   /**
-   * Representative points extraction will duplicate the cluster center if the cluster has no 
-   * assigned points. These clusters should be ignored like empty clusters above
-   * @throws IOException 
+   * Representative points extraction will duplicate the cluster center if the
+   * cluster has no assigned points. These clusters should be ignored like empty
+   * clusters above
+   * 
+   * @throws IOException
    */
   @Test
   public void testAllSameValueCluster() throws IOException {
-    ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata, "file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata,
+        "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.25, measure);
-    Canopy cluster = new Canopy(new DenseVector(new double[] { 0, 0 }), 19, measure);
+    Canopy cluster = new Canopy(new DenseVector(new double[] {0, 0}), 19,
+        measure);
     clusters.add(cluster);
     List<VectorWritable> points = new ArrayList<VectorWritable>();
     points.add(new VectorWritable(cluster.getCenter()));
     points.add(new VectorWritable(cluster.getCenter()));
     points.add(new VectorWritable(cluster.getCenter()));
     representativePoints.put(cluster.getId(), points);
-    ClusterEvaluator evaluator = new ClusterEvaluator(representativePoints, clusters, measure);
-    assertEquals("inter cluster density", 0.33333333333333315, evaluator.interClusterDensity(), EPSILON);
-    assertEquals("intra cluster density", 0.3656854249492381, evaluator.intraClusterDensity(), EPSILON);
+    ClusterEvaluator evaluator = new ClusterEvaluator(representativePoints,
+        clusters, measure);
+    assertEquals("inter cluster density", 0.33333333333333315,
+        evaluator.interClusterDensity(), EPSILON);
+    assertEquals("intra cluster density", 0.3656854249492381,
+        evaluator.intraClusterDensity(), EPSILON);
   }
-
+  
   @Test
   public void testCanopy() throws Exception {
-    ClusteringTestUtils.writePointsToFile(sampleData, new Path(testdata, "file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(sampleData, new Path(testdata,
+        "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     Configuration conf = new Configuration();
     CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, true, true);
     int numIterations = 10;
     Path clustersIn = new Path(output, "clusters-0");
-    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations, true);
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(output,
+        "clusteredPoints"), output, measure, numIterations, true);
     ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
     // now print out the Results
-    System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
-    System.out.println("Inter-cluster density = " + evaluator.interClusterDensity());
-
+    System.out.println("Intra-cluster density = "
+        + evaluator.intraClusterDensity());
+    System.out.println("Inter-cluster density = "
+        + evaluator.interClusterDensity());
+    
     printRepPoints(numIterations);
   }
-
+  
   @Test
   public void testKmeans() throws Exception {
-    ClusteringTestUtils.writePointsToFile(sampleData, new Path(testdata, "file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(sampleData, new Path(testdata,
+        "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     // now run the Canopy job to prime kMeans canopies
     Configuration conf = new Configuration();
     CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, false, true);
     // now run the KMeans job
-    KMeansDriver.run(testdata, new Path(output, "clusters-0"), output, measure, 0.001, 10, true, true);
+    KMeansDriver.run(testdata, new Path(output, "clusters-0"), output, measure,
+        0.001, 10, true, true);
     int numIterations = 10;
     Path clustersIn = new Path(output, "clusters-2");
-    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations, true);
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(output,
+        "clusteredPoints"), output, measure, numIterations, true);
     ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
     // now print out the Results
-    System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
-    System.out.println("Inter-cluster density = " + evaluator.interClusterDensity());
+    System.out.println("Intra-cluster density = "
+        + evaluator.intraClusterDensity());
+    System.out.println("Inter-cluster density = "
+        + evaluator.interClusterDensity());
     printRepPoints(numIterations);
   }
-
+  
   @Test
   public void testFuzzyKmeans() throws Exception {
-    ClusteringTestUtils.writePointsToFile(sampleData, new Path(testdata, "file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(sampleData, new Path(testdata,
+        "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     // now run the Canopy job to prime kMeans canopies
     Configuration conf = new Configuration();
     CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, false, true);
     // now run the KMeans job
-    FuzzyKMeansDriver.run(testdata, new Path(output, "clusters-0"), output, measure, 0.001, 10, 2, true, true, 0, true);
+    FuzzyKMeansDriver.run(testdata, new Path(output, "clusters-0"), output,
+        measure, 0.001, 10, 2, true, true, 0, true);
     int numIterations = 10;
     Path clustersIn = new Path(output, "clusters-4");
-    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations, true);
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(output,
+        "clusteredPoints"), output, measure, numIterations, true);
     ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
     // now print out the Results
-    System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
-    System.out.println("Inter-cluster density = " + evaluator.interClusterDensity());
+    System.out.println("Intra-cluster density = "
+        + evaluator.intraClusterDensity());
+    System.out.println("Inter-cluster density = "
+        + evaluator.interClusterDensity());
     printRepPoints(numIterations);
   }
-
+  
   @Test
   public void testMeanShift() throws Exception {
-    ClusteringTestUtils.writePointsToFile(sampleData, new Path(testdata, "file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(sampleData, new Path(testdata,
+        "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
+    IKernelProfile kernelProfile = new TriangularKernelProfile();
     Configuration conf = new Configuration();
-    new MeanShiftCanopyDriver().run(conf, testdata, output, measure, 2.1, 1.0, 0.001, 10, false, true, true);
+    MeanShiftCanopyDriver.run(conf, testdata, output, measure, kernelProfile,
+        2.1, 1.0, 0.001, 10, false, true, true);
     int numIterations = 10;
-    Path clustersIn = new Path(output, "clusters-10");
-    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations, true);
+    Path clustersIn = new Path(output, "clusters-7");
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(output,
+        "clusteredPoints"), output, measure, numIterations, true);
     ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
     // now print out the Results
-    System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
-    System.out.println("Inter-cluster density = " + evaluator.interClusterDensity());
+    System.out.println("Intra-cluster density = "
+        + evaluator.intraClusterDensity());
+    System.out.println("Inter-cluster density = "
+        + evaluator.interClusterDensity());
     printRepPoints(numIterations);
   }
-
+  
   @Test
   public void testDirichlet() throws Exception {
-    ClusteringTestUtils.writePointsToFile(sampleData, new Path(testdata, "file1"), fs, conf);
-    DistributionDescription description =
-        new DistributionDescription(GaussianClusterDistribution.class.getName(),
-                                    DenseVector.class.getName(),
-                                    null,
-                                    2);
-    DirichletDriver.run(testdata, output, description, 15, 5, 1.0, true, true, 0, true);
+    ClusteringTestUtils.writePointsToFile(sampleData, new Path(testdata,
+        "file1"), fs, conf);
+    DistributionDescription description = new DistributionDescription(
+        GaussianClusterDistribution.class.getName(),
+        DenseVector.class.getName(), null, 2);
+    DirichletDriver.run(testdata, output, description, 15, 5, 1.0, true, true,
+        0, true);
     int numIterations = 10;
     Configuration conf = new Configuration();
     Path clustersIn = new Path(output, "clusters-5");
-    RepresentativePointsDriver.run(conf,
-                                   clustersIn,
-                                   new Path(output, "clusteredPoints"),
-                                   output,
-                                   new EuclideanDistanceMeasure(),
-                                   numIterations,
-                                   true);
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(output,
+        "clusteredPoints"), output, new EuclideanDistanceMeasure(),
+        numIterations, true);
     ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
     // now print out the Results
-    System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
-    System.out.println("Inter-cluster density = " + evaluator.interClusterDensity());
+    System.out.println("Intra-cluster density = "
+        + evaluator.intraClusterDensity());
+    System.out.println("Inter-cluster density = "
+        + evaluator.interClusterDensity());
     printRepPoints(numIterations);
   }
-
+  
 }

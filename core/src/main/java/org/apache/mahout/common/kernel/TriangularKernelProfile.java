@@ -14,17 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.mahout.common.kernel;
 
-package org.apache.mahout.clustering.meanshift;
+import org.apache.commons.lang.NotImplementedException;
 
-public interface MeanShiftCanopyConfigKeys {
+public class TriangularKernelProfile implements IKernelProfile {
   
-  // keys used by Driver, Mapper, Combiner & Reducer
-  String DISTANCE_MEASURE_KEY = "org.apache.mahout.clustering.canopy.measure";
-  String KERNEL_PROFILE_KEY = "org.apache.mahout.clustering.canopy.kernelprofile";
-  String T1_KEY = "org.apache.mahout.clustering.canopy.t1";
-  String T2_KEY = "org.apache.mahout.clustering.canopy.t2";
-  String CONTROL_PATH_KEY = "org.apache.mahout.clustering.control.path";
-  String CLUSTER_CONVERGENCE_KEY = "org.apache.mahout.clustering.canopy.convergence";
+  @Override
+  public double calculateValue(double distance, double h) {
+    throw new NotImplementedException();
+  }
+  
+  @Override
+  public double calculateDerivativeValue(double distance, double h) {
+    return (distance < h) ? 1.0 : 0.0;
+  }
   
 }

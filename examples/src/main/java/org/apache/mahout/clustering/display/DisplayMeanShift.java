@@ -31,31 +31,30 @@ import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
+import org.apache.mahout.common.kernel.IKernelProfile;
+import org.apache.mahout.common.kernel.TriangularKernelProfile;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DisplayMeanShift extends DisplayClustering {
-
-  private static final Logger log = LoggerFactory.getLogger(DisplayMeanShift.class);
-
+  
   private static double t1;
-
+  
   private static double t2;
-
+  
   private DisplayMeanShift() {
     initialize();
-    this.setTitle("Mean Shift Canopy Clusters (>" + (int) (significance * 100) + "% of population)");
+    this.setTitle("Mean Shift Canopy Clusters (>" + (int) (significance * 100)
+        + "% of population)");
   }
-
+  
   @Override
   public void paint(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
     double sx = (double) res / DS;
     g2.setTransform(AffineTransform.getScaleInstance(sx, sx));
-
+    
     // plot the axes
     g2.setColor(Color.BLACK);
     Vector dv = new DenseVector(2).assign(SIZE / 2.0);
@@ -63,7 +62,7 @@ public class DisplayMeanShift extends DisplayClustering {
     Vector dv2 = new DenseVector(2).assign(t2);
     DisplayClustering.plotRectangle(g2, new DenseVector(2).assign(2), dv);
     DisplayClustering.plotRectangle(g2, new DenseVector(2).assign(-2), dv);
-
+    
     // plot the sample data
     g2.setColor(Color.DARK_GRAY);
     dv.assign(0.03);
@@ -73,7 +72,8 @@ public class DisplayMeanShift extends DisplayClustering {
     int i = 0;
     for (Cluster cluster : CLUSTERS.get(CLUSTERS.size() - 1)) {
       MeanShiftCanopy canopy = (MeanShiftCanopy) cluster;
-      if (canopy.getBoundPoints().toList().size() >= significance * DisplayClustering.SAMPLE_DATA.size()) {
+      if (canopy.getBoundPoints().toList().size() >= significance
+          * DisplayClustering.SAMPLE_DATA.size()) {
         g2.setColor(COLORS[Math.min(i++, DisplayClustering.COLORS.length - 1)]);
         int count = 0;
         Vector center = new DenseVector(2);
@@ -89,36 +89,40 @@ public class DisplayMeanShift extends DisplayClustering {
       }
     }
   }
-
+  
   public static void main(String[] args) throws Exception {
     t1 = 1.5;
     t2 = 0.5;
     DistanceMeasure measure = new EuclideanDistanceMeasure();
+    IKernelProfile kernelProfile = new TriangularKernelProfile();
     significance = 0.02;
-
+    
     Path samples = new Path("samples");
     Path output = new Path("output");
     Configuration conf = new Configuration();
     HadoopUtil.delete(conf, samples);
     HadoopUtil.delete(conf, output);
-
+    
     RandomUtils.useTestSeed();
     DisplayClustering.generateSamples();
     writeSampleData(samples);
-    //boolean b = true;
-    //if (b) {
-    MeanShiftCanopyDriver.run(conf, samples, output, measure, t1, t2, 0.005, 20, false, true, true);
+    // boolean b = true;
+    // if (b) {
+    MeanShiftCanopyDriver.run(conf, samples, output, measure, kernelProfile,
+        t1, t2, 0.005, 20, false, true, true);
     loadClusters(output);
-    //} else {
-    //  Collection<Vector> points = new ArrayList<Vector>();
-    //  for (VectorWritable sample : SAMPLE_DATA) {
-    //    points.add(sample.get());
-    //  }
-    //  List<MeanShiftCanopy> canopies = MeanShiftCanopyClusterer.clusterPoints(points, measure, 0.005, t1, t2, 20);
-    //  for (MeanShiftCanopy canopy : canopies) {
-    //    log.info(canopy.toString());
+    // } else {
+    // Collection<Vector> points = new ArrayList<Vector>();
+    // for (VectorWritable sample : SAMPLE_DATA) {
+    // points.add(sample.get());
     // }
-    //}
+    // List<MeanShiftCanopy> canopies =
+    // MeanShiftCanopyClusterer.clusterPoints(points, measure, 0.005, t1, t2,
+    // 20);
+    // for (MeanShiftCanopy canopy : canopies) {
+    // log.info(canopy.toString());
+    // }
+    // }
     new DisplayMeanShift();
   }
 }
