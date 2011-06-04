@@ -203,11 +203,12 @@ public final class BayesFileFormatter {
                                 Charset charset, Writer writer) throws IOException {
     Reader reader = Files.newReader(inFile, charset);
     try {
-      TokenStream ts = analyzer.tokenStream(label, reader);
+      TokenStream ts = analyzer.reusableTokenStream(label, reader);
       writer.write(label);
       writer.write('\t'); // edit: Inorder to match Hadoop standard
       // TextInputFormat
       TermAttribute termAtt = ts.addAttribute(TermAttribute.class);
+      ts.reset();
       while (ts.incrementToken()) {
         char[] termBuffer = termAtt.termBuffer();
         int termLen = termAtt.termLength();
@@ -229,10 +230,11 @@ public final class BayesFileFormatter {
    * @return An array of unique tokens
    */
   public static String[] readerToDocument(Analyzer analyzer, Reader reader) throws IOException {
-    TokenStream ts = analyzer.tokenStream("", reader);
+    TokenStream ts = analyzer.reusableTokenStream("", reader);
     
     List<String> coll = new ArrayList<String>();
     TermAttribute termAtt = ts.addAttribute(TermAttribute.class);
+    ts.reset();
     while (ts.incrementToken()) {
       char[] termBuffer = termAtt.termBuffer();
       int termLen = termAtt.termLength();

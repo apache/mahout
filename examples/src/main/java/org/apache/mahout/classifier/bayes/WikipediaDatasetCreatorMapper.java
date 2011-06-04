@@ -67,8 +67,9 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
       StringBuilder contents = new StringBuilder(1000);
       document = StringEscapeUtils.unescapeHtml(WikipediaDatasetCreatorMapper.CLOSE_TEXT_TAG_PATTERN.matcher(
           WikipediaDatasetCreatorMapper.OPEN_TEXT_TAG_PATTERN.matcher(document).replaceFirst("")).replaceAll(""));
-      TokenStream stream = analyzer.tokenStream(catMatch, new StringReader(document));
+      TokenStream stream = analyzer.reusableTokenStream(catMatch, new StringReader(document));
       CharTermAttribute termAtt = stream.addAttribute(CharTermAttribute.class);
+      stream.reset();
       while (stream.incrementToken()) {
         contents.append(termAtt.buffer(), 0, termAtt.length()).append(' ');
       }

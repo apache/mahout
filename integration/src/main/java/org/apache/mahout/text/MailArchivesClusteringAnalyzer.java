@@ -17,17 +17,19 @@
 package org.apache.mahout.text;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.ASCIIFoldingFilter;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.PorterStemFilter;
 import org.apache.lucene.analysis.StopFilter;
+import org.apache.lucene.analysis.StopwordAnalyzerBase;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.standard.StandardFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 
@@ -39,12 +41,12 @@ import org.apache.lucene.util.Version;
  * for clustering the ASF Mail Archives using an extended set of
  * stop words, excluding non-alpha-numeric tokens, and porter stemming.
  */
-public final class MailArchivesClusteringAnalyzer extends Analyzer {
+public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
   
   // extended set of stop words composed of common mail terms like "hi",
   // HTML tags, and Java keywords asmany of the messages in the archives
   // are subversion check-in notifications
-  private static final String[] STOP_WORDS = {
+  private static final CharArraySet STOP_WORDS = new CharArraySet(Version.LUCENE_31, Arrays.asList(
     "3d","7bit","a0","about","above","abstract","across","additional","after",
     "afterwards","again","against","align","all","almost","alone","along",
     "already","also","although","always","am","among","amongst","amoungst",
@@ -97,36 +99,29 @@ public final class MailArchivesClusteringAnalyzer extends Analyzer {
     "whole","whom","whose","why","width","will","with","within","without",
     "wont","would","wrote","www","yes","yet","you","your","yours","yourself",
     "yourselves"
-  };
+  ), false);
 
   // Regex used to exclude non-alpha-numeric tokens
   private static final Pattern alphaNumeric = Pattern.compile("^[a-z][a-z0-9_]+$");
-  private final CharArraySet stopSet;
 
   public MailArchivesClusteringAnalyzer() {
-    stopSet = (CharArraySet)StopFilter.makeStopSet(Version.LUCENE_31, Arrays.asList(STOP_WORDS));
-    /*
-    Collection<String> tmp = new java.util.TreeSet<String>();
-    for (Object entry : stopSet) {
-      tmp.add(entry.toString());
-    }
-     */
+    super(Version.LUCENE_31, STOP_WORDS);
   }
 
   public MailArchivesClusteringAnalyzer(CharArraySet stopSet) {
-    this.stopSet = stopSet;
+    super(Version.LUCENE_31, stopSet);
   }
-
+  
   @Override
-  public TokenStream tokenStream(String fieldName, java.io.Reader reader) {
-
-    TokenStream result = new StandardTokenizer(Version.LUCENE_31, reader);
-    result = new StandardFilter(Version.LUCENE_31, result);
+  protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
+    Tokenizer tokenizer = new StandardTokenizer(Version.LUCENE_31, reader);
+    TokenStream result = new StandardFilter(Version.LUCENE_31, tokenizer);
     result = new LowerCaseFilter(Version.LUCENE_31, result);
     result = new ASCIIFoldingFilter(result);
     result = new AlphaNumericMaxLengthFilter(result);
-    result = new StopFilter(Version.LUCENE_31, result, stopSet);
-    return new PorterStemFilter(result);
+    result = new StopFilter(Version.LUCENE_31, result, stopwords);
+    result = new PorterStemFilter(result);
+    return new TokenStreamComponents(tokenizer, result);
   }
 
   /**

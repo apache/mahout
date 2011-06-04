@@ -21,6 +21,7 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
 
+import java.io.IOException;
 import java.io.Reader;
 
 /**
@@ -35,5 +36,10 @@ public final class DefaultAnalyzer extends Analyzer {
   @Override
   public TokenStream tokenStream(String fieldName, Reader reader) {
     return stdAnalyzer.tokenStream(fieldName, reader);
+  }
+  
+  @Override
+  public TokenStream reusableTokenStream(String fieldName, Reader reader) throws IOException {
+    return stdAnalyzer.reusableTokenStream(fieldName, reader);
   }
 }

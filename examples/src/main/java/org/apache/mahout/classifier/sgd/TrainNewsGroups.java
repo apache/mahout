@@ -320,8 +320,9 @@ public final class TrainNewsGroups {
   }
 
   private static void countWords(Analyzer analyzer, Collection<String> words, Reader in) throws IOException {
-    TokenStream ts = analyzer.tokenStream("text", in);
+    TokenStream ts = analyzer.reusableTokenStream("text", in);
     ts.addAttribute(CharTermAttribute.class);
+    ts.reset();
     while (ts.incrementToken()) {
       String s = ts.getAttribute(CharTermAttribute.class).toString();
       words.add(s);

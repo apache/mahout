@@ -49,9 +49,13 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
    */
   @Override
   protected Iterable<String> tokenize(CharSequence originalForm) {
-    TokenStream ts = analyzer.tokenStream(getName(), new CharSequenceReader(originalForm));
-    ts.addAttribute(CharTermAttribute.class);
-    return new LuceneTokenIterable(ts);
+    try {
+      TokenStream ts = analyzer.reusableTokenStream(getName(), new CharSequenceReader(originalForm));
+      ts.addAttribute(CharTermAttribute.class);
+      return new LuceneTokenIterable(ts);
+    } catch (IOException ex) {
+      throw new IllegalStateException(ex);
+    }
   }
 
   private static final class CharSequenceReader extends Reader {

@@ -39,9 +39,10 @@ public class SequenceFileTokenizerMapper extends Mapper<Text, Text, Text, String
 
   @Override
   protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
-    TokenStream stream = analyzer.tokenStream(key.toString(), new StringReader(value.toString()));
+    TokenStream stream = analyzer.reusableTokenStream(key.toString(), new StringReader(value.toString()));
     CharTermAttribute termAtt = stream.addAttribute(CharTermAttribute.class);
     StringTuple document = new StringTuple();
+    stream.reset();
     while (stream.incrementToken()) {
       if (termAtt.length() > 0) {
         document.add(new String(termAtt.buffer(), 0, termAtt.length()));
