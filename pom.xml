@@ -343,6 +343,18 @@
         <scope>provided</scope>
       </dependency>
 
+    <dependency>
+      <groupId>org.mongodb</groupId>
+      <artifactId>mongo-java-driver</artifactId>
+      <version>2.5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mongodb</groupId>
+      <artifactId>bson</artifactId>
+      <version>2.5</version>
+    </dependency>
+
     </dependencies>
   </dependencyManagement>
   <build>
