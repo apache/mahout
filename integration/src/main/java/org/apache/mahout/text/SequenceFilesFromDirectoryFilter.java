@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.mahout.text;
 
 import org.apache.hadoop.conf.Configuration;
@@ -53,13 +54,13 @@ public abstract class SequenceFilesFromDirectoryFilter extends SequenceFilesFrom
   protected SequenceFilesFromDirectoryFilter(Configuration conf,
                                              String keyPrefix,
                                              Map<String, String> options,
-                                             ChunkedWriter writer)
-    throws IOException {
+                                             ChunkedWriter writer,
+                                             FileSystem fs) {
     this.conf = conf;
     this.prefix = keyPrefix;
     this.writer = writer;
     this.charset = Charset.forName(options.get(SequenceFilesFromDirectory.CHARSET_OPTION[0]));
-    this.fs = FileSystem.get(conf);
+    this.fs = fs;
     this.options = options;
   }
 

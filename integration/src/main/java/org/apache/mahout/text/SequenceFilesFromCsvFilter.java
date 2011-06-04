@@ -19,6 +19,7 @@ package org.apache.mahout.text;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.iterator.FileLineIterable;
@@ -51,8 +52,9 @@ public final class SequenceFilesFromCsvFilter extends SequenceFilesFromDirectory
   public SequenceFilesFromCsvFilter(Configuration conf,
                                     String keyPrefix,
                                     Map<String, String> options,
-                                    ChunkedWriter writer) throws IOException {
-    super(conf, keyPrefix, options, writer);
+                                    ChunkedWriter writer,
+                                    FileSystem fs) {
+    super(conf, keyPrefix, options, writer, fs);
     this.keyColumn = Integer.parseInt(options.get(KEY_COLUMN_OPTION[0]));
     this.valueColumn = Integer.parseInt(options.get(VALUE_COLUMN_OPTION[0]));
   }
@@ -84,7 +86,7 @@ public final class SequenceFilesFromCsvFilter extends SequenceFilesFromDirectory
     if (fst.isDir()) {
       fs.listStatus(fst.getPath(),
                     new SequenceFilesFromCsvFilter(conf, prefix + Path.SEPARATOR + current.getName(),
-                        this.options, writer));
+                        this.options, writer, fs));
     } else {
       InputStream in = fs.open(fst.getPath());
       for (CharSequence aFit : new FileLineIterable(in, charset, false)) {

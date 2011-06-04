@@ -43,7 +43,7 @@ public final class ChunkedWriter implements Closeable {
       chunkSizeInMB = 1984;
     }
     maxChunkSizeInBytes = chunkSizeInMB * 1024 * 1024;
-    fs = FileSystem.get(conf);
+    fs = FileSystem.get(output.toUri(), conf);
     currentChunkID = 0;
     writer = new SequenceFile.Writer(fs, conf, getPath(currentChunkID), Text.class, Text.class);
   }

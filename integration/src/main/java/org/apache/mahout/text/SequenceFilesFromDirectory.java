@@ -32,8 +32,6 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Converts a directory of text documents into SequenceFiles of Specified chunkSize. This class takes in a
@@ -43,8 +41,6 @@ import org.slf4j.LoggerFactory;
  * files. The content of the output SequenceFiles are encoded as UTF-8 text.
  */
 public class SequenceFilesFromDirectory extends AbstractJob {
-
-  private static final Logger log = LoggerFactory.getLogger(SequenceFilesFromDirectory.class);
 
   private static final String PREFIX_ADDITION_FILTER = PrefixAdditionFilter.class.getName();
   
@@ -60,21 +56,24 @@ public class SequenceFilesFromDirectory extends AbstractJob {
                   Path output)
     throws InstantiationException, IllegalAccessException, InvocationTargetException, IOException,
            NoSuchMethodException, ClassNotFoundException {
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(input.toUri(), conf);
     ChunkedWriter writer = new ChunkedWriter(conf, Integer.parseInt(options.get(CHUNK_SIZE_OPTION[0])), output);
 
     try {
       SequenceFilesFromDirectoryFilter pathFilter;
-
       String fileFilterClassName = options.get(FILE_FILTER_CLASS_OPTION[0]);
       if (PrefixAdditionFilter.class.getName().equals(fileFilterClassName)) {
-        pathFilter = new PrefixAdditionFilter(conf, keyPrefix, options, writer);
+        pathFilter = new PrefixAdditionFilter(conf, keyPrefix, options, writer, fs);
       } else {
         Class<? extends SequenceFilesFromDirectoryFilter> pathFilterClass =
             Class.forName(fileFilterClassName).asSubclass(SequenceFilesFromDirectoryFilter.class);
         Constructor<? extends SequenceFilesFromDirectoryFilter> constructor =
-            pathFilterClass.getConstructor(Configuration.class, String.class, Map.class, ChunkedWriter.class);
-        pathFilter = constructor.newInstance(conf, keyPrefix, options, writer);
+            pathFilterClass.getConstructor(Configuration.class,
+                                           String.class,
+                                           Map.class,
+                                           ChunkedWriter.class,
+                                           FileSystem.class);
+        pathFilter = constructor.newInstance(conf, keyPrefix, options, writer, fs);
       }
       fs.listStatus(input, pathFilter);
     } finally {

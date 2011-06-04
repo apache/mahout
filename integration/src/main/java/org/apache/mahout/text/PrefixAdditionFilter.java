@@ -19,6 +19,7 @@ package org.apache.mahout.text;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.mahout.common.iterator.FileLineIterable;
@@ -32,9 +33,12 @@ import java.util.Map;
  */
 public final class PrefixAdditionFilter extends SequenceFilesFromDirectoryFilter {
 
-  public PrefixAdditionFilter(Configuration conf, String keyPrefix, Map<String, String> options, ChunkedWriter writer)
-    throws IOException {
-    super(conf, keyPrefix, options, writer);
+  public PrefixAdditionFilter(Configuration conf,
+                              String keyPrefix,
+                              Map<String, String> options, 
+                              ChunkedWriter writer,
+                              FileSystem fs) {
+    super(conf, keyPrefix, options, writer, fs);
   }
 
   @Override
@@ -42,7 +46,7 @@ public final class PrefixAdditionFilter extends SequenceFilesFromDirectoryFilter
     if (fst.isDir()) {
       fs.listStatus(fst.getPath(),
                     new PrefixAdditionFilter(conf, prefix + Path.SEPARATOR + current.getName(),
-                        options, writer));
+                        options, writer, fs));
     } else {
       InputStream in = null;
       try {
