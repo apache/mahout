@@ -73,7 +73,7 @@ public class SimilarityMatrixEntryKey implements WritableComparable<SimilarityMa
 
   @Override
   public int compareTo(SimilarityMatrixEntryKey other) {
-    return (row == other.row) ? 0 : (row < other.row) ? -1 : 1;
+    return row == other.row ? 0 : row < other.row ? -1 : 1;
   }
 
   @Override
@@ -110,11 +110,11 @@ public class SimilarityMatrixEntryKey implements WritableComparable<SimilarityMa
     }
 
     protected static int compare(long a, long b) {
-      return (a == b) ? 0 : (a < b) ? -1 : 1;
+      return a == b ? 0 : a < b ? -1 : 1;
     }
 
     protected static int compare(double a, double b) {
-      return (a == b) ? 0 : (a < b) ? -1 : 1;
+      return a == b ? 0 : a < b ? -1 : 1;
     }
   }
 

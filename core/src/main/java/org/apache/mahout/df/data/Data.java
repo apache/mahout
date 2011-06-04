@@ -294,10 +294,9 @@ public class Data implements Cloneable {
     
     int[] labels = new int[dataset.nbInstances()];
     DataConverter converter = new DataConverter(dataset);
-    
-    int index = 0;
 
     try {
+      int index = 0;
       while (iterator.hasNext()) {
         labels[index++] = converter.convert(0, iterator.next()).getLabel();
       }

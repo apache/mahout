@@ -322,7 +322,7 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
     
     @Override
     public String toString() {
-      return "(" + row + "," + col + "):" + val;
+      return "(" + row + ',' + col + "):" + val;
     }
   }
 }

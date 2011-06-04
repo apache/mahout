@@ -39,8 +39,6 @@ import org.apache.mahout.math.VectorWritable;
 
 /**
  * This class trains a Naive Bayes Classifier (Parameters for both Naive Bayes and Complementary Naive Bayes)
- * 
- * 
  */
 public final class NaiveBayesTrainer {
   
@@ -202,8 +200,8 @@ public final class NaiveBayesTrainer {
     Path labelMapPath = new Path(labelMapPathBase, LABEL_MAP);
     
     SequenceFile.Writer dictWriter = new SequenceFile.Writer(fs, conf, labelMapPath, Text.class, IntWritable.class);
-    int i = 0;
     try {
+      int i = 0;
       for (String label : labels) {
         Writable key = new Text(label);
         dictWriter.append(key, new IntWritable(i++));

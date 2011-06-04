@@ -275,13 +275,13 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     assertEquals(0.0, result1.getDistanceSquared(result2), EPSILON);
   }
 
-  public Configuration createInitialConf() {
+  public static Configuration createInitialConf() {
     Configuration initialConf = new Configuration();
     initialConf.set(TEST_PROPERTY_KEY, TEST_PROPERTY_VALUE);
     return initialConf;
   }
-  
-  private void deleteContentsOfPath(Configuration conf, Path path) throws Exception {
+
+  private static void deleteContentsOfPath(Configuration conf, Path path) throws Exception {
     FileSystem fs = path.getFileSystem(conf);
     
     FileStatus[] statuses = fs.listStatus(path);

@@ -18,7 +18,6 @@
 package org.apache.mahout.clustering;
 
 import org.apache.mahout.clustering.canopy.Canopy;
-import org.apache.mahout.clustering.dirichlet.DirichletCluster;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.DistanceMeasure;

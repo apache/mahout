@@ -29,7 +29,6 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ReflectionUtils;
-import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.common.Pair;
 
 /**

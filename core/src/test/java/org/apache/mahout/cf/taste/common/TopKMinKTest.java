@@ -17,19 +17,19 @@
 
 package org.apache.mahout.cf.taste.common;
 
+import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * tests for {@link TopK} and {@link MinK}
  */
-public class TopKMinKTest {
+public class TopKMinKTest extends MahoutTestCase {
 
-  static class IntComparator implements Comparator<Integer> {
+  static class IntComparator implements Comparator<Integer>, Serializable {
     @Override
     public int compare(Integer one, Integer two) {
       return one.compareTo(two);
@@ -44,11 +44,11 @@ public class TopKMinKTest {
     }
 
     List<Integer> numbers = topFiveNumbers.retrieve();
-    assertEquals(new Integer(1000000), numbers.get(0));
-    assertEquals(new Integer(999999), numbers.get(1));
-    assertEquals(new Integer(999998), numbers.get(2));
-    assertEquals(new Integer(999997), numbers.get(3));
-    assertEquals(new Integer(999996), numbers.get(4));
+    assertEquals(Integer.valueOf(1000000), numbers.get(0));
+    assertEquals(Integer.valueOf(999999), numbers.get(1));
+    assertEquals(Integer.valueOf(999998), numbers.get(2));
+    assertEquals(Integer.valueOf(999997), numbers.get(3));
+    assertEquals(Integer.valueOf(999996), numbers.get(4));
   }
 
   @Test
@@ -58,7 +58,7 @@ public class TopKMinKTest {
       topFiveNumbers.offer(n);
     }
 
-    assertEquals(new Integer(999996), topFiveNumbers.smallestGreat());
+    assertEquals(Integer.valueOf(999996), topFiveNumbers.smallestGreat());
   }
 
   @Test
@@ -69,11 +69,11 @@ public class TopKMinKTest {
     }
 
     List<Integer> numbers = minFiveNumbers.retrieve();
-    assertEquals(new Integer(1), numbers.get(0));
-    assertEquals(new Integer(2), numbers.get(1));
-    assertEquals(new Integer(3), numbers.get(2));
-    assertEquals(new Integer(4), numbers.get(3));
-    assertEquals(new Integer(5), numbers.get(4));
+    assertEquals(Integer.valueOf(1), numbers.get(0));
+    assertEquals(Integer.valueOf(2), numbers.get(1));
+    assertEquals(Integer.valueOf(3), numbers.get(2));
+    assertEquals(Integer.valueOf(4), numbers.get(3));
+    assertEquals(Integer.valueOf(5), numbers.get(4));
   }
 
   @Test
@@ -83,7 +83,7 @@ public class TopKMinKTest {
       minFiveNumbers.offer(n);
     }
 
-    assertEquals(new Integer(5), minFiveNumbers.greatestSmall());
+    assertEquals(Integer.valueOf(5), minFiveNumbers.greatestSmall());
   }
 
   @Test
@@ -95,9 +95,9 @@ public class TopKMinKTest {
     }
 
     List<Integer> numbers = topThreeNumbers.retrieve();
-    assertEquals(new Integer(1000000), numbers.get(0));
-    assertEquals(new Integer(1000000), numbers.get(1));
-    assertEquals(new Integer(999999), numbers.get(2));
+    assertEquals(Integer.valueOf(1000000), numbers.get(0));
+    assertEquals(Integer.valueOf(1000000), numbers.get(1));
+    assertEquals(Integer.valueOf(999999), numbers.get(2));
   }
 
   @Test
@@ -109,8 +109,8 @@ public class TopKMinKTest {
     }
 
     List<Integer> numbers = minThreeNumbers.retrieve();
-    assertEquals(new Integer(1), numbers.get(0));
-    assertEquals(new Integer(1), numbers.get(1));
-    assertEquals(new Integer(2), numbers.get(2));
+    assertEquals(Integer.valueOf(1), numbers.get(0));
+    assertEquals(Integer.valueOf(1), numbers.get(1));
+    assertEquals(Integer.valueOf(2), numbers.get(2));
   }
 }

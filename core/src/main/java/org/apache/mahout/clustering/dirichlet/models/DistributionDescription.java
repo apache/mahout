@@ -19,7 +19,9 @@ package org.apache.mahout.clustering.dirichlet.models;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Iterator;
 
+import com.google.common.base.Splitter;
 import org.apache.mahout.clustering.ModelDistribution;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
@@ -101,8 +103,12 @@ public final class DistributionDescription {
   }
 
   public static DistributionDescription fromString(String s) {
-    String[] tokens = s.split(",");
-    return new DistributionDescription(tokens[0], tokens[1], tokens[2], Integer.parseInt(tokens[3]));
+    Iterator<String> tokens = Splitter.on(',').split(s).iterator();
+    String modelFactory = tokens.next();
+    String modelPrototype = tokens.next();
+    String distanceMeasure = tokens.next();
+    int prototypeSize = Integer.parseInt(tokens.next());
+    return new DistributionDescription(modelFactory, modelPrototype, distanceMeasure, prototypeSize);
   }
 
 }

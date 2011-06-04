@@ -102,7 +102,7 @@ public final class TestMapReduce extends MahoutTestCase {
    *          double standard deviation in y of the samples
    */
   private void generateAsymmetricSamples(int num, double mx, double my, double sdx, double sdy) {
-    System.out.println("Generating " + num + " samples m=[" + mx + ", " + my + "] sd=[" + sdx + ", " + sdy + "]");
+    System.out.println("Generating " + num + " samples m=[" + mx + ", " + my + "] sd=[" + sdx + ", " + sdy + ']');
     for (int i = 0; i < num; i++) {
       addSample(new double[] { UncommonDistributions.rNorm(mx, sdx), UncommonDistributions.rNorm(my, sdy) });
     }

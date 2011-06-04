@@ -22,7 +22,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import com.google.common.io.Closeables;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

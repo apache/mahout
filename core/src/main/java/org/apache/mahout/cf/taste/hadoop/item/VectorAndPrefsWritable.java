@@ -83,6 +83,6 @@ public final class VectorAndPrefsWritable implements Writable {
 
   @Override
   public String toString() {
-    return vector + "\t" + userIDs + "\t" + values;
+    return vector + "\t" + userIDs + '\t' + values;
   }
 }

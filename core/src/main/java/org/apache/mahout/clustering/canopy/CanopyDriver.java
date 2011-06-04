@@ -417,7 +417,7 @@ public class CanopyDriver extends AbstractJob {
         }
       } finally {
         Closeables.closeQuietly(reader);
-        Closeables.closeQuietly(writer);;
+        Closeables.closeQuietly(writer);
       }
     }
   }

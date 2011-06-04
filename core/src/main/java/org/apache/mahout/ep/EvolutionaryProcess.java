@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.classifier.sgd.PolymorphicWritable;
 
+import java.io.Closeable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -64,7 +65,7 @@ import java.util.concurrent.Future;
  *
  * @param <T> The payload class.
  */
-public class EvolutionaryProcess<T extends Payload<U>, U> implements Writable {
+public class EvolutionaryProcess<T extends Payload<U>, U> implements Writable, Closeable {
   // used to execute operations on the population in thread parallel.
   private ExecutorService pool;
 
@@ -187,21 +188,16 @@ public class EvolutionaryProcess<T extends Payload<U>, U> implements Writable {
     return population;
   }
 
+  @Override
   public void close() {
     List<Runnable> remainingTasks = pool.shutdownNow();
     if (!remainingTasks.isEmpty()) {
-      throw new EarlyTerminationException("Had to forcefully shut down " + remainingTasks.size() + " tasks");
+      throw new IllegalStateException("Had to forcefully shut down " + remainingTasks.size() + " tasks");
     }
   }
 
   public interface Function<T> {
     double apply(T payload, double[] params);
-  }
-
-  public static class EarlyTerminationException extends RuntimeException {
-    public EarlyTerminationException(String message) {
-      super(message);
-    }
   }
 
   @Override

@@ -17,6 +17,7 @@
 
 package org.apache.mahout.classifier.sgd;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.classifier.OnlineLearner;
 import org.apache.mahout.common.MahoutTestCase;
@@ -44,9 +45,8 @@ public final class ModelSerializerTest extends MahoutTestCase {
     try {
       PolymorphicWritable.write(dos, m);
     } finally {
-      dos.close();
+      Closeables.closeQuietly(dos);
     }
-
     return PolymorphicWritable.read(new DataInputStream(new ByteArrayInputStream(buf.toByteArray())), clazz);
   }
 

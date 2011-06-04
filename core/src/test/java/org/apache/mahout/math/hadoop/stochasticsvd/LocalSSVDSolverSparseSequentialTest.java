@@ -78,14 +78,13 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
     closeables.addFirst(w);
 
     int n = 100;
-    Vector dv;
     VectorWritable vw = new VectorWritable();
     IntWritable roww = new IntWritable();
 
     double muAmplitude = 50.0;
     int m = 1000;
     for (int i = 0; i < m; i++) {
-      dv=new SequentialAccessSparseVector(n);
+      Vector dv = new SequentialAccessSparseVector(n);
       for (int j = 0; j < n / 5; j++) {
         dv.setQuick(rnd.nextInt(n), muAmplitude * (rnd.nextDouble() - 0.5));
       }

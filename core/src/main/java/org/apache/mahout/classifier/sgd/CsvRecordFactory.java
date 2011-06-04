@@ -202,13 +202,13 @@ public class CsvRecordFactory implements RecordFactory {
         predictorEncoders.put(predictor, encoder);
         encoder.setTraceDictionary(traceDictionary);
       } catch (InstantiationException e) {
-        throw new ImpossibleException(CANNOT_CONSTRUCT_CONVERTER, e);
+        throw new IllegalStateException(CANNOT_CONSTRUCT_CONVERTER, e);
       } catch (IllegalAccessException e) {
-        throw new ImpossibleException(CANNOT_CONSTRUCT_CONVERTER, e);
+        throw new IllegalStateException(CANNOT_CONSTRUCT_CONVERTER, e);
       } catch (InvocationTargetException e) {
-        throw new ImpossibleException(CANNOT_CONSTRUCT_CONVERTER, e);
+        throw new IllegalStateException(CANNOT_CONSTRUCT_CONVERTER, e);
       } catch (NoSuchMethodException e) {
-        throw new ImpossibleException(CANNOT_CONSTRUCT_CONVERTER, e);
+        throw new IllegalStateException(CANNOT_CONSTRUCT_CONVERTER, e);
       }
     }
   }
@@ -282,12 +282,6 @@ public class CsvRecordFactory implements RecordFactory {
       r.subList(maxTargetValue, r.size()).clear();
     }
     return r;
-  }
-
-  private static final class ImpossibleException extends RuntimeException {
-    private ImpossibleException(String message, Throwable cause) {
-      super(message, cause);
-    }
   }
 
 }

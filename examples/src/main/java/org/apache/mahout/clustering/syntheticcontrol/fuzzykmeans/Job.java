@@ -60,7 +60,7 @@ public final class Job extends AbstractJob {
       Path output = new Path("output");
       Configuration conf = new Configuration();
       HadoopUtil.delete(conf, output);
-      new Job().run(conf, new Path("testdata"), output,
+      run(conf, new Path("testdata"), output,
           new EuclideanDistanceMeasure(), 80, 55, 10, (float) 2, 0.5);
     }
   }
@@ -160,11 +160,16 @@ public final class Job extends AbstractJob {
    * @throws IllegalAccessException
    * @throws InstantiationException
    */
-  public void run(Configuration conf, Path input, Path output,
-      DistanceMeasure measure, double t1, double t2, int maxIterations,
-      float fuzziness, double convergenceDelta) throws IOException,
-      InterruptedException, ClassNotFoundException, InstantiationException,
-      IllegalAccessException {
+  public static void run(Configuration conf,
+                         Path input,
+                         Path output,
+                         DistanceMeasure measure,
+                         double t1,
+                         double t2,
+                         int maxIterations,
+                         float fuzziness,
+                         double convergenceDelta)
+    throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
     Path directoryContainingConvertedInput = new Path(output,
         DIRECTORY_CONTAINING_CONVERTED_INPUT);
     log.info("Preparing Input");

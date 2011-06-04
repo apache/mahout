@@ -55,9 +55,9 @@ public final class MathHelper {
       public boolean matches(Object argument) {
         if (argument instanceof MatrixEntryWritable) {
           MatrixEntryWritable entry = (MatrixEntryWritable) argument;
-          return (row == entry.getRow()
+          return row == entry.getRow()
               && col == entry.getCol()
-              && Math.abs(value - entry.getVal()) <= MahoutTestCase.EPSILON);
+              && Math.abs(value - entry.getVal()) <= MahoutTestCase.EPSILON;
         }
         return false;
       }

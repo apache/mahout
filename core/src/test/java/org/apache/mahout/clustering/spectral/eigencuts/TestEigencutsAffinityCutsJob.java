@@ -169,7 +169,8 @@ public class TestEigencutsAffinityCutsJob extends MahoutTestCase {
       List<VertexWritable> row = entry.getValue();
       IntWritable key = new IntWritable(Integer.parseInt(entry.getKey().toString()));
       
-      double calcDiag = 0.0, trueDiag = sumOfRowCuts(key.get(), this.sensitivity);
+      double calcDiag = 0.0;
+      double trueDiag = sumOfRowCuts(key.get(), this.sensitivity);
       for (VertexWritable e : row) {
 
         // should the value have been cut, e.g. set to 0?

@@ -135,7 +135,7 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
       NamedVector v = (NamedVector) value.get();
       eigenVectors.assignRow(i, v);
       log.info(v.getName());
-      if(EigenVector.getCosAngleError(v.getName()) < 1e-3) {
+      if(EigenVector.getCosAngleError(v.getName()) < 1.0e-3) {
         eigenvalues.add(EigenVector.getEigenValue(v.getName()));
       }
       i++;

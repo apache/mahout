@@ -50,8 +50,8 @@ public final class ClusteringTestUtils {
                                                          path,
                                                          intWritable ? IntWritable.class : LongWritable.class,
                                                          VectorWritable.class);
-    int recNum = 0;
     try {
+      int recNum = 0;
       for (VectorWritable point : points) {
         writer.append(intWritable ? new IntWritable(recNum++) : new LongWritable(recNum++), point);
       }

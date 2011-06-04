@@ -24,11 +24,6 @@ import java.nio.charset.Charset;
 import java.util.Iterator;
 
 import com.google.common.base.Charsets;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.mahout.cf.taste.impl.common.FastIDSet;
-import org.apache.mahout.common.HadoopUtil;
 
 /**
  * Iterable representing the lines of a text file. It can produce an {@link Iterator} over those lines. This

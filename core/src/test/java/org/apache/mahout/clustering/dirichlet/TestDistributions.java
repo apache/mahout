@@ -51,7 +51,7 @@ public final class TestDistributions extends MahoutTestCase {
   @Test
   public void testDnorm() {
     for (int i = -30; i < 30; i++) {
-      double d = (i * 0.1);
+      double d = i * 0.1;
       double dnorm = UncommonDistributions.dNorm(d, 0, 1);
       char[] bar = new char[(int) (dnorm * 100)];
       for (int j = 0; j < bar.length; j++) {
@@ -65,7 +65,7 @@ public final class TestDistributions extends MahoutTestCase {
   @Test
   public void testDnorm2() {
     for (int i = -30; i < 30; i++) {
-      double d = (i * 0.1);
+      double d = i * 0.1;
       double dnorm = UncommonDistributions.dNorm(d, 0, 2);
       char[] bar = new char[(int) (dnorm * 100)];
       for (int j = 0; j < bar.length; j++) {
@@ -79,7 +79,7 @@ public final class TestDistributions extends MahoutTestCase {
   @Test
   public void testDnorm1() {
     for (int i = -10; i < 10; i++) {
-      double d = (i * 0.1);
+      double d = i * 0.1;
       double dnorm = UncommonDistributions.dNorm(d, 0, 0.2);
       char[] bar = new char[(int) (dnorm * 100)];
       for (int j = 0; j < bar.length; j++) {

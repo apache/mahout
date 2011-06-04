@@ -107,7 +107,7 @@ public class DisplayMeanShift extends DisplayClustering {
     writeSampleData(samples);
     //boolean b = true;
     //if (b) {
-    new MeanShiftCanopyDriver().run(conf, samples, output, measure, t1, t2, 0.005, 20, false, true, true);
+    MeanShiftCanopyDriver.run(conf, samples, output, measure, t1, t2, 0.005, 20, false, true, true);
     loadClusters(output);
     //} else {
     //  Collection<Vector> points = new ArrayList<Vector>();

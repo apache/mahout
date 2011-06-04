@@ -19,10 +19,12 @@ package org.apache.mahout.classifier;
 
 import org.apache.mahout.math.Vector;
 
+import java.io.Closeable;
+
 /**
  * The simplest interface for online learning algorithms.
  */
-public interface OnlineLearner {
+public interface OnlineLearner extends Closeable {
   /**
    * Updates the model using a particular target variable value and a feature vector.
    * <p/>
@@ -89,5 +91,6 @@ public interface OnlineLearner {
    * An online classifier should be able to accept more training after being closed, but
    * closing the classifier may make classification more efficient.
    */
+  @Override
   void close();
 }

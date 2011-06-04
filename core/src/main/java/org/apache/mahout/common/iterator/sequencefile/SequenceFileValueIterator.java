@@ -28,7 +28,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ReflectionUtils;
-import org.apache.mahout.common.IOUtils;
 
 /**
  * <p>{@link java.util.Iterator} over a {@link SequenceFile}'s values only.</p>

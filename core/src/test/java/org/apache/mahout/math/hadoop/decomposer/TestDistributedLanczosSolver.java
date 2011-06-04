@@ -18,8 +18,8 @@
 package org.apache.mahout.math.hadoop.decomposer;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.decomposer.SolverTest;
 import org.apache.mahout.math.decomposer.lanczos.LanczosState;
@@ -31,44 +31,27 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 
-public final class TestDistributedLanczosSolver extends SolverTest {
-  private Path testTempDirPath = null;
-  int counter = 0;
-  File symTestData;
-  File asymTestData;
-  DistributedRowMatrix symCorpus;
-  DistributedRowMatrix asymCorpus;
+public final class TestDistributedLanczosSolver extends MahoutTestCase {
+
+  private int counter = 0;
+  private DistributedRowMatrix symCorpus;
+  private DistributedRowMatrix asymCorpus;
 
   @Before
   public void setup() throws Exception {
-    symTestData = getTestTempDir("symTestData");
-    asymTestData = getTestTempDir("asymTestData");
+    File symTestData = getTestTempDir("symTestData");
+    File asymTestData = getTestTempDir("asymTestData");
     symCorpus = new TestDistributedRowMatrix().randomDistributedMatrix(500,
         450, 400, 10, 10.0, true, symTestData.getAbsolutePath());
     asymCorpus = new TestDistributedRowMatrix().randomDistributedMatrix(500,
         450, 400, 10, 10.0, false, asymTestData.getAbsolutePath());
   }
 
-  protected final Path getTestTempDirPath() throws IOException {
-    FileSystem fs = null;
-    if (testTempDirPath == null) {
-      fs = FileSystem.get(new Configuration());
-      long simpleRandomLong = (long) (Long.MAX_VALUE * Math.random());
-      testTempDirPath = fs.makeQualified(
-          new Path("/tmp/mahout-" + getClass().getSimpleName() + '-' + simpleRandomLong));
-      if (!fs.mkdirs(testTempDirPath)) {
-        throw new IOException("Could not create " + testTempDirPath);
-      }
-      fs.deleteOnExit(testTempDirPath);
-    }
-    return testTempDirPath;
+  private static String suf(boolean symmetric) {
+    return symmetric ? "_sym" : "_asym";
   }
 
-  private String suf(boolean symmetric) {
-    return (symmetric ? "_sym" : "_asym");
-  }
-
-  private DistributedRowMatrix getCorpus(boolean symmetric) throws IOException {
+  private DistributedRowMatrix getCorpus(boolean symmetric) {
     return symmetric ? symCorpus : asymCorpus;
   }
 
@@ -96,9 +79,9 @@ public final class TestDistributedLanczosSolver extends SolverTest {
       state = new LanczosState(corpus, corpus.numCols(), desiredRank, intitialVector);
     }
     solver.solve(state, desiredRank, symmetric);
-    assertOrthonormal(state);
+    SolverTest.assertOrthonormal(state);
     for(int i = 0; i < desiredRank/2; i++) {
-      assertEigen(i, state.getRightSingularVector(i), corpus, 0.1, symmetric);
+      SolverTest.assertEigen(i, state.getRightSingularVector(i), corpus, 0.1, symmetric);
     }
     counter++;
     return state;

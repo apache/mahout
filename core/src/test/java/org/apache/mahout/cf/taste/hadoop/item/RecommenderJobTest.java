@@ -246,7 +246,7 @@ public class RecommenderJobTest extends TasteTestCase {
       @Override
       public boolean matches(Object argument) {
         if (argument instanceof VectorOrPrefWritable) {
-          VectorOrPrefWritable pref = ((VectorOrPrefWritable) argument);
+          VectorOrPrefWritable pref = (VectorOrPrefWritable) argument;
           return pref.getUserID() == userID && pref.getValue() == prefValue;
         }
         return false;
@@ -323,7 +323,7 @@ public class RecommenderJobTest extends TasteTestCase {
       @Override
       public boolean matches(Object argument) {
         if (argument instanceof VectorOrPrefWritable) {
-          VectorOrPrefWritable pref = ((VectorOrPrefWritable) argument);
+          VectorOrPrefWritable pref = (VectorOrPrefWritable) argument;
           return pref.getUserID() == userID && Float.isNaN(pref.getValue());
         }
         return false;
@@ -371,7 +371,7 @@ public class RecommenderJobTest extends TasteTestCase {
       @Override
       public boolean matches(Object argument) {
         if (argument instanceof VectorAndPrefsWritable) {
-          VectorAndPrefsWritable vectorAndPrefs = ((VectorAndPrefsWritable) argument);
+          VectorAndPrefsWritable vectorAndPrefs = (VectorAndPrefsWritable) argument;
 
           if (!vectorAndPrefs.getUserIDs().equals(userIDs)) {
             return false;
@@ -643,7 +643,7 @@ public class RecommenderJobTest extends TasteTestCase {
       @Override
       public boolean matches(Object argument) {
         if (argument instanceof RecommendedItemsWritable) {
-          RecommendedItemsWritable recommendedItemsWritable = ((RecommendedItemsWritable) argument);
+          RecommendedItemsWritable recommendedItemsWritable = (RecommendedItemsWritable) argument;
           List<RecommendedItem> expectedItems = new LinkedList<RecommendedItem>(Arrays.asList(items));
           return expectedItems.equals(recommendedItemsWritable.getRecommendedItems());
         }

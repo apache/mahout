@@ -18,6 +18,7 @@
 package org.apache.mahout.math.hadoop.decomposer;
 
 import com.google.common.io.Closeables;
+import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -66,7 +67,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
                              int desiredRank,
                              boolean isSymmetric,
                              String outputEigenVectorPathString) throws IOException {
-    ((DistributedRowMatrix)state.getCorpus()).setConf(new Configuration(originalConfig));
+    ((Configurable) state.getCorpus()).setConf(new Configuration(originalConfig));
     setConf(originalConfig);
     solve(state, desiredRank, isSymmetric);
     serializeOutput(state, new Path(outputEigenVectorPathString));

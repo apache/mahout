@@ -65,7 +65,7 @@ public class MeanShiftCanopyCreatorMapper extends Mapper<WritableComparable<?>, 
           && "attempt".equals(parts[0])
           && ("m".equals(parts[3]) || "r".equals(parts[3])),
           "TaskAttemptId string: %d is not properly formed", taskId);
-      nextCanopyId = ((1 << 31) / 50000) * (Integer.parseInt(parts[4]));
+      nextCanopyId = ((1 << 31) / 50000) * Integer.parseInt(parts[4]);
       //each mapper has 42,949 ids to give.
     }
   }

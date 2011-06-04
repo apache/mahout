@@ -297,7 +297,7 @@ public abstract class AbstractJob extends Configured implements Tool {
     argMap = new TreeMap<String, String>();
     maybePut(argMap, cmdLine, this.options.toArray(new Option[this.options.size()]));
 
-    this.tempPath = new Path(argMap.get("--tempDir").toString());
+    this.tempPath = new Path(argMap.get("--tempDir"));
 
     log.info("Command line arguments: {}", argMap);
     return argMap;

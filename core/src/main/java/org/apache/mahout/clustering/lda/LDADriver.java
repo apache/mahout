@@ -79,8 +79,6 @@ public final class LDADriver extends AbstractJob {
 
   private LDAState state = null;
 
-  private LDAState newState = null;
-
   private LDAInference inference = null;
 
   private Iterable<Pair<Writable, VectorWritable>> trainingCorpus = null;
@@ -178,7 +176,7 @@ public final class LDADriver extends AbstractJob {
     return 0;
   }
 
-  private Path getLastKnownStatePath(Configuration conf, Path stateDir) throws IOException {
+  private static Path getLastKnownStatePath(Configuration conf, Path stateDir) throws IOException {
     FileSystem fs = FileSystem.get(conf);
     Path lastPath = null;
     int maxIteration = Integer.MIN_VALUE;
@@ -362,7 +360,7 @@ public final class LDADriver extends AbstractJob {
     if (inference == null) {
       inference = new LDAInference(state);
     }
-    newState = createState(conf, true);
+    LDAState newState = createState(conf, true);
     double ll = 0.0;
     for(Pair<Writable, VectorWritable> slice : trainingCorpus) {
       LDAInference.InferredDocument doc;

@@ -26,7 +26,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 
-import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

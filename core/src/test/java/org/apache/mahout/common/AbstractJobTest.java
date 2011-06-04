@@ -229,6 +229,7 @@ public final class AbstractJobTest extends MahoutTestCase {
         "-Dmapred.output.dir=" + testOutputPropertyPath,
         "--input", testInputPath,
         "--output", testOutputPath });
+    assertEquals("0 for complete options", 0, ret);
     assertEquals("input command-line option precedes property",
         testInputPath, job.getInputPath().toString());
     assertEquals("output command-line option precedes property",

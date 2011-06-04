@@ -40,7 +40,6 @@ import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.Functions;
@@ -166,7 +165,7 @@ public final class TimesSquaredJob {
     DistributedCache.setCacheFiles(new URI[] {ivpURI}, conf);
 
     conf.set(INPUT_VECTOR, ivpURI.toString());
-    conf.setBoolean(IS_SPARSE_OUTPUT, !(v.isDense()));
+    conf.setBoolean(IS_SPARSE_OUTPUT, !v.isDense());
     conf.setInt(OUTPUT_VECTOR_DIMENSION, outputVectorDim);
     FileInputFormat.addInputPath(conf, matrixInputPath);
     conf.setInputFormat(SequenceFileInputFormat.class);

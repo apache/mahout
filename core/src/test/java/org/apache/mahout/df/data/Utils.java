@@ -303,7 +303,7 @@ public final class Utils {
   
     for (int partition = 0; partition < numMaps; partition++) {
       int from = partition * partitionSize;
-      int to = (partition == (numMaps - 1)) ? nbInstances : (partition + 1)
+      int to = partition == (numMaps - 1) ? nbInstances : (partition + 1)
           * partitionSize;
   
       splits[partition] = Arrays.copyOfRange(sData, from, to);

@@ -275,7 +275,7 @@ public final class SimpleCsvExamples {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
       Closeables.closeQuietly(in);
     }
   }

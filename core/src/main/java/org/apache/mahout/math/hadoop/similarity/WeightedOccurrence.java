@@ -85,6 +85,6 @@ class WeightedOccurrence implements Writable, Cloneable {
   
   @Override
   public String toString() {
-    return row + ":" + value + "(" + weight + ")";
+    return row + ":" + value + '(' + weight + ')';
   }
 }

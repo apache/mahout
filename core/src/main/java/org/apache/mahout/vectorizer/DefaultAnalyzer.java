@@ -30,11 +30,7 @@ import java.io.Reader;
  */
 public final class DefaultAnalyzer extends Analyzer {
 
-  private StandardAnalyzer stdAnalyzer = new StandardAnalyzer(Version.LUCENE_31);
-
-  public DefaultAnalyzer() {
-    super();
-  }
+  private final StandardAnalyzer stdAnalyzer = new StandardAnalyzer(Version.LUCENE_31);
 
   @Override
   public TokenStream tokenStream(String fieldName, Reader reader) {

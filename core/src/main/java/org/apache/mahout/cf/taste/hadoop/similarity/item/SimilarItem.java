@@ -43,7 +43,7 @@ class SimilarItem {
   static class BySimilaritySimilarItemComparator implements Comparator<SimilarItem>, Serializable {
     @Override
     public int compare(SimilarItem s1, SimilarItem s2) {
-      return (s1.similarity == s2.similarity) ? 0 : (s1.similarity < s2.similarity) ? -1 : 1;
+      return s1.similarity == s2.similarity ? 0 : s1.similarity < s2.similarity ? -1 : 1;
     }
   }
 }

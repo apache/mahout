@@ -44,13 +44,13 @@ public class DocumentProcessorTest extends MahoutTestCase {
     Path output = new Path(getTestTempDirPath(), "outputDir");
 
     String documentId1 = "123";
-    String text1 = "A test for the document processor";
     String documentId2 = "456";
-    String text2 = "and another one";
 
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, configuration, input, Text.class, Text.class);
     try {
+      String text1 = "A test for the document processor";
       writer.append(new Text(documentId1), new Text(text1));
+      String text2 = "and another one";
       writer.append(new Text(documentId2), new Text(text2));
     } finally {
       Closeables.closeQuietly(writer);
