@@ -273,6 +273,22 @@ public final class Functions {
     }
   };
 
+  /** Function that returns <tt> 1 / (1 + exp(-a) </tt> */
+  public static final DoubleFunction SIGMOID = new DoubleFunction() {
+    @Override
+    public double apply(double a) {
+      return 1.0 / (1.0 + Math.exp(-a));
+    }
+  };
+
+  /** Function that returns <tt> a * (1-a) </tt> */
+  public static final DoubleFunction SIGMOIDGRADIENT = new DoubleFunction() {
+    @Override
+    public double apply(double a) {
+      return a * (1.0 - a);
+    }
+  };
+
   /** Function that returns <tt>Math.tan(a)</tt>. */
   public static final DoubleFunction TAN = new DoubleFunction() {
 
