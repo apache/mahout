@@ -34,10 +34,14 @@ import org.apache.mahout.math.VectorWritable;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.PriorityQueue;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class UserVectorSplitterMapper extends
     Mapper<VarLongWritable,VectorWritable, VarIntWritable,VectorOrPrefWritable> {
+
+  private static final Logger log = LoggerFactory.getLogger(UserVectorSplitterMapper.class);
 
   static final String USERS_FILE = "usersFile";
   static final String MAX_PREFS_PER_USER_CONSIDERED = "maxPrefsPerUserConsidered";
@@ -60,7 +64,11 @@ public final class UserVectorSplitterMapper extends
         Path usersFilePath = unqualifiedUsersFilePath.makeQualified(fs);
         in = fs.open(usersFilePath);
         for (String line : new FileLineIterable(in)) {
-          usersToRecommendFor.add(Long.parseLong(line));
+          try {
+            usersToRecommendFor.add(Long.parseLong(line));
+          } catch (NumberFormatException nfe) {
+            log.warn("usersFile line ignored: {}", line);
+          }
         }
       } finally {
         IOUtils.closeStream(in);

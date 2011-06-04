@@ -38,6 +38,9 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * <p>computes prediction values for each user</p>
  *
@@ -52,6 +55,8 @@ import java.util.Iterator;
  */
 public final class AggregateAndRecommendReducer extends
     Reducer<VarLongWritable,PrefAndSimilarityColumnWritable,VarLongWritable,RecommendedItemsWritable> {
+
+  private static final Logger log = LoggerFactory.getLogger(AggregateAndRecommendReducer.class);
 
   static final String ITEMID_INDEX_PATH = "itemIDIndexPath";
   static final String NUM_RECOMMENDATIONS = "numRecommendations";
@@ -83,7 +88,11 @@ public final class AggregateAndRecommendReducer extends
     if (itemFilePathString != null) {
       itemsToRecommendFor = new FastIDSet();
       for (String line : new FileLineIterable(HadoopUtil.openStream(new Path(itemFilePathString), conf))) {
-        itemsToRecommendFor.add(Long.parseLong(line));
+        try {
+          itemsToRecommendFor.add(Long.parseLong(line));
+        } catch (NumberFormatException nfe) {
+          log.warn("itemsFile line ignored: {}", line);
+        }
       }
     }
   }
