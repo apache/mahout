@@ -35,7 +35,7 @@ import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 /**
  * Emits tokens based on bloom filter membership.
  */
-public class BloomTokenFilter extends TokenFilter {
+public final class BloomTokenFilter extends TokenFilter {
   
   private final Filter filter;
   private final TermAttribute termAtt;

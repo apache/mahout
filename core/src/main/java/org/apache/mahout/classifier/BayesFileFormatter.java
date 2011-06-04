@@ -17,7 +17,11 @@
 
 package org.apache.mahout.classifier;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +42,6 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 import org.apache.lucene.util.Version;
-import org.apache.mahout.common.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -302,7 +305,7 @@ public final class BayesFileFormatter {
       if (cmdLine.hasOption(analyzerOpt)) {
         analyzer = Class.forName((String) cmdLine.getValue(analyzerOpt)).asSubclass(Analyzer.class).newInstance();
       } else {
-        analyzer = new StandardAnalyzer(Version.LUCENE_30);
+        analyzer = new StandardAnalyzer(Version.LUCENE_31);
       }
       Charset charset = Charsets.UTF_8;
       if (cmdLine.hasOption(charsetOpt)) {

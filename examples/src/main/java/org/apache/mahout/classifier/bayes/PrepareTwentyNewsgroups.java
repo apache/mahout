@@ -90,7 +90,7 @@ public final class PrepareTwentyNewsgroups {
       try {
         analyzer = Class.forName(analyzerName).asSubclass(Analyzer.class).newInstance();
       } catch (InstantiationException e) {
-        analyzer = (Analyzer) Class.forName(analyzerName).getConstructor(Version.class).newInstance(Version.LUCENE_30);
+        analyzer = (Analyzer) Class.forName(analyzerName).getConstructor(Version.class).newInstance(Version.LUCENE_31);
       }
       // parent dir contains dir by category
       if (!parentDir.exists()) {

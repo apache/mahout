@@ -102,7 +102,7 @@ public final class TestL1ModelClustering extends MahoutTestCase {
     sampleData = new ArrayList<VectorWritable>();
     RAMDirectory directory = new RAMDirectory();
     IndexWriter writer = new IndexWriter(directory,
-                                         new StandardAnalyzer(Version.LUCENE_30),
+                                         new StandardAnalyzer(Version.LUCENE_31),
                                          true,
                                          IndexWriter.MaxFieldLength.UNLIMITED);
     try {

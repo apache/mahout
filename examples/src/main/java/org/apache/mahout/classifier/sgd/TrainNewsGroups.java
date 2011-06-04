@@ -122,7 +122,7 @@ public final class TrainNewsGroups {
     new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss", Locale.ENGLISH)
   };
 
-  private static final Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_30);
+  private static final Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_31);
   private static final FeatureVectorEncoder encoder = new StaticWordValueEncoder("body");
   private static final FeatureVectorEncoder bias = new ConstantValueEncoder("Intercept");
   private static Multiset<String> overallCounts;

@@ -170,7 +170,7 @@ public final class LuceneIterableTest extends MahoutTestCase {
                                               int startingId) throws IOException {
     IndexWriter writer = new IndexWriter(
         directory,
-        new StandardAnalyzer(Version.LUCENE_30),
+        new StandardAnalyzer(Version.LUCENE_31),
         createNew,
         IndexWriter.MaxFieldLength.UNLIMITED);
     try {

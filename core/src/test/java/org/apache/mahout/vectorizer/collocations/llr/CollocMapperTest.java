@@ -86,7 +86,7 @@ public final class CollocMapperTest extends MahoutTestCase {
     for (String[] v : values) {
       Type p = v[0].startsWith("h") ? Gram.Type.HEAD : Gram.Type.TAIL;
       int frequency = 1;
-      if (v[1].equals("of times")) {
+      if ("of times".equals(v[1])) {
         frequency = 2;
       }
       
@@ -150,8 +150,8 @@ public final class CollocMapperTest extends MahoutTestCase {
       Type p = v[0].startsWith("h") ? Gram.Type.HEAD : Gram.Type.TAIL;
       p = v[0].startsWith("u") ? Gram.Type.UNIGRAM : p;
       int frequency = 1;
-      if (v[1].equals("of times") || v[1].equals("of") || v[1].equals("times")
-          || v[1].equals("the")) {
+      if ("of times".equals(v[1]) || "of".equals(v[1]) || "times".equals(v[1])
+          || "the".equals(v[1])) {
         frequency = 2;
       }
       
@@ -190,7 +190,7 @@ public final class CollocMapperTest extends MahoutTestCase {
     private final Analyzer a;
     
     public TestAnalyzer() {
-      a = new StandardAnalyzer(Version.LUCENE_29, Collections.emptySet());
+      a = new StandardAnalyzer(Version.LUCENE_31, Collections.emptySet());
     }
     
     @Override
