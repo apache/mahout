@@ -58,9 +58,6 @@ public final class CollocDriver extends AbstractJob {
 
   private static final Logger log = LoggerFactory.getLogger(CollocDriver.class);
 
-  private CollocDriver() {
-  }
-
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new CollocDriver(), args);
   }
