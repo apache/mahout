@@ -185,4 +185,10 @@ public final class VectorWritable extends Configured implements Writable {
     v.readFields(in);
     return v.get();
   }
+
+  @Override
+  public String toString() {
+    return vector.toString();
+  }
+
 }
