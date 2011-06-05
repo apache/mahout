@@ -52,7 +52,7 @@ import org.apache.mahout.math.hadoop.similarity.vector.DistributedCooccurrenceVe
 import org.apache.mahout.math.hadoop.similarity.vector.DistributedTanimotoCoefficientVectorSimilarity;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
 import org.easymock.IArgumentMatcher;
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 import org.junit.Test;
 
 public class RecommenderJobTest extends TasteTestCase {

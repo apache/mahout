@@ -30,7 +30,7 @@ import org.apache.mahout.cf.taste.recommender.MostSimilarItemsCandidateItemsStra
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 import org.junit.Test;
 
 import java.util.ArrayList;

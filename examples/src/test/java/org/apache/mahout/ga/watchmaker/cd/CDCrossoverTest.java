@@ -18,7 +18,7 @@
 package org.apache.mahout.ga.watchmaker.cd;
 
 import org.apache.mahout.examples.MahoutTestCase;
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 import org.apache.mahout.common.RandomUtils;
 import org.junit.Test;
 

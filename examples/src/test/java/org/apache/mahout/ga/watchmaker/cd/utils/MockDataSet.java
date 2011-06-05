@@ -19,7 +19,7 @@ package org.apache.mahout.ga.watchmaker.cd.utils;
 
 import com.google.common.base.Preconditions;
 import org.apache.mahout.ga.watchmaker.cd.DataSet;
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 
 import java.util.Random;
 
@@ -103,7 +103,7 @@ public final class MockDataSet {
   /**
    * Verifies the dataset mock object.
    * 
-   * @see org.easymock.classextension.EasyMock#verify(Object...)
+   * @see org.easymock.EasyMock#verify(Object...)
    */
   public void verify() {
     EasyMock.verify(dataset);

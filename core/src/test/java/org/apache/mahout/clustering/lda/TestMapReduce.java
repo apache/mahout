@@ -17,7 +17,7 @@
 package org.apache.mahout.clustering.lda;
 
 import org.apache.commons.math.distribution.IntegerDistribution;
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 
 import java.util.Iterator;
 import java.util.Random;

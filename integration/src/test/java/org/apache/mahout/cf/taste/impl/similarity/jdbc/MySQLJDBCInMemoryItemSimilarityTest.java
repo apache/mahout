@@ -19,7 +19,7 @@ package org.apache.mahout.cf.taste.impl.similarity.jdbc;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 import org.junit.Test;
 
 import javax.sql.DataSource;

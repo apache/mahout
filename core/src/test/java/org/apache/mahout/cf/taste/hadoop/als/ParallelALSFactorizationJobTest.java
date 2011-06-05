@@ -38,7 +38,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.als.AlternateLeastSquaresSolver;
 import org.apache.mahout.math.hadoop.MathHelper;
 import org.easymock.IArgumentMatcher;
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

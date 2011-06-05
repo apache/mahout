@@ -32,7 +32,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.stats.LogLikelihood;
 import org.apache.mahout.vectorizer.collocations.llr.LLRReducer.LLCallback;
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;

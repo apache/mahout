@@ -42,7 +42,7 @@ import org.apache.mahout.math.hadoop.similarity.RowSimilarityJob.SimilarityReduc
 import org.apache.mahout.math.hadoop.similarity.vector.DistributedTanimotoCoefficientVectorSimilarity;
 import org.apache.mahout.math.hadoop.similarity.vector.DistributedVectorSimilarity;
 import org.easymock.IArgumentMatcher;
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 import org.junit.Test;
 
 /**
