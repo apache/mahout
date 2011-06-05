@@ -113,8 +113,11 @@ public class FuzzyKMeansDriver extends AbstractJob {
     DistanceMeasure measure = ccl.loadClass(measureClass).asSubclass(DistanceMeasure.class).newInstance();
 
     if (hasOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)) {
-      clusters = RandomSeedGenerator.buildRandom(getConf(), input, clusters, Integer.parseInt(parseArguments(args)
-          .get(DefaultOptionCreator.NUM_CLUSTERS_OPTION)), measure);
+      clusters = RandomSeedGenerator.buildRandom(getConf(),
+                                                 input,
+                                                 clusters,
+                                                 Integer.parseInt(getOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)),
+                                                 measure);
     }
     boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
     boolean runSequential = getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(
