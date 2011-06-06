@@ -35,28 +35,22 @@ public final class InvertedRunningAverageTest extends TasteTestCase {
     assertEquals(-1.5, inverted.getAverage(), EPSILON);
   }
 
-  @Test
-  public void testUnsupported() {
-    RunningAverage avg = new FullRunningAverage();
-    RunningAverage inverted = new InvertedRunningAverage(avg);
-    try {
-      inverted.addDatum(1.0);
-      fail("Should have thrown exception");
-    } catch (UnsupportedOperationException uoe) {
-      // good
-    }
-    try {
-      inverted.changeDatum(1.0);
-      fail("Should have thrown exception");
-    } catch (UnsupportedOperationException uoe) {
-      // good
-    }
-    try {
-      inverted.removeDatum(1.0);
-      fail("Should have thrown exception");
-    } catch (UnsupportedOperationException uoe) {
-      // good
-    }
+  @Test(expected = UnsupportedOperationException.class)
+  public void testUnsupported1() {
+    RunningAverage inverted = new InvertedRunningAverage(new FullRunningAverage());
+    inverted.addDatum(1.0);
+  }
+
+  @Test(expected = UnsupportedOperationException.class)
+  public void testUnsupported2() {
+    RunningAverage inverted = new InvertedRunningAverage(new FullRunningAverage());
+    inverted.changeDatum(1.0);
+  }
+
+  @Test(expected = UnsupportedOperationException.class)
+  public void testUnsupported3() {
+    RunningAverage inverted = new InvertedRunningAverage(new FullRunningAverage());
+    inverted.removeDatum(1.0);
   }
 
   @Test
@@ -73,28 +67,22 @@ public final class InvertedRunningAverageTest extends TasteTestCase {
     assertEquals(Math.sqrt(2.0)/2.0, inverted.getStandardDeviation(), EPSILON);
   }
 
-  @Test
-  public void testAndStdDevUnsupported() {
-    RunningAverageAndStdDev avg = new FullRunningAverageAndStdDev();
-    RunningAverage inverted = new InvertedRunningAverageAndStdDev(avg);
-    try {
-      inverted.addDatum(1.0);
-      fail("Should have thrown exception");
-    } catch (UnsupportedOperationException uoe) {
-      // good
-    }
-    try {
-      inverted.changeDatum(1.0);
-      fail("Should have thrown exception");
-    } catch (UnsupportedOperationException uoe) {
-      // good
-    }
-    try {
-      inverted.removeDatum(1.0);
-      fail("Should have thrown exception");
-    } catch (UnsupportedOperationException uoe) {
-      // good
-    }
+  @Test(expected = UnsupportedOperationException.class)
+  public void testAndStdDevUnsupported1() {
+    RunningAverage inverted = new InvertedRunningAverageAndStdDev(new FullRunningAverageAndStdDev());
+    inverted.addDatum(1.0);
+  }
+
+  @Test(expected = UnsupportedOperationException.class)
+  public void testAndStdDevUnsupported2() {
+    RunningAverage inverted = new InvertedRunningAverageAndStdDev(new FullRunningAverageAndStdDev());
+    inverted.changeDatum(1.0);
+  }
+
+  @Test(expected = UnsupportedOperationException.class)
+  public void testAndStdDevUnsupported3() {
+    RunningAverage inverted = new InvertedRunningAverageAndStdDev(new FullRunningAverageAndStdDev());
+    inverted.removeDatum(1.0);
   }
 
 }

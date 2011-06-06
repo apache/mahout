@@ -781,32 +781,18 @@ public final class VectorTest extends MahoutTestCase {
         v.aggregate(w, Functions.PLUS, Functions.chain(Functions.pow(2), Functions.MINUS)), EPSILON);
   }
 
-  @Test
-  public void testEmptyAggregate() {
+  @Test(expected = IllegalArgumentException.class)
+  public void testEmptyAggregate1() {
     assertEquals(1.0, new DenseVector(new double[]{1}).aggregate(Functions.MIN, Functions.IDENTITY), EPSILON);
     assertEquals(1.0, new DenseVector(new double[]{2, 1}).aggregate(Functions.MIN, Functions.IDENTITY), EPSILON);
+    new DenseVector(new double[0]).aggregate(Functions.MIN, Functions.IDENTITY);
+  }
 
-    try {
-      new DenseVector(new double[0]).aggregate(Functions.MIN, Functions.IDENTITY);
-      fail("Should have thrown exception with empty vector");
-    } catch (IllegalArgumentException e) {
-      // as it should be
-    }
-
-    assertEquals(3.0,
-            new DenseVector(new double[]{1}).aggregate(
-                    new DenseVector(new double[]{2}),
-                    Functions.MIN, Functions.PLUS), EPSILON);
-
-    try {
-      new DenseVector(new double[0]).aggregate(
-              new DenseVector(new double[0]),
-              Functions.MIN, Functions.PLUS);
-      
-      fail("Should have thrown exception with empty vector");
-    } catch (IllegalArgumentException e) {
-      // as it should be
-    }
+  @Test(expected = IllegalArgumentException.class)
+  public void testEmptyAggregate2() {
+    assertEquals(3.0, new DenseVector(new double[]{1}).aggregate(
+        new DenseVector(new double[]{2}),Functions.MIN, Functions.PLUS), EPSILON);
+    new DenseVector(new double[0]).aggregate(new DenseVector(new double[0]), Functions.MIN, Functions.PLUS);
   }
 
   private static void setUpFirstVector(Vector v) {

@@ -86,22 +86,17 @@ public final class FastMapTest extends TasteTestCase {
     assertFalse(map.containsValue("something"));
   }
 
-  @Test
-  public void testNull() {
+  @Test(expected = NullPointerException.class)
+  public void testNull1() {
     Map<String, String> map = new FastMap<String, String>();
-    try {
-      map.put(null, "bar");
-      fail("Should have thrown NullPointerException");
-    } catch (NullPointerException npe) {
-      // good
-    }
-    try {
-      map.put("foo", null);
-      fail("Should have thrown NullPointerException");
-    } catch (NullPointerException npe) {
-      // good
-    }
     assertNull(map.get(null));
+    map.put(null, "bar");
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testNull2() {
+    Map<String, String> map = new FastMap<String, String>();
+    map.put("foo", null);
   }
 
   @Test

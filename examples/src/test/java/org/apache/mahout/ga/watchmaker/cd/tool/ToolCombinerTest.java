@@ -39,19 +39,13 @@ public final class ToolCombinerTest extends MahoutTestCase {
     assertEquals("-32.0,10.0", descriptor);
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testCreateDescriptionIgnored() throws Exception {
     ToolCombiner combiner = new ToolCombiner();
 
     char[] descriptors = { 'I', 'N', 'C' };
     combiner.configure(descriptors);
-
-    try {
-      combiner.createDescription(0, null);
-      fail("Should throw a IllegalArgumentException");
-    } catch (IllegalArgumentException e) {
-
-    }
+    combiner.createDescription(0, null);
   }
 
   @Test

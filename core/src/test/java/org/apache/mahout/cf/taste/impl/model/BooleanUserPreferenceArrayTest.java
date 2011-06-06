@@ -45,17 +45,12 @@ public final class BooleanUserPreferenceArrayTest extends TasteTestCase {
     assertEquals(3L, prefs.getItemID(2));
   }
 
-  @Test
+  @Test(expected = UnsupportedOperationException.class)
   public void testSetValue() {
     PreferenceArray prefs = new BooleanUserPreferenceArray(3);
-    assertEquals(3, prefs.length());
-    try {
-      prefs.setValue(0, 1.0f);
-      fail("Should have thrown exception");
-    } catch (UnsupportedOperationException uoe) {
-      // good
-    }
     assertEquals(1.0f, prefs.getValue(2), EPSILON);
+    assertEquals(3, prefs.length());
+    prefs.setValue(0, 1.0f);
   }
 
   @Test

@@ -14,28 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.mahout.common.kernel;
 
 public interface IKernelProfile {
+
   /**
-   * Returns the calculated value of the kernel
-   * 
-   * @param distance
-   *          a double
-   * @param h
-   *          a double
-   * @return a double
+   * @return calculated value of the kernel
    */
-  public double calculateValue(double distance, double h);
+  double calculateValue(double distance, double h);
   
   /**
-   * Returns the calculated dervative value of the kernel
-   * 
-   * @param distance
-   *          a double
-   * @param h
-   *          a double
-   * @return a double
+   * @return the calculated dervative value of the kernel
    */
-  public double calculateDerivativeValue(double distance, double h);
+  double calculateDerivativeValue(double distance, double h);
+
 }

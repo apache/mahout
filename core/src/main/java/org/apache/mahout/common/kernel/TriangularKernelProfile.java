@@ -14,20 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.mahout.common.kernel;
 
-import org.apache.commons.lang.NotImplementedException;
+package org.apache.mahout.common.kernel;
 
 public class TriangularKernelProfile implements IKernelProfile {
   
   @Override
   public double calculateValue(double distance, double h) {
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException();
   }
   
   @Override
   public double calculateDerivativeValue(double distance, double h) {
-    return (distance < h) ? 1.0 : 0.0;
+    return distance < h ? 1.0 : 0.0;
   }
   
 }

@@ -53,21 +53,16 @@ public final class GramTest extends MahoutTestCase {
     
     Gram four = new Gram("foo", 5, Gram.Type.NGRAM);
     assertEquals(Gram.Type.NGRAM, four.getType());
-   
-    try {
-      new Gram(null, 4, Gram.Type.UNIGRAM);
-      fail("expected exception");
-    } catch (NullPointerException ex) {
-      /* ok */
-    }
-   
-    
-    try {
-      new Gram("foo", 4, null);
-      fail("expected exception");
-    } catch (NullPointerException ex) {
-      /* ok */
-    }
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testNull1() {
+    new Gram(null, 4, Gram.Type.UNIGRAM);
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testNull2() {
+    new Gram("foo", 4, null);
   }
   
   @Test

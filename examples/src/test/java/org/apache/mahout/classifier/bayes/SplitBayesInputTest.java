@@ -174,19 +174,19 @@ public final class SplitBayesInputTest extends MahoutTestCase {
   @Test
   public void testValidate() throws Exception {
     SplitBayesInput st = new SplitBayesInput();
-    assertValidateException(st, IllegalArgumentException.class);
+    assertValidateException(st);
     
     st.setTestSplitSize(100);
-    assertValidateException(st, IllegalArgumentException.class);
+    assertValidateException(st);
     
     st.setTestOutputDirectory(tempTestDirectory);
-    assertValidateException(st, IllegalArgumentException.class); 
+    assertValidateException(st);
     
     st.setTrainingOutputDirectory(tempTrainingDirectory);
     st.validate();
     
     st.setTestSplitPct(50);
-    assertValidateException(st, IllegalArgumentException.class);
+    assertValidateException(st);
     
     st = new SplitBayesInput();
     st.setTestRandomSelectionPct(50);
@@ -195,7 +195,7 @@ public final class SplitBayesInputTest extends MahoutTestCase {
     st.validate();
     
     st.setTestSplitPct(50);
-    assertValidateException(st, IllegalArgumentException.class);
+    assertValidateException(st);
     
     st = new SplitBayesInput();
     st.setTestRandomSelectionPct(50);
@@ -204,7 +204,7 @@ public final class SplitBayesInputTest extends MahoutTestCase {
     st.validate();
     
     st.setTestSplitSize(100);
-    assertValidateException(st, IllegalArgumentException.class);
+    assertValidateException(st);
   }
   
   private class TestCallback implements SplitBayesInput.SplitCallback {
@@ -221,16 +221,14 @@ public final class SplitBayesInputTest extends MahoutTestCase {
       assertSplit(fs, tempInputFile, charset, testSplitSize, trainingLines, tempTrainingDirectory, tempTestDirectory);
     }
   }
-  
-  private static void assertValidateException(SplitBayesInput st, Class<?> clazz) throws Exception {
+
+  private static void assertValidateException(SplitBayesInput st) throws IOException {
     try {
       st.validate();
-      fail("Expected valdate() to throw an exception, received none");
-    } catch (Exception e) {
-      if (!e.getClass().isAssignableFrom(clazz)) {
-        throw e;
-      }
-    } 
+      fail("Expected IllegalArgumentException");
+    } catch (IllegalArgumentException iae) {
+      // good
+    }
   }
   
   private static void assertSplit(FileSystem fs,

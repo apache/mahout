@@ -24,20 +24,15 @@ import java.util.NoSuchElementException;
 
 public final class SamplingLongPrimitiveIteratorTest extends TasteTestCase {
 
-  @Test
+  @Test(expected = NoSuchElementException.class)
   public void testEmpty() {
     LongPrimitiveArrayIterator it = new LongPrimitiveArrayIterator(new long[0]);
     LongPrimitiveIterator sample = new SamplingLongPrimitiveIterator(it, 0.5);
     assertFalse(sample.hasNext());
-    try {
-      sample.next();
-      fail("Should have thrown exception");
-    } catch (NoSuchElementException nsee) {
-      // good
-    }
+    sample.next();
   }
 
-  @Test
+  @Test(expected = NoSuchElementException.class)
   public void testNext() {
     LongPrimitiveArrayIterator it = new LongPrimitiveArrayIterator(new long[] {5,4,3,2,1});
     LongPrimitiveIterator sample = new SamplingLongPrimitiveIterator(it, 0.5);
@@ -48,12 +43,7 @@ public final class SamplingLongPrimitiveIteratorTest extends TasteTestCase {
     assertTrue(sample.hasNext());
     assertEquals(1, (long) sample.next());
     assertFalse(sample.hasNext());
-    try {
-      it.nextLong();
-      fail("Should have thrown exception");
-    } catch (NoSuchElementException nsee) {
-      // good
-    }
+    it.nextLong();
   }
 
   @Test

@@ -91,7 +91,7 @@ public final class FileDataModelTest extends TasteTestCase {
     assertEquals("pref Size: " + pref.length() + " is not: " + 3, 3, pref.length());
   }
 
-  @Test  
+  @Test(expected = NoSuchElementException.class)
   public void testGetItems() throws Exception {
     LongPrimitiveIterator it = model.getItemIDs();
     assertNotNull(it);
@@ -108,12 +108,7 @@ public final class FileDataModelTest extends TasteTestCase {
     assertTrue(it.hasNext());
     assertEquals(999, it.nextLong());
     assertFalse(it.hasNext());
-    try {
-      it.next();
-      fail("Should throw NoSuchElementException");
-    } catch (NoSuchElementException nsee) {
-      // good
-    }
+    it.next();
   }
 
   @Test
@@ -186,15 +181,10 @@ public final class FileDataModelTest extends TasteTestCase {
     assertTrue(model.toString().length() > 0);
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testEmptyFile() throws Exception {
     File file = getTestTempFile("empty");
     writeLines(file, new String[0]); //required to create file.
-    try {
-      new FileDataModel(file);
-      fail("Should throw an IllegalArgumentException");
-    } catch (IllegalArgumentException iae) {
-      // good
-    }
+    new FileDataModel(file);
   }
 }

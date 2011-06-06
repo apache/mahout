@@ -42,19 +42,13 @@ public final class ToolReducerTest extends MahoutTestCase {
     assertEquals("-32.0,25.0", descriptor);
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testCreateDescriptionIgnored() throws Exception {
     ToolReducer reducer = new ToolReducer();
 
     char[] descriptors = { 'I', 'N', 'C' };
     reducer.configure(descriptors);
-
-    try {
-      reducer.combineDescriptions(0, null);
-      fail("Should throw a IllegalArgumentException");
-    } catch (IllegalArgumentException e) {
-
-    }
+    reducer.combineDescriptions(0, null);
   }
 
   @Test

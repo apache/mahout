@@ -16,14 +16,13 @@
  */
 package org.apache.mahout.common.kernel;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
 
 public class NormalKernelProfile implements IKernelProfile {
   
   @Override
   public double calculateValue(double distance, double h) {
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException();
   }
   
   @Override

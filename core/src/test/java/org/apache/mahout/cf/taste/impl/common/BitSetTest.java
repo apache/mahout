@@ -36,21 +36,16 @@ public final class BitSetTest extends TasteTestCase {
     assertTrue(bitSet.get(NUM_BITS-1));
   }
 
-  @Test
-  public void testBounds() {
+  @Test(expected = ArrayIndexOutOfBoundsException.class)
+  public void testBounds1() {
     BitSet bitSet = new BitSet(NUM_BITS);
-    try {
-      bitSet.set(1000);
-      fail("Should have thrown exception");
-    } catch (ArrayIndexOutOfBoundsException aioobe) {
-      // continue
-    }
-    try {
-      bitSet.set(-1);
-      fail("Should have thrown exception");
-    } catch (ArrayIndexOutOfBoundsException aioobe) {
-      // continue
-    }
+    bitSet.set(1000);
+  }
+
+  @Test(expected = ArrayIndexOutOfBoundsException.class)
+  public void testBounds2() {
+    BitSet bitSet = new BitSet(NUM_BITS);
+    bitSet.set(-1);
   }
 
   @Test

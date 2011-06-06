@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.io.Closeables;
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -162,7 +161,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
         AbstractCluster.formatVector(pdf, null));
   }
   
-  @Test
+  @Test(expected = UnsupportedOperationException.class)
   public void testMSCanopyClassification() {
     List<Cluster> models = new ArrayList<Cluster>();
     DistanceMeasure measure = new ManhattanDistanceMeasure();
@@ -170,10 +169,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     models.add(new MeanShiftCanopy(new DenseVector(2), 1, measure));
     models.add(new MeanShiftCanopy(new DenseVector(2).assign(-1), 2, measure));
     ClusterClassifier classifier = new ClusterClassifier(models);
-    try {
-      classifier.classify(new DenseVector(2));
-      fail("Expected NotImplementedException");
-    } catch (NotImplementedException e) {}
+    classifier.classify(new DenseVector(2));
   }
   
   @Test

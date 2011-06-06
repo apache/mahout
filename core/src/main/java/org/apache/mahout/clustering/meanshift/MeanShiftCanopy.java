@@ -21,7 +21,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.mahout.clustering.kmeans.Cluster;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
@@ -122,12 +121,12 @@ public class MeanShiftCanopy extends Cluster {
    * 
    * @param canopy
    *          an existing MeanShiftCanopy
-   * @param the
+   * @param weight
    *          double weight of the touching
    */
   void touch(MeanShiftCanopy canopy, double weight) {
-    canopy.observe(getCenter(), weight * ((double) boundPoints.size()));
-    observe(canopy.getCenter(), weight * ((double) canopy.boundPoints.size()));
+    canopy.observe(getCenter(), weight * boundPoints.size());
+    observe(canopy.getCenter(), weight * canopy.boundPoints.size());
   }
   
   @Override
@@ -178,7 +177,7 @@ public class MeanShiftCanopy extends Cluster {
   public double pdf(VectorWritable vw) {
     // MSCanopy membership is explicit via membership in boundPoints. Can't
     // compute pdf for Arbitrary point
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException();
   }
   
 }
