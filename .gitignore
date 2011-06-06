@@ -8,7 +8,6 @@ math/target/*
 examples/target/*
 buildtools/target/*
 integration/target/*
-eclipse/target/*
 .settings/
 buildtools/.settings/
 core/.settings/
@@ -17,7 +16,6 @@ core/input/
 core/output/
 core/testdata/
 distribution/.settings/
-eclipse/.settings/
 examples/.settings/
 foo
 math-tests/

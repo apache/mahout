@@ -440,7 +440,7 @@
           <dependencies>
             <dependency>
               <groupId>org.apache.mahout</groupId>
-              <artifactId>mahout-eclipse-support</artifactId>
+              <artifactId>mahout-buildtools</artifactId>
               <version>${project.version}</version>
             </dependency>
           </dependencies>
@@ -516,7 +516,7 @@
           <configuration>
             <rulesets>
               <!-- classpath -->
-              <ruleset>../eclipse/src/main/resources/mahout-pmd-ruleset.xml</ruleset>
+              <ruleset>../buildtools/src/main/resources/mahout-pmd-ruleset.xml</ruleset>
             </rulesets>
             <sourceEncoding>UTF-8</sourceEncoding>
             <targetJdk>1.5</targetJdk>
@@ -591,7 +591,6 @@
   </build>
   <modules>
     <module>buildtools</module>
-    <module>eclipse</module>
     <module>math</module>
     <module>core</module>
     <module>integration</module>
@@ -752,7 +751,7 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>2.6</version>
         <configuration>
-          <configLocation>${project.build.directory}/../../eclipse/src/main/resources/mahout-checkstyle.xml</configLocation>
+          <configLocation>${project.build.directory}/../../buildtools/src/main/resources/mahout-checkstyle.xml</configLocation>
           <consoleOutput>true</consoleOutput>
         </configuration>
       </plugin>
@@ -782,7 +781,7 @@
         <version>2.5</version>
         <configuration>
           <rulesets>
-            <ruleset>../eclipse/src/main/resources/mahout-pmd-ruleset.xml</ruleset>
+            <ruleset>../buildtools/src/main/resources/mahout-pmd-ruleset.xml</ruleset>
           </rulesets>
           <sourceEncoding>UTF-8</sourceEncoding>
           <targetJdk>1.5</targetJdk>
@@ -818,7 +817,7 @@
           <!--omitVisitors>FindDeadLocalStores,UnreadFields</omitVisitors-->
           <debug>true</debug>
           <relaxed>true</relaxed>
-          <excludeFilterFile>../eclipse/src/main/resources/findbugs-exclude.xml</excludeFilterFile>
+          <excludeFilterFile>../buildtools/src/main/resources/findbugs-exclude.xml</excludeFilterFile>
         </configuration>
       </plugin>
       <plugin>
