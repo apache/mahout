@@ -41,10 +41,10 @@ public final class TestDistributedLanczosSolver extends MahoutTestCase {
   public void setup() throws Exception {
     File symTestData = getTestTempDir("symTestData");
     File asymTestData = getTestTempDir("asymTestData");
-    symCorpus = new TestDistributedRowMatrix().randomDistributedMatrix(500,
-        450, 400, 10, 10.0, true, symTestData.getAbsolutePath());
-    asymCorpus = new TestDistributedRowMatrix().randomDistributedMatrix(500,
-        450, 400, 10, 10.0, false, asymTestData.getAbsolutePath());
+    symCorpus = new TestDistributedRowMatrix().randomDistributedMatrix(100,
+        90, 80, 2, 10.0, true, symTestData.getAbsolutePath());
+    asymCorpus = new TestDistributedRowMatrix().randomDistributedMatrix(100,
+        90, 80, 2, 10.0, false, asymTestData.getAbsolutePath());
   }
 
   private static String suf(boolean symmetric) {
