@@ -20,10 +20,10 @@ package org.apache.mahout.common;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.io.WritableComparable;
 
 /**
@@ -33,7 +33,7 @@ import org.apache.hadoop.io.WritableComparable;
  */
 public final class IntegerTuple implements WritableComparable<IntegerTuple> {
   
-  private List<Integer> tuple = new ArrayList<Integer>();
+  private List<Integer> tuple = Lists.newArrayList();
   
   public IntegerTuple() { }
   
@@ -137,7 +137,7 @@ public final class IntegerTuple implements WritableComparable<IntegerTuple> {
   @Override
   public void readFields(DataInput in) throws IOException {
     int len = in.readInt();
-    tuple = new ArrayList<Integer>(len);
+    tuple = Lists.newArrayListWithCapacity(len);
     for (int i = 0; i < len; i++) {
       int data = in.readInt();
       tuple.add(data);

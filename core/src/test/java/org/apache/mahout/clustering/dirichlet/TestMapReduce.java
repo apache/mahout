@@ -18,10 +18,10 @@ package org.apache.mahout.clustering.dirichlet;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -54,7 +54,7 @@ import org.junit.Test;
 
 public final class TestMapReduce extends MahoutTestCase {
 
-  private Collection<VectorWritable> sampleData = new ArrayList<VectorWritable>();
+  private Collection<VectorWritable> sampleData = Lists.newArrayList();
 
   private FileSystem fs;
 
@@ -178,7 +178,7 @@ public final class TestMapReduce extends MahoutTestCase {
     DirichletState state =
         new DirichletState(new GaussianClusterDistribution(new VectorWritable(new DenseVector(2))), 20, 1.0);
 
-    Collection<Model<VectorWritable>[]> models = new ArrayList<Model<VectorWritable>[]>();
+    Collection<Model<VectorWritable>[]> models = Lists.newArrayList();
 
     for (int iteration = 0; iteration < 10; iteration++) {
       DirichletMapper mapper = new DirichletMapper();
@@ -265,7 +265,7 @@ public final class TestMapReduce extends MahoutTestCase {
     dirichletDriver.setConf(conf);
     dirichletDriver.run(args);
     // and inspect results
-    Collection<List<DirichletCluster>> clusters = new ArrayList<List<DirichletCluster>>();
+    Collection<List<DirichletCluster>> clusters = Lists.newArrayList();
     Configuration conf = new Configuration();
     conf.set(DirichletDriver.MODEL_DISTRIBUTION_KEY, description.toString());
     conf.set(DirichletDriver.NUM_CLUSTERS_KEY, "20");
@@ -302,7 +302,7 @@ public final class TestMapReduce extends MahoutTestCase {
         optKey(DefaultOptionCreator.CLUSTERING_OPTION)};
     ToolRunner.run(new Configuration(), new DirichletDriver(), args);
     // and inspect results
-    Collection<List<DirichletCluster>> clusters = new ArrayList<List<DirichletCluster>>();
+    Collection<List<DirichletCluster>> clusters = Lists.newArrayList();
     Configuration conf = new Configuration();
     conf.set(DirichletDriver.MODEL_DISTRIBUTION_KEY, description.toString());
     conf.set(DirichletDriver.NUM_CLUSTERS_KEY, "20");
@@ -338,7 +338,7 @@ public final class TestMapReduce extends MahoutTestCase {
                         0,
                         false);
     // and inspect results
-    Collection<List<DirichletCluster>> clusters = new ArrayList<List<DirichletCluster>>();
+    Collection<List<DirichletCluster>> clusters = Lists.newArrayList();
     conf.set(DirichletDriver.MODEL_DISTRIBUTION_KEY, description.toString());
     conf.set(DirichletDriver.NUM_CLUSTERS_KEY, "20");
     conf.set(DirichletDriver.ALPHA_0_KEY, "1.0");
@@ -409,7 +409,7 @@ public final class TestMapReduce extends MahoutTestCase {
     dirichletDriver.setConf(conf);
     dirichletDriver.run(args);
     // and inspect results
-    Collection<List<DirichletCluster>> clusters = new ArrayList<List<DirichletCluster>>();
+    Collection<List<DirichletCluster>> clusters = Lists.newArrayList();
     Configuration conf = new Configuration();
     conf.set(DirichletDriver.MODEL_DISTRIBUTION_KEY, description.toString());
     conf.set(DirichletDriver.NUM_CLUSTERS_KEY, "20");
@@ -481,7 +481,7 @@ public final class TestMapReduce extends MahoutTestCase {
     dirichletDriver.setConf(conf);
     ToolRunner.run(conf, dirichletDriver, args);
     // and inspect results
-    Collection<List<DirichletCluster>> clusters = new ArrayList<List<DirichletCluster>>();
+    Collection<List<DirichletCluster>> clusters = Lists.newArrayList();
     Configuration conf = new Configuration();
     conf.set(DirichletDriver.MODEL_DISTRIBUTION_KEY, description.toString());
     conf.set(DirichletDriver.NUM_CLUSTERS_KEY, "20");
@@ -496,13 +496,13 @@ public final class TestMapReduce extends MahoutTestCase {
   private void generate4Datasets() throws IOException {
     generateSamples(500, 0, 0, 0.5);
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data1.txt"), fs, conf);
-    sampleData = new ArrayList<VectorWritable>();
+    sampleData = Lists.newArrayList();
     generateSamples(500, 2, 0, 0.2);
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data2.txt"), fs, conf);
-    sampleData = new ArrayList<VectorWritable>();
+    sampleData = Lists.newArrayList();
     generateSamples(500, 0, 2, 0.3);
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data3.txt"), fs, conf);
-    sampleData = new ArrayList<VectorWritable>();
+    sampleData = Lists.newArrayList();
     generateSamples(500, 2, 2, 1);
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data4.txt"), fs, conf);
   }

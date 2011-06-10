@@ -59,9 +59,8 @@ public final class MinHashDriver extends AbstractJob {
     conf.setInt(MinhashOptionCreator.KEY_GROUPS, keyGroups);
     conf.setBoolean(MinhashOptionCreator.DEBUG_OUTPUT, debugOutput);
 
-    Class<? extends Writable> outputClass = 
-        debugOutput ? VectorWritable.class : Text.class;
-    Class<? extends OutputFormat> outputFormatClass = 
+    Class<? extends Writable> outputClass = debugOutput ? VectorWritable.class : Text.class;
+    Class<? extends OutputFormat> outputFormatClass =
         debugOutput ? SequenceFileOutputFormat.class : TextOutputFormat.class;
     
     Job job = new Job(conf, "MinHash Clustering");

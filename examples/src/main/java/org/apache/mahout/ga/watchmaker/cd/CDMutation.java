@@ -17,11 +17,11 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import org.uncommons.watchmaker.framework.EvolutionaryOperator;
 
 /**
@@ -61,7 +61,7 @@ public class CDMutation implements EvolutionaryOperator<CDRule> {
   
   @Override
   public List<CDRule> apply(List<CDRule> selectedCandidates, Random rng) {
-    List<CDRule> mutatedPopulation = new ArrayList<CDRule>(selectedCandidates.size());
+    List<CDRule> mutatedPopulation = Lists.newArrayListWithCapacity(selectedCandidates.size());
     for (CDRule ind : selectedCandidates) {
       mutatedPopulation.add(mutate(ind, rng));
     }

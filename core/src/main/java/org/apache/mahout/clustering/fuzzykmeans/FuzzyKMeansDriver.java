@@ -18,10 +18,10 @@
 package org.apache.mahout.clustering.fuzzykmeans;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -354,7 +354,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
                                        int maxIterations,
                                        float m) throws IOException {
     FuzzyKMeansClusterer clusterer = new FuzzyKMeansClusterer(measure, convergenceDelta, m);
-    List<SoftCluster> clusters = new ArrayList<SoftCluster>();
+    List<SoftCluster> clusters = Lists.newArrayList();
 
     FuzzyKMeansUtil.configureWithClusterInfo(clustersIn, clusters);
     if (clusters.isEmpty()) {
@@ -470,7 +470,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
                                      double convergenceDelta,
                                      float m) throws IOException {
     FuzzyKMeansClusterer clusterer = new FuzzyKMeansClusterer(measure, convergenceDelta, m);
-    List<SoftCluster> clusters = new ArrayList<SoftCluster>();
+    List<SoftCluster> clusters = Lists.newArrayList();
     FuzzyKMeansUtil.configureWithClusterInfo(clustersIn, clusters);
     if (clusters.isEmpty()) {
       throw new IllegalStateException("Clusters is empty!");
@@ -546,7 +546,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
   private static boolean isConverged(Path filePath, Configuration conf, FileSystem fs) throws IOException {
 
     Path clusterPath = new Path(filePath, "*");
-    Collection<Path> result = new ArrayList<Path>();
+    Collection<Path> result = Lists.newArrayList();
 
     FileStatus[] matches =
         fs.listStatus(FileUtil.stat2Paths(fs.globStatus(clusterPath, PathFilters.partFilter())),

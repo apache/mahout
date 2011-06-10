@@ -17,7 +17,6 @@
 
 package org.apache.mahout.df.data;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -112,7 +111,7 @@ public class DataTest extends MahoutTestCase {
     Dataset dataset = Utils.randomData(rng, ATTRIBUTE_COUNT, 1).getDataset();
     
     // test empty data
-    Data empty = new Data(dataset, new ArrayList<Instance>());
+    Data empty = new Data(dataset);
     assertTrue(empty.isIdentical());
 
     // test identical data, except for the labels
@@ -152,7 +151,7 @@ public class DataTest extends MahoutTestCase {
     Dataset dataset = Utils.randomData(rng, ATTRIBUTE_COUNT, 1).getDataset();
     
     // test empty data
-    Data empty = new Data(dataset, new ArrayList<Instance>());
+    Data empty = new Data(dataset);
     assertTrue(empty.identicalLabel());
 
     // test identical labels

@@ -27,7 +27,7 @@ import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
-import org.apache.mahout.classifier.bayes.common.BayesParameters;
+import org.apache.mahout.classifier.bayes.BayesParameters;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.StringTuple;
 

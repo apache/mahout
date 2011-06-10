@@ -18,10 +18,10 @@ package org.apache.mahout.clustering;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.classifier.OnlineLearner;
@@ -66,8 +66,8 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
   public Vector classify(Vector instance) {
     Vector pdfs = new DenseVector(models.size());
     if (models.get(0) instanceof SoftCluster) {
-      Collection<SoftCluster> clusters = new ArrayList<SoftCluster>();
-      List<Double> distances = new ArrayList<Double>();
+      Collection<SoftCluster> clusters = Lists.newArrayList();
+      List<Double> distances = Lists.newArrayList();
       for (Cluster model : models) {
         SoftCluster sc = (SoftCluster) model;
         clusters.add(sc);
@@ -116,7 +116,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
       Class<? extends Cluster> factory = ccl.loadClass(modelClass).asSubclass(
           Cluster.class);
       
-      models = new ArrayList<Cluster>();
+      models = Lists.newArrayList();
       for (int i = 0; i < size; i++) {
         Cluster element = factory.newInstance();
         element.readFields(in);

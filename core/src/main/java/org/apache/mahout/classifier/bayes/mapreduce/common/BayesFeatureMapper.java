@@ -31,7 +31,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.lucene.analysis.shingle.ShingleFilter;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
-import org.apache.mahout.classifier.bayes.common.BayesParameters;
+import org.apache.mahout.classifier.bayes.BayesParameters;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.common.lucene.IteratorTokenStream;
 import org.apache.mahout.math.function.ObjectIntProcedure;

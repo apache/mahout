@@ -21,12 +21,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -875,7 +875,7 @@ public class RecommenderJobTest extends TasteTestCase {
 
 
   static Map<Long,List<RecommendedItem>> readRecommendations(File file) throws IOException {
-    Map<Long,List<RecommendedItem>> recommendations = new HashMap<Long,List<RecommendedItem>>();
+    Map<Long,List<RecommendedItem>> recommendations = Maps.newHashMap();
     Iterable<String> lineIterable = new FileLineIterable(file);
     for (String line : lineIterable) {
 

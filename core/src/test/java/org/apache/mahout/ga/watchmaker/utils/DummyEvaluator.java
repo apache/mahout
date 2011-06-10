@@ -17,10 +17,10 @@
 
 package org.apache.mahout.ga.watchmaker.utils;
 
+import com.google.common.collect.Maps;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
 import org.apache.mahout.common.RandomUtils;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -33,7 +33,7 @@ public final class DummyEvaluator implements FitnessEvaluator<DummyCandidate> {
 
   private final Random rng = RandomUtils.getRandom();
 
-  private static final Map<Integer, Double> evaluations = new HashMap<Integer, Double>();
+  private static final Map<Integer, Double> evaluations = Maps.newHashMap();
 
   public static double getFitness(Integer key) {
     if (!evaluations.containsKey(key)) {

@@ -18,11 +18,11 @@
 package org.apache.mahout.clustering.evaluation;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -41,7 +41,7 @@ public class RepresentativePointsMapper
 
   private Map<Integer, List<VectorWritable>> representativePoints;
 
-  private final Map<Integer, WeightedVectorWritable> mostDistantPoints = new HashMap<Integer, WeightedVectorWritable>();
+  private final Map<Integer, WeightedVectorWritable> mostDistantPoints = Maps.newHashMap();
 
   private DistanceMeasure measure = new EuclideanDistanceMeasure();
 
@@ -106,7 +106,7 @@ public class RepresentativePointsMapper
   }
 
   public static Map<Integer, List<VectorWritable>> getRepresentativePoints(Configuration conf, Path statePath) {
-    Map<Integer, List<VectorWritable>> representativePoints = new HashMap<Integer, List<VectorWritable>>();
+    Map<Integer, List<VectorWritable>> representativePoints = Maps.newHashMap();
     for (Pair<IntWritable,VectorWritable> record
          : new SequenceFileDirIterable<IntWritable,VectorWritable>(statePath,
                                                                    PathType.LIST,
@@ -115,7 +115,7 @@ public class RepresentativePointsMapper
       int keyValue = record.getFirst().get();
       List<VectorWritable> repPoints = representativePoints.get(keyValue);
       if (repPoints == null) {
-        repPoints = new ArrayList<VectorWritable>();
+        repPoints = Lists.newArrayList();
         representativePoints.put(keyValue, repPoints);
       }
       repPoints.add(record.getSecond());

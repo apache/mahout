@@ -18,9 +18,9 @@
 package org.apache.mahout.fpm.pfpgrowth.convertors.integer;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.common.Pair;
@@ -46,9 +46,9 @@ public final class IntegerStringOutputConverter implements
   @Override
   public void collect(Integer key, List<Pair<List<Integer>,Long>> value) throws IOException {
     String stringKey = featureReverseMap.get(key);
-    List<Pair<List<String>,Long>> stringValues = new ArrayList<Pair<List<String>,Long>>();
+    List<Pair<List<String>,Long>> stringValues = Lists.newArrayList();
     for (Pair<List<Integer>,Long> e : value) {
-      List<String> pattern = new ArrayList<String>();
+      List<String> pattern = Lists.newArrayList();
       for (Integer i : e.getFirst()) {
         pattern.add(featureReverseMap.get(i));
       }

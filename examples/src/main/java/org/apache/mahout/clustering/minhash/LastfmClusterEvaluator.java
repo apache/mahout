@@ -18,12 +18,13 @@
 package org.apache.mahout.clustering.minhash;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.HashSet;
+
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -90,7 +91,7 @@ public final class LastfmClusterEvaluator {
     Configuration conf = new Configuration();
     Random rand = RandomUtils.getRandom();
     Text prevCluster = new Text();
-    List<List<Integer>> listenerVectors = new ArrayList<List<Integer>>();
+    List<List<Integer>> listenerVectors = Lists.newArrayList();
     long similarListeners = 0;
     long allListeners = 0;
     int clustersProcessed = 0;
@@ -121,7 +122,7 @@ public final class LastfmClusterEvaluator {
         clustersProcessed++;
         System.out.print('\r' + usedMemory() + " Clusters processed: " + clustersProcessed);
       }
-      List<Integer> listeners = new ArrayList<Integer>();
+      List<Integer> listeners = Lists.newArrayList();
       for (Vector.Element ele : point.get()) {
         listeners.add((int) ele.get());
       }

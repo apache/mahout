@@ -17,12 +17,12 @@
 
 package org.apache.mahout.fpm.pfpgrowth;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
 import com.google.common.collect.AbstractIterator;
+import com.google.common.collect.Lists;
 import org.apache.mahout.common.Pair;
 
 /**
@@ -67,7 +67,7 @@ final class TransactionTreeIterator extends AbstractIterator<Pair<List<Integer>,
       }
     } while (sum == transactionTree.count(childId));
 
-    List<Integer> data = new ArrayList<Integer>();
+    List<Integer> data = Lists.newArrayList();
     Iterator<int[]> it = depth.iterator();
     it.next();
     while (it.hasNext()) {

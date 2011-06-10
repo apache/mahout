@@ -18,13 +18,13 @@
 package org.apache.mahout.fpm.pfpgrowth;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.mutable.MutableLong;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -47,7 +47,7 @@ import org.apache.mahout.math.map.OpenObjectIntHashMap;
  */
 public class ParallelFPGrowthReducer extends Reducer<LongWritable,TransactionTree,Text,TopKStringPatterns> {
   
-  private final List<String> featureReverseMap = new ArrayList<String>();
+  private final List<String> featureReverseMap = Lists.newArrayList();
   
   private final OpenObjectIntHashMap<String> fMap = new OpenObjectIntHashMap<String>();
   
@@ -66,7 +66,7 @@ public class ParallelFPGrowthReducer extends Reducer<LongWritable,TransactionTre
       }
     }
     
-    List<Pair<Integer,Long>> localFList = new ArrayList<Pair<Integer,Long>>();
+    List<Pair<Integer,Long>> localFList = Lists.newArrayList();
     for (Entry<Integer,MutableLong> fItem : cTree.generateFList().entrySet()) {
       localFList.add(new Pair<Integer,Long>(fItem.getKey(), fItem.getValue().toLong()));
       

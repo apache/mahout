@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import com.google.common.io.Closeables;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
 import org.apache.mahout.common.IOUtils;
@@ -136,7 +137,7 @@ public final class GenericJDBCDataModel extends AbstractJDBCDataModel {
         props.load(is);
         return props;
       } finally {
-        IOUtils.quietClose(is);
+        Closeables.closeQuietly(is);
       }
     } catch (IOException ioe) {
       throw new TasteException(ioe);

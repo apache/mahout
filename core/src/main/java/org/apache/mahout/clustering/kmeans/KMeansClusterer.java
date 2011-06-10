@@ -17,9 +17,9 @@
 package org.apache.mahout.clustering.kmeans;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.SequenceFile.Writer;
@@ -177,14 +177,14 @@ public class KMeansClusterer {
                                                   DistanceMeasure measure,
                                                   int maxIter,
                                                   double distanceThreshold) {
-    List<List<Cluster>> clustersList = new ArrayList<List<Cluster>>();
+    List<List<Cluster>> clustersList = Lists.newArrayList();
     clustersList.add(clusters);
 
     boolean converged = false;
     int iteration = 0;
     while (!converged && iteration < maxIter) {
       log.info("Reference Iteration: " + iteration);
-      List<Cluster> next = new ArrayList<Cluster>();
+      List<Cluster> next = Lists.newArrayList();
       for (Cluster c : clustersList.get(iteration)) {
         next.add(new Cluster(c.getCenter(), c.getId(), measure));
       }

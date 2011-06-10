@@ -17,7 +17,6 @@
 
 package org.apache.mahout.common.iterator;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -26,6 +25,7 @@ import java.util.Random;
 import com.google.common.base.Function;
 import com.google.common.collect.ForwardingIterator;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.RandomUtils;
 
@@ -38,7 +38,7 @@ public class StableFixedSizeSamplingIterator<T> extends ForwardingIterator<T> {
   private final Iterator<T> delegate;
   
   public StableFixedSizeSamplingIterator(int size, Iterator<T> source) {
-    List<Pair<Integer,T>> buf = new ArrayList<Pair<Integer,T>>(size);
+    List<Pair<Integer,T>> buf = Lists.newArrayListWithCapacity(size);
     int sofar = 0;
     Random random = RandomUtils.getRandom();
     while (source.hasNext()) {

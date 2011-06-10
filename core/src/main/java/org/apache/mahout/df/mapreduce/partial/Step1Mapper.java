@@ -18,10 +18,10 @@
 package org.apache.mahout.df.mapreduce.partial;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -63,7 +63,7 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
   private int partition;
   
   /** will contain all instances if this mapper's split */
-  private final List<Instance> instances = new ArrayList<Instance>();
+  private final List<Instance> instances = Lists.newArrayList();
   
   public int getFirstTreeId() {
     return firstTreeId;

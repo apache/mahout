@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.hadoop.item;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -25,7 +26,6 @@ import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,8 +44,8 @@ public class ItemFilterAsVectorAndPrefsReducer
     /* artificial NaN summand to exclude this item from the recommendations for all users specified in userIDs */
     vector.set(itemIDIndex, Double.NaN);
 
-    List<Long> userIDs = new ArrayList<Long>();
-    List<Float> prefValues = new ArrayList<Float>();
+    List<Long> userIDs = Lists.newArrayList();
+    List<Float> prefValues = Lists.newArrayList();
     for (VarLongWritable userID : values) {
       userIDs.add(userID.get());
       prefValues.add(1.0f);

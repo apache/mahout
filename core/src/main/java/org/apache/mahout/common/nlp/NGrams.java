@@ -17,8 +17,9 @@
 
 package org.apache.mahout.common.nlp;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -35,12 +36,12 @@ public class NGrams {
   }
   
   public Map<String,List<String>> generateNGrams() {
-    Map<String,List<String>> returnDocument = new HashMap<String,List<String>>();
+    Map<String,List<String>> returnDocument = Maps.newHashMap();
     
     StringTokenizer tokenizer = new StringTokenizer(line);
-    List<String> tokens = new ArrayList<String>();
+    List<String> tokens = Lists.newArrayList();
     String labelName = tokenizer.nextToken();
-    List<String> previousN1Grams = new ArrayList<String>();
+    List<String> previousN1Grams = Lists.newArrayList();
     while (tokenizer.hasMoreTokens()) {
       
       String nextToken = tokenizer.nextToken();
@@ -66,9 +67,9 @@ public class NGrams {
   public List<String> generateNGramsWithoutLabel() {
     
     StringTokenizer tokenizer = new StringTokenizer(line);
-    List<String> tokens = new ArrayList<String>();
+    List<String> tokens = Lists.newArrayList();
     
-    List<String> previousN1Grams = new ArrayList<String>();
+    List<String> previousN1Grams = Lists.newArrayList();
     while (tokenizer.hasMoreTokens()) {
       
       String nextToken = tokenizer.nextToken();

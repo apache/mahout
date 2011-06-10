@@ -17,6 +17,7 @@
 
 package org.apache.mahout.ga.watchmaker.cd.tool;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -32,7 +33,6 @@ import org.junit.Test;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -220,12 +220,12 @@ public final class CDInfosToolTest extends MahoutTestCase {
       randomDataset(fs, inpath, descriptors, descriptions);
 
       // Start the tool
-      List<String> result = new ArrayList<String>();
+      List<String> result = Lists.newArrayList();
       fs.delete(output, true); // It's unhappy if this directory exists
       CDInfosTool.gatherInfos(descriptors, inpath, output, result);
 
       // check the results
-      Collection<String> target = new ArrayList<String>();
+      Collection<String> target = Lists.newArrayList();
 
       assertEquals(nbNonIgnored(descriptors), result.size());
       int rindex = 0;

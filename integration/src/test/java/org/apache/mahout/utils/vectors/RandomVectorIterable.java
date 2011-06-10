@@ -18,7 +18,6 @@
 package org.apache.mahout.utils.vectors;
 
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.Random;
 
 import com.google.common.base.Function;

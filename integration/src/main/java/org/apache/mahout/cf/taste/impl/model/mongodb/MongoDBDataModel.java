@@ -19,7 +19,6 @@ package org.apache.mahout.cf.taste.impl.model.mongodb;
 
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -31,6 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
@@ -404,8 +404,8 @@ public final class MongoDBDataModel implements DataModel {
     while (cursor.hasNext()) {
       Map<String,Object> user = (Map<String,Object>) cursor.next().toMap();
       String userID = getID(user.get(mongoUserID), true);
-      Collection<List<String>> items = new ArrayList<List<String>>();
-      List<String> item = new ArrayList<String>();
+      Collection<List<String>> items = Lists.newArrayList();
+      List<String> item = Lists.newArrayList();
       item.add(getID(user.get(mongoItemID), false));
       item.add(Float.toString(getPreference(user.get(mongoPreference))));
       items.add(item);
@@ -427,8 +427,8 @@ public final class MongoDBDataModel implements DataModel {
       Map<String,Object> user = (Map<String,Object>) cursor.next().toMap();
       if (!user.containsKey("deleted_at")) {
         String userID = getID(user.get(mongoUserID), true);
-        Collection<List<String>> items = new ArrayList<List<String>>();
-        List<String> item = new ArrayList<String>();
+        Collection<List<String>> items = Lists.newArrayList();
+        List<String> item = Lists.newArrayList();
         item.add(getID(user.get(mongoItemID), false));
         item.add(Float.toString(getPreference(user.get(mongoPreference))));
         items.add(item);
@@ -566,7 +566,7 @@ public final class MongoDBDataModel implements DataModel {
           float ratingValue = getPreference(user.get(mongoPreference));
           Collection<Preference> userPrefs = userIDPrefMap.get(userID);
           if (userPrefs == null) {
-            userPrefs = new ArrayList<Preference>(2);
+            userPrefs = Lists.newArrayListWithCapacity(2);
             userIDPrefMap.put(userID, userPrefs);
           }
           userPrefs.add(new GenericPreference(userID, itemID, ratingValue));

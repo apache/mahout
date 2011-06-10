@@ -17,11 +17,11 @@
 package org.apache.mahout.clustering.kmeans;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -63,11 +63,11 @@ public class KMeansReducer extends Reducer<Text, ClusterObservations, Text, Clus
 
       this.convergenceDelta = Double.parseDouble(conf.get(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY));
       this.clusterer = new KMeansClusterer(measure);
-      this.clusterMap = new HashMap<String, Cluster>();
+      this.clusterMap = Maps.newHashMap();
 
       String path = conf.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
       if (path.length() > 0) {
-        Collection<Cluster> clusters = new ArrayList<Cluster>();
+        Collection<Cluster> clusters = Lists.newArrayList();
         KMeansUtil.configureWithClusterInfo(conf, new Path(path), clusters);
         setClusterMap(clusters);
         if (clusterMap.isEmpty()) {
@@ -84,7 +84,7 @@ public class KMeansReducer extends Reducer<Text, ClusterObservations, Text, Clus
   }
 
   private void setClusterMap(Collection<Cluster> clusters) {
-    clusterMap = new HashMap<String, Cluster>();
+    clusterMap = Maps.newHashMap();
     for (Cluster cluster : clusters) {
       clusterMap.put(cluster.getIdentifier(), cluster);
     }

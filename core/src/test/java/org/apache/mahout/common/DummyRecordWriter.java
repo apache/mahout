@@ -18,12 +18,12 @@
 package org.apache.mahout.common;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.RecordWriter;
@@ -39,7 +39,7 @@ public final class DummyRecordWriter<K, V> extends RecordWriter<K, V> {
   public void write(K key, V value) {
     List<V> points = data.get(key);
     if (points == null) {
-      points = new ArrayList<V>();
+      points = Lists.newArrayList();
       data.put(key, points);
     }
     points.add(value);

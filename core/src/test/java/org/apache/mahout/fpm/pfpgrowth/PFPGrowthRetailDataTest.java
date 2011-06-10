@@ -19,9 +19,7 @@ package org.apache.mahout.fpm.pfpgrowth;
 
 import java.io.File;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -30,6 +28,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.mahout.common.MahoutTestCase;
@@ -65,7 +65,7 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
     try {
       StringRecordIterator it = new StringRecordIterator(new FileLineIterable(Resources.getResource(
         "retail.dat").openStream()), "\\s+");
-      Collection<List<String>> transactions = new ArrayList<List<String>>();
+      Collection<List<String>> transactions = Lists.newArrayList();
       
       while (it.hasNext()) {
         Pair<List<String>,Long> next = it.next();
@@ -91,10 +91,10 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
     StringRecordIterator it = new StringRecordIterator(new FileLineIterable(Resources.getResource(
       "retail_results_with_min_sup_100.dat").openStream()), "\\s+");
     
-    Map<Set<String>,Long> expectedResults = new HashMap<Set<String>,Long>();
+    Map<Set<String>,Long> expectedResults = Maps.newHashMap();
     while (it.hasNext()) {
       Pair<List<String>,Long> next = it.next();
-      List<String> items = new ArrayList<String>(next.getFirst());
+      List<String> items = Lists.newArrayList(next.getFirst());
       String supportString = items.remove(items.size() - 1);
       Long support = Long.parseLong(supportString.substring(1, supportString.length() - 1));
       expectedResults.put(new HashSet<String>(items), support);
@@ -112,7 +112,7 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
     PFPGrowth.startAggregating(params);
     List<Pair<String,TopKStringPatterns>> frequentPatterns = PFPGrowth.readFrequentPattern(params);
     
-    Map<Set<String>,Long> results = new HashMap<Set<String>,Long>();
+    Map<Set<String>,Long> results = Maps.newHashMap();
     for (Pair<String,TopKStringPatterns> topK : frequentPatterns) {
       Iterator<Pair<List<String>,Long>> topKIt = topK.getSecond().iterator();
       while (topKIt.hasNext()) {

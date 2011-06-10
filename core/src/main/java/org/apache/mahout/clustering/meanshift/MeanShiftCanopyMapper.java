@@ -18,16 +18,16 @@
 package org.apache.mahout.clustering.meanshift;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 
 public class MeanShiftCanopyMapper extends Mapper<WritableComparable<?>,MeanShiftCanopy,Text,MeanShiftCanopy> {
   
-  private final Collection<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
+  private final Collection<MeanShiftCanopy> canopies = Lists.newArrayList();
   
   private MeanShiftCanopyClusterer clusterer;
 

@@ -18,10 +18,10 @@
 package org.apache.mahout.ga.watchmaker.cd;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.ga.watchmaker.STFitnessEvaluator;
 import org.apache.mahout.ga.watchmaker.cd.hadoop.CDMahoutEvaluator;
@@ -37,7 +37,7 @@ public class CDFitnessEvaluator extends STFitnessEvaluator<Rule> {
   
   private final DatasetSplit split;
   
-  private final Collection<CDFitness> evals = new ArrayList<CDFitness>();
+  private final Collection<CDFitness> evals = Lists.newArrayList();
   
   private final int target;
   

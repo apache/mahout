@@ -21,10 +21,10 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
@@ -130,8 +130,8 @@ public class Step0Job {
     
     log.info("mapred.map.tasks = {}", conf.getInt("mapred.map.tasks", -1));
 
-    List<Integer> keys = new ArrayList<Integer>();
-    List<Step0Output> values = new ArrayList<Step0Output>();
+    List<Integer> keys = Lists.newArrayList();
+    List<Step0Output> values = Lists.newArrayList();
 
     // read all the outputs
     for (Pair<IntWritable,Step0Output> record

@@ -18,9 +18,9 @@
 package org.apache.mahout.common;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.util.GenericsUtil;
@@ -31,7 +31,7 @@ public class Parameters {
   
   private static final Logger log = LoggerFactory.getLogger(Parameters.class);
   
-  private Map<String,String> params = new HashMap<String,String>();
+  private Map<String,String> params = Maps.newHashMap();
 
   public Parameters() {
 
@@ -84,7 +84,7 @@ public class Parameters {
     conf.set("io.serializations",
              "org.apache.hadoop.io.serializer.JavaSerialization,"
              + "org.apache.hadoop.io.serializer.WritableSerialization");
-    Map<String,String> params = new HashMap<String,String>();
+    Map<String,String> params = Maps.newHashMap();
     DefaultStringifier<Map<String,String>> mapStringifier = new DefaultStringifier<Map<String,String>>(conf,
         GenericsUtil.getClass(params));
     return mapStringifier.fromString(serializedString);

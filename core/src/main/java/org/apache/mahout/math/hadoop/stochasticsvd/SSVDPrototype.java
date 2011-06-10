@@ -18,12 +18,12 @@
 package org.apache.mahout.math.hadoop.stochasticsvd;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.iterator.CopyConstructorIterator;
 import org.apache.mahout.math.DenseMatrix;
@@ -45,8 +45,8 @@ public class SSVDPrototype {
   private int cnt;
   private int blckCnt;
   private final int r;
-  private final List<UpperTriangular> rBlocks = new ArrayList<UpperTriangular>();
-  private final List<double[][]> qtBlocks = new ArrayList<double[][]>();
+  private final List<UpperTriangular> rBlocks = Lists.newArrayList();
+  private final List<double[][]> qtBlocks = Lists.newArrayList();
   private final List<double[]> yLookahead;
 
   public SSVDPrototype(long seed, int kp, int r) {
@@ -55,7 +55,7 @@ public class SSVDPrototype {
     yRow = new double[kp];
     // m_yRowV = new DenseVector(m_yRow,true);
     this.r = r;
-    yLookahead = new ArrayList<double[]>(kp);
+    yLookahead = Lists.newArrayList();
   }
 
   void firstPass(Vector aRow) {
@@ -187,7 +187,7 @@ public class SSVDPrototype {
 
     long seed = RandomUtils.getRandom().nextLong();
 
-    final Map<Integer, Vector> btRows = new HashMap<Integer, Vector>();
+    final Map<Integer, Vector> btRows = Maps.newHashMap();
 
     PartialRowEmitter btEmitter = new PartialRowEmitter() {
       @Override
@@ -215,7 +215,7 @@ public class SSVDPrototype {
     // false,1e-10);
 
     // reconstruct bbt
-    final Map<Integer, Vector> bbt = new HashMap<Integer, Vector>();
+    final Map<Integer, Vector> bbt = Maps.newHashMap();
     PartialRowEmitter bbtEmitter = new PartialRowEmitter() {
 
       @Override
@@ -298,7 +298,7 @@ public class SSVDPrototype {
 
     int m = mx.rowSize(); /* ,n=mx.columnSize(); */
 
-    final Map<Integer, Vector> btRows = new HashMap<Integer, Vector>();
+    final Map<Integer, Vector> btRows = Maps.newHashMap();
 
     PartialRowEmitter btEmitter = new PartialRowEmitter() {
       @Override
@@ -326,7 +326,7 @@ public class SSVDPrototype {
     // false,1e-10);
 
     // reconstruct bbt
-    final Map<Integer, Vector> bbt = new HashMap<Integer, Vector>();
+    final Map<Integer, Vector> bbt = Maps.newHashMap();
     PartialRowEmitter bbtEmitter = new PartialRowEmitter() {
 
       @Override

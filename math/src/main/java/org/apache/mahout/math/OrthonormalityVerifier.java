@@ -17,7 +17,8 @@
 
 package org.apache.mahout.math;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
+
 import java.util.List;
 
 public final class OrthonormalityVerifier {
@@ -28,7 +29,7 @@ public final class OrthonormalityVerifier {
   public static VectorIterable pairwiseInnerProducts(Iterable<MatrixSlice> basis) {
     DenseMatrix out = null;
     for (MatrixSlice slice1 : basis) {
-      List<Double> dots = new ArrayList<Double>();
+      List<Double> dots = Lists.newArrayList();
       for (MatrixSlice slice2 : basis) {
         dots.add(slice1.vector().dot(slice2.vector()));
       }

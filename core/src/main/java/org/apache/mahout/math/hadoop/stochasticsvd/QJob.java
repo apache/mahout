@@ -22,11 +22,11 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -129,7 +129,7 @@ public final class QJob {
     private final Deque<Closeable> closeables = new LinkedList<Closeable>();
     private SequenceFile.Writer tempQw;
     private Path tempQPath;
-    private final List<UpperTriangular> rSubseq = new ArrayList<UpperTriangular>();
+    private final List<UpperTriangular> rSubseq = Lists.newArrayList();
 
     private void flushSolver(Context context) throws IOException {
       UpperTriangular r = qSolver.getRTilde();
@@ -229,7 +229,7 @@ public final class QJob {
       long omegaSeed = Long.parseLong(context.getConfiguration().get(PROP_OMEGA_SEED));
       r = Integer.parseInt(context.getConfiguration().get(PROP_AROWBLOCK_SIZE));
       omega = new Omega(omegaSeed, k, p);
-      yLookahead = new ArrayList<double[]>(kp);
+      yLookahead = Lists.newArrayListWithCapacity(kp);
       qSolver = new GivensThinSolver(r, kp);
       outputs = new MultipleOutputs(new JobConf(context.getConfiguration()));
       closeables.addFirst(new Closeable() {

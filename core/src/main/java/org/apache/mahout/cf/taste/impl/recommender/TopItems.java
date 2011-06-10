@@ -17,13 +17,13 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -83,7 +83,7 @@ public final class TopItems {
     if (size == 0) {
       return Collections.emptyList();
     }
-    List<RecommendedItem> result = new ArrayList<RecommendedItem>(size);
+    List<RecommendedItem> result = Lists.newArrayListWithCapacity(size);
     result.addAll(topItems);
     Collections.sort(result, ByValueRecommendedItemComparator.getInstance());
     return result;
@@ -123,7 +123,7 @@ public final class TopItems {
     if (size == 0) {
       return NO_IDS;
     }
-    List<SimilarUser> sorted = new ArrayList<SimilarUser>(size);
+    List<SimilarUser> sorted = Lists.newArrayListWithCapacity(size);
     sorted.addAll(topUsers);
     Collections.sort(sorted);
     long[] result = new long[size];
@@ -168,8 +168,7 @@ public final class TopItems {
     if (size == 0) {
       return Collections.emptyList();
     }
-    List<GenericItemSimilarity.ItemItemSimilarity> result =
-        new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(size);
+    List<GenericItemSimilarity.ItemItemSimilarity> result = Lists.newArrayListWithCapacity(size);
     result.addAll(topSimilarities);
     Collections.sort(result);
     return result;
@@ -200,8 +199,7 @@ public final class TopItems {
     if (size == 0) {
       return Collections.emptyList();
     }
-    List<GenericUserSimilarity.UserUserSimilarity> result =
-        new ArrayList<GenericUserSimilarity.UserUserSimilarity>(size);
+    List<GenericUserSimilarity.UserUserSimilarity> result = Lists.newArrayListWithCapacity(size);
     result.addAll(topSimilarities);
     Collections.sort(result);
     return result;

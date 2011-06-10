@@ -75,18 +75,15 @@ public final class SplitBayesInputTest extends MahoutTestCase {
     for (String[] entry : ClassifierData.DATA) {
       if (!entry[0].equals(currentLabel)) {
         currentLabel = entry[0];
-        if (writer != null) {
-          IOUtils.quietClose(writer);
-        }
+        Closeables.closeQuietly(writer);
         
-        writer = new BufferedWriter(
-            new OutputStreamWriter(
-                fs.create(new Path(tempInputDirectory, currentLabel)), Charsets.UTF_8));
+        writer = new BufferedWriter(new OutputStreamWriter(fs.create(new Path(tempInputDirectory, currentLabel)),
+            Charsets.UTF_8));
       }
       countMap.adjustOrPutValue(currentLabel, 1, 1);
       writer.write(currentLabel + '\t' + entry[1] + '\n');
     }
-    IOUtils.quietClose(writer);
+    Closeables.closeQuietly(writer);
   }
 
   private void writeSingleInputFile() throws IOException {

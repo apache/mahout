@@ -18,11 +18,11 @@
 package org.apache.mahout.clustering.canopy;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -225,7 +225,7 @@ public class CanopyClusterer {
                                             DistanceMeasure measure,
                                             double t1,
                                             double t2) {
-    List<Canopy> canopies = new ArrayList<Canopy>();
+    List<Canopy> canopies = Lists.newArrayList();
     /**
      * Reference Implementation: Given a distance metric, one can create
      * canopies as follows: Start with a list of the data points in any
@@ -272,7 +272,7 @@ public class CanopyClusterer {
    * @return the List<Vector>
    */
   public static List<Vector> getCenters(Iterable<Canopy> canopies) {
-    List<Vector> result = new ArrayList<Vector>();
+    List<Vector> result = Lists.newArrayList();
     for (Canopy canopy : canopies) {
       result.add(canopy.getCenter());
     }

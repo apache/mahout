@@ -18,12 +18,12 @@
 package org.apache.mahout.df.data;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -98,7 +98,7 @@ public final class DataLoader {
       } else { // CATEGORICAL or LABEL
         // update values
         if (values[attr] == null) {
-          values[attr] = new ArrayList<String>();
+          values[attr] = Lists.newArrayList();
         }
         if (!values[attr].contains(token)) {
           values[attr].add(token);
@@ -134,7 +134,7 @@ public final class DataLoader {
     FSDataInputStream input = fs.open(fpath);
     Scanner scanner = new Scanner(input);
     
-    List<Instance> instances = new ArrayList<Instance>();
+    List<Instance> instances = Lists.newArrayList();
     
     DataConverter converter = new DataConverter(dataset);
     
@@ -164,7 +164,7 @@ public final class DataLoader {
    * Loads the data from a String array
    */
   public static Data loadData(Dataset dataset, String[] data) {
-    List<Instance> instances = new ArrayList<Instance>();
+    List<Instance> instances = Lists.newArrayList();
     
     DataConverter converter = new DataConverter(dataset);
     

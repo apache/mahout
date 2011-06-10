@@ -19,10 +19,10 @@ package org.apache.mahout.vectorizer.tfidf;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
@@ -154,7 +154,7 @@ public final class TFIDFConverter {
         createDictionaryChunks(wordCountPath, output, baseConf, chunkSizeInMegabytes);
 
     int partialVectorIndex = 0;
-    List<Path> partialVectorPaths = new ArrayList<Path>();
+    List<Path> partialVectorPaths = Lists.newArrayList();
     List<Path> dictionaryChunks = datasetFeatures.getSecond();
     for (Path dictionaryChunk : dictionaryChunks) {
       Path partialVectorOutputPath = new Path(output, VECTOR_OUTPUT_FOLDER + partialVectorIndex++);
@@ -196,7 +196,7 @@ public final class TFIDFConverter {
                                                                  Path dictionaryPathBase,
                                                                  Configuration baseConf,
                                                                  int chunkSizeInMegabytes) throws IOException {
-    List<Path> chunkPaths = new ArrayList<Path>();
+    List<Path> chunkPaths = Lists.newArrayList();
     Configuration conf = new Configuration(baseConf);
 
     FileSystem fs = FileSystem.get(featureCountPath.toUri(), conf);

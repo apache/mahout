@@ -35,6 +35,7 @@ import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.mapreduce.VectorSumReducer;
 import org.apache.mahout.math.VectorWritable;
 
 /**
@@ -91,8 +92,8 @@ public final class NaiveBayesTrainer {
     FileInputFormat.setInputPaths(job, input);
     FileOutputFormat.setOutputPath(job, output);
     job.setMapperClass(NaiveBayesInstanceMapper.class);
-    job.setCombinerClass(NaiveBayesSumReducer.class);
-    job.setReducerClass(NaiveBayesSumReducer.class);
+    job.setCombinerClass(VectorSumReducer.class);
+    job.setReducerClass(VectorSumReducer.class);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setOutputKeyClass(IntWritable.class);
@@ -120,7 +121,7 @@ public final class NaiveBayesTrainer {
     FileInputFormat.setInputPaths(job, input);
     FileOutputFormat.setOutputPath(job, output);
     job.setMapperClass(NaiveBayesWeightsMapper.class);
-    job.setReducerClass(NaiveBayesSumReducer.class);
+    job.setReducerClass(VectorSumReducer.class);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setOutputKeyClass(Text.class);
@@ -149,7 +150,7 @@ public final class NaiveBayesTrainer {
     FileInputFormat.setInputPaths(job, input);
     FileOutputFormat.setOutputPath(job, output);
     job.setMapperClass(NaiveBayesThetaMapper.class);
-    job.setReducerClass(NaiveBayesSumReducer.class);
+    job.setReducerClass(VectorSumReducer.class);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setOutputKeyClass(IntWritable.class);
@@ -178,7 +179,7 @@ public final class NaiveBayesTrainer {
     FileInputFormat.setInputPaths(job, input);
     FileOutputFormat.setOutputPath(job, output);
     job.setMapperClass(NaiveBayesThetaComplementaryMapper.class);
-    job.setReducerClass(NaiveBayesSumReducer.class);
+    job.setReducerClass(VectorSumReducer.class);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setOutputKeyClass(IntWritable.class);

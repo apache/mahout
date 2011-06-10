@@ -17,11 +17,11 @@
 
 package org.apache.mahout.ga.watchmaker;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -112,7 +112,7 @@ public final class STFitnessEvaluatorTest extends MahoutTestCase {
   }
 
   private static List<Integer> randomInts(int size, Random rng) {
-    List<Integer> population = new ArrayList<Integer>();
+    List<Integer> population = Lists.newArrayList();
     for (int index = 0; index < size; index++) {
       population.add(rng.nextInt());
     }
@@ -121,7 +121,7 @@ public final class STFitnessEvaluatorTest extends MahoutTestCase {
   }
 
   private static List<Double> randomFloats(int size, Random rng) {
-    List<Double> population = new ArrayList<Double>();
+    List<Double> population = Lists.newArrayList();
     for (int index = 0; index < size; index++) {
       population.add(rng.nextDouble());
     }

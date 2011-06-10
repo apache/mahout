@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.mapred.JobConf;
@@ -78,7 +79,7 @@ public class BayesThetaNormalizerMapper extends MapReduceBase implements
   public void configure(JobConf job) {
     try {
       labelWeightSum.clear();
-      Map<String,Double> labelWeightSumTemp = new HashMap<String,Double>();
+      Map<String,Double> labelWeightSumTemp = Maps.newHashMap();
       
       DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(job,
           GenericsUtil.getClass(labelWeightSumTemp));

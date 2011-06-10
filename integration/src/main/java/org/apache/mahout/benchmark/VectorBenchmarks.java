@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +28,8 @@ import java.util.Random;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -73,16 +74,16 @@ public class VectorBenchmarks {
   private final Vector[][] vectors;
   private final Vector[] clusters;
   private final SparseMatrix clusterDistances;
-  private final List<Vector> randomVectors = new ArrayList<Vector>();
-  private final List<int[]> randomVectorIndices = new ArrayList<int[]>();
-  private final List<double[]> randomVectorValues = new ArrayList<double[]>();
+  private final List<Vector> randomVectors = Lists.newArrayList();
+  private final List<int[]> randomVectorIndices = Lists.newArrayList();
+  private final List<double[]> randomVectorValues = Lists.newArrayList();
   private final int cardinality;
   private final int sparsity;
   private final int numVectors;
   private final int loop;
   private final int opsPerUnit;
-  private final Map<String,Integer> implType = new HashMap<String,Integer>();
-  private final Map<String,List<String[]>> statsMap = new HashMap<String,List<String[]>>();
+  private final Map<String,Integer> implType = Maps.newHashMap();
+  private final Map<String,List<String[]>> statsMap = Maps.newHashMap();
   private final int numClusters;
   
   public VectorBenchmarks(int cardinality, int sparsity, int numVectors, int numClusters, int loop, int opsPerUnit) {
@@ -187,7 +188,7 @@ public class VectorBenchmarks {
   private void buildVectorIncrementally(TimingStatistics stats, int randomIndex, Vector v, boolean useSetQuick) {
     int[] indexes = randomVectorIndices.get(randomIndex);
     double[] values = randomVectorValues.get(randomIndex);
-    List<Integer> randomOrder = new ArrayList<Integer>();
+    List<Integer> randomOrder = Lists.newArrayList();
     for (int i = 0; i < indexes.length; i++) {
       randomOrder.add(i);
     }
@@ -814,7 +815,7 @@ public class VectorBenchmarks {
       }
     }
     sb.append('\n');
-    List<String> keys = new ArrayList<String>(statsMap.keySet());
+    List<String> keys = Lists.newArrayList(statsMap.keySet());
     Collections.sort(keys);
     for (String benchmarkName : keys) {
       List<String[]> implTokenizedStats = statsMap.get(benchmarkName);

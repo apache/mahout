@@ -17,10 +17,10 @@
 
 package org.apache.mahout.df.data;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Random;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -50,7 +50,7 @@ public final class DataLoaderTest extends MahoutTestCase {
 
     // prepare the data
     double[][] data = Utils.randomDoubles(rng, descriptor, datasize);
-    Collection<Integer> missings = new ArrayList<Integer>();
+    Collection<Integer> missings = Lists.newArrayList();
     String[] sData = prepareData(data, attrs, missings);
     Dataset dataset = DataLoader.generateDataset(descriptor, sData);
     Data loaded = DataLoader.loadData(dataset, sData);
@@ -74,7 +74,7 @@ public final class DataLoaderTest extends MahoutTestCase {
 
     // prepare the data
     double[][] data = Utils.randomDoubles(rng, descriptor, datasize);
-    Collection<Integer> missings = new ArrayList<Integer>();
+    Collection<Integer> missings = Lists.newArrayList();
     String[] sData = prepareData(data, attrs, missings);
     Dataset expected = DataLoader.generateDataset(descriptor, sData);
 
@@ -221,7 +221,7 @@ public final class DataLoaderTest extends MahoutTestCase {
 
     // prepare the data
     double[][] source = Utils.randomDoubles(rng, descriptor, datasize);
-    Collection<Integer> missings = new ArrayList<Integer>();
+    Collection<Integer> missings = Lists.newArrayList();
     String[] sData = prepareData(source, attrs, missings);
     Dataset dataset = DataLoader.generateDataset(descriptor, sData);
 
@@ -247,7 +247,7 @@ public final class DataLoaderTest extends MahoutTestCase {
 
     // prepare the data
     double[][] source = Utils.randomDoubles(rng, descriptor, datasize);
-    Collection<Integer> missings = new ArrayList<Integer>();
+    Collection<Integer> missings = Lists.newArrayList();
     String[] sData = prepareData(source, attrs, missings);
     Dataset expected = DataLoader.generateDataset(descriptor, sData);
 

@@ -40,13 +40,7 @@ public final class IOUtils {
   private static final Logger log = LoggerFactory.getLogger(IOUtils.class);
   
   private IOUtils() { }
-  
-  public static void quietClose(Closeable... closeables) {
-    for (Closeable closeable : closeables) {
-      Closeables.closeQuietly(closeable);
-    }
-  }
-  
+
   // Sheez, why can't ResultSet, Statement and Connection implement Closeable?
   
   public static void quietClose(ResultSet closeable) {

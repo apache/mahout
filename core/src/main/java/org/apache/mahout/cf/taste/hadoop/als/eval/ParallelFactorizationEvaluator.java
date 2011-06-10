@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.utils.eval;
+package org.apache.mahout.cf.taste.hadoop.als.eval;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -99,7 +100,7 @@ public class ParallelFactorizationEvaluator extends AbstractJob {
       writer = new BufferedWriter(new OutputStreamWriter(outputStream));
       writer.write(String.valueOf(rmse));
     } finally {
-      IOUtils.quietClose(writer);
+      Closeables.closeQuietly(writer);
     }
 
     return 0;

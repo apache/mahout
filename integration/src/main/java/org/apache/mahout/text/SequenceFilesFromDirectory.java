@@ -20,9 +20,9 @@ package org.apache.mahout.text;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -132,7 +132,7 @@ public class SequenceFilesFromDirectory extends AbstractJob {
    * super() otherwise standard options (input/output dirs etc) will not be available.
    */
   protected Map<String, String> parseOptions() throws IOException {
-    Map<String, String> options = new HashMap<String, String>();
+    Map<String, String> options = Maps.newHashMap();
     options.put(CHUNK_SIZE_OPTION[0], getOption(CHUNK_SIZE_OPTION[0]));
     options.put(FILE_FILTER_CLASS_OPTION[0], getOption(FILE_FILTER_CLASS_OPTION[0]));
     options.put(CHARSET_OPTION[0], getOption(CHARSET_OPTION[0]));

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 
 import com.google.common.collect.AbstractIterator;
+import com.google.common.io.Closeables;
 import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -54,7 +55,7 @@ final class ARFFIterator extends AbstractIterator<Vector> {
       throw new IllegalStateException(ioe);
     }
     if (line == null) {
-      IOUtils.quietClose(reader);
+      Closeables.closeQuietly(reader);
       return endOfData();
     }
     Vector result;

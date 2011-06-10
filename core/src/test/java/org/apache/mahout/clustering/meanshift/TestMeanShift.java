@@ -17,14 +17,13 @@
 
 package org.apache.mahout.clustering.meanshift;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -97,7 +96,7 @@ public final class TestMeanShift extends MahoutTestCase {
   
   private List<MeanShiftCanopy> getInitialCanopies() {
     int nextCanopyId = 0;
-    List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
+    List<MeanShiftCanopy> canopies = Lists.newArrayList();
     for (Vector point : raw) {
       canopies.add(new MeanShiftCanopy(point, nextCanopyId++,
           euclideanDistanceMeasure));
@@ -135,7 +134,7 @@ public final class TestMeanShift extends MahoutTestCase {
     MeanShiftCanopyClusterer clusterer = new MeanShiftCanopyClusterer(
         new EuclideanDistanceMeasure(), new TriangularKernelProfile(), 4.0,
         1.0, 0.5);
-    List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
+    List<MeanShiftCanopy> canopies = Lists.newArrayList();
     // add all points to the canopies
     int nextCanopyId = 0;
     for (Vector aRaw : raw) {
@@ -146,7 +145,7 @@ public final class TestMeanShift extends MahoutTestCase {
     int iter = 1;
     while (!done) {// shift canopies to their centroids
       done = true;
-      List<MeanShiftCanopy> migratedCanopies = new ArrayList<MeanShiftCanopy>();
+      List<MeanShiftCanopy> migratedCanopies = Lists.newArrayList();
       for (MeanShiftCanopy canopy : canopies) {
         done = clusterer.shiftToMean(canopy) && done;
         clusterer.mergeCanopy(canopy, migratedCanopies);
@@ -164,7 +163,7 @@ public final class TestMeanShift extends MahoutTestCase {
    */
   @Test
   public void testClustererReferenceImplementation() {
-    Iterable<Vector> points = new ArrayList<Vector>(Arrays.asList(raw));
+    Iterable<Vector> points = Lists.newArrayList(raw);
     List<MeanShiftCanopy> canopies = MeanShiftCanopyClusterer.clusterPoints(
         points, euclideanDistanceMeasure, kernelProfile, 0.5, 4, 1, 10);
     printCanopies(canopies);
@@ -183,7 +182,7 @@ public final class TestMeanShift extends MahoutTestCase {
     // get the initial canopies
     List<MeanShiftCanopy> canopies = getInitialCanopies();
     // build the reference set
-    Collection<MeanShiftCanopy> refCanopies = new ArrayList<MeanShiftCanopy>();
+    Collection<MeanShiftCanopy> refCanopies = Lists.newArrayList();
     int nextCanopyId = 0;
     for (Vector aRaw : raw) {
       clusterer.mergeCanopy(new MeanShiftCanopy(aRaw, nextCanopyId++,
@@ -216,13 +215,13 @@ public final class TestMeanShift extends MahoutTestCase {
     assertEquals("Number of canopies", refCanopies.size(), data.size());
     
     // add all points to the reference canopies
-    Map<String,MeanShiftCanopy> refCanopyMap = new HashMap<String,MeanShiftCanopy>();
+    Map<String,MeanShiftCanopy> refCanopyMap = Maps.newHashMap();
     for (MeanShiftCanopy canopy : refCanopies) {
       clusterer.shiftToMean(canopy);
       refCanopyMap.put(canopy.getIdentifier(), canopy);
     }
     // build a map of the combiner output
-    Map<String,MeanShiftCanopy> canopyMap = new HashMap<String,MeanShiftCanopy>();
+    Map<String,MeanShiftCanopy> canopyMap = Maps.newHashMap();
     for (MeanShiftCanopy d : data) {
       canopyMap.put(d.getIdentifier(), d);
     }
@@ -253,7 +252,7 @@ public final class TestMeanShift extends MahoutTestCase {
     // get the initial canopies
     List<MeanShiftCanopy> canopies = getInitialCanopies();
     // build the mapper output reference set
-    Collection<MeanShiftCanopy> mapperReference = new ArrayList<MeanShiftCanopy>();
+    Collection<MeanShiftCanopy> mapperReference = Lists.newArrayList();
     int nextCanopyId = 0;
     for (Vector aRaw : raw) {
       clusterer.mergeCanopy(new MeanShiftCanopy(aRaw, nextCanopyId++,
@@ -263,7 +262,7 @@ public final class TestMeanShift extends MahoutTestCase {
       clusterer.shiftToMean(canopy);
     }
     // build the reducer reference output set
-    Collection<MeanShiftCanopy> reducerReference = new ArrayList<MeanShiftCanopy>();
+    Collection<MeanShiftCanopy> reducerReference = Lists.newArrayList();
     for (MeanShiftCanopy canopy : mapperReference) {
       clusterer.mergeCanopy(canopy, reducerReference);
     }
@@ -309,7 +308,7 @@ public final class TestMeanShift extends MahoutTestCase {
         .getKeys().size());
     
     // add all points to the reference canopy maps
-    Map<String,MeanShiftCanopy> reducerReferenceMap = new HashMap<String,MeanShiftCanopy>();
+    Map<String,MeanShiftCanopy> reducerReferenceMap = Maps.newHashMap();
     for (MeanShiftCanopy canopy : reducerReference) {
       reducerReferenceMap.put(canopy.getIdentifier(), canopy);
     }
@@ -344,7 +343,7 @@ public final class TestMeanShift extends MahoutTestCase {
     Path input = getTestTempDirPath("testdata");
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(input.toUri(), conf);
-    Collection<VectorWritable> points = new ArrayList<VectorWritable>();
+    Collection<VectorWritable> points = Lists.newArrayList();
     for (Vector v : raw) {
       points.add(new VectorWritable(v));
     }
@@ -394,7 +393,7 @@ public final class TestMeanShift extends MahoutTestCase {
     Path input = getTestTempDirPath("testdata");
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(input.toUri(), conf);
-    Collection<VectorWritable> points = new ArrayList<VectorWritable>();
+    Collection<VectorWritable> points = Lists.newArrayList();
     for (Vector v : raw) {
       points.add(new VectorWritable(v));
     }

@@ -17,8 +17,9 @@
 
 package org.apache.mahout.fpm.pfpgrowth.fpgrowth;
 
+import com.google.common.collect.Maps;
+
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
 
@@ -30,7 +31,7 @@ public class LeastKCache<K extends Comparable<? super K>,V> {
   
   public LeastKCache(int capacity) {
     this.capacity = capacity;
-    cache = new HashMap<K,V>(capacity);
+    cache = Maps.newHashMapWithExpectedSize(capacity);
     queue = new PriorityQueue<K>(capacity + 1, Collections.reverseOrder());
   }
 

@@ -88,7 +88,7 @@ public final class SimpleCsvExamples {
           out.println(x);
         }
       } finally {
-        IOUtils.quietClose(out);
+        Closeables.closeQuietly(out);
       }
     } else if ("--parse".equals(args[0])) {
       BufferedReader in = Files.newReader(new File(args[1]), Charsets.UTF_8);
@@ -104,7 +104,7 @@ public final class SimpleCsvExamples {
           line = in.readLine();
         }
       } finally {
-        IOUtils.quietClose(in);
+        Closeables.closeQuietly(in);
       }
       String separator = "";
       for (int i = 0; i < FIELDS; i++) {
@@ -125,7 +125,7 @@ public final class SimpleCsvExamples {
           line = in.read();
         }
       } finally {
-        IOUtils.quietClose(in);
+        Closeables.closeQuietly(in);
       }
       String separator = "";
       for (int i = 0; i < FIELDS; i++) {

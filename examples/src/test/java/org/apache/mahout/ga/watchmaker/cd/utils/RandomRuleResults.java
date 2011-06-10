@@ -17,14 +17,14 @@
 
 package org.apache.mahout.ga.watchmaker.cd.utils;
 
+import com.google.common.collect.Maps;
 import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public final class RandomRuleResults {
 
-  private static final Map<Integer, CDFitness> results = new HashMap<Integer, CDFitness>();
+  private static final Map<Integer, CDFitness> results = Maps.newHashMap();
 
   private RandomRuleResults() {
   }

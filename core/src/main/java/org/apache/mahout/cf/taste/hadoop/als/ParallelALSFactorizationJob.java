@@ -18,6 +18,8 @@
 package org.apache.mahout.cf.taste.hadoop.als;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.FloatWritable;
@@ -46,8 +48,6 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.als.AlternateLeastSquaresSolver;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -210,7 +210,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     protected void reduce(VarIntWritable id, Iterable<FeatureVectorWithRatingWritable> values, Context ctx)
       throws IOException, InterruptedException {
       Vector featureVector = null;
-      Map<Integer,Float> ratings = new HashMap<Integer,Float>();
+      Map<Integer,Float> ratings = Maps.newHashMap();
       for (FeatureVectorWithRatingWritable value : values) {
         if (value.getFeatureVector() == null) {
           ratings.put(value.getIDIndex(), value.getRating());
@@ -249,7 +249,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     @Override
     protected void reduce(IndexedVarIntWritable key, Iterable<FeatureVectorWithRatingWritable> values, Context ctx)
       throws IOException, InterruptedException {
-      List<Vector> UorMColumns = new ArrayList<Vector>();
+      List<Vector> UorMColumns = Lists.newArrayList();
       Vector ratingVector = new RandomAccessSparseVector(Integer.MAX_VALUE);
       int n = 0;
       for (FeatureVectorWithRatingWritable value : values) {

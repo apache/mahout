@@ -17,11 +17,11 @@
 
 package org.apache.mahout.cf.taste.impl.eval;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.eval.DataModelBuilder;
@@ -213,7 +213,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
                                        DataModel dataModel) throws TasteException {
     PreferenceArray prefs2Array = dataModel.getPreferencesFromUser(userID2);
     if (id == userID2) {
-      List<Preference> prefs2 = new ArrayList<Preference>(prefs2Array.length());
+      List<Preference> prefs2 = Lists.newArrayListWithCapacity(prefs2Array.length());
       for (Preference pref : prefs2Array) {
         prefs2.add(pref);
       }

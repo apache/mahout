@@ -17,13 +17,13 @@
 
 package org.apache.mahout.math;
 
+import com.google.common.collect.Maps;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.VectorFunction;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
@@ -598,13 +598,13 @@ public abstract class MatrixTest extends MahoutTestCase {
         {1, 4, 2}});
     assertNull("row bindings", m.getRowLabelBindings());
     assertNull("col bindings", m.getColumnLabelBindings());
-    Map<String, Integer> rowBindings = new HashMap<String, Integer>();
+    Map<String, Integer> rowBindings = Maps.newHashMap();
     rowBindings.put("Fee", 0);
     rowBindings.put("Fie", 1);
     rowBindings.put("Foe", 2);
     m.setRowLabelBindings(rowBindings);
     assertEquals("row", rowBindings, m.getRowLabelBindings());
-    Map<String, Integer> colBindings = new HashMap<String, Integer>();
+    Map<String, Integer> colBindings = Maps.newHashMap();
     colBindings.put("Foo", 0);
     colBindings.put("Bar", 1);
     colBindings.put("Baz", 2);
@@ -638,13 +638,13 @@ public abstract class MatrixTest extends MahoutTestCase {
         {1, 4, 2}});
     assertNull("row bindings", m.getRowLabelBindings());
     assertNull("col bindings", m.getColumnLabelBindings());
-    Map<String, Integer> rowBindings = new HashMap<String, Integer>();
+    Map<String, Integer> rowBindings = Maps.newHashMap();
     rowBindings.put("Fee", 0);
     rowBindings.put("Fie", 1);
     rowBindings.put("Foe", 2);
     m.setRowLabelBindings(rowBindings);
     assertEquals("row", rowBindings, m.getRowLabelBindings());
-    Map<String, Integer> colBindings = new HashMap<String, Integer>();
+    Map<String, Integer> colBindings = Maps.newHashMap();
     colBindings.put("Foo", 0);
     colBindings.put("Bar", 1);
     colBindings.put("Baz", 2);

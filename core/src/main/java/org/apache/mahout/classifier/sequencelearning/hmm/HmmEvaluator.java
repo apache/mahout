@@ -155,8 +155,7 @@ public final class HmmEvaluator {
    * @param scaled     set to true if betas are log-scaled.
    * @return likelihood of the outputSequence given the model.
    */
-  public static double modelLikelihood(HmmModel model, int[] outputSequence,
-                                       Matrix beta, boolean scaled) {
+  public static double modelLikelihood(HmmModel model, int[] outputSequence, Matrix beta, boolean scaled) {
     double likelihood = 0;
     // fetch the emission probabilities
     Matrix e = model.getEmissionMatrix();

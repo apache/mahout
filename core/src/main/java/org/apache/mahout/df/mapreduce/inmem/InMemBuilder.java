@@ -18,11 +18,11 @@
 package org.apache.mahout.df.mapreduce.inmem;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
@@ -81,7 +81,7 @@ public class InMemBuilder extends Builder {
   protected DecisionForest parseOutput(Job job, PredictionCallback callback) throws IOException {
     Configuration conf = job.getConfiguration();
     
-    Map<Integer,MapredOutput> output = new HashMap<Integer,MapredOutput>();
+    Map<Integer,MapredOutput> output = Maps.newHashMap();
     
     Path outputPath = getOutputPath(conf);
     FileSystem fs = outputPath.getFileSystem(conf);
@@ -102,7 +102,7 @@ public class InMemBuilder extends Builder {
    * Process the output, extracting the trees and passing the predictions to the callback
    */
   private static DecisionForest processOutput(Map<Integer,MapredOutput> output, PredictionCallback callback) {
-    List<Node> trees = new ArrayList<Node>();
+    List<Node> trees = Lists.newArrayList();
     
     for (Map.Entry<Integer,MapredOutput> entry : output.entrySet()) {
       MapredOutput value = entry.getValue();

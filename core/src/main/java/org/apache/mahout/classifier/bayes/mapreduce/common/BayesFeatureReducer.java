@@ -20,6 +20,7 @@ package org.apache.mahout.classifier.bayes.mapreduce.common;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.apache.mahout.classifier.bayes.BayesParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,6 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.common.StringTuple;
 
 import com.google.common.base.Preconditions;

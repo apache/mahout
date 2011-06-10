@@ -17,9 +17,10 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
@@ -47,7 +48,7 @@ public final class PreferredItemsNeighborhoodCandidateItemsStrategyTest extends 
     itemIDsFromUser456.add(1L);
     itemIDsFromUser456.add(2L);
 
-    List<Preference> prefs = new ArrayList<Preference>();
+    List<Preference> prefs = Lists.newArrayList();
     prefs.add(new GenericPreference(123L, 1L, 1.0f));
     prefs.add(new GenericPreference(456L, 1L, 1.0f));
     PreferenceArray preferencesForItem1 = new GenericItemPreferenceArray(prefs);

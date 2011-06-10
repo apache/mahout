@@ -18,11 +18,11 @@
 package org.apache.mahout.clustering.evaluation;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -167,7 +167,7 @@ public final class RepresentativePointsDriver extends AbstractJob {
                                       DistanceMeasure measure) throws IOException {
 
     Map<Integer, List<VectorWritable>> repPoints = RepresentativePointsMapper.getRepresentativePoints(conf, stateIn);
-    Map<Integer, WeightedVectorWritable> mostDistantPoints = new HashMap<Integer, WeightedVectorWritable>();
+    Map<Integer, WeightedVectorWritable> mostDistantPoints = Maps.newHashMap();
     FileSystem fs = FileSystem.get(clusteredPointsIn.toUri(), conf);
     for (Pair<IntWritable,WeightedVectorWritable> record :
          new SequenceFileDirIterable<IntWritable,WeightedVectorWritable>(

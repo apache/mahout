@@ -18,9 +18,9 @@
 package org.apache.mahout.ga.watchmaker.cd;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -174,7 +174,7 @@ public final class CDGA {
     CandidateFactory<CDRule> factory = new CDFactory(threshold);
 
     // Evolution Scheme
-    List<EvolutionaryOperator<CDRule>> operators = new ArrayList<EvolutionaryOperator<CDRule>>();
+    List<EvolutionaryOperator<CDRule>> operators = Lists.newArrayList();
     operators.add(new CDCrossover(crosspnts));
     operators.add(new CDMutation(mutrate, mutrange, mutprec));
     EvolutionPipeline<CDRule> pipeline = new EvolutionPipeline<CDRule>(operators);

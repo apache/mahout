@@ -19,7 +19,7 @@ package org.apache.mahout.classifier.bayes.mapreduce.common;
 import java.io.IOException;
 
 import org.apache.hadoop.fs.Path;
-import org.apache.mahout.classifier.bayes.common.BayesParameters;
+import org.apache.mahout.classifier.bayes.BayesParameters;
 
 /**
  * Implementors of this interface provide a way for running bayes training jobs on a hadoop cluster.

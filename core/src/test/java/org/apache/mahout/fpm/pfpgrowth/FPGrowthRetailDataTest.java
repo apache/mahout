@@ -18,12 +18,12 @@
 package org.apache.mahout.fpm.pfpgrowth;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Maps;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
@@ -52,7 +52,7 @@ public final class FPGrowthRetailDataTest extends MahoutTestCase {
       }
     }
     
-    final Map<Set<String>,Long> results = new HashMap<Set<String>,Long>();
+    final Map<Set<String>,Long> results = Maps.newHashMap();
     
     Set<String> returnableFeatures = new HashSet<String>();
     returnableFeatures.add("41");
@@ -90,7 +90,7 @@ public final class FPGrowthRetailDataTest extends MahoutTestCase {
   public void testRetailDataMinSup100() throws IOException {
     StringRecordIterator it = new StringRecordIterator(new FileLineIterable(Resources.getResource(
       "retail_results_with_min_sup_100.dat").openStream()), "\\s+");
-    final Map<Set<String>,Long> expectedResults = new HashMap<Set<String>,Long>();
+    final Map<Set<String>,Long> expectedResults = Maps.newHashMap();
     while (it.hasNext()) {
       Pair<List<String>,Long> next = it.next();
       List<String> items = new ArrayList<String>(next.getFirst());

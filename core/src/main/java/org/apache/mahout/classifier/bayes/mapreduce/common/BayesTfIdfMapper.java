@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.mapred.JobConf;
@@ -90,7 +91,7 @@ public class BayesTfIdfMapper extends MapReduceBase implements
   public void configure(JobConf job) {
     try {
       this.labelDocumentCounts.clear();
-      Map<String,Double> labelDocCountTemp = new HashMap<String,Double>();
+      Map<String,Double> labelDocCountTemp = Maps.newHashMap();
       
       DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(job,
           GenericsUtil.getClass(labelDocCountTemp));

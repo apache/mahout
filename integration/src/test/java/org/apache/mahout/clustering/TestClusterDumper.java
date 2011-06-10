@@ -18,10 +18,10 @@
 package org.apache.mahout.clustering;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -110,7 +110,7 @@ public final class TestClusterDumper extends MahoutTestCase {
   }
   
   private void getSampleData(String[] docs2) throws IOException {
-    sampleData = new ArrayList<VectorWritable>();
+    sampleData = Lists.newArrayList();
     RAMDirectory directory = new RAMDirectory();
     IndexWriter writer = new IndexWriter(directory, new StandardAnalyzer(
         Version.LUCENE_31), true, IndexWriter.MaxFieldLength.UNLIMITED);

@@ -18,12 +18,12 @@
 package org.apache.mahout.ga.watchmaker.cd.hadoop;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -106,7 +106,7 @@ public final class CDMahoutEvaluator {
    */
   public static CDFitness evaluate(Rule rule, int target, Path inpath, Path output, DatasetSplit split)
     throws IOException, InterruptedException, ClassNotFoundException {
-    List<CDFitness> evals = new ArrayList<CDFitness>();
+    List<CDFitness> evals = Lists.newArrayList();
 
     evaluate(Arrays.asList(rule), target, inpath, output, evals, split);
 

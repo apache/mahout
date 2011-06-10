@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -32,6 +31,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.commons.lang.StringUtils;
@@ -246,7 +246,7 @@ public final class ClusterDumper extends AbstractJob {
       int keyValue = record.getFirst().get();
       List<WeightedVectorWritable> pointList = result.get(keyValue);
       if (pointList == null) {
-        pointList = new ArrayList<WeightedVectorWritable>();
+        pointList = Lists.newArrayList();
         result.put(keyValue, pointList);
       }
       pointList.add(record.getSecond());
@@ -265,7 +265,7 @@ public final class ClusterDumper extends AbstractJob {
 
   public static String getTopFeatures(Vector vector, String[] dictionary, int numTerms) {
 
-    List<TermIndexWeight> vectorTerms = new ArrayList<TermIndexWeight>();
+    List<TermIndexWeight> vectorTerms = Lists.newArrayList();
 
     Iterator<Vector.Element> iter = vector.iterateNonZero();
     while (iter.hasNext()) {

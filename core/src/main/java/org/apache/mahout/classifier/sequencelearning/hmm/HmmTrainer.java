@@ -51,9 +51,8 @@ public final class HmmTrainer {
    *                         probabilities.
    * @return An initial model using the estimated parameters
    */
-  public static HmmModel trainSupervised(int nrOfHiddenStates,
-                                         int nrOfOutputStates, int[] observedSequence, int[] hiddenSequence,
-                                         double pseudoCount) {
+  public static HmmModel trainSupervised(int nrOfHiddenStates, int nrOfOutputStates, int[] observedSequence,
+      int[] hiddenSequence, double pseudoCount) {
     // make sure the pseudo count is not zero
     pseudoCount = pseudoCount == 0 ? Double.MIN_VALUE : pseudoCount;
 

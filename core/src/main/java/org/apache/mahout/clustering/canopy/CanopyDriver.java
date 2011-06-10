@@ -18,9 +18,9 @@
 package org.apache.mahout.clustering.canopy;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -270,7 +270,7 @@ public class CanopyDriver extends AbstractJob {
                                        double t1,
                                        double t2) throws IOException {
     CanopyClusterer clusterer = new CanopyClusterer(measure, t1, t2);
-    Collection<Canopy> canopies = new ArrayList<Canopy>();
+    Collection<Canopy> canopies = Lists.newArrayList();
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(input.toUri(), conf);
 
@@ -383,7 +383,7 @@ public class CanopyDriver extends AbstractJob {
     throws InstantiationException, IllegalAccessException, IOException {
     CanopyClusterer clusterer = new CanopyClusterer(measure, t1, t2);
 
-    Collection<Canopy> clusters = new ArrayList<Canopy>();
+    Collection<Canopy> clusters = Lists.newArrayList();
     Configuration conf = new Configuration();
 
     for (Canopy value

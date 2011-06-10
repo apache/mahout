@@ -17,11 +17,11 @@
 
 package org.apache.mahout.cf.taste.impl.recommender.svd;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
@@ -98,7 +98,7 @@ public final class ExpectationMaximizationSVDFactorizer extends AbstractFactoriz
         rightVectors[itemIndex][feature] = defaultValue + (random.nextDouble() - 0.5) * interval * randomNoise;
       }
     }
-    cachedPreferences = new ArrayList<SVDPreference>(dataModel.getNumUsers());
+    cachedPreferences = Lists.newArrayListWithCapacity(dataModel.getNumUsers());
     cachePreferences();
     double rmse = dataModel.getMaxPreference() - dataModel.getMinPreference();
     for (int ii = 0; ii < numFeatures; ii++) {

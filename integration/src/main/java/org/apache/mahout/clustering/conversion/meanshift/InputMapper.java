@@ -18,10 +18,10 @@
 package org.apache.mahout.clustering.conversion.meanshift;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -40,7 +40,7 @@ public class InputMapper extends Mapper<LongWritable, Text, Text, MeanShiftCanop
   protected void map(LongWritable key, Text values, Context context) throws IOException, InterruptedException {
     String[] numbers = InputMapper.SPACE.split(values.toString());
     // sometimes there are multiple separator spaces
-    Collection<Double> doubles = new ArrayList<Double>();
+    Collection<Double> doubles = Lists.newArrayList();
     for (String value : numbers) {
       if (value.length() > 0) {
         doubles.add(Double.valueOf(value));

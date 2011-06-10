@@ -20,9 +20,9 @@ package org.apache.mahout.cf.taste.hadoop;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
@@ -66,7 +66,7 @@ public final class RecommendedItemsWritable implements Writable {
   @Override
   public void readFields(DataInput in) throws IOException {
     int size = in.readInt();
-    recommended = new ArrayList<RecommendedItem>(size);
+    recommended = Lists.newArrayListWithCapacity(size);
     for (int i = 0; i < size; i++) {
       long itemID = Varint.readSignedVarLong(in);
       float value = in.readFloat();

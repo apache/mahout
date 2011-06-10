@@ -28,7 +28,6 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.fs.Path;
-import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.classifier.bayes.mapreduce.bayes.BayesDriver;
 import org.apache.mahout.classifier.bayes.mapreduce.cbayes.CBayesDriver;
 import org.apache.mahout.common.CommandLineUtil;

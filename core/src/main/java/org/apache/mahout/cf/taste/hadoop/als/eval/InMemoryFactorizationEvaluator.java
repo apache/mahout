@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.utils.eval;
+package org.apache.mahout.cf.taste.hadoop.als.eval;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -109,7 +110,7 @@ public class InMemoryFactorizationEvaluator extends AbstractJob {
       double mae = maeAvg.getAverage();
       writer.write("RMSE: " + rmse + ", MAE: " + mae + "\n");
     } finally {
-      IOUtils.quietClose(writer);
+      Closeables.closeQuietly(writer);
     }
     return 0;
   }
@@ -135,7 +136,7 @@ public class InMemoryFactorizationEvaluator extends AbstractJob {
           }
         }
       } finally {
-        IOUtils.quietClose(reader);
+        Closeables.closeQuietly(reader);
       }
     }
     return matrix;
@@ -160,7 +161,7 @@ public class InMemoryFactorizationEvaluator extends AbstractJob {
           preferences.add(new GenericPreference(userID, itemID, value));
         }
       } finally {
-        IOUtils.quietClose(in);
+        Closeables.closeQuietly(in);
       }
     }
     return preferences;

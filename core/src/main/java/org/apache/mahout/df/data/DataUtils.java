@@ -18,8 +18,8 @@
 package org.apache.mahout.df.data;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -72,7 +72,7 @@ public final class DataUtils {
    */
   public static int maxindex(Random rng, int[] values) {
     int max = 0;
-    List<Integer> maxindices = new ArrayList<Integer>();
+    List<Integer> maxindices = Lists.newArrayList();
     
     for (int index = 0; index < values.length; index++) {
       if (values[index] > max) {

@@ -18,10 +18,10 @@
 package org.apache.mahout.clustering.dirichlet;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile.Writer;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -103,7 +103,7 @@ public class DirichletClusterer {
 
   private final int numClusters;
 
-  private final List<Cluster[]> clusterSamples = new ArrayList<Cluster[]>();
+  private final List<Cluster[]> clusterSamples = Lists.newArrayList();
 
   private boolean emitMostLikely;
 

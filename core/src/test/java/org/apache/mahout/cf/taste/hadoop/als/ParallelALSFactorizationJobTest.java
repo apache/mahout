@@ -49,7 +49,7 @@ import java.util.Iterator;
 
 public class ParallelALSFactorizationJobTest extends TasteTestCase {
 
-  private static final Logger logger = LoggerFactory.getLogger(ParallelALSFactorizationJobTest.class);
+  private static final Logger log = LoggerFactory.getLogger(ParallelALSFactorizationJobTest.class);
 
   @Test
   public void prefsToRatingsMapper() throws Exception {
@@ -234,7 +234,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
         }
       }
     }
-    logger.info("Input matrix:\n" + prefsAsText);
+    log.info("Input matrix:\n" + prefsAsText);
     writeLines(inputFile, prefsAsText.toString());
 
     ParallelALSFactorizationJob alsFactorization = new ParallelALSFactorizationJob();
@@ -268,13 +268,13 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
           double estimate = u.getRow(slice.index()).dot(m.getRow(e.index()));
           double err = pref - estimate;
           avg.addDatum(err * err);
-          logger.info("Comparing preference of user [" + slice.index() + "] towards item [" + e.index() + "], " +
+          log.info("Comparing preference of user [" + slice.index() + "] towards item [" + e.index() + "], " +
               "was [" + pref + "] estimate is [" + estimate + ']');
         }
       }
     }
     double rmse = Math.sqrt(avg.getAverage());
-    logger.info("RMSE: " + rmse);
+    log.info("RMSE: " + rmse);
 
     assertTrue(rmse < 0.2);
   }

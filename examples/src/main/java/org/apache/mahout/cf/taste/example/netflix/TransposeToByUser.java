@@ -22,13 +22,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.io.Closeables;
 import org.apache.commons.cli2.OptionException;
 import org.apache.mahout.cf.taste.example.TasteOptionParser;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
@@ -72,7 +73,7 @@ public final class TransposeToByUser {
         String ratingString = line.substring(firstComma, secondComma); // keep comma
         List<String> cachedLines = byUserEntryCache.get(userIDString);
         if (cachedLines == null) {
-          cachedLines = new ArrayList<String>();
+          cachedLines = Lists.newArrayList();
           byUserEntryCache.put(userIDString, cachedLines);
         }
         cachedLines.add(movieIDString + ratingString);
@@ -108,7 +109,7 @@ public final class TransposeToByUser {
         outputStreamWriter.println(s);
       }
     } finally {
-      IOUtils.quietClose(outputStreamWriter);
+      Closeables.closeQuietly(outputStreamWriter);
     }
   }
   

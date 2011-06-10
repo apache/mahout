@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math.hadoop;
 
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -33,7 +34,6 @@ import org.apache.mahout.math.decomposer.SolverTest;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -44,8 +44,8 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
   private static void assertEquals(VectorIterable m, VectorIterable mtt, double errorTolerance) {
     Iterator<MatrixSlice> mIt = m.iterateAll();
     Iterator<MatrixSlice> mttIt = mtt.iterateAll();
-    Map<Integer, Vector> mMap = new HashMap<Integer,Vector>();
-    Map<Integer, Vector> mttMap = new HashMap<Integer, Vector>();
+    Map<Integer, Vector> mMap = Maps.newHashMap();
+    Map<Integer, Vector> mttMap = Maps.newHashMap();
     while (mIt.hasNext() && mttIt.hasNext()) {
       MatrixSlice ms = mIt.next();
       mMap.put(ms.index(), ms.vector());

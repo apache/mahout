@@ -16,9 +16,9 @@
  */
 package org.apache.mahout.clustering;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
@@ -34,7 +34,7 @@ public final class TestGaussianAccumulators extends MahoutTestCase {
 
   private static final Logger log = LoggerFactory.getLogger(TestGaussianAccumulators.class);
 
-  private Collection<VectorWritable> sampleData = new ArrayList<VectorWritable>();
+  private Collection<VectorWritable> sampleData = Lists.newArrayList();
   private int sampleN;
   private Vector sampleMean;
   private Vector sampleStd;
@@ -43,7 +43,7 @@ public final class TestGaussianAccumulators extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    sampleData = new ArrayList<VectorWritable>();
+    sampleData = Lists.newArrayList();
     generateSamples();
     sampleN = 0;
     Vector sum = new DenseVector(2);

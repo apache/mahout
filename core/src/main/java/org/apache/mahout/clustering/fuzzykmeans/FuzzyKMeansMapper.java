@@ -18,10 +18,10 @@
 package org.apache.mahout.clustering.fuzzykmeans;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -36,7 +36,7 @@ public class FuzzyKMeansMapper extends Mapper<WritableComparable<?>,VectorWritab
   
   private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansMapper.class);
   
-  private final List<SoftCluster> clusters = new ArrayList<SoftCluster>();
+  private final List<SoftCluster> clusters = Lists.newArrayList();
   private FuzzyKMeansClusterer clusterer;
 
   @Override

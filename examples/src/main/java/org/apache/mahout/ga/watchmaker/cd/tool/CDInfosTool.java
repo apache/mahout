@@ -20,13 +20,13 @@ package org.apache.mahout.ga.watchmaker.cd.tool;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -155,7 +155,7 @@ public final class CDInfosTool {
     FSDataInputStream input = fs.open(infpath);
     Scanner reader = new Scanner(input);
 
-    List<Character> descriptors = new ArrayList<Character>();
+    List<Character> descriptors = Lists.newArrayList();
 
     while (reader.hasNextLine()) {
       String c = reader.nextLine();
@@ -238,7 +238,7 @@ public final class CDInfosTool {
       Descriptors descriptors = loadDescriptors(fs, input);
 
       log.info("Gathering informations...");
-      List<String> descriptions = new ArrayList<String>();
+      List<String> descriptions = Lists.newArrayList();
       gatherInfos(descriptors, input, output, descriptions);
 
       log.info("Storing Descriptions...");

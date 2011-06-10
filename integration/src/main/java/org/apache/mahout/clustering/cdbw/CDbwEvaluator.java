@@ -17,12 +17,12 @@
 
 package org.apache.mahout.clustering.cdbw;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.Cluster;
@@ -48,7 +48,7 @@ public class CDbwEvaluator {
   private static final Logger log = LoggerFactory.getLogger(CDbwEvaluator.class);
 
   private final Map<Integer, List<VectorWritable>> representativePoints;
-  private final Map<Integer, Double> stDevs = new HashMap<Integer, Double>();
+  private final Map<Integer, Double> stDevs = Maps.newHashMap();
   private final List<Cluster> clusters;
   private final DistanceMeasure measure;
   private boolean pruned;
@@ -102,7 +102,7 @@ public class CDbwEvaluator {
    * @return a List<Cluster> of the clusters
    */
   private static List<Cluster> loadClusters(Configuration conf, Path clustersIn) {
-    List<Cluster> clusters = new ArrayList<Cluster>();
+    List<Cluster> clusters = Lists.newArrayList();
     for (Cluster value :
          new SequenceFileDirValueIterable<Cluster>(clustersIn, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
       clusters.add(value);

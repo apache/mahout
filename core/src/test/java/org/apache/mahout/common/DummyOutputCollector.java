@@ -17,11 +17,11 @@
 
 package org.apache.mahout.common;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.OutputCollector;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,7 +36,7 @@ public final class DummyOutputCollector<K extends WritableComparable, V extends 
   public void collect(K key,V values) {
     List<V> points = data.get(key);
     if (points == null) {
-      points = new ArrayList<V>();
+      points = Lists.newArrayList();
       data.put(key, points);
     }
     points.add(values);

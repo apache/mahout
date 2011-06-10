@@ -19,11 +19,11 @@ package org.apache.mahout.vectorizer;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
@@ -170,7 +170,7 @@ public final class DictionaryVectorizer {
     }
     
     int partialVectorIndex = 0;
-    Collection<Path> partialVectorPaths = new ArrayList<Path>();
+    Collection<Path> partialVectorPaths = Lists.newArrayList();
     for (Path dictionaryChunk : dictionaryChunks) {
       Path partialVectorOutputPath = new Path(output, VECTOR_OUTPUT_FOLDER + partialVectorIndex++);
       partialVectorPaths.add(partialVectorOutputPath);
@@ -195,7 +195,7 @@ public final class DictionaryVectorizer {
                                                    Configuration baseConf,
                                                    int chunkSizeInMegabytes,
                                                    int[] maxTermDimension) throws IOException {
-    List<Path> chunkPaths = new ArrayList<Path>();
+    List<Path> chunkPaths = Lists.newArrayList();
     
     Configuration conf = new Configuration(baseConf);
     

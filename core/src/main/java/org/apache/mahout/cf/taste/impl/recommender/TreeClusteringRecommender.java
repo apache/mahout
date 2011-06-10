@@ -17,13 +17,13 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
@@ -202,7 +202,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     }
 
     DataModel dataModel = getDataModel();
-    List<RecommendedItem> rescored = new ArrayList<RecommendedItem>(recommended.size());
+    List<RecommendedItem> rescored = Lists.newArrayListWithCapacity(recommended.size());
     // Only add items the user doesn't already have a preference for.
     // And that the rescorer doesn't "reject".
     for (RecommendedItem recommendedItem : recommended) {
@@ -257,7 +257,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     DataModel model = getDataModel();
     int numUsers = model.getNumUsers();
     if (numUsers > 0) {
-      List<FastIDSet> newClusters = new ArrayList<FastIDSet>(numUsers);
+      List<FastIDSet> newClusters = Lists.newArrayListWithCapacity(numUsers);
       // Begin with a cluster for each user:
       LongPrimitiveIterator it = model.getUserIDs();
       while (it.hasNext()) {

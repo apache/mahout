@@ -21,7 +21,7 @@ import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.mahout.classifier.bayes.common.BayesParameters;
+import org.apache.mahout.classifier.bayes.BayesParameters;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesFeatureDriver;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesJob;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesTfIdfDriver;

@@ -18,11 +18,11 @@
 package org.apache.mahout.ga.watchmaker.cd.tool;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -86,7 +86,7 @@ public class ToolMapper extends Mapper<LongWritable, Text, LongWritable, Text> {
    * attributes.
    */
   static List<String> extractAttributes(Text value) {
-    List<String> result = new ArrayList<String>();
+    List<String> result = Lists.newArrayList();
     for (String token : COMMA.split(value.toString())) {
       result.add(token.trim());
     }

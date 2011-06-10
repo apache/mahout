@@ -17,7 +17,6 @@
 
 package org.apache.mahout.cf.taste.impl.eval;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +28,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -95,8 +95,8 @@ public abstract class AbstractDifferenceRecommenderEvaluator implements Recommen
                          DataModel dataModel,
                          double trainingPercentage,
                          double evaluationPercentage) throws TasteException {
-    Preconditions.checkArgument(recommenderBuilder != null, "recommenderBuilder is null");
-    Preconditions.checkArgument(dataModel != null, "dataModel is null");
+    Preconditions.checkNotNull(recommenderBuilder);
+    Preconditions.checkNotNull(dataModel);
     Preconditions.checkArgument(trainingPercentage >= 0.0 && trainingPercentage <= 1.0,
       "Invalid trainingPercentage: " + trainingPercentage);
     Preconditions.checkArgument(evaluationPercentage >= 0.0 && evaluationPercentage <= 1.0,
@@ -141,12 +141,12 @@ public abstract class AbstractDifferenceRecommenderEvaluator implements Recommen
       Preference newPref = new GenericPreference(userID, prefs.getItemID(i), prefs.getValue(i));
       if (random.nextDouble() < trainingPercentage) {
         if (trainingPrefs == null) {
-          trainingPrefs = new ArrayList<Preference>(3);
+          trainingPrefs = Lists.newArrayListWithCapacity(3);
         }
         trainingPrefs.add(newPref);
       } else {
         if (testPrefs == null) {
-          testPrefs = new ArrayList<Preference>(3);
+          testPrefs = Lists.newArrayListWithCapacity(3);
         }
         testPrefs.add(newPref);
       }
@@ -172,7 +172,7 @@ public abstract class AbstractDifferenceRecommenderEvaluator implements Recommen
   private double getEvaluation(FastByIDMap<PreferenceArray> testUserPrefs, Recommender recommender)
     throws TasteException {
     reset();
-    Collection<Callable<Void>> estimateCallables = new ArrayList<Callable<Void>>();
+    Collection<Callable<Void>> estimateCallables = Lists.newArrayList();
     AtomicInteger noEstimateCounter = new AtomicInteger();
     for (Map.Entry<Long,PreferenceArray> entry : testUserPrefs.entrySet()) {
       estimateCallables.add(
@@ -207,7 +207,7 @@ public abstract class AbstractDifferenceRecommenderEvaluator implements Recommen
   private static Collection<Callable<Void>> wrapWithStatsCallables(Collection<Callable<Void>> callables,
                                                                    AtomicInteger noEstimateCounter) {
     int size = callables.size();
-    Collection<Callable<Void>> wrapped = new ArrayList<Callable<Void>>(size);
+    Collection<Callable<Void>> wrapped = Lists.newArrayList();
     int count = 0;
     RunningAverageAndStdDev timing = new FullRunningAverageAndStdDev();
     for (Callable<Void> callable : callables) {

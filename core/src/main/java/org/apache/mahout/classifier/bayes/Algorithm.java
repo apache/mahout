@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.classifier.bayes.interfaces;
+package org.apache.mahout.classifier.bayes;
 
 import java.util.Collection;
 
 import org.apache.mahout.classifier.ClassifierResult;
-import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
 
 /**
  * The algorithm interface for implementing variations of bayes Algorithm
@@ -75,7 +74,7 @@ public interface Algorithm {
    * Get the weighted probability of the feature.
    * 
    * @param datastore
-   *          The {@link org.apache.mahout.classifier.bayes.interfaces.Datastore} (InMemory)
+   *          The {@link Datastore} (InMemory)
    * @param label
    *          The label of the feature
    * @param feature
@@ -90,7 +89,7 @@ public interface Algorithm {
    * of a particular class
    * 
    * @param datastore
-   *          The {@link org.apache.mahout.classifier.bayes.interfaces.Datastore} (InMemory)
+   *          The {@link Datastore} (InMemory)
    * @param label
    *          The label to calculate the probability of
    * @param document
@@ -104,7 +103,7 @@ public interface Algorithm {
    * Returns the labels in the given Model
    * 
    * @param datastore
-   *          The {@link org.apache.mahout.classifier.bayes.interfaces.Datastore} (InMemory)
+   *          The {@link Datastore} (InMemory)
    * @throws InvalidDatastoreException
    * @return {@link Collection} of labels
    */

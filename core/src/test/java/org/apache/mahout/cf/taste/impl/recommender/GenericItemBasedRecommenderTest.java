@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
@@ -33,7 +34,6 @@ import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.easymock.EasyMock;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -70,8 +70,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
                     {0.2, 0.3, 0.6, 0.7, 0.1, 0.2},
             });
 
-    Collection<GenericItemSimilarity.ItemItemSimilarity> similarities =
-        new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(6);
+    Collection<GenericItemSimilarity.ItemItemSimilarity> similarities = Lists.newArrayList();
     for (int i = 0; i < 6; i++) {
       for (int j = i + 1; j < 6; j++) {
         similarities.add(
@@ -102,8 +101,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
                     {0.4, 0.4, 0.5, 0.9},
             });
 
-    Collection<GenericItemSimilarity.ItemItemSimilarity> similarities =
-        new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(6);
+    Collection<GenericItemSimilarity.ItemItemSimilarity> similarities = Lists.newArrayList();
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(0, 1, 1.0));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(0, 2, 0.5));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(0, 3, 0.2));
@@ -219,8 +217,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
 
   private static ItemBasedRecommender buildRecommender() {
     DataModel dataModel = getDataModel();
-    Collection<GenericItemSimilarity.ItemItemSimilarity> similarities =
-        new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(3);
+    Collection<GenericItemSimilarity.ItemItemSimilarity> similarities = Lists.newArrayList();
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(0, 1, 1.0));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(0, 2, 0.5));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(1, 2, 0.0));
@@ -239,8 +236,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
                 {0.7, 0.3, 0.8, 0.5, 0.6},
         });
 
-    Collection<GenericItemSimilarity.ItemItemSimilarity> similarities =
-        new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(10);
+    Collection<GenericItemSimilarity.ItemItemSimilarity> similarities = Lists.newArrayList();
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(0, 1, 1.0));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(0, 2, 0.8));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(0, 3, -0.6));

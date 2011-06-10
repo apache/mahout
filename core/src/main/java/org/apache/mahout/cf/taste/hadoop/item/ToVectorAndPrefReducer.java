@@ -18,9 +18,9 @@
 package org.apache.mahout.cf.taste.hadoop.item;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.Vector;
@@ -33,8 +33,8 @@ public final class ToVectorAndPrefReducer extends
                         Iterable<VectorOrPrefWritable> values,
                         Context context) throws IOException, InterruptedException {
 
-    List<Long> userIDs = new ArrayList<Long>();
-    List<Float> prefValues = new ArrayList<Float>();
+    List<Long> userIDs = Lists.newArrayList();
+    List<Float> prefValues = Lists.newArrayList();
     Vector similarityMatrixColumn = null;
     for (VectorOrPrefWritable value : values) {
       if (value.getVector() == null) {

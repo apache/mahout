@@ -18,9 +18,9 @@
 package org.apache.mahout.clustering.canopy;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.math.Vector;
@@ -28,7 +28,7 @@ import org.apache.mahout.math.VectorWritable;
 
 public class CanopyReducer extends Reducer<Text, VectorWritable, Text, Canopy> {
 
-  private final Collection<Canopy> canopies = new ArrayList<Canopy>();
+  private final Collection<Canopy> canopies = Lists.newArrayList();
 
   private CanopyClusterer canopyClusterer;
 

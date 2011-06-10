@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math.decomposer;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.MahoutTestCase;
@@ -30,7 +31,6 @@ import org.apache.mahout.math.function.Functions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -42,7 +42,7 @@ public abstract class SolverTest extends MahoutTestCase {
   }
 
   public static void assertOrthonormal(Matrix currentEigens, double errorMargin) {
-    List<String> nonOrthogonals = new ArrayList<String>();
+    List<String> nonOrthogonals = Lists.newArrayList();
     for (int i = 0; i < currentEigens.numRows(); i++) {
       Vector ei = currentEigens.getRow(i);
       for (int j = 0; j <= i; j++) {
@@ -66,7 +66,7 @@ public abstract class SolverTest extends MahoutTestCase {
 
   public static void assertOrthonormal(LanczosState state) {
     double errorMargin = 1.0e-5;
-    List<String> nonOrthogonals = new ArrayList<String>();
+    List<String> nonOrthogonals = Lists.newArrayList();
     for (int i = 0; i < state.getIterationNumber(); i++) {
       Vector ei = state.getRightSingularVector(i);
       for (int j = 0; j <= i; j++) {

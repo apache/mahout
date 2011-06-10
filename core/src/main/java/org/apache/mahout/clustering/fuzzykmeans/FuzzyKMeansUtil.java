@@ -18,9 +18,9 @@
 package org.apache.mahout.clustering.fuzzykmeans;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -43,7 +43,7 @@ final class FuzzyKMeansUtil {
     // Get the path location where the cluster Info is stored
     Configuration conf = new Configuration();
     Path clusterPath = new Path(clusterPathStr, "*");
-    Collection<Path> result = new ArrayList<Path>();
+    Collection<Path> result = Lists.newArrayList();
 
     // get all filtered file names in result list
     FileSystem fs = clusterPath.getFileSystem(conf);

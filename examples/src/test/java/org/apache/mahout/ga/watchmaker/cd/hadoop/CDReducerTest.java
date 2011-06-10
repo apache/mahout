@@ -17,11 +17,11 @@
 
 package org.apache.mahout.ga.watchmaker.cd.hadoop;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -44,7 +44,7 @@ public final class CDReducerTest extends MahoutTestCase {
   public void setUp() throws Exception {
     super.setUp();
     // generate random evaluatons and calculate expectations
-    evaluations = new ArrayList<CDFitness>();
+    evaluations = Lists.newArrayList();
     Random rng = RandomUtils.getRandom();
     int tp = 0;
     int fp = 0;

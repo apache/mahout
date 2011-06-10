@@ -18,9 +18,9 @@
 package org.apache.mahout.fpm.pfpgrowth;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.common.Pair;
@@ -39,7 +39,7 @@ public class AggregatorMapper extends Mapper<Text,TopKStringPatterns,Text,TopKSt
                                                                           InterruptedException {
     for (Pair<List<String>,Long> pattern : values.getPatterns()) {
       for (String item : pattern.getFirst()) {
-        List<Pair<List<String>,Long>> patternSingularList = new ArrayList<Pair<List<String>,Long>>();
+        List<Pair<List<String>,Long>> patternSingularList = Lists.newArrayList();
         patternSingularList.add(pattern);
         context.setStatus("Aggregator Mapper:Grouping Patterns for " + item);
         context.write(new Text(item), new TopKStringPatterns(patternSingularList));

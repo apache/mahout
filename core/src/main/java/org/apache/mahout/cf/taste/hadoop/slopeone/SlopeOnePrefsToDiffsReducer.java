@@ -18,10 +18,10 @@
 package org.apache.mahout.cf.taste.hadoop.slopeone;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
@@ -35,7 +35,7 @@ public final class SlopeOnePrefsToDiffsReducer extends
   protected void reduce(VarLongWritable key,
                         Iterable<EntityPrefWritable> values,
                         Context context) throws IOException, InterruptedException {
-    List<EntityPrefWritable> prefs = new ArrayList<EntityPrefWritable>();
+    List<EntityPrefWritable> prefs = Lists.newArrayList();
     for (EntityPrefWritable writable : values) {
       prefs.add(new EntityPrefWritable(writable));
     }

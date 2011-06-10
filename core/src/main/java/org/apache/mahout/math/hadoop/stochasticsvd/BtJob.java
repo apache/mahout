@@ -18,11 +18,11 @@
 package org.apache.mahout.math.hadoop.stochasticsvd;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -69,7 +69,7 @@ public final class BtJob {
   public static class BtMapper extends Mapper<Writable, VectorWritable, IntWritable, VectorWritable> {
 
     private SequenceFile.Reader qInput;
-    private final List<UpperTriangular> mRs = new ArrayList<UpperTriangular>();
+    private final List<UpperTriangular> mRs = Lists.newArrayList();
     private int blockNum;
     private double[][] mQt;
     private int cnt;

@@ -17,6 +17,8 @@
 
 package org.apache.mahout.utils.vectors.arff;
 
+import com.google.common.collect.Maps;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -51,10 +53,10 @@ public class MapBackedARFFModel implements ARFFModel {
   public MapBackedARFFModel(Map<String,Long> words, long wordCount, Map<String,Map<String,Integer>> nominalMap) {
     this.words = words;
     this.wordCount = wordCount;
-    labelBindings = new HashMap<String,Integer>();
-    idxLabel = new HashMap<Integer,String>();
-    typeMap = new HashMap<Integer,ARFFType>();
-    dateMap = new HashMap<Integer,DateFormat>();
+    labelBindings = Maps.newHashMap();
+    idxLabel = Maps.newHashMap();
+    typeMap = Maps.newHashMap();
+    dateMap = Maps.newHashMap();
     this.nominalMap = nominalMap;
     
   }
@@ -210,7 +212,7 @@ public class MapBackedARFFModel implements ARFFModel {
   public void addNominal(String label, String nominal, int idx) {
     Map<String,Integer> noms = nominalMap.get(label);
     if (noms == null) {
-      noms = new HashMap<String,Integer>();
+      noms = Maps.newHashMap();
       nominalMap.put(label, noms);
     }
     noms.put(nominal, idx);

@@ -20,10 +20,10 @@ package org.apache.mahout.clustering.display;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.Cluster;
@@ -83,11 +83,11 @@ public class DisplayFuzzyKMeans extends DisplayClustering {
                                                     DistanceMeasure measure,
                                                     int numClusters,
                                                     int maxIterations) throws IOException {
-    Collection<Vector> points = new ArrayList<Vector>();
+    Collection<Vector> points = Lists.newArrayList();
     for (int i = 0; i < numClusters; i++) {
       points.add(SAMPLE_DATA.get(i).get());
     }
-    List<Cluster> initialClusters = new ArrayList<Cluster>();
+    List<Cluster> initialClusters = Lists.newArrayList();
     int id = 0;
     for (Vector point : points) {
       initialClusters.add(new SoftCluster(point, id++, measure));

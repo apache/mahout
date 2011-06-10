@@ -17,9 +17,9 @@
 
 package org.apache.mahout.clustering.dirichlet;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.dirichlet.models.DistanceMeasureClusterDistribution;
 import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
@@ -37,7 +37,7 @@ public final class TestDirichletClustering extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    sampleData = new ArrayList<VectorWritable>();
+    sampleData = Lists.newArrayList();
   }
 
   /**

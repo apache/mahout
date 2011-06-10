@@ -18,11 +18,11 @@
 package org.apache.mahout.clustering.fuzzykmeans;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -31,7 +31,7 @@ import org.apache.mahout.clustering.ClusterObservations;
 
 public class FuzzyKMeansReducer extends Reducer<Text, ClusterObservations, Text, SoftCluster> {
 
-  private final Map<String, SoftCluster> clusterMap = new HashMap<String, SoftCluster>();
+  private final Map<String, SoftCluster> clusterMap = Maps.newHashMap();
 
   private FuzzyKMeansClusterer clusterer;
 
@@ -61,7 +61,7 @@ public class FuzzyKMeansReducer extends Reducer<Text, ClusterObservations, Text,
     Configuration conf = context.getConfiguration();
     clusterer = new FuzzyKMeansClusterer(conf);
 
-    Collection<SoftCluster> clusters = new ArrayList<SoftCluster>();
+    Collection<SoftCluster> clusters = Lists.newArrayList();
     String clusterPath = conf.get(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY);
     if (clusterPath != null && clusterPath.length() > 0) {
       FuzzyKMeansUtil.configureWithClusterInfo(new Path(clusterPath), clusters);

@@ -17,9 +17,9 @@
 
 package org.apache.mahout.vectorizer.encoders;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +38,7 @@ public class Dictionary {
 
   public List<String> values() {
     // order of keySet is guaranteed to be insertion order
-    return new ArrayList<String>(dict.keySet());
+    return Lists.newArrayList(dict.keySet());
   }
 
   public int size() {

@@ -17,13 +17,13 @@
 
 package org.apache.mahout.clustering.canopy;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -73,7 +73,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
   private FileSystem fs;
 
   private static List<VectorWritable> getPointsWritable() {
-    List<VectorWritable> points = new ArrayList<VectorWritable>();
+    List<VectorWritable> points = Lists.newArrayList();
     for (double[] fr : RAW) {
       Vector vec = new RandomAccessSparseVector(fr.length);
       vec.assign(fr);
@@ -83,7 +83,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
   }
 
   private static List<Vector> getPoints() {
-    List<Vector> points = new ArrayList<Vector>();
+    List<Vector> points = Lists.newArrayList();
     for (double[] fr : RAW) {
       Vector vec = new RandomAccessSparseVector(fr.length);
       vec.assign(fr);
@@ -410,13 +410,13 @@ public final class TestCanopyCreation extends MahoutTestCase {
         DummyRecordWriter.build(mapper, conf, writer);
     mapper.setup(context);
 
-    Collection<Canopy> canopies = new ArrayList<Canopy>();
+    Collection<Canopy> canopies = Lists.newArrayList();
     int nextCanopyId = 0;
     for (Vector centroid : manhattanCentroids) {
       canopies.add(new Canopy(centroid, nextCanopyId++,
           manhattanDistanceMeasure));
     }
-    mapper.config(canopies);
+    setField(mapper, "canopies", canopies);
     List<VectorWritable> points = getPointsWritable();
     // map the data
     for (VectorWritable point : points) {
@@ -453,13 +453,14 @@ public final class TestCanopyCreation extends MahoutTestCase {
         .build(mapper, conf, writer);
     mapper.setup(context);
 
-    Collection<Canopy> canopies = new ArrayList<Canopy>();
+    Collection<Canopy> canopies = Lists.newArrayList();
     int nextCanopyId = 0;
     for (Vector centroid : euclideanCentroids) {
       canopies.add(new Canopy(centroid, nextCanopyId++,
           euclideanDistanceMeasure));
     }
-    mapper.config(canopies);
+
+    setField(mapper, "canopies", canopies);
     List<VectorWritable> points = getPointsWritable();
     // map the data
     for (VectorWritable point : points) {

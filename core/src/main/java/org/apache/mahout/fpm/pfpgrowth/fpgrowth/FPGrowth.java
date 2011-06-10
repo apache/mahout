@@ -18,17 +18,17 @@
 package org.apache.mahout.fpm.pfpgrowth.fpgrowth;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.commons.lang.mutable.MutableLong;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -55,7 +55,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
   private static final Logger log = LoggerFactory.getLogger(FPGrowth.class);
 
   public static List<Pair<String,TopKStringPatterns>> readFrequentPattern(Configuration conf, Path path) {
-    List<Pair<String,TopKStringPatterns>> ret = new ArrayList<Pair<String,TopKStringPatterns>>();
+    List<Pair<String,TopKStringPatterns>> ret = Lists.newArrayList();
     // key is feature value is count
     for (Pair<Writable,TopKStringPatterns> record
          : new SequenceFileIterable<Writable,TopKStringPatterns>(path, true, conf)) {
@@ -77,7 +77,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
    */
   public final List<Pair<A,Long>> generateFList(Iterator<Pair<List<A>,Long>> transactions, int minSupport) {
 
-    Map<A,MutableLong> attributeSupport = new HashMap<A,MutableLong>();
+    Map<A,MutableLong> attributeSupport = Maps.newHashMap();
     while (transactions.hasNext()) {
       Pair<List<A>,Long> transaction = transactions.next();
       for (A attribute : transaction.getFirst()) {
@@ -88,7 +88,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
         }
       }
     }
-    List<Pair<A,Long>> fList = new ArrayList<Pair<A,Long>>();
+    List<Pair<A,Long>> fList = Lists.newArrayList();
     for (Entry<A,MutableLong> e : attributeSupport.entrySet()) {
       long value = e.getValue().longValue();
       if (value >= minSupport) {
@@ -130,8 +130,8 @@ public class FPGrowth<A extends Comparable<? super A>> {
                                                  OutputCollector<A,List<Pair<List<A>,Long>>> output,
                                                  StatusUpdater updater) throws IOException {
 
-    Map<Integer,A> reverseMapping = new HashMap<Integer,A>();
-    Map<A,Integer> attributeIdMapping = new HashMap<A,Integer>();
+    Map<Integer,A> reverseMapping = Maps.newHashMap();
+    Map<A,Integer> attributeIdMapping = Maps.newHashMap();
 
     int id = 0;
     for (Pair<A,Long> feature : frequencyList) {
@@ -201,7 +201,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
                                                        TopKPatternsOutputConverter<A> outputCollector,
                                                        StatusUpdater updater) throws IOException {
 
-    Map<Integer,FrequentPatternMaxHeap> patterns = new HashMap<Integer,FrequentPatternMaxHeap>();
+    Map<Integer,FrequentPatternMaxHeap> patterns = Maps.newHashMap();
     FPTreeDepthCache treeCache = new FPTreeDepthCache();
     for (int i = tree.getHeaderTableCount() - 1; i >= 0; i--) {
       int attribute = tree.getAttributeAtIndex(i);

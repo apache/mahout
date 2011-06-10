@@ -24,7 +24,6 @@ import org.apache.mahout.math.function.PlusMult;
 import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.VectorFunction;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -141,7 +140,7 @@ public abstract class AbstractMatrix implements Matrix {
   @Override
   public void set(String rowLabel, int row, double[] rowData) {
     if (rowLabelBindings == null) {
-      rowLabelBindings = new HashMap<String, Integer>();
+      rowLabelBindings = Maps.newHashMap();
     }
     rowLabelBindings.put(rowLabel, row);
     set(row, rowData);
@@ -163,11 +162,11 @@ public abstract class AbstractMatrix implements Matrix {
   @Override
   public void set(String rowLabel, String columnLabel, int row, int column, double value) {
     if (rowLabelBindings == null) {
-      rowLabelBindings = new HashMap<String, Integer>();
+      rowLabelBindings = Maps.newHashMap();
     }
     rowLabelBindings.put(rowLabel, row);
     if (columnLabelBindings == null) {
-      columnLabelBindings = new HashMap<String, Integer>();
+      columnLabelBindings = Maps.newHashMap();
     }
     columnLabelBindings.put(columnLabel, column);
 

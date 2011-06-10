@@ -18,12 +18,12 @@
 package org.apache.mahout.df.data;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -41,10 +41,15 @@ public class Data implements Cloneable {
   private final List<Instance> instances;
   
   private final Dataset dataset;
-  
+
+  public Data(Dataset dataset) {
+    this.dataset = dataset;
+    this.instances = Lists.newArrayList();
+  }
+
   public Data(Dataset dataset, List<Instance> instances) {
     this.dataset = dataset;
-    this.instances = new ArrayList<Instance>(instances);
+    this.instances = Lists.newArrayList(instances);
   }
   
   /**
@@ -96,7 +101,7 @@ public class Data implements Cloneable {
    * @return the subset from this data that matches the given condition
    */
   public Data subset(Condition condition) {
-    List<Instance> subset = new ArrayList<Instance>();
+    List<Instance> subset = Lists.newArrayList();
     
     for (Instance instance : instances) {
       if (condition.isTrueFor(instance)) {
@@ -115,7 +120,7 @@ public class Data implements Cloneable {
    * @return a random subset without modifying the current data
    */
   public Data rsubset(Random rng, double ratio) {
-    List<Instance> subset = new ArrayList<Instance>();
+    List<Instance> subset = Lists.newArrayList();
     
     for (Instance instance : instances) {
       if (rng.nextDouble() < ratio) {
@@ -133,7 +138,7 @@ public class Data implements Cloneable {
    */
   public Data bagging(Random rng) {
     int datasize = size();
-    List<Instance> bag = new ArrayList<Instance>(datasize);
+    List<Instance> bag = Lists.newArrayListWithCapacity(datasize);
     
     for (int i = 0; i < datasize; i++) {
       bag.add(instances.get(rng.nextInt(datasize)));
@@ -153,7 +158,7 @@ public class Data implements Cloneable {
    */
   public Data bagging(Random rng, boolean[] sampled) {
     int datasize = size();
-    List<Instance> bag = new ArrayList<Instance>(datasize);
+    List<Instance> bag = Lists.newArrayListWithCapacity(datasize);
     
     for (int i = 0; i < datasize; i++) {
       int index = rng.nextInt(datasize);
@@ -170,7 +175,7 @@ public class Data implements Cloneable {
    * @param rng
    */
   public Data rsplit(Random rng, int subsize) {
-    List<Instance> subset = new ArrayList<Instance>(subsize);
+    List<Instance> subset = Lists.newArrayListWithCapacity(subsize);
     
     for (int i = 0; i < subsize; i++) {
       subset.add(instances.remove(rng.nextInt(instances.size())));
@@ -244,7 +249,7 @@ public class Data implements Cloneable {
   
   @Override
   public Data clone() {
-    return new Data(dataset, new ArrayList<Instance>(instances));
+    return new Data(dataset, Lists.newArrayList(instances));
   }
   
   @Override

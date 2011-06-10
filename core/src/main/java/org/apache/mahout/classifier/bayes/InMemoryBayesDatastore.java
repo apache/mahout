@@ -15,15 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.classifier.bayes.datastore;
+package org.apache.mahout.classifier.bayes;
 
 import java.util.Collection;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.mahout.classifier.bayes.common.BayesParameters;
-import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
-import org.apache.mahout.classifier.bayes.interfaces.Datastore;
-import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.SparseMatrix;
 import org.apache.mahout.math.map.OpenIntDoubleHashMap;

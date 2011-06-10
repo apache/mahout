@@ -17,11 +17,11 @@
 
 package org.apache.mahout.fpm.pfpgrowth;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.RandomUtils;
@@ -53,7 +53,7 @@ public final class TransactionTreeTest extends MahoutTestCase {
   }
 
   private List<Integer> generateRandomArray() {
-    List<Integer> list = new ArrayList<Integer>();
+    List<Integer> list = Lists.newArrayList();
     for (int i = 0; i < MAX_FEATURES; i++) {
       if (gen.nextInt() % SKIP_RATE == 0) {
         list.add(i);

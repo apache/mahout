@@ -17,12 +17,13 @@
 
 package org.apache.mahout.ga.watchmaker.travellingsalesman;
 
+import com.google.common.collect.Lists;
+
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.TreeSet;
 
@@ -47,7 +48,7 @@ final class ItineraryPanel extends JPanel {
     super(new BorderLayout());
     
     Container checkBoxPanel = new JPanel(new GridLayout(0, 1));
-    checkBoxes = new ArrayList<JCheckBox>(cities.size());
+    checkBoxes = Lists.newArrayListWithCapacity(cities.size());
     for (String city : cities) {
       JCheckBox checkBox = new JCheckBox(city, false);
       checkBoxes.add(checkBox);

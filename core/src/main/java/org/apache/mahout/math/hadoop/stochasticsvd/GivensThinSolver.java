@@ -17,11 +17,11 @@
 
 package org.apache.mahout.math.hadoop.stochasticsvd;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.math.AbstractVector;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
@@ -510,7 +510,7 @@ public class GivensThinSolver {
     int n = qtHats.iterator().next().length;
     int rank = 0;
     for (int i = 0; i < n; i++) {
-      List<Vector> ei = new ArrayList<Vector>();
+      List<Vector> ei = Lists.newArrayList();
       // Vector e_i=new DenseVector (qt[i],true);
       for (double[][] qtHat : qtHats) {
         ei.add(new DenseVector(qtHat[i], true));
@@ -528,7 +528,7 @@ public class GivensThinSolver {
       }
 
       for (int j = 0; j <= i; j++) {
-        List<Vector> ej = new ArrayList<Vector>();
+        List<Vector> ej = Lists.newArrayList();
         for (double[][] qtHat : qtHats) {
           ej.add(new DenseVector(qtHat[j], true));
         }

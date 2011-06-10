@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.impl;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.common.MahoutTestCase;
@@ -33,7 +34,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class TasteTestCase extends MahoutTestCase {
@@ -41,7 +41,7 @@ public abstract class TasteTestCase extends MahoutTestCase {
   public static DataModel getDataModel(long[] userIDs, Double[][] prefValues) {
     FastByIDMap<PreferenceArray> result = new FastByIDMap<PreferenceArray>();
     for (int i = 0; i < userIDs.length; i++) {
-      List<Preference> prefsList = new ArrayList<Preference>();
+      List<Preference> prefsList = Lists.newArrayList();
       for (int j = 0; j < prefValues[i].length; j++) {
         if (prefValues[i][j] != null) {
           prefsList.add(new GenericPreference(userIDs[i], j, prefValues[i][j].floatValue()));

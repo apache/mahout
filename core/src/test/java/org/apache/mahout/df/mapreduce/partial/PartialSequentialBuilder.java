@@ -18,9 +18,9 @@
 package org.apache.mahout.df.mapreduce.partial;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -179,7 +179,7 @@ public class PartialSequentialBuilder extends PartialBuilder {
    * extract the decision forest and call the callback after correcting the instance ids
    */
   protected DecisionForest processOutput(TreeID[] keys, MapredOutput[] values, PredictionCallback callback) {
-    List<Node> trees = new ArrayList<Node>();
+    List<Node> trees = Lists.newArrayList();
 
     for (int index = 0; index < keys.length; index++) {
       TreeID key = keys[index];

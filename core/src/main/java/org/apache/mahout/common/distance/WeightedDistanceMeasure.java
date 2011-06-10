@@ -20,10 +20,10 @@ package org.apache.mahout.common.distance;
 import java.io.DataInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -45,7 +45,7 @@ public abstract class WeightedDistanceMeasure implements DistanceMeasure {
   
   @Override
   public void createParameters(String prefix, Configuration jobConf) {
-    parameters = new ArrayList<Parameter<?>>();
+    parameters = Lists.newArrayList();
     weightsFile = new PathParameter(prefix, "weightsFile", jobConf, null,
         "Path on DFS to a file containing the weights.");
     parameters.add(weightsFile);

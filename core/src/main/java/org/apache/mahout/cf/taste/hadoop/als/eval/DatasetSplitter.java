@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.utils.eval;
+package org.apache.mahout.cf.taste.hadoop.als.eval;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;

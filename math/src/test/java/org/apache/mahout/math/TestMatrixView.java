@@ -17,11 +17,11 @@
 
 package org.apache.mahout.math;
 
+import com.google.common.collect.Maps;
 import org.apache.mahout.math.function.Functions;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public final class TestMatrixView extends MahoutTestCase {
@@ -448,12 +448,12 @@ public final class TestMatrixView extends MahoutTestCase {
   public void testLabelBindings() {
     assertNull("row bindings", test.getRowLabelBindings());
     assertNull("col bindings", test.getColumnLabelBindings());
-    Map<String, Integer> rowBindings = new HashMap<String, Integer>();
+    Map<String, Integer> rowBindings = Maps.newHashMap();
     rowBindings.put("Fee", 0);
     rowBindings.put("Fie", 1);
     test.setRowLabelBindings(rowBindings);
     assertEquals("row", rowBindings, test.getRowLabelBindings());
-    Map<String, Integer> colBindings = new HashMap<String, Integer>();
+    Map<String, Integer> colBindings = Maps.newHashMap();
     colBindings.put("Foo", 0);
     colBindings.put("Bar", 1);
     test.setColumnLabelBindings(colBindings);
@@ -482,13 +482,13 @@ public final class TestMatrixView extends MahoutTestCase {
   public void testLabelBindingSerialization() {
     assertNull("row bindings", test.getRowLabelBindings());
     assertNull("col bindings", test.getColumnLabelBindings());
-    Map<String, Integer> rowBindings = new HashMap<String, Integer>();
+    Map<String, Integer> rowBindings = Maps.newHashMap();
     rowBindings.put("Fee", 0);
     rowBindings.put("Fie", 1);
     rowBindings.put("Foe", 2);
     test.setRowLabelBindings(rowBindings);
     assertEquals("row", rowBindings, test.getRowLabelBindings());
-    Map<String, Integer> colBindings = new HashMap<String, Integer>();
+    Map<String, Integer> colBindings = Maps.newHashMap();
     colBindings.put("Foo", 0);
     colBindings.put("Bar", 1);
     colBindings.put("Baz", 2);

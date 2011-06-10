@@ -26,6 +26,7 @@ import java.io.PrintWriter;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Closeables;
 import org.apache.mahout.cf.taste.example.grouplens.GroupLensDataModel;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.common.iterator.FileLineIterable;
@@ -85,7 +86,7 @@ public final class BookCrossingDataModel extends FileDataModel {
       resultFile.delete();
       throw ioe;
     } finally {
-      IOUtils.quietClose(writer);
+      Closeables.closeQuietly(writer);
     }
     return resultFile;
   }

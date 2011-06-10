@@ -18,9 +18,9 @@
 package org.apache.mahout.clustering.spectral.eigencuts;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -71,7 +71,7 @@ public class EigencutsSensitivityMapper extends
     
     // go through the vector, performing the calculations
     // sadly, no way to get around n^2 computations      
-    Map<Integer, EigencutsSensitivityNode> columns = new HashMap<Integer, EigencutsSensitivityNode>();
+    Map<Integer, EigencutsSensitivityNode> columns = Maps.newHashMap();
     Vector ev = vw.get();
     for (int i = 0; i < ev.size(); i++) {
       double minsij = Double.MAX_VALUE;

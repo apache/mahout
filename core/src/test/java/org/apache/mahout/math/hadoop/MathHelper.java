@@ -20,6 +20,7 @@ package org.apache.mahout.math.hadoop;
 import java.io.IOException;
 import java.util.Iterator;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -201,7 +202,7 @@ public final class MathHelper {
         writer.append(new IntWritable(n), new VectorWritable(v));
       }
     } finally {
-      IOUtils.quietClose(writer);
+      Closeables.closeQuietly(writer);
     }
   }
 }

@@ -18,9 +18,9 @@
 package org.apache.mahout.clustering.meanshift;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -29,7 +29,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 public class MeanShiftCanopyReducer extends Reducer<Text,MeanShiftCanopy,Text,MeanShiftCanopy> {
   
-  private final Collection<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
+  private final Collection<MeanShiftCanopy> canopies = Lists.newArrayList();
   private MeanShiftCanopyClusterer clusterer;
   private boolean allConverged = true;
 

@@ -26,6 +26,7 @@ import java.io.DataOutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import com.google.common.collect.Maps;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
@@ -112,7 +113,7 @@ public final class GramTest extends MahoutTestCase {
      new Gram("bar", Gram.Type.UNIGRAM)
     };
     
-    HashMap<Gram,Gram> map = new HashMap<Gram,Gram>();
+    HashMap<Gram,Gram> map = Maps.newHashMap();
     for (Gram n : input) {
       Gram val = map.get(n);
       if (val != null) {

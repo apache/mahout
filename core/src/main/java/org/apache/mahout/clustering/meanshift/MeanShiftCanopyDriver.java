@@ -18,12 +18,10 @@
 package org.apache.mahout.clustering.meanshift;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.commons.cli2.builder.ArgumentBuilder;
-import org.apache.commons.cli2.builder.DefaultOptionBuilder;
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -53,7 +51,6 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterab
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.common.kernel.IKernelProfile;
-import org.apache.mahout.common.kernel.TriangularKernelProfile;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -292,7 +289,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
       double t2, double convergenceDelta, int maxIterations) throws IOException {
     MeanShiftCanopyClusterer clusterer = new MeanShiftCanopyClusterer(measure,
         aKernelProfile, t1, t2, convergenceDelta);
-    List<MeanShiftCanopy> clusters = new ArrayList<MeanShiftCanopy>();
+    List<MeanShiftCanopy> clusters = Lists.newArrayList();
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(clustersIn.toUri(), conf);
     for (MeanShiftCanopy value : new SequenceFileDirValueIterable<MeanShiftCanopy>(
@@ -437,7 +434,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
    */
   private static void clusterDataSeq(Path input, Path clustersIn, Path output)
       throws IOException {
-    Collection<MeanShiftCanopy> clusters = new ArrayList<MeanShiftCanopy>();
+    Collection<MeanShiftCanopy> clusters = Lists.newArrayList();
     Configuration conf = new Configuration();
     for (MeanShiftCanopy value : new SequenceFileDirValueIterable<MeanShiftCanopy>(
         clustersIn, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {

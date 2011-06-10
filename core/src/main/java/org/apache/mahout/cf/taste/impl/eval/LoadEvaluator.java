@@ -17,11 +17,11 @@
 
 package org.apache.mahout.cf.taste.impl.eval;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.common.SamplingLongPrimitiveIterator;
@@ -42,7 +42,7 @@ public final class LoadEvaluator {
     LongPrimitiveIterator userSampler = SamplingLongPrimitiveIterator.maybeWrapIterator(dataModel
         .getUserIDs(), sampleRate);
     recommender.recommend(userSampler.next(), 10); // Warm up
-    Collection<Callable<Void>> callables = new ArrayList<Callable<Void>>();
+    Collection<Callable<Void>> callables = Lists.newArrayList();
     while (userSampler.hasNext()) {
       callables.add(new LoadCallable(recommender, userSampler.next()));
     }

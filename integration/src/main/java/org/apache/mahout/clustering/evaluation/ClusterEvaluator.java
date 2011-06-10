@@ -17,11 +17,11 @@
 
 package org.apache.mahout.clustering.evaluation;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.Cluster;
@@ -88,7 +88,7 @@ public class ClusterEvaluator {
    * @return a List<Cluster> of the clusters
    */
   private static List<Cluster> loadClusters(Configuration conf, Path clustersIn) {
-    List<Cluster> clusters = new ArrayList<Cluster>();
+    List<Cluster> clusters = Lists.newArrayList();
     for (Cluster value :
          new SequenceFileDirValueIterable<Cluster>(clustersIn, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
       clusters.add(value);

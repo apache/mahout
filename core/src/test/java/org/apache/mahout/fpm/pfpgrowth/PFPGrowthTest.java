@@ -19,13 +19,13 @@ package org.apache.mahout.fpm.pfpgrowth;
 
 import java.io.File;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.hadoop.conf.Configuration;
@@ -57,7 +57,7 @@ public final class PFPGrowthTest extends MahoutTestCase {
     params.set(PFPGrowth.OUTPUT, outputDir.getAbsolutePath());
     Writer writer = Files.newWriter(input, Charsets.UTF_8);
     try {
-      Collection<List<String>> transactions = new ArrayList<List<String>>();
+      Collection<List<String>> transactions = Lists.newArrayList();
       transactions.add(Arrays.asList("E", "A", "D", "B"));
       transactions.add(Arrays.asList("D", "A", "C", "E", "B"));
       transactions.add(Arrays.asList("C", "A", "B", "E"));

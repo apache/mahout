@@ -17,11 +17,11 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import org.uncommons.maths.random.Probability;
 import org.uncommons.watchmaker.framework.operators.AbstractCrossover;
 
@@ -56,7 +56,7 @@ public class CDCrossover extends AbstractCrossover<CDRule> {
       }
     }
     
-    List<CDRule> result = new ArrayList<CDRule>(2);
+    List<CDRule> result = Lists.newArrayListWithCapacity(2);
     result.add(offspring1);
     result.add(offspring2);
     return result;

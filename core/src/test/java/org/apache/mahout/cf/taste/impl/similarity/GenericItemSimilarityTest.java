@@ -16,13 +16,13 @@
  */
 package org.apache.mahout.cf.taste.impl.similarity;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,8 +31,7 @@ public final class GenericItemSimilarityTest extends SimilarityTestCase {
 
   @Test
   public void testSimple() {
-    List<GenericItemSimilarity.ItemItemSimilarity> similarities =
-        new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(4);
+    List<GenericItemSimilarity.ItemItemSimilarity> similarities = Lists.newArrayList();
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(1, 2, 0.5));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(2, 1, 0.6));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(1, 1, 0.5));

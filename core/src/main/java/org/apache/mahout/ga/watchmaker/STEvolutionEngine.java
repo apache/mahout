@@ -17,11 +17,11 @@
 
 package org.apache.mahout.ga.watchmaker;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import com.google.common.collect.Lists;
 import org.uncommons.watchmaker.framework.AbstractEvolutionEngine;
 import org.uncommons.watchmaker.framework.CandidateFactory;
 import org.uncommons.watchmaker.framework.EvaluatedCandidate;
@@ -42,12 +42,12 @@ public class STEvolutionEngine<T> extends AbstractEvolutionEngine<T> {
   
   @Override
   protected List<EvaluatedCandidate<T>> evaluatePopulation(List<T> population) {
-    List<Double> evaluations = new ArrayList<Double>();
+    List<Double> evaluations = Lists.newArrayList();
     STFitnessEvaluator<? super T> evaluator = (STFitnessEvaluator<? super T>) getFitnessEvaluator();
     
     evaluator.evaluate(population, evaluations);
     
-    List<EvaluatedCandidate<T>> evaluatedPopulation = new ArrayList<EvaluatedCandidate<T>>();
+    List<EvaluatedCandidate<T>> evaluatedPopulation = Lists.newArrayList();
     for (int index = 0; index < population.size(); index++) {
       evaluatedPopulation.add(new EvaluatedCandidate<T>(population.get(index), evaluations.get(index)));
     }

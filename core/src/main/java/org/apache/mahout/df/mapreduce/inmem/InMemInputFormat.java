@@ -20,11 +20,11 @@ package org.apache.mahout.df.mapreduce.inmem;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
@@ -93,7 +93,7 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
     
     int id = 0;
     
-    List<InputSplit> splits = new ArrayList<InputSplit>(numSplits);
+    List<InputSplit> splits = Lists.newArrayListWithCapacity(numSplits);
     
     for (int index = 0; index < numSplits - 1; index++) {
       splits.add(new InMemInputSplit(id, splitSize, nextSeed()));

@@ -144,8 +144,7 @@ public class HmmModel implements Cloneable {
    * @param initialProbabilities initial start probabilities.
    * @throws IllegalArgumentException If the given parameter set is invalid
    */
-  public HmmModel(Matrix transitionMatrix, Matrix emissionMatrix,
-                  Vector initialProbabilities) {
+  public HmmModel(Matrix transitionMatrix, Matrix emissionMatrix, Vector initialProbabilities) {
     this.nrOfHiddenStates = initialProbabilities.size();
     this.nrOfOutputStates = emissionMatrix.numCols();
     this.transitionMatrix = transitionMatrix;

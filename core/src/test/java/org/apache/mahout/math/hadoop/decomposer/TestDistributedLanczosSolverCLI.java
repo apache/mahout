@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math.hadoop.decomposer;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.common.MahoutTestCase;
@@ -32,7 +33,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Arrays;
 
@@ -110,7 +110,7 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
   
     Path cleanEigenvectors = new Path(output, EigenVerificationJob.CLEAN_EIGENVECTORS);
     Matrix eigenVectors = new DenseMatrix(6, corpus.numCols());
-    Collection<Double> eigenvalues = new ArrayList<Double>();
+    Collection<Double> eigenvalues = Lists.newArrayList();
 
     output = getTestTempDirPath("output2");
     tmp = getTestTempDirPath("tmp2");
@@ -128,7 +128,7 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
     Path cleanEigenvectors2 = new Path(output, EigenVerificationJob.CLEAN_EIGENVECTORS);
     Matrix eigenVectors2 = new DenseMatrix(7, corpus.numCols());
     Configuration conf = new Configuration();
-    Collection<Double> newEigenValues = new ArrayList<Double>();
+    Collection<Double> newEigenValues = Lists.newArrayList();
 
     int i = 0;
     for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(cleanEigenvectors, conf)) {
@@ -151,7 +151,7 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
       i++;
     }
 
-    Collection<Integer> oldEigensFound = new ArrayList<Integer>();
+    Collection<Integer> oldEigensFound = Lists.newArrayList();
     for(int row = 0; row < eigenVectors.numRows(); row++) {
       Vector oldEigen = eigenVectors.getRow(row);
       if(oldEigen == null) {
@@ -169,7 +169,7 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
     }
     assertEquals("the number of new eigenvectors", 5, i);
 
-    Collection<Double> oldEigenValuesNotFound = new ArrayList<Double>();
+    Collection<Double> oldEigenValuesNotFound = Lists.newArrayList();
     for(double d : eigenvalues) {
       boolean found = false;
       for(double newD : newEigenValues) {

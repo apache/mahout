@@ -17,9 +17,11 @@
 
 package org.apache.mahout.utils.eval;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.mahout.cf.taste.hadoop.als.eval.ParallelFactorizationEvaluator;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.math.hadoop.MathHelper;
@@ -69,7 +71,7 @@ public class ParallelFactorizationEvaluatorTest extends TasteTestCase {
       double rmse = Double.parseDouble(reader.readLine());
       assertEquals(0.89342, rmse, EPSILON);
     } finally {
-      IOUtils.quietClose(reader);
+      Closeables.closeQuietly(reader);
     }
 
   }

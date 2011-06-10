@@ -18,9 +18,9 @@
 package org.apache.mahout.clustering.meanshift;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -59,7 +59,7 @@ public class MeanShiftCanopyClusterMapper
 
   public static List<MeanShiftCanopy> getCanopies(Configuration conf) {
     String statePath = conf.get(MeanShiftCanopyDriver.STATE_IN_KEY);
-    List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
+    List<MeanShiftCanopy> canopies = Lists.newArrayList();
     Path path = new Path(statePath);
     for (MeanShiftCanopy value 
          : new SequenceFileDirValueIterable<MeanShiftCanopy>(path, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {

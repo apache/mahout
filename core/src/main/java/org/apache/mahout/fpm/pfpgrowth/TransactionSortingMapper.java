@@ -18,13 +18,13 @@
 package org.apache.mahout.fpm.pfpgrowth;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -50,7 +50,7 @@ public class TransactionSortingMapper extends Mapper<LongWritable,Text,LongWrita
     String[] items = splitter.split(input.toString());
     Iterable<String> uniqueItems = new HashSet<String>(Arrays.asList(items));
     
-    List<Integer> itemSet = new ArrayList<Integer>();
+    List<Integer> itemSet = Lists.newArrayList();
     for (String item : uniqueItems) { // remove items not in the fList
       if (fMap.containsKey(item) && item.trim().length() != 0) {
         itemSet.add(fMap.get(item));

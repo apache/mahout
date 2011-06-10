@@ -19,10 +19,10 @@ package org.apache.mahout.cf.taste.example.jester;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.example.grouplens.GroupLensDataModel;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
@@ -73,7 +73,7 @@ public final class JesterDataModel extends FileDataModel {
     FastByIDMap<Collection<Preference>> data = (FastByIDMap<Collection<Preference>>) rawData;
     String[] jokePrefs = COMMA_PATTERN.split(line);
     int count = Integer.parseInt(jokePrefs[0]);
-    Collection<Preference> prefs = new ArrayList<Preference>(count);
+    Collection<Preference> prefs = Lists.newArrayListWithCapacity(count);
     for (int itemID = 1; itemID < jokePrefs.length; itemID++) { // yes skip first one, just a count
       String jokePref = jokePrefs[itemID];
       if (!"99".equals(jokePref)) {

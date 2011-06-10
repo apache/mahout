@@ -17,9 +17,9 @@
 package org.apache.mahout.clustering.kmeans;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -249,7 +249,7 @@ public class KMeansDriver extends AbstractJob {
     throws IOException {
 
     KMeansClusterer clusterer = new KMeansClusterer(measure);
-    Collection<Cluster> clusters = new ArrayList<Cluster>();
+    Collection<Cluster> clusters = Lists.newArrayList();
 
     KMeansUtil.configureWithClusterInfo(conf, clustersIn, clusters);
     if (clusters.isEmpty()) {
@@ -433,7 +433,7 @@ public class KMeansDriver extends AbstractJob {
                                      DistanceMeasure measure) throws IOException {
 
     KMeansClusterer clusterer = new KMeansClusterer(measure);
-    Collection<Cluster> clusters = new ArrayList<Cluster>();
+    Collection<Cluster> clusters = Lists.newArrayList();
     KMeansUtil.configureWithClusterInfo(conf, clustersIn, clusters);
     if (clusters.isEmpty()) {
       throw new IllegalStateException("Clusters is empty!");

@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.classifier.bayes.model;
+package org.apache.mahout.classifier.bayes;
 
 import java.util.Collection;
 
 import org.apache.mahout.classifier.ClassifierResult;
-import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
-import org.apache.mahout.classifier.bayes.interfaces.Algorithm;
-import org.apache.mahout.classifier.bayes.interfaces.Datastore;
+import org.apache.mahout.classifier.bayes.Algorithm;
+import org.apache.mahout.classifier.bayes.Datastore;
+import org.apache.mahout.classifier.bayes.InvalidDatastoreException;
 
 /**
  * The Classifier Wrapper used for choosing the {@link Algorithm} and {@link Datastore}

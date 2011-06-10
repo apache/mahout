@@ -17,12 +17,12 @@
 
 package org.apache.mahout.cf.taste.impl.model;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.Refreshable;
@@ -94,7 +94,7 @@ public final class GenericDataModel extends AbstractDataModel {
         itemIDSet.add(itemID);
         Collection<Preference> prefsForItem = prefsForItems.get(itemID);
         if (prefsForItem == null) {
-          prefsForItem = new ArrayList<Preference>(2);
+          prefsForItem = Lists.newArrayListWithCapacity(2);
           prefsForItems.put(itemID, prefsForItem);
         }
         prefsForItem.add(preference);

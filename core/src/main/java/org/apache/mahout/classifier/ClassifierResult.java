@@ -17,10 +17,21 @@
 
 package org.apache.mahout.classifier;
 
+import java.util.Comparator;
+
 /**
- * Result of a Document Classification. The label and the associated score(Usually probabilty)
+ * Result of a document classification. The label and the associated score (usually probabilty)
  */
 public class ClassifierResult {
+
+  public static final Comparator<ClassifierResult> COMPARE_BY_SCORE_AND_LABEL =
+      new Comparator<ClassifierResult>() {
+        @Override
+        public int compare(ClassifierResult cr1, ClassifierResult cr2) {
+          return cr1.score < cr2.score ? 1 : cr1.score > cr2.score ? -1 : cr1.label.compareTo(cr2.label);
+        }
+      };
+
   private String label;
   private double score;
   

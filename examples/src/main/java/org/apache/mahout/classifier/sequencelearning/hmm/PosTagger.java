@@ -20,13 +20,13 @@ package org.apache.mahout.classifier.sequencelearning.hmm;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Maps;
 import com.google.common.io.CharStreams;
 import com.google.common.io.Resources;
 import org.apache.mahout.math.Matrix;
@@ -177,8 +177,8 @@ public final class PosTagger {
   }
 
   private static void trainModel(String trainingURL) throws IOException {
-    tagIDs = new HashMap<String, Integer>(44); // we expect 44 distinct tags
-    wordIDs = new HashMap<String, Integer>(19122); // we expect 19122
+    tagIDs = Maps.newHashMapWithExpectedSize(44); // we expect 44 distinct tags
+    wordIDs = Maps.newHashMapWithExpectedSize(19122); // we expect 19122
     // distinct words
     log.info("Reading and parsing training data file from URL: {}", trainingURL);
     long start = System.currentTimeMillis();

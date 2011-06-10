@@ -17,6 +17,7 @@
 
 package org.apache.mahout.clustering.spectral.eigencuts;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
@@ -35,7 +36,6 @@ import org.apache.mahout.math.hadoop.decomposer.EigenVerificationJob;
 import org.apache.mahout.math.stats.OnlineSummarizer;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -134,7 +134,7 @@ public class EigencutsDriver extends AbstractJob {
 
       DistributedRowMatrix U = performEigenDecomposition(conf, L, state, eigenrank, overshoot, outputCalc);
       U.setConf(new Configuration(conf));
-      List<Double> eigenValues = new ArrayList<Double>();
+      List<Double> eigenValues = Lists.newArrayList();
       for(int i=0; i<eigenrank; i++) {
         eigenValues.set(i, state.getSingularValue(i));
       }

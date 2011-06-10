@@ -43,11 +43,8 @@ public final class HmmAlgorithms {
    * @param scaled       Should log-scaled beta factors be computed?
    * @return matrix of alpha factors.
    */
-  public static Matrix forwardAlgorithm(HmmModel model, int[] observations,
-                                        boolean scaled) {
-
+  public static Matrix forwardAlgorithm(HmmModel model, int[] observations, boolean scaled) {
     Matrix alpha = new DenseMatrix(observations.length, model.getNrOfHiddenStates());
-
     forwardAlgorithm(alpha, model, observations, scaled);
 
     return alpha;
@@ -61,8 +58,7 @@ public final class HmmAlgorithms {
    * @param observations observation sequence seen.
    * @param scaled       set to true if log-scaled beta factors should be computed.
    */
-  static void forwardAlgorithm(Matrix alpha, HmmModel model,
-                               int[] observations, boolean scaled) {
+  static void forwardAlgorithm(Matrix alpha, HmmModel model, int[] observations, boolean scaled) {
 
     // fetch references to the model parameters
     Vector ip = model.getInitialProbabilities();
@@ -117,9 +113,7 @@ public final class HmmAlgorithms {
    * @param scaled       Set to true if log-scaled beta factors should be computed.
    * @return beta factors based on the model and observation sequence.
    */
-  public static Matrix backwardAlgorithm(HmmModel model, int[] observations,
-                                         boolean scaled) {
-
+  public static Matrix backwardAlgorithm(HmmModel model, int[] observations, boolean scaled) {
     // initialize the matrix
     Matrix beta = new DenseMatrix(observations.length, model.getNrOfHiddenStates());
     // compute the beta factors
@@ -136,8 +130,7 @@ public final class HmmAlgorithms {
    * @param observations sequence of observations to estimate.
    * @param scaled       set to true to compute log-scaled parameters.
    */
-  static void backwardAlgorithm(Matrix beta, HmmModel model,
-                                int[] observations, boolean scaled) {
+  static void backwardAlgorithm(Matrix beta, HmmModel model, int[] observations, boolean scaled) {
     // fetch references to the model parameters
     Matrix b = model.getEmissionMatrix();
     Matrix a = model.getTransitionMatrix();
@@ -193,8 +186,7 @@ public final class HmmAlgorithms {
    * @return nrOfObservations 1D int array containing the most likely hidden
    *         sequence
    */
-  public static int[] viterbiAlgorithm(HmmModel model, int[] observations,
-                                       boolean scaled) {
+  public static int[] viterbiAlgorithm(HmmModel model, int[] observations, boolean scaled) {
 
     // probability that the most probable hidden states ends at state i at
     // time t
@@ -228,8 +220,8 @@ public final class HmmAlgorithms {
    *                     effort but is numerically more stable for large observation
    *                     sequences
    */
-  static void viterbiAlgorithm(int[] sequence, double[][] delta, int[][] phi,
-                               HmmModel model, int[] observations, boolean scaled) {
+  static void viterbiAlgorithm(int[] sequence, double[][] delta, int[][] phi, HmmModel model, int[] observations,
+      boolean scaled) {
     // fetch references to the model parameters
     Vector ip = model.getInitialProbabilities();
     Matrix b = model.getEmissionMatrix();

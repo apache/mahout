@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
@@ -30,7 +31,6 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.CandidateItemsStrategy;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,14 +40,14 @@ public final class SamplingCandidateItemsStrategyTest extends TasteTestCase {
 
   @Test
   public void testStrategy() throws TasteException {
-    List<Preference> prefsOfUser123 = new ArrayList<Preference>();
+    List<Preference> prefsOfUser123 = Lists.newArrayList();
     prefsOfUser123.add(new GenericPreference(123L, 1L, 1.0f));
 
-    List<Preference> prefsOfUser456 = new ArrayList<Preference>();
+    List<Preference> prefsOfUser456 = Lists.newArrayList();
     prefsOfUser456.add(new GenericPreference(456L, 1L, 1.0f));
     prefsOfUser456.add(new GenericPreference(456L, 2L, 1.0f));
 
-    List<Preference> prefsOfUser789 = new ArrayList<Preference>();
+    List<Preference> prefsOfUser789 = Lists.newArrayList();
     prefsOfUser789.add(new GenericPreference(789L, 1L, 0.5f));
     prefsOfUser789.add(new GenericPreference(789L, 3L, 1.0f));
 

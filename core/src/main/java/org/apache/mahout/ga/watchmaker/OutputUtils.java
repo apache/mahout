@@ -18,9 +18,9 @@
 package org.apache.mahout.ga.watchmaker;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -46,7 +46,7 @@ public final class OutputUtils {
    */
   public static Path[] listOutputFiles(FileSystem fs, Path outpath) throws IOException {
     FileStatus[] status = fs.listStatus(outpath);
-    Collection<Path> outpaths = new ArrayList<Path>();
+    Collection<Path> outpaths = Lists.newArrayList();
     for (FileStatus s : status) {
       if (!s.isDir()) {
         outpaths.add(s.getPath());

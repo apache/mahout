@@ -17,11 +17,11 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
@@ -67,7 +67,7 @@ public final class RandomRecommender extends AbstractRecommender {
   public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException {
     DataModel dataModel = getDataModel();
     int numItems = dataModel.getNumItems();
-    List<RecommendedItem> result = new ArrayList<RecommendedItem>(howMany);
+    List<RecommendedItem> result = Lists.newArrayListWithCapacity(howMany);
     while (result.size() < howMany) {
       LongPrimitiveIterator it = dataModel.getItemIDs();
       it.skip(random.nextInt(numItems));

@@ -20,8 +20,6 @@ package org.apache.mahout.clustering.syntheticcontrol.meanshift;
 import java.io.IOException;
 import java.util.Map;
 
-import org.apache.commons.cli2.builder.ArgumentBuilder;
-import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;

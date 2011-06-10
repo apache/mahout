@@ -18,11 +18,6 @@
 package org.apache.mahout.classifier.bayes;
 
 import org.apache.mahout.classifier.ClassifierResult;
-import org.apache.mahout.classifier.bayes.algorithm.CBayesAlgorithm;
-import org.apache.mahout.classifier.bayes.common.BayesParameters;
-import org.apache.mahout.classifier.bayes.datastore.InMemoryBayesDatastore;
-import org.apache.mahout.classifier.bayes.interfaces.Algorithm;
-import org.apache.mahout.classifier.bayes.model.ClassifierContext;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Before;
 import org.junit.Test;

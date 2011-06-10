@@ -18,13 +18,13 @@
 package org.apache.mahout.fpm.pfpgrowth;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -88,7 +88,7 @@ public final class PFPGrowth {
   public static List<Pair<String,Long>> deserializeList(Parameters params,
                                                         String key,
                                                         Configuration conf) throws IOException {
-    List<Pair<String,Long>> list = new ArrayList<Pair<String,Long>>();
+    List<Pair<String,Long>> list = Lists.newArrayList();
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
                                   + "org.apache.hadoop.io.serializer.WritableSerialization");
     
@@ -106,7 +106,7 @@ public final class PFPGrowth {
    * @return Deserialized Group List
    */
   public static Map<String,Long> deserializeMap(Parameters params, String key, Configuration conf) throws IOException {
-    Map<String,Long> map = new HashMap<String,Long>();
+    Map<String,Long> map = Maps.newHashMap();
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
                                   + "org.apache.hadoop.io.serializer.WritableSerialization");
     
@@ -138,7 +138,7 @@ public final class PFPGrowth {
         queue.add(new Pair<String,Long>(record.getFirst().toString(), value));
       }
     }
-    List<Pair<String,Long>> fList = new ArrayList<Pair<String,Long>>();
+    List<Pair<String,Long>> fList = Lists.newArrayList();
     while (!queue.isEmpty()) {
       fList.add(queue.poll());
     }
@@ -158,7 +158,7 @@ public final class PFPGrowth {
     FileSystem fs = FileSystem.get(frequentPatternsPath.toUri(), conf);
     FileStatus[] outputFiles = fs.globStatus(new Path(frequentPatternsPath, FILE_PATTERN));
     
-    List<Pair<String,TopKStringPatterns>> ret = new ArrayList<Pair<String,TopKStringPatterns>>();
+    List<Pair<String,TopKStringPatterns>> ret = Lists.newArrayList();
     for (FileStatus fileStatus : outputFiles) {
       ret.addAll(FPGrowth.readFrequentPattern(conf, fileStatus.getPath()));
     }
@@ -226,7 +226,7 @@ public final class PFPGrowth {
     List<Pair<String,Long>> fList = readFList(params);
     Integer numGroups = Integer.valueOf(params.get(NUM_GROUPS, "50"));
     
-    Map<String,Long> gList = new HashMap<String,Long>();
+    Map<String,Long> gList = Maps.newHashMap();
     long maxPerGroup = fList.size() / numGroups;
     if (fList.size() != maxPerGroup * numGroups) {
       maxPerGroup++;

@@ -17,6 +17,7 @@
 
 package org.apache.mahout.clustering.minhash;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
@@ -26,7 +27,6 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 
 public class MinHashReducer extends Reducer<Text,Writable,Text,Writable> {
@@ -53,7 +53,7 @@ public class MinHashReducer extends Reducer<Text,Writable,Text,Writable> {
   @Override
   protected void reduce(Text cluster, Iterable<Writable> points, Context context)
     throws IOException, InterruptedException {
-    Collection<Writable> pointList = new ArrayList<Writable>();
+    Collection<Writable> pointList = Lists.newArrayList();
     for (Writable point : points) {
       if (debugOutput) {
         Vector pointVector = ((VectorWritable) point).get().clone();

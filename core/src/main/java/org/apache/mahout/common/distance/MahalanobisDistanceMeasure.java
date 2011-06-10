@@ -20,10 +20,10 @@ package org.apache.mahout.common.distance;
 import java.io.DataInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -116,14 +116,13 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
   
   @Override
   public void createParameters(String prefix, Configuration jobConf) {
-    parameters = new ArrayList<Parameter<?>>();
+    parameters = Lists.newArrayList();
     inverseCovarianceFile = new PathParameter(prefix, "inverseCovarianceFile", jobConf, null,
                                               "Path on DFS to a file containing the inverse covariance matrix.");
     parameters.add(inverseCovarianceFile);
 
-    matrixClass =
-        new ClassParameter(prefix, "maxtrixClass", jobConf, DenseMatrix.class,
-                           "Class<Matix> file specified in parameter inverseCovarianceFile has been serialized with.");
+    matrixClass = new ClassParameter(prefix, "maxtrixClass", jobConf, DenseMatrix.class,
+        "Class<Matix> file specified in parameter inverseCovarianceFile has been serialized with.");
     parameters.add(matrixClass);      
     
     meanVectorFile = new PathParameter(prefix, "meanVectorFile", jobConf, null,

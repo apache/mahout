@@ -19,12 +19,12 @@ package org.apache.mahout.cf.taste.example.netflix;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.AbstractLongPrimitiveIterator;
@@ -84,7 +84,7 @@ public final class NetflixFileDataModel implements DataModel {
     while (itemIDPadded.length() < 5) {
       itemIDPadded.insert(0, '0');
     }
-    List<Preference> prefs = new ArrayList<Preference>();
+    List<Preference> prefs = Lists.newArrayList();
     File movieFile = new File(new File(dataDirectory, "training_set"), "mv_00" + itemIDPadded + ".txt");
     try {
       for (String line : new FileLineIterable(movieFile, true)) {

@@ -236,9 +236,8 @@ abstract class AbstractSimilarity extends AbstractItemSimilarity implements User
     // "Center" the data. If my math is correct, this'll do it.
     double result;
     if (centerData) {
-      double n = count;
-      double meanX = sumX / n;
-      double meanY = sumY / n;
+      double meanX = sumX / count;
+      double meanY = sumY / count;
       // double centeredSumXY = sumXY - meanY * sumX - meanX * sumY + n * meanX * meanY;
       double centeredSumXY = sumXY - meanY * sumX;
       // double centeredSumX2 = sumX2 - 2.0 * meanX * sumX + n * meanX * meanX;

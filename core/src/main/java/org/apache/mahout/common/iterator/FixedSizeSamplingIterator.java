@@ -17,12 +17,12 @@
 
 package org.apache.mahout.common.iterator;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
 import com.google.common.collect.ForwardingIterator;
+import com.google.common.collect.Lists;
 import org.apache.mahout.common.RandomUtils;
 
 /**
@@ -33,7 +33,7 @@ public final class FixedSizeSamplingIterator<T> extends ForwardingIterator<T> {
   private final Iterator<T> delegate;
   
   public FixedSizeSamplingIterator(int size, Iterator<T> source) {
-    List<T> buf = new ArrayList<T>(size);
+    List<T> buf = Lists.newArrayListWithCapacity(size);
     int sofar = 0;
     Random random = RandomUtils.getRandom();
     while (source.hasNext()) {

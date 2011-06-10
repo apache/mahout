@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.recommender.svd;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
@@ -31,7 +32,6 @@ import org.apache.mahout.math.als.AlternateLeastSquaresSolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -150,7 +150,7 @@ public class ALSWRFactorizer extends AbstractFactorizer {
           queue.execute(new Runnable() {
             @Override
             public void run() {
-              List<Vector> featureVectors = new ArrayList<Vector>();
+              List<Vector> featureVectors = Lists.newArrayList();
               while (itemIDsFromUser.hasNext()) {
                 long itemID = itemIDsFromUser.nextLong();
                 featureVectors.add(features.getItemFeatureColumn(itemIndex(itemID)));
@@ -165,7 +165,7 @@ public class ALSWRFactorizer extends AbstractFactorizer {
         try {
           queue.awaitTermination(dataModel.getNumUsers(), TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-          throw new IllegalStateException("Error when computing user features", e);
+          log.warn("Error when computing user features", e);
         }
       }
 
@@ -179,7 +179,7 @@ public class ALSWRFactorizer extends AbstractFactorizer {
           queue.execute(new Runnable() {
             @Override
             public void run() {
-              List<Vector> featureVectors = new ArrayList<Vector>();
+              List<Vector> featureVectors = Lists.newArrayList();
               for (Preference pref : itemPrefs) {
                 long userID = pref.getUserID();
                 featureVectors.add(features.getUserFeatureColumn(userIndex(userID)));
@@ -194,7 +194,7 @@ public class ALSWRFactorizer extends AbstractFactorizer {
         try {
           queue.awaitTermination(dataModel.getNumItems(), TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-          throw new IllegalStateException("Error when computing item features", e);
+          log.warn("Error when computing item features", e);
         }
       }
     }

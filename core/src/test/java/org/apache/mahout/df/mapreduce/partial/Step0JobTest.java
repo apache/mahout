@@ -18,11 +18,11 @@
 package org.apache.mahout.df.mapreduce.partial;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -174,8 +174,8 @@ public final class Step0JobTest extends MahoutTestCase {
     splits.toArray(sorted);
     Builder.sortSplits(sorted);
 
-    List<Integer> keys = new ArrayList<Integer>();
-    List<Step0Output> values = new ArrayList<Step0Output>();
+    List<Integer> keys = Lists.newArrayList();
+    List<Step0Output> values = Lists.newArrayList();
 
     int[] expectedIds = new int[NUM_MAPS];
 

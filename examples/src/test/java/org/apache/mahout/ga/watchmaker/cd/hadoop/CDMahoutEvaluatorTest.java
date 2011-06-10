@@ -17,10 +17,10 @@
 
 package org.apache.mahout.ga.watchmaker.cd.hadoop;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -43,7 +43,7 @@ public final class CDMahoutEvaluatorTest extends MahoutTestCase {
     int target = 1;
 
     // random rules
-    List<Rule> rules = new ArrayList<Rule>();
+    List<Rule> rules = Lists.newArrayList();
     for (int index = 0; index < nbrules; index++) {
       rules.add(new RandomRule(index, target, rng));
     }
@@ -55,7 +55,7 @@ public final class CDMahoutEvaluatorTest extends MahoutTestCase {
     CDMahoutEvaluator.initializeDataSet(input);
 
     // evaluate the rules
-    List<CDFitness> results = new ArrayList<CDFitness>();
+    List<CDFitness> results = Lists.newArrayList();
     Path output = getTestTempDirPath("output");
     fs = output.getFileSystem(new Configuration());
     fs.delete(output, true); // It's unhappy if this directory exists

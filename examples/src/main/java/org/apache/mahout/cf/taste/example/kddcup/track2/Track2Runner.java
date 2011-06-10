@@ -21,13 +21,13 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.mahout.cf.taste.example.kddcup.DataFileIterable;
 import org.apache.mahout.cf.taste.example.kddcup.KDDCupDataModel;
@@ -65,7 +65,7 @@ public final class Track2Runner {
     log.info("Loaded model in {}s", (end - start) / 1000);
     start = end;
 
-    Collection<Track2Callable> callables = new ArrayList<Track2Callable>();
+    Collection<Track2Callable> callables = Lists.newArrayList();
     for (Pair<PreferenceArray,long[]> tests : new DataFileIterable(KDDCupDataModel.getTestFile(dataFileDirectory))) {
       PreferenceArray userTest = tests.getFirst();
       callables.add(new Track2Callable(recommender, userTest));

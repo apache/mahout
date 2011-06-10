@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -87,7 +88,7 @@ public final class BayesClassifierDriver {
   
   public static ConfusionMatrix readResult(Path pathPattern, Configuration conf, Parameters params) {
     String defaultLabel = params.get("defaultCat");
-    Map<String,Map<String,Integer>> confusionMatrix = new HashMap<String,Map<String,Integer>>();
+    Map<String,Map<String,Integer>> confusionMatrix = Maps.newHashMap();
     for (Pair<StringTuple,DoubleWritable> record
          : new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern,
                                                                    PathType.GLOB,
@@ -101,7 +102,7 @@ public final class BayesClassifierDriver {
       String classifiedLabel = key.stringAt(2);
       Map<String,Integer> rowMatrix = confusionMatrix.get(correctLabel);
       if (rowMatrix == null) {
-        rowMatrix = new HashMap<String,Integer>();
+        rowMatrix = Maps.newHashMap();
       }
       Integer count = Double.valueOf(value.get()).intValue();
       rowMatrix.put(classifiedLabel, count);

@@ -18,12 +18,12 @@
 package org.apache.mahout.clustering.dirichlet;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -99,7 +99,7 @@ public final class TestL1ModelClustering extends MahoutTestCase {
   private List<VectorWritable> sampleData;
 
   private void getSampleData(String[] docs2) throws IOException {
-    sampleData = new ArrayList<VectorWritable>();
+    sampleData = Lists.newArrayList();
     RAMDirectory directory = new RAMDirectory();
     IndexWriter writer = new IndexWriter(directory,
                                          new StandardAnalyzer(Version.LUCENE_31),

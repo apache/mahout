@@ -29,10 +29,10 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -63,11 +63,11 @@ public class DisplayClustering extends Frame {
 
   protected static final int SIZE = 8; // screen size in inches
 
-  private static final Collection<Vector> SAMPLE_PARAMS = new ArrayList<Vector>();
+  private static final Collection<Vector> SAMPLE_PARAMS = Lists.newArrayList();
 
-  protected static final List<VectorWritable> SAMPLE_DATA = new ArrayList<VectorWritable>();
+  protected static final List<VectorWritable> SAMPLE_DATA = Lists.newArrayList();
 
-  protected static final List<List<Cluster>> CLUSTERS = new ArrayList<List<Cluster>>();
+  protected static final List<List<Cluster>> CLUSTERS = Lists.newArrayList();
 
   static final Color[] COLORS = {
     Color.red, Color.orange, Color.yellow, Color.green, Color.blue, Color.magenta, Color.lightGray
@@ -249,7 +249,7 @@ public class DisplayClustering extends Frame {
   }
 
   protected static List<Cluster> readClusters(Path clustersIn) {
-    List<Cluster> clusters = new ArrayList<Cluster>();
+    List<Cluster> clusters = Lists.newArrayList();
     Configuration conf = new Configuration();
     for (Cluster value :
          new SequenceFileDirValueIterable<Cluster>(clustersIn, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {

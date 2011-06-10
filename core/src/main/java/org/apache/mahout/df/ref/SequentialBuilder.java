@@ -17,10 +17,10 @@
 
 package org.apache.mahout.df.ref;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.df.Bagging;
 import org.apache.mahout.df.DecisionForest;
 import org.apache.mahout.df.builder.TreeBuilder;
@@ -57,7 +57,7 @@ public class SequentialBuilder {
   }
   
   public DecisionForest build(int nbTrees, PredictionCallback callback) {
-    List<Node> trees = new ArrayList<Node>();
+    List<Node> trees = Lists.newArrayList();
     
     for (int treeId = 0; treeId < nbTrees; treeId++) {
       trees.add(bagging.build(treeId, rng, callback));

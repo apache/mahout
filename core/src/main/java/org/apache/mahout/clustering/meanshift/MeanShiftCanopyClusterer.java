@@ -17,11 +17,11 @@
 
 package org.apache.mahout.clustering.meanshift;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.kernel.IKernelProfile;
@@ -194,7 +194,7 @@ public class MeanShiftCanopyClusterer {
         aKernelProfileDerivative, t1, t2, convergenceThreshold);
     int nextCanopyId = 0;
     
-    List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
+    List<MeanShiftCanopy> canopies = Lists.newArrayList();
     for (Vector point : points) {
       clusterer.mergeCanopy(
           new MeanShiftCanopy(point, nextCanopyId++, measure), canopies);
@@ -210,7 +210,7 @@ public class MeanShiftCanopyClusterer {
   protected List<MeanShiftCanopy> iterate(Iterable<MeanShiftCanopy> canopies,
       boolean[] converged) {
     converged[0] = true;
-    List<MeanShiftCanopy> migratedCanopies = new ArrayList<MeanShiftCanopy>();
+    List<MeanShiftCanopy> migratedCanopies = Lists.newArrayList();
     for (MeanShiftCanopy canopy : canopies) {
       converged[0] = shiftToMean(canopy) && converged[0];
       mergeCanopy(canopy, migratedCanopies);

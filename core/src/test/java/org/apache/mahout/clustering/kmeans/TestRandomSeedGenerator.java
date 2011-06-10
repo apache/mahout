@@ -17,11 +17,11 @@
 
 package org.apache.mahout.clustering.kmeans;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -45,7 +45,7 @@ public final class TestRandomSeedGenerator extends MahoutTestCase {
   private FileSystem fs;
   
   private static List<VectorWritable> getPoints() {
-    List<VectorWritable> points = new ArrayList<VectorWritable>();
+    List<VectorWritable> points = Lists.newArrayList();
     for (double[] fr : RAW) {
       Vector vec = new RandomAccessSparseVector(fr.length);
       vec.assign(fr);

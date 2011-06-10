@@ -17,11 +17,11 @@
 
 package org.apache.mahout.ga.watchmaker.cd.tool;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.io.Text;
 import org.apache.mahout.examples.MahoutTestCase;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -64,7 +64,7 @@ public final class ToolReducerTest extends MahoutTestCase {
 
     String description = reducer.nominalDescription(values.iterator());
 
-    Collection<String> actual = new ArrayList<String>();
+    Collection<String> actual = Lists.newArrayList();
     DescriptionUtils.extractNominalValues(description, actual);
 
     assertEquals(expected.size(), actual.size());
@@ -72,7 +72,7 @@ public final class ToolReducerTest extends MahoutTestCase {
   }
 
   static List<Text> asList(String... strings) {
-    List<Text> values = new ArrayList<Text>();
+    List<Text> values = Lists.newArrayList();
 
     for (String value : strings) {
       values.add(new Text(value));

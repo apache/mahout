@@ -18,7 +18,6 @@
 package org.apache.mahout.ga.watchmaker.cd;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -26,6 +25,7 @@ import java.util.Scanner;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -69,8 +69,8 @@ public final class FileInfoParser {
     FSDataInputStream input = fs.open(info);
     Scanner reader = new Scanner(input);
     
-    List<Integer> ignored = new ArrayList<Integer>();
-    List<Attribute> attributes = new ArrayList<Attribute>();
+    List<Integer> ignored = Lists.newArrayList();
+    List<Attribute> attributes = Lists.newArrayList();
     int labelIndex = -1;
     
     int index = 0;
@@ -121,7 +121,7 @@ public final class FileInfoParser {
    * Parse a nominal attribute.
    */
   private static NominalAttr parseNominal(Iterator<String> tokens) {
-    Collection<String> vlist = new ArrayList<String>();
+    Collection<String> vlist = Lists.newArrayList();
     while (tokens.hasNext()) {
       vlist.add(tokens.next());
     }

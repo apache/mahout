@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.zip.GZIPOutputStream;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -63,7 +64,7 @@ public final class SequenceFilesFromMailArchivesTest extends MahoutTestCase {
       gzOut.write(testMailMessages.getBytes("UTF-8"));
       gzOut.finish();
     } finally {
-      IOUtils.quietClose(gzOut);
+      Closeables.closeQuietly(gzOut);
     }    
   }
 

@@ -21,8 +21,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 
-import java.util.ArrayList;
-
+import com.google.common.collect.Lists;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.AbstractMatrix;
 import org.apache.mahout.math.DenseMatrix;
@@ -173,7 +172,7 @@ public class HebbianSolver {
                              int desiredRank) {
     int cols = corpus.numCols();
     Matrix eigens = new DenseMatrix(desiredRank, cols);
-    List<Double> eigenValues = new ArrayList<Double>();
+    List<Double> eigenValues = Lists.newArrayList();
     log.info("Finding " + desiredRank + " singular vectors of matrix with " + corpus.numRows() + " rows, via Hebbian");
     /**
      * The corpusProjections matrix is a running cache of the residual projection of each corpus vector against all

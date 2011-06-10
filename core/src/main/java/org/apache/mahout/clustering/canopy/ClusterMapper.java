@@ -18,9 +18,9 @@
 package org.apache.mahout.clustering.canopy;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -46,15 +46,7 @@ public class ClusterMapper
     canopyClusterer.emitPointToClosestCanopy(point.get(), canopies, context);
   }
 
-  private final Collection<Canopy> canopies = new ArrayList<Canopy>();
-
-  /**
-   * Configure the mapper by providing its canopies. Used by unit tests.
-   */
-  public void config(Collection<Canopy> canopies) {
-    this.canopies.clear();
-    this.canopies.addAll(canopies);
-  }
+  private final Collection<Canopy> canopies = Lists.newArrayList();
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
@@ -71,8 +63,7 @@ public class ClusterMapper
       FileSystem fs = clusterPath.getFileSystem(conf);
       Path[] paths = FileUtil.stat2Paths(fs.globStatus(clusterPath, PathFilters.partFilter()));
       for (FileStatus file : fs.listStatus(paths, PathFilters.partFilter())) {
-        for (Canopy value : new SequenceFileValueIterable<Canopy>(file
-            .getPath(), conf)) {
+        for (Canopy value : new SequenceFileValueIterable<Canopy>(file.getPath(), conf)) {
           canopies.add(value);
         }
       }

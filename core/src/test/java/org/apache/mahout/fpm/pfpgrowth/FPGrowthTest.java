@@ -17,12 +17,12 @@
 
 package org.apache.mahout.fpm.pfpgrowth;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -46,7 +46,7 @@ public final class FPGrowthTest extends MahoutTestCase {
 
     FPGrowth<String> fp = new FPGrowth<String>();
 
-    Collection<Pair<List<String>,Long>> transactions = new ArrayList<Pair<List<String>,Long>>();
+    Collection<Pair<List<String>,Long>> transactions = Lists.newArrayList();
     transactions.add(new Pair<List<String>,Long>(Arrays.asList("E", "A", "D", "B"), 1L));
     transactions.add(new Pair<List<String>,Long>(Arrays.asList("D", "A", "C", "E", "B"), 1L));
     transactions.add(new Pair<List<String>,Long>(Arrays.asList("C", "A", "B", "E"), 1L));
@@ -94,7 +94,7 @@ public final class FPGrowthTest extends MahoutTestCase {
 
     FPGrowth<String> fp = new FPGrowth<String>();
 
-    Collection<Pair<List<String>,Long>> transactions = new ArrayList<Pair<List<String>,Long>>();
+    Collection<Pair<List<String>,Long>> transactions = Lists.newArrayList();
     transactions.add(new Pair<List<String>,Long>(Arrays.asList("X"), 12L));
     transactions.add(new Pair<List<String>,Long>(Arrays.asList("Y"), 4L));
     transactions.add(new Pair<List<String>,Long>(Arrays.asList("X", "Y"), 10L));
@@ -131,7 +131,7 @@ public final class FPGrowthTest extends MahoutTestCase {
 
     FPGrowth<String> fp = new FPGrowth<String>();
 
-    Collection<Pair<List<String>,Long>> transactions = new ArrayList<Pair<List<String>,Long>>();
+    Collection<Pair<List<String>,Long>> transactions = Lists.newArrayList();
     transactions.add(new Pair<List<String>,Long>(Arrays.asList("X"), 12L));
     transactions.add(new Pair<List<String>,Long>(Arrays.asList("Y"), 4L));
     transactions.add(new Pair<List<String>,Long>(Arrays.asList("X", "Y"), 10L));
@@ -170,7 +170,7 @@ public final class FPGrowthTest extends MahoutTestCase {
 
     FPGrowth<String> fp = new FPGrowth<String>();
 
-    Collection<Pair<List<String>,Long>> transactions = new ArrayList<Pair<List<String>,Long>>();
+    Collection<Pair<List<String>,Long>> transactions = Lists.newArrayList();
     transactions.add(new Pair<List<String>,Long>(Arrays.asList("E", "A", "D", "B"), 1L));
 
     OutputCollector<String, List<Pair<List<String>, Long>>> noOutput =

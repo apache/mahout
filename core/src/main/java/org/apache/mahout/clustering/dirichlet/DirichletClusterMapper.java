@@ -18,9 +18,9 @@
 package org.apache.mahout.clustering.dirichlet;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -64,7 +64,7 @@ public class DirichletClusterMapper
   }
 
   protected static List<DirichletCluster> loadClusters(Configuration conf, Path stateIn) {
-    List<DirichletCluster> clusters = new ArrayList<DirichletCluster>();
+    List<DirichletCluster> clusters = Lists.newArrayList();
     for (DirichletCluster value
          : new SequenceFileDirValueIterable<DirichletCluster>(stateIn,
                                                               PathType.LIST,

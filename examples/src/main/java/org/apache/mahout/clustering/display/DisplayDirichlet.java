@@ -20,9 +20,9 @@ package org.apache.mahout.clustering.display;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.Cluster;
@@ -91,7 +91,7 @@ public class DisplayDirichlet extends DisplayClustering {
   private static void runSequentialDirichletClassifier(ModelDistribution<VectorWritable> modelDist,
                                                        int numClusters,
                                                        int numIterations) throws IOException {
-    List<Cluster> models = new ArrayList<Cluster>();
+    List<Cluster> models = Lists.newArrayList();
     for (Model<VectorWritable> cluster : modelDist.sampleFromPrior(numClusters)) {
       models.add((Cluster) cluster);
     }
@@ -106,7 +106,7 @@ public class DisplayDirichlet extends DisplayClustering {
     new ClusterIterator(policy).iterate(samples, priorClassifier, output, numIterations);
     for (int i = 1; i <= numIterations; i++) {
       ClusterClassifier posterior = readClassifier(conf, new Path(output, "classifier-" + i));
-      List<Cluster> clusters = new ArrayList<Cluster>();    
+      List<Cluster> clusters = Lists.newArrayList();
       for (Cluster cluster : posterior.getModels()) {
         if (isSignificant(cluster)) {
           clusters.add(cluster);
@@ -126,7 +126,7 @@ public class DisplayDirichlet extends DisplayClustering {
     List<Cluster[]> result = dc.cluster(numIterations);
     printModels(result, burnin);
     for (Cluster[] models : result) {
-      List<Cluster> clusters = new ArrayList<Cluster>();
+      List<Cluster> clusters = Lists.newArrayList();
       for (Cluster cluster : models) {
         if (isSignificant(cluster)) {
           clusters.add(cluster);

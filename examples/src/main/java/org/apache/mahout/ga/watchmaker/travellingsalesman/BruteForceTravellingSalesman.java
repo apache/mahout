@@ -17,11 +17,11 @@
 
 package org.apache.mahout.ga.watchmaker.travellingsalesman;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.uncommons.maths.combinatorics.PermutationGenerator;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
@@ -65,7 +65,7 @@ public class BruteForceTravellingSalesman implements TravellingSalesmanStrategy 
   public List<String> calculateShortestRoute(Collection<String> cities, ProgressListener progressListener) {
     Iterator<String> iterator = cities.iterator();
     String startCity = iterator.next();
-    Collection<String> destinations = new ArrayList<String>(cities.size() - 1);
+    Collection<String> destinations = Lists.newArrayListWithCapacity(cities.size() - 1);
     while (iterator.hasNext()) {
       destinations.add(iterator.next());
     }
@@ -76,14 +76,14 @@ public class BruteForceTravellingSalesman implements TravellingSalesmanStrategy 
     long count = 0;
     List<String> shortestRoute = null;
     double shortestDistance = Double.POSITIVE_INFINITY;
-    List<String> currentRoute = new ArrayList<String>(cities.size());
+    List<String> currentRoute = Lists.newArrayListWithCapacity(cities.size());
     while (generator.hasMore()) {
       List<String> route = generator.nextPermutationAsList(currentRoute);
       route.add(0, startCity);
       double distance = evaluator.getFitness(route, null);
       if (distance < shortestDistance) {
         shortestDistance = distance;
-        shortestRoute = new ArrayList<String>(route);
+        shortestRoute = Lists.newArrayList(route);
       }
       ++count;
       if (count % 1000 == 0 && progressListener != null) {

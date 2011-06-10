@@ -17,11 +17,11 @@
 
 package org.apache.mahout.classifier.sequencelearning.hmm;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
@@ -177,16 +177,14 @@ public final class HmmUtils {
      * probability of the matrix is non-negative. The sum of each row is equal
      * to 1.
      */
-    Preconditions.checkArgument(model.getEmissionMatrix() != null,
-                                "Error: The output state matrix is not initialized!");
+    Preconditions.checkNotNull(model.getEmissionMatrix(), "Error: The output state matrix is not initialized!");
     Preconditions.checkArgument(model.getEmissionMatrix().numRows() == model.getNrOfHiddenStates()
-      && model.getEmissionMatrix().numCols() == model.getNrOfOutputStates(),
-      "Error: The output state matrix is not of the form nrOfHiddenStates x nrOfOutputStates");
+        && model.getEmissionMatrix().numCols() == model.getNrOfOutputStates(),
+        "Error: The output state matrix is not of the form nrOfHiddenStates x nrOfOutputStates");
     for (int i = 0; i < model.getEmissionMatrix().numRows(); i++) {
       sum = 0;
       for (int j = 0; j < model.getEmissionMatrix().numCols(); j++) {
-        Preconditions.checkArgument(
-            model.getEmissionMatrix().get(i, j) >= 0,
+        Preconditions.checkArgument(model.getEmissionMatrix().get(i, j) >= 0,
             "The output state probability from hidden state " + i + " to output state " + j + " is negative");
         sum += model.getEmissionMatrix().get(i, j);
       }
@@ -208,8 +206,7 @@ public final class HmmUtils {
       sum = 0;
       for (int j = 0; j < model.getTransitionMatrix().numCols(); j++) {
         Preconditions.checkArgument(model.getTransitionMatrix().get(i, j) >= 0,
-          "Error: The transition probability from hidden state %d to hidden state %d is negative",
-          i, j);
+          "Error: The transition probability from hidden state %d to hidden state %d is negative", i, j);
         sum += model.getTransitionMatrix().get(i, j);
       }
       Preconditions.checkArgument(Maths.approxEquals(sum, 1, 0.00001),
@@ -261,7 +258,7 @@ public final class HmmUtils {
                                                  int[] sequence,
                                                  boolean observed,
                                                  String defaultValue) {
-    List<String> decoded = new ArrayList<String>(sequence.length);
+    List<String> decoded = Lists.newArrayListWithCapacity(sequence.length);
     for (int position : sequence) {
       String nextState;
       if (observed) {

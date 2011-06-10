@@ -17,7 +17,6 @@
 
 package org.apache.mahout.cf.taste.example.kddcup.track2;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,6 +25,7 @@ import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
@@ -73,7 +73,7 @@ final class Track2Callable implements Callable<UserResult> {
     }
 
     Collection<Long> itemIDs = estimateToItemID.values();
-    List<Long> topThree = new ArrayList<Long>(itemIDs);
+    List<Long> topThree = Lists.newArrayList(itemIDs);
     if (topThree.size() > 3) {
       topThree = topThree.subList(0, 3);
     } else if (topThree.size() < 3) {
@@ -86,7 +86,7 @@ final class Track2Callable implements Callable<UserResult> {
         newItemIDs.add(userTest.getItemID(i));
         i++;
       }
-      topThree = new ArrayList<Long>(newItemIDs);
+      topThree = Lists.newArrayList(newItemIDs);
     }
     if (topThree.size() != 3) {
       throw new IllegalStateException();

@@ -19,7 +19,6 @@ package org.apache.mahout.math.hadoop.stochasticsvd;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Deque;
@@ -29,6 +28,7 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -425,7 +425,7 @@ public class SSVDSolver {
       return null;
     }
 
-    List<double[]> denseData = new ArrayList<double[]>();
+    List<double[]> denseData = Lists.newArrayList();
 
     // int m=0;
 

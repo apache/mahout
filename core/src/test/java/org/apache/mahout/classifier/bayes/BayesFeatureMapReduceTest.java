@@ -29,7 +29,6 @@ import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesConstants;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesFeatureMapper;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesFeatureReducer;

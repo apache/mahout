@@ -15,15 +15,15 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.classifier.bayes.io;
+package org.apache.mahout.classifier.bayes;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.mahout.classifier.bayes.datastore.InMemoryBayesDatastore;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesConstants;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.Parameters;
@@ -150,7 +150,7 @@ public final class SequenceFileModelReader {
   }
   
   public static Map<String,Double> readLabelSums(Path pathPattern, Configuration conf) {
-    Map<String,Double> labelSum = new HashMap<String,Double>();
+    Map<String,Double> labelSum = Maps.newHashMap();
     // the key is either _label_ or label,feature
     for (Pair<StringTuple,DoubleWritable> record
          : new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern,
@@ -170,7 +170,7 @@ public final class SequenceFileModelReader {
   }
   
   public static Map<String,Double> readLabelDocumentCounts(Path pathPattern, Configuration conf) {
-    Map<String,Double> labelDocumentCounts = new HashMap<String,Double>();
+    Map<String,Double> labelDocumentCounts = Maps.newHashMap();
     // the key is either _label_ or label,feature
     for (Pair<StringTuple,DoubleWritable> record
          : new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern,
@@ -190,7 +190,7 @@ public final class SequenceFileModelReader {
   }
   
   public static double readSigmaJSigmaK(Path pathPattern, Configuration conf) {
-    Map<String,Double> weightSum = new HashMap<String,Double>();
+    Map<String,Double> weightSum = Maps.newHashMap();
     for (Pair<StringTuple,DoubleWritable> record
          : new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern,
                                                                    PathType.GLOB,
@@ -210,7 +210,7 @@ public final class SequenceFileModelReader {
   }
   
   public static double readVocabCount(Path pathPattern, Configuration conf) {
-    Map<String,Double> weightSum = new HashMap<String,Double>();
+    Map<String,Double> weightSum = Maps.newHashMap();
     for (Pair<StringTuple,DoubleWritable> record
          : new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern,
                                                                    PathType.GLOB, 

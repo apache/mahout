@@ -18,13 +18,13 @@
 package org.apache.mahout.math.hadoop.similarity;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -229,7 +229,7 @@ public class RowSimilarityJob extends AbstractJob {
     protected void reduce(VarIntWritable column, Iterable<WeightedOccurrence> weightedOccurrences, Context ctx)
       throws IOException, InterruptedException {
 
-      List<WeightedOccurrence> collectedWeightedOccurrences = new ArrayList<WeightedOccurrence>();
+      List<WeightedOccurrence> collectedWeightedOccurrences = Lists.newArrayList();
       for (WeightedOccurrence weightedOccurrence : weightedOccurrences) {
         collectedWeightedOccurrences.add(weightedOccurrence.clone());
       }

@@ -17,10 +17,10 @@
 
 package org.apache.mahout.ga.watchmaker.cd.tool;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.examples.MahoutTestCase;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -45,7 +45,7 @@ public final class DescriptionUtilsTest extends MahoutTestCase {
   @Test
   public void testExtractNominalValues() {
     String description = "val1,val2,val3";
-    Collection<String> target = new ArrayList<String>();
+    Collection<String> target = Lists.newArrayList();
 
     DescriptionUtils.extractNominalValues(description, target);
 

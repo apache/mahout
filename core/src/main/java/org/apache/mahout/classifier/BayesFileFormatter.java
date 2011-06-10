@@ -23,10 +23,10 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.commons.cli2.CommandLine;
@@ -232,7 +232,7 @@ public final class BayesFileFormatter {
   public static String[] readerToDocument(Analyzer analyzer, Reader reader) throws IOException {
     TokenStream ts = analyzer.reusableTokenStream("", reader);
     
-    List<String> coll = new ArrayList<String>();
+    List<String> coll = Lists.newArrayList();
     TermAttribute termAtt = ts.addAttribute(TermAttribute.class);
     ts.reset();
     while (ts.incrementToken()) {

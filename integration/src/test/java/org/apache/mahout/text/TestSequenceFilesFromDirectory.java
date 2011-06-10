@@ -19,10 +19,10 @@ package org.apache.mahout.text;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -145,7 +145,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     assertEquals("chunk-0", fstats[0].getPath().getName());
     
 
-    Map<String,String> fileToData = new HashMap<String,String>();
+    Map<String,String> fileToData = Maps.newHashMap();
     for (String[] aData : data) {
       if (inputType == ParserType.CSV) {
         fileToData.put(prefix + aData[0], aData[1]);

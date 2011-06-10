@@ -52,7 +52,7 @@
  * A Model can be created by hand, or, if using
  * the {@link org.apache.mahout.classifier.bayes.BayesDriver}, it can be created from the
  * {@link org.apache.hadoop.io.SequenceFile} that is output. To create it from the SequenceFile, use the
- * {@link org.apache.mahout.classifier.bayes.io.SequenceFileModelReader} located in the io subpackage.</p>
+ * {@link SequenceFileModelReader} located in the io subpackage.</p>
  *
  * <h3>The Classifier</h3>
  *

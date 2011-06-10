@@ -58,6 +58,10 @@ abstract class FixedSizePriorityQueue<T> {
     return queue.isEmpty();
   }
 
+  public int size() {
+    return queue.size();
+  }
+
   public List<T> retrieve() {
     List<T> topItems = Lists.newArrayList(queue);
     Collections.sort(topItems, sortingComparator(comparator));

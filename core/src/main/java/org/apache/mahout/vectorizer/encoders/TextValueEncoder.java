@@ -20,10 +20,10 @@ package org.apache.mahout.vectorizer.encoders;
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multiset;
 import org.apache.mahout.math.Vector;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
@@ -97,7 +97,7 @@ public class TextValueEncoder extends FeatureVectorEncoder {
 
   @Override
   protected Iterable<Integer> hashesForProbe(byte[] originalForm, int dataSize, String name, int probe) {
-    Collection<Integer> hashes = new ArrayList<Integer>();
+    Collection<Integer> hashes = Lists.newArrayList();
     for (String word : tokenize(new String(originalForm, Charsets.UTF_8))) {
       hashes.add(hashForProbe(bytesForString(word), dataSize, name, probe));
     }

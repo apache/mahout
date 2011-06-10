@@ -20,15 +20,15 @@ package org.apache.mahout.fpm.pfpgrowth;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.commons.lang.mutable.MutableLong;
 import org.apache.hadoop.io.VIntWritable;
 import org.apache.hadoop.io.VLongWritable;
@@ -78,7 +78,7 @@ public final class TransactionTree implements Writable, Iterable<Pair<List<Integ
   
   public TransactionTree(Integer[] items, Long support) {
     representedAsList = true;
-    transactionSet = new ArrayList<Pair<List<Integer>,Long>>();
+    transactionSet = Lists.newArrayList();
     transactionSet.add(new Pair<List<Integer>,Long>(Arrays.asList(items), support));
   }
   
@@ -168,7 +168,7 @@ public final class TransactionTree implements Writable, Iterable<Pair<List<Integ
   }
   
   public Map<Integer,MutableLong> generateFList() {
-    Map<Integer,MutableLong> frequencyList = new HashMap<Integer,MutableLong>();
+    Map<Integer,MutableLong> frequencyList = Maps.newHashMap();
     Iterator<Pair<List<Integer>,Long>> it = iterator();
     //int items = 0;
     //int count = 0;
@@ -198,7 +198,7 @@ public final class TransactionTree implements Writable, Iterable<Pair<List<Integ
       }
     };
     int size = 0;
-    List<Pair<List<Integer>,Long>> compressedTransactionSet = new ArrayList<Pair<List<Integer>,Long>>();
+    List<Pair<List<Integer>,Long>> compressedTransactionSet = Lists.newArrayList();
     while (it.hasNext()) {
       Pair<List<Integer>,Long> p = it.next();
       Collections.sort(p.getFirst(), comparator);
@@ -244,7 +244,7 @@ public final class TransactionTree implements Writable, Iterable<Pair<List<Integ
     VLongWritable vLong = new VLongWritable();
     
     if (representedAsList) {
-      transactionSet = new ArrayList<Pair<List<Integer>,Long>>();
+      transactionSet = Lists.newArrayList();
       vInt.readFields(in);
       int numTransactions = vInt.get();
       for (int i = 0; i < numTransactions; i++) {

@@ -35,8 +35,9 @@ import java.util.Random;
  * are examined.
  */
 public class Auc {
+
   private int maxBufferSize = 10000;
-  private final DoubleArrayList[] scores = {new DoubleArrayList(), new DoubleArrayList()};
+  private final DoubleArrayList[] scores = { new DoubleArrayList(), new DoubleArrayList() };
   private final Random rand;
   private int samples;
   private final double threshold;

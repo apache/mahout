@@ -20,11 +20,11 @@ package org.apache.mahout.fpm.pfpgrowth.convertors.string;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.Pair;
 
@@ -36,11 +36,11 @@ public final class TopKStringPatterns implements Writable {
   private final List<Pair<List<String>,Long>> frequentPatterns;
   
   public TopKStringPatterns() {
-    frequentPatterns = new ArrayList<Pair<List<String>,Long>>();
+    frequentPatterns = Lists.newArrayList();
   }
   
   public TopKStringPatterns(Collection<Pair<List<String>, Long>> patterns) {
-    frequentPatterns = new ArrayList<Pair<List<String>,Long>>();
+    frequentPatterns = Lists.newArrayList();
     frequentPatterns.addAll(patterns);
   }
   
@@ -53,7 +53,7 @@ public final class TopKStringPatterns implements Writable {
   }
   
   public TopKStringPatterns merge(TopKStringPatterns pattern, int heapSize) {
-    List<Pair<List<String>,Long>> patterns = new ArrayList<Pair<List<String>,Long>>();
+    List<Pair<List<String>,Long>> patterns = Lists.newArrayList();
     Iterator<Pair<List<String>,Long>> myIterator = frequentPatterns.iterator();
     Iterator<Pair<List<String>,Long>> otherIterator = pattern.iterator();
     Pair<List<String>,Long> myItem = null;
@@ -107,7 +107,7 @@ public final class TopKStringPatterns implements Writable {
     frequentPatterns.clear();
     int length = in.readInt();
     for (int i = 0; i < length; i++) {
-      List<String> items = new ArrayList<String>();
+      List<String> items = Lists.newArrayList();
       int itemsetLength = in.readInt();
       long support = in.readLong();
       for (int j = 0; j < itemsetLength; j++) {

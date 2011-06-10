@@ -18,10 +18,10 @@
 package org.apache.mahout.df.tools;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -131,7 +131,7 @@ public final class Describe {
   }
   
   private static List<String> convert(Collection<?> values) {
-    List<String> list = new ArrayList<String>(values.size());
+    List<String> list = Lists.newArrayListWithCapacity(values.size());
     for (Object value : values) {
       list.add(value.toString());
     }

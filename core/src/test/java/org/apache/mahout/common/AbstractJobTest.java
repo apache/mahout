@@ -20,9 +20,9 @@
 package org.apache.mahout.common;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -36,7 +36,7 @@ public final class AbstractJobTest extends MahoutTestCase {
   
   @Test
   public void testFlag() throws Exception {
-    final Map<String,String> testMap = new HashMap<String,String>();
+    final Map<String,String> testMap = Maps.newHashMap();
     
     AbstractJobFactory fact = new AbstractJobFactory() {
       @Override
@@ -67,7 +67,7 @@ public final class AbstractJobTest extends MahoutTestCase {
   
   @Test
   public void testOptions() throws Exception {
-    final Map<String,String> testMap = new HashMap<String,String>();
+    final Map<String,String> testMap = Maps.newHashMap();
     
     AbstractJobFactory fact = new AbstractJobFactory() {
       @Override

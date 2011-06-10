@@ -19,16 +19,16 @@
 
 package org.apache.mahout.common;
 
-import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.StatusReporter;
 
 public final class DummyStatusReporter extends StatusReporter {
 
-  private final Map<Enum<?>, Counter> counters = new HashMap<Enum<?>, Counter>();
-  private final Map<String, Counter> counterGroups = new HashMap<String, Counter>();
+  private final Map<Enum<?>, Counter> counters = Maps.newHashMap();
+  private final Map<String, Counter> counterGroups = Maps.newHashMap();
 
   @Override
   public Counter getCounter(Enum<?> name) {

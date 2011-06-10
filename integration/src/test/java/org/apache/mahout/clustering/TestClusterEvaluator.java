@@ -18,11 +18,11 @@
 package org.apache.mahout.clustering;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -61,9 +61,9 @@ public final class TestClusterEvaluator extends MahoutTestCase {
   private static final double[][] REFERENCE = { {1, 1}, {2, 1}, {1, 2}, {2, 2},
       {3, 3}, {4, 4}, {5, 4}, {4, 5}, {5, 5}};
   
-  private List<VectorWritable> referenceData = new ArrayList<VectorWritable>();
+  private List<VectorWritable> referenceData = Lists.newArrayList();
   
-  private final List<VectorWritable> sampleData = new ArrayList<VectorWritable>();
+  private final List<VectorWritable> sampleData = Lists.newArrayList();
   
   private Map<Integer,List<VectorWritable>> representativePoints;
   
@@ -148,7 +148,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
    *          the DistanceMeasure
    */
   private void initData(double dC, double dP, DistanceMeasure measure) {
-    clusters = new ArrayList<Cluster>();
+    clusters = Lists.newArrayList();
     clusters.add(new Canopy(new DenseVector(new double[] {-dC, -dC}), 1,
         measure));
     clusters
@@ -157,9 +157,9 @@ public final class TestClusterEvaluator extends MahoutTestCase {
         .add(new Canopy(new DenseVector(new double[] {dC, dC}), 5, measure));
     clusters
         .add(new Canopy(new DenseVector(new double[] {dC, -dC}), 7, measure));
-    representativePoints = new HashMap<Integer,List<VectorWritable>>();
+    representativePoints = Maps.newHashMap();
     for (Cluster cluster : clusters) {
-      List<VectorWritable> points = new ArrayList<VectorWritable>();
+      List<VectorWritable> points = Lists.newArrayList();
       representativePoints.put(cluster.getId(), points);
       points.add(new VectorWritable(cluster.getCenter().clone()));
       points.add(new VectorWritable(cluster.getCenter().plus(
@@ -252,7 +252,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     Canopy cluster = new Canopy(new DenseVector(new double[] {10, 10}), 19,
         measure);
     clusters.add(cluster);
-    List<VectorWritable> points = new ArrayList<VectorWritable>();
+    List<VectorWritable> points = Lists.newArrayList();
     representativePoints.put(cluster.getId(), points);
     ClusterEvaluator evaluator = new ClusterEvaluator(representativePoints,
         clusters, measure);
@@ -271,7 +271,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     Canopy cluster = new Canopy(new DenseVector(new double[] {0, 0}), 19,
         measure);
     clusters.add(cluster);
-    List<VectorWritable> points = new ArrayList<VectorWritable>();
+    List<VectorWritable> points = Lists.newArrayList();
     points.add(new VectorWritable(cluster.getCenter().plus(
         new DenseVector(new double[] {1, 1}))));
     representativePoints.put(cluster.getId(), points);
@@ -299,7 +299,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     Canopy cluster = new Canopy(new DenseVector(new double[] {0, 0}), 19,
         measure);
     clusters.add(cluster);
-    List<VectorWritable> points = new ArrayList<VectorWritable>();
+    List<VectorWritable> points = Lists.newArrayList();
     points.add(new VectorWritable(cluster.getCenter()));
     points.add(new VectorWritable(cluster.getCenter()));
     points.add(new VectorWritable(cluster.getCenter()));

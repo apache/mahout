@@ -17,9 +17,9 @@
 
 package org.apache.mahout.clustering.dirichlet;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.Model;
 import org.apache.mahout.clustering.ModelDistribution;
@@ -47,7 +47,7 @@ public class DirichletState {
     this.modelFactory = modelFactory;
     this.alpha0 = alpha0;
     // sample initial prior models
-    clusters = new ArrayList<DirichletCluster>();
+    clusters = Lists.newArrayList();
     for (Model<VectorWritable> m : modelFactory.sampleFromPrior(numClusters)) {
       clusters.add(new DirichletCluster((Cluster) m));
     }

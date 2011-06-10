@@ -17,7 +17,8 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
+
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -52,7 +53,7 @@ public class DataLine {
     
     // extract tokens
     StringTokenizer tokenizer = new StringTokenizer(dlstr, ",");
-    List<String> tokens = new ArrayList<String>();
+    List<String> tokens = Lists.newArrayList();
     while (tokenizer.hasMoreTokens()) {
       tokens.add(tokenizer.nextToken());
     }

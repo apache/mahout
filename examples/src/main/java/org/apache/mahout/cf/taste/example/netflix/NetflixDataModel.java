@@ -20,11 +20,11 @@ package org.apache.mahout.cf.taste.example.netflix;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
@@ -91,7 +91,7 @@ public final class NetflixDataModel implements DataModel {
         float rating = Float.parseFloat(line.substring(firstComma + 1, secondComma));
         Collection<Preference> userPrefs = userIDPrefMap.get(userID);
         if (userPrefs == null) {
-          userPrefs = new ArrayList<Preference>(2);
+          userPrefs = Lists.newArrayListWithCapacity(2);
           userIDPrefMap.put(userID, userPrefs);
         }
         userPrefs.add(new GenericPreference(userID, movieID, rating));

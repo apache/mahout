@@ -17,11 +17,11 @@
 
 package org.apache.mahout.clustering.spectral.eigencuts;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -281,11 +281,11 @@ public class TestEigencutsAffinityCutsJob extends MahoutTestCase {
    */
   private Map<Text, List<VertexWritable>> buildMapData(Path affinity, 
       Path sensitivity, double [][] array) {
-    Map<Text, List<VertexWritable>> map = new HashMap<Text, List<VertexWritable>>();
+    Map<Text, List<VertexWritable>> map = Maps.newHashMap();
     for (int i = 0; i < this.affinity.length; i++) {
       for (int j = 0; j < this.affinity[i].length; j++) {
         Text key = new Text(Math.max(i, j) + "_" + Math.min(i, j));
-        List<VertexWritable> toAdd = new ArrayList<VertexWritable>();
+        List<VertexWritable> toAdd = Lists.newArrayList();
         if (map.containsKey(key)) {
           toAdd = map.get(key);
           map.remove(key);

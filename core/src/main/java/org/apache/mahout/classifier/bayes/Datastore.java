@@ -15,11 +15,9 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.classifier.bayes.interfaces;
+package org.apache.mahout.classifier.bayes;
 
 import java.util.Collection;
-
-import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
 
 /**
  * The Datastore interface for the {@link Algorithm} to use

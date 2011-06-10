@@ -17,13 +17,13 @@
 
 package org.apache.mahout.ga.watchmaker.travellingsalesman;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.ga.watchmaker.MahoutFitnessEvaluator;
 import org.uncommons.maths.random.PoissonGenerator;
@@ -131,7 +131,7 @@ public class EvolutionaryTravellingSalesman implements TravellingSalesmanStrateg
     Random rng = RandomUtils.getRandom();
     
     // Set-up evolution pipeline (cross-over followed by mutation).
-    List<EvolutionaryOperator<List<String>>> operators = new ArrayList<EvolutionaryOperator<List<String>>>(2);
+    List<EvolutionaryOperator<List<String>>> operators = Lists.newArrayListWithCapacity(2);
     if (crossover) {
       operators.add(new ListOrderCrossover());
     }

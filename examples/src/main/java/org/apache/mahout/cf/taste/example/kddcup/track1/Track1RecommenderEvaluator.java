@@ -18,11 +18,11 @@
 package org.apache.mahout.cf.taste.example.kddcup.track1;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.eval.DataModelBuilder;
 import org.apache.mahout.cf.taste.eval.RecommenderBuilder;
@@ -67,7 +67,7 @@ public final class Track1RecommenderEvaluator extends AbstractDifferenceRecommen
 
     Recommender recommender = recommenderBuilder.buildRecommender(dataModel);
 
-    Collection<Callable<Void>> estimateCallables = new ArrayList<Callable<Void>>();
+    Collection<Callable<Void>> estimateCallables = Lists.newArrayList();
     AtomicInteger noEstimateCounter = new AtomicInteger();
     for (Pair<PreferenceArray,long[]> userData :
          new DataFileIterable(KDDCupDataModel.getValidationFile(dataFileDirectory))) {

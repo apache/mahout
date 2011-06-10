@@ -22,12 +22,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import javax.sql.DataSource;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.Refreshable;
@@ -284,7 +284,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       log.debug("Executing SQL query: {}", getUserSQL);
       rs = stmt.executeQuery();
 
-      List<Preference> prefs = new ArrayList<Preference>();
+      List<Preference> prefs = Lists.newArrayList();
       while (rs.next()) {
         prefs.add(buildPreference(rs));
       }
@@ -324,7 +324,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       rs = stmt.executeQuery(getAllUsersSQL);
 
       Long currentUserID = null;
-      List<Preference> currentPrefs = new ArrayList<Preference>();
+      List<Preference> currentPrefs = Lists.newArrayList();
       while (rs.next()) {
         long nextUserID = getLongColumn(rs, 1);
         if (currentUserID != null && !currentUserID.equals(nextUserID) && !currentPrefs.isEmpty()) {
@@ -534,7 +534,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
 
       log.debug("Executing SQL query: {}", getPrefsForItemSQL);
       rs = stmt.executeQuery();
-      List<Preference> prefs = new ArrayList<Preference>();
+      List<Preference> prefs = Lists.newArrayList();
       while (rs.next()) {
         prefs.add(buildPreference(rs));
       }

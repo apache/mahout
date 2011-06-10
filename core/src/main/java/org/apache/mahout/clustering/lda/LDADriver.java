@@ -107,7 +107,7 @@ public final class LDADriver extends AbstractJob {
     double[] logTotals = new double[numTopics];
     Arrays.fill(logTotals, Double.NEGATIVE_INFINITY);
     double ll = 0.0;
-    if(empty) {
+    if (empty) {
       return new LDAState(numTopics, numWords, topicSmoothing, pWgT, logTotals, ll);
     }
     for (Pair<IntPairWritable,DoubleWritable> record
@@ -180,7 +180,7 @@ public final class LDADriver extends AbstractJob {
     FileSystem fs = FileSystem.get(conf);
     Path lastPath = null;
     int maxIteration = Integer.MIN_VALUE;
-    for(FileStatus fstatus : fs.globStatus(new Path(stateDir, "state-*"))) {
+    for (FileStatus fstatus : fs.globStatus(new Path(stateDir, "state-*"))) {
       try {
         int iteration = Integer.parseInt(fstatus.getPath().getName().split("-")[1]);
         if(iteration > maxIteration) {
@@ -205,7 +205,7 @@ public final class LDADriver extends AbstractJob {
     throws IOException, InterruptedException, ClassNotFoundException {
     Path lastKnownState = getLastKnownStatePath(conf, output);
     Path stateIn;
-    if(lastKnownState == null) {
+    if (lastKnownState == null) {
       stateIn = new Path(output, "state-0");
       writeInitialState(stateIn, numTopics, numWords);
     } else {
@@ -336,10 +336,10 @@ public final class LDADriver extends AbstractJob {
   }
 
   private double runIterationSequential(Configuration conf, Path input, Path stateOut) throws IOException {
-    if(state == null) {
+    if (state == null) {
       state = createState(conf);
     }
-    if(trainingCorpus == null) {
+    if (trainingCorpus == null) {
       Class<? extends Writable> keyClass = peekAtSequenceFileForKeyType(conf, input);
       Collection<Pair<Writable, VectorWritable>> corpus = new LinkedList<Pair<Writable, VectorWritable>>();
       for (FileStatus fileStatus : FileSystem.get(conf).globStatus(new Path(input, "part-*"))) {
@@ -362,7 +362,7 @@ public final class LDADriver extends AbstractJob {
     }
     LDAState newState = createState(conf, true);
     double ll = 0.0;
-    for(Pair<Writable, VectorWritable> slice : trainingCorpus) {
+    for (Pair<Writable, VectorWritable> slice : trainingCorpus) {
       LDAInference.InferredDocument doc;
       Vector wordCounts = slice.getSecond().get();
       try {
@@ -469,7 +469,7 @@ public final class LDADriver extends AbstractJob {
       Writable key = ReflectionUtils.newInstance(keyClass, conf);
       Writable vw = new VectorWritable();
 
-      for(Pair<Writable, VectorWritable> slice : trainingCorpus) {
+      for (Pair<Writable, VectorWritable> slice : trainingCorpus) {
         Vector wordCounts = slice.getSecond().get();
         try {
           inference.infer(wordCounts);

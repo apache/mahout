@@ -17,6 +17,7 @@
 
 package org.apache.mahout.ga.watchmaker;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -30,7 +31,6 @@ import org.junit.Test;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public final class MahoutEvaluatorTest extends MahoutTestCase {
@@ -47,7 +47,7 @@ public final class MahoutEvaluatorTest extends MahoutTestCase {
     FitnessEvaluator<DummyCandidate> evaluator = new DummyEvaluator();
 
     // run MahoutEvaluator
-    List<Double> results = new ArrayList<Double>();
+    List<Double> results = Lists.newArrayList();
     Path input = getTestTempDirPath("input");
     Path output = getTestTempDirPath("output");
 
@@ -83,7 +83,7 @@ public final class MahoutEvaluatorTest extends MahoutTestCase {
   }
 
   private static List<DummyCandidate> loadPopulation(FileSystem fs, Path f) throws IOException {
-    List<DummyCandidate> population = new ArrayList<DummyCandidate>();
+    List<DummyCandidate> population = Lists.newArrayList();
     FSDataInputStream in = fs.open(f);
     for (String line : new FileLineIterable(in)) {
       population.add(StringUtils.<DummyCandidate>fromString(line));

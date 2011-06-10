@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.classifier.bayes.common;
+package org.apache.mahout.classifier.bayes;
 
 import java.io.Serializable;
 import java.util.Comparator;

@@ -17,7 +17,8 @@
 
 package org.apache.mahout.fpm.pfpgrowth.fpgrowth;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
+
 import java.util.List;
 
 /**
@@ -29,7 +30,7 @@ public class FPTreeDepthCache {
   private final LeastKCache<Integer,FPTree> firstLevelCache = new LeastKCache<Integer,FPTree>(5);
   private int hits;
   private int misses;
-  private final List<FPTree> treeCache = new ArrayList<FPTree>();
+  private final List<FPTree> treeCache = Lists.newArrayList();
   
   public final FPTree getFirstLevelTree(Integer attr) {
     FPTree tree = firstLevelCache.get(attr);

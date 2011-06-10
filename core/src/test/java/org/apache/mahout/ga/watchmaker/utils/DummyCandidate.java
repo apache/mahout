@@ -18,8 +18,8 @@
 package org.apache.mahout.ga.watchmaker.utils;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public final class DummyCandidate {
@@ -61,7 +61,7 @@ public final class DummyCandidate {
   public static List<DummyCandidate> generatePopulation(int size) {
     Preconditions.checkArgument(size > 0, "Size must be positive", size);
 
-    List<DummyCandidate> population = new ArrayList<DummyCandidate>();
+    List<DummyCandidate> population = Lists.newArrayList();
     for (int index = 0; index < size; index++) {
       population.add(new DummyCandidate(index));
     }

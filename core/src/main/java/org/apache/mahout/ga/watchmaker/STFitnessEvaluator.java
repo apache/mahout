@@ -17,9 +17,9 @@
 
 package org.apache.mahout.ga.watchmaker;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
 import com.google.common.base.Preconditions;
@@ -27,7 +27,7 @@ import com.google.common.base.Preconditions;
 /** Special Fitness Evaluator that evaluates all the population ones. */
 public abstract class STFitnessEvaluator<T> implements FitnessEvaluator<T> {
   
-  private final List<Double> evaluations = new ArrayList<Double>();
+  private final List<Double> evaluations = Lists.newArrayList();
   
   private List<? extends T> population;
   

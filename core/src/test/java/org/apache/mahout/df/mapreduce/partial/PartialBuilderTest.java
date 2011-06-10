@@ -18,11 +18,11 @@
 package org.apache.mahout.df.mapreduce.partial;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -119,7 +119,7 @@ public final class PartialBuilderTest extends MahoutTestCase {
   private static void randomKeyValues(Random rng, TreeID[] keys, MapredOutput[] values, int[] firstIds) {
     int index = 0;
     int firstId = 0;
-    Collection<Integer> partitions = new ArrayList<Integer>();
+    Collection<Integer> partitions = Lists.newArrayList();
 
     for (int p = 0; p < NUM_MAPS; p++) {
       // select a random partition, not yet selected

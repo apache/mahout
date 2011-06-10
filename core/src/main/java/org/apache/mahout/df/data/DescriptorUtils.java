@@ -17,11 +17,11 @@
 
 package org.apache.mahout.df.data;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.df.data.Dataset.Attribute;
 
 /**
@@ -65,7 +65,7 @@ public final class DescriptorUtils {
    */
   public static String generateDescriptor(String description) throws DescriptorException {
     StringTokenizer tokenizer = new StringTokenizer(description, " ");
-    Collection<String> tokens = new ArrayList<String>();
+    Collection<String> tokens = Lists.newArrayList();
     
     while (tokenizer.hasMoreTokens()) {
       tokens.add(tokenizer.nextToken());
