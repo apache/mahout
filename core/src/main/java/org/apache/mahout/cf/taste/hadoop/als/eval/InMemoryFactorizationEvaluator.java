@@ -29,7 +29,6 @@ import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.common.AbstractJob;
-import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.SparseMatrix;
 import org.apache.mahout.math.Vector;

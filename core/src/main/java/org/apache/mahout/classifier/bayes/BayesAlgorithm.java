@@ -17,11 +17,7 @@
 
 package org.apache.mahout.classifier.bayes;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.PriorityQueue;
 
 import org.apache.commons.lang.mutable.MutableDouble;
 import org.apache.mahout.classifier.ClassifierResult;

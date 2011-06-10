@@ -18,7 +18,6 @@
 package org.apache.mahout.classifier.bayes.mapreduce.common;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.google.common.collect.Maps;

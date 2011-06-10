@@ -33,7 +33,6 @@ import com.google.common.io.InputSupplier;
 import com.google.common.io.Resources;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.common.iterator.FileLineIterable;
-import org.apache.mahout.common.IOUtils;
 
 public final class GroupLensDataModel extends FileDataModel {
   

@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 
 import com.google.common.collect.AbstractIterator;
 import com.google.common.io.Closeables;
-import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;

@@ -17,7 +17,6 @@
 
 package org.apache.mahout.classifier.bayes;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import com.google.common.collect.Maps;

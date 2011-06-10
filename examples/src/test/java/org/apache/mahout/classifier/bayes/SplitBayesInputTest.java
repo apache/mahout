@@ -29,7 +29,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.classifier.ClassifierData;
-import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.examples.MahoutTestCase;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 import org.junit.Before;

@@ -41,7 +41,6 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.common.CommandLineUtil;
-import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.jet.random.sampling.RandomSampler;

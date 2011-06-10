@@ -23,7 +23,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.cf.taste.hadoop.als.eval.ParallelFactorizationEvaluator;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
-import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.math.hadoop.MathHelper;
 import org.junit.Test;
 

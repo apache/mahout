@@ -36,7 +36,6 @@ import org.apache.mahout.cf.taste.hadoop.als.PredictionJob;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.common.AbstractJob;
-import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.common.IntPairWritable;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.PathType;

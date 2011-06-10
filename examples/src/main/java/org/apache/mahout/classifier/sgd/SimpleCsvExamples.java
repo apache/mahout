@@ -23,7 +23,6 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
-import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;

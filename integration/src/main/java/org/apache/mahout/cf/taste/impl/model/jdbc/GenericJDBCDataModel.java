@@ -27,7 +27,6 @@ import java.util.Properties;
 import com.google.common.io.Closeables;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
-import org.apache.mahout.common.IOUtils;
 
 /**
  * <p>
