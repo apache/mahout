@@ -1,9 +1,9 @@
 org.apache.mahout.utils.vectors.VectorDumper = vectordump : Dump vectors from a sequence file to text
 org.apache.mahout.utils.clustering.ClusterDumper = clusterdump : Dump cluster output to text
 org.apache.mahout.utils.SequenceFileDumper = seqdumper : Generic Sequence File dumper
-org.apache.mahout.utils.eval.DatasetSplitter = splitDataset : split a rating dataset into training and probe parts
-org.apache.mahout.utils.eval.InMemoryFactorizationEvaluator = evaluateFactorization : compute RMSE of a rating matrix factorization against probes in memory
-org.apache.mahout.utils.eval.ParallelFactorizationEvaluator = evaluateFactorizationParallel : compute RMSE of a rating matrix factorization against probes
+org.apache.mahout.cf.taste.hadoop.als.eval.DatasetSplitter = splitDataset : split a rating dataset into training and probe parts
+org.apache.mahout.cf.taste.hadoop.als.eval.InMemoryFactorizationEvaluator = evaluateFactorization : compute RMSE of a rating matrix factorization against probes in memory
+org.apache.mahout.cf.taste.hadoop.als.eval.ParallelFactorizationEvaluator = evaluateFactorizationParallel : compute RMSE of a rating matrix factorization against probes
 org.apache.mahout.clustering.kmeans.KMeansDriver = kmeans : K-means clustering
 org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver = fkmeans : Fuzzy K-means clustering
 org.apache.mahout.clustering.lda.LDADriver = lda : Latent Dirchlet Allocation
