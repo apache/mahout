@@ -18,6 +18,9 @@
 package org.apache.mahout.cf.taste.hadoop;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.ByteStreams;
+import com.google.common.io.Closeables;
+import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -86,13 +89,14 @@ public final class TasteHadoopUtils {
     FileSystem fs = outputDir.getFileSystem(conf);
     Path outputFile = fs.listStatus(outputDir, PathFilters.partFilter())[0].getPath();
     InputStream in = null;
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
     try  {
       in = fs.open(outputFile);
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
       IOUtils.copyBytes(in, out, conf);
       return Integer.parseInt(new String(out.toByteArray(), Charsets.UTF_8).trim());
     } finally {
-      IOUtils.closeStream(in);
+      Closeables.closeQuietly(in);
+      Closeables.closeQuietly(out);
     }
   }
 }

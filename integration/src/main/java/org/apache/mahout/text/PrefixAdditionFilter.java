@@ -17,6 +17,7 @@
 
 package org.apache.mahout.text;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -61,7 +62,7 @@ public final class PrefixAdditionFilter extends SequenceFilesFromDirectoryFilter
             : current.getName() + Path.SEPARATOR + fst.getPath().getName();
         writer.write(prefix + Path.SEPARATOR + name, file.toString());
       } finally {
-        IOUtils.closeStream(in);
+        Closeables.closeQuietly(in);
       }
     }
   }

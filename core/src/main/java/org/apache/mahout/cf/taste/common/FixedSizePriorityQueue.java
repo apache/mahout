@@ -32,14 +32,17 @@ import java.util.Queue;
 abstract class FixedSizePriorityQueue<T> {
 
   private final int k;
-  private final Comparator<? super T> comparator;
+  private final Comparator<? super T> queueingComparator;
+  private final Comparator<? super T> sortingComparator;
   private final Queue<T> queue;
 
   FixedSizePriorityQueue(int k, Comparator<? super T> comparator) {
     Preconditions.checkArgument(k > 0);
     this.k = k;
-    this.comparator = Preconditions.checkNotNull(comparator);
-    this.queue = new PriorityQueue<T>(k + 1, queueingComparator(comparator));
+    Preconditions.checkNotNull(comparator);
+    this.queueingComparator = queueingComparator(comparator);
+    this.sortingComparator = sortingComparator(comparator);
+    this.queue = new PriorityQueue<T>(k + 1, queueingComparator);
   }
 
   abstract Comparator<? super T> queueingComparator(Comparator<? super T> stdComparator);
@@ -48,7 +51,7 @@ abstract class FixedSizePriorityQueue<T> {
   public void offer(T item) {
     if (queue.size() < k) {
       queue.add(item);
-    } else if (comparator.compare(item, queue.peek()) > 0) {
+    } else if (queueingComparator.compare(item, queue.peek()) > 0) {
       queue.add(item);
       queue.poll();
     }
@@ -64,7 +67,7 @@ abstract class FixedSizePriorityQueue<T> {
 
   public List<T> retrieve() {
     List<T> topItems = Lists.newArrayList(queue);
-    Collections.sort(topItems, sortingComparator(comparator));
+    Collections.sort(topItems, sortingComparator);
     return topItems;
   }
 

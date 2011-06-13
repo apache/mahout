@@ -265,10 +265,11 @@ public class RowSimilarityJob extends AbstractJob {
           double valueB = weightedOccurrences[m].getValue();
           if (rowA <= rowB) {
             rowPair.set(rowA, rowB, weightA, weightB);
+            coocurrence.set(column.get(), valueA, valueB);
           } else {
             rowPair.set(rowB, rowA, weightB, weightA);
+            coocurrence.set(column.get(), valueB, valueA);
           }
-          coocurrence.set(column.get(), valueA, valueB);
           ctx.write(rowPair, coocurrence);
           numPairs++;
         }

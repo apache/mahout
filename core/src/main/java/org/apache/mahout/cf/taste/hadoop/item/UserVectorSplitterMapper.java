@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.hadoop.item;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -71,7 +72,7 @@ public final class UserVectorSplitterMapper extends
           }
         }
       } finally {
-        IOUtils.closeStream(in);
+        Closeables.closeQuietly(in);
       }
     }
   }
