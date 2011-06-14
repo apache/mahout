@@ -69,7 +69,10 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
   public void testTranspose() throws Exception {
     DistributedRowMatrix m = randomDistributedMatrix(10, 9, 5, 4, 1.0, false);
     DistributedRowMatrix mt = m.transpose();
-    mt.setOutputTempPathString(new Path(m.getOutputTempPath().getParent(), "/tmpOutTranspose").toString());
+
+    Path tmpPath = getTestTempDirPath();
+    m.setOutputTempPathString(tmpPath.toString());
+    mt.setOutputTempPathString(new Path(tmpPath, "/tmpOutTranspose").toString());
     DistributedRowMatrix mtt = mt.transpose();
     assertEquals(m, mtt, EPSILON);
   }
