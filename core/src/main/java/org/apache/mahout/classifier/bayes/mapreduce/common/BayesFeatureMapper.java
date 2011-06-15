@@ -101,7 +101,8 @@ public class BayesFeatureMapper extends MapReduceBase implements Mapper<Text,Tex
     wordList.forEachPair(new ObjectIntProcedure<String>() {
       @Override
       public boolean apply(String word, int dKJ) {
-        lengthNormalisationMut.add(dKJ * dKJ);
+        long squared = (long) dKJ * (long) dKJ;
+        lengthNormalisationMut.add(squared);
         return true;
       }
     });
