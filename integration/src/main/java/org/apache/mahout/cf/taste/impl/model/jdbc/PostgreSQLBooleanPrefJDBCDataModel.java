@@ -19,7 +19,6 @@ package org.apache.mahout.cf.taste.impl.model.jdbc;
 
 import com.google.common.base.Preconditions;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
 import org.apache.mahout.common.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,13 +48,12 @@ import java.sql.SQLException;
  *
  * </p>
  *
- * <p>See {@link MySQLBooleanPrefJDBCDataModel} which is largely identical.</p>
- *
- * @see MySQLBooleanPrefJDBCDataModel
+ * @see PostgreSQLJDBCDataModel
  */
-public class PostgreSQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataModel {
+public class PostgreSQLBooleanPrefJDBCDataModel extends SQL92BooleanPrefJDBCDataModel {
 
   private static final Logger log = LoggerFactory.getLogger(PostgreSQLBooleanPrefJDBCDataModel.class);
+
   private static final String POSTGRESQL_DUPLICATE_KEY_STATE = "23505"; // this is brittle...
 
   /**
@@ -65,10 +63,9 @@ public class PostgreSQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCD
    * </p>
    *
    * @throws org.apache.mahout.cf.taste.common.TasteException
-   *           if {@link javax.sql.DataSource} can't be found
+   *          if {@link javax.sql.DataSource} can't be found
    */
   public PostgreSQLBooleanPrefJDBCDataModel() throws TasteException {
-    this(DEFAULT_DATASOURCE_NAME);
   }
 
   /**
@@ -77,17 +74,12 @@ public class PostgreSQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCD
    * under the given name, and using default table/column names.
    * </p>
    *
-   * @param dataSourceName
-   *          name of {@link javax.sql.DataSource} to look up
+   * @param dataSourceName name of {@link javax.sql.DataSource} to look up
    * @throws org.apache.mahout.cf.taste.common.TasteException
-   *           if {@link javax.sql.DataSource} can't be found
+   *          if {@link javax.sql.DataSource} can't be found
    */
   public PostgreSQLBooleanPrefJDBCDataModel(String dataSourceName) throws TasteException {
-    this(AbstractJDBCComponent.lookupDataSource(dataSourceName),
-         DEFAULT_PREFERENCE_TABLE,
-         DEFAULT_USER_ID_COLUMN,
-         DEFAULT_ITEM_ID_COLUMN,
-         DEFAULT_PREFERENCE_TIME_COLUMN);
+    super(dataSourceName);
   }
 
   /**
@@ -96,15 +88,10 @@ public class PostgreSQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCD
    * table/column names.
    * </p>
    *
-   * @param dataSource
-   *          {@link javax.sql.DataSource} to use
+   * @param dataSource {@link javax.sql.DataSource} to use
    */
   public PostgreSQLBooleanPrefJDBCDataModel(DataSource dataSource) {
-    this(dataSource,
-         DEFAULT_PREFERENCE_TABLE,
-         DEFAULT_USER_ID_COLUMN,
-         DEFAULT_ITEM_ID_COLUMN,
-         DEFAULT_PREFERENCE_TIME_COLUMN);
+    super(dataSource);
   }
 
   /**
@@ -113,14 +100,10 @@ public class PostgreSQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCD
    * table/column names.
    * </p>
    *
-   * @param dataSource
-   *          {@link javax.sql.DataSource} to use
-   * @param preferenceTable
-   *          name of table containing preference data
-   * @param userIDColumn
-   *          user ID column name
-   * @param itemIDColumn
-   *          item ID column name
+   * @param dataSource      {@link javax.sql.DataSource} to use
+   * @param preferenceTable name of table containing preference data
+   * @param userIDColumn    user ID column name
+   * @param itemIDColumn    item ID column name
    * @param timestampColumn timestamp column name (may be null)
    */
   public PostgreSQLBooleanPrefJDBCDataModel(DataSource dataSource,
@@ -128,43 +111,7 @@ public class PostgreSQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCD
                                             String userIDColumn,
                                             String itemIDColumn,
                                             String timestampColumn) {
-    super(dataSource, preferenceTable, userIDColumn, itemIDColumn,
-        NO_SUCH_COLUMN,
-        // getPreferenceSQL
-        "SELECT 1 FROM " + preferenceTable + " WHERE " + userIDColumn + "=? AND " + itemIDColumn + "=?",
-        // getPreferenceTimeSQL
-        "SELECT " + timestampColumn + " FROM " + preferenceTable + " WHERE " + userIDColumn + "=? AND "
-            + itemIDColumn + "=?",
-        // getUserSQL
-        "SELECT DISTINCT " + userIDColumn + ", " + itemIDColumn + " FROM " + preferenceTable + " WHERE "
-            + userIDColumn + "=?",
-        // getAllUsersSQL
-        "SELECT DISTINCT " + userIDColumn + ", " + itemIDColumn + " FROM " + preferenceTable + " ORDER BY "
-            + userIDColumn,
-        // getNumItemsSQL
-        "SELECT COUNT(DISTINCT " + itemIDColumn + ") FROM " + preferenceTable,
-        // getNumUsersSQL
-        "SELECT COUNT(DISTINCT " + userIDColumn + ") FROM " + preferenceTable,
-        // setPreferenceSQL
-        "INSERT INTO " + preferenceTable + '(' + userIDColumn + ',' + itemIDColumn + ") VALUES (?,?)",
-        // removePreference SQL
-        "DELETE FROM " + preferenceTable + " WHERE " + userIDColumn + "=? AND " + itemIDColumn + "=?",
-        // getUsersSQL
-        "SELECT DISTINCT " + userIDColumn + " FROM " + preferenceTable + " ORDER BY " + userIDColumn,
-        // getItemsSQL
-        "SELECT DISTINCT " + itemIDColumn + " FROM " + preferenceTable + " ORDER BY " + itemIDColumn,
-        // getPrefsForItemSQL
-        "SELECT DISTINCT " + userIDColumn + ", " + itemIDColumn + " FROM " + preferenceTable + " WHERE "
-            + itemIDColumn + "=? ORDER BY " + userIDColumn,
-        // getNumPreferenceForItemSQL
-        "SELECT COUNT(1) FROM " + preferenceTable + " WHERE " + itemIDColumn + "=?",
-        // getNumPreferenceForItemsSQL
-        "SELECT COUNT(1) FROM " + preferenceTable + " tp1 JOIN " + preferenceTable + " tp2 " + "USING ("
-            + userIDColumn + ") WHERE tp1." + itemIDColumn + "=? and tp2." + itemIDColumn + "=?",
-        // getMaxPreferenceSQL
-        "SELECT 1.0",
-        // getMinPreferenceSQL
-        "SELECT 1.0");
+      super(dataSource, preferenceTable, userIDColumn, itemIDColumn, timestampColumn);
   }
 
   /**
