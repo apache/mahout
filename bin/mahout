@@ -124,7 +124,7 @@ then
   done
 
   # add dev targets if they exist
-  for f in $MAHOUT_HOME/*/target/mahout-*-job.jar; do
+  for f in $MAHOUT_HOME/*/target/mahout-examples-*-job.jar; do
     CLASSPATH=${CLASSPATH}:$f;
   done
 
@@ -198,6 +198,7 @@ if [ "$HADOOP_HOME" = "" ] || [ "$MAHOUT_LOCAL" != "" ] ; then
   elif [ "$MAHOUT_LOCAL" != "" ] ; then
     echo "MAHOUT_LOCAL is set, running locally"
   fi
+  echo "CLASSPATH: $CLASSPATH"
   exec "$JAVA" $JAVA_HEAP_MAX $MAHOUT_OPTS -classpath "$CLASSPATH" $CLASS "$@"
 else
   echo "Running on hadoop, using HADOOP_HOME=$HADOOP_HOME"
@@ -212,10 +213,12 @@ else
     echo "ERROR: Could not find mahout-examples-*.job in $MAHOUT_HOME or $MAHOUT_HOME/examples/target, please run 'mvn install' to create the .job file"
     exit 1
   else
-    export HADOOP_CLASSPATH=$MAHOUT_CONF_DIR:${HADOOP_CLASSPATH}:$CLASSPATH
     if [ "$1" = "hadoop" ]; then
+      export HADOOP_CLASSPATH=$MAHOUT_CONF_DIR:${HADOOP_CLASSPATH}:$CLASSPATH
       exec "$HADOOP_HOME/bin/$@"
     else
+      echo "MAHOUT-JOB: $MAHOUT_JOB"
+      export HADOOP_CLASSPATH=$MAHOUT_CONF_DIR:${HADOOP_CLASSPATH}
       exec "$HADOOP_HOME/bin/hadoop" jar $MAHOUT_JOB $CLASS "$@"
     fi
   fi
