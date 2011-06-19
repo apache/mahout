@@ -47,9 +47,12 @@ import org.apache.mahout.math.VectorWritable;
 public final class ToUserVectorReducer extends
     Reducer<VarLongWritable,VarLongWritable,VarLongWritable,VectorWritable> {
 
-  public static final String MIN_PREFERENCES_PER_USER = ToUserVectorReducer.class.getName() + ".minPreferencesPerUser";
+  public static final String MIN_PREFERENCES_PER_USER = ToUserVectorReducer.class.getName() +
+      ".minPreferencesPerUser";
 
   private int minPreferences;
+
+  public enum Counters { USERS };
 
   @Override
   protected void setup(Context ctx) throws IOException, InterruptedException {
@@ -71,6 +74,7 @@ public final class ToUserVectorReducer extends
     if (userVector.getNumNondefaultElements() >= minPreferences) {
       VectorWritable vw = new VectorWritable(userVector);
       vw.setWritesLaxPrecision(true);
+      context.getCounter(Counters.USERS).increment(1);
       context.write(userID, vw);
     }
   }

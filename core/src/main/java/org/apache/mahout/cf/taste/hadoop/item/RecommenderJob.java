@@ -20,7 +20,6 @@ package org.apache.mahout.cf.taste.hadoop.item;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -33,11 +32,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.MaybePruneRowsMapper;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
-import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.CountUsersKeyWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.CountUsersMapper;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.CountUsersReducer;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.ToItemVectorsReducer;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.math.VarIntWritable;
@@ -166,6 +161,7 @@ public final class RecommenderJob extends AbstractJob {
       itemIDIndex.waitForCompletion(true);
     }
 
+    int numberOfUsers = 0;
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
       Job toUserVector = prepareJob(
         inputPath, userVectorPath, TextInputFormat.class,
@@ -175,22 +171,8 @@ public final class RecommenderJob extends AbstractJob {
       toUserVector.getConfiguration().setBoolean(BOOLEAN_DATA, booleanData);
       toUserVector.getConfiguration().setInt(ToUserVectorReducer.MIN_PREFERENCES_PER_USER, minPrefsPerUser);
       toUserVector.waitForCompletion(true);
-    }
 
-    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
-      Job countUsers = prepareJob(userVectorPath,
-                                  countUsersPath,
-                                  SequenceFileInputFormat.class,
-                                  CountUsersMapper.class,
-                                  CountUsersKeyWritable.class,
-                                  VarLongWritable.class,
-                                  CountUsersReducer.class,
-                                  VarIntWritable.class,
-                                  NullWritable.class,
-                                  TextOutputFormat.class);
-      countUsers.setPartitionerClass(CountUsersKeyWritable.CountUsersPartitioner.class);
-      countUsers.setGroupingComparatorClass(CountUsersKeyWritable.CountUsersGroupComparator.class);
-      countUsers.waitForCompletion(true);
+      numberOfUsers = (int) toUserVector.getCounters().findCounter(ToUserVectorReducer.Counters.USERS).getValue();
     }
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
@@ -208,8 +190,6 @@ public final class RecommenderJob extends AbstractJob {
           maxCooccurrencesPerItem);
       maybePruneAndTransponse.waitForCompletion(true);
     }
-
-    int numberOfUsers = TasteHadoopUtils.readIntFromFile(getConf(), countUsersPath);
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
       /* Once DistributedRowMatrix uses the hadoop 0.20 API, we should refactor this call to something like

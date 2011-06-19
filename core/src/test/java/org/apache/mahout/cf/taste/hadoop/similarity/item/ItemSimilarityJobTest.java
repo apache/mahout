@@ -26,14 +26,12 @@ import java.util.List;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
-import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.VarIntWritable;
@@ -52,63 +50,6 @@ import org.junit.Test;
  * some integration tests with tiny data sets at the end
  */
 public final class ItemSimilarityJobTest extends TasteTestCase {
-
-  /**
-   * Tests {@link CountUsersMapper}
-   */
-  @Test
-  public void testCountUsersMapper() throws Exception {
-    Mapper<VarLongWritable,VectorWritable,CountUsersKeyWritable,VarLongWritable>.Context context =
-        EasyMock.createMock(Mapper.Context.class);
-    context.write(keyForUserID(12L), EasyMock.eq(new VarLongWritable(12L)));
-    context.write(keyForUserID(35L), EasyMock.eq(new VarLongWritable(35L)));
-    EasyMock.replay(context);
-
-    CountUsersMapper mapper = new CountUsersMapper();
-    mapper.map(new VarLongWritable(12), new VectorWritable(), context);
-    mapper.map(new VarLongWritable(35), new VectorWritable(), context);
-
-    EasyMock.verify(context);
-  }
-
-  /**
-   * Applies an {@link IArgumentMatcher} to a {@link CountUsersKeyWritable} checking whether it matches the userID
-   */
-  static CountUsersKeyWritable keyForUserID(final long userID) {
-    EasyMock.reportMatcher(new IArgumentMatcher() {
-      @Override
-      public boolean matches(Object argument) {
-        if (argument instanceof CountUsersKeyWritable) {
-          CountUsersKeyWritable key = (CountUsersKeyWritable) argument;
-          return userID == key.getUserID();
-        }
-        return false;
-      }
-
-      @Override
-      public void appendTo(StringBuffer buffer) {}
-    });
-
-    return null;
-  }
-
-  /**
-   * Tests {@link CountUsersReducer}
-   */
-  @Test
-  public void testCountUsersReducer() throws Exception {
-    Reducer<CountUsersKeyWritable,VarLongWritable,VarIntWritable,NullWritable>.Context context =
-        EasyMock.createMock(Reducer.Context.class);
-    context.write(new VarIntWritable(3), NullWritable.get());
-    EasyMock.replay(context);
-
-    List<VarLongWritable> userIDs = Arrays.asList(new VarLongWritable(1L), new VarLongWritable(1L),
-                                                  new VarLongWritable(3L), new VarLongWritable(5L),
-                                                  new VarLongWritable(5L), new VarLongWritable(5L));
-
-    new CountUsersReducer().reduce(null, userIDs, context);
-    EasyMock.verify(context);
-  }
 
   /**
    * Tests {@link MostSimilarItemPairsMapper}
@@ -198,12 +139,6 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
 
     similarityJob.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--similarityClassname",
        DistributedUncenteredZeroAssumingCosineVectorSimilarity.class.getName() });
-
-    File countUsersPart = new File(tmpDir, "countUsers");
-    int numberOfUsers = TasteHadoopUtils.readIntFromFile(new Configuration(),
-        new Path(countUsersPart.getAbsolutePath()));
-
-    assertEquals(3, numberOfUsers);
 
     File outPart = outputDir.listFiles(new FilenameFilter() {
       @Override

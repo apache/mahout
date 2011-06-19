@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.hadoop.item;
 
+import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
@@ -52,18 +53,21 @@ public class ToUserVectorReducerTest extends TasteTestCase {
   public void testToUsersReducerMinPreferencesUserPasses() throws Exception {
     Reducer<VarLongWritable,VarLongWritable,VarLongWritable,VectorWritable>.Context context =
         EasyMock.createMock(Reducer.Context.class);
+    Counter userCounters = EasyMock.createMock(Counter.class);
 
     ToUserVectorReducer reducer = new ToUserVectorReducer();
     setField(reducer, "minPreferences", 2);
 
+    EasyMock.expect(context.getCounter(ToUserVectorReducer.Counters.USERS)).andReturn(userCounters);
+    userCounters.increment(1);
     context.write(EasyMock.eq(new VarLongWritable(123)), MathHelper.vectorMatches(
         MathHelper.elem(TasteHadoopUtils.idToIndex(456L), 1.0), MathHelper.elem(TasteHadoopUtils.idToIndex(789L), 1.0)));
 
-    EasyMock.replay(context);
+    EasyMock.replay(context, userCounters);
 
     reducer.reduce(new VarLongWritable(123), Arrays.asList(new VarLongWritable(456), new VarLongWritable(789)), context);
 
-    EasyMock.verify(context);
+    EasyMock.verify(context, userCounters);
   }
 
 }

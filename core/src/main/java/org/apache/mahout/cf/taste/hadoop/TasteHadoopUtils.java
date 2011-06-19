@@ -82,21 +82,4 @@ public final class TasteHadoopUtils {
     return indexItemIDMap;
   }
 
-  /**
-   * Reads a text-based outputfile that only contains an int
-   */
-  public static int readIntFromFile(Configuration conf, Path outputDir) throws IOException {
-    FileSystem fs = outputDir.getFileSystem(conf);
-    Path outputFile = fs.listStatus(outputDir, PathFilters.partFilter())[0].getPath();
-    InputStream in = null;
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    try  {
-      in = fs.open(outputFile);
-      IOUtils.copyBytes(in, out, conf);
-      return Integer.parseInt(new String(out.toByteArray(), Charsets.UTF_8).trim());
-    } finally {
-      Closeables.closeQuietly(in);
-      Closeables.closeQuietly(out);
-    }
-  }
 }

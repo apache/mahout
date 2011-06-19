@@ -31,6 +31,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
@@ -136,11 +137,14 @@ public class RecommenderJobTest extends TasteTestCase {
   public void testToUserVectorReducer() throws Exception {
     Reducer<VarLongWritable,VarLongWritable,VarLongWritable,VectorWritable>.Context context =
       EasyMock.createMock(Reducer.Context.class);
+    Counter userCounters = EasyMock.createMock(Counter.class);
 
+    EasyMock.expect(context.getCounter(ToUserVectorReducer.Counters.USERS)).andReturn(userCounters);
+    userCounters.increment(1);
     context.write(EasyMock.eq(new VarLongWritable(12L)), MathHelper.vectorMatches(
         MathHelper.elem(TasteHadoopUtils.idToIndex(34L), 1.0), MathHelper.elem(TasteHadoopUtils.idToIndex(56L), 2.0)));
 
-    EasyMock.replay(context);
+    EasyMock.replay(context, userCounters);
 
     Collection<VarLongWritable> varLongWritables = new LinkedList<VarLongWritable>();
     varLongWritables.add(new EntityPrefWritable(34L, 1.0f));
@@ -148,7 +152,7 @@ public class RecommenderJobTest extends TasteTestCase {
 
     new ToUserVectorReducer().reduce(new VarLongWritable(12L), varLongWritables, context);
 
-    EasyMock.verify(context);
+    EasyMock.verify(context, userCounters);
   }
 
   /**
@@ -158,16 +162,19 @@ public class RecommenderJobTest extends TasteTestCase {
   public void testToUserVectorReducerWithBooleanData() throws Exception {
     Reducer<VarLongWritable,VarLongWritable,VarLongWritable,VectorWritable>.Context context =
       EasyMock.createMock(Reducer.Context.class);
+    Counter userCounters = EasyMock.createMock(Counter.class);
 
+    EasyMock.expect(context.getCounter(ToUserVectorReducer.Counters.USERS)).andReturn(userCounters);
+    userCounters.increment(1);
     context.write(EasyMock.eq(new VarLongWritable(12L)), MathHelper.vectorMatches(
         MathHelper.elem(TasteHadoopUtils.idToIndex(34L), 1.0), MathHelper.elem(TasteHadoopUtils.idToIndex(56L), 1.0)));
 
-    EasyMock.replay(context);
+    EasyMock.replay(context, userCounters);
 
     new ToUserVectorReducer().reduce(new VarLongWritable(12L), Arrays.asList(new VarLongWritable(34L),
         new VarLongWritable(56L)), context);
 
-    EasyMock.verify(context);
+    EasyMock.verify(context, userCounters);
   }
 
   /**
