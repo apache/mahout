@@ -109,7 +109,7 @@ public final class RecommenderJob extends AbstractJob {
     addOutputOption();
     addOption("recommenderClassName", "r", "Name of recommender class to instantiate");
     addOption("numRecommendations", "n", "Number of recommendations per user", "10");
-    addOption("usersFile", "u", "Number of recommendations per user", null);
+    addOption("usersFile", "u", "File of users to recommend for", null);
     
     Map<String,String> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {

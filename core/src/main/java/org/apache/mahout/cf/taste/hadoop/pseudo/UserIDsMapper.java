@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.hadoop.pseudo;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
@@ -30,15 +31,16 @@ import org.apache.mahout.math.VarLongWritable;
  */
 public final class UserIDsMapper extends
     Mapper<LongWritable,Text, VarLongWritable,NullWritable> {
-  
+
+  private static final Pattern DELIMITER = Pattern.compile("[\t,]");
+
   @Override
   protected void map(LongWritable key,
                      Text value,
                      Context context) throws IOException, InterruptedException {
-    String line = value.toString();
-    int comma = line.indexOf(',');
-    long userID = comma >= 0 ? Long.parseLong(line.substring(0, comma)) : Long.parseLong(line);
+    String[] tokens = DELIMITER.split(value.toString());
+    long userID = Long.parseLong(tokens[0]);
     context.write(new VarLongWritable(userID), NullWritable.get());
   }
-  
+
 }
