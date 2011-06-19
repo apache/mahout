@@ -74,14 +74,4 @@ public abstract class TasteTestCase extends MahoutTestCase {
     return false;
   }
 
-  protected static void writeLines(File file, String... lines) throws FileNotFoundException {
-    PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8));
-    try {
-      for (String line : lines) {
-        writer.println(line);
-      }
-    } finally {
-      Closeables.closeQuietly(writer);
-    }
-  }
 }

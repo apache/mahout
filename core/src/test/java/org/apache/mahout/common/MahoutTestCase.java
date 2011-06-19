@@ -17,9 +17,11 @@
 
 package org.apache.mahout.common;
 
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Field;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -120,5 +122,16 @@ public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCa
    */
   protected static String optKey(String optionName) {
     return AbstractJob.keyFor(optionName);
+  }
+
+  protected static void writeLines(File file, String... lines) throws FileNotFoundException {
+    PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8));
+    try {
+      for (String line : lines) {
+        writer.println(line);
+      }
+    } finally {
+      Closeables.closeQuietly(writer);
+    }
   }
 }
