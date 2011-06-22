@@ -36,7 +36,7 @@ public class DistributedCooccurrenceVectorSimilarity implements DistributedVecto
                            Iterable<Cooccurrence> cooccurrences,
                            double weightOfVectorA,
                            double weightOfVectorB,
-                           int numberOfColumns) {
+                           long numberOfColumns) {
     return AbstractDistributedVectorSimilarity.countElements(cooccurrences);
   }
 }

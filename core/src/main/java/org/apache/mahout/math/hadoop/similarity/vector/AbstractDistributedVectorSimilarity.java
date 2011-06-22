@@ -32,7 +32,7 @@ public abstract class AbstractDistributedVectorSimilarity implements Distributed
    */
   @Override
   public final double similarity(int rowA, int rowB, Iterable<Cooccurrence> cooccurrences, double weightOfVectorA,
-      double weightOfVectorB, int numberOfColumns) {
+      double weightOfVectorB, long numberOfColumns) {
 
     double result = doComputeResult(rowA, rowB, cooccurrences, weightOfVectorA, weightOfVectorB, numberOfColumns);
 
@@ -66,14 +66,14 @@ public abstract class AbstractDistributedVectorSimilarity implements Distributed
   /**
    * do the actual similarity computation
    *
-   * @see DistributedVectorSimilarity#similarity(int, int, Iterable, double, double, int)
+   * @see DistributedVectorSimilarity#similarity(int, int, Iterable, double, double, long)
    */
   protected abstract double doComputeResult(int rowA,
                                             int rowB,
                                             Iterable<Cooccurrence> cooccurrences,
                                             double weightOfVectorA,
                                             double weightOfVectorB,
-                                            int numberOfColumns);
+                                            long numberOfColumns);
 
   /**
    * vectors have no weight (NaN) by default, subclasses may override this

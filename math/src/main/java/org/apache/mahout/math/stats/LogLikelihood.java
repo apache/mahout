@@ -47,10 +47,10 @@ public final class LogLikelihood {
    *
    * @return The entropy value for the elements
    */
-  public static double entropy(int... elements) {
+  public static double entropy(long... elements) {
     double sum = 0.0;
     double result = 0.0;
-    for (int element : elements) {
+    for (long element : elements) {
       if (element < 0) {
         throw new IllegalArgumentException("Should not have negative count for entropy computation: (" + element + ')');
       }
@@ -81,7 +81,7 @@ public final class LogLikelihood {
    * <p/>
    * Credit to http://tdunning.blogspot.com/2008/03/surprise-and-coincidence.html for the table and the descriptions.
    */
-  public static double logLikelihoodRatio(int k11, int k12, int k21, int k22) {
+  public static double logLikelihoodRatio(long k11, long k12, long k21, long k22) {
     // note that we have counts here, not probabilities, and that the entropy is not normalized.
     double rowEntropy = entropy(k11, k12) + entropy(k21, k22);
     double columnEntropy = entropy(k11, k21) + entropy(k12, k22);
@@ -95,7 +95,7 @@ public final class LogLikelihood {
   
   /** 
    * Calculates the root log-likelihood ratio for two events.
-   * See {@link #logLikelihoodRatio(int, int, int, int)}.
+   * See {@link #logLikelihoodRatio(long, long, long, long)}.
 
    * @param k11 The number of times the two events occurred together
    * @param k12 The number of times the second event occurred WITHOUT the first event
@@ -107,7 +107,7 @@ public final class LogLikelihood {
    * See discussion of raw vs. root LLR at 
    * http://www.lucidimagination.com/search/document/6dc8709e65a7ced1/llr_scoring_question
    */
-  public static double rootLogLikelihoodRatio(int k11, int k12, int k21, int k22) {
+  public static double rootLogLikelihoodRatio(long k11, long k12, long k21, long k22) {
     double llr = logLikelihoodRatio(k11, k12, k21, k22);
     double sqrt = Math.sqrt(llr);
     if ((double) k11 / (k11 + k12) < (double) k21 / (k21 + k22)) {

@@ -29,7 +29,7 @@ public class DistributedUncenteredZeroAssumingCosineVectorSimilarity extends Abs
 
   @Override
   protected double doComputeResult(int rowA, int rowB, Iterable<Cooccurrence> cooccurrences, double weightOfVectorA,
-      double weightOfVectorB, int numberOfColumns) {
+      double weightOfVectorB, long numberOfColumns) {
 
     double sumXY = 0.0;
     for (Cooccurrence cooccurrence : cooccurrences) {

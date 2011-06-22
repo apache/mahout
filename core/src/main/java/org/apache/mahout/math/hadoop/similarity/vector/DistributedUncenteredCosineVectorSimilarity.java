@@ -26,7 +26,7 @@ public class DistributedUncenteredCosineVectorSimilarity extends AbstractDistrib
 
   @Override
   protected double doComputeResult(int rowA, int rowB, Iterable<Cooccurrence> cooccurrences, double weightOfVectorA,
-      double weightOfVectorB, int numberOfColumns) {
+      double weightOfVectorB, long numberOfColumns) {
 
     int n = 0;
     double sumXY = 0.0;

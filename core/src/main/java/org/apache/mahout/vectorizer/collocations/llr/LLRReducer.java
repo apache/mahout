@@ -94,33 +94,31 @@ public class LLRReducer extends Reducer<Gram, Gram, Text, DoubleWritable> {
       log.warn("Missing head for {}, skipping.", ngram);
       context.getCounter(Skipped.MISSING_HEAD).increment(1);
       return;
-    } else if (gramFreq[1] == -1) {
+    }
+    if (gramFreq[1] == -1) {
       log.warn("Missing tail for {}, skipping", ngram);
       context.getCounter(Skipped.MISSING_TAIL).increment(1);
       return;
     }
 
-    int k11 = ngram.getFrequency(); /* a&b */
-    int k12 = gramFreq[0] - ngram.getFrequency(); /* a&!b */
-    int k21 = gramFreq[1] - ngram.getFrequency(); /* !b&a */
-    int k22 = (int) (ngramTotal - (gramFreq[0] + gramFreq[1] - ngram.getFrequency())); /* !a&!b */
+    long k11 = ngram.getFrequency(); /* a&b */
+    long k12 = gramFreq[0] - ngram.getFrequency(); /* a&!b */
+    long k21 = gramFreq[1] - ngram.getFrequency(); /* !b&a */
+    long k22 = ngramTotal - (gramFreq[0] + gramFreq[1] - ngram.getFrequency()); /* !a&!b */
 
+    double llr;
     try {
-      double llr = ll.logLikelihoodRatio(k11, k12, k21, k22);
-      if (llr < minLLRValue) {
-        context.getCounter(Skipped.LESS_THAN_MIN_LLR).increment(1);
-        return;
-      }
-      DoubleWritable dd = new DoubleWritable(llr);
-      Text t = new Text(ngram.getString());
-      context.write(t, dd);
+      llr = ll.logLikelihoodRatio(k11, k12, k21, k22);
     } catch (IllegalArgumentException ex) {
       context.getCounter(Skipped.LLR_CALCULATION_ERROR).increment(1);
-      log.error("Problem calculating LLR ratio: " + ex.getMessage());
-      log.error("NGram: " + ngram);
-      log.error("HEAD: " + gram[0] + ':' + gramFreq[0]);
-      log.error("TAIL: " + gram[1] + ':' + gramFreq[1]);
-      log.error("k11: " + k11 + " k12: " + k12 + " k21: " + k21 + " k22: " + k22);
+      log.warn("Problem calculating LLR ratio for ngram {}, HEAD {}:{}, TAIL {}:{}, k11/k12/k21/k22: {}/{}/{}/{}",
+          new Object[] {ngram, gram[0], gramFreq[0], gram[1], gramFreq[1], k11, k12, k21, k22}, ex);
+      return;
+    }
+    if (llr < minLLRValue) {
+      context.getCounter(Skipped.LESS_THAN_MIN_LLR).increment(1);
+    } else {
+      context.write(new Text(ngram.getString()), new DoubleWritable(llr));
     }
   }
 
@@ -133,11 +131,8 @@ public class LLRReducer extends Reducer<Gram, Gram, Text, DoubleWritable> {
 
     this.emitUnigrams = conf.getBoolean(CollocDriver.EMIT_UNIGRAMS, CollocDriver.DEFAULT_EMIT_UNIGRAMS);
 
-    if (log.isInfoEnabled()) {
-      log.info("NGram Total is {}", ngramTotal);
-      log.info("Min LLR value is {}", minLLRValue);
-      log.info("Emit Unitgrams is {}", emitUnigrams);
-    }
+    log.info("NGram Total: {}, Min LLR value: {}, Emit Unigrams: {}",
+             new Object[] {ngramTotal, minLLRValue, emitUnigrams});
 
     if (ngramTotal == -1) {
       throw new IllegalStateException("No NGRAM_TOTAL available in job config");
@@ -162,13 +157,13 @@ public class LLRReducer extends Reducer<Gram, Gram, Text, DoubleWritable> {
    * provide interface so the input to the llr calculation can be captured for validation in unit testing
    */
   public interface LLCallback {
-    double logLikelihoodRatio(int k11, int k12, int k21, int k22);
+    double logLikelihoodRatio(long k11, long k12, long k21, long k22);
   }
 
   /** concrete implementation delegates to LogLikelihood class */
   public static final class ConcreteLLCallback implements LLCallback {
     @Override
-    public double logLikelihoodRatio(int k11, int k12, int k21, int k22) {
+    public double logLikelihoodRatio(long k11, long k12, long k21, long k22) {
       return LogLikelihood.logLikelihoodRatio(k11, k12, k21, k22);
     }
   }

@@ -50,5 +50,5 @@ public interface DistributedVectorSimilarity {
                     Iterable<Cooccurrence> cooccurrences,
                     double weightOfVectorA,
                     double weightOfVectorB,
-                    int numberOfColumns);
+                    long numberOfColumns);
 }

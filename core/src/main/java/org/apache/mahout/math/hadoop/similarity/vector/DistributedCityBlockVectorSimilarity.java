@@ -31,7 +31,7 @@ public final class DistributedCityBlockVectorSimilarity extends AbstractDistribu
                                    Iterable<Cooccurrence> cooccurrences,
                                    double weightOfVectorA,
                                    double weightOfVectorB,
-                                   int numberOfColumns) {
+                                   long numberOfColumns) {
     int cooccurrenceCount = countElements(cooccurrences);
     if (cooccurrenceCount == 0) {
       return Double.NaN;

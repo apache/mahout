@@ -55,14 +55,14 @@ public final class LogLikelihoodSimilarity extends AbstractItemSimilarity implem
     FastIDSet prefs1 = dataModel.getItemIDsFromUser(userID1);
     FastIDSet prefs2 = dataModel.getItemIDsFromUser(userID2);
     
-    int prefs1Size = prefs1.size();
-    int prefs2Size = prefs2.size();
-    int intersectionSize = prefs1Size < prefs2Size ? prefs2.intersectionSize(prefs1) : prefs1
-        .intersectionSize(prefs2);
+    long prefs1Size = prefs1.size();
+    long prefs2Size = prefs2.size();
+    long intersectionSize =
+        prefs1Size < prefs2Size ? prefs2.intersectionSize(prefs1) : prefs1.intersectionSize(prefs2);
     if (intersectionSize == 0) {
       return Double.NaN;
     }
-    int numItems = dataModel.getNumItems();
+    long numItems = dataModel.getNumItems();
     double logLikelihood =
         LogLikelihood.logLikelihoodRatio(intersectionSize,
                                          prefs2Size - intersectionSize,
@@ -74,16 +74,16 @@ public final class LogLikelihoodSimilarity extends AbstractItemSimilarity implem
   @Override
   public double itemSimilarity(long itemID1, long itemID2) throws TasteException {
     DataModel dataModel = getDataModel();
-    int preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
-    int numUsers = dataModel.getNumUsers();    
+    long preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
+    long numUsers = dataModel.getNumUsers();
     return doItemSimilarity(itemID1, itemID2, preferring1, numUsers);
   }
 
   @Override
   public double[] itemSimilarities(long itemID1, long[] itemID2s) throws TasteException {
     DataModel dataModel = getDataModel();
-    int preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
-    int numUsers = dataModel.getNumUsers();
+    long preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
+    long numUsers = dataModel.getNumUsers();
     int length = itemID2s.length;
     double[] result = new double[length];
     for (int i = 0; i < length; i++) {
@@ -92,13 +92,13 @@ public final class LogLikelihoodSimilarity extends AbstractItemSimilarity implem
     return result;
   }
 
-  private double doItemSimilarity(long itemID1, long itemID2, int preferring1, int numUsers) throws TasteException {
+  private double doItemSimilarity(long itemID1, long itemID2, long preferring1, long numUsers) throws TasteException {
     DataModel dataModel = getDataModel();
-    int preferring1and2 = dataModel.getNumUsersWithPreferenceFor(itemID1, itemID2);
+    long preferring1and2 = dataModel.getNumUsersWithPreferenceFor(itemID1, itemID2);
     if (preferring1and2 == 0) {
       return Double.NaN;
     }
-    int preferring2 = dataModel.getNumUsersWithPreferenceFor(itemID2);
+    long preferring2 = dataModel.getNumUsersWithPreferenceFor(itemID2);
     double logLikelihood =
         LogLikelihood.logLikelihoodRatio(preferring1and2,
                                          preferring2 - preferring1and2,

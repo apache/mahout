@@ -26,7 +26,7 @@ public class DistributedEuclideanDistanceVectorSimilarity extends AbstractDistri
 
   @Override
   protected double doComputeResult(int rowA, int rowB, Iterable<Cooccurrence> cooccurrences, double weightOfVectorA,
-      double weightOfVectorB, int numberOfColumns) {
+      double weightOfVectorB, long numberOfColumns) {
 
     double n = 0.0;
     double sumXYdiff2 = 0.0;

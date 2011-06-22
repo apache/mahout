@@ -324,7 +324,7 @@ public final class TestRowSimilarityJob extends MahoutTestCase {
 
     @Override
     public double similarity(int rowA, int rowB, Iterable<Cooccurrence> cooccurrences, double weightOfVectorA,
-        double weightOfVectorB, int numberOfRows) {
+        double weightOfVectorB, long numberOfRows) {
       if (rowA == rowB) {
         return Double.NaN;
       }

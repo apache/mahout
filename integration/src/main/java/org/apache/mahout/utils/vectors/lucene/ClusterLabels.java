@@ -260,9 +260,9 @@ public class ClusterLabels {
     return bitset;
   }
 
-  private static double scoreDocumentFrequencies(int inDF, int outDF, int clusterSize, int corpusSize) {
-    int k12 = clusterSize - inDF;
-    int k22 = corpusSize - clusterSize - outDF;
+  private static double scoreDocumentFrequencies(long inDF, long outDF, long clusterSize, long corpusSize) {
+    long k12 = clusterSize - inDF;
+    long k22 = corpusSize - clusterSize - outDF;
 
     return LogLikelihood.logLikelihoodRatio(inDF, k12, outDF, k22);
   }

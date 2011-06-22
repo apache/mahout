@@ -29,15 +29,15 @@ public class DistributedLoglikelihoodVectorSimilarity extends
 
   @Override
   protected double doComputeResult(int rowA, int rowB, Iterable<Cooccurrence> cooccurrences, double weightOfVectorA,
-      double weightOfVectorB, int numberOfColumns) {
+      double weightOfVectorB, long numberOfColumns) {
 
-    int cooccurrenceCount = countElements(cooccurrences);
+    long cooccurrenceCount = countElements(cooccurrences);
     if (cooccurrenceCount == 0) {
       return Double.NaN;
     }
 
-    int occurrencesA = (int) weightOfVectorA;
-    int occurrencesB = (int) weightOfVectorB;
+    long occurrencesA = (long) weightOfVectorA;
+    long occurrencesB = (long) weightOfVectorB;
 
     double logLikelihood =
         LogLikelihood.logLikelihoodRatio(cooccurrenceCount,
