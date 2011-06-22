@@ -22,7 +22,6 @@ import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
@@ -82,25 +81,23 @@ public final class PFPGrowthTest extends MahoutTestCase {
 
   @Test
   public void testStartParallelFPGrowth() throws Exception {
+    Configuration conf = new Configuration();
     log.info("Starting Parallel Counting Test: {}", params.get(PFPGrowth.MAX_HEAPSIZE));
-    PFPGrowth.startParallelCounting(params);
+    PFPGrowth.startParallelCounting(params, conf);
     log.info("Reading fList Test: {}", params.get(PFPGrowth.MAX_HEAPSIZE));
     List<Pair<String,Long>> fList = PFPGrowth.readFList(params);
     log.info("{}", fList);
     assertEquals("[(B,6), (D,6), (A,5), (E,4), (C,3)]", fList.toString());
  
     log.info("Starting Grouping Test: {}", params.get(PFPGrowth.MAX_HEAPSIZE));
-    PFPGrowth.startGroupingItems(params);
-    Map<String,Long> gList = PFPGrowth.deserializeMap(params, PFPGrowth.G_LIST, new Configuration());
-    log.info("{}", gList);
-    assertEquals("{D=0, E=1, A=0, B=0, C=1}", gList.toString());
+    PFPGrowth.startGroupingItems(params, conf);
  
     log.info("Starting Parallel FPGrowth Test: {}", params.get(PFPGrowth.MAX_HEAPSIZE));
-    PFPGrowth.startGroupingItems(params);
-    PFPGrowth.startTransactionSorting(params);
-    PFPGrowth.startParallelFPGrowth(params);
+    PFPGrowth.startGroupingItems(params, conf);
+    PFPGrowth.startTransactionSorting(params, conf);
+    PFPGrowth.startParallelFPGrowth(params, conf);
     log.info("Starting Pattern Aggregation Test: {}", params.get(PFPGrowth.MAX_HEAPSIZE));
-    PFPGrowth.startAggregating(params);
+    PFPGrowth.startAggregating(params, conf);
     List<Pair<String,TopKStringPatterns>> frequentPatterns = PFPGrowth.readFrequentPattern(params);
     assertEquals("[(A,([A],5), ([D, A],4), ([B, A],4), ([A, E],4)), "
                  + "(B,([B],6), ([B, D],4), ([B, A],4), ([B, D, A],3)), " 

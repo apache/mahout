@@ -71,9 +71,9 @@ public class TransactionSortingMapper extends Mapper<LongWritable,Text,LongWrita
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Parameters params = new Parameters(context.getConfiguration().get(PFPGrowth.PFP_PARAMETERS, ""));
-    
+
     int i = 0;
-    for (Pair<String,Long> e : PFPGrowth.deserializeList(params, PFPGrowth.F_LIST, context.getConfiguration())) {
+    for (Pair<String,Long> e : PFPGrowth.readFList(context.getConfiguration())) {
       fMap.put(e.getFirst(), i++);
     }
     

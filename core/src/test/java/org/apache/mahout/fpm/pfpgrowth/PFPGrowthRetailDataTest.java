@@ -32,6 +32,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.Parameters;
@@ -99,17 +100,17 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
       Long support = Long.parseLong(supportString.substring(1, supportString.length() - 1));
       expectedResults.put(new HashSet<String>(items), support);
     }
-    
+    Configuration conf = new Configuration();
     log.info("Starting Parallel Counting Test: {}", params.get(PFPGrowth.MAX_HEAPSIZE));
-    PFPGrowth.startParallelCounting(params);
+    PFPGrowth.startParallelCounting(params, conf);
     log.info("Starting Grouping Test: {}", params.get(PFPGrowth.MAX_HEAPSIZE));
-    PFPGrowth.startGroupingItems(params);
+    PFPGrowth.startGroupingItems(params, conf);
     log.info("Starting Parallel FPGrowth Test: {}", params.get(PFPGrowth.MAX_HEAPSIZE));
-    PFPGrowth.startGroupingItems(params);
-    PFPGrowth.startTransactionSorting(params);
-    PFPGrowth.startParallelFPGrowth(params);
+    PFPGrowth.startGroupingItems(params, conf);
+    PFPGrowth.startTransactionSorting(params, conf);
+    PFPGrowth.startParallelFPGrowth(params, conf);
     log.info("Starting Pattern Aggregation Test: {}", params.get(PFPGrowth.MAX_HEAPSIZE));
-    PFPGrowth.startAggregating(params);
+    PFPGrowth.startAggregating(params, conf);
     List<Pair<String,TopKStringPatterns>> frequentPatterns = PFPGrowth.readFrequentPattern(params);
     
     Map<Set<String>,Long> results = Maps.newHashMap();

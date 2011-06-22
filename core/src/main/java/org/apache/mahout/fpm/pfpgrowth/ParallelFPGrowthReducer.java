@@ -94,13 +94,13 @@ public class ParallelFPGrowthReducer extends Reducer<LongWritable,TransactionTre
     Parameters params = new Parameters(context.getConfiguration().get(PFPGrowth.PFP_PARAMETERS, ""));
     
     int i = 0;
-    for (Pair<String,Long> e : PFPGrowth.deserializeList(params, PFPGrowth.F_LIST, context.getConfiguration())) {
+    for (Pair<String,Long> e : PFPGrowth.readFList(context.getConfiguration())) {
       featureReverseMap.add(e.getFirst());
       fMap.put(e.getFirst(), i++);
       
     }
     
-    Map<String,Long> gList = PFPGrowth.deserializeMap(params, PFPGrowth.G_LIST, context.getConfiguration());
+    Map<String,Long> gList = PFPGrowth.readGList(context.getConfiguration());
     
     for (Entry<String,Long> entry : gList.entrySet()) {
       IntArrayList groupList = groupFeatures.get(entry.getValue());

@@ -26,7 +26,6 @@ import java.util.Map.Entry;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.common.Pair;
-import org.apache.mahout.common.Parameters;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
@@ -47,9 +46,8 @@ public class ParallelFPGrowthMapper extends Mapper<LongWritable,TransactionTree,
       Integer[] prunedItems = pattern.getFirst().toArray(new Integer[pattern.getFirst().size()]);
 
       Collection<Long> groups = new HashSet<Long>();
-      for (int j = prunedItems.length - 1; j >= 0; j--) { // generate group
-        // dependent
-        // shards
+      for (int j = prunedItems.length - 1; j >= 0; j--) {
+        // generate group dependent shards
         Integer item = prunedItems[j];
         Long groupID = gListInt.get(item);
 
@@ -68,16 +66,13 @@ public class ParallelFPGrowthMapper extends Mapper<LongWritable,TransactionTree,
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    Parameters params = new Parameters(context.getConfiguration().get(PFPGrowth.PFP_PARAMETERS, ""));
-    
     OpenObjectIntHashMap<String> fMap = new OpenObjectIntHashMap<String>();
     int i = 0;
-    for (Pair<String,Long> e : PFPGrowth.deserializeList(params, PFPGrowth.F_LIST, context.getConfiguration())) {
+    for (Pair<String,Long> e : PFPGrowth.readFList(context.getConfiguration())) {
       fMap.put(e.getFirst(), i++);
     }
     
-    for (Entry<String,Long> e : PFPGrowth.deserializeMap(params, PFPGrowth.G_LIST, context.getConfiguration())
-        .entrySet()) {
+    for (Entry<String,Long> e : PFPGrowth.readGList(context.getConfiguration()).entrySet()) {
       gListInt.put(fMap.get(e.getKey()), e.getValue());
     }
     
