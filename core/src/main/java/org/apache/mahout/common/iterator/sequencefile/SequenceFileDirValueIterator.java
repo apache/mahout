@@ -66,7 +66,7 @@ public final class SequenceFileDirValueIterator<V extends Writable> extends Forw
                                 try {
                                   return new SequenceFileValueIterator<V>(from.getPath(), reuseKeyValueInstances, conf);
                                 } catch (IOException ioe) {
-                                  throw new IllegalStateException(ioe);
+                                  throw new IllegalStateException(from.getPath().toString(), ioe);
                                 }
                               }
                             });

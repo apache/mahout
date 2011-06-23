@@ -26,13 +26,15 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.StringTuple;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.junit.Test;
 
 import java.util.Arrays;
 
 /**
- * Tests tokenizing of <Text documentId, Text text> {@link SequenceFile}s by the {@link DocumentProcessor} into
- * <Text documentId, StringTuple tokens> sequence files
+ * Tests tokenizing of {@link SequenceFile}s containing document ID and text (both as {@link Text})
+ * by the {@link DocumentProcessor} into {@link SequenceFile}s of document ID and tokens (as
+ * {@link StringTuple}).
  */
 public class DocumentProcessorTest extends MahoutTestCase {
 
@@ -58,7 +60,7 @@ public class DocumentProcessorTest extends MahoutTestCase {
 
     DocumentProcessor.tokenizeDocuments(input, DefaultAnalyzer.class, output, configuration);
 
-    FileStatus[] statuses = fs.listStatus(output);
+    FileStatus[] statuses = fs.listStatus(output, PathFilters.logsCRCFilter());
     assertEquals(1, statuses.length);
     Path filePath = statuses[0].getPath();
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, filePath, configuration);

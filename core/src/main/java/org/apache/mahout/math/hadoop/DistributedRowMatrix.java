@@ -28,6 +28,7 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterator;
 import org.apache.mahout.math.CardinalityException;
@@ -133,7 +134,11 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
     try {
       return Iterators.transform(
           new SequenceFileDirIterator<IntWritable,VectorWritable>(new Path(rowPath, "*"),
-                                                                  PathType.GLOB, null, null, true, conf),
+                                                                  PathType.GLOB,
+                                                                  PathFilters.logsCRCFilter(),
+                                                                  null,
+                                                                  true,
+                                                                  conf),
           new Function<Pair<IntWritable,VectorWritable>,MatrixSlice>() {
             @Override
             public MatrixSlice apply(Pair<IntWritable, VectorWritable> from) {

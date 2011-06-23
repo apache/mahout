@@ -24,6 +24,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.MatrixSlice;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -235,8 +236,8 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     Path outputTempPath = outputStatuses[0].getPath();
     Path inputVectorPath = new Path(outputTempPath, TimesSquaredJob.INPUT_VECTOR);
     Path outputVectorPath = new Path(outputTempPath, TimesSquaredJob.OUTPUT_VECTOR_FILENAME);
-    assertEquals(1, fs.listStatus(inputVectorPath).length);
-    assertEquals(1, fs.listStatus(outputVectorPath).length);
+    assertEquals(1, fs.listStatus(inputVectorPath, PathFilters.logsCRCFilter()).length);
+    assertEquals(1, fs.listStatus(outputVectorPath, PathFilters.logsCRCFilter()).length);
 
     assertEquals(0.0, result1.getDistanceSquared(result2), EPSILON);
   }
@@ -272,8 +273,8 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     Path outputTempPath = outputStatuses[0].getPath();
     Path inputVectorPath = new Path(outputTempPath, TimesSquaredJob.INPUT_VECTOR);
     Path outputVectorPath = new Path(outputTempPath, TimesSquaredJob.OUTPUT_VECTOR_FILENAME);
-    assertEquals(1, fs.listStatus(inputVectorPath).length);
-    assertEquals(1, fs.listStatus(outputVectorPath).length);
+    assertEquals(1, fs.listStatus(inputVectorPath, PathFilters.logsCRCFilter()).length);
+    assertEquals(1, fs.listStatus(outputVectorPath, PathFilters.logsCRCFilter()).length);
     
     assertEquals(0.0, result1.getDistanceSquared(result2), EPSILON);
   }

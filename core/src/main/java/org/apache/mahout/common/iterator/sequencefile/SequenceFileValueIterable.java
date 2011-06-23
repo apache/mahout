@@ -59,7 +59,7 @@ public final class SequenceFileValueIterable<V extends Writable> implements Iter
     try {
       return new SequenceFileValueIterator<V>(path, reuseKeyValueInstances, conf);
     } catch (IOException ioe) {
-      throw new IllegalStateException(ioe);
+      throw new IllegalStateException(path.toString(), ioe);
     }
   }
 

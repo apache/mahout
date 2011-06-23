@@ -38,6 +38,7 @@ import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.IntPairWritable;
 import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 
@@ -108,7 +109,10 @@ public class ParallelFactorizationEvaluator extends AbstractJob {
   protected double computeRmse(Path errors) {
     RunningAverage average = new FullRunningAverage();
     for (Pair<DoubleWritable,NullWritable> entry :
-        new SequenceFileDirIterable<DoubleWritable, NullWritable>(errors, PathType.LIST, getConf())) {
+        new SequenceFileDirIterable<DoubleWritable, NullWritable>(errors,
+                                                                  PathType.LIST,
+                                                                  PathFilters.logsCRCFilter(),
+                                                                  getConf())) {
       DoubleWritable error = entry.getFirst();
       average.addDatum(error.get() * error.get());
     }

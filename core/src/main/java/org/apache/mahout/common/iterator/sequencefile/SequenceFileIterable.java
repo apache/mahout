@@ -60,7 +60,7 @@ public final class SequenceFileIterable<K extends Writable,V extends Writable> i
     try {
       return new SequenceFileIterator<K, V>(path, reuseKeyValueInstances, conf);
     } catch (IOException ioe) {
-      throw new IllegalStateException(ioe);
+      throw new IllegalStateException(path.toString(), ioe);
     }
   }
 

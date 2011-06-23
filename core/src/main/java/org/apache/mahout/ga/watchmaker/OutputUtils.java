@@ -28,6 +28,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 
 /** Utility Class that deals with the output. */
@@ -45,18 +46,13 @@ public final class OutputUtils {
    * @return {@code Path} array
    */
   public static Path[] listOutputFiles(FileSystem fs, Path outpath) throws IOException {
-    FileStatus[] status = fs.listStatus(outpath);
     Collection<Path> outpaths = Lists.newArrayList();
-    for (FileStatus s : status) {
+    for (FileStatus s : fs.listStatus(outpath, PathFilters.logsCRCFilter())) {
       if (!s.isDir()) {
         outpaths.add(s.getPath());
       }
     }
-    
-    Path[] outfiles = new Path[outpaths.size()];
-    outpaths.toArray(outfiles);
-    
-    return outfiles;
+    return outpaths.toArray(new Path[outpaths.size()]);
   }
   
   /**

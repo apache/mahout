@@ -75,7 +75,7 @@ public final class SequenceFileDirValueIterable<V extends Writable> implements I
     try {
       return new SequenceFileDirValueIterator<V>(path, pathType, filter, ordering, reuseKeyValueInstances, conf);
     } catch (IOException ioe) {
-      throw new IllegalStateException(ioe);
+      throw new IllegalStateException(path.toString(), ioe);
     }
   }
 
