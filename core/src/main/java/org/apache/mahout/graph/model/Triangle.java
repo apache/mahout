@@ -46,6 +46,18 @@ public class Triangle implements Writable {
     this(new Vertex(firstVertexId), new Vertex(secondVertexId), new Vertex(thirdVertexId));
   }
 
+  public Vertex getFirstVertex() {
+    return first;
+  }
+
+  public Vertex getSecondVertex() {
+    return second;
+  }
+
+  public Vertex getThirdVertex() {
+    return third;
+  }
+
   @Override
   public void write(DataOutput out) throws IOException {
     first.write(out);

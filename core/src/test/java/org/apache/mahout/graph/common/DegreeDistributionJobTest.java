@@ -36,7 +36,7 @@ import java.util.Map;
 
 public class DegreeDistributionJobTest extends MahoutTestCase {
 
-@Test
+  @Test
   public void toyIntegrationTest() throws Exception {
 
     File inputFile = getTestTempFile("edges.seq");
@@ -47,7 +47,7 @@ public class DegreeDistributionJobTest extends MahoutTestCase {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
 
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, new Path(inputFile.getAbsolutePath().toString()),
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, new Path(inputFile.getAbsolutePath()),
         UndirectedEdge.class, NullWritable.class);
 
     try {
