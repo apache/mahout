@@ -25,9 +25,9 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.mapreduce.lib.reduce.IntSumReducer;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
-import org.apache.mahout.common.mapreduce.SumReducer;
 import org.apache.mahout.graph.model.UndirectedEdge;
 import org.apache.mahout.graph.model.Vertex;
 
@@ -76,15 +76,15 @@ public class DegreeDistributionJob extends AbstractJob {
     Path degreesPerVertexPath = new Path(tempDirPath, "degreesPerVertex");
 
     Job degreesPerVertex = prepareJob(getInputPath(), degreesPerVertexPath, SequenceFileInputFormat.class,
-        DegreeOfVertexMapper.class, Vertex.class, IntWritable.class, SumReducer.class, Vertex.class, IntWritable.class,
-        SequenceFileOutputFormat.class);
-    degreesPerVertex.setCombinerClass(SumReducer.class);
+        DegreeOfVertexMapper.class, Vertex.class, IntWritable.class, IntSumReducer.class, Vertex.class,
+        IntWritable.class, SequenceFileOutputFormat.class);
+    degreesPerVertex.setCombinerClass(IntSumReducer.class);
     degreesPerVertex.waitForCompletion(true);
 
     Job degreeDistribution = prepareJob(degreesPerVertexPath, getOutputPath(), SequenceFileInputFormat.class,
-        DegreesMapper.class, IntWritable.class, IntWritable.class, SumReducer.class, IntWritable.class,
+        DegreesMapper.class, IntWritable.class, IntWritable.class, IntSumReducer.class, IntWritable.class,
         IntWritable.class, TextOutputFormat.class);
-    degreeDistribution.setCombinerClass(SumReducer.class);
+    degreeDistribution.setCombinerClass(IntSumReducer.class);
     degreeDistribution.waitForCompletion(true);
 
     return 0;
