@@ -73,37 +73,25 @@ import org.apache.mahout.cf.taste.common.TasteException;
  * @see org.apache.mahout.cf.taste.impl.recommender.slopeone.jdbc.MySQLJDBCDiffStorage
  * @see org.apache.mahout.cf.taste.impl.model.jdbc.MySQLJDBCDataModel
  */
-public final class MySQLJDBCItemSimilarity extends AbstractJDBCItemSimilarity {
-  
+public class MySQLJDBCItemSimilarity extends SQL92JDBCItemSimilarity {
+
   public MySQLJDBCItemSimilarity() throws TasteException {
-    this(DEFAULT_DATASOURCE_NAME);
   }
-  
+
   public MySQLJDBCItemSimilarity(String dataSourceName) throws TasteException {
-    this(lookupDataSource(dataSourceName));
+    super(dataSourceName);
   }
-  
+
   public MySQLJDBCItemSimilarity(DataSource dataSource) {
-    this(dataSource,
-         DEFAULT_SIMILARITY_TABLE,
-         DEFAULT_ITEM_A_ID_COLUMN,
-         DEFAULT_ITEM_B_ID_COLUMN,
-         DEFAULT_SIMILARITY_COLUMN);
+    super(dataSource);
   }
-  
+
   public MySQLJDBCItemSimilarity(DataSource dataSource,
                                  String similarityTable,
                                  String itemAIDColumn,
                                  String itemBIDColumn,
                                  String similarityColumn) {
-    super(dataSource,
-          similarityTable,
-          itemAIDColumn,
-          itemBIDColumn, similarityColumn,
-          "SELECT " + similarityColumn + " FROM " + similarityTable + " WHERE "
-              + itemAIDColumn + "=? AND " + itemBIDColumn + "=?",
-          "SELECT " + itemAIDColumn + ", " + itemBIDColumn + " FROM " + similarityTable + " WHERE "
-              + itemAIDColumn + "=? OR " + itemBIDColumn + "=?");
+    super(dataSource, similarityTable, itemAIDColumn, itemBIDColumn, similarityColumn);
   }
   
   @Override

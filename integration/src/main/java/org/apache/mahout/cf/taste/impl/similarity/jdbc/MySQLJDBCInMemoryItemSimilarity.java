@@ -18,30 +18,20 @@
 package org.apache.mahout.cf.taste.impl.similarity.jdbc;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
 
 import javax.sql.DataSource;
 
-public class MySQLJDBCInMemoryItemSimilarity extends AbstractJDBCInMemoryItemSimilarity {
-
-  static final String DEFAULT_GET_ALL_ITEMSIMILARITIES_SQL =
-      "SELECT " + AbstractJDBCItemSimilarity.DEFAULT_ITEM_A_ID_COLUMN + ", "
-      + AbstractJDBCItemSimilarity.DEFAULT_ITEM_B_ID_COLUMN + ", "
-      + AbstractJDBCItemSimilarity.DEFAULT_SIMILARITY_COLUMN + " FROM "
-      + AbstractJDBCItemSimilarity.DEFAULT_SIMILARITY_TABLE;
-
+public class MySQLJDBCInMemoryItemSimilarity extends SQL92JDBCInMemoryItemSimilarity {
 
   public MySQLJDBCInMemoryItemSimilarity() throws TasteException {
-    this(AbstractJDBCComponent.lookupDataSource(AbstractJDBCComponent.DEFAULT_DATASOURCE_NAME),
-        DEFAULT_GET_ALL_ITEMSIMILARITIES_SQL);
   }
 
   public MySQLJDBCInMemoryItemSimilarity(String dataSourceName) throws TasteException {
-    this(AbstractJDBCComponent.lookupDataSource(dataSourceName), DEFAULT_GET_ALL_ITEMSIMILARITIES_SQL);
+    super(dataSourceName);
   }
 
   public MySQLJDBCInMemoryItemSimilarity(DataSource dataSource) {
-    this(dataSource, DEFAULT_GET_ALL_ITEMSIMILARITIES_SQL);
+    super(dataSource);
   }
 
   public MySQLJDBCInMemoryItemSimilarity(DataSource dataSource, String getAllItemSimilaritiesSQL) {
@@ -53,4 +43,5 @@ public class MySQLJDBCInMemoryItemSimilarity extends AbstractJDBCInMemoryItemSim
     // Need to return this for MySQL Connector/J to make it use streaming mode
     return Integer.MIN_VALUE;
   }
+
 }
