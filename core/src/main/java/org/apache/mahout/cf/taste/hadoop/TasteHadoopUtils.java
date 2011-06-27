@@ -17,15 +17,9 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.ByteStreams;
-import com.google.common.io.Closeables;
-import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IOUtils;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
@@ -34,9 +28,6 @@ import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.regex.Pattern;
 
 /**

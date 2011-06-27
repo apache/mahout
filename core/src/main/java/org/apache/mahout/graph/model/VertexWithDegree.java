@@ -81,6 +81,6 @@ public class VertexWithDegree implements Writable, Cloneable {
 
   @Override
   public String toString() {
-    return "(" + vertex + "," + degree + ")";
+    return "(" + vertex + ',' + degree + ')';
   }
 }

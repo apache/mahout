@@ -20,7 +20,6 @@ package org.apache.mahout.df.data;
 import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
-import java.util.StringTokenizer;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -61,23 +60,17 @@ public final class DataLoader {
    * @return null if there are missing values '?'
    */
   private static Instance parseString(int id, Attribute[] attrs, List<String>[] values, String string) {
-    StringTokenizer tokenizer = new StringTokenizer(string, ", ");
-    Preconditions.checkArgument(tokenizer.countTokens() == attrs.length, "Wrong number of attributes in the string");
+    String[] tokens = string.split("[, ]");
+    Preconditions.checkArgument(tokens.length == attrs.length, "Wrong number of attributes in the string");
 
     // extract tokens and check is there is any missing value
-    String[] tokens = new String[attrs.length];
     for (int attr = 0; attr < attrs.length; attr++) {
-      String token = tokenizer.nextToken();
-      
       if (attrs[attr].isIgnored()) {
         continue;
       }
-      
-      if ("?".equals(token)) {
+      if ("?".equals(tokens[attr])) {
         return null; // missing value
       }
-      
-      tokens[attr] = token;
     }
     
     int nbattrs = Dataset.countAttributes(attrs);
@@ -249,22 +242,5 @@ public final class DataLoader {
     
     return new Dataset(attrs, values, id);
   }
-  
-  /**
-   * constructs the data
-   * 
-   * @param attrs
-   *          attributes description
-   * @param vectors
-   *          data elements
-   * @param values
-   *          used to convert CATEGORICAL attributes to Integer
-   */
-  /*
-  private static Data constructData(Attribute[] attrs, List<Instance> vectors, List<String>[] values) {
-    Dataset dataset = new Dataset(attrs, values, vectors.size());
-    
-    return new Data(dataset, vectors);
-  }
-   */
+
 }

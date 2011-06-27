@@ -17,10 +17,12 @@
 
 package org.apache.mahout.df.data;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.StringTokenizer;
+import com.google.common.base.Splitter;
 
+import java.util.List;
+import java.util.Locale;
+
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import org.apache.mahout.df.data.Dataset.Attribute;
 
@@ -28,6 +30,9 @@ import org.apache.mahout.df.data.Dataset.Attribute;
  * Contains various methods that deal with descriptor strings
  */
 public final class DescriptorUtils {
+
+  private static final Splitter SPACE = Splitter.on(' ').omitEmptyStrings();
+
   private DescriptorUtils() { }
   
   /**
@@ -36,26 +41,23 @@ public final class DescriptorUtils {
    * @throws DescriptorException
    *           if a bad token is encountered
    */
-  public static Attribute[] parseDescriptor(String descriptor) throws DescriptorException {
-    StringTokenizer tokenizer = new StringTokenizer(descriptor);
-    Attribute[] attributes = new Attribute[tokenizer.countTokens()];
-    
-    for (int attr = 0; attr < attributes.length; attr++) {
-      String token = tokenizer.nextToken().toUpperCase(Locale.ENGLISH);
+  public static Attribute[] parseDescriptor(CharSequence descriptor) throws DescriptorException {
+    List<Attribute> attributes = Lists.newArrayList();
+    for (String token : SPACE.split(descriptor)) {
+      token = token.toUpperCase(Locale.ENGLISH);
       if ("I".equals(token)) {
-        attributes[attr] = Attribute.IGNORED;
+        attributes.add(Attribute.IGNORED);
       } else if ("N".equals(token)) {
-        attributes[attr] = Attribute.NUMERICAL;
+        attributes.add(Attribute.NUMERICAL);
       } else if ("C".equals(token)) {
-        attributes[attr] = Attribute.CATEGORICAL;
+        attributes.add(Attribute.CATEGORICAL);
       } else if ("L".equals(token)) {
-        attributes[attr] = Attribute.LABEL;
+        attributes.add(Attribute.LABEL);
       } else {
         throw new DescriptorException("Bad Token : " + token);
       }
     }
-    
-    return attributes;
+    return attributes.toArray(new Attribute[attributes.size()]);
   }
   
   /**
@@ -63,15 +65,8 @@ public final class DescriptorUtils {
    * for example "3 N I N N 2 C L 5 I" generates "N N N I N N C C L I I I I I".<br>
    * this useful when describing datasets with a large number of attributes
    */
-  public static String generateDescriptor(String description) throws DescriptorException {
-    StringTokenizer tokenizer = new StringTokenizer(description, " ");
-    Collection<String> tokens = Lists.newArrayList();
-    
-    while (tokenizer.hasMoreTokens()) {
-      tokens.add(tokenizer.nextToken());
-    }
-    
-    return generateDescriptor(tokens);
+  public static String generateDescriptor(CharSequence description) throws DescriptorException {
+    return generateDescriptor(SPACE.split(description));
   }
   
   /**

@@ -18,7 +18,6 @@
 package org.apache.mahout.graph.common;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.hadoop.fs.Path;

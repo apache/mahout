@@ -121,83 +121,10 @@ import java.util.Random;
  * <p><b>Implementation:</b> after J.S. Vitter, An Efficient Algorithm for Sequential Random Sampling,
  * ACM Transactions on Mathematical Software, Vol 13, 1987.
  * Paper available <A HREF="http://www.cs.duke.edu/~jsv"> here</A>.
- *
- * @see RandomSamplingAssistant
  */
+public final class RandomSampler {
 
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
-public class RandomSampler {
-
-  //public class RandomSampler extends Object implements java.io.Serializable {
-  private long n;
-  private long N;
-  private long low;
-  private final Random randomGenerator;
-
-  /**
-   * Constructs a random sampler that computes and delivers sorted random sets in blocks. A set block can be retrieved
-   * with method <tt>nextBlock</tt>. Successive calls to method <tt>nextBlock</tt> will deliver as many random numbers
-   * as required.
-   *
-   * @param n               the total number of elements to choose (must be <tt>n &gt;= 0</tt> and <tt>n &lt;= N</tt>).
-   * @param N               the interval to choose random numbers from is <tt>[low,low+N-1]</tt>.
-   * @param low             the interval to choose random numbers from is <tt>[low,low+N-1]</tt>. Hint: If
-   *                        <tt>low==0</tt>, then random numbers will be drawn from the interval <tt>[0,N-1]</tt>.
-   * @param randomGenerator a random number generator. Set this parameter to <tt>null</tt> to use the default random
-   *                        number generator.
-   */
-  public RandomSampler(long n, long N, long low, Random randomGenerator) {
-    if (n < 0) {
-      throw new IllegalArgumentException("n must be >= 0");
-    }
-    if (n > N) {
-      throw new IllegalArgumentException("n must by <= N");
-    }
-    this.n = n;
-    this.N = N;
-    this.low = low;
-
-    if (randomGenerator == null) {
-      randomGenerator = RandomUtils.getRandom();
-    }
-    this.randomGenerator = randomGenerator;
-  }
-
-  Random getRandomGenerator() {
-    return randomGenerator;
-  }
-
-  /**
-   * Computes the next <tt>count</tt> random numbers of the sorted random set specified on instance construction and
-   * fills them into <tt>values</tt>, starting at index <tt>fromIndex</tt>.
-   *
-   * <p>Numbers are filled into the specified array starting at index <tt>fromIndex</tt> to the right. The array is
-   * returned sorted ascending in the range filled with numbers.
-   *
-   * @param count     the number of elements to be filled into <tt>values</tt> by this call (must be &gt;= 0).
-   * @param values    the array into which the random numbers are to be filled; must have a length <tt>&gt;=
-   *                  count+fromIndex</tt>.
-   * @param fromIndex the first index within <tt>values</tt> to be filled with numbers (inclusive).
-   */
-  public void nextBlock(int count, long[] values, int fromIndex) {
-    if (count > n) {
-      throw new IllegalArgumentException("Random sample exhausted.");
-    }
-    if (count < 0) {
-      throw new IllegalArgumentException("Negative count.");
-    }
-
-    if (count == 0) {
-      return;
-    } //nothing to do
-
-    sample(n, N, count, low, values, fromIndex, randomGenerator);
-
-    long lastSample = values[fromIndex + count - 1];
-    n -= count;
-    N = N - lastSample - 1 + low;
-    low = lastSample + 1;
+  private RandomSampler() {
   }
 
   /**
@@ -220,8 +147,8 @@ public class RandomSampler {
    * @param fromIndex       the first index within <tt>values</tt> to be filled with numbers (inclusive).
    * @param randomGenerator a random number generator.
    */
-  protected static void rejectMethodD(long n, long N, int count, long low, long[] values, int fromIndex,
-                                      Random randomGenerator) {
+  private static void rejectMethodD(long n, long N, int count, long low, long[] values, int fromIndex,
+                                    Random randomGenerator) {
     /*  This algorithm is applicable if a large percentage (90%..100%) of N shall be sampled.
       In such cases it is more efficient than sampleMethodA() and sampleMethodD().
         The idea is that it is more efficient to express
@@ -385,8 +312,8 @@ public class RandomSampler {
     if (count == N) { // rare case treated quickly
       long val = low;
       int limit = fromIndex + count;
-      for (int i = fromIndex; i < limit;) {
-        values[i++] = val++;
+      for (int i = fromIndex; i < limit; i++) {
+        values[i] = val++;
       }
       return;
     }
@@ -420,8 +347,8 @@ public class RandomSampler {
    * @param fromIndex       the first index within <tt>values</tt> to be filled with numbers (inclusive).
    * @param randomGenerator a random number generator.
    */
-  protected static void sampleMethodA(long n, long N, int count, long low, long[] values, int fromIndex,
-                                      Random randomGenerator) {
+  private static void sampleMethodA(long n, long N, int count, long low, long[] values, int fromIndex,
+                                    Random randomGenerator) {
     long chosen = -1 + low;
 
     double top = N - n;
@@ -472,8 +399,8 @@ public class RandomSampler {
    * @param fromIndex       the first index within <tt>values</tt> to be filled with numbers (inclusive).
    * @param randomGenerator a random number generator.
    */
-  protected static void sampleMethodD(long n, long N, int count, long low, long[] values, int fromIndex,
-                                      Random randomGenerator) {
+  private static void sampleMethodD(long n, long N, int count, long low, long[] values, int fromIndex,
+                                    Random randomGenerator) {
     long chosen = -1 + low;
 
     double nreal = n;

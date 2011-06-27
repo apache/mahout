@@ -28,7 +28,7 @@ public final class DescriptorUtilsTest extends MahoutTestCase {
 
   /**
    * Test method for
-   * {@link org.apache.mahout.df.data.DescriptorUtils#parseDescriptor(java.lang.String)}.
+   * {@link org.apache.mahout.df.data.DescriptorUtils#parseDescriptor(java.lang.CharSequence)}.
    */
   @Test
   public void testParseDescriptor() throws Exception {
@@ -85,7 +85,7 @@ public final class DescriptorUtilsTest extends MahoutTestCase {
     }
   }
   
-  private static void validate(String descriptor, String description) throws DescriptorException {
+  private static void validate(String descriptor, CharSequence description) throws DescriptorException {
     assertEquals(descriptor, DescriptorUtils.generateDescriptor(description));
   }
 

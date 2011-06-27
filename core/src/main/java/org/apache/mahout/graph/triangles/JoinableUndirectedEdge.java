@@ -88,7 +88,7 @@ public class JoinableUndirectedEdge implements WritableComparable<JoinableUndire
 
   @Override
   public String toString() {
-    return "(" + edge + "," +marked + ")";
+    return "(" + edge + ',' + marked + ')';
   }
 
   public static class SecondarySortComparator extends WritableComparator implements Serializable {

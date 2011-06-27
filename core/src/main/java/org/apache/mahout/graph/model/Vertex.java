@@ -55,13 +55,13 @@ public class Vertex implements WritableComparable<Vertex>, Cloneable {
     return this.id;
   }
 
-  /** Compares this instance to another according to the <code>id</code> attribute. */
+  /** Compares this instance to another according to the {@code id} attribute. */
   @Override
   public int compareTo(Vertex other) {
     return Longs.compare(id, other.id);
   }
 
-  /** Compares this instance to another according to the <code>id</code> attribute */
+  /** Compares this instance to another according to the {@code id} attribute */
   @Override
   public boolean equals(Object other) {
     if (other instanceof Vertex) {
@@ -76,7 +76,7 @@ public class Vertex implements WritableComparable<Vertex>, Cloneable {
   }
 
   /**
-   * The hash code the <code>id</code> attribute
+   * The hash code the {@code id} attribute
    */
   @Override
   public int hashCode() {
@@ -85,7 +85,7 @@ public class Vertex implements WritableComparable<Vertex>, Cloneable {
   
   @Override
   public String toString() {
-    return "(" + id + ")";
+    return "(" + id + ')';
   }
 
 }

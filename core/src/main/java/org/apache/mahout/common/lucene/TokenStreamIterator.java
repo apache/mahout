@@ -44,7 +44,7 @@ public final class TokenStreamIterator extends AbstractIterator<String> {
         return endOfData();
       }
     } catch (IOException e) {
-      throw new RuntimeException("IO error while tokenizing", e);
+      throw new IllegalStateException("IO error while tokenizing", e);
     }
   }
 

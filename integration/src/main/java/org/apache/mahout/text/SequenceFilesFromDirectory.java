@@ -49,11 +49,11 @@ public class SequenceFilesFromDirectory extends AbstractJob {
   public static final String[] KEY_PREFIX_OPTION = {"keyPrefix", "prefix"};
   public static final String[] CHARSET_OPTION = {"charset", "c"};
 
-  public void run(Configuration conf,
-                  String keyPrefix,
-                  Map<String, String> options,
-                  Path input,
-                  Path output)
+  public static void run(Configuration conf,
+                         String keyPrefix,
+                         Map<String, String> options,
+                         Path input,
+                         Path output)
     throws InstantiationException, IllegalAccessException, InvocationTargetException, IOException,
            NoSuchMethodException, ClassNotFoundException {
     FileSystem fs = FileSystem.get(input.toUri(), conf);

@@ -340,12 +340,12 @@ public final class DefaultOptionCreator {
   
   public static DefaultOptionBuilder kernelProfileOption() {
     return new DefaultOptionBuilder()
-        .withLongName(DefaultOptionCreator.KERNEL_PROFILE_OPTION)
+        .withLongName(KERNEL_PROFILE_OPTION)
         .withRequired(false)
         .withShortName("kp")
         .withArgument(
             new ArgumentBuilder()
-                .withName(DefaultOptionCreator.KERNEL_PROFILE_OPTION)
+                .withName(KERNEL_PROFILE_OPTION)
                 .withDefault(TriangularKernelProfile.class.getName())
                 .withMinimum(1).withMaximum(1).create())
         .withDescription(

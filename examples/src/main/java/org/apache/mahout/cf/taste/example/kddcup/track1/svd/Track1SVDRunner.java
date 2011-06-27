@@ -84,8 +84,8 @@ public class Track1SVDRunner {
     log.info("Estimating validation preferences...");
     int prefsProcessed = 0;
     RunningAverage average = new FullRunningAverage();
-    DataFileIterable validations = new DataFileIterable(KDDCupDataModel.getValidationFile(dataFileDirectory));
-    for (Pair<PreferenceArray,long[]> validationPair : validations) {
+    for (Pair<PreferenceArray,long[]> validationPair :
+         new DataFileIterable(KDDCupDataModel.getValidationFile(dataFileDirectory))) {
       for (Preference validationPref : validationPair.getFirst()) {
         double estimate = estimatePreference(factorization, validationPref.getUserID(), validationPref.getItemID(),
             factorizablePreferences.getMinPreference(), factorizablePreferences.getMaxPreference());
@@ -107,8 +107,8 @@ public class Track1SVDRunner {
     try {
       out = new BufferedOutputStream(new FileOutputStream(resultFile));
 
-      DataFileIterable tests = new DataFileIterable(KDDCupDataModel.getTestFile(dataFileDirectory));
-      for (Pair<PreferenceArray,long[]> testPair : tests) {
+      for (Pair<PreferenceArray,long[]> testPair :
+           new DataFileIterable(KDDCupDataModel.getTestFile(dataFileDirectory))) {
         for (Preference testPref : testPair.getFirst()) {
           double estimate = estimatePreference(factorization, testPref.getUserID(), testPref.getItemID(),
               factorizablePreferences.getMinPreference(), factorizablePreferences.getMaxPreference());

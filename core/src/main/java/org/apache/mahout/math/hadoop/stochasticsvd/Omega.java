@@ -45,9 +45,7 @@ public class Omega {
    */
   public double getQuick(int row, int column) {
     long hash = murmur64((long) row << Integer.SIZE | column, 8, seed);
-    double result = hash / UNIFORM_DIVISOR;
-    //assert result >= -1.0 && result < 1.0;
-    return result;
+    return hash / UNIFORM_DIVISOR;
   }
 
   public void accumDots(int aIndex, double aElement, double[] yRow) {

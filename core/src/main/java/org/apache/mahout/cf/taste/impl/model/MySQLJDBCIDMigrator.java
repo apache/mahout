@@ -39,7 +39,7 @@ import javax.sql.DataSource;
  * Separately, note that in a MySQL database, the following function calls will convert a string value into a
  * numeric value in the same way that the standard implementations in this package do. This may be useful in
  * writing SQL statements for use with
- * {@link org.apache.mahout.cf.taste.impl.model.jdbc.AbstractJDBCDataModel} subclasses which convert string
+ * {@code AbstractJDBCDataModel} subclasses which convert string
  * column values to appropriate numeric values -- though this should be viewed as a temporary arrangement
  * since it will impact performance:
  * </p>

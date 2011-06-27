@@ -18,7 +18,6 @@
 package org.apache.mahout.df.data;
 
 import java.util.Arrays;
-import java.util.StringTokenizer;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.mahout.math.DenseVector;
@@ -44,8 +43,8 @@ public class DataConverter {
     // all attributes (categorical, numerical), ignored, label
     int nball = dataset.nbAttributes() + dataset.getIgnored().length + 1;
     
-    StringTokenizer tokenizer = new StringTokenizer(string, ", ");
-    Preconditions.checkArgument(tokenizer.countTokens() == nball, "Wrong number of attributes in the string");
+    String[] tokens = string.split("[, ]");
+    Preconditions.checkArgument(tokens.length == nball, "Wrong number of attributes in the string");
     
     int nbattrs = dataset.nbAttributes();
     DenseVector vector = new DenseVector(nbattrs);
@@ -53,7 +52,7 @@ public class DataConverter {
     int aId = 0;
     int label = -1;
     for (int attr = 0; attr < nball; attr++) {
-      String token = tokenizer.nextToken().trim();
+      String token = tokens[attr].trim();
       
       if (ArrayUtils.contains(dataset.getIgnored(), attr)) {
         continue; // IGNORED

@@ -150,7 +150,7 @@ public class LocalClusteringCoefficientJob extends AbstractJob {
       }
 
       double localClusteringCoefficient = numEdges > 1 ?
-          (double) numTriangles / (double) (numEdges * (numEdges - 1)) : 0d;
+          (double) numTriangles / (double) (numEdges * (numEdges - 1)) : 0.0;
 
       ctx.write(new LongWritable(vertex.getId()), new DoubleWritable(localClusteringCoefficient));
     }

@@ -199,9 +199,6 @@ public final class MahoutDriver {
         Properties properties = new Properties();
         properties.load(propsStream);
         return properties;
-      } catch (IOException ioe) {
-        log.warn("Error while loading {}", resource, ioe);
-        // Continue
       } finally {
         Closeables.closeQuietly(propsStream);
       }

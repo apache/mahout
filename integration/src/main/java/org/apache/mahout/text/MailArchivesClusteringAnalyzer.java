@@ -19,6 +19,7 @@ package org.apache.mahout.text;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Arrays;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.lucene.analysis.ASCIIFoldingFilter;
@@ -46,7 +47,7 @@ public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
   // extended set of stop words composed of common mail terms like "hi",
   // HTML tags, and Java keywords asmany of the messages in the archives
   // are subversion check-in notifications
-  private static final CharArraySet STOP_WORDS = new CharArraySet(Version.LUCENE_31, Arrays.asList(
+  private static final Set<?> STOP_WORDS = new CharArraySet(Version.LUCENE_31, Arrays.asList(
     "3d","7bit","a0","about","above","abstract","across","additional","after",
     "afterwards","again","against","align","all","almost","alone","along",
     "already","also","although","always","am","among","amongst","amoungst",
@@ -108,7 +109,7 @@ public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
     super(Version.LUCENE_31, STOP_WORDS);
   }
 
-  public MailArchivesClusteringAnalyzer(CharArraySet stopSet) {
+  public MailArchivesClusteringAnalyzer(Set<?> stopSet) {
     super(Version.LUCENE_31, stopSet);
   }
   

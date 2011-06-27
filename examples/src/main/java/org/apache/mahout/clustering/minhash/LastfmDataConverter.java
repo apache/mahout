@@ -56,6 +56,9 @@ public final class LastfmDataConverter {
     Lastfm(int totalRecords) {
       this.totalRecords = totalRecords;
     }
+    int getTotalRecords() {
+      return totalRecords;
+    }
   }
 
   private LastfmDataConverter() {
@@ -95,7 +98,7 @@ public final class LastfmDataConverter {
    *          Type of dataset - 360K Users or 1K Users
    */
   public static Map<String, List<Integer>> convertToItemFeatures(String inputFile, Lastfm dataSet) throws IOException {
-    long totalRecords = dataSet.totalRecords;
+    long totalRecords = dataSet.getTotalRecords();
     Map<String, Integer> featureIdxMap = Maps.newHashMap();
     Map<String, List<Integer>> itemFeaturesMap = Maps.newHashMap();
     String msg = usedMemory() + "Converting data to internal vector format: ";

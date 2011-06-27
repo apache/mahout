@@ -42,9 +42,16 @@ public class CDMapper extends Mapper<LongWritable, Text, LongWritable, CDFitness
 
   public static final String CLASSDISCOVERY_TARGET_LABEL = "mahout.ga.classdiscovery.target";
 
-  List<Rule> rules;
+  private List<Rule> rules;
+  private int target;
 
-  int target;
+  List<Rule> getRules() {
+    return rules;
+  }
+
+  int getTarget() {
+    return target;
+  }
 
   @Override
   protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {

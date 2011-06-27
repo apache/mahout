@@ -18,8 +18,8 @@
 package org.apache.mahout.analysis;
 
 import java.io.Reader;
+import java.util.Set;
 
-import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.StopAnalyzer;
 import org.apache.lucene.analysis.StopFilter;
@@ -37,7 +37,7 @@ public class WikipediaAnalyzer extends StopwordAnalyzerBase {
     super(Version.LUCENE_31, StopAnalyzer.ENGLISH_STOP_WORDS_SET);
   }
   
-  public WikipediaAnalyzer(CharArraySet stopSet) {
+  public WikipediaAnalyzer(Set<?> stopSet) {
     super(Version.LUCENE_31, stopSet);
   }
   

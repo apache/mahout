@@ -36,6 +36,8 @@ import java.util.Map;
 
 public class DegreeDistributionJobTest extends MahoutTestCase {
 
+  private static final Splitter TAB = Splitter.on('\t');
+
   @Test
   public void toyIntegrationTest() throws Exception {
 
@@ -73,8 +75,8 @@ public class DegreeDistributionJobTest extends MahoutTestCase {
         "--output", outputDir.getAbsolutePath(), "--tempDir", tempDir.getAbsolutePath() });
 
     Map<Integer,Integer> degreeDistribution = Maps.newHashMap();
-    for (String line : new FileLineIterable(new File(outputDir, "part-r-00000"))) {
-      String[] tokens = Iterables.toArray(Splitter.on("\t").split(line), String.class);
+    for (CharSequence line : new FileLineIterable(new File(outputDir, "part-r-00000"))) {
+      String[] tokens = Iterables.toArray(TAB.split(line), String.class);
       degreeDistribution.put(Integer.parseInt(tokens[0]), Integer.parseInt(tokens[1]));
     }
 

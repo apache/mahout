@@ -148,7 +148,7 @@ public abstract class FeatureVectorEncoder {
    * @return An integer in the range [0..numFeatures-1] that has good spread for small changes in
    *         term and probe.
    */
-  protected int hash(byte[] term, int probe, int numFeatures) {
+  protected static int hash(byte[] term, int probe, int numFeatures) {
     long r = MurmurHash.hash64A(term, probe) % numFeatures;
     if (r < 0) {
       r += numFeatures;
@@ -166,7 +166,7 @@ public abstract class FeatureVectorEncoder {
    * @return An integer in the range [0..numFeatures-1] that has good spread for small changes in
    *         term and probe.
    */
-  protected int hash(String term1, String term2, int probe, int numFeatures) {
+  protected static int hash(String term1, String term2, int probe, int numFeatures) {
     long r = MurmurHash.hash64A(bytesForString(term1), probe);
     r = MurmurHash.hash64A(bytesForString(term2), (int) r) % numFeatures;
     if (r < 0) {
@@ -272,11 +272,7 @@ public abstract class FeatureVectorEncoder {
     this.traceDictionary = traceDictionary;
   }
 
-  protected byte[] bytesForString(String x) {
-    if (x != null) {
-      return x.getBytes(Charsets.UTF_8);
-    } else {
-      return EMPTY_ARRAY;
-    }
+  protected static byte[] bytesForString(String x) {
+    return x == null ? EMPTY_ARRAY : x.getBytes(Charsets.UTF_8);
   }
 }

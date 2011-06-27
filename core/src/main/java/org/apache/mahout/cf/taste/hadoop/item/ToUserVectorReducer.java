@@ -52,7 +52,7 @@ public final class ToUserVectorReducer extends
 
   private int minPreferences;
 
-  public enum Counters { USERS };
+  public enum Counters { USERS }
 
   @Override
   protected void setup(Context ctx) throws IOException, InterruptedException {

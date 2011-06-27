@@ -27,7 +27,6 @@ import javax.sql.DataSource;
 import org.apache.commons.dbcp.ConnectionFactory;
 import org.apache.commons.dbcp.PoolableConnectionFactory;
 import org.apache.commons.dbcp.PoolingDataSource;
-import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 import com.google.common.base.Preconditions;
@@ -49,9 +48,8 @@ public final class ConnectionPoolDataSource implements DataSource {
     objectPool.setTestOnReturn(false);
     objectPool.setTestWhileIdle(true);
     objectPool.setTimeBetweenEvictionRunsMillis(60 * 1000L);
-    PoolableObjectFactory factory = new PoolableConnectionFactory(connectionFactory, objectPool, null,
-      "SELECT 1", false, false);
-    objectPool.setFactory(factory);
+    // Constructor actually sets itself as factory on pool
+    new PoolableConnectionFactory(connectionFactory, objectPool, null, "SELECT 1", false, false);
     delegate = new PoolingDataSource(objectPool);
   }
   

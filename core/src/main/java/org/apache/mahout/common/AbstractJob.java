@@ -451,14 +451,8 @@ public abstract class AbstractJob extends Configured implements Tool {
   /**
    * necessary to make this job (having a combined input path) work on Amazon S3, hopefully this is obsolete when MultipleInputs is available
    * again
-   *
-   * @param job
-   * @param referencePath
-   * @param inputPathOne
-   * @param inputPathTwo
-   * @throws IOException
    */
-  public void setS3SafeCombinedInputPath(Job job, Path referencePath, Path inputPathOne, Path inputPathTwo)
+  public static void setS3SafeCombinedInputPath(Job job, Path referencePath, Path inputPathOne, Path inputPathTwo)
       throws IOException {
     FileSystem fs = FileSystem.get(referencePath.toUri(), job.getConfiguration());
     FileInputFormat.setInputPaths(job, inputPathOne.makeQualified(fs), inputPathTwo.makeQualified(fs));

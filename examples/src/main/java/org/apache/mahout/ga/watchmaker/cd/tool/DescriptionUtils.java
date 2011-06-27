@@ -18,12 +18,15 @@
 package org.apache.mahout.ga.watchmaker.cd.tool;
 
 import java.util.Collection;
-import java.util.StringTokenizer;
+import java.util.Collections;
+import java.util.regex.Pattern;
 
 /**
  * Utility functions to handle Attribute's description strings.
  */
 public final class DescriptionUtils {
+
+  private static final Pattern COMMA = Pattern.compile(",");
 
   private DescriptionUtils() {
   }
@@ -57,10 +60,10 @@ public final class DescriptionUtils {
     return buffer.toString();
   }
   
-  public static double[] extractNumericalRange(String description) {
-    StringTokenizer tokenizer = new StringTokenizer(description, ",");
-    double min = Double.parseDouble(tokenizer.nextToken());
-    double max = Double.parseDouble(tokenizer.nextToken());
+  public static double[] extractNumericalRange(CharSequence description) {
+    String[] tokens = COMMA.split(description);
+    double min = Double.parseDouble(tokens[0]);
+    double max = Double.parseDouble(tokens[1]);
     return new double[] {min,max};
   }
   /**
@@ -70,12 +73,9 @@ public final class DescriptionUtils {
    * @param target the extracted values will be added to this collection. It
    *        will not be cleared.
    */
-  public static void extractNominalValues(String description,
+  public static void extractNominalValues(CharSequence description,
                                           Collection<String> target) {
-    StringTokenizer tokenizer = new StringTokenizer(description, ",");
-    while (tokenizer.hasMoreTokens()) {
-      target.add(tokenizer.nextToken());
-    }
+    Collections.addAll(target, COMMA.split(description));
   }
   
 }

@@ -87,7 +87,7 @@ public class UndirectedEdgeWithDegrees implements WritableComparable<UndirectedE
 
   @Override
   public String toString() {
-    return "(" + first + ", " + second + ")";
+    return "(" + first + ", " + second + ')';
   }
 
   @Override

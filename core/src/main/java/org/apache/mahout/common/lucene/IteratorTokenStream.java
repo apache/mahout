@@ -20,8 +20,6 @@ package org.apache.mahout.common.lucene;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 
-
-import java.io.IOException;
 import java.util.Iterator;
 
 /** Used to emit tokens from an input string array in the style of TokenStream */
@@ -35,7 +33,7 @@ public final class IteratorTokenStream extends TokenStream {
   }
 
   @Override
-  public boolean incrementToken() throws IOException {
+  public boolean incrementToken() {
     if (iterator.hasNext()) {
       clearAttributes();
       termAtt.append(iterator.next());

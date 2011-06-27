@@ -87,7 +87,7 @@ public class UndirectedEdge implements WritableComparable<UndirectedEdge>, Clone
 
   @Override
   public String toString() {
-    return "(" + first.getId() + "," + second.getId() + ")";
+    return "(" + first.getId() + ',' + second.getId() + ')';
   }
 
   @Override

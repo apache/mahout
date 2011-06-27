@@ -89,9 +89,9 @@ public class InMemoryFactorizationEvaluator extends AbstractJob {
 
     FullRunningAverage rmseAvg = new FullRunningAverage();
     FullRunningAverage maeAvg = new FullRunningAverage();
-    int pairsUsed = 1;
     Writer writer = new OutputStreamWriter(System.out);
     try {
+      int pairsUsed = 1;
       for (Preference pref : readProbePreferences(pairs)) {
         int userID = (int) pref.getUserID();
         int itemID = (int) pref.getItemID();
@@ -102,12 +102,12 @@ public class InMemoryFactorizationEvaluator extends AbstractJob {
         rmseAvg.addDatum(err * err);
         maeAvg.addDatum(Math.abs(err));
         writer.write("Probe [" + pairsUsed + "], rating of user [" + userID + "] towards item [" + itemID + "], " +
-            "[" + rating + "] estimated [" + estimate + "]\n");
+                         '[' + rating + "] estimated [" + estimate + "]\n");
         pairsUsed++;
       }
       double rmse = Math.sqrt(rmseAvg.getAverage());
       double mae = maeAvg.getAverage();
-      writer.write("RMSE: " + rmse + ", MAE: " + mae + "\n");
+      writer.write("RMSE: " + rmse + ", MAE: " + mae + '\n');
     } finally {
       Closeables.closeQuietly(writer);
     }

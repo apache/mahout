@@ -237,13 +237,4 @@ public class HdfsBackedLanczosState extends LanczosState implements Configurable
     return diagonalMatrix;
   }
 
-  @Override
-  public void setBasisVector(int i, Vector vector) {
-    super.setBasisVector(i, vector);
-  }
-
-  @Override
-  public void setRightSingularVector(int i, Vector vector) {
-    super.setRightSingularVector(i, vector);
-  }
 }
