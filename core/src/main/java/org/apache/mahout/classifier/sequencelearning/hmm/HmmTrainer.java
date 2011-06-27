@@ -220,14 +220,8 @@ public final class HmmTrainer {
     pseudoCount = pseudoCount == 0 ? Double.MIN_VALUE : pseudoCount;
 
     // allocate space for iteration models
-    HmmModel lastIteration;
-    HmmModel iteration;
-    try {
-      lastIteration = initialModel.clone();
-      iteration = initialModel.clone();
-    } catch (CloneNotSupportedException e) {
-      throw new UnknownError("Cloning HmmModels broke. Check for programming errors, changed APIs.");
-    }
+    HmmModel lastIteration = initialModel.clone();
+    HmmModel iteration = initialModel.clone();
 
     // allocate space for Viterbi path calculation
     int[] viterbiPath = new int[observedSequence.length];
@@ -301,14 +295,9 @@ public final class HmmTrainer {
   public static HmmModel trainBaumWelch(HmmModel initialModel,
                                         int[] observedSequence, double epsilon, int maxIterations, boolean scaled) {
     // allocate space for the iterations
-    HmmModel lastIteration;
-    HmmModel iteration;
-    try {
-      lastIteration = initialModel.clone();
-      iteration = initialModel.clone();
-    } catch (CloneNotSupportedException e) {
-      throw new UnknownError("Cloning HmmModels broke. Check for programming errors, changed APIs etc.");
-    }
+    HmmModel lastIteration = initialModel.clone();
+    HmmModel iteration = initialModel.clone();
+
     // allocate space for baum-welch factors
     int hiddenCount = initialModel.getNrOfHiddenStates();
     int visibleCount = observedSequence.length;

@@ -78,8 +78,7 @@ public class HmmModel implements Cloneable {
    * Get a copy of this model
    */
   @Override
-  public HmmModel clone() throws CloneNotSupportedException {
-    super.clone();
+  public HmmModel clone() {
     HmmModel model = new HmmModel(transitionMatrix.clone(), emissionMatrix.clone(), initialProbabilities.clone());
     if (hiddenStateNames != null) {
       model.hiddenStateNames = HashBiMap.create(hiddenStateNames);
