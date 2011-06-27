@@ -50,16 +50,18 @@ public final class RandomWrapper extends Random {
   }
 
   private Random buildRandom() {
-    if (testSeed) {
-      return new MersenneTwisterRNG(STANDARD_SEED);
-    } else if (fixedSeed == null) {
-      // Force use of standard generator, and disallow use of those based on /dev/random since
-      // it causes hangs on Ubuntu
-      try {
-        return new MersenneTwisterRNG(SEED_GENERATOR);
-      } catch (SeedException se) {
-        // Can't happen
-        throw new IllegalStateException(se);
+    if (fixedSeed == null) {
+      if (testSeed) {
+        return new MersenneTwisterRNG(STANDARD_SEED);
+      } else {
+        // Force use of standard generator, and disallow use of those based on /dev/random since
+        // it causes hangs on Ubuntu
+        try {
+          return new MersenneTwisterRNG(SEED_GENERATOR);
+        } catch (SeedException se) {
+          // Can't happen
+          throw new IllegalStateException(se);
+        }
       }
     } else {
       return new MersenneTwisterRNG(RandomUtils.longSeedtoBytes(fixedSeed));

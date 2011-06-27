@@ -99,4 +99,20 @@ public final class RandomUtilsTest extends MahoutTestCase {
     }
   }
 
+  @Test
+  public void testSetSeed() {
+    Random rTest0 = RandomUtils.getRandom();
+    Random rTest1 = RandomUtils.getRandom();
+    Random r0 = RandomUtils.getRandom(0);
+    Random r1 = RandomUtils.getRandom(1);
+
+    long lTest0 = rTest0.nextLong();
+    long lTest1 = rTest1.nextLong();
+    long l0 = r0.nextLong();
+    long l1 = r1.nextLong();
+    assertEquals("getRandom() must match getRandom() in unit tests", lTest0, lTest1);
+    assertTrue("getRandom() must differ from getRandom(0)", lTest0 != l1);
+    assertTrue("getRandom(0) must differ from getRandom(1)", l0 != l1);
+  }
+
 }
