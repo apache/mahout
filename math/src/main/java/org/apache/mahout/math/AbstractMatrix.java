@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math;
 
+import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.Maps;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.Functions;
@@ -26,7 +27,6 @@ import org.apache.mahout.math.function.VectorFunction;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 /** A few universal implementations of convenience functions */
 public abstract class AbstractMatrix implements Matrix {
@@ -59,26 +59,15 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public Iterator<MatrixSlice> iterateAll() {
-    return new Iterator<MatrixSlice>() {
+    return new AbstractIterator<MatrixSlice>() {
       private int slice;
-
       @Override
-      public boolean hasNext() {
-        return slice < numSlices();
-      }
-
-      @Override
-      public MatrixSlice next() {
+      protected MatrixSlice computeNext() {
         if (slice >= numSlices()) {
-          throw new NoSuchElementException();
+          return endOfData();
         }
         int i = slice++;
         return new MatrixSlice(slice(i), i);
-      }
-
-      @Override
-      public void remove() {
-        throw new UnsupportedOperationException("remove() not supported for Matrix iterator");
       }
     };
   }
@@ -642,24 +631,14 @@ public abstract class AbstractMatrix implements Matrix {
 
     @Override
     public Iterator<Element> iterator() {
-      return new Iterator<Element>() {
+      return new AbstractIterator<Element>() {
         private int i;
         @Override
-        public boolean hasNext() {
-          return i < size();
-        }
-
-        @Override
-        public Element next() {
+        protected Element computeNext() {
           if (i >= size()) {
-            throw new NoSuchElementException();
+            return endOfData();
           }
           return getElement(i++);
-        }
-
-        @Override
-        public void remove() {
-          throw new UnsupportedOperationException("Element removal not supported");
         }
       };
     }

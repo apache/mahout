@@ -17,6 +17,8 @@
 
 package org.apache.mahout.math.hadoop;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -329,28 +331,18 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
   }
 
   private static DistributedRowMatrix saveToFs(final Matrix m, Path baseTmpDirPath) throws IOException {
-        Configuration conf = new Configuration();
+    Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
 
     ClusteringTestUtils.writePointsToFile(new Iterable<VectorWritable>() {
       @Override
       public Iterator<VectorWritable> iterator() {
-        final Iterator<MatrixSlice> it = m.iterator();
-        return new Iterator<VectorWritable>() {
+        return Iterators.transform(m.iterator(), new Function<MatrixSlice,VectorWritable>() {
           @Override
-          public boolean hasNext() {
-            return it.hasNext();
+          public VectorWritable apply(MatrixSlice input) {
+            return new VectorWritable(input.vector());
           }
-          @Override
-          public VectorWritable next() {
-            MatrixSlice slice = it.next();
-            return new VectorWritable(slice.vector());
-          }
-          @Override
-          public void remove() {
-            it.remove();
-          }
-        };
+        });
       }
     }, true, new Path(baseTmpDirPath, "distMatrix/part-00000"), fs, conf);
 

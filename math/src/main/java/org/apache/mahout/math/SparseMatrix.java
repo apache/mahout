@@ -17,12 +17,16 @@
 
 package org.apache.mahout.math;
 
+import com.google.common.collect.AbstractIterator;
+import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.map.OpenIntObjectHashMap;
 
+import java.util.Iterator;
 import java.util.Map;
 
 /** Doubly sparse matrix. Implemented as a Map of RandomAccessSparseVector rows */
 public class SparseMatrix extends AbstractMatrix {
+
   private OpenIntObjectHashMap<Vector> rows;
   
   public SparseMatrix() {
@@ -69,6 +73,25 @@ public class SparseMatrix extends AbstractMatrix {
     clone.cardinality = cardinality.clone();
     clone.rows = rows.clone();
     return clone;
+  }
+
+  @Override
+  public Iterator<MatrixSlice> iterator() {
+    final IntArrayList keys = new IntArrayList(rows.size());
+    rows.keys(keys);
+    return new AbstractIterator<MatrixSlice>() {
+      private int slice;
+      @Override
+      protected MatrixSlice computeNext() {
+        if (slice >= rows.size()) {
+          return endOfData();
+        }
+        int i = keys.get(slice);
+        Vector row = rows.get(i);
+        slice++;
+        return new MatrixSlice(row, i);
+      }
+    };
   }
   
   @Override
