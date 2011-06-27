@@ -287,23 +287,40 @@ public final class GenericDataModel extends AbstractDataModel {
       return prefs1.length();
     }
 
-    // itemIDs.length == 2)
+    // itemIDs.length == 2
     PreferenceArray prefs2 = preferenceForItems.get(itemIDs[1]);
     if (prefs2 == null) {
       return 0;
     }
-    FastIDSet users1 = new FastIDSet(prefs1.length());
+
     int size1 = prefs1.length();
-    for (int i = 0; i < size1; i++) {
-      users1.add(prefs1.getUserID(i));
-    }
-    FastIDSet users2 = new FastIDSet(prefs2.length());
     int size2 = prefs2.length();
-    for (int i = 0; i < size2; i++) {
-      users2.add(prefs2.getUserID(i));
+    int count = 0;
+    int i = 0;
+    int j = 0;
+    long userID1 = prefs1.getUserID(0);
+    long userID2 = prefs2.getUserID(0);
+    while (true) {
+      if (userID1 < userID2) {
+        if (++i == size1) {
+          break;
+        }
+        userID1 = prefs1.getUserID(i);
+      } else if (userID1 > userID2) {
+        if (++j == size2) {
+          break;
+        }
+        userID2 = prefs2.getUserID(j);
+      } else {
+        count++;
+        if (++i == size1 || ++j == size2) {
+          break;
+        }
+        userID1 = prefs1.getUserID(i);
+        userID2 = prefs2.getUserID(j);
+      }
     }
-    users1.retainAll(users2);
-    return users1.size();
+    return count;
   }
 
   @Override
