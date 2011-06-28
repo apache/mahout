@@ -219,7 +219,7 @@ else
     else
       echo "MAHOUT-JOB: $MAHOUT_JOB"
       export HADOOP_CLASSPATH=$MAHOUT_CONF_DIR:${HADOOP_CLASSPATH}
-      exec "$HADOOP_HOME/bin/hadoop" jar $MAHOUT_JOB $CLASS "$@"
+      exec "$HADOOP_HOME/bin/hadoop" --config $HADOOP_CONF_DIR jar $MAHOUT_JOB $CLASS "$@"
     fi
   fi
 fi
