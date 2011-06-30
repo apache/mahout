@@ -30,6 +30,11 @@ public class ElasticBandPrior implements PriorFunction {
   private L1 l1;
   private L2 l2;
 
+  // Exists for Writable
+  public ElasticBandPrior() {
+    this(0.0);
+  }
+
   public ElasticBandPrior(double alphaByLambda) {
     this.alphaByLambda = alphaByLambda;
     l1 = new L1();
