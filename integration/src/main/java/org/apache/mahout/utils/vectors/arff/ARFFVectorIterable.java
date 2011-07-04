@@ -111,7 +111,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
           label = ARFFType.DATE.getLabel(lower);
           type = ARFFType.DATE;
           //TODO: DateFormatter map
-          DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+          DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH);
           int idx = lower.indexOf(ARFFType.DATE.getIndicator());
           String[] split = ARFFVectorIterable.SPACE_PATTERN.split(line);
           if (split.length >= 4) { //we have a date format
@@ -119,7 +119,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
             if (formStr.startsWith("\"")) {
               formStr = formStr.substring(1, formStr.length() - 1);
             }
-            format = new SimpleDateFormat(formStr);
+            format = new SimpleDateFormat(formStr, Locale.ENGLISH);
           }
           model.addDateFormat(labelNumInt, format);
           //@attribute <name> date [<date-format>]

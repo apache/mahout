@@ -30,7 +30,7 @@ import org.apache.hadoop.util.bloom.Filter;
 import org.apache.hadoop.util.bloom.Key;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.tokenattributes.TermAttribute;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 
 /**
  * Emits tokens based on bloom filter membership.
@@ -38,7 +38,7 @@ import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 public final class BloomTokenFilter extends TokenFilter {
   
   private final Filter filter;
-  private final TermAttribute termAtt;
+  private final CharTermAttribute termAtt;
   private final CharsetEncoder encoder;
   private final Key key;
   private final boolean keepMembers;
@@ -56,7 +56,7 @@ public final class BloomTokenFilter extends TokenFilter {
     this.filter = filter;
     this.keepMembers = keepMembers;
     this.key = new Key();
-    this.termAtt = addAttribute(TermAttribute.class);
+    this.termAtt = addAttribute(CharTermAttribute.class);
     this.encoder = Charsets.UTF_8.newEncoder().
       onMalformedInput(CodingErrorAction.REPORT).
       onUnmappableCharacter(CodingErrorAction.REPORT);
@@ -65,7 +65,7 @@ public final class BloomTokenFilter extends TokenFilter {
   @Override
   public boolean incrementToken() throws IOException {
     while (input.incrementToken()) {
-      ByteBuffer bytes =  encoder.encode(CharBuffer.wrap(termAtt.termBuffer(), 0, termAtt.termLength()));
+      ByteBuffer bytes =  encoder.encode(CharBuffer.wrap(termAtt.buffer(), 0, termAtt.length()));
       key.set(bytes.array(), 1.0f);
       boolean member = filter.membershipTest(key);
       if ((keepMembers && member) || (!keepMembers && !member)) {

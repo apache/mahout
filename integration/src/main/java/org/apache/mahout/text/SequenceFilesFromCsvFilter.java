@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
 public final class SequenceFilesFromCsvFilter extends SequenceFilesFromDirectoryFilter {
 
   private static final Logger log = LoggerFactory.getLogger(SequenceFilesFromCsvFilter.class);
-  private static final Pattern TAB = Pattern.compile("\\t");
+  private static final Pattern TAB = Pattern.compile("\t");
 
   public static final String[] KEY_COLUMN_OPTION = {"keyColumn", "kcol"};
   public static final String[] VALUE_COLUMN_OPTION = {"valueColumn", "vcol"};
@@ -83,18 +83,20 @@ public final class SequenceFilesFromCsvFilter extends SequenceFilesFromDirectory
 
   @Override
   protected void process(FileStatus fst, Path current) throws IOException {
+    FileSystem fs = getFs();
+    ChunkedWriter writer = getWriter();
     if (fst.isDir()) {
       fs.listStatus(fst.getPath(),
-                    new SequenceFilesFromCsvFilter(conf, prefix + Path.SEPARATOR + current.getName(),
-                        this.options, writer, fs));
+                    new SequenceFilesFromCsvFilter(getConf(), getPrefix() + Path.SEPARATOR + current.getName(),
+                                                   this.getOptions(), writer, getFs()));
     } else {
       InputStream in = fs.open(fst.getPath());
-      for (CharSequence aFit : new FileLineIterable(in, charset, false)) {
+      for (CharSequence aFit : new FileLineIterable(in, getCharset(), false)) {
         String[] columns = TAB.split(aFit);
         log.info("key : {}, value : {}", columns[keyColumn], columns[valueColumn]);
         String key = columns[keyColumn];
         String value = columns[valueColumn];
-        writer.write(prefix + key, value);
+        writer.write(getPrefix() + key, value);
       }
     }
   }

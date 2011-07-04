@@ -465,7 +465,7 @@ public final class TestMatrixView extends MahoutTestCase {
     assertEquals("FeeBar", test.get(0, 1), test.get("Fee", "Bar"), EPSILON);
   }
 
-  @Test(expected = UnboundLabelException.class)
+  @Test(expected = IllegalStateException.class)
   public void testSettingLabelBindings() {
     assertNull("row bindings", test.getRowLabelBindings());
     assertNull("col bindings", test.getColumnLabelBindings());

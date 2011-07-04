@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -143,7 +144,7 @@ public class MapBackedARFFModel implements ARFFModel {
   protected double processDate(String data, int idx) {
     DateFormat format = dateMap.get(idx);
     if (format == null) {
-      format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+      format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH);
     }
     double result;
     try {

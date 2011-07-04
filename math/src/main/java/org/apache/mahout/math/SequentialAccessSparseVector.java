@@ -18,6 +18,7 @@
 package org.apache.mahout.math;
 
 import com.google.common.collect.AbstractIterator;
+import com.google.common.primitives.Doubles;
 import org.apache.mahout.math.function.Functions;
 
 import java.util.Arrays;
@@ -390,13 +391,28 @@ public class SequentialAccessSparseVector extends AbstractVector {
       this.index = index;
       this.value = value;
     }
-    
+
     @Override
-    public int compareTo(final OrderedElement that) {
+    public int compareTo(OrderedElement that) {
       // both indexes are positive, and neither can be Integer.MAX_VALUE (otherwise there would be
       // an array somewhere with Integer.MAX_VALUE + 1 elements)
       return this.index - that.index;
     }
+
+    @Override
+    public int hashCode() {
+      return index ^ Doubles.hashCode(value);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (!(o instanceof OrderedElement)) {
+        return false;
+      }
+      OrderedElement other = (OrderedElement) o;
+      return index == other.index && value == other.value;
+    }
+
   }
   
 }

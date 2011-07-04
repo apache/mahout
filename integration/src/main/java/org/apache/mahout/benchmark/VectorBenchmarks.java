@@ -69,7 +69,9 @@ import org.slf4j.LoggerFactory;
 public class VectorBenchmarks {
 
   private static final Logger log = LoggerFactory.getLogger(VectorBenchmarks.class);
-  private static final Pattern TAB_PATTERN = Pattern.compile("\t");
+
+  private static final Pattern TAB_NEWLINE_PATTERN = Pattern.compile("[\n\t]");
+  private static final String[] EMPTY = new String[0];
 
   private final Vector[][] vectors;
   private final Vector[] clusters;
@@ -136,8 +138,7 @@ public class VectorBenchmarks {
     float opsPerSec = loop * numVectors * 1000000000.0f / stats.getSumTime();
     log.info("{} {} \n{} {} \nSpeed: {} UnitsProcessed/sec {} MBytes/sec                                   ",
       new Object[] {benchmarkName, implName, content, stats.toString(), opsPerSec, speed});
-    String info = stats.toString().replaceAll("\n", "\t") + "\tSpeed = " + opsPerSec + " /sec\tRate = "
-                  + speed + " MB/s";
+
     if (!implType.containsKey(implName)) {
       implType.put(implName, implType.size());
     }
@@ -147,9 +148,10 @@ public class VectorBenchmarks {
     }
     List<String[]> implStats = statsMap.get(benchmarkName);
     while (implStats.size() < implId + 1) {
-      implStats.add(new String[] {});
+      implStats.add(EMPTY);
     }
-    implStats.set(implId, TAB_PATTERN.split(info));
+    implStats.set(implId,
+                  TAB_NEWLINE_PATTERN.split(stats + "\tSpeed = " + opsPerSec + " /sec\tRate = " + speed + " MB/s"));
   }
   
   public void createBenchmark() {

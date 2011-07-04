@@ -617,7 +617,7 @@ public abstract class MatrixTest extends MahoutTestCase {
     assertEquals("FeeBaz", m.get(0, 2), m.get("Fee", "Baz"), EPSILON);
   }
 
-  @Test(expected = UnboundLabelException.class)
+  @Test(expected = IllegalStateException.class)
   public void testSettingLabelBindings() {
     Matrix m = matrixFactory(new double[][]{{1, 3, 4}, {5, 2, 3},
         {1, 4, 2}});

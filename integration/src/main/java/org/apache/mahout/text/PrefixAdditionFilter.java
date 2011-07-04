@@ -43,23 +43,25 @@ public final class PrefixAdditionFilter extends SequenceFilesFromDirectoryFilter
 
   @Override
   protected void process(FileStatus fst, Path current) throws IOException {
+    FileSystem fs = getFs();
+    ChunkedWriter writer = getWriter();
     if (fst.isDir()) {
       fs.listStatus(fst.getPath(),
-                    new PrefixAdditionFilter(conf, prefix + Path.SEPARATOR + current.getName(),
-                        options, writer, fs));
+                    new PrefixAdditionFilter(getConf(), getPrefix() + Path.SEPARATOR + current.getName(),
+                                             getOptions(), writer, fs));
     } else {
       InputStream in = null;
       try {
         in = fs.open(fst.getPath());
 
         StringBuilder file = new StringBuilder();
-        for (String aFit : new FileLineIterable(in, charset, false)) {
+        for (String aFit : new FileLineIterable(in, getCharset(), false)) {
           file.append(aFit).append('\n');
         }
         String name = current.getName().equals(fst.getPath().getName())
             ? current.getName()
             : current.getName() + Path.SEPARATOR + fst.getPath().getName();
-        writer.write(prefix + Path.SEPARATOR + name, file.toString());
+        writer.write(getPrefix() + Path.SEPARATOR + name, file.toString());
       } finally {
         Closeables.closeQuietly(in);
       }

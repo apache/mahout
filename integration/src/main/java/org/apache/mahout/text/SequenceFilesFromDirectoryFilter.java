@@ -35,18 +35,16 @@ import java.util.Map;
 public abstract class SequenceFilesFromDirectoryFilter extends SequenceFilesFromDirectory implements PathFilter {
   private static final Logger log = LoggerFactory.getLogger(SequenceFilesFromDirectoryFilter.class);
 
-  protected final String prefix;
-  protected final ChunkedWriter writer;
-  protected final Charset charset;
-  protected final Configuration conf;
-  protected final FileSystem fs;
-  protected final Map<String, String> options;
+  private final String prefix;
+  private final ChunkedWriter writer;
+  private final Charset charset;
+  private final FileSystem fs;
+  private final Map<String, String> options;
 
   protected SequenceFilesFromDirectoryFilter() {
     this.prefix = null;
     this.writer = null;
     this.charset = null;
-    this.conf = null;
     this.fs = null;
     this.options = null;
   }
@@ -56,12 +54,28 @@ public abstract class SequenceFilesFromDirectoryFilter extends SequenceFilesFrom
                                              Map<String, String> options,
                                              ChunkedWriter writer,
                                              FileSystem fs) {
-    this.conf = conf;
     this.prefix = keyPrefix;
     this.writer = writer;
     this.charset = Charset.forName(options.get(SequenceFilesFromDirectory.CHARSET_OPTION[0]));
     this.fs = fs;
     this.options = options;
+    setConf(conf);
+  }
+
+  protected final String getPrefix() {
+    return prefix;
+  }
+
+  protected final ChunkedWriter getWriter() {
+    return writer;
+  }
+
+  protected final Charset getCharset() {
+    return charset;
+  }
+
+  protected final FileSystem getFs() {
+    return fs;
   }
 
   protected final Map<String, String> getOptions() {

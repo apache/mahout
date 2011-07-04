@@ -93,12 +93,12 @@ public abstract class AbstractMatrix implements Matrix {
   @Override
   public double get(String rowLabel, String columnLabel) {
     if (columnLabelBindings == null || rowLabelBindings == null) {
-      throw new UnboundLabelException();
+      throw new IllegalStateException("Unbound label");
     }
     Integer row = rowLabelBindings.get(rowLabel);
     Integer col = columnLabelBindings.get(columnLabel);
     if (row == null || col == null) {
-      throw new UnboundLabelException();
+      throw new IllegalStateException("Unbound label");
     }
 
     return get(row, col);
@@ -117,11 +117,11 @@ public abstract class AbstractMatrix implements Matrix {
   @Override
   public void set(String rowLabel, double[] rowData) {
     if (columnLabelBindings == null) {
-      throw new UnboundLabelException();
+      throw new IllegalStateException("Unbound label");
     }
     Integer row = rowLabelBindings.get(rowLabel);
     if (row == null) {
-      throw new UnboundLabelException();
+      throw new IllegalStateException("Unbound label");
     }
     set(row, rowData);
   }
@@ -138,12 +138,12 @@ public abstract class AbstractMatrix implements Matrix {
   @Override
   public void set(String rowLabel, String columnLabel, double value) {
     if (columnLabelBindings == null || rowLabelBindings == null) {
-      throw new UnboundLabelException();
+      throw new IllegalStateException("Unbound label");
     }
     Integer row = rowLabelBindings.get(rowLabel);
     Integer col = columnLabelBindings.get(columnLabel);
     if (row == null || col == null) {
-      throw new UnboundLabelException();
+      throw new IllegalStateException("Unbound label");
     }
     set(row, col, value);
   }

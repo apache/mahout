@@ -9,14 +9,14 @@ import org.apache.mahout.math.VectorIterable;
 import java.util.Map;
 
 public class LanczosState {
-  protected Matrix diagonalMatrix;
-  protected VectorIterable corpus;
+  protected  Matrix diagonalMatrix;
+  protected final VectorIterable corpus;
   protected double scaleFactor;
   protected int iterationNumber;
-  protected int desiredRank;
+  protected final int desiredRank;
   protected Map<Integer, Vector> basis;
 
-  protected Map<Integer, Double> singularValues;
+  protected final Map<Integer, Double> singularValues;
   protected Map<Integer, Vector> singularVectors;
 
   public LanczosState(VectorIterable corpus, int numCols, int desiredRank, Vector initialVector) {

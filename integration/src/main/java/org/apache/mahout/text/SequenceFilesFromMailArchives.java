@@ -224,8 +224,6 @@ public final class SequenceFilesFromMailArchives {
           String key = prefix + File.separator + current.getName() + File.separator + messageId;
           writer.write(key, file.toString());
           file.setLength(0); // reset the buffer
-          messageId = null;
-          inBody = false;
         }
       } catch (FileNotFoundException e) {
         // Skip file.
