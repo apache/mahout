@@ -107,7 +107,7 @@ public final class RecommenderJob extends AbstractJob {
     addOption("filterFile", "f", "File containing comma-separated userID,itemID pairs. Used to exclude the item from "
         + "the recommendations for that user (optional)", null);
     addOption("booleanData", "b", "Treat input as without pref values", Boolean.FALSE.toString());
-    addOption("maxPrefsPerUser", "mp",
+    addOption("maxPrefsPerUser", "mxp",
         "Maximum number of preferences considered per user in final recommendation phase",
         String.valueOf(UserVectorSplitterMapper.DEFAULT_MAX_PREFS_PER_USER_CONSIDERED));
     addOption("minPrefsPerUser", "mp", "ignore users with less preferences than this in the similarity computation "
