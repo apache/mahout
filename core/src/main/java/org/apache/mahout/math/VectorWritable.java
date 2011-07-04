@@ -187,6 +187,19 @@ public final class VectorWritable extends Configured implements Writable {
   }
 
   @Override
+  public boolean equals(Object o) {
+    if (o instanceof VectorWritable) {
+      return vector.equals(((VectorWritable)o).get());
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    return vector.hashCode();
+  }
+
+  @Override
   public String toString() {
     return vector.toString();
   }

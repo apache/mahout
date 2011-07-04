@@ -15,24 +15,19 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.classifier.naivebayes;
+ package org.apache.mahout.classifier.naivebayes.training;
 
-/**
- * Class containing Constants used by Naive Bayes classifier classes
- * 
- */
-public final class BayesConstants {
-  
-  // Ensure all the strings are unique
-  //public static final String ALPHA_SMOOTHING_FACTOR = "__SF"; // -
-  
-  //public static final String WEIGHT = "__WT";
-  
-  public static final String FEATURE_SUM = "__SJ";
-  
-  public static final String LABEL_SUM = "__SK";
-  
-  public static final String LABEL_THETA_NORMALIZER = "_LTN";
-  
-  private BayesConstants() { }
+import org.apache.mahout.math.Vector;
+
+public class StandardThetaTrainer extends AbstractThetaTrainer {
+
+  public StandardThetaTrainer(Vector weightsPerFeature, Vector weightsPerLabel, double alphaI) {
+    super(weightsPerFeature, weightsPerLabel, alphaI);
+  }
+
+  @Override
+  public void train(int label, Vector instance) {
+    double weight = Math.log((instance.zSum() + alphaI()) / (labelWeight(label) + alphaI() * numFeatures()));
+    updatePerLabelThetaNormalizer(label, weight);
+  }
 }

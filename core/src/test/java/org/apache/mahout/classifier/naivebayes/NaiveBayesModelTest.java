@@ -26,7 +26,7 @@ public class NaiveBayesModelTest extends NaiveBayesTestBase {
     // make sure we generate a valid random model
     NaiveBayesModel model = getModel();
     // check whether the model is valid
-    NaiveBayesModel.validate(model);
+    model.validate();
   }
 
 }

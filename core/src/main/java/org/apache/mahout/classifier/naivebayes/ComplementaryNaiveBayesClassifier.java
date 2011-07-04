@@ -31,16 +31,10 @@ public class ComplementaryNaiveBayesClassifier extends AbstractNaiveBayesClassif
   @Override
   public double getScoreForLabelFeature(int label, int feature) {
     NaiveBayesModel model = getModel();
-    double result = model.getWeightMatrix().get(label, feature);
-    double vocabCount = model.getVocabCount();
-    double featureSum = model.getFeatureSum().get(feature);
-    double totalSum = model.getTotalSum();
-    double labelSum = model.getLabelSum().get(label);
-    double numerator = featureSum - result + model.getAlphaI();
-    double denominator =  totalSum - labelSum + vocabCount;
-    double weight = Math.log(numerator / denominator);
-    result = weight / model.getPerlabelThetaNormalizer().get(label);
-    return result;
+    double numerator = model.featureWeight(feature) - model.weight(label, feature) + model.alphaI();
+    double denominator =  model.totalWeightSum() - model.labelWeight(label) + model.alphaI() * model.numFeatures();
+
+    return Math.log(numerator / denominator);
   }
 
 }

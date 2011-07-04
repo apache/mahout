@@ -23,11 +23,8 @@ import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
 
-/**
- * Class implementing the Naive Bayes Classifier Algorithm
- * 
- */
-public abstract class AbstractNaiveBayesClassifier extends AbstractVectorClassifier {
+/** Class implementing the Naive Bayes Classifier Algorithm */
+abstract class AbstractNaiveBayesClassifier extends AbstractVectorClassifier {
 
   private final NaiveBayesModel model;
   
@@ -39,27 +36,27 @@ public abstract class AbstractNaiveBayesClassifier extends AbstractVectorClassif
     return model;
   }
   
-  public abstract double getScoreForLabelFeature(int label, int feature);
-  
-  public double getScoreForLabelInstance(int label, Vector instance) {
+  protected abstract double getScoreForLabelFeature(int label, int feature);
+
+  protected double getScoreForLabelInstance(int label, Vector instance) {
     double result = 0.0;
-    Iterator<Element> it = instance.iterateNonZero();
-    while (it.hasNext()) {
-      result +=  getScoreForLabelFeature(label, it.next().index());
+    Iterator<Element> elements = instance.iterateNonZero();
+    while (elements.hasNext()) {
+      result += getScoreForLabelFeature(label, elements.next().index());
     }
-    return result;
+    return result / model.thetaNormalizer(label);
   }
   
   @Override
   public int numCategories() {
-    return model.getNumLabels();
+    return model.numLabels();
   }
 
   @Override
   public Vector classify(Vector instance) {
-    Vector score = model.getLabelSum().like();
-    for (int i = 0; i < score.size(); i++) {
-      score.set(i, getScoreForLabelInstance(i, instance));
+    Vector score = model.createScoringVector();
+    for (int label = 0; label < model.numLabels(); label++) {
+      score.set(label, getScoreForLabelInstance(label, instance));
     }
     return score;
   }

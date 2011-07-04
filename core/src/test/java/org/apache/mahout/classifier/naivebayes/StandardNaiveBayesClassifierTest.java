@@ -38,10 +38,10 @@ public final class StandardNaiveBayesClassifierTest extends NaiveBayesTestBase {
   @Test
   public void testNaiveBayes() throws Exception {
     assertEquals(4, classifier.numCategories());
-    assertEquals(0, maxIndex(classifier.classify(new DenseVector(new double[] {1.0, 0.0, 0.0, 0.0}))));
-    assertEquals(1, maxIndex(classifier.classify(new DenseVector(new double[] {0.0, 1.0, 0.0, 0.0}))));
-    assertEquals(2, maxIndex(classifier.classify(new DenseVector(new double[] {0.0, 0.0, 1.0, 0.0}))));
-    assertEquals(3, maxIndex(classifier.classify(new DenseVector(new double[] {0.0, 0.0, 0.0, 1.0}))));
+    assertEquals(0, maxIndex(classifier.classify(new DenseVector(new double[] { 1.0, 0.0, 0.0, 0.0 }))));
+    assertEquals(1, maxIndex(classifier.classify(new DenseVector(new double[] { 0.0, 1.0, 0.0, 0.0 }))));
+    assertEquals(2, maxIndex(classifier.classify(new DenseVector(new double[] { 0.0, 0.0, 1.0, 0.0 }))));
+    assertEquals(3, maxIndex(classifier.classify(new DenseVector(new double[] { 0.0, 0.0, 0.0, 1.0 }))));
     
   }
   

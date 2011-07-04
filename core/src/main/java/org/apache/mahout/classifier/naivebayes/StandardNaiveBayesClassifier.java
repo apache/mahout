@@ -18,10 +18,7 @@
 package org.apache.mahout.classifier.naivebayes;
 
 
-/**
- * Class implementing the Naive Bayes Classifier Algorithm
- * 
- */
+/** Class implementing the Naive Bayes Classifier Algorithm */
 public class StandardNaiveBayesClassifier extends AbstractNaiveBayesClassifier { 
  
   public StandardNaiveBayesClassifier(NaiveBayesModel model) {
@@ -31,14 +28,11 @@ public class StandardNaiveBayesClassifier extends AbstractNaiveBayesClassifier {
   @Override
   public double getScoreForLabelFeature(int label, int feature) {
     NaiveBayesModel model = getModel();
-    double result = model.getWeightMatrix().get(label, feature);
-    double vocabCount = model.getVocabCount();
-    double sumLabelWeight = model.getLabelSum().get(label);
-    double numerator = result + model.getAlphaI();
-    double denominator = sumLabelWeight + vocabCount;
-    double weight = -Math.log(numerator / denominator);
-    result = weight / model.getPerlabelThetaNormalizer().get(label);
-    return result;
+
+    double numerator = model.weight(label, feature) + model.alphaI();
+    double denominator = model.labelWeight(label) + model.alphaI() * model.numFeatures();
+
+    return -Math.log(numerator / denominator);
   }
   
 }
