@@ -64,6 +64,9 @@ import java.util.Map;
  */
 public class LocalClusteringCoefficientJob extends AbstractJob {
 
+  public static final String TMP_EDGES_PER_VERTEX = "edgesPerVertex";
+  public static final String TMP_TRIANGLES_PER_VERTEX = "trianglesPerVertex";
+
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new LocalClusteringCoefficientJob(), args);
   }
@@ -83,27 +86,23 @@ public class LocalClusteringCoefficientJob extends AbstractJob {
     Path edgesPath = new Path(parsedArgs.get("--edges"));
     Path trianglesPath = new Path(parsedArgs.get("--triangles"));
 
-    Path tempDirPath = new Path(parsedArgs.get("--tempDir"));
-
-    Path edgesPerVertex = new Path(tempDirPath, "edgesPerVertex");
-    Path trianglesPerVertex = new Path(tempDirPath, "trianglesPerVertex");
-
     // unfortunately we don't have access to an undeprecated MultipleInputs, so we need several M/R steps instead of one...
-    Job countEdgesPerVertex = prepareJob(edgesPath, edgesPerVertex, SequenceFileInputFormat.class,
-        EdgeCountMapper.class, Vertex.class, TriangleOrEdgeCount.class, Reducer.class, Vertex.class,
-        TriangleOrEdgeCount.class, SequenceFileOutputFormat.class);
+    Job countEdgesPerVertex = prepareJob(edgesPath, getTempPath(TMP_EDGES_PER_VERTEX),
+        SequenceFileInputFormat.class, EdgeCountMapper.class, Vertex.class, TriangleOrEdgeCount.class, Reducer.class,
+        Vertex.class, TriangleOrEdgeCount.class, SequenceFileOutputFormat.class);
     countEdgesPerVertex.setCombinerClass(TriangleOrEdgeCountCombiner.class);
     countEdgesPerVertex.waitForCompletion(true);
 
-    Job countTrianglesPerVertex = prepareJob(trianglesPath, trianglesPerVertex, SequenceFileInputFormat.class,
-        TriangleCountMapper.class, Vertex.class, TriangleOrEdgeCount.class, Reducer.class, Vertex.class,
-        TriangleOrEdgeCount.class, SequenceFileOutputFormat.class);
+    Job countTrianglesPerVertex = prepareJob(trianglesPath, getTempPath(TMP_TRIANGLES_PER_VERTEX),
+        SequenceFileInputFormat.class, TriangleCountMapper.class, Vertex.class, TriangleOrEdgeCount.class,
+        Reducer.class, Vertex.class, TriangleOrEdgeCount.class, SequenceFileOutputFormat.class);
     countTrianglesPerVertex.setCombinerClass(TriangleOrEdgeCountCombiner.class);
     countTrianglesPerVertex.waitForCompletion(true);
 
-    Job computeLocalClusteringCoefficient = prepareJob(new Path(edgesPerVertex + "," + trianglesPerVertex),
-        getOutputPath(), SequenceFileInputFormat.class, Mapper.class, Vertex.class, TriangleOrEdgeCount.class,
-        LocalClusteringCoefficientReducer.class, LongWritable.class, DoubleWritable.class, TextOutputFormat.class);
+    Job computeLocalClusteringCoefficient = prepareJob(getCombinedTempPath(TMP_EDGES_PER_VERTEX,
+        TMP_TRIANGLES_PER_VERTEX), getOutputPath(), SequenceFileInputFormat.class, Mapper.class,
+        Vertex.class, TriangleOrEdgeCount.class, LocalClusteringCoefficientReducer.class, LongWritable.class,
+        DoubleWritable.class, TextOutputFormat.class);
     computeLocalClusteringCoefficient.setCombinerClass(TriangleOrEdgeCountCombiner.class);
     computeLocalClusteringCoefficient.waitForCompletion(true);
 

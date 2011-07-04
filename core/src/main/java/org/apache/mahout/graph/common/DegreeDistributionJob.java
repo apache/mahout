@@ -17,7 +17,6 @@
 
 package org.apache.mahout.graph.common;
 
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
@@ -56,6 +55,8 @@ import java.util.Map;
  */
 public class DegreeDistributionJob extends AbstractJob {
 
+  public static final String TMP_DEGREES_PER_VERTEX = "degreesPerVertex";
+
   private static final IntWritable ONE = new IntWritable(1);
 
   public static void main(String[] args) throws Exception {
@@ -72,18 +73,15 @@ public class DegreeDistributionJob extends AbstractJob {
       return -1;
     }
 
-    Path tempDirPath = new Path(parsedArgs.get("--tempDir"));
-    Path degreesPerVertexPath = new Path(tempDirPath, "degreesPerVertex");
-
-    Job degreesPerVertex = prepareJob(getInputPath(), degreesPerVertexPath, SequenceFileInputFormat.class,
-        DegreeOfVertexMapper.class, Vertex.class, IntWritable.class, IntSumReducer.class, Vertex.class,
-        IntWritable.class, SequenceFileOutputFormat.class);
+    Job degreesPerVertex = prepareJob(getInputPath(), getTempPath(TMP_DEGREES_PER_VERTEX),
+        SequenceFileInputFormat.class, DegreeOfVertexMapper.class, Vertex.class, IntWritable.class, IntSumReducer.class,
+        Vertex.class, IntWritable.class, SequenceFileOutputFormat.class);
     degreesPerVertex.setCombinerClass(IntSumReducer.class);
     degreesPerVertex.waitForCompletion(true);
 
-    Job degreeDistribution = prepareJob(degreesPerVertexPath, getOutputPath(), SequenceFileInputFormat.class,
-        DegreesMapper.class, IntWritable.class, IntWritable.class, IntSumReducer.class, IntWritable.class,
-        IntWritable.class, TextOutputFormat.class);
+    Job degreeDistribution = prepareJob(getTempPath(TMP_DEGREES_PER_VERTEX), getOutputPath(),
+        SequenceFileInputFormat.class, DegreesMapper.class, IntWritable.class, IntWritable.class, IntSumReducer.class,
+        IntWritable.class, IntWritable.class, TextOutputFormat.class);
     degreeDistribution.setCombinerClass(IntSumReducer.class);
     degreeDistribution.waitForCompletion(true);
 

@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -41,6 +40,9 @@ import org.apache.mahout.graph.model.VertexWithDegree;
 /** Enumerates all triangles of an undirected graph. */
 public class EnumerateTrianglesJob extends AbstractJob {
 
+  public static final String TMP_CLOSING_EDGES = "closingEdges";
+  public static final String TMP_OPEN_TRIADS = "openTriads";
+
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new EnumerateTrianglesJob(), args);
   }
@@ -55,29 +57,22 @@ public class EnumerateTrianglesJob extends AbstractJob {
       return -1;
     }
 
-    Path tempDirPath = new Path(parsedArgs.get("--tempDir"));
-
-    Path inputPath = getInputPath();
-    Path joinableInputPath = new Path(tempDirPath, "joinableInput");
-    Path triadsPath = new Path(tempDirPath, "triangles");
-    Path outputPath = getOutputPath();
-
     // scatter the edges to lower degree vertex and build open triads
-    Job scatter = prepareJob(inputPath, triadsPath, SequenceFileInputFormat.class,
+    Job scatter = prepareJob(getInputPath(), getTempPath(TMP_OPEN_TRIADS), SequenceFileInputFormat.class,
         ScatterEdgesToLowerDegreeVertexMapper.class, Vertex.class, Vertex.class,
         BuildOpenTriadsReducer.class, JoinableUndirectedEdge.class, VertexOrMarker.class,
         SequenceFileOutputFormat.class);
     scatter.waitForCompletion(true);
 
     // necessary as long as we don't have access to an undeprecated MultipleInputs
-    Job prepareInput = prepareJob(inputPath, joinableInputPath, SequenceFileInputFormat.class, PrepareInputMapper.class,
-        JoinableUndirectedEdge.class, VertexOrMarker.class, Reducer.class, JoinableUndirectedEdge.class,
-        VertexOrMarker.class, SequenceFileOutputFormat.class);
+    Job prepareInput = prepareJob(getInputPath(), getTempPath(TMP_CLOSING_EDGES), SequenceFileInputFormat.class,
+        PrepareInputMapper.class, JoinableUndirectedEdge.class, VertexOrMarker.class, Reducer.class,
+        JoinableUndirectedEdge.class, VertexOrMarker.class, SequenceFileOutputFormat.class);
     prepareInput.setGroupingComparatorClass(JoinableUndirectedEdge.GroupingComparator.class);
     prepareInput.waitForCompletion(true);
 
     //join opentriads and edges pairwise to get all triangles
-    Job joinTriads = prepareJob(new Path(triadsPath + "," + joinableInputPath), outputPath,
+    Job joinTriads = prepareJob(getCombinedTempPath(TMP_OPEN_TRIADS, TMP_CLOSING_EDGES), getOutputPath(),
         SequenceFileInputFormat.class, Mapper.class, JoinableUndirectedEdge.class, VertexOrMarker.class,
         JoinTrianglesReducer.class, Triangle.class, NullWritable.class, SequenceFileOutputFormat.class);
     joinTriads.setGroupingComparatorClass(JoinableUndirectedEdge.GroupingComparator.class);
