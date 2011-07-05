@@ -59,8 +59,7 @@ import java.util.Random;
  */
 public final class SimpleCsvExamples {
 
-  public static final int SEPARATOR_CHAR = '\t';
-  public static final String SEPARATOR = "\t";
+  public static final char SEPARATOR_CHAR = '\t';
   private static final int FIELDS = 100;
 
   private SimpleCsvExamples() {
@@ -137,8 +136,8 @@ public final class SimpleCsvExamples {
 
 
   private static final class Line {
-    private static final Splitter ON_TABS = Splitter.on(SEPARATOR).trimResults();
-    public static final Joiner WITH_COMMAS = Joiner.on(SEPARATOR);
+    private static final Splitter ON_TABS = Splitter.on(SEPARATOR_CHAR).trimResults();
+    public static final Joiner WITH_COMMAS = Joiner.on(SEPARATOR_CHAR);
 
     public static final Random rand = RandomUtils.getRandom();
 

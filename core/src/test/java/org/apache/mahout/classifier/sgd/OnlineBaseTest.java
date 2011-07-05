@@ -126,7 +126,7 @@ public abstract class OnlineBaseTest extends MahoutTestCase {
    * @throws IOException If there is an error reading the data
    */
   protected static Matrix readCsv(String resourceName) throws IOException {
-    Splitter onCommas = Splitter.on(",").trimResults(CharMatcher.anyOf(" \""));
+    Splitter onCommas = Splitter.on(',').trimResults(CharMatcher.anyOf(" \""));
 
     Readable isr = new InputStreamReader(Resources.getResource(resourceName).openStream(), Charsets.UTF_8);
     List<String> data = CharStreams.readLines(isr);

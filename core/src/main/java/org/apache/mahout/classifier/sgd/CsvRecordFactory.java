@@ -70,7 +70,7 @@ public class CsvRecordFactory implements RecordFactory {
 
   // crude CSV value splitter.  This will fail if any double quoted strings have
   // commas inside.  Also, escaped quotes will not be unescaped.  Good enough for now.
-  private final Splitter onComma = Splitter.on(",").trimResults(CharMatcher.is('"'));
+  private final Splitter COMMA = Splitter.on(',').trimResults(CharMatcher.is('"'));
 
   private static final Map<String, Class<? extends FeatureVectorEncoder>> TYPE_DICTIONARY =
           ImmutableMap.<String, Class<? extends FeatureVectorEncoder>>builder()
@@ -157,7 +157,7 @@ public class CsvRecordFactory implements RecordFactory {
   public void firstLine(String line) {
     // read variable names, build map of name -> column
     final Map<String, Integer> vars = Maps.newHashMap();
-    variableNames = Lists.newArrayList(onComma.split(line));
+    variableNames = Lists.newArrayList(COMMA.split(line));
     int column = 0;
     for (String var : variableNames) {
       vars.put(var, column++);
@@ -226,7 +226,7 @@ public class CsvRecordFactory implements RecordFactory {
    */
   @Override
   public int processLine(String line, Vector featureVector) {
-    List<String> values = Lists.newArrayList(onComma.split(line));
+    List<String> values = Lists.newArrayList(COMMA.split(line));
 
     int targetValue = targetDictionary.intern(values.get(target));
     if (targetValue >= maxTargetValue) {

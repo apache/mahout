@@ -17,6 +17,7 @@
 
 package org.apache.mahout.common.nlp;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -27,7 +28,7 @@ import java.util.Map;
 
 public class NGrams {
 
-  private static final Splitter SPACE = Splitter.on(' ');
+  private static final Splitter SPACE_TAB = Splitter.on(CharMatcher.anyOf(" \t"));
   
   private final String line;
   private final int gramSize;
@@ -40,7 +41,7 @@ public class NGrams {
   public Map<String,List<String>> generateNGrams() {
     Map<String,List<String>> returnDocument = Maps.newHashMap();
     
-    Iterator<String> tokenizer = SPACE.split(line).iterator();
+    Iterator<String> tokenizer = SPACE_TAB.split(line).iterator();
     List<String> tokens = Lists.newArrayList();
     String labelName = tokenizer.next();
     List<String> previousN1Grams = Lists.newArrayList();
@@ -70,7 +71,7 @@ public class NGrams {
 
     List<String> tokens = Lists.newArrayList();
     List<String> previousN1Grams = Lists.newArrayList();
-    for (String nextToken : SPACE.split(line)) {
+    for (String nextToken : SPACE_TAB.split(line)) {
       
       if (previousN1Grams.size() == gramSize) {
         previousN1Grams.remove(0);

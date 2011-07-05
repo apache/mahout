@@ -35,9 +35,10 @@ import java.util.regex.Pattern;
  */
 public class TextValueEncoder extends FeatureVectorEncoder {
 
-  private static final double LOG_2 = Math.log(2);
+  private static final double LOG_2 = Math.log(2.0);
 
-  private final Splitter onNonWord = Splitter.on(Pattern.compile("\\W+")).omitEmptyStrings();
+  private static final Splitter ON_NON_WORD = Splitter.on(Pattern.compile("\\W+")).omitEmptyStrings();
+
   private FeatureVectorEncoder wordEncoder;
   private final Multiset<String> counts;
 
@@ -110,7 +111,7 @@ public class TextValueEncoder extends FeatureVectorEncoder {
    * @see LuceneTextValueEncoder
    */
   protected Iterable<String> tokenize(CharSequence originalForm) {
-    return onNonWord.split(originalForm);
+    return ON_NON_WORD.split(originalForm);
   }
 
   /**
