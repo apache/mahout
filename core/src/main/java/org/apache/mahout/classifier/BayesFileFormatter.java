@@ -40,7 +40,7 @@ import org.apache.commons.cli2.commandline.Parser;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.analysis.tokenattributes.TermAttribute;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -207,11 +207,11 @@ public final class BayesFileFormatter {
       writer.write(label);
       writer.write('\t'); // edit: Inorder to match Hadoop standard
       // TextInputFormat
-      TermAttribute termAtt = ts.addAttribute(TermAttribute.class);
+      CharTermAttribute termAtt = ts.addAttribute(CharTermAttribute.class);
       ts.reset();
       while (ts.incrementToken()) {
-        char[] termBuffer = termAtt.termBuffer();
-        int termLen = termAtt.termLength();
+        char[] termBuffer = termAtt.buffer();
+        int termLen = termAtt.length();
         writer.write(termBuffer, 0, termLen);
         writer.write(' ');
       }
@@ -233,11 +233,11 @@ public final class BayesFileFormatter {
     TokenStream ts = analyzer.reusableTokenStream("", reader);
     
     List<String> coll = Lists.newArrayList();
-    TermAttribute termAtt = ts.addAttribute(TermAttribute.class);
+    CharTermAttribute termAtt = ts.addAttribute(CharTermAttribute.class);
     ts.reset();
     while (ts.incrementToken()) {
-      char[] termBuffer = termAtt.termBuffer();
-      int termLen = termAtt.termLength();
+      char[] termBuffer = termAtt.buffer();
+      int termLen = termAtt.length();
       String val = new String(termBuffer, 0, termLen);
       coll.add(val);
     }

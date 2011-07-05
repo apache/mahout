@@ -30,7 +30,7 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.lucene.analysis.shingle.ShingleFilter;
-import org.apache.lucene.analysis.tokenattributes.TermAttribute;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.mahout.classifier.bayes.BayesParameters;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.common.lucene.IteratorTokenStream;
@@ -79,7 +79,7 @@ public class BayesFeatureMapper extends MapReduceBase implements Mapper<Text,Tex
     if (gramSize > 1) {
       ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(Iterators.forArray(tokens)), gramSize);
       do {
-        String term = sf.getAttribute(TermAttribute.class).term();
+        String term = sf.getAttribute(CharTermAttribute.class).toString();
         if (term.length() > 0) {
           if (wordList.containsKey(term)) {
             wordList.put(term, 1 + wordList.get(term));

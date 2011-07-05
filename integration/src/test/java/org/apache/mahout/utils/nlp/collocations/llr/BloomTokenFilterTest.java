@@ -33,7 +33,7 @@ import org.apache.hadoop.util.hash.Hash;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.shingle.ShingleFilter;
-import org.apache.lucene.analysis.tokenattributes.TermAttribute;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.util.Version;
 import org.apache.mahout.utils.MahoutTestCase;
 import org.junit.Test;
@@ -122,8 +122,8 @@ public final class BloomTokenFilterTest extends MahoutTestCase {
     int pos = 0;
     while (ts.incrementToken()) {
       assertTrue("Analyzer produced too many tokens", pos <= expected.length);
-      TermAttribute termAttr = ts.getAttribute(TermAttribute.class);
-      assertEquals("Unexpected term", expected[pos++], termAttr.term());
+      CharTermAttribute termAttr = ts.getAttribute(CharTermAttribute.class);
+      assertEquals("Unexpected term", expected[pos++], termAttr.toString());
     }
     assertEquals("Analyzer produced too few terms", expected.length, pos);
   }
