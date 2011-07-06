@@ -70,7 +70,7 @@ public class CsvRecordFactory implements RecordFactory {
 
   // crude CSV value splitter.  This will fail if any double quoted strings have
   // commas inside.  Also, escaped quotes will not be unescaped.  Good enough for now.
-  private final Splitter COMMA = Splitter.on(',').trimResults(CharMatcher.is('"'));
+  private static final Splitter COMMA = Splitter.on(',').trimResults(CharMatcher.is('"'));
 
   private static final Map<String, Class<? extends FeatureVectorEncoder>> TYPE_DICTIONARY =
           ImmutableMap.<String, Class<? extends FeatureVectorEncoder>>builder()
@@ -87,6 +87,10 @@ public class CsvRecordFactory implements RecordFactory {
 
   private int target;
   private final Dictionary targetDictionary;
+  
+  //Which column is  used for identify a CSV file line 
+  private String idName;
+  private int id = -1;
 
   private List<Integer> predictors;
   private Map<Integer, FeatureVectorEncoder> predictorEncoders;
@@ -107,6 +111,11 @@ public class CsvRecordFactory implements RecordFactory {
     this.targetName = targetName;
     this.typeMap = typeMap;
     targetDictionary = new Dictionary();
+  }
+
+  public CsvRecordFactory(String targetName, String idName, Map<String, String> typeMap){
+    this(targetName, typeMap);
+    this.idName = idName;
   }
 
   /**
@@ -165,6 +174,11 @@ public class CsvRecordFactory implements RecordFactory {
 
     // record target column and establish dictionary for decoding target
     target = vars.get(targetName);
+    
+    // record id column
+    if (idName != null){
+      id = vars.get(idName);
+    }
 
     // create list of predictor column numbers
     predictors = Lists.newArrayList(Collections2.transform(typeMap.keySet(), new Function<String, Integer>() {
@@ -244,6 +258,69 @@ public class CsvRecordFactory implements RecordFactory {
     }
     return targetValue;
   }
+  
+  /***
+   * Decodes a single line of csv data and records the target(if retrunTarget is true)
+   * and predictor variables in a record. As a side effect, features are added into the featureVector.
+   * Returns the value of the target variable. When used during classify against production data without
+   * target value, the method will be called with returnTarget = false. 
+   * @param line The raw data.
+   * @param featureVector Where to fill in the features.  Should be zeroed before calling
+   *                      processLine.
+   * @param returnTarget whether process and return target value, -1 will be returned if false.
+   * @return The value of the target variable.
+   */
+  public int processLine(CharSequence line, Vector featureVector, boolean returnTarget) {
+    List<String> values = Lists.newArrayList(COMMA.split(line));
+    int targetValue = -1;
+    if (returnTarget) {
+      targetValue = targetDictionary.intern(values.get(target));
+      if (targetValue >= maxTargetValue) {
+        targetValue = maxTargetValue - 1;
+      }
+    }
+
+    for (Integer predictor : predictors) {
+      String value = predictor >= 0 ? values.get(predictor) : null;
+      predictorEncoders.get(predictor).addToVector(value, featureVector);
+    }
+    return targetValue;
+  }
+  
+  /***
+   * Extract the raw target string from a line read from a CSV file.
+   * @param line the line of content read from CSV file
+   * @return the raw target value in the corresponding column of CSV line 
+   */
+  public String getTargetString(CharSequence line) {
+    List<String> values = Lists.newArrayList(COMMA.split(line));
+    return values.get(target);
+
+  }
+
+  /***
+   * Extract the corresponding raw target label according to a code 
+   * @param code the integer code encoded during training process
+   * @return the raw target label
+   */  
+  public String getTargetLabel(int code) {
+    for (String key: targetDictionary.values()) {
+      if (targetDictionary.intern(key) == code) {
+        return key;
+      }
+    }
+    return null;
+  }
+  
+  /***
+   * Extract the id column value from the CSV record
+   * @param line the line of content read from CSV file
+   * @return the id value of the CSV record
+   */
+  public String getIdString(CharSequence line){
+    List<String> values = Lists.newArrayList(COMMA.split(line));
+    return values.get(id);
+  }
 
   /**
    * Returns a list of the names of the predictor variables.
@@ -282,6 +359,14 @@ public class CsvRecordFactory implements RecordFactory {
       r.subList(maxTargetValue, r.size()).clear();
     }
     return r;
+  }
+
+  public String getIdName() {
+    return idName;
+  }
+
+  public void setIdName(String idName) {
+    this.idName = idName;
   }
 
 }

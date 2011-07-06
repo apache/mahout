@@ -17,7 +17,12 @@
 
 package org.apache.mahout.common;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
 
 import com.google.common.base.Charsets;
@@ -106,15 +111,15 @@ public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCa
    * Find a declared field in a class or one of it's super classes
    */
   private static Field findDeclaredField(Class<?> inClass, String fieldname) throws NoSuchFieldException {
-    if (Object.class.equals(inClass)) {
-      throw new NoSuchFieldException();
-    }
-    for (Field field : inClass.getDeclaredFields()) {
-      if (field.getName().equalsIgnoreCase(fieldname)) {
-        return field;
+    while (!Object.class.equals(inClass)) {
+      for (Field field : inClass.getDeclaredFields()) {
+        if (field.getName().equalsIgnoreCase(fieldname)) {
+          return field;
+        }
       }
+      inClass = inClass.getSuperclass();
     }
-    return findDeclaredField(inClass.getSuperclass(), fieldname);
+    throw new NoSuchFieldException();
   }
 
   /**

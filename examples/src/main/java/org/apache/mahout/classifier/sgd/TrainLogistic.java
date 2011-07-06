@@ -40,7 +40,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Locale;
 
@@ -53,16 +53,18 @@ public final class TrainLogistic {
   private static String inputFile;
   private static String outputFile;
   private static LogisticModelParameters lmp;
-
   private static int passes;
   private static boolean scores;
   private static OnlineLogisticRegression model;
-  static PrintStream output = System.out;
 
   private TrainLogistic() {
   }
 
   public static void main(String[] args) throws IOException {
+    mainToOutput(args, new PrintWriter(System.out));
+  }
+
+  static void mainToOutput(String[] args, PrintWriter output) throws IOException {
     if (parseArgs(args)) {
       double logPEstimate = 0;
       int samples = 0;

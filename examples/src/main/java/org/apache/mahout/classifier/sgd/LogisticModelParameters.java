@@ -216,6 +216,10 @@ public class LogisticModelParameters implements Writable {
     maxTargetCategories = targetCategories.size();
   }
 
+  public List<String> getTargetCategories() {
+    return this.targetCategories;
+  }
+
   public void setUseBias(boolean useBias) {
     this.useBias = useBias;
   }
@@ -230,6 +234,10 @@ public class LogisticModelParameters implements Writable {
 
   public Map<String, String> getTypeMap() {
     return typeMap;
+  }
+
+  public void setTypeMap(Map<String, String> map) {
+    this.typeMap = map;
   }
 
   public int getNumFeatures() {

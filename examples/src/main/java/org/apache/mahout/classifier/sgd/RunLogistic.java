@@ -33,7 +33,7 @@ import org.apache.mahout.classifier.evaluation.Auc;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.Locale;
 
 public final class RunLogistic {
@@ -43,12 +43,15 @@ public final class RunLogistic {
   private static boolean showAuc;
   private static boolean showScores;
   private static boolean showConfusion;
-  static PrintStream output = System.out;
 
   private RunLogistic() {
   }
 
   public static void main(String[] args) throws IOException {
+    mainToOutput(args, new PrintWriter(System.out));
+  }
+
+  static void mainToOutput(String[] args, PrintWriter output) throws IOException {
     if (parseArgs(args)) {
       if (!showAuc && !showConfusion && !showScores) {
         showAuc = true;

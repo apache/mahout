@@ -28,15 +28,11 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.junit.Test;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,16 +43,19 @@ public class TrainLogisticTest extends MahoutTestCase {
   public void example13_1() throws Exception {
     String outputFile = getTestTempFile("model").getAbsolutePath();
 
-    String trainOut = runMain(TrainLogistic.class, new String[]{
-      "--input", "donut.csv",
-      "--output", outputFile,
-      "--target", "color", "--categories", "2",
-      "--predictors", "x", "y",
-      "--types", "numeric",
-      "--features", "20",
-      "--passes", "100",
-      "--rate", "50"
-    });
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    TrainLogistic.mainToOutput(new String[]{
+        "--input", "donut.csv",
+        "--output", outputFile,
+        "--target", "color", "--categories", "2",
+        "--predictors", "x", "y",
+        "--types", "numeric",
+        "--features", "20",
+        "--passes", "100",
+        "--rate", "50"
+    }, pw);
+    String trainOut = sw.toString();
     assertTrue(trainOut.contains("x -0.7"));
     assertTrue(trainOut.contains("y -0.4"));
 
@@ -87,20 +86,26 @@ public class TrainLogisticTest extends MahoutTestCase {
       Closeables.closeQuietly(in);
     }
 
-    String output = runMain(RunLogistic.class, new String[]{
+    sw = new StringWriter();
+    pw = new PrintWriter(sw);
+    RunLogistic.mainToOutput(new String[]{
         "--input", "donut.csv",
         "--model", outputFile,
         "--auc",
         "--confusion"
-    });
-    assertTrue(output.contains("AUC = 0.57"));
-    assertTrue(output.contains("confusion: [[27.0, 13.0], [0.0, 0.0]]"));
+    }, pw);
+    trainOut = sw.toString();
+    assertTrue(trainOut.contains("AUC = 0.57"));
+    assertTrue(trainOut.contains("confusion: [[27.0, 13.0], [0.0, 0.0]]"));
   }
 
   @Test
   public void example13_2() throws Exception {
     String outputFile = getTestTempFile("model").getAbsolutePath();
-    String trainOut = runMain(TrainLogistic.class, new String[]{
+
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    TrainLogistic.mainToOutput(new String[]{
         "--input", "donut.csv",
         "--output", outputFile,
         "--target", "color",
@@ -110,59 +115,34 @@ public class TrainLogisticTest extends MahoutTestCase {
         "--features", "20",
         "--passes", "100",
         "--rate", "50"
-    });
+    }, pw);
 
+    String trainOut = sw.toString();
     assertTrue(trainOut.contains("a 0."));
     assertTrue(trainOut.contains("b -1."));
     assertTrue(trainOut.contains("c -25."));
 
-    String output = runMain(RunLogistic.class, new String[]{
+    sw = new StringWriter();
+    pw = new PrintWriter(sw);
+    RunLogistic.mainToOutput(new String[]{
         "--input", "donut.csv",
         "--model", outputFile,
         "--auc",
         "--confusion"
-    });
-    assertTrue(output.contains("AUC = 1.00"));
+    }, pw);
+    trainOut = sw.toString();
+    assertTrue(trainOut.contains("AUC = 1.00"));
 
-    String heldout = runMain(RunLogistic.class, new String[]{
+    sw = new StringWriter();
+    pw = new PrintWriter(sw);
+    RunLogistic.mainToOutput(new String[]{
         "--input", "donut-test.csv",
         "--model", outputFile,
         "--auc",
         "--confusion"
-    });
-    assertTrue(heldout.contains("AUC = 0.9"));
-  }
-
-  /**
-   * Runs a class with a public static void main method.  We assume that there is an accessible
-   * field named "output" that we can change to redirect output.
-   *
-   *
-   * @param clazz   contains the main method.
-   * @param args    contains the command line arguments
-   * @return The contents to standard out as a string.
-   * @throws IOException                   Not possible, but must be declared.
-   * @throws NoSuchFieldException          If there isn't an output field.
-   * @throws IllegalAccessException        If the output field isn't accessible by us.
-   * @throws NoSuchMethodException         If there isn't a main method.
-   * @throws InvocationTargetException     If the main method throws an exception.
-   */
-  private static String runMain(Class<?> clazz, String[] args)
-    throws NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-    ByteArrayOutputStream trainOutput = new ByteArrayOutputStream();
-    PrintStream printStream = new PrintStream(trainOutput);
-
-    try {
-      Field outputField = clazz.getDeclaredField("output");
-      Method main = clazz.getMethod("main", args.getClass());
-
-      outputField.set(null, printStream);
-      Object[] argList = {args};
-      main.invoke(null, argList);
-      return new String(trainOutput.toByteArray(), Charsets.UTF_8);
-    } finally {
-      Closeables.closeQuietly(printStream);
-    }
+    }, pw);
+    trainOut = sw.toString();
+    assertTrue(trainOut.contains("AUC = 0.9"));
   }
 
   private static void verifyModel(LogisticModelParameters lmp,
