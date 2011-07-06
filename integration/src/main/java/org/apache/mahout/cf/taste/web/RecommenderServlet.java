@@ -115,7 +115,7 @@ public final class RecommenderServlet extends HttpServlet {
   }
 
   private static void writeXML(HttpServletResponse response, Iterable<RecommendedItem> items) throws IOException {
-    response.setContentType("text/xml");
+    response.setContentType("application/xml");
     response.setCharacterEncoding("UTF-8");
     response.setHeader("Cache-Control", "no-cache");
     PrintWriter writer = response.getWriter();
@@ -131,7 +131,7 @@ public final class RecommenderServlet extends HttpServlet {
   }
 
   private static void writeJSON(HttpServletResponse response, Iterable<RecommendedItem> items) throws IOException {
-    response.setContentType("text/plain");
+    response.setContentType("application/json");
     response.setCharacterEncoding("UTF-8");
     response.setHeader("Cache-Control", "no-cache");
     PrintWriter writer = response.getWriter();
