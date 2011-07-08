@@ -113,7 +113,7 @@ public final class ViterbiEvaluator {
       int[] hiddenStates = HmmEvaluator.decode(model, observationsArray, true);
 
       //writing output
-      PrintWriter writer = new PrintWriter(new FileOutputStream(output));
+      PrintWriter writer = new PrintWriter(new FileOutputStream(output), true);
       try {
         for (int hiddenState : hiddenStates) {
           writer.print(hiddenState);

@@ -60,7 +60,7 @@ public final class TrainAdaptiveLogistic {
   }
 
   public static void main(String[] args) throws IOException {
-    mainToOutput(args, new PrintWriter(System.out));
+    mainToOutput(args, new PrintWriter(System.out, true));
   }
 
   static void mainToOutput(String[] args, PrintWriter output) throws IOException {

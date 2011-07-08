@@ -18,11 +18,10 @@
 package org.apache.mahout.common;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.Writer;
 import java.lang.reflect.Field;
 
 import com.google.common.base.Charsets;
@@ -129,11 +128,12 @@ public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCa
     return AbstractJob.keyFor(optionName);
   }
 
-  protected static void writeLines(File file, String... lines) throws FileNotFoundException {
-    PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8));
+  protected static void writeLines(File file, String... lines) throws IOException {
+    Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8);
     try {
       for (String line : lines) {
-        writer.println(line);
+        writer.write(line);
+        writer.write('\n');
       }
     } finally {
       Closeables.closeQuietly(writer);

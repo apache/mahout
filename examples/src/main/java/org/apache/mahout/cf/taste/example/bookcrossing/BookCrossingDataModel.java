@@ -22,7 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Charsets;
@@ -59,9 +59,9 @@ public final class BookCrossingDataModel extends FileDataModel {
     }
     File resultFile = new File(new File(System.getProperty("java.io.tmpdir")), "taste.bookcrossing.txt");
     resultFile.delete();
-    PrintWriter writer = null;
+    Writer writer = null;
     try {
-      writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(resultFile), Charsets.UTF_8));
+      writer = new OutputStreamWriter(new FileOutputStream(resultFile), Charsets.UTF_8);
       for (String line : new FileLineIterable(originalFile, true)) {
         // 0 ratings are basically "no rating", ignore them (thanks h.9000)
         if (line.endsWith("\"0\"")) {
@@ -78,7 +78,8 @@ public final class BookCrossingDataModel extends FileDataModel {
           // drop rating
           convertedLine = convertedLine.substring(0, convertedLine.lastIndexOf(','));
         }
-        writer.println(convertedLine);
+        writer.write(convertedLine);
+        writer.write('\n');
       }
       writer.flush();
     } catch (IOException ioe) {

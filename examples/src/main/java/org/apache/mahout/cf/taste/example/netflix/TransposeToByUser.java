@@ -21,7 +21,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -101,14 +101,14 @@ public final class TransposeToByUser {
   }
   
   private static void appendStringsToFile(Iterable<String> strings, File file) throws IOException {
-    PrintWriter outputStreamWriter =
-      new PrintWriter(new OutputStreamWriter(new FileOutputStream(file, true), Charsets.UTF_8));
+    Writer out = new OutputStreamWriter(new FileOutputStream(file, true), Charsets.UTF_8);
     try {
       for (String s : strings) {
-        outputStreamWriter.println(s);
+        out.write(s);
+        out.write('\n');
       }
     } finally {
-      Closeables.closeQuietly(outputStreamWriter);
+      Closeables.closeQuietly(out);
     }
   }
   

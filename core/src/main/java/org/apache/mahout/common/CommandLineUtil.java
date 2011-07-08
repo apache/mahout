@@ -51,7 +51,7 @@ public final class CommandLineUtil {
     fmt.printHelp("<command> [Generic Options] [Job-Specific Options]", 
         "Generic Options:", ops, "");
     
-    PrintWriter pw = new PrintWriter(System.out);
+    PrintWriter pw = new PrintWriter(System.out, true);
     HelpFormatter formatter = new HelpFormatter();
     formatter.setGroup(group);
     formatter.setPrintWriter(pw);
@@ -69,7 +69,7 @@ public final class CommandLineUtil {
     fmt.printHelp("<command> [Generic Options] [Job-Specific Options]",
         "Generic Options:", ops, "");
 
-    PrintWriter pw = new PrintWriter(System.out);
+    PrintWriter pw = new PrintWriter(System.out, true);
     HelpFormatter formatter = new HelpFormatter();
     formatter.setGroup(group);
     formatter.setPrintWriter(pw);

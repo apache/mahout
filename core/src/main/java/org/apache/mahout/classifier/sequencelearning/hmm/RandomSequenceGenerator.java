@@ -90,7 +90,7 @@ public final class RandomSequenceGenerator {
       int[] observations = HmmEvaluator.predict(model, length, System.currentTimeMillis());
 
       //writing output
-      PrintWriter writer = new PrintWriter(new FileOutputStream(output));
+      PrintWriter writer = new PrintWriter(new FileOutputStream(output), true);
       try {
         for (int observation : observations) {
           writer.print(observation);

@@ -44,7 +44,7 @@ public class TrainLogisticTest extends MahoutTestCase {
     String outputFile = getTestTempFile("model").getAbsolutePath();
 
     StringWriter sw = new StringWriter();
-    PrintWriter pw = new PrintWriter(sw);
+    PrintWriter pw = new PrintWriter(sw, true);
     TrainLogistic.mainToOutput(new String[]{
         "--input", "donut.csv",
         "--output", outputFile,
@@ -87,7 +87,7 @@ public class TrainLogisticTest extends MahoutTestCase {
     }
 
     sw = new StringWriter();
-    pw = new PrintWriter(sw);
+    pw = new PrintWriter(sw, true);
     RunLogistic.mainToOutput(new String[]{
         "--input", "donut.csv",
         "--model", outputFile,
@@ -104,7 +104,7 @@ public class TrainLogisticTest extends MahoutTestCase {
     String outputFile = getTestTempFile("model").getAbsolutePath();
 
     StringWriter sw = new StringWriter();
-    PrintWriter pw = new PrintWriter(sw);
+    PrintWriter pw = new PrintWriter(sw, true);
     TrainLogistic.mainToOutput(new String[]{
         "--input", "donut.csv",
         "--output", outputFile,
@@ -123,7 +123,7 @@ public class TrainLogisticTest extends MahoutTestCase {
     assertTrue(trainOut.contains("c -25."));
 
     sw = new StringWriter();
-    pw = new PrintWriter(sw);
+    pw = new PrintWriter(sw, true);
     RunLogistic.mainToOutput(new String[]{
         "--input", "donut.csv",
         "--model", outputFile,
@@ -134,7 +134,7 @@ public class TrainLogisticTest extends MahoutTestCase {
     assertTrue(trainOut.contains("AUC = 1.00"));
 
     sw = new StringWriter();
-    pw = new PrintWriter(sw);
+    pw = new PrintWriter(sw, true);
     RunLogistic.mainToOutput(new String[]{
         "--input", "donut-test.csv",
         "--model", outputFile,

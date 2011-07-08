@@ -22,7 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.URL;
 import java.util.regex.Pattern;
 
@@ -57,9 +57,9 @@ public final class GroupLensDataModel extends FileDataModel {
     if (resultFile.exists()) {
       resultFile.delete();
     }
-    PrintWriter writer = null;
+    Writer writer = null;
     try {
-      writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(resultFile), Charsets.UTF_8));
+      writer = new OutputStreamWriter(new FileOutputStream(resultFile), Charsets.UTF_8);
       for (String line : new FileLineIterable(originalFile, false)) {
         int lastDelimiterStart = line.lastIndexOf(COLON_DELIMTER);
         if (lastDelimiterStart < 0) {
@@ -67,7 +67,8 @@ public final class GroupLensDataModel extends FileDataModel {
         }
         String subLine = line.substring(0, lastDelimiterStart);
         String convertedLine = COLON_DELIMITER_PATTERN.matcher(subLine).replaceAll(",");
-        writer.println(convertedLine);
+        writer.write(convertedLine);
+        writer.write('\n');
       }
     } catch (IOException ioe) {
       resultFile.delete();

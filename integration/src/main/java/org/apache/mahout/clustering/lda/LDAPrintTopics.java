@@ -43,7 +43,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -158,17 +158,18 @@ public final class LDAPrintTopics {
     throws IOException {
     for (int i = 0; i < topWords.size(); ++i) {
       Collection<Pair<String,Double>> topK = topWords.get(i);
-      PrintWriter out = null;
+      Writer out = null;
       boolean printingToSystemOut = false;
       try {
         if (outputDir != null) {
-          out = new PrintWriter(new OutputStreamWriter(
-              new FileOutputStream(new File(outputDir, "topic_" + i)), Charsets.UTF_8));
+          out = new OutputStreamWriter(new FileOutputStream(new File(outputDir, "topic_" + i)), Charsets.UTF_8);
         } else {
-          out = new PrintWriter(new OutputStreamWriter(System.out, Charsets.UTF_8));
+          out = new OutputStreamWriter(System.out, Charsets.UTF_8);
           printingToSystemOut = true;
-          out.println("Topic " + i);
-          out.println("===========");
+          out.write("Topic " + i);
+          out.write('\n');
+          out.write("===========");
+          out.write('\n');
         }
         List<Pair<String,Double>> topKasList = Lists.newArrayListWithCapacity(topK.size());
         for(Pair<String,Double> wordWithScore : topK) {
@@ -181,8 +182,9 @@ public final class LDAPrintTopics {
           }
         });
         for(Pair<String,Double> wordWithScore : topKasList) {
-          out.println(wordWithScore.getFirst() + " [p(" + wordWithScore.getFirst() + "|topic_" + i +") = "
+          out.write(wordWithScore.getFirst() + " [p(" + wordWithScore.getFirst() + "|topic_" + i +") = "
            + wordWithScore.getSecond());
+          out.write('\n');
         }
       } finally {
         if (!printingToSystemOut) {
