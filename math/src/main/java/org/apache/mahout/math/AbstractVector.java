@@ -601,6 +601,8 @@ public abstract class AbstractVector implements Vector {
     }
     if (result.length() > 1) {
       result.setCharAt(result.length() - 1, '}');
+    } else {
+      result.append('}');
     }
     return result.toString();
   }

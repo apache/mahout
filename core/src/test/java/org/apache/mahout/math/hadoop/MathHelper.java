@@ -43,8 +43,7 @@ import org.easymock.EasyMock;
  */
 public final class MathHelper {
 
-  private MathHelper() {
-  }
+  private MathHelper() {}
 
   /**
    * applies an {@link IArgumentMatcher} to {@link MatrixEntryWritable}s
