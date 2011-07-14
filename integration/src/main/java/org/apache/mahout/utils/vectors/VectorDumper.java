@@ -92,7 +92,7 @@ public final class VectorDumper {
 
     Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt).withOption(
             dictTypeOpt).withOption(dictOpt).withOption(csvOpt).withOption(vectorAsKeyOpt).withOption(
-            printKeyOpt).withOption(sizeOpt).create();
+            printKeyOpt).withOption(sizeOpt).withOption(helpOpt).create();
 
     try {
       Parser parser = new Parser();
