@@ -25,10 +25,10 @@ import org.apache.hadoop.io.Writable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-public final class WeightedVectorWritable implements Writable {
+public class WeightedVectorWritable implements Writable {
 
-  private final VectorWritable vectorWritable = new VectorWritable();
-  private double weight;
+  protected VectorWritable vectorWritable = new VectorWritable();
+  protected double weight;
 
   public WeightedVectorWritable() {
   }

@@ -17,6 +17,30 @@
 
 package org.apache.mahout.utils.clustering;
 
+import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
+import com.google.common.io.Closeables;
+import com.google.common.io.Files;
+import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.mahout.clustering.AbstractCluster;
+import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.clustering.WeightedPropertyVectorWritable;
+import org.apache.mahout.clustering.WeightedVectorWritable;
+import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.utils.vectors.VectorHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -29,28 +53,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
-import com.google.common.base.Charsets;
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
-import com.google.common.io.Files;
-import org.apache.commons.lang.StringUtils;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.mahout.clustering.AbstractCluster;
-import org.apache.mahout.clustering.Cluster;
-import org.apache.mahout.clustering.WeightedVectorWritable;
-import org.apache.mahout.common.AbstractJob;
-import org.apache.mahout.common.Pair;
-import org.apache.mahout.common.iterator.sequencefile.PathFilters;
-import org.apache.mahout.common.iterator.sequencefile.PathType;
-import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
-import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.utils.vectors.VectorHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class ClusterDumper extends AbstractJob {
 
@@ -94,8 +96,8 @@ public final class ClusterDumper extends AbstractJob {
     addOption(SUBSTRING_OPTION, "b", "The number of chars of the asFormatString() to print");
     addOption(NUM_WORDS_OPTION, "n", "The number of top terms to print");
     addOption(POINTS_DIR_OPTION, "p",
-        "The directory containing points sequence files mapping input vectors to their cluster.  "
-            + "If specified, then the program will output the points associated with a cluster");
+            "The directory containing points sequence files mapping input vectors to their cluster.  "
+                    + "If specified, then the program will output the points associated with a cluster");
     addOption(DICTIONARY_OPTION, "d", "The dictionary file");
     addOption(DICTIONARY_TYPE_OPTION, "dt", "The dictionary file type (text|sequencefile)", "text");
     if (parseArguments(args) == null) {
@@ -147,7 +149,7 @@ public final class ClusterDumper extends AbstractJob {
     }
     try {
       for (Cluster value :
-           new SequenceFileDirValueIterable<Cluster>(new Path(seqFileDir, "part-*"), PathType.GLOB, conf)) {
+              new SequenceFileDirValueIterable<Cluster>(new Path(seqFileDir, "part-*"), PathType.GLOB, conf)) {
         String fmtStr = value.asFormatString(dictionary);
         if (subString > 0 && fmtStr.length() > subString) {
           writer.write(':');
@@ -167,11 +169,24 @@ public final class ClusterDumper extends AbstractJob {
 
         List<WeightedVectorWritable> points = clusterIdToPoints.get(value.getId());
         if (points != null) {
-          writer.write("\tWeight:  Point:\n\t");
-          for (Iterator<WeightedVectorWritable> iterator = points.iterator(); iterator.hasNext();) {
+          writer.write("\tWeight : [props - optional]:  Point:\n\t");
+          for (Iterator<WeightedVectorWritable> iterator = points.iterator(); iterator.hasNext(); ) {
             WeightedVectorWritable point = iterator.next();
             writer.write(String.valueOf(point.getWeight()));
+            if (point instanceof WeightedPropertyVectorWritable) {
+              WeightedPropertyVectorWritable tmp = (WeightedPropertyVectorWritable) point;
+              Map<Text, Text> map = tmp.getProperties();
+              writer.write(" : [");
+              for (Map.Entry<Text, Text> entry : map.entrySet()) {
+                writer.write(entry.getKey().toString());
+                writer.write("=");
+                writer.write(entry.getValue().toString());
+              }
+              writer.write("]");
+            }
+
             writer.write(": ");
+
             writer.write(AbstractCluster.formatVector(point.getVector(), dictionary));
             if (iterator.hasNext()) {
               writer.write("\n\t");
@@ -236,9 +251,9 @@ public final class ClusterDumper extends AbstractJob {
 
   public static Map<Integer, List<WeightedVectorWritable>> readPoints(Path pointsPathDir, Configuration conf) {
     Map<Integer, List<WeightedVectorWritable>> result = new TreeMap<Integer, List<WeightedVectorWritable>>();
-    for (Pair<IntWritable,WeightedVectorWritable> record :
-         new SequenceFileDirIterable<IntWritable,WeightedVectorWritable>(
-             pointsPathDir, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+    for (Pair<IntWritable, WeightedVectorWritable> record :
+            new SequenceFileDirIterable<IntWritable, WeightedVectorWritable>(
+                    pointsPathDir, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
       // value is the cluster id as an int, key is the name/id of the
       // vector, but that doesn't matter because we only care about printing
       // it
@@ -257,6 +272,7 @@ public final class ClusterDumper extends AbstractJob {
   private static class TermIndexWeight {
     private final int index;
     private final double weight;
+
     TermIndexWeight(int index, double weight) {
       this.index = index;
       this.weight = weight;

@@ -36,6 +36,7 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.ClusterObservations;
+import org.apache.mahout.clustering.WeightedPropertyVectorWritable;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
@@ -474,7 +475,7 @@ public class KMeansDriver extends AbstractJob {
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setOutputKeyClass(IntWritable.class);
-    job.setOutputValueClass(WeightedVectorWritable.class);
+    job.setOutputValueClass(WeightedPropertyVectorWritable.class);
 
     FileInputFormat.setInputPaths(job, input);
     HadoopUtil.delete(conf, output);

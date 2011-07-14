@@ -17,15 +17,20 @@
 package org.apache.mahout.clustering.kmeans;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.common.collect.Lists;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.SequenceFile.Writer;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.ClusterObservations;
+import org.apache.mahout.clustering.WeightedPropertyVectorWritable;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
@@ -117,7 +122,7 @@ public class KMeansClusterer {
 
   public void outputPointWithClusterInfo(Vector vector,
                                          Iterable<Cluster> clusters,
-                                         Mapper<?,?,IntWritable,WeightedVectorWritable>.Context context)
+                                         Mapper<?,?,IntWritable,WeightedPropertyVectorWritable>.Context context)
     throws IOException, InterruptedException {
     AbstractCluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
@@ -129,7 +134,9 @@ public class KMeansClusterer {
         nearestDistance = distance;
       }
     }
-    context.write(new IntWritable(nearestCluster.getId()), new WeightedVectorWritable(1, vector));
+    Map<Text, Text> props = new HashMap<Text, Text>();
+    props.put(new Text("distance"), new Text(String.valueOf(nearestDistance)));
+    context.write(new IntWritable(nearestCluster.getId()), new WeightedPropertyVectorWritable(1, vector, props));
   }
 
   /**

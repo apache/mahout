@@ -26,6 +26,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.clustering.WeightedPropertyVectorWritable;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.VectorWritable;
@@ -38,7 +39,7 @@ import org.apache.mahout.math.VectorWritable;
  * @see KMeansDriver for more information on how to invoke this process
  */
 public class KMeansClusterMapper
-    extends Mapper<WritableComparable<?>,VectorWritable,IntWritable,WeightedVectorWritable> {
+    extends Mapper<WritableComparable<?>,VectorWritable,IntWritable,WeightedPropertyVectorWritable> {
   
   private final Collection<Cluster> clusters = Lists.newArrayList();
   private KMeansClusterer clusterer;
