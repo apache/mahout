@@ -18,11 +18,11 @@ package org.apache.mahout.math.hadoop.similarity;
 
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -34,11 +34,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
- *
- **/
-public class VectorDistanceMapper extends Mapper<WritableComparable<?>, VectorWritable, StringTuple, DoubleWritable> {
-  private transient static Logger log = LoggerFactory.getLogger(VectorDistanceMapper.class);
+ * Similar to {@link org.apache.mahout.math.hadoop.similarity.VectorDistanceMapper}, except it outputs
+ * &lt;input, Vector&gt;, where the vector is a dense vector contain one entry for every seed vector
+ */
+public class VectorDistanceInvertedMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable> {
+  private transient static Logger log = LoggerFactory.getLogger(VectorDistanceInvertedMapper.class);
   protected DistanceMeasure measure;
   protected List<NamedVector> seedVectors;
 
@@ -51,13 +51,12 @@ public class VectorDistanceMapper extends Mapper<WritableComparable<?>, VectorWr
     } else {
       keyName = key.toString();
     }
+    Vector outVec = new DenseVector(new double[seedVectors.size()]);
+    int i = 0;
     for (NamedVector seedVector : seedVectors) {
-      double distance = measure.distance(seedVector, valVec);
-      StringTuple outKey = new StringTuple();
-      outKey.add(seedVector.getName());
-      outKey.add(keyName);
-      context.write(outKey, new DoubleWritable(distance));
+      outVec.setQuick(i++, measure.distance(seedVector, valVec));
     }
+    context.write(new Text(keyName), new VectorWritable(outVec));
   }
 
   @Override

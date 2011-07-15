@@ -23,15 +23,20 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.ClusteringTestUtils;
-import org.apache.mahout.clustering.kmeans.KMeansDriver;
+import org.apache.mahout.common.DummyOutputCollector;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
+import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -42,6 +47,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -98,6 +104,37 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
 
   }
 
+  @Test
+  public void testVectorDistanceInvertedMapper() throws Exception {
+     Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable>.Context context =
+            EasyMock.createMock(Mapper.Context.class);
+    Vector expectVec = new DenseVector(new double[]{Math.sqrt(2.0), 1.0});
+    context.write(new Text("other"), new VectorWritable(expectVec));
+    EasyMock.replay(context);
+    Vector vector = new NamedVector(new RandomAccessSparseVector(2), "other");
+    vector.set(0, 2);
+    vector.set(1, 2);
+
+    VectorDistanceInvertedMapper mapper = new VectorDistanceInvertedMapper();
+    setField(mapper, "measure", new EuclideanDistanceMeasure());
+    List<NamedVector> seedVectors = new ArrayList<NamedVector>();
+    Vector seed1 = new RandomAccessSparseVector(2);
+    seed1.set(0, 1);
+    seed1.set(1, 1);
+    Vector seed2 = new RandomAccessSparseVector(2);
+    seed2.set(0, 2);
+    seed2.set(1, 1);
+
+    seedVectors.add(new NamedVector(seed1, "foo"));
+    seedVectors.add(new NamedVector(seed2, "foo2"));
+    setField(mapper, "seedVectors", seedVectors);
+
+    mapper.map(new IntWritable(123), new VectorWritable(vector), context);
+
+    EasyMock.verify(context);
+
+  }
+
   public static final double[][] REFERENCE = {
           {1, 1}, {2, 1}, {1, 2}, {2, 2}, {3, 3}, {4, 4}, {5, 4}, {4, 5}, {5, 5}
   };
@@ -119,8 +156,49 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
     String[] args = {optKey(DefaultOptionCreator.INPUT_OPTION), input.toString(),
             optKey(VectorDistanceSimilarityJob.SEEDS), seedsPath.toString(), optKey(DefaultOptionCreator.OUTPUT_OPTION),
             output.toString(), optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION), EuclideanDistanceMeasure.class.getName()
-            };
+    };
     ToolRunner.run(new Configuration(), new VectorDistanceSimilarityJob(), args);
+    int expect = SEEDS.length * REFERENCE.length;
+    DummyOutputCollector<StringTuple, DoubleWritable> collector =
+            new DummyOutputCollector<StringTuple, DoubleWritable>();
+    //
+    for (Pair<StringTuple, DoubleWritable> record :
+            new SequenceFileIterable<StringTuple, DoubleWritable>(
+                    new Path(output, "part-m-00000"), conf)) {
+      collector.collect(record.getFirst(), record.getSecond());
+    }
+    assertEquals(expect, collector.getData().size());
+  }
+
+  @Test
+  public void testRunInverted() throws Exception {
+    Path input = getTestTempDirPath("input");
+    Path output = getTestTempDirPath("output");
+    Path seedsPath = getTestTempDirPath("seeds");
+    List<VectorWritable> points = getPointsWritable(REFERENCE);
+    List<VectorWritable> seeds = getPointsWritable(SEEDS);
+    Configuration conf = new Configuration();
+    ClusteringTestUtils.writePointsToFile(points, true, new Path(input, "file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(seeds, true, new Path(seedsPath, "part-seeds"), fs, conf);
+    String[] args = {optKey(DefaultOptionCreator.INPUT_OPTION), input.toString(),
+            optKey(VectorDistanceSimilarityJob.SEEDS), seedsPath.toString(), optKey(DefaultOptionCreator.OUTPUT_OPTION),
+            output.toString(), optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION), EuclideanDistanceMeasure.class.getName(),
+            optKey(VectorDistanceSimilarityJob.OUT_TYPE_KEY), "v"
+    };
+    ToolRunner.run(new Configuration(), new VectorDistanceSimilarityJob(), args);
+
+    DummyOutputCollector<Text, VectorWritable> collector =
+            new DummyOutputCollector<Text, VectorWritable>();
+    //
+    for (Pair<Text, VectorWritable> record :
+            new SequenceFileIterable<Text, VectorWritable>(
+                    new Path(output, "part-m-00000"), conf)) {
+      collector.collect(record.getFirst(), record.getSecond());
+    }
+    assertEquals(REFERENCE.length, collector.getData().size());
+    for (Map.Entry<Text, List<VectorWritable>> entry : collector.getData().entrySet()) {
+      assertEquals(SEEDS.length, entry.getValue().iterator().next().get().size());
+    }
   }
 
   public static List<VectorWritable> getPointsWritable(double[][] raw) {

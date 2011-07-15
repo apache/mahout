@@ -20,6 +20,7 @@ package org.apache.mahout.math.hadoop.similarity;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
@@ -32,6 +33,7 @@ import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
+import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +48,7 @@ public class VectorDistanceSimilarityJob extends AbstractJob {
   public static final String SEEDS = "seeds";
   public static final String SEEDS_PATH_KEY = "seedsPath";
   public static final String DISTANCE_MEASURE_KEY = "vectorDistSim.measure";
+  public static final String OUT_TYPE_KEY = "outType";
 
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(), new VectorDistanceSimilarityJob(), args);
@@ -59,7 +62,7 @@ public class VectorDistanceSimilarityJob extends AbstractJob {
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
     addOption(SEEDS, "s", "The set of vectors to compute distances against.  Must fit in memory on the mapper");
     addOption(DefaultOptionCreator.overwriteOption().create());
-
+    addOption(OUT_TYPE_KEY, "ot", "[pw|v] -- Define the output style: pairwise, the default, (pw) or vector (v).  Pairwise is a tuple of <seed, other, distance>, vector is <other, <Vector of size the number of seeds>>.", "pw");
     if (parseArguments(args) == null) {
       return -1;
     }
@@ -79,7 +82,12 @@ public class VectorDistanceSimilarityJob extends AbstractJob {
     if (getConf() == null) {
       setConf(new Configuration());
     }
-    run(getConf(), input, seeds, output, measure);
+    String outType = getOption(OUT_TYPE_KEY);
+    if (outType == null) {
+      outType = "pw";
+    }
+
+    run(getConf(), input, seeds, output, measure, outType);
     return 0;
   }
 
@@ -87,17 +95,28 @@ public class VectorDistanceSimilarityJob extends AbstractJob {
                          Path input,
                          Path seeds,
                          Path output,
-                         DistanceMeasure measure) throws IOException, ClassNotFoundException, InterruptedException {
+                         DistanceMeasure measure, String outType) throws IOException, ClassNotFoundException, InterruptedException {
     conf.set(DISTANCE_MEASURE_KEY, measure.getClass().getName());
     conf.set(SEEDS_PATH_KEY, seeds.toString());
     Job job = new Job(conf, "Vector Distance Similarity: seeds: " + seeds + " input: " + input);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
-    job.setMapOutputKeyClass(StringTuple.class);
-    job.setOutputKeyClass(StringTuple.class);
-    job.setMapOutputValueClass(DoubleWritable.class);
-    job.setOutputValueClass(DoubleWritable.class);
-    job.setMapperClass(VectorDistanceMapper.class);
+    if (outType.equalsIgnoreCase("pw")) {
+      job.setMapOutputKeyClass(StringTuple.class);
+      job.setOutputKeyClass(StringTuple.class);
+      job.setMapOutputValueClass(DoubleWritable.class);
+      job.setOutputValueClass(DoubleWritable.class);
+      job.setMapperClass(VectorDistanceMapper.class);
+    } else if (outType.equalsIgnoreCase("v")) {
+      job.setMapOutputKeyClass(Text.class);
+      job.setOutputKeyClass(Text.class);
+      job.setMapOutputValueClass(VectorWritable.class);
+      job.setOutputValueClass(VectorWritable.class);
+      job.setMapperClass(VectorDistanceInvertedMapper.class);
+    } else {
+      throw new InterruptedException("Invalid outType specified: " + outType);
+    }
+
 
     job.setNumReduceTasks(0);
     FileInputFormat.addInputPath(job, input);
