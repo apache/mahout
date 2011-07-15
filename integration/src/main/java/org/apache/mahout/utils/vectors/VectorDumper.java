@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.Iterator;
 
 /**
  * Can read in a {@link SequenceFile} of {@link Vector}s and dump
@@ -87,12 +88,15 @@ public final class VectorDumper {
             .withShortName("n").create();
     Option sizeOpt = obuilder.withLongName("sizeOnly").withRequired(false).
             withDescription("Dump only the size of the vector").withShortName("sz").create();
+    Option numItemsOpt = obuilder.withLongName("n").withRequired(false).withArgument(
+            abuilder.withName("numItems").withMinimum(1).withMaximum(1).create()).
+            withDescription("Output at most <n> key value pairs").withShortName("n").create();
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
             .create();
 
     Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt).withOption(
             dictTypeOpt).withOption(dictOpt).withOption(csvOpt).withOption(vectorAsKeyOpt).withOption(
-            printKeyOpt).withOption(sizeOpt).withOption(helpOpt).create();
+            printKeyOpt).withOption(sizeOpt).withOption(numItemsOpt).withOption(helpOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -138,18 +142,27 @@ public final class VectorDumper {
         }
         try {
           boolean printKey = cmdLine.hasOption(printKeyOpt);
-          if (useCSV && dictionary != null){
+          if (useCSV && dictionary != null) {
             writer.write("#");
             for (int j = 0; j < dictionary.length; j++) {
               writer.write(dictionary[j]);
-              if (j < dictionary.length - 1){
+              if (j < dictionary.length - 1) {
                 writer.write(',');
               }
             }
             writer.write('\n');
           }
           long i = 0;
-          for (Pair<Writable,Writable> record : new SequenceFileIterable<Writable, Writable>(path, true, conf)) {
+          long count = 0;
+          long numItems = Long.MAX_VALUE;
+          if (cmdLine.hasOption(numItemsOpt)) {
+            numItems = Long.parseLong(cmdLine.getValue(numItemsOpt).toString());
+            writer.append("#Max Items to dump: ").append(String.valueOf(numItems)).append('\n');
+          }
+          SequenceFileIterable<Writable, Writable> iterable = new SequenceFileIterable<Writable, Writable>(path, true, conf);
+          Iterator<Pair<Writable,Writable>> iterator = iterable.iterator();
+          while (iterator.hasNext() && count < numItems) {
+            Pair<Writable, Writable> record = iterator.next();
             Writable keyWritable = record.getFirst();
             Writable valueWritable = record.getSecond();
             if (printKey) {
@@ -171,7 +184,7 @@ public final class VectorDumper {
               writer.write('\n');
             } else {
               String fmtStr;
-              if (useCSV){
+              if (useCSV) {
                 fmtStr = VectorHelper.vectorToCSVString(vector, namesAsComments);
               } else {
                 fmtStr = vector.asFormatString();
@@ -179,6 +192,7 @@ public final class VectorDumper {
               writer.write(fmtStr);
               writer.write('\n');
             }
+            count++;
           }
         } finally {
           Closeables.closeQuietly(writer);

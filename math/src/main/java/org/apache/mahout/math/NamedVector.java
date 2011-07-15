@@ -73,6 +73,13 @@ public class NamedVector implements Vector {
   }
 
   @Override
+  public String toString() {
+    StringBuilder bldr = new StringBuilder();
+    bldr.append(name).append(':').append(delegate.toString());
+    return bldr.toString();
+  }
+
+  @Override
   public Vector assign(double value) {
     return delegate.assign(value);
   }
