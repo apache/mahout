@@ -68,7 +68,7 @@ public final class LogLikelihoodTest extends MahoutTestCase {
 
   @Test
   public void testRootNegativeLLR() {
-    assertEquals(0.0, LogLikelihood.rootLogLikelihoodRatio(6, 7567, 1924, 2426487), 0.00000001);
+    assertTrue(LogLikelihood.rootLogLikelihoodRatio(6, 7567, 1924, 2426487) > 0.0);
   }
 
   @Test

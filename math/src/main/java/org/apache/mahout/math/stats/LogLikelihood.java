@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math.stats;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Ordering;
@@ -48,19 +49,34 @@ public final class LogLikelihood {
    * @return The entropy value for the elements
    */
   public static double entropy(long... elements) {
-    double sum = 0.0;
+    long sum = 0;
     double result = 0.0;
     for (long element : elements) {
-      if (element < 0) {
-        throw new IllegalArgumentException("Should not have negative count for entropy computation: (" + element + ')');
-      }
-      if (element > 0) {
-        result += element * Math.log(element);
-        sum += element;
-      }
+      Preconditions.checkArgument(element >= 0);
+      result += xLogX(element);
+      sum += element;
     }
-    result -= sum * Math.log(sum);
-    return -result;
+    return xLogX(sum) - result;
+  }
+
+  private static double xLogX(long x) {
+    return x == 0 ? 0.0 : x * Math.log(x);
+  }
+
+  /**
+   * Merely an optimization for the common two argument case of {@link #entropy(long...)}
+   * @see #logLikelihoodRatio(long, long, long, long)
+   */
+  private static double entropy(long a, long b) {
+    return xLogX(a + b) - xLogX(a) - xLogX(b);
+  }
+
+  /**
+   * Merely an optimization for the common four argument case of {@link #entropy(long...)}
+   * @see #logLikelihoodRatio(long, long, long, long)
+   */
+  private static double entropy(long a, long b, long c, long d) {
+    return xLogX(a + b + c + d) - xLogX(a) - xLogX(b) - xLogX(c) - xLogX(d);
   }
 
   /**
@@ -82,6 +98,7 @@ public final class LogLikelihood {
    * Credit to http://tdunning.blogspot.com/2008/03/surprise-and-coincidence.html for the table and the descriptions.
    */
   public static double logLikelihoodRatio(long k11, long k12, long k21, long k22) {
+    Preconditions.checkArgument(k11 >= 0 && k12 >= 0 && k21 >= 0 && k22 >= 0);
     // note that we have counts here, not probabilities, and that the entropy is not normalized.
     double rowEntropy = entropy(k11, k12) + entropy(k21, k22);
     double columnEntropy = entropy(k11, k21) + entropy(k12, k22);

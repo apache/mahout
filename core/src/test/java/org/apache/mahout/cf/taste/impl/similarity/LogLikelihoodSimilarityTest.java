@@ -67,8 +67,8 @@ public final class LogLikelihoodSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(Double.NaN, similarity.itemSimilarity(1, 0));
     assertCorrelationEquals(Double.NaN, similarity.itemSimilarity(0, 1));
 
-    assertCorrelationEquals(Double.NaN, similarity.itemSimilarity(2, 3));
-    assertCorrelationEquals(Double.NaN, similarity.itemSimilarity(3, 2));
+    assertCorrelationEquals(0.0, similarity.itemSimilarity(2, 3));
+    assertCorrelationEquals(0.0, similarity.itemSimilarity(3, 2));
   }
 
   @Test

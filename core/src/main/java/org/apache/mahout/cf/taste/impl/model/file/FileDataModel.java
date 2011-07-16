@@ -22,11 +22,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.regex.Pattern;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.mahout.cf.taste.common.Refreshable;
@@ -127,7 +128,7 @@ public class FileDataModel extends AbstractDataModel {
   private long lastModified;
   private long lastUpdateFileModified;
   private final char delimiter;
-  private final Pattern delimiterPattern;
+  private final Splitter delimiterPattern;
   private final boolean hasPrefValues;
   private DataModel delegate;
   private final ReentrantLock reloadLock;
@@ -177,10 +178,13 @@ public class FileDataModel extends AbstractDataModel {
     Closeables.closeQuietly(iterator);
 
     delimiter = determineDelimiter(firstLine);
-    delimiterPattern = Pattern.compile(String.valueOf(delimiter));
-    String[] firstLineSplit = delimiterPattern.split(firstLine);
+    delimiterPattern = Splitter.on(delimiter);
+    List<String> firstLineSplit = Lists.newArrayList();
+    for (String token : delimiterPattern.split(firstLine)) {
+      firstLineSplit.add(token);
+    }
     // If preference value exists and isn't empty then the file is specifying pref values
-    hasPrefValues = firstLineSplit.length >= 3 && firstLineSplit[2].length() > 0;
+    hasPrefValues = firstLineSplit.size() >= 3 && firstLineSplit.get(2).length() > 0;
 
     this.reloadLock = new ReentrantLock();
     this.transpose = transpose;
@@ -368,15 +372,12 @@ public class FileDataModel extends AbstractDataModel {
       return;
     }
 
-    // Consume up to 4 tokens, and gather whatever is left in an unused 5th token:
-    String[] tokens = delimiterPattern.split(line, 5);
-
-    Preconditions.checkArgument(tokens.length >= 3, "Bad line: %s", line);
-
-    String userIDString = tokens[0];
-    String itemIDString = tokens[1];
-    String preferenceValueString = tokens[2];
-    String timestampString = tokens.length >= 4 ? tokens[3] : null;
+    Iterator<String> tokens = delimiterPattern.split(line).iterator();
+    String userIDString = tokens.next();
+    String itemIDString = tokens.next();
+    String preferenceValueString = tokens.next();
+    boolean hasTimestamp = tokens.hasNext();
+    String timestampString = hasTimestamp ? tokens.next() : null;
 
     long userID = readUserIDFromString(userIDString);
     long itemID = readItemIDFromString(itemIDString);
@@ -393,7 +394,7 @@ public class FileDataModel extends AbstractDataModel {
       // Data are PreferenceArray
 
       PreferenceArray prefs = (PreferenceArray) maybePrefs;
-      if (tokens.length == 3 && preferenceValueString.length() == 0) {
+      if (!hasTimestamp && preferenceValueString.length() == 0) {
         // Then line is of form "userID,itemID,", meaning remove
         if (prefs != null) {
           boolean exists = false;
@@ -461,7 +462,7 @@ public class FileDataModel extends AbstractDataModel {
 
       Collection<Preference> prefs = (Collection<Preference>) maybePrefs;
 
-      if (tokens.length == 3 && preferenceValueString.length() == 0) {
+      if (!hasTimestamp && preferenceValueString.length() == 0) {
         // Then line is of form "userID,itemID,", meaning remove
         if (prefs != null) {
           // remove pref
@@ -532,12 +533,13 @@ public class FileDataModel extends AbstractDataModel {
       return;
     }
 
-    String[] tokens = delimiterPattern.split(line);
-    Preconditions.checkArgument(tokens.length >= 2, "Bad line: %s", line);
-    String userIDString = tokens[0];
-    String itemIDString = tokens[1];
-    String preferenceValueString = tokens.length >= 3 ? tokens[2] : "";
-    String timestampString = tokens.length >= 4 ? tokens[3] : null;
+    Iterator<String> tokens = delimiterPattern.split(line).iterator();
+    String userIDString = tokens.next();
+    String itemIDString = tokens.next();
+    boolean hasPreference = tokens.hasNext();
+    String preferenceValueString = hasPreference ? tokens.next() : "";
+    boolean hasTimestamp = tokens.hasNext();
+    String timestampString = hasTimestamp ? tokens.next() : null;
 
     long userID = readUserIDFromString(userIDString);
     long itemID = readItemIDFromString(itemIDString);
@@ -548,7 +550,7 @@ public class FileDataModel extends AbstractDataModel {
       itemID = tmp;
     }
 
-    if (tokens.length == 3 && preferenceValueString.length() == 0) {
+    if (hasPreference && !hasTimestamp && preferenceValueString.length() == 0) {
       // Then line is of form "userID,itemID,", meaning remove
 
       FastIDSet itemIDs = data.get(userID);
