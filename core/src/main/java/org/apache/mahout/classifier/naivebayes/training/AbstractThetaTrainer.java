@@ -22,12 +22,12 @@ import org.apache.mahout.math.Vector;
 
 public abstract class AbstractThetaTrainer {
 
-  private Vector weightsPerFeature;
-  private Vector weightsPerLabel;
-  private Vector perLabelThetaNormalizer;
-  private double alphaI;
-  private double totalWeightSum;
-  private double numFeatures;
+  private final Vector weightsPerFeature;
+  private final Vector weightsPerLabel;
+  private final Vector perLabelThetaNormalizer;
+  private final double alphaI;
+  private final double totalWeightSum;
+  private final double numFeatures;
 
   public AbstractThetaTrainer(Vector weightsPerFeature, Vector weightsPerLabel, double alphaI) {
     Preconditions.checkNotNull(weightsPerFeature);

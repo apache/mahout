@@ -72,7 +72,7 @@ import org.apache.mahout.math.hadoop.similarity.vector.DistributedVectorSimilari
  * <p>Note that because of how Hadoop parses arguments, all "-D" arguments must appear before all other
  * arguments.</p>
  */
-public class RowSimilarityJob extends AbstractJob {
+public final class RowSimilarityJob extends AbstractJob {
 
   public static final String DISTRIBUTED_SIMILARITY_CLASSNAME =
       RowSimilarityJob.class.getName() + ".distributedSimilarityClassname";

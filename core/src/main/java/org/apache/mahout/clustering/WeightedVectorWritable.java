@@ -27,8 +27,8 @@ import org.apache.mahout.math.VectorWritable;
 
 public class WeightedVectorWritable implements Writable {
 
-  protected VectorWritable vectorWritable = new VectorWritable();
-  protected double weight;
+  private final VectorWritable vectorWritable = new VectorWritable();
+  private double weight;
 
   public WeightedVectorWritable() {
   }

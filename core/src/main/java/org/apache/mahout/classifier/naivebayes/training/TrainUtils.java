@@ -50,15 +50,11 @@ public class TrainUtils {
 
   static NaiveBayesModel readModelFromTempDir(Path base, Configuration conf) {
 
-    Vector scoresPerLabel = null;
-    Vector perlabelThetaNormalizer = null;
-    Vector scoresPerFeature = null;
-    Matrix scoresPerLabelAndFeature;
-    float alphaI;
-
-    alphaI = conf.getFloat(ThetaMapper.ALPHA_I, 1.0f);
+    float alphaI = conf.getFloat(ThetaMapper.ALPHA_I, 1.0f);
 
     // read feature sums and label sums
+    Vector scoresPerLabel = null;
+    Vector scoresPerFeature = null;
     for (Pair<Text,VectorWritable> record : new SequenceFileDirIterable<Text, VectorWritable>(
         new Path(base, TrainNaiveBayesJob.WEIGHTS), PathType.LIST, PathFilters.partFilter(), conf)) {
       String key = record.getFirst().toString();
@@ -73,12 +69,13 @@ public class TrainUtils {
     Preconditions.checkNotNull(scoresPerFeature);
     Preconditions.checkNotNull(scoresPerLabel);
 
-    scoresPerLabelAndFeature = new SparseMatrix(new int[] { scoresPerLabel.size(), scoresPerFeature.size() });
+    Matrix scoresPerLabelAndFeature = new SparseMatrix(new int[]{scoresPerLabel.size(), scoresPerFeature.size()});
     for (Pair<IntWritable,VectorWritable> entry : new SequenceFileDirIterable<IntWritable,VectorWritable>(
         new Path(base, TrainNaiveBayesJob.SUMMED_OBSERVATIONS), PathType.LIST, PathFilters.partFilter(), conf)) {
       scoresPerLabelAndFeature.assignRow(entry.getFirst().get(), entry.getSecond().get());
     }
 
+    Vector perlabelThetaNormalizer = null;
     for (Pair<Text,VectorWritable> entry : new SequenceFileDirIterable<Text,VectorWritable>(
         new Path(base, TrainNaiveBayesJob.THETAS), PathType.LIST, PathFilters.partFilter(), conf)) {
       if (entry.getFirst().toString().equals(TrainNaiveBayesJob.LABEL_THETA_NORMALIZER)) {

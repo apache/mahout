@@ -53,7 +53,7 @@ public final class Job extends AbstractJob {
       Path output = new Path("output");
       Configuration conf = new Configuration();
       HadoopUtil.delete(conf, output);
-      new Job().run(conf, new Path("testdata"), output,
+      run(conf, new Path("testdata"), output,
           new EuclideanDistanceMeasure(), new TriangularKernelProfile(), 47.6,
           1, 0.5, 10);
     }
@@ -130,10 +130,16 @@ public final class Job extends AbstractJob {
    * @param maxIterations
    *          the int maximum number of iterations
    */
-  public void run(Configuration conf, Path input, Path output,
-      DistanceMeasure measure, IKernelProfile kernelProfile, double t1,
-      double t2, double convergenceDelta, int maxIterations)
-      throws IOException, InterruptedException, ClassNotFoundException {
+  public static void run(Configuration conf,
+                         Path input,
+                         Path output,
+                         DistanceMeasure measure,
+                         IKernelProfile kernelProfile,
+                         double t1,
+                         double t2,
+                         double convergenceDelta,
+                         int maxIterations)
+    throws IOException, InterruptedException, ClassNotFoundException {
     Path directoryContainingConvertedInput = new Path(output,
         DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput);

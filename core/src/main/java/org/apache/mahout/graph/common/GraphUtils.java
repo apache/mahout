@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /** helper method for working with graphs */
-public class GraphUtils {
+public final class GraphUtils {
 
   private GraphUtils() {}
 

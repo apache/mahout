@@ -34,16 +34,19 @@ import java.io.IOException;
 /** NaiveBayesModel holds the weight Matrix, the feature and label sums and the weight normalizer vectors.*/
 public class NaiveBayesModel {
 
-  private Vector weightsPerLabel;
-  private Vector perlabelThetaNormalizer;
-  private Vector weightsPerFeature;
-  private Matrix weightsPerLabelAndFeature;
-  private float alphaI;
-  private double numFeatures;
-  private double totalWeightSum;
+  private final Vector weightsPerLabel;
+  private final Vector perlabelThetaNormalizer;
+  private final Vector weightsPerFeature;
+  private final Matrix weightsPerLabelAndFeature;
+  private final float alphaI;
+  private final double numFeatures;
+  private final double totalWeightSum;
 
-  public NaiveBayesModel(Matrix weightMatrix, Vector weightsPerFeature, Vector weightsPerLabel, Vector thetaNormalizer,
-      float alphaI) {
+  public NaiveBayesModel(Matrix weightMatrix,
+                         Vector weightsPerFeature,
+                         Vector weightsPerLabel,
+                         Vector thetaNormalizer,
+                         float alphaI) {
     this.weightsPerLabelAndFeature = weightMatrix;
     this.weightsPerFeature = weightsPerFeature;
     this.weightsPerLabel = weightsPerLabel;

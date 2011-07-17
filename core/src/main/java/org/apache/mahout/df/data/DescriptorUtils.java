@@ -22,7 +22,6 @@ import com.google.common.base.Splitter;
 import java.util.List;
 import java.util.Locale;
 
-import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import org.apache.mahout.df.data.Dataset.Attribute;
 

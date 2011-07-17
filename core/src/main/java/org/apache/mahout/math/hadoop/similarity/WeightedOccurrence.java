@@ -27,7 +27,7 @@ import org.apache.mahout.math.Varint;
 /**
  * an entry in a row vector stored together with a precomputed weight of the row
  */
-class WeightedOccurrence implements Writable, Cloneable {
+final class WeightedOccurrence implements Writable, Cloneable {
 
   private int row;
   private double value;

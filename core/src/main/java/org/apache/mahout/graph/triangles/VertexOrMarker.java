@@ -43,7 +43,7 @@ public class VertexOrMarker implements Writable {
   }
 
   private VertexOrMarker(boolean marker) {
-    this.marker = true;
+    this.marker = marker;
   }
 
   public boolean isMarker() {

@@ -68,7 +68,7 @@ public final class TrainAdaptiveLogistic {
 
       CsvRecordFactory csv = lmp.getCsvRecordFactory();
       model = lmp.createAdaptiveLogisticRegression();
-      State<Wrapper, CrossFoldLearner> best = null;
+      State<Wrapper, CrossFoldLearner> best;
       CrossFoldLearner learner = null;
 
       int k = 0;

@@ -62,7 +62,7 @@ import org.apache.mahout.math.map.OpenLongIntHashMap;
  *
  * <p>The input files need to be a {@link org.apache.hadoop.io.SequenceFile} with {@link Edge}s as keys and
  * any Writable as values and another {@link org.apache.hadoop.io.SequenceFile} with {@link IntWritable}s as keys and {@link Vertex} as
- * values, as produced by {@link org.apache.mahout.graph.common.GraphUtils.indexVertices())}</p>
+ * values, as produced by {@link org.apache.mahout.graph.common.GraphUtils#indexVertices(Configuration, Path, Path)}</p>
  *
  * <p>This job outputs text files with a vertex id and its pagerank per line.</p>
   *
@@ -105,7 +105,7 @@ public class PageRankJob extends AbstractJob {
     addOption("numIterations", "it", "number of numIterations", String.valueOf(5));
     addOption("teleportationProbability", "tp", "probability to teleport to a random vertex", String.valueOf(0.8));
 
-    Map<String, String> parsedArgs = super.parseArguments(args);
+    Map<String, String> parsedArgs = parseArguments(args);
 
     Path vertexIndex = new Path(parsedArgs.get("--vertexIndex"));
     Path edges = new Path(parsedArgs.get("--edges"));
@@ -116,7 +116,7 @@ public class PageRankJob extends AbstractJob {
 
     Preconditions.checkArgument(numVertices > 0);
     Preconditions.checkArgument(numIterations > 0);
-    Preconditions.checkArgument(teleportationProbability > 0 && teleportationProbability < +1);
+    Preconditions.checkArgument(teleportationProbability > 0.0 && teleportationProbability < 1.0);
 
     Job indexedDegrees = prepareJob(edges, getTempPath(TMP_INDEXED_DEGREES), SequenceFileInputFormat.class,
         IndexAndCountDegreeMapper.class, IntWritable.class, IntWritable.class, IntSumReducer.class, IntWritable.class,
@@ -245,7 +245,7 @@ public class PageRankJob extends AbstractJob {
       Vector vector = new RandomAccessSparseVector(numVertices);
       for (IntWritable incidentVertexIndex : incidentVertexIndexes) {
         double weight = weights.get(incidentVertexIndex.get()) * teleportationProbability;
-        System.out.println(vertexIndex.get() + "," + incidentVertexIndex.get() + ": " + weight);
+        //System.out.println(vertexIndex.get() + "," + incidentVertexIndex.get() + ": " + weight);
         vector.set(incidentVertexIndex.get(), weight);
       }
       ctx.write(vertexIndex, new VectorWritable(vector));

@@ -1,4 +1,3 @@
-package org.apache.mahout.clustering;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,7 @@ package org.apache.mahout.clustering;
  * limitations under the License.
  */
 
+package org.apache.mahout.clustering;
 
 import org.apache.hadoop.io.Text;
 import org.apache.mahout.math.Vector;
@@ -26,13 +26,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- *
- *
- **/
 public class WeightedPropertyVectorWritable extends WeightedVectorWritable {
 
-  protected Map<Text, Text> properties;
+  private Map<Text, Text> properties;
 
   public WeightedPropertyVectorWritable() {
   }
@@ -82,13 +78,13 @@ public class WeightedPropertyVectorWritable extends WeightedVectorWritable {
 
   public String toString() {
     Vector vector = getVector();
-    StringBuilder bldr = new StringBuilder("wt: ").append(weight);
-    if (properties != null && properties.isEmpty() == false) {
+    StringBuilder bldr = new StringBuilder("wt: ").append(getWeight());
+    if (properties != null && !properties.isEmpty()) {
       for (Map.Entry<Text, Text> entry : properties.entrySet()) {
         bldr.append(entry.getKey().toString()).append(": ").append(entry.getValue().toString()).append(' ');
       }
     }
-    bldr.append(" vec: ").append((vector == null ? "null" : AbstractCluster.formatVector(vector, null)));
+    bldr.append(" vec: ").append(vector == null ? "null" : AbstractCluster.formatVector(vector, null));
     return bldr.toString();
   }
 

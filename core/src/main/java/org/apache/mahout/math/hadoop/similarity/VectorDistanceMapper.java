@@ -1,4 +1,3 @@
-package org.apache.mahout.math.hadoop.similarity;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,7 @@ package org.apache.mahout.math.hadoop.similarity;
  * limitations under the License.
  */
 
+package org.apache.mahout.math.hadoop.similarity;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
@@ -26,24 +26,19 @@ import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- *
- **/
-public class VectorDistanceMapper extends Mapper<WritableComparable<?>, VectorWritable, StringTuple, DoubleWritable> {
-  private transient static Logger log = LoggerFactory.getLogger(VectorDistanceMapper.class);
-  protected DistanceMeasure measure;
-  protected List<NamedVector> seedVectors;
+public final class VectorDistanceMapper
+    extends Mapper<WritableComparable<?>, VectorWritable, StringTuple, DoubleWritable> {
+
+  private DistanceMeasure measure;
+  private List<NamedVector> seedVectors;
 
   @Override
-  protected void map(WritableComparable<?> key, VectorWritable value, Context context) throws IOException, InterruptedException {
+  protected void map(WritableComparable<?> key, VectorWritable value, Context context)
+    throws IOException, InterruptedException {
     String keyName;
     Vector valVec = value.get();
     if (valVec instanceof NamedVector) {
@@ -69,8 +64,7 @@ public class VectorDistanceMapper extends Mapper<WritableComparable<?>, VectorWr
       measure = ccl.loadClass(conf.get(VectorDistanceSimilarityJob.DISTANCE_MEASURE_KEY))
               .asSubclass(DistanceMeasure.class).newInstance();
       measure.configure(conf);
-      seedVectors = new ArrayList<NamedVector>(1000);
-      SeedVectorUtil.loadSeedVectors(conf, seedVectors);
+      seedVectors = SeedVectorUtil.loadSeedVectors(conf);
     } catch (InstantiationException e) {
       throw new IllegalStateException(e);
     } catch (IllegalAccessException e) {

@@ -1,4 +1,3 @@
-package org.apache.mahout.math.hadoop.similarity;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,7 @@ package org.apache.mahout.math.hadoop.similarity;
  * limitations under the License.
  */
 
+package org.apache.mahout.math.hadoop.similarity;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -34,8 +34,6 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.apache.mahout.math.VectorWritable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -44,7 +42,7 @@ import java.io.IOException;
  * and emits the a tuple of seed id, other id, distance.  It is a more generic version of KMean's mapper
  */
 public class VectorDistanceSimilarityJob extends AbstractJob {
-  private static final Logger log = LoggerFactory.getLogger(VectorDistanceSimilarityJob.class);
+
   public static final String SEEDS = "seeds";
   public static final String SEEDS_PATH_KEY = "seedsPath";
   public static final String DISTANCE_MEASURE_KEY = "vectorDistSim.measure";
@@ -62,7 +60,10 @@ public class VectorDistanceSimilarityJob extends AbstractJob {
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
     addOption(SEEDS, "s", "The set of vectors to compute distances against.  Must fit in memory on the mapper");
     addOption(DefaultOptionCreator.overwriteOption().create());
-    addOption(OUT_TYPE_KEY, "ot", "[pw|v] -- Define the output style: pairwise, the default, (pw) or vector (v).  Pairwise is a tuple of <seed, other, distance>, vector is <other, <Vector of size the number of seeds>>.", "pw");
+    addOption(OUT_TYPE_KEY, "ot",
+              "[pw|v] -- Define the output style: pairwise, the default, (pw) or vector (v).  Pairwise is a "
+                  + "tuple of <seed, other, distance>, vector is <other, <Vector of size the number of seeds>>.",
+              "pw");
     if (parseArguments(args) == null) {
       return -1;
     }
@@ -95,26 +96,27 @@ public class VectorDistanceSimilarityJob extends AbstractJob {
                          Path input,
                          Path seeds,
                          Path output,
-                         DistanceMeasure measure, String outType) throws IOException, ClassNotFoundException, InterruptedException {
+                         DistanceMeasure measure, String outType)
+    throws IOException, ClassNotFoundException, InterruptedException {
     conf.set(DISTANCE_MEASURE_KEY, measure.getClass().getName());
     conf.set(SEEDS_PATH_KEY, seeds.toString());
     Job job = new Job(conf, "Vector Distance Similarity: seeds: " + seeds + " input: " + input);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
-    if (outType.equalsIgnoreCase("pw")) {
+    if ("pw".equalsIgnoreCase(outType)) {
       job.setMapOutputKeyClass(StringTuple.class);
       job.setOutputKeyClass(StringTuple.class);
       job.setMapOutputValueClass(DoubleWritable.class);
       job.setOutputValueClass(DoubleWritable.class);
       job.setMapperClass(VectorDistanceMapper.class);
-    } else if (outType.equalsIgnoreCase("v")) {
+    } else if ("v".equalsIgnoreCase(outType)) {
       job.setMapOutputKeyClass(Text.class);
       job.setOutputKeyClass(Text.class);
       job.setMapOutputValueClass(VectorWritable.class);
       job.setOutputValueClass(VectorWritable.class);
       job.setMapperClass(VectorDistanceInvertedMapper.class);
     } else {
-      throw new InterruptedException("Invalid outType specified: " + outType);
+      throw new IllegalArgumentException("Invalid outType specified: " + outType);
     }
 
 
@@ -125,7 +127,7 @@ public class VectorDistanceSimilarityJob extends AbstractJob {
     job.setJarByClass(VectorDistanceSimilarityJob.class);
     HadoopUtil.delete(conf, output);
     if (!job.waitForCompletion(true)) {
-      throw new InterruptedException("VectorDistance Similarity failed processing " + seeds);
+      throw new IllegalStateException("VectorDistance Similarity failed processing " + seeds);
     }
   }
 }

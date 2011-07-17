@@ -79,7 +79,7 @@ public class Edge implements WritableComparable<Edge>, Cloneable {
 
   @Override
   public String toString() {
-    return "(" + start.getId() + "," + end.getId() + ")";
+    return "(" + start.getId() + ',' + end.getId() + ')';
   }
 
   @Override

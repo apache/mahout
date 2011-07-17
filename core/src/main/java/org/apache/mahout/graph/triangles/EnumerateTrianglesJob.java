@@ -112,7 +112,7 @@ public class EnumerateTrianglesJob extends AbstractJob {
         while (bufferedVertexIdsIterator.hasNext()) {
           Vertex secondVertexOfMissingEdge = new Vertex(bufferedVertexIdsIterator.nextLong());
           UndirectedEdge missingEdge = new UndirectedEdge(firstVertexOfMissingEdge, secondVertexOfMissingEdge);
-          System.out.println(new JoinableUndirectedEdge(missingEdge, false) + " " + new VertexOrMarker(vertex));
+          //System.out.println(new JoinableUndirectedEdge(missingEdge, false) + " " + new VertexOrMarker(vertex));
           ctx.write(new JoinableUndirectedEdge(missingEdge, false), new VertexOrMarker(vertex));
         }
         bufferedVertexIDs.add(firstVertexOfMissingEdge.getId());

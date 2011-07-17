@@ -24,7 +24,7 @@ import org.apache.hadoop.io.ArrayWritable;
 /**
  * an array of {@link WeightedOccurrence}s
  */
-class WeightedOccurrenceArray extends ArrayWritable {
+final class WeightedOccurrenceArray extends ArrayWritable {
 
   WeightedOccurrenceArray() {
     super(WeightedOccurrence.class);

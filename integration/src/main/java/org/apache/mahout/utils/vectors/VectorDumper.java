@@ -152,8 +152,6 @@ public final class VectorDumper {
             }
             writer.write('\n');
           }
-          long i = 0;
-          long count = 0;
           long numItems = Long.MAX_VALUE;
           if (cmdLine.hasOption(numItemsOpt)) {
             numItems = Long.parseLong(cmdLine.getValue(numItemsOpt).toString());
@@ -161,6 +159,8 @@ public final class VectorDumper {
           }
           SequenceFileIterable<Writable, Writable> iterable = new SequenceFileIterable<Writable, Writable>(path, true, conf);
           Iterator<Pair<Writable,Writable>> iterator = iterable.iterator();
+          long i = 0;
+          long count = 0;
           while (iterator.hasNext() && count < numItems) {
             Pair<Writable, Writable> record = iterator.next();
             Writable keyWritable = record.getFirst();
