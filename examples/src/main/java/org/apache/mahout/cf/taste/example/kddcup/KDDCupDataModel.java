@@ -188,8 +188,13 @@ public final class KDDCupDataModel implements DataModel {
   }
 
   @Override
-  public int getNumUsersWithPreferenceFor(long... itemIDs) throws TasteException {
-    return delegate.getNumUsersWithPreferenceFor(itemIDs);
+  public int getNumUsersWithPreferenceFor(long itemID) throws TasteException {
+    return delegate.getNumUsersWithPreferenceFor(itemID);
+  }
+
+  @Override
+  public int getNumUsersWithPreferenceFor(long itemID1, long itemID2) throws TasteException {
+    return delegate.getNumUsersWithPreferenceFor(itemID1, itemID2);
   }
 
   @Override

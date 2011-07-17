@@ -273,22 +273,20 @@ public final class GenericDataModel extends AbstractDataModel {
   public int getNumUsers() {
     return userIDs.length;
   }
+
+  @Override
+  public int getNumUsersWithPreferenceFor(long itemID) {
+    PreferenceArray prefs1 = preferenceForItems.get(itemID);
+    return prefs1 == null ? 0 : prefs1.length();
+  }
   
   @Override
-  public int getNumUsersWithPreferenceFor(long... itemIDs) {
-    Preconditions.checkArgument(itemIDs != null, "itemIDs is null");
-    Preconditions.checkArgument(itemIDs.length == 1 || itemIDs.length == 2, "Illegal number of IDs", itemIDs.length);
-    PreferenceArray prefs1 = preferenceForItems.get(itemIDs[0]);
+  public int getNumUsersWithPreferenceFor(long itemID1, long itemID2) {
+    PreferenceArray prefs1 = preferenceForItems.get(itemID1);
     if (prefs1 == null) {
       return 0;
     }
-
-    if (itemIDs.length == 1) {
-      return prefs1.length();
-    }
-
-    // itemIDs.length == 2
-    PreferenceArray prefs2 = preferenceForItems.get(itemIDs[1]);
+    PreferenceArray prefs2 = preferenceForItems.get(itemID2);
     if (prefs2 == null) {
       return 0;
     }

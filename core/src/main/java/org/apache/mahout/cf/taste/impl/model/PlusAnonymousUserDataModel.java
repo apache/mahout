@@ -211,25 +211,37 @@ public final class PlusAnonymousUserDataModel implements DataModel {
   }
   
   @Override
-  public int getNumUsersWithPreferenceFor(long... itemIDs) throws TasteException {
+  public int getNumUsersWithPreferenceFor(long itemID) throws TasteException {
     if (tempPrefs == null) {
-      return delegate.getNumUsersWithPreferenceFor(itemIDs);
+      return delegate.getNumUsersWithPreferenceFor(itemID);
     }
-    boolean hasAll = true;
-    for (long itemID : itemIDs) {
-      boolean found = false;
-      for (int i = 0; i < tempPrefs.length(); i++) {
-        if (tempPrefs.getItemID(i) == itemID) {
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
-        hasAll = false;
+    boolean found = false;
+    for (int i = 0; i < tempPrefs.length(); i++) {
+      if (tempPrefs.getItemID(i) == itemID) {
+        found = true;
         break;
       }
     }
-    return delegate.getNumUsersWithPreferenceFor(itemIDs) + (hasAll ? 1 : 0);
+    return delegate.getNumUsersWithPreferenceFor(itemID) + (found ? 1 : 0);
+  }
+
+  @Override
+  public int getNumUsersWithPreferenceFor(long itemID1, long itemID2) throws TasteException {
+    if (tempPrefs == null) {
+      return delegate.getNumUsersWithPreferenceFor(itemID1, itemID2);
+    }
+    boolean found1 = false;
+    boolean found2 = false;
+    for (int i = 0; i < tempPrefs.length() && !(found1 && found2); i++) {
+      long itemID = tempPrefs.getItemID(i);
+      if (itemID == itemID1) {
+        found1 = true;
+      }
+      if (itemID == itemID2) {
+        found2 = true;
+      }
+    }
+    return delegate.getNumUsersWithPreferenceFor(itemID1, itemID2) + (found1 && found2 ? 1 : 0);
   }
   
   @Override

@@ -122,14 +122,19 @@ public interface DataModel extends Refreshable, Serializable {
   int getNumUsers() throws TasteException;
   
   /**
-   * @param itemIDs item IDs to check for
-   * @return the number of users who have expressed a preference for all of the items
+   * @param itemID item ID to check for
+   * @return the number of users who have expressed a preference for the item
    * @throws TasteException if an error occurs while accessing the data
-   * @throws IllegalArgumentException
-   *  if itemIDs is null or empty. Arguments larger than 2 elements are not necessarily supported
-   *  and may result in this exception
    */
-  int getNumUsersWithPreferenceFor(long... itemIDs) throws TasteException;
+  int getNumUsersWithPreferenceFor(long itemID) throws TasteException;
+
+  /**
+   * @param itemID1 first item ID to check for
+   * @param itemID2 second item ID to check for
+   * @return the number of users who have expressed a preference for the items
+   * @throws TasteException if an error occurs while accessing the data
+   */
+  int getNumUsersWithPreferenceFor(long itemID1, long itemID2) throws TasteException;
   
   /**
    * <p>

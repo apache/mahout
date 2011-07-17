@@ -141,8 +141,13 @@ public final class ReloadFromJDBCDataModel implements DataModel {
   }
 
   @Override
-  public int getNumUsersWithPreferenceFor(long... itemIDs) throws TasteException {
-    return delegateInMemory.getNumUsersWithPreferenceFor(itemIDs);
+  public int getNumUsersWithPreferenceFor(long itemID) throws TasteException {
+    return delegateInMemory.getNumUsersWithPreferenceFor(itemID);
+  }
+
+  @Override
+  public int getNumUsersWithPreferenceFor(long itemID1, long itemID2) throws TasteException {
+    return delegateInMemory.getNumUsersWithPreferenceFor(itemID1, itemID2);
   }
 
   @Override

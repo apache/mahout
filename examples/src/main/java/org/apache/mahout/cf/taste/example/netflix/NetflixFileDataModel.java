@@ -104,15 +104,26 @@ public final class NetflixFileDataModel implements DataModel {
   public int getNumItems() {
     return MovieIDIterator.COUNT;
   }
-  
+
+  /**
+   * @throws UnsupportedOperationException
+   */
   @Override
   public int getNumUsers() {
-    throw new UnsupportedOperationException(); // TODO
+    throw new UnsupportedOperationException();
   }
-  
+
+  /**
+   * @throws UnsupportedOperationException
+   */
   @Override
-  public int getNumUsersWithPreferenceFor(long... itemIDs) {
-    throw new UnsupportedOperationException(); // TODO
+  public int getNumUsersWithPreferenceFor(long itemID) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public int getNumUsersWithPreferenceFor(long itemID1, long itemID2) {
+    throw new UnsupportedOperationException();
   }
   
   /**

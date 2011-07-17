@@ -564,14 +564,13 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   }
 
   @Override
-  public int getNumUsersWithPreferenceFor(long... itemIDs) throws TasteException {
-    Preconditions.checkArgument(itemIDs != null, "itemIDs is null");
+  public int getNumUsersWithPreferenceFor(long itemID) throws TasteException {
+    return itemPrefCounts.get(itemID);
+  }
 
-    int length = itemIDs.length;
-    Preconditions.checkArgument(length != 0 && length <= 2, "Illegal number of item IDs: " + length);
-
-    return length == 1 ? itemPrefCounts.get(itemIDs[0]) : getNumThings("user preferring items",
-      getNumPreferenceForItemsSQL, itemIDs);
+  @Override
+  public int getNumUsersWithPreferenceFor(long itemID1, long itemID2) throws TasteException {
+    return getNumThings("user preferring items", getNumPreferenceForItemsSQL, itemID1, itemID2);
   }
 
   private int getNumThings(String name, String sql, long... args) throws TasteException {
