@@ -81,16 +81,19 @@ public class RandomAccessSparseVector extends AbstractVector {
     StringBuilder result = new StringBuilder();
     result.append('{');
     Iterator<Element> it = iterateNonZero();
+    boolean first = true;
     while (it.hasNext()) {
+      if (first) {
+        first = false;
+      } else {
+        result.append(',');
+      }
       Element e = it.next();
       result.append(e.index());
       result.append(':');
       result.append(e.get());
-      result.append(',');
     }
-    if (result.length() > 1) {
-      result.setCharAt(result.length() - 1, '}');
-    }
+    result.append('}');
     return result.toString();
   }
 
