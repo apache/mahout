@@ -30,30 +30,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MeanShiftCanopyClusterer {
-  
+
   private static final Logger log = LoggerFactory
       .getLogger(MeanShiftCanopyClusterer.class);
-  
+
   private final double convergenceDelta;
-  
+
   // the T1 distance threshold
   private final double t1;
-  
+
   // the T2 distance threshold
   private final double t2;
-  
+
   // the distance measure
   private final DistanceMeasure measure;
-  
+
   private final IKernelProfile kernelProfile;
-  
+
+  // if true accumulate clusters during merge so clusters can be produced later
+  private final boolean runClustering;
+
   public MeanShiftCanopyClusterer(Configuration configuration) {
     try {
-      measure = Class
-          .forName(
-              configuration.get(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY))
+      measure = Class.forName(
+          configuration.get(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY))
           .asSubclass(DistanceMeasure.class).newInstance();
       measure.configure(configuration);
+      runClustering = configuration.getBoolean(
+          MeanShiftCanopyConfigKeys.CLUSTER_POINTS_KEY, true);
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
     } catch (IllegalAccessException e) {
@@ -62,9 +66,8 @@ public class MeanShiftCanopyClusterer {
       throw new IllegalStateException(e);
     }
     try {
-      kernelProfile = Class
-          .forName(
-              configuration.get(MeanShiftCanopyConfigKeys.KERNEL_PROFILE_KEY))
+      kernelProfile = Class.forName(
+          configuration.get(MeanShiftCanopyConfigKeys.KERNEL_PROFILE_KEY))
           .asSubclass(IKernelProfile.class).newInstance();
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
@@ -81,26 +84,27 @@ public class MeanShiftCanopyClusterer {
     convergenceDelta = Double.parseDouble(configuration
         .get(MeanShiftCanopyConfigKeys.CLUSTER_CONVERGENCE_KEY));
   }
-  
+
   public MeanShiftCanopyClusterer(DistanceMeasure aMeasure,
       IKernelProfile aKernelProfileDerivative, double aT1, double aT2,
-      double aDelta) {
+      double aDelta, boolean runClustering) {
     // nextCanopyId = 100; // so canopyIds will sort properly // never read?
     measure = aMeasure;
     t1 = aT1;
     t2 = aT2;
     convergenceDelta = aDelta;
     kernelProfile = aKernelProfileDerivative;
+    this.runClustering = runClustering;
   }
-  
+
   public double getT1() {
     return t1;
   }
-  
+
   public double getT2() {
     return t2;
   }
-  
+
   /**
    * Merge the given canopy into the canopies list. If it touches any existing
    * canopy (norm<T1) then add the center of each to the other. If it covers any
@@ -131,10 +135,10 @@ public class MeanShiftCanopyClusterer {
     if (closestCoveringCanopy == null) {
       canopies.add(aCanopy);
     } else {
-      closestCoveringCanopy.merge(aCanopy);
+      closestCoveringCanopy.merge(aCanopy, runClustering);
     }
   }
-  
+
   /**
    * Shift the center to the new centroid of the cluster
    * 
@@ -143,12 +147,12 @@ public class MeanShiftCanopyClusterer {
    * @return if the cluster is converged
    */
   public boolean shiftToMean(MeanShiftCanopy canopy) {
-    canopy.observe(canopy.getCenter(), canopy.getBoundPoints().size());
+    canopy.observe(canopy.getCenter(), canopy.getMass());
     canopy.computeConvergence(measure, convergenceDelta);
     canopy.computeParameters();
     return canopy.isConverged();
   }
-  
+
   /**
    * Return if the point is covered by this canopy
    * 
@@ -161,7 +165,7 @@ public class MeanShiftCanopyClusterer {
   boolean covers(MeanShiftCanopy canopy, Vector point) {
     return measure.distance(canopy.getCenter(), point) < t1;
   }
-  
+
   /**
    * Return if the point is closely covered by the canopy
    * 
@@ -174,7 +178,7 @@ public class MeanShiftCanopyClusterer {
   public boolean closelyBound(MeanShiftCanopy canopy, Vector point) {
     return measure.distance(canopy.getCenter(), point) < t2;
   }
-  
+
   /**
    * This is the reference mean-shift implementation. Given its inputs it
    * iterates over the points and clusters until their centers converge or until
@@ -191,22 +195,22 @@ public class MeanShiftCanopyClusterer {
       DistanceMeasure measure, IKernelProfile aKernelProfileDerivative,
       double convergenceThreshold, double t1, double t2, int numIter) {
     MeanShiftCanopyClusterer clusterer = new MeanShiftCanopyClusterer(measure,
-        aKernelProfileDerivative, t1, t2, convergenceThreshold);
+        aKernelProfileDerivative, t1, t2, convergenceThreshold, true);
     int nextCanopyId = 0;
-    
+
     List<MeanShiftCanopy> canopies = Lists.newArrayList();
     for (Vector point : points) {
       clusterer.mergeCanopy(
           new MeanShiftCanopy(point, nextCanopyId++, measure), canopies);
     }
     List<MeanShiftCanopy> newCanopies = canopies;
-    boolean[] converged = {false};
+    boolean[] converged = { false };
     for (int iter = 0; !converged[0] && iter < numIter; iter++) {
       newCanopies = clusterer.iterate(newCanopies, converged);
     }
     return newCanopies;
   }
-  
+
   protected List<MeanShiftCanopy> iterate(Iterable<MeanShiftCanopy> canopies,
       boolean[] converged) {
     converged[0] = true;
@@ -217,22 +221,7 @@ public class MeanShiftCanopyClusterer {
     }
     return migratedCanopies;
   }
-  
-  protected static void verifyNonOverlap(Iterable<MeanShiftCanopy> canopies) {
-    Collection<Integer> coveredPoints = new HashSet<Integer>();
-    // verify no overlap
-    for (MeanShiftCanopy canopy : canopies) {
-      for (int v : canopy.getBoundPoints().toList()) {
-        if (coveredPoints.contains(v)) {
-          log.info("Duplicate bound point: {} in Canopy: {}", v,
-              canopy.asFormatString(null));
-        } else {
-          coveredPoints.add(v);
-        }
-      }
-    }
-  }
-  
+
   protected static MeanShiftCanopy findCoveringCanopy(MeanShiftCanopy canopy,
       Iterable<MeanShiftCanopy> clusters) {
     // canopies use canopyIds assigned when input vectors are processed as
@@ -247,5 +236,5 @@ public class MeanShiftCanopyClusterer {
     }
     return null;
   }
-  
+
 }

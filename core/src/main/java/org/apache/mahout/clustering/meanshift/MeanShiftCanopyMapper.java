@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.util.Collection;
 
 import com.google.common.collect.Lists;
+
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -31,10 +33,14 @@ public class MeanShiftCanopyMapper extends Mapper<WritableComparable<?>,MeanShif
   
   private MeanShiftCanopyClusterer clusterer;
 
+private Integer numReducers;
+
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    clusterer = new MeanShiftCanopyClusterer(context.getConfiguration());
+    Configuration conf = context.getConfiguration();
+	clusterer = new MeanShiftCanopyClusterer(conf);
+    numReducers = Integer.valueOf(conf.get(MeanShiftCanopyDriver.MAPRED_REDUCE_TASKS, "1"));
   }
 
   @Override
@@ -45,9 +51,14 @@ public class MeanShiftCanopyMapper extends Mapper<WritableComparable<?>,MeanShif
 
   @Override
   protected void cleanup(Context context) throws IOException, InterruptedException {
+	int reducer = 0;
     for (MeanShiftCanopy canopy : canopies) {
       clusterer.shiftToMean(canopy);
-      context.write(new Text("canopy"), canopy);
+      context.write(new Text(String.valueOf(reducer)), canopy);
+      reducer++;
+      if (reducer >= numReducers){
+    	  reducer=0;
+      }
     }
     super.cleanup(context);
   }

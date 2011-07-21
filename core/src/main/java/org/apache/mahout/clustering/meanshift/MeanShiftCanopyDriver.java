@@ -57,19 +57,27 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.io.Closeables;
 
+/**
+ * This class implements the driver for Mean Shift Canopy clustering
+ * 
+ */
 public class MeanShiftCanopyDriver extends AbstractJob {
-  
+
+  public static final String MAPRED_REDUCE_TASKS = "mapred.reduce.tasks";
+
   private static final Logger log = LoggerFactory
       .getLogger(MeanShiftCanopyDriver.class);
-  
+
   public static final String INPUT_IS_CANOPIES_OPTION = "inputIsCanopies";
+
   public static final String STATE_IN_KEY = "org.apache.mahout.clustering.meanshift.stateInKey";
+
   private static final String CONTROL_CONVERGED = "control/converged";
-  
+
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(), new MeanShiftCanopyDriver(), args);
   }
-  
+
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();
@@ -84,11 +92,11 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     addOption(DefaultOptionCreator.t2Option().create());
     addOption(DefaultOptionCreator.clusteringOption().create());
     addOption(DefaultOptionCreator.methodOption().create());
-    
+
     if (parseArguments(args) == null) {
       return -1;
     }
-    
+
     Path input = getInputPath();
     Path output = getOutputPath();
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
@@ -107,17 +115,17 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     boolean runSequential = getOption(DefaultOptionCreator.METHOD_OPTION)
         .equalsIgnoreCase(DefaultOptionCreator.SEQUENTIAL_METHOD);
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    DistanceMeasure measure = ccl.loadClass(measureClass)
-        .asSubclass(DistanceMeasure.class).newInstance();
+    DistanceMeasure measure = ccl.loadClass(measureClass).asSubclass(
+        DistanceMeasure.class).newInstance();
     IKernelProfile kernelProfile = ccl.loadClass(kernelProfileClass)
         .asSubclass(IKernelProfile.class).newInstance();
     run(getConf(), input, output, measure, kernelProfile, t1, t2,
         convergenceDelta, maxIterations, inputIsCanopies, runClustering,
         runSequential);
-    
+
     return 0;
   }
-  
+
   /**
    * Run the job where the input format can be either Vectors or Canopies. If
    * requested, cluster the input data using the computed Canopies
@@ -160,16 +168,17 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     } else {
       createCanopyFromVectors(conf, input, clustersIn, measure, runSequential);
     }
-    
+
     Path clustersOut = buildClusters(conf, clustersIn, output, measure,
-        kernelProfile, t1, t2, convergenceDelta, maxIterations, runSequential);
+        kernelProfile, t1, t2, convergenceDelta, maxIterations, runSequential,
+        runClustering);
     if (runClustering) {
       clusterData(inputIsCanopies ? input : new Path(output,
           Cluster.INITIAL_CLUSTERS_DIR), clustersOut, new Path(output,
           Cluster.CLUSTERED_POINTS_DIR), runSequential);
     }
   }
-  
+
   /**
    * Convert input vectors to MeanShiftCanopies for further processing
    */
@@ -182,7 +191,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
       createCanopyFromVectorsMR(conf, input, output, measure);
     }
   }
-  
+
   /**
    * Convert vectors to MeanShiftCanopies sequentially
    * 
@@ -206,15 +215,15 @@ public class MeanShiftCanopyDriver extends AbstractJob {
       try {
         for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(
             s.getPath(), conf)) {
-          writer.append(new Text(),
-              MeanShiftCanopy.initialCanopy(value.get(), id++, measure));
+          writer.append(new Text(), MeanShiftCanopy.initialCanopy(value.get(),
+              id++, measure));
         }
       } finally {
         Closeables.closeQuietly(writer);
       }
     }
   }
-  
+
   /**
    * Convert vectors to MeanShiftCanopies using Hadoop
    */
@@ -231,16 +240,16 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     job.setNumReduceTasks(0);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
-    
+
     FileInputFormat.setInputPaths(job, input);
     FileOutputFormat.setOutputPath(job, output);
-    
+
     if (!job.waitForCompletion(true)) {
       throw new InterruptedException(
           "Mean Shift createCanopyFromVectorsMR failed on input " + input);
     }
   }
-  
+
   /**
    * Iterate over the input clusters to produce the next cluster directories for
    * each iteration
@@ -265,30 +274,33 @@ public class MeanShiftCanopyDriver extends AbstractJob {
    *          an int number of iterations
    * @param runSequential
    *          if true run in sequential execution mode
+   * @param runClustering
+   *          if true accumulate merged clusters for subsequent clustering step
    */
   public static Path buildClusters(Configuration conf, Path clustersIn,
       Path output, DistanceMeasure measure, IKernelProfile kernelProfile,
       double t1, double t2, double convergenceDelta, int maxIterations,
-      boolean runSequential) throws IOException, InterruptedException,
-      ClassNotFoundException {
+      boolean runSequential, boolean runClustering) throws IOException,
+      InterruptedException, ClassNotFoundException {
     if (runSequential) {
       return buildClustersSeq(clustersIn, output, measure, kernelProfile, t1,
-          t2, convergenceDelta, maxIterations);
+          t2, convergenceDelta, maxIterations, runClustering);
     } else {
       return buildClustersMR(conf, clustersIn, output, measure, kernelProfile,
-          t1, t2, convergenceDelta, maxIterations);
+          t1, t2, convergenceDelta, maxIterations, runClustering);
     }
   }
-  
+
   /**
    * Build new clusters sequentially
    * 
    */
   private static Path buildClustersSeq(Path clustersIn, Path output,
       DistanceMeasure measure, IKernelProfile aKernelProfile, double t1,
-      double t2, double convergenceDelta, int maxIterations) throws IOException {
+      double t2, double convergenceDelta, int maxIterations,
+      boolean runClustering) throws IOException {
     MeanShiftCanopyClusterer clusterer = new MeanShiftCanopyClusterer(measure,
-        aKernelProfile, t1, t2, convergenceDelta);
+        aKernelProfile, t1, t2, convergenceDelta, runClustering);
     List<MeanShiftCanopy> clusters = Lists.newArrayList();
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(clustersIn.toUri(), conf);
@@ -296,7 +308,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
         clustersIn, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
       clusterer.mergeCanopy(value, clusters);
     }
-    boolean[] converged = {false};
+    boolean[] converged = { false };
     int iteration = 1;
     while (!converged[0] && iteration <= maxIterations) {
       log.info("Mean Shift Iteration: {}", iteration);
@@ -308,11 +320,11 @@ public class MeanShiftCanopyDriver extends AbstractJob {
         for (MeanShiftCanopy cluster : clusters) {
           log.debug(
               "Writing Cluster:{} center:{} numPoints:{} radius:{} to: {}",
-              new Object[] {cluster.getId(),
+              new Object[] { cluster.getId(),
                   AbstractCluster.formatVector(cluster.getCenter(), null),
                   cluster.getNumPoints(),
                   AbstractCluster.formatVector(cluster.getRadius(), null),
-                  clustersOut.getName()});
+                  clustersOut.getName() });
           writer.append(new Text(cluster.getIdentifier()), cluster);
         }
       } finally {
@@ -323,33 +335,43 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     }
     return clustersIn;
   }
-  
+
   /**
    * Build new clusters using Hadoop
+   * 
    */
   private static Path buildClustersMR(Configuration conf, Path clustersIn,
       Path output, DistanceMeasure measure, IKernelProfile aKernelProfile,
-      double t1, double t2, double convergenceDelta, int maxIterations)
-      throws IOException, InterruptedException, ClassNotFoundException {
+      double t1, double t2, double convergenceDelta, int maxIterations,
+      boolean runClustering) throws IOException, InterruptedException,
+      ClassNotFoundException {
     // iterate until the clusters converge
     boolean converged = false;
     int iteration = 1;
     while (!converged && iteration <= maxIterations) {
-      log.info("Mean Shift Iteration {}", iteration);
+      int numReducers = Integer.valueOf(conf.get(MAPRED_REDUCE_TASKS, "1"));
+      log.info("Mean Shift Iteration: {}, numReducers {}", new Object[] {
+          iteration, numReducers });
       // point the output to a new directory per iteration
       Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
       Path controlOut = new Path(output, CONTROL_CONVERGED);
       runIterationMR(conf, clustersIn, clustersOut, controlOut, measure
           .getClass().getName(), aKernelProfile.getClass().getName(), t1, t2,
-          convergenceDelta);
+          convergenceDelta, runClustering);
       converged = FileSystem.get(new Configuration()).exists(controlOut);
       // now point the input to the old output directory
       clustersIn = clustersOut;
       iteration++;
+      // decrease the number of reducers if it is > 1 to cross-pollenate
+      // map sets
+      if (numReducers > 1) {
+        numReducers--;
+        conf.set(MAPRED_REDUCE_TASKS, String.valueOf(numReducers));
+      }
     }
     return clustersIn;
   }
-  
+
   /**
    * Run an iteration using Hadoop
    * 
@@ -371,33 +393,35 @@ public class MeanShiftCanopyDriver extends AbstractJob {
    *          the T2 distance threshold
    * @param convergenceDelta
    *          the double convergence criteria
+   * @param runClustering
+   *          if true accumulate merged clusters for subsequent clustering step
    */
   private static void runIterationMR(Configuration conf, Path input,
       Path output, Path control, String measureClassName,
       String kernelProfileClassName, double t1, double t2,
-      double convergenceDelta) throws IOException, InterruptedException,
-      ClassNotFoundException {
-    
+      double convergenceDelta, boolean runClustering) throws IOException,
+      InterruptedException, ClassNotFoundException {
+
     conf.set(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY, measureClassName);
     conf.set(MeanShiftCanopyConfigKeys.KERNEL_PROFILE_KEY,
         kernelProfileClassName);
-    conf.set(MeanShiftCanopyConfigKeys.CLUSTER_CONVERGENCE_KEY,
-        String.valueOf(convergenceDelta));
+    conf.set(MeanShiftCanopyConfigKeys.CLUSTER_CONVERGENCE_KEY, String
+        .valueOf(convergenceDelta));
     conf.set(MeanShiftCanopyConfigKeys.T1_KEY, String.valueOf(t1));
     conf.set(MeanShiftCanopyConfigKeys.T2_KEY, String.valueOf(t2));
     conf.set(MeanShiftCanopyConfigKeys.CONTROL_PATH_KEY, control.toString());
-    
+    conf.set(MeanShiftCanopyConfigKeys.CLUSTER_POINTS_KEY, String
+        .valueOf(runClustering));
     Job job = new Job(conf,
         "Mean Shift Driver running runIteration over input: " + input);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(MeanShiftCanopy.class);
-    
+
     FileInputFormat.setInputPaths(job, input);
     FileOutputFormat.setOutputPath(job, output);
-    
+
     job.setMapperClass(MeanShiftCanopyMapper.class);
     job.setReducerClass(MeanShiftCanopyReducer.class);
-    job.setNumReduceTasks(1);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setJarByClass(MeanShiftCanopyDriver.class);
@@ -406,7 +430,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
           + input);
     }
   }
-  
+
   /**
    * Run the job using supplied arguments
    * 
@@ -428,7 +452,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
       clusterDataMR(input, clustersIn, output);
     }
   }
-  
+
   /**
    * Cluster the data sequentially
    */
@@ -450,7 +474,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
           output, "part-m-" + part++), IntWritable.class,
           WeightedVectorWritable.class);
       try {
-        for (Pair<Writable,MeanShiftCanopy> record : new SequenceFileIterable<Writable,MeanShiftCanopy>(
+        for (Pair<Writable, MeanShiftCanopy> record : new SequenceFileIterable<Writable, MeanShiftCanopy>(
             s.getPath(), conf)) {
           MeanShiftCanopy canopy = record.getSecond();
           MeanShiftCanopy closest = MeanShiftCanopyClusterer
@@ -463,7 +487,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
       }
     }
   }
-  
+
   /**
    * Cluster the data using Hadoop
    */
@@ -476,15 +500,15 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     job.setOutputKeyClass(IntWritable.class);
     job.setOutputValueClass(WeightedVectorWritable.class);
     job.setMapperClass(MeanShiftCanopyClusterMapper.class);
-    
+
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setNumReduceTasks(0);
     job.setJarByClass(MeanShiftCanopyDriver.class);
-    
+
     FileInputFormat.setInputPaths(job, input);
     FileOutputFormat.setOutputPath(job, output);
-    
+
     if (!job.waitForCompletion(true)) {
       throw new InterruptedException(
           "Mean Shift Clustering failed on clustersIn " + clustersIn);

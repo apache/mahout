@@ -72,7 +72,7 @@ public class DisplayMeanShift extends DisplayClustering {
     int i = 0;
     for (Cluster cluster : CLUSTERS.get(CLUSTERS.size() - 1)) {
       MeanShiftCanopy canopy = (MeanShiftCanopy) cluster;
-      if (canopy.getBoundPoints().toList().size() >= significance
+      if (canopy.getMass() >= significance
           * DisplayClustering.SAMPLE_DATA.size()) {
         g2.setColor(COLORS[Math.min(i++, DisplayClustering.COLORS.length - 1)]);
         int count = 0;
