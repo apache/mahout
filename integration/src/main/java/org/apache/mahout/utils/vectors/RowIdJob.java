@@ -38,10 +38,14 @@ public class RowIdJob extends AbstractJob {
 
   @Override
   public int run(String[] strings) throws Exception {
+
+    addInputOption();
+    addOutputOption();
+
     Configuration conf = getConf();
     FileSystem fs = FileSystem.get(conf);
-    Path inputPath = fs.makeQualified(new Path(conf.get("mapred.input.dir")));
-    Path outputPath = fs.makeQualified(new Path(conf.get("mapred.output.dir")));
+
+    Path outputPath = getOutputPath();
     Path indexPath = new Path(outputPath, "docIndex");
     Path matrixPath = new Path(outputPath, "matrix");
     SequenceFile.Writer indexWriter = SequenceFile.createWriter(fs,
@@ -59,7 +63,12 @@ public class RowIdJob extends AbstractJob {
       int i = 0;
       int numCols = 0;
       for (Pair<Text,VectorWritable> record :
-         new SequenceFileDirIterable<Text,VectorWritable>(inputPath, PathType.LIST, null, null, true, conf)) {
+           new SequenceFileDirIterable<Text,VectorWritable>(getInputPath(),
+                                                            PathType.LIST,
+                                                            null,
+                                                            null,
+                                                            true,
+                                                            conf)) {
         VectorWritable value = record.getSecond();
         docId.set(i);
         indexWriter.append(docId, record.getFirst());
