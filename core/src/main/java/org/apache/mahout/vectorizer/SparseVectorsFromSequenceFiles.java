@@ -238,7 +238,6 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
       }
 
       Configuration conf = getConf();
-      HadoopUtil.delete(conf, outputDir);
       Path tokenizedPath = new Path(outputDir, DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER);
       DocumentProcessor.tokenizeDocuments(inputDir, analyzerClass, tokenizedPath, conf);
       

@@ -56,9 +56,6 @@ public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrate
    *   max(defaultMaxPrefsPerItemConsidered, userItemCountFactor * log(max(N_users, N_items)))
    * </pre>
    * </p>
-   *
-   * @param defaultMaxPrefsPerItemConsidered
-   * @param userItemCountMultiplier
    */
   public SamplingCandidateItemsStrategy(int defaultMaxPrefsPerItemConsidered, int userItemCountMultiplier) {
     Preconditions.checkArgument(defaultMaxPrefsPerItemConsidered > 0, "defaultMaxPrefsPerItemConsidered must be " +
@@ -76,7 +73,7 @@ public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrate
     for (long itemID : preferredItemIDs) {
       PreferenceArray prefs = dataModel.getPreferencesForItem(itemID);
       int prefsConsidered = Math.min(prefs.length(), maxPrefsPerItemConsidered);
-      Iterator<Preference> sampledPrefs = new FixedSizeSamplingIterator(prefsConsidered, prefs.iterator());
+      Iterator<Preference> sampledPrefs = new FixedSizeSamplingIterator<Preference>(prefsConsidered, prefs.iterator());
       while (sampledPrefs.hasNext()) {
         possibleItemsIDs.addAll(dataModel.getItemIDsFromUser(sampledPrefs.next().getUserID()));
       }
