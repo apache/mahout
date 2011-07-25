@@ -145,6 +145,16 @@
       <groupId>org.mongodb</groupId>
       <artifactId>bson</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.apache.cassandra</groupId>
+      <artifactId>cassandra-all</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>me.prettyprint</groupId>
+      <artifactId>hector-core</artifactId>
+    </dependency>
     
     <dependency>
       <groupId>org.slf4j</groupId>

@@ -365,6 +365,18 @@
       <version>2.5</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.cassandra</groupId>
+      <artifactId>cassandra-all</artifactId>
+      <version>0.8.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>me.prettyprint</groupId>
+      <artifactId>hector-core</artifactId>
+      <version>0.8.0-1</version>
+    </dependency>
+
     </dependencies>
   </dependencyManagement>
   <build>
