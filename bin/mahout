@@ -124,7 +124,7 @@ then
   done
 
   # add dev targets if they exist
-  for f in "$MAHOUT_HOME/examples/target/mahout-examples-*-job.jar" "$MAHOUT_HOME/mahout-examples-*-job.jar"; do
+  for f in $MAHOUT_HOME/examples/target/mahout-examples-*-job.jar $MAHOUT_HOME/mahout-examples-*-job.jar ; do
     CLASSPATH=${CLASSPATH}:$f;
   done
 
@@ -176,7 +176,7 @@ fi
 
 CLASS=org.apache.mahout.driver.MahoutDriver
 
-for f in "$MAHOUT_HOME/examples/target/mahout-examples-*-job.jar" "$MAHOUT_HOME/mahout-examples-*-job.jar" ; do
+for f in $MAHOUT_HOME/examples/target/mahout-examples-*-job.jar $MAHOUT_HOME/mahout-examples-*-job.jar ; do
   if [ -e "$f" ]; then
     MAHOUT_JOB=$f
   fi
