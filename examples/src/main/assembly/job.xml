@@ -15,8 +15,10 @@
       <outputDirectory>/</outputDirectory>
       <excludes>
         <exclude>org.apache.hadoop:hadoop-core</exclude>
-        <exclude>META-INF</exclude>
-        <exclude>META-INF/**</exclude>
+        <!-- This jar contains a LICENSE file in the combined package. Another JAR includes
+          a licenses/ directory. That's OK except when unpacked on case-insensitive file
+          systems like Mac HFS+. Since this isn't really needed, we just remove it. -->
+        <exclude>com.github.stephenc.high-scale-lib:high-scale-lib</exclude>
       </excludes>
     </dependencySet>
   </dependencySets>
