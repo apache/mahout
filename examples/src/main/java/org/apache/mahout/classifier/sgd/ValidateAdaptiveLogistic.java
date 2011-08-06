@@ -49,6 +49,7 @@ public final class ValidateAdaptiveLogistic {
 
   private static String inputFile;
   private static String modelFile;
+  private static String defaultCategory;
   private static boolean showAuc;
   private static boolean showScores;
   private static boolean showConfusion;
@@ -78,8 +79,7 @@ public final class ValidateAdaptiveLogistic {
       }
       
       OnlineSummarizer slh = new OnlineSummarizer();
-      ConfusionMatrix cm = new ConfusionMatrix(lmp.getTargetCategories(), "unknown");
-
+      ConfusionMatrix cm = new ConfusionMatrix(lmp.getTargetCategories(), defaultCategory);
 
       State<Wrapper, CrossFoldLearner> best = lr.getBest();
       if (best == null) {
@@ -172,11 +172,19 @@ public final class ValidateAdaptiveLogistic {
             argumentBuilder.withName("model").withMaximum(1)
                 .create())
         .withDescription("where to get the trained model").create();
+    
+    Option defaultCagetoryOption = builder
+    	.withLongName("defaultCategory")
+    	.withRequired(false)
+    	.withArgument(
+    			argumentBuilder.withName("defaultCategory").withMaximum(1).withDefault("unknown")
+    			.create())
+    	.withDescription("the default category value to use").create();
 
     Group normalArgs = new GroupBuilder().withOption(help)
         .withOption(quiet).withOption(auc).withOption(scores)
         .withOption(confusion).withOption(inputFileOption)
-        .withOption(modelFileOption).create();
+        .withOption(modelFileOption).withOption(defaultCagetoryOption).create();
 
     Parser parser = new Parser();
     parser.setHelpOption(help);
@@ -191,6 +199,7 @@ public final class ValidateAdaptiveLogistic {
 
     inputFile = getStringArgument(cmdLine, inputFileOption);
     modelFile = getStringArgument(cmdLine, modelFileOption);
+    defaultCategory = getStringArgument(cmdLine, defaultCagetoryOption);
     showAuc = getBooleanArgument(cmdLine, auc);
     showScores = getBooleanArgument(cmdLine, scores);
     showConfusion = getBooleanArgument(cmdLine, confusion);
