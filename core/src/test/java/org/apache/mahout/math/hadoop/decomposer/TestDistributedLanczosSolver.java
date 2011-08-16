@@ -114,6 +114,8 @@ public final class TestDistributedLanczosSolver extends MahoutTestCase {
     counter++;
   }
 
+  // TODO when this can be made to run in under 20 minutes, re-enable
+  /*
   @Test
   public void testDistributedLanczosSolver() throws Exception {
     doTestDistributedLanczosSolver(true, 30);
@@ -121,5 +123,6 @@ public final class TestDistributedLanczosSolver extends MahoutTestCase {
     doTestResumeIteration(true);
     doTestResumeIteration(false);
   }
+   */
 
 }
