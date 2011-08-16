@@ -323,6 +323,11 @@ public final class CassandraDataModel implements DataModel, Closeable {
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     userCache.clear();
+    itemCache.clear();
+    userIDsFromItemCache.clear();
+    itemIDsFromUserCache.clear();
+    userCountCache.set(null);
+    itemCountCache.set(null);
   }
 
   @Override
