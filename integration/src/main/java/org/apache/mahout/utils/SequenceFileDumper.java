@@ -88,9 +88,12 @@ public final class SequenceFileDumper {
         Configuration conf = new Configuration();
 
         Writer writer;
+        boolean shouldClose;
         if (cmdLine.hasOption(outputOpt)) {
+          shouldClose = true;
           writer = Files.newWriter(new File(cmdLine.getValue(outputOpt).toString()), Charsets.UTF_8);
         } else {
+          shouldClose = false;
           writer = new OutputStreamWriter(System.out);
         }
         try {
@@ -127,8 +130,13 @@ public final class SequenceFileDumper {
             }
             writer.append("Count: ").append(String.valueOf(count)).append('\n');
           }
+
+          writer.flush();
+
         } finally {
-          Closeables.closeQuietly(writer);
+          if (shouldClose) {
+            Closeables.closeQuietly(writer);
+          }
         }
       }
 
