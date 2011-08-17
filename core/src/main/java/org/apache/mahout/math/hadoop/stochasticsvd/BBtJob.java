@@ -37,9 +37,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 /**
- * Compute B*Bt using simple fact that B*Bt = sum(outer prod ( B_(*i), (B_(*i))
- * ).
- * 
+ * Compute B*Bt using simple fact that B*Bt = sum(outer prod ( B_(*i), (B_(*i)) ).
  */
 public final class BBtJob {
 
@@ -63,9 +61,10 @@ public final class BBtJob {
     job.setMapOutputKeyClass(IntWritable.class);
     job.setMapOutputValueClass(VectorWritable.class);
     job.setMapperClass(BBtMapper.class);
-    job.setReducerClass(BBtReducer.class);
 
     // combiner and reducer
+    job.setReducerClass(BBtReducer.class);
+    job.setNumReduceTasks(numReduceTasks);
     job.setOutputKeyClass(IntWritable.class);
     job.setOutputValueClass(VectorWritable.class);
 
@@ -91,8 +90,7 @@ public final class BBtJob {
 
     private final VectorWritable vw = new VectorWritable();
     private final IntWritable iw = new IntWritable();
-    private UpperTriangular bbtPartial; // are all partial BBt products
-                                          // symmetrical as well? yes.
+    private UpperTriangular bbtPartial; // are all partial BBt products symmetrical as well? yes.
 
     @Override
     protected void map(IntWritable key, VectorWritable value, Context context)
