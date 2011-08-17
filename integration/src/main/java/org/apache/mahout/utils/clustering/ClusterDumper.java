@@ -195,6 +195,9 @@ public final class ClusterDumper extends AbstractJob {
           writer.write('\n');
         }
       }
+
+      writer.flush();
+
     } finally {
       if (shouldClose) {
         Closeables.closeQuietly(writer);
