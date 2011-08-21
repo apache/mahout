@@ -24,11 +24,13 @@ import org.apache.mahout.math.Vector;
 import java.util.Random;
 
 /**
- * Provides a stochastic mixture of ranking updates and normal logistic updates. This uses a
+ * <p>Provides a stochastic mixture of ranking updates and normal logistic updates. This uses a
  * combination of AUC driven learning to improve ranking performance and traditional log-loss driven
- * learning to improve log-likelihood.
- * <p/>
- * See www.eecs.tufts.edu/~dsculley/papers/combined-ranking-and-regression.pdf
+ * learning to improve log-likelihood.</p>
+ *
+ * <p>See www.eecs.tufts.edu/~dsculley/papers/combined-ranking-and-regression.pdf</p>
+ *
+ * <p>This implementation only makes sense for the binomial case.</p>
  */
 public class MixedGradient implements Gradient {
 
@@ -36,6 +38,8 @@ public class MixedGradient implements Gradient {
   private final RankingGradient rank;
   private final Gradient basic;
   private final Random random = RandomUtils.getRandom();
+  private boolean hasZero;
+  private boolean hasOne;
 
   public MixedGradient(double alpha, int window) {
     this.alpha = alpha;
@@ -47,8 +51,13 @@ public class MixedGradient implements Gradient {
   public Vector apply(String groupKey, int actual, Vector instance, AbstractVectorClassifier classifier) {
     if (random.nextDouble() < alpha) {
       // one option is to apply a ranking update relative to our recent history
+      if (!hasZero || !hasOne) {
+        throw new IllegalStateException();
+      }
       return rank.apply(groupKey, actual, instance, classifier);
     } else {
+      hasZero |= actual == 0;
+      hasOne |= actual == 1;
       // the other option is a normal update, but we have to update our history on the way
       rank.addToHistory(actual, instance);
       return basic.apply(groupKey, actual, instance, classifier);
