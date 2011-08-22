@@ -19,6 +19,7 @@ package org.apache.mahout.vectorizer.encoders;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
+import org.apache.mahout.math.MurmurHash;
 import org.apache.mahout.math.Vector;
 
 import java.util.Collections;

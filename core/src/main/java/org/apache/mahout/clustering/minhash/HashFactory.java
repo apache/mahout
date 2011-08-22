@@ -17,7 +17,7 @@
 package org.apache.mahout.clustering.minhash;
 
 import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.vectorizer.encoders.MurmurHash;
+import org.apache.mahout.math.MurmurHash;
 
 import java.util.Random;
 

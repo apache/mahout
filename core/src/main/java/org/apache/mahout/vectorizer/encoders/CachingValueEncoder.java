@@ -17,6 +17,8 @@
 
 package org.apache.mahout.vectorizer.encoders;
 
+import org.apache.mahout.math.MurmurHash;
+
 /**
  * Provides basic hashing semantics for encoders where the probe locations
  * depend only on the name of the variable.

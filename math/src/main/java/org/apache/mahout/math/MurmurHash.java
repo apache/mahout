@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.vectorizer.encoders;
+package org.apache.mahout.math;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
