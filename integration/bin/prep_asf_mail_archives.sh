@@ -8,16 +8,15 @@
 #   $1 - Path to this script's working directory, you will need about
 #        22GB of free space to run this script.
 #
-#   $2 - Path to where this script saves the SequenceFile output.
+#   $2 - Path to where the ASF Public Archive data is, untarred.
+#        If you are running Hadoop and the files are in HDFS, then
+#        this will need to be an HDFS path.   Default is $1/input
+#   $3 - Path to where this script saves the SequenceFile output.
 #        If you are running Hadoop and you want the sequence files
 #        saved to your HDFS then you need to set this value to an 
 #        HDFS path and make sure you set HADOOP_HOME so Mahout can
-#        find Hadoop.
+#        find Hadoop.  Default is $1/sequence-files
 #
-#   In addition, you will need to install, configure and add s3cmd
-#   to your PATH before running this script. s3cmd is needed to
-#   download the TAR files from Amazon S3, for more information, see:
-#      http://s3tools.org/s3cmd
 #
 # Required Environment Variables:
 #
@@ -28,7 +27,7 @@
 #          Only needed if you want to send output to HDFS
 #
 # Example:
-#   ./prep_asf_mail_archives.sh /mnt/asf-mail-archives /mnt/asf-mail-archives/output
+#   ./prep_asf_mail_archives.sh /mnt/asf-mail-archives /mnt/asf-archives/asf-mail-archives-7-18-2011 /mnt/asf-mail-archives/output
 #
 #   This will download the TAR files from S3, extract them, and then
 #   run the Mahout org.apache.mahout.text.SequenceFilesFromMailArchives job
@@ -56,12 +55,6 @@ if [ "$MAHOUT_HOME" = "" ]; then
   exit 1
 fi
 
-# Make sure they have s3cmd installed
-command -v s3cmd >/dev/null || { 
-  echo "Error: s3cmd command not found. See http://s3tools.org/s3cmd for more information."; 
-  exit 1; 
-}
-
 if [ "$1" = "" ]; then
   echo "Error: Please pass the path to your prep directory, such as /mnt/asf-mail-archives.\n\n\tUsage: $0 workingDir outputPath\n"
   exit 1
@@ -70,9 +63,16 @@ fi
 # Location where this script saves files
 PREP_DIR=$1
 
-# Change this to an HDFS path if you are running Hadoop
 if [ "$2" != "" ]; then
-  SEQFILE_OUTPUT_DIR=$2
+  SEQFILE_INPUT_DIR=$2
+else
+  SEQFILE_INPUT_DIR=$PREP_DIR/input
+fi
+
+
+# Change this to an HDFS path if you are running Hadoop
+if [ "$3" != "" ]; then
+  SEQFILE_OUTPUT_DIR=$3
 else
   SEQFILE_OUTPUT_DIR=$PREP_DIR/sequence-files
 fi
@@ -90,6 +90,7 @@ fi
 
 echo "Running $0 with:
   PREP_DIR = $PREP_DIR
+  SEQFILE_INPUT_DIR = $SEQFILE_INPUT_DIR
   SEQFILE_OUTPUT_DIR = $SEQFILE_OUTPUT_DIR
   MAHOUT_LOCAL = $MAHOUT_LOCAL
   HADOOP_HOME = $HADOOP_HOME"
@@ -97,101 +98,9 @@ echo "Running $0 with:
 # Run Mahout in Local mode! Remove this if you want the
 # sequence files stored in your HDFS
 
-mkdir -p $PREP_DIR/downloads $PREP_DIR/extracted
-
-# download the tar files from S3
-
-cd $PREP_DIR/downloads
-if [ ! -e public_a_d.tar ]
-then
-  echo "Downloading public_a_d.tar files from S3 to $PREP_DIR/downloads"
-  s3cmd get s3://asf-mail-archives/public_a_d.tar || {
-    echo "Download from S3 failed, check console for errors.";
-    exit 1;
-  }
-fi
-if [ ! -e public_e_k.tar ]
-then
-  echo "Downloading public_e_k.tar files from S3 to $PREP_DIR/downloads"
-  s3cmd get s3://asf-mail-archives/public_e_k.tar || {
-   echo "Download from S3 failed, check console for errors.";
-   exit 1;
-  }
-fi
-if [ ! -e public_l_o.tar ]
-then
-  echo "Downloading public_l_o.tar files from S3 to $PREP_DIR/downloads"
-  s3cmd get s3://asf-mail-archives/public_l_o.tar || {
-   echo "Download from S3 failed, check console for errors.";
-    exit 1;
-  }
-fi
-if [ ! -e public_s_t.tar ]
-then
-  echo "Downloading public_s_t.tar files from S3 to $PREP_DIR/downloads"
-  s3cmd get s3://asf-mail-archives/public_s_t.tar || {
-   echo "Download from S3 failed, check console for errors.";
-    exit 1;
-  }
-fi
-if [ ! -e public_u_z.tar ]
-then
-  echo "Downloading public_u_z.tar files from S3 to $PREP_DIR/downloads"
-  s3cmd get s3://asf-mail-archives/public_u_z.tar || {
-   echo "Download from S3 failed, check console for errors.";
-    exit 1;
-  }
-fi
-
-
-
-# extract the tar files to your local drive
-
-cd $PREP_DIR/extracted
-#check to see if we have already extracted
-if [ ! -e "$PREP_DIR/extracted/abdera.apache.org" ]
-then
-  echo "Extracting tar files from $PREP_DIR/downloads/public_a_d.tar"
-  tar xf $PREP_DIR/downloads/public_a_d.tar || {
-    echo "Extract TAR files failed, check console for errors.";
-    exit 1;
-  }
-fi
-if [ ! -e "$PREP_DIR/extracted/excalibur.apache.org" ]
-then
-  echo "Extracting tar files from $PREP_DIR/downloads/public_e_k.tar"
-  tar xf $PREP_DIR/downloads/public_e_k.tar || {
-    echo "Extract TAR files failed, check console for errors.";
-    exit 1;
-  }
-fi
-if [ ! -e "$PREP_DIR/extracted/labs.apache.org" ]
-then
-  echo "Extracting tar files from $PREP_DIR/downloads/public_l_o.tar"
-  tar xf $PREP_DIR/downloads/public_l_o.tar || {
-    echo "Extract TAR files failed, check console for errors.";
-    exit 1;
-  }
-fi
-if [ ! -e "$PREP_DIR/extracted/shale.apache.org" ]
-then
-  echo "Extracting tar files from $PREP_DIR/downloads/public_s_t.tar"
-  tar xf $PREP_DIR/downloads/public_s_t.tar || {
-    echo "Extract TAR files failed, check console for errors.";
-    exit 1;
-  }
-fi
-if [ ! -e "$PREP_DIR/extracted/uima.apache.org" ]
-then
-  echo "Extracting tar files from $PREP_DIR/downloads/public_u_z.tar"
-  tar xf $PREP_DIR/downloads/public_u_z.tar || {
-    echo "Extract TAR files failed, check console for errors.";
-    exit 1;
-  }
-fi
 
 # convert the extracted gz files into Hadoop SequenceFiles
 echo "Converting extracted directories to SequenceFiles ..."
 $MAHOUT_HOME/bin/mahout org.apache.mahout.text.SequenceFilesFromMailArchives \
---input $PREP_DIR/extracted --output $SEQFILE_OUTPUT_DIR \
+--input $SEQFILE_INPUT_DIR --output $SEQFILE_OUTPUT_DIR \
 -c UTF-8 -chunk 1024 -prefix asf_archives
