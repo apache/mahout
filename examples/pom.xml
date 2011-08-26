@@ -63,28 +63,6 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>examples</id>
-            <phase>package</phase>
-            <configuration>
-              <tasks>
-                <ant antfile="build.xml" target="build-grouplens-jar">
-                  <property name="dest" value="${project.build.directory}" />
-                  <property name="examples-base" value="src/main/java" />
-                </ant>
-              </tasks>
-
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
 
       <!-- create examples hadoop job jar -->
       <plugin>
