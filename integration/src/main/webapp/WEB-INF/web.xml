@@ -28,24 +28,14 @@
     <servlet-class>org.apache.mahout.cf.taste.web.RecommenderServlet</servlet-class>
     <init-param>
       <param-name>recommender-class</param-name>
-      <param-value>${recommender.class}</param-value>
+      <param-value>org.apache.mahout.cf.taste.example.grouplens.GroupLensRecommender</param-value>
     </init-param>
     <load-on-startup>1</load-on-startup>
-  </servlet>
-
-  <servlet>
-    <servlet-name>axis</servlet-name>
-    <display-name>Apache-Axis Servlet</display-name>
-    <servlet-class>org.apache.axis.transport.http.AxisServlet</servlet-class>
   </servlet>
 
   <servlet-mapping>
     <servlet-name>taste-recommender</servlet-name>
     <url-pattern>/RecommenderServlet</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>axis</servlet-name>
-    <url-pattern>*.jws</url-pattern>
   </servlet-mapping>
 
   <!-- The rest of the config is adapted from Axis's default web app -->
@@ -53,17 +43,5 @@
   <session-config>
     <session-timeout>5</session-timeout>
   </session-config>
-
-  <!-- currently the W3C havent settled on a media type for WSDL;
-     http://www.w3.org/TR/2003/WD-wsdl12-20030303/#ietf-draft
-     for now we go with the basic 'it's XML' response -->
-  <mime-mapping>
-    <extension>wsdl</extension>
-    <mime-type>text/xml</mime-type>
-  </mime-mapping>
-  <mime-mapping>
-    <extension>xsd</extension>
-    <mime-type>text/xml</mime-type>
-  </mime-mapping>
 
 </web-app>

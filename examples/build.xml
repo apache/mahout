@@ -24,17 +24,6 @@
  -->
 
 <project name="mahout" default="core-job" basedir="../etc">
-  <!-- Run in examples during the package phase -->
-  <target name="build-grouplens-jar">
-    <jar jarfile="${dest}/grouplens.jar">
-      <fileset dir="${examples-base}">
-        <include name="**/*.dat"/>
-      </fileset>
-      <fileset dir="${dest}/classes">
-        <include name="org/apache/mahout/cf/taste/example/grouplens/**"/>
-      </fileset>
-    </jar>
-  </target>
   <!-- Examples -->
   <property name="working.dir" value="work"/>
   <target name="check-files">
