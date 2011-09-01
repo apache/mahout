@@ -212,16 +212,6 @@ public class DenseVector extends AbstractVector {
     return result;
   }
 
-  @Override
-  public void addTo(Vector v) {
-    if (size() != v.size()) {
-      throw new CardinalityException(size(), v.size());
-    }
-    for (int i = 0; i < values.length; i++) {
-      v.setQuick(i, values[i] + v.getQuick(i));
-    }
-  }
-  
   public void addAll(Vector v) {
     if (size() != v.size()) {
       throw new CardinalityException(size(), v.size());

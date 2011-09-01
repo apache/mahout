@@ -78,7 +78,7 @@ public abstract class MatrixTest extends MahoutTestCase {
     MatrixSlice m;
     while(it.hasNext() && (m = it.next()) != null) {
       Vector v = m.vector();
-      Vector w = test instanceof SparseColumnMatrix ? test.getColumn(m.index()) : test.getRow(m.index());
+      Vector w = test instanceof SparseColumnMatrix ? test.viewColumn(m.index()) : test.viewRow(m.index());
       assertEquals("iterator: " + v + ", randomAccess: " + w, v, w);
     }
   }
@@ -245,17 +245,12 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   @Test
   public void testRowView() {
-    int[] c = test.size();
-    for (int row = 0; row < c[ROW]; row++) {
-      assertEquals(0.0, test.getRow(row).minus(test.viewRow(row)).norm(1), 0);
-    }
-
-    assertEquals(c[COL], test.viewRow(3).size());
-    assertEquals(c[COL], test.viewRow(5).size());
+    assertEquals(test.columnSize(), test.viewRow(1).size());
+    assertEquals(test.columnSize(), test.viewRow(2).size());
 
     Random gen = RandomUtils.getRandom();
-    for (int row = 0; row < c[ROW]; row++) {
-      int j = gen.nextInt(c[COL]);
+    for (int row = 0; row < test.rowSize(); row++) {
+      int j = gen.nextInt(test.columnSize());
       double old = test.get(row, j);
       double v = gen.nextGaussian();
       test.viewRow(row).set(j, v);
@@ -269,17 +264,12 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   @Test
   public void testColumnView() {
-    int[] c = test.size();
-    for (int col = 0; col < c[COL]; col++) {
-      assertEquals(0.0, test.getColumn(col).minus(test.viewColumn(col)).norm(1), 0);
-    }
-
-    assertEquals(c[ROW], test.viewColumn(3).size());
-    assertEquals(c[ROW], test.viewColumn(5).size());
+    assertEquals(test.rowSize(), test.viewColumn(0).size());
+    assertEquals(test.rowSize(), test.viewColumn(1).size());
 
     Random gen = RandomUtils.getRandom();
-    for (int col = 0; col < c[COL]; col++) {
-      int j = gen.nextInt(c[COL]);
+    for (int col = 0; col < test.columnSize(); col++) {
+      int j = gen.nextInt(test.columnSize());
       double old = test.get(col, j);
       double v = gen.nextGaussian();
       test.viewColumn(col).set(j, v);
@@ -301,7 +291,7 @@ public abstract class MatrixTest extends MahoutTestCase {
     });
 
     for (int i = 0; i < test.numRows(); i++) {
-      assertEquals(test.getRow(i).zSum(), v.get(i), EPSILON);
+      assertEquals(test.viewRow(i).zSum(), v.get(i), EPSILON);
     }
   }
 
@@ -315,7 +305,7 @@ public abstract class MatrixTest extends MahoutTestCase {
     });
 
     for (int i = 0; i < test.numCols(); i++) {
-      assertEquals(test.getColumn(i).zSum(), v.get(i), EPSILON);
+      assertEquals(test.viewColumn(i).zSum(), v.get(i), EPSILON);
     }
   }
 
@@ -554,39 +544,39 @@ public abstract class MatrixTest extends MahoutTestCase {
   }
 
   @Test
-  public void testGetRow() {
-    Vector row = test.getRow(1);
+  public void testViewRow() {
+    Vector row = test.viewRow(1);
     assertEquals("row size", 2, row.getNumNondefaultElements());
   }
 
   @Test(expected = IndexException.class)
-  public void testGetRowIndexUnder() {
-    test.getRow(-1);
+  public void testViewRowIndexUnder() {
+    test.viewRow(-1);
   }
 
   @Test(expected = IndexException.class)
-  public void testGetRowIndexOver() {
-    test.getRow(5);
+  public void testViewRowIndexOver() {
+    test.viewRow(5);
   }
 
   @Test
-  public void testGetColumn() {
-    Vector column = test.getColumn(1);
+  public void testViewColumn() {
+    Vector column = test.viewColumn(1);
     assertEquals("row size", 3, column.getNumNondefaultElements());
   }
 
   @Test(expected = IndexException.class)
-  public void testGetColumnIndexUnder() {
-    test.getColumn(-1);
+  public void testViewColumnIndexUnder() {
+    test.viewColumn(-1);
   }
 
   @Test(expected = IndexException.class)
-  public void testGetColumnIndexOver() {
-    test.getColumn(5);
+  public void testViewColumnIndexOver() {
+    test.viewColumn(5);
   }
 
   @Test
-  public void testDetermitant() {
+  public void testDeterminant() {
     Matrix m = matrixFactory(new double[][]{{1, 3, 4}, {5, 2, 3},
         {1, 4, 2}});
     assertEquals("determinant", 43.0, m.determinant(), EPSILON);

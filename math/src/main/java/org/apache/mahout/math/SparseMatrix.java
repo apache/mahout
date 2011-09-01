@@ -183,19 +183,7 @@ public class SparseMatrix extends AbstractMatrix {
   }
   
   @Override
-  public Vector getColumn(int column) {
-    if (column < 0 || column >= cardinality[COL]) {
-      throw new IndexException(column, cardinality[COL]);
-    }
-    double[] d = new double[cardinality[ROW]];
-    for (int row = 0; row < cardinality[ROW]; row++) {
-      d[row] = getQuick(row, column);
-    }
-    return new DenseVector(d);
-  }
-  
-  @Override
-  public Vector getRow(int row) {
+  public Vector viewRow(int row) {
     if (row < 0 || row >= cardinality[ROW]) {
       throw new IndexException(row, cardinality[ROW]);
     }

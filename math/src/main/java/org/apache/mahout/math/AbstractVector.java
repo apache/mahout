@@ -398,16 +398,6 @@ public abstract class AbstractVector implements Vector {
   }
 
   @Override
-  public void addTo(Vector v) {
-    Iterator<Element> it = iterateNonZero();
-    while (it.hasNext()) {
-      Element e = it.next();
-      int index = e.index();
-      v.setQuick(index, v.getQuick(index) + e.get());
-    }
-  }
-
-  @Override
   public void set(int index, double value) {
     if (index < 0 || index >= size) {
       throw new IndexException(index, size);

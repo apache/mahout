@@ -130,7 +130,7 @@ public class NaiveBayesModel {
       VectorWritable.writeVector(out, weightsPerLabel);
       VectorWritable.writeVector(out, perlabelThetaNormalizer);
       for (int row = 0; row < weightsPerLabelAndFeature.numRows(); row++) {
-        VectorWritable.writeVector(out, weightsPerLabelAndFeature.getRow(row));
+        VectorWritable.writeVector(out, weightsPerLabelAndFeature.viewRow(row));
       }
     } finally {
       Closeables.closeQuietly(out);

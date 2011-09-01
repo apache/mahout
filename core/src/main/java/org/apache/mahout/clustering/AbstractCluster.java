@@ -31,6 +31,7 @@ import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.SquareRootFunction;
 
 public abstract class AbstractCluster implements Cluster {
@@ -140,12 +141,12 @@ public abstract class AbstractCluster implements Cluster {
     if (s1 == null) {
       s1 = observations.getS1().clone();
     } else {
-      observations.getS1().addTo(s1);
+      s1.assign(observations.getS1(), Functions.PLUS);
     }
     if (s2 == null) {
       s2 = observations.getS2().clone();
     } else {
-      observations.getS2().addTo(s2);
+      s2.assign(observations.getS2(), Functions.PLUS);
     }
   }
   
@@ -168,13 +169,13 @@ public abstract class AbstractCluster implements Cluster {
       if (s1 == null) {
         s1 = weightedX;
       } else {
-        weightedX.addTo(s1);
+        s1.assign(weightedX, Functions.PLUS);
       }
       Vector x2 = x.times(x).times(weight);
       if (s2 == null) {
         s2 = x2;
       } else {
-        x2.addTo(s2);
+        s2.assign(x2, Functions.PLUS);
       }
     }
   }
@@ -184,13 +185,13 @@ public abstract class AbstractCluster implements Cluster {
     if (s1 == null) {
       s1 = x.clone();
     } else {
-      x.addTo(s1);
+      s1.assign(x, Functions.PLUS);
     }
     Vector x2 = x.times(x);
     if (s2 == null) {
       s2 = x2;
     } else {
-      x2.addTo(s2);
+      s2.assign(x2, Functions.PLUS);
     }
   }
   

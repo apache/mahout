@@ -544,7 +544,7 @@ public abstract class AbstractMatrix implements Matrix {
     }
     Vector w = new DenseVector(c[ROW]);
     for (int i = 0; i < c[ROW]; i++) {
-      w.setQuick(i, v.dot(getRow(i)));
+      w.setQuick(i, v.dot(viewRow(i)));
     }
     return w;
   }
@@ -557,7 +557,7 @@ public abstract class AbstractMatrix implements Matrix {
     }
     Vector w = new DenseVector(c[COL]);
     for (int i = 0; i < c[ROW]; i++) {
-      Vector xi = getRow(i);
+      Vector xi = viewRow(i);
       double d = xi.dot(v);
       if (d != 0.0) {
         w.assign(xi, new PlusMult(d));
@@ -618,7 +618,7 @@ public abstract class AbstractMatrix implements Matrix {
     @Override
     public Vector clone() {
       Vector v = new DenseVector(size());
-      addTo(v);
+      v.assign(this, Functions.PLUS);
       return v;
     }
 
@@ -683,13 +683,13 @@ public abstract class AbstractMatrix implements Matrix {
 
     @Override
     public double getQuick(int index) {
-      Vector v = rowToColumn ? matrix.getRow(index) : matrix.getColumn(index);
+      Vector v = rowToColumn ? matrix.viewRow(index) : matrix.viewRow(index);
       return v == null ? 0 : v.getQuick(transposeOffset);
     }
 
     @Override
     public void setQuick(int index, double value) {
-      Vector v = rowToColumn ? matrix.getRow(index) : matrix.getColumn(index);
+      Vector v = rowToColumn ? matrix.viewRow(index) : matrix.viewRow(index);
       if (v == null) {
         v = newVector(numCols);
         matrix.assignRow(index, v);

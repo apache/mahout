@@ -210,14 +210,4 @@ public class VectorView extends AbstractVector {
     }
     return result;
   }
-
-  @Override
-  public void addTo(Vector v) {
-    Iterator<Element> iter = iterateNonZero();
-    while (iter.hasNext()) {
-      Element elt = iter.next();
-      v.set(elt.index(), elt.get() + v.get(elt.index()));
-    }
-  }
-
 }

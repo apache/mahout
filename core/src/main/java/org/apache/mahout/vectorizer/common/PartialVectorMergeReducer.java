@@ -27,6 +27,7 @@ import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.function.Functions;
 
 /**
  * Merges partial vectors in to a full sparse vector
@@ -50,7 +51,7 @@ public class PartialVectorMergeReducer extends
 
     Vector vector = new RandomAccessSparseVector(dimension, 10);
     for (VectorWritable value : values) {
-      value.get().addTo(vector);
+      vector.assign(value.get(), Functions.PLUS);
     }
     if (normPower != PartialVectorMerger.NO_NORMALIZING) {
       if (logNormalize) {

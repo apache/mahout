@@ -26,6 +26,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.function.Functions;
 
 public class WeightsMapper extends Mapper<IntWritable, VectorWritable, Text, VectorWritable> {
 
@@ -49,7 +50,8 @@ public class WeightsMapper extends Mapper<IntWritable, VectorWritable, Text, Vec
     }
 
     int label = index.get();
-    instance.addTo(weightsPerFeature);
+//    instance.addTo(weightsPerFeature);
+    weightsPerFeature.assign(instance, Functions.PLUS);
     weightsPerLabel.set(label, weightsPerLabel.get(label) + instance.zSum());
   }
 

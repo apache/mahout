@@ -36,6 +36,7 @@ import org.apache.mahout.common.kernel.TriangularKernelProfile;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.function.Functions;
 
 public class DisplayMeanShift extends DisplayClustering {
   
@@ -80,7 +81,7 @@ public class DisplayMeanShift extends DisplayClustering {
         for (int vix : canopy.getBoundPoints().toList()) {
           Vector v = SAMPLE_DATA.get(vix).get();
           count++;
-          v.addTo(center);
+          center.assign(v, Functions.PLUS);
           DisplayClustering.plotRectangle(g2, v, dv);
         }
         center = center.divide(count);

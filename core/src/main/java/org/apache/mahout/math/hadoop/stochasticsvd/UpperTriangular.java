@@ -101,16 +101,6 @@ public class UpperTriangular extends AbstractMatrix {
   }
 
   @Override
-  public Vector getColumn(int column) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public Vector getRow(int row) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public double getQuick(int row, int column) {
     if (row > column) {
       return 0;

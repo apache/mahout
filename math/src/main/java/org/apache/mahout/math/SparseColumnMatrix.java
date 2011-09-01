@@ -66,16 +66,6 @@ public class SparseColumnMatrix extends AbstractMatrix {
   }
 
   /**
-   * Iterate over columns.
-   * @param index of the column number to grab as a vector (shallowly)
-   * @return the column vector at that index.
-   */
-  @Override
-  protected Vector slice(int index) {
-    return getColumn(index);
-  }
-
-  /**
    * Abstracted out for the iterator
    * @return {@link #numCols()} 
    */
@@ -165,19 +155,10 @@ public class SparseColumnMatrix extends AbstractMatrix {
   }
 
   @Override
-  public Vector getColumn(int column) {
+  public Vector viewColumn(int column) {
     if (column < 0 || column >= cardinality[COL]) {
       throw new IndexException(column, cardinality[COL]);
     }
     return columns[column];
   }
-
-  @Override
-  public Vector getRow(int row) {
-    if (row < 0 || row >= cardinality[ROW]) {
-      throw new IndexException(row, cardinality[ROW]);
-    }
-    return new TransposeViewVector(this, row, false);
-  }
-
 }

@@ -328,7 +328,7 @@ public final class TestClusterDumper extends MahoutTestCase {
       
       for (int row = 0; row < sData.numRows(); row++) {
         key.set(row);
-        value.set(sData.getRow(row));
+        value.set(sData.viewRow(row));
         writer.append(key, value);
       }
     } finally {

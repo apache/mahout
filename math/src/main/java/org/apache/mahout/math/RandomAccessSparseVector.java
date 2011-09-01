@@ -170,14 +170,6 @@ public class RandomAccessSparseVector extends AbstractVector {
   }
 
   @Override
-  public void addTo(Vector v) {
-    if (v.size() != size()) {
-      throw new CardinalityException(size(), v.size());
-    }
-    values.forEachPair(new AddToVector(v));
-  }
-
-  @Override
   public double dot(Vector x) {
     if (size() != x.size()) {
       throw new CardinalityException(size(), x.size());

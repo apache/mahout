@@ -409,24 +409,24 @@ public final class TestMatrixView extends MahoutTestCase {
   }
 
   @Test
-  public void testGetRow() {
-    Vector row = test.getRow(1);
+  public void testViewRow() {
+    Vector row = test.viewRow(1);
     assertEquals("row size", 2, row.getNumNondefaultElements());
   }
 
   @Test(expected = IndexException.class)
-  public void testGetRowIndexUnder() {
-    test.getRow(-1);
+  public void testViewRowIndexUnder() {
+    test.viewRow(-1);
   }
 
   @Test(expected = IndexException.class)
-  public void testGetRowIndexOver() {
-    test.getRow(5);
+  public void testViewRowIndexOver() {
+    test.viewRow(5);
   }
 
   @Test
-  public void testGetColumn() {
-    Vector column = test.getColumn(1);
+  public void testViewColumn() {
+    Vector column = test.viewColumn(1);
     assertEquals("row size", 3, column.getNumNondefaultElements());
     int i = 0;
     for (double x : new double[]{3.3, 5.5, 7.7}) {
@@ -435,13 +435,13 @@ public final class TestMatrixView extends MahoutTestCase {
   }
 
   @Test(expected = IndexException.class)
-  public void testGetColumnIndexUnder() {
-    test.getColumn(-1);
+  public void testViewColumnIndexUnder() {
+    test.viewColumn(-1);
   }
 
   @Test(expected = IndexException.class)
-  public void testGetColumnIndexOver() {
-    test.getColumn(5);
+  public void testViewColumnIndexOver() {
+    test.viewColumn(5);
   }
 
   @Test

@@ -44,9 +44,9 @@ public abstract class SolverTest extends MahoutTestCase {
   public static void assertOrthonormal(Matrix currentEigens, double errorMargin) {
     List<String> nonOrthogonals = Lists.newArrayList();
     for (int i = 0; i < currentEigens.numRows(); i++) {
-      Vector ei = currentEigens.getRow(i);
+      Vector ei = currentEigens.viewRow(i);
       for (int j = 0; j <= i; j++) {
-        Vector ej = currentEigens.getRow(j);
+        Vector ej = currentEigens.viewRow(j);
         if (ei.norm(2) == 0 || ej.norm(2) == 0) {
           continue;
         }
@@ -100,7 +100,7 @@ public abstract class SolverTest extends MahoutTestCase {
                                  double errorMargin,
                                  boolean isSymmetric) {
     for (int i = 0; i < numEigensToCheck; i++) {
-      Vector e = eigens.getRow(i);
+      Vector e = eigens.viewRow(i);
       assertEigen(i, e, corpus, errorMargin, isSymmetric);
     }
   }
@@ -142,7 +142,7 @@ public abstract class SolverTest extends MahoutTestCase {
       if (r.nextBoolean() || numRows == nonNullRows) {
         m.assignRow(numRows == nonNullRows ? i : c, v);
       } else {
-        Vector other = m.getRow(r.nextInt(numRows));
+        Vector other = m.viewRow(r.nextInt(numRows));
         if (other != null && other.getLengthSquared() > 0) {
           m.assignRow(c, other.clone());
         }

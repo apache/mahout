@@ -169,15 +169,7 @@ public class DenseMatrix extends AbstractMatrix {
   }
   
   @Override
-  public Vector getColumn(int column) {
-    if (column < 0 || column >= columnSize()) {
-      throw new IndexException(column, columnSize());
-    }
-    return new TransposeViewVector(this, column);
-  }
-  
-  @Override
-  public Vector getRow(int row) {
+  public Vector viewRow(int row) {
     if (row < 0 || row >= rowSize()) {
       throw new IndexException(row, rowSize());
     }

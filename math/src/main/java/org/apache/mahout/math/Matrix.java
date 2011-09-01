@@ -166,24 +166,6 @@ public interface Matrix extends Cloneable, VectorIterable {
   double get(int row, int column);
 
   /**
-   * Return the column at the given index
-   *
-   * @param column an int column index
-   * @return a Vector at the index
-   * @throws IndexException if the index is out of bounds
-   */
-  Vector getColumn(int column);
-
-  /**
-   * Return the row at the given index
-   *
-   * @param row an int row index
-   * @return a Vector at the index
-   * @throws IndexException if the index is out of bounds
-   */
-  Vector getRow(int row);
-
-  /**
    * Return the value at the given indexes, without checking bounds
    *
    * @param row    an int row index
@@ -286,31 +268,6 @@ public interface Matrix extends Cloneable, VectorIterable {
   Matrix transpose();
 
   /**
-   * Return a new matrix containing the subset of the recipient
-   *
-   * @param offset an int[2] offset into the receiver
-   * @param size   the int[2] size of the desired result
-   * @return a new Matrix that is a view of the original
-   * @throws CardinalityException if the length is greater than the cardinality of the receiver
-   * @throws IndexException       if the offset is negative or the offset+length is outside of the receiver
-   */
-  Matrix viewPart(int[] offset, int[] size);
-
-  /**
-   * Return a new matrix containing the subset of the recipient
-   *
-   * @param rowOffset           The first row of the view
-   * @param rowsRequested       The number of rows in the view
-   * @param columnOffset        The first column in the view
-   * @param columnsRequested    The number of columns in the view
-   * @return a new Matrix that is a view of the original
-   * @throws CardinalityException if the length is greater than the cardinality of the receiver
-   * @throws IndexException       if the offset is negative or the offset+length is outside of the
-   *                              receiver
-   */
-  Matrix viewPart(int rowOffset, int rowsRequested, int columnOffset, int columnsRequested);
-
-  /**
    * Return the sum of all the elements of the receiver
    *
    * @return a double
@@ -406,9 +363,51 @@ public interface Matrix extends Cloneable, VectorIterable {
   // NewMatrix assign(Matrix y, DoubleDoubleFunction function, IntArrayList
   // nonZeroIndexes);
 
+  /**
+   * Return a view into part of a matrix.  Changes to the view will change the
+   * original matrix.
+   *
+   * @param offset an int[2] offset into the receiver
+   * @param size   the int[2] size of the desired result
+   * @return a matrix that shares storage with part of the original matrix.
+   * @throws CardinalityException if the length is greater than the cardinality of the receiver
+   * @throws IndexException       if the offset is negative or the offset+length is outside of the receiver
+   */
+  Matrix viewPart(int[] offset, int[] size);
+
+  /**
+   * Return a view into part of a matrix.  Changes to the view will change the
+   * original matrix.
+   *
+   * @param rowOffset           The first row of the view
+   * @param rowsRequested       The number of rows in the view
+   * @param columnOffset        The first column in the view
+   * @param columnsRequested    The number of columns in the view
+   * @return a matrix that shares storage with part of the original matrix.
+   * @throws CardinalityException if the length is greater than the cardinality of the receiver
+   * @throws IndexException       if the offset is negative or the offset+length is outside of the
+   *                              receiver
+   */
+  Matrix viewPart(int rowOffset, int rowsRequested, int columnOffset, int columnsRequested);
+
+  /**
+   * Return a reference to a row.  Changes to the view will change the original matrix.
+   * @param row  The index of the row to return.
+   * @return A vector that shares storage with the original.
+   */
   Vector viewRow(int row);
 
+  /**
+   * Return a reference to a column.  Changes to the view will change the original matrix.
+   * @param column  The index of the column to return.
+   * @return A vector that shares storage with the original.
+   */
   Vector viewColumn(int column);
 
+  /**
+   * Returns a reference to the diagonal of a matrix. Changes to the view will change
+   * the original matrix.
+   * @return A vector that shares storage with the original matrix.
+   */
   Vector viewDiagonal();
 }

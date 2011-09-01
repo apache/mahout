@@ -153,12 +153,12 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
 
     Collection<Integer> oldEigensFound = Lists.newArrayList();
     for(int row = 0; row < eigenVectors.numRows(); row++) {
-      Vector oldEigen = eigenVectors.getRow(row);
+      Vector oldEigen = eigenVectors.viewRow(row);
       if(oldEigen == null) {
         break;
       }
       for(int newRow = 0; newRow < eigenVectors2.numRows(); newRow++) {
-        Vector newEigen = eigenVectors2.getRow(newRow);
+        Vector newEigen = eigenVectors2.viewRow(newRow);
         if(newEigen != null) {
           if(oldEigen.dot(newEigen) > 0.9) {
             oldEigensFound.add(row);

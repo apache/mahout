@@ -53,7 +53,7 @@ public class AlternateLeastSquaresSolver {
   }
 
   Vector solve(Matrix Ai, Matrix Vi) {
-    return new QRDecomposition(Ai).solve(Vi).getColumn(0);
+    return new QRDecomposition(Ai).solve(Vi).viewColumn(0);
   }
 
   protected Matrix addLambdaTimesNuiTimesE(Matrix matrix, double lambda, int nui) {

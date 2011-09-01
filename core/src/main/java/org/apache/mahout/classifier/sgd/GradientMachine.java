@@ -210,7 +210,7 @@ public class GradientMachine extends AbstractVectorClassifier implements OnlineL
     for (int i = 0; i < numHidden; i++) {
       activations.setQuick(i, hiddenWeights[i].dot(input));
     }
-    hiddenBias.addTo(activations);
+    activations.assign(hiddenBias, Functions.PLUS);
     activations.assign(Functions.min(40.0)).assign(Functions.max(-40));
     activations.assign(Functions.SIGMOID);
     return activations;
@@ -226,7 +226,7 @@ public class GradientMachine extends AbstractVectorClassifier implements OnlineL
     for (int i = 0; i < numOutput; i++) {
       activations.setQuick(i, outputWeights[i].dot(hiddenActivation));
     }
-    outputBias.addTo(activations);
+    activations.assign(outputBias, Functions.PLUS);
     return activations;
   }
 
@@ -276,11 +276,11 @@ public class GradientMachine extends AbstractVectorClassifier implements OnlineL
       gradGood.assign(Functions.NEGATE);
       Vector propHidden = gradGood.clone();
       Vector gradBad = outputWeights[bad].clone();
-      gradBad.addTo(propHidden);
+      propHidden.assign(gradBad, Functions.PLUS);
       gradGood.assign(Functions.mult(-learningRate * (1.0 - regularization)));
-      gradGood.addTo(outputWeights[good]);
+      outputWeights[good].assign(gradGood, Functions.PLUS);
       gradBad.assign(Functions.mult(-learningRate * (1.0 + regularization)));
-      gradBad.addTo(outputWeights[bad]);
+      outputWeights[bad].assign(gradBad, Functions.PLUS);
       outputBias.setQuick(good, outputBias.get(good) + learningRate);
       outputBias.setQuick(bad, outputBias.get(bad) - learningRate);
       // Gradient of sigmoid is s * (1 -s).

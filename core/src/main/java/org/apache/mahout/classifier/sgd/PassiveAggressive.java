@@ -17,6 +17,7 @@
 
 package org.apache.mahout.classifier.sgd;
 
+import com.google.common.base.Function;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.classifier.OnlineLearner;
@@ -167,25 +168,27 @@ public class PassiveAggressive extends AbstractVectorClassifier implements Onlin
       lossSum = 0;
     }
     Vector result = classifyNoLink(instance);
-    double my_score = result.get(actual);
+    double myScore = result.get(actual);
     // Find the highest score that is not actual.
-    int other_idx = result.maxValueIndex();
-    double other_value = result.get(other_idx);
-    if (other_idx == actual) {
-      result.setQuick(other_idx, Double.NEGATIVE_INFINITY);
-      other_idx = result.maxValueIndex();
-      other_value = result.get(other_idx);
+    int otherIndex = result.maxValueIndex();
+    double otherValue = result.get(otherIndex);
+    if (otherIndex == actual) {
+      result.setQuick(otherIndex, Double.NEGATIVE_INFINITY);
+      otherIndex = result.maxValueIndex();
+      otherValue = result.get(otherIndex);
     }
-    double loss = 1.0 - my_score + other_value;
+    double loss = 1.0 - myScore + otherValue;
     lossCount += 1;
     if (loss >= 0) {
       lossSum += loss;
       double tau = loss / (instance.dot(instance) + 0.5 / learningRate);
       Vector delta = instance.clone();
       delta.assign(Functions.mult(tau));
-      delta.addTo(weights.getRow(actual));
+      weights.viewRow(actual).assign(delta, Functions.PLUS);
+//      delta.addTo(weights.viewRow(actual));
       delta.assign(Functions.mult(-1));
-      delta.addTo(weights.getRow(other_idx));
+      weights.viewRow(otherIndex).assign(delta, Functions.PLUS);
+//      delta.addTo(weights.viewRow(otherIndex));
     }
   }
 

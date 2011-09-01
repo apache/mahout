@@ -67,7 +67,7 @@ public abstract class OnlineBaseTest extends MahoutTestCase {
 
     // train on samples in random order (but only one pass)
     for (int row : permute(gen, 60)) {
-      lr.train((int) target.get(row), input.getRow(row));
+      lr.train((int) target.get(row), input.viewRow(row));
     }
     lr.close();
   }
@@ -77,10 +77,10 @@ public abstract class OnlineBaseTest extends MahoutTestCase {
     // now test the accuracy
     Matrix tmp = lr.classify(input);
     // mean(abs(tmp - target))
-    double meanAbsoluteError = tmp.getColumn(0).minus(target).aggregate(Functions.PLUS, Functions.ABS) / 60;
+    double meanAbsoluteError = tmp.viewColumn(0).minus(target).aggregate(Functions.PLUS, Functions.ABS) / 60;
 
     // max(abs(tmp - target)
-    double maxAbsoluteError = tmp.getColumn(0).minus(target).aggregate(Functions.MAX, Functions.ABS);
+    double maxAbsoluteError = tmp.viewColumn(0).minus(target).aggregate(Functions.MAX, Functions.ABS);
 
     System.out.printf("mAE = %.4f, maxAE = %.4f\n", meanAbsoluteError, maxAbsoluteError);
     assertEquals(0, meanAbsoluteError , expected_mean_error);
@@ -88,9 +88,9 @@ public abstract class OnlineBaseTest extends MahoutTestCase {
 
     // convenience methods should give the same results
     Vector v = lr.classifyScalar(input);
-    assertEquals(0, v.minus(tmp.getColumn(0)).norm(1), 1.0e-5);
-    v = lr.classifyFull(input).getColumn(1);
-    assertEquals(0, v.minus(tmp.getColumn(0)).norm(1), 1.0e-4);
+    assertEquals(0, v.minus(tmp.viewColumn(0)).norm(1), 1.0e-5);
+    v = lr.classifyFull(input).viewColumn(1);
+    assertEquals(0, v.minus(tmp.viewColumn(0)).norm(1), 1.0e-4);
   }
 
   /**

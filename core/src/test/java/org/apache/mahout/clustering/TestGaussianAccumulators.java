@@ -24,6 +24,7 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.SquareRootFunction;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +49,7 @@ public final class TestGaussianAccumulators extends MahoutTestCase {
     sampleN = 0;
     Vector sum = new DenseVector(2);
     for (VectorWritable v : sampleData) {
-      v.get().addTo(sum);
+      sum.assign(v.get(), Functions.PLUS);
       sampleN++;
     }
     sampleMean = sum.divide(sampleN);
@@ -56,7 +57,7 @@ public final class TestGaussianAccumulators extends MahoutTestCase {
     Vector sampleVar = new DenseVector(2);
     for (VectorWritable v : sampleData) {
       Vector delta = v.get().minus(sampleMean);
-      delta.times(delta).addTo(sampleVar);
+      sampleVar.assign(delta.times(delta), Functions.PLUS);
     }
     sampleVar = sampleVar.divide(sampleN - 1);
     sampleStd = sampleVar.clone();

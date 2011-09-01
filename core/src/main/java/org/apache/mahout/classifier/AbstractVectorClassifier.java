@@ -117,7 +117,7 @@ public abstract class AbstractVectorClassifier {
   public Matrix classify(Matrix data) {
     Matrix r = new DenseMatrix(data.numRows(), numCategories() - 1);
     for (int row = 0; row < data.numRows(); row++) {
-      r.assignRow(row, classify(data.getRow(row)));
+      r.assignRow(row, classify(data.viewRow(row)));
     }
     return r;
   }
@@ -132,7 +132,7 @@ public abstract class AbstractVectorClassifier {
   public Matrix classifyFull(Matrix data) {
     Matrix r = new DenseMatrix(data.numRows(), numCategories());
     for (int row = 0; row < data.numRows(); row++) {
-      classifyFull(r.viewRow(row), data.getRow(row));
+      classifyFull(r.viewRow(row), data.viewRow(row));
     }
     return r;
   }
@@ -150,7 +150,7 @@ public abstract class AbstractVectorClassifier {
 
     Vector r = new DenseVector(data.numRows());
     for (int row = 0; row < data.numRows(); row++) {
-      r.set(row, classifyScalar(data.getRow(row)));
+      r.set(row, classifyScalar(data.viewRow(row)));
     }
     return r;
   }

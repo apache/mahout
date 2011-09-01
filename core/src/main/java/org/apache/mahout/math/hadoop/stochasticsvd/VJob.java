@@ -116,7 +116,7 @@ public class VJob {
       Vector qRow = value.get();
       for (int i = 0; i < k; i++) {
         vRow.setQuick(i,
-                      qRow.dot(uHat.getColumn(i)) / sValues.getQuick(i));
+                      qRow.dot(uHat.viewColumn(i)) / sValues.getQuick(i));
       }
       context.write(key, vRowWritable); // U inherits original A row labels.
     }

@@ -30,7 +30,7 @@ public final class Algebra {
     Vector result = new DenseVector(m.numRows());
     
     for (int i = 0; i < m.numRows(); i++) {
-      result.set(i, m.getRow(i).dot(v));
+      result.set(i, m.viewRow(i).dot(v));
     }
     
     return result;
@@ -59,7 +59,7 @@ public final class Algebra {
     double max = 0.0;
     for (int i = 0; i < m.numRows(); i++) {
       int sum = 0;
-      Vector cv = m.getRow(i);
+      Vector cv = m.viewRow(i);
       for (int j = 0; j < cv.size(); j++) {
         sum += Math.abs(cv.getQuick(j));
       }

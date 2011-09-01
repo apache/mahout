@@ -85,7 +85,7 @@ public class SSVDPrototypeTest extends MahoutTestCase {
     int n = mtx.columnSize();
     int rank = 0;
     for (int i = 0; i < n; i++) {
-      Vector ei = mtx.getColumn(i);
+      Vector ei = mtx.viewColumn(i);
 
       double norm = ei.norm(2);
 
@@ -96,7 +96,7 @@ public class SSVDPrototypeTest extends MahoutTestCase {
       }
 
       for (int j = 0; j <= i; j++) {
-        Vector e_j = mtx.getColumn(j);
+        Vector e_j = mtx.viewColumn(j);
         double dot = ei.dot(e_j);
         Assert
             .assertTrue(Math.abs((i == j && rank > j ? 1 : 0) - dot) < epsilon);

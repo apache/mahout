@@ -139,20 +139,19 @@ public class MatrixView extends AbstractMatrix {
   }
 
   @Override
-  public Vector getColumn(int column) {
+  public Vector viewColumn(int column) {
     if (column < 0 || column >= columnSize()) {
       throw new IndexException(column, columnSize());
     }
-    return new VectorView(matrix.getColumn(column + offset[COL]), offset[ROW], rowSize());
+    return new VectorView(matrix.viewColumn(column + offset[COL]), offset[ROW], rowSize());
   }
 
   @Override
-  public Vector getRow(int row) {
+  public Vector viewRow(int row) {
     if (row < 0 || row >= rowSize()) {
       throw new IndexException(row, rowSize());
     }
-    return new VectorView(matrix.getRow(row + offset[ROW]), offset[COL],
-        columnSize());
+    return new VectorView(matrix.viewRow(row + offset[ROW]), offset[COL], columnSize());
   }
 
 }

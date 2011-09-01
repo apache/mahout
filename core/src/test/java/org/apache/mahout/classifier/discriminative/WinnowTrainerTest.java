@@ -54,8 +54,8 @@ public final class WinnowTrainerTest extends MahoutTestCase {
 
     Matrix dataset = new DenseMatrix(values);
     trainer.train(labelset, dataset);
-    assertTrue(trainer.getModel().classify(dataset.getColumn(3)));
-    assertFalse(trainer.getModel().classify(dataset.getColumn(0)));
+    assertTrue(trainer.getModel().classify(dataset.viewColumn(3)));
+    assertFalse(trainer.getModel().classify(dataset.viewColumn(0)));
   }
 
 }

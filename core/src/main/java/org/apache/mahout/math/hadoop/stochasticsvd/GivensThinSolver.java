@@ -84,7 +84,7 @@ public class GivensThinSolver {
 
     double[] aRow = new double[n];
     for (int i = 0; i < m; i++) {
-      Vector aRowV = a.getRow(i);
+      Vector aRowV = a.viewRow(i);
       for (int j = 0; j < n; j++) {
         aRow[j] = aRowV.getQuick(j);
       }

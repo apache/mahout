@@ -265,7 +265,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
         Vector.Element e = elementIterator.next();
         if (!Double.isNaN(e.get())) {
           double pref = e.get();
-          double estimate = u.getRow(slice.index()).dot(m.getRow(e.index()));
+          double estimate = u.viewRow(slice.index()).dot(m.viewRow(e.index()));
           double err = pref - estimate;
           avg.addDatum(err * err);
           log.info("Comparing preference of user [" + slice.index() + "] towards item [" + e.index() + "], " +

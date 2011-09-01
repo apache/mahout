@@ -97,7 +97,7 @@ public class InMemoryFactorizationEvaluator extends AbstractJob {
         int itemID = (int) pref.getItemID();
 
         double rating = pref.getValue();
-        double estimate = u.getRow(userID).dot(m.getRow(itemID));
+        double estimate = u.viewRow(userID).dot(m.viewRow(itemID));
         double err = rating - estimate;
         rmseAvg.addDatum(err * err);
         maeAvg.addDatum(Math.abs(err));

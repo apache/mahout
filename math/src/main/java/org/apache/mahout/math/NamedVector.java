@@ -283,10 +283,4 @@ public class NamedVector implements Vector {
   public double getDistanceSquared(Vector v) {
     return delegate.getDistanceSquared(v);
   }
-
-  @Override
-  public void addTo(Vector v) {
-    delegate.addTo(v);
-  }
-
 }

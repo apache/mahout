@@ -116,11 +116,11 @@ public class UJob {
       if (sValues != null) {
         for (int i = 0; i < k; i++) {
           uRow.setQuick(i,
-                        qRow.dot(uHat.getColumn(i)) * sValues.getQuick(i));
+                        qRow.dot(uHat.viewColumn(i)) * sValues.getQuick(i));
         }
       } else {
         for (int i = 0; i < k; i++) {
-          uRow.setQuick(i, qRow.dot(uHat.getColumn(i)));
+          uRow.setQuick(i, qRow.dot(uHat.viewColumn(i)));
         }
       }
 

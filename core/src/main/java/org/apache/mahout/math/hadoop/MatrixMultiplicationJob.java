@@ -37,6 +37,7 @@ import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.function.Functions;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -156,7 +157,7 @@ public class MatrixMultiplicationJob extends AbstractJob {
       Vector accumulator = new RandomAccessSparseVector(it.next().get());
       while (it.hasNext()) {
         Vector row = it.next().get();
-        row.addTo(accumulator);
+        accumulator.assign(row, Functions.PLUS);
       }
       out.collect(rowNum, new VectorWritable(new SequentialAccessSparseVector(accumulator)));
     }

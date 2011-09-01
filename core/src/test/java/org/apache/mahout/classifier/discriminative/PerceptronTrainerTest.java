@@ -54,8 +54,8 @@ public final class PerceptronTrainerTest extends MahoutTestCase {
 
     Matrix dataset = new DenseMatrix(values);
     this.trainer.train(labelset, dataset);
-    assertFalse(this.trainer.getModel().classify(dataset.getColumn(3)));
-    assertTrue(this.trainer.getModel().classify(dataset.getColumn(0)));
+    assertFalse(this.trainer.getModel().classify(dataset.viewColumn(3)));
+    assertTrue(this.trainer.getModel().classify(dataset.viewColumn(0)));
   }
 
 }

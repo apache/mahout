@@ -21,6 +21,7 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.function.Functions;
 
 import java.io.IOException;
 
@@ -38,7 +39,7 @@ public class VectorSumReducer
       if (vector == null) {
         vector = v.get();
       } else {
-        v.get().addTo(vector);
+        vector.assign(v.get(), Functions.PLUS);
       }
     }
     context.write(key, new VectorWritable(vector));

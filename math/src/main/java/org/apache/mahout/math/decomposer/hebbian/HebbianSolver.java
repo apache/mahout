@@ -187,13 +187,13 @@ public class HebbianSolver {
       Vector previousEigen = null;
       while (hasNotConverged(currentEigen, corpus, state)) {
         int randomStartingIndex = getRandomStartingIndex(corpus, eigens);
-        Vector initialTrainingVector = corpus.getRow(randomStartingIndex);
+        Vector initialTrainingVector = corpus.viewRow(randomStartingIndex);
         state.setTrainingIndex(randomStartingIndex);
         updater.update(currentEigen, initialTrainingVector, state);
         for (int corpusRow = 0; corpusRow < corpus.numRows(); corpusRow++) {
           state.setTrainingIndex(corpusRow);
           if (corpusRow != randomStartingIndex) {
-            updater.update(currentEigen, corpus.getRow(corpusRow), state);
+            updater.update(currentEigen, corpus.viewRow(corpusRow), state);
           }
         }
         state.setFirstPass(false);
@@ -247,7 +247,7 @@ public class HebbianSolver {
     do {
       double r = rng.nextDouble();
       index = (int) (r * corpus.numRows());
-      v = corpus.getRow(index);
+      v = corpus.viewRow(index);
     } while (v == null || v.norm(2) == 0 || v.getNumNondefaultElements() < 5);
     return index;
   }
@@ -275,13 +275,13 @@ public class HebbianSolver {
      * Step 2: zero-out the helper vector because it has already helped.
      */
     for (int i = 0; i < state.getNumEigensProcessed(); i++) {
-      Vector previousEigen = previousEigens.getRow(i);
+      Vector previousEigen = previousEigens.viewRow(i);
       currentPseudoEigen.assign(previousEigen, new PlusMult(-state.getHelperVector().get(i)));
       state.getHelperVector().set(i, 0);
     }
     if (DEBUG && currentPseudoEigen.norm(2) > 0) {
       for (int i = 0; i < state.getNumEigensProcessed(); i++) {
-        Vector previousEigen = previousEigens.getRow(i);
+        Vector previousEigen = previousEigens.viewRow(i);
         log.info("dot with previous: {}", previousEigen.dot(currentPseudoEigen) / currentPseudoEigen.norm(2));
       }
     }

@@ -17,6 +17,7 @@
 package org.apache.mahout.clustering;
 
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.SquareRootFunction;
 
 /**
@@ -68,13 +69,13 @@ public class RunningSumsGaussianAccumulator implements GaussianAccumulator {
     if (s1 == null) {
       s1 = weightedX;
     } else {
-      weightedX.addTo(s1);
+      s1.assign(weightedX, Functions.PLUS);
     }
     Vector x2 = x.times(x).times(weight);
     if (s2 == null) {
       s2 = x2;
     } else {
-      x2.addTo(s2);
+      s2.assign(x2, Functions.PLUS);
     }
   }
 

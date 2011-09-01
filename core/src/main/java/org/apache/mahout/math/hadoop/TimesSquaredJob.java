@@ -285,7 +285,7 @@ public final class TimesSquaredJob {
       while (vectors.hasNext()) {
         VectorWritable v = vectors.next();
         if (v != null) {
-          v.get().addTo(outputVector);
+          outputVector.assign(v.get(), Functions.PLUS);
         }
       }
       out.collect(NullWritable.get(), new VectorWritable(outputVector));

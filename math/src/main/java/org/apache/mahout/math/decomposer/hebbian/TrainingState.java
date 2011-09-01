@@ -51,14 +51,14 @@ public class TrainingState {
   }
 
   public Vector mostRecentEigen() {
-    return currentEigens.getRow(numEigensProcessed - 1);
+    return currentEigens.viewRow(numEigensProcessed - 1);
   }
 
   public Vector currentTrainingProjection() {
-    if (trainingProjections.getRow(trainingIndex) == null) {
+    if (trainingProjections.viewRow(trainingIndex) == null) {
       trainingProjections.assignRow(trainingIndex, new DenseVector(currentEigens.numCols()));
     }
-    return trainingProjections.getRow(trainingIndex);
+    return trainingProjections.viewRow(trainingIndex);
   }
 
   public Matrix getCurrentEigens() {
