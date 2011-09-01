@@ -1,3 +1,20 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.math;
 
 /**
@@ -45,30 +62,6 @@ public class DiagonalMatrix extends AbstractMatrix {
   @Override
   public Matrix assignRow(int row, Vector other) {
     throw new UnsupportedOperationException("Can't assign a row to a diagonal matrix");
-  }
-
-  /**
-   * Return the column at the given index
-   *
-   * @param column an int column index
-   * @return a Vector at the index
-   * @throws IndexException if the index is out of bounds
-   */
-  @Override
-  public Vector getColumn(int column) {
-    return new MatrixVectorView(this, 0, column, 1, 0);
-  }
-
-  /**
-   * Return the row at the given index
-   *
-   * @param row an int row index
-   * @return a Vector at the index
-   * @throws IndexException if the index is out of bounds
-   */
-  @Override
-  public Vector getRow(int row) {
-    return new MatrixVectorView(this, row, 0, 0, 1);
   }
 
   /**

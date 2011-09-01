@@ -154,7 +154,7 @@ public class LDAInference {
   }
   
   private void createPhiMatrix(int docLength) {
-    if (phi == null || phi.getRow(0).size() != docLength) {
+    if (phi == null || phi.rowSize() != docLength) {
       phi = new DenseMatrix(state.getNumTopics(), docLength);
     } else {
       phi.assign(0);

@@ -67,18 +67,9 @@ public abstract class AbstractMatrix implements Matrix {
           return endOfData();
         }
         int i = slice++;
-        return new MatrixSlice(slice(i), i);
+        return new MatrixSlice(viewRow(i), i);
       }
     };
-  }
-
-  /**
-   * Abstracted out for iterating over either rows or columns (default is rows).
-   * @param index the row or column number to grab as a vector (shallowly)
-   * @return the row or column vector at that index.
-   */
-  protected Vector slice(int index) {
-    return getRow(index);
   }
 
   /**
