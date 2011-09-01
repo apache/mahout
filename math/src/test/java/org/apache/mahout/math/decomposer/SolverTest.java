@@ -127,7 +127,7 @@ public abstract class SolverTest extends MahoutTestCase {
                                                           int numCols,
                                                           int entriesPerRow,
                                                           double entryMean) {
-    Matrix m = new SparseRowMatrix(new int[]{numRows, numCols});
+    Matrix m = new SparseRowMatrix(numRows, numCols);
     //double n = 0;
     //Random r = RandomUtils.getRandom();
     Random r = new Random(1234L);

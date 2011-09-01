@@ -25,9 +25,8 @@ public class DiagonalMatrix extends AbstractMatrix {
   private Vector diagonal;
 
   public DiagonalMatrix(Vector values) {
+    super(values.size(), values.size());
     this.diagonal = values;
-    super.cardinality[0] = values.size();
-    super.cardinality[1] = values.size();
   }
 
   public DiagonalMatrix(Matrix values) {
@@ -39,6 +38,7 @@ public class DiagonalMatrix extends AbstractMatrix {
   }
 
   public DiagonalMatrix(double[] values) {
+    super(values.length, values.length);
     this.diagonal = new DenseVector(values);
   }
 
@@ -95,7 +95,7 @@ public class DiagonalMatrix extends AbstractMatrix {
    */
   @Override
   public Matrix like() {
-    return new SparseRowMatrix(size());
+    return new SparseRowMatrix(rowSize(), columnSize());
   }
 
   /**
@@ -107,7 +107,7 @@ public class DiagonalMatrix extends AbstractMatrix {
    */
   @Override
   public Matrix like(int rows, int columns) {
-    return new SparseRowMatrix(new int[]{rows, columns});
+    return new SparseRowMatrix(rows, columns);
   }
 
   @Override

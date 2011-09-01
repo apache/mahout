@@ -306,10 +306,10 @@ public final class TestVectorView extends MahoutTestCase {
   @Test
   public void testCrossProduct() {
     Matrix result = test.cross(test);
-    assertEquals("row size", test.size(), result.size()[0]);
-    assertEquals("col size", test.size(), result.size()[1]);
-    for (int row = 0; row < result.size()[0]; row++) {
-      for (int col = 0; col < result.size()[1]; col++) {
+    assertEquals("row size", test.size(), result.rowSize());
+    assertEquals("col size", test.size(), result.columnSize());
+    for (int row = 0; row < result.rowSize(); row++) {
+      for (int col = 0; col < result.columnSize(); col++) {
         assertEquals("cross[" + row + "][" + col + ']', test.getQuick(row)
             * test.getQuick(col), result.getQuick(row, col), EPSILON);
       }

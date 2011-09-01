@@ -43,14 +43,21 @@ public class UpperTriangular extends AbstractMatrix {
    */
 
   public UpperTriangular(int n) {
+    super(n, n);
     values = new double[n * (n + 1) / 2];
     this.n = n;
-    cardinality[0] = cardinality[1] = n;
   }
 
   public UpperTriangular(Vector data) {
-    n = (int) Math.round((-1 + Math.sqrt(1 + 8 * data.size())) / 2);
-    cardinality[0] = cardinality[1] = n;
+    this((int) Math.round((-1 + Math.sqrt(1 + 8 * data.size())) / 2), data);
+  }
+
+  public UpperTriangular(double[] data, boolean shallow) {
+    this((int) Math.round((-1 + Math.sqrt(1 + 8 * data.length)) / 2), data, shallow);
+  }
+
+  private UpperTriangular(int rows, Vector data) {
+    super(rows, rows);
     values = new double[n * (n + 1) / 2];
     int n = data.size();
     // if ( data instanceof DenseVector )
@@ -62,13 +69,12 @@ public class UpperTriangular extends AbstractMatrix {
     }
   }
 
-  public UpperTriangular(double[] data, boolean shallow) {
+  private UpperTriangular(int rows, double[] data, boolean shallow) {
+    super(rows, rows);
     if (data == null) {
       throw new IllegalArgumentException("data");
     }
     values = shallow ? data : data.clone();
-    n = (int) Math.round((-1 + Math.sqrt(1 + 8 * data.length)) / 2);
-    cardinality[0] = cardinality[1] = n;
   }
 
   // copy-constructor
@@ -78,7 +84,6 @@ public class UpperTriangular extends AbstractMatrix {
 
   @Override
   public Matrix assignColumn(int column, Vector other) {
-
     throw new UnsupportedOperationException();
   }
 

@@ -69,7 +69,7 @@ public class TrainUtils {
     Preconditions.checkNotNull(scoresPerFeature);
     Preconditions.checkNotNull(scoresPerLabel);
 
-    Matrix scoresPerLabelAndFeature = new SparseMatrix(new int[]{scoresPerLabel.size(), scoresPerFeature.size()});
+    Matrix scoresPerLabelAndFeature = new SparseMatrix(scoresPerLabel.size(), scoresPerFeature.size());
     for (Pair<IntWritable,VectorWritable> entry : new SequenceFileDirIterable<IntWritable,VectorWritable>(
         new Path(base, TrainNaiveBayesJob.SUMMED_OBSERVATIONS), PathType.LIST, PathFilters.partFilter(), conf)) {
       scoresPerLabelAndFeature.assignRow(entry.getFirst().get(), entry.getSecond().get());

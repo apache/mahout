@@ -25,9 +25,6 @@ public class MatrixView extends AbstractMatrix {
   // the offset into the Matrix
   private int[] offset;
 
-  private MatrixView() {
-  }
-
   /**
    * Construct a view of the matrix with given offset and cardinality
    *
@@ -36,6 +33,7 @@ public class MatrixView extends AbstractMatrix {
    * @param size        the int[2] size of the view
    */
   public MatrixView(Matrix matrix, int[] offset, int[] size) {
+    super(size[ROW], size[COL]);
     int rowOffset = offset[ROW];
     if (rowOffset < 0) {
       throw new IndexException(rowOffset, rowSize());
@@ -57,7 +55,6 @@ public class MatrixView extends AbstractMatrix {
     }
     this.matrix = matrix;
     this.offset = offset;
-    this.cardinality = Arrays.copyOf(size, 2);
   }
 
   @Override
@@ -65,7 +62,6 @@ public class MatrixView extends AbstractMatrix {
     MatrixView clone = (MatrixView) super.clone();
     clone.matrix = matrix.clone();
     clone.offset = offset.clone();
-    clone.cardinality = cardinality.clone();
     return clone;
   }
 
@@ -91,7 +87,8 @@ public class MatrixView extends AbstractMatrix {
 
   @Override
   public int[] getNumNondefaultElements() {
-    return cardinality;
+    return new int[]{rowSize(), columnSize()};
+
   }
 
   @Override

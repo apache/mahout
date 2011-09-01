@@ -214,7 +214,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
     File tmpDir = getTestTempDir("tmp");
 
     Double na = Double.NaN;
-    Matrix preferences = new SparseRowMatrix(new int[] { 4, 4 }, new Vector[] {
+    Matrix preferences = new SparseRowMatrix(4, 4, new Vector[] {
         new DenseVector(new double[] {5.0, 5.0, 2.0,  na }),
         new DenseVector(new double[] {2.0,  na, 3.0, 5.0 }),
         new DenseVector(new double[] { na, 5.0,  na, 3.0 }),

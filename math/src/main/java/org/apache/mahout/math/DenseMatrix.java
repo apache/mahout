@@ -24,9 +24,6 @@ public class DenseMatrix extends AbstractMatrix {
 
   private double[][] values;
 
-  public DenseMatrix() {
-  }
-  
   /**
    * Construct a matrix from the given values
    * 
@@ -34,13 +31,13 @@ public class DenseMatrix extends AbstractMatrix {
    *          a double[][]
    */
   public DenseMatrix(double[][] values) {
+    super(values.length, values[0].length);
     // clone the rows
     this.values = new double[values.length][];
     // be careful, need to clone the columns too
     for (int i = 0; i < values.length; i++) {
       this.values[i] = values[i].clone();
     }
-    initSize();
   }
   
   /**
@@ -49,15 +46,10 @@ public class DenseMatrix extends AbstractMatrix {
    * @param columns The number of columns in the result.
    */
   public DenseMatrix(int rows, int columns) {
+    super(rows, columns);
     this.values = new double[rows][columns];
-    initSize();
   }
 
-  private void initSize() {
-    cardinality[ROW] = values.length;
-    cardinality[COL] = values[0].length;
-  }
-  
   @Override
   public Matrix clone() {
     DenseMatrix clone = (DenseMatrix) super.clone();
@@ -87,12 +79,7 @@ public class DenseMatrix extends AbstractMatrix {
   public void setQuick(int row, int column, double value) {
     values[row][column] = value;
   }
-  
-  @Override
-  public int[] getNumNondefaultElements() {
-    return size();
-  }
-  
+
   @Override
   public Matrix viewPart(int[] offset, int[] size) {
     int rowOffset = offset[ROW];

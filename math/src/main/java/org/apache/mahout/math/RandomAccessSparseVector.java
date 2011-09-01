@@ -67,8 +67,7 @@ public class RandomAccessSparseVector extends AbstractVector {
 
   @Override
   protected Matrix matrixLike(int rows, int columns) {
-    int[] cardinality = {rows, columns};
-    return new SparseRowMatrix(cardinality);
+    return new SparseRowMatrix(rows, columns);
   }
 
   @Override

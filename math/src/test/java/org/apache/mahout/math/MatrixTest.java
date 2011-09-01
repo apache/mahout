@@ -54,18 +54,16 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   @Test
   public void testCardinality() {
-    int[] c = test.size();
-    assertEquals("row cardinality", values.length, c[ROW]);
-    assertEquals("col cardinality", values[0].length, c[COL]);
+    assertEquals("row cardinality", values.length, test.rowSize());
+    assertEquals("col cardinality", values[0].length, test.columnSize());
   }
 
   @Test
   public void testCopy() {
-    int[] c = test.size();
     Matrix copy = test.clone();
     assertSame("wrong class", copy.getClass(), test.getClass());
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < test.rowSize(); row++) {
+      for (int col = 0; col < test.columnSize(); col++) {
         assertEquals("value[" + row + "][" + col + ']',
             test.getQuick(row, col), copy.getQuick(row, col), EPSILON);
       }
@@ -85,9 +83,8 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   @Test
   public void testGetQuick() {
-    int[] c = test.size();
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < test.rowSize(); row++) {
+      for (int col = 0; col < test.columnSize(); col++) {
         assertEquals("value[" + row + "][" + col + ']', values[row][col], test
             .getQuick(row, col), EPSILON);
       }
@@ -98,21 +95,20 @@ public abstract class MatrixTest extends MahoutTestCase {
   public void testLike() {
     Matrix like = test.like();
     assertSame("type", like.getClass(), test.getClass());
-    assertEquals("rows", test.size()[ROW], like.size()[ROW]);
-    assertEquals("columns", test.size()[COL], like.size()[COL]);
+    assertEquals("rows", test.rowSize(), like.rowSize());
+    assertEquals("columns", test.columnSize(), like.columnSize());
   }
 
   @Test
   public void testLikeIntInt() {
     Matrix like = test.like(4, 4);
     assertSame("type", like.getClass(), test.getClass());
-    assertEquals("rows", 4, like.size()[ROW]);
-    assertEquals("columns", 4, like.size()[COL]);
+    assertEquals("rows", 4, like.rowSize());
+    assertEquals("columns", 4, like.columnSize());
   }
 
   @Test
   public void testSetQuick() {
-    int[] c = test.size();
     for (int row = 0; row < test.rowSize(); row++) {
       for (int col = 0; col < test.columnSize(); col++) {
         test.setQuick(row, col, 1.23);
@@ -136,11 +132,10 @@ public abstract class MatrixTest extends MahoutTestCase {
     Matrix view = test.viewPart(offset, size);
     assertEquals(2, view.rowSize());
     assertEquals(1, view.columnSize());
-    int[] c = view.size();
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < view.rowSize(); row++) {
+      for (int col = 0; col < view.columnSize(); col++) {
         assertEquals("value[" + row + "][" + col + ']',
-            values[row + 1][col + 1], view.getQuick(row, col), EPSILON);
+            values[row + 1][col + 1], view.get(row, col), EPSILON);
       }
     }
   }
@@ -168,10 +163,9 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   @Test
   public void testAssignDouble() {
-    int[] c = test.size();
     test.assign(4.53);
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < test.rowSize(); row++) {
+      for (int col = 0; col < test.columnSize(); col++) {
         assertEquals("value[" + row + "][" + col + ']', 4.53, test.getQuick(
             row, col), EPSILON);
       }
@@ -180,10 +174,9 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   @Test
   public void testAssignDoubleArrayArray() {
-    int[] c = test.size();
     test.assign(new double[3][2]);
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < test.rowSize(); row++) {
+      for (int col = 0; col < test.columnSize(); col++) {
         assertEquals("value[" + row + "][" + col + ']', 0.0, test.getQuick(row,
             col), EPSILON);
       }
@@ -192,16 +185,14 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   @Test(expected = CardinalityException.class)
   public void testAssignDoubleArrayArrayCardinality() {
-    int[] c = test.size();
-    test.assign(new double[c[ROW] + 1][c[COL]]);
+    test.assign(new double[test.rowSize() + 1][test.columnSize()]);
   }
 
   @Test
   public void testAssignMatrixBinaryFunction() {
-    int[] c = test.size();
     test.assign(test, Functions.PLUS);
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < test.rowSize(); row++) {
+      for (int col = 0; col < test.columnSize(); col++) {
         assertEquals("value[" + row + "][" + col + ']', 2 * values[row][col],
             test.getQuick(row, col), EPSILON);
       }
@@ -215,11 +206,10 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   @Test
   public void testAssignMatrix() {
-    int[] c = test.size();
     Matrix value = test.like();
     value.assign(test);
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < test.rowSize(); row++) {
+      for (int col = 0; col < test.columnSize(); col++) {
         assertEquals("value[" + row + "][" + col + ']',
             test.getQuick(row, col), value.getQuick(row, col), EPSILON);
       }
@@ -233,10 +223,9 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   @Test
   public void testAssignUnaryFunction() {
-    int[] c = test.size();
     test.assign(Functions.mult(-1));
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < test.rowSize(); row++) {
+      for (int col = 0; col < test.columnSize(); col++) {
         assertEquals("value[" + row + "][" + col + ']', -values[row][col], test
             .getQuick(row, col), EPSILON);
       }
@@ -322,10 +311,9 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   @Test
   public void testDivide() {
-    int[] c = test.size();
     Matrix value = test.divide(4.53);
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < test.rowSize(); row++) {
+      for (int col = 0; col < test.columnSize(); col++) {
         assertEquals("value[" + row + "][" + col + ']',
             values[row][col] / 4.53, value.getQuick(row, col), EPSILON);
       }
@@ -334,9 +322,8 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   @Test
   public void testGet() {
-    int[] c = test.size();
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < test.rowSize(); row++) {
+      for (int col = 0; col < test.columnSize(); col++) {
         assertEquals("value[" + row + "][" + col + ']', values[row][col], test
             .get(row, col), EPSILON);
       }
@@ -345,9 +332,8 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   @Test(expected = IndexException.class)
   public void testGetIndexUnder() {
-    int[] c = test.size();
-    for (int row = -1; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = -1; row < test.rowSize(); row++) {
+      for (int col = 0; col < test.columnSize(); col++) {
         test.get(row, col);
       }
     }
@@ -355,9 +341,8 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   @Test(expected = IndexException.class)
   public void testGetIndexOver() {
-    int[] c = test.size();
-    for (int row = 0; row < c[ROW] + 1; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < test.rowSize() + 1; row++) {
+      for (int col = 0; col < test.columnSize(); col++) {
         test.get(row, col);
       }
     }
@@ -365,10 +350,9 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   @Test
   public void testMinus() {
-    int[] c = test.size();
     Matrix value = test.minus(test);
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < test.rowSize(); row++) {
+      for (int col = 0; col < test.columnSize(); col++) {
         assertEquals("value[" + row + "][" + col + ']', 0.0, value.getQuick(
             row, col), EPSILON);
       }
@@ -382,10 +366,9 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   @Test
   public void testPlusDouble() {
-    int[] c = test.size();
     Matrix value = test.plus(4.53);
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < test.rowSize(); row++) {
+      for (int col = 0; col < test.columnSize(); col++) {
         assertEquals("value[" + row + "][" + col + ']',
             values[row][col] + 4.53, value.getQuick(row, col), EPSILON);
       }
@@ -394,10 +377,9 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   @Test
   public void testPlusMatrix() {
-    int[] c = test.size();
     Matrix value = test.plus(test);
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < test.rowSize(); row++) {
+      for (int col = 0; col < test.columnSize(); col++) {
         assertEquals("value[" + row + "][" + col + ']', values[row][col] * 2,
             value.getQuick(row, col), EPSILON);
       }
@@ -411,9 +393,8 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   @Test(expected = IndexException.class)
   public void testSetUnder() {
-    int[] c = test.size();
-    for (int row = -1; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = -1; row < test.rowSize(); row++) {
+      for (int col = 0; col < test.columnSize(); col++) {
         test.set(row, col, 1.23);
       }
     }
@@ -421,9 +402,8 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   @Test(expected = IndexException.class)
   public void testSetOver() {
-    int[] c = test.size();
-    for (int row = 0; row < c[ROW] + 1; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < test.rowSize() + 1; row++) {
+      for (int col = 0; col < test.columnSize(); col++) {
         test.set(row, col, 1.23);
       }
     }
@@ -431,10 +411,9 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   @Test
   public void testTimesDouble() {
-    int[] c = test.size();
     Matrix value = test.times(4.53);
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < test.rowSize(); row++) {
+      for (int col = 0; col < test.columnSize(); col++) {
         assertEquals("value[" + row + "][" + col + ']',
             values[row][col] * 4.53, value.getQuick(row, col), EPSILON);
       }
@@ -443,12 +422,10 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   @Test
   public void testTimesMatrix() {
-    int[] c = test.size();
     Matrix transpose = test.transpose();
     Matrix value = test.times(transpose);
-    int[] v = value.size();
-    assertEquals("rows", c[ROW], v[ROW]);
-    assertEquals("cols", c[ROW], v[COL]);
+    assertEquals("rows", test.rowSize(), value.rowSize());
+    assertEquals("cols", test.rowSize(), value.columnSize());
 
     Matrix expected = new DenseMatrix(new double[][]{{5.0, 11.0, 17.0},
         {11.0, 25.0, 39.0}, {17.0, 39.0, 61.0}}).times(1.21);
@@ -495,13 +472,11 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   @Test
   public void testTranspose() {
-    int[] c = test.size();
     Matrix transpose = test.transpose();
-    int[] t = transpose.size();
-    assertEquals("rows", c[COL], t[ROW]);
-    assertEquals("cols", c[ROW], t[COL]);
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    assertEquals("rows", test.columnSize(), transpose.rowSize());
+    assertEquals("cols", test.rowSize(), transpose.columnSize());
+    for (int row = 0; row < test.rowSize(); row++) {
+      for (int col = 0; col < test.columnSize(); col++) {
         assertEquals("value[" + row + "][" + col + ']',
             test.getQuick(row, col), transpose.getQuick(col, row), EPSILON);
       }

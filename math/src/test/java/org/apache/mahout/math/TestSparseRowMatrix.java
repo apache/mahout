@@ -21,10 +21,9 @@ public final class TestSparseRowMatrix extends MatrixTest {
 
   @Override
   public Matrix matrixFactory(double[][] values) {
-    int[] cardinality = {values.length, values[0].length};
-    Matrix matrix = new SparseRowMatrix(cardinality);
-    for (int row = 0; row < cardinality[ROW]; row++) {
-      for (int col = 0; col < cardinality[COL]; col++) {
+    Matrix matrix = new SparseRowMatrix(values.length, values[0].length);
+    for (int row = 0; row < matrix.rowSize(); row++) {
+      for (int col = 0; col < matrix.columnSize(); col++) {
         matrix.setQuick(row, col, values[row][col]);
       }
     }

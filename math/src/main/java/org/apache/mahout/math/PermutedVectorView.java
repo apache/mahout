@@ -43,7 +43,7 @@ public class PermutedVectorView extends AbstractVector {
     if (vector.isDense()) {
       return new DenseMatrix(rows, columns);
     } else {
-      return new SparseRowMatrix(new int[] {rows, columns});
+      return new SparseRowMatrix(rows, columns);
     }
   }
 

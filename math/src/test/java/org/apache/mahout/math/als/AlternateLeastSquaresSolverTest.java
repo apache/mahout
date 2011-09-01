@@ -42,7 +42,7 @@ public class AlternateLeastSquaresSolverTest extends MahoutTestCase {
   public void addLambdaTimesNuiTimesE() {
     int nui = 5;
     double lambda = 0.2;
-    Matrix matrix = new SparseMatrix(new int[] { 5, 5 });
+    Matrix matrix = new SparseMatrix(5, 5);
 
     solver.addLambdaTimesNuiTimesE(matrix, lambda, nui);
 

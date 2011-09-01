@@ -111,7 +111,7 @@ public class MatrixWritable implements Writable {
     if (dense) {
       r = new DenseMatrix(rows, columns);
     } else {
-      r = new SparseRowMatrix(new int[]{rows, columns}, !sequential);
+      r = new SparseRowMatrix(rows, columns, !sequential);
     }
 
     for (int row = 0; row < rows; row++) {

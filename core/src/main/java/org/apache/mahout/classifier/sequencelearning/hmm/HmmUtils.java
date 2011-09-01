@@ -327,10 +327,8 @@ public final class HmmUtils {
     // allocate the sparse data structures
     RandomAccessSparseVector sparseIp = new RandomAccessSparseVector(model
         .getNrOfHiddenStates());
-    SparseMatrix sparseEm = new SparseMatrix(new int[]{
-        model.getNrOfHiddenStates(), model.getNrOfOutputStates()});
-    SparseMatrix sparseTr = new SparseMatrix(new int[]{
-        model.getNrOfHiddenStates(), model.getNrOfHiddenStates()});
+    SparseMatrix sparseEm = new SparseMatrix(model.getNrOfHiddenStates(), model.getNrOfOutputStates());
+    SparseMatrix sparseTr = new SparseMatrix(model.getNrOfHiddenStates(), model.getNrOfHiddenStates());
     // now transfer the values
     for (int i = 0; i < model.getNrOfHiddenStates(); ++i) {
       double value = ip.getQuick(i);

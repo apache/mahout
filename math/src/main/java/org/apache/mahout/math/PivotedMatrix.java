@@ -34,8 +34,7 @@ public class PivotedMatrix extends AbstractMatrix {
     this(base, pivot, java.util.Arrays.copyOf(pivot, pivot.length));
   }
   public PivotedMatrix(Matrix base, int[] rowPivot, int[] columnPivot) {
-    cardinality[ROW] = base.rowSize();
-    cardinality[COL] = base.columnSize();
+    super(base.rowSize(), base.columnSize());
 
     this.base = base;
     this.rowPivot = rowPivot;

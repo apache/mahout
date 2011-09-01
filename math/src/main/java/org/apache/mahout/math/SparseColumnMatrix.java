@@ -22,45 +22,43 @@ package org.apache.mahout.math;
  * SparseVectors.
  */
 public class SparseColumnMatrix extends AbstractMatrix {
-  private Vector[] columns;
-
-  public SparseColumnMatrix() {
-  }
+  private Vector[] columnVectors;
 
   /**
    * Construct a matrix of the given cardinality with the given data columns
    *
-   * @param cardinality the int[2] cardinality
+   * @param rows
    * @param columns     a RandomAccessSparseVector[] array of columns
+   * @param columnVectors
    */
-  public SparseColumnMatrix(int[] cardinality, RandomAccessSparseVector[] columns) {
-    this.cardinality = cardinality.clone();
-    this.columns = columns.clone();
-    for (int col = 0; col < cardinality[COL]; col++) {
-      this.columns[col] = columns[col].clone();
+  public SparseColumnMatrix(int rows, int columns, RandomAccessSparseVector[] columnVectors) {
+    super(rows, columns);
+    this.columnVectors = this.columnVectors.clone();
+    for (int col = 0; col < columnSize(); col++) {
+      this.columnVectors[col] = this.columnVectors[col].clone();
     }
   }
 
   /**
    * Construct a matrix of the given cardinality
    *
-   * @param cardinality the int[2] cardinality
+   * @param rows
+   * @param columns
    */
-  public SparseColumnMatrix(int[] cardinality) {
-    this.cardinality = cardinality.clone();
-    this.columns = new RandomAccessSparseVector[cardinality[COL]];
-    for (int col = 0; col < cardinality[COL]; col++) {
-      this.columns[col] = new RandomAccessSparseVector(cardinality[ROW]);
+  public SparseColumnMatrix(int rows, int columns) {
+    super(rows, columns);
+    this.columnVectors = new RandomAccessSparseVector[columnSize()];
+    for (int col = 0; col < columnSize(); col++) {
+      this.columnVectors[col] = new RandomAccessSparseVector(rowSize());
     }
   }
 
   @Override
   public Matrix clone() {
     SparseColumnMatrix clone = (SparseColumnMatrix) super.clone();
-    clone.cardinality = cardinality.clone();
-    clone.columns = new Vector[columns.length];
-    for (int i = 0; i < columns.length; i++) {
-      clone.columns[i] = columns[i].clone();
+    clone.columnVectors = new Vector[columnVectors.length];
+    for (int i = 0; i < columnVectors.length; i++) {
+      clone.columnVectors[i] = columnVectors[i].clone();
     }
     return clone;
   }
@@ -76,36 +74,33 @@ public class SparseColumnMatrix extends AbstractMatrix {
 
   @Override
   public double getQuick(int row, int column) {
-    return columns[column] == null ? 0.0 : columns[column].getQuick(row);
+    return columnVectors[column] == null ? 0.0 : columnVectors[column].getQuick(row);
   }
 
   @Override
   public Matrix like() {
-    return new SparseColumnMatrix(cardinality);
+    return new SparseColumnMatrix(rowSize(), columnSize());
   }
 
   @Override
   public Matrix like(int rows, int columns) {
-    int[] c = new int[2];
-    c[ROW] = rows;
-    c[COL] = columns;
-    return new SparseColumnMatrix(c);
+    return new SparseColumnMatrix(rows, columns);
   }
 
   @Override
   public void setQuick(int row, int column, double value) {
-    if (columns[column] == null) {
-      columns[column] = new RandomAccessSparseVector(cardinality[ROW]);
+    if (columnVectors[column] == null) {
+      columnVectors[column] = new RandomAccessSparseVector(rowSize());
     }
-    columns[column].setQuick(row, value);
+    columnVectors[column].setQuick(row, value);
   }
 
   @Override
   public int[] getNumNondefaultElements() {
     int[] result = new int[2];
-    result[COL] = columns.length;
-    for (int col = 0; col < cardinality[COL]; col++) {
-      result[ROW] = Math.max(result[ROW], columns[col]
+    result[COL] = columnVectors.length;
+    for (int col = 0; col < columnSize(); col++) {
+      result[ROW] = Math.max(result[ROW], columnVectors[col]
           .getNumNondefaultElements());
     }
     return result;
@@ -114,51 +109,51 @@ public class SparseColumnMatrix extends AbstractMatrix {
   @Override
   public Matrix viewPart(int[] offset, int[] size) {
     if (offset[ROW] < 0) {
-      throw new IndexException(offset[ROW], columns[COL].size());
+      throw new IndexException(offset[ROW], columnVectors[COL].size());
     }
-    if (offset[ROW] + size[ROW] > columns[COL].size()) {
-      throw new IndexException(offset[ROW] + size[ROW], columns[COL].size());
+    if (offset[ROW] + size[ROW] > columnVectors[COL].size()) {
+      throw new IndexException(offset[ROW] + size[ROW], columnVectors[COL].size());
     }
     if (offset[COL] < 0) {
-      throw new IndexException(offset[COL], columns.length);
+      throw new IndexException(offset[COL], columnVectors.length);
     }
-    if (offset[COL] + size[COL] > columns.length) {
-      throw new IndexException(offset[COL] + size[COL], columns.length);
+    if (offset[COL] + size[COL] > columnVectors.length) {
+      throw new IndexException(offset[COL] + size[COL], columnVectors.length);
     }
     return new MatrixView(this, offset, size);
   }
 
   @Override
   public Matrix assignColumn(int column, Vector other) {
-    if (cardinality[ROW] != other.size()) {
-      throw new CardinalityException(cardinality[ROW], other.size());
+    if (rowSize() != other.size()) {
+      throw new CardinalityException(rowSize(), other.size());
     }
-    if (column < 0 || column >= cardinality[COL]) {
-      throw new IndexException(column, cardinality[COL]);
+    if (column < 0 || column >= columnSize()) {
+      throw new IndexException(column, columnSize());
     }
-    columns[column].assign(other);
+    columnVectors[column].assign(other);
     return this;
   }
 
   @Override
   public Matrix assignRow(int row, Vector other) {
-    if (cardinality[COL] != other.size()) {
-      throw new CardinalityException(cardinality[COL], other.size());
+    if (columnSize() != other.size()) {
+      throw new CardinalityException(columnSize(), other.size());
     }
-    if (row < 0 || row >= cardinality[ROW]) {
-      throw new IndexException(row, cardinality[ROW]);
+    if (row < 0 || row >= rowSize()) {
+      throw new IndexException(row, rowSize());
     }
-    for (int col = 0; col < cardinality[COL]; col++) {
-      columns[col].setQuick(row, other.getQuick(col));
+    for (int col = 0; col < columnSize(); col++) {
+      columnVectors[col].setQuick(row, other.getQuick(col));
     }
     return this;
   }
 
   @Override
   public Vector viewColumn(int column) {
-    if (column < 0 || column >= cardinality[COL]) {
-      throw new IndexException(column, cardinality[COL]);
+    if (column < 0 || column >= columnSize()) {
+      throw new IndexException(column, columnSize());
     }
-    return columns[column];
+    return columnVectors[column];
   }
 }

@@ -22,94 +22,90 @@ package org.apache.mahout.math;
  * either SequentialAccessSparseVectors or RandomAccessSparseVectors.
  */
 public class SparseRowMatrix extends AbstractMatrix {
-  private Vector[] rows;
+  private Vector[] rowVectors;
 
   private boolean randomAccessRows;
 
-  public SparseRowMatrix() {
-  }
-
   /**
-   * Construct a matrix of the given cardinality with the given rows
+   * Construct a sparse matrix starting with the provided row vectors.
    *
-   * @param cardinality the int[2] cardinality desired
-   * @param rows        a Vector[] array of rows
+   * @param rows              The number of rows in the result
+   * @param columns           The number of columns in the result
+   * @param rowVectors        a Vector[] array of rows
    */
-  public SparseRowMatrix(int[] cardinality, Vector[] rows) {
-    this(cardinality, rows, false, rows instanceof RandomAccessSparseVector[]);
+  public SparseRowMatrix(int rows, int columns, Vector[] rowVectors) {
+    this(rows, columns, rowVectors, false, rowVectors instanceof RandomAccessSparseVector[]);
   }
 
-  public SparseRowMatrix(int[] cardinality, boolean randomAccess) {
-    this(cardinality, randomAccess
-                    ? new RandomAccessSparseVector[cardinality[ROW]]
-                    : new SequentialAccessSparseVector[cardinality[ROW]],
+  public SparseRowMatrix(int rows, int columns, boolean randomAccess) {
+    this(rows, columns, randomAccess
+                    ? new RandomAccessSparseVector[rows]
+                    : new SequentialAccessSparseVector[rows],
         true,
         randomAccess);
   }
   
-  public SparseRowMatrix(int[] cardinality, Vector[] rows, boolean shallowCopy, boolean randomAccess) {
-    this.cardinality = cardinality.clone();
+  public SparseRowMatrix(int rows, int columns, Vector[] vectors, boolean shallowCopy, boolean randomAccess) {
+    super(rows, columns);
     this.randomAccessRows = randomAccess;
-    this.rows = rows.clone();
-    for (int row = 0; row < cardinality[ROW]; row++) {
-      if (rows[row] == null) {
-        rows[row] = randomAccess
-                  ? new RandomAccessSparseVector(numCols(), 10)
-                  : new SequentialAccessSparseVector(numCols(), 10);
+    this.rowVectors = vectors.clone();
+    for (int row = 0; row < rows; row++) {
+      if (vectors[row] == null) {
+        // TODO: this can't be right to change the argument
+        vectors[row] = randomAccess
+          ? new RandomAccessSparseVector(numCols(), 10)
+          : new SequentialAccessSparseVector(numCols(), 10);
       }
-      this.rows[row] = shallowCopy ? rows[row] : rows[row].clone();
+      this.rowVectors[row] = shallowCopy ? vectors[row] : vectors[row].clone();
     }
   }
 
   /**
    * Construct a matrix of the given cardinality, with rows defaulting to RandomAccessSparseVector implementation
    *
-   * @param cardinality the int[2] cardinality desired
+   * @param rows
+   * @param columns
    */
-  public SparseRowMatrix(int[] cardinality) {
-    this(cardinality, true);
+  public SparseRowMatrix(int rows, int columns) {
+    this(rows, columns, true);
   }
 
   @Override
   public Matrix clone() {
     SparseRowMatrix clone = (SparseRowMatrix) super.clone();
-    clone.cardinality = cardinality.clone();
-    clone.rows = new Vector[rows.length];
-    for (int i = 0; i < rows.length; i++) {
-      clone.rows[i] = rows[i].clone();
+    clone.rowVectors = new Vector[rowVectors.length];
+    for (int i = 0; i < rowVectors.length; i++) {
+      clone.rowVectors[i] = rowVectors[i].clone();
     }
     return clone;
   }
 
   @Override
   public double getQuick(int row, int column) {
-    return rows[row] == null ? 0.0 : rows[row].getQuick(column);
+    return rowVectors[row] == null ? 0.0 : rowVectors[row].getQuick(column);
   }
 
   @Override
   public Matrix like() {
-    return new SparseRowMatrix(cardinality, randomAccessRows);
+    return new SparseRowMatrix(rowSize(), columnSize(), randomAccessRows);
   }
 
   @Override
   public Matrix like(int rows, int columns) {
-    int[] c = new int[2];
-    c[ROW] = rows;
-    c[COL] = columns;
-    return new SparseRowMatrix(c, randomAccessRows);
+    return new SparseRowMatrix(rows, columns, randomAccessRows);
   }
 
   @Override
   public void setQuick(int row, int column, double value) {
-    rows[row].setQuick(column, value);
+    rowVectors[row].setQuick(column, value);
   }
 
   @Override
   public int[] getNumNondefaultElements() {
     int[] result = new int[2];
-    result[ROW] = rows.length;
-    for (int row = 0; row < cardinality[ROW]; row++) {
-      result[COL] = Math.max(result[COL], rows[row].getNumNondefaultElements());
+    result[ROW] = rowVectors.length;
+    for (int row = 0; row < rowSize(); row++) {
+      result[COL] = Math.max(result[COL], rowVectors[row].getNumNondefaultElements());
     }
     return result;
   }
@@ -117,43 +113,43 @@ public class SparseRowMatrix extends AbstractMatrix {
   @Override
   public Matrix viewPart(int[] offset, int[] size) {
     if (offset[ROW] < 0) {
-      throw new IndexException(offset[ROW], rows.length);
+      throw new IndexException(offset[ROW], rowVectors.length);
     }
-    if (offset[ROW] + size[ROW] > rows.length) {
-      throw new IndexException(offset[ROW] + size[ROW], rows.length);
+    if (offset[ROW] + size[ROW] > rowVectors.length) {
+      throw new IndexException(offset[ROW] + size[ROW], rowVectors.length);
     }
     if (offset[COL] < 0) {
-      throw new IndexException(offset[COL], rows[ROW].size());
+      throw new IndexException(offset[COL], rowVectors[ROW].size());
     }
-    if (offset[COL] + size[COL] > rows[ROW].size()) {
-      throw new IndexException(offset[COL] + size[COL], rows[ROW].size());
+    if (offset[COL] + size[COL] > rowVectors[ROW].size()) {
+      throw new IndexException(offset[COL] + size[COL], rowVectors[ROW].size());
     }
     return new MatrixView(this, offset, size);
   }
 
   @Override
   public Matrix assignColumn(int column, Vector other) {
-    if (cardinality[ROW] != other.size()) {
-      throw new CardinalityException(cardinality[ROW], other.size());
+    if (rowSize() != other.size()) {
+      throw new CardinalityException(rowSize(), other.size());
     }
-    if (column < 0 || column >= cardinality[COL]) {
-      throw new IndexException(column, cardinality[COL]);
+    if (column < 0 || column >= columnSize()) {
+      throw new IndexException(column, columnSize());
     }
-    for (int row = 0; row < cardinality[ROW]; row++) {
-      rows[row].setQuick(column, other.getQuick(row));
+    for (int row = 0; row < rowSize(); row++) {
+      rowVectors[row].setQuick(column, other.getQuick(row));
     }
     return this;
   }
 
   @Override
   public Matrix assignRow(int row, Vector other) {
-    if (cardinality[COL] != other.size()) {
-      throw new CardinalityException(cardinality[COL], other.size());
+    if (columnSize() != other.size()) {
+      throw new CardinalityException(columnSize(), other.size());
     }
-    if (row < 0 || row >= cardinality[ROW]) {
-      throw new IndexException(row, cardinality[ROW]);
+    if (row < 0 || row >= rowSize()) {
+      throw new IndexException(row, rowSize());
     }
-    rows[row].assign(other);
+    rowVectors[row].assign(other);
     return this;
   }
 
@@ -164,10 +160,10 @@ public class SparseRowMatrix extends AbstractMatrix {
    */
   @Override
   public Vector viewRow(int row) {
-    if (row < 0 || row >= cardinality[ROW]) {
-      throw new IndexException(row, cardinality[ROW]);
+    if (row < 0 || row >= rowSize()) {
+      throw new IndexException(row, rowSize());
     }
-    return rows[row];
+    return rowVectors[row];
   }
 
 }

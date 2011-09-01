@@ -45,7 +45,7 @@ public class InMemoryBayesDatastore implements Datastore {
   
   private final OpenIntDoubleHashMap thetaNormalizerPerLabel = new OpenIntDoubleHashMap();
   
-  private final Matrix weightMatrix = new SparseMatrix(new int[] {1, 0});
+  private final Matrix weightMatrix = new SparseMatrix(1, 0);
   
   private final BayesParameters params;
   

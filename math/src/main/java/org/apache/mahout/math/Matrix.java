@@ -117,13 +117,6 @@ public interface Matrix extends Cloneable, VectorIterable {
   double aggregate(DoubleDoubleFunction combiner, DoubleFunction mapper);
 
   /**
-   * Return the cardinality of the recipient (the maximum number of values)
-   *
-   * @return an int[2]
-   */
-  int[] size();
-
-  /**
    * @return The number of rows in the matrix.
    */
   int columnSize();

@@ -35,21 +35,21 @@ public abstract class AbstractMatrix implements Matrix {
 
   protected Map<String, Integer> rowLabelBindings;
 
-  protected int[] cardinality = new int[2];
+  protected int rows, columns;
+
+  public AbstractMatrix(int rows, int columns) {
+    this.rows = rows;
+    this.columns = columns;
+  }
 
   @Override
   public int columnSize() {
-    return cardinality[COL];
+    return columns;
   }
 
   @Override
   public int rowSize() {
-    return cardinality[ROW];
-  }
-
-  @Override
-  public int[] size() {
-    return cardinality;
+    return rows;
   }
 
   @Override
@@ -171,12 +171,12 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public int numRows() {
-    return size()[ROW];
+    return rowSize();
   }
 
   @Override
   public int numCols() {
-    return size()[COL];
+    return columnSize();
   }
 
   @Override
@@ -186,9 +186,10 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public Matrix assign(double value) {
-    int[] c = size();
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    int rows = rowSize();
+    int columns = columnSize();
+    for (int row = 0; row < rows; row++) {
+      for (int col = 0; col < columns; col++) {
         setQuick(row, col, value);
       }
     }
@@ -197,17 +198,16 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public Matrix assign(double[][] values) {
-    int[] c = size();
-    if (c[ROW] != values.length) {
-      throw new CardinalityException(c[ROW], values.length);
+    if (rowSize() != values.length) {
+      throw new CardinalityException(rowSize(), values.length);
     }
-    for (int row = 0; row < c[ROW]; row++) {
-      if (c[COL] == values[row].length) {
-        for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < rowSize(); row++) {
+      if (columnSize() == values[row].length) {
+        for (int col = 0; col < columnSize(); col++) {
           setQuick(row, col, values[row][col]);
         }
       } else {
-        throw new CardinalityException(c[COL], values[row].length);
+        throw new CardinalityException(columnSize(), values[row].length);
       }
     }
     return this;
@@ -215,16 +215,16 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public Matrix assign(Matrix other, DoubleDoubleFunction function) {
-    int[] c = size();
-    int[] o = other.size();
-    if (c[ROW] != o[ROW]) {
-      throw new CardinalityException(c[ROW], o[ROW]);
+    int rows = rowSize();
+    int columns = columnSize();
+    if (rows != other.rowSize()) {
+      throw new CardinalityException(rowSize(), other.rowSize());
     }
-    if (c[COL] != o[COL]) {
-      throw new CardinalityException(c[COL], o[COL]);
+    if (columns != other.columnSize()) {
+      throw new CardinalityException(columnSize(), other.columnSize());
     }
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < rows; row++) {
+      for (int col = 0; col < columns; col++) {
         setQuick(row, col, function.apply(getQuick(row, col), other.getQuick(
             row, col)));
       }
@@ -234,16 +234,16 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public Matrix assign(Matrix other) {
-    int[] c = size();
-    int[] o = other.size();
-    if (c[ROW] != o[ROW]) {
-      throw new CardinalityException(c[ROW], o[ROW]);
+    int rows = rowSize();
+    int columns = columnSize();
+    if (rows != other.rowSize()) {
+      throw new CardinalityException(rowSize(), other.rowSize());
     }
-    if (c[COL] != o[COL]) {
-      throw new CardinalityException(c[COL], o[COL]);
+    if (columns != other.columnSize()) {
+      throw new CardinalityException(columnSize(), other.columnSize());
     }
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < rows; row++) {
+      for (int col = 0; col < columns; col++) {
         setQuick(row, col, other.getQuick(row, col));
       }
     }
@@ -252,9 +252,10 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public Matrix assign(DoubleFunction function) {
-    int[] c = size();
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    int rows = rowSize();
+    int columns = columnSize();
+    for (int row = 0; row < rows; row++) {
+      for (int col = 0; col < columns; col++) {
         setQuick(row, col, function.apply(getQuick(row, col)));
       }
     }
@@ -307,21 +308,6 @@ public abstract class AbstractMatrix implements Matrix {
   }
 
   /**
-   * Collects the results of a function applied to each column of a matrix.
-   *
-   * @param f The function to be applied to each column.
-   * @return The vector of results.
-   */
-  @Override
-  public Vector aggregateColumns(VectorFunction f) {
-    Vector r = new DenseVector(numCols());
-    for (int col = 0; col < numCols(); col++) {
-      r.set(col, f.apply(viewColumn(col)));
-    }
-    return r;
-  }
-
-  /**
    * Collects the results of a function applied to each element of a matrix and then aggregated.
    *
    * @param combiner A function that combines the results of the mapper.
@@ -338,26 +324,40 @@ public abstract class AbstractMatrix implements Matrix {
     }).aggregate(combiner, Functions.IDENTITY);
   }
 
+  /**
+   * Collects the results of a function applied to each column of a matrix.
+   *
+   * @param f The function to be applied to each column.
+   * @return The vector of results.
+   */
+  @Override
+  public Vector aggregateColumns(VectorFunction f) {
+    Vector r = new DenseVector(numCols());
+    for (int col = 0; col < numCols(); col++) {
+      r.set(col, f.apply(viewColumn(col)));
+    }
+    return r;
+  }
+
   @Override
   public double determinant() {
-    int[] card = size();
-    int rowSize = card[ROW];
-    int columnSize = card[COL];
-    if (rowSize != columnSize) {
-      throw new CardinalityException(rowSize, columnSize);
+    if (rowSize() != columnSize()) {
+      throw new CardinalityException(rowSize(), columnSize());
     }
 
-    if (rowSize == 2) {
+    if (rowSize() == 2) {
       return getQuick(0, 0) * getQuick(1, 1) - getQuick(0, 1) * getQuick(1, 0);
     } else {
+      // TODO: this really should just be one line:
+      // TODO: new CholeskyDecomposition(this).getL().viewDiagonal().aggregate(Functions.TIMES)
       int sign = 1;
       double ret = 0;
 
-      for (int i = 0; i < columnSize; i++) {
-        Matrix minor = new DenseMatrix(rowSize - 1, columnSize - 1);
-        for (int j = 1; j < rowSize; j++) {
+      for (int i = 0; i < columnSize(); i++) {
+        Matrix minor = new DenseMatrix(rowSize() - 1, columnSize() - 1);
+        for (int j = 1; j < rowSize(); j++) {
           boolean flag = false; /* column offset flag */
-          for (int k = 0; k < columnSize; k++) {
+          for (int k = 0; k < columnSize(); k++) {
             if (k == i) {
               flag = true;
               continue;
@@ -395,9 +395,8 @@ public abstract class AbstractMatrix implements Matrix {
   @Override
   public Matrix divide(double x) {
     Matrix result = like();
-    int[] c = size();
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < rowSize(); row++) {
+      for (int col = 0; col < columnSize(); col++) {
         result.setQuick(row, col, getQuick(row, col) / x);
       }
     }
@@ -406,29 +405,28 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public double get(int row, int column) {
-    int[] c = size();
-    if (row < 0 || row >= c[ROW]) {
-      throw new IndexException(row, c[ROW]);
+    if (row < 0 || row >= rowSize()) {
+      throw new IndexException(row, rowSize());
     }
-    if (column < 0 || column >= c[COL]) {
-      throw new IndexException(column, c[COL]);
+    if (column < 0 || column >= columnSize()) {
+      throw new IndexException(column, columnSize());
     }
     return getQuick(row, column);
   }
 
   @Override
   public Matrix minus(Matrix other) {
-    int[] c = size();
-    int[] o = other.size();
-    if (c[ROW] != o[ROW]) {
-      throw new CardinalityException(c[ROW], o[ROW]);
+    int rows = rowSize();
+    int columns = columnSize();
+    if (rows != other.rowSize()) {
+      throw new CardinalityException(rowSize(), other.rowSize());
     }
-    if (c[COL] != o[COL]) {
-      throw new CardinalityException(c[COL], o[COL]);
+    if (columns != other.columnSize()) {
+      throw new CardinalityException(columnSize(), other.columnSize());
     }
     Matrix result = like();
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < rows; row++) {
+      for (int col = 0; col < columns; col++) {
         result.setQuick(row, col, getQuick(row, col)
             - other.getQuick(row, col));
       }
@@ -439,9 +437,10 @@ public abstract class AbstractMatrix implements Matrix {
   @Override
   public Matrix plus(double x) {
     Matrix result = like();
-    int[] c = size();
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    int rows = rowSize();
+    int columns = columnSize();
+    for (int row = 0; row < rows; row++) {
+      for (int col = 0; col < columns; col++) {
         result.setQuick(row, col, getQuick(row, col) + x);
       }
     }
@@ -450,17 +449,15 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public Matrix plus(Matrix other) {
-    int[] c = size();
-    int[] o = other.size();
-    if (c[ROW] != o[ROW]) {
-      throw new CardinalityException(c[ROW], o[ROW]);
+    if (rowSize() != other.rowSize()) {
+      throw new CardinalityException(rowSize(), other.rowSize());
     }
-    if (c[COL] != o[COL]) {
-      throw new CardinalityException(c[COL], o[COL]);
+    if (columnSize() != other.columnSize()) {
+      throw new CardinalityException(columnSize(), other.columnSize());
     }
     Matrix result = like();
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < rowSize(); row++) {
+      for (int col = 0; col < columnSize(); col++) {
         result.setQuick(row, col, getQuick(row, col)
             + other.getQuick(row, col));
       }
@@ -470,27 +467,25 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public void set(int row, int column, double value) {
-    int[] c = size();
-    if (row < 0 || row >= c[ROW]) {
-      throw new IndexException(row, c[ROW]);
+    if (row < 0 || row >= rowSize()) {
+      throw new IndexException(row, rowSize());
     }
-    if (column < 0 || column >= c[COL]) {
-      throw new IndexException(column, c[COL]);
+    if (column < 0 || column >= columnSize()) {
+      throw new IndexException(column, columnSize());
     }
     setQuick(row, column, value);
   }
 
   @Override
   public void set(int row, double[] data) {
-    int[] c = size();
-    if (c[COL] < data.length) {
-      throw new CardinalityException(c[COL], data.length);
+    if (columnSize() < data.length) {
+      throw new CardinalityException(columnSize(), data.length);
     }
-    if (row < 0 || row >= c[ROW]) {
-      throw new IndexException(row, c[ROW]);
+    if (row < 0 || row >= rowSize()) {
+      throw new IndexException(row, rowSize());
     }
 
-    for (int i = 0; i < c[COL]; i++) {
+    for (int i = 0; i < columnSize(); i++) {
       setQuick(row, i, data[i]);
     }
   }
@@ -498,9 +493,10 @@ public abstract class AbstractMatrix implements Matrix {
   @Override
   public Matrix times(double x) {
     Matrix result = like();
-    int[] c = size();
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    int rows = rowSize();
+    int columns = columnSize();
+    for (int row = 0; row < rows; row++) {
+      for (int col = 0; col < columns; col++) {
         result.setQuick(row, col, getQuick(row, col) * x);
       }
     }
@@ -509,16 +505,17 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public Matrix times(Matrix other) {
-    int[] c = size();
-    int[] o = other.size();
-    if (c[COL] != o[ROW]) {
-      throw new CardinalityException(c[COL], o[ROW]);
+    int rows = rowSize();
+    int columns = other.columnSize();
+    Matrix result = like(rows, other.columnSize());
+    if (columnSize() != other.rowSize()) {
+      throw new CardinalityException(rowSize(), other.columnSize());
     }
-    Matrix result = like(c[ROW], o[COL]);
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < o[COL]; col++) {
+
+    for (int row = 0; row < rows; row++) {
+      for (int col = 0; col < columns; col++) {
         double sum = 0;
-        for (int k = 0; k < c[COL]; k++) {
+        for (int k = 0; k < columnSize(); k++) {
           sum += getQuick(row, k) * other.getQuick(k, col);
         }
         result.setQuick(row, col, sum);
@@ -529,25 +526,27 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public Vector times(Vector v) {
-    int[] c = size();
-    if (c[COL] != v.size()) {
-      throw new CardinalityException(c[COL], v.size());
+    int rows = rowSize();
+    Vector w = new DenseVector(rows);
+    if (columnSize() != v.size()) {
+      throw new CardinalityException(rowSize(), v.size());
     }
-    Vector w = new DenseVector(c[ROW]);
-    for (int i = 0; i < c[ROW]; i++) {
-      w.setQuick(i, v.dot(viewRow(i)));
+    for (int row = 0; row < rows; row++) {
+      w.setQuick(row, v.dot(viewRow(row)));
     }
     return w;
   }
 
   @Override
   public Vector timesSquared(Vector v) {
-    int[] c = size();
-    if (c[COL] != v.size()) {
-      throw new CardinalityException(c[COL], v.size());
+    int rows = rowSize();
+    int columns = columnSize();
+    if (columns != v.size()) {
+      throw new CardinalityException(columnSize(), v.size());
     }
-    Vector w = new DenseVector(c[COL]);
-    for (int i = 0; i < c[ROW]; i++) {
+
+    Vector w = new DenseVector(columns);
+    for (int i = 0; i < rows; i++) {
       Vector xi = viewRow(i);
       double d = xi.dot(v);
       if (d != 0.0) {
@@ -560,10 +559,11 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public Matrix transpose() {
-    int[] card = size();
-    Matrix result = like(card[COL], card[ROW]);
-    for (int row = 0; row < card[ROW]; row++) {
-      for (int col = 0; col < card[COL]; col++) {
+    int rows = rowSize();
+    int columns = columnSize();
+    Matrix result = like(columns, rows);
+    for (int row = 0; row < rows; row++) {
+      for (int col = 0; col < columns; col++) {
         result.setQuick(col, row, getQuick(row, col));
       }
     }
@@ -578,13 +578,17 @@ public abstract class AbstractMatrix implements Matrix {
   @Override
   public double zSum() {
     double result = 0;
-    int[] c = size();
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < rowSize(); row++) {
+      for (int col = 0; col < columnSize(); col++) {
         result += getQuick(row, col);
       }
     }
     return result;
+  }
+
+  @Override
+  public int[] getNumNondefaultElements() {
+    return new int[]{rowSize(), columnSize()};
   }
 
   protected class TransposeViewVector extends AbstractVector {
