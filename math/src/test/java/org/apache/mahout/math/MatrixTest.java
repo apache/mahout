@@ -113,8 +113,8 @@ public abstract class MatrixTest extends MahoutTestCase {
   @Test
   public void testSetQuick() {
     int[] c = test.size();
-    for (int row = 0; row < c[ROW]; row++) {
-      for (int col = 0; col < c[COL]; col++) {
+    for (int row = 0; row < test.rowSize(); row++) {
+      for (int col = 0; col < test.columnSize(); col++) {
         test.setQuick(row, col, 1.23);
         assertEquals("value[" + row + "][" + col + ']', 1.23, test.getQuick(
             row, col), EPSILON);
