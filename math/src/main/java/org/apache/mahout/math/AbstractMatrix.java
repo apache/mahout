@@ -308,6 +308,14 @@ public abstract class AbstractMatrix implements Matrix {
   }
 
   /**
+   * Provides a view of the diagonal of a matrix.
+   */
+  @Override
+  public Vector viewDiagonal() {
+    return new MatrixVectorView(this, 0, 0, 1, 1);
+  }
+
+  /**
    * Collects the results of a function applied to each column of a matrix.
    *
    * @param f The function to be applied to each column.

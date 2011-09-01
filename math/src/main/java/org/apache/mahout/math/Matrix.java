@@ -409,4 +409,6 @@ public interface Matrix extends Cloneable, VectorIterable {
   Vector viewRow(int row);
 
   Vector viewColumn(int column);
+
+  Vector viewDiagonal();
 }
