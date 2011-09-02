@@ -19,6 +19,7 @@ package org.apache.mahout.math.hadoop.stochasticsvd;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Random;
@@ -57,7 +58,7 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
   private static final double s_epsilon = 1.0E-10d;
 
   @Test
-  public void testSSVDSolver() throws Exception {
+  public void testSSVDSolver() throws IOException {
 
     Configuration conf = new Configuration();
     conf.set("mapred.job.tracker", "local");

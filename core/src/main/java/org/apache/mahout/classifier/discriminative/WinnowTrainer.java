@@ -71,7 +71,9 @@ public class WinnowTrainer extends LinearTrainer {
       Iterator<Vector.Element> iter = updateVector.iterateNonZero();
       while (iter.hasNext()) {
         Vector.Element element = iter.next();
-        model.timesDelta(element.index(), element.get());
+        if (element.get() != 0) {
+          model.timesDelta(element.index(), element.get());
+        }
       }
     } else {
       // case two
@@ -80,7 +82,9 @@ public class WinnowTrainer extends LinearTrainer {
       Iterator<Vector.Element> iter = updateVector.iterateNonZero();
       while (iter.hasNext()) {
         Vector.Element element = iter.next();
-        model.timesDelta(element.index(), element.get());
+        if (element.get() != 0) {
+          model.timesDelta(element.index(), element.get());
+        }
       }
     }
     log.info(model.toString());

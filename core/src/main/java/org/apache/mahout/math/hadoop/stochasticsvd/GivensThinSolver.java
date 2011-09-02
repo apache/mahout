@@ -219,7 +219,8 @@ public class GivensThinSolver {
   }
 
   private double[] getRRow(int row) {
-    return mR[(row += rStartRow) >= n ? row - n : row];
+    row += rStartRow;
+    return mR[row >= n ? row - n : row];
   }
 
   private void setRRow(int row, double[] rrow) {
@@ -235,7 +236,7 @@ public class GivensThinSolver {
   public UpperTriangular getRTilde() {
     UpperTriangular packedR = new UpperTriangular(n);
     for (int i = 0; i < n; i++) {
-      packedR.assignRow(i, getRRow(i));
+      packedR.assignNonZeroElementsInRow(i, getRRow(i));
     }
     return packedR;
   }
