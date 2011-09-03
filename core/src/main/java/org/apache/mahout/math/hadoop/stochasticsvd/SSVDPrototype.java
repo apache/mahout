@@ -31,6 +31,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.SingularValueDecomposition;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
+import org.apache.mahout.math.hadoop.stochasticsvd.qr.GivensThinSolver;
 import org.apache.mahout.math.ssvd.EigenSolverWrapper;
 
 /**

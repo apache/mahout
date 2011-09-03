@@ -45,16 +45,30 @@ public class SSVDCli extends AbstractJob {
     addOutputOption();
     addOption("rank", "k", "decomposition rank", true);
     addOption("oversampling", "p", "oversampling", true);
-    addOption("blockHeight", "r", "Y block height (must be > (k+p))", true);
+    addOption("blockHeight", "r", "Y block height (must be > (k+p))", "10000");
+    addOption("outerProdBlockHeight",
+              "oh",
+              "block height of outer products during multiplication, increase for sparse input",
+              "10000");
     addOption("minSplitSize", "s", "minimum split size", "-1");
     addOption("computeU", "U", "compute U (true/false)", "true");
-    addOption("uHalfSigma", "uhs", "Compute U as UHat=U x pow(Sigma,0.5)",
-        "false");
+    addOption("uHalfSigma",
+              "uhs",
+              "Compute U as UHat=U x pow(Sigma,0.5)",
+              "false");
     addOption("computeV", "V", "compute V (true/false)", "true");
-    addOption("vHalfSigma", "vhs", "compute V as VHat= V x pow(Sigma,0.5)",
-        "false");
-    addOption("reduceTasks", "t", "number of reduce tasks (where applicable)",
-        "1");
+    addOption("vHalfSigma",
+              "vhs",
+              "compute V as VHat= V x pow(Sigma,0.5)",
+              "false");
+    addOption("reduceTasks",
+              "t",
+              "number of reduce tasks (where applicable)",
+              "1");
+    addOption("powerIter",
+              "q",
+              "number of additional power iterations (0..2 is good)",
+              "0");
     addOption(DefaultOptionCreator.overwriteOption().create());
 
     Map<String, String> pargs = parseArguments(args);
@@ -68,25 +82,37 @@ public class SSVDCli extends AbstractJob {
     int k = Integer.parseInt(pargs.get("--rank"));
     int p = Integer.parseInt(pargs.get("--oversampling"));
     int r = Integer.parseInt(pargs.get("--blockHeight"));
+    int h = Integer.parseInt(pargs.get("--outerProdBlockHeight"));
+    int q = Integer.parseInt(pargs.get("--powerIter"));
     int minSplitSize = Integer.parseInt(pargs.get("--minSplitSize"));
     boolean computeU = Boolean.parseBoolean(pargs.get("--computeU"));
     boolean computeV = Boolean.parseBoolean(pargs.get("--computeV"));
     boolean cUHalfSigma = Boolean.parseBoolean(pargs.get("--uHalfSigma"));
     boolean cVHalfSigma = Boolean.parseBoolean(pargs.get("--vHalfSigma"));
     int reduceTasks = Integer.parseInt(pargs.get("--reduceTasks"));
-    boolean overwrite = pargs.containsKey(keyFor(DefaultOptionCreator.OVERWRITE_OPTION));
+    boolean overwrite =
+      pargs.containsKey(keyFor(DefaultOptionCreator.OVERWRITE_OPTION));
 
     Configuration conf = getConf();
     if (conf == null) {
       throw new IOException("No Hadoop configuration present");
     }
 
-    SSVDSolver solver = new SSVDSolver(conf, new Path[] {new Path(input)}, new Path(tempDir), r, k, p, reduceTasks);
+    SSVDSolver solver =
+      new SSVDSolver(conf,
+                     new Path[] { new Path(input) },
+                     new Path(tempDir),
+                     r,
+                     h,
+                     k,
+                     p,
+                     reduceTasks);
     solver.setMinSplitSize(minSplitSize);
     solver.setComputeU(computeU);
     solver.setComputeV(computeV);
     solver.setcUHalfSigma(cUHalfSigma);
     solver.setcVHalfSigma(cVHalfSigma);
+    solver.setQ(q);
     solver.setOverwrite(overwrite);
 
     solver.run();
@@ -98,10 +124,15 @@ public class SSVDCli extends AbstractJob {
     fs.mkdirs(outPath);
 
     SequenceFile.Writer sigmaW =
-        SequenceFile.createWriter(fs, conf, new Path(outPath, "sigma"), NullWritable.class, VectorWritable.class);
+      SequenceFile.createWriter(fs,
+                                conf,
+                                new Path(outPath, "sigma"),
+                                NullWritable.class,
+                                VectorWritable.class);
     try {
-      Writable sValues = new VectorWritable(new DenseVector(
-          Arrays.copyOf(solver.getSingularValues(), k), true));
+      Writable sValues =
+        new VectorWritable(new DenseVector(Arrays.copyOf(solver
+          .getSingularValues(), k), true));
       sigmaW.append(NullWritable.get(), sValues);
 
     } finally {

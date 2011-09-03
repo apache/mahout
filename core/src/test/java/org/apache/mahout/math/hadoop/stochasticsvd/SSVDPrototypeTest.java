@@ -27,6 +27,7 @@ import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.DoubleFunction;
+import org.apache.mahout.math.hadoop.stochasticsvd.qr.GivensThinSolver;
 import org.junit.Test;
 
 /** 

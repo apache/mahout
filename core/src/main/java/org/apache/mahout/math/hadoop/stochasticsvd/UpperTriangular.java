@@ -37,7 +37,6 @@ public class UpperTriangular extends AbstractMatrix {
                                                  // non-upper assignments
 
   private double[] values;
-  private int n;
 
   /**
    * represents n x n upper triangular matrix
@@ -48,11 +47,10 @@ public class UpperTriangular extends AbstractMatrix {
   public UpperTriangular(int n) {
     super(n, n);
     values = new double[n * (n + 1) / 2];
-    this.n = n;
   }
 
   public UpperTriangular(double[] data, boolean shallow) {
-    this(data != null ? data.length : 0, elementsToMatrixSize(data != null ? data.length : 0));
+    this(elementsToMatrixSize(data != null ? data.length : 0));
     if (data == null) {
       throw new IllegalArgumentException("data");
     }
@@ -60,22 +58,13 @@ public class UpperTriangular extends AbstractMatrix {
   }
 
   public UpperTriangular(Vector data) {
-    this(data.size(), elementsToMatrixSize(data.size()));
+    this(elementsToMatrixSize(data.size()));
 
-    values = new double[n * (n + 1) / 2];
-    n = data.size();
-    // if ( data instanceof DenseVector )
-    // ((DenseVector)data).
-    // system.arraycopy would've been much faster, but this way it's a drag
-    // on B-t job.
-    for (int i = 0; i < n; i++) {
+    values = new double[rows * (rows + 1) / 2];
+    rows = data.size();
+    for (int i = 0; i < rows; i++) {
       values[i] = data.getQuick(i);
     }
-  }
-
-  private UpperTriangular(int n, int rows) {
-    super(rows, rows);
-    this.n = n;
   }
 
   private static int elementsToMatrixSize(int size) {
@@ -111,14 +100,14 @@ public class UpperTriangular extends AbstractMatrix {
         throw new IllegalArgumentException("non-triangular source");
       }
     }
-    for (int i = row; i < n; i++) {
+    for (int i = row; i < rows; i++) {
       setQuick(row, i, other.get(i));
     }
     return this;
   }
 
   public Matrix assignNonZeroElementsInRow(int row, double[] other) {
-    System.arraycopy(other, row, values, getL(row, row), n - row);
+    System.arraycopy(other, row, values, getL(row, row), rows - row);
     return this;
   }
 
@@ -162,7 +151,7 @@ public class UpperTriangular extends AbstractMatrix {
     return new MatrixView(this, offset, size);
   }
 
-  double[] getData() {
+  public double[] getData() {
     return values;
   }
 

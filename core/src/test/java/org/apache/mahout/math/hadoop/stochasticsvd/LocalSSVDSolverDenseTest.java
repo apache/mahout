@@ -17,48 +17,48 @@
 
 package org.apache.mahout.math.hadoop.stochasticsvd;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.Random;
 
-import com.google.common.io.Closeables;
 import junit.framework.Assert;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.SequenceFile.CompressionType;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.compress.DefaultCodec;
 import org.apache.mahout.common.MahoutTestCase;
-import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.SingularValueDecomposition;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorWritable;
 import org.junit.Test;
 
 /**
  * 
- * Tests SSVD solver with a made-up data running hadoop 
- * solver in a local mode. It requests full-rank SSVD and 
- * then compares singular values to that of Colt's SVD 
- * asserting epsilon(precision) 1e-10 or whatever most recent 
- * value configured. 
+ * Tests SSVD solver with a made-up data running hadoop solver in a local mode.
+ * It requests full-rank SSVD and then compares singular values to that of
+ * Colt's SVD asserting epsilon(precision) 1e-10 or whatever most recent value
+ * configured.
  * 
  */
 public class LocalSSVDSolverDenseTest extends MahoutTestCase {
 
   private static final double s_epsilon = 1.0E-10d;
 
+  // I actually never saw errors more than 3% worst case for this test,
+  // but since it's non-deterministic test, it still may ocasionally produce
+  // bad results with a non-zero probability, so i put this pct% for error
+  // margin higher so it never fails.
+  private static final double s_precisionPct = 10;
+
   @Test
-  public void testSSVDSolver() throws IOException {
+  public void testSSVDSolverDense() throws IOException { 
+    runSSVDSolver(0);
+  }
+  
+  @Test
+  public void testSSVDSolverPowerIterations1() throws IOException { 
+    runSSVDSolver(1);
+  }
+  
+  public void runSSVDSolver(int q) throws IOException {
 
     Configuration conf = new Configuration();
     conf.set("mapred.job.tracker", "local");
@@ -67,8 +67,8 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
     // conf.set("mapred.job.tracker","localhost:11011");
     // conf.set("fs.default.name","hdfs://localhost:11010/");
 
-    Deque<Closeable> closeables = new LinkedList<Closeable>();
-    Random rnd = RandomUtils.getRandom();
+    // Deque<Closeable> closeables = new LinkedList<Closeable>();
+    // Random rnd = RandomUtils.getRandom();
 
     File tmpDir = getTestTempDir("svdtmp");
     conf.set("hadoop.tmp.dir", tmpDir.getAbsolutePath());
@@ -76,28 +76,30 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
     Path aLocPath = new Path(getTestTempDirPath("svdtmp/A"), "A.seq");
 
     // create distributed row matrix-like struct
-    SequenceFile.Writer w = SequenceFile.createWriter(
-        FileSystem.getLocal(conf), conf, aLocPath, IntWritable.class,
-        VectorWritable.class, CompressionType.BLOCK, new DefaultCodec());
-    closeables.addFirst(w);
+    // SequenceFile.Writer w = SequenceFile.createWriter(
+    // FileSystem.getLocal(conf), conf, aLocPath, IntWritable.class,
+    // VectorWritable.class, CompressionType.NONE, new DefaultCodec());
+    // closeables.addFirst(w);
 
-    int n = 100;
-    double[] row = new double[n];
-    Vector dv = new DenseVector(row, true);
-    Writable vw = new VectorWritable(dv);
-    IntWritable roww = new IntWritable();
+    // make input equivalent to 2 mln non-zero elements.
+    // With 100mln the precision turns out to be only better (LLN law i guess)
+    // With oversampling of 100, i don't get any error at all.
+    int n = 1000;
+    int m = 2000;
+    int ablockRows = 867;
+    int p = 10;
+    int k = 3;
+    DenseVector singularValues =
+      new DenseVector(new double[] { 10, 4, 1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+          0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+          0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+          0.1, 0.1, 0.1, 0.1, 0.1, 0.1 });
 
-    double muAmplitude = 50.0;
-    int m = 1000;
-    for (int i = 0; i < m; i++) {
-      for (int j = 0; j < n; j++) {
-        row[j] = muAmplitude * (rnd.nextDouble() - 0.5);
-      }
-      roww.set(i);
-      w.append(roww, vw);
-    }
-    closeables.remove(w);
-    Closeables.closeQuietly(w);
+    SSVDTestsHelper.generateDenseInput(aLocPath,
+                                       FileSystem.getLocal(conf),
+                                       singularValues,
+                                       m,
+                                       n);
 
     FileSystem fs = FileSystem.get(conf);
 
@@ -110,52 +112,82 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
     // make sure we wipe out previous test results, just a convenience
     fs.delete(svdOutPath, true);
 
-    int ablockRows = 251;
-    int p = 60;
-    int k = 40;
-    SSVDSolver ssvd = new SSVDSolver(conf, new Path[] { aPath }, svdOutPath,
-        ablockRows, k, p, 3);
+    // Solver starts here:
+    System.out.println("Input prepared, starting solver...");
+
+    SSVDSolver ssvd =
+      new SSVDSolver(conf,
+                     new Path[] { aPath },
+                     svdOutPath,
+                     ablockRows,
+                     500,
+                     k,
+                     p,
+                     3);
     // ssvd.setcUHalfSigma(true);
     // ssvd.setcVHalfSigma(true);
     ssvd.setOverwrite(true);
+    ssvd.setQ(q);
     ssvd.run();
 
     double[] stochasticSValues = ssvd.getSingularValues();
     System.out.println("--SSVD solver singular values:");
     dumpSv(stochasticSValues);
-    System.out.println("--Colt SVD solver singular values:");
 
-    // try to run the same thing without stochastic algo
-    double[][] a = SSVDSolver.loadDistributedRowMatrix(fs, aPath, conf);
+    // the full-rank svd for this test size takes too long to run,
+    // so i comment it out, instead, i will be comparing
+    // result singular values to the original values used
+    // to generate input (which are guaranteed to be right).
 
-    // SingularValueDecompositionImpl svd=new SingularValueDecompositionImpl(new
-    // Array2DRowRealMatrix(a));
-    SingularValueDecomposition svd2 = new SingularValueDecomposition(
-        new DenseMatrix(a));
+    /*
+     * System.out.println("--Colt SVD solver singular values:"); // try to run
+     * 
+     * the same thing without stochastic algo double[][] a =
+     * SSVDSolver.loadDistributedRowMatrix(fs, aPath, conf);
+     * 
+     * 
+     * 
+     * SingularValueDecomposition svd2 = new SingularValueDecomposition(new
+     * DenseMatrix(a));
+     * 
+     * a = null;
+     * 
+     * double[] svalues2 = svd2.getSingularValues(); dumpSv(svalues2);
+     * 
+     * for (int i = 0; i < k ; i++) { Assert .assertTrue(1-Math.abs((svalues2[i]
+     * - stochasticSValues[i])/svalues2[i]) <= s_precisionPct/100); }
+     */
 
-    a = null;
+    // assert first k against those
+    // used to generate surrogate input
 
-    double[] svalues2 = svd2.getSingularValues();
-    dumpSv(svalues2);
-
-    for (int i = 0; i < k + p; i++) {
-      Assert.assertTrue(Math.abs(svalues2[i] - stochasticSValues[i]) <= s_epsilon);
+    for (int i = 0; i < k; i++) {
+      Assert
+        .assertTrue(Math.abs((singularValues.getQuick(i) - stochasticSValues[i])
+            / singularValues.getQuick(i)) <= s_precisionPct / 100);
     }
 
-    double[][] q = SSVDSolver.loadDistributedRowMatrix(fs, new Path(svdOutPath,
-        "Bt-job/" + BtJob.OUTPUT_Q + "-*"), conf);
-
-    SSVDPrototypeTest.assertOrthonormality(new DenseMatrix(q), false, s_epsilon);
-
-    double[][] u = SSVDSolver.loadDistributedRowMatrix(fs, new Path(svdOutPath,
-                                                                    "U/[^_]*"), conf);
-
-    SSVDPrototypeTest.assertOrthonormality(new DenseMatrix(u), false, s_epsilon);
-    double[][] v = SSVDSolver.loadDistributedRowMatrix(fs, new Path(svdOutPath,
-        "V/[^_]*"), conf);
+    double[][] mQ =
+      SSVDSolver.loadDistributedRowMatrix(fs, new Path(svdOutPath, "Bt-job/"
+          + BtJob.OUTPUT_Q + "-*"), conf);
 
     SSVDPrototypeTest
-        .assertOrthonormality(new DenseMatrix(v), false, s_epsilon);
+      .assertOrthonormality(new DenseMatrix(mQ), false, s_epsilon);
+
+    double[][] u =
+      SSVDSolver.loadDistributedRowMatrix(fs,
+                                          new Path(svdOutPath, "U/[^_]*"),
+                                          conf);
+
+    SSVDPrototypeTest
+      .assertOrthonormality(new DenseMatrix(u), false, s_epsilon);
+    double[][] v =
+      SSVDSolver.loadDistributedRowMatrix(fs,
+                                          new Path(svdOutPath, "V/[^_]*"),
+                                          conf);
+
+    SSVDPrototypeTest
+      .assertOrthonormality(new DenseMatrix(v), false, s_epsilon);
   }
 
   static void dumpSv(double[] s) {

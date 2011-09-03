@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 
+import org.apache.hadoop.mapred.lib.MultipleOutputs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -173,7 +174,25 @@ public final class IOUtils {
         file.delete();
       }
     }
+  }
 
+  /**
+   * MultipleOutputs to closeable adapter.
+   * 
+   */
+  public static class MultipleOutputsCloseableAdapter implements Closeable {
+    private MultipleOutputs mo;
+
+    public MultipleOutputsCloseableAdapter(MultipleOutputs mo) {
+      super();
+      this.mo = mo;
+    }
+
+    @Override
+    public void close() throws IOException {
+      if (mo != null)
+        mo.close();
+    }
   }
 
 }
