@@ -159,7 +159,7 @@ public final class SequenceFilesFromMailArchives {
         try {
           parseFileLineByLine(current);
         } catch (IOException e) {
-          throw new IllegalStateException(e);
+          throw new IllegalStateException("Error processing " + current, e);
         }
       }
       return false;
