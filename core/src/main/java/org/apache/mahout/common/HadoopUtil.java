@@ -25,7 +25,10 @@ import java.util.Iterator;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterator;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +59,25 @@ public final class HadoopUtil {
   public static long countRecords(Path path, Configuration conf) throws IOException {
     long count = 0;
     Iterator<?> iterator = new SequenceFileValueIterator<Writable>(path, true, conf);
+    while (iterator.hasNext()) {
+      iterator.next();
+      count++;
+    }
+    return count;
+  }
+
+  /**
+   * Count all the records in a directory using a {@link org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterator}
+   * @param path The {@link org.apache.hadoop.fs.Path} to count
+   * @param pt The {@link org.apache.mahout.common.iterator.sequencefile.PathType}
+   * @param filter Apply the {@link org.apache.hadoop.fs.PathFilter}.  May be null
+   * @param conf The Hadoop {@link org.apache.hadoop.conf.Configuration}
+   * @return The number of records
+   * @throws IOException if there was an IO error
+   */
+  public static long countRecords(Path path, PathType pt, PathFilter filter, Configuration conf) throws IOException {
+    long count = 0;
+    Iterator<?> iterator = new SequenceFileDirValueIterator<Writable>(path, pt, filter, null, true, conf);
     while (iterator.hasNext()) {
       iterator.next();
       count++;

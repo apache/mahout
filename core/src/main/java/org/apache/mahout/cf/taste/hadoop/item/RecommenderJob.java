@@ -35,6 +35,8 @@ import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.ToItemVectorsReducer;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.VectorWritable;
@@ -161,7 +163,7 @@ public final class RecommenderJob extends AbstractJob {
       itemIDIndex.waitForCompletion(true);
     }
 
-    int numberOfUsers = 0;
+    int numberOfUsers = -1;
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
       Job toUserVector = prepareJob(
         inputPath, userVectorPath, TextInputFormat.class,
@@ -195,6 +197,9 @@ public final class RecommenderJob extends AbstractJob {
       /* Once DistributedRowMatrix uses the hadoop 0.20 API, we should refactor this call to something like
        * new DistributedRowMatrix(...).rowSimilarity(...) */
       try {
+        if (numberOfUsers == -1){
+           numberOfUsers = (int) HadoopUtil.countRecords(userVectorPath, PathType.LIST, null, getConf());
+        }
         ToolRunner.run(getConf(), new RowSimilarityJob(), new String[] {
           "-Dmapred.input.dir=" + itemUserMatrixPath,
           "-Dmapred.output.dir=" + similarityMatrixPath,
