@@ -189,7 +189,12 @@ public final class AggregateAndRecommendReducer extends
     while (recommendationVectorIterator.hasNext()) {
       Vector.Element element = recommendationVectorIterator.next();
       int index = element.index();
-      long itemID = indexItemIDMap.get(index);
+      long itemID;
+      if (indexItemIDMap != null && indexItemIDMap.isEmpty() == false) {
+        itemID = indexItemIDMap.get(index);
+      } else { //we don't have any mappings, so just use the original
+        itemID = index;
+      }
       if (itemsToRecommendFor == null || itemsToRecommendFor.contains(itemID)) {
         float value = (float) element.get();
         if (!Float.isNaN(value)) {
