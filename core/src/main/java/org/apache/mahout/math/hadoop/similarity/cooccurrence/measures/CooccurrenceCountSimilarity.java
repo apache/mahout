@@ -25,7 +25,7 @@ public class CooccurrenceCountSimilarity extends CountbasedMeasure {
   }
 
   @Override
-  public boolean consider(int numNonZeroEntriesA, int numNonZeroEntriesB, double maxValueA, double treshold) {
-    return numNonZeroEntriesA >= treshold && numNonZeroEntriesB >= treshold;
+  public boolean consider(int numNonZeroEntriesA, int numNonZeroEntriesB, double maxValueA, double threshold) {
+    return numNonZeroEntriesA >= threshold && numNonZeroEntriesB >= threshold;
   }
 }

@@ -51,7 +51,7 @@ public class EuclideanDistanceSimilarity implements VectorSimilarityMeasure {
   }
 
   @Override
-  public boolean consider(int numNonZeroEntriesA, int numNonZeroEntriesB, double maxValueA, double treshold) {
+  public boolean consider(int numNonZeroEntriesA, int numNonZeroEntriesB, double maxValueA, double threshold) {
     return true;
   }
 }
