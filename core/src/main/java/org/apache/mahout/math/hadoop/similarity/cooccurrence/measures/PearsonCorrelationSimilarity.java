@@ -15,28 +15,26 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math.hadoop.similarity.vector;
+package org.apache.mahout.math.hadoop.similarity.cooccurrence.measures;
 
-import org.junit.Test;
+import org.apache.mahout.math.Vector;
 
-/**
- * tests {@link DistributedUncenteredZeroAssumingCosineVectorSimilarity}
- */
-public final class DistributedUncenteredZeroAssumingCosineVectorSimilarityTest
-    extends DistributedVectorSimilarityTestCase {
+import java.util.Iterator;
 
-  @Test
-  public void testUncenteredZeroAssumingCosine() throws Exception {
-    assertSimilar(new DistributedUncenteredZeroAssumingCosineVectorSimilarity(),
-        asVector(0, 0, 0, 0, 1),
-        asVector(0, 1, 1, 1, 1), 5, 0.5);
+public class PearsonCorrelationSimilarity extends CosineSimilarity {
 
-    assertSimilar(new DistributedUncenteredZeroAssumingCosineVectorSimilarity(),
-        asVector(0, 1),
-        asVector(1, 0), 2, Double.NaN);
-
-    assertSimilar(new DistributedUncenteredZeroAssumingCosineVectorSimilarity(),
-        asVector(1, 0),
-        asVector(1, 0), 2, 1.0);
+  @Override
+  public Vector normalize(Vector vector) {
+    if (vector.getNumNondefaultElements() == 0) {
+      return vector;
+    }
+    // center non-zero elements
+    final double average = vector.norm(1) / vector.getNumNondefaultElements();
+    Iterator<Vector.Element> nonZeroElements = vector.iterateNonZero();
+    while (nonZeroElements.hasNext()) {
+      Vector.Element nonZeroElement = nonZeroElements.next();
+      vector.setQuick(nonZeroElement.index(), nonZeroElement.get() - average);
+    }
+    return super.normalize(vector);
   }
 }

@@ -46,15 +46,15 @@ public class ParallelFactorizationEvaluatorTest extends TasteTestCase {
     Path inputPath = new Path(pairs.getAbsolutePath());
     FileSystem fs = FileSystem.get(inputPath.toUri(), conf);
 
-    MathHelper.writeEntries(new double[][] {
-        new double[] {  1.5, -2,   0.3 },
-        new double[] { -0.7,  2,   0.6 },
-        new double[] { -1,    2.5, 3   } }, fs, conf, new Path(userFeatures.getAbsolutePath()));
+    MathHelper.writeDistributedRowMatrix(new double[][]{
+        new double[]{1.5, -2, 0.3},
+        new double[]{-0.7, 2, 0.6},
+        new double[]{-1, 2.5, 3}}, fs, conf, new Path(userFeatures.getAbsolutePath()));
 
-    MathHelper.writeEntries(new double [][] {
-        new double[] {  2.3,  0.5, 0   },
-        new double[] {  4.7, -1,   0.2 },
-        new double[] {  0.6,  2,   1.3 } }, fs, conf, new Path(itemFeatures.getAbsolutePath()));
+    MathHelper.writeDistributedRowMatrix(new double[][]{
+        new double[]{2.3, 0.5, 0},
+        new double[]{4.7, -1, 0.2},
+        new double[]{0.6, 2, 1.3}}, fs, conf, new Path(itemFeatures.getAbsolutePath()));
 
     writeLines(pairs, "0,0,3", "2,1,-7", "1,0,-2");
 

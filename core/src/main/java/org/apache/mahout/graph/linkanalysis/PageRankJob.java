@@ -106,6 +106,9 @@ public class PageRankJob extends AbstractJob {
     addOption("teleportationProbability", "tp", "probability to teleport to a random vertex", String.valueOf(0.8));
 
     Map<String, String> parsedArgs = parseArguments(args);
+    if (parsedArgs == null) {
+      return -1;
+    }
 
     Path vertexIndex = new Path(parsedArgs.get("--vertexIndex"));
     Path edges = new Path(parsedArgs.get("--edges"));

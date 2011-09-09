@@ -15,29 +15,17 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math.hadoop.similarity.vector;
+package org.apache.mahout.math.hadoop.similarity.cooccurrence.measures;
 
-import org.junit.Test;
+import org.apache.mahout.math.Vector;
 
-/**
- * tests {@link DistributedTanimotoCoefficientVectorSimilarity}
- */
-public final class DistributedTanimotoCoefficientVectorSimilarityTest extends
-    DistributedVectorSimilarityTestCase {
+public interface VectorSimilarityMeasure {
 
-  @Test
-  public void testTanimoto() throws Exception {
+  public static final double NO_NORM = 0;
 
-    assertSimilar(new DistributedTanimotoCoefficientVectorSimilarity(),
-        asVector(0, 0, 0, 0, 1),
-        asVector(0, 1, 1, 1, 1), 5, 0.25);
-
-    assertSimilar(new DistributedTanimotoCoefficientVectorSimilarity(),
-        asVector(0, 1),
-        asVector(1, 0), 2, Double.NaN);
-
-    assertSimilar(new DistributedTanimotoCoefficientVectorSimilarity(),
-        asVector(0, 1),
-        asVector(0, 1), 2, 1.0);
-  }
+  Vector normalize(Vector vector);
+  double norm(Vector vector);
+  double aggregate(double nonZeroValueA, double nonZeroValueB);
+  double similarity(double summedAggregations, double normA, double normB, int numberOfColumns);
+  boolean consider(int numNonZeroEntriesA, int numNonZeroEntriesB, double maxValueA, double treshold);
 }

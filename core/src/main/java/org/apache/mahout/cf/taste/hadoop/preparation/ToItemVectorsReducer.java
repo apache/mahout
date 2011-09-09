@@ -15,32 +15,21 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math.hadoop.similarity;
+package org.apache.mahout.cf.taste.hadoop.preparation;
 
-import java.util.Arrays;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.mahout.math.VectorWritable;
 
-import org.apache.hadoop.io.ArrayWritable;
+import java.io.IOException;
 
-/**
- * an array of {@link WeightedOccurrence}s
- */
-final class WeightedOccurrenceArray extends ArrayWritable {
+public class ToItemVectorsReducer extends Reducer<IntWritable,VectorWritable,IntWritable,VectorWritable> {
 
-  WeightedOccurrenceArray() {
-    super(WeightedOccurrence.class);
-  }
-
-  WeightedOccurrenceArray(WeightedOccurrence[] weightedOccurrences) {
-    super(WeightedOccurrence.class);
-    set(weightedOccurrences);
-  }
-
-  public WeightedOccurrence[] getWeightedOccurrences() {
-    return (WeightedOccurrence[]) toArray();
-  }
-  
   @Override
-  public String toString() {
-    return Arrays.toString(getWeightedOccurrences());
+  protected void reduce(IntWritable row, Iterable<VectorWritable> vectors, Context ctx)
+      throws IOException, InterruptedException {
+    VectorWritable vectorWritable = VectorWritable.merge(vectors.iterator());
+    vectorWritable.setWritesLaxPrecision(true);
+    ctx.write(row, vectorWritable);
   }
 }

@@ -100,7 +100,7 @@ public class PageRankJobTest extends GraphTestCase {
         { 0.266666667, 0,   0.8, 0.4 },
         { 0.266666667, 0.4, 0,   0 } });
 
-    Matrix actualTransitionMatrix = MathHelper.readEntries(conf, new Path(tempDir.getAbsolutePath(),
+    Matrix actualTransitionMatrix = MathHelper.readMatrix(conf, new Path(tempDir.getAbsolutePath(),
         "transitionMatrix/part-r-00000"), numVertices, numVertices);
 
     assertEquals(expectedTransitionMatrix, actualTransitionMatrix);

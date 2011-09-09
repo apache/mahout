@@ -15,29 +15,25 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math.hadoop.similarity.vector;
+package org.apache.mahout.math.hadoop.similarity.cooccurrence.measures;
 
-import org.junit.Test;
+import org.apache.mahout.math.Vector;
 
-/**
- * tests {@link DistributedPearsonCorrelationVectorSimilarity}
- */
-public final class DistributedPearsonCorrelationVectorSimilarityTest
-    extends DistributedVectorSimilarityTestCase {
+public abstract class CountbasedMeasure implements VectorSimilarityMeasure {
 
-  @Test
-  public void testPearsonCorrelation() throws Exception {
-    assertSimilar(new DistributedPearsonCorrelationVectorSimilarity(),
-        asVector(3, -2),
-        asVector(3, -2), 2, 1.0);
+  @Override
+  public Vector normalize(Vector vector) {
+    return vector;
+  }
 
-    assertSimilar(new DistributedPearsonCorrelationVectorSimilarity(),
-        asVector(3, 3),
-        asVector(3, 3), 2, Double.NaN);
+  @Override
+  public double norm(Vector vector) {
+    return vector.norm(0);
+  }
 
-    assertSimilar(new DistributedPearsonCorrelationVectorSimilarity(),
-        asVector(0, 3),
-        asVector(3, 0), 2, Double.NaN);
+  @Override
+  public double aggregate(double valueA, double nonZeroValueB) {
+    return 1;
   }
 
 }

@@ -168,10 +168,10 @@ public final class MathHelper {
   /**
    * read a {@link Matrix} from a SequenceFile<IntWritable,VectorWritable>
    */
-  public static Matrix readEntries(Configuration conf, Path path, int rows, int columns) {
+  public static Matrix readMatrix(Configuration conf, Path path, int rows, int columns) {
     Matrix matrix = new DenseMatrix(rows, columns);
     for (Pair<IntWritable,VectorWritable> record :
-         new SequenceFileIterable<IntWritable,VectorWritable>(path, true, conf)) {
+        new SequenceFileIterable<IntWritable,VectorWritable>(path, true, conf)) {
       IntWritable key = record.getFirst();
       VectorWritable value = record.getSecond();
       int row = key.get();
@@ -187,7 +187,7 @@ public final class MathHelper {
   /**
    * write a two-dimensional double array to an SequenceFile<IntWritable,VectorWritable>
    */
-  public static void writeEntries(double[][] entries, FileSystem fs, Configuration conf, Path path)
+  public static void writeDistributedRowMatrix(double[][] entries, FileSystem fs, Configuration conf, Path path)
       throws IOException {
     SequenceFile.Writer writer = null;
     try {

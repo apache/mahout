@@ -44,6 +44,8 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
@@ -122,6 +124,11 @@ public abstract class AbstractJob extends Configured implements Tool {
   protected Path getOutputPath() {
     return outputPath;
   }
+
+  protected Path getOutputPath(String path) {
+    return new Path(outputPath, path);
+  }
+
 
   protected Path getTempPath() {
     return tempPath;
@@ -391,6 +398,48 @@ public abstract class AbstractJob extends Configured implements Tool {
       log.info("Skipping phase {}", phase);
     }
     return !phaseSkipped;
+  }
+
+  protected Job prepareJob(Path inputPath,
+                           Path outputPath,
+                           Class<? extends InputFormat> inputFormat,
+                           Class<? extends Mapper> mapper,
+                           Class<? extends Writable> mapperKey,
+                           Class<? extends Writable> mapperValue,
+                           Class<? extends OutputFormat> outputFormat) throws IOException {
+
+    Job job = new Job(new Configuration(getConf()));
+    Configuration jobConf = job.getConfiguration();
+
+    if (mapper.equals(Mapper.class)) {
+        throw new IllegalStateException("Can't figure out the user class jar file from mapper/reducer");
+    }
+    job.setJarByClass(mapper);
+
+    job.setInputFormatClass(inputFormat);
+    jobConf.set("mapred.input.dir", inputPath.toString());
+
+    job.setMapperClass(mapper);
+    job.setMapOutputKeyClass(mapperKey);
+    job.setMapOutputValueClass(mapperValue);
+
+    jobConf.setBoolean("mapred.compress.map.output", true);
+    job.setNumReduceTasks(0);
+
+
+    job.setJobName(getCustomJobName(job, mapper, Reducer.class));
+
+    job.setOutputFormatClass(outputFormat);
+    jobConf.set("mapred.output.dir", outputPath.toString());
+
+    return job;
+  }
+
+  protected Job prepareJob(Path inputPath, Path outputPath, Class<? extends Mapper> mapper,
+      Class<? extends Writable> mapperKey, Class<? extends Writable> mapperValue, Class<? extends Reducer> reducer,
+      Class<? extends Writable> reducerKey, Class<? extends Writable> reducerValue) throws IOException {
+    return prepareJob(inputPath, outputPath, SequenceFileInputFormat.class, mapper, mapperKey, mapperValue, reducer,
+        reducerKey, reducerValue, SequenceFileOutputFormat.class);
   }
 
   protected Job prepareJob(Path inputPath,

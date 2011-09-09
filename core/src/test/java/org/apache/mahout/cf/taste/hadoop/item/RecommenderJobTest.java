@@ -49,8 +49,8 @@ import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.hadoop.MathHelper;
-import org.apache.mahout.math.hadoop.similarity.vector.DistributedCooccurrenceVectorSimilarity;
-import org.apache.mahout.math.hadoop.similarity.vector.DistributedTanimotoCoefficientVectorSimilarity;
+import org.apache.mahout.math.hadoop.similarity.cooccurrence.measures.CooccurrenceCountSimilarity;
+import org.apache.mahout.math.hadoop.similarity.cooccurrence.measures.TanimotoCoefficientSimilarity;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
 import org.easymock.IArgumentMatcher;
 import org.easymock.EasyMock;
@@ -131,7 +131,7 @@ public class RecommenderJobTest extends TasteTestCase {
   }
 
   /**
-   * tests {@link ToUserVectorReducer}
+   * tests {@link ToUserVectorsReducer}
    */
   @Test
   public void testToUserVectorReducer() throws Exception {
@@ -139,7 +139,7 @@ public class RecommenderJobTest extends TasteTestCase {
       EasyMock.createMock(Reducer.Context.class);
     Counter userCounters = EasyMock.createMock(Counter.class);
 
-    EasyMock.expect(context.getCounter(ToUserVectorReducer.Counters.USERS)).andReturn(userCounters);
+    EasyMock.expect(context.getCounter(ToUserVectorsReducer.Counters.USERS)).andReturn(userCounters);
     userCounters.increment(1);
     context.write(EasyMock.eq(new VarLongWritable(12L)), MathHelper.vectorMatches(
         MathHelper.elem(TasteHadoopUtils.idToIndex(34L), 1.0), MathHelper.elem(TasteHadoopUtils.idToIndex(56L), 2.0)));
@@ -150,13 +150,13 @@ public class RecommenderJobTest extends TasteTestCase {
     varLongWritables.add(new EntityPrefWritable(34L, 1.0f));
     varLongWritables.add(new EntityPrefWritable(56L, 2.0f));
 
-    new ToUserVectorReducer().reduce(new VarLongWritable(12L), varLongWritables, context);
+    new ToUserVectorsReducer().reduce(new VarLongWritable(12L), varLongWritables, context);
 
     EasyMock.verify(context, userCounters);
   }
 
   /**
-   * tests {@link ToUserVectorReducer} using boolean data
+   * tests {@link ToUserVectorsReducer} using boolean data
    */
   @Test
   public void testToUserVectorReducerWithBooleanData() throws Exception {
@@ -164,14 +164,14 @@ public class RecommenderJobTest extends TasteTestCase {
       EasyMock.createMock(Reducer.Context.class);
     Counter userCounters = EasyMock.createMock(Counter.class);
 
-    EasyMock.expect(context.getCounter(ToUserVectorReducer.Counters.USERS)).andReturn(userCounters);
+    EasyMock.expect(context.getCounter(ToUserVectorsReducer.Counters.USERS)).andReturn(userCounters);
     userCounters.increment(1);
     context.write(EasyMock.eq(new VarLongWritable(12L)), MathHelper.vectorMatches(
         MathHelper.elem(TasteHadoopUtils.idToIndex(34L), 1.0), MathHelper.elem(TasteHadoopUtils.idToIndex(56L), 1.0)));
 
     EasyMock.replay(context, userCounters);
 
-    new ToUserVectorReducer().reduce(new VarLongWritable(12L), Arrays.asList(new VarLongWritable(34L),
+    new ToUserVectorsReducer().reduce(new VarLongWritable(12L), Arrays.asList(new VarLongWritable(34L),
         new VarLongWritable(56L)), context);
 
     EasyMock.verify(context, userCounters);
@@ -728,7 +728,7 @@ public class RecommenderJobTest extends TasteTestCase {
     recommenderJob.setConf(conf);
 
     recommenderJob.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--similarityClassname",
-       DistributedTanimotoCoefficientVectorSimilarity.class.getName(), "--numRecommendations", "4" });
+       TanimotoCoefficientSimilarity.class.getName(), "--numRecommendations", "4" });
 
     Map<Long,List<RecommendedItem>> recommendations = readRecommendations(new File(outputDir, "part-r-00000"));
 
@@ -804,7 +804,7 @@ public class RecommenderJobTest extends TasteTestCase {
     recommenderJob.setConf(conf);
 
     recommenderJob.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--similarityClassname",
-        DistributedCooccurrenceVectorSimilarity.class.getName(), "--booleanData", "true",
+        CooccurrenceCountSimilarity.class.getName(), "--booleanData", "true",
         "--usersFile", usersFile.getAbsolutePath() });
 
     Map<Long,List<RecommendedItem>> recommendations = readRecommendations(new File(outputDir, "part-r-00000"));
@@ -865,7 +865,7 @@ public class RecommenderJobTest extends TasteTestCase {
      recommenderJob.setConf(conf);
 
      recommenderJob.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--similarityClassname",
-        DistributedTanimotoCoefficientVectorSimilarity.class.getName(), "--numRecommendations", "1",
+        TanimotoCoefficientSimilarity.class.getName(), "--numRecommendations", "1",
         "--usersFile", userFile.getAbsolutePath(), "--filterFile", filterFile.getAbsolutePath() });
 
      Map<Long,List<RecommendedItem>> recommendations = readRecommendations(new File(outputDir, "part-r-00000"));

@@ -15,29 +15,22 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math.hadoop.similarity.vector;
+package org.apache.mahout.math.hadoop.similarity.cooccurrence.measures;
 
-import org.apache.mahout.math.hadoop.similarity.Cooccurrence;
+import org.apache.mahout.math.stats.LogLikelihood;
 
-/**
- * distributed implementation of euclidean distance as vector similarity measure
- */
-public class DistributedEuclideanDistanceVectorSimilarity extends AbstractDistributedVectorSimilarity {
+public class LoglikelihoodSimilarity extends CountbasedMeasure {
 
   @Override
-  protected double doComputeResult(int rowA, int rowB, Iterable<Cooccurrence> cooccurrences, double weightOfVectorA,
-      double weightOfVectorB, long numberOfColumns) {
+  public double similarity(double summedAggregations, double normA, double normB, int numberOfColumns) {
+    double logLikelihood = LogLikelihood.logLikelihoodRatio((long) summedAggregations, (long) (normB - summedAggregations),
+        (long) (normA - summedAggregations), (long) (numberOfColumns - normA - normB + summedAggregations));
 
-    double n = 0.0;
-    double sumXYdiff2 = 0.0;
-
-    for (Cooccurrence cooccurrence : cooccurrences) {
-      double diff = cooccurrence.getValueA() - cooccurrence.getValueB();
-      sumXYdiff2 += diff * diff;
-      n++;
-    }
-
-    return n / (1.0 + Math.sqrt(sumXYdiff2));
+    return 1.0 - 1.0 / (1.0 + logLikelihood);
   }
 
+  @Override
+  public boolean consider(int numNonZeroEntriesA, int numNonZeroEntriesB, double maxValueA, double treshold) {
+    return true;
+  }
 }

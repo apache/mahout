@@ -15,28 +15,17 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math.hadoop.similarity.vector;
+package org.apache.mahout.math.hadoop.similarity.cooccurrence.measures;
 
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.hadoop.similarity.Cooccurrence;
-
-/**
- * uses the co-occcurence count as vector similarity
- */
-public class DistributedCooccurrenceVectorSimilarity implements DistributedVectorSimilarity {
+public class CityBlockSimilarity extends CountbasedMeasure {
 
   @Override
-  public double weight(Vector v) {
-    return Double.NaN;
+  public double similarity(double dots, double normA, double normB, int numberOfColumns) {
+    return 1.0 / (1.0 + normA + normB - 2 * dots);
   }
 
   @Override
-  public double similarity(int rowA,
-                           int rowB,
-                           Iterable<Cooccurrence> cooccurrences,
-                           double weightOfVectorA,
-                           double weightOfVectorB,
-                           long numberOfColumns) {
-    return AbstractDistributedVectorSimilarity.countElements(cooccurrences);
+  public boolean consider(int numNonZeroEntriesA, int numNonZeroEntriesB, double maxValueA, double treshold) {
+    return true;
   }
 }

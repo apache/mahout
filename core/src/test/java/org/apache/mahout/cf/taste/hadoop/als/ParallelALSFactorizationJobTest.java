@@ -251,10 +251,10 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
     alsFactorization.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--lambda", String.valueOf(lambda),
         "--numFeatures", String.valueOf(numFeatures), "--numIterations", String.valueOf(numIterations) });
 
-    Matrix u = MathHelper.readEntries(conf, new Path(outputDir.getAbsolutePath(), "U/part-r-00000"),
+    Matrix u = MathHelper.readMatrix(conf, new Path(outputDir.getAbsolutePath(), "U/part-r-00000"),
         preferences.numRows(), numFeatures);
-    Matrix m = MathHelper.readEntries(conf, new Path(outputDir.getAbsolutePath(), "M/part-r-00000"),
-      preferences.numCols(), numFeatures);
+    Matrix m = MathHelper.readMatrix(conf, new Path(outputDir.getAbsolutePath(), "M/part-r-00000"),
+        preferences.numCols(), numFeatures);
 
     RunningAverage avg = new FullRunningAverage();
     sliceIterator = preferences.iterateAll();

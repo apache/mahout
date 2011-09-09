@@ -20,6 +20,7 @@ package org.apache.mahout.math;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.DoubleFunction;
+import org.apache.mahout.math.function.Functions;
 
 import java.util.Iterator;
 
@@ -515,8 +516,18 @@ public abstract class AbstractVector implements Vector {
     if (size != other.size()) {
       throw new CardinalityException(size, other.size());
     }
-    for (int i = 0; i < size; i++) {
-      setQuick(i, function.apply(getQuick(i), other.getQuick(i)));
+
+    /* special case: we only need to iterate over the non-zero elements of the vector to add */
+    if (Functions.PLUS.equals(function)) {
+      Iterator<Vector.Element> nonZeroElements = other.iterateNonZero();
+      while (nonZeroElements.hasNext()) {
+        Vector.Element e = nonZeroElements.next();
+        setQuick(e.index(), function.apply(getQuick(e.index()), e.get()));
+      }
+    } else {
+      for (int i = 0; i < size; i++) {
+        setQuick(i, function.apply(getQuick(i), other.getQuick(i)));
+      }
     }
     return this;
   }

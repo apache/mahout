@@ -21,27 +21,22 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;
-import java.util.List;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.VarIntWritable;
-import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.hadoop.similarity.vector.DistributedTanimotoCoefficientVectorSimilarity;
-import org.apache.mahout.math.hadoop.similarity.vector.DistributedUncenteredZeroAssumingCosineVectorSimilarity;
+import org.apache.mahout.math.hadoop.similarity.cooccurrence.measures.CosineSimilarity;
+import org.apache.mahout.math.hadoop.similarity.cooccurrence.measures.TanimotoCoefficientSimilarity;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
-import org.easymock.IArgumentMatcher;
 import org.easymock.EasyMock;
 import org.junit.Test;
 
@@ -138,7 +133,7 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
     similarityJob.setConf(conf);
 
     similarityJob.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--similarityClassname",
-       DistributedUncenteredZeroAssumingCosineVectorSimilarity.class.getName() });
+       CosineSimilarity.class.getName() });
 
     File outPart = outputDir.listFiles(new FilenameFilter() {
       @Override
@@ -234,7 +229,7 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
     similarityJob.setConf(conf);
 
     similarityJob.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--similarityClassname",
-        DistributedTanimotoCoefficientVectorSimilarity.class.getName(), "--maxSimilaritiesPerItem", "1" });
+        TanimotoCoefficientSimilarity.class.getName(), "--maxSimilaritiesPerItem", "1" });
 
     File outPart = outputDir.listFiles(new FilenameFilter() {
       @Override

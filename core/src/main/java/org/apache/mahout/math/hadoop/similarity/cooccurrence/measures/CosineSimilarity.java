@@ -15,29 +15,34 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math.hadoop.similarity.vector;
+package org.apache.mahout.math.hadoop.similarity.cooccurrence.measures;
 
-import org.junit.Test;
+import org.apache.mahout.math.Vector;
 
-/**
- * tests {@link DistributedLoglikelihoodVectorSimilarity}
- */
-public final class DistributedLoglikelihoodVectorSimilarityTest
-    extends DistributedVectorSimilarityTestCase {
+public class CosineSimilarity implements VectorSimilarityMeasure {
 
-  @Test
-  public void testLoglikelihood() throws Exception {
-    assertSimilar(new DistributedLoglikelihoodVectorSimilarity(),
-        asVector(1, 1, 0, 1, 0),
-        asVector(1, 0, 0, 1, 1), 5, 0.12160727029227925);
-
-    assertSimilar(new DistributedLoglikelihoodVectorSimilarity(),
-        asVector(1, 0, 0, 1, 1),
-        asVector(1, 1, 0, 1, 0), 5, 0.12160727029227925);
-
-    assertSimilar(new DistributedLoglikelihoodVectorSimilarity(),
-        asVector(1, 0, 0, 1, 1),
-        asVector(0, 1, 1, 1, 1), 5, 0.5423213660693733);
+  @Override
+  public Vector normalize(Vector vector) {
+    return vector.normalize();
   }
 
+  @Override
+  public double norm(Vector vector) {
+    return VectorSimilarityMeasure.NO_NORM;
+  }
+
+  @Override
+  public double aggregate(double valueA, double nonZeroValueB) {
+    return valueA * nonZeroValueB;
+  }
+
+  @Override
+  public double similarity(double dots, double normA, double normB, int numberOfColumns) {
+    return dots;
+  }
+
+  @Override
+  public boolean consider(int numNonZeroEntriesA, int numNonZeroEntriesB, double maxValueA, double treshold) {
+    return numNonZeroEntriesB >= treshold / maxValueA;
+  }
 }

@@ -127,28 +127,13 @@ public class TransposeJob extends AbstractJob {
     }
   }
 
-  static Vector merge(Iterator<VectorWritable> vectors) {
-    Vector accumulator = vectors.next().get();
-    while (vectors.hasNext()) {
-      VectorWritable v = vectors.next();
-      if (v != null) {
-        Iterator<Vector.Element> nonZeroElements = v.get().iterateNonZero();
-        while (nonZeroElements.hasNext()) {
-          Vector.Element nonZeroElement = nonZeroElements.next();
-          accumulator.setQuick(nonZeroElement.index(), nonZeroElement.get());
-        }
-      }
-    }
-    return accumulator;
-  }
-
   public static class MergeVectorsCombiner extends MapReduceBase
         implements Reducer<WritableComparable<?>,VectorWritable,WritableComparable<?>,VectorWritable> {
 
     @Override
     public void reduce(WritableComparable<?> key, Iterator<VectorWritable> vectors,
         OutputCollector<WritableComparable<?>, VectorWritable> out, Reporter reporter) throws IOException {
-      out.collect(key, new VectorWritable(merge(vectors)));
+      out.collect(key, VectorWritable.merge(vectors));
     }
   }
 
@@ -158,7 +143,8 @@ public class TransposeJob extends AbstractJob {
     @Override
     public void reduce(WritableComparable<?> key, Iterator<VectorWritable> vectors,
         OutputCollector<WritableComparable<?>, VectorWritable> out, Reporter reporter) throws IOException {
-      out.collect(key, new VectorWritable(new SequentialAccessSparseVector(merge(vectors))));
+      Vector merged = VectorWritable.merge(vectors).get();
+      out.collect(key, new VectorWritable(new SequentialAccessSparseVector(merged)));
     }
   }
 }

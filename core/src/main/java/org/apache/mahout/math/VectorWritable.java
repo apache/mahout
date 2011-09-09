@@ -21,6 +21,9 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.io.Writable;
 
 import com.google.common.base.Preconditions;
+import org.apache.mahout.math.map.OpenDoubleIntHashMap;
+import org.apache.mahout.math.map.OpenIntDoubleHashMap;
+import org.apache.mahout.math.map.OpenIntIntHashMap;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -125,7 +128,7 @@ public final class VectorWritable extends Configured implements Writable {
   public static void writeVector(DataOutput out, Vector vector) throws IOException {
     writeVector(out, vector, false);
   }
-  
+
   public static void writeVector(DataOutput out, Vector vector, boolean laxPrecision) throws IOException {
     boolean dense = vector.isDense();
     boolean sequential = vector.isSequentialAccess();
@@ -184,6 +187,21 @@ public final class VectorWritable extends Configured implements Writable {
     VectorWritable v = new VectorWritable();
     v.readFields(in);
     return v.get();
+  }
+
+  public static VectorWritable merge(Iterator<VectorWritable> vectors) {
+    Vector accumulator = vectors.next().get();
+    while (vectors.hasNext()) {
+      VectorWritable v = vectors.next();
+      if (v != null) {
+        Iterator<Vector.Element> nonZeroElements = v.get().iterateNonZero();
+        while (nonZeroElements.hasNext()) {
+          Vector.Element nonZeroElement = nonZeroElements.next();
+          accumulator.setQuick(nonZeroElement.index(), nonZeroElement.get());
+        }
+      }
+    }
+    return new VectorWritable(accumulator);
   }
 
   @Override

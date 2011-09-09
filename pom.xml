@@ -586,7 +586,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <forkMode>once</forkMode>
-          <argLine>-Xms256m -Xmx512m</argLine>
+          <argLine>-Xms256m -Xmx768m</argLine>
           <testFailureIgnore>false</testFailureIgnore>
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
         </configuration>

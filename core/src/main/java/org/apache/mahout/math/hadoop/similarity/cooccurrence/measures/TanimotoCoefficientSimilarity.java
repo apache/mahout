@@ -15,28 +15,17 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math.hadoop.similarity.vector;
+package org.apache.mahout.math.hadoop.similarity.cooccurrence.measures;
 
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.hadoop.similarity.Cooccurrence;
-
-/**
- * distributed implementation of the tanimoto coefficient
- */
-public class DistributedTanimotoCoefficientVectorSimilarity extends AbstractDistributedVectorSimilarity {
+public class TanimotoCoefficientSimilarity extends CountbasedMeasure {
 
   @Override
-  protected double doComputeResult(int rowA, int rowB, Iterable<Cooccurrence> cooccurrences, double weightOfVectorA,
-      double weightOfVectorB, long numberOfColumns) {
-    double cooccurrenceCount = countElements(cooccurrences);
-    if (cooccurrenceCount == 0) {
-      return Double.NaN;
-    }
-    return cooccurrenceCount / (weightOfVectorA + weightOfVectorB - cooccurrenceCount);
+  public double similarity(double dots, double normA, double normB, int numberOfColumns) {
+    return dots / (normA + normB - dots);
   }
 
   @Override
-  public double weight(Vector v) {
-    return (double) countElements(v.iterateNonZero());
+  public boolean consider(int numNonZeroEntriesA, int numNonZeroEntriesB, double maxValueA, double treshold) {
+    return numNonZeroEntriesA >= numNonZeroEntriesB * treshold;
   }
 }

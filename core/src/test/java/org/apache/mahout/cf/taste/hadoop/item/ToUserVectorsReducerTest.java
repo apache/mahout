@@ -30,16 +30,16 @@ import org.junit.Test;
 import java.util.Arrays;
 
 /**
- * tests {@link org.apache.mahout.cf.taste.hadoop.item.ToUserVectorReducer}
+ * tests {@link ToUserVectorsReducer}
  */
-public class ToUserVectorReducerTest extends TasteTestCase {
+public class ToUserVectorsReducerTest extends TasteTestCase {
 
   @Test
   public void testToUsersReducerMinPreferencesUserIgnored() throws Exception {
     Reducer<VarLongWritable,VarLongWritable,VarLongWritable,VectorWritable>.Context context =
         EasyMock.createMock(Reducer.Context.class);
 
-    ToUserVectorReducer reducer = new ToUserVectorReducer();
+    ToUserVectorsReducer reducer = new ToUserVectorsReducer();
     setField(reducer, "minPreferences", 2);
 
     EasyMock.replay(context);
@@ -55,10 +55,10 @@ public class ToUserVectorReducerTest extends TasteTestCase {
         EasyMock.createMock(Reducer.Context.class);
     Counter userCounters = EasyMock.createMock(Counter.class);
 
-    ToUserVectorReducer reducer = new ToUserVectorReducer();
+    ToUserVectorsReducer reducer = new ToUserVectorsReducer();
     setField(reducer, "minPreferences", 2);
 
-    EasyMock.expect(context.getCounter(ToUserVectorReducer.Counters.USERS)).andReturn(userCounters);
+    EasyMock.expect(context.getCounter(ToUserVectorsReducer.Counters.USERS)).andReturn(userCounters);
     userCounters.increment(1);
     context.write(EasyMock.eq(new VarLongWritable(123)), MathHelper.vectorMatches(
         MathHelper.elem(TasteHadoopUtils.idToIndex(456L), 1.0), MathHelper.elem(TasteHadoopUtils.idToIndex(789L), 1.0)));
