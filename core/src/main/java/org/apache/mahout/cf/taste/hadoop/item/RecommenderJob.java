@@ -62,9 +62,9 @@ import java.util.regex.Pattern;
  * <p>Command line arguments specific to this class are:</p>
  *
  * <ol>
- * <li>-Dmapred.input.dir=(path): Directory containing one or more text files with the preference data</li>
- * <li>-Dmapred.output.dir=(path): output path where recommender output should go</li>
- * <li>--similarityClassname (classname): Name of distributed similarity class to instantiate or a predefined similarity
+ * <li>--input(path): Directory containing one or more text files with the preference data</li>
+ * <li>--output(path): output path where recommender output should go</li>
+ * <li>--similarityClassname (classname): Name of vector similarity class to instantiate or a predefined similarity
  *  from {@link org.apache.mahout.math.hadoop.similarity.cooccurrence.measures.VectorSimilarityMeasure}</li>
  * <li>--usersFile (path): only compute recommendations for user IDs contained in this file (optional)</li>
  * <li>--itemsFile (path): only include item IDs from this file in the recommendations (optional)</li>
@@ -72,10 +72,12 @@ import java.util.regex.Pattern;
  * recommendations for that user (optional)</li>
  * <li>--numRecommendations (integer): Number of recommendations to compute per user (10)</li>
  * <li>--booleanData (boolean): Treat input data as having no pref values (false)</li>
- * <li>--maxPrefsPerUser (integer): Maximum number of preferences considered per user in
- *  final recommendation phase (10)</li>
+ * <li>--maxPrefsPerUser (integer): Maximum number of preferences considered per user in  final recommendation phase (10)</li>
  * <li>--maxSimilaritiesPerItem (integer): Maximum number of similarities considered per item (100)</li>
- * <li>--maxCooccurrencesPerItem (integer): Maximum number of cooccurrences considered per item (100)</li>
+ * <li>--minPrefsPerUser (integer): ignore users with less preferences than this in the similarity computation (1)</li>
+ * <li>--maxPrefsPerUserInItemSimilarity (integer): max number of preferences to consider per user in the item similarity computation phase,
+ * users with more preferences will be sampled down (1000)</li>
+ * <li>--threshold (double): discard item pairs with a similarity value below this</li>
  * </ol>
  *
  * <p>General command line options are documented in {@link AbstractJob}.</p>
@@ -115,6 +117,7 @@ public final class RecommenderJob extends AbstractJob {
         DEFAULT_MAX_PREFS_PER_USER + ")", String.valueOf(DEFAULT_MAX_PREFS_PER_USER));
     addOption("similarityClassname", "s", "Name of distributed similarity measures class to instantiate, " +
         "alternatively use one of the predefined similarities (" + VectorSimilarityMeasures.list() + ')');
+    addOption("threshold", "tr", "discard item pairs with a similarity value below this", false);
 
     Map<String,String> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
@@ -132,6 +135,9 @@ public final class RecommenderJob extends AbstractJob {
     int maxPrefsPerUserInItemSimilarity = Integer.parseInt(parsedArgs.get("--maxPrefsPerUserInItemSimilarity"));
     int maxSimilaritiesPerItem = Integer.parseInt(parsedArgs.get("--maxSimilaritiesPerItem"));
     String similarityClassname = parsedArgs.get("--similarityClassname");
+    double threshold = parsedArgs.containsKey("--threshold") ?
+        Double.parseDouble(parsedArgs.get("--threshold")) : RowSimilarityJob.NO_THRESHOLD;
+
 
     Path prepPath = getTempPath("preparePreferenceMatrix");
     Path similarityMatrixPath = getTempPath("similarityMatrix");
@@ -172,7 +178,9 @@ public final class RecommenderJob extends AbstractJob {
         "--output", similarityMatrixPath.toString(),
         "--numberOfColumns", String.valueOf(numberOfUsers),
         "--similarityClassname", similarityClassname,
-        "--maxSimilaritiesPerRow", String.valueOf(maxSimilaritiesPerItem + 1),
+        "--maxSimilaritiesPerRow", String.valueOf(maxSimilaritiesPerItem),
+        "--excludeSelfSimilarity", String.valueOf(Boolean.TRUE),
+        "--threshold", String.valueOf(threshold),
         "--tempDir", getTempPath().toString() });
     }
 

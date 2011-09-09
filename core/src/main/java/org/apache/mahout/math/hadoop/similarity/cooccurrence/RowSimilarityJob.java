@@ -35,7 +35,6 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.hadoop.similarity.cooccurrence.measures.VectorSimilarityMeasures;
 import org.apache.mahout.math.hadoop.similarity.cooccurrence.measures.VectorSimilarityMeasure;
-import org.apache.mahout.math.map.OpenIntDoubleHashMap;
 import org.apache.mahout.math.map.OpenIntIntHashMap;
 
 import java.io.IOException;
@@ -47,18 +46,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class RowSimilarityJob extends AbstractJob {
 
+  public static final double NO_THRESHOLD = Double.MIN_VALUE;
+
   static final String SIMILARITY_CLASSNAME = RowSimilarityJob.class + ".distributedSimilarityClassname";
   static final String NUMBER_OF_COLUMNS = RowSimilarityJob.class + ".numberOfColumns";
   static final String MAX_SIMILARITIES_PER_ROW = RowSimilarityJob.class + ".maxSimilaritiesPerRow";
   static final String EXCLUDE_SELF_SIMILARITY = RowSimilarityJob.class + ".excludeSelfSimilarity";
-  static final String THRESHOLD = RowSimilarityJob.class + ".threshold";
 
+  static final String THRESHOLD = RowSimilarityJob.class + ".threshold";
   static final String NORMS_PATH = RowSimilarityJob.class + ".normsPath";
   static final String MAXVALUES_PATH = RowSimilarityJob.class + ".maxWeightsPath";
-  static final String NUM_NON_ZERO_ENTRIES_PATH = RowSimilarityJob.class + ".nonZeroEntriesPath";
 
+  static final String NUM_NON_ZERO_ENTRIES_PATH = RowSimilarityJob.class + ".nonZeroEntriesPath";
   private static final int DEFAULT_MAX_SIMILARITIES_PER_ROW = 100;
-  private static final double NO_THRESHOLD = Double.MIN_VALUE;
 
   private static final int NORM_VECTOR_MARKER = Integer.MIN_VALUE;
   private static final int MAXVALUE_VECTOR_MARKER = Integer.MIN_VALUE + 1;
@@ -69,6 +69,7 @@ public class RowSimilarityJob extends AbstractJob {
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new RowSimilarityJob(), args);
   }
+
 
   @Override
   public int run(String[] args) throws Exception {
@@ -81,7 +82,7 @@ public class RowSimilarityJob extends AbstractJob {
     addOption("maxSimilaritiesPerRow", "m", "Number of maximum similarities per row (default: "
         + DEFAULT_MAX_SIMILARITIES_PER_ROW + ')', String.valueOf(DEFAULT_MAX_SIMILARITIES_PER_ROW));
     addOption("excludeSelfSimilarity", "ess", "compute similarity of rows to themselves?", String.valueOf(false));
-    addOption("threshold", "tr", "drop row pairs with a similarity value below this");
+    addOption("threshold", "tr", "discard row pairs with a similarity value below this", false);
 
     Map<String,String> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {

@@ -47,7 +47,7 @@ import org.junit.Test;
 public final class ItemSimilarityJobTest extends TasteTestCase {
 
   /**
-   * Tests {@link MostSimilarItemPairsMapper}
+   * Tests {@link ItemSimilarityJob.MostSimilarItemPairsMapper}
    */
   @Test
   public void testMostSimilarItemsPairsMapper() throws Exception {
@@ -66,10 +66,9 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
 
     Vector vector = new RandomAccessSparseVector(Integer.MAX_VALUE);
     vector.set(12, 0.2);
-    vector.set(34, 1.0);
     vector.set(56, 0.9);
 
-    MostSimilarItemPairsMapper mapper = new MostSimilarItemPairsMapper();
+    ItemSimilarityJob.MostSimilarItemPairsMapper mapper = new ItemSimilarityJob.MostSimilarItemPairsMapper();
     setField(mapper, "indexItemIDMap", indexItemIDMap);
     setField(mapper, "maxSimilarItemsPerItem", 1);
 
@@ -79,7 +78,7 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
   }
 
   /**
-   * Tests {@link MostSimilarItemPairsReducer}
+   * Tests {@link ItemSimilarityJob.MostSimilarItemPairsReducer}
    */
   @Test
   public void testMostSimilarItemPairsReducer() throws Exception {
@@ -90,7 +89,7 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
 
     EasyMock.replay(context);
 
-    new MostSimilarItemPairsReducer().reduce(new EntityEntityWritable(123L, 456L),
+    new ItemSimilarityJob.MostSimilarItemPairsReducer().reduce(new EntityEntityWritable(123L, 456L),
         Arrays.asList(new DoubleWritable(0.5), new DoubleWritable(0.5)), context);
 
     EasyMock.verify(context);

@@ -17,23 +17,33 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
+import java.io.IOException;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 
 import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.mahout.cf.taste.common.TopK;
 import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
 import org.apache.mahout.cf.taste.hadoop.preparation.PreparePreferenceMatrixJob;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.hadoop.similarity.cooccurrence.RowSimilarityJob;
 import org.apache.mahout.math.hadoop.similarity.cooccurrence.measures.VectorSimilarityMeasures;
+import org.apache.mahout.math.map.OpenIntLongHashMap;
 
 /**
  * <p>Distributed precomputation of the item-item-similarities for Itembased Collaborative Filtering</p>
@@ -95,6 +105,7 @@ public final class ItemSimilarityJob extends AbstractJob {
     addOption("minPrefsPerUser", "mp", "ignore users with less preferences than this "
         + "(default: " + DEFAULT_MIN_PREFS_PER_USER + ')', String.valueOf(DEFAULT_MIN_PREFS_PER_USER));
     addOption("booleanData", "b", "Treat input as without pref values", String.valueOf(Boolean.FALSE));
+    addOption("threshold", "tr", "discard item pairs with a similarity value below this", false);
 
     Map<String,String> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
@@ -107,50 +118,102 @@ public final class ItemSimilarityJob extends AbstractJob {
     int minPrefsPerUser = Integer.parseInt(parsedArgs.get("--minPrefsPerUser"));
     boolean booleanData = Boolean.valueOf(parsedArgs.get("--booleanData"));
 
+    double threshold = parsedArgs.containsKey("--threshold") ?
+        Double.parseDouble(parsedArgs.get("--threshold")) : RowSimilarityJob.NO_THRESHOLD;
+
     Path similarityMatrixPath = getTempPath("similarityMatrix");
     Path prepPath = getTempPath("prepareRatingMatrix");
 
     AtomicInteger currentPhase = new AtomicInteger();
 
-    ToolRunner.run(getConf(), new PreparePreferenceMatrixJob(), new String[]{
-        "--input", getInputPath().toString(),
-        "--output", prepPath.toString(),
-        "--maxPrefsPerUser", String.valueOf(maxPrefsPerUser),
-        "--minPrefsPerUser", String.valueOf(minPrefsPerUser),
-        "--booleanData", String.valueOf(booleanData),
-        "--tempDir", getTempPath().toString()});
-
-    int numberOfUsers = TasteHadoopUtils.readInt(new Path(prepPath, PreparePreferenceMatrixJob.NUM_USERS), getConf());
-
-    /* Once DistributedRowMatrix uses the hadoop 0.20 API, we should refactor this call to something like
-     * new DistributedRowMatrix(...).rowSimilarity(...) */
-    ToolRunner.run(getConf(), new RowSimilarityJob(), new String[] {
-        "--input", new Path(prepPath, PreparePreferenceMatrixJob.RATING_MATRIX).toString(),
-        "--output", similarityMatrixPath.toString(),
-        "--numberOfColumns", String.valueOf(numberOfUsers),
-        "--similarityClassname", similarityClassName,
-        "--maxSimilaritiesPerRow", String.valueOf(maxSimilarItemsPerItem + 1),
-        "--tempDir", getTempPath().toString() });
+    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+      ToolRunner.run(getConf(), new PreparePreferenceMatrixJob(), new String[]{
+          "--input", getInputPath().toString(),
+          "--output", prepPath.toString(),
+          "--maxPrefsPerUser", String.valueOf(maxPrefsPerUser),
+          "--minPrefsPerUser", String.valueOf(minPrefsPerUser),
+          "--booleanData", String.valueOf(booleanData),
+          "--tempDir", getTempPath().toString() });
+    }
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
-      Job mostSimilarItems = prepareJob(similarityMatrixPath,
-                                  getOutputPath(),
-                                  SequenceFileInputFormat.class,
-                                  MostSimilarItemPairsMapper.class,
-                                  EntityEntityWritable.class,
-                                  DoubleWritable.class,
-                                  MostSimilarItemPairsReducer.class,
-                                  EntityEntityWritable.class,
-                                  DoubleWritable.class,
-                                  TextOutputFormat.class);
+      int numberOfUsers = TasteHadoopUtils.readInt(new Path(prepPath, PreparePreferenceMatrixJob.NUM_USERS),
+          getConf());
+
+      ToolRunner.run(getConf(), new RowSimilarityJob(), new String[] {
+          "--input", new Path(prepPath, PreparePreferenceMatrixJob.RATING_MATRIX).toString(),
+          "--output", similarityMatrixPath.toString(),
+          "--numberOfColumns", String.valueOf(numberOfUsers),
+          "--similarityClassname", similarityClassName,
+          "--maxSimilaritiesPerRow", String.valueOf(maxSimilarItemsPerItem),
+          "--excludeSelfSimilarity", String.valueOf(Boolean.TRUE),
+          "--threshold", String.valueOf(threshold),
+          "--tempDir", getTempPath().toString() });
+    }
+
+    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+      Job mostSimilarItems = prepareJob(similarityMatrixPath, getOutputPath(), SequenceFileInputFormat.class,
+          MostSimilarItemPairsMapper.class, EntityEntityWritable.class, DoubleWritable.class,
+          MostSimilarItemPairsReducer.class, EntityEntityWritable.class, DoubleWritable.class, TextOutputFormat.class);
       Configuration mostSimilarItemsConf = mostSimilarItems.getConfiguration();
       mostSimilarItemsConf.set(ITEM_ID_INDEX_PATH_STR,
           new Path(prepPath, PreparePreferenceMatrixJob.ITEMID_INDEX).toString());
       mostSimilarItemsConf.setInt(MAX_SIMILARITIES_PER_ITEM, maxSimilarItemsPerItem);
-      mostSimilarItems.setCombinerClass(MostSimilarItemPairsReducer.class);
       mostSimilarItems.waitForCompletion(true);
     }
 
     return 0;
+  }
+
+  public static class MostSimilarItemPairsMapper
+      extends Mapper<IntWritable,VectorWritable,EntityEntityWritable,DoubleWritable> {
+
+    private OpenIntLongHashMap indexItemIDMap;
+    private int maxSimilarItemsPerItem;
+
+    @Override
+    protected void setup(Context ctx) {
+      Configuration conf = ctx.getConfiguration();
+      maxSimilarItemsPerItem = conf.getInt(ItemSimilarityJob.MAX_SIMILARITIES_PER_ITEM, -1);
+      indexItemIDMap = TasteHadoopUtils.readItemIDIndexMap(conf.get(ItemSimilarityJob.ITEM_ID_INDEX_PATH_STR), conf);
+
+      Preconditions.checkArgument(maxSimilarItemsPerItem > 0, "maxSimilarItemsPerItem was not correctly set!");
+    }
+
+    @Override
+    protected void map(IntWritable itemIDIndexWritable, VectorWritable similarityVector, Context ctx)
+      throws IOException, InterruptedException {
+
+      int itemIDIndex = itemIDIndexWritable.get();
+
+      TopK<SimilarItem> topKMostSimilarItems =
+          new TopK<SimilarItem>(maxSimilarItemsPerItem, SimilarItem.COMPARE_BY_SIMILARITY);
+
+      Iterator<Vector.Element> similarityVectorIterator = similarityVector.get().iterateNonZero();
+
+      while (similarityVectorIterator.hasNext()) {
+        Vector.Element element = similarityVectorIterator.next();
+        topKMostSimilarItems.offer(new SimilarItem(indexItemIDMap.get(element.index()), element.get()));
+      }
+
+      long itemID = indexItemIDMap.get(itemIDIndex);
+      for (SimilarItem similarItem : topKMostSimilarItems.retrieve()) {
+        long otherItemID = similarItem.getItemID();
+        if (itemID < otherItemID) {
+          ctx.write(new EntityEntityWritable(itemID, otherItemID), new DoubleWritable(similarItem.getSimilarity()));
+        } else {
+          ctx.write(new EntityEntityWritable(otherItemID, itemID), new DoubleWritable(similarItem.getSimilarity()));
+        }
+      }
+    }
+  }
+
+  static class MostSimilarItemPairsReducer
+      extends Reducer<EntityEntityWritable,DoubleWritable,EntityEntityWritable,DoubleWritable> {
+    @Override
+    protected void reduce(EntityEntityWritable pair, Iterable<DoubleWritable> values, Context ctx)
+        throws IOException, InterruptedException {
+      ctx.write(pair, values.iterator().next());
+    }
   }
 }
