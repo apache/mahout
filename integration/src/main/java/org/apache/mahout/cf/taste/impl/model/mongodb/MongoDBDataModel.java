@@ -474,7 +474,8 @@ public final class MongoDBDataModel implements DataModel {
     DBObject objectIdLong = collectionMap.findOne(new BasicDBObject("element_id", id));
     if (objectIdLong != null) {
       Map<String,Object> idLong = (Map<String,Object>) objectIdLong.toMap();
-      return (String) idLong.get("long_value");
+      Object value = idLong.get("long_value");
+      return value == null ? null : value.toString();
     } else {
       objectIdLong = new BasicDBObject();
       String longValue = Long.toString(idCounter++);
@@ -511,7 +512,8 @@ public final class MongoDBDataModel implements DataModel {
   public String fromLongToId(long id) {
     DBObject objectIdLong = collectionMap.findOne(new BasicDBObject("long_value", Long.toString(id)));
     Map<String,Object> idLong = (Map<String,Object>) objectIdLong.toMap();
-    return (String) idLong.get("element_id");
+    Object value = idLong.get("element_id");
+    return value == null ? null : value.toString();
   }
 
   /**
@@ -708,7 +710,7 @@ public final class MongoDBDataModel implements DataModel {
       return (Date) date;
     } else if (date.getClass().getName().contains("String")) {
       try {
-        return dateFormat.parse((String) date);
+        return dateFormat.parse(date.toString());
       } catch (ParseException ioe) {
         log.warn("Error parsing timestamp", ioe);
       }
@@ -720,7 +722,7 @@ public final class MongoDBDataModel implements DataModel {
     if (value != null) {
       if (value.getClass().getName().contains("String")) {
         preferenceIsString = true;
-        return Float.parseFloat((String) value);
+        return Float.parseFloat(value.toString());
       } else {
         preferenceIsString = false;
         return Double.valueOf(value.toString()).floatValue();
@@ -739,7 +741,7 @@ public final class MongoDBDataModel implements DataModel {
       }
       return ((ObjectId) id).toStringMongod();
     } else {
-      return (String) id;
+      return id.toString();
     }
   }
 
