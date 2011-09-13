@@ -45,9 +45,6 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
   
   private static final Logger log = LoggerFactory.getLogger(SparseVectorsFromSequenceFiles.class);
   
-  private SparseVectorsFromSequenceFiles() {
-  }
-  
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new SparseVectorsFromSequenceFiles(), args);
   }
