@@ -195,8 +195,8 @@ if [ "$HADOOP_HOME" = "" ] || [ "$MAHOUT_LOCAL" != "" ] ; then
 else
   echo "Running on hadoop, using HADOOP_HOME=$HADOOP_HOME"
   if [ "$HADOOP_CONF_DIR" = "" ] ; then
-    HADOOP_CONF_DIR=$HADOOP_HOME/src/conf
-    echo "No HADOOP_CONF_DIR set, using $HADOOP_HOME/src/conf "
+    HADOOP_CONF_DIR=$HADOOP_HOME/conf
+    echo "No HADOOP_CONF_DIR set, using $HADOOP_HOME/conf "
   else
     echo "HADOOP_CONF_DIR=$HADOOP_CONF_DIR"
   fi
