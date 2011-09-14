@@ -55,7 +55,8 @@ public final class ChunkedWriter implements Closeable {
   public void write(String key, String value) throws IOException {
     if (currentChunkSize > maxChunkSizeInBytes) {
       Closeables.closeQuietly(writer);
-      writer = new SequenceFile.Writer(fs, conf, getPath(currentChunkID++), Text.class, Text.class);
+      currentChunkID++;
+      writer = new SequenceFile.Writer(fs, conf, getPath(currentChunkID), Text.class, Text.class);
       currentChunkSize = 0;
     }
 
