@@ -46,9 +46,8 @@ public final class PrefixAdditionFilter extends SequenceFilesFromDirectoryFilter
     FileSystem fs = getFs();
     ChunkedWriter writer = getWriter();
     if (fst.isDir()) {
-      fs.listStatus(fst.getPath(),
-                    new PrefixAdditionFilter(getConf(), getPrefix() + Path.SEPARATOR + current.getName(),
-                                             getOptions(), writer, fs));
+      String dirPath = getPrefix() + Path.SEPARATOR + current.getName() + Path.SEPARATOR + fst.getPath().getName();
+      fs.listStatus(fst.getPath(), new PrefixAdditionFilter(getConf(), dirPath, getOptions(), writer, fs));
     } else {
       InputStream in = null;
       try {
