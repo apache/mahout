@@ -49,6 +49,7 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.vectorizer.collocations.llr.CollocDriver;
 import org.apache.mahout.vectorizer.common.PartialVectorMerger;
 import org.apache.mahout.vectorizer.term.TFPartialVectorReducer;
+import org.apache.mahout.vectorizer.term.TermCountCombiner;
 import org.apache.mahout.vectorizer.term.TermCountMapper;
 import org.apache.mahout.vectorizer.term.TermCountReducer;
 
@@ -332,7 +333,7 @@ public final class DictionaryVectorizer {
     job.setMapperClass(TermCountMapper.class);
     
     job.setInputFormatClass(SequenceFileInputFormat.class);
-    job.setCombinerClass(TermCountReducer.class);
+    job.setCombinerClass(TermCountCombiner.class);
     job.setReducerClass(TermCountReducer.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     
