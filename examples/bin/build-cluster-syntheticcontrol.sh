@@ -40,10 +40,14 @@ else
 fi
 
 cd examples/bin/
-mkdir -p work
-if [ ! -f work/synthetic_control.data ]; then
+
+WORK_DIR=/tmp/mahout-work-${USER}
+
+echo "creating work directory at ${WORK_DIR}"
+mkdir -p ${WORK_DIR}
+if [ ! -f ${WORK_DIR}/synthetic_control.data ]; then
   echo "Downloading Synthetic control data"
-  curl http://archive.ics.uci.edu/ml/databases/synthetic_control/synthetic_control.data  -o work/synthetic_control.data
+  curl http://archive.ics.uci.edu/ml/databases/synthetic_control/synthetic_control.data  -o ${WORK_DIR}/synthetic_control.data
 fi
 
 if [ "$HADOOP_HOME" != "" ]; then
@@ -54,7 +58,7 @@ if [ "$HADOOP_HOME" != "" ]; then
     echo "Uploading Synthetic control data to HDFS"
     $HADOOP_HOME/bin/hadoop fs -rmr testdata
     $HADOOP_HOME/bin/hadoop fs -mkdir testdata
-    $HADOOP_HOME/bin/hadoop fs -put work/synthetic_control.data testdata
+    $HADOOP_HOME/bin/hadoop fs -put ${WORK_DIR}/synthetic_control.data testdata
     echo "Successfully Uploaded Synthetic control data to HDFS "
 
     ../../bin/mahout org.apache.mahout.clustering.syntheticcontrol."${clustertype}".Job
@@ -64,3 +68,6 @@ if [ "$HADOOP_HOME" != "" ]; then
 else
   echo " HADOOP_HOME variable is not set. Please set this environment variable and rerun the script"
 fi
+
+# Remove the work directory
+rm -rf ${WORK_DIR}

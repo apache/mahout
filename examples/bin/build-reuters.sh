@@ -48,29 +48,32 @@ else
   clustertype=${algorithm[$choice-1]} 
 fi
 
-mkdir -p mahout-work
+WORK_DIR=/tmp/mahout-work-${USER}
+echo "creating work directory at ${WORK_DIR}"
 
-if [ ! -e mahout-work/reuters-out-seqdir ]; then
-    if [ ! -e mahout-work/reuters-out ]; then
-	if [ ! -e mahout-work/reuters-sgm ]; then
-	    if [ ! -f mahout-work/reuters21578.tar.gz ]; then
+mkdir -p ${WORK_DIR}
+
+if [ ! -e ${WORK_DIR}/reuters-out-seqdir ]; then
+    if [ ! -e ${WORK_DIR}/reuters-out ]; then
+	if [ ! -e ${WORK_DIR}/reuters-sgm ]; then
+	    if [ ! -f ${WORK_DIR}/reuters21578.tar.gz ]; then
 		echo "Downloading Reuters-21578"
 		curl http://kdd.ics.uci.edu/databases/reuters21578/reuters21578.tar.gz \
-                     -o mahout-work/reuters21578.tar.gz
+                     -o ${WORK_DIR}/reuters21578.tar.gz
 	    fi
-	    mkdir -p mahout-work/reuters-sgm
+	    mkdir -p ${WORK_DIR}/reuters-sgm
 	    echo "Extracting..."
-	    cd mahout-work/reuters-sgm && tar xzf ../reuters21578.tar.gz && cd .. && cd ..
+	    cd ${WORK_DIR}/reuters-sgm && tar xzf ../reuters21578.tar.gz && cd .. && cd ..
 	fi
 	
 	$MAHOUT org.apache.lucene.benchmark.utils.ExtractReuters \
-	    mahout-work/reuters-sgm \
-	    mahout-work/reuters-out 
+	    ${WORK_DIR}/reuters-sgm \
+	    ${WORK_DIR}/reuters-out 
     fi
 
     MAHOUT_LOCAL=true $MAHOUT seqdirectory \
-        -i mahout-work/reuters-out \
-        -o mahout-work/reuters-out-seqdir \
+        -i ${WORK_DIR}/reuters-out \
+        -o ${WORK_DIR}/reuters-out-seqdir \
         -c UTF-8 -chunk 5
 fi
 
@@ -86,42 +89,45 @@ if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
 
     set +e
     $HADOOP dfs -rmr \
-        mahout-work/reuters-out-seqdir
+        ${WORK_DIR}/reuters-out-seqdir
     set -e
     $HADOOP dfs -put \
-        mahout-work/reuters-out-seqdir \
-        mahout-work/reuters-out-seqdir
+        ${WORK_DIR}/reuters-out-seqdir \
+        ${WORK_DIR}/reuters-out-seqdir
 fi
 
 if [ "x$clustertype" == "xkmeans" ]; then
   $MAHOUT seq2sparse \
-    -i mahout-work/reuters-out-seqdir/ \
-    -o mahout-work/reuters-out-seqdir-sparse-kmeans \
+    -i ${WORK_DIR}/reuters-out-seqdir/ \
+    -o ${WORK_DIR}/reuters-out-seqdir-sparse-kmeans \
   && \
   $MAHOUT kmeans \
-    -i mahout-work/reuters-out-seqdir-sparse-kmeans/tfidf-vectors/ \
-    -c mahout-work/reuters-kmeans-clusters \
-    -o mahout-work/reuters-kmeans \
+    -i ${WORK_DIR}/reuters-out-seqdir-sparse-kmeans/tfidf-vectors/ \
+    -c ${WORK_DIR}/reuters-kmeans-clusters \
+    -o ${WORK_DIR}/reuters-kmeans \
     -x 10 -k 20 -ow \
   && \
   $MAHOUT clusterdump \
-    -s mahout-work/reuters-kmeans/clusters-10 \
-    -d mahout-work/reuters-out-seqdir-sparse-kmeans/dictionary.file-0 \
+    -s ${WORK_DIR}/reuters-kmeans/clusters-10 \
+    -d ${WORK_DIR}/reuters-out-seqdir-sparse-kmeans/dictionary.file-0 \
     -dt sequencefile -b 100 -n 20
 elif [ "x$clustertype" == "xlda" ]; then
   $MAHOUT seq2sparse \
-    -i mahout-work/reuters-out-seqdir/ \
-    -o mahout-work/reuters-out-seqdir-sparse-lda \
+    -i ${WORK_DIR}/reuters-out-seqdir/ \
+    -o ${WORK_DIR}/reuters-out-seqdir-sparse-lda \
     -wt tf -seq -nr 3 \
   && \
   $MAHOUT lda \
-    -i mahout-work/reuters-out-seqdir-sparse-lda/tf-vectors \
-    -o mahout-work/reuters-lda -k 20 -v 50000 -ow -x 20 \
+    -i ${WORK_DIR}/reuters-out-seqdir-sparse-lda/tf-vectors \
+    -o ${WORK_DIR}/reuters-lda -k 20 -v 50000 -ow -x 20 \
   && \
   $MAHOUT ldatopics \
-    -i mahout-work/reuters-lda/state-20 \
-    -d mahout-work/reuters-out-seqdir-sparse-lda/dictionary.file-0 \
+    -i ${WORK_DIR}/reuters-lda/state-20 \
+    -d ${WORK_DIR}/reuters-out-seqdir-sparse-lda/dictionary.file-0 \
     -dt sequencefile
 else 
   echo "unknown cluster type: $clustertype";
 fi 
+
+# Remove the work directory
+rm -rf ${WORK_DIR}

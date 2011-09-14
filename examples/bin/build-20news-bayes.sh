@@ -27,16 +27,20 @@ if [ "$0" != "$SCRIPT_PATH" ] && [ "$SCRIPT_PATH" != "" ]; then
   cd $SCRIPT_PATH
 fi
 
-mkdir -p work
-if [ ! -e work/20news-bayesinput ]; then
-  if [ ! -e work/20news-bydate ]; then
-    if [ ! -f work/20news-bydate.tar.gz ]; then
+WORK_DIR=/tmp/mahout-work-${USER}
+
+echo "creating work directory at ${WORK_DIR}"
+
+mkdir -p ${WORK_DIR}
+if [ ! -e ${WORK_DIR}/20news-bayesinput ]; then
+  if [ ! -e ${WORK_DIR}/20news-bydate ]; then
+    if [ ! -f ${WORK_DIR}/20news-bydate.tar.gz ]; then
       echo "Downloading 20news-bydate"
-      curl http://people.csail.mit.edu/jrennie/20Newsgroups/20news-bydate.tar.gz -o work/20news-bydate.tar.gz
+      curl http://people.csail.mit.edu/jrennie/20Newsgroups/20news-bydate.tar.gz -o ${WORK_DIR}/20news-bydate.tar.gz
     fi
-    mkdir -p work/20news-bydate
+    mkdir -p ${WORK_DIR}/20news-bydate
     echo "Extracting..."
-    cd work/20news-bydate && tar xzf ../20news-bydate.tar.gz && cd .. && cd ..
+    cd ${WORK_DIR}/20news-bydate && tar xzf ../20news-bydate.tar.gz && cd .. && cd ..
   fi
 fi
 
@@ -45,14 +49,14 @@ cd ../..
 set -e
 
 ./bin/mahout org.apache.mahout.classifier.bayes.PrepareTwentyNewsgroups \
-  -p examples/bin/work/20news-bydate/20news-bydate-train \
-  -o examples/bin/work/20news-bydate/bayes-train-input \
+  -p ${WORK_DIR}/20news-bydate/20news-bydate-train \
+  -o ${WORK_DIR}/20news-bydate/bayes-train-input \
   -a org.apache.mahout.vectorizer.DefaultAnalyzer \
   -c UTF-8
 
 ./bin/mahout org.apache.mahout.classifier.bayes.PrepareTwentyNewsgroups \
-  -p examples/bin/work/20news-bydate/20news-bydate-test \
-  -o examples/bin/work/20news-bydate/bayes-test-input \
+  -p ${WORK_DIR}/20news-bydate/20news-bydate-test \
+  -o ${WORK_DIR}/20news-bydate/bayes-test-input \
   -a org.apache.mahout.vectorizer.DefaultAnalyzer \
   -c UTF-8 
 
@@ -65,33 +69,36 @@ if [ "$HADOOP_HOME" != "" ]; then
 
     set +e 
     hadoop dfs -rmr \
-      examples/bin/work/20news-bydate/bayes-train-input 
+      ${WORK_DIR}/20news-bydate/bayes-train-input 
 
     hadoop dfs -rmr \
-      examples/bin/work/20news-bydate/bayes-test-input
+      ${WORK_DIR}/20news-bydate/bayes-test-input
 
     set -e
     hadoop dfs -put \
-      examples/bin/work/20news-bydate/bayes-train-input \
-      examples/bin/work/20news-bydate/bayes-train-input 
+      ${WORK_DIR}/20news-bydate/bayes-train-input \
+      ${WORK_DIR}/20news-bydate/bayes-train-input 
 
     hadoop dfs -put \
-      examples/bin/work/20news-bydate/bayes-test-input \
-      examples/bin/work/20news-bydate/bayes-test-input
+      ${WORK_DIR}/20news-bydate/bayes-test-input \
+      ${WORK_DIR}/20news-bydate/bayes-test-input
 fi
 
 
 ./bin/mahout trainclassifier \
-  -i examples/bin/work/20news-bydate/bayes-train-input \
-  -o examples/bin/work/20news-bydate/bayes-model \
+  -i ${WORK_DIR}/20news-bydate/bayes-train-input \
+  -o ${WORK_DIR}/20news-bydate/bayes-model \
   -type bayes \
   -ng 1 \
   -source hdfs
 
 ./bin/mahout testclassifier \
-  -m examples/bin/work/20news-bydate/bayes-model \
-  -d examples/bin/work/20news-bydate/bayes-test-input \
+  -m ${WORK_DIR}/20news-bydate/bayes-model \
+  -d ${WORK_DIR}/20news-bydate/bayes-test-input \
   -type bayes \
   -ng 1 \
   -source hdfs \
   -method ${TEST_METHOD}
+
+# Remove the work directory
+rm -rf ${WORK_DIR}
