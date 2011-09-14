@@ -91,6 +91,7 @@ public class TransposeJob extends AbstractJob {
     FileInputFormat.addInputPath(conf, matrixInputPath);
     conf.setInputFormat(SequenceFileInputFormat.class);
     FileOutputFormat.setOutputPath(conf, matrixOutputPath);
+    System.out.println("OUTPUT --> " + matrixOutputPath.toString());
     conf.setMapperClass(TransposeMapper.class);
     conf.setMapOutputKeyClass(IntWritable.class);
     conf.setMapOutputValueClass(VectorWritable.class);

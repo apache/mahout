@@ -22,25 +22,19 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.graph.GraphTestCase;
-import org.apache.mahout.graph.model.Edge;
 import org.apache.mahout.graph.preprocessing.GraphUtils;
+import org.apache.mahout.graph.model.Edge;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.hadoop.MathHelper;
-import org.apache.mahout.math.map.OpenLongIntHashMap;
-import org.easymock.EasyMock;
 import org.junit.Test;
 
 import java.io.File;
 import java.util.Map;
 
-/** example from "Mining Massive Datasets" */
-public class PageRankJobTest extends GraphTestCase {
+public class RandomWalkWithRestartJobTest extends GraphTestCase {
 
   @Test
   public void toyIntegrationTest() throws Exception {
@@ -59,46 +53,48 @@ public class PageRankJobTest extends GraphTestCase {
     writeComponents(edgesFile, conf, Edge.class,
         new Edge(12, 34),
         new Edge(12, 56),
-        new Edge(12, 78),
-        new Edge(34, 12),
+        new Edge(34, 34),
         new Edge(34, 78),
+        new Edge(56, 12),
+        new Edge(56, 34),
         new Edge(56, 56),
-        new Edge(78, 34),
-        new Edge(78, 56));
+        new Edge(56, 78),
+        new Edge(78, 34));
 
     int numVertices = GraphUtils.indexVertices(conf, new Path(verticesFile.getAbsolutePath()),
         new Path(indexedVerticesFile.getAbsolutePath()));
 
-    PageRankJob pageRank = new PageRankJob();
-    pageRank.setConf(conf);
-    pageRank.run(new String[] { "--vertexIndex", indexedVerticesFile.getAbsolutePath(),
-        "--edges", edgesFile.getAbsolutePath(), "--output", outputDir.getAbsolutePath(),
-        "--numVertices", String.valueOf(numVertices), "--numIterations", String.valueOf(3),
-        "--stayingProbability", String.valueOf(0.8), "--tempDir", tempDir.getAbsolutePath() });
+    RandomWalkWithRestartJob randomWalkWithRestart = new RandomWalkWithRestartJob();
+    randomWalkWithRestart.setConf(conf);
+    randomWalkWithRestart.run(new String[]{"--vertexIndex", indexedVerticesFile.getAbsolutePath(),
+        "--edges", edgesFile.getAbsolutePath(), "--sourceVertexIndex", String.valueOf(2),
+        "--output", outputDir.getAbsolutePath(), "--numVertices", String.valueOf(numVertices),
+        "--numIterations", String.valueOf(2), "--stayingProbability", String.valueOf(0.75),
+        "--tempDir", tempDir.getAbsolutePath()});
 
     Matrix expectedAdjacenyMatrix = new DenseMatrix(new double[][] {
-        { 0,           0.4, 0,   0   },
-        { 0.266666667, 0,   0,   0.4 },
-        { 0.266666667, 0,   0.8, 0.4 },
-        { 0.266666667, 0.4, 0,   0   } });
+        { 0,     0,     0.1875, 0    },
+        { 0.375, 0.375, 0.1875, 0.75 },
+        { 0.375, 0,     0.1875, 0    },
+        { 0,     0.375, 0.1875, 0    } });
 
     Matrix actualAdjacencyMatrix = MathHelper.readMatrix(conf, new Path(tempDir.getAbsolutePath(),
         "adjacencyMatrix/part-r-00000"), numVertices, numVertices);
 
     assertMatrixEquals(expectedAdjacenyMatrix, actualAdjacencyMatrix);
 
-    Map<Long,Double> rankPerVertex = Maps.newHashMap();
+    Map<Long,Double> steadyStateProbabilities = Maps.newHashMap();
     for (String line : new FileLineIterable(new File(outputDir, "part-m-00000"))) {
       String[] tokens = Iterables.toArray(Splitter.on("\t").split(line), String.class);
-      rankPerVertex.put(Long.parseLong(tokens[0]), Double.parseDouble(tokens[1]));
+      steadyStateProbabilities.put(Long.parseLong(tokens[0]), Double.parseDouble(tokens[1]));
     }
 
-    assertEquals(4, rankPerVertex.size());
-    assertEquals(0.1206666, rankPerVertex.get(12L), EPSILON);
-    assertEquals(0.1571111, rankPerVertex.get(34L), EPSILON);
-    assertEquals(0.5651111, rankPerVertex.get(56L), EPSILON);
-    assertEquals(0.1571111, rankPerVertex.get(78L), EPSILON);
-  }
+    assertEquals(4, steadyStateProbabilities.size());
 
+    assertEquals(steadyStateProbabilities.get(12L), 75.0 / 1024.0, EPSILON);
+    assertEquals(steadyStateProbabilities.get(34L), 363.0 / 1024.0, EPSILON);
+    assertEquals(steadyStateProbabilities.get(56L), 349.0 / 1024.0, EPSILON);
+    assertEquals(steadyStateProbabilities.get(78L), 237.0 / 1024.0, EPSILON);
+  }
 
 }

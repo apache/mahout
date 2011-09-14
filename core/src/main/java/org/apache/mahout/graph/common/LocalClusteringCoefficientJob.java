@@ -46,7 +46,7 @@ import java.util.Map;
  *
  * <p>The input files needs to be  {@link org.apache.hadoop.io.SequenceFile}s, one with {@link UndirectedEdge}s as keys and
  * any Writable as values, as it is already produced by {@link SimplifyGraphJob}, the other with {@link Triangle}s as keys and any Writable as
- * values, as it is already produced by {@link org.apache.mahout.graph.triangles.EnumerateTrianglesJob}</p>
+ * values, as it is already produced by {@link EnumerateTrianglesJob}</p>
  *
  * <p>This job outputs text files with a vertex id and it local clustering coefficient per line.</p>
  *
@@ -115,8 +115,8 @@ public class LocalClusteringCoefficientJob extends AbstractJob {
 
     @Override
     protected void map(UndirectedEdge edge, Writable value, Context ctx) throws IOException, InterruptedException {
-      ctx.write(edge.getFirstVertex(), ONE_EDGE);
-      ctx.write(edge.getSecondVertex(), ONE_EDGE);
+      ctx.write(edge.firstVertex(), ONE_EDGE);
+      ctx.write(edge.secondVertex(), ONE_EDGE);
     }
   }
 
@@ -126,9 +126,9 @@ public class LocalClusteringCoefficientJob extends AbstractJob {
 
     @Override
     protected void map(Triangle triangle, Writable value, Context ctx) throws IOException, InterruptedException {
-      ctx.write(triangle.getFirstVertex(), ONE_TRIANGLE);
-      ctx.write(triangle.getSecondVertex(), ONE_TRIANGLE);
-      ctx.write(triangle.getThirdVertex(), ONE_TRIANGLE);
+      ctx.write(triangle.firstVertex(), ONE_TRIANGLE);
+      ctx.write(triangle.secondVertex(), ONE_TRIANGLE);
+      ctx.write(triangle.thirdVertex(), ONE_TRIANGLE);
     }
   }
 
@@ -151,7 +151,7 @@ public class LocalClusteringCoefficientJob extends AbstractJob {
       double localClusteringCoefficient = numEdges > 1 ?
           (double) numTriangles / (double) (numEdges * (numEdges - 1)) : 0.0;
 
-      ctx.write(new LongWritable(vertex.getId()), new DoubleWritable(localClusteringCoefficient));
+      ctx.write(new LongWritable(vertex.id()), new DoubleWritable(localClusteringCoefficient));
     }
   }
 

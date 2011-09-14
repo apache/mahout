@@ -25,6 +25,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.math.Matrix;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,6 +44,17 @@ public abstract class GraphTestCase extends MahoutTestCase {
       }
     } finally {
       Closeables.closeQuietly(writer);
+    }
+  }
+
+  protected void assertMatrixEquals(Matrix expected, Matrix actual) {
+    assertEquals(expected.numRows(), actual.numRows());
+    assertEquals(actual.numCols(), actual.numCols());
+    for (int row = 0; row < expected.numRows(); row++) {
+      for (int col = 0; col < expected.numCols(); col ++) {
+        assertEquals("Non-matching values in [" + row + "," + col + "]",
+            expected.get(row, col), actual.get(row, col), EPSILON);
+      }
     }
   }
 }

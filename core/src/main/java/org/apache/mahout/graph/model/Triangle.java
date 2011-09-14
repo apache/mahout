@@ -46,15 +46,15 @@ public class Triangle implements Writable {
     this(new Vertex(firstVertexId), new Vertex(secondVertexId), new Vertex(thirdVertexId));
   }
 
-  public Vertex getFirstVertex() {
+  public Vertex firstVertex() {
     return first;
   }
 
-  public Vertex getSecondVertex() {
+  public Vertex secondVertex() {
     return second;
   }
 
-  public Vertex getThirdVertex() {
+  public Vertex thirdVertex() {
     return third;
   }
 
@@ -92,6 +92,6 @@ public class Triangle implements Writable {
 
   @Override
   public String toString() {
-    return "(" + first.getId() + ',' + second.getId() + ',' + third.getId() + ')';
+    return first.id() + "," + second.id() + "," + third.id();
   }
 }

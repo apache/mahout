@@ -22,7 +22,6 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.reduce.IntSumReducer;
 import org.apache.hadoop.util.ToolRunner;
@@ -37,7 +36,7 @@ import java.util.Map;
  * <p>Distributed computation of the distribution of degrees of an undirected graph</p>
  *
  * <p>The input file needs to be a {@link org.apache.hadoop.io.SequenceFile} with {@link UndirectedEdge}s as keys and
- * any Writable as values, as it is already produced by {@link SimplifyGraphJob}</p>
+ * any Writable as values, as it is already produced by {@link org.apache.mahout.graph.preprocessing.SimplifyGraphJob}</p>
  *
  * <p>This job outputs text files with a degree and the number of nodes having that degree per line.</p>
  *
@@ -74,8 +73,8 @@ public class DegreeDistributionJob extends AbstractJob {
     }
 
     Job degreesPerVertex = prepareJob(getInputPath(), getTempPath(TMP_DEGREES_PER_VERTEX),
-        SequenceFileInputFormat.class, DegreeOfVertexMapper.class, Vertex.class, IntWritable.class, IntSumReducer.class,
-        Vertex.class, IntWritable.class, SequenceFileOutputFormat.class);
+        DegreeOfVertexMapper.class, Vertex.class, IntWritable.class, IntSumReducer.class, Vertex.class,
+        IntWritable.class);
     degreesPerVertex.setCombinerClass(IntSumReducer.class);
     degreesPerVertex.waitForCompletion(true);
 
@@ -91,8 +90,8 @@ public class DegreeDistributionJob extends AbstractJob {
   public static class DegreeOfVertexMapper extends Mapper<UndirectedEdge,Writable,Vertex,IntWritable> {
     @Override
     protected void map(UndirectedEdge edge, Writable value, Context ctx) throws IOException, InterruptedException {
-      ctx.write(edge.getFirstVertex(), ONE);
-      ctx.write(edge.getSecondVertex(), ONE);
+      ctx.write(edge.firstVertex(), ONE);
+      ctx.write(edge.secondVertex(), ONE);
     }
   }
 

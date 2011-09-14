@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.graph.model;
+package org.apache.mahout.graph.common;
 
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.graph.model.Vertex;
 import org.apache.mahout.math.Varint;
 
 import java.io.DataInput;
@@ -40,11 +41,11 @@ public class VertexWithDegree implements Writable, Cloneable {
     this(new Vertex(vertexId), degree);
   }
 
-  public Vertex getVertex() {
+  public Vertex vertex() {
     return vertex;
   }
 
-  public int getDegree() {
+  public int degree() {
     return degree;
   }
 
@@ -81,6 +82,6 @@ public class VertexWithDegree implements Writable, Cloneable {
 
   @Override
   public String toString() {
-    return "(" + vertex + ',' + degree + ')';
+    return vertex + "," + degree;
   }
 }

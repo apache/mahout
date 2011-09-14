@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.graph.common;
+package org.apache.mahout.graph.preprocessing;
 
 import java.io.IOException;
 import java.util.regex.Pattern;

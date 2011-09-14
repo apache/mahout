@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.graph.model;
+package org.apache.mahout.graph.common;
 
 import com.google.common.collect.ComparisonChain;
 import org.apache.hadoop.io.WritableComparable;
@@ -32,7 +32,7 @@ public class UndirectedEdgeWithDegrees implements WritableComparable<UndirectedE
   public UndirectedEdgeWithDegrees() {}
 
   public UndirectedEdgeWithDegrees(VertexWithDegree first, VertexWithDegree second) {
-    if (first.getVertex().compareTo(second.getVertex()) < 0) {
+    if (first.vertex().compareTo(second.vertex()) < 0) {
       this.first = first;
       this.second = second;
     } else {
@@ -93,7 +93,7 @@ public class UndirectedEdgeWithDegrees implements WritableComparable<UndirectedE
   @Override
   public int compareTo(UndirectedEdgeWithDegrees other) {
     return ComparisonChain.start()
-        .compare(first.getVertex(), other.first.getVertex())
-        .compare(second.getVertex(), other.second.getVertex()).result();
+        .compare(first.vertex(), other.first.vertex())
+        .compare(second.vertex(), other.second.vertex()).result();
   }
 }

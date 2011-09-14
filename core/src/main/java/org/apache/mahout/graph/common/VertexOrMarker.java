@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.graph.triangles;
+package org.apache.mahout.graph.common;
 
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.graph.model.Vertex;
@@ -50,7 +50,7 @@ public class VertexOrMarker implements Writable {
     return marker;
   }
 
-  public Vertex getVertex() {
+  public Vertex vertex() {
     return connectingVertex;
   }
 

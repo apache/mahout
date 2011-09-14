@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.graph.triangles;
+package org.apache.mahout.graph.common;
 
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
@@ -51,7 +51,7 @@ public class JoinableUndirectedEdge implements WritableComparable<JoinableUndire
     this(new UndirectedEdge(firstVertexId, secondVertexId), marked);
   }
 
-  public UndirectedEdge getEdge() {
+  public UndirectedEdge edge() {
     return edge;
   }
 
@@ -88,7 +88,7 @@ public class JoinableUndirectedEdge implements WritableComparable<JoinableUndire
 
   @Override
   public String toString() {
-    return "(" + edge + ',' + marked + ')';
+    return edge + "," + marked;
   }
 
   public static class SecondarySortComparator extends WritableComparator implements Serializable {

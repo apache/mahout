@@ -51,7 +51,7 @@ public class Vertex implements WritableComparable<Vertex>, Cloneable {
     out.writeLong(id);
   }
 
-  public long getId() {
+  public long id() {
     return this.id;
   }
 
@@ -75,9 +75,6 @@ public class Vertex implements WritableComparable<Vertex>, Cloneable {
     return new Vertex(id);
   }
 
-  /**
-   * The hash code the {@code id} attribute
-   */
   @Override
   public int hashCode() {
     return Longs.hashCode(id);
@@ -85,7 +82,7 @@ public class Vertex implements WritableComparable<Vertex>, Cloneable {
   
   @Override
   public String toString() {
-    return "(" + id + ')';
+    return String.valueOf(id);
   }
 
 }

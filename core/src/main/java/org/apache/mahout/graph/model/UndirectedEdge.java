@@ -33,7 +33,7 @@ public class UndirectedEdge implements WritableComparable<UndirectedEdge>, Clone
   public UndirectedEdge() {}
 
   public UndirectedEdge(Vertex first, Vertex second) {
-    if (first.getId() < second.getId()) {
+    if (first.id() < second.id()) {
       this.first = first;
       this.second = second;
     } else {
@@ -72,11 +72,11 @@ public class UndirectedEdge implements WritableComparable<UndirectedEdge>, Clone
     return false;
   }
 
-  public Vertex getFirstVertex() {
+  public Vertex firstVertex() {
     return first;
   }
 
-  public Vertex getSecondVertex() {
+  public Vertex secondVertex() {
     return second;
   }
 
@@ -87,7 +87,7 @@ public class UndirectedEdge implements WritableComparable<UndirectedEdge>, Clone
 
   @Override
   public String toString() {
-    return "(" + first.getId() + ',' + second.getId() + ')';
+    return first.id() + "," + second.id();
   }
 
   @Override

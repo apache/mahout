@@ -426,7 +426,6 @@ public abstract class AbstractJob extends Configured implements Tool {
     jobConf.setBoolean("mapred.compress.map.output", true);
     job.setNumReduceTasks(0);
 
-
     job.setJobName(getCustomJobName(job, mapper, Reducer.class));
 
     job.setOutputFormatClass(outputFormat);

@@ -33,14 +33,13 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
+import org.apache.mahout.graph.model.Triangle;
 import org.apache.mahout.graph.model.UndirectedEdge;
-import org.apache.mahout.graph.model.UndirectedEdgeWithDegrees;
 import org.apache.mahout.graph.model.Vertex;
-import org.apache.mahout.graph.model.VertexWithDegree;
 import org.easymock.EasyMock;
 import org.junit.Test;
 
-public class AugmentGraphWithDegreesJobTest extends MahoutTestCase {
+public class EnumerateTrianglesJobTest extends MahoutTestCase {
 
   @Test
   public void testScatterEdges() throws Exception {
@@ -51,7 +50,7 @@ public class AugmentGraphWithDegreesJobTest extends MahoutTestCase {
 
     EasyMock.replay(ctx);
 
-    new AugmentGraphWithDegreesJob.ScatterEdgesMapper()
+    new EnumerateTrianglesJob.ScatterEdgesMapper()
         .map(new UndirectedEdge(new Vertex(123), new Vertex(456)), null, ctx);
 
     EasyMock.verify(ctx);
@@ -69,7 +68,7 @@ public class AugmentGraphWithDegreesJobTest extends MahoutTestCase {
 
     EasyMock.replay(ctx);
 
-    new AugmentGraphWithDegreesJob.SumDegreesReducer()
+    new EnumerateTrianglesJob.SumDegreesReducer()
         .reduce(vertex, Arrays.asList(new Vertex(3), new Vertex(5), new Vertex(7)), ctx);
 
     EasyMock.verify(ctx);
@@ -86,8 +85,65 @@ public class AugmentGraphWithDegreesJobTest extends MahoutTestCase {
 
     EasyMock.replay(ctx);
 
-    new AugmentGraphWithDegreesJob.JoinDegreesReducer().reduce(new UndirectedEdge(first, second),
+    new EnumerateTrianglesJob.JoinDegreesReducer().reduce(new UndirectedEdge(first, second),
         Arrays.asList(new VertexWithDegree(first, 1), new VertexWithDegree(second, 3)), ctx);
+
+    EasyMock.verify(ctx);
+  }
+
+  @Test
+  public void testScatterEdgesToLowerVertexDegree() throws Exception {
+    Mapper.Context ctx = EasyMock.createMock(Mapper.Context.class);
+
+    ctx.write(new Vertex(1), new Vertex(3));
+
+    EasyMock.replay(ctx);
+
+    new EnumerateTrianglesJob.ScatterEdgesToLowerDegreeVertexMapper()
+        .map(new UndirectedEdgeWithDegrees(1, 5, 3, 7), null, ctx);
+
+    EasyMock.verify(ctx);
+  }
+
+  @Test
+  public void testBuildOpenTriads() throws Exception {
+    Reducer.Context ctx = EasyMock.createMock(Reducer.Context.class);
+
+    ctx.write(new JoinableUndirectedEdge(1, 2, false), new VertexOrMarker(0));
+    ctx.write(new JoinableUndirectedEdge(1, 3, false), new VertexOrMarker(0));
+    ctx.write(new JoinableUndirectedEdge(2, 3, false), new VertexOrMarker(0));
+
+    EasyMock.replay(ctx);
+
+    new EnumerateTrianglesJob.BuildOpenTriadsReducer().reduce(new Vertex(0), Arrays.asList(new Vertex(1), new Vertex(2),
+        new Vertex(3)), ctx);
+
+    EasyMock.verify(ctx);
+  }
+
+  @Test
+  public void testJoinTriangles() throws Exception {
+    Reducer.Context ctx = EasyMock.createMock(Reducer.Context.class);
+
+    ctx.write(new Triangle(0, 1, 2), NullWritable.get());
+    ctx.write(new Triangle(0, 2, 3), NullWritable.get());
+
+    EasyMock.replay(ctx);
+
+    new EnumerateTrianglesJob.JoinTrianglesReducer().reduce(new JoinableUndirectedEdge(0, 2, true),
+        Arrays.asList(VertexOrMarker.MARKER, new VertexOrMarker(1), new VertexOrMarker(3)), ctx);
+
+    EasyMock.verify(ctx);
+  }
+
+  @Test
+  public void testJoinTrianglesNoTriangleIfMarkerIsMissing() throws Exception {
+    Reducer.Context ctx = EasyMock.createMock(Reducer.Context.class);
+
+    EasyMock.replay(ctx);
+
+    new EnumerateTrianglesJob.JoinTrianglesReducer().reduce(new JoinableUndirectedEdge(0, 2, false),
+        Arrays.asList(new VertexOrMarker(1), new VertexOrMarker(3)), ctx);
 
     EasyMock.verify(ctx);
   }
@@ -122,30 +178,24 @@ public class AugmentGraphWithDegreesJobTest extends MahoutTestCase {
       Closeables.closeQuietly(writer);
     }
 
-    AugmentGraphWithDegreesJob augmentGraphWithDegreesJob = new AugmentGraphWithDegreesJob();
-    augmentGraphWithDegreesJob.setConf(conf);
-    augmentGraphWithDegreesJob.run(new String[] { "--input", inputFile.getAbsolutePath(),
+    EnumerateTrianglesJob enumerateTrianglesJob = new EnumerateTrianglesJob();
+    enumerateTrianglesJob.setConf(conf);
+    enumerateTrianglesJob.run(new String[] { "--input", inputFile.getAbsolutePath(),
         "--output", outputDir.getAbsolutePath(), "--tempDir", tempDir.getAbsolutePath() });
 
-    Set<UndirectedEdgeWithDegrees> edges = Sets.newHashSet();
-    for (Pair<UndirectedEdgeWithDegrees,NullWritable> result :
-        new SequenceFileIterable<UndirectedEdgeWithDegrees, NullWritable>(new Path(outputDir.getAbsolutePath() +
-        "/part-r-00000"), false, conf)) {
-      edges.add(result.getFirst());
+    Set<Triangle> triangles = Sets.newHashSet();
+    for (Pair<Triangle,NullWritable> result :
+        new SequenceFileIterable<Triangle, NullWritable>(new Path(outputDir.getAbsolutePath() + "/part-r-00000"),
+        false, conf)) {
+      triangles.add(result.getFirst());
     }
 
-    assertEquals(12, edges.size());
-    assertTrue(edges.contains(new UndirectedEdgeWithDegrees(0, 7, 1, 3)));
-    assertTrue(edges.contains(new UndirectedEdgeWithDegrees(0, 7, 2, 3)));
-    assertTrue(edges.contains(new UndirectedEdgeWithDegrees(0, 7, 3, 3)));
-    assertTrue(edges.contains(new UndirectedEdgeWithDegrees(0, 7, 4, 3)));
-    assertTrue(edges.contains(new UndirectedEdgeWithDegrees(0, 7, 5, 2)));
-    assertTrue(edges.contains(new UndirectedEdgeWithDegrees(0, 7, 6, 1)));
-    assertTrue(edges.contains(new UndirectedEdgeWithDegrees(0, 7, 7, 2)));
-    assertTrue(edges.contains(new UndirectedEdgeWithDegrees(1, 3, 2, 3)));
-    assertTrue(edges.contains(new UndirectedEdgeWithDegrees(1, 3, 3, 3)));
-    assertTrue(edges.contains(new UndirectedEdgeWithDegrees(2, 3, 3, 3)));
-    assertTrue(edges.contains(new UndirectedEdgeWithDegrees(4, 3, 5, 2)));
-    assertTrue(edges.contains(new UndirectedEdgeWithDegrees(4, 3, 7, 2)));
+    assertEquals(6, triangles.size());
+    assertTrue(triangles.contains(new Triangle(0, 1, 2)));
+    assertTrue(triangles.contains(new Triangle(0, 1, 3)));
+    assertTrue(triangles.contains(new Triangle(0, 2, 3)));
+    assertTrue(triangles.contains(new Triangle(0, 4, 5)));
+    assertTrue(triangles.contains(new Triangle(0, 4, 7)));
+    assertTrue(triangles.contains(new Triangle(1, 2, 3)));
   }
 }
