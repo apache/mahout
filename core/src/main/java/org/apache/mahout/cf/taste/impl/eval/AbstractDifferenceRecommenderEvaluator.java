@@ -206,7 +206,6 @@ public abstract class AbstractDifferenceRecommenderEvaluator implements Recommen
   
   private static Collection<Callable<Void>> wrapWithStatsCallables(Collection<Callable<Void>> callables,
                                                                    AtomicInteger noEstimateCounter) {
-    int size = callables.size();
     Collection<Callable<Void>> wrapped = Lists.newArrayList();
     int count = 0;
     RunningAverageAndStdDev timing = new FullRunningAverageAndStdDev();

@@ -57,8 +57,7 @@ public final class VectorTest extends MahoutTestCase {
     }
     assertEquals(n, elements);
 
-    Vector empty = new SequentialAccessSparseVector(0);
-    assertFalse(empty.iterator().hasNext());
+    assertFalse(new SequentialAccessSparseVector(0).iterator().hasNext());
   }
 
   @Test
@@ -519,7 +518,7 @@ public final class VectorTest extends MahoutTestCase {
     }
     
     try {
-      norm = vec2.logNormalize(Double.POSITIVE_INFINITY);
+      vec2.logNormalize(Double.POSITIVE_INFINITY);
       fail("Should fail with positive infinity norm");
     } catch (IllegalArgumentException e) {
       // expected
@@ -542,10 +541,10 @@ public final class VectorTest extends MahoutTestCase {
     vec1.setQuick(2, -2);
 
     double max = vec1.maxValue();
-    assertEquals(max + " does not equal: " + (-1.0), -1.0, max, 0.0);
+    assertEquals(-1.0, max, 0.0);
 
     int idx = vec1.maxValueIndex();
-    assertEquals(idx + " does not equal: " + 0, 0, idx);
+    assertEquals(0, idx);
 
     vec1 = new RandomAccessSparseVector(3);
 
@@ -553,10 +552,10 @@ public final class VectorTest extends MahoutTestCase {
     vec1.setQuick(2, -2);
     
     max = vec1.maxValue();
-    assertEquals(max + " does not equal: " + 0, 0.0, max, 0.0);
+    assertEquals(0.0, max, 0.0);
 
     idx = vec1.maxValueIndex();
-    assertEquals(idx + " does not equal: " + 1, 1, idx);
+    assertEquals(1, idx);
     
     vec1 = new SequentialAccessSparseVector(3);
 
@@ -564,10 +563,10 @@ public final class VectorTest extends MahoutTestCase {
     vec1.setQuick(2, -2);
     
     max = vec1.maxValue();
-    assertEquals(max + " does not equal: " + 0, 0.0, max, 0.0);
+    assertEquals(0.0, max, 0.0);
 
     idx = vec1.maxValueIndex();
-    assertEquals(idx + " does not equal: " + 1, 1, idx);
+    assertEquals(1, idx);
     
     vec1 = new DenseVector(3);
 
@@ -575,34 +574,34 @@ public final class VectorTest extends MahoutTestCase {
     vec1.setQuick(2, -2);
     
     max = vec1.maxValue();
-    assertEquals(max + " does not equal: " + 0, 0.0, max, 0.0);
+    assertEquals(0.0, max, 0.0);
 
     idx = vec1.maxValueIndex();
-    assertEquals(idx + " does not equal: " + 1, 1, idx);
+    assertEquals(1, idx);
     
     vec1 = new RandomAccessSparseVector(3);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal 0", 0.0, max, EPSILON);
+    assertEquals(0.0, max, EPSILON);
 
     vec1 = new DenseVector(3);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal 0", 0.0, max, EPSILON);
+    assertEquals(0.0, max, EPSILON);
 
     vec1 = new SequentialAccessSparseVector(3);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal 0", 0.0, max, EPSILON);
+    assertEquals(0.0, max, EPSILON);
 
     vec1 = new RandomAccessSparseVector(0);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max, EPSILON);
+    assertEquals(Double.NEGATIVE_INFINITY, max, EPSILON);
 
     vec1 = new DenseVector(0);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max, EPSILON);
+    assertEquals(Double.NEGATIVE_INFINITY, max, EPSILON);
 
     vec1 = new SequentialAccessSparseVector(0);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max, EPSILON);
+    assertEquals(Double.NEGATIVE_INFINITY, max, EPSILON);
 
   }
 
@@ -615,10 +614,10 @@ public final class VectorTest extends MahoutTestCase {
     vec1.setQuick(2, 2);
 
     double max = vec1.minValue();
-    assertEquals(max + " does not equal: " + (1.0), 1.0, max, 0.0);
+    assertEquals(1.0, max, 0.0);
 
     int idx = vec1.maxValueIndex();
-    assertEquals(idx + " does not equal: " + 1, 1, idx);
+    assertEquals(1, idx);
 
     vec1 = new RandomAccessSparseVector(3);
 
@@ -626,10 +625,10 @@ public final class VectorTest extends MahoutTestCase {
     vec1.setQuick(2, -2);
 
     max = vec1.maxValue();
-    assertEquals(max + " does not equal: " + 0, 0.0, max, 0.0);
+    assertEquals(0.0, max, 0.0);
 
     idx = vec1.maxValueIndex();
-    assertEquals(idx + " does not equal: " + 1, 1, idx);
+    assertEquals(1, idx);
 
     vec1 = new SequentialAccessSparseVector(3);
 
@@ -637,10 +636,10 @@ public final class VectorTest extends MahoutTestCase {
     vec1.setQuick(2, -2);
 
     max = vec1.maxValue();
-    assertEquals(max + " does not equal: " + 0, 0.0, max, 0.0);
+    assertEquals(0.0, max, 0.0);
 
     idx = vec1.maxValueIndex();
-    assertEquals(idx + " does not equal: " + 1, 1, idx);
+    assertEquals(1, idx);
 
     vec1 = new DenseVector(3);
 
@@ -648,34 +647,34 @@ public final class VectorTest extends MahoutTestCase {
     vec1.setQuick(2, -2);
 
     max = vec1.maxValue();
-    assertEquals(max + " does not equal: " + 0, 0.0, max, 0.0);
+    assertEquals(0.0, max, 0.0);
 
     idx = vec1.maxValueIndex();
-    assertEquals(idx + " does not equal: " + 1, 1, idx);
+    assertEquals(1, idx);
 
     vec1 = new RandomAccessSparseVector(3);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal 0", 0.0, max, EPSILON);
+    assertEquals(0.0, max, EPSILON);
 
     vec1 = new DenseVector(3);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal 0", 0.0, max, EPSILON);
+    assertEquals(0.0, max, EPSILON);
 
     vec1 = new SequentialAccessSparseVector(3);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal 0", 0.0, max, EPSILON);
+    assertEquals(0.0, max, EPSILON);
 
     vec1 = new RandomAccessSparseVector(0);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max, EPSILON);
+    assertEquals(Double.NEGATIVE_INFINITY, max, EPSILON);
 
     vec1 = new DenseVector(0);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max, EPSILON);
+    assertEquals(Double.NEGATIVE_INFINITY, max, EPSILON);
 
     vec1 = new SequentialAccessSparseVector(0);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max, EPSILON);
+    assertEquals(Double.NEGATIVE_INFINITY, max, EPSILON);
 
   }
 

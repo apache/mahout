@@ -63,7 +63,7 @@ public final class TestHebbianSolver extends SolverTest {
     long time = 0L;
     time += System.nanoTime() - start;
     assertEquals(state.getCurrentEigens().numRows(), desiredRank);
-    return (time / 1000000L);
+    return time / 1000000L;
   }
 
 

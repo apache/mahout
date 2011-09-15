@@ -131,17 +131,20 @@ public final class BaumWelchTrainer {
 
       //printing tranied model
       System.out.println("Initial probabilities: ");
-      for (int i = 0; i < trainedModel.getNrOfHiddenStates(); ++i)
+      for (int i = 0; i < trainedModel.getNrOfHiddenStates(); ++i) {
         System.out.print(i + " ");
+      }
       System.out.println();
-      for (int i = 0; i < trainedModel.getNrOfHiddenStates(); ++i)
+      for (int i = 0; i < trainedModel.getNrOfHiddenStates(); ++i) {
         System.out.print(trainedModel.getInitialProbabilities().get(i) + " ");
+      }
       System.out.println();
 
       System.out.println("Transition matrix:");
       System.out.print("  ");
-      for (int i = 0; i < trainedModel.getNrOfHiddenStates(); ++i)
+      for (int i = 0; i < trainedModel.getNrOfHiddenStates(); ++i) {
         System.out.print(i + " ");
+      }
       System.out.println();
       for (int i = 0; i < trainedModel.getNrOfHiddenStates(); ++i) {
         System.out.print(i + " ");
@@ -152,8 +155,9 @@ public final class BaumWelchTrainer {
       }
       System.out.println("Emission matrix: ");
       System.out.print("  ");
-      for (int i = 0; i < trainedModel.getNrOfOutputStates(); ++i)
+      for (int i = 0; i < trainedModel.getNrOfOutputStates(); ++i) {
         System.out.print(i + " ");
+      }
       System.out.println();
       for (int i = 0; i < trainedModel.getNrOfHiddenStates(); ++i) {
         System.out.print(i + " ");

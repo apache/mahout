@@ -17,9 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
@@ -29,11 +27,6 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.util.List;
 
 public abstract class TasteTestCase extends MahoutTestCase {

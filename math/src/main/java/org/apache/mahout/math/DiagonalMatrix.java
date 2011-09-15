@@ -17,12 +17,8 @@
 
 package org.apache.mahout.math;
 
-/**
- * Created by IntelliJ IDEA. User: tdunning Date: 8/9/11 Time: 10:36 PM To change this template use
- * File | Settings | File Templates.
- */
 public class DiagonalMatrix extends AbstractMatrix {
-  private Vector diagonal;
+  private final Vector diagonal;
 
   public DiagonalMatrix(Vector values) {
     super(values.size(), values.size());

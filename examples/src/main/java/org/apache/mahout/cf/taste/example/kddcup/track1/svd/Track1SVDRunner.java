@@ -55,7 +55,7 @@ public class Track1SVDRunner {
 
     if (args.length != 2) {
       System.err.println("Necessary arguments: <kddDataFileDirectory> <resultFile>");
-      System.exit(-1);
+      return;
     }
 
     File dataFileDirectory = new File(args[0]);

@@ -103,6 +103,7 @@ public class Normal extends AbstractContinousDistribution {
   }
 
   /** Returns a String representation of the receiver. */
+  @Override
   public String toString() {
     return String.format(Locale.ENGLISH, "%s(m=%f, sd=%f)", this.getClass().getName(), mean, standardDeviation);
   }

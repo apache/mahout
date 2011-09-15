@@ -21,7 +21,7 @@ import org.apache.mahout.math.Vector;
 
 public interface VectorSimilarityMeasure {
 
-  public static final double NO_NORM = 0;
+  double NO_NORM = 0.0;
 
   Vector normalize(Vector vector);
   double norm(Vector vector);

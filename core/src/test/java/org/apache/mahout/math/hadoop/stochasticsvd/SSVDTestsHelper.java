@@ -1,3 +1,20 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.math.hadoop.stochasticsvd;
 
 import java.io.IOException;
@@ -8,6 +25,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Writable;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
@@ -16,6 +34,9 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.hadoop.stochasticsvd.qr.GrammSchmidt;
 
 public class SSVDTestsHelper {
+
+  private SSVDTestsHelper() {
+  }
 
   static void generateDenseInput(Path outputPath,
                                  FileSystem dfs,
@@ -47,8 +68,9 @@ public class SSVDTestsHelper {
 
     // apply singular values
     Matrix mx = m > n ? v : u;
-    for (int i = 0; i < svCnt; i++)
+    for (int i = 0; i < svCnt; i++) {
       mx.assignColumn(i, mx.viewColumn(i).times(svalues.getQuick(i)));
+    }
 
     SequenceFile.Writer w =
       SequenceFile.createWriter(dfs,
@@ -59,13 +81,14 @@ public class SSVDTestsHelper {
     try {
 
       Vector outV = new DenseVector(n);
-      VectorWritable vw = new VectorWritable(outV);
+      Writable vw = new VectorWritable(outV);
       IntWritable iw = new IntWritable();
 
       for (int i = 0; i < m; i++) {
         iw.set(startRowKey + i);
-        for (int j = 0; j < n; j++)
+        for (int j = 0; j < n; j++) {
           outV.setQuick(j, u.viewRow(i).dot(v.viewRow(j)));
+        }
         w.append(iw, vw);
       }
 
@@ -76,14 +99,14 @@ public class SSVDTestsHelper {
   }
 
   static Matrix generateDenseOrthonormalRandom(int m, int n, Random rnd) {
-    DenseMatrix result = new DenseMatrix(m, n);
+    Matrix result = new DenseMatrix(m, n);
     for (int j = 0; j < n; j++) {
       for (int i = 0; i < m; i++) {
         result.setQuick(i, j, rnd.nextDouble() - 0.5);
       }
     }
     GrammSchmidt.orthonormalizeColumns(result);
-    SSVDPrototypeTest.assertOrthonormality(result, false, 1E-10);
+    SSVDPrototypeTest.assertOrthonormality(result, false, 1.0e-10);
     return result;
   }
 

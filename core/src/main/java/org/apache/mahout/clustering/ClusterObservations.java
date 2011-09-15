@@ -98,6 +98,7 @@ public class ClusterObservations implements Writable {
     return s2;
   }
 
+  @Override
   public String toString() {
     StringBuilder buf = new StringBuilder(50);
     buf.append("co{s0=").append(s0).append(" s1=");

@@ -92,7 +92,7 @@ public final class BtJob {
       Mapper<Writable, VectorWritable, LongWritable, SparseRowBlockWritable> {
 
     private QRLastStep qr;
-    private Deque<Closeable> closeables = new ArrayDeque<Closeable>();
+    private final Deque<Closeable> closeables = new ArrayDeque<Closeable>();
 
     private int blockNum;
     private MultipleOutputs outputs;
@@ -163,7 +163,7 @@ public final class BtJob {
     }
 
     @Override
-    protected void setup(final Context context) throws IOException,
+    protected void setup(Context context) throws IOException,
       InterruptedException {
       super.setup(context);
 
@@ -257,8 +257,9 @@ public final class BtJob {
                           Iterable<SparseRowBlockWritable> values,
                           Context context) throws IOException,
       InterruptedException {
-      for (SparseRowBlockWritable bw : values)
+      for (SparseRowBlockWritable bw : values) {
         accum.plusBlock(bw);
+      }
       context.write(key, accum);
       accum.clear();
     }
@@ -317,8 +318,9 @@ public final class BtJob {
       InterruptedException {
 
       accum.clear();
-      for (SparseRowBlockWritable bw : values)
+      for (SparseRowBlockWritable bw : values) {
         accum.plusBlock(bw);
+      }
 
       // at this point, sum of rows should be in accum,
       // so we just generate outer self product of it and add to
@@ -338,8 +340,9 @@ public final class BtJob {
             if (vi != 0.0) {
               for (int j = i; j < kp; j++) {
                 double vj = btRow.get(j);
-                if (vj != 0.0)
+                if (vj != 0.0) {
                   mBBt.setQuick(i, j, mBBt.getQuick(i, j) + vi * vj);
+                }
               }
             }
           }

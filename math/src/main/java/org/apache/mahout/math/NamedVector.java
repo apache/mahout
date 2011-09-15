@@ -51,6 +51,7 @@ public class NamedVector implements Vector {
     return delegate;
   }
 
+  @Override
   public int hashCode() {
     return delegate.hashCode();
   }
@@ -58,6 +59,7 @@ public class NamedVector implements Vector {
   /**
    * To not break transitivity with other {@link Vector}s, this does not compare name.
    */
+  @Override
   public boolean equals(Object other) {
     return delegate.equals(other);
   }

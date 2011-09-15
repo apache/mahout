@@ -48,19 +48,19 @@ public class EigenVector extends NamedVector {
     return getIndex(getName());
   }
 
-  public static double getEigenValue(String name) {
+  public static double getEigenValue(CharSequence name) {
     return parseMetaData(name)[1];
   }
 
-  public static double getCosAngleError(String name) {
+  public static double getCosAngleError(CharSequence name) {
     return parseMetaData(name)[2];
   }
 
-  public static int getIndex(String name) {
+  public static int getIndex(CharSequence name) {
     return (int)parseMetaData(name)[0];
   }
 
-  public static double[] parseMetaData(String name) {
+  public static double[] parseMetaData(CharSequence name) {
     double[] m = new double[3];
     String[] s = EQUAL_PATTERN.split(name);
     m[0] = Double.parseDouble(PIPE_PATTERN.split(s[0])[1]);

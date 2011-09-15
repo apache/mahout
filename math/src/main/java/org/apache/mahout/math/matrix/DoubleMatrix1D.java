@@ -327,6 +327,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D implements Cloneab
    * @param obj the object to compare with.
    * @return {@code true} if the objects are the same; {@code false} otherwise.
    */
+  @Override
   public boolean equals(Object obj) {
     if (this == obj) {
       return true;

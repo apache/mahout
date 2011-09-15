@@ -303,7 +303,7 @@ public class SSVDSolver {
                 outerBlockHeight,
                 reduceTasks > 1000 ? 1000 : reduceTasks,
                 labelType,
-                q > 0 ? false : true);
+                q <= 0);
 
       // power iterations
       for (int i = 0; i < q; q--) {
@@ -332,7 +332,7 @@ public class SSVDSolver {
                   outerBlockHeight,
                   reduceTasks > 1000 ? 1000 : reduceTasks,
                   labelType,
-                  i == q - 1 ? true : false);
+                  i == q - 1);
       }
 
       // we don't need BBt now.

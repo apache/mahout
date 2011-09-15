@@ -30,8 +30,6 @@ import org.apache.mahout.common.iterator.FixedSizeSamplingIterator;
 import org.apache.mahout.math.Varint;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.map.OpenDoubleIntHashMap;
-import org.apache.mahout.math.map.OpenIntDoubleHashMap;
 import org.apache.mahout.math.map.OpenIntIntHashMap;
 
 import java.io.DataInput;
@@ -99,7 +97,7 @@ public class Vectors {
 
   static class TemporaryElement implements Vector.Element {
 
-    private int index;
+    private final int index;
     private double value;
 
     TemporaryElement(int index, double value) {

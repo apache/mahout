@@ -39,8 +39,8 @@ public final class SequenceFilesFromCsvFilter extends SequenceFilesFromDirectory
   private static final Logger log = LoggerFactory.getLogger(SequenceFilesFromCsvFilter.class);
   private static final Pattern TAB = Pattern.compile("\t");
 
-  public static final String[] KEY_COLUMN_OPTION = {"keyColumn", "kcol"};
-  public static final String[] VALUE_COLUMN_OPTION = {"valueColumn", "vcol"};
+  private static final String[] KEY_COLUMN_OPTION = {"keyColumn", "kcol"};
+  private static final String[] VALUE_COLUMN_OPTION = {"valueColumn", "vcol"};
 
   private volatile int keyColumn;
   private volatile int valueColumn;

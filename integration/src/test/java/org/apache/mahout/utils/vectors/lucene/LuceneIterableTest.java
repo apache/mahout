@@ -114,11 +114,9 @@ public final class LuceneIterableTest extends MahoutTestCase {
     //0 percent tolerance
     LuceneIterable iterable = new LuceneIterable(reader, "id", "content", mapper);
     try {
-        Iterator<Vector> iterator = iterable.iterator();
-        while (iterator.hasNext()) {
-            iterator.next();
-        }
-        exceptionThrown = false;
+      for (Object a : iterable) {
+      }
+      exceptionThrown = false;
     }
     catch(IllegalStateException ise) {
         exceptionThrown = true;
@@ -128,11 +126,9 @@ public final class LuceneIterableTest extends MahoutTestCase {
     //100 percent tolerance
     iterable = new LuceneIterable(reader, "id", "content", mapper, -1, 1.0);
     try {
-        Iterator<Vector> iterator = iterable.iterator();
-        while (iterator.hasNext()) {
-            iterator.next();
-        }
-        exceptionThrown = false;
+      for (Object a : iterable) {
+      }
+      exceptionThrown = false;
     }
     catch(IllegalStateException ise) {
         exceptionThrown = true;

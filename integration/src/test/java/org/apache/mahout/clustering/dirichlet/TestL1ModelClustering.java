@@ -53,14 +53,13 @@ public final class TestL1ModelClustering extends MahoutTestCase {
 
   private class MapElement implements Comparable<MapElement> {
 
+    private final Double pdf;
+    private final String doc;
+
     MapElement(double pdf, String doc) {
       this.pdf = pdf;
       this.doc = doc;
     }
-
-    private final Double pdf;
-
-    private final String doc;
 
     @Override
     // reverse compare to sort in reverse order
@@ -72,6 +71,25 @@ public final class TestL1ModelClustering extends MahoutTestCase {
       } else {
         return 0;
       }
+    }
+
+    @Override
+    public int hashCode() {
+      int hash = pdf == null ? 0 : pdf.hashCode();
+      hash ^= doc == null ? 0 : doc.hashCode();
+      return hash;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+      if (!(other instanceof MapElement)) {
+        return false;
+      }
+      MapElement otherElement = (MapElement) other;
+      if ((pdf == null && otherElement.pdf != null) || (pdf != null && !pdf.equals(otherElement.pdf))) {
+        return false;
+      }
+      return doc == null ? otherElement.doc == null : doc.equals(otherElement.doc);
     }
 
     @Override

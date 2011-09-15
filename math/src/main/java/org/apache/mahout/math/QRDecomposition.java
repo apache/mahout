@@ -223,6 +223,7 @@ public class QRDecomposition {
   /**
    * Returns a rough string rendition of a QR.
    */
+  @Override
   public String toString() {
     return String.format(Locale.ENGLISH, "QR(%d,%d,fullRank=%s)", originalColumns, originalRows, hasFullRank());
   }

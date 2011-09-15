@@ -39,8 +39,8 @@ public final class CDFitnessTest extends MahoutTestCase {
       int fn = rng.nextInt(1000);
 
       CDFitness fitness = new CDFitness(tp, fp, tn, fn);
-      double se = ((double) tp) / (tp + fn);
-      double sp = ((double) tn) / (tn + fp);
+      double se = (double) tp / (tp + fn);
+      double sp = (double) tn / (tn + fp);
 
       assertEquals(se * sp, fitness.get(), EPSILON);
     }

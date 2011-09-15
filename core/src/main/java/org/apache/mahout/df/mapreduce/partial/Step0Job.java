@@ -125,7 +125,7 @@ public class Step0Job {
    * 
    * @return info for each partition in Hadoop's order
    */
-  protected Step0Output[] parseOutput(JobContext job) throws IOException {
+  protected Step0Output[] parseOutput(JobContext job) {
     Configuration conf = job.getConfiguration();
     
     log.info("mapred.map.tasks = {}", conf.getInt("mapred.map.tasks", -1));

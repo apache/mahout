@@ -1,3 +1,20 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.math;
 
 import com.google.common.collect.AbstractIterator;
@@ -8,9 +25,9 @@ import java.util.Iterator;
  * Provides a permuted view of a vector.
  */
 public class PermutedVectorView extends AbstractVector {
-  private Vector vector;            // the vector containing the data
-  private int[] pivot;              // convert from external index to internal
-  private int[] unpivot;            // convert from internal index to external
+  private final Vector vector;            // the vector containing the data
+  private final int[] pivot;              // convert from external index to internal
+  private final int[] unpivot;            // convert from internal index to external
 
   public PermutedVectorView(Vector vector, int[] pivot, int[] unpivot) {
     super(vector.size());
@@ -76,14 +93,14 @@ public class PermutedVectorView extends AbstractVector {
   @Override
   public Iterator<Element> iterator() {
     return new AbstractIterator<Element>() {
-      Iterator<Element> i = vector.iterator();
+      final Iterator<Element> i = vector.iterator();
 
       @Override
       protected Vector.Element computeNext() {
         if (i.hasNext()) {
           final Element x = i.next();
           return new Element() {
-            int index = unpivot[x.index()];
+            final int index = unpivot[x.index()];
 
             @Override
             public double get() {
@@ -117,14 +134,14 @@ public class PermutedVectorView extends AbstractVector {
   @Override
   public Iterator<Element> iterateNonZero() {
     return new AbstractIterator<Element>() {
-      Iterator<Element> i = vector.iterateNonZero();
+      final Iterator<Element> i = vector.iterateNonZero();
 
       @Override
       protected Vector.Element computeNext() {
         if (i.hasNext()) {
           final Element x = i.next();
           return new Element() {
-            int index = unpivot[x.index()];
+            final int index = unpivot[x.index()];
 
             @Override
             public double get() {

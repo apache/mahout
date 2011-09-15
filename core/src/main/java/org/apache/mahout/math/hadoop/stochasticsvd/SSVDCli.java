@@ -159,8 +159,8 @@ public class SSVDCli extends AbstractJob {
     return 0;
   }
 
-  public static int main(String[] args) throws Exception {
-    return ToolRunner.run(new SSVDCli(), args);
+  public static void main(String[] args) throws Exception {
+    ToolRunner.run(new SSVDCli(), args);
   }
 
 }

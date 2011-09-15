@@ -50,13 +50,11 @@ public class SplitPartitionedWritable implements
   private long taskItemOrdinal;
 
   public SplitPartitionedWritable(Mapper<?, ?, ?, ?>.Context mapperContext) {
-    super();
     // this is basically a split # if i understand it right
     taskId = mapperContext.getTaskAttemptID().getTaskID().getId();
   }
 
   public SplitPartitionedWritable() {
-    super();
   }
 
   public int getTaskId() {
@@ -89,7 +87,7 @@ public class SplitPartitionedWritable implements
 
   @Override
   public int hashCode() {
-    final int prime = 31;
+    int prime = 31;
     int result = 1;
     result = prime * result + taskId;
     return result;
@@ -97,15 +95,19 @@ public class SplitPartitionedWritable implements
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null) {
       return false;
-    if (getClass() != obj.getClass())
+    }
+    if (getClass() != obj.getClass()) {
       return false;
+    }
     SplitPartitionedWritable other = (SplitPartitionedWritable) obj;
-    if (taskId != other.taskId)
+    if (taskId != other.taskId) {
       return false;
+    }
     return true;
   }
 

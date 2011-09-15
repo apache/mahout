@@ -48,6 +48,7 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
       this.x = c;
     }
 
+    @Override
     public String toString() {
       return String.valueOf(x);
     }
@@ -200,6 +201,7 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
     }
   }
 
+  @Override
   public String toString() {
     return '\'' + getString() + "'[" + getType() + "]:" + frequency;
   }

@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.mahout.math.hadoop.stochasticsvd;
 
 import java.io.Closeable;
@@ -83,7 +84,7 @@ public class ABtJob {
       Mapper<Writable, VectorWritable, SplitPartitionedWritable, SparseRowBlockWritable> {
 
     private SplitPartitionedWritable outKey;
-    private Deque<Closeable> closeables = new ArrayDeque<Closeable>();
+    private final Deque<Closeable> closeables = new ArrayDeque<Closeable>();
     private SequenceFileDirIterator<IntWritable, VectorWritable> btInput;
     private Vector[] aCols;
     // private Vector[] yiRows;
@@ -100,10 +101,11 @@ public class ABtJob {
       Vector vec = value.get();
 
       int vecSize = vec.size();
-      if (aCols == null)
+      if (aCols == null) {
         aCols = new Vector[vecSize];
-      else if (aCols.length < vecSize)
+      } else if (aCols.length < vecSize) {
         aCols = Arrays.copyOf(aCols, vecSize);
+      }
 
       if (vec.isDense()) {
         for (int i = 0; i < vecSize; i++) {
@@ -123,12 +125,12 @@ public class ABtJob {
     }
 
     private void extendAColIfNeeded(int col, int rowCount) {
-      if (aCols[col] == null)
+      if (aCols[col] == null) {
         aCols[col] =
-          new SequentialAccessSparseVector(rowCount < 10000 ? 10000 : rowCount,
-                                           16);
-      else if (aCols[col].size() < rowCount) {
-        SequentialAccessSparseVector newVec =
+            new SequentialAccessSparseVector(rowCount < 10000 ? 10000 : rowCount,
+                                             16);
+      } else if (aCols[col].size() < rowCount) {
+        Vector newVec =
           new SequentialAccessSparseVector(rowCount << 1,
                                            aCols[col]
                                              .getNumNondefaultElements() << 1);
@@ -145,16 +147,17 @@ public class ABtJob {
 
         int lastRowIndex = -1;
 
-        for (; btInput.hasNext();) {
+        while (btInput.hasNext()) {
           Pair<IntWritable, VectorWritable> btRec = btInput.next();
           int btIndex = btRec.getFirst().get();
           Vector btVec = btRec.getSecond().get();
           Vector aCol;
-          if (btIndex > aCols.length || null == (aCol = aCols[btIndex]))
+          if (btIndex > aCols.length || (aCol = aCols[btIndex]) == null) {
             continue;
+          }
           int j = -1;
           for (Iterator<Vector.Element> aColIter = aCol.iterateNonZero(); aColIter
-            .hasNext();) {
+              .hasNext(); ) {
             Vector.Element aEl = aColIter.next();
             j = aEl.index();
 
@@ -164,8 +167,9 @@ public class ABtJob {
             // context.write(outKey, outValue);
             yiCollector.collect((long) j, btVec.times(aEl.get()));
           }
-          if (lastRowIndex < j)
+          if (lastRowIndex < j) {
             lastRowIndex = j;
+          }
         }
         aCols = null;
 
@@ -173,7 +177,7 @@ public class ABtJob {
         // this happens in sparse matrices when last rows are all zeros
         // and is subsequently causing shorter Q matrix row count which we
         // probably don't want to repair there but rather here.
-        SequentialAccessSparseVector yDummy =
+        Vector yDummy =
           new SequentialAccessSparseVector(kp);
         // outValue.set(yDummy);
         for (lastRowIndex += 1; lastRowIndex < aRowCount; lastRowIndex++) {
@@ -311,8 +315,9 @@ public class ABtJob {
       InterruptedException {
 
       accum.clear();
-      for (SparseRowBlockWritable bw : values)
+      for (SparseRowBlockWritable bw : values) {
         accum.plusBlock(bw);
+      }
 
       if (key.getTaskId() != lastTaskId) {
         setupBlock(context, key);
@@ -361,7 +366,7 @@ public class ABtJob {
                               Context ctx,
                               Class<V> valueClass) throws IOException,
           InterruptedException {
-      final Path outputPath = getSplitFilePath(name, spw, ctx);
+      Path outputPath = getSplitFilePath(name, spw, ctx);
       final SequenceFile.Writer w =
         SequenceFile.createWriter(FileSystem.get(ctx.getConfiguration()),
                                   ctx.getConfiguration(),

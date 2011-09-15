@@ -34,14 +34,13 @@ import org.junit.Test;
  * Tests parts of of Stochastic SVD solver code in local mode
  * using "prototype" code (class that simulates processes 
  * actually happenning in the MR jobs).
- * 
- * 
  */
 public class SSVDPrototypeTest extends MahoutTestCase {
 
   private static final double SCALE = 1000;
   private static final double SVD_EPSILON = 1.0e-10;
 
+  @Test
   public void testSSVDPrototype() throws Exception {
     SSVDPrototype.main(null);
   }

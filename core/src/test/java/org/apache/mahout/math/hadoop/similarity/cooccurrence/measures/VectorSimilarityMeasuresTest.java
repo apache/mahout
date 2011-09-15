@@ -25,7 +25,9 @@ import org.junit.Test;
 
 public class VectorSimilarityMeasuresTest extends MahoutTestCase {
 
-  double distributedSimilarity(double[] one, double[] two, Class<? extends VectorSimilarityMeasure> similarityMeasureClass) {
+  static double distributedSimilarity(double[] one,
+                                      double[] two,
+                                      Class<? extends VectorSimilarityMeasure> similarityMeasureClass) {
     VectorSimilarityMeasure similarityMeasure = ClassUtils.instantiateAs(similarityMeasureClass,
         VectorSimilarityMeasure.class);
     Vector oneNormalized = similarityMeasure.normalize(asSparseVector(one));
@@ -43,7 +45,7 @@ public class VectorSimilarityMeasuresTest extends MahoutTestCase {
     return similarityMeasure.similarity(dot, normOne, normTwo, one.length);
   }
 
-  Vector asSparseVector(double[] values) {
+  static Vector asSparseVector(double[] values) {
     Vector vector = new RandomAccessSparseVector(Integer.MAX_VALUE);
     for (int dim = 0; dim < values.length; dim++) {
       if (values[dim] != 0) {
@@ -59,7 +61,7 @@ public class VectorSimilarityMeasuresTest extends MahoutTestCase {
         new double[] { 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0 },
         new double[] { 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1 }, CooccurrenceCountSimilarity.class);
 
-    assertEquals(5d, similarity, 0);
+    assertEquals(5.0, similarity, 0);
   }
 
   @Test

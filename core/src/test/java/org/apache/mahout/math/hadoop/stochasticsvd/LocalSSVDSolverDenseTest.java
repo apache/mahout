@@ -28,6 +28,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Vector;
 import org.junit.Test;
 
 /**
@@ -86,10 +87,7 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
     // With oversampling of 100, i don't get any error at all.
     int n = 1000;
     int m = 2000;
-    int ablockRows = 867;
-    int p = 10;
-    int k = 3;
-    DenseVector singularValues =
+    Vector singularValues =
       new DenseVector(new double[] { 10, 4, 1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
           0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
           0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
@@ -115,6 +113,9 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
     // Solver starts here:
     System.out.println("Input prepared, starting solver...");
 
+    int ablockRows = 867;
+    int p = 10;
+    int k = 3;
     SSVDSolver ssvd =
       new SSVDSolver(conf,
                      new Path[] { aPath },

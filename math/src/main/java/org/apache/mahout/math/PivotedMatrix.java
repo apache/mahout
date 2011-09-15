@@ -23,12 +23,12 @@ import com.google.common.base.Preconditions;
  * Matrix that allows transparent row and column permutation.
  */
 public class PivotedMatrix extends AbstractMatrix {
-  private Matrix base;
-  private int[] rowPivot;
-  private int[] rowUnpivot;
 
-  private int[] columnPivot;
-  private int[] columnUnpivot;
+  private final Matrix base;
+  private final int[] rowPivot;
+  private final int[] rowUnpivot;
+  private final int[] columnPivot;
+  private final int[] columnUnpivot;
 
   public PivotedMatrix(Matrix base, int[] pivot) {
     this(base, pivot, java.util.Arrays.copyOf(pivot, pivot.length));
@@ -80,7 +80,7 @@ public class PivotedMatrix extends AbstractMatrix {
     swap(columnPivot, columnUnpivot, i, j);
   }
 
-  private void swap(int[] pivot, int[] unpivot, int i, int j) {
+  private static void swap(int[] pivot, int[] unpivot, int i, int j) {
     Preconditions.checkPositionIndex(i, pivot.length);
     Preconditions.checkPositionIndex(j, pivot.length);
     if (i != j) {
@@ -263,7 +263,7 @@ public class PivotedMatrix extends AbstractMatrix {
     return pivot;
   }
 
-  private int[] invert(int[] pivot) {
+  private static int[] invert(int[] pivot) {
     int[] x = new int[pivot.length];
     for (int i = 0; i < pivot.length; i++) {
       x[pivot[i]] = i;

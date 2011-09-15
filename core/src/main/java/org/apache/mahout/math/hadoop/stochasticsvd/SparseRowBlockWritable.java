@@ -1,3 +1,20 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.math.hadoop.stochasticsvd;
 
 import java.io.DataInput;
@@ -14,13 +31,10 @@ import org.apache.mahout.math.function.PlusMult;
 /**
  * block that supports accumulating rows and their sums , suitable for combiner
  * and reducers of multiplication jobs.
- * <P>
- * 
  */
-
 public class SparseRowBlockWritable implements Writable {
 
-  private int rowIndices[];
+  private int[] rowIndices;
   private Vector[] rows;
   int numRows;
 
@@ -29,7 +43,6 @@ public class SparseRowBlockWritable implements Writable {
   }
 
   public SparseRowBlockWritable(int initialCapacity) {
-    super();
     rowIndices = new int[initialCapacity];
     rows = new Vector[initialCapacity];
   }
@@ -108,10 +121,12 @@ public class SparseRowBlockWritable implements Writable {
   public void plusBlock(SparseRowBlockWritable bOther) {
     // since we maintained row indices in a sorted order, we can run
     // sort merge to expedite this operation
-    int i = 0, j = 0;
+    int i = 0;
+    int j = 0;
     while (i < numRows && j < bOther.numRows) {
-      while (i < numRows && rowIndices[i] < bOther.rowIndices[j])
+      while (i < numRows && rowIndices[i] < bOther.rowIndices[j]) {
         i++;
+      }
       if (i < numRows) {
         if (rowIndices[i] == bOther.rowIndices[j]) {
           rows[i].assign(bOther.rows[j], PlusMult.plusMult(1));

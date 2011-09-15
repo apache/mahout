@@ -20,6 +20,7 @@ package org.apache.mahout.classifier.sgd;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.io.Writable;
 
+import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
@@ -63,7 +64,7 @@ public final class ModelSerializer {
   }
 
   public static <T extends Writable> T readBinary(InputStream in, Class<T> clazz) throws IOException {
-    DataInputStream dataIn = new DataInputStream(in);
+    DataInput dataIn = new DataInputStream(in);
     try {
       return PolymorphicWritable.read(dataIn, clazz);
     } finally {

@@ -26,7 +26,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.mahout.clustering.AbstractCluster;
+import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
@@ -77,8 +77,8 @@ public final class TestRandomSeedGenerator extends MahoutTestCase {
 
     int clusterCount = 0;
     Collection<Integer> set = new HashSet<Integer>();
-    for (AbstractCluster value :
-         new SequenceFileValueIterable<AbstractCluster>(new Path(output, "part-randomSeed"), true, conf)) {
+    for (Cluster value :
+         new SequenceFileValueIterable<Cluster>(new Path(output, "part-randomSeed"), true, conf)) {
       clusterCount++;
       int id = value.getId();
       assertTrue(set.add(id)); // validate unique id's

@@ -128,7 +128,7 @@ public final class Utils {
    * @param descriptor attributes description
    * @param number number of data lines to generate
    */
-  public static double[][] randomDoubles(Random rng, String descriptor, int number) throws DescriptorException {
+  public static double[][] randomDoubles(Random rng, CharSequence descriptor, int number) throws DescriptorException {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
 
     double[][] data = new double[number][];
@@ -241,7 +241,7 @@ public final class Utils {
   /**
    * finds the label attribute's index
    */
-  public static int findLabel(String descriptor) throws DescriptorException {
+  public static int findLabel(CharSequence descriptor) throws DescriptorException {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
     return ArrayUtils.indexOf(attrs, Attribute.LABEL);
   }

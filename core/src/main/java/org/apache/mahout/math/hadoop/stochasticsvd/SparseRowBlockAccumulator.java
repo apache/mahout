@@ -1,3 +1,20 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.math.hadoop.stochasticsvd;
 
 import java.io.Closeable;
@@ -28,22 +45,22 @@ import org.apache.mahout.math.Vector;
 public class SparseRowBlockAccumulator implements
     OutputCollector<Long, Vector>, Closeable {
 
-  private int height;
-  private OutputCollector<LongWritable, SparseRowBlockWritable> delegate;
+  private final int height;
+  private final OutputCollector<LongWritable, SparseRowBlockWritable> delegate;
   private long currentBlockNum = -1;
   private SparseRowBlockWritable block;
-  private LongWritable blockKeyW = new LongWritable();
+  private final LongWritable blockKeyW = new LongWritable();
 
   public SparseRowBlockAccumulator(int height,
                                    OutputCollector<LongWritable, SparseRowBlockWritable> delegate) {
-    super();
     this.height = height;
     this.delegate = delegate;
   }
 
   private void flushBlock() throws IOException {
-    if (block == null || block.getNumRows() == 0)
+    if (block == null || block.getNumRows() == 0) {
       return;
+    }
     blockKeyW.set(currentBlockNum);
     delegate.collect(blockKeyW, block);
     block.clear();
@@ -56,8 +73,9 @@ public class SparseRowBlockAccumulator implements
 
     if (blockKey != currentBlockNum) {
       flushBlock();
-      if (block == null)
+      if (block == null) {
         block = new SparseRowBlockWritable(100);
+      }
       currentBlockNum = blockKey;
     }
 

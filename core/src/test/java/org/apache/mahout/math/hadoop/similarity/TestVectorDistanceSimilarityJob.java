@@ -1,4 +1,3 @@
-package org.apache.mahout.math.hadoop.similarity;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,7 @@ package org.apache.mahout.math.hadoop.similarity;
  * limitations under the License.
  */
 
+package org.apache.mahout.math.hadoop.similarity;
 
 import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
@@ -24,7 +24,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.util.ToolRunner;
@@ -46,13 +45,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- *
- **/
 public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
   private FileSystem fs;
 
@@ -68,8 +64,7 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
   public void testVectorDistanceMapper() throws Exception {
     Mapper<WritableComparable<?>, VectorWritable, StringTuple, DoubleWritable>.Context context =
             EasyMock.createMock(Mapper.Context.class);
-    StringTuple tuple;
-    tuple = new StringTuple();
+    StringTuple tuple = new StringTuple();
     tuple.add("foo");
     tuple.add("123");
     context.write(tuple, new DoubleWritable(Math.sqrt(2.0)));
@@ -86,7 +81,7 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
 
     VectorDistanceMapper mapper = new VectorDistanceMapper();
     setField(mapper, "measure", new EuclideanDistanceMeasure());
-    List<NamedVector> seedVectors = new ArrayList<NamedVector>();
+    Collection<NamedVector> seedVectors = new ArrayList<NamedVector>();
     Vector seed1 = new RandomAccessSparseVector(2);
     seed1.set(0, 1);
     seed1.set(1, 1);
@@ -117,7 +112,7 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
 
     VectorDistanceInvertedMapper mapper = new VectorDistanceInvertedMapper();
     setField(mapper, "measure", new EuclideanDistanceMeasure());
-    List<NamedVector> seedVectors = new ArrayList<NamedVector>();
+    Collection<NamedVector> seedVectors = new ArrayList<NamedVector>();
     Vector seed1 = new RandomAccessSparseVector(2);
     seed1.set(0, 1);
     seed1.set(1, 1);
@@ -135,11 +130,11 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
 
   }
 
-  public static final double[][] REFERENCE = {
+  private static final double[][] REFERENCE = {
           {1, 1}, {2, 1}, {1, 2}, {2, 2}, {3, 3}, {4, 4}, {5, 4}, {4, 5}, {5, 5}
   };
 
-  public static final double[][] SEEDS = {
+  private static final double[][] SEEDS = {
           {1, 1}, {10, 10}
   };
 

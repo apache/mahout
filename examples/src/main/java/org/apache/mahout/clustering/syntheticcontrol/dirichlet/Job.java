@@ -59,7 +59,7 @@ public final class Job extends AbstractJob {
                                       RandomAccessSparseVector.class.getName(),
                                       null,
                                       60);
-      new Job().run(new Path("testdata"), output, description, 10, 5, 1.0, true, 0);
+      run(new Path("testdata"), output, description, 10, 5, 1.0, true, 0);
     }
   }
 
@@ -128,14 +128,14 @@ public final class Job extends AbstractJob {
    * @param alpha0
    *          the alpha0 value for the DirichletDistribution
    */
-  public void run(Path input,
-                  Path output,
-                  DistributionDescription description,
-                  int numModels,
-                  int maxIterations,
-                  double alpha0,
-                  boolean emitMostLikely,
-                  double threshold)
+  public static void run(Path input,
+                         Path output,
+                         DistributionDescription description,
+                         int numModels,
+                         int maxIterations,
+                         double alpha0,
+                         boolean emitMostLikely,
+                         double threshold)
     throws IOException, ClassNotFoundException, InterruptedException {
     Path directoryContainingConvertedInput = new Path(output, DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");

@@ -32,8 +32,10 @@ import java.io.IOException;
 
 public abstract class GraphTestCase extends MahoutTestCase {
 
-  protected <T extends WritableComparable> void writeComponents(File destination, Configuration conf,
-      Class<T> componentClass, T... components) throws IOException {
+  protected static <T extends WritableComparable> void writeComponents(File destination,
+                                                                       Configuration conf,
+                                                                       Class<T> componentClass, T... components)
+      throws IOException {
     Path path = new Path(destination.getAbsolutePath());
     FileSystem fs = FileSystem.get(path.toUri(), conf);
 

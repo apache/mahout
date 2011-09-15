@@ -133,8 +133,8 @@ public final class Job extends AbstractJob {
    * @param maxIterations
    *          the int maximum number of iterations
    */
-  public void run(Configuration conf, Path input, Path output,
-      DistanceMeasure measure, int k, double convergenceDelta, int maxIterations)
+  public static void run(Configuration conf, Path input, Path output,
+                         DistanceMeasure measure, int k, double convergenceDelta, int maxIterations)
       throws IOException, InterruptedException, ClassNotFoundException {
     Path directoryContainingConvertedInput = new Path(output,
         DIRECTORY_CONTAINING_CONVERTED_INPUT);
@@ -181,16 +181,11 @@ public final class Job extends AbstractJob {
    *          the double convergence criteria for iterations
    * @param maxIterations
    *          the int maximum number of iterations
-   * @throws IOException 
-   * @throws InterruptedException 
-   * @throws ClassNotFoundException 
-   * @throws IllegalAccessException
-   * @throws InstantiationException
    */
-  public void run(Configuration conf, Path input, Path output,
-      DistanceMeasure measure, double t1, double t2, double convergenceDelta,
-      int maxIterations) throws IOException, InterruptedException,
-      ClassNotFoundException, InstantiationException, IllegalAccessException {
+  public static void run(Configuration conf, Path input, Path output,
+                         DistanceMeasure measure, double t1, double t2, double convergenceDelta,
+                         int maxIterations)
+      throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
     Path directoryContainingConvertedInput = new Path(output,
         DIRECTORY_CONTAINING_CONVERTED_INPUT);
     log.info("Preparing Input");

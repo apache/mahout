@@ -39,7 +39,7 @@ public final class FileInfosDatasetTest extends MahoutTestCase {
     DataSet.initialize(dataset);
 
     DataLine dl = new DataLine();
-    for (String line : new FileLineIterable(new File(Resources.getResource("wdbc/wdbc.data").getPath()))) {
+    for (CharSequence line : new FileLineIterable(new File(Resources.getResource("wdbc/wdbc.data").getPath()))) {
       dl.set(line);
       for (int index = 0; index < dataset.getNbAttributes(); index++) {
         if (dataset.isNumerical(index)) {

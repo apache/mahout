@@ -95,9 +95,6 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
 
     int n = 100;
     int m = 20000;
-    int ablockRows = 867;
-    int p = 60;
-    int k = 40;
     double percent = 5;
 
     VectorWritable vw = new VectorWritable();
@@ -130,6 +127,9 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
     // Solver starts here:
     System.out.println("Input prepared, starting solver...");
 
+    int ablockRows = 867;
+    int p = 60;
+    int k = 40;
     SSVDSolver ssvd =
       new SSVDSolver(conf,
                      new Path[] { aPath },

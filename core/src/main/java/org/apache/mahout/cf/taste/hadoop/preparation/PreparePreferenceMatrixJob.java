@@ -60,7 +60,7 @@ public class PreparePreferenceMatrixJob extends AbstractJob {
     addOption("minPrefsPerUser", "mp", "ignore users with less preferences than this "
         + "(default: " + DEFAULT_MIN_PREFS_PER_USER + ')', String.valueOf(DEFAULT_MIN_PREFS_PER_USER));
     addOption("booleanData", "b", "Treat input as without pref values", Boolean.FALSE.toString());
-    addOption("ratingShift", "rs", "shift ratings by this value", String.valueOf(0f));
+    addOption("ratingShift", "rs", "shift ratings by this value", "0.0");
 
     Map<String,String> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {

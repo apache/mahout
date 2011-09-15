@@ -84,7 +84,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   private static void checkIterator(Iterator<Vector.Element> nzIter, double[] values) {
     while (nzIter.hasNext()) {
       Vector.Element elt = nzIter.next();
-      assertEquals((elt.index()) + " Value: " + values[elt.index()]
+      assertEquals(elt.index() + " Value: " + values[elt.index()]
           + " does not equal: " + elt.get(), values[elt.index()], elt.get(), 0.0);
     }
   }
@@ -159,7 +159,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testSize() throws Exception {
+  public void testSize() {
     assertEquals("size", 3, test.getNumNondefaultElements());
   }
 

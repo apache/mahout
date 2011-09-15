@@ -222,6 +222,7 @@ public class State<T extends Payload<U>, U> implements Comparable<State<T, U>>, 
     return id == other.id && value == other.value;
   }
 
+  @Override
   public int hashCode() {
     return RandomUtils.hashDouble(value) ^ id;
   }
@@ -247,6 +248,7 @@ public class State<T extends Payload<U>, U> implements Comparable<State<T, U>>, 
     return 0;
   }
 
+  @Override
   public String toString() {
     double sum = 0;
     for (double v : step) {

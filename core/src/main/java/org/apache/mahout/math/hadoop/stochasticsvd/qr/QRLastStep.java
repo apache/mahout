@@ -39,7 +39,7 @@ import com.google.common.collect.Lists;
  */
 public class QRLastStep implements Closeable, Iterator<Vector> {
 
-  private Iterator<DenseBlockWritable> qHatInput;
+  private final Iterator<DenseBlockWritable> qHatInput;
 
   private final List<UpperTriangular> mRs = Lists.newArrayList();
   private final int blockNum;
@@ -61,8 +61,7 @@ public class QRLastStep implements Closeable, Iterator<Vector> {
    */
   public QRLastStep(Iterator<DenseBlockWritable> qHatInput,
                     Iterator<VectorWritable> rHatInput,
-                    int blockNum) throws IOException {
-    super();
+                    int blockNum) {
     this.blockNum = blockNum;
     this.qHatInput = qHatInput;
     // in this implementation we actually preload all Rs into memory to make R
@@ -81,14 +80,11 @@ public class QRLastStep implements Closeable, Iterator<Vector> {
   }
 
   private boolean loadNextQt() {
-    DenseBlockWritable v = new DenseBlockWritable();
-
     boolean more = qHatInput.hasNext();
-    if (!more)
+    if (!more) {
       return false;
-
-    v = qHatInput.next();
-
+    }
+    DenseBlockWritable v = qHatInput.next();
     mQt =
       GivensThinSolver
         .computeQtHat(v.getBlock(),
@@ -105,10 +101,10 @@ public class QRLastStep implements Closeable, Iterator<Vector> {
 
   @Override
   public boolean hasNext() {
-    boolean result = true;
     if (mQt != null && cnt == r) {
       mQt = null;
     }
+    boolean result = true;
     if (mQt == null) {
       result = loadNextQt();
       cnt = 0;
@@ -120,8 +116,9 @@ public class QRLastStep implements Closeable, Iterator<Vector> {
   public Vector next() {
     Validate.isTrue(hasNext(), "Q input overrun");
     int qRowIndex = r - cnt - 1; // because QHats are initially stored in
-    for (int j = 0; j < kp; j++)
+    for (int j = 0; j < kp; j++) {
       qRow.setQuick(j, mQt[j][qRowIndex]);
+    }
     cnt++;
     return qRow;
   }

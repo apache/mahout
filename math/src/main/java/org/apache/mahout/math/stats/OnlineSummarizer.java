@@ -82,7 +82,7 @@ public class OnlineSummarizer {
 
       double rate = 2 * (q[3] - q[1]) / n;
       q[1] += (Math.signum(sample - q[1]) - 0.5) * rate;
-      q[2] += (Math.signum(sample - q[2])) * rate;
+      q[2] += Math.signum(sample - q[2]) * rate;
       q[3] += (Math.signum(sample - q[3]) + 0.5) * rate;
 
       if (q[1] < q[0]) {

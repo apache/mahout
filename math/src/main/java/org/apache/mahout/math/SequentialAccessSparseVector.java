@@ -65,20 +65,20 @@ public class SequentialAccessSparseVector extends AbstractVector {
 
   public SequentialAccessSparseVector(Vector other) {
     this(other.size(), other.getNumNondefaultElements());
-    
-    if (!other.isSequentialAccess()) {
-      // If the incoming Vector to copy is random, then adding items
-      // from the Iterator can degrade performance dramatically if 
-      // the number of elements is large as this Vector tries to stay
-      // in order as items are added, so it's better to sort the other
-      // Vector's elements by index and then add them to this
-      copySortedRandomAccessSparseVector(other);
-    } else {
+
+    if (other.isSequentialAccess()) {
       Iterator<Element> it = other.iterateNonZero();
       Element e;
       while (it.hasNext() && (e = it.next()) != null) {
         set(e.index(), e.get());
       }
+    } else {
+      // If the incoming Vector to copy is random, then adding items
+      // from the Iterator can degrade performance dramatically if
+      // the number of elements is large as this Vector tries to stay
+      // in order as items are added, so it's better to sort the other
+      // Vector's elements by index and then add them to this
+      copySortedRandomAccessSparseVector(other);
     }    
   }
 

@@ -26,8 +26,15 @@ public class SimpleEigenVerifier implements SingularVectorVerifier {
     Vector resultantVector = corpus.timesSquared(vector);
     double newNorm = resultantVector.norm(2);
     double oldNorm = vector.norm(2);
-    double eigenValue = (newNorm > 0 && oldNorm > 0) ? newNorm / oldNorm : 1;
-    double cosAngle = (newNorm > 0 && oldNorm > 0) ? resultantVector.dot(vector) / (newNorm * oldNorm) : 0;
+    double eigenValue;
+    double cosAngle;
+    if (newNorm > 0 && oldNorm > 0) {
+      eigenValue = newNorm / oldNorm;
+      cosAngle = resultantVector.dot(vector) / newNorm * oldNorm;
+    } else {
+      eigenValue = 1.0;
+      cosAngle = 0.0;
+    }
     return new EigenStatus(eigenValue, cosAngle, false);
   }
 

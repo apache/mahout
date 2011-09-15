@@ -181,17 +181,17 @@ public final class IOUtils {
    * 
    */
   public static class MultipleOutputsCloseableAdapter implements Closeable {
-    private MultipleOutputs mo;
+    private final MultipleOutputs mo;
 
     public MultipleOutputsCloseableAdapter(MultipleOutputs mo) {
-      super();
       this.mo = mo;
     }
 
     @Override
     public void close() throws IOException {
-      if (mo != null)
+      if (mo != null) {
         mo.close();
+      }
     }
   }
 

@@ -21,9 +21,6 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.io.Writable;
 
 import com.google.common.base.Preconditions;
-import org.apache.mahout.math.map.OpenDoubleIntHashMap;
-import org.apache.mahout.math.map.OpenIntDoubleHashMap;
-import org.apache.mahout.math.map.OpenIntIntHashMap;
 
 import java.io.DataInput;
 import java.io.DataOutput;

@@ -157,6 +157,7 @@ public class Uniform extends AbstractContinousDistribution {
 
 
   /** Returns a String representation of the receiver. */
+  @Override
   public String toString() {
     return this.getClass().getName() + '(' + min + ',' + max + ')';
   }

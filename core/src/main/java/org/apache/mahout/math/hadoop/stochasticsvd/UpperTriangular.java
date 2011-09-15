@@ -81,7 +81,7 @@ public class UpperTriangular extends AbstractMatrix {
     if (columnSize() != other.size()) {
       throw new IndexException(columnSize(), other.size());
     }
-    if (other.viewPart(column + 1, other.size() - column - 1).norm(1) > 1e-14) {
+    if (other.viewPart(column + 1, other.size() - column - 1).norm(1) > 1.0e-14) {
       throw new IllegalArgumentException("Cannot set lower portion of triangular matrix to non-zero");
     }
     for (Vector.Element element : other.viewPart(0, column)) {

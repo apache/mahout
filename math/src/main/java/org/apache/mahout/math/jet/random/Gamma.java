@@ -266,6 +266,7 @@ public class Gamma extends AbstractContinousDistribution {
     return rate * Math.exp((alpha - 1.0) * Math.log(x * rate) - x * rate - logGamma(alpha));
   }
 
+  @Override
   public String toString() {
     return this.getClass().getName() + '(' + rate + ',' + alpha + ')';
   }

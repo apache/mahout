@@ -44,7 +44,7 @@ import java.util.Set;
 
 public class TestMinHashClustering extends MahoutTestCase {
   
-  public static final double[][] REFERENCE = { {1, 2, 3, 4, 5}, {2, 1, 3, 6, 7}, {3, 7, 6, 11, 8, 9},
+  private static final double[][] REFERENCE = { {1, 2, 3, 4, 5}, {2, 1, 3, 6, 7}, {3, 7, 6, 11, 8, 9},
                                               {4, 7, 8, 9, 6, 1}, {5, 8, 10, 4, 1}, {6, 17, 14, 15},
                                               {8, 9, 11, 6, 12, 1, 7}, {10, 13, 9, 7, 4, 6, 3},
                                               {3, 5, 7, 9, 2, 11}, {13, 7, 6, 8, 5}};

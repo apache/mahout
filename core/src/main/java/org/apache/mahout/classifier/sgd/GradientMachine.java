@@ -386,7 +386,7 @@ public class GradientMachine extends AbstractVectorClassifier implements OnlineL
   @Override
   public void train(long trackingKey, String groupKey, int actual, Vector instance) {
     Vector hiddenActivation = inputToHidden(instance);
-    Vector outputActivation = hiddenToOutput(hiddenActivation);
+    hiddenToOutput(hiddenActivation);
     Collection<Integer> goodLabels = new HashSet<Integer>();
     goodLabels.add(actual);
     updateRanking(hiddenActivation, goodLabels, 2, rnd);

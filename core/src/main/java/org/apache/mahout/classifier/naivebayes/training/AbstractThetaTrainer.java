@@ -29,7 +29,7 @@ public abstract class AbstractThetaTrainer {
   private final double totalWeightSum;
   private final double numFeatures;
 
-  public AbstractThetaTrainer(Vector weightsPerFeature, Vector weightsPerLabel, double alphaI) {
+  protected AbstractThetaTrainer(Vector weightsPerFeature, Vector weightsPerLabel, double alphaI) {
     Preconditions.checkNotNull(weightsPerFeature);
     Preconditions.checkNotNull(weightsPerLabel);
     this.weightsPerFeature = weightsPerFeature;

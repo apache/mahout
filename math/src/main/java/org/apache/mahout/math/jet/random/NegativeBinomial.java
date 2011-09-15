@@ -98,6 +98,7 @@ public final class NegativeBinomial extends AbstractDiscreteDistribution {
   /**
    * Returns a String representation of the receiver.
    */
+  @Override
   public String toString() {
     return this.getClass().getName() + '(' + r + ',' + p + ')';
   }

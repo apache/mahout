@@ -100,7 +100,7 @@ public final class ItemSimilarityJob extends AbstractJob {
         + "(default: " + DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM + ')',
         String.valueOf(DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM));
     addOption("maxPrefsPerUser", "mppu", "max number of preferences to consider per user, " +
-        "users with more preferences will be sampled down (default: " + DEFAULT_MAX_PREFS_PER_USER + ")",
+        "users with more preferences will be sampled down (default: " + DEFAULT_MAX_PREFS_PER_USER + ')',
         String.valueOf(DEFAULT_MAX_PREFS_PER_USER));
     addOption("minPrefsPerUser", "mp", "ignore users with less preferences than this "
         + "(default: " + DEFAULT_MIN_PREFS_PER_USER + ')', String.valueOf(DEFAULT_MIN_PREFS_PER_USER));

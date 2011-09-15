@@ -22,7 +22,6 @@ import org.apache.mahout.examples.MahoutTestCase;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.StringTokenizer;
 
 public final class ToolCombinerTest extends MahoutTestCase {
 
@@ -58,10 +57,9 @@ public final class ToolCombinerTest extends MahoutTestCase {
     List<Text> values = ToolReducerTest.asList("val1", "val2", "val1", "val3", "val2");
     String descriptor = combiner.createDescription(2, values.iterator());
 
-    StringTokenizer tokenizer = new StringTokenizer(descriptor, ",");
     int nbvalues = 0;
-    while (tokenizer.hasMoreTokens()) {
-      String value = tokenizer.nextToken().trim();
+    for (String value : descriptor.split(",")) {
+      value = value.trim();
       if (!"val1".equals(value) && !"val2".equals(value) && !"val3".equals(value)) {
         fail("Incorrect value : " + value);
       }

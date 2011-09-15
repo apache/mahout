@@ -44,10 +44,10 @@ public class SequenceFilesFromDirectory extends AbstractJob {
 
   private static final String PREFIX_ADDITION_FILTER = PrefixAdditionFilter.class.getName();
   
-  public static final String[] CHUNK_SIZE_OPTION = {"chunkSize", "chunk"};
-  public static final String[] FILE_FILTER_CLASS_OPTION = {"fileFilterClass","filter"};
-  public static final String[] KEY_PREFIX_OPTION = {"keyPrefix", "prefix"};
-  public static final String[] CHARSET_OPTION = {"charset", "c"};
+  private static final String[] CHUNK_SIZE_OPTION = {"chunkSize", "chunk"};
+  static final String[] FILE_FILTER_CLASS_OPTION = {"fileFilterClass","filter"};
+  private static final String[] KEY_PREFIX_OPTION = {"keyPrefix", "prefix"};
+  static final String[] CHARSET_OPTION = {"charset", "c"};
 
   public static void run(Configuration conf,
                          String keyPrefix,

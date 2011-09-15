@@ -126,6 +126,7 @@ public final class GramKey extends BinaryComparable implements WritableComparabl
     }
   }
   
+  @Override
   public String toString() {
     return '\'' + getPrimaryString() + "'[" + getType() + ']';
   }

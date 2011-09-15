@@ -62,6 +62,7 @@ public class WeightedVectorWritable implements Writable {
     out.writeDouble(weight);
   }
 
+  @Override
   public String toString() {
     Vector vector = vectorWritable.get();
     return weight + ": " + (vector == null ? "null" : AbstractCluster.formatVector(vector, null));

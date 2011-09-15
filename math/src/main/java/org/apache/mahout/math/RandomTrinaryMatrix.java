@@ -30,13 +30,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  * which uses a murmur hash of the coordinates.
  */
 public class RandomTrinaryMatrix extends AbstractMatrix {
-  private static AtomicInteger id = new AtomicInteger();
+  private static final AtomicInteger id = new AtomicInteger();
   private static final int PRIME1 = 104047;
   private static final int PRIME2 = 101377;
   private static final int PRIME3 = 64661;
-
-  private int seed;
   private static final long SCALE = 1L << 32;
+
+  private final int seed;
 
   // set this to true to use a high quality hash
   private boolean highQuality = false;
@@ -76,10 +76,10 @@ public class RandomTrinaryMatrix extends AbstractMatrix {
       buf.putInt(row);
       buf.putInt(column);
       buf.flip();
-      return (MurmurHash.hash64A(buf, seed) & (SCALE - 1)) / ((double) SCALE);
+      return (MurmurHash.hash64A(buf, seed) & (SCALE - 1)) / (double) SCALE;
     } else {
     // this isn't a fantastic random number generator, but it is just fine for random projections
-    return ((((row * PRIME1) + (column * PRIME2 + row * column * PRIME3)) & 8) * 0.25) - 1;
+    return ((((row * PRIME1) + column * PRIME2 + row * column * PRIME3) & 8) * 0.25) - 1;
     }
   }
 

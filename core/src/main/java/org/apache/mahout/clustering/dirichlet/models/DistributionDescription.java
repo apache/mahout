@@ -102,7 +102,7 @@ public final class DistributionDescription {
     return modelFactory + ',' + modelPrototype + ',' + distanceMeasure + ',' + prototypeSize;
   }
 
-  public static DistributionDescription fromString(String s) {
+  public static DistributionDescription fromString(CharSequence s) {
     Iterator<String> tokens = Splitter.on(',').split(s).iterator();
     String modelFactory = tokens.next();
     String modelPrototype = tokens.next();

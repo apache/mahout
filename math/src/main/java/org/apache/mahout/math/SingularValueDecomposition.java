@@ -611,6 +611,7 @@ public class SingularValueDecomposition implements java.io.Serializable {
    * trace         : 0
    * </pre>
    */
+  @Override
   public String toString() {
     StringBuilder buf = new StringBuilder();
     buf.append("---------------------------------------------------------------------\n");

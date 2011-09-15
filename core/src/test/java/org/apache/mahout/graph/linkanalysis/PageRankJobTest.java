@@ -22,9 +22,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.graph.GraphTestCase;
 import org.apache.mahout.graph.model.Edge;
@@ -32,15 +29,13 @@ import org.apache.mahout.graph.preprocessing.GraphUtils;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.hadoop.MathHelper;
-import org.apache.mahout.math.map.OpenLongIntHashMap;
-import org.easymock.EasyMock;
 import org.junit.Test;
 
 import java.io.File;
 import java.util.Map;
 
 /** example from "Mining Massive Datasets" */
-public class PageRankJobTest extends GraphTestCase {
+public final class PageRankJobTest extends GraphTestCase {
 
   @Test
   public void toyIntegrationTest() throws Exception {
@@ -73,14 +68,14 @@ public class PageRankJobTest extends GraphTestCase {
     pageRank.setConf(conf);
     pageRank.run(new String[] { "--vertexIndex", indexedVerticesFile.getAbsolutePath(),
         "--edges", edgesFile.getAbsolutePath(), "--output", outputDir.getAbsolutePath(),
-        "--numVertices", String.valueOf(numVertices), "--numIterations", String.valueOf(3),
-        "--stayingProbability", String.valueOf(0.8), "--tempDir", tempDir.getAbsolutePath() });
+        "--numVertices", String.valueOf(numVertices), "--numIterations", "3",
+        "--stayingProbability", "0.8", "--tempDir", tempDir.getAbsolutePath() });
 
     Matrix expectedAdjacenyMatrix = new DenseMatrix(new double[][] {
-        { 0,           0.4, 0,   0   },
-        { 0.266666667, 0,   0,   0.4 },
-        { 0.266666667, 0,   0.8, 0.4 },
-        { 0.266666667, 0.4, 0,   0   } });
+        { 0.0,         0.4, 0.0, 0.0 },
+        { 0.266666667, 0.0, 0.0, 0.4 },
+        { 0.266666667, 0.0, 0.8, 0.4 },
+        { 0.266666667, 0.4, 0.0, 0.0 } });
 
     Matrix actualAdjacencyMatrix = MathHelper.readMatrix(conf, new Path(tempDir.getAbsolutePath(),
         "adjacencyMatrix/part-r-00000"), numVertices, numVertices);
@@ -88,7 +83,7 @@ public class PageRankJobTest extends GraphTestCase {
     assertMatrixEquals(expectedAdjacenyMatrix, actualAdjacencyMatrix);
 
     Map<Long,Double> rankPerVertex = Maps.newHashMap();
-    for (String line : new FileLineIterable(new File(outputDir, "part-m-00000"))) {
+    for (CharSequence line : new FileLineIterable(new File(outputDir, "part-m-00000"))) {
       String[] tokens = Iterables.toArray(Splitter.on("\t").split(line), String.class);
       rankPerVertex.put(Long.parseLong(tokens[0]), Double.parseDouble(tokens[1]));
     }

@@ -1,3 +1,20 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.math;
 
 import org.apache.mahout.common.RandomUtils;
@@ -14,7 +31,7 @@ public class PermutedVectorViewTest extends MahoutTestCase {
 
     int[] pivot = pivot();
 
-    PermutedVectorView pvv = new PermutedVectorView(v, pivot);
+    Vector pvv = new PermutedVectorView(v, pivot);
 
     // verify the view has the same contents
     for (int i = 0; i < 20; i++) {
@@ -59,11 +76,11 @@ public class PermutedVectorViewTest extends MahoutTestCase {
     }
   }
 
-  private int[] pivot() {
+  private static int[] pivot() {
     return new int[]{11, 7, 10, 9, 8, 3, 17, 0, 19, 13, 12, 1, 5, 6, 16, 2, 4, 14, 18, 15};
   }
 
-  private int[] unpivot() {
+  private static int[] unpivot() {
     int[] pivot = pivot();
     int[] unpivot = new int[20];
 
@@ -73,10 +90,10 @@ public class PermutedVectorViewTest extends MahoutTestCase {
     return unpivot;
   }
 
-  private Vector randomVector() {
+  private static Vector randomVector() {
     Vector v = new DenseVector(20);
     v.assign(new DoubleFunction() {
-      Random gen = RandomUtils.getRandom();
+      final Random gen = RandomUtils.getRandom();
 
       @Override
       public double apply(double arg1) {

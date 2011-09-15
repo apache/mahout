@@ -35,8 +35,9 @@ public class IndexInstancesMapperTest extends MahoutTestCase {
   OpenObjectIntHashMap<String> labelIndex;
   VectorWritable instance;
 
+  @Override
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     super.setUp();
 
     ctx = EasyMock.createMock(Mapper.Context.class);

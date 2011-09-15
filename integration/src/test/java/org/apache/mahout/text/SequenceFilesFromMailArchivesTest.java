@@ -133,15 +133,14 @@ public final class SequenceFilesFromMailArchivesTest extends MahoutTestCase {
     "Message-ID: <"+testVars[0][0]+">\n"+
     "From: \"Testy McTester\" <user@example.com>\n"+
     "To: <ant-user@jakarta.apache.org>\n"+
-    "Subject: "+testVars[0][1]+"\n"+
+    "Subject: "+testVars[0][1]+ '\n' +
     "Date: Mon, 24 Jul 2000 12:24:56 -0700\n"+
     "MIME-Version: 1.0\n"+
     "Content-Type: text/plain;\n"+
     "  charset=\"Windows-1252\"\n"+
     "Content-Transfer-Encoding: 7bit\n"+
     "X-Spam-Rating: locus.apache.org 1.6.2 0/1000/N\n"+
-    testVars[0][2]+
-    "\n"+
+    testVars[0][2]+'\n' +
     "From somebody@example.com  Wed Jul 26 11:32:16 2000\n"+
     "Return-Path: <somebody@example.com>\n"+
     "Mailing-List: contact ant-user-help@jakarta.apache.org; run by ezmlm\n"+
@@ -149,7 +148,7 @@ public final class SequenceFilesFromMailArchivesTest extends MahoutTestCase {
     "Received: (qmail 73966 invoked from network); 26 Jul 2000 11:32:16 -0000\n"+
     "User-Agent: Microsoft-Outlook-Express-Macintosh-Edition/5.02.2022\n"+
     "Date: Wed, 26 Jul 2000 13:32:08 +0200\n"+
-    "Subject: "+testVars[1][1]+"\n"+
+    "Subject: "+testVars[1][1]+ '\n' +
     "From: Another Test <somebody@example.com>\n"+
     "To: <ant-user@jakarta.apache.org>\n"+
     "Message-Id: <"+testVars[1][0]+">\n"+

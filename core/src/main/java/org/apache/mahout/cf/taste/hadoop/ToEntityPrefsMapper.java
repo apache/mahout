@@ -49,7 +49,7 @@ public abstract class ToEntityPrefsMapper extends
     Configuration jobConf = context.getConfiguration();
     booleanData = jobConf.getBoolean(RecommenderJob.BOOLEAN_DATA, false);
     transpose = jobConf.getBoolean(TRANSPOSE_USER_ITEM, false);
-    ratingShift = Float.parseFloat(jobConf.get(RATING_SHIFT, String.valueOf(0f)));
+    ratingShift = Float.parseFloat(jobConf.get(RATING_SHIFT, "0.0"));
   }
 
   @Override

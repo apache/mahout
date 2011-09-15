@@ -64,7 +64,7 @@ public class RowSimilarityJob extends AbstractJob {
   private static final int MAXVALUE_VECTOR_MARKER = Integer.MIN_VALUE + 1;
   private static final int NUM_NON_ZERO_ENTRIES_VECTOR_MARKER = Integer.MIN_VALUE + 2;
 
-  static enum Counters { ROWS, COOCCURRENCES, PRUNED_COOCCURRENCES }
+  enum Counters { ROWS, COOCCURRENCES, PRUNED_COOCCURRENCES }
 
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new RowSimilarityJob(), args);

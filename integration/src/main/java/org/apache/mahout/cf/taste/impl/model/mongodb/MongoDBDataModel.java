@@ -710,7 +710,9 @@ public final class MongoDBDataModel implements DataModel {
       return (Date) date;
     } else if (date.getClass().getName().contains("String")) {
       try {
-        return dateFormat.parse(date.toString());
+        synchronized (dateFormat) {
+          return dateFormat.parse(date.toString());
+        }
       } catch (ParseException ioe) {
         log.warn("Error parsing timestamp", ioe);
       }

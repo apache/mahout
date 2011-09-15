@@ -25,7 +25,7 @@ public final class TestDenseVector extends AbstractTestVector {
   }
 
   @Override
-  public void testSize() throws Exception {
+  public void testSize() {
     assertEquals("size", 7, getTestVector().getNumNondefaultElements());
   }
 

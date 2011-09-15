@@ -51,7 +51,7 @@ public final class EntityPrefWritable extends VarLongWritable {
   }
 
   public void set(long id, float prefValue) {
-    super.set(id);
+    set(id);
     this.prefValue = prefValue;
   }
   

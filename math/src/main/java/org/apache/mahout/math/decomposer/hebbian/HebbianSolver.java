@@ -23,7 +23,6 @@ import java.util.Random;
 
 import com.google.common.collect.Lists;
 import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.math.AbstractMatrix;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
@@ -319,7 +318,7 @@ public class HebbianSolver {
     int rank = Integer.parseInt(props.getProperty("solver.output.desiredRank"));
     double convergence = Double.parseDouble(props.getProperty("solver.convergence"));
     int maxPasses = Integer.parseInt(props.getProperty("solver.maxPasses"));
-    int numThreads = Integer.parseInt(props.getProperty("solver.verifier.numThreads"));
+    //int numThreads = Integer.parseInt(props.getProperty("solver.verifier.numThreads"));
 
     HebbianUpdater updater = new HebbianUpdater();
     SingularVectorVerifier verifier = new AsyncEigenVerifier();

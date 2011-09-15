@@ -24,7 +24,7 @@ package org.apache.mahout.math;
 public class SparseRowMatrix extends AbstractMatrix {
   private Vector[] rowVectors;
 
-  private boolean randomAccessRows;
+  private final boolean randomAccessRows;
 
   /**
    * Construct a sparse matrix starting with the provided row vectors.

@@ -43,6 +43,7 @@ import org.apache.mahout.math.VectorWritable;
  * @deprecated now should not be necessary if we sum up BBt products in output
  *             of Bt job.
  */
+@Deprecated
 public final class BBtJob {
 
   public static final String OUTPUT_BBT = "part";

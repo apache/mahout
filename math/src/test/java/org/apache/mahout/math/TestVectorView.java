@@ -82,7 +82,7 @@ public final class TestVectorView extends MahoutTestCase {
     int i = 0;
     while (iter.hasNext()) {
       Vector.Element elt = iter.next();
-      assertEquals((elt.index()) + " Value: " + gold[i]
+      assertEquals(elt.index() + " Value: " + gold[i]
           + " does not equal: " + elt.get(), gold[i], elt.get(), 0.0);
       i++;
     }

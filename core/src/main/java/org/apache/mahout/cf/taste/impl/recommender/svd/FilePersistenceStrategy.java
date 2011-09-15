@@ -79,7 +79,7 @@ public class FilePersistenceStrategy implements PersistenceStrategy {
     }
   }
 
-  protected void writeBinary(Factorization factorization, DataOutput out) throws IOException {
+  protected static void writeBinary(Factorization factorization, DataOutput out) throws IOException {
     out.writeInt(factorization.numFeatures());
     out.writeInt(factorization.numUsers());
     out.writeInt(factorization.numItems());
@@ -113,7 +113,7 @@ public class FilePersistenceStrategy implements PersistenceStrategy {
     }
   }
 
-  public Factorization readBinary(DataInput in) throws IOException {
+  public static Factorization readBinary(DataInput in) throws IOException {
     int numFeatures = in.readInt();
     int numUsers = in.readInt();
     int numItems = in.readInt();

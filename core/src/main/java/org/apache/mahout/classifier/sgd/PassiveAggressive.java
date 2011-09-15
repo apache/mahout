@@ -17,7 +17,6 @@
 
 package org.apache.mahout.classifier.sgd;
 
-import com.google.common.base.Function;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.classifier.OnlineLearner;
@@ -96,7 +95,7 @@ public class PassiveAggressive extends AbstractVectorClassifier implements Onlin
 
   @Override
   public Vector classify(Vector instance) {
-    Vector result = (DenseVector) classifyNoLink(instance);
+    Vector result = classifyNoLink(instance);
     // Convert to probabilities by exponentiation.
     double max = result.maxValue();
     result.assign(Functions.minus(max)).assign(Functions.EXP);

@@ -485,7 +485,7 @@ public final class Functions {
 
       @Override
       public double apply(double a) {
-        return (from <= a && a <= to) ? 1 : 0;
+        return from <= a && a <= to ? 1 : 0;
       }
     };
   }

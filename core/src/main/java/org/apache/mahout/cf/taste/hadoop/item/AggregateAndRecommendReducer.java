@@ -190,7 +190,7 @@ public final class AggregateAndRecommendReducer extends
       Vector.Element element = recommendationVectorIterator.next();
       int index = element.index();
       long itemID;
-      if (indexItemIDMap != null && indexItemIDMap.isEmpty() == false) {
+      if (indexItemIDMap != null && !indexItemIDMap.isEmpty()) {
         itemID = indexItemIDMap.get(index);
       } else { //we don't have any mappings, so just use the original
         itemID = index;

@@ -76,6 +76,7 @@ public class WeightedPropertyVectorWritable extends WeightedVectorWritable {
     }
   }
 
+  @Override
   public String toString() {
     Vector vector = getVector();
     StringBuilder bldr = new StringBuilder("wt: ").append(getWeight());

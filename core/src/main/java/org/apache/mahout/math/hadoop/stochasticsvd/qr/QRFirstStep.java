@@ -54,8 +54,7 @@ import com.google.common.io.Closeables;
  * 
  */
 @SuppressWarnings("deprecation")
-public class QRFirstStep implements Closeable,
-    OutputCollector<Writable, Vector> {
+public class QRFirstStep implements Closeable, OutputCollector<Writable, Vector> {
 
   public static final String PROP_K = "ssvd.k";
   public static final String PROP_P = "ssvd.p";
@@ -65,7 +64,6 @@ public class QRFirstStep implements Closeable,
   private List<double[]> yLookahead;
   private GivensThinSolver qSolver;
   private int blockCnt;
-  private int r;
   private final DenseBlockWritable value = new DenseBlockWritable();
   private final Writable tempKey = new IntWritable();
   private MultipleOutputs outputs;
@@ -73,16 +71,14 @@ public class QRFirstStep implements Closeable,
   private SequenceFile.Writer tempQw;
   private Path tempQPath;
   private final List<UpperTriangular> rSubseq = Lists.newArrayList();
-  private Configuration jobConf;
+  private final Configuration jobConf;
 
-  private OutputCollector<? super Writable, ? super DenseBlockWritable> qtHatOut;
-  private OutputCollector<? super Writable, ? super VectorWritable> rHatOut;
+  private final OutputCollector<? super Writable, ? super DenseBlockWritable> qtHatOut;
+  private final OutputCollector<? super Writable, ? super VectorWritable> rHatOut;
 
   public QRFirstStep(Configuration jobConf,
                      OutputCollector<? super Writable, ? super DenseBlockWritable> qtHatOut,
-                     OutputCollector<? super Writable, ? super VectorWritable> rHatOut) throws IOException,
-    InterruptedException {
-    super();
+                     OutputCollector<? super Writable, ? super VectorWritable> rHatOut) {
     this.jobConf = jobConf;
     this.qtHatOut = qtHatOut;
     this.rHatOut = rHatOut;
@@ -188,8 +184,9 @@ public class QRFirstStep implements Closeable,
     }
 
     if (incomingYRow.isDense()) {
-      for (int i = 0; i < kp; i++)
+      for (int i = 0; i < kp; i++) {
         yRow[i] = incomingYRow.get(i);
+      }
     } else {
       Arrays.fill(yRow, 0);
       for (Iterator<Vector.Element> yIter = incomingYRow.iterateNonZero(); yIter
@@ -202,9 +199,9 @@ public class QRFirstStep implements Closeable,
     yLookahead.add(yRow);
   }
 
-  protected void setup() throws IOException, InterruptedException {
+  protected void setup() {
 
-    r = Integer.parseInt(jobConf.get(PROP_AROWBLOCK_SIZE));
+    int r = Integer.parseInt(jobConf.get(PROP_AROWBLOCK_SIZE));
     int k = Integer.parseInt(jobConf.get(PROP_K));
     int p = Integer.parseInt(jobConf.get(PROP_P));
     kp = k + p;

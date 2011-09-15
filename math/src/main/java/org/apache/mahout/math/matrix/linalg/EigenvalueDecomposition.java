@@ -738,6 +738,7 @@ public final class EigenvalueDecomposition implements Serializable {
    * trace         : 0
    * </pre>
    */
+  @Override
   public String toString() {
     StringBuilder buf = new StringBuilder();
 

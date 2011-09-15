@@ -1,5 +1,3 @@
-package org.apache.mahout.graph.linkanalysis;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +14,8 @@ package org.apache.mahout.graph.linkanalysis;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.mahout.graph.linkanalysis;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.util.ToolRunner;

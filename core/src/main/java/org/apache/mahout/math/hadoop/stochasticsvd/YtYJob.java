@@ -95,12 +95,14 @@ public class YtYJob {
       if (yRow.isDense()) {
         for (int i = 0; i < kp; i++) {
           double yi;
-          if ((yi = yRow.getQuick(i)) == 0.0)
+          if ((yi = yRow.getQuick(i)) == 0.0) {
             continue; // avoid densing up here unnecessarily
+          }
           for (int j = i; j < kp; j++) {
             double yj;
-            if ((yj = yRow.getQuick(j)) != 0.0)
+            if ((yj = yRow.getQuick(j)) != 0.0) {
               mYtY.setQuick(i, j, mYtY.getQuick(i, j) + yi * yj);
+            }
           }
         }
       } else {
@@ -115,8 +117,9 @@ public class YtYJob {
               .hasNext();) {
             Vector.Element elj = iterJ.next();
             int j = elj.index();
-            if (j < i)
+            if (j < i) {
               continue;
+            }
             mYtY.setQuick(i, j, mYtY.getQuick(i, j) + eli.get() * elj.get());
           }
         }
@@ -156,8 +159,9 @@ public class YtYJob {
     @Override
     protected void reduce(IntWritable key, Iterable<VectorWritable> values,
         Context arg2) throws IOException, InterruptedException {
-      for (VectorWritable vw : values)
+      for (VectorWritable vw : values) {
         acc.addAll(vw.get());
+      }
     }
   }
 

@@ -1,4 +1,3 @@
-package org.apache.mahout.common.lucene;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,7 @@ package org.apache.mahout.common.lucene;
  * limitations under the License.
  */
 
+package org.apache.mahout.common.lucene;
 
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;

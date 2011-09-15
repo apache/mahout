@@ -100,7 +100,6 @@ public final class TestMatrixView extends MahoutTestCase {
 
   @Test
   public void testSize() {
-    int[] c = test.getNumNondefaultElements();
     assertEquals("row size", values.length - 2, test.rowSize());
     assertEquals("col size", values[0].length - 1, test.columnSize());
   }

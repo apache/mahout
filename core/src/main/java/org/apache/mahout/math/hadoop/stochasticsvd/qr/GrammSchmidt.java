@@ -27,6 +27,9 @@ import org.apache.mahout.math.function.DoubleFunction;
  */
 public class GrammSchmidt {
 
+  private GrammSchmidt() {
+  }
+
   public static void orthonormalizeColumns(Matrix mx) {
 
     int n = mx.numCols();

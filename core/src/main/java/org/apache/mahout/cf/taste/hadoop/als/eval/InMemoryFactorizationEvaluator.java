@@ -26,6 +26,7 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
+import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.common.AbstractJob;
@@ -87,8 +88,8 @@ public class InMemoryFactorizationEvaluator extends AbstractJob {
     Matrix u = readMatrix(userFeatures);
     Matrix m = readMatrix(itemFeatures);
 
-    FullRunningAverage rmseAvg = new FullRunningAverage();
-    FullRunningAverage maeAvg = new FullRunningAverage();
+    RunningAverage rmseAvg = new FullRunningAverage();
+    RunningAverage maeAvg = new FullRunningAverage();
     Writer writer = new OutputStreamWriter(System.out);
     try {
       int pairsUsed = 1;

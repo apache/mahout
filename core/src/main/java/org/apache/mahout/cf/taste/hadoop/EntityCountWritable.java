@@ -51,7 +51,7 @@ public final class EntityCountWritable extends VarLongWritable {
   }
 
   public void set(long id, int count) {
-    super.set(id);
+    set(id);
     this.count = count;
   }
 
