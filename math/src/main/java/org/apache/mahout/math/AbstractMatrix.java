@@ -32,12 +32,11 @@ import java.util.Map;
 public abstract class AbstractMatrix implements Matrix {
 
   protected Map<String, Integer> columnLabelBindings;
-
   protected Map<String, Integer> rowLabelBindings;
+  protected int rows;
+  protected int columns;
 
-  protected int rows, columns;
-
-  public AbstractMatrix(int rows, int columns) {
+  protected AbstractMatrix(int rows, int columns) {
     this.rows = rows;
     this.columns = columns;
   }
@@ -678,16 +677,20 @@ public abstract class AbstractMatrix implements Matrix {
 
     @Override
     public double getQuick(int index) {
-      Vector v = rowToColumn ? matrix.viewRow(index) : matrix.viewRow(index);
-      return v == null ? 0 : v.getQuick(transposeOffset);
+      Vector v = rowToColumn ? matrix.viewColumn(index) : matrix.viewRow(index);
+      return v == null ? 0.0 : v.getQuick(transposeOffset);
     }
 
     @Override
     public void setQuick(int index, double value) {
-      Vector v = rowToColumn ? matrix.viewRow(index) : matrix.viewRow(index);
+      Vector v = rowToColumn ? matrix.viewColumn(index) : matrix.viewRow(index);
       if (v == null) {
         v = newVector(numCols);
-        matrix.assignRow(index, v);
+        if (rowToColumn) {
+          matrix.assignColumn(index, v);
+        } else {
+          matrix.assignRow(index, v);
+        }
       }
       v.setQuick(transposeOffset, value);
     }
