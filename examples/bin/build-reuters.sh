@@ -119,6 +119,3 @@ elif [ "x$clustertype" == "xlda" ]; then
 else 
   echo "unknown cluster type: $clustertype";
 fi 
-
-# Remove the work directory
-rm -rf ${WORK_DIR}
