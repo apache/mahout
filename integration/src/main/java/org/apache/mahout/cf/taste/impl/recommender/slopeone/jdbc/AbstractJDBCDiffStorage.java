@@ -195,6 +195,8 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       stmt.setFetchSize(getFetchSize());
       stmt.setLong(1, itemID);
       stmt.setLong(2, userID);
+      stmt.setLong(3, itemID);
+      stmt.setLong(4, userID);
       log.debug("Executing SQL query: {}", getDiffsSQL);
       rs = stmt.executeQuery();
       // We should have up to one result for each Preference in prefs

@@ -115,16 +115,16 @@ public final class MySQLJDBCDiffStorage extends AbstractJDBCDiffStorage {
         "SELECT " + countColumn + ", " + avgColumn + ", " + stdevColumn + " FROM "
             + diffsTable + " WHERE " + itemIDAColumn + "=? AND " + itemIDBColumn + "=?",
         // getDiffsSQL
-        "SELECT " + countColumn + ", " + avgColumn + ", " + stdevColumn + ", " + itemIDAColumn
+        "(SELECT " + countColumn + ", " + avgColumn + ", " + stdevColumn + ", " + itemIDAColumn
             + " FROM " + diffsTable + ", "
             + dataModel.getPreferenceTable() + " WHERE " + itemIDBColumn + "=? AND " + itemIDAColumn + " = "
             + dataModel.getItemIDColumn() + " AND " + dataModel.getUserIDColumn() + "=? ORDER BY "
-            + itemIDAColumn + " UNION "
+            + itemIDAColumn + ") UNION ("
             + "SELECT " + countColumn + ", -" + avgColumn + ", " + stdevColumn + ", " + itemIDBColumn
             + " FROM " + diffsTable + ", "
             + dataModel.getPreferenceTable() + " WHERE " + itemIDAColumn + "=? AND " + itemIDBColumn + " = "
             + dataModel.getItemIDColumn() + " AND " + dataModel.getUserIDColumn() + "=? ORDER BY "
-            + itemIDBColumn,
+            + itemIDBColumn + ')',
         // getAverageItemPrefSQL
         "SELECT COUNT(1), AVG(" + dataModel.getPreferenceColumn() + ") FROM "
             + dataModel.getPreferenceTable() + " WHERE " + dataModel.getItemIDColumn() + "=?",
