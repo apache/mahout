@@ -267,7 +267,8 @@ public final class RecommenderJob extends AbstractJob {
         }
       }
     }
-    conf.setInt("io.sort.mb", assumedHeapSize / 2);
+    // Cap this at 1024MB now; see https://issues.apache.org/jira/browse/MAPREDUCE-2308
+    conf.setInt("io.sort.mb", Math.min(assumedHeapSize / 2, 1024));
     // For some reason the Merger doesn't report status for a long time; increase
     // timeout when running these jobs
     conf.setInt("mapred.task.timeout", 60 * 60 * 1000);
