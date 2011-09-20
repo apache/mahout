@@ -59,6 +59,8 @@ public final class AffinityMatrixInputJob {
     FileInputFormat.addInputPath(job, input);
     FileOutputFormat.setOutputPath(job, output);
 
+    job.setJarByClass(AffinityMatrixInputJob.class);
+
     job.waitForCompletion(true);
   }
 

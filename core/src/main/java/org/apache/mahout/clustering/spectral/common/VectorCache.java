@@ -19,6 +19,7 @@ package org.apache.mahout.clustering.spectral.common;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
 
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
@@ -32,6 +33,9 @@ import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * This class handles reading and writing vectors to the Hadoop
@@ -39,6 +43,8 @@ import org.apache.mahout.math.VectorWritable;
  * of such functionality, but available to any algorithm requiring it.
  */
 public final class VectorCache {
+
+  private static final Logger log = LoggerFactory.getLogger(VectorCache.class);
 
   private VectorCache() {
   }
@@ -94,6 +100,7 @@ public final class VectorCache {
     if (files == null || files.length < 1) {
       return null;
     }
+    log.info("Files are: {}", Arrays.toString(files));
     return load(conf, new Path(files[0].getPath()));
   }
   
@@ -101,6 +108,7 @@ public final class VectorCache {
    * Loads a Vector from the specified path. Returns null if no vector exists.
    */
   public static Vector load(Configuration conf, Path input) throws IOException {
+    log.info("Loading vector from: {}", input);
     SequenceFileValueIterator<VectorWritable> iterator =
         new SequenceFileValueIterator<VectorWritable>(input, true, conf);
     try {

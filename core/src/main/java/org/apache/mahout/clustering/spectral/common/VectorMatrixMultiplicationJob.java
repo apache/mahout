@@ -78,6 +78,9 @@ public final class VectorMatrixMultiplicationJob {
     
     FileInputFormat.addInputPath(job, markovPath);
     FileOutputFormat.setOutputPath(job, outputPath);
+
+    job.setJarByClass(VectorMatrixMultiplicationJob.class);
+
     job.waitForCompletion(true);
     
     // build the resulting DRM from the results

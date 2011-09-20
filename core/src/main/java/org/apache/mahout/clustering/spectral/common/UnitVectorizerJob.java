@@ -61,6 +61,8 @@ public final class UnitVectorizerJob {
     FileInputFormat.addInputPath(job, input);
     FileOutputFormat.setOutputPath(job, output);
 
+    job.setJarByClass(UnitVectorizerJob.class);
+
     job.waitForCompletion(true);
   }
   

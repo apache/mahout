@@ -67,6 +67,8 @@ public final class MatrixDiagonalizeJob {
     FileInputFormat.addInputPath(job, affInput);
     FileOutputFormat.setOutputPath(job, diagOutput);
     
+    job.setJarByClass(MatrixDiagonalizeJob.class);
+
     job.waitForCompletion(true);
     
     // read the results back from the path
