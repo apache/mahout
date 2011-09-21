@@ -306,7 +306,7 @@ public class SSVDSolver {
                 q <= 0);
 
       // power iterations
-      for (int i = 0; i < q; q--) {
+      for (int i = 0; i < q; i++) {
 
         qPath = new Path(outputPath, String.format("ABt-job-%d", i + 1));
         ABtJob.run(conf,

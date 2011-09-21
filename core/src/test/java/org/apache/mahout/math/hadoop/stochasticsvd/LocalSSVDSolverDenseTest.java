@@ -58,7 +58,12 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
   public void testSSVDSolverPowerIterations1() throws IOException { 
     runSSVDSolver(1);
   }
-  
+
+  @Test
+  public void testSSVDSolverPowerIterations2() throws IOException { 
+    runSSVDSolver(2);
+  }
+
   public void runSSVDSolver(int q) throws IOException {
 
     Configuration conf = new Configuration();
