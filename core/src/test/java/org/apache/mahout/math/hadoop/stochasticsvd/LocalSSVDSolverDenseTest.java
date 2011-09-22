@@ -44,9 +44,9 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
   private static final double s_epsilon = 1.0E-10d;
 
   // I actually never saw errors more than 3% worst case for this test,
-  // but since it's non-deterministic test, it still may ocasionally produce
+  // but since it's non-deterministic test, it still may occasionally produce
   // bad results with a non-zero probability, so i put this pct% for error
-  // margin higher so it never fails.
+  // margin high enough so it (almost) never fails.
   private static final double s_precisionPct = 10;
 
   @Test
@@ -111,9 +111,6 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
     fs.copyFromLocalFile(aLocPath, aPath);
 
     Path svdOutPath = new Path(tempDirPath, "SSVD-out");
-
-    // make sure we wipe out previous test results, just a convenience
-    fs.delete(svdOutPath, true);
 
     // Solver starts here:
     System.out.println("Input prepared, starting solver...");

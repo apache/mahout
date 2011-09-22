@@ -54,7 +54,8 @@ import com.google.common.io.Closeables;
  * 
  */
 @SuppressWarnings("deprecation")
-public class QRFirstStep implements Closeable, OutputCollector<Writable, Vector> {
+public class QRFirstStep implements Closeable,
+    OutputCollector<Writable, Vector> {
 
   public static final String PROP_K = "ssvd.k";
   public static final String PROP_P = "ssvd.p";
@@ -259,7 +260,9 @@ public class QRFirstStep implements Closeable, OutputCollector<Writable, Vector>
       // then at least it is always sequential.
       String taskTmpDir = System.getProperty("java.io.tmpdir");
       FileSystem localFs = FileSystem.getLocal(jobConf);
-      tempQPath = new Path(new Path(taskTmpDir), "q-temp.seq");
+      tempQPath =
+        new Path(new Path(taskTmpDir),
+                 String.format("q-temp-%d.seq", System.currentTimeMillis()));
       tempQw =
         SequenceFile.createWriter(localFs,
                                   jobConf,
@@ -277,7 +280,6 @@ public class QRFirstStep implements Closeable, OutputCollector<Writable, Vector>
   @Override
   public void collect(Writable key, Vector vw) throws IOException {
     map(key, vw);
-
   }
 
 }
