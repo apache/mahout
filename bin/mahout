@@ -110,7 +110,14 @@ fi
 
 # CLASSPATH initially contains $MAHOUT_CONF_DIR, or defaults to $MAHOUT_HOME/src/conf
 CLASSPATH=${CLASSPATH}:$MAHOUT_CONF_DIR
-CLASSPATH=${CLASSPATH}:$HADOOP_CONF_DIR
+
+if [ "$MAHOUT_LOCAL" != "" ]; then
+  echo "MAHOUT_LOCAL is set, so we don't add HADOOP_CONF_DIR to classpath."
+else
+  echo "MAHOUT_LOCAL is not set; adding HADOOP_CONF_DIR to classpath."
+  CLASSPATH=${CLASSPATH}:$HADOOP_CONF_DIR
+fi
+
 CLASSPATH=${CLASSPATH}:$JAVA_HOME/lib/tools.jar
 
 # so that filenames w/ spaces are handled correctly in loops below
