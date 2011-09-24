@@ -301,7 +301,7 @@ public final class BtJob {
         int p = context.getConfiguration().getInt(QJob.PROP_P, -1);
 
         Validate.isTrue(k > 0, "invalid k parameter");
-        Validate.isTrue(p > 0, "invalid p parameter");
+        Validate.isTrue(p >= 0, "invalid p parameter");
         mBBt = new UpperTriangular(k + p);
 
         outputs = new MultipleOutputs(new JobConf(context.getConfiguration()));
