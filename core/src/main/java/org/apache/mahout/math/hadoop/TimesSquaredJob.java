@@ -245,7 +245,9 @@ public final class TimesSquaredJob {
 
     @Override
     public void close() throws IOException {
-      out.collect(NullWritable.get(), new VectorWritable(outputVector));
+      if (out != null) {
+        out.collect(NullWritable.get(), new VectorWritable(outputVector));
+      }
     }
 
   }
