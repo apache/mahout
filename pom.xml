@@ -291,6 +291,7 @@
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-jcl</artifactId>
         <version>1.6.1</version>
+        <scope>test</scope>
       </dependency>
       
       <dependency>
