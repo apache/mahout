@@ -66,7 +66,7 @@ public class DisplayFuzzyKMeans extends DisplayClustering {
     RandomUtils.useTestSeed();
     DisplayClustering.generateSamples();
     writeSampleData(samples);
-    boolean runClusterer = false;
+    boolean runClusterer = true;
     int maxIterations = 10;
     if (runClusterer) {
       runSequentialFuzzyKClusterer(conf, samples, output, measure, maxIterations);

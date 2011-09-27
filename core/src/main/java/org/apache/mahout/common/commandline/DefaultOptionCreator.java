@@ -58,6 +58,8 @@ public final class DefaultOptionCreator {
   
   public static final String T4_OPTION = "t4";
   
+  public static final String CLUSTER_FILTER_OPTION = "clusterFilter";
+  
   public static final String THRESHOLD_OPTION = "threshold";
   
   public static final String SEQUENTIAL_METHOD = "sequential";
@@ -201,7 +203,7 @@ public final class DefaultOptionCreator {
   
   /**
    * Returns a default command line option for specification of T3 (Reducer T1).
-   * Used by Canopy, MeanShift
+   * Used by Canopy
    */
   public static DefaultOptionBuilder t3Option() {
     return new DefaultOptionBuilder()
@@ -216,7 +218,7 @@ public final class DefaultOptionCreator {
   
   /**
    * Returns a default command line option for specification of T4 (Reducer T2).
-   * Used by Canopy, MeanShift
+   * Used by Canopy
    */
   public static DefaultOptionBuilder t4Option() {
     return new DefaultOptionBuilder()
@@ -227,6 +229,21 @@ public final class DefaultOptionCreator {
                 .withMaximum(1).create())
         .withDescription("T4 (Reducer T2) threshold value")
         .withShortName(T4_OPTION);
+  }
+  
+  /**
+ * @return a DefaultOptionBuilder for the clusterFilter option
+ */
+public static DefaultOptionBuilder clusterFilterOption() {
+    return new DefaultOptionBuilder()
+        .withLongName(CLUSTER_FILTER_OPTION)
+        .withShortName("cf")
+        .withRequired(false)
+        .withArgument(
+            new ArgumentBuilder().withName(CLUSTER_FILTER_OPTION).withMinimum(1)
+                .withMaximum(1).create())
+        .withDescription("Cluster filter suppresses small canopies from mapper")
+        .withShortName(CLUSTER_FILTER_OPTION);
   }
   
   /**

@@ -32,4 +32,6 @@ public interface CanopyConfigKeys {
   // keys used by Driver, Mapper, Combiner & Reducer
   String DISTANCE_MEASURE_KEY = "org.apache.mahout.clustering.canopy.measure";
 
+  String CF_KEY = "org.apache.mahout.clustering.canopy.canopyFilter";
+
 }

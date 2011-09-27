@@ -26,28 +26,39 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.VectorWritable;
 
-class CanopyMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable> {
+class CanopyMapper extends
+    Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable> {
 
   private final Collection<Canopy> canopies = Lists.newArrayList();
 
   private CanopyClusterer canopyClusterer;
 
+  private Integer clusterFilter;
+
   @Override
-  protected void map(WritableComparable<?> key, VectorWritable point, Context context)
-    throws IOException, InterruptedException {
+  protected void map(WritableComparable<?> key, VectorWritable point,
+      Context context) throws IOException, InterruptedException {
     canopyClusterer.addPointToCanopies(point.get(), canopies);
   }
 
   @Override
-  protected void setup(Context context) throws IOException, InterruptedException {
+  protected void setup(Context context) throws IOException,
+      InterruptedException {
     super.setup(context);
     canopyClusterer = new CanopyClusterer(context.getConfiguration());
+    clusterFilter = Integer.valueOf(context.getConfiguration().get(
+        CanopyConfigKeys.CF_KEY));
   }
 
   @Override
-  protected void cleanup(Context context) throws IOException, InterruptedException {
+  protected void cleanup(Context context) throws IOException,
+      InterruptedException {
     for (Canopy canopy : canopies) {
-      context.write(new Text("centroid"), new VectorWritable(canopy.computeCentroid()));
+      canopy.computeParameters();
+      if (canopy.getNumPoints() > clusterFilter) {
+        context.write(new Text("centroid"), new VectorWritable(canopy
+            .getCenter()));
+      }
     }
     super.cleanup(context);
   }

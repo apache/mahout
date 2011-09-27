@@ -80,7 +80,7 @@ public class DisplayCanopy extends DisplayClustering {
     writeSampleData(samples);
     //boolean b = true;
     //if (b) {
-    CanopyDriver.buildClusters(conf, samples, output, new ManhattanDistanceMeasure(), T1, T2, true);
+    CanopyDriver.buildClusters(conf, samples, output, new ManhattanDistanceMeasure(), T1, T2, 0, true);
     loadClusters(output);
     //} else {
     //  List<Vector> points = new ArrayList<Vector>();

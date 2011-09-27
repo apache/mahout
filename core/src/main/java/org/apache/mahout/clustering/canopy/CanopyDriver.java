@@ -70,6 +70,7 @@ public class CanopyDriver extends AbstractJob {
     addOption(DefaultOptionCreator.t2Option().create());
     addOption(DefaultOptionCreator.t3Option().create());
     addOption(DefaultOptionCreator.t4Option().create());
+    addOption(DefaultOptionCreator.clusterFilterOption().create());
     addOption(DefaultOptionCreator.overwriteOption().create());
     addOption(DefaultOptionCreator.clusteringOption().create());
     addOption(DefaultOptionCreator.methodOption().create());
@@ -95,13 +96,20 @@ public class CanopyDriver extends AbstractJob {
     if (hasOption(DefaultOptionCreator.T4_OPTION)) {
       t4 = Double.parseDouble(getOption(DefaultOptionCreator.T4_OPTION));
     }
+    int clusterFilter = 0;
+    if (hasOption(DefaultOptionCreator.CLUSTER_FILTER_OPTION)) {
+      clusterFilter = Integer
+          .parseInt(getOption(DefaultOptionCreator.CLUSTER_FILTER_OPTION));
+    }
     boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
-    boolean runSequential = getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(
-        DefaultOptionCreator.SEQUENTIAL_METHOD);
+    boolean runSequential = getOption(DefaultOptionCreator.METHOD_OPTION)
+        .equalsIgnoreCase(DefaultOptionCreator.SEQUENTIAL_METHOD);
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    DistanceMeasure measure = ccl.loadClass(measureClass).asSubclass(DistanceMeasure.class).newInstance();
+    DistanceMeasure measure = ccl.loadClass(measureClass).asSubclass(
+        DistanceMeasure.class).newInstance();
 
-    run(conf, input, output, measure, t1, t2, t3, t4, runClustering, runSequential);
+    run(conf, input, output, measure, t1, t2, t3, t4, clusterFilter,
+        runClustering, runSequential);
     return 0;
   }
 
@@ -125,41 +133,35 @@ public class CanopyDriver extends AbstractJob {
    *          the reducer's double T1 distance metric
    * @param t4
    *          the reducer's double T2 distance metric
+   * @param clusterFilter
+   *          the minimum canopy size output by the mappers
    * @param runClustering
    *          cluster the input vectors if true
    * @param runSequential
    *          execute sequentially if true
    */
-  public static void run(Configuration conf,
-                         Path input,
-                         Path output,
-                         DistanceMeasure measure,
-                         double t1,
-                         double t2,
-                         double t3,
-                         double t4,
-                         boolean runClustering,
-                         boolean runSequential)
-    throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
-    Path clustersOut = buildClusters(conf, input, output, measure, t1, t2, t3, t4, runSequential);
+  public static void run(Configuration conf, Path input, Path output,
+      DistanceMeasure measure, double t1, double t2, double t3, double t4,
+      int clusterFilter, boolean runClustering, boolean runSequential)
+      throws IOException, InterruptedException, ClassNotFoundException,
+      InstantiationException, IllegalAccessException {
+    Path clustersOut = buildClusters(conf, input, output, measure, t1, t2, t3,
+        t4, clusterFilter, runSequential);
     if (runClustering) {
-      clusterData(conf, input, clustersOut, output, measure, t1, t2, runSequential);
+      clusterData(conf, input, clustersOut, output, measure, t1, t2,
+          runSequential);
     }
   }
 
   /**
    * Convenience method to provide backward compatibility
    */
-  public static void run(Configuration conf,
-                         Path input,
-                         Path output,
-                         DistanceMeasure measure,
-                         double t1,
-                         double t2,
-                         boolean runClustering,
-                         boolean runSequential)
-    throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
-    run(conf, input, output, measure, t1, t2, t1, t2, runClustering, runSequential);
+  public static void run(Configuration conf, Path input, Path output,
+      DistanceMeasure measure, double t1, double t2, boolean runClustering,
+      boolean runSequential) throws IOException, InterruptedException,
+      ClassNotFoundException, InstantiationException, IllegalAccessException {
+    run(conf, input, output, measure, t1, t2, t1, t2, 0, runClustering,
+        runSequential);
   }
 
   /**
@@ -180,29 +182,24 @@ public class CanopyDriver extends AbstractJob {
    * @param runSequential
    *          execute sequentially if true
    */
-  public static void run(Path input,
-                         Path output,
-                         DistanceMeasure measure,
-                         double t1,
-                         double t2,
-                         boolean runClustering,
-                         boolean runSequential)
-    throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
-    run(new Configuration(), input, output, measure, t1, t2, runClustering, runSequential);
+  public static void run(Path input, Path output, DistanceMeasure measure,
+      double t1, double t2, boolean runClustering, boolean runSequential)
+      throws IOException, InterruptedException, ClassNotFoundException,
+      InstantiationException, IllegalAccessException {
+    run(new Configuration(), input, output, measure, t1, t2, runClustering,
+        runSequential);
   }
 
   /**
    * Convenience method for backwards compatibility
+   * 
    */
-  public static Path buildClusters(Configuration conf,
-                                   Path input,
-                                   Path output,
-                                   DistanceMeasure measure,
-                                   double t1,
-                                   double t2,
-                                   boolean runSequential)
-    throws IOException, InterruptedException, ClassNotFoundException {
-    return buildClusters(conf, input, output, measure, t1, t2, t1, t2, runSequential);
+  public static Path buildClusters(Configuration conf, Path input, Path output,
+      DistanceMeasure measure, double t1, double t2, int clusterFilter,
+      boolean runSequential) throws IOException, InterruptedException,
+      ClassNotFoundException {
+    return buildClusters(conf, input, output, measure, t1, t2, t1, t2,
+        clusterFilter, runSequential);
   }
 
   /**
@@ -225,26 +222,23 @@ public class CanopyDriver extends AbstractJob {
    *          the reducer's double T1 distance metric
    * @param t4
    *          the reducer's double T2 distance metric
+   * @param clusterFilter
+   *          the int minimum size of canopies produced
    * @param runSequential
    *          a boolean indicates to run the sequential (reference) algorithm
    * @return the canopy output directory Path
    */
-  public static Path buildClusters(Configuration conf,
-                                   Path input,
-                                   Path output,
-                                   DistanceMeasure measure,
-                                   double t1,
-                                   double t2,
-                                   double t3,
-                                   double t4,
-                                   boolean runSequential)
-    throws IOException, InterruptedException, ClassNotFoundException {
+  public static Path buildClusters(Configuration conf, Path input, Path output,
+      DistanceMeasure measure, double t1, double t2, double t3, double t4,
+      int clusterFilter, boolean runSequential) throws IOException,
+      InterruptedException, ClassNotFoundException {
     log.info("Build Clusters Input: {} Out: {} Measure: {} t1: {} t2: {}",
-             new Object[] {input, output, measure, t1, t2});
+        new Object[] { input, output, measure, t1, t2 });
     if (runSequential) {
-      return buildClustersSeq(input, output, measure, t1, t2);
+      return buildClustersSeq(input, output, measure, t1, t2, clusterFilter);
     } else {
-      return buildClustersMR(conf, input, output, measure, t1, t2, t3, t4);
+      return buildClustersMR(conf, input, output, measure, t1, t2, t3, t4,
+          clusterFilter);
     }
   }
 
@@ -262,37 +256,38 @@ public class CanopyDriver extends AbstractJob {
    *          the double T1 distance metric
    * @param t2
    *          the double T2 distance metric
+   * @param clusterFilter
+   *          the int minimum size of canopies produced
    * @return the canopy output directory Path
    */
-  private static Path buildClustersSeq(Path input,
-                                       Path output,
-                                       DistanceMeasure measure,
-                                       double t1,
-                                       double t2) throws IOException {
+  private static Path buildClustersSeq(Path input, Path output,
+      DistanceMeasure measure, double t1, double t2, int clusterFilter)
+      throws IOException {
     CanopyClusterer clusterer = new CanopyClusterer(measure, t1, t2);
     Collection<Canopy> canopies = Lists.newArrayList();
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(input.toUri(), conf);
 
-    for (VectorWritable vw
-         : new SequenceFileDirValueIterable<VectorWritable>(input, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+    for (VectorWritable vw : new SequenceFileDirValueIterable<VectorWritable>(
+        input, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
       clusterer.addPointToCanopies(vw.get(), canopies);
     }
 
     Path canopyOutputDir = new Path(output, Cluster.CLUSTERS_DIR + '0');
     Path path = new Path(canopyOutputDir, "part-r-00000");
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, Text.class, Canopy.class);
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path,
+        Text.class, Canopy.class);
     try {
       for (Canopy canopy : canopies) {
         canopy.computeParameters();
         log.debug("Writing Canopy:{} center:{} numPoints:{} radius:{}",
-                  new Object[] {
-                      canopy.getIdentifier(),
-                      AbstractCluster.formatVector(canopy.getCenter(), null),
-                      canopy.getNumPoints(),
-                      AbstractCluster.formatVector(canopy.getRadius(), null)
-                  });
-        writer.append(new Text(canopy.getIdentifier()), canopy);
+            new Object[] { canopy.getIdentifier(),
+                AbstractCluster.formatVector(canopy.getCenter(), null),
+                canopy.getNumPoints(),
+                AbstractCluster.formatVector(canopy.getRadius(), null) });
+        if (canopy.getNumPoints() > clusterFilter) {
+          writer.append(new Text(canopy.getIdentifier()), canopy);
+        }
       }
     } finally {
       Closeables.closeQuietly(writer);
@@ -305,6 +300,7 @@ public class CanopyDriver extends AbstractJob {
    * arguments. Run mapreduce execution
    * 
    * @param conf
+   *          the Configuration
    * @param input
    *          the Path to the directory containing input vectors
    * @param output
@@ -319,25 +315,24 @@ public class CanopyDriver extends AbstractJob {
    *          the reducer's double T1 distance metric
    * @param t4
    *          the reducer's double T2 distance metric
-   * 
+   * @param clusterFilter
+   *          the int minimum size of canopies produced
    * @return the canopy output directory Path
    */
-  private static Path buildClustersMR(Configuration conf,
-                                      Path input,
-                                      Path output,
-                                      DistanceMeasure measure,
-                                      double t1,
-                                      double t2,
-                                      double t3,
-                                      double t4)
-    throws IOException, InterruptedException, ClassNotFoundException {
-    conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, measure.getClass().getName());
+  private static Path buildClustersMR(Configuration conf, Path input,
+      Path output, DistanceMeasure measure, double t1, double t2, double t3,
+      double t4, int clusterFilter) throws IOException, InterruptedException,
+      ClassNotFoundException {
+    conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, measure.getClass()
+        .getName());
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(t1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(t2));
     conf.set(CanopyConfigKeys.T3_KEY, String.valueOf(t3));
     conf.set(CanopyConfigKeys.T4_KEY, String.valueOf(t4));
+    conf.set(CanopyConfigKeys.CF_KEY, String.valueOf(clusterFilter));
 
-    Job job = new Job(conf, "Canopy Driver running buildClusters over input: " + input);
+    Job job = new Job(conf, "Canopy Driver running buildClusters over input: "
+        + input);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setMapperClass(CanopyMapper.class);
@@ -358,15 +353,11 @@ public class CanopyDriver extends AbstractJob {
     return canopyOutputDir;
   }
 
-  public static void clusterData(Configuration conf,
-                                 Path points,
-                                 Path canopies,
-                                 Path output,
-                                 DistanceMeasure measure,
-                                 double t1,
-                                 double t2,
-                                 boolean runSequential)
-    throws InstantiationException, IllegalAccessException, IOException, InterruptedException, ClassNotFoundException {
+  public static void clusterData(Configuration conf, Path points,
+      Path canopies, Path output, DistanceMeasure measure, double t1,
+      double t2, boolean runSequential) throws InstantiationException,
+      IllegalAccessException, IOException, InterruptedException,
+      ClassNotFoundException {
     if (runSequential) {
       clusterDataSeq(points, canopies, output, measure, t1, t2);
     } else {
@@ -374,20 +365,16 @@ public class CanopyDriver extends AbstractJob {
     }
   }
 
-  private static void clusterDataSeq(Path points,
-                                     Path canopies,
-                                     Path output,
-                                     DistanceMeasure measure,
-                                     double t1,
-                                     double t2)
-    throws InstantiationException, IllegalAccessException, IOException {
+  private static void clusterDataSeq(Path points, Path canopies, Path output,
+      DistanceMeasure measure, double t1, double t2)
+      throws InstantiationException, IllegalAccessException, IOException {
     CanopyClusterer clusterer = new CanopyClusterer(measure, t1, t2);
 
     Collection<Canopy> clusters = Lists.newArrayList();
     Configuration conf = new Configuration();
 
-    for (Canopy value
-         : new SequenceFileDirValueIterable<Canopy>(canopies, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+    for (Canopy value : new SequenceFileDirValueIterable<Canopy>(canopies,
+        PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
       clusters.add(value);
     }
 
@@ -422,20 +409,17 @@ public class CanopyDriver extends AbstractJob {
     }
   }
 
-  private static void clusterDataMR(Configuration conf,
-                                    Path points,
-                                    Path canopies,
-                                    Path output,
-                                    DistanceMeasure measure,
-                                    double t1,
-                                    double t2)
-    throws IOException, InterruptedException, ClassNotFoundException {
-    conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, measure.getClass().getName());
+  private static void clusterDataMR(Configuration conf, Path points,
+      Path canopies, Path output, DistanceMeasure measure, double t1, double t2)
+      throws IOException, InterruptedException, ClassNotFoundException {
+    conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, measure.getClass()
+        .getName());
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(t1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(t2));
     conf.set(CanopyConfigKeys.CANOPY_PATH_KEY, canopies.toString());
 
-    Job job = new Job(conf, "Canopy Driver running clusterData over input: " + points);
+    Job job = new Job(conf, "Canopy Driver running clusterData over input: "
+        + points);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setMapperClass(ClusterMapper.class);
@@ -450,7 +434,8 @@ public class CanopyDriver extends AbstractJob {
     HadoopUtil.delete(conf, outPath);
 
     if (!job.waitForCompletion(true)) {
-      throw new InterruptedException("Canopy Clustering failed processing " + canopies);
+      throw new InterruptedException("Canopy Clustering failed processing "
+          + canopies);
     }
   }
 

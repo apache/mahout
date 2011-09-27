@@ -189,6 +189,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
         .getClass().getName());
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
+    conf.set(CanopyConfigKeys.CF_KEY, "0");
     DummyRecordWriter<Text, VectorWritable> writer = new DummyRecordWriter<Text, VectorWritable>();
     Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable>.Context context = DummyRecordWriter
         .build(mapper, conf, writer);
@@ -224,6 +225,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
         .getClass().getName());
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
+    conf.set(CanopyConfigKeys.CF_KEY, "0");
     DummyRecordWriter<Text, VectorWritable> writer = new DummyRecordWriter<Text, VectorWritable>();
     Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable>.Context context = DummyRecordWriter
         .build(mapper, conf, writer);
@@ -259,6 +261,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
         "org.apache.mahout.common.distance.ManhattanDistanceMeasure");
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
+    conf.set(CanopyConfigKeys.CF_KEY, "0");
     DummyRecordWriter<Text, Canopy> writer = new DummyRecordWriter<Text, Canopy>();
     Reducer<Text, VectorWritable, Text, Canopy>.Context context = DummyRecordWriter
         .build(reducer, conf, writer, Text.class, VectorWritable.class);
@@ -292,6 +295,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
         "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
+    conf.set(CanopyConfigKeys.CF_KEY, "0");
     DummyRecordWriter<Text, Canopy> writer = new DummyRecordWriter<Text, Canopy>();
     Reducer<Text, VectorWritable, Text, Canopy>.Context context = DummyRecordWriter
         .build(reducer, conf, writer, Text.class, VectorWritable.class);
@@ -404,10 +408,9 @@ public final class TestCanopyCreation extends MahoutTestCase {
         "org.apache.mahout.common.distance.ManhattanDistanceMeasure");
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
-    DummyRecordWriter<IntWritable, WeightedVectorWritable> writer =
-        new DummyRecordWriter<IntWritable, WeightedVectorWritable>();
-    Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable>.Context context =
-        DummyRecordWriter.build(mapper, conf, writer);
+    DummyRecordWriter<IntWritable, WeightedVectorWritable> writer = new DummyRecordWriter<IntWritable, WeightedVectorWritable>();
+    Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable>.Context context = DummyRecordWriter
+        .build(mapper, conf, writer);
     mapper.setup(context);
 
     Collection<Canopy> canopies = Lists.newArrayList();
@@ -653,11 +656,66 @@ public final class TestCanopyCreation extends MahoutTestCase {
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
     conf.set(CanopyConfigKeys.T3_KEY, String.valueOf(1.1));
     conf.set(CanopyConfigKeys.T4_KEY, String.valueOf(0.1));
+    conf.set(CanopyConfigKeys.CF_KEY, "0");
     DummyRecordWriter<Text, Canopy> writer = new DummyRecordWriter<Text, Canopy>();
     Reducer<Text, VectorWritable, Text, Canopy>.Context context = DummyRecordWriter
         .build(reducer, conf, writer, Text.class, VectorWritable.class);
     reducer.setup(context);
     assertEquals(1.1, reducer.getCanopyClusterer().getT1(), EPSILON);
     assertEquals(0.1, reducer.getCanopyClusterer().getT2(), EPSILON);
+  }
+
+  /**
+   * Story: User can specify a clustering limit that prevents output of small
+   * clusters
+   */
+  @Test
+  public void testCanopyMapperClusterFilter() throws Exception {
+    CanopyMapper mapper = new CanopyMapper();
+    Configuration conf = new Configuration();
+    conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, manhattanDistanceMeasure
+        .getClass().getName());
+    conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
+    conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
+    conf.set(CanopyConfigKeys.CF_KEY, "3");
+    DummyRecordWriter<Text, VectorWritable> writer = new DummyRecordWriter<Text, VectorWritable>();
+    Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable>.Context context = DummyRecordWriter
+        .build(mapper, conf, writer);
+    mapper.setup(context);
+
+    List<VectorWritable> points = getPointsWritable();
+    // map the data
+    for (VectorWritable point : points) {
+      mapper.map(new Text(), point, context);
+    }
+    mapper.cleanup(context);
+    assertEquals("Number of map results", 1, writer.getData().size());
+    // now verify the output
+    List<VectorWritable> data = writer.getValue(new Text("centroid"));
+    assertEquals("Number of centroids", 2, data.size());
+  }
+
+  /**
+   * Story: User can specify a cluster filter that limits the minimum size of
+   * canopies produced by the reducer
+   */
+  @Test
+  public void testCanopyReducerClusterFilter() throws Exception {
+    CanopyReducer reducer = new CanopyReducer();
+    Configuration conf = new Configuration();
+    conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY,
+        "org.apache.mahout.common.distance.ManhattanDistanceMeasure");
+    conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
+    conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
+    conf.set(CanopyConfigKeys.CF_KEY, "3");
+    DummyRecordWriter<Text, Canopy> writer = new DummyRecordWriter<Text, Canopy>();
+    Reducer<Text, VectorWritable, Text, Canopy>.Context context = DummyRecordWriter
+        .build(reducer, conf, writer, Text.class, VectorWritable.class);
+    reducer.setup(context);
+
+    List<VectorWritable> points = getPointsWritable();
+    reducer.reduce(new Text("centroid"), points, context);
+    Set<Text> keys = writer.getKeys();
+    assertEquals("Number of centroids", 2, keys.size());
   }
 }
