@@ -43,10 +43,6 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
       {"test3", "This is the third text."}
   };
 
-  private enum ParserType {
-    TEXT, CSV
-  }
-  
   /**
    * Story converting text files to SequenceFile
    */
@@ -66,46 +62,15 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     // prepare input files
     createFilesFromArrays(conf, inputDir, DATA1);
 
-    String prefix = "UID";
-    SequenceFilesFromDirectory.main(new String[] {"--input",
-        inputDir.toString(), "--output", outputDir.toString(), "--chunkSize",
-        "64", "--charset",
-        Charsets.UTF_8.name(), "--keyPrefix", prefix});
+    SequenceFilesFromDirectory.main(new String[] {
+        "--input", inputDir.toString(),
+        "--output", outputDir.toString(),
+        "--chunkSize", "64",
+        "--charset", Charsets.UTF_8.name(),
+        "--keyPrefix", "UID"});
     
     // check output chunk files
-    checkChunkFiles(conf, outputDir, DATA1, prefix, ParserType.TEXT);
-  }
-
-  /**
-   * Story converting a TSV file to SequenceFile
-   */
-  @Test
-  public void testSequnceFileFromDirectoryTsv() throws Exception {
-    Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(conf);
-
-    // create
-    Path tmpDir = this.getTestTempDirPath();
-    Path inputDir = new Path(tmpDir, "inputDir");
-    fs.mkdirs(inputDir);
-    Path outputDir = new Path(tmpDir, "outputDir");
-    
-    // prepare input TSV file
-    createTsvFilesFromArrays(conf, inputDir, DATA1);
-    
-    // convert it to SequenceFile
-    String prefix = "UID";
-    int chunkSizeInMB = 64;
-    int keyColumn = 0;
-    int valueColumn = 1;
-    SequenceFilesFromCsvFilter.main(new String[] {"--input", inputDir.toString(),
-        "--output", outputDir.toString(), "--charset", Charsets.UTF_8.name(),
-        "--chunkSize", Integer.toString(chunkSizeInMB), "--keyPrefix", prefix,
-        "--keyColumn", Integer.toString(keyColumn), "--valueColumn",
-        Integer.toString(valueColumn)});
-    
-    // check output chunk files
-    checkChunkFiles(conf, outputDir, DATA1, prefix, ParserType.CSV);
+    checkChunkFiles(conf, outputDir, DATA1, "UID");
   }
 
   private static void createFilesFromArrays(Configuration conf, Path inputDir, String[][] data) throws IOException {
@@ -120,23 +85,10 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     }
   }
 
-  private static void createTsvFilesFromArrays(Configuration conf, Path inputDir, String[][] data) throws IOException {
-    FileSystem fs = FileSystem.get(conf);
-    OutputStreamWriter writer = new OutputStreamWriter(fs.create(new Path(inputDir, "inputTsvFile")));
-    try {
-      for (String[] aData : data) {
-        writer.write(aData[0] + '\t' + aData[1] + '\n');
-      }
-    } finally {
-      Closeables.closeQuietly(writer);
-    }
-  }
-
   private static void checkChunkFiles(Configuration conf,
                                       Path outputDir,
                                       String[][] data,
-                                      String prefix,
-                                      ParserType inputType) throws IOException {
+                                      String prefix) throws IOException {
     FileSystem fs = FileSystem.get(conf);
     
     // output exists?
@@ -147,11 +99,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
 
     Map<String,String> fileToData = Maps.newHashMap();
     for (String[] aData : data) {
-      if (inputType == ParserType.CSV) {
-        fileToData.put(prefix + aData[0], aData[1]);
-      } else {
-        fileToData.put(prefix + Path.SEPARATOR + aData[0], aData[1]);
-      }
+      fileToData.put(prefix + Path.SEPARATOR + aData[0], aData[1]);
     }
 
     // read a chunk to check content

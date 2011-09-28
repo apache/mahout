@@ -26,6 +26,7 @@ import org.apache.mahout.common.iterator.FileLineIterable;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 /**
@@ -37,8 +38,9 @@ public final class PrefixAdditionFilter extends SequenceFilesFromDirectoryFilter
                               String keyPrefix,
                               Map<String, String> options, 
                               ChunkedWriter writer,
+                              Charset charset,
                               FileSystem fs) {
-    super(conf, keyPrefix, options, writer, fs);
+    super(conf, keyPrefix, options, writer, charset, fs);
   }
 
   @Override
@@ -47,7 +49,8 @@ public final class PrefixAdditionFilter extends SequenceFilesFromDirectoryFilter
     ChunkedWriter writer = getWriter();
     if (fst.isDir()) {
       String dirPath = getPrefix() + Path.SEPARATOR + current.getName() + Path.SEPARATOR + fst.getPath().getName();
-      fs.listStatus(fst.getPath(), new PrefixAdditionFilter(getConf(), dirPath, getOptions(), writer, fs));
+      fs.listStatus(fst.getPath(),
+                    new PrefixAdditionFilter(getConf(), dirPath, getOptions(), writer, getCharset(), fs));
     } else {
       InputStream in = null;
       try {

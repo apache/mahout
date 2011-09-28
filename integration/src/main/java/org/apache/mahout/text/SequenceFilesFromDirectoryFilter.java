@@ -32,7 +32,7 @@ import java.util.Map;
 /**
  * Implement this interface if you wish to extend SequenceFilesFromDirectory with your own parsing logic.
  */
-public abstract class SequenceFilesFromDirectoryFilter extends SequenceFilesFromDirectory implements PathFilter {
+public abstract class SequenceFilesFromDirectoryFilter implements PathFilter {
   private static final Logger log = LoggerFactory.getLogger(SequenceFilesFromDirectoryFilter.class);
 
   private final String prefix;
@@ -40,26 +40,20 @@ public abstract class SequenceFilesFromDirectoryFilter extends SequenceFilesFrom
   private final Charset charset;
   private final FileSystem fs;
   private final Map<String, String> options;
-
-  protected SequenceFilesFromDirectoryFilter() {
-    this.prefix = null;
-    this.writer = null;
-    this.charset = null;
-    this.fs = null;
-    this.options = null;
-  }
+  private final Configuration conf;
 
   protected SequenceFilesFromDirectoryFilter(Configuration conf,
                                              String keyPrefix,
                                              Map<String, String> options,
                                              ChunkedWriter writer,
+                                             Charset charset,
                                              FileSystem fs) {
     this.prefix = keyPrefix;
     this.writer = writer;
-    this.charset = Charset.forName(options.get(SequenceFilesFromDirectory.CHARSET_OPTION[0]));
+    this.charset = charset;
     this.fs = fs;
     this.options = options;
-    setConf(conf);
+    this.conf = conf;
   }
 
   protected final String getPrefix() {
@@ -80,6 +74,10 @@ public abstract class SequenceFilesFromDirectoryFilter extends SequenceFilesFrom
 
   protected final Map<String, String> getOptions() {
     return options;
+  }
+  
+  protected final Configuration getConf() {
+    return conf;
   }
 
   @Override
