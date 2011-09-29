@@ -36,4 +36,9 @@ public abstract class CountbasedMeasure implements VectorSimilarityMeasure {
     return 1;
   }
 
+  @Override
+  public boolean consider(int numNonZeroEntriesA, int numNonZeroEntriesB, double maxValueA, double maxValueB,
+      double threshold) {
+    return true;
+  }
 }

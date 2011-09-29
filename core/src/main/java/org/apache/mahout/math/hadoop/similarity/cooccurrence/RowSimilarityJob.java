@@ -279,8 +279,9 @@ public class RowSimilarityJob extends AbstractJob {
       int numNonZeroEntriesB = numNonZeroEntries.get(occurrenceB.index());
 
       double maxValueA = maxValues.get(occurrenceA.index());
+      double maxValueB = maxValues.get(occurrenceB.index());
 
-      return similarity.consider(numNonZeroEntriesA, numNonZeroEntriesB, maxValueA, threshold);
+      return similarity.consider(numNonZeroEntriesA, numNonZeroEntriesB, maxValueA, maxValueB, threshold);
     }
 
     @Override

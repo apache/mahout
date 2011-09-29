@@ -29,8 +29,4 @@ public class LoglikelihoodSimilarity extends CountbasedMeasure {
     return 1.0 - 1.0 / (1.0 + logLikelihood);
   }
 
-  @Override
-  public boolean consider(int numNonZeroEntriesA, int numNonZeroEntriesB, double maxValueA, double threshold) {
-    return true;
-  }
 }

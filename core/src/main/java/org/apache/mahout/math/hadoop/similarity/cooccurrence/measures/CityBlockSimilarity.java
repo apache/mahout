@@ -23,9 +23,4 @@ public class CityBlockSimilarity extends CountbasedMeasure {
   public double similarity(double dots, double normA, double normB, int numberOfColumns) {
     return 1.0 / (1.0 + normA + normB - 2 * dots);
   }
-
-  @Override
-  public boolean consider(int numNonZeroEntriesA, int numNonZeroEntriesB, double maxValueA, double threshold) {
-    return true;
-  }
 }

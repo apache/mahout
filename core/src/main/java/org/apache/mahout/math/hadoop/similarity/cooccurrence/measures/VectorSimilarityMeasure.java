@@ -27,5 +27,6 @@ public interface VectorSimilarityMeasure {
   double norm(Vector vector);
   double aggregate(double nonZeroValueA, double nonZeroValueB);
   double similarity(double summedAggregations, double normA, double normB, int numberOfColumns);
-  boolean consider(int numNonZeroEntriesA, int numNonZeroEntriesB, double maxValueA, double threshold);
+  boolean consider(int numNonZeroEntriesA, int numNonZeroEntriesB, double maxValueA, double maxValueB,
+      double threshold);
 }
