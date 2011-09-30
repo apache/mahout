@@ -374,7 +374,8 @@ public class DirichletDriver extends AbstractJob {
                                        int maxIterations,
                                        double alpha0,
                                        Path clustersIn) throws IOException {
-    for (int iteration = 1; iteration <= maxIterations; iteration++) {
+    int iteration = 1;
+    while (iteration <= maxIterations) {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
       Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
@@ -383,7 +384,7 @@ public class DirichletDriver extends AbstractJob {
                                                        description,
                                                        alpha0,
                                                        numClusters);
-      
+
       List<DirichletCluster> oldModels = state.getClusters();
       for (DirichletCluster oldModel : oldModels) {
         oldModel.getModel().configure(conf);
@@ -405,8 +406,11 @@ public class DirichletDriver extends AbstractJob {
 
       // now point the input to the old output directory
       clustersIn = clustersOut;
+      iteration++;
     }
-    return clustersIn;
+    Path finalClustersIn = new Path(output, Cluster.CLUSTERS_DIR + (iteration-1) + Cluster.FINAL_ITERATION_SUFFIX);
+    FileSystem.get(conf).rename(new Path(output, Cluster.CLUSTERS_DIR + (iteration-1)), finalClustersIn);
+    return finalClustersIn;
   }
 
   private static Path buildClustersMR(Configuration conf,
@@ -418,15 +422,19 @@ public class DirichletDriver extends AbstractJob {
                                       double alpha0,
                                       Path clustersIn)
     throws IOException, InterruptedException, ClassNotFoundException {
-    for (int iteration = 1; iteration <= maxIterations; iteration++) {
+    int iteration = 1;
+    while (iteration <= maxIterations) {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
       Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
       runIteration(conf, input, clustersIn, clustersOut, description, numClusters, alpha0);
       // now point the input to the old output directory
       clustersIn = clustersOut;
+      iteration++;
     }
-    return clustersIn;
+    Path finalClustersIn = new Path(output, Cluster.CLUSTERS_DIR + (iteration-1) + Cluster.FINAL_ITERATION_SUFFIX);
+    FileSystem.get(conf).rename(new Path(output, Cluster.CLUSTERS_DIR + (iteration-1)), finalClustersIn);
+    return finalClustersIn;
   }
 
   /**

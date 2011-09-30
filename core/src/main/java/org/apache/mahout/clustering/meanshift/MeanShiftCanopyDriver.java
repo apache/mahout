@@ -333,7 +333,9 @@ public class MeanShiftCanopyDriver extends AbstractJob {
       clustersIn = clustersOut;
       iteration++;
     }
-    return clustersIn;
+    Path finalClustersIn = new Path(output, Cluster.CLUSTERS_DIR + (iteration-1) + "-final");
+    FileSystem.get(conf).rename(new Path(output, Cluster.CLUSTERS_DIR + (iteration-1)), finalClustersIn);
+    return finalClustersIn;
   }
 
   /**
@@ -369,7 +371,9 @@ public class MeanShiftCanopyDriver extends AbstractJob {
         conf.set(MAPRED_REDUCE_TASKS, String.valueOf(numReducers));
       }
     }
-    return clustersIn;
+    Path finalClustersIn = new Path(output, Cluster.CLUSTERS_DIR + (iteration-1) + Cluster.FINAL_ITERATION_SUFFIX);
+    FileSystem.get(conf).rename(new Path(output, Cluster.CLUSTERS_DIR + (iteration-1)), finalClustersIn);
+    return finalClustersIn;
   }
 
   /**

@@ -19,10 +19,12 @@ package org.apache.mahout.clustering.display;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
+import org.apache.mahout.clustering.Cluster;
 
 public class ClustersFilter implements PathFilter {
   @Override
   public boolean accept(Path path) {
-    return path.toString().contains("/clusters-");
+    String pathString = path.toString();
+    return pathString.contains("/clusters-") && pathString.endsWith(Cluster.FINAL_ITERATION_SUFFIX);
   }
 }

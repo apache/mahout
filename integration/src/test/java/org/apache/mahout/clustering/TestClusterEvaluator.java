@@ -391,7 +391,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     MeanShiftCanopyDriver.run(conf, testdata, output, measure, kernelProfile,
         2.1, 1.0, 0.001, 10, false, true, true);
     int numIterations = 10;
-    Path clustersIn = new Path(output, "clusters-7");
+    Path clustersIn = new Path(output, "clusters-7-final");
     RepresentativePointsDriver.run(conf, clustersIn, new Path(output,
         "clusteredPoints"), output, measure, numIterations, true);
     ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
@@ -414,7 +414,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
         0, true);
     int numIterations = 10;
     Configuration conf = new Configuration();
-    Path clustersIn = new Path(output, "clusters-5");
+    Path clustersIn = new Path(output, "clusters-5-final");
     RepresentativePointsDriver.run(conf, clustersIn, new Path(output,
         "clusteredPoints"), output, new EuclideanDistanceMeasure(),
         numIterations, true);

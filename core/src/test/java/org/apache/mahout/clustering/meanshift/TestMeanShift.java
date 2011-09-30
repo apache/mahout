@@ -61,7 +61,7 @@ public final class TestMeanShift extends MahoutTestCase {
 
   /**
    * Print the canopies to the transcript
-   * 
+   *
    * @param canopies
    *          a List<Canopy>
    */
@@ -376,7 +376,7 @@ public final class TestMeanShift extends MahoutTestCase {
         optKey(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION), "0.2",
         optKey(DefaultOptionCreator.OVERWRITE_OPTION) };
     ToolRunner.run(conf, new MeanShiftCanopyDriver(), args);
-    Path outPart = new Path(output, "clusters-4/part-r-00000");
+    Path outPart = new Path(output, "clusters-4-final/part-r-00000");
     long count = HadoopUtil.countRecords(outPart, conf);
     assertEquals("count", 3, count);
     outPart = new Path(output, "clusters-0/part-m-00000");
@@ -430,7 +430,7 @@ public final class TestMeanShift extends MahoutTestCase {
         optKey(DefaultOptionCreator.METHOD_OPTION),
         DefaultOptionCreator.SEQUENTIAL_METHOD };
     ToolRunner.run(new Configuration(), new MeanShiftCanopyDriver(), args);
-    Path outPart = new Path(output, "clusters-7/part-r-00000");
+    Path outPart = new Path(output, "clusters-7-final/part-r-00000");
     long count = HadoopUtil.countRecords(outPart, conf);
     assertEquals("count", 3, count);
   }
@@ -470,7 +470,7 @@ public final class TestMeanShift extends MahoutTestCase {
         optKey(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION), "0.2",
         optKey(DefaultOptionCreator.OVERWRITE_OPTION) };
     ToolRunner.run(conf, new MeanShiftCanopyDriver(), args);
-    Path outPart = new Path(output, "clusters-3/part-r-00000");
+    Path outPart = new Path(output, "clusters-3-final/part-r-00000");
     long count = HadoopUtil.countRecords(outPart, conf);
     assertEquals("count", 3, count);
     Iterator<?> iterator = new SequenceFileValueIterator<Writable>(outPart,
@@ -520,7 +520,7 @@ public final class TestMeanShift extends MahoutTestCase {
         optKey(DefaultOptionCreator.METHOD_OPTION),
         DefaultOptionCreator.SEQUENTIAL_METHOD };
     ToolRunner.run(new Configuration(), new MeanShiftCanopyDriver(), args);
-    Path outPart = new Path(output, "clusters-7/part-r-00000");
+    Path outPart = new Path(output, "clusters-7-final/part-r-00000");
     long count = HadoopUtil.countRecords(outPart, conf);
     assertEquals("count", 3, count);
     Iterator<?> iterator = new SequenceFileValueIterator<Writable>(outPart,

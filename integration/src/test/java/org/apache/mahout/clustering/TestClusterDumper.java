@@ -96,7 +96,7 @@ public final class TestClusterDumper extends MahoutTestCase {
   private List<VectorWritable> sampleData;
   
   private String[] termDictionary;
-  
+
   @Override
   @Before
   public void setUp() throws Exception {
@@ -176,7 +176,7 @@ public final class TestClusterDumper extends MahoutTestCase {
       int maxIterations) throws IOException {
     FileSystem fs = FileSystem.get(conf);
     for (int i = maxIterations; i >= 0; i--) {
-      Path clusters = new Path(output, "clusters-" + i);
+      Path clusters = new Path(output, "clusters-" + i + "-final");
       if (fs.exists(clusters)) {
         return clusters;
       }

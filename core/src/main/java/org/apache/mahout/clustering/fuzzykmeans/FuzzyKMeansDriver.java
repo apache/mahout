@@ -362,9 +362,9 @@ public class FuzzyKMeansDriver extends AbstractJob {
     }
     boolean converged = false;
     int iteration = 1;
+    Configuration conf = new Configuration();
     while (!converged && iteration <= maxIterations) {
       log.info("Fuzzy k-Means Iteration: " + iteration);
-      Configuration conf = new Configuration();
       FileSystem fs = FileSystem.get(input.toUri(), conf);
       for (VectorWritable value
            : new SequenceFileDirValueIterable<VectorWritable>(input,
@@ -398,7 +398,9 @@ public class FuzzyKMeansDriver extends AbstractJob {
       clustersIn = clustersOut;
       iteration++;
     }
-    return clustersIn;
+    Path finalClustersIn = new Path(output, Cluster.CLUSTERS_DIR + (iteration-1) + Cluster.FINAL_ITERATION_SUFFIX);
+    FileSystem.get(conf).rename(new Path(output, Cluster.CLUSTERS_DIR + (iteration-1)), finalClustersIn);
+    return finalClustersIn;
   }
 
   private static Path buildClustersMR(Configuration conf,
@@ -424,7 +426,9 @@ public class FuzzyKMeansDriver extends AbstractJob {
       clustersIn = clustersOut;
       iteration++;
     }
-    return clustersIn;
+    Path finalClustersIn = new Path(output, Cluster.CLUSTERS_DIR + (iteration-1) + "-final");
+    FileSystem.get(conf).rename(new Path(output, Cluster.CLUSTERS_DIR + (iteration-1)), finalClustersIn);
+    return finalClustersIn;
   }
 
   /**

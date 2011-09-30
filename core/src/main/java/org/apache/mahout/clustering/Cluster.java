@@ -35,6 +35,9 @@ public interface Cluster extends Model<VectorWritable>, Parametered {
   // default directory for output of clusters per iteration
   String CLUSTERS_DIR = "clusters-";
 
+  // default suffix for output of clusters for final iteration
+  String FINAL_ITERATION_SUFFIX = "-final";
+
   /**
    * Get the id of the Cluster
    * 
