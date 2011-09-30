@@ -99,7 +99,7 @@ if [ "x$clustertype" == "xkmeans" ]; then
     -x 10 -k 20 -ow \
   && \
   $MAHOUT clusterdump \
-    -s ${WORK_DIR}/reuters-kmeans/clusters-10 \
+    -s ${WORK_DIR}/reuters-kmeans/clusters-*-final \
     -d ${WORK_DIR}/reuters-out-seqdir-sparse-kmeans/dictionary.file-0 \
     -dt sequencefile -b 100 -n 20
 elif [ "x$clustertype" == "xlda" ]; then
@@ -110,7 +110,7 @@ elif [ "x$clustertype" == "xlda" ]; then
   && \
   $MAHOUT lda \
     -i ${WORK_DIR}/reuters-out-seqdir-sparse-lda/tf-vectors \
-    -o ${WORK_DIR}/reuters-lda -k 20 -v 50000 -ow -x 20 \
+    -o ${WORK_DIR}/reuters-lda -k 20 -ow -x 20 \
   && \
   $MAHOUT ldatopics \
     -i ${WORK_DIR}/reuters-lda/state-20 \

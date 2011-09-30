@@ -42,6 +42,7 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterator;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterator;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Vector;
@@ -63,7 +64,6 @@ import java.util.Random;
 public final class LDADriver extends AbstractJob {
 
   private static final String TOPIC_SMOOTHING_OPTION = "topicSmoothing";
-  private static final String NUM_WORDS_OPTION = "numWords";
   private static final String NUM_TOPICS_OPTION = "numTopics";
   // TODO: sequential iteration is not yet correct.
   // private static final String SEQUENTIAL_OPTION = "sequential";
@@ -146,9 +146,6 @@ public final class LDADriver extends AbstractJob {
     addOutputOption();
     addOption(DefaultOptionCreator.overwriteOption().create());
     addOption(NUM_TOPICS_OPTION, "k", "The total number of topics in the corpus", true);
-    addOption(NUM_WORDS_OPTION,
-              "v",
-              "The total number of words in the corpus (can be approximate, needs to exceed the actual value)");
     addOption(TOPIC_SMOOTHING_OPTION, "a", "Topic smoothing parameter. Default is 50/numTopics.", "-1.0");
     // addOption(SEQUENTIAL_OPTION, "seq", "Run sequentially (not Hadoop-based).  Default is false.", "false");
     addOption(DefaultOptionCreator.maxIterationsOption().withRequired(false).create());
@@ -164,7 +161,7 @@ public final class LDADriver extends AbstractJob {
     }
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     int numTopics = Integer.parseInt(getOption(NUM_TOPICS_OPTION));
-    int numWords = Integer.parseInt(getOption(NUM_WORDS_OPTION));
+    int numWords = determineNumberOfWordsFromFirstVector();
     double topicSmoothing = Double.parseDouble(getOption(TOPIC_SMOOTHING_OPTION));
     if (topicSmoothing < 1) {
       topicSmoothing = 50.0 / numTopics;
@@ -192,6 +189,29 @@ public final class LDADriver extends AbstractJob {
       }
     }
     return lastPath;
+  }
+
+  /**
+   * Determine the number of words based on the size of the input vectors.
+   * Note: can't just check first part since it might have null vector. (this 
+   * is a possible when seq2sparse is run over a small dataset with a large number
+   * of reducers)
+   */
+  private int determineNumberOfWordsFromFirstVector() throws IOException {
+    SequenceFileDirValueIterator<VectorWritable> it =
+        new SequenceFileDirValueIterator<VectorWritable>(getInputPath(), PathType.LIST, null, null, true, getConf());
+    try {
+      while (it.hasNext()) {
+        VectorWritable v = it.next();
+        if (v.get() != null) {
+          return v.get().size();
+        }
+      }
+    } finally {
+      Closeables.closeQuietly(it);
+    }
+    log.warn("can't determine number of words; no vectors in {}", getInputPath());
+    return 0;
   }
 
   private void run(Configuration conf,
