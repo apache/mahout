@@ -113,7 +113,7 @@ public class State<T extends Payload<U>, U> implements Comparable<State<T, U>>, 
 
     State<T, U> r = this.copy();
     double magnitude = 0.9 * omni + sum / 10;
-    r.omni = magnitude * -Math.log(1 - gen.nextDouble());
+    r.omni = magnitude * -Math.log1p(-gen.nextDouble());
     for (int i = 0; i < step.length; i++) {
       r.step[i] = lambda * step[i] + r.omni * gen.nextGaussian();
       r.params[i] += r.step[i];

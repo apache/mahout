@@ -177,7 +177,7 @@ public final class SimpleCsvExamples {
      * @return
      */
     private static int randomValue(double mean) {
-      return (int) (-mean * Math.log(1 - rand.nextDouble()));
+      return (int) (-mean * Math.log1p(-rand.nextDouble()));
     }
 
     @Override

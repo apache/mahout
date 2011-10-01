@@ -81,7 +81,7 @@ public final class LogLikelihoodTest extends MahoutTestCase {
       .assign(new DoubleFunction() {
         @Override
         public double apply(double arg1) {
-          return -Math.log(1 - rand.nextDouble());
+          return -Math.log1p(-rand.nextDouble());
         }
       });
 

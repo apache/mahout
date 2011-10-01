@@ -26,6 +26,9 @@ import java.io.IOException;
  * doesn't tend to set them to exactly zero.
  */
 public class L2 implements PriorFunction {
+
+  private static final double HALF_LOG_2PI = Math.log(2.0 * Math.PI) / 2.0;
+
   private double s2;
   private double s;
 
@@ -44,7 +47,7 @@ public class L2 implements PriorFunction {
 
   @Override
   public double logP(double betaIJ) {
-    return -betaIJ * betaIJ / s2 / 2.0 - Math.log(s) - Math.log(2.0 * Math.PI) / 2.0;
+    return -betaIJ * betaIJ / s2 / 2.0 - Math.log(s) - HALF_LOG_2PI;
   }
 
   @Override

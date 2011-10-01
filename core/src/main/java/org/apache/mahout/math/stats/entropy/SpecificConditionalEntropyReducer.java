@@ -33,6 +33,8 @@ import java.io.IOException;
  * = (sum * log(sum) - sum_i(values_i * log(values_i)) / (n * log(2))
  */
 public final class SpecificConditionalEntropyReducer extends Reducer<Text, VarIntWritable, Text, DoubleWritable> {
+  
+  private static final double LOG2 = Math.log(2.0);
 
   private final DoubleWritable result = new DoubleWritable();
   private double numberItemsLog2;
@@ -40,8 +42,7 @@ public final class SpecificConditionalEntropyReducer extends Reducer<Text, VarIn
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    numberItemsLog2 =
-        Math.log(2) * Integer.parseInt(context.getConfiguration().get(ConditionalEntropy.NUMBER_ITEMS_PARAM));
+    numberItemsLog2 = LOG2 * Integer.parseInt(context.getConfiguration().get(ConditionalEntropy.NUMBER_ITEMS_PARAM));
   }
 
   @Override

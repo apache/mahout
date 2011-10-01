@@ -27,7 +27,7 @@ final class LDAUtil {
    */
   static double logSum(double a, double b) {
     return a == Double.NEGATIVE_INFINITY ? b : b == Double.NEGATIVE_INFINITY ? a
-        : a < b ? b + Math.log(1 + Math.exp(a - b)) : a + Math.log(1 + Math.exp(b - a));
+        : a < b ? b + Math.log1p(Math.exp(a - b)) : a + Math.log1p(Math.exp(b - a));
   }
   
 }

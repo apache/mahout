@@ -86,7 +86,7 @@ public class TextValueEncoder extends FeatureVectorEncoder {
   public void flush(double weight, Vector data) {
     for (String word : counts.elementSet()) {
       // weight words by log_2(tf) times whatever other weight we are given
-      wordEncoder.addToVector(word, weight * Math.log(1 + counts.count(word)) / LOG_2, data);
+      wordEncoder.addToVector(word, weight * Math.log1p(counts.count(word)) / LOG_2, data);
     }
     counts.clear();
   }

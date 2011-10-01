@@ -43,7 +43,7 @@ public final class ThreadedEvolutionaryProcessTest extends MahoutTestCase {
         }
         try {
           // variable delays to emulate a tricky function
-          Thread.sleep((long) Math.floor(-2 * Math.log(1 - random.nextDouble())));
+          Thread.sleep((long) Math.floor(-2 * Math.log1p(-random.nextDouble())));
         } catch (InterruptedException e) {
           // ignore interruptions
         }

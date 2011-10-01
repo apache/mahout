@@ -419,7 +419,7 @@ public final class HmmTrainer {
               + beta.getQuick(t + 1, j);
           if (temp > Double.NEGATIVE_INFINITY) {
             // handle 0-probabilities
-            sum = temp + Math.log(1 + Math.exp(sum - temp));
+            sum = temp + Math.log1p(Math.exp(sum - temp));
           }
         }
         transitionMatrix.setQuick(i, j, transitionMatrix.getQuick(i, j)
@@ -436,7 +436,7 @@ public final class HmmTrainer {
             double temp = alpha.getQuick(t, i) + beta.getQuick(t, i);
             if (temp > Double.NEGATIVE_INFINITY) {
               // handle 0-probabilities
-              sum = temp + Math.log(1 + Math.exp(sum - temp));
+              sum = temp + Math.log1p(Math.exp(sum - temp));
             }
           }
         }

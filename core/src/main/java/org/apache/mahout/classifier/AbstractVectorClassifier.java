@@ -170,14 +170,14 @@ public abstract class AbstractVectorClassifier {
       if (actual > 0) {
         return Math.max(-100.0, Math.log(p));
       } else {
-        return Math.max(-100.0, Math.log(1.0 - p));
+        return Math.max(-100.0, Math.log1p(-p));
       }
     } else {
       Vector p = classify(data);
       if (actual > 0) {
         return Math.max(-100.0, Math.log(p.get(actual - 1)));
       } else {
-        return Math.max(-100.0, Math.log(1.0 - p.zSum()));
+        return Math.max(-100.0, Math.log1p(-p.zSum()));
       }
     }
   }

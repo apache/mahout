@@ -46,7 +46,7 @@ public class Exponential extends AbstractContinousDistribution {
    */
   @Override
   public double nextDouble() {
-    return -Math.log(1 - randomGenerator.nextDouble()) / lambda;
+    return -Math.log1p(-randomGenerator.nextDouble()) / lambda;
   }
 
   /**

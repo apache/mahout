@@ -190,12 +190,12 @@ public class Gamma extends AbstractContinousDistribution {
       if (x > 0.0) {                        // Step 5. Calculation of q
         v = t / (s + s);                  // Step 6.
         if (Math.abs(v) > 0.25) {
-          q = q0 - s * t + 0.25 * t * t + (ss + ss) * Math.log(1.0 + v);
+          q = q0 - s * t + 0.25 * t * t + (ss + ss) * Math.log1p(v);
         } else {
           q = q0 + 0.5 * t * t * ((((((((a9 * v + a8) * v + a7) * v + a6)
               * v + a5) * v + a4) * v + a3) * v + a2) * v + a1) * v;
         }                  // Step 7. Quotient acceptance
-        if (Math.log(1.0 - u) <= q) {
+        if (Math.log1p(-u) <= q) {
           return gds / rate;
         }
       }
@@ -219,7 +219,7 @@ public class Gamma extends AbstractContinousDistribution {
         } while (t <= -0.71874483771719); // Step 9. Rejection of t
         v = t / (s + s);                  // Step 10. New q(t)
         if (Math.abs(v) > 0.25) {
-          q = q0 - s * t + 0.25 * t * t + (ss + ss) * Math.log(1.0 + v);
+          q = q0 - s * t + 0.25 * t * t + (ss + ss) * Math.log1p(v);
         } else {
           q = q0 + 0.5 * t * t * ((((((((a9 * v + a8) * v + a7) * v + a6)
               * v + a5) * v + a4) * v + a3) * v + a2) * v + a1) * v;

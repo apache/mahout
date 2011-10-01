@@ -81,7 +81,7 @@ public class Auc {
     if (isProbabilityScore()) {
       double limited = Math.max(1.0e-20, Math.min(score, 1 - 1.0e-20));
       double v0 = entropy.get(trueValue, 0);
-      entropy.set(trueValue, 0, (Math.log(1 - limited) - v0) / samples + v0);
+      entropy.set(trueValue, 0, (Math.log1p(-limited) - v0) / samples + v0);
 
       double v1 = entropy.get(trueValue, 1);
       entropy.set(trueValue, 1, (Math.log(limited) - v1) / samples + v1);
@@ -211,9 +211,9 @@ public class Auc {
       // find a constant score that would optimize log-likelihood, but use a dash of Bayesian
       // conservatism to avoid dividing by zero or taking log(0)
       double p = (0.5 + confusion.get(1, 1)) / (1 + confusion.get(0, 0) + confusion.get(1, 1));
-      entropy.set(0, 0, confusion.get(0, 0) * Math.log(1 - p));
+      entropy.set(0, 0, confusion.get(0, 0) * Math.log1p(-p));
       entropy.set(0, 1, confusion.get(0, 1) * Math.log(p));
-      entropy.set(1, 0, confusion.get(1, 0) * Math.log(1 - p));
+      entropy.set(1, 0, confusion.get(1, 0) * Math.log1p(-p));
       entropy.set(1, 1, confusion.get(1, 1) * Math.log(p));
     }
     return entropy;

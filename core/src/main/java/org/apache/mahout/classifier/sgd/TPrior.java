@@ -46,7 +46,7 @@ public class TPrior implements PriorFunction {
     return Gamma.logGamma((df + 1.0) / 2.0)
         - Math.log(df * Math.PI)
         - Gamma.logGamma(df / 2.0)
-        - (df + 1.0) / 2.0 * Math.log(1.0 + betaIJ * betaIJ);
+        - (df + 1.0) / 2.0 * Math.log1p(betaIJ * betaIJ);
   }
 
   @Override

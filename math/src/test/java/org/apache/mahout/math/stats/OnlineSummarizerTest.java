@@ -108,7 +108,7 @@ public final class OnlineSummarizerTest extends MahoutTestCase {
     // TODO use RandomUtils.getRandom() and rejigger constants to make test pass
     Random gen = new Random(1L);
     for (int i = 0; i < n; i++) {
-      x.add(-Math.log(1 - gen.nextDouble()));
+      x.add(-Math.log1p(-gen.nextDouble()));
     }
     return x;
   }

@@ -119,7 +119,7 @@ public class BayesFeatureMapper extends MapReduceBase implements Mapper<Text,Tex
           tuple.add(BayesConstants.WEIGHT);
           tuple.add(label);
           tuple.add(token);
-          DoubleWritable f = new DoubleWritable(Math.log(1.0 + dKJ) / lengthNormalisation);
+          DoubleWritable f = new DoubleWritable(Math.log1p(dKJ) / lengthNormalisation);
           output.collect(tuple, f);
         } catch (IOException e) {
           throw new IllegalStateException(e);

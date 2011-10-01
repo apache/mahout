@@ -102,8 +102,8 @@ public final class GammaTest extends MahoutTestCase {
   public void beta() {
     Random r = RandomUtils.getRandom();
     for (int i = 0; i < 200; i++) {
-      double alpha = -50 * Math.log(1 - r.nextDouble());
-      double beta = -50 * Math.log(1 - r.nextDouble());
+      double alpha = -50 * Math.log1p(-r.nextDouble());
+      double beta = -50 * Math.log1p(-r.nextDouble());
       double ref = Math.exp(Gamma.logGamma(alpha) + Gamma.logGamma(beta) - Gamma.logGamma(alpha + beta));
       double actual = Gamma.beta(alpha, beta);
       double err = (ref - actual) / ref;

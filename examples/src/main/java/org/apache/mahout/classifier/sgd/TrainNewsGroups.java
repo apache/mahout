@@ -313,7 +313,7 @@ public final class TrainNewsGroups {
     Vector v = new RandomAccessSparseVector(FEATURES);
     bias.addToVector("", 1, v);
     for (String word : words.elementSet()) {
-      encoder.addToVector(word, Math.log(1 + words.count(word)), v);
+      encoder.addToVector(word, Math.log1p(words.count(word)), v);
     }
 
     return v;

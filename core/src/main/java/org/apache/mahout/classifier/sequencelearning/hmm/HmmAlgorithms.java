@@ -79,7 +79,7 @@ public final class HmmAlgorithms {
             double tmp = alpha.getQuick(t - 1, j) + Math.log(a.getQuick(j, i));
             if (tmp > Double.NEGATIVE_INFINITY) {
               // make sure we handle log(0) correctly
-              sum = tmp + Math.log(1 + Math.exp(sum - tmp));
+              sum = tmp + Math.log1p(Math.exp(sum - tmp));
             }
           }
           alpha.setQuick(t, i, sum + Math.log(b.getQuick(i, observations[t])));
@@ -150,7 +150,7 @@ public final class HmmAlgorithms {
                 + Math.log(b.getQuick(j, observations[t + 1]));
             if (tmp > Double.NEGATIVE_INFINITY) {
               // handle log(0)
-              sum = tmp + Math.log(1 + Math.exp(sum - tmp));
+              sum = tmp + Math.log1p(Math.exp(sum - tmp));
             }
           }
           beta.setQuick(t, i, sum);

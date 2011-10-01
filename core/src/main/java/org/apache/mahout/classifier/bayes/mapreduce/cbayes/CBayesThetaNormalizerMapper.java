@@ -89,7 +89,7 @@ public class CBayesThetaNormalizerMapper extends MapReduceBase implements
       
       double dIJ = value.get();
       double denominator = 0.5 * (sigmaJSigmaK / vocabCount + dIJ * this.labelWeightSum.size());
-      double weight = Math.log(1.0 - dIJ / denominator);
+      double weight = Math.log1p(-dIJ / denominator);
       
       reporter.setStatus("Complementary Bayes Theta Normalizer Mapper: " + label + " => " + weight);
       

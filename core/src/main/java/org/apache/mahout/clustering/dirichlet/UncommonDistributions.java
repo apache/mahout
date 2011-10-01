@@ -224,7 +224,7 @@ public final class UncommonDistributions {
     if (p >= 1.0) {
       return n; // needed to avoid infinite loops and negative results
     }
-    double q = -Math.log(1.0 - p);
+    double q = -Math.log1p(-p);
     double sum = 0.0;
     int x = 0;
     while (sum <= q) {
