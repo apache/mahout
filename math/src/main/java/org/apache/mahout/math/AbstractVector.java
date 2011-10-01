@@ -26,6 +26,8 @@ import java.util.Iterator;
 
 /** Implementations of generic capabilities like sum of elements and dot products */
 public abstract class AbstractVector implements Vector {
+  
+  private static final double LOG2 = Math.log(2.0);
 
   private int size;
   protected double lengthSquared = -1.0;
@@ -112,6 +114,39 @@ public abstract class AbstractVector implements Vector {
     if (this == x) {
       return dotSelf();
     }
+
+    // Crude rule of thumb: when a sequential-access vector, with O(log n) lookups, has about
+    // 2^n elements, its lookups take longer than a dense / random access vector (with O(1) lookups) by
+    // about a factor of (0.71n - 12.3). This holds pretty well from n=19 up to at least n=23 according to my tests;
+    // below that lookups are so fast that this difference is near zero.
+
+    int thisNumNonDefault = getNumNondefaultElements();
+    int thatNumNonDefault = x.getNumNondefaultElements();
+    // Default: dot from smaller vector to larger vector
+    boolean reverseDot = thatNumNonDefault < thisNumNonDefault;
+
+    // But, see if we should override that -- is exactly one of them sequential access and so slower to lookup in?
+    if (isSequentialAccess() != x.isSequentialAccess()) {
+      double log2ThisSize = Math.log(thisNumNonDefault) / LOG2;
+      double log2ThatSize = Math.log(thatNumNonDefault) / LOG2;
+      // Only override when the O(log n) factor seems big enough to care about:
+      if (log2ThisSize >= 19.0 && log2ThatSize >= 19.0) {
+        double dotCost = thisNumNonDefault;
+        if (x.isSequentialAccess()) {
+          dotCost *= 0.71 * log2ThatSize - 12.3;
+        }
+        double reverseDotCost = thatNumNonDefault;
+        if (isSequentialAccess()) {
+          reverseDotCost *= 0.71 * log2ThisSize - 12.3;
+        }
+        reverseDot = reverseDotCost < dotCost;
+      }
+    }
+
+    if (reverseDot) {
+      return x.dot(this);
+    }
+
     double result = 0.0;
     Iterator<Element> iter = iterateNonZero();
     while (iter.hasNext()) {
@@ -191,7 +226,7 @@ public abstract class AbstractVector implements Vector {
       Iterator<Element> iter = result.iterateNonZero();
       while (iter.hasNext()) {
         Element element = iter.next();
-        element.set(Math.log(1 + element.get()) / denominator);
+        element.set(Math.log1p(element.get()) / denominator);
       }
       return result;
     }

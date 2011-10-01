@@ -168,46 +168,6 @@ public class RandomAccessSparseVector extends AbstractVector {
     return new AllIterator();
   }
 
-  @Override
-  public double dot(Vector x) {
-    if (size() != x.size()) {
-      throw new CardinalityException(size(), x.size());
-    }
-    if (this == x) {
-      return dotSelf();
-    }
-    
-    double result = 0;
-    if (x instanceof SequentialAccessSparseVector) {
-      Iterator<Element> iter = x.iterateNonZero();
-      while (iter.hasNext()) {
-        Element element = iter.next();
-        result += element.get() * getQuick(element.index());
-      }
-      return result;
-    } else { 
-      Iterator<Element> iter = iterateNonZero();
-      while (iter.hasNext()) {
-        Element element = iter.next();
-        result += element.get() * x.getQuick(element.index());
-      }
-      return result;
-    }
-  }
-
-
-  private static final class AddToVector implements IntDoubleProcedure {
-    private final Vector v;
-    private AddToVector(Vector v) {
-      this.v = v;
-    }
-    @Override
-    public boolean apply(int key, double value) {
-      v.set(key, value + v.get(key));
-      return true;
-    }
-  }
-
   private final class NonDefaultIterator extends AbstractIterator<Element> {
 
     private final RandomAccessElement element = new RandomAccessElement();

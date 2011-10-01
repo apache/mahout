@@ -211,56 +211,6 @@ public class SequentialAccessSparseVector extends AbstractVector {
   }
 
   @Override
-  public double dot(Vector x) {
-    if (size() != x.size()) {
-      throw new CardinalityException(size(), x.size());
-    }
-    if (this == x) {
-      return dotSelf();
-    }
-
-    if (x instanceof SequentialAccessSparseVector) {
-      // For sparse SeqAccVectors. do dot product without lookup in a linear fashion
-      Iterator<Element> myIter = iterateNonZero();
-      Iterator<Element> otherIter = x.iterateNonZero();
-      if (!myIter.hasNext() || !otherIter.hasNext()) {
-        return 0.0;
-      }
-      Element myCurrent = myIter.next();
-      Element otherCurrent = otherIter.next();
-      double result = 0.0;
-      while (true) {
-        int myIndex = myCurrent.index();
-        int otherIndex = otherCurrent.index();
-        if (myIndex == otherIndex) {
-          result += myCurrent.get() * otherCurrent.get();
-        }
-        if (myIndex <= otherIndex) {
-          if (!myIter.hasNext()) {
-            break;
-          }
-          myCurrent = myIter.next();
-        }
-        if (myIndex >= otherIndex) {
-          if (!otherIter.hasNext()) {
-            break;
-          }
-          otherCurrent = otherIter.next();
-        }
-      }
-      return result;
-    } else { // seq.rand. seq.dense
-      double result = 0.0;
-      Iterator<Element> iter = iterateNonZero();
-      while (iter.hasNext()) {
-        Element element = iter.next();
-        result += element.get() * x.getQuick(element.index());
-      }
-      return result;
-    }
-  }
-
-  @Override
   public Vector minus(Vector that) {
     if (size() != that.size()) {
       throw new CardinalityException(size(), that.size());
