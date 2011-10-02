@@ -74,5 +74,34 @@ public final class RunningAverageAndStdDevTest extends TasteTestCase {
     assertEquals(1000.0 / Math.sqrt(12.0), average.getStandardDeviation(), SMALL_EPSILON);
 
   }
+  
+  @Test
+  public void testStddev() {
+    
+    RunningAverageAndStdDev runningAverage = new FullRunningAverageAndStdDev();
+
+    assertEquals(0, runningAverage.getCount());
+    assertTrue(Double.isNaN(runningAverage.getAverage()));
+    runningAverage.addDatum(1.0);
+    assertEquals(1, runningAverage.getCount());
+    assertEquals(1.0, runningAverage.getAverage(), EPSILON);
+    assertTrue(Double.isNaN(runningAverage.getStandardDeviation()));
+    runningAverage.addDatum(1.0);
+    assertEquals(2, runningAverage.getCount());
+    assertEquals(1.0, runningAverage.getAverage(), EPSILON);
+    assertEquals(0.0, runningAverage.getStandardDeviation(), EPSILON);
+
+    runningAverage.addDatum(7.0);
+    assertEquals(3, runningAverage.getCount());
+    assertEquals(3.0, runningAverage.getAverage(), EPSILON); 
+    assertEquals(3.464101552963257, runningAverage.getStandardDeviation(), EPSILON);
+
+    runningAverage.addDatum(5.0);
+    assertEquals(4, runningAverage.getCount());
+    assertEquals(3.5, runningAverage.getAverage(), EPSILON); 
+    assertEquals(3.0, runningAverage.getStandardDeviation(), EPSILON);
+
+  }
+  
 
 }

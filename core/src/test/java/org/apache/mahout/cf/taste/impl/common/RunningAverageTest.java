@@ -56,5 +56,20 @@ public final class RunningAverageTest extends TasteTestCase {
     assertEquals(2, runningAverage.getCount());
     assertEquals(2.0, runningAverage.getAverage(), EPSILON);
   }
+  
+  @Test
+  public void testCopyConstructor() {
+    RunningAverage runningAverage = new FullRunningAverage();
+
+    runningAverage.addDatum(1.0);
+    runningAverage.addDatum(1.0);
+    assertEquals(2, runningAverage.getCount());
+    assertEquals(1.0, runningAverage.getAverage(), EPSILON);
+
+    RunningAverage copy = new FullRunningAverage(runningAverage.getCount(), runningAverage.getAverage());
+    assertEquals(2, copy.getCount());
+    assertEquals(1.0, copy.getAverage(), EPSILON);
+    
+  }
 
 }

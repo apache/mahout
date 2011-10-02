@@ -33,10 +33,14 @@ public class FullRunningAverage implements RunningAverage, Serializable {
   private double average;
   
   public FullRunningAverage() {
-    count = 0;
-    average = Double.NaN;
+    this(0, Double.NaN);
   }
-  
+
+  public FullRunningAverage(int count, double average) {
+    this.count = count;
+    this.average = average;    
+  }
+
   /**
    * @param datum
    *          new item to add to the running average

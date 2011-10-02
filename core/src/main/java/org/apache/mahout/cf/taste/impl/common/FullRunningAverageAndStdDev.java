@@ -25,10 +25,23 @@ package org.apache.mahout.cf.taste.impl.common;
  */
 public final class FullRunningAverageAndStdDev extends FullRunningAverage implements RunningAverageAndStdDev {
 
-  private double stdDev = Double.NaN;
+  private double stdDev;
   private double mk;
   private double sk;
   
+  public FullRunningAverageAndStdDev() {
+    mk = 0.0;
+    sk = 0.0;
+    recomputeStdDev();
+  }
+  
+  public FullRunningAverageAndStdDev(int count, double average, double mk, double sk) {
+    super(count, average);
+    this.mk = mk;
+    this.sk = sk;
+    recomputeStdDev();
+  }
+
   @Override
   public synchronized double getStandardDeviation() {
     return stdDev;
@@ -70,11 +83,7 @@ public final class FullRunningAverageAndStdDev extends FullRunningAverage implem
   
   private synchronized void recomputeStdDev() {
     int count = getCount();
-    if (count > 1) {
-      stdDev = Math.sqrt(sk / (count - 1));
-    } else {
-      stdDev = Double.NaN;
-    }
+    stdDev = count > 1 ? Math.sqrt(sk / (count - 1)) : Double.NaN;
   }
   
   @Override
