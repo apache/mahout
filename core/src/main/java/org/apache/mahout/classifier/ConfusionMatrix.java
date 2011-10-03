@@ -1,9 +1,9 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
+ * Licensed to the Apache Software Foundation (ASF) under one or more
  * the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -17,12 +17,18 @@
 
 package org.apache.mahout.classifier;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
 import org.apache.commons.lang.StringUtils;
+import org.apache.mahout.math.CardinalityException;
+import org.apache.mahout.math.DenseMatrix;
+import org.apache.mahout.math.Matrix;
 
 import com.google.common.base.Preconditions;
 
@@ -125,6 +131,46 @@ public class ConfusionMatrix {
       }
     }
     return this;
+  }
+  
+  public Matrix getMatrix() {
+	  int length = confusionMatrix.length;
+	  Matrix m = new DenseMatrix(length, length);
+	  for (int r = 0; r < length; r++) {
+		  for (int c = 0; c < length; c++) {
+			  m.set(r, c, confusionMatrix[r][c]);
+		  }
+	  }
+	  Map<String,Integer> labels = Maps.newHashMap();
+	  for (Map.Entry<String, Integer> entry : labelMap.entrySet()) {
+		  labels.put(entry.getKey(), entry.getValue());
+	  }
+	  m.setRowLabelBindings(labels);
+	  m.setColumnLabelBindings(labels);
+	  return m;
+  }
+
+  public void setMatrix(Matrix m) {
+	  int length = confusionMatrix.length;
+	  if (m.numRows() != m.numCols()) {
+      throw new CardinalityException(m.numRows(), m.numCols());
+    }
+    if (m.numRows() != length) {
+      throw new CardinalityException(m.numRows(), length);
+    }
+	  for (int r = 0; r < length; r++) {
+		  for (int c = 0; c < length; c++) {
+			  confusionMatrix[r][c] = (int) Math.round(m.get(r, c));
+		  }
+	  }
+	  Map<String,Integer> labels = m.getRowLabelBindings();
+	  if (labels == null) {
+      labels = m.getColumnLabelBindings();
+    }
+    labelMap.clear();    
+	  if (labels != null) {
+      labelMap.putAll(labels);
+	  }
   }
   
   @Override

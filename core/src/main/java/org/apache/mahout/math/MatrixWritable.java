@@ -18,19 +18,23 @@
 package org.apache.mahout.math;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import org.apache.hadoop.io.Writable;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 public class MatrixWritable implements Writable {
 
+  private static final int FLAG_DENSE = 0x01;
+  private static final int FLAG_SEQUENTIAL = 0x02;
+  private static final int FLAG_LABELS = 0x04;
+  private static final int NUM_FLAGS = 3;
+
   private Matrix matrix;
-  private static final int NUM_FLAGS = 2;
-  private static final int FLAG_DENSE = 1;
-  private static final int FLAG_SEQUENTIAL = 2;
 
   public MatrixWritable() {
   }
@@ -103,6 +107,7 @@ public class MatrixWritable implements Writable {
     Preconditions.checkArgument(flags >> NUM_FLAGS == 0, "Unknown flags set: %d", Integer.toString(flags, 2));
     boolean dense = (flags & FLAG_DENSE) != 0;
     boolean sequential = (flags & FLAG_SEQUENTIAL) != 0;
+    boolean hasLabels = (flags & FLAG_LABELS) != 0;
 
     int rows = in.readInt();
     int columns = in.readInt();
@@ -118,6 +123,18 @@ public class MatrixWritable implements Writable {
       r.viewRow(row).assign(VectorWritable.readVector(in));
     }
 
+    if (hasLabels) {
+    	Map<String,Integer> columnLabelBindings = Maps.newHashMap();
+    	Map<String,Integer> rowLabelBindings = Maps.newHashMap();
+    	readLabels(in, columnLabelBindings, rowLabelBindings);
+    	if (!columnLabelBindings.isEmpty()) {
+    		r.setColumnLabelBindings(columnLabelBindings);
+    	}
+    	if (!rowLabelBindings.isEmpty()) {
+    		r.setRowLabelBindings(rowLabelBindings);
+    	}
+    }
+
     return r;
   }
 
@@ -131,6 +148,9 @@ public class MatrixWritable implements Writable {
     if (row.isSequentialAccess()) {
       flags |= FLAG_SEQUENTIAL;
     }
+    if (matrix.getRowLabelBindings() != null || matrix.getColumnLabelBindings() != null) {
+      flags |= FLAG_LABELS;
+    }
     out.writeInt(flags);
 
     out.writeInt(matrix.rowSize());
@@ -138,6 +158,9 @@ public class MatrixWritable implements Writable {
 
     for (int i = 0; i < matrix.rowSize(); i++) {
       VectorWritable.writeVector(out, matrix.viewRow(i), false);
+    }
+    if ((flags & FLAG_LABELS) != 0) {
+    	writeLabelBindings(out, matrix.getColumnLabelBindings(), matrix.getRowLabelBindings());
     }
   }
 }

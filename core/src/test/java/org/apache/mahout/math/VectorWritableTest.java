@@ -53,11 +53,27 @@ public final class VectorWritableTest extends MahoutTestCase {
     doTestVectorWritableEquals(v);
   }
 
+  @Test
+  public void testNamedVectorWritable() throws Exception {
+    Vector v = new DenseVector(5);
+    v = new NamedVector(v, "Victor");
+    v.set(1, 3.0);
+    v.set(3, 5.0);
+    doTestVectorWritableEquals(v);
+  }
+
   private static void doTestVectorWritableEquals(Vector v) throws IOException {
     Writable vectorWritable = new VectorWritable(v);
     VectorWritable vectorWritable2 = new VectorWritable();
     writeAndRead(vectorWritable, vectorWritable2);
     Vector v2 = vectorWritable2.get();
+    if (v instanceof NamedVector) {
+    	assertTrue(v2 instanceof NamedVector);
+    	NamedVector nv = (NamedVector) v;
+    	NamedVector nv2 = (NamedVector) v2;
+    	assertEquals(nv.getName(), nv2.getName());
+    	assertEquals("Victor", nv.getName());
+    }
     assertEquals(v, v2);
   }
 
