@@ -211,10 +211,14 @@ if [ "$HADOOP_HOME" = "" ] || [ "$MAHOUT_LOCAL" != "" ] ; then
       ;;
     (*)
 <<<<<<< HEAD
+<<<<<<< HEAD
       CLASSPATH=$CLASSPATH exec "$JAVA" $JAVA_HEAP_MAX $MAHOUT_OPTS $CLASS "$@"
 =======
       exec "$JAVA" $JAVA_HEAP_MAX $MAHOUT_OPTS -classpath "$CLASSPATH" $CLASS "$@"
 >>>>>>> b2289f420c0702f4ceeb5e1488c0977cd70f5f89
+=======
+      CLASSPATH=$CLASSPATH exec "$JAVA" $JAVA_HEAP_MAX $MAHOUT_OPTS $CLASS "$@"
+>>>>>>> 998503d2d2897f1c7c661584237b487edc8ef4a9
     esac
 else
   echo "Running on hadoop, using HADOOP_HOME=$HADOOP_HOME"
