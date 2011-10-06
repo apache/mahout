@@ -105,7 +105,15 @@ if [ "$MAHOUT_HEAPSIZE" != "" ]; then
 fi
 
 if [ "x$MAHOUT_CONF_DIR" = "x" ]; then
-  MAHOUT_CONF_DIR=$MAHOUT_HOME/src/conf
+  if [ -d $MAHOUT_HOME/src/conf ]; then
+    MAHOUT_CONF_DIR=$MAHOUT_HOME/src/conf
+  else
+    if [ -d $MAHOUT_HOME/conf ]; then
+      MAHOUT_CONF_DIR=$MAHOUT_HOME/conf
+    else
+      echo No MAHOUT_CONF_DIR found
+    fi
+  fi
 fi
 
 # CLASSPATH initially contains $MAHOUT_CONF_DIR, or defaults to $MAHOUT_HOME/src/conf
