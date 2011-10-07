@@ -31,6 +31,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.mahout.classifier.ClassifierData;
 import org.apache.mahout.examples.MahoutTestCase;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
+import org.apache.mahout.utils.SplitInput;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -43,7 +44,7 @@ public final class SplitBayesInputTest extends MahoutTestCase {
   private Path tempTrainingDirectory;
   private Path tempTestDirectory;
   private Path tempInputDirectory;
-  private SplitBayesInput si;
+  private SplitInput si;
     
   @Override
   @Before
@@ -61,7 +62,7 @@ public final class SplitBayesInputTest extends MahoutTestCase {
     tempTestDirectory = getTestTempDirPath("bayestest");
     tempInputDirectory = getTestTempDirPath("bayesinputdir");
     
-    si = new SplitBayesInput();
+    si = new SplitInput();
     si.setTrainingOutputDirectory(tempTrainingDirectory);
     si.setTestOutputDirectory(tempTestDirectory);
     si.setInputDirectory(tempInputDirectory);
@@ -103,7 +104,7 @@ public final class SplitBayesInputTest extends MahoutTestCase {
 
     final int testSplitSize = 1;
     si.setTestSplitSize(testSplitSize);
-    si.setCallback(new SplitBayesInput.SplitCallback() {
+    si.setCallback(new SplitInput.SplitCallback() {
           @Override
           public void splitComplete(Path inputFile, int lineCount, int trainCount, int testCount, int testSplitStart) {
             int trainingLines = countMap.get(inputFile.getName()) - testSplitSize;
@@ -169,7 +170,7 @@ public final class SplitBayesInputTest extends MahoutTestCase {
 
   @Test
   public void testValidate() throws Exception {
-    SplitBayesInput st = new SplitBayesInput();
+    SplitInput st = new SplitInput();
     assertValidateException(st);
     
     st.setTestSplitSize(100);
@@ -184,7 +185,7 @@ public final class SplitBayesInputTest extends MahoutTestCase {
     st.setTestSplitPct(50);
     assertValidateException(st);
     
-    st = new SplitBayesInput();
+    st = new SplitInput();
     st.setTestRandomSelectionPct(50);
     st.setTestOutputDirectory(tempTestDirectory);
     st.setTrainingOutputDirectory(tempTrainingDirectory);
@@ -193,7 +194,7 @@ public final class SplitBayesInputTest extends MahoutTestCase {
     st.setTestSplitPct(50);
     assertValidateException(st);
     
-    st = new SplitBayesInput();
+    st = new SplitInput();
     st.setTestRandomSelectionPct(50);
     st.setTestOutputDirectory(tempTestDirectory);
     st.setTrainingOutputDirectory(tempTrainingDirectory);
@@ -203,7 +204,7 @@ public final class SplitBayesInputTest extends MahoutTestCase {
     assertValidateException(st);
   }
   
-  private class TestCallback implements SplitBayesInput.SplitCallback {
+  private class TestCallback implements SplitInput.SplitCallback {
     private final int testSplitSize;
     private final int trainingLines;
     
@@ -218,7 +219,7 @@ public final class SplitBayesInputTest extends MahoutTestCase {
     }
   }
 
-  private static void assertValidateException(SplitBayesInput st) throws IOException {
+  private static void assertValidateException(SplitInput st) throws IOException {
     try {
       st.validate();
       fail("Expected IllegalArgumentException");
@@ -238,11 +239,11 @@ public final class SplitBayesInputTest extends MahoutTestCase {
     try {
       Path testFile = new Path(tempTestDirectory, tempInputFile.getName());
       //assertTrue("test file exists", testFile.isFile());
-      assertEquals("test line count", testSplitSize, SplitBayesInput.countLines(fs, testFile, charset));
+      assertEquals("test line count", testSplitSize, SplitInput.countLines(fs, testFile, charset));
 
       Path trainingFile = new Path(tempTrainingDirectory, tempInputFile.getName());
       //assertTrue("training file exists", trainingFile.isFile());
-      assertEquals("training line count", trainingLines, SplitBayesInput.countLines(fs, trainingFile, charset));
+      assertEquals("training line count", trainingLines, SplitInput.countLines(fs, trainingFile, charset));
     } catch (IOException ioe) {
       fail(ioe.toString());
     }

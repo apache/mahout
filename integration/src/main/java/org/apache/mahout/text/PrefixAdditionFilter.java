@@ -23,6 +23,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.common.iterator.FileLineIterable;
+import org.apache.mahout.utils.io.ChunkedWriter;
 
 import java.io.IOException;
 import java.io.InputStream;

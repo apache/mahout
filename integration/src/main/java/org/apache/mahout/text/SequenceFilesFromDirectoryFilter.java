@@ -22,6 +22,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
+import org.apache.mahout.utils.io.ChunkedWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

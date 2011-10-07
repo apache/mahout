@@ -21,14 +21,10 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
-import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
-import org.apache.mahout.clustering.WeightedPropertyVectorWritable;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.Pair;
@@ -36,8 +32,10 @@ import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
-import org.apache.mahout.math.Vector;
 import org.apache.mahout.utils.vectors.VectorHelper;
+import org.apache.mahout.utils.vectors.io.CSVClusterWriter;
+import org.apache.mahout.utils.vectors.io.ClusterDumperWriter;
+import org.apache.mahout.utils.vectors.io.ClusterWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,16 +43,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 public final class ClusterDumper extends AbstractJob {
+  public enum OUTPUT_FORMAT{TEXT, CSV, GRAPH_ML};
 
   public static final String OUTPUT_OPTION = "output";
   public static final String DICTIONARY_TYPE_OPTION = "dictionaryType";
@@ -64,8 +59,9 @@ public final class ClusterDumper extends AbstractJob {
   public static final String SUBSTRING_OPTION = "substring";
   public static final String SEQ_FILE_DIR_OPTION = "seqFileDir";
 
-  private static final Logger log = LoggerFactory.getLogger(ClusterDumper.class);
+  public static final String OUTPUT_FORMAT_OPT = "outputFormat";
 
+  private static final Logger log = LoggerFactory.getLogger(ClusterDumper.class);
   private Path seqFileDir;
   private Path pointsDir;
   private String termDictionary;
@@ -74,6 +70,7 @@ public final class ClusterDumper extends AbstractJob {
   private int subString = Integer.MAX_VALUE;
   private int numTopFeatures = 10;
   private Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints;
+  private OUTPUT_FORMAT outputFormat = OUTPUT_FORMAT.TEXT;
 
   public ClusterDumper(Path seqFileDir, Path pointsDir) {
     this.seqFileDir = seqFileDir;
@@ -93,6 +90,7 @@ public final class ClusterDumper extends AbstractJob {
   public int run(String[] args) throws Exception {
     addOption(SEQ_FILE_DIR_OPTION, "s", "The directory containing Sequence Files for the Clusters", true);
     addOption(OUTPUT_OPTION, "o", "Optional output directory. Default is to output to the console.");
+    addOption(OUTPUT_FORMAT_OPT, "of", "The optional output format to write the results as.  Options: TEXT, CSV or GML", "TEXT");
     addOption(SUBSTRING_OPTION, "b", "The number of chars of the asFormatString() to print");
     addOption(NUM_WORDS_OPTION, "n", "The number of top terms to print");
     addOption(POINTS_DIR_OPTION, "p",
@@ -119,6 +117,9 @@ public final class ClusterDumper extends AbstractJob {
     dictionaryFormat = getOption(DICTIONARY_TYPE_OPTION);
     if (hasOption(NUM_WORDS_OPTION)) {
       numTopFeatures = Integer.parseInt(getOption(NUM_WORDS_OPTION));
+    }
+    if (hasOption(OUTPUT_FORMAT_OPT)) {
+      outputFormat = OUTPUT_FORMAT.valueOf(getOption(OUTPUT_FORMAT_OPT));
     }
     init();
     printClusters(null);
@@ -147,62 +148,44 @@ public final class ClusterDumper extends AbstractJob {
       shouldClose = true;
       writer = Files.newWriter(new File(this.outputFile), Charsets.UTF_8);
     }
+    ClusterWriter clusterWriter = createClusterWriter(writer, dictionary);
     try {
-      for (Cluster value :
-              new SequenceFileDirValueIterable<Cluster>(new Path(seqFileDir, "part-*"), PathType.GLOB, conf)) {
-        String fmtStr = value.asFormatString(dictionary);
-        if (subString > 0 && fmtStr.length() > subString) {
-          writer.write(':');
-          writer.write(fmtStr, 0, Math.min(subString, fmtStr.length()));
-        } else {
-          writer.write(fmtStr);
-        }
-
-        writer.write('\n');
-
-        if (dictionary != null) {
-          String topTerms = getTopFeatures(value.getCenter(), dictionary, numTopFeatures);
-          writer.write("\tTop Terms: ");
-          writer.write(topTerms);
-          writer.write('\n');
-        }
-
-        List<WeightedVectorWritable> points = clusterIdToPoints.get(value.getId());
-        if (points != null) {
-          writer.write("\tWeight : [props - optional]:  Point:\n\t");
-          for (Iterator<WeightedVectorWritable> iterator = points.iterator(); iterator.hasNext(); ) {
-            WeightedVectorWritable point = iterator.next();
-            writer.write(String.valueOf(point.getWeight()));
-            if (point instanceof WeightedPropertyVectorWritable) {
-              WeightedPropertyVectorWritable tmp = (WeightedPropertyVectorWritable) point;
-              Map<Text, Text> map = tmp.getProperties();
-              writer.write(" : [");
-              for (Map.Entry<Text, Text> entry : map.entrySet()) {
-                writer.write(entry.getKey().toString());
-                writer.write("=");
-                writer.write(entry.getValue().toString());
-              }
-              writer.write("]");
-            }
-
-            writer.write(": ");
-
-            writer.write(AbstractCluster.formatVector(point.getVector(), dictionary));
-            if (iterator.hasNext()) {
-              writer.write("\n\t");
-            }
-          }
-          writer.write('\n');
-        }
-      }
+      long numWritten = clusterWriter.write(new SequenceFileDirValueIterable<Cluster>(new Path(seqFileDir, "part-*"), PathType.GLOB, conf));
 
       writer.flush();
-
+      log.info("Wrote {} clusters", numWritten);
     } finally {
       if (shouldClose) {
-        Closeables.closeQuietly(writer);
+        Closeables.closeQuietly(clusterWriter);
+      } else {
+        if (clusterWriter instanceof GraphMLClusterWriter){
+          clusterWriter.close();
+        }
       }
     }
+  }
+
+  protected ClusterWriter createClusterWriter(Writer writer, String[] dictionary) throws IOException {
+    ClusterWriter result = null;
+
+    switch (outputFormat){
+      case TEXT:{
+        result = new ClusterDumperWriter(writer, clusterIdToPoints, numTopFeatures, dictionary, subString);
+        break;
+      }
+      case CSV:{
+        result = new CSVClusterWriter(writer, clusterIdToPoints);
+        break;
+      }
+      case GRAPH_ML:{
+        result = new GraphMLClusterWriter(writer, clusterIdToPoints);
+        break;
+      }
+      default:{
+        break;
+      }
+    }
+    return result;
   }
 
   private void init() {
@@ -272,56 +255,8 @@ public final class ClusterDumper extends AbstractJob {
     return result;
   }
 
-  private static class TermIndexWeight {
-    private final int index;
-    private final double weight;
 
-    TermIndexWeight(int index, double weight) {
-      this.index = index;
-      this.weight = weight;
-    }
-  }
 
-  public static String getTopFeatures(Vector vector, String[] dictionary, int numTerms) {
 
-    List<TermIndexWeight> vectorTerms = Lists.newArrayList();
-
-    Iterator<Vector.Element> iter = vector.iterateNonZero();
-    while (iter.hasNext()) {
-      Vector.Element elt = iter.next();
-      vectorTerms.add(new TermIndexWeight(elt.index(), elt.get()));
-    }
-
-    // Sort results in reverse order (ie weight in descending order)
-    Collections.sort(vectorTerms, new Comparator<TermIndexWeight>() {
-      @Override
-      public int compare(TermIndexWeight one, TermIndexWeight two) {
-        return Double.compare(two.weight, one.weight);
-      }
-    });
-
-    Collection<Pair<String, Double>> topTerms = new LinkedList<Pair<String, Double>>();
-
-    for (int i = 0; i < vectorTerms.size() && i < numTerms; i++) {
-      int index = vectorTerms.get(i).index;
-      String dictTerm = dictionary[index];
-      if (dictTerm == null) {
-        log.error("Dictionary entry missing for {}", index);
-        continue;
-      }
-      topTerms.add(new Pair<String, Double>(dictTerm, vectorTerms.get(i).weight));
-    }
-
-    StringBuilder sb = new StringBuilder(100);
-
-    for (Pair<String, Double> item : topTerms) {
-      String term = item.getFirst();
-      sb.append("\n\t\t");
-      sb.append(StringUtils.rightPad(term, 40));
-      sb.append("=>");
-      sb.append(StringUtils.leftPad(item.getSecond().toString(), 20));
-    }
-    return sb.toString();
-  }
 
 }

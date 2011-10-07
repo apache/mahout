@@ -422,7 +422,8 @@ public abstract class AbstractJob extends Configured implements Tool {
     job.setMapperClass(mapper);
     job.setMapOutputKeyClass(mapperKey);
     job.setMapOutputValueClass(mapperValue);
-
+    job.setOutputKeyClass(mapperKey);
+    job.setOutputValueClass(mapperValue);
     jobConf.setBoolean("mapred.compress.map.output", true);
     job.setNumReduceTasks(0);
 

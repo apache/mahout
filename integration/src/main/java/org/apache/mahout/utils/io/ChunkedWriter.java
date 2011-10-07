@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.mahout.text;
+package org.apache.mahout.utils.io;
 
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;

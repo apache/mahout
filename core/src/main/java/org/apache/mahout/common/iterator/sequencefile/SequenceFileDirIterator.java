@@ -19,7 +19,6 @@ package org.apache.mahout.common.iterator.sequencefile;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -31,10 +30,10 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.common.Pair;
 
@@ -57,16 +56,7 @@ public final class SequenceFileDirIterator<K extends Writable,V extends Writable
                                  final Configuration conf) throws IOException {
 
 
-    FileStatus[] statuses;
-    FileSystem fs = path.getFileSystem(conf);
-    if (filter == null) {
-      statuses = pathType == PathType.GLOB ? fs.globStatus(path) : fs.listStatus(path);
-    } else {
-      statuses = pathType == PathType.GLOB ? fs.globStatus(path, filter) : fs.listStatus(path, filter);
-    }
-    if (ordering != null) {
-      Arrays.sort(statuses, ordering);
-    }
+    FileStatus[] statuses = HadoopUtil.getFileStatus(path, pathType, filter, ordering, conf);
     Iterator<FileStatus> fileStatusIterator = Iterators.forArray(statuses);
 
     iterators = Lists.newArrayList();

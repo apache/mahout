@@ -15,13 +15,12 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.classifier.naivebayes.training;
+package org.apache.mahout.classifier.naivebayes;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -29,6 +28,9 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.classifier.naivebayes.NaiveBayesModel;
+import org.apache.mahout.classifier.naivebayes.training.ThetaMapper;
+import org.apache.mahout.classifier.naivebayes.training.TrainNaiveBayesJob;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
@@ -41,14 +43,17 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
 import java.io.IOException;
-import java.net.URI;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
-public class TrainUtils {
+public class BayesUtils {
 
-  private TrainUtils() {}
+  private BayesUtils() {}
 
-  static NaiveBayesModel readModelFromTempDir(Path base, Configuration conf) {
+
+  public static NaiveBayesModel readModelFromDir(Path base, Configuration conf) {
 
     float alphaI = conf.getFloat(ThetaMapper.ALPHA_I, 1.0f);
 
@@ -89,48 +94,66 @@ public class TrainUtils {
         alphaI);
   }
 
-  protected static void setSerializations(Configuration conf) {
-    conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
-        + "org.apache.hadoop.io.serializer.WritableSerialization");
-  }
-
-  protected static void cacheFiles(Path fileToCache, Configuration conf) {
-    DistributedCache.setCacheFiles(new URI[] { fileToCache.toUri() }, conf);
-  }
-
   /** Write the list of labels into a map file */
-  protected static void writeLabelIndex(Configuration conf, Iterable<String> labels, Path indexPath)
+  public static int writeLabelIndex(Configuration conf, Iterable<String> labels, Path indexPath)
       throws IOException {
     FileSystem fs = FileSystem.get(indexPath.toUri(), conf);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, indexPath, Text.class, IntWritable.class);
+    int i = 0;
     try {
-      int i = 0;
       for (String label : labels) {
         writer.append(new Text(label), new IntWritable(i++));
       }
     } finally {
       Closeables.closeQuietly(writer);
     }
+    return i;
   }
 
-  private static Path cachedFile(Configuration conf) throws IOException {
-    return new Path(DistributedCache.getCacheFiles(conf)[0].getPath());
+  public static int writeLabelIndex(Configuration conf, Path indexPath, SequenceFileDirIterable labels) throws IOException {
+    FileSystem fs = FileSystem.get(indexPath.toUri(), conf);
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, indexPath, Text.class, IntWritable.class);
+    Set<String> seen = new HashSet<String>();
+    int i = 0;
+    try {
+      for (Object label : labels) {
+        String theLabel = ((Pair) label).getFirst().toString();
+        if (seen.contains(theLabel) == false){
+          writer.append(new Text(theLabel), new IntWritable(i++));
+          seen.add(theLabel);
+        }
+      }
+    } finally {
+      Closeables.closeQuietly(writer);
+    }
+    return i;
   }
 
-  protected static OpenObjectIntHashMap<String> readIndexFromCache(Configuration conf) throws IOException {
+  public static Map<Integer, String> readLabelIndex(Configuration conf, Path indexPath) throws IOException {
+    Map<Integer, String> labelMap = new HashMap<Integer, String>();
+    SequenceFileIterable<Text, IntWritable> fileIterable = new SequenceFileIterable<Text, IntWritable>(indexPath, true, conf);
+    for (Pair<Text, IntWritable> pair : fileIterable) {
+      labelMap.put(pair.getSecond().get(), pair.getFirst().toString());
+    }
+    return labelMap;
+  }
+
+  public static OpenObjectIntHashMap<String> readIndexFromCache(Configuration conf) throws IOException {
     OpenObjectIntHashMap<String> index = new OpenObjectIntHashMap<String>();
-    for (Pair<Writable,IntWritable> entry : new SequenceFileIterable<Writable,IntWritable>(cachedFile(conf), conf)) {
+    for (Pair<Writable,IntWritable> entry : new SequenceFileIterable<Writable,IntWritable>(HadoopUtil.cachedFile(conf), conf)) {
       index.put(entry.getFirst().toString(), entry.getSecond().get());
     }
     return index;
   }
 
-  protected static Map<String,Vector> readScoresFromCache(Configuration conf) throws IOException {
+  public static Map<String,Vector> readScoresFromCache(Configuration conf) throws IOException {
     Map<String,Vector> sumVectors = Maps.newHashMap();
-    for (Pair<Text,VectorWritable> entry : new SequenceFileDirIterable<Text,VectorWritable>(cachedFile(conf),
+    for (Pair<Text,VectorWritable> entry : new SequenceFileDirIterable<Text,VectorWritable>(HadoopUtil.cachedFile(conf),
         PathType.LIST, PathFilters.partFilter(), conf)) {
       sumVectors.put(entry.getFirst().toString(), entry.getSecond().get());
     }
     return sumVectors;
   }
+
+
 }

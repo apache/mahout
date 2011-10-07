@@ -22,6 +22,7 @@ import java.io.IOException;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.classifier.naivebayes.BayesUtils;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
@@ -33,7 +34,7 @@ public class IndexInstancesMapper extends Mapper<Text, VectorWritable, IntWritab
 
   @Override
   protected void setup(Context ctx) throws IOException, InterruptedException {
-    labelIndex = TrainUtils.readIndexFromCache(ctx.getConfiguration());
+    labelIndex = BayesUtils.readIndexFromCache(ctx.getConfiguration());
   }
 
   @Override

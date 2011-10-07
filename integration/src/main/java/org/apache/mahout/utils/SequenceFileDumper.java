@@ -118,7 +118,7 @@ public final class SequenceFileDumper {
             long numItems = Long.MAX_VALUE;
             if (cmdLine.hasOption(numItemsOpt)) {
               numItems = Long.parseLong(cmdLine.getValue(numItemsOpt).toString());
-              writer.append("Max Items to dump: ").append(String.valueOf(numItems));
+              writer.append("Max Items to dump: ").append(String.valueOf(numItems)).append("\n");
             }
             while (iterator.hasNext() && count < numItems) {
               Pair<?, ?> record = iterator.next();

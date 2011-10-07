@@ -16,15 +16,6 @@
  */
 package org.apache.mahout.text;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -35,14 +26,23 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Text;
 import org.apache.mahout.common.CommandLineUtil;
-import org.apache.mahout.common.iterator.FileLineIterable;
+
+import org.apache.mahout.utils.email.MailProcessor;
+import org.apache.mahout.utils.email.MailOptions;
+import org.apache.mahout.utils.io.ChunkedWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Converts a directory of gzipped mail archives into SequenceFiles of specified chunkSize.
@@ -53,217 +53,111 @@ import org.slf4j.LoggerFactory;
 public final class SequenceFilesFromMailArchives {
 
   private static final Logger log = LoggerFactory.getLogger(SequenceFilesFromMailArchives.class);
-  
-  private static ChunkedWriter createNewChunkedWriter(int chunkSizeInMB, String outputDir) throws IOException {
-    return new ChunkedWriter(chunkSizeInMB, outputDir);
-  }
-  
-  public void createSequenceFiles(File parentDir,
-                                  String outputDir,
-                                  String prefix,
-                                  int chunkSizeInMB,
-                                  Charset charset) throws IOException {
-    ChunkedWriter writer = createNewChunkedWriter(chunkSizeInMB, outputDir);
+
+  public void createSequenceFiles(MailOptions options) throws IOException {
+    ChunkedWriter writer = new ChunkedWriter(new Configuration(), options.chunkSize, new Path(options.outputDir));
+    MailProcessor processor = new MailProcessor(options, options.prefix, writer);
     try {
-      PrefixAdditionFilter filter = new PrefixAdditionFilter(prefix, writer, charset);
-      parentDir.listFiles(filter);
-      log.info("Parsed "+filter.getMessageCount()+" messages from "+parentDir.getAbsolutePath());
+      if (options.input.isDirectory()) {
+        PrefixAdditionFilter filter = new PrefixAdditionFilter(processor, writer);
+        options.input.listFiles(filter);
+        log.info("Parsed " + filter.getMessageCount() + " messages from " + options.input.getAbsolutePath());
+      } else {
+        long start = System.currentTimeMillis();
+        long cnt = processor.parseMboxLineByLine(options.input);
+        long finish = System.currentTimeMillis();
+        log.info("Parsed " + cnt + " messages from " + options.input.getAbsolutePath() + " in time: " + (finish - start));
+      }
     } finally {
       Closeables.closeQuietly(writer);
     }
   }
-  
-  public static class ChunkedWriter implements Closeable {
-    private final int maxChunkSizeInBytes;
-    private final String outputDir;
-    private SequenceFile.Writer writer;
-    private int currentChunkID;
-    private int currentChunkSize;
-    private final Configuration conf = new Configuration();
-    private final FileSystem fs;
-    
-    public ChunkedWriter(int chunkSizeInMB, String outputDir) throws IOException {
-      if (chunkSizeInMB > 1984) {
-        chunkSizeInMB = 1984;
-      }
-      maxChunkSizeInBytes = chunkSizeInMB * 1024 * 1024;
-      this.outputDir = outputDir;
-      fs = FileSystem.get(conf);
-      currentChunkID = 0;
-      
-      writer = SequenceFile.createWriter(fs, conf, getPath(currentChunkID), Text.class, Text.class, SequenceFile.CompressionType.BLOCK);      
-    }
-    
-    private Path getPath(int chunkID) {
-      return new Path(outputDir + "/chunk-" + chunkID);
-    }
-    
-    public void write(String key, String value) throws IOException {
-      if (currentChunkSize > maxChunkSizeInBytes) {
-        Closeables.closeQuietly(writer);
-        log.info("Chunk size ("+currentChunkSize+") reached MAX; creating new chunk "+(currentChunkID+1));
-        writer = SequenceFile.createWriter(fs, conf, getPath(currentChunkID++), Text.class, Text.class, SequenceFile.CompressionType.BLOCK);
-        currentChunkSize = 0;        
-      }
-      
-      Text keyT = new Text(key);
-      Text valueT = new Text(value);
-      currentChunkSize += keyT.getBytes().length + valueT.getBytes().length; // Overhead
-      writer.append(keyT, valueT);
-    }
-    
-    @Override
-    public void close() throws IOException {
-      Closeables.closeQuietly(writer);
-    }
-  }
-  
-  // regular expressions used to parse individual messages
-  private static final Pattern MESSAGE_START = 
-    Pattern.compile("^From \\S+@\\S.*\\d{4}$", Pattern.CASE_INSENSITIVE);
-  private static final Pattern MESSAGE_ID_PREFIX = 
-    Pattern.compile("^message-id: <(.*)>$", Pattern.CASE_INSENSITIVE);
-  private static final Pattern SUBJECT_PREFIX = 
-    Pattern.compile("^subject: (.*)$", Pattern.CASE_INSENSITIVE);  
-  
+
   public class PrefixAdditionFilter implements FileFilter {
-    private final String prefix;
-    private final ChunkedWriter writer;
-    private final Charset charset;
-    private final StringBuilder file;
-    private int messageCount;
-    
-    public PrefixAdditionFilter(String prefix, ChunkedWriter writer, Charset charset) {
-      this.prefix = prefix;
+    private MailProcessor processor;
+    private ChunkedWriter writer;
+    private long messageCount;
+
+    public PrefixAdditionFilter(MailProcessor processor, ChunkedWriter writer) {
+      this.processor = processor;
       this.writer = writer;
-      this.charset = charset;
-      this.file = new StringBuilder();
       this.messageCount = 0;
     }
-    
-    public int getMessageCount() {
+
+    public long getMessageCount() {
       return messageCount;
     }
-    
+
     @Override
     public boolean accept(File current) {
       if (current.isDirectory()) {
-        log.info("At "+current.getAbsolutePath());
-        PrefixAdditionFilter nested = 
-          new PrefixAdditionFilter(prefix + File.separator + current.getName(), writer, charset);
+        log.info("At " + current.getAbsolutePath());
+        PrefixAdditionFilter nested =
+                new PrefixAdditionFilter(new MailProcessor(processor.getOptions(), processor.getPrefix() + File.separator + current.getName(), writer),
+                        writer);
         current.listFiles(nested);
-        int dirCount = nested.getMessageCount();
-        log.info("Parsed "+dirCount+" messages from directory "+current.getAbsolutePath());
+        long dirCount = nested.getMessageCount();
+        log.info("Parsed " + dirCount + " messages from directory " + current.getAbsolutePath());
         messageCount += dirCount;
       } else {
         try {
-          parseFileLineByLine(current);
+          messageCount += processor.parseMboxLineByLine(current);
         } catch (IOException e) {
           throw new IllegalStateException("Error processing " + current, e);
         }
       }
       return false;
     }
-    
-    // extracts mail subject and body text from 0 or more mail messages
-    // embedded in the supplied file using simple pattern matching
-    private void parseFileLineByLine(File current) throws IOException {
-      try {
-        file.setLength(0); // reset the buffer
-        
-        // tmps used during mail message parsing
-        String messageId = null;
-        boolean inBody = false;
-        Matcher subjectMatcher = SUBJECT_PREFIX.matcher("");
-        Matcher messageIdMatcher = MESSAGE_ID_PREFIX.matcher("");
-        Matcher messageBoundaryMatcher = MESSAGE_START.matcher("");
-        
-        for (String nextLine : new FileLineIterable(current, charset, false)) {
-
-          // subject may come before message ID
-          subjectMatcher.reset(nextLine);
-          if (subjectMatcher.matches()) {
-            file.append(subjectMatcher.group(1)).append('\n');
-          }
-          
-          // only start appending body content after we've seen a message ID
-          if (messageId != null) {            
-            // first, see if we hit the end of the message
-            messageBoundaryMatcher.reset(nextLine);              
-            if (messageBoundaryMatcher.matches()) {
-                // done parsing this message ... write it out
-                String key = prefix + File.separator + current.getName() + File.separator + messageId;
-                writer.write(key, file.toString());
-                file.setLength(0); // reset the buffer
-                messageId = null;
-                inBody = false;
-            } else {
-              if (inBody) {
-                if (nextLine.length() > 0) {
-                  file.append(nextLine).append('\n');
-                }
-              } else {
-                // first empty line we see after reading the message Id
-                // indicates that we are in the body ...
-                inBody = nextLine.length() == 0;
-              }
-            }
-          } else {
-            if (nextLine.length() > 14) {
-              messageIdMatcher.reset(nextLine);
-              if (messageIdMatcher.matches()) {
-                messageId = messageIdMatcher.group(1);
-                ++messageCount;
-              }
-            }
-          }
-        }
-
-        // write the last message in the file if available
-        if (messageId != null) {
-          String key = prefix + File.separator + current.getName() + File.separator + messageId;
-          writer.write(key, file.toString());
-          file.setLength(0); // reset the buffer
-        }
-      } catch (FileNotFoundException e) {
-        // Skip file.
-      }
-      // TODO: report exceptions and continue;
-
-    }
   }
-  
+
   public static void main(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
-    
-    Option parentOpt = obuilder.withLongName("input").withRequired(true).withArgument(
-      abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The input dir containing the documents").withShortName("i").create();
-    
+
+    Option inputOpt = obuilder.withLongName("input").withRequired(true).withArgument(
+            abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
+            "The input file/dir containing the documents").withShortName("i").create();
+
     Option outputDirOpt = obuilder.withLongName("output").withRequired(true).withArgument(
-      abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The output directory").withShortName("o").create();
-    
+            abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
+            "The output directory").withShortName("o").create();
+
     Option chunkSizeOpt = obuilder.withLongName("chunkSize").withArgument(
-      abuilder.withName("chunkSize").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The chunkSize in MegaBytes. Defaults to 64").withShortName("chunk").create();
-    
+            abuilder.withName("chunkSize").withMinimum(1).withMaximum(1).create()).withDescription(
+            "The chunkSize in MegaBytes. Defaults to 64").withShortName("chunk").create();
+
     Option keyPrefixOpt = obuilder.withLongName("keyPrefix").withArgument(
-      abuilder.withName("keyPrefix").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The prefix to be prepended to the key").withShortName("prefix").create();
-    
+            abuilder.withName("keyPrefix").withMinimum(1).withMaximum(1).create()).withDescription(
+            "The prefix to be prepended to the key").withShortName("prefix").create();
     Option charsetOpt = obuilder.withLongName("charset").withRequired(true).withArgument(
-      abuilder.withName("charset").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The name of the character encoding of the input files").withShortName("c").create();
-    
+            abuilder.withName("charset").withMinimum(1).withMaximum(1).create()).withDescription(
+            "The name of the character encoding of the input files").withShortName("c").create();
+    Option subjectOpt = obuilder.withLongName("subject").withRequired(false).
+            withDescription("Include the Mail subject as part of the text.  Default is false").withShortName("s").create();
+    Option toOpt = obuilder.withLongName("to").withRequired(false).
+            withDescription("Include the to field in the text.  Default is false").withShortName("to").create();
+    Option fromOpt = obuilder.withLongName("from").withRequired(false).
+            withDescription("Include the from field in the text.  Default is false").withShortName("from").create();
+    Option refsOpt = obuilder.withLongName("references").withRequired(false).
+            withDescription("Include the references field in the text.  Default is false").withShortName("refs").create();
+    Option bodyOpt = obuilder.withLongName("body").withRequired(false).
+            withDescription("Include the body in the output.  Default is false").withShortName("b").create();
+    Option separatorOpt = obuilder.withLongName("separator").withRequired(false).withArgument(
+            abuilder.withName("separator").withMinimum(1).withMaximum(1).create()).
+            withDescription("The separator to use between metadata items (to, from, etc.).  Default is \\n").withShortName("sep").create();
+
+    Option bodySeparatorOpt = obuilder.withLongName("bodySeparator").withRequired(false).withArgument(
+            abuilder.withName("bodySeparator").withMinimum(1).withMaximum(1).create()).
+            withDescription("The separator to use between lines in the body.  Default is \\n.  Useful to change if you wish to have the message be on one line").withShortName("bodySep").create();
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
-        .create();
-    
+            .create();
+
     Group group = gbuilder.withName("Options").withOption(keyPrefixOpt).withOption(chunkSizeOpt).withOption(
-      charsetOpt).withOption(outputDirOpt).withOption(helpOpt).withOption(parentOpt).create();
-    
+            charsetOpt).withOption(outputDirOpt).withOption(helpOpt).withOption(inputOpt).withOption(subjectOpt).withOption(toOpt)
+            .withOption(fromOpt).withOption(bodyOpt).withOption(refsOpt).withOption(bodySeparatorOpt)
+            .withOption(separatorOpt).create();
+
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
@@ -273,25 +167,62 @@ public final class SequenceFilesFromMailArchives {
         CommandLineUtil.printHelp(group);
         return;
       }
-      File parentDir = new File((String) cmdLine.getValue(parentOpt));
+      File input = new File((String) cmdLine.getValue(inputOpt));
       String outputDir = (String) cmdLine.getValue(outputDirOpt);
-      
+
       int chunkSize = 64;
       if (cmdLine.hasOption(chunkSizeOpt)) {
         chunkSize = Integer.parseInt((String) cmdLine.getValue(chunkSizeOpt));
       }
-      
+
       String prefix = "";
       if (cmdLine.hasOption(keyPrefixOpt)) {
         prefix = (String) cmdLine.getValue(keyPrefixOpt);
       }
+
       Charset charset = Charset.forName((String) cmdLine.getValue(charsetOpt));
       SequenceFilesFromMailArchives dir = new SequenceFilesFromMailArchives();
-      
-      dir.createSequenceFiles(parentDir, outputDir, prefix, chunkSize, charset);
+      MailOptions options = new MailOptions();
+      options.input = input;
+      options.outputDir = outputDir;
+      options.prefix = prefix;
+      options.chunkSize = chunkSize;
+      options.charset = charset;
+
+      //If this order changes, must change FromEmailToDictionaryMapper, potentially, as it expects From to be first
+      List<Pattern> patterns = new ArrayList<Pattern>();
+      //new Pattern[]{MailProcessor.FROM_PREFIX, MailProcessor.TO_PREFIX, MailProcessor.REFS_PREFIX, MailProcessor.SUBJECT_PREFIX, };
+      if (cmdLine.hasOption(fromOpt)) {
+        patterns.add(MailProcessor.FROM_PREFIX);
+      }
+      if (cmdLine.hasOption(toOpt)) {
+        patterns.add(MailProcessor.TO_PREFIX);
+      }
+      if (cmdLine.hasOption(refsOpt)) {
+        patterns.add(MailProcessor.REFS_PREFIX);
+      }
+      if (cmdLine.hasOption(subjectOpt)) {
+        patterns.add(MailProcessor.SUBJECT_PREFIX);
+      }
+      options.patternsToMatch = patterns.toArray(new Pattern[patterns.size()]);
+      options.includeBody = cmdLine.hasOption(bodyOpt);
+      options.separator = "\n";
+      if (cmdLine.hasOption(separatorOpt)) {
+        options.separator = cmdLine.getValue(separatorOpt).toString();
+      }
+      if (cmdLine.hasOption(bodySeparatorOpt)) {
+        options.bodySeparator = cmdLine.getValue(bodySeparatorOpt).toString();
+      }
+      long start = System.currentTimeMillis();
+      dir.createSequenceFiles(options);
+      long finish = System.currentTimeMillis();
+      if (log.isInfoEnabled()) {
+        log.info("Conversion took " + (finish - start) + " ms");
+      }
     } catch (OptionException e) {
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     }
   }
+
 }

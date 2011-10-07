@@ -19,10 +19,14 @@ package org.apache.mahout.common;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.filecache.DistributedCache;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
@@ -34,9 +38,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class HadoopUtil {
-  
+
   private static final Logger log = LoggerFactory.getLogger(HadoopUtil.class);
-  
+
   private HadoopUtil() { }
 
   public static void delete(Configuration conf, Iterable<Path> paths) throws IOException {
@@ -51,7 +55,7 @@ public final class HadoopUtil {
       }
     }
   }
-  
+
   public static void delete(Configuration conf, Path... paths) throws IOException {
     delete(conf, Arrays.asList(paths));
   }
@@ -90,4 +94,30 @@ public final class HadoopUtil {
     return fs.open(path.makeQualified(fs));
   }
 
+  public static FileStatus[] getFileStatus(Path path, PathType pathType, PathFilter filter, Comparator<FileStatus> ordering, Configuration conf) throws IOException {
+    FileStatus[] statuses;
+    FileSystem fs = path.getFileSystem(conf);
+    if (filter == null) {
+      statuses = pathType == PathType.GLOB ? fs.globStatus(path) : fs.listStatus(path);
+    } else {
+      statuses = pathType == PathType.GLOB ? fs.globStatus(path, filter) : fs.listStatus(path, filter);
+    }
+    if (ordering != null) {
+      Arrays.sort(statuses, ordering);
+    }
+    return statuses;
+  }
+
+  public static void cacheFiles(Path fileToCache, Configuration conf) {
+    DistributedCache.setCacheFiles(new URI[]{fileToCache.toUri()}, conf);
+  }
+
+  public static Path cachedFile(Configuration conf) throws IOException {
+    return new Path(DistributedCache.getCacheFiles(conf)[0].getPath());
+  }
+
+  public static void setSerializations(Configuration conf) {
+    conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
+        + "org.apache.hadoop.io.serializer.WritableSerialization");
+  }
 }

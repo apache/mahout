@@ -24,7 +24,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
 
 /** Class implementing the Naive Bayes Classifier Algorithm */
-abstract class AbstractNaiveBayesClassifier extends AbstractVectorClassifier {
+public abstract class AbstractNaiveBayesClassifier extends AbstractVectorClassifier {
 
   private final NaiveBayesModel model;
   

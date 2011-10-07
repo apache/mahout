@@ -56,7 +56,7 @@ if [ "$MAHOUT_HOME" = "" ]; then
 fi
 
 if [ "$1" = "" ]; then
-  echo "Error: Please pass the path to your prep directory, such as /mnt/asf-mail-archives.\n\n\tUsage: $0 workingDir outputPath\n"
+  echo "Error: Please pass the path to your prep directory, such as /mnt/asf-mail-archives.\n\n\tUsage: $0 workingDir inputPath outputPath\n"
   exit 1
 fi
 
@@ -102,5 +102,5 @@ echo "Running $0 with:
 # convert the extracted gz files into Hadoop SequenceFiles
 echo "Converting extracted directories to SequenceFiles ..."
 $MAHOUT_HOME/bin/mahout org.apache.mahout.text.SequenceFilesFromMailArchives \
---input $SEQFILE_INPUT_DIR --output $SEQFILE_OUTPUT_DIR \
+--input $SEQFILE_INPUT_DIR --output $SEQFILE_OUTPUT_DIR --subject --body \
 -c UTF-8 -chunk 1024 -prefix asf_archives

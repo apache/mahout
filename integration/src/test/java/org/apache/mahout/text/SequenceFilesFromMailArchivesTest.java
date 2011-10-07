@@ -77,7 +77,8 @@ public final class SequenceFilesFromMailArchivesTest extends MahoutTestCase {
       "--input", inputDir.getAbsolutePath(),  
       "--output", outputDir.getAbsolutePath(),
       "--charset", "UTF-8",
-      "--keyPrefix", "TEST"
+      "--keyPrefix", "TEST",
+       "--body", "--subject", "--separator", ""
     };
     
     // run the application's main method

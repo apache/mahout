@@ -1,0 +1,161 @@
+package org.apache.mahout.utils.email;
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+import org.apache.mahout.common.iterator.FileLineIterable;
+import org.apache.mahout.utils.io.ChunkedWriter;
+import org.apache.mahout.utils.io.ChunkedWrapper;
+import org.apache.mahout.utils.io.IOWriterWrapper;
+import org.apache.mahout.utils.io.WrappedWriter;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ *
+ *
+ **/
+public class MailProcessor {
+  private static final Pattern MESSAGE_START =
+          Pattern.compile("^From \\S+@\\S.*\\d{4}$", Pattern.CASE_INSENSITIVE);
+  private static final Pattern MESSAGE_ID_PREFIX =
+          Pattern.compile("^message-id: <(.*)>$", Pattern.CASE_INSENSITIVE);
+  // regular expressions used to parse individual messages
+  public static final Pattern SUBJECT_PREFIX =
+          Pattern.compile("^subject: (.*)$", Pattern.CASE_INSENSITIVE);
+  public static final Pattern FROM_PREFIX =
+                  Pattern.compile("^from: (.*)$", Pattern.CASE_INSENSITIVE);
+  public static final Pattern REFS_PREFIX =
+                          Pattern.compile("^references: (.*)$", Pattern.CASE_INSENSITIVE);
+  public static final Pattern TO_PREFIX =
+                                  Pattern.compile("^to: (.*)$", Pattern.CASE_INSENSITIVE);
+  private String prefix;
+  private MailOptions options;
+  private WrappedWriter writer;
+
+  public MailProcessor(MailOptions options, String prefix, Writer writer) {
+    this.writer = new IOWriterWrapper(writer);
+    this.options = options;
+    this.prefix = prefix;
+  }
+
+  public MailProcessor(MailOptions options, String prefix, ChunkedWriter writer) {
+    this.writer = new ChunkedWrapper(writer);
+    this.options = options;
+    this.prefix = prefix;
+  }
+
+  public long parseMboxLineByLine(File mboxFile) throws IOException {
+    long messageCount = 0;
+    try {
+      StringBuilder contents = new StringBuilder();
+      // tmps used during mail message parsing
+      StringBuilder body = new StringBuilder();
+      String messageId = null;
+      boolean inBody = false;
+      Matcher messageIdMatcher = MESSAGE_ID_PREFIX.matcher("");
+      Matcher messageBoundaryMatcher = MESSAGE_START.matcher("");
+      String[] patternResults = new String[options.patternsToMatch.length];
+      Matcher[] matchers = new Matcher[options.patternsToMatch.length];
+      for (int i = 0; i < matchers.length; i++) {
+        matchers[i] = options.patternsToMatch[i].matcher("");
+      }
+
+      for (String nextLine : new FileLineIterable(mboxFile, options.charset, false)) {
+        for (int i = 0; i < matchers.length; i++) {
+          Matcher matcher = matchers[i];
+          matcher.reset(nextLine);
+          if (matcher.matches()) {
+            patternResults[i] = matcher.group(1);
+          }
+        }
+
+        // only start appending body content after we've seen a message ID
+        if (messageId != null) {
+          // first, see if we hit the end of the message
+          messageBoundaryMatcher.reset(nextLine);
+          if (messageBoundaryMatcher.matches()) {
+            // done parsing this message ... write it out
+            String key = generateKey(mboxFile, prefix, messageId);
+            //if this ordering changes, then also change FromEmailToDictionaryMapper
+            writeContent(options.separator, contents, body, patternResults);
+            writer.write(key, contents.toString());
+            contents.setLength(0); // reset the buffer
+            body.setLength(0);
+
+            messageId = null;
+            inBody = false;
+          } else {
+            if (inBody && options.includeBody) {
+              if (nextLine.length() > 0) {
+                body.append(nextLine).append(options.bodySeparator);
+              }
+            } else {
+              // first empty line we see after reading the message Id
+              // indicates that we are in the body ...
+              inBody = nextLine.length() == 0;
+            }
+          }
+        } else {
+          if (nextLine.length() > 14) {
+            messageIdMatcher.reset(nextLine);
+            if (messageIdMatcher.matches()) {
+              messageId = messageIdMatcher.group(1);
+              ++messageCount;
+            }
+          }
+        }
+      }
+      // write the last message in the file if available
+      if (messageId != null) {
+        String key = generateKey(mboxFile, prefix, messageId);
+        writeContent(options.separator, contents, body, patternResults);
+        writer.write(key, contents.toString());
+        contents.setLength(0); // reset the buffer
+      }
+    } catch (FileNotFoundException e) {
+      // Skip file.
+    }
+    // TODO: report exceptions and continue;
+    return messageCount;
+  }
+
+  protected String generateKey(File mboxFile, String prefix, String messageId) {
+    return prefix + File.separator + mboxFile.getName() + File.separator + messageId;
+  }
+
+  public String getPrefix() {
+    return prefix;
+  }
+
+  public MailOptions getOptions() {
+    return options;
+  }
+
+  private void writeContent(String separator, StringBuilder contents, StringBuilder body, String[] matches) {
+    for (int i = 0; i < matches.length; i++) {
+      String match = matches[i];
+      contents.append(match).append(separator);
+    }
+    contents.append("\n").append(body);
+  }
+}

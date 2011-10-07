@@ -17,17 +17,26 @@
 
 package org.apache.mahout.classifier.naivebayes.training;
 
+import java.io.IOException;
 import java.util.Map;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.classifier.naivebayes.NaiveBayesModel;
+import org.apache.mahout.classifier.naivebayes.BayesUtils;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.common.mapreduce.VectorSumReducer;
 import org.apache.mahout.math.VectorWritable;
 
@@ -42,27 +51,44 @@ public final class TrainNaiveBayesJob extends AbstractJob {
   public static final String WEIGHTS = "weights";
   public static final String THETAS = "thetas";
 
+  public static void main(String[] args) throws Exception {
+    ToolRunner.run(new Configuration(), new TrainNaiveBayesJob(), args);
+  }
+
   @Override
   public int run(String[] args) throws Exception {
 
     addInputOption();
     addOutputOption();
-    addOption("labels", "l", "comma-separated list of labels to include in training", true);
-    addOption("alphaI", "a", "smoothing parameter", String.valueOf(1.0f));
-    addOption("trainComplementary", "c", "train complementary?", String.valueOf(false));
+    addOption("labels", "l", "comma-separated list of labels to include in training", false);
 
+    addOption(buildOption("extractLabels", "el", "Extract the labels from the input", false, false, ""));
+    addOption("alphaI", "a", "smoothing parameter", String.valueOf(1.0f));
+    addOption(buildOption("trainComplementary", "c", "train complementary?", false, false, String.valueOf(false)));
+    addOption("labelIndex", "li", "The path to store the label index in", false);
+    addOption(DefaultOptionCreator.overwriteOption().create());
     Map<String,String> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
-
-    Iterable<String> labels = Splitter.on(",").split(parsedArgs.get("--labels"));
+    if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
+      HadoopUtil.delete(getConf(), getOutputPath());
+      HadoopUtil.delete(getConf(), getTempPath());
+    }
+    Path labPath;
+    String labPathStr = parsedArgs.get("--labelIndex");
+    if (labPathStr != null){
+      labPath = new Path(labPathStr);
+    } else {
+      labPath = getTempPath("labelIndex");
+    }
+    long labelSize = createLabelIndex(parsedArgs, labPath);
     float alphaI = Float.parseFloat(parsedArgs.get("--alphaI"));
     boolean trainComplementary = Boolean.parseBoolean(parsedArgs.get("--trainComplementary"));
 
-    TrainUtils.writeLabelIndex(getConf(), labels, getTempPath("labelIndex"));
-    TrainUtils.setSerializations(getConf());
-    TrainUtils.cacheFiles(getTempPath("labelIndex"), getConf());
+
+    HadoopUtil.setSerializations(getConf());
+    HadoopUtil.cacheFiles(labPath, getConf());
 
     Job indexInstances = prepareJob(getInputPath(), getTempPath(SUMMED_OBSERVATIONS), SequenceFileInputFormat.class,
         IndexInstancesMapper.class, IntWritable.class, VectorWritable.class, VectorSumReducer.class, IntWritable.class,
@@ -73,11 +99,11 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     Job weightSummer = prepareJob(getTempPath(SUMMED_OBSERVATIONS), getTempPath(WEIGHTS),
         SequenceFileInputFormat.class, WeightsMapper.class, Text.class, VectorWritable.class, VectorSumReducer.class,
         Text.class, VectorWritable.class, SequenceFileOutputFormat.class);
-    weightSummer.getConfiguration().set(WeightsMapper.NUM_LABELS, String.valueOf(Iterables.size(labels)));
+    weightSummer.getConfiguration().set(WeightsMapper.NUM_LABELS, String.valueOf(labelSize));
     weightSummer.setCombinerClass(VectorSumReducer.class);
     weightSummer.waitForCompletion(true);
 
-    TrainUtils.cacheFiles(getTempPath(WEIGHTS), getConf());
+    HadoopUtil.cacheFiles(getTempPath(WEIGHTS), getConf());
 
     Job thetaSummer = prepareJob(getTempPath(SUMMED_OBSERVATIONS), getTempPath(THETAS),
         SequenceFileInputFormat.class, ThetaMapper.class, Text.class, VectorWritable.class, VectorSumReducer.class,
@@ -87,11 +113,24 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     thetaSummer.getConfiguration().setBoolean(ThetaMapper.TRAIN_COMPLEMENTARY, trainComplementary);
     thetaSummer.waitForCompletion(true);
 
-    NaiveBayesModel naiveBayesModel = TrainUtils.readModelFromTempDir(getTempPath(), getConf());
+    NaiveBayesModel naiveBayesModel = BayesUtils.readModelFromDir(getTempPath(), getConf());
     naiveBayesModel.validate();
     naiveBayesModel.serialize(getOutputPath(), getConf());
 
     return 0;
+  }
+
+  private long createLabelIndex(Map<String, String> parsedArgs, Path labPath) throws IOException {
+    long labelSize = 0;
+    if (parsedArgs.containsKey("--labels")){
+      Iterable<String> labels;
+      labels = Splitter.on(",").split(parsedArgs.get("--labels"));
+      labelSize = BayesUtils.writeLabelIndex(getConf(), labels, labPath);
+    } else if (parsedArgs.containsKey("--extractLabels")){
+      SequenceFileDirIterable iterable = new SequenceFileDirIterable(getInputPath(), PathType.LIST, PathFilters.logsCRCFilter(), getConf());
+      labelSize = BayesUtils.writeLabelIndex(getConf(), labPath, iterable);
+    }
+    return labelSize;
   }
 
 }

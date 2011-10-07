@@ -32,6 +32,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.utils.io.ChunkedWriter;
 
 /**
  * Converts a directory of text documents into SequenceFiles of Specified chunkSize. This class takes in a

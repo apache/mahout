@@ -24,6 +24,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.classifier.naivebayes.BayesUtils;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -40,7 +41,7 @@ public class ThetaMapper extends Mapper<IntWritable, VectorWritable, Text, Vecto
 
     float alphaI = conf.getFloat(ALPHA_I, 1.0f);
     boolean trainComplemenary = conf.getBoolean(TRAIN_COMPLEMENTARY, false);
-    Map<String,Vector> scores = TrainUtils.readScoresFromCache(conf);
+    Map<String,Vector> scores = BayesUtils.readScoresFromCache(conf);
 
     if (!trainComplemenary) {
       trainer = new StandardThetaTrainer(scores.get(TrainNaiveBayesJob.WEIGHTS_PER_FEATURE),
