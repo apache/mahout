@@ -99,7 +99,7 @@ public class BreimanExample extends Configured implements Tool {
     Data train = data.clone();
     Data test = train.rsplit(rng, (int) (data.size() * 0.1));
     
-    int[] trainLabels = train.extractLabels();
+    int[] labels = data.extractLabels();
     int[] testLabels = test.extractLabels();
     
     DefaultTreeBuilder treeBuilder = new DefaultTreeBuilder();
@@ -107,8 +107,8 @@ public class BreimanExample extends Configured implements Tool {
     SequentialBuilder forestBuilder = new SequentialBuilder(rng, treeBuilder, train);
     
     // grow a forest with m = log2(M)+1
-    ForestPredictions errorM = new ForestPredictions(train.size(), nblabels); // oob error when using m =
-                                                                              // log2(M)+1
+    ForestPredictions errorM = new ForestPredictions(data.size(), nblabels); // oob error when using m =
+                                                                             // log2(M)+1
     treeBuilder.setM(m);
     
     long time = System.currentTimeMillis();
@@ -117,11 +117,11 @@ public class BreimanExample extends Configured implements Tool {
     sumTimeM += System.currentTimeMillis() - time;
     numNodesM += forestM.nbNodes();
     
-    double oobM = ErrorEstimate.errorRate(trainLabels, errorM.computePredictions(rng)); // oob error estimate
-                                                                                        // when m = log2(M)+1
+    double oobM = ErrorEstimate.errorRate(labels, errorM.computePredictions(rng)); // oob error estimate
+                                                                                   // when m = log2(M)+1
     
     // grow a forest with m=1
-    ForestPredictions errorOne = new ForestPredictions(train.size(), nblabels); // oob error when using m = 1
+    ForestPredictions errorOne = new ForestPredictions(data.size(), nblabels); // oob error when using m = 1
     treeBuilder.setM(1);
     
     time = System.currentTimeMillis();
@@ -130,9 +130,9 @@ public class BreimanExample extends Configured implements Tool {
     sumTimeOne += System.currentTimeMillis() - time;
     numNodesOne += forestOne.nbNodes();
     
-    double oobOne = ErrorEstimate.errorRate(trainLabels, errorOne.computePredictions(rng)); // oob error
-                                                                                            // estimate when m
-                                                                                            // = 1
+    double oobOne = ErrorEstimate.errorRate(labels, errorOne.computePredictions(rng)); // oob error
+                                                                                       // estimate when m
+                                                                                       // = 1
     
     // compute the test set error (Selection Error), and mean tree error (One Tree Error),
     // using the lowest oob error forest

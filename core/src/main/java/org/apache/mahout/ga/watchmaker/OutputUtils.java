@@ -48,7 +48,7 @@ public final class OutputUtils {
   public static Path[] listOutputFiles(FileSystem fs, Path outpath) throws IOException {
     Collection<Path> outpaths = Lists.newArrayList();
     for (FileStatus s : fs.listStatus(outpath, PathFilters.logsCRCFilter())) {
-      if (!s.isDir()) {
+      if (!s.isDir() && !s.getPath().getName().startsWith("_")) {
         outpaths.add(s.getPath());
       }
     }

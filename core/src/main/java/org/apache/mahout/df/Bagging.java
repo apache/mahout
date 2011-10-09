@@ -23,6 +23,7 @@ import java.util.Random;
 import org.apache.mahout.df.builder.TreeBuilder;
 import org.apache.mahout.df.callback.PredictionCallback;
 import org.apache.mahout.df.data.Data;
+import org.apache.mahout.df.data.Instance;
 import org.apache.mahout.df.node.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,8 +66,9 @@ public class Bagging {
       log.debug("Oob error estimation");
       for (int index = 0; index < data.size(); index++) {
         if (!sampled[index]) {
-          int prediction = tree.classify(data.get(index));
-          callback.prediction(treeId, index, prediction);
+        	Instance instance = data.get(index);
+          int prediction = tree.classify(instance);
+          callback.prediction(treeId, instance.getId(), prediction);
         }
       }
     }

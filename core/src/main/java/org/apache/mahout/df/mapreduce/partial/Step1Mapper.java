@@ -65,6 +65,9 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
   /** will contain all instances if this mapper's split */
   private final List<Instance> instances = Lists.newArrayList();
   
+  /** current instance's id */
+  private int id;
+  
   public int getFirstTreeId() {
     return firstTreeId;
   }
@@ -140,7 +143,7 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
   
   @Override
   protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-    instances.add(converter.convert((int) key.get(), value.toString()));
+    instances.add(converter.convert(id++, value.toString()));
   }
   
   @Override
