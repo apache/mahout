@@ -104,7 +104,7 @@ public class TestNaiveBayesDriver extends AbstractJob {
             bestIdx = element.index();
           }
         }
-        if (bestIdx != Integer.MAX_VALUE) {
+        if (bestIdx != Integer.MIN_VALUE) {
           ClassifierResult classifierResult = new ClassifierResult(labelMap.get(bestIdx), bestScore);
           analyzer.addInstance(pair.getFirst().toString(), classifierResult);
         }
