@@ -110,18 +110,24 @@ public class PartialBuilder extends Builder {
     
     Path outputPath = getOutputPath(conf);
     
-    log.info("Computing partitions' first ids...");
-    Step0Job step0 = new Step0Job(getOutputPath(conf), getDataPath(), getDatasetPath());
-    Step0Output[] partitions = step0.run(new Configuration(conf));
-    
-    log.info("Processing the output...");
+    int[] firstIds = null;
     TreeID[] keys = new TreeID[numTrees];
     Node[] trees = new Node[numTrees];
-    int[] firstIds = Step0Output.extractFirstIds(partitions);
-    processOutput(job, outputPath, firstIds, keys, trees, callback);
+    Step0Output[] partitions = null;
+    int numMaps = 0;
     
-    // JobClient should have updated numMaps to the correct number of maps
-    int numMaps = partitions.length;
+    if (callback != null) {
+	    log.info("Computing partitions' first ids...");
+	    Step0Job step0 = new Step0Job(getOutputPath(conf), getDataPath(), getDatasetPath());
+	    partitions = step0.run(new Configuration(conf));
+	    
+	    log.info("Processing the output...");
+	    firstIds = Step0Output.extractFirstIds(partitions);
+	    
+	    numMaps = partitions.length;
+    }
+    
+    processOutput(job, outputPath, firstIds, keys, trees, callback);
     
     // call the second step in order to complete the oob predictions
     if (callback != null && numMaps > 1 && isStep2(conf)) {
@@ -179,7 +185,9 @@ public class PartialBuilder extends Builder {
         if (trees != null) {
           trees[index] = value.getTree();
         }
-        processOutput(firstIds, key, value, callback);
+        if (callback != null) {
+        	processOutput(firstIds, key, value, callback);
+        }
         index++;
       }
     }
@@ -201,12 +209,10 @@ public class PartialBuilder extends Builder {
                                     MapredOutput value,
                                     PredictionCallback callback) {
     
-    if (callback != null) {
-      int[] predictions = value.getPredictions();
-      
-      for (int instanceId = 0; instanceId < predictions.length; instanceId++) {
-        callback.prediction(key.treeId(), firstIds[key.partition()] + instanceId, predictions[instanceId]);
-      }
+    int[] predictions = value.getPredictions();
+    
+    for (int instanceId = 0; instanceId < predictions.length; instanceId++) {
+      callback.prediction(key.treeId(), firstIds[key.partition()] + instanceId, predictions[instanceId]);
     }
   }
 }
