@@ -126,7 +126,7 @@ elif [ "x$alg" == "xclassification" ]; then
     $MAHOUT seq2sparse --input $MAIL_OUT --output $SEQ2SP --norm 2 --weight TFIDF --namedVector --maxDFPercent 90 --minSupport 2 --analyzerName org.apache.mahout.text.MailArchivesClusteringAnalyzer
     #We need to modify the vectors to have a better label
     echo "Converting vector labels"
-    $MAHOUT org.apache.mahout.classifier.email.PrepEmailVectorsDriver --input "$SEQ2SP/tfidf-vectors" --output $SEQ2SPLABEL --overwrite
+    $MAHOUT org.apache.mahout.classifier.email.PrepEmailVectorsDriver --input "$SEQ2SP/tfidf-vectors" --output $SEQ2SPLABEL --overwrite --maxItemsPerLabel 1000
   fi
   if [ "x$OVER" == "xover" ] || [ ! -e "$TRAIN/part-m-00000" ]; then
     #setup train/test files
