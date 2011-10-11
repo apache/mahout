@@ -18,7 +18,6 @@
 package org.apache.mahout.df.mapreduce;
 
 import java.io.IOException;
-import java.util.Random;
 
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -35,12 +34,9 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.CommandLineUtil;
-import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.DFUtils;
 import org.apache.mahout.df.DecisionForest;
-import org.apache.mahout.df.ErrorEstimate;
 import org.apache.mahout.df.builder.DefaultTreeBuilder;
-import org.apache.mahout.df.callback.ForestPredictions;
 import org.apache.mahout.df.data.Data;
 import org.apache.mahout.df.data.DataLoader;
 import org.apache.mahout.df.data.Dataset;
@@ -69,8 +65,6 @@ public class BuildForest extends Configured implements Tool {
   private Long seed; // Random seed
   
   private boolean isPartial; // use partial data implementation
-  
-  private boolean isOob; // estimate oob error;
 
   @Override
   public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
@@ -78,9 +72,6 @@ public class BuildForest extends Configured implements Tool {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
-    
-    Option oobOpt = obuilder.withShortName("oob").withRequired(false).withDescription(
-      "Optional, estimate the out-of-bag error").create();
     
     Option dataOpt = obuilder.withLongName("data").withShortName("d").withRequired(true).withArgument(
       abuilder.withName("path").withMinimum(1).withMaximum(1).create()).withDescription("Data path").create();
@@ -111,7 +102,7 @@ public class BuildForest extends Configured implements Tool {
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
         .create();
     
-    Group group = gbuilder.withName("Options").withOption(oobOpt).withOption(dataOpt).withOption(datasetOpt)
+    Group group = gbuilder.withName("Options").withOption(dataOpt).withOption(datasetOpt)
         .withOption(selectionOpt).withOption(seedOpt).withOption(partialOpt).withOption(nbtreesOpt)
         .withOption(outputOpt).withOption(helpOpt).create();
     
@@ -126,7 +117,6 @@ public class BuildForest extends Configured implements Tool {
       }
       
       isPartial = cmdLine.hasOption(partialOpt);
-      isOob = cmdLine.hasOption(oobOpt);
       String dataName = cmdLine.getValue(dataOpt).toString();
       String datasetName = cmdLine.getValue(datasetOpt).toString();
       String outputName = cmdLine.getValue(outputOpt).toString();
@@ -144,8 +134,7 @@ public class BuildForest extends Configured implements Tool {
       log.debug("seed : {}", seed);
       log.debug("nbtrees : {}", nbTrees);
       log.debug("isPartial : {}", isPartial);
-      log.debug("isOob : {}", isOob);
-      
+     
       dataPath = new Path(dataName);
       datasetPath = new Path(datasetName);
       outputPath = new Path(outputName);
@@ -172,11 +161,6 @@ public class BuildForest extends Configured implements Tool {
     DefaultTreeBuilder treeBuilder = new DefaultTreeBuilder();
     treeBuilder.setM(m);
     
-    Dataset dataset = Dataset.load(getConf(), datasetPath);
-    
-    ForestPredictions callback = isOob ? new ForestPredictions(dataset.nbInstances(), dataset.nblabels())
-        : null;
-    
     Builder forestBuilder;
     
     if (isPartial) {
@@ -192,7 +176,7 @@ public class BuildForest extends Configured implements Tool {
     log.info("Building the forest...");
     long time = System.currentTimeMillis();
     
-    DecisionForest forest = forestBuilder.build(nbTrees, callback);
+    DecisionForest forest = forestBuilder.build(nbTrees);
     
     time = System.currentTimeMillis() - time;
     log.info("Build Time: {}", DFUtils.elapsedTime(time));
@@ -200,26 +184,10 @@ public class BuildForest extends Configured implements Tool {
     log.info("Forest mean num Nodes: {}", forest.meanNbNodes());
     log.info("Forest mean max Depth: {}", forest.meanMaxDepth());
 
-    if (isOob) {
-      Random rng;
-      if (seed != null) {
-        rng = RandomUtils.getRandom(seed);
-      } else {
-        rng = RandomUtils.getRandom();
-      }
-      
-      FileSystem fs = dataPath.getFileSystem(getConf());
-      int[] labels = Data.extractLabels(dataset, fs, dataPath);
-      
-      log.info("oob error estimate : "
-                           + ErrorEstimate.errorRate(labels, callback.computePredictions(rng)));
-    }
-
     // store the decision forest in the output path
     Path forestPath = new Path(outputPath, "forest.seq");
     log.info("Storing the forest in: " + forestPath);
     DFUtils.storeWritable(getConf(), forestPath, forest);
-
   }
   
   protected static Data loadData(Configuration conf, Path dataPath, Dataset dataset) throws IOException {

@@ -24,7 +24,6 @@ import com.google.common.collect.Lists;
 import org.apache.mahout.df.Bagging;
 import org.apache.mahout.df.DecisionForest;
 import org.apache.mahout.df.builder.TreeBuilder;
-import org.apache.mahout.df.callback.PredictionCallback;
 import org.apache.mahout.df.data.Data;
 import org.apache.mahout.df.node.Node;
 import org.slf4j.Logger;
@@ -56,11 +55,11 @@ public class SequentialBuilder {
     bagging = new Bagging(treeBuilder, data);
   }
   
-  public DecisionForest build(int nbTrees, PredictionCallback callback) {
+  public DecisionForest build(int nbTrees) {
     List<Node> trees = Lists.newArrayList();
     
     for (int treeId = 0; treeId < nbTrees; treeId++) {
-      trees.add(bagging.build(treeId, rng, callback));
+      trees.add(bagging.build(treeId, rng));
       logProgress(((float) treeId + 1) / nbTrees);
     }
     

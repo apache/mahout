@@ -34,10 +34,8 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.df.DFUtils;
 import org.apache.mahout.df.DecisionForest;
 import org.apache.mahout.df.builder.TreeBuilder;
-import org.apache.mahout.df.callback.PredictionCallback;
 import org.apache.mahout.df.mapreduce.Builder;
 import org.apache.mahout.df.mapreduce.MapredOutput;
-import org.apache.mahout.df.mapreduce.partial.Step0Job.Step0Output;
 import org.apache.mahout.df.node.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,14 +62,6 @@ public class PartialBuilder extends Builder {
   }
 
   /**
-   * Indicates if we should run the second step of the builder.<br>
-   * This parameter is only meant for debuging, so we keep it protected.
-   */
-  protected static boolean isStep2(Configuration conf) {
-    return conf.getBoolean("debug.mahout.rf.partial.step2", true);
-  }
-
-  /**
    * Should run the second step of the builder ?
    *
    * @param value
@@ -83,7 +73,7 @@ public class PartialBuilder extends Builder {
   }
   
   @Override
-  protected void configureJob(Job job, int nbTrees, boolean oobEstimate) throws IOException {
+  protected void configureJob(Job job, int nbTrees) throws IOException {
     Configuration conf = job.getConfiguration();
     
     job.setJarByClass(PartialBuilder.class);
@@ -102,7 +92,7 @@ public class PartialBuilder extends Builder {
   }
   
   @Override
-  protected DecisionForest parseOutput(Job job, PredictionCallback callback)
+  protected DecisionForest parseOutput(Job job)
     throws IOException, ClassNotFoundException, InterruptedException {
     Configuration conf = job.getConfiguration();
     
@@ -113,31 +103,8 @@ public class PartialBuilder extends Builder {
     int[] firstIds = null;
     TreeID[] keys = new TreeID[numTrees];
     Node[] trees = new Node[numTrees];
-    Step0Output[] partitions = null;
-    int numMaps = 0;
-    
-    if (callback != null) {
-	    log.info("Computing partitions' first ids...");
-	    Step0Job step0 = new Step0Job(getOutputPath(conf), getDataPath(), getDatasetPath());
-	    partitions = step0.run(new Configuration(conf));
-	    
-	    log.info("Processing the output...");
-	    firstIds = Step0Output.extractFirstIds(partitions);
-	    
-	    numMaps = partitions.length;
-    }
-    
-    processOutput(job, outputPath, firstIds, keys, trees, callback);
-    
-    // call the second step in order to complete the oob predictions
-    if (callback != null && numMaps > 1 && isStep2(conf)) {
-      log.info("*****************************");
-      log.info("Second Step");
-      log.info("*****************************");
-      Step2Job step2 = new Step2Job(getOutputPath(conf), getDataPath(), getDatasetPath(), partitions);
-      
-      step2.run(new Configuration(conf), keys, trees, callback);
-    }
+        
+    processOutput(job, outputPath, firstIds, keys, trees);
     
     return new DecisionForest(Arrays.asList(trees));
   }
@@ -154,15 +121,12 @@ public class PartialBuilder extends Builder {
    *          can be null
    * @param trees
    *          can be null
-   * @param callback
-   *          can be null
    */
   protected static void processOutput(JobContext job,
                                       Path outputPath,
                                       int[] firstIds,
                                       TreeID[] keys,
-                                      Node[] trees,
-                                      PredictionCallback callback) throws IOException {
+                                      Node[] trees) throws IOException {
     Preconditions.checkArgument(keys == null && trees == null || keys != null && trees != null,
         "if keys is null, trees should also be null");
     Preconditions.checkArgument(keys == null || keys.length == trees.length, "keys.length != trees.length");
@@ -185,9 +149,6 @@ public class PartialBuilder extends Builder {
         if (trees != null) {
           trees[index] = value.getTree();
         }
-        if (callback != null) {
-        	processOutput(firstIds, key, value, callback);
-        }
         index++;
       }
     }
@@ -195,24 +156,6 @@ public class PartialBuilder extends Builder {
     // make sure we got all the keys/values
     if (keys != null && index != keys.length) {
       throw new IllegalStateException("Some key/values are missing from the output");
-    }
-  }
-  
-  /**
-   * Process the output, extracting the trees and passing the predictions to the callback
-   * 
-   * @param firstIds
-   *          partitions' first ids in hadoop's order
-   */
-  private static void processOutput(int[] firstIds,
-                                    TreeID key,
-                                    MapredOutput value,
-                                    PredictionCallback callback) {
-    
-    int[] predictions = value.getPredictions();
-    
-    for (int instanceId = 0; instanceId < predictions.length; instanceId++) {
-      callback.prediction(key.treeId(), firstIds[key.partition()] + instanceId, predictions[instanceId]);
     }
   }
 }

@@ -35,7 +35,6 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.builder.DefaultTreeBuilder;
 import org.apache.mahout.df.builder.TreeBuilder;
-import org.apache.mahout.df.callback.PredictionCallback;
 import org.apache.mahout.df.mapreduce.MapredOutput;
 import org.apache.mahout.df.node.Leaf;
 import org.apache.mahout.df.node.Node;
@@ -83,8 +82,7 @@ public final class PartialBuilderTest extends MahoutTestCase {
     TreeID[] newKeys = new TreeID[NUM_TREES];
     Node[] newTrees = new Node[NUM_TREES];
     
-    PartialBuilder.processOutput(new Job(conf), base, firstIds, newKeys, newTrees, 
-        new TestCallback(keys, values));
+    PartialBuilder.processOutput(new Job(conf), base, firstIds, newKeys, newTrees);
 
     // check the forest
     for (int tree = 0; tree < NUM_TREES; tree++) {
@@ -188,41 +186,12 @@ public final class PartialBuilderTest extends MahoutTestCase {
       assertEquals(NUM_TREES, getNbTrees(conf));
 
       assertFalse(isOutput(conf));
-      assertTrue(isOobEstimate(conf));
 
       assertEquals(treeBuilder, getTreeBuilder(conf));
 
       assertEquals(datasetPath, getDistributedCacheFile(conf, 0));
       
       return true;
-    }
-
-  }
-
-  /**
-   * Mock Callback. Make sure that the callback receives the correct predictions
-   * 
-   */
-  static class TestCallback implements PredictionCallback {
-
-    private final TreeID[] keys;
-
-    private final MapredOutput[] values;
-
-    TestCallback(TreeID[] keys, MapredOutput[] values) {
-      this.keys = keys;
-      this.values = values;
-    }
-
-    @Override
-    public void prediction(int treeId, int instanceId, int prediction) {
-      int partition = instanceId / NUM_INSTANCES;
-
-      TreeID key = new TreeID(partition, treeId);
-      int index = ArrayUtils.indexOf(keys, key);
-      assertTrue("key not found", index >= 0);
-
-      assertEquals(values[index].getPredictions()[instanceId % NUM_INSTANCES], prediction);
     }
 
   }

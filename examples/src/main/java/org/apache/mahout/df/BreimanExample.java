@@ -37,9 +37,6 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.builder.DefaultTreeBuilder;
-import org.apache.mahout.df.callback.ForestPredictions;
-import org.apache.mahout.df.callback.MeanTreeCollector;
-import org.apache.mahout.df.callback.MultiCallback;
 import org.apache.mahout.df.data.Data;
 import org.apache.mahout.df.data.DataLoader;
 import org.apache.mahout.df.data.Dataset;
@@ -58,12 +55,6 @@ public class BreimanExample extends Configured implements Tool {
   
   /** sum test error */
   private double sumTestErr;
-  
-  /** sum mean tree error */
-  private double sumTreeErr;
-  
-  /** sum test error with m=1 */
-  private double sumOneErr;
   
   /** mean time to build a forest with m=log2(M)+1 */
   private long sumTimeM;
@@ -93,65 +84,38 @@ public class BreimanExample extends Configured implements Tool {
    */
   private void runIteration(Random rng, Data data, int m, int nbtrees) {
     
-    int nblabels = data.getDataset().nblabels();
-    
     log.info("Splitting the data");
     Data train = data.clone();
     Data test = train.rsplit(rng, (int) (data.size() * 0.1));
-    
-    int[] labels = data.extractLabels();
-    int[] testLabels = test.extractLabels();
     
     DefaultTreeBuilder treeBuilder = new DefaultTreeBuilder();
     
     SequentialBuilder forestBuilder = new SequentialBuilder(rng, treeBuilder, train);
     
     // grow a forest with m = log2(M)+1
-    ForestPredictions errorM = new ForestPredictions(data.size(), nblabels); // oob error when using m =
-                                                                             // log2(M)+1
     treeBuilder.setM(m);
     
     long time = System.currentTimeMillis();
     log.info("Growing a forest with m={}", m);
-    DecisionForest forestM = forestBuilder.build(nbtrees, errorM);
+    DecisionForest forestM = forestBuilder.build(nbtrees);
     sumTimeM += System.currentTimeMillis() - time;
     numNodesM += forestM.nbNodes();
     
-    double oobM = ErrorEstimate.errorRate(labels, errorM.computePredictions(rng)); // oob error estimate
-                                                                                   // when m = log2(M)+1
-    
     // grow a forest with m=1
-    ForestPredictions errorOne = new ForestPredictions(data.size(), nblabels); // oob error when using m = 1
     treeBuilder.setM(1);
     
     time = System.currentTimeMillis();
     log.info("Growing a forest with m=1");
-    DecisionForest forestOne = forestBuilder.build(nbtrees, errorOne);
+    DecisionForest forestOne = forestBuilder.build(nbtrees);
     sumTimeOne += System.currentTimeMillis() - time;
     numNodesOne += forestOne.nbNodes();
     
-    double oobOne = ErrorEstimate.errorRate(labels, errorOne.computePredictions(rng)); // oob error
-                                                                                       // estimate when m
-                                                                                       // = 1
-    
     // compute the test set error (Selection Error), and mean tree error (One Tree Error),
-    // using the lowest oob error forest
-    ForestPredictions testError = new ForestPredictions(test.size(), nblabels); // test set error
-    MeanTreeCollector treeError = new MeanTreeCollector(test, nbtrees); // mean tree error
+    int[] testLabels = test.extractLabels();
+    int[] predictions = new int[test.size()];
+    forestM.classify(test, predictions);
     
-    // compute the test set error using m=1 (Single Input Error)
-    errorOne = new ForestPredictions(test.size(), nblabels);
-    
-    if (oobM < oobOne) {
-      forestM.classify(test, new MultiCallback(testError, treeError));
-      forestOne.classify(test, errorOne);
-    } else {
-      forestOne.classify(test, new MultiCallback(testError, treeError, errorOne));
-    }
-    
-    sumTestErr += ErrorEstimate.errorRate(testLabels, testError.computePredictions(rng));
-    sumOneErr += ErrorEstimate.errorRate(testLabels, errorOne.computePredictions(rng));
-    sumTreeErr += treeError.meanTreeError();
+    sumTestErr += ErrorEstimate.errorRate(testLabels, predictions);
   }
   
   public static void main(String[] args) throws Exception {
@@ -231,8 +195,6 @@ public class BreimanExample extends Configured implements Tool {
     
     log.info("********************************************");
     log.info("Selection error : {}", sumTestErr / nbIterations);
-    log.info("Single Input error : {}", sumOneErr / nbIterations);
-    log.info("One Tree error : {}", sumTreeErr / nbIterations);
     log.info("Mean Random Input Time : {}", DFUtils.elapsedTime(sumTimeM / nbIterations));
     log.info("Mean Single Input Time : {}", DFUtils.elapsedTime(sumTimeOne / nbIterations));
     log.info("Mean Random Input Num Nodes : {}", numNodesM / nbIterations);

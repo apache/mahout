@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
@@ -36,10 +34,12 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.df.DFUtils;
 import org.apache.mahout.df.DecisionForest;
 import org.apache.mahout.df.builder.TreeBuilder;
-import org.apache.mahout.df.callback.PredictionCallback;
 import org.apache.mahout.df.mapreduce.Builder;
 import org.apache.mahout.df.mapreduce.MapredOutput;
 import org.apache.mahout.df.node.Node;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * MapReduce implementation where each mapper loads a full copy of the data in-memory. The forest trees are
@@ -56,7 +56,7 @@ public class InMemBuilder extends Builder {
   }
   
   @Override
-  protected void configureJob(Job job, int nbTrees, boolean oobEstimate) throws IOException {
+  protected void configureJob(Job job, int nbTrees) throws IOException {
     Configuration conf = job.getConfiguration();
     
     job.setJarByClass(InMemBuilder.class);
@@ -78,7 +78,7 @@ public class InMemBuilder extends Builder {
   }
   
   @Override
-  protected DecisionForest parseOutput(Job job, PredictionCallback callback) throws IOException {
+  protected DecisionForest parseOutput(Job job) throws IOException {
     Configuration conf = job.getConfiguration();
     
     Map<Integer,MapredOutput> output = Maps.newHashMap();
@@ -95,26 +95,18 @@ public class InMemBuilder extends Builder {
       }
     }
     
-    return processOutput(output, callback);
+    return processOutput(output);
   }
   
   /**
-   * Process the output, extracting the trees and passing the predictions to the callback
+   * Process the output, extracting the trees
    */
-  private static DecisionForest processOutput(Map<Integer,MapredOutput> output, PredictionCallback callback) {
+  private static DecisionForest processOutput(Map<Integer,MapredOutput> output) {
     List<Node> trees = Lists.newArrayList();
     
     for (Map.Entry<Integer,MapredOutput> entry : output.entrySet()) {
       MapredOutput value = entry.getValue();
-      
       trees.add(value.getTree());
-      
-      if (callback != null) {
-        int[] predictions = value.getPredictions();
-        for (int index = 0; index < predictions.length; index++) {
-          callback.prediction(entry.getKey(), index, predictions[index]);
-        }
-      }
     }
     
     return new DecisionForest(trees);

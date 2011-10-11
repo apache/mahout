@@ -27,7 +27,6 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.Bagging;
-import org.apache.mahout.df.callback.SingleTreePredictions;
 import org.apache.mahout.df.data.Data;
 import org.apache.mahout.df.data.DataLoader;
 import org.apache.mahout.df.data.Dataset;
@@ -84,22 +83,14 @@ public class InMemMapper extends MapredMapper<IntWritable,NullWritable,IntWritab
   
   protected void map(IntWritable key, Context context) throws IOException, InterruptedException {
     
-    SingleTreePredictions callback = null;
-    int[] predictions = null;
-    
-    if (isOobEstimate() && !isNoOutput()) {
-      callback = new SingleTreePredictions(data.size());
-      predictions = callback.getPredictions();
-    }
-    
     initRandom((InMemInputSplit) context.getInputSplit());
     
     log.debug("Building...");
-    Node tree = bagging.build(key.get(), rng, callback);
+    Node tree = bagging.build(key.get(), rng);
     
     if (!isNoOutput()) {
       log.debug("Outputing...");
-      MapredOutput mrOut = new MapredOutput(tree, predictions);
+      MapredOutput mrOut = new MapredOutput(tree);
       
       context.write(key, mrOut);
     }

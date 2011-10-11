@@ -25,7 +25,6 @@ import java.io.DataInput;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
-import org.apache.mahout.df.callback.PredictionCallback;
 import org.apache.mahout.df.data.Data;
 import org.apache.mahout.df.data.DataUtils;
 import org.apache.mahout.df.data.Instance;
@@ -62,8 +61,8 @@ public class DecisionForest implements Writable {
   /**
    * Classifies the data and calls callback for each classification
    */
-  public void classify(Data data, PredictionCallback callback) {
-    Preconditions.checkArgument(callback != null, "callback must not be null");
+  public void classify(Data data, int[] predictions) {
+    Preconditions.checkArgument(data.size() == predictions.length, "predictions.length must be equal to data.size()");
 
     if (data.isEmpty()) {
       return; // nothing to classify
@@ -73,8 +72,7 @@ public class DecisionForest implements Writable {
       Node tree = trees.get(treeId);
 
       for (int index = 0; index < data.size(); index++) {
-        int prediction = tree.classify(data.get(index));
-        callback.prediction(treeId, index, prediction);
+        predictions[index] = tree.classify(data.get(index));
       }
     }
   }

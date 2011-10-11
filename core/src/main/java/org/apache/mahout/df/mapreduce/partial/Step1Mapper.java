@@ -21,13 +21,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
-import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.Bagging;
-import org.apache.mahout.df.callback.SingleTreePredictions;
 import org.apache.mahout.df.data.Data;
 import org.apache.mahout.df.data.DataConverter;
 import org.apache.mahout.df.data.Instance;
@@ -39,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 /**
  * First step of the Partial Data Builder. Builds the trees using the data available in the InputSplit.
@@ -157,21 +156,15 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
     TreeID key = new TreeID();
     
     log.debug("Building {} trees", nbTrees);
-    SingleTreePredictions callback = null;
-    int[] predictions = null;
     for (int treeId = 0; treeId < nbTrees; treeId++) {
       log.debug("Building tree number : {}", treeId);
-      if (isOobEstimate() && !isNoOutput()) {
-        callback = new SingleTreePredictions(data.size());
-        predictions = callback.getPredictions();
-      }
       
-      Node tree = bagging.build(treeId, rng, callback);
+      Node tree = bagging.build(treeId, rng);
       
       key.set(partition, firstTreeId + treeId);
       
       if (!isNoOutput()) {
-        MapredOutput emOut = new MapredOutput(tree, predictions);
+        MapredOutput emOut = new MapredOutput(tree);
         context.write(key, emOut);
       }
     }

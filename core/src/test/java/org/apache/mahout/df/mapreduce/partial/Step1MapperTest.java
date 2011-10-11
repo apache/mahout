@@ -66,7 +66,7 @@ public final class Step1MapperTest extends MahoutTestCase {
   private static class MockStep1Mapper extends Step1Mapper {
     private MockStep1Mapper(TreeBuilder treeBuilder, Dataset dataset, Long seed,
         int partition, int numMapTasks, int numTrees) {
-      configure(false, true, treeBuilder, dataset);
+      configure(false, treeBuilder, dataset);
       configure(seed, partition, numMapTasks, numTrees);
     }
   }

@@ -33,19 +33,9 @@ public class MapredMapper<KEYIN,VALUEIN,KEYOUT,VALUEOUT> extends Mapper<KEYIN,VA
   
   private boolean noOutput;
   
-  private boolean oobEstimate;
-  
   private TreeBuilder treeBuilder;
   
   private Dataset dataset;
-  
-  /**
-   * 
-   * @return if false, the mapper does not output
-   */
-  protected boolean isOobEstimate() {
-    return oobEstimate;
-  }
   
   /**
    * 
@@ -69,17 +59,16 @@ public class MapredMapper<KEYIN,VALUEIN,KEYOUT,VALUEOUT> extends Mapper<KEYIN,VA
     
     Configuration conf = context.getConfiguration();
     
-    configure(!Builder.isOutput(conf), Builder.isOobEstimate(conf), Builder.getTreeBuilder(conf), Builder
+    configure(!Builder.isOutput(conf), Builder.getTreeBuilder(conf), Builder
         .loadDataset(conf));
   }
   
   /**
    * Useful for testing
    */
-  protected void configure(boolean noOutput, boolean oobEstimate, TreeBuilder treeBuilder, Dataset dataset) {
+  protected void configure(boolean noOutput, TreeBuilder treeBuilder, Dataset dataset) {
     Preconditions.checkArgument(treeBuilder != null, "TreeBuilder not found in the Job parameters");
     this.noOutput = noOutput;
-    this.oobEstimate = oobEstimate;
     this.treeBuilder = treeBuilder;
     this.dataset = dataset;
   }

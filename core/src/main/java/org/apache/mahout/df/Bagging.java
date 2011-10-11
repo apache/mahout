@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Random;
 
 import org.apache.mahout.df.builder.TreeBuilder;
-import org.apache.mahout.df.callback.PredictionCallback;
 import org.apache.mahout.df.data.Data;
 import org.apache.mahout.df.data.Instance;
 import org.apache.mahout.df.node.Node;
@@ -53,27 +52,13 @@ public class Bagging {
    * @param treeId
    *          tree identifier
    */
-  public Node build(int treeId, Random rng, PredictionCallback callback) {
+  public Node build(int treeId, Random rng) {
     log.debug("Bagging...");
     Arrays.fill(sampled, false);
     Data bag = data.bagging(rng, sampled);
     
     log.debug("Building...");
-    Node tree = treeBuilder.build(rng, bag);
-    
-    // predict the label for the out-of-bag elements
-    if (callback != null) {
-      log.debug("Oob error estimation");
-      for (int index = 0; index < data.size(); index++) {
-        if (!sampled[index]) {
-        	Instance instance = data.get(index);
-          int prediction = tree.classify(instance);
-          callback.prediction(treeId, instance.getId(), prediction);
-        }
-      }
-    }
-    
-    return tree;
+    return treeBuilder.build(rng, bag);
   }
   
 }

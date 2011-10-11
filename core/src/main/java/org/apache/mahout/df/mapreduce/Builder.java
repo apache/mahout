@@ -32,7 +32,6 @@ import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.StringUtils;
 import org.apache.mahout.df.DecisionForest;
 import org.apache.mahout.df.builder.TreeBuilder;
-import org.apache.mahout.df.callback.PredictionCallback;
 import org.apache.mahout.df.data.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,14 +105,6 @@ public abstract class Builder {
    */
   protected static boolean isOutput(Configuration conf) {
     return conf.getBoolean("debug.mahout.rf.output", true);
-  }
-  
-  protected static boolean isOobEstimate(Configuration conf) {
-    return conf.getBoolean("mahout.rf.oob", false);
-  }
-  
-  private static void setOobEstimate(Configuration conf, boolean value) {
-    conf.setBoolean("mahout.rf.oob", value);
   }
   
   /**
@@ -254,12 +245,10 @@ public abstract class Builder {
    *          Hadoop's Job
    * @param nbTrees
    *          number of trees to grow
-   * @param oobEstimate
-   *          true, if oob error should be estimated
    * @throws IOException
    *           if anything goes wrong while configuring the job
    */
-  protected abstract void configureJob(Job job, int nbTrees, boolean oobEstimate) throws IOException;
+  protected abstract void configureJob(Job job, int nbTrees) throws IOException;
   
   /**
    * Sequential implementation should override this method to simulate the job execution
@@ -277,16 +266,14 @@ public abstract class Builder {
    * 
    * @param job
    *          Hadoop's job
-   * @param callback
-   *          can be null
    * @return Built DecisionForest
    * @throws IOException
    *           if anything goes wrong while parsing the output
    */
-  protected abstract DecisionForest parseOutput(Job job, PredictionCallback callback)
+  protected abstract DecisionForest parseOutput(Job job)
     throws IOException, ClassNotFoundException, InterruptedException;
   
-  public DecisionForest build(int nbTrees, PredictionCallback callback)
+  public DecisionForest build(int nbTrees)
     throws IOException, ClassNotFoundException, InterruptedException {
     // int numTrees = getNbTrees(conf);
     
@@ -303,7 +290,6 @@ public abstract class Builder {
     }
     setNbTrees(conf, nbTrees);
     setTreeBuilder(conf, treeBuilder);
-    setOobEstimate(conf, callback != null);
     
     // put the dataset into the DistributedCache
     DistributedCache.addCacheFile(datasetPath.toUri(), conf);
@@ -311,7 +297,7 @@ public abstract class Builder {
     Job job = new Job(conf, "decision forest builder");
     
     log.debug("Configuring the job...");
-    configureJob(job, nbTrees, callback != null);
+    configureJob(job, nbTrees);
     
     log.debug("Running the job...");
     if (!runJob(job)) {
@@ -321,7 +307,7 @@ public abstract class Builder {
     
     if (isOutput(conf)) {
       log.debug("Parsing the output...");
-      DecisionForest forest = parseOutput(job, callback);
+      DecisionForest forest = parseOutput(job);
       HadoopUtil.delete(conf, outputPath);
       return forest;
     }
