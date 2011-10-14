@@ -21,6 +21,7 @@ package org.apache.mahout.utils.email;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -28,7 +29,10 @@ import java.util.regex.Pattern;
 *
 **/
 public class MailOptions {
-
+  public static final String FROM = "FROM";
+  public static final String TO = "TO";
+  public static final String REFS = "REFS";
+  public static final String SUBJECT = "SUBJECT";
   public File input;
   public String outputDir;
   public String prefix;
@@ -38,5 +42,6 @@ public class MailOptions {
   public String bodySeparator = "\n";
   public boolean includeBody;
   public Pattern[] patternsToMatch;
-
+  //maps FROM, TO, REFS, SUBJECT, etc. to the order they appear in patternsToMatch.  See MailToRecMapper
+  public Map<String, Integer> patternOrder;
 }

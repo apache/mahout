@@ -41,7 +41,9 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -189,22 +191,30 @@ public final class SequenceFilesFromMailArchives {
       options.chunkSize = chunkSize;
       options.charset = charset;
 
-      //If this order changes, must change FromEmailToDictionaryMapper, potentially, as it expects From to be first
-      List<Pattern> patterns = new ArrayList<Pattern>();
-      //new Pattern[]{MailProcessor.FROM_PREFIX, MailProcessor.TO_PREFIX, MailProcessor.REFS_PREFIX, MailProcessor.SUBJECT_PREFIX, };
+
+      List<Pattern> patterns = new ArrayList<Pattern>(5);
+      //patternOrder is used downstream so that we can know what order the text is in instead of encoding it in the string, which
+      //would require more processing later to remove it pre feature selection.
+      Map<String, Integer> patternOrder = new HashMap<String, Integer>();
+      int order = 0;
       if (cmdLine.hasOption(fromOpt)) {
         patterns.add(MailProcessor.FROM_PREFIX);
+        patternOrder.put(MailOptions.FROM, order++);
       }
       if (cmdLine.hasOption(toOpt)) {
         patterns.add(MailProcessor.TO_PREFIX);
+        patternOrder.put(MailOptions.TO, order++);
       }
       if (cmdLine.hasOption(refsOpt)) {
         patterns.add(MailProcessor.REFS_PREFIX);
+        patternOrder.put(MailOptions.REFS, order++);
       }
       if (cmdLine.hasOption(subjectOpt)) {
         patterns.add(MailProcessor.SUBJECT_PREFIX);
+        patternOrder.put(MailOptions.SUBJECT, order++);
       }
       options.patternsToMatch = patterns.toArray(new Pattern[patterns.size()]);
+      options.patternOrder = patternOrder;
       options.includeBody = cmdLine.hasOption(bodyOpt);
       options.separator = "\n";
       if (cmdLine.hasOption(separatorOpt)) {

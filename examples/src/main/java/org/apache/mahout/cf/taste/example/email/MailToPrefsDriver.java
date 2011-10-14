@@ -57,7 +57,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * file that can be consumed by the {@link org.apache.mahout.cf.taste.hadoop.pseudo.RecommenderJob}.
  * <p/>
  * This assumes the input is a Sequence File, that the key is: filename/message id and the value is a list (separated by the
- * user's choosing) of: from, to, subject
+ * user's choosing) containing the from email and any references
  * <p/>
  * The output is a matrix where either the from or to are the rows (represented as longs) and the columns are the message ids
  * that the user has interacted with (as a VectorWritable).  This class currently does not account for thread hijacking.
@@ -83,6 +83,8 @@ public class MailToPrefsDriver extends AbstractJob {
     addOption(DefaultOptionCreator.overwriteOption().create());
     addOption("chunkSize", "cs", "The size of chunks to write.  Default is 100 mb", "100");
     addOption("separator", "sep", "The separator used in the input file to separate to, from, subject.  Default is \\n", "\n");
+    addOption("from", "f", "The position in the input text (value) where the from email is located, starting from zero (0).", "0");
+    addOption("refs", "r", "The position in the input text (value) where the reference ids are located, starting from zero (0).", "1");
     Map<String, String> parsedArgs = parseArguments(args);
 
     Path input = getInputPath();
@@ -159,6 +161,8 @@ public class MailToPrefsDriver extends AbstractJob {
       conf.set(EmailUtility.MSG_ID_DIMENSION, String.valueOf(msgDim[0]));
       conf.set(EmailUtility.FROM_PREFIX, "fromIds-dictionary-");
       conf.set(EmailUtility.MSG_IDS_PREFIX, "msgIds-dictionary-");
+      conf.set(EmailUtility.FROM_INDEX, parsedArgs.get("--from"));
+      conf.set(EmailUtility.REFS_INDEX, parsedArgs.get("--refs"));
       conf.set(EmailUtility.SEPARATOR, separator);
       for (Path fromChunk : fromChunks) {
         for (Path idChunk : msgIdChunks) {

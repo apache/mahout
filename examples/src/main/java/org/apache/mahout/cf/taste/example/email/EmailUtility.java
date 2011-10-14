@@ -23,6 +23,8 @@ public final class EmailUtility {
   public static final String MSG_IDS_PREFIX = "msgIdsPrefix";
   public static final String FROM_PREFIX = "fromPrefix";
   public static final String MSG_ID_DIMENSION = "msgIdDim";
+  public static final String FROM_INDEX = "fromIdx";
+  public static final String REFS_INDEX = "refsIdx";
 
   private EmailUtility() {
 

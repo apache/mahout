@@ -39,6 +39,8 @@ public class MailToRecMapper extends
   private OpenObjectIntHashMap<String> fromDictionary = new OpenObjectIntHashMap<String>();
   private OpenObjectIntHashMap<String> msgIdDictionary = new OpenObjectIntHashMap<String>();
   private String separator = "\n";
+  protected int fromIdx;
+  protected int refsIdx;
 
   public enum Counters {
     REFERENCE, ORIGINAL
@@ -49,6 +51,8 @@ public class MailToRecMapper extends
     Configuration conf = context.getConfiguration();
     String fromPrefix = conf.get(EmailUtility.FROM_PREFIX);
     String msgPrefix = conf.get(EmailUtility.MSG_IDS_PREFIX);
+    fromIdx = conf.getInt(EmailUtility.FROM_INDEX, 0);
+    refsIdx = conf.getInt(EmailUtility.REFS_INDEX, 1);
     EmailUtility.loadDictionaries(conf, fromPrefix, fromDictionary, msgPrefix, msgIdDictionary);
     log.info("From Dictionary size: {} Msg Id Dictionary size: {}", fromDictionary.size(), msgIdDictionary.size());
     separator = context.getConfiguration().get(EmailUtility.SEPARATOR);
@@ -64,14 +68,15 @@ public class MailToRecMapper extends
     int fromKey = Integer.MIN_VALUE;
     String valStr = value.toString();
     String[] splits = StringUtils.splitByWholeSeparatorPreserveAllTokens(valStr, separator);
-    //format is:  from, to, refs, subject, body
 
     if (splits != null && splits.length > 0) {
-      String from = EmailUtility.cleanUpEmailAddress(splits[0]);
-      fromKey = fromDictionary.get(from);
+      if (splits.length > refsIdx){
+        String from = EmailUtility.cleanUpEmailAddress(splits[fromIdx]);
+        fromKey = fromDictionary.get(from);
+      }
       //get the references
-      if (splits.length > 2) {
-        String[] theRefs = EmailUtility.parseReferences(splits[2]);
+      if (splits.length > refsIdx) {
+        String[] theRefs = EmailUtility.parseReferences(splits[refsIdx]);
         if (theRefs != null && theRefs.length > 0) {
           //we have a reference, the first one is the original message id, so map to that one if it exists
           msgIdKey = msgIdDictionary.get(theRefs[0]);
