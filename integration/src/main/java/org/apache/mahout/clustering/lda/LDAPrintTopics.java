@@ -35,6 +35,7 @@ import org.apache.hadoop.io.DoubleWritable;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.IntPairWritable;
 import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.utils.vectors.VectorHelper;
@@ -72,18 +73,14 @@ public final class LDAPrintTopics {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
     
-    Option inputOpt = obuilder.withLongName("input").withRequired(true).withArgument(
-      abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
-      "Path to an LDA output (a state)").withShortName("i").create();
+    Option inputOpt = DefaultOptionCreator.inputOption().create();
     
     Option dictOpt = obuilder.withLongName("dict").withRequired(true).withArgument(
       abuilder.withName("dict").withMinimum(1).withMaximum(1).create()).withDescription(
       "Dictionary to read in, in the same format as one created by "
           + "org.apache.mahout.utils.vectors.lucene.Driver").withShortName("d").create();
     
-    Option outOpt = obuilder.withLongName("output").withRequired(false).withArgument(
-      abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
-      "Output directory to write top words").withShortName("o").create();
+    Option outOpt = DefaultOptionCreator.outputOption().create();
     
     Option wordOpt = obuilder.withLongName("words").withRequired(false).withArgument(
       abuilder.withName("words").withMinimum(0).withMaximum(1).withDefault("20").create()).withDescription(

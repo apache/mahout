@@ -144,7 +144,7 @@ public final class Driver {
     Option idFieldOpt = obuilder.withLongName("idField").withRequired(false).withArgument(
         abuilder.withName("idField").withMinimum(1).withMaximum(1).create()).withDescription(
         "The field in the index containing the index.  If null, then the Lucene internal doc "
-            + "id is used which is prone to error if the underlying index changes").withShortName("i").create();
+            + "id is used which is prone to error if the underlying index changes").create();
 
     Option dictOutOpt = obuilder.withLongName("dictOut").withRequired(true).withArgument(
         abuilder.withName("dictOut").withMinimum(1).withMaximum(1).create()).withDescription(

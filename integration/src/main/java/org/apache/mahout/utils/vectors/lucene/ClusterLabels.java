@@ -52,6 +52,7 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.OpenBitSet;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.stats.LogLikelihood;
@@ -320,7 +321,7 @@ public class ClusterLabels {
     Option maxLabelsOpt = obuilder.withLongName("maxLabels").withRequired(false).withArgument(
         abuilder.withName("maxLabels").withMinimum(1).withMaximum(1).create()).withDescription(
         "The maximum number of labels to print per cluster").withShortName("x").create();
-    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h").create();
+    Option helpOpt = DefaultOptionCreator.helpOption();
 
     Group group = gbuilder.withName("Options").withOption(indexOpt).withOption(idFieldOpt).withOption(outputOpt)
         .withOption(fieldOpt).withOption(seqOpt).withOption(pointsOpt).withOption(helpOpt)

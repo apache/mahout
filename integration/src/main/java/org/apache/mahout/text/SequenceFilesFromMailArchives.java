@@ -29,6 +29,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 
 import org.apache.mahout.utils.email.MailProcessor;
 import org.apache.mahout.utils.email.MailOptions;
@@ -57,18 +58,19 @@ public final class SequenceFilesFromMailArchives {
   private static final Logger log = LoggerFactory.getLogger(SequenceFilesFromMailArchives.class);
 
   public void createSequenceFiles(MailOptions options) throws IOException {
-    ChunkedWriter writer = new ChunkedWriter(new Configuration(), options.chunkSize, new Path(options.outputDir));
-    MailProcessor processor = new MailProcessor(options, options.prefix, writer);
+    ChunkedWriter writer = new ChunkedWriter(new Configuration(), options.getChunkSize(), new Path(options.getOutputDir()));
+    MailProcessor processor = new MailProcessor(options, options.getPrefix(), writer);
     try {
-      if (options.input.isDirectory()) {
+      if (options.getInput().isDirectory()) {
         PrefixAdditionFilter filter = new PrefixAdditionFilter(processor, writer);
-        options.input.listFiles(filter);
-        log.info("Parsed " + filter.getMessageCount() + " messages from " + options.input.getAbsolutePath());
+        options.getInput().listFiles(filter);
+        log.info("Parsed {} messages from {}", filter.getMessageCount(), options.getInput().getAbsolutePath());
       } else {
         long start = System.currentTimeMillis();
-        long cnt = processor.parseMboxLineByLine(options.input);
+        long cnt = processor.parseMboxLineByLine(options.getInput());
         long finish = System.currentTimeMillis();
-        log.info("Parsed " + cnt + " messages from " + options.input.getAbsolutePath() + " in time: " + (finish - start));
+        log.info("Parsed {} messages from {} in time: {}",
+                 new Object[] { cnt, options.getInput().getAbsolutePath(), (finish - start) });
       }
     } finally {
       Closeables.closeQuietly(writer);
@@ -76,8 +78,8 @@ public final class SequenceFilesFromMailArchives {
   }
 
   public class PrefixAdditionFilter implements FileFilter {
-    private MailProcessor processor;
-    private ChunkedWriter writer;
+    private final MailProcessor processor;
+    private final ChunkedWriter writer;
     private long messageCount;
 
     public PrefixAdditionFilter(MailProcessor processor, ChunkedWriter writer) {
@@ -93,13 +95,12 @@ public final class SequenceFilesFromMailArchives {
     @Override
     public boolean accept(File current) {
       if (current.isDirectory()) {
-        log.info("At " + current.getAbsolutePath());
-        PrefixAdditionFilter nested =
-                new PrefixAdditionFilter(new MailProcessor(processor.getOptions(), processor.getPrefix() + File.separator + current.getName(), writer),
-                        writer);
+        log.info("At {}", current.getAbsolutePath());
+        PrefixAdditionFilter nested = new PrefixAdditionFilter(new MailProcessor(
+            processor.getOptions(), processor.getPrefix() + File.separator + current.getName(), writer), writer);
         current.listFiles(nested);
         long dirCount = nested.getMessageCount();
-        log.info("Parsed " + dirCount + " messages from directory " + current.getAbsolutePath());
+        log.info("Parsed {} messages from directory {}", dirCount, current.getAbsolutePath());
         messageCount += dirCount;
       } else {
         try {
@@ -117,13 +118,9 @@ public final class SequenceFilesFromMailArchives {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
-    Option inputOpt = obuilder.withLongName("input").withRequired(true).withArgument(
-            abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
-            "The input file/dir containing the documents").withShortName("i").create();
+    Option inputOpt = DefaultOptionCreator.inputOption().create();
 
-    Option outputDirOpt = obuilder.withLongName("output").withRequired(true).withArgument(
-            abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
-            "The output directory").withShortName("o").create();
+    Option outputDirOpt = DefaultOptionCreator.outputOption().create();
 
     Option chunkSizeOpt = obuilder.withLongName("chunkSize").withArgument(
             abuilder.withName("chunkSize").withMinimum(1).withMaximum(1).create()).withDescription(
@@ -152,8 +149,7 @@ public final class SequenceFilesFromMailArchives {
     Option bodySeparatorOpt = obuilder.withLongName("bodySeparator").withRequired(false).withArgument(
             abuilder.withName("bodySeparator").withMinimum(1).withMaximum(1).create()).
             withDescription("The separator to use between lines in the body.  Default is \\n.  Useful to change if you wish to have the message be on one line").withShortName("bodySep").create();
-    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
-            .create();
+    Option helpOpt = DefaultOptionCreator.helpOption();
 
     Group group = gbuilder.withName("Options").withOption(keyPrefixOpt).withOption(chunkSizeOpt).withOption(
             charsetOpt).withOption(outputDirOpt).withOption(helpOpt).withOption(inputOpt).withOption(subjectOpt).withOption(toOpt)
@@ -185,16 +181,17 @@ public final class SequenceFilesFromMailArchives {
       Charset charset = Charset.forName((String) cmdLine.getValue(charsetOpt));
       SequenceFilesFromMailArchives dir = new SequenceFilesFromMailArchives();
       MailOptions options = new MailOptions();
-      options.input = input;
-      options.outputDir = outputDir;
-      options.prefix = prefix;
-      options.chunkSize = chunkSize;
-      options.charset = charset;
+      options.setInput(input);
+      options.setOutputDir(outputDir);
+      options.setPrefix(prefix);
+      options.setChunkSize(chunkSize);
+      options.setCharset(charset);
 
 
       List<Pattern> patterns = new ArrayList<Pattern>(5);
-      //patternOrder is used downstream so that we can know what order the text is in instead of encoding it in the string, which
-      //would require more processing later to remove it pre feature selection.
+      // patternOrder is used downstream so that we can know what order the text is in instead 
+      // of encoding it in the string, which
+      // would require more processing later to remove it pre feature selection.
       Map<String, Integer> patternOrder = new HashMap<String, Integer>();
       int order = 0;
       if (cmdLine.hasOption(fromOpt)) {
@@ -213,22 +210,20 @@ public final class SequenceFilesFromMailArchives {
         patterns.add(MailProcessor.SUBJECT_PREFIX);
         patternOrder.put(MailOptions.SUBJECT, order++);
       }
-      options.patternsToMatch = patterns.toArray(new Pattern[patterns.size()]);
-      options.patternOrder = patternOrder;
-      options.includeBody = cmdLine.hasOption(bodyOpt);
-      options.separator = "\n";
+      options.setPatternsToMatch(patterns.toArray(new Pattern[patterns.size()]));
+      options.setPatternOrder(patternOrder);
+      options.setIncludeBody(cmdLine.hasOption(bodyOpt));
+      options.setSeparator("\n");
       if (cmdLine.hasOption(separatorOpt)) {
-        options.separator = cmdLine.getValue(separatorOpt).toString();
+        options.setSeparator(cmdLine.getValue(separatorOpt).toString());
       }
       if (cmdLine.hasOption(bodySeparatorOpt)) {
-        options.bodySeparator = cmdLine.getValue(bodySeparatorOpt).toString();
+        options.setBodySeparator(cmdLine.getValue(bodySeparatorOpt).toString());
       }
       long start = System.currentTimeMillis();
       dir.createSequenceFiles(options);
       long finish = System.currentTimeMillis();
-      if (log.isInfoEnabled()) {
-        log.info("Conversion took " + (finish - start) + " ms");
-      }
+      log.info("Conversion took {}ms", finish - start);
     } catch (OptionException e) {
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);

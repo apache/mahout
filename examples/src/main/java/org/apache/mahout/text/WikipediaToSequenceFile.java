@@ -43,6 +43,7 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.mahout.classifier.bayes.XmlInputFormat;
 import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.common.HadoopUtil;
 import org.slf4j.Logger;
@@ -70,13 +71,9 @@ public final class WikipediaToSequenceFile {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
     
-    Option dirInputPathOpt = obuilder.withLongName("input").withRequired(true).withArgument(
-      abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The input directory path").withShortName("i").create();
+    Option dirInputPathOpt = DefaultOptionCreator.inputOption().create();
     
-    Option dirOutputPathOpt = obuilder.withLongName("output").withRequired(true).withArgument(
-      abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The output directory Path").withShortName("o").create();
+    Option dirOutputPathOpt = DefaultOptionCreator.outputOption().create();
     
     Option categoriesOpt = obuilder.withLongName("categories").withArgument(
       abuilder.withName("categories").withMinimum(1).withMaximum(1).create()).withDescription(
@@ -90,8 +87,7 @@ public final class WikipediaToSequenceFile {
     Option allOpt = obuilder.withLongName("all")
         .withDescription("If set, Select all files. Default is false").withShortName("all").create();
     
-    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
-        .create();
+    Option helpOpt = DefaultOptionCreator.helpOption();
     
     Group group = gbuilder.withName("Options").withOption(categoriesOpt).withOption(dirInputPathOpt)
         .withOption(dirOutputPathOpt).withOption(exactMatchOpt).withOption(allOpt).withOption(helpOpt)
@@ -162,9 +158,8 @@ public final class WikipediaToSequenceFile {
              + "org.apache.hadoop.io.serializer.WritableSerialization");
     
     Job job = new Job(conf);
-    if (WikipediaToSequenceFile.log.isInfoEnabled()) {
-      log.info("Input: " + input + " Out: " + output + " Categories: " + catFile
-                                       + " All Files: " + all);
+    if (log.isInfoEnabled()) {
+      log.info("Input: {} Out: {} Categories: {} All Files: {}", new Object[] {input, output, catFile, all});
     }
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(Text.class);

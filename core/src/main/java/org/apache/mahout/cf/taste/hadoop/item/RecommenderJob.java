@@ -100,8 +100,8 @@ public final class RecommenderJob extends AbstractJob {
     addOutputOption();
     addOption("numRecommendations", "n", "Number of recommendations per user",
         String.valueOf(AggregateAndRecommendReducer.DEFAULT_NUM_RECOMMENDATIONS));
-    addOption("usersFile", "u", "File of users to recommend for", null);
-    addOption("itemsFile", "i", "File of items to recommend for", null);
+    addOption("usersFile", null, "File of users to recommend for", null);
+    addOption("itemsFile", null, "File of items to recommend for", null);
     addOption("filterFile", "f", "File containing comma-separated userID,itemID pairs. Used to exclude the item from "
         + "the recommendations for that user (optional)", null);
     addOption("booleanData", "b", "Treat input as without pref values", Boolean.FALSE.toString());

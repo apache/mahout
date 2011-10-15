@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.hadoop.als.eval;
 
+import com.google.common.base.Charsets;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -41,7 +42,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -72,8 +72,8 @@ public class InMemoryFactorizationEvaluator extends AbstractJob {
   public int run(String[] args) throws Exception {
 
     addOption("pairs", "p", "path containing the test ratings, each line must be userID,itemID,rating", true);
-    addOption("userFeatures", "u", "path to the user feature matrix", true);
-    addOption("itemFeatures", "i", "path to the item feature matrix", true);
+    addOption("userFeatures", null, "path to the user feature matrix", true);
+    addOption("itemFeatures", null, "path to the item feature matrix", true);
     addOutputOption();
 
     Map<String,String> parsedArgs = parseArguments(args);
@@ -151,7 +151,7 @@ public class InMemoryFactorizationEvaluator extends AbstractJob {
       InputStream in = null;
       try  {
         in = fs.open(path);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName("UTF-8")));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charsets.UTF_8));
         String line;
         while ((line = reader.readLine()) != null) {
           String[] tokens = TasteHadoopUtils.splitPrefTokens(line);

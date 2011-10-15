@@ -32,6 +32,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.vectorizer.collocations.llr.LLRReducer;
 import org.apache.mahout.vectorizer.common.PartialVectorMerger;
 import org.apache.mahout.vectorizer.tfidf.TFIDFConverter;
@@ -55,13 +56,9 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
     
-    Option inputDirOpt = obuilder.withLongName("input").withRequired(true).withArgument(
-      abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
-      "input dir containing the documents in sequence file format").withShortName("i").create();
+    Option inputDirOpt = DefaultOptionCreator.inputOption().create();
     
-    Option outputDirOpt = obuilder.withLongName("output").withRequired(true).withArgument(
-      abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The output directory").withShortName("o").create();
+    Option outputDirOpt = DefaultOptionCreator.outputOption().create();
     
     Option minSupportOpt = obuilder.withLongName("minSupport").withArgument(
       abuilder.withName("minSupport").withMinimum(1).withMaximum(1).create()).withDescription(

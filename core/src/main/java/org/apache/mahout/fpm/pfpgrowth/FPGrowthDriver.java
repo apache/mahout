@@ -67,9 +67,7 @@ public final class FPGrowthDriver {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
     
-    Option inputDirOpt = obuilder.withLongName("input").withRequired(true).withArgument(
-      abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The Directory on HDFS containing the transaction files").withShortName("i").create();
+    Option inputDirOpt = DefaultOptionCreator.inputOption().create();
     
     Option outputOpt = DefaultOptionCreator.outputOption().create();
     

@@ -41,6 +41,7 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.df.DFUtils;
 import org.apache.mahout.df.DecisionForest;
 import org.apache.mahout.classifier.ResultAnalyzer;
@@ -79,8 +80,7 @@ public class TestForest extends Configured implements Tool {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
-    Option inputOpt = obuilder.withLongName("input").withShortName("i").withRequired(true).withArgument(
-      abuilder.withName("path").withMinimum(1).withMaximum(1).create()).withDescription("Test data path").create();
+    Option inputOpt = DefaultOptionCreator.inputOption().create();
 
     Option datasetOpt = obuilder.withLongName("dataset").withShortName("ds").withRequired(true).withArgument(
       abuilder.withName("dataset").withMinimum(1).withMaximum(1).create()).withDescription("Dataset path")
@@ -90,16 +90,13 @@ public class TestForest extends Configured implements Tool {
         abuilder.withName("path").withMinimum(1).withMaximum(1).create()).
         withDescription("Path to the Decision Forest").create();
 
-    Option outputOpt = obuilder.withLongName("output").withShortName("o").withRequired(false).withArgument(
-      abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
-      "Path to generated predictions file").create();
+    Option outputOpt = DefaultOptionCreator.outputOption().create();
 
     Option analyzeOpt = obuilder.withLongName("analyze").withShortName("a").withRequired(false).create();
 
     Option mrOpt = obuilder.withLongName("mapreduce").withShortName("mr").withRequired(false).create();
 
-    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
-        .create();
+    Option helpOpt = DefaultOptionCreator.helpOption();
 
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(datasetOpt).withOption(modelOpt)
         .withOption(outputOpt).withOption(analyzeOpt).withOption(mrOpt).withOption(helpOpt).create();
@@ -230,7 +227,7 @@ public class TestForest extends Configured implements Tool {
     Path[] infiles = DFUtils.listOutputFiles(dataFS, dataPath);
 
     for (Path path : infiles) {
-      log.info("Classifying : " + path);
+      log.info("Classifying : {}", path);
       Path outfile = outPath != null ? new Path(outPath, path.getName()).suffix(".out") : null;
       testFile(path, outfile, converter, forest, dataset, analyzer, rng);
     }

@@ -93,7 +93,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     addOutputOption();
     addOption("lambda", "l", "regularization parameter", true);
     addOption("numFeatures", "f", "dimension of the feature space", true);
-    addOption("numIterations", "i", "number of iterations", true);
+    addOption("numIterations", null, "number of iterations", true);
 
     Map<String,String> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {

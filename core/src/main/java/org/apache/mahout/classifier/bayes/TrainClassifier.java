@@ -65,15 +65,9 @@ public final class TrainClassifier {
     
     Option helpOpt = DefaultOptionCreator.helpOption();
     
-    Option inputDirOpt = obuilder.withLongName("input").withRequired(true).withArgument(
-      abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The Directory on HDFS containing the collapsed, properly formatted files: "
-          + "One doc per line, first entry on the line is the label, rest is the evidence")
-        .withShortName("i").create();
+    Option inputDirOpt = DefaultOptionCreator.inputOption().create();
     
-    Option outputOpt = obuilder.withLongName("output").withRequired(true).withArgument(
-      abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The location of the model on the HDFS").withShortName("o").create();
+    Option outputOpt = DefaultOptionCreator.outputOption().create();
     
     Option gramSizeOpt = obuilder.withLongName("gramSize").withRequired(false).withArgument(
       abuilder.withName("gramSize").withMinimum(1).withMaximum(1).create()).withDescription(

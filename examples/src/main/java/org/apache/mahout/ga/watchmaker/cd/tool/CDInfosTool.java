@@ -32,8 +32,6 @@ import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
 import org.apache.commons.cli2.OptionException;
-import org.apache.commons.cli2.builder.ArgumentBuilder;
-import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configuration;
@@ -207,13 +205,9 @@ public final class CDInfosTool {
   }
 
   public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
-    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
-    ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
-    Option inputOpt = obuilder.withLongName("input").withRequired(true).withShortName("i").withArgument(
-        abuilder.withName("input").withMinimum(1).withMaximum(1).create())
-        .withDescription("The Path for input data directory.").create();
+    Option inputOpt = DefaultOptionCreator.inputOption().create();
 
     Option helpOpt = DefaultOptionCreator.helpOption();
 

@@ -80,9 +80,7 @@ public final class CDGA {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
 
-    Option inputOpt = obuilder.withLongName("input").withRequired(true).withShortName("i").withArgument(
-        abuilder.withName("input").withMinimum(1).withMaximum(1).create())
-        .withDescription("The Path for input data directory.").create();
+    Option inputOpt = DefaultOptionCreator.inputOption().create();
 
     Option labelOpt = obuilder.withLongName("label").withRequired(true).withShortName("l")
         .withArgument(abuilder.withName("index").withMinimum(1).withMaximum(1).create())

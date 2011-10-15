@@ -27,6 +27,7 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 
 import java.io.DataInputStream;
 import java.io.FileInputStream;
@@ -49,15 +50,9 @@ public final class ViterbiEvaluator {
     DefaultOptionBuilder optionBuilder = new DefaultOptionBuilder();
     ArgumentBuilder argumentBuilder = new ArgumentBuilder();
 
-    Option inputOption = optionBuilder.withLongName("input").
-      withDescription("Text file with space-separated integers to segment").
-      withShortName("i").withArgument(argumentBuilder.withMaximum(1).withMinimum(1).
-      withName("path").create()).withRequired(true).create();
+    Option inputOption = DefaultOptionCreator.inputOption().create();
 
-    Option outputOption = optionBuilder.withLongName("output").
-      withDescription("Output file with decoded sequence of hidden states").
-      withShortName("o").withArgument(argumentBuilder.withMaximum(1).withMinimum(1).
-      withName("path").create()).withRequired(true).create();
+    Option outputOption = DefaultOptionCreator.outputOption().create();
 
     Option modelOption = optionBuilder.withLongName("model").
       withDescription("Path to serialized HMM model").

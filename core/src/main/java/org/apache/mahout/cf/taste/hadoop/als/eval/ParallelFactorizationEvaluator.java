@@ -69,8 +69,8 @@ public class ParallelFactorizationEvaluator extends AbstractJob {
   public int run(String[] args) throws Exception {
 
     addOption("pairs", "p", "path containing the test ratings, each line must be userID,itemID,rating", true);
-    addOption("userFeatures", "u", "path to the user feature matrix", true);
-    addOption("itemFeatures", "i", "path to the item feature matrix", true);
+    addOption("userFeatures", null, "path to the user feature matrix", true);
+    addOption("itemFeatures", null, "path to the item feature matrix", true);
     addOutputOption();
 
     Map<String,String> parsedArgs = parseArguments(args);
