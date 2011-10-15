@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.mahout.clustering.Cluster;
@@ -146,7 +147,13 @@ public final class ClusterDumper extends AbstractJob {
       writer = new OutputStreamWriter(System.out);
     } else {
       shouldClose = true;
-      writer = Files.newWriter(new File(this.outputFile), Charsets.UTF_8);
+      if (outputFile.startsWith("s3n://")) {
+        Path p = new Path(this.outputFile);
+        FileSystem fs = FileSystem.get(p.toUri(), conf);
+        writer = new OutputStreamWriter(fs.create(p), Charsets.UTF_8);
+      } else {
+        writer = Files.newWriter(new File(this.outputFile), Charsets.UTF_8);
+      }
     }
     ClusterWriter clusterWriter = createClusterWriter(writer, dictionary);
     try {
