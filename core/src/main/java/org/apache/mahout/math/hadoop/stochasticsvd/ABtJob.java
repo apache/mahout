@@ -64,6 +64,9 @@ public class ABtJob {
 
   public static final String PROP_BT_PATH = "ssvd.Bt.path";
 
+  private ABtJob() {
+  }
+
   /**
    * So, here, i preload A block into memory.
    * <P>

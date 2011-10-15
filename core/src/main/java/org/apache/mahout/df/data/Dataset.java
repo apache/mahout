@@ -236,7 +236,7 @@ public class Dataset implements Writable {
     if (this == obj) {
       return true;
     }
-    if (obj == null || !(obj instanceof Dataset)) {
+    if (!(obj instanceof Dataset)) {
       return false;
     }
     

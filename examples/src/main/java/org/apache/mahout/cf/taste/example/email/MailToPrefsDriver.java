@@ -1,4 +1,3 @@
-package org.apache.mahout.cf.taste.example.email;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,7 @@ package org.apache.mahout.cf.taste.example.email;
  * limitations under the License.
  */
 
+package org.apache.mahout.cf.taste.example.email;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
@@ -64,12 +64,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p/>
  * It also outputs a side table mapping the row ids to their original and the message ids to the message thread id
  */
-public class MailToPrefsDriver extends AbstractJob {
+public final class MailToPrefsDriver extends AbstractJob {
+
   private static final Logger log = LoggerFactory.getLogger(MailToPrefsDriver.class);
 
   private static final String OUTPUT_FILES_PATTERN = "part-*";
   private static final int DICTIONARY_BYTE_OVERHEAD = 4;
-
 
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(), new MailToPrefsDriver(), args);
@@ -77,7 +77,6 @@ public class MailToPrefsDriver extends AbstractJob {
 
   @Override
   public int run(String[] args) throws Exception {
-    int result = 0;
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.overwriteOption().create());
@@ -99,9 +98,8 @@ public class MailToPrefsDriver extends AbstractJob {
 
     AtomicInteger currentPhase = new AtomicInteger();
     int[] msgDim = new int[1];
-    int[] fromDim = new int[1];
     //TODO: mod this to not do so many passes over the data.  Dictionary creation could probably be a chain mapper
-    List<Path> msgIdChunks = null, fromChunks = null;
+    List<Path> msgIdChunks = null;
     boolean overwrite = hasOption(DefaultOptionCreator.OVERWRITE_OPTION);
     // create the dictionary between message ids and longs
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
@@ -126,6 +124,7 @@ public class MailToPrefsDriver extends AbstractJob {
       msgIdChunks = createDictionaryChunks(msgIdsPath, output, "msgIds-dictionary-", createMsgIdDictionary.getConfiguration(), chunkSize, msgDim);
     }
     //create the dictionary between from email addresses and longs
+    List<Path> fromChunks = null;
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
       Path fromIdsPath = new Path(output, "fromIds");
       if (overwrite) {
@@ -145,6 +144,7 @@ public class MailToPrefsDriver extends AbstractJob {
       createFromIdDictionary.getConfiguration().set(EmailUtility.SEPARATOR, separator);
       createFromIdDictionary.waitForCompletion(true);
       //write out the dictionary at the top level
+      int[] fromDim = new int[1];
       fromChunks = createDictionaryChunks(fromIdsPath, output, "fromIds-dictionary-", createFromIdDictionary.getConfiguration(), chunkSize, fromDim);
     }
     //OK, we have our dictionaries, let's output the real thing we need: <from_id -> <msgId, msgId, msgId, ...>>
@@ -152,7 +152,7 @@ public class MailToPrefsDriver extends AbstractJob {
       //Job map
       //may be a way to do this so that we can load the from ids in memory, if they are small enough so that we don't need the double loop
       log.info("Creating recommendation matrix");
-      int i = 0, j = 0;
+      int i = 0;
       Path vecPath = new Path(output, "recInput");
       if (overwrite) {
         HadoopUtil.delete(conf, vecPath);
@@ -164,9 +164,10 @@ public class MailToPrefsDriver extends AbstractJob {
       conf.set(EmailUtility.FROM_INDEX, parsedArgs.get("--from"));
       conf.set(EmailUtility.REFS_INDEX, parsedArgs.get("--refs"));
       conf.set(EmailUtility.SEPARATOR, separator);
+      int j = 0;
       for (Path fromChunk : fromChunks) {
         for (Path idChunk : msgIdChunks) {
-          Path out = new Path(vecPath, "tmp-" + i + "-" + j);
+          Path out = new Path(vecPath, "tmp-" + i + '-' + j);
           DistributedCache.setCacheFiles(new URI[]{fromChunk.toUri(), idChunk.toUri()}, conf);
           Job createRecMatrix = prepareJob(input, out, SequenceFileInputFormat.class,
                   MailToRecMapper.class, NullWritable.class, Text.class,
@@ -175,10 +176,10 @@ public class MailToPrefsDriver extends AbstractJob {
           createRecMatrix.waitForCompletion(true);
           //copy the results up a level
           //HadoopUtil.copyMergeSeqFiles(out.getFileSystem(conf), out, vecPath.getFileSystem(conf), outPath, true, conf, "");
-          FileStatus fs[] = HadoopUtil.getFileStatus(new Path(out, "*"), PathType.GLOB, PathFilters.partFilter(), null, conf);
+          FileStatus[] fs = HadoopUtil.getFileStatus(new Path(out, "*"), PathType.GLOB, PathFilters.partFilter(), null, conf);
           for (int k = 0; k < fs.length; k++) {
             FileStatus f = fs[k];
-            Path outPath = new Path(vecPath, "chunk-" + i + "-" + j + "-" + k);
+            Path outPath = new Path(vecPath, "chunk-" + i + '-' + j + '-' + k);
             FileUtil.copy(f.getPath().getFileSystem(conf), f.getPath(), outPath.getFileSystem(conf), outPath, true, overwrite, conf);
           }
           HadoopUtil.delete(conf, out);
@@ -195,7 +196,7 @@ public class MailToPrefsDriver extends AbstractJob {
       //HadoopUtil.copyMergeSeqFiles(vecPath.getFileSystem(conf), vecPath, mergePath.getFileSystem(conf), mergePath, false, conf, "\n");
     }
 
-    return result;
+    return 0;
   }
 
   private static List<Path> createDictionaryChunks(Path inputPath,

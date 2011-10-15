@@ -57,8 +57,7 @@ public final class Job extends AbstractJob {
       Path output = new Path("output");
       Configuration conf = new Configuration();
       HadoopUtil.delete(conf, output);
-      new Job().run(conf, new Path("testdata"), output,
-          new EuclideanDistanceMeasure(), 6, 0.5, 10);
+      run(conf, new Path("testdata"), output, new EuclideanDistanceMeasure(), 6, 0.5, 10);
     }
   }
 

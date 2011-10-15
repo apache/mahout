@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.io;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,15 +15,13 @@ package org.apache.mahout.utils.io;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.io;
 
 import java.io.IOException;
 
-/**
-*
-*
-**/
-public class ChunkedWrapper extends WrappedWriter {
-  ChunkedWriter writer;
+public class ChunkedWrapper implements WrappedWriter {
+
+  private final ChunkedWriter writer;
 
   public ChunkedWrapper(ChunkedWriter writer) {
     this.writer = writer;

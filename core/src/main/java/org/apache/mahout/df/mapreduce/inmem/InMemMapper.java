@@ -49,9 +49,7 @@ public class InMemMapper extends MapredMapper<IntWritable,NullWritable,IntWritab
   private Bagging bagging;
   
   private Random rng;
-  
-  private Data data;
-  
+
   /**
    * Load the training data
    */
@@ -68,7 +66,7 @@ public class InMemMapper extends MapredMapper<IntWritable,NullWritable,IntWritab
     Configuration conf = context.getConfiguration();
     
     log.info("Loading the data...");
-    data = loadData(conf, getDataset());
+    Data data = loadData(conf, getDataset());
     log.info("Data loaded : {} instances", data.size());
     
     bagging = new Bagging(getTreeBuilder(), data);

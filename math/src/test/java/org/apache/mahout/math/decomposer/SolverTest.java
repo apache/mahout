@@ -55,12 +55,12 @@ public abstract class SolverTest extends MahoutTestCase {
           assertTrue("not norm 1 : " + dot + " (eigen #" + i + ')', Math.abs(1.0 - dot) < errorMargin);
         } else {
           if(Math.abs(dot) > errorMargin) {
-            log.info("not orthogonal : " + dot + " (eigens " + i + ", " + j + ')', Math.abs(dot) < errorMargin);
+            log.info("not orthogonal : {} (eigens {}, {})", new Object[] {dot, i, j});
             nonOrthogonals.add("(" + i + ',' + j + ')');
           }
         }
       }
-      log.info(nonOrthogonals.size() + ": " + nonOrthogonals.toString());
+      log.info("{}:{}", nonOrthogonals.size(), nonOrthogonals);
     }
   }
 
@@ -79,13 +79,13 @@ public abstract class SolverTest extends MahoutTestCase {
           assertTrue("not norm 1 : " + dot + " (eigen #" + i + ')', Math.abs(1.0 - dot) < errorMargin);
         } else {
           if(Math.abs(dot) > errorMargin) {
-            log.info("not orthogonal : " + dot + " (eigens " + i + ", " + j + ')', Math.abs(dot) < errorMargin);
+            log.info("not orthogonal : {} (eigens {}, {})", new Object[] {dot, i, j});
             nonOrthogonals.add("(" + i + ',' + j + ')');
           }
         }
       }
       if (!nonOrthogonals.isEmpty()) {
-        log.info(nonOrthogonals.size() + ": " + nonOrthogonals.toString());
+        log.info("{}:{}", nonOrthogonals.size(), nonOrthogonals);
       }
     }
   }

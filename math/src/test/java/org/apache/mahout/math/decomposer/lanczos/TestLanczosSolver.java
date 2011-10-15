@@ -52,7 +52,7 @@ public final class TestLanczosSolver extends SolverTest {
     for(int i = 0; i < fractionOfEigensExpectedGood * desiredRank; i++) {
       double s = state.getSingularValue(desiredRank - i - 1);
       double e = eigenvalues.get(eigenvalues.size() - i - 1);
-      log.info(i + " : L = {}, E = {}", s, e);
+      log.info("{} : L = {}, E = {}", new Object[] {i, s, e});
       assertTrue("Singular value differs from eigenvalue", Math.abs((s-e)/e) < ERROR_TOLERANCE);
       Vector v = state.getRightSingularVector(i);
       Vector v2 = decomposition.getV().viewColumn(eigenvalues.size() - i - 1).toVector();

@@ -31,10 +31,12 @@ import java.util.Arrays;
 
 public class AlternateLeastSquaresSolverTest extends MahoutTestCase {
 
-  AlternateLeastSquaresSolver solver;
+  private AlternateLeastSquaresSolver solver;
 
+  @Override
   @Before
-  public void setup() {
+  public void setUp() throws Exception {
+    super.setUp();
     solver = new AlternateLeastSquaresSolver();
   }
 

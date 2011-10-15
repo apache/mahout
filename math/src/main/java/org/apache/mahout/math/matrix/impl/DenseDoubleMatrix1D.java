@@ -322,7 +322,8 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
     if (other instanceof SelectedDenseDoubleMatrix1D) {
       SelectedDenseDoubleMatrix1D otherMatrix = (SelectedDenseDoubleMatrix1D) other;
       return this.elements == otherMatrix.elements;
-    } else if (other instanceof DenseDoubleMatrix1D) {
+    }
+    if (other instanceof DenseDoubleMatrix1D) {
       DenseDoubleMatrix1D otherMatrix = (DenseDoubleMatrix1D) other;
       return this.elements == otherMatrix.elements;
     }

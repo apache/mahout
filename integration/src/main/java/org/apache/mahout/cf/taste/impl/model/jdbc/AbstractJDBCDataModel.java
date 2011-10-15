@@ -190,8 +190,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     AbstractJDBCComponent.checkNotNullAndLog("getMinPreferenceSQL", getMinPreferenceSQL);
 
     if (!(dataSource instanceof ConnectionPoolDataSource)) {
-      AbstractJDBCDataModel.log
-          .warn("You are not using ConnectionPoolDataSource. Make sure your DataSource pools connections "
+      log.warn("You are not using ConnectionPoolDataSource. Make sure your DataSource pools connections "
                 + "to the database itself, or database performance will be severely reduced.");
     }
 

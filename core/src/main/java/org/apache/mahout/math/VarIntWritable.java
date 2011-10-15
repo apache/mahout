@@ -66,7 +66,8 @@ public class VarIntWritable implements WritableComparable<VarIntWritable>, Clone
   public int compareTo(VarIntWritable other) {
     if (value < other.value) {
       return -1;
-    } else if (value > other.value) {
+    }
+    if (value > other.value) {
       return 1;
     }
     return 0;

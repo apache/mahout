@@ -228,7 +228,8 @@ public class SplitInput {
 
       if (cmdLine.hasOption(testSplitSizeOpt) && cmdLine.hasOption(testSplitPctOpt)) {
         throw new OptionException(testSplitSizeOpt, "must have either split size or split percentage option, not BOTH");
-      } else if (!cmdLine.hasOption(testSplitSizeOpt) && !cmdLine.hasOption(testSplitPctOpt) && !cmdLine.hasOption(randomSelectionPctOpt) && !cmdLine.hasOption(randomSelectionSizeOpt)) {
+      }
+      if (!cmdLine.hasOption(testSplitSizeOpt) && !cmdLine.hasOption(testSplitPctOpt) && !cmdLine.hasOption(randomSelectionPctOpt) && !cmdLine.hasOption(randomSelectionSizeOpt)) {
         throw new OptionException(testSplitSizeOpt, "must set one of test split size/percentage or randomSelectionSize/percentage");
       }
 
@@ -280,7 +281,8 @@ public class SplitInput {
   public void splitDirectory(Path inputDir) throws IOException {
     if (fs.getFileStatus(inputDir) == null) {
       throw new IOException(inputDir + " does not exist");
-    } else if (!fs.getFileStatus(inputDir).isDir()) {
+    }
+    if (!fs.getFileStatus(inputDir).isDir()) {
       throw new IOException(inputDir + " is not a directory");
     }
 
@@ -301,7 +303,8 @@ public class SplitInput {
   public void splitFile(Path inputFile) throws IOException {
     if (fs.getFileStatus(inputFile) == null) {
       throw new IOException(inputFile + " does not exist");
-    } else if (fs.getFileStatus(inputFile).isDir()) {
+    }
+    if (fs.getFileStatus(inputFile).isDir()) {
       throw new IOException(inputFile + " is a directory");
     }
 

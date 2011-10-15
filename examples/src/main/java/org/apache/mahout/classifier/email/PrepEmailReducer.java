@@ -1,4 +1,3 @@
-package org.apache.mahout.classifier.email;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,7 @@ package org.apache.mahout.classifier.email;
  * limitations under the License.
  */
 
+package org.apache.mahout.classifier.email;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -24,19 +24,18 @@ import org.apache.mahout.math.VectorWritable;
 import java.io.IOException;
 import java.util.Iterator;
 
-/**
- *
- *
- **/
 public class PrepEmailReducer extends Reducer<Text, VectorWritable, Text, VectorWritable>{
-  long maxItemsPerLabel = 10000;
+
+  private long maxItemsPerLabel = 10000;
+
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     maxItemsPerLabel = Long.parseLong(context.getConfiguration().get(PrepEmailVectorsDriver.ITEMS_PER_CLASS));
   }
 
   @Override
-  protected void reduce(Text key, Iterable<VectorWritable> values, Context context) throws IOException, InterruptedException {
+  protected void reduce(Text key, Iterable<VectorWritable> values, Context context)
+    throws IOException, InterruptedException {
     //TODO: support randomization?  Likely not needed due to the SplitInput utility which does random selection
     long i = 0;
     Iterator<VectorWritable> iterator = values.iterator();

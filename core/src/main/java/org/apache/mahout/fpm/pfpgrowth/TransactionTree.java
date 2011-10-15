@@ -208,12 +208,10 @@ public final class TransactionTree implements Writable, Iterable<Pair<List<Integ
     }
     
     log.debug("Nodes in UnCompressed Tree: {} ", nodes);
-    log.debug("UnCompressed Tree Size: {}", (this.nodes * 4 * 4 + this.childCount() * 4)
-                                                            / (double) 1000000);
+    log.debug("UnCompressed Tree Size: {}", (this.nodes * 4 * 4 + this.childCount() * 4) / 1000000.0);
     log.debug("Nodes in Compressed Tree: {} ", node);
-    log.debug("Compressed Tree Size: {}", (node * 4 * 4 + ctree.childCount() * 4)
-                                                          / (double) 1000000);
-    log.debug("TransactionSet Size: {}", size * 4 / (double) 1000000);
+    log.debug("Compressed Tree Size: {}", (node * 4 * 4 + ctree.childCount() * 4) / 1000000.0);
+    log.debug("TransactionSet Size: {}", size * 4 / 1000000.0);
     if (node * 4 * 4 + ctree.childCount() * 4 <= size * 4) {
       return ctree;
     } else {

@@ -364,7 +364,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     int iteration = 1;
     Configuration conf = new Configuration();
     while (!converged && iteration <= maxIterations) {
-      log.info("Fuzzy k-Means Iteration: " + iteration);
+      log.info("Fuzzy k-Means Iteration: {}", iteration);
       FileSystem fs = FileSystem.get(input.toUri(), conf);
       for (VectorWritable value
            : new SequenceFileDirValueIterable<VectorWritable>(input,

@@ -259,7 +259,7 @@ public class KMeansDriver extends AbstractJob {
     boolean converged = false;
     int iteration = 1;
     while (!converged && iteration <= maxIterations) {
-      log.info("K-Means Iteration: " + iteration);
+      log.info("K-Means Iteration: {}", iteration);
       FileSystem fs = FileSystem.get(input.toUri(), conf);
       for (VectorWritable value
            : new SequenceFileDirValueIterable<VectorWritable>(input,

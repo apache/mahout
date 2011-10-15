@@ -20,8 +20,6 @@ package org.apache.mahout.math.hadoop.stochasticsvd;
 import java.io.File;
 import java.io.IOException;
 
-import junit.framework.Assert;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -165,8 +163,7 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
     // used to generate surrogate input
 
     for (int i = 0; i < k; i++) {
-      Assert
-        .assertTrue(Math.abs((singularValues.getQuick(i) - stochasticSValues[i])
+      assertTrue(Math.abs((singularValues.getQuick(i) - stochasticSValues[i])
             / singularValues.getQuick(i)) <= s_precisionPct / 100);
     }
 

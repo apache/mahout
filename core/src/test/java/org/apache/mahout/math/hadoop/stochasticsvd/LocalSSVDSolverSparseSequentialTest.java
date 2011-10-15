@@ -25,7 +25,6 @@ import java.util.LinkedList;
 import java.util.Random;
 
 import com.google.common.io.Closeables;
-import junit.framework.Assert;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -158,14 +157,11 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
     SingularValueDecomposition svd2 =
       new SingularValueDecomposition(new DenseMatrix(a));
 
-    a = null;
-
     double[] svalues2 = svd2.getSingularValues();
     dumpSv(svalues2);
 
     for (int i = 0; i < k + p; i++) {
-      Assert
-        .assertTrue(Math.abs(svalues2[i] - stochasticSValues[i]) <= s_epsilon);
+      assertTrue(Math.abs(svalues2[i] - stochasticSValues[i]) <= s_epsilon);
     }
 
     double[][] mQ =

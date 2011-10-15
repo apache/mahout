@@ -72,7 +72,7 @@ public class AdjacencyMatrixJob extends AbstractJob {
   static final String VERTEX_INDEX_PARAM = AdjacencyMatrixJob.class.getName() + ".vertexIndex";
   static final String STOCHASTIFY_PARAM = AdjacencyMatrixJob.class.getName() + ".normalize";
 
-  private final String TRANSPOSED_ADJACENCY_MATRIX = "transposedAdjacencyMatrix";
+  private static final String TRANSPOSED_ADJACENCY_MATRIX = "transposedAdjacencyMatrix";
 
   @Override
   public int run(String[] args) throws Exception {

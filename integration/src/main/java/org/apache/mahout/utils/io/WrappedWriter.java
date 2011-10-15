@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.io;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,17 +15,16 @@ package org.apache.mahout.utils.io;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.io;
 
 import java.io.Closeable;
 import java.io.IOException;
 
 /**
-* Convenience class for wrapping either a java.io.Writer or a SequenceFile.Writer with some basic functionality
-*
-**/
-public abstract class WrappedWriter implements Closeable {
-  public abstract void write(String key, String value) throws IOException;
+ * Convenience class for wrapping either a java.io.Writer or a SequenceFile.Writer with some basic functionality
+ */
+public interface WrappedWriter extends Closeable {
 
-  @Override
-  public abstract void close() throws IOException;
+  void write(String key, String value) throws IOException;
+
 }

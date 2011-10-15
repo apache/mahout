@@ -56,7 +56,7 @@ public abstract class ToEntityPrefsMapper extends
   public void map(LongWritable key,
                   Text value,
                   Context context) throws IOException, InterruptedException {
-    String[] tokens = ToEntityPrefsMapper.DELIMITER.split(value.toString());
+    String[] tokens = DELIMITER.split(value.toString());
     long userID = Long.parseLong(tokens[0]);
     long itemID = Long.parseLong(tokens[1]);
     if (itemKey ^ transpose) {

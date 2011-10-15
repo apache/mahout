@@ -75,7 +75,7 @@ public class KMeansClusterer {
     for (Cluster cluster : clusters) {
       Vector clusterCenter = cluster.getCenter();
       double distance = this.measure.distance(clusterCenter.getLengthSquared(), clusterCenter, point);
-      if (KMeansClusterer.log.isDebugEnabled()) {
+      if (log.isDebugEnabled()) {
         log.debug("{} Cluster: {}", distance, cluster.getId());
       }
       if (distance < nearestDistance || nearestCluster == null) {
@@ -188,7 +188,7 @@ public class KMeansClusterer {
     boolean converged = false;
     int iteration = 0;
     while (!converged && iteration < maxIter) {
-      log.info("Reference Iteration: " + iteration);
+      log.info("Reference Iteration: {}", iteration);
       List<Cluster> next = Lists.newArrayList();
       for (Cluster c : clustersList.get(iteration)) {
         next.add(new Cluster(c.getCenter(), c.getId(), measure));

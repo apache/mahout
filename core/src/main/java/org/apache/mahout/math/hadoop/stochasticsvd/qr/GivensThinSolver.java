@@ -31,8 +31,6 @@ import org.apache.mahout.math.hadoop.stochasticsvd.UpperTriangular;
 /**
  * Givens Thin solver. Standard Givens operations are reordered in a way that
  * helps us to push them thru MapReduce operations in a block fashion.
- * 
- * 
  */
 public class GivensThinSolver {
 
@@ -44,8 +42,8 @@ public class GivensThinSolver {
   private double[] vQtRow;
   // private UpperTriangular m_rTilde;
   // private TriangularRowView m_rTildeRowView, m_rTildeRowView2;
-  private double[][] mQt;
-  private double[][] mR;
+  private final double[][] mQt;
+  private final double[][] mR;
   private int qtStartRow;
   private int rStartRow;
   private int m;

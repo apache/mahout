@@ -210,7 +210,8 @@ public final class IntPairWritable
       int firstb2 = ((IntPairWritable) o2).getFirst();
       if (firstb1 < firstb2) {
         return -1;
-      } else if (firstb1 > firstb2) {
+      }
+      if (firstb1 > firstb2) {
         return 1;
       }
       return 0;
@@ -255,7 +256,8 @@ public final class IntPairWritable
     public int compareTo(Frequency that) {
       if (frequency < that.frequency) {
         return -1;
-      } else if (frequency > that.frequency) {
+      }
+      if (frequency > that.frequency) {
         return 1;
       }
       return 0;

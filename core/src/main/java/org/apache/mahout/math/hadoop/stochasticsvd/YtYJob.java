@@ -49,6 +49,9 @@ public class YtYJob {
   // we have single output, so we use standard output
   public static final String OUTPUT_YtY = "part-";
 
+  private YtYJob() {
+  }
+
   public static class YtYMapper extends
       Mapper<Writable, VectorWritable, IntWritable, VectorWritable> {
 

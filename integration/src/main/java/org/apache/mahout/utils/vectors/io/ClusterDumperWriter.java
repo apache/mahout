@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.vectors.io;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,40 +15,34 @@ package org.apache.mahout.utils.vectors.io;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.vectors.io;
 
-import com.google.common.collect.Lists;
-import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.io.Text;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedPropertyVectorWritable;
 import org.apache.mahout.clustering.WeightedVectorWritable;
-import org.apache.mahout.common.Pair;
-import org.apache.mahout.math.Vector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Implements a {@link org.apache.mahout.utils.vectors.io.ClusterWriter} that outputs in the format
- * used by ClusterDumper in Mahout 0.5
+ * Implements a {@link ClusterWriter} that outputs in the format used by ClusterDumper in Mahout 0.5
  */
-public class ClusterDumperWriter extends AbstractClusterWriter implements ClusterWriter {
-  private transient static Logger log = LoggerFactory.getLogger(ClusterDumperWriter.class);
-  protected int subString;
-  protected String[] dictionary;
-  protected int numTopFeatures;
+public class ClusterDumperWriter extends AbstractClusterWriter {
 
-  public ClusterDumperWriter(Writer writer, Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints, int numTopFeatures, String[] dictionary, int subString) {
+  private final int subString;
+  private final String[] dictionary;
+  private final int numTopFeatures;
+
+  public ClusterDumperWriter(Writer writer,
+                             Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints,
+                             int numTopFeatures,
+                             String[] dictionary,
+                             int subString) {
     super(writer, clusterIdToPoints);
     this.numTopFeatures = numTopFeatures;
     this.dictionary = dictionary;
@@ -59,6 +52,7 @@ public class ClusterDumperWriter extends AbstractClusterWriter implements Cluste
   @Override
   public void write(Cluster value) throws IOException {
     String fmtStr = value.asFormatString(dictionary);
+    Writer writer = getWriter();
     if (subString > 0 && fmtStr.length() > subString) {
       writer.write(':');
       writer.write(fmtStr, 0, Math.min(subString, fmtStr.length()));
@@ -75,6 +69,7 @@ public class ClusterDumperWriter extends AbstractClusterWriter implements Cluste
       writer.write('\n');
     }
 
+    Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints = getClusterIdToPoints();
     List<WeightedVectorWritable> points = clusterIdToPoints.get(value.getId());
     if (points != null) {
       writer.write("\tWeight : [props - optional]:  Point:\n\t");

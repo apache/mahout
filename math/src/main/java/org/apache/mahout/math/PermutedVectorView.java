@@ -93,14 +93,14 @@ public class PermutedVectorView extends AbstractVector {
   @Override
   public Iterator<Element> iterator() {
     return new AbstractIterator<Element>() {
-      final Iterator<Element> i = vector.iterator();
+      private final Iterator<Element> i = vector.iterator();
 
       @Override
       protected Vector.Element computeNext() {
         if (i.hasNext()) {
           final Element x = i.next();
           return new Element() {
-            final int index = unpivot[x.index()];
+            private final int index = unpivot[x.index()];
 
             @Override
             public double get() {
@@ -134,14 +134,14 @@ public class PermutedVectorView extends AbstractVector {
   @Override
   public Iterator<Element> iterateNonZero() {
     return new AbstractIterator<Element>() {
-      final Iterator<Element> i = vector.iterateNonZero();
+      private final Iterator<Element> i = vector.iterateNonZero();
 
       @Override
       protected Vector.Element computeNext() {
         if (i.hasNext()) {
           final Element x = i.next();
           return new Element() {
-            final int index = unpivot[x.index()];
+            private final int index = unpivot[x.index()];
 
             @Override
             public double get() {

@@ -52,7 +52,7 @@ public final class EuropeanDistanceLookup implements DistanceLookup {
     amsterdam.put("Rome", 1304);
     amsterdam.put("Stockholm", 1132);
     amsterdam.put("Vienna", 938);
-    EuropeanDistanceLookup.DISTANCES.put("Amsterdam", amsterdam);
+    DISTANCES.put("Amsterdam", amsterdam);
     
     Map<String,Integer> athens = Maps.newHashMapWithExpectedSize(20);
     athens.put("Amsterdam", 2162);
@@ -70,7 +70,7 @@ public final class EuropeanDistanceLookup implements DistanceLookup {
     athens.put("Rome", 1040);
     athens.put("Stockholm", 2410);
     athens.put("Vienna", 1280);
-    EuropeanDistanceLookup.DISTANCES.put("Athens", athens);
+    DISTANCES.put("Athens", athens);
     
     Map<String,Integer> berlin = Maps.newHashMapWithExpectedSize(20);
     berlin.put("Amsterdam", 576);
@@ -88,7 +88,7 @@ public final class EuropeanDistanceLookup implements DistanceLookup {
     berlin.put("Rome", 1185);
     berlin.put("Stockholm", 818);
     berlin.put("Vienna", 525);
-    EuropeanDistanceLookup.DISTANCES.put("Berlin", berlin);
+    DISTANCES.put("Berlin", berlin);
     
     Map<String,Integer> brussels = Maps.newHashMapWithExpectedSize(20);
     brussels.put("Amsterdam", 171);
@@ -106,7 +106,7 @@ public final class EuropeanDistanceLookup implements DistanceLookup {
     brussels.put("Rome", 1182);
     brussels.put("Stockholm", 1284);
     brussels.put("Vienna", 917);
-    EuropeanDistanceLookup.DISTANCES.put("Brussels", brussels);
+    DISTANCES.put("Brussels", brussels);
     
     Map<String,Integer> copenhagen = Maps.newHashMapWithExpectedSize(20);
     copenhagen.put("Amsterdam", 622);
@@ -124,7 +124,7 @@ public final class EuropeanDistanceLookup implements DistanceLookup {
     copenhagen.put("Rome", 1540);
     copenhagen.put("Stockholm", 526);
     copenhagen.put("Vienna", 876);
-    EuropeanDistanceLookup.DISTANCES.put("Copenhagen", copenhagen);
+    DISTANCES.put("Copenhagen", copenhagen);
     
     Map<String,Integer> dublin = Maps.newHashMapWithExpectedSize(20);
     dublin.put("Amsterdam", 757);
@@ -142,7 +142,7 @@ public final class EuropeanDistanceLookup implements DistanceLookup {
     dublin.put("Rome", 1903);
     dublin.put("Stockholm", 1625);
     dublin.put("Vienna", 1687);
-    EuropeanDistanceLookup.DISTANCES.put("Dublin", dublin);
+    DISTANCES.put("Dublin", dublin);
     
     Map<String,Integer> helsinki = Maps.newHashMapWithExpectedSize(20);
     helsinki.put("Amsterdam", 1506);
@@ -160,7 +160,7 @@ public final class EuropeanDistanceLookup implements DistanceLookup {
     helsinki.put("Rome", 2202);
     helsinki.put("Stockholm", 396);
     helsinki.put("Vienna", 1439);
-    EuropeanDistanceLookup.DISTANCES.put("Helsinki", helsinki);
+    DISTANCES.put("Helsinki", helsinki);
     
     Map<String,Integer> lisbon = Maps.newHashMapWithExpectedSize(20);
     lisbon.put("Amsterdam", 1861);
@@ -178,7 +178,7 @@ public final class EuropeanDistanceLookup implements DistanceLookup {
     lisbon.put("Rome", 1873);
     lisbon.put("Stockholm", 2993);
     lisbon.put("Vienna", 2300);
-    EuropeanDistanceLookup.DISTANCES.put("Lisbon", lisbon);
+    DISTANCES.put("Lisbon", lisbon);
     
     Map<String,Integer> london = Maps.newHashMapWithExpectedSize(20);
     london.put("Amsterdam", 356);
@@ -196,7 +196,7 @@ public final class EuropeanDistanceLookup implements DistanceLookup {
     london.put("Rome", 1444);
     london.put("Stockholm", 1436);
     london.put("Vienna", 1237);
-    EuropeanDistanceLookup.DISTANCES.put("London", london);
+    DISTANCES.put("London", london);
     
     Map<String,Integer> luxembourg = Maps.newHashMapWithExpectedSize(20);
     luxembourg.put("Amsterdam", 318);
@@ -214,7 +214,7 @@ public final class EuropeanDistanceLookup implements DistanceLookup {
     luxembourg.put("Rome", 995);
     luxembourg.put("Stockholm", 1325);
     luxembourg.put("Vienna", 761);
-    EuropeanDistanceLookup.DISTANCES.put("Luxembourg", luxembourg);
+    DISTANCES.put("Luxembourg", luxembourg);
     
     Map<String,Integer> madrid = Maps.newHashMapWithExpectedSize(20);
     madrid.put("Amsterdam", 1477);
@@ -232,7 +232,7 @@ public final class EuropeanDistanceLookup implements DistanceLookup {
     madrid.put("Rome", 1377);
     madrid.put("Stockholm", 2596);
     madrid.put("Vienna", 1812);
-    EuropeanDistanceLookup.DISTANCES.put("Madrid", madrid);
+    DISTANCES.put("Madrid", madrid);
     
     Map<String,Integer> paris = Maps.newHashMapWithExpectedSize(20);
     paris.put("Amsterdam", 429);
@@ -250,7 +250,7 @@ public final class EuropeanDistanceLookup implements DistanceLookup {
     paris.put("Rome", 1117);
     paris.put("Stockholm", 1549);
     paris.put("Vienna", 1037);
-    EuropeanDistanceLookup.DISTANCES.put("Paris", paris);
+    DISTANCES.put("Paris", paris);
     
     Map<String,Integer> rome = Maps.newHashMapWithExpectedSize(20);
     rome.put("Amsterdam", 1304);
@@ -268,7 +268,7 @@ public final class EuropeanDistanceLookup implements DistanceLookup {
     rome.put("Rome", 0);
     rome.put("Stockholm", 1984);
     rome.put("Vienna", 765);
-    EuropeanDistanceLookup.DISTANCES.put("Rome", rome);
+    DISTANCES.put("Rome", rome);
     
     Map<String,Integer> stockholm = Maps.newHashMapWithExpectedSize(20);
     stockholm.put("Amsterdam", 1132);
@@ -286,7 +286,7 @@ public final class EuropeanDistanceLookup implements DistanceLookup {
     stockholm.put("Rome", 1984);
     stockholm.put("Stockholm", 0);
     stockholm.put("Vienna", 1247);
-    EuropeanDistanceLookup.DISTANCES.put("Stockholm", stockholm);
+    DISTANCES.put("Stockholm", stockholm);
     
     Map<String,Integer> vienna = Maps.newHashMapWithExpectedSize(20);
     vienna.put("Amsterdam", 938);
@@ -304,18 +304,18 @@ public final class EuropeanDistanceLookup implements DistanceLookup {
     vienna.put("Rome", 765);
     vienna.put("Stockholm", 1247);
     vienna.put("Vienna", 0);
-    EuropeanDistanceLookup.DISTANCES.put("Vienna", vienna);
+    DISTANCES.put("Vienna", vienna);
   }
   
   @Override
   public List<String> getKnownCities() {
-    List<String> cities = Lists.newArrayList(EuropeanDistanceLookup.DISTANCES.keySet());
+    List<String> cities = Lists.newArrayList(DISTANCES.keySet());
     Collections.sort(cities);
     return cities;
   }
   
   @Override
   public int getDistance(String startingCity, String destinationCity) {
-    return EuropeanDistanceLookup.DISTANCES.get(startingCity).get(destinationCity);
+    return DISTANCES.get(startingCity).get(destinationCity);
   }
 }

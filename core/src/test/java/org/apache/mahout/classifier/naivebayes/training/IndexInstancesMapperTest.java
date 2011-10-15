@@ -31,9 +31,9 @@ import org.junit.Test;
 
 public class IndexInstancesMapperTest extends MahoutTestCase {
 
-  Mapper.Context ctx;
-  OpenObjectIntHashMap<String> labelIndex;
-  VectorWritable instance;
+  private Mapper.Context ctx;
+  private OpenObjectIntHashMap<String> labelIndex;
+  private VectorWritable instance;
 
   @Override
   @Before

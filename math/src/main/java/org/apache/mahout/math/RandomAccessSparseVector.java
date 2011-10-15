@@ -20,7 +20,6 @@ package org.apache.mahout.math;
 import java.util.Iterator;
 
 import com.google.common.collect.AbstractIterator;
-import org.apache.mahout.math.function.IntDoubleProcedure;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.map.OpenIntDoubleHashMap;
 

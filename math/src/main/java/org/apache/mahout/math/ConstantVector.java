@@ -73,8 +73,8 @@ public class ConstantVector extends AbstractVector {
   @Override
   public Iterator<Element> iterator() {
     return new AbstractIterator<Element>() {
-      int i = 0;
-      final int n = size();
+      private int i = 0;
+      private final int n = size();
       @Override
       protected Element computeNext() {
         if (i < n) {

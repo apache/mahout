@@ -105,22 +105,21 @@ public class SplitPartitionedWritable implements
       return false;
     }
     SplitPartitionedWritable other = (SplitPartitionedWritable) obj;
-    if (taskId != other.taskId) {
-      return false;
-    }
-    return true;
+    return taskId == other.taskId;
   }
 
   @Override
   public int compareTo(SplitPartitionedWritable o) {
     if (taskId < o.taskId) {
       return -1;
-    } else if (taskId > o.taskId) {
+    }
+    if (taskId > o.taskId) {
       return 1;
     }
     if (taskItemOrdinal < o.taskItemOrdinal) {
       return -1;
-    } else if (taskItemOrdinal > o.taskItemOrdinal) {
+    }
+    if (taskItemOrdinal > o.taskItemOrdinal) {
       return 1;
     }
     return 0;
@@ -139,7 +138,8 @@ public class SplitPartitionedWritable implements
 
       if (o1.taskId < o2.taskId) {
         return -1;
-      } else if (o1.taskId > o2.taskId) {
+      }
+      if (o1.taskId > o2.taskId) {
         return 1;
       }
       return 0;

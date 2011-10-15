@@ -65,10 +65,12 @@ public class RandomWalkWithRestartJob extends RandomWalk {
     return dampingVector;
   }
 
+  @Override
   protected void addSpecificOptions() {
     addOption("sourceVertexIndex", "svi", "index of source vertex", true);
   }
 
+  @Override
   protected void evaluateSpecificOptions(Map<String, String> parsedArgs) {
     sourceVertexIndex = Integer.parseInt(parsedArgs.get("--sourceVertexIndex"));
   }

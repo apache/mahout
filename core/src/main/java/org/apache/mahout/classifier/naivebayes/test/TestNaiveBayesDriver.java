@@ -1,4 +1,3 @@
-package org.apache.mahout.classifier.naivebayes.test;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,7 @@ package org.apache.mahout.classifier.naivebayes.test;
  * limitations under the License.
  */
 
+package org.apache.mahout.classifier.naivebayes.test;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -46,7 +46,9 @@ import java.util.Map;
  * by running the iterating the test set and comparing it to the model
  */
 public class TestNaiveBayesDriver extends AbstractJob {
-  private transient static Logger log = LoggerFactory.getLogger(TestNaiveBayesDriver.class);
+
+  private static final Logger log = LoggerFactory.getLogger(TestNaiveBayesDriver.class);
+
   public static final String LABEL_KEY = "labels";
   public static final String COMPLEMENTARY = "class"; //b for bayes, c for complementary
 
@@ -56,7 +58,6 @@ public class TestNaiveBayesDriver extends AbstractJob {
 
   @Override
   public int run(String[] args) throws Exception {
-    int result = 0;
     addInputOption();
     addOutputOption();
     addOption(addOption(DefaultOptionCreator.overwriteOption().create()));
@@ -83,48 +84,34 @@ public class TestNaiveBayesDriver extends AbstractJob {
     Map<Integer, String> labelMap = BayesUtils.readLabelIndex(getConf(), new Path(parsedArgs.get("--labelIndex")));
 
     //loop over the results and create the confusion matrix
-    SequenceFileDirIterable<Text, VectorWritable> dirIterable = new SequenceFileDirIterable<Text, VectorWritable>(getOutputPath(), PathType.LIST, PathFilters.partFilter(), getConf());
+    SequenceFileDirIterable<Text, VectorWritable> dirIterable =
+        new SequenceFileDirIterable<Text, VectorWritable>(getOutputPath(),
+                                                          PathType.LIST,
+                                                          PathFilters.partFilter(),
+                                                          getConf());
     ResultAnalyzer analyzer = new ResultAnalyzer(labelMap.values(), "DEFAULT");
-    analyzeResults(labelMap, dirIterable, analyzer, complementary);
+    analyzeResults(labelMap, dirIterable, analyzer);
 
-    log.info((complementary ? "Complementary" : "Standard NB") + " Results: {}", analyzer);
-    return result;
+    log.info("{} Results: {}", complementary ? "Complementary" : "Standard NB", analyzer);
+    return 0;
   }
 
-  private void analyzeResults(Map<Integer, String> labelMap, SequenceFileDirIterable<Text, VectorWritable> dirIterable, ResultAnalyzer analyzer, boolean complementary) {
-    double bestScore;
-    int bestIdx;
-    if (complementary){
-      for (Pair<Text, VectorWritable> pair : dirIterable) {
-        bestIdx = Integer.MIN_VALUE;
-        bestScore = Long.MIN_VALUE;
-        for (Vector.Element element : pair.getSecond().get()) {
-          if (element.get() > bestScore) {
-            bestScore = element.get();
-            bestIdx = element.index();
-          }
-        }
-        if (bestIdx != Integer.MIN_VALUE) {
-          ClassifierResult classifierResult = new ClassifierResult(labelMap.get(bestIdx), bestScore);
-          analyzer.addInstance(pair.getFirst().toString(), classifierResult);
+  private static void analyzeResults(Map<Integer, String> labelMap,
+                                     SequenceFileDirIterable<Text, VectorWritable> dirIterable,
+                                     ResultAnalyzer analyzer) {
+    for (Pair<Text, VectorWritable> pair : dirIterable) {
+      int bestIdx = Integer.MIN_VALUE;
+      double bestScore = Long.MIN_VALUE;
+      for (Vector.Element element : pair.getSecond().get()) {
+        if (element.get() > bestScore) {
+          bestScore = element.get();
+          bestIdx = element.index();
         }
       }
-    } else {
-      for (Pair<Text, VectorWritable> pair : dirIterable) {
-        bestIdx = Integer.MIN_VALUE;
-        bestScore = Long.MIN_VALUE;
-        for (Vector.Element element : pair.getSecond().get()) {
-          if (element.get() > bestScore) {
-            bestScore = element.get();
-            bestIdx = element.index();
-          }
-        }
-        if (bestIdx != Integer.MIN_VALUE) {
-          ClassifierResult classifierResult = new ClassifierResult(labelMap.get(bestIdx), bestScore);
-          analyzer.addInstance(pair.getFirst().toString(), classifierResult);
-        }
+      if (bestIdx != Integer.MIN_VALUE) {
+        ClassifierResult classifierResult = new ClassifierResult(labelMap.get(bestIdx), bestScore);
+        analyzer.addInstance(pair.getFirst().toString(), classifierResult);
       }
     }
-
   }
 }

@@ -55,12 +55,6 @@ public class PartialSequentialBuilder extends PartialBuilder {
 
   private final Dataset dataset;
 
-  /** first instance id in hadoop's order */
-  private int[] firstIds;
-  
-  /** partitions' sizes in hadoop order */
-  private int[] sizes;
-
   public PartialSequentialBuilder(TreeBuilder treeBuilder, Path dataPath,
       Dataset dataset, long seed, Configuration conf) {
     super(treeBuilder, dataPath, new Path("notUsed"), seed, conf);
@@ -106,8 +100,10 @@ public class PartialSequentialBuilder extends PartialBuilder {
 
     firstOutput = new MockContext(new Step1Mapper(), conf, task.getTaskAttemptID(), numTrees);
 
-    firstIds = new int[nbSplits];
-    sizes = new int[nbSplits];
+    /* first instance id in hadoop's order */
+    int[] firstIds = new int[nbSplits];
+    /* partitions' sizes in hadoop order */
+    int[] sizes = new int[nbSplits];
     
     // to compute firstIds, process the splits in file order
     long slowest = 0; // duration of slowest map
@@ -146,7 +142,7 @@ public class PartialSequentialBuilder extends PartialBuilder {
   }
 
   @Override
-  protected DecisionForest parseOutput(Job job) throws IOException, InterruptedException {
+  protected DecisionForest parseOutput(Job job) throws IOException {
     return processOutput(firstOutput.getKeys(), firstOutput.getValues());
   }
 

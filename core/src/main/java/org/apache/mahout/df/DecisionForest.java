@@ -68,9 +68,7 @@ public class DecisionForest implements Writable {
       return; // nothing to classify
     }
 
-    for (int treeId = 0; treeId < trees.size(); treeId++) {
-      Node tree = trees.get(treeId);
-
+    for (Node tree : trees) {
       for (int index = 0; index < data.size(); index++) {
         predictions[index] = tree.classify(data.get(index));
       }

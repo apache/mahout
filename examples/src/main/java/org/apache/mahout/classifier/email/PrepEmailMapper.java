@@ -1,4 +1,3 @@
-package org.apache.mahout.classifier.email;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,18 +15,26 @@ package org.apache.mahout.classifier.email;
  * limitations under the License.
  */
 
+package org.apache.mahout.classifier.email;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.utils.email.MailProcessor;
 
 import java.io.IOException;
+import java.util.Locale;
+import java.util.regex.Pattern;
 
 /**
- * Convert the labels created by the {@link org.apache.mahout.utils.email.MailProcessor} to one consumable by the classifiers
+ * Convert the labels created by the {@link MailProcessor} to one consumable by the classifiers
  */
 public class PrepEmailMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable> {
+
+  private static final Pattern DASH_DOT = Pattern.compile("-|\\.");
+  private static final Pattern SLASH = Pattern.compile("\\/");
+
   private boolean useListName = false;//if true, use the project name and the list name in label creation
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
@@ -35,18 +42,24 @@ public class PrepEmailMapper extends Mapper<WritableComparable<?>, VectorWritabl
   }
 
   @Override
-  protected void map(WritableComparable<?> key, VectorWritable value, Context context) throws IOException, InterruptedException {
+  protected void map(WritableComparable<?> key, VectorWritable value, Context context)
+    throws IOException, InterruptedException {
     String input = key.toString();
     ///Example: /cocoon.apache.org/dev/200307.gz/001401c3414f$8394e160$1e01a8c0@WRPO
-    String[] splits = input.split("\\/");
+    String[] splits = SLASH.split(input);
     //we need the first two splits;
     if (splits.length >= 3) {
-      StringBuilder bldr = new StringBuilder(splits[1].replaceAll("-|\\.", "_").toLowerCase());
-      if (useListName == true) {
-        bldr.append("_").append(splits[2].replaceAll("-|\\.", "_").toLowerCase());
+      StringBuilder bldr = new StringBuilder();
+      bldr.append(escape(splits[1]));
+      if (useListName) {
+        bldr.append('_').append(escape(splits[2]));
       }
       context.write(new Text(bldr.toString()), value);
     }
 
+  }
+  
+  private static String escape(CharSequence value) {
+    return DASH_DOT.matcher(value).replaceAll("_").toLowerCase(Locale.ENGLISH);
   }
 }

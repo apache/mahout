@@ -102,7 +102,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
           type = ARFFType.NOMINAL;
           //@ATTRIBUTE class        {Iris-setosa,Iris-versicolor,Iris-virginica}
           int classIdx = lower.indexOf(ARFFType.NOMINAL.getIndicator());
-          String [] classes = ARFFVectorIterable.COMMA_PATTERN.split(line.substring(classIdx + 1, line.length() - 1));
+          String[] classes = COMMA_PATTERN.split(line.substring(classIdx + 1, line.length() - 1));
           for (int i = 0; i < classes.length; i++) {
             model.addNominal(label, classes[i].trim(), i);
           }
@@ -113,7 +113,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
           //TODO: DateFormatter map
           DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH);
           int idx = lower.indexOf(ARFFType.DATE.getIndicator());
-          String[] split = ARFFVectorIterable.SPACE_PATTERN.split(line);
+          String[] split = SPACE_PATTERN.split(line);
           if (split.length >= 4) { //we have a date format
             String formStr = line.substring(idx + ARFFType.DATE.getIndicator().length()).trim();
             if (formStr.startsWith("\"")) {

@@ -65,8 +65,8 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
     String catMatch = findMatchingCategory(document);
     if (!"Unknown".equals(catMatch)) {
       StringBuilder contents = new StringBuilder(1000);
-      document = StringEscapeUtils.unescapeHtml(WikipediaDatasetCreatorMapper.CLOSE_TEXT_TAG_PATTERN.matcher(
-          WikipediaDatasetCreatorMapper.OPEN_TEXT_TAG_PATTERN.matcher(document).replaceFirst("")).replaceAll(""));
+      document = StringEscapeUtils.unescapeHtml(CLOSE_TEXT_TAG_PATTERN.matcher(
+          OPEN_TEXT_TAG_PATTERN.matcher(document).replaceFirst("")).replaceAll(""));
       TokenStream stream = analyzer.reusableTokenStream(catMatch, new StringReader(document));
       CharTermAttribute termAtt = stream.addAttribute(CharTermAttribute.class);
       stream.reset();
@@ -74,7 +74,7 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
         contents.append(termAtt.buffer(), 0, termAtt.length()).append(' ');
       }
       context.write(
-          new Text(WikipediaDatasetCreatorMapper.SPACE_NON_ALPHA_PATTERN.matcher(catMatch).replaceAll("_")),
+          new Text(SPACE_NON_ALPHA_PATTERN.matcher(catMatch).replaceAll("_")),
           new Text(contents.toString()));
     }
   }
@@ -132,11 +132,12 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
       // categories.add(category.toLowerCase());
       if (exactMatchOnly && inputCategories.contains(category)) {
         return category;
-      } else if (!exactMatchOnly) {
+      }
+      if (!exactMatchOnly) {
         for (int i = 0; i < inputCategories.size(); i++) {
           String inputCategory = inputCategories.get(i);
           Pattern inputCategoryPattern = inputCategoryPatterns.get(i);
-          if (inputCategoryPattern.matcher(category).matches()) { // inexact match with word boundary. 
+          if (inputCategoryPattern.matcher(category).matches()) { // inexact match with word boundary.
             return inputCategory;
           }
         }

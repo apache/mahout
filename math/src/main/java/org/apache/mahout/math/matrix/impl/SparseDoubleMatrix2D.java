@@ -283,7 +283,8 @@ public final class SparseDoubleMatrix2D extends DoubleMatrix2D {
     if (other instanceof SelectedSparseDoubleMatrix2D) {
       SelectedSparseDoubleMatrix2D otherMatrix = (SelectedSparseDoubleMatrix2D) other;
       return this.elements == otherMatrix.elements;
-    } else if (other instanceof SparseDoubleMatrix2D) {
+    }
+    if (other instanceof SparseDoubleMatrix2D) {
       SparseDoubleMatrix2D otherMatrix = (SparseDoubleMatrix2D) other;
       return this.elements == otherMatrix.elements;
     }

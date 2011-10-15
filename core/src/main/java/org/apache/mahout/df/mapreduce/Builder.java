@@ -270,8 +270,7 @@ public abstract class Builder {
    * @throws IOException
    *           if anything goes wrong while parsing the output
    */
-  protected abstract DecisionForest parseOutput(Job job)
-    throws IOException, ClassNotFoundException, InterruptedException;
+  protected abstract DecisionForest parseOutput(Job job) throws IOException;
   
   public DecisionForest build(int nbTrees)
     throws IOException, ClassNotFoundException, InterruptedException {

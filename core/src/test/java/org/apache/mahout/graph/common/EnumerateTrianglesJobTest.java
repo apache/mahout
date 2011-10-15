@@ -158,7 +158,7 @@ public class EnumerateTrianglesJobTest extends MahoutTestCase {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
 
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, new Path(inputFile.getAbsolutePath().toString()),
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, new Path(inputFile.getAbsolutePath()),
         UndirectedEdge.class, NullWritable.class);
 
     try {

@@ -97,11 +97,7 @@ public final class TestVectorView extends MahoutTestCase {
   public void testSet() throws Exception {
     test.set(2, 4.5);
     for (int i = 0; i < test.size(); i++) {
-      if (i == 2) {
-        assertEquals("set [" + i + ']', 4.5, test.get(i), EPSILON);
-      } else {
-        assertEquals("set [" + i + ']', values[OFFSET + i], test.get(i), EPSILON);
-      }
+      assertEquals("set [" + i + ']', i == 2 ? 4.5 : values[OFFSET + i], test.get(i), EPSILON);
     }
   }
 

@@ -34,14 +34,10 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   protected static final int COL = AbstractMatrix.COL;
 
-  private final double[][] values = {{1.1, 2.2}, {3.3, 4.4},
-      {5.5, 6.6}};
+  private final double[][] values = {{1.1, 2.2}, {3.3, 4.4}, {5.5, 6.6}};
 
   private final double[] vectorAValues = {1.0 / 1.1, 2.0 / 1.1};
-
-  //protected final double[] vectorBValues = {5.0, 10.0, 100.0};
-
-  protected Matrix test;
+  private Matrix test;
 
   @Override
   @Before

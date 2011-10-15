@@ -29,6 +29,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import com.google.common.io.Closeables;
@@ -61,8 +62,8 @@ public class AdaptiveLogisticModelParameters extends LogisticModelParameters {
 
   public void checkParameters() {
     if (prior != null) {
-      if ("TP".equals(prior.toUpperCase().trim()) ||
-          "EBP".equals(prior.toUpperCase().trim())) {
+      if ("TP".equals(prior.toUpperCase(Locale.ENGLISH).trim()) ||
+          "EBP".equals(prior.toUpperCase(Locale.ENGLISH).trim())) {
         if (Double.isNaN(priorOption)) {
           throw new IllegalArgumentException("You must specify a double value for TPrior and ElasticBandPrior.");
         }
@@ -74,19 +75,19 @@ public class AdaptiveLogisticModelParameters extends LogisticModelParameters {
     if (cmd == null) {
       return null;
     }
-    if ("L1".equals(cmd.toUpperCase().trim())) {
+    if ("L1".equals(cmd.toUpperCase(Locale.ENGLISH).trim())) {
       return new L1();
     }
-    if ("L2".equals(cmd.toUpperCase().trim())) {
+    if ("L2".equals(cmd.toUpperCase(Locale.ENGLISH).trim())) {
       return new L2();
     }
-    if ("UP".equals(cmd.toUpperCase().trim())) {
+    if ("UP".equals(cmd.toUpperCase(Locale.ENGLISH).trim())) {
       return new UniformPrior();
     }
-    if ("TP".equals(cmd.toUpperCase().trim())) {
+    if ("TP".equals(cmd.toUpperCase(Locale.ENGLISH).trim())) {
       return new TPrior(priorOption);
     }
-    if ("EBP".equals(cmd.toUpperCase().trim())) {
+    if ("EBP".equals(cmd.toUpperCase(Locale.ENGLISH).trim())) {
       return new ElasticBandPrior(priorOption);
     }
 
@@ -97,10 +98,10 @@ public class AdaptiveLogisticModelParameters extends LogisticModelParameters {
     if (cmd == null) {
       return null;
     }
-    if ("GLOBAL".equals(cmd.toUpperCase().trim())) {
+    if ("GLOBAL".equals(cmd.toUpperCase(Locale.ENGLISH).trim())) {
       return new GlobalOnlineAuc();
     }
-    if ("GROUPED".equals(cmd.toUpperCase().trim())) {
+    if ("GROUPED".equals(cmd.toUpperCase(Locale.ENGLISH).trim())) {
       return new GroupedOnlineAuc();
     }
     return null;

@@ -92,8 +92,7 @@ public class PartialBuilder extends Builder {
   }
   
   @Override
-  protected DecisionForest parseOutput(Job job)
-    throws IOException, ClassNotFoundException, InterruptedException {
+  protected DecisionForest parseOutput(Job job) throws IOException {
     Configuration conf = job.getConfiguration();
     
     int numTrees = Builder.getNbTrees(conf);

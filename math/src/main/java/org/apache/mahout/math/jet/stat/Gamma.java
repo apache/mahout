@@ -135,7 +135,8 @@ public final class Gamma {
     while (x < 0.0) {
       if (x == 0.0) {
         throw new ArithmeticException("gamma: singular");
-      } else if (x > -1.0e-9) {
+      }
+      if (x > -1.0e-9) {
         return z / ((1.0 + 0.5772156649015329 * x) * x);
       }
       z /= x;
@@ -145,7 +146,8 @@ public final class Gamma {
     while (x < 2.0) {
       if (x == 0.0) {
         throw new ArithmeticException("gamma: singular");
-      } else if (x < 1.0e-9) {
+      }
+      if (x < 1.0e-9) {
         return z / ((1.0 + 0.5772156649015329 * x) * x);
       }
       z /= x;
@@ -640,7 +642,7 @@ public final class Gamma {
     u = a * Math.log(x);
     if ((a + b) < Constants.MAXGAM && Math.abs(u) < Constants.MAXLOG) {
       t = gamma(a + b) / (gamma(a) * gamma(b));
-      s = s * t * Math.pow(x, a);
+      s *= t * Math.pow(x, a);
     } else {
       t = logGamma(a + b) - logGamma(a) - logGamma(b) + u + Math.log(s);
       s = t < Constants.MINLOG ? 0.0 : Math.exp(t);

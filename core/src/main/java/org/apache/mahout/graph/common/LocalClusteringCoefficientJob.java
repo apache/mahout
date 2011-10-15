@@ -40,12 +40,16 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * <p>Distributed computation of the local clustering coefficient of the vertices of an undirected graph. The local clustering coefficient is a
- * measure for the "connectedness" of a vertex in its neighborhood and is computed by dividing the number of closed triangles with a vertex'
+ * <p>Distributed computation of the local clustering coefficient of the vertices of an undirected graph.
+ * The local clustering coefficient is a
+ * measure for the "connectedness" of a vertex in its neighborhood and is computed by dividing the number
+ * of closed triangles with a vertex'
  * neighbors by the number of possible triangles of this vertex with it's neighbours.</p>
  *
- * <p>The input files needs to be  {@link org.apache.hadoop.io.SequenceFile}s, one with {@link UndirectedEdge}s as keys and
- * any Writable as values, as it is already produced by {@link SimplifyGraphJob}, the other with {@link Triangle}s as keys and any Writable as
+ * <p>The input files needs to be  {@link org.apache.hadoop.io.SequenceFile}s, one with {@link UndirectedEdge}s
+ * as keys and any Writable as values, as it is already produced by
+ * {@link org.apache.mahout.graph.preprocessing.SimplifyGraphJob}, the other with {@link Triangle}s
+ * as keys and any Writable as
  * values, as it is already produced by {@link EnumerateTrianglesJob}</p>
  *
  * <p>This job outputs text files with a vertex id and it local clustering coefficient per line.</p>

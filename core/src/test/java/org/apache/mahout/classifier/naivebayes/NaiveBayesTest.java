@@ -37,10 +37,10 @@ import java.io.File;
 
 public class NaiveBayesTest extends MahoutTestCase {
 
-  Configuration conf;
-  File inputFile;
-  File outputDir;
-  File tempDir;
+  private Configuration conf;
+  private File inputFile;
+  private File outputDir;
+  private File tempDir;
 
   static final Text LABEL_STOLEN = new Text("stolen");
   static final Text LABEL_NOT_STOLEN = new Text("not_stolen");

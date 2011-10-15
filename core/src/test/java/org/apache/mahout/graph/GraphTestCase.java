@@ -49,12 +49,12 @@ public abstract class GraphTestCase extends MahoutTestCase {
     }
   }
 
-  protected void assertMatrixEquals(Matrix expected, Matrix actual) {
+  protected static void assertMatrixEquals(Matrix expected, Matrix actual) {
     assertEquals(expected.numRows(), actual.numRows());
     assertEquals(actual.numCols(), actual.numCols());
     for (int row = 0; row < expected.numRows(); row++) {
       for (int col = 0; col < expected.numCols(); col ++) {
-        assertEquals("Non-matching values in [" + row + "," + col + "]",
+        assertEquals("Non-matching values in [" + row + ',' + col + ']',
             expected.get(row, col), actual.get(row, col), EPSILON);
       }
     }

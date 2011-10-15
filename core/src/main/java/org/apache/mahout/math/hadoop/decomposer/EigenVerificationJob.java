@@ -102,7 +102,8 @@ public class EigenVerificationJob extends AbstractJob {
     Map<String, String> argMap = handleArgs(args);
     if (argMap == null) {
       return -1;
-    } else if (argMap.isEmpty()) {
+    }
+    if (argMap.isEmpty()) {
       return 0;
     }
     // parse out the arguments
@@ -236,7 +237,8 @@ public class EigenVerificationJob extends AbstractJob {
         int index2 = e2.getKey().index();
         if (index1 < index2) {
           return -1;
-        } else if (index1 > index2) {
+        }
+        if (index1 > index2) {
           return 1;
         }
         return 0;

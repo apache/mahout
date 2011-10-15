@@ -27,7 +27,6 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
-import org.apache.mahout.classifier.naivebayes.NaiveBayesModel;
 import org.apache.mahout.classifier.naivebayes.training.ThetaMapper;
 import org.apache.mahout.classifier.naivebayes.training.TrainNaiveBayesJob;
 import org.apache.mahout.common.HadoopUtil;
@@ -43,15 +42,14 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
-public class BayesUtils {
+public final class BayesUtils {
 
   private BayesUtils() {}
-
 
   public static NaiveBayesModel readModelFromDir(Path base, Configuration conf) {
 
@@ -110,15 +108,16 @@ public class BayesUtils {
     return i;
   }
 
-  public static int writeLabelIndex(Configuration conf, Path indexPath, SequenceFileDirIterable labels) throws IOException {
+  public static int writeLabelIndex(Configuration conf, Path indexPath,
+                                    SequenceFileDirIterable<Text, IntWritable> labels) throws IOException {
     FileSystem fs = FileSystem.get(indexPath.toUri(), conf);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, indexPath, Text.class, IntWritable.class);
-    Set<String> seen = new HashSet<String>();
+    Collection<String> seen = new HashSet<String>();
     int i = 0;
     try {
       for (Object label : labels) {
-        String theLabel = ((Pair) label).getFirst().toString();
-        if (seen.contains(theLabel) == false){
+        String theLabel = ((Pair<?,?>) label).getFirst().toString();
+        if (!seen.contains(theLabel)){
           writer.append(new Text(theLabel), new IntWritable(i++));
           seen.add(theLabel);
         }
@@ -129,9 +128,10 @@ public class BayesUtils {
     return i;
   }
 
-  public static Map<Integer, String> readLabelIndex(Configuration conf, Path indexPath) throws IOException {
+  public static Map<Integer, String> readLabelIndex(Configuration conf, Path indexPath) {
     Map<Integer, String> labelMap = new HashMap<Integer, String>();
-    SequenceFileIterable<Text, IntWritable> fileIterable = new SequenceFileIterable<Text, IntWritable>(indexPath, true, conf);
+    SequenceFileIterable<Text, IntWritable> fileIterable =
+        new SequenceFileIterable<Text, IntWritable>(indexPath, true, conf);
     for (Pair<Text, IntWritable> pair : fileIterable) {
       labelMap.put(pair.getSecond().get(), pair.getFirst().toString());
     }
@@ -140,7 +140,8 @@ public class BayesUtils {
 
   public static OpenObjectIntHashMap<String> readIndexFromCache(Configuration conf) throws IOException {
     OpenObjectIntHashMap<String> index = new OpenObjectIntHashMap<String>();
-    for (Pair<Writable,IntWritable> entry : new SequenceFileIterable<Writable,IntWritable>(HadoopUtil.cachedFile(conf), conf)) {
+    for (Pair<Writable,IntWritable> entry :
+         new SequenceFileIterable<Writable,IntWritable>(HadoopUtil.cachedFile(conf), conf)) {
       index.put(entry.getFirst().toString(), entry.getSecond().get());
     }
     return index;
@@ -148,7 +149,8 @@ public class BayesUtils {
 
   public static Map<String,Vector> readScoresFromCache(Configuration conf) throws IOException {
     Map<String,Vector> sumVectors = Maps.newHashMap();
-    for (Pair<Text,VectorWritable> entry : new SequenceFileDirIterable<Text,VectorWritable>(HadoopUtil.cachedFile(conf),
+    for (Pair<Text,VectorWritable> entry :
+         new SequenceFileDirIterable<Text,VectorWritable>(HadoopUtil.cachedFile(conf),
         PathType.LIST, PathFilters.partFilter(), conf)) {
       sumVectors.put(entry.getFirst().toString(), entry.getSecond().get());
     }

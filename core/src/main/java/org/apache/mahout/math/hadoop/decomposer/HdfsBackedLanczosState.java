@@ -144,7 +144,7 @@ public class HdfsBackedLanczosState extends LanczosState implements Configurable
     SequenceFile.Writer writer = null;
     try {
       if(fs.exists(p)) {
-        log.warn(p + " exists, will overwrite");
+        log.warn("{} exists, will overwrite", p);
         fs.delete(p, true);
       }
       writer = new SequenceFile.Writer(fs, conf, p,

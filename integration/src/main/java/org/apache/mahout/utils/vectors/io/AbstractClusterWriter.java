@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.vectors.io;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,9 +15,10 @@ package org.apache.mahout.utils.vectors.io;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.vectors.io;
+
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
-import org.apache.mahout.cf.taste.impl.common.SamplingLongPrimitiveIterator;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.Pair;
@@ -40,14 +40,23 @@ import java.util.Map;
  * Base class for implementing ClusterWriter
  */
 public abstract class AbstractClusterWriter implements ClusterWriter {
-  private transient static Logger log = LoggerFactory.getLogger(AbstractClusterWriter.class);
 
-  protected Writer writer;
-  protected Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints;
+  private static final Logger log = LoggerFactory.getLogger(AbstractClusterWriter.class);
 
-  public AbstractClusterWriter(Writer writer, Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints) {
+  private final Writer writer;
+  private final Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints;
+
+  protected AbstractClusterWriter(Writer writer, Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints) {
     this.writer = writer;
     this.clusterIdToPoints = clusterIdToPoints;
+  }
+  
+  protected Writer getWriter() {
+    return writer;
+  }
+
+  protected Map<Integer, List<WeightedVectorWritable>> getClusterIdToPoints() {
+    return clusterIdToPoints;
   }
 
   public static String getTopFeatures(Vector vector, String[] dictionary, int numTerms) {

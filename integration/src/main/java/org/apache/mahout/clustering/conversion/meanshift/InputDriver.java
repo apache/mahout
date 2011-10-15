@@ -72,7 +72,7 @@ public final class InputDriver {
       Path output = new Path(cmdLine.getValue(outputOpt, "output").toString());
       runJob(input, output);
     } catch (OptionException e) {
-      InputDriver.log.error("Exception parsing command line: ", e);
+      log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
     }
   }

@@ -68,7 +68,7 @@ public final class BookCrossingDataModel extends FileDataModel {
           continue;
         }
         // Delete replace anything that isn't numeric, or a semicolon delimiter. Make comma the delimiter.
-        String convertedLine = BookCrossingDataModel.NON_DIGIT_SEMICOLON_PATTERN.matcher(line)
+        String convertedLine = NON_DIGIT_SEMICOLON_PATTERN.matcher(line)
             .replaceAll("").replace(';', ',');
         // If this means we deleted an entire ID -- few cases like that -- skip the line
         if (convertedLine.contains(",,")) {

@@ -17,7 +17,6 @@
 
 package org.apache.mahout.text;
 
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -123,7 +122,7 @@ public class SequenceFilesFromDirectory extends AbstractJob {
    * Override this method in order to parse your additional options from the command line. Do not forget to call
    * super() otherwise standard options (input/output dirs etc) will not be available.
    */
-  protected Map<String, String> parseOptions() throws IOException {
+  protected Map<String, String> parseOptions() {
     Map<String, String> options = Maps.newHashMap();
     options.put(CHUNK_SIZE_OPTION[0], getOption(CHUNK_SIZE_OPTION[0]));
     options.put(FILE_FILTER_CLASS_OPTION[0], getOption(FILE_FILTER_CLASS_OPTION[0]));

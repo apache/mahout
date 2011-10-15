@@ -60,7 +60,7 @@ public class Leaf extends Node {
     if (this == obj) {
       return true;
     }
-    if (obj == null || !(obj instanceof Leaf)) {
+    if (!(obj instanceof Leaf)) {
       return false;
     }
     

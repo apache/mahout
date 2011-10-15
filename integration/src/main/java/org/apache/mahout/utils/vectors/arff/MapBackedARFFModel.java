@@ -84,7 +84,7 @@ public class MapBackedARFFModel implements ARFFModel {
   @Override
   public double getValue(String data, int idx) {
     ARFFType type = typeMap.get(idx);
-    data = MapBackedARFFModel.QUOTE_PATTERN.matcher(data).replaceAll("");
+    data = QUOTE_PATTERN.matcher(data).replaceAll("");
     data = data.trim();
     double result;
     switch (type) {
@@ -127,7 +127,7 @@ public class MapBackedARFFModel implements ARFFModel {
 
   // Not sure how scalable this is going to be
   protected double processString(String data) {
-    data = MapBackedARFFModel.QUOTE_PATTERN.matcher(data).replaceAll("");
+    data = QUOTE_PATTERN.matcher(data).replaceAll("");
     // map it to an long
     Long theLong = words.get(data);
     if (theLong == null) {

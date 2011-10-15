@@ -172,8 +172,8 @@ public class HebbianSolver {
     int cols = corpus.numCols();
     Matrix eigens = new DenseMatrix(desiredRank, cols);
     List<Double> eigenValues = Lists.newArrayList();
-    log.info("Finding " + desiredRank + " singular vectors of matrix with " + corpus.numRows() + " rows, via Hebbian");
-    /**
+    log.info("Finding {} singular vectors of matrix with {} rows, via Hebbian", desiredRank, corpus.numRows());
+    /*
      * The corpusProjections matrix is a running cache of the residual projection of each corpus vector against all
      * of the previously found singular vectors.  Without this, if multiple passes over the data is made (per
      * singular vector), recalculating these projections eventually dominates the computational complexity of the

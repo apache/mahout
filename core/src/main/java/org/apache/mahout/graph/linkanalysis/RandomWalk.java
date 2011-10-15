@@ -127,6 +127,7 @@ public abstract class RandomWalk extends AbstractJob {
       }
     }
 
+    @Override
     protected void map(IntWritable index, Vertex vertex, Mapper.Context ctx) throws IOException, InterruptedException {
       ctx.write(new LongWritable(vertex.id()), new DoubleWritable(ranks.get(index.get())));
     }

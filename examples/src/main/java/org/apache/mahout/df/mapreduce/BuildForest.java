@@ -186,7 +186,7 @@ public class BuildForest extends Configured implements Tool {
 
     // store the decision forest in the output path
     Path forestPath = new Path(outputPath, "forest.seq");
-    log.info("Storing the forest in: " + forestPath);
+    log.info("Storing the forest in: {}", forestPath);
     DFUtils.storeWritable(getConf(), forestPath, forest);
   }
   

@@ -1,4 +1,3 @@
-package org.apache.mahout.cf.taste.example.email;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,31 +15,28 @@ package org.apache.mahout.cf.taste.example.email;
  * limitations under the License.
  */
 
+package org.apache.mahout.cf.taste.example.email;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-/**
- *
- *
- **/
-public class MailToRecMapper extends
-        Mapper<Text, Text, NullWritable, Text> {
-  private transient static Logger log = LoggerFactory.getLogger(MailToRecMapper.class);
-  private OpenObjectIntHashMap<String> fromDictionary = new OpenObjectIntHashMap<String>();
-  private OpenObjectIntHashMap<String> msgIdDictionary = new OpenObjectIntHashMap<String>();
+public final class MailToRecMapper extends Mapper<Text, Text, NullWritable, Text> {
+
+  private static final Logger log = LoggerFactory.getLogger(MailToRecMapper.class);
+
+  private final OpenObjectIntHashMap<String> fromDictionary = new OpenObjectIntHashMap<String>();
+  private final OpenObjectIntHashMap<String> msgIdDictionary = new OpenObjectIntHashMap<String>();
   private String separator = "\n";
-  protected int fromIdx;
-  protected int refsIdx;
+  private int fromIdx;
+  private int refsIdx;
 
   public enum Counters {
     REFERENCE, ORIGINAL
@@ -48,6 +44,7 @@ public class MailToRecMapper extends
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
     Configuration conf = context.getConfiguration();
     String fromPrefix = conf.get(EmailUtility.FROM_PREFIX);
     String msgPrefix = conf.get(EmailUtility.MSG_IDS_PREFIX);
@@ -61,7 +58,6 @@ public class MailToRecMapper extends
   @Override
   protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
 
-    String msgId = null;
     int msgIdKey = Integer.MIN_VALUE;
 
 
@@ -87,9 +83,9 @@ public class MailToRecMapper extends
     if (msgIdKey == Integer.MIN_VALUE) {//we don't have any references, so use the msg id
       //get the msg id and the from and output the associated ids
       String keyStr = key.toString();
-      int idx = keyStr.lastIndexOf("/");
+      int idx = keyStr.lastIndexOf('/');
       if (idx != -1) {
-        msgId = keyStr.substring(idx + 1);
+        String msgId = keyStr.substring(idx + 1);
         msgIdKey = msgIdDictionary.get(msgId);
         context.getCounter(Counters.ORIGINAL).increment(1);
       }

@@ -31,10 +31,19 @@ import org.apache.mahout.math.function.IntFunction;
 import java.util.Random;
 
 public abstract class AbstractDistribution implements DoubleFunction, IntFunction {
-  protected Random randomGenerator;
+
+  private Random randomGenerator;
 
   /** Makes this class non instantiable, but still let's others inherit from it. */
   protected AbstractDistribution() {
+  }
+  
+  protected Random getRandomGenerator() {
+    return randomGenerator;
+  }
+
+  protected double randomDouble() {
+    return randomGenerator.nextDouble();
   }
 
   /**

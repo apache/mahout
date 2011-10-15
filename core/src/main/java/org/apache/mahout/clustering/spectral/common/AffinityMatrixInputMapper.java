@@ -56,9 +56,11 @@ public class AffinityMatrixInputMapper
     // enforce well-formed textual representation of the graph
     if (elements.length != 3) {
       throw new IOException("Expected input of length 3, received "
-          + elements.length + ". Please make sure you adhere to "
-          + "the structure of (i,j,value) for representing a graph in text. Input line was: '"+value+"'.");
-    } else if (elements[0].length() == 0 || elements[1].length() == 0 || elements[2].length() == 0) {
+                            + elements.length + ". Please make sure you adhere to "
+                            + "the structure of (i,j,value) for representing a graph in text. "
+                            + "Input line was: '" + value + "'.");
+    }
+    if (elements[0].length() == 0 || elements[1].length() == 0 || elements[2].length() == 0) {
       throw new IOException("Found an element of 0 length. Please be sure you adhere to the structure of "
           + "(i,j,value) for  representing a graph in text.");
     }

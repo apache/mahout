@@ -21,6 +21,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.apache.commons.lang.Validate;
 import org.apache.mahout.common.iterator.CopyConstructorIterator;
@@ -114,6 +115,9 @@ public class QRLastStep implements Closeable, Iterator<Vector> {
 
   @Override
   public Vector next() {
+    if (!hasNext()) {
+      throw new NoSuchElementException();
+    }
     Validate.isTrue(hasNext(), "Q input overrun");
     int qRowIndex = r - cnt - 1; // because QHats are initially stored in
     for (int j = 0; j < kp; j++) {

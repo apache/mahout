@@ -49,8 +49,8 @@ public final class UncommonDistributions {
       double cheng = 1.0 + Math.log(4.5);
       double x;
       do {
-        double u = UncommonDistributions.RANDOM.nextDouble();
-        double v = UncommonDistributions.RANDOM.nextDouble();
+        double u = RANDOM.nextDouble();
+        double v = RANDOM.nextDouble();
         double y = 1.0 / lam * Math.log(v / (1.0 - v));
         x = k * Math.exp(y);
         double z = u * v * v;
@@ -66,8 +66,8 @@ public final class UncommonDistributions {
       double d = (1.0 - k) * Math.pow(k, k / (1.0 - k));
       double x;
       do {
-        double u = UncommonDistributions.RANDOM.nextDouble();
-        double v = UncommonDistributions.RANDOM.nextDouble();
+        double u = RANDOM.nextDouble();
+        double v = RANDOM.nextDouble();
         double z = -Math.log(u);
         double e = -Math.log(v);
         x = Math.pow(z, c);
@@ -171,7 +171,7 @@ public final class UncommonDistributions {
   public static int rMultinom(Vector probabilities) {
     // our probability argument are not normalized.
     double total = probabilities.zSum();
-    double nextDouble = UncommonDistributions.RANDOM.nextDouble();
+    double nextDouble = RANDOM.nextDouble();
     double p = nextDouble * total;
     for (int i = 0; i < probabilities.size(); i++) {
       double pi = probabilities.get(i);
@@ -228,7 +228,7 @@ public final class UncommonDistributions {
     double sum = 0.0;
     int x = 0;
     while (sum <= q) {
-      double u = UncommonDistributions.RANDOM.nextDouble();
+      double u = RANDOM.nextDouble();
       double e = -Math.log(u);
       sum += e / (n - x);
       x++;

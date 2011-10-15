@@ -42,7 +42,7 @@ public final class StringUtils {
    * @return the string representation of the object
    */
   public static String toString(Object obj) {
-    return StringUtils.NEWLINE_PATTERN.matcher(StringUtils.XSTREAM.toXML(obj)).replaceAll("");
+    return NEWLINE_PATTERN.matcher(XSTREAM.toXML(obj)).replaceAll("");
   }
   
   /**
@@ -53,6 +53,6 @@ public final class StringUtils {
    * @return restored object
    */
   public static <T> T fromString(String str) {
-    return (T) StringUtils.XSTREAM.fromXML(str);
+    return (T) XSTREAM.fromXML(str);
   }
 }

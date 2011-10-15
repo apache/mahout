@@ -708,7 +708,8 @@ public final class MongoDBDataModel implements DataModel {
   private Date getDate(Object date) {
     if (date.getClass().getName().contains("Date")) {
       return (Date) date;
-    } else if (date.getClass().getName().contains("String")) {
+    }
+    if (date.getClass().getName().contains("String")) {
       try {
         synchronized (dateFormat) {
           return dateFormat.parse(date.toString());

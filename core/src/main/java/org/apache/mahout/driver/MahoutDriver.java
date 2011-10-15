@@ -124,7 +124,7 @@ public final class MahoutDriver {
 
     Properties mainProps = loadProperties(progName + ".props");
     if (mainProps == null) {
-      log.warn("No " + progName + ".props found on classpath, will use command-line arguments only");
+      log.warn("No {}.props found on classpath, will use command-line arguments only", progName);
       mainProps = new Properties();
     }
 

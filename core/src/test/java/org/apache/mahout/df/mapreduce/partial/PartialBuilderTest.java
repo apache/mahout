@@ -24,7 +24,6 @@ import java.util.Random;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;

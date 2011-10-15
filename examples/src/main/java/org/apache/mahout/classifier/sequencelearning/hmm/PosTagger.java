@@ -211,7 +211,7 @@ public final class PosTagger {
   }
 
   private static void testModel(String testingURL) throws IOException {
-    log.info("Reading and parsing test data file from URL:" + testingURL);
+    log.info("Reading and parsing test data file from URL: {}", testingURL);
     long start = System.currentTimeMillis();
     readFromURL(testingURL, false);
     long end = System.currentTimeMillis();

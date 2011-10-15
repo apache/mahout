@@ -22,7 +22,6 @@ import java.util.Random;
 
 import org.apache.mahout.df.builder.TreeBuilder;
 import org.apache.mahout.df.data.Data;
-import org.apache.mahout.df.data.Instance;
 import org.apache.mahout.df.node.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

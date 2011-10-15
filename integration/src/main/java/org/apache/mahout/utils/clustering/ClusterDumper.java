@@ -50,7 +50,12 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public final class ClusterDumper extends AbstractJob {
-  public enum OUTPUT_FORMAT{TEXT, CSV, GRAPH_ML};
+
+  public enum OUTPUT_FORMAT {
+    TEXT,
+    CSV,
+    GRAPH_ML,
+  }
 
   public static final String OUTPUT_OPTION = "output";
   public static final String DICTIONARY_TYPE_OPTION = "dictionaryType";
@@ -172,25 +177,19 @@ public final class ClusterDumper extends AbstractJob {
     }
   }
 
-  protected ClusterWriter createClusterWriter(Writer writer, String[] dictionary) throws IOException {
+  ClusterWriter createClusterWriter(Writer writer, String[] dictionary) throws IOException {
     ClusterWriter result = null;
 
     switch (outputFormat){
-      case TEXT:{
+      case TEXT:
         result = new ClusterDumperWriter(writer, clusterIdToPoints, numTopFeatures, dictionary, subString);
         break;
-      }
-      case CSV:{
+      case CSV:
         result = new CSVClusterWriter(writer, clusterIdToPoints);
         break;
-      }
-      case GRAPH_ML:{
+      case GRAPH_ML:
         result = new GraphMLClusterWriter(writer, clusterIdToPoints);
         break;
-      }
-      default:{
-        break;
-      }
     }
     return result;
   }

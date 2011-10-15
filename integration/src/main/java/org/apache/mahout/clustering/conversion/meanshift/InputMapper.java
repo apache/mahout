@@ -38,7 +38,7 @@ public class InputMapper extends Mapper<LongWritable, Text, Text, MeanShiftCanop
 
   @Override
   protected void map(LongWritable key, Text values, Context context) throws IOException, InterruptedException {
-    String[] numbers = InputMapper.SPACE.split(values.toString());
+    String[] numbers = SPACE.split(values.toString());
     // sometimes there are multiple separator spaces
     Collection<Double> doubles = Lists.newArrayList();
     for (String value : numbers) {

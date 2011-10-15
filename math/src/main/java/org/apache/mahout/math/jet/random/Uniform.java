@@ -50,7 +50,7 @@ public class Uniform extends AbstractContinousDistribution {
 
   /** Returns a uniformly distributed random <tt>boolean</tt>. */
   public boolean nextBoolean() {
-    return randomGenerator.nextDouble() > 0.5;
+    return randomDouble() > 0.5;
   }
 
   /**
@@ -59,7 +59,7 @@ public class Uniform extends AbstractContinousDistribution {
    */
   @Override
   public double nextDouble() {
-    return min + (max - min) * randomGenerator.nextDouble();
+    return min + (max - min) * randomDouble();
   }
 
   /**
@@ -67,7 +67,7 @@ public class Uniform extends AbstractContinousDistribution {
    * <tt>to</tt>). Pre conditions: <tt>from &lt;= to</tt>.
    */
   public double nextDoubleFromTo(double from, double to) {
-    return from + (to - from) * randomGenerator.nextDouble();
+    return from + (to - from) * randomDouble();
   }
 
   /**
@@ -84,7 +84,7 @@ public class Uniform extends AbstractContinousDistribution {
    * and <tt>to</tt>). Pre conditions: <tt>from &lt;= to</tt>.
    */
   public int nextIntFromTo(int from, int to) {
-    return (int) ((long) from + (long) ((1L + (long) to - (long) from) * randomGenerator.nextDouble()));
+    return (int) ((long) from + (long) ((1L + (long) to - (long) from) * randomDouble()));
   }
 
   /**
@@ -123,9 +123,9 @@ public class Uniform extends AbstractContinousDistribution {
         int i2 = nextIntFromTo(Integer.MIN_VALUE, Integer.MAX_VALUE);
         return ((i1 & 0xFFFFFFFFL) << 32) | (i2 & 0xFFFFFFFFL);
       }
-      random = Math.round(nextDoubleFromTo(from, to + 1));
+      random = Math.round(nextDoubleFromTo(Long.MIN_VALUE, to + 1));
       if (random > to) {
-        random = from;
+        random = Long.MIN_VALUE;
       }
     } else {
       random = Math.round(nextDoubleFromTo(from - 1, to));

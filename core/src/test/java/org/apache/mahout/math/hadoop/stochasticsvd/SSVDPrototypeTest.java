@@ -19,8 +19,6 @@ package org.apache.mahout.math.hadoop.stochasticsvd;
 
 import java.util.Random;
 
-import junit.framework.Assert;
-
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
@@ -92,17 +90,16 @@ public class SSVDPrototypeTest extends MahoutTestCase {
       if (Math.abs(1 - norm) < epsilon) {
         rank++;
       } else {
-        Assert.assertTrue(Math.abs(norm) < epsilon);
+        assertTrue(Math.abs(norm) < epsilon);
       }
 
       for (int j = 0; j <= i; j++) {
         Vector e_j = mtx.viewColumn(j);
         double dot = ei.dot(e_j);
-        Assert
-            .assertTrue(Math.abs((i == j && rank > j ? 1 : 0) - dot) < epsilon);
+        assertTrue(Math.abs((i == j && rank > j ? 1 : 0) - dot) < epsilon);
       }
     }
-    Assert.assertTrue((!insufficientRank && rank == n) || (insufficientRank && rank < n));
+    assertTrue((!insufficientRank && rank == n) || (insufficientRank && rank < n));
 
   }
 

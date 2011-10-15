@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.io;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,16 +15,14 @@ package org.apache.mahout.utils.io;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.io;
 
 import java.io.IOException;
 import java.io.Writer;
 
-/**
-*
-*
-**/
-public class IOWriterWrapper extends WrappedWriter {
-  Writer writer;
+public class IOWriterWrapper implements WrappedWriter {
+
+  private final Writer writer;
 
   public IOWriterWrapper(Writer writer) {
     this.writer = writer;
@@ -33,7 +30,7 @@ public class IOWriterWrapper extends WrappedWriter {
 
   @Override
   public void write(String key, String value) throws IOException {
-    writer.write(key + " " + value);
+    writer.write(key + ' ' + value);
   }
 
   @Override

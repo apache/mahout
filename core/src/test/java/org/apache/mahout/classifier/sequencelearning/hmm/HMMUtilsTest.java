@@ -145,11 +145,7 @@ public class HMMUtilsTest extends HMMTestBase {
     Matrix sparse_tr = sparseModel.getTransitionMatrix();
     Matrix sparse_em = sparseModel.getEmissionMatrix();
     for (int i = 0; i < sparseModel.getNrOfHiddenStates(); ++i) {
-      if (i == 2) {
-        assertEquals(1.0, sparse_ip.getQuick(i), EPSILON);
-      } else {
-        assertEquals(0.0, sparse_ip.getQuick(i), EPSILON);
-      }
+      assertEquals(i == 2 ? 1.0 : 0.0, sparse_ip.getQuick(i), EPSILON);
       for (int j = 0; j < sparseModel.getNrOfHiddenStates(); ++j) {
         if (i == j) {
           assertEquals(1.0, sparse_tr.getQuick(i, j), EPSILON);

@@ -65,10 +65,12 @@ public class VarLongWritable implements WritableComparable<VarLongWritable>, Clo
 
   @Override
   public int compareTo(VarLongWritable other) {
-    if (value < other.value) {
+    if (value >= other.value) {
+      if (value > other.value) {
+        return 1;
+      }
+    } else {
       return -1;
-    } else if (value > other.value) {
-      return 1;
     }
     return 0;
   }

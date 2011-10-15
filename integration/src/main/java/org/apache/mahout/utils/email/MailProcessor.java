@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.email;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,7 @@ package org.apache.mahout.utils.email;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.email;
 
 import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.utils.io.ChunkedWriter;
@@ -30,10 +30,6 @@ import java.io.Writer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- *
- *
- **/
 public class MailProcessor {
   private static final Pattern MESSAGE_START =
           Pattern.compile("^From \\S+@\\S.*\\d{4}$", Pattern.CASE_INSENSITIVE);
@@ -48,9 +44,9 @@ public class MailProcessor {
                           Pattern.compile("^references: (.*)$", Pattern.CASE_INSENSITIVE);
   public static final Pattern TO_PREFIX =
                                   Pattern.compile("^to: (.*)$", Pattern.CASE_INSENSITIVE);
-  private String prefix;
-  private MailOptions options;
-  private WrappedWriter writer;
+  private final String prefix;
+  private final MailOptions options;
+  private final WrappedWriter writer;
 
   public MailProcessor(MailOptions options, String prefix, Writer writer) {
     this.writer = new IOWriterWrapper(writer);
@@ -70,17 +66,17 @@ public class MailProcessor {
       StringBuilder contents = new StringBuilder();
       // tmps used during mail message parsing
       StringBuilder body = new StringBuilder();
-      String messageId = null;
-      boolean inBody = false;
       Matcher messageIdMatcher = MESSAGE_ID_PREFIX.matcher("");
       Matcher messageBoundaryMatcher = MESSAGE_START.matcher("");
-      String[] patternResults = new String[options.patternsToMatch.length];
-      Matcher[] matchers = new Matcher[options.patternsToMatch.length];
+      String[] patternResults = new String[options.getPatternsToMatch().length];
+      Matcher[] matchers = new Matcher[options.getPatternsToMatch().length];
       for (int i = 0; i < matchers.length; i++) {
-        matchers[i] = options.patternsToMatch[i].matcher("");
+        matchers[i] = options.getPatternsToMatch()[i].matcher("");
       }
 
-      for (String nextLine : new FileLineIterable(mboxFile, options.charset, false)) {
+      String messageId = null;
+      boolean inBody = false;
+      for (String nextLine : new FileLineIterable(mboxFile, options.getCharset(), false)) {
         for (int i = 0; i < matchers.length; i++) {
           Matcher matcher = matchers[i];
           matcher.reset(nextLine);
@@ -97,7 +93,7 @@ public class MailProcessor {
             // done parsing this message ... write it out
             String key = generateKey(mboxFile, prefix, messageId);
             //if this ordering changes, then also change FromEmailToDictionaryMapper
-            writeContent(options.separator, contents, body, patternResults);
+            writeContent(options.getSeparator(), contents, body, patternResults);
             writer.write(key, contents.toString());
             contents.setLength(0); // reset the buffer
             body.setLength(0);
@@ -105,9 +101,9 @@ public class MailProcessor {
             messageId = null;
             inBody = false;
           } else {
-            if (inBody && options.includeBody) {
+            if (inBody && options.isIncludeBody()) {
               if (nextLine.length() > 0) {
-                body.append(nextLine).append(options.bodySeparator);
+                body.append(nextLine).append(options.getBodySeparator());
               }
             } else {
               // first empty line we see after reading the message Id
@@ -128,7 +124,7 @@ public class MailProcessor {
       // write the last message in the file if available
       if (messageId != null) {
         String key = generateKey(mboxFile, prefix, messageId);
-        writeContent(options.separator, contents, body, patternResults);
+        writeContent(options.getSeparator(), contents, body, patternResults);
         writer.write(key, contents.toString());
         contents.setLength(0); // reset the buffer
       }
@@ -139,7 +135,7 @@ public class MailProcessor {
     return messageCount;
   }
 
-  protected String generateKey(File mboxFile, String prefix, String messageId) {
+  protected static String generateKey(File mboxFile, String prefix, String messageId) {
     return prefix + File.separator + mboxFile.getName() + File.separator + messageId;
   }
 
@@ -151,11 +147,10 @@ public class MailProcessor {
     return options;
   }
 
-  private void writeContent(String separator, StringBuilder contents, StringBuilder body, String[] matches) {
-    for (int i = 0; i < matches.length; i++) {
-      String match = matches[i];
+  private static void writeContent(String separator, StringBuilder contents, CharSequence body, String[] matches) {
+    for (String match : matches) {
       contents.append(match).append(separator);
     }
-    contents.append("\n").append(body);
+    contents.append('\n').append(body);
   }
 }

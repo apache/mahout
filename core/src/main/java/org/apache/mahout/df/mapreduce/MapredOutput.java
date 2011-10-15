@@ -101,7 +101,7 @@ public class MapredOutput implements Writable, Cloneable {
     if (this == obj) {
       return true;
     }
-    if (obj == null || !(obj instanceof MapredOutput)) {
+    if (!(obj instanceof MapredOutput)) {
       return false;
     }
     

@@ -93,7 +93,7 @@ public class PermutedVectorViewTest extends MahoutTestCase {
   private static Vector randomVector() {
     Vector v = new DenseVector(20);
     v.assign(new DoubleFunction() {
-      final Random gen = RandomUtils.getRandom();
+      private final Random gen = RandomUtils.getRandom();
 
       @Override
       public double apply(double arg1) {

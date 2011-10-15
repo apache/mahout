@@ -64,7 +64,7 @@ public class Instance {
     if (this == obj) {
       return true;
     }
-    if (obj == null || !(obj instanceof Instance)) {
+    if (!(obj instanceof Instance)) {
       return false;
     }
     

@@ -92,6 +92,6 @@ public class Triangle implements Writable {
 
   @Override
   public String toString() {
-    return first.id() + "," + second.id() + "," + third.id();
+    return first.id() + "," + second.id() + ',' + third.id();
   }
 }

@@ -18,6 +18,7 @@
 package org.apache.mahout.df.data;
 
 import java.util.Arrays;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.mahout.math.DenseVector;
@@ -32,18 +33,20 @@ import com.google.common.base.Preconditions;
 public class DataConverter {
   
   private static final Logger log = LoggerFactory.getLogger(DataConverter.class);
-  
+
+  private static final Pattern COMMA_SPACE = Pattern.compile("[, ]");
+
   private final Dataset dataset;
   
   public DataConverter(Dataset dataset) {
     this.dataset = dataset;
   }
   
-  public Instance convert(int id, String string) {
+  public Instance convert(int id, CharSequence string) {
     // all attributes (categorical, numerical), ignored, label
     int nball = dataset.nbAttributes() + dataset.getIgnored().length + 1;
     
-    String[] tokens = string.split("[, ]");
+    String[] tokens = COMMA_SPACE.split(string);
     Preconditions.checkArgument(tokens.length == nball, "Wrong number of attributes in the string");
     
     int nbattrs = dataset.nbAttributes();

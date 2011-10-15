@@ -88,7 +88,7 @@ public abstract class LinearTrainer {
       int columnCount = dataset.columnSize();
       for (int i = 0; i < columnCount; i++) {
         Vector dataPoint = dataset.viewColumn(i);
-        log.debug("Training point: " + dataPoint);
+        log.debug("Training point: {}", dataPoint);
         
         synchronized (this.model) {
           boolean prediction = model.classify(dataPoint);

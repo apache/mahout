@@ -52,11 +52,14 @@ public class FeatureLabelComparator extends WritableComparator implements Serial
     if (cmp != 0) {
       if (ta.stringAt(0).equals(BayesConstants.FEATURE_TF)) {
         return -1;
-      } else if (tb.stringAt(0).equals(BayesConstants.FEATURE_TF)) {
+      }
+      if (tb.stringAt(0).equals(BayesConstants.FEATURE_TF)) {
         return 1;
-      } else if (ta.stringAt(0).equals(BayesConstants.FEATURE_COUNT)) {
+      }
+      if (ta.stringAt(0).equals(BayesConstants.FEATURE_COUNT)) {
         return -1;
-      } else if (tb.stringAt(0).equals(BayesConstants.FEATURE_COUNT)) {
+      }
+      if (tb.stringAt(0).equals(BayesConstants.FEATURE_COUNT)) {
         return 1;
       }
       return cmp;

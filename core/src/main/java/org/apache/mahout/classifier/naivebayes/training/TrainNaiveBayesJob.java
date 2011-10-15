@@ -123,11 +123,11 @@ public final class TrainNaiveBayesJob extends AbstractJob {
   private long createLabelIndex(Map<String, String> parsedArgs, Path labPath) throws IOException {
     long labelSize = 0;
     if (parsedArgs.containsKey("--labels")){
-      Iterable<String> labels;
-      labels = Splitter.on(",").split(parsedArgs.get("--labels"));
+      Iterable<String> labels = Splitter.on(",").split(parsedArgs.get("--labels"));
       labelSize = BayesUtils.writeLabelIndex(getConf(), labels, labPath);
     } else if (parsedArgs.containsKey("--extractLabels")){
-      SequenceFileDirIterable iterable = new SequenceFileDirIterable(getInputPath(), PathType.LIST, PathFilters.logsCRCFilter(), getConf());
+      SequenceFileDirIterable<Text, IntWritable> iterable =
+          new SequenceFileDirIterable<Text, IntWritable>(getInputPath(), PathType.LIST, PathFilters.logsCRCFilter(), getConf());
       labelSize = BayesUtils.writeLabelIndex(getConf(), labPath, iterable);
     }
     return labelSize;

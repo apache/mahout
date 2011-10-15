@@ -119,7 +119,7 @@ public final class VectorHelper {
       if (line.startsWith("#")) {
         continue;
       }
-      String[] tokens = VectorHelper.TAB_PATTERN.split(line);
+      String[] tokens = TAB_PATTERN.split(line);
       if (tokens.length < 3) {
         continue;
       }

@@ -1,4 +1,3 @@
-package org.apache.mahout.classifier.naivebayes.test;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,7 @@ package org.apache.mahout.classifier.naivebayes.test;
  * limitations under the License.
  */
 
+package org.apache.mahout.classifier.naivebayes.test;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -37,7 +37,8 @@ import java.io.IOException;
  * The output value is the generated label, the Pair is the expected label and true if they match:
  */
 public class BayesTestMapper extends Mapper<Text, VectorWritable, Text, VectorWritable> {
-  AbstractNaiveBayesClassifier classifier;
+
+  private AbstractNaiveBayesClassifier classifier;
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {

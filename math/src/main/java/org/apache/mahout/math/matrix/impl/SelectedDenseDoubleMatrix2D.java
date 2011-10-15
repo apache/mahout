@@ -134,7 +134,8 @@ final class SelectedDenseDoubleMatrix2D extends DoubleMatrix2D {
     if (other instanceof SelectedDenseDoubleMatrix2D) {
       SelectedDenseDoubleMatrix2D otherMatrix = (SelectedDenseDoubleMatrix2D) other;
       return this.elements == otherMatrix.elements;
-    } else if (other instanceof DenseDoubleMatrix2D) {
+    }
+    if (other instanceof DenseDoubleMatrix2D) {
       DenseDoubleMatrix2D otherMatrix = (DenseDoubleMatrix2D) other;
       return this.elements == otherMatrix.elements;
     }

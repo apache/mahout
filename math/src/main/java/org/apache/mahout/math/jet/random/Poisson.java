@@ -78,23 +78,23 @@ public final class Poisson extends AbstractDiscreteDistribution {
 
   /** Returns a random number from the distribution; bypasses the internal state. */
   public int nextInt(double theMean) {
-/******************************************************************
- *                                                                *
- * Poisson Distribution - Patchwork Rejection/Inversion           *
- *                                                                *
- ******************************************************************
- *                                                                *
- * For parameter  my < 10  Tabulated Inversion is applied.        *
- * For my >= 10  Patchwork Rejection is employed:                 *
- * The area below the histogram function f(x) is rearranged in    *
- * its body by certain point reflections. Within a large center   *
- * interval variates are sampled efficiently by rejection from    *
- * uniform hats. Rectangular immediate acceptance regions speed   *
- * up the generation. The remaining tails are covered by          *
- * exponential functions.                                         *
- *                                                                *
- *****************************************************************/
-    Random gen = this.randomGenerator;
+    /******************************************************************
+     *                                                                *
+     * Poisson Distribution - Patchwork Rejection/Inversion           *
+     *                                                                *
+     ******************************************************************
+     *                                                                *
+     * For parameter  my < 10  Tabulated Inversion is applied.        *
+     * For my >= 10  Patchwork Rejection is employed:                 *
+     * The area below the histogram function f(x) is rearranged in    *
+     * its body by certain point reflections. Within a large center   *
+     * interval variates are sampled efficiently by rejection from    *
+     * uniform hats. Rectangular immediate acceptance regions speed   *
+     * up the generation. The remaining tails are covered by          *
+     * exponential functions.                                         *
+     *                                                                *
+     *****************************************************************/
+    Random gen = getRandomGenerator();
 
     //double t, g, my_k;
 

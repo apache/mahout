@@ -1,5 +1,21 @@
-package org.apache.mahout.cf.taste.example.email;
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+package org.apache.mahout.cf.taste.example.email;
 
 import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
@@ -13,37 +29,33 @@ import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.regex.Pattern;
 
-/**
- *
- *
- **/
 public final class EmailUtility {
+
   public static final String SEPARATOR = "separator";
   public static final String MSG_IDS_PREFIX = "msgIdsPrefix";
   public static final String FROM_PREFIX = "fromPrefix";
   public static final String MSG_ID_DIMENSION = "msgIdDim";
   public static final String FROM_INDEX = "fromIdx";
   public static final String REFS_INDEX = "refsIdx";
+  private static final String[] EMPTY = new String[0];
+  private static final Pattern ADDRESS_CLEANUP = Pattern.compile("mailto:|<|>|\\[|\\]|\\=20");
+  private static final Pattern ANGLE_BRACES = Pattern.compile("<|>");
+  private static final Pattern SPACE_OR_CLOSE_ANGLE = Pattern.compile(">|\\s+");
 
   private EmailUtility() {
-
   }
 
   /**
    * Strip off some spurious characters that make it harder to dedup
-   *
-   * @param address
-   * @return
    */
-  public static String cleanUpEmailAddress(String address) {
+  public static String cleanUpEmailAddress(CharSequence address) {
     //do some cleanup to normalize some things, like: Key: karthik ananth <karthik.jcecs@gmail.com>: Value: 178
     //Key: karthik ananth [mailto:karthik.jcecs@gmail.com]=20: Value: 179
     //TODO: is there more to clean up here?
-    address = address.replaceAll("mailto:|<|>|\\[|\\]|\\=20", "");
-    return address;
+    return ADDRESS_CLEANUP.matcher(address).replaceAll("");
   }
-
 
   public static void loadDictionaries(Configuration conf, String fromPrefix,
                                       OpenObjectIntHashMap<String> fromDictionary,
@@ -53,8 +65,7 @@ public final class EmailUtility {
     URI[] localFiles = DistributedCache.getCacheFiles(conf);
     Preconditions.checkArgument(localFiles != null,
             "missing paths from the DistributedCache");
-    for (int i = 0; i < localFiles.length; i++) {
-      URI localFile = localFiles[i];
+    for (URI localFile : localFiles) {
       Path dictionaryFile = new Path(localFile.getPath());
       // key is word value is id
 
@@ -66,7 +77,7 @@ public final class EmailUtility {
       }
       if (dictionary != null) {
         for (Pair<Writable, IntWritable> record
-                : new SequenceFileIterable<Writable, IntWritable>(dictionaryFile, true, conf)) {
+            : new SequenceFileIterable<Writable, IntWritable>(dictionaryFile, true, conf)) {
           dictionary.put(record.getFirst().toString(), record.getSecond().get());
         }
       }
@@ -74,14 +85,12 @@ public final class EmailUtility {
 
   }
 
-  private static final String [] EMPTY = new String[0];
-
-  public static String[] parseReferences(String rawRefs) {
-    String[] splits = null;
+  public static String[] parseReferences(CharSequence rawRefs) {
+    String[] splits;
     if (rawRefs != null && rawRefs.length() > 0) {
-      splits = rawRefs.split(">|\\s+");
+      splits = SPACE_OR_CLOSE_ANGLE.split(rawRefs);
       for (int i = 0; i < splits.length; i++) {
-        splits[i] = splits[i].replaceAll("<|>", "");
+        splits[i] = ANGLE_BRACES.matcher(splits[i]).replaceAll("");
       }
     } else {
       splits = EMPTY;

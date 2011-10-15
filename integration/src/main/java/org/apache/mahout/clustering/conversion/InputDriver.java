@@ -84,7 +84,7 @@ public final class InputDriver {
          "org.apache.mahout.math.RandomAccessSparseVector").toString();
       runJob(input, output, vectorClassName);
     } catch (OptionException e) {
-      InputDriver.log.error("Exception parsing command line: ", e);
+      log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
     }
   }

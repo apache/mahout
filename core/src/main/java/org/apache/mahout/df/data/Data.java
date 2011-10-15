@@ -257,7 +257,7 @@ public class Data implements Cloneable {
     if (this == obj) {
       return true;
     }
-    if (obj == null || !(obj instanceof Data)) {
+    if (!(obj instanceof Data)) {
       return false;
     }
     

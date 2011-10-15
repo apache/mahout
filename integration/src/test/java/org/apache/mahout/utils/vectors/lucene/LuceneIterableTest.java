@@ -170,7 +170,7 @@ public final class LuceneIterableTest extends MahoutTestCase {
         createNew,
         IndexWriter.MaxFieldLength.UNLIMITED);
     try {
-      for (int i = 0; i < LuceneIterableTest.DOCS.length; i++) {
+      for (int i = 0; i < DOCS.length; i++) {
         Document doc = new Document();
         Fieldable id = new Field("id", "doc_" + (i + startingId), Field.Store.YES,
             Field.Index.NOT_ANALYZED_NO_NORMS);

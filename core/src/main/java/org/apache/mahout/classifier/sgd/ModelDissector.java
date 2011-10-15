@@ -132,7 +132,8 @@ public class ModelDissector {
       if (r == 0) {
         if (o.index < index) {
           return -1;
-        } else if (o.index > index) {
+        }
+        if (o.index > index) {
           return 1;
         }
         return 0;

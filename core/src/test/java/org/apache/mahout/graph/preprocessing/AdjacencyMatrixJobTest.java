@@ -32,22 +32,20 @@ import java.io.File;
 
 public class AdjacencyMatrixJobTest extends GraphTestCase {
 
-  File verticesFile;
-  File edgesFile;
-  File indexedVerticesFile;
-  File outputDir;
-  File tempDir;
+  private File edgesFile;
+  private File indexedVerticesFile;
+  private File outputDir;
+  private File tempDir;
+  private int numVertices;
+  private double stayingProbability;
+  private Matrix expectedAdjacencyMatrix;
+  private Configuration conf;
 
-  int numVertices;
-  double stayingProbability;
-  Matrix expectedAdjacencyMatrix;
-
-  Configuration conf;
-
+  @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    verticesFile = getTestTempFile("vertices.txt");
+    File verticesFile = getTestTempFile("vertices.txt");
     edgesFile = getTestTempFile("edges.seq");
     indexedVerticesFile = getTestTempFile("indexedVertices.seq");
     outputDir = getTestTempDir("output");

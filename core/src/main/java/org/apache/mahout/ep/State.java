@@ -242,7 +242,8 @@ public class State<T extends Payload<U>, U> implements Comparable<State<T, U>>, 
     }
     if (this.id < other.id) {
       return -1;
-    } else if (this.id > other.id) {
+    }
+    if (this.id > other.id) {
       return 1;
     }
     return 0;

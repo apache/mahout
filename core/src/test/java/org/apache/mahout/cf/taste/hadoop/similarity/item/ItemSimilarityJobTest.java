@@ -21,6 +21,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -45,6 +46,8 @@ import org.junit.Test;
  * some integration tests with tiny data sets at the end
  */
 public final class ItemSimilarityJobTest extends TasteTestCase {
+
+  private static final Pattern TAB = Pattern.compile("\t");
 
   /**
    * Tests {@link ItemSimilarityJob.MostSimilarItemPairsMapper}
@@ -146,7 +149,7 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
     int currentLine = 1;
     while ( (line = reader.readLine()) != null) {
 
-      String[] tokens = line.split("\t");
+      String[] tokens = TAB.split(line);
 
       long itemAID = Long.parseLong(tokens[0]);
       long itemBID = Long.parseLong(tokens[1]);
@@ -242,7 +245,7 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
     int currentLine = 1;
     while ((line = reader.readLine()) != null) {
 
-      String[] tokens = line.split("\t");
+      String[] tokens = TAB.split(line);
 
       long itemAID = Long.parseLong(tokens[0]);
       long itemBID = Long.parseLong(tokens[1]);

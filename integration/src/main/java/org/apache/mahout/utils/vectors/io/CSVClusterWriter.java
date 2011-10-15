@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.vectors.io;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,7 @@ package org.apache.mahout.utils.vectors.io;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.vectors.io;
 
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
@@ -26,13 +26,16 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Format is adjacency style as put forth at http://gephi.org/users/supported-graph-formats/csv-format/, the centroid
  * is the first element and all the rest of the row are the points in that cluster
  *
  **/
-public class CSVClusterWriter extends AbstractClusterWriter implements ClusterWriter {
+public class CSVClusterWriter extends AbstractClusterWriter {
+
+  private static final Pattern VEC_PATTERN = Pattern.compile("\\{|\\:|\\,|\\}");
 
   public CSVClusterWriter(Writer writer, Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints) {
     super(writer, clusterIdToPoints);
@@ -42,21 +45,21 @@ public class CSVClusterWriter extends AbstractClusterWriter implements ClusterWr
   public void write(Cluster cluster) throws IOException {
     StringBuilder line = new StringBuilder();
     line.append(cluster.getId());
-    List<WeightedVectorWritable> points = clusterIdToPoints.get(cluster.getId());
+    List<WeightedVectorWritable> points = getClusterIdToPoints().get(cluster.getId());
     if (points != null) {
       for (WeightedVectorWritable point : points) {
         Vector theVec = point.getVector();
-        line.append(",");
+        line.append(',');
         if (theVec instanceof NamedVector){
           line.append(((NamedVector)theVec).getName());
         } else {
           String vecStr = theVec.asFormatString();
           //do some basic manipulations for display
-          vecStr = vecStr.replaceAll("\\{|\\:|\\,|\\}", "_");
+          vecStr = VEC_PATTERN.matcher(vecStr).replaceAll("_");
           line.append(vecStr);
         }
       }
-      writer.append(line).append("\n");
+      getWriter().append(line).append("\n");
     }
   }
 }

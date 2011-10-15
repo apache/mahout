@@ -123,7 +123,7 @@ public class DisplayClustering extends Frame {
     int cx = CLUSTERS.size() - 1;
     for (List<Cluster> clusters : CLUSTERS) {
       g2.setStroke(new BasicStroke(cx == 0 ? 3 : 1));
-      g2.setColor(COLORS[Math.min(DisplayClustering.COLORS.length - 1, cx--)]);
+      g2.setColor(COLORS[Math.min(COLORS.length - 1, cx--)]);
       for (Cluster cluster : clusters) {
         plotEllipse(g2, cluster.getCenter(), cluster.getRadius().times(3));
       }

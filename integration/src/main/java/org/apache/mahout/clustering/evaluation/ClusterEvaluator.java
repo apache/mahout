@@ -125,7 +125,7 @@ public class ClusterEvaluator {
     for (Iterator<Cluster> it = clusters.iterator(); it.hasNext();) {
       Cluster cluster = it.next();
       if (invalidCluster(cluster)) {
-        log.info("Pruning cluster Id=" + cluster.getId());
+        log.info("Pruning cluster Id={}", cluster.getId());
         it.remove();
         representativePoints.remove(cluster.getId());
       }
@@ -156,7 +156,7 @@ public class ClusterEvaluator {
       }
     }
     double density = (sum / count - min) / (max - min);
-    log.info("Inter-Cluster Density = " + density);
+    log.info("Inter-Cluster Density = {}", density);
     return density;
   }
 
@@ -186,10 +186,10 @@ public class ClusterEvaluator {
       }
       double density = (sum / count - min) / (max - min);
       avgDensity += density;
-      log.info("Intra-Cluster Density[" + cluster.getId() + "] = " + density);
+      log.info("Intra-Cluster Density[{}] = {}", cluster.getId(), density);
     }
     avgDensity = clusters.isEmpty() ? 0 : avgDensity / clusters.size();
-    log.info("Intra-Cluster Density = " + avgDensity);
+    log.info("Intra-Cluster Density = {}", avgDensity);
     return avgDensity;
 
   }

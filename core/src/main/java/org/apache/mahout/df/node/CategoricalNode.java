@@ -86,7 +86,7 @@ public class CategoricalNode extends Node {
     if (this == obj) {
       return true;
     }
-    if (obj == null || !(obj instanceof CategoricalNode)) {
+    if (!(obj instanceof CategoricalNode)) {
       return false;
     }
     

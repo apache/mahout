@@ -77,7 +77,7 @@ public class NumericalNode extends Node {
     if (this == obj) {
       return true;
     }
-    if (obj == null || !(obj instanceof NumericalNode)) {
+    if (!(obj instanceof NumericalNode)) {
       return false;
     }
     

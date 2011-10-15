@@ -234,7 +234,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
         }
       }
     }
-    log.info("Input matrix:\n" + prefsAsText);
+    log.info("Input matrix:\n{}", prefsAsText);
     writeLines(inputFile, prefsAsText.toString());
 
     ParallelALSFactorizationJob alsFactorization = new ParallelALSFactorizationJob();
@@ -268,13 +268,13 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
           double estimate = u.viewRow(slice.index()).dot(m.viewRow(e.index()));
           double err = pref - estimate;
           avg.addDatum(err * err);
-          log.info("Comparing preference of user [" + slice.index() + "] towards item [" + e.index() + "], " +
-              "was [" + pref + "] estimate is [" + estimate + ']');
+          log.info("Comparing preference of user [{}] towards item [{}], was [{}] estimate is [{}]",
+                   new Object[] {slice.index(), e.index(), pref, estimate});
         }
       }
     }
     double rmse = Math.sqrt(avg.getAverage());
-    log.info("RMSE: " + rmse);
+    log.info("RMSE: {}", rmse);
 
     assertTrue(rmse < 0.2);
   }

@@ -20,6 +20,7 @@ package org.apache.mahout.df.data;
 import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -45,7 +46,9 @@ import org.slf4j.LoggerFactory;
 public final class DataLoader {
   
   private static final Logger log = LoggerFactory.getLogger(DataLoader.class);
-  
+
+  private static final Pattern COMMA_SPACE = Pattern.compile("[, ]");
+
   private DataLoader() { }
   
   /**
@@ -59,8 +62,8 @@ public final class DataLoader {
    *          used to convert CATEGORICAL attribute values to Integer
    * @return null if there are missing values '?'
    */
-  private static Instance parseString(int id, Attribute[] attrs, List<String>[] values, String string) {
-    String[] tokens = string.split("[, ]");
+  private static Instance parseString(int id, Attribute[] attrs, List<String>[] values, CharSequence string) {
+    String[] tokens = COMMA_SPACE.split(string);
     Preconditions.checkArgument(tokens.length == attrs.length, "Wrong number of attributes in the string");
 
     // extract tokens and check is there is any missing value

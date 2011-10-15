@@ -52,7 +52,7 @@ public class FileIDMigrator extends AbstractIDMigrator {
   private final ReentrantLock reloadLock;
 
   private long lastModified;
-  private long minReloadIntervalMS;
+  private final long minReloadIntervalMS;
 
   private static final Logger log = LoggerFactory.getLogger(FileIDMigrator.class);
 
