@@ -116,7 +116,7 @@ public final class RecommenderJob extends AbstractJob {
         "item similarity computation phase, users with more preferences will be sampled down (default: " +
         DEFAULT_MAX_PREFS_PER_USER + ')', String.valueOf(DEFAULT_MAX_PREFS_PER_USER));
     addOption("similarityClassname", "s", "Name of distributed similarity measures class to instantiate, " +
-        "alternatively use one of the predefined similarities (" + VectorSimilarityMeasures.list() + ')');
+        "alternatively use one of the predefined similarities (" + VectorSimilarityMeasures.list() + ')', true);
     addOption("threshold", "tr", "discard item pairs with a similarity value below this", false);
 
     Map<String,String> parsedArgs = parseArguments(args);
