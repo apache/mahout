@@ -80,7 +80,7 @@ public class DisplayDirichlet extends DisplayClustering {
                                         double alpha0,
                                         int thin,
                                         int burnin) throws IOException {
-    boolean runClusterer = false;
+    boolean runClusterer = true;
     if (runClusterer) {
       runSequentialDirichletClusterer(modelDist, numClusters, numIterations, alpha0, thin, burnin);
     } else {

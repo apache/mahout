@@ -96,6 +96,7 @@ if [ "x$clustertype" == "xkmeans" ]; then
     -i ${WORK_DIR}/reuters-out-seqdir-sparse-kmeans/tfidf-vectors/ \
     -c ${WORK_DIR}/reuters-kmeans-clusters \
     -o ${WORK_DIR}/reuters-kmeans \
+    -dm org.apache.mahout.common.distance.CosineDistanceMeasure \
     -x 10 -k 20 -ow \
   && \
   $MAHOUT clusterdump \
