@@ -255,8 +255,11 @@ public final class RecommenderJob extends AbstractJob {
   private static void setIOSort(JobContext job) {
     Configuration conf = job.getConfiguration();
     conf.setInt("io.sort.factor", 100);
+    String javaOpts = conf.get("mapred.map.child.java.opts"); // new arg name
+    if (javaOpts == null) {
+      javaOpts = conf.get("mapred.child.java.opts"); // old arg name
+    }
     int assumedHeapSize = 512;
-    String javaOpts = conf.get("mapred.child.java.opts");
     if (javaOpts != null) {
       Matcher m = Pattern.compile("-Xmx([0-9]+)([mMgG])").matcher(javaOpts);
       if (m.find()) {
