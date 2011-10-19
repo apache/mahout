@@ -19,14 +19,16 @@ package org.apache.mahout.clustering.dirichlet.models;
 
 import org.apache.mahout.clustering.DistanceMeasureCluster;
 import org.apache.mahout.clustering.Model;
+import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 /**
- * An implementation of the ModelDistribution interface suitable for testing the DirichletCluster algorithm.
- * Models use a DistanceMeasure to calculate pdf values.
+ * An implementation of the ModelDistribution interface suitable for testing the
+ * DirichletCluster algorithm. Models use a DistanceMeasure to calculate pdf
+ * values.
  */
 public class DistanceMeasureClusterDistribution extends AbstractVectorModelDistribution {
 
@@ -48,9 +50,12 @@ public class DistanceMeasureClusterDistribution extends AbstractVectorModelDistr
   @Override
   public Model<VectorWritable>[] sampleFromPrior(int howMany) {
     Model<VectorWritable>[] result = new DistanceMeasureCluster[howMany];
+    Vector prototype = getModelPrototype().get().like();
+    for (int i = 0; i < prototype.size(); i++) {
+      prototype.setQuick(i, UncommonDistributions.rNorm(0, 1));
+    }
     for (int i = 0; i < howMany; i++) {
-      Vector prototype = getModelPrototype().get();
-      result[i] = new DistanceMeasureCluster(prototype.like(), i, measure);
+      result[i] = new DistanceMeasureCluster(prototype, i, measure);
     }
     return result;
   }
