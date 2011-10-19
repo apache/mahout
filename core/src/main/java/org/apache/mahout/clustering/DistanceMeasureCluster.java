@@ -37,7 +37,7 @@ public class DistanceMeasureCluster extends AbstractCluster {
 
   public DistanceMeasureCluster() {
   }
-  
+
   @Override
   public void configure(Configuration job) {
     if (getMeasure() != null) {
@@ -69,7 +69,7 @@ public class DistanceMeasureCluster extends AbstractCluster {
 
   @Override
   public double pdf(VectorWritable vw) {
-    return Math.exp(-measure.distance(vw.get(), getCenter()));
+    return 1 / (1 + measure.distance(vw.get(), getCenter()));
   }
 
   @Override
@@ -82,7 +82,8 @@ public class DistanceMeasureCluster extends AbstractCluster {
   }
 
   /**
-   * @param measure the measure to set
+   * @param measure
+   *          the measure to set
    */
   public void setMeasure(DistanceMeasure measure) {
     this.measure = measure;

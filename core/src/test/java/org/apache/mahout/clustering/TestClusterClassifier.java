@@ -127,10 +127,10 @@ public final class TestClusterClassifier extends MahoutTestCase {
   public void testDMClusterClassification() {
     ClusterClassifier classifier = newDMClassifier();
     Vector pdf = classifier.classify(new DenseVector(2));
-    assertEquals("[0,0]", "[0.107, 0.787, 0.107]",
+    assertEquals("[0,0]", "[0.200, 0.600, 0.200]",
         AbstractCluster.formatVector(pdf, null));
     pdf = classifier.classify(new DenseVector(2).assign(2));
-    assertEquals("[2,2]", "[0.867, 0.117, 0.016]",
+    assertEquals("[2,2]", "[0.493, 0.296, 0.211]",
         AbstractCluster.formatVector(pdf, null));
   }
   
@@ -143,10 +143,10 @@ public final class TestClusterClassifier extends MahoutTestCase {
     models.add(new Canopy(new DenseVector(2).assign(-1), 2, measure));
     ClusterClassifier classifier = new ClusterClassifier(models);
     Vector pdf = classifier.classify(new DenseVector(2));
-    assertEquals("[0,0]", "[0.107, 0.787, 0.107]",
+    assertEquals("[0,0]", "[0.200, 0.600, 0.200]",
         AbstractCluster.formatVector(pdf, null));
     pdf = classifier.classify(new DenseVector(2).assign(2));
-    assertEquals("[2,2]", "[0.867, 0.117, 0.016]",
+    assertEquals("[2,2]", "[0.493, 0.296, 0.211]",
         AbstractCluster.formatVector(pdf, null));
   }
   
@@ -154,10 +154,10 @@ public final class TestClusterClassifier extends MahoutTestCase {
   public void testClusterClassification() {
     ClusterClassifier classifier = newClusterClassifier();
     Vector pdf = classifier.classify(new DenseVector(2));
-    assertEquals("[0,0]", "[0.107, 0.787, 0.107]",
+    assertEquals("[0,0]", "[0.200, 0.600, 0.200]",
         AbstractCluster.formatVector(pdf, null));
     pdf = classifier.classify(new DenseVector(2).assign(2));
-    assertEquals("[2,2]", "[0.867, 0.117, 0.016]",
+    assertEquals("[2,2]", "[0.493, 0.296, 0.211]",
         AbstractCluster.formatVector(pdf, null));
   }
   

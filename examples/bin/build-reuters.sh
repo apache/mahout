@@ -142,7 +142,7 @@ elif [ "x$clustertype" == "xdirichlet" ]; then
   && \
   $MAHOUT dirichlet \
     -i ${WORK_DIR}/reuters-out-seqdir-sparse-dirichlet/tfidf-vectors \
-    -o ${WORK_DIR}/reuters-dirichlet -k 20 -ow -x 10 -a0 2 \
+    -o ${WORK_DIR}/reuters-dirichlet -k 20 -ow -x 20 -a0 2 \
     -md org.apache.mahout.clustering.dirichlet.models.DistanceMeasureClusterDistribution \
     -mp org.apache.mahout.math.DenseVector \
     -dm org.apache.mahout.common.distance.CosineDistanceMeasure \
