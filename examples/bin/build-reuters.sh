@@ -37,11 +37,13 @@ fi
 if [ "$1" = "-ni" ]; then
   clustertype=kmeans
 else
-  algorithm=( kmeans lda )
+  algorithm=( kmeans fuzzykmeans lda dirichlet)
  
   echo "Please select a number to choose the corresponding clustering algorithm"
   echo "1. ${algorithm[0]} clustering"
   echo "2. ${algorithm[1]} clustering"
+  echo "3. ${algorithm[2]} clustering"
+  echo "4. ${algorithm[3]} clustering"
   read -p "Enter your choice : " choice
 
   echo "ok. You chose $choice and we'll use ${algorithm[$choice-1]} Clustering"
@@ -103,6 +105,22 @@ if [ "x$clustertype" == "xkmeans" ]; then
     -s ${WORK_DIR}/reuters-kmeans/clusters-*-final \
     -d ${WORK_DIR}/reuters-out-seqdir-sparse-kmeans/dictionary.file-0 \
     -dt sequencefile -b 100 -n 20
+elif [ "x$clustertype" == "xfuzzykmeans" ]; then
+  $MAHOUT seq2sparse \
+    -i ${WORK_DIR}/reuters-out-seqdir/ \
+    -o ${WORK_DIR}/reuters-out-seqdir-sparse-fkmeans \
+  && \
+  $MAHOUT fkmeans \
+    -i ${WORK_DIR}/reuters-out-seqdir-sparse-fkmeans/tfidf-vectors/ \
+    -c ${WORK_DIR}/reuters-fkmeans-clusters \
+    -o ${WORK_DIR}/reuters-fkmeans \
+    -dm org.apache.mahout.common.distance.CosineDistanceMeasure \
+    -x 10 -k 20 -ow -m 1.1 \
+  && \
+  $MAHOUT clusterdump \
+    -s ${WORK_DIR}/reuters-fkmeans/clusters-*-final \
+    -d ${WORK_DIR}/reuters-out-seqdir-sparse-fkmeans/dictionary.file-0 \
+    -dt sequencefile -b 100 -n 20
 elif [ "x$clustertype" == "xlda" ]; then
   $MAHOUT seq2sparse \
     -i ${WORK_DIR}/reuters-out-seqdir/ \
@@ -117,6 +135,19 @@ elif [ "x$clustertype" == "xlda" ]; then
     -i ${WORK_DIR}/reuters-lda/state-20 \
     -d ${WORK_DIR}/reuters-out-seqdir-sparse-lda/dictionary.file-0 \
     -dt sequencefile
+elif [ "x$clustertype" == "xdirichlet" ]; then
+  $MAHOUT seq2sparse \
+    -i ${WORK_DIR}/reuters-out-seqdir/ \
+    -o ${WORK_DIR}/reuters-out-seqdir-sparse-dirichlet \
+  && \
+  $MAHOUT dirichlet \
+    -i ${WORK_DIR}/reuters-out-seqdir-sparse-dirichlet/tfidf-vectors \
+    -o ${WORK_DIR}/reuters-dirichlet -k 20 -ow -x 20 \
+  && \
+  $MAHOUT clusterdump \
+    -s ${WORK_DIR}/reuters-dirichlet/clusters-*-final \
+    -d ${WORK_DIR}/reuters-out-seqdir-sparse-dirichlet/dictionary.file-0 \
+    -dt sequencefile -b 100 -n 20
 else 
   echo "unknown cluster type: $clustertype";
 fi 
