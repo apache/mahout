@@ -115,7 +115,7 @@ public class DirichletCluster implements Cluster {
 
   @Override
   public String asFormatString(String[] bindings) {
-    return "C-" + model.getId() + ": " + model.asFormatString(bindings);
+    return "DC-" + model.getId()+ " total= " + (int)totalCount + " model= " + model.asFormatString(bindings);
   }
 
   @Override
