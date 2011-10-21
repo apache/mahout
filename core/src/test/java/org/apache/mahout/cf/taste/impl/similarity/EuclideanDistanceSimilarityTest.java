@@ -71,7 +71,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
                     {-3.0, 2.0},
             });
     double correlation = new EuclideanDistanceSimilarity(dataModel).userSimilarity(1, 2);
-    assertCorrelationEquals(0.24357264905599915, correlation);
+    assertCorrelationEquals(0.1639607805437114, correlation);
   }
 
   @Test
@@ -83,7 +83,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
                     {-3.0, 2.0},
             });
     double correlation = new EuclideanDistanceSimilarity(dataModel, Weighting.WEIGHTED).userSimilarity(1, 2);
-    assertCorrelationEquals(0.747857549685333, correlation);
+    assertCorrelationEquals(0.7213202601812372, correlation);
   }
 
   @Test
@@ -95,7 +95,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
                     {null, null, 1.0},
             });
     double correlation = new EuclideanDistanceSimilarity(dataModel).userSimilarity(1, 2);
-    assertEquals(0.0, correlation, EPSILON);
+    assertTrue(Double.isNaN(correlation));
   }
 
   @Test
@@ -107,7 +107,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
                     {70.0, 80.0, 90.0},
             });
     double correlation = new EuclideanDistanceSimilarity(dataModel).userSimilarity(1, 2);
-    assertCorrelationEquals(0.10244407226831752, correlation);
+    assertCorrelationEquals(0.05770363219029305, correlation);
   }
 
   @Test
@@ -119,7 +119,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
                     {2.0, 5.0, 6.0},
             });
     double correlation = new EuclideanDistanceSimilarity(dataModel).userSimilarity(1, 2);
-    assertCorrelationEquals(0.5598164905901122, correlation);
+    assertCorrelationEquals(0.2843646522044218, correlation);
   }
 
   @Test
@@ -131,7 +131,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
                     {2.0, 5.0, 6.0},
             });
     double correlation = new EuclideanDistanceSimilarity(dataModel, Weighting.WEIGHTED).userSimilarity(1, 2);
-    assertCorrelationEquals(0.889954122647528, correlation);
+    assertCorrelationEquals(0.8210911630511055, correlation);
   }
 
   @Test
@@ -170,7 +170,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
             });
     double correlation =
         new EuclideanDistanceSimilarity(dataModel).itemSimilarity(0, 1);
-    assertCorrelationEquals(0.24357264905599915, correlation);
+    assertCorrelationEquals(0.1639607805437114, correlation);
   }
 
   @Test
@@ -182,7 +182,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
                     {null, null, 1.0},
             });
     double correlation = new EuclideanDistanceSimilarity(dataModel).itemSimilarity(1, 2);
-    assertEquals(0.0, correlation, EPSILON);
+    assertTrue(Double.isNaN(correlation));
   }
 
   @Test
@@ -196,7 +196,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
             });
     double correlation =
         new EuclideanDistanceSimilarity(dataModel).itemSimilarity(0, 1);
-    assertCorrelationEquals(0.10244407226831752, correlation);
+    assertCorrelationEquals(0.05770363219029305, correlation);
   }
 
   @Test
@@ -210,7 +210,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
             });
     double correlation =
         new EuclideanDistanceSimilarity(dataModel).itemSimilarity(0, 1);
-    assertCorrelationEquals(0.5598164905901122, correlation);
+    assertCorrelationEquals(0.2843646522044218, correlation);
   }
 
   @Test
@@ -224,7 +224,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
             });
     ItemSimilarity itemSimilarity = new EuclideanDistanceSimilarity(dataModel, Weighting.WEIGHTED);
     double correlation = itemSimilarity.itemSimilarity(0, 1);
-    assertCorrelationEquals(0.889954122647528, correlation);
+    assertCorrelationEquals(0.8210911630511055, correlation);
   }
 
   @Test

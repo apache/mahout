@@ -47,7 +47,7 @@ public class EuclideanDistanceSimilarity implements VectorSimilarityMeasure {
   @Override
   public double similarity(double dots, double normA, double normB, int numberOfColumns) {
     double euclideanDistance = Math.sqrt(normA - 2 * dots + normB);
-    return 1.0 - 1.0 / (1.0 + euclideanDistance);
+    return 1.0 / (1.0 + euclideanDistance);
   }
 
   @Override
