@@ -173,8 +173,8 @@ public class Classifier {
             ofile.writeChar('\n');
 
             if (analyzer != null) {
-              analyzer.addInstance(dataset.getLabel(key),
-                                   new ClassifierResult(dataset.getLabel(Integer.parseInt(value)), 1.0));
+              analyzer.addInstance(dataset.getLabelString(key),
+                                   new ClassifierResult(dataset.getLabelString(Integer.parseInt(value)), 1.0));
             }
           }
         }
@@ -204,6 +204,7 @@ public class Classifier {
     private final Random rng = RandomUtils.getRandom();
     private boolean first = true;
     private final Text lvalue = new Text();
+    private Dataset dataset;
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
@@ -216,8 +217,8 @@ public class Classifier {
       if (files == null || files.length < 2) {
         throw new IOException("not enough paths in the DistributedCache");
       }
-
-      Dataset dataset = Dataset.load(conf, new Path(files[0].getPath()));
+      
+      dataset = Dataset.load(conf, new Path(files[0].getPath()));
 
       converter = new DataConverter(dataset);
 
@@ -242,7 +243,7 @@ public class Classifier {
       if (!line.isEmpty()) {
         Instance instance = converter.convert(0, line);
         int prediction = forest.classify(rng, instance);
-        key.set(instance.getLabel());
+        key.set(dataset.getLabel(instance));
         lvalue.set(Integer.toString(prediction));
         context.write(key, lvalue);
       }

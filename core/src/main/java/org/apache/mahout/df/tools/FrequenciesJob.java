@@ -163,12 +163,13 @@ public class FrequenciesJob {
     private LongWritable firstId;
     
     private DataConverter converter;
+    private Dataset dataset;
     
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
       Configuration conf = context.getConfiguration();
       
-      Dataset dataset = Builder.loadDataset(conf);
+      dataset = Builder.loadDataset(conf);
       setup(dataset);
     }
     
@@ -188,7 +189,7 @@ public class FrequenciesJob {
       
       Instance instance = converter.convert((int) key.get(), value.toString());
       
-      context.write(firstId, new IntWritable(instance.getLabel()));
+      context.write(firstId, new IntWritable(dataset.getLabel(instance)));
     }
     
   }

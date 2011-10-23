@@ -54,7 +54,9 @@ public class BreimanExample extends Configured implements Tool {
   private static final Logger log = LoggerFactory.getLogger(BreimanExample.class);
   
   /** sum test error */
-  private double sumTestErr;
+  private double sumTestErrM;
+
+  private double sumTestErrOne;
   
   /** mean time to build a forest with m=log2(M)+1 */
   private long sumTimeM;
@@ -113,9 +115,12 @@ public class BreimanExample extends Configured implements Tool {
     // compute the test set error (Selection Error), and mean tree error (One Tree Error),
     int[] testLabels = test.extractLabels();
     int[] predictions = new int[test.size()];
-    forestM.classify(test, predictions);
     
-    sumTestErr += ErrorEstimate.errorRate(testLabels, predictions);
+    forestM.classify(test, predictions);
+    sumTestErrM += ErrorEstimate.errorRate(testLabels, predictions);
+    
+    forestOne.classify(test, predictions);
+    sumTestErrOne += ErrorEstimate.errorRate(testLabels, predictions);
   }
   
   public static void main(String[] args) throws Exception {
@@ -194,7 +199,8 @@ public class BreimanExample extends Configured implements Tool {
     }
     
     log.info("********************************************");
-    log.info("Selection error : {}", sumTestErr / nbIterations);
+    log.info("Random Input Test Error : {}", sumTestErrM / nbIterations);
+    log.info("Single Input Test Error : {}", sumTestErrOne / nbIterations);
     log.info("Mean Random Input Time : {}", DFUtils.elapsedTime(sumTimeM / nbIterations));
     log.info("Mean Single Input Time : {}", DFUtils.elapsedTime(sumTimeOne / nbIterations));
     log.info("Mean Random Input Num Nodes : {}", numNodesM / nbIterations);

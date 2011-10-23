@@ -30,7 +30,6 @@ import org.apache.mahout.df.data.Instance;
 public abstract class Node implements Writable {
   
   protected enum Type {
-    MOCKLEAF,
     LEAF,
     NUMERICAL,
     CATEGORICAL
@@ -60,9 +59,6 @@ public abstract class Node implements Writable {
     Node node;
     
     switch (type) {
-      case MOCKLEAF:
-        node = new MockLeaf();
-        break;
       case LEAF:
         node = new Leaf();
         break;

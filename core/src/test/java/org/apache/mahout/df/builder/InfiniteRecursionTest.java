@@ -47,7 +47,7 @@ public final class InfiniteRecursionTest extends MahoutTestCase {
 
     String[] source = Utils.double2String(dData);
     String descriptor = "N N N N N N N N L";
-    Dataset dataset = DataLoader.generateDataset(descriptor, source);
+    Dataset dataset = DataLoader.generateDataset(descriptor, false, source);
     Data data = DataLoader.loadData(dataset, source);
 
     builder.build(rng, data);

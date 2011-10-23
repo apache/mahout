@@ -34,9 +34,9 @@ public final class DataConverterTest extends MahoutTestCase {
     Random rng = RandomUtils.getRandom();
     
     String descriptor = Utils.randomDescriptor(rng, ATTRIBUTE_COUNT);
-    double[][] source = Utils.randomDoubles(rng, descriptor, INSTANCE_COUNT);
+    double[][] source = Utils.randomDoubles(rng, descriptor, false, INSTANCE_COUNT);
     String[] sData = Utils.double2String(source);
-    Dataset dataset = DataLoader.generateDataset(descriptor, sData);
+    Dataset dataset = DataLoader.generateDataset(descriptor, false, sData);
     Data data = DataLoader.loadData(dataset, sData);
     
     DataConverter converter = new DataConverter(dataset);

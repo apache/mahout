@@ -68,11 +68,14 @@ public final class Describe {
       abuilder.withName("file").withMinimum(1).withMaximum(1).create()).withDescription(
       "Path to generated descriptor file").create();
     
+    Option regOpt = obuilder.withLongName("regression").withDescription("Regression Problem").withShortName("r")
+        .create();
+    
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
         .create();
     
     Group group = gbuilder.withName("Options").withOption(pathOpt).withOption(descPathOpt).withOption(
-      descriptorOpt).withOption(helpOpt).create();
+      descriptorOpt).withOption(regOpt).withOption(helpOpt).create();
     
     try {
       Parser parser = new Parser();
@@ -87,19 +90,21 @@ public final class Describe {
       String dataPath = cmdLine.getValue(pathOpt).toString();
       String descPath = cmdLine.getValue(descPathOpt).toString();
       List<String> descriptor = convert(cmdLine.getValues(descriptorOpt));
+      boolean regression = cmdLine.hasOption(regOpt);
       
       log.debug("Data path : {}", dataPath);
       log.debug("Descriptor path : {}", descPath);
       log.debug("Descriptor : {}", descriptor);
+      log.debug("Regression : {}", regression);
       
-      runTool(dataPath, descriptor, descPath);
+      runTool(dataPath, descriptor, descPath, regression);
     } catch (OptionException e) {
       log.warn(e.toString());
       CommandLineUtil.printHelp(group);
     }
   }
   
-  private static void runTool(String dataPath, Iterable<String> description, String filePath)
+  private static void runTool(String dataPath, Iterable<String> description, String filePath, boolean regression)
     throws DescriptorException, IOException {
     log.info("Generating the descriptor...");
     String descriptor = DescriptorUtils.generateDescriptor(description);
@@ -107,17 +112,17 @@ public final class Describe {
     Path fPath = validateOutput(filePath);
     
     log.info("generating the dataset...");
-    Dataset dataset = generateDataset(descriptor, dataPath);
+    Dataset dataset = generateDataset(descriptor, dataPath, regression);
     
     log.info("storing the dataset description");
     DFUtils.storeWritable(new Configuration(), fPath, dataset);
   }
   
-  private static Dataset generateDataset(String descriptor, String dataPath) throws IOException, DescriptorException {
+  private static Dataset generateDataset(String descriptor, String dataPath, boolean regression) throws IOException, DescriptorException {
     Path path = new Path(dataPath);
     FileSystem fs = path.getFileSystem(new Configuration());
     
-    return DataLoader.generateDataset(descriptor, fs, path);
+    return DataLoader.generateDataset(descriptor, regression, fs, path);
   }
   
   private static Path validateOutput(String filePath) throws IOException {

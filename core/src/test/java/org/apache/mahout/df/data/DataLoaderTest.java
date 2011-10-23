@@ -49,10 +49,10 @@ public final class DataLoaderTest extends MahoutTestCase {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
 
     // prepare the data
-    double[][] data = Utils.randomDoubles(rng, descriptor, datasize);
+    double[][] data = Utils.randomDoubles(rng, descriptor, false, datasize);
     Collection<Integer> missings = Lists.newArrayList();
     String[] sData = prepareData(data, attrs, missings);
-    Dataset dataset = DataLoader.generateDataset(descriptor, sData);
+    Dataset dataset = DataLoader.generateDataset(descriptor, false, sData);
     Data loaded = DataLoader.loadData(dataset, sData);
 
     testLoadedData(data, attrs, missings, loaded);
@@ -73,12 +73,12 @@ public final class DataLoaderTest extends MahoutTestCase {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
 
     // prepare the data
-    double[][] data = Utils.randomDoubles(rng, descriptor, datasize);
+    double[][] data = Utils.randomDoubles(rng, descriptor, false, datasize);
     Collection<Integer> missings = Lists.newArrayList();
     String[] sData = prepareData(data, attrs, missings);
-    Dataset expected = DataLoader.generateDataset(descriptor, sData);
+    Dataset expected = DataLoader.generateDataset(descriptor, false, sData);
 
-    Dataset dataset = DataLoader.generateDataset(descriptor, sData);
+    Dataset dataset = DataLoader.generateDataset(descriptor, false, sData);
     
     assertEquals(expected, dataset);
   }
@@ -157,13 +157,13 @@ public final class DataLoaderTest extends MahoutTestCase {
 
         if (attrs[attr].isNumerical()) {
           assertEquals(vector[attr], instance.get(aId++), EPSILON);
-        } else if (attrs[attr].isCategorical()) {
+        } else if (attrs[attr].isCategorical()||attrs[attr].isLabel()) {
           checkCategorical(data, missings, loaded, attr, aId, vector[attr],
               instance.get(aId));
           aId++;
-        } else if (attrs[attr].isLabel()) {
+        } /*else if (attrs[attr].isLabel()) {
           checkLabel(data, missings, loaded, attr, vector[attr]);
-        }
+        }*/
       }
       
       lind++;
@@ -192,7 +192,7 @@ public final class DataLoaderTest extends MahoutTestCase {
 
       int aId = 0;
       for (int attr = 0; attr < nbAttributes; attr++) {
-        if (attrs[attr].isIgnored() || attrs[attr].isLabel()) {
+        if (attrs[attr].isIgnored()) {
           continue;
         }
 
@@ -220,10 +220,10 @@ public final class DataLoaderTest extends MahoutTestCase {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
 
     // prepare the data
-    double[][] source = Utils.randomDoubles(rng, descriptor, datasize);
+    double[][] source = Utils.randomDoubles(rng, descriptor, false, datasize);
     Collection<Integer> missings = Lists.newArrayList();
     String[] sData = prepareData(source, attrs, missings);
-    Dataset dataset = DataLoader.generateDataset(descriptor, sData);
+    Dataset dataset = DataLoader.generateDataset(descriptor, false, sData);
 
     Path dataPath = Utils.writeDataToTestFile(sData);
     FileSystem fs = dataPath.getFileSystem(new Configuration());
@@ -246,15 +246,15 @@ public final class DataLoaderTest extends MahoutTestCase {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
 
     // prepare the data
-    double[][] source = Utils.randomDoubles(rng, descriptor, datasize);
+    double[][] source = Utils.randomDoubles(rng, descriptor, false, datasize);
     Collection<Integer> missings = Lists.newArrayList();
     String[] sData = prepareData(source, attrs, missings);
-    Dataset expected = DataLoader.generateDataset(descriptor, sData);
+    Dataset expected = DataLoader.generateDataset(descriptor, false, sData);
 
     Path path = Utils.writeDataToTestFile(sData);
     FileSystem fs = path.getFileSystem(new Configuration());
     
-    Dataset dataset = DataLoader.generateDataset(descriptor, fs, path);
+    Dataset dataset = DataLoader.generateDataset(descriptor, false, fs, path);
     
     assertEquals(expected, dataset);
   }
@@ -304,6 +304,8 @@ public final class DataLoaderTest extends MahoutTestCase {
                          Data loaded,
                          int labelInd,
                          double value) {
+  	Dataset dataset = loaded.getDataset();
+  	
     // label's code that corresponds to the value
     int code = loaded.getDataset().labelCode(Double.toString(value));
 
@@ -315,9 +317,9 @@ public final class DataLoaderTest extends MahoutTestCase {
       }
 
       if (source[index][labelInd] == value) {
-        assertEquals(code, loaded.get(lind).getLabel());
+        assertEquals(code, dataset.getLabel(loaded.get(lind)));
       } else {
-        assertFalse(code == loaded.get(lind).getLabel());
+        assertFalse(code == dataset.getLabel(loaded.get(lind)));
       }
 
       lind++;

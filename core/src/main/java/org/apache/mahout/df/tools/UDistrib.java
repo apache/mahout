@@ -175,7 +175,7 @@ public final class UDistrib {
       
       // write the tuple in files[tuple.label]
       Instance instance = converter.convert(id++, line);
-      int label = instance.getLabel();
+      int label = dataset.getLabel(instance);
       files[currents[label]].writeBytes(line);
       files[currents[label]].writeChar('\n');
       

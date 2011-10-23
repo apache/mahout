@@ -43,8 +43,8 @@ public class DataConverter {
   }
   
   public Instance convert(int id, CharSequence string) {
-    // all attributes (categorical, numerical), ignored, label
-    int nball = dataset.nbAttributes() + dataset.getIgnored().length + 1;
+    // all attributes (categorical, numerical, label), ignored
+    int nball = dataset.nbAttributes() + dataset.getIgnored().length;
     
     String[] tokens = COMMA_SPACE.split(string);
     Preconditions.checkArgument(tokens.length == nball, "Wrong number of attributes in the string");
@@ -55,26 +55,28 @@ public class DataConverter {
     int aId = 0;
     int label = -1;
     for (int attr = 0; attr < nball; attr++) {
-      String token = tokens[attr].trim();
-      
       if (ArrayUtils.contains(dataset.getIgnored(), attr)) {
         continue; // IGNORED
       }
+
+      String token = tokens[attr].trim();
       
       if ("?".equals(token)) {
         // missing value
         return null;
       }
       
-      if (attr == dataset.getLabelId()) {
+      if (aId == dataset.getLabelId()) {
         label = dataset.labelCode(token);
         if (label == -1) {
           log.error("label token: {} dataset.labels: {}", token, Arrays.toString(dataset.labels()));
           throw new IllegalStateException("Label value (" + token + ") not known");
         }
-      } else if (dataset.isNumerical(aId)) {
+      } 
+      
+      if (dataset.isNumerical(aId)) {
         vector.set(aId++, Double.parseDouble(token));
-      } else {
+      } else { // CATEGORICAL/LABEL
         vector.set(aId, dataset.valueOf(aId, token));
         aId++;
       }
@@ -85,6 +87,6 @@ public class DataConverter {
       throw new IllegalStateException("Label not found!");
     }
     
-    return new Instance(id, vector, label);
+    return new Instance(id, vector);
   }
 }

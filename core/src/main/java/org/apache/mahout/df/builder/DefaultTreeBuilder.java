@@ -69,6 +69,7 @@ public class DefaultTreeBuilder implements TreeBuilder {
     
     if (selected == null) {
       selected = new boolean[data.getDataset().nbAttributes()];
+      selected[data.getDataset().getLabelId()] = true; // never select the label
     }
     
     if (data.isEmpty()) {
@@ -78,7 +79,7 @@ public class DefaultTreeBuilder implements TreeBuilder {
       return new Leaf(data.majorityLabel(rng));
     }
     if (data.identicalLabel()) {
-      return new Leaf(data.get(0).getLabel());
+      return new Leaf(data.getDataset().getLabel(data.get(0)));
     }
     
     int[] attributes = randomAttributes(rng, selected, m);

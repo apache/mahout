@@ -261,8 +261,8 @@ public class TestForest extends Configured implements Tool {
         }
 
         if (analyzer != null) {
-          analyzer.addInstance(dataset.getLabel(instance.getLabel()),
-                               new ClassifierResult(dataset.getLabel(prediction), 1.0));
+          analyzer.addInstance(dataset.getLabelString(dataset.getLabel(instance)),
+                               new ClassifierResult(dataset.getLabelString(prediction), 1.0));
         }
       }
 

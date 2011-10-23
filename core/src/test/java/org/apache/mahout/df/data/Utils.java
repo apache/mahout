@@ -106,16 +106,17 @@ public final class Utils {
    * 
    * @param rng Random number generator
    * @param nbAttributes number of attributes
+   * @param regression true is the label is numerical
    * @param number of data lines to generate
    */
-  public static double[][] randomDoubles(Random rng, int nbAttributes,int number) throws DescriptorException {
+  public static double[][] randomDoubles(Random rng, int nbAttributes, boolean regression, int number) throws DescriptorException {
     String descriptor = randomDescriptor(rng, nbAttributes);
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
 
     double[][] data = new double[number][];
 
     for (int index = 0; index < number; index++) {
-      data[index] = randomVector(rng, attrs);
+      data[index] = randomVector(rng, attrs, regression);
     }
 
     return data;
@@ -128,13 +129,13 @@ public final class Utils {
    * @param descriptor attributes description
    * @param number number of data lines to generate
    */
-  public static double[][] randomDoubles(Random rng, CharSequence descriptor, int number) throws DescriptorException {
+  public static double[][] randomDoubles(Random rng, CharSequence descriptor, boolean regression, int number) throws DescriptorException {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
 
     double[][] data = new double[number][];
 
     for (int index = 0; index < number; index++) {
-      data[index] = randomVector(rng, attrs);
+      data[index] = randomVector(rng, attrs, regression);
     }
 
     return data;
@@ -145,13 +146,14 @@ public final class Utils {
    * 
    * @param rng Random number generator
    * @param nbAttributes number of attributes
+   * @param regression true is the label should be numerical
    * @param size data size
    */
-  public static Data randomData(Random rng, int nbAttributes, int size) throws DescriptorException {
+  public static Data randomData(Random rng, int nbAttributes, boolean regression, int size) throws DescriptorException {
     String descriptor = randomDescriptor(rng, nbAttributes);
-    double[][] source = randomDoubles(rng, descriptor, size);
+    double[][] source = randomDoubles(rng, descriptor, regression, size);
     String[] sData = double2String(source);
-    Dataset dataset = DataLoader.generateDataset(descriptor, sData);
+    Dataset dataset = DataLoader.generateDataset(descriptor, regression, sData);
     
     return DataLoader.loadData(dataset, sData);
   }
@@ -168,7 +170,7 @@ public final class Utils {
    * 
    * @param attrs attributes description
    */
-  private static double[] randomVector(Random rng, Attribute[] attrs) {
+  private static double[] randomVector(Random rng, Attribute[] attrs, boolean regression) {
     double[] vector = new double[attrs.length];
 
     for (int attr = 0; attr < attrs.length; attr++) {
@@ -176,9 +178,14 @@ public final class Utils {
         vector[attr] = Double.NaN;
       } else if (attrs[attr].isNumerical()) {
         vector[attr] = rng.nextDouble();
-      } else {
-        // CATEGORICAL or LABEL
+      } else if (attrs[attr].isCategorical()){
         vector[attr] = rng.nextInt(CATEGORICAL_RANGE);
+      } else { // LABEL
+      	if (regression) {
+          vector[attr] = rng.nextDouble();
+      	} else {
+          vector[attr] = rng.nextInt(CATEGORICAL_RANGE);
+      	}
       }
     }
 
@@ -222,14 +229,15 @@ public final class Utils {
    * 
    * @param rng
    * @param descriptor
+   * @param regression
    * @param number data size
    * @param value label value
    */
   public static double[][] randomDoublesWithSameLabel(Random rng,
-      String descriptor, int number, int value) throws DescriptorException {
+      String descriptor, boolean regression, int number, int value) throws DescriptorException {
     int label = findLabel(descriptor);
     
-    double[][] source = randomDoubles(rng, descriptor, number);
+    double[][] source = randomDoubles(rng, descriptor, regression, number);
     
     for (int index = 0; index < number; index++) {
       source[index][label] = value;

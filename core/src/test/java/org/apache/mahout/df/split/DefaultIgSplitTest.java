@@ -38,9 +38,9 @@ public final class DefaultIgSplitTest extends MahoutTestCase {
     int label = Utils.findLabel(descriptor);
 
     // all the vectors have the same label (0)
-    double[][] temp = Utils.randomDoublesWithSameLabel(rng, descriptor, 100, 0);
+    double[][] temp = Utils.randomDoublesWithSameLabel(rng, descriptor, false, 100, 0);
     String[] sData = Utils.double2String(temp);
-    Dataset dataset = DataLoader.generateDataset(descriptor, sData);
+    Dataset dataset = DataLoader.generateDataset(descriptor, false, sData);
     Data data = DataLoader.loadData(dataset, sData);
     DefaultIgSplit iG = new DefaultIgSplit();
 
@@ -53,7 +53,7 @@ public final class DefaultIgSplitTest extends MahoutTestCase {
       temp[index][label] = 1.0;
     }
     sData = Utils.double2String(temp);
-    dataset = DataLoader.generateDataset(descriptor, sData);
+    dataset = DataLoader.generateDataset(descriptor, false, sData);
     data = DataLoader.loadData(dataset, sData);
     iG = new DefaultIgSplit();
     
@@ -67,7 +67,7 @@ public final class DefaultIgSplitTest extends MahoutTestCase {
       temp[index][label] = 2.0;
     }
     sData = Utils.double2String(temp);
-    dataset = DataLoader.generateDataset(descriptor, sData);
+    dataset = DataLoader.generateDataset(descriptor, false, sData);
     data = DataLoader.loadData(dataset, sData);
     iG = new DefaultIgSplit();
     

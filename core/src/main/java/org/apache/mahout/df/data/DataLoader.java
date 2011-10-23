@@ -112,7 +112,7 @@ public final class DataLoader {
       throw new IllegalStateException("Label not found!");
     }
     
-    return new Instance(id, vector, label);
+    return new Instance(id, vector);
   }
   
   /**
@@ -188,12 +188,14 @@ public final class DataLoader {
    * 
    * @param descriptor
    *          attributes description
+   * @param regression
+   * 					if true, the label is numerical
    * @param fs
    *          file system
    * @param path
    *          data path
    */
-  public static Dataset generateDataset(String descriptor, FileSystem fs, Path path) throws DescriptorException,
+  public static Dataset generateDataset(String descriptor, boolean regression, FileSystem fs, Path path) throws DescriptorException,
                                                                                     IOException {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
     
@@ -217,7 +219,7 @@ public final class DataLoader {
     
     scanner.close();
     
-    return new Dataset(attrs, values, id);
+    return new Dataset(attrs, values, id, regression);
   }
   
   /**
@@ -226,7 +228,7 @@ public final class DataLoader {
    * @param descriptor
    *          attributes description
    */
-  public static Dataset generateDataset(String descriptor, String[] data) throws DescriptorException {
+  public static Dataset generateDataset(String descriptor, boolean regression, String[] data) throws DescriptorException {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
     
     // used to convert CATEGORICAL and LABEL attributes to Integer
@@ -243,7 +245,7 @@ public final class DataLoader {
       }
     }
     
-    return new Dataset(attrs, values, id);
+    return new Dataset(attrs, values, id, regression);
   }
 
 }

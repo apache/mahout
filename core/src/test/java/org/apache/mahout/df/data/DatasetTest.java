@@ -51,7 +51,7 @@ public final class DatasetTest extends MahoutTestCase {
     for (int nloop = 0; nloop < n; nloop++) {
       byteOutStream.reset();
       
-      Dataset dataset = Utils.randomData(rng, NUM_ATTRIBUTES, 1).getDataset();
+      Dataset dataset = Utils.randomData(rng, NUM_ATTRIBUTES, false, 1).getDataset();
       
       dataset.write(out);
       

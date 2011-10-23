@@ -90,9 +90,9 @@ public final class Step1MapperTest extends MahoutTestCase {
 
     // prepare the data
     String descriptor = Utils.randomDescriptor(rng, NUM_ATTRIBUTES);
-    double[][] source = Utils.randomDoubles(rng, descriptor, NUM_INSTANCES);
+    double[][] source = Utils.randomDoubles(rng, descriptor, false, NUM_INSTANCES);
     String[] sData = Utils.double2String(source);
-    Dataset dataset = DataLoader.generateDataset(descriptor, sData);
+    Dataset dataset = DataLoader.generateDataset(descriptor, false, sData);
     String[][] splits = Utils.splitData(sData, NUM_MAPPERS);
 
     MockTreeBuilder treeBuilder = new MockTreeBuilder();

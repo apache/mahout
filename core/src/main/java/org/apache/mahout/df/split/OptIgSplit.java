@@ -22,6 +22,7 @@ import java.util.Arrays;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.mahout.df.data.Data;
 import org.apache.mahout.df.data.DataUtils;
+import org.apache.mahout.df.data.Dataset;
 import org.apache.mahout.df.data.Instance;
 
 /**
@@ -52,11 +53,13 @@ public class OptIgSplit extends IgSplit {
     int[][] counts = new int[values.length][data.getDataset().nblabels()];
     int[] countAll = new int[data.getDataset().nblabels()];
     
+    Dataset dataset = data.getDataset();
+    
     // compute frequencies
     for (int index = 0; index < data.size(); index++) {
       Instance instance = data.get(index);
-      counts[ArrayUtils.indexOf(values, instance.get(attr))][instance.getLabel()]++;
-      countAll[instance.getLabel()]++;
+      counts[ArrayUtils.indexOf(values, instance.get(attr))][dataset.getLabel(instance)]++;
+      countAll[dataset.getLabel(instance)]++;
     }
     
     int size = data.size();
@@ -93,10 +96,12 @@ public class OptIgSplit extends IgSplit {
   }
   
   protected void computeFrequencies(Data data, int attr, double[] values) {
+  	Dataset dataset = data.getDataset();
+  	
     for (int index = 0; index < data.size(); index++) {
       Instance instance = data.get(index);
-      counts[ArrayUtils.indexOf(values, instance.get(attr))][instance.getLabel()]++;
-      countAll[instance.getLabel()]++;
+      counts[ArrayUtils.indexOf(values, instance.get(attr))][dataset.getLabel(instance)]++;
+      countAll[dataset.getLabel(instance)]++;
     }
   }
   

@@ -39,7 +39,7 @@ public class DataTest extends MahoutTestCase {
   public void setUp() throws Exception {
     super.setUp();
     rng = RandomUtils.getRandom();
-    data = Utils.randomData(rng, ATTRIBUTE_COUNT, DATA_SIZE);
+    data = Utils.randomData(rng, ATTRIBUTE_COUNT, false, DATA_SIZE);
   }
 
   /**
@@ -82,7 +82,7 @@ public class DataTest extends MahoutTestCase {
 
   @Test
   public void testValues() throws Exception {
-    Data data = Utils.randomData(rng, ATTRIBUTE_COUNT, DATA_SIZE);
+    Data data = Utils.randomData(rng, ATTRIBUTE_COUNT, false, DATA_SIZE);
 
     for (int attr = 0; attr < data.getDataset().nbAttributes(); attr++) {
       double[] values = data.values(attr);
@@ -108,14 +108,14 @@ public class DataTest extends MahoutTestCase {
   @Test
   public void testIdenticalTrue() throws Exception {
     // generate a small data, only to get the dataset
-    Dataset dataset = Utils.randomData(rng, ATTRIBUTE_COUNT, 1).getDataset();
+    Dataset dataset = Utils.randomData(rng, ATTRIBUTE_COUNT, false, 1).getDataset();
     
     // test empty data
     Data empty = new Data(dataset);
     assertTrue(empty.isIdentical());
 
     // test identical data, except for the labels
-    Data identical = Utils.randomData(rng, ATTRIBUTE_COUNT, DATA_SIZE);
+    Data identical = Utils.randomData(rng, ATTRIBUTE_COUNT, false, DATA_SIZE);
     Instance model = identical.get(0);
     for (int index = 1; index < DATA_SIZE; index++) {
       for (int attr = 0; attr < identical.getDataset().nbAttributes(); attr++) {
@@ -131,7 +131,7 @@ public class DataTest extends MahoutTestCase {
     int n = 10;
 
     for (int nloop = 0; nloop < n; nloop++) {
-      Data data = Utils.randomData(rng, ATTRIBUTE_COUNT, DATA_SIZE);
+      Data data = Utils.randomData(rng, ATTRIBUTE_COUNT, false, DATA_SIZE);
 
       // choose a random instance
       int index = rng.nextInt(DATA_SIZE);
@@ -148,7 +148,7 @@ public class DataTest extends MahoutTestCase {
   @Test
   public void testIdenticalLabelTrue() throws Exception {
     // generate a small data, only to get a dataset
-    Dataset dataset = Utils.randomData(rng, ATTRIBUTE_COUNT, 1).getDataset();
+    Dataset dataset = Utils.randomData(rng, ATTRIBUTE_COUNT, false, 1).getDataset();
     
     // test empty data
     Data empty = new Data(dataset);
@@ -156,11 +156,11 @@ public class DataTest extends MahoutTestCase {
 
     // test identical labels
     String descriptor = Utils.randomDescriptor(rng, ATTRIBUTE_COUNT);
-    double[][] source = Utils.randomDoublesWithSameLabel(rng, descriptor,
+    double[][] source = Utils.randomDoublesWithSameLabel(rng, descriptor, false,
             DATA_SIZE, rng.nextInt());
     String[] sData = Utils.double2String(source);
     
-    dataset = DataLoader.generateDataset(descriptor, sData);
+    dataset = DataLoader.generateDataset(descriptor, false, sData);
     Data data = DataLoader.loadData(dataset, sData);
     
     assertTrue(data.identicalLabel());
@@ -173,7 +173,7 @@ public class DataTest extends MahoutTestCase {
     for (int nloop = 0; nloop < n; nloop++) {
       String descriptor = Utils.randomDescriptor(rng, ATTRIBUTE_COUNT);
       int label = Utils.findLabel(descriptor);
-      double[][] source = Utils.randomDoublesWithSameLabel(rng, descriptor,
+      double[][] source = Utils.randomDoublesWithSameLabel(rng, descriptor, false,
               DATA_SIZE, rng.nextInt());
       // choose a random vector and change its label
       int index = rng.nextInt(DATA_SIZE);
@@ -181,7 +181,7 @@ public class DataTest extends MahoutTestCase {
 
       String[] sData = Utils.double2String(source);
       
-      Dataset dataset = DataLoader.generateDataset(descriptor, sData);
+      Dataset dataset = DataLoader.generateDataset(descriptor, false, sData);
       Data data = DataLoader.loadData(dataset, sData);
 
       assertFalse(data.identicalLabel());
@@ -237,8 +237,9 @@ public class DataTest extends MahoutTestCase {
 
   @Test
   public void testCountLabel() throws Exception {
-    Data data = Utils.randomData(rng, ATTRIBUTE_COUNT, DATA_SIZE);
-    int[] counts = new int[data.getDataset().nblabels()];
+    Data data = Utils.randomData(rng, ATTRIBUTE_COUNT, false, DATA_SIZE);
+    Dataset dataset = data.getDataset();
+    int[] counts = new int[dataset.nblabels()];
 
     int n = 10;
 
@@ -247,7 +248,7 @@ public class DataTest extends MahoutTestCase {
       data.countLabels(counts);
       
       for (int index=0;index<data.size();index++) {
-        counts[data.get(index).getLabel()]--;
+        counts[dataset.getLabel(data.get(index))]--;
       }
       
       for (int label = 0; label < data.getDataset().nblabels(); label++) {
@@ -264,11 +265,11 @@ public class DataTest extends MahoutTestCase {
     int label = Utils.findLabel(descriptor);
 
     int label1 = rng.nextInt();
-    double[][] source = Utils.randomDoublesWithSameLabel(rng, descriptor, 100,
+    double[][] source = Utils.randomDoublesWithSameLabel(rng, descriptor, false, 100,
         label1);
     String[] sData = Utils.double2String(source);
     
-    Dataset dataset = DataLoader.generateDataset(descriptor, sData);
+    Dataset dataset = DataLoader.generateDataset(descriptor, false, sData);
     Data data = DataLoader.loadData(dataset, sData);
 
     int code1 = dataset.labelCode(Double.toString(label1));
@@ -286,7 +287,7 @@ public class DataTest extends MahoutTestCase {
       }
     }
     sData = Utils.double2String(source);
-    dataset = DataLoader.generateDataset(descriptor, sData);
+    dataset = DataLoader.generateDataset(descriptor, false, sData);
     data = DataLoader.loadData(dataset, sData);
     int code2 = dataset.labelCode(Double.toString(label2));
 

@@ -29,12 +29,9 @@ public class Instance {
   /** attributes, except LABEL and IGNORED */
   private final Vector attrs;
   
-  private final int label;
-  
-  public Instance(int id, Vector attrs, int label) {
+  public Instance(int id, Vector attrs) {
     this.id = id;
     this.attrs = attrs;
-    this.label = label;
   }
   
   /**
@@ -70,26 +67,17 @@ public class Instance {
     
     Instance instance = (Instance) obj;
     
-    return id == instance.id && label == instance.label && attrs.equals(instance.attrs);
+    return id == instance.id && attrs.equals(instance.attrs);
     
   }
   
   @Override
   public int hashCode() {
-    return id + label + attrs.hashCode();
+    return id + attrs.hashCode();
   }
 
   /** instance unique id */
   public int getId() {
     return id;
-  }
-
-  /**
-   * instance label code.<br>
-   * use Dataset.labels to get the real label value
-   *
-   */
-  public int getLabel() {
-    return label;
   }
 }

@@ -215,9 +215,9 @@ public class Data implements Cloneable {
       return true;
     }
     
-    int label = get(0).getLabel();
+    int label = dataset.getLabel(get(0));
     for (int index = 1; index < size(); index++) {
-      if (get(index).getLabel() != label) {
+      if (dataset.getLabel(get(index)) != label) {
         return false;
       }
     }
@@ -278,7 +278,7 @@ public class Data implements Cloneable {
     int[] labels = new int[size()];
     
     for (int index = 0; index < labels.length; index++) {
-      labels[index] = get(index).getLabel();
+      labels[index] = dataset.getLabel(get(index));
     }
     
     return labels;
@@ -300,10 +300,12 @@ public class Data implements Cloneable {
     int[] labels = new int[dataset.nbInstances()];
     DataConverter converter = new DataConverter(dataset);
 
+    int labelId = dataset.getLabelId();
+    
     try {
       int index = 0;
       while (iterator.hasNext()) {
-        labels[index++] = converter.convert(0, iterator.next()).getLabel();
+        labels[index++] = (int) converter.convert(0, iterator.next()).get(labelId);
       }
     } finally {
       Closeables.closeQuietly(iterator);
@@ -322,7 +324,7 @@ public class Data implements Cloneable {
     int[] counts = new int[dataset.nblabels()];
     
     for (int index = 0; index < size(); index++) {
-      counts[get(index).getLabel()]++;
+      counts[dataset.getLabel(get(index))]++;
     }
     
     // find the label values that appears the most
@@ -337,7 +339,7 @@ public class Data implements Cloneable {
    */
   public void countLabels(int[] counts) {
     for (int index = 0; index < size(); index++) {
-      counts[get(index).getLabel()]++;
+      counts[dataset.getLabel(get(index))]++;
     }
   }
   

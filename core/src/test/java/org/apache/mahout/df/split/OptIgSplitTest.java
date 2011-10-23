@@ -37,7 +37,7 @@ public final class OptIgSplitTest extends MahoutTestCase {
     IgSplit opt = new OptIgSplit();
 
     Random rng = RandomUtils.getRandom();
-    Data data = Utils.randomData(rng, NUM_ATTRIBUTES, NUM_INSTANCES);
+    Data data = Utils.randomData(rng, NUM_ATTRIBUTES, false, NUM_INSTANCES);
 
     for (int nloop = 0; nloop < 100; nloop++) {
       int attr = rng.nextInt(data.getDataset().nbAttributes());
