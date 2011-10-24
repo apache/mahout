@@ -42,7 +42,7 @@ public class DataConverter {
     this.dataset = dataset;
   }
   
-  public Instance convert(int id, CharSequence string) {
+  public Instance convert(CharSequence string) {
     // all attributes (categorical, numerical, label), ignored
     int nball = dataset.nbAttributes() + dataset.getIgnored().length;
     
@@ -83,10 +83,10 @@ public class DataConverter {
     }
     
     if (label == -1) {
-      log.error("Label not found, instance id : {}, string : {}", id, string);
+      log.error("Label not found, instance string : {}", string);
       throw new IllegalStateException("Label not found!");
     }
     
-    return new Instance(id, vector);
+    return new Instance(vector);
   }
 }

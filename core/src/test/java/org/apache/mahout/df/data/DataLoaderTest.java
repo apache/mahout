@@ -146,9 +146,6 @@ public final class DataLoaderTest extends MahoutTestCase {
       double[] vector = data[index];
       Instance instance = loaded.get(lind);
 
-      // make sure the id is correct
-      assertEquals(lind, instance.getId());
-
       int aId = 0;
       for (int attr = 0; attr < nbAttributes; attr++) {
         if (attrs[attr].isIgnored()) {

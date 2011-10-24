@@ -252,7 +252,7 @@ public class TestForest extends Configured implements Tool {
           continue; // skip empty lines
         }
 
-        Instance instance = converter.convert(0, line);
+        Instance instance = converter.convert(line);
         int prediction = forest.classify(rng, instance);
 
         if (outputPath != null) {

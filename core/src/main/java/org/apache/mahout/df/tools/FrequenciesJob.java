@@ -187,7 +187,7 @@ public class FrequenciesJob {
         firstId = new LongWritable(key.get());
       }
       
-      Instance instance = converter.convert((int) key.get(), value.toString());
+      Instance instance = converter.convert(value.toString());
       
       context.write(firstId, new IntWritable(dataset.getLabel(instance)));
     }

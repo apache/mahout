@@ -24,13 +24,10 @@ import org.apache.mahout.math.Vector;
  */
 public class Instance {
   
-  private final int id;
-  
   /** attributes, except LABEL and IGNORED */
   private final Vector attrs;
   
-  public Instance(int id, Vector attrs) {
-    this.id = id;
+  public Instance(Vector attrs) {
     this.attrs = attrs;
   }
   
@@ -67,17 +64,12 @@ public class Instance {
     
     Instance instance = (Instance) obj;
     
-    return id == instance.id && attrs.equals(instance.attrs);
+    return /*id == instance.id &&*/ attrs.equals(instance.attrs);
     
   }
   
   @Override
   public int hashCode() {
-    return id + attrs.hashCode();
-  }
-
-  /** instance unique id */
-  public int getId() {
-    return id;
+    return /*id +*/ attrs.hashCode();
   }
 }

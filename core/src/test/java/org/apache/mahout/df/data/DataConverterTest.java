@@ -42,7 +42,7 @@ public final class DataConverterTest extends MahoutTestCase {
     DataConverter converter = new DataConverter(dataset);
     
     for (int index = 0; index < data.size(); index++) {
-      assertEquals(data.get(index), converter.convert(index, sData[index]));
+      assertEquals(data.get(index), converter.convert(sData[index]));
     }
   }
 }

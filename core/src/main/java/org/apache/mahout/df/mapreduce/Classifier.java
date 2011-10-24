@@ -241,7 +241,7 @@ public class Classifier {
 
       String line = value.toString();
       if (!line.isEmpty()) {
-        Instance instance = converter.convert(0, line);
+        Instance instance = converter.convert(line);
         int prediction = forest.classify(rng, instance);
         key.set(dataset.getLabel(instance));
         lvalue.set(Integer.toString(prediction));

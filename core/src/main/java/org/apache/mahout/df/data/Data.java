@@ -305,7 +305,7 @@ public class Data implements Cloneable {
     try {
       int index = 0;
       while (iterator.hasNext()) {
-        labels[index++] = (int) converter.convert(0, iterator.next()).get(labelId);
+        labels[index++] = (int) converter.convert(iterator.next()).get(labelId);
       }
     } finally {
       Closeables.closeQuietly(iterator);

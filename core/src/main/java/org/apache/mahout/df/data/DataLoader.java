@@ -54,15 +54,13 @@ public final class DataLoader {
   /**
    * Converts a comma-separated String to a Vector.
    * 
-   * @param id
-   *          unique id for the current instance
    * @param attrs
    *          attributes description
    * @param values
    *          used to convert CATEGORICAL attribute values to Integer
    * @return null if there are missing values '?'
    */
-  private static Instance parseString(int id, Attribute[] attrs, List<String>[] values, CharSequence string) {
+  private static Instance parseString(Attribute[] attrs, List<String>[] values, CharSequence string) {
     String[] tokens = COMMA_SPACE.split(string);
     Preconditions.checkArgument(tokens.length == attrs.length, "Wrong number of attributes in the string");
 
@@ -112,7 +110,7 @@ public final class DataLoader {
       throw new IllegalStateException("Label not found!");
     }
     
-    return new Instance(id, vector);
+    return new Instance(vector);
   }
   
   /**
@@ -141,7 +139,7 @@ public final class DataLoader {
         continue;
       }
       
-      Instance instance = converter.convert(instances.size(), line);
+      Instance instance = converter.convert(line);
       if (instance == null) {
         // missing values found
         log.warn("{}: missing values", instances.size());
@@ -170,7 +168,7 @@ public final class DataLoader {
         continue;
       }
       
-      Instance instance = converter.convert(instances.size(), line);
+      Instance instance = converter.convert(line);
       if (instance == null) {
         // missing values found
         log.warn("{}: missing values", instances.size());
@@ -205,21 +203,21 @@ public final class DataLoader {
     // used to convert CATEGORICAL attribute to Integer
     List<String>[] values = new List[attrs.length];
     
-    int id = 0;
+    int size = 0;
     while (scanner.hasNextLine()) {
       String line = scanner.nextLine();
       if (line.isEmpty()) {
         continue;
       }
       
-      if (parseString(id, attrs, values, line) != null) {
-        id++;
+      if (parseString(attrs, values, line) != null) {
+        size++;
       }
     }
     
     scanner.close();
     
-    return new Dataset(attrs, values, id, regression);
+    return new Dataset(attrs, values, size, regression);
   }
   
   /**
@@ -234,18 +232,18 @@ public final class DataLoader {
     // used to convert CATEGORICAL and LABEL attributes to Integer
     List<String>[] values = new List[attrs.length];
     
-    int id = 0;
+    int size = 0;
     for (String aData : data) {
       if (aData.isEmpty()) {
         continue;
       }
       
-      if (parseString(id, attrs, values, aData) != null) {
-        id++;
+      if (parseString(attrs, values, aData) != null) {
+        size++;
       }
     }
     
-    return new Dataset(attrs, values, id, regression);
+    return new Dataset(attrs, values, size, regression);
   }
 
 }
