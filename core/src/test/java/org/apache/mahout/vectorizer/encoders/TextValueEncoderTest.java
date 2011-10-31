@@ -18,6 +18,8 @@
 package org.apache.mahout.vectorizer.encoders;
 
 import com.google.common.collect.ImmutableMap;
+import org.apache.lucene.analysis.WhitespaceAnalyzer;
+import org.apache.lucene.util.Version;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
@@ -63,5 +65,37 @@ public final class TextValueEncoderTest extends MahoutTestCase {
     Locale.setDefault(Locale.ENGLISH);
     FeatureVectorEncoder enc = new TextValueEncoder("text");
     assertEquals("[text:test1:1.0000, text:and:1.0000, text:more:1.0000]", enc.asString("test1 and more"));
+  }
+
+  @Test
+  public void testLuceneEncoding() throws Exception {
+    LuceneTextValueEncoder enc = new LuceneTextValueEncoder("text");
+    enc.setAnalyzer(new WhitespaceAnalyzer(Version.LUCENE_34));
+    Vector v1;
+    v1 = new DenseVector(200);
+    enc.addToVector("test1 and more", v1);
+    enc.flush(1, v1);
+
+    //should be the same as text test above, since we are splitting on whitespace
+    // should set 6 distinct locations to 1
+    assertEquals(6.0, v1.norm(1), 0);
+    assertEquals(1.0, v1.maxValue(), 0);
+
+    v1 = new DenseVector(200);
+    enc.addToVector("", v1);
+    enc.flush(1, v1);
+    assertEquals(0.0, v1.norm(1), 0);
+    assertEquals(0.0, v1.maxValue(), 0);
+
+    v1 = new DenseVector(200);
+    StringBuilder builder = new StringBuilder(5000);
+    for (int i = 0; i < 1000; i++){//lucene's internal buffer length request is 4096, so let's make sure we can handle larger size
+      builder.append("token_").append(i).append(" ");
+    }
+    enc.addToVector(builder.toString(), v1);
+    enc.flush(1, v1);
+    //System.out.println(v1);
+    assertEquals(2000.0, v1.norm(1), 0);
+    assertEquals(19.0, v1.maxValue(), 0);
   }
 }

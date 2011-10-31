@@ -71,6 +71,7 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
       for (int i = 0; i < n; i++) {
         buf.put(input.charAt(i));
       }
+      buf.rewind();
     }
 
     /**
@@ -84,8 +85,13 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
      */
     @Override
     public int read(char[] cbuf, int off, int len) {
-      buf.get(cbuf, off, len);
-      return len;
+      int toRead = Math.min(len, buf.remaining());
+      if (toRead > 0){
+        buf.get(cbuf, off, toRead);
+        return toRead;
+      } else {
+        return -1;
+      }
     }
 
     @Override
