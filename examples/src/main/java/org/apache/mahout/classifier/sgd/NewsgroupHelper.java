@@ -1,4 +1,20 @@
 package org.apache.mahout.classifier.sgd;
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 import com.google.common.base.Charsets;
@@ -37,9 +53,9 @@ public class NewsgroupHelper {
 
   static final Random rand = RandomUtils.getRandom();
   static final SimpleDateFormat[] DATE_FORMATS = {
-    new SimpleDateFormat("", Locale.ENGLISH),
-    new SimpleDateFormat("MMM-yyyy", Locale.ENGLISH),
-    new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss", Locale.ENGLISH)
+          new SimpleDateFormat("", Locale.ENGLISH),
+          new SimpleDateFormat("MMM-yyyy", Locale.ENGLISH),
+          new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss", Locale.ENGLISH)
   };
   static final Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_31);
   static final FeatureVectorEncoder encoder = new StaticWordValueEncoder("body");
@@ -61,8 +77,8 @@ public class NewsgroupHelper {
       countWords(analyzer, words, dateString, overallCounts);
       while (line != null && line.length() > 0) {
         boolean countHeader = (
-          line.startsWith("From:") || line.startsWith("Subject:") ||
-            line.startsWith("Keywords:") || line.startsWith("Summary:")) && leakType < 6;
+                line.startsWith("From:") || line.startsWith("Subject:") ||
+                        line.startsWith("Keywords:") || line.startsWith("Summary:")) && leakType < 6;
         do {
           Reader in = new StringReader(line);
           if (countHeader) {

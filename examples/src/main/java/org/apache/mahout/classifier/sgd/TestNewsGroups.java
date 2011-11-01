@@ -29,10 +29,7 @@ import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.cli2.util.HelpFormatter;
 import org.apache.mahout.classifier.ClassifierResult;
-import org.apache.mahout.classifier.ConfusionMatrix;
 import org.apache.mahout.classifier.ResultAnalyzer;
-import org.apache.mahout.classifier.evaluation.Auc;
-import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.vectorizer.encoders.Dictionary;
 
@@ -42,7 +39,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Run the 20 news groups test data through SGD, as trained by {@link org.apache.mahout.classifier.sgd.TrainNewsGroups}.
@@ -50,7 +46,6 @@ import java.util.Locale;
 public class TestNewsGroups {
   protected String inputFile;
   protected String modelFile;
-
 
 
   private TestNewsGroups() {
