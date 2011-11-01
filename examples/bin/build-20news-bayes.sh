@@ -26,6 +26,7 @@ SCRIPT_PATH=${0%/*}
 if [ "$0" != "$SCRIPT_PATH" ] && [ "$SCRIPT_PATH" != "" ]; then 
   cd $SCRIPT_PATH
 fi
+START_PATH=`pwd`
 
 WORK_DIR=/tmp/mahout-work-${USER}
 
@@ -43,16 +44,19 @@ if [ ! -e ${WORK_DIR}/20news-bayesinput ]; then
     cd ${WORK_DIR}/20news-bydate && tar xzf ../20news-bydate.tar.gz && cd .. && cd ..
   fi
 fi
-
+#echo $START_PATH
+cd $START_PATH
 cd ../..
 
 set -e
-
+echo "Preparing Training Data"
 ./bin/mahout org.apache.mahout.classifier.bayes.PrepareTwentyNewsgroups \
   -p ${WORK_DIR}/20news-bydate/20news-bydate-train \
   -o ${WORK_DIR}/20news-bydate/bayes-train-input \
   -a org.apache.mahout.vectorizer.DefaultAnalyzer \
   -c UTF-8
+
+echo "Preparing Test Data"
 
 ./bin/mahout org.apache.mahout.classifier.bayes.PrepareTwentyNewsgroups \
   -p ${WORK_DIR}/20news-bydate/20news-bydate-test \
