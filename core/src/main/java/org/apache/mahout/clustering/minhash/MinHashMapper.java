@@ -102,6 +102,7 @@ public class MinHashMapper extends Mapper<Text, VectorWritable, Text, Writable> 
       for (int j = 0; j < keyGroups; j++) {
         clusterIdBuilder.append(minHashValues[(i + j) % numHashFunctions]).append('-');
       }
+      //remove the last dash
       clusterIdBuilder.deleteCharAt(clusterIdBuilder.length() - 1);
       Text cluster = new Text(clusterIdBuilder.toString());
       Writable point;
