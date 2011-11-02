@@ -18,6 +18,7 @@ package org.apache.mahout.clustering.minhash;
 
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.MurmurHash;
+import org.apache.mahout.math.MurmurHash3;
 
 import java.util.Random;
 
@@ -27,7 +28,7 @@ public final class HashFactory {
   }
 
   public enum HashType {
-    LINEAR, POLYNOMIAL, MURMUR
+    LINEAR, POLYNOMIAL, MURMUR, MURMUR3
   }
 
   public static HashFunction[] createHashFunctions(HashType type, int numFunctions) {
@@ -47,6 +48,11 @@ public final class HashFactory {
       case MURMUR:
         for (int i = 0; i < numFunctions; i++) {
           hashFunction[i] = new MurmurHashWrapper(seed.nextInt());
+        }
+        break;
+      case MURMUR3:
+        for (int i = 0; i < numFunctions; i++) {
+          hashFunction[i] = new MurmurHash3Wrapper(seed.nextInt());
         }
         break;
       default:
@@ -108,6 +114,20 @@ public final class HashFactory {
     @Override
     public int hash(byte[] bytes) {
       long hashValue = MurmurHash.hash64A(bytes, seed);
+      return Math.abs((int) (hashValue % RandomUtils.MAX_INT_SMALLER_TWIN_PRIME));
+    }
+  }
+
+  static class MurmurHash3Wrapper implements HashFunction {
+    private final int seed;
+
+    MurmurHash3Wrapper(int seed) {
+      this.seed = seed;
+    }
+
+    @Override
+    public int hash(byte[] bytes) {
+      long hashValue = MurmurHash3.murmurhash3_x86_32(bytes, 0, bytes.length, seed);
       return Math.abs((int) (hashValue % RandomUtils.MAX_INT_SMALLER_TWIN_PRIME));
     }
   }

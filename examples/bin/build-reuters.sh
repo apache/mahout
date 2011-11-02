@@ -93,7 +93,7 @@ fi
 if [ "x$clustertype" == "xkmeans" ]; then
   $MAHOUT seq2sparse \
     -i ${WORK_DIR}/reuters-out-seqdir/ \
-    -o ${WORK_DIR}/reuters-out-seqdir-sparse-kmeans \
+    -o ${WORK_DIR}/reuters-out-seqdir-sparse-kmeans --maxDFPercent 85 \
   && \
   $MAHOUT kmeans \
     -i ${WORK_DIR}/reuters-out-seqdir-sparse-kmeans/tfidf-vectors/ \
@@ -109,7 +109,7 @@ if [ "x$clustertype" == "xkmeans" ]; then
 elif [ "x$clustertype" == "xfuzzykmeans" ]; then
   $MAHOUT seq2sparse \
     -i ${WORK_DIR}/reuters-out-seqdir/ \
-    -o ${WORK_DIR}/reuters-out-seqdir-sparse-fkmeans \
+    -o ${WORK_DIR}/reuters-out-seqdir-sparse-fkmeans --maxDFPercent 85 \
   && \
   $MAHOUT fkmeans \
     -i ${WORK_DIR}/reuters-out-seqdir-sparse-fkmeans/tfidf-vectors/ \
@@ -139,7 +139,7 @@ elif [ "x$clustertype" == "xlda" ]; then
 elif [ "x$clustertype" == "xdirichlet" ]; then
   $MAHOUT seq2sparse \
     -i ${WORK_DIR}/reuters-out-seqdir/ \
-    -o ${WORK_DIR}/reuters-out-seqdir-sparse-dirichlet \
+    -o ${WORK_DIR}/reuters-out-seqdir-sparse-dirichlet  --maxDFPercent 85 \
   && \
   $MAHOUT dirichlet \
     -i ${WORK_DIR}/reuters-out-seqdir-sparse-dirichlet/tfidf-vectors \
@@ -155,7 +155,7 @@ elif [ "x$clustertype" == "xdirichlet" ]; then
 elif [ "x$clustertype" == "xminhash" ]; then
   $MAHOUT seq2sparse \
     -i ${WORK_DIR}/reuters-out-seqdir/ \
-    -o ${WORK_DIR}/reuters-out-seqdir-sparse-minhash \
+    -o ${WORK_DIR}/reuters-out-seqdir-sparse-minhash --maxDFPercent 85 \
   && \
   $MAHOUT org.apache.mahout.clustering.minhash.MinHashDriver \
     -i ${WORK_DIR}/reuters-out-seqdir-sparse-minhash/tfidf-vectors \

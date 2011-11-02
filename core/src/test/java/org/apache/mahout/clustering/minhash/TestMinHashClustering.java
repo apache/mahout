@@ -170,5 +170,13 @@ public class TestMinHashClustering extends MahoutTestCase {
     assertEquals("Minhash MR Job failed for " + HashType.MURMUR, 0, ret);
     verify(output, 0.3, "Hash Type: MURMUR");
   }
+
+  @Test
+  public void testMurmur3MinHashMRJob() throws Exception {
+    String[] args = makeArguments(2, 3, 20, 4, HashType.MURMUR3.toString());
+    int ret = ToolRunner.run(new Configuration(), new MinHashDriver(), args);
+    assertEquals("Minhash MR Job failed for " + HashType.MURMUR3, 0, ret);
+    verify(output, 0.3, "Hash Type: MURMUR");
+  }
   
 }
