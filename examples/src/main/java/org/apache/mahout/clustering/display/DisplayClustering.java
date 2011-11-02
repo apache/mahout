@@ -241,8 +241,9 @@ public class DisplayClustering extends Frame {
     FileSystem fs = FileSystem.get(output.toUri(), conf);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, output, Text.class, VectorWritable.class);
     try {
+      int i = 0;
       for (VectorWritable vw : SAMPLE_DATA) {
-        writer.append(new Text(), vw);
+        writer.append(new Text("sample_"  + i++), vw);
       }
     } finally {
       Closeables.closeQuietly(writer);
