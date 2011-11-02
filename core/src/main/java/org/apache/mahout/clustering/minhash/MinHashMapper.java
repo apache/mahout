@@ -30,10 +30,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public class MinHashMapper extends Mapper<Text,VectorWritable,Text,Writable> {
-  
+public class MinHashMapper extends Mapper<Text, VectorWritable, Text, Writable> {
+
   private static final Logger log = LoggerFactory.getLogger(MinHashMapper.class);
-  
+
   private HashFunction[] hashFunction;
   private int numHashFunctions;
   private int keyGroups;
@@ -41,7 +41,7 @@ public class MinHashMapper extends Mapper<Text,VectorWritable,Text,Writable> {
   private boolean debugOutput;
   private int[] minHashValues;
   private byte[] bytesToHash;
-  
+
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
@@ -53,7 +53,7 @@ public class MinHashMapper extends Mapper<Text,VectorWritable,Text,Writable> {
     this.minVectorSize = conf.getInt(MinhashOptionCreator.MIN_VECTOR_SIZE, 5);
     String htype = conf.get(MinhashOptionCreator.HASH_TYPE, "linear");
     this.debugOutput = conf.getBoolean(MinhashOptionCreator.DEBUG_OUTPUT, false);
-    
+
     HashType hashType;
     try {
       hashType = HashType.valueOf(htype);
@@ -63,11 +63,11 @@ public class MinHashMapper extends Mapper<Text,VectorWritable,Text,Writable> {
     }
     hashFunction = HashFactory.createHashFunctions(hashType, numHashFunctions);
   }
-  
+
   /**
    * Hash all items with each function and retain min. value for each iteration. We up with X number of
    * minhash signatures.
-   * 
+   * <p/>
    * Now depending upon the number of key-groups (1 - 4) concatenate that many minhash values to form
    * cluster-id as 'key' and item-id as 'value'
    */
@@ -81,7 +81,7 @@ public class MinHashMapper extends Mapper<Text,VectorWritable,Text,Writable> {
     for (int i = 0; i < numHashFunctions; i++) {
       minHashValues[i] = Integer.MAX_VALUE;
     }
-    
+
     for (int i = 0; i < numHashFunctions; i++) {
       for (Vector.Element ele : featureVector) {
         int value = (int) ele.get();
@@ -90,6 +90,7 @@ public class MinHashMapper extends Mapper<Text,VectorWritable,Text,Writable> {
         bytesToHash[2] = (byte) (value >> 8);
         bytesToHash[3] = (byte) value;
         int hashIndex = hashFunction[i].hash(bytesToHash);
+        //if our new hash value is less than the old one, replace the old one
         if (minHashValues[i] > hashIndex) {
           minHashValues[i] = hashIndex;
         }
