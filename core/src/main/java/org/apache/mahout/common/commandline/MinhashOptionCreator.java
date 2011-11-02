@@ -36,10 +36,7 @@ public final class MinhashOptionCreator {
     return new DefaultOptionBuilder()
         .withLongName(DEBUG_OUTPUT)
         .withShortName("debug")
-        .withArgument(
-            new ArgumentBuilder().withName(DEBUG_OUTPUT).withDefault("false")
-                .withMinimum(1).withMaximum(1).create())
-        .withDescription("Cluster the whole vectors for debugging");
+        .withDescription("Output the whole vectors for debugging");
   }
 
   public static DefaultOptionBuilder numReducersOption() {

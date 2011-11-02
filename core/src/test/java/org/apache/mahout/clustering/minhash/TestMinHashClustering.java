@@ -95,7 +95,7 @@ public class TestMinHashClustering extends MahoutTestCase {
                          optKey(MinhashOptionCreator.NUM_HASH_FUNCTIONS), String.valueOf(numHashFunctions),
                          optKey(MinhashOptionCreator.KEY_GROUPS), String.valueOf(keyGroups),
                          optKey(MinhashOptionCreator.NUM_REDUCERS), "1",
-                         optKey(MinhashOptionCreator.DEBUG_OUTPUT), "true"};
+                         optKey(MinhashOptionCreator.DEBUG_OUTPUT)};
   }
   
   private static Set<Integer> getValues(Vector vector) {

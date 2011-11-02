@@ -110,7 +110,7 @@ public final class MinHashDriver extends AbstractJob {
     int numHashFunctions = Integer.valueOf(getOption(MinhashOptionCreator.NUM_HASH_FUNCTIONS));
     int keyGroups = Integer.valueOf(getOption(MinhashOptionCreator.KEY_GROUPS));
     int numReduceTasks = Integer.parseInt(getOption(MinhashOptionCreator.NUM_REDUCERS));
-    boolean debugOutput = Boolean.parseBoolean(getOption(MinhashOptionCreator.DEBUG_OUTPUT));
+    boolean debugOutput = hasOption(MinhashOptionCreator.DEBUG_OUTPUT);
 
     runJob(input,
            output,
