@@ -238,6 +238,8 @@ public final class TrainNewsGroups {
 
     List<String> ngNames = Lists.newArrayList(newsGroups.values());
     List<ModelDissector.Weight> weights = md.summary(100);
+    System.out.println("============");
+    System.out.println("Model Dissection");
     for (ModelDissector.Weight w : weights) {
       System.out.printf("%s\t%.1f\t%s\t%.1f\t%s\t%.1f\t%s\n",
                         w.getFeature(), w.getWeight(), ngNames.get(w.getMaxImpact() + 1),

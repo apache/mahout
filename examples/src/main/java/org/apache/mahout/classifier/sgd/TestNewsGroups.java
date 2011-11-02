@@ -86,7 +86,8 @@ public class TestNewsGroups {
       Vector result = classifier.classifyFull(input);
       int cat = result.maxValueIndex();
       double score = result.maxValue();
-      ClassifierResult cr = new ClassifierResult(newsGroups.values().get(cat), score);
+      double ll = classifier.logLikelihood(actual, input);
+      ClassifierResult cr = new ClassifierResult(newsGroups.values().get(cat), score, ll);
       ra.addInstance(newsGroups.values().get(actual), cr);
 
     }

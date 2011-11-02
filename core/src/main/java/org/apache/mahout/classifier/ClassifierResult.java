@@ -34,6 +34,7 @@ public class ClassifierResult {
 
   private String label;
   private double score;
+  private double logLikelihood = Double.MAX_VALUE;
   
   public ClassifierResult() { }
   
@@ -45,7 +46,21 @@ public class ClassifierResult {
   public ClassifierResult(String label) {
     this.label = label;
   }
-  
+
+  public ClassifierResult(String label, double score, double logLikelihood) {
+    this.label = label;
+    this.score = score;
+    this.logLikelihood = logLikelihood;
+  }
+
+  public double getLogLikelihood() {
+    return logLikelihood;
+  }
+
+  public void setLogLikelihood(double logLikelihood) {
+    this.logLikelihood = logLikelihood;
+  }
+
   public String getLabel() {
     return label;
   }

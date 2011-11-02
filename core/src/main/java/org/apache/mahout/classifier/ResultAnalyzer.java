@@ -22,6 +22,7 @@ import java.text.NumberFormat;
 import java.util.Collection;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.mahout.math.stats.OnlineSummarizer;
 
 /**
  * ResultAnalyzer captures the classification statistics and displays in a tabular manner
@@ -29,6 +30,8 @@ import org.apache.commons.lang.StringUtils;
 public class ResultAnalyzer {
   
   private final ConfusionMatrix confusionMatrix;
+  private OnlineSummarizer summarizer;
+  boolean hasLL = false;
   
   /*
    * === Summary ===
@@ -43,6 +46,7 @@ public class ResultAnalyzer {
   
   public ResultAnalyzer(Collection<String> labelSet, String defaultLabel) {
     confusionMatrix = new ConfusionMatrix(labelSet, defaultLabel);
+    summarizer = new OnlineSummarizer();
   }
   
   public ConfusionMatrix getConfusionMatrix() {
@@ -65,6 +69,10 @@ public class ResultAnalyzer {
       incorrectlyClassified++;
     }
     confusionMatrix.addInstance(correctLabel, classifiedResult);
+    if (classifiedResult.getLogLikelihood() != Double.MAX_VALUE){
+      summarizer.add(classifiedResult.getLogLikelihood());
+      hasLL = true;
+    }
     return result;
   }
   
@@ -91,7 +99,12 @@ public class ResultAnalyzer {
     returnString.append('\n');
     
     returnString.append(confusionMatrix);
-    
+    if (hasLL) {
+      returnString.append("\n\n");
+      returnString.append("Avg. Log-likelihood: ").append(summarizer.getMean()).append(" 25%-ile: ").append(summarizer.getQuartile(1))
+              .append(" 75%-ile: ").append(summarizer.getQuartile(2));
+    }
+
     return returnString.toString();
   }
 }
