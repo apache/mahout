@@ -37,13 +37,14 @@ fi
 if [ "$1" = "-ni" ]; then
   clustertype=kmeans
 else
-  algorithm=( kmeans fuzzykmeans lda dirichlet)
+  algorithm=( kmeans fuzzykmeans lda dirichlet minhash)
  
   echo "Please select a number to choose the corresponding clustering algorithm"
   echo "1. ${algorithm[0]} clustering"
   echo "2. ${algorithm[1]} clustering"
   echo "3. ${algorithm[2]} clustering"
   echo "4. ${algorithm[3]} clustering"
+  echo "5. ${algorithm[4]} clustering"
   read -p "Enter your choice : " choice
 
   echo "ok. You chose $choice and we'll use ${algorithm[$choice-1]} Clustering"
@@ -151,6 +152,14 @@ elif [ "x$clustertype" == "xdirichlet" ]; then
     -s ${WORK_DIR}/reuters-dirichlet/clusters-*-final \
     -d ${WORK_DIR}/reuters-out-seqdir-sparse-dirichlet/dictionary.file-0 \
     -dt sequencefile -b 100 -n 20
+elif [ "x$clustertype" == "xminhash" ]; then
+  $MAHOUT seq2sparse \
+    -i ${WORK_DIR}/reuters-out-seqdir/ \
+    -o ${WORK_DIR}/reuters-out-seqdir-sparse-minhash \
+  && \
+  $MAHOUT org.apache.mahout.clustering.minhash.MinHashDriver \
+    -i ${WORK_DIR}/reuters-out-seqdir-sparse-minhash/tfidf-vectors \
+    -o ${WORK_DIR}/reuters-minhash
 else 
   echo "unknown cluster type: $clustertype"
 fi 
