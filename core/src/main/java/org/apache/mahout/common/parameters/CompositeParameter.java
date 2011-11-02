@@ -20,6 +20,7 @@ package org.apache.mahout.common.parameters;
 import java.util.Collection;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.mahout.common.ClassUtils;
 
 /** A placeholder for some sort of class with more parameters. */
 public class CompositeParameter<T extends Parametered> extends AbstractParameter<T> {
@@ -50,15 +51,7 @@ public class CompositeParameter<T extends Parametered> extends AbstractParameter
   
   @Override
   public void setStringValue(String className) {
-    try {
-      set((T) Class.forName(className).newInstance());
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
-    }
+    set((T) ClassUtils.instantiateAs(className, Object.class));
   }
   
   @Override

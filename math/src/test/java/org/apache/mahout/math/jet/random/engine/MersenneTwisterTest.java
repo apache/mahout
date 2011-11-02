@@ -70,7 +70,7 @@ public final class MersenneTwisterTest extends MahoutTestCase {
 
   @Test
   public void testRegression() {
-    MersenneTwister r = new MersenneTwister(42);
+    RandomEngine r = new MersenneTwister(42);
     int i = 0;
     for (double x : reference3) {
       assertEquals("t-regression-"+i, x, r.nextDouble(), 1.0e-7);
@@ -81,8 +81,8 @@ public final class MersenneTwisterTest extends MahoutTestCase {
 
   @Test
   public void testDateConstructor() {
-    MersenneTwister r1 = new MersenneTwister(1275264362);
-    MersenneTwister r2 = new MersenneTwister(new Date(1275264362));
+    RandomEngine r1 = new MersenneTwister(1275264362);
+    RandomEngine r2 = new MersenneTwister(new Date(1275264362));
     for (int i = 0; i < 100; i++) {
       assertEquals("date-"+i, r1.nextInt(), r2.nextInt());
     }

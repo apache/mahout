@@ -40,6 +40,7 @@ import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
@@ -67,8 +68,7 @@ public final class RepresentativePointsDriver extends AbstractJob {
   }
 
   @Override
-  public int run(String[] args)
-    throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException, InterruptedException {
+  public int run(String[] args) throws ClassNotFoundException, IOException, InterruptedException {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
@@ -84,8 +84,7 @@ public final class RepresentativePointsDriver extends AbstractJob {
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     boolean runSequential = getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(
         DefaultOptionCreator.SEQUENTIAL_METHOD);
-    ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    DistanceMeasure measure = ccl.loadClass(distanceMeasureClass).asSubclass(DistanceMeasure.class).newInstance();
+    DistanceMeasure measure = ClassUtils.instantiateAs(distanceMeasureClass, DistanceMeasure.class);
 
     run(getConf(), input, null, output, measure, maxIterations, runSequential);
     return 0;

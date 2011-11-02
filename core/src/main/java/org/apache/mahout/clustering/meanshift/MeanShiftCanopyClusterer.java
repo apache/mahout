@@ -22,16 +22,12 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.kernel.IKernelProfile;
 import org.apache.mahout.math.Vector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MeanShiftCanopyClusterer {
-
-  private static final Logger log = LoggerFactory
-      .getLogger(MeanShiftCanopyClusterer.class);
 
   private final double convergenceDelta;
 
@@ -50,31 +46,12 @@ public class MeanShiftCanopyClusterer {
   private final boolean runClustering;
 
   public MeanShiftCanopyClusterer(Configuration configuration) {
-    try {
-      measure = Class.forName(
-          configuration.get(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY))
-          .asSubclass(DistanceMeasure.class).newInstance();
-      measure.configure(configuration);
-      runClustering = configuration.getBoolean(
-          MeanShiftCanopyConfigKeys.CLUSTER_POINTS_KEY, true);
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
-    }
-    try {
-      kernelProfile = Class.forName(
-          configuration.get(MeanShiftCanopyConfigKeys.KERNEL_PROFILE_KEY))
-          .asSubclass(IKernelProfile.class).newInstance();
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
-    }
+    measure = ClassUtils.instantiateAs(configuration.get(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY), 
+                                       DistanceMeasure.class);
+    measure.configure(configuration);
+    runClustering = configuration.getBoolean(MeanShiftCanopyConfigKeys.CLUSTER_POINTS_KEY, true);
+    kernelProfile = ClassUtils.instantiateAs(configuration.get(MeanShiftCanopyConfigKeys.KERNEL_PROFILE_KEY),
+                                             IKernelProfile.class);
     // nextCanopyId = 0; // never read?
     t1 = Double
         .parseDouble(configuration.get(MeanShiftCanopyConfigKeys.T1_KEY));

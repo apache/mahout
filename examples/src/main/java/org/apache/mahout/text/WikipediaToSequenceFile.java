@@ -180,7 +180,7 @@ public final class WikipediaToSequenceFile {
     HadoopUtil.delete(conf, outPath);
     
     Set<String> categories = new HashSet<String>();
-    if (catFile.length() > 0) {
+    if (!catFile.isEmpty()) {
       for (String line : new FileLineIterable(new File(catFile))) {
         categories.add(line.trim().toLowerCase(Locale.ENGLISH));
       }

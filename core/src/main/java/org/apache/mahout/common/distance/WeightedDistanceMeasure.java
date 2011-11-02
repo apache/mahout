@@ -28,6 +28,7 @@ import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.parameters.ClassParameter;
 import org.apache.mahout.common.parameters.Parameter;
 import org.apache.mahout.common.parameters.PathParameter;
@@ -67,7 +68,8 @@ public abstract class WeightedDistanceMeasure implements DistanceMeasure {
     try {
       if (weightsFile.get() != null) {
         FileSystem fs = FileSystem.get(weightsFile.get().toUri(), jobConf);
-        VectorWritable weights = (VectorWritable) vectorClass.get().newInstance();
+        VectorWritable weights =
+            ClassUtils.instantiateAs((Class<? extends VectorWritable>) vectorClass.get(), VectorWritable.class);
         if (!fs.exists(weightsFile.get())) {
           throw new FileNotFoundException(weightsFile.get().toString());
         }
@@ -80,10 +82,6 @@ public abstract class WeightedDistanceMeasure implements DistanceMeasure {
         this.weights = weights.get();
       }
     } catch (IOException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    } catch (InstantiationException e) {
       throw new IllegalStateException(e);
     }
   }

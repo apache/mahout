@@ -99,7 +99,9 @@ import org.slf4j.LoggerFactory;
  * MS&E, Stanford University. -----------------------------------------------------------------------
  */
 public class LSMR {
-  private Logger log = LoggerFactory.getLogger(LSMR.class);
+
+  private static final Logger log = LoggerFactory.getLogger(LSMR.class);
+
   private double lambda;
   private int localSize;
   private int iterationLimit;
@@ -107,12 +109,9 @@ public class LSMR {
   private double bTolerance;
   private double aTolerance;
   private int localPointer;
-  private Vector v;
-  private boolean localVQueueFull;
   private Vector[] localV;
   private double residualNorm;
   private double normalEquationResidual;
-  private double aNorm;
   private double xNorm;
   private int iteration;
   private double normA;
@@ -160,12 +159,12 @@ public class LSMR {
 
   public LSMR() {
     // Set default parameters.
-    setLambda(0);
-    setAtolerance(1e-6);
-    setBtolerance(1e-6);
-    setConditionLimit(1e8);
-    setIterationLimit(-1);
-    setLocalSize(0);
+    lambda = 0;
+    aTolerance = 1.0e-6;
+    bTolerance = 1.0e-6;
+    conditionLimit = 1.0e8;
+    iterationLimit = -1;
+    localSize = 0;
   }
 
   public Vector solve(Matrix A, Vector b) {
@@ -193,20 +192,20 @@ public class LSMR {
       u = u.divide(beta);
     }
 
-    v = transposedA.times(u);
+    Vector v = transposedA.times(u);
     int m = A.numRows();
     int n = A.numCols();
 
     int minDim = Math.min(m, n);
     if (iterationLimit == -1) {
-      setIterationLimit(minDim);
+      iterationLimit = minDim;
     }
 
     if (log.isDebugEnabled()) {
       log.debug("LSMR - Least-squares solution of  Ax = b, based on Matlab Version 1.02, 14 Apr 2010, Mahout version {}",
         this.getClass().getPackage().getImplementationVersion());
       log.debug(String.format("The matrix A has %d rows  and %d cols, lambda = %.4g, atol = %g, btol = %g",
-        m, n, getLambda(), getAtolerance(), getBtolerance()));
+        m, n, lambda, aTolerance, bTolerance));
     }
 
     double alpha = v.norm(2);
@@ -216,15 +215,14 @@ public class LSMR {
 
 
     // Initialization for local reorthogonalization
-    boolean localOrtho = false;
     localPointer = 0;
-    localVQueueFull = false;
 
     // Preallocate storage for storing the last few v_k. Since with
     // orthogonal v_k's, Krylov subspace method would converge in not
     // more iterations than the number of singular values, more
     // space is not necessary.
     localV = new Vector[Math.min(localSize, minDim)];
+    boolean localOrtho = false;
     if (localSize > 0) {
       localOrtho = true;
       localV[0] = v;
@@ -236,10 +234,6 @@ public class LSMR {
     iteration = 0;
     double zetabar = alpha * beta;
     double alphabar = alpha;
-    double rho = 1;
-    double rhobar = 1;
-    double cbar = 1;
-    double sbar = 0;
 
     Vector h = v;
     Vector hbar = zeros(n);
@@ -248,24 +242,13 @@ public class LSMR {
     // Initialize variables for estimation of ||r||.
 
     double betadd = beta;
-    double betad = 0;
-    double rhodold = 1;
-    double tautildeold = 0;
-    double thetatilde = 0;
-    double zeta = 0;
-    double d = 0;
 
     // Initialize variables for estimation of ||A|| and cond(A)
 
-    aNorm = alpha * alpha;
-    double maxrbar = 0;
-    double minrbar = 1e+100;
+    double aNorm = alpha * alpha;
 
     // Items for use in stopping rules.
     double normb = beta;
-
-    int istop = 0;
-    StopCode stop = StopCode.CONTINUE;
 
     double ctol = 0;
     if (conditionLimit > 0) {
@@ -284,11 +267,11 @@ public class LSMR {
 
 
     if (log.isDebugEnabled()) {
-      double test1 = 1;
       double test2 = alpha / beta;
 //      log.debug('{} {}', hdg1, hdg2);
       log.debug("{} {}", iteration, x.get(0));
       log.debug("{} {}", residualNorm, normalEquationResidual);
+      double test1 = 1;
       log.debug("{} {}", test1, test2);
     }
 
@@ -296,9 +279,23 @@ public class LSMR {
     //------------------------------------------------------------------
     //     Main iteration loop.
     //------------------------------------------------------------------
+    double rho = 1;
+    double rhobar = 1;
+    double cbar = 1;
+    double sbar = 0;
+    double betad = 0;
+    double rhodold = 1;
+    double tautildeold = 0;
+    double thetatilde = 0;
+    double zeta = 0;
+    double d = 0;
+    double maxrbar = 0;
+    double minrbar = 1.0e+100;
+    int istop = 0;
+    StopCode stop = StopCode.CONTINUE;
     while (iteration <= iterationLimit && stop == StopCode.CONTINUE) {
 
-      iteration = iteration + 1;
+      iteration++;
 
       // Perform the next step of the bidiagonalization to obtain the
       // next beta, u, alpha, v.  These satisfy the relations
@@ -388,13 +385,13 @@ public class LSMR {
 
       tautildeold = (zetaold - thetatildeold * tautildeold) / rhotildeold;
       double taud = (zeta - thetatilde * tautildeold) / rhodold;
-      d = d + betacheck * betacheck;
+      d += betacheck * betacheck;
       residualNorm = Math.sqrt(d + (betad - taud) * (betad - taud) + betadd * betadd);
 
       // Estimate ||A||.
-      aNorm = aNorm + beta * beta;
+      aNorm += beta * beta;
       normA = Math.sqrt(aNorm);
-      aNorm = aNorm + alpha * alpha;
+      aNorm += alpha * alpha;
 
       // Estimate cond(A).
       maxrbar = Math.max(maxrbar, rhobarold);
@@ -494,7 +491,7 @@ public class LSMR {
     log.debug("{} {}", normA, condA);
   }
 
-  private Vector zeros(int n) {
+  private static Vector zeros(int n) {
     return new DenseVector(n);
   }
 
@@ -533,9 +530,9 @@ public class LSMR {
     CONDITION_MACHINE_TOLERANCE("Cond(Abar) seems to be too large for this machine"),
     ITERATION_LIMIT("The iteration limit has been reached");
 
-    private String message;
+    private final String message;
 
-    private StopCode(String message) {
+    StopCode(String message) {
       this.message = message;
     }
 

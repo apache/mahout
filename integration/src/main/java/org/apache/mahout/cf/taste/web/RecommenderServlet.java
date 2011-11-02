@@ -70,11 +70,7 @@ public final class RecommenderServlet extends HttpServlet {
     if (recommenderClassName == null) {
       throw new ServletException("Servlet init-param \"recommender-class\" is not defined");
     }
-    try {
-      RecommenderSingleton.initializeIfNeeded(recommenderClassName);
-    } catch (TasteException te) {
-      throw new ServletException(te);
-    }
+    RecommenderSingleton.initializeIfNeeded(recommenderClassName);
     recommender = RecommenderSingleton.getInstance().getRecommender();
   }
 

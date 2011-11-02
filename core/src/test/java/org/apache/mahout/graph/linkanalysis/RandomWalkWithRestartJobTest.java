@@ -64,7 +64,7 @@ public class RandomWalkWithRestartJobTest extends GraphTestCase {
     int numVertices = GraphUtils.indexVertices(conf, new Path(verticesFile.getAbsolutePath()),
         new Path(indexedVerticesFile.getAbsolutePath()));
 
-    RandomWalkWithRestartJob randomWalkWithRestart = new RandomWalkWithRestartJob();
+    RandomWalk randomWalkWithRestart = new RandomWalkWithRestartJob();
     randomWalkWithRestart.setConf(conf);
     randomWalkWithRestart.run(new String[]{"--vertexIndex", indexedVerticesFile.getAbsolutePath(),
         "--edges", edgesFile.getAbsolutePath(), "--sourceVertexIndex", String.valueOf(2),
@@ -84,7 +84,7 @@ public class RandomWalkWithRestartJobTest extends GraphTestCase {
     assertMatrixEquals(expectedAdjacenyMatrix, actualAdjacencyMatrix);
 
     Map<Long,Double> steadyStateProbabilities = Maps.newHashMap();
-    for (String line : new FileLineIterable(new File(outputDir, "part-m-00000"))) {
+    for (CharSequence line : new FileLineIterable(new File(outputDir, "part-m-00000"))) {
       String[] tokens = Iterables.toArray(Splitter.on("\t").split(line), String.class);
       steadyStateProbabilities.put(Long.parseLong(tokens[0]), Double.parseDouble(tokens[1]));
     }

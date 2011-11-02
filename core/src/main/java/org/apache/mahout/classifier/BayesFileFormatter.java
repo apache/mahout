@@ -42,6 +42,7 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.util.Version;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -302,7 +303,7 @@ public final class BayesFileFormatter {
       String label = (String) cmdLine.getValue(labelOpt);
       Analyzer analyzer;
       if (cmdLine.hasOption(analyzerOpt)) {
-        analyzer = Class.forName((String) cmdLine.getValue(analyzerOpt)).asSubclass(Analyzer.class).newInstance();
+        analyzer = ClassUtils.instantiateAs((String) cmdLine.getValue(analyzerOpt), Analyzer.class);
       } else {
         analyzer = new StandardAnalyzer(Version.LUCENE_31);
       }

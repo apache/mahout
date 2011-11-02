@@ -178,7 +178,7 @@ public final class FileDataModelTest extends TasteTestCase {
 
   @Test
   public void testToString() {
-    assertTrue(model.toString().length() > 0);
+    assertFalse(model.toString().isEmpty());
   }
 
   @Test(expected = IllegalArgumentException.class)

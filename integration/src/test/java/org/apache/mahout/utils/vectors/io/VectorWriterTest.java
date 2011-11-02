@@ -68,7 +68,7 @@ public final class VectorWriterTest extends MahoutTestCase {
     }
     String buffer = strWriter.toString();
     assertNotNull(buffer);
-    assertTrue(buffer.length() > 0);
+    assertFalse(buffer.isEmpty());
     
   }
 }

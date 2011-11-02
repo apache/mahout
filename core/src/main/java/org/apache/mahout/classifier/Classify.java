@@ -39,6 +39,7 @@ import org.apache.mahout.classifier.bayes.CBayesAlgorithm;
 import org.apache.mahout.classifier.bayes.Datastore;
 import org.apache.mahout.classifier.bayes.ClassifierContext;
 import org.apache.mahout.classifier.bayes.InMemoryBayesDatastore;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.nlp.NGrams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,8 +148,7 @@ public final class Classify {
     }
     Analyzer analyzer = null;
     if (cmdLine.hasOption(analyzerOpt)) {
-      String className = (String) cmdLine.getValue(analyzerOpt);
-      analyzer = Class.forName(className).asSubclass(Analyzer.class).newInstance();
+      analyzer = ClassUtils.instantiateAs((String) cmdLine.getValue(analyzerOpt), Analyzer.class);
     }
     if (analyzer == null) {
       analyzer = new StandardAnalyzer(Version.LUCENE_31);

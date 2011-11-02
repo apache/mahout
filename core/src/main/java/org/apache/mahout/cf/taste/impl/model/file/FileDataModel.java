@@ -171,7 +171,7 @@ public class FileDataModel extends AbstractDataModel {
 
     FileLineIterator iterator = new FileLineIterator(dataFile, false);
     String firstLine = iterator.peek();
-    while (firstLine.length() == 0 || firstLine.charAt(0) == COMMENT_CHAR) {
+    while (firstLine.isEmpty() || firstLine.charAt(0) == COMMENT_CHAR) {
       iterator.next();
       firstLine = iterator.peek();
     }
@@ -329,7 +329,7 @@ public class FileDataModel extends AbstractDataModel {
     int count = 0;
     while (dataOrUpdateFileIterator.hasNext()) {
       String line = dataOrUpdateFileIterator.next();
-      if (line.length() > 0) {
+      if (!line.isEmpty()) {
         processLine(line, data, timestamps, fromPriorData);
         if (++count % 1000000 == 0) {
           log.info("Processed {} lines", count);
@@ -368,7 +368,7 @@ public class FileDataModel extends AbstractDataModel {
                              boolean fromPriorData) {
 
     // Ignore empty lines and comments
-    if (line.length() == 0 || line.charAt(0) == COMMENT_CHAR) {
+    if (line.isEmpty() || line.charAt(0) == COMMENT_CHAR) {
       return;
     }
 
@@ -394,7 +394,7 @@ public class FileDataModel extends AbstractDataModel {
       // Data are PreferenceArray
 
       PreferenceArray prefs = (PreferenceArray) maybePrefs;
-      if (!hasTimestamp && preferenceValueString.length() == 0) {
+      if (!hasTimestamp && preferenceValueString.isEmpty()) {
         // Then line is of form "userID,itemID,", meaning remove
         if (prefs != null) {
           boolean exists = false;
@@ -462,7 +462,7 @@ public class FileDataModel extends AbstractDataModel {
 
       Collection<Preference> prefs = (Collection<Preference>) maybePrefs;
 
-      if (!hasTimestamp && preferenceValueString.length() == 0) {
+      if (!hasTimestamp && preferenceValueString.isEmpty()) {
         // Then line is of form "userID,itemID,", meaning remove
         if (prefs != null) {
           // remove pref
@@ -515,7 +515,7 @@ public class FileDataModel extends AbstractDataModel {
     int count = 0;
     while (dataOrUpdateFileIterator.hasNext()) {
       String line = dataOrUpdateFileIterator.next();
-      if (line.length() > 0) {
+      if (!line.isEmpty()) {
         processLineWithoutID(line, data, timestamps);
         if (++count % 100000 == 0) {
           log.info("Processed {} lines", count);
@@ -529,7 +529,7 @@ public class FileDataModel extends AbstractDataModel {
                                       FastByIDMap<FastIDSet> data,
                                       FastByIDMap<FastByIDMap<Long>> timestamps) {
 
-    if (line.length() == 0 || line.charAt(0) == COMMENT_CHAR) {
+    if (line.isEmpty() || line.charAt(0) == COMMENT_CHAR) {
       return;
     }
 
@@ -550,7 +550,7 @@ public class FileDataModel extends AbstractDataModel {
       itemID = tmp;
     }
 
-    if (hasPreference && !hasTimestamp && preferenceValueString.length() == 0) {
+    if (hasPreference && !hasTimestamp && preferenceValueString.isEmpty()) {
       // Then line is of form "userID,itemID,", meaning remove
 
       FastIDSet itemIDs = data.get(userID);

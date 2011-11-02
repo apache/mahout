@@ -28,6 +28,7 @@ import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.parameters.ClassParameter;
 import org.apache.mahout.common.parameters.Parameter;
 import org.apache.mahout.common.parameters.PathParameter;
@@ -72,7 +73,8 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
     try {
       if (inverseCovarianceFile.get() != null) {
         FileSystem fs = FileSystem.get(inverseCovarianceFile.get().toUri(), jobConf);
-        MatrixWritable inverseCovarianceMatrix = (MatrixWritable) matrixClass.get().newInstance();
+        MatrixWritable inverseCovarianceMatrix = 
+            ClassUtils.instantiateAs((Class<? extends MatrixWritable>) matrixClass.get(), MatrixWritable.class);
         if (!fs.exists(inverseCovarianceFile.get())) {
           throw new FileNotFoundException(inverseCovarianceFile.get().toString());
         }
@@ -87,7 +89,8 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
       
       if (meanVectorFile.get() != null) {
         FileSystem fs = FileSystem.get(meanVectorFile.get().toUri(), jobConf);
-        VectorWritable meanVector = (VectorWritable) vectorClass.get().newInstance();
+        VectorWritable meanVector = 
+            ClassUtils.instantiateAs((Class<? extends VectorWritable>) vectorClass.get(), VectorWritable.class);
         if (!fs.exists(meanVectorFile.get())) {
           throw new FileNotFoundException(meanVectorFile.get().toString());
         }
@@ -101,10 +104,6 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
       }
       
     } catch (IOException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    } catch (InstantiationException e) {
       throw new IllegalStateException(e);
     }
   }

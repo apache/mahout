@@ -260,7 +260,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
         assertEquals("too many values", 1, values.size());
         ClusterObservations info = values.get(0);
 
-        count += info.getS0();
+        count += (int) info.getS0();
         total = total.plus(info.getS1());
       }
       assertEquals("total points", 9, count);

@@ -1,13 +1,28 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.math.solver;
 
 import org.apache.mahout.math.CardinalityException;
 import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorIterable;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.PlusMult;
-import org.apache.mahout.math.function.TimesFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +54,7 @@ import org.slf4j.LoggerFactory;
 
 public class ConjugateGradientSolver
 {
-  public static final double DEFAULT_MAX_ERROR = 1e-9;
+  public static final double DEFAULT_MAX_ERROR = 1.0e-9;
   
   private static final Logger log = LoggerFactory.getLogger(ConjugateGradientSolver.class);
   private static final PlusMult plusMult = new PlusMult(1.0);
@@ -129,14 +144,12 @@ public class ConjugateGradientSolver
     Vector residual = b.minus(a.times(x));
     residualNormSquared = residual.dot(residual);
 
-    double conditionedNormSqr;
-    double previousConditionedNormSqr = 0.0;
-
-    Vector updateDirection = null;
-    
     log.info("Conjugate gradient initial residual norm = " + Math.sqrt(residualNormSquared));
+    double previousConditionedNormSqr = 0.0;
+    Vector updateDirection = null;
     while (Math.sqrt(residualNormSquared) > maxError && iterations < maxIterations) {
       Vector conditionedResidual;
+      double conditionedNormSqr;
       if (preconditioner == null) {
         conditionedResidual = residual;
         conditionedNormSqr = residualNormSquared;

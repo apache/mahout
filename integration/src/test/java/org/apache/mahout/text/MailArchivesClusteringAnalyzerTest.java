@@ -14,11 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.mahout.text;
 
+import java.io.Reader;
 import java.io.StringReader;
-import org.apache.lucene.analysis.TokenStream;
 
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
 
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.mahout.utils.MahoutTestCase;
@@ -31,7 +34,7 @@ public class MailArchivesClusteringAnalyzerTest extends MahoutTestCase {
   
   @Test
   public void testAnalysis() throws Exception {
-    MailArchivesClusteringAnalyzer analyzer = new MailArchivesClusteringAnalyzer();
+    Analyzer analyzer = new MailArchivesClusteringAnalyzer();
     
     String text = "A test message\n";
     text += "atokenthatistoolongtobeusefulforclustertextanalysis\n";
@@ -40,7 +43,7 @@ public class MailArchivesClusteringAnalyzerTest extends MahoutTestCase {
     text += "apache_hadoop provides the foundation for scalability\n";
     text += "www.nabble.com general-help@incubator.apache.org\n";
     text += "public void int protected package";
-    StringReader reader = new StringReader(text);
+    Reader reader = new StringReader(text);
     
     // if you change the text above, then you may need to change this as well
     // order matters too

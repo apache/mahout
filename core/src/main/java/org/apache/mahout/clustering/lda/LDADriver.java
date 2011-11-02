@@ -409,8 +409,6 @@ public final class LDADriver extends AbstractJob {
     newState.setLogLikelihood(ll);
     writeState(conf, newState, stateOut);
     state = newState;
-    newState = null;
-
     return ll;
   }
 

@@ -134,7 +134,7 @@ public final class ARFFVectorIterableTest extends MahoutTestCase {
     ARFFVectorIterable iterable = new ARFFVectorIterable(NON_NUMERIC_ARFF, model);
     Iterator<Vector> iter = iterable.iterator();
     Vector firstVector = iter.next();
-    assertEquals(firstVector.get(2),1.0,0); 
+    assertEquals(1.0, firstVector.get(2),0);
     DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
     Date date = format.parse("1973-10-23");
     long result = date.getTime();

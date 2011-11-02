@@ -30,7 +30,7 @@ import org.apache.mahout.math.stats.OnlineSummarizer;
 public class ResultAnalyzer {
   
   private final ConfusionMatrix confusionMatrix;
-  private OnlineSummarizer summarizer;
+  private final OnlineSummarizer summarizer;
   boolean hasLL = false;
   
   /*

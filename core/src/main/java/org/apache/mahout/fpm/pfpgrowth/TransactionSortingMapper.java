@@ -52,7 +52,7 @@ public class TransactionSortingMapper extends Mapper<LongWritable,Text,LongWrita
     
     List<Integer> itemSet = Lists.newArrayList();
     for (String item : uniqueItems) { // remove items not in the fList
-      if (fMap.containsKey(item) && item.trim().length() != 0) {
+      if (fMap.containsKey(item) && !item.trim().isEmpty()) {
         itemSet.add(fMap.get(item));
       }
     }

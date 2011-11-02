@@ -20,6 +20,7 @@
 package org.apache.mahout.utils.nlp.collocations.llr;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -30,6 +31,7 @@ import org.apache.hadoop.util.bloom.BloomFilter;
 import org.apache.hadoop.util.bloom.Filter;
 import org.apache.hadoop.util.bloom.Key;
 import org.apache.hadoop.util.hash.Hash;
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.shingle.ShingleFilter;
@@ -76,8 +78,8 @@ public final class BloomTokenFilterTest extends MahoutTestCase {
   /** normal case, unfiltered analyzer */
   @Test
   public void testAnalyzer() throws IOException {
-    StringReader reader = new StringReader(input);
-    WhitespaceAnalyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_31);
+    Reader reader = new StringReader(input);
+    Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_31);
     TokenStream ts = analyzer.tokenStream(null, reader);
     validateTokens(allTokens, ts);
   }
@@ -85,31 +87,31 @@ public final class BloomTokenFilterTest extends MahoutTestCase {
   /** filtered analyzer */
   @Test
   public void testNonKeepdAnalyzer() throws IOException {
-    StringReader reader = new StringReader(input);
-    WhitespaceAnalyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_31);
+    Reader reader = new StringReader(input);
+    Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_31);
     TokenStream ts = analyzer.tokenStream(null, reader);
-    BloomTokenFilter f = new BloomTokenFilter(getFilter(filterTokens), false /* toss matching tokens */, ts);
+    TokenStream f = new BloomTokenFilter(getFilter(filterTokens), false /* toss matching tokens */, ts);
     validateTokens(expectedNonKeepTokens, f);
   }
 
   /** keep analyzer */
   @Test
   public void testKeepAnalyzer() throws IOException {
-    StringReader reader = new StringReader(input);
-    WhitespaceAnalyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_31);
+    Reader reader = new StringReader(input);
+    Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_31);
     TokenStream ts = analyzer.tokenStream(null, reader);
-    BloomTokenFilter f = new BloomTokenFilter(getFilter(filterTokens), true /* keep matching tokens */, ts);
+    TokenStream f = new BloomTokenFilter(getFilter(filterTokens), true /* keep matching tokens */, ts);
     validateTokens(expectedKeepTokens, f);
   }
   
   /** shingles, keep those matching whitelist */
   @Test
   public void testShingleFilteredAnalyzer() throws IOException {
-    StringReader reader = new StringReader(input);
-    WhitespaceAnalyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_31);
+    Reader reader = new StringReader(input);
+    Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_31);
     TokenStream ts = analyzer.tokenStream(null, reader);
     ShingleFilter sf = new ShingleFilter(ts, 3);
-    BloomTokenFilter f = new BloomTokenFilter(getFilter(shingleKeepTokens),  true, sf);
+    TokenStream f = new BloomTokenFilter(getFilter(shingleKeepTokens),  true, sf);
     validateTokens(expectedShingleTokens, f);
   }
   

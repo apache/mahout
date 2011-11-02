@@ -30,6 +30,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.ClusterObservations;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.kmeans.Cluster;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
@@ -125,24 +126,13 @@ public class FuzzyKMeansClusterer {
    * Configure the distance measure from the job
    */
   private void configure(Configuration job) {
-    try {
-      ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      measure = ccl.loadClass(job.get(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY))
-          .asSubclass(DistanceMeasure.class).newInstance();
-      measure.configure(job);
-      convergenceDelta = Double.parseDouble(job.get(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY));
-      // nextClusterId = 0;
-      m = Double.parseDouble(job.get(FuzzyKMeansConfigKeys.M_KEY));
-      emitMostLikely = Boolean.parseBoolean(job.get(FuzzyKMeansConfigKeys.EMIT_MOST_LIKELY_KEY));
-      threshold = Double.parseDouble(job.get(FuzzyKMeansConfigKeys.THRESHOLD_KEY));
-
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
-    }
+    measure = ClassUtils.instantiateAs(job.get(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY), DistanceMeasure.class);
+    measure.configure(job);
+    convergenceDelta = Double.parseDouble(job.get(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY));
+    // nextClusterId = 0;
+    m = Double.parseDouble(job.get(FuzzyKMeansConfigKeys.M_KEY));
+    emitMostLikely = Boolean.parseBoolean(job.get(FuzzyKMeansConfigKeys.EMIT_MOST_LIKELY_KEY));
+    threshold = Double.parseDouble(job.get(FuzzyKMeansConfigKeys.THRESHOLD_KEY));
   }
 
   /**

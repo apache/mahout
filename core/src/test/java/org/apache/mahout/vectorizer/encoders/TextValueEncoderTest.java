@@ -71,8 +71,7 @@ public final class TextValueEncoderTest extends MahoutTestCase {
   public void testLuceneEncoding() throws Exception {
     LuceneTextValueEncoder enc = new LuceneTextValueEncoder("text");
     enc.setAnalyzer(new WhitespaceAnalyzer(Version.LUCENE_34));
-    Vector v1;
-    v1 = new DenseVector(200);
+    Vector v1 = new DenseVector(200);
     enc.addToVector("test1 and more", v1);
     enc.flush(1, v1);
 
@@ -90,7 +89,7 @@ public final class TextValueEncoderTest extends MahoutTestCase {
     v1 = new DenseVector(200);
     StringBuilder builder = new StringBuilder(5000);
     for (int i = 0; i < 1000; i++){//lucene's internal buffer length request is 4096, so let's make sure we can handle larger size
-      builder.append("token_").append(i).append(" ");
+      builder.append("token_").append(i).append(' ');
     }
     enc.addToVector(builder.toString(), v1);
     enc.flush(1, v1);

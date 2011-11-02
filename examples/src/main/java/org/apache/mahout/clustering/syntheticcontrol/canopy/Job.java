@@ -26,6 +26,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.conversion.InputDriver;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
@@ -76,15 +77,10 @@ public final class Job extends AbstractJob {
    *          the canopy T1 threshold
    * @param t2
    *          the canopy T2 threshold
-   * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
-   * @throws InstantiationException
-   * @throws IllegalAccessException
    */
   private static void run(Path input, Path output, DistanceMeasure measure,
       double t1, double t2) throws IOException, InterruptedException,
-      ClassNotFoundException, InstantiationException, IllegalAccessException {
+      ClassNotFoundException {
     Path directoryContainingConvertedInput = new Path(output,
         DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput,
@@ -120,9 +116,7 @@ public final class Job extends AbstractJob {
     String measureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
     double t1 = Double.parseDouble(getOption(DefaultOptionCreator.T1_OPTION));
     double t2 = Double.parseDouble(getOption(DefaultOptionCreator.T2_OPTION));
-    ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    DistanceMeasure measure = (DistanceMeasure) ((Class<?>) ccl
-        .loadClass(measureClass)).newInstance();
+    DistanceMeasure measure = ClassUtils.instantiateAs(measureClass, DistanceMeasure.class);
 
     run(input, output, measure, t1, t2);
     return 0;

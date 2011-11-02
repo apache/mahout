@@ -17,29 +17,39 @@
 
 package org.apache.mahout.common;
 
-public class ClassUtils {
+import java.lang.reflect.InvocationTargetException;
+
+public final class ClassUtils {
 
   private ClassUtils() {}
 
   public static <T> T instantiateAs(String classname, Class<T> asSubclassOfClass) {
     try {
-      return Class.forName(classname).asSubclass(asSubclassOfClass).newInstance();
+      return Class.forName(classname).asSubclass(asSubclassOfClass).getConstructor().newInstance();
     } catch (ClassNotFoundException cnfe) {
       throw new IllegalStateException(cnfe);
     } catch (InstantiationException ie) {
       throw new IllegalStateException(ie);
     } catch (IllegalAccessException iae) {
       throw new IllegalStateException(iae);
+    } catch (NoSuchMethodException nsme) {
+      throw new IllegalStateException(nsme);
+    } catch (InvocationTargetException ite) {
+      throw new IllegalStateException(ite);
     }
   }
 
   public static <T> T instantiateAs(Class<? extends T> clazz, Class<T> asSubclassOfClass) {
     try {
-      return clazz.asSubclass(asSubclassOfClass).newInstance();
+      return clazz.asSubclass(asSubclassOfClass).getConstructor().newInstance();
     } catch (InstantiationException ie) {
       throw new IllegalStateException(ie);
     } catch (IllegalAccessException iae) {
       throw new IllegalStateException(iae);
+    } catch (NoSuchMethodException nsme) {
+      throw new IllegalStateException(nsme);
+    } catch (InvocationTargetException ite) {
+      throw new IllegalStateException(ite);
     }
   }
 }

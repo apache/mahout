@@ -25,6 +25,7 @@ import java.util.Collections;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.Model;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.parameters.Parameter;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -99,16 +100,7 @@ public class DirichletCluster implements Cluster {
   /** Reads a typed Model instance from the input stream */
   public static Cluster readModel(DataInput in) throws IOException {
     String modelClassName = in.readUTF();
-    Cluster model;
-    try {
-      model = Class.forName(modelClassName).asSubclass(Cluster.class).newInstance();
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
-    }
+    Cluster model = ClassUtils.instantiateAs(modelClassName, Cluster.class);
     model.readFields(in);
     return model;
   }

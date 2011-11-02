@@ -180,7 +180,7 @@ public class Auc {
 
     if (i1 < n1) {
       rankSum += (rank + (n1 - i1 - 1) / 2.0) * (n1 - i1);
-      rank += n1 - i1;
+      rank += (int) (n1 - i1);
     }
 
     return (rankSum / n1 - (n1 + 1) / 2) / n0;

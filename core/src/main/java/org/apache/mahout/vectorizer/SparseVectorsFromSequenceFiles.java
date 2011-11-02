@@ -30,6 +30,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -182,14 +183,14 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
         reduceTasks = Integer.parseInt(cmdLine.getValue(numReduceTasksOpt).toString());
       }
       log.info("Number of reduce tasks: {}", reduceTasks);
-      
+
       Class<? extends Analyzer> analyzerClass = DefaultAnalyzer.class;
       if (cmdLine.hasOption(analyzerNameOpt)) {
         String className = cmdLine.getValue(analyzerNameOpt).toString();
         analyzerClass = Class.forName(className).asSubclass(Analyzer.class);
         // try instantiating it, b/c there isn't any point in setting it if
         // you can't instantiate it
-        analyzerClass.newInstance();
+        ClassUtils.instantiateAs(analyzerClass, Analyzer.class);
       }
       
       boolean processIdf;

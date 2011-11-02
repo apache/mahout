@@ -61,7 +61,7 @@ public final class Algebra {
       int sum = 0;
       Vector cv = m.viewRow(i);
       for (int j = 0; j < cv.size(); j++) {
-        sum += Math.abs(cv.getQuick(j));
+        sum += (int) Math.abs(cv.getQuick(j));
       }
       if (sum > max) {
         max = sum;

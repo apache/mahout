@@ -18,6 +18,7 @@
 package org.apache.mahout.classifier.sgd;
 
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.common.ClassUtils;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -26,7 +27,7 @@ import java.io.IOException;
 /**
  * Utilities that write a class name and then serialize using writables.
  */
-public final class PolymorphicWritable<T> {
+public final class PolymorphicWritable {
 
   private PolymorphicWritable() {
   }
@@ -38,16 +39,7 @@ public final class PolymorphicWritable<T> {
 
   public static <T extends Writable> T read(DataInput dataInput, Class<? extends T> clazz) throws IOException {
     String className = dataInput.readUTF();
-    T r;
-    try {
-      r = Class.forName(className).asSubclass(clazz).newInstance();
-    } catch (InstantiationException e) {
-      throw new IOException("Can't create object", e);
-    } catch (IllegalAccessException e) {
-      throw new IOException("Can't access constructor", e);
-    } catch (ClassNotFoundException e) {
-      throw new IOException("No such class", e);
-    }
+    T r = ClassUtils.instantiateAs(className, clazz);
     r.readFields(dataInput);
     return r;
   }

@@ -67,7 +67,7 @@ public final class ConstantValueEncoderTest extends MahoutTestCase {
 
   @Test
   public void testAsString() {
-    ConstantValueEncoder enc = new ConstantValueEncoder("foo");
+    FeatureVectorEncoder enc = new ConstantValueEncoder("foo");
     assertEquals("foo", enc.asString("123"));
   }
 

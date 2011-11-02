@@ -33,13 +33,13 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
-import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterator;
 import org.apache.mahout.math.jet.random.sampling.RandomSampler;
 import org.slf4j.Logger;
@@ -365,7 +365,7 @@ public class SplitInput {
     }
     int trainCount = 0;
     int testCount = 0;
-    if (useSequence == false) {
+    if (!useSequence) {
       BufferedReader reader = new BufferedReader(new InputStreamReader(fs.open(inputFile), charset));
       Writer trainingWriter = new OutputStreamWriter(fs.create(trainingOutputFile), charset);
       Writer testWriter = new OutputStreamWriter(fs.create(testOutputFile), charset);
@@ -405,17 +405,16 @@ public class SplitInput {
         Closeables.closeQuietly(testWriter);
       }
     } else {
-      SequenceFileIterable iter = new SequenceFileIterable(inputFile, fs.getConf());
-      SequenceFileIterator iterator = (SequenceFileIterator) iter.iterator();
+      SequenceFileIterator<Writable,Writable> iterator =
+          new SequenceFileIterator<Writable,Writable>(inputFile, false, fs.getConf());
       SequenceFile.Writer trainingWriter = SequenceFile.createWriter(fs, fs.getConf(), trainingOutputFile, iterator.getKeyClass(), iterator.getValueClass());
       SequenceFile.Writer testWriter = SequenceFile.createWriter(fs, fs.getConf(), testOutputFile, iterator.getKeyClass(), iterator.getValueClass());
       try {
 
-        String line;
         int pos = 0;
-        SequenceFile.Writer writer;
         while (iterator.hasNext()) {
           pos++;
+          SequenceFile.Writer writer;
           if (testRandomSelectionPct > 0) { // Randomly choose
             writer = randomSel.get(pos) ? testWriter : trainingWriter;
           } else { // Choose based on location
@@ -432,7 +431,7 @@ public class SplitInput {
           if (writer == trainingWriter) {
             trainCount++;
           }
-          Pair pair = (Pair) iterator.next();
+          Pair<Writable,Writable> pair = iterator.next();
           writer.append(pair.getFirst(), pair.getSecond());
         }
 

@@ -26,6 +26,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.vectorizer.DefaultAnalyzer;
 import org.apache.mahout.vectorizer.DocumentProcessor;
@@ -54,17 +55,8 @@ public class SequenceFileTokenizerMapper extends Mapper<Text, Text, Text, String
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    try {
-      ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      Class<?> cl = ccl
-          .loadClass(context.getConfiguration().get(DocumentProcessor.ANALYZER_CLASS, DefaultAnalyzer.class.getName()));
-      analyzer = (Analyzer) cl.newInstance();
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    }
+    analyzer = ClassUtils.instantiateAs(context.getConfiguration().get(DocumentProcessor.ANALYZER_CLASS,
+                                                                       DefaultAnalyzer.class.getName()),
+                                        Analyzer.class);
   }
 }

@@ -1,4 +1,3 @@
-package org.apache.mahout.classifier.sgd;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,7 @@ package org.apache.mahout.classifier.sgd;
  * limitations under the License.
  */
 
+package org.apache.mahout.classifier.sgd;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Lists;
@@ -43,13 +43,12 @@ import java.util.List;
 /**
  * Run the 20 news groups test data through SGD, as trained by {@link org.apache.mahout.classifier.sgd.TrainNewsGroups}.
  */
-public class TestNewsGroups {
-  protected String inputFile;
-  protected String modelFile;
+public final class TestNewsGroups {
 
+  private String inputFile;
+  private String modelFile;
 
   private TestNewsGroups() {
-
   }
 
   public static void main(String[] args) throws IOException {
@@ -82,7 +81,8 @@ public class TestNewsGroups {
       String ng = file.getParentFile().getName();
 
       int actual = newsGroups.intern(ng);
-      Vector input = NewsgroupHelper.encodeFeatureVector(file, actual, 0, overallCounts);//no leak type ensures this is a normal vector
+      NewsgroupHelper helper = new NewsgroupHelper();
+      Vector input = helper.encodeFeatureVector(file, actual, 0, overallCounts);//no leak type ensures this is a normal vector
       Vector result = classifier.classifyFull(input);
       int cat = result.maxValueIndex();
       double score = result.maxValue();
@@ -129,16 +129,9 @@ public class TestNewsGroups {
       return false;
     }
 
-    inputFile = getStringArgument(cmdLine, inputFileOption);
-    modelFile = getStringArgument(cmdLine, modelFileOption);
+    inputFile = (String) cmdLine.getValue(inputFileOption);
+    modelFile = (String) cmdLine.getValue(modelFileOption);
     return true;
   }
 
-  protected boolean getBooleanArgument(CommandLine cmdLine, Option option) {
-    return cmdLine.hasOption(option);
-  }
-
-  protected String getStringArgument(CommandLine cmdLine, Option inputFile) {
-    return (String) cmdLine.getValue(inputFile);
-  }
 }

@@ -72,7 +72,8 @@ public final class TravellingSalesman extends JApplet {
         } else {
           try {
             setEnabled(false);
-            createTask(cities).execute();
+            TravellingSalesmanStrategy strategy = strategyPanel.getStrategy();
+            new TSSwingBackgroundTask(strategy, cities, executionPanel, evaluator).execute();
           } catch (IllegalArgumentException ex) {
             JOptionPane.showMessageDialog(TravellingSalesman.this, ex.getMessage(), "Error",
               JOptionPane.ERROR_MESSAGE);
@@ -83,19 +84,7 @@ public final class TravellingSalesman extends JApplet {
     });
     validate();
   }
-  
-  /**
-   * Helper method to create a background task for running the travelling salesman algorithm.
-   * 
-   * @param cities
-   *          The set of cities to generate a route for.
-   * @return A Swing task that will execute on a background thread and update the GUI when it is done.
-   */
-  private SwingBackgroundTask<List<String>> createTask(Collection<String> cities) {
-    TravellingSalesmanStrategy strategy = strategyPanel.getStrategy();
-    return new TSSwingBackgroundTask(strategy, cities, executionPanel, evaluator);
-  }
-  
+
   /**
    * Toggles whether the controls are enabled for input or not.
    * 

@@ -23,6 +23,7 @@ import java.util.Iterator;
 
 import com.google.common.base.Splitter;
 import org.apache.mahout.clustering.ModelDistribution;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -70,17 +71,14 @@ public final class DistributionDescription {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     AbstractVectorModelDistribution modelDistribution;
     try {
-      Class<? extends AbstractVectorModelDistribution> cl = ccl.loadClass(modelFactory)
-          .asSubclass(AbstractVectorModelDistribution.class);
-      modelDistribution = cl.newInstance();
+      modelDistribution = ClassUtils.instantiateAs(modelFactory, AbstractVectorModelDistribution.class);
 
       Class<? extends Vector> vcl = ccl.loadClass(modelPrototype).asSubclass(Vector.class);
       Constructor<? extends Vector> v = vcl.getConstructor(int.class);
       modelDistribution.setModelPrototype(new VectorWritable(v.newInstance(prototypeSize)));
 
       if (modelDistribution instanceof DistanceMeasureClusterDistribution) {
-        Class<? extends DistanceMeasure> measureCl = ccl.loadClass(distanceMeasure).asSubclass(DistanceMeasure.class);
-        DistanceMeasure measure = measureCl.newInstance();
+        DistanceMeasure measure = ClassUtils.instantiateAs(distanceMeasure, DistanceMeasure.class);
         ((DistanceMeasureClusterDistribution) modelDistribution).setMeasure(measure);
       }
     } catch (ClassNotFoundException cnfe) {

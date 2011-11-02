@@ -102,13 +102,13 @@ public class MailProcessor {
             inBody = false;
           } else {
             if (inBody && options.isIncludeBody()) {
-              if (nextLine.length() > 0) {
+              if (!nextLine.isEmpty()) {
                 body.append(nextLine).append(options.getBodySeparator());
               }
             } else {
               // first empty line we see after reading the message Id
               // indicates that we are in the body ...
-              inBody = nextLine.length() == 0;
+              inBody = nextLine.isEmpty();
             }
           }
         } else {

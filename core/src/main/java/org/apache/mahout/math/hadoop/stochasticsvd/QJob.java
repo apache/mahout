@@ -145,13 +145,8 @@ public final class QJob {
 
 
     @Override
-    protected void cleanup(Context context) throws IOException,
-      InterruptedException {
-      try {
-
-      } finally {
-        IOUtils.close(closeables);
-      }
+    protected void cleanup(Context context) throws IOException, InterruptedException {
+      IOUtils.close(closeables);
     }
   }
 

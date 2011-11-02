@@ -136,7 +136,7 @@ public final class FileItemSimilarityTest extends TasteTestCase {
   @Test
   public void testToString() throws Exception {
     ItemSimilarity similarity = new FileItemSimilarity(testFile);
-    assertTrue(similarity.toString().length() > 0);
+    assertTrue(!similarity.toString().isEmpty());
   }
 
 }

@@ -25,11 +25,14 @@ package org.apache.mahout.math;
  */
 public class MurmurHash3 {
 
+  private MurmurHash3() {
+  }
+
   /** Returns the MurmurHash3_x86_32 hash. */
   public static int murmurhash3_x86_32(byte[] data, int offset, int len, int seed) {
 
-    final int c1 = 0xcc9e2d51;
-    final int c2 = 0x1b873593;
+    int c1 = 0xcc9e2d51;
+    int c2 = 0x1b873593;
 
     int h1 = seed;
     int roundedEnd = offset + (len & 0xfffffffc);  // round down to 4 byte block

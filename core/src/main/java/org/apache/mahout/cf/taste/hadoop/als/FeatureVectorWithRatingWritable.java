@@ -115,10 +115,7 @@ public class FeatureVectorWithRatingWritable implements Writable, Cloneable {
     if (rating != null ? !rating.equals(other.rating) : other.rating != null) {
       return false;
     }
-    if (vector != null ? !vector.equals(other.vector) : other.vector != null) {
-      return false;
-    }
-    return true;
+    return vector == null ? other.vector == null : vector.equals(other.vector);
   }
 
   @Override

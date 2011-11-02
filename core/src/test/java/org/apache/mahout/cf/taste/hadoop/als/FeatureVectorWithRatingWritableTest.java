@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.hadoop.als;
 
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
@@ -76,12 +77,10 @@ public class FeatureVectorWithRatingWritableTest extends MahoutTestCase {
     assertEquals(v, clonedFeatureVector.getFeatureVector());
   }
 
-  static <T extends Writable> T recreate(Class<T> tClass, T original)
-      throws IOException, IllegalAccessException, InstantiationException {
+  static <T extends Writable> T recreate(Class<T> tClass, T original) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     original.write(new DataOutputStream(out));
-
-    T clone = tClass.newInstance();
+    T clone = ClassUtils.instantiateAs(tClass, tClass);
     clone.readFields(new DataInputStream(new ByteArrayInputStream(out.toByteArray())));
     return clone;
   }

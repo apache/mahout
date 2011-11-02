@@ -24,6 +24,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
@@ -64,9 +65,9 @@ public class DocumentProcessorTest extends MahoutTestCase {
     assertEquals(1, statuses.length);
     Path filePath = statuses[0].getPath();
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, filePath, configuration);
-    Text key = reader.getKeyClass().asSubclass(Text.class).newInstance();
-    StringTuple value = reader.getValueClass().asSubclass(StringTuple.class).newInstance();
-
+    Text key = ClassUtils.instantiateAs((Class<? extends Text>) reader.getKeyClass(), Text.class);
+    StringTuple value =
+        ClassUtils.instantiateAs((Class<? extends StringTuple>) reader.getValueClass(), StringTuple.class);
     reader.next(key, value);
     assertEquals(documentId1, key.toString());
     assertEquals(Arrays.asList("test", "document", "processor"), value.getEntries());

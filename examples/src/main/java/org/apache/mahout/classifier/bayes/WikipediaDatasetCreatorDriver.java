@@ -42,6 +42,7 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.analysis.WikipediaAnalyzer;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.iterator.FileLineIterable;
@@ -109,7 +110,7 @@ public final class WikipediaDatasetCreatorDriver {
         analyzerClass = Class.forName(className).asSubclass(Analyzer.class);
         // try instantiating it, b/c there isn't any point in setting it if
         // you can't instantiate it
-        analyzerClass.newInstance();
+        ClassUtils.instantiateAs(analyzerClass, Analyzer.class);
       }
       runJob(inputPath, outputPath, catFile, cmdLine.hasOption(exactMatchOpt),
         analyzerClass);
@@ -119,13 +120,7 @@ public final class WikipediaDatasetCreatorDriver {
     } catch (ClassNotFoundException e) {
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);
-    } catch (InstantiationException e) {
-      log.error("Exception", e);
-      CommandLineUtil.printHelp(group);
-    } catch (IllegalAccessException e) {
-      log.error("Exception", e);
-      CommandLineUtil.printHelp(group);
-    } 
+    }
   }
   
   /**

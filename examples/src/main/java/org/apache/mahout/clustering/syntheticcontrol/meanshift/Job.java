@@ -26,6 +26,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.conversion.meanshift.InputDriver;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
@@ -60,8 +61,7 @@ public final class Job extends AbstractJob {
   }
   
   @Override
-  public int run(String[] args) throws IOException, ClassNotFoundException,
-      InterruptedException, InstantiationException, IllegalAccessException {
+  public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.convergenceOption().create());
@@ -88,17 +88,11 @@ public final class Job extends AbstractJob {
     String kernelProfileClass = getOption(DefaultOptionCreator.KERNEL_PROFILE_OPTION);
     double t1 = Double.parseDouble(getOption(DefaultOptionCreator.T1_OPTION));
     double t2 = Double.parseDouble(getOption(DefaultOptionCreator.T2_OPTION));
-    double convergenceDelta = Double
-        .parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
-    int maxIterations = Integer
-        .parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
-    ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    DistanceMeasure measure = ccl.loadClass(measureClass)
-        .asSubclass(DistanceMeasure.class).newInstance();
-    IKernelProfile kernelProfile = ccl.loadClass(kernelProfileClass)
-        .asSubclass(IKernelProfile.class).newInstance();
-    run(getConf(), input, output, measure, kernelProfile, t1, t2,
-        convergenceDelta, maxIterations);
+    double convergenceDelta = Double.parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
+    int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
+    DistanceMeasure measure = ClassUtils.instantiateAs(measureClass, DistanceMeasure.class);
+    IKernelProfile kernelProfile = ClassUtils.instantiateAs(kernelProfileClass, IKernelProfile.class);
+    run(getConf(), input, output, measure, kernelProfile, t1, t2, convergenceDelta, maxIterations);
     return 0;
   }
 

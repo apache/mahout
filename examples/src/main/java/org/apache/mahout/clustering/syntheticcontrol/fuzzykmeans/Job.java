@@ -31,6 +31,7 @@ import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.conversion.InputDriver;
 import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
@@ -105,9 +106,7 @@ public final class Job extends AbstractJob {
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.delete(getConf(), output);
     }
-    ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    DistanceMeasure measure = ccl.loadClass(measureClass).asSubclass(
-        DistanceMeasure.class).newInstance();
+    DistanceMeasure measure = ClassUtils.instantiateAs(measureClass, DistanceMeasure.class);
     double t1 = Double.parseDouble(getOption(DefaultOptionCreator.T1_OPTION));
     double t2 = Double.parseDouble(getOption(DefaultOptionCreator.T2_OPTION));
     run(getConf(), input, output, measure, t1, t2, maxIterations, fuzziness,
@@ -155,10 +154,6 @@ public final class Job extends AbstractJob {
    *          the float "m" fuzziness coefficient
    * @param convergenceDelta
    *          the double convergence criteria for iterations
-   * @throws InterruptedException 
-   * @throws ClassNotFoundException 
-   * @throws IllegalAccessException
-   * @throws InstantiationException
    */
   public static void run(Configuration conf,
                          Path input,
@@ -169,7 +164,7 @@ public final class Job extends AbstractJob {
                          int maxIterations,
                          float fuzziness,
                          double convergenceDelta)
-    throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    throws IOException, InterruptedException, ClassNotFoundException {
     Path directoryContainingConvertedInput = new Path(output,
         DIRECTORY_CONTAINING_CONVERTED_INPUT);
     log.info("Preparing Input");

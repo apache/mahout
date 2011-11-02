@@ -753,10 +753,10 @@ public final class MongoDBDataModel implements DataModel {
                          boolean add) throws NoSuchUserException, NoSuchItemException {
     Preconditions.checkNotNull(userID);
     Preconditions.checkNotNull(items);
-    Preconditions.checkArgument(userID.length() > 0);
+    Preconditions.checkArgument(!userID.isEmpty());
     for (List<String> item : items) {
       Preconditions.checkNotNull(item.get(0));
-      Preconditions.checkArgument(item.get(0).length() > 0);
+      Preconditions.checkArgument(!item.get(0).isEmpty());
     }
     if (userIsObject && !ID_PATTERN.matcher(userID).matches()) {
       throw new IllegalArgumentException();

@@ -176,7 +176,7 @@ public final class MahoutDriver {
       } else {
         argsList.add(arg);
         for (String argValue : Arrays.asList(argMap.get(arg))) {
-          if (argValue.length() > 0) {
+          if (!argValue.isEmpty()) {
             argsList.add(argValue);
           }
         }

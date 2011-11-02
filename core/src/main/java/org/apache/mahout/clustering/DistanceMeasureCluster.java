@@ -22,6 +22,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -40,24 +41,15 @@ public class DistanceMeasureCluster extends AbstractCluster {
 
   @Override
   public void configure(Configuration job) {
-    if (getMeasure() != null) {
-      getMeasure().configure(job);
+    if (measure != null) {
+      measure.configure(job);
     }
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
     String dm = in.readUTF();
-    try {
-      ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      this.measure = ccl.loadClass(dm).asSubclass(DistanceMeasure.class).newInstance();
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    }
+    this.measure = ClassUtils.instantiateAs(dm, DistanceMeasure.class);
     super.readFields(in);
   }
 

@@ -17,22 +17,14 @@
 
 package org.apache.mahout.math.solver;
 
-import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.MahoutTestCase;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.solver.LSMR;
 import org.junit.Test;
 
-import java.util.Random;
-
-/**
- * Created by IntelliJ IDEA. User: tdunning Date: Sep 15, 2010 Time: 7:32:27 PM To change this
- * template use File | Settings | File Templates.
- */
-public class LSMRTest extends MahoutTestCase {
+public final class LSMRTest extends MahoutTestCase {
   @Test
   public void basics() {
     Matrix m = hilbert(5);
@@ -40,14 +32,14 @@ public class LSMRTest extends MahoutTestCase {
     // make sure it is the hilbert matrix we know and love
     assertEquals(1, m.get(0, 0), 0);
     assertEquals(0.5, m.get(0, 1), 0);
-    assertEquals(1 / 6.0, m.get(2, 3), 1e-9);
+    assertEquals(1 / 6.0, m.get(2, 3), 1.0e-9);
 
     Vector x = new DenseVector(new double[]{5, -120, 630, -1120, 630});
 
     Vector b = new DenseVector(5);
     b.assign(1);
 
-    assertEquals(0, m.times(x).minus(b).norm(2), 1e-9);
+    assertEquals(0, m.times(x).minus(b).norm(2), 1.0e-9);
 
     LSMR r = new LSMR();
     Vector x1 = r.solve(m, b);
@@ -58,15 +50,15 @@ public class LSMRTest extends MahoutTestCase {
     // a fast iterative solution.
     // Thus, we have to check the residuals rather than testing that the answer matched
     // the ideal.
-    assertEquals(m.times(x1).minus(b).norm(2), 0, 1e-2);
-    assertEquals(0, m.transpose().times(m).times(x1).minus(m.transpose().times(b)).norm(2), 1e-7);
+    assertEquals(0, m.times(x1).minus(b).norm(2), 1.0e-2);
+    assertEquals(0, m.transpose().times(m).times(x1).minus(m.transpose().times(b)).norm(2), 1.0e-7);
 
     // and we need to check that the error estimates are pretty good.
-    assertEquals(m.times(x1).minus(b).norm(2), r.getResidualNorm(), 1e-5);
-    assertEquals(m.transpose().times(m).times(x1).minus(m.transpose().times(b)).norm(2), r.getNormalEquationResidual(), 1e-9);
+    assertEquals(m.times(x1).minus(b).norm(2), r.getResidualNorm(), 1.0e-5);
+    assertEquals(m.transpose().times(m).times(x1).minus(m.transpose().times(b)).norm(2), r.getNormalEquationResidual(), 1.0e-9);
   }
   
-  private Matrix hilbert(int n) {
+  private static Matrix hilbert(int n) {
     Matrix r = new DenseMatrix(n, n);
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < n; j++) {
@@ -76,6 +68,7 @@ public class LSMRTest extends MahoutTestCase {
     return r;
   }
 
+  /*
   private Matrix overDetermined(int n) {
     Random rand = RandomUtils.getRandom();
     Matrix r = new DenseMatrix(2 * n, n);
@@ -86,4 +79,5 @@ public class LSMRTest extends MahoutTestCase {
     }
     return r;
   }
+   */
 }

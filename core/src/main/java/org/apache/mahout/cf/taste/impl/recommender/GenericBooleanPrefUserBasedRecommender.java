@@ -54,7 +54,7 @@ public final class GenericBooleanPrefUserBasedRecommender extends GenericUserBas
       // See GenericItemBasedRecommender.doEstimatePreference() too
       if (userID != theUserID && dataModel.getPreferenceValue(userID, itemID) != null) {
         foundAPref = true;
-        totalSimilarity += similarity.userSimilarity(theUserID, userID);
+        totalSimilarity += (float) similarity.userSimilarity(theUserID, userID);
       }
     }
     return foundAPref ? totalSimilarity : Float.NaN;

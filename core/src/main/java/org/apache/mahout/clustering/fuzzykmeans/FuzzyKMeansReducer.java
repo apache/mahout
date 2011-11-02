@@ -63,7 +63,7 @@ public class FuzzyKMeansReducer extends Reducer<Text, ClusterObservations, Text,
 
     Collection<SoftCluster> clusters = Lists.newArrayList();
     String clusterPath = conf.get(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY);
-    if (clusterPath != null && clusterPath.length() > 0) {
+    if (clusterPath != null && !clusterPath.isEmpty()) {
       FuzzyKMeansUtil.configureWithClusterInfo(new Path(clusterPath), clusters);
       setClusterMap(clusters);
     }

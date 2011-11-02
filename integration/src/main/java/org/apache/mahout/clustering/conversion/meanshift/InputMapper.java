@@ -42,7 +42,7 @@ public class InputMapper extends Mapper<LongWritable, Text, Text, MeanShiftCanop
     // sometimes there are multiple separator spaces
     Collection<Double> doubles = Lists.newArrayList();
     for (String value : numbers) {
-      if (value.length() > 0) {
+      if (!value.isEmpty()) {
         doubles.add(Double.valueOf(value));
       }
     }

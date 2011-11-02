@@ -105,7 +105,8 @@ public final class TrainNewsGroups {
 
     Dictionary newsGroups = new Dictionary();
 
-    NewsgroupHelper.encoder.setProbes(2);
+    NewsgroupHelper helper = new NewsgroupHelper();
+    helper.getEncoder().setProbes(2);
     AdaptiveLogisticRegression learningAlgorithm = new AdaptiveLogisticRegression(20, NewsgroupHelper.FEATURES, new L1());
     learningAlgorithm.setInterval(800);
     learningAlgorithm.setAveragingWindow(500);
@@ -130,7 +131,7 @@ public final class TrainNewsGroups {
       String ng = file.getParentFile().getName();
       int actual = newsGroups.intern(ng);
 
-      Vector v = NewsgroupHelper.encodeFeatureVector(file, actual, leakType, overallCounts);
+      Vector v = helper.encodeFeatureVector(file, actual, leakType, overallCounts);
       learningAlgorithm.train(actual, v);
 
       k++;
@@ -224,15 +225,16 @@ public final class TrainNewsGroups {
     Map<String, Set<Integer>> traceDictionary = Maps.newTreeMap();
     ModelDissector md = new ModelDissector();
 
-    NewsgroupHelper.encoder.setTraceDictionary(traceDictionary);
-    NewsgroupHelper.bias.setTraceDictionary(traceDictionary);
+    NewsgroupHelper helper = new NewsgroupHelper();
+    helper.getEncoder().setTraceDictionary(traceDictionary);
+    helper.getBias().setTraceDictionary(traceDictionary);
 
-    for (File file : permute(files, NewsgroupHelper.rand).subList(0, 500)) {
+    for (File file : permute(files, helper.getRandom()).subList(0, 500)) {
       String ng = file.getParentFile().getName();
       int actual = newsGroups.intern(ng);
 
       traceDictionary.clear();
-      Vector v = NewsgroupHelper.encodeFeatureVector(file, actual, leakType, overallCounts);
+      Vector v = helper.encodeFeatureVector(file, actual, leakType, overallCounts);
       md.update(v, traceDictionary, model);
     }
 

@@ -1,4 +1,3 @@
-package org.apache.mahout.classifier.email;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,7 @@ package org.apache.mahout.classifier.email;
  * limitations under the License.
  */
 
+package org.apache.mahout.classifier.email;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -47,7 +47,6 @@ public class PrepEmailVectorsDriver extends AbstractJob {
 
   @Override
   public int run(String[] args) throws Exception {
-    int result = 0;
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.overwriteOption().create());
@@ -68,6 +67,6 @@ public class PrepEmailVectorsDriver extends AbstractJob {
     convertJob.getConfiguration().set(ITEMS_PER_CLASS, parsedArgs.get("--maxItemsPerLabel"));
     convertJob.getConfiguration().set(USE_LIST_NAME, String.valueOf(parsedArgs.containsKey("--useListName")));
     convertJob.waitForCompletion(true);
-    return result;
+    return 0;
   }
 }

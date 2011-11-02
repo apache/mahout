@@ -76,7 +76,7 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
       try {
         do {
           String term = sf.getAttribute(CharTermAttribute.class).toString();
-          if (term.length() > 0 && dictionary.containsKey(term)) { // ngram
+          if (!term.isEmpty() && dictionary.containsKey(term)) { // ngram
             int termId = dictionary.get(term);
             vector.setQuick(termId, vector.getQuick(termId) + 1);
           }
@@ -88,7 +88,7 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
       }
     } else {
       for (String term : value.getEntries()) {
-        if (term.length() > 0 && dictionary.containsKey(term)) { // unigram
+        if (!term.isEmpty() && dictionary.containsKey(term)) { // unigram
           int termId = dictionary.get(term);
           vector.setQuick(termId, vector.getQuick(termId) + 1);
         }

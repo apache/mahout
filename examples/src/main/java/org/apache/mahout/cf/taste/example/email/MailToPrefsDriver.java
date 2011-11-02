@@ -152,7 +152,6 @@ public final class MailToPrefsDriver extends AbstractJob {
       //Job map
       //may be a way to do this so that we can load the from ids in memory, if they are small enough so that we don't need the double loop
       log.info("Creating recommendation matrix");
-      int i = 0;
       Path vecPath = new Path(output, "recInput");
       if (overwrite) {
         HadoopUtil.delete(conf, vecPath);
@@ -165,6 +164,7 @@ public final class MailToPrefsDriver extends AbstractJob {
       conf.set(EmailUtility.REFS_INDEX, parsedArgs.get("--refs"));
       conf.set(EmailUtility.SEPARATOR, separator);
       int j = 0;
+      int i = 0;
       for (Path fromChunk : fromChunks) {
         for (Path idChunk : msgIdChunks) {
           Path out = new Path(vecPath, "tmp-" + i + '-' + j);

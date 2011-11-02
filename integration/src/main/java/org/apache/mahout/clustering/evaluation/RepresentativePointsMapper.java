@@ -28,6 +28,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.WeightedVectorWritable;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
@@ -81,18 +82,9 @@ public class RepresentativePointsMapper
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
-    try {
-      ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      measure = ccl.loadClass(conf.get(RepresentativePointsDriver.DISTANCE_MEASURE_KEY)).asSubclass(DistanceMeasure.class)
-          .newInstance();
-      representativePoints = getRepresentativePoints(conf);
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    }
+    measure =
+        ClassUtils.instantiateAs(conf.get(RepresentativePointsDriver.DISTANCE_MEASURE_KEY), DistanceMeasure.class);
+    representativePoints = getRepresentativePoints(conf);
   }
 
   public void configure(Map<Integer, List<VectorWritable>> referencePoints, DistanceMeasure measure) {

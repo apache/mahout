@@ -27,6 +27,7 @@ import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.classifier.OnlineLearner;
 import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansClusterer;
 import org.apache.mahout.clustering.fuzzykmeans.SoftCluster;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -111,23 +112,11 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
   public void readFields(DataInput in) throws IOException {
     int size = in.readInt();
     modelClass = in.readUTF();
-    ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    try {
-      Class<? extends Cluster> factory = ccl.loadClass(modelClass).asSubclass(
-          Cluster.class);
-      
-      models = Lists.newArrayList();
-      for (int i = 0; i < size; i++) {
-        Cluster element = factory.newInstance();
-        element.readFields(in);
-        models.add(element);
-      }
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
+    models = Lists.newArrayList();
+    for (int i = 0; i < size; i++) {
+      Cluster element = ClassUtils.instantiateAs(modelClass, Cluster.class);
+      element.readFields(in);
+      models.add(element);
     }
   }
   

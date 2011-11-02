@@ -45,7 +45,7 @@ final class SeedVectorUtil {
   public static List<NamedVector> loadSeedVectors(Configuration conf) {
 
     String seedPathStr = conf.get(VectorDistanceSimilarityJob.SEEDS_PATH_KEY);
-    if (seedPathStr == null || seedPathStr.length() <= 0) {
+    if (seedPathStr == null || seedPathStr.isEmpty()) {
       return Collections.emptyList();
     }
 

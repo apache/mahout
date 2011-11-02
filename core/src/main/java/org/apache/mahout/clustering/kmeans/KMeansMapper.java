@@ -26,6 +26,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.ClusterObservations;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.VectorWritable;
 
@@ -45,27 +46,18 @@ public class KMeansMapper extends Mapper<WritableComparable<?>, VectorWritable, 
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
-    try {
-      ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      DistanceMeasure measure = ccl.loadClass(conf.get(KMeansConfigKeys.DISTANCE_MEASURE_KEY))
-          .asSubclass(DistanceMeasure.class).newInstance();
-      measure.configure(conf);
+    DistanceMeasure measure =
+        ClassUtils.instantiateAs(conf.get(KMeansConfigKeys.DISTANCE_MEASURE_KEY), DistanceMeasure.class);
+    measure.configure(conf);
 
-      this.clusterer = new KMeansClusterer(measure);
+    this.clusterer = new KMeansClusterer(measure);
 
-      String clusterPath = conf.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
-      if (clusterPath != null && clusterPath.length() > 0) {
-        KMeansUtil.configureWithClusterInfo(conf, new Path(clusterPath), clusters);
-        if (clusters.isEmpty()) {
-          throw new IllegalStateException("No clusters found. Check your -c path.");
-        }
+    String clusterPath = conf.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
+    if (clusterPath != null && !clusterPath.isEmpty()) {
+      KMeansUtil.configureWithClusterInfo(conf, new Path(clusterPath), clusters);
+      if (clusters.isEmpty()) {
+        throw new IllegalStateException("No clusters found. Check your -c path.");
       }
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
     }
   }
 

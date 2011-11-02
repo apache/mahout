@@ -193,8 +193,10 @@ public final class DataLoader {
    * @param path
    *          data path
    */
-  public static Dataset generateDataset(String descriptor, boolean regression, FileSystem fs, Path path) throws DescriptorException,
-                                                                                    IOException {
+  public static Dataset generateDataset(CharSequence descriptor,
+                                        boolean regression,
+                                        FileSystem fs,
+                                        Path path) throws DescriptorException, IOException {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
     
     FSDataInputStream input = fs.open(path);
@@ -226,7 +228,9 @@ public final class DataLoader {
    * @param descriptor
    *          attributes description
    */
-  public static Dataset generateDataset(String descriptor, boolean regression, String[] data) throws DescriptorException {
+  public static Dataset generateDataset(CharSequence descriptor,
+                                        boolean regression,
+                                        String[] data) throws DescriptorException {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
     
     // used to convert CATEGORICAL and LABEL attributes to Integer

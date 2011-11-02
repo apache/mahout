@@ -87,7 +87,7 @@ public final class SplitBayesInputTest extends MahoutTestCase {
   }
 
   private void writeSingleInputFile() throws IOException {
-    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fs.create(tempInputFile), Charsets.UTF_8));
+    Writer writer = new BufferedWriter(new OutputStreamWriter(fs.create(tempInputFile), Charsets.UTF_8));
     try {
       for (String[] entry : ClassifierData.DATA) {
         writer.write(entry[0] + '\t' + entry[1] + '\n');

@@ -310,7 +310,7 @@ public class HebbianSolver {
 
     String corpusDir = props.getProperty("solver.input.dir");
     String outputDir = props.getProperty("solver.output.dir");
-    if (corpusDir == null || corpusDir.length() == 0 || outputDir == null || outputDir.length() == 0) {
+    if (corpusDir == null || corpusDir.isEmpty() || outputDir == null || outputDir.isEmpty()) {
       log.error("{} must contain values for solver.input.dir and solver.output.dir", propertiesFile);
       return;
     }

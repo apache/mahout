@@ -18,6 +18,7 @@
 package org.apache.mahout.math.decomposer;
 
 import com.google.common.collect.Lists;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.MahoutTestCase;
@@ -129,10 +130,9 @@ public abstract class SolverTest extends MahoutTestCase {
                                                           double entryMean) {
     Matrix m = new SparseRowMatrix(numRows, numCols);
     //double n = 0;
-    //Random r = RandomUtils.getRandom();
-    Random r = new Random(1234L);
+    Random r = RandomUtils.getRandom();
     for (int i = 0; i < nonNullRows; i++) {
-      SequentialAccessSparseVector v = new SequentialAccessSparseVector(numCols);
+      Vector v = new SequentialAccessSparseVector(numCols);
       for (int j = 0; j < entriesPerRow; j++) {
         int col = r.nextInt(numCols);
         double val = r.nextGaussian();

@@ -21,6 +21,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.NamedVector;
@@ -59,18 +60,9 @@ public final class VectorDistanceMapper
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
-    ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    try {
-      measure = ccl.loadClass(conf.get(VectorDistanceSimilarityJob.DISTANCE_MEASURE_KEY))
-              .asSubclass(DistanceMeasure.class).newInstance();
-      measure.configure(conf);
-      seedVectors = SeedVectorUtil.loadSeedVectors(conf);
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    }
+    measure =
+        ClassUtils.instantiateAs(conf.get(VectorDistanceSimilarityJob.DISTANCE_MEASURE_KEY), DistanceMeasure.class);
+    measure.configure(conf);
+    seedVectors = SeedVectorUtil.loadSeedVectors(conf);
   }
 }

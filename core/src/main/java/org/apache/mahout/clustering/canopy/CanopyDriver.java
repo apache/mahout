@@ -40,6 +40,7 @@ import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
@@ -104,10 +105,7 @@ public class CanopyDriver extends AbstractJob {
     boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
     boolean runSequential = getOption(DefaultOptionCreator.METHOD_OPTION)
         .equalsIgnoreCase(DefaultOptionCreator.SEQUENTIAL_METHOD);
-    ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    DistanceMeasure measure = ccl.loadClass(measureClass).asSubclass(
-        DistanceMeasure.class).newInstance();
-
+    DistanceMeasure measure = ClassUtils.instantiateAs(measureClass, DistanceMeasure.class);
     run(conf, input, output, measure, t1, t2, t3, t4, clusterFilter,
         runClustering, runSequential);
     return 0;
@@ -143,8 +141,7 @@ public class CanopyDriver extends AbstractJob {
   public static void run(Configuration conf, Path input, Path output,
       DistanceMeasure measure, double t1, double t2, double t3, double t4,
       int clusterFilter, boolean runClustering, boolean runSequential)
-      throws IOException, InterruptedException, ClassNotFoundException,
-      InstantiationException, IllegalAccessException {
+      throws IOException, InterruptedException, ClassNotFoundException {
     Path clustersOut = buildClusters(conf, input, output, measure, t1, t2, t3,
         t4, clusterFilter, runSequential);
     if (runClustering) {
@@ -159,7 +156,7 @@ public class CanopyDriver extends AbstractJob {
   public static void run(Configuration conf, Path input, Path output,
       DistanceMeasure measure, double t1, double t2, boolean runClustering,
       boolean runSequential) throws IOException, InterruptedException,
-      ClassNotFoundException, InstantiationException, IllegalAccessException {
+      ClassNotFoundException {
     run(conf, input, output, measure, t1, t2, t1, t2, 0, runClustering,
         runSequential);
   }
@@ -184,8 +181,7 @@ public class CanopyDriver extends AbstractJob {
    */
   public static void run(Path input, Path output, DistanceMeasure measure,
       double t1, double t2, boolean runClustering, boolean runSequential)
-      throws IOException, InterruptedException, ClassNotFoundException,
-      InstantiationException, IllegalAccessException {
+      throws IOException, InterruptedException, ClassNotFoundException {
     run(new Configuration(), input, output, measure, t1, t2, runClustering,
         runSequential);
   }
@@ -355,9 +351,7 @@ public class CanopyDriver extends AbstractJob {
 
   public static void clusterData(Configuration conf, Path points,
       Path canopies, Path output, DistanceMeasure measure, double t1,
-      double t2, boolean runSequential) throws InstantiationException,
-      IllegalAccessException, IOException, InterruptedException,
-      ClassNotFoundException {
+      double t2, boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException {
     if (runSequential) {
       clusterDataSeq(points, canopies, output, measure, t1, t2);
     } else {
@@ -366,8 +360,7 @@ public class CanopyDriver extends AbstractJob {
   }
 
   private static void clusterDataSeq(Path points, Path canopies, Path output,
-      DistanceMeasure measure, double t1, double t2)
-      throws InstantiationException, IllegalAccessException, IOException {
+      DistanceMeasure measure, double t1, double t2) throws IOException {
     CanopyClusterer clusterer = new CanopyClusterer(measure, t1, t2);
 
     Collection<Canopy> clusters = Lists.newArrayList();
@@ -391,16 +384,13 @@ public class CanopyDriver extends AbstractJob {
           outPath, "part-m-" + part), IntWritable.class,
           WeightedVectorWritable.class);
       try {
-        Writable key = reader.getKeyClass().asSubclass(Writable.class)
-            .newInstance();
-        VectorWritable vw = reader.getValueClass().asSubclass(
-            VectorWritable.class).newInstance();
+        Writable key = ClassUtils.instantiateAs(reader.getKeyClassName(), Writable.class);
+        VectorWritable vw = ClassUtils.instantiateAs(reader.getValueClassName(), VectorWritable.class);
         while (reader.next(key, vw)) {
           Canopy closest = clusterer.findClosestCanopy(vw.get(), clusters);
           writer.append(new IntWritable(closest.getId()),
               new WeightedVectorWritable(1, vw.get()));
-          vw = reader.getValueClass().asSubclass(VectorWritable.class)
-              .newInstance();
+          vw = ClassUtils.instantiateAs(reader.getValueClassName(), VectorWritable.class);
         }
       } finally {
         Closeables.closeQuietly(reader);

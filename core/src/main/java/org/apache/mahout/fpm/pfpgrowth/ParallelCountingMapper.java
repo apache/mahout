@@ -43,7 +43,7 @@ public class ParallelCountingMapper extends Mapper<LongWritable,Text,Text,LongWr
     
     String[] items = splitter.split(input.toString());
     for (String item : items) {
-      if (item.trim().length() == 0) {
+      if (item.trim().isEmpty()) {
         continue;
       }
       context.setStatus("Parallel Counting Mapper: " + item);

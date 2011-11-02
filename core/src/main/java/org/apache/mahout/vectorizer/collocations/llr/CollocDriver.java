@@ -33,6 +33,7 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.vectorizer.DefaultAnalyzer;
@@ -135,7 +136,7 @@ public final class CollocDriver extends AbstractJob {
         analyzerClass = Class.forName(className).asSubclass(Analyzer.class);
         // try instantiating it, b/c there isn't any point in setting it if
         // you can't instantiate it
-        analyzerClass.newInstance();
+        ClassUtils.instantiateAs(analyzerClass, Analyzer.class);
       }
 
       Path tokenizedPath = new Path(output, DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER);

@@ -491,7 +491,7 @@ public abstract class AbstractJob extends Configured implements Tool {
                                   Class<? extends Reducer> reducer) {
     StringBuilder name = new StringBuilder(100);
     String customJobName = job.getJobName();
-    if (customJobName == null || customJobName.trim().length() == 0) {
+    if (customJobName == null || customJobName.trim().isEmpty()) {
       name.append(getClass().getSimpleName());
     } else {
       name.append(customJobName);

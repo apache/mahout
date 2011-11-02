@@ -58,7 +58,7 @@ public class ClusterMapper
     String clustersIn = conf.get(CanopyConfigKeys.CANOPY_PATH_KEY);
 
     // filter out the files
-    if (clustersIn != null && clustersIn.length() > 0) {
+    if (clustersIn != null && !clustersIn.isEmpty()) {
       Path clusterPath = new Path(clustersIn, "*");
       FileSystem fs = clusterPath.getFileSystem(conf);
       Path[] paths = FileUtil.stat2Paths(fs.globStatus(clusterPath, PathFilters.partFilter()));

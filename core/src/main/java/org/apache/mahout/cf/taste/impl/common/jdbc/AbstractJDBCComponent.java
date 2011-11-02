@@ -39,7 +39,7 @@ public abstract class AbstractJDBCComponent {
   protected static final String DEFAULT_DATASOURCE_NAME = "jdbc/taste";
   
   protected static void checkNotNullAndLog(String argName, Object value) {
-    Preconditions.checkArgument(value != null && value.toString().length() != 0,
+    Preconditions.checkArgument(value != null && !value.toString().isEmpty(),
       argName + " is null or empty");
     log.debug("{}: {}", argName, value);
   }

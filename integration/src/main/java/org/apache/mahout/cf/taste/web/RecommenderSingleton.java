@@ -17,8 +17,8 @@
 
 package org.apache.mahout.cf.taste.web;
 
-import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.apache.mahout.common.ClassUtils;
 
 /**
  * <p>A singleton which holds an instance of a {@link Recommender}. This is used to share
@@ -37,25 +37,17 @@ public final class RecommenderSingleton {
     return instance;
   }
 
-  public static synchronized void initializeIfNeeded(String recommenderClassName) throws TasteException {
+  public static synchronized void initializeIfNeeded(String recommenderClassName) {
     if (instance == null) {
       instance = new RecommenderSingleton(recommenderClassName);
     }
   }
 
-  private RecommenderSingleton(String recommenderClassName) throws TasteException {
+  private RecommenderSingleton(String recommenderClassName) {
     if (recommenderClassName == null) {
       throw new IllegalArgumentException("Recommender class name is null");
     }
-    try {
-      recommender = Class.forName(recommenderClassName).asSubclass(Recommender.class).newInstance();
-    } catch (ClassNotFoundException cnfe) {
-      throw new TasteException(cnfe);
-    } catch (InstantiationException ie) {
-      throw new TasteException(ie);
-    } catch (IllegalAccessException iae) {
-      throw new TasteException(iae);
-    }
+    recommender = ClassUtils.instantiateAs(recommenderClassName, Recommender.class);
   }
 
   public Recommender getRecommender() {

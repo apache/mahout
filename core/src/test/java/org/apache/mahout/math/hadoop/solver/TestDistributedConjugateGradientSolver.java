@@ -1,9 +1,27 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.math.hadoop.solver;
 
 import java.io.File;
 import java.util.Random;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.MahoutTestCase;
 import org.apache.mahout.math.Vector;
@@ -11,12 +29,11 @@ import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 import org.apache.mahout.math.hadoop.TestDistributedRowMatrix;
 import org.junit.Test;
 
+public final class TestDistributedConjugateGradientSolver extends MahoutTestCase {
 
-public class TestDistributedConjugateGradientSolver extends MahoutTestCase
-{
-  private Vector randomVector(int size, double entryMean) {
+  private static Vector randomVector(int size, double entryMean) {
     DenseVector v = new DenseVector(size);
-    Random r = new Random(1234L);
+    Random r = RandomUtils.getRandom();
     
     for (int i = 0; i < size; ++i) {
       v.setQuick(i, r.nextGaussian() * entryMean);

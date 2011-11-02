@@ -92,7 +92,7 @@ public class Dataset implements Writable {
    * @param nbInstances
    */
   protected Dataset(Attribute[] attrs, List<String>[] values, int nbInstances, boolean regression) {
-  	Preconditions.checkArgument(regression == false, "Regression Problems not supported");
+  	Preconditions.checkArgument(!regression, "Regression Problems not supported");
     validateValues(attrs, values);
 
     int nbattrs = countAttributes(attrs);
@@ -261,7 +261,9 @@ public class Dataset implements Writable {
       hashCode = 31 * hashCode + attr.hashCode();
     }
     for (String[] valueRow : values) {
-    	if (valueRow == null) continue;
+    	if (valueRow == null) {
+        continue;
+      }
       for (String value : valueRow) {
         hashCode = 31 * hashCode + value.hashCode();
       }

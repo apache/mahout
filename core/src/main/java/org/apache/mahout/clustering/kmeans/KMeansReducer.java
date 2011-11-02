@@ -27,6 +27,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.clustering.ClusterObservations;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 
 public class KMeansReducer extends Reducer<Text, ClusterObservations, Text, Cluster> {
@@ -55,31 +56,22 @@ public class KMeansReducer extends Reducer<Text, ClusterObservations, Text, Clus
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
-    try {
-      ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      DistanceMeasure measure = ccl.loadClass(conf.get(KMeansConfigKeys.DISTANCE_MEASURE_KEY))
-          .asSubclass(DistanceMeasure.class).newInstance();
-      measure.configure(conf);
+    DistanceMeasure measure =
+        ClassUtils.instantiateAs(conf.get(KMeansConfigKeys.DISTANCE_MEASURE_KEY), DistanceMeasure.class);
+    measure.configure(conf);
 
-      this.convergenceDelta = Double.parseDouble(conf.get(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY));
-      this.clusterer = new KMeansClusterer(measure);
-      this.clusterMap = Maps.newHashMap();
+    this.convergenceDelta = Double.parseDouble(conf.get(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY));
+    this.clusterer = new KMeansClusterer(measure);
+    this.clusterMap = Maps.newHashMap();
 
-      String path = conf.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
-      if (path.length() > 0) {
-        Collection<Cluster> clusters = Lists.newArrayList();
-        KMeansUtil.configureWithClusterInfo(conf, new Path(path), clusters);
-        setClusterMap(clusters);
-        if (clusterMap.isEmpty()) {
-          throw new IllegalStateException("Cluster is empty!");
-        }
+    String path = conf.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
+    if (!path.isEmpty()) {
+      Collection<Cluster> clusters = Lists.newArrayList();
+      KMeansUtil.configureWithClusterInfo(conf, new Path(path), clusters);
+      setClusterMap(clusters);
+      if (clusterMap.isEmpty()) {
+        throw new IllegalStateException("Cluster is empty!");
       }
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
     }
   }
 

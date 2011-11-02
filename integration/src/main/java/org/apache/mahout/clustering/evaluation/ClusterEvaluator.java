@@ -25,6 +25,7 @@ import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
@@ -71,11 +72,8 @@ public class ClusterEvaluator {
    * @param clustersIn
    *            a String path to the input clusters directory
    */
-  public ClusterEvaluator(Configuration conf, Path clustersIn)
-    throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-    ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    measure = ccl.loadClass(conf.get(RepresentativePointsDriver.DISTANCE_MEASURE_KEY)).asSubclass(DistanceMeasure.class)
-        .newInstance();
+  public ClusterEvaluator(Configuration conf, Path clustersIn) {
+    measure = ClassUtils.instantiateAs(conf.get(RepresentativePointsDriver.DISTANCE_MEASURE_KEY), DistanceMeasure.class);
     representativePoints = RepresentativePointsMapper.getRepresentativePoints(conf);
     clusters = loadClusters(conf, clustersIn);
   }

@@ -1,4 +1,3 @@
-package org.apache.mahout.classifier.sgd;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,7 @@ package org.apache.mahout.classifier.sgd;
  * limitations under the License.
  */
 
+package org.apache.mahout.classifier.sgd;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ConcurrentHashMultiset;
@@ -45,28 +45,38 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
 
-/**
- *
- *
- **/
-public class NewsgroupHelper {
+final class NewsgroupHelper {
 
-  static final Random rand = RandomUtils.getRandom();
-  static final SimpleDateFormat[] DATE_FORMATS = {
+  private static final SimpleDateFormat[] DATE_FORMATS = {
           new SimpleDateFormat("", Locale.ENGLISH),
           new SimpleDateFormat("MMM-yyyy", Locale.ENGLISH),
           new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss", Locale.ENGLISH)
   };
-  static final Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_31);
-  static final FeatureVectorEncoder encoder = new StaticWordValueEncoder("body");
-  static final FeatureVectorEncoder bias = new ConstantValueEncoder("Intercept");
   public static final int FEATURES = 10000;
   // 1997-01-15 00:01:00 GMT
-  static final long DATE_REFERENCE = 853286460;
-  static final long MONTH = 30 * 24 * 3600;
-  static final long WEEK = 7 * 24 * 3600;
+  private static final long DATE_REFERENCE = 853286460;
+  private static final long MONTH = 30 * 24 * 3600;
+  private static final long WEEK = 7 * 24 * 3600;
+  
+  private final Random rand = RandomUtils.getRandom();  
+  private final Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_31);
+  private final FeatureVectorEncoder encoder = new StaticWordValueEncoder("body");
+  private final FeatureVectorEncoder bias = new ConstantValueEncoder("Intercept");
+  
+  FeatureVectorEncoder getEncoder() {
+    return encoder;
+  }
+  
+  FeatureVectorEncoder getBias() {
+    return bias;
+  }
+  
+  Random getRandom() {
+    return rand;
+  }
 
-  static Vector encodeFeatureVector(File file, int actual, int leakType, Multiset<String> overallCounts) throws IOException {
+  Vector encodeFeatureVector(File file, int actual, int leakType, Multiset<String> overallCounts)
+    throws IOException {
     long date = (long) (1000 * (DATE_REFERENCE + actual * MONTH + 1 * WEEK * rand.nextDouble()));
     Multiset<String> words = ConcurrentHashMultiset.create();
 
@@ -103,7 +113,8 @@ public class NewsgroupHelper {
     return v;
   }
 
-  static void countWords(Analyzer analyzer, Collection<String> words, Reader in, Multiset<String> overallCounts) throws IOException {
+  static void countWords(Analyzer analyzer, Collection<String> words, Reader in, Multiset<String> overallCounts) 
+    throws IOException {
     TokenStream ts = analyzer.reusableTokenStream("text", in);
     ts.addAttribute(CharTermAttribute.class);
     ts.reset();

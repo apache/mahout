@@ -30,6 +30,7 @@ import org.apache.mahout.clustering.conversion.InputDriver;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
@@ -92,9 +93,7 @@ public final class Job extends AbstractJob {
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.delete(getConf(), output);
     }
-    ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    Class<?> cl = ccl.loadClass(measureClass);
-    DistanceMeasure measure = (DistanceMeasure) cl.newInstance();
+    DistanceMeasure measure = ClassUtils.instantiateAs(measureClass, DistanceMeasure.class);
     if (hasOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)) {
       int k = Integer
           .parseInt(getOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION));
@@ -184,7 +183,7 @@ public final class Job extends AbstractJob {
   public static void run(Configuration conf, Path input, Path output,
                          DistanceMeasure measure, double t1, double t2, double convergenceDelta,
                          int maxIterations)
-      throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+      throws IOException, InterruptedException, ClassNotFoundException {
     Path directoryContainingConvertedInput = new Path(output,
         DIRECTORY_CONTAINING_CONVERTED_INPUT);
     log.info("Preparing Input");

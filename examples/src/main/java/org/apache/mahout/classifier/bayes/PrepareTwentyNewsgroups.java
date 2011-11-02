@@ -30,8 +30,8 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.util.Version;
 import org.apache.mahout.classifier.BayesFileFormatter;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 
@@ -86,12 +86,7 @@ public final class PrepareTwentyNewsgroups {
       File outputDir = new File((String) cmdLine.getValue(outputDirOpt));
       String analyzerName = (String) cmdLine.getValue(analyzerNameOpt);
       Charset charset = Charset.forName((String) cmdLine.getValue(charsetOpt));
-      Analyzer analyzer;
-      try {
-        analyzer = Class.forName(analyzerName).asSubclass(Analyzer.class).newInstance();
-      } catch (InstantiationException e) {
-        analyzer = (Analyzer) Class.forName(analyzerName).getConstructor(Version.class).newInstance(Version.LUCENE_31);
-      }
+      Analyzer analyzer = ClassUtils.instantiateAs(analyzerName, Analyzer.class);
       // parent dir contains dir by category
       if (!parentDir.exists()) {
         throw new FileNotFoundException("Can't find input directory " + parentDir);

@@ -105,7 +105,7 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
         if ("shingle".equals(type)) {
           count++;
           ngrams.adjustOrPutValue(term, 1, 1);
-        } else if (emitUnigrams && term.length() > 0) { // unigram
+        } else if (emitUnigrams && !term.isEmpty()) { // unigram
           unigrams.adjustOrPutValue(term, 1, 1);
         }
       } while (sf.incrementToken());

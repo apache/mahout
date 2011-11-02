@@ -38,6 +38,7 @@ import org.apache.lucene.analysis.TokenStream;
 
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.mahout.analysis.WikipediaAnalyzer;
+import org.apache.mahout.common.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,17 +103,8 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
     exactMatchOnly = conf.getBoolean("exact.match.only", false);
 
     if (analyzer == null) {
-      try {
-        String analyzerStr = conf.get("analyzer.class", WikipediaAnalyzer.class.getName());
-        Class<? extends Analyzer> analyzerClass = Class.forName(analyzerStr).asSubclass(Analyzer.class);
-        analyzer = analyzerClass.newInstance();
-      } catch (ClassNotFoundException e) {
-        throw new IllegalStateException(e);
-      } catch (IllegalAccessException e) {
-        throw new IllegalStateException(e);
-      } catch (InstantiationException e) {
-        throw new IllegalStateException(e);
-      }
+      String analyzerStr = conf.get("analyzer.class", WikipediaAnalyzer.class.getName());
+      analyzer = ClassUtils.instantiateAs(analyzerStr, Analyzer.class);
     }
 
     log.info("Configure: Input Categories size: {} Exact Match: {} Analyzer: {}",

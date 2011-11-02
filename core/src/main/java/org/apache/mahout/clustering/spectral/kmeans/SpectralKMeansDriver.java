@@ -30,6 +30,7 @@ import org.apache.mahout.clustering.spectral.common.MatrixDiagonalizeJob;
 import org.apache.mahout.clustering.spectral.common.UnitVectorizerJob;
 import org.apache.mahout.clustering.spectral.common.VectorMatrixMultiplicationJob;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -85,8 +86,7 @@ public class SpectralKMeansDriver extends AbstractJob {
     int numDims = Integer.parseInt(parsedArgs.get("--dimensions"));
     int clusters = Integer.parseInt(parsedArgs.get("--clusters"));
     String measureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
-    ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    DistanceMeasure measure = ccl.loadClass(measureClass).asSubclass(DistanceMeasure.class).newInstance();
+    DistanceMeasure measure = ClassUtils.instantiateAs(measureClass, DistanceMeasure.class);
     double convergenceDelta = Double.parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
 
