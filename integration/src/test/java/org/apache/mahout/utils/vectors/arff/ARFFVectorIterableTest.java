@@ -18,7 +18,10 @@
 package org.apache.mahout.utils.vectors.arff;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.mahout.math.DenseVector;
@@ -123,6 +126,19 @@ public final class ARFFVectorIterableTest extends MahoutTestCase {
     Map<Integer, DateFormat> integerDateFormatMap = model.getDateMap();
     assertNotNull("date format null", integerDateFormatMap);
     assertEquals(1, integerDateFormatMap.size());
+  }
+
+  @Test
+  public void testDate() throws Exception {
+    MapBackedARFFModel model = new MapBackedARFFModel();
+    ARFFVectorIterable iterable = new ARFFVectorIterable(NON_NUMERIC_ARFF, model);
+    Iterator<Vector> iter = iterable.iterator();
+    Vector firstVector = iter.next();
+    assertEquals(firstVector.get(2),1.0,0); 
+    DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+    Date date = format.parse("1973-10-23");
+    long result = date.getTime();
+    assertEquals(result, firstVector.get(4),0);
     
   }
 

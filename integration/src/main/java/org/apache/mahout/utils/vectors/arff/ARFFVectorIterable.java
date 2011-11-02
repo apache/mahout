@@ -104,7 +104,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
           int classIdx = lower.indexOf(ARFFType.NOMINAL.getIndicator());
           String[] classes = COMMA_PATTERN.split(line.substring(classIdx + 1, line.length() - 1));
           for (int i = 0; i < classes.length; i++) {
-            model.addNominal(label, classes[i].trim(), i);
+            model.addNominal(label, classes[i].trim(), i + 1);
           }
           
         } else if (lower.contains(ARFFType.DATE.getIndicator())) {
