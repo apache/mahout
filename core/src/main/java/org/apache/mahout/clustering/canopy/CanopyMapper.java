@@ -33,7 +33,7 @@ class CanopyMapper extends
 
   private CanopyClusterer canopyClusterer;
 
-  private Integer clusterFilter;
+  private int clusterFilter;
 
   @Override
   protected void map(WritableComparable<?> key, VectorWritable point,
@@ -46,7 +46,7 @@ class CanopyMapper extends
       InterruptedException {
     super.setup(context);
     canopyClusterer = new CanopyClusterer(context.getConfiguration());
-    clusterFilter = Integer.valueOf(context.getConfiguration().get(
+    clusterFilter = Integer.parseInt(context.getConfiguration().get(
         CanopyConfigKeys.CF_KEY));
   }
 

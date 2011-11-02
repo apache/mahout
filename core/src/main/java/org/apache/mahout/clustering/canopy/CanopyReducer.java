@@ -32,7 +32,7 @@ public class CanopyReducer extends Reducer<Text, VectorWritable, Text, Canopy> {
 
   private CanopyClusterer canopyClusterer;
 
-  private Integer clusterFilter;
+  private int clusterFilter;
 
   CanopyClusterer getCanopyClusterer() {
     return canopyClusterer;
@@ -59,7 +59,7 @@ public class CanopyReducer extends Reducer<Text, VectorWritable, Text, Canopy> {
     super.setup(context);
     canopyClusterer = new CanopyClusterer(context.getConfiguration());
     canopyClusterer.useT3T4();
-    clusterFilter = Integer.valueOf(context.getConfiguration().get(
+    clusterFilter = Integer.parseInt(context.getConfiguration().get(
         CanopyConfigKeys.CF_KEY));
   }
 
