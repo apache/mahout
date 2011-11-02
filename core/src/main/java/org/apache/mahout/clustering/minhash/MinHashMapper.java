@@ -102,9 +102,8 @@ public class MinHashMapper extends Mapper<Text, VectorWritable, Text, Writable> 
       for (int j = 0; j < keyGroups; j++) {
         clusterIdBuilder.append(minHashValues[(i + j) % numHashFunctions]).append('-');
       }
-      String clusterId = clusterIdBuilder.toString();
-      clusterId = clusterId.substring(0, clusterId.lastIndexOf('-'));
-      Text cluster = new Text(clusterId);
+      clusterIdBuilder.deleteCharAt(clusterIdBuilder.length() - 1);
+      Text cluster = new Text(clusterIdBuilder.toString());
       Writable point;
       if (debugOutput) {
         point = new VectorWritable(featureVector.clone());
