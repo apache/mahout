@@ -140,8 +140,9 @@ public final class ExpectationMaximizationSVDFactorizer extends AbstractFactoriz
     double[] rightVectorJ = rightVectors[j];
     double prediction = predictRating(i, j, f, pref, true);
     double err = pref.getValue() - prediction;
+    double leftVectorIF = leftVectorI[f];
     leftVectorI[f] += learningRate * (err * rightVectorJ[f] - preventOverfitting * leftVectorI[f]);
-    rightVectorJ[f] += learningRate * (err * leftVectorI[f] - preventOverfitting * rightVectorJ[f]);
+    rightVectorJ[f] += learningRate * (err * leftVectorIF - preventOverfitting * rightVectorJ[f]);
     return err;
   }
 
