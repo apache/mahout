@@ -38,6 +38,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
@@ -268,6 +269,15 @@ public class DisplayClustering extends Frame {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
     for (FileStatus s : fs.listStatus(output, new ClustersFilter())) {
+      List<Cluster> clusters = readClusters(s.getPath());
+      CLUSTERS.add(clusters);
+    }
+  }
+
+  protected static void loadClusters(Path output, PathFilter filter) throws IOException {
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.get(output.toUri(), conf);
+    for (FileStatus s : fs.listStatus(output, filter)) {
       List<Cluster> clusters = readClusters(s.getPath());
       CLUSTERS.add(clusters);
     }
