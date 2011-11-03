@@ -56,13 +56,13 @@ public class PreparePreferenceMatrixJob extends AbstractJob {
     addInputOption();
     addOutputOption();
     addOption("maxPrefsPerUser", "mppu", "max number of preferences to consider per user, " +
-        "users with more preferences will be sampled down");
+            "users with more preferences will be sampled down");
     addOption("minPrefsPerUser", "mp", "ignore users with less preferences than this "
-        + "(default: " + DEFAULT_MIN_PREFS_PER_USER + ')', String.valueOf(DEFAULT_MIN_PREFS_PER_USER));
+            + "(default: " + DEFAULT_MIN_PREFS_PER_USER + ')', String.valueOf(DEFAULT_MIN_PREFS_PER_USER));
     addOption("booleanData", "b", "Treat input as without pref values", Boolean.FALSE.toString());
     addOption("ratingShift", "rs", "shift ratings by this value", "0.0");
 
-    Map<String,String> parsedArgs = parseArguments(args);
+    Map<String, String> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
@@ -70,27 +70,27 @@ public class PreparePreferenceMatrixJob extends AbstractJob {
     int minPrefsPerUser = Integer.parseInt(parsedArgs.get("--minPrefsPerUser"));
     boolean booleanData = Boolean.valueOf(parsedArgs.get("--booleanData"));
     float ratingShift = Float.parseFloat(parsedArgs.get("--ratingShift"));
-
+    //convert items to an internal index
     Job itemIDIndex = prepareJob(getInputPath(), getOutputPath(ITEMID_INDEX), TextInputFormat.class,
-        ItemIDIndexMapper.class, VarIntWritable.class, VarLongWritable.class, ItemIDIndexReducer.class,
-        VarIntWritable.class, VarLongWritable.class, SequenceFileOutputFormat.class);
+            ItemIDIndexMapper.class, VarIntWritable.class, VarLongWritable.class, ItemIDIndexReducer.class,
+            VarIntWritable.class, VarLongWritable.class, SequenceFileOutputFormat.class);
     itemIDIndex.setCombinerClass(ItemIDIndexReducer.class);
     itemIDIndex.waitForCompletion(true);
-
+    //convert user preferences into a vector per user
     Job toUserVectors = prepareJob(getInputPath(), getOutputPath(USER_VECTORS), TextInputFormat.class,
-        ToItemPrefsMapper.class, VarLongWritable.class, booleanData ? VarLongWritable.class : EntityPrefWritable.class,
-        ToUserVectorsReducer.class, VarLongWritable.class, VectorWritable.class, SequenceFileOutputFormat.class);
+            ToItemPrefsMapper.class, VarLongWritable.class, booleanData ? VarLongWritable.class : EntityPrefWritable.class,
+            ToUserVectorsReducer.class, VarLongWritable.class, VectorWritable.class, SequenceFileOutputFormat.class);
     toUserVectors.getConfiguration().setBoolean(RecommenderJob.BOOLEAN_DATA, booleanData);
     toUserVectors.getConfiguration().setInt(ToUserVectorsReducer.MIN_PREFERENCES_PER_USER, minPrefsPerUser);
     toUserVectors.getConfiguration().set(ToEntityPrefsMapper.RATING_SHIFT, String.valueOf(ratingShift));
     toUserVectors.waitForCompletion(true);
-
+    //we need the number of users later
     int numberOfUsers = (int) toUserVectors.getCounters().findCounter(ToUserVectorsReducer.Counters.USERS).getValue();
     TasteHadoopUtils.writeInt(numberOfUsers, getOutputPath(NUM_USERS), getConf());
-
+    //build the rating matrix
     Job toItemVectors = prepareJob(getOutputPath(USER_VECTORS), getOutputPath(RATING_MATRIX),
-        ToItemVectorsMapper.class, IntWritable.class, VectorWritable.class, ToItemVectorsReducer.class,
-        IntWritable.class, VectorWritable.class);
+            ToItemVectorsMapper.class, IntWritable.class, VectorWritable.class, ToItemVectorsReducer.class,
+            IntWritable.class, VectorWritable.class);
     toItemVectors.setCombinerClass(ToItemVectorsReducer.class);
 
     /* configure sampling regarding the uservectors */
