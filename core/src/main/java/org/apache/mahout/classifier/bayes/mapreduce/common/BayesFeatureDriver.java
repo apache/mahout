@@ -17,8 +17,6 @@
 
 package org.apache.mahout.classifier.bayes.mapreduce.common;
 
-import java.io.IOException;
-
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
@@ -31,7 +29,11 @@ import org.apache.mahout.classifier.bayes.BayesParameters;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.StringTuple;
 
-/** Create and run the Bayes Feature Reader Step. */
+import java.io.IOException;
+
+/**
+ * Create and run the Bayes Feature Reader Step.
+ */
 public class BayesFeatureDriver implements BayesJob {
 
   @Override
@@ -45,32 +47,22 @@ public class BayesFeatureDriver implements BayesJob {
     conf.setOutputKeyComparatorClass(FeatureLabelComparator.class);
     FileInputFormat.setInputPaths(conf, input);
     FileOutputFormat.setOutputPath(conf, output);
-    
+
     conf.setMapperClass(BayesFeatureMapper.class);
-    
+
     conf.setInputFormat(KeyValueTextInputFormat.class);
     conf.setCombinerClass(BayesFeatureCombiner.class);
     conf.setReducerClass(BayesFeatureReducer.class);
     conf.setOutputFormat(BayesFeatureOutputFormat.class);
     conf.set("io.serializations",
-          "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
+            "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
     // this conf parameter needs to be set enable serialisation of conf values
 
     HadoopUtil.delete(conf, output);
     conf.set("bayes.parameters", params.toString());
-    
+
     client.setConf(conf);
     JobClient.runJob(conf);
-    
-  }
-  
-  public static void main(String[] args) throws IOException {
-    // test harness, delete me
-    BayesFeatureDriver driver = new BayesFeatureDriver();
-    BayesParameters p = new BayesParameters();
-    p.setGramSize(1);
-    Path input = new Path("/home/drew/mahout/bayes/20news-input");
-    Path output = new Path("/home/drew/mahout/bayes/20-news-features");
-    driver.runJob(input, output, p);
+
   }
 }
