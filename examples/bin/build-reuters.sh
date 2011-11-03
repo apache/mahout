@@ -100,12 +100,13 @@ if [ "x$clustertype" == "xkmeans" ]; then
     -c ${WORK_DIR}/reuters-kmeans-clusters \
     -o ${WORK_DIR}/reuters-kmeans \
     -dm org.apache.mahout.common.distance.CosineDistanceMeasure \
-    -x 10 -k 20 -ow \
+    -x 10 -k 20 -ow --clustering \
   && \
   $MAHOUT clusterdump \
     -s ${WORK_DIR}/reuters-kmeans/clusters-*-final \
     -d ${WORK_DIR}/reuters-out-seqdir-sparse-kmeans/dictionary.file-0 \
-    -dt sequencefile -b 100 -n 20
+    -dt sequencefile -b 100 -n 20 --evaluate -dm org.apache.mahout.common.distance.CosineDistanceMeasure \
+    --pointsDir ${WORK_DIR}/reuters-kmeans/clusteredPoints
 elif [ "x$clustertype" == "xfuzzykmeans" ]; then
   $MAHOUT seq2sparse \
     -i ${WORK_DIR}/reuters-out-seqdir/ \

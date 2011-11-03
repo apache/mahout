@@ -27,8 +27,16 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
+import org.apache.mahout.clustering.cdbw.CDbwEvaluator;
+import org.apache.mahout.clustering.evaluation.ClusterEvaluator;
+import org.apache.mahout.clustering.evaluation.RepresentativePointsDriver;
+import org.apache.mahout.clustering.evaluation.RepresentativePointsMapper;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.ClassUtils;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
@@ -51,6 +59,8 @@ import java.util.TreeMap;
 
 public final class ClusterDumper extends AbstractJob {
 
+  protected DistanceMeasure measure;
+
   public enum OUTPUT_FORMAT {
     TEXT,
     CSV,
@@ -64,6 +74,7 @@ public final class ClusterDumper extends AbstractJob {
   public static final String NUM_WORDS_OPTION = "numWords";
   public static final String SUBSTRING_OPTION = "substring";
   public static final String SEQ_FILE_DIR_OPTION = "seqFileDir";
+  public static final String EVALUATE_CLUSTERS = "evaluate";
 
   public static final String OUTPUT_FORMAT_OPT = "outputFormat";
 
@@ -77,6 +88,7 @@ public final class ClusterDumper extends AbstractJob {
   private int numTopFeatures = 10;
   private Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints;
   private OUTPUT_FORMAT outputFormat = OUTPUT_FORMAT.TEXT;
+  private boolean runEvaluation;
 
   public ClusterDumper(Path seqFileDir, Path pointsDir) {
     this.seqFileDir = seqFileDir;
@@ -104,6 +116,8 @@ public final class ClusterDumper extends AbstractJob {
                     + "If specified, then the program will output the points associated with a cluster");
     addOption(DICTIONARY_OPTION, "d", "The dictionary file");
     addOption(DICTIONARY_TYPE_OPTION, "dt", "The dictionary file type (text|sequencefile)", "text");
+    addOption(buildOption(EVALUATE_CLUSTERS, "e", "Run ClusterEvaluator and CDbwEvaluator over the input.  The output will be appended to the rest of the output at the end.", false, false, null));
+    addOption(DefaultOptionCreator.distanceMeasureOption().create());
     if (parseArguments(args) == null) {
       return -1;
     }
@@ -127,12 +141,15 @@ public final class ClusterDumper extends AbstractJob {
     if (hasOption(OUTPUT_FORMAT_OPT)) {
       outputFormat = OUTPUT_FORMAT.valueOf(getOption(OUTPUT_FORMAT_OPT));
     }
+    runEvaluation = hasOption(EVALUATE_CLUSTERS);
+    String distanceMeasureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
+    measure = ClassUtils.instantiateAs(distanceMeasureClass, DistanceMeasure.class);
     init();
     printClusters(null);
     return 0;
   }
 
-  public void printClusters(String[] dictionary) throws IOException {
+  public void printClusters(String[] dictionary) throws Exception {
     Configuration conf = new Configuration();
 
     if (this.termDictionary != null) {
@@ -165,6 +182,28 @@ public final class ClusterDumper extends AbstractJob {
       long numWritten = clusterWriter.write(new SequenceFileDirValueIterable<Cluster>(new Path(seqFileDir, "part-*"), PathType.GLOB, conf));
 
       writer.flush();
+      if (runEvaluation){
+        HadoopUtil.delete(conf, new Path("tmp/representative"));
+        int numIters = 5;
+        RepresentativePointsDriver.main(new String[]{
+                "--input", seqFileDir.toString(),
+                "--output", "tmp/representative",
+                "--clusteredPoints", pointsDir.toString(),
+                "--distanceMeasure", measure.getClass().getName(),
+                "--maxIter", String.valueOf(numIters)//
+        });
+        conf.set(RepresentativePointsDriver.DISTANCE_MEASURE_KEY, measure.getClass().getName());
+        conf.set(RepresentativePointsDriver.STATE_IN_KEY, "tmp/representative/representativePoints-" + numIters);
+        ClusterEvaluator ce = new ClusterEvaluator(conf, seqFileDir);
+        writer.append("\n");
+        writer.append("Inter-Cluster Density: ").append(String.valueOf(ce.interClusterDensity())).append("\n");
+        writer.append("Intra-Cluster Density: ").append(String.valueOf(ce.intraClusterDensity())).append("\n");
+        CDbwEvaluator cdbw = new CDbwEvaluator(conf, seqFileDir);
+        writer.append("CDbw Inter-Cluster Density: ").append(String.valueOf(cdbw.interClusterDensity())).append("\n");
+        writer.append("CDbw Intra-Cluster Density: ").append(String.valueOf(cdbw.intraClusterDensity())).append("\n");
+        writer.append("CDbw Separation: ").append(String.valueOf(cdbw.separation())).append("\n");
+        writer.flush();
+      }
       log.info("Wrote {} clusters", numWritten);
     } finally {
       if (shouldClose) {

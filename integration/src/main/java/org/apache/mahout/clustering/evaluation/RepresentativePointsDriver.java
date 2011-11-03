@@ -71,6 +71,7 @@ public final class RepresentativePointsDriver extends AbstractJob {
   public int run(String[] args) throws ClassNotFoundException, IOException, InterruptedException {
     addInputOption();
     addOutputOption();
+    addOption("clusteredPoints", "cp", "The path to the clustered points", true);
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
     addOption(DefaultOptionCreator.maxIterationsOption().create());
     addOption(DefaultOptionCreator.methodOption().create());
@@ -85,8 +86,8 @@ public final class RepresentativePointsDriver extends AbstractJob {
     boolean runSequential = getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(
         DefaultOptionCreator.SEQUENTIAL_METHOD);
     DistanceMeasure measure = ClassUtils.instantiateAs(distanceMeasureClass, DistanceMeasure.class);
-
-    run(getConf(), input, null, output, measure, maxIterations, runSequential);
+    Path clusteredPoints = new Path(getOption("clusteredPoints"));
+    run(getConf(), input, clusteredPoints, output, measure, maxIterations, runSequential);
     return 0;
   }
 
