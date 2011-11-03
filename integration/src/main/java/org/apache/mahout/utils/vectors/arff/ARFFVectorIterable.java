@@ -17,6 +17,10 @@
 
 package org.apache.mahout.utils.vectors.arff;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+import org.apache.mahout.math.Vector;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -29,10 +33,6 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-import org.apache.mahout.math.Vector;
-
 /**
  * Read in ARFF (http://www.cs.waikato.ac.nz/~ml/weka/arff.html) and create {@link Vector}s
  * <p/>
@@ -40,7 +40,7 @@ import org.apache.mahout.math.Vector;
  * <ul>
  * <li>Numeric -> As is</li>
  * <li>Nominal -> ordinal(value) i.e. @attribute lumber {'\'(-inf-0.5]\'','\'(0.5-inf)\''}
- *  will convert -inf-0.5 -> 0, and 0.5-inf -> 1</li>
+ * will convert -inf-0.5 -> 0, and 0.5-inf -> 1</li>
  * <li>Dates -> Convert to time as a long</li>
  * <li>Strings -> Create a map of String -> long</li>
  * </ul>
@@ -48,25 +48,25 @@ import org.apache.mahout.math.Vector;
  * bindings, call {@link MapBackedARFFModel#getLabelBindings()}, as they are the same for every vector.
  */
 public class ARFFVectorIterable implements Iterable<Vector> {
-  
+
   private static final Pattern COMMA_PATTERN = Pattern.compile(",");
   private static final Pattern SPACE_PATTERN = Pattern.compile(" ");
 
   private final BufferedReader buff;
   private final ARFFModel model;
-  
+
   public ARFFVectorIterable(File file, ARFFModel model) throws IOException {
     this(file, Charsets.UTF_8, model);
   }
-  
+
   public ARFFVectorIterable(File file, Charset encoding, ARFFModel model) throws IOException {
     this(Files.newReader(file, encoding), model);
   }
-  
+
   public ARFFVectorIterable(String arff, ARFFModel model) throws IOException {
     this(new StringReader(arff), model);
   }
-  
+
   public ARFFVectorIterable(Reader reader, ARFFModel model) throws IOException {
     if (reader instanceof BufferedReader) {
       buff = (BufferedReader) reader;
@@ -75,7 +75,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
     }
     //grab the attributes, then start the iterator at the first line of data
     this.model = model;
-    
+
     int labelNumber = 0;
     String line;
     while ((line = buff.readLine()) != null) {
@@ -95,8 +95,6 @@ public class ARFFVectorIterable implements Iterable<Vector> {
         } else if (lower.contains(ARFFType.STRING.getIndicator())) {
           label = ARFFType.STRING.getLabel(lower);
           type = ARFFType.STRING;
-          //TODO: create a map so we know which
-          
         } else if (lower.contains(ARFFType.NOMINAL.getIndicator())) {
           label = ARFFType.NOMINAL.getLabel(lower);
           type = ARFFType.NOMINAL;
@@ -106,7 +104,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
           for (int i = 0; i < classes.length; i++) {
             model.addNominal(label, classes[i].trim(), i + 1);
           }
-          
+
         } else if (lower.contains(ARFFType.DATE.getIndicator())) {
           label = ARFFType.DATE.getLabel(lower);
           type = ARFFType.DATE;
@@ -134,9 +132,9 @@ public class ARFFVectorIterable implements Iterable<Vector> {
         break; //skip it
       }
     }
-    
+
   }
-  
+
   @Override
   public Iterator<Vector> iterator() {
     return new ARFFIterator(buff, model);
@@ -144,6 +142,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
 
   /**
    * Returns info about the ARFF content that was parsed.
+   *
    * @return the model
    */
   public ARFFModel getModel() {
