@@ -63,8 +63,7 @@ public final class Job extends AbstractJob {
   }
 
   @Override
-  public int run(String[] args) throws IOException, ClassNotFoundException,
-      InstantiationException, IllegalAccessException, InterruptedException {
+  public int run(String[] args) throws Exception{
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
@@ -133,7 +132,7 @@ public final class Job extends AbstractJob {
    */
   public static void run(Configuration conf, Path input, Path output,
                          DistanceMeasure measure, int k, double convergenceDelta, int maxIterations)
-      throws IOException, InterruptedException, ClassNotFoundException {
+          throws Exception{
     Path directoryContainingConvertedInput = new Path(output,
         DIRECTORY_CONTAINING_CONVERTED_INPUT);
     log.info("Preparing Input");
@@ -183,7 +182,7 @@ public final class Job extends AbstractJob {
   public static void run(Configuration conf, Path input, Path output,
                          DistanceMeasure measure, double t1, double t2, double convergenceDelta,
                          int maxIterations)
-      throws IOException, InterruptedException, ClassNotFoundException {
+          throws Exception{
     Path directoryContainingConvertedInput = new Path(output,
         DIRECTORY_CONTAINING_CONVERTED_INPUT);
     log.info("Preparing Input");

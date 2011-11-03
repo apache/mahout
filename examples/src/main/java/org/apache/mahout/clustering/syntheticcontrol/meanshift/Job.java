@@ -61,7 +61,7 @@ public final class Job extends AbstractJob {
   }
   
   @Override
-  public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
+  public int run(String[] args) throws Exception{
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.convergenceOption().create());
@@ -133,7 +133,7 @@ public final class Job extends AbstractJob {
                          double t2,
                          double convergenceDelta,
                          int maxIterations)
-    throws IOException, InterruptedException, ClassNotFoundException {
+          throws Exception{
     Path directoryContainingConvertedInput = new Path(output,
         DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput);

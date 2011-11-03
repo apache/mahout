@@ -64,7 +64,7 @@ public final class Job extends AbstractJob {
   }
 
   @Override
-  public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
+  public int run(String[] args) throws Exception{
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.maxIterationsOption().create());
@@ -136,7 +136,7 @@ public final class Job extends AbstractJob {
                          double alpha0,
                          boolean emitMostLikely,
                          double threshold)
-    throws IOException, ClassNotFoundException, InterruptedException {
+          throws Exception{
     Path directoryContainingConvertedInput = new Path(output, DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     DirichletDriver.run(directoryContainingConvertedInput,
