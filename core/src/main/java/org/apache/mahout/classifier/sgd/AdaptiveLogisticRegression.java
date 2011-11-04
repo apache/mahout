@@ -20,9 +20,9 @@ package org.apache.mahout.classifier.sgd;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.classifier.OnlineLearner;
-import org.apache.mahout.ep.Payload;
 import org.apache.mahout.ep.EvolutionaryProcess;
 import org.apache.mahout.ep.Mapping;
+import org.apache.mahout.ep.Payload;
 import org.apache.mahout.ep.State;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -36,7 +36,7 @@ import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 /**
- * This is a meta-learner that maintains a pool of ordinary OnlineLogisticRegression learners. Each
+ * This is a meta-learner that maintains a pool of ordinary {@link org.apache.mahout.classifier.sgd.OnlineLogisticRegression} learners. Each
  * member of the pool has different learning rates.  Whichever of the learners in the pool falls
  * behind in terms of average log-likelihood will be tossed out and replaced with variants of the
  * survivors.  This will let us automatically derive an annealing schedule that optimizes learning
@@ -45,7 +45,7 @@ import java.util.concurrent.ExecutionException;
  * learn also decreases the number of learning rate parameters required and replaces the normal
  * hyper-parameter search.
  * <p/>
- * One wrinkle is that the pool of learners that we maintain is actually a pool of CrossFoldLearners
+ * One wrinkle is that the pool of learners that we maintain is actually a pool of {@link org.apache.mahout.classifier.sgd.CrossFoldLearner}
  * which themselves contain several OnlineLogisticRegression objects.  These pools allow estimation
  * of performance on the fly even if we make many passes through the data.  This does, however,
  * increase the cost of training since if we are using 5-fold cross-validation, each vector is used
@@ -113,6 +113,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
     record++;
 
     buffer.add(new TrainingExample(trackingKey, groupKey, actual, instance));
+    //don't train until we have enough examples
     if (buffer.size() > bufferSize) {
       trainWithBufferedExamples();
     }
