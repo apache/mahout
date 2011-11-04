@@ -23,8 +23,8 @@ import org.apache.mahout.classifier.OnlineLearner;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.DoubleFunction;
+import org.apache.mahout.math.function.Functions;
 
 import java.util.Iterator;
 
@@ -33,7 +33,7 @@ import java.util.Iterator;
  * response to a feature vector.  This classifier uses 1 of n-1 coding where the 0-th category
  * is not stored explicitly.
  * <p/>
- * Provides the based SGD based algorithm for learning a logistic regression, but omits all
+ * Provides the SGD based algorithm for learning a logistic regression, but omits all
  * annealing of learning rates.  Any extension of this abstract class must define the overall
  * and per-term annealing for themselves.
  */
@@ -78,8 +78,8 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
   /**
    * Computes the inverse link function, by default the logistic link function.
    *
-   * @param v  The output of the linear combination in a GLM.  Note that the value
-   * of v is disturbed.
+   * @param v The output of the linear combination in a GLM.  Note that the value
+   *          of v is disturbed.
    * @return A version of v with the link function applied.
    */
   public Vector link(Vector v) {
@@ -97,8 +97,9 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
 
   /**
    * Computes the binomial logistic inverse link function.
-   * @param r  The value to transform.
-   * @return   The logit of r.
+   *
+   * @param r The value to transform.
+   * @return The logit of r.
    */
   public double link(double r) {
     if (r < 0.0) {
@@ -299,7 +300,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
   public void copyFrom(AbstractOnlineLogisticRegression other) {
     // number of categories we are classifying.  This should the number of rows of beta plus one.
     Preconditions.checkArgument(numCategories == other.numCategories,
-                                "Can't copy unless number of target categories is the same");
+            "Can't copy unless number of target categories is the same");
 
     beta.assign(other.beta);
 
