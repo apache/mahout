@@ -33,6 +33,7 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.mahout.classifier.ClassifierResult;
+import org.apache.mahout.classifier.ConfusionMatrix;
 import org.apache.mahout.classifier.ResultAnalyzer;
 import org.apache.mahout.classifier.bayes.mapreduce.bayes.BayesClassifierDriver;
 import org.apache.mahout.common.CommandLineUtil;
@@ -104,9 +105,14 @@ public final class TestClassifier {
       "Method of Classification: sequential|mapreduce. Default Value: sequential").withShortName("method")
         .create();
     
+    Option confusionMatrixOpt = obuilder.withLongName("confusionMatrix").withRequired(false).withArgument(
+        abuilder.withName("confusionMatrix").withMinimum(1).withMaximum(1).create()).withDescription(
+        "Export ConfusionMatrix as SequenceFile").withShortName("cm").create();
+      
     Group group = gbuilder.withName("Options").withOption(defaultCatOpt).withOption(dirOpt).withOption(
       encodingOpt).withOption(gramSizeOpt).withOption(pathOpt).withOption(typeOpt).withOption(dataSourceOpt)
-        .withOption(helpOpt).withOption(methodOpt).withOption(verboseOutputOpt).withOption(alphaOpt).create();
+        .withOption(helpOpt).withOption(methodOpt).withOption(verboseOutputOpt).withOption(alphaOpt)
+        .withOption(confusionMatrixOpt).create();
     
     try {
       Parser parser = new Parser();
@@ -163,6 +169,11 @@ public final class TestClassifier {
         classificationMethod = (String) cmdLine.getValue(methodOpt);
       }
       
+      String confusionMatrixFile = null;
+      if (cmdLine.hasOption(confusionMatrixOpt)) {
+        confusionMatrixFile = (String) cmdLine.getValue(confusionMatrixOpt);
+      }
+      
       params.setGramSize(gramSize);
       params.set("verbose", Boolean.toString(verbose));
       params.setBasePath(modelBasePath);
@@ -172,6 +183,7 @@ public final class TestClassifier {
       params.set("encoding", encoding);
       params.set("alpha_i", alphaI);
       params.set("testDirPath", testDirPath);
+      params.set("confusionMatrix", confusionMatrixFile);
       
       if ("sequential".equalsIgnoreCase(classificationMethod)) {
         classifySequential(params);
@@ -253,12 +265,12 @@ public final class TestClassifier {
           }
           lineNum++;
         }
-        /*
-         * log.info("{}\t{}\t{}/{}", new Object[] {correctLabel,
-         * resultAnalyzer.getConfusionMatrix().getAccuracy(correctLabel),
-         * resultAnalyzer.getConfusionMatrix().getCorrect(correctLabel),
-         * resultAnalyzer.getConfusionMatrix().getTotal(correctLabel)});
-         */
+        ConfusionMatrix matrix = resultAnalyzer.getConfusionMatrix();
+        log.info("{}", matrix);
+        BayesClassifierDriver.confusionMatrixSeqFileExport(params, matrix);
+
+        log.info("ConfusionMatrix: {}", matrix.toString());
+           
         log.info("Classified instances from {}", file.getName());
         if (verbose) {
           log.info("Performance stats {}", operationStats.toString());

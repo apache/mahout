@@ -123,15 +123,15 @@ public class MatrixWritable implements Writable {
     }
 
     if (hasLabels) {
-    	Map<String,Integer> columnLabelBindings = Maps.newHashMap();
-    	Map<String,Integer> rowLabelBindings = Maps.newHashMap();
-    	readLabels(in, columnLabelBindings, rowLabelBindings);
-    	if (!columnLabelBindings.isEmpty()) {
-    		r.setColumnLabelBindings(columnLabelBindings);
-    	}
-    	if (!rowLabelBindings.isEmpty()) {
-    		r.setRowLabelBindings(rowLabelBindings);
-    	}
+      Map<String,Integer> columnLabelBindings = Maps.newHashMap();
+      Map<String,Integer> rowLabelBindings = Maps.newHashMap();
+      readLabels(in, columnLabelBindings, rowLabelBindings);
+      if (!columnLabelBindings.isEmpty()) {
+        r.setColumnLabelBindings(columnLabelBindings);
+      }
+      if (!rowLabelBindings.isEmpty()) {
+        r.setRowLabelBindings(rowLabelBindings);
+      }
     }
 
     return r;
@@ -159,7 +159,7 @@ public class MatrixWritable implements Writable {
       VectorWritable.writeVector(out, matrix.viewRow(i), false);
     }
     if ((flags & FLAG_LABELS) != 0) {
-    	writeLabelBindings(out, matrix.getColumnLabelBindings(), matrix.getRowLabelBindings());
+      writeLabelBindings(out, matrix.getColumnLabelBindings(), matrix.getRowLabelBindings());
     }
   }
 }

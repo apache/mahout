@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math;
 
+import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.io.Writable;
 import org.junit.Test;
@@ -26,7 +27,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 public final class MatrixWritableTest extends MahoutTestCase {
@@ -36,13 +36,14 @@ public final class MatrixWritableTest extends MahoutTestCase {
 		Matrix m = new SparseMatrix(5, 5);
 		m.set(1, 2, 3.0);
 		m.set(3, 4, 5.0);
-		Map<String, Integer> bindings = new HashMap<String, Integer>();
+		Map<String, Integer> bindings = Maps.newHashMap();
 		bindings.put("A", 0);
 		bindings.put("B", 1);
 		bindings.put("C", 2);
 		bindings.put("D", 3);
 		bindings.put("default", 4);
 		m.setRowLabelBindings(bindings);
+    m.setColumnLabelBindings(bindings);
 		doTestMatrixWritableEquals(m);
 	}
 
@@ -51,12 +52,13 @@ public final class MatrixWritableTest extends MahoutTestCase {
 		Matrix m = new DenseMatrix(5,5);
 		m.set(1, 2, 3.0);
 		m.set(3, 4, 5.0);
-		Map<String, Integer> bindings = new HashMap<String, Integer>();
+		Map<String, Integer> bindings = Maps.newHashMap();
 		bindings.put("A", 0);
 		bindings.put("B", 1);
 		bindings.put("C", 2);
 		bindings.put("D", 3);
 		bindings.put("default", 4);
+    m.setRowLabelBindings(bindings);
 		m.setColumnLabelBindings(bindings);
 		doTestMatrixWritableEquals(m);
 	}
@@ -66,7 +68,9 @@ public final class MatrixWritableTest extends MahoutTestCase {
 		MatrixWritable matrixWritable2 = new MatrixWritable();
 		writeAndRead(matrixWritable, matrixWritable2);
 		Matrix m2 = matrixWritable2.get();
-		compareMatrices(m, m2);  // not sure this works?
+		compareMatrices(m, m2); 
+    doCheckBindings(m2.getRowLabelBindings());
+    doCheckBindings(m2.getColumnLabelBindings());    
 	}
 
 	private static void compareMatrices(Matrix m, Matrix m2) {
@@ -97,6 +101,14 @@ public final class MatrixWritableTest extends MahoutTestCase {
 			}
 		}
 	}
+
+  private static void doCheckBindings(Map<String,Integer> labels) {
+    assertTrue("Missing label", labels.keySet().contains("A"));
+    assertTrue("Missing label", labels.keySet().contains("B"));
+    assertTrue("Missing label", labels.keySet().contains("C"));
+    assertTrue("Missing label", labels.keySet().contains("D"));
+    assertTrue("Missing label", labels.keySet().contains("default"));
+  }
 
 	private static void writeAndRead(Writable toWrite, Writable toRead) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();

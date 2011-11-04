@@ -47,3 +47,5 @@ org.apache.mahout.classifier.sequencelearning.hmm.RandomSequenceGenerator = hmmp
 org.apache.mahout.utils.SplitInput = split : Split Input data into test and train sets
 org.apache.mahout.classifier.naivebayes.training.TrainNaiveBayesJob = trainnb : Train the Vector-based Bayes classifier
 org.apache.mahout.classifier.naivebayes.test.TestNaiveBayesDriver = testnb : Test the Vector-based Bayes classifier
+org.apache.mahout.classifier.ConfusionMatrixDumper = cmdump : Dump confusion matrix in HTML or text formats
+org.apache.mahout.utils.MatrixDumper = matrixdump : Dump matrix in CSV format

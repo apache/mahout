@@ -21,10 +21,15 @@ import java.io.IOException;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
+import com.google.common.io.Closeables;
+
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
@@ -38,6 +43,7 @@ import org.apache.mahout.common.Parameters;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
+import org.apache.mahout.math.MatrixWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,6 +89,10 @@ public final class BayesClassifierDriver {
     Path outputFiles = new Path(outPath, "part*");
     ConfusionMatrix matrix = readResult(outputFiles, conf, params);
     log.info("{}", matrix);
+    if (params.get("confusionMatrix") != null) {
+      confusionMatrixSeqFileExport(params, matrix);
+    }
+    
   }
   
   public static ConfusionMatrix readResult(Path pathPattern, Configuration conf, Parameters params) {
@@ -117,6 +127,24 @@ public final class BayesClassifierDriver {
       }
     }
     return matrix;
+  }
     
+  public static void confusionMatrixSeqFileExport(Parameters params, ConfusionMatrix matrix) throws IOException {
+    if (params.get("confusionMatrix") != null) {
+      Configuration conf = new Configuration();
+      FileSystem fs = FileSystem.get(conf);
+      SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf,
+          new Path(params.get("confusionMatrix")), Text.class, MatrixWritable.class);
+      String name = params.get("confusionMatrix");
+      // embed file name as sequence key- useful for tuning classifiers
+      name = name.substring(name.lastIndexOf('/') + 1, name.length());
+      Text key = new Text(name);
+      MatrixWritable mw = new MatrixWritable(matrix.getMatrix());
+      try {
+        writer.append(key, mw);
+      } finally {
+        Closeables.closeQuietly(writer);
+      }
+    }
   }
 }
