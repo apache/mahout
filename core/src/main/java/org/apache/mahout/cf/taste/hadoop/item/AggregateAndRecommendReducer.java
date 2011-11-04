@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.hadoop.item;
 
+import com.google.common.primitives.Floats;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -73,7 +74,7 @@ public final class AggregateAndRecommendReducer extends
       new Comparator<RecommendedItem>() {
         @Override
         public int compare(RecommendedItem one, RecommendedItem two) {
-          return one.getValue() == two.getValue() ? 0 : one.getValue() > two.getValue() ? 1 : -1;
+          return Floats.compare(one.getValue(), two.getValue());
         }
       };
 

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop.als.eval;
+package org.apache.mahout.cf.taste.hadoop.als;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
@@ -23,7 +23,6 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
@@ -84,21 +83,18 @@ public class DatasetSplitter extends AbstractJob {
     Path probeSetPath = new Path(getOutputPath(), "probeSet");
 
     Job markPreferences = prepareJob(getInputPath(), markedPrefs, TextInputFormat.class, MarkPreferencesMapper.class,
-        Text.class, Text.class, Reducer.class, Text.class, Text.class,
-        SequenceFileOutputFormat.class);
+        Text.class, Text.class, SequenceFileOutputFormat.class);
     markPreferences.getConfiguration().set(TRAINING_PERCENTAGE, String.valueOf(trainingPercentage));
     markPreferences.getConfiguration().set(PROBE_PERCENTAGE, String.valueOf(probePercentage));
     markPreferences.waitForCompletion(true);
 
     Job createTrainingSet = prepareJob(markedPrefs, trainingSetPath, SequenceFileInputFormat.class,
-        WritePrefsMapper.class, NullWritable.class, Text.class, Reducer.class, NullWritable.class, Text.class,
-        TextOutputFormat.class);
+        WritePrefsMapper.class, NullWritable.class, Text.class, TextOutputFormat.class);
     createTrainingSet.getConfiguration().set(PART_TO_USE, INTO_TRAINING_SET.toString());
     createTrainingSet.waitForCompletion(true);
 
     Job createProbeSet = prepareJob(markedPrefs, probeSetPath, SequenceFileInputFormat.class,
-        WritePrefsMapper.class, NullWritable.class, Text.class, Reducer.class, NullWritable.class, Text.class,
-        TextOutputFormat.class);
+        WritePrefsMapper.class, NullWritable.class, Text.class, TextOutputFormat.class);
     createProbeSet.getConfiguration().set(PART_TO_USE, INTO_PROBE_SET.toString());
     createProbeSet.waitForCompletion(true);
 

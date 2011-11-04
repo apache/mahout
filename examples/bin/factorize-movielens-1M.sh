@@ -32,6 +32,8 @@ then
   exit -1
 fi
 
+MAHOUT="../../bin/mahout"
+
 WORK_DIR=/tmp/mahout-work-${USER}
 echo "creating work directory at ${WORK_DIR}"
 mkdir -p ${WORK_DIR}/movielens
@@ -39,21 +41,30 @@ mkdir -p ${WORK_DIR}/movielens
 echo "Converting ratings..."
 cat $1 |sed -e s/::/,/g| cut -d, -f1,2,3 > ${WORK_DIR}/movielens/ratings.csv
 
-#create a 90% percent training set and a 10% probe set
-bin/mahout splitDataset --input ${WORK_DIR}/movielens/ratings.csv --output ${WORK_DIR}/dataset \
+# create a 90% percent training set and a 10% probe set
+$MAHOUT splitDataset --input ${WORK_DIR}/movielens/ratings.csv --output ${WORK_DIR}/dataset \
     --trainingPercentage 0.9 --probePercentage 0.1 --tempDir ${WORK_DIR}/dataset/tmp
 
-#run distributed ALS-WR to factorize the rating matrix based on the training set
-bin/mahout parallelALS --input ${WORK_DIR}/dataset/trainingSet/ --output ${WORK_DIR}/als/out \
+# run distributed ALS-WR to factorize the rating matrix defined by the training set
+$MAHOUT parallelALS --input ${WORK_DIR}/dataset/trainingSet/ --output ${WORK_DIR}/als/out \
     --tempDir ${WORK_DIR}/als/tmp --numFeatures 20 --numIterations 10 --lambda 0.065
 
 # compute predictions against the probe set, measure the error
-bin/mahout evaluateFactorizationParallel --output ${WORK_DIR}/als/rmse --pairs ${WORK_DIR}/dataset/probeSet/ \
-    --userFeatures ${WORK_DIR}/als/out/U/ --itemFeatures ${WORK_DIR}/als/out/M/
+$MAHOUT evaluateFactorization --input ${WORK_DIR}/dataset/probeSet/ --output ${WORK_DIR}/als/rmse/ \
+    --userFeatures ${WORK_DIR}/als/out/U/ --itemFeatures ${WORK_DIR}/als/out/M/ --tempDir ${WORK_DIR}/als/tmp
+
+# compute recommendations
+$MAHOUT recommendfactorized --input ${WORK_DIR}/als/out/userRatings/ --output ${WORK_DIR}/recommendations/ \
+    --userFeatures ${WORK_DIR}/als/out/U/ --itemFeatures ${WORK_DIR}/als/out/M/ \
+    --numRecommendations 6 --maxRating 5
 
 # print the error
 echo -e "\nRMSE is:\n"
 cat ${WORK_DIR}/als/rmse/rmse.txt
+echo -e "\n"
+
+echo -e "\nSample recommendations:\n"
+shuf ${WORK_DIR}/recommendations/part-m-00000 |head
 echo -e "\n\n"
 
 echo "removing work directory"

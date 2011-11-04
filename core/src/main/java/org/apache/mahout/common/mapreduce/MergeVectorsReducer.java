@@ -19,26 +19,19 @@ package org.apache.mahout.common.mapreduce;
 
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.function.Functions;
 
 import java.io.IOException;
 
-public class VectorSumReducer
-    extends Reducer<WritableComparable<?>, VectorWritable, WritableComparable<?>, VectorWritable> {
+public class MergeVectorsReducer extends
+    Reducer<WritableComparable<?>,VectorWritable,WritableComparable<?>,VectorWritable> {
 
   @Override
-  protected void reduce(WritableComparable<?> key, Iterable<VectorWritable> values, Context ctx)
-    throws IOException, InterruptedException {
-    Vector vector = null;
-    for (VectorWritable v : values) {
-      if (vector == null) {
-        vector = v.get();
-      } else {
-        vector.assign(v.get(), Functions.PLUS);
-      }
-    }
-    ctx.write(key, new VectorWritable(vector));
+  public void reduce(WritableComparable<?> key, Iterable<VectorWritable> vectors, Context ctx)
+      throws IOException, InterruptedException {
+    Vector merged = VectorWritable.merge(vectors.iterator()).get();
+    ctx.write(key, new VectorWritable(new SequentialAccessSparseVector(merged)));
   }
 }

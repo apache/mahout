@@ -18,13 +18,13 @@
 package org.apache.mahout.math.als;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.QRDecomposition;
 import org.apache.mahout.math.Vector;
 
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * See <a href="http://www.hpl.hp.com/personal/Robert_Schreiber/papers/2008%20AAIM%20Netflix/netflix_aaim08(submitted).pdf">
@@ -32,12 +32,13 @@ import java.util.List;
  */
 public class AlternateLeastSquaresSolver {
 
-  public Vector solve(List<Vector> featureVectors, Vector ratingVector, double lambda, int numFeatures) {
+  public Vector solve(Iterable<Vector> featureVectors, Vector ratingVector, double lambda, int numFeatures) {
 
     Preconditions.checkNotNull(featureVectors, "Feature vectors cannot be null");
-    Preconditions.checkArgument(!featureVectors.isEmpty());
-    Preconditions.checkNotNull(ratingVector, "Rating vector cannot be null");
-    Preconditions.checkArgument(featureVectors.size() == ratingVector.getNumNondefaultElements());
+    Preconditions.checkArgument(!Iterables.isEmpty(featureVectors));
+    Preconditions.checkNotNull(ratingVector, "rating vector cannot be null");
+    Preconditions.checkArgument(ratingVector.getNumNondefaultElements() > 0, "Rating vector cannot be empty");
+    Preconditions.checkArgument(Iterables.size(featureVectors) == ratingVector.getNumNondefaultElements());
 
     int nui = ratingVector.getNumNondefaultElements();
 
@@ -46,32 +47,32 @@ public class AlternateLeastSquaresSolver {
 
     /* compute Ai = MiIi * t(MiIi) + lambda * nui * E */
     Matrix Ai = addLambdaTimesNuiTimesE(MiIi.times(MiIi.transpose()), lambda, nui);
-    /* compute Vi = MIi * t(R(i,Ii)) */
+    /* compute Vi = MiIi * t(R(i,Ii)) */
     Matrix Vi = MiIi.times(RiIiMaybeTransposed);
-    /* compute ui = inverse(Ai) * Vi */
+    /* compute Ai * ui = Vi */
     return solve(Ai, Vi);
   }
 
-  Vector solve(Matrix Ai, Matrix Vi) {
+  protected Vector solve(Matrix Ai, Matrix Vi) {
     return new QRDecomposition(Ai).solve(Vi).viewColumn(0);
   }
 
   protected Matrix addLambdaTimesNuiTimesE(Matrix matrix, double lambda, int nui) {
     Preconditions.checkArgument(matrix.numCols() == matrix.numRows());
-    double lambdaTimesNui = lambda * nui;
     for (int n = 0; n < matrix.numCols(); n++) {
-      matrix.setQuick(n, n, matrix.getQuick(n, n) + lambdaTimesNui);
+      matrix.setQuick(n, n, matrix.getQuick(n, n) + lambda * nui);
     }
     return matrix;
   }
 
-  protected Matrix createMiIi(List<Vector> featureVectors, int numFeatures) {
-    Matrix MiIi = new DenseMatrix(numFeatures, featureVectors.size());
-    for (int n = 0; n < featureVectors.size(); n++) {
-      Vector featureVector = featureVectors.get(n);
+  protected Matrix createMiIi(Iterable<Vector> featureVectors, int numFeatures) {
+    Matrix MiIi = new DenseMatrix(numFeatures, Iterables.size(featureVectors));
+    int n = 0;
+    for (Vector featureVector : featureVectors) {
       for (int m = 0; m < numFeatures; m++) {
         MiIi.setQuick(m, n, featureVector.get(m));
       }
+      n++;
     }
     return MiIi;
   }

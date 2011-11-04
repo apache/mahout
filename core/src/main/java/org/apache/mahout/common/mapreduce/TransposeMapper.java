@@ -17,28 +17,27 @@
 
 package org.apache.mahout.common.mapreduce;
 
-import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.function.Functions;
 
 import java.io.IOException;
+import java.util.Iterator;
 
-public class VectorSumReducer
-    extends Reducer<WritableComparable<?>, VectorWritable, WritableComparable<?>, VectorWritable> {
+public class TransposeMapper extends Mapper<IntWritable,VectorWritable,IntWritable,VectorWritable> {
 
   @Override
-  protected void reduce(WritableComparable<?> key, Iterable<VectorWritable> values, Context ctx)
-    throws IOException, InterruptedException {
-    Vector vector = null;
-    for (VectorWritable v : values) {
-      if (vector == null) {
-        vector = v.get();
-      } else {
-        vector.assign(v.get(), Functions.PLUS);
-      }
+  protected void map(IntWritable r, VectorWritable v, Context ctx) throws IOException, InterruptedException {
+    int row = r.get();
+    Iterator<Vector.Element> it = v.get().iterateNonZero();
+    while (it.hasNext()) {
+      Vector.Element e = it.next();
+      RandomAccessSparseVector tmp = new RandomAccessSparseVector(Integer.MAX_VALUE, 1);
+      tmp.setQuick(row, e.get());
+      r.set(e.index());
+      ctx.write(r, new VectorWritable(tmp));
     }
-    ctx.write(key, new VectorWritable(vector));
   }
 }

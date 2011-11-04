@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop.als.eval;
+package org.apache.mahout.cf.taste.hadoop.als;
 
 import com.google.common.io.Closeables;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -27,20 +27,19 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
-import org.apache.mahout.cf.taste.hadoop.als.PredictionJob;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.common.AbstractJob;
-import org.apache.mahout.common.IntPairWritable;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.map.OpenIntObjectHashMap;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -59,16 +58,19 @@ import java.util.Map;
  * <li>--itemFeatures (path): path to the item feature matrix</li>
  * </ol>
  */
-public class ParallelFactorizationEvaluator extends AbstractJob {
+public class FactorizationEvaluator extends AbstractJob {
+
+  private static final String USER_FEATURES_PATH = RecommenderJob.class.getName() + ".userFeatures";
+  private static final String ITEM_FEATURES_PATH = RecommenderJob.class.getName() + ".itemFeatures";
 
   public static void main(String[] args) throws Exception {
-    ToolRunner.run(new ParallelFactorizationEvaluator(), args);
+    ToolRunner.run(new FactorizationEvaluator(), args);
   }
 
   @Override
   public int run(String[] args) throws Exception {
 
-    addOption("pairs", "p", "path containing the test ratings, each line must be userID,itemID,rating", true);
+    addInputOption();
     addOption("userFeatures", null, "path to the user feature matrix", true);
     addOption("itemFeatures", null, "path to the item feature matrix", true);
     addOutputOption();
@@ -78,24 +80,18 @@ public class ParallelFactorizationEvaluator extends AbstractJob {
       return -1;
     }
 
-    Path tempDir = new Path(parsedArgs.get("--tempDir"));
-    Path predictions = new Path(tempDir, "predictions");
-    Path errors = new Path(tempDir, "errors");
+    Path errors = getTempPath("errors");
 
-    ToolRunner.run(getConf(), new PredictionJob(), new String[] { "--output", predictions.toString(),
-        "--pairs", parsedArgs.get("--pairs"), "--userFeatures", parsedArgs.get("--userFeatures"),
-        "--itemFeatures", parsedArgs.get("--itemFeatures"),
-        "--tempDir", tempDir.toString() });
-
-    Job estimationErrors = prepareJob(new Path(parsedArgs.get("--pairs") + ',' + predictions), errors,
-        TextInputFormat.class, PairsWithRatingMapper.class, IntPairWritable.class, DoubleWritable.class,
-        ErrorReducer.class, DoubleWritable.class, NullWritable.class, SequenceFileOutputFormat.class);
-    estimationErrors.waitForCompletion(true);
+    Job predictRatings = prepareJob(getInputPath(), errors, TextInputFormat.class, PredictRatingsMapper.class,
+        DoubleWritable.class, NullWritable.class, SequenceFileOutputFormat.class);
+    predictRatings.getConfiguration().set(USER_FEATURES_PATH, parsedArgs.get("--userFeatures"));
+    predictRatings.getConfiguration().set(ITEM_FEATURES_PATH, parsedArgs.get("--itemFeatures"));
+    predictRatings.waitForCompletion(true);
 
     BufferedWriter writer  = null;
     try {
       FileSystem fs = FileSystem.get(getOutputPath().toUri(), getConf());
-      FSDataOutputStream outputStream = fs.create(new Path(getOutputPath(), "rmse.txt"));
+      FSDataOutputStream outputStream = fs.create(getOutputPath("rmse.txt"));
       double rmse = computeRmse(errors);
       writer = new BufferedWriter(new OutputStreamWriter(outputStream));
       writer.write(String.valueOf(rmse));
@@ -120,37 +116,34 @@ public class ParallelFactorizationEvaluator extends AbstractJob {
     return Math.sqrt(average.getAverage());
   }
 
-  public static class PairsWithRatingMapper extends Mapper<LongWritable,Text,IntPairWritable,DoubleWritable> {
+  public static class PredictRatingsMapper extends Mapper<LongWritable,Text,DoubleWritable,NullWritable> {
+
+    private OpenIntObjectHashMap<Vector> U;
+    private OpenIntObjectHashMap<Vector> M;
+
+    @Override
+    protected void setup(Context ctx) throws IOException, InterruptedException {
+      Path pathToU = new Path(ctx.getConfiguration().get(USER_FEATURES_PATH));
+      Path pathToM = new Path(ctx.getConfiguration().get(ITEM_FEATURES_PATH));
+
+      U = ALSUtils.readMatrixByRows(pathToU, ctx.getConfiguration());
+      M = ALSUtils.readMatrixByRows(pathToM, ctx.getConfiguration());
+    }
+
     @Override
     protected void map(LongWritable key, Text value, Context ctx) throws IOException, InterruptedException {
+
       String[] tokens = TasteHadoopUtils.splitPrefTokens(value.toString());
-      int userIDIndex = TasteHadoopUtils.idToIndex(Long.parseLong(tokens[0]));
-      int itemIDIndex = TasteHadoopUtils.idToIndex(Long.parseLong(tokens[1]));
+      int userID = Integer.parseInt(tokens[0]);
+      int itemID = Integer.parseInt(tokens[1]);
       double rating = Double.parseDouble(tokens[2]);
-      ctx.write(new IntPairWritable(userIDIndex, itemIDIndex), new DoubleWritable(rating));
-    }
-  }
 
-  public static class ErrorReducer extends Reducer<IntPairWritable,DoubleWritable,DoubleWritable,NullWritable> {
-    @Override
-    protected void reduce(IntPairWritable key, Iterable<DoubleWritable> ratingAndEstimate, Context ctx)
-        throws IOException, InterruptedException {
-
-      double error = Double.NaN;
-      boolean bothFound = false;
-      for (DoubleWritable ratingOrEstimate : ratingAndEstimate) {
-        if (Double.isNaN(error)) {
-          error = ratingOrEstimate.get();
-        } else {
-          error -= ratingOrEstimate.get();
-          bothFound = true;
-          break;
-        }
-      }
-
-      if (bothFound) {
-        ctx.write(new DoubleWritable(error), NullWritable.get());
+      if (U.containsKey(userID) && M.containsKey(itemID)) {
+        double estimate = U.get(userID).dot(M.get(itemID));
+        double err = rating - estimate;
+        ctx.write(new DoubleWritable(err), NullWritable.get());
       }
     }
   }
+
 }

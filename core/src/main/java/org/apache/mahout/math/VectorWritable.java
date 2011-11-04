@@ -45,6 +45,11 @@ public final class VectorWritable extends Configured implements Writable {
     this.vector = vector;
   }
 
+  public VectorWritable(Vector vector, boolean writesLaxPrecision) {
+    this(vector);
+    setWritesLaxPrecision(writesLaxPrecision);
+  }
+
   /**
    * @return {@link Vector} that this is to write, or has
    *  just read

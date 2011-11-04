@@ -486,6 +486,18 @@ public abstract class AbstractJob extends Configured implements Tool {
     return job;
   }
 
+  private String getCustomJobName(JobContext job,Class<? extends Mapper> mapper) {
+    StringBuilder name = new StringBuilder(100);
+    String customJobName = job.getJobName();
+    if (customJobName == null || customJobName.trim().length() == 0) {
+      name.append(getClass().getSimpleName());
+    } else {
+      name.append(customJobName);
+    }
+    name.append('-').append(mapper.getSimpleName());
+    return name.toString();
+  }
+
   private String getCustomJobName(JobContext job,
                                   Class<? extends Mapper> mapper,
                                   Class<? extends Reducer> reducer) {
