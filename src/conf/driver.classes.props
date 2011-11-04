@@ -5,6 +5,7 @@ org.apache.mahout.cf.taste.hadoop.als.DatasetSplitter = splitDataset : split a r
 org.apache.mahout.cf.taste.hadoop.als.FactorizationEvaluator = evaluateFactorization : compute RMSE and MAE of a rating matrix factorization against probes
 org.apache.mahout.clustering.kmeans.KMeansDriver = kmeans : K-means clustering
 org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver = fkmeans : Fuzzy K-means clustering
+org.apache.mahout.clustering.minhash.MinHashDriver = minhash : Run Minhash clustering
 org.apache.mahout.clustering.lda.LDADriver = lda : Latent Dirchlet Allocation
 org.apache.mahout.clustering.lda.LDAPrintTopics = ldatopics : LDA Print Topics
 org.apache.mahout.fpm.pfpgrowth.FPGrowthDriver = fpg : Frequent Pattern Growth

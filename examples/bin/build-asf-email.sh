@@ -61,11 +61,12 @@ if [ "x$alg" == "xrecommender" ]; then
 elif [ "x$alg" == "xclustering" ]; then
   MAIL_OUT="$OUT/clustering/seq-files"
   SEQ2SP="$OUT/clustering/seq2sparse"
-  algorithm=( kmeans dirichlet )
+  algorithm=( kmeans dirichlet minhash )
 
   echo "Please select a number to choose the corresponding algorithm to run"
   echo "1. ${algorithm[0]}"
   echo "2. ${algorithm[1]}"
+  echo "3. ${algorithm[2]}"
   read -p "Enter your choice : " choice
 
   echo "ok. You chose $choice and we'll use ${algorithm[$choice-1]}"
@@ -89,6 +90,10 @@ elif [ "x$alg" == "xclustering" ]; then
     CLUST_OUT="$OUT/clustering/dirichlet"
     echo "Running Dirichlet"
     $MAHOUT dirichlet --input "$SEQ2SP/tfidf-vectors" --output $CLUST_OUT -k 50 --maxIter 20 --distanceMeasure org.apache.mahout.common.distance.CosineDistanceMeasure --method mapreduce
+  elif [ "x$nbalg" == "xminhash"  ]; then
+    CLUST_OUT="$OUT/clustering/minhash"
+    echo "Running Minhash"
+    $MAHOUT minhash --input "$SEQ2SP/tfidf-vectors" --output $CLUST_OUT
   fi
 
 #classification
