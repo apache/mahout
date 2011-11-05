@@ -45,7 +45,7 @@ public final class EncodedVectorsFromSequenceFiles extends AbstractJob {
   public int run(String[] args) throws Exception {
     addInputOption();
     addOutputOption();
-    addOption("analyzerName", "an", "The class name of the analyzer", DefaultAnalyzer.class.getName());
+    addOption(DefaultOptionCreator.analyzerOption().create());
     addOption(buildOption("sequentialAccessVector", "seq", "(Optional) Whether output vectors should be SequentialAccessVectors. If set true else false", false, false, null));
     addOption(buildOption("namedVector", "nv", "Create named vectors using the key.  False by default", false, false, null));
     addOption("cardinality", "c", "The cardinality to use for creating the vectors.  Default is 5000", String.valueOf(5000));
@@ -63,14 +63,7 @@ public final class EncodedVectorsFromSequenceFiles extends AbstractJob {
       HadoopUtil.delete(getConf(), output);
     }
 
-    Class<? extends Analyzer> analyzerClass = DefaultAnalyzer.class;
-    if (hasOption("analyzerName")) {
-      String className = getOption("analyzerName").toString();
-      analyzerClass = Class.forName(className).asSubclass(Analyzer.class);
-      // try instantiating it, b/c there isn't any point in setting it if
-      // you can't instantiate it
-      ClassUtils.instantiateAs(analyzerClass, Analyzer.class);
-    }
+    Class<? extends Analyzer> analyzerClass = getAnalyzerClassFromOption();
 
 
     Configuration conf = getConf();

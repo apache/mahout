@@ -7,6 +7,7 @@ org.apache.mahout.utils.vectors.arff.Driver = arff.vector : Generate Vectors fro
 org.apache.mahout.utils.vectors.RowIdJob = rowid : Map SequenceFile<Text,VectorWritable> to {SequenceFile<IntWritable,VectorWritable>, SequenceFile<IntWritable,Text>}
 org.apache.mahout.utils.SplitInput = split : Split Input data into test and train sets
 org.apache.mahout.utils.MatrixDumper = matrixdump : Dump matrix in CSV format
+org.apache.mahout.utils.regex.RegexConverterDriver = regexconverter : Convert text files on a per line basis based on regular expressions
 org.apache.mahout.text.SequenceFilesFromDirectory = seqdirectory : Generate sequence files (of Text) from a directory
 org.apache.mahout.vectorizer.SparseVectorsFromSequenceFiles = seq2sparse: Sparse Vector generation from Text sequence files
 org.apache.mahout.vectorizer.EncodedVectorsFromSequenceFiles = seq2encoded: Encoded Sparse Vector generation from Text sequence files
@@ -34,25 +35,30 @@ org.apache.mahout.clustering.spectral.kmeans.SpectralKMeansDriver = spectralkmea
 #Freq. Itemset Mining
 org.apache.mahout.fpm.pfpgrowth.FPGrowthDriver = fpg : Frequent Pattern Growth
 #Classification
+#old bayes
+org.apache.mahout.classifier.bayes.PrepareTwentyNewsgroups = prepare20newsgroups : Reformat 20 newsgroups data
+org.apache.mahout.classifier.bayes.WikipediaXmlSplitter = wikipediaXMLSplitter : Reads wikipedia data and creates ch
+org.apache.mahout.classifier.bayes.WikipediaDatasetCreatorDriver = wikipediaDataSetCreator : Splits data set of wikipedia wrt feature like country
 org.apache.mahout.classifier.bayes.TestClassifier = testclassifier : Test the text based Bayes Classifier
 org.apache.mahout.classifier.bayes.TrainClassifier = trainclassifier : Train the text based Bayes Classifier
-org.apache.mahout.classifier.bayes.PrepareTwentyNewsgroups = prepare20newsgroups : Reformat 20 newsgroups data
+#new bayes
+org.apache.mahout.classifier.naivebayes.training.TrainNaiveBayesJob = trainnb : Train the Vector-based Bayes classifier
+org.apache.mahout.classifier.naivebayes.test.TestNaiveBayesDriver = testnb : Test the Vector-based Bayes classifier
+#SGD
 org.apache.mahout.classifier.sgd.TrainLogistic = trainlogistic : Train a logistic regression using stochastic gradient descent
 org.apache.mahout.classifier.sgd.RunLogistic = runlogistic : Run a logistic regression model against CSV data
 org.apache.mahout.classifier.sgd.PrintResourceOrFile = cat : Print a file or resource as the logistic regression models would see it
 org.apache.mahout.classifier.sgd.TrainAdaptiveLogistic = trainAdaptiveLogistic : Train an AdaptivelogisticRegression model
 org.apache.mahout.classifier.sgd.ValidateAdaptiveLogistic = validateAdaptiveLogistic : Validate an AdaptivelogisticRegression model against hold-out data set
 org.apache.mahout.classifier.sgd.RunAdaptiveLogistic = runAdaptiveLogistic : Score new production data using a probably trained and validated AdaptivelogisticRegression model
-org.apache.mahout.classifier.bayes.WikipediaXmlSplitter = wikipediaXMLSplitter : Reads wikipedia data and creates ch
-org.apache.mahout.classifier.bayes.WikipediaDatasetCreatorDriver = wikipediaDataSetCreator : Splits data set of wikipedia wrt feature like country
+#HMM
 org.apache.mahout.classifier.sequencelearning.hmm.BaumWelchTrainer = baumwelch : Baum-Welch algorithm for unsupervised HMM training
 org.apache.mahout.classifier.sequencelearning.hmm.ViterbiEvaluator = viterbi : Viterbi decoding of hidden states from given output states sequence
 org.apache.mahout.classifier.sequencelearning.hmm.RandomSequenceGenerator = hmmpredict : Generate random sequence of observations by given HMM
-org.apache.mahout.classifier.naivebayes.training.TrainNaiveBayesJob = trainnb : Train the Vector-based Bayes classifier
-org.apache.mahout.classifier.naivebayes.test.TestNaiveBayesDriver = testnb : Test the Vector-based Bayes classifier
+#Classifier Utils
 org.apache.mahout.classifier.ConfusionMatrixDumper = cmdump : Dump confusion matrix in HTML or text formats
 
-
+#Recommenders
 org.apache.mahout.cf.taste.hadoop.als.DatasetSplitter = splitDataset : split a rating dataset into training and probe parts
 org.apache.mahout.cf.taste.hadoop.als.FactorizationEvaluator = evaluateFactorization : compute RMSE and MAE of a rating matrix factorization against probes
 org.apache.mahout.cf.taste.hadoop.similarity.item.ItemSimilarityJob = itemsimilarity : Compute the item-item-similarities for item-based collaborative filtering

@@ -47,7 +47,9 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.Tool;
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.vectorizer.DefaultAnalyzer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -448,4 +450,15 @@ public abstract class AbstractJob extends Configured implements Tool {
     FileInputFormat.setInputPaths(job, inputPathOne.makeQualified(fs), inputPathTwo.makeQualified(fs));
   }
 
+  protected Class<? extends Analyzer> getAnalyzerClassFromOption() throws ClassNotFoundException {
+    Class<? extends Analyzer> analyzerClass = DefaultAnalyzer.class;
+    if (hasOption(DefaultOptionCreator.ANALYZER_NAME_OPTION)) {
+      String className = getOption(DefaultOptionCreator.ANALYZER_NAME_OPTION).toString();
+      analyzerClass = Class.forName(className).asSubclass(Analyzer.class);
+      // try instantiating it, b/c there isn't any point in setting it if
+      // you can't instantiate it
+      ClassUtils.instantiateAs(analyzerClass, Analyzer.class);
+    }
+    return analyzerClass;
+  }
 }

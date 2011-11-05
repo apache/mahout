@@ -23,6 +23,7 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.apache.mahout.common.kernel.TriangularKernelProfile;
+import org.apache.mahout.vectorizer.DefaultAnalyzer;
 
 public final class DefaultOptionCreator {
   
@@ -67,6 +68,8 @@ public final class DefaultOptionCreator {
   public static final String MAPREDUCE_METHOD = "mapreduce";
   
   public static final String KERNEL_PROFILE_OPTION = "kernelProfile";
+
+  public static final String ANALYZER_NAME_OPTION = "analyzerName";
   
   private DefaultOptionCreator() {}
   
@@ -321,6 +324,24 @@ public static DefaultOptionBuilder clusterFilterOption() {
             "If present, run clustering after the iterations have taken place")
         .withShortName("cl");
   }
+
+  /**
+   * Returns a default command line option for specifying a Lucene analyzer class
+   * @return {@link DefaultOptionBuilder}
+   */
+  public static DefaultOptionBuilder analyzerOption() {
+    return new DefaultOptionBuilder()
+        .withLongName(ANALYZER_NAME_OPTION)
+        .withRequired(false)
+        .withDescription(
+            "If present, the name of a Lucene analyzer class to use")
+        .withArgument(
+                new ArgumentBuilder().withName(ANALYZER_NAME_OPTION).withDefault(DefaultAnalyzer.class.getName())
+                .withMinimum(1).withMaximum(1).create()
+        )
+        .withShortName("an");
+  }
+
   
   /**
    * Returns a default command line option for specifying the emitMostLikely
