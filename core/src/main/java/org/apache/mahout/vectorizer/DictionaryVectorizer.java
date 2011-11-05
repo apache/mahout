@@ -60,7 +60,8 @@ import org.apache.mahout.vectorizer.term.TermCountReducer;
  * This is a dictionary based Vectorizer.
  * 
  */
-public final class DictionaryVectorizer {
+
+public final class DictionaryVectorizer implements Vectorizer{
   
   public static final String DOCUMENT_VECTOR_OUTPUT_FOLDER = "tf-vectors";
   
@@ -88,10 +89,17 @@ public final class DictionaryVectorizer {
   /**
    * Cannot be initialized. Use the static functions
    */
-  private DictionaryVectorizer() {
+  public DictionaryVectorizer() {
 
   }
-  
+  //TODO: move more of SparseVectorsFromSequenceFile in here, and then fold SparseVectorsFrom with EncodedVectorsFrom to have one framework.
+
+  @Override
+  public void createVectors(Path input, Path output, VectorizerConfig config) throws Exception {
+    createTermFrequencyVectors(input, output, config.conf, config.minSupport, config.maxNGramSize,
+            config.minLLRValue, config.normPower, config.logNormalize, config.numReducers, config.chunkSizeInMegabytes, config.sequentialAccess, config.namedVectors);
+  }
+
   /**
    * Create Term Frequency (Tf) Vectors from the input set of documents in {@link SequenceFile} format. This
    * tries to fix the maximum memory used by the feature chunk per node thereby splitting the process across

@@ -98,60 +98,92 @@ elif [ "x$alg" == "xclustering" ]; then
 
 #classification
 elif [ "x$alg" == "xclassification" ]; then
-  algorithm=( standard complementary )
+  algorithm=( standard complementary sgd )
 
   echo "Please select a number to choose the corresponding algorithm to run"
   echo "1. ${algorithm[0]}"
   echo "2. ${algorithm[1]}"
+#  echo "3. ${algorithm[2]}"
   read -p "Enter your choice : " choice
 
   echo "ok. You chose $choice and we'll use ${algorithm[$choice-1]}"
-  nbalg=${algorithm[$choice-1]}
-
-  CLASS="$OUT/classification/"
-  MAIL_OUT="$CLASS/seq-files"
-  SEQ2SP="$CLASS/seq2sparse"
-  SEQ2SPLABEL="$CLASS/labeled"
-  SPLIT="$CLASS/splits"
-  TRAIN="$SPLIT/train"
-  TEST="$SPLIT/test"
-  TEST_OUT="$CLASS/test-results"
-  LABEL="$SPLIT/labels"
+  classAlg=${algorithm[$choice-1]}
   #Convert mail to be formatted as:
   # label\ttext
   # One per line
   # the label is the project_name_mailing_list, as in tomcat.apache.org_dev
-  if [ "x$OVER" == "xover" ] || [ ! -e "$MAIL_OUT/chunk-0" ]; then
-    echo "Converting Mail files to Sequence Files"
-    $MAHOUT org.apache.mahout.text.SequenceFilesFromMailArchives --charset "UTF-8" --subject --body --input $ASF_ARCHIVES --output $MAIL_OUT
-  fi
   #Convert to vectors
-  if [ "x$OVER" == "xover" ] || [ ! -e "$SEQ2SP/dictionary.file-0" ]; then
-    echo "Converting the files to sparse vectors"
-    $MAHOUT seq2sparse --input $MAIL_OUT --output $SEQ2SP --norm 2 --weight TFIDF --namedVector --maxDFPercent 90 --minSupport 2 --analyzerName org.apache.mahout.text.MailArchivesClusteringAnalyzer
+  if [ "x$classAlg" == "xstandard" ] || [ "x$classAlg" == "xcomplementary" ]; then
+    CLASS="$OUT/classification/bayesian"
+    MAIL_OUT="$CLASS/seq-files"
+    SEQ2SP="$CLASS/seq2sparse"
+    SEQ2SPLABEL="$CLASS/labeled"
+    SPLIT="$CLASS/splits"
+    TRAIN="$SPLIT/train"
+    TEST="$SPLIT/test"
+    TEST_OUT="$CLASS/test-results"
+    LABEL="$SPLIT/labels"
+    if [ "x$OVER" == "xover" ] || [ ! -e "$MAIL_OUT/chunk-0" ]; then
+      echo "Converting Mail files to Sequence Files"
+      $MAHOUT org.apache.mahout.text.SequenceFilesFromMailArchives --charset "UTF-8" --subject --body --input $ASF_ARCHIVES --output $MAIL_OUT
+    fi
+    if [ "x$OVER" == "xover" ] || [ ! -e "$SEQ2SP/dictionary.file-0" ]; then
+      echo "Converting the files to sparse vectors"
+      $MAHOUT seq2sparse --input $MAIL_OUT --output $SEQ2SP --norm 2 --weight TFIDF --namedVector --maxDFPercent 90 --minSupport 2 --analyzerName org.apache.mahout.text.MailArchivesClusteringAnalyzer
+      #We need to modify the vectors to have a better label
+      echo "Converting vector labels"
+      $MAHOUT org.apache.mahout.classifier.email.PrepEmailVectorsDriver --input "$SEQ2SP/tfidf-vectors" --output $SEQ2SPLABEL --overwrite --maxItemsPerLabel 1000
+    fi
+    if [ "x$OVER" == "xover" ] || [ ! -e "$TRAIN/part-m-00000" ]; then
+      #setup train/test files
+      echo "Creating training and test inputs"
+      $MAHOUT split --input $SEQ2SPLABEL --trainingOutput $TRAIN --testOutput $TEST --randomSelectionPct 20 --overwrite --sequenceFiles
+    fi
+    MODEL="$CLASS/model"
+    if [ "x$classAlg" == "xstandard" ]; then
+      echo "Running Standard Training"
+      $MAHOUT trainnb -i $TRAIN -o $MODEL --extractLabels --labelIndex $LABEL --overwrite
+      echo "Running Test"
+      $MAHOUT testnb -i $TEST -o $TEST_OUT -m $MODEL --labelIndex $LABEL --overwrite
+
+    elif [ "x$classAlg" == "xcomplementary"  ]; then
+      echo "Running Complementary Training"
+      $MAHOUT trainnb -i $TRAIN -o $MODEL --extractLabels --labelIndex $LABEL --overwrite --trainComplementary
+      echo "Running Complementary Test"
+      $MAHOUT testnb -i $TEST -o $TEST_OUT -m $MODEL --labelIndex $LABEL --overwrite --testComplementary
+    fi
+  elif [ "x$classAlg" == "xsgd"  ]; then
+    CLASS="$OUT/classification/sgd"
+    MAIL_OUT="$CLASS/seq-files"
+    SEQ2SP="$CLASS/seq2encoded"
+    SEQ2SPLABEL="$CLASS/labeled"
+    SPLIT="$CLASS/splits"
+    TRAIN="$SPLIT/train"
+    TEST="$SPLIT/test"
+    TEST_OUT="$CLASS/test-results"
+    LABEL="$SPLIT/labels"
+    if [ "x$OVER" == "xover" ] || [ ! -e "$MAIL_OUT/chunk-0" ]; then
+      echo "Converting Mail files to Sequence Files"
+      $MAHOUT org.apache.mahout.text.SequenceFilesFromMailArchives --charset "UTF-8" --subject --body --input $ASF_ARCHIVES --output $MAIL_OUT
+    fi
+    echo "Converting the files to sparse vectors in $SEQ2SP"
+    $MAHOUT seq2encoded --input $MAIL_OUT --output $SEQ2SP --analyzerName org.apache.mahout.text.MailArchivesClusteringAnalyzer
     #We need to modify the vectors to have a better label
     echo "Converting vector labels"
-    $MAHOUT org.apache.mahout.classifier.email.PrepEmailVectorsDriver --input "$SEQ2SP/tfidf-vectors" --output $SEQ2SPLABEL --overwrite --maxItemsPerLabel 1000
-  fi
-  if [ "x$OVER" == "xover" ] || [ ! -e "$TRAIN/part-m-00000" ]; then
-    #setup train/test files
-    echo "Creating training and test inputs"
-    $MAHOUT split --input $SEQ2SPLABEL --trainingOutput $TRAIN --testOutput $TEST --randomSelectionPct 20 --overwrite --sequenceFiles
-  fi
-  MODEL="$CLASS/model"
-  if [ "x$nbalg" == "xstandard" ]; then
-    echo "Running Standard Training"
-    $MAHOUT trainnb -i $TRAIN -o $MODEL --extractLabels --labelIndex $LABEL --overwrite
+    $MAHOUT org.apache.mahout.classifier.email.PrepEmailVectorsDriver --input "$SEQ2SP" --output $SEQ2SPLABEL --overwrite
+    if [ "x$OVER" == "xover" ] || [ ! -e "$TRAIN/part-m-00000" ]; then
+      #setup train/test files
+      echo "Creating training and test inputs from $SEQ2SPLABEL"
+      $MAHOUT split --input $SEQ2SPLABEL --trainingOutput $TRAIN --testOutput $TEST --randomSelectionPct 20 --overwrite --sequenceFiles
+    fi
+    MODEL="$CLASS/model"
+
+    echo "Running SGD Training"
+    #$MAHOUT trainnb -i $TRAIN -o $MODEL --extractLabels --labelIndex $LABEL --overwrite
     echo "Running Test"
-    $MAHOUT testnb -i $TEST -o $TEST_OUT -m $MODEL --labelIndex $LABEL --overwrite
+#$MAHOUT testnb -i $TEST -o $TEST_OUT -m $MODEL --labelIndex $LABEL --overwrite
 
-  elif [ "x$nbalg" == "xcomplementary"  ]; then
-    echo "Running Complementary Training"
-    $MAHOUT trainnb -i $TRAIN -o $MODEL --extractLabels --labelIndex $LABEL --overwrite --trainComplementary
-    echo "Running Complementary Test"
-    $MAHOUT testnb -i $TEST -o $TEST_OUT -m $MODEL --labelIndex $LABEL --overwrite --testComplementary
   fi
-
 fi
 
 

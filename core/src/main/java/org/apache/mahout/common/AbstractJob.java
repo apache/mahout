@@ -408,31 +408,11 @@ public abstract class AbstractJob extends Configured implements Tool {
                            Class<? extends Writable> mapperValue,
                            Class<? extends OutputFormat> outputFormat) throws IOException {
 
-    Job job = new Job(new Configuration(getConf()));
-    Configuration jobConf = job.getConfiguration();
-
-    if (mapper.equals(Mapper.class)) {
-        throw new IllegalStateException("Can't figure out the user class jar file from mapper/reducer");
-    }
-    job.setJarByClass(mapper);
-
-    job.setInputFormatClass(inputFormat);
-    jobConf.set("mapred.input.dir", inputPath.toString());
-
-    job.setMapperClass(mapper);
-    job.setMapOutputKeyClass(mapperKey);
-    job.setMapOutputValueClass(mapperValue);
-    job.setOutputKeyClass(mapperKey);
-    job.setOutputValueClass(mapperValue);
-    jobConf.setBoolean("mapred.compress.map.output", true);
-    job.setNumReduceTasks(0);
-
-    job.setJobName(getCustomJobName(job, mapper, Reducer.class));
-
-    job.setOutputFormatClass(outputFormat);
-    jobConf.set("mapred.output.dir", outputPath.toString());
-
+    Job job = HadoopUtil.prepareJob(inputPath, outputPath,
+            inputFormat, mapper, mapperKey, mapperValue, outputFormat, getConf());
+    job.setJobName(HadoopUtil.getCustomJobName(getClass().getSimpleName(), job, mapper, Reducer.class));
     return job;
+
   }
 
   protected Job prepareJob(Path inputPath, Path outputPath, Class<? extends Mapper> mapper,
@@ -452,65 +432,10 @@ public abstract class AbstractJob extends Configured implements Tool {
                            Class<? extends Writable> reducerKey,
                            Class<? extends Writable> reducerValue,
                            Class<? extends OutputFormat> outputFormat) throws IOException {
-
-    Job job = new Job(new Configuration(getConf()));
-    Configuration jobConf = job.getConfiguration();
-
-    if (reducer.equals(Reducer.class)) {
-      if (mapper.equals(Mapper.class)) {
-        throw new IllegalStateException("Can't figure out the user class jar file from mapper/reducer");
-      }
-      job.setJarByClass(mapper);
-    } else {
-      job.setJarByClass(reducer);
-    }
-
-    job.setInputFormatClass(inputFormat);
-    jobConf.set("mapred.input.dir", inputPath.toString());
-
-    job.setMapperClass(mapper);
-    job.setMapOutputKeyClass(mapperKey);
-    job.setMapOutputValueClass(mapperValue);
-
-    jobConf.setBoolean("mapred.compress.map.output", true);
-
-    job.setReducerClass(reducer);
-    job.setOutputKeyClass(reducerKey);
-    job.setOutputValueClass(reducerValue);
-
-    job.setJobName(getCustomJobName(job, mapper, reducer));
-
-    job.setOutputFormatClass(outputFormat);
-    jobConf.set("mapred.output.dir", outputPath.toString());
-
+    Job job = HadoopUtil.prepareJob(inputPath, outputPath,
+            inputFormat, mapper, mapperKey, mapperValue, reducer, reducerKey, reducerValue, outputFormat, getConf());
+    job.setJobName(HadoopUtil.getCustomJobName(getClass().getSimpleName(), job, mapper, Reducer.class));
     return job;
-  }
-
-  private String getCustomJobName(JobContext job,Class<? extends Mapper> mapper) {
-    StringBuilder name = new StringBuilder(100);
-    String customJobName = job.getJobName();
-    if (customJobName == null || customJobName.trim().length() == 0) {
-      name.append(getClass().getSimpleName());
-    } else {
-      name.append(customJobName);
-    }
-    name.append('-').append(mapper.getSimpleName());
-    return name.toString();
-  }
-
-  private String getCustomJobName(JobContext job,
-                                  Class<? extends Mapper> mapper,
-                                  Class<? extends Reducer> reducer) {
-    StringBuilder name = new StringBuilder(100);
-    String customJobName = job.getJobName();
-    if (customJobName == null || customJobName.trim().isEmpty()) {
-      name.append(getClass().getSimpleName());
-    } else {
-      name.append(customJobName);
-    }
-    name.append('-').append(mapper.getSimpleName());
-    name.append('-').append(reducer.getSimpleName());
-    return name.toString();
   }
 
   /**

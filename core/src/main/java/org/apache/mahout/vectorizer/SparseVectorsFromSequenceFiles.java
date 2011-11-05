@@ -234,18 +234,18 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
 
       Configuration conf = getConf();
       Path tokenizedPath = new Path(outputDir, DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER);
+      //TODO: move this into DictionaryVectorizer , and then fold SparseVectorsFrom with EncodedVectorsFrom to have one framework for all of this.
       DocumentProcessor.tokenizeDocuments(inputDir, analyzerClass, tokenizedPath, conf);
-      
+
       boolean sequentialAccessOutput = false;
       if (cmdLine.hasOption(sequentialAccessVectorOpt)) {
         sequentialAccessOutput = true;
       }
-      
+
       boolean namedVectors = false;
       if (cmdLine.hasOption(namedVectorOpt)) {
         namedVectors = true;
       }
-      
       if (!processIdf) {
         DictionaryVectorizer.createTermFrequencyVectors(tokenizedPath, outputDir, conf, minSupport, maxNGramSize,
           minLLRValue, norm, logNormalize, reduceTasks, chunkSize, sequentialAccessOutput, namedVectors);

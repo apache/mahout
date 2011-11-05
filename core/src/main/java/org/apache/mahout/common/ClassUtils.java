@@ -25,9 +25,23 @@ public final class ClassUtils {
 
   public static <T> T instantiateAs(String classname, Class<T> asSubclassOfClass) {
     try {
-      return Class.forName(classname).asSubclass(asSubclassOfClass).getConstructor().newInstance();
-    } catch (ClassNotFoundException cnfe) {
-      throw new IllegalStateException(cnfe);
+      return instantiateAs(Class.forName(classname).asSubclass(asSubclassOfClass), asSubclassOfClass);
+    } catch (ClassNotFoundException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
+  public static <T> T instantiateAs(String classname, Class<T> asSubclassOfClass, Class[] params, Object[] args) {
+    try {
+      return instantiateAs(Class.forName(classname).asSubclass(asSubclassOfClass), asSubclassOfClass, params, args);
+    } catch (ClassNotFoundException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
+  public static <T> T instantiateAs(Class<? extends T> clazz, Class<T> asSubclassOfClass, Class[] params, Object[] args) {
+    try {
+      return clazz.asSubclass(asSubclassOfClass).getConstructor(params).newInstance(args);
     } catch (InstantiationException ie) {
       throw new IllegalStateException(ie);
     } catch (IllegalAccessException iae) {
@@ -38,6 +52,7 @@ public final class ClassUtils {
       throw new IllegalStateException(ite);
     }
   }
+
 
   public static <T> T instantiateAs(Class<? extends T> clazz, Class<T> asSubclassOfClass) {
     try {

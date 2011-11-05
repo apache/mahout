@@ -31,6 +31,12 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.mapreduce.InputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterator;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
@@ -42,6 +48,134 @@ public final class HadoopUtil {
   private static final Logger log = LoggerFactory.getLogger(HadoopUtil.class);
 
   private HadoopUtil() { }
+
+  /**
+   * Create a map-only Hadoop Job out of the passed in parameters.  Does not set the
+   * Job name.
+   * @param inputPath
+   * @param outputPath
+   * @param inputFormat
+   * @param mapper
+   * @param mapperKey
+   * @param mapperValue
+   * @param outputFormat
+   * @param conf
+   * @return
+   * @throws IOException
+   *
+   * @see #getCustomJobName(String, org.apache.hadoop.mapreduce.JobContext, Class, Class)
+   */
+  public static Job prepareJob(Path inputPath,
+                           Path outputPath,
+                           Class<? extends InputFormat> inputFormat,
+                           Class<? extends Mapper> mapper,
+                           Class<? extends Writable> mapperKey,
+                           Class<? extends Writable> mapperValue,
+                           Class<? extends OutputFormat> outputFormat, Configuration conf) throws IOException {
+
+    Job job = new Job(new Configuration(conf));
+    Configuration jobConf = job.getConfiguration();
+
+    if (mapper.equals(Mapper.class)) {
+        throw new IllegalStateException("Can't figure out the user class jar file from mapper/reducer");
+    }
+    job.setJarByClass(mapper);
+
+    job.setInputFormatClass(inputFormat);
+    jobConf.set("mapred.input.dir", inputPath.toString());
+
+    job.setMapperClass(mapper);
+    job.setMapOutputKeyClass(mapperKey);
+    job.setMapOutputValueClass(mapperValue);
+    job.setOutputKeyClass(mapperKey);
+    job.setOutputValueClass(mapperValue);
+    jobConf.setBoolean("mapred.compress.map.output", true);
+    job.setNumReduceTasks(0);
+
+    job.setOutputFormatClass(outputFormat);
+    jobConf.set("mapred.output.dir", outputPath.toString());
+
+    return job;
+  }
+
+  /**
+   * Create a map and reduce Hadoop job.  Does not set the name on the job.
+   * @param inputPath
+   * @param outputPath
+   * @param inputFormat
+   * @param mapper
+   * @param mapperKey
+   * @param mapperValue
+   * @param reducer
+   * @param reducerKey
+   * @param reducerValue
+   * @param outputFormat
+   * @param conf
+   * @return
+   * @throws IOException
+   *
+   * @see #getCustomJobName(String, org.apache.hadoop.mapreduce.JobContext, Class, Class)
+   * @see #prepareJob(org.apache.hadoop.fs.Path, org.apache.hadoop.fs.Path, Class, Class, Class, Class, Class, org.apache.hadoop.conf.Configuration)
+   */
+  public static Job prepareJob(Path inputPath,
+                           Path outputPath,
+                           Class<? extends InputFormat> inputFormat,
+                           Class<? extends Mapper> mapper,
+                           Class<? extends Writable> mapperKey,
+                           Class<? extends Writable> mapperValue,
+                           Class<? extends Reducer> reducer,
+                           Class<? extends Writable> reducerKey,
+                           Class<? extends Writable> reducerValue,
+                           Class<? extends OutputFormat> outputFormat,
+                           Configuration conf) throws IOException {
+
+    Job job = new Job(new Configuration(conf));
+    Configuration jobConf = job.getConfiguration();
+
+    if (reducer.equals(Reducer.class)) {
+      if (mapper.equals(Mapper.class)) {
+        throw new IllegalStateException("Can't figure out the user class jar file from mapper/reducer");
+      }
+      job.setJarByClass(mapper);
+    } else {
+      job.setJarByClass(reducer);
+    }
+
+    job.setInputFormatClass(inputFormat);
+    jobConf.set("mapred.input.dir", inputPath.toString());
+
+    job.setMapperClass(mapper);
+    job.setMapOutputKeyClass(mapperKey);
+    job.setMapOutputValueClass(mapperValue);
+
+    jobConf.setBoolean("mapred.compress.map.output", true);
+
+    job.setReducerClass(reducer);
+    job.setOutputKeyClass(reducerKey);
+    job.setOutputValueClass(reducerValue);
+
+    job.setOutputFormatClass(outputFormat);
+    jobConf.set("mapred.output.dir", outputPath.toString());
+
+    return job;
+  }
+
+
+  public static String getCustomJobName(String className, JobContext job,
+                                  Class<? extends Mapper> mapper,
+                                  Class<? extends Reducer> reducer) {
+    StringBuilder name = new StringBuilder(100);
+    String customJobName = job.getJobName();
+    if (customJobName == null || customJobName.trim().isEmpty()) {
+      name.append(className);
+    } else {
+      name.append(customJobName);
+    }
+    name.append('-').append(mapper.getSimpleName());
+    name.append('-').append(reducer.getSimpleName());
+    return name.toString();
+  }
+
 
   public static void delete(Configuration conf, Iterable<Path> paths) throws IOException {
     if (conf == null) {
