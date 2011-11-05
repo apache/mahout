@@ -43,6 +43,9 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 
+/**
+ * Transpose a matrix
+ */
 public class TransposeJob extends AbstractJob {
 
   public static final String NUM_ROWS_KEY = "SparseRowMatrix.numRows";
@@ -56,7 +59,7 @@ public class TransposeJob extends AbstractJob {
     addInputOption();
     addOption("numRows", "nr", "Number of rows of the input matrix");
     addOption("numCols", "nc", "Number of columns of the input matrix");
-    Map<String,String> parsedArgs = parseArguments(strings);
+    Map<String, String> parsedArgs = parseArguments(strings);
     if (parsedArgs == null) {
       return -1;
     }
@@ -76,7 +79,7 @@ public class TransposeJob extends AbstractJob {
                                                     int numInputRows) throws IOException {
     return buildTransposeJobConf(new Configuration(), matrixInputPath, matrixOutputPath, numInputRows);
   }
-  
+
   public static Configuration buildTransposeJobConf(Configuration initialConf,
                                                     Path matrixInputPath,
                                                     Path matrixOutputPath,
@@ -104,7 +107,7 @@ public class TransposeJob extends AbstractJob {
   }
 
   public static class TransposeMapper extends MapReduceBase
-      implements Mapper<IntWritable,VectorWritable,IntWritable,VectorWritable> {
+          implements Mapper<IntWritable, VectorWritable, IntWritable, VectorWritable> {
 
     private int newNumCols;
 
@@ -115,7 +118,7 @@ public class TransposeJob extends AbstractJob {
 
     @Override
     public void map(IntWritable r, VectorWritable v, OutputCollector<IntWritable, VectorWritable> out,
-        Reporter reporter) throws IOException {
+                    Reporter reporter) throws IOException {
       int row = r.get();
       Iterator<Vector.Element> it = v.get().iterateNonZero();
       while (it.hasNext()) {
@@ -129,21 +132,21 @@ public class TransposeJob extends AbstractJob {
   }
 
   public static class MergeVectorsCombiner extends MapReduceBase
-        implements Reducer<WritableComparable<?>,VectorWritable,WritableComparable<?>,VectorWritable> {
+          implements Reducer<WritableComparable<?>, VectorWritable, WritableComparable<?>, VectorWritable> {
 
     @Override
     public void reduce(WritableComparable<?> key, Iterator<VectorWritable> vectors,
-        OutputCollector<WritableComparable<?>, VectorWritable> out, Reporter reporter) throws IOException {
+                       OutputCollector<WritableComparable<?>, VectorWritable> out, Reporter reporter) throws IOException {
       out.collect(key, VectorWritable.merge(vectors));
     }
   }
 
   public static class MergeVectorsReducer extends MapReduceBase
-        implements Reducer<WritableComparable<?>,VectorWritable,WritableComparable<?>,VectorWritable> {
+          implements Reducer<WritableComparable<?>, VectorWritable, WritableComparable<?>, VectorWritable> {
 
     @Override
     public void reduce(WritableComparable<?> key, Iterator<VectorWritable> vectors,
-        OutputCollector<WritableComparable<?>, VectorWritable> out, Reporter reporter) throws IOException {
+                       OutputCollector<WritableComparable<?>, VectorWritable> out, Reporter reporter) throws IOException {
       Vector merged = VectorWritable.merge(vectors).get();
       out.collect(key, new VectorWritable(new SequentialAccessSparseVector(merged)));
     }
