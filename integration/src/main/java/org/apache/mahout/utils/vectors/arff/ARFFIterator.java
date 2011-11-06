@@ -29,8 +29,9 @@ import org.apache.mahout.math.Vector;
 
 final class ARFFIterator extends AbstractIterator<Vector> {
 
-  private static final Pattern COMMA_PATTERN = Pattern.compile(",");
-  private static final Pattern SPACE_PATTERN = Pattern.compile(" ");
+  // This pattern will make sure a , inside a string is not a point for split.
+  // Ex: "Arizona" , "0:08 PM, PDT" , 110 will be split considering "0:08 PM, PDT" as one string
+  private static final Pattern COMMA_PATTERN = Pattern.compile(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
 
   private final BufferedReader reader;
   private final ARFFModel model;
@@ -63,9 +64,11 @@ final class ARFFIterator extends AbstractIterator<Vector> {
       String[] splits = COMMA_PATTERN.split(line);
       result = new RandomAccessSparseVector(model.getLabelSize());
       for (String split : splits) {
-        String[] data = SPACE_PATTERN.split(split); // first is index, second is
-        int idx = Integer.parseInt(data[0]);
-        result.setQuick(idx, model.getValue(data[1], idx));
+        split = split.trim();
+        int idIndex = split.indexOf(' ');
+        int idx = Integer.parseInt(split.substring(0, idIndex).trim());
+        String data = split.substring(idIndex).trim();
+        result.setQuick(idx, model.getValue(data, idx));
       }
     } else {
       result = new DenseVector(model.getLabelSize());

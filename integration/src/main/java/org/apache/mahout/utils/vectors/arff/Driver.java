@@ -122,23 +122,10 @@ public final class Driver {
           });
           
           for (File file : files) {
-            writeFile(outDir, file, maxDocs, model);
+            writeFile(outDir, file, maxDocs, model, dictOut, delimiter);
           }
         } else {
-          writeFile(outDir, input, maxDocs, model);
-        }
-        log.info("Dictionary Output file: {}", dictOut);
-        Map<String,Integer> labels = model.getLabelBindings();
-        Writer writer = Files.newWriter(dictOut, Charsets.UTF_8);
-        try {
-          for (Map.Entry<String,Integer> entry : labels.entrySet()) {
-            writer.write(entry.getKey());
-            writer.write(delimiter);
-            writer.write(String.valueOf(entry.getValue()));
-            writer.write('\n');
-          }
-        } finally {
-          Closeables.closeQuietly(writer);
+          writeFile(outDir, input, maxDocs, model, dictOut, delimiter);
         }
       }
       
@@ -148,7 +135,29 @@ public final class Driver {
     }
   }
   
-  private static void writeFile(String outDir, File file, long maxDocs, ARFFModel arffModel) throws IOException {
+  private static void writeLabelBindings(File dictOut, ARFFModel arffModel, String delimiter) throws IOException {
+    Map<String,Integer> labels = arffModel.getLabelBindings();
+    Writer writer = Files.newWriterSupplier(dictOut, Charsets.UTF_8, true).getOutput();
+    try {
+      writer.write("Label bindings for Relation " + arffModel.getRelation() + "\n");
+      for (Map.Entry<String,Integer> entry : labels.entrySet()) {
+        writer.write(entry.getKey());
+        writer.write(delimiter);
+        writer.write(String.valueOf(entry.getValue()));
+        writer.write('\n');
+      }
+      writer.write('\n');
+    } finally {
+      Closeables.closeQuietly(writer);
+    }
+  }
+  
+  private static void writeFile(String outDir,
+                                File file,
+                                long maxDocs,
+                                ARFFModel arffModel,
+                                File dictOut,
+                                String delimiter) throws IOException {
     log.info("Converting File: {}", file);
     ARFFModel model = new MapBackedARFFModel(arffModel.getWords(), arffModel.getWordCount() + 1, arffModel
         .getNominalMap());
@@ -158,6 +167,7 @@ public final class Driver {
     VectorWriter vectorWriter = getSeqFileWriter(outFile);
     try {
       long numDocs = vectorWriter.write(iteratable, maxDocs);
+      writeLabelBindings(dictOut, model, delimiter);
       log.info("Wrote: {} vectors", numDocs);
     } finally {
       Closeables.closeQuietly(vectorWriter);

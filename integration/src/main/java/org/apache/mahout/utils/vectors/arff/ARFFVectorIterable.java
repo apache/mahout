@@ -110,7 +110,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
           type = ARFFType.DATE;
           //TODO: DateFormatter map
           DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH);
-          int idx = lower.indexOf(ARFFType.DATE.getIndicator());
+          int idx = lower.lastIndexOf(ARFFType.DATE.getIndicator());
           String[] split = SPACE_PATTERN.split(line);
           if (split.length >= 4) { //we have a date format
             String formStr = line.substring(idx + ARFFType.DATE.getIndicator().length()).trim();
