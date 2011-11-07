@@ -324,8 +324,8 @@ public class MeanShiftCanopyDriver extends AbstractJob {
                     cluster.getNumPoints(),
                     AbstractCluster.formatVector(cluster.getRadius(), null),
                     clustersOut.getName() });
-            writer.append(new Text(cluster.getIdentifier()), cluster);
           }
+          writer.append(new Text(cluster.getIdentifier()), cluster);
         }
       } finally {
         Closeables.closeQuietly(writer);
