@@ -126,14 +126,16 @@ public class BuildForest extends Configured implements Tool {
       if (cmdLine.hasOption(seedOpt)) {
         seed = Long.valueOf(cmdLine.getValue(seedOpt).toString());
       }
-      
-      log.debug("data : {}", dataName);
-      log.debug("dataset : {}", datasetName);
-      log.debug("output : {}", outputName);
-      log.debug("m : {}", m);
-      log.debug("seed : {}", seed);
-      log.debug("nbtrees : {}", nbTrees);
-      log.debug("isPartial : {}", isPartial);
+
+      if (log.isDebugEnabled()) {
+        log.debug("data : {}", dataName);
+        log.debug("dataset : {}", datasetName);
+        log.debug("output : {}", outputName);
+        log.debug("m : {}", m);
+        log.debug("seed : {}", seed);
+        log.debug("nbtrees : {}", nbTrees);
+        log.debug("isPartial : {}", isPartial);
+      }
      
       dataPath = new Path(dataName);
       datasetPath = new Path(datasetName);

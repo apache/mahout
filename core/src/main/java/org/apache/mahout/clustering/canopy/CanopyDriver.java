@@ -276,11 +276,13 @@ public class CanopyDriver extends AbstractJob {
     try {
       for (Canopy canopy : canopies) {
         canopy.computeParameters();
-        log.debug("Writing Canopy:{} center:{} numPoints:{} radius:{}",
-            new Object[] { canopy.getIdentifier(),
-                AbstractCluster.formatVector(canopy.getCenter(), null),
-                canopy.getNumPoints(),
-                AbstractCluster.formatVector(canopy.getRadius(), null) });
+        if (log.isDebugEnabled()) {
+          log.debug("Writing Canopy:{} center:{} numPoints:{} radius:{}",
+              new Object[] { canopy.getIdentifier(),
+                  AbstractCluster.formatVector(canopy.getCenter(), null),
+                  canopy.getNumPoints(),
+                  AbstractCluster.formatVector(canopy.getRadius(), null) });
+        }
         if (canopy.getNumPoints() > clusterFilter) {
           writer.append(new Text(canopy.getIdentifier()), canopy);
         }

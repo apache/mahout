@@ -321,11 +321,13 @@ public class CDbwEvaluator {
           density = minDistance * interDensity / stdSum;
         }
 
-        log.debug("minDistance[{},{}]={}", new Object[] {cI, cJ, minDistance});
-        log.debug("stDev[{}]={}", cI, stDevI);
-        log.debug("stDev[{}]={}", cJ, stDevJ);
-        log.debug("interDensity[{},{}]={}", new Object[] {cI, cJ, interDensity});
-        log.debug("density[{},{}]={}", new Object[] {cI, cJ, density});
+        if (log.isDebugEnabled()) {
+          log.debug("minDistance[{},{}]={}", new Object[] {cI, cJ, minDistance});
+          log.debug("stDev[{}]={}", cI, stDevI);
+          log.debug("stDev[{}]={}", cJ, stDevJ);
+          log.debug("interDensity[{},{}]={}", new Object[] {cI, cJ, interDensity});
+          log.debug("density[{},{}]={}", new Object[] {cI, cJ, density});
+        }
 
         sum += density;
       }

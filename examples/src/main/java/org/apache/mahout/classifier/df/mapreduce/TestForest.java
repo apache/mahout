@@ -118,12 +118,14 @@ public class TestForest extends Configured implements Tool {
       analyze = cmdLine.hasOption(analyzeOpt);
       useMapreduce = cmdLine.hasOption(mrOpt);
 
-      log.debug("inout     : {}", dataName);
-      log.debug("dataset   : {}", datasetName);
-      log.debug("model     : {}", modelName);
-      log.debug("output    : {}", outputName);
-      log.debug("analyze   : {}", analyze);
-      log.debug("mapreduce : {}", useMapreduce);
+      if (log.isDebugEnabled()) {
+        log.debug("inout     : {}", dataName);
+        log.debug("dataset   : {}", datasetName);
+        log.debug("model     : {}", modelName);
+        log.debug("output    : {}", outputName);
+        log.debug("analyze   : {}", analyze);
+        log.debug("mapreduce : {}", useMapreduce);
+      }
 
       dataPath = new Path(dataName);
       datasetPath = new Path(datasetName);

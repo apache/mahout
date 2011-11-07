@@ -124,7 +124,9 @@ public final class RepresentativePointsDriver extends AbstractJob {
       SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
       try {
         for (Cluster value : new SequenceFileValueIterable<Cluster>(inPart, true, conf)) {
-          log.debug("C-{}: {}", value.getId(), AbstractCluster.formatVector(value.getCenter(), null));
+          if (log.isDebugEnabled()) {
+            log.debug("C-{}: {}", value.getId(), AbstractCluster.formatVector(value.getCenter(), null));
+          }
           writer.append(new IntWritable(value.getId()), new VectorWritable(value.getCenter()));
         }
       } finally {

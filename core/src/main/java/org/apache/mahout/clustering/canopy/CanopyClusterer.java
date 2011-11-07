@@ -152,13 +152,17 @@ public class CanopyClusterer {
     for (Canopy canopy : canopies) {
       double dist = measure.distance(canopy.getCenter().getLengthSquared(), canopy.getCenter(), point);
       if (dist < t1) {
-        log.debug("Added point: {} to canopy: {}", AbstractCluster.formatVector(point, null), canopy.getIdentifier());
+        if (log.isDebugEnabled()) {
+          log.debug("Added point: {} to canopy: {}", AbstractCluster.formatVector(point, null), canopy.getIdentifier());
+        }
         canopy.observe(point);
       }
       pointStronglyBound = pointStronglyBound || dist < t2;
     }
     if (!pointStronglyBound) {
-      log.debug("Created new Canopy:{} at center:{}", nextCanopyId, AbstractCluster.formatVector(point, null));
+      if (log.isDebugEnabled()) {
+        log.debug("Created new Canopy:{} at center:{}", nextCanopyId, AbstractCluster.formatVector(point, null));
+      }
       canopies.add(new Canopy(point, nextCanopyId++, measure));
     }
   }

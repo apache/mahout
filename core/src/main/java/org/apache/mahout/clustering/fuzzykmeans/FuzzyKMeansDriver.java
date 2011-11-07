@@ -382,14 +382,16 @@ public class FuzzyKMeansDriver extends AbstractJob {
                                                            SoftCluster.class);
       try {
         for (SoftCluster cluster : clusters) {
-          log.debug("Writing Cluster:{} center:{} numPoints:{} radius:{} to: {}",
-                    new Object[] {
-                        cluster.getId(),
-                        AbstractCluster.formatVector(cluster.getCenter(), null),
-                        cluster.getNumPoints(),
-                        AbstractCluster.formatVector(cluster.getRadius(), null),
-                        clustersOut.getName()
-                    });
+          if (log.isDebugEnabled()) {
+            log.debug("Writing Cluster:{} center:{} numPoints:{} radius:{} to: {}",
+                      new Object[] {
+                          cluster.getId(),
+                          AbstractCluster.formatVector(cluster.getCenter(), null),
+                          cluster.getNumPoints(),
+                          AbstractCluster.formatVector(cluster.getRadius(), null),
+                          clustersOut.getName()
+                      });
+          }
           writer.append(new Text(cluster.getIdentifier()), cluster);
         }
       } finally {
