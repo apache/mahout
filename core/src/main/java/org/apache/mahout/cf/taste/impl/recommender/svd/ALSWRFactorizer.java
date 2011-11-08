@@ -28,7 +28,7 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.als.AlternateLeastSquaresSolver;
+import org.apache.mahout.math.als.AlternatingLeastSquaresSolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,20 +74,20 @@ public class ALSWRFactorizer extends AbstractFactorizer {
     private final double[][] U;
 
     Features(ALSWRFactorizer factorizer) throws TasteException {
-      this.dataModel = factorizer.dataModel;
-      this.numFeatures = factorizer.numFeatures;
+      dataModel = factorizer.dataModel;
+      numFeatures = factorizer.numFeatures;
       Random random = RandomUtils.getRandom();
-      M = new double[this.dataModel.getNumItems()][this.numFeatures];
-      LongPrimitiveIterator itemIDsIterator = this.dataModel.getItemIDs();
+      M = new double[dataModel.getNumItems()][numFeatures];
+      LongPrimitiveIterator itemIDsIterator = dataModel.getItemIDs();
       while (itemIDsIterator.hasNext()) {
         long itemID = itemIDsIterator.nextLong();
         int itemIDIndex = factorizer.itemIndex(itemID);
         M[itemIDIndex][0] = averateRating(itemID);
-        for (int feature = 1; feature < this.numFeatures; feature++) {
+        for (int feature = 1; feature < numFeatures; feature++) {
           M[itemIDIndex][feature] = random.nextDouble() * 0.1;
         }
       }
-      U = new double[this.dataModel.getNumUsers()][this.numFeatures];
+      U = new double[dataModel.getNumUsers()][numFeatures];
     }
 
     double[][] getM() {
@@ -98,11 +98,11 @@ public class ALSWRFactorizer extends AbstractFactorizer {
       return U;
     }
 
-    DenseVector getUserFeatureColumn(int index) {
+    Vector getUserFeatureColumn(int index) {
       return new DenseVector(U[index]);
     }
 
-    DenseVector getItemFeatureColumn(int index) {
+    Vector getItemFeatureColumn(int index) {
       return new DenseVector(M[index]);
     }
 
@@ -133,7 +133,7 @@ public class ALSWRFactorizer extends AbstractFactorizer {
   @Override
   public Factorization factorize() throws TasteException {
     log.info("starting to compute the factorization...");
-    final AlternateLeastSquaresSolver solver = new AlternateLeastSquaresSolver();
+    final AlternatingLeastSquaresSolver solver = new AlternatingLeastSquaresSolver();
     final Features features = new Features(this);
 
     for (int iteration = 0; iteration < numIterations; iteration++) {

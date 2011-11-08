@@ -28,6 +28,7 @@ import org.apache.mahout.math.MatrixSlice;
 import org.apache.mahout.math.SparseRowMatrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.hadoop.MathHelper;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,23 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
 
   private static final Logger log = LoggerFactory.getLogger(ParallelALSFactorizationJobTest.class);
 
+  File inputFile;
+  File outputDir;
+  File tmpDir;
+
+  Configuration conf;
+
+  @Before
+  @Override
+  public void setUp() throws Exception {
+    super.setUp();
+    inputFile = getTestTempFile("prefs.txt");
+    outputDir = getTestTempDir("output");
+    outputDir.delete();
+    tmpDir = getTestTempDir("tmp");
+
+    conf = new Configuration();
+  }
 
   /**
    * small integration test that runs the full job
@@ -58,11 +76,6 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
   @Test
   public void completeJobToyExample() throws Exception {
 
-    File inputFile = getTestTempFile("prefs.txt");
-    File outputDir = getTestTempDir("output");
-    outputDir.delete();
-    File tmpDir = getTestTempDir("tmp");
-
     Double na = Double.NaN;
     Matrix preferences = new SparseRowMatrix(4, 4, new Vector[] {
         new DenseVector(new double[] { 5.0, 5.0, 2.0, na }),
@@ -70,35 +83,17 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
         new DenseVector(new double[] { na,  5.0, na,  3.0 }),
         new DenseVector(new double[] { 3.0, na,  na,  5.0 }) });
 
-    StringBuilder prefsAsText = new StringBuilder();
-    String separator = "";
-    Iterator<MatrixSlice> sliceIterator = preferences.iterateAll();
-    while (sliceIterator.hasNext()) {
-      MatrixSlice slice = sliceIterator.next();
-      Iterator<Vector.Element> elementIterator = slice.vector().iterateNonZero();
-      while (elementIterator.hasNext()) {
-        Vector.Element e = elementIterator.next();
-        if (!Double.isNaN(e.get())) {
-          prefsAsText.append(separator).append(slice.index()).append(',').append(e.index()).append(',').append(e.get());
-          separator = "\n";
-        }
-      }
-    }
-    log.info("Input matrix:\n{}", prefsAsText);
-    writeLines(inputFile, prefsAsText.toString());
+    writeLines(inputFile, preferencesAsText(preferences));
 
     ParallelALSFactorizationJob alsFactorization = new ParallelALSFactorizationJob();
-
-    Configuration conf = new Configuration();
-    conf.set("mapred.input.dir", inputFile.getAbsolutePath());
-    conf.set("mapred.output.dir", outputDir.getAbsolutePath());
-    conf.setBoolean("mapred.output.compress", false);
-
     alsFactorization.setConf(conf);
+
     int numFeatures = 3;
     int numIterations = 5;
     double lambda = 0.065;
-    alsFactorization.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--lambda", String.valueOf(lambda),
+
+    alsFactorization.run(new String[] { "--input", inputFile.getAbsolutePath(), "--output", outputDir.getAbsolutePath(),
+        "--tempDir", tmpDir.getAbsolutePath(), "--lambda", String.valueOf(lambda),
         "--numFeatures", String.valueOf(numFeatures), "--numIterations", String.valueOf(numIterations) });
 
     Matrix u = MathHelper.readMatrix(conf, new Path(outputDir.getAbsolutePath(), "U/part-m-00000"),
@@ -106,29 +101,22 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
     Matrix m = MathHelper.readMatrix(conf, new Path(outputDir.getAbsolutePath(), "M/part-m-00000"),
         preferences.numCols(), numFeatures);
 
-    System.out.println("A - users x items\n");
-    for (int n = 0; n < preferences.numRows(); n++) {
-      System.out.println(ALSUtils.nice(preferences.viewRow(n)));
-    }
-    System.out.println("\nU - users x features\n");
-    for (int n = 0; n < u.numRows(); n++) {
-      System.out.println(ALSUtils.nice(u.viewRow(n)));
-    }
-    System.out.println("\nM - items x features\n");
-    for (int n = 0; n < m.numRows(); n++) {
-      System.out.println(ALSUtils.nice(m.viewRow(n)));
-    }
+    StringBuilder info = new StringBuilder();
+    info.append("\nA - users x items\n\n");
+    info.append(nice(preferences));
+    info.append("\nU - users x features\n\n");
+    info.append(nice(u));
+    info.append("\nM - items x features\n\n");
+    info.append(nice(m));
     Matrix Ak = u.times(m.transpose());
-    System.out.println("\nAk - users x items\n");
-    for (int n = 0; n < Ak.numRows(); n++) {
-      System.out.println(ALSUtils.nice(Ak.viewRow(n)));
-    }
+    info.append("\nAk - users x items\n\n");
+    info.append(nice(Ak));
+    info.append("\n");
 
-    System.out.println();
-
+    log.info(info.toString());
 
     RunningAverage avg = new FullRunningAverage();
-    sliceIterator = preferences.iterateAll();
+    Iterator<MatrixSlice> sliceIterator = preferences.iterateAll();
     while (sliceIterator.hasNext()) {
       MatrixSlice slice = sliceIterator.next();
       Iterator<Vector.Element> elementIterator = slice.vector().iterateNonZero();
@@ -150,4 +138,104 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
     assertTrue(rmse < 0.2);
   }
 
+  @Test
+  public void completeJobImplicitToyExample() throws Exception {
+
+    Matrix observations = new SparseRowMatrix(4, 4, new Vector[] {
+        new DenseVector(new double[] { 5.0, 5.0, 2.0, 0 }),
+        new DenseVector(new double[] { 2.0, 0,   3.0, 5.0 }),
+        new DenseVector(new double[] { 0,   5.0, 0,   3.0 }),
+        new DenseVector(new double[] { 3.0, 0,   0,   5.0 }) });
+
+    Matrix preferences = new SparseRowMatrix(4, 4, new Vector[] {
+        new DenseVector(new double[] { 1.0, 1.0, 1.0, 0 }),
+        new DenseVector(new double[] { 1.0, 0,   1.0, 1.0 }),
+        new DenseVector(new double[] { 0,   1.0, 0,   1.0 }),
+        new DenseVector(new double[] { 1.0, 0,   0,   1.0 }) });
+
+    writeLines(inputFile, preferencesAsText(observations));
+
+    ParallelALSFactorizationJob alsFactorization = new ParallelALSFactorizationJob();
+    alsFactorization.setConf(conf);
+
+    int numFeatures = 3;
+    int numIterations = 5;
+    double lambda = 0.065;
+    double alpha = 20;
+
+    alsFactorization.run(new String[] { "--input", inputFile.getAbsolutePath(), "--output", outputDir.getAbsolutePath(),
+        "--tempDir", tmpDir.getAbsolutePath(), "--lambda", String.valueOf(lambda),
+        "--implicitFeedback", String.valueOf(true), "--alpha", String.valueOf(alpha),
+        "--numFeatures", String.valueOf(numFeatures), "--numIterations", String.valueOf(numIterations) });
+
+    Matrix u = MathHelper.readMatrix(conf, new Path(outputDir.getAbsolutePath(), "U/part-m-00000"),
+        observations.numRows(), numFeatures);
+    Matrix m = MathHelper.readMatrix(conf, new Path(outputDir.getAbsolutePath(), "M/part-m-00000"),
+        observations.numCols(), numFeatures);
+
+    StringBuilder info = new StringBuilder();
+    info.append("\nObservations - users x items\n");
+    info.append(nice(observations));
+    info.append("\nA - users x items\n\n");
+    info.append(nice(preferences));
+    info.append("\nU - users x features\n\n");
+    info.append(nice(u));
+    info.append("\nM - items x features\n\n");
+    info.append(nice(m));
+    Matrix Ak = u.times(m.transpose());
+    info.append("\nAk - users x items\n\n");
+    info.append(nice(Ak));
+    info.append("\n");
+
+    log.info(info.toString());
+
+    RunningAverage avg = new FullRunningAverage();
+    Iterator<MatrixSlice> sliceIterator = preferences.iterateAll();
+    while (sliceIterator.hasNext()) {
+      MatrixSlice slice = sliceIterator.next();
+      Iterator<Vector.Element> elementIterator = slice.vector().iterator();
+      while (elementIterator.hasNext()) {
+        Vector.Element e = elementIterator.next();
+        if (!Double.isNaN(e.get())) {
+          double pref = e.get();
+          double estimate = u.viewRow(slice.index()).dot(m.viewRow(e.index()));
+          double confidence = 1 + alpha * observations.getQuick(slice.index(), e.index());
+          double err = confidence * (pref - estimate) * (pref - estimate);
+          avg.addDatum(err);
+          log.info("Comparing preference of user [{}] towards item [{}], was [{}] with confidence [{}] " +
+              "estimate is [{}]", new Object[] { slice.index(), e.index(), pref, confidence, estimate });
+        }
+      }
+    }
+    double rmse = Math.sqrt(avg.getAverage());
+    log.info("RMSE: {}", rmse);
+
+    assertTrue(rmse < 0.4);
+  }
+
+  protected String preferencesAsText(Matrix preferences) {
+    StringBuilder prefsAsText = new StringBuilder();
+    String separator = "";
+    Iterator<MatrixSlice> sliceIterator = preferences.iterateAll();
+    while (sliceIterator.hasNext()) {
+      MatrixSlice slice = sliceIterator.next();
+      Iterator<Vector.Element> elementIterator = slice.vector().iterateNonZero();
+      while (elementIterator.hasNext()) {
+        Vector.Element e = elementIterator.next();
+        if (!Double.isNaN(e.get())) {
+          prefsAsText.append(separator).append(slice.index()).append(',').append(e.index()).append(',').append(e.get());
+          separator = "\n";
+        }
+      }
+    }
+    return prefsAsText.toString();
+  }
+
+  protected StringBuilder nice(Matrix matrix) {
+    StringBuilder info = new StringBuilder();
+    for (int n = 0; n < matrix.numRows(); n++) {
+      info.append(ALSUtils.nice(matrix.viewRow(n))).append("\n");
+    }
+    return info;
+  }
 }

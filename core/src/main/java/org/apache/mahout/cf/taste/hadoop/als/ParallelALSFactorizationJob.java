@@ -20,6 +20,7 @@ package org.apache.mahout.cf.taste.hadoop.als;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -46,7 +47,8 @@ import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.als.AlternateLeastSquaresSolver;
+import org.apache.mahout.math.als.AlternatingLeastSquaresSolver;
+import org.apache.mahout.math.als.ImplicitFeedbackAlternatingLeastSquaresSolver;
 import org.apache.mahout.math.map.OpenIntObjectHashMap;
 
 import java.io.IOException;
@@ -56,13 +58,15 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * <p>MapReduce implementation of the factorization algorithm described in "Large-scale Parallel Collaborative Filtering for the Netﬂix Prize"
- * available at
+ * <p>MapReduce implementation of the two factorization algorithms described in
+ *
+ * <p>"Large-scale Parallel Collaborative Filtering for the Netﬂix Prize" available at
  * http://www.hpl.hp.com/personal/Robert_Schreiber/papers/2008%20AAIM%20Netflix/netflix_aaim08(submitted).pdf.</p>
  *
- * <p>Implements a parallel algorithm that uses "Alternating-Least-Squares with Weighted-λ-Regularization"
- * to factorize the preference-matrix </p>
+ * "<p>Collaborative Filtering for Implicit Feedback Datasets" available at
+ * http://research.yahoo.com/pub/2433</p>
  *
+ * </p>
  * <p>Command line arguments specific to this class are:</p>
  *
  * <ol>
@@ -77,11 +81,14 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
   static final String NUM_FEATURES = ParallelALSFactorizationJob.class.getName() + ".numFeatures";
   static final String LAMBDA = ParallelALSFactorizationJob.class.getName() + ".lambda";
+  static final String ALPHA = ParallelALSFactorizationJob.class.getName() + ".alpha";
   static final String FEATURE_MATRIX = ParallelALSFactorizationJob.class.getName() + ".featureMatrix";
 
+  private boolean implicitFeedback;
   private int numIterations;
   private int numFeatures;
   private double lambda;
+  private double alpha;
 
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new ParallelALSFactorizationJob(), args);
@@ -92,8 +99,10 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     addInputOption();
     addOutputOption();
-    addOption("lambda", "l", "regularization parameter", true);
-    addOption("numFeatures", "f", "dimension of the feature space", true);
+    addOption("lambda", null, "regularization parameter", true);
+    addOption("implicitFeedback", null, "data consists of implicit feedback?", String.valueOf(false));
+    addOption("alpha", null, "confidence parameter (only used on implicit feedback)", String.valueOf(40));
+    addOption("numFeatures", null, "dimension of the feature space", true);
     addOption("numIterations", null, "number of iterations", true);
 
     Map<String,String> parsedArgs = parseArguments(args);
@@ -104,6 +113,8 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     numFeatures = Integer.parseInt(parsedArgs.get("--numFeatures"));
     numIterations = Integer.parseInt(parsedArgs.get("--numIterations"));
     lambda = Double.parseDouble(parsedArgs.get("--lambda"));
+    alpha = Double.parseDouble(parsedArgs.get("--alpha"));
+    implicitFeedback = Boolean.parseBoolean(parsedArgs.get("--implicitFeedback"));
 
     /*
         * compute the factorization A = U M'
@@ -143,7 +154,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     for (int currentIteration = 0; currentIteration < numIterations; currentIteration++) {
       /* broadcast M, read A row-wise, recompute U row-wise */
       runSolver(pathToUserRatings(), pathToU(currentIteration), pathToM(currentIteration - 1));
-      /* broadcast U, read A' row-wise, recompute I row-wise */
+      /* broadcast U, read A' row-wise, recompute M row-wise */
       runSolver(pathToItemRatings(), pathToM(currentIteration), pathToU(currentIteration));
     }
 
@@ -191,28 +202,34 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
   private void runSolver(Path ratings, Path output, Path pathToUorI)
       throws ClassNotFoundException, IOException, InterruptedException {
-    Job solverForUorI = prepareJob(ratings, output, SequenceFileInputFormat.class, SolveMapper.class, IntWritable.class,
+
+    Class<? extends Mapper> solverMapper = implicitFeedback ?
+        SolveImplicitFeedbackMapper.class : SolveExplicitFeedbackMapper.class;
+
+    Job solverForUorI = prepareJob(ratings, output, SequenceFileInputFormat.class, solverMapper, IntWritable.class,
         VectorWritable.class, SequenceFileOutputFormat.class);
-    solverForUorI.getConfiguration().set(LAMBDA, String.valueOf(lambda));
-    solverForUorI.getConfiguration().setInt(NUM_FEATURES, numFeatures);
-    solverForUorI.getConfiguration().set(FEATURE_MATRIX, pathToUorI.toString());
+    Configuration solverConf = solverForUorI.getConfiguration();
+    solverConf.set(LAMBDA, String.valueOf(lambda));
+    solverConf.set(ALPHA, String.valueOf(alpha));
+    solverConf.setInt(NUM_FEATURES, numFeatures);
+    solverConf.set(FEATURE_MATRIX, pathToUorI.toString());
     solverForUorI.waitForCompletion(true);
   }
 
-  static class SolveMapper extends Mapper<IntWritable,VectorWritable,IntWritable,VectorWritable> {
+  static class SolveExplicitFeedbackMapper extends Mapper<IntWritable,VectorWritable,IntWritable,VectorWritable> {
 
     private double lambda;
     private int numFeatures;
 
     private OpenIntObjectHashMap<Vector> UorM;
 
-    private AlternateLeastSquaresSolver solver;
+    private AlternatingLeastSquaresSolver solver;
 
     @Override
     protected void setup(Mapper.Context ctx) throws IOException, InterruptedException {
       lambda = Double.parseDouble(ctx.getConfiguration().get(LAMBDA));
       numFeatures = ctx.getConfiguration().getInt(NUM_FEATURES, -1);
-      solver = new AlternateLeastSquaresSolver();
+      solver = new AlternatingLeastSquaresSolver();
 
       Path UOrIPath = new Path(ctx.getConfiguration().get(FEATURE_MATRIX));
 
@@ -232,6 +249,35 @@ public class ParallelALSFactorizationJob extends AbstractJob {
       }
 
       Vector uiOrmj = solver.solve(featureVectors, ratings, lambda, numFeatures);
+
+      ctx.write(userOrItemID, new VectorWritable(uiOrmj));
+    }
+  }
+
+  static class SolveImplicitFeedbackMapper extends Mapper<IntWritable,VectorWritable,IntWritable,VectorWritable> {
+
+    private ImplicitFeedbackAlternatingLeastSquaresSolver solver;
+
+    @Override
+    protected void setup(Mapper.Context ctx) throws IOException, InterruptedException {
+      double lambda = Double.parseDouble(ctx.getConfiguration().get(LAMBDA));
+      double alpha = Double.parseDouble(ctx.getConfiguration().get(ALPHA));
+      int numFeatures = ctx.getConfiguration().getInt(NUM_FEATURES, -1);
+
+      Path YPath = new Path(ctx.getConfiguration().get(FEATURE_MATRIX));
+      OpenIntObjectHashMap<Vector> Y = ALSUtils.readMatrixByRows(YPath, ctx.getConfiguration());
+
+      solver = new ImplicitFeedbackAlternatingLeastSquaresSolver(numFeatures, lambda, alpha, Y);
+
+      Preconditions.checkArgument(numFeatures > 0, "numFeatures was not set correctly!");
+    }
+
+    @Override
+    protected void map(IntWritable userOrItemID, VectorWritable ratingsWritable, Context ctx)
+        throws IOException, InterruptedException {
+      Vector ratings = new SequentialAccessSparseVector(ratingsWritable.get());
+
+      Vector uiOrmj = solver.solve(ratings);
 
       ctx.write(userOrItemID, new VectorWritable(uiOrmj));
     }

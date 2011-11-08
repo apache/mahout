@@ -29,15 +29,15 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-public class AlternateLeastSquaresSolverTest extends MahoutTestCase {
+public class AlternatingLeastSquaresSolverTest extends MahoutTestCase {
 
-  private AlternateLeastSquaresSolver solver;
+  private AlternatingLeastSquaresSolver solver;
 
   @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    solver = new AlternateLeastSquaresSolver();
+    solver = new AlternatingLeastSquaresSolver();
   }
 
   @Test

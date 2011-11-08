@@ -30,7 +30,7 @@ import java.util.Iterator;
  * See <a href="http://www.hpl.hp.com/personal/Robert_Schreiber/papers/2008%20AAIM%20Netflix/netflix_aaim08(submitted).pdf">
  * this paper.</a>
  */
-public class AlternateLeastSquaresSolver {
+public class AlternatingLeastSquaresSolver {
 
   public Vector solve(Iterable<Vector> featureVectors, Vector ratingVector, double lambda, int numFeatures) {
 
