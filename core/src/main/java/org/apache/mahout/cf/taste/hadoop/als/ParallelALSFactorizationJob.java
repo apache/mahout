@@ -50,6 +50,8 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.als.AlternatingLeastSquaresSolver;
 import org.apache.mahout.math.als.ImplicitFeedbackAlternatingLeastSquaresSolver;
 import org.apache.mahout.math.map.OpenIntObjectHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -78,6 +80,8 @@ import java.util.Random;
  * </ol>
  */
 public class ParallelALSFactorizationJob extends AbstractJob {
+
+  private static final Logger log = LoggerFactory.getLogger(ParallelALSFactorizationJob.class);
 
   static final String NUM_FEATURES = ParallelALSFactorizationJob.class.getName() + ".numFeatures";
   static final String LAMBDA = ParallelALSFactorizationJob.class.getName() + ".lambda";
@@ -153,8 +157,10 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     for (int currentIteration = 0; currentIteration < numIterations; currentIteration++) {
       /* broadcast M, read A row-wise, recompute U row-wise */
+      log.info("Recomputing U (iteration {}/{})", currentIteration, numIterations);
       runSolver(pathToUserRatings(), pathToU(currentIteration), pathToM(currentIteration - 1));
       /* broadcast U, read A' row-wise, recompute M row-wise */
+      log.info("Recomputing M (iteration {}/{})", currentIteration, numIterations);
       runSolver(pathToItemRatings(), pathToM(currentIteration), pathToU(currentIteration));
     }
 

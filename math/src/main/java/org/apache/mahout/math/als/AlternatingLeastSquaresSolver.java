@@ -70,7 +70,7 @@ public class AlternatingLeastSquaresSolver {
     int n = 0;
     for (Vector featureVector : featureVectors) {
       for (int m = 0; m < numFeatures; m++) {
-        MiIi.setQuick(m, n, featureVector.get(m));
+        MiIi.setQuick(m, n, featureVector.getQuick(m));
       }
       n++;
     }
