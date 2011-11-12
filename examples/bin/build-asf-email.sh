@@ -109,11 +109,16 @@ elif [ "x$alg" == "xclassification" ]; then
   echo "Please select a number to choose the corresponding algorithm to run"
   echo "1. ${algorithm[0]}"
   echo "2. ${algorithm[1]}"
-#  echo "3. ${algorithm[2]}"
+  echo "3. ${algorithm[2]}"
   read -p "Enter your choice : " choice
 
   echo "ok. You chose $choice and we'll use ${algorithm[$choice-1]}"
   classAlg=${algorithm[$choice-1]}
+
+  if [ "x$classAlg" == "xsgd"  ]; then
+    echo "How many labels/projects are there in the data set:"
+    read -p "Enter your choice : " numLabels
+  fi
   #Convert mail to be formatted as:
   # label\ttext
   # One per line
@@ -167,6 +172,7 @@ elif [ "x$alg" == "xclassification" ]; then
     TRAIN="$SPLIT/train"
     TEST="$SPLIT/test"
     TEST_OUT="$CLASS/test-results"
+    MODELS="$CLASS/models"
     LABEL="$SPLIT/labels"
     if [ "x$OVER" == "xover" ] || [ ! -e "$MAIL_OUT/chunk-0" ]; then
       echo "Converting Mail files to Sequence Files"
@@ -182,12 +188,14 @@ elif [ "x$alg" == "xclassification" ]; then
       echo "Creating training and test inputs from $SEQ2SPLABEL"
       $MAHOUT split --input $SEQ2SPLABEL --trainingOutput $TRAIN --testOutput $TEST --randomSelectionPct 20 --overwrite --sequenceFiles
     fi
-    MODEL="$CLASS/model"
+    MODEL="$MODELS/asf.model"
+
 
     echo "Running SGD Training"
-    #$MAHOUT trainnb -i $TRAIN -o $MODEL --extractLabels --labelIndex $LABEL --overwrite
+    $MAHOUT org.apache.mahout.classifier.sgd.TrainASFEmail $TRAIN $MODELS $numLabels 5000
     echo "Running Test"
-#$MAHOUT testnb -i $TEST -o $TEST_OUT -m $MODEL --labelIndex $LABEL --overwrite
+    $MODEL="$MODELS/asf.model"
+    $MAHOUT org.apache.mahout.classifier.sgd.TestASFEmail --input $TEST --model $MODEL
 
   fi
 fi
