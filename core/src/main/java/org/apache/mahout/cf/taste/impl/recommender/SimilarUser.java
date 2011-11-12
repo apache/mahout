@@ -61,7 +61,20 @@ public final class SimilarUser implements Comparable<SimilarUser> {
   @Override
   public int compareTo(SimilarUser other) {
     double otherSimilarity = other.getSimilarity();
-    return similarity > otherSimilarity ? -1 : similarity < otherSimilarity ? 1 : 0;
+    if (similarity > otherSimilarity) {
+      return -1;
+    }
+    if (similarity < otherSimilarity) {
+      return 1;
+    }
+    long otherUserID = other.getUserID();
+    if (userID < otherUserID) {
+      return -1;
+    }
+    if (userID > otherUserID) {
+      return 1;
+    }
+    return 0;
   }
   
 }

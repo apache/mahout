@@ -121,7 +121,7 @@ public final class GenericUserBasedRecommenderTest extends TasteTestCase {
     assertNotNull(similar);
     assertEquals(2, similar.length);
     assertEquals(2, similar[0]);
-    assertEquals(4, similar[1]);
+    assertEquals(3, similar[1]);
   }
 
   @Test

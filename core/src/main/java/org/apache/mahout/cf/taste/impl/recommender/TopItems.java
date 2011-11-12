@@ -109,7 +109,7 @@ public final class TopItems {
       }
       double rescoredSimilarity = rescorer == null ? similarity : rescorer.rescore(userID, similarity);
       if (!Double.isNaN(rescoredSimilarity) && (!full || rescoredSimilarity > lowestTopValue)) {
-        topUsers.add(new SimilarUser(userID, similarity));
+        topUsers.add(new SimilarUser(userID, rescoredSimilarity));
         if (full) {
           topUsers.poll();
         } else if (topUsers.size() > howMany) {
