@@ -1,4 +1,3 @@
-package org.apache.mahout.cf.taste.impl.recommender;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,8 +15,8 @@ package org.apache.mahout.cf.taste.impl.recommender;
  * limitations under the License.
  */
 
+package org.apache.mahout.cf.taste.impl.recommender;
 
-import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveArrayIterator;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
@@ -32,10 +31,9 @@ import java.util.List;
 import java.util.Random;
 
 /**
- *
- *
- **/
-public class TopItemsTest extends TasteTestCase {
+ * Tests for {@link TopItems}.
+ */
+public final class TopItemsTest extends TasteTestCase {
 
   @Test
   public void testTopItems() throws Exception {
@@ -46,7 +44,7 @@ public class TopItemsTest extends TasteTestCase {
     LongPrimitiveIterator possibleItemIds = new LongPrimitiveArrayIterator(ids);
     TopItems.Estimator<Long> estimator = new TopItems.Estimator<Long>() {
       @Override
-      public double estimate(Long thing) throws TasteException {
+      public double estimate(Long thing) {
         return thing;
       }
     };
@@ -68,13 +66,13 @@ public class TopItemsTest extends TasteTestCase {
     final Random random = RandomUtils.getRandom();
     TopItems.Estimator<Long> estimator = new TopItems.Estimator<Long>() {
       @Override
-      public double estimate(Long thing) throws TasteException {
+      public double estimate(Long thing) {
         return random.nextDouble();
       }
     };
     List<RecommendedItem> topItems = TopItems.getTopItems(10, possibleItemIds, null, estimator);
-    double last = 2;
     assertEquals(10, topItems.size());
+    double last = 2.0;
     for (RecommendedItem topItem : topItems) {
       assertTrue(topItem.getValue() <= last);
       last = topItem.getItemID();
@@ -90,14 +88,14 @@ public class TopItemsTest extends TasteTestCase {
     LongPrimitiveIterator possibleItemIds = new LongPrimitiveArrayIterator(ids);
     TopItems.Estimator<Long> estimator = new TopItems.Estimator<Long>() {
       @Override
-      public double estimate(Long thing) throws TasteException {
+      public double estimate(Long thing) {
         return thing;
       }
     };
     long[] topItems = TopItems.getTopUsers(10, possibleItemIds, null, estimator);
     int gold = 99;
-    for (int i = 0; i < topItems.length; i++) {
-      assertEquals(gold--, topItems[i]);
+    for (long topItem : topItems) {
+      assertEquals(gold--, topItem);
     }
   }
 
@@ -110,8 +108,8 @@ public class TopItemsTest extends TasteTestCase {
 
     List<GenericItemSimilarity.ItemItemSimilarity> res = TopItems.getTopItemItemSimilarities(10, sims.iterator());
     int gold = 99;
-    for (int i = 0; i < res.size(); i++) {
-      assertEquals(gold--, res.get(i).getItemID2());//the second id should be equal to 99 to start
+    for (GenericItemSimilarity.ItemItemSimilarity re : res) {
+      assertEquals(gold--, re.getItemID2());//the second id should be equal to 99 to start
     }
   }
 
@@ -124,11 +122,10 @@ public class TopItemsTest extends TasteTestCase {
 
     List<GenericItemSimilarity.ItemItemSimilarity> res = TopItems.getTopItemItemSimilarities(10, sims.iterator());
     int gold = 0;
-    for (int i = 0; i < res.size(); i++) {
-      assertEquals(gold++, res.get(i).getItemID1());//the second id should be equal to 99 to start
+    for (GenericItemSimilarity.ItemItemSimilarity re : res) {
+      assertEquals(gold++, re.getItemID1());//the second id should be equal to 99 to start
     }
   }
-
 
   @Test
   public void testTopUserUser() throws Exception {
@@ -139,8 +136,8 @@ public class TopItemsTest extends TasteTestCase {
 
     List<GenericUserSimilarity.UserUserSimilarity> res = TopItems.getTopUserUserSimilarities(10, sims.iterator());
     int gold = 99;
-    for (int i = 0; i < res.size(); i++) {
-      assertEquals(gold--, res.get(i).getUserID2());//the second id should be equal to 99 to start
+    for (GenericUserSimilarity.UserUserSimilarity re : res) {
+      assertEquals(gold--, re.getUserID2());//the second id should be equal to 99 to start
     }
   }
 
@@ -153,8 +150,9 @@ public class TopItemsTest extends TasteTestCase {
 
     List<GenericUserSimilarity.UserUserSimilarity> res = TopItems.getTopUserUserSimilarities(10, sims.iterator());
     int gold = 0;
-    for (int i = 0; i < res.size(); i++) {
-      assertEquals(gold++, res.get(i).getUserID1());//the first id should be equal to 0 to start
+    for (GenericUserSimilarity.UserUserSimilarity re : res) {
+      assertEquals(gold++, re.getUserID1());//the first id should be equal to 0 to start
     }
   }
+
 }
