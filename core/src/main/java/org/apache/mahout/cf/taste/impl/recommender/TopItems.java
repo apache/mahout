@@ -174,7 +174,7 @@ public final class TopItems {
     return result;
   }
   
-  public static List<GenericUserSimilarity.UserUserSimilarity>getTopUserUserSimilarities(
+  public static List<GenericUserSimilarity.UserUserSimilarity> getTopUserUserSimilarities(
     int howMany, Iterator<GenericUserSimilarity.UserUserSimilarity> allSimilarities) {
     
     Queue<GenericUserSimilarity.UserUserSimilarity> topSimilarities
