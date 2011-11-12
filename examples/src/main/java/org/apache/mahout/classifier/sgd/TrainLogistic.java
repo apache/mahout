@@ -110,6 +110,7 @@ public final class TrainLogistic {
             lr.train(targetValue, input);
 
             line = in.readLine();
+            lineCount++;
           }
         } finally {
           Closeables.closeQuietly(in);

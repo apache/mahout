@@ -50,11 +50,11 @@ public final class RunAdaptiveLogistic {
   private RunAdaptiveLogistic() {
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     mainToOutput(args, new PrintWriter(System.out, true));
   }
 
-  static void mainToOutput(String[] args, PrintWriter output) throws IOException {
+  static void mainToOutput(String[] args, PrintWriter output) throws Exception {
     if (!parseArgs(args)) {
       return;
     }
@@ -85,9 +85,15 @@ public final class RunAdaptiveLogistic {
     line = in.readLine();
     Map<String, Double> results = new HashMap<String, Double>();
     int k = 0;
+    int lineCount = 2;
     while (line != null) {
       Vector v = new SequentialAccessSparseVector(lmp.getNumFeatures());
-      csv.processLine(line, v, false);
+      try {
+        csv.processLine(line, v, false);
+      } catch (Exception e) {
+        System.out.println("Exception at line " + lineCount);
+        throw e;
+      }
       Vector scores = learner.classifyFull(v);
       results.clear();
       if (maxScoreOnly) {
@@ -108,6 +114,7 @@ public final class RunAdaptiveLogistic {
         output.printf(Locale.ENGLISH, "%d records processed \n", k);
       }
       line = in.readLine();
+      lineCount++;
     }
     out.flush();
     out.close();
