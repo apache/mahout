@@ -59,11 +59,11 @@ public final class TrainAdaptiveLogistic {
   private TrainAdaptiveLogistic() {
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     mainToOutput(args, new PrintWriter(System.out, true));
   }
 
-  static void mainToOutput(String[] args, PrintWriter output) throws IOException {
+  static void mainToOutput(String[] args, PrintWriter output) throws Exception {
     if (parseArgs(args)) {
 
       CsvRecordFactory csv = lmp.getCsvRecordFactory();
@@ -79,11 +79,17 @@ public final class TrainAdaptiveLogistic {
         csv.firstLine(in.readLine());
 
         String line = in.readLine();
-
+        int lineCount = 2;
         while (line != null) {
           // for each new line, get target and predictors
           Vector input = new RandomAccessSparseVector(lmp.getNumFeatures());
-          int targetValue = csv.processLine(line, input);
+          int targetValue = 0;
+          try {
+            targetValue = csv.processLine(line, input);
+          } catch (Exception e) {
+            System.out.println("Exception at line " + lineCount);
+            throw e;
+          }
           // update model
           model.train(targetValue, input);
           k++;
@@ -106,6 +112,7 @@ public final class TrainAdaptiveLogistic {
             }
           }
           line = in.readLine();
+          lineCount++;
         }
         in.close();
       }
@@ -116,7 +123,7 @@ public final class TrainAdaptiveLogistic {
       }
       if (learner == null) {
         output.printf(Locale.ENGLISH,
-                      "%s\n", "AdaptiveLogisticRegression has not successfully trained any model.");
+                      "%s\n", "AdaptiveLogisticRegression has failed to train a model.");
         return;
       }
 

@@ -60,11 +60,11 @@ public final class TrainLogistic {
   private TrainLogistic() {
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     mainToOutput(args, new PrintWriter(System.out, true));
   }
 
-  static void mainToOutput(String[] args, PrintWriter output) throws IOException {
+  static void mainToOutput(String[] args, PrintWriter output) throws Exception {
     if (parseArgs(args)) {
       double logPEstimate = 0;
       int samples = 0;
@@ -78,10 +78,17 @@ public final class TrainLogistic {
           csv.firstLine(in.readLine());
 
           String line = in.readLine();
+          int lineCount = 0;
           while (line != null) {
             // for each new line, get target and predictors
             Vector input = new RandomAccessSparseVector(lmp.getNumFeatures());
-            int targetValue = csv.processLine(line, input);
+            int targetValue = 0;
+            try {
+              targetValue = csv.processLine(line, input);
+            } catch (Exception e) {
+              System.out.println("Exception at line " + lineCount);
+              throw e;
+            }
 
             // check performance while this is still news
             double logP = lr.logLikelihood(targetValue, input);
@@ -115,7 +122,7 @@ public final class TrainLogistic {
       } finally {
         Closeables.closeQuietly(modelOutput);
       }
-      
+
       output.printf(Locale.ENGLISH, "%d\n", lmp.getNumFeatures());
       output.printf(Locale.ENGLISH, "%s ~ ", lmp.getTargetVariable());
       String sep = "";
