@@ -37,7 +37,7 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
   private static final Pattern VEC_PATTERN = Pattern.compile("\\{|\\:|\\,|\\}");
 
   public GraphMLClusterWriter(Writer writer, Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints)
-    throws IOException {
+          throws IOException {
     super(writer, clusterIdToPoints);
     writer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
     writer.append("<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"\n" +
@@ -70,8 +70,8 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
       for (WeightedVectorWritable point : points) {
         Vector theVec = point.getVector();
         String vecStr;
-        if (theVec instanceof NamedVector){
-          vecStr = ((NamedVector)theVec).getName();
+        if (theVec instanceof NamedVector) {
+          vecStr = ((NamedVector) theVec).getName();
           line.append(createNode(vecStr));
         } else {
           vecStr = theVec.asFormatString();
@@ -95,7 +95,7 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
 
   @Override
   public void close() throws IOException {
-    getWriter().append("</graph>");
+    getWriter().append("</graph>").append("</graphml>");
     super.close();
   }
 }
