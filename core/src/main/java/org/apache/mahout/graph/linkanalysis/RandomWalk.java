@@ -179,8 +179,9 @@ abstract class RandomWalk extends AbstractJob {
     @Override
     protected void setup(Context ctx) throws IOException, InterruptedException {
       Path pageRankPath = new Path(ctx.getConfiguration().get(RANK_PATH_PARAM));
-      DataInputStream in = FileSystem.get(pageRankPath.toUri(), ctx.getConfiguration()).open(pageRankPath);
+      DataInputStream in = null;
       try {
+        in = FileSystem.get(pageRankPath.toUri(), ctx.getConfiguration()).open(pageRankPath);
         ranks = VectorWritable.readVector(in);
       } finally {
         Closeables.closeQuietly(in);
