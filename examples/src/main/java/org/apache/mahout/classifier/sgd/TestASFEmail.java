@@ -46,7 +46,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
- * Run the 20 news groups test data through SGD, as trained by {@link TrainNewsGroups}.
+ * Run the ASF email, as trained by TrainASFEmail
  */
 public final class TestASFEmail {
 
@@ -87,12 +87,11 @@ public final class TestASFEmail {
     ResultAnalyzer ra = new ResultAnalyzer(asfDictionary.values(), "DEFAULT");
     iter = new SequenceFileDirIterator<Text, VectorWritable>(new Path(base.toString()), PathType.LIST, PathFilters.partFilter(),
             null, true, conf);
-    while (iter.hasNext()){
+    while (iter.hasNext()) {
       Pair<Text, VectorWritable> next = iter.next();
       String ng = next.getFirst().toString();
 
       int actual = asfDictionary.intern(ng);
-      NewsgroupHelper helper = new NewsgroupHelper();
       Vector result = classifier.classifyFull(next.getSecond().get());
       int cat = result.maxValueIndex();
       double score = result.maxValue();
