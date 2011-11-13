@@ -159,7 +159,7 @@ public final class RecommenderJob extends AbstractJob {
               "--booleanData", String.valueOf(booleanData),
               "--tempDir", getTempPath().toString()});
 
-      numberOfUsers = TasteHadoopUtils.readInt(new Path(prepPath, PreparePreferenceMatrixJob.NUM_USERS), getConf());
+      numberOfUsers = HadoopUtil.readInt(new Path(prepPath, PreparePreferenceMatrixJob.NUM_USERS), getConf());
     }
 
 

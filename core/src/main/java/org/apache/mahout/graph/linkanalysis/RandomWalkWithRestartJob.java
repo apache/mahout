@@ -17,33 +17,26 @@
 
 package org.apache.mahout.graph.linkanalysis;
 
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
-import org.apache.mahout.graph.model.Vertex;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import java.util.Map;
 
 /**
- * <p>Distributed computation of multiple random walks in a directed graph, one for each source vertex given</p>
+ * <p>Distributed computation of the proximities of vertices to a source vertex in a directed graph</p>
  *
- * <p>The input files need to be a {@link org.apache.hadoop.io.SequenceFile} with {@link org.apache.mahout.graph.model.Edge}s as keys and
- * any Writable as values and another {@link org.apache.hadoop.io.SequenceFile} with {@link IntWritable}s as keys and {@link Vertex} as
- * values, as produced by {@link org.apache.mahout.graph.preprocessing.GraphUtils )}</p>
- *
- * <p>This job outputs text files with a source vertex id, a reached vertex id and its score</p>
+ * <p>This job outputs text files with a vertex id and its pagerank per line.</p>
   *
  * <p>Command line arguments specific to this class are:</p>
  *
  * <ol>
- * <li>-Dmapred.output.dir=(path): output path</li>
- * <li>--vertexIndex=(path): Directory containing vertex index as created by GraphUtils.indexVertices()</li>
- * <li>--edges=(path): Directory containing edges of the graph</li>
- * <li>--sourceVertexIndex (Integer): index of source vertex</li>
- * <li>--numVertices=(Integer): number of vertices in the graph</li>
- * <li>--numIterations=(Integer): number of numIterations, default: 5</li>
- * <li>--stayingProbability=(Double): probability not to teleport to a random vertex, default: 0.8</li>
+ * <li>--output=(path): output path</li>
+ * <li>--vertices=(path): file containing the list of vertices of the graph (one per line)</li>
+ * <li>--sourceVertexIndex=(int): index of the source vertex for the random walk (line number in vertices file)</li>
+ * <li>--edges=(path): directory containing edges of the graph (pair of vertex ids per line in textformat)</li>
+ * <li>--numIterations=(Integer): number of numIterations, default: 10</li>
+ * <li>--stayingProbability=(Double): probability not to teleport to a random vertex, default: 0.85</li>
  * </ol>
  *
  * <p>General command line options are documented in {@link AbstractJob}.</p>
@@ -67,7 +60,7 @@ public class RandomWalkWithRestartJob extends RandomWalk {
 
   @Override
   protected void addSpecificOptions() {
-    addOption("sourceVertexIndex", "svi", "index of source vertex", true);
+    addOption("sourceVertexIndex", null, "index of source vertex", true);
   }
 
   @Override

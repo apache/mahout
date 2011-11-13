@@ -22,26 +22,29 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.iterator.FileLineIterable;
-import org.apache.mahout.graph.GraphTestCase;
-import org.apache.mahout.graph.preprocessing.GraphUtils;
-import org.apache.mahout.graph.model.Edge;
+import org.apache.mahout.graph.AdjacencyMatrixJob;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.hadoop.MathHelper;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Map;
 
-public class RandomWalkWithRestartJobTest extends GraphTestCase {
+public class RandomWalkWithRestartJobTest extends MahoutTestCase {
+
+  private static final Logger log = LoggerFactory.getLogger(RandomWalkWithRestartJobTest.class);
 
   @Test
   public void toyIntegrationTest() throws Exception {
 
     File verticesFile = getTestTempFile("vertices.txt");
-    File edgesFile = getTestTempFile("edges.seq");
-    File indexedVerticesFile = getTestTempFile("indexedVertices.seq");
+    File edgesFile = getTestTempFile("edges.txt");
     File outputDir = getTestTempDir("output");
     outputDir.delete();
     File tempDir = getTestTempDir();
@@ -50,38 +53,62 @@ public class RandomWalkWithRestartJobTest extends GraphTestCase {
 
     writeLines(verticesFile, "12", "34", "56", "78");
 
-    writeComponents(edgesFile, conf, Edge.class,
-        new Edge(12, 34),
-        new Edge(12, 56),
-        new Edge(34, 34),
-        new Edge(34, 78),
-        new Edge(56, 12),
-        new Edge(56, 34),
-        new Edge(56, 56),
-        new Edge(56, 78),
-        new Edge(78, 34));
-
-    int numVertices = GraphUtils.indexVertices(conf, new Path(verticesFile.getAbsolutePath()),
-        new Path(indexedVerticesFile.getAbsolutePath()));
+    writeLines(edgesFile,
+        "12,34",
+        "12,56",
+        "34,34",
+        "34,78",
+        "56,12",
+        "56,34",
+        "56,56",
+        "56,78",
+        "78,34");
 
     RandomWalk randomWalkWithRestart = new RandomWalkWithRestartJob();
     randomWalkWithRestart.setConf(conf);
-    randomWalkWithRestart.run(new String[]{"--vertexIndex", indexedVerticesFile.getAbsolutePath(),
+    randomWalkWithRestart.run(new String[]{"--vertices", verticesFile.getAbsolutePath(),
         "--edges", edgesFile.getAbsolutePath(), "--sourceVertexIndex", String.valueOf(2),
-        "--output", outputDir.getAbsolutePath(), "--numVertices", String.valueOf(numVertices),
-        "--numIterations", String.valueOf(2), "--stayingProbability", String.valueOf(0.75),
-        "--tempDir", tempDir.getAbsolutePath()});
+        "--output", outputDir.getAbsolutePath(), "--numIterations", String.valueOf(2),
+        "--stayingProbability", String.valueOf(0.75), "--tempDir", tempDir.getAbsolutePath()});
 
-    Matrix expectedAdjacenyMatrix = new DenseMatrix(new double[][] {
+    Matrix expectedAdjacencyMatrix = new DenseMatrix(new double[][] {
+        { 0, 1, 1, 0 },
+        { 0, 1, 0, 1 },
+        { 1, 1, 1, 1 },
+        { 0, 1, 0, 0 } });
+
+    int numVertices = HadoopUtil.readInt(new Path(tempDir.getAbsolutePath(), AdjacencyMatrixJob.NUM_VERTICES), conf);
+    assertEquals(4, numVertices);
+    Matrix actualAdjacencyMatrix = MathHelper.readMatrix(conf, new Path(tempDir.getAbsolutePath(),
+        AdjacencyMatrixJob.ADJACENCY_MATRIX + "/part-r-00000"), numVertices, numVertices);
+
+    StringBuilder info = new StringBuilder();
+    info.append("\nexpected adjacency matrix\n\n");
+    info.append(MathHelper.nice(expectedAdjacencyMatrix));
+    info.append("\nactual adjacency matrix \n\n");
+    info.append(MathHelper.nice(actualAdjacencyMatrix));
+    info.append("\n");
+    log.info(info.toString());
+
+    Matrix expectedTransitionMatrix = new DenseMatrix(new double[][] {
         { 0,     0,     0.1875, 0    },
         { 0.375, 0.375, 0.1875, 0.75 },
         { 0.375, 0,     0.1875, 0    },
         { 0,     0.375, 0.1875, 0    } });
 
-    Matrix actualAdjacencyMatrix = MathHelper.readMatrix(conf, new Path(tempDir.getAbsolutePath(),
-        "adjacencyMatrix/part-r-00000"), numVertices, numVertices);
+    Matrix actualTransitionMatrix = MathHelper.readMatrix(conf, new Path(tempDir.getAbsolutePath(),
+        "transitionMatrix/part-r-00000"), numVertices, numVertices);
 
-    assertMatrixEquals(expectedAdjacenyMatrix, actualAdjacencyMatrix);
+    info = new StringBuilder();
+    info.append("\nexpected transition matrix\n\n");
+    info.append(MathHelper.nice(expectedTransitionMatrix));
+    info.append("\nactual transition matrix\n\n");
+    info.append(MathHelper.nice(actualTransitionMatrix));
+    info.append("\n");
+    log.info(info.toString());
+
+    MathHelper.assertMatrixEquals(expectedAdjacencyMatrix, actualAdjacencyMatrix);
+    MathHelper.assertMatrixEquals(expectedTransitionMatrix, actualTransitionMatrix);
 
     Map<Long,Double> steadyStateProbabilities = Maps.newHashMap();
     for (CharSequence line : new FileLineIterable(new File(outputDir, "part-m-00000"))) {

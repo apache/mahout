@@ -24,12 +24,10 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.PathFilter;
+import org.apache.hadoop.fs.*;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
@@ -253,5 +251,25 @@ public final class HadoopUtil {
   public static void setSerializations(Configuration conf) {
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
         + "org.apache.hadoop.io.serializer.WritableSerialization");
+  }
+
+  public static void writeInt(int value, Path path, Configuration conf) throws IOException {
+    FileSystem fs = FileSystem.get(path.toUri(), conf);
+    FSDataOutputStream out = fs.create(path);
+    try {
+      out.writeInt(value);
+    } finally {
+      Closeables.closeQuietly(out);
+    }
+  }
+
+  public static int readInt(Path path, Configuration conf) throws IOException {
+    FileSystem fs = FileSystem.get(path.toUri(), conf);
+    FSDataInputStream in = fs.open(path);
+    try {
+      return in.readInt();
+    } finally {
+      Closeables.closeQuietly(in);
+    }
   }
 }

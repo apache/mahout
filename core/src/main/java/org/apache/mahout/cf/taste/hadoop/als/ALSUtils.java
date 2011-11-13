@@ -25,6 +25,7 @@ import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenIntObjectHashMap;
@@ -59,30 +60,5 @@ public class ALSUtils {
       matrix.put(rowIndex, row);
     }
     return matrix;
-  }
-
-  public static String nice(Vector v) {
-    if (!v.isSequentialAccess()) {
-      v = new DenseVector(v);
-    }
-
-    DecimalFormat df = new DecimalFormat("0.00", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
-
-    StringBuilder buffer = new StringBuilder("[");
-    String separator = "";
-    for (Vector.Element e : v) {
-      buffer.append(separator);
-      if (!Double.isNaN(e.get())) {
-        if (e.get() >= 0) {
-          buffer.append(" ");
-        }
-        buffer.append(df.format(e.get()));
-      } else {
-        buffer.append("  -  ");
-      }
-      separator = "\t";
-    }
-    buffer.append(" ]");
-    return buffer.toString();
   }
 }

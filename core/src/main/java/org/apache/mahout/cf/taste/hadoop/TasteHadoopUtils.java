@@ -77,24 +77,6 @@ public final class TasteHadoopUtils {
     return indexItemIDMap;
   }
 
-  public static void writeInt(int value, Path path, Configuration conf) throws IOException {
-    FileSystem fs = FileSystem.get(path.toUri(), conf);
-    FSDataOutputStream out = fs.create(path);
-    try {
-      out.writeInt(value);
-    } finally {
-      Closeables.closeQuietly(out);
-    }
-  }
 
-  public static int readInt(Path path, Configuration conf) throws IOException {
-    FileSystem fs = FileSystem.get(path.toUri(), conf);
-    FSDataInputStream in = fs.open(path);
-    try {
-      return in.readInt();
-    } finally {
-      Closeables.closeQuietly(in);
-    }
-  }
 
 }

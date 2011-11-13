@@ -18,7 +18,10 @@
 package org.apache.mahout.math.hadoop;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Iterator;
+import java.util.Locale;
 
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
@@ -29,14 +32,12 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
-import org.apache.mahout.math.DenseMatrix;
-import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.*;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix.MatrixEntryWritable;
 import org.easymock.IArgumentMatcher;
 import org.easymock.EasyMock;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * a collection of small helper methods useful for unit-testing mathematical operations
@@ -169,17 +170,22 @@ public final class MathHelper {
    * read a {@link Matrix} from a SequenceFile<IntWritable,VectorWritable>
    */
   public static Matrix readMatrix(Configuration conf, Path path, int rows, int columns) {
+    boolean readOneRow = false;
     Matrix matrix = new DenseMatrix(rows, columns);
     for (Pair<IntWritable,VectorWritable> record :
         new SequenceFileIterable<IntWritable,VectorWritable>(path, true, conf)) {
       IntWritable key = record.getFirst();
       VectorWritable value = record.getSecond();
+      readOneRow = true;
       int row = key.get();
       Iterator<Vector.Element> elementsIterator = value.get().iterateNonZero();
       while (elementsIterator.hasNext()) {
         Vector.Element element = elementsIterator.next();
         matrix.set(row, element.index(), element.get());
       }
+    }
+    if (!readOneRow) {
+      throw new IllegalStateException("Not a single row read!");
     }
     return matrix;
   }
@@ -202,5 +208,49 @@ public final class MathHelper {
     } finally {
       Closeables.closeQuietly(writer);
     }
+  }
+
+  public static void assertMatrixEquals(Matrix expected, Matrix actual) {
+    assertEquals(expected.numRows(), actual.numRows());
+    assertEquals(actual.numCols(), actual.numCols());
+    for (int row = 0; row < expected.numRows(); row++) {
+      for (int col = 0; col < expected.numCols(); col ++) {
+        assertEquals("Non-matching values in [" + row + ',' + col + ']',
+            expected.get(row, col), actual.get(row, col), MahoutTestCase.EPSILON);
+      }
+    }
+  }
+
+  public static String nice(Vector v) {
+    if (!v.isSequentialAccess()) {
+      v = new DenseVector(v);
+    }
+
+    DecimalFormat df = new DecimalFormat("0.00", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+
+    StringBuilder buffer = new StringBuilder("[");
+    String separator = "";
+    for (Vector.Element e : v) {
+      buffer.append(separator);
+      if (!Double.isNaN(e.get())) {
+        if (e.get() >= 0) {
+          buffer.append(" ");
+        }
+        buffer.append(df.format(e.get()));
+      } else {
+        buffer.append("  -  ");
+      }
+      separator = "\t";
+    }
+    buffer.append(" ]");
+    return buffer.toString();
+  }
+
+  public static String nice(Matrix matrix) {
+    StringBuilder info = new StringBuilder();
+    for (int n = 0; n < matrix.numRows(); n++) {
+      info.append(nice(matrix.viewRow(n))).append("\n");
+    }
+    return info.toString();
   }
 }

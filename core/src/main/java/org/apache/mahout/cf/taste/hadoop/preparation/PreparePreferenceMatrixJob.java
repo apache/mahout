@@ -31,6 +31,7 @@ import org.apache.mahout.cf.taste.hadoop.item.ItemIDIndexReducer;
 import org.apache.mahout.cf.taste.hadoop.item.RecommenderJob;
 import org.apache.mahout.cf.taste.hadoop.item.ToUserVectorsReducer;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.VectorWritable;
@@ -86,7 +87,7 @@ public class PreparePreferenceMatrixJob extends AbstractJob {
     toUserVectors.waitForCompletion(true);
     //we need the number of users later
     int numberOfUsers = (int) toUserVectors.getCounters().findCounter(ToUserVectorsReducer.Counters.USERS).getValue();
-    TasteHadoopUtils.writeInt(numberOfUsers, getOutputPath(NUM_USERS), getConf());
+    HadoopUtil.writeInt(numberOfUsers, getOutputPath(NUM_USERS), getConf());
     //build the rating matrix
     Job toItemVectors = prepareJob(getOutputPath(USER_VECTORS), getOutputPath(RATING_MATRIX),
             ToItemVectorsMapper.class, IntWritable.class, VectorWritable.class, ToItemVectorsReducer.class,

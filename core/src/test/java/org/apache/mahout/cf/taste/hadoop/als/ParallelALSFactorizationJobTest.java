@@ -103,14 +103,14 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
 
     StringBuilder info = new StringBuilder();
     info.append("\nA - users x items\n\n");
-    info.append(nice(preferences));
+    info.append(MathHelper.nice(preferences));
     info.append("\nU - users x features\n\n");
-    info.append(nice(u));
+    info.append(MathHelper.nice(u));
     info.append("\nM - items x features\n\n");
-    info.append(nice(m));
+    info.append(MathHelper.nice(m));
     Matrix Ak = u.times(m.transpose());
     info.append("\nAk - users x items\n\n");
-    info.append(nice(Ak));
+    info.append(MathHelper.nice(Ak));
     info.append("\n");
 
     log.info(info.toString());
@@ -175,16 +175,16 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
 
     StringBuilder info = new StringBuilder();
     info.append("\nObservations - users x items\n");
-    info.append(nice(observations));
+    info.append(MathHelper.nice(observations));
     info.append("\nA - users x items\n\n");
-    info.append(nice(preferences));
+    info.append(MathHelper.nice(preferences));
     info.append("\nU - users x features\n\n");
-    info.append(nice(u));
+    info.append(MathHelper.nice(u));
     info.append("\nM - items x features\n\n");
-    info.append(nice(m));
+    info.append(MathHelper.nice(m));
     Matrix Ak = u.times(m.transpose());
     info.append("\nAk - users x items\n\n");
-    info.append(nice(Ak));
+    info.append(MathHelper.nice(Ak));
     info.append("\n");
 
     log.info(info.toString());
@@ -231,11 +231,5 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
     return prefsAsText.toString();
   }
 
-  protected StringBuilder nice(Matrix matrix) {
-    StringBuilder info = new StringBuilder();
-    for (int n = 0; n < matrix.numRows(); n++) {
-      info.append(ALSUtils.nice(matrix.viewRow(n))).append("\n");
-    }
-    return info;
-  }
+
 }
