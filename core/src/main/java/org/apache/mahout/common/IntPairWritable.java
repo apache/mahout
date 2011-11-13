@@ -30,9 +30,7 @@ import java.util.Arrays;
 /**
  * A {@link WritableComparable} which encapsulates an ordered pair of signed integers.
  */
-public final class
-    IntPairWritable
-    extends BinaryComparable 
+public final class IntPairWritable extends BinaryComparable
     implements WritableComparable<BinaryComparable>, Serializable, Cloneable {
 
   static final int INT_BYTE_LENGTH = 4;
