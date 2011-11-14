@@ -67,6 +67,7 @@ public final class PFPGrowth {
   public static final String F_LIST = "fList";
   public static final String G_LIST = "gList";
   public static final String NUM_GROUPS = "numGroups";
+  public static final int NUM_GROUPS_DEFAULT = 1000;
   public static final String OUTPUT = "output";
   public static final String MIN_SUPPORT = "minSupport";
   public static final String MAX_HEAPSIZE = "maxHeapSize";
@@ -282,7 +283,7 @@ public final class PFPGrowth {
    */
   public static void startGroupingItems(Parameters params, Configuration conf) throws IOException {
     List<Pair<String,Long>> fList = readFList(params);
-    Integer numGroups = Integer.valueOf(params.get(NUM_GROUPS, "50"));
+    int numGroups = params.getInt(NUM_GROUPS, NUM_GROUPS_DEFAULT);
     
     Map<String,Long> gList = Maps.newHashMap();
     long maxPerGroup = fList.size() / numGroups;
@@ -353,7 +354,18 @@ public final class PFPGrowth {
     String input = params.get(INPUT);
     Job job = new Job(conf, "PFP Transaction Sorting running over input" + input);
     job.setJarByClass(PFPGrowth.class);
-    
+
+    Integer numGroups = Integer.valueOf(params.get(NUM_GROUPS, "-1"));
+    int numRed = job.getNumReduceTasks();
+    if (numGroups < 0) {
+      if (NUM_GROUPS_DEFAULT < numRed) {
+        params.set(NUM_GROUPS, Integer.toString(numRed));
+      }
+    }
+    if (numRed > numGroups) {
+      log.info("Warning: running with less groups of work than  reducers!");
+    }
+
     job.setMapOutputKeyClass(LongWritable.class);
     job.setMapOutputValueClass(TransactionTree.class);
     

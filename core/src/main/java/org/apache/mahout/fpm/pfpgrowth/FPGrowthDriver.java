@@ -66,7 +66,8 @@ public final class FPGrowthDriver extends AbstractJob {
     addOption("minSupport", "s", "(Optional) The minimum number of times a co-occurrence must be present. Default Value: 3", "3");
     addOption("maxHeapSize", "k", "(Optional) Maximum Heap Size k, to denote the requirement to mine top K items. Default value: 50", "50");
     addOption("numGroups", "g", "(Optional) Number of groups the features should be divided in the map-reduce version."
-            + " Doesn't work in sequential version Default Value:1000", "1000");
+            + " Doesn't work in sequential version Default Value:" + PFPGrowth.NUM_GROUPS_DEFAULT,
+	      Integer.toString(PFPGrowth.NUM_GROUPS_DEFAULT));
     addOption("splitterPattern", "regex", "Regular Expression pattern used to split given string transaction into itemsets."
             + " Default value splits comma separated itemsets.  Default Value:"
             + " \"[ ,\\t]*[,|\\t][ ,\\t]*\" ", "[ ,\t]*[,|\t][ ,\t]*");

@@ -57,7 +57,12 @@ public class Parameters {
   public void set(String key, String value) {
     params.put(key, value);
   }
-  
+
+  public int getInt(String key, int defaultValue) {
+    String ret = params.get(key);
+    return ret == null ? defaultValue : Integer.parseInt(ret);
+  }
+
   @Override
   public String toString() {
     Configuration conf = new Configuration();
