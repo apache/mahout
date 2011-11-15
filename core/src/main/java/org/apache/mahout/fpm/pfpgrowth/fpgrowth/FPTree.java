@@ -409,4 +409,33 @@ public class FPTree {
     System.arraycopy(oldProperties, 0, this.headerTableProperties, 0,
       headerTableCount);
   }
+
+  private void toStringHelper(StringBuilder sb, int currNode, String prefix) {
+    if (childCount[currNode] == 0) {
+      sb.append(prefix).append("-{attr:").append(attribute[currNode])
+        .append(", id: ").append(currNode)
+        .append(", cnt:").append(nodeCount[currNode]).append("}\n");
+    } else {
+      StringBuilder newPre = new StringBuilder(prefix);
+      newPre.append("-{attr:").append(attribute[currNode])
+        .append(", id: ").append(currNode)
+        .append(", cnt:").append(nodeCount[currNode]).append('}');
+      StringBuilder fakePre = new StringBuilder();
+      while (fakePre.length() < newPre.length()) {
+        fakePre.append(' ');
+      }
+      for (int i = 0; i < childCount[currNode]; i++) {
+        toStringHelper(sb, nodeChildren[currNode][i], (i == 0 ? newPre : fakePre).toString() + '-' + i + "->");
+      }
+    }
+  }
+  
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder("[FPTree\n");
+    toStringHelper(sb, 0, "  ");
+    sb.append("\n]\n");
+    return sb.toString();
+  }
+
 }
