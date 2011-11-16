@@ -351,7 +351,7 @@ public final class GenericDataModel extends AbstractDataModel {
       }
       result.append(userIDs[i]);
     }
-    if (result.length() > 3) {
+    if (userIDs.length > 3) {
       result.append("...");
     }
     result.append(']');
