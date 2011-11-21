@@ -22,52 +22,12 @@
 # To run:  change into the mahout directory and type:
 #  examples/bin/cluster-syntheticcontrol.sh
 
-if [ $1 = "-ni" ];then
-  clustertype=canopy
-else
-  algorithm=( canopy kmeans fuzzykmeans dirichlet meanshift )
+echo "Please call cluster-syntheticcontrol.sh directly next time.  This file is going away."
 
-  echo "Please select a number to choose the corresponding clustering algorithm"
-  echo "1. ${algorithm[0]} clustering"
-  echo "2. ${algorithm[1]} clustering"
-  echo "3. ${algorithm[2]} clustering"
-  echo "4. ${algorithm[3]} clustering"
-  echo "5. ${algorithm[4]} clustering"
-  read -p "Enter your choice : " choice
-
-  echo "ok. You chose $choice and we'll use ${algorithm[$choice-1]} Clustering"
-  clustertype=${algorithm[$choice-1]}
+SCRIPT_PATH=${0%/*}
+if [ "$0" != "$SCRIPT_PATH" ] && [ "$SCRIPT_PATH" != "" ]; then
+  cd $SCRIPT_PATH
 fi
+START_PATH=`pwd`
 
-cd examples/bin/
-
-WORK_DIR=/tmp/mahout-work-${USER}
-
-echo "creating work directory at ${WORK_DIR}"
-mkdir -p ${WORK_DIR}
-if [ ! -f ${WORK_DIR}/synthetic_control.data ]; then
-  echo "Downloading Synthetic control data"
-  curl http://archive.ics.uci.edu/ml/databases/synthetic_control/synthetic_control.data  -o ${WORK_DIR}/synthetic_control.data
-fi
-
-if [ "$HADOOP_HOME" != "" ]; then
-  echo "Checking the health of DFS..."
-  $HADOOP_HOME/bin/hadoop fs -ls 
-  if [ $? -eq 0 ];then 
-    echo "DFS is healthy... "
-    echo "Uploading Synthetic control data to HDFS"
-    $HADOOP_HOME/bin/hadoop fs -rmr testdata
-    $HADOOP_HOME/bin/hadoop fs -mkdir testdata
-    $HADOOP_HOME/bin/hadoop fs -put ${WORK_DIR}/synthetic_control.data testdata
-    echo "Successfully Uploaded Synthetic control data to HDFS "
-
-    ../../bin/mahout org.apache.mahout.clustering.syntheticcontrol."${clustertype}".Job
-  else
-    echo " HADOOP is not running. Please make sure you hadoop is running. "
-  fi
-else
-  echo " HADOOP_HOME variable is not set. Please set this environment variable and rerun the script"
-fi
-
-# Remove the work directory
-rm -rf ${WORK_DIR}
+./cluster-syntheticcontrol.sh $@
