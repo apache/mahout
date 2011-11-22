@@ -29,7 +29,9 @@ import org.apache.mahout.cf.taste.eval.RecommenderBuilder;
 import org.apache.mahout.cf.taste.example.kddcup.DataFileIterable;
 import org.apache.mahout.cf.taste.example.kddcup.KDDCupDataModel;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
+import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
+import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.eval.AbstractDifferenceRecommenderEvaluator;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -77,7 +79,8 @@ public final class Track1RecommenderEvaluator extends AbstractDifferenceRecommen
           new PreferenceEstimateCallable(recommender, userID, validationPrefs, noEstimateCounter));
     }
 
-    execute(estimateCallables, noEstimateCounter);
+    RunningAverageAndStdDev timing = new FullRunningAverageAndStdDev();
+    execute(estimateCallables, noEstimateCounter, timing);
 
     double result = computeFinalEvaluation();
     log.info("Evaluation result: {}", result);

@@ -23,7 +23,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
+import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.SamplingLongPrimitiveIterator;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.recommender.Recommender;
@@ -34,36 +36,26 @@ import org.apache.mahout.cf.taste.recommender.Recommender;
 public final class LoadEvaluator {
   
   private LoadEvaluator() { }
+
+  public static LoadStatistics runLoad(Recommender recommender) throws TasteException {
+    return runLoad(recommender, 10);
+  }
   
-  public static void runLoad(Recommender recommender) throws TasteException {
+  public static LoadStatistics runLoad(Recommender recommender, int howMany) throws TasteException {
     DataModel dataModel = recommender.getDataModel();
     int numUsers = dataModel.getNumUsers();
     double sampleRate = 1000.0 / numUsers;
-    LongPrimitiveIterator userSampler = SamplingLongPrimitiveIterator.maybeWrapIterator(dataModel
-        .getUserIDs(), sampleRate);
-    recommender.recommend(userSampler.next(), 10); // Warm up
+    LongPrimitiveIterator userSampler =
+        SamplingLongPrimitiveIterator.maybeWrapIterator(dataModel.getUserIDs(), sampleRate);
+    recommender.recommend(userSampler.next(), howMany); // Warm up
     Collection<Callable<Void>> callables = Lists.newArrayList();
     while (userSampler.hasNext()) {
       callables.add(new LoadCallable(recommender, userSampler.next()));
     }
-    AbstractDifferenceRecommenderEvaluator.execute(callables, new AtomicInteger());
+    AtomicInteger noEstimateCounter = new AtomicInteger();
+    RunningAverageAndStdDev timing = new FullRunningAverageAndStdDev();
+    AbstractDifferenceRecommenderEvaluator.execute(callables, noEstimateCounter, timing);
+    return new LoadStatistics(timing);
   }
-  
-  private static final class LoadCallable implements Callable<Void> {
-    
-    private final Recommender recommender;
-    private final long userID;
-    
-    private LoadCallable(Recommender recommender, long userID) {
-      this.recommender = recommender;
-      this.userID = userID;
-    }
-    
-    @Override
-    public Void call() throws Exception {
-      recommender.recommend(userID, 10);
-      return null;
-    }
-  }
-  
+
 }
