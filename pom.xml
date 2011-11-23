@@ -322,6 +322,12 @@
         <groupId>org.uncommons.watchmaker</groupId>
         <artifactId>watchmaker-framework</artifactId>
         <version>0.6.2</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.google.collections</groupId>
+            <artifactId>google-collections</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.uncommons.watchmaker</groupId>
