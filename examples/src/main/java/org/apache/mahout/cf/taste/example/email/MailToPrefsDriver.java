@@ -26,6 +26,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
@@ -84,6 +85,8 @@ public final class MailToPrefsDriver extends AbstractJob {
     addOption("separator", "sep", "The separator used in the input file to separate to, from, subject.  Default is \\n", "\n");
     addOption("from", "f", "The position in the input text (value) where the from email is located, starting from zero (0).", "0");
     addOption("refs", "r", "The position in the input text (value) where the reference ids are located, starting from zero (0).", "1");
+    addOption(buildOption("useCounts", "u", "If set, then use the number of times the user has interacted with a thread as an indication of their preference.  Otherwise, use boolean preferences.",
+            false, false, "true"));
     Map<String, String> parsedArgs = parseArguments(args);
 
     Path input = getInputPath();
@@ -95,7 +98,7 @@ public final class MailToPrefsDriver extends AbstractJob {
       setConf(new Configuration());
       conf = getConf();
     }
-
+    boolean useCounts = hasOption("--useCounts");
     AtomicInteger currentPhase = new AtomicInteger();
     int[] msgDim = new int[1];
     //TODO: mod this to not do so many passes over the data.  Dictionary creation could probably be a chain mapper
@@ -163,6 +166,7 @@ public final class MailToPrefsDriver extends AbstractJob {
       conf.set(EmailUtility.FROM_INDEX, parsedArgs.get("--from"));
       conf.set(EmailUtility.REFS_INDEX, parsedArgs.get("--refs"));
       conf.set(EmailUtility.SEPARATOR, separator);
+      conf.set(MailToRecReducer.USE_COUNTS_PREFERENCE, String.valueOf(useCounts));
       int j = 0;
       int i = 0;
       for (Path fromChunk : fromChunks) {
@@ -170,7 +174,7 @@ public final class MailToPrefsDriver extends AbstractJob {
           Path out = new Path(vecPath, "tmp-" + i + '-' + j);
           DistributedCache.setCacheFiles(new URI[]{fromChunk.toUri(), idChunk.toUri()}, conf);
           Job createRecMatrix = prepareJob(input, out, SequenceFileInputFormat.class,
-                  MailToRecMapper.class, NullWritable.class, Text.class,
+                  MailToRecMapper.class, Text.class, LongWritable.class, MailToRecReducer.class, Text.class, NullWritable.class,
                   TextOutputFormat.class);
           createRecMatrix.getConfiguration().set("mapred.output.compress", "false");
           createRecMatrix.waitForCompletion(true);
@@ -220,7 +224,7 @@ public final class MailToPrefsDriver extends AbstractJob {
     try {
       long currentChunkSize = 0;
       Path filesPattern = new Path(inputPath, OUTPUT_FILES_PATTERN);
-      int i = 0;
+      int i = 1;//start at 1, since a miss in the OpenObjectIntHashMap returns a 0
       for (Pair<Writable, Writable> record
               : new SequenceFileDirIterable<Writable, Writable>(filesPattern, PathType.GLOB, null, null, true, conf)) {
         if (currentChunkSize > chunkSizeLimit) {

@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.example.email;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -28,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public final class MailToRecMapper extends Mapper<Text, Text, NullWritable, Text> {
+public final class MailToRecMapper extends Mapper<Text, Text, Text, LongWritable> {
 
   private static final Logger log = LoggerFactory.getLogger(MailToRecMapper.class);
 
@@ -92,7 +93,7 @@ public final class MailToRecMapper extends Mapper<Text, Text, NullWritable, Text
     }
 
     if (msgIdKey != Integer.MIN_VALUE && fromKey != Integer.MIN_VALUE) {
-      context.write(null, new Text(fromKey + "," + msgIdKey + ",1"));
+      context.write(new Text(fromKey + "," + msgIdKey), new LongWritable(1));
     }
   }
 

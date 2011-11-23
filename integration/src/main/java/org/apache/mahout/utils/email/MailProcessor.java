@@ -149,7 +149,11 @@ public class MailProcessor {
 
   private static void writeContent(String separator, StringBuilder contents, CharSequence body, String[] matches) {
     for (String match : matches) {
-      contents.append(match).append(separator);
+      if (match != null) {
+        contents.append(match).append(separator);
+      } else {
+        contents.append("").append(separator);
+      }
     }
     contents.append('\n').append(body);
   }
