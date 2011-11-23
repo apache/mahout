@@ -44,7 +44,9 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Can read in a {@link SequenceFile} of {@link Vector}s and dump
@@ -91,12 +93,16 @@ public final class VectorDumper {
     Option numItemsOpt = obuilder.withLongName("n").withRequired(false).withArgument(
             abuilder.withName("numItems").withMinimum(1).withMaximum(1).create()).
             withDescription("Output at most <n> key value pairs").withShortName("n").create();
+    Option filtersOpt = obuilder.withLongName("filter").withRequired(false).withArgument(
+            abuilder.withName("filter").withMinimum(1).withMaximum(100).create()).
+            withDescription("Only dump out those vectors whose name matches the filter.  Multiple items may be specified by repeating the argument.").withShortName("fi").create();
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
             .create();
 
     Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt).withOption(
             dictTypeOpt).withOption(dictOpt).withOption(csvOpt).withOption(vectorAsKeyOpt).withOption(
-            printKeyOpt).withOption(sizeOpt).withOption(numItemsOpt).withOption(helpOpt).create();
+            printKeyOpt).withOption(sizeOpt).withOption(numItemsOpt).withOption(filtersOpt)
+            .withOption(helpOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -128,6 +134,13 @@ public final class VectorDumper {
           } else {
             throw new OptionException(dictTypeOpt);
           }
+        }
+
+        Set<String> filters;
+        if (cmdLine.hasOption(filtersOpt)) {
+          filters = new HashSet<String>(cmdLine.getValues(filtersOpt));
+        } else {
+          filters = null;
         }
         boolean useCSV = cmdLine.hasOption(csvOpt);
 
@@ -175,6 +188,10 @@ public final class VectorDumper {
             }
             VectorWritable vectorWritable = (VectorWritable) (transposeKeyValue ? keyWritable : valueWritable);
             Vector vector = vectorWritable.get();
+            if (filters != null && (vector instanceof NamedVector && filters.contains(((NamedVector)vector).getName()) == false)){
+              //we are filtering out this item, skip
+              continue;
+            }
             if (sizeOnly) {
               if (vector instanceof NamedVector) {
                 writer.write(((NamedVector) vector).getName());
