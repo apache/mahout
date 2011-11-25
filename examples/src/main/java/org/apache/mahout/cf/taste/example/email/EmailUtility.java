@@ -43,6 +43,7 @@ public final class EmailUtility {
   private static final Pattern ADDRESS_CLEANUP = Pattern.compile("mailto:|<|>|\\[|\\]|\\=20");
   private static final Pattern ANGLE_BRACES = Pattern.compile("<|>");
   private static final Pattern SPACE_OR_CLOSE_ANGLE = Pattern.compile(">|\\s+");
+  public static final Pattern WHITESPACE = Pattern.compile("\\s*");
 
   private EmailUtility() {
   }
@@ -96,5 +97,9 @@ public final class EmailUtility {
       splits = EMPTY;
     }
     return splits;
+  }
+
+  public enum Counters {
+    NO_MESSAGE_ID, NO_FROM_ADDRESS
   }
 }

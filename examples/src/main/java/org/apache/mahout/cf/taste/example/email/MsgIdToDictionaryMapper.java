@@ -28,20 +28,22 @@ import java.io.IOException;
  */
 public final class MsgIdToDictionaryMapper extends Mapper<Text, Text, Text, VarIntWritable> {
 
-  public enum Counters {
-    NO_MESSAGE_ID
-  }
-
   @Override
   protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
     //message id is in the key: /201008/AANLkTikvVnhNH+Y5AGEwqd2=u0CFv2mCm0ce6E6oBnj1@mail.gmail.com
     String keyStr = key.toString();
-    int idx = keyStr.lastIndexOf('/');
+    int idx = keyStr.lastIndexOf('@');//find the last @
     if (idx == -1) {
-      context.getCounter(Counters.NO_MESSAGE_ID).increment(1);
+      context.getCounter(EmailUtility.Counters.NO_MESSAGE_ID).increment(1);
     } else {
+      //found the @, now find the last slash before the @ and grab everything after that
+      idx = keyStr.lastIndexOf('/', idx);
       String msgId = keyStr.substring(idx + 1);
-      context.write(new Text(msgId), new VarIntWritable(1));
+      if (EmailUtility.WHITESPACE.matcher(msgId).matches() == false) {
+        context.write(new Text(msgId), new VarIntWritable(1));
+      } else {
+        context.getCounter(EmailUtility.Counters.NO_MESSAGE_ID).increment(1);
+      }
     }
   }
 }

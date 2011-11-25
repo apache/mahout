@@ -39,7 +39,7 @@ public class MailProcessor {
   public static final Pattern SUBJECT_PREFIX =
           Pattern.compile("^subject: (.*)$", Pattern.CASE_INSENSITIVE);
   public static final Pattern FROM_PREFIX =
-                  Pattern.compile("^from: (.*)$", Pattern.CASE_INSENSITIVE);
+                  Pattern.compile("^from: (\\S.*)$", Pattern.CASE_INSENSITIVE);//we need to have at least one character
   public static final Pattern REFS_PREFIX =
                           Pattern.compile("^references: (.*)$", Pattern.CASE_INSENSITIVE);
   public static final Pattern TO_PREFIX =

@@ -48,7 +48,13 @@ public final class FromEmailToDictionaryMapper extends Mapper<Text, Text, Text, 
       //TODO: is there more to clean up here?
       full = EmailUtility.cleanUpEmailAddress(full);
 
-      context.write(new Text(full), new VarIntWritable(1));
+      if (EmailUtility.WHITESPACE.matcher(full).matches() == false) {
+        context.write(new Text(full), new VarIntWritable(1));
+      } else {
+        context.getCounter(EmailUtility.Counters.NO_FROM_ADDRESS).increment(1);
+      }
+    } else {
+      context.getCounter(EmailUtility.Counters.NO_FROM_ADDRESS).increment(1);
     }
 
   }
