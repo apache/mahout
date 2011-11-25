@@ -105,56 +105,56 @@ public abstract class AbstractDifferenceRecommenderEvaluator implements Recommen
     log.info("Beginning evaluation using {} of {}", trainingPercentage, dataModel);
     
     int numUsers = dataModel.getNumUsers();
-    FastByIDMap<PreferenceArray> trainingUsers = new FastByIDMap<PreferenceArray>(
+    FastByIDMap<PreferenceArray> trainingPrefs = new FastByIDMap<PreferenceArray>(
         1 + (int) (evaluationPercentage * numUsers));
-    FastByIDMap<PreferenceArray> testUserPrefs = new FastByIDMap<PreferenceArray>(
+    FastByIDMap<PreferenceArray> testPrefs = new FastByIDMap<PreferenceArray>(
         1 + (int) (evaluationPercentage * numUsers));
     
     LongPrimitiveIterator it = dataModel.getUserIDs();
     while (it.hasNext()) {
       long userID = it.nextLong();
       if (random.nextDouble() < evaluationPercentage) {
-        processOneUser(trainingPercentage, trainingUsers, testUserPrefs, userID, dataModel);
+        splitOneUsersPrefs(trainingPercentage, trainingPrefs, testPrefs, userID, dataModel);
       }
     }
     
-    DataModel trainingModel = dataModelBuilder == null ? new GenericDataModel(trainingUsers)
-        : dataModelBuilder.buildDataModel(trainingUsers);
+    DataModel trainingModel = dataModelBuilder == null ? new GenericDataModel(trainingPrefs)
+        : dataModelBuilder.buildDataModel(trainingPrefs);
     
     Recommender recommender = recommenderBuilder.buildRecommender(trainingModel);
     
-    double result = getEvaluation(testUserPrefs, recommender);
+    double result = getEvaluation(testPrefs, recommender);
     log.info("Evaluation result: {}", result);
     return result;
   }
   
-  private void processOneUser(double trainingPercentage,
-                              FastByIDMap<PreferenceArray> trainingUsers,
-                              FastByIDMap<PreferenceArray> testUserPrefs,
-                              long userID,
-                              DataModel dataModel) throws TasteException {
-    List<Preference> trainingPrefs = null;
-    List<Preference> testPrefs = null;
+  private void splitOneUsersPrefs(double trainingPercentage,
+                                  FastByIDMap<PreferenceArray> trainingPrefs,
+                                  FastByIDMap<PreferenceArray> testPrefs,
+                                  long userID,
+                                  DataModel dataModel) throws TasteException {
+    List<Preference> oneUserTrainingPrefs = null;
+    List<Preference> oneUserTestPrefs = null;
     PreferenceArray prefs = dataModel.getPreferencesFromUser(userID);
     int size = prefs.length();
     for (int i = 0; i < size; i++) {
       Preference newPref = new GenericPreference(userID, prefs.getItemID(i), prefs.getValue(i));
       if (random.nextDouble() < trainingPercentage) {
-        if (trainingPrefs == null) {
-          trainingPrefs = Lists.newArrayListWithCapacity(3);
+        if (oneUserTrainingPrefs == null) {
+          oneUserTrainingPrefs = Lists.newArrayListWithCapacity(3);
         }
-        trainingPrefs.add(newPref);
+        oneUserTrainingPrefs.add(newPref);
       } else {
-        if (testPrefs == null) {
-          testPrefs = Lists.newArrayListWithCapacity(3);
+        if (oneUserTestPrefs == null) {
+          oneUserTestPrefs = Lists.newArrayListWithCapacity(3);
         }
-        testPrefs.add(newPref);
+        oneUserTestPrefs.add(newPref);
       }
     }
-    if (trainingPrefs != null) {
-      trainingUsers.put(userID, new GenericUserPreferenceArray(trainingPrefs));
-      if (testPrefs != null) {
-        testUserPrefs.put(userID, new GenericUserPreferenceArray(testPrefs));
+    if (oneUserTrainingPrefs != null) {
+      trainingPrefs.put(userID, new GenericUserPreferenceArray(oneUserTrainingPrefs));
+      if (oneUserTestPrefs != null) {
+        testPrefs.put(userID, new GenericUserPreferenceArray(oneUserTestPrefs));
       }
     }
   }
@@ -169,12 +169,12 @@ public abstract class AbstractDifferenceRecommenderEvaluator implements Recommen
     return estimate;
   }
 
-  private double getEvaluation(FastByIDMap<PreferenceArray> testUserPrefs, Recommender recommender)
+  private double getEvaluation(FastByIDMap<PreferenceArray> testPrefs, Recommender recommender)
     throws TasteException {
     reset();
     Collection<Callable<Void>> estimateCallables = Lists.newArrayList();
     AtomicInteger noEstimateCounter = new AtomicInteger();
-    for (Map.Entry<Long,PreferenceArray> entry : testUserPrefs.entrySet()) {
+    for (Map.Entry<Long,PreferenceArray> entry : testPrefs.entrySet()) {
       estimateCallables.add(
           new PreferenceEstimateCallable(recommender, entry.getKey(), entry.getValue(), noEstimateCounter));
     }
