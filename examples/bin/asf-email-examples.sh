@@ -194,7 +194,6 @@ elif [ "x$alg" == "xclassification" ]; then
     echo "Running SGD Training"
     $MAHOUT org.apache.mahout.classifier.sgd.TrainASFEmail $TRAIN $MODELS $numLabels 5000
     echo "Running Test"
-    $MODEL="$MODELS/asf.model"
     $MAHOUT org.apache.mahout.classifier.sgd.TestASFEmail --input $TEST --model $MODEL
 
   fi
