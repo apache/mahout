@@ -81,8 +81,8 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
         }
         line.append(createEdge(String.valueOf(cluster.getId()), vecStr));
       }
-      getWriter().append(line).append("\n");
     }
+    getWriter().append(line).append("\n");
   }
 
   private static String createEdge(String left, String right) {
