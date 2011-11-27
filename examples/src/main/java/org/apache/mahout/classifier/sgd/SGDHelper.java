@@ -42,7 +42,7 @@ public class SGDHelper {
   private static final String[] LEAK_LABELS = {"none", "month-year", "day-month-year"};
 
   public static void dissect(int leakType,
-                             Dictionary newsGroups,
+                             Dictionary dictionary,
                              AdaptiveLogisticRegression learningAlgorithm,
                              Iterable<File> files, Multiset<String> overallCounts) throws IOException {
     CrossFoldLearner model = learningAlgorithm.getBest().getPayload().getLearner();
@@ -57,14 +57,14 @@ public class SGDHelper {
 
     for (File file : permute(files, helper.getRandom()).subList(0, 500)) {
       String ng = file.getParentFile().getName();
-      int actual = newsGroups.intern(ng);
+      int actual = dictionary.intern(ng);
 
       traceDictionary.clear();
       Vector v = helper.encodeFeatureVector(file, actual, leakType, overallCounts);
       md.update(v, traceDictionary, model);
     }
 
-    List<String> ngNames = Lists.newArrayList(newsGroups.values());
+    List<String> ngNames = Lists.newArrayList(dictionary.values());
     List<ModelDissector.Weight> weights = md.summary(100);
     System.out.println("============");
     System.out.println("Model Dissection");
