@@ -63,11 +63,11 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
   @Override
   protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
     String document = value.toString();
+    document = StringEscapeUtils.unescapeHtml(CLOSE_TEXT_TAG_PATTERN.matcher(
+        OPEN_TEXT_TAG_PATTERN.matcher(document).replaceFirst("")).replaceAll(""));
     String catMatch = findMatchingCategory(document);
     if (!"Unknown".equals(catMatch)) {
       StringBuilder contents = new StringBuilder(1000);
-      document = StringEscapeUtils.unescapeHtml(CLOSE_TEXT_TAG_PATTERN.matcher(
-          OPEN_TEXT_TAG_PATTERN.matcher(document).replaceFirst("")).replaceAll(""));
       TokenStream stream = analyzer.reusableTokenStream(catMatch, new StringReader(document));
       CharTermAttribute termAtt = stream.addAttribute(CharTermAttribute.class);
       stream.reset();

@@ -144,8 +144,8 @@ public final class WikipediaDatasetCreatorDriver {
     throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set("key.value.separator.in.input.line", " ");
-    conf.set("xmlinput.start", "<text xml:space=\"preserve\">");
-    conf.set("xmlinput.end", "</text>");
+    conf.set("xmlinput.start", "<page>");
+    conf.set("xmlinput.end", "</page>");
     conf.setBoolean("exact.match.only", exactMatchOnly);
     conf.set("analyzer.class", analyzerClass.getName());
     conf.set("io.serializations",
