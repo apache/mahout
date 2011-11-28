@@ -40,6 +40,7 @@ import org.apache.mahout.common.IntPairWritable;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterator;
@@ -199,7 +200,12 @@ public final class LDADriver extends AbstractJob {
    */
   private int determineNumberOfWordsFromFirstVector() throws IOException {
     SequenceFileDirValueIterator<VectorWritable> it =
-        new SequenceFileDirValueIterator<VectorWritable>(getInputPath(), PathType.LIST, null, null, true, getConf());
+        new SequenceFileDirValueIterator<VectorWritable>(getInputPath(),
+                                                         PathType.LIST,
+                                                         PathFilters.logsCRCFilter(),
+                                                         null,
+                                                         true,
+                                                         getConf());
     try {
       while (it.hasNext()) {
         VectorWritable v = it.next();
