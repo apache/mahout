@@ -95,7 +95,7 @@ public final class RandomSeedGenerator {
           if (currentSize < k) {
             chosenTexts.add(newText);
             chosenClusters.add(newCluster);
-          } else if (random.nextInt(currentSize + 1) == 0) { // with chance 1/(currentSize+1) pick new element
+          } else if (random.nextInt(currentSize + 1) != 0) { // with chance 1/(currentSize+1) pick new element
             int indexToRemove = random.nextInt(currentSize); // evict one chosen randomly
             chosenTexts.remove(indexToRemove);
             chosenClusters.remove(indexToRemove);
@@ -106,7 +106,7 @@ public final class RandomSeedGenerator {
       }
 
       try {
-        for (int i = 0; i < k; i++) {
+        for (int i = 0; i < chosenTexts.size(); i++) {
           writer.append(chosenTexts.get(i), chosenClusters.get(i));
         }
         log.info("Wrote {} vectors to {}", k, outFile);
