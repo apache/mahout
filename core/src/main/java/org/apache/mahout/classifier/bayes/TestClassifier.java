@@ -102,7 +102,7 @@ public final class TestClassifier {
     
     Option methodOpt = obuilder.withLongName("method").withRequired(false).withArgument(
       abuilder.withName("method").withMinimum(1).withMaximum(1).create()).withDescription(
-      "Method of Classification: sequential|mapreduce. Default Value: sequential").withShortName("method")
+      "Method of Classification: sequential|mapreduce. Default Value: mapreduce").withShortName("method")
         .create();
     
     Option confusionMatrixOpt = obuilder.withLongName("confusionMatrix").withRequired(false).withArgument(
@@ -164,7 +164,7 @@ public final class TestClassifier {
       
       String testDirPath = (String) cmdLine.getValue(dirOpt);
 
-      String classificationMethod = "sequential";
+      String classificationMethod = "mapreduce";
       if (cmdLine.hasOption(methodOpt)) {
         classificationMethod = (String) cmdLine.getValue(methodOpt);
       }
