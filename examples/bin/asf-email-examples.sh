@@ -77,6 +77,10 @@ elif [ "x$alg" == "xclustering" ]; then
 
   echo "ok. You chose $choice and we'll use ${algorithm[$choice-1]}"
   nbalg=${algorithm[$choice-1]}
+  if [ "x$nbalg" == "xkmeans"  ] || [ "x$nbalg" == "xdirichlet" ]; then
+    echo "How many clusters would you like to generate:"
+    read -p "Enter your choice : " numClusters
+  fi
   if [ "x$OVER" == "xover" ] || [ ! -e "$MAIL_OUT/chunk-0" ]; then
     echo "Converting Mail files to Sequence Files"
     $MAHOUT org.apache.mahout.text.SequenceFilesFromMailArchives --charset "UTF-8" --subject --body --input $ASF_ARCHIVES --output $MAIL_OUT
@@ -90,12 +94,12 @@ elif [ "x$alg" == "xclustering" ]; then
   fi
   if [ "x$nbalg" == "xkmeans" ]; then
     CLUST_OUT="$OUT/clustering/kmeans"
-    echo "Running K-Means"
-    $MAHOUT kmeans --input "$SEQ2SP/tfidf-vectors" --output $CLUST_OUT -k 50 --maxIter 20 --distanceMeasure org.apache.mahout.common.distance.CosineDistanceMeasure --clustering --method mapreduce --clusters "$CLUST_OUT/clusters"
+    echo "Running K-Means with K = $numClusters"
+    $MAHOUT kmeans --input "$SEQ2SP/tfidf-vectors" --output $CLUST_OUT -k $numClusters --maxIter 20 --distanceMeasure org.apache.mahout.common.distance.CosineDistanceMeasure --clustering --method mapreduce --clusters "$CLUST_OUT/clusters"
   elif [ "x$nbalg" == "xdirichlet"  ]; then
     CLUST_OUT="$OUT/clustering/dirichlet"
-    echo "Running Dirichlet"
-    $MAHOUT dirichlet --input "$SEQ2SP/tfidf-vectors" --output $CLUST_OUT -k 50 --maxIter 20 --distanceMeasure org.apache.mahout.common.distance.CosineDistanceMeasure --method mapreduce
+    echo "Running Dirichlet with K = $numClusters"
+    $MAHOUT dirichlet --input "$SEQ2SP/tfidf-vectors" --output $CLUST_OUT -k $numClusters --maxIter 20 --distanceMeasure org.apache.mahout.common.distance.CosineDistanceMeasure --method mapreduce
   elif [ "x$nbalg" == "xminhash"  ]; then
     CLUST_OUT="$OUT/clustering/minhash"
     echo "Running Minhash"
@@ -179,7 +183,9 @@ elif [ "x$alg" == "xclassification" ]; then
       $MAHOUT org.apache.mahout.text.SequenceFilesFromMailArchives --charset "UTF-8" --subject --body --input $ASF_ARCHIVES --output $MAIL_OUT
     fi
     echo "Converting the files to sparse vectors in $SEQ2SP"
-    $MAHOUT seq2encoded --input $MAIL_OUT --output $SEQ2SP --analyzerName org.apache.mahout.text.MailArchivesClusteringAnalyzer
+    if [ "x$OVER" == "xover" ] || [ ! -e "$SEQ2SP/part-m-00000" ]; then
+      $MAHOUT seq2encoded --input $MAIL_OUT --output $SEQ2SP --analyzerName org.apache.mahout.text.MailArchivesClusteringAnalyzer --cardinality 20000
+    fi
     #We need to modify the vectors to have a better label
     echo "Converting vector labels"
     $MAHOUT org.apache.mahout.classifier.email.PrepEmailVectorsDriver --input "$SEQ2SP" --output $SEQ2SPLABEL --overwrite
@@ -192,7 +198,7 @@ elif [ "x$alg" == "xclassification" ]; then
 
 
     echo "Running SGD Training"
-    $MAHOUT org.apache.mahout.classifier.sgd.TrainASFEmail $TRAIN $MODELS $numLabels 5000
+    $MAHOUT org.apache.mahout.classifier.sgd.TrainASFEmail $TRAIN $MODELS $numLabels 20000
     echo "Running Test"
     $MAHOUT org.apache.mahout.classifier.sgd.TestASFEmail --input $TEST --model $MODEL
 
