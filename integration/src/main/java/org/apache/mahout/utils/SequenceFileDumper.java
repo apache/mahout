@@ -20,131 +20,130 @@ package org.apache.mahout.utils;
 import com.google.common.base.Charsets;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
-import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
-import org.apache.commons.cli2.Option;
-import org.apache.commons.cli2.OptionException;
-import org.apache.commons.cli2.builder.ArgumentBuilder;
-import org.apache.commons.cli2.builder.DefaultOptionBuilder;
-import org.apache.commons.cli2.builder.GroupBuilder;
-import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.cli2.util.HelpFormatter;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterator;
+import org.apache.mahout.math.list.IntArrayList;
+import org.apache.mahout.math.map.OpenObjectIntHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 
-public final class SequenceFileDumper {
+public final class SequenceFileDumper extends AbstractJob {
 
   private static final Logger log = LoggerFactory.getLogger(SequenceFileDumper.class);
+  public SequenceFileDumper() {
+    setConf(new Configuration());
+  }
 
-  private SequenceFileDumper() {
+  @Override
+  public int run(String[] args) throws Exception {
+
+    addOption("seqFile", "s", "The Sequence File to read in", true);
+    addOption(DefaultOptionCreator.outputOption().create());
+    addOption("substring", "b", "The number of chars to print out per value", false);
+    addOption(buildOption("count", "c", "Report the count only", false, false, null));
+    addOption("numItems", "n", "Output at most <n> key value pairs", false);
+    addOption(buildOption("facets", "fa", "Output the counts per key.  Note, if there are a lot of unique keys, this can take up a fair amount of memory", false, false, null));
+
+
+    if (parseArguments(args) == null) {
+      return -1;
+    }
+    Path path = new Path(getOption("seqFile"));
+    Configuration conf = new Configuration();
+
+    Writer writer;
+    boolean shouldClose;
+    if (hasOption("output")) {
+      shouldClose = true;
+      writer = Files.newWriter(new File(getOption("output")), Charsets.UTF_8);
+    } else {
+      shouldClose = false;
+      writer = new OutputStreamWriter(System.out);
+    }
+    try {
+      writer.append("Input Path: ").append(String.valueOf(path)).append('\n');
+
+      int sub = Integer.MAX_VALUE;
+      if (hasOption("substring")) {
+        sub = Integer.parseInt(getOption("substring"));
+      }
+      boolean countOnly = hasOption("count");
+      SequenceFileIterator<?, ?> iterator = new SequenceFileIterator<Writable, Writable>(path, true, conf);
+      writer.append("Key class: ").append(iterator.getKeyClass().toString());
+      writer.append(" Value Class: ").append(iterator.getValueClass().toString()).append('\n');
+      OpenObjectIntHashMap<String> facets = null;
+      if (hasOption("facets")){
+        facets = new OpenObjectIntHashMap<String>();
+      }
+      long count = 0;
+      if (countOnly) {
+        while (iterator.hasNext()) {
+          Pair<?, ?> record = iterator.next();
+          String key = record.getFirst().toString();
+          if (facets != null){
+            facets.adjustOrPutValue(key, 1, 1);//either insert or add 1
+          }
+          count++;
+        }
+        writer.append("Count: ").append(String.valueOf(count)).append('\n');
+      } else {
+        long numItems = Long.MAX_VALUE;
+        if (hasOption("numItems")) {
+          numItems = Long.parseLong(getOption("numItems").toString());
+          writer.append("Max Items to dump: ").append(String.valueOf(numItems)).append("\n");
+        }
+        while (iterator.hasNext() && count < numItems) {
+          Pair<?, ?> record = iterator.next();
+          String key = record.getFirst().toString();
+          writer.append("Key: ").append(key);
+          String str = record.getSecond().toString();
+          writer.append(": Value: ").append(str.length() > sub ? str.substring(0, sub) : str);
+          writer.write('\n');
+          if (facets != null){
+            facets.adjustOrPutValue(key, 1, 1);//either insert or add 1
+          }
+          count++;
+        }
+        writer.append("Count: ").append(String.valueOf(count)).append('\n');
+      }
+      List<String> keyList = new ArrayList<String>(facets.size());
+
+      IntArrayList valueList = new IntArrayList(facets.size());
+      facets.pairsSortedByKey(keyList, valueList);
+      int i = 0;
+      writer.append("-----Facets---\n");
+      writer.append("Key\t\tCount\n");
+      for (String key : keyList) {
+        writer.append(key).append("\t\t").append(String.valueOf(valueList.get(i++))).append('\n');
+
+      }
+      writer.flush();
+
+    } finally {
+      if (shouldClose) {
+        Closeables.closeQuietly(writer);
+      }
+    }
+
+
+    return 0;
   }
 
   public static void main(String[] args) throws Exception {
-    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
-    ArgumentBuilder abuilder = new ArgumentBuilder();
-    GroupBuilder gbuilder = new GroupBuilder();
-
-    Option seqOpt = obuilder.withLongName("seqFile").withRequired(false).withArgument(
-            abuilder.withName("seqFile").withMinimum(1).withMaximum(1).create()).
-            withDescription("The Sequence File containing the Clusters").withShortName("s").create();
-    Option outputOpt = obuilder.withLongName("output").withRequired(false).withArgument(
-            abuilder.withName("output").withMinimum(1).withMaximum(1).create()).
-            withDescription("The output file.  If not specified, dumps to the console").withShortName("o").create();
-    Option substringOpt = obuilder.withLongName("substring").withRequired(false).withArgument(
-            abuilder.withName("substring").withMinimum(1).withMaximum(1).create()).
-            withDescription("The number of chars of the asFormatString() to print").withShortName("b").create();
-    Option countOpt = obuilder.withLongName("count").withRequired(false).
-            withDescription("Report the count only").withShortName("c").create();
-    Option numItemsOpt = obuilder.withLongName("n").withRequired(false).withArgument(
-            abuilder.withName("numItems").withMinimum(1).withMaximum(1).create()).
-            withDescription("Output at most <n> key value pairs").withShortName("n").create();
-    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h").create();
-
-    Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt)
-            .withOption(substringOpt).withOption(countOpt).withOption(numItemsOpt).withOption(helpOpt).create();
-
-    try {
-      Parser parser = new Parser();
-      parser.setGroup(group);
-      CommandLine cmdLine = parser.parse(args);
-
-      if (cmdLine.hasOption(helpOpt)) {
-
-        printHelp(group);
-        return;
-      }
-
-      if (cmdLine.hasOption(seqOpt)) {
-        Path path = new Path(cmdLine.getValue(seqOpt).toString());
-        Configuration conf = new Configuration();
-
-        Writer writer;
-        boolean shouldClose;
-        if (cmdLine.hasOption(outputOpt)) {
-          shouldClose = true;
-          writer = Files.newWriter(new File(cmdLine.getValue(outputOpt).toString()), Charsets.UTF_8);
-        } else {
-          shouldClose = false;
-          writer = new OutputStreamWriter(System.out);
-        }
-        try {
-          writer.append("Input Path: ").append(String.valueOf(path)).append('\n');
-
-          int sub = Integer.MAX_VALUE;
-          if (cmdLine.hasOption(substringOpt)) {
-            sub = Integer.parseInt(cmdLine.getValue(substringOpt).toString());
-          }
-          boolean countOnly = cmdLine.hasOption(countOpt);
-          SequenceFileIterator<?, ?> iterator = new SequenceFileIterator<Writable, Writable>(path, true, conf);
-          writer.append("Key class: ").append(iterator.getKeyClass().toString());
-          writer.append(" Value Class: ").append(iterator.getValueClass().toString()).append('\n');
-          long count = 0;
-          if (countOnly) {
-            while (iterator.hasNext()) {
-              iterator.next();
-              count++;
-            }
-            writer.append("Count: ").append(String.valueOf(count)).append('\n');
-          } else {
-            long numItems = Long.MAX_VALUE;
-            if (cmdLine.hasOption(numItemsOpt)) {
-              numItems = Long.parseLong(cmdLine.getValue(numItemsOpt).toString());
-              writer.append("Max Items to dump: ").append(String.valueOf(numItems)).append("\n");
-            }
-            while (iterator.hasNext() && count < numItems) {
-              Pair<?, ?> record = iterator.next();
-              writer.append("Key: ").append(record.getFirst().toString());
-              String str = record.getSecond().toString();
-              writer.append(": Value: ").append(str.length() > sub ? str.substring(0, sub) : str);
-              writer.write('\n');
-              count++;
-            }
-            writer.append("Count: ").append(String.valueOf(count)).append('\n');
-          }
-
-          writer.flush();
-
-        } finally {
-          if (shouldClose) {
-            Closeables.closeQuietly(writer);
-          }
-        }
-      }
-
-    } catch (OptionException e) {
-      log.error("Exception", e);
-      printHelp(group);
-    }
-
+    new SequenceFileDumper().run(args);
   }
 
   private static void printHelp(Group group) {
