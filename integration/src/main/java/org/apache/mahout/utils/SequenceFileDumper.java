@@ -119,16 +119,18 @@ public final class SequenceFileDumper extends AbstractJob {
         }
         writer.append("Count: ").append(String.valueOf(count)).append('\n');
       }
-      List<String> keyList = new ArrayList<String>(facets.size());
+      if (facets != null) {
+        List<String> keyList = new ArrayList<String>(facets.size());
 
-      IntArrayList valueList = new IntArrayList(facets.size());
-      facets.pairsSortedByKey(keyList, valueList);
-      int i = 0;
-      writer.append("-----Facets---\n");
-      writer.append("Key\t\tCount\n");
-      for (String key : keyList) {
-        writer.append(key).append("\t\t").append(String.valueOf(valueList.get(i++))).append('\n');
+        IntArrayList valueList = new IntArrayList(facets.size());
+        facets.pairsSortedByKey(keyList, valueList);
+        int i = 0;
+        writer.append("-----Facets---\n");
+        writer.append("Key\t\tCount\n");
+        for (String key : keyList) {
+          writer.append(key).append("\t\t").append(String.valueOf(valueList.get(i++))).append('\n');
 
+        }
       }
       writer.flush();
 
