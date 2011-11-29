@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.recommender.knn;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -41,6 +42,8 @@ import org.apache.mahout.common.LongPair;
  */
 public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
   
+  private static final double BETA = 500.0;
+
   private final Optimizer optimizer;
   private final int neighborhoodSize;
   
@@ -71,57 +74,109 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
     return TopItems.getTopItems(howMany, possibleItemIDs, null, estimator);
   }
   
-  private double[] getInterpolations(long itemID, long userID, long[] itemNeighborhood) throws TasteException {
+  private double[] getInterpolations(long itemID, 
+                                     long userID, 
+                                     long[] itemNeighborhood, 
+                                     List<Long> usersRatedNeighborhood) throws TasteException {
     
-    int k = itemNeighborhood.length;
+    int length = 0;
+    for (int i = 0; i < itemNeighborhood.length; i++) {
+      if (itemNeighborhood[i] == itemID) {
+        itemNeighborhood[i] = -1;
+        length = itemNeighborhood.length - 1;
+        break;
+      }
+    }
+    
+    int k = length;
     double[][] aMatrix = new double[k][k];
     double[] b = new double[k];
     int i = 0;
     
     DataModel dataModel = getDataModel();
     
-    int numUsers = getDataModel().getNumUsers();
+    int numUsers = usersRatedNeighborhood.size();
     for (long iitem : itemNeighborhood) {
-      PreferenceArray iPrefs = getDataModel().getPreferencesForItem(iitem);
-      int iSize = iPrefs.length();
+      if (iitem == -1) {
+        break;
+      }
       int j = 0;
+      double value = 0.0;
       for (long jitem : itemNeighborhood) {
-        double value = 0.0;
-        for (int pi = 0; pi < iSize; pi++) {
-          long v = iPrefs.getUserID(pi);
-          if (v == userID) {
-            continue;
-          }
-          Float pj = dataModel.getPreferenceValue(userID, jitem);
-          if (pj != null) {
-            value += iPrefs.getValue(pi) * pj;
-          }
+      if (jitem == -1) {
+        continue;
+      }
+      for (long user : usersRatedNeighborhood) {
+        float prefVJ = dataModel.getPreferenceValue(user, iitem);
+        float prefVK = dataModel.getPreferenceValue(user, jitem);
+          value += prefVJ * prefVK;
         }
-        aMatrix[i][j] = value / numUsers;
+        aMatrix[i][j] = value/numUsers;
         j++;
       }
       i++;
     }
     
-    PreferenceArray iPrefs = getDataModel().getPreferencesForItem(itemID);
-    int iSize = iPrefs.length();
     i = 0;
     for (long jitem : itemNeighborhood) {
+      if (jitem == -1) {
+        break;
+      }
       double value = 0.0;
-      for (int pi = 0; pi < iSize; pi++) {
-        long v = iPrefs.getUserID(pi);
-        if (v == userID) {
-          continue;
-        }
-        Float pj = dataModel.getPreferenceValue(userID, jitem);
-        if (pj != null) {
-          value += iPrefs.getValue(pi) * pj;
-        }
+      for (long user : usersRatedNeighborhood) {
+        float prefVJ = dataModel.getPreferenceValue(user, jitem);
+        float prefVI = dataModel.getPreferenceValue(user, itemID);
+        value += prefVJ * prefVI;
       }
       b[i] = value / numUsers;
       i++;
     }
     
+    // Find the larger diagonal and calculate the average
+    double avgDiagonal = 0.0;
+    if (k > 1) {
+      double diagonalA = 0.0;
+      double diagonalB = 0.0;
+      for (i = 0; i < k; i++) {
+        diagonalA += aMatrix[i][i];
+      }
+      for (i = k - 1; i >= 0; i--) {
+        for (int j = 0; j < k; j++) {
+          diagonalB += aMatrix[i--][j];
+        }
+      }
+      avgDiagonal = Math.max(diagonalA, diagonalB) / k;
+    }
+    // Calculate the average of non-diagonal values
+    double avgMatrixA = 0.0;
+    double avgVectorB = 0.0;
+    for (i = 0; i < k; i++) {
+      for (int j = 0; j < k; j++) {
+        if (i != j || k <= 1) {
+          avgMatrixA += aMatrix[i][j];
+        }
+      }
+      avgVectorB += b[i];
+    }
+    if (k > 1) {
+      avgMatrixA /= k * k - k;
+    }
+    avgVectorB /= k;
+
+    double numUsersPlusBeta = numUsers + BETA;
+    for (i = 0; i < k; i++) {
+      for (int j = 0; j < k; j++) {
+        double average;
+        if (i == j && k > 1) {
+          average = avgDiagonal;
+        } else {
+          average = avgMatrixA;
+        }
+        aMatrix[i][j] = (numUsers * aMatrix[i][j] + BETA * average) / numUsersPlusBeta;
+      }
+      b[i] = (numUsers * b[i] + BETA * avgVectorB) / numUsersPlusBeta;
+    }
+
     return optimizer.optimize(aMatrix, b);
   }
   
@@ -139,13 +194,41 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
     
     List<RecommendedItem> mostSimilar = mostSimilarItems(itemID, possibleItemIDs.iterator(),
       neighborhoodSize, null);
-    long[] theNeighborhood = new long[mostSimilar.size()];
+    long[] theNeighborhood = new long[mostSimilar.size() + 1];
+    theNeighborhood[0] = -1;
+  
+    List<Long> usersRatedNeighborhood = new ArrayList<Long>();
     int nOffset = 0;
     for (RecommendedItem rec : mostSimilar) {
       theNeighborhood[nOffset++] = rec.getItemID();
     }
     
-    double[] weights = getInterpolations(itemID, theUserID, theNeighborhood);
+    if (!mostSimilar.isEmpty()) {
+      theNeighborhood[mostSimilar.size()] = itemID;
+      for (int i = 0; i < theNeighborhood.length; i++) {
+        PreferenceArray usersNeighborhood = dataModel.getPreferencesForItem(theNeighborhood[i]);
+        int size1 = usersRatedNeighborhood.isEmpty() ? usersNeighborhood.length() : usersRatedNeighborhood.size();
+        for (int j = 0; j < size1; j++) {
+          if (i == 0) {
+            usersRatedNeighborhood.add(usersNeighborhood.getUserID(j));
+          } else {
+            if (j >= usersRatedNeighborhood.size()) {
+              break;
+            }
+            long index = usersRatedNeighborhood.get(j);
+            if (!usersNeighborhood.hasPrefWithUserID(index) || index == theUserID) {
+              usersRatedNeighborhood.remove(index);
+              j--;
+            }
+          }
+        }
+      }
+    }
+
+    double[] weights = null;
+    if (!mostSimilar.isEmpty()) {
+      weights = getInterpolations(itemID, theUserID, theNeighborhood, usersRatedNeighborhood);
+    }
     
     int i = 0;
     double preference = 0.0;
@@ -155,8 +238,9 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
       Float pref = dataModel.getPreferenceValue(theUserID, jitem);
       
       if (pref != null) {
-        preference += pref * weights[i];
-        totalSimilarity += weights[i];
+        double weight = weights[i];
+        preference += pref * weight;
+        totalSimilarity += weight;
       }
       i++;
       
