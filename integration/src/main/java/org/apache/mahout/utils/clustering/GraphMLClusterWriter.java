@@ -21,7 +21,6 @@ import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.utils.vectors.io.AbstractClusterWriter;
 
 import java.io.IOException;
 import java.io.Writer;

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.utils.vectors.io;
+package org.apache.mahout.utils.clustering;
 
 import org.apache.hadoop.io.Text;
 import org.apache.mahout.clustering.AbstractCluster;

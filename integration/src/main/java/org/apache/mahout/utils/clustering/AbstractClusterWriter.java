@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.utils.vectors.io;
+package org.apache.mahout.utils.clustering;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
