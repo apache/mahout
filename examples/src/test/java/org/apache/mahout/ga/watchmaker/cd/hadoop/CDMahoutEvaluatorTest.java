@@ -51,7 +51,7 @@ public final class CDMahoutEvaluatorTest extends MahoutTestCase {
     // dataset
     // This is sensitive to the working directory where the test is run:
     FileSystem fs = FileSystem.get(new Configuration());
-    Path input = fs.makeQualified(new Path(Resources.getResource("wdbc").toString()));
+    Path input = fs.makeQualified(new Path(Resources.getResource("wdbc").toURI()));
     CDMahoutEvaluator.initializeDataSet(input);
 
     // evaluate the rules

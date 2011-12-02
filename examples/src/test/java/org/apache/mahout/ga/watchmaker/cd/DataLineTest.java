@@ -35,7 +35,7 @@ public final class DataLineTest extends MahoutTestCase {
   @Test
   public void testSet() throws Exception {
     FileSystem fs = FileSystem.get(new Configuration());
-    Path inpath = fs.makeQualified(new Path(Resources.getResource("wdbc").toString()));
+    Path inpath = fs.makeQualified(new Path(Resources.getResource("wdbc").toURI()));
     
     DataSet dataset = FileInfoParser.parseFile(fs, inpath);
     DataSet.initialize(dataset);

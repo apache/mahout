@@ -33,13 +33,13 @@ public final class FileInfosDatasetTest extends MahoutTestCase {
   @Test
   public void testRanges() throws Exception {
     FileSystem fs = FileSystem.get(new Configuration());
-    Path inpath = fs.makeQualified(new Path(Resources.getResource("wdbc").toString()));
+    Path inpath = fs.makeQualified(new Path(Resources.getResource("wdbc").toURI()));
     
     DataSet dataset = FileInfoParser.parseFile(fs, inpath);
     DataSet.initialize(dataset);
 
     DataLine dl = new DataLine();
-    for (CharSequence line : new FileLineIterable(new File(Resources.getResource("wdbc/wdbc.data").getPath()))) {
+    for (CharSequence line : new FileLineIterable(new File(Resources.getResource("wdbc/wdbc.data").toURI()))) {
       dl.set(line);
       for (int index = 0; index < dataset.getNbAttributes(); index++) {
         if (dataset.isNumerical(index)) {
