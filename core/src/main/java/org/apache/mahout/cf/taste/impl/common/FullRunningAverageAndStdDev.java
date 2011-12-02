@@ -42,6 +42,14 @@ public final class FullRunningAverageAndStdDev extends FullRunningAverage implem
     recomputeStdDev();
   }
 
+  public double getMk() {
+    return mk;
+  }
+  
+  public double getSk() {
+    return sk;
+  }
+
   @Override
   public synchronized double getStandardDeviation() {
     return stdDev;
@@ -84,6 +92,11 @@ public final class FullRunningAverageAndStdDev extends FullRunningAverage implem
   private synchronized void recomputeStdDev() {
     int count = getCount();
     stdDev = count > 1 ? Math.sqrt(sk / (count - 1)) : Double.NaN;
+  }
+
+  @Override
+  public RunningAverageAndStdDev inverse() {
+    return new InvertedRunningAverageAndStdDev(this);
   }
   
   @Override

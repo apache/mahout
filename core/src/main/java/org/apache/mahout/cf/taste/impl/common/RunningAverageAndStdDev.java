@@ -26,5 +26,10 @@ public interface RunningAverageAndStdDev extends RunningAverage {
   
   /** @return standard deviation of data */
   double getStandardDeviation();
+
+  /**
+   * @return a (possibly immutable) object whose average is the negative of this object's
+   */
+  RunningAverageAndStdDev inverse();
   
 }

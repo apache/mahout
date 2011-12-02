@@ -95,6 +95,11 @@ public class FullRunningAverage implements RunningAverage, Serializable {
   public synchronized double getAverage() {
     return average;
   }
+
+  @Override
+  public RunningAverage inverse() {
+    return new InvertedRunningAverage(this);
+  }
   
   @Override
   public synchronized String toString() {

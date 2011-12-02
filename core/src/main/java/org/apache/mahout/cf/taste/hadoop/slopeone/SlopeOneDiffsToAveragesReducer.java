@@ -22,20 +22,19 @@ import java.io.IOException;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
+import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 
 public final class SlopeOneDiffsToAveragesReducer extends
-    Reducer<EntityEntityWritable,FloatWritable, EntityEntityWritable,FloatWritable> {
+    Reducer<EntityEntityWritable,FloatWritable,EntityEntityWritable,FullRunningAverageAndStdDevWritable> {
   
   @Override
   protected void reduce(EntityEntityWritable key,
                         Iterable<FloatWritable> values,
                         Context context) throws IOException, InterruptedException {
-    int count = 0;
-    double total = 0.0;
+    FullRunningAverageAndStdDev average = new FullRunningAverageAndStdDev();
     for (FloatWritable value : values) {
-      total += value.get();
-      count++;
+      average.addDatum(value.get());
     }
-    context.write(key, new FloatWritable((float) (total / count)));
+    context.write(key, new FullRunningAverageAndStdDevWritable(average));
   }
 }

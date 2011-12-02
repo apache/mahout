@@ -54,5 +54,10 @@ public final class InvertedRunningAverageAndStdDev implements RunningAverageAndS
   public double getStandardDeviation() {
     return delegate.getStandardDeviation();
   }
+
+  @Override
+  public RunningAverageAndStdDev inverse() {
+    return delegate;
+  }
   
 }

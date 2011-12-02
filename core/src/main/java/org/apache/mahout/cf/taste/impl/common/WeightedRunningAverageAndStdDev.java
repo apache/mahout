@@ -75,6 +75,11 @@ public final class WeightedRunningAverageAndStdDev extends WeightedRunningAverag
     return Math.sqrt((totalWeightedSquaredData * totalWeight - totalWeightedData * totalWeightedData)
                          / (totalWeight * totalWeight - totalSquaredWeight));
   }
+
+  @Override
+  public RunningAverageAndStdDev inverse() {
+    return new InvertedRunningAverageAndStdDev(this);
+  }
   
   @Override
   public synchronized String toString() {

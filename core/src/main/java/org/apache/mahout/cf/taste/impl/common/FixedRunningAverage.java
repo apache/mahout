@@ -71,6 +71,11 @@ public class FixedRunningAverage implements RunningAverage, Serializable {
   }
 
   @Override
+  public RunningAverage inverse() {
+    return new InvertedRunningAverage(this);
+  }
+
+  @Override
   public synchronized String toString() {
     return String.valueOf(average);
   }

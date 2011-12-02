@@ -32,7 +32,6 @@ import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.InvertedRunningAverage;
-import org.apache.mahout.cf.taste.impl.common.InvertedRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
@@ -132,11 +131,7 @@ public final class MemoryDiffStorage implements DiffStorage {
       average = level2Map.get(itemID2);
     }
     if (inverted) {
-      if (average == null) {
-        return null;
-      }
-      return stdDevWeighted ? new InvertedRunningAverageAndStdDev((RunningAverageAndStdDev) average)
-          : new InvertedRunningAverage(average);
+      return average == null ? null : average.inverse();
     } else {
       return average;
     }

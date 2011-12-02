@@ -49,5 +49,10 @@ public final class InvertedRunningAverage implements RunningAverage {
   public double getAverage() {
     return -delegate.getAverage();
   }
+
+  @Override
+  public RunningAverage inverse() {
+    return delegate;
+  }
   
 }

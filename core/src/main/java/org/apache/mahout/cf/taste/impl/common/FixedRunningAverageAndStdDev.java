@@ -34,6 +34,11 @@ public final class FixedRunningAverageAndStdDev extends FixedRunningAverage impl
   }
 
   @Override
+  public RunningAverageAndStdDev inverse() {
+    return new InvertedRunningAverageAndStdDev(this);
+  }
+
+  @Override
   public synchronized String toString() {
     return super.toString() + ',' + stdDev;
   }

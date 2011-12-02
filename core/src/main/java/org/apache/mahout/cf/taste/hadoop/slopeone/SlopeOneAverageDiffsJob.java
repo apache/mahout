@@ -81,7 +81,7 @@ public final class SlopeOneAverageDiffsJob extends AbstractJob {
                                           FloatWritable.class,
                                           SlopeOneDiffsToAveragesReducer.class,
                                           EntityEntityWritable.class,
-                                          FloatWritable.class,
+                                          FullRunningAverageAndStdDevWritable.class,
                                           TextOutputFormat.class);
       FileOutputFormat.setOutputCompressorClass(diffsToAveragesJob, GzipCodec.class);
       diffsToAveragesJob.waitForCompletion(true);

@@ -25,15 +25,18 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.regex.Pattern;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
+import org.apache.mahout.cf.taste.common.Weighting;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
+import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.InvertedRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
-import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
+import org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.slopeone.DiffStorage;
 import org.apache.mahout.common.iterator.FileLineIterator;
@@ -48,12 +51,21 @@ import com.google.common.base.Preconditions;
  * one diff per line:
  * </p>
  * 
- * {@code itemID1,itemID2,diff}
+ * {@code itemID1,itemID2,diff[,count[,mk,sk]]}
  * 
+ * <p>
+ * The fourth column is optional, and is a count representing the number of occurrences of the item-item pair
+ * that contribute to the diff. It is assumed to be 1 if not present. The fifth and sixth arguments are
+ * computed values used by {@link FullRunningAverageAndStdDev} implementations to compute a running standard deviation.
+ * They are required if using {@link Weighting#WEIGHTED} with {@link SlopeOneRecommender}.
+ * </p>
+ *
  * <p>
  * Commas or tabs can be delimiters. This is intended for use in conjuction with the output of
  * {@link org.apache.mahout.cf.taste.hadoop.slopeone.SlopeOneAverageDiffsJob}.
  * </p>
+ *
+ * <p>Note that the same item-item pair should not appear on multiple lines -- one line per item-item pair.</p>
  */
 public final class FileDiffStorage implements DiffStorage {
   
@@ -61,7 +73,8 @@ public final class FileDiffStorage implements DiffStorage {
   
   private static final long MIN_RELOAD_INTERVAL_MS = 60 * 1000L; // 1 minute?
   private static final char COMMENT_CHAR = '#';
-  
+  private static final Pattern SEPARATOR = Pattern.compile("[\t,]");
+
   private final File dataFile;
   private long lastModified;
   private final long maxEntries;
@@ -107,10 +120,9 @@ public final class FileDiffStorage implements DiffStorage {
           iterator.next();
           firstLine = iterator.peek();
         }
-        char delimiter = FileDataModel.determineDelimiter(firstLine);
         long averageCount = 0L;
         while (iterator.hasNext()) {
-          averageCount = processLine(iterator.next(), delimiter, averageCount);
+          averageCount = processLine(iterator.next(), averageCount);
         }
         
         pruneInconsequentialDiffs();
@@ -124,20 +136,20 @@ public final class FileDiffStorage implements DiffStorage {
     }
   }
   
-  private long processLine(String line, char delimiter, long averageCount) {
+  private long processLine(String line, long averageCount) {
 
     if (line.isEmpty() || line.charAt(0) == COMMENT_CHAR) {
       return averageCount;
     }
     
-    int delimiterOne = line.indexOf(delimiter);
-    Preconditions.checkArgument(delimiterOne >= 0, "Bad line: %s", line);
-    int delimiterTwo = line.indexOf(delimiter, delimiterOne + 1);
-    Preconditions.checkArgument(delimiterTwo >= 0, "Bad line: %s", line);
-    
-    long itemID1 = Long.parseLong(line.substring(0, delimiterOne));
-    long itemID2 = Long.parseLong(line.substring(delimiterOne + 1, delimiterTwo));
-    double diff = Double.parseDouble(line.substring(delimiterTwo + 1));
+    String[] tokens = SEPARATOR.split(line);
+    Preconditions.checkArgument(tokens.length >=3 && tokens.length != 5, "Bad line: %s", line);
+
+    long itemID1 = Long.parseLong(tokens[0]);
+    long itemID2 = Long.parseLong(tokens[1]);
+    double diff = Double.parseDouble(tokens[2]);
+    int count = tokens.length >= 4 ? Integer.parseInt(tokens[3]) : 1;
+    boolean hasMkSk = tokens.length >= 5;
     
     if (itemID1 > itemID2) {
       long temp = itemID1;
@@ -151,15 +163,21 @@ public final class FileDiffStorage implements DiffStorage {
       averageDiffs.put(itemID1, level1Map);
     }
     RunningAverage average = level1Map.get(itemID2);
-    if (average == null && averageCount < maxEntries) {
-      average = new FullRunningAverage();
+    if (average != null) {
+      throw new IllegalArgumentException("Duplicated line for item-item pair " + itemID1 + " / " + itemID2);
+    }
+    if (averageCount < maxEntries) {
+      if (hasMkSk) {
+        double mk = Double.parseDouble(tokens[4]);
+        double sk = Double.parseDouble(tokens[5]);
+        average = new FullRunningAverageAndStdDev(count, diff, mk, sk);
+      } else {
+        average = new FullRunningAverage(count, diff);
+      }
       level1Map.put(itemID2, average);
       averageCount++;
     }
-    if (average != null) {
-      average.addDatum(diff);
-    }
-    
+
     allRecommendableItemIDs.add(itemID1);
     allRecommendableItemIDs.add(itemID2);
     
@@ -222,10 +240,7 @@ public final class FileDiffStorage implements DiffStorage {
       average = level2Map.get(itemID2);
     }
     if (inverted) {
-      if (average == null) {
-        return null;
-      }
-      return new InvertedRunningAverage(average);
+      return average == null ? null : average.inverse();
     } else {
       return average;
     }
