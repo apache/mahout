@@ -30,9 +30,12 @@ import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.cli2.util.HelpFormatter;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.NamedVector;
@@ -88,21 +91,31 @@ public final class VectorDumper {
     Option namesAsCommentsOpt = obuilder.withLongName("namesAsComments").withRequired(false).withDescription(
             "If using CSV output, optionally add a comment line for each NamedVector (if the vector is one) printing out the name")
             .withShortName("n").create();
+    Option sortVectorsOpt = obuilder.withLongName("sortVectors").withRequired(false).withDescription(
+            "Sort output key/value pairs of the vector entries in abs magnitude descending order")
+            .withShortName("sort").create();
     Option sizeOpt = obuilder.withLongName("sizeOnly").withRequired(false).
             withDescription("Dump only the size of the vector").withShortName("sz").create();
-    Option numItemsOpt = obuilder.withLongName("n").withRequired(false).withArgument(
-            abuilder.withName("numItems").withMinimum(1).withMaximum(1).create()).
-            withDescription("Output at most <n> key value pairs").withShortName("n").create();
+    Option numItemsOpt = obuilder.withLongName("numItems").withRequired(false).withArgument(
+            abuilder.withName("n").withMinimum(1).withMaximum(1).create()).
+            withDescription("Output at most <n> vecors").withShortName("n").create();
+    Option numIndexesPerVectorOpt = obuilder.withLongName("vectorSize").withShortName("vs")
+        .withRequired(false).withArgument(abuilder.withName("vs").withMinimum(1)
+        .withMaximum(1).create())
+        .withDescription("Truncate vectors to <vs> length when dumping (most useful when in"
+                          + " conjunction with -sort").create();
     Option filtersOpt = obuilder.withLongName("filter").withRequired(false).withArgument(
             abuilder.withName("filter").withMinimum(1).withMaximum(100).create()).
-            withDescription("Only dump out those vectors whose name matches the filter.  Multiple items may be specified by repeating the argument.").withShortName("fi").create();
+            withDescription("Only dump out those vectors whose name matches the filter." +
+            "  Multiple items may be specified by repeating the argument.").withShortName("fi").create();
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
             .create();
 
-    Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt).withOption(
-            dictTypeOpt).withOption(dictOpt).withOption(csvOpt).withOption(vectorAsKeyOpt).withOption(
-            printKeyOpt).withOption(sizeOpt).withOption(numItemsOpt).withOption(filtersOpt)
-            .withOption(helpOpt).create();
+    Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt)
+                          .withOption(dictTypeOpt).withOption(dictOpt).withOption(csvOpt)
+                          .withOption(vectorAsKeyOpt).withOption(printKeyOpt).withOption(sortVectorsOpt)
+                          .withOption(filtersOpt).withOption(helpOpt).withOption(numItemsOpt)
+                          .withOption(sizeOpt).withOption(numIndexesPerVectorOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -110,20 +123,23 @@ public final class VectorDumper {
       CommandLine cmdLine = parser.parse(args);
 
       if (cmdLine.hasOption(helpOpt)) {
-
-        printHelp(group);
+        CommandLineUtil.printHelpWithGenericOptions(group);
         return;
       }
 
       if (cmdLine.hasOption(seqOpt)) {
-        Path path = new Path(cmdLine.getValue(seqOpt).toString());
-        //System.out.println("Input Path: " + path); interferes with output?
         Configuration conf = new Configuration();
+        Path pathPattern = new Path(cmdLine.getValue(seqOpt).toString());
+        FileSystem fs = FileSystem.get(conf);
+        FileStatus[] inputPaths = fs.globStatus(pathPattern);
 
         String dictionaryType = "text";
         if (cmdLine.hasOption(dictTypeOpt)) {
           dictionaryType = cmdLine.getValue(dictTypeOpt).toString();
         }
+
+        boolean sortVectors = cmdLine.hasOption(sortVectorsOpt);
+        log.info("Sort? " + sortVectors);
 
         String[] dictionary = null;
         if (cmdLine.hasOption(dictOpt)) {
@@ -168,55 +184,70 @@ public final class VectorDumper {
             }
             writer.write('\n');
           }
-          long numItems = Long.MAX_VALUE;
+          Long numItems = null;
           if (cmdLine.hasOption(numItemsOpt)) {
             numItems = Long.parseLong(cmdLine.getValue(numItemsOpt).toString());
             writer.append("#Max Items to dump: ").append(String.valueOf(numItems)).append('\n');
           }
-          SequenceFileIterable<Writable, Writable> iterable = new SequenceFileIterable<Writable, Writable>(path, true, conf);
-          Iterator<Pair<Writable,Writable>> iterator = iterable.iterator();
-          long i = 0;
-          long count = 0;
-          while (iterator.hasNext() && count < numItems) {
-            Pair<Writable, Writable> record = iterator.next();
-            Writable keyWritable = record.getFirst();
-            Writable valueWritable = record.getSecond();
-            if (printKey) {
-              Writable notTheVectorWritable = transposeKeyValue ? valueWritable : keyWritable;
-              writer.write(notTheVectorWritable.toString());
-              writer.write('\t');
+          int maxIndexesPerVector = cmdLine.hasOption(numIndexesPerVectorOpt)
+              ? Integer.parseInt(cmdLine.getValue(numIndexesPerVectorOpt).toString())
+              : Integer.MAX_VALUE;
+          long itemCount = 0;
+          int fileCount = 0;
+          for (FileStatus stat : inputPaths) {
+            if (numItems != null && numItems <= itemCount) {
+              break;
             }
-            VectorWritable vectorWritable = (VectorWritable) (transposeKeyValue ? keyWritable : valueWritable);
-            Vector vector = vectorWritable.get();
-            if (filters != null && (vector instanceof NamedVector && filters.contains(((NamedVector)vector).getName()) == false)){
-              //we are filtering out this item, skip
-              continue;
-            }
-            if (sizeOnly) {
-              if (vector instanceof NamedVector) {
-                writer.write(((NamedVector) vector).getName());
-                writer.write(":");
-              } else {
-                writer.write(String.valueOf(i++));
-                writer.write(":");
+            Path path = stat.getPath();
+            log.info("Processing file '{}' ({}/{})",
+                new Object[]{path, ++fileCount, inputPaths.length});
+            SequenceFileIterable<Writable, Writable> iterable =
+                new SequenceFileIterable<Writable, Writable>(path, true, conf);
+            Iterator<Pair<Writable,Writable>> iterator = iterable.iterator();
+            long i = 0;
+            while (iterator.hasNext() && (numItems == null || itemCount < numItems)) {
+              Pair<Writable, Writable> record = iterator.next();
+              Writable keyWritable = record.getFirst();
+              Writable valueWritable = record.getSecond();
+              if (printKey) {
+                Writable notTheVectorWritable = transposeKeyValue ? valueWritable : keyWritable;
+                writer.write(notTheVectorWritable.toString());
+                writer.write('\t');
               }
-              writer.write(String.valueOf(vector.size()));
-              writer.write('\n');
-            } else {
-              String fmtStr;
-              if (useCSV) {
-                fmtStr = VectorHelper.vectorToCSVString(vector, namesAsComments);
-              } else {
-                fmtStr = vector.asFormatString();
+              VectorWritable vectorWritable =
+                  (VectorWritable) (transposeKeyValue ? keyWritable : valueWritable);
+              Vector vector = vectorWritable.get();
+              if (filters != null
+                  && vector instanceof NamedVector
+                  && filters.contains(((NamedVector)vector).getName()) == false){
+                //we are filtering out this item, skip
+                continue;
               }
-              writer.write(fmtStr);
-              writer.write('\n');
+              if (sizeOnly) {
+                if (vector instanceof NamedVector) {
+                  writer.write(((NamedVector) vector).getName());
+                  writer.write(":");
+                } else {
+                  writer.write(String.valueOf(i++));
+                  writer.write(":");
+                }
+                writer.write(String.valueOf(vector.size()));
+                writer.write('\n');
+              } else {
+                String fmtStr;
+                if (useCSV) {
+                  fmtStr = VectorHelper.vectorToCSVString(vector, namesAsComments);
+                } else {
+                  fmtStr = VectorHelper.vectorToJson(vector, dictionary, maxIndexesPerVector,
+                      sortVectors);
+                }
+                writer.write(fmtStr);
+                writer.write('\n');
+              }
+              itemCount++;
             }
-            count++;
           }
-
           writer.flush();
-
         } finally {
           if (shouldClose) {
             Closeables.closeQuietly(writer);

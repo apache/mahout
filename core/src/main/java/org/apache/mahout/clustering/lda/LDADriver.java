@@ -84,7 +84,7 @@ public final class LDADriver extends AbstractJob {
 
   private Iterable<Pair<Writable, VectorWritable>> trainingCorpus = null;
 
-  private LDADriver() {
+  public LDADriver() {
   }
 
   public static void main(String[] args) throws Exception {
@@ -220,7 +220,7 @@ public final class LDADriver extends AbstractJob {
     return 0;
   }
 
-  private void run(Configuration conf,
+  public double run(Configuration conf,
                           Path input,
                           Path output,
                           int numTopics,
@@ -274,6 +274,7 @@ public final class LDADriver extends AbstractJob {
                                         numWords,
                                         topicSmoothing);
     }
+    return -oldLL;
   }
 
   private static void writeInitialState(Path statePath, int numTopics, int numWords) throws IOException {

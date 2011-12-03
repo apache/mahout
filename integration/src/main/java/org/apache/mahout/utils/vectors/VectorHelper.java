@@ -17,18 +17,16 @@
 
 package org.apache.mahout.utils.vectors;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Iterator;
-import java.util.regex.Pattern;
-
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.lucene.util.PriorityQueue;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.FileLineIterator;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
@@ -36,6 +34,15 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.regex.Pattern;
 
 public final class VectorHelper {
 
@@ -48,6 +55,77 @@ public final class VectorHelper {
     Appendable bldr = new StringBuilder(2048);
     vectorToCSVString(vector, namesAsComments, bldr);
     return bldr.toString();
+  }
+
+  public static String buildJson(Iterable<Pair<String,Double>> iterable) {
+    return buildJson(iterable, new StringBuilder(2048));
+  }
+
+  public static String buildJson(Iterable<Pair<String,Double>> iterable, StringBuilder bldr) {
+    bldr.append("{");
+    Iterator<Pair<String, Double>> listIt = iterable.iterator();
+    while(listIt.hasNext()) {
+      Pair<String,Double> p = listIt.next();
+      bldr.append(p.getFirst());
+      bldr.append(":");
+      bldr.append(p.getSecond());
+      bldr.append(",");
+    }
+    if(bldr.length() > 1) {
+      bldr.setCharAt(bldr.length() - 1, '}');
+    }
+    return bldr.toString();
+  }
+
+  public static String vectorToSortedString(Vector vector, String[] dictionary) {
+    return vectorToJson(vector, dictionary, Integer.MAX_VALUE, true);
+  }
+
+  public static List<Pair<Integer, Double>> topEntries(Vector vector, int maxEntries) {
+    PriorityQueue<Pair<Integer,Double>> queue = new TDoublePQ<Integer>(-1, maxEntries);
+    Iterator<Vector.Element> it = vector.iterateNonZero();
+    while(it.hasNext()) {
+      Vector.Element e = it.next();
+      queue.insertWithOverflow(Pair.of(e.index(), e.get()));
+    }
+    List<Pair<Integer, Double>> entries = Lists.newArrayList();
+    Pair<Integer, Double> pair = null;
+    while((pair = queue.pop()) != null) {
+      if(pair.getFirst() > -1) {
+        entries.add(pair);
+      }
+    }
+    Collections.sort(entries, Ordering.natural().reverse());
+    return entries;
+  }
+
+  public static List<Pair<Integer, Double>> firstEntries(Vector vector, int maxEntries) {
+    List<Pair<Integer, Double>> entries = Lists.newArrayList();
+    Iterator<Vector.Element> it = vector.iterateNonZero();
+    int i = 0;
+    while(it.hasNext() && i++ < maxEntries) {
+      Vector.Element e = it.next();
+      entries.add(Pair.of(e.index(), e.get()));
+    }
+    return entries;
+  }
+
+  public static List<Pair<String, Double>> toWeightedTerms(List<Pair<Integer, Double>> entries,
+      final String[] dictionary) {
+    return Lists.newArrayList(Collections2.transform(entries,
+          new Function<Pair<Integer, Double>, Pair<String, Double>>() {
+            @Override
+            public Pair<String, Double> apply(Pair<Integer, Double> p) {
+              return Pair.of(dictionary[p.getFirst()], p.getSecond());
+            }
+          }));
+  }
+
+  public static String vectorToJson(Vector vector, final String[] dictionary, int maxEntries,
+      boolean sort) {
+    return buildJson(toWeightedTerms(sort
+                                     ? topEntries(vector, maxEntries)
+                                     : firstEntries(vector, maxEntries), dictionary));
   }
 
   public static void vectorToCSVString(Vector vector,
@@ -91,7 +169,8 @@ public final class VectorHelper {
   public static String[] loadTermDictionary(Configuration conf, String filePattern) {
     OpenObjectIntHashMap<String> dict = new OpenObjectIntHashMap<String>();
     for (Pair<Text,IntWritable> record :
-         new SequenceFileDirIterable<Text,IntWritable>(new Path(filePattern), PathType.GLOB, null, null, true, conf)) {
+         new SequenceFileDirIterable<Text,IntWritable>(new Path(filePattern), PathType.GLOB,
+             null, null, true, conf)) {
       dict.put(record.getFirst().toString(), record.getSecond().get());
     }
     String[] dictionary = new String[dict.size()];
@@ -127,5 +206,22 @@ public final class VectorHelper {
       result[index] = tokens[0];
     }
     return result;
+  }
+
+  private static class TDoublePQ<T> extends PriorityQueue<Pair<T, Double>> {
+    final T sentinel;
+    public TDoublePQ(T sentinel, int size) {
+      initialize(size);
+      this.sentinel = sentinel;
+    }
+    @Override
+    protected boolean lessThan(Pair<T, Double> a,
+        Pair<T, Double> b) {
+      return a.getSecond().compareTo(b.getSecond()) < 0;
+    }
+    @Override
+    protected Pair<T, Double> getSentinelObject() {
+      return Pair.of(sentinel, Double.NEGATIVE_INFINITY);
+    }
   }
 }

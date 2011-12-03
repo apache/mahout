@@ -624,12 +624,16 @@ public abstract class AbstractVector implements Vector {
 
   @Override
   public String toString() {
+    return toString(null);
+  }
+
+  public String toString(String[] dictionary) {
     StringBuilder result = new StringBuilder();
     result.append('{');
     for (int index = 0; index < size; index++) {
       double value = getQuick(index);
       if (value != 0.0) {
-        result.append(index);
+        result.append(dictionary != null && dictionary.length > index ? dictionary[index] : index);
         result.append(':');
         result.append(value);
         result.append(',');

@@ -16,15 +16,13 @@
  */
 package org.apache.mahout.clustering.lda;
 
-import org.apache.commons.math.distribution.IntegerDistribution;
-import org.easymock.EasyMock;
-
-import java.util.Iterator;
-import java.util.Random;
-
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import org.apache.commons.math.MathException;
-
+import org.apache.commons.math.distribution.IntegerDistribution;
 import org.apache.commons.math.distribution.PoissonDistributionImpl;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.mahout.common.IntPairWritable;
@@ -32,11 +30,21 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.MatrixUtils;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.function.DoubleFunction;
+import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Ignore;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+
+import static org.apache.mahout.clustering.ClusteringTestUtils.*;
 
 public final class TestMapReduce extends MahoutTestCase {
 
@@ -107,6 +115,55 @@ public final class TestMapReduce extends MahoutTestCase {
       mapper.map(new Text("tstMapper"), vw, mock);
       EasyMock.verify(mock);
     }
+  }
+
+  @Test
+  @Ignore("MAHOUT-399")
+  public void testEndToEnd() throws Exception {
+    double eta = 0.1;
+    int numGeneratingTopics = 5;
+    int numTerms = 26;
+    Matrix matrix = randomStructuredModel(numGeneratingTopics, numTerms,
+        new DoubleFunction() {
+      @Override public double apply(double d) {
+        return 1d / Math.pow(d+1, 3);
+      }
+    });
+
+    int numDocs = 500;
+    int numSamples = 10;
+    int numTopicsPerDoc = 1;
+
+    Matrix sampledCorpus = sampledCorpus(matrix, new Random(1234),
+        numDocs, numSamples, numTopicsPerDoc);
+
+    Path sampleCorpusPath = getTestTempDirPath("corpus");
+    MatrixUtils.write(sampleCorpusPath, new Configuration(), sampledCorpus);
+
+    int numIterations = 10;
+    List<Double> perplexities = Lists.newArrayList();
+    int startTopic = numGeneratingTopics - 2;
+    int numTestTopics = startTopic;
+    while(numTestTopics < numGeneratingTopics + 3) {
+      LDADriver driver = new LDADriver();
+      driver.setConf(new Configuration());
+      Path outputPath = getTestTempDirPath("output" + numTestTopics);
+      perplexities.add(driver.run(driver.getConf(), sampleCorpusPath, outputPath, numTestTopics,
+          numTerms, eta, numIterations, false));
+      numTestTopics++;
+    }
+    
+    int bestTopic = -1;
+    double lowestPerplexity = Double.MAX_VALUE;
+    for(int t = 0; t < perplexities.size(); t++) {
+      if(perplexities.get(t) < lowestPerplexity) {
+        lowestPerplexity = perplexities.get(t);
+        bestTopic = t + startTopic;
+      }
+    }
+    assertEquals("The optimal number of topics is not that of the generating distribution",
+        bestTopic, numGeneratingTopics);
+    System.out.println("Perplexities: " + Joiner.on(", ").join(perplexities));
   }
 
   private static int numNonZero(Vector v) {
