@@ -99,7 +99,7 @@ public class CachingCVB0Mapper
   public void map(IntWritable docId, VectorWritable document, Context context)
       throws IOException, InterruptedException{
     /* where to get docTopics? */
-    Vector topicVector = new DenseVector(new double[numTopics]).assign(1/numTopics);
+    Vector topicVector = new DenseVector(new double[numTopics]).assign(1.0/numTopics);
     modelTrainer.train(document.get(), topicVector, true, maxIters);
   }
 

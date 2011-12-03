@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -204,7 +205,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
       }
     }
     if(rows.isEmpty()) {
-      throw new IOException(modelPaths + " have no vectors in it");
+      throw new IOException(Arrays.toString(modelPaths) + " have no vectors in it");
     }
     numTopics++;
     Matrix model = new DenseMatrix(numTopics, numTerms);
@@ -216,6 +217,8 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     return Pair.of(model, topicSums);
   }
 
+  // NOTE: this is purely for debug purposes.  It is not performant to "toString()" a real model
+  @Override
   public String toString() {
     String buf = "";
     for(int x = 0; x < numTopics; x++) {
