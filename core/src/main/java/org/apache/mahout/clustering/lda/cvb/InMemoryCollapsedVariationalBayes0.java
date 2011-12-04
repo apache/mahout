@@ -39,6 +39,7 @@ import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
@@ -483,7 +484,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
     if(fs.isFile(vectorPath)) {
       subPaths.add(vectorPath);
     } else {
-      for(FileStatus fileStatus : fs.listStatus(vectorPath)) {
+      for(FileStatus fileStatus : fs.listStatus(vectorPath, PathFilters.logsCRCFilter())) {
         subPaths.add(fileStatus.getPath());
       }
     }
