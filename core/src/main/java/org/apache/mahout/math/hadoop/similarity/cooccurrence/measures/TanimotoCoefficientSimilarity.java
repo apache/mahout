@@ -21,7 +21,7 @@ public class TanimotoCoefficientSimilarity extends CountbasedMeasure {
 
   @Override
   public double similarity(double dots, double normA, double normB, int numberOfColumns) {
-    return dots / (normA + normB - dots);
+    return dots == 0 ? Double.NaN : dots / (normA + normB - dots);
   }
 
   @Override

@@ -105,6 +105,9 @@ public final class TanimotoCoefficientSimilarity extends AbstractItemSimilarity 
   private double doItemSimilarity(long itemID1, long itemID2, int preferring1) throws TasteException {
     DataModel dataModel = getDataModel();
     int preferring1and2 = dataModel.getNumUsersWithPreferenceFor(itemID1, itemID2);
+    if (preferring1and2 == 0) {
+      return Double.NaN;
+    }
     int preferring2 = dataModel.getNumUsersWithPreferenceFor(itemID2);
     return (double) preferring1and2 / (double) (preferring1 + preferring2 - preferring1and2);
   }

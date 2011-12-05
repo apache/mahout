@@ -89,4 +89,33 @@ public final class TanimotoCoefficientSimilarityTest extends SimilarityTestCase 
     new TanimotoCoefficientSimilarity(getDataModel()).refresh(null);
   }
 
+  @Test
+  public void testReturnNaNDoubleWhenNoSimilaritiesForTwoItems() throws Exception {
+	  DataModel dataModel = getDataModel(
+            new long[] {1, 2},
+            new Double[][] {
+                    {null, null, 3.0},
+                    {1.0, 1.0, null},
+            });  
+	  Double similarity = new TanimotoCoefficientSimilarity(dataModel).itemSimilarity(1, 2);
+	  assertEquals(Double.NaN, similarity, EPSILON);
+  }
+  
+  @Test
+  public void testItemsSimilarities() throws Exception {
+	  DataModel dataModel = getDataModel(
+	            new long[] {1, 2},
+	            new Double[][] {
+	                    {2.0, null, 2.0},
+	                    {1.0, 1.0, 1.0},
+	            });  
+	  TanimotoCoefficientSimilarity tCS = new TanimotoCoefficientSimilarity(dataModel);
+	  assertEquals(0.5, tCS.itemSimilarity(0, 1), EPSILON);
+	  assertEquals(1, tCS.itemSimilarity(0, 2), EPSILON);
+	  
+	  double[] similarities = tCS.itemSimilarities(0, new long [] {1, 2});
+	  assertEquals(0.5, similarities[0], EPSILON);
+	  assertEquals(1, similarities[1], EPSILON);
+  }
+  
 }
