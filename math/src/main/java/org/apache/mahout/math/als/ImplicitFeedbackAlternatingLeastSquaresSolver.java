@@ -52,7 +52,7 @@ public class ImplicitFeedbackAlternatingLeastSquaresSolver {
     return solve(YtransposeY.plus(YtransponseCuMinusIYPlusLambdaI(ratings)), YtransponseCuPu(ratings));
   }
 
-  private Vector solve(Matrix A, Matrix y) {
+  private static Vector solve(Matrix A, Matrix y) {
     return new QRDecomposition(A).solve(y).viewColumn(0);
   }
 
@@ -116,7 +116,7 @@ public class ImplicitFeedbackAlternatingLeastSquaresSolver {
     Iterator<Vector.Element> ratings = userRatings.iterateNonZero();
     while (ratings.hasNext()) {
       Vector.Element e = ratings.next();
-      YtransponseCuPu.assign((Y.get(e.index()).times(confidence(e.get()))), Functions.PLUS);
+      YtransponseCuPu.assign(Y.get(e.index()).times(confidence(e.get())), Functions.PLUS);
     }
 
     return columnVectorAsMatrix(YtransponseCuPu);
@@ -124,8 +124,9 @@ public class ImplicitFeedbackAlternatingLeastSquaresSolver {
 
   private Matrix columnVectorAsMatrix(Vector v) {
     Matrix matrix = new DenseMatrix(numFeatures, 1);
-    for (Vector.Element e : v)
-    matrix.setQuick(e.index(), 0, e.get());
+    for (Vector.Element e : v) {
+      matrix.setQuick(e.index(), 0, e.get());
+    }
     return matrix;
   }
 

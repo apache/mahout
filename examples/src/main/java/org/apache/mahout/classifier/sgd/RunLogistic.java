@@ -32,7 +32,6 @@ import org.apache.mahout.classifier.evaluation.Auc;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Locale;
 
@@ -70,23 +69,16 @@ public final class RunLogistic {
       if (showScores) {
         output.printf(Locale.ENGLISH, "\"%s\",\"%s\",\"%s\"\n", "target", "model-output", "log-likelihood");
       }
-      int lineCount = 0;
       while (line != null) {
         Vector v = new SequentialAccessSparseVector(lmp.getNumFeatures());
-        int target = 0;
-        try {
-          target = csv.processLine(line, v);
-        } catch (Exception e) {
-          System.out.println("Exception at line " + lineCount);
-          throw e;
-        }
+        int target = csv.processLine(line, v);
+
         double score = lr.classifyScalar(v);
         if (showScores) {
           output.printf(Locale.ENGLISH, "%d,%.3f,%.6f\n", target, score, lr.logLikelihood(target, v));
         }
         collector.add(target, score);
         line = in.readLine();
-        lineCount++;
       }
 
       if (showAuc) {

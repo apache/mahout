@@ -87,19 +87,8 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
                              String outputEigenVectorPathString) throws IOException {
     DistributedRowMatrix matrix = new DistributedRowMatrix(inputPath, outputTmpPath, numRows, numCols);
     matrix.setConf(new Configuration(originalConfig));
-    LanczosState state = new LanczosState(matrix, numCols, desiredRank, getInitialVector(matrix));
+    LanczosState state = new LanczosState(matrix, desiredRank, getInitialVector(matrix));
     return runJob(originalConfig, state, desiredRank, isSymmetric, outputEigenVectorPathString);
-  }
-
-  public void runJob(Configuration originalConfig,
-                     LanczosState state,
-                     int numCols,
-                     int desiredRank,
-                     boolean isSymmetric,
-                     String outputEigenVectorPathString) throws IOException {
-    setConf(originalConfig);
-    solve(state, desiredRank, isSymmetric);
-    serializeOutput(state, new Path(outputEigenVectorPathString));
   }
 
   @Override
@@ -201,11 +190,10 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
 
     LanczosState state;
     if(workingDirPath == null) {
-      state = new LanczosState(matrix, numCols, desiredRank, getInitialVector(matrix));
+      state = new LanczosState(matrix, desiredRank, getInitialVector(matrix));
     } else {
       HdfsBackedLanczosState hState =
-          new HdfsBackedLanczosState(matrix, numCols, desiredRank, getInitialVector(matrix),
-              workingDirPath);
+          new HdfsBackedLanczosState(matrix, desiredRank, getInitialVector(matrix), workingDirPath);
       hState.setConf(matrix.getConf());
       state = hState;
     }

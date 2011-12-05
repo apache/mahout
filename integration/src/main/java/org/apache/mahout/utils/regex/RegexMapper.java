@@ -1,5 +1,4 @@
-package org.apache.mahout.utils.regex;
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,6 +15,8 @@ package org.apache.mahout.utils.regex;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.regex;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -28,12 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-
-/**
- *
- *
- **/
 public class RegexMapper extends Mapper<LongWritable, Text, LongWritable, Text> {
+
   public static final String REGEX = "regex";
   public static final String GROUP_MATCHERS = "regex.groups";
   public static final String TRANSFORMER_CLASS = "transformer.class";
@@ -54,8 +51,8 @@ public class RegexMapper extends Mapper<LongWritable, Text, LongWritable, Text> 
     regex = Pattern.compile(regexStr);
     String[] groups = config.getStrings(GROUP_MATCHERS);
     if (groups != null) {
-      for (int i = 0; i < groups.length; i++) {
-        groupsToKeep.add(Integer.parseInt(groups[i]));
+      for (String group : groups) {
+        groupsToKeep.add(Integer.parseInt(group));
       }
     }
 
@@ -74,7 +71,7 @@ public class RegexMapper extends Mapper<LongWritable, Text, LongWritable, Text> 
   @Override
   protected void map(LongWritable key, Text text, Context context) throws IOException, InterruptedException {
     String result = RegexUtils.extract(text.toString(), regex, groupsToKeep, " ", transformer);
-    if (result != null && result.length() > 0) {
+    if (result != null && !result.isEmpty()) {
       String format = formatter.format(result);
       context.write(key, new Text(format));
     }

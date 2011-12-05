@@ -20,6 +20,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.MatrixSlice;
 import org.apache.mahout.math.Vector;
@@ -28,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Random;
 
 /**
  * Run ensemble learning via loading the {@link ModelTrainer} with two {@link TopicModel} instances:
@@ -54,11 +54,24 @@ import java.util.Random;
  */
 public class CachingCVB0Mapper
     extends Mapper<IntWritable, VectorWritable, IntWritable, VectorWritable> {
-  private static Logger log = LoggerFactory.getLogger(CachingCVB0Mapper.class);
 
-  protected ModelTrainer modelTrainer;
-  protected int maxIters;
-  protected int numTopics;
+  private static final Logger log = LoggerFactory.getLogger(CachingCVB0Mapper.class);
+
+  private ModelTrainer modelTrainer;
+  private int maxIters;
+  private int numTopics;
+  
+  protected ModelTrainer getModelTrainer() {
+    return modelTrainer;
+  }
+  
+  protected int getMaxIters() {
+    return maxIters;
+  }
+  
+  protected int getNumTopics() {
+    return numTopics;
+  }
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
@@ -81,7 +94,7 @@ public class CachingCVB0Mapper
       readModel = new TopicModel(conf, eta, alpha, null, numUpdateThreads, modelWeight, modelPaths);
     } else {
       log.info("No model files found");
-      readModel = new TopicModel(numTopics, numTerms, eta, alpha, new Random(seed), null,
+      readModel = new TopicModel(numTopics, numTerms, eta, alpha, RandomUtils.getRandom(seed), null,
           numTrainThreads, modelWeight);
     }
 

@@ -40,11 +40,10 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
 
   private static final Logger log = LoggerFactory.getLogger(ParallelALSFactorizationJobTest.class);
 
-  File inputFile;
-  File outputDir;
-  File tmpDir;
-
-  Configuration conf;
+  private File inputFile;
+  private File outputDir;
+  private File tmpDir;
+  private Configuration conf;
 
   @Before
   @Override
@@ -111,7 +110,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
     Matrix Ak = u.times(m.transpose());
     info.append("\nAk - users x items\n\n");
     info.append(MathHelper.nice(Ak));
-    info.append("\n");
+    info.append('\n');
 
     log.info(info.toString());
 
@@ -185,7 +184,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
     Matrix Ak = u.times(m.transpose());
     info.append("\nAk - users x items\n\n");
     info.append(MathHelper.nice(Ak));
-    info.append("\n");
+    info.append('\n');
 
     log.info(info.toString());
 
@@ -193,9 +192,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
     Iterator<MatrixSlice> sliceIterator = preferences.iterateAll();
     while (sliceIterator.hasNext()) {
       MatrixSlice slice = sliceIterator.next();
-      Iterator<Vector.Element> elementIterator = slice.vector().iterator();
-      while (elementIterator.hasNext()) {
-        Vector.Element e = elementIterator.next();
+      for (Vector.Element e : slice.vector()) {
         if (!Double.isNaN(e.get())) {
           double pref = e.get();
           double estimate = u.viewRow(slice.index()).dot(m.viewRow(e.index()));
@@ -203,7 +200,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
           double err = confidence * (pref - estimate) * (pref - estimate);
           avg.addDatum(err);
           log.info("Comparing preference of user [{}] towards item [{}], was [{}] with confidence [{}] " +
-              "estimate is [{}]", new Object[] { slice.index(), e.index(), pref, confidence, estimate });
+                       "estimate is [{}]", new Object[]{slice.index(), e.index(), pref, confidence, estimate});
         }
       }
     }
@@ -213,7 +210,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
     assertTrue(rmse < 0.4);
   }
 
-  protected String preferencesAsText(Matrix preferences) {
+  protected static String preferencesAsText(Matrix preferences) {
     StringBuilder prefsAsText = new StringBuilder();
     String separator = "";
     Iterator<MatrixSlice> sliceIterator = preferences.iterateAll();

@@ -17,8 +17,6 @@
 
 package org.apache.mahout.classifier.sgd;
 
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Multiset;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -67,11 +65,12 @@ public final class TestASFEmail {
 
     File base = new File(inputFile);
     //contains the best model
-    OnlineLogisticRegression classifier = ModelSerializer.readBinary(new FileInputStream(modelFile), OnlineLogisticRegression.class);
+    OnlineLogisticRegression classifier =
+        ModelSerializer.readBinary(new FileInputStream(modelFile), OnlineLogisticRegression.class);
 
 
     Dictionary asfDictionary = new Dictionary();
-    Multiset<String> overallCounts = HashMultiset.create();
+    //<String> overallCounts = HashMultiset.create();
     Configuration conf = new Configuration();
     SequenceFileDirIterator<Text, VectorWritable> iter = new SequenceFileDirIterator<Text, VectorWritable>(new Path(base.toString()), PathType.LIST, PathFilters.partFilter(),
             null, true, conf);
@@ -103,7 +102,7 @@ public final class TestASFEmail {
     output.printf("%s\n\n", ra.toString());
   }
 
-  protected boolean parseArgs(String[] args) {
+  boolean parseArgs(String[] args) {
     DefaultOptionBuilder builder = new DefaultOptionBuilder();
 
     Option help = builder.withLongName("help").withDescription("print this list").create();

@@ -21,7 +21,7 @@ public interface Weight {
   
   /**
    * Experimental
-   * 
+   *
    * @param tf term freq
    * @param df doc freq
    * @param length Length of the document

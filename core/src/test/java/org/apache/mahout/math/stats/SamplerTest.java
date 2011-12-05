@@ -27,19 +27,19 @@ public class SamplerTest extends MahoutTestCase {
   @Test
   public void testDiscreteSampler() {
     Vector distribution = new DenseVector(new double[] {1, 0, 2, 3, 5, 0});
-    Sampler sampler = new Sampler(RandomUtils.getRandom(1234), distribution);
+    Sampler sampler = new Sampler(RandomUtils.getRandom(), distribution);
     Vector sampledDistribution = distribution.like();
     int i = 0;
-    while(i < 10000) {
+    while (i < 100000) {
       int index = sampler.sample();
       sampledDistribution.set(index, sampledDistribution.get(index) + 1);
       i++;
     }
     assertTrue("sampled distribution is far from the original",
-        l1Dist(distribution, sampledDistribution) < 1e-2);
+        l1Dist(distribution, sampledDistribution) < 1.0e-2);
   }
 
-  private double l1Dist(Vector v, Vector w) {
-    return v.normalize(1d).minus(w.normalize(1)).norm(1d);
+  private static double l1Dist(Vector v, Vector w) {
+    return v.normalize(1.0).minus(w.normalize(1)).norm(1.0);
   }
 }

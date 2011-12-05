@@ -169,7 +169,7 @@ public class YtYJob {
   }
 
   public static void run(Configuration conf, Path[] inputPaths,
-      Path outputPath, int k, int p, long seed, int numReduceTasks)
+      Path outputPath, int k, int p, long seed)
       throws ClassNotFoundException, InterruptedException, IOException {
 
     Job job = new Job(conf);

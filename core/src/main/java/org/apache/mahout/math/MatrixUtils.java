@@ -30,7 +30,10 @@ import org.apache.mahout.math.map.OpenObjectIntHashMap;
 import java.io.IOException;
 import java.util.List;
 
-public class MatrixUtils {
+public final class MatrixUtils {
+
+  private MatrixUtils() {
+  }
 
   public static void write(Path outputDir, Configuration conf, VectorIterable matrix)
       throws IOException {
@@ -84,8 +87,7 @@ public class MatrixUtils {
     return matrix;
   }
 
-  public static OpenObjectIntHashMap<String> readDictionary(Configuration conf, Path... dictPath)
-    throws IOException {
+  public static OpenObjectIntHashMap<String> readDictionary(Configuration conf, Path... dictPath) {
     OpenObjectIntHashMap<String> dictionary = new OpenObjectIntHashMap<String>();
     for(Path dictionaryFile : dictPath) {
       for (Pair<Writable, IntWritable> record

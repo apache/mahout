@@ -87,7 +87,7 @@ public class RandomWalkWithRestartJobTest extends MahoutTestCase {
     info.append(MathHelper.nice(expectedAdjacencyMatrix));
     info.append("\nactual adjacency matrix \n\n");
     info.append(MathHelper.nice(actualAdjacencyMatrix));
-    info.append("\n");
+    info.append('\n');
     log.info(info.toString());
 
     Matrix expectedTransitionMatrix = new DenseMatrix(new double[][] {
@@ -104,7 +104,7 @@ public class RandomWalkWithRestartJobTest extends MahoutTestCase {
     info.append(MathHelper.nice(expectedTransitionMatrix));
     info.append("\nactual transition matrix\n\n");
     info.append(MathHelper.nice(actualTransitionMatrix));
-    info.append("\n");
+    info.append('\n');
     log.info(info.toString());
 
     MathHelper.assertMatrixEquals(expectedAdjacencyMatrix, actualAdjacencyMatrix);

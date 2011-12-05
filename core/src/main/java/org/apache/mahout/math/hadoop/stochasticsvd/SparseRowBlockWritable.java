@@ -36,7 +36,7 @@ public class SparseRowBlockWritable implements Writable {
 
   private int[] rowIndices;
   private Vector[] rows;
-  int numRows;
+  private int numRows;
 
   public SparseRowBlockWritable() {
     this(10);

@@ -45,7 +45,6 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
-import org.apache.mahout.common.distance.UserDefinedDistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -596,50 +595,6 @@ public final class TestCanopyCreation extends MahoutTestCase {
     Path path = new Path(output, "clusteredPoints/part-m-00000");
     long count = HadoopUtil.countRecords(path, conf);
     assertEquals("number of points", points.size(), count);
-  }
-
-  /**
-   * Story: Clustering algorithm must support arbitrary user defined distance
-   * measure
-   */
-  @Test
-  public void testUserDefinedDistanceMeasure() throws Exception {
-    List<VectorWritable> points = getPointsWritable();
-    Configuration conf = new Configuration();
-    ClusteringTestUtils.writePointsToFile(points,
-        getTestTempFilePath("testdata/file1"), fs, conf);
-    ClusteringTestUtils.writePointsToFile(points,
-        getTestTempFilePath("testdata/file2"), fs, conf);
-    // now run the Canopy Driver. User defined measure happens to be a Manhattan
-    // subclass so results are same.
-    Path output = getTestTempDirPath("output");
-    CanopyDriver.run(conf, getTestTempDirPath("testdata"), output,
-        new UserDefinedDistanceMeasure(), 3.1, 2.1, false, false);
-
-    // verify output from sequence file
-    Configuration job = new Configuration();
-    Path path = new Path(output, "clusters-0/part-r-00000");
-    FileSystem fs = FileSystem.get(path.toUri(), job);
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
-    try {
-      Writable key = new Text();
-      Canopy value = new Canopy();
-      assertTrue("more to come", reader.next(key, value));
-      assertEquals("1st key", "C-0", key.toString());
-
-      assertEquals("1st x value", 1.5, value.getCenter().get(0), EPSILON);
-      assertEquals("1st y value", 1.5, value.getCenter().get(1), EPSILON);
-      assertTrue("more to come", reader.next(key, value));
-      assertEquals("2nd key", "C-1", key.toString());
-
-      assertEquals("1st x value", 4.333333333333334, value.getCenter().get(0),
-          EPSILON);
-      assertEquals("1st y value", 4.333333333333334, value.getCenter().get(1),
-          EPSILON);
-      assertFalse("more to come", reader.next(key, value));
-    } finally {
-      Closeables.closeQuietly(reader);
-    }
   }
 
   /**

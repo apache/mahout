@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.regex;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,8 @@ package org.apache.mahout.utils.regex;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.regex;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -26,14 +27,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-
-/**
- *
- *
- **/
-
-public class RegexMapperTest extends MahoutTestCase {
-
+public final class RegexMapperTest extends MahoutTestCase {
 
   @Test
   public void testRegex() throws Exception {
@@ -41,7 +35,6 @@ public class RegexMapperTest extends MahoutTestCase {
     Configuration conf = new Configuration();
     conf.set(RegexMapper.REGEX, "(?<=(\\?|&)q=).*?(?=&|$)");
     conf.set(RegexMapper.TRANSFORMER_CLASS, URLDecodeTransformer.class.getName());
-    //conf.set(RegexMapper.);
     DummyRecordWriter<LongWritable, Text> mapWriter = new DummyRecordWriter<LongWritable, Text>();
     Mapper<LongWritable, Text, LongWritable, Text>.Context mapContext = DummyRecordWriter
             .build(mapper, conf, mapWriter);
@@ -53,7 +46,7 @@ public class RegexMapperTest extends MahoutTestCase {
       LongWritable key = new LongWritable(i);
       mapper.map(key, new Text(testStr), mapContext);
       List<Text> value = mapWriter.getValue(key);
-      if (RegexUtilsTest.GOLD[i].equals("") == false) {
+      if (!RegexUtilsTest.GOLD[i].isEmpty()) {
         assertEquals(1, value.size());
         assertEquals(RegexUtilsTest.GOLD[i], value.get(0).toString());
       }
@@ -67,7 +60,6 @@ public class RegexMapperTest extends MahoutTestCase {
     conf.set(RegexMapper.REGEX, "(\\d+)\\.(\\d+)\\.(\\d+)");
     conf.set(RegexMapper.TRANSFORMER_CLASS, URLDecodeTransformer.class.getName());
     conf.setStrings(RegexMapper.GROUP_MATCHERS, "1", "3");
-    //conf.set(RegexMapper.);
     DummyRecordWriter<LongWritable, Text> mapWriter = new DummyRecordWriter<LongWritable, Text>();
     Mapper<LongWritable, Text, LongWritable, Text>.Context mapContext = DummyRecordWriter
             .build(mapper, conf, mapWriter);
@@ -79,9 +71,8 @@ public class RegexMapperTest extends MahoutTestCase {
       LongWritable key = new LongWritable(i);
       mapper.map(key, new Text(testStr), mapContext);
       List<Text> value = mapWriter.getValue(key);
-      String gold = "127 0";
       assertEquals(1, value.size());
-      assertEquals(gold, value.get(0).toString());
+      assertEquals("127 0", value.get(0).toString());
     }
   }
 
@@ -92,20 +83,19 @@ public class RegexMapperTest extends MahoutTestCase {
     conf.set(RegexMapper.REGEX, "(?<=(\\?|&)q=).*?(?=&|$)");
     conf.set(RegexMapper.TRANSFORMER_CLASS, URLDecodeTransformer.class.getName());
     conf.set(RegexMapper.FORMATTER_CLASS, FPGFormatter.class.getName());
-    //conf.set(RegexMapper.);
     DummyRecordWriter<LongWritable, Text> mapWriter = new DummyRecordWriter<LongWritable, Text>();
     Mapper<LongWritable, Text, LongWritable, Text>.Context mapContext = DummyRecordWriter
             .build(mapper, conf, mapWriter);
 
     mapper.setup(mapContext);
-    FPGFormatter formatter = new FPGFormatter();
+    RegexFormatter formatter = new FPGFormatter();
     for (int i = 0; i < RegexUtilsTest.TEST_STRS.length; i++) {
       String testStr = RegexUtilsTest.TEST_STRS[i];
 
       LongWritable key = new LongWritable(i);
       mapper.map(key, new Text(testStr), mapContext);
       List<Text> value = mapWriter.getValue(key);
-      if (RegexUtilsTest.GOLD[i].equals("") == false) {
+      if (!RegexUtilsTest.GOLD[i].isEmpty()) {
         assertEquals(1, value.size());
         assertEquals(formatter.format(RegexUtilsTest.GOLD[i]), value.get(0).toString());
       }

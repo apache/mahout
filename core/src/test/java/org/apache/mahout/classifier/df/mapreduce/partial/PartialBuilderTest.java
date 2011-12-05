@@ -81,7 +81,7 @@ public final class PartialBuilderTest extends MahoutTestCase {
     TreeID[] newKeys = new TreeID[NUM_TREES];
     Node[] newTrees = new Node[NUM_TREES];
     
-    PartialBuilder.processOutput(new Job(conf), base, firstIds, newKeys, newTrees);
+    PartialBuilder.processOutput(new Job(conf), base, newKeys, newTrees);
 
     // check the forest
     for (int tree = 0; tree < NUM_TREES; tree++) {

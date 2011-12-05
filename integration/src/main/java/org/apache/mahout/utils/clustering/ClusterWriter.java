@@ -1,5 +1,4 @@
-package org.apache.mahout.utils.clustering;
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,6 +15,7 @@ package org.apache.mahout.utils.clustering;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.clustering;
 
 import org.apache.mahout.clustering.Cluster;
 
@@ -24,8 +24,7 @@ import java.io.IOException;
 
 /**
  * Writes out clusters
- *
- **/
+ */
 public interface ClusterWriter extends Closeable {
   /**
    * Write all values in the Iterable to the output

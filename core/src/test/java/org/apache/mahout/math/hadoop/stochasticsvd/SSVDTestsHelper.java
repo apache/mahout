@@ -26,6 +26,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
@@ -60,7 +61,7 @@ public class SSVDTestsHelper {
                                  int n,
                                  int startRowKey) throws IOException {
 
-    Random rnd = new Random();
+    Random rnd = RandomUtils.getRandom();
 
     int svCnt = svalues.size();
     Matrix v = generateDenseOrthonormalRandom(n, svCnt, rnd);

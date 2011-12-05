@@ -1,5 +1,4 @@
-package org.apache.mahout.math;
-/**
+/*
  *  This code is public domain.
  *
  *  The MurmurHash3 algorithm was created by Austin Appleby and put into the public domain.  See http://code.google.com/p/smhasher/
@@ -8,7 +7,7 @@ package org.apache.mahout.math;
  *  Yonik Seeley and was placed into the public domain per https://github.com/yonik/java_util/blob/master/src/util/hash/MurmurHash3.java.
  */
 
-//
+package org.apache.mahout.math;
 
 /**
  *  <p>
@@ -60,7 +59,7 @@ public class MurmurHash3 {
         k1 |= (data[roundedEnd + 1] & 0xff) << 8;
         // fallthrough
       case 1:
-        k1 |= (data[roundedEnd] & 0xff);
+        k1 |= data[roundedEnd] & 0xff;
         k1 *= c1;
         k1 = (k1 << 15) | (k1 >>> 17);  // ROTL32(k1,15);
         k1 *= c2;

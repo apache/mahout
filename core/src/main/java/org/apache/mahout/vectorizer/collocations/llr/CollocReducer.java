@@ -73,10 +73,10 @@ public class CollocReducer extends Reducer<GramKey, Gram, Gram, Gram> {
 
     if (keyType == Gram.Type.UNIGRAM) {
       // sum frequencies for unigrams.
-      processUnigram(key, values.iterator(), context);
+      processUnigram(values.iterator(), context);
     } else if (keyType == Gram.Type.HEAD || keyType == Gram.Type.TAIL) {
       // sum frequencies for subgrams, ngram and collect for each ngram.
-      processSubgram(key, values.iterator(), context);
+      processSubgram(values.iterator(), context);
     } else {
       context.getCounter(Skipped.MALFORMED_TYPES).increment(1);
     }
@@ -97,7 +97,7 @@ public class CollocReducer extends Reducer<GramKey, Gram, Gram, Gram> {
   /**
    * Sum frequencies for unigrams and deliver to the collector
    */
-  protected void processUnigram(GramKey key, Iterator<Gram> values, Context context)
+  protected void processUnigram(Iterator<Gram> values, Context context)
     throws IOException, InterruptedException {
 
     int freq = 0;
@@ -129,7 +129,7 @@ public class CollocReducer extends Reducer<GramKey, Gram, Gram, Gram> {
    *  some extra work.
    * @throws InterruptedException 
    */
-  protected void processSubgram(GramKey key, Iterator<Gram> values, Context context)
+  protected void processSubgram(Iterator<Gram> values, Context context)
     throws IOException, InterruptedException {
 
     Gram subgram = null;

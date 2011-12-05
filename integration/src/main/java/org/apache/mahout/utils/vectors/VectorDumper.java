@@ -77,10 +77,10 @@ public final class VectorDumper {
             "Print out the key as well, delimited by a tab (or the value if useKey is true)").withShortName("p")
             .create();
     Option outputOpt = obuilder.withLongName("output").withRequired(false).withArgument(
-            abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
+        abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
             "The output file.  If not specified, dumps to the console").withShortName("o").create();
     Option dictOpt = obuilder.withLongName("dictionary").withRequired(false).withArgument(
-            abuilder.withName("dictionary").withMinimum(1).withMaximum(1).create()).withDescription(
+        abuilder.withName("dictionary").withMinimum(1).withMaximum(1).create()).withDescription(
             "The dictionary file. ").withShortName("d").create();
     Option dictTypeOpt = obuilder.withLongName("dictionaryType").withRequired(false).withArgument(
             abuilder.withName("dictionaryType").withMinimum(1).withMaximum(1).create()).withDescription(
@@ -97,13 +97,13 @@ public final class VectorDumper {
     Option sizeOpt = obuilder.withLongName("sizeOnly").withRequired(false).
             withDescription("Dump only the size of the vector").withShortName("sz").create();
     Option numItemsOpt = obuilder.withLongName("numItems").withRequired(false).withArgument(
-            abuilder.withName("n").withMinimum(1).withMaximum(1).create()).
+        abuilder.withName("n").withMinimum(1).withMaximum(1).create()).
             withDescription("Output at most <n> vecors").withShortName("n").create();
     Option numIndexesPerVectorOpt = obuilder.withLongName("vectorSize").withShortName("vs")
         .withRequired(false).withArgument(abuilder.withName("vs").withMinimum(1)
-        .withMaximum(1).create())
+                                              .withMaximum(1).create())
         .withDescription("Truncate vectors to <vs> length when dumping (most useful when in"
-                          + " conjunction with -sort").create();
+                             + " conjunction with -sort").create();
     Option filtersOpt = obuilder.withLongName("filter").withRequired(false).withArgument(
             abuilder.withName("filter").withMinimum(1).withMaximum(100).create()).
             withDescription("Only dump out those vectors whose name matches the filter." +
@@ -219,7 +219,7 @@ public final class VectorDumper {
               Vector vector = vectorWritable.get();
               if (filters != null
                   && vector instanceof NamedVector
-                  && filters.contains(((NamedVector)vector).getName()) == false){
+                  && !filters.contains(((NamedVector)vector).getName())){
                 //we are filtering out this item, skip
                 continue;
               }

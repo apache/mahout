@@ -27,8 +27,12 @@ import org.slf4j.LoggerFactory;
 /**
  * Memory utilities.
  */
-public class MemoryUtil {
+public final class MemoryUtil {
+
   private static final Logger log = LoggerFactory.getLogger(MemoryUtil.class);
+
+  private MemoryUtil() {
+  }
 
   /**
    * Logs current heap memory statistics.
@@ -65,6 +69,7 @@ public class MemoryUtil {
       }
     });
     Runnable memoryLoogerRunnable = new Runnable() {
+      @Override
       public void run() {
         logMemoryStatistics();
       }
@@ -85,21 +90,10 @@ public class MemoryUtil {
    * {@link #startMemoryLogger()}.
    */
   public static void stopMemoryLogger() {
-    if (scheduler == null) {
-      return;
+    if (scheduler != null) {
+      scheduler.shutdownNow();
+      scheduler = null;
     }
-    scheduler.shutdownNow();
-    scheduler = null;
   }
 
-  /**
-   * Tests {@link MemoryLoggerThread}.
-   *
-   * @param args
-   * @throws InterruptedException
-   */
-  public static void main(String[] args) throws InterruptedException {
-    startMemoryLogger();
-    Thread.sleep(10000);
-  }
 }

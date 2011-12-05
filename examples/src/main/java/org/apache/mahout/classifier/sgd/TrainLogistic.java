@@ -82,13 +82,7 @@ public final class TrainLogistic {
           while (line != null) {
             // for each new line, get target and predictors
             Vector input = new RandomAccessSparseVector(lmp.getNumFeatures());
-            int targetValue = 0;
-            try {
-              targetValue = csv.processLine(line, input);
-            } catch (Exception e) {
-              System.out.println("Exception at line " + lineCount);
-              throw e;
-            }
+            int targetValue = csv.processLine(line, input);
 
             // check performance while this is still news
             double logP = lr.logLikelihood(targetValue, input);

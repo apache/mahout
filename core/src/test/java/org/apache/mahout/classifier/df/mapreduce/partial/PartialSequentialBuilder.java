@@ -101,7 +101,7 @@ public class PartialSequentialBuilder extends PartialBuilder {
     firstOutput = new MockContext(new Step1Mapper(), conf, task.getTaskAttemptID(), numTrees);
 
     /* first instance id in hadoop's order */
-    int[] firstIds = new int[nbSplits];
+    //int[] firstIds = new int[nbSplits];
     /* partitions' sizes in hadoop order */
     int[] sizes = new int[nbSplits];
     
@@ -119,7 +119,7 @@ public class PartialSequentialBuilder extends PartialBuilder {
 
       long time = System.currentTimeMillis();
 
-      firstIds[hp] = firstId;
+      //firstIds[hp] = firstId;
 
       while (reader.nextKeyValue()) {
         mapper.map(reader.getCurrentKey(), reader.getCurrentValue(), firstOutput);
@@ -149,7 +149,7 @@ public class PartialSequentialBuilder extends PartialBuilder {
   /**
    * extract the decision forest
    */
-  protected DecisionForest processOutput(TreeID[] keys, MapredOutput[] values) {
+  protected static DecisionForest processOutput(TreeID[] keys, MapredOutput[] values) {
     List<Node> trees = Lists.newArrayList();
 
     for (int index = 0; index < keys.length; index++) {

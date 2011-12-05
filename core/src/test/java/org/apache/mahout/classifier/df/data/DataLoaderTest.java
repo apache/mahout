@@ -61,7 +61,7 @@ public final class DataLoaderTest extends MahoutTestCase {
 
   /**
    * Test method for
-   * {@link DataLoader#generateDataset(String, boolean, String[])}
+   * {@link DataLoader#generateDataset(CharSequence, boolean, String[])}
    */
   @Test
   public void testGenerateDataset() throws Exception {
@@ -231,7 +231,7 @@ public final class DataLoaderTest extends MahoutTestCase {
 
   /**
    * Test method for
-   * {@link DataLoader#generateDataset(String, boolean, FileSystem, Path)}
+   * {@link DataLoader#generateDataset(CharSequence, boolean, FileSystem, Path)}
    */
   @Test
   public void testGenerateDatasetFromFile() throws Exception {

@@ -84,8 +84,7 @@ public class CDMutation implements EvolutionaryOperator<CDRule> {
         rule.setV(condInd, rndDouble(rule.getV(condInd), dataset
           .getMin(attrInd), dataset.getMax(attrInd), rng));
       } else {
-        rule.setV(condInd, rndInt(rule.getV(condInd), dataset
-          .getNbValues(attrInd), rng));
+        rule.setV(condInd, rndInt(dataset.getNbValues(attrInd), rng));
       }
     }
     
@@ -110,7 +109,7 @@ public class CDMutation implements EvolutionaryOperator<CDRule> {
     return value;
   }
   
-  static int rndInt(double value, int nbcategories, Random rng) {
+  static int rndInt(int nbcategories, Random rng) {
     return rng.nextInt(nbcategories);
   }
 }

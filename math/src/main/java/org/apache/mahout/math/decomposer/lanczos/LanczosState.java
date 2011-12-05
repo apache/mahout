@@ -26,20 +26,20 @@ import org.apache.mahout.math.VectorIterable;
 import java.util.Map;
 
 public class LanczosState {
+
   protected  Matrix diagonalMatrix;
   protected final VectorIterable corpus;
   protected double scaleFactor;
   protected int iterationNumber;
   protected final int desiredRank;
   protected Map<Integer, Vector> basis;
-
   protected final Map<Integer, Double> singularValues;
   protected Map<Integer, Vector> singularVectors;
 
-  public LanczosState(VectorIterable corpus, int numCols, int desiredRank, Vector initialVector) {
+  public LanczosState(VectorIterable corpus, int desiredRank, Vector initialVector) {
     this.corpus = corpus;
     this.desiredRank = desiredRank;
-    intitializeBasisAndSingularVectors(numCols, desiredRank);
+    intitializeBasisAndSingularVectors();
     setBasisVector(0, initialVector);
     scaleFactor = 0;
     diagonalMatrix = new DenseMatrix(desiredRank, desiredRank);
@@ -47,7 +47,7 @@ public class LanczosState {
     iterationNumber = 1;
   }
 
-  protected void intitializeBasisAndSingularVectors(int numCols, int rank) {
+  protected void intitializeBasisAndSingularVectors() {
     basis = Maps.newHashMap();
     singularVectors = Maps.newHashMap();
   }

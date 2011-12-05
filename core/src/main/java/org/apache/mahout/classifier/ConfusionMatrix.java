@@ -157,7 +157,7 @@ public class ConfusionMatrix {
     int length = confusionMatrix.length;
     if (m.numRows() != m.numCols()) {
       throw new IllegalArgumentException(
-          String.format("ConfusionMatrix: matrix({},{}) must be square", m.numRows(), m.numCols()));
+          "ConfusionMatrix: matrix(" + m.numRows() + ',' + m.numCols() + ") must be square");
     }
     for (int r = 0; r < length; r++) {
       for (int c = 0; c < length; c++) {
@@ -187,9 +187,9 @@ public class ConfusionMatrix {
     return sorted;
   }
   
-  private void verifyLabels(int length, String[] sorted) {
+  private static void verifyLabels(int length, String[] sorted) {
     Preconditions.checkArgument(sorted.length == length, "One label, one row");
-    for(int i = 0; i < length; i++) {
+    for (int i = 0; i < length; i++) {
       if (sorted[i] == null) {
         Preconditions.checkArgument(false, "One label, one row");
       }

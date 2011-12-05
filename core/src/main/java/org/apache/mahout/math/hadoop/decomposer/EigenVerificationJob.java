@@ -113,7 +113,7 @@ public class EigenVerificationJob extends AbstractJob {
            getOutputPath(),
            argMap.get("--inMemory") != null,
            Double.parseDouble(argMap.get("--maxError")),
-           Double.parseDouble(argMap.get("--minEigenvalue")),
+           //Double.parseDouble(argMap.get("--minEigenvalue")),
            Integer.parseInt(argMap.get("--maxEigens")));
     return 0;
   }
@@ -294,7 +294,6 @@ public class EigenVerificationJob extends AbstractJob {
                      Path output,
                      boolean inMemory,
                      double maxError,
-                     double minEigenValue,
                      int maxEigens) throws IOException {
     // no need to handle command line arguments
     outPath = output;
@@ -310,9 +309,6 @@ public class EigenVerificationJob extends AbstractJob {
     corpus = c;
 
     eigenVerifier = new SimpleEigenVerifier();
-    //OrthonormalityVerifier orthoVerifier = new OrthonormalityVerifier();
-    //VectorIterable pairwiseInnerProducts = computePairwiseInnerProducts();
-    // FIXME: Why is the above vector computed if it is never used?
 
     Map<MatrixSlice, EigenStatus> eigenMetaData = verifyEigens();
     List<Map.Entry<MatrixSlice, EigenStatus>> prunedEigenMeta = pruneEigens(eigenMetaData);

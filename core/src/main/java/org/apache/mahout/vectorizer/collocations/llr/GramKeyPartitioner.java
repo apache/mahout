@@ -29,7 +29,7 @@ public class GramKeyPartitioner extends Partitioner<GramKey, Gram> {
 
   private static final String HASH_OFFSET_PROPERTY_NAME = "grampartitioner.hash.offset";
     
-  public static void setOffsets(Configuration conf, int left, int right) {
+  public static void setOffsets(Configuration conf, int left) {
     conf.setInt(HASH_OFFSET_PROPERTY_NAME, left);
   }
   

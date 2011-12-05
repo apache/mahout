@@ -55,7 +55,7 @@ import java.util.TreeMap;
 
 public final class ClusterDumper extends AbstractJob {
 
-  protected DistanceMeasure measure;
+  private DistanceMeasure measure;
 
   public enum OUTPUT_FORMAT {
     TEXT,

@@ -31,7 +31,7 @@ public class ResultAnalyzer {
   
   private final ConfusionMatrix confusionMatrix;
   private final OnlineSummarizer summarizer;
-  boolean hasLL = false;
+  private boolean hasLL = false;
   
   /*
    * === Summary ===

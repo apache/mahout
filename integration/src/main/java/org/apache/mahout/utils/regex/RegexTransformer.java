@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.regex;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,11 +15,13 @@ package org.apache.mahout.utils.regex;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.regex;
 
 /**
  * Transforms the match of a regular expression.
  */
 public interface RegexTransformer {
-  public String transformMatch(String match);
+
+  String transformMatch(String match);
 
 }

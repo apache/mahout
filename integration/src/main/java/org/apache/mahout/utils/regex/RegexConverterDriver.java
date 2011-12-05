@@ -1,19 +1,4 @@
-package org.apache.mahout.utils.regex;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
-import org.apache.hadoop.util.ToolRunner;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.mahout.common.AbstractJob;
-import org.apache.mahout.common.HadoopUtil;
-import org.apache.mahout.common.commandline.DefaultOptionCreator;
-import org.apache.mahout.vectorizer.DefaultAnalyzer;
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -30,6 +15,20 @@ import org.apache.mahout.vectorizer.DefaultAnalyzer;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.regex;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.util.ToolRunner;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 
 /**
  * Experimental
@@ -64,14 +63,14 @@ public class RegexConverterDriver extends AbstractJob {
     }
     String trans = getOption("transformerClass");
     if (trans != null) {
-      if (trans.equalsIgnoreCase("url")) {
+      if ("url".equalsIgnoreCase(trans)) {
         trans = URLDecodeTransformer.class.getName();
       }
       conf.set(RegexMapper.TRANSFORMER_CLASS, trans);
     }
     String formatter = getOption("formatterClass");
     if (formatter != null) {
-      if (formatter.equalsIgnoreCase("fpg")) {
+      if ("fpg".equalsIgnoreCase(formatter)) {
         formatter = FPGFormatter.class.getName();
       }
       conf.set(RegexMapper.FORMATTER_CLASS, formatter);

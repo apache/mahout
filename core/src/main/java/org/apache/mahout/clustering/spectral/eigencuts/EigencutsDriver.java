@@ -129,7 +129,7 @@ public class EigencutsDriver extends AbstractJob {
 
       // eigendecomposition (step 3)
       int overshoot = (int) ((double) eigenrank * OVERSHOOT_MULTIPLIER);
-      LanczosState state = new LanczosState(L, overshoot, eigenrank,
+      LanczosState state = new LanczosState(L, eigenrank,
           new DistributedLanczosSolver().getInitialVector(L));
 
       DistributedRowMatrix U = performEigenDecomposition(conf, L, state, eigenrank, overshoot, outputCalc);
@@ -188,7 +188,7 @@ public class EigencutsDriver extends AbstractJob {
     // now run the verifier to trim down the number of eigenvectors
     EigenVerificationJob verifier = new EigenVerificationJob();
     Path verifiedEigens = new Path(tmp, "verifiedeigens");
-    verifier.runJob(conf, seqFiles, input.getRowPath(), verifiedEigens, false, 1.0, 0.0, numEigenVectors);
+    verifier.runJob(conf, seqFiles, input.getRowPath(), verifiedEigens, false, 1.0, numEigenVectors);
     Path cleanedEigens = verifier.getCleanedEigensPath();
     return new DistributedRowMatrix(cleanedEigens, new Path(cleanedEigens, "tmp"), numEigenVectors, input.numRows());
   }

@@ -1,9 +1,4 @@
-package org.apache.mahout.utils.regex;
-
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -20,44 +15,49 @@ import java.util.regex.Pattern;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.regex;
 
-/**
- *
- *
- **/
-public class RegexUtils {
+import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public final class RegexUtils {
+
   public static final RegexTransformer IDENTITY_TRANSFORMER = new IdentityTransformer();
   public static final RegexFormatter IDENTITY_FORMATTER = new IdentityFormatter();
 
-  public static String extract(String line, Pattern pattern, List<Integer> groupsToKeep,
+  private RegexUtils() {
+  }
+
+  public static String extract(CharSequence line, Pattern pattern, Collection<Integer> groupsToKeep,
                                String separator, RegexTransformer transformer) {
     StringBuilder bldr = new StringBuilder();
     extract(line, bldr, pattern, groupsToKeep, separator, transformer);
     return bldr.toString();
   }
 
-  public static void extract(String line, StringBuilder outputBuffer,
-                             Pattern pattern, List<Integer> groupsToKeep, String separator,
+  public static void extract(CharSequence line, StringBuilder outputBuffer,
+                             Pattern pattern, Collection<Integer> groupsToKeep, String separator,
                              RegexTransformer transformer) {
     if (transformer == null) {
       transformer = IDENTITY_TRANSFORMER;
     }
     Matcher matcher = pattern.matcher(line);
     String match;
-    if (groupsToKeep.isEmpty() == false) {
-      while (matcher.find() == true) {
+    if (groupsToKeep.isEmpty()) {
+      while (matcher.find()) {
+        match = matcher.group();
+        if (match != null) {
+          outputBuffer.append(transformer.transformMatch(match)).append(separator);
+        }
+      }
+    } else {
+      while (matcher.find()) {
         for (Integer groupNum : groupsToKeep) {
           match = matcher.group(groupNum);
           if (match != null) {
             outputBuffer.append(transformer.transformMatch(match)).append(separator);
           }
-        }
-      }
-    } else {
-      while (matcher.find() == true) {
-        match = matcher.group();
-        if (match != null) {
-          outputBuffer.append(transformer.transformMatch(match)).append(separator);
         }
       }
     }

@@ -23,6 +23,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
@@ -61,7 +62,9 @@ import java.util.concurrent.TimeUnit;
  * accumulated.
  */
 public class TopicModel implements Configurable, Iterable<MatrixSlice> {
+  
   private static final Logger log = LoggerFactory.getLogger(TopicModel.class);
+  
   private final String[] dictionary;
   private final Matrix topicTermCounts;
   private final Vector topicSums;
@@ -74,7 +77,6 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
 
   private Sampler sampler;
   private final int numThreads;
-  private ThreadPoolExecutor threadPool;
   private Updater[] updaters;
 
   public int getNumTerms() {
@@ -131,7 +133,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     this.numTerms = topicTermCounts.numCols();
     this.eta = eta;
     this.alpha = alpha;
-    this.sampler = new Sampler(new Random(1234));
+    this.sampler = new Sampler(RandomUtils.getRandom());
     this.numThreads = numThreads;
     if(modelWeight != 1) {
       topicSums.assign(Functions.mult(modelWeight));
@@ -151,8 +153,8 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   private void initializeThreadPool() {
-    threadPool = new ThreadPoolExecutor(numThreads, numThreads, 0, TimeUnit.SECONDS,
-        new ArrayBlockingQueue<Runnable>(numThreads * 10));
+    ThreadPoolExecutor threadPool = new ThreadPoolExecutor(numThreads, numThreads, 0, TimeUnit.SECONDS,
+                                                           new ArrayBlockingQueue<Runnable>(numThreads * 10));
     threadPool.allowCoreThreadTimeOut(false);
     updaters = new Updater[numThreads];
     for(int i = 0; i < numThreads; i++) {
@@ -165,6 +167,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     return topicTermCounts;
   }
 
+  @Override
   public Iterator<MatrixSlice> iterator() {
     return topicTermCounts.iterateAll();
   }
@@ -184,7 +187,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
       }
     }
     for(int x = 0; x < numTopics; x++) {
-      topicSums.set(x, random == null ? 1d : topicTermCounts.viewRow(x).norm(1));
+      topicSums.set(x, random == null ? 1.0 : topicTermCounts.viewRow(x).norm(1));
     }
     return Pair.of(topicTermCounts, topicSums);
   }
@@ -220,14 +223,14 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   // NOTE: this is purely for debug purposes.  It is not performant to "toString()" a real model
   @Override
   public String toString() {
-    String buf = "";
+    StringBuilder buf = new StringBuilder();
     for(int x = 0; x < numTopics; x++) {
       String v = dictionary != null
           ? vectorToSortedString(topicTermCounts.viewRow(x).normalize(1), dictionary)
           : topicTermCounts.viewRow(x).asFormatString();
-      buf += v + "\n";
+      buf.append(v).append('\n');
     }
-    return buf;
+    return buf.toString();
   }
 
   public int sampleTerm(Vector topicDistribution) {
@@ -340,7 +343,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     // for each topic x
     for(int x = 0; x < numTopics; x++) {
       // get p(topic x | document i), or 1.0 if docTopics is null
-      double topicWeight = docTopics == null ? 1d : docTopics.get(x);
+      double topicWeight = docTopics == null ? 1.0 : docTopics.get(x);
       // get w(term a | topic x)
       Vector topicTermRow = topicTermCounts.viewRow(x);
       // get \sum_a w(term a | topic x)
@@ -419,15 +422,15 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     });
     Iterator<Pair<String,Double>> listIt = vectorValues.iterator();
     StringBuilder bldr = new StringBuilder(2048);
-    bldr.append("{");
+    bldr.append('{');
     int i = 0;
     while(listIt.hasNext() && i < 25) {
       i++;
       Pair<String,Double> p = listIt.next();
       bldr.append(p.getFirst());
-      bldr.append(":");
+      bldr.append(':');
       bldr.append(p.getSecond());
-      bldr.append(",");
+      bldr.append(',');
     }
     if(bldr.length() > 1) {
       bldr.setCharAt(bldr.length() - 1, '}');

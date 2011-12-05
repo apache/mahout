@@ -1,5 +1,4 @@
-package org.apache.mahout.utils.regex;
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,17 +15,20 @@ package org.apache.mahout.utils.regex;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.regex;
 
 import java.util.regex.Pattern;
 
 /**
  *  Collapses/converts all whitespace to a single tab
- *
- **/
+ */
 public class FPGFormatter implements RegexFormatter {
+
   private static final Pattern WHITESPACE = Pattern.compile("\\W+");
+
   @Override
   public String format(String toFormat) {
-    return "\t" + WHITESPACE.matcher(toFormat).replaceAll("|");
+    return '\t' + WHITESPACE.matcher(toFormat).replaceAll("|");
   }
+
 }

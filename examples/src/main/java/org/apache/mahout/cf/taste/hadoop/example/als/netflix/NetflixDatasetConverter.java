@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /** converts the raw files provided by netflix to an appropriate input format */
-public class NetflixDatasetConverter {
+public final class NetflixDatasetConverter {
 
   private static final Logger log = LoggerFactory.getLogger(NetflixDatasetConverter.class);
 
@@ -48,6 +48,9 @@ public class NetflixDatasetConverter {
   private static final String MOVIE_DENOTER = ":";
   private static final String TAB = "\t";
   private static final String NEWLINE = "\n";
+
+  private NetflixDatasetConverter() {
+  }
 
   public static void main(String[] args) throws IOException {
 
@@ -73,17 +76,14 @@ public class NetflixDatasetConverter {
 
       int ratingsProcessed = 0;
       for (File movieRatings : new File(trainingDataDir).listFiles()) {
-        boolean firstLineRead = false;
-        String movieID = null;
         FileLineIterator lines = null;
         try  {
           lines = new FileLineIterator(movieRatings);
+          boolean firstLineRead = false;
+          String movieID = null;
           while (lines.hasNext()) {
             String line = lines.next();
-            if (!firstLineRead) {
-              movieID = line.replaceAll(MOVIE_DENOTER, "");
-              firstLineRead = true;
-            } else {
+            if (firstLineRead) {
               String[] tokens = SEPARATOR.split(line);
               String userID = tokens[0];
               String rating = tokens[1];
@@ -92,6 +92,9 @@ public class NetflixDatasetConverter {
               if (ratingsProcessed % 1000000 == 0) {
                 log.info("{} ratings processed...", ratingsProcessed);
               }
+            } else {
+              movieID = line.replaceAll(MOVIE_DENOTER, "");
+              firstLineRead = true;
             }
           }
         } finally {

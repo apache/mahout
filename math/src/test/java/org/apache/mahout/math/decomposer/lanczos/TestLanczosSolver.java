@@ -41,7 +41,7 @@ public final class TestLanczosSolver extends SolverTest {
     initialVector.assign(1.0 / Math.sqrt(size));
     LanczosSolver solver = new LanczosSolver();
     int desiredRank = 80;
-    LanczosState state = new LanczosState(m, size, desiredRank, initialVector);
+    LanczosState state = new LanczosState(m, desiredRank, initialVector);
     // set initial vector?
     solver.solve(state, desiredRank, true);
 
@@ -71,7 +71,7 @@ public final class TestLanczosSolver extends SolverTest {
     Vector initialVector = new DenseVector(numColumns);
     initialVector.assign(1.0 / Math.sqrt(numColumns));
     int rank = 50;
-    LanczosState state = new LanczosState(corpus, numColumns, rank, initialVector);
+    LanczosState state = new LanczosState(corpus, rank, initialVector);
     long time = timeLanczos(corpus, state, rank, false);
     assertTrue("Lanczos taking too long!  Are you in the debugger? :)", time < 10000);
     assertOrthonormal(state);
@@ -88,7 +88,7 @@ public final class TestLanczosSolver extends SolverTest {
     Vector initialVector = new DenseVector(numCols);
     initialVector.assign(1.0 / Math.sqrt(numCols));
     int rank = 30;
-    LanczosState state = new LanczosState(corpus, numCols, rank, initialVector);
+    LanczosState state = new LanczosState(corpus, rank, initialVector);
     long time = timeLanczos(corpus, state, rank, true);
     assertTrue("Lanczos taking too long!  Are you in the debugger? :)", time < 10000);
     //assertOrthonormal(state);

@@ -350,7 +350,6 @@ public final class ConfusionMatrixDumper extends AbstractJob {
   }
   
   public static void printCountsTable(ConfusionMatrix cm, PrintStream out) {
-    int length = cm.getLabels().size();
     format("<table class='%s'>\n", out, CSS_TABLE);
     printCountsHeader(cm, out, false);
     printCountsRows(cm, out);

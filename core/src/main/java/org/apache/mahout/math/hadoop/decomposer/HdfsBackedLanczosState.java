@@ -51,9 +51,8 @@ public class HdfsBackedLanczosState extends LanczosState implements Configurable
   private final Path singularVectorPath;
   private FileSystem fs;
   
-  public HdfsBackedLanczosState(VectorIterable corpus, int numCols, int desiredRank,
-      Vector initialVector, Path dir) {
-    super(corpus, numCols, desiredRank, initialVector);
+  public HdfsBackedLanczosState(VectorIterable corpus, int desiredRank, Vector initialVector, Path dir) {
+    super(corpus, desiredRank, initialVector);
     baseDir = dir;
     //Path metadataPath = new Path(dir, METADATA_FILE);
     basisPath = new Path(dir, BASIS_PREFIX);

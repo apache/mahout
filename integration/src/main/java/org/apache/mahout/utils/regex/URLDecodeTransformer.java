@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.regex;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,16 +15,14 @@ package org.apache.mahout.utils.regex;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.regex;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
+public final class URLDecodeTransformer implements RegexTransformer {
 
-/**
- *
- *
- **/
-public class URLDecodeTransformer implements RegexTransformer {
-  private String enc;
+  private final String enc;
 
   public URLDecodeTransformer() {
     enc = "UTF-8";
@@ -40,7 +37,7 @@ public class URLDecodeTransformer implements RegexTransformer {
     try {
       return URLDecoder.decode(match, enc);
     } catch (UnsupportedEncodingException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
   }
 }

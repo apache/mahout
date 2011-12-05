@@ -167,7 +167,7 @@ public class QRFirstStep implements Closeable, OutputCollector<Writable, Vector>
 
   }
 
-  protected void map(Writable key, Vector incomingYRow) throws IOException {
+  protected void map(Vector incomingYRow) throws IOException {
     double[] yRow;
     if (yLookahead.size() == kp) {
       if (qSolver.isFull()) {
@@ -279,8 +279,7 @@ public class QRFirstStep implements Closeable, OutputCollector<Writable, Vector>
 
   @Override
   public void collect(Writable key, Vector vw) throws IOException {
-    map(key, vw);
-
+    map(vw);
   }
 
 }

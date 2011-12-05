@@ -39,7 +39,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -453,7 +452,7 @@ public abstract class AbstractJob extends Configured implements Tool {
   protected Class<? extends Analyzer> getAnalyzerClassFromOption() throws ClassNotFoundException {
     Class<? extends Analyzer> analyzerClass = DefaultAnalyzer.class;
     if (hasOption(DefaultOptionCreator.ANALYZER_NAME_OPTION)) {
-      String className = getOption(DefaultOptionCreator.ANALYZER_NAME_OPTION).toString();
+      String className = getOption(DefaultOptionCreator.ANALYZER_NAME_OPTION);
       analyzerClass = Class.forName(className).asSubclass(Analyzer.class);
       // try instantiating it, b/c there isn't any point in setting it if
       // you can't instantiate it

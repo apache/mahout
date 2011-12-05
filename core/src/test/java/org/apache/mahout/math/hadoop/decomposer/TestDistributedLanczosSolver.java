@@ -36,8 +36,10 @@ public final class TestDistributedLanczosSolver extends MahoutTestCase {
   private DistributedRowMatrix symCorpus;
   private DistributedRowMatrix asymCorpus;
 
+  @Override
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
+    super.setUp();
     File symTestData = getTestTempDir("symTestData");
     File asymTestData = getTestTempDir("asymTestData");
     symCorpus = new TestDistributedRowMatrix().randomDistributedMatrix(100,
@@ -54,10 +56,12 @@ public final class TestDistributedLanczosSolver extends MahoutTestCase {
     return symmetric ? symCorpus : asymCorpus;
   }
 
+  /*
   private LanczosState doTestDistributedLanczosSolver(boolean symmetric,
       int desiredRank) throws IOException {
     return doTestDistributedLanczosSolver(symmetric, desiredRank, true);
   }
+   */
 
   private LanczosState doTestDistributedLanczosSolver(boolean symmetric,
       int desiredRank, boolean hdfsBackedState)
@@ -69,13 +73,13 @@ public final class TestDistributedLanczosSolver extends MahoutTestCase {
     Vector intitialVector = solver.getInitialVector(corpus);
     LanczosState state;
     if(hdfsBackedState) {
-      HdfsBackedLanczosState hState = new HdfsBackedLanczosState(corpus, corpus.numCols(),
+      HdfsBackedLanczosState hState = new HdfsBackedLanczosState(corpus,
           desiredRank, intitialVector, new Path(getTestTempDirPath(),
               "lanczosStateDir" + suf(symmetric) + counter));
       hState.setConf(conf);
       state = hState;
     } else {
-      state = new LanczosState(corpus, corpus.numCols(), desiredRank, intitialVector);
+      state = new LanczosState(corpus, desiredRank, intitialVector);
     }
     solver.solve(state, desiredRank, symmetric);
     SolverTest.assertOrthonormal(state);
@@ -93,12 +97,12 @@ public final class TestDistributedLanczosSolver extends MahoutTestCase {
     DistributedLanczosSolver solver = new DistributedLanczosSolver();
     int rank = 10;
     Vector intitialVector = solver.getInitialVector(corpus);
-    HdfsBackedLanczosState state = new HdfsBackedLanczosState(corpus, corpus.numCols(), rank,
+    HdfsBackedLanczosState state = new HdfsBackedLanczosState(corpus, rank,
         intitialVector, new Path(getTestTempDirPath(), "lanczosStateDir" + suf(symmetric) + counter));
     solver.solve(state, rank, symmetric);
 
     rank *= 2;
-    state = new HdfsBackedLanczosState(corpus, corpus.numCols(), rank,
+    state = new HdfsBackedLanczosState(corpus, rank,
         intitialVector, new Path(getTestTempDirPath(), "lanczosStateDir" + suf(symmetric) + counter));
     solver = new DistributedLanczosSolver();
     solver.solve(state, rank, symmetric);

@@ -30,8 +30,11 @@ public class CVB0DocInferenceMapper extends CachingCVB0Mapper {
   @Override
   public void map(IntWritable docId, VectorWritable doc, Context context)
       throws IOException, InterruptedException {
-    Vector docTopics = new DenseVector(new double[numTopics]).assign(1d/numTopics);
+    int numTopics = getNumTopics();
+    Vector docTopics = new DenseVector(new double[numTopics]).assign(1.0 /numTopics);
     Matrix docModel = new SparseRowMatrix(numTopics, doc.get().size());
+    int maxIters = getMaxIters();
+    ModelTrainer modelTrainer = getModelTrainer();
     for(int i = 0; i < maxIters; i++) {
       modelTrainer.getReadModel().trainDocTopicModel(doc.get(), docTopics, docModel);
     }
@@ -40,6 +43,6 @@ public class CVB0DocInferenceMapper extends CachingCVB0Mapper {
 
   @Override
   protected void cleanup(Context context) {
-    modelTrainer.stop();
+    getModelTrainer().stop();
   }
 }

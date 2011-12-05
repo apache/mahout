@@ -67,10 +67,10 @@ public final class TanimotoCoefficientSimilarity extends AbstractItemSimilarity 
 
     int xPrefsSize = xPrefs.size();
     int yPrefsSize = yPrefs.size();
-    if (xPrefsSize == 0 && yPrefs.size() == 0) {
+    if (xPrefsSize == 0 && yPrefsSize == 0) {
       return Double.NaN;
     }
-    if (xPrefsSize == 0 || yPrefs.size() == 0) {
+    if (xPrefsSize == 0 || yPrefsSize == 0) {
       return 0.0;
     }
     

@@ -31,8 +31,6 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterator;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.OutputStreamWriter;
@@ -42,7 +40,6 @@ import java.util.List;
 
 public final class SequenceFileDumper extends AbstractJob {
 
-  private static final Logger log = LoggerFactory.getLogger(SequenceFileDumper.class);
   public SequenceFileDumper() {
     setConf(new Configuration());
   }
@@ -102,7 +99,7 @@ public final class SequenceFileDumper extends AbstractJob {
       } else {
         long numItems = Long.MAX_VALUE;
         if (hasOption("numItems")) {
-          numItems = Long.parseLong(getOption("numItems").toString());
+          numItems = Long.parseLong(getOption("numItems"));
           writer.append("Max Items to dump: ").append(String.valueOf(numItems)).append("\n");
         }
         while (iterator.hasNext() && count < numItems) {
@@ -124,9 +121,9 @@ public final class SequenceFileDumper extends AbstractJob {
 
         IntArrayList valueList = new IntArrayList(facets.size());
         facets.pairsSortedByKey(keyList, valueList);
-        int i = 0;
         writer.append("-----Facets---\n");
         writer.append("Key\t\tCount\n");
+        int i = 0;
         for (String key : keyList) {
           writer.append(key).append("\t\t").append(String.valueOf(valueList.get(i++))).append('\n');
 

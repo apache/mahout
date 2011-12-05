@@ -1,4 +1,3 @@
-package org.apache.mahout.classifier.sgd;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,7 @@ package org.apache.mahout.classifier.sgd;
  * limitations under the License.
  */
 
+package org.apache.mahout.classifier.sgd;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -34,12 +34,12 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-/**
- *
- *
- **/
-public class SGDHelper {
+public final class SGDHelper {
+
   private static final String[] LEAK_LABELS = {"none", "month-year", "day-month-year"};
+
+  private SGDHelper() {
+  }
 
   public static void dissect(int leakType,
                              Dictionary dictionary,
@@ -90,8 +90,8 @@ public class SGDHelper {
   }
 
   static void analyzeState(SGDInfo info, int leakType, int k, State<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner> best) throws IOException {
-    int bump = info.bumps[(int) Math.floor(info.step) % info.bumps.length];
-    int scale = (int) Math.pow(10, Math.floor(info.step / info.bumps.length));
+    int bump = info.getBumps()[(int) Math.floor(info.getStep()) % info.getBumps().length];
+    int scale = (int) Math.pow(10, Math.floor(info.getStep() / info.getBumps().length));
     double maxBeta;
     double nonZeros;
     double positive;
@@ -102,8 +102,8 @@ public class SGDHelper {
 
     if (best != null) {
       CrossFoldLearner state = best.getPayload().getLearner();
-      info.averageCorrect = state.percentCorrect();
-      info.averageLL = state.logLikelihood();
+      info.setAverageCorrect(state.percentCorrect());
+      info.setAverageLL(state.logLikelihood());
 
       OnlineLogisticRegression model = state.getModels().get(0);
       // finish off pending regularization
@@ -139,10 +139,10 @@ public class SGDHelper {
                 best.getPayload().getLearner().getModels().get(0));
       }
 
-      info.step += 0.25;
+      info.setStep(info.getStep() + 0.25);
       System.out.printf("%.2f\t%.2f\t%.2f\t%.2f\t%.8g\t%.8g\t", maxBeta, nonZeros, positive, norm, lambda, mu);
       System.out.printf("%d\t%.3f\t%.2f\t%s\n",
-        k, info.averageLL, info.averageCorrect * 100, LEAK_LABELS[leakType % 3]);
+        k, info.getAverageLL(), info.getAverageCorrect() * 100, LEAK_LABELS[leakType % 3]);
     }
   }
 

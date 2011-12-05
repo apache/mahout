@@ -139,7 +139,7 @@ public final class Driver {
     Map<String,Integer> labels = arffModel.getLabelBindings();
     Writer writer = Files.newWriterSupplier(dictOut, Charsets.UTF_8, true).getOutput();
     try {
-      writer.write("Label bindings for Relation " + arffModel.getRelation() + "\n");
+      writer.write("Label bindings for Relation " + arffModel.getRelation() + '\n');
       for (Map.Entry<String,Integer> entry : labels.entrySet()) {
         writer.write(entry.getKey());
         writer.write(delimiter);

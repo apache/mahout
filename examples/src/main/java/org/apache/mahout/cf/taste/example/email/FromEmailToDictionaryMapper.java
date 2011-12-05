@@ -41,20 +41,20 @@ public final class FromEmailToDictionaryMapper extends Mapper<Text, Text, Text, 
     //From is in the value
     String valStr = value.toString();
     int idx = valStr.indexOf(separator);
-    if (idx != -1){
+    if (idx == -1) {
+      context.getCounter(EmailUtility.Counters.NO_FROM_ADDRESS).increment(1);
+    } else {
       String full = valStr.substring(0, idx);
       //do some cleanup to normalize some things, like: Key: karthik ananth <karthik.jcecs@gmail.com>: Value: 178
-            //Key: karthik ananth [mailto:karthik.jcecs@gmail.com]=20: Value: 179
+      //Key: karthik ananth [mailto:karthik.jcecs@gmail.com]=20: Value: 179
       //TODO: is there more to clean up here?
       full = EmailUtility.cleanUpEmailAddress(full);
 
-      if (EmailUtility.WHITESPACE.matcher(full).matches() == false) {
-        context.write(new Text(full), new VarIntWritable(1));
-      } else {
+      if (EmailUtility.WHITESPACE.matcher(full).matches()) {
         context.getCounter(EmailUtility.Counters.NO_FROM_ADDRESS).increment(1);
+      } else {
+        context.write(new Text(full), new VarIntWritable(1));
       }
-    } else {
-      context.getCounter(EmailUtility.Counters.NO_FROM_ADDRESS).increment(1);
     }
 
   }

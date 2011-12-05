@@ -30,7 +30,7 @@ import java.util.Iterator;
  * See <a href="http://www.hpl.hp.com/personal/Robert_Schreiber/papers/2008%20AAIM%20Netflix/netflix_aaim08(submitted).pdf">
  * this paper.</a>
  */
-public class AlternatingLeastSquaresSolver {
+public final class AlternatingLeastSquaresSolver {
 
   public Vector solve(Iterable<Vector> featureVectors, Vector ratingVector, double lambda, int numFeatures) {
 
@@ -53,11 +53,11 @@ public class AlternatingLeastSquaresSolver {
     return solve(Ai, Vi);
   }
 
-  protected Vector solve(Matrix Ai, Matrix Vi) {
+  Vector solve(Matrix Ai, Matrix Vi) {
     return new QRDecomposition(Ai).solve(Vi).viewColumn(0);
   }
 
-  protected Matrix addLambdaTimesNuiTimesE(Matrix matrix, double lambda, int nui) {
+  Matrix addLambdaTimesNuiTimesE(Matrix matrix, double lambda, int nui) {
     Preconditions.checkArgument(matrix.numCols() == matrix.numRows());
     for (int n = 0; n < matrix.numCols(); n++) {
       matrix.setQuick(n, n, matrix.getQuick(n, n) + lambda * nui);
@@ -65,7 +65,7 @@ public class AlternatingLeastSquaresSolver {
     return matrix;
   }
 
-  protected Matrix createMiIi(Iterable<Vector> featureVectors, int numFeatures) {
+  Matrix createMiIi(Iterable<Vector> featureVectors, int numFeatures) {
     Matrix MiIi = new DenseMatrix(numFeatures, Iterables.size(featureVectors));
     int n = 0;
     for (Vector featureVector : featureVectors) {
@@ -77,7 +77,7 @@ public class AlternatingLeastSquaresSolver {
     return MiIi;
   }
 
-  protected Matrix createRiIiMaybeTransposed(Vector ratingVector) {
+  Matrix createRiIiMaybeTransposed(Vector ratingVector) {
     Preconditions.checkArgument(ratingVector.isSequentialAccess());
     Matrix RiIiMaybeTransposed = new DenseMatrix(ratingVector.getNumNondefaultElements(), 1);
     Iterator<Vector.Element> ratingsIterator = ratingVector.iterateNonZero();

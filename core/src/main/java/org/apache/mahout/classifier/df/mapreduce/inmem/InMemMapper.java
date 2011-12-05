@@ -84,7 +84,7 @@ public class InMemMapper extends MapredMapper<IntWritable,NullWritable,IntWritab
     initRandom((InMemInputSplit) context.getInputSplit());
     
     log.debug("Building...");
-    Node tree = bagging.build(key.get(), rng);
+    Node tree = bagging.build(rng);
     
     if (!isNoOutput()) {
       log.debug("Outputing...");

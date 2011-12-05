@@ -47,7 +47,7 @@ final class ARFFIterator extends AbstractIterator<Vector> {
     try {
       while ((line = reader.readLine()) != null) {
         line = line.trim();
-        if (line.length() > 0 && !line.startsWith(ARFFModel.ARFF_COMMENT)) {
+        if (!line.isEmpty() && !line.startsWith(ARFFModel.ARFF_COMMENT)) {
           break;
         }
       }

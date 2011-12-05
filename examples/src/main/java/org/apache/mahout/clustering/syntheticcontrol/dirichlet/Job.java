@@ -17,7 +17,6 @@
 
 package org.apache.mahout.clustering.syntheticcontrol.dirichlet;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.apache.commons.cli2.builder.ArgumentBuilder;

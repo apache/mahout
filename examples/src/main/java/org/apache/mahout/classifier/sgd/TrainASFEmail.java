@@ -1,5 +1,4 @@
-package org.apache.mahout.classifier.sgd;
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,6 +15,7 @@ package org.apache.mahout.classifier.sgd;
  * limitations under the License.
  */
 
+package org.apache.mahout.classifier.sgd;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Lists;
@@ -37,14 +37,9 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-/**
- *
- *
- **/
-public class TrainASFEmail {
-  private static final String[] LEAK_LABELS = {"none", "month-year", "day-month-year"};
+public final class TrainASFEmail {
 
-  private static Multiset<String> overallCounts;
+  //private static final String[] LEAK_LABELS = {"none", "month-year", "day-month-year"};
 
   private TrainASFEmail() {
   }
@@ -52,7 +47,7 @@ public class TrainASFEmail {
   public static void main(String[] args) throws IOException {
     File base = new File(args[0]);
 
-    overallCounts = HashMultiset.create();
+    Multiset<String> overallCounts = HashMultiset.create();
     File output = new File(args[1]);
     output.mkdirs();
     int numCats = Integer.parseInt(args[2]);
@@ -84,11 +79,11 @@ public class TrainASFEmail {
     System.out.printf("%d training files\n", numItems);
 
 
-    int k = 0;
     SGDInfo info = new SGDInfo();
 
     iter = new SequenceFileDirIterator<Text, VectorWritable>(new Path(base.toString()), PathType.LIST, PathFilters.partFilter(),
             null, true, conf);
+    int k = 0;
     while (iter.hasNext()) {
       Pair<Text, VectorWritable> next = iter.next();
       String ng = next.getFirst().toString();

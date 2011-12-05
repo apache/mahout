@@ -1,5 +1,4 @@
-package org.apache.mahout.utils.regex;
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,13 +15,16 @@ package org.apache.mahout.utils.regex;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.regex;
 
 /**
  * No-op
  */
-public class IdentityTransformer implements RegexTransformer {
+public final class IdentityTransformer implements RegexTransformer {
+
   @Override
   public String transformMatch(String match) {
     return match;
   }
+
 }

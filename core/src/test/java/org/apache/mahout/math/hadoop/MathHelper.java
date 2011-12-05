@@ -32,7 +32,12 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
-import org.apache.mahout.math.*;
+import org.apache.mahout.math.DenseMatrix;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix.MatrixEntryWritable;
 import org.easymock.IArgumentMatcher;
 import org.easymock.EasyMock;
@@ -234,7 +239,7 @@ public final class MathHelper {
       buffer.append(separator);
       if (!Double.isNaN(e.get())) {
         if (e.get() >= 0) {
-          buffer.append(" ");
+          buffer.append(' ');
         }
         buffer.append(df.format(e.get()));
       } else {
@@ -249,7 +254,7 @@ public final class MathHelper {
   public static String nice(Matrix matrix) {
     StringBuilder info = new StringBuilder();
     for (int n = 0; n < matrix.numRows(); n++) {
-      info.append(nice(matrix.viewRow(n))).append("\n");
+      info.append(nice(matrix.viewRow(n))).append('\n');
     }
     return info.toString();
   }

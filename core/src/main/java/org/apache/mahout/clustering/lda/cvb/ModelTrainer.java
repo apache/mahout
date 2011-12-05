@@ -164,7 +164,7 @@ public class ModelTrainer {
         train(document, topicDist, true, numDocTopicIters);
         if(log.isDebugEnabled()) {
           times[i % times.length] =
-              ((System.nanoTime() - start)/(1e6 * document.getNumNondefaultElements()));
+              (System.nanoTime() - start) /(1.0e6 * document.getNumNondefaultElements());
           if(i % 100 == 0) {
             long time = System.nanoTime() - startTime;
             log.debug("trained " + i + " documents in " + (time * 1d / 1e6) + "ms");
@@ -263,7 +263,7 @@ public class ModelTrainer {
     private final Matrix docTopicModel;
     private final int numDocTopicIters;
 
-    public TrainerRunnable(TopicModel readModel, TopicModel writeModel, Vector document,
+    private TrainerRunnable(TopicModel readModel, TopicModel writeModel, Vector document,
         Vector docTopics, Matrix docTopicModel, int numDocTopicIters) {
       this.readModel = readModel;
       this.writeModel = writeModel;

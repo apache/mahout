@@ -27,6 +27,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -38,7 +39,7 @@ public final class TestDistributedConjugateGradientSolverCLI extends MahoutTestC
 
   private static Vector randomVector(int size, double entryMean) {
     Vector v = new DenseVector(size);
-    Random r = new Random(1234L);
+    Random r = RandomUtils.getRandom();
     for (int i = 0; i < size; ++i) {
       v.setQuick(i, r.nextGaussian() * entryMean);
     }

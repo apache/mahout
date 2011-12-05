@@ -1,4 +1,3 @@
-package org.apache.mahout.classifier.sgd;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,15 +15,45 @@ package org.apache.mahout.classifier.sgd;
  * limitations under the License.
  */
 
+package org.apache.mahout.classifier.sgd;
 
-/**
- *
- *
- **/
-class SGDInfo {
-  double averageLL = 0;
-  double averageCorrect = 0;
-  double step = 0;
-  int[] bumps = {1, 2, 5};
+final class SGDInfo {
+
+  private double averageLL;
+  private double averageCorrect;
+  private double step;
+  private int[] bumps = {1, 2, 5};
+
+  double getAverageLL() {
+    return averageLL;
+  }
+
+  void setAverageLL(double averageLL) {
+    this.averageLL = averageLL;
+  }
+
+  double getAverageCorrect() {
+    return averageCorrect;
+  }
+
+  void setAverageCorrect(double averageCorrect) {
+    this.averageCorrect = averageCorrect;
+  }
+
+  double getStep() {
+    return step;
+  }
+
+  void setStep(double step) {
+    this.step = step;
+  }
+
+  int[] getBumps() {
+    return bumps;
+  }
+
+  void setBumps(int[] bumps) {
+    this.bumps = bumps;
+  }
 
 }

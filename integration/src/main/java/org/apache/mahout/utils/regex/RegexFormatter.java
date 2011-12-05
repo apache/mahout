@@ -1,4 +1,3 @@
-package org.apache.mahout.utils.regex;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,11 +15,10 @@ package org.apache.mahout.utils.regex;
  * limitations under the License.
  */
 
+package org.apache.mahout.utils.regex;
 
-/**
- *
- *
- **/
 public interface RegexFormatter {
-  public String format(String toFormat);
+
+  String format(String toFormat);
+
 }

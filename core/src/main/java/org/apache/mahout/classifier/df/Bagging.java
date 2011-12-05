@@ -47,11 +47,8 @@ public class Bagging {
   
   /**
    * Builds one tree
-   * 
-   * @param treeId
-   *          tree identifier
    */
-  public Node build(int treeId, Random rng) {
+  public Node build(Random rng) {
     log.debug("Bagging...");
     Arrays.fill(sampled, false);
     Data bag = data.bagging(rng, sampled);

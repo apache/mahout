@@ -58,9 +58,7 @@ import org.apache.mahout.vectorizer.term.TermCountReducer;
  * input should have a {@link Text} key containing the unique document identifier and a {@link StringTuple}
  * value containing the tokenized document. You may use {@link DocumentProcessor} to tokenize the document.
  * This is a dictionary based Vectorizer.
- * 
  */
-
 public final class DictionaryVectorizer implements Vectorizer{
   
   public static final String DOCUMENT_VECTOR_OUTPUT_FOLDER = "tf-vectors";
@@ -89,15 +87,26 @@ public final class DictionaryVectorizer implements Vectorizer{
   /**
    * Cannot be initialized. Use the static functions
    */
-  public DictionaryVectorizer() {
-
+  private DictionaryVectorizer() {
   }
+
   //TODO: move more of SparseVectorsFromSequenceFile in here, and then fold SparseVectorsFrom with EncodedVectorsFrom to have one framework.
 
   @Override
-  public void createVectors(Path input, Path output, VectorizerConfig config) throws Exception {
-    createTermFrequencyVectors(input, output, config.conf, config.minSupport, config.maxNGramSize,
-            config.minLLRValue, config.normPower, config.logNormalize, config.numReducers, config.chunkSizeInMegabytes, config.sequentialAccess, config.namedVectors);
+  public void createVectors(Path input, Path output, VectorizerConfig config)
+    throws IOException, ClassNotFoundException, InterruptedException {
+    createTermFrequencyVectors(input,
+                               output,
+                               config.getConf(),
+                               config.getMinSupport(),
+                               config.getMaxNGramSize(),
+                               config.getMinLLRValue(),
+                               config.getNormPower(),
+                               config.isLogNormalize(),
+                               config.getNumReducers(),
+                               config.getChunkSizeInMegabytes(),
+                               config.isSequentialAccess(),
+                               config.isNamedVectors());
   }
 
   /**

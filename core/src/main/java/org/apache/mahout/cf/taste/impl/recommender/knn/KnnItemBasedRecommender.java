@@ -75,8 +75,7 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
   }
   
   private double[] getInterpolations(long itemID, 
-                                     long userID, 
-                                     long[] itemNeighborhood, 
+                                     long[] itemNeighborhood,
                                      List<Long> usersRatedNeighborhood) throws TasteException {
     
     int length = 0;
@@ -136,10 +135,10 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
     double avgDiagonal = 0.0;
     if (k > 1) {
       double diagonalA = 0.0;
-      double diagonalB = 0.0;
       for (i = 0; i < k; i++) {
         diagonalA += aMatrix[i][i];
       }
+      double diagonalB = 0.0;
       for (i = k - 1; i >= 0; i--) {
         for (int j = 0; j < k; j++) {
           diagonalB += aMatrix[i--][j];
@@ -227,7 +226,7 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
 
     double[] weights = null;
     if (!mostSimilar.isEmpty()) {
-      weights = getInterpolations(itemID, theUserID, theNeighborhood, usersRatedNeighborhood);
+      weights = getInterpolations(itemID, theNeighborhood, usersRatedNeighborhood);
     }
     
     int i = 0;

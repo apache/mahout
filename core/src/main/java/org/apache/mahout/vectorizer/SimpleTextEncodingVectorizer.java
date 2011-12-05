@@ -1,5 +1,4 @@
-package org.apache.mahout.vectorizer;
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,6 +15,7 @@ package org.apache.mahout.vectorizer;
  * limitations under the License.
  */
 
+package org.apache.mahout.vectorizer;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -28,39 +28,43 @@ import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 /**
- * Runs a Map/Reduce job that encodes {@link org.apache.mahout.vectorizer.encoders.FeatureVectorEncoder} the
- * input and writes it to the output as a sequence file.
- *<p/>
- * Only works on basic text, where the value in the SequenceFile is a blob of text.
+ * <p>Runs a Map/Reduce job that encodes {@link org.apache.mahout.vectorizer.encoders.FeatureVectorEncoder} the
+ * input and writes it to the output as a sequence file.</p>
+ *
+ * <p>Only works on basic text, where the value in the SequenceFile is a blob of text.</p>
  */
 //TODO: find commonalities w/ DictionaryVectorizer and abstract them out
 public class SimpleTextEncodingVectorizer implements Vectorizer {
-  private transient static Logger log = LoggerFactory.getLogger(SimpleTextEncodingVectorizer.class);
 
-  public SimpleTextEncodingVectorizer() {
-  }
-
+  private static final Logger log = LoggerFactory.getLogger(SimpleTextEncodingVectorizer.class);
 
   @Override
-  public void createVectors(final Path input, final Path output, final VectorizerConfig config) throws Exception {
+  public void createVectors(Path input, Path output, VectorizerConfig config)
+    throws IOException, ClassNotFoundException, InterruptedException {
     //do this for convenience of using prepareJob
-    Job job = HadoopUtil.prepareJob(input, output, SequenceFileInputFormat.class, EncodingMapper.class, Text.class, VectorWritable.class,
-            SequenceFileOutputFormat.class, config.conf);
+    Job job = HadoopUtil.prepareJob(input, output,
+                                    SequenceFileInputFormat.class,
+                                    EncodingMapper.class,
+                                    Text.class,
+                                    VectorWritable.class,
+                                    SequenceFileOutputFormat.class,
+                                    config.getConf());
     Configuration conf = job.getConfiguration();
-    conf.set(EncodingMapper.USE_SEQUENTIAL, String.valueOf(config.sequentialAccess));
-    conf.set(EncodingMapper.USE_NAMED_VECTORS, String.valueOf(config.namedVectors));
-    conf.set(EncodingMapper.ANALYZER_NAME, config.analyzerClassName);
-    conf.set(EncodingMapper.ENCODER_FIELD_NAME, config.encoderName);
-    conf.set(EncodingMapper.ENCODER_CLASS, config.encoderClass);
-    conf.set(EncodingMapper.CARDINALITY, String.valueOf(config.cardinality));
+    conf.set(EncodingMapper.USE_SEQUENTIAL, String.valueOf(config.isSequentialAccess()));
+    conf.set(EncodingMapper.USE_NAMED_VECTORS, String.valueOf(config.isNamedVectors()));
+    conf.set(EncodingMapper.ANALYZER_NAME, config.getAnalyzerClassName());
+    conf.set(EncodingMapper.ENCODER_FIELD_NAME, config.getEncoderName());
+    conf.set(EncodingMapper.ENCODER_CLASS, config.getEncoderClass());
+    conf.set(EncodingMapper.CARDINALITY, String.valueOf(config.getCardinality()));
     job.setNumReduceTasks(0);
     boolean finished = job.waitForCompletion(true);
 
-    log.info("result of run: " + finished);
+    log.info("result of run: {}", finished);
     //TODO: something useful w/ this result should it be meaningful.
   }
-
 
 }
 

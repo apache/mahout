@@ -17,7 +17,6 @@
 
 package org.apache.mahout.clustering.syntheticcontrol.meanshift;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;

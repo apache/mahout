@@ -156,7 +156,7 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
     for (int treeId = 0; treeId < nbTrees; treeId++) {
       log.debug("Building tree number : {}", treeId);
       
-      Node tree = bagging.build(treeId, rng);
+      Node tree = bagging.build(rng);
       
       key.set(partition, firstTreeId + treeId);
       

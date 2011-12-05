@@ -94,7 +94,7 @@ public final class TestNewsGroups {
     output.printf("%s\n\n", ra.toString());
   }
 
-  protected boolean parseArgs(String[] args) {
+  boolean parseArgs(String[] args) {
     DefaultOptionBuilder builder = new DefaultOptionBuilder();
 
     Option help = builder.withLongName("help").withDescription("print this list").create();

@@ -1,4 +1,3 @@
-package org.apache.mahout.vectorizer;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,13 +15,14 @@ package org.apache.mahout.vectorizer;
  * limitations under the License.
  */
 
+package org.apache.mahout.vectorizer;
 
 import org.apache.hadoop.fs.Path;
 
-/**
- *
- *
- **/
+import java.io.IOException;
+
 public interface Vectorizer {
-  void createVectors(Path input, Path output, VectorizerConfig config) throws Exception;
+
+  void createVectors(Path input, Path output, VectorizerConfig config) throws IOException, ClassNotFoundException, InterruptedException;
+
 }

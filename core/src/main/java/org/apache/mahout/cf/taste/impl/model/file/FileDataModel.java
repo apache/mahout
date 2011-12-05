@@ -184,7 +184,7 @@ public class FileDataModel extends AbstractDataModel {
       firstLineSplit.add(token);
     }
     // If preference value exists and isn't empty then the file is specifying pref values
-    hasPrefValues = firstLineSplit.size() >= 3 && firstLineSplit.get(2).length() > 0;
+    hasPrefValues = firstLineSplit.size() >= 3 && !firstLineSplit.get(2).isEmpty();
 
     this.reloadLock = new ReentrantLock();
     this.transpose = transpose;

@@ -78,15 +78,13 @@ import java.util.List;
  */
 public final class TrainNewsGroups {
 
-  private static Multiset<String> overallCounts;
-
   private TrainNewsGroups() {
   }
 
   public static void main(String[] args) throws IOException {
     File base = new File(args[0]);
 
-    overallCounts = HashMultiset.create();
+    Multiset<String> overallCounts = HashMultiset.create();
 
     int leakType = 0;
     if (args.length > 1) {

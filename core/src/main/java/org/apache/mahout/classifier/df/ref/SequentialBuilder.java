@@ -59,7 +59,7 @@ public class SequentialBuilder {
     List<Node> trees = Lists.newArrayList();
     
     for (int treeId = 0; treeId < nbTrees; treeId++) {
-      trees.add(bagging.build(treeId, rng));
+      trees.add(bagging.build(rng));
       logProgress(((float) treeId + 1) / nbTrees);
     }
     

@@ -1,5 +1,4 @@
-package org.apache.mahout.vectorizer;
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,6 +15,7 @@ package org.apache.mahout.vectorizer;
  * limitations under the License.
  */
 
+package org.apache.mahout.vectorizer;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
@@ -34,19 +34,21 @@ import org.apache.mahout.vectorizer.encoders.LuceneTextValueEncoder;
 import java.io.IOException;
 
 /**
-* The Mapper that does the work of encoding text
-*
-**/
+ * The Mapper that does the work of encoding text
+ */
 public class EncodingMapper extends Mapper<Text, Text, Text, VectorWritable> {
+
   public static final String USE_NAMED_VECTORS = "namedVectors";
   public static final String USE_SEQUENTIAL = "sequential";
   public static final String ANALYZER_NAME = "analyzer";
   public static final String ENCODER_FIELD_NAME = "encoderFieldName";
   public static final String ENCODER_CLASS = "encoderClass";
   public static final String CARDINALITY = "cardinality";
-  boolean sequentialVecs, namedVectors;
-  FeatureVectorEncoder encoder;
-  int cardinality;
+
+  private boolean sequentialVecs;
+  private boolean namedVectors;
+  private FeatureVectorEncoder encoder;
+  private int cardinality;
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
@@ -58,7 +60,10 @@ public class EncodingMapper extends Mapper<Text, Text, Text, VectorWritable> {
     String encoderName = conf.get(ENCODER_FIELD_NAME, "text");
     cardinality = conf.getInt(CARDINALITY, 5000);
     String encClass = conf.get(ENCODER_CLASS);
-    encoder = ClassUtils.instantiateAs(encClass, FeatureVectorEncoder.class, new Class[]{String.class}, new Object[]{encoderName});
+    encoder = ClassUtils.instantiateAs(encClass,
+                                       FeatureVectorEncoder.class,
+                                       new Class[]{String.class},
+                                       new Object[]{encoderName});
     if (encoder instanceof LuceneTextValueEncoder){
       ((LuceneTextValueEncoder) encoder).setAnalyzer(analyzer);
     }
@@ -66,7 +71,7 @@ public class EncodingMapper extends Mapper<Text, Text, Text, VectorWritable> {
 
   @Override
   protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
-    Vector vector = null;
+    Vector vector;
     if (sequentialVecs) {
       vector = new SequentialAccessSparseVector(cardinality);
     } else {

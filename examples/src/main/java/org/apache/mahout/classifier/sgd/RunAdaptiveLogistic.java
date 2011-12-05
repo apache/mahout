@@ -33,7 +33,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Locale;
@@ -85,15 +84,9 @@ public final class RunAdaptiveLogistic {
     line = in.readLine();
     Map<String, Double> results = new HashMap<String, Double>();
     int k = 0;
-    int lineCount = 2;
     while (line != null) {
       Vector v = new SequentialAccessSparseVector(lmp.getNumFeatures());
-      try {
-        csv.processLine(line, v, false);
-      } catch (Exception e) {
-        System.out.println("Exception at line " + lineCount);
-        throw e;
-      }
+      csv.processLine(line, v, false);
       Vector scores = learner.classifyFull(v);
       results.clear();
       if (maxScoreOnly) {
@@ -114,7 +107,6 @@ public final class RunAdaptiveLogistic {
         output.printf(Locale.ENGLISH, "%d records processed \n", k);
       }
       line = in.readLine();
-      lineCount++;
     }
     out.flush();
     out.close();

@@ -120,13 +120,12 @@ public final class TestMapReduce extends MahoutTestCase {
   @Test
   @Ignore("MAHOUT-399")
   public void testEndToEnd() throws Exception {
-    double eta = 0.1;
     int numGeneratingTopics = 5;
     int numTerms = 26;
     Matrix matrix = randomStructuredModel(numGeneratingTopics, numTerms,
         new DoubleFunction() {
       @Override public double apply(double d) {
-        return 1d / Math.pow(d+1, 3);
+        return 1.0 / Math.pow(d+1, 3);
       }
     });
 
@@ -134,7 +133,7 @@ public final class TestMapReduce extends MahoutTestCase {
     int numSamples = 10;
     int numTopicsPerDoc = 1;
 
-    Matrix sampledCorpus = sampledCorpus(matrix, new Random(1234),
+    Matrix sampledCorpus = sampledCorpus(matrix, RandomUtils.getRandom(),
         numDocs, numSamples, numTopicsPerDoc);
 
     Path sampleCorpusPath = getTestTempDirPath("corpus");
@@ -144,6 +143,7 @@ public final class TestMapReduce extends MahoutTestCase {
     List<Double> perplexities = Lists.newArrayList();
     int startTopic = numGeneratingTopics - 2;
     int numTestTopics = startTopic;
+    double eta = 0.1;
     while(numTestTopics < numGeneratingTopics + 3) {
       LDADriver driver = new LDADriver();
       driver.setConf(new Configuration());

@@ -1,3 +1,20 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.math.hadoop.solver;
 
 import java.io.IOException;
@@ -18,14 +35,11 @@ import org.apache.mahout.math.solver.ConjugateGradientSolver;
 import org.apache.mahout.math.solver.Preconditioner;
 
 /**
- * 
  * Distributed implementation of the conjugate gradient solver. More or less, this is just the standard solver
  * but wrapped with some methods that make it easy to run it on a DistributedRowMatrix.
- *  
  */
+public class DistributedConjugateGradientSolver extends ConjugateGradientSolver implements Tool {
 
-public class DistributedConjugateGradientSolver extends ConjugateGradientSolver implements Tool
-{
   private Configuration conf; 
   private Map<String, String> parsedArgs;
 
@@ -60,20 +74,17 @@ public class DistributedConjugateGradientSolver extends ConjugateGradientSolver 
   }
   
   @Override
-  public Configuration getConf()
-  {
+  public Configuration getConf() {
     return conf;
   }
 
   @Override
-  public void setConf(Configuration conf)
-  {
+  public void setConf(Configuration conf) {
     this.conf = conf;    
   }
 
   @Override
-  public int run(String[] strings) throws Exception
-  {
+  public int run(String[] strings) throws Exception {
     Path inputPath = new Path(parsedArgs.get("--input"));
     Path outputPath = new Path(parsedArgs.get("--output"));
     Path tempPath = new Path(parsedArgs.get("--tempDir"));
@@ -136,8 +147,7 @@ public class DistributedConjugateGradientSolver extends ConjugateGradientSolver 
     }
     
     @Override
-    public int run(String[] args) throws Exception
-    {
+    public int run(String[] args) throws Exception {
       addInputOption();
       addOutputOption();
       addOption("numRows", "nr", "Number of rows in the input matrix", true);

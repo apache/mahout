@@ -39,10 +39,10 @@ public final class MsgIdToDictionaryMapper extends Mapper<Text, Text, Text, VarI
       //found the @, now find the last slash before the @ and grab everything after that
       idx = keyStr.lastIndexOf('/', idx);
       String msgId = keyStr.substring(idx + 1);
-      if (EmailUtility.WHITESPACE.matcher(msgId).matches() == false) {
-        context.write(new Text(msgId), new VarIntWritable(1));
-      } else {
+      if (EmailUtility.WHITESPACE.matcher(msgId).matches()) {
         context.getCounter(EmailUtility.Counters.NO_MESSAGE_ID).increment(1);
+      } else {
+        context.write(new Text(msgId), new VarIntWritable(1));
       }
     }
   }

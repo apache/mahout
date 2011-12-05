@@ -84,7 +84,7 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
           Closeables.closeQuietly(in);
         }
         this.inverseCovarianceMatrix = inverseCovarianceMatrix.get();
-        Preconditions.checkArgument(inverseCovarianceMatrix != null, "inverseCovarianceMatrix not initialized");
+        Preconditions.checkArgument(this.inverseCovarianceMatrix != null, "inverseCovarianceMatrix not initialized");
       }
 
       if (meanVectorFile.get() != null) {
@@ -101,7 +101,7 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
           Closeables.closeQuietly(in);
         }
         this.meanVector = meanVector.get();
-        Preconditions.checkArgument(meanVector != null, "meanVector not initialized");
+        Preconditions.checkArgument(this.meanVector != null, "meanVector not initialized");
       }
 
     } catch (IOException e) {

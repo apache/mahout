@@ -99,11 +99,10 @@ public class PartialBuilder extends Builder {
     
     Path outputPath = getOutputPath(conf);
     
-    int[] firstIds = null;
     TreeID[] keys = new TreeID[numTrees];
     Node[] trees = new Node[numTrees];
         
-    processOutput(job, outputPath, firstIds, keys, trees);
+    processOutput(job, outputPath, keys, trees);
     
     return new DecisionForest(Arrays.asList(trees));
   }
@@ -114,8 +113,6 @@ public class PartialBuilder extends Builder {
    * @param job
    * @param outputPath
    *          directory that contains the output of the job
-   * @param firstIds
-   *          partitions' first ids in hadoop's order
    * @param keys
    *          can be null
    * @param trees
@@ -123,7 +120,6 @@ public class PartialBuilder extends Builder {
    */
   protected static void processOutput(JobContext job,
                                       Path outputPath,
-                                      int[] firstIds,
                                       TreeID[] keys,
                                       Node[] trees) throws IOException {
     Preconditions.checkArgument(keys == null && trees == null || keys != null && trees != null,
