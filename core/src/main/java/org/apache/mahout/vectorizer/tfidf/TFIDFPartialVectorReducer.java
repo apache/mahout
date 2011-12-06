@@ -52,7 +52,7 @@ public class TFIDFPartialVectorReducer extends
 
   private int minDf = 1;
 
-  private int maxDfPercent = 99;
+  private long maxDf = -1;
 
   private long vectorCount = 1;
 
@@ -78,7 +78,7 @@ public class TFIDFPartialVectorReducer extends
         continue;
       }
       long df = dictionary.get(e.index());
-      if (df * 100.0 / vectorCount > maxDfPercent) {
+      if (maxDf > -1 && df > maxDf) {
         continue;
       }
       if (df < minDf) {
@@ -109,7 +109,7 @@ public class TFIDFPartialVectorReducer extends
     vectorCount = conf.getLong(TFIDFConverter.VECTOR_COUNT, 1);
     featureCount = conf.getLong(TFIDFConverter.FEATURE_COUNT, 1);
     minDf = conf.getInt(TFIDFConverter.MIN_DF, 1);
-    maxDfPercent = conf.getInt(TFIDFConverter.MAX_DF_PERCENTAGE, 99);
+    maxDf = conf.getLong(TFIDFConverter.MAX_DF, -1);
     sequentialAccess = conf.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
     namedVector = conf.getBoolean(PartialVectorMerger.NAMED_VECTOR, false);
 

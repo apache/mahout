@@ -97,6 +97,7 @@ public final class DictionaryVectorizer implements Vectorizer{
     throws IOException, ClassNotFoundException, InterruptedException {
     createTermFrequencyVectors(input,
                                output,
+                               config.getTfDirName(),
                                config.getConf(),
                                config.getMinSupport(),
                                config.getMaxNGramSize(),
@@ -119,6 +120,8 @@ public final class DictionaryVectorizer implements Vectorizer{
    * @param output
    *          output directory where {@link org.apache.mahout.math.RandomAccessSparseVector}'s of the document
    *          are generated
+   * @param tfVectorsFolderName
+   *          The name of the folder in which the final output vectors will be stored
    * @param baseConf
    *          job configuration
    * @param normPower
@@ -141,6 +144,7 @@ public final class DictionaryVectorizer implements Vectorizer{
    */
   public static void createTermFrequencyVectors(Path input,
                                                 Path output,
+                                                String tfVectorsFolderName,
                                                 Configuration baseConf,
                                                 int minSupport,
                                                 int maxNGramSize,
@@ -198,7 +202,7 @@ public final class DictionaryVectorizer implements Vectorizer{
     
     Configuration conf = new Configuration(baseConf);
 
-    Path outputDir = new Path(output, DOCUMENT_VECTOR_OUTPUT_FOLDER);
+    Path outputDir = new Path(output, tfVectorsFolderName);
     PartialVectorMerger.mergePartialVectors(partialVectorPaths, outputDir, conf, normPower, logNormalize,
       maxTermDimension[0], sequentialAccess, namedVectors, numReducers);
     HadoopUtil.delete(conf, partialVectorPaths);

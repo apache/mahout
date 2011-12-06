@@ -31,6 +31,7 @@ public final class VectorizerConfig {
   private boolean namedVectors;
   private int cardinality;
   private String encoderClass;
+  private String tfDirName;
   private int minSupport;
   private int maxNGramSize;
   private float minLLRValue;
@@ -85,6 +86,15 @@ public final class VectorizerConfig {
 
   public void setSequentialAccess(boolean sequentialAccess) {
     this.sequentialAccess = sequentialAccess;
+  }
+
+
+  public String getTfDirName() {
+    return tfDirName;
+  }
+
+  public void setTfDirName(String tfDirName) {
+    this.tfDirName = tfDirName;
   }
 
   public boolean isNamedVectors() {

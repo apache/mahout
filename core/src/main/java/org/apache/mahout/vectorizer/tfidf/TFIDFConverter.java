@@ -63,7 +63,7 @@ public final class TFIDFConverter {
 
   public static final String MIN_DF = "min.df";
 
-  public static final String MAX_DF_PERCENTAGE = "max.df.percentage";
+  public static final String MAX_DF = "max.df";
 
   //public static final String TFIDF_OUTPUT_FOLDER = "tfidf";
 
@@ -81,7 +81,7 @@ public final class TFIDFConverter {
 
   private static final String VECTOR_OUTPUT_FOLDER = "partial-vectors-";
 
-  private static final String WORDCOUNT_OUTPUT_FOLDER = "df-count";
+  public static final String WORDCOUNT_OUTPUT_FOLDER = "df-count";
 
   /**
    * Cannot be initialized. Use the static functions
@@ -94,21 +94,18 @@ public final class TFIDFConverter {
    * Create Term Frequency-Inverse Document Frequency (Tf-Idf) Vectors from the input set of vectors in
    * {@link SequenceFile} format. This job uses a fixed limit on the maximum memory used by the feature chunk
    * per node thereby splitting the process across multiple map/reduces.
+   * Before using this method calculateDF should be called
    * 
    * @param input
    *          input directory of the vectors in {@link SequenceFile} format
    * @param output
    *          output directory where {@link org.apache.mahout.math.RandomAccessSparseVector}'s of the document
    *          are generated
-   * @param chunkSizeInMegabytes
-   *          the size in MB of the feature => id chunk to be kept in memory at each node during Map/Reduce
-   *          stage. Its recommended you calculated this based on the number of cores and the free memory
-   *          available to you per node. Say, you have 2 cores and around 1GB extra memory to spare we
-   *          recommend you use a split size of around 400-500MB so that two simultaneous reducers can create
-   *          partial vectors without thrashing the system due to increased swapping
+   * @param datasetFeatures
+   *          Document frequencies information calculated by calculateDF
    * @param minDf
    *          The minimum document frequency. Default 1
-   * @param maxDFPercent
+   * @param maxDF
    *          The max percentage of vectors for the DF. Can be used to remove really high frequency features.
    *          Expressed as an integer between 0 and 100. Default 99
    * @param numReducers 
@@ -119,9 +116,9 @@ public final class TFIDFConverter {
   public static void processTfIdf(Path input,
                                   Path output,
                                   Configuration baseConf,
-                                  int chunkSizeInMegabytes,
+                                  Pair<Long[], List<Path>> datasetFeatures,
                                   int minDf,
-                                  int maxDFPercent,
+                                  long maxDF,
                                   float normPower,
                                   boolean logNormalize,
                                   boolean sequentialAccessOutput,
@@ -134,25 +131,6 @@ public final class TFIDFConverter {
                                 || !logNormalize,
         "normPower must be > 1 and not infinite if log normalization is chosen", normPower);
 
-    if (chunkSizeInMegabytes < MIN_CHUNKSIZE) {
-      chunkSizeInMegabytes = MIN_CHUNKSIZE;
-    } else if (chunkSizeInMegabytes > MAX_CHUNKSIZE) { // 10GB
-      chunkSizeInMegabytes = MAX_CHUNKSIZE;
-    }
-
-    if (minDf < 1) {
-      minDf = 1;
-    }
-    if (maxDFPercent < 0 || maxDFPercent > 100) {
-      maxDFPercent = 99;
-    }
-
-    Path wordCountPath = new Path(output, WORDCOUNT_OUTPUT_FOLDER);
-
-    startDFCounting(input, wordCountPath, baseConf);
-    Pair<Long[], List<Path>> datasetFeatures =
-        createDictionaryChunks(wordCountPath, output, baseConf, chunkSizeInMegabytes);
-
     int partialVectorIndex = 0;
     List<Path> partialVectorPaths = Lists.newArrayList();
     List<Path> dictionaryChunks = datasetFeatures.getSecond();
@@ -164,7 +142,7 @@ public final class TFIDFConverter {
                          datasetFeatures.getFirst()[0],
                          datasetFeatures.getFirst()[1],
                          minDf,
-                         maxDFPercent,
+                         maxDF,
                          dictionaryChunk,
                          partialVectorOutputPath,
                          sequentialAccessOutput,
@@ -186,6 +164,42 @@ public final class TFIDFConverter {
                                             numReducers);
     HadoopUtil.delete(conf, partialVectorPaths);
 
+  }
+  
+  /**
+   * Calculates the document frequencies of all terms from the input set of vectors in
+   * {@link SequenceFile} format. This job uses a fixed limit on the maximum memory used by the feature chunk
+   * per node thereby splitting the process across multiple map/reduces.
+   * 
+   * @param input
+   *          input directory of the vectors in {@link SequenceFile} format
+   * @param output
+   *          output directory where document frequencies will be stored
+   * @param chunkSizeInMegabytes
+   *          the size in MB of the feature => id chunk to be kept in memory at each node during Map/Reduce
+   *          stage. Its recommended you calculated this based on the number of cores and the free memory
+   *          available to you per node. Say, you have 2 cores and around 1GB extra memory to spare we
+   *          recommend you use a split size of around 400-500MB so that two simultaneous reducers can create
+   *          partial vectors without thrashing the system due to increased swapping
+   */
+  public static Pair<Long[], List<Path>> calculateDF(Path input,
+                                  Path output,
+                                  Configuration baseConf,
+                                  int chunkSizeInMegabytes) throws IOException, InterruptedException, ClassNotFoundException {
+
+    if (chunkSizeInMegabytes < MIN_CHUNKSIZE) {
+      chunkSizeInMegabytes = MIN_CHUNKSIZE;
+    } else if (chunkSizeInMegabytes > MAX_CHUNKSIZE) { // 10GB
+      chunkSizeInMegabytes = MAX_CHUNKSIZE;
+    }
+
+    Path wordCountPath = new Path(output, WORDCOUNT_OUTPUT_FOLDER);
+
+    startDFCounting(input, wordCountPath, baseConf);
+    Pair<Long[], List<Path>> datasetFeatures =
+        createDictionaryChunks(wordCountPath, output, baseConf, chunkSizeInMegabytes);
+    
+    return datasetFeatures;
   }
 
   /**
@@ -264,7 +278,7 @@ public final class TFIDFConverter {
    *          Number of vectors in the dataset
    * @param minDf
    *          The minimum document frequency. Default 1
-   * @param maxDFPercent
+   * @param maxDF
    *          The max percentage of vectors for the DF. Can be used to remove really high frequency features.
    *          Expressed as an integer between 0 and 100. Default 99
    * @param dictionaryFilePath
@@ -281,7 +295,7 @@ public final class TFIDFConverter {
                                          Long featureCount,
                                          Long vectorCount,
                                          int minDf,
-                                         int maxDFPercent,
+                                         long maxDF,
                                          Path dictionaryFilePath,
                                          Path output,
                                          boolean sequentialAccess,
@@ -295,7 +309,7 @@ public final class TFIDFConverter {
     conf.setLong(FEATURE_COUNT, featureCount);
     conf.setLong(VECTOR_COUNT, vectorCount);
     conf.setInt(MIN_DF, minDf);
-    conf.setInt(MAX_DF_PERCENTAGE, maxDFPercent);
+    conf.setLong(MAX_DF, maxDF);
     conf.setBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, sequentialAccess);
     conf.setBoolean(PartialVectorMerger.NAMED_VECTOR, namedVector);
     DistributedCache.setCacheFiles(new URI[] {dictionaryFilePath.toUri()}, conf);

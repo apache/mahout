@@ -18,6 +18,7 @@
 package org.apache.mahout.vectorizer;
 
 import java.io.IOException;
+import java.util.List;
 
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
@@ -27,6 +28,7 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
@@ -105,6 +107,7 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
     
     DictionaryVectorizer.createTermFrequencyVectors(tokenizedDocuments,
                                                     wordCount,
+                                                    DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER,
                                                     conf,
                                                     2,
                                                     1,
@@ -118,12 +121,15 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
     
     validateVectors(conf, NUM_DOCS, tfVectors, sequential, named);
     
+    Pair<Long[], List<Path>> docFrequenciesFeatures = TFIDFConverter.calculateDF(tfVectors, 
+    		tfidf, conf, 100);
+
     TFIDFConverter.processTfIdf(tfVectors,
                                 tfidf,
                                 conf,
-                                100,
+                                docFrequenciesFeatures,
                                 1,
-                                99,
+                                -1,
                                 2.0f,
                                 false,
                                 sequential,

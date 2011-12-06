@@ -297,7 +297,8 @@ public interface Vector extends Cloneable, Iterable<Vector.Element> {
   void setQuick(int index, double value);
 
   /**
-   * Return the number of values in the recipient
+   * Return the number of values in the recipient which are not the default value.  For instance, for a
+   * sparse vector, this would be the number of non-zero values.
    *
    * @return an int
    */

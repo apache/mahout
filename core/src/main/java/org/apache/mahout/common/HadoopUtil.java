@@ -103,19 +103,19 @@ public final class HadoopUtil {
 
   /**
    * Create a map and reduce Hadoop job.  Does not set the name on the job.
-   * @param inputPath
-   * @param outputPath
-   * @param inputFormat
-   * @param mapper
-   * @param mapperKey
-   * @param mapperValue
-   * @param reducer
-   * @param reducerKey
-   * @param reducerValue
-   * @param outputFormat
-   * @param conf
-   * @return
-   * @throws IOException
+   * @param inputPath The input {@link org.apache.hadoop.fs.Path}
+   * @param outputPath The output {@link org.apache.hadoop.fs.Path}
+   * @param inputFormat The {@link org.apache.hadoop.mapreduce.InputFormat}
+   * @param mapper The {@link org.apache.hadoop.mapreduce.Mapper} class to use
+   * @param mapperKey The {@link org.apache.hadoop.io.Writable} key class.  If the Mapper is a no-op, this value may be null
+   * @param mapperValue The {@link org.apache.hadoop.io.Writable} value class.  If the Mapper is a no-op, this value may be null
+   * @param reducer The {@link org.apache.hadoop.mapreduce.Reducer} to use
+   * @param reducerKey The reducer key class.
+   * @param reducerValue The reducer value class.
+   * @param outputFormat The {@link org.apache.hadoop.mapreduce.OutputFormat}.
+   * @param conf The {@link org.apache.hadoop.conf.Configuration} to use.
+   * @return The {@link org.apache.hadoop.mapreduce.Job}.
+   * @throws IOException if there is a problem with the IO.
    *
    * @see #getCustomJobName(String, org.apache.hadoop.mapreduce.JobContext, Class, Class)
    * @see #prepareJob(org.apache.hadoop.fs.Path, org.apache.hadoop.fs.Path, Class, Class, Class, Class, Class, org.apache.hadoop.conf.Configuration)
@@ -148,8 +148,12 @@ public final class HadoopUtil {
     jobConf.set("mapred.input.dir", inputPath.toString());
 
     job.setMapperClass(mapper);
-    job.setMapOutputKeyClass(mapperKey);
-    job.setMapOutputValueClass(mapperValue);
+    if (mapperKey != null) {
+      job.setMapOutputKeyClass(mapperKey);
+    }
+    if (mapperValue != null) {
+      job.setMapOutputValueClass(mapperValue);
+    }
 
     jobConf.setBoolean("mapred.compress.map.output", true);
 
