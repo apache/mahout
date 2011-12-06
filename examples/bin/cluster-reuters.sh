@@ -22,6 +22,11 @@
 # To run:  change into the mahout directory and type:
 #  examples/bin/build-reuters.sh
 
+if [ "$1" = "--help" ] || [ "$1" = "--?" ]; then
+  echo "This script clusters the Reuters data set using a variety of algorithms.  The data set is downloaded automatically."
+  exit
+fi
+
 SCRIPT_PATH=${0%/*}
 if [ "$0" != "$SCRIPT_PATH" ] && [ "$SCRIPT_PATH" != "" ]; then 
   cd $SCRIPT_PATH
@@ -34,11 +39,10 @@ if [ ! -e $MAHOUT ]; then
   exit 1
 fi
 
-if [ "$1" = "-ni" ]; then
-  clustertype=kmeans
+algorithm=( kmeans fuzzykmeans lda dirichlet minhash)
+if [ -n "$1" ]; then
+  choice=$1
 else
-  algorithm=( kmeans fuzzykmeans lda dirichlet minhash)
- 
   echo "Please select a number to choose the corresponding clustering algorithm"
   echo "1. ${algorithm[0]} clustering"
   echo "2. ${algorithm[1]} clustering"
@@ -46,10 +50,10 @@ else
   echo "4. ${algorithm[3]} clustering"
   echo "5. ${algorithm[4]} clustering"
   read -p "Enter your choice : " choice
-
-  echo "ok. You chose $choice and we'll use ${algorithm[$choice-1]} Clustering"
-  clustertype=${algorithm[$choice-1]} 
 fi
+
+echo "ok. You chose $choice and we'll use ${algorithm[$choice-1]} Clustering"
+clustertype=${algorithm[$choice-1]} 
 
 WORK_DIR=/tmp/mahout-work-${USER}
 echo "creating work directory at ${WORK_DIR}"

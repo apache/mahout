@@ -28,6 +28,12 @@
 # To run:
 #  ./factorize-netflix.sh /path/to/training_set/ /path/to/qualifying.txt /path/to/judging.txt
 
+if [ "$1" = "--help" ] || [ "$1" = "--?" ]; then
+  echo "This script runs the ALS Recommender on the Netflix data set."
+  echo "Syntax: $0 /path/to/training_set/ /path/to/qualifying.txt /path/to/judging.txt\n"
+  exit
+fi
+
 if [ $# -ne 3 ]
 then
   echo -e "Syntax: $0 /path/to/training_set/ /path/to/qualifying.txt /path/to/judging.txt\n"

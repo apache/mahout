@@ -24,6 +24,12 @@
 # To run:  change into the mahout directory and type:
 #  examples/bin/factorize-movielens-1M.sh /path/to/ratings.dat
 
+if [ "$1" = "--help" ] || [ "$1" = "--?" ]; then
+  echo "This script runs the Alternating Least Squares Recommender on the Grouplens data set (size 1M)."
+  echo "Syntax: $0 /path/to/ratings.dat\n"
+  exit
+fi
+
 if [ $# -ne 1 ]
 then
   echo -e "\nYou have to download the Movielens 1M dataset from http://www.grouplens.org/node/73 before"

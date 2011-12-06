@@ -22,6 +22,11 @@
 # To run:  change into the mahout directory and type:
 #  examples/bin/build-20news.sh
 
+if [ "$1" = "--help" ] || [ "$1" = "--?" ]; then
+  echo "This script runs SGD and Bayes classifiers over the classic 20 News Groups."
+  exit
+fi
+
 SCRIPT_PATH=${0%/*}
 if [ "$0" != "$SCRIPT_PATH" ] && [ "$SCRIPT_PATH" != "" ]; then 
   cd $SCRIPT_PATH
@@ -29,20 +34,19 @@ fi
 START_PATH=`pwd`
 
 WORK_DIR=/tmp/mahout-work-${USER}
-if [ "$1" = "-ni" ]; then
-  alg=rec
+algorithm=( naivebayes sgd clean)
+if [ -n "$1" ]; then
+  choice=$1
 else
-  algorithm=( naivebayes sgd clean)
-
   echo "Please select a number to choose the corresponding task to run"
   echo "1. ${algorithm[0]}"
   echo "2. ${algorithm[1]}"
   echo "3. ${algorithm[2]} -- cleans up the work area in $WORK_DIR"
   read -p "Enter your choice : " choice
-
-  echo "ok. You chose $choice and we'll use ${algorithm[$choice-1]}"
-  alg=${algorithm[$choice-1]}
 fi
+
+echo "ok. You chose $choice and we'll use ${algorithm[$choice-1]}"
+alg=${algorithm[$choice-1]}
 
 echo "creating work directory at ${WORK_DIR}"
 
