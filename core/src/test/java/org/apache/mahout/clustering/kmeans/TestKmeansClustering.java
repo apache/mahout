@@ -491,7 +491,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
 
     // now run the KMeans job
     KMeansDriver.run(pointsPath,
-                     new Path(outputPath, "clusters-0"),
+                     new Path(outputPath, "clusters-0-final"),
                      outputPath,
                      new EuclideanDistanceMeasure(),
                      0.001,

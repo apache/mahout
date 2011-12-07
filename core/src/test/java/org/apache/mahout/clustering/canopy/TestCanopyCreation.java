@@ -333,7 +333,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
         manhattanDistanceMeasure, 3.1, 2.1, false, false);
 
     // verify output from sequence file
-    Path path = new Path(output, "clusters-0/part-r-00000");
+    Path path = new Path(output, "clusters-0-final/part-r-00000");
     FileSystem fs = FileSystem.get(path.toUri(), config);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, config);
     try {
@@ -373,7 +373,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
         euclideanDistanceMeasure, 3.1, 2.1, false, false);
 
     // verify output from sequence file
-    Path path = new Path(output, "clusters-0/part-r-00000");
+    Path path = new Path(output, "clusters-0-final/part-r-00000");
     FileSystem fs = FileSystem.get(path.toUri(), config);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, config);
     try {
@@ -495,7 +495,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
         manhattanDistanceMeasure, 3.1, 2.1, true, true);
 
     // verify output from sequence file
-    Path path = new Path(output, "clusters-0/part-r-00000");
+    Path path = new Path(output, "clusters-0-final/part-r-00000");
     int ix = 0;
     for (Canopy value : new SequenceFileValueIterable<Canopy>(path, true,
         config)) {
@@ -532,7 +532,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     new CanopyDriver().run(args);
 
     // verify output from sequence file
-    Path path = new Path(output, "clusters-0/part-r-00000");
+    Path path = new Path(output, "clusters-0-final/part-r-00000");
 
     int ix = 0;
     for (Canopy value : new SequenceFileValueIterable<Canopy>(path, true,

@@ -1,0 +1,229 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.mahout.clustering.topdown.postprocessor;
+
+import java.io.IOException;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.util.ToolRunner;
+import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.math.VectorWritable;
+
+/**
+ * Post processes the output of clustering algorithms and groups them into respective clusters. Ideal to be
+ * used for top down clustering. It can also be used if the clustering output needs to be grouped into their
+ * respective clusters.
+ */
+public class ClusterOutputPostProcessorDriver extends AbstractJob {
+  
+  /**
+   * CLI to run clustering post processor. The input to post processor is the ouput path specified to the
+   * clustering.
+   */
+  @Override
+  public int run(String[] args) throws Exception {
+    
+    addInputOption();
+    addOutputOption();
+    addOption(DefaultOptionCreator.methodOption().create());
+
+    if (parseArguments(args) == null) {
+      return -1;
+    }
+    
+    Path input = getInputPath();
+    Path output = getOutputPath();
+
+    if (getConf() == null) {
+      setConf(new Configuration());
+    }
+    boolean runSequential = getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(
+      DefaultOptionCreator.SEQUENTIAL_METHOD);
+    run(input, output, runSequential);
+    return 0;
+    
+  }
+  
+  /**
+   * Constructor to be used by the ToolRunner.
+   */
+  private ClusterOutputPostProcessorDriver() {}
+  
+  public static void main(String[] args) throws Exception {
+    ToolRunner.run(new Configuration(), new ClusterOutputPostProcessorDriver(), args);
+  }
+  
+  /**
+   * Post processes the output of clustering algorithms and groups them into respective clusters. Each
+   * cluster's vectors are written into a directory named after its clusterId.
+   * 
+   * @param input
+   *          The output path provided to the clustering algorithm, whose would be post processed. Hint : The
+   *          path of the directory containing clusters-*-final and clusteredPoints.
+   * @param output
+   *          The post processed data would be stored at this path.
+   * @param runSequential
+   *          If set to true, post processes it sequentially, else, uses. MapReduce. Hint : If the clustering
+   *          was done sequentially, make it sequential, else vice versa.
+   * @throws IOException
+   * @throws InterruptedException
+   * @throws ClassNotFoundException
+   * @throws IllegalAccessException
+   * @throws InstantiationException
+   */
+  public static void run(Path input, Path output, boolean runSequential) throws IOException,
+                                                                        InterruptedException,
+                                                                        ClassNotFoundException,
+                                                                        InstantiationException,
+                                                                        IllegalAccessException {
+    if (runSequential) {
+      postProcessSeq(input, output);
+    } else {
+      Configuration conf = new Configuration();
+      postProcessMR(conf, input, output);
+      movePartFilesToRespectiveDirectories(conf, output);
+    }
+    
+  }
+  
+  /**
+   * Process Sequentially. Reads the vectors one by one, and puts them into respective directory, named after
+   * their clusterId.
+   * 
+   * @param input
+   *          The output path provided to the clustering algorithm, whose would be post processed. Hint : The
+   *          path of the directory containing clusters-*-final and clusteredPoints.
+   * @param output
+   *          The post processed data would be stored at this path.
+   * @throws IOException
+   * @throws IllegalAccessException
+   * @throws InstantiationException
+   */
+  private static void postProcessSeq(Path input, Path output) throws IOException,
+                                                             InstantiationException,
+                                                             IllegalAccessException {
+    ClusterOutputPostProcessor clusterOutputPostProcessor = new ClusterOutputPostProcessor(input, output,
+        new Configuration());
+    clusterOutputPostProcessor.process();
+  }
+  
+  /**
+   * Process as a map reduce job. The numberOfReduceTasks is set to the number of clusters present in the
+   * output. So that each cluster's vector is written in its own part file.
+   * 
+   * @param conf
+   *          The hadoop configuration.
+   * @param input
+   *          The output path provided to the clustering algorithm, whose would be post processed. Hint : The
+   *          path of the directory containing clusters-*-final and clusteredPoints.
+   * @param output
+   *          The post processed data would be stored at this path.
+   * @throws IOException
+   * @throws InstantiationException
+   * @throws IllegalAccessException
+   * @throws InterruptedException
+   * @throws ClassNotFoundException
+   */
+  private static void postProcessMR(Configuration conf, Path input, Path output) throws IOException,
+                                                                                InstantiationException,
+                                                                                IllegalAccessException,
+                                                                                InterruptedException,
+                                                                                ClassNotFoundException {
+    Job job = new Job(conf, "ClusterOutputPostProcessor Driver running over input: " + input);
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+    job.setMapperClass(ClusterOutputPostProcessorMapper.class);
+    job.setMapOutputKeyClass(Text.class);
+    job.setMapOutputValueClass(VectorWritable.class);
+    job.setReducerClass(ClusterOutputPostProcessorReducer.class);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(VectorWritable.class);
+    int numberOfClusters = ClusterCountReader.getNumberOfClusters(input, conf);
+    job.setNumReduceTasks(numberOfClusters);
+    job.setJarByClass(ClusterOutputPostProcessorDriver.class);
+    
+    FileInputFormat.addInputPath(job, new Path(input, new Path("clusteredPoints")));
+    FileOutputFormat.setOutputPath(job, output);
+    if (!job.waitForCompletion(true)) {
+      throw new InterruptedException("ClusterOutputPostProcessor Job failed processing " + input);
+    }
+  }
+  
+  /**
+   * The mapreduce version of the post processor writes different clusters into different part files. This
+   * method reads the part files and moves them into directories named after their clusterIds.
+   * 
+   * @param conf
+   *          The hadoop configuration.
+   * @param output
+   *          The post processed data would be stored at this path.
+   * @throws IOException
+   * @throws InstantiationException
+   * @throws IllegalAccessException
+   */
+  private static void movePartFilesToRespectiveDirectories(Configuration conf, Path output) throws IOException,
+                                                                                           InstantiationException,
+                                                                                           IllegalAccessException {
+    FileStatus[] partFiles = getPartFiles(output, conf);
+    for (FileStatus fileStatus : partFiles) {
+      SequenceFile.Reader reader = new SequenceFile.Reader(FileSystem.get(conf), fileStatus.getPath(), conf);
+      WritableComparable key = (WritableComparable) reader.getKeyClass().newInstance();
+      Writable value = (Writable) reader.getValueClass().newInstance();
+      boolean next = reader.next(key, value);
+      reader.close();
+      if (next) {
+        renameFile(key, fileStatus, conf);
+      }
+    }
+  }
+  
+  /**
+   * Using @FileSystem rename method to move the file.
+   */
+  private static void renameFile(WritableComparable key, FileStatus fileStatus, Configuration conf) throws IOException {
+    Path path = fileStatus.getPath();
+    FileSystem fileSystem = path.getFileSystem(conf);
+    Path subDir = new Path(key.toString());
+    Path renameTo = new Path(path.getParent(), subDir);
+    boolean mkdirs = fileSystem.mkdirs(renameTo);
+    fileSystem.rename(path, renameTo);
+  }
+  
+  /**
+   * Gets the part file of the final iteration. clusters-n-final
+   */
+  private static FileStatus[] getPartFiles(Path output, Configuration conf) throws IOException {
+    FileSystem fileSystem = output.getFileSystem(conf);
+    FileStatus[] partFiles = fileSystem.listStatus(output, PathFilters.partFilter());
+    return partFiles;
+  }
+}

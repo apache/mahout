@@ -329,7 +329,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     CanopyDriver.run(new Configuration(), testdata, output, measure, 3.1, 2.1,
         true, true);
     int numIterations = 10;
-    Path clustersIn = new Path(output, "clusters-0");
+    Path clustersIn = new Path(output, "clusters-0-final");
     RepresentativePointsDriver.run(conf, clustersIn, new Path(output,
         "clusteredPoints"), output, measure, numIterations, true);
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
@@ -352,7 +352,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     CanopyDriver.run(new Configuration(), testdata, output, measure, 3.1, 2.1,
         false, true);
     // now run the KMeans job
-    KMeansDriver.run(testdata, new Path(output, "clusters-0"), output, measure,
+    KMeansDriver.run(testdata, new Path(output, "clusters-0-final"), output, measure,
         0.001, 10, true, true);
     int numIterations = 10;
     Path clustersIn = new Path(output, "clusters-2");
@@ -378,7 +378,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     CanopyDriver.run(new Configuration(), testdata, output, measure, 3.1, 2.1,
         false, true);
     // now run the KMeans job
-    FuzzyKMeansDriver.run(testdata, new Path(output, "clusters-0"), output,
+    FuzzyKMeansDriver.run(testdata, new Path(output, "clusters-0-final"), output,
         measure, 0.001, 10, 2, true, true, 0, true);
     int numIterations = 10;
     Path clustersIn = new Path(output, "clusters-4");

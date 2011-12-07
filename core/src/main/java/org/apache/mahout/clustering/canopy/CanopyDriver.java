@@ -269,7 +269,7 @@ public class CanopyDriver extends AbstractJob {
       clusterer.addPointToCanopies(vw.get(), canopies);
     }
 
-    Path canopyOutputDir = new Path(output, Cluster.CLUSTERS_DIR + '0');
+    Path canopyOutputDir = new Path(output, Cluster.CLUSTERS_DIR + '0'+ Cluster.FINAL_ITERATION_SUFFIX);
     Path path = new Path(canopyOutputDir, "part-r-00000");
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path,
         Text.class, Canopy.class);
@@ -343,7 +343,7 @@ public class CanopyDriver extends AbstractJob {
     job.setJarByClass(CanopyDriver.class);
 
     FileInputFormat.addInputPath(job, input);
-    Path canopyOutputDir = new Path(output, Cluster.CLUSTERS_DIR + '0');
+    Path canopyOutputDir = new Path(output, Cluster.CLUSTERS_DIR + '0' + Cluster.FINAL_ITERATION_SUFFIX);
     FileOutputFormat.setOutputPath(job, canopyOutputDir);
     if (!job.waitForCompletion(true)) {
       throw new InterruptedException("Canopy Job failed processing " + input);
