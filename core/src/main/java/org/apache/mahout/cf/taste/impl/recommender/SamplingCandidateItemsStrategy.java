@@ -38,29 +38,56 @@ import java.util.Iterator;
  * things, noted above:</p>
  *
  * <ol>
- *   <li>The items</li>
+ *   <li>The items that the user has preferred</li>
+ *   <li>The users who also prefer each of those items</li>
+ *   <li>The items those users also prefer</li>
  * </ol>
  * 
- * <p><pre>
- * max(defaultMaxPrefsPerItemConsidered, userItemCountFactor * log(max(N_users, N_items)))
- * </pre></p>
+ * <p>There is a maximum associated with each of these three things; if the number of items or users exceeds
+ * that max, it is sampled so that the expected number of items or users actually used in that part of the
+ * computation is equal to the max.</p>
  * 
- * <p>This limit is applied in two ways. First, for each item that the current user prefers, it limits
- * the number of other users who preferred that item that are then considered. Then for each of those users,
- * it limits the number of their preferred items that are added to the list of candidates.</p>
+ * <p>Three arguments control these three maxima. Each is a "factor" f, which establishes the max at
+ * f * log2(n), where n is the number of users or items in the data. For example if factor #2 is 5,
+ * which controls the number of users sampled per item, then 5 * log2(# users) is the maximum for this
+ * part of the computation.</p>
+ * 
+ * <p>Each can be set to not do any limiting with value {@link #NO_LIMIT_FACTOR}.</p>
  */
 public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrategy {
 
-  private static final int DEFAULT_FACTOR = 5;
+  /**
+   * Default factor used if not otherwise specified, for all limits. (30).
+   */
+  public static final int DEFAULT_FACTOR = 30;
+  /**
+   * Specify this value as a factor to mean no limit.
+   */
+  public static final int NO_LIMIT_FACTOR = Integer.MAX_VALUE;
+  private static final int MAX_LIMIT = Integer.MAX_VALUE;
+  private static final double LOG2 = Math.log(2.0);
   
   private final int maxItems;
   private final int maxUsersPerItem;
   private final int maxItemsPerUser;
 
+  /**
+   * Defaults to using no limit ({@link #NO_LIMIT_FACTOR}) for all factors, except 
+   * {@code candidatesPerUserFactor} which defaults to {@link #DEFAULT_FACTOR}.
+   *
+   * @see #SamplingCandidateItemsStrategy(int, int, int, int, int)
+   */
   public SamplingCandidateItemsStrategy(int numUsers, int numItems) {
     this(DEFAULT_FACTOR, DEFAULT_FACTOR, DEFAULT_FACTOR, numUsers, numItems);
   }
 
+  /**
+   * @param itemsFactor factor controlling max items considered for a user
+   * @param usersPerItemFactor factor controlling max users considered for each of those items
+   * @param candidatesPerUserFactor factor controlling max candidate items considered from each of those users
+   * @param numUsers number of users currently in the data
+   * @param numItems number of items in the data
+   */
   public SamplingCandidateItemsStrategy(int itemsFactor,
                                         int usersPerItemFactor,
                                         int candidatesPerUserFactor,
@@ -71,9 +98,17 @@ public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrate
     Preconditions.checkArgument(candidatesPerUserFactor > 0);
     Preconditions.checkArgument(numUsers > 0);
     Preconditions.checkArgument(numItems > 0);
-    maxItems = (int) (itemsFactor * (1.0 + Math.log(numItems)));
-    maxUsersPerItem = (int) (itemsFactor * (1.0 + Math.log(numUsers)));
-    maxItemsPerUser = (int) (itemsFactor *(1.0 + Math.log(numItems)));
+    maxItems = computeMaxFrom(itemsFactor, numItems);
+    maxUsersPerItem = computeMaxFrom(usersPerItemFactor, numUsers);
+    maxItemsPerUser = computeMaxFrom(candidatesPerUserFactor, numItems);
+  }
+  
+  private static int computeMaxFrom(int factor, int numThings) {
+    if (factor == NO_LIMIT_FACTOR) {
+      return MAX_LIMIT;
+    }
+    long max = (long) (factor * (1.0 + Math.log(numThings) / LOG2));
+    return max > MAX_LIMIT ? MAX_LIMIT : (int) max;
   }
 
   @Override
