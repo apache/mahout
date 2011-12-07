@@ -60,7 +60,8 @@ public final class SamplingCandidateItemsStrategyTest extends TasteTestCase {
 
     DataModel dataModel = new GenericDataModel(userData);
 
-    CandidateItemsStrategy strategy = new SamplingCandidateItemsStrategy(1, 1);
+    CandidateItemsStrategy strategy =
+        new SamplingCandidateItemsStrategy(1, 1, 1, dataModel.getNumUsers(), dataModel.getNumItems());
 
     FastIDSet candidateItems = strategy.getCandidateItems(123L, prefArrayOfUser123, dataModel);
     /* result can be either item2 or item3 or empty */
