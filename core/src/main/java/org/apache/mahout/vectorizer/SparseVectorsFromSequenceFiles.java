@@ -84,13 +84,18 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
     Option minDFOpt = obuilder.withLongName("minDF").withRequired(false).withArgument(
       abuilder.withName("minDF").withMinimum(1).withMaximum(1).create()).withDescription(
       "The minimum document frequency.  Default is 1").withShortName("md").create();
-    
+
+    Option maxDFPercentOpt = obuilder.withLongName("maxDFPercent").withRequired(false).withArgument(
+      abuilder.withName("maxDFPercent").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The max percentage of docs for the DF.  Can be used to remove really high frequency terms."
+          + " Expressed as an integer between 0 and 100. Default is 99.  If maxDFSigma is also set, it will override this value.").withShortName("x").create();
+
     Option maxDFSigmaOpt = obuilder.withLongName("maxDFSigma").withRequired(false).withArgument(
       abuilder.withName("maxDFSigma").withMinimum(1).withMaximum(1).create()).withDescription(
       "What portion of the tf (tf-idf) vectors to be used, expressed in times the standard deviation (sigma) of the document frequencies of these vectors." +
               "  Can be used to remove really high frequency terms."
           + " Expressed as a double value. Good value to be specified is 3.0. In case the value is less then 0 no vectors " +
-              "will be filtered out. Default is -1.0.").withShortName("xs").create();
+              "will be filtered out. Default is -1.0.  Overrides maxDFPercent").withShortName("xs").create();
     
     Option minLLROpt = obuilder.withLongName("minLLR").withRequired(false).withArgument(
       abuilder.withName("minLLR").withMinimum(1).withMaximum(1).create()).withDescription(
@@ -134,7 +139,7 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
     
     Group group = gbuilder.withName("Options").withOption(minSupportOpt).withOption(analyzerNameOpt)
         .withOption(chunkSizeOpt).withOption(outputDirOpt).withOption(inputDirOpt).withOption(minDFOpt)
-        .withOption(maxDFSigmaOpt).withOption(weightOpt).withOption(powerOpt).withOption(minLLROpt)
+        .withOption(maxDFSigmaOpt).withOption(maxDFPercentOpt).withOption(weightOpt).withOption(powerOpt).withOption(minLLROpt)
         .withOption(numReduceTasksOpt).withOption(maxNGramSizeOpt).withOption(overwriteOutput)
         .withOption(helpOpt).withOption(sequentialAccessVectorOpt).withOption(namedVectorOpt)
         .withOption(logNormalizeOpt)
@@ -218,6 +223,10 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
       if (cmdLine.hasOption(minDFOpt)) {
         minDf = Integer.parseInt(cmdLine.getValue(minDFOpt).toString());
       }
+      int maxDFPercent = 99;
+      if (cmdLine.hasOption(maxDFPercentOpt)) {
+        maxDFPercent = Integer.parseInt(cmdLine.getValue(maxDFPercentOpt).toString());
+      }
       double maxDFSigma = -1.0;
       if (cmdLine.hasOption(maxDFSigmaOpt)) {
     	  maxDFSigma = Double.parseDouble(cmdLine.getValue(maxDFSigmaOpt).toString());
@@ -269,7 +278,7 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
                  outputDir, conf, chunkSize);
        }
 
-       long maxDF = -1;
+       long maxDF = maxDFPercent;//if we are pruning by std dev, then this will get changed
        if (shouldPrune) {
          Path dfDir = new Path(outputDir, TFIDFConverter.WORDCOUNT_OUTPUT_FOLDER);
          Path stdCalcDir = new Path(outputDir, HighDFWordsPruner.STD_CALC_DIR);
