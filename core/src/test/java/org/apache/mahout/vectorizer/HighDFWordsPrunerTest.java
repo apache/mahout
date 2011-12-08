@@ -41,7 +41,7 @@ import java.util.List;
 public class HighDFWordsPrunerTest extends MahoutTestCase {
   private static final int NUM_DOCS = 100;
 
-  private static final String[] HIGF_DF_WORDS = {"has", "which", "what", "srtyui"};
+  private static final String[] HIGH_DF_WORDS = {"has", "which", "what", "srtyui"};
 
   private Configuration conf;
   private Path inputPath;
@@ -66,8 +66,8 @@ public class HighDFWordsPrunerTest extends MahoutTestCase {
 
   private String enhanceWithHighDFWords(String initialDoc) {
     StringBuilder sb = new StringBuilder(initialDoc);
-    for (int i = 0; i < HIGF_DF_WORDS.length; i++) {
-      sb.append(' ').append(HIGF_DF_WORDS[i]);
+    for (int i = 0; i < HIGH_DF_WORDS.length; i++) {
+      sb.append(' ').append(HIGH_DF_WORDS[i]);
     }
 
     return sb.toString();
@@ -95,6 +95,9 @@ public class HighDFWordsPrunerTest extends MahoutTestCase {
     if (prune) {
       argList.add("-xs");
       argList.add("3"); // we prune all words that are outside 3*sigma
+    } else {
+      argList.add("--maxDFPercent");
+      argList.add("100"); // the default if, -xs is not specified is to use maxDFPercent, which defaults to 99%
     }
 
     argList.add("-seq");
@@ -114,9 +117,9 @@ public class HighDFWordsPrunerTest extends MahoutTestCase {
   }
 
   private int[] getHighDFWordsDictionaryIndices(Path dictionaryPath) {
-    int[] highDFWordsDictionaryIndices = new int[HIGF_DF_WORDS.length];
+    int[] highDFWordsDictionaryIndices = new int[HIGH_DF_WORDS.length];
 
-    List<String> highDFWordsList = Arrays.asList(HIGF_DF_WORDS);
+    List<String> highDFWordsList = Arrays.asList(HIGH_DF_WORDS);
 
     for (Pair<Text, IntWritable> record : new SequenceFileDirIterable<Text, IntWritable>(dictionaryPath, PathType.GLOB,
             null, null, true, conf)) {
@@ -135,10 +138,10 @@ public class HighDFWordsPrunerTest extends MahoutTestCase {
       Vector v = ((NamedVector) value.get()).getDelegate();
       for (int i = 0; i < highDFWordsDictionaryIndices.length; i++) {
         if (prune) {
-          assertTrue("Found vector for which word " + HIGF_DF_WORDS[i] + " is not pruned", v
+          assertTrue("Found vector for which word '" + HIGH_DF_WORDS[i] + "' is not pruned", v
                   .get(highDFWordsDictionaryIndices[i]) == 0.0);
         } else {
-          assertTrue("Found vector for which word " + HIGF_DF_WORDS[i] + " is pruned, and shouldn't have been", v
+          assertTrue("Found vector for which word '" + HIGH_DF_WORDS[i] + "' is pruned, and shouldn't have been", v
                   .get(highDFWordsDictionaryIndices[i]) != 0.0);
         }
       }
