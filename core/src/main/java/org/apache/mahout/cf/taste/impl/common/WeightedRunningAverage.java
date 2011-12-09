@@ -40,7 +40,7 @@ public class WeightedRunningAverage implements RunningAverage, Serializable {
     double oldTotalWeight = totalWeight;
     totalWeight += weight;
     if (oldTotalWeight <= 0.0) {
-      average = datum * weight;
+    	average = datum;
     } else {
       average = average * oldTotalWeight / totalWeight + datum * weight / totalWeight;
     }

@@ -32,9 +32,9 @@ public final class WeightedRunningAverageTest extends TasteTestCase {
 
     assertEquals(0, runningAverage.getCount());
     assertTrue(Double.isNaN(runningAverage.getAverage()));
-    runningAverage.addDatum(1.0);
-    assertEquals(1.0, runningAverage.getAverage(), EPSILON);
     runningAverage.addDatum(1.0, 2.0);
+    assertEquals(1.0, runningAverage.getAverage(), EPSILON);
+    runningAverage.addDatum(1.0);
     assertEquals(1.0, runningAverage.getAverage(), EPSILON);
     runningAverage.addDatum(8.0, 0.5);
     assertEquals(2.0, runningAverage.getAverage(), EPSILON);
