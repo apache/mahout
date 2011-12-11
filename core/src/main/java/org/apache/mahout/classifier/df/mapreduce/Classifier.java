@@ -42,15 +42,15 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.LongWritable;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.net.URI;
-import org.apache.mahout.classifier.ClassifierResult;
-import org.apache.mahout.classifier.ResultAnalyzer;
 
 /**
  * Mapreduce implementation that classifies the Input data using a previousely built decision forest
@@ -63,36 +63,24 @@ public class Classifier {
   private final Path inputPath;
   private final Path datasetPath;
   private final Configuration conf;
-  /** If not null, the Job will build the confusionMatrix. */
-  private final ResultAnalyzer analyzer;
-  private final Dataset dataset;
   private final Path outputPath; // path that will containt the final output of the classifier
   private final Path mappersOutputPath; // mappers will output here
-
-  public ResultAnalyzer getAnalyzer() {
-    return analyzer;
+  private double[][] results;
+  
+  public double[][] getResults() {
+    return results;
   }
 
   public Classifier(Path forestPath,
                     Path inputPath,
                     Path datasetPath,
                     Path outputPath,
-                    Configuration conf,
-                    boolean analyze) throws IOException {
+                    Configuration conf) {
     this.forestPath = forestPath;
     this.inputPath = inputPath;
     this.datasetPath = datasetPath;
     this.outputPath = outputPath;
     this.conf = conf;
-
-    if (analyze) {
-      dataset = Dataset.load(conf, datasetPath);
-      analyzer = new ResultAnalyzer(Arrays.asList(dataset.labels()), "unknown");
-
-    } else {
-      dataset = null;
-      analyzer = null;
-    }
 
     mappersOutputPath = new Path(outputPath, "mappers");
   }
@@ -104,7 +92,7 @@ public class Classifier {
     FileInputFormat.setInputPaths(job, inputPath);
     FileOutputFormat.setOutputPath(job, mappersOutputPath);
 
-    job.setOutputKeyClass(LongWritable.class);
+    job.setOutputKeyClass(DoubleWritable.class);
     job.setOutputValueClass(Text.class);
 
     job.setMapperClass(CMapper.class);
@@ -158,11 +146,12 @@ public class Classifier {
     Path[] outfiles = DFUtils.listOutputFiles(fs, mappersOutputPath);
 
     // read all the output
+    List<double[]> resList = new ArrayList<double[]>();
     for (Path path : outfiles) {
       FSDataOutputStream ofile = null;
       try {
-        for (Pair<LongWritable,Text> record : new SequenceFileIterable<LongWritable,Text>(path, true, conf)) {
-          int key = (int) record.getFirst().get();
+        for (Pair<DoubleWritable,Text> record : new SequenceFileIterable<DoubleWritable,Text>(path, true, conf)) {
+          double key = record.getFirst().get();
           String value = record.getSecond().toString();
           if (ofile == null) {
             // this is the first value, it contains the name of the input file
@@ -172,31 +161,29 @@ public class Classifier {
             ofile.writeChars(value); // write the prediction
             ofile.writeChar('\n');
 
-            if (analyzer != null) {
-              analyzer.addInstance(dataset.getLabelString(key),
-                                   new ClassifierResult(dataset.getLabelString(Integer.parseInt(value)), 1.0));
-            }
+            resList.add(new double[]{key, Double.valueOf(value)});
           }
         }
       } finally {
         Closeables.closeQuietly(ofile);
       }
     }
-
+    results = new double[resList.size()][2];
+    resList.toArray(results);
   }
 
   /**
    * TextInputFormat that does not split the input files. This ensures that each input file is processed by one single
    * mapper.
    */
-  public static class CTextInputFormat extends TextInputFormat {
+  private static class CTextInputFormat extends TextInputFormat {
     @Override
     protected boolean isSplitable(JobContext jobContext, Path path) {
       return false;
     }
   }
   
-  public static class CMapper extends Mapper<LongWritable, Text, LongWritable, Text> {
+  public static class CMapper extends Mapper<LongWritable, Text, DoubleWritable, Text> {
 
     /** used to convert input values to data instances */
     private DataConverter converter;
@@ -205,6 +192,7 @@ public class Classifier {
     private boolean first = true;
     private final Text lvalue = new Text();
     private Dataset dataset;
+    private final DoubleWritable lkey = new DoubleWritable();
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
@@ -234,7 +222,8 @@ public class Classifier {
         FileSplit split = (FileSplit) context.getInputSplit();
         Path path = split.getPath(); // current split path
         lvalue.set(path.getName());
-        context.write(key, lvalue);
+        lkey.set(key.get());
+        context.write(lkey, lvalue);
 
         first = false;
       }
@@ -242,10 +231,10 @@ public class Classifier {
       String line = value.toString();
       if (!line.isEmpty()) {
         Instance instance = converter.convert(line);
-        int prediction = forest.classify(rng, instance);
-        key.set(dataset.getLabel(instance));
-        lvalue.set(Integer.toString(prediction));
-        context.write(key, lvalue);
+        double prediction = forest.classify(dataset, rng, instance);
+        lkey.set(dataset.getLabel(instance));
+        lvalue.set(Double.toString(prediction));
+        context.write(lkey, lvalue);
       }
     }
   }

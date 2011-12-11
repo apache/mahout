@@ -47,25 +47,15 @@ public class MapredOutput implements Writable, Cloneable {
     this(tree, null);
   }
 
-  public MapredOutput(int[] predictions) {
-    this(null, predictions);
-  }
-  
-  public Node getTree() {
+    public Node getTree() {
     return tree;
   }
   
-  public int[] getPredictions() {
+  int[] getPredictions() {
     return predictions;
   }
-  
-  public static MapredOutput read(DataInput in) throws IOException {
-    MapredOutput rfOutput = new MapredOutput();
-    rfOutput.readFields(in);
-    return rfOutput;
-  }
-  
-  @Override
+
+    @Override
   public void readFields(DataInput in) throws IOException {
     boolean readTree = in.readBoolean();
     if (readTree) {

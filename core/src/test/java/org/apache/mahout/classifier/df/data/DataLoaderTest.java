@@ -57,6 +57,16 @@ public final class DataLoaderTest extends MahoutTestCase {
 
     testLoadedData(data, attrs, missings, loaded);
     testLoadedDataset(data, attrs, missings, loaded);
+
+    // regression
+    data = Utils.randomDoubles(rng, descriptor, true, datasize);
+    missings = Lists.newArrayList();
+    sData = prepareData(data, attrs, missings);
+    dataset = DataLoader.generateDataset(descriptor, true, sData);
+    loaded = DataLoader.loadData(dataset, sData);
+
+    testLoadedData(data, attrs, missings, loaded);
+    testLoadedDataset(data, attrs, missings, loaded);
   }
 
   /**
@@ -81,7 +91,17 @@ public final class DataLoaderTest extends MahoutTestCase {
     Dataset dataset = DataLoader.generateDataset(descriptor, false, sData);
     
     assertEquals(expected, dataset);
-  }
+
+    // regression
+    data = Utils.randomDoubles(rng, descriptor, true, datasize);
+    missings = Lists.newArrayList();
+    sData = prepareData(data, attrs, missings);
+    expected = DataLoader.generateDataset(descriptor, true, sData);
+
+    dataset = DataLoader.generateDataset(descriptor, true, sData);
+    
+    assertEquals(expected, dataset);
+}
 
   /**
    * Converts the data to an array of comma-separated strings and adds some
@@ -153,14 +173,21 @@ public final class DataLoaderTest extends MahoutTestCase {
         }
 
         if (attrs[attr].isNumerical()) {
-          assertEquals(vector[attr], instance.get(aId++), EPSILON);
-        } else if (attrs[attr].isCategorical()||attrs[attr].isLabel()) {
+          assertEquals(vector[attr], instance.get(aId), EPSILON);
+          aId++;
+        } else if (attrs[attr].isCategorical()) {
           checkCategorical(data, missings, loaded, attr, aId, vector[attr],
               instance.get(aId));
           aId++;
-        } /*else if (attrs[attr].isLabel()) {
-          checkLabel(data, missings, loaded, attr, vector[attr]);
-        }*/
+        } else if (attrs[attr].isLabel()) {
+          if (loaded.getDataset().isNumerical(aId)) {
+            assertEquals(vector[attr], instance.get(aId), EPSILON);
+          } else {
+            checkCategorical(data, missings, loaded, attr, aId, vector[attr],
+              instance.get(aId));
+          }
+          aId++;
+        }
       }
       
       lind++;
@@ -193,14 +220,21 @@ public final class DataLoaderTest extends MahoutTestCase {
           continue;
         }
 
-        assertEquals(attrs[attr].isNumerical(), loaded.getDataset().isNumerical(aId));
-        
-        if (attrs[attr].isCategorical()) {
-          double nValue = instance.get(aId);
-          String oValue = Double.toString(data[index][attr]);
-          assertEquals((double) loaded.getDataset().valueOf(aId, oValue), nValue, EPSILON);
+        if (attrs[attr].isLabel()) {
+          if (!loaded.getDataset().isNumerical(aId)) {
+            double nValue = instance.get(aId);
+            String oValue = Double.toString(data[index][attr]);
+            assertEquals((double) loaded.getDataset().valueOf(aId, oValue), nValue, EPSILON);
+          }
+        } else {
+          assertEquals(attrs[attr].isNumerical(), loaded.getDataset().isNumerical(aId));
+          
+          if (attrs[attr].isCategorical()) {
+            double nValue = instance.get(aId);
+            String oValue = Double.toString(data[index][attr]);
+            assertEquals((double) loaded.getDataset().valueOf(aId, oValue), nValue, EPSILON);
+          }
         }
-
         aId++;
       }
     }
@@ -227,7 +261,19 @@ public final class DataLoaderTest extends MahoutTestCase {
     Data loaded = DataLoader.loadData(dataset, fs, dataPath);
 
     testLoadedData(source, attrs, missings, loaded);
-  }
+
+    // regression
+    source = Utils.randomDoubles(rng, descriptor, true, datasize);
+    missings = Lists.newArrayList();
+    sData = prepareData(source, attrs, missings);
+    dataset = DataLoader.generateDataset(descriptor, true, sData);
+
+    dataPath = Utils.writeDataToTestFile(sData);
+    fs = dataPath.getFileSystem(new Configuration());
+    loaded = DataLoader.loadData(dataset, fs, dataPath);
+
+    testLoadedData(source, attrs, missings, loaded);
+}
 
   /**
    * Test method for
@@ -252,6 +298,19 @@ public final class DataLoaderTest extends MahoutTestCase {
     FileSystem fs = path.getFileSystem(new Configuration());
     
     Dataset dataset = DataLoader.generateDataset(descriptor, false, fs, path);
+    
+    assertEquals(expected, dataset);
+
+    // regression
+    source = Utils.randomDoubles(rng, descriptor, false, datasize);
+    missings = Lists.newArrayList();
+    sData = prepareData(source, attrs, missings);
+    expected = DataLoader.generateDataset(descriptor, false, sData);
+
+    path = Utils.writeDataToTestFile(sData);
+    fs = path.getFileSystem(new Configuration());
+    
+    dataset = DataLoader.generateDataset(descriptor, false, fs, path);
     
     assertEquals(expected, dataset);
   }
@@ -283,40 +342,6 @@ public final class DataLoaderTest extends MahoutTestCase {
         assertEquals(nValue, loaded.get(lind).get(aId), EPSILON);
       } else {
         assertFalse(nValue == loaded.get(lind).get(aId));
-      }
-
-      lind++;
-    }
-  }
-
-  /**
-   * each time value appears in data as a label, its corresponding code must
-   * appear in all the instances with the same label.
-   *
-   * @param labelInd label's index in source
-   * @param value source label's value
-   */
-  static void checkLabel(double[][] source,
-                         Collection<Integer> missings,
-                         Data loaded,
-                         int labelInd,
-                         double value) {
-  	Dataset dataset = loaded.getDataset();
-  	
-    // label's code that corresponds to the value
-    int code = loaded.getDataset().labelCode(Double.toString(value));
-
-    int lind = 0;
-
-    for (int index = 0; index < source.length; index++) {
-      if (missings.contains(index)) {
-        continue;
-      }
-
-      if (source[index][labelInd] == value) {
-        assertEquals(code, dataset.getLabel(loaded.get(lind)));
-      } else {
-        assertFalse(code == dataset.getLabel(loaded.get(lind)));
       }
 
       lind++;

@@ -33,13 +33,16 @@ public class DataTest extends MahoutTestCase {
 
   private Random rng;
 
-  private Data data;
+  private Data classifierData;
+
+  private Data regressionData;
 
   @Override
   public void setUp() throws Exception {
     super.setUp();
     rng = RandomUtils.getRandom();
-    data = Utils.randomData(rng, ATTRIBUTE_COUNT, false, DATA_SIZE);
+    classifierData = Utils.randomData(rng, ATTRIBUTE_COUNT, false, DATA_SIZE);
+    regressionData = Utils.randomData(rng, ATTRIBUTE_COUNT, true, DATA_SIZE);
   }
 
   /**
@@ -51,17 +54,45 @@ public class DataTest extends MahoutTestCase {
     int n = 10;
 
     for (int nloop = 0; nloop < n; nloop++) {
-      int attr = rng.nextInt(data.getDataset().nbAttributes());
+      int attr = rng.nextInt(classifierData.getDataset().nbAttributes());
 
-      double[] values = data.values(attr);
+      double[] values = classifierData.values(attr);
       double value = values[rng.nextInt(values.length)];
 
-      Data eSubset = data.subset(Condition.equals(attr, value));
-      Data lSubset = data.subset(Condition.lesser(attr, value));
-      Data gSubset = data.subset(Condition.greaterOrEquals(attr, value));
+      Data eSubset = classifierData.subset(Condition.equals(attr, value));
+      Data lSubset = classifierData.subset(Condition.lesser(attr, value));
+      Data gSubset = classifierData.subset(Condition.greaterOrEquals(attr, value));
 
       for (int index = 0; index < DATA_SIZE; index++) {
-        Instance instance = data.get(index);
+        Instance instance = classifierData.get(index);
+
+        if (instance.get(attr) < value) {
+          assertTrue(lSubset.contains(instance));
+          assertFalse(eSubset.contains(instance));
+          assertFalse(gSubset.contains(instance));
+        } else if (instance.get(attr) == value) {
+          assertFalse(lSubset.contains(instance));
+          assertTrue(eSubset.contains(instance));
+          assertTrue(gSubset.contains(instance));
+        } else {
+          assertFalse(lSubset.contains(instance));
+          assertFalse(eSubset.contains(instance));
+          assertTrue(gSubset.contains(instance));
+        }
+      }
+
+      // regression
+      attr = rng.nextInt(regressionData.getDataset().nbAttributes());
+
+      values = regressionData.values(attr);
+      value = values[rng.nextInt(values.length)];
+
+      eSubset = regressionData.subset(Condition.equals(attr, value));
+      lSubset = regressionData.subset(Condition.lesser(attr, value));
+      gSubset = regressionData.subset(Condition.greaterOrEquals(attr, value));
+
+      for (int index = 0; index < DATA_SIZE; index++) {
+        Instance instance = regressionData.get(index);
 
         if (instance.get(attr) < value) {
           assertTrue(lSubset.contains(instance));
@@ -82,17 +113,23 @@ public class DataTest extends MahoutTestCase {
 
   @Test
   public void testValues() throws Exception {
-    Data data = Utils.randomData(rng, ATTRIBUTE_COUNT, false, DATA_SIZE);
-
-    for (int attr = 0; attr < data.getDataset().nbAttributes(); attr++) {
-      double[] values = data.values(attr);
+    for (int attr = 0; attr < classifierData.getDataset().nbAttributes(); attr++) {
+      double[] values = classifierData.values(attr);
 
       // each value of the attribute should appear exactly one time in values
       for (int index = 0; index < DATA_SIZE; index++) {
-        assertEquals(1, count(values, data.get(index).get(attr)));
+        assertEquals(1, count(values, classifierData.get(index).get(attr)));
       }
     }
 
+    for (int attr = 0; attr < regressionData.getDataset().nbAttributes(); attr++) {
+      double[] values = regressionData.values(attr);
+
+      // each value of the attribute should appear exactly one time in values
+      for (int index = 0; index < DATA_SIZE; index++) {
+        assertEquals(1, count(values, regressionData.get(index).get(attr)));
+      }
+    }
   }
 
   private static int count(double[] values, double value) {
@@ -194,19 +231,33 @@ public class DataTest extends MahoutTestCase {
    */
   @Test
   public void testBagging() {
-    Data bag = data.bagging(rng);
+    Data bag = classifierData.bagging(rng);
 
     // the bag should have the same size as the data
-    assertEquals(data.size(), bag.size());
+    assertEquals(classifierData.size(), bag.size());
 
     // at least one element from the data should not be in the bag
     boolean found = false;
-    for (int index = 0; index < data.size() && !found; index++) {
-      found = !bag.contains(data.get(index));
+    for (int index = 0; index < classifierData.size() && !found; index++) {
+      found = !bag.contains(classifierData.get(index));
     }
     
     assertTrue("some instances from data should not be in the bag", found);
-  }
+
+    // regression
+    bag = regressionData.bagging(rng);
+
+    // the bag should have the same size as the data
+    assertEquals(regressionData.size(), bag.size());
+
+    // at least one element from the data should not be in the bag
+    found = false;
+    for (int index = 0; index < regressionData.size() && !found; index++) {
+      found = !bag.contains(regressionData.get(index));
+    }
+    
+    assertTrue("some instances from data should not be in the bag", found);
+}
 
   /**
    * Test method for
@@ -216,42 +267,61 @@ public class DataTest extends MahoutTestCase {
   public void testRsplit() {
 
     // rsplit should handle empty subsets
-    Data source = data.clone();
+    Data source = classifierData.clone();
     Data subset = source.rsplit(rng, 0);
     assertTrue("subset should be empty", subset.isEmpty());
     assertEquals("source.size is incorrect", DATA_SIZE, source.size());
 
     // rsplit should handle full size subsets
-    source = data.clone();
+    source = classifierData.clone();
     subset = source.rsplit(rng, DATA_SIZE);
     assertEquals("subset.size is incorrect", DATA_SIZE, subset.size());
     assertTrue("source should be empty", source.isEmpty());
 
     // random case
     int subsize = rng.nextInt(DATA_SIZE);
-    source = data.clone();
+    source = classifierData.clone();
     subset = source.rsplit(rng, subsize);
     assertEquals("subset.size is incorrect", subsize, subset.size());
     assertEquals("source.size is incorrect", DATA_SIZE - subsize, source.size());
-  }
+
+    // regression
+    // rsplit should handle empty subsets
+    source = regressionData.clone();
+    subset = source.rsplit(rng, 0);
+    assertTrue("subset should be empty", subset.isEmpty());
+    assertEquals("source.size is incorrect", DATA_SIZE, source.size());
+
+    // rsplit should handle full size subsets
+    source = regressionData.clone();
+    subset = source.rsplit(rng, DATA_SIZE);
+    assertEquals("subset.size is incorrect", DATA_SIZE, subset.size());
+    assertTrue("source should be empty", source.isEmpty());
+
+    // random case
+    subsize = rng.nextInt(DATA_SIZE);
+    source = regressionData.clone();
+    subset = source.rsplit(rng, subsize);
+    assertEquals("subset.size is incorrect", subsize, subset.size());
+    assertEquals("source.size is incorrect", DATA_SIZE - subsize, source.size());
+}
 
   @Test
   public void testCountLabel() throws Exception {
-    Data data = Utils.randomData(rng, ATTRIBUTE_COUNT, false, DATA_SIZE);
-    Dataset dataset = data.getDataset();
+    Dataset dataset = classifierData.getDataset();
     int[] counts = new int[dataset.nblabels()];
 
     int n = 10;
 
     for (int nloop = 0; nloop < n; nloop++) {
       Arrays.fill(counts, 0);
-      data.countLabels(counts);
+      classifierData.countLabels(counts);
       
-      for (int index=0;index<data.size();index++) {
-        counts[dataset.getLabel(data.get(index))]--;
+      for (int index = 0; index < classifierData.size(); index++) {
+        counts[(int) dataset.getLabel(classifierData.get(index))]--;
       }
       
-      for (int label = 0; label < data.getDataset().nblabels(); label++) {
+      for (int label = 0; label < classifierData.getDataset().nblabels(); label++) {
         assertEquals("Wrong label 'equals' count", 0, counts[0]);
       }
     }

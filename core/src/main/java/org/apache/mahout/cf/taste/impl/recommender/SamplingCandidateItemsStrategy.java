@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.impl.recommender;
 
 import com.google.common.base.Preconditions;
+
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveArrayIterator;
@@ -27,6 +28,8 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.common.iterator.FixedSizeSamplingIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 
@@ -55,6 +58,8 @@ import java.util.Iterator;
  * <p>Each can be set to not do any limiting with value {@link #NO_LIMIT_FACTOR}.</p>
  */
 public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrategy {
+
+	private static final Logger log = LoggerFactory.getLogger(SamplingCandidateItemsStrategy.class);
 
   /**
    * Default factor used if not otherwise specified, for all limits. (30).
@@ -101,6 +106,7 @@ public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrate
     maxItems = computeMaxFrom(itemsFactor, numItems);
     maxUsersPerItem = computeMaxFrom(usersPerItemFactor, numUsers);
     maxItemsPerUser = computeMaxFrom(candidatesPerUserFactor, numItems);
+    log.debug("maxItems {}, maxUsersPerItem {}, maxItemsPerUser {}", new Object[] {maxItems, maxUsersPerItem, maxItemsPerUser});
   }
   
   private static int computeMaxFrom(int factor, int numThings) {
@@ -116,8 +122,10 @@ public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrate
     FastIDSet possibleItemsIDs = new FastIDSet();
     LongPrimitiveIterator preferredItemIDsIterator = new LongPrimitiveArrayIterator(preferredItemIDs);
     if (preferredItemIDs.length > maxItems) {
-      preferredItemIDsIterator =
-          new SamplingLongPrimitiveIterator(preferredItemIDsIterator, (double) maxItems / preferredItemIDs.length);
+      double samplingRate = (double) maxItems / preferredItemIDs.length;
+//      log.info("preferredItemIDs.length {}, samplingRate {}", preferredItemIDs.length, samplingRate);
+      preferredItemIDsIterator = 
+          new SamplingLongPrimitiveIterator(preferredItemIDsIterator, samplingRate);
     }
     while (preferredItemIDsIterator.hasNext()) {
       long itemID = preferredItemIDsIterator.nextLong();

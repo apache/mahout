@@ -37,6 +37,7 @@ import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.classifier.df.DFUtils;
 import org.apache.mahout.classifier.df.DecisionForest;
 import org.apache.mahout.classifier.df.builder.DefaultTreeBuilder;
+import org.apache.mahout.classifier.df.builder.TreeBuilder;
 import org.apache.mahout.classifier.df.data.Data;
 import org.apache.mahout.classifier.df.data.DataLoader;
 import org.apache.mahout.classifier.df.data.Dataset;
@@ -65,9 +66,12 @@ public class BuildForest extends Configured implements Tool {
   private Long seed; // Random seed
   
   private boolean isPartial; // use partial data implementation
+  
+  private String builderName; // Tree builder class name
 
   @Override
-  public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
+  public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException,
+    InstantiationException, IllegalAccessException {
     
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
@@ -99,12 +103,16 @@ public class BuildForest extends Configured implements Tool {
         abuilder.withName("path").withMinimum(1).withMaximum(1).create()).
         withDescription("Output path, will contain the Decision Forest").create();
 
+    Option builderOpt = obuilder.withLongName("builder").withShortName("b").withRequired(false)
+      .withArgument(abuilder.withName("builder").withMinimum(1).withMaximum(1).create()).
+      withDescription("Tree builder class name").create();
+
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
         .create();
     
     Group group = gbuilder.withName("Options").withOption(dataOpt).withOption(datasetOpt)
         .withOption(selectionOpt).withOption(seedOpt).withOption(partialOpt).withOption(nbtreesOpt)
-        .withOption(outputOpt).withOption(helpOpt).create();
+        .withOption(outputOpt).withOption(builderOpt).withOption(helpOpt).create();
     
     try {
       Parser parser = new Parser();
@@ -127,6 +135,10 @@ public class BuildForest extends Configured implements Tool {
         seed = Long.valueOf(cmdLine.getValue(seedOpt).toString());
       }
 
+      if (cmdLine.hasOption(builderOpt)) {
+        builderName = cmdLine.getValue(builderOpt).toString();
+      }
+
       if (log.isDebugEnabled()) {
         log.debug("data : {}", dataName);
         log.debug("dataset : {}", datasetName);
@@ -135,6 +147,7 @@ public class BuildForest extends Configured implements Tool {
         log.debug("seed : {}", seed);
         log.debug("nbtrees : {}", nbTrees);
         log.debug("isPartial : {}", isPartial);
+        log.debug("builder : {}", builderName);
       }
      
       dataPath = new Path(dataName);
@@ -152,7 +165,8 @@ public class BuildForest extends Configured implements Tool {
     return 0;
   }
   
-  private void buildForest() throws IOException, ClassNotFoundException, InterruptedException {
+  private void buildForest() throws IOException, ClassNotFoundException, InterruptedException,
+    InstantiationException, IllegalAccessException {
     // make sure the output path does not exist
     FileSystem ofs = outputPath.getFileSystem(getConf());
     if (ofs.exists(outputPath)) {
@@ -160,8 +174,14 @@ public class BuildForest extends Configured implements Tool {
       return;
     }
 
-    DefaultTreeBuilder treeBuilder = new DefaultTreeBuilder();
-    treeBuilder.setM(m);
+    TreeBuilder treeBuilder;
+    if (builderName == null) {
+      treeBuilder = new DefaultTreeBuilder();
+      ((DefaultTreeBuilder) treeBuilder).setM(m);
+    } else {
+      Class<?> clazz = Class.forName(builderName);
+      treeBuilder = (TreeBuilder) clazz.newInstance();
+    }
     
     Builder forestBuilder;
     

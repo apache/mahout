@@ -89,10 +89,8 @@ public class Dataset implements Writable {
    *          attributes description
    * @param values
    *          distinct values for all CATEGORICAL attributes
-   * @param nbInstances
    */
-  protected Dataset(Attribute[] attrs, List<String>[] values, int nbInstances, boolean regression) {
-  	Preconditions.checkArgument(!regression, "Regression Problems not supported");
+  Dataset(Attribute[] attrs, List<String>[] values, int nbInstances, boolean regression) {
     validateValues(attrs, values);
 
     int nbattrs = countAttributes(attrs);
@@ -116,6 +114,11 @@ public class Dataset implements Writable {
           throw new IllegalStateException("Label found more than once");
         }
         labelId = ind;
+        if (regression) {
+          attrs[attr] = Attribute.NUMERICAL;
+        } else {
+          attrs[attr] = Attribute.CATEGORICAL;
+        }
       }
 
       if (attrs[attr].isCategorical() || (!regression && attrs[attr].isLabel())) {
@@ -133,6 +136,10 @@ public class Dataset implements Writable {
     this.nbInstances = nbInstances;
   }
   
+  public int nbValues(int attr) {
+    return values[attr].length;
+  }
+  
   public String[] labels() {
     return Arrays.copyOf(values[labelId], nblabels());
   }
@@ -145,8 +152,8 @@ public class Dataset implements Writable {
     return labelId;
   }
   
-  public int getLabel(Instance instance) {
-  	return (int) instance.get(getLabelId());
+  public double getLabel(Instance instance) {
+  	return instance.get(getLabelId());
   }
 
   public int nbInstances() {
@@ -164,12 +171,20 @@ public class Dataset implements Writable {
     return ArrayUtils.indexOf(values[labelId], label);
   }
   
-  public String getLabelString(int code) {
+  /**
+   * Returns the label value in the data
+   * This method can be used when the criterion variable is the categorical attribute.
+   * 
+   * @param code
+   *          label's code
+   * @return label's value
+   */
+  public String getLabelString(double code) {
     // handle the case (prediction == -1)
   	if (code == -1) {
   		return "unknown";
   	}
-    return values[labelId][code];
+    return values[labelId][(int) code];
   }
   
   /**
@@ -192,7 +207,7 @@ public class Dataset implements Writable {
   /**
    * @return number of attributes that are not IGNORED
    */
-  protected static int countAttributes(Attribute[] attrs) {
+  private static int countAttributes(Attribute[] attrs) {
     int nbattrs = 0;
     
     for (Attribute attr : attrs) {
@@ -207,7 +222,7 @@ public class Dataset implements Writable {
   private static void validateValues(Attribute[] attrs, List<String>[] values) {
     Preconditions.checkArgument(attrs.length == values.length,  "attrs.length != values.length");
     for (int attr = 0; attr < attrs.length; attr++) {
-      Preconditions.checkArgument(!(attrs[attr].isCategorical() || attrs[attr].isLabel()) || values[attr] != null,
+      Preconditions.checkArgument(!attrs[attr].isCategorical() || values[attr] != null,
           "values not found for attribute " + attr);
     }
   }
@@ -273,6 +288,7 @@ public class Dataset implements Writable {
   
   /**
    * Loads the dataset from a file
+   * @throws java.io.IOException
    */
   public static Dataset load(Configuration conf, Path path) throws IOException {
     FileSystem fs = path.getFileSystem(conf);
@@ -302,10 +318,10 @@ public class Dataset implements Writable {
     
     ignored = DFUtils.readIntArray(in);
     
-    // only CATEGORICAL/LABEL attributes have values
+    // only CATEGORICAL attributes have values
     values = new String[nbAttributes][];
     for (int attr = 0; attr < nbAttributes; attr++) {
-      if (attributes[attr].isCategorical() || attributes[attr].isLabel()) {
+      if (attributes[attr].isCategorical()) {
         values[attr] = WritableUtils.readStringArray(in);
       }
     }

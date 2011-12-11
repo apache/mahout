@@ -67,13 +67,13 @@ public class PartialSequentialBuilder extends PartialBuilder {
   }
 
   @Override
-  protected void configureJob(Job job, int nbTrees)
+  protected void configureJob(Job job)
       throws IOException {
     Configuration conf = job.getConfiguration();
     
     int num = conf.getInt("mapred.map.tasks", -1);
 
-    super.configureJob(job, nbTrees);
+    super.configureJob(job);
 
     // PartialBuilder sets the number of maps to 1 if we are running in 'local'
     conf.setInt("mapred.map.tasks", num);

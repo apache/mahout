@@ -42,7 +42,7 @@ public class CategoricalNode extends Node {
   }
   
   @Override
-  public int classify(Instance instance) {
+  public double classify(Instance instance) {
     int index = ArrayUtils.indexOf(values, instance.get(attr));
     if (index == -1) {
       // value not available, we cannot predict

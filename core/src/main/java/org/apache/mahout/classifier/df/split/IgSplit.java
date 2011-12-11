@@ -24,7 +24,7 @@ import org.apache.mahout.classifier.df.data.Data;
  */
 public abstract class IgSplit {
   
-  protected static final double LOG2 = Math.log(2.0);
+  static final double LOG2 = Math.log(2.0);
   
   /**
    * Computes the best split for the given attribute

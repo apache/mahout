@@ -56,7 +56,7 @@ public class InMemBuilder extends Builder {
   }
   
   @Override
-  protected void configureJob(Job job, int nbTrees) throws IOException {
+  protected void configureJob(Job job) throws IOException {
     Configuration conf = job.getConfiguration();
     
     job.setJarByClass(InMemBuilder.class);

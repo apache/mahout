@@ -32,7 +32,6 @@ public final class DataUtils {
   /**
    * Computes the sum of the values
    * 
-   * @param values
    */
   public static int sum(int[] values) {
     int sum = 0;

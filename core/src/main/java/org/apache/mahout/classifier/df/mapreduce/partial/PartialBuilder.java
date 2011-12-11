@@ -37,8 +37,6 @@ import org.apache.mahout.classifier.df.builder.TreeBuilder;
 import org.apache.mahout.classifier.df.mapreduce.Builder;
 import org.apache.mahout.classifier.df.mapreduce.MapredOutput;
 import org.apache.mahout.classifier.df.node.Node;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
@@ -46,10 +44,8 @@ import com.google.common.base.Preconditions;
  * Builds a random forest using partial data. Each mapper uses only the data given by its InputSplit
  */
 public class PartialBuilder extends Builder {
-  
-  private static final Logger log = LoggerFactory.getLogger(PartialBuilder.class);
-  
-  public PartialBuilder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath, Long seed) {
+
+    public PartialBuilder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath, Long seed) {
     this(treeBuilder, dataPath, datasetPath, seed, new Configuration());
   }
   
@@ -61,19 +57,8 @@ public class PartialBuilder extends Builder {
     super(treeBuilder, dataPath, datasetPath, seed, conf);
   }
 
-  /**
-   * Should run the second step of the builder ?
-   *
-   * @param value
-   *          true to indicate that the second step will be launched
-   *
-   */
-  protected static void setStep2(Configuration conf, boolean value) {
-    conf.setBoolean("debug.mahout.rf.partial.step2", value);
-  }
-  
   @Override
-  protected void configureJob(Job job, int nbTrees) throws IOException {
+  protected void configureJob(Job job) throws IOException {
     Configuration conf = job.getConfiguration();
     
     job.setJarByClass(PartialBuilder.class);
@@ -110,13 +95,13 @@ public class PartialBuilder extends Builder {
   /**
    * Processes the output from the output path.<br>
    * 
-   * @param job
    * @param outputPath
    *          directory that contains the output of the job
    * @param keys
    *          can be null
    * @param trees
    *          can be null
+   * @throws java.io.IOException
    */
   protected static void processOutput(JobContext job,
                                       Path outputPath,

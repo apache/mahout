@@ -26,7 +26,8 @@ import org.apache.mahout.classifier.df.data.Dataset;
 import org.apache.mahout.classifier.df.data.Instance;
 
 /**
- * Optimized implementation of IgSplit
+ * Optimized implementation of IgSplit<br>
+ * This class can be used when the criterion variable is the categorical attribute.
  */
 public class OptIgSplit extends IgSplit {
   
@@ -58,8 +59,8 @@ public class OptIgSplit extends IgSplit {
     // compute frequencies
     for (int index = 0; index < data.size(); index++) {
       Instance instance = data.get(index);
-      counts[ArrayUtils.indexOf(values, instance.get(attr))][dataset.getLabel(instance)]++;
-      countAll[dataset.getLabel(instance)]++;
+      counts[ArrayUtils.indexOf(values, instance.get(attr))][(int) dataset.getLabel(instance)]++;
+      countAll[(int) dataset.getLabel(instance)]++;
     }
     
     int size = data.size();
@@ -89,26 +90,26 @@ public class OptIgSplit extends IgSplit {
   /**
    * Instantiates the counting arrays
    */
-  protected void initCounts(Data data, double[] values) {
+  void initCounts(Data data, double[] values) {
     counts = new int[values.length][data.getDataset().nblabels()];
     countAll = new int[data.getDataset().nblabels()];
     countLess = new int[data.getDataset().nblabels()];
   }
   
-  protected void computeFrequencies(Data data, int attr, double[] values) {
+  void computeFrequencies(Data data, int attr, double[] values) {
   	Dataset dataset = data.getDataset();
   	
     for (int index = 0; index < data.size(); index++) {
       Instance instance = data.get(index);
-      counts[ArrayUtils.indexOf(values, instance.get(attr))][dataset.getLabel(instance)]++;
-      countAll[dataset.getLabel(instance)]++;
+      counts[ArrayUtils.indexOf(values, instance.get(attr))][(int) dataset.getLabel(instance)]++;
+      countAll[(int) dataset.getLabel(instance)]++;
     }
   }
   
   /**
    * Computes the best split for a NUMERICAL attribute
    */
-  protected Split numericalSplit(Data data, int attr) {
+  Split numericalSplit(Data data, int attr) {
     double[] values = sortedValues(data, attr);
     
     initCounts(data, values);

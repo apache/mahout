@@ -74,17 +74,8 @@ public class Data implements Cloneable {
   public boolean contains(Instance v) {
     return instances.contains(v);
   }
-  
-  /**
-   * @param v
-   *          element to search for
-   * @return the index of the first occurrence of the element in this data or -1 if the element is not found
-   */
-  public int indexof(Instance v) {
-    return instances.indexOf(v);
-  }
-  
-  /**
+
+    /**
    * Returns the element at the specified position
    * 
    * @param index
@@ -111,30 +102,9 @@ public class Data implements Cloneable {
     
     return new Data(dataset, subset);
   }
-  
-  /**
-   * @param rng
-   *          Random number generator
-   * @param ratio
-   *          [0,1]
-   * @return a random subset without modifying the current data
-   */
-  public Data rsubset(Random rng, double ratio) {
-    List<Instance> subset = Lists.newArrayList();
-    
-    for (Instance instance : instances) {
-      if (rng.nextDouble() < ratio) {
-        subset.add(instance);
-      }
-    }
-    
-    return new Data(dataset, subset);
-  }
-  
-  /**
+
+    /**
    * if data has N cases, sample N cases at random -but with replacement.
-   * 
-   * @param rng
    */
   public Data bagging(Random rng) {
     int datasize = size();
@@ -150,7 +120,6 @@ public class Data implements Cloneable {
   /**
    * if data has N cases, sample N cases at random -but with replacement.
    * 
-   * @param rng
    * @param sampled
    *          indicating which instance has been sampled
    * 
@@ -171,8 +140,6 @@ public class Data implements Cloneable {
   
   /**
    * Splits the data in two, returns one part, and this gets the rest of the data. <b>VERY SLOW!</b>
-   * 
-   * @param rng
    */
   public Data rsplit(Random rng, int subsize) {
     List<Instance> subset = Lists.newArrayListWithCapacity(subsize);
@@ -215,7 +182,7 @@ public class Data implements Cloneable {
       return true;
     }
     
-    int label = dataset.getLabel(get(0));
+    double label = dataset.getLabel(get(0));
     for (int index = 1; index < size(); index++) {
       if (dataset.getLabel(get(index)) != label) {
         return false;
@@ -227,8 +194,6 @@ public class Data implements Cloneable {
   
   /**
    * finds all distinct values of a given attribute
-   * 
-   * @param attr
    */
   public double[] values(int attr) {
     Collection<Double> result = new HashSet<Double>();
@@ -274,8 +239,8 @@ public class Data implements Cloneable {
   /**
    * extract the labels of all instances
    */
-  public int[] extractLabels() {
-    int[] labels = new int[size()];
+  public double[] extractLabels() {
+    double[] labels = new double[size()];
     
     for (int index = 0; index < labels.length; index++) {
       labels[index] = dataset.getLabel(get(index));
@@ -283,40 +248,11 @@ public class Data implements Cloneable {
     
     return labels;
   }
-  
-  /**
-   * extract the labels of all instances from a data file
-   * 
-   * @param dataset
-   * @param fs
-   *          file system
-   * @param path
-   *          data path
-   */
-  public static int[] extractLabels(Dataset dataset, FileSystem fs, Path path) throws IOException {
-    FSDataInputStream input = fs.open(path);
-    FileLineIterator iterator = new FileLineIterator(input);
-    
-    int[] labels = new int[dataset.nbInstances()];
-    DataConverter converter = new DataConverter(dataset);
 
-    int labelId = dataset.getLabelId();
-    
-    try {
-      int index = 0;
-      while (iterator.hasNext()) {
-        labels[index++] = (int) converter.convert(iterator.next()).get(labelId);
-      }
-    } finally {
-      Closeables.closeQuietly(iterator);
-    }
-    
-    return labels;
-  }
-  
-  /**
-   * finds the majority label, breaking ties randomly
-   * 
+    /**
+   * finds the majority label, breaking ties randomly<br>
+   * This method can be used when the criterion variable is the categorical attribute.
+   *
    * @return the majority label value
    */
   public int majorityLabel(Random rng) {
@@ -324,7 +260,7 @@ public class Data implements Cloneable {
     int[] counts = new int[dataset.nblabels()];
     
     for (int index = 0; index < size(); index++) {
-      counts[dataset.getLabel(get(index))]++;
+      counts[(int) dataset.getLabel(get(index))]++;
     }
     
     // find the label values that appears the most
@@ -332,14 +268,15 @@ public class Data implements Cloneable {
   }
   
   /**
-   * Counts the number of occurrences of each label value
+   * Counts the number of occurrences of each label value<br>
+   * This method can be used when the criterion variable is the categorical attribute.
    * 
    * @param counts
    *          will contain the results, supposed to be initialized at 0
    */
   public void countLabels(int[] counts) {
     for (int index = 0; index < size(); index++) {
-      counts[dataset.getLabel(get(index))]++;
+      counts[(int) dataset.getLabel(get(index))]++;
     }
   }
   

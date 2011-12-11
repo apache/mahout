@@ -38,17 +38,23 @@ public final class Split {
     this(attr, ig, Double.NaN);
   }
 
-  /** attribute to split for */
+  /**
+   * @return attribute to split for
+   */
   public int getAttr() {
     return attr;
   }
 
-  /** Information Gain of the split */
+  /**
+   * @return Information Gain of the split
+   */
   public double getIg() {
     return ig;
   }
 
-  /** split value for NUMERICAL attributes */
+  /**
+   * @return split value for NUMERICAL attributes
+   */
   public double getSplit() {
     return split;
   }

@@ -50,7 +50,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Temporary class used to compute the frequency distribution of the "class attribute".
+ * Temporary class used to compute the frequency distribution of the "class attribute".<br>
+ * This class can be used when the criterion variable is the categorical attribute.
  */
 public class FrequenciesJob {
   
@@ -124,7 +125,7 @@ public class FrequenciesJob {
    * 
    * @return counts[partition][label] = num tuples from 'partition' with class == label
    */
-  protected int[][] parseOutput(JobContext job) throws IOException {
+  int[][] parseOutput(JobContext job) throws IOException {
     Configuration conf = job.getConfiguration();
     
     int numMaps = conf.getInt("mapred.map.tasks", -1);
@@ -176,7 +177,7 @@ public class FrequenciesJob {
     /**
      * Useful when testing
      */
-    protected void setup(Dataset dataset) {
+    void setup(Dataset dataset) {
       converter = new DataConverter(dataset);
     }
     
@@ -189,7 +190,7 @@ public class FrequenciesJob {
       
       Instance instance = converter.convert(value.toString());
       
-      context.write(firstId, new IntWritable(dataset.getLabel(instance)));
+      context.write(firstId, new IntWritable((int) dataset.getLabel(instance)));
     }
     
   }
@@ -208,7 +209,7 @@ public class FrequenciesJob {
     /**
      * Useful when testing
      */
-    protected void setup(int nblabels) {
+    void setup(int nblabels) {
       this.nblabels = nblabels;
     }
     
@@ -236,7 +237,9 @@ public class FrequenciesJob {
     /** counts[c] = num tuples from the partition with label == c */
     private int[] counts;
     
-    protected Frequencies(long firstId, int[] counts) {
+    public Frequencies() { }
+    
+    Frequencies(long firstId, int[] counts) {
       this.firstId = firstId;
       this.counts = Arrays.copyOf(counts, counts.length);
     }

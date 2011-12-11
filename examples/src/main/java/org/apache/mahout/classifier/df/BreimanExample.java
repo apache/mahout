@@ -113,8 +113,8 @@ public class BreimanExample extends Configured implements Tool {
     numNodesOne += forestOne.nbNodes();
     
     // compute the test set error (Selection Error), and mean tree error (One Tree Error),
-    int[] testLabels = test.extractLabels();
-    int[] predictions = new int[test.size()];
+    double[] testLabels = test.extractLabels();
+    double[] predictions = new double[test.size()];
     
     forestM.classify(test, predictions);
     sumTestErrM += ErrorEstimate.errorRate(testLabels, predictions);

@@ -56,6 +56,15 @@ public final class DatasetTest extends MahoutTestCase {
       dataset.write(out);
       
       assertEquals(dataset, readDataset(byteOutStream.toByteArray()));
+
+      // regression
+      byteOutStream.reset();
+      
+      dataset = Utils.randomData(rng, NUM_ATTRIBUTES, true, 1).getDataset();
+      
+      dataset.write(out);
+      
+      assertEquals(dataset, readDataset(byteOutStream.toByteArray()));
     }
   }
   

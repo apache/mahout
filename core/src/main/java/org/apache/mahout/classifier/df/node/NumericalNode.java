@@ -49,7 +49,7 @@ public class NumericalNode extends Node {
   }
   
   @Override
-  public int classify(Instance instance) {
+  public double classify(Instance instance) {
     if (instance.get(attr) < split) {
       return loChild.classify(instance);
     } else {

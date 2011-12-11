@@ -20,15 +20,17 @@ package org.apache.mahout.classifier.df.data;
 import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.classifier.df.data.Dataset.Attribute;
-import org.apache.mahout.math.DenseVector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,9 +60,10 @@ public final class DataLoader {
    *          attributes description
    * @param values
    *          used to convert CATEGORICAL attribute values to Integer
-   * @return null if there are missing values '?'
+   * @return false if there are missing values '?' or NUMERICAL attribute values is not numeric
    */
-  private static Instance parseString(Attribute[] attrs, List<String>[] values, CharSequence string) {
+  private static boolean parseString(Attribute[] attrs, Set<String>[] values, CharSequence string,
+    boolean regression) {
     String[] tokens = COMMA_SPACE.split(string);
     Preconditions.checkArgument(tokens.length == attrs.length, "Wrong number of attributes in the string");
 
@@ -70,47 +73,33 @@ public final class DataLoader {
         continue;
       }
       if ("?".equals(tokens[attr])) {
-        return null; // missing value
+        return false; // missing value
       }
     }
     
-    int nbattrs = Dataset.countAttributes(attrs);
-    
-    DenseVector vector = new DenseVector(nbattrs);
-    
-    int aId = 0;
-    int label = -1;
     for (int attr = 0; attr < attrs.length; attr++) {
       if (attrs[attr].isIgnored()) {
         continue;
       }
       
       String token = tokens[attr];
-      
-      if (attrs[attr].isNumerical()) {
-        vector.set(aId++, Double.parseDouble(token));
-      } else { // CATEGORICAL or LABEL
+
+      if (attrs[attr].isCategorical() || (!regression && attrs[attr].isLabel())) {
         // update values
         if (values[attr] == null) {
-          values[attr] = Lists.newArrayList();
+          values[attr] = Sets.newHashSet();
         }
-        if (!values[attr].contains(token)) {
-          values[attr].add(token);
-        }
-        
-        if (attrs[attr].isCategorical()) {
-          vector.set(aId++, values[attr].indexOf(token));
-        } else { // LABEL
-          label = values[attr].indexOf(token);
+        values[attr].add(token);
+      } else {
+        try {
+          Double.parseDouble(token);
+        } catch (NumberFormatException e) {
+          return false;
         }
       }
     }
-    
-    if (label == -1) {
-      throw new IllegalStateException("Label not found!");
-    }
-    
-    return new Instance(vector);
+      
+    return true;
   }
   
   /**
@@ -203,8 +192,9 @@ public final class DataLoader {
     Scanner scanner = new Scanner(input);
     
     // used to convert CATEGORICAL attribute to Integer
-    List<String>[] values = new List[attrs.length];
-    
+    @SuppressWarnings("unchecked")
+    Set<String>[] valsets = new Set[attrs.length];
+
     int size = 0;
     while (scanner.hasNextLine()) {
       String line = scanner.nextLine();
@@ -212,13 +202,21 @@ public final class DataLoader {
         continue;
       }
       
-      if (parseString(attrs, values, line) != null) {
+      if (parseString(attrs, valsets, line, regression)) {
         size++;
       }
     }
     
     scanner.close();
     
+    @SuppressWarnings("unchecked")
+    List<String>[] values = new List[attrs.length];
+    for (int i = 0; i < valsets.length; i++) {
+      if (valsets[i] != null) {
+        values[i] = Lists.newArrayList(valsets[i]);
+      }
+    }
+
     return new Dataset(attrs, values, size, regression);
   }
   
@@ -233,8 +231,9 @@ public final class DataLoader {
                                         String[] data) throws DescriptorException {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
     
-    // used to convert CATEGORICAL and LABEL attributes to Integer
-    List<String>[] values = new List[attrs.length];
+    // used to convert CATEGORICAL attributes to Integer
+    @SuppressWarnings("unchecked")
+    Set<String>[] valsets = new Set[attrs.length];
     
     int size = 0;
     for (String aData : data) {
@@ -242,8 +241,16 @@ public final class DataLoader {
         continue;
       }
       
-      if (parseString(attrs, values, aData) != null) {
+      if (parseString(attrs, valsets, aData, regression)) {
         size++;
+      }
+    }
+
+    @SuppressWarnings("unchecked")
+    List<String>[] values = new List[attrs.length];
+    for (int i = 0; i < valsets.length; i++) {
+      if (valsets[i] != null) {
+        values[i] = Lists.newArrayList(valsets[i]);
       }
     }
     

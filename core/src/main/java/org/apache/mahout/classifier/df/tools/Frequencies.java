@@ -39,7 +39,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Compute the frequency distribution of the "class label"
+ * Compute the frequency distribution of the "class label"<br>
+ * This class can be used when the criterion variable is the categorical attribute.
  */
 public final class Frequencies extends Configured implements Tool {
   

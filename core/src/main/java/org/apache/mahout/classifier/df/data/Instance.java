@@ -45,7 +45,6 @@ public class Instance {
   /**
    * Set the value at the given index
    * 
-   * @param index
    * @param value
    *          a double value to set
    */

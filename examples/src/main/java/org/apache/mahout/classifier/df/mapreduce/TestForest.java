@@ -18,6 +18,8 @@
 package org.apache.mahout.classifier.df.mapreduce;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Arrays;
@@ -44,6 +46,7 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.classifier.df.DFUtils;
 import org.apache.mahout.classifier.df.DecisionForest;
+import org.apache.mahout.classifier.RegressionResultAnalyzer;
 import org.apache.mahout.classifier.ResultAnalyzer;
 import org.apache.mahout.classifier.ClassifierResult;
 import org.apache.mahout.classifier.df.data.DataConverter;
@@ -179,12 +182,27 @@ public class TestForest extends Configured implements Tool {
       throw new IllegalArgumentException("You must specify the ouputPath when using the mapreduce implementation");
     }
 
-    Classifier classifier = new Classifier(modelPath, dataPath, datasetPath, outputPath, getConf(), analyze);
+    Classifier classifier = new Classifier(modelPath, dataPath, datasetPath, outputPath, getConf());
 
     classifier.run();
 
     if (analyze) {
-      log.info("{}", classifier.getAnalyzer());
+      double[][] results = classifier.getResults();
+      if (results != null) {
+        Dataset dataset = Dataset.load(getConf(), datasetPath);
+        if (dataset.isNumerical(dataset.getLabelId())) {
+          RegressionResultAnalyzer regressionAnalyzer = new RegressionResultAnalyzer();
+          regressionAnalyzer.setInstances(results);
+          log.info("{}", regressionAnalyzer);
+        } else {
+          ResultAnalyzer analyzer = new ResultAnalyzer(Arrays.asList(dataset.labels()), "unknown");
+          for (double[] res : results) {
+            analyzer.addInstance(dataset.getLabelString(res[0]),
+              new ClassifierResult(dataset.getLabelString(res[1]), 1.0));
+          }
+          log.info("{}", analyzer);
+        }
+      }
     }
   }
 
@@ -206,37 +224,49 @@ public class TestForest extends Configured implements Tool {
     long time = System.currentTimeMillis();
 
     Random rng = RandomUtils.getRandom();
-    ResultAnalyzer analyzer = analyze ? new ResultAnalyzer(Arrays.asList(dataset.labels()), "unknown") : null;
 
+    List<double[]> resList = new ArrayList<double[]>();
     if (dataFS.getFileStatus(dataPath).isDir()) {
       //the input is a directory of files
-      testDirectory(outputPath, converter, forest, dataset, analyzer, rng);
+      testDirectory(outputPath, converter, forest, dataset, resList, rng);
     }  else {
       // the input is one single file
-      testFile(dataPath, outputPath, converter, forest, dataset, analyzer, rng);
+      testFile(dataPath, outputPath, converter, forest, dataset, resList, rng);
     }
 
     time = System.currentTimeMillis() - time;
     log.info("Classification Time: {}", DFUtils.elapsedTime(time));
 
-    if (analyzer != null) {
-      log.info("{}", analyzer);
+    if (analyze) {
+      if (dataset.isNumerical(dataset.getLabelId())) {
+        RegressionResultAnalyzer regressionAnalyzer = new RegressionResultAnalyzer();
+        double[][] results = new double[resList.size()][2];
+        regressionAnalyzer.setInstances(resList.toArray(results));
+        log.info("{}", regressionAnalyzer);
+      } else {
+        ResultAnalyzer analyzer = new ResultAnalyzer(Arrays.asList(dataset.labels()), "unknown");
+        for (double[] r : resList) {
+          analyzer.addInstance(dataset.getLabelString(r[0]),
+            new ClassifierResult(dataset.getLabelString(r[1]), 1.0));
+        }
+        log.info("{}", analyzer);
+      }
     }
   }
 
-  private void testDirectory(Path outPath, DataConverter converter, DecisionForest forest, Dataset dataset,
-                        ResultAnalyzer analyzer, Random rng) throws IOException {
+  private void testDirectory(Path outPath, DataConverter converter, DecisionForest forest,
+    Dataset dataset, List<double[]> results, Random rng) throws IOException {
     Path[] infiles = DFUtils.listOutputFiles(dataFS, dataPath);
 
     for (Path path : infiles) {
       log.info("Classifying : {}", path);
       Path outfile = outPath != null ? new Path(outPath, path.getName()).suffix(".out") : null;
-      testFile(path, outfile, converter, forest, dataset, analyzer, rng);
+      testFile(path, outfile, converter, forest, dataset, results, rng);
     }
   }
 
-  private void testFile(Path inPath, Path outPath, DataConverter converter, DecisionForest forest, Dataset dataset,
-                        ResultAnalyzer analyzer, Random rng) throws IOException {
+  private void testFile(Path inPath, Path outPath, DataConverter converter, DecisionForest forest,
+    Dataset dataset, List<double[]> results, Random rng) throws IOException {
     // create the predictions file
     FSDataOutputStream ofile = null;
 
@@ -255,17 +285,14 @@ public class TestForest extends Configured implements Tool {
         }
 
         Instance instance = converter.convert(line);
-        int prediction = forest.classify(rng, instance);
+        double prediction = forest.classify(dataset, rng, instance);
 
         if (outputPath != null) {
-          ofile.writeChars(Integer.toString(prediction)); // write the prediction
+          ofile.writeChars(Double.toString(prediction)); // write the prediction
           ofile.writeChar('\n');
         }
-
-        if (analyzer != null) {
-          analyzer.addInstance(dataset.getLabelString(dataset.getLabel(instance)),
-                               new ClassifierResult(dataset.getLabelString(prediction), 1.0));
-        }
+        
+        results.add(new double[] {dataset.getLabel(instance), prediction});
       }
 
       scanner.close();

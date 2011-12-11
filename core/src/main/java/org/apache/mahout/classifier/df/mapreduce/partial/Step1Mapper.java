@@ -80,7 +80,6 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
   /**
    * Useful when testing
    * 
-   * @param seed
    * @param partition
    *          current mapper inputSplit partition
    * @param numMapTasks

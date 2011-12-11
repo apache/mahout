@@ -17,7 +17,6 @@
 
 package org.apache.mahout.classifier.df.data;
 
-import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.ArrayUtils;
@@ -31,10 +30,8 @@ import com.google.common.base.Preconditions;
  * Converts String to Instance using a Dataset
  */
 public class DataConverter {
-  
-  private static final Logger log = LoggerFactory.getLogger(DataConverter.class);
 
-  private static final Pattern COMMA_SPACE = Pattern.compile("[, ]");
+    private static final Pattern COMMA_SPACE = Pattern.compile("[, ]");
 
   private final Dataset dataset;
   
@@ -53,7 +50,6 @@ public class DataConverter {
     DenseVector vector = new DenseVector(nbattrs);
     
     int aId = 0;
-    int label = -1;
     for (int attr = 0; attr < nball; attr++) {
       if (ArrayUtils.contains(dataset.getIgnored(), attr)) {
         continue; // IGNORED
@@ -66,25 +62,12 @@ public class DataConverter {
         return null;
       }
       
-      if (aId == dataset.getLabelId()) {
-        label = dataset.labelCode(token);
-        if (label == -1) {
-          log.error("label token: {} dataset.labels: {}", token, Arrays.toString(dataset.labels()));
-          throw new IllegalStateException("Label value (" + token + ") not known");
-        }
-      } 
-      
       if (dataset.isNumerical(aId)) {
         vector.set(aId++, Double.parseDouble(token));
-      } else { // CATEGORICAL/LABEL
+      } else { // CATEGORICAL
         vector.set(aId, dataset.valueOf(aId, token));
         aId++;
       }
-    }
-    
-    if (label == -1) {
-      log.error("Label not found, instance string : {}", string);
-      throw new IllegalStateException("Label not found!");
     }
     
     return new Instance(vector);

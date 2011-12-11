@@ -56,13 +56,13 @@ public final class NodeTest extends MahoutTestCase {
   public void testReadTree() throws Exception {
     Node node1 = new CategoricalNode(rng.nextInt(), 
         new double[] { rng.nextDouble(), rng.nextDouble() }, 
-        new Node[] { new Leaf(rng.nextInt()), new Leaf(rng.nextInt()) });
+        new Node[] { new Leaf(rng.nextDouble()), new Leaf(rng.nextDouble()) });
     Node node2 = new NumericalNode(rng.nextInt(), rng.nextDouble(), 
-        new Leaf(rng.nextInt()), new Leaf(rng.nextInt()));
+        new Leaf(rng.nextDouble()), new Leaf(rng.nextDouble()));
     
     Node root = new CategoricalNode(rng.nextInt(), 
         new double[] { rng.nextDouble(), rng.nextDouble(), rng.nextDouble() }, 
-        new Node[] { node1, node2, new Leaf(rng.nextInt()) });
+        new Node[] { node1, node2, new Leaf(rng.nextDouble()) });
 
     // write the node to a DataOutput
     root.write(out);
@@ -80,7 +80,7 @@ public final class NodeTest extends MahoutTestCase {
   @Test
   public void testReadLeaf() throws Exception {
 
-    Node leaf = new Leaf(rng.nextInt());
+    Node leaf = new Leaf(rng.nextDouble());
     leaf.write(out);
     assertEquals(leaf, readNode());
   }
@@ -89,7 +89,7 @@ public final class NodeTest extends MahoutTestCase {
   public void testParseNumerical() throws Exception {
 
     Node node = new NumericalNode(rng.nextInt(), rng.nextDouble(), new Leaf(rng
-        .nextInt()), new Leaf(rng.nextInt()));
+        .nextInt()), new Leaf(rng.nextDouble()));
     node.write(out);
     assertEquals(node, readNode());
   }
@@ -98,8 +98,8 @@ public final class NodeTest extends MahoutTestCase {
 
     Node node = new CategoricalNode(rng.nextInt(), new double[]{rng.nextDouble(),
         rng.nextDouble(), rng.nextDouble()}, new Node[]{
-        new Leaf(rng.nextInt()), new Leaf(rng.nextInt()),
-        new Leaf(rng.nextInt())});
+        new Leaf(rng.nextDouble()), new Leaf(rng.nextDouble()),
+        new Leaf(rng.nextDouble())});
 
     node.write(out);
     assertEquals(node, readNode());

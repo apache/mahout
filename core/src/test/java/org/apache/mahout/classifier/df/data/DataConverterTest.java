@@ -44,5 +44,17 @@ public final class DataConverterTest extends MahoutTestCase {
     for (int index = 0; index < data.size(); index++) {
       assertEquals(data.get(index), converter.convert(sData[index]));
     }
+
+    // regression
+    source = Utils.randomDoubles(rng, descriptor, true, INSTANCE_COUNT);
+    sData = Utils.double2String(source);
+    dataset = DataLoader.generateDataset(descriptor, true, sData);
+    data = DataLoader.loadData(dataset, sData);
+    
+    converter = new DataConverter(dataset);
+    
+    for (int index = 0; index < data.size(); index++) {
+      assertEquals(data.get(index), converter.convert(sData[index]));
+    }
   }
 }

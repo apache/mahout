@@ -27,16 +27,18 @@ import org.apache.mahout.classifier.df.data.Instance;
  * Represents a Leaf node
  */
 public class Leaf extends Node {
-  private int label;
+  private static final double EPSILON = 1e-6;
+
+  private double label;
   
-  protected Leaf() { } 
+  Leaf() { }
   
-  public Leaf(int label) {
+  public Leaf(double label) {
     this.label = label;
   }
   
   @Override
-  public int classify(Instance instance) {
+  public double classify(Instance instance) {
     return label;
   }
   
@@ -66,12 +68,13 @@ public class Leaf extends Node {
     
     Leaf leaf = (Leaf) obj;
     
-    return label == leaf.label;
+    return Math.abs(label - leaf.label) < EPSILON;
   }
   
   @Override
   public int hashCode() {
-    return label;
+    long bits = Double.doubleToLongBits(label);
+    return (int)(bits ^ (bits >>> 32));
   }
   
   @Override
@@ -81,11 +84,11 @@ public class Leaf extends Node {
   
   @Override
   public void readFields(DataInput in) throws IOException {
-    label = in.readInt();
+    label = in.readDouble();
   }
   
   @Override
   protected void writeNode(DataOutput out) throws IOException {
-    out.writeInt(label);
+    out.writeDouble(label);
   }
 }

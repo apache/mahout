@@ -40,7 +40,7 @@ public abstract class Node implements Writable {
    * 
    * @return -1 if the label cannot be predicted
    */
-  public abstract int classify(Instance instance);
+  public abstract double classify(Instance instance);
   
   /**
    * @return the total number of nodes of the tree

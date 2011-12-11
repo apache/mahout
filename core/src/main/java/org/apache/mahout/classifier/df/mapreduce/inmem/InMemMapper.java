@@ -79,7 +79,7 @@ public class InMemMapper extends MapredMapper<IntWritable,NullWritable,IntWritab
     map(key, context);
   }
   
-  protected void map(IntWritable key, Context context) throws IOException, InterruptedException {
+  void map(IntWritable key, Context context) throws IOException, InterruptedException {
     
     initRandom((InMemInputSplit) context.getInputSplit());
     
@@ -94,7 +94,7 @@ public class InMemMapper extends MapredMapper<IntWritable,NullWritable,IntWritab
     }
   }
   
-  protected void initRandom(InMemInputSplit split) {
+  void initRandom(InMemInputSplit split) {
     if (rng == null) { // first execution of this mapper
       Long seed = split.getSeed();
       log.debug("Initialising rng with seed : {}", seed);

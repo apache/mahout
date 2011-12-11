@@ -38,6 +38,7 @@ public final class DFUtils {
   
   /**
    * Writes an Node[] into a DataOutput
+   * @throws java.io.IOException
    */
   public static void writeArray(DataOutput out, Node[] array) throws IOException {
     out.writeInt(array.length);
@@ -48,6 +49,7 @@ public final class DFUtils {
   
   /**
    * Reads a Node[] from a DataInput
+   * @throws java.io.IOException
    */
   public static Node[] readNodeArray(DataInput in) throws IOException {
     int length = in.readInt();
@@ -61,6 +63,7 @@ public final class DFUtils {
   
   /**
    * Writes a double[] into a DataOutput
+   * @throws java.io.IOException
    */
   public static void writeArray(DataOutput out, double[] array) throws IOException {
     out.writeInt(array.length);
@@ -71,6 +74,7 @@ public final class DFUtils {
   
   /**
    * Reads a double[] from a DataInput
+   * @throws java.io.IOException
    */
   public static double[] readDoubleArray(DataInput in) throws IOException {
     int length = in.readInt();
@@ -84,6 +88,7 @@ public final class DFUtils {
   
   /**
    * Writes an int[] into a DataOutput
+   * @throws java.io.IOException
    */
   public static void writeArray(DataOutput out, int[] array) throws IOException {
     out.writeInt(array.length);
@@ -94,6 +99,7 @@ public final class DFUtils {
   
   /**
    * Reads an int[] from a DataInput
+   * @throws java.io.IOException
    */
   public static int[] readIntArray(DataInput in) throws IOException {
     int length = in.readInt();
@@ -107,7 +113,6 @@ public final class DFUtils {
   
   /**
    * Return a list of all files in the output directory
-   *
    * @throws IOException if no file is found
    */
   public static Path[] listOutputFiles(FileSystem fs, Path outputPath) throws IOException {

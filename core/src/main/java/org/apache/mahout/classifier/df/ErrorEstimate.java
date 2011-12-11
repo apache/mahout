@@ -27,7 +27,7 @@ public final class ErrorEstimate {
   private ErrorEstimate() {
   }
   
-  public static double errorRate(int[] labels, int[] predictions) {
+  public static double errorRate(double[] labels, double[] predictions) {
     Preconditions.checkArgument(labels.length == predictions.length, "labels.length != predictions.length");
     double nberrors = 0; // number of instance that got bad predictions
     double datasize = 0; // number of classified instances
@@ -46,40 +46,5 @@ public final class ErrorEstimate {
 
     return nberrors / datasize;
   }
-  
-  /**
-   * Counts the number of classified instances (prediction != -1)
-   */
-  public static int nbPredicted(int[] predictions) {
-    int nbpredicted = 0;
-    
-    for (int prediction : predictions) {
-      if (prediction != -1) {
-        nbpredicted++;
-      }
-    }
-    
-    return nbpredicted;
-  }
-  
-  /**
-   * Counts the number of instance that got bad predictions
-   */
-  public static int nbErrors(int[] labels, int[] predictions) {
-    Preconditions.checkArgument(labels.length == predictions.length, "labels.length != predictions.length");
 
-    int nberrors = 0;
-    
-    for (int index = 0; index < labels.length; index++) {
-      if (predictions[index] == -1) {
-        continue; // instance not classified
-      }
-      
-      if (predictions[index] != labels[index]) {
-        nberrors++;
-      }
-    }
-    
-    return nberrors;
-  }
 }

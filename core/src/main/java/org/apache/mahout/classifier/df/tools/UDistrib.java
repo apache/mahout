@@ -50,7 +50,8 @@ import com.google.common.base.Preconditions;
 
 /**
  * This tool is used to uniformly distribute the class of all the tuples of the dataset over a given number of
- * partitions.
+ * partitions.<br>
+ * This class can be used when the criterion variable is the categorical attribute.
  */
 public final class UDistrib {
   
@@ -63,7 +64,8 @@ public final class UDistrib {
    * Launch the uniform distribution tool. Requires the following command line arguments:<br>
    * 
    * data : data path dataset : dataset path numpartitions : num partitions output : output path
-   * 
+   *
+   * @throws java.io.IOException
    */
   public static void main(String[] args) throws IOException {
     
@@ -175,7 +177,7 @@ public final class UDistrib {
       
       // write the tuple in files[tuple.label]
       Instance instance = converter.convert(line);
-      int label = dataset.getLabel(instance);
+      int label = (int) dataset.getLabel(instance);
       files[currents[label]].writeBytes(line);
       files[currents[label]].writeChar('\n');
       

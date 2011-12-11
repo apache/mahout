@@ -75,11 +75,7 @@ public abstract class Builder {
   protected Path getDataPath() {
     return dataPath;
   }
-  
-  protected Path getDatasetPath() {
-    return datasetPath;
-  }
-  
+
   protected Long getSeed() {
     return seed;
   }
@@ -194,7 +190,7 @@ public abstract class Builder {
    * @throws IOException
    *           if we cannot get the default FileSystem
    */
-  public Path getOutputPath(Configuration conf) throws IOException {
+  protected Path getOutputPath(Configuration conf) throws IOException {
     // the output directory is accessed only by this class, so use the default
     // file system
     FileSystem fs = FileSystem.get(conf);
@@ -241,14 +237,13 @@ public abstract class Builder {
   /**
    * Used by the inheriting classes to configure the job
    * 
+   *
    * @param job
    *          Hadoop's Job
-   * @param nbTrees
-   *          number of trees to grow
    * @throws IOException
    *           if anything goes wrong while configuring the job
    */
-  protected abstract void configureJob(Job job, int nbTrees) throws IOException;
+  protected abstract void configureJob(Job job) throws IOException;
   
   /**
    * Sequential implementation should override this method to simulate the job execution
@@ -296,7 +291,7 @@ public abstract class Builder {
     Job job = new Job(conf, "decision forest builder");
     
     log.debug("Configuring the job...");
-    configureJob(job, nbTrees);
+    configureJob(job);
     
     log.debug("Running the job...");
     if (!runJob(job)) {
