@@ -17,9 +17,7 @@
 
 package org.apache.mahout.classifier.df.builder;
 
-import java.util.HashSet;
-import java.util.Random;
-
+import com.google.common.collect.Sets;
 import org.apache.mahout.classifier.df.data.Data;
 import org.apache.mahout.classifier.df.data.Dataset;
 import org.apache.mahout.classifier.df.data.Instance;
@@ -35,7 +33,8 @@ import org.apache.mahout.classifier.df.split.Split;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Sets;
+import java.util.HashSet;
+import java.util.Random;
 
 /**
  * Builds a classification tree or regression tree<br>
@@ -43,33 +42,49 @@ import com.google.common.collect.Sets;
  * A regression tree is built when the criterion variable is the numerical attribute.
  */
 public class DecisionTreeBuilder implements TreeBuilder {
-  
+
   private static final Logger log = LoggerFactory.getLogger(DecisionTreeBuilder.class);
 
   private static final int[] NO_ATTRIBUTES = new int[0];
   private static final double EPSILON = 1e-6;
 
-  /** indicates which CATEGORICAL attributes have already been selected in the parent nodes */
+  /**
+   * indicates which CATEGORICAL attributes have already been selected in the parent nodes
+   */
   private boolean[] selected;
-  /** number of attributes to select randomly at each node */
-  private int m = 0;
-  /** IgSplit implementation */
+  /**
+   * number of attributes to select randomly at each node
+   */
+  private int m;
+  /**
+   * IgSplit implementation
+   */
   private IgSplit igSplit;
-  /** tree is complemented */
+  /**
+   * tree is complemented
+   */
   private boolean complemented = true;
-  /** minimum number for split */
+  /**
+   * minimum number for split
+   */
   private double minSplitNum = 2;
-  /** minimum proportion of the total variance for split */
+  /**
+   * minimum proportion of the total variance for split
+   */
   private double minVarianceProportion = 1e-3;
-  /** full set data */
+  /**
+   * full set data
+   */
   private Data fullSet;
-  /** minimum variance for split */
+  /**
+   * minimum variance for split
+   */
   private double minVariance = Double.NaN;
-  
+
   public void setM(int m) {
     this.m = m;
   }
-  
+
   public void setIgSplit(IgSplit igSplit) {
     this.igSplit = igSplit;
   }
@@ -77,7 +92,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
   public void setComplemented(boolean complemented) {
     this.complemented = complemented;
   }
-  
+
   public void setMinSplitNum(int minSplitNum) {
     this.minSplitNum = minSplitNum;
   }
@@ -85,7 +100,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
   public void setMinVarianceProportion(double minVarianceProportion) {
     this.minVarianceProportion = minVarianceProportion;
   }
-  
+
   @Override
   public Node build(Random rng, Data data) {
     if (selected == null) {
@@ -127,11 +142,11 @@ public class DecisionTreeBuilder implements TreeBuilder {
         minVariance = var / data.size() * minVarianceProportion;
         log.debug("minVariance:{}", minVariance);
       }
-      
+
       // variance is compared with minimum variance
       if ((var / data.size()) < minVariance) {
-        log.debug("variance(" + (var /data.size()) + ") < minVariance(" + minVariance + ") Leaf(" +
-          (sum / data.size()) + ")");
+        log.debug("variance(" + (var / data.size()) + ") < minVariance(" + minVariance + ") Leaf(" +
+            (sum / data.size()) + ")");
         return new Leaf(sum / data.size());
       }
     } else {
@@ -148,7 +163,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
     if (fullSet == null) {
       fullSet = data;
     }
-    
+
     int[] attributes = randomAttributes(rng, selected, m);
     if (attributes == null || attributes.length == 0) {
       // we tried all the attributes and could not split the data anymore
@@ -196,14 +211,14 @@ public class DecisionTreeBuilder implements TreeBuilder {
     }
 
     log.debug("best split attr:" + best.getAttr() + ", split:" + best.getSplit() + ", ig:" +
-      best.getIg());
+        best.getIg());
 
     boolean alreadySelected = selected[best.getAttr()];
     if (alreadySelected) {
       // attribute already selected
       log.warn("attribute {} already selected in a parent node", best.getAttr());
     }
-    
+
     Node childNode;
     if (data.getDataset().isNumerical(best.getAttr())) {
       boolean[] temp = null;
@@ -283,7 +298,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
       }
 
       selected[best.getAttr()] = true;
-      
+
       Node[] children = new Node[values.length];
       for (int index = 0; index < values.length; index++) {
         if (complemented && (subsetValues == null || !subsetValues.contains(values[index]))) {
@@ -302,16 +317,16 @@ public class DecisionTreeBuilder implements TreeBuilder {
       }
 
       selected[best.getAttr()] = alreadySelected;
-      
+
       childNode = new CategoricalNode(best.getAttr(), values, children);
     }
-    
+
     return childNode;
   }
-  
+
   /**
    * checks if all the vectors have identical attribute values. Ignore selected attributes.
-   * 
+   *
    * @return true is all the vectors are identical or the data is empty<br>
    *         false otherwise
    */
@@ -319,25 +334,26 @@ public class DecisionTreeBuilder implements TreeBuilder {
     if (data.isEmpty()) {
       return true;
     }
-    
+
     Instance instance = data.get(0);
     for (int attr = 0; attr < selected.length; attr++) {
       if (selected[attr]) {
         continue;
       }
-      
+
       for (int index = 1; index < data.size(); index++) {
         if (data.get(index).get(attr) != instance.get(attr)) {
           return false;
         }
       }
     }
-    
+
     return true;
   }
 
   /**
    * Make a copy of the selection state of the attributes, unselect all numerical attributes
+   *
    * @param selected selection state to clone
    * @return cloned selection state
    */
@@ -354,13 +370,10 @@ public class DecisionTreeBuilder implements TreeBuilder {
 
   /**
    * Randomly selects m attributes to consider for split, excludes IGNORED and LABEL attributes
-   * 
-   * @param rng
-   *          random-numbers generator
-   * @param selected
-   *          attributes' state (selected or not)
-   * @param m
-   *          number of attributes to choose
+   *
+   * @param rng      random-numbers generator
+   * @param selected attributes' state (selected or not)
+   * @param m        number of attributes to choose
    * @return list of selected attributes' indices, or null if all attributes have already been selected
    */
   private static int[] randomAttributes(Random rng, boolean[] selected, int m) {
@@ -370,12 +383,12 @@ public class DecisionTreeBuilder implements TreeBuilder {
         nbNonSelected++;
       }
     }
-    
+
     if (nbNonSelected == 0) {
       log.warn("All attributes are selected !");
       return NO_ATTRIBUTES;
     }
-    
+
     int[] result;
     if (nbNonSelected <= m) {
       // return all non selected attributes
@@ -394,17 +407,17 @@ public class DecisionTreeBuilder implements TreeBuilder {
         do {
           rind = rng.nextInt(selected.length);
         } while (selected[rind]);
-        
+
         result[index] = rind;
         selected[rind] = true; // temporarily set the chosen attribute to be selected
       }
-      
+
       // the chosen attributes are not yet selected
       for (int attr : result) {
         selected[attr] = false;
       }
     }
-    
+
     return result;
   }
 }

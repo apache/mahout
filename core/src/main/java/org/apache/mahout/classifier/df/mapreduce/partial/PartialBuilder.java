@@ -17,9 +17,7 @@
 
 package org.apache.mahout.classifier.df.mapreduce.partial;
 
-import java.io.IOException;
-import java.util.Arrays;
-
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -29,23 +27,24 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
-import org.apache.mahout.common.Pair;
-import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.classifier.df.DFUtils;
 import org.apache.mahout.classifier.df.DecisionForest;
 import org.apache.mahout.classifier.df.builder.TreeBuilder;
 import org.apache.mahout.classifier.df.mapreduce.Builder;
 import org.apache.mahout.classifier.df.mapreduce.MapredOutput;
 import org.apache.mahout.classifier.df.node.Node;
+import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 
-import com.google.common.base.Preconditions;
+import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Builds a random forest using partial data. Each mapper uses only the data given by its InputSplit
  */
 public class PartialBuilder extends Builder {
 
-    public PartialBuilder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath, Long seed) {
+  public PartialBuilder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath, Long seed) {
     this(treeBuilder, dataPath, datasetPath, seed, new Configuration());
   }
   

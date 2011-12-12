@@ -17,11 +17,11 @@
 
 package org.apache.mahout.classifier.df.node;
 
+import org.apache.mahout.classifier.df.data.Instance;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-
-import org.apache.mahout.classifier.df.data.Instance;
 
 /**
  * Represents a node that splits using a numerical attribute

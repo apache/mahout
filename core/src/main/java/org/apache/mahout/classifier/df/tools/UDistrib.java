@@ -17,12 +17,7 @@
 
 package org.apache.mahout.classifier.df.tools;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Locale;
-import java.util.Random;
-import java.util.Scanner;
-
+import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -38,15 +33,19 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
-import org.apache.mahout.common.CommandLineUtil;
-import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.classifier.df.data.DataConverter;
 import org.apache.mahout.classifier.df.data.Dataset;
 import org.apache.mahout.classifier.df.data.Instance;
+import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
+import java.io.File;
+import java.io.IOException;
+import java.util.Locale;
+import java.util.Random;
+import java.util.Scanner;
 
 /**
  * This tool is used to uniformly distribute the class of all the tuples of the dataset over a given number of

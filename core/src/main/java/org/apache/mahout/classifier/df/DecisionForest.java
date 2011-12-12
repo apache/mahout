@@ -17,26 +17,25 @@
 
 package org.apache.mahout.classifier.df;
 
-import java.util.List;
-import java.util.Random;
-import java.io.DataOutput;
-import java.io.IOException;
-import java.io.DataInput;
-
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.Writable;
 import org.apache.mahout.classifier.df.data.Data;
 import org.apache.mahout.classifier.df.data.DataUtils;
 import org.apache.mahout.classifier.df.data.Dataset;
 import org.apache.mahout.classifier.df.data.Instance;
 import org.apache.mahout.classifier.df.node.Node;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.conf.Configuration;
 
-import com.google.common.base.Preconditions;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Represents a forest of decision trees.

@@ -18,12 +18,11 @@
 package org.apache.mahout.classifier.df.data;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
+import org.apache.mahout.classifier.df.data.Dataset.Attribute;
 
 import java.util.List;
 import java.util.Locale;
-
-import com.google.common.collect.Lists;
-import org.apache.mahout.classifier.df.data.Dataset.Attribute;
 
 /**
  * Contains various methods that deal with descriptor strings

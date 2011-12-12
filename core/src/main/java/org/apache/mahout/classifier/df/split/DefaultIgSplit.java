@@ -17,10 +17,10 @@
 
 package org.apache.mahout.classifier.df.split;
 
-import java.util.Arrays;
-
 import org.apache.mahout.classifier.df.data.Data;
 import org.apache.mahout.classifier.df.data.conditions.Condition;
+
+import java.util.Arrays;
 
 /**
  * Default, not optimized, implementation of IgSplit

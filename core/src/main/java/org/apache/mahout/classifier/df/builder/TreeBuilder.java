@@ -17,10 +17,10 @@
 
 package org.apache.mahout.classifier.df.builder;
 
-import java.util.Random;
-
 import org.apache.mahout.classifier.df.data.Data;
 import org.apache.mahout.classifier.df.node.Node;
+
+import java.util.Random;
 
 /**
  * Abstract base class for TreeBuilders

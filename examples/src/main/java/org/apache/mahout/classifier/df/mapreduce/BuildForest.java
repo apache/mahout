@@ -221,10 +221,6 @@ public class BuildForest extends Configured implements Tool {
     return data;
   }
   
-  /**
-   * @param args
-   * @throws Exception
-   */
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(), new BuildForest(), args);
   }

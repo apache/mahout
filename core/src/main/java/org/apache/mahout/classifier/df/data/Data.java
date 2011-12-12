@@ -17,19 +17,13 @@
 
 package org.apache.mahout.classifier.df.data;
 
-import java.io.IOException;
+import com.google.common.collect.Lists;
+import org.apache.mahout.classifier.df.data.conditions.Condition;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.mahout.common.iterator.FileLineIterator;
-import org.apache.mahout.classifier.df.data.conditions.Condition;
 
 /**
  * Holds a list of vectors and their corresponding Dataset. contains various operations that deals with the

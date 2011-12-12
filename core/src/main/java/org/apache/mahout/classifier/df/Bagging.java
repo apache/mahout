@@ -17,14 +17,14 @@
 
 package org.apache.mahout.classifier.df;
 
-import java.util.Arrays;
-import java.util.Random;
-
 import org.apache.mahout.classifier.df.builder.TreeBuilder;
 import org.apache.mahout.classifier.df.data.Data;
 import org.apache.mahout.classifier.df.node.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
+import java.util.Random;
 
 /**
  * Builds a tree using bagging

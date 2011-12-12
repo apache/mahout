@@ -81,8 +81,6 @@ public class BreimanExample extends Configured implements Tool {
    *          number of random variables to select at each tree-node
    * @param nbtrees
    *          number of trees to grow
-   * @throws Exception
-   *           if an error occured while growing the trees
    */
   private void runIteration(Random rng, Data data, int m, int nbtrees) {
     

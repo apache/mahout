@@ -17,15 +17,11 @@
 
 package org.apache.mahout.classifier.df.mapreduce.inmem;
 
-import java.io.IOException;
-import java.util.Random;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.classifier.df.Bagging;
 import org.apache.mahout.classifier.df.data.Data;
 import org.apache.mahout.classifier.df.data.DataLoader;
@@ -35,8 +31,12 @@ import org.apache.mahout.classifier.df.mapreduce.MapredMapper;
 import org.apache.mahout.classifier.df.mapreduce.MapredOutput;
 import org.apache.mahout.classifier.df.mapreduce.inmem.InMemInputFormat.InMemInputSplit;
 import org.apache.mahout.classifier.df.node.Node;
+import org.apache.mahout.common.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Random;
 
 /**
  * In-memory mapper that grows the trees using a full copy of the data loaded in-memory. The number of trees

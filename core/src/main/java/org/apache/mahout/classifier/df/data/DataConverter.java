@@ -17,38 +17,36 @@
 
 package org.apache.mahout.classifier.df.data;
 
-import java.util.regex.Pattern;
-
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.mahout.math.DenseVector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
+import java.util.regex.Pattern;
 
 /**
  * Converts String to Instance using a Dataset
  */
 public class DataConverter {
 
-    private static final Pattern COMMA_SPACE = Pattern.compile("[, ]");
+  private static final Pattern COMMA_SPACE = Pattern.compile("[, ]");
 
   private final Dataset dataset;
-  
+
   public DataConverter(Dataset dataset) {
     this.dataset = dataset;
   }
-  
+
   public Instance convert(CharSequence string) {
     // all attributes (categorical, numerical, label), ignored
     int nball = dataset.nbAttributes() + dataset.getIgnored().length;
-    
+
     String[] tokens = COMMA_SPACE.split(string);
-    Preconditions.checkArgument(tokens.length == nball, "Wrong number of attributes in the string");
-    
+    Preconditions.checkArgument(tokens.length == nball,
+        "Wrong number of attributes in the string");
+
     int nbattrs = dataset.nbAttributes();
     DenseVector vector = new DenseVector(nbattrs);
-    
+
     int aId = 0;
     for (int attr = 0; attr < nball; attr++) {
       if (ArrayUtils.contains(dataset.getIgnored(), attr)) {
@@ -56,12 +54,12 @@ public class DataConverter {
       }
 
       String token = tokens[attr].trim();
-      
+
       if ("?".equals(token)) {
         // missing value
         return null;
       }
-      
+
       if (dataset.isNumerical(aId)) {
         vector.set(aId++, Double.parseDouble(token));
       } else { // CATEGORICAL
@@ -69,7 +67,7 @@ public class DataConverter {
         aId++;
       }
     }
-    
+
     return new Instance(vector);
   }
 }

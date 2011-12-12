@@ -17,8 +17,6 @@
 
 package org.apache.mahout.classifier.df.builder;
 
-import java.util.Random;
-
 import org.apache.mahout.classifier.df.data.Data;
 import org.apache.mahout.classifier.df.data.Dataset;
 import org.apache.mahout.classifier.df.data.Instance;
@@ -33,6 +31,8 @@ import org.apache.mahout.classifier.df.split.Split;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Random;
+
 /**
  * Builds a Decision Tree <br>
  * Based on the algorithm described in the "Decision Trees" tutorials by Andrew W. Moore, available at:<br>
@@ -42,34 +42,40 @@ import org.slf4j.LoggerFactory;
  * This class can be used when the criterion variable is the categorical attribute.
  */
 public class DefaultTreeBuilder implements TreeBuilder {
-  
+
   private static final Logger log = LoggerFactory.getLogger(DefaultTreeBuilder.class);
 
   private static final int[] NO_ATTRIBUTES = new int[0];
 
-  /** indicates which CATEGORICAL attributes have already been selected in the parent nodes */
+  /**
+   * indicates which CATEGORICAL attributes have already been selected in the parent nodes
+   */
   private boolean[] selected;
-  /** number of attributes to select randomly at each node */
+  /**
+   * number of attributes to select randomly at each node
+   */
   private int m = 1;
-  /** IgSplit implementation */
+  /**
+   * IgSplit implementation
+   */
   private final IgSplit igSplit;
-  
+
   public DefaultTreeBuilder() {
     igSplit = new OptIgSplit();
   }
-  
+
   public void setM(int m) {
     this.m = m;
   }
 
-    @Override
+  @Override
   public Node build(Random rng, Data data) {
-    
+
     if (selected == null) {
       selected = new boolean[data.getDataset().nbAttributes()];
       selected[data.getDataset().getLabelId()] = true; // never select the label
     }
-    
+
     if (data.isEmpty()) {
       return new Leaf(-1);
     }
@@ -79,7 +85,7 @@ public class DefaultTreeBuilder implements TreeBuilder {
     if (data.identicalLabel()) {
       return new Leaf(data.getDataset().getLabel(data.get(0)));
     }
-    
+
     int[] attributes = randomAttributes(rng, selected, m);
     if (attributes == null || attributes.length == 0) {
       // we tried all the attributes and could not split the data anymore
@@ -94,13 +100,13 @@ public class DefaultTreeBuilder implements TreeBuilder {
         best = split;
       }
     }
-    
+
     boolean alreadySelected = selected[best.getAttr()];
     if (alreadySelected) {
       // attribute already selected
       log.warn("attribute {} already selected in a parent node", best.getAttr());
     }
-    
+
     Node childNode;
     if (data.getDataset().isNumerical(best.getAttr())) {
       boolean[] temp = null;
@@ -130,26 +136,26 @@ public class DefaultTreeBuilder implements TreeBuilder {
       childNode = new NumericalNode(best.getAttr(), best.getSplit(), loChild, hiChild);
     } else { // CATEGORICAL attribute
       selected[best.getAttr()] = true;
-      
+
       double[] values = data.values(best.getAttr());
       Node[] children = new Node[values.length];
-      
+
       for (int index = 0; index < values.length; index++) {
         Data subset = data.subset(Condition.equals(best.getAttr(), values[index]));
         children[index] = build(rng, subset);
       }
 
       selected[best.getAttr()] = alreadySelected;
-      
+
       childNode = new CategoricalNode(best.getAttr(), values, children);
     }
-    
+
     return childNode;
   }
-  
+
   /**
    * checks if all the vectors have identical attribute values. Ignore selected attributes.
-   * 
+   *
    * @return true is all the vectors are identical or the data is empty<br>
    *         false otherwise
    */
@@ -157,26 +163,27 @@ public class DefaultTreeBuilder implements TreeBuilder {
     if (data.isEmpty()) {
       return true;
     }
-    
+
     Instance instance = data.get(0);
     for (int attr = 0; attr < selected.length; attr++) {
       if (selected[attr]) {
         continue;
       }
-      
+
       for (int index = 1; index < data.size(); index++) {
         if (data.get(index).get(attr) != instance.get(attr)) {
           return false;
         }
       }
     }
-    
+
     return true;
   }
 
 
   /**
    * Make a copy of the selection state of the attributes, unselect all numerical attributes
+   *
    * @param selected selection state to clone
    * @return cloned selection state
    */
@@ -192,13 +199,10 @@ public class DefaultTreeBuilder implements TreeBuilder {
 
   /**
    * Randomly selects m attributes to consider for split, excludes IGNORED and LABEL attributes
-   * 
-   * @param rng
-   *          random-numbers generator
-   * @param selected
-   *          attributes' state (selected or not)
-   * @param m
-   *          number of attributes to choose
+   *
+   * @param rng      random-numbers generator
+   * @param selected attributes' state (selected or not)
+   * @param m        number of attributes to choose
    * @return list of selected attributes' indices, or null if all attributes have already been selected
    */
   protected static int[] randomAttributes(Random rng, boolean[] selected, int m) {
@@ -208,12 +212,12 @@ public class DefaultTreeBuilder implements TreeBuilder {
         nbNonSelected++;
       }
     }
-    
+
     if (nbNonSelected == 0) {
       log.warn("All attributes are selected !");
       return NO_ATTRIBUTES;
     }
-    
+
     int[] result;
     if (nbNonSelected <= m) {
       // return all non selected attributes
@@ -232,17 +236,17 @@ public class DefaultTreeBuilder implements TreeBuilder {
         do {
           rind = rng.nextInt(selected.length);
         } while (selected[rind]);
-        
+
         result[index] = rind;
         selected[rind] = true; // temporarily set the chosen attribute to be selected
       }
-      
+
       // the chosen attributes are not yet selected
       for (int attr : result) {
         selected[attr] = false;
       }
     }
-    
+
     return result;
   }
 }

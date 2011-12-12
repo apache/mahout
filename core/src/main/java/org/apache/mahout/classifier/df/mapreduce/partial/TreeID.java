@@ -17,9 +17,8 @@
 
 package org.apache.mahout.classifier.df.mapreduce.partial;
 
-import org.apache.hadoop.io.LongWritable;
-
 import com.google.common.base.Preconditions;
+import org.apache.hadoop.io.LongWritable;
 
 /**
  * Indicates both the tree and the data partition used to grow the tree

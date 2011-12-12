@@ -17,14 +17,13 @@
 
 package org.apache.mahout.classifier.df.mapreduce;
 
-import java.io.IOException;
-
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.classifier.df.builder.TreeBuilder;
 import org.apache.mahout.classifier.df.data.Dataset;
 
-import com.google.common.base.Preconditions;
+import java.io.IOException;
 
 /**
  * Base class for Mapred mappers. Loads common parameters from the job

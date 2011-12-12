@@ -287,7 +287,7 @@ public class TestForest extends Configured implements Tool {
         Instance instance = converter.convert(line);
         double prediction = forest.classify(dataset, rng, instance);
 
-        if (outputPath != null) {
+        if (ofile != null) {
           ofile.writeChars(Double.toString(prediction)); // write the prediction
           ofile.writeChar('\n');
         }

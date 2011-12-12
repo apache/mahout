@@ -17,9 +17,6 @@
 
 package org.apache.mahout.classifier.df.ref;
 
-import java.util.List;
-import java.util.Random;
-
 import com.google.common.collect.Lists;
 import org.apache.mahout.classifier.df.Bagging;
 import org.apache.mahout.classifier.df.DecisionForest;
@@ -28,6 +25,9 @@ import org.apache.mahout.classifier.df.data.Data;
 import org.apache.mahout.classifier.df.node.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Random;
 
 /**
  * Builds a Random Decision Forest using a given TreeBuilder to grow the trees

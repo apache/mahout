@@ -17,9 +17,6 @@
 
 package org.apache.mahout.classifier.df.tools;
 
-import java.io.IOException;
-import java.util.Arrays;
-
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -37,6 +34,9 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.CommandLineUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Compute the frequency distribution of the "class label"<br>

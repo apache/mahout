@@ -17,26 +17,25 @@
 
 package org.apache.mahout.classifier.df.mapreduce;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.Comparator;
-
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.mahout.common.HadoopUtil;
-import org.apache.mahout.common.StringUtils;
 import org.apache.mahout.classifier.df.DecisionForest;
 import org.apache.mahout.classifier.df.builder.TreeBuilder;
 import org.apache.mahout.classifier.df.data.Dataset;
+import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * Base class for Mapred DecisionForest builders. Takes care of storing the parameters common to the mapred

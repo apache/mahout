@@ -17,22 +17,21 @@
 
 package org.apache.mahout.classifier.df.data;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Set;
-import java.util.regex.Pattern;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.classifier.df.data.Dataset.Attribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Converts the input data to a Vector Array using the information given by the Dataset.<br>

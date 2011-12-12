@@ -17,14 +17,14 @@
 
 package org.apache.mahout.classifier.df.node;
 
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.mahout.classifier.df.DFUtils;
+import org.apache.mahout.classifier.df.data.Instance;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
-
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.mahout.classifier.df.DFUtils;
-import org.apache.mahout.classifier.df.data.Instance;
 
 public class CategoricalNode extends Node {
   private int attr;
