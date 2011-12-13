@@ -72,4 +72,9 @@ public interface IRStatistics {
    */
   double getNormalizedDiscountedCumulativeGain();
   
+  /**
+   * @return the fraction of all users for whom recommendations could be produced
+   */
+  double getReach();
+  
 }

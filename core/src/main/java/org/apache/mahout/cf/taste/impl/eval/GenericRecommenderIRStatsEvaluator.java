@@ -97,6 +97,8 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
     RunningAverage recall = new FullRunningAverage();
     RunningAverage fallOut = new FullRunningAverage();
     RunningAverage nDCG = new FullRunningAverage();
+    int numUsersRecommendedFor = 0;
+    int numUsersWithRecommendations = 0;
 
     LongPrimitiveIterator it = dataModel.getUserIDs();
     while (it.hasNext()) {
@@ -194,6 +196,12 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
         }
       }
       nDCG.addDatum(cumulativeGain / idealizedGain);
+      
+      // Reach
+      numUsersRecommendedFor++;
+      if (numRecommendedItems > 0) {
+        numUsersWithRecommendations++;
+      }
 
       long end = System.currentTimeMillis();
 
@@ -203,7 +211,14 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
       });
     }
 
-    return new IRStatisticsImpl(precision.getAverage(), recall.getAverage(), fallOut.getAverage(), nDCG.getAverage());
+    double reach = (double) numUsersWithRecommendations / (double) numUsersRecommendedFor;
+
+    return new IRStatisticsImpl(
+        precision.getAverage(),
+        recall.getAverage(),
+        fallOut.getAverage(),
+        nDCG.getAverage(),
+        reach);
   }
   
   private static void processOtherUser(long id,
