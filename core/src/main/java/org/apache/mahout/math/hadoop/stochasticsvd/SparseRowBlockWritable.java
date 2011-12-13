@@ -83,8 +83,10 @@ public class SparseRowBlockWritable implements Writable {
   }
 
   public void plusRow(int index, Vector row) {
-    // often accumulation goes in row-increasing order,
-    // so check for this to avoid binary search (another log Height multiplier).
+    /*
+     * often accumulation goes in row-increasing order, so check for this to
+     * avoid binary search (another log Height multiplier).
+     */
 
     int pos =
       numRows == 0 || rowIndices[numRows - 1] < index ? -numRows - 1 : Arrays
@@ -119,8 +121,10 @@ public class SparseRowBlockWritable implements Writable {
    *          block to add
    */
   public void plusBlock(SparseRowBlockWritable bOther) {
-    // since we maintained row indices in a sorted order, we can run
-    // sort merge to expedite this operation
+    /*
+     * since we maintained row indices in a sorted order, we can run sort merge
+     * to expedite this operation
+     */
     int i = 0;
     int j = 0;
     while (i < numRows && j < bOther.numRows) {

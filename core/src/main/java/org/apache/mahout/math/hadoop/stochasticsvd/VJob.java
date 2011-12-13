@@ -37,11 +37,6 @@ import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-/**
- * Computes U=Q*Uhat of SSVD
- * 
- * 
- */
 public class VJob {
   private static final String OUTPUT_V = "v";
   private static final String PROP_UHAT_PATH = "ssvd.uhat.path";

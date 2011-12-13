@@ -150,15 +150,6 @@ public class SSVDPrototype {
   public static void testThinQr(int dims, int kp) throws IOException {
 
     DenseMatrix mx = new DenseMatrix(dims << 2, dims);
-    // mx.assign(new UnaryFunction() {
-    //
-    // Random m_rnd = new Random(rndSeed);
-    //
-    // @Override
-    // public double apply(double arg0) {
-    // return m_rnd.nextDouble()*1000;
-    // }
-    // });
 
     Random rnd = RandomUtils.getRandom();
     for (int i = 0; i < mx.rowSize(); i++) {
@@ -264,15 +255,6 @@ public class SSVDPrototype {
   public static void testBlockQrWithSSVD(int dims, int kp, int r, long rndSeed) throws IOException {
 
     DenseMatrix mx = new DenseMatrix(dims << 2, dims);
-    // mx.assign(new UnaryFunction() {
-    //
-    // Random m_rnd = new Random(rndSeed);
-    //
-    // @Override
-    // public double apply(double arg0) {
-    // return (m_rnd.nextDouble()-0.5)*1000;
-    // }
-    // });
 
     Random rnd = RandomUtils.getRandom();
     for (int i = 0; i < mx.rowSize(); i++) {

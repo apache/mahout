@@ -22,14 +22,11 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -40,11 +37,15 @@ import org.apache.hadoop.io.SequenceFile.CompressionType;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.ssvd.EigenSolverWrapper;
+
+import com.google.common.collect.Lists;
+import com.google.common.io.Closeables;
 
 /**
  * Stochastic SVD solver (API class).
@@ -100,13 +101,14 @@ public class SSVDSolver {
   private boolean computeV = true;
   private String uPath;
   private String vPath;
+  private int outerBlockHeight = 30000;
+  private int abtBlockHeight = 200000;
 
   // configured stuff
   private final Configuration conf;
   private final Path[] inputPath;
   private final Path outputPath;
   private final int ablockRows;
-  private final int outerBlockHeight;
   private final int k;
   private final int p;
   private int q;
@@ -144,14 +146,12 @@ public class SSVDSolver {
                     Path[] inputPath,
                     Path outputPath,
                     int ablockRows,
-                    int outerBlockHeight,
                     int k,
                     int p,
                     int reduceTasks) {
     this.conf = conf;
     this.inputPath = inputPath;
     this.outputPath = outputPath;
-    this.outerBlockHeight = outerBlockHeight;
     this.ablockRows = ablockRows;
     this.k = k;
     this.p = p;
@@ -252,6 +252,38 @@ public class SSVDSolver {
     this.overwrite = overwrite;
   }
 
+  public int getOuterBlockHeight() {
+    return outerBlockHeight;
+  }
+
+  /**
+   * The height of outer blocks during Q'A multiplication. Higher values allow
+   * to produce less keys for combining and shuffle and sort therefore somewhat
+   * improving running time; but require larger blocks to be formed in RAM (so
+   * setting this too high can lead to OOM).
+   * 
+   * @param outerBlockHeight
+   */
+  public void setOuterBlockHeight(int outerBlockHeight) {
+    this.outerBlockHeight = outerBlockHeight;
+  }
+
+  public int getAbtBlockHeight() {
+    return abtBlockHeight;
+  }
+
+  /**
+   * the block height of Y_i during power iterations. It is probably important
+   * to set it higher than default 200,000 for extremely sparse inputs and when
+   * more ram is available. y_i block height and ABt job would occupy approx.
+   * abtBlockHeight x (k+p) x sizeof (double) (as dense).
+   * 
+   * @param abtBlockHeight
+   */
+  public void setAbtBlockHeight(int abtBlockHeight) {
+    this.abtBlockHeight = abtBlockHeight;
+  }
+
   /**
    * run all SSVD jobs.
    * 
@@ -260,7 +292,7 @@ public class SSVDSolver {
    */
   public void run() throws IOException {
 
-    Deque<Closeable> closeables = new LinkedList<Closeable>();
+    Deque<Closeable> closeables = Lists.<Closeable>newLinkedList();
     try {
       Class<? extends Writable> labelType =
         sniffInputLabelType(inputPath, conf);
@@ -301,7 +333,7 @@ public class SSVDSolver {
                 k,
                 p,
                 outerBlockHeight,
-                reduceTasks > 1000 ? 1000 : reduceTasks,
+                Math.min(1000, reduceTasks),
                 labelType,
                 q <= 0);
 
@@ -309,16 +341,17 @@ public class SSVDSolver {
       for (int i = 0; i < q; i++) {
 
         qPath = new Path(outputPath, String.format("ABt-job-%d", i + 1));
-        ABtJob.run(conf,
-                   inputPath,
-                   new Path(btPath, BtJob.OUTPUT_BT + "-*"),
-                   qPath,
-                   ablockRows,
-                   minSplitSize,
-                   k,
-                   p,
-                   outerBlockHeight,
-                   reduceTasks);
+        Path btPathGlob = new Path(btPath, BtJob.OUTPUT_BT + "-*");
+        ABtDenseOutJob.run(conf,
+                           inputPath,
+                           btPathGlob,
+                           qPath,
+                           ablockRows,
+                           minSplitSize,
+                           k,
+                           p,
+                           abtBlockHeight,
+                           reduceTasks);
 
         btPath = new Path(outputPath, String.format("Bt-job-%d", i + 1));
 
@@ -330,13 +363,10 @@ public class SSVDSolver {
                   k,
                   p,
                   outerBlockHeight,
-                  reduceTasks > 1000 ? 1000 : reduceTasks,
+                  Math.min(1000, reduceTasks),
                   labelType,
                   i == q - 1);
       }
-
-      // we don't need BBt now.
-      // BBtJob.run(conf, new Path(btPath, BtJob.OUTPUT_BT + "-*"), bbtPath, 1);
 
       UpperTriangular bbt =
         loadAndSumUpperTriangularMatrices(fs, new Path(btPath, BtJob.OUTPUT_BBT
@@ -367,7 +397,6 @@ public class SSVDSolver {
       }
 
       // save/redistribute UHat
-      //
       double[][] uHat = eigenWrapper.getUHat();
 
       fs.mkdirs(uHatPath);
@@ -465,9 +494,17 @@ public class SSVDSolver {
       if (fstats == null || fstats.length == 0) {
         continue;
       }
-      SequenceFile.Reader r =
-        new SequenceFile.Reader(fs, fstats[0].getPath(), conf);
+
+      FileStatus firstSeqFile;
+      if (!fstats[0].isDir()) {
+        firstSeqFile = fstats[0];
+      } else {
+        firstSeqFile = fs.listStatus(fstats[0].getPath(), PathFilters.logsCRCFilter())[0];
+      }
+
+      SequenceFile.Reader r = null;
       try {
+        r = new SequenceFile.Reader(fs, firstSeqFile.getPath(), conf);
         return r.getKeyClass().asSubclass(Writable.class);
       } finally {
         Closeables.closeQuietly(r);
@@ -476,8 +513,8 @@ public class SSVDSolver {
     throw new IOException("Unable to open input files to determine input label type.");
   }
 
-  private static final Pattern OUTPUT_FILE_PATTERN = Pattern
-    .compile("(\\w+)-(m|r)-(\\d+)(\\.\\w+)?");
+  private static final Pattern OUTPUT_FILE_PATTERN =
+    Pattern.compile("(\\w+)-(m|r)-(\\d+)(\\.\\w+)?");
 
   static final Comparator<FileStatus> PARTITION_COMPARATOR =
     new Comparator<FileStatus>() {
@@ -529,15 +566,15 @@ public class SSVDSolver {
 
     List<double[]> denseData = Lists.newArrayList();
 
-    // int m=0;
 
-    // assume it is partitioned output, so we need to read them up
-    // in order of partitions.
+    /*
+     * assume it is partitioned output, so we need to read them up in order of
+     * partitions.
+     */
     Arrays.sort(files, PARTITION_COMPARATOR);
 
     for (FileStatus fstat : files) {
-      for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(fstat
-                                                                                  .getPath(),
+      for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(fstat.getPath(),
                                                                                 true,
                                                                                 conf)) {
         Vector v = value.get();
@@ -573,14 +610,15 @@ public class SSVDSolver {
       return null;
     }
 
-    // assume it is partitioned output, so we need to read them up
-    // in order of partitions.
+    /*
+     * assume it is partitioned output, so we need to read them up in order of
+     * partitions.
+     */
     Arrays.sort(files, PARTITION_COMPARATOR);
 
     DenseVector result = null;
     for (FileStatus fstat : files) {
-      for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(fstat
-                                                                                  .getPath(),
+      for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(fstat.getPath(),
                                                                                 true,
                                                                                 conf)) {
         Vector v = value.get();
@@ -618,14 +656,15 @@ public class SSVDSolver {
       return null;
     }
 
-    // assume it is partitioned output, so we need to read them up
-    // in order of partitions.
+    /*
+     * assume it is partitioned output, so we need to read them up in order of
+     * partitions.
+     */
     Arrays.sort(files, PARTITION_COMPARATOR);
 
     UpperTriangular result = null;
     for (FileStatus fstat : files) {
-      for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(fstat
-                                                                                  .getPath(),
+      for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(fstat.getPath(),
                                                                                 true,
                                                                                 conf)) {
         Vector v = value.get();

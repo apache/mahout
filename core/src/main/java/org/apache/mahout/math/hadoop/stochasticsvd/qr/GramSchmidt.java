@@ -21,13 +21,13 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.DoubleFunction;
 
 /**
- * Gramm Schmidt quick helper.
+ * Gram Schmidt quick helper.
  * 
  * 
  */
-public class GrammSchmidt {
+public class GramSchmidt {
 
-  private GrammSchmidt() {
+  private GramSchmidt() {
   }
 
   public static void orthonormalizeColumns(Matrix mx) {

@@ -30,9 +30,10 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.hadoop.stochasticsvd.qr.GrammSchmidt;
+import org.apache.mahout.math.hadoop.stochasticsvd.qr.GramSchmidt;
 
 public class SSVDTestsHelper {
 
@@ -106,7 +107,7 @@ public class SSVDTestsHelper {
         result.setQuick(i, j, rnd.nextDouble() - 0.5);
       }
     }
-    GrammSchmidt.orthonormalizeColumns(result);
+    GramSchmidt.orthonormalizeColumns(result);
     SSVDPrototypeTest.assertOrthonormality(result, false, 1.0e-10);
     return result;
   }
@@ -118,11 +119,49 @@ public class SSVDTestsHelper {
     FileSystem dfs = FileSystem.getLocal(conf);
     Path outputDir=new Path("/tmp/DRM");
     dfs.mkdirs(outputDir);
-    for ( int i = 1; i <= 10; i++ ) {
-      generateDenseInput(new Path(outputDir,String.format("part-%05d",i)),dfs,
-                         new DenseVector ( new double[] {
-                             15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0.8,0.3,0.1,0.01
-                         }),1200,10000,(i-1)*1200);
+//    for ( int i = 1; i <= 10; i++ ) {
+//      generateDenseInput(new Path(outputDir,String.format("part-%05d",i)),dfs,
+//                         new DenseVector ( new double[] {
+//                             15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0.8,0.3,0.1,0.01
+//                         }),1200,10000,(i-1)*1200);
+//    }
+    
+    /*
+     *  create 2Gb sparse 4.5 m x 4.5m input . (similar to wikipedia graph).
+     *  
+     *  In order to get at 2Gb, we need to generate ~ 40 non-zero items per row average.
+     *   
+     */
+    
+    outputDir = new Path("/tmp/DRM-sparse");
+    int n = 4500000;
+    int avgNZero = 40;
+    Random rnd = new Random();
+
+    SequenceFile.Writer w =
+      SequenceFile.createWriter(dfs,
+                                dfs.getConf(),
+                                new Path(outputDir, "sparse.seq"),
+                                IntWritable.class,
+                                VectorWritable.class);
+
+    try {
+
+      IntWritable iw = new IntWritable();
+      VectorWritable vw = new VectorWritable();
+      for (int i = 1; i < n; i++) {
+        RandomAccessSparseVector vector = new RandomAccessSparseVector(n);
+        double nz = Math.round(avgNZero * (rnd.nextGaussian() + 1));
+        if (nz < 0)
+          nz = 0;
+        for (int j = 1; j < nz; j++)
+          vector.set(rnd.nextInt(n), rnd.nextGaussian() * 25 + 3);
+        iw.set(i);
+        vw.set(vector);
+        w.append(iw, vw);
+      }
+    } finally {
+      w.close();
     }
     
   }

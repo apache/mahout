@@ -65,8 +65,10 @@ public class QRLastStep implements Closeable, Iterator<Vector> {
                     int blockNum) {
     this.blockNum = blockNum;
     this.qHatInput = qHatInput;
-    // in this implementation we actually preload all Rs into memory to make R
-    // sequence modifications more efficient.
+    /*
+     * in this implementation we actually preload all Rs into memory to make R
+     * sequence modifications more efficient.
+     */
     int block = 0;
     while (rHatInput.hasNext()) {
       Vector value = rHatInput.next().get();
@@ -119,7 +121,10 @@ public class QRLastStep implements Closeable, Iterator<Vector> {
       throw new NoSuchElementException();
     }
     Validate.isTrue(hasNext(), "Q input overrun");
-    int qRowIndex = r - cnt - 1; // because QHats are initially stored in
+    /*
+     * because Q blocks are initially stored in inverse order
+     */
+    int qRowIndex = r - cnt - 1; 
     for (int j = 0; j < kp; j++) {
       qRow.setQuick(j, mQt[j][qRowIndex]);
     }
@@ -135,7 +140,6 @@ public class QRLastStep implements Closeable, Iterator<Vector> {
   @Override
   public void close() throws IOException {
     mQt = null;
-
     mRs.clear();
   }
 

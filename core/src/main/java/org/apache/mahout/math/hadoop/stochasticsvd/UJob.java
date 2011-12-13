@@ -65,7 +65,7 @@ public class UJob {
     FileInputFormat.setInputPaths(job, inputPathQ);
     FileOutputFormat.setOutputPath(job, outputPath);
 
-    // Warn: tight hadoop integration here:
+    // WARN: tight hadoop integration here:
     job.getConfiguration().set("mapreduce.output.basename", OUTPUT_U);
     FileOutputFormat.setCompressOutput(job, true);
     FileOutputFormat.setOutputCompressorClass(job, DefaultCodec.class);

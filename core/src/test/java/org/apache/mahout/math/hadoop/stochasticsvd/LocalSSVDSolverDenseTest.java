@@ -48,17 +48,20 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
   private static final double s_precisionPct = 10;
 
   @Test
-  public void testSSVDSolverDense() throws IOException { 
+  public void testSSVDSolverDense() throws IOException {
     runSSVDSolver(0);
-  }
-  
-  @Test
-  public void testSSVDSolverPowerIterations1() throws IOException { 
-    runSSVDSolver(1);
   }
 
   @Test
-  public void testSSVDSolverPowerIterations2() throws IOException { 
+  public void testSSVDSolverPowerIterations1() throws IOException {
+    runSSVDSolver(1);
+  }
+
+  /*
+   * remove from active tests to save time.
+   */
+  /* @Test */
+  public void testSSVDSolverPowerIterations2() throws IOException {
     runSSVDSolver(2);
   }
 
@@ -70,9 +73,6 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
 
     // conf.set("mapred.job.tracker","localhost:11011");
     // conf.set("fs.default.name","hdfs://localhost:11010/");
-
-    // Deque<Closeable> closeables = new LinkedList<Closeable>();
-    // Random rnd = RandomUtils.getRandom();
 
     File tmpDir = getTestTempDir("svdtmp");
     conf.set("hadoop.tmp.dir", tmpDir.getAbsolutePath());
@@ -88,7 +88,7 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
     // make input equivalent to 2 mln non-zero elements.
     // With 100mln the precision turns out to be only better (LLN law i guess)
     // With oversampling of 100, i don't get any error at all.
-    int n = 1000;
+    int n = 100;
     int m = 2000;
     Vector singularValues =
       new DenseVector(new double[] { 10, 4, 1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
@@ -121,12 +121,15 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
                      new Path[] { aPath },
                      svdOutPath,
                      ablockRows,
-                     500,
                      k,
                      p,
                      3);
-    // ssvd.setcUHalfSigma(true);
-    // ssvd.setcVHalfSigma(true);
+    /*
+     * these are only tiny-test values to simulate high load cases, in reality
+     * one needs much bigger
+     */
+    ssvd.setOuterBlockHeight(500);
+    ssvd.setAbtBlockHeight(400);
     ssvd.setOverwrite(true);
     ssvd.setQ(q);
     ssvd.run();
@@ -164,30 +167,29 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
 
     for (int i = 0; i < k; i++) {
       assertTrue(Math.abs((singularValues.getQuick(i) - stochasticSValues[i])
-            / singularValues.getQuick(i)) <= s_precisionPct / 100);
+          / singularValues.getQuick(i)) <= s_precisionPct / 100);
     }
 
     double[][] mQ =
       SSVDSolver.loadDistributedRowMatrix(fs, new Path(svdOutPath, "Bt-job/"
           + BtJob.OUTPUT_Q + "-*"), conf);
 
-    SSVDPrototypeTest
-      .assertOrthonormality(new DenseMatrix(mQ), false, s_epsilon);
+    SSVDPrototypeTest.assertOrthonormality(new DenseMatrix(mQ),
+                                           false,
+                                           s_epsilon);
 
     double[][] u =
       SSVDSolver.loadDistributedRowMatrix(fs,
                                           new Path(svdOutPath, "U/[^_]*"),
                                           conf);
 
-    SSVDPrototypeTest
-      .assertOrthonormality(new DenseMatrix(u), false, s_epsilon);
+    SSVDPrototypeTest.assertOrthonormality(new DenseMatrix(u), false, s_epsilon);
     double[][] v =
       SSVDSolver.loadDistributedRowMatrix(fs,
                                           new Path(svdOutPath, "V/[^_]*"),
                                           conf);
 
-    SSVDPrototypeTest
-      .assertOrthonormality(new DenseMatrix(v), false, s_epsilon);
+    SSVDPrototypeTest.assertOrthonormality(new DenseMatrix(v), false, s_epsilon);
   }
 
   static void dumpSv(double[] s) {

@@ -59,12 +59,13 @@ public class YtYJob {
     private Omega omega;
     private UpperTriangular mYtY;
 
-    // we keep yRow in a dense form here
-    // but keep an eye not to dense up while doing YtY products.
-    // I am not sure that sparse vector would create much performance
-    // benefits since we must to assume that y would be more often
-    // dense than sparse, so for bulk dense operations that would perform
-    // somewhat better than a RandomAccessSparse vector frequent updates.
+    /*
+     * we keep yRow in a dense form here but keep an eye not to dense up while
+     * doing YtY products. I am not sure that sparse vector would create much
+     * performance benefits since we must to assume that y would be more often
+     * dense than sparse, so for bulk dense operations that would perform
+     * somewhat better than a RandomAccessSparse vector frequent updates.
+     */
     private Vector yRow;
 
     @Override
@@ -109,9 +110,11 @@ public class YtYJob {
           }
         }
       } else {
-        // the disadvantage of using sparse vector (aside from the fact that we
-        // are creating some short-lived references) here is that we obviously
-        // do two times more iterations then necessary if y row is pretty dense.
+        /*
+         * the disadvantage of using sparse vector (aside from the fact that we
+         * are creating some short-lived references) here is that we obviously
+         * do two times more iterations then necessary if y row is pretty dense.
+         */
         for (Iterator<Vector.Element> iterI = yRow.iterateNonZero(); iterI
             .hasNext();) {
           Vector.Element eli = iterI.next();
@@ -195,11 +198,12 @@ public class YtYJob {
     job.getConfiguration().setInt(PROP_K, k);
     job.getConfiguration().setInt(PROP_P, p);
 
-    // we must reduce to just one matrix which means
-    // we need only one reducer.
-    // But it's ok since each mapper outputs only one
-    // vector (a packed UpperTriangular) so even if
-    // there're thousands of mappers, one reducer should cope just fine.
+    /*
+     * we must reduce to just one matrix which means we need only one reducer.
+     * But it's ok since each mapper outputs only one vector (a packed
+     * UpperTriangular) so even if there're thousands of mappers, one reducer
+     * should cope just fine.
+     */
     job.setNumReduceTasks(1);
 
     job.submit();

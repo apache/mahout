@@ -54,7 +54,10 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
 
   private static final double s_epsilon = 1.0E-10d;
 
-  @Test
+  /*
+   * removing from tests to reduce test running time
+   */
+  /* @Test */
   public void testSSVDSolverSparse() throws IOException { 
     runSSVDSolver(0);
   }
@@ -93,7 +96,7 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
     closeables.addFirst(w);
 
     int n = 100;
-    int m = 20000;
+    int m = 2000;
     double percent = 5;
 
     VectorWritable vw = new VectorWritable();
@@ -134,12 +137,19 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
                      new Path[] { aPath },
                      svdOutPath,
                      ablockRows,
-                     500,
                      k,
                      p,
                      3);
-    // ssvd.setcUHalfSigma(true);
-    // ssvd.setcVHalfSigma(true);
+    ssvd.setOuterBlockHeight(500);
+    ssvd.setAbtBlockHeight(251);
+    
+    /*
+     * removing V,U jobs from this test to reduce running time. i will keep them
+     * put in the dense test though.
+     */
+    ssvd.setComputeU(false);
+    ssvd.setComputeV(false);
+    
     ssvd.setOverwrite(true);
     ssvd.setQ(q);
     ssvd.run();
@@ -171,6 +181,12 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
     SSVDPrototypeTest
       .assertOrthonormality(new DenseMatrix(mQ), false, s_epsilon);
 
+    /*
+     * removing tests on U and V to keep this test leaner. I will keep U,V
+     * computation and assertions in the dense tests though.
+     */
+
+    /*
     double[][] u =
       SSVDSolver.loadDistributedRowMatrix(fs,
                                           new Path(svdOutPath, "U/[^_]*"),
@@ -185,6 +201,7 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
 
     SSVDPrototypeTest
       .assertOrthonormality(new DenseMatrix(v), false, s_epsilon);
+    */
   }
 
   static void dumpSv(double[] s) {

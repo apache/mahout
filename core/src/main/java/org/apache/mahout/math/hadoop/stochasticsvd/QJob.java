@@ -137,7 +137,6 @@ public final class QJob {
     @Override
     protected void map(Writable key, VectorWritable value, Context context)
       throws IOException, InterruptedException {
-      // omega.computeYRow(value.get(), yRow);
       omega.computeYRow(value.get(), yRow);
       qr.collect(key, yRow);
     }
@@ -205,8 +204,10 @@ public final class QJob {
     job.getConfiguration().setInt(PROP_K, k);
     job.getConfiguration().setInt(PROP_P, p);
 
-    // number of reduce tasks doesn't matter. we don't actually
-    // send anything to reducers.
+    /*
+     * number of reduce tasks doesn't matter. we don't actually send anything to
+     * reducers.
+     */
 
     job.setNumReduceTasks(0 /* numReduceTasks */);
 

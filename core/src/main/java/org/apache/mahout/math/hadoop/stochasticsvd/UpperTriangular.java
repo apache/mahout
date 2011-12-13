@@ -121,8 +121,10 @@ public class UpperTriangular extends AbstractMatrix {
   }
 
   private int getL(int row, int col) {
-    // each row starts with some zero elements that we don't store.
-    // this accumulates an offset of (row+1)*row/2
+    /*
+     * each row starts with some zero elements that we don't store. this
+     * accumulates an offset of (row+1)*row/2
+     */
     return col + row * numCols() - (row + 1) * row / 2;
   }
 

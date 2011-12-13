@@ -34,14 +34,8 @@ import org.apache.mahout.math.hadoop.stochasticsvd.UpperTriangular;
  */
 public class GivensThinSolver {
 
-  // private static final double s_epsilon = 1e-10;
-
-  // private double[][] m_rTilde;
-  // private Vector m_aRowV;
   private double[] vARow;
   private double[] vQtRow;
-  // private UpperTriangular m_rTilde;
-  // private TriangularRowView m_rTildeRowView, m_rTildeRowView2;
   private final double[][] mQt;
   private final double[][] mR;
   private int qtStartRow;
@@ -62,7 +56,6 @@ public class GivensThinSolver {
     mQt = new double[n][];
     mR = new double[n][];
     vARow = new double[n];
-    // m_aRowV = new DenseVector(m_aRow, true);
     vQtRow = new double[m];
 
     for (int i = 0; i < n; i++) {
@@ -109,7 +102,8 @@ public class GivensThinSolver {
 
   public void adjust(int newM) {
     if (newM == m) {
-      return; // no adjustment is required.
+      // no adjustment is required.
+      return; 
     }
     if (newM < n) {
       throw new IllegalArgumentException("new m can't be less than n");
@@ -153,10 +147,11 @@ public class GivensThinSolver {
       throw new IllegalStateException("thin QR solver fed more rows than initialized for");
     }
     try {
-      // moving pointers around is inefficient but
-      // for the sanity's sake i am keeping it this way so i don't
-      // have to guess how R-tilde index maps to actual block index
-
+      /*
+       * moving pointers around is inefficient but for the sanity's sake i am
+       * keeping it this way so i don't have to guess how R-tilde index maps to
+       * actual block index
+       */
       Arrays.fill(vQtRow, 0);
       vQtRow[m - cnt - 1] = 1;
       int height = cnt > n ? n : cnt;
@@ -175,25 +170,16 @@ public class GivensThinSolver {
         applyGivensInPlace(cs[0], cs[1], getQtRow(i - 1), getQtRow(i), 0,
             m);
       }
-      // push qt and r-tilde 1 row down
-      // just sqp the references to reduce GC churning
+      /*
+       * push qt and r-tilde 1 row down
+       * 
+       * just swap the references to reduce GC churning
+       */
       pushQtDown();
       double[] swap = getQtRow(0);
       setQtRow(0, vQtRow);
       vQtRow = swap;
 
-      // triangular push -- obviously, less efficient than
-      // this is terribly inefficient. for each row we are basically
-      // moving ~ 2-4Mb of memory around.
-      // for (int i = m_n - 1; i > 0; i--) {
-      // // copy (i-1)th row into i-th row ignoring main diagonal item
-      // // which must be 0 now
-      // assert m_rTilde.getQuick(i - 1, i - 1) <= s_epsilon;
-      // for (int j = i; j < m_n; j++)
-      // m_rTilde.setQuick(i, j, m_rTilde.getQuick(i - 1, j));
-      // }
-      // for (int i = 0; i < m_n; i++)
-      // m_rTilde.setQuick(0, i, m_aRow[i]);
       pushRDown();
       swap = getRRow(0);
       setRRow(0, vARow);
@@ -230,8 +216,10 @@ public class GivensThinSolver {
     rStartRow = rStartRow == 0 ? n - 1 : rStartRow - 1;
   }
 
-  // warning: both of these return actually n+1 rows with the last one being
-  // not interesting.
+  /*
+   * warning: both of these return actually n+1 rows with the last one being //
+   * not interesting.
+   */
   public UpperTriangular getRTilde() {
     UpperTriangular packedR = new UpperTriangular(n);
     for (int i = 0; i < n; i++) {
@@ -242,9 +230,12 @@ public class GivensThinSolver {
 
   public double[][] getThinQtTilde() {
     if (qtStartRow != 0) {
-      // rotate qt rows into place
-      double[][] qt = new double[n][]; // double[~500][], once per block, not
-                                         // a big deal.
+      /*
+       * rotate qt rows into place
+       * 
+       * double[~500][], once per block, not a big deal.
+       */
+      double[][] qt = new double[n][]; 
       System.arraycopy(mQt, qtStartRow, qt, 0, n - qtStartRow);
       System.arraycopy(mQt, 0, qt, n - qtStartRow, qtStartRow);
       return qt;
@@ -400,8 +391,10 @@ public class GivensThinSolver {
     assert qt2[0].length == r;
     double[] cs = new double[2];
 
-    // pairwise givens(a,b) so that a come off main diagonal in r1
-    // and bs come off u-th upper subdiagonal in r2.
+    /*
+     * pairwise givens(a,b) so that a come off main diagonal in r1 and bs come
+     * off u-th upper subdiagonal in r2.
+     */
     for (int v = 0; v < kp; v++) {
       for (int u = v; u < kp; u++) {
         givens(r1[u][u], r2[u - v][u], cs);

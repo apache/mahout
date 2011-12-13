@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -67,7 +66,7 @@ public class QRFirstStep implements Closeable, OutputCollector<Writable, Vector>
   private final DenseBlockWritable value = new DenseBlockWritable();
   private final Writable tempKey = new IntWritable();
   private MultipleOutputs outputs;
-  private final Deque<Closeable> closeables = new LinkedList<Closeable>();
+  private final Deque<Closeable> closeables = Lists.<Closeable>newLinkedList();
   private SequenceFile.Writer tempQw;
   private Path tempQPath;
   private final List<UpperTriangular> rSubseq = Lists.newArrayList();
@@ -103,12 +102,12 @@ public class QRFirstStep implements Closeable, OutputCollector<Writable, Vector>
     value.setBlock(qt);
     getTempQw().append(tempKey, value);
 
-    // this probably should be
-    // a sparse row matrix,
-    // but compressor should get it for disk and in memory we want it
-    // dense anyway, sparse random implementations would be
-    // a mostly a memory management disaster consisting of rehashes and GC
-    // thrashing. (IMHO)
+    /*
+     * this probably should be a sparse row matrix, but compressor should get it
+     * for disk and in memory we want it dense anyway, sparse random
+     * implementations would be a mostly a memory management disaster consisting
+     * of rehashes and GC // thrashing. (IMHO)
+     */
     value.setBlock(null);
     qSolver.reset();
   }
@@ -116,10 +115,11 @@ public class QRFirstStep implements Closeable, OutputCollector<Writable, Vector>
   // second pass to run a modified version of computeQHatSequence.
   private void flushQBlocks() throws IOException {
     if (blockCnt == 1) {
-      // only one block, no temp file, no second pass. should be the default
-      // mode
-      // for efficiency in most cases. Sure mapper should be able to load
-      // the entire split in memory -- and we don't require even that.
+      /*
+       * only one block, no temp file, no second pass. should be the default
+       * mode for efficiency in most cases. Sure mapper should be able to load
+       * the entire split in memory -- and we don't require even that.
+       */
       value.setBlock(qSolver.getThinQtTilde());
       outputQHat(value);
       outputR(new VectorWritable(new DenseVector(qSolver.getRTilde().getData(),
@@ -152,8 +152,10 @@ public class QRFirstStep implements Closeable, OutputCollector<Writable, Vector>
                                                 new CopyConstructorIterator<UpperTriangular>(rSubseq
                                                   .iterator())));
       if (qCnt == 1) {
-        // just merge r[0] <- r[1] so it doesn't have to repeat
-        // in subsequent computeQHat iterators
+        /*
+         * just merge r[0] <- r[1] so it doesn't have to repeat in subsequent
+         * computeQHat iterators
+         */
         GivensThinSolver.mergeR(rSubseq.get(0), rSubseq.remove(1));
       } else {
         qCnt++;
@@ -251,12 +253,12 @@ public class QRFirstStep implements Closeable, OutputCollector<Writable, Vector>
 
   private SequenceFile.Writer getTempQw() throws IOException {
     if (tempQw == null) {
-      // temporary Q output
-      // hopefully will not exceed size of IO cache in which case it is only
-      // good since it
-      // is going to be maanged by kernel, not java GC. And if IO cache is not
-      // good enough,
-      // then at least it is always sequential.
+      /*
+       * temporary Q output hopefully will not exceed size of IO cache in which
+       * case it is only good since it is going to be managed by kernel, not
+       * java GC. And if IO cache is not good enough, then at least it is always
+       * sequential.
+       */
       String taskTmpDir = System.getProperty("java.io.tmpdir");
 
       FileSystem localFs = FileSystem.getLocal(jobConf);

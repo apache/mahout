@@ -144,8 +144,6 @@ public final class BtJob {
           for (int j = 0; j < kp; j++) {
             btRow.setQuick(j, mul * qRow.getQuick(j));
           }
-          // btKey.set(el.index());
-          // context.write(btKey, btValue);
           btCollector.collect((long) el.index(), btRow);
         }
       } else {
@@ -155,8 +153,6 @@ public final class BtJob {
           for (int j = 0; j < kp; j++) {
             btRow.setQuick(j, mul * qRow.getQuick(j));
           }
-          // btKey.set(i);
-          // context.write(btKey, btValue);
           btCollector.collect((long) i, btRow);
         }
       }
@@ -169,11 +165,11 @@ public final class BtJob {
 
       Path qJobPath = new Path(context.getConfiguration().get(PROP_QJOB_PATH));
 
-      // actually this is kind of dangerous
-      // becuase this routine thinks we need to create file name for
-      // our current job and this will use -m- so it's just serendipity we are
-      // calling
-      // it from the mapper too as the QJob did.
+      /*
+       * actually this is kind of dangerous because this routine thinks we need
+       * to create file name for our current job and this will use -m- so it's
+       * just serendipity we are calling it from the mapper too as the QJob did.
+       */
       Path qInputPath =
         new Path(qJobPath, FileOutputFormat.getUniqueFile(context,
                                                           QJob.OUTPUT_QHAT,
@@ -187,8 +183,10 @@ public final class BtJob {
                                                             .getConfiguration());
       closeables.addFirst(qhatInput);
 
-      // read all r files _in order of task ids_, i.e. partitions (aka group
-      // nums)
+      /*
+       * read all r files _in order of task ids_, i.e. partitions (aka group
+       * nums)
+       */
 
       Path rPath = new Path(qJobPath, QJob.OUTPUT_RHAT + "-*");
 
@@ -206,9 +204,11 @@ public final class BtJob {
 
       qr = new QRLastStep(qhatInput, rhatInput, blockNum);
       closeables.addFirst(qr);
-      // it's so happens that current QRLastStep's implementation
-      // preloads R sequence into memory in the constructor
-      // so it's ok to close rhat input now.
+      /*
+       * it's so happens that current QRLastStep's implementation preloads R
+       * sequence into memory in the constructor so it's ok to close rhat input
+       * now.
+       */
       if (!rhatInput.hasNext()) {
         closeables.remove(rhatInput);
         rhatInput.close();
@@ -240,7 +240,6 @@ public final class BtJob {
       extends
       Reducer<Writable, SparseRowBlockWritable, Writable, SparseRowBlockWritable> {
 
-    // protected final VectorWritable outValue = new VectorWritable();
     protected final SparseRowBlockWritable accum = new SparseRowBlockWritable();
     protected final Deque<Closeable> closeables = new ArrayDeque<Closeable>();
     protected int blockHeight;
@@ -322,9 +321,10 @@ public final class BtJob {
         accum.plusBlock(bw);
       }
 
-      // at this point, sum of rows should be in accum,
-      // so we just generate outer self product of it and add to
-      // BBt accumulator.
+      /*
+       * at this point, sum of rows should be in accum, so we just generate
+       * outer self product of it and add to BBt accumulator.
+       */
 
       for (int k = 0; k < accum.getNumRows(); k++) {
         Vector btRow = accum.getRows()[k];
@@ -406,10 +406,11 @@ public final class BtJob {
                         VectorWritable.class);
     }
 
-    // hack: we use old api multiple outputs
-    // since they are not available in the new api of
-    // either 0.20.2 or 0.20.203 but wrap it into a new api
-    // job so we can use new api interfaces.
+    /*
+     * HACK: we use old api multiple outputs since they are not available in the
+     * new api of either 0.20.2 or 0.20.203 but wrap it into a new api job so we
+     * can use new api interfaces.
+     */
 
     Job job = new Job(oldApiJob);
     job.setJobName("Bt-job");
@@ -423,13 +424,9 @@ public final class BtJob {
     }
     FileOutputFormat.setOutputPath(job, outputPath);
 
-    // MultipleOutputs.addNamedOutput(job, OUTPUT_Bt,
-    // SequenceFileOutputFormat.class,
-    // QJobKeyWritable.class,QJobValueWritable.class);
-
-    // Warn: tight hadoop integration here:
+    // WARN: tight hadoop integration here:
     job.getConfiguration().set("mapreduce.output.basename", OUTPUT_BT);
-    // FileOutputFormat.setCompressOutput(job, true);
+
     FileOutputFormat.setOutputCompressorClass(job, DefaultCodec.class);
     SequenceFileOutputFormat.setOutputCompressionType(job,
                                                       CompressionType.BLOCK);
@@ -443,10 +440,7 @@ public final class BtJob {
     job.setMapperClass(BtMapper.class);
     job.setCombinerClass(OuterProductCombiner.class);
     job.setReducerClass(OuterProductReducer.class);
-    // job.setPartitionerClass(QPartitioner.class);
 
-    // job.getConfiguration().setInt(QJob.PROP_AROWBLOCK_SIZE,aBlockRows );
-    // job.getConfiguration().setLong(PROP_OMEGA_SEED, seed);
     job.getConfiguration().setInt(QJob.PROP_K, k);
     job.getConfiguration().setInt(QJob.PROP_P, p);
     job.getConfiguration().set(PROP_QJOB_PATH, inputPathQJob.toString());
@@ -454,10 +448,6 @@ public final class BtJob {
                                       outputBBtProducts);
     job.getConfiguration().setInt(PROP_OUTER_PROD_BLOCK_HEIGHT, btBlockHeight);
 
-    // number of reduce tasks doesn't matter. we don't actually
-    // send anything to reducers. in fact, the only reason
-    // we need to configure reduce step is so that combiners can fire.
-    // so reduce here is purely symbolic.
     job.setNumReduceTasks(numReduceTasks);
 
     job.submit();
