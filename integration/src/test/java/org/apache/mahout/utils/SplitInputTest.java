@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.classifier.bayes;
+package org.apache.mahout.utils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -29,13 +29,11 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.classifier.ClassifierData;
-import org.apache.mahout.examples.MahoutTestCase;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
-import org.apache.mahout.utils.SplitInput;
 import org.junit.Before;
 import org.junit.Test;
 
-public final class SplitBayesInputTest extends MahoutTestCase {
+public final class SplitInputTest extends MahoutTestCase {
 
   private OpenObjectIntHashMap<String> countMap;
   private Charset charset;
