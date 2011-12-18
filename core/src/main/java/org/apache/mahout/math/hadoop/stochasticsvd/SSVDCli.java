@@ -45,12 +45,15 @@ public class SSVDCli extends AbstractJob {
     addOutputOption();
     addOption("rank", "k", "decomposition rank", true);
     addOption("oversampling", "p", "oversampling", String.valueOf(15));
-    addOption("blockHeight", "r", "Y block height (must be > (k+p))", String.valueOf(10000));
+    addOption("blockHeight",
+              "r",
+              "Y block height (must be > (k+p))",
+              String.valueOf(10000));
     addOption("outerProdBlockHeight",
               "oh",
               "block height of outer products during multiplication, increase for sparse inputs",
               String.valueOf(30000));
-    addOption("abtBlockHeight", 
+    addOption("abtBlockHeight",
               "abth",
               "block height of Y_i in ABtJob during AB' multiplication, increase for extremely sparse inputs",
               String.valueOf(200000));
@@ -73,6 +76,10 @@ public class SSVDCli extends AbstractJob {
               "q",
               "number of additional power iterations (0..2 is good)",
               String.valueOf(0));
+    addOption("broadcast",
+              "br",
+              "whether use distributed cache to broadcast matrices wherever possible",
+              String.valueOf(true));
     addOption(DefaultOptionCreator.overwriteOption().create());
 
     Map<String, String> pargs = parseArguments(args);
@@ -92,6 +99,7 @@ public class SSVDCli extends AbstractJob {
     boolean cUHalfSigma = Boolean.parseBoolean(pargs.get("--uHalfSigma"));
     boolean cVHalfSigma = Boolean.parseBoolean(pargs.get("--vHalfSigma"));
     int reduceTasks = Integer.parseInt(pargs.get("--reduceTasks"));
+    boolean broadcast = Boolean.parseBoolean(pargs.get("--broadcast"));
     boolean overwrite =
       pargs.containsKey(keyFor(DefaultOptionCreator.OVERWRITE_OPTION));
 
@@ -116,6 +124,7 @@ public class SSVDCli extends AbstractJob {
     solver.setOuterBlockHeight(h);
     solver.setAbtBlockHeight(abh);
     solver.setQ(q);
+    solver.setBroadcast(broadcast);
     solver.setOverwrite(overwrite);
 
     solver.run();
@@ -128,14 +137,16 @@ public class SSVDCli extends AbstractJob {
     SequenceFile.Writer sigmaW = null;
 
     try {
-      sigmaW = SequenceFile.createWriter(fs,
-                                conf,
-                                getOutputPath("sigma"),
-                                NullWritable.class,
-                                VectorWritable.class);
+      sigmaW =
+        SequenceFile.createWriter(fs,
+                                  conf,
+                                  getOutputPath("sigma"),
+                                  NullWritable.class,
+                                  VectorWritable.class);
       Writable sValues =
-        new VectorWritable(new DenseVector(Arrays.copyOf(solver
-          .getSingularValues(), k), true));
+        new VectorWritable(new DenseVector(Arrays.copyOf(solver.getSingularValues(),
+                                                         k),
+                                           true));
       sigmaW.append(NullWritable.get(), sValues);
 
     } finally {

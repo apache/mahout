@@ -57,7 +57,8 @@ public final class SequenceFileDirIterator<K extends Writable,V extends Writable
 
 
     FileStatus[] statuses = HadoopUtil.getFileStatus(path, pathType, filter, ordering, conf);
-    Iterator<FileStatus> fileStatusIterator = Iterators.forArray(statuses);
+    Iterator<FileStatus> fileStatusIterator =
+      Iterators.forArray(statuses == null ? new FileStatus[0] : statuses);
 
     iterators = Lists.newArrayList();
 
