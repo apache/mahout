@@ -117,7 +117,6 @@ public class SSVDSolver {
   private boolean cUHalfSigma;
   private boolean cVHalfSigma;
   private boolean overwrite;
-  private boolean broadcast = true;
 
   /**
    * create new SSVD solver. Required parameters are passed to constructor to
@@ -285,20 +284,6 @@ public class SSVDSolver {
     this.abtBlockHeight = abtBlockHeight;
   }
 
-  public boolean isBroadcast() {
-    return broadcast;
-  }
-
-  /**
-   * If this property is true, use DestributedCache mechanism to broadcast some
-   * stuff around. May improve efficiency. Default is false.
-   * 
-   * @param broadcast
-   */
-  public void setBroadcast(boolean broadcast) {
-    this.broadcast = broadcast;
-  }
-
   /**
    * run all SSVD jobs.
    * 
@@ -307,7 +292,7 @@ public class SSVDSolver {
    */
   public void run() throws IOException {
 
-    Deque<Closeable> closeables = Lists.<Closeable> newLinkedList();
+    Deque<Closeable> closeables = Lists.<Closeable>newLinkedList();
     try {
       Class<? extends Writable> labelType =
         sniffInputLabelType(inputPath, conf);
@@ -366,8 +351,7 @@ public class SSVDSolver {
                            k,
                            p,
                            abtBlockHeight,
-                           reduceTasks,
-                           broadcast);
+                           reduceTasks);
 
         btPath = new Path(outputPath, String.format("Bt-job-%d", i + 1));
 
@@ -515,8 +499,7 @@ public class SSVDSolver {
       if (!fstats[0].isDir()) {
         firstSeqFile = fstats[0];
       } else {
-        firstSeqFile =
-          fs.listStatus(fstats[0].getPath(), PathFilters.logsCRCFilter())[0];
+        firstSeqFile = fs.listStatus(fstats[0].getPath(), PathFilters.logsCRCFilter())[0];
       }
 
       SequenceFile.Reader r = null;
@@ -582,6 +565,7 @@ public class SSVDSolver {
     }
 
     List<double[]> denseData = Lists.newArrayList();
+
 
     /*
      * assume it is partitioned output, so we need to read them up in order of
