@@ -30,6 +30,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.Writable;
@@ -45,9 +46,49 @@ import org.apache.mahout.common.Pair;
 public final class SequenceFileDirIterator<K extends Writable,V extends Writable>
     extends ForwardingIterator<Pair<K,V>> implements Closeable {
 
-  private final Iterator<Pair<K,V>> delegate;
+  private Iterator<Pair<K,V>> delegate;
   private final List<SequenceFileIterator<K,V>> iterators;
 
+  /**
+   * Multifile sequence file iterator where files are specified explicitly by
+   * path parameters.
+   * 
+   * @param path
+   * @param ordering
+   * @param reuseKeyValueInstances
+   * @param conf
+   * @throws IOException
+   */
+  public SequenceFileDirIterator(Path[] path,
+                                      Comparator<FileStatus> ordering,
+                                      final boolean reuseKeyValueInstances,
+                                      final Configuration conf) throws IOException {
+
+    iterators = Lists.newArrayList();
+    /*
+     * we assume all files should exist, otherwise we will bail out.
+     */
+    FileSystem fs = FileSystem.get(conf);
+    FileStatus[] statuses = new FileStatus[path.length];
+    for (int i = 0; i < statuses.length; i++)
+      statuses[i] = fs.getFileStatus(path[i]);
+    init(statuses, ordering, reuseKeyValueInstances, conf);
+  }
+
+  /**
+   * Constructor that uses either {@link FileSystem#listStatus(Path)} or
+   * {@link FileSystem#globStatus(Path)} to obtain list of files to iterate over
+   * (depending on pathType parameter).
+   * <P>
+   * 
+   * @param path
+   * @param pathType
+   * @param filter
+   * @param ordering
+   * @param reuseKeyValueInstances
+   * @param conf
+   * @throws IOException
+   */
   public SequenceFileDirIterator(Path path,
                                  PathType pathType,
                                  PathFilter filter,
@@ -55,27 +96,47 @@ public final class SequenceFileDirIterator<K extends Writable,V extends Writable
                                  final boolean reuseKeyValueInstances,
                                  final Configuration conf) throws IOException {
 
-
-    FileStatus[] statuses = HadoopUtil.getFileStatus(path, pathType, filter, ordering, conf);
-    Iterator<FileStatus> fileStatusIterator = Iterators.forArray(statuses);
-
+    FileStatus[] statuses =
+      HadoopUtil.getFileStatus(path, pathType, filter, ordering, conf);
     iterators = Lists.newArrayList();
+    init(statuses, ordering, reuseKeyValueInstances, conf);
+  }
 
-    Iterator<Iterator<Pair<K,V>>> fsIterators =
-        Iterators.transform(fileStatusIterator,
-                            new Function<FileStatus, Iterator<Pair<K, V>>>() {
-                              @Override
-                              public Iterator<Pair<K, V>> apply(FileStatus from) {
-                                try {
-                                  SequenceFileIterator<K,V> iterator =
-                                      new SequenceFileIterator<K,V>(from.getPath(), reuseKeyValueInstances, conf);
-                                  iterators.add(iterator);
-                                  return iterator;
-                                } catch (IOException ioe) {
-                                  throw new IllegalStateException(from.getPath().toString(), ioe);
-                                }
+  private void init(FileStatus[] statuses,
+                    Comparator<FileStatus> ordering,
+                    final boolean reuseKeyValueInstances,
+                    final Configuration conf) throws IOException {
+
+    /*
+     * prevent NPEs. Unfortunately, Hadoop would return null for list if nothing
+     * was qualified. In this case, which is a corner case, we should assume an
+     * empty iterator, not an NPE.
+     */
+    if (statuses == null)
+      statuses = new FileStatus[0];
+
+    Iterator<FileStatus> fileStatusIterator =
+      Iterators.forArray(statuses == null ? new FileStatus[0] : statuses);
+
+    Iterator<Iterator<Pair<K, V>>> fsIterators =
+      Iterators.transform(fileStatusIterator,
+                          new Function<FileStatus, Iterator<Pair<K, V>>>() {
+                            @Override
+                            public Iterator<Pair<K, V>> apply(FileStatus from) {
+                              try {
+                                SequenceFileIterator<K, V> iterator =
+                                  new SequenceFileIterator<K, V>(from.getPath(),
+                                                                 reuseKeyValueInstances,
+                                                                 conf);
+                                iterators.add(iterator);
+                                return iterator;
+                              } catch (IOException ioe) {
+                                throw new IllegalStateException(from.getPath()
+                                                                    .toString(),
+                                                                ioe);
                               }
-                            });
+                            }
+                          });
 
     Collections.reverse(iterators); // close later in reverse order
 

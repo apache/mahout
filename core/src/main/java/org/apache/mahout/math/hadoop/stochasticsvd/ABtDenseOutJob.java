@@ -29,6 +29,8 @@ import java.util.regex.Matcher;
 
 import org.apache.commons.lang.Validate;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.filecache.DistributedCache;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -63,6 +65,7 @@ import org.apache.mahout.math.hadoop.stochasticsvd.qr.QRFirstStep;
 public class ABtDenseOutJob {
 
   public static final String PROP_BT_PATH = "ssvd.Bt.path";
+  public static final String PROP_BT_BROADCAST = "ssvd.Bt.broadcast";
 
   private ABtDenseOutJob() {
   }
@@ -94,6 +97,9 @@ public class ABtDenseOutJob {
     private int aRowCount;
     private int kp;
     private int blockHeight;
+    private boolean distributedBt;
+    private Path[] btLocalPath;
+    private Configuration localFsConfig;
 
     @Override
     protected void map(Writable key, VectorWritable value, Context context)
@@ -114,8 +120,7 @@ public class ABtDenseOutJob {
           aCols[i].setQuick(aRowCount, vec.getQuick(i));
         }
       } else if (vec.size() > 0) {
-        for (Iterator<Vector.Element> vecIter = vec.iterateNonZero(); vecIter
-          .hasNext();) {
+        for (Iterator<Vector.Element> vecIter = vec.iterateNonZero(); vecIter.hasNext();) {
           Vector.Element vecEl = vecIter.next();
           int i = vecEl.index();
           extendAColIfNeeded(i, aRowCount + 1);
@@ -133,8 +138,7 @@ public class ABtDenseOutJob {
       } else if (aCols[col].size() < rowCount) {
         Vector newVec =
           new SequentialAccessSparseVector(rowCount + blockHeight,
-                                           aCols[col]
-                                             .getNumNondefaultElements() << 1);
+                                           aCols[col].getNumNondefaultElements() << 1);
         newVec.viewPart(0, aCols[col].size()).assign(aCols[col]);
         aCols[col] = newVec;
       }
@@ -176,15 +180,26 @@ public class ABtDenseOutJob {
          */
         for (int pass = 0; pass < numPasses; pass++) {
 
-          btInput =
-            new SequenceFileDirIterator<IntWritable, VectorWritable>(btPath,
-                                                                     PathType.GLOB,
-                                                                     null,
-                                                                     null,
-                                                                     true,
-                                                                     context
-                                                                       .getConfiguration());
+          if (distributedBt) {
+
+            btInput =
+              new SequenceFileDirIterator<IntWritable, VectorWritable>(btLocalPath,
+                                                                       null,
+                                                                       true,
+                                                                       localFsConfig);
+
+          } else {
+
+            btInput =
+              new SequenceFileDirIterator<IntWritable, VectorWritable>(btPath,
+                                                                       PathType.GLOB,
+                                                                       null,
+                                                                       null,
+                                                                       true,
+                                                                       context.getConfiguration());
+          }
           closeables.addFirst(btInput);
+          Validate.isTrue(btInput.hasNext(), "Empty B' input!");
 
           int aRowBegin = pass * blockHeight;
           int bh = Math.min(blockHeight, aRowCount - aRowBegin);
@@ -217,8 +232,7 @@ public class ABtDenseOutJob {
               continue;
             }
             int j = -1;
-            for (Iterator<Vector.Element> aColIter = aCol.iterateNonZero(); aColIter
-              .hasNext();) {
+            for (Iterator<Vector.Element> aColIter = aCol.iterateNonZero(); aColIter.hasNext();) {
               Vector.Element aEl = aColIter.next();
               j = aEl.index();
 
@@ -282,6 +296,15 @@ public class ABtDenseOutJob {
       blockHeight =
         context.getConfiguration().getInt(BtJob.PROP_OUTER_PROD_BLOCK_HEIGHT,
                                           -1);
+      distributedBt = context.getConfiguration().get(PROP_BT_BROADCAST) != null;
+      if (distributedBt) {
+
+        btLocalPath =
+          DistributedCache.getLocalCacheFiles(context.getConfiguration());
+
+        localFsConfig = new Configuration();
+        localFsConfig.set("fs.default.name", "file:///");
+      }
 
     }
   }
@@ -303,8 +326,8 @@ public class ABtDenseOutJob {
      * management completely and bypass MultipleOutputs entirely.
      */
 
-    private static final NumberFormat NUMBER_FORMAT = NumberFormat
-      .getInstance();
+    private static final NumberFormat NUMBER_FORMAT =
+      NumberFormat.getInstance();
     static {
       NUMBER_FORMAT.setMinimumIntegerDigits(5);
       NUMBER_FORMAT.setGroupingUsed(false);
@@ -393,8 +416,8 @@ public class ABtDenseOutJob {
       String uniqueFileName = FileOutputFormat.getUniqueFile(context, name, "");
       uniqueFileName = uniqueFileName.replaceFirst("-r-", "-m-");
       uniqueFileName =
-        uniqueFileName.replaceFirst("\\d+$", Matcher
-          .quoteReplacement(NUMBER_FORMAT.format(spw.getTaskId())));
+        uniqueFileName.replaceFirst("\\d+$",
+                                    Matcher.quoteReplacement(NUMBER_FORMAT.format(spw.getTaskId())));
       return new Path(FileOutputFormat.getWorkOutputPath(context),
                       uniqueFileName);
     }
@@ -454,8 +477,9 @@ public class ABtDenseOutJob {
                          int k,
                          int p,
                          int outerProdBlockHeight,
-                         int numReduceTasks) throws ClassNotFoundException,
-    InterruptedException, IOException {
+                         int numReduceTasks,
+                         boolean broadcastBInput)
+    throws ClassNotFoundException, InterruptedException, IOException {
 
     JobConf oldApiJob = new JobConf(conf);
 
@@ -491,6 +515,24 @@ public class ABtDenseOutJob {
     job.getConfiguration().set(PROP_BT_PATH, inputBtGlob.toString());
 
     job.setNumReduceTasks(numReduceTasks);
+
+    // broadcast Bt files if required.
+    if (broadcastBInput) {
+      job.getConfiguration().set(PROP_BT_BROADCAST, "y");
+
+      FileSystem fs = FileSystem.get(conf);
+      FileStatus[] fstats = fs.globStatus(inputBtGlob);
+      if (fstats != null) {
+        for (FileStatus fstat : fstats) {
+          /*
+           * new api is not enabled yet in our dependencies at this time, still
+           * using deprecated one
+           */
+          DistributedCache.addCacheFile(fstat.getPath().toUri(),
+                                        job.getConfiguration());
+        }
+      }
+    }
 
     job.submit();
     job.waitForCompletion(false);

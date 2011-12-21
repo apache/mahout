@@ -29,6 +29,8 @@ import java.util.regex.Matcher;
 
 import org.apache.commons.lang.Validate;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.filecache.DistributedCache;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -63,6 +65,7 @@ import org.apache.mahout.math.hadoop.stochasticsvd.qr.QRFirstStep;
 public class ABtJob {
 
   public static final String PROP_BT_PATH = "ssvd.Bt.path";
+  public static final String PROP_BT_BROADCAST = "ssvd.Bt.broadcast";
 
   private ABtJob() {
   }
@@ -116,8 +119,7 @@ public class ABtJob {
           aCols[i].setQuick(aRowCount, vec.getQuick(i));
         }
       } else {
-        for (Iterator<Vector.Element> vecIter = vec.iterateNonZero(); vecIter
-          .hasNext();) {
+        for (Iterator<Vector.Element> vecIter = vec.iterateNonZero(); vecIter.hasNext();) {
           Vector.Element vecEl = vecIter.next();
           int i = vecEl.index();
           extendAColIfNeeded(i, aRowCount + 1);
@@ -130,13 +132,12 @@ public class ABtJob {
     private void extendAColIfNeeded(int col, int rowCount) {
       if (aCols[col] == null) {
         aCols[col] =
-            new SequentialAccessSparseVector(rowCount < 10000 ? 10000 : rowCount,
-                                             16);
+          new SequentialAccessSparseVector(rowCount < 10000 ? 10000 : rowCount,
+                                           1);
       } else if (aCols[col].size() < rowCount) {
         Vector newVec =
           new SequentialAccessSparseVector(rowCount << 1,
-                                           aCols[col]
-                                             .getNumNondefaultElements() << 1);
+                                           aCols[col].getNumNondefaultElements() << 1);
         newVec.viewPart(0, aCols[col].size()).assign(aCols[col]);
         aCols[col] = newVec;
       }
@@ -159,8 +160,7 @@ public class ABtJob {
             continue;
           }
           int j = -1;
-          for (Iterator<Vector.Element> aColIter = aCol.iterateNonZero(); aColIter
-              .hasNext(); ) {
+          for (Iterator<Vector.Element> aColIter = aCol.iterateNonZero(); aColIter.hasNext();) {
             Vector.Element aEl = aColIter.next();
             j = aEl.index();
 
@@ -180,8 +180,7 @@ public class ABtJob {
         // this happens in sparse matrices when last rows are all zeros
         // and is subsequently causing shorter Q matrix row count which we
         // probably don't want to repair there but rather here.
-        Vector yDummy =
-          new SequentialAccessSparseVector(kp);
+        Vector yDummy = new SequentialAccessSparseVector(kp);
         // outValue.set(yDummy);
         for (lastRowIndex += 1; lastRowIndex < aRowCount; lastRowIndex++) {
           // outKey.setTaskItemOrdinal(lastRowIndex);
@@ -210,14 +209,42 @@ public class ABtJob {
       Validate.notNull(propBtPathStr, "Bt input is not set");
       Path btPath = new Path(propBtPathStr);
 
-      btInput =
-        new SequenceFileDirIterator<IntWritable, VectorWritable>(btPath,
-                                                                 PathType.GLOB,
-                                                                 null,
-                                                                 null,
-                                                                 true,
-                                                                 context
-                                                                   .getConfiguration());
+      boolean distributedBt =
+        context.getConfiguration().get(PROP_BT_BROADCAST) != null;
+
+      if (distributedBt) {
+
+        Path[] btFiles =
+          DistributedCache.getLocalCacheFiles(context.getConfiguration());
+
+        // DEBUG: stdout
+        System.out.printf("list of files: " + btFiles);
+
+        String btLocalPath = "";
+        for (Path btFile : btFiles) {
+          if (btLocalPath.length() > 0)
+            btLocalPath += Path.SEPARATOR_CHAR;
+          btLocalPath += btFile;
+        }
+
+        btInput =
+          new SequenceFileDirIterator<IntWritable, VectorWritable>(new Path(btLocalPath),
+                                                                   PathType.LIST,
+                                                                   null,
+                                                                   null,
+                                                                   true,
+                                                                   context.getConfiguration());
+
+      } else {
+
+        btInput =
+          new SequenceFileDirIterator<IntWritable, VectorWritable>(btPath,
+                                                                   PathType.GLOB,
+                                                                   null,
+                                                                   null,
+                                                                   true,
+                                                                   context.getConfiguration());
+      }
       // TODO: how do i release all that stuff??
       closeables.addFirst(btInput);
       OutputCollector<LongWritable, SparseRowBlockWritable> yiBlockCollector =
@@ -261,8 +288,8 @@ public class ABtJob {
     // management
     // completely and bypass MultipleOutputs entirely.
 
-    private static final NumberFormat NUMBER_FORMAT = NumberFormat
-      .getInstance();
+    private static final NumberFormat NUMBER_FORMAT =
+      NumberFormat.getInstance();
     static {
       NUMBER_FORMAT.setMinimumIntegerDigits(5);
       NUMBER_FORMAT.setGroupingUsed(false);
@@ -342,8 +369,8 @@ public class ABtJob {
       String uniqueFileName = FileOutputFormat.getUniqueFile(context, name, "");
       uniqueFileName = uniqueFileName.replaceFirst("-r-", "-m-");
       uniqueFileName =
-        uniqueFileName.replaceFirst("\\d+$", Matcher
-          .quoteReplacement(NUMBER_FORMAT.format(spw.getTaskId())));
+        uniqueFileName.replaceFirst("\\d+$",
+                                    Matcher.quoteReplacement(NUMBER_FORMAT.format(spw.getTaskId())));
       return new Path(FileOutputFormat.getWorkOutputPath(context),
                       uniqueFileName);
     }
@@ -403,8 +430,9 @@ public class ABtJob {
                          int k,
                          int p,
                          int outerProdBlockHeight,
-                         int numReduceTasks) throws ClassNotFoundException,
-    InterruptedException, IOException {
+                         int numReduceTasks,
+                         boolean broadcastBInput)
+    throws ClassNotFoundException, InterruptedException, IOException {
 
     JobConf oldApiJob = new JobConf(conf);
 
@@ -458,6 +486,23 @@ public class ABtJob {
     // send anything to reducers.
 
     job.setNumReduceTasks(numReduceTasks);
+
+    // broadcast Bt files if required.
+    if (broadcastBInput) {
+      job.getConfiguration().set(PROP_BT_BROADCAST, "y");
+
+      FileSystem fs = FileSystem.get(conf);
+      FileStatus[] fstats = fs.globStatus(inputBtGlob);
+      if (fstats != null) {
+        for (FileStatus fstat : fstats) {
+          /*
+           * new api is not enabled yet in our dependencies at this time, still
+           * using deprecated one
+           */
+          DistributedCache.addCacheFile(fstat.getPath().toUri(), conf);
+        }
+      }
+    }
 
     job.submit();
     job.waitForCompletion(false);

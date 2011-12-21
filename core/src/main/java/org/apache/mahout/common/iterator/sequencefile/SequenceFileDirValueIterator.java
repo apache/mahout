@@ -38,16 +38,31 @@ import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.IOUtils;
 
 /**
- * Like {@link SequenceFileValueIterator}, but iterates not just over one sequence file, but many. The input path
- * may be specified as a directory of files to read, or as a glob pattern. The set of files may be optionally
+ * Like {@link SequenceFileValueIterator}, but iterates not just over one
+ * sequence file, but many. The input path may be specified as a directory of
+ * files to read, or as a glob pattern. The set of files may be optionally
  * restricted with a {@link PathFilter}.
  */
-public final class SequenceFileDirValueIterator<V extends Writable>
-    extends ForwardingIterator<V> implements Closeable {
+public final class SequenceFileDirValueIterator<V extends Writable> extends
+    ForwardingIterator<V> implements Closeable {
 
-  private final Iterator<V> delegate;
+  private Iterator<V> delegate;
   private final List<SequenceFileValueIterator<V>> iterators;
 
+  /**
+   * Constructor that uses either {@link FileSystem#listStatus(Path)} or
+   * {@link FileSystem#globStatus(Path)} to obtain list of files to iterate over
+   * (depending on pathType parameter).
+   * <P>
+   * 
+   * @param path
+   * @param pathType
+   * @param filter
+   * @param ordering
+   * @param reuseKeyValueInstances
+   * @param conf
+   * @throws IOException
+   */
   public SequenceFileDirValueIterator(Path path,
                                       PathType pathType,
                                       PathFilter filter,
@@ -55,38 +70,103 @@ public final class SequenceFileDirValueIterator<V extends Writable>
                                       final boolean reuseKeyValueInstances,
                                       final Configuration conf) throws IOException {
     FileStatus[] statuses;
-    FileSystem fs = path.getFileSystem(conf);
+    FileSystem fs = FileSystem.get(conf);
     if (filter == null) {
-      statuses = pathType == PathType.GLOB ? fs.globStatus(path) : fs.listStatus(path);
+      statuses =
+        pathType == PathType.GLOB ? fs.globStatus(path) : fs.listStatus(path);
     } else {
-      statuses = pathType == PathType.GLOB ? fs.globStatus(path, filter) : fs.listStatus(path, filter);
+      statuses =
+        pathType == PathType.GLOB ? fs.globStatus(path, filter)
+            : fs.listStatus(path, filter);
     }
+    iterators = Lists.newArrayList();
+    init(statuses, ordering, reuseKeyValueInstances, conf);
+  }
+
+  /**
+   * Multifile sequence file iterator where files are specified explicitly by
+   * path parameters.
+   * 
+   * @param path
+   * @param ordering
+   * @param reuseKeyValueInstances
+   * @param conf
+   * @throws IOException
+   */
+  public SequenceFileDirValueIterator(Path[] path,
+                                      Comparator<FileStatus> ordering,
+                                      final boolean reuseKeyValueInstances,
+                                      final Configuration conf) throws IOException {
+
+    iterators = Lists.newArrayList();
+    /*
+     * we assume all files should exist, otherwise we will bail out.
+     */
+    FileSystem fs = FileSystem.get(conf);
+    FileStatus[] statuses = new FileStatus[path.length];
+    for (int i = 0; i < statuses.length; i++)
+      statuses[i] = fs.getFileStatus(path[i]);
+    init(statuses, ordering, reuseKeyValueInstances, conf);
+  }
+
+  private void init(FileStatus[] statuses,
+                    Comparator<FileStatus> ordering,
+                    final boolean reuseKeyValueInstances,
+                    final Configuration conf) throws IOException {
+
+    /*
+     * prevent NPEs. Unfortunately, Hadoop would return null for list if nothing
+     * was qualified. In this case, which is a corner case, we should assume an
+     * empty iterator, not an NPE.
+     */
+    if (statuses == null)
+      statuses = new FileStatus[0];
+
     if (ordering != null) {
       Arrays.sort(statuses, ordering);
     }
     Iterator<FileStatus> fileStatusIterator = Iterators.forArray(statuses);
 
-    iterators = Lists.newArrayList();
+    boolean ok = false;
 
-    Iterator<Iterator<V>> fsIterators =
+    try {
+
+      Iterator<Iterator<V>> fsIterators =
         Iterators.transform(fileStatusIterator,
                             new Function<FileStatus, Iterator<V>>() {
                               @Override
                               public Iterator<V> apply(FileStatus from) {
                                 try {
                                   SequenceFileValueIterator<V> iterator =
-                                    new SequenceFileValueIterator<V>(from.getPath(), reuseKeyValueInstances, conf);
+                                    new SequenceFileValueIterator<V>(from.getPath(),
+                                                                     reuseKeyValueInstances,
+                                                                     conf);
                                   iterators.add(iterator);
                                   return iterator;
                                 } catch (IOException ioe) {
-                                  throw new IllegalStateException(from.getPath().toString(), ioe);
+                                  throw new IllegalStateException(from.getPath()
+                                                                      .toString(),
+                                                                  ioe);
                                 }
                               }
                             });
 
-    Collections.reverse(iterators); // close later in reverse order
+      Collections.reverse(iterators); // close later in reverse order
 
-    delegate = Iterators.concat(fsIterators);
+      delegate = Iterators.concat(fsIterators);
+      ok = true;
+
+    } finally {
+      /*
+       * prevent file handle leaks in case one of handles fails to open. If some
+       * of the files fail to open, constructor will fail and close() will never
+       * be called. Thus, those handles that did open in constructor, would leak
+       * out, unless we specifically handle it here.
+       */
+
+      if (!ok)
+        IOUtils.close(iterators);
+    }
   }
 
   @Override
@@ -97,7 +177,6 @@ public final class SequenceFileDirValueIterator<V extends Writable>
   @Override
   public void close() throws IOException {
     IOUtils.close(iterators);
-    iterators.clear();
   }
 
 }

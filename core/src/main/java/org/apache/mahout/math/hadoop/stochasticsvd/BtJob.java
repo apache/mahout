@@ -25,6 +25,9 @@ import java.util.Iterator;
 
 import org.apache.commons.lang.Validate;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.filecache.DistributedCache;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -82,6 +85,7 @@ public final class BtJob {
     "ssvd.BtJob.outputBBtProducts";
   public static final String PROP_OUTER_PROD_BLOCK_HEIGHT =
     "ssvd.outerProdBlockHeight";
+  public static final String PROP_RHAT_BROADCAST = "ssvd.rhat.broadcast";
 
   static final double SPARSE_ZEROS_PCT_THRESHOLD = 0.1;
 
@@ -137,8 +141,7 @@ public final class BtJob {
       }
 
       if (!aRow.isDense()) {
-        for (Iterator<Vector.Element> iter = aRow.iterateNonZero(); iter
-          .hasNext();) {
+        for (Iterator<Vector.Element> iter = aRow.iterateNonZero(); iter.hasNext();) {
           Vector.Element el = iter.next();
           double mul = el.get();
           for (int j = 0; j < kp; j++) {
@@ -179,25 +182,51 @@ public final class BtJob {
       SequenceFileValueIterator<DenseBlockWritable> qhatInput =
         new SequenceFileValueIterator<DenseBlockWritable>(qInputPath,
                                                           true,
-                                                          context
-                                                            .getConfiguration());
+                                                          context.getConfiguration());
       closeables.addFirst(qhatInput);
 
       /*
        * read all r files _in order of task ids_, i.e. partitions (aka group
-       * nums)
+       * nums).
+       * 
+       * Note: if broadcast option is used, this comes from distributed cache
+       * files rather than hdfs path.
        */
 
-      Path rPath = new Path(qJobPath, QJob.OUTPUT_RHAT + "-*");
+      SequenceFileDirValueIterator<VectorWritable> rhatInput;
 
-      SequenceFileDirValueIterator<VectorWritable> rhatInput =
-        new SequenceFileDirValueIterator<VectorWritable>(rPath,
-                                                         PathType.GLOB,
-                                                         null,
-                                                         SSVDSolver.PARTITION_COMPARATOR,
-                                                         true,
-                                                         context
-                                                           .getConfiguration());
+      boolean distributedRHat =
+        context.getConfiguration().get(PROP_RHAT_BROADCAST) != null;
+      if (distributedRHat) {
+
+        Path[] rFiles =
+          DistributedCache.getLocalCacheFiles(context.getConfiguration());
+
+        Validate.notNull(rFiles,
+                         "no RHat files in distributed cache job definition");
+
+        Configuration conf = new Configuration();
+        conf.set("fs.default.name", "file:///");
+
+        rhatInput =
+          new SequenceFileDirValueIterator<VectorWritable>(rFiles,
+                                                           SSVDSolver.PARTITION_COMPARATOR,
+                                                           true,
+                                                           conf);
+
+      } else {
+        Path rPath = new Path(qJobPath, QJob.OUTPUT_RHAT + "-*");
+        rhatInput =
+          new SequenceFileDirValueIterator<VectorWritable>(rPath,
+                                                           PathType.GLOB,
+                                                           null,
+                                                           SSVDSolver.PARTITION_COMPARATOR,
+                                                           true,
+                                                           context.getConfiguration());
+      }
+
+      Validate.isTrue(rhatInput.hasNext(), "Empty R-hat input!");
+
       closeables.addFirst(rhatInput);
       outputs = new MultipleOutputs(new JobConf(context.getConfiguration()));
       closeables.addFirst(new IOUtils.MultipleOutputsCloseableAdapter(outputs));
@@ -230,7 +259,9 @@ public final class BtJob {
 
       btCollector =
         new SparseRowBlockAccumulator(context.getConfiguration()
-          .getInt(PROP_OUTER_PROD_BLOCK_HEIGHT, -1), btBlockCollector);
+                                             .getInt(PROP_OUTER_PROD_BLOCK_HEIGHT,
+                                                     -1),
+                                      btBlockCollector);
       closeables.addFirst(btCollector);
 
     }
@@ -304,8 +335,7 @@ public final class BtJob {
         mBBt = new UpperTriangular(k + p);
 
         outputs = new MultipleOutputs(new JobConf(context.getConfiguration()));
-        closeables
-          .addFirst(new IOUtils.MultipleOutputsCloseableAdapter(outputs));
+        closeables.addFirst(new IOUtils.MultipleOutputsCloseableAdapter(outputs));
 
       }
     }
@@ -363,9 +393,8 @@ public final class BtJob {
           OutputCollector<Writable, Writable> collector =
             outputs.getCollector(OUTPUT_BBT, null);
 
-          collector
-            .collect(new IntWritable(),
-                     new VectorWritable(new DenseVector(mBBt.getData())));
+          collector.collect(new IntWritable(),
+                            new VectorWritable(new DenseVector(mBBt.getData())));
         }
       } finally {
         IOUtils.close(closeables);
@@ -384,26 +413,25 @@ public final class BtJob {
                          int p,
                          int btBlockHeight,
                          int numReduceTasks,
+                         boolean broadcast,
                          Class<? extends Writable> labelClass,
                          boolean outputBBtProducts)
     throws ClassNotFoundException, InterruptedException, IOException {
 
     JobConf oldApiJob = new JobConf(conf);
 
-    MultipleOutputs
-      .addNamedOutput(oldApiJob,
-                      OUTPUT_Q,
-                      org.apache.hadoop.mapred.SequenceFileOutputFormat.class,
-                      labelClass,
-                      VectorWritable.class);
+    MultipleOutputs.addNamedOutput(oldApiJob,
+                                   OUTPUT_Q,
+                                   org.apache.hadoop.mapred.SequenceFileOutputFormat.class,
+                                   labelClass,
+                                   VectorWritable.class);
 
     if (outputBBtProducts) {
-      MultipleOutputs
-        .addNamedOutput(oldApiJob,
-                        OUTPUT_BBT,
-                        org.apache.hadoop.mapred.SequenceFileOutputFormat.class,
-                        IntWritable.class,
-                        VectorWritable.class);
+      MultipleOutputs.addNamedOutput(oldApiJob,
+                                     OUTPUT_BBT,
+                                     org.apache.hadoop.mapred.SequenceFileOutputFormat.class,
+                                     IntWritable.class,
+                                     VectorWritable.class);
     }
 
     /*
@@ -449,6 +477,30 @@ public final class BtJob {
     job.getConfiguration().setInt(PROP_OUTER_PROD_BLOCK_HEIGHT, btBlockHeight);
 
     job.setNumReduceTasks(numReduceTasks);
+
+    /*
+     * we can broadhast Rhat files since all of them are reuqired by each job,
+     * but not Q files which correspond to splits of A (so each split of A will
+     * require only particular Q file, each time different one).
+     */
+
+    if (broadcast) {
+      job.getConfiguration().set(PROP_RHAT_BROADCAST, "y");
+
+      FileSystem fs = FileSystem.get(conf);
+      FileStatus[] fstats =
+        fs.globStatus(new Path(inputPathQJob, QJob.OUTPUT_RHAT + "-*"));
+      if (fstats != null) {
+        for (FileStatus fstat : fstats) {
+          /*
+           * new api is not enabled yet in our dependencies at this time, still
+           * using deprecated one
+           */
+          DistributedCache.addCacheFile(fstat.getPath().toUri(),
+                                        job.getConfiguration());
+        }
+      }
+    }
 
     job.submit();
     job.waitForCompletion(false);

@@ -117,6 +117,7 @@ public class SSVDSolver {
   private boolean cUHalfSigma;
   private boolean cVHalfSigma;
   private boolean overwrite;
+  private boolean broadcast = true;
 
   /**
    * create new SSVD solver. Required parameters are passed to constructor to
@@ -284,6 +285,20 @@ public class SSVDSolver {
     this.abtBlockHeight = abtBlockHeight;
   }
 
+  public boolean isBroadcast() {
+    return broadcast;
+  }
+
+  /**
+   * If this property is true, use DestributedCache mechanism to broadcast some
+   * stuff around. May improve efficiency. Default is false.
+   * 
+   * @param broadcast
+   */
+  public void setBroadcast(boolean broadcast) {
+    this.broadcast = broadcast;
+  }
+
   /**
    * run all SSVD jobs.
    * 
@@ -292,7 +307,7 @@ public class SSVDSolver {
    */
   public void run() throws IOException {
 
-    Deque<Closeable> closeables = Lists.<Closeable>newLinkedList();
+    Deque<Closeable> closeables = Lists.<Closeable> newLinkedList();
     try {
       Class<? extends Writable> labelType =
         sniffInputLabelType(inputPath, conf);
@@ -322,8 +337,12 @@ public class SSVDSolver {
                seed,
                reduceTasks);
 
-      // restrict number of reducers to a reasonable number
-      // so we don't have to run too many additions in the frontend.
+      /*
+       * restrict number of reducers to a reasonable number so we don't have to
+       * run too many additions in the frontend when reconstructing BBt for the
+       * last B' and BB' computations. The user may not realize that and gives a
+       * bit too many (I would be happy i that were ever the case though).
+       */
 
       BtJob.run(conf,
                 inputPath,
@@ -333,7 +352,8 @@ public class SSVDSolver {
                 k,
                 p,
                 outerBlockHeight,
-                Math.min(1000, reduceTasks),
+                q <= 0 ? Math.min(1000, reduceTasks) : reduceTasks,
+                broadcast,
                 labelType,
                 q <= 0);
 
@@ -351,7 +371,8 @@ public class SSVDSolver {
                            k,
                            p,
                            abtBlockHeight,
-                           reduceTasks);
+                           reduceTasks,
+                           broadcast);
 
         btPath = new Path(outputPath, String.format("Bt-job-%d", i + 1));
 
@@ -363,7 +384,8 @@ public class SSVDSolver {
                   k,
                   p,
                   outerBlockHeight,
-                  Math.min(1000, reduceTasks),
+                  i == q - 1 ? Math.min(1000, reduceTasks) : reduceTasks,
+                  broadcast,
                   labelType,
                   i == q - 1);
       }
@@ -499,7 +521,8 @@ public class SSVDSolver {
       if (!fstats[0].isDir()) {
         firstSeqFile = fstats[0];
       } else {
-        firstSeqFile = fs.listStatus(fstats[0].getPath(), PathFilters.logsCRCFilter())[0];
+        firstSeqFile =
+          fs.listStatus(fstats[0].getPath(), PathFilters.logsCRCFilter())[0];
       }
 
       SequenceFile.Reader r = null;
@@ -565,7 +588,6 @@ public class SSVDSolver {
     }
 
     List<double[]> denseData = Lists.newArrayList();
-
 
     /*
      * assume it is partitioned output, so we need to read them up in order of
