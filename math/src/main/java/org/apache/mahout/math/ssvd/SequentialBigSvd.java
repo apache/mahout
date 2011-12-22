@@ -38,7 +38,7 @@ public class SequentialBigSvd {
 
   public SequentialBigSvd(Matrix A, int p) {
     // Y = A * \Omega
-    y = A.times(new RandomTrinaryMatrix(A.rowSize(), p));
+    y = A.times(new RandomTrinaryMatrix(A.columnSize(), p));
 
     // R'R = Y' Y
     cd1 = new CholeskyDecomposition(y.transpose().times(y));

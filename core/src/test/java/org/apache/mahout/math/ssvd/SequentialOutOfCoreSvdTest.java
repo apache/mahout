@@ -7,6 +7,7 @@ import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.MatrixWritable;
 import org.apache.mahout.math.RandomTrinaryMatrix;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.function.Functions;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -46,7 +47,7 @@ public class SequentialOutOfCoreSvdTest {
 
   @Test
   public void testSingularValues() throws IOException {
-    Matrix A = lowRankMatrix(tmpDir, "A", 200);
+    Matrix A = lowRankMatrix(tmpDir, "A", 200, 970, 1020);
 
     List<File> partsOfA = Arrays.asList(tmpDir.listFiles(new FilenameFilter() {
       @Override
@@ -54,11 +55,12 @@ public class SequentialOutOfCoreSvdTest {
         return s.matches("A-.*");
       }
     }));
-    SequentialOutOfCoreSvd s = new SequentialOutOfCoreSvd(partsOfA, "U", "V", tmpDir, 100, 200);
-    SequentialBigSvd svd = new SequentialBigSvd(A, 20);
+    SequentialOutOfCoreSvd s = new SequentialOutOfCoreSvd(partsOfA, "U", "V", tmpDir, 100, 210);
+    SequentialBigSvd svd = new SequentialBigSvd(A, 100);
 
     Vector reference = new DenseVector(svd.getSingularValues()).viewPart(0, 6);
-    assertEquals(0, reference.minus(s.getSingularValues().viewPart(0, 6)).maxValue(), 1e-9);
+    Vector actual = s.getSingularValues().viewPart(0, 6);
+    assertEquals(0, reference.minus(actual).maxValue(), 1e-9);
 
     s.computeU(partsOfA, "U-", tmpDir);
     Matrix u = readBlockMatrix(Arrays.asList(tmpDir.listFiles(new FilenameFilter() {
@@ -66,7 +68,7 @@ public class SequentialOutOfCoreSvdTest {
       public boolean accept(File file, String s) {
         return s.matches("U-.*");
       }
-    })), A.rowSize(), 15);
+    })));
 
     s.computeV(tmpDir, "V-", A.columnSize());
     Matrix v = readBlockMatrix(Arrays.asList(tmpDir.listFiles(new FilenameFilter() {
@@ -74,14 +76,17 @@ public class SequentialOutOfCoreSvdTest {
       public boolean accept(File file, String s) {
         return s.matches("V-.*");
       }
-    })), A.rowSize(), 15);
+    })));
 
-    assertEquals(A, u.times(new DiagonalMatrix(s.getSingularValues())).times(v.transpose()));
+    // The values in A are pretty big so this is a pretty tight relative tolerance
+    assertEquals(0, A.minus(u.times(new DiagonalMatrix(s.getSingularValues())).times(v.transpose())).aggregate(Functions.PLUS, Functions.ABS), 1e-7);
   }
 
-  private Matrix readBlockMatrix(List<File> files, int nrows, int ncols) throws IOException {
+  private Matrix readBlockMatrix(List<File> files) throws IOException {
     Collections.sort(files);
-    Matrix r = new DenseMatrix(nrows, ncols);
+    int nrows = -1;
+    int ncols = -1;
+    Matrix r = null;
 
     MatrixWritable m = new MatrixWritable();
 
@@ -90,8 +95,16 @@ public class SequentialOutOfCoreSvdTest {
       DataInputStream in = new DataInputStream(new FileInputStream(file));
       m.readFields(in);
       in.close();
+      if (nrows == -1) {
+        nrows = m.get().rowSize() * files.size();
+        ncols = m.get().columnSize();
+        r = new DenseMatrix(nrows, ncols);
+      }
       r.viewPart(row, m.get().rowSize(), 0, r.columnSize()).assign(m.get());
       row += m.get().rowSize();
+    }
+    if (row != nrows && r != null) {
+      r = r.viewPart(0, row, 0, ncols);
     }
     return r;
   }
@@ -129,19 +142,19 @@ public class SequentialOutOfCoreSvdTest {
 //    assertEquals(v1, v2);
 //  }
 
-  private Matrix lowRankMatrix(File tmpDir, String aBase, int rowsPerSlice) throws IOException {
+  private Matrix lowRankMatrix(File tmpDir, String aBase, int rowsPerSlice, int rows, int columns) throws IOException {
     int rank = 10;
-    Matrix u = new RandomTrinaryMatrix(1, 1000, rank, false);
+    Matrix u = new RandomTrinaryMatrix(1, rows, rank, false);
     Matrix d = new DenseMatrix(rank, rank);
     d.set(0, 0, 5);
     d.set(1, 1, 3);
     d.set(2, 2, 1);
-    d.set(3, 3, 0);
-    Matrix v = new RandomTrinaryMatrix(2, 1000, rank, false);
+    d.set(3, 3, 0.5);
+    Matrix v = new RandomTrinaryMatrix(2, columns, rank, false);
     Matrix a = u.times(d).times(v.transpose());
 
     for (int i = 0; i < a.rowSize(); i += rowsPerSlice) {
-      MatrixWritable m = new MatrixWritable(a.viewPart(i, rowsPerSlice, 0, a.columnSize()));
+      MatrixWritable m = new MatrixWritable(a.viewPart(i, Math.min(a.rowSize() - i, rowsPerSlice), 0, a.columnSize()));
       DataOutputStream out = new DataOutputStream(new FileOutputStream(new File(tmpDir, String.format("%s-%09d", aBase, i))));
       try {
         m.write(out);

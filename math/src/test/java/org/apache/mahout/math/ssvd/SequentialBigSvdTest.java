@@ -46,13 +46,14 @@ public class SequentialBigSvdTest extends MahoutTestCase {
   public void testLeftVectors() {
     Matrix A = lowRankMatrix();
 
-    SequentialBigSvd s = new SequentialBigSvd(A, 6);
+    SequentialBigSvd s = new SequentialBigSvd(A, 8);
     SingularValueDecomposition svd = new SingularValueDecomposition(A);
 
-    // can only check first few singular vectors
-    Matrix u1 = svd.getU().viewPart(0, 20, 0, 3).assign(Functions.ABS);
-    Matrix u2 = s.getU().viewPart(0, 20, 0, 3).assign(Functions.ABS);
-    assertEquals(u1, u2);
+    // can only check first few singular vectors because once the singular values
+    // go to zero, the singular vectors are not uniquely determined
+    Matrix u1 = svd.getU().viewPart(0, 20, 0, 4).assign(Functions.ABS);
+    Matrix u2 = s.getU().viewPart(0, 20, 0, 4).assign(Functions.ABS);
+    assertEquals(0, u1.minus(u2).aggregate(Functions.PLUS, Functions.ABS), 1e-9);
   }
 
   private void assertEquals(Matrix u1, Matrix u2) {
@@ -77,12 +78,8 @@ public class SequentialBigSvdTest extends MahoutTestCase {
 
   private Matrix lowRankMatrix() {
     Matrix u = new RandomTrinaryMatrix(1, 20, 4, false);
-    Matrix d = new DenseMatrix(4, 4);
-    d.set(0, 0, 5);
-    d.set(1, 1, 3);
-    d.set(2, 2, 1);
-    d.set(3, 3, 0);
-    Matrix v = new RandomTrinaryMatrix(2, 20, 4, false);
+    Matrix d = new DiagonalMatrix(new double[]{5, 3, 1, 0.5});
+    Matrix v = new RandomTrinaryMatrix(2, 23, 4, false);
 
     return u.times(d).times(v.transpose());
   }
