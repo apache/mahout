@@ -103,10 +103,15 @@ public class SequentialOutOfCoreSvd {
     // step 1, compute R as in R'R = Y'Y where Y = A \Omega
     for (File file : partsOfA) {
       MatrixWritable m = new MatrixWritable();
-      m.readFields(new DataInputStream(new FileInputStream(file)));
+      DataInputStream in = new DataInputStream(new FileInputStream(file));
+      try {
+        m.readFields(in);
+      } finally {
+        in.close();
+      }
 
       Matrix aI = m.get();
-      Matrix omega = new RandomTrinaryMatrix(seed, aI.numCols(), internalDimension, false);
+      Matrix omega = new RandomTrinaryMatrix(seed, aI.columnSize(), internalDimension, false);
       Matrix y = aI.times(omega);
 
       if (y2 == null) {
@@ -123,11 +128,13 @@ public class SequentialOutOfCoreSvd {
       MatrixWritable m = new MatrixWritable();
       m.readFields(new DataInputStream(new FileInputStream(file)));
       Matrix aI = m.get();
-      ncols = Math.max(ncols, aI.numCols());
+      ncols = Math.max(ncols, aI.columnSize());
 
-      for (int j = 0; j + columnsPerSlice <= aI.numCols(); j += columnsPerSlice) {
-        Matrix omega = new RandomTrinaryMatrix(seed, aI.numCols(), internalDimension, false);
-        Matrix bIJ = r2.solveLeft(aI.times(omega).transpose().times(aI.viewPart(0, aI.numRows(), j, columnsPerSlice)));
+      Matrix omega = new RandomTrinaryMatrix(seed, aI.numCols(), internalDimension, false);
+      for (int j = 0; j < aI.numCols(); j += columnsPerSlice) {
+        Matrix yI = aI.times(omega);
+        Matrix aIJ = aI.viewPart(0, aI.rowSize(), j, Math.min(columnsPerSlice, aI.columnSize() - j));
+        Matrix bIJ = r2.solveRight(yI).transpose().times(aIJ);
         addToSavedCopy(bFile(tmpDir, j), bIJ);
       }
     }
@@ -168,10 +175,11 @@ public class SequentialOutOfCoreSvd {
         m.readFields(new DataInputStream(new FileInputStream(file)));
         Matrix aI = m.get();
 
-        Matrix y = aI.times(new RandomTrinaryMatrix(seed, aI.numCols(), dim, false).viewPart(i * columnsPerSlice, columnsPerSlice, 0, aI.numCols()));
-        m.set(r2.solveRight(y).times(svd.getU()));
+        Matrix y = aI.times(new RandomTrinaryMatrix(seed, aI.numCols(), dim, false));
+        Matrix uI = r2.solveRight(y).times(svd.getU());
+        m.set(uI);
         m.write(new DataOutputStream(new FileOutputStream(new File(tmpDir, uBase + i))));
-        i++;
+        i += aI.rowSize();
       }
     }
   }

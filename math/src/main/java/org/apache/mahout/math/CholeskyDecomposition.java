@@ -209,7 +209,7 @@ public class CholeskyDecomposition {
           int i = L.rowUnpivot(internalI);
           x.set(j, k, x.get(j, k) - x.get(j, i) * L.get(k, i));
           if (Double.isInfinite(x.get(j, k)) || Double.isNaN(x.get(j, k))) {
-            System.out.printf("bad at %d,%d\n", j, k);
+            throw new InvalidCholeskyState(j, k);
           }
         }
         if (L.get(k, k) != 0) {
@@ -218,11 +218,17 @@ public class CholeskyDecomposition {
           x.set(j, k, 0);
         }
         if (Double.isInfinite(x.get(j, k)) || Double.isNaN(x.get(j, k))) {
-          System.out.printf("bad at %d,%d\n", j, k);
+          throw new InvalidCholeskyState(j, k);
         }
       }
     }
     return x;
+  }
+
+  private class InvalidCholeskyState extends RuntimeException {
+    public InvalidCholeskyState(int j, int k) {
+      super(String.format("Invalid value found at %d,%d (should not be possible)", j, k));
+    }
   }
 }
 
