@@ -52,16 +52,14 @@ public class GaussianCluster extends AbstractCluster {
   public double pdf(VectorWritable vw) {
     Vector x = vw.get();
     Vector m = getCenter();
-    Vector s = getRadius().plus(0.0000001); // add a small prior to avoid divide
-                                            // by zero
-    return Math.exp(-(divideSquareAndSum(x.minus(m), s) / 2))
-        / zProd(s.times(UncommonDistributions.SQRT2PI));
+    Vector s = getRadius().plus(0.0000001); // add a small prior to avoid divide by zero
+    return Math.exp(-(divideSquareAndSum(x.minus(m), s) / 2)) / zProdSqt2Pi(s);
   }
   
-  private double zProd(Vector s) {
+  private double zProdSqt2Pi(Vector s) {
     double prod = 1;
     for (int i = 0; i < s.size(); i++) {
-      prod *= s.getQuick(i);
+      prod *= s.getQuick(i) * UncommonDistributions.SQRT2PI;
     }
     return prod;
   }
