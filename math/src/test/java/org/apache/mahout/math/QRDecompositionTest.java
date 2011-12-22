@@ -17,10 +17,27 @@
 
 package org.apache.mahout.math;
 
+import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.Functions;
 import org.junit.Test;
 
 public final class QRDecompositionTest extends MahoutTestCase {
+  @Test
+  public void rank1() {
+    Matrix x = new DenseMatrix(3, 3);
+    x.viewRow(0).assign(new double[]{1, 2, 3});
+    x.viewRow(1).assign(new double[]{2, 4, 6});
+    x.viewRow(2).assign(new double[]{3, 6, 9});
+
+    QRDecomposition qr = new QRDecomposition(x);
+    assertFalse(qr.hasFullRank());
+    assertEquals(0, new DenseVector(new double[]{3.741657, 7.483315, 11.22497}).aggregate(qr.getR().viewRow(0), Functions.PLUS, new DoubleDoubleFunction() {
+      @Override
+      public double apply(double arg1, double arg2) {
+        return Math.abs(arg1) - Math.abs(arg2);
+      }
+    }), 1e-5);
+  }
 
   @Test
   public void fullRankTall() {
