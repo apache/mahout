@@ -26,7 +26,7 @@ import org.uncommons.maths.random.GaussianGenerator;
 
 public final class UncommonDistributions {
   
-  private static final double SQRT2PI = Math.sqrt(2.0 * Math.PI);
+  public static final double SQRT2PI = Math.sqrt(2.0 * Math.PI);
   
   private static final Random RANDOM = RandomUtils.getRandom();
   

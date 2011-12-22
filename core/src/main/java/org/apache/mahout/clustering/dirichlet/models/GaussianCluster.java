@@ -17,10 +17,13 @@
 
 package org.apache.mahout.clustering.dirichlet.models;
 
+import java.util.Iterator;
+
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Model;
 import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.VectorWritable;
 
 public class GaussianCluster extends AbstractCluster {
@@ -48,15 +51,29 @@ public class GaussianCluster extends AbstractCluster {
   @Override
   public double pdf(VectorWritable vw) {
     Vector x = vw.get();
-    // return the product of the component pdfs
-    // TODO: is this reasonable? correct? It seems to work in some cases.
-    double pdf = 1;
-    for (int i = 0; i < x.size(); i++) {
-      // small prior on stdDev to avoid numeric instability when stdDev==0
-      pdf *= UncommonDistributions.dNorm(x.getQuick(i),
-          getCenter().getQuick(i), getRadius().getQuick(i) + 0.000001);
+    Vector m = getCenter();
+    Vector s = getRadius().plus(0.0000001); // add a small prior to avoid divide
+                                            // by zero
+    return Math.exp(-(divideSquareAndSum(x.minus(m), s) / 2))
+        / zProd(s.times(UncommonDistributions.SQRT2PI));
+  }
+  
+  private double zProd(Vector s) {
+    double prod = 1;
+    for (int i = 0; i < s.size(); i++) {
+      prod *= s.getQuick(i);
     }
-    return pdf;
+    return prod;
+  }
+  
+  private double divideSquareAndSum(Vector numerator, Vector denominator) {
+    double result = 0;
+    for (Iterator<Element> it = denominator.iterateNonZero(); it.hasNext();) {
+      Element denom = it.next();
+      double quotient = numerator.getQuick(denom.index()) / denom.get();
+      result += quotient * quotient;
+    }
+    return result;
   }
   
 }
