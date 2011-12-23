@@ -108,8 +108,8 @@ public final class CollocDriver extends AbstractJob {
     }
 
     int minSupport = CollocReducer.DEFAULT_MIN_SUPPORT;
-    if (argMap.get("--minsupport") != null) {
-      minSupport = Integer.parseInt(argMap.get("--minsupport"));
+    if (argMap.get("--minSupport") != null) {
+      minSupport = Integer.parseInt(argMap.get("--minSupport"));
     }
     log.info("Minimum Support value: {}", minSupport);
 
