@@ -37,19 +37,24 @@ public final class InfiniteRecursionTest extends MahoutTestCase {
   };
 
   /**
-   * make sure DefaultTreeBuilder.build() does not throw a StackOverflowException
+   * make sure DecisionTreeBuilder.build() does not throw a StackOverflowException
    */
   @Test
   public void testBuild() throws Exception {
     Random rng = RandomUtils.getRandom();
 
-    TreeBuilder builder = new DefaultTreeBuilder();
-
     String[] source = Utils.double2String(dData);
     String descriptor = "N N N N N N N N L";
+
     Dataset dataset = DataLoader.generateDataset(descriptor, false, source);
     Data data = DataLoader.loadData(dataset, source);
+    TreeBuilder builder = new DecisionTreeBuilder();
+    builder.build(rng, data);
 
+    // regression
+    dataset = DataLoader.generateDataset(descriptor, true, source);
+    data = DataLoader.loadData(dataset, source);
+    builder = new DecisionTreeBuilder();
     builder.build(rng, data);
   }
 }
