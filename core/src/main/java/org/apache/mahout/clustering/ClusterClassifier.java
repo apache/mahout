@@ -65,7 +65,6 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
   
   @Override
   public Vector classify(Vector instance) {
-    Vector pdfs = new DenseVector(models.size());
     if (models.get(0) instanceof SoftCluster) {
       Collection<SoftCluster> clusters = Lists.newArrayList();
       List<Double> distances = Lists.newArrayList();
@@ -77,6 +76,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
       return new FuzzyKMeansClusterer().computePi(clusters, distances);
     } else {
       int i = 0;
+      Vector pdfs = new DenseVector(models.size());
       for (Cluster model : models) {
         pdfs.set(i++, model.pdf(new VectorWritable(instance)));
       }

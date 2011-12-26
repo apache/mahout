@@ -54,7 +54,15 @@ public interface Model<O> extends Writable {
    *          a double weighting factor
    */
   void observe(O x, double weight);
-
+  
+  /**
+   * Observe the given model, retaining information about its observations
+   * 
+   * @param x
+   *          a Model<0>
+   */
+  void observe(Model<O> x);
+  
   /**
    * Compute a new set of posterior parameters based upon the Observations that
    * have been observed since my creation

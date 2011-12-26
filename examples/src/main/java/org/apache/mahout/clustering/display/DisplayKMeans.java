@@ -89,7 +89,7 @@ public class DisplayKMeans extends DisplayClustering {
     
     int maxIter = 10;
     ClusteringPolicy policy = new KMeansClusteringPolicy();
-    new ClusterIterator(policy).iterate(samples, priorClassifier, output, maxIter);
+    new ClusterIterator(policy).iterateSeq(samples, priorClassifier, output, maxIter);
     for (int i = 1; i <= maxIter; i++) {
       ClusterClassifier posterior = readClassifier(conf, new Path(output, "classifier-" + i));
       CLUSTERS.add(posterior.getModels());

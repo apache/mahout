@@ -48,16 +48,16 @@ public abstract class AbstractCluster implements Cluster {
   protected AbstractCluster() {}
   
   protected AbstractCluster(Vector point, int id2) {
-    this.numPoints = 0;
-    this.center = new RandomAccessSparseVector(point);
-    this.radius = point.like();
+    this.setNumPoints(0);
+    this.setCenter(new RandomAccessSparseVector(point));
+    this.setRadius(point.like());
     this.id = id2;
   }
   
   protected AbstractCluster(Vector center2, Vector radius2, int id2) {
-    this.numPoints = 0;
-    this.center = new RandomAccessSparseVector(center2);
-    this.radius = new RandomAccessSparseVector(radius2);
+    this.setNumPoints(0);
+    this.setCenter(new RandomAccessSparseVector(center2));
+    this.setRadius(new RandomAccessSparseVector(radius2));
     this.id = id2;
   }
   
@@ -136,17 +136,25 @@ public abstract class AbstractCluster implements Cluster {
     return s2;
   }
   
+  @Override
+  public void observe(Model<VectorWritable> x) {
+    AbstractCluster cl = (AbstractCluster) x;
+    setS0(getS0() + cl.getS0());
+    setS1(getS1().plus(cl.getS1()));
+    setS2(getS2().plus(cl.getS2()));
+  }
+  
   public void observe(ClusterObservations observations) {
-    s0 += observations.getS0();
-    if (s1 == null) {
-      s1 = observations.getS1().clone();
+    setS0(getS0() + observations.getS0());
+    if (getS1() == null) {
+      setS1(observations.getS1().clone());
     } else {
-      s1.assign(observations.getS1(), Functions.PLUS);
+      getS1().assign(observations.getS1(), Functions.PLUS);
     }
-    if (s2 == null) {
-      s2 = observations.getS2().clone();
+    if (getS2() == null) {
+      setS2(observations.getS2().clone());
     } else {
-      s2.assign(observations.getS2(), Functions.PLUS);
+      getS2().assign(observations.getS2(), Functions.PLUS);
     }
   }
   
@@ -164,34 +172,34 @@ public abstract class AbstractCluster implements Cluster {
     if (weight == 1.0) {
       observe(x);
     } else {
-      s0 += weight;
+      setS0(getS0() + weight);
       Vector weightedX = x.times(weight);
-      if (s1 == null) {
-        s1 = weightedX;
+      if (getS1() == null) {
+        setS1(weightedX);
       } else {
-        s1.assign(weightedX, Functions.PLUS);
+        getS1().assign(weightedX, Functions.PLUS);
       }
       Vector x2 = x.times(x).times(weight);
-      if (s2 == null) {
-        s2 = x2;
+      if (getS2() == null) {
+        setS2(x2);
       } else {
-        s2.assign(x2, Functions.PLUS);
+        getS2().assign(x2, Functions.PLUS);
       }
     }
   }
   
   public void observe(Vector x) {
-    s0 += 1;
-    if (s1 == null) {
-      s1 = x.clone();
+    setS0(getS0() + 1);
+    if (getS1() == null) {
+      setS1(x.clone());
     } else {
-      s1.assign(x, Functions.PLUS);
+      getS1().assign(x, Functions.PLUS);
     }
     Vector x2 = x.times(x);
-    if (s2 == null) {
-      s2 = x2;
+    if (getS2() == null) {
+      setS2(x2);
     } else {
-      s2.assign(x2, Functions.PLUS);
+      getS2().assign(x2, Functions.PLUS);
     }
   }
   
@@ -201,54 +209,54 @@ public abstract class AbstractCluster implements Cluster {
   }
   
   public ClusterObservations getObservations() {
-    return new ClusterObservations(s0, s1, s2);
+    return new ClusterObservations(getS0(), getS1(), getS2());
   }
   
   @Override
   public void computeParameters() {
-    if (s0 == 0) {
+    if (getS0() == 0) {
       return;
     }
-    numPoints = (int) s0;
-    center = s1.divide(s0);
+    setNumPoints((int) getS0());
+    setCenter(getS1().divide(getS0()));
     // compute the component stds
-    if (s0 > 1) {
-      radius = s2.times(s0).minus(s1.times(s1))
-          .assign(new SquareRootFunction()).divide(s0);
+    if (getS0() > 1) {
+      setRadius(getS2().times(getS0()).minus(getS1().times(getS1()))
+          .assign(new SquareRootFunction()).divide(getS0()));
     }
-    s0 = 0;
-    s1 = null;
-    s2 = null;
+    setS0(0);
+    setS1(null);
+    setS2(null);
   }
   
   @Override
   public void readFields(DataInput in) throws IOException {
     this.id = in.readInt();
-    this.numPoints = in.readLong();
+    this.setNumPoints(in.readLong());
     VectorWritable temp = new VectorWritable();
     temp.readFields(in);
-    this.center = temp.get();
+    this.setCenter(temp.get());
     temp.readFields(in);
-    this.radius = temp.get();
+    this.setRadius(temp.get());
   }
   
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(id);
-    out.writeLong(numPoints);
-    VectorWritable.writeVector(out, center);
-    VectorWritable.writeVector(out, radius);
+    out.writeLong(getNumPoints());
+    VectorWritable.writeVector(out, getCenter());
+    VectorWritable.writeVector(out, getRadius());
   }
   
   @Override
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder(50);
-    buf.append(getIdentifier()).append("{n=").append(numPoints);
-    if (center != null) {
-      buf.append(" c=").append(formatVector(center, bindings));
+    buf.append(getIdentifier()).append("{n=").append(getNumPoints());
+    if (getCenter() != null) {
+      buf.append(" c=").append(formatVector(getCenter(), bindings));
     }
-    if (radius != null) {
-      buf.append(" r=").append(formatVector(radius, bindings));
+    if (getRadius() != null) {
+      buf.append(" r=").append(formatVector(getRadius(), bindings));
     }
     buf.append('}');
     return buf.toString();
@@ -277,7 +285,7 @@ public abstract class AbstractCluster implements Cluster {
    * @return the new centroid
    */
   public Vector computeCentroid() {
-    return s0 == 0 ? getCenter() : s1.divide(s0);
+    return getS0() == 0 ? getCenter() : getS1().divide(getS0());
   }
   
   /**
@@ -328,5 +336,23 @@ public abstract class AbstractCluster implements Cluster {
   @Override
   public long count() {
     return getNumPoints();
+  }
+  
+  @Override
+  public boolean isConverged() {
+    // Convergence has no meaning yet, perhaps in subclasses
+    return false;
+  }
+
+  protected void setS0(double s0) {
+    this.s0 = s0;
+  }
+
+  protected void setS1(Vector s1) {
+    this.s1 = s1;
+  }
+
+  protected void setS2(Vector s2) {
+    this.s2 = s2;
   }
 }

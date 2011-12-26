@@ -97,7 +97,7 @@ public class DisplayFuzzyKMeans extends DisplayClustering {
     writeClassifier(prior, conf, priorClassifier);
     
     ClusteringPolicy policy = new FuzzyKMeansClusteringPolicy();
-    new ClusterIterator(policy).iterate(samples, priorClassifier, output, maxIterations);
+    new ClusterIterator(policy).iterateSeq(samples, priorClassifier, output, maxIterations);
     for (int i = 1; i <= maxIterations; i++) {
       ClusterClassifier posterior = readClassifier(conf, new Path(output, "classifier-" + i));
       CLUSTERS.add(posterior.getModels());

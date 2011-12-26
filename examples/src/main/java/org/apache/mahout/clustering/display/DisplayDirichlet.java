@@ -103,7 +103,7 @@ public class DisplayDirichlet extends DisplayClustering {
     writeClassifier(prior, conf, priorClassifier);
     
     ClusteringPolicy policy = new DirichletClusteringPolicy(numClusters, numIterations);
-    new ClusterIterator(policy).iterate(samples, priorClassifier, output, numIterations);
+    new ClusterIterator(policy).iterateSeq(samples, priorClassifier, output, numIterations);
     for (int i = 1; i <= numIterations; i++) {
       ClusterClassifier posterior = readClassifier(conf, new Path(output, "classifier-" + i));
       List<Cluster> clusters = Lists.newArrayList();

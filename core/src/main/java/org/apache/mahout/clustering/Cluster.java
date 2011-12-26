@@ -28,23 +28,24 @@ public interface Cluster extends Model<VectorWritable>, Parametered {
   
   // default directory for all clustered points
   String CLUSTERED_POINTS_DIR = "clusteredPoints";
-
-  // default directory for initial clusters to prime iterative clustering algorithms
+  
+  // default directory for initial clusters to prime iterative clustering
+  // algorithms
   String INITIAL_CLUSTERS_DIR = "clusters-0";
-
+  
   // default directory for output of clusters per iteration
   String CLUSTERS_DIR = "clusters-";
-
+  
   // default suffix for output of clusters for final iteration
   String FINAL_ITERATION_SUFFIX = "-final";
-
+  
   /**
    * Get the id of the Cluster
    * 
    * @return a unique integer
    */
   int getId();
-
+  
   /**
    * Get the "center" of the Cluster as a Vector
    * 
@@ -53,27 +54,35 @@ public interface Cluster extends Model<VectorWritable>, Parametered {
   Vector getCenter();
   
   /**
-   * Get the "radius" of the Cluster as a Vector. Usually the radius is the standard deviation expressed
-   * as a Vector of size equal to the center. Some clusters may return zero values if not appropriate.
+   * Get the "radius" of the Cluster as a Vector. Usually the radius is the
+   * standard deviation expressed as a Vector of size equal to the center. Some
+   * clusters may return zero values if not appropriate.
    * 
    * @return aVector
    */
   Vector getRadius();
-
+  
   /**
    * Get an integer denoting the number of points observed by this cluster
-   * @return an integer 
+   * 
+   * @return an integer
    */
   long getNumPoints();
   
   /**
    * Produce a custom, human-friendly, printable representation of the Cluster.
-   *
+   * 
    * @param bindings
-   *          an optional String[] containing labels used to format the primary Vector/s of this
-   *          implementation.
+   *          an optional String[] containing labels used to format the primary
+   *          Vector/s of this implementation.
    * @return a String
    */
   String asFormatString(String[] bindings);
-
+  
+  /**
+   * @return if the receiver has converged, or false if that has no meaning for
+   *         the implementation
+   */
+  boolean isConverged();
+  
 }

@@ -283,7 +283,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     }
     ClusteringPolicy policy = new KMeansClusteringPolicy();
     ClusterIterator iterator = new ClusterIterator(policy);
-    iterator.iterate(pointsPath, path, outPath, 5);
+    iterator.iterateSeq(pointsPath, path, outPath, 5);
     
     for (int i = 1; i <= 5; i++) {
       System.out.println("Classifier-" + i);

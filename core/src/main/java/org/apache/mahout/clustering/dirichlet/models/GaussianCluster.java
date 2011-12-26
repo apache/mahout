@@ -48,16 +48,17 @@ public class GaussianCluster extends AbstractCluster {
     return new GaussianCluster(getCenter(), getRadius(), getId());
   }
   
-  // the value of the zProduct(S*2pi) term. Calculated below.
-  private Double zProd2piR = null;
-  
+  /* (non-Javadoc)
+   * @see org.apache.mahout.clustering.AbstractCluster#setRadius(org.apache.mahout.math.Vector)
+   */
   @Override
-  public double pdf(VectorWritable vw) {
-    if (zProd2piR == null) {
-      computeProd2piR();
-    }
-    return Math.exp(-(sumXminusCdivRsquared(vw.get()) / 2)) / zProd2piR;
+  protected void setRadius(Vector s2) {
+    super.setRadius(s2);
+    computeProd2piR();
   }
+
+  // the value of the zProduct(S*2pi) term. Calculated below.
+  private double zProd2piR;
   
   /**
    * Compute the product(r[i]*SQRT2PI) over all i. Note that the cluster Radius
@@ -70,11 +71,10 @@ public class GaussianCluster extends AbstractCluster {
       zProd2piR *= radius.get() * UncommonDistributions.SQRT2PI;
     }
   }
-  
+
   @Override
-  public void computeParameters() {
-    super.computeParameters();
-    zProd2piR = null;
+  public double pdf(VectorWritable vw) {
+    return Math.exp(-(sumXminusCdivRsquared(vw.get()) / 2)) / zProd2piR;
   }
   
   /**
