@@ -40,14 +40,13 @@ public class CholeskyDecompositionTest extends MahoutTestCase {
       public double apply(double arg1, double arg2) {
         return Math.abs(arg1) - Math.abs(arg2);
       }
-    }), 1e-5);
+    }), 1.0e-5);
 
-    assertEquals(0, rr.getL().viewPart(0, 3, 1, 2).aggregate(Functions.PLUS, Functions.ABS), 1e-9);
+    assertEquals(0, rr.getL().viewPart(0, 3, 1, 2).aggregate(Functions.PLUS, Functions.ABS), 1.0e-9);
   }
 
   @Test
   public void test1() {
-    Matrix lastL;
 
     final Random rand = RandomUtils.getRandom();
 
@@ -64,28 +63,27 @@ public class CholeskyDecompositionTest extends MahoutTestCase {
     for (boolean type = false; !type; type=true) {
       CholeskyDecomposition cd = new CholeskyDecomposition(A, type);
       Matrix L = cd.getL();
-      lastL = L;
 //      Assert.assertTrue("Positive definite", cd.isPositiveDefinite());
 
       Matrix Abar = L.times(L.transpose());
 
       double error = A.minus(Abar).aggregate(Functions.MAX, Functions.ABS);
-      Assert.assertEquals("type = " + type, 0, error, 1e-10);
+      Assert.assertEquals("type = " + type, 0, error, 1.0e-10);
 
       // L should give us a quick and dirty LQ decomposition
       Matrix q = cd.solveLeft(z);
       Matrix id = q.times(q.transpose());
       for (int i = 0; i < id.columnSize(); i++) {
-        Assert.assertEquals("type = " + type, 1, id.get(i, i), 1e-9);
-        Assert.assertEquals("type = " + type, 1, id.viewRow(i).norm(1), 1e-9);
+        Assert.assertEquals("type = " + type, 1, id.get(i, i), 1.0e-9);
+        Assert.assertEquals("type = " + type, 1, id.viewRow(i).norm(1), 1.0e-9);
       }
 
       // and QR as well
       q = cd.solveRight(z.transpose());
       id = q.transpose().times(q);
       for (int i = 0; i < id.columnSize(); i++) {
-        Assert.assertEquals("type = " + type, 1, id.get(i, i), 1e-9);
-        Assert.assertEquals("type = " + type, 1, id.viewRow(i).norm(1), 1e-9);
+        Assert.assertEquals("type = " + type, 1, id.get(i, i), 1.0e-9);
+        Assert.assertEquals("type = " + type, 1, id.viewRow(i).norm(1), 1.0e-9);
       }
     }
   }
@@ -102,11 +100,11 @@ public class CholeskyDecompositionTest extends MahoutTestCase {
 
     // without pivoting
     CholeskyDecomposition cd = new CholeskyDecomposition(A, false);
-    assertEquals(0, cd.getL().times(cd.getL().transpose()).minus(A).aggregate(Functions.PLUS, Functions.ABS), 1e-10);
+    assertEquals(0, cd.getL().times(cd.getL().transpose()).minus(A).aggregate(Functions.PLUS, Functions.ABS), 1.0e-10);
 
     // with pivoting
     cd = new CholeskyDecomposition(A);
-    assertEquals(0, cd.getL().times(cd.getL().transpose()).minus(A).aggregate(Functions.PLUS, Functions.ABS), 1e-10);
+    assertEquals(0, cd.getL().times(cd.getL().transpose()).minus(A).aggregate(Functions.PLUS, Functions.ABS), 1.0e-10);
   }
 
 
@@ -114,24 +112,22 @@ public class CholeskyDecompositionTest extends MahoutTestCase {
   public void testRankDeficient() {
     Matrix A = rank4Matrix();
 
-    CholeskyDecomposition cd = new CholeskyDecomposition(A, false);
-
-    cd = new CholeskyDecomposition(A);
+    CholeskyDecomposition cd = new CholeskyDecomposition(A);
 
     PivotedMatrix Ax = new PivotedMatrix(A, cd.getPivot());
     CholeskyDecomposition cd2 = new CholeskyDecomposition(Ax, false);
 
-    assertEquals(0, cd2.getL().times(cd2.getL().transpose()).minus(Ax).aggregate(Functions.PLUS, Functions.ABS), 1e-10);
-    assertEquals(0, cd.getL().times(cd.getL().transpose()).minus(A).aggregate(Functions.PLUS, Functions.ABS), 1e-10);
+    assertEquals(0, cd2.getL().times(cd2.getL().transpose()).minus(Ax).aggregate(Functions.PLUS, Functions.ABS), 1.0e-10);
+    assertEquals(0, cd.getL().times(cd.getL().transpose()).minus(A).aggregate(Functions.PLUS, Functions.ABS), 1.0e-10);
 
     Assert.assertFalse(cd.isPositiveDefinite());
     Matrix L = cd.getL();
     Matrix Abar = L.times(L.transpose());
     double error = A.minus(Abar).aggregate(Functions.MAX, Functions.ABS);
-    Assert.assertEquals(0, error, 1e-10);
+    Assert.assertEquals(0, error, 1.0e-10);
   }
 
-  private Matrix rank4Matrix() {
+  private static Matrix rank4Matrix() {
     final Random rand = RandomUtils.getRandom();
 
     Matrix u = new DenseMatrix(10, 4);

@@ -23,7 +23,7 @@ import org.apache.mahout.classifier.df.data.Instance;
 import java.util.Arrays;
 
 /**
- * Regression problem implementation of IgSplit<br>
+ * Regression problem implementation of IgSplit.
  * This class can be used when the criterion variable is the numerical attribute.
  */
 public class RegressionSplit extends IgSplit {
@@ -34,7 +34,7 @@ public class RegressionSplit extends IgSplit {
   private static class InstanceComparator implements java.util.Comparator<Instance> {
     private final int attr;
 
-    public InstanceComparator(int attr) {
+    InstanceComparator(int attr) {
       this.attr = attr;
     }
     
@@ -88,16 +88,7 @@ public class RegressionSplit extends IgSplit {
   /**
    * Computes the best split for a NUMERICAL attribute
    */
-  Split numericalSplit(Data data, int attr) {
-    double[] sums = new double[2];
-    double[] sumSquared = new double[2];
-    double[] counts = new double[2];
-    double totalSum = 0;
-    double totalSumSquared = 0;
-    double split = Double.NaN;
-    double[] curSums = new double[2];
-    double[] curSumSquared = new double[2];
-    double[] curCounts = new double[2];
+  static Split numericalSplit(Data data, int attr) {
 
     // Instance sort
     Instance[] instances = new Instance[data.size()];
@@ -107,22 +98,30 @@ public class RegressionSplit extends IgSplit {
     Arrays.sort(instances, new InstanceComparator(attr));
 
     // sum and sum of squares
+    double totalSum = 0.0;
+    double totalSumSquared = 0.0;
     for (Instance instance : instances) {
       double label = data.getDataset().getLabel(instance);
       totalSum += label;
       totalSumSquared += label * label;
     }
+    double[] sums = new double[2];
+    double[] curSums = new double[2];
     sums[1] = curSums[1] = totalSum;
+    double[] sumSquared = new double[2];
+    double[] curSumSquared = new double[2];
     sumSquared[1] = curSumSquared[1] = totalSumSquared;
+    double[] counts = new double[2];
+    double[] curCounts = new double[2];
     counts[1] = curCounts[1] = data.size();
 
     // find the best split point
     double curSplit = instances[0].get(attr);
-    double curVal;
     double bestVal = Double.MAX_VALUE;
+    double split = Double.NaN;
     for (Instance instance : instances) {
       if (instance.get(attr) > curSplit) {
-        curVal = variance(curSums, curSumSquared, curCounts);
+        double curVal = variance(curSums, curSumSquared, curCounts);
         if (curVal < bestVal) {
           bestVal = curVal;
           split = (instance.get(attr) + curSplit) / 2.0;

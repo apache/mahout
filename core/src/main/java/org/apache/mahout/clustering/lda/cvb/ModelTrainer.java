@@ -56,15 +56,17 @@ import java.util.concurrent.TimeUnit;
  * on account of parallelism badness.
  */
 public class ModelTrainer {
+
   private static final Logger log = LoggerFactory.getLogger(ModelTrainer.class);
-  private int numTopics;
-  private int numTerms;
+
+  private final int numTopics;
+  private final int numTerms;
   private TopicModel readModel;
   private TopicModel writeModel;
   private ThreadPoolExecutor threadPool;
   private BlockingQueue<Runnable> workQueue;
-  private int numTrainThreads;
-  private boolean isReadWrite;
+  private final int numTrainThreads;
+  private final boolean isReadWrite;
 
   public ModelTrainer(TopicModel initialReadModel, TopicModel initialWriteModel,
       int numTrainThreads, int numTopics, int numTerms) {
@@ -73,7 +75,7 @@ public class ModelTrainer {
     this.numTrainThreads = numTrainThreads;
     this.numTopics = numTopics;
     this.numTerms = numTerms;
-    isReadWrite = (initialReadModel == initialWriteModel);
+    isReadWrite = initialReadModel == initialWriteModel;
   }
 
   /**
@@ -122,7 +124,7 @@ public class ModelTrainer {
       int docId = docSlice.index();
       Vector document = docSlice.vector();
       Vector topicDist = topicSlice.vector();
-      if(testFraction == 0 || docId % ((int)1/testFraction) == 0) {
+      if(testFraction == 0 || docId % (1/testFraction) == 0) {
         trainSync(document, topicDist, false, 10);
         perplexity += readModel.perplexity(document, topicDist);
         matrixNorm += document.norm(1);
@@ -167,7 +169,7 @@ public class ModelTrainer {
               (System.nanoTime() - start) /(1.0e6 * document.getNumNondefaultElements());
           if(i % 100 == 0) {
             long time = System.nanoTime() - startTime;
-            log.debug("trained " + i + " documents in " + (time * 1d / 1e6) + "ms");
+            log.debug("trained " + i + " documents in " + (time / 1.0e6) + "ms");
             if(i % 500 == 0) {
               Arrays.sort(times);
               log.debug("training took median " + times[times.length / 2] + "ms per token-instance");
@@ -237,11 +239,11 @@ public class ModelTrainer {
         log.warn("Threadpool timed out on await termination - jobs still running!");
       }
       long newTime = System.nanoTime();
-      log.info("threadpool took: " + (newTime - startTime)*1d/1e6 + "ms");
+      log.info("threadpool took: " + (newTime - startTime) / 1.0e6 + "ms");
       startTime = newTime;
       writeModel.awaitTermination();
       newTime = System.nanoTime();
-      log.info("writeModel.awaitTermination() took " + (newTime - startTime)*1d/1e6 + "ms");
+      log.info("writeModel.awaitTermination() took " + (newTime - startTime) / 1.0e6 + "ms");
       TopicModel tmpModel = writeModel;
       writeModel = readModel;
       readModel = tmpModel;
@@ -273,7 +275,8 @@ public class ModelTrainer {
       this.numDocTopicIters = numDocTopicIters;
     }
 
-    @Override public void run() {
+    @Override
+    public void run() {
       for(int i = 0; i < numDocTopicIters; i++) {
         // synchronous read-only call:
         readModel.trainDocTopicModel(document, docTopics, docTopicModel);
@@ -286,7 +289,8 @@ public class ModelTrainer {
       }
     }
 
-    @Override public Double call() {
+    @Override
+    public Double call() {
       run();
       return readModel.perplexity(document, docTopics);
     }

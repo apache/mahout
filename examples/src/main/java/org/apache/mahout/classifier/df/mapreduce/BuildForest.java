@@ -152,11 +152,7 @@ public class BuildForest extends Configured implements Tool {
       if (cmdLine.hasOption(selectionOpt)) {
         m = Integer.parseInt(cmdLine.getValue(selectionOpt).toString());
       }
-      if (cmdLine.hasOption(noCompleteOpt)) {
-        complemented = false;
-      } else {
-        complemented = true;
-      }
+      complemented = !cmdLine.hasOption(noCompleteOpt);
       if (cmdLine.hasOption(minSplitOpt)) {
         minSplitNum = Integer.parseInt(cmdLine.getValue(minSplitOpt).toString());
       }

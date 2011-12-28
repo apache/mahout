@@ -307,7 +307,7 @@ public class SSVDSolver {
    */
   public void run() throws IOException {
 
-    Deque<Closeable> closeables = Lists.<Closeable> newLinkedList();
+    Deque<Closeable> closeables = Lists.newLinkedList();
     try {
       Class<? extends Writable> labelType =
         sniffInputLabelType(inputPath, conf);
@@ -518,11 +518,10 @@ public class SSVDSolver {
       }
 
       FileStatus firstSeqFile;
-      if (!fstats[0].isDir()) {
-        firstSeqFile = fstats[0];
+      if (fstats[0].isDir()) {
+        firstSeqFile = fs.listStatus(fstats[0].getPath(), PathFilters.logsCRCFilter())[0];
       } else {
-        firstSeqFile =
-          fs.listStatus(fstats[0].getPath(), PathFilters.logsCRCFilter())[0];
+        firstSeqFile = fstats[0];
       }
 
       SequenceFile.Reader r = null;

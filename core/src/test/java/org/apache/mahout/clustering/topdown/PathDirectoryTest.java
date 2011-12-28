@@ -19,51 +19,47 @@
 
 package org.apache.mahout.clustering.topdown;
 
-import static java.io.File.separator;
-import static org.apache.mahout.clustering.topdown.PathDirectory.getClusterPostProcessorOutputDirectory;
-import static org.apache.mahout.clustering.topdown.TopDownClusteringPathConstants.clusteredPointsDirectory;
-import static org.apache.mahout.clustering.topdown.TopDownClusteringPathConstants.postProcessDirectory;
-import static org.apache.mahout.clustering.topdown.TopDownClusteringPathConstants.topLevelClusterDirectory;
-import junit.framework.Assert;
-
 import org.apache.hadoop.fs.Path;
+import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
-public class PathDirectoryTest {
+import java.io.File;
+
+public final class PathDirectoryTest extends MahoutTestCase {
   
-  private Path output = new Path("output");
+  private final Path output = new Path("output");
   
   @Test
   public void shouldReturnTopLevelClusterPath() {
-    Path expectedPath = new Path(output, topLevelClusterDirectory);
-    Assert.assertEquals(expectedPath, PathDirectory.getTopLevelClusterPath(output));
+    Path expectedPath = new Path(output, PathDirectory.TOP_LEVEL_CLUSTER_DIRECTORY);
+    assertEquals(expectedPath, PathDirectory.getTopLevelClusterPath(output));
   }
   
   @Test
   public void shouldReturnClusterPostProcessorOutputDirectory() {
-    Path expectedPath = new Path(output, postProcessDirectory);
-    Assert.assertEquals(expectedPath, getClusterPostProcessorOutputDirectory(output));
+    Path expectedPath = new Path(output, PathDirectory.POST_PROCESS_DIRECTORY);
+    assertEquals(expectedPath, PathDirectory.getClusterPostProcessorOutputDirectory(output));
   }
   
   @Test
   public void shouldReturnClusterOutputClusteredPoints() {
-    Path expectedPath = new Path(output, clusteredPointsDirectory + separator + "*");
-    Assert.assertEquals(expectedPath, PathDirectory.getClusterOutputClusteredPoints(output));
+    Path expectedPath = new Path(output, PathDirectory.CLUSTERED_POINTS_DIRECTORY + File.separator + '*');
+    assertEquals(expectedPath, PathDirectory.getClusterOutputClusteredPoints(output));
   }
   
   @Test
   public void shouldReturnBottomLevelClusterPath() {
-    Path expectedPath = new Path(output + separator
-                                 + TopDownClusteringPathConstants.bottomLevelClusterDirectory + separator
-                                 + "1");
-    Assert.assertEquals(expectedPath, PathDirectory.getBottomLevelClusterPath(output, "1"));
+    Path expectedPath = new Path(output + File.separator
+                                 + PathDirectory.BOTTOM_LEVEL_CLUSTER_DIRECTORY + File.separator
+                                 + '1');
+    assertEquals(expectedPath, PathDirectory.getBottomLevelClusterPath(output, "1"));
   }
   
   @Test
   public void shouldReturnClusterPathForClusterId() {
-    Path expectedPath = new Path(getClusterPostProcessorOutputDirectory(output), new Path("1"));
-    Assert.assertEquals(expectedPath,
-      PathDirectory.getClusterPathForClusterId(getClusterPostProcessorOutputDirectory(output), "1"));
+    Path expectedPath = new Path(PathDirectory.getClusterPostProcessorOutputDirectory(output), new Path("1"));
+    assertEquals(expectedPath, PathDirectory.getClusterPathForClusterId(
+        PathDirectory.getClusterPostProcessorOutputDirectory(output), "1"));
   }
   
 }

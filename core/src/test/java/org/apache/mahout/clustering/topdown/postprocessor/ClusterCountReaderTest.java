@@ -32,6 +32,7 @@ import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.common.DummyOutputCollector;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -43,16 +44,12 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
-public class ClusterCountReaderTest extends MahoutTestCase {
+public final class ClusterCountReaderTest extends MahoutTestCase {
   
   public static final double[][] REFERENCE = { {1, 1}, {2, 1}, {1, 2}, {4, 4}, {5, 4}, {4, 5}, {5, 5}};
   
   private FileSystem fs;
-  
   private Path outputPathForCanopy;
-  
-  private Configuration conf;
-  
   private Path outputPathForKMeans;
   
   @Override
@@ -82,7 +79,7 @@ public class ClusterCountReaderTest extends MahoutTestCase {
     List<VectorWritable> points = getPointsWritable(REFERENCE);
     
     Path pointsPath = getTestTempDirPath("points");
-    conf = new Configuration();
+    Configuration conf = new Configuration();
     ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file1"), fs, conf);
     ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file2"), fs, conf);
     
@@ -100,23 +97,25 @@ public class ClusterCountReaderTest extends MahoutTestCase {
   private void topLevelClustering(Path pointsPath, Configuration conf) throws IOException,
                                                                       InterruptedException,
                                                                       ClassNotFoundException {
-    final ManhattanDistanceMeasure measure = new ManhattanDistanceMeasure();
+    DistanceMeasure measure = new ManhattanDistanceMeasure();
     CanopyDriver.run(conf, pointsPath, outputPathForCanopy, measure, 4.0, 3.0, true, true);
-    final Path clustersIn = new Path(outputPathForCanopy, new Path(Cluster.CLUSTERS_DIR + '0'
+    Path clustersIn = new Path(outputPathForCanopy, new Path(Cluster.CLUSTERS_DIR + '0'
                                                                    + Cluster.FINAL_ITERATION_SUFFIX));
     KMeansDriver.run(conf, pointsPath, clustersIn, outputPathForKMeans, measure, 1, 1, true, true);
   }
   
-  private void verifyThatNumberOfClustersIsCorrect(Configuration conf, Path clusteredPointsPath) {
-    DummyOutputCollector<IntWritable,WeightedVectorWritable> collector = new DummyOutputCollector<IntWritable,WeightedVectorWritable>();
+  private static void verifyThatNumberOfClustersIsCorrect(Configuration conf, Path clusteredPointsPath) {
+    DummyOutputCollector<IntWritable,WeightedVectorWritable> collector =
+        new DummyOutputCollector<IntWritable,WeightedVectorWritable>();
     
     // The key is the clusterId, the value is the weighted vector
-    for (Pair<IntWritable,WeightedVectorWritable> record : new SequenceFileIterable<IntWritable,WeightedVectorWritable>(
-        new Path(clusteredPointsPath, "part-m-0"), conf)) {
+    for (Pair<IntWritable,WeightedVectorWritable> record :
+         new SequenceFileIterable<IntWritable,WeightedVectorWritable>(new Path(clusteredPointsPath, "part-m-0"),
+                                                                      conf)) {
       collector.collect(record.getFirst(), record.getSecond());
     }
-    final int clusterSize = collector.getKeys().size();
-    Assert.assertTrue(clusterSize == 2);
+    int clusterSize = collector.getKeys().size();
+    assertEquals(2, clusterSize);
   }
   
 }

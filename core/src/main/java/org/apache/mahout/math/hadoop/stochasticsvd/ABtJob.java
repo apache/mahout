@@ -218,12 +218,13 @@ public class ABtJob {
           DistributedCache.getLocalCacheFiles(context.getConfiguration());
 
         // DEBUG: stdout
-        System.out.printf("list of files: " + btFiles);
+        //System.out.printf("list of files: " + btFiles);
 
         String btLocalPath = "";
         for (Path btFile : btFiles) {
-          if (btLocalPath.length() > 0)
+          if (!btLocalPath.isEmpty()) {
             btLocalPath += Path.SEPARATOR_CHAR;
+          }
           btLocalPath += btFile;
         }
 

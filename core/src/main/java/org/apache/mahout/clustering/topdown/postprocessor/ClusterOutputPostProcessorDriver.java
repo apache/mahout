@@ -23,10 +23,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
@@ -36,6 +34,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterator;
 import org.apache.mahout.math.VectorWritable;
 
 /**
@@ -94,17 +93,10 @@ public class ClusterOutputPostProcessorDriver extends AbstractJob {
    * @param runSequential
    *          If set to true, post processes it sequentially, else, uses. MapReduce. Hint : If the clustering
    *          was done sequentially, make it sequential, else vice versa.
-   * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
-   * @throws IllegalAccessException
-   * @throws InstantiationException
    */
   public static void run(Path input, Path output, boolean runSequential) throws IOException,
                                                                         InterruptedException,
-                                                                        ClassNotFoundException,
-                                                                        InstantiationException,
-                                                                        IllegalAccessException {
+                                                                        ClassNotFoundException {
     if (runSequential) {
       postProcessSeq(input, output);
     } else {
@@ -124,13 +116,8 @@ public class ClusterOutputPostProcessorDriver extends AbstractJob {
    *          path of the directory containing clusters-*-final and clusteredPoints.
    * @param output
    *          The post processed data would be stored at this path.
-   * @throws IOException
-   * @throws IllegalAccessException
-   * @throws InstantiationException
    */
-  private static void postProcessSeq(Path input, Path output) throws IOException,
-                                                             InstantiationException,
-                                                             IllegalAccessException {
+  private static void postProcessSeq(Path input, Path output) throws IOException {
     ClusterOutputPostProcessor clusterOutputPostProcessor = new ClusterOutputPostProcessor(input, output,
         new Configuration());
     clusterOutputPostProcessor.process();
@@ -147,15 +134,8 @@ public class ClusterOutputPostProcessorDriver extends AbstractJob {
    *          path of the directory containing clusters-*-final and clusteredPoints.
    * @param output
    *          The post processed data would be stored at this path.
-   * @throws IOException
-   * @throws InstantiationException
-   * @throws IllegalAccessException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
    */
   private static void postProcessMR(Configuration conf, Path input, Path output) throws IOException,
-                                                                                InstantiationException,
-                                                                                IllegalAccessException,
                                                                                 InterruptedException,
                                                                                 ClassNotFoundException {
     Job job = new Job(conf, "ClusterOutputPostProcessor Driver running over input: " + input);
@@ -186,44 +166,29 @@ public class ClusterOutputPostProcessorDriver extends AbstractJob {
    *          The hadoop configuration.
    * @param output
    *          The post processed data would be stored at this path.
-   * @throws IOException
-   * @throws InstantiationException
-   * @throws IllegalAccessException
    */
-  private static void movePartFilesToRespectiveDirectories(Configuration conf, Path output) throws IOException,
-                                                                                           InstantiationException,
-                                                                                           IllegalAccessException {
-    FileStatus[] partFiles = getPartFiles(output, conf);
-    for (FileStatus fileStatus : partFiles) {
-      SequenceFile.Reader reader = new SequenceFile.Reader(FileSystem.get(conf), fileStatus.getPath(), conf);
-      WritableComparable key = (WritableComparable) reader.getKeyClass().newInstance();
-      Writable value = (Writable) reader.getValueClass().newInstance();
-      boolean next = reader.next(key, value);
-      reader.close();
-      if (next) {
-        renameFile(key, fileStatus, conf);
+  private static void movePartFilesToRespectiveDirectories(Configuration conf, Path output) throws IOException {
+    FileSystem fileSystem = output.getFileSystem(conf);
+    for (FileStatus fileStatus : fileSystem.listStatus(output, PathFilters.partFilter())) {
+      SequenceFileIterator<Writable,Writable> it =
+          new SequenceFileIterator<Writable,Writable>(fileStatus.getPath(), true, conf);
+      if (it.hasNext()) {
+        renameFile(it.next().getFirst(), fileStatus, conf);
       }
+      it.close();
     }
   }
   
   /**
    * Using @FileSystem rename method to move the file.
    */
-  private static void renameFile(WritableComparable key, FileStatus fileStatus, Configuration conf) throws IOException {
+  private static void renameFile(Writable key, FileStatus fileStatus, Configuration conf) throws IOException {
     Path path = fileStatus.getPath();
     FileSystem fileSystem = path.getFileSystem(conf);
     Path subDir = new Path(key.toString());
     Path renameTo = new Path(path.getParent(), subDir);
-    boolean mkdirs = fileSystem.mkdirs(renameTo);
+    fileSystem.mkdirs(renameTo);
     fileSystem.rename(path, renameTo);
   }
-  
-  /**
-   * Gets the part file of the final iteration. clusters-n-final
-   */
-  private static FileStatus[] getPartFiles(Path output, Configuration conf) throws IOException {
-    FileSystem fileSystem = output.getFileSystem(conf);
-    FileStatus[] partFiles = fileSystem.listStatus(output, PathFilters.partFilter());
-    return partFiles;
-  }
+
 }

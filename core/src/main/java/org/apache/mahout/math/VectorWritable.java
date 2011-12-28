@@ -208,10 +208,7 @@ public final class VectorWritable extends Configured implements Writable {
 
   @Override
   public boolean equals(Object o) {
-    if (o instanceof VectorWritable) {
-      return vector.equals(((VectorWritable)o).get());
-    }
-    return false;
+    return o instanceof VectorWritable && vector.equals(((VectorWritable) o).get());
   }
 
   @Override

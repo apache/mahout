@@ -28,7 +28,7 @@ import org.apache.mahout.math.function.Functions;
  * will also be real.
  */
 public class CholeskyDecomposition {
-  private PivotedMatrix L;
+  private final PivotedMatrix L;
   private boolean isPositiveDefinite;
 
   public CholeskyDecomposition(Matrix a) {

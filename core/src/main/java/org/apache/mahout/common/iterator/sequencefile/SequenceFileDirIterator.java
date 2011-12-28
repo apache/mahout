@@ -46,77 +46,60 @@ import org.apache.mahout.common.Pair;
 public final class SequenceFileDirIterator<K extends Writable,V extends Writable>
     extends ForwardingIterator<Pair<K,V>> implements Closeable {
 
+  private static final FileStatus[] NO_STATUSES = new FileStatus[0];
+
   private Iterator<Pair<K,V>> delegate;
   private final List<SequenceFileIterator<K,V>> iterators;
 
   /**
    * Multifile sequence file iterator where files are specified explicitly by
    * path parameters.
-   * 
-   * @param path
-   * @param ordering
-   * @param reuseKeyValueInstances
-   * @param conf
-   * @throws IOException
    */
   public SequenceFileDirIterator(Path[] path,
-                                      Comparator<FileStatus> ordering,
-                                      final boolean reuseKeyValueInstances,
-                                      final Configuration conf) throws IOException {
+                                 boolean reuseKeyValueInstances,
+                                 Configuration conf) throws IOException {
 
     iterators = Lists.newArrayList();
-    /*
-     * we assume all files should exist, otherwise we will bail out.
-     */
+    // we assume all files should exist, otherwise we will bail out.
     FileSystem fs = FileSystem.get(conf);
     FileStatus[] statuses = new FileStatus[path.length];
-    for (int i = 0; i < statuses.length; i++)
+    for (int i = 0; i < statuses.length; i++) {
       statuses[i] = fs.getFileStatus(path[i]);
-    init(statuses, ordering, reuseKeyValueInstances, conf);
+    }
+    init(statuses, reuseKeyValueInstances, conf);
   }
 
   /**
    * Constructor that uses either {@link FileSystem#listStatus(Path)} or
    * {@link FileSystem#globStatus(Path)} to obtain list of files to iterate over
    * (depending on pathType parameter).
-   * <P>
-   * 
-   * @param path
-   * @param pathType
-   * @param filter
-   * @param ordering
-   * @param reuseKeyValueInstances
-   * @param conf
-   * @throws IOException
    */
   public SequenceFileDirIterator(Path path,
                                  PathType pathType,
                                  PathFilter filter,
                                  Comparator<FileStatus> ordering,
-                                 final boolean reuseKeyValueInstances,
-                                 final Configuration conf) throws IOException {
+                                 boolean reuseKeyValueInstances,
+                                 Configuration conf) throws IOException {
 
-    FileStatus[] statuses =
-      HadoopUtil.getFileStatus(path, pathType, filter, ordering, conf);
+    FileStatus[] statuses = HadoopUtil.getFileStatus(path, pathType, filter, ordering, conf);
     iterators = Lists.newArrayList();
-    init(statuses, ordering, reuseKeyValueInstances, conf);
+    init(statuses, reuseKeyValueInstances, conf);
   }
 
   private void init(FileStatus[] statuses,
-                    Comparator<FileStatus> ordering,
                     final boolean reuseKeyValueInstances,
-                    final Configuration conf) throws IOException {
+                    final Configuration conf){
 
     /*
      * prevent NPEs. Unfortunately, Hadoop would return null for list if nothing
      * was qualified. In this case, which is a corner case, we should assume an
      * empty iterator, not an NPE.
      */
-    if (statuses == null)
-      statuses = new FileStatus[0];
+    if (statuses == null) {
+      statuses = NO_STATUSES;
+    }
 
-    Iterator<FileStatus> fileStatusIterator =
-      Iterators.forArray(statuses == null ? new FileStatus[0] : statuses);
+    Iterator<FileStatus> fileStatusIterator = Iterators.forArray(statuses);
 
     Iterator<Iterator<Pair<K, V>>> fsIterators =
       Iterators.transform(fileStatusIterator,

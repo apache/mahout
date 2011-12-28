@@ -109,7 +109,7 @@ public final class BayesUtils {
   }
 
   public static int writeLabelIndex(Configuration conf, Path indexPath,
-                                    SequenceFileDirIterable<Text, IntWritable> labels) throws IOException {
+                                    Iterable<Pair<Text,IntWritable>> labels) throws IOException {
     FileSystem fs = FileSystem.get(indexPath.toUri(), conf);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, indexPath, Text.class, IntWritable.class);
     Collection<String> seen = new HashSet<String>();
@@ -130,9 +130,7 @@ public final class BayesUtils {
 
   public static Map<Integer, String> readLabelIndex(Configuration conf, Path indexPath) {
     Map<Integer, String> labelMap = new HashMap<Integer, String>();
-    SequenceFileIterable<Text, IntWritable> fileIterable =
-        new SequenceFileIterable<Text, IntWritable>(indexPath, true, conf);
-    for (Pair<Text, IntWritable> pair : fileIterable) {
+    for (Pair<Text, IntWritable> pair : new SequenceFileIterable<Text, IntWritable>(indexPath, true, conf)) {
       labelMap.put(pair.getSecond().get(), pair.getFirst().toString());
     }
     return labelMap;

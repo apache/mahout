@@ -111,11 +111,9 @@ public class DistributedConjugateGradientSolver extends ConjugateGradientSolver 
   private Vector loadInputVector(Path path) throws IOException {
     FileSystem fs = path.getFileSystem(conf);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-    IntWritable key = new IntWritable();
     VectorWritable value = new VectorWritable();
-    
     try {
-      if (!reader.next(key, value)) {
+      if (!reader.next(new IntWritable(), value)) {
         throw new IOException("Input vector file is empty.");      
       }
       return value.get();

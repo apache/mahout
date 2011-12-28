@@ -184,7 +184,7 @@ public class SequentialOutOfCoreSvd {
     }
   }
 
-  private void addToSavedCopy(File file, Matrix matrix) throws IOException {
+  private static void addToSavedCopy(File file, Matrix matrix) throws IOException {
     MatrixWritable mw = new MatrixWritable();
     if (file.exists()) {
       DataInputStream in = new DataInputStream(new FileInputStream(file));
@@ -205,7 +205,7 @@ public class SequentialOutOfCoreSvd {
     }
   }
 
-  private File bFile(File tmpDir, int j) {
+  private static File bFile(File tmpDir, int j) {
     return new File(tmpDir, String.format("B-%09d", j));
   }
 

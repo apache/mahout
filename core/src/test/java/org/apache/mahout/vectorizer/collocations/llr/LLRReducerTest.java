@@ -17,10 +17,6 @@
 
 package org.apache.mahout.vectorizer.collocations.llr;
 
-import static org.apache.mahout.vectorizer.collocations.llr.Gram.Type.HEAD;
-import static org.apache.mahout.vectorizer.collocations.llr.Gram.Type.NGRAM;
-import static org.apache.mahout.vectorizer.collocations.llr.Gram.Type.TAIL;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -76,12 +72,12 @@ public final class LLRReducerTest extends MahoutTestCase {
     
     
     Gram[][] input = {
-                      {new Gram("the best",  1, NGRAM), new Gram("the",   2, HEAD), new Gram("best",  1, TAIL) },
-                      {new Gram("best of",   1, NGRAM), new Gram("best",  1, HEAD), new Gram("of",    2, TAIL) },
-                      {new Gram("of times",  2, NGRAM), new Gram("of",    2, HEAD), new Gram("times", 2, TAIL) },
-                      {new Gram("times the", 1, NGRAM), new Gram("times", 1, HEAD), new Gram("the",   1, TAIL) },
-                      {new Gram("the worst", 1, NGRAM), new Gram("the",   2, HEAD), new Gram("worst", 1, TAIL) },
-                      {new Gram("worst of",  1, NGRAM), new Gram("worst", 1, HEAD), new Gram("of",    2, TAIL) }
+      {new Gram("the best",  1, Gram.Type.NGRAM), new Gram("the",   2, Gram.Type.HEAD), new Gram("best",  1, Gram.Type.TAIL) },
+      {new Gram("best of",   1, Gram.Type.NGRAM), new Gram("best",  1, Gram.Type.HEAD), new Gram("of",    2, Gram.Type.TAIL) },
+      {new Gram("of times",  2, Gram.Type.NGRAM), new Gram("of",    2, Gram.Type.HEAD), new Gram("times", 2, Gram.Type.TAIL) },
+      {new Gram("times the", 1, Gram.Type.NGRAM), new Gram("times", 1, Gram.Type.HEAD), new Gram("the",   1, Gram.Type.TAIL) },
+      {new Gram("the worst", 1, Gram.Type.NGRAM), new Gram("the",   2, Gram.Type.HEAD), new Gram("worst", 1, Gram.Type.TAIL) },
+      {new Gram("worst of",  1, Gram.Type.NGRAM), new Gram("worst", 1, Gram.Type.HEAD), new Gram("of",    2, Gram.Type.TAIL) }
     };
     
     int[][] expectations = {

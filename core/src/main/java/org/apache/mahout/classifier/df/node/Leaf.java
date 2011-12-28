@@ -27,7 +27,7 @@ import java.io.IOException;
  * Represents a Leaf node
  */
 public class Leaf extends Node {
-  private static final double EPSILON = 1e-6;
+  private static final double EPSILON = 1.0e-6;
 
   private double label;
   

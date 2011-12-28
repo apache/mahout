@@ -17,26 +17,24 @@
 
 package org.apache.mahout.clustering.topdown.postprocessor;
 
-import static org.apache.mahout.clustering.topdown.PathDirectory.getClusterOutputClusteredPoints;
-import static org.apache.mahout.clustering.topdown.PathDirectory.getClusterPathForClusterId;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.SequenceFile.Writer;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.topdown.PathDirectory;
+import org.apache.mahout.common.IOUtils;
+import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.math.VectorWritable;
 
 /**
@@ -47,69 +45,46 @@ import org.apache.mahout.math.VectorWritable;
  * This class incorporates a sequential algorithm and is appropriate for use for data which has been clustered
  * sequentially.
  * 
- * The sequential and non sequential version, both are being used from @ClusterOutputPostProcessorDriver.
- * 
+ * The sequential and non sequential version, both are being used from {@link ClusterOutputPostProcessorDriver}.
  */
-public class ClusterOutputPostProcessor {
+public final class ClusterOutputPostProcessor {
   
   private Path clusteredPoints;
-  private FileSystem fileSystem;
-  private Configuration conf;
-  private Path clusterPostProcessorOutput;
-  private Map<String,Path> postProcessedClusterDirectories = new HashMap<String,Path>();
-  private long uniqueVectorId = 0;
-  private Map<String,SequenceFile.Writer> writersForClusters;
+  private final FileSystem fileSystem;
+  private final Configuration conf;
+  private final Path clusterPostProcessorOutput;
+  private final Map<String,Path> postProcessedClusterDirectories = new HashMap<String,Path>();
+  private long uniqueVectorId = 0L;
+  private final Map<String,SequenceFile.Writer> writersForClusters;
   
   public ClusterOutputPostProcessor(Path clusterOutputToBeProcessed,
                                     Path output,
-                                    Configuration hadoopConfiguration) {
+                                    Configuration hadoopConfiguration) throws IOException {
     this.clusterPostProcessorOutput = output;
-    this.clusteredPoints = getClusterOutputClusteredPoints(clusterOutputToBeProcessed);
+    this.clusteredPoints = PathDirectory.getClusterOutputClusteredPoints(clusterOutputToBeProcessed);
     this.conf = hadoopConfiguration;
     this.writersForClusters = new HashMap<String,SequenceFile.Writer>();
+    fileSystem = clusteredPoints.getFileSystem(conf);    
   }
   
   /**
-   * 
    * This method takes the clustered points output by the clustering algorithms as input and writes them into
    * their respective clusters.
-   * 
-   * @throws IOException
-   * @throws IllegalAccessException
-   * @throws InstantiationException
    */
-  public void process() throws IOException, InstantiationException, IllegalAccessException {
-    
-    fileSystem = clusteredPoints.getFileSystem(conf);
-    
+  public void process() throws IOException {
     createPostProcessDirectory();
-    
-    FileStatus[] partFiles = getAllClusteredPointPartFiles();
-    for (FileStatus partFile : partFiles) {
-      SequenceFile.Reader clusteredPointsReader = new SequenceFile.Reader(fileSystem, partFile.getPath(),
-          conf);
-      WritableComparable clusterIdAsKey = (WritableComparable) clusteredPointsReader.getKeyClass()
-          .newInstance();
-      Writable vector = (Writable) clusteredPointsReader.getValueClass().newInstance();
-      while (clusteredPointsReader.next(clusterIdAsKey, vector)) {
-        String clusterId = clusterIdAsKey.toString().trim();
-        putVectorInRespectiveCluster(clusterId, (WeightedVectorWritable) vector);
-      }
-      
-      clusteredPointsReader.close();
-      closeWriters();
+    for (Pair<?,WeightedVectorWritable> record : 
+         new SequenceFileDirIterable<Writable,WeightedVectorWritable>(clusteredPoints,
+                                                                      PathType.GLOB,
+                                                                      PathFilters.partFilter(),
+                                                                      null,
+                                                                      false,
+                                                                      conf)) {
+      String clusterId = record.getFirst().toString().trim();
+      putVectorInRespectiveCluster(clusterId, record.getSecond());
     }
-    
-  }
-  
-  /**
-   * Returns all the part files in the clusterdPoints directory.
-   */
-  private FileStatus[] getAllClusteredPointPartFiles() throws IOException {
-    Path[] partFilePaths = FileUtil.stat2Paths(fileSystem.globStatus(clusteredPoints,
-      PathFilters.partFilter()));
-    FileStatus[] partFileStatuses = fileSystem.listStatus(partFilePaths, PathFilters.partFilter());
-    return partFileStatuses;
+    IOUtils.close(writersForClusters.values());
+    writersForClusters.clear();
   }
   
   /**
@@ -117,8 +92,7 @@ public class ClusterOutputPostProcessor {
    */
   private void createPostProcessDirectory() throws IOException {
     if (!fileSystem.exists(clusterPostProcessorOutput)) {
-      boolean directoryCreationSuccessFlag = fileSystem.mkdirs(clusterPostProcessorOutput);
-      if (!directoryCreationSuccessFlag) {
+      if (!fileSystem.mkdirs(clusterPostProcessorOutput)) {
         throw new IOException("Error creating cluster post processor directory");
       }
     }
@@ -131,7 +105,7 @@ public class ClusterOutputPostProcessor {
   private void putVectorInRespectiveCluster(String clusterId, WeightedVectorWritable point) throws IOException {
     Writer writer = findWriterForVector(clusterId);
     postProcessedClusterDirectories.put(clusterId,
-      getClusterPathForClusterId(clusterPostProcessorOutput, clusterId));
+                                        PathDirectory.getClusterPathForClusterId(clusterPostProcessorOutput, clusterId));
     writeVectorToCluster(writer, point);
   }
   
@@ -142,10 +116,8 @@ public class ClusterOutputPostProcessor {
     Path clusterDirectory = PathDirectory.getClusterPathForClusterId(clusterPostProcessorOutput, clusterId);
     Writer writer = writersForClusters.get(clusterId);
     if (writer == null) {
-      final Path pathToWrite = new Path(clusterDirectory, new Path("part-m-0"));
-      SequenceFile.Writer fileWriter = new SequenceFile.Writer(fileSystem, conf, pathToWrite,
-          LongWritable.class, VectorWritable.class);
-      writer = fileWriter;
+      Path pathToWrite = new Path(clusterDirectory, new Path("part-m-0"));
+      writer = new Writer(fileSystem, conf, pathToWrite, LongWritable.class, VectorWritable.class);
       writersForClusters.put(clusterId, writer);
     }
     return writer;
@@ -160,8 +132,7 @@ public class ClusterOutputPostProcessor {
   }
   
   /**
-   * 
-   * Returns the set of all post processed cluster paths.
+   * @return the set of all post processed cluster paths.
    */
   public Map<String,Path> getPostProcessedClusterDirectories() {
     return postProcessedClusterDirectories;
@@ -169,12 +140,6 @@ public class ClusterOutputPostProcessor {
   
   public void setClusteredPoints(Path clusteredPoints) {
     this.clusteredPoints = clusteredPoints;
-  }
-  
-  public void closeWriters() throws IOException {
-    for (Writer writer : writersForClusters.values()) {
-      writer.close();
-    }
   }
   
 }

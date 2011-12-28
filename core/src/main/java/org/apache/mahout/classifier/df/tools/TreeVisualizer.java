@@ -46,7 +46,7 @@ public final class TreeVisualizer {
 
   private static String toStringNode(Node node, Dataset dataset, String[] attrNames,
     Map<String, Field> fields, int layer) throws IllegalAccessException {
-    StringBuffer buff = new StringBuffer();
+    StringBuilder buff = new StringBuilder();
 
     if (node instanceof CategoricalNode) {
       CategoricalNode cnode = (CategoricalNode) node;
@@ -55,7 +55,7 @@ public final class TreeVisualizer {
       Node[] childs = (Node[]) fields.get("CategoricalNode.childs").get(cnode);
       String[][] attrValues = (String[][]) fields.get("Dataset.values").get(dataset);
       for (int i = 0; i < childs.length; i++) {
-        buff.append("\n");
+        buff.append('\n');
         for (int j = 0; j < layer; j++) {
           buff.append("|   ");
         }
@@ -71,13 +71,13 @@ public final class TreeVisualizer {
       double split = (Double) fields.get("NumericalNode.split").get(nnode);
       Node loChild = (Node) fields.get("NumericalNode.loChild").get(nnode);
       Node hiChild = (Node) fields.get("NumericalNode.hiChild").get(nnode);
-      buff.append("\n");
+      buff.append('\n');
       for (int j = 0; j < layer; j++) {
         buff.append("|   ");
       }
       buff.append((attrNames == null ? attr : attrNames[attr]) + " < " + doubleToString(split));
       buff.append(toStringNode(loChild, dataset, attrNames, fields, layer + 1));
-      buff.append("\n");
+      buff.append('\n');
       for (int j = 0; j < layer; j++) {
         buff.append("|   ");
       }
@@ -87,9 +87,9 @@ public final class TreeVisualizer {
       Leaf leaf = (Leaf) node;
       double label = (Double) fields.get("Leaf.label").get(leaf);
       if (dataset.isNumerical(dataset.getLabelId())) {
-        buff.append(" : " + doubleToString(label));
+        buff.append(" : ").append(doubleToString(label));
       } else {
-        buff.append(" : " + dataset.getLabelString((int) label));
+        buff.append(" : ").append(dataset.getLabelString((int) label));
       }
     }
 
@@ -157,7 +157,7 @@ public final class TreeVisualizer {
 
   private static String toStringPredict(Node node, Instance instance, Dataset dataset,
     String[] attrNames, Map<String, Field> fields) throws IllegalAccessException {
-    StringBuffer buff = new StringBuffer();
+    StringBuilder buff = new StringBuilder();
 
     if (node instanceof CategoricalNode) {
       CategoricalNode cnode = (CategoricalNode) node;

@@ -147,12 +147,9 @@ public class ClusterIterator {
    *          a Path of output directory
    * @param numIterations
    *          the int number of iterations to perform
-   * @throws IOException
-   * @throws ClassNotFoundException
-   * @throws InterruptedException
    */
-  public void iterateMR(Path inPath, Path priorPath, Path outPath,
-      int numIterations) throws IOException, InterruptedException,
+  public static void iterateMR(Path inPath, Path priorPath, Path outPath,
+                               int numIterations) throws IOException, InterruptedException,
       ClassNotFoundException {
     Configuration conf = new Configuration();
     for (int iteration = 1; iteration <= numIterations; iteration++) {
@@ -180,7 +177,9 @@ public class ClusterIterator {
             + " failed processing " + priorPath);
       }
       FileSystem fs = FileSystem.get(outPath.toUri(), conf);
-      if (isConverged(outPath, conf, fs)) break;
+      if (isConverged(outPath, conf, fs)) {
+        break;
+      }
     }
   }
   
@@ -194,7 +193,7 @@ public class ClusterIterator {
    * @throws IOException
    *           if there was an IO error
    */
-  private boolean isConverged(Path filePath, Configuration conf, FileSystem fs)
+  private static boolean isConverged(Path filePath, Configuration conf, FileSystem fs)
       throws IOException {
     for (FileStatus part : fs.listStatus(filePath, PathFilters.partFilter())) {
       SequenceFileValueIterator<Cluster> iterator = new SequenceFileValueIterator<Cluster>(

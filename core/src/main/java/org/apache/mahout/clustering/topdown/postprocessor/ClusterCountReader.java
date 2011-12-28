@@ -18,22 +18,26 @@
 package org.apache.mahout.clustering.topdown.postprocessor;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterator;
 
 /**
  * Reads the number of clusters produced by the clustering algorithm.
  */
-public class ClusterCountReader {
-  
+public final class ClusterCountReader {
+
+  private ClusterCountReader() {
+  }
+
   /**
    * Reads the number of clusters present by reading the clusters-*-final file.
    * 
@@ -42,39 +46,24 @@ public class ClusterCountReader {
    * @param conf
    *          The hadoop configuration.
    * @return the number of final clusters.
-   * @throws IOException
-   * @throws IllegalAccessException
-   * @throws InstantiationException
    */
-  public static int getNumberOfClusters(Path clusterOutputPath, Configuration conf) throws IOException,
-                                                                                   InstantiationException,
-                                                                                   IllegalAccessException {
+  public static int getNumberOfClusters(Path clusterOutputPath, Configuration conf) throws IOException {
+    FileSystem fileSystem = clusterOutputPath.getFileSystem(conf);
+    FileStatus[] clusterFiles = fileSystem.listStatus(clusterOutputPath, CLUSTER_FINAL);
     int numberOfClusters = 0;
-    FileStatus[] partFiles = getPartFiles(clusterOutputPath, conf);
-    for (FileStatus fileStatus : partFiles) {
-      SequenceFile.Reader reader = new SequenceFile.Reader(FileSystem.get(conf), fileStatus.getPath(), conf);
-      WritableComparable key = (WritableComparable) reader.getKeyClass().newInstance();
-      Writable value = (Writable) reader.getValueClass().newInstance();
-      while (reader.next(key, value)) {
-        numberOfClusters++;
-      }
-      reader.close();
+    Iterator<?> it = new SequenceFileDirValueIterator<Writable>(clusterFiles[0].getPath(),
+                                                                PathType.LIST,
+                                                                PathFilters.partFilter(),
+                                                                null,
+                                                                true,
+                                                                conf);
+    while (it.hasNext()) {
+      it.next();
+      numberOfClusters++;
     }
     return numberOfClusters;
   }
-  
-  /**
-   * Gets the part file of the final iteration. clusters-n-final
-   * 
-   */
-  private static FileStatus[] getPartFiles(Path path, Configuration conf) throws IOException {
-    FileSystem fileSystem = path.getFileSystem(conf);
-    FileStatus[] clusterFiles = fileSystem.listStatus(path, CLUSTER_FINAL);
-    FileStatus[] partFileStatuses = fileSystem
-        .listStatus(clusterFiles[0].getPath(), PathFilters.partFilter());
-    return partFileStatuses;
-  }
-  
+
   /**
    * Pathfilter to read the final clustering file.
    */

@@ -84,9 +84,6 @@ public final class LDADriver extends AbstractJob {
 
   private Iterable<Pair<Writable, VectorWritable>> trainingCorpus = null;
 
-  public LDADriver() {
-  }
-
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(), new LDADriver(), args);
   }

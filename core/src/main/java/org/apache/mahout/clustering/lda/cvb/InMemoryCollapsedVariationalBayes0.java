@@ -173,7 +173,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
     long start = System.nanoTime();
     modelTrainer.start();
     for(int docId = 0; docId < corpusWeights.numRows(); docId++) {
-      if(testFraction == 0 || docId % ((int)1/testFraction) != 0) {
+      if(testFraction == 0 || docId % (1/testFraction) != 0) {
         Vector docTopics = new DenseVector(numTopics).assign(1.0/numTopics); // docTopicCounts.getRow(docId)
         modelTrainer.trainSync(corpusWeights.viewRow(docId), docTopics , true, 10);
       }

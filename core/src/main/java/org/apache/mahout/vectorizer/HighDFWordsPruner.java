@@ -20,7 +20,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -33,8 +32,6 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.vectorizer.common.PartialVectorMerger;
 import org.apache.mahout.vectorizer.pruner.PrunedPartialVectorMergeReducer;
 import org.apache.mahout.vectorizer.pruner.WordsPrunerReducer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -47,8 +44,8 @@ public class HighDFWordsPruner {
   public static final String STD_CALC_DIR = "stdcalc";
   public static final String MAX_DF = "max.df";
 
-  private static final Logger log = LoggerFactory
-          .getLogger(HighDFWordsPruner.class);
+  private HighDFWordsPruner() {
+  }
 
 
   public static void pruneVectors(Path tfDir, Path prunedTFDir, Path prunedPartialTFDir, long maxDF,

@@ -45,6 +45,8 @@ import org.apache.mahout.common.IOUtils;
  */
 public final class SequenceFileDirValueIterator<V extends Writable> extends
     ForwardingIterator<V> implements Closeable {
+  
+  private static final FileStatus[] NO_STATUSES = new FileStatus[0];
 
   private Iterator<V> delegate;
   private final List<SequenceFileValueIterator<V>> iterators;
@@ -53,31 +55,19 @@ public final class SequenceFileDirValueIterator<V extends Writable> extends
    * Constructor that uses either {@link FileSystem#listStatus(Path)} or
    * {@link FileSystem#globStatus(Path)} to obtain list of files to iterate over
    * (depending on pathType parameter).
-   * <P>
-   * 
-   * @param path
-   * @param pathType
-   * @param filter
-   * @param ordering
-   * @param reuseKeyValueInstances
-   * @param conf
-   * @throws IOException
    */
   public SequenceFileDirValueIterator(Path path,
                                       PathType pathType,
                                       PathFilter filter,
                                       Comparator<FileStatus> ordering,
-                                      final boolean reuseKeyValueInstances,
-                                      final Configuration conf) throws IOException {
+                                      boolean reuseKeyValueInstances,
+                                      Configuration conf) throws IOException {
     FileStatus[] statuses;
     FileSystem fs = FileSystem.get(conf);
     if (filter == null) {
-      statuses =
-        pathType == PathType.GLOB ? fs.globStatus(path) : fs.listStatus(path);
+      statuses = pathType == PathType.GLOB ? fs.globStatus(path) : fs.listStatus(path);
     } else {
-      statuses =
-        pathType == PathType.GLOB ? fs.globStatus(path, filter)
-            : fs.listStatus(path, filter);
+      statuses = pathType == PathType.GLOB ? fs.globStatus(path, filter) : fs.listStatus(path, filter);
     }
     iterators = Lists.newArrayList();
     init(statuses, ordering, reuseKeyValueInstances, conf);
@@ -86,17 +76,11 @@ public final class SequenceFileDirValueIterator<V extends Writable> extends
   /**
    * Multifile sequence file iterator where files are specified explicitly by
    * path parameters.
-   * 
-   * @param path
-   * @param ordering
-   * @param reuseKeyValueInstances
-   * @param conf
-   * @throws IOException
    */
   public SequenceFileDirValueIterator(Path[] path,
                                       Comparator<FileStatus> ordering,
-                                      final boolean reuseKeyValueInstances,
-                                      final Configuration conf) throws IOException {
+                                      boolean reuseKeyValueInstances,
+                                      Configuration conf) throws IOException {
 
     iterators = Lists.newArrayList();
     /*
@@ -104,8 +88,9 @@ public final class SequenceFileDirValueIterator<V extends Writable> extends
      */
     FileSystem fs = FileSystem.get(conf);
     FileStatus[] statuses = new FileStatus[path.length];
-    for (int i = 0; i < statuses.length; i++)
+    for (int i = 0; i < statuses.length; i++) {
       statuses[i] = fs.getFileStatus(path[i]);
+    }
     init(statuses, ordering, reuseKeyValueInstances, conf);
   }
 
@@ -119,15 +104,14 @@ public final class SequenceFileDirValueIterator<V extends Writable> extends
      * was qualified. In this case, which is a corner case, we should assume an
      * empty iterator, not an NPE.
      */
-    if (statuses == null)
-      statuses = new FileStatus[0];
+    if (statuses == null) {
+      statuses = NO_STATUSES;
+    }
 
     if (ordering != null) {
       Arrays.sort(statuses, ordering);
     }
     Iterator<FileStatus> fileStatusIterator = Iterators.forArray(statuses);
-
-    boolean ok = false;
 
     try {
 
@@ -154,7 +138,6 @@ public final class SequenceFileDirValueIterator<V extends Writable> extends
       Collections.reverse(iterators); // close later in reverse order
 
       delegate = Iterators.concat(fsIterators);
-      ok = true;
 
     } finally {
       /*
@@ -163,9 +146,7 @@ public final class SequenceFileDirValueIterator<V extends Writable> extends
        * be called. Thus, those handles that did open in constructor, would leak
        * out, unless we specifically handle it here.
        */
-
-      if (!ok)
-        IOUtils.close(iterators);
+      IOUtils.close(iterators);
     }
   }
 

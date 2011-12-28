@@ -237,7 +237,7 @@ public class FrequenciesJob {
     /** counts[c] = num tuples from the partition with label == c */
     private int[] counts;
     
-    public Frequencies() { }
+    Frequencies() { }
     
     Frequencies(long firstId, int[] counts) {
       this.firstId = firstId;

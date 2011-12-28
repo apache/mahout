@@ -29,11 +29,11 @@ import org.apache.mahout.math.Vector;
  * for algorithm notes.
  */
 public class SequentialBigSvd {
-  private Matrix y;
-  private CholeskyDecomposition cd1;
-  private CholeskyDecomposition cd2;
-  private SingularValueDecomposition svd;
-  private Matrix b;
+  private final Matrix y;
+  private final CholeskyDecomposition cd1;
+  private final CholeskyDecomposition cd2;
+  private final SingularValueDecomposition svd;
+  private final Matrix b;
 
 
   public SequentialBigSvd(Matrix A, int p) {

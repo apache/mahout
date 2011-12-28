@@ -24,8 +24,6 @@ import org.junit.Test;
 
 import java.util.Random;
 
-import static org.apache.mahout.math.stats.GlobalOnlineAuc.ReplacementPolicy.*;
-
 public final class OnlineAucTest extends MahoutTestCase {
 
   @Test
@@ -39,13 +37,13 @@ public final class OnlineAucTest extends MahoutTestCase {
 
     for (int i = 0; i < 100; i++) {
       OnlineAuc a1 = new GlobalOnlineAuc();
-      a1.setPolicy(FAIR);
+      a1.setPolicy(GlobalOnlineAuc.ReplacementPolicy.FAIR);
 
       OnlineAuc a2 = new GlobalOnlineAuc();
-      a2.setPolicy(FIFO);
+      a2.setPolicy(GlobalOnlineAuc.ReplacementPolicy.FIFO);
 
       OnlineAuc a3 = new GlobalOnlineAuc();
-      a3.setPolicy(RANDOM);
+      a3.setPolicy(GlobalOnlineAuc.ReplacementPolicy.RANDOM);
 
       Auc a4 = new Auc();
 
@@ -72,7 +70,11 @@ public final class OnlineAucTest extends MahoutTestCase {
     }
     
     int i = 0;
-    for (GlobalOnlineAuc.ReplacementPolicy policy : new GlobalOnlineAuc.ReplacementPolicy[]{FAIR, FIFO, RANDOM, null}) {
+    for (GlobalOnlineAuc.ReplacementPolicy policy : new GlobalOnlineAuc.ReplacementPolicy[] {
+                                                      GlobalOnlineAuc.ReplacementPolicy.FAIR,
+                                                      GlobalOnlineAuc.ReplacementPolicy.FIFO,
+                                                      GlobalOnlineAuc.ReplacementPolicy.RANDOM,
+                                                      null}) {
       OnlineSummarizer summary = stats[i++];
       System.out.printf("%s,%.4f (min = %.4f, 25%%-ile=%.4f, 75%%-ile=%.4f, max=%.4f)\n", policy, summary.getMean(),
         summary.getQuartile(0), summary.getQuartile(1), summary.getQuartile(2), summary.getQuartile(3));

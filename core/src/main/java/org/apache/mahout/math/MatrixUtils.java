@@ -68,7 +68,7 @@ public final class MatrixUtils {
       }
     }
     if(rows.isEmpty()) {
-      throw new IOException(modelPaths + " have no vectors in it");
+      throw new IOException(Arrays.toString(modelPaths) + " have no vectors in it");
     }
     numRows++;
     Vector[] arrayOfRows = new Vector[numRows];

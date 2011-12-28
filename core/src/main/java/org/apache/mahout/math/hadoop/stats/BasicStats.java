@@ -1,4 +1,3 @@
-package org.apache.mahout.math.hadoop.stats;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +15,7 @@ package org.apache.mahout.math.hadoop.stats;
  * limitations under the License.
  */
 
+package org.apache.mahout.math.hadoop.stats;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -23,9 +23,7 @@ import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Pair;
@@ -37,50 +35,10 @@ import java.io.IOException;
 /**
  * Methods for calculating basic stats (mean, variance, stdDev, etc.) in map/reduce
  */
-public class BasicStats {
+public final class BasicStats {
 
-	/**
-	 * Holds the total values needed to compute mean and standard deviation
-	 * Provides methods for their computation
-	 */
-	public static class VarianceTotals {
-		private double sumOfSquares = 0;
-		private double sum = 0;
-		private double totalCount = 0;
-		
-		public double getSumOfSquares() {
-			return sumOfSquares;
-		}
-		public void setSumOfSquares(double sumOfSquares) {
-			this.sumOfSquares = sumOfSquares;
-		}
-		public double getSum() {
-			return sum;
-		}
-		public void setSum(double sum) {
-			this.sum = sum;
-		}
-		public double getTotalCount() {
-			return totalCount;
-		}
-		public void setTotalCount(double totalCount) {
-			this.totalCount = totalCount;
-		}
-		
-		public double computeMean() {
-			return sum/totalCount;
-		}
-		
-		public double computeVariance() {
-			return ((totalCount * sumOfSquares) - (sum * sum))
-            / (totalCount * (totalCount - 1.0D));
-		}
-		
-		public double computeVarianceForGivenMean(double mean) {
-			return (sumOfSquares - totalCount*(mean * mean))
-            / (totalCount - 1.0D);
-		}
-	}
+  private BasicStats() {
+  }
 
   /**
    * Calculate the variance of values stored as
@@ -89,9 +47,6 @@ public class BasicStats {
    * @param output   The output to store the intermediate values
    * @param baseConf
    * @return The variance (based on sample estimation)
-   * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
    */
   public static double variance(Path input, Path output,
                                 Configuration baseConf) throws IOException, InterruptedException,
@@ -109,9 +64,6 @@ public class BasicStats {
    * @param mean The mean based on which to compute the variance
    * @param baseConf
    * @return The variance (based on sample estimation)
-   * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
    */
   public static double varianceForGivenMean(Path input, Path output, double mean,
                                 Configuration baseConf) throws IOException, InterruptedException,
@@ -170,9 +122,6 @@ public class BasicStats {
    * @param output   The output file to write the counting results to
    * @param baseConf The base configuration
    * @return The standard deviation
-   * @throws java.io.IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
    */
   public static double stdDev(Path input, Path output,
                               Configuration baseConf) throws IOException, InterruptedException,
@@ -188,9 +137,6 @@ public class BasicStats {
    * @param mean The mean based on which to compute the standard deviation
    * @param baseConf The base configuration
    * @return The standard deviation
-   * @throws java.io.IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
    */
   public static double stdDevForGivenMean(Path input, Path output, double mean,
                               Configuration baseConf) throws IOException, InterruptedException,

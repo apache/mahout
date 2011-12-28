@@ -1,5 +1,23 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.math.ssvd;
 
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.DiagonalMatrix;
@@ -9,7 +27,6 @@ import org.apache.mahout.math.RandomTrinaryMatrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,25 +41,27 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-
-public class SequentialOutOfCoreSvdTest {
+public final class SequentialOutOfCoreSvdTest extends MahoutTestCase {
 
   private File tmpDir;
 
+  @Override
   @Before
-  public void setup() throws IOException {
+  public void setUp() throws Exception {
+    super.setUp();
     tmpDir = File.createTempFile("matrix", "");
-    Assert.assertTrue(tmpDir.delete());
-    Assert.assertTrue(tmpDir.mkdir());
+    assertTrue(tmpDir.delete());
+    assertTrue(tmpDir.mkdir());
   }
 
+  @Override
   @After
-  public void tearDown() {
+  public void tearDown() throws Exception {
     for (File f : tmpDir.listFiles()) {
-      Assert.assertTrue(f.delete());
+      assertTrue(f.delete());
     }
-    Assert.assertTrue(tmpDir.delete());
+    assertTrue(tmpDir.delete());
+    super.tearDown();
   }
 
   @Test
@@ -82,7 +101,7 @@ public class SequentialOutOfCoreSvdTest {
     assertEquals(0, A.minus(u.times(new DiagonalMatrix(s.getSingularValues())).times(v.transpose())).aggregate(Functions.PLUS, Functions.ABS), 1e-7);
   }
 
-  private Matrix readBlockMatrix(List<File> files) throws IOException {
+  private static Matrix readBlockMatrix(List<File> files) throws IOException {
     Collections.sort(files);
     int nrows = -1;
     int ncols = -1;
@@ -123,11 +142,11 @@ public class SequentialOutOfCoreSvdTest {
 //  }
 //
 //  private void assertEquals(Matrix u1, Matrix u2) {
-//    Assert.assertEquals(0.0, u1.minus(u2).aggregate(Functions.MAX, Functions.ABS), 1e-10);
+//    assertEquals(0.0, u1.minus(u2).aggregate(Functions.MAX, Functions.ABS), 1e-10);
 //  }
 //
 //  private void assertEquals(Vector u1, Vector u2) {
-//    Assert.assertEquals(0.0, u1.minus(u2).aggregate(Functions.MAX, Functions.ABS), 1e-10);
+//    assertEquals(0.0, u1.minus(u2).aggregate(Functions.MAX, Functions.ABS), 1e-10);
 //  }
 //
 //  @Test
@@ -142,7 +161,7 @@ public class SequentialOutOfCoreSvdTest {
 //    assertEquals(v1, v2);
 //  }
 
-  private Matrix lowRankMatrix(File tmpDir, String aBase, int rowsPerSlice, int rows, int columns) throws IOException {
+  private static Matrix lowRankMatrix(File tmpDir, String aBase, int rowsPerSlice, int rows, int columns) throws IOException {
     int rank = 10;
     Matrix u = new RandomTrinaryMatrix(1, rows, rank, false);
     Matrix d = new DenseMatrix(rank, rank);

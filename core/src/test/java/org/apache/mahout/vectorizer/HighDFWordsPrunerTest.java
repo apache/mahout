@@ -64,12 +64,11 @@ public class HighDFWordsPrunerTest extends MahoutTestCase {
     writer.close();
   }
 
-  private String enhanceWithHighDFWords(String initialDoc) {
+  private static String enhanceWithHighDFWords(String initialDoc) {
     StringBuilder sb = new StringBuilder(initialDoc);
-    for (int i = 0; i < HIGH_DF_WORDS.length; i++) {
-      sb.append(' ').append(HIGH_DF_WORDS[i]);
+    for (String word : HIGH_DF_WORDS) {
+      sb.append(' ').append(word);
     }
-
     return sb.toString();
   }
 
@@ -138,8 +137,8 @@ public class HighDFWordsPrunerTest extends MahoutTestCase {
       Vector v = ((NamedVector) value.get()).getDelegate();
       for (int i = 0; i < highDFWordsDictionaryIndices.length; i++) {
         if (prune) {
-          assertTrue("Found vector for which word '" + HIGH_DF_WORDS[i] + "' is not pruned", v
-                  .get(highDFWordsDictionaryIndices[i]) == 0.0);
+          assertEquals("Found vector for which word '" + HIGH_DF_WORDS[i] + "' is not pruned", 0.0, v
+              .get(highDFWordsDictionaryIndices[i]), 0.0);
         } else {
           assertTrue("Found vector for which word '" + HIGH_DF_WORDS[i] + "' is pruned, and shouldn't have been", v
                   .get(highDFWordsDictionaryIndices[i]) != 0.0);

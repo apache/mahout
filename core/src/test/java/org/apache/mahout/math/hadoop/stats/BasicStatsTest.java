@@ -31,11 +31,7 @@ import org.uncommons.maths.random.MersenneTwisterRNG;
 
 import java.util.Random;
 
-/**
- *
- *
- **/
-public class BasicStatsTest extends MahoutTestCase {
+public final class BasicStatsTest extends MahoutTestCase {
 
   private Configuration conf;
 
@@ -85,7 +81,7 @@ public class BasicStatsTest extends MahoutTestCase {
   private void produceTestData(Path input) throws Exception {
 	FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, input, IntWritable.class, DoubleWritable.class);
-    Random random = new MersenneTwisterRNG();
+    //Random random = new MersenneTwisterRNG();
     /*Normal normal = new Normal(5, 3, random);
     for (int i = 0; i < 10000; i++){
       writer.append(new IntWritable(i), new DoubleWritable((long)normal.nextDouble()));

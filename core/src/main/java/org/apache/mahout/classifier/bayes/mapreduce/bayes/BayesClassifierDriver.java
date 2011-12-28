@@ -138,10 +138,8 @@ public final class BayesClassifierDriver {
       String name = params.get("confusionMatrix");
       // embed file name as sequence key- useful for tuning classifiers
       name = name.substring(name.lastIndexOf('/') + 1, name.length());
-      Text key = new Text(name);
-      MatrixWritable mw = new MatrixWritable(matrix.getMatrix());
       try {
-        writer.append(key, mw);
+        writer.append(new Text(name), new MatrixWritable(matrix.getMatrix()));
       } finally {
         Closeables.closeQuietly(writer);
       }

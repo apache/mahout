@@ -292,10 +292,26 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
          Path prunedTFDir = new Path(outputDir, DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER);
          Path prunedPartialTFDir = new Path(outputDir, DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER
                  + "-partial");
-         if (!processIdf) {
-           HighDFWordsPruner.pruneVectors(tfDir, prunedTFDir, prunedPartialTFDir, maxDF, conf, docFrequenciesFeatures, norm, logNormalize, reduceTasks);
+         if (processIdf) {
+           HighDFWordsPruner.pruneVectors(tfDir,
+                                          prunedTFDir,
+                                          prunedPartialTFDir,
+                                          maxDF,
+                                          conf,
+                                          docFrequenciesFeatures,
+                                          -1.0f,
+                                          false,
+                                          reduceTasks);
          } else {
-           HighDFWordsPruner.pruneVectors(tfDir, prunedTFDir, prunedPartialTFDir, maxDF, conf, docFrequenciesFeatures, -1.0f, false, reduceTasks);
+           HighDFWordsPruner.pruneVectors(tfDir,
+                                          prunedTFDir,
+                                          prunedPartialTFDir,
+                                          maxDF,
+                                          conf,
+                                          docFrequenciesFeatures,
+                                          norm,
+                                          logNormalize,
+                                          reduceTasks);
          }
          HadoopUtil.delete(new Configuration(conf), tfDir);
        }

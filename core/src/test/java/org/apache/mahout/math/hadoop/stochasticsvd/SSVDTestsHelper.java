@@ -134,8 +134,6 @@ public class SSVDTestsHelper {
      */
     
     outputDir = new Path("/tmp/DRM-sparse");
-    int n = 4500000;
-    int avgNZero = 40;
     Random rnd = new Random();
 
     SequenceFile.Writer w =
@@ -149,13 +147,17 @@ public class SSVDTestsHelper {
 
       IntWritable iw = new IntWritable();
       VectorWritable vw = new VectorWritable();
+      int avgNZero = 40;
+      int n = 4500000;
       for (int i = 1; i < n; i++) {
-        RandomAccessSparseVector vector = new RandomAccessSparseVector(n);
+        Vector vector = new RandomAccessSparseVector(n);
         double nz = Math.round(avgNZero * (rnd.nextGaussian() + 1));
-        if (nz < 0)
+        if (nz < 0) {
           nz = 0;
-        for (int j = 1; j < nz; j++)
+        }
+        for (int j = 1; j < nz; j++) {
           vector.set(rnd.nextInt(n), rnd.nextGaussian() * 25 + 3);
+        }
         iw.set(i);
         vw.set(vector);
         w.append(iw, vw);

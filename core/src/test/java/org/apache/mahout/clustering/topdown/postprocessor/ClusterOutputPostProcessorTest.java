@@ -34,6 +34,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Writable;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
@@ -109,9 +110,9 @@ public class ClusterOutputPostProcessorTest extends MahoutTestCase {
     Path clusterPath = cluster.getValue();
     
     try {
-      if (clusterId.equals("0")) {
+      if ("0".equals(clusterId)) {
         assertPointsInFirstTopLevelCluster(clusterPath);
-      } else if (clusterId.equals("1")) {
+      } else if ("1".equals(clusterId)) {
         assertPointsInSecondTopLevelCluster(clusterPath);
       }
     } catch (IOException e) {
@@ -142,7 +143,7 @@ public class ClusterOutputPostProcessorTest extends MahoutTestCase {
     List<Vector> vectors = new ArrayList<Vector>();
     for (FileStatus partFile : listStatus) {
       SequenceFile.Reader topLevelClusterReader = new SequenceFile.Reader(fs, partFile.getPath(), conf);
-      LongWritable clusterIdAsKey = new LongWritable();
+      Writable clusterIdAsKey = new LongWritable();
       VectorWritable point = new VectorWritable();
       while (topLevelClusterReader.next(clusterIdAsKey, point)) {
         vectors.add(point.get());
@@ -168,16 +169,18 @@ public class ClusterOutputPostProcessorTest extends MahoutTestCase {
   private void assertBottomLevelCluster(Path bottomLevelCluster) {
     Path clusteredPointsPath = new Path(bottomLevelCluster, "clusteredPoints");
     
-    DummyOutputCollector<IntWritable,WeightedVectorWritable> collector = new DummyOutputCollector<IntWritable,WeightedVectorWritable>();
+    DummyOutputCollector<IntWritable,WeightedVectorWritable> collector =
+        new DummyOutputCollector<IntWritable,WeightedVectorWritable>();
     
     // The key is the clusterId, the value is the weighted vector
-    for (Pair<IntWritable,WeightedVectorWritable> record : new SequenceFileIterable<IntWritable,WeightedVectorWritable>(
-        new Path(clusteredPointsPath, "part-m-0"), conf)) {
+    for (Pair<IntWritable,WeightedVectorWritable> record :
+         new SequenceFileIterable<IntWritable,WeightedVectorWritable>(new Path(clusteredPointsPath, "part-m-0"),
+                                                                      conf)) {
       collector.collect(record.getFirst(), record.getSecond());
     }
-    final int clusterSize = collector.getKeys().size();
+    int clusterSize = collector.getKeys().size();
     // First top level cluster produces two more clusters, second top level cluster is not broken again
-    Assert.assertTrue(clusterSize == 1 || clusterSize == 2);
+    assertTrue(clusterSize == 1 || clusterSize == 2);
     
   }
   
@@ -187,8 +190,7 @@ public class ClusterOutputPostProcessorTest extends MahoutTestCase {
     }
   }
   
-  private Map<String,Path> ouputPostProcessing(Configuration conf) throws IOException,
-                                                                  InstantiationException, IllegalAccessException {
+  private Map<String,Path> ouputPostProcessing(Configuration conf) throws IOException {
     ClusterOutputPostProcessor clusterOutputPostProcessor = new ClusterOutputPostProcessor(outputPath,
         outputPath, conf);
     clusterOutputPostProcessor.process();

@@ -33,7 +33,7 @@ import org.apache.mahout.classifier.df.split.Split;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.Random;
 
 /**
@@ -46,7 +46,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
   private static final Logger log = LoggerFactory.getLogger(DecisionTreeBuilder.class);
 
   private static final int[] NO_ATTRIBUTES = new int[0];
-  private static final double EPSILON = 1e-6;
+  private static final double EPSILON = 1.0e-6;
 
   /**
    * indicates which CATEGORICAL attributes have already been selected in the parent nodes
@@ -67,11 +67,11 @@ public class DecisionTreeBuilder implements TreeBuilder {
   /**
    * minimum number for split
    */
-  private double minSplitNum = 2;
+  private double minSplitNum = 2.0;
   /**
    * minimum proportion of the total variance for split
    */
-  private double minVarianceProportion = 1e-3;
+  private double minVarianceProportion = 1.0e-3;
   /**
    * full set data
    */
@@ -109,7 +109,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
     }
     if (m == 0) {
       // set default m
-      double e = (data.getDataset().nbAttributes() - 1);
+      double e = data.getDataset().nbAttributes() - 1;
       if (data.getDataset().isNumerical(data.getDataset().getLabelId())) {
         // regression
         m = (int) Math.ceil(e / 3.0);
@@ -123,11 +123,11 @@ public class DecisionTreeBuilder implements TreeBuilder {
       return new Leaf(-1);
     }
 
-    double sum = 0;
-    double sumSquared = 0;
+    double sum = 0.0;
     if (data.getDataset().isNumerical(data.getDataset().getLabelId())) {
       // regression
       // sum and sum squared of a label is computed
+      double sumSquared = 0.0;
       for (int i = 0; i < data.size(); i++) {
         double label = data.getDataset().getLabel(data.get(i));
         sum += label;
@@ -146,7 +146,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
       // variance is compared with minimum variance
       if ((var / data.size()) < minVariance) {
         log.debug("variance(" + (var / data.size()) + ") < minVariance(" + minVariance + ") Leaf(" +
-            (sum / data.size()) + ")");
+            (sum / data.size()) + ')');
         return new Leaf(sum / data.size());
       }
     } else {
@@ -263,7 +263,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
       double[] values = data.values(best.getAttr());
 
       // tree is complemented
-      HashSet<Double> subsetValues = null;
+      Collection<Double> subsetValues = null;
       if (complemented) {
         subsetValues = Sets.newHashSet();
         for (double value : values) {

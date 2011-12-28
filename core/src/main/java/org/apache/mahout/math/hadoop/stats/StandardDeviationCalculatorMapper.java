@@ -44,7 +44,7 @@ public class StandardDeviationCalculatorMapper extends
     } else if (value instanceof DoubleWritable) {
       df = ((DoubleWritable)value).get();
     }
-    if (Double.isNaN(df) == false) {
+    if (!Double.isNaN(df)) {
       // For calculating the sum of squares
       context.write(SUM_OF_SQUARES, new DoubleWritable(df * df));
       context.write(SUM, new DoubleWritable(df));

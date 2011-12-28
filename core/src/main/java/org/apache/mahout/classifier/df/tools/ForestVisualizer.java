@@ -54,7 +54,7 @@ public final class ForestVisualizer {
     List<Node> trees = (List<Node>) getTrees.invoke(forest);
     
     int cnt = 1;
-    StringBuffer buff = new StringBuffer();
+    StringBuilder buff = new StringBuilder();
     for (Node tree : trees) {
       buff.append("Tree[" + cnt + "]:");
       buff.append(TreeVisualizer.toString(tree, dataset, attrNames));
@@ -132,7 +132,7 @@ public final class ForestVisualizer {
       String modelName = cmdLine.getValue(modelOpt).toString();
       String[] attrNames = null;
       if (cmdLine.hasOption(attrNamesOpt)) {
-        List<?> names = cmdLine.getValues(attrNamesOpt);
+        List<String> names = (List<String>) cmdLine.getValues(attrNamesOpt);
         if (!names.isEmpty()) {
           attrNames = new String[names.size()];
           names.toArray(attrNames);
@@ -143,7 +143,6 @@ public final class ForestVisualizer {
     } catch (Exception e) {
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);
-      return;
     }
   }
 }

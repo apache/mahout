@@ -30,8 +30,8 @@ import org.apache.commons.lang.StringUtils;
 public class RegressionResultAnalyzer {
 
   private static class Result {
-    double actual;
-    double result;
+    final double actual;
+    final double result;
     Result(double actual, double result) {
       this.actual = actual;
       this.result = result;
@@ -48,7 +48,9 @@ public class RegressionResultAnalyzer {
    *          The regression result
    */
   public void addInstance(double actual, double result) {
-    if (results == null) results = new ArrayList<Result>();
+    if (results == null) {
+      results = new ArrayList<Result>();
+    }
     results.add(new Result(actual, result));
   }
 
@@ -65,12 +67,12 @@ public class RegressionResultAnalyzer {
 
   @Override
   public String toString() {
-    double sumActual = 0;
-    double sumActualSquared = 0;
-    double sumResult = 0;
-    double sumResultSquared = 0;
-    double sumAbsolute = 0;
-    double sumAbsoluteSquared = 0;
+    double sumActual = 0.0;
+    double sumActualSquared = 0.0;
+    double sumResult = 0.0;
+    double sumResultSquared = 0.0;
+    double sumAbsolute = 0.0;
+    double sumAbsoluteSquared = 0.0;
 
     for (Result res : results) {
       sumActual += res.actual;
@@ -82,11 +84,11 @@ public class RegressionResultAnalyzer {
       sumAbsoluteSquared += absolute * absolute;
     }
     
-    double correlation = 0;
     double varActual = sumActualSquared - sumActual * sumActual / results.size();
     double varResult = sumResultSquared - sumResult * sumResult / results.size();
     double varAbsolute = sumResultSquared - sumActual * sumResult /  results.size();
 
+    double correlation;
     if (varActual * varResult <= 0) {
       correlation = 0.0;
     } else {

@@ -31,12 +31,8 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
-import org.apache.mahout.math.NamedVector;
-import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.junit.Before;
 import org.junit.Test;
 
 public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
@@ -45,12 +41,6 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
   
   private Configuration conf;
   private Path inputPath;
-  
-  @Override
-  @Before
-  public void setUp() throws Exception {
-    super.setUp();
-  }
 
   private void setupDocs() throws IOException {
     conf = new Configuration();

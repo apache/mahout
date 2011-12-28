@@ -25,6 +25,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.common.IntPairWritable;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
@@ -43,8 +44,6 @@ import org.junit.Ignore;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-
-import static org.apache.mahout.clustering.ClusteringTestUtils.*;
 
 public final class TestMapReduce extends MahoutTestCase {
 
@@ -122,18 +121,19 @@ public final class TestMapReduce extends MahoutTestCase {
   public void testEndToEnd() throws Exception {
     int numGeneratingTopics = 5;
     int numTerms = 26;
-    Matrix matrix = randomStructuredModel(numGeneratingTopics, numTerms,
-        new DoubleFunction() {
-      @Override public double apply(double d) {
-        return 1.0 / Math.pow(d+1, 3);
-      }
-    });
+    Matrix matrix = ClusteringTestUtils.randomStructuredModel(numGeneratingTopics, numTerms,
+                                                              new DoubleFunction() {
+                                                                @Override
+                                                                public double apply(double d) {
+                                                                  return 1.0 / Math.pow(d + 1, 3);
+                                                                }
+                                                              });
 
     int numDocs = 500;
     int numSamples = 10;
     int numTopicsPerDoc = 1;
 
-    Matrix sampledCorpus = sampledCorpus(matrix, RandomUtils.getRandom(),
+    Matrix sampledCorpus = ClusteringTestUtils.sampledCorpus(matrix, RandomUtils.getRandom(),
         numDocs, numSamples, numTopicsPerDoc);
 
     Path sampleCorpusPath = getTestTempDirPath("corpus");

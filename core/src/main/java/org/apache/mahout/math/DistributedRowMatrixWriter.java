@@ -24,7 +24,10 @@ import org.apache.hadoop.io.SequenceFile;
 
 import java.io.IOException;
 
-public class DistributedRowMatrixWriter {
+public final class DistributedRowMatrixWriter {
+
+  private DistributedRowMatrixWriter() {
+  }
 
   public static void write(Path outputDir, Configuration conf, VectorIterable matrix)
       throws IOException {

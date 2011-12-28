@@ -77,15 +77,15 @@ public class CachingCVB0Mapper
   protected void setup(Context context) throws IOException, InterruptedException {
     log.info("Retrieving configuration");
     Configuration conf = context.getConfiguration();
-    double eta = conf.getFloat(CVB0Driver.TERM_TOPIC_SMOOTHING, Float.NaN);
-    double alpha = conf.getFloat(CVB0Driver.DOC_TOPIC_SMOOTHING, Float.NaN);
+    float eta = conf.getFloat(CVB0Driver.TERM_TOPIC_SMOOTHING, Float.NaN);
+    float alpha = conf.getFloat(CVB0Driver.DOC_TOPIC_SMOOTHING, Float.NaN);
     long seed = conf.getLong(CVB0Driver.RANDOM_SEED, 1234L);
     numTopics = conf.getInt(CVB0Driver.NUM_TOPICS, -1);
     int numTerms = conf.getInt(CVB0Driver.NUM_TERMS, -1);
     int numUpdateThreads = conf.getInt(CVB0Driver.NUM_UPDATE_THREADS, 1);
     int numTrainThreads = conf.getInt(CVB0Driver.NUM_TRAIN_THREADS, 4);
     maxIters = conf.getInt(CVB0Driver.MAX_ITERATIONS_PER_DOC, 10);
-    double modelWeight = conf.getFloat(CVB0Driver.MODEL_WEIGHT, 1f);
+    float modelWeight = conf.getFloat(CVB0Driver.MODEL_WEIGHT, 1.0f);
 
     log.info("Initializing read model");
     TopicModel readModel;

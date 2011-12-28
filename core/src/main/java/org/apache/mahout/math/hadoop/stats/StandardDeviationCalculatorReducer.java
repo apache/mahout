@@ -28,7 +28,7 @@ public class StandardDeviationCalculatorReducer extends
   @Override
   protected void reduce(IntWritable key, Iterable<DoubleWritable> values,
                         Context context) throws IOException, InterruptedException {
-    long sum = 0;
+    double sum = 0.0;
     for (DoubleWritable value : values) {
       sum += value.get();
     }

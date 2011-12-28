@@ -17,11 +17,6 @@
 
 package org.apache.mahout.clustering.topdown;
 
-import static org.apache.mahout.clustering.topdown.TopDownClusteringPathConstants.bottomLevelClusterDirectory;
-import static org.apache.mahout.clustering.topdown.TopDownClusteringPathConstants.clusteredPointsDirectory;
-import static org.apache.mahout.clustering.topdown.TopDownClusteringPathConstants.postProcessDirectory;
-import static org.apache.mahout.clustering.topdown.TopDownClusteringPathConstants.topLevelClusterDirectory;
-
 import java.io.File;
 
 import org.apache.hadoop.fs.Path;
@@ -29,8 +24,16 @@ import org.apache.hadoop.fs.Path;
 /**
  * Contains list of all internal paths used in top down clustering.
  */
-public class PathDirectory {
-  
+public final class PathDirectory {
+
+  public static final String TOP_LEVEL_CLUSTER_DIRECTORY = "topLevelCluster";
+  public static final String POST_PROCESS_DIRECTORY = "clusterPostProcessed";
+  public static final String CLUSTERED_POINTS_DIRECTORY = "clusteredPoints";
+  public static final String BOTTOM_LEVEL_CLUSTER_DIRECTORY = "bottomLevelCluster";
+
+  private PathDirectory() {
+  }
+
   /**
    * All output of top level clustering is stored in output directory/topLevelCluster.
    * 
@@ -39,7 +42,7 @@ public class PathDirectory {
    * @return The top level Cluster Directory.
    */
   public static Path getTopLevelClusterPath(Path output) {
-    return new Path(output + File.separator + topLevelClusterDirectory);
+    return new Path(output + File.separator + TOP_LEVEL_CLUSTER_DIRECTORY);
   }
   
   /**
@@ -50,7 +53,7 @@ public class PathDirectory {
    * @return the path where the output of top level cluster post processor is kept.
    */
   public static Path getClusterPostProcessorOutputDirectory(Path outputPathProvidedByUser) {
-    return new Path(outputPathProvidedByUser + File.separator + postProcessDirectory);
+    return new Path(outputPathProvidedByUser + File.separator + POST_PROCESS_DIRECTORY);
   }
   
   /**
@@ -61,7 +64,7 @@ public class PathDirectory {
    * @return the clustered points directory
    */
   public static Path getClusterOutputClusteredPoints(Path output) {
-    return new Path(output + File.separator + clusteredPointsDirectory + File.separator, "*");
+    return new Path(output + File.separator + CLUSTERED_POINTS_DIRECTORY + File.separator, "*");
   }
   
   /**
@@ -72,7 +75,7 @@ public class PathDirectory {
    * @return the bottom level clustering path.
    */
   public static Path getBottomLevelClusterPath(Path output, String clusterId) {
-    return new Path(output + File.separator + bottomLevelClusterDirectory + File.separator + clusterId);
+    return new Path(output + File.separator + BOTTOM_LEVEL_CLUSTER_DIRECTORY + File.separator + clusterId);
   }
   
   /**

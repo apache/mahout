@@ -75,7 +75,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
 
   private Configuration conf;
 
-  private Sampler sampler;
+  private final Sampler sampler;
   private final int numThreads;
   private Updater[] updaters;
 
@@ -245,7 +245,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     for(int x = 0; x < numTopics; x++) {
       topicTermCounts.assignRow(x, new SequentialAccessSparseVector(numTerms));
     }
-    topicSums.assign(1d);
+    topicSums.assign(1.0);
     initializeThreadPool();
   }
 
@@ -258,7 +258,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   public void renormalize() {
     for(int x = 0; x < numTopics; x++) {
       topicTermCounts.assignRow(x, topicTermCounts.viewRow(x).normalize(1));
-      topicSums.assign(1d);
+      topicSums.assign(1.0);
     }
   }
 
@@ -278,7 +278,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
       }
     }
     // now recalculate p(topic|doc) by summing contributions from all of pTopicGivenTerm
-    topics.assign(0d);
+    topics.assign(0.0);
     for(int x = 0; x < numTopics; x++) {
       topics.set(x, docTopicModel.viewRow(x).norm(1));
     }
@@ -449,7 +449,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   private final class Updater implements Runnable {
-    private ArrayBlockingQueue<Pair<Integer, Vector>> queue =
+    private final ArrayBlockingQueue<Pair<Integer, Vector>> queue =
         new ArrayBlockingQueue<Pair<Integer, Vector>>(100);
     private boolean shutdown = false;
     private boolean shutdownComplete = false;

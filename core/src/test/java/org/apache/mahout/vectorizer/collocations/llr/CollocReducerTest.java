@@ -17,11 +17,6 @@
 
 package org.apache.mahout.vectorizer.collocations.llr;
 
-import static org.apache.mahout.vectorizer.collocations.llr.Gram.Type.HEAD;
-import static org.apache.mahout.vectorizer.collocations.llr.Gram.Type.NGRAM;
-import static org.apache.mahout.vectorizer.collocations.llr.Gram.Type.TAIL;
-import static org.apache.mahout.vectorizer.collocations.llr.Gram.Type.UNIGRAM;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -53,17 +48,17 @@ public final class CollocReducerTest extends MahoutTestCase {
     // input[*][1..n] are the values passed in via
     // the iterator.
     Gram[][] input = {
-        {new Gram("the", UNIGRAM), new Gram("the", UNIGRAM), new Gram("the", UNIGRAM)},
-        {new Gram("the", HEAD), new Gram("the best", NGRAM), new Gram("the worst", NGRAM)},
-        {new Gram("of", HEAD), new Gram("of times", NGRAM), new Gram("of times", NGRAM)},
-        {new Gram("times", TAIL), new Gram("of times", NGRAM), new Gram("of times", NGRAM)}};
+        {new Gram("the", Gram.Type.UNIGRAM), new Gram("the", Gram.Type.UNIGRAM), new Gram("the", Gram.Type.UNIGRAM)},
+        {new Gram("the", Gram.Type.HEAD), new Gram("the best", Gram.Type.NGRAM), new Gram("the worst", Gram.Type.NGRAM)},
+        {new Gram("of", Gram.Type.HEAD), new Gram("of times", Gram.Type.NGRAM), new Gram("of times", Gram.Type.NGRAM)},
+        {new Gram("times", Gram.Type.TAIL), new Gram("of times", Gram.Type.NGRAM), new Gram("of times", Gram.Type.NGRAM)}};
     
     // expected results.
-    Gram[][] values = {{new Gram("the", 2, UNIGRAM), new Gram("the", 2, UNIGRAM)},
-                                    {new Gram("the best", 1, NGRAM), new Gram("the", 2, HEAD)},
-                                    {new Gram("the worst", 1, NGRAM), new Gram("the", 2, HEAD)},
-                                    {new Gram("of times", 2, NGRAM), new Gram("of", 2, HEAD)},
-                                    {new Gram("of times", 2, NGRAM), new Gram("times", 2, TAIL)}};
+    Gram[][] values = {{new Gram("the", 2, Gram.Type.UNIGRAM), new Gram("the", 2, Gram.Type.UNIGRAM)},
+                                    {new Gram("the best", 1, Gram.Type.NGRAM), new Gram("the", 2, Gram.Type.HEAD)},
+                                    {new Gram("the worst", 1, Gram.Type.NGRAM), new Gram("the", 2, Gram.Type.HEAD)},
+                                    {new Gram("of times", 2, Gram.Type.NGRAM), new Gram("of", 2, Gram.Type.HEAD)},
+                                    {new Gram("of times", 2, Gram.Type.NGRAM), new Gram("times", 2, Gram.Type.TAIL)}};
 
     // set up expectations
     for (Gram[] v : values) {

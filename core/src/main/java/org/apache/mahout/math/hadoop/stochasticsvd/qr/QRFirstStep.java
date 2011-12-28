@@ -66,7 +66,7 @@ public class QRFirstStep implements Closeable, OutputCollector<Writable, Vector>
   private final DenseBlockWritable value = new DenseBlockWritable();
   private final Writable tempKey = new IntWritable();
   private MultipleOutputs outputs;
-  private final Deque<Closeable> closeables = Lists.<Closeable>newLinkedList();
+  private final Deque<Closeable> closeables = Lists.newLinkedList();
   private SequenceFile.Writer tempQw;
   private Path tempQPath;
   private final List<UpperTriangular> rSubseq = Lists.newArrayList();

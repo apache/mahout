@@ -96,6 +96,7 @@ public class Cluster extends DistanceMeasureCluster {
     return converged;
   }
 
+  @Override
   public boolean isConverged() {
     return converged;
   }

@@ -59,7 +59,6 @@ import org.apache.mahout.math.hadoop.stochasticsvd.qr.QRFirstStep;
 /**
  * Computes ABt products, then first step of QR which is pushed down to the
  * reducer.
- * 
  */
 @SuppressWarnings("deprecation")
 public class ABtDenseOutJob {
@@ -149,20 +148,18 @@ public class ABtDenseOutJob {
       InterruptedException {
       try {
 
-        int lastRowIndex = -1;
-
         yiCols = new double[kp][];
 
         for (int i = 0; i < kp; i++) {
           yiCols[i] = new double[Math.min(aRowCount, blockHeight)];
         }
 
-        final int numPasses = (aRowCount - 1) / blockHeight + 1;
+        int numPasses = (aRowCount - 1) / blockHeight + 1;
 
         String propBtPathStr = context.getConfiguration().get(PROP_BT_PATH);
         Validate.notNull(propBtPathStr, "Bt input is not set");
-        final Path btPath = new Path(propBtPathStr);
-        final DenseBlockWritable dbw = new DenseBlockWritable();
+        Path btPath = new Path(propBtPathStr);
+        DenseBlockWritable dbw = new DenseBlockWritable();
 
         /*
          * so it turns out that it may be much more efficient to do a few
@@ -178,13 +175,13 @@ public class ABtDenseOutJob {
          * that projection is thicker than the original anyway, why would one
          * use that many k+p then).
          */
+        int lastRowIndex = -1;
         for (int pass = 0; pass < numPasses; pass++) {
 
           if (distributedBt) {
 
             btInput =
               new SequenceFileDirIterator<IntWritable, VectorWritable>(btLocalPath,
-                                                                       null,
                                                                        true,
                                                                        localFsConfig);
 
@@ -208,15 +205,18 @@ public class ABtDenseOutJob {
            * check if we need to trim block allocation
            */
           if (pass > 0) {
-            if (bh != blockHeight) {
-
-              for (int i = 0; i < kp; i++)
-                yiCols[i] = null;
-              for (int i = 0; i < kp; i++)
-                yiCols[i] = new double[bh];
-            } else {
-              for (int i = 0; i < kp; i++)
+            if (bh == blockHeight) {
+              for (int i = 0; i < kp; i++) {
                 Arrays.fill(yiCols[i], 0.0);
+              }
+            } else {
+
+              for (int i = 0; i < kp; i++) {
+                yiCols[i] = null;
+              }
+              for (int i = 0; i < kp; i++) {
+                yiCols[i] = new double[bh];
+              }
             }
           }
 
@@ -247,10 +247,12 @@ public class ABtDenseOutJob {
                * at very few elements without engaging them in any operations so
                * even then it should be ok.
                */
-              if (j < aRowBegin)
+              if (j < aRowBegin) {
                 continue;
-              else if (j >= aRowBegin + bh)
+              }
+              if (j >= aRowBegin + bh) {
                 break;
+              }
 
               /*
                * assume btVec is dense
@@ -282,7 +284,7 @@ public class ABtDenseOutJob {
     }
 
     @Override
-    protected void setup(final Context context) throws IOException,
+    protected void setup(Context context) throws IOException,
       InterruptedException {
 
       int k =
@@ -400,8 +402,9 @@ public class ABtDenseOutJob {
       }
 
       for (int k = 0; k < bh; k++) {
-        for (int j = 0; j < yiCols.length; j++)
+        for (int j = 0; j < yiCols.length; j++) {
           yiRow.setQuick(j, yiCols[j][k]);
+        }
 
         key.setTaskItemOrdinal(blockBase + k);
         qr.collect(key, yiRow);

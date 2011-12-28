@@ -196,10 +196,8 @@ public final class TFIDFConverter {
     Path wordCountPath = new Path(output, WORDCOUNT_OUTPUT_FOLDER);
 
     startDFCounting(input, wordCountPath, baseConf);
-    Pair<Long[], List<Path>> datasetFeatures =
-        createDictionaryChunks(wordCountPath, output, baseConf, chunkSizeInMegabytes);
-    
-    return datasetFeatures;
+
+    return createDictionaryChunks(wordCountPath, output, baseConf, chunkSizeInMegabytes);
   }
 
   /**
