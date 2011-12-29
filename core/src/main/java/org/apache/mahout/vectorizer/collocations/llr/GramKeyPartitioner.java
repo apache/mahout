@@ -17,35 +17,24 @@
 
 package org.apache.mahout.vectorizer.collocations.llr;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.WritableComparator;
 import org.apache.hadoop.mapreduce.Partitioner;
 
 /**
  * Partition GramKeys based on their Gram, ignoring the secondary sort key so that all GramKeys with the same
  * gram are sent to the same partition.
  */
-public class GramKeyPartitioner extends Partitioner<GramKey, Gram> {
-
-  private static final String HASH_OFFSET_PROPERTY_NAME = "grampartitioner.hash.offset";
-    
-  public static void setOffsets(Configuration conf, int left) {
-    conf.setInt(HASH_OFFSET_PROPERTY_NAME, left);
-  }
-  
-  private int offset;
+public final class GramKeyPartitioner extends Partitioner<GramKey, Gram> {
 
   @Override
   public int getPartition(GramKey key, Gram value, int numPartitions) {
-    // see: http://svn.apache.org/viewvc/hadoop/mapreduce/trunk/src/java/org/apache/hadoop/mapreduce/
-    //      lib/partition/BinaryPartitioner.java?revision=816664&view=markup
-    int length = key.getLength() - 1;
-    int right = (offset + length) % length;
-    int hash = WritableComparator.hashBytes(key.getBytes(), right);
+    int hash = 1;
+    byte[] bytes = key.getBytes();
+    int length = key.getPrimaryLength();
+    // Copied from WritableComparator.hashBytes(); skips first byte, type byte
+    for (int i = 1; i < length; i++) {
+      hash = (31 * hash) + (int) bytes[i];
+    }
     return (hash & Integer.MAX_VALUE) % numPartitions;
   }
 
-  public void configure(Configuration conf) {
-    offset = conf.getInt(HASH_OFFSET_PROPERTY_NAME, -1);
-  }
 }
