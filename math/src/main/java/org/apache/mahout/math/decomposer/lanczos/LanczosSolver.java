@@ -150,7 +150,7 @@ public class LanczosSolver {
       Vector realEigen = null;
       // the eigenvectors live as columns of V, in reverse order.  Weird but true.
       DoubleMatrix1D ejCol = eigenVects.viewColumn(i - row - 1);
-      int size = ejCol.size();
+      int size = Math.min(ejCol.size(), state.getBasisSize());
       for (int j = 0; j < size; j++) {
         double d = ejCol.get(j);
         Vector rowJ = state.getBasisVector(j);

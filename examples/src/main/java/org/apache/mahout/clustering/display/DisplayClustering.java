@@ -30,31 +30,37 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusterClassifier;
+import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
+import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
+import com.google.common.io.Closeables;
 
 public class DisplayClustering extends Frame {
 
@@ -160,6 +166,77 @@ public class DisplayClustering extends Frame {
     for (VectorWritable v : SAMPLE_DATA) {
       plotRectangle(g2, v.get(), dv);
     }
+  }
+  
+  /**
+   * This method plots points and colors them according to their cluster
+   * membership, rather than drawing ellipses.
+   * 
+   * As of commit, this method is used only by K-means spectral clustering.
+   * Since the cluster assignments are set within the eigenspace of the data,
+   * it is not inherent that the original data cluster as they would in K-means:
+   * that is, as symmetric gaussian mixtures.
+   * 
+   * Since Spectral K-Means uses K-Means to cluster the eigenspace data, the
+   * raw output is not directly usable. Rather, the cluster assignments from the
+   * raw output need to be transferred back to the original data. As such, this
+   * method will read the SequenceFile cluster results of K-means and transfer
+   * the cluster assignments to the original data, coloring them appropriately.
+   * 
+   * @param g2
+   * @param data
+   */
+  protected static void plotClusteredSampleData(Graphics2D g2, Path data) {
+  	double sx = (double) res / DS;
+  	g2.setTransform(AffineTransform.getScaleInstance(sx, sx));
+  	
+    g2.setColor(Color.BLACK);
+    Vector dv = new DenseVector(2).assign(SIZE / 2.0);
+    plotRectangle(g2, new DenseVector(2).assign(2), dv);
+    plotRectangle(g2, new DenseVector(2).assign(-2), dv);
+
+    // plot the sample data, colored according to the cluster they belong to
+    dv.assign(0.03);
+    
+    Path clusteredPointsPath = new Path(data, "clusteredPoints");
+    Path inputPath = new Path(clusteredPointsPath, "part-m-00000");
+    HashMap<Integer, Color> colors = new HashMap<Integer, Color>();
+    int point = 0;
+    for (Pair<IntWritable,WeightedVectorWritable> record 
+         : new SequenceFileIterable<IntWritable, WeightedVectorWritable>(inputPath, new Configuration())) {
+    	int clusterId = record.getFirst().get();
+    	VectorWritable v = SAMPLE_DATA.get(point++);
+    	Integer key = new Integer(clusterId);
+    	if (!colors.containsKey(key)){
+    		colors.put(key, COLORS[Math.min(COLORS.length - 1, colors.size())]);
+    	}
+    	plotClusteredRectangle(g2, v.get(), dv, colors.get(key));
+    }
+  }
+  
+  /**
+   * Identical to plotRectangle(), but with the option of setting the color
+   * of the rectangle's stroke.
+   * 
+   * NOTE: This should probably be refactored with plotRectangle() since most
+   * of the code here is direct copy/paste from that method.
+   * 
+   * @param g2 A Graphics2D context.
+   * @param v A vector for the rectangle's center.
+   * @param dv A vector for the rectangle's dimensions.
+   * @param color The color of the rectangle's stroke.
+   */
+  protected static void plotClusteredRectangle(Graphics2D g2, Vector v, Vector dv, Color color) {
+    double[] flip = {1, -1};
+    Vector v2 = v.times(new DenseVector(flip));
+    v2 = v2.minus(dv.divide(2));
+    int h = SIZE / 2;
+    double x = v2.get(0) + h;
+    double y = v2.get(1) + h;
+    
+  	g2.setStroke(new BasicStroke(1));
+  	g2.setColor(color);
+    g2.draw(new Rectangle2D.Double(x * DS, y * DS, dv.get(0) * DS, dv.get(1) * DS));
   }
 
   /**

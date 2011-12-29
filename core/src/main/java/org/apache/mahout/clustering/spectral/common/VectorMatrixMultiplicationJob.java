@@ -59,6 +59,12 @@ public final class VectorMatrixMultiplicationJob {
   public static DistributedRowMatrix runJob(Path markovPath, Vector diag, Path outputPath)
     throws IOException, ClassNotFoundException, InterruptedException {
     
+    return runJob(markovPath, diag, outputPath, new Path(outputPath, "tmp"));
+  }
+
+  public static DistributedRowMatrix runJob(Path markovPath, Vector diag, Path outputPath, Path tmpPath)
+    throws IOException, ClassNotFoundException, InterruptedException {
+
     // set up the serialization of the diagonal vector
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
@@ -66,7 +72,7 @@ public final class VectorMatrixMultiplicationJob {
     outputPath = fs.makeQualified(outputPath);
     Path vectorOutputPath = new Path(outputPath.getParent(), "vector");
     VectorCache.save(new IntWritable(EigencutsKeys.DIAGONAL_CACHE_INDEX), diag, vectorOutputPath, conf);
-    
+
     // set up the job itself
     Job job = new Job(conf, "VectorMatrixMultiplication");
     job.setInputFormatClass(SequenceFileInputFormat.class);
@@ -75,16 +81,16 @@ public final class VectorMatrixMultiplicationJob {
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setMapperClass(VectorMatrixMultiplicationMapper.class);
     job.setNumReduceTasks(0);
-    
+
     FileInputFormat.addInputPath(job, markovPath);
     FileOutputFormat.setOutputPath(job, outputPath);
 
     job.setJarByClass(VectorMatrixMultiplicationJob.class);
 
     job.waitForCompletion(true);
-    
+
     // build the resulting DRM from the results
-    return new DistributedRowMatrix(outputPath, new Path(outputPath, "tmp"), 
+    return new DistributedRowMatrix(outputPath, tmpPath,
         diag.size(), diag.size());
   }
   

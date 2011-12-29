@@ -141,7 +141,7 @@ public class SpectralKMeansDriver extends AbstractJob {
     Vector D = MatrixDiagonalizeJob.runJob(affSeqFiles, numDims);
     DistributedRowMatrix L =
         VectorMatrixMultiplicationJob.runJob(affSeqFiles, D,
-            new Path(outputCalc, "laplacian-" + (System.nanoTime() & 0xFF)));
+            new Path(outputCalc, "laplacian-" + (System.nanoTime() & 0xFF)), new Path(outputCalc, "laplacian-tmp-" + (System.nanoTime() & 0xFF)));
     L.setConf(depConf);
 
     // Next step: perform eigen-decomposition using LanczosSolver
@@ -181,6 +181,11 @@ public class SpectralKMeansDriver extends AbstractJob {
                                                            new Path(output, Cluster.INITIAL_CLUSTERS_DIR),
                                                            clusters,
                                                            measure);
+    
+    // The output format is the same as the K-means output format.
+    // TODO: Perhaps a conversion of the output format from points and clusters
+    // in eigenspace to the original dataset. Currently, the user has to perform
+    // the association step after this job finishes on their own.
     KMeansDriver.run(conf,
                      Wt.getRowPath(),
                      initialclusters,
@@ -190,16 +195,5 @@ public class SpectralKMeansDriver extends AbstractJob {
                      maxIterations,
                      true,
                      false);
-
-    // Read through the cluster assignments
-    Path clusteredPointsPath = new Path(output, "clusteredPoints");
-    Path inputPath = new Path(clusteredPointsPath, "part-m-00000");
-    int id = 0;
-    for (Pair<IntWritable,WeightedVectorWritable> record 
-         : new SequenceFileIterable<IntWritable, WeightedVectorWritable>(inputPath, conf)) {
-      log.info("{}: {}", id++, record.getFirst().get());
-    }
-
-    // TODO: output format???
   }
 }

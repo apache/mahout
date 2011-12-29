@@ -80,6 +80,10 @@ public class LanczosState {
     return basis.get(i);
   }
 
+  public int getBasisSize(){
+    return basis.size();
+  }
+
   public void setBasisVector(int i, Vector basisVector) {
     basis.put(i, basisVector);
   }

@@ -36,6 +36,10 @@ import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 
 public class DisplaySpectralKMeans extends DisplayClustering {
 
+	protected static final String SAMPLES = "samples";
+	protected static final String OUTPUT = "output";
+	protected static final String AFFINITIES = "affinities";
+	
   DisplaySpectralKMeans() {
     initialize();
     this.setTitle("Spectral k-Means Clusters (>" + (int) (significance * 100) + "% of population)");
@@ -43,8 +47,8 @@ public class DisplaySpectralKMeans extends DisplayClustering {
 
   public static void main(String[] args) throws Exception {
     DistanceMeasure measure = new ManhattanDistanceMeasure();
-    Path samples = new Path("samples");
-    Path output = new Path("output");
+    Path samples = new Path(SAMPLES);
+    Path output = new Path(OUTPUT);
     Configuration conf = new Configuration();
     HadoopUtil.delete(conf, samples);
     HadoopUtil.delete(conf, output);
@@ -52,7 +56,7 @@ public class DisplaySpectralKMeans extends DisplayClustering {
     RandomUtils.useTestSeed();
     DisplayClustering.generateSamples();
     writeSampleData(samples);
-    Path affinities = new Path(output, "affinities");
+    Path affinities = new Path(output, AFFINITIES);
     FileSystem fs = FileSystem.get(output.toUri(), conf);
     if (!fs.exists(output)) {
       fs.mkdirs(output);
@@ -69,15 +73,13 @@ public class DisplaySpectralKMeans extends DisplayClustering {
     }
     int maxIter = 10;
     double convergenceDelta = 0.001;
-    SpectralKMeansDriver.run(new Configuration(), affinities, output, 1100, 2, measure, convergenceDelta, maxIter);
-    loadClusters(output);
+    SpectralKMeansDriver.run(new Configuration(), affinities, output, SAMPLE_DATA.size(), 3, measure, convergenceDelta, maxIter);
     new DisplaySpectralKMeans();
   }
 
   // Override the paint() method
   @Override
   public void paint(Graphics g) {
-    plotSampleData((Graphics2D) g);
-    plotClusters((Graphics2D) g);
+  	plotClusteredSampleData((Graphics2D) g, new Path(OUTPUT));
   }
 }
