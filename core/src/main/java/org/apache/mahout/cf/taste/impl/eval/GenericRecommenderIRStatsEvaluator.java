@@ -17,17 +17,16 @@
 
 package org.apache.mahout.cf.taste.impl.eval;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
-import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.eval.DataModelBuilder;
 import org.apache.mahout.cf.taste.eval.IRStatistics;
 import org.apache.mahout.cf.taste.eval.RecommenderBuilder;
 import org.apache.mahout.cf.taste.eval.RecommenderIRStatsEvaluator;
+import org.apache.mahout.cf.taste.eval.RelevantItemsDataSplitter;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
@@ -36,9 +35,7 @@ import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
-import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
@@ -63,7 +60,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
   private static final Logger log = LoggerFactory.getLogger(GenericRecommenderIRStatsEvaluator.class);
 
   private static final double LOG2 = Math.log(2.0);
-  
+
   /**
    * Pass as "relevanceThreshold" argument to
    * {@link #evaluate(RecommenderBuilder, DataModelBuilder, DataModel, IDRescorer, int, double, double)} to
@@ -72,9 +69,16 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
   public static final double CHOOSE_THRESHOLD = Double.NaN;
   
   private final Random random;
-  
+  private final RelevantItemsDataSplitter dataSplitter;
+
   public GenericRecommenderIRStatsEvaluator() {
-    random = RandomUtils.getRandom();
+	  this(new GenericRelevantItemsDataSplitter());
+  }
+  
+  public GenericRecommenderIRStatsEvaluator(RelevantItemsDataSplitter dataSplitter) {
+    Preconditions.checkNotNull(dataSplitter);
+	  random = RandomUtils.getRandom();
+	  this.dataSplitter = dataSplitter;
   }
   
   @Override
@@ -113,24 +117,10 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
       long start = System.currentTimeMillis();
 
       PreferenceArray prefs = dataModel.getPreferencesFromUser(userID);
-      int size = prefs.length();
-      if (size < 2 * at) {
-        // Really not enough prefs to meaningfully evaluate this user
-        continue;
-      }
-
-      FastIDSet relevantItemIDs = new FastIDSet(at);
 
       // List some most-preferred items that would count as (most) "relevant" results
       double theRelevanceThreshold = Double.isNaN(relevanceThreshold) ? computeThreshold(prefs) : relevanceThreshold;
-
-      prefs.sortByValueReversed();
-
-      for (int i = 0; i < size && relevantItemIDs.size() < at; i++) {
-        if (prefs.getValue(i) >= theRelevanceThreshold) {
-          relevantItemIDs.add(prefs.getItemID(i));
-        }
-      }
+      FastIDSet relevantItemIDs = dataSplitter.getRelevantItemsIDs(userID, at, theRelevanceThreshold, dataModel);
 
       int numRelevantItems = relevantItemIDs.size();
       if (numRelevantItems <= 0) {
@@ -140,18 +130,24 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
       FastByIDMap<PreferenceArray> trainingUsers = new FastByIDMap<PreferenceArray>(dataModel.getNumUsers());
       LongPrimitiveIterator it2 = dataModel.getUserIDs();
       while (it2.hasNext()) {
-        processOtherUser(userID, relevantItemIDs, trainingUsers, it2.nextLong(), dataModel);
+        dataSplitter.processOtherUser(userID, relevantItemIDs, trainingUsers, it2.nextLong(), dataModel);
       }
 
       DataModel trainingModel = dataModelBuilder == null ? new GenericDataModel(trainingUsers)
           : dataModelBuilder.buildDataModel(trainingUsers);
-      Recommender recommender = recommenderBuilder.buildRecommender(trainingModel);
-
       try {
         trainingModel.getPreferencesFromUser(userID);
       } catch (NoSuchUserException nsee) {
         continue; // Oops we excluded all prefs for the user -- just move on
       }
+
+      int size = relevantItemIDs.size() + trainingModel.getItemIDsFromUser(userID).size();
+      if (size < 2 * at) {
+        // Really not enough prefs to meaningfully evaluate this user
+        continue;
+      }
+
+      Recommender recommender = recommenderBuilder.buildRecommender(trainingModel);
 
       int intersectionSize = 0;
       List<RecommendedItem> recommendedItems = recommender.recommend(userID, at, rescorer);
@@ -219,31 +215,6 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
         fallOut.getAverage(),
         nDCG.getAverage(),
         reach);
-  }
-  
-  private static void processOtherUser(long id,
-                                       FastIDSet relevantItemIDs,
-                                       FastByIDMap<PreferenceArray> trainingUsers,
-                                       long userID2,
-                                       DataModel dataModel) throws TasteException {
-    PreferenceArray prefs2Array = dataModel.getPreferencesFromUser(userID2);
-    if (id == userID2) {
-      List<Preference> prefs2 = Lists.newArrayListWithCapacity(prefs2Array.length());
-      for (Preference pref : prefs2Array) {
-        prefs2.add(pref);
-      }
-      for (Iterator<Preference> iterator = prefs2.iterator(); iterator.hasNext();) {
-        Preference pref = iterator.next();
-        if (relevantItemIDs.contains(pref.getItemID())) {
-          iterator.remove();
-        }
-      }
-      if (!prefs2.isEmpty()) {
-        trainingUsers.put(userID2, new GenericUserPreferenceArray(prefs2));
-      }
-    } else {
-      trainingUsers.put(userID2, prefs2Array);
-    }
   }
   
   private static double computeThreshold(PreferenceArray prefs) {
