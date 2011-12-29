@@ -23,12 +23,12 @@
  * <p>The trainer is manifested in several classes:</p>
  *
  * <ol>
- *   <li>{@link org.apache.mahout.classifier.bayes.BayesDriver} -- Creates the Hadoop Naive Bayes job and outputs
+ *   <li>{@link org.apache.mahout.classifier.bayes.mapreduce.bayes.BayesDriver} -- Creates the Hadoop Naive Bayes job and outputs
  *     the model. This Driver encapsulates a lot of intermediate Map-Reduce Classes</li>
- *   <li>{@link org.apache.mahout.classifier.bayes.common.BayesFeatureDriver}</li>
- *   <li>{@link org.apache.mahout.classifier.bayes.common.BayesTfIdfDriver}</li>
- *   <li>{@link org.apache.mahout.classifier.bayes.common.BayesWeightSummerDriver}</li>
- *   <li>{@link org.apache.mahout.classifier.bayes.BayesThetaNormalizerDriver}</li>
+ *   <li>{@link org.apache.mahout.classifier.bayes.mapreduce.common.BayesFeatureDriver}</li>
+ *   <li>{@link org.apache.mahout.classifier.bayes.mapreduce.common.BayesTfIdfDriver}</li>
+ *   <li>{@link org.apache.mahout.classifier.bayes.mapreduce.common.BayesWeightSummerDriver}</li>
+ *   <li>{@link org.apache.mahout.classifier.bayes.mapreduce.bayes.BayesThetaNormalizerDriver}</li>
  * </ol>
  *
  * <p>The trainer assumes that the input files are in the {@link org.apache.hadoop.mapred.KeyValueTextInputFormat},
@@ -44,19 +44,5 @@
  * particular labels.</p>
  *
  * <p>The output from the trainer is a {@link org.apache.hadoop.io.SequenceFile}.</p>
- *
- * <h3>The Model</h3>
- *
- * <p>The {@link org.apache.mahout.classifier.bayes.BayesModel} is the data structure used to represent the results of
- * the training for use by the {@link org.apache.mahout.classifier.bayes.BayesClassifier}.
- * A Model can be created by hand, or, if using
- * the {@link org.apache.mahout.classifier.bayes.BayesDriver}, it can be created from the
- * {@link org.apache.hadoop.io.SequenceFile} that is output. To create it from the SequenceFile, use the
- * {@link SequenceFileModelReader} located in the io subpackage.</p>
- *
- * <h3>The Classifier</h3>
- *
- * <p>The {@link org.apache.mahout.classifier.bayes.BayesClassifier} is responsible for using a
- * {@link org.apache.mahout.classifier.bayes.BayesModel} to classify documents into categories.</p>
  */
 package org.apache.mahout.classifier.bayes;

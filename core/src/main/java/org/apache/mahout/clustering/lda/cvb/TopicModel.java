@@ -366,9 +366,6 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
 
   /**
    * sum_x sum_a (c_ai * log(p(x|i) * p(a|x)))
-   * @param document
-   * @param docTopics
-   * @return
    */
   public double perplexity(Vector document, Vector docTopics) {
     double perplexity = 0;

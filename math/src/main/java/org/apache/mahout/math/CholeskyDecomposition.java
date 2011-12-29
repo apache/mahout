@@ -190,9 +190,6 @@ public class CholeskyDecomposition {
 
   /**
    * Compute z * inv(L') efficiently
-   *
-   * @param z
-   * @return
    */
   public Matrix solveRight(Matrix z) {
     int n = z.columnSize();

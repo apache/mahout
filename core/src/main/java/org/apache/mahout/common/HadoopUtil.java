@@ -55,16 +55,6 @@ public final class HadoopUtil {
   /**
    * Create a map-only Hadoop Job out of the passed in parameters.  Does not set the
    * Job name.
-   * @param inputPath
-   * @param outputPath
-   * @param inputFormat
-   * @param mapper
-   * @param mapperKey
-   * @param mapperValue
-   * @param outputFormat
-   * @param conf
-   * @return
-   * @throws IOException
    *
    * @see #getCustomJobName(String, org.apache.hadoop.mapreduce.JobContext, Class, Class)
    */

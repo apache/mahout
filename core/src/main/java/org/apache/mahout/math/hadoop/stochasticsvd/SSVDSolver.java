@@ -660,12 +660,6 @@ public class SSVDSolver {
   /**
    * Load only one upper triangular matrix and issue error if mroe than one is
    * found.
-   * 
-   * @param fs
-   * @param glob
-   * @param conf
-   * @return
-   * @throws IOException
    */
   public static UpperTriangular loadUpperTriangularMatrix(FileSystem fs,
                                                           Path glob,

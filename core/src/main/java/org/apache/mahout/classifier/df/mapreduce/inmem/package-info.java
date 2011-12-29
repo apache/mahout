@@ -17,8 +17,6 @@
  * <p>The Forest builder ({@link org.apache.mahout.classifier.df.mapreduce.inmem.InMemBuilder}) is responsible
  * for configuring and launching the job.
  * At the end of the job it parses the output files and builds the corresponding
- * {@link org.apache.mahout.classifier.df.DecisionForest}, and for each tree prediction it calls (if available) a
- * {@link org.apache.mahout.classifier.df.callback.PredictionCallback} that allows the caller to compute any error
- * needed.</p>
+ * {@link org.apache.mahout.classifier.df.DecisionForest}.</p>
  */
 package org.apache.mahout.classifier.df.mapreduce.inmem;

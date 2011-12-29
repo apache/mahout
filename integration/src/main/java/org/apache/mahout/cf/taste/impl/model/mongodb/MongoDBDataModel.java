@@ -66,7 +66,7 @@ import com.mongodb.MongoException;
  *
  * <p>An example of a document in MongoDB:</p>
  *
- * <p>{@code{ "_id" : ObjectId("4d7627bf6c7d47ade9fc7780"),
+ * <p>{@code { "_id" : ObjectId("4d7627bf6c7d47ade9fc7780"),
  * "user_id" : ObjectId("4c2209fef3924d31102bd84b"),
  * "item_id" : ObjectId(4c2209fef3924d31202bd853),
  * "preference" : 0.5,
