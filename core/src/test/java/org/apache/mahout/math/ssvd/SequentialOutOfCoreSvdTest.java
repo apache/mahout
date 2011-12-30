@@ -26,7 +26,6 @@ import org.apache.mahout.math.MatrixWritable;
 import org.apache.mahout.math.RandomTrinaryMatrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -49,19 +48,7 @@ public final class SequentialOutOfCoreSvdTest extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    tmpDir = File.createTempFile("matrix", "");
-    assertTrue(tmpDir.delete());
-    assertTrue(tmpDir.mkdir());
-  }
-
-  @Override
-  @After
-  public void tearDown() throws Exception {
-    for (File f : tmpDir.listFiles()) {
-      assertTrue(f.delete());
-    }
-    assertTrue(tmpDir.delete());
-    super.tearDown();
+    tmpDir = getTestTempDir("matrix");
   }
 
   @Test
@@ -70,8 +57,8 @@ public final class SequentialOutOfCoreSvdTest extends MahoutTestCase {
 
     List<File> partsOfA = Arrays.asList(tmpDir.listFiles(new FilenameFilter() {
       @Override
-      public boolean accept(File file, String s) {
-        return s.matches("A-.*");
+      public boolean accept(File file, String fileName) {
+        return fileName.matches("A-.*");
       }
     }));
     SequentialOutOfCoreSvd s = new SequentialOutOfCoreSvd(partsOfA, "U", "V", tmpDir, 100, 210);
@@ -79,21 +66,21 @@ public final class SequentialOutOfCoreSvdTest extends MahoutTestCase {
 
     Vector reference = new DenseVector(svd.getSingularValues()).viewPart(0, 6);
     Vector actual = s.getSingularValues().viewPart(0, 6);
-    assertEquals(0, reference.minus(actual).maxValue(), 1e-9);
+    assertEquals(0, reference.minus(actual).maxValue(), 1.0e-9);
 
     s.computeU(partsOfA, "U-", tmpDir);
     Matrix u = readBlockMatrix(Arrays.asList(tmpDir.listFiles(new FilenameFilter() {
       @Override
-      public boolean accept(File file, String s) {
-        return s.matches("U-.*");
+      public boolean accept(File file, String fileName) {
+        return fileName.matches("U-.*");
       }
     })));
 
     s.computeV(tmpDir, "V-", A.columnSize());
     Matrix v = readBlockMatrix(Arrays.asList(tmpDir.listFiles(new FilenameFilter() {
       @Override
-      public boolean accept(File file, String s) {
-        return s.matches("V-.*");
+      public boolean accept(File file, String fileName) {
+        return fileName.matches("V-.*");
       }
     })));
 
