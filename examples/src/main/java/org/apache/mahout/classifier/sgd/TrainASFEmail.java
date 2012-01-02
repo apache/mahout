@@ -23,6 +23,7 @@ import com.google.common.collect.Multiset;
 import com.google.common.collect.Ordering;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.Text;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
@@ -67,7 +68,13 @@ public final class TrainASFEmail {
 
     //We ran seq2encoded and split input already, so let's just build up the dictionary
     Configuration conf = new Configuration();
-    SequenceFileDirIterator<Text, VectorWritable> iter = new SequenceFileDirIterator<Text, VectorWritable>(new Path(base.toString()), PathType.LIST, PathFilters.partFilter(),
+    PathFilter trainFilter = new PathFilter() {
+      @Override
+      public boolean accept(Path path) {
+        return path.getName().contains("training");
+      }
+    };
+    SequenceFileDirIterator<Text, VectorWritable> iter = new SequenceFileDirIterator<Text, VectorWritable>(new Path(base.toString()), PathType.LIST, trainFilter,
             null, true, conf);
     long numItems = 0;
     while (iter.hasNext()) {
@@ -81,7 +88,7 @@ public final class TrainASFEmail {
 
     SGDInfo info = new SGDInfo();
 
-    iter = new SequenceFileDirIterator<Text, VectorWritable>(new Path(base.toString()), PathType.LIST, PathFilters.partFilter(),
+    iter = new SequenceFileDirIterator<Text, VectorWritable>(new Path(base.toString()), PathType.LIST, trainFilter,
             null, true, conf);
     int k = 0;
     while (iter.hasNext()) {

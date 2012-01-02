@@ -28,7 +28,16 @@ import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
 import org.apache.mahout.classifier.ClassifierData;
+import org.apache.mahout.math.SequentialAccessSparseVector;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,40 +50,44 @@ public final class SplitInputTest extends MahoutTestCase {
   private Path tempInputFile;
   private Path tempTrainingDirectory;
   private Path tempTestDirectory;
+  private Path tempMapRedOutputDirectory;
   private Path tempInputDirectory;
+  private Path tempSequenceDirectory;
   private SplitInput si;
-    
+
   @Override
   @Before
   public void setUp() throws Exception {
     Configuration conf = new Configuration();
-    fs   = FileSystem.get(conf);
-    
+    fs = FileSystem.get(conf);
+
     super.setUp();
-  
+
     countMap = new OpenObjectIntHashMap<String>();
-    
+
     charset = Charsets.UTF_8;
+    tempSequenceDirectory = getTestTempFilePath("tmpsequence");
     tempInputFile = getTestTempFilePath("bayesinputfile");
     tempTrainingDirectory = getTestTempDirPath("bayestrain");
     tempTestDirectory = getTestTempDirPath("bayestest");
+    tempMapRedOutputDirectory = new Path(getTestTempDirPath(), "mapRedOutput");
     tempInputDirectory = getTestTempDirPath("bayesinputdir");
-    
+
     si = new SplitInput();
     si.setTrainingOutputDirectory(tempTrainingDirectory);
     si.setTestOutputDirectory(tempTestDirectory);
     si.setInputDirectory(tempInputDirectory);
   }
-  
+
   private void writeMultipleInputFiles() throws IOException {
     Writer writer = null;
     String currentLabel = null;
-    
+
     for (String[] entry : ClassifierData.DATA) {
       if (!entry[0].equals(currentLabel)) {
         currentLabel = entry[0];
         Closeables.closeQuietly(writer);
-        
+
         writer = new BufferedWriter(new OutputStreamWriter(fs.create(new Path(tempInputDirectory, currentLabel)),
             Charsets.UTF_8));
       }
@@ -109,7 +122,7 @@ public final class SplitInputTest extends MahoutTestCase {
             assertSplit(fs, inputFile, charset, testSplitSize, trainingLines, tempTrainingDirectory, tempTestDirectory);
           }
     });
-    
+
     si.splitDirectory(tempInputDirectory);
   }
 
@@ -134,7 +147,7 @@ public final class SplitInputTest extends MahoutTestCase {
   public void testSplitFilePct() throws Exception {
     writeSingleInputFile();
     si.setTestSplitPct(25);
-   
+
     si.setCallback(new TestCallback(3, 9));
     si.splitFile(tempInputFile);
   }
@@ -152,7 +165,7 @@ public final class SplitInputTest extends MahoutTestCase {
   public void testSplitFileRandomSelectionSize() throws Exception {
     writeSingleInputFile();
     si.setTestRandomSelectionSize(5);
-   
+
     si.setCallback(new TestCallback(5, 7));
     si.splitFile(tempInputFile);
   }
@@ -161,56 +174,250 @@ public final class SplitInputTest extends MahoutTestCase {
   public void testSplitFileRandomSelectionPct() throws Exception {
     writeSingleInputFile();
     si.setTestRandomSelectionPct(25);
-   
+
     si.setCallback(new TestCallback(3, 9));
     si.splitFile(tempInputFile);
+  }
+
+  /**
+   * Create a Sequencefile for testing consisting of IntWritable
+   * keys and VectorWritable values
+   * @param path path for test SequenceFile
+   * @param testPoints number of records in test SequenceFile
+   */
+  private void writeVectorSequenceFile(Path path, int testPoints)
+      throws IOException {
+    Path tempSequenceFile = new Path(path, "part-00000");
+    Configuration conf = new Configuration();
+    IntWritable key = new IntWritable();
+    VectorWritable value = new VectorWritable();
+    SequenceFile.Writer writer = null;
+    try {
+      writer =
+          SequenceFile.createWriter(fs, conf, tempSequenceFile,
+              IntWritable.class, VectorWritable.class);
+      for (int i = 0; i < testPoints; i++) {
+        key.set(i);
+        Vector v = new SequentialAccessSparseVector(4);
+        v.assign(i);
+        value.set(v);
+        writer.append(key, value);
+      }
+    } finally {
+      IOUtils.closeStream(writer);
+    }
+  }
+
+  /**
+   * Create a Sequencefile for testing consisting of IntWritable
+   * keys and Text values
+   * @param path path for test SequenceFile
+   * @param testPoints number of records in test SequenceFile
+   */
+  private void writeTextSequenceFile(Path path, int testPoints)
+      throws IOException {
+    Path tempSequenceFile = new Path(path, "part-00000");
+    Configuration conf = new Configuration();
+    Text key = new Text();
+    Text value = new Text();
+    SequenceFile.Writer writer = null;
+    try {
+      writer =
+          SequenceFile.createWriter(fs, conf, tempSequenceFile,
+              Text.class, Text.class);
+      for (int i = 0; i < testPoints; i++) {
+        key.set(Integer.toString(i));
+        value.set("Line " + i);
+        writer.append(key, value);
+      }
+    } finally {
+      IOUtils.closeStream(writer);
+    }
+  }
+
+  /**
+   * Display contents of a SequenceFile
+   * @param sequenceFilePath path to SequenceFile
+   */
+  private void displaySequenceFile(Path sequenceFilePath) throws IOException,
+      InstantiationException, IllegalAccessException {
+    Configuration conf = new Configuration();
+    SequenceFile.Reader reader = null;
+    try {
+      reader = new SequenceFile.Reader(fs, sequenceFilePath, conf);
+      Class<?> keyClass = reader.getKeyClass();
+      Class<?> valueClass = reader.getValueClass();
+      WritableComparable<?> key = (WritableComparable<?>) keyClass.newInstance();
+      Writable value = (Writable) valueClass.newInstance();
+      while (reader.next(key, value)) {
+        System.out.printf("%s\t%s\n", key, value);
+      }
+    } finally {
+      IOUtils.closeStream(reader);
+    }
+  }
+
+  /**
+   * Determine number of records in a SequenceFile
+   * @param sequenceFilePath path to SequenceFile
+   * @return number of records
+   */
+  private int getNumberRecords(Path sequenceFilePath) throws IOException,
+      InstantiationException, IllegalAccessException {
+    Configuration conf = new Configuration();
+    SequenceFile.Reader reader = null;
+    int numberRecords = 0;
+    try {
+      reader = new SequenceFile.Reader(fs, sequenceFilePath, conf);
+      Class<?> keyClass = reader.getKeyClass();
+      Class<?> valueClass = reader.getValueClass();
+      WritableComparable<?> key = (WritableComparable<?>) keyClass.newInstance();
+      Writable value = (Writable) valueClass.newInstance();
+      while (reader.next(key, value)) {
+        numberRecords++;
+      }
+    } finally {
+      IOUtils.closeStream(reader);
+    }
+    return numberRecords;
+  }
+
+  /**
+   * Test map reduce version of split input with Text, Text key value
+   * pairs in input
+   */
+  @Test
+  public void testSplitInputMapReduceText() throws Exception {
+    writeTextSequenceFile(tempSequenceDirectory, 1000);
+    testSplitInputMapReduce(1000);
+  }
+
+  /**
+   * Test map reduce version of split input with Text, Text key value
+   * pairs in input called from command line
+   */
+  @Test
+  public void testSplitInputMapReduceTextCli() throws Exception {
+    writeTextSequenceFile(tempSequenceDirectory, 1000);
+    testSplitInputMapReduceCli(1000);
+  }
+
+  /**
+   * Test map reduce version of split input with IntWritable, Vector key value
+   * pairs in input
+   */
+  @Test
+  public void testSplitInputMapReduceVector() throws Exception {
+    writeVectorSequenceFile(tempSequenceDirectory, 1000);
+    testSplitInputMapReduce(1000);
+  }
+
+  /**
+   * Test map reduce version of split input with IntWritable, Vector key value
+   * pairs in input called from command line
+   */
+  @Test
+  public void testSplitInputMapReduceVectorCli() throws Exception {
+    writeVectorSequenceFile(tempSequenceDirectory, 1000);
+    testSplitInputMapReduceCli(1000);
+  }
+
+  /**
+   * Test map reduce version of split input through CLI
+   */
+  private void testSplitInputMapReduceCli(int numPoints) throws Exception {
+    int randomSelectionPct = 25;
+    int keepPct = 10;
+    String[] args =
+        { "--method", "mapreduce", "--input", tempSequenceDirectory.toString(),
+            "--mapRedOutputDir", tempMapRedOutputDirectory.toString(),
+            "--randomSelectionPct", Integer.toString(randomSelectionPct),
+            "--keepPct", Integer.toString(keepPct), "-ow" };
+    SplitInput.main(args);
+    validateSplitInputMapReduce(numPoints, randomSelectionPct, keepPct);
+  }
+
+  /**
+   * Test map reduce version of split input through method call
+   */
+  private void testSplitInputMapReduce(int numPoints) throws Exception {
+    int randomSelectionPct = 25;
+    int keepPct = 10;
+    si.setTestRandomSelectionPct(randomSelectionPct);
+    si.setKeepPct(keepPct);
+    si.setMapRedOutputDirectory(tempMapRedOutputDirectory);
+    si.setUseMapRed(true);
+    si.splitDirectory(tempSequenceDirectory);
+
+    validateSplitInputMapReduce(numPoints, randomSelectionPct, keepPct);
+  }
+
+  /**
+   * Validate that number of test records and number of training records
+   * are consistant with keepPct and randomSelectionPct
+   */
+  private void validateSplitInputMapReduce(int numPoints,
+      int randomSelectionPct, int keepPct) throws Exception {
+    Path testPath = new Path(tempMapRedOutputDirectory, "test-r-00000");
+    Path trainingPath = new Path(tempMapRedOutputDirectory, "training-r-00000");
+    int numberTestRecords = getNumberRecords(testPath);
+    int numberTrainingRecords = getNumberRecords(trainingPath);
+    System.out.printf("Test data: %d records\n", numberTestRecords);
+    displaySequenceFile(testPath);
+    System.out.printf("Training data: %d records\n", numberTrainingRecords);
+    displaySequenceFile(trainingPath);
+    assertEquals((randomSelectionPct / 100.0) * (keepPct / 100.0) * numPoints,
+        numberTestRecords, 2);
+    assertEquals(
+        (1 - randomSelectionPct / 100.0) * (keepPct / 100.0) * numPoints,
+        numberTrainingRecords, 2);
   }
 
   @Test
   public void testValidate() throws Exception {
     SplitInput st = new SplitInput();
     assertValidateException(st);
-    
+
     st.setTestSplitSize(100);
     assertValidateException(st);
-    
+
     st.setTestOutputDirectory(tempTestDirectory);
     assertValidateException(st);
-    
+
     st.setTrainingOutputDirectory(tempTrainingDirectory);
     st.validate();
-    
+
     st.setTestSplitPct(50);
     assertValidateException(st);
-    
+
     st = new SplitInput();
     st.setTestRandomSelectionPct(50);
     st.setTestOutputDirectory(tempTestDirectory);
     st.setTrainingOutputDirectory(tempTrainingDirectory);
     st.validate();
-    
+
     st.setTestSplitPct(50);
     assertValidateException(st);
-    
+
     st = new SplitInput();
     st.setTestRandomSelectionPct(50);
     st.setTestOutputDirectory(tempTestDirectory);
     st.setTrainingOutputDirectory(tempTrainingDirectory);
     st.validate();
-    
+
     st.setTestSplitSize(100);
     assertValidateException(st);
   }
-  
+
   private class TestCallback implements SplitInput.SplitCallback {
     private final int testSplitSize;
     private final int trainingLines;
-    
+
     private TestCallback(int testSplitSize, int trainingLines) {
       this.testSplitSize = testSplitSize;
       this.trainingLines = trainingLines;
     }
-    
+
     @Override
     public void splitComplete(Path inputFile, int lineCount, int trainCount, int testCount, int testSplitStart) {
       assertSplit(fs, tempInputFile, charset, testSplitSize, trainingLines, tempTrainingDirectory, tempTestDirectory);
@@ -225,7 +432,7 @@ public final class SplitInputTest extends MahoutTestCase {
       // good
     }
   }
-  
+
   private static void assertSplit(FileSystem fs,
                                   Path tempInputFile,
                                   Charset charset,

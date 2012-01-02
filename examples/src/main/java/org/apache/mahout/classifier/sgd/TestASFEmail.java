@@ -27,6 +27,7 @@ import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.cli2.util.HelpFormatter;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.Text;
 import org.apache.mahout.classifier.ClassifierResult;
 import org.apache.mahout.classifier.ResultAnalyzer;
@@ -72,7 +73,13 @@ public final class TestASFEmail {
     Dictionary asfDictionary = new Dictionary();
     //<String> overallCounts = HashMultiset.create();
     Configuration conf = new Configuration();
-    SequenceFileDirIterator<Text, VectorWritable> iter = new SequenceFileDirIterator<Text, VectorWritable>(new Path(base.toString()), PathType.LIST, PathFilters.partFilter(),
+    PathFilter testFilter = new PathFilter() {
+      @Override
+      public boolean accept(Path path) {
+        return path.getName().contains("test");
+      }
+    };
+    SequenceFileDirIterator<Text, VectorWritable> iter = new SequenceFileDirIterator<Text, VectorWritable>(new Path(base.toString()), PathType.LIST, testFilter,
             null, true, conf);
 
     long numItems = 0;
@@ -84,7 +91,7 @@ public final class TestASFEmail {
 
     System.out.printf("%d test files\n", numItems);
     ResultAnalyzer ra = new ResultAnalyzer(asfDictionary.values(), "DEFAULT");
-    iter = new SequenceFileDirIterator<Text, VectorWritable>(new Path(base.toString()), PathType.LIST, PathFilters.partFilter(),
+    iter = new SequenceFileDirIterator<Text, VectorWritable>(new Path(base.toString()), PathType.LIST, testFilter,
             null, true, conf);
     while (iter.hasNext()) {
       Pair<Text, VectorWritable> next = iter.next();

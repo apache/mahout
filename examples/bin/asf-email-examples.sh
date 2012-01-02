@@ -16,6 +16,12 @@
 # limitations under the License.
 #
 
+#
+# You will need to download or otherwise obtain some or all of the Amazon ASF Email Public Dataset (http://aws.amazon.com/datasets/7791434387204566) to use this script.
+# To obtain a full copy you will need to launch an EC2 instance and mount the dataset to download it, otherwise you can get a sample of it at
+# http://www.lucidimagination.com/devzone/technical-articles/scaling-mahout
+# Also, see http://www.ibm.com/developerworks/java/library/j-mahout-scaling/ for more info
+
 function fileExists() {
   if ([ "$MAHOUT_LOCAL" != "" ] && [ ! -e "$1" ]) || ([ "$MAHOUT_LOCAL" == "" ] && ! hadoop fs -test -e /user/$USER/$1); then
     return 1 # file doesn't exist
@@ -218,6 +224,7 @@ elif [ "x$alg" == "xclassification" ]; then
     SPLIT="$CLASS/splits"
     TRAIN="$SPLIT/train"
     TEST="$SPLIT/test"
+    MAPREDOUT="$SPLIT/mapRedOut"
     TEST_OUT="$CLASS/test-results"
     MODELS="$CLASS/models"
     LABEL="$SPLIT/labels"
@@ -227,23 +234,23 @@ elif [ "x$alg" == "xclassification" ]; then
     fi
     echo "Converting the files to sparse vectors in $SEQ2SP"
     if ! fileExists "$SEQ2SP/part-m-00000"; then
-      $MAHOUT seq2encoded --input $MAIL_OUT --output $SEQ2SP --analyzerName org.apache.mahout.text.MailArchivesClusteringAnalyzer --cardinality 20000
+      $MAHOUT seq2encoded --input $MAIL_OUT --output $SEQ2SP --analyzerName org.apache.mahout.text.MailArchivesClusteringAnalyzer --cardinality 100000
     fi
     #We need to modify the vectors to have a better label
     echo "Converting vector labels"
     $MAHOUT org.apache.mahout.classifier.email.PrepEmailVectorsDriver --input "$SEQ2SP" --output $SEQ2SPLABEL --overwrite
-    if ! fileExists "$TRAIN/part-m-00000"; then
+    if ! fileExists "$MAPREDOUT/training-r-00000"; then
       #setup train/test files
       echo "Creating training and test inputs from $SEQ2SPLABEL"
-      $MAHOUT split --input $SEQ2SPLABEL --trainingOutput $TRAIN --testOutput $TEST --randomSelectionPct 20 --overwrite --sequenceFiles
+      $MAHOUT split --input $SEQ2SPLABEL --mapRedOutputDir $MAPREDOUT  --randomSelectionPct 20 --overwrite --sequenceFiles --method mapreduce
     fi
     MODEL="$MODELS/asf.model"
 
 
     echo "Running SGD Training"
-    $MAHOUT org.apache.mahout.classifier.sgd.TrainASFEmail $TRAIN $MODELS $numLabels 20000
+    $MAHOUT org.apache.mahout.classifier.sgd.TrainASFEmail $MAPREDOUT/ $MODELS $numLabels 100000
     echo "Running Test"
-    $MAHOUT org.apache.mahout.classifier.sgd.TestASFEmail --input $TEST --model $MODEL
+    $MAHOUT org.apache.mahout.classifier.sgd.TestASFEmail --input $MAPREDOUT/ --model $MODEL
 
   fi
 elif [ "x$alg" == "xclean" ]; then

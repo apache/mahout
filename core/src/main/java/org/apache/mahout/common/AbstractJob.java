@@ -103,6 +103,7 @@ public abstract class AbstractJob extends Configured implements Tool {
 
   /** internal list of options that have been added */
   private final List<Option> options;
+  protected Group group;
 
   protected AbstractJob() {
     options = new LinkedList<Option>();
@@ -249,6 +250,21 @@ public abstract class AbstractJob extends Configured implements Tool {
 
     return optBuilder.create();
   }
+  //convenience method
+
+  /**
+   *
+   * @param name The name of the option
+   * @return the {@link org.apache.commons.cli2.Option} with the name, else null
+   */
+  protected Option getCLIOption(String name){
+    for (Option option : options) {
+      if (option.getPreferredName().equals(name)){
+        return option;
+      }
+    }
+    return null;
+  }
 
   /** Parse the arguments specified based on the options defined using the 
    *  various {@code addOption} methods. If -h is specified or an
@@ -278,7 +294,7 @@ public abstract class AbstractJob extends Configured implements Tool {
       gBuilder = gBuilder.withOption(opt);
     }
 
-    Group group = gBuilder.create();
+    group = gBuilder.create();
 
     CommandLine cmdLine;
     try {

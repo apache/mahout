@@ -20,20 +20,15 @@ package org.apache.mahout.utils;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
-import org.apache.commons.cli2.CommandLine;
-import org.apache.commons.cli2.Group;
-import org.apache.commons.cli2.Option;
 import org.apache.commons.cli2.OptionException;
-import org.apache.commons.cli2.builder.ArgumentBuilder;
-import org.apache.commons.cli2.builder.DefaultOptionBuilder;
-import org.apache.commons.cli2.builder.GroupBuilder;
-import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.util.ToolRunner;
+import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Pair;
@@ -112,7 +107,7 @@ import java.util.BitSet;
  * that the desired test set size is allocated. Split location has no effect is
  * random sampling is employed.
  */
-public class SplitInput {
+public class SplitInput extends AbstractJob {
 
   private static final Logger log = LoggerFactory.getLogger(SplitInput.class);
 
@@ -121,26 +116,33 @@ public class SplitInput {
   private int splitLocation = 100;
   private int testRandomSelectionSize = -1;
   private int testRandomSelectionPct = -1;
+  private int keepPct = 100;
   private Charset charset = Charsets.UTF_8;
   private boolean useSequence;
+  private boolean useMapRed;
 
-  private final FileSystem fs;
   private Path inputDirectory;
   private Path trainingOutputDirectory;
   private Path testOutputDirectory;
+  private Path mapRedOutputDirectory;
 
   private SplitCallback callback;
 
-  public static void main(String[] args) throws Exception {
-    SplitInput si = new SplitInput();
-    if (si.parseArgs(args)) {
-      si.splitDirectory();
+  @Override
+  public int run(String[] args) throws Exception {
+
+    if (parseArgs(args)) {
+      splitDirectory();
     }
+    return 0;
+  }
+
+  public static void main(String[] args) throws Exception {
+    ToolRunner.run(new Configuration(), new SplitInput(), args);
   }
 
   public SplitInput() throws IOException {
-    Configuration conf = new Configuration();
-    fs = FileSystem.get(conf);
+
   }
 
   /**
@@ -151,110 +153,108 @@ public class SplitInput {
    * @throws Exception if there is a problem parsing the command-line arguments or the particular
    *                   combination would violate class invariants.
    */
-  public boolean parseArgs(String[] args) throws Exception {
+  private boolean parseArgs(String[] args) throws Exception {
 
-    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
-    ArgumentBuilder abuilder = new ArgumentBuilder();
-    GroupBuilder gbuilder = new GroupBuilder();
-    Option helpOpt = DefaultOptionCreator.helpOption();
+    addInputOption();
+    addOption("trainingOutput", "tr", "The training data output directory", false);
+    addOption("testOutput", "te", "The test data output directory", false);
+    addOption("testSplitSize", "ss", "The number of documents held back as test data for each category", false);
+    addOption("testSplitPct", "sp", "The % of documents held back as test data for each category", false);
+    addOption("splitLocation", "sl", "Location for start of test data expressed as a percentage of the input file size (0=start, 50=middle, 100=end", false);
+    addOption("randomSelectionSize", "rs", "The number of items to be randomly selected as test data ", false);
+    addOption("randomSelectionPct", "rp", "Percentage of items to be randomly selected as test data when using mapreduce mode", false);
+    addOption("charset", "c", "The name of the character encoding of the input files (not needed if using SequenceFiles)", false);
+    addOption(buildOption("sequenceFiles", "seq", "Set if the input files are sequence files.  Default is false", false, false, "false"));
+    addOption(DefaultOptionCreator.methodOption().create());
+    addOption(DefaultOptionCreator.overwriteOption().create());
+    //TODO: extend this to sequential mode
+    addOption("keepPct", "k", "The percentage of total data to keep in map-reduce mode, the rest will be ignored.  Default is 100%", false);
+    addOption("mapRedOutputDir", "mro", "Output directory for map reduce jobs", false);
 
-    Option inputDirOpt = obuilder.withLongName("input").withRequired(true).withArgument(
-            abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
-            "The input directory").withShortName("i").create();
-
-    Option trainingOutputDirOpt = obuilder.withLongName("trainingOutput").withRequired(true).withArgument(
-            abuilder.withName("outputDir").withMinimum(1).withMaximum(1).create()).withDescription(
-            "The training data output directory").withShortName("tr").create();
-
-    Option testOutputDirOpt = obuilder.withLongName("testOutput").withRequired(true).withArgument(
-            abuilder.withName("outputDir").withMinimum(1).withMaximum(1).create()).withDescription(
-            "The test data output directory").withShortName("te").create();
-
-    Option testSplitSizeOpt = obuilder.withLongName("testSplitSize").withRequired(false).withArgument(
-            abuilder.withName("splitSize").withMinimum(1).withMaximum(1).create()).withDescription(
-            "The number of documents held back as test data for each category").withShortName("ss").create();
-
-    Option testSplitPctOpt = obuilder.withLongName("testSplitPct").withRequired(false).withArgument(
-            abuilder.withName("splitPct").withMinimum(1).withMaximum(1).create()).withDescription(
-            "The percentage of documents held back as test data for each category").withShortName("sp").create();
-
-    Option splitLocationOpt = obuilder.withLongName("splitLocation").withRequired(false).withArgument(
-            abuilder.withName("splitLoc").withMinimum(1).withMaximum(1).create()).withDescription(
-            "Location for start of test data expressed as a percentage of the input file size (0=start, 50=middle, 100=end")
-            .withShortName("sl").create();
-
-    Option randomSelectionSizeOpt = obuilder.withLongName("randomSelectionSize").withRequired(false).withArgument(
-            abuilder.withName("randomSize").withMinimum(1).withMaximum(1).create()).withDescription(
-            "The number of items to be randomly selected as test data ").withShortName("rs").create();
-
-    Option randomSelectionPctOpt = obuilder.withLongName("randomSelectionPct").withRequired(false).withArgument(
-            abuilder.withName("randomPct").withMinimum(1).withMaximum(1).create()).withDescription(
-            "Percentage of items to be randomly selected as test data ").withShortName("rp").create();
-
-    Option charsetOpt = obuilder.withLongName("charset").withRequired(false).withArgument(
-            abuilder.withName("charset").withMinimum(1).withMaximum(1).create()).withDescription(
-            "The name of the character encoding of the input files (not needed if using SequenceFiles)").withShortName("c").create();
-    Option sequenceFileOpt = obuilder.withLongName("sequenceFiles").withRequired(false).
-            withDescription("Set if the input files are sequence files.  Default is false").withShortName("seq").create();
-
-    Option overOpt = DefaultOptionCreator.overwriteOption().create();
-    Group group = gbuilder.withName("Options").withOption(inputDirOpt).withOption(trainingOutputDirOpt)
-            .withOption(testOutputDirOpt).withOption(testSplitSizeOpt).withOption(testSplitPctOpt)
-            .withOption(splitLocationOpt).withOption(randomSelectionSizeOpt).withOption(randomSelectionPctOpt)
-            .withOption(charsetOpt).withOption(sequenceFileOpt).withOption(overOpt).create();
+    if (parseArguments(args) == null) {
+      return false;
+    }
 
     try {
+      inputDirectory = getInputPath();
 
-      Parser parser = new Parser();
-      parser.setGroup(group);
-      CommandLine cmdLine = parser.parse(args);
+      useMapRed = getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(DefaultOptionCreator.MAPREDUCE_METHOD);
 
-      if (cmdLine.hasOption(helpOpt)) {
-        CommandLineUtil.printHelp(group);
-        return false;
+      if (useMapRed) {
+        if (!hasOption("randomSelectionPct")) {
+          throw new OptionException(getCLIOption("randomSelectionPct"),
+                  "must set randomSelectionPct when mapRed option is used");
+        }
+        if (!hasOption("mapRedOutputDir")) {
+          throw new OptionException(getCLIOption("mapRedOutputDir"),
+                  "mapRedOutputDir must be set when mapRed option is used");
+        } else {
+          mapRedOutputDirectory =
+                  new Path((String) getOption("mapRedOutputDir"));
+        }
+        if (hasOption("keepPct")) {
+          keepPct =
+                  Integer.parseInt((String) getOption("keepPct"));
+        }
+        if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
+          HadoopUtil.delete(getConf(), mapRedOutputDirectory);
+        }
+      } else {
+        if (!hasOption("trainingOutput")
+                || !hasOption("testOutput")) {
+          throw new OptionException(getCLIOption("trainingOutput"),
+                  "trainingOutput and testOutput must be set if mapRed option is not used");
+        }
+        if (!hasOption("testSplitSize")
+                && !hasOption("testSplitPct")
+                && !hasOption("randomSelectionPct")
+                && !hasOption("randomSelectionSize")) {
+          throw new OptionException(getCLIOption("testSplitSize"),
+                  "must set one of test split size/percentage or randomSelectionSize/percentage");
+        }
+
+        trainingOutputDirectory =
+                new Path((String) getOption("trainingOutput"));
+        testOutputDirectory =
+                new Path((String) getOption("testOutput"));
+        FileSystem fs = trainingOutputDirectory.getFileSystem(getConf());
+        if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
+          HadoopUtil.delete(fs.getConf(), trainingOutputDirectory);
+          HadoopUtil.delete(fs.getConf(), testOutputDirectory);
+        }
+        fs.mkdirs(trainingOutputDirectory);
+        fs.mkdirs(testOutputDirectory);
       }
 
-      inputDirectory = new Path((String) cmdLine.getValue(inputDirOpt));
-      trainingOutputDirectory = new Path((String) cmdLine.getValue(trainingOutputDirOpt));
-      testOutputDirectory = new Path((String) cmdLine.getValue(testOutputDirOpt));
-      if (cmdLine.hasOption(overOpt)) {
-        HadoopUtil.delete(fs.getConf(), trainingOutputDirectory);
-        HadoopUtil.delete(fs.getConf(), testOutputDirectory);
+      if (hasOption("charset")) {
+        charset = Charset.forName((String) getOption("charset"));
       }
 
-      if (cmdLine.hasOption(charsetOpt)) {
-        charset = Charset.forName((String) cmdLine.getValue(charsetOpt));
+      if (hasOption("testSplitSize") && hasOption("testSplitPct")) {
+        throw new OptionException(getCLIOption("testSplitPct"), "must have either split size or split percentage option, not BOTH");
       }
 
-      if (cmdLine.hasOption(testSplitSizeOpt) && cmdLine.hasOption(testSplitPctOpt)) {
-        throw new OptionException(testSplitSizeOpt, "must have either split size or split percentage option, not BOTH");
-      }
-      if (!cmdLine.hasOption(testSplitSizeOpt) && !cmdLine.hasOption(testSplitPctOpt) && !cmdLine.hasOption(randomSelectionPctOpt) && !cmdLine.hasOption(randomSelectionSizeOpt)) {
-        throw new OptionException(testSplitSizeOpt, "must set one of test split size/percentage or randomSelectionSize/percentage");
+      if (hasOption("testSplitSize")) {
+        setTestSplitSize(Integer.parseInt(getOption("testSplitSize")));
       }
 
-      if (cmdLine.hasOption(testSplitSizeOpt)) {
-        setTestSplitSize(Integer.parseInt((String) cmdLine.getValue(testSplitSizeOpt)));
+      if (hasOption("testSplitPct")) {
+        setTestSplitPct(Integer.parseInt(getOption("testSplitPct")));
       }
 
-      if (cmdLine.hasOption(testSplitPctOpt)) {
-        setTestSplitPct(Integer.parseInt((String) cmdLine.getValue(testSplitPctOpt)));
+      if (hasOption("splitLocation")) {
+        setSplitLocation(Integer.parseInt(getOption("splitLocation")));
       }
 
-      if (cmdLine.hasOption(splitLocationOpt)) {
-        setSplitLocation(Integer.parseInt((String) cmdLine.getValue(splitLocationOpt)));
+      if (hasOption("randomSelectionSize")) {
+        setTestRandomSelectionSize(Integer.parseInt(getOption("randomSelectionSize")));
       }
 
-      if (cmdLine.hasOption(randomSelectionSizeOpt)) {
-        setTestRandomSelectionSize(Integer.parseInt((String) cmdLine.getValue(randomSelectionSizeOpt)));
+      if (hasOption("randomSelectionPct")) {
+        setTestRandomSelectionPct(Integer.parseInt(getOption("randomSelectionPct")));
       }
 
-      if (cmdLine.hasOption(randomSelectionPctOpt)) {
-        setTestRandomSelectionPct(Integer.parseInt((String) cmdLine.getValue(randomSelectionPctOpt)));
-      }
-      useSequence = cmdLine.hasOption(sequenceFileOpt);
-      fs.mkdirs(trainingOutputDirectory);
-      fs.mkdirs(testOutputDirectory);
+      useSequence = hasOption("sequenceFiles");
 
     } catch (OptionException e) {
       log.error("Command-line option Exception", e);
@@ -279,6 +279,11 @@ public class SplitInput {
    * directory.
    */
   public void splitDirectory(Path inputDir) throws IOException {
+    Configuration conf = getConf();
+    if (conf == null) {
+      conf = new Configuration();
+    }
+    FileSystem fs = inputDir.getFileSystem(conf);
     if (fs.getFileStatus(inputDir) == null) {
       throw new IOException(inputDir + " does not exist");
     }
@@ -286,11 +291,16 @@ public class SplitInput {
       throw new IOException(inputDir + " is not a directory");
     }
 
-    // input dir contains one file per category.
-    FileStatus[] fileStats = fs.listStatus(inputDir, PathFilters.logsCRCFilter());
-    for (FileStatus inputFile : fileStats) {
-      if (!inputFile.isDir()) {
-        splitFile(inputFile.getPath());
+    if (useMapRed) {
+      SplitInputJob.run(new Configuration(), inputDir, mapRedOutputDirectory,
+              keepPct, testRandomSelectionPct);
+    } else {
+      // input dir contains one file per category.
+      FileStatus[] fileStats = fs.listStatus(inputDir, PathFilters.logsCRCFilter());
+      for (FileStatus inputFile : fileStats) {
+        if (!inputFile.isDir()) {
+          splitFile(inputFile.getPath());
+        }
       }
     }
   }
@@ -301,6 +311,11 @@ public class SplitInput {
    * training and test output directories. The {@link #validate()} method is called prior to executing the split.
    */
   public void splitFile(Path inputFile) throws IOException {
+    Configuration conf = getConf();
+    if (conf == null) {
+      conf = new Configuration();
+    }
+    FileSystem fs = inputFile.getFileSystem(conf);
     if (fs.getFileStatus(inputFile) == null) {
       throw new IOException(inputFile + " does not exist");
     }
@@ -405,8 +420,8 @@ public class SplitInput {
         Closeables.closeQuietly(testWriter);
       }
     } else {
-      SequenceFileIterator<Writable,Writable> iterator =
-          new SequenceFileIterator<Writable,Writable>(inputFile, false, fs.getConf());
+      SequenceFileIterator<Writable, Writable> iterator =
+              new SequenceFileIterator<Writable, Writable>(inputFile, false, fs.getConf());
       SequenceFile.Writer trainingWriter = SequenceFile.createWriter(fs, fs.getConf(), trainingOutputFile, iterator.getKeyClass(), iterator.getValueClass());
       SequenceFile.Writer testWriter = SequenceFile.createWriter(fs, fs.getConf(), testOutputFile, iterator.getKeyClass(), iterator.getValueClass());
       try {
@@ -431,7 +446,7 @@ public class SplitInput {
           if (writer == trainingWriter) {
             trainCount++;
           }
-          Pair<Writable,Writable> pair = iterator.next();
+          Pair<Writable, Writable> pair = iterator.next();
           writer.append(pair.getFirst(), pair.getSecond());
         }
 
@@ -469,6 +484,28 @@ public class SplitInput {
    */
   public void setTestSplitPct(int testSplitPct) {
     this.testSplitPct = testSplitPct;
+  }
+
+  /**
+   * Sets the percentage of the input data to keep in a map reduce split input job
+   *
+   * @param keepPct a value between 0 and 100 inclusive.
+   */
+  public void setKeepPct(int keepPct) {
+    this.keepPct = keepPct;
+  }
+
+  /**
+   * Set to true to use map reduce to split the input
+   *
+   * @param useMapRed a boolean to indicate whether map reduce should be used
+   */
+  public void setUseMapRed(boolean useMapRed) {
+    this.useMapRed = useMapRed;
+  }
+
+  public void setMapRedOutputDirectory(Path mapRedOutputDirectory) {
+    this.mapRedOutputDirectory = mapRedOutputDirectory;
   }
 
   public int getSplitLocation() {
@@ -589,8 +626,8 @@ public class SplitInput {
             || testRandomSelectionPct == -1,
             "Invalid testRandomSelectionPct percentage", testRandomSelectionPct);
 
-    Preconditions.checkArgument(trainingOutputDirectory != null, "No training output directory was specified");
-    Preconditions.checkArgument(testOutputDirectory != null, "No test output directory was specified");
+    Preconditions.checkArgument(trainingOutputDirectory != null || useMapRed, "No training output directory was specified");
+    Preconditions.checkArgument(testOutputDirectory != null || useMapRed, "No test output directory was specified");
 
     // only one of the following may be set, one must be set.
     int count = 0;
@@ -610,12 +647,19 @@ public class SplitInput {
     Preconditions.checkArgument(count == 1,
             "Exactly one of testSplitSize, testSplitPct, testRandomSelectionSize, testRandomSelectionPct should be set");
 
-    FileStatus trainingOutputDirStatus = fs.getFileStatus(trainingOutputDirectory);
-    Preconditions.checkArgument(trainingOutputDirStatus != null && trainingOutputDirStatus.isDir(),
-            "%s is not a directory", trainingOutputDirectory);
-    FileStatus testOutputDirStatus = fs.getFileStatus(testOutputDirectory);
-    Preconditions.checkArgument(testOutputDirStatus != null && testOutputDirStatus.isDir(),
-            "%s is not a directory", testOutputDirectory);
+    if (!useMapRed) {
+      Configuration conf = getConf();
+      if (conf == null) {
+        conf = new Configuration();
+      }
+      FileSystem fs = trainingOutputDirectory.getFileSystem(conf);
+      FileStatus trainingOutputDirStatus = fs.getFileStatus(trainingOutputDirectory);
+      Preconditions.checkArgument(trainingOutputDirStatus != null && trainingOutputDirStatus.isDir(),
+              "%s is not a directory", trainingOutputDirectory);
+      FileStatus testOutputDirStatus = fs.getFileStatus(testOutputDirectory);
+      Preconditions.checkArgument(testOutputDirStatus != null && testOutputDirStatus.isDir(),
+              "%s is not a directory", testOutputDirectory);
+    }
   }
 
   /**
