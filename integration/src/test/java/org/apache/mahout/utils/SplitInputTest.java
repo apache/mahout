@@ -33,8 +33,10 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.mahout.classifier.ClassifierData;
+import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -239,21 +241,9 @@ public final class SplitInputTest extends MahoutTestCase {
    * Display contents of a SequenceFile
    * @param sequenceFilePath path to SequenceFile
    */
-  private void displaySequenceFile(Path sequenceFilePath) throws IOException,
-      InstantiationException, IllegalAccessException {
-    Configuration conf = new Configuration();
-    SequenceFile.Reader reader = null;
-    try {
-      reader = new SequenceFile.Reader(fs, sequenceFilePath, conf);
-      Class<?> keyClass = reader.getKeyClass();
-      Class<?> valueClass = reader.getValueClass();
-      WritableComparable<?> key = (WritableComparable<?>) keyClass.newInstance();
-      Writable value = (Writable) valueClass.newInstance();
-      while (reader.next(key, value)) {
-        System.out.printf("%s\t%s\n", key, value);
-      }
-    } finally {
-      IOUtils.closeStream(reader);
+  private static void displaySequenceFile(Path sequenceFilePath) {
+    for (Pair<?,?> record : new SequenceFileIterable<Writable,Writable>(sequenceFilePath, true, new Configuration())) {
+      System.out.println(record.getFirst() + "\t" + record.getSecond());
     }
   }
 
@@ -262,22 +252,10 @@ public final class SplitInputTest extends MahoutTestCase {
    * @param sequenceFilePath path to SequenceFile
    * @return number of records
    */
-  private int getNumberRecords(Path sequenceFilePath) throws IOException,
-      InstantiationException, IllegalAccessException {
-    Configuration conf = new Configuration();
-    SequenceFile.Reader reader = null;
+  private static int getNumberRecords(Path sequenceFilePath) {
     int numberRecords = 0;
-    try {
-      reader = new SequenceFile.Reader(fs, sequenceFilePath, conf);
-      Class<?> keyClass = reader.getKeyClass();
-      Class<?> valueClass = reader.getValueClass();
-      WritableComparable<?> key = (WritableComparable<?>) keyClass.newInstance();
-      Writable value = (Writable) valueClass.newInstance();
-      while (reader.next(key, value)) {
-        numberRecords++;
-      }
-    } finally {
-      IOUtils.closeStream(reader);
+    for (Object value : new SequenceFileValueIterable<Writable>(sequenceFilePath, true, new Configuration())) {
+      numberRecords++;
     }
     return numberRecords;
   }
@@ -342,8 +320,8 @@ public final class SplitInputTest extends MahoutTestCase {
    */
   private void testSplitInputMapReduce(int numPoints) throws Exception {
     int randomSelectionPct = 25;
-    int keepPct = 10;
     si.setTestRandomSelectionPct(randomSelectionPct);
+    int keepPct = 10;
     si.setKeepPct(keepPct);
     si.setMapRedOutputDirectory(tempMapRedOutputDirectory);
     si.setUseMapRed(true);

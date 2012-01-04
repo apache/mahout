@@ -49,7 +49,7 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterator;
  * for a learning algorithm, downsamples it, applies a random
  * permutation and splits it into test and training sets
  */
-public class SplitInputJob {
+public final class SplitInputJob {
 
   private static final String DOWNSAMPLING_FACTOR =
       "SplitInputJob.downsamplingFactor";
@@ -57,6 +57,9 @@ public class SplitInputJob {
       "SplitInputJob.randomSelectionPct";
   private static final String TRAINING_TAG = "training";
   private static final String TEST_TAG = "test";
+
+  private SplitInputJob() {
+  }
 
   /**
    * Run job to downsample, randomly permute and split data into test and
@@ -79,9 +82,9 @@ public class SplitInputJob {
   @SuppressWarnings("rawtypes")
   public static void run(Configuration initialConf, Path inputPath,
       Path outputPath, int keepPct, float randomSelectionPercent)
-      throws IOException {
+      throws IOException, ClassNotFoundException, InterruptedException {
 
-    int downsamplingFactor = (int) (100.0f / keepPct);
+    int downsamplingFactor = (int) (100.0 / keepPct);
     initialConf.setInt(DOWNSAMPLING_FACTOR, downsamplingFactor);
     initialConf.setFloat(RANDOM_SELECTION_PCT, randomSelectionPercent);
 
@@ -91,14 +94,14 @@ public class SplitInputJob {
     SequenceFileDirIterator<? extends WritableComparable, Writable> iterator =
         new SequenceFileDirIterator<WritableComparable, Writable>(inputPath,
             PathType.LIST, PathFilters.partFilter(), null, false, fs.getConf());
-    Class<? extends WritableComparable> keyClass = null;
-    Class<? extends Writable> valueClass = null;
+    Class<? extends WritableComparable> keyClass;
+    Class<? extends Writable> valueClass;
     if (iterator.hasNext()) {
       Pair<? extends WritableComparable, Writable> pair = iterator.next();
       keyClass = pair.getFirst().getClass();
       valueClass = pair.getSecond().getClass();
     } else {
-      throw new RuntimeException("Couldn't determine class of the input values");
+      throw new IllegalStateException("Couldn't determine class of the input values");
     }
     // Use old API for multiple outputs
     JobConf oldApiJob = new JobConf(initialConf);
@@ -121,14 +124,8 @@ public class SplitInputJob {
     job.setSortComparatorClass(SplitInputComparator.class);
     job.setOutputKeyClass(keyClass);
     job.setOutputValueClass(valueClass);
-    try {
-      job.submit();
-      job.waitForCompletion(true);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    } catch (ClassNotFoundException e) {
-      e.printStackTrace();
-    }
+    job.submit();
+    job.waitForCompletion(true);
   }
 
   /**

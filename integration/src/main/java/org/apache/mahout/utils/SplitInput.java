@@ -141,8 +141,7 @@ public class SplitInput extends AbstractJob {
     ToolRunner.run(new Configuration(), new SplitInput(), args);
   }
 
-  public SplitInput() throws IOException {
-
+  public SplitInput() {
   }
 
   /**
@@ -187,14 +186,11 @@ public class SplitInput extends AbstractJob {
         }
         if (!hasOption("mapRedOutputDir")) {
           throw new OptionException(getCLIOption("mapRedOutputDir"),
-                  "mapRedOutputDir must be set when mapRed option is used");
-        } else {
-          mapRedOutputDirectory =
-                  new Path((String) getOption("mapRedOutputDir"));
+                                    "mapRedOutputDir must be set when mapRed option is used");
         }
+        mapRedOutputDirectory = new Path(getOption("mapRedOutputDir"));
         if (hasOption("keepPct")) {
-          keepPct =
-                  Integer.parseInt((String) getOption("keepPct"));
+          keepPct = Integer.parseInt(getOption("keepPct"));
         }
         if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
           HadoopUtil.delete(getConf(), mapRedOutputDirectory);
@@ -213,10 +209,8 @@ public class SplitInput extends AbstractJob {
                   "must set one of test split size/percentage or randomSelectionSize/percentage");
         }
 
-        trainingOutputDirectory =
-                new Path((String) getOption("trainingOutput"));
-        testOutputDirectory =
-                new Path((String) getOption("testOutput"));
+        trainingOutputDirectory = new Path(getOption("trainingOutput"));
+        testOutputDirectory = new Path(getOption("testOutput"));
         FileSystem fs = trainingOutputDirectory.getFileSystem(getConf());
         if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
           HadoopUtil.delete(fs.getConf(), trainingOutputDirectory);
@@ -227,7 +221,7 @@ public class SplitInput extends AbstractJob {
       }
 
       if (hasOption("charset")) {
-        charset = Charset.forName((String) getOption("charset"));
+        charset = Charset.forName(getOption("charset"));
       }
 
       if (hasOption("testSplitSize") && hasOption("testSplitPct")) {
@@ -270,7 +264,7 @@ public class SplitInput extends AbstractJob {
    * Perform a split on directory specified by {@link #setInputDirectory(Path)} by calling {@link #splitFile(Path)}
    * on each file found within that directory.
    */
-  public void splitDirectory() throws IOException {
+  public void splitDirectory() throws IOException, ClassNotFoundException, InterruptedException {
     this.splitDirectory(inputDirectory);
   }
 
@@ -278,7 +272,7 @@ public class SplitInput extends AbstractJob {
    * Perform a split on the specified directory by calling {@link #splitFile(Path)} on each file found within that
    * directory.
    */
-  public void splitDirectory(Path inputDir) throws IOException {
+  public void splitDirectory(Path inputDir) throws IOException, ClassNotFoundException, InterruptedException {
     Configuration conf = getConf();
     if (conf == null) {
       conf = new Configuration();

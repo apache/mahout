@@ -22,7 +22,11 @@ import com.google.common.io.Resources;
 
 import java.io.IOException;
 
-public class Version {
+public final class Version {
+
+  private Version() {
+  }
+
   public static String version() {
     return Version.class.getPackage().getImplementationVersion();
   }
@@ -32,6 +36,6 @@ public class Version {
   }
 
   public static void main(String[] args) throws IOException {
-    System.out.printf("%s %s\n", Version.version(), Version.versionFromResource());
+    System.out.println(version() + ' ' + versionFromResource());
   }
 }

@@ -32,7 +32,6 @@ import org.apache.hadoop.io.Text;
 import org.apache.mahout.classifier.ClassifierResult;
 import org.apache.mahout.classifier.ResultAnalyzer;
 import org.apache.mahout.common.Pair;
-import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterator;
 import org.apache.mahout.math.Vector;
