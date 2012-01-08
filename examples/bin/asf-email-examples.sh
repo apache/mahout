@@ -150,7 +150,11 @@ elif [ "x$alg" == "xclustering" ]; then
 #classification
 elif [ "x$alg" == "xclassification" ]; then
   algorithm=( standard complementary sgd )
-
+  echo ""
+  echo "!!!!!!!!!!!"
+  echo "NOTE: The classification examples are still experimental for this data set due to quality concerns likely due to preprocessing.  We are working to remedy these.  For more info, see https://issues.apache.org/jira/browse/MAHOUT-939"
+  echo "!!!!!!!!!!!"
+  echo ""
   if [ -n "$4" ]; then
     choice=$4
   else
@@ -230,7 +234,7 @@ elif [ "x$alg" == "xclassification" ]; then
     LABEL="$SPLIT/labels"
     if ! fileExists "$MAIL_OUT/chunk-0"; then
       echo "Converting Mail files to Sequence Files"
-      $MAHOUT org.apache.mahout.text.SequenceFilesFromMailArchives --charset "UTF-8" --subject --body --input $ASF_ARCHIVES --output $MAIL_OUT
+      $MAHOUT org.apache.mahout.text.SequenceFilesFromMailArchives --charset "UTF-8" --subject --body --input $ASF_ARCHIVES --output $MAIL_OUT --stripQuoted
     fi
     echo "Converting the files to sparse vectors in $SEQ2SP"
     if ! fileExists "$SEQ2SP/part-m-00000"; then
@@ -248,7 +252,7 @@ elif [ "x$alg" == "xclassification" ]; then
 
 
     echo "Running SGD Training"
-    $MAHOUT org.apache.mahout.classifier.sgd.TrainASFEmail $MAPREDOUT/ $MODELS $numLabels 100000
+    $MAHOUT org.apache.mahout.classifier.sgd.TrainASFEmail -i $MAPREDOUT/ -o $MODELS --categories $numLabels --cardinality 100000
     echo "Running Test"
     $MAHOUT org.apache.mahout.classifier.sgd.TestASFEmail --input $MAPREDOUT/ --model $MODEL
 

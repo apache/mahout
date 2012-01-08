@@ -44,4 +44,29 @@ public final class MailProcessorTest extends MahoutTestCase {
     assertEquals(7, count);
   }
 
+  @Test
+  public void testStripQuoted() throws Exception {
+    StringWriter writer = new StringWriter();
+    MailOptions options = new MailOptions();
+    options.setSeparator(":::");
+    options.setCharset(Charsets.UTF_8);
+        options.setPatternsToMatch(new Pattern[]{
+        MailProcessor.SUBJECT_PREFIX});
+    options.setInput(new File(System.getProperty("user.dir")));
+    options.setIncludeBody(true);
+    MailProcessor proc = new MailProcessor(options, "", writer);
+    URL url = MailProcessorTest.class.getClassLoader().getResource("test.mbox");
+    File file = new File(url.toURI());
+    long count = proc.parseMboxLineByLine(file);
+    assertEquals(7, count);
+    assertTrue(writer.getBuffer().toString().contains("> Cocoon Cron Block Configurable Clustering"));
+    writer = new StringWriter();
+    proc = new MailProcessor(options, "", writer);
+    options.setStripQuotedText(true);
+    count = proc.parseMboxLineByLine(file);
+    assertEquals(7, count);
+    assertFalse(writer.getBuffer().toString().contains("> Cocoon Cron Block Configurable Clustering"));
+
+  }
+
 }

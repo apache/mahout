@@ -28,7 +28,9 @@ public class MailOptions {
   public static final String TO = "TO";
   public static final String REFS = "REFS";
   public static final String SUBJECT = "SUBJECT";
+  public static final Pattern DEFAULT_QUOTED_TEXT = Pattern.compile("^(\\||>)");
 
+  private boolean stripQuotedText;
   private File input;
   private String outputDir;
   private String prefix;
@@ -40,6 +42,9 @@ public class MailOptions {
   private Pattern[] patternsToMatch;
   //maps FROM, TO, REFS, SUBJECT, etc. to the order they appear in patternsToMatch.  See MailToRecMapper
   private Map<String, Integer> patternOrder;
+
+  //the regular expression to use for identifying quoted text.
+  private Pattern quotedTextPattern = DEFAULT_QUOTED_TEXT;
 
   public File getInput() {
     return input;
@@ -121,4 +126,32 @@ public class MailOptions {
     this.patternOrder = patternOrder;
   }
 
+  /**
+   *
+   * @return true if we should strip out quoted email text
+   */
+  public boolean isStripQuotedText() {
+    return stripQuotedText;
+  }
+
+  /**
+   *
+   * @param stripQuotedText if true, then strip off quoted text, such as lines starting with | or >
+   */
+  public void setStripQuotedText(boolean stripQuotedText) {
+    this.stripQuotedText = stripQuotedText;
+  }
+
+  public Pattern getQuotedTextPattern() {
+    return quotedTextPattern;
+  }
+
+  /**
+   * @see #setStripQuotedText(boolean)
+   *
+   * @param quotedTextPattern The {@link java.util.regex.Pattern} to use to identify lines that are quoted text.  Default is | and >
+   */
+  public void setQuotedTextPattern(Pattern quotedTextPattern) {
+    this.quotedTextPattern = quotedTextPattern;
+  }
 }

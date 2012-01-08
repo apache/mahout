@@ -346,6 +346,20 @@ public abstract class AbstractJob extends Configured implements Tool {
   }
 
   /**
+   * Get the option, else the default
+   * @param optionName The name of the option to look up, without the --
+   * @param defaultVal The default value.
+   * @return The requested option, else the default value if it doesn't exist
+   */
+  public String getOption(String optionName, String defaultVal){
+    String res = getOption(optionName);
+    if (res == null) {
+      res = defaultVal;
+    }
+    return res;
+  }
+
+  /**
    * @return if the requested option has been specified
    */
   public boolean hasOption(String optionName) {

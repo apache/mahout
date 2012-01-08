@@ -25,7 +25,9 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.Text;
+import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.Pair;
+
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterator;
 import org.apache.mahout.ep.State;
@@ -37,31 +39,37 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-public final class TrainASFEmail {
+public final class TrainASFEmail extends AbstractJob {
 
   //private static final String[] LEAK_LABELS = {"none", "month-year", "day-month-year"};
 
   private TrainASFEmail() {
   }
 
-  public static void main(String[] args) throws IOException {
-    File base = new File(args[0]);
-
-    Multiset<String> overallCounts = HashMultiset.create();
-    File output = new File(args[1]);
-    output.mkdirs();
-    int numCats = Integer.parseInt(args[2]);
-    int cardinality = Integer.parseInt(args[3]);
-
-    int leakType = 0;
-    if (args.length > 4) {
-      leakType = Integer.parseInt(args[4]);
+  @Override
+  public int run(String[] args) throws Exception {
+    int result = 0;
+    addInputOption();
+    addOutputOption();
+    addOption("categories", "nc", "The number of categories to train on", true);
+    addOption("cardinality", "c", "The size of the vectors to use", "100000");
+    addOption("threads", "t", "The number of threads to use in the learner", "20");
+    addOption("poolSize", "p", "The number of CrossFoldLearners to use in the AdaptiveLogisticRegression.  Higher values require more memory.", "5");
+    if (parseArguments(args) == null) {
+      return -1;
     }
 
+    File base = new File(getInputPath().toString());
+
+    Multiset<String> overallCounts = HashMultiset.create();
+    File output = new File(getOutputPath().toString());
+    output.mkdirs();
+    int numCats = Integer.parseInt(getOption("categories"));
+    int cardinality = Integer.parseInt(getOption("cardinality", "100000"));
+    int threadCount = Integer.parseInt(getOption("threads", "20"));
+    int poolSize = Integer.parseInt(getOption("poolSize", "5"));
     Dictionary asfDictionary = new Dictionary();
-
-
-    AdaptiveLogisticRegression learningAlgorithm = new AdaptiveLogisticRegression(numCats, cardinality, new L1());
+    AdaptiveLogisticRegression learningAlgorithm = new AdaptiveLogisticRegression(numCats, cardinality, new L1(), threadCount, poolSize);
     learningAlgorithm.setInterval(800);
     learningAlgorithm.setAveragingWindow(500);
 
@@ -99,7 +107,7 @@ public final class TrainASFEmail {
       k++;
       State<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner> best = learningAlgorithm.getBest();
 
-      SGDHelper.analyzeState(info, leakType, k, best);
+      SGDHelper.analyzeState(info, 0, k, best);
     }
     learningAlgorithm.close();
     //TODO: how to dissection since we aren't processing the files here
@@ -123,5 +131,11 @@ public final class TrainASFEmail {
         break;
       }
     }
+    return result;
+  }
+
+  public static void main(String[] args) throws Exception {
+    TrainASFEmail trainer = new TrainASFEmail();
+    trainer.run(args);
   }
 }

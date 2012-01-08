@@ -64,7 +64,8 @@ import java.util.concurrent.ExecutionException;
  * value in non-binary cases.
  */
 public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
-
+  public static final int DEFAULT_THREAD_COUNT = 20;
+  public static final int DEFAULT_POOL_SIZE = 20;
   private static final int SURVIVORS = 2;
 
   private int record;
@@ -77,8 +78,8 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
   private List<TrainingExample> buffer = Lists.newArrayList();
   private EvolutionaryProcess<Wrapper, CrossFoldLearner> ep;
   private State<Wrapper, CrossFoldLearner> best;
-  private int threadCount = 20;
-  private int poolSize = 20;
+  private int threadCount = DEFAULT_THREAD_COUNT;
+  private int poolSize = DEFAULT_POOL_SIZE;
   private State<Wrapper, CrossFoldLearner> seed;
   private int numFeatures;
 
@@ -87,15 +88,37 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
   public AdaptiveLogisticRegression() {
   }
 
+  /**
+   * Uses {@link #DEFAULT_THREAD_COUNT} and {@link #DEFAULT_POOL_SIZE}
+   * @param numCategories The number of categories (labels) to train on
+   * @param numFeatures The number of features used in creating the vectors (i.e. the cardinality of the vector)
+   * @param prior The {@link org.apache.mahout.classifier.sgd.PriorFunction} to use
+   *
+   * @see {@link #AdaptiveLogisticRegression(int, int, org.apache.mahout.classifier.sgd.PriorFunction, int, int)}
+   */
   public AdaptiveLogisticRegression(int numCategories, int numFeatures, PriorFunction prior) {
+    this(numCategories, numFeatures, prior, DEFAULT_THREAD_COUNT, DEFAULT_POOL_SIZE);
+  }
+
+  /**
+   *
+   * @param numCategories The number of categories (labels) to train on
+   * @param numFeatures The number of features used in creating the vectors (i.e. the cardinality of the vector)
+   * @param prior The {@link org.apache.mahout.classifier.sgd.PriorFunction} to use
+   * @param threadCount The number of threads to use for training
+   * @param poolSize The number of {@link org.apache.mahout.classifier.sgd.CrossFoldLearner} to use.
+   */
+  public AdaptiveLogisticRegression(int numCategories, int numFeatures, PriorFunction prior, int threadCount, int poolSize) {
     this.numFeatures = numFeatures;
+    this.threadCount = threadCount;
+    this.poolSize = poolSize;
     seed = new State<Wrapper, CrossFoldLearner>(new double[2], 10);
     Wrapper w = new Wrapper(numCategories, numFeatures, prior);
     seed.setPayload(w);
 
     w.setMappings(seed);
     seed.setPayload(w);
-    setPoolSize(poolSize);
+    setPoolSize(this.poolSize);
   }
 
   @Override

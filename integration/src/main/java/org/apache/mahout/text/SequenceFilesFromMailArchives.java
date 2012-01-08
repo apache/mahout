@@ -142,6 +142,10 @@ public final class SequenceFilesFromMailArchives {
             withDescription("Include the references field in the text.  Default is false").withShortName("refs").create();
     Option bodyOpt = obuilder.withLongName("body").withRequired(false).
             withDescription("Include the body in the output.  Default is false").withShortName("b").create();
+    Option quotedOpt = obuilder.withLongName("stripQuoted").withRequired(false).
+            withDescription("Strip (remove) quoted email text in the body.  Default is false").withShortName("q").create();
+    Option quotedRegexOpt = obuilder.withLongName("quotedRegex").withRequired(false).withArgument(abuilder.withName("regex").withMinimum(1).withMaximum(1).create())
+            .withDescription("Specify the regex that identifies quoted text.  Default is to look for > or | at the beginning of the line.").withShortName("q").create();
     Option separatorOpt = obuilder.withLongName("separator").withRequired(false).withArgument(
             abuilder.withName("separator").withMinimum(1).withMaximum(1).create()).
             withDescription("The separator to use between metadata items (to, from, etc.).  Default is \\n").withShortName("sep").create();
@@ -153,7 +157,8 @@ public final class SequenceFilesFromMailArchives {
 
     Group group = gbuilder.withName("Options").withOption(keyPrefixOpt).withOption(chunkSizeOpt).withOption(
             charsetOpt).withOption(outputDirOpt).withOption(helpOpt).withOption(inputOpt).withOption(subjectOpt).withOption(toOpt)
-            .withOption(fromOpt).withOption(bodyOpt).withOption(refsOpt).withOption(bodySeparatorOpt)
+            .withOption(fromOpt).withOption(bodyOpt).withOption(quotedOpt).withOption(refsOpt).withOption(bodySeparatorOpt)
+            .withOption(quotedRegexOpt)
             .withOption(separatorOpt).create();
 
     try {
@@ -210,6 +215,8 @@ public final class SequenceFilesFromMailArchives {
         patterns.add(MailProcessor.SUBJECT_PREFIX);
         patternOrder.put(MailOptions.SUBJECT, order++);
       }
+      options.setStripQuotedText(cmdLine.hasOption(quotedOpt));
+
       options.setPatternsToMatch(patterns.toArray(new Pattern[patterns.size()]));
       options.setPatternOrder(patternOrder);
       options.setIncludeBody(cmdLine.hasOption(bodyOpt));
@@ -219,6 +226,9 @@ public final class SequenceFilesFromMailArchives {
       }
       if (cmdLine.hasOption(bodySeparatorOpt)) {
         options.setBodySeparator(cmdLine.getValue(bodySeparatorOpt).toString());
+      }
+      if (cmdLine.hasOption(quotedRegexOpt)){
+        options.setQuotedTextPattern(Pattern.compile(cmdLine.getValue(quotedRegexOpt).toString()));
       }
       long start = System.currentTimeMillis();
       dir.createSequenceFiles(options);
