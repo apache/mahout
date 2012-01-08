@@ -22,6 +22,7 @@ import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedPropertyVectorWritable;
 import org.apache.mahout.clustering.WeightedVectorWritable;
+import org.apache.mahout.common.distance.DistanceMeasure;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -40,10 +41,11 @@ public class ClusterDumperWriter extends AbstractClusterWriter {
 
   public ClusterDumperWriter(Writer writer,
                              Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints,
+                             DistanceMeasure measure,
                              int numTopFeatures,
                              String[] dictionary,
                              int subString) {
-    super(writer, clusterIdToPoints);
+    super(writer, clusterIdToPoints, measure);
     this.numTopFeatures = numTopFeatures;
     this.dictionary = dictionary;
     this.subString = subString;

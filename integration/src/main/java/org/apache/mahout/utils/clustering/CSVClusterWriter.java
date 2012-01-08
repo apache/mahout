@@ -19,6 +19,7 @@ package org.apache.mahout.utils.clustering;
 
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
+import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 
@@ -37,8 +38,8 @@ public class CSVClusterWriter extends AbstractClusterWriter {
 
   private static final Pattern VEC_PATTERN = Pattern.compile("\\{|\\:|\\,|\\}");
 
-  public CSVClusterWriter(Writer writer, Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints) {
-    super(writer, clusterIdToPoints);
+  public CSVClusterWriter(Writer writer, Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints, DistanceMeasure measure) {
+    super(writer, clusterIdToPoints, measure);
   }
 
   @Override

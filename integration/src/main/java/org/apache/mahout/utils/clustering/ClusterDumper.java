@@ -55,7 +55,8 @@ import java.util.TreeMap;
 
 public final class ClusterDumper extends AbstractJob {
 
-  private DistanceMeasure measure;
+  public static final String SAMPLE_POINTS = "samplePoints";
+  protected DistanceMeasure measure;
 
   public enum OUTPUT_FORMAT {
     TEXT,
@@ -77,6 +78,7 @@ public final class ClusterDumper extends AbstractJob {
   private static final Logger log = LoggerFactory.getLogger(ClusterDumper.class);
   private Path seqFileDir;
   private Path pointsDir;
+  private long maxPointsPerCluster = Long.MAX_VALUE;
   private String termDictionary;
   private String dictionaryFormat;
   private String outputFile;
@@ -110,6 +112,7 @@ public final class ClusterDumper extends AbstractJob {
     addOption(POINTS_DIR_OPTION, "p",
             "The directory containing points sequence files mapping input vectors to their cluster.  "
                     + "If specified, then the program will output the points associated with a cluster");
+    addOption(SAMPLE_POINTS, "sp", "Specifies the maximum number of points to include _per_ cluster.  The default is to include all points");
     addOption(DICTIONARY_OPTION, "d", "The dictionary file");
     addOption(DICTIONARY_TYPE_OPTION, "dt", "The dictionary file type (text|sequencefile)", "text");
     addOption(buildOption(EVALUATE_CLUSTERS, "e", "Run ClusterEvaluator and CDbwEvaluator over the input.  The output will be appended to the rest of the output at the end.", false, false, null));
@@ -137,9 +140,15 @@ public final class ClusterDumper extends AbstractJob {
     if (hasOption(OUTPUT_FORMAT_OPT)) {
       outputFormat = OUTPUT_FORMAT.valueOf(getOption(OUTPUT_FORMAT_OPT));
     }
+    if (hasOption(SAMPLE_POINTS)){
+      maxPointsPerCluster = Long.parseLong(getOption(SAMPLE_POINTS));
+    } else {
+      maxPointsPerCluster = Long.MAX_VALUE;
+    }
     runEvaluation = hasOption(EVALUATE_CLUSTERS);
     String distanceMeasureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
     measure = ClassUtils.instantiateAs(distanceMeasureClass, DistanceMeasure.class);
+
     init();
     printClusters(null);
     return 0;
@@ -217,13 +226,13 @@ public final class ClusterDumper extends AbstractJob {
 
     switch (outputFormat){
       case TEXT:
-        result = new ClusterDumperWriter(writer, clusterIdToPoints, numTopFeatures, dictionary, subString);
+        result = new ClusterDumperWriter(writer, clusterIdToPoints, measure, numTopFeatures, dictionary, subString);
         break;
       case CSV:
-        result = new CSVClusterWriter(writer, clusterIdToPoints);
+        result = new CSVClusterWriter(writer, clusterIdToPoints, measure);
         break;
       case GRAPH_ML:
-        result = new GraphMLClusterWriter(writer, clusterIdToPoints);
+        result = new GraphMLClusterWriter(writer, clusterIdToPoints, measure, numTopFeatures, dictionary, subString);
         break;
     }
     return result;
@@ -233,7 +242,7 @@ public final class ClusterDumper extends AbstractJob {
     if (this.pointsDir != null) {
       Configuration conf = new Configuration();
       // read in the points
-      clusterIdToPoints = readPoints(this.pointsDir, conf);
+      clusterIdToPoints = readPoints(this.pointsDir, maxPointsPerCluster, conf);
     } else {
       clusterIdToPoints = Collections.emptyMap();
     }
@@ -276,7 +285,15 @@ public final class ClusterDumper extends AbstractJob {
     return this.numTopFeatures;
   }
 
-  public static Map<Integer, List<WeightedVectorWritable>> readPoints(Path pointsPathDir, Configuration conf) {
+  public long getMaxPointsPerCluster() {
+    return maxPointsPerCluster;
+  }
+
+  public void setMaxPointsPerCluster(long maxPointsPerCluster) {
+    this.maxPointsPerCluster = maxPointsPerCluster;
+  }
+
+  public static Map<Integer, List<WeightedVectorWritable>> readPoints(Path pointsPathDir, long maxPointsPerCluster, Configuration conf) {
     Map<Integer, List<WeightedVectorWritable>> result = new TreeMap<Integer, List<WeightedVectorWritable>>();
     for (Pair<IntWritable, WeightedVectorWritable> record :
             new SequenceFileDirIterable<IntWritable, WeightedVectorWritable>(
@@ -291,13 +308,10 @@ public final class ClusterDumper extends AbstractJob {
         pointList = Lists.newArrayList();
         result.put(keyValue, pointList);
       }
-      pointList.add(record.getSecond());
+      if (pointList.size() < maxPointsPerCluster){
+        pointList.add(record.getSecond());
+      }
     }
     return result;
   }
-
-
-
-
-
 }

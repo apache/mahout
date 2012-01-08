@@ -22,6 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,12 +44,20 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
 
   private static final Logger log = LoggerFactory.getLogger(AbstractClusterWriter.class);
 
-  private final Writer writer;
-  private final Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints;
+  protected final Writer writer;
+  protected final Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints;
+  protected final DistanceMeasure measure;
 
-  protected AbstractClusterWriter(Writer writer, Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints) {
+  /**
+   *
+   * @param writer The underlying {@link java.io.Writer} to use
+   * @param clusterIdToPoints The map between cluster ids {@link org.apache.mahout.clustering.Cluster#getId()} and the points in the cluster
+   * @param measure The {@link org.apache.mahout.common.distance.DistanceMeasure} used to calculate the distance.  Some writers may wish to use it for calculating weights for display.  May be null.
+   */
+  protected AbstractClusterWriter(Writer writer, Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints, DistanceMeasure measure) {
     this.writer = writer;
     this.clusterIdToPoints = clusterIdToPoints;
+    this.measure = measure;
   }
   
   protected Writer getWriter() {
@@ -98,6 +107,46 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
       sb.append("=>");
       sb.append(StringUtils.leftPad(item.getSecond().toString(), 20));
     }
+    return sb.toString();
+  }
+
+  public static String getTopTerms(Vector vector, String[] dictionary, int numTerms) {
+
+    List<TermIndexWeight> vectorTerms = Lists.newArrayList();
+
+    Iterator<Vector.Element> iter = vector.iterateNonZero();
+    while (iter.hasNext()) {
+      Vector.Element elt = iter.next();
+      vectorTerms.add(new TermIndexWeight(elt.index(), elt.get()));
+    }
+
+    // Sort results in reverse order (ie weight in descending order)
+    Collections.sort(vectorTerms, new Comparator<TermIndexWeight>() {
+      @Override
+      public int compare(TermIndexWeight one, TermIndexWeight two) {
+        return Double.compare(two.weight, one.weight);
+      }
+    });
+
+    Collection<Pair<String, Double>> topTerms = new LinkedList<Pair<String, Double>>();
+
+    for (int i = 0; i < vectorTerms.size() && i < numTerms; i++) {
+      int index = vectorTerms.get(i).index;
+      String dictTerm = dictionary[index];
+      if (dictTerm == null) {
+        log.error("Dictionary entry missing for {}", index);
+        continue;
+      }
+      topTerms.add(new Pair<String, Double>(dictTerm, vectorTerms.get(i).weight));
+    }
+
+    StringBuilder sb = new StringBuilder(100);
+
+    for (Pair<String, Double> item : topTerms) {
+      String term = item.getFirst();
+      sb.append(term).append("_");
+    }
+    sb.deleteCharAt(sb.length() - 1);
     return sb.toString();
   }
 

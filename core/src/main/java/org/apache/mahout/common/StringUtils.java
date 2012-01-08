@@ -55,4 +55,8 @@ public final class StringUtils {
   public static <T> T fromString(String str) {
     return (T) XSTREAM.fromXML(str);
   }
+
+  public static String escapeXML(String input){
+    return input.replaceAll("\"|\\&|\\<|\\>|\'", "_");
+  }
 }
