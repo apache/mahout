@@ -103,7 +103,7 @@ public abstract class AbstractJob extends Configured implements Tool {
 
   /** internal list of options that have been added */
   private final List<Option> options;
-  protected Group group;
+  private Group group;
 
   protected AbstractJob() {
     options = new LinkedList<Option>();
@@ -193,6 +193,10 @@ public abstract class AbstractJob extends Configured implements Tool {
   protected Option addOption(Option option) {
     options.add(option);
     return option;
+  }
+
+  protected Group getGroup() {
+    return group;
   }
 
   /** Add the default input directory option, '-i' which takes a directory

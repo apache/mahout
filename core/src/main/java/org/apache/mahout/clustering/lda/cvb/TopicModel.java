@@ -456,7 +456,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
         synchronized (this) {
           while(!shutdownComplete) {
             shutdown = true;
-            wait();
+            wait(10000L); // Arbitrarily, wait 10 seconds rather than forever for this
           }
         }
       } catch (InterruptedException e) {

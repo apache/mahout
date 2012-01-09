@@ -70,7 +70,7 @@ public class CholeskyDecomposition {
       L.swap(k, pivot);
 
       double akk = L.get(k, k);
-      double epsilon = 1e-10 * Math.max(uberMax, L.viewColumn(k).aggregate(Functions.MAX, Functions.ABS));
+      double epsilon = 1.0e-10 * Math.max(uberMax, L.viewColumn(k).aggregate(Functions.MAX, Functions.ABS));
 
       if (akk < -epsilon) {
         // can't have decidedly negative element on diagonal
@@ -110,7 +110,7 @@ public class CholeskyDecomposition {
       // set upper part of column to 0.
       L.viewColumn(k).viewPart(0, k).assign(0);
 
-      double epsilon = 1e-10 * L.viewColumn(k).aggregate(Functions.MAX, Functions.ABS);
+      double epsilon = 1.0e-10 * L.viewColumn(k).aggregate(Functions.MAX, Functions.ABS);
       if (akk <= epsilon) {
         // degenerate column case.  Set diagonal to 1, all others to zero
         L.viewColumn(k).viewPart(k, n - k).assign(0);
@@ -206,7 +206,7 @@ public class CholeskyDecomposition {
           int i = L.rowUnpivot(internalI);
           x.set(j, k, x.get(j, k) - x.get(j, i) * L.get(k, i));
           if (Double.isInfinite(x.get(j, k)) || Double.isNaN(x.get(j, k))) {
-            throw new InvalidCholeskyState(j, k);
+            throw new IllegalStateException(String.format("Invalid value found at %d,%d (should not be possible)", j, k));
           }
         }
         if (L.get(k, k) != 0) {
@@ -215,17 +215,12 @@ public class CholeskyDecomposition {
           x.set(j, k, 0);
         }
         if (Double.isInfinite(x.get(j, k)) || Double.isNaN(x.get(j, k))) {
-          throw new InvalidCholeskyState(j, k);
+          throw new IllegalStateException(String.format("Invalid value found at %d,%d (should not be possible)", j, k));
         }
       }
     }
     return x;
   }
 
-  private class InvalidCholeskyState extends RuntimeException {
-    public InvalidCholeskyState(int j, int k) {
-      super(String.format("Invalid value found at %d,%d (should not be possible)", j, k));
-    }
-  }
 }
 

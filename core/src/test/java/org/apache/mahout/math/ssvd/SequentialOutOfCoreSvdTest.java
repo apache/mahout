@@ -85,7 +85,7 @@ public final class SequentialOutOfCoreSvdTest extends MahoutTestCase {
     })));
 
     // The values in A are pretty big so this is a pretty tight relative tolerance
-    assertEquals(0, A.minus(u.times(new DiagonalMatrix(s.getSingularValues())).times(v.transpose())).aggregate(Functions.PLUS, Functions.ABS), 1e-7);
+    assertEquals(0, A.minus(u.times(new DiagonalMatrix(s.getSingularValues())).times(v.transpose())).aggregate(Functions.PLUS, Functions.ABS), 1.0e-7);
   }
 
   private static Matrix readBlockMatrix(List<File> files) throws IOException {

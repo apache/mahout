@@ -154,6 +154,7 @@ public abstract class SolverTest extends MahoutTestCase {
 
   public static Matrix randomHierarchicalMatrix(int numRows, int numCols, boolean symmetric) {
     Matrix matrix = new DenseMatrix(numRows, numCols);
+    // TODO rejigger tests so that it doesn't expect this particular seed
     Random r = new Random(1234L);
     for(int row = 0; row < numRows; row++) {
       Vector v = new DenseVector(numCols);

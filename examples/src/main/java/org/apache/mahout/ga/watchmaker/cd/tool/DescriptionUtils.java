@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 /**
  * Utility functions to handle Attribute's description strings.
  */
-public final class DescriptionUtils {
+final class DescriptionUtils {
 
   private static final Pattern COMMA = Pattern.compile(",");
 
@@ -33,20 +33,15 @@ public final class DescriptionUtils {
 
   /**
    * Create a numerical attribute description.
-   * 
-   * @param min
-   * @param max
    */
-  public static String createNumericalDescription(double min, double max) {
+  static String createNumericalDescription(double min, double max) {
     return min + "," + max;
   }
   
   /**
    * Create a nominal description from the possible values.
-   * 
-   * @param values
    */
-  public static String createNominalDescription(Collection<String> values) {
+  static String createNominalDescription(Collection<String> values) {
     StringBuilder buffer = new StringBuilder();
     int ind = 0;
     
@@ -60,7 +55,7 @@ public final class DescriptionUtils {
     return buffer.toString();
   }
   
-  public static double[] extractNumericalRange(CharSequence description) {
+  static double[] extractNumericalRange(CharSequence description) {
     String[] tokens = COMMA.split(description);
     double min = Double.parseDouble(tokens[0]);
     double max = Double.parseDouble(tokens[1]);
@@ -69,12 +64,10 @@ public final class DescriptionUtils {
   /**
    * Extract all available values from the description.
    * 
-   * @param description
    * @param target the extracted values will be added to this collection. It
    *        will not be cleared.
    */
-  public static void extractNominalValues(CharSequence description,
-                                          Collection<String> target) {
+  static void extractNominalValues(CharSequence description, Collection<String> target) {
     Collections.addAll(target, COMMA.split(description));
   }
   

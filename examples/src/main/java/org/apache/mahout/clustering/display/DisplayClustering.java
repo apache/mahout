@@ -206,7 +206,7 @@ public class DisplayClustering extends Frame {
          : new SequenceFileIterable<IntWritable, WeightedVectorWritable>(inputPath, new Configuration())) {
     	int clusterId = record.getFirst().get();
     	VectorWritable v = SAMPLE_DATA.get(point++);
-    	Integer key = new Integer(clusterId);
+    	Integer key = clusterId;
     	if (!colors.containsKey(key)){
     		colors.put(key, COLORS[Math.min(COLORS.length - 1, colors.size())]);
     	}

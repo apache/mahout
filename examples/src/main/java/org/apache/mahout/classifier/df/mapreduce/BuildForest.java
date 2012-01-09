@@ -191,8 +191,7 @@ public class BuildForest extends Configured implements Tool {
     return 0;
   }
   
-  private void buildForest() throws IOException, ClassNotFoundException, InterruptedException,
-    InstantiationException, IllegalAccessException {
+  private void buildForest() throws IOException, ClassNotFoundException, InterruptedException {
     // make sure the output path does not exist
     FileSystem ofs = outputPath.getFileSystem(getConf());
     if (ofs.exists(outputPath)) {

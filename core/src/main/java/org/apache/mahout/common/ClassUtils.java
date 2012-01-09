@@ -31,7 +31,7 @@ public final class ClassUtils {
     }
   }
 
-  public static <T> T instantiateAs(String classname, Class<T> asSubclassOfClass, Class[] params, Object[] args) {
+  public static <T> T instantiateAs(String classname, Class<T> asSubclassOfClass, Class<?>[] params, Object[] args) {
     try {
       return instantiateAs(Class.forName(classname).asSubclass(asSubclassOfClass), asSubclassOfClass, params, args);
     } catch (ClassNotFoundException e) {
@@ -39,7 +39,10 @@ public final class ClassUtils {
     }
   }
 
-  public static <T> T instantiateAs(Class<? extends T> clazz, Class<T> asSubclassOfClass, Class[] params, Object[] args) {
+  public static <T> T instantiateAs(Class<? extends T> clazz,
+                                    Class<T> asSubclassOfClass,
+                                    Class<?>[] params,
+                                    Object[] args) {
     try {
       return clazz.asSubclass(asSubclassOfClass).getConstructor(params).newInstance(args);
     } catch (InstantiationException ie) {

@@ -131,7 +131,7 @@ public final class CDCrossoverTest extends MahoutTestCase {
 
   }
 
-  static int countAreas(CDRule rule) {
+  private static int countAreas(CDRule rule) {
 
     int nbareas = 1; // we already start in an area
     int partind = 0; // index of the start of the current part
@@ -147,7 +147,7 @@ public final class CDCrossoverTest extends MahoutTestCase {
     return nbareas;
   }
 
-  static CDRule generate0Rule() {
+  private static CDRule generate0Rule() {
     CDRule rule = new CDRule(1);
 
     for (int index = 0; index < rule.getNbConditions(); index++) {
@@ -159,7 +159,7 @@ public final class CDCrossoverTest extends MahoutTestCase {
     return rule;
   }
 
-  static CDRule generate1Rule() {
+  private static CDRule generate1Rule() {
     CDRule rule = new CDRule(1);
 
     for (int index = 0; index < rule.getNbConditions(); index++) {

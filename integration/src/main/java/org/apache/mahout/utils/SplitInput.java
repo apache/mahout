@@ -141,9 +141,6 @@ public class SplitInput extends AbstractJob {
     ToolRunner.run(new Configuration(), new SplitInput(), args);
   }
 
-  public SplitInput() {
-  }
-
   /**
    * Configure this instance based on the command-line arguments contained within provided array.
    * Calls {@link #validate()} to ensure consistency of configuration.
@@ -252,7 +249,7 @@ public class SplitInput extends AbstractJob {
 
     } catch (OptionException e) {
       log.error("Command-line option Exception", e);
-      CommandLineUtil.printHelp(group);
+      CommandLineUtil.printHelp(getGroup());
       return false;
     }
 

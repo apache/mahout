@@ -44,11 +44,11 @@ public abstract class OnlineBaseTest extends MahoutTestCase {
 
   private Matrix input;
 
-  protected Matrix getInput() {
+  Matrix getInput() {
     return input;
   }
 
-  protected Vector readStandardData() throws IOException {
+  Vector readStandardData() throws IOException {
     // 60 test samples.  First column is constant.  Second and third are normally distributed from
     // either N([2,2], 1) (rows 0...29) or N([-2,-2], 1) (rows 30...59).  The first 30 rows have a
     // target variable of 0, the last 30 a target of 1.  The remaining columns are are random noise.
@@ -61,7 +61,7 @@ public abstract class OnlineBaseTest extends MahoutTestCase {
     return target;
   }
 
-  protected static void train(Matrix input, Vector target, OnlineLearner lr) {
+  static void train(Matrix input, Vector target, OnlineLearner lr) {
     RandomUtils.useTestSeed();
     Random gen = RandomUtils.getRandom();
 
@@ -72,8 +72,8 @@ public abstract class OnlineBaseTest extends MahoutTestCase {
     lr.close();
   }
 
-  protected static void test(Matrix input, Vector target, AbstractVectorClassifier lr,
-                             double expected_mean_error, double expected_absolute_error) {
+  static void test(Matrix input, Vector target, AbstractVectorClassifier lr,
+                   double expected_mean_error, double expected_absolute_error) {
     // now test the accuracy
     Matrix tmp = lr.classify(input);
     // mean(abs(tmp - target))
@@ -100,7 +100,7 @@ public abstract class OnlineBaseTest extends MahoutTestCase {
    * @param max The number of integers to permute
    * @return An array of jumbled integer values
    */
-  protected static int[] permute(Random gen, int max) {
+  static int[] permute(Random gen, int max) {
     int[] permutation = new int[max];
     permutation[0] = 0;
     for (int i = 1; i < max; i++) {
@@ -125,7 +125,7 @@ public abstract class OnlineBaseTest extends MahoutTestCase {
    * @return A matrix of the results.
    * @throws IOException If there is an error reading the data
    */
-  protected static Matrix readCsv(String resourceName) throws IOException {
+  static Matrix readCsv(String resourceName) throws IOException {
     Splitter onCommas = Splitter.on(',').trimResults(CharMatcher.anyOf(" \""));
 
     Readable isr = new InputStreamReader(Resources.getResource(resourceName).openStream(), Charsets.UTF_8);

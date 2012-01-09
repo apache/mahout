@@ -196,9 +196,17 @@ public final class TimesSquaredJob {
   public static class TimesSquaredMapper<T extends WritableComparable> extends MapReduceBase
       implements Mapper<T,VectorWritable, NullWritable,VectorWritable> {
 
-    Vector outputVector;
-    OutputCollector<NullWritable,VectorWritable> out;
+    private Vector outputVector;
+    private OutputCollector<NullWritable,VectorWritable> out;
     private Vector inputVector;
+
+    Vector getOutputVector() {
+      return outputVector;
+    }
+    
+    void setOut(OutputCollector<NullWritable,VectorWritable> out) {
+      this.out = out;
+    }
 
     @Override
     public void configure(JobConf conf) {
@@ -230,7 +238,7 @@ public final class TimesSquaredJob {
                     VectorWritable v,
                     OutputCollector<NullWritable,VectorWritable> out,
                     Reporter rep) throws IOException {
-      this.out = out;
+      setOut(out);
       double d = scale(v);
       if (d == 1.0) {
         outputVector.assign(v.get(), Functions.PLUS);
@@ -258,10 +266,10 @@ public final class TimesSquaredJob {
                     VectorWritable v,
                     OutputCollector<NullWritable,VectorWritable> out,
                     Reporter rep) {
-      this.out = out;
+      setOut(out);
       double d = scale(v);
       if (d != 0.0) {
-        outputVector.setQuick(rowNum.get(), d);
+        getOutputVector().setQuick(rowNum.get(), d);
       }
     }
   }

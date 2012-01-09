@@ -25,12 +25,10 @@ import java.io.PrintStream;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.MatrixWritable;
 
@@ -67,11 +65,11 @@ public final class MatrixDumper extends AbstractJob {
   }
   
   private static void exportCSV(Path inputPath, String outputFile, boolean doLabels) throws IOException {
-    MatrixWritable mw = new MatrixWritable();
-    Text key = new Text();
-    readSeqFile(inputPath, key, mw);
+    SequenceFileValueIterator<MatrixWritable> it =
+        new SequenceFileValueIterator<MatrixWritable>(inputPath, true, new Configuration());
+    Matrix m = it.next().get();
+    it.close();
     PrintStream ps = getPrintStream(outputFile);
-    Matrix m = mw.get();
     String[] columnLabels = getLabels(m.numCols(), m.getColumnLabelBindings(), "col");
     String[] rowLabels = getLabels(m.numRows(), m.getRowLabelBindings(), "row");
     if (doLabels) {
@@ -98,14 +96,6 @@ public final class MatrixDumper extends AbstractJob {
     }
   }
   
-  private static void readSeqFile(Path inputPath, Text key, MatrixWritable m) throws IOException {
-    Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(conf);
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, inputPath, conf);
-    reader.getMetadata();
-    reader.next(key, m);
-  }
-  
   private static PrintStream getPrintStream(String outputPath) throws IOException {
     if (outputPath != null) {
       File outputFile = new File(outputPath);
@@ -128,13 +118,12 @@ public final class MatrixDumper extends AbstractJob {
   private static String[] getLabels(int length, Map<String,Integer> labels, String start) {
     if (labels != null) {
       return sortLabels(labels);
-    } else {
-      String[] sorted = new String[length];
-      for(int i = 1; i <= length; i++) {
-        sorted[i] = start + i;
-      }
-      return sorted;
     }
+    String[] sorted = new String[length];
+    for(int i = 1; i <= length; i++) {
+      sorted[i] = start + i;
+    }
+    return sorted;
   }
   
   private static String[] sortLabels(Map<String,Integer> labels) {

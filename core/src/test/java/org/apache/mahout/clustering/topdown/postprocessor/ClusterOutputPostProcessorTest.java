@@ -53,9 +53,9 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
-public class ClusterOutputPostProcessorTest extends MahoutTestCase {
+public final class ClusterOutputPostProcessorTest extends MahoutTestCase {
   
-  public static final double[][] REFERENCE = { {1, 1}, {2, 1}, {1, 2}, {4, 4}, {5, 4}, {4, 5}, {5, 5}};
+  private static final double[][] REFERENCE = { {1, 1}, {2, 1}, {1, 2}, {4, 4}, {5, 4}, {4, 5}, {5, 5}};
   
   private FileSystem fs;
   
@@ -71,7 +71,7 @@ public class ClusterOutputPostProcessorTest extends MahoutTestCase {
     fs = FileSystem.get(conf);
   }
   
-  public static List<VectorWritable> getPointsWritable(double[][] raw) {
+  private static List<VectorWritable> getPointsWritable(double[][] raw) {
     List<VectorWritable> points = Lists.newArrayList();
     for (double[] fr : raw) {
       Vector vec = new RandomAccessSparseVector(fr.length);

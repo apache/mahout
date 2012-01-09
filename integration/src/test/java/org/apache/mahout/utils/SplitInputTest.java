@@ -334,8 +334,7 @@ public final class SplitInputTest extends MahoutTestCase {
    * Validate that number of test records and number of training records
    * are consistant with keepPct and randomSelectionPct
    */
-  private void validateSplitInputMapReduce(int numPoints,
-      int randomSelectionPct, int keepPct) throws Exception {
+  private void validateSplitInputMapReduce(int numPoints, int randomSelectionPct, int keepPct) {
     Path testPath = new Path(tempMapRedOutputDirectory, "test-r-00000");
     Path trainingPath = new Path(tempMapRedOutputDirectory, "training-r-00000");
     int numberTestRecords = getNumberRecords(testPath);

@@ -36,7 +36,7 @@ public final class QRDecompositionTest extends MahoutTestCase {
       public double apply(double arg1, double arg2) {
         return Math.abs(arg1) - Math.abs(arg2);
       }
-    }), 1e-5);
+    }), 1.0e-5);
   }
 
   @Test

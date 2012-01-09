@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.impl.recommender.knn;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -76,7 +77,7 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
   
   private double[] getInterpolations(long itemID, 
                                      long[] itemNeighborhood,
-                                     List<Long> usersRatedNeighborhood) throws TasteException {
+                                     Collection<Long> usersRatedNeighborhood) throws TasteException {
     
     int length = 0;
     for (int i = 0; i < itemNeighborhood.length; i++) {

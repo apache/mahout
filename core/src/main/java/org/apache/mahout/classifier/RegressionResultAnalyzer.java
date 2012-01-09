@@ -30,11 +30,17 @@ import org.apache.commons.lang.StringUtils;
 public class RegressionResultAnalyzer {
 
   private static class Result {
-    final double actual;
-    final double result;
+    private final double actual;
+    private final double result;
     Result(double actual, double result) {
       this.actual = actual;
       this.result = result;
+    }
+    double getActual() {
+      return actual;
+    }
+    double getResult() {
+      return result;
     }
   }
   
@@ -75,11 +81,13 @@ public class RegressionResultAnalyzer {
     double sumAbsoluteSquared = 0.0;
 
     for (Result res : results) {
-      sumActual += res.actual;
-      sumActualSquared += res.actual * res.actual;
-      sumResult += res.result;
-      sumResultSquared += res.result * res.result;
-      double absolute = Math.abs(res.actual - res.result);
+      double actual = res.getActual();
+      double result = res.getResult();
+      sumActual += actual;
+      sumActualSquared += actual * actual;
+      sumResult += result;
+      sumResultSquared += result * result;
+      double absolute = Math.abs(actual - result);
       sumAbsolute += absolute;
       sumAbsoluteSquared += absolute * absolute;
     }

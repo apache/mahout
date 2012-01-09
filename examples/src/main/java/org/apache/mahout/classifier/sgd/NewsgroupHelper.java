@@ -113,8 +113,10 @@ final class NewsgroupHelper {
     return v;
   }
 
-  static void countWords(Analyzer analyzer, Collection<String> words, Reader in, Multiset<String> overallCounts) 
-    throws IOException {
+  private static void countWords(Analyzer analyzer,
+                                 Collection<String> words,
+                                 Reader in,
+                                 Multiset<String> overallCounts) throws IOException {
     TokenStream ts = analyzer.reusableTokenStream("text", in);
     ts.addAttribute(CharTermAttribute.class);
     ts.reset();

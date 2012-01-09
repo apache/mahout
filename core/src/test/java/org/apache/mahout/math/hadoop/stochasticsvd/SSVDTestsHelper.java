@@ -134,7 +134,7 @@ public class SSVDTestsHelper {
      */
     
     outputDir = new Path("/tmp/DRM-sparse");
-    Random rnd = new Random();
+    Random rnd = RandomUtils.getRandom();
 
     SequenceFile.Writer w =
       SequenceFile.createWriter(dfs,

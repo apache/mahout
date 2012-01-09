@@ -29,8 +29,7 @@ public final class DistributedRowMatrixWriter {
   private DistributedRowMatrixWriter() {
   }
 
-  public static void write(Path outputDir, Configuration conf, VectorIterable matrix)
-      throws IOException {
+  public static void write(Path outputDir, Configuration conf, Iterable<MatrixSlice> matrix) throws IOException {
     FileSystem fs = outputDir.getFileSystem(conf);
     SequenceFile.Writer writer = SequenceFile.createWriter(fs, conf, outputDir,
         IntWritable.class, VectorWritable.class);

@@ -17,7 +17,6 @@
 
 package org.apache.mahout.math.ssvd;
 
-import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.DiagonalMatrix;
 import org.apache.mahout.math.MahoutTestCase;
@@ -28,7 +27,8 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
 import org.junit.Test;
 
-public class SequentialBigSvdTest extends MahoutTestCase {
+public final class SequentialBigSvdTest extends MahoutTestCase {
+
   @Test
   public void testSingularValues() {
     Matrix A = lowRankMatrix();
@@ -53,15 +53,15 @@ public class SequentialBigSvdTest extends MahoutTestCase {
     // go to zero, the singular vectors are not uniquely determined
     Matrix u1 = svd.getU().viewPart(0, 20, 0, 4).assign(Functions.ABS);
     Matrix u2 = s.getU().viewPart(0, 20, 0, 4).assign(Functions.ABS);
-    assertEquals(0, u1.minus(u2).aggregate(Functions.PLUS, Functions.ABS), 1e-9);
+    assertEquals(0, u1.minus(u2).aggregate(Functions.PLUS, Functions.ABS), 1.0e-9);
   }
 
-  private void assertEquals(Matrix u1, Matrix u2) {
-    assertEquals(0, u1.minus(u2).aggregate(Functions.MAX, Functions.ABS), 1e-10);
+  private static void assertEquals(Matrix u1, Matrix u2) {
+    assertEquals(0, u1.minus(u2).aggregate(Functions.MAX, Functions.ABS), 1.0e-10);
   }
 
-  private void assertEquals(Vector u1, Vector u2) {
-    assertEquals(0, u1.minus(u2).aggregate(Functions.MAX, Functions.ABS), 1e-10);
+  private static void assertEquals(Vector u1, Vector u2) {
+    assertEquals(0, u1.minus(u2).aggregate(Functions.MAX, Functions.ABS), 1.0e-10);
   }
 
   @Test
@@ -76,7 +76,7 @@ public class SequentialBigSvdTest extends MahoutTestCase {
     assertEquals(v1, v2);
   }
 
-  private Matrix lowRankMatrix() {
+  private static Matrix lowRankMatrix() {
     Matrix u = new RandomTrinaryMatrix(1, 20, 4, false);
     Matrix d = new DiagonalMatrix(new double[]{5, 3, 1, 0.5});
     Matrix v = new RandomTrinaryMatrix(2, 23, 4, false);

@@ -66,7 +66,7 @@ public class State<T extends Payload<U>, U> implements Comparable<State<T, U>>, 
   private double[] step;
   // current fitness value
   private double value;
-  private Payload<U> payload;
+  private T payload;
 
   public State() {
   }
@@ -91,7 +91,7 @@ public class State<T extends Payload<U>, U> implements Comparable<State<T, U>>, 
     r.step = Arrays.copyOf(this.step, this.step.length);
     r.maps = Arrays.copyOf(this.maps, this.maps.length);
     if (this.payload != null) {
-      r.payload = this.payload.copy();
+      r.payload = (T) this.payload.copy();
     }
     r.gen = this.gen;
     return r;
@@ -177,7 +177,7 @@ public class State<T extends Payload<U>, U> implements Comparable<State<T, U>>, 
   }
 
   public T getPayload() {
-    return (T) payload;
+    return payload;
   }
 
   public double getValue() {
@@ -297,6 +297,6 @@ public class State<T extends Payload<U>, U> implements Comparable<State<T, U>>, 
       step[i] = input.readDouble();
     }
     value = input.readDouble();
-    payload = PolymorphicWritable.read(input, Payload.class);
+    payload = (T) PolymorphicWritable.read(input, Payload.class);
   }
 }

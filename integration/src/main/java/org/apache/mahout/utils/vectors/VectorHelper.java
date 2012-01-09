@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -62,14 +63,12 @@ public final class VectorHelper {
   }
 
   public static String buildJson(Iterable<Pair<String,Double>> iterable, StringBuilder bldr) {
-    bldr.append("{");
-    Iterator<Pair<String, Double>> listIt = iterable.iterator();
-    while(listIt.hasNext()) {
-      Pair<String,Double> p = listIt.next();
+    bldr.append('{');
+    for (Pair<String,Double> p : iterable) {
       bldr.append(p.getFirst());
-      bldr.append(":");
+      bldr.append(':');
       bldr.append(p.getSecond());
-      bldr.append(",");
+      bldr.append(',');
     }
     if(bldr.length() > 1) {
       bldr.setCharAt(bldr.length() - 1, '}');
@@ -89,7 +88,7 @@ public final class VectorHelper {
       queue.insertWithOverflow(Pair.of(e.index(), e.get()));
     }
     List<Pair<Integer, Double>> entries = Lists.newArrayList();
-    Pair<Integer, Double> pair = null;
+    Pair<Integer, Double> pair;
     while((pair = queue.pop()) != null) {
       if(pair.getFirst() > -1) {
         entries.add(pair);
@@ -110,7 +109,7 @@ public final class VectorHelper {
     return entries;
   }
 
-  public static List<Pair<String, Double>> toWeightedTerms(List<Pair<Integer, Double>> entries,
+  public static List<Pair<String, Double>> toWeightedTerms(Collection<Pair<Integer, Double>> entries,
       final String[] dictionary) {
     return Lists.newArrayList(Collections2.transform(entries,
           new Function<Pair<Integer, Double>, Pair<String, Double>>() {
@@ -121,8 +120,7 @@ public final class VectorHelper {
           }));
   }
 
-  public static String vectorToJson(Vector vector, final String[] dictionary, int maxEntries,
-      boolean sort) {
+  public static String vectorToJson(Vector vector, String[] dictionary, int maxEntries, boolean sort) {
     return buildJson(toWeightedTerms(sort
                                      ? topEntries(vector, maxEntries)
                                      : firstEntries(vector, maxEntries), dictionary));
@@ -209,8 +207,8 @@ public final class VectorHelper {
   }
 
   private static class TDoublePQ<T> extends PriorityQueue<Pair<T, Double>> {
-    final T sentinel;
-    public TDoublePQ(T sentinel, int size) {
+    private final T sentinel;
+    private TDoublePQ(T sentinel, int size) {
       initialize(size);
       this.sentinel = sentinel;
     }

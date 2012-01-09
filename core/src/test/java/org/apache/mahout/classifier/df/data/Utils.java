@@ -226,15 +226,15 @@ public final class Utils {
 
   /**
    * Generates random data with same label value
-   * 
-   * @param rng
-   * @param descriptor
-   * @param regression
+   *
    * @param number data size
    * @param value label value
    */
   public static double[][] randomDoublesWithSameLabel(Random rng,
-      String descriptor, boolean regression, int number, int value) throws DescriptorException {
+                                                      CharSequence descriptor,
+                                                      boolean regression,
+                                                      int number,
+                                                      int value) throws DescriptorException {
     int label = findLabel(descriptor);
     
     double[][] source = randomDoubles(rng, descriptor, regression, number);

@@ -32,7 +32,7 @@ import org.apache.mahout.math.map.OpenIntObjectHashMap;
 import java.io.IOException;
 import java.util.Iterator;
 
-public final class ALSUtils {
+final class ALSUtils {
 
   private ALSUtils() {}
 
