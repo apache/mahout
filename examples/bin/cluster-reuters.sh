@@ -164,7 +164,7 @@ elif [ "x$clustertype" == "xminhash" ]; then
   && \
   $MAHOUT org.apache.mahout.clustering.minhash.MinHashDriver \
     -i ${WORK_DIR}/reuters-out-seqdir-sparse-minhash/tfidf-vectors \
-    -o ${WORK_DIR}/reuters-minhash
+    -o ${WORK_DIR}/reuters-minhash --overwrite
 else 
   echo "unknown cluster type: $clustertype"
 fi 

@@ -30,6 +30,8 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.commandline.MinhashOptionCreator;
 import org.apache.mahout.math.VectorWritable;
 
@@ -97,6 +99,7 @@ public final class MinHashDriver extends AbstractJob {
     addOption(MinhashOptionCreator.keyGroupsOption().create());
     addOption(MinhashOptionCreator.numReducersOption().create());
     addOption(MinhashOptionCreator.debugOutputOption().create());
+    addOption(DefaultOptionCreator.overwriteOption().create());
 
     if (parseArguments(args) == null) {
       return -1;
@@ -104,6 +107,9 @@ public final class MinHashDriver extends AbstractJob {
 
     Path input = getInputPath();
     Path output = getOutputPath();
+    if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
+      HadoopUtil.delete(getConf(), output);
+    }
     int minClusterSize = Integer.valueOf(getOption(MinhashOptionCreator.MIN_CLUSTER_SIZE));
     int minVectorSize = Integer.valueOf(getOption(MinhashOptionCreator.MIN_VECTOR_SIZE));
     String hashType = getOption(MinhashOptionCreator.HASH_TYPE);
