@@ -20,7 +20,9 @@ package org.apache.mahout.fpm.pfpgrowth;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.hadoop.io.LongWritable;
+import org.apache.mahout.math.list.IntArrayList;
+
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.common.Pair;
 
@@ -28,14 +30,14 @@ import org.apache.mahout.common.Pair;
  *  takes each group of dependent transactions and\ compacts it in a
  * TransactionTree structure
  */
-public class ParallelFPGrowthCombiner extends Reducer<LongWritable,TransactionTree,LongWritable,TransactionTree> {
+public class ParallelFPGrowthCombiner extends Reducer<IntWritable,TransactionTree,IntWritable,TransactionTree> {
   
   @Override
-  protected void reduce(LongWritable key, Iterable<TransactionTree> values, Context context)
+  protected void reduce(IntWritable key, Iterable<TransactionTree> values, Context context)
     throws IOException, InterruptedException {
     TransactionTree cTree = new TransactionTree();
     for (TransactionTree tr : values) {
-      for (Pair<List<Integer>,Long> p : tr) {
+      for (Pair<IntArrayList,Long> p : tr) {
         cTree.addPattern(p.getFirst(), p.getSecond());
       }
     }

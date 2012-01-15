@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.fpm.pfpgrowth;
+package org.apache.mahout.fpm.pfpgrowth2;
 
 import java.io.File;
 import java.io.Writer;
@@ -39,16 +39,17 @@ import org.apache.mahout.common.Parameters;
 import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.common.iterator.StringRecordIterator;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
+import org.apache.mahout.fpm.pfpgrowth.PFPGrowth;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.io.Resources;
 
-public class PFPGrowthRetailDataTest extends MahoutTestCase {
+public class PFPGrowthRetailDataTest2 extends MahoutTestCase {
   
   private final Parameters params = new Parameters();
-  private static final Logger log = LoggerFactory.getLogger(PFPGrowthRetailDataTest.class);
+  private static final Logger log = LoggerFactory.getLogger(PFPGrowthRetailDataTest2.class);
   
   @Override
   public void setUp() throws Exception {
@@ -57,6 +58,7 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
     params.set(PFPGrowth.MAX_HEAPSIZE, "10000");
     params.set(PFPGrowth.NUM_GROUPS, "50");
     params.set(PFPGrowth.ENCODING, "UTF-8");
+    params.set(PFPGrowth.USE_FPG2, "true");
     File inputDir = getTestTempDir("transactions");
     File outputDir = getTestTempDir("frequentpatterns");
     File input = new File(inputDir, "test.txt");
@@ -87,7 +89,6 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
     }
   }
   
-   
   /**
    * Test Parallel FPGrowth on retail data using top-level runPFPGrowth() method
    */ 
@@ -107,7 +108,7 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
     PFPGrowth.runPFPGrowth(params);
 
     List<Pair<String,TopKStringPatterns>> frequentPatterns = PFPGrowth.readFrequentPattern(params);
-  
+    
     Map<Set<String>,Long> results = Maps.newHashMap();
     for (Pair<String,TopKStringPatterns> topK : frequentPatterns) {
       Iterator<Pair<List<String>,Long>> topKIt = topK.getSecond().iterator();
@@ -116,7 +117,7 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
         results.put(new HashSet<String>(entry.getFirst()), entry.getSecond());
       }
     }
-  
+    
     for (Entry<Set<String>,Long> entry : results.entrySet()) {
       Set<String> key = entry.getKey();
       if (expectedResults.get(key) == null) {
@@ -124,13 +125,13 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
       } else {
         if (!expectedResults.get(key).equals(results.get(entry.getKey()))) {
           System.out.println("invalid (1): " + key + ", expected: " + expectedResults.get(key) + ", got: "
-                             +                             + results.get(entry.getKey()));
+                             + results.get(entry.getKey()));
         } else {
           System.out.println("matched (1): " + key + ", with: " + expectedResults.get(key));
         }
       }
     }
-  
+    
     for (Entry<Set<String>,Long> entry : expectedResults.entrySet()) {
       Set<String> key = entry.getKey();
       if (results.get(key) == null) {
@@ -139,7 +140,6 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
     }
     assertEquals(expectedResults.size(), results.size());
   }
-  
 
   /**
    * Test Parallel FPG on retail data, running various stages individually
@@ -147,7 +147,7 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
   @Test
   public void testRetailDataMinSup100InSteps() throws Exception {
     StringRecordIterator it = new StringRecordIterator(new FileLineIterable(Resources.getResource(
-      "retail_results_with_min_sup_100.dat").openStream()), "\\s+");   
+      "retail_results_with_min_sup_100.dat").openStream()), "\\s+");    
     Map<Set<String>,Long> expectedResults = Maps.newHashMap();
     while (it.hasNext()) {
       Pair<List<String>,Long> next = it.next();
@@ -162,6 +162,7 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
 
     List<Pair<String,Long>> fList = PFPGrowth.readFList(params);
     PFPGrowth.saveFList(fList, params, conf);
+
     int numGroups = params.getInt(PFPGrowth.NUM_GROUPS, 
                                   PFPGrowth.NUM_GROUPS_DEFAULT);
     int maxPerGroup = fList.size() / numGroups;
@@ -169,6 +170,7 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
       maxPerGroup++;
     params.set(PFPGrowth.MAX_PER_GROUP, Integer.toString(maxPerGroup));
 
+    log.info("Starting Parallel FPGrowth Test: {}", params.get(PFPGrowth.MAX_HEAPSIZE));
     PFPGrowth.startParallelFPGrowth(params, conf);
     log.info("Starting Pattern Aggregation Test: {}", params.get(PFPGrowth.MAX_HEAPSIZE));
     PFPGrowth.startAggregating(params, conf);
@@ -186,21 +188,21 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
     for (Entry<Set<String>,Long> entry : results.entrySet()) {
       Set<String> key = entry.getKey();
       if (expectedResults.get(key) == null) {
-        System.out.println("spurious (2): " + key);
+        System.out.println("spurious (2): " + key + ", " + entry.getValue());
       } else {
         if (!expectedResults.get(key).equals(results.get(entry.getKey()))) {
           System.out.println("invalid (2): " + key + ", expected: " + expectedResults.get(key) + ", got: "
                              + results.get(entry.getKey()));
         } else {
           System.out.println("matched (2): " + key + ", with: " + expectedResults.get(key));
-        }
+        }         
       }
     }
     
     for (Entry<Set<String>,Long> entry : expectedResults.entrySet()) {
       Set<String> key = entry.getKey();
       if (results.get(key) == null) {
-        System.out.println("missing: " + key);
+        System.out.println("missing2: " + key + ", " + entry.getValue());
       }
     }
     assertEquals(expectedResults.size(), results.size());

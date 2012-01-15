@@ -78,6 +78,8 @@ public final class FPGrowthDriver extends AbstractJob {
             + "Default Value:5 Recommended Values: [5-10]", "5");
     addOption("method", "method", "Method of processing: sequential|mapreduce", "sequential");
     addOption("encoding", "e", "(Optional) The file encoding.  Default value: UTF-8", "UTF-8");
+    addFlag("useFPG2", "2", "Use an alternate FPG implementation");
+
     if (parseArguments(args) == null) {
       return -1;
     }
@@ -112,6 +114,11 @@ public final class FPGrowthDriver extends AbstractJob {
       encoding = getOption("encoding");
     }
     params.set("encoding", encoding);
+
+    if (hasOption("useFPG2")) {
+      params.set(PFPGrowth.USE_FPG2, "true");
+    }
+
     Path inputDir = getInputPath();
     Path outputDir = getOutputPath();
 
@@ -148,23 +155,44 @@ public final class FPGrowthDriver extends AbstractJob {
 
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, Text.class, TopKStringPatterns.class);
 
-    FPGrowth<String> fp = new FPGrowth<String>();
-    Collection<String> features = new HashSet<String>();
+    if ("true".equals(params.get("useFPG2"))) {
+      org.apache.mahout.fpm.pfpgrowth.fpgrowth2.FPGrowthObj<String> fp 
+        = new org.apache.mahout.fpm.pfpgrowth.fpgrowth2.FPGrowthObj<String>();
+      Collection<String> features = new HashSet<String>();
 
-    try {
-      fp.generateTopKFrequentPatterns(
-              new StringRecordIterator(new FileLineIterable(new File(input), encoding, false), pattern),
-              fp.generateFList(
-                      new StringRecordIterator(new FileLineIterable(new File(input), encoding, false), pattern),
-                      minSupport),
-              minSupport,
-              maxHeapSize,
-              features,
-              new StringOutputConverter(new SequenceFileOutputCollector<Text, TopKStringPatterns>(writer)),
-              new ContextStatusUpdater(null));
-    } finally {
-      Closeables.closeQuietly(writer);
-    }
+      try {
+        fp.generateTopKFrequentPatterns(
+                new StringRecordIterator(new FileLineIterable(new File(input), encoding, false), pattern),
+                fp.generateFList(
+                        new StringRecordIterator(new FileLineIterable(new File(input), encoding, false), pattern),
+                        minSupport),
+                minSupport,
+                maxHeapSize,
+                features,
+                new StringOutputConverter(new SequenceFileOutputCollector<Text, TopKStringPatterns>(writer)),
+                new ContextStatusUpdater(null));
+        } finally {
+          Closeables.closeQuietly(writer);
+        }
+    } else {
+      FPGrowth<String> fp = new FPGrowth<String>();
+      Collection<String> features = new HashSet<String>();
+      try {
+        fp.generateTopKFrequentPatterns(
+                new StringRecordIterator(new FileLineIterable(new File(input), encoding, false), pattern),
+                fp.generateFList(
+                        new StringRecordIterator(new FileLineIterable(new File(input), encoding, false), pattern),
+                        minSupport),
+                minSupport,
+                maxHeapSize,
+                features,
+                new StringOutputConverter(new SequenceFileOutputCollector<Text, TopKStringPatterns>(writer)),
+                new ContextStatusUpdater(null));
+      } finally {
+        Closeables.closeQuietly(writer);
+      }
+    } 
+
 
     List<Pair<String, TopKStringPatterns>> frequentPatterns = FPGrowth.readFrequentPattern(conf, path);
     for (Pair<String, TopKStringPatterns> entry : frequentPatterns) {

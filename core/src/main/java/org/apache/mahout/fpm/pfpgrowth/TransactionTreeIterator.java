@@ -21,6 +21,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
+import org.apache.mahout.math.list.IntArrayList;
+
 import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.Lists;
 import org.apache.mahout.common.Pair;
@@ -29,7 +31,7 @@ import org.apache.mahout.common.Pair;
  * Generates a List of transactions view of Transaction Tree by doing Depth First Traversal on the tree
  * structure
  */
-final class TransactionTreeIterator extends AbstractIterator<Pair<List<Integer>,Long>> {
+final class TransactionTreeIterator extends AbstractIterator<Pair<IntArrayList,Long>> {
 
   private final Stack<int[]> depth = new Stack<int[]>();
   private final TransactionTree transactionTree;
@@ -40,7 +42,7 @@ final class TransactionTreeIterator extends AbstractIterator<Pair<List<Integer>,
   }
 
   @Override
-  protected Pair<List<Integer>, Long> computeNext() {
+  protected Pair<IntArrayList, Long> computeNext() {
 
     if (depth.isEmpty()) {
       return endOfData();
@@ -67,14 +69,14 @@ final class TransactionTreeIterator extends AbstractIterator<Pair<List<Integer>,
       }
     } while (sum == transactionTree.count(childId));
 
-    List<Integer> data = Lists.newArrayList();
+    IntArrayList data = new IntArrayList();
     Iterator<int[]> it = depth.iterator();
     it.next();
     while (it.hasNext()) {
       data.add(transactionTree.attribute(it.next()[0]));
     }
 
-    Pair<List<Integer>,Long> returnable = new Pair<List<Integer>,Long>(data, transactionTree.count(childId) - sum);
+    Pair<IntArrayList,Long> returnable = new Pair<IntArrayList,Long>(data, transactionTree.count(childId) - sum);
 
     int[] top = depth.peek();
     while (top[1] + 1 == transactionTree.childCount(top[0])) {

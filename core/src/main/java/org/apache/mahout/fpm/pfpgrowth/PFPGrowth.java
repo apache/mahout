@@ -35,6 +35,7 @@ import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
@@ -52,6 +53,7 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth;
+import org.apache.mahout.math.list.IntArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,6 +70,7 @@ public final class PFPGrowth {
   public static final String G_LIST = "gList";
   public static final String NUM_GROUPS = "numGroups";
   public static final int NUM_GROUPS_DEFAULT = 1000;
+  public static final String MAX_PER_GROUP = "maxPerGroup";
   public static final String OUTPUT = "output";
   public static final String MIN_SUPPORT = "minSupport";
   public static final String MAX_HEAPSIZE = "maxHeapSize";
@@ -77,8 +80,8 @@ public final class PFPGrowth {
   public static final String FPGROWTH = "fpgrowth";
   public static final String FREQUENT_PATTERNS = "frequentpatterns";
   public static final String PARALLEL_COUNTING = "parallelcounting";
-  public static final String SORTED_OUTPUT = "sortedoutput";
   public static final String SPLIT_PATTERN = "splitPattern";
+  public static final String USE_FPG2 = "use_fpg2";
 
   public static final Pattern SPLITTER = Pattern.compile("[ ,\t]*[,|\t][ ,\t]*");
   
@@ -94,8 +97,11 @@ public final class PFPGrowth {
   public static List<Pair<String,Long>> readFList(Configuration conf) throws IOException {
     List<Pair<String,Long>> list = new ArrayList<Pair<String,Long>>();
     URI[] files = DistributedCache.getCacheFiles(conf);
-    if (files == null || files.length < 2) {
-      throw new IOException("Cannot read Frequency list and Grouping list from Distributed Cache");
+    if (files == null) {
+      throw new IOException("Cannot read Frequency list from Distributed Cache");
+    }
+    if (files.length != 1) {
+      throw new IOException("Cannot read Frequency list from Distributed Cache ("+files.length+")");
     }
     for (Pair<Text,LongWritable> record :
          new SequenceFileIterable<Text,LongWritable>(new Path(files[0].getPath()), true, conf)) {
@@ -105,30 +111,11 @@ public final class PFPGrowth {
   }
   
   /**
-   * Generates the gList(Group ID Mapping of Various frequent Features) Map from the corresponding serialized
-   * representation
-   * 
-   * @return Deserialized Group List
-   */
-  public static Map<String,Long> readGList(Configuration conf) throws IOException {
-    Map<String,Long> map = new HashMap<String,Long>();
-    URI[] files = DistributedCache.getCacheFiles(conf);
-    if (files == null || files.length < 2) {
-      throw new IOException("Cannot read Frequency list and Grouping list from Distributed Cache");
-    }
-    for (Pair<Text,LongWritable> record :
-         new SequenceFileIterable<Text,LongWritable>(new Path(files[1].getPath()), true, conf)) {
-      map.put(record.getFirst().toString(), record.getSecond().get());
-    }
-    return map;
-  }
-  
-  /**
    * Serializes the fList and returns the string representation of the List
    * 
    * @return Serialized String representation of List
    */
-  private static void saveFList(Iterable<Pair<String,Long>> flist, Parameters params, Configuration conf)
+  public static void saveFList(Iterable<Pair<String,Long>> flist, Parameters params, Configuration conf)
     throws IOException {
     Path flistPath = new Path(params.get(OUTPUT), F_LIST);
     FileSystem fs = FileSystem.get(conf);
@@ -138,27 +125,6 @@ public final class PFPGrowth {
     try {
       for (Pair<String,Long> pair : flist) {
         writer.append(new Text(pair.getFirst()), new LongWritable(pair.getSecond()));
-      }
-    } finally {
-      writer.close();
-    }
-    DistributedCache.addCacheFile(flistPath.toUri(), conf);
-  }
-  
-  /**
-   * Converts a given Map in to a String using DefaultStringifier of Hadoop
-   * 
-   * @return Serialized String representation of the GList Map
-   */
-  private static void saveGList(Map<String,Long> glist, Parameters params, Configuration conf) throws IOException {
-    Path flistPath = new Path(params.get(OUTPUT), G_LIST);
-    FileSystem fs = FileSystem.get(conf);
-    flistPath = fs.makeQualified(flistPath);
-    HadoopUtil.delete(conf, flistPath);
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, flistPath, Text.class, LongWritable.class);
-    try {
-      for (Entry<String,Long> pair : glist.entrySet()) {
-        writer.append(new Text(pair.getKey()), new LongWritable(pair.getValue()));
       }
     } finally {
       writer.close();
@@ -203,6 +169,24 @@ public final class PFPGrowth {
     }
     return fList;
   }
+
+  public static final int getGroup(int itemId, int maxPerGroup) {
+    return itemId / maxPerGroup;
+  }
+
+  public static final IntArrayList getGroupMembers(int groupId, 
+                                                   int maxPerGroup, 
+                                                   int numFeatures) {
+    IntArrayList ret = new IntArrayList();
+    int start = groupId * maxPerGroup;
+    int end = start + maxPerGroup;
+    if (end > numFeatures) 
+      end= numFeatures;
+    for (int i = start; i < end; i++) {
+      ret.add(i);
+    }
+    return ret;
+  }
   
   /**
    * Read the Frequent Patterns generated from Text
@@ -237,8 +221,20 @@ public final class PFPGrowth {
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
                                   + "org.apache.hadoop.io.serializer.WritableSerialization");
     startParallelCounting(params, conf);
-    startGroupingItems(params, conf);
-    startTransactionSorting(params, conf);
+
+    // save feature list to dcache
+    List<Pair<String,Long>> fList = readFList(params);
+    saveFList(fList, params, conf);
+
+    // set param to control group size in MR jobs
+    int numGroups = params.getInt(PFPGrowth.NUM_GROUPS, 
+                                  PFPGrowth.NUM_GROUPS_DEFAULT);
+    int maxPerGroup = fList.size() / numGroups;
+    if (fList.size() % numGroups != 0) 
+      maxPerGroup++;
+    params.set(MAX_PER_GROUP, Integer.toString(maxPerGroup));
+    fList = null;
+
     startParallelFPGrowth(params, conf);
     startAggregating(params, conf);
   }
@@ -273,41 +269,6 @@ public final class PFPGrowth {
     
     HadoopUtil.delete(conf, outPath);
     job.waitForCompletion(true);
-  }
-  
-  /**
-   * Group the given Features into g groups as defined by the numGroups parameter in params
-   * 
-   * @param params
-   * @throws IOException
-   */
-  public static void startGroupingItems(Parameters params, Configuration conf) throws IOException {
-    List<Pair<String,Long>> fList = readFList(params);
-    int numGroups = params.getInt(NUM_GROUPS, NUM_GROUPS_DEFAULT);
-    
-    Map<String,Long> gList = Maps.newHashMap();
-    long maxPerGroup = fList.size() / numGroups;
-    if (fList.size() != maxPerGroup * numGroups) {
-      maxPerGroup++;
-    }
-    
-    long i = 0;
-    long groupID = 0;
-    for (Pair<String,Long> featureFreq : fList) {
-      String feature = featureFreq.getFirst();
-      if (i / maxPerGroup == groupID) {
-        gList.put(feature, groupID);
-      } else {
-        groupID++;
-        gList.put(feature, groupID);
-      }
-      i++;
-    }
-    
-    log.info("No of Features: {}", fList.size());
-    
-    saveFList(fList, params, conf);
-    saveGList(gList, params, conf);
   }
   
   /**
@@ -346,59 +307,16 @@ public final class PFPGrowth {
   /**
    * Run the Parallel FPGrowth Map/Reduce Job to calculate the Top K features of group dependent shards
    */
-  public static void startTransactionSorting(Parameters params, Configuration conf)
-    throws IOException, InterruptedException, ClassNotFoundException {
-    conf.set(PFP_PARAMETERS, params.toString());
-    conf.set("mapred.compress.map.output", "true");
-    conf.set("mapred.output.compression.type", "BLOCK");
-    String input = params.get(INPUT);
-    Job job = new Job(conf, "PFP Transaction Sorting running over input" + input);
-    job.setJarByClass(PFPGrowth.class);
-
-    Integer numGroups = Integer.valueOf(params.get(NUM_GROUPS, "-1"));
-    int numRed = job.getNumReduceTasks();
-    if (numGroups < 0) {
-      if (NUM_GROUPS_DEFAULT < numRed) {
-        params.set(NUM_GROUPS, Integer.toString(numRed));
-      }
-    }
-    if (numRed > numGroups) {
-      log.info("Warning: running with less groups of work than  reducers!");
-    }
-
-    job.setMapOutputKeyClass(LongWritable.class);
-    job.setMapOutputValueClass(TransactionTree.class);
-    
-    job.setOutputKeyClass(LongWritable.class);
-    job.setOutputValueClass(TransactionTree.class);
-    
-    FileInputFormat.addInputPath(job, new Path(input));
-    Path outPath = new Path(params.get(OUTPUT), SORTED_OUTPUT);
-    FileOutputFormat.setOutputPath(job, outPath);
-    
-    HadoopUtil.delete(conf, outPath);
-    
-    job.setInputFormatClass(TextInputFormat.class);
-    job.setMapperClass(TransactionSortingMapper.class);
-    job.setReducerClass(TransactionSortingReducer.class);
-    job.setOutputFormatClass(SequenceFileOutputFormat.class);
-    
-    job.waitForCompletion(true);
-  }
-  
-  /**
-   * Run the Parallel FPGrowth Map/Reduce Job to calculate the Top K features of group dependent shards
-   */
   public static void startParallelFPGrowth(Parameters params, Configuration conf)
     throws IOException, InterruptedException, ClassNotFoundException {
     conf.set(PFP_PARAMETERS, params.toString());
     conf.set("mapred.compress.map.output", "true");
     conf.set("mapred.output.compression.type", "BLOCK");
-    Path input = new Path(params.get(OUTPUT), SORTED_OUTPUT);
+    Path input = new Path(params.get(INPUT));
     Job job = new Job(conf, "PFP Growth Driver running over input" + input);
     job.setJarByClass(PFPGrowth.class);
     
-    job.setMapOutputKeyClass(LongWritable.class);
+    job.setMapOutputKeyClass(IntWritable.class);
     job.setMapOutputValueClass(TransactionTree.class);
     
     job.setOutputKeyClass(Text.class);
@@ -410,7 +328,7 @@ public final class PFPGrowth {
     
     HadoopUtil.delete(conf, outPath);
     
-    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setInputFormatClass(TextInputFormat.class);
     job.setMapperClass(ParallelFPGrowthMapper.class);
     job.setCombinerClass(ParallelFPGrowthCombiner.class);
     job.setReducerClass(ParallelFPGrowthReducer.class);

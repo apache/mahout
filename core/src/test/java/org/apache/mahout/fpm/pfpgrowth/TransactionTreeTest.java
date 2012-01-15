@@ -21,10 +21,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
-import com.google.common.collect.Lists;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.list.IntArrayList;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -52,8 +52,8 @@ public final class TransactionTreeTest extends MahoutTestCase {
     gen = RandomUtils.getRandom();
   }
 
-  private List<Integer> generateRandomArray() {
-    List<Integer> list = Lists.newArrayList();
+  private IntArrayList generateRandomArray() {
+    IntArrayList list = new IntArrayList();
     for (int i = 0; i < MAX_FEATURES; i++) {
       if (gen.nextInt() % SKIP_RATE == 0) {
         list.add(i);
@@ -69,7 +69,7 @@ public final class TransactionTreeTest extends MahoutTestCase {
     int nodes = 0;
     int total = 0;
     for (int i = 0; i < MAX_TRANSACTIONS; i++) {
-      List<Integer> array = generateRandomArray();
+      IntArrayList array = generateRandomArray();
       total += array.size();
       nodes += tree.addPattern(array, 1 + gen.nextInt(MAX_DUPLICATION));
     }
@@ -84,9 +84,9 @@ public final class TransactionTreeTest extends MahoutTestCase {
     StringBuilder sb = new StringBuilder();
     int count = 0;
     int items = 0;
-    Iterator<Pair<List<Integer>,Long>> it = tree.iterator();
+    Iterator<Pair<IntArrayList,Long>> it = tree.iterator();
     while (it.hasNext()) {
-      Pair<List<Integer>,Long> p = it.next();
+      Pair<IntArrayList,Long> p = it.next();
       vtree.addPattern(p.getFirst(), p.getSecond());
       items += p.getFirst().size();
       count++;

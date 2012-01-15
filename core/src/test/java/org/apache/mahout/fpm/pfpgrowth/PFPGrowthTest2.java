@@ -36,7 +36,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class PFPGrowthTest extends MahoutTestCase {
+public final class PFPGrowthTest2 extends MahoutTestCase {
   
   private static final Logger log = LoggerFactory.getLogger(PFPGrowthTest.class);
   
@@ -49,6 +49,7 @@ public final class PFPGrowthTest extends MahoutTestCase {
     params.set(PFPGrowth.MAX_HEAPSIZE, "4");
     params.set(PFPGrowth.NUM_GROUPS, "2");
     params.set(PFPGrowth.ENCODING, "UTF-8");
+    params.set(PFPGrowth.USE_FPG2, "true");
     File inputDir = getTestTempDir("transactions");
     File outputDir = getTestTempDir("frequentpatterns");
     File input = new File(inputDir, "test.txt");
@@ -94,12 +95,12 @@ public final class PFPGrowthTest extends MahoutTestCase {
                  + "(B,([B],6), ([B, D],4), ([B, A],4), ([B, D, A],3)), " 
                  + "(C,([B, C],3)), "
                  + "(D,([D],6), ([D, A],4), ([B, D],4), ([D, A, E],3)), "
-                 + "(E,([A, E],4), ([D, A, E],3), ([B, A, E],3))]", frequentPatterns.toString());
+                 + "(E,([A, E],4), ([D, A, E],3), ([B, A, E],3))]", frequentPatterns.toString());                                                                 
   }
 
   /**
-   * Test Parallel FPGrowth on small example data using top-level
-   * runPFPGrowth() method
+   * Test Parallel FPG on small example data, running various stages
+   * individually
    */ 
   @Test
   public void testStartParallelFPGrowthInSteps() throws Exception {
@@ -123,12 +124,13 @@ public final class PFPGrowthTest extends MahoutTestCase {
     PFPGrowth.startParallelFPGrowth(params, conf);
     log.info("Starting Pattern Aggregation Test: {}", params.get(PFPGrowth.MAX_HEAPSIZE));
     PFPGrowth.startAggregating(params, conf);
+
     List<Pair<String,TopKStringPatterns>> frequentPatterns = PFPGrowth.readFrequentPattern(params);
+
     assertEquals("[(A,([A],5), ([D, A],4), ([B, A],4), ([A, E],4)), "
                  + "(B,([B],6), ([B, D],4), ([B, A],4), ([B, D, A],3)), " 
                  + "(C,([B, C],3)), "
                  + "(D,([D],6), ([D, A],4), ([B, D],4), ([D, A, E],3)), "
-                 + "(E,([A, E],4), ([D, A, E],3), ([B, A, E],3))]", frequentPatterns.toString());
-    
+                 + "(E,([A, E],4), ([D, A, E],3), ([B, A, E],3))]", frequentPatterns.toString());                                                                 
   }
 }

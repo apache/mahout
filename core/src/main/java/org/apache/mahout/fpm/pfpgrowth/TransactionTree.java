@@ -27,6 +27,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.mahout.math.list.IntArrayList;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang.mutable.MutableLong;
@@ -43,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * Map/Reduce of {@link PFPGrowth} algorithm by reducing data size passed from the Mapper to the reducer where
  * {@link org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth} mining is done
  */
-public final class TransactionTree implements Writable, Iterable<Pair<List<Integer>,Long>> {
+public final class TransactionTree implements Writable, Iterable<Pair<IntArrayList,Long>> {
 
   private static final Logger log = LoggerFactory.getLogger(TransactionTree.class);
 
@@ -58,7 +60,7 @@ public final class TransactionTree implements Writable, Iterable<Pair<List<Integ
   private long[] nodeCount;
   private int nodes;
   private boolean representedAsList;
-  private List<Pair<List<Integer>,Long>> transactionSet;
+  private List<Pair<IntArrayList,Long>> transactionSet;
   
   public TransactionTree() {
     this(DEFAULT_INITIAL_SIZE);
@@ -76,13 +78,19 @@ public final class TransactionTree implements Writable, Iterable<Pair<List<Integ
     representedAsList = false;
   }
   
-  public TransactionTree(Integer[] items, Long support) {
+  public TransactionTree(int[] items, Long support) {
     representedAsList = true;
     transactionSet = Lists.newArrayList();
-    transactionSet.add(new Pair<List<Integer>,Long>(Arrays.asList(items), support));
+    transactionSet.add(new Pair<IntArrayList,Long>(new IntArrayList(items), support));
+  }
+
+  public TransactionTree(IntArrayList items, Long support) {
+    representedAsList = true;
+    transactionSet = Lists.newArrayList();
+    transactionSet.add(new Pair<IntArrayList,Long>(items, support));
   }
   
-  public TransactionTree(List<Pair<List<Integer>,Long>> transactionSet) {
+  public TransactionTree(List<Pair<IntArrayList,Long>> transactionSet) {
     representedAsList = true;
     this.transactionSet = transactionSet;
   }
@@ -104,13 +112,13 @@ public final class TransactionTree implements Writable, Iterable<Pair<List<Integ
     }
     return false;
   }
-  
-  public int addPattern(Iterable<Integer> myList, long addCount) {
+
+  public int addPattern(IntArrayList myList, long addCount) {
     int temp = ROOTNODEID;
     int ret = 0;
     boolean addCountMode = true;
-    for (int attributeValue : myList) {
-      
+    for (int idx = 0; idx < myList.size(); idx++) {
+      int attributeValue = myList.get(idx);
       int child;
       if (addCountMode) {
         child = childWithAttribute(temp, attributeValue);
@@ -169,18 +177,19 @@ public final class TransactionTree implements Writable, Iterable<Pair<List<Integ
   
   public Map<Integer,MutableLong> generateFList() {
     Map<Integer,MutableLong> frequencyList = Maps.newHashMap();
-    Iterator<Pair<List<Integer>,Long>> it = iterator();
+    Iterator<Pair<IntArrayList,Long>> it = iterator();
     //int items = 0;
     //int count = 0;
     while (it.hasNext()) {
-      Pair<List<Integer>,Long> p = it.next();
+      Pair<IntArrayList,Long> p = it.next();
       //items += p.getFirst().size();
       //count++;
-      for (Integer i : p.getFirst()) {
-        if (!frequencyList.containsKey(i)) {
-          frequencyList.put(i, new MutableLong(0));
+      IntArrayList items= p.getFirst();
+      for (int idx = 0; idx < items.size(); idx++) {
+        if (!frequencyList.containsKey(items.get(idx))) {
+          frequencyList.put(items.get(idx), new MutableLong(0));
         }
-        frequencyList.get(i).add(p.getSecond());
+        frequencyList.get(items.get(idx)).add(p.getSecond());
       }
     }
     return frequencyList;
@@ -188,7 +197,7 @@ public final class TransactionTree implements Writable, Iterable<Pair<List<Integ
   
   public TransactionTree getCompressedTree() {
     TransactionTree ctree = new TransactionTree();
-    Iterator<Pair<List<Integer>,Long>> it = iterator();
+    Iterator<Pair<IntArrayList,Long>> it = iterator();
     final Map<Integer,MutableLong> fList = generateFList();
     int node = 0;
     Comparator<Integer> comparator = new Comparator<Integer>() {
@@ -198,10 +207,10 @@ public final class TransactionTree implements Writable, Iterable<Pair<List<Integ
       }
     };
     int size = 0;
-    List<Pair<List<Integer>,Long>> compressedTransactionSet = Lists.newArrayList();
+    List<Pair<IntArrayList,Long>> compressedTransactionSet = Lists.newArrayList();
     while (it.hasNext()) {
-      Pair<List<Integer>,Long> p = it.next();
-      Collections.sort(p.getFirst(), comparator);
+      Pair<IntArrayList,Long> p = it.next();
+      p.getFirst().sort();
       compressedTransactionSet.add(p);
       node += ctree.addPattern(p.getFirst(), p.getSecond());
       size += p.getFirst().size() + 2;
@@ -222,7 +231,7 @@ public final class TransactionTree implements Writable, Iterable<Pair<List<Integ
   }
   
   @Override
-  public Iterator<Pair<List<Integer>,Long>> iterator() {
+  public Iterator<Pair<IntArrayList,Long>> iterator() {
     if (this.isTreeEmpty() && !representedAsList) {
       throw new IllegalStateException("This is a bug. Please report this to mahout-user list");
     } else if (representedAsList) {
@@ -254,12 +263,12 @@ public final class TransactionTree implements Writable, Iterable<Pair<List<Integ
         vInt.readFields(in);
         int length = vInt.get();
         
-        Integer[] items = new Integer[length];
+        int[] items = new int[length];
         for (int j = 0; j < length; j++) {
           vInt.readFields(in);
           items[j] = vInt.get();
         }
-        Pair<List<Integer>,Long> transaction = new Pair<List<Integer>,Long>(Arrays.asList(items), support);
+        Pair<IntArrayList,Long> transaction = new Pair<IntArrayList,Long>(new IntArrayList(items), support);
         transactionSet.add(transaction);
       }
     } else {
@@ -295,14 +304,16 @@ public final class TransactionTree implements Writable, Iterable<Pair<List<Integ
       int transactionSetSize = transactionSet.size();
       vInt.set(transactionSetSize);
       vInt.write(out);
-      for (Pair<List<Integer>, Long> transaction : transactionSet) {
+      for (Pair<IntArrayList, Long> transaction : transactionSet) {
         vLong.set(transaction.getSecond());
         vLong.write(out);
 
         vInt.set(transaction.getFirst().size());
         vInt.write(out);
 
-        for (Integer item : transaction.getFirst()) {
+        IntArrayList items = transaction.getFirst();
+        for (int idx = 0; idx < items.size(); idx++) {
+          int item = items.get(idx);
           vInt.set(item);
           vInt.write(out);
         }

@@ -42,8 +42,6 @@ public class Pattern implements Comparable<Pattern> {
   
   private long support = Long.MAX_VALUE;
   
-  private long[] supportValues;
-  
   public Pattern() {
     this(DEFAULT_INITIAL_SIZE);
   }
@@ -53,7 +51,6 @@ public class Pattern implements Comparable<Pattern> {
       size = DEFAULT_INITIAL_SIZE;
     }
     this.pattern = new int[size];
-    this.supportValues = new long[size];
     dirty = true;
   }
   
@@ -62,17 +59,13 @@ public class Pattern implements Comparable<Pattern> {
     if (length >= pattern.length) {
       resize();
     }
-    this.pattern[length] = id;
-    this.supportValues[length++] = supportCount;
+    this.pattern[length++] = id;
+    Arrays.sort(this.pattern, 0, length);
     this.support = supportCount > this.support ? this.support : supportCount;
   }
 
   public final int[] getPattern() {
     return this.pattern;
-  }
-
-  public final Object[] getPatternWithSupport() {
-    return new Object[] {this.pattern, this.supportValues};
   }
 
   public final boolean isSubPatternOf(Pattern frequentPattern) {
@@ -110,11 +103,8 @@ public class Pattern implements Comparable<Pattern> {
       size = DEFAULT_INITIAL_SIZE;
     }
     int[] oldpattern = pattern;
-    long[] oldSupport = supportValues;
     this.pattern = new int[size];
-    this.supportValues = new long[size];
     System.arraycopy(oldpattern, 0, this.pattern, 0, length);
-    System.arraycopy(oldSupport, 0, this.supportValues, 0, length);
   }
   
   @Override
