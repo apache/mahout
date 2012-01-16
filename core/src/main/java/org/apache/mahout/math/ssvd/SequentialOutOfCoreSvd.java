@@ -54,7 +54,8 @@ import java.io.IOException;
  * <p/>
  * R' R = \sum_i Y_i' Y_i
  * <p/>
- * For reference, R is all we need to compute explicitly.  Q will be computed on the fly when needed.
+ * For reference, R is all we need to compute explicitly.  Q will be computed on the fly when
+ * needed.
  * <p/>
  * Q = Y R^-1
  * <p/>
@@ -93,7 +94,7 @@ public class SequentialOutOfCoreSvd {
   private final int seed;
   private final int dim;
 
-  public SequentialOutOfCoreSvd(Iterable<File> partsOfA, String uBase, String vBase, File tmpDir, int internalDimension, int columnsPerSlice) throws IOException {
+  public SequentialOutOfCoreSvd(Iterable<File> partsOfA, File tmpDir, int internalDimension, int columnsPerSlice) throws IOException {
     this.columnsPerSlice = columnsPerSlice;
     this.dim = internalDimension;
 
@@ -126,7 +127,12 @@ public class SequentialOutOfCoreSvd {
     int ncols = 0;
     for (File file : partsOfA) {
       MatrixWritable m = new MatrixWritable();
-      m.readFields(new DataInputStream(new FileInputStream(file)));
+      final DataInputStream in = new DataInputStream(new FileInputStream(file));
+      try {
+        m.readFields(in);
+      } finally {
+        in.close();
+      }
       Matrix aI = m.get();
       ncols = Math.max(ncols, aI.columnSize());
 
@@ -144,7 +150,13 @@ public class SequentialOutOfCoreSvd {
     MatrixWritable bTmp = new MatrixWritable();
     for (int j = 0; j < ncols; j += columnsPerSlice) {
       if (bFile(tmpDir, j).exists()) {
-        bTmp.readFields(new DataInputStream(new FileInputStream(bFile(tmpDir, j))));
+        final DataInputStream in = new DataInputStream(new FileInputStream(bFile(tmpDir, j)));
+        try {
+          bTmp.readFields(in);
+        } finally {
+          in.close();
+        }
+
         b2.assign(bTmp.get().times(bTmp.get().transpose()), Functions.PLUS);
       }
     }
@@ -152,34 +164,44 @@ public class SequentialOutOfCoreSvd {
     svd = new SingularValueDecomposition(l2.getL());
   }
 
-  public void computeV(File tmpDir, String vBase, int ncols) throws IOException {
+  public void computeV(File tmpDir, int ncols) throws IOException {
     // step 5, compute pieces of V
-    if (vBase != null) {
-      for (int j = 0; j < ncols; j += columnsPerSlice) {
-        if (bFile(tmpDir, j).exists()) {
-          MatrixWritable m = new MatrixWritable();
-          m.readFields(new DataInputStream(new FileInputStream(bFile(tmpDir, j))));
-          m.set(l2.solveRight(m.get().transpose()).times(svd.getV()));
-          m.write(new DataOutputStream(new FileOutputStream(new File(tmpDir, vBase + j / columnsPerSlice))));
+    for (int j = 0; j < ncols; j += columnsPerSlice) {
+      final File bPath = bFile(tmpDir, j);
+      if (bPath.exists()) {
+        MatrixWritable m = new MatrixWritable();
+        final DataInputStream in = new DataInputStream(new FileInputStream(bPath));
+        try {
+          m.readFields(in);
+        } finally {
+          in.close();
+        }
+        m.set(l2.solveRight(m.get().transpose()).times(svd.getV()));
+        final DataOutputStream out = new DataOutputStream(new FileOutputStream(new File(tmpDir, String.format("V-%s", bPath.getName().replaceAll(".*-", "")))));
+        try {
+          m.write(out);
+        } finally {
+          out.close();
         }
       }
     }
   }
 
-  public void computeU(Iterable<File> partsOfA, String uBase, File tmpDir) throws IOException {
+  public void computeU(Iterable<File> partsOfA, File tmpDir) throws IOException {
     // step 4, compute pieces of U
-    if (uBase != null) {
-      int i = 0;
-      for (File file : partsOfA) {
-        MatrixWritable m = new MatrixWritable();
-        m.readFields(new DataInputStream(new FileInputStream(file)));
-        Matrix aI = m.get();
+    for (File file : partsOfA) {
+      MatrixWritable m = new MatrixWritable();
+      m.readFields(new DataInputStream(new FileInputStream(file)));
+      Matrix aI = m.get();
 
-        Matrix y = aI.times(new RandomTrinaryMatrix(seed, aI.numCols(), dim, false));
-        Matrix uI = r2.solveRight(y).times(svd.getU());
-        m.set(uI);
-        m.write(new DataOutputStream(new FileOutputStream(new File(tmpDir, uBase + i))));
-        i += aI.rowSize();
+      Matrix y = aI.times(new RandomTrinaryMatrix(seed, aI.numCols(), dim, false));
+      Matrix uI = r2.solveRight(y).times(svd.getU());
+      m.set(uI);
+      final DataOutputStream out = new DataOutputStream(new FileOutputStream(new File(tmpDir, String.format("U-%s", file.getName().replaceAll(".*-", "")))));
+      try {
+        m.write(out);
+      } finally {
+        out.close();
       }
     }
   }
