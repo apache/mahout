@@ -27,6 +27,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.math.VectorWritable;
@@ -72,7 +73,7 @@ public class RowIdJob extends AbstractJob {
       for (Pair<Text,VectorWritable> record :
            new SequenceFileDirIterable<Text,VectorWritable>(getInputPath(),
                                                             PathType.LIST,
-                                                            null,
+                                                            PathFilters.logsCRCFilter(),
                                                             null,
                                                             true,
                                                             conf)) {
