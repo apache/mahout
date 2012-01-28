@@ -264,10 +264,10 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
       boolean shouldPrune = maxDFSigma >=0.0;
       String tfDirName = shouldPrune ? DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER+"-toprune" : DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER;
 
-      if (!processIdf && !shouldPrune) {
+      if (!processIdf) {
         DictionaryVectorizer.createTermFrequencyVectors(tokenizedPath, outputDir, tfDirName, conf, minSupport, maxNGramSize,
           minLLRValue, norm, logNormalize, reduceTasks, chunkSize, sequentialAccessOutput, namedVectors);
-      } else if (processIdf) {
+      } else {
         DictionaryVectorizer.createTermFrequencyVectors(tokenizedPath, outputDir, tfDirName, conf, minSupport, maxNGramSize,
           minLLRValue, -1.0f, false, reduceTasks, chunkSize, sequentialAccessOutput, namedVectors);
       }

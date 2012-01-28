@@ -64,25 +64,25 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
   @Test
   public void testCreateTermFrequencyVectors() throws Exception {
     setupDocs();
-    runTest(false, false, -1, NUM_DOCS);
+    runTest(false, false, false, -1, NUM_DOCS);
   }
 
   @Test
   public void testCreateTermFrequencyVectorsNam() throws Exception {
     setupDocs();
-    runTest(false, true, -1, NUM_DOCS);
+    runTest(false, false, true, -1, NUM_DOCS);
   }
   
   @Test
   public void testCreateTermFrequencyVectorsSeq() throws Exception {
     setupDocs();
-    runTest(true, false, -1, NUM_DOCS);
+    runTest(false, true, false, -1, NUM_DOCS);
   }
   
   @Test
   public void testCreateTermFrequencyVectorsSeqNam() throws Exception {
     setupDocs();
-    runTest(true, true, -1, NUM_DOCS);
+    runTest(false, true, true, -1, NUM_DOCS);
   }
 
   @Test
@@ -102,7 +102,7 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
     } finally {
       Closeables.closeQuietly(writer);
     }
-    Path outPath = runTest(false, false, 2, docs.length);
+    Path outPath = runTest(false, false, false, 2, docs.length);
     Path tfidfVectors = new Path(outPath, "tfidf-vectors");
     int count = 0;
     Vector [] res = new Vector[docs.length];
@@ -122,7 +122,44 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
     assertEquals(1, res[2].getNumNondefaultElements());
   }
 
-  private Path runTest(boolean sequential, boolean named, double maxDFSigma, int numDocs) throws Exception {
+  @Test
+  public void testPruningTF() throws Exception {
+    conf = new Configuration();
+    FileSystem fs = FileSystem.get(conf);
+
+    inputPath = getTestTempFilePath("documents/docs.file");
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, inputPath, Text.class, Text.class);
+
+    String [] docs = {"a b c", "a a a a a b", "a a a a a c"};
+
+    try {
+      for (int i = 0; i < docs.length; i++) {
+        writer.append(new Text("Document::ID::" + i), new Text(docs[i]));
+      }
+    } finally {
+      Closeables.closeQuietly(writer);
+    }
+    Path outPath = runTest(true, false, false, 2, docs.length);
+    Path tfVectors = new Path(outPath, "tf-vectors");
+    int count = 0;
+    Vector [] res = new Vector[docs.length];
+    for (VectorWritable value :
+         new SequenceFileDirValueIterable<VectorWritable>(
+             tfVectors, PathType.LIST, PathFilters.partFilter(), null, true, conf)) {
+      Vector v = value.get();
+      System.out.println(v);
+      assertEquals(2, v.size());
+      res[count] = v;
+      count++;
+    }
+    assertEquals(docs.length, count);
+    //the first doc should have two values, the second and third should have 1, since the a gets removed
+    assertEquals(2, res[0].getNumNondefaultElements());
+    assertEquals(1, res[1].getNumNondefaultElements());
+    assertEquals(1, res[2].getNumNondefaultElements());
+  }
+
+  private Path runTest(boolean tfWeighting, boolean sequential, boolean named, double maxDFSigma, int numDocs) throws Exception {
     Path outputPath = getTestTempFilePath("output");
 
     
@@ -143,6 +180,10 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
       argList.add("--maxDFSigma");
       argList.add(String.valueOf(maxDFSigma));
     }
+    if (tfWeighting){
+      argList.add("--weight");
+      argList.add("tf");
+    }
     String[] args = argList.toArray(new String[argList.size()]);
     
     SparseVectorsFromSequenceFiles.main(args);
@@ -151,7 +192,9 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
     Path tfidfVectors = new Path(outputPath, "tfidf-vectors");
     
     DictionaryVectorizerTest.validateVectors(conf, numDocs, tfVectors, sequential, named);
-    DictionaryVectorizerTest.validateVectors(conf, numDocs, tfidfVectors, sequential, named);
+    if (tfWeighting == false) {
+      DictionaryVectorizerTest.validateVectors(conf, numDocs, tfidfVectors, sequential, named);
+    }
     return outputPath;
   }  
 }
