@@ -6,6 +6,8 @@ target/*
 core/target/*
 math/target/*
 examples/target/*
+examples/bin/tmp
+output
 buildtools/target/*
 integration/target/*
 .settings/
