@@ -202,7 +202,7 @@ public final class GenericItemPreferenceArray implements PreferenceArray {
       case VALUE:
         return values[i] < values[j];
       case VALUE_REVERSED:
-        return values[i] >= values[j];
+        return values[i] > values[j];
       default:
         throw new IllegalStateException();
     }
