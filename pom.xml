@@ -97,6 +97,10 @@
     <skipTests>false</skipTests>
     <maven.clover.multiproject>true</maven.clover.multiproject>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <hadoop.version>0.20.204.0</hadoop.version>
+    <lucene.version>3.4.0</lucene.version>
+    <mongodb.version>2.5</mongodb.version>
+    <cassandra.version>0.8.1</cassandra.version>
   </properties>
   <issueManagement>
     <system>Jira</system>
@@ -157,22 +161,22 @@
       <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-analyzers</artifactId>
-        <version>3.4.0</version>
+        <version>${lucene.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-core</artifactId>
-        <version>3.4.0</version>
+        <version>${lucene.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-benchmark</artifactId>
-        <version>3.4.0</version>
+        <version>${lucene.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.solr</groupId>
         <artifactId>solr-commons-csv</artifactId>
-        <version>3.4.0</version>
+        <version>${lucene.version}</version>
       </dependency>
       
       <dependency>
@@ -191,7 +195,7 @@
       <dependency>
         <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-core</artifactId>
-        <version>0.20.204.0</version>
+        <version>${hadoop.version}</version>
         <exclusions>
           <exclusion>
             <groupId>net.sf.kosmosfs</groupId>
@@ -363,19 +367,19 @@
     <dependency>
       <groupId>org.mongodb</groupId>
       <artifactId>mongo-java-driver</artifactId>
-      <version>2.5</version>
+      <version>${mongodb.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.mongodb</groupId>
       <artifactId>bson</artifactId>
-      <version>2.5</version>
+      <version>${mongodb.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.cassandra</groupId>
       <artifactId>cassandra-all</artifactId>
-      <version>0.8.1</version>
+      <version>${cassandra.version}</version>
     </dependency>
 
     <dependency>
