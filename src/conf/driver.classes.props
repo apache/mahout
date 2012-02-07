@@ -12,6 +12,7 @@ org.apache.mahout.text.SequenceFilesFromDirectory = seqdirectory : Generate sequ
 org.apache.mahout.vectorizer.SparseVectorsFromSequenceFiles = seq2sparse: Sparse Vector generation from Text sequence files
 org.apache.mahout.vectorizer.EncodedVectorsFromSequenceFiles = seq2encoded: Encoded Sparse Vector generation from Text sequence files
 org.apache.mahout.text.WikipediaToSequenceFile = seqwiki : Wikipedia xml dump to sequence file
+org.apache.mahout.text.SequenceFilesFromMailArchives = seqmailarchives : Creates SequenceFile from a directory containing gzipped mail archives
 
 #Math
 org.apache.mahout.math.hadoop.TransposeJob = transpose : Take the transpose of a matrix
