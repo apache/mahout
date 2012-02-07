@@ -156,7 +156,7 @@ public final class MongoDBDataModel implements DataModel {
   private static final DateFormat DEFAULT_DATE_FORMAT =
       new SimpleDateFormat("EE MMM dd yyyy HH:mm:ss 'GMT'Z (zzz)", Locale.ENGLISH);
 
-  private static final String MONGO_MAP_COLLECTION = "mongo_data_model_map";
+  public static final String DEFAULT_MONGO_MAP_COLLECTION = "mongo_data_model_map";
 
   private static final Pattern ID_PATTERN = Pattern.compile("[a-f0-9]{24}");
 
@@ -177,6 +177,8 @@ public final class MongoDBDataModel implements DataModel {
   private String mongoPassword = DEFAULT_MONGO_PASSWORD;
   /** MongoDB table/collection */
   private String mongoCollection = DEFAULT_MONGO_COLLECTION;
+  /** MongoDB mapping table/collection */
+  private String mongoMapCollection = DEFAULT_MONGO_MAP_COLLECTION;
   /**
    * MongoDB update flag. When this flag is activated, the
    * DataModel updates both model and database
@@ -263,7 +265,8 @@ public final class MongoDBDataModel implements DataModel {
                           DateFormat format,
                           String userIDField,
                           String itemIDField,
-                          String preferenceField) throws UnknownHostException, MongoException {
+                          String preferenceField,
+                          String mappingCollection) throws UnknownHostException, MongoException {
     mongoHost = host;
     mongoPort = port;
     mongoDB = database;
@@ -274,6 +277,7 @@ public final class MongoDBDataModel implements DataModel {
     mongoUserID = userIDField;
     mongoItemID = itemIDField;
     mongoPreference = preferenceField;
+    mongoMapCollection = mappingCollection;
     this.reloadLock = new ReentrantLock();
     buildModel();
   }
@@ -315,7 +319,6 @@ public final class MongoDBDataModel implements DataModel {
    * (with authentication)
    *
    * @throws UnknownHostException if the database host cannot be resolved
-   * @see #MongoDBDataModel(String, int, String, String, boolean, boolean, DateFormat, String, String, String)
    * @see #MongoDBDataModel(String, int, String, String, boolean, boolean, DateFormat, String, String)
    */
   public MongoDBDataModel(String host,
@@ -329,7 +332,8 @@ public final class MongoDBDataModel implements DataModel {
                           String password,
                           String userIDField,
                           String itemIDField,
-                          String preferenceField) throws UnknownHostException, MongoException {
+                          String preferenceField,
+                          String mappingCollection) throws UnknownHostException, MongoException {
     mongoHost = host;
     mongoPort = port;
     mongoDB = database;
@@ -343,6 +347,7 @@ public final class MongoDBDataModel implements DataModel {
     mongoUserID = userIDField;
     mongoItemID = itemIDField;
     mongoPreference = preferenceField;
+    mongoMapCollection = mappingCollection;
     this.reloadLock = new ReentrantLock();
     buildModel();
   }
@@ -551,7 +556,7 @@ public final class MongoDBDataModel implements DataModel {
     FastByIDMap<Collection<Preference>> userIDPrefMap = new FastByIDMap<Collection<Preference>>();
     if (!mongoAuth || (mongoAuth && db.authenticate(mongoUsername, mongoPassword.toCharArray()))) {
       collection = db.getCollection(mongoCollection);
-      collectionMap = db.getCollection(MONGO_MAP_COLLECTION);
+      collectionMap = db.getCollection(mongoMapCollection);
       DBObject indexObj = new BasicDBObject();
       indexObj.put("element_id", 1);
       collectionMap.ensureIndex(indexObj);
@@ -774,6 +779,13 @@ public final class MongoDBDataModel implements DataModel {
         throw new NoSuchItemException();
       }
     }
+  }
+
+  /**
+   * Cleanup mapping collection.
+   */
+  public void cleanupMappingCollection() {
+    collectionMap.drop();
   }
 
   @Override
