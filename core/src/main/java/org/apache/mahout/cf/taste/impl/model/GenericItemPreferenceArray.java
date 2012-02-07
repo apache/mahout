@@ -143,7 +143,7 @@ public final class GenericItemPreferenceArray implements PreferenceArray {
   
   @Override
   public void sortByUser() {
-    selectionSort(USER);
+    lateralSort(USER);
   }
   
   @Override
@@ -151,12 +151,12 @@ public final class GenericItemPreferenceArray implements PreferenceArray {
   
   @Override
   public void sortByValue() {
-    selectionSort(VALUE);
+    lateralSort(VALUE);
   }
   
   @Override
   public void sortByValueReversed() {
-    selectionSort(VALUE_REVERSED);
+    lateralSort(VALUE_REVERSED);
   }
   
   @Override
@@ -174,30 +174,25 @@ public final class GenericItemPreferenceArray implements PreferenceArray {
     return id == itemID;
   }
   
-  private void selectionSort(int type) {
-    // I think this sort will prove to be too dumb, but, it's in place and OK for tiny, mostly sorted data
-    int max = length();
-    boolean sorted = true;
-    for (int i = 1; i < max; i++) {
-      if (isLess(i, i - 1, type)) {
-        sorted = false;
-        break;
+  private void lateralSort(int type) {
+    //Comb sort: http://en.wikipedia.org/wiki/Comb_sort
+    int length = length();
+    int gap = length;
+    boolean swapped = false;
+    while (gap > 1 || swapped) {
+      if (gap > 1) {
+        gap /= 1.247330950103979; // = 1 / (1 - 1/e^phi)
       }
-    }
-    if (sorted) {
-      return;
-    }
-    for (int i = 0; i < max; i++) {
-      int min = i;
-      for (int j = i + 1; j < max; j++) {
-        if (isLess(j, min, type)) {
-          min = j;
+      swapped = false;
+      int max = length - gap;
+      for (int i = 0; i < max; i++){
+        int other = i + gap;
+        if (isLess(other, i, type)) {
+          swap(i, other);
+          swapped = true;
         }
       }
-      if (i != min) {
-        swap(i, min);
-      }
-    }
+	  }
   }
   
   private boolean isLess(int i, int j, int type) {
