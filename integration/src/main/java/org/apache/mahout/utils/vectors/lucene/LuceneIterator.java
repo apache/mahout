@@ -101,31 +101,35 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
   @Override
   protected Vector computeNext() {
     try {
-      if (!termDocs.next()) {
-        return endOfData();
-      }
+      int doc;
+      TermFreqVector termFreqVector;
 
-      int doc = termDocs.doc();
-      TermFreqVector termFreqVector = indexReader.getTermFreqVector(doc, field);
-      if (termFreqVector == null) {
-        numErrorDocs++;
-        if (numErrorDocs >= maxErrorDocs) {
-          log.error("There are too many documents that do not have a term vector for {}", field);
-          throw new IllegalStateException("There are too many documents that do not have a term vector for " + field);
+      do {
+        if (!termDocs.next()) {
+          return endOfData();
         }
-        if (numErrorDocs >= nextLogRecord) {
-          if (skippedErrorMessages == 0) {
-            log.warn("{} does not have a term vector for {}", indexReader.document(doc).get(idField), field);
-          } else {
-            log.warn("{} documents do not have a term vector for {}", numErrorDocs, field);
+
+        doc = termDocs.doc();
+        termFreqVector = indexReader.getTermFreqVector(doc, field);
+        if (termFreqVector == null) {
+          numErrorDocs++;
+          if (numErrorDocs >= maxErrorDocs) {
+            log.error("There are too many documents that do not have a term vector for {}", field);
+            throw new IllegalStateException("There are too many documents that do not have a term vector for " + field);
           }
-          nextLogRecord = bump.increment();
-          skippedErrorMessages = 0;
-        } else {
-          skippedErrorMessages++;
+          if (numErrorDocs >= nextLogRecord) {
+            if (skippedErrorMessages == 0) {
+              log.warn("{} does not have a term vector for {}", indexReader.document(doc).get(idField), field);
+            } else {
+              log.warn("{} documents do not have a term vector for {}", numErrorDocs, field);
+            }
+            nextLogRecord = bump.increment();
+            skippedErrorMessages = 0;
+          } else {
+            skippedErrorMessages++;
+          }
         }
-        computeNext();
-      }
+      } while (termFreqVector == null);
 
       indexReader.getTermFreqVector(doc, field, mapper);
       mapper.setDocumentNumber(doc);
