@@ -62,7 +62,7 @@ public class MeanShiftCanopyReducer extends Reducer<Text,MeanShiftCanopy,Text,Me
     Configuration conf = context.getConfiguration();
     if (allConverged) {
       Path path = new Path(conf.get(MeanShiftCanopyConfigKeys.CONTROL_PATH_KEY));
-      FileSystem.get(conf).createNewFile(path);
+      FileSystem.get(path.toUri(), conf).createNewFile(path);
     }
     super.cleanup(context);
   }

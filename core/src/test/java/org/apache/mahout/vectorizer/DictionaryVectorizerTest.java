@@ -55,9 +55,10 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
   public void setUp() throws Exception {
     super.setUp();
     Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(conf);
 
     inputPath = getTestTempFilePath("documents/docs.file");
+    FileSystem fs = FileSystem.get(inputPath.toUri(), conf);
+
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, inputPath, Text.class, Text.class);
 
     try {

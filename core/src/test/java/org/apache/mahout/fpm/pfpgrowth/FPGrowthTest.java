@@ -58,7 +58,7 @@ public final class FPGrowthTest extends MahoutTestCase {
 
     Path path = getTestTempFilePath("fpgrowthTest.dat");
     Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(path.toUri(), conf);
 
     SequenceFile.Writer writer =
         new SequenceFile.Writer(fs, conf, path, Text.class, TopKStringPatterns.class);
@@ -101,7 +101,7 @@ public final class FPGrowthTest extends MahoutTestCase {
 
     Path path = getTestTempFilePath("fpgrowthTestData1.dat");
     Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(path.toUri(), conf);
     System.out.println(fp.generateFList(transactions.iterator(), 2));
     SequenceFile.Writer writer =
         new SequenceFile.Writer(fs, conf, path, Text.class, TopKStringPatterns.class);
@@ -139,7 +139,7 @@ public final class FPGrowthTest extends MahoutTestCase {
 
     Path path = getTestTempFilePath("fpgrowthTestData2.dat");
     Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(path.toUri(), conf);
     System.out.println(fp.generateFList(transactions.iterator(), 2));
     SequenceFile.Writer writer =
         new SequenceFile.Writer(fs, conf, path, Text.class, TopKStringPatterns.class);

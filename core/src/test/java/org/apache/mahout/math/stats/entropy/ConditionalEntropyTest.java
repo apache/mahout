@@ -40,9 +40,9 @@ public final class ConditionalEntropyTest extends MahoutTestCase {
   public void testConditionalEntropy() throws Exception {
 
     Configuration configuration = new Configuration();
-    FileSystem fileSystem = FileSystem.get(configuration);
     Path input = getTestTempFilePath("input");
     Path output = getTestTempFilePath("output");
+    FileSystem fileSystem = FileSystem.get(input.toUri(), configuration);
 
     // create input
     String[] keys = { "Math", "History", "CS", "Math", "Math", "CS", "History", "Math" };

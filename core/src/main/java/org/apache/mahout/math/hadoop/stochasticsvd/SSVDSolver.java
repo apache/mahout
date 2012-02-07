@@ -311,7 +311,7 @@ public class SSVDSolver {
     try {
       Class<? extends Writable> labelType =
         sniffInputLabelType(inputPath, conf);
-      FileSystem fs = FileSystem.get(conf);
+      FileSystem fs = FileSystem.get(outputPath.toUri(), conf);
 
       Path qPath = new Path(outputPath, "Q-job");
       Path btPath = new Path(outputPath, "Bt-job");
@@ -510,7 +510,7 @@ public class SSVDSolver {
   private static Class<? extends Writable>
       sniffInputLabelType(Path[] inputPath, Configuration conf)
         throws IOException {
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(inputPath[0].toUri(), conf);
     for (Path p : inputPath) {
       FileStatus[] fstats = fs.globStatus(p);
       if (fstats == null || fstats.length == 0) {

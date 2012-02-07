@@ -120,10 +120,10 @@ public class VJob {
     protected void setup(Context context) throws IOException,
         InterruptedException {
       super.setup(context);
-      FileSystem fs = FileSystem.get(context.getConfiguration());
       Path uHatPath = new Path(context.getConfiguration().get(PROP_UHAT_PATH));
 
       Path sigmaPath = new Path(context.getConfiguration().get(PROP_SIGMA_PATH));
+      FileSystem fs = FileSystem.get(uHatPath.toUri(), context.getConfiguration());
 
       uHat = new DenseMatrix(SSVDSolver.loadDistributedRowMatrix(fs,
           uHatPath, context.getConfiguration()));

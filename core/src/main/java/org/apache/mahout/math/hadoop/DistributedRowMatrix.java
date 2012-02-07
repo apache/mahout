@@ -104,8 +104,9 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
   public void setConf(Configuration conf) {
     this.conf = conf;
     try {
-      rowPath = FileSystem.get(conf).makeQualified(inputPath);
-      outputTmpBasePath = FileSystem.get(conf).makeQualified(outputTmpPath);
+      FileSystem fs = FileSystem.get(inputPath.toUri(), conf);
+      rowPath = fs.makeQualified(inputPath);
+      outputTmpBasePath = fs.makeQualified(outputTmpPath);
       keepTempFiles = conf.getBoolean(KEEP_TEMP_FILES, false);
     } catch (IOException ioe) {
       throw new IllegalStateException(ioe);

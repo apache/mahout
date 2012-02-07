@@ -245,7 +245,7 @@ public class CVB0Driver extends AbstractJob {
                ? "" : "p(topic|docId) will be stored " + docTopicOutputPath.toString() + '\n';
     log.info(infoString);
 
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(topicModelStateTempPath.toUri(), conf);
     int iterationNumber = getCurrentIterationNumber(conf, topicModelStateTempPath, maxIterations);
     log.info("Current iteration number: {}", iterationNumber);
 
@@ -404,7 +404,7 @@ public class CVB0Driver extends AbstractJob {
   public static double readPerplexity(Configuration conf, Path topicModelStateTemp, int iteration)
       throws IOException {
     Path perplexityPath = perplexityPath(topicModelStateTemp, iteration);
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(perplexityPath.toUri(), conf);
     if (!fs.exists(perplexityPath)) {
       log.warn("Perplexity path {} does not exist, returning NaN", perplexityPath);
       return Double.NaN;
@@ -454,9 +454,9 @@ public class CVB0Driver extends AbstractJob {
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setOutputKeyClass(IntWritable.class);
     job.setOutputValueClass(VectorWritable.class);
-    FileSystem fs = FileSystem.get(conf);
-    if(modelInput != null && fs.exists(modelInput)) {
-      FileStatus[] statuses = FileSystem.get(conf).listStatus(modelInput, PathFilters.partFilter());
+    FileSystem fs = FileSystem.get(corpus.toUri(), conf);
+    if (modelInput != null && fs.exists(modelInput)) {
+      FileStatus[] statuses = fs.listStatus(modelInput, PathFilters.partFilter());
       URI[] modelUris = new URI[statuses.length];
       for(int i = 0; i < statuses.length; i++) {
         modelUris[i] = statuses[i].getPath().toUri();
@@ -484,7 +484,7 @@ public class CVB0Driver extends AbstractJob {
 
   private static int getCurrentIterationNumber(Configuration config, Path modelTempDir, int maxIterations)
       throws IOException {
-    FileSystem fs = FileSystem.get(config);
+    FileSystem fs = FileSystem.get(modelTempDir.toUri(), config);
     int iterationNumber = 1;
     Path iterationPath = modelPath(modelTempDir, iterationNumber);
     while(fs.exists(iterationPath) && iterationNumber <= maxIterations) {
@@ -522,11 +522,10 @@ public class CVB0Driver extends AbstractJob {
 
   private static void setModelPaths(Job job, Path modelPath) throws IOException {
     Configuration conf = job.getConfiguration();
-    FileSystem fs = FileSystem.get(conf);
-    if (modelPath == null || !fs.exists(modelPath)) {
+    if (modelPath == null || !FileSystem.get(modelPath.toUri(), conf).exists(modelPath)) {
       return;
     }
-    FileStatus[] statuses = FileSystem.get(conf).listStatus(modelPath, PathFilters.partFilter());
+    FileStatus[] statuses = FileSystem.get(modelPath.toUri(), conf).listStatus(modelPath, PathFilters.partFilter());
     Preconditions.checkState(statuses.length > 0, "No part files found in model path '%s'", modelPath.toString());
     String[] modelPaths = new String[statuses.length];
     for (int i = 0; i < statuses.length; i++) {

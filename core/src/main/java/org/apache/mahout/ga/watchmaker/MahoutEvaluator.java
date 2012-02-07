@@ -68,7 +68,7 @@ public final class MahoutEvaluator {
 
     Configuration conf = job.getConfiguration();
 
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(input.toUri(), conf);
     HadoopUtil.delete(conf, input);
     HadoopUtil.delete(conf, output);
     

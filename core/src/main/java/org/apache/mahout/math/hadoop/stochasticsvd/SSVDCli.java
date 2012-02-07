@@ -130,7 +130,7 @@ public class SSVDCli extends AbstractJob {
     solver.run();
 
     // housekeeping
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(getOutputPath().toUri(), conf);
 
     fs.mkdirs(getOutputPath());
 

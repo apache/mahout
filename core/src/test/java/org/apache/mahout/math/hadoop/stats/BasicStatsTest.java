@@ -79,7 +79,7 @@ public final class BasicStatsTest extends MahoutTestCase {
   }
   
   private void produceTestData(Path input) throws Exception {
-	FileSystem fs = FileSystem.get(conf);
+	  FileSystem fs = FileSystem.get(input.toUri(), conf);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, input, IntWritable.class, DoubleWritable.class);
     //Random random = new MersenneTwisterRNG();
     /*Normal normal = new Normal(5, 3, random);
@@ -105,7 +105,7 @@ public final class BasicStatsTest extends MahoutTestCase {
   public void testStdDev2() throws Exception {
     Path input = getTestTempFilePath("stdDev/counts.file");
     Path output = getTestTempFilePath("stdDev/output.file");
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(input.toUri(), conf);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, input, IntWritable.class,
             DoubleWritable.class);
     Random random = RandomUtils.getRandom();

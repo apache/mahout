@@ -33,8 +33,8 @@ public final class InformationGainTest extends MahoutTestCase {
   public void testInformationGain() throws Exception {
 
     Configuration configuration = new Configuration();
-    FileSystem fileSystem = FileSystem.get(configuration);
     Path input = getTestTempFilePath("input");
+    FileSystem fileSystem = FileSystem.get(input.toUri(), configuration);
 
     // create input
     String[] keys = { "Math", "History", "CS", "Math", "Math", "CS", "History", "Math" };

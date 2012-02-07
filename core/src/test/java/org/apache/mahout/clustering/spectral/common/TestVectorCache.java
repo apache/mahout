@@ -65,11 +65,11 @@ public class TestVectorCache extends MahoutTestCase {
   public void testLoad() throws Exception {
     // save a vector manually
     Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(conf);
     Writable key = new IntWritable(0);
     Vector value = new DenseVector(VECTOR);
     Path path = getTestTempDirPath("output");
-    
+
+    FileSystem fs = FileSystem.get(path.toUri(), conf);
     // write the vector
     path = fs.makeQualified(path);
     fs.deleteOnExit(path);

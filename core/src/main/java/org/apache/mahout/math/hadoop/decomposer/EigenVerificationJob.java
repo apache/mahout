@@ -189,7 +189,7 @@ public class EigenVerificationJob extends AbstractJob {
   private void saveCleanEigens(Configuration conf, Collection<Map.Entry<MatrixSlice, EigenStatus>> prunedEigenMeta)
     throws IOException {
     Path path = new Path(outPath, CLEAN_EIGENVECTORS);
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(path.toUri(), conf);
     SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
     try {
       IntWritable iw = new IntWritable();

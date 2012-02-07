@@ -294,8 +294,9 @@ public class KMeansDriver extends AbstractJob {
       clustersIn = clustersOut;
       iteration++;
     }
+    Path fromPath = new Path(output, AbstractCluster.CLUSTERS_DIR + (iteration-1));
     Path finalClustersIn = new Path(output, AbstractCluster.CLUSTERS_DIR + (iteration-1) + org.apache.mahout.clustering.Cluster.FINAL_ITERATION_SUFFIX);
-    FileSystem.get(conf).rename(new Path(output, AbstractCluster.CLUSTERS_DIR + (iteration-1)), finalClustersIn);
+    FileSystem.get(fromPath.toUri(), conf).rename(fromPath, finalClustersIn);
     return finalClustersIn;
   }
 
@@ -318,8 +319,9 @@ public class KMeansDriver extends AbstractJob {
       clustersIn = clustersOut;
       iteration++;
     }
+    Path fromPath = new Path(output, AbstractCluster.CLUSTERS_DIR + (iteration-1));
     Path finalClustersIn = new Path(output, AbstractCluster.CLUSTERS_DIR + (iteration-1) + "-final");
-    FileSystem.get(conf).rename(new Path(output, AbstractCluster.CLUSTERS_DIR + (iteration-1)), finalClustersIn);
+    FileSystem.get(fromPath.toUri(), conf).rename(fromPath, finalClustersIn);
     return finalClustersIn;
   }
 

@@ -44,9 +44,10 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
 
   private void setupDocs() throws IOException {
     conf = new Configuration();
-    FileSystem fs = FileSystem.get(conf);
 
     inputPath = getTestTempFilePath("documents/docs.file");
+    FileSystem fs = FileSystem.get(inputPath.toUri(), conf);
+
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, inputPath, Text.class, Text.class);
 
     RandomDocumentGenerator gen = new RandomDocumentGenerator();
@@ -88,9 +89,10 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
   @Test
   public void testPruning() throws Exception {
     conf = new Configuration();
-    FileSystem fs = FileSystem.get(conf);
 
     inputPath = getTestTempFilePath("documents/docs.file");
+    FileSystem fs = FileSystem.get(inputPath.toUri(), conf);
+
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, inputPath, Text.class, Text.class);
 
     String [] docs = {"a b c", "a a a a a b", "a a a a a c"};

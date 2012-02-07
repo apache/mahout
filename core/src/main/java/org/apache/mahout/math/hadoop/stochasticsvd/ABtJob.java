@@ -382,14 +382,6 @@ public class ABtJob {
      * 
      * @param <K>
      *          bogus
-     * @param <V>
-     * @param name
-     * @param spw
-     * @param ctx
-     * @param valueClass
-     * @return
-     * @throws IOException
-     * @throws InterruptedException
      */
     private <K, V> OutputCollector<K, V>
         createOutputCollector(String name,
@@ -399,7 +391,7 @@ public class ABtJob {
           InterruptedException {
       Path outputPath = getSplitFilePath(name, spw, ctx);
       final SequenceFile.Writer w =
-        SequenceFile.createWriter(FileSystem.get(ctx.getConfiguration()),
+        SequenceFile.createWriter(FileSystem.get(outputPath.toUri(), ctx.getConfiguration()),
                                   ctx.getConfiguration(),
                                   outputPath,
                                   SplitPartitionedWritable.class,
@@ -492,7 +484,7 @@ public class ABtJob {
     if (broadcastBInput) {
       job.getConfiguration().set(PROP_BT_BROADCAST, "y");
 
-      FileSystem fs = FileSystem.get(conf);
+      FileSystem fs = FileSystem.get(inputBtGlob.toUri(), conf);
       FileStatus[] fstats = fs.globStatus(inputBtGlob);
       if (fstats != null) {
         for (FileStatus fstat : fstats) {

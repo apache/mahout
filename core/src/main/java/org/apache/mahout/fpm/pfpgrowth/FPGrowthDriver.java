@@ -146,7 +146,7 @@ public final class FPGrowthDriver extends AbstractJob {
 
     Path path = new Path(output);
     Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(path.toUri(), conf);
 
     Charset encoding = Charset.forName(params.get("encoding"));
     String input = params.get("input");

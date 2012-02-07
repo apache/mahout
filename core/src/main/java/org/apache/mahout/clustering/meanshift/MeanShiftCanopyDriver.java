@@ -333,8 +333,9 @@ public class MeanShiftCanopyDriver extends AbstractJob {
       clustersIn = clustersOut;
       iteration++;
     }
+    Path fromPath = new Path(output, Cluster.CLUSTERS_DIR + (iteration-1));
     Path finalClustersIn = new Path(output, Cluster.CLUSTERS_DIR + (iteration-1) + "-final");
-    FileSystem.get(conf).rename(new Path(output, Cluster.CLUSTERS_DIR + (iteration-1)), finalClustersIn);
+    FileSystem.get(fromPath.toUri(), conf).rename(fromPath, finalClustersIn);
     return finalClustersIn;
   }
 
@@ -360,7 +361,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
       runIterationMR(conf, clustersIn, clustersOut, controlOut, measure
           .getClass().getName(), aKernelProfile.getClass().getName(), t1, t2,
           convergenceDelta, runClustering);
-      converged = FileSystem.get(new Configuration()).exists(controlOut);
+      converged = FileSystem.get(controlOut.toUri(), conf).exists(controlOut);
       // now point the input to the old output directory
       clustersIn = clustersOut;
       iteration++;
@@ -371,8 +372,9 @@ public class MeanShiftCanopyDriver extends AbstractJob {
         conf.set(MAPRED_REDUCE_TASKS, String.valueOf(numReducers));
       }
     }
+    Path fromPath = new Path(output, Cluster.CLUSTERS_DIR + (iteration-1));
     Path finalClustersIn = new Path(output, Cluster.CLUSTERS_DIR + (iteration-1) + Cluster.FINAL_ITERATION_SUFFIX);
-    FileSystem.get(conf).rename(new Path(output, Cluster.CLUSTERS_DIR + (iteration-1)), finalClustersIn);
+    FileSystem.get(fromPath.toUri(), conf).rename(fromPath, finalClustersIn);
     return finalClustersIn;
   }
 

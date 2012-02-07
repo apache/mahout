@@ -51,9 +51,9 @@ public final class EntropyTest extends MahoutTestCase {
   private void calculateEntropy(String[] content, double expected, String source) throws Exception {
 
     Configuration configuration = new Configuration();
-    FileSystem fileSystem = FileSystem.get(configuration);
     Path input = getTestTempFilePath("input");
     Path output = getTestTempFilePath("output");
+    FileSystem fileSystem = FileSystem.get(input.toUri(), configuration);
 
     // write content into test text file
     SequenceFile.Writer writer = new SequenceFile.Writer(fileSystem, configuration, input, Text.class, Text.class);

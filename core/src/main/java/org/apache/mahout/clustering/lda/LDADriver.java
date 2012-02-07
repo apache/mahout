@@ -172,7 +172,7 @@ public final class LDADriver extends AbstractJob {
   }
 
   private static Path getLastKnownStatePath(Configuration conf, Path stateDir) throws IOException {
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(stateDir.toUri(), conf);
     Path lastPath = null;
     int maxIteration = Integer.MIN_VALUE;
     for (FileStatus fstatus : fs.globStatus(new Path(stateDir, "state-*"))) {
@@ -366,9 +366,10 @@ public final class LDADriver extends AbstractJob {
     if (trainingCorpus == null) {
       Class<? extends Writable> keyClass = peekAtSequenceFileForKeyType(conf, input);
       Collection<Pair<Writable, VectorWritable>> corpus = new LinkedList<Pair<Writable, VectorWritable>>();
-      for (FileStatus fileStatus : FileSystem.get(conf).globStatus(new Path(input, "part-*"))) {
+      FileSystem fs = FileSystem.get(input.toUri(), conf);
+      for (FileStatus fileStatus :fs.globStatus(new Path(input, "part-*"))) {
         Path inputPart = fileStatus.getPath();
-        SequenceFile.Reader reader = new SequenceFile.Reader(FileSystem.get(conf), inputPart, conf);
+        SequenceFile.Reader reader = new SequenceFile.Reader(fs, inputPart, conf);
         Writable key = ReflectionUtils.newInstance(keyClass, conf);
         VectorWritable value = new VectorWritable();
         while (reader.next(key, value)) {
@@ -510,7 +511,7 @@ public final class LDADriver extends AbstractJob {
 
   private static Class<? extends Writable> peekAtSequenceFileForKeyType(Configuration conf, Path input) {
     try {
-      SequenceFile.Reader reader = new SequenceFile.Reader(FileSystem.get(conf), input, conf);
+      SequenceFile.Reader reader = new SequenceFile.Reader(FileSystem.get(input.toUri(), conf), input, conf);
       return (Class<? extends Writable>) reader.getKeyClass();
     } catch (IOException ioe) {
       return Text.class;

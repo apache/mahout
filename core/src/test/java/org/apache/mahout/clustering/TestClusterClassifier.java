@@ -268,7 +268,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     Path priorPath = getTestTempDirPath("prior");
     Path outPath = getTestTempDirPath("output");
     Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(pointsPath.toUri(), conf);
     List<VectorWritable> points = TestKmeansClustering
         .getPointsWritable(TestKmeansClustering.REFERENCE);
     ClusteringTestUtils.writePointsToFile(points,

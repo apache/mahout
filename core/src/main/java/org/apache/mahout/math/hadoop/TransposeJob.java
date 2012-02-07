@@ -86,7 +86,7 @@ public class TransposeJob extends AbstractJob {
                                                     int numInputRows) throws IOException {
     JobConf conf = new JobConf(initialConf, TransposeJob.class);
     conf.setJobName("TransposeJob: " + matrixInputPath + " transpose -> " + matrixOutputPath);
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(matrixInputPath.toUri(), conf);
     matrixInputPath = fs.makeQualified(matrixInputPath);
     matrixOutputPath = fs.makeQualified(matrixOutputPath);
     conf.setInt(NUM_ROWS_KEY, numInputRows);

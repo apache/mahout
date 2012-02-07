@@ -118,7 +118,7 @@ public final class PFPGrowth {
   public static void saveFList(Iterable<Pair<String,Long>> flist, Parameters params, Configuration conf)
     throws IOException {
     Path flistPath = new Path(params.get(OUTPUT), F_LIST);
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(flistPath.toUri(), conf);
     flistPath = fs.makeQualified(flistPath);
     HadoopUtil.delete(conf, flistPath);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, flistPath, Text.class, LongWritable.class);

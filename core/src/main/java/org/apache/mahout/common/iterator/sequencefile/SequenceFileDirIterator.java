@@ -61,7 +61,7 @@ public final class SequenceFileDirIterator<K extends Writable,V extends Writable
 
     iterators = Lists.newArrayList();
     // we assume all files should exist, otherwise we will bail out.
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(path[0].toUri(), conf);
     FileStatus[] statuses = new FileStatus[path.length];
     for (int i = 0; i < statuses.length; i++) {
       statuses[i] = fs.getFileStatus(path[i]);

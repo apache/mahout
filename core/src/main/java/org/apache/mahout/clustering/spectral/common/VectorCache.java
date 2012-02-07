@@ -61,7 +61,7 @@ public final class VectorCache {
                           boolean overwritePath,
                           boolean deleteOnExit) throws IOException {
     
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(output.toUri(), conf);
     output = fs.makeQualified(output);
     if (overwritePath) {
       HadoopUtil.delete(conf, output);

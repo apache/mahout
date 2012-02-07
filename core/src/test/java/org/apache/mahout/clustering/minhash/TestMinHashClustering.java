@@ -66,11 +66,11 @@ public class TestMinHashClustering extends MahoutTestCase {
   public void setUp() throws Exception {
     super.setUp();
     Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(conf);
     List<VectorWritable> points = getPointsWritable(REFERENCE);
     input = getTestTempDirPath("points");
     output = new Path(getTestTempDirPath(), "output");
     Path pointFile = new Path(input, "file1");
+    FileSystem fs = FileSystem.get(pointFile.toUri(), conf);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, pointFile, Text.class, VectorWritable.class);
     try {
       int id = 0;

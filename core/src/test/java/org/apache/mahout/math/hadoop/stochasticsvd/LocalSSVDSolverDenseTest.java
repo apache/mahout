@@ -102,7 +102,7 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
                                        m,
                                        n);
 
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(aLocPath.toUri(), conf);
 
     Path tempDirPath = getTestTempDirPath("svd-proc");
     Path aPath = new Path(tempDirPath, "A/A.seq");

@@ -487,7 +487,7 @@ public final class BtJob {
     if (broadcast) {
       job.getConfiguration().set(PROP_RHAT_BROADCAST, "y");
 
-      FileSystem fs = FileSystem.get(conf);
+      FileSystem fs = FileSystem.get(inputPathQJob.toUri(), conf);
       FileStatus[] fstats =
         fs.globStatus(new Path(inputPathQJob, QJob.OUTPUT_RHAT + "-*"));
       if (fstats != null) {

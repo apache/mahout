@@ -115,7 +115,7 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
     closeables.remove(w);
     Closeables.close(w, true);
 
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(aLocPath.toUri(), conf);
 
     Path tempDirPath = getTestTempDirPath("svd-proc");
     Path aPath = new Path(tempDirPath, "A/A.seq");

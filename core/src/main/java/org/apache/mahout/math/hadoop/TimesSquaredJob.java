@@ -150,7 +150,7 @@ public final class TimesSquaredJob {
     throws IOException {
     JobConf conf = new JobConf(initialConf, TimesSquaredJob.class);
     conf.setJobName("TimesSquaredJob: " + matrixInputPath);
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(matrixInputPath.toUri(), conf);
     matrixInputPath = fs.makeQualified(matrixInputPath);
     outputVectorPathBase = fs.makeQualified(outputVectorPathBase);
 

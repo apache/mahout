@@ -67,7 +67,7 @@ public final class VectorMatrixMultiplicationJob {
 
     // set up the serialization of the diagonal vector
     Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(markovPath.toUri(), conf);
     markovPath = fs.makeQualified(markovPath);
     outputPath = fs.makeQualified(outputPath);
     Path vectorOutputPath = new Path(outputPath.getParent(), "vector");

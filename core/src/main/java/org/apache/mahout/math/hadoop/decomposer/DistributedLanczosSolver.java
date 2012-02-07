@@ -212,7 +212,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
     int numEigenVectors = state.getIterationNumber();
     log.info("Persisting {} eigenVectors and eigenValues to: {}", numEigenVectors, outputPath); 
     Configuration conf = getConf() != null ? getConf() : new Configuration();
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(outputPath.toUri(), conf);
     SequenceFile.Writer seqWriter =
         new SequenceFile.Writer(fs, conf, outputPath, IntWritable.class, VectorWritable.class);
     try {
