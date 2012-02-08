@@ -79,7 +79,10 @@ public class TestNaiveBayesDriver extends AbstractJob {
     //testJob.getConfiguration().set(LABEL_KEY, parsedArgs.get("--labels"));
     boolean complementary = parsedArgs.containsKey("--testComplementary");
     testJob.getConfiguration().set(COMPLEMENTARY, String.valueOf(complementary));
-    testJob.waitForCompletion(true);
+    boolean succeeded = testJob.waitForCompletion(true);
+    if (!succeeded) {
+      return -1;
+    }
     //load the labels
     Map<Integer, String> labelMap = BayesUtils.readLabelIndex(getConf(), new Path(parsedArgs.get("--labelIndex")));
 
