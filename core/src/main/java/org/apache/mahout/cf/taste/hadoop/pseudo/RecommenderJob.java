@@ -139,8 +139,8 @@ public final class RecommenderJob extends AbstractJob {
     jobConf.setInt(RecommenderReducer.RECOMMENDATIONS_PER_USER, recommendationsPerUser);
     jobConf.set(RecommenderReducer.DATA_MODEL_FILE, inputFile.toString());
 
-    job.waitForCompletion(true);
-    return 0;
+    boolean succeeded = job.waitForCompletion(true);
+    return succeeded ? 0 : -1;
   }
   
   public static void main(String[] args) throws Exception {

@@ -68,7 +68,9 @@ public final class SlopeOneAverageDiffsJob extends AbstractJob {
                                        EntityEntityWritable.class,
                                        FloatWritable.class,
                                        SequenceFileOutputFormat.class);
-      prefsToDiffsJob.waitForCompletion(true);
+      boolean succeeded = prefsToDiffsJob.waitForCompletion(true);
+      if (!succeeded) 
+        return -1;
     }
 
 
@@ -84,7 +86,9 @@ public final class SlopeOneAverageDiffsJob extends AbstractJob {
                                           FullRunningAverageAndStdDevWritable.class,
                                           TextOutputFormat.class);
       FileOutputFormat.setOutputCompressorClass(diffsToAveragesJob, GzipCodec.class);
-      diffsToAveragesJob.waitForCompletion(true);
+      boolean succeeded = diffsToAveragesJob.waitForCompletion(true);
+      if (!succeeded)
+        return -1;
     }
     return 0;
   }

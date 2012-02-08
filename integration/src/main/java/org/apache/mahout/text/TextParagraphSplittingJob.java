@@ -46,8 +46,8 @@ public class TextParagraphSplittingJob extends AbstractJob {
                          Text.class,
                          SequenceFileOutputFormat.class);
     job.setNumReduceTasks(0);
-    job.waitForCompletion(true);
-    return 1;
+    boolean succeeded = job.waitForCompletion(true);
+    return succeeded ? 0 : -1;
   }
 
   public static class SplitMap extends Mapper<Text,Text,Text,Text> {

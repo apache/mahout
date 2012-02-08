@@ -119,6 +119,9 @@ public final class EigencutsSensitivityJob {
     FileInputFormat.addInputPath(job, eigenvectors);
     FileOutputFormat.setOutputPath(job, output);
     
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) {
+      throw new IllegalStateException("Job failed!");
+    }
   }  
 }

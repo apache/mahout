@@ -118,9 +118,10 @@ public class AdjacencyMatrixJob extends AbstractJob {
     createAdjacencyMatrixConf.set(NUM_VERTICES_PARAM, String.valueOf(numVertices));
     createAdjacencyMatrixConf.set(VERTEX_INDEX_PARAM, getOutputPath(VERTEX_INDEX).toString());
     createAdjacencyMatrixConf.setBoolean(SYMMETRIC_PARAM, symmetric);
-    createAdjacencyMatrix.waitForCompletion(true);
 
-    return 0;
+    boolean succeeded = createAdjacencyMatrix.waitForCompletion(true);
+
+    return succeeded ? 0 : -1;
   }
 
   //TODO do this in parallel?

@@ -111,7 +111,10 @@ public final class Entropy extends AbstractJob {
         VarIntWritable.class, VarIntSumReducer.class, Text.class, VarIntWritable.class,
         SequenceFileOutputFormat.class);
     job.setCombinerClass(VarIntSumReducer.class);
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) {
+      throw new IllegalStateException("Job failed!");
+    }
 
     numberItems =
         job.getCounters().findCounter("org.apache.hadoop.mapred.Task$Counter", "MAP_INPUT_RECORDS").getValue();
@@ -135,7 +138,10 @@ public final class Entropy extends AbstractJob {
         DoubleWritable.class, SequenceFileOutputFormat.class);
     job.getConfiguration().set(NUMBER_ITEMS_PARAM, String.valueOf(numberItems));
     job.setCombinerClass(DoubleSumReducer.class);
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) {
+      throw new IllegalStateException("Job failed!");
+    }
 
   }
 

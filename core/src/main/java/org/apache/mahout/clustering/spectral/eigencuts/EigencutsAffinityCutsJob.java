@@ -80,8 +80,11 @@ public final class EigencutsAffinityCutsJob {
     FileInputFormat.addInputPath(job, cutMatrix);
     FileOutputFormat.setOutputPath(job, nextAffinity);
     
-    job.waitForCompletion(true);
-    
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) {
+      throw new IllegalStateException("Job failed!");
+    }
+
     return job.getCounters().findCounter(CUTSCOUNTER.NUM_CUTS).getValue();
   }
   

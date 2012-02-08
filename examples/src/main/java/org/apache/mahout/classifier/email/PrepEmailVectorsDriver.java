@@ -66,7 +66,8 @@ public class PrepEmailVectorsDriver extends AbstractJob {
             Text.class, VectorWritable.class, PrepEmailReducer.class, Text.class, VectorWritable.class, SequenceFileOutputFormat.class);
     convertJob.getConfiguration().set(ITEMS_PER_CLASS, parsedArgs.get("--maxItemsPerLabel"));
     convertJob.getConfiguration().set(USE_LIST_NAME, String.valueOf(parsedArgs.containsKey("--useListName")));
-    convertJob.waitForCompletion(true);
-    return 0;
+
+    boolean succeeded = convertJob.waitForCompletion(true);
+    return succeeded ? 0 : -1;
   }
 }

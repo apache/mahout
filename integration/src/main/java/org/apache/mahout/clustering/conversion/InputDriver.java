@@ -105,7 +105,10 @@ public final class InputDriver {
     FileInputFormat.addInputPath(job, input);
     FileOutputFormat.setOutputPath(job, output);
     
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) {
+      throw new IllegalStateException("Job failed!");
+    }
   }
   
 }

@@ -122,7 +122,11 @@ public final class MailToPrefsDriver extends AbstractJob {
               Text.class,
               VarIntWritable.class,
               SequenceFileOutputFormat.class);
-      createMsgIdDictionary.waitForCompletion(true);
+
+      boolean succeeded = createMsgIdDictionary.waitForCompletion(true);
+      if (!succeeded) {
+        return -1;
+      }
       //write out the dictionary at the top level
       msgIdChunks = createDictionaryChunks(msgIdsPath, output, "msgIds-dictionary-", createMsgIdDictionary.getConfiguration(), chunkSize, msgDim);
     }
@@ -145,7 +149,10 @@ public final class MailToPrefsDriver extends AbstractJob {
               VarIntWritable.class,
               SequenceFileOutputFormat.class);
       createFromIdDictionary.getConfiguration().set(EmailUtility.SEPARATOR, separator);
-      createFromIdDictionary.waitForCompletion(true);
+      boolean succeeded = createFromIdDictionary.waitForCompletion(true);
+      if (!succeeded) {
+        return -1;
+      }
       //write out the dictionary at the top level
       int[] fromDim = new int[1];
       fromChunks = createDictionaryChunks(fromIdsPath, output, "fromIds-dictionary-", createFromIdDictionary.getConfiguration(), chunkSize, fromDim);
@@ -177,7 +184,10 @@ public final class MailToPrefsDriver extends AbstractJob {
                   MailToRecMapper.class, Text.class, LongWritable.class, MailToRecReducer.class, Text.class, NullWritable.class,
                   TextOutputFormat.class);
           createRecMatrix.getConfiguration().set("mapred.output.compress", "false");
-          createRecMatrix.waitForCompletion(true);
+          boolean succeeded = createRecMatrix.waitForCompletion(true);
+          if (!succeeded) {
+            return -1;
+          }
           //copy the results up a level
           //HadoopUtil.copyMergeSeqFiles(out.getFileSystem(conf), out, vecPath.getFileSystem(conf), outPath, true, conf, "");
           FileStatus[] fs = HadoopUtil.getFileStatus(new Path(out, "*"), PathType.GLOB, PathFilters.partFilter(), null, conf);

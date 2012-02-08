@@ -92,7 +92,9 @@ public class HighDFWordsPruner {
 
     HadoopUtil.delete(conf, output);
 
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) 
+      throw new IllegalStateException("Job failed!");
   }
 
   public static void mergePartialVectors(Iterable<Path> partialVectorPaths,
@@ -129,7 +131,9 @@ public class HighDFWordsPruner {
 
     HadoopUtil.delete(conf, output);
 
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) 
+      throw new IllegalStateException("Job failed!");
   }
 
   private static String getCommaSeparatedPaths(Iterable<Path> paths) {

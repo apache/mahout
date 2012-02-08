@@ -85,7 +85,10 @@ public final class BasicStats {
             IntWritable.class, DoubleWritable.class, SequenceFileOutputFormat.class, conf);
     HadoopUtil.delete(conf, output);
     job.setCombinerClass(StandardDeviationCalculatorReducer.class);
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) {
+      throw new IllegalStateException("Job failed!");
+    }
 
     // Now extract the computed sum
     Path filesPattern = new Path(output, "part-*");

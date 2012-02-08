@@ -84,7 +84,10 @@ public final class ConditionalEntropy extends AbstractJob {
         GroupAndCountByKeyAndValueMapper.class, StringTuple.class, VarIntWritable.class, VarIntSumReducer.class,
         StringTuple.class, VarIntWritable.class, SequenceFileOutputFormat.class);
     job.setCombinerClass(VarIntSumReducer.class);
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) {
+      throw new IllegalStateException("Job failed!");
+    }
 
     numberItems =
         job.getCounters().findCounter("org.apache.hadoop.mapred.Task$Counter", "MAP_INPUT_RECORDS").getValue();
@@ -102,7 +105,10 @@ public final class ConditionalEntropy extends AbstractJob {
         SpecificConditionalEntropyReducer.class, Text.class, DoubleWritable.class,
         SequenceFileOutputFormat.class);
     job.getConfiguration().set(NUMBER_ITEMS_PARAM, String.valueOf(numberItems));
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) {
+      throw new IllegalStateException("Job failed!");
+    }
 
   }
 
@@ -116,7 +122,10 @@ public final class ConditionalEntropy extends AbstractJob {
         DoubleSumReducer.class, NullWritable.class, DoubleWritable.class,
         SequenceFileOutputFormat.class);
     job.setCombinerClass(DoubleSumReducer.class);
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) {
+      throw new IllegalStateException("Job failed!");
+    }
 
   }
 

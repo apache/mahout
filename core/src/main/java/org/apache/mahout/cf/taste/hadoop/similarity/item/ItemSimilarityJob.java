@@ -160,7 +160,10 @@ public final class ItemSimilarityJob extends AbstractJob {
       mostSimilarItemsConf.set(ITEM_ID_INDEX_PATH_STR,
           new Path(prepPath, PreparePreferenceMatrixJob.ITEMID_INDEX).toString());
       mostSimilarItemsConf.setInt(MAX_SIMILARITIES_PER_ITEM, maxSimilarItemsPerItem);
-      mostSimilarItems.waitForCompletion(true);
+      boolean succeeded = mostSimilarItems.waitForCompletion(true);
+      if (!succeeded) {
+        return -1;
+      }
     }
 
     return 0;

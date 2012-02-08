@@ -134,21 +134,27 @@ public class ParallelALSFactorizationJob extends AbstractJob {
         VectorWritable.class, VectorSumReducer.class, IntWritable.class,
         VectorWritable.class, SequenceFileOutputFormat.class);
     itemRatings.setCombinerClass(VectorSumReducer.class);
-    itemRatings.waitForCompletion(true);
+    boolean succeeded = itemRatings.waitForCompletion(true);
+    if (!succeeded) 
+      return -1;
 
     /* create A */
     Job userRatings = prepareJob(pathToItemRatings(), pathToUserRatings(),
         TransposeMapper.class, IntWritable.class, VectorWritable.class, MergeVectorsReducer.class, IntWritable.class,
         VectorWritable.class);
     userRatings.setCombinerClass(MergeVectorsCombiner.class);
-    userRatings.waitForCompletion(true);
+    succeeded = userRatings.waitForCompletion(true);
+    if (!succeeded) 
+      return -1;
 
     //TODO this could be fiddled into one of the upper jobs
     Job averageItemRatings = prepareJob(pathToItemRatings(), getTempPath("averageRatings"),
         AverageRatingMapper.class, IntWritable.class, VectorWritable.class, MergeVectorsReducer.class,
         IntWritable.class, VectorWritable.class);
     averageItemRatings.setCombinerClass(MergeVectorsCombiner.class);
-    averageItemRatings.waitForCompletion(true);
+    succeeded = averageItemRatings.waitForCompletion(true);
+    if (!succeeded) 
+      return -1;
 
     Vector averageRatings = ALSUtils.readFirstRow(getTempPath("averageRatings"), getConf());
 
@@ -219,7 +225,9 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     solverConf.set(ALPHA, String.valueOf(alpha));
     solverConf.setInt(NUM_FEATURES, numFeatures);
     solverConf.set(FEATURE_MATRIX, pathToUorI.toString());
-    solverForUorI.waitForCompletion(true);
+    boolean succeeded = solverForUorI.waitForCompletion(true);
+    if (!succeeded) 
+      throw new IllegalStateException("Job failed!");
   }
 
   static class SolveExplicitFeedbackMapper extends Mapper<IntWritable,VectorWritable,IntWritable,VectorWritable> {

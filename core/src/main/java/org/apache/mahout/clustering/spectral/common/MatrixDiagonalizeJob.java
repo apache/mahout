@@ -69,8 +69,11 @@ public final class MatrixDiagonalizeJob {
     
     job.setJarByClass(MatrixDiagonalizeJob.class);
 
-    job.waitForCompletion(true);
-    
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) {
+      throw new IllegalStateException("Job failed!");
+    }
+
     // read the results back from the path
     return VectorCache.load(conf, new Path(diagOutput, "part-r-00000"));
   }

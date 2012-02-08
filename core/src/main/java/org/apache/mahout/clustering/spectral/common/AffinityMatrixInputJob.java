@@ -61,7 +61,10 @@ public final class AffinityMatrixInputJob {
 
     job.setJarByClass(AffinityMatrixInputJob.class);
 
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) {
+      throw new IllegalStateException("Job failed!");
+    }
   }
 
   /**

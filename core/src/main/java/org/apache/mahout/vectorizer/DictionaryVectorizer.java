@@ -324,7 +324,9 @@ public final class DictionaryVectorizer implements Vectorizer{
 
     HadoopUtil.delete(conf, output);
     
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) 
+      throw new IllegalStateException("Job failed!");
   }
   
   /**
@@ -360,6 +362,8 @@ public final class DictionaryVectorizer implements Vectorizer{
     
     HadoopUtil.delete(conf, output);
     
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) 
+      throw new IllegalStateException("Job failed!");
   }
 }

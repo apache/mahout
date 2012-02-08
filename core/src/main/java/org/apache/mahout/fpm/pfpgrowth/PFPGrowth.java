@@ -268,7 +268,10 @@ public final class PFPGrowth {
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     
     HadoopUtil.delete(conf, outPath);
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) {
+      throw new IllegalStateException("Job failed!");
+    }
   }
   
   /**
@@ -300,7 +303,10 @@ public final class PFPGrowth {
     job.setReducerClass(ParallelCountingReducer.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) {
+      throw new IllegalStateException("Job failed!");
+    }
     
   }
   
@@ -334,6 +340,9 @@ public final class PFPGrowth {
     job.setReducerClass(ParallelFPGrowthReducer.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) {
+      throw new IllegalStateException("Job failed!");
+    }
   }
 }

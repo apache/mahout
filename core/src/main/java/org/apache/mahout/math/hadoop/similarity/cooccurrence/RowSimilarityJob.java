@@ -121,7 +121,10 @@ public class RowSimilarityJob extends AbstractJob {
       normsAndTransposeConf.set(NUM_NON_ZERO_ENTRIES_PATH, numNonZeroEntriesPath.toString());
       normsAndTransposeConf.set(MAXVALUES_PATH, maxValuesPath.toString());
       normsAndTransposeConf.set(SIMILARITY_CLASSNAME, similarityClassname);
-      normsAndTranspose.waitForCompletion(true);
+      boolean succeeded = normsAndTranspose.waitForCompletion(true);
+      if (!succeeded) {
+        return -1;
+      }
     }
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
@@ -136,7 +139,10 @@ public class RowSimilarityJob extends AbstractJob {
       pairwiseConf.set(SIMILARITY_CLASSNAME, similarityClassname);
       pairwiseConf.setInt(NUMBER_OF_COLUMNS, numberOfColumns);
       pairwiseConf.setBoolean(EXCLUDE_SELF_SIMILARITY, excludeSelfSimilarity);
-      pairwiseSimilarity.waitForCompletion(true);
+      boolean succeeded = pairwiseSimilarity.waitForCompletion(true);
+      if (!succeeded) {
+        return -1;
+      }
     }
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
@@ -145,7 +151,10 @@ public class RowSimilarityJob extends AbstractJob {
           VectorWritable.class);
       asMatrix.setCombinerClass(MergeToTopKSimilaritiesReducer.class);
       asMatrix.getConfiguration().setInt(MAX_SIMILARITIES_PER_ROW, maxSimilaritiesPerRow);
-      asMatrix.waitForCompletion(true);
+      boolean succeeded = asMatrix.waitForCompletion(true);
+      if (!succeeded) {
+        return -1;
+      }
     }
 
     return 0;

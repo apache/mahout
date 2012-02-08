@@ -69,6 +69,9 @@ public final class KeyBasedStringTupleGrouper {
     job.setReducerClass(KeyBasedStringTupleReducer.class);
     job.setOutputFormatClass(TextOutputFormat.class);
     
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) {
+      throw new IllegalStateException("Job failed!");
+    }
   }
 }

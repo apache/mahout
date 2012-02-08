@@ -75,7 +75,10 @@ public final class MahoutEvaluator {
     storePopulation(fs, new Path(input, "population"), population);
 
     configureJob(job, conf, evaluator, input, output);
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) {
+      throw new IllegalStateException("Job failed!");
+    }
     
     OutputUtils.importEvaluations(fs, conf, output, evaluations);
   }

@@ -90,6 +90,9 @@ public final class DocumentProcessor {
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     HadoopUtil.delete(conf, output);
 
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) 
+      throw new IllegalStateException("Job failed!");
+
   }
 }

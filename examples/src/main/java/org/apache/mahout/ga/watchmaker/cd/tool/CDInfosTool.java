@@ -84,7 +84,10 @@ public final class CDInfosTool {
     Job job = new Job(conf);
 
     configureJob(job, descriptors, inpath, output);
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) {
+      throw new IllegalStateException("Job failed!");
+    }
 
     importDescriptions(fs, conf, output, descriptions);
   }

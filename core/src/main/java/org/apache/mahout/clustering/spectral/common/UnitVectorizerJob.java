@@ -63,7 +63,10 @@ public final class UnitVectorizerJob {
 
     job.setJarByClass(UnitVectorizerJob.class);
 
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) {
+      throw new IllegalStateException("Job failed!");
+    }
   }
   
   public static class UnitVectorizerMapper

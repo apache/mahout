@@ -86,17 +86,23 @@ public class DatasetSplitter extends AbstractJob {
         Text.class, Text.class, SequenceFileOutputFormat.class);
     markPreferences.getConfiguration().set(TRAINING_PERCENTAGE, String.valueOf(trainingPercentage));
     markPreferences.getConfiguration().set(PROBE_PERCENTAGE, String.valueOf(probePercentage));
-    markPreferences.waitForCompletion(true);
+    boolean succeeded = markPreferences.waitForCompletion(true);
+    if (!succeeded) 
+      return -1;
 
     Job createTrainingSet = prepareJob(markedPrefs, trainingSetPath, SequenceFileInputFormat.class,
         WritePrefsMapper.class, NullWritable.class, Text.class, TextOutputFormat.class);
     createTrainingSet.getConfiguration().set(PART_TO_USE, INTO_TRAINING_SET.toString());
-    createTrainingSet.waitForCompletion(true);
+    succeeded = createTrainingSet.waitForCompletion(true);
+    if (!succeeded) 
+      return -1;
 
     Job createProbeSet = prepareJob(markedPrefs, probeSetPath, SequenceFileInputFormat.class,
         WritePrefsMapper.class, NullWritable.class, Text.class, TextOutputFormat.class);
     createProbeSet.getConfiguration().set(PART_TO_USE, INTO_PROBE_SET.toString());
-    createProbeSet.waitForCompletion(true);
+    succeeded = createProbeSet.waitForCompletion(true);
+    if (!succeeded) 
+      return -1;
 
     return 0;
   }

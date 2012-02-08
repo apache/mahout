@@ -63,7 +63,8 @@ public class SimpleTextEncodingVectorizer implements Vectorizer {
     boolean finished = job.waitForCompletion(true);
 
     log.info("result of run: {}", finished);
-    //TODO: something useful w/ this result should it be meaningful.
+    if (!finished) 
+      throw new IllegalStateException("Job failed!");
   }
 
 }

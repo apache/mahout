@@ -111,7 +111,10 @@ public class FrequenciesJob {
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     
     // run the job
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) {
+      throw new IllegalStateException("Job failed!");
+    }
     
     int[][] counts = parseOutput(job);
 

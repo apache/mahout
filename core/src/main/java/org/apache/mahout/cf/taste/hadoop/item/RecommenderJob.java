@@ -191,7 +191,9 @@ public final class RecommenderJob extends AbstractJob {
               SimilarityMatrixRowWrapperMapper.class, VarIntWritable.class, VectorOrPrefWritable.class,
               Reducer.class, VarIntWritable.class, VectorOrPrefWritable.class,
               SequenceFileOutputFormat.class);
-      prePartialMultiply1.waitForCompletion(true);
+      boolean succeeded = prePartialMultiply1.waitForCompletion(true);
+      if (!succeeded) 
+        return -1;
       //continue the multiplication
       Job prePartialMultiply2 = prepareJob(new Path(prepPath, PreparePreferenceMatrixJob.USER_VECTORS),
               prePartialMultiplyPath2, SequenceFileInputFormat.class, UserVectorSplitterMapper.class, VarIntWritable.class,
@@ -202,7 +204,9 @@ public final class RecommenderJob extends AbstractJob {
       }
       prePartialMultiply2.getConfiguration().setInt(UserVectorSplitterMapper.MAX_PREFS_PER_USER_CONSIDERED,
               maxPrefsPerUser);
-      prePartialMultiply2.waitForCompletion(true);
+      succeeded = prePartialMultiply2.waitForCompletion(true);
+      if (!succeeded) 
+        return -1;
       //finish the job
       Job partialMultiply = prepareJob(
               new Path(prePartialMultiplyPath1 + "," + prePartialMultiplyPath2), partialMultiplyPath,
@@ -210,7 +214,9 @@ public final class RecommenderJob extends AbstractJob {
               ToVectorAndPrefReducer.class, VarIntWritable.class, VectorAndPrefsWritable.class,
               SequenceFileOutputFormat.class);
       setS3SafeCombinedInputPath(partialMultiply, getTempPath(), prePartialMultiplyPath1, prePartialMultiplyPath2);
-      partialMultiply.waitForCompletion(true);
+      succeeded = partialMultiply.waitForCompletion(true);
+      if (!succeeded) 
+        return -1;
     }
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
@@ -221,7 +227,9 @@ public final class RecommenderJob extends AbstractJob {
                 ItemFilterMapper.class, VarLongWritable.class, VarLongWritable.class,
                 ItemFilterAsVectorAndPrefsReducer.class, VarIntWritable.class, VectorAndPrefsWritable.class,
                 SequenceFileOutputFormat.class);
-        itemFiltering.waitForCompletion(true);
+        boolean succeeded = itemFiltering.waitForCompletion(true);
+        if (!succeeded) 
+          return -1;
       }
 
       String aggregateAndRecommendInput = partialMultiplyPath.toString();
@@ -247,7 +255,9 @@ public final class RecommenderJob extends AbstractJob {
               new Path(prepPath, PreparePreferenceMatrixJob.ITEMID_INDEX).toString());
       aggregateAndRecommendConf.setInt(AggregateAndRecommendReducer.NUM_RECOMMENDATIONS, numRecommendations);
       aggregateAndRecommendConf.setBoolean(BOOLEAN_DATA, booleanData);
-      aggregateAndRecommend.waitForCompletion(true);
+      boolean succeeded = aggregateAndRecommend.waitForCompletion(true);
+      if (!succeeded) 
+        return -1;
     }
 
     return 0;

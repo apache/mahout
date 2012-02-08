@@ -77,7 +77,10 @@ public final class CDMahoutEvaluator {
     Job job = new Job(conf);
 
     configureJob(job, rules, target, inpath, output, split);
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) {
+      throw new IllegalStateException("Job failed!");
+    }
 
     importEvaluations(fs, conf, output, evaluations);
   }

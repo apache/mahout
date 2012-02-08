@@ -97,14 +97,20 @@ public final class TrainNaiveBayesJob extends AbstractJob {
             IndexInstancesMapper.class, IntWritable.class, VectorWritable.class, VectorSumReducer.class, IntWritable.class,
             VectorWritable.class, SequenceFileOutputFormat.class);
     indexInstances.setCombinerClass(VectorSumReducer.class);
-    indexInstances.waitForCompletion(true);
+    boolean succeeded = indexInstances.waitForCompletion(true);
+    if (!succeeded) {
+      return -1;
+    }
     //sum up all the weights from the previous step, per label and per feature
     Job weightSummer = prepareJob(getTempPath(SUMMED_OBSERVATIONS), getTempPath(WEIGHTS),
             SequenceFileInputFormat.class, WeightsMapper.class, Text.class, VectorWritable.class, VectorSumReducer.class,
             Text.class, VectorWritable.class, SequenceFileOutputFormat.class);
     weightSummer.getConfiguration().set(WeightsMapper.NUM_LABELS, String.valueOf(labelSize));
     weightSummer.setCombinerClass(VectorSumReducer.class);
-    weightSummer.waitForCompletion(true);
+    succeeded = weightSummer.waitForCompletion(true);
+    if (!succeeded) {
+      return -1;
+    }
     //put the per label and per feature vectors into the cache
     HadoopUtil.cacheFiles(getTempPath(WEIGHTS), getConf());
     //calculate the Thetas, write out to LABEL_THETA_NORMALIZER vectors -- TODO: add reference here to the part of the Rennie paper that discusses this
@@ -114,7 +120,10 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     thetaSummer.setCombinerClass(VectorSumReducer.class);
     thetaSummer.getConfiguration().setFloat(ThetaMapper.ALPHA_I, alphaI);
     thetaSummer.getConfiguration().setBoolean(ThetaMapper.TRAIN_COMPLEMENTARY, trainComplementary);
-    thetaSummer.waitForCompletion(true);
+    succeeded = thetaSummer.waitForCompletion(true);
+    if (!succeeded) {
+      return -1;
+    }
     //validate our model and then write it out to the official output
     NaiveBayesModel naiveBayesModel = BayesUtils.readModelFromDir(getTempPath(), getConf());
     naiveBayesModel.validate();

@@ -75,7 +75,10 @@ public class PreparePreferenceMatrixJob extends AbstractJob {
             ItemIDIndexMapper.class, VarIntWritable.class, VarLongWritable.class, ItemIDIndexReducer.class,
             VarIntWritable.class, VarLongWritable.class, SequenceFileOutputFormat.class);
     itemIDIndex.setCombinerClass(ItemIDIndexReducer.class);
-    itemIDIndex.waitForCompletion(true);
+    boolean succeeded = itemIDIndex.waitForCompletion(true);
+    if (!succeeded) {
+      return -1;
+    }
     //convert user preferences into a vector per user
     Job toUserVectors = prepareJob(getInputPath(), getOutputPath(USER_VECTORS), TextInputFormat.class,
             ToItemPrefsMapper.class, VarLongWritable.class, booleanData ? VarLongWritable.class : EntityPrefWritable.class,
@@ -83,7 +86,10 @@ public class PreparePreferenceMatrixJob extends AbstractJob {
     toUserVectors.getConfiguration().setBoolean(RecommenderJob.BOOLEAN_DATA, booleanData);
     toUserVectors.getConfiguration().setInt(ToUserVectorsReducer.MIN_PREFERENCES_PER_USER, minPrefsPerUser);
     toUserVectors.getConfiguration().set(ToEntityPrefsMapper.RATING_SHIFT, String.valueOf(ratingShift));
-    toUserVectors.waitForCompletion(true);
+    succeeded = toUserVectors.waitForCompletion(true);
+    if (!succeeded) {
+      return -1;
+    }
     //we need the number of users later
     int numberOfUsers = (int) toUserVectors.getCounters().findCounter(ToUserVectorsReducer.Counters.USERS).getValue();
     HadoopUtil.writeInt(numberOfUsers, getOutputPath(NUM_USERS), getConf());
@@ -99,7 +105,10 @@ public class PreparePreferenceMatrixJob extends AbstractJob {
       toItemVectors.getConfiguration().setInt(ToItemVectorsMapper.SAMPLE_SIZE, samplingSize);
     }
 
-    toItemVectors.waitForCompletion(true);
+    succeeded = toItemVectors.waitForCompletion(true);
+    if (!succeeded) {
+      return -1;
+    }
 
     return 0;
   }

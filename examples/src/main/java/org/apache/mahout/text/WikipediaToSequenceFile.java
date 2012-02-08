@@ -193,6 +193,9 @@ public final class WikipediaToSequenceFile {
     
     conf.set("wikipedia.categories", categoriesStr);
     
-    job.waitForCompletion(true);
+    boolean succeeded = job.waitForCompletion(true);
+    if (!succeeded) {
+      throw new IllegalStateException("Job failed!");
+    }
   }
 }

@@ -86,7 +86,9 @@ public class FactorizationEvaluator extends AbstractJob {
         DoubleWritable.class, NullWritable.class, SequenceFileOutputFormat.class);
     predictRatings.getConfiguration().set(USER_FEATURES_PATH, parsedArgs.get("--userFeatures"));
     predictRatings.getConfiguration().set(ITEM_FEATURES_PATH, parsedArgs.get("--itemFeatures"));
-    predictRatings.waitForCompletion(true);
+    boolean succeeded = predictRatings.waitForCompletion(true);
+    if (!succeeded) 
+      return -1;
 
     BufferedWriter writer  = null;
     try {

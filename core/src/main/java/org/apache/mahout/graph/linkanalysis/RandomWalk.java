@@ -101,7 +101,10 @@ abstract class RandomWalk extends AbstractJob {
     createTransitionMatrix.setCombinerClass(MergeVectorsCombiner.class);
     createTransitionMatrix.getConfiguration().set(NUM_VERTICES_PARAM, String.valueOf(numVertices));
     createTransitionMatrix.getConfiguration().set(STAYING_PROBABILITY_PARAM, String.valueOf(stayingProbability));
-    createTransitionMatrix.waitForCompletion(true);
+    boolean succeeded = createTransitionMatrix.waitForCompletion(true);
+    if (!succeeded) {
+      return -1;
+    }
 
     DistributedRowMatrix transitionMatrix = new DistributedRowMatrix(transitionMatrixPath, getTempPath(),
         numVertices, numVertices);
@@ -121,9 +124,12 @@ abstract class RandomWalk extends AbstractJob {
         RankPerVertexMapper.class, LongWritable.class, DoubleWritable.class, TextOutputFormat.class);
     vertexWithPageRank.getConfiguration().set(RankPerVertexMapper.RANK_PATH_PARAM,
         getTempPath(RANK_VECTOR).toString());
-    vertexWithPageRank.waitForCompletion(true);
+    succeeded = vertexWithPageRank.waitForCompletion(true);
+    if (!succeeded) {
+      return -1;
+    }
 
-    return 1;
+    return 0;
   }
 
   static void persistVector(Configuration conf, Path path, Vector vector) throws IOException {

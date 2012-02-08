@@ -125,8 +125,7 @@ public class Classifier {
 
     log.info("Running the job...");
     if (!job.waitForCompletion(true)) {
-      log.error("Job failed!");
-      return;
+      throw new IllegalStateException("Job failed!");
     }
 
     parseOutput(job);
