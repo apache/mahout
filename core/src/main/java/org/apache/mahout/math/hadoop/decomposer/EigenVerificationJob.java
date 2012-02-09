@@ -201,7 +201,7 @@ public class EigenVerificationJob extends AbstractJob {
                                          meta.getEigenValue(),
                                          Math.abs(1 - meta.getCosAngle()),
                                          s.index());
-        log.info("appending {} to {}", ev, path);
+        //log.info("appending {} to {}", ev, path);
         Writable vw = new VectorWritable(ev);
         iw.set(s.index());
         seqWriter.append(iw, vw);
