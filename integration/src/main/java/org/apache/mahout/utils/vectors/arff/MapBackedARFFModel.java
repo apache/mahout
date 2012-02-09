@@ -84,6 +84,9 @@ public class MapBackedARFFModel implements ARFFModel {
   @Override
   public double getValue(String data, int idx) {
     ARFFType type = typeMap.get(idx);
+    if (type == null) {
+      throw new IllegalArgumentException("Attribute type cannot be NULL, attribute index was: " + idx);
+    }
     data = QUOTE_PATTERN.matcher(data).replaceAll("");
     data = data.trim();
     double result;
