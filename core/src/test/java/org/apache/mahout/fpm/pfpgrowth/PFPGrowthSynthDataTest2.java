@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.fpm.pfpgrowth2;
+package org.apache.mahout.fpm.pfpgrowth;
 
 import java.io.File;
 import java.io.Writer;
