@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -14,32 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.mahout.clustering;
 
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.IOException;
-import java.util.Iterator;
 
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.io.Writable;
+import org.apache.mahout.classifier.sgd.PolymorphicWritable;
 
-public class CIReducer extends Reducer<IntWritable,ClusterWritable,IntWritable,ClusterWritable> {
+public class ClusterWritable implements Writable {
+
+  private Cluster value;
+
+  public Cluster getValue() {
+    return value;
+  }
+
+  public void setValue(Cluster value) {
+    this.value = value;
+  }
 
   @Override
-  protected void reduce(IntWritable key, Iterable<ClusterWritable> values,
-      Context context) throws IOException, InterruptedException {
-    Iterator<ClusterWritable> iter =values.iterator();
-    ClusterWritable first = null;
-    while(iter.hasNext()){
-      ClusterWritable cw = iter.next();
-      if (first == null){
-        first = cw;
-      } else {
-        first.getValue().observe(cw.getValue());
-      }
-    }
-    first.getValue().computeParameters();
-    context.write(key, first);
+  public void write(DataOutput out) throws IOException {
+    PolymorphicWritable.write(out, value);
   }
-  
+
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    value = PolymorphicWritable.read(in, Cluster.class);
+  }
+
 }
