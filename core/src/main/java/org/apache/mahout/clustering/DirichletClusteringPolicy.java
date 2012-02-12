@@ -16,13 +16,22 @@
  */
 package org.apache.mahout.clustering;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
 import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 public class DirichletClusteringPolicy implements ClusteringPolicy {
   
+  public DirichletClusteringPolicy() {
+    super();
+  }
+
   public DirichletClusteringPolicy(int k, double alpha0) {
     this.totalCounts = new DenseVector(k);
     this.alpha0 = alpha0;
@@ -34,11 +43,14 @@ public class DirichletClusteringPolicy implements ClusteringPolicy {
   private Vector mixture;
   
   // Alpha_0 primes the Dirichlet distribution
-  private final double alpha0;
+  private double alpha0;
   
   // Total observed over all time
-  private final Vector totalCounts;
+  private Vector totalCounts;
   
+  /* (non-Javadoc)
+   * @see org.apache.mahout.clustering.ClusteringPolicy#select(org.apache.mahout.math.Vector)
+   */
   @Override
   public Vector select(Vector probabilities) {
     int rMultinom = UncommonDistributions.rMultinom(probabilities.times(mixture));
@@ -48,6 +60,9 @@ public class DirichletClusteringPolicy implements ClusteringPolicy {
   }
   
   // update the total counts and then the mixture
+  /* (non-Javadoc)
+   * @see org.apache.mahout.clustering.ClusteringPolicy#update(org.apache.mahout.clustering.ClusterClassifier)
+   */
   @Override
   public void update(ClusterClassifier prior) {
     for (int i = 0; i < totalCounts.size(); i++) {
@@ -55,5 +70,25 @@ public class DirichletClusteringPolicy implements ClusteringPolicy {
       totalCounts.set(i, totalCounts.get(i) + nObserved);
     }
     mixture = UncommonDistributions.rDirichlet(totalCounts, alpha0);
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.io.Writable#write(java.io.DataOutput)
+   */
+  @Override
+  public void write(DataOutput out) throws IOException {
+    out.writeDouble(alpha0);
+    VectorWritable.writeVector(out, totalCounts);
+    VectorWritable.writeVector(out, mixture);
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.io.Writable#readFields(java.io.DataInput)
+   */
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    this.alpha0 = in.readDouble();
+    this.totalCounts = VectorWritable.readVector(in);
+    this.mixture = VectorWritable.readVector(in);
   }
 }

@@ -20,50 +20,36 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.mahout.math.Vector;
+import org.apache.hadoop.io.Writable;
+import org.apache.mahout.classifier.sgd.PolymorphicWritable;
 
-/**
- * This is a probability-weighted clustering policy, suitable for fuzzy k-means
- * clustering
- * 
- */
-public class FuzzyKMeansClusteringPolicy implements ClusteringPolicy {
-    
-  private double m;
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * org.apache.mahout.clustering.ClusteringPolicy#update(org.apache.mahout.
-   * clustering.ClusterClassifier)
-   */
-  @Override
-  public void update(ClusterClassifier posterior) {
-    // nothing to do here
+public class ClusteringPolicyWritable implements Writable {
+  
+  private ClusteringPolicy value;
+  
+  public ClusteringPolicyWritable(ClusteringPolicy policy) {
+    this.value = policy;
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.ClusteringPolicy#select(org.apache.mahout.math.Vector)
-   */
-  @Override
-  public Vector select(Vector probabilities) {
-    return probabilities;
+  public ClusteringPolicyWritable() {
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.io.Writable#write(java.io.DataOutput)
-   */
+  public ClusteringPolicy getValue() {
+    return value;
+  }
+  
+  public void setValue(ClusteringPolicy value) {
+    this.value = value;
+  }
+  
   @Override
   public void write(DataOutput out) throws IOException {
-    out.writeDouble(m);
+    PolymorphicWritable.write(out, value);
   }
-
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.io.Writable#readFields(java.io.DataInput)
-   */
+  
   @Override
   public void readFields(DataInput in) throws IOException {
-    this.m = in.readDouble();
+    value = PolymorphicWritable.read(in, ClusteringPolicy.class);
   }
   
 }

@@ -27,6 +27,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -54,6 +55,7 @@ import com.google.common.io.Closeables;
 public class ClusterIterator {
   
   public static final String PRIOR_PATH_KEY = "org.apache.mahout.clustering.prior.path";
+  public static final String POLICY_PATH_KEY = "org.apache.mahout.clustering.policy.path";
   
   public ClusterIterator(ClusteringPolicy policy) {
     this.policy = policy;
@@ -151,6 +153,9 @@ public class ClusterIterator {
       InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     HadoopUtil.delete(conf, outPath);
+    Path policyPath = new Path(outPath, "policy.seq");
+    writePolicy(policy, policyPath);
+    conf.set(POLICY_PATH_KEY, policyPath.toString());
     for (int iteration = 1; iteration <= numIterations; iteration++) {
       conf.set(PRIOR_PATH_KEY, priorPath.toString());
       
@@ -236,5 +241,24 @@ public class ClusterIterator {
     }
     ClusterClassifier classifierOut = new ClusterClassifier(clusters);
     return classifierOut;
+  }
+  
+  public static ClusteringPolicy readPolicy(Path policyPath) throws IOException {
+    Configuration config = new Configuration();
+    FileSystem fs = FileSystem.get(policyPath.toUri(), config);
+    SequenceFile.Reader reader = new SequenceFile.Reader(fs, policyPath, config);
+    Text key = new Text();
+    ClusteringPolicyWritable cpw = new ClusteringPolicyWritable();
+    reader.next(key, cpw);
+    return cpw.getValue();
+  }
+  
+  public static void writePolicy(ClusteringPolicy policy, Path policyPath) throws IOException {
+    Configuration config = new Configuration();
+    FileSystem fs = FileSystem.get(policyPath.toUri(), config);
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs, config, policyPath, Text.class,
+        ClusteringPolicyWritable.class);
+    writer.append(new Text(), new ClusteringPolicyWritable(policy));
+    writer.close();
   }
 }

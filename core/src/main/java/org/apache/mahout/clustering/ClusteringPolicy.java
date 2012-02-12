@@ -16,13 +16,14 @@
  */
 package org.apache.mahout.clustering;
 
+import org.apache.hadoop.io.Writable;
 import org.apache.mahout.math.Vector;
 
 /**
  * A ClusteringPolicy captures the semantics of assignment of points to clusters
  * 
  */
-public interface ClusteringPolicy {
+public interface ClusteringPolicy extends Writable{
   
   /**
    * Return the index of the most appropriate model

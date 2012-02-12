@@ -28,8 +28,9 @@ public class CIMapper extends Mapper<WritableComparable<?>,VectorWritable,IntWri
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     String priorClustersPath = context.getConfiguration().get(ClusterIterator.PRIOR_PATH_KEY);
+    String policyPath = context.getConfiguration().get(ClusterIterator.POLICY_PATH_KEY);
     classifier = ClusterIterator.readClassifier(new Path(priorClustersPath));
-    policy = new KMeansClusteringPolicy();
+    policy = ClusterIterator.readPolicy(new Path(policyPath));
     super.setup(context);
   }
   
