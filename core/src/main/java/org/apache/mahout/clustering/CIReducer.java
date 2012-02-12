@@ -24,15 +24,15 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 
 public class CIReducer extends Reducer<IntWritable,ClusterWritable,IntWritable,ClusterWritable> {
-
+  
   @Override
-  protected void reduce(IntWritable key, Iterable<ClusterWritable> values,
-      Context context) throws IOException, InterruptedException {
-    Iterator<ClusterWritable> iter =values.iterator();
+  protected void reduce(IntWritable key, Iterable<ClusterWritable> values, Context context) throws IOException,
+      InterruptedException {
+    Iterator<ClusterWritable> iter = values.iterator();
     ClusterWritable first = null;
-    while(iter.hasNext()){
+    while (iter.hasNext()) {
       ClusterWritable cw = iter.next();
-      if (first == null){
+      if (first == null) {
         first = cw;
       } else {
         first.getValue().observe(cw.getValue());

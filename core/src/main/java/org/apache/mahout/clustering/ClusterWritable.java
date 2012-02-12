@@ -24,25 +24,25 @@ import org.apache.hadoop.io.Writable;
 import org.apache.mahout.classifier.sgd.PolymorphicWritable;
 
 public class ClusterWritable implements Writable {
-
+  
   private Cluster value;
-
+  
   public Cluster getValue() {
     return value;
   }
-
+  
   public void setValue(Cluster value) {
     this.value = value;
   }
-
+  
   @Override
   public void write(DataOutput out) throws IOException {
     PolymorphicWritable.write(out, value);
   }
-
+  
   @Override
   public void readFields(DataInput in) throws IOException {
     value = PolymorphicWritable.read(in, Cluster.class);
   }
-
+  
 }

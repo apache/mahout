@@ -12,17 +12,18 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.VectorWritable;
 
-public class CIMapper extends
-    Mapper<WritableComparable<?>,VectorWritable,IntWritable,ClusterWritable> {
+public class CIMapper extends Mapper<WritableComparable<?>,VectorWritable,IntWritable,ClusterWritable> {
   
   private ClusterClassifier classifier;
-
+  
   private ClusteringPolicy policy;
-
+  
   /*
    * (non-Javadoc)
    * 
-   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper .Context)
+   * @see
+   * org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper
+   * .Context)
    */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
@@ -31,12 +32,12 @@ public class CIMapper extends
     policy = new KMeansClusteringPolicy();
     super.setup(context);
   }
-
+  
   /*
    * (non-Javadoc)
    * 
-   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object,
-   * org.apache.hadoop.mapreduce.Mapper.Context)
+   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object,
+   * java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
    */
   @Override
   protected void map(WritableComparable<?> key, VectorWritable value, Context context) throws IOException,
@@ -48,11 +49,13 @@ public class CIMapper extends
       classifier.train(el.index(), value.get(), el.get());
     }
   }
-
+  
   /*
    * (non-Javadoc)
    * 
-   * @see org.apache.hadoop.mapreduce.Mapper#cleanup(org.apache.hadoop.mapreduce. Mapper.Context)
+   * @see
+   * org.apache.hadoop.mapreduce.Mapper#cleanup(org.apache.hadoop.mapreduce.
+   * Mapper.Context)
    */
   @Override
   protected void cleanup(Context context) throws IOException, InterruptedException {
@@ -64,5 +67,5 @@ public class CIMapper extends
     }
     super.cleanup(context);
   }
-
+  
 }

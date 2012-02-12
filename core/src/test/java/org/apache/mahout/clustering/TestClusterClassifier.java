@@ -39,7 +39,7 @@ import org.junit.Test;
 import com.google.common.collect.Lists;
 
 public final class TestClusterClassifier extends MahoutTestCase {
-
+  
   private static ClusterClassifier newDMClassifier() {
     List<Cluster> models = Lists.newArrayList();
     DistanceMeasure measure = new ManhattanDistanceMeasure();
@@ -48,7 +48,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     models.add(new DistanceMeasureCluster(new DenseVector(2).assign(-1), 2, measure));
     return new ClusterClassifier(models);
   }
-
+  
   private static ClusterClassifier newClusterClassifier() {
     List<Cluster> models = Lists.newArrayList();
     DistanceMeasure measure = new ManhattanDistanceMeasure();
@@ -57,7 +57,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     models.add(new org.apache.mahout.clustering.kmeans.Cluster(new DenseVector(2).assign(-1), 2, measure));
     return new ClusterClassifier(models);
   }
-
+  
   private static ClusterClassifier newSoftClusterClassifier() {
     List<Cluster> models = Lists.newArrayList();
     DistanceMeasure measure = new ManhattanDistanceMeasure();
@@ -66,7 +66,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     models.add(new SoftCluster(new DenseVector(2).assign(-1), 2, measure));
     return new ClusterClassifier(models);
   }
-
+  
   private static ClusterClassifier newGaussianClassifier() {
     List<Cluster> models = Lists.newArrayList();
     models.add(new GaussianCluster(new DenseVector(2).assign(1), new DenseVector(2).assign(1), 0));
@@ -74,13 +74,13 @@ public final class TestClusterClassifier extends MahoutTestCase {
     models.add(new GaussianCluster(new DenseVector(2).assign(-1), new DenseVector(2).assign(1), 2));
     return new ClusterClassifier(models);
   }
-
+  
   private ClusterClassifier writeAndRead(ClusterClassifier classifier) throws IOException {
     Path path = new Path(getTestTempDirPath(), "output");
     ClusterIterator.writeClassifier(classifier, path);
     return ClusterIterator.readClassifier(path);
   }
-
+  
   @Test
   public void testDMClusterClassification() {
     ClusterClassifier classifier = newDMClassifier();
@@ -89,7 +89,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     pdf = classifier.classify(new DenseVector(2).assign(2));
     assertEquals("[2,2]", "[0.493, 0.296, 0.211]", AbstractCluster.formatVector(pdf, null));
   }
-
+  
   @Test
   public void testCanopyClassification() {
     List<Cluster> models = Lists.newArrayList();
@@ -103,7 +103,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     pdf = classifier.classify(new DenseVector(2).assign(2));
     assertEquals("[2,2]", "[0.493, 0.296, 0.211]", AbstractCluster.formatVector(pdf, null));
   }
-
+  
   @Test
   public void testClusterClassification() {
     ClusterClassifier classifier = newClusterClassifier();
@@ -112,7 +112,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     pdf = classifier.classify(new DenseVector(2).assign(2));
     assertEquals("[2,2]", "[0.493, 0.296, 0.211]", AbstractCluster.formatVector(pdf, null));
   }
-
+  
   @Test(expected = UnsupportedOperationException.class)
   public void testMSCanopyClassification() {
     List<Cluster> models = Lists.newArrayList();
@@ -123,7 +123,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     ClusterClassifier classifier = new ClusterClassifier(models);
     classifier.classify(new DenseVector(2));
   }
-
+  
   @Test
   public void testSoftClusterClassification() {
     ClusterClassifier classifier = newSoftClusterClassifier();
@@ -132,7 +132,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     pdf = classifier.classify(new DenseVector(2).assign(2));
     assertEquals("[2,2]", "[0.735, 0.184, 0.082]", AbstractCluster.formatVector(pdf, null));
   }
-
+  
   @Test
   public void testGaussianClusterClassification() {
     ClusterClassifier classifier = newGaussianClassifier();
@@ -141,7 +141,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     pdf = classifier.classify(new DenseVector(2).assign(2));
     assertEquals("[2,2]", "[0.952, 0.047, 0.000]", AbstractCluster.formatVector(pdf, null));
   }
-
+  
   @Test
   public void testDMClassifierSerialization() throws Exception {
     ClusterClassifier classifier = newDMClassifier();
@@ -150,7 +150,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     assertEquals(classifier.getModels().get(0).getClass().getName(), classifierOut.getModels().get(0).getClass()
         .getName());
   }
-
+  
   @Test
   public void testClusterClassifierSerialization() throws Exception {
     ClusterClassifier classifier = newClusterClassifier();
@@ -159,7 +159,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     assertEquals(classifier.getModels().get(0).getClass().getName(), classifierOut.getModels().get(0).getClass()
         .getName());
   }
-
+  
   @Test
   public void testSoftClusterClassifierSerialization() throws Exception {
     ClusterClassifier classifier = newSoftClusterClassifier();
@@ -168,7 +168,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     assertEquals(classifier.getModels().get(0).getClass().getName(), classifierOut.getModels().get(0).getClass()
         .getName());
   }
-
+  
   @Test
   public void testGaussianClassifierSerialization() throws Exception {
     ClusterClassifier classifier = newGaussianClassifier();
@@ -177,7 +177,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     assertEquals(classifier.getModels().get(0).getClass().getName(), classifierOut.getModels().get(0).getClass()
         .getName());
   }
-
+  
   @Test
   public void testClusterIteratorKMeans() {
     List<Vector> data = TestKmeansClustering.getPoints(TestKmeansClustering.REFERENCE);
@@ -190,7 +190,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
       System.out.println(cluster.asFormatString(null));
     }
   }
-
+  
   @Test
   public void testClusterIteratorDirichlet() {
     List<Vector> data = TestKmeansClustering.getPoints(TestKmeansClustering.REFERENCE);
@@ -203,7 +203,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
       System.out.println(cluster.asFormatString(null));
     }
   }
-
+  
   @Test
   public void testSeqFileClusterIteratorKMeans() throws IOException {
     Path pointsPath = getTestTempDirPath("points");
@@ -224,7 +224,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     ClusteringPolicy policy = new KMeansClusteringPolicy();
     ClusterIterator iterator = new ClusterIterator(policy);
     iterator.iterateSeq(pointsPath, path, outPath, 5);
-
+    
     for (int i = 1; i <= 5; i++) {
       System.out.println("Classifier-" + i);
       ClusterClassifier posterior = ClusterIterator.readClassifier(new Path(outPath, "classifier-" + i));
@@ -232,10 +232,10 @@ public final class TestClusterClassifier extends MahoutTestCase {
       for (Cluster cluster : posterior.getModels()) {
         System.out.println(cluster.asFormatString(null));
       }
-
+      
     }
   }
-
+  
   @Test
   public void testMRFileClusterIteratorKMeans() throws IOException, InterruptedException, ClassNotFoundException {
     Path pointsPath = getTestTempDirPath("points");
@@ -256,7 +256,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     ClusteringPolicy policy = new KMeansClusteringPolicy();
     ClusterIterator iterator = new ClusterIterator(policy);
     iterator.iterateMR(pointsPath, path, outPath, 5);
-
+    
     for (int i = 1; i <= 5; i++) {
       System.out.println("Classifier-" + i);
       ClusterClassifier posterior = ClusterIterator.readClassifier(new Path(outPath, "clusters-" + i));
@@ -264,7 +264,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
       for (Cluster cluster : posterior.getModels()) {
         System.out.println(cluster.asFormatString(null));
       }
-
+      
     }
   }
 }
