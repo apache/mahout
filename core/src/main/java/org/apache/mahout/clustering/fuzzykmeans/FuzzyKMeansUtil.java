@@ -23,7 +23,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.clustering.canopy.Canopy;
-import org.apache.mahout.clustering.kmeans.Cluster;
+import org.apache.mahout.clustering.kmeans.Kluster;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
@@ -41,9 +41,9 @@ final class FuzzyKMeansUtil {
                                                     PathFilters.partFilter(),
                                                     new Configuration())) {
       Class<? extends Writable> valueClass = value.getClass();
-      if (valueClass.equals(Cluster.class)) {
+      if (valueClass.equals(Kluster.class)) {
         // get the cluster info
-        Cluster cluster = (Cluster) value;
+        Kluster cluster = (Kluster) value;
         clusters.add(new SoftCluster(cluster.getCenter(), cluster.getId(), cluster.getMeasure()));
       } else if (valueClass.equals(SoftCluster.class)) {
         // get the cluster info

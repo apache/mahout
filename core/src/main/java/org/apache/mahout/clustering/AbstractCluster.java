@@ -39,26 +39,67 @@ public abstract class AbstractCluster implements Cluster {
   // cluster persistent state
   private int id;
   
-  private long numPoints;
+  private long numObservations;
+  
+  private long totalObservations;
   
   private Vector center;
   
   private Vector radius;
   
+  // the observation statistics
+  private double s0;
+  
+  private Vector s1;
+  
+  private Vector s2;
+  
   protected AbstractCluster() {}
   
   protected AbstractCluster(Vector point, int id2) {
-    this.setNumPoints(0);
-    this.setCenter(new RandomAccessSparseVector(point));
-    this.setRadius(point.like());
+    setNumObservations(0);
+    setTotalObservations(0);
+    setCenter(new RandomAccessSparseVector(point));
+    setRadius(center.like());
+    setS0(0);
+    setS1(center.like());
+    setS2(center.like());
     this.id = id2;
   }
   
   protected AbstractCluster(Vector center2, Vector radius2, int id2) {
-    this.setNumPoints(0);
-    this.setCenter(new RandomAccessSparseVector(center2));
-    this.setRadius(new RandomAccessSparseVector(radius2));
+    setNumObservations(0);
+    setTotalObservations(0);
+    setCenter(new RandomAccessSparseVector(center2));
+    setRadius(new RandomAccessSparseVector(radius2));
+    setS0(0);
+    setS1(center.like());
+    setS2(center.like());
     this.id = id2;
+  }
+  
+  @Override
+  public void write(DataOutput out) throws IOException {
+    out.writeInt(id);
+    out.writeLong(getNumObservations());
+    out.writeLong(getTotalObservations());
+    VectorWritable.writeVector(out, getCenter());
+    VectorWritable.writeVector(out, getRadius());
+    out.writeDouble(s0);
+    VectorWritable.writeVector(out, s1);
+    VectorWritable.writeVector(out, s2);
+  }
+  
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    this.id = in.readInt();
+    this.setNumObservations(in.readLong());
+    this.setTotalObservations(in.readLong());
+    this.setCenter(VectorWritable.readVector(in));
+    this.setRadius(VectorWritable.readVector(in));
+    this.setS0(in.readDouble());
+    this.setS1(VectorWritable.readVector(in));
+    this.setS2(VectorWritable.readVector(in));
   }
   
   @Override
@@ -76,6 +117,11 @@ public abstract class AbstractCluster implements Cluster {
     // nothing to do
   }
   
+  @Override
+  public int getId() {
+    return id;
+  }
+
   /**
    * @param id
    *          the id to set
@@ -84,14 +130,31 @@ public abstract class AbstractCluster implements Cluster {
     this.id = id;
   }
   
+  public long getNumObservations() {
+    return numObservations;
+  }
+
   /**
    * @param l
    *          the numPoints to set
    */
-  protected void setNumPoints(long l) {
-    this.numPoints = l;
+  protected void setNumObservations(long l) {
+    this.numObservations = l;
   }
   
+  public long getTotalObservations() {
+    return totalObservations;
+  }
+
+  protected void setTotalObservations(long totalPoints) {
+    this.totalObservations = totalPoints;
+  }
+
+  @Override
+  public Vector getCenter() {
+    return center;
+  }
+
   /**
    * @param center
    *          the center to set
@@ -100,6 +163,11 @@ public abstract class AbstractCluster implements Cluster {
     this.center = center;
   }
   
+  @Override
+  public Vector getRadius() {
+    return radius;
+  }
+
   /**
    * @param radius
    *          the radius to set
@@ -108,13 +176,6 @@ public abstract class AbstractCluster implements Cluster {
     this.radius = radius;
   }
   
-  // the observation statistics, initialized by the first observation
-  private double s0;
-  
-  private Vector s1;
-  
-  private Vector s2;
-  
   /**
    * @return the s0
    */
@@ -122,6 +183,10 @@ public abstract class AbstractCluster implements Cluster {
     return s0;
   }
   
+  protected void setS0(double s0) {
+    this.s0 = s0;
+  }
+
   /**
    * @return the s1
    */
@@ -129,6 +194,10 @@ public abstract class AbstractCluster implements Cluster {
     return s1;
   }
   
+  protected void setS1(Vector s1) {
+    this.s1 = s1;
+  }
+
   /**
    * @return the s2
    */
@@ -136,6 +205,10 @@ public abstract class AbstractCluster implements Cluster {
     return s2;
   }
   
+  protected void setS2(Vector s2) {
+    this.s2 = s2;
+  }
+
   @Override
   public void observe(Model<VectorWritable> x) {
     AbstractCluster cl = (AbstractCluster) x;
@@ -203,10 +276,6 @@ public abstract class AbstractCluster implements Cluster {
     }
   }
   
-  @Override
-  public long getNumPoints() {
-    return numPoints;
-  }
   
   public ClusterObservations getObservations() {
     return new ClusterObservations(getS0(), getS1(), getS2());
@@ -217,41 +286,22 @@ public abstract class AbstractCluster implements Cluster {
     if (getS0() == 0) {
       return;
     }
-    setNumPoints((int) getS0());
+    setNumObservations((long) getS0());
+    setTotalObservations(getTotalObservations() + getNumObservations());
     setCenter(getS1().divide(getS0()));
     // compute the component stds
     if (getS0() > 1) {
-      setRadius(getS2().times(getS0()).minus(getS1().times(getS1()))
-          .assign(new SquareRootFunction()).divide(getS0()));
+      setRadius(getS2().times(getS0()).minus(getS1().times(getS1())).assign(new SquareRootFunction()).divide(getS0()));
     }
     setS0(0);
-    setS1(null);
-    setS2(null);
-  }
-  
-  @Override
-  public void readFields(DataInput in) throws IOException {
-    this.id = in.readInt();
-    this.setNumPoints(in.readLong());
-    VectorWritable temp = new VectorWritable();
-    temp.readFields(in);
-    this.setCenter(temp.get());
-    temp.readFields(in);
-    this.setRadius(temp.get());
-  }
-  
-  @Override
-  public void write(DataOutput out) throws IOException {
-    out.writeInt(id);
-    out.writeLong(getNumPoints());
-    VectorWritable.writeVector(out, getCenter());
-    VectorWritable.writeVector(out, getRadius());
+    setS1(center.like());
+    setS2(center.like());
   }
   
   @Override
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder(50);
-    buf.append(getIdentifier()).append("{n=").append(getNumPoints());
+    buf.append(getIdentifier()).append("{n=").append(getNumObservations());
     if (getCenter() != null) {
       buf.append(" c=").append(formatVector(getCenter(), bindings));
     }
@@ -263,21 +313,6 @@ public abstract class AbstractCluster implements Cluster {
   }
   
   public abstract String getIdentifier();
-  
-  @Override
-  public Vector getCenter() {
-    return center;
-  }
-  
-  @Override
-  public int getId() {
-    return id;
-  }
-  
-  @Override
-  public Vector getRadius() {
-    return radius;
-  }
   
   /**
    * Compute the centroid by averaging the pointTotals
@@ -334,25 +369,8 @@ public abstract class AbstractCluster implements Cluster {
   }
   
   @Override
-  public long count() {
-    return getNumPoints();
-  }
-  
-  @Override
   public boolean isConverged() {
     // Convergence has no meaning yet, perhaps in subclasses
     return false;
-  }
-
-  protected void setS0(double s0) {
-    this.s0 = s0;
-  }
-
-  protected void setS1(Vector s1) {
-    this.s1 = s1;
-  }
-
-  protected void setS2(Vector s2) {
-    this.s2 = s2;
   }
 }

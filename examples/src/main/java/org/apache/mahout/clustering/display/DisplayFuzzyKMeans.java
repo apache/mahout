@@ -66,7 +66,7 @@ public class DisplayFuzzyKMeans extends DisplayClustering {
     RandomUtils.useTestSeed();
     DisplayClustering.generateSamples();
     writeSampleData(samples);
-    boolean runClusterer = true;
+    boolean runClusterer = false;
     int maxIterations = 10;
     if (runClusterer) {
       runSequentialFuzzyKClusterer(conf, samples, output, measure, maxIterations);
@@ -94,12 +94,12 @@ public class DisplayFuzzyKMeans extends DisplayClustering {
     }
     ClusterClassifier prior = new ClusterClassifier(initialClusters);
     Path priorClassifier = new Path(output, "classifier-0");
-    writeClassifier(prior, conf, priorClassifier);
+    ClusterIterator.writeClassifier(prior, priorClassifier);
     
-    ClusteringPolicy policy = new FuzzyKMeansClusteringPolicy();
+    ClusteringPolicy policy = new FuzzyKMeansClusteringPolicy(1.1, 0.001);
     new ClusterIterator(policy).iterateSeq(samples, priorClassifier, output, maxIterations);
     for (int i = 1; i <= maxIterations; i++) {
-      ClusterClassifier posterior = readClassifier(conf, new Path(output, "classifier-" + i));
+      ClusterClassifier posterior = ClusterIterator.readClassifier(new Path(output, "classifier-" + i));
       CLUSTERS.add(posterior.getModels());
     }
   }

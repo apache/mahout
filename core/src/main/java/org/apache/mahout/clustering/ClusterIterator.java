@@ -78,6 +78,8 @@ public class ClusterIterator {
   public ClusterClassifier iterate(Iterable<Vector> data, ClusterClassifier classifier, int numIterations) {
     for (int iteration = 1; iteration <= numIterations; iteration++) {
       for (Vector vector : data) {
+        // update the policy based upon the prior
+        policy.update(classifier);
         // classification yields probabilities
         Vector probabilities = classifier.classify(vector);
         // policy selects weights for models given those probabilities
@@ -90,8 +92,6 @@ public class ClusterIterator {
       }
       // compute the posterior models
       classifier.close();
-      // update the policy
-      policy.update(classifier);
     }
     return classifier;
   }

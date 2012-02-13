@@ -280,10 +280,10 @@ public class CanopyDriver extends AbstractJob {
           log.debug("Writing Canopy:{} center:{} numPoints:{} radius:{}",
               new Object[] { canopy.getIdentifier(),
                   AbstractCluster.formatVector(canopy.getCenter(), null),
-                  canopy.getNumPoints(),
+                  canopy.getNumObservations(),
                   AbstractCluster.formatVector(canopy.getRadius(), null) });
         }
-        if (canopy.getNumPoints() > clusterFilter) {
+        if (canopy.getNumObservations() > clusterFilter) {
           writer.append(new Text(canopy.getIdentifier()), canopy);
         }
       }

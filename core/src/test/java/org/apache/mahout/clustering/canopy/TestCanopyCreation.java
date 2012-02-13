@@ -140,7 +140,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
       double[][] expectedCentroids = { { 1.5, 1.5 }, { 4.0, 4.0 },
           { 4.666666666666667, 4.6666666666666667 } };
       assertEquals("canopy points " + canopyIx, expectedNumPoints[canopyIx],
-          testCanopy.getNumPoints());
+          testCanopy.getNumObservations());
       double[] refCentroid = expectedCentroids[canopyIx];
       Vector testCentroid = testCanopy.computeCentroid();
       for (int pointIx = 0; pointIx < refCentroid.length; pointIx++) {
@@ -165,7 +165,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     for (int canopyIx = 0; canopyIx < referenceEuclidean.size(); canopyIx++) {
       Canopy testCanopy = referenceEuclidean.get(canopyIx);
       assertEquals("canopy points " + canopyIx, expectedNumPoints[canopyIx],
-          testCanopy.getNumPoints());
+          testCanopy.getNumObservations());
       double[] refCentroid = expectedCentroids[canopyIx];
       Vector testCentroid = testCanopy.computeCentroid();
       for (int pointIx = 0; pointIx < refCentroid.length; pointIx++) {

@@ -52,9 +52,9 @@ public final class TestClusterClassifier extends MahoutTestCase {
   private static ClusterClassifier newClusterClassifier() {
     List<Cluster> models = Lists.newArrayList();
     DistanceMeasure measure = new ManhattanDistanceMeasure();
-    models.add(new org.apache.mahout.clustering.kmeans.Cluster(new DenseVector(2).assign(1), 0, measure));
-    models.add(new org.apache.mahout.clustering.kmeans.Cluster(new DenseVector(2), 1, measure));
-    models.add(new org.apache.mahout.clustering.kmeans.Cluster(new DenseVector(2).assign(-1), 2, measure));
+    models.add(new org.apache.mahout.clustering.kmeans.Kluster(new DenseVector(2).assign(1), 0, measure));
+    models.add(new org.apache.mahout.clustering.kmeans.Kluster(new DenseVector(2), 1, measure));
+    models.add(new org.apache.mahout.clustering.kmeans.Kluster(new DenseVector(2).assign(-1), 2, measure));
     return new ClusterClassifier(models);
   }
   

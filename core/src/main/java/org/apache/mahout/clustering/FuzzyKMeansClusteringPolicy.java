@@ -28,8 +28,19 @@ import org.apache.mahout.math.Vector;
  * 
  */
 public class FuzzyKMeansClusteringPolicy implements ClusteringPolicy {
-    
+  
+  public FuzzyKMeansClusteringPolicy() {
+    super();
+  }
+  
   private double m;
+  
+  private double convergenceDelta;
+  
+  public FuzzyKMeansClusteringPolicy(double m, double convergenceDelta) {
+    this.m = m;
+  }
+  
   /*
    * (non-Javadoc)
    * 
@@ -41,29 +52,39 @@ public class FuzzyKMeansClusteringPolicy implements ClusteringPolicy {
   public void update(ClusterClassifier posterior) {
     // nothing to do here
   }
-
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.ClusteringPolicy#select(org.apache.mahout.math.Vector)
+  
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * org.apache.mahout.clustering.ClusteringPolicy#select(org.apache.mahout.
+   * math.Vector)
    */
   @Override
   public Vector select(Vector probabilities) {
     return probabilities;
   }
-
-  /* (non-Javadoc)
+  
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.hadoop.io.Writable#write(java.io.DataOutput)
    */
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeDouble(m);
+    out.writeDouble(convergenceDelta);
   }
-
-  /* (non-Javadoc)
+  
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.hadoop.io.Writable#readFields(java.io.DataInput)
    */
   @Override
   public void readFields(DataInput in) throws IOException {
     this.m = in.readDouble();
+    this.convergenceDelta = in.readDouble();
   }
   
 }

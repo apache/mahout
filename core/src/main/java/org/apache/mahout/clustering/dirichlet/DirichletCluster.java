@@ -34,16 +34,12 @@ public class DirichletCluster implements Cluster {
   
   private Cluster model; // the model for this iteration
   
-  private double totalCount; // total count of observations for the model
-  
   public DirichletCluster(Cluster model, double totalCount) {
     this.model = model;
-    this.totalCount = totalCount;
   }
   
   public DirichletCluster(Cluster model) {
     this.model = model;
-    this.totalCount = 0.0;
   }
   
   public DirichletCluster() {}
@@ -69,22 +65,15 @@ public class DirichletCluster implements Cluster {
   
   public void setModel(Cluster model) {
     this.model = model;
-    this.totalCount += model.count();
-  }
-  
-  public double getTotalCount() {
-    return totalCount;
   }
   
   @Override
   public void readFields(DataInput in) throws IOException {
-    this.totalCount = in.readDouble();
     this.model = readModel(in);
   }
   
   @Override
   public void write(DataOutput out) throws IOException {
-    out.writeDouble(totalCount);
     writeModel(out, model);
   }
   
@@ -107,7 +96,7 @@ public class DirichletCluster implements Cluster {
   
   @Override
   public String asFormatString(String[] bindings) {
-    return "DC-" + model.getId() + " total= " + (int) totalCount + " model= "
+    return "DC-" + model.getId() + " total= " + (int) getTotalObservations() + " model= "
         + model.asFormatString(bindings);
   }
   
@@ -122,11 +111,6 @@ public class DirichletCluster implements Cluster {
   }
   
   @Override
-  public long getNumPoints() {
-    return model.getNumPoints();
-  }
-  
-  @Override
   public Vector getRadius() {
     return model.getRadius();
   }
@@ -137,8 +121,8 @@ public class DirichletCluster implements Cluster {
   }
   
   @Override
-  public long count() {
-    return model.count();
+  public long getNumObservations() {
+    return model.getNumObservations();
   }
   
   @Override
@@ -159,7 +143,6 @@ public class DirichletCluster implements Cluster {
   @Override
   public void observe(VectorWritable x, double weight) {
     model.observe(x, weight);
-    totalCount += weight;
   }
   
   @Override
@@ -171,7 +154,11 @@ public class DirichletCluster implements Cluster {
   @Override
   public void observe(Model<VectorWritable> x) {
     model.observe(x);
-    totalCount += x.count();
+  }
+
+  @Override
+  public long getTotalObservations() {
+    return model.getTotalObservations();
   }
   
 }

@@ -80,18 +80,18 @@ public class DisplayKMeans extends DisplayClustering {
     List<Cluster> initialClusters = Lists.newArrayList();
     int id = 0;
     for (Vector point : points) {
-      initialClusters.add(new org.apache.mahout.clustering.kmeans.Cluster(
+      initialClusters.add(new org.apache.mahout.clustering.kmeans.Kluster(
           point, id++, measure));
     }
     ClusterClassifier prior = new ClusterClassifier(initialClusters);
     Path priorClassifier = new Path(output, "clusters-0");
-    writeClassifier(prior, conf, priorClassifier);
+    ClusterIterator.writeClassifier(prior, priorClassifier);
     
     int maxIter = 10;
     ClusteringPolicy policy = new KMeansClusteringPolicy();
     new ClusterIterator(policy).iterateSeq(samples, priorClassifier, output, maxIter);
     for (int i = 1; i <= maxIter; i++) {
-      ClusterClassifier posterior = readClassifier(conf, new Path(output, "classifier-" + i));
+      ClusterClassifier posterior = ClusterIterator.readClassifier(new Path(output, "classifier-" + i));
       CLUSTERS.add(posterior.getModels());
     }
   }

@@ -50,17 +50,17 @@ import org.apache.mahout.vectorizer.Weight;
 import org.junit.Test;
 
 public final class TestL1ModelClustering extends MahoutTestCase {
-
+  
   private class MapElement implements Comparable<MapElement> {
-
+    
     private final Double pdf;
     private final String doc;
-
+    
     MapElement(double pdf, String doc) {
       this.pdf = pdf;
       this.doc = doc;
     }
-
+    
     @Override
     // reverse compare to sort in reverse order
     public int compareTo(MapElement e) {
@@ -72,14 +72,14 @@ public final class TestL1ModelClustering extends MahoutTestCase {
         return 0;
       }
     }
-
+    
     @Override
     public int hashCode() {
       int hash = pdf == null ? 0 : pdf.hashCode();
       hash ^= doc == null ? 0 : doc.hashCode();
       return hash;
     }
-
+    
     @Override
     public boolean equals(Object other) {
       if (!(other instanceof MapElement)) {
@@ -91,38 +91,40 @@ public final class TestL1ModelClustering extends MahoutTestCase {
       }
       return doc == null ? otherElement.doc == null : doc.equals(otherElement.doc);
     }
-
+    
     @Override
     public String toString() {
       return pdf.toString() + ' ' + doc;
     }
-
+    
   }
-
-  private static final String[] DOCS = { "The quick red fox jumped over the lazy brown dogs.",
+  
+  private static final String[] DOCS = {"The quick red fox jumped over the lazy brown dogs.",
       "The quick brown fox jumped over the lazy red dogs.", "The quick red cat jumped over the lazy brown dogs.",
       "The quick brown cat jumped over the lazy red dogs.", "Mary had a little lamb whose fleece was white as snow.",
-      "Moby Dick is a story of a whale and a man obsessed.", "The robber wore a black fleece jacket and a baseball cap.",
-      "The English Springer Spaniel is the best of all dogs." };
-
-  private static final String[] DOCS2 = { "The quick red fox jumped over the lazy brown dogs.",
+      "Moby Dick is a story of a whale and a man obsessed.",
+      "The robber wore a black fleece jacket and a baseball cap.",
+      "The English Springer Spaniel is the best of all dogs."};
+  
+  private static final String[] DOCS2 = {"The quick red fox jumped over the lazy brown dogs.",
       "The quick brown fox jumped over the lazy red dogs.", "The quick red cat jumped over the lazy brown dogs.",
       "The quick brown cat jumped over the lazy red dogs.", "Mary had a little lamb whose fleece was white as snow.",
-      "Mary had a little goat whose fleece was white as snow.", "Mary had a little lamb whose fleece was black as tar.",
+      "Mary had a little goat whose fleece was white as snow.",
+      "Mary had a little lamb whose fleece was black as tar.",
       "Dick had a little goat whose fleece was white as snow.", "Moby Dick is a story of a whale and a man obsessed.",
       "Moby Bob is a story of a walrus and a man obsessed.", "Moby Dick is a story of a whale and a crazy man.",
-      "The robber wore a black fleece jacket and a baseball cap.", "The robber wore a red fleece jacket and a baseball cap.",
-      "The robber wore a white fleece jacket and a baseball cap.", "The English Springer Spaniel is the best of all dogs." };
-
+      "The robber wore a black fleece jacket and a baseball cap.",
+      "The robber wore a red fleece jacket and a baseball cap.",
+      "The robber wore a white fleece jacket and a baseball cap.",
+      "The English Springer Spaniel is the best of all dogs."};
+  
   private List<VectorWritable> sampleData;
-
+  
   private void getSampleData(String[] docs2) throws IOException {
     sampleData = Lists.newArrayList();
     RAMDirectory directory = new RAMDirectory();
-    IndexWriter writer = new IndexWriter(directory,
-                                         new StandardAnalyzer(Version.LUCENE_31),
-                                         true,
-                                         IndexWriter.MaxFieldLength.UNLIMITED);
+    IndexWriter writer = new IndexWriter(directory, new StandardAnalyzer(Version.LUCENE_34), true,
+        IndexWriter.MaxFieldLength.UNLIMITED);
     try {
       for (int i = 0; i < docs2.length; i++) {
         Document doc = new Document();
@@ -141,7 +143,7 @@ public final class TestL1ModelClustering extends MahoutTestCase {
     TermInfo termInfo = new CachedTermInfo(reader, "content", 1, 100);
     VectorMapper mapper = new TFDFMapper(reader, weight, termInfo);
     Iterable<Vector> iterable = new LuceneIterable(reader, "id", "content", mapper);
-
+    
     int i = 0;
     for (Vector vector : iterable) {
       assertNotNull(vector);
@@ -149,7 +151,7 @@ public final class TestL1ModelClustering extends MahoutTestCase {
       sampleData.add(new VectorWritable(vector));
     }
   }
-
+  
   private static String formatVector(Vector v) {
     StringBuilder buf = new StringBuilder();
     int nzero = 0;
@@ -176,19 +178,19 @@ public final class TestL1ModelClustering extends MahoutTestCase {
     buf.append(']');
     return buf.toString();
   }
-
+  
   private static void printSamples(Iterable<Cluster[]> result, int significant) {
     int row = 0;
     for (Cluster[] r : result) {
       int sig = 0;
       for (Cluster model : r) {
-        if (model.count() > significant) {
+        if (model.getNumObservations() > significant) {
           sig++;
         }
       }
       System.out.print("sample[" + row++ + "] (" + sig + ")= ");
       for (Cluster model : r) {
-        if (model.count() > significant) {
+        if (model.getNumObservations() > significant) {
           System.out.print(model.asFormatString(null) + ", ");
         }
       }
@@ -196,11 +198,11 @@ public final class TestL1ModelClustering extends MahoutTestCase {
     }
     System.out.println();
   }
-
+  
   private void printClusters(Model<VectorWritable>[] models, List<VectorWritable> samples, String[] docs) {
     for (int m = 0; m < models.length; m++) {
       Model<VectorWritable> model = models[m];
-      long count = model.count();
+      long count = model.getNumObservations();
       if (count == 0) {
         continue;
       }
@@ -224,57 +226,49 @@ public final class TestL1ModelClustering extends MahoutTestCase {
       }
     }
   }
-
+  
   @Test
   public void testDocs() throws Exception {
     getSampleData(DOCS);
-    DirichletClusterer dc =
-        new DirichletClusterer(sampleData, new GaussianClusterDistribution(sampleData.get(0)), 1.0, 15, 1, 0);
+    DirichletClusterer dc = new DirichletClusterer(sampleData, new GaussianClusterDistribution(sampleData.get(0)), 1.0,
+        15, 1, 0);
     List<Cluster[]> result = dc.cluster(10);
     assertNotNull(result);
     printSamples(result, 0);
     printClusters(result.get(result.size() - 1), sampleData, DOCS);
   }
-
+  
   @Test
   public void testDMDocs() throws Exception {
     getSampleData(DOCS);
     DirichletClusterer dc = new DirichletClusterer(sampleData,
-                                                   new DistanceMeasureClusterDistribution(sampleData.get(0)),
-                                                   1.0,
-                                                   15,
-                                                   1,
-                                                   0);
+        new DistanceMeasureClusterDistribution(sampleData.get(0)), 1.0, 15, 1, 0);
     List<Cluster[]> result = dc.cluster(10);
     assertNotNull(result);
     printSamples(result, 0);
     printClusters(result.get(result.size() - 1), sampleData, DOCS);
   }
-
+  
   @Test
   public void testDocs2() throws Exception {
     getSampleData(DOCS2);
-    DirichletClusterer dc =
-        new DirichletClusterer(sampleData, new GaussianClusterDistribution(sampleData.get(0)), 1.0, 15, 1, 0);
+    DirichletClusterer dc = new DirichletClusterer(sampleData, new GaussianClusterDistribution(sampleData.get(0)), 1.0,
+        15, 1, 0);
     List<Cluster[]> result = dc.cluster(10);
     assertNotNull(result);
     printSamples(result, 0);
     printClusters(result.get(result.size() - 1), sampleData, DOCS2);
   }
-
+  
   @Test
   public void testDMDocs2() throws Exception {
     getSampleData(DOCS2);
     DirichletClusterer dc = new DirichletClusterer(sampleData,
-                                                   new DistanceMeasureClusterDistribution(sampleData.get(0)),
-                                                   1.0,
-                                                   15,
-                                                   1,
-                                                   0);
+        new DistanceMeasureClusterDistribution(sampleData.get(0)), 1.0, 15, 1, 0);
     List<Cluster[]> result = dc.cluster(10);
     assertNotNull(result);
     printSamples(result, 0);
     printClusters(result.get(result.size() - 1), sampleData, DOCS2);
   }
-
+  
 }

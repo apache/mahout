@@ -21,7 +21,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.mahout.clustering.kmeans.Cluster;
+import org.apache.mahout.clustering.kmeans.Kluster;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -33,7 +33,7 @@ import org.apache.mahout.math.list.IntArrayList;
  * a point total which is the sum of all the points and is used to compute the
  * centroid when needed.
  */
-public class MeanShiftCanopy extends Cluster {
+public class MeanShiftCanopy extends Kluster {
 
   // TODO: this is still problematic from a scalability perspective, but how
   // else to encode membership?
@@ -152,7 +152,7 @@ public class MeanShiftCanopy extends Cluster {
     result.setId(this.getId());
     result.setCenter(this.getCenter());
     result.setRadius(this.getRadius());
-    result.setNumPoints(this.getNumPoints());
+    result.setNumObservations(this.getNumObservations());
     result.setBoundPoints(boundPoints);
     result.setMass(mass);
     return result;

@@ -70,11 +70,20 @@ public interface Model<O> extends Writable {
   void computeParameters();
   
   /**
-   * Return the number of observations that have been observed by this model
+   * Return the number of observations that this model has seen since its
+   * parameters were last computed
    * 
-   * @return an int
+   * @return a long
    */
-  long count();
+  long getNumObservations();
+  
+  /**
+   * Return the number of observations that this model has seen over its
+   * lifetime
+   * 
+   * @return a long
+   */
+  long getTotalObservations();
   
   /**
    * @return a sample of my posterior model

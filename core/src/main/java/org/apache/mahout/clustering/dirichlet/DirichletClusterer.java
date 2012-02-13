@@ -338,7 +338,7 @@ public class DirichletClusterer {
     throws IOException, InterruptedException {
     for (int i = 0; i < clusters.size(); i++) {
       double pdf = pi.get(i);
-      if (pdf > threshold && clusters.get(i).getTotalCount() > 0) {
+      if (pdf > threshold && clusters.get(i).getTotalObservations() > 0) {
         //System.out.println(i + ": " + ClusterBase.formatVector(vector.get(), null));
         context.write(new IntWritable(i), new WeightedVectorWritable(pdf, point.get()));
       }
@@ -379,7 +379,7 @@ public class DirichletClusterer {
     throws IOException {
     for (int i = 0; i < clusters.size(); i++) {
       double pdf = pi.get(i);
-      if (pdf > threshold && clusters.get(i).getTotalCount() > 0) {
+      if (pdf > threshold && clusters.get(i).getTotalObservations() > 0) {
         //System.out.println(i + ": " + ClusterBase.formatVector(vector.get(), null));
         writer.append(new IntWritable(i), new WeightedVectorWritable(pdf, vector.get()));
       }

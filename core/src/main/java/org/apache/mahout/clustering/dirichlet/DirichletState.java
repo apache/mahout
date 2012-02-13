@@ -100,7 +100,7 @@ public class DirichletState {
   private Vector computeTotalCounts() {
     Vector result = new DenseVector(numClusters);
     for (int i = 0; i < numClusters; i++) {
-      result.set(i, clusters.get(i).getTotalCount());
+      result.set(i, clusters.get(i).getTotalObservations());
     }
     return result;
   }

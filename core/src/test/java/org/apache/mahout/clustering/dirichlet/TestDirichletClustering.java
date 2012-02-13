@@ -76,7 +76,7 @@ public final class TestDirichletClustering extends MahoutTestCase {
     for (Cluster[] r : result) {
       System.out.print("sample[" + row++ + "]= ");
       for (Cluster model : r) {
-        if (model.count() > significant) {
+        if (model.getNumObservations() > significant) {
           System.out.print(model.asFormatString(null) + ", ");
         }
       }

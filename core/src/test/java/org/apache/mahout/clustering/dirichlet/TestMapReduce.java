@@ -53,13 +53,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 public final class TestMapReduce extends MahoutTestCase {
-
+  
   private Collection<VectorWritable> sampleData = Lists.newArrayList();
-
+  
   private FileSystem fs;
-
+  
   private Configuration conf;
-
+  
   private void addSample(double[] values) {
     Vector v = new DenseVector(2);
     for (int j = 0; j < values.length; j++) {
@@ -67,10 +67,10 @@ public final class TestMapReduce extends MahoutTestCase {
     }
     sampleData.add(new VectorWritable(v));
   }
-
+  
   /**
    * Generate random samples and add them to the sampleData
-   *
+   * 
    * @param num
    *          int number of samples to generate
    * @param mx
@@ -83,13 +83,14 @@ public final class TestMapReduce extends MahoutTestCase {
   private void generateSamples(int num, double mx, double my, double sd) {
     System.out.println("Generating " + num + " samples m=[" + mx + ", " + my + "] sd=" + sd);
     for (int i = 0; i < num; i++) {
-      addSample(new double[] { UncommonDistributions.rNorm(mx, sd), UncommonDistributions.rNorm(my, sd) });
+      addSample(new double[] {UncommonDistributions.rNorm(mx, sd), UncommonDistributions.rNorm(my, sd)});
     }
   }
-
+  
   /**
-   * Generate random samples with asymmetric standard deviations and add them to the sampleData
-   *
+   * Generate random samples with asymmetric standard deviations and add them to
+   * the sampleData
+   * 
    * @param num
    *          int number of samples to generate
    * @param mx
@@ -104,10 +105,10 @@ public final class TestMapReduce extends MahoutTestCase {
   private void generateAsymmetricSamples(int num, double mx, double my, double sdx, double sdy) {
     System.out.println("Generating " + num + " samples m=[" + mx + ", " + my + "] sd=[" + sdx + ", " + sdy + ']');
     for (int i = 0; i < num; i++) {
-      addSample(new double[] { UncommonDistributions.rNorm(mx, sdx), UncommonDistributions.rNorm(my, sdy) });
+      addSample(new double[] {UncommonDistributions.rNorm(mx, sdx), UncommonDistributions.rNorm(my, sdy)});
     }
   }
-
+  
   @Override
   @Before
   public void setUp() throws Exception {
@@ -115,19 +116,19 @@ public final class TestMapReduce extends MahoutTestCase {
     conf = new Configuration();
     fs = FileSystem.get(conf);
   }
-
+  
   /** Test the basic Mapper */
   @Test
   public void testMapper() throws Exception {
     generateSamples(10, 0, 0, 1);
-    DirichletState state =
-        new DirichletState(new GaussianClusterDistribution(new VectorWritable(new DenseVector(2))), 5, 1);
+    DirichletState state = new DirichletState(new GaussianClusterDistribution(new VectorWritable(new DenseVector(2))),
+        5, 1);
     DirichletMapper mapper = new DirichletMapper();
     mapper.setup(state);
-
-    RecordWriter<Text, VectorWritable> writer = new DummyRecordWriter<Text, VectorWritable>();
-    Mapper<WritableComparable<?>,VectorWritable,Text,VectorWritable>.Context context =
-        DummyRecordWriter.build(mapper, conf, writer);
+    
+    RecordWriter<Text,VectorWritable> writer = new DummyRecordWriter<Text,VectorWritable>();
+    Mapper<WritableComparable<?>,VectorWritable,Text,VectorWritable>.Context context = DummyRecordWriter.build(mapper,
+        conf, writer);
     for (VectorWritable v : sampleData) {
       mapper.map(null, v, context);
     }
@@ -135,7 +136,7 @@ public final class TestMapReduce extends MahoutTestCase {
     // this seed happens to produce two partitions, but they work
     // assertEquals("output size", 3, data.size());
   }
-
+  
   /** Test the basic Reducer */
   @Test
   public void testReducer() throws Exception {
@@ -143,31 +144,31 @@ public final class TestMapReduce extends MahoutTestCase {
     generateSamples(100, 2, 0, 1);
     generateSamples(100, 0, 2, 1);
     generateSamples(100, 2, 2, 1);
-    DirichletState state =
-        new DirichletState(new GaussianClusterDistribution(new VectorWritable(new DenseVector(2))), 20, 1);
+    DirichletState state = new DirichletState(new GaussianClusterDistribution(new VectorWritable(new DenseVector(2))),
+        20, 1);
     DirichletMapper mapper = new DirichletMapper();
     mapper.setup(state);
-
-    DummyRecordWriter<Text, VectorWritable> mapWriter = new DummyRecordWriter<Text, VectorWritable>();
-    Mapper<WritableComparable<?>,VectorWritable,Text,VectorWritable>.Context mapContext =
-        DummyRecordWriter.build(mapper, conf, mapWriter);
+    
+    DummyRecordWriter<Text,VectorWritable> mapWriter = new DummyRecordWriter<Text,VectorWritable>();
+    Mapper<WritableComparable<?>,VectorWritable,Text,VectorWritable>.Context mapContext = DummyRecordWriter.build(
+        mapper, conf, mapWriter);
     for (VectorWritable v : sampleData) {
       mapper.map(null, v, mapContext);
     }
-
+    
     DirichletReducer reducer = new DirichletReducer();
     reducer.setup(state);
-    RecordWriter<Text, DirichletCluster> reduceWriter = new DummyRecordWriter<Text, DirichletCluster>();
-    Reducer<Text, VectorWritable, Text, DirichletCluster>.Context reduceContext =
-        DummyRecordWriter.build(reducer, conf, reduceWriter, Text.class, VectorWritable.class);
+    RecordWriter<Text,DirichletCluster> reduceWriter = new DummyRecordWriter<Text,DirichletCluster>();
+    Reducer<Text,VectorWritable,Text,DirichletCluster>.Context reduceContext = DummyRecordWriter.build(reducer, conf,
+        reduceWriter, Text.class, VectorWritable.class);
     for (Text key : mapWriter.getKeys()) {
       reducer.reduce(new Text(key), mapWriter.getValue(key), reduceContext);
     }
-
+    
     Cluster[] newModels = reducer.getNewModels();
     state.update(newModels);
   }
-
+  
   /** Test the Mapper and Reducer in an iteration loop */
   @Test
   public void testMRIterations() throws Exception {
@@ -175,44 +176,44 @@ public final class TestMapReduce extends MahoutTestCase {
     generateSamples(100, 2, 0, 1);
     generateSamples(100, 0, 2, 1);
     generateSamples(100, 2, 2, 1);
-    DirichletState state =
-        new DirichletState(new GaussianClusterDistribution(new VectorWritable(new DenseVector(2))), 20, 1.0);
-
+    DirichletState state = new DirichletState(new GaussianClusterDistribution(new VectorWritable(new DenseVector(2))),
+        20, 1.0);
+    
     Collection<Model<VectorWritable>[]> models = Lists.newArrayList();
-
+    
     for (int iteration = 0; iteration < 10; iteration++) {
       DirichletMapper mapper = new DirichletMapper();
       mapper.setup(state);
-      DummyRecordWriter<Text, VectorWritable> mapWriter = new DummyRecordWriter<Text, VectorWritable>();
-      Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable>.Context mapContext =
-          DummyRecordWriter.build(mapper, conf, mapWriter);
+      DummyRecordWriter<Text,VectorWritable> mapWriter = new DummyRecordWriter<Text,VectorWritable>();
+      Mapper<WritableComparable<?>,VectorWritable,Text,VectorWritable>.Context mapContext = DummyRecordWriter.build(
+          mapper, conf, mapWriter);
       for (VectorWritable v : sampleData) {
         mapper.map(null, v, mapContext);
       }
-
+      
       DirichletReducer reducer = new DirichletReducer();
       reducer.setup(state);
-      RecordWriter<Text, DirichletCluster> reduceWriter = new DummyRecordWriter<Text, DirichletCluster>();
-      Reducer<Text,VectorWritable, Text,DirichletCluster>.Context reduceContext =
-          DummyRecordWriter.build(reducer, conf, reduceWriter, Text.class, VectorWritable.class);
+      RecordWriter<Text,DirichletCluster> reduceWriter = new DummyRecordWriter<Text,DirichletCluster>();
+      Reducer<Text,VectorWritable,Text,DirichletCluster>.Context reduceContext = DummyRecordWriter.build(reducer, conf,
+          reduceWriter, Text.class, VectorWritable.class);
       for (Text key : mapWriter.getKeys()) {
         reducer.reduce(new Text(key), mapWriter.getValue(key), reduceContext);
       }
-
+      
       Cluster[] newModels = reducer.getNewModels();
       state.update(newModels);
       models.add(newModels);
     }
     printModels(models, 0);
   }
-
+  
   private static void printModels(Iterable<Model<VectorWritable>[]> results, int significant) {
     int row = 0;
     for (Model<VectorWritable>[] r : results) {
       System.out.print("sample[" + row++ + "]= ");
       for (int k = 0; k < r.length; k++) {
         Model<VectorWritable> model = r[k];
-        if (model.count() > significant) {
+        if (model.getNumObservations() > significant) {
           System.out.print("m" + k + model.toString() + ", ");
         }
       }
@@ -220,15 +221,15 @@ public final class TestMapReduce extends MahoutTestCase {
     }
     System.out.println();
   }
-
+  
   private static void printResults(Iterable<List<DirichletCluster>> clusters, int significant) {
     int row = 0;
     for (List<DirichletCluster> r : clusters) {
       System.out.print("sample[" + row++ + "]= ");
       for (int k = 0; k < r.size(); k++) {
         Model<VectorWritable> model = r.get(k).getModel();
-        if (model.count() > significant) {
-          int total = (int) r.get(k).getTotalCount();
+        if (model.getNumObservations() > significant) {
+          int total = (int) r.get(k).getTotalObservations();
           System.out.print("m" + k + '(' + total + ')' + model.toString() + ", ");
         }
       }
@@ -236,7 +237,7 @@ public final class TestMapReduce extends MahoutTestCase {
     }
     System.out.println();
   }
-
+  
   /** Test the Mapper and Reducer using the Driver in sequential execution mode */
   @Test
   public void testDriverIterationsSeq() throws Exception {
@@ -245,22 +246,19 @@ public final class TestMapReduce extends MahoutTestCase {
     generateSamples(100, 0, 2, 0.3);
     generateSamples(100, 2, 2, 1);
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data.txt"), fs, conf);
-    // Now run the driver using the run() method. Others can use runJob() as before
+    // Now run the driver using the run() method. Others can use runJob() as
+    // before
     Integer maxIterations = 5;
-    DistributionDescription description =
-        new DistributionDescription(GaussianClusterDistribution.class.getName(),
-                                    DenseVector.class.getName(),
-                                    null,
-                                    2);
-    String[] args = { optKey(DefaultOptionCreator.INPUT_OPTION), getTestTempDirPath("input").toString(),
+    DistributionDescription description = new DistributionDescription(GaussianClusterDistribution.class.getName(),
+        DenseVector.class.getName(), null, 2);
+    String[] args = {optKey(DefaultOptionCreator.INPUT_OPTION), getTestTempDirPath("input").toString(),
         optKey(DefaultOptionCreator.OUTPUT_OPTION), getTestTempDirPath("output").toString(),
         optKey(DirichletDriver.MODEL_DISTRIBUTION_CLASS_OPTION), description.getModelFactory(),
         optKey(DirichletDriver.MODEL_PROTOTYPE_CLASS_OPTION), description.getModelPrototype(),
         optKey(DefaultOptionCreator.NUM_CLUSTERS_OPTION), "20", optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION),
         maxIterations.toString(), optKey(DirichletDriver.ALPHA_OPTION), "1.0",
-        optKey(DefaultOptionCreator.OVERWRITE_OPTION),
-        optKey(DefaultOptionCreator.CLUSTERING_OPTION), optKey(DefaultOptionCreator.METHOD_OPTION),
-        DefaultOptionCreator.SEQUENTIAL_METHOD };
+        optKey(DefaultOptionCreator.OVERWRITE_OPTION), optKey(DefaultOptionCreator.CLUSTERING_OPTION),
+        optKey(DefaultOptionCreator.METHOD_OPTION), DefaultOptionCreator.SEQUENTIAL_METHOD};
     DirichletDriver dirichletDriver = new DirichletDriver();
     dirichletDriver.setConf(conf);
     dirichletDriver.run(args);
@@ -276,7 +274,7 @@ public final class TestMapReduce extends MahoutTestCase {
     }
     printResults(clusters, 0);
   }
-
+  
   /** Test the Mapper and Reducer using the Driver in mapreduce mode */
   @Test
   public void testDriverIterationsMR() throws Exception {
@@ -285,21 +283,18 @@ public final class TestMapReduce extends MahoutTestCase {
     generateSamples(100, 0, 2, 0.3);
     generateSamples(100, 2, 2, 1);
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data.txt"), fs, conf);
-    // Now run the driver using the run() method. Others can use runJob() as before
+    // Now run the driver using the run() method. Others can use runJob() as
+    // before
     Integer maxIterations = 5;
-    DistributionDescription description =
-        new DistributionDescription(GaussianClusterDistribution.class.getName(),
-                                    DenseVector.class.getName(),
-                                    null,
-                                    2);
-    String[] args = { optKey(DefaultOptionCreator.INPUT_OPTION), getTestTempDirPath("input").toString(),
+    DistributionDescription description = new DistributionDescription(GaussianClusterDistribution.class.getName(),
+        DenseVector.class.getName(), null, 2);
+    String[] args = {optKey(DefaultOptionCreator.INPUT_OPTION), getTestTempDirPath("input").toString(),
         optKey(DefaultOptionCreator.OUTPUT_OPTION), getTestTempDirPath("output").toString(),
         optKey(DirichletDriver.MODEL_DISTRIBUTION_CLASS_OPTION), description.getModelFactory(),
         optKey(DirichletDriver.MODEL_PROTOTYPE_CLASS_OPTION), description.getModelPrototype(),
         optKey(DefaultOptionCreator.NUM_CLUSTERS_OPTION), "20", optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION),
         maxIterations.toString(), optKey(DirichletDriver.ALPHA_OPTION), "1.0",
-        optKey(DefaultOptionCreator.OVERWRITE_OPTION),
-        optKey(DefaultOptionCreator.CLUSTERING_OPTION)};
+        optKey(DefaultOptionCreator.OVERWRITE_OPTION), optKey(DefaultOptionCreator.CLUSTERING_OPTION)};
     ToolRunner.run(new Configuration(), new DirichletDriver(), args);
     // and inspect results
     Collection<List<DirichletCluster>> clusters = Lists.newArrayList();
@@ -313,30 +308,18 @@ public final class TestMapReduce extends MahoutTestCase {
     }
     printResults(clusters, 0);
   }
-
+  
   /** Test the Mapper and Reducer using the Driver */
   @Test
   public void testDriverMnRIterations() throws Exception {
     generate4Datasets();
     // Now run the driver
     int maxIterations = 3;
-    DistributionDescription description =
-        new DistributionDescription(GaussianClusterDistribution.class.getName(),
-                                    DenseVector.class.getName(),
-                                    null,
-                                    2);
+    DistributionDescription description = new DistributionDescription(GaussianClusterDistribution.class.getName(),
+        DenseVector.class.getName(), null, 2);
     Configuration conf = new Configuration();
-    DirichletDriver.run(conf,
-                        getTestTempDirPath("input"),
-                        getTestTempDirPath("output"),
-                        description,
-                        20,
-                        maxIterations,
-                        1.0,
-                        false,
-                        true,
-                        0,
-                        false);
+    DirichletDriver.run(conf, getTestTempDirPath("input"), getTestTempDirPath("output"), description, 20,
+        maxIterations, 1.0, false, true, 0, false);
     // and inspect results
     Collection<List<DirichletCluster>> clusters = Lists.newArrayList();
     conf.set(DirichletDriver.MODEL_DISTRIBUTION_KEY, description.toString());
@@ -348,28 +331,30 @@ public final class TestMapReduce extends MahoutTestCase {
     }
     printResults(clusters, 0);
   }
-
-  /** Test the Driver in sequential execution mode using MahalanobisDistanceMeasure */
+  
+  /**
+   * Test the Driver in sequential execution mode using
+   * MahalanobisDistanceMeasure
+   */
   @Test
   public void testDriverIterationsMahalanobisSeq() throws Exception {
     generateAsymmetricSamples(100, 0, 0, 0.5, 3.0);
     generateAsymmetricSamples(100, 0, 3, 0.3, 4.0);
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data.txt"), fs, conf);
-    // Now run the driver using the run() method. Others can use runJob() as before
+    // Now run the driver using the run() method. Others can use runJob() as
+    // before
     MahalanobisDistanceMeasure measure = new MahalanobisDistanceMeasure();
-    DistributionDescription description =
-        new DistributionDescription(DistanceMeasureClusterDistribution.class.getName(),
-                                    DenseVector.class.getName(),
-                                    MahalanobisDistanceMeasure.class.getName(),
-                                    2);
-
-    Vector meanVector = new DenseVector(new double[] { 0.0, 0.0 });
+    DistributionDescription description = new DistributionDescription(
+        DistanceMeasureClusterDistribution.class.getName(), DenseVector.class.getName(),
+        MahalanobisDistanceMeasure.class.getName(), 2);
+    
+    Vector meanVector = new DenseVector(new double[] {0.0, 0.0});
     measure.setMeanVector(meanVector);
-    Matrix m= new DenseMatrix(new double [][] {{0.5, 0.0}, {0.0, 4.0}});
+    Matrix m = new DenseMatrix(new double[][] { {0.5, 0.0}, {0.0, 4.0}});
     measure.setCovarianceMatrix(m);
-
-    Path inverseCovarianceFile =
-        new Path(getTestTempDirPath("mahalanobis"), "MahalanobisDistanceMeasureInverseCovarianceFile");
+    
+    Path inverseCovarianceFile = new Path(getTestTempDirPath("mahalanobis"),
+        "MahalanobisDistanceMeasureInverseCovarianceFile");
     conf.set("MahalanobisDistanceMeasure.inverseCovarianceFile", inverseCovarianceFile.toString());
     FileSystem fs = FileSystem.get(inverseCovarianceFile.toUri(), conf);
     MatrixWritable inverseCovarianceMatrix = new MatrixWritable(measure.getInverseCovarianceMatrix());
@@ -379,7 +364,7 @@ public final class TestMapReduce extends MahoutTestCase {
     } finally {
       Closeables.closeQuietly(out);
     }
-
+    
     Path meanVectorFile = new Path(getTestTempDirPath("mahalanobis"), "MahalanobisDistanceMeasureMeanVectorFile");
     conf.set("MahalanobisDistanceMeasure.meanVectorFile", meanVectorFile.toString());
     fs = FileSystem.get(meanVectorFile.toUri(), conf);
@@ -390,21 +375,20 @@ public final class TestMapReduce extends MahoutTestCase {
     } finally {
       Closeables.closeQuietly(out);
     }
-
+    
     conf.set("MahalanobisDistanceMeasure.maxtrixClass", MatrixWritable.class.getName());
     conf.set("MahalanobisDistanceMeasure.vectorClass", VectorWritable.class.getName());
-
+    
     Integer maxIterations = 5;
-    String[] args = { optKey(DefaultOptionCreator.INPUT_OPTION), getTestTempDirPath("input").toString(),
+    String[] args = {optKey(DefaultOptionCreator.INPUT_OPTION), getTestTempDirPath("input").toString(),
         optKey(DefaultOptionCreator.OUTPUT_OPTION), getTestTempDirPath("output").toString(),
         optKey(DirichletDriver.MODEL_DISTRIBUTION_CLASS_OPTION), description.getModelFactory(),
         optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION), description.getDistanceMeasure(),
         optKey(DirichletDriver.MODEL_PROTOTYPE_CLASS_OPTION), description.getModelPrototype(),
         optKey(DefaultOptionCreator.NUM_CLUSTERS_OPTION), "20", optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION),
         maxIterations.toString(), optKey(DirichletDriver.ALPHA_OPTION), "1.0",
-        optKey(DefaultOptionCreator.OVERWRITE_OPTION),
-        optKey(DefaultOptionCreator.CLUSTERING_OPTION), optKey(DefaultOptionCreator.METHOD_OPTION),
-        DefaultOptionCreator.SEQUENTIAL_METHOD };
+        optKey(DefaultOptionCreator.OVERWRITE_OPTION), optKey(DefaultOptionCreator.CLUSTERING_OPTION),
+        optKey(DefaultOptionCreator.METHOD_OPTION), DefaultOptionCreator.SEQUENTIAL_METHOD};
     DirichletDriver dirichletDriver = new DirichletDriver();
     dirichletDriver.setConf(conf);
     dirichletDriver.run(args);
@@ -420,29 +404,28 @@ public final class TestMapReduce extends MahoutTestCase {
     }
     printResults(clusters, 0);
   }
-
+  
   /** Test the Mapper and Reducer using the Driver in mapreduce mode */
   @Test
   public void testDriverIterationsMahalanobisMR() throws Exception {
     generateAsymmetricSamples(100, 0, 0, 0.5, 3.0);
     generateAsymmetricSamples(100, 0, 3, 0.3, 4.0);
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data.txt"), fs, conf);
-    // Now run the driver using the run() method. Others can use runJob() as before
-
+    // Now run the driver using the run() method. Others can use runJob() as
+    // before
+    
     MahalanobisDistanceMeasure measure = new MahalanobisDistanceMeasure();
-    DistributionDescription description =
-        new DistributionDescription(DistanceMeasureClusterDistribution.class.getName(),
-                                    DenseVector.class.getName(),
-                                    MahalanobisDistanceMeasure.class.getName(),
-                                    2);
-
-    Vector meanVector = new DenseVector(new double[]{0.0, 0.0});
+    DistributionDescription description = new DistributionDescription(
+        DistanceMeasureClusterDistribution.class.getName(), DenseVector.class.getName(),
+        MahalanobisDistanceMeasure.class.getName(), 2);
+    
+    Vector meanVector = new DenseVector(new double[] {0.0, 0.0});
     measure.setMeanVector(meanVector);
-    Matrix m = new DenseMatrix(new double [][] {{0.5, 0.0}, {0.0, 4.0}});
+    Matrix m = new DenseMatrix(new double[][] { {0.5, 0.0}, {0.0, 4.0}});
     measure.setCovarianceMatrix(m);
-
-    Path inverseCovarianceFile =
-        new Path(getTestTempDirPath("mahalanobis"), "MahalanobisDistanceMeasureInverseCovarianceFile");
+    
+    Path inverseCovarianceFile = new Path(getTestTempDirPath("mahalanobis"),
+        "MahalanobisDistanceMeasureInverseCovarianceFile");
     conf.set("MahalanobisDistanceMeasure.inverseCovarianceFile", inverseCovarianceFile.toString());
     FileSystem fs = FileSystem.get(inverseCovarianceFile.toUri(), conf);
     MatrixWritable inverseCovarianceMatrix = new MatrixWritable(measure.getInverseCovarianceMatrix());
@@ -452,7 +435,7 @@ public final class TestMapReduce extends MahoutTestCase {
     } finally {
       Closeables.closeQuietly(out);
     }
-
+    
     Path meanVectorFile = new Path(getTestTempDirPath("mahalanobis"), "MahalanobisDistanceMeasureMeanVectorFile");
     conf.set("MahalanobisDistanceMeasure.meanVectorFile", meanVectorFile.toString());
     fs = FileSystem.get(meanVectorFile.toUri(), conf);
@@ -463,20 +446,19 @@ public final class TestMapReduce extends MahoutTestCase {
     } finally {
       Closeables.closeQuietly(out);
     }
-
+    
     conf.set("MahalanobisDistanceMeasure.maxtrixClass", MatrixWritable.class.getName());
     conf.set("MahalanobisDistanceMeasure.vectorClass", VectorWritable.class.getName());
-
+    
     Integer maxIterations = 5;
-    String[] args = { optKey(DefaultOptionCreator.INPUT_OPTION), getTestTempDirPath("input").toString(),
+    String[] args = {optKey(DefaultOptionCreator.INPUT_OPTION), getTestTempDirPath("input").toString(),
         optKey(DefaultOptionCreator.OUTPUT_OPTION), getTestTempDirPath("output").toString(),
         optKey(DirichletDriver.MODEL_DISTRIBUTION_CLASS_OPTION), description.getModelFactory(),
         optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION), description.getDistanceMeasure(),
         optKey(DirichletDriver.MODEL_PROTOTYPE_CLASS_OPTION), description.getModelPrototype(),
         optKey(DefaultOptionCreator.NUM_CLUSTERS_OPTION), "20", optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION),
         maxIterations.toString(), optKey(DirichletDriver.ALPHA_OPTION), "1.0",
-        optKey(DefaultOptionCreator.OVERWRITE_OPTION),
-        optKey(DefaultOptionCreator.CLUSTERING_OPTION)};
+        optKey(DefaultOptionCreator.OVERWRITE_OPTION), optKey(DefaultOptionCreator.CLUSTERING_OPTION)};
     Tool dirichletDriver = new DirichletDriver();
     dirichletDriver.setConf(conf);
     ToolRunner.run(conf, dirichletDriver, args);
@@ -492,7 +474,7 @@ public final class TestMapReduce extends MahoutTestCase {
     }
     printResults(clusters, 0);
   }
-
+  
   private void generate4Datasets() throws IOException {
     generateSamples(500, 0, 0, 0.5);
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data1.txt"), fs, conf);
@@ -506,5 +488,5 @@ public final class TestMapReduce extends MahoutTestCase {
     generateSamples(500, 2, 2, 1);
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data4.txt"), fs, conf);
   }
-
+  
 }

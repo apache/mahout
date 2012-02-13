@@ -387,7 +387,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
                       new Object[] {
                           cluster.getId(),
                           AbstractCluster.formatVector(cluster.getCenter(), null),
-                          cluster.getNumPoints(),
+                          cluster.getNumObservations(),
                           AbstractCluster.formatVector(cluster.getRadius(), null),
                           clustersOut.getName()
                       });

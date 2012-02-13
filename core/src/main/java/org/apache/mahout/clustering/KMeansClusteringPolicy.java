@@ -30,6 +30,17 @@ import org.apache.mahout.math.Vector;
  */
 public class KMeansClusteringPolicy implements ClusteringPolicy {
   
+  public KMeansClusteringPolicy() {
+    super();
+  }
+
+  public KMeansClusteringPolicy(double convergenceDelta) {
+    super();
+    this.convergenceDelta = convergenceDelta;
+  }
+
+  private double convergenceDelta;
+  
   /* (non-Javadoc)
    * @see org.apache.mahout.clustering.ClusteringPolicy#select(org.apache.mahout.math.Vector)
    */
@@ -54,7 +65,7 @@ public class KMeansClusteringPolicy implements ClusteringPolicy {
    */
   @Override
   public void write(DataOutput out) throws IOException {
-    // nothing to do here
+    out.writeDouble(convergenceDelta);
   }
 
   /* (non-Javadoc)
@@ -62,7 +73,7 @@ public class KMeansClusteringPolicy implements ClusteringPolicy {
    */
   @Override
   public void readFields(DataInput in) throws IOException {
-    // nothing to do here
+    this.convergenceDelta = in.readDouble();
   }
   
 }

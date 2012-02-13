@@ -24,13 +24,13 @@ import org.apache.mahout.clustering.DistanceMeasureCluster;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 
-public class Cluster extends DistanceMeasureCluster {
+public class Kluster extends DistanceMeasureCluster {
 
   /** Has the centroid converged with the center? */
   private boolean converged;
 
   /** For (de)serialization as a Writable */
-  public Cluster() {
+  public Kluster() {
   }
 
   /**
@@ -40,7 +40,7 @@ public class Cluster extends DistanceMeasureCluster {
    * @param clusterId the int cluster id
    * @param measure a DistanceMeasure
    */
-  public Cluster(Vector center, int clusterId, DistanceMeasure measure) {
+  public Kluster(Vector center, int clusterId, DistanceMeasure measure) {
     super(center, clusterId, measure);
   }
 
@@ -51,7 +51,7 @@ public class Cluster extends DistanceMeasureCluster {
    *          the Cluster
    * @return the String representation of the Cluster
    */
-  public static String formatCluster(Cluster cluster) {
+  public static String formatCluster(Kluster cluster) {
     return cluster.getIdentifier() + ": " + cluster.computeCentroid().asFormatString();
   }
 

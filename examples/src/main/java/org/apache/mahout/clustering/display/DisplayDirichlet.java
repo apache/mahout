@@ -22,8 +22,6 @@ import java.awt.Graphics2D;
 import java.io.IOException;
 import java.util.List;
 
-import com.google.common.collect.Lists;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusterClassifier;
@@ -39,6 +37,8 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
 
 public class DisplayDirichlet extends DisplayClustering {
   
@@ -64,7 +64,7 @@ public class DisplayDirichlet extends DisplayClustering {
       models.append("sample[").append(row++).append("]= ");
       for (int k = 0; k < r.length; k++) {
         Cluster model = r[k];
-        if (model.count() > significant) {
+        if (model.getNumObservations() > significant) {
           models.append('m').append(k).append(model.asFormatString(null)).append(", ");
         }
       }
@@ -80,7 +80,7 @@ public class DisplayDirichlet extends DisplayClustering {
                                         double alpha0,
                                         int thin,
                                         int burnin) throws IOException {
-    boolean runClusterer = true;
+    boolean runClusterer = false;
     if (runClusterer) {
       runSequentialDirichletClusterer(modelDist, numClusters, numIterations, alpha0, thin, burnin);
     } else {
@@ -99,13 +99,12 @@ public class DisplayDirichlet extends DisplayClustering {
     Path samples = new Path("samples");
     Path output = new Path("output");
     Path priorClassifier = new Path(output, "clusters-0");
-    Configuration conf = new Configuration();
-    writeClassifier(prior, conf, priorClassifier);
+    ClusterIterator.writeClassifier(prior, priorClassifier);
     
     ClusteringPolicy policy = new DirichletClusteringPolicy(numClusters, numIterations);
     new ClusterIterator(policy).iterateSeq(samples, priorClassifier, output, numIterations);
     for (int i = 1; i <= numIterations; i++) {
-      ClusterClassifier posterior = readClassifier(conf, new Path(output, "classifier-" + i));
+      ClusterClassifier posterior = ClusterIterator.readClassifier(new Path(output, "classifier-" + i));
       List<Cluster> clusters = Lists.newArrayList();
       for (Cluster cluster : posterior.getModels()) {
         if (isSignificant(cluster)) {

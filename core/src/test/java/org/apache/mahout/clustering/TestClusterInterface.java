@@ -75,7 +75,7 @@ public final class TestClusterInterface extends MahoutTestCase {
   public void testClusterAsFormatString() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
-    Cluster cluster = new org.apache.mahout.clustering.kmeans.Cluster(m, 123, measure);
+    Cluster cluster = new org.apache.mahout.clustering.kmeans.Kluster(m, 123, measure);
     String formatString = cluster.asFormatString(null);
     assertEquals("CL-123{n=0 c=[1.100, 2.200, 3.300] r=[]}", formatString);
   }
@@ -85,7 +85,7 @@ public final class TestClusterInterface extends MahoutTestCase {
     double[] d = { 1.1, 0.0, 3.3 };
     Vector m = new SequentialAccessSparseVector(3);
     m.assign(d);
-    Cluster cluster = new org.apache.mahout.clustering.kmeans.Cluster(m, 123, measure);
+    Cluster cluster = new org.apache.mahout.clustering.kmeans.Kluster(m, 123, measure);
     String formatString = cluster.asFormatString(null);
     assertEquals("CL-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
   }
@@ -94,7 +94,7 @@ public final class TestClusterInterface extends MahoutTestCase {
   public void testClusterAsFormatStringWithBindings() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
-    Cluster cluster = new org.apache.mahout.clustering.kmeans.Cluster(m, 123, measure);
+    Cluster cluster = new org.apache.mahout.clustering.kmeans.Kluster(m, 123, measure);
     String[] bindings = { "fee", null, "foo" };
     String formatString = cluster.asFormatString(bindings);
     assertEquals("CL-123{n=0 c=[fee:1.100, 1:2.200, foo:3.300] r=[]}", formatString);
@@ -105,7 +105,7 @@ public final class TestClusterInterface extends MahoutTestCase {
     double[] d = { 1.1, 0.0, 3.3 };
     Vector m = new SequentialAccessSparseVector(3);
     m.assign(d);
-    Cluster cluster = new org.apache.mahout.clustering.kmeans.Cluster(m, 123, measure);
+    Cluster cluster = new org.apache.mahout.clustering.kmeans.Kluster(m, 123, measure);
     String formatString = cluster.asFormatString(null);
     assertEquals("CL-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
   }

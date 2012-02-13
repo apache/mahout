@@ -17,12 +17,12 @@
 
 package org.apache.mahout.clustering.fuzzykmeans;
 
-import org.apache.mahout.clustering.kmeans.Cluster;
+import org.apache.mahout.clustering.kmeans.Kluster;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-public class SoftCluster extends Cluster {
+public class SoftCluster extends Kluster {
   
   // For Writable
   public SoftCluster() {}

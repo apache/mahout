@@ -33,9 +33,8 @@ public class DirichletClusteringPolicy implements ClusteringPolicy {
   }
 
   public DirichletClusteringPolicy(int k, double alpha0) {
-    this.totalCounts = new DenseVector(k);
     this.alpha0 = alpha0;
-    this.mixture = UncommonDistributions.rDirichlet(totalCounts, alpha0);
+    this.mixture = UncommonDistributions.rDirichlet(new DenseVector(k), alpha0);
   }
   
   // The mixture is the Dirichlet distribution of the total Cluster counts over
@@ -44,9 +43,6 @@ public class DirichletClusteringPolicy implements ClusteringPolicy {
   
   // Alpha_0 primes the Dirichlet distribution
   private double alpha0;
-  
-  // Total observed over all time
-  private Vector totalCounts;
   
   /* (non-Javadoc)
    * @see org.apache.mahout.clustering.ClusteringPolicy#select(org.apache.mahout.math.Vector)
@@ -65,9 +61,9 @@ public class DirichletClusteringPolicy implements ClusteringPolicy {
    */
   @Override
   public void update(ClusterClassifier prior) {
-    for (int i = 0; i < totalCounts.size(); i++) {
-      long nObserved = prior.getModels().get(i).getNumPoints();
-      totalCounts.set(i, totalCounts.get(i) + nObserved);
+    Vector totalCounts = new DenseVector(prior.getModels().size());
+    for (int i = 0; i < prior.getModels().size(); i++) {
+      totalCounts.set(i, prior.getModels().get(i).getTotalObservations());
     }
     mixture = UncommonDistributions.rDirichlet(totalCounts, alpha0);
   }
@@ -78,7 +74,6 @@ public class DirichletClusteringPolicy implements ClusteringPolicy {
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeDouble(alpha0);
-    VectorWritable.writeVector(out, totalCounts);
     VectorWritable.writeVector(out, mixture);
   }
 
@@ -88,7 +83,6 @@ public class DirichletClusteringPolicy implements ClusteringPolicy {
   @Override
   public void readFields(DataInput in) throws IOException {
     this.alpha0 = in.readDouble();
-    this.totalCounts = VectorWritable.readVector(in);
     this.mixture = VectorWritable.readVector(in);
   }
 }

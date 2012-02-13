@@ -29,7 +29,7 @@ import org.apache.hadoop.io.SequenceFile.Writer;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.ClusterObservations;
 import org.apache.mahout.clustering.WeightedVectorWritable;
-import org.apache.mahout.clustering.kmeans.Cluster;
+import org.apache.mahout.clustering.kmeans.Kluster;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.DenseVector;
@@ -186,7 +186,7 @@ public class FuzzyKMeansClusterer {
    * 
    * @return if the cluster is converged
    */
-  public boolean computeConvergence(Cluster cluster) {
+  public boolean computeConvergence(Kluster cluster) {
     return cluster.computeConvergence(measure, convergenceDelta);
   }
 

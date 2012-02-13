@@ -238,8 +238,8 @@ public final class TestMeanShift extends MahoutTestCase {
           .asFormatString(), canopy.getCenter().asFormatString());
       assertEquals("bound points", ref.getBoundPoints().toList().size(), canopy
           .getBoundPoints().toList().size());
-      assertEquals("num bound points", ref.getNumPoints(), canopy
-          .getNumPoints());
+      assertEquals("num bound points", ref.getNumObservations(), canopy
+          .getNumObservations());
     }
   }
 
@@ -326,8 +326,8 @@ public final class TestMeanShift extends MahoutTestCase {
       assertEquals("values", 1, values.size());
       MeanShiftCanopy reducerCanopy = values.get(0);
       assertEquals("ids", refCanopy.getId(), reducerCanopy.getId());
-      long refNumPoints = refCanopy.getNumPoints();
-      long reducerNumPoints = reducerCanopy.getNumPoints();
+      long refNumPoints = refCanopy.getNumObservations();
+      long reducerNumPoints = reducerCanopy.getNumObservations();
       assertEquals("numPoints", refNumPoints, reducerNumPoints);
       String refCenter = refCanopy.getCenter().asFormatString();
       String reducerCenter = reducerCanopy.getCenter().asFormatString();
@@ -335,8 +335,8 @@ public final class TestMeanShift extends MahoutTestCase {
           reducerCenter);
       assertEquals("bound points", refCanopy.getBoundPoints().toList().size(),
           reducerCanopy.getBoundPoints().toList().size());
-      assertEquals("num bound points", refCanopy.getNumPoints(), reducerCanopy
-          .getNumPoints());
+      assertEquals("num bound points", refCanopy.getNumObservations(), reducerCanopy
+          .getNumObservations());
     }
   }
 
@@ -527,7 +527,6 @@ public final class TestMeanShift extends MahoutTestCase {
         true, conf);
     while (iterator.hasNext()) {
       MeanShiftCanopy canopy = (MeanShiftCanopy) iterator.next();
-      assertTrue(canopy.getCenter() instanceof DenseVector);
       assertEquals(1, canopy.getBoundPoints().size());
     }
   }

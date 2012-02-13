@@ -41,10 +41,8 @@ import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
-import org.apache.mahout.clustering.ClusterClassifier;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
 import org.apache.mahout.common.Pair;
@@ -63,45 +61,44 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 
 public class DisplayClustering extends Frame {
-
+  
   private static final Logger log = LoggerFactory.getLogger(DisplayClustering.class);
-
+  
   protected static final int DS = 72; // default scale = 72 pixels per inch
-
+  
   protected static final int SIZE = 8; // screen size in inches
-
+  
   private static final Collection<Vector> SAMPLE_PARAMS = Lists.newArrayList();
-
+  
   protected static final List<VectorWritable> SAMPLE_DATA = Lists.newArrayList();
-
+  
   protected static final List<List<Cluster>> CLUSTERS = Lists.newArrayList();
-
-  static final Color[] COLORS = {
-    Color.red, Color.orange, Color.yellow, Color.green, Color.blue, Color.magenta, Color.lightGray
-  };
-
+  
+  static final Color[] COLORS = {Color.red, Color.orange, Color.yellow, Color.green, Color.blue, Color.magenta,
+      Color.lightGray};
+  
   protected static final double T1 = 3.0;
-
+  
   protected static final double T2 = 2.8;
   
   static double significance = 0.05;
-
+  
   protected static int res; // screen resolution
-
+  
   public DisplayClustering() {
     initialize();
     this.setTitle("Sample Data");
   }
-
+  
   public void initialize() {
     // Get screen resolution
     res = Toolkit.getDefaultToolkit().getScreenResolution();
-
+    
     // Set Frame size in inches
     this.setSize(SIZE * res, SIZE * res);
     this.setVisible(true);
     this.setTitle("Asymmetric Sample Data");
-
+    
     // Window listener to terminate program.
     this.addWindowListener(new WindowAdapter() {
       @Override
@@ -110,13 +107,13 @@ public class DisplayClustering extends Frame {
       }
     });
   }
-
+  
   public static void main(String[] args) throws Exception {
     RandomUtils.useTestSeed();
     generateSamples();
     new DisplayClustering();
   }
-
+  
   // Override the paint() method
   @Override
   public void paint(Graphics g) {
@@ -125,7 +122,7 @@ public class DisplayClustering extends Frame {
     plotSampleParameters(g2);
     plotClusters(g2);
   }
-
+  
   protected static void plotClusters(Graphics2D g2) {
     int cx = CLUSTERS.size() - 1;
     for (List<Cluster> clusters : CLUSTERS) {
@@ -136,7 +133,7 @@ public class DisplayClustering extends Frame {
       }
     }
   }
-
+  
   protected static void plotSampleParameters(Graphics2D g2) {
     Vector v = new DenseVector(2);
     Vector dv = new DenseVector(2);
@@ -149,17 +146,17 @@ public class DisplayClustering extends Frame {
       plotEllipse(g2, v, dv);
     }
   }
-
+  
   protected static void plotSampleData(Graphics2D g2) {
     double sx = (double) res / DS;
     g2.setTransform(AffineTransform.getScaleInstance(sx, sx));
-
+    
     // plot the axes
     g2.setColor(Color.BLACK);
     Vector dv = new DenseVector(2).assign(SIZE / 2.0);
     plotRectangle(g2, new DenseVector(2).assign(2), dv);
     plotRectangle(g2, new DenseVector(2).assign(-2), dv);
-
+    
     // plot the sample data
     g2.setColor(Color.DARK_GRAY);
     dv.assign(0.03);
@@ -173,13 +170,13 @@ public class DisplayClustering extends Frame {
    * membership, rather than drawing ellipses.
    * 
    * As of commit, this method is used only by K-means spectral clustering.
-   * Since the cluster assignments are set within the eigenspace of the data,
-   * it is not inherent that the original data cluster as they would in K-means:
+   * Since the cluster assignments are set within the eigenspace of the data, it
+   * is not inherent that the original data cluster as they would in K-means:
    * that is, as symmetric gaussian mixtures.
    * 
-   * Since Spectral K-Means uses K-Means to cluster the eigenspace data, the
-   * raw output is not directly usable. Rather, the cluster assignments from the
-   * raw output need to be transferred back to the original data. As such, this
+   * Since Spectral K-Means uses K-Means to cluster the eigenspace data, the raw
+   * output is not directly usable. Rather, the cluster assignments from the raw
+   * output need to be transferred back to the original data. As such, this
    * method will read the SequenceFile cluster results of K-means and transfer
    * the cluster assignments to the original data, coloring them appropriately.
    * 
@@ -187,44 +184,48 @@ public class DisplayClustering extends Frame {
    * @param data
    */
   protected static void plotClusteredSampleData(Graphics2D g2, Path data) {
-  	double sx = (double) res / DS;
-  	g2.setTransform(AffineTransform.getScaleInstance(sx, sx));
-  	
+    double sx = (double) res / DS;
+    g2.setTransform(AffineTransform.getScaleInstance(sx, sx));
+    
     g2.setColor(Color.BLACK);
     Vector dv = new DenseVector(2).assign(SIZE / 2.0);
     plotRectangle(g2, new DenseVector(2).assign(2), dv);
     plotRectangle(g2, new DenseVector(2).assign(-2), dv);
-
+    
     // plot the sample data, colored according to the cluster they belong to
     dv.assign(0.03);
     
     Path clusteredPointsPath = new Path(data, "clusteredPoints");
     Path inputPath = new Path(clusteredPointsPath, "part-m-00000");
-    HashMap<Integer, Color> colors = new HashMap<Integer, Color>();
+    HashMap<Integer,Color> colors = new HashMap<Integer,Color>();
     int point = 0;
-    for (Pair<IntWritable,WeightedVectorWritable> record 
-         : new SequenceFileIterable<IntWritable, WeightedVectorWritable>(inputPath, new Configuration())) {
-    	int clusterId = record.getFirst().get();
-    	VectorWritable v = SAMPLE_DATA.get(point++);
-    	Integer key = clusterId;
-    	if (!colors.containsKey(key)){
-    		colors.put(key, COLORS[Math.min(COLORS.length - 1, colors.size())]);
-    	}
-    	plotClusteredRectangle(g2, v.get(), dv, colors.get(key));
+    for (Pair<IntWritable,WeightedVectorWritable> record : new SequenceFileIterable<IntWritable,WeightedVectorWritable>(
+        inputPath, new Configuration())) {
+      int clusterId = record.getFirst().get();
+      VectorWritable v = SAMPLE_DATA.get(point++);
+      Integer key = clusterId;
+      if (!colors.containsKey(key)) {
+        colors.put(key, COLORS[Math.min(COLORS.length - 1, colors.size())]);
+      }
+      plotClusteredRectangle(g2, v.get(), dv, colors.get(key));
     }
   }
   
   /**
-   * Identical to plotRectangle(), but with the option of setting the color
-   * of the rectangle's stroke.
+   * Identical to plotRectangle(), but with the option of setting the color of
+   * the rectangle's stroke.
    * 
-   * NOTE: This should probably be refactored with plotRectangle() since most
-   * of the code here is direct copy/paste from that method.
+   * NOTE: This should probably be refactored with plotRectangle() since most of
+   * the code here is direct copy/paste from that method.
    * 
-   * @param g2 A Graphics2D context.
-   * @param v A vector for the rectangle's center.
-   * @param dv A vector for the rectangle's dimensions.
-   * @param color The color of the rectangle's stroke.
+   * @param g2
+   *          A Graphics2D context.
+   * @param v
+   *          A vector for the rectangle's center.
+   * @param dv
+   *          A vector for the rectangle's dimensions.
+   * @param color
+   *          The color of the rectangle's stroke.
    */
   protected static void plotClusteredRectangle(Graphics2D g2, Vector v, Vector dv, Color color) {
     double[] flip = {1, -1};
@@ -234,11 +235,11 @@ public class DisplayClustering extends Frame {
     double x = v2.get(0) + h;
     double y = v2.get(1) + h;
     
-  	g2.setStroke(new BasicStroke(1));
-  	g2.setColor(color);
+    g2.setStroke(new BasicStroke(1));
+    g2.setColor(color);
     g2.draw(new Rectangle2D.Double(x * DS, y * DS, dv.get(0) * DS, dv.get(1) * DS));
   }
-
+  
   /**
    * Draw a rectangle on the graphics context
    * 
@@ -258,7 +259,7 @@ public class DisplayClustering extends Frame {
     double y = v2.get(1) + h;
     g2.draw(new Rectangle2D.Double(x * DS, y * DS, dv.get(0) * DS, dv.get(1) * DS));
   }
-
+  
   /**
    * Draw an ellipse on the graphics context
    * 
@@ -278,19 +279,19 @@ public class DisplayClustering extends Frame {
     double y = v2.get(1) + h;
     g2.draw(new Ellipse2D.Double(x * DS, y * DS, dv.get(0) * DS, dv.get(1) * DS));
   }
-
+  
   protected static void generateSamples() {
     generateSamples(500, 1, 1, 3);
     generateSamples(300, 1, 0, 0.5);
     generateSamples(300, 0, 2, 0.1);
   }
-
+  
   protected static void generate2dSamples() {
     generate2dSamples(500, 1, 1, 3, 1);
     generate2dSamples(300, 1, 0, 0.5, 1);
     generate2dSamples(300, 0, 2, 0.1, 0.5);
   }
-
+  
   /**
    * Generate random samples and add them to the sampleData
    * 
@@ -308,11 +309,11 @@ public class DisplayClustering extends Frame {
     SAMPLE_PARAMS.add(new DenseVector(params));
     log.info("Generating {} samples m=[{}, {}] sd={}", new Object[] {num, mx, my, sd});
     for (int i = 0; i < num; i++) {
-      SAMPLE_DATA.add(new VectorWritable(new DenseVector(
-          new double[] {UncommonDistributions.rNorm(mx, sd), UncommonDistributions.rNorm(my, sd)})));
+      SAMPLE_DATA.add(new VectorWritable(new DenseVector(new double[] {UncommonDistributions.rNorm(mx, sd),
+          UncommonDistributions.rNorm(my, sd)})));
     }
   }
-
+  
   protected static void writeSampleData(Path output) throws IOException {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
@@ -320,24 +321,22 @@ public class DisplayClustering extends Frame {
     try {
       int i = 0;
       for (VectorWritable vw : SAMPLE_DATA) {
-        writer.append(new Text("sample_"  + i++), vw);
+        writer.append(new Text("sample_" + i++), vw);
       }
     } finally {
       Closeables.closeQuietly(writer);
     }
   }
-
+  
   protected static List<Cluster> readClusters(Path clustersIn) {
     List<Cluster> clusters = Lists.newArrayList();
     Configuration conf = new Configuration();
-    for (Cluster value :
-         new SequenceFileDirValueIterable<Cluster>(clustersIn, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
-      log.info("Reading Cluster:{} center:{} numPoints:{} radius:{}", new Object[] {
-          value.getId(),
-          AbstractCluster.formatVector(value.getCenter(), null),
-          value.getNumPoints(),
-          AbstractCluster.formatVector(value.getRadius(), null)
-      });
+    for (Cluster value : new SequenceFileDirValueIterable<Cluster>(clustersIn, PathType.LIST,
+        PathFilters.logsCRCFilter(), conf)) {
+      log.info(
+          "Reading Cluster:{} center:{} numPoints:{} radius:{}",
+          new Object[] {value.getId(), AbstractCluster.formatVector(value.getCenter(), null),
+              value.getNumObservations(), AbstractCluster.formatVector(value.getRadius(), null)});
       clusters.add(value);
     }
     return clusters;
@@ -351,7 +350,7 @@ public class DisplayClustering extends Frame {
       CLUSTERS.add(clusters);
     }
   }
-
+  
   protected static void loadClusters(Path output, PathFilter filter) throws IOException {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
@@ -360,7 +359,7 @@ public class DisplayClustering extends Frame {
       CLUSTERS.add(clusters);
     }
   }
-
+  
   /**
    * Generate random samples and add them to the sampleData
    * 
@@ -380,36 +379,12 @@ public class DisplayClustering extends Frame {
     SAMPLE_PARAMS.add(new DenseVector(params));
     log.info("Generating {} samples m=[{}, {}] sd=[{}, {}]", new Object[] {num, mx, my, sdx, sdy});
     for (int i = 0; i < num; i++) {
-      SAMPLE_DATA.add(new VectorWritable(new DenseVector(
-          new double[] {UncommonDistributions.rNorm(mx, sdx), UncommonDistributions.rNorm(my, sdy)})));
+      SAMPLE_DATA.add(new VectorWritable(new DenseVector(new double[] {UncommonDistributions.rNorm(mx, sdx),
+          UncommonDistributions.rNorm(my, sdy)})));
     }
   }
-
+  
   protected static boolean isSignificant(Cluster cluster) {
-    return (double) cluster.getNumPoints() / SAMPLE_DATA.size() > significance;
-  }
-
-  protected static ClusterClassifier readClassifier(Configuration config, Path path) throws IOException {
-    SequenceFile.Reader reader = new SequenceFile.Reader(FileSystem.get(config), path, config);
-    try {
-      Writable key = new Text();
-      ClusterClassifier classifierOut = new ClusterClassifier();
-      reader.next(key, classifierOut);
-      return classifierOut;
-    } finally {
-      Closeables.closeQuietly(reader);
-    }
-  }
-
-  protected static void writeClassifier(ClusterClassifier classifier, Configuration config, Path path)
-    throws IOException {
-    SequenceFile.Writer writer =
-        new SequenceFile.Writer(FileSystem.get(config), config, path, Text.class, ClusterClassifier.class);
-    try {
-      Writable key = new Text("test");
-      writer.append(key, classifier);
-    } finally {
-      Closeables.closeQuietly(writer);
-    }
+    return (double) cluster.getNumObservations() / SAMPLE_DATA.size() > significance;
   }
 }

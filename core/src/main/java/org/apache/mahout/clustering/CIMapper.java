@@ -31,6 +31,7 @@ public class CIMapper extends Mapper<WritableComparable<?>,VectorWritable,IntWri
     String policyPath = context.getConfiguration().get(ClusterIterator.POLICY_PATH_KEY);
     classifier = ClusterIterator.readClassifier(new Path(priorClustersPath));
     policy = ClusterIterator.readPolicy(new Path(policyPath));
+    policy.update(classifier);
     super.setup(context);
   }
   

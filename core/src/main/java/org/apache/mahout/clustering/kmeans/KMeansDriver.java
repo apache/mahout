@@ -250,7 +250,7 @@ public class KMeansDriver extends AbstractJob {
     throws IOException {
 
     KMeansClusterer clusterer = new KMeansClusterer(measure);
-    Collection<Cluster> clusters = Lists.newArrayList();
+    Collection<Kluster> clusters = Lists.newArrayList();
 
     KMeansUtil.configureWithClusterInfo(conf, clustersIn, clusters);
     if (clusters.isEmpty()) {
@@ -274,15 +274,15 @@ public class KMeansDriver extends AbstractJob {
                                                            conf,
                                                            new Path(clustersOut, "part-r-00000"),
                                                            Text.class,
-                                                           Cluster.class);
+                                                           Kluster.class);
       try {
-        for (Cluster cluster : clusters) {
+        for (Kluster cluster : clusters) {
           if (log.isDebugEnabled()) {
             log.debug("Writing Cluster:{} center:{} numPoints:{} radius:{} to: {}",
                       new Object[] {
                           cluster.getId(),
                           AbstractCluster.formatVector(cluster.getCenter(), null),
-                          cluster.getNumPoints(),
+                          cluster.getNumObservations(),
                           AbstractCluster.formatVector(cluster.getRadius(), null), clustersOut.getName()
                       });
           }
@@ -356,7 +356,7 @@ public class KMeansDriver extends AbstractJob {
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(ClusterObservations.class);
     job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(Cluster.class);
+    job.setOutputValueClass(Kluster.class);
 
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
@@ -388,9 +388,9 @@ public class KMeansDriver extends AbstractJob {
    */
   private static boolean isConverged(Path filePath, Configuration conf, FileSystem fs) throws IOException {
     for (FileStatus part : fs.listStatus(filePath, PathFilters.partFilter())) {
-      SequenceFileValueIterator<Cluster> iterator = new SequenceFileValueIterator<Cluster>(part.getPath(), true, conf);
+      SequenceFileValueIterator<Kluster> iterator = new SequenceFileValueIterator<Kluster>(part.getPath(), true, conf);
       while (iterator.hasNext()) {
-        Cluster value = iterator.next();
+        Kluster value = iterator.next();
         if (!value.isConverged()) {
           Closeables.closeQuietly(iterator);
           return false;
@@ -442,7 +442,7 @@ public class KMeansDriver extends AbstractJob {
                                      DistanceMeasure measure) throws IOException {
 
     KMeansClusterer clusterer = new KMeansClusterer(measure);
-    Collection<Cluster> clusters = Lists.newArrayList();
+    Collection<Kluster> clusters = Lists.newArrayList();
     KMeansUtil.configureWithClusterInfo(conf, clustersIn, clusters);
     if (clusters.isEmpty()) {
       throw new IllegalStateException("Clusters is empty!");
