@@ -17,6 +17,7 @@
 
 package org.apache.mahout.clustering.syntheticcontrol.meanshift;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
@@ -73,7 +74,7 @@ public final class Job extends AbstractJob {
     addOption(DefaultOptionCreator.t2Option().create());
     addOption(DefaultOptionCreator.clusteringOption().create());
     
-    Map<String,String> argMap = parseArguments(args);
+    Map<String,List<String>> argMap = parseArguments(args);
     if (argMap == null) {
       return -1;
     }

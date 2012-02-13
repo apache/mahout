@@ -34,6 +34,7 @@ import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Map;
 
 public class RowIdJob extends AbstractJob {
@@ -45,7 +46,7 @@ public class RowIdJob extends AbstractJob {
     addInputOption();
     addOutputOption();
 
-    Map<String,String> parsedArgs = parseArguments(args);
+    Map<String,List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }

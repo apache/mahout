@@ -18,6 +18,7 @@
 package org.apache.mahout.clustering.syntheticcontrol.fuzzykmeans;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.cli2.builder.ArgumentBuilder;
@@ -79,7 +80,7 @@ public final class Job extends AbstractJob {
     addOption(M_OPTION, M_OPTION,
         "coefficient normalization factor, must be greater than 1", true);
 
-    Map<String, String> argMap = parseArguments(args);
+    Map<String, List<String>> argMap = parseArguments(args);
     if (argMap == null) {
       return -1;
     }

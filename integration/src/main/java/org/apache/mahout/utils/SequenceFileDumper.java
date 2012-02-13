@@ -50,33 +50,27 @@ public final class SequenceFileDumper extends AbstractJob {
   @Override
   public int run(String[] args) throws Exception {
 
-    addOption("seqFile", "s", "The Sequence File to read in", false);
-    addOption("seqDirectory", "d", "A directory containing sequence files to read", false);
-    addOption(DefaultOptionCreator.outputOption().create());
+    addInputOption();
+    addOutputOption();
     addOption("substring", "b", "The number of chars to print out per value", false);
     addOption(buildOption("count", "c", "Report the count only", false, false, null));
     addOption("numItems", "n", "Output at most <n> key value pairs", false);
     addOption(buildOption("facets", "fa", "Output the counts per key.  Note, if there are a lot of unique keys, this can take up a fair amount of memory", false, false, null));
     addOption(buildOption("quiet", "q", "Print only file contents.", false, false, null));
 
-    if (parseArguments(args) == null) {
+    if (parseArguments(args, false, true) == null) {
       return -1;
     }
 
     Path[] pathArr= null;
     Configuration conf = new Configuration();
-
-    if (getOption("seqFile") != null) {
+    Path input = getInputPath();
+    FileSystem fs = input.getFileSystem(conf);
+    if (fs.getFileStatus(input).isDir()) {
+      pathArr = FileUtil.stat2Paths(fs.listStatus(input, new OutputFilesFilter()));
+    } else {
       pathArr = new Path[1];
-      pathArr[0] = new Path(getOption("seqFile"));
-    } else if (getOption("seqDirectory") != null) {
-      Path dirPath = new Path(getOption("seqDirectory"));
-      FileSystem fs = dirPath.getFileSystem(conf);
-      pathArr = FileUtil.stat2Paths(fs.listStatus(dirPath, new OutputFilesFilter()));
-    }
-    if (pathArr == null) {
-      System.out.println("Must specify --seqFile (-s) or --seqDirectory (-d)!");      
-      return -1;
+      pathArr[0] = input;
     }
 
 
@@ -91,8 +85,9 @@ public final class SequenceFileDumper extends AbstractJob {
     }
     try {
       for (Path path : pathArr) {
-        if (!hasOption("quiet"))
+        if (!hasOption("quiet")){
           writer.append("Input Path: ").append(String.valueOf(path)).append('\n');
+        }
 
         int sub = Integer.MAX_VALUE;
         if (hasOption("substring")) {

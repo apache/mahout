@@ -17,6 +17,7 @@
 
 package org.apache.mahout.clustering.syntheticcontrol.dirichlet;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.cli2.builder.ArgumentBuilder;
@@ -87,7 +88,7 @@ public final class Job extends AbstractJob {
     addOption(DefaultOptionCreator.emitMostLikelyOption().create());
     addOption(DefaultOptionCreator.thresholdOption().create());
 
-    Map<String, String> argMap = parseArguments(args);
+    Map<String, List<String>> argMap = parseArguments(args);
     if (argMap == null) {
       return -1;
     }

@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
@@ -55,11 +56,11 @@ public final class MatrixDumper extends AbstractJob {
     
     addInputOption();
     addOption("output", "o", "Output path", null); // AbstractJob output feature requires param
-    Map<String, String> parsedArgs = parseArguments(args);
+    Map<String, List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
-    String outputFile = parsedArgs.containsKey("--output") ? parsedArgs.get("--output") : null;
+    String outputFile = hasOption("output") ? getOption("output") : null;
     exportCSV(getInputPath(), outputFile, false);
     return 0;
   }

@@ -18,6 +18,7 @@
 package org.apache.mahout.clustering.syntheticcontrol.kmeans;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
@@ -74,7 +75,7 @@ public final class Job extends AbstractJob {
     addOption(DefaultOptionCreator.maxIterationsOption().create());
     addOption(DefaultOptionCreator.overwriteOption().create());
 
-    Map<String, String> argMap = parseArguments(args);
+    Map<String, List<String>> argMap = parseArguments(args);
     if (argMap == null) {
       return -1;
     }

@@ -94,17 +94,17 @@ public abstract class AbstractJob extends Configured implements Tool {
   private Option outputOption;
 
   /** input path, populated by {@link #parseArguments(String[])} */
-  private Path inputPath;
-  private File inputFile;//the input represented as a file
+  protected Path inputPath;
+  protected File inputFile;//the input represented as a file
 
   /** output path, populated by {@link #parseArguments(String[]) */
-  private Path outputPath;
-  private File outputFile;//the output represented as a file
+  protected Path outputPath;
+  protected File outputFile;//the output represented as a file
 
   /** temp path, populated by {@link #parseArguments(String[]) */
-  private Path tempPath;
+  protected Path tempPath;
 
-  private Map<String, List<String>> argMap;
+  protected Map<String, List<String>> argMap;
 
   /** internal list of options that have been added */
   private final List<Option> options;
@@ -308,10 +308,22 @@ public abstract class AbstractJob extends Configured implements Tool {
    *  argument values can be retrieved using {@code get(optionName)}. The
    *  names used for keys are the option name parameter prefixed by '--'.
    *
+   * @see #parseArguments(String[], boolean, boolean)  -- passes in false, false for the optional args.
    *
    */
   public Map<String, List<String>> parseArguments(String[] args) throws IOException {
+    return parseArguments(args, false, false);
+  }
 
+  /**
+   *
+   * @param args  The args to parse
+   * @param inputOptional if false, then the input option, if set, need not be present.  If true and input is an option and there is no input, then throw an error
+   * @param outputOptional if false, then the output option, if set, need not be present.  If true and output is an option and there is no output, then throw an error
+   * @return the args parsed into a map.
+   * @throws IOException
+   */
+  public Map<String, List<String>> parseArguments(String[] args, boolean inputOptional, boolean outputOptional) throws IOException{
     Option helpOpt = addOption(DefaultOptionCreator.helpOption());
     addOption("tempDir", null, "Intermediate output directory", "temp");
     addOption("startPhase", null, "First phase to run", "0");
@@ -344,7 +356,7 @@ public abstract class AbstractJob extends Configured implements Tool {
     }
 
     try {
-      parseDirectories(cmdLine);
+      parseDirectories(cmdLine, inputOptional, outputOptional);
     } catch (IllegalArgumentException e) {
       log.error(e.getMessage());
       CommandLineUtil.printHelpWithGenericOptions(group);
@@ -424,7 +436,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    *   specified or outputOption is present and neither {@code --output}
    *   nor {@code -Dmapred.output.dir} are specified.
    */
-  protected void parseDirectories(CommandLine cmdLine) {
+  protected void parseDirectories(CommandLine cmdLine, boolean inputOptional, boolean outputOptional) {
 
     Configuration conf = getConf();
 
@@ -444,9 +456,9 @@ public abstract class AbstractJob extends Configured implements Tool {
       this.outputPath = new Path(conf.get("mapred.output.dir"));
     }
 
-    Preconditions.checkArgument(inputOption == null || inputPath != null,
+    Preconditions.checkArgument(inputOptional == true || inputOption == null || inputPath != null,
         "No input specified or -Dmapred.input.dir must be provided to specify input directory");
-    Preconditions.checkArgument(outputOption == null || outputPath != null,
+    Preconditions.checkArgument(outputOptional == true || outputOption == null || outputPath != null,
         "No output specified:  or -Dmapred.output.dir must be provided to specify output directory");
   }
 

@@ -87,18 +87,18 @@ public final class MailToPrefsDriver extends AbstractJob {
     addOption("refs", "r", "The position in the input text (value) where the reference ids are located, starting from zero (0).", "1");
     addOption(buildOption("useCounts", "u", "If set, then use the number of times the user has interacted with a thread as an indication of their preference.  Otherwise, use boolean preferences.",
             false, false, "true"));
-    Map<String, String> parsedArgs = parseArguments(args);
+    Map<String, List<String>> parsedArgs = parseArguments(args);
 
     Path input = getInputPath();
     Path output = getOutputPath();
-    int chunkSize = Integer.parseInt(parsedArgs.get("--chunkSize"));
-    String separator = parsedArgs.get("--separator");
+    int chunkSize = Integer.parseInt(getOption("chunkSize"));
+    String separator = getOption("separator");
     Configuration conf = getConf();
     if (conf == null) {
       setConf(new Configuration());
       conf = getConf();
     }
-    boolean useCounts = hasOption("--useCounts");
+    boolean useCounts = hasOption("useCounts");
     AtomicInteger currentPhase = new AtomicInteger();
     int[] msgDim = new int[1];
     //TODO: mod this to not do so many passes over the data.  Dictionary creation could probably be a chain mapper
@@ -170,8 +170,8 @@ public final class MailToPrefsDriver extends AbstractJob {
       conf.set(EmailUtility.MSG_ID_DIMENSION, String.valueOf(msgDim[0]));
       conf.set(EmailUtility.FROM_PREFIX, "fromIds-dictionary-");
       conf.set(EmailUtility.MSG_IDS_PREFIX, "msgIds-dictionary-");
-      conf.set(EmailUtility.FROM_INDEX, parsedArgs.get("--from"));
-      conf.set(EmailUtility.REFS_INDEX, parsedArgs.get("--refs"));
+      conf.set(EmailUtility.FROM_INDEX, getOption("from"));
+      conf.set(EmailUtility.REFS_INDEX, getOption("refs"));
       conf.set(EmailUtility.SEPARATOR, separator);
       conf.set(MailToRecReducer.USE_COUNTS_PREFERENCE, String.valueOf(useCounts));
       int j = 0;

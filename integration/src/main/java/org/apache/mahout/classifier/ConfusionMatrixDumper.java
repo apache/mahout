@@ -139,13 +139,13 @@ public final class ConfusionMatrixDumper extends AbstractJob {
     addOption(DefaultOptionCreator.overwriteOption().create());
     addFlag("html", null, "Create complete HTML page");
     addFlag("text", null, "Dump simple text");
-    Map<String,String> parsedArgs = parseArguments(args);
+    Map<String,List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
     
     Path inputPath = getInputPath();
-    String outputFile = parsedArgs.containsKey("--output") ? parsedArgs.get("--output") : null;
+    String outputFile = hasOption("output") ? getOption("output") : null;
     boolean text = parsedArgs.containsKey("--text");
     boolean wrapHtml = parsedArgs.containsKey("--html");
     PrintStream out = getPrintStream(outputFile);

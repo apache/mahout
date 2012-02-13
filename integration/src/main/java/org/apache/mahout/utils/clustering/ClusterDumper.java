@@ -81,7 +81,6 @@ public final class ClusterDumper extends AbstractJob {
   private long maxPointsPerCluster = Long.MAX_VALUE;
   private String termDictionary;
   private String dictionaryFormat;
-  private String outputFile;
   private int subString = Integer.MAX_VALUE;
   private int numTopFeatures = 10;
   private Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints;
@@ -104,8 +103,8 @@ public final class ClusterDumper extends AbstractJob {
 
   @Override
   public int run(String[] args) throws Exception {
-    addOption(SEQ_FILE_DIR_OPTION, "s", "The directory containing Sequence Files for the Clusters", true);
-    addOption(OUTPUT_OPTION, "o", "Optional output directory. Default is to output to the console.");
+    addInputOption();
+    addOutputOption();
     addOption(OUTPUT_FORMAT_OPT, "of", "The optional output format to write the results as.  Options: TEXT, CSV or GRAPH_ML", "TEXT");
     addOption(SUBSTRING_OPTION, "b", "The number of chars of the asFormatString() to print");
     addOption(NUM_WORDS_OPTION, "n", "The number of top terms to print");
@@ -121,11 +120,11 @@ public final class ClusterDumper extends AbstractJob {
       return -1;
     }
 
-    seqFileDir = new Path(getOption(SEQ_FILE_DIR_OPTION));
+    seqFileDir = getInputPath();
     if (hasOption(POINTS_DIR_OPTION)) {
       pointsDir = new Path(getOption(POINTS_DIR_OPTION));
     }
-    outputFile = getOption(OUTPUT_OPTION);
+    outputFile = getOutputFile();
     if (hasOption(SUBSTRING_OPTION)) {
       int sub = Integer.parseInt(getOption(SUBSTRING_OPTION));
       if (sub >= 0) {
@@ -174,12 +173,12 @@ public final class ClusterDumper extends AbstractJob {
       writer = new OutputStreamWriter(System.out);
     } else {
       shouldClose = true;
-      if (outputFile.startsWith("s3n://")) {
-        Path p = new Path(this.outputFile);
+      if (outputFile.getName().startsWith("s3n://")) {
+        Path p = outputPath;
         FileSystem fs = FileSystem.get(p.toUri(), conf);
         writer = new OutputStreamWriter(fs.create(p), Charsets.UTF_8);
       } else {
-        writer = Files.newWriter(new File(this.outputFile), Charsets.UTF_8);
+        writer = Files.newWriter(this.outputFile, Charsets.UTF_8);
       }
     }
     ClusterWriter clusterWriter = createClusterWriter(writer, dictionary);
@@ -248,13 +247,6 @@ public final class ClusterDumper extends AbstractJob {
     }
   }
 
-  public String getOutputFile() {
-    return outputFile;
-  }
-
-  public void setOutputFile(String outputFile) {
-    this.outputFile = outputFile;
-  }
 
   public int getSubString() {
     return subString;

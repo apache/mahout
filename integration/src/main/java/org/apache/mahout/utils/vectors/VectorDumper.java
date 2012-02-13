@@ -92,7 +92,7 @@ public final class VectorDumper extends AbstractJob {
     addOption(buildOption("filter", "fi", "Only dump out those vectors whose name matches the filter." +
             "  Multiple items may be specified by repeating the argument.", true, 1, 100, false, null));
 
-    if (parseArguments(args) == null) {
+    if (parseArguments(args, false, true) == null) {
       return -1;
     }
 

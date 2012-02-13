@@ -29,6 +29,7 @@ import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.VectorWritable;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -52,7 +53,7 @@ public class PrepEmailVectorsDriver extends AbstractJob {
     addOption(DefaultOptionCreator.overwriteOption().create());
     addOption("maxItemsPerLabel", "mipl", "The maximum number of items per label.  Can be useful for making the training sets the same size", String.valueOf(100000));
     addOption(buildOption("useListName", "ul", "Use the name of the list as part of the label.  If not set, then just use the project name", false, false, "false"));
-    Map<String,String> parsedArgs = parseArguments(args);
+    Map<String,List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
@@ -64,8 +65,8 @@ public class PrepEmailVectorsDriver extends AbstractJob {
     }
     Job convertJob = prepareJob(input, output, SequenceFileInputFormat.class, PrepEmailMapper.class,
             Text.class, VectorWritable.class, PrepEmailReducer.class, Text.class, VectorWritable.class, SequenceFileOutputFormat.class);
-    convertJob.getConfiguration().set(ITEMS_PER_CLASS, parsedArgs.get("--maxItemsPerLabel"));
-    convertJob.getConfiguration().set(USE_LIST_NAME, String.valueOf(parsedArgs.containsKey("--useListName")));
+    convertJob.getConfiguration().set(ITEMS_PER_CLASS, getOption("maxItemsPerLabel"));
+    convertJob.getConfiguration().set(USE_LIST_NAME, String.valueOf(hasOption("useListName")));
 
     boolean succeeded = convertJob.waitForCompletion(true);
     return succeeded ? 0 : -1;

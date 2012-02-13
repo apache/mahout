@@ -79,7 +79,7 @@ public class WeightedPropertyVectorWritable extends WeightedVectorWritable {
   @Override
   public String toString() {
     Vector vector = getVector();
-    StringBuilder bldr = new StringBuilder("wt: ").append(getWeight());
+    StringBuilder bldr = new StringBuilder("wt: ").append(getWeight()).append(" ");
     if (properties != null && !properties.isEmpty()) {
       for (Map.Entry<Text, Text> entry : properties.entrySet()) {
         bldr.append(entry.getKey().toString()).append(": ").append(entry.getValue().toString()).append(' ');
