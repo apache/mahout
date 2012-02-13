@@ -18,6 +18,7 @@
 package org.apache.mahout.math.hadoop.solver;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
@@ -41,7 +42,7 @@ import org.apache.mahout.math.solver.Preconditioner;
 public class DistributedConjugateGradientSolver extends ConjugateGradientSolver implements Tool {
 
   private Configuration conf; 
-  private Map<String, String> parsedArgs;
+  private Map<String, List<String>> parsedArgs;
 
   /**
    * 
@@ -85,15 +86,15 @@ public class DistributedConjugateGradientSolver extends ConjugateGradientSolver 
 
   @Override
   public int run(String[] strings) throws Exception {
-    Path inputPath = new Path(parsedArgs.get("--input"));
-    Path outputPath = new Path(parsedArgs.get("--output"));
-    Path tempPath = new Path(parsedArgs.get("--tempDir"));
-    Path vectorPath = new Path(parsedArgs.get("--vector"));
-    int numRows = Integer.parseInt(parsedArgs.get("--numRows"));
-    int numCols = Integer.parseInt(parsedArgs.get("--numCols"));
-    int maxIterations = parsedArgs.containsKey("--maxIter") ? Integer.parseInt(parsedArgs.get("--maxIter")) : numCols;
+    Path inputPath = new Path(AbstractJob.getOption(parsedArgs, "--input"));
+    Path outputPath = new Path(AbstractJob.getOption(parsedArgs, "--output"));
+    Path tempPath = new Path(AbstractJob.getOption(parsedArgs, "--tempDir"));
+    Path vectorPath = new Path(AbstractJob.getOption(parsedArgs, "--vector"));
+    int numRows = Integer.parseInt(AbstractJob.getOption(parsedArgs, "--numRows"));
+    int numCols = Integer.parseInt(AbstractJob.getOption(parsedArgs, "--numCols"));
+    int maxIterations = parsedArgs.containsKey("--maxIter") ? Integer.parseInt(AbstractJob.getOption(parsedArgs, "--maxIter")) : numCols;
     double maxError = parsedArgs.containsKey("--maxError") 
-        ? Double.parseDouble(parsedArgs.get("--maxError")) 
+        ? Double.parseDouble(AbstractJob.getOption(parsedArgs, "--maxError"))
         : ConjugateGradientSolver.DEFAULT_MAX_ERROR;
 
     Vector b = loadInputVector(vectorPath);

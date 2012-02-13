@@ -99,7 +99,7 @@ public class EigenVerificationJob extends AbstractJob {
 
   @Override
   public int run(String[] args) throws Exception {
-    Map<String, String> argMap = handleArgs(args);
+    Map<String, List<String>> argMap = handleArgs(args);
     if (argMap == null) {
       return -1;
     }
@@ -108,13 +108,13 @@ public class EigenVerificationJob extends AbstractJob {
     }
     // parse out the arguments
     runJob(getConf(),
-           new Path(argMap.get("--eigenInput")),
-           new Path(argMap.get("--corpusInput")),
+           new Path(getOption("eigenInput")),
+           new Path(getOption("corpusInput")),
            getOutputPath(),
-           argMap.get("--inMemory") != null,
-           Double.parseDouble(argMap.get("--maxError")),
-           //Double.parseDouble(argMap.get("--minEigenvalue")),
-           Integer.parseInt(argMap.get("--maxEigens")));
+           getOption("inMemory") != null,
+           Double.parseDouble(getOption("maxError")),
+           //Double.parseDouble(getOption("minEigenvalue")),
+           Integer.parseInt(getOption("maxEigens")));
     return 0;
   }
 
@@ -165,7 +165,7 @@ public class EigenVerificationJob extends AbstractJob {
     return 0;
   }
 
-  private Map<String, String> handleArgs(String[] args) throws IOException {
+  private Map<String, List<String>> handleArgs(String[] args) throws IOException {
     addOutputOption();
     addOption("eigenInput",
               "ei",

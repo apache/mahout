@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.hadoop.slopeone;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -46,14 +47,14 @@ public final class SlopeOneAverageDiffsJob extends AbstractJob {
     addInputOption();
     addOutputOption();
 
-    Map<String,String> parsedArgs = parseArguments(args);
+    Map<String,List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
     
     Path prefsFile = getInputPath();
     Path outputPath = getOutputPath();
-    Path averagesOutputPath = new Path(parsedArgs.get("--tempDir"));
+    Path averagesOutputPath = new Path(getOption("--tempDir"));
 
     AtomicInteger currentPhase = new AtomicInteger();
 

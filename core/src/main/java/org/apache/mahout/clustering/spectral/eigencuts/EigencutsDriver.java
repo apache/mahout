@@ -64,22 +64,22 @@ public class EigencutsDriver extends AbstractJob {
     addOption(DefaultOptionCreator.inputOption().create());
     addOption(DefaultOptionCreator.outputOption().create());
     addOption(DefaultOptionCreator.overwriteOption().create());
-    Map<String, String> parsedArgs = parseArguments(arg0);
+    Map<String, List<String>> parsedArgs = parseArguments(arg0);
     if (parsedArgs == null) {
       return 0;
     }
 
     // read in the command line values
-    Path input = new Path(parsedArgs.get("--input"));
-    Path output = new Path(parsedArgs.get("--output"));
+    Path input = getInputPath();
+    Path output = getOutputPath();
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.delete(getConf(), output);
     }
-    int dimensions = Integer.parseInt(parsedArgs.get("--dimensions"));
-    double halflife = Double.parseDouble(parsedArgs.get("--half-life"));
-    double epsilon = Double.parseDouble(parsedArgs.get("--epsilon"));
-    double tau = Double.parseDouble(parsedArgs.get("--tau"));
-    int eigenrank = Integer.parseInt(parsedArgs.get("--eigenrank"));
+    int dimensions = Integer.parseInt(getOption("dimensions"));
+    double halflife = Double.parseDouble(getOption("half-life"));
+    double epsilon = Double.parseDouble(getOption("epsilon"));
+    double tau = Double.parseDouble(getOption("tau"));
+    int eigenrank = Integer.parseInt(getOption("eigenrank"));
 
     run(getConf(), input, output, eigenrank, dimensions, halflife, epsilon, tau);
 

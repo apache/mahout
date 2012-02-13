@@ -109,16 +109,16 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     addOption("numFeatures", null, "dimension of the feature space", true);
     addOption("numIterations", null, "number of iterations", true);
 
-    Map<String,String> parsedArgs = parseArguments(args);
+    Map<String,List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
 
-    numFeatures = Integer.parseInt(parsedArgs.get("--numFeatures"));
-    numIterations = Integer.parseInt(parsedArgs.get("--numIterations"));
-    lambda = Double.parseDouble(parsedArgs.get("--lambda"));
-    alpha = Double.parseDouble(parsedArgs.get("--alpha"));
-    implicitFeedback = Boolean.parseBoolean(parsedArgs.get("--implicitFeedback"));
+    numFeatures = Integer.parseInt(getOption("numFeatures"));
+    numIterations = Integer.parseInt(getOption("numIterations"));
+    lambda = Double.parseDouble(getOption("lambda"));
+    alpha = Double.parseDouble(getOption("alpha"));
+    implicitFeedback = Boolean.parseBoolean(getOption("implicitFeedback"));
 
     /*
         * compute the factorization A = U M'

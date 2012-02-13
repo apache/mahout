@@ -39,6 +39,7 @@ import org.apache.mahout.math.hadoop.decomposer.DistributedLanczosSolver;
 import org.apache.mahout.math.hadoop.decomposer.EigenVerificationJob;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -65,7 +66,7 @@ public class SpectralKMeansDriver extends AbstractJob {
     addOption(DefaultOptionCreator.convergenceOption().create());
     addOption(DefaultOptionCreator.maxIterationsOption().create());
     addOption(DefaultOptionCreator.overwriteOption().create());
-    Map<String, String> parsedArgs = parseArguments(arg0);
+    Map<String, List<String>> parsedArgs = parseArguments(arg0);
     if (parsedArgs == null) {
       return 0;
     }
@@ -75,8 +76,8 @@ public class SpectralKMeansDriver extends AbstractJob {
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.delete(conf, output);
     }
-    int numDims = Integer.parseInt(parsedArgs.get("--dimensions"));
-    int clusters = Integer.parseInt(parsedArgs.get("--clusters"));
+    int numDims = Integer.parseInt(getOption("dimensions"));
+    int clusters = Integer.parseInt(getOption("clusters"));
     String measureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
     DistanceMeasure measure = ClassUtils.instantiateAs(measureClass, DistanceMeasure.class);
     double convergenceDelta = Double.parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));

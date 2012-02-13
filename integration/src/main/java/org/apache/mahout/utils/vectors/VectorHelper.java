@@ -111,13 +111,22 @@ public final class VectorHelper {
 
   public static List<Pair<String, Double>> toWeightedTerms(Collection<Pair<Integer, Double>> entries,
       final String[] dictionary) {
-    return Lists.newArrayList(Collections2.transform(entries,
-          new Function<Pair<Integer, Double>, Pair<String, Double>>() {
-            @Override
-            public Pair<String, Double> apply(Pair<Integer, Double> p) {
-              return Pair.of(dictionary[p.getFirst()], p.getSecond());
-            }
-          }));
+    if (dictionary != null) 
+      return Lists.newArrayList(Collections2.transform(entries,
+            new Function<Pair<Integer, Double>, Pair<String, Double>>() {
+              @Override
+              public Pair<String, Double> apply(Pair<Integer, Double> p) {
+                return Pair.of(dictionary[p.getFirst()], p.getSecond());
+              }
+            }));
+    else 
+      return Lists.newArrayList(Collections2.transform(entries,
+            new Function<Pair<Integer, Double>, Pair<String, Double>>() {
+              @Override
+              public Pair<String, Double> apply(Pair<Integer, Double> p) {
+                return Pair.of(Integer.toString(p.getFirst()), p.getSecond());
+              }
+            }));
   }
 
   public static String vectorToJson(Vector vector, String[] dictionary, int maxEntries, boolean sort) {

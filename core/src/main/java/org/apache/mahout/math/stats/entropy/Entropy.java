@@ -31,6 +31,7 @@ import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.math.VarIntWritable;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -88,8 +89,11 @@ public final class Entropy extends AbstractJob {
     addOption("source", "s", "Sets, if the entropy is calculated for the keys or the values. Can be <key> or <value>"
         , "key");
 
-    Map<String, String> arguments = parseArguments(args);
-    source = arguments.get("--source");
+    Map<String, List<String>> arguments = parseArguments(args);
+    if (arguments == null){
+      return;
+    }
+    source = getOption("source");
     tempPath = new Path(getTempPath(), TEMP_FILE + '-' + System.currentTimeMillis());
 
   }

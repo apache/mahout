@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -108,19 +109,19 @@ public final class ItemSimilarityJob extends AbstractJob {
     addOption("booleanData", "b", "Treat input as without pref values", String.valueOf(Boolean.FALSE));
     addOption("threshold", "tr", "discard item pairs with a similarity value below this", false);
 
-    Map<String,String> parsedArgs = parseArguments(args);
+    Map<String,List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
 
-    String similarityClassName = parsedArgs.get("--similarityClassname");
-    int maxSimilarItemsPerItem = Integer.parseInt(parsedArgs.get("--maxSimilaritiesPerItem"));
-    int maxPrefsPerUser = Integer.parseInt(parsedArgs.get("--maxPrefsPerUser"));
-    int minPrefsPerUser = Integer.parseInt(parsedArgs.get("--minPrefsPerUser"));
-    boolean booleanData = Boolean.valueOf(parsedArgs.get("--booleanData"));
+    String similarityClassName = getOption("similarityClassname");
+    int maxSimilarItemsPerItem = Integer.parseInt(getOption("maxSimilaritiesPerItem"));
+    int maxPrefsPerUser = Integer.parseInt(getOption("maxPrefsPerUser"));
+    int minPrefsPerUser = Integer.parseInt(getOption("minPrefsPerUser"));
+    boolean booleanData = Boolean.valueOf(getOption("booleanData"));
 
-    double threshold = parsedArgs.containsKey("--threshold") ?
-        Double.parseDouble(parsedArgs.get("--threshold")) : RowSimilarityJob.NO_THRESHOLD;
+    double threshold = hasOption("threshold") ?
+        Double.parseDouble(getOption("threshold")) : RowSimilarityJob.NO_THRESHOLD;
 
     Path similarityMatrixPath = getTempPath("similarityMatrix");
     Path prepPath = getTempPath("prepareRatingMatrix");

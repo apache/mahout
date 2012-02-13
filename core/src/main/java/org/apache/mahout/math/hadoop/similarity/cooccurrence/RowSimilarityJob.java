@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -84,13 +85,13 @@ public class RowSimilarityJob extends AbstractJob {
     addOption("excludeSelfSimilarity", "ess", "compute similarity of rows to themselves?", String.valueOf(false));
     addOption("threshold", "tr", "discard row pairs with a similarity value below this", false);
 
-    Map<String,String> parsedArgs = parseArguments(args);
+    Map<String,List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
 
-    int numberOfColumns = Integer.parseInt(parsedArgs.get("--numberOfColumns"));
-    String similarityClassnameArg = parsedArgs.get("--similarityClassname");
+    int numberOfColumns = Integer.parseInt(getOption("numberOfColumns"));
+    String similarityClassnameArg = getOption("similarityClassname");
     String similarityClassname;
     try {
       similarityClassname = VectorSimilarityMeasures.valueOf(similarityClassnameArg).getClassname();
@@ -98,10 +99,10 @@ public class RowSimilarityJob extends AbstractJob {
       similarityClassname = similarityClassnameArg;
     }
 
-    int maxSimilaritiesPerRow = Integer.parseInt(parsedArgs.get("--maxSimilaritiesPerRow"));
-    boolean excludeSelfSimilarity = Boolean.parseBoolean(parsedArgs.get("--excludeSelfSimilarity"));
-    double threshold = parsedArgs.containsKey("--threshold") ?
-        Double.parseDouble(parsedArgs.get("--threshold")) : NO_THRESHOLD;
+    int maxSimilaritiesPerRow = Integer.parseInt(getOption("maxSimilaritiesPerRow"));
+    boolean excludeSelfSimilarity = Boolean.parseBoolean(getOption("excludeSelfSimilarity"));
+    double threshold = hasOption("threshold") ?
+        Double.parseDouble(getOption("threshold")) : NO_THRESHOLD;
 
     Path weightsPath = getTempPath("weights");
     Path normsPath = getTempPath("norms.bin");

@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 public class DistributedLanczosSolver extends LanczosSolver implements Tool {
@@ -50,7 +51,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
 
   private Configuration conf;
 
-  private Map<String, String> parsedArgs;
+  private Map<String, List<String>> parsedArgs;
 
   /**
    * For the distributed case, the best guess at a useful initialization state for Lanczos we'll chose to be
@@ -93,21 +94,21 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
 
   @Override
   public int run(String[] strings) throws Exception {
-    Path inputPath = new Path(parsedArgs.get("--input"));
-    Path outputPath = new Path(parsedArgs.get("--output"));
-    Path outputTmpPath = new Path(parsedArgs.get("--tempDir"));
-    Path workingDirPath = parsedArgs.get("--workingDir") != null
-                        ? new Path(parsedArgs.get("--workingDir")) : null;
-    int numRows = Integer.parseInt(parsedArgs.get("--numRows"));
-    int numCols = Integer.parseInt(parsedArgs.get("--numCols"));
-    boolean isSymmetric = Boolean.parseBoolean(parsedArgs.get("--symmetric"));
-    int desiredRank = Integer.parseInt(parsedArgs.get("--rank"));
+    Path inputPath = new Path(AbstractJob.getOption(parsedArgs, "--input"));
+    Path outputPath = new Path(AbstractJob.getOption(parsedArgs, "--output"));
+    Path outputTmpPath = new Path(AbstractJob.getOption(parsedArgs, "--tempDir"));
+    Path workingDirPath = AbstractJob.getOption(parsedArgs, "--workingDir") != null
+                        ? new Path(AbstractJob.getOption(parsedArgs, "--workingDir")) : null;
+    int numRows = Integer.parseInt(AbstractJob.getOption(parsedArgs, "--numRows"));
+    int numCols = Integer.parseInt(AbstractJob.getOption(parsedArgs, "--numCols"));
+    boolean isSymmetric = Boolean.parseBoolean(AbstractJob.getOption(parsedArgs, "--symmetric"));
+    int desiredRank = Integer.parseInt(AbstractJob.getOption(parsedArgs, "--rank"));
 
-    boolean cleansvd = Boolean.parseBoolean(parsedArgs.get("--cleansvd"));
+    boolean cleansvd = Boolean.parseBoolean(AbstractJob.getOption(parsedArgs, "--cleansvd"));
     if (cleansvd) {
-      double maxError = Double.parseDouble(parsedArgs.get("--maxError"));
-      double minEigenvalue = Double.parseDouble(parsedArgs.get("--minEigenvalue"));
-      boolean inMemory = Boolean.parseBoolean(parsedArgs.get("--inMemory"));
+      double maxError = Double.parseDouble(AbstractJob.getOption(parsedArgs, "--maxError"));
+      double minEigenvalue = Double.parseDouble(AbstractJob.getOption(parsedArgs, "--minEigenvalue"));
+      boolean inMemory = Boolean.parseBoolean(AbstractJob.getOption(parsedArgs, "--inMemory"));
       return run(inputPath,
                  outputPath,
                  outputTmpPath,

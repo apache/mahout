@@ -80,7 +80,7 @@ public class RecommenderJob extends AbstractJob {
     addOption("maxRating", null, "maximum rating available", true);
     addOutputOption();
 
-    Map<String,String> parsedArgs = parseArguments(args);
+    Map<String,List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
@@ -88,13 +88,14 @@ public class RecommenderJob extends AbstractJob {
     Job prediction = prepareJob(getInputPath(), getOutputPath(), SequenceFileInputFormat.class, PredictionMapper.class,
         IntWritable.class, RecommendedItemsWritable.class, TextOutputFormat.class);
     prediction.getConfiguration().setInt(NUM_RECOMMENDATIONS,
-        Integer.parseInt(parsedArgs.get("--numRecommendations")));
-    prediction.getConfiguration().set(USER_FEATURES_PATH, parsedArgs.get("--userFeatures"));
-    prediction.getConfiguration().set(ITEM_FEATURES_PATH, parsedArgs.get("--itemFeatures"));
-    prediction.getConfiguration().set(MAX_RATING, parsedArgs.get("--maxRating"));
+        Integer.parseInt(getOption("numRecommendations")));
+    prediction.getConfiguration().set(USER_FEATURES_PATH, getOption("userFeatures"));
+    prediction.getConfiguration().set(ITEM_FEATURES_PATH, getOption("itemFeatures"));
+    prediction.getConfiguration().set(MAX_RATING, getOption("maxRating"));
     boolean succeeded = prediction.waitForCompletion(true);
-    if (!succeeded) 
+    if (!succeeded)
       return -1;
+
 
     return 0;
   }

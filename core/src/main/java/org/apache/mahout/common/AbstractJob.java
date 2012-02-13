@@ -17,7 +17,10 @@
 
 package org.apache.mahout.common;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -92,14 +95,16 @@ public abstract class AbstractJob extends Configured implements Tool {
 
   /** input path, populated by {@link #parseArguments(String[])} */
   private Path inputPath;
+  private File inputFile;//the input represented as a file
 
   /** output path, populated by {@link #parseArguments(String[]) */
   private Path outputPath;
+  private File outputFile;//the output represented as a file
 
   /** temp path, populated by {@link #parseArguments(String[]) */
   private Path tempPath;
 
-  private Map<String, String> argMap;
+  private Map<String, List<String>> argMap;
 
   /** internal list of options that have been added */
   private final List<Option> options;
@@ -129,6 +134,14 @@ public abstract class AbstractJob extends Configured implements Tool {
 
   protected Path getOutputPath(String path) {
     return new Path(outputPath, path);
+  }
+
+  protected File getInputFile(){
+    return inputFile;
+  }
+
+  protected File getOutputFile(){
+    return outputFile;
   }
 
 
@@ -217,6 +230,8 @@ public abstract class AbstractJob extends Configured implements Tool {
     this.outputOption = addOption(DefaultOptionCreator.outputOption().create());
   }
 
+
+
   /** Build an option with the given parameters. Name and description are
    *  required.
    * 
@@ -235,6 +250,16 @@ public abstract class AbstractJob extends Configured implements Tool {
                                     boolean required,
                                     String defaultValue) {
 
+    return buildOption(name, shortName, description, hasArg, 1, 1, required, defaultValue);
+  }
+
+  protected static Option buildOption(String name,
+                                    String shortName,
+                                    String description,
+                                    boolean hasArg, int min, int max,
+                                    boolean required,
+                                    String defaultValue) {
+
     DefaultOptionBuilder optBuilder = new DefaultOptionBuilder().withLongName(name).withDescription(description)
         .withRequired(required);
 
@@ -243,7 +268,7 @@ public abstract class AbstractJob extends Configured implements Tool {
     }
 
     if (hasArg) {
-      ArgumentBuilder argBuilder = new ArgumentBuilder().withName(name).withMinimum(1).withMaximum(1);
+      ArgumentBuilder argBuilder = new ArgumentBuilder().withName(name).withMinimum(min).withMaximum(max);
 
       if (defaultValue != null) {
         argBuilder = argBuilder.withDefault(defaultValue);
@@ -285,7 +310,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    *
    *
    */
-  public Map<String, String> parseArguments(String[] args) throws IOException {
+  public Map<String, List<String>> parseArguments(String[] args) throws IOException {
 
     Option helpOpt = addOption(DefaultOptionCreator.helpOption());
     addOption("tempDir", null, "Intermediate output directory", "temp");
@@ -326,12 +351,14 @@ public abstract class AbstractJob extends Configured implements Tool {
       return null;
     }
 
-    argMap = new TreeMap<String, String>();
+    argMap = new TreeMap<String, List<String>>();
     maybePut(argMap, cmdLine, this.options.toArray(new Option[this.options.size()]));
 
-    this.tempPath = new Path(argMap.get("--tempDir"));
+    this.tempPath = new Path(getOption("tempDir"));
 
-    log.info("Command line arguments: {}", argMap);
+    if (!hasOption("quiet")){
+      log.info("Command line arguments: {}", argMap);
+    }
     return argMap;
   }
   
@@ -346,7 +373,11 @@ public abstract class AbstractJob extends Configured implements Tool {
    * @return the requested option, or null if it has not been specified
    */
   public String getOption(String optionName) {
-    return argMap.get(keyFor(optionName));
+    List<String> list = argMap.get(keyFor(optionName));
+    if (list != null && list.isEmpty() == false){
+      return list.get(0);
+    }
+    return null;
   }
 
   /**
@@ -361,6 +392,15 @@ public abstract class AbstractJob extends Configured implements Tool {
       res = defaultVal;
     }
     return res;
+  }
+
+  /**
+   * Options can occur multiple times, so return the list
+   * @param optionName The unadorned (no "--" prefixing it) option name
+   * @return The values, else null.  If the option is present, but has no values, then the result will be an empty list (Collections.emptyList())
+   */
+  public List<String> getOptions(String optionName){
+    return argMap.get(keyFor(optionName));
   }
 
   /**
@@ -390,6 +430,7 @@ public abstract class AbstractJob extends Configured implements Tool {
 
     if (inputOption != null && cmdLine.hasOption(inputOption)) {
       this.inputPath = new Path(cmdLine.getValue(inputOption).toString());
+      this.inputFile = new File(cmdLine.getValue(inputOption).toString());
     }
     if (inputPath == null && conf.get("mapred.input.dir") != null) {
       this.inputPath = new Path(conf.get("mapred.input.dir"));
@@ -397,6 +438,7 @@ public abstract class AbstractJob extends Configured implements Tool {
 
     if (outputOption != null && cmdLine.hasOption(outputOption)) {
       this.outputPath = new Path(cmdLine.getValue(outputOption).toString());
+      this.outputFile = new File(cmdLine.getValue(outputOption).toString());
     }
     if (outputPath == null && conf.get("mapred.output.dir") != null) {
       this.outputPath = new Path(conf.get("mapred.output.dir"));
@@ -408,25 +450,47 @@ public abstract class AbstractJob extends Configured implements Tool {
         "No output specified:  or -Dmapred.output.dir must be provided to specify output directory");
   }
 
-  protected static void maybePut(Map<String, String> args, CommandLine cmdLine, Option... opt) {
+  protected static void maybePut(Map<String, List<String>> args, CommandLine cmdLine, Option... opt) {
     for (Option o : opt) {
 
       // the option appeared on the command-line, or it has a value
       // (which is likely a default value). 
-      if (cmdLine.hasOption(o) || cmdLine.getValue(o) != null) {
+      if (cmdLine.hasOption(o) || cmdLine.getValue(o) != null || (cmdLine.getValues(o) != null && cmdLine.getValues(o).isEmpty() == false)) {
 
         // nulls are ok, for cases where options are simple flags.
-        Object vo = cmdLine.getValue(o);
-        String value = vo == null ? null : vo.toString();
-        args.put(o.getPreferredName(), value);
+        List vo = cmdLine.getValues(o);
+        if (vo != null && vo.isEmpty() == false){
+          List<String> vals = new ArrayList<String>();
+          for (Object o1 : vo) {
+            vals.add(o1.toString());
+          }
+          args.put(o.getPreferredName(), vals);
+        } else {
+          args.put(o.getPreferredName(), null);
+        }
       }
     }
   }
 
-  protected static boolean shouldRunNextPhase(Map<String, String> args, AtomicInteger currentPhase) {
+  /**
+   *
+   * @param args The input argument map
+   * @param optName The adorned (including "--") option name
+   * @return The first value in the match, else null
+   */
+  public static String getOption(Map<String, List<String>> args, String optName){
+    List<String> res = args.get(optName);
+    if (res != null && res.isEmpty() == false){
+      return res.get(0);
+    }
+    return null;
+  }
+
+
+  protected static boolean shouldRunNextPhase(Map<String, List<String>> args, AtomicInteger currentPhase) {
     int phase = currentPhase.getAndIncrement();
-    String startPhase = args.get("--startPhase");
-    String endPhase = args.get("--endPhase");
+    String startPhase = getOption(args, "--startPhase");
+    String endPhase = getOption(args, "--endPhase");
     boolean phaseSkipped = (startPhase != null && phase < Integer.parseInt(startPhase))
         || (endPhase != null && phase > Integer.parseInt(endPhase));
     if (phaseSkipped) {

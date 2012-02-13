@@ -20,6 +20,8 @@
 package org.apache.mahout.common;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
@@ -36,7 +38,7 @@ public final class AbstractJobTest extends MahoutTestCase {
   
   @Test
   public void testFlag() throws Exception {
-    final Map<String,String> testMap = Maps.newHashMap();
+    final Map<String,List<String>> testMap = Maps.newHashMap();
     
     AbstractJobFactory fact = new AbstractJobFactory() {
       @Override
@@ -46,7 +48,7 @@ public final class AbstractJobTest extends MahoutTestCase {
           public int run(String[] args) throws IOException {
             addFlag("testFlag", "t", "a simple test flag");
             
-            Map<String,String> argMap = parseArguments(args);
+            Map<String,List<String>> argMap = parseArguments(args);
             testMap.clear();
             testMap.putAll(argMap);
             return 1;
@@ -67,7 +69,7 @@ public final class AbstractJobTest extends MahoutTestCase {
   
   @Test
   public void testOptions() throws Exception {
-    final Map<String,String> testMap = Maps.newHashMap();
+    final Map<String,List<String>> testMap = Maps.newHashMap();
     
     AbstractJobFactory fact = new AbstractJobFactory() {
       @Override
@@ -82,7 +84,7 @@ public final class AbstractJobTest extends MahoutTestCase {
             this.addOption("hasDefault", "hd", "option w/ default", "defaultValue");
 
 
-            Map<String,String> argMap = parseArguments(args);
+            Map<String,List<String>> argMap = parseArguments(args);
             if (argMap == null) {
               return -1;
             }
@@ -103,8 +105,8 @@ public final class AbstractJobTest extends MahoutTestCase {
       "--required", "requiredArg"
     });
     assertEquals("0 for no missing required options", 0, ret);
-    assertEquals("requiredArg", testMap.get("--required"));
-    assertEquals("defaultValue", testMap.get("--hasDefault"));
+    assertEquals(Collections.singletonList("requiredArg"), testMap.get("--required"));
+    assertEquals(Collections.singletonList("defaultValue"), testMap.get("--hasDefault"));
     assertNull(testMap.get("--option"));
     assertNull(testMap.get("--notRequired"));
     assertFalse(testMap.containsKey("--overwrite"));
@@ -129,10 +131,10 @@ public final class AbstractJobTest extends MahoutTestCase {
       "--notRequired", "notRequired"
     });
     assertEquals("0 for no missing required options", 0, ret);
-    assertEquals("requiredArg", testMap.get("--required"));
-    assertEquals("nonDefault", testMap.get("--hasDefault"));
-    assertEquals("optionValue", testMap.get("--option"));
-    assertEquals("notRequired", testMap.get("--notRequired"));
+    assertEquals(Collections.singletonList("requiredArg"), testMap.get("--required"));
+    assertEquals(Collections.singletonList("nonDefault"), testMap.get("--hasDefault"));
+    assertEquals(Collections.singletonList("optionValue"), testMap.get("--option"));
+    assertEquals(Collections.singletonList("notRequired"), testMap.get("--notRequired"));
     assertTrue(testMap.containsKey("--overwrite"));
     
     ret = ToolRunner.run(fact.getJob(), new String[]{
@@ -143,10 +145,10 @@ public final class AbstractJobTest extends MahoutTestCase {
       "-nr", "notRequired"
     });
     assertEquals("0 for no missing required options", 0, ret);
-    assertEquals("requiredArg", testMap.get("--required"));
-    assertEquals("nonDefault", testMap.get("--hasDefault"));
-    assertEquals("optionValue", testMap.get("--option"));
-    assertEquals("notRequired", testMap.get("--notRequired"));
+    assertEquals(Collections.singletonList("requiredArg"), testMap.get("--required"));
+    assertEquals(Collections.singletonList("nonDefault"), testMap.get("--hasDefault"));
+    assertEquals(Collections.singletonList("optionValue"), testMap.get("--option"));
+    assertEquals(Collections.singletonList("notRequired"), testMap.get("--notRequired"));
     assertTrue(testMap.containsKey("--overwrite"));
     
   }
@@ -164,7 +166,7 @@ public final class AbstractJobTest extends MahoutTestCase {
             addOutputOption();
             
             // arg map should be null if a required option is missing.
-            Map<String, String> argMap = parseArguments(args);
+            Map<String, List<String>> argMap = parseArguments(args);
             
             if (argMap == null) {
               return -1;

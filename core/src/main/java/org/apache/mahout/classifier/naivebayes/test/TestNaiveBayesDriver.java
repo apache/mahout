@@ -39,6 +39,7 @@ import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -64,27 +65,27 @@ public class TestNaiveBayesDriver extends AbstractJob {
     addOption("model", "m", "The path to the model built during training", true);
     addOption(buildOption("testComplementary", "c", "test complementary?", false, false, String.valueOf(false)));
     addOption("labelIndex", "l", "The path to the location of the label index", true);
-    Map<String, String> parsedArgs = parseArguments(args);
+    Map<String, List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.delete(getConf(), getOutputPath());
     }
-    Path model = new Path(parsedArgs.get("--model"));
+    Path model = new Path(getOption("model"));
     HadoopUtil.cacheFiles(model, getConf());
     //the output key is the expected value, the output value are the scores for all the labels
     Job testJob = prepareJob(getInputPath(), getOutputPath(), SequenceFileInputFormat.class, BayesTestMapper.class,
             Text.class, VectorWritable.class, SequenceFileOutputFormat.class);
-    //testJob.getConfiguration().set(LABEL_KEY, parsedArgs.get("--labels"));
-    boolean complementary = parsedArgs.containsKey("--testComplementary");
+    //testJob.getConfiguration().set(LABEL_KEY, getOption("--labels"));
+    boolean complementary = parsedArgs.containsKey("testComplementary");
     testJob.getConfiguration().set(COMPLEMENTARY, String.valueOf(complementary));
     boolean succeeded = testJob.waitForCompletion(true);
     if (!succeeded) {
       return -1;
     }
     //load the labels
-    Map<Integer, String> labelMap = BayesUtils.readLabelIndex(getConf(), new Path(parsedArgs.get("--labelIndex")));
+    Map<Integer, String> labelMap = BayesUtils.readLabelIndex(getConf(), new Path(getOption("labelIndex")));
 
     //loop over the results and create the confusion matrix
     SequenceFileDirIterable<Text, VectorWritable> dirIterable =

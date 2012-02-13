@@ -18,6 +18,7 @@ package org.apache.mahout.math.hadoop.stochasticsvd;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import com.google.common.io.Closeables;
@@ -82,24 +83,24 @@ public class SSVDCli extends AbstractJob {
               String.valueOf(true));
     addOption(DefaultOptionCreator.overwriteOption().create());
 
-    Map<String, String> pargs = parseArguments(args);
+    Map<String, List<String>> pargs = parseArguments(args);
     if (pargs == null) {
       return -1;
     }
 
-    int k = Integer.parseInt(pargs.get("--rank"));
-    int p = Integer.parseInt(pargs.get("--oversampling"));
-    int r = Integer.parseInt(pargs.get("--blockHeight"));
-    int h = Integer.parseInt(pargs.get("--outerProdBlockHeight"));
-    int abh = Integer.parseInt(pargs.get("--abtBlockHeight"));
-    int q = Integer.parseInt(pargs.get("--powerIter"));
-    int minSplitSize = Integer.parseInt(pargs.get("--minSplitSize"));
-    boolean computeU = Boolean.parseBoolean(pargs.get("--computeU"));
-    boolean computeV = Boolean.parseBoolean(pargs.get("--computeV"));
-    boolean cUHalfSigma = Boolean.parseBoolean(pargs.get("--uHalfSigma"));
-    boolean cVHalfSigma = Boolean.parseBoolean(pargs.get("--vHalfSigma"));
-    int reduceTasks = Integer.parseInt(pargs.get("--reduceTasks"));
-    boolean broadcast = Boolean.parseBoolean(pargs.get("--broadcast"));
+    int k = Integer.parseInt(getOption("rank"));
+    int p = Integer.parseInt(getOption("oversampling"));
+    int r = Integer.parseInt(getOption("blockHeight"));
+    int h = Integer.parseInt(getOption("outerProdBlockHeight"));
+    int abh = Integer.parseInt(getOption("abtBlockHeight"));
+    int q = Integer.parseInt(getOption("powerIter"));
+    int minSplitSize = Integer.parseInt(getOption("minSplitSize"));
+    boolean computeU = Boolean.parseBoolean(getOption("computeU"));
+    boolean computeV = Boolean.parseBoolean(getOption("computeV"));
+    boolean cUHalfSigma = Boolean.parseBoolean(getOption("uHalfSigma"));
+    boolean cVHalfSigma = Boolean.parseBoolean(getOption("vHalfSigma"));
+    int reduceTasks = Integer.parseInt(getOption("reduceTasks"));
+    boolean broadcast = Boolean.parseBoolean(getOption("broadcast"));
     boolean overwrite =
       pargs.containsKey(keyFor(DefaultOptionCreator.OVERWRITE_OPTION));
 

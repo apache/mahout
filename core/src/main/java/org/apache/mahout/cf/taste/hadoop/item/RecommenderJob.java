@@ -38,6 +38,7 @@ import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.hadoop.similarity.cooccurrence.RowSimilarityJob;
 import org.apache.mahout.math.hadoop.similarity.cooccurrence.measures.VectorSimilarityMeasures;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -118,24 +119,24 @@ public final class RecommenderJob extends AbstractJob {
             "alternatively use one of the predefined similarities (" + VectorSimilarityMeasures.list() + ')', true);
     addOption("threshold", "tr", "discard item pairs with a similarity value below this", false);
 
-    Map<String, String> parsedArgs = parseArguments(args);
+    Map<String, List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
 
     Path outputPath = getOutputPath();
-    int numRecommendations = Integer.parseInt(parsedArgs.get("--numRecommendations"));
-    String usersFile = parsedArgs.get("--usersFile");
-    String itemsFile = parsedArgs.get("--itemsFile");
-    String filterFile = parsedArgs.get("--filterFile");
-    boolean booleanData = Boolean.valueOf(parsedArgs.get("--booleanData"));
-    int maxPrefsPerUser = Integer.parseInt(parsedArgs.get("--maxPrefsPerUser"));
-    int minPrefsPerUser = Integer.parseInt(parsedArgs.get("--minPrefsPerUser"));
-    int maxPrefsPerUserInItemSimilarity = Integer.parseInt(parsedArgs.get("--maxPrefsPerUserInItemSimilarity"));
-    int maxSimilaritiesPerItem = Integer.parseInt(parsedArgs.get("--maxSimilaritiesPerItem"));
-    String similarityClassname = parsedArgs.get("--similarityClassname");
-    double threshold = parsedArgs.containsKey("--threshold") ?
-            Double.parseDouble(parsedArgs.get("--threshold")) : RowSimilarityJob.NO_THRESHOLD;
+    int numRecommendations = Integer.parseInt(getOption("numRecommendations"));
+    String usersFile = getOption("usersFile");
+    String itemsFile = getOption("itemsFile");
+    String filterFile = getOption("filterFile");
+    boolean booleanData = Boolean.valueOf(getOption("booleanData"));
+    int maxPrefsPerUser = Integer.parseInt(getOption("maxPrefsPerUser"));
+    int minPrefsPerUser = Integer.parseInt(getOption("minPrefsPerUser"));
+    int maxPrefsPerUserInItemSimilarity = Integer.parseInt(getOption("maxPrefsPerUserInItemSimilarity"));
+    int maxSimilaritiesPerItem = Integer.parseInt(getOption("maxSimilaritiesPerItem"));
+    String similarityClassname = getOption("similarityClassname");
+    double threshold = parsedArgs.containsKey("threshold") ?
+            Double.parseDouble(getOption("threshold")) : RowSimilarityJob.NO_THRESHOLD;
 
 
     Path prepPath = getTempPath("preparePreferenceMatrix");

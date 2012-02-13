@@ -46,6 +46,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 abstract class RandomWalk extends AbstractJob {
@@ -58,7 +59,7 @@ abstract class RandomWalk extends AbstractJob {
   protected abstract Vector createDampingVector(int numVertices, double stayingProbability);
 
   protected void addSpecificOptions() {}
-  protected void evaluateSpecificOptions(Map<String, String> parsedArgs) {}
+  protected void evaluateSpecificOptions() {}
 
   @Override
   public final int run(String[] args) throws Exception {
@@ -70,15 +71,15 @@ abstract class RandomWalk extends AbstractJob {
 
     addSpecificOptions();
 
-    Map<String, String> parsedArgs = parseArguments(args);
+    Map<String, List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
 
-    evaluateSpecificOptions(parsedArgs);
+    evaluateSpecificOptions();
 
-    int numIterations = Integer.parseInt(parsedArgs.get("--numIterations"));
-    double stayingProbability = Double.parseDouble(parsedArgs.get("--stayingProbability"));
+    int numIterations = Integer.parseInt(getOption("numIterations"));
+    double stayingProbability = Double.parseDouble(getOption("stayingProbability"));
 
     Preconditions.checkArgument(numIterations > 0);
     Preconditions.checkArgument(stayingProbability > 0.0 && stayingProbability <= 1.0);
@@ -89,8 +90,8 @@ abstract class RandomWalk extends AbstractJob {
     Path numVerticesPath = getTempPath(AdjacencyMatrixJob.NUM_VERTICES);
 
     /* create the adjacency matrix */
-    ToolRunner.run(getConf(), new AdjacencyMatrixJob(), new String[] { "--vertices", parsedArgs.get("--vertices"),
-        "--edges", parsedArgs.get("--edges"), "--output", getTempPath().toString() });
+    ToolRunner.run(getConf(), new AdjacencyMatrixJob(), new String[] { "--vertices", getOption("vertices"),
+        "--edges", getOption("edges"), "--output", getTempPath().toString() });
 
     int numVertices = HadoopUtil.readInt(numVerticesPath, getConf());
     Preconditions.checkArgument(numVertices > 0);

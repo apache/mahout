@@ -41,6 +41,7 @@ import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -59,13 +60,13 @@ public class TransposeJob extends AbstractJob {
     addInputOption();
     addOption("numRows", "nr", "Number of rows of the input matrix");
     addOption("numCols", "nc", "Number of columns of the input matrix");
-    Map<String, String> parsedArgs = parseArguments(strings);
+    Map<String, List<String>> parsedArgs = parseArguments(strings);
     if (parsedArgs == null) {
       return -1;
     }
 
-    int numRows = Integer.parseInt(parsedArgs.get("--numRows"));
-    int numCols = Integer.parseInt(parsedArgs.get("--numCols"));
+    int numRows = Integer.parseInt(getOption("numRows"));
+    int numCols = Integer.parseInt(getOption("numCols"));
 
     DistributedRowMatrix matrix = new DistributedRowMatrix(getInputPath(), getTempPath(), numRows, numCols);
     matrix.setConf(new Configuration(getConf()));

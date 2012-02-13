@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -94,14 +95,14 @@ public class AdjacencyMatrixJob extends AbstractJob {
 
     addOutputOption();
 
-    Map<String, String> parsedArgs = parseArguments(args);
+    Map<String, List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
 
-    Path vertices = new Path(parsedArgs.get("--vertices"));
-    Path edges = new Path(parsedArgs.get("--edges"));
-    boolean symmetric = Boolean.parseBoolean(parsedArgs.get("--symmetric"));
+    Path vertices = new Path(getOption("vertices"));
+    Path edges = new Path(getOption("edges"));
+    boolean symmetric = Boolean.parseBoolean(getOption("symmetric"));
 
     log.info("Indexing vertices sequentially, this might take a while...");
     int numVertices = indexVertices(vertices, getOutputPath(VERTEX_INDEX));

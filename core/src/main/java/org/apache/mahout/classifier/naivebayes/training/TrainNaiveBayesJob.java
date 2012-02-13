@@ -38,6 +38,7 @@ import org.apache.mahout.common.mapreduce.VectorSumReducer;
 import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -69,7 +70,7 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     addOption(buildOption("trainComplementary", "c", "train complementary?", false, false, String.valueOf(false)));
     addOption("labelIndex", "li", "The path to store the label index in", false);
     addOption(DefaultOptionCreator.overwriteOption().create());
-    Map<String, String> parsedArgs = parseArguments(args);
+    Map<String, List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
@@ -78,15 +79,15 @@ public final class TrainNaiveBayesJob extends AbstractJob {
       HadoopUtil.delete(getConf(), getTempPath());
     }
     Path labPath;
-    String labPathStr = parsedArgs.get("--labelIndex");
+    String labPathStr = getOption("labelIndex");
     if (labPathStr != null) {
       labPath = new Path(labPathStr);
     } else {
       labPath = getTempPath("labelIndex");
     }
-    long labelSize = createLabelIndex(parsedArgs, labPath);
-    float alphaI = Float.parseFloat(parsedArgs.get("--alphaI"));
-    boolean trainComplementary = Boolean.parseBoolean(parsedArgs.get("--trainComplementary"));
+    long labelSize = createLabelIndex(labPath);
+    float alphaI = Float.parseFloat(getOption("alphaI"));
+    boolean trainComplementary = Boolean.parseBoolean(getOption("trainComplementary"));
 
 
     HadoopUtil.setSerializations(getConf());
@@ -132,12 +133,12 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     return 0;
   }
 
-  private long createLabelIndex(Map<String, String> parsedArgs, Path labPath) throws IOException {
+  private long createLabelIndex(Path labPath) throws IOException {
     long labelSize = 0;
-    if (parsedArgs.containsKey("--labels")) {
-      Iterable<String> labels = Splitter.on(",").split(parsedArgs.get("--labels"));
+    if (hasOption("labels")) {
+      Iterable<String> labels = Splitter.on(",").split(getOption("labels"));
       labelSize = BayesUtils.writeLabelIndex(getConf(), labels, labPath);
-    } else if (parsedArgs.containsKey("--extractLabels")) {
+    } else if (hasOption("extractLabels")) {
       SequenceFileDirIterable<Text, IntWritable> iterable =
               new SequenceFileDirIterable<Text, IntWritable>(getInputPath(), PathType.LIST, PathFilters.logsCRCFilter(), getConf());
       labelSize = BayesUtils.writeLabelIndex(getConf(), labPath, iterable);

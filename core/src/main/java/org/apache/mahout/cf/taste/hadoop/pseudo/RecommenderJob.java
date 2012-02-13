@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.hadoop.pseudo;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
@@ -111,17 +112,17 @@ public final class RecommenderJob extends AbstractJob {
     addOption("numRecommendations", "n", "Number of recommendations per user", "10");
     addOption("usersFile", "u", "File of users to recommend for", null);
     
-    Map<String,String> parsedArgs = parseArguments(args);
+    Map<String,List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
 
     Path inputFile = getInputPath();
     Path outputPath = getOutputPath();
-    Path usersFile = parsedArgs.get("--usersFile") == null ? inputFile : new Path(parsedArgs.get("--usersFile"));
+    Path usersFile = hasOption("usersFile") ? inputFile : new Path(getOption("usersFile"));
     
-    String recommendClassName = parsedArgs.get("--recommenderClassName");
-    int recommendationsPerUser = Integer.parseInt(parsedArgs.get("--numRecommendations"));
+    String recommendClassName = getOption("recommenderClassName");
+    int recommendationsPerUser = Integer.parseInt(getOption("numRecommendations"));
     
     Job job = prepareJob(usersFile,
                          outputPath,

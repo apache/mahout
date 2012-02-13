@@ -18,6 +18,7 @@
 package org.apache.mahout.vectorizer.collocations.llr;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
@@ -84,7 +85,7 @@ public final class CollocDriver extends AbstractJob {
         + " which will be tokenized using the specified analyzer.");
     addFlag("unigram", "u", "If set, unigrams will be emitted in the final output alongside collocations");
 
-    Map<String, String> argMap = parseArguments(args);
+    Map<String, List<String>> argMap = parseArguments(args);
 
     if (argMap == null) {
       return -1;
@@ -94,45 +95,45 @@ public final class CollocDriver extends AbstractJob {
     Path output = getOutputPath();
 
     int maxNGramSize = DEFAULT_MAX_NGRAM_SIZE;
-    if (argMap.get("--maxNGramSize") != null) {
+    if (hasOption("maxNGramSize")) {
       try {
-        maxNGramSize = Integer.parseInt(argMap.get("--maxNGramSize"));
+        maxNGramSize = Integer.parseInt(getOption("maxNGramSize"));
       } catch (NumberFormatException ex) {
         log.warn("Could not parse ngram size option");
       }
     }
     log.info("Maximum n-gram size is: {}", maxNGramSize);
 
-    if (argMap.containsKey("--overwrite")) {
+    if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.delete(getConf(), output);
     }
 
     int minSupport = CollocReducer.DEFAULT_MIN_SUPPORT;
-    if (argMap.get("--minSupport") != null) {
-      minSupport = Integer.parseInt(argMap.get("--minSupport"));
+    if (getOption("minSupport") != null) {
+      minSupport = Integer.parseInt(getOption("minSupport"));
     }
     log.info("Minimum Support value: {}", minSupport);
 
     float minLLRValue = LLRReducer.DEFAULT_MIN_LLR;
-    if (argMap.get("--minLLR") != null) {
-      minLLRValue = Float.parseFloat(argMap.get("--minLLR"));
+    if (getOption("minLLR") != null) {
+      minLLRValue = Float.parseFloat(getOption("minLLR"));
     }
     log.info("Minimum LLR value: {}", minLLRValue);
 
     int reduceTasks = DEFAULT_PASS1_NUM_REDUCE_TASKS;
-    if (argMap.get("--maxRed") != null) {
-      reduceTasks = Integer.parseInt(argMap.get("--maxRed"));
+    if (getOption("maxRed") != null) {
+      reduceTasks = Integer.parseInt(getOption("maxRed"));
     }
     log.info("Number of pass1 reduce tasks: {}", reduceTasks);
 
-    boolean emitUnigrams = argMap.containsKey("--emitUnigrams");
+    boolean emitUnigrams = argMap.containsKey("emitUnigrams");
 
-    if (argMap.containsKey("--preprocess")) {
+    if (argMap.containsKey("preprocess")) {
       log.info("Input will be preprocessed");
 
       Class<? extends Analyzer> analyzerClass = DefaultAnalyzer.class;
-      if (argMap.get("--analyzerName") != null) {
-        String className = argMap.get("--analyzerName");
+      if (getOption("analyzerName") != null) {
+        String className = getOption("analyzerName");
         analyzerClass = Class.forName(className).asSubclass(Analyzer.class);
         // try instantiating it, b/c there isn't any point in setting it if
         // you can't instantiate it

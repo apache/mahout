@@ -41,6 +41,7 @@ import org.apache.mahout.math.function.Functions;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class MatrixMultiplicationJob extends AbstractJob {
@@ -90,19 +91,19 @@ public class MatrixMultiplicationJob extends AbstractJob {
     addOption("inputPathA", "ia", "Path to the first input matrix", true);
     addOption("inputPathB", "ib", "Path to the second input matrix", true);
 
-    Map<String, String> argMap = parseArguments(strings);
+    Map<String, List<String>> argMap = parseArguments(strings);
     if (argMap == null) {
       return -1;
     }
 
-    DistributedRowMatrix a = new DistributedRowMatrix(new Path(argMap.get("--inputPathA")),
-                                                      new Path(argMap.get("--tempDir")),
-                                                      Integer.parseInt(argMap.get("--numRowsA")),
-                                                      Integer.parseInt(argMap.get("--numColsA")));
-    DistributedRowMatrix b = new DistributedRowMatrix(new Path(argMap.get("--inputPathB")),
-                                                      new Path(argMap.get("--tempDir")),
-                                                      Integer.parseInt(argMap.get("--numRowsB")),
-                                                      Integer.parseInt(argMap.get("--numColsB")));
+    DistributedRowMatrix a = new DistributedRowMatrix(new Path(getOption("inputPathA")),
+                                                      new Path(getOption("tempDir")),
+                                                      Integer.parseInt(getOption("numRowsA")),
+                                                      Integer.parseInt(getOption("numColsA")));
+    DistributedRowMatrix b = new DistributedRowMatrix(new Path(getOption("inputPathB")),
+                                                      new Path(getOption("tempDir")),
+                                                      Integer.parseInt(getOption("numRowsB")),
+                                                      Integer.parseInt(getOption("numColsB")));
 
     a.setConf(new Configuration(getConf()));
     b.setConf(new Configuration(getConf()));

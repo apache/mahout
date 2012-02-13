@@ -23,8 +23,11 @@ import com.google.common.io.Files;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.util.HelpFormatter;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.mapred.Utils.OutputFileUtils.OutputFilesFilter;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -47,19 +50,35 @@ public final class SequenceFileDumper extends AbstractJob {
   @Override
   public int run(String[] args) throws Exception {
 
-    addOption("seqFile", "s", "The Sequence File to read in", true);
+    addOption("seqFile", "s", "The Sequence File to read in", false);
+    addOption("seqDirectory", "d", "A directory containing sequence files to read", false);
     addOption(DefaultOptionCreator.outputOption().create());
     addOption("substring", "b", "The number of chars to print out per value", false);
     addOption(buildOption("count", "c", "Report the count only", false, false, null));
     addOption("numItems", "n", "Output at most <n> key value pairs", false);
     addOption(buildOption("facets", "fa", "Output the counts per key.  Note, if there are a lot of unique keys, this can take up a fair amount of memory", false, false, null));
-
+    addOption(buildOption("quiet", "q", "Print only file contents.", false, false, null));
 
     if (parseArguments(args) == null) {
       return -1;
     }
-    Path path = new Path(getOption("seqFile"));
+
+    Path[] pathArr= null;
     Configuration conf = new Configuration();
+
+    if (getOption("seqFile") != null) {
+      pathArr = new Path[1];
+      pathArr[0] = new Path(getOption("seqFile"));
+    } else if (getOption("seqDirectory") != null) {
+      Path dirPath = new Path(getOption("seqDirectory"));
+      FileSystem fs = dirPath.getFileSystem(conf);
+      pathArr = FileUtil.stat2Paths(fs.listStatus(dirPath, new OutputFilesFilter()));
+    }
+    if (pathArr == null) {
+      System.out.println("Must specify --seqFile (-s) or --seqDirectory (-d)!");      
+      return -1;
+    }
+
 
     Writer writer;
     boolean shouldClose;
@@ -71,62 +90,69 @@ public final class SequenceFileDumper extends AbstractJob {
       writer = new OutputStreamWriter(System.out);
     }
     try {
-      writer.append("Input Path: ").append(String.valueOf(path)).append('\n');
+      for (Path path : pathArr) {
+        if (!hasOption("quiet"))
+          writer.append("Input Path: ").append(String.valueOf(path)).append('\n');
 
-      int sub = Integer.MAX_VALUE;
-      if (hasOption("substring")) {
-        sub = Integer.parseInt(getOption("substring"));
-      }
-      boolean countOnly = hasOption("count");
-      SequenceFileIterator<?, ?> iterator = new SequenceFileIterator<Writable, Writable>(path, true, conf);
-      writer.append("Key class: ").append(iterator.getKeyClass().toString());
-      writer.append(" Value Class: ").append(iterator.getValueClass().toString()).append('\n');
-      OpenObjectIntHashMap<String> facets = null;
-      if (hasOption("facets")){
-        facets = new OpenObjectIntHashMap<String>();
-      }
-      long count = 0;
-      if (countOnly) {
-        while (iterator.hasNext()) {
-          Pair<?, ?> record = iterator.next();
-          String key = record.getFirst().toString();
-          if (facets != null){
-            facets.adjustOrPutValue(key, 1, 1);//either insert or add 1
+        int sub = Integer.MAX_VALUE;
+        if (hasOption("substring")) {
+          sub = Integer.parseInt(getOption("substring"));
+        }
+        boolean countOnly = hasOption("count");
+        SequenceFileIterator<?, ?> iterator = new SequenceFileIterator<Writable, Writable>(path, true, conf);
+        if (!hasOption("quiet")) {
+          writer.append("Key class: ").append(iterator.getKeyClass().toString());
+          writer.append(" Value Class: ").append(iterator.getValueClass().toString()).append('\n');
+        }
+        OpenObjectIntHashMap<String> facets = null;
+        if (hasOption("facets")){
+          facets = new OpenObjectIntHashMap<String>();
+        }
+        long count = 0;
+        if (countOnly) {
+          while (iterator.hasNext()) {
+            Pair<?, ?> record = iterator.next();
+            String key = record.getFirst().toString();
+            if (facets != null){
+              facets.adjustOrPutValue(key, 1, 1);//either insert or add 1
+            }
+            count++;
           }
-          count++;
-        }
-        writer.append("Count: ").append(String.valueOf(count)).append('\n');
-      } else {
-        long numItems = Long.MAX_VALUE;
-        if (hasOption("numItems")) {
-          numItems = Long.parseLong(getOption("numItems"));
-          writer.append("Max Items to dump: ").append(String.valueOf(numItems)).append("\n");
-        }
-        while (iterator.hasNext() && count < numItems) {
-          Pair<?, ?> record = iterator.next();
-          String key = record.getFirst().toString();
-          writer.append("Key: ").append(key);
-          String str = record.getSecond().toString();
-          writer.append(": Value: ").append(str.length() > sub ? str.substring(0, sub) : str);
-          writer.write('\n');
-          if (facets != null){
-            facets.adjustOrPutValue(key, 1, 1);//either insert or add 1
+          writer.append("Count: ").append(String.valueOf(count)).append('\n');
+        } else {
+          long numItems = Long.MAX_VALUE;
+          if (hasOption("numItems")) {
+            numItems = Long.parseLong(getOption("numItems"));
+            if (!hasOption("quiet"))
+              writer.append("Max Items to dump: ").append(String.valueOf(numItems)).append("\n");
           }
-          count++;
+          while (iterator.hasNext() && count < numItems) {
+            Pair<?, ?> record = iterator.next();
+            String key = record.getFirst().toString();
+            writer.append("Key: ").append(key);
+            String str = record.getSecond().toString();
+            writer.append(": Value: ").append(str.length() > sub 
+                                              ? str.substring(0, sub) : str);
+            writer.write('\n');
+            if (facets != null){
+              facets.adjustOrPutValue(key, 1, 1);//either insert or add 1
+            }
+            count++;
+          }
+          if (!hasOption("quiet"))
+            writer.append("Count: ").append(String.valueOf(count)).append('\n');
         }
-        writer.append("Count: ").append(String.valueOf(count)).append('\n');
-      }
-      if (facets != null) {
-        List<String> keyList = new ArrayList<String>(facets.size());
+        if (facets != null) {
+          List<String> keyList = new ArrayList<String>(facets.size());
 
-        IntArrayList valueList = new IntArrayList(facets.size());
-        facets.pairsSortedByKey(keyList, valueList);
-        writer.append("-----Facets---\n");
-        writer.append("Key\t\tCount\n");
-        int i = 0;
-        for (String key : keyList) {
-          writer.append(key).append("\t\t").append(String.valueOf(valueList.get(i++))).append('\n');
-
+          IntArrayList valueList = new IntArrayList(facets.size());
+          facets.pairsSortedByKey(keyList, valueList);
+          writer.append("-----Facets---\n");
+          writer.append("Key\t\tCount\n");
+          int i = 0;
+          for (String key : keyList) {
+            writer.append(key).append("\t\t").append(String.valueOf(valueList.get(i++))).append('\n');
+          }
         }
       }
       writer.flush();

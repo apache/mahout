@@ -35,6 +35,7 @@ import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.VectorWritable;
 
+import java.util.List;
 import java.util.Map;
 
 public class PreparePreferenceMatrixJob extends AbstractJob {
@@ -62,14 +63,14 @@ public class PreparePreferenceMatrixJob extends AbstractJob {
     addOption("booleanData", "b", "Treat input as without pref values", Boolean.FALSE.toString());
     addOption("ratingShift", "rs", "shift ratings by this value", "0.0");
 
-    Map<String, String> parsedArgs = parseArguments(args);
+    Map<String, List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
 
-    int minPrefsPerUser = Integer.parseInt(parsedArgs.get("--minPrefsPerUser"));
-    boolean booleanData = Boolean.valueOf(parsedArgs.get("--booleanData"));
-    float ratingShift = Float.parseFloat(parsedArgs.get("--ratingShift"));
+    int minPrefsPerUser = Integer.parseInt(getOption("minPrefsPerUser"));
+    boolean booleanData = Boolean.valueOf(getOption("booleanData"));
+    float ratingShift = Float.parseFloat(getOption("ratingShift"));
     //convert items to an internal index
     Job itemIDIndex = prepareJob(getInputPath(), getOutputPath(ITEMID_INDEX), TextInputFormat.class,
             ItemIDIndexMapper.class, VarIntWritable.class, VarLongWritable.class, ItemIDIndexReducer.class,
@@ -100,8 +101,8 @@ public class PreparePreferenceMatrixJob extends AbstractJob {
     toItemVectors.setCombinerClass(ToItemVectorsReducer.class);
 
     /* configure sampling regarding the uservectors */
-    if (parsedArgs.containsKey("--maxPrefsPerUser")) {
-      int samplingSize = Integer.parseInt(parsedArgs.get("--maxPrefsPerUser"));
+    if (hasOption("maxPrefsPerUser")) {
+      int samplingSize = Integer.parseInt(getOption("maxPrefsPerUser"));
       toItemVectors.getConfiguration().setInt(ToItemVectorsMapper.SAMPLE_SIZE, samplingSize);
     }
 

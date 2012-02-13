@@ -44,6 +44,7 @@ import org.apache.mahout.math.map.OpenIntObjectHashMap;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -75,7 +76,7 @@ public class FactorizationEvaluator extends AbstractJob {
     addOption("itemFeatures", null, "path to the item feature matrix", true);
     addOutputOption();
 
-    Map<String,String> parsedArgs = parseArguments(args);
+    Map<String,List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
@@ -84,10 +85,11 @@ public class FactorizationEvaluator extends AbstractJob {
 
     Job predictRatings = prepareJob(getInputPath(), errors, TextInputFormat.class, PredictRatingsMapper.class,
         DoubleWritable.class, NullWritable.class, SequenceFileOutputFormat.class);
-    predictRatings.getConfiguration().set(USER_FEATURES_PATH, parsedArgs.get("--userFeatures"));
-    predictRatings.getConfiguration().set(ITEM_FEATURES_PATH, parsedArgs.get("--itemFeatures"));
+
+    predictRatings.getConfiguration().set(USER_FEATURES_PATH, getOption("userFeatures"));
+    predictRatings.getConfiguration().set(ITEM_FEATURES_PATH, getOption("itemFeatures"));
     boolean succeeded = predictRatings.waitForCompletion(true);
-    if (!succeeded) 
+    if (!succeeded)
       return -1;
 
     BufferedWriter writer  = null;

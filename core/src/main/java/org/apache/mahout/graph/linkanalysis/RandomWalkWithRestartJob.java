@@ -21,6 +21,8 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
+
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -64,8 +66,8 @@ public class RandomWalkWithRestartJob extends RandomWalk {
   }
 
   @Override
-  protected void evaluateSpecificOptions(Map<String, String> parsedArgs) {
-    sourceVertexIndex = Integer.parseInt(parsedArgs.get("--sourceVertexIndex"));
+  protected void evaluateSpecificOptions() {
+    sourceVertexIndex = Integer.parseInt(getOption("sourceVertexIndex"));
   }
 
 }
