@@ -27,7 +27,7 @@ public class KMeansCombiner extends Reducer<Text, ClusterObservations, Text, Clu
   @Override
   protected void reduce(Text key, Iterable<ClusterObservations> values, Context context)
     throws IOException, InterruptedException {
-    Cluster cluster = new Cluster();
+    Kluster cluster = new Kluster();
     for (ClusterObservations value : values) {
       cluster.observe(value);
     }

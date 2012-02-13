@@ -41,7 +41,7 @@ import org.apache.mahout.math.VectorWritable;
 public class KMeansClusterMapper
     extends Mapper<WritableComparable<?>,VectorWritable,IntWritable,WeightedPropertyVectorWritable> {
   
-  private final Collection<Cluster> clusters = Lists.newArrayList();
+  private final Collection<Kluster> clusters = Lists.newArrayList();
   private KMeansClusterer clusterer;
 
   @Override

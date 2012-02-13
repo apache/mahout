@@ -35,17 +35,17 @@ final class KMeansUtil {
   /** Configure the mapper with the cluster info */
   public static void configureWithClusterInfo(Configuration conf,
                                               Path clusterPath,
-                                              Collection<Cluster> clusters) {
+                                              Collection<Kluster> clusters) {
     for (Writable value :
          new SequenceFileDirValueIterable<Writable>(clusterPath, PathType.LIST, PathFilters.partFilter(), conf)) {
       Class<? extends Writable> valueClass = value.getClass();
-      if (valueClass.equals(Cluster.class)) {
+      if (valueClass.equals(Kluster.class)) {
         // get the cluster info
-        clusters.add((Cluster) value);
+        clusters.add((Kluster) value);
       } else if (valueClass.equals(Canopy.class)) {
         // get the cluster info
         Canopy canopy = (Canopy) value;
-        clusters.add(new Cluster(canopy.getCenter(), canopy.getId(), canopy.getMeasure()));
+        clusters.add(new Kluster(canopy.getCenter(), canopy.getId(), canopy.getMeasure()));
       } else {
         throw new IllegalStateException("Bad value class: " + valueClass);
       }

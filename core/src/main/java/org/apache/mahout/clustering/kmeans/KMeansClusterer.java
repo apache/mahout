@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class implements the k-means clustering algorithm. It uses {@link Cluster} as a cluster
+ * This class implements the k-means clustering algorithm. It uses {@link Kluster} as a cluster
  * representation. The class can be used as part of a clustering job to be started as map/reduce job.
  * */
 public class KMeansClusterer {
@@ -67,12 +67,12 @@ public class KMeansClusterer {
    *          a List<Cluster> to test.
    */
   public void emitPointToNearestCluster(Vector point,
-                                        Iterable<Cluster> clusters,
+                                        Iterable<Kluster> clusters,
                                         Mapper<?,?,Text,ClusterObservations>.Context context)
     throws IOException, InterruptedException {
-    Cluster nearestCluster = null;
+    Kluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
-    for (Cluster cluster : clusters) {
+    for (Kluster cluster : clusters) {
       Vector clusterCenter = cluster.getCenter();
       double distance = this.measure.distance(clusterCenter.getLengthSquared(), clusterCenter, point);
       if (log.isDebugEnabled()) {
@@ -91,10 +91,10 @@ public class KMeansClusterer {
    * @param point
    * @param clusters
    */
-  protected void addPointToNearestCluster(Vector point, Iterable<Cluster> clusters) {
-    Cluster closestCluster = null;
+  protected void addPointToNearestCluster(Vector point, Iterable<Kluster> clusters) {
+    Kluster closestCluster = null;
     double closestDistance = Double.MAX_VALUE;
-    for (Cluster cluster : clusters) {
+    for (Kluster cluster : clusters) {
       double distance = measure.distance(cluster.getCenter(), point);
       if (closestCluster == null || closestDistance > distance) {
         closestCluster = cluster;
@@ -107,9 +107,9 @@ public class KMeansClusterer {
   /**
    * Sequential implementation to test convergence and update cluster centers
    */
-  protected boolean testConvergence(Iterable<Cluster> clusters, double distanceThreshold) {
+  protected boolean testConvergence(Iterable<Kluster> clusters, double distanceThreshold) {
     boolean converged = true;
-    for (Cluster cluster : clusters) {
+    for (Kluster cluster : clusters) {
       if (!computeConvergence(cluster, distanceThreshold)) {
         converged = false;
       }
@@ -119,7 +119,7 @@ public class KMeansClusterer {
   }
 
   public void outputPointWithClusterInfo(Vector vector,
-                                         Iterable<Cluster> clusters,
+                                         Iterable<Kluster> clusters,
                                          Mapper<?,?,IntWritable,WeightedPropertyVectorWritable>.Context context)
     throws IOException, InterruptedException {
     AbstractCluster nearestCluster = null;
@@ -146,7 +146,7 @@ public class KMeansClusterer {
    * @param clusters
    *          a List<Cluster> to test.
    */
-  protected void emitPointToNearestCluster(Vector point, Iterable<Cluster> clusters, Writer writer)
+  protected void emitPointToNearestCluster(Vector point, Iterable<Kluster> clusters, Writer writer)
     throws IOException {
     AbstractCluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
@@ -177,21 +177,21 @@ public class KMeansClusterer {
    * @param maxIter
    *          the maximum number of iterations
    */
-  public static List<List<Cluster>> clusterPoints(Iterable<Vector> points,
-                                                  List<Cluster> clusters,
+  public static List<List<Kluster>> clusterPoints(Iterable<Vector> points,
+                                                  List<Kluster> clusters,
                                                   DistanceMeasure measure,
                                                   int maxIter,
                                                   double distanceThreshold) {
-    List<List<Cluster>> clustersList = Lists.newArrayList();
+    List<List<Kluster>> clustersList = Lists.newArrayList();
     clustersList.add(clusters);
 
     boolean converged = false;
     int iteration = 0;
     while (!converged && iteration < maxIter) {
       log.info("Reference Iteration: {}", iteration);
-      List<Cluster> next = Lists.newArrayList();
-      for (Cluster c : clustersList.get(iteration)) {
-        next.add(new Cluster(c.getCenter(), c.getId(), measure));
+      List<Kluster> next = Lists.newArrayList();
+      for (Kluster c : clustersList.get(iteration)) {
+        next.add(new Kluster(c.getCenter(), c.getId(), measure));
       }
       clustersList.add(next);
       converged = runKMeansIteration(points, next, measure, distanceThreshold);
@@ -212,7 +212,7 @@ public class KMeansClusterer {
    *          a DistanceMeasure to use
    */
   protected static boolean runKMeansIteration(Iterable<Vector> points,
-                                              Iterable<Cluster> clusters,
+                                              Iterable<Kluster> clusters,
                                               DistanceMeasure measure,
                                               double distanceThreshold) {
     // iterate through all points, assigning each to the nearest cluster
@@ -223,7 +223,7 @@ public class KMeansClusterer {
     return clusterer.testConvergence(clusters, distanceThreshold);
   }
 
-  public boolean computeConvergence(Cluster cluster, double distanceThreshold) {
+  public boolean computeConvergence(Kluster cluster, double distanceThreshold) {
     return cluster.computeConvergence(measure, distanceThreshold);
   }
 

@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Given an Input Path containing a {@link org.apache.hadoop.io.SequenceFile}, randomly select k vectors and
- * write them to the output file as a {@link org.apache.mahout.clustering.kmeans.Cluster} representing the
+ * write them to the output file as a {@link org.apache.mahout.clustering.kmeans.Kluster} representing the
  * initial centroid to use.
  */
 public final class RandomSeedGenerator {
@@ -74,10 +74,10 @@ public final class RandomSeedGenerator {
       }
       
       FileStatus[] inputFiles = fs.globStatus(inputPathPattern, PathFilters.logsCRCFilter());
-      SequenceFile.Writer writer = SequenceFile.createWriter(fs, conf, outFile, Text.class, Cluster.class);
+      SequenceFile.Writer writer = SequenceFile.createWriter(fs, conf, outFile, Text.class, Kluster.class);
       Random random = RandomUtils.getRandom();
       List<Text> chosenTexts = Lists.newArrayListWithCapacity(k);
-      List<Cluster> chosenClusters = Lists.newArrayListWithCapacity(k);
+      List<Kluster> chosenClusters = Lists.newArrayListWithCapacity(k);
       int nextClusterId = 0;
       
       for (FileStatus fileStatus : inputFiles) {
@@ -88,7 +88,7 @@ public final class RandomSeedGenerator {
              : new SequenceFileIterable<Writable,VectorWritable>(fileStatus.getPath(), true, conf)) {
           Writable key = record.getFirst();
           VectorWritable value = record.getSecond();
-          Cluster newCluster = new Cluster(value.get(), nextClusterId++, measure);
+          Kluster newCluster = new Kluster(value.get(), nextClusterId++, measure);
           newCluster.observe(value.get(), 1);
           Text newText = new Text(key.toString());
           int currentSize = chosenTexts.size();

@@ -34,7 +34,7 @@ public class KMeansMapper extends Mapper<WritableComparable<?>, VectorWritable, 
 
   private KMeansClusterer clusterer;
 
-  private final Collection<Cluster> clusters = Lists.newArrayList();
+  private final Collection<Kluster> clusters = Lists.newArrayList();
 
   @Override
   protected void map(WritableComparable<?> key, VectorWritable point, Context context)
@@ -67,7 +67,7 @@ public class KMeansMapper extends Mapper<WritableComparable<?>, VectorWritable, 
    * @param clusters
    *          a List<Cluster>
    */
-  void setup(Collection<Cluster> clusters, DistanceMeasure measure) {
+  void setup(Collection<Kluster> clusters, DistanceMeasure measure) {
     this.clusters.clear();
     this.clusters.addAll(clusters);
     this.clusterer = new KMeansClusterer(measure);

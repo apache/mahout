@@ -30,16 +30,16 @@ import org.apache.mahout.clustering.ClusterObservations;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 
-public class KMeansReducer extends Reducer<Text, ClusterObservations, Text, Cluster> {
+public class KMeansReducer extends Reducer<Text, ClusterObservations, Text, Kluster> {
 
-  private Map<String, Cluster> clusterMap;
+  private Map<String, Kluster> clusterMap;
   private double convergenceDelta;
   private KMeansClusterer clusterer;
 
   @Override
   protected void reduce(Text key, Iterable<ClusterObservations> values, Context context)
     throws IOException, InterruptedException {
-    Cluster cluster = clusterMap.get(key.toString());
+    Kluster cluster = clusterMap.get(key.toString());
     for (ClusterObservations delta : values) {
       cluster.observe(delta);
     }
@@ -66,7 +66,7 @@ public class KMeansReducer extends Reducer<Text, ClusterObservations, Text, Clus
 
     String path = conf.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
     if (!path.isEmpty()) {
-      Collection<Cluster> clusters = Lists.newArrayList();
+      Collection<Kluster> clusters = Lists.newArrayList();
       KMeansUtil.configureWithClusterInfo(conf, new Path(path), clusters);
       setClusterMap(clusters);
       if (clusterMap.isEmpty()) {
@@ -75,15 +75,15 @@ public class KMeansReducer extends Reducer<Text, ClusterObservations, Text, Clus
     }
   }
 
-  private void setClusterMap(Collection<Cluster> clusters) {
+  private void setClusterMap(Collection<Kluster> clusters) {
     clusterMap = Maps.newHashMap();
-    for (Cluster cluster : clusters) {
+    for (Kluster cluster : clusters) {
       clusterMap.put(cluster.getIdentifier(), cluster);
     }
     clusters.clear();
   }
 
-  public void setup(Collection<Cluster> clusters, DistanceMeasure measure) {
+  public void setup(Collection<Kluster> clusters, DistanceMeasure measure) {
     setClusterMap(clusters);
     this.clusterer = new KMeansClusterer(measure);
   }
