@@ -59,6 +59,8 @@ public final class DefaultOptionCreator {
   
   public static final String T4_OPTION = "t4";
   
+  public static final String OUTLIER_THRESHOLD = "outlierThreshold";
+  
   public static final String CLUSTER_FILTER_OPTION = "clusterFilter";
   
   public static final String THRESHOLD_OPTION = "threshold";
@@ -401,6 +403,20 @@ public static DefaultOptionBuilder clusterFilterOption() {
                 .withMinimum(1).withMaximum(1).create())
         .withDescription(
             "If present, the input directory already contains MeanShiftCanopies");
+  }
+  
+  /**
+   * Returns a default command line option for specification of OUTLIER THRESHOLD value. Used by
+   * Cluster Classification.
+   */
+  public static DefaultOptionBuilder classificationThresholdOption() {
+    return new DefaultOptionBuilder()
+        .withLongName(OUTLIER_THRESHOLD)
+        .withRequired(false)
+        .withArgument(
+            new ArgumentBuilder().withName(OUTLIER_THRESHOLD).withMinimum(1)
+                .withMaximum(1).create()).withDescription("Outlier threshold value")
+        .withShortName(OUTLIER_THRESHOLD);
   }
   
 }

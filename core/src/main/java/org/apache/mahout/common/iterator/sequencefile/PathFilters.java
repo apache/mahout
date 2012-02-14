@@ -32,6 +32,17 @@ public final class PathFilters {
       return name.startsWith("part-") && !name.endsWith(".crc");
     }
   };
+  
+  /**
+   * Pathfilter to read the final clustering file.
+   */
+  private static final PathFilter CLUSTER_FINAL = new PathFilter() {
+    @Override
+    public boolean accept(Path path) {
+      String name = path.getName();
+      return name.startsWith("clusters-") && name.endsWith("-final");
+    }
+  };
 
   private static final PathFilter LOGS_CRC_INSTANCE = new PathFilter() {
     @Override
@@ -50,6 +61,13 @@ public final class PathFilters {
    */
   public static PathFilter partFilter() {
     return PART_FILE_INSTANCE;
+  }
+  
+  /**
+   * @return {@link PathFilter} that accepts paths whose file name starts with "part-" and ends with "-final".
+   */
+  public static PathFilter finalPartFilter() {
+    return CLUSTER_FINAL;
   }
 
   /**

@@ -24,7 +24,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
@@ -49,7 +48,7 @@ public final class ClusterCountReader {
    */
   public static int getNumberOfClusters(Path clusterOutputPath, Configuration conf) throws IOException {
     FileSystem fileSystem = clusterOutputPath.getFileSystem(conf);
-    FileStatus[] clusterFiles = fileSystem.listStatus(clusterOutputPath, CLUSTER_FINAL);
+    FileStatus[] clusterFiles = fileSystem.listStatus(clusterOutputPath, PathFilters.finalPartFilter());
     int numberOfClusters = 0;
     Iterator<?> it = new SequenceFileDirValueIterator<Writable>(clusterFiles[0].getPath(),
                                                                 PathType.LIST,
@@ -64,14 +63,4 @@ public final class ClusterCountReader {
     return numberOfClusters;
   }
 
-  /**
-   * Pathfilter to read the final clustering file.
-   */
-  private static final PathFilter CLUSTER_FINAL = new PathFilter() {
-    @Override
-    public boolean accept(Path path) {
-      String name = path.getName();
-      return name.startsWith("clusters-") && name.endsWith("-final");
-    }
-  };
 }
