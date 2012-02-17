@@ -76,7 +76,7 @@ import com.google.common.base.Preconditions;
  *
  * </p>
  */
-public final class PlusAnonymousUserDataModel implements DataModel {
+public class PlusAnonymousUserDataModel implements DataModel {
 
   public static final long TEMP_USER_ID = Long.MIN_VALUE;
   
@@ -87,6 +87,10 @@ public final class PlusAnonymousUserDataModel implements DataModel {
   public PlusAnonymousUserDataModel(DataModel delegate) {
     this.delegate = delegate;
     this.prefItemIDs = new FastIDSet();
+  }
+
+  protected DataModel getDelegate() {
+    return delegate;
   }
   
   public void setTempPrefs(PreferenceArray prefs) {
