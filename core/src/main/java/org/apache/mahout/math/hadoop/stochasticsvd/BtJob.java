@@ -51,6 +51,8 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.function.Functions;
+import org.apache.mahout.math.function.PlusMult;
 import org.apache.mahout.math.hadoop.stochasticsvd.qr.QRLastStep;
 
 /**
@@ -80,12 +82,17 @@ public final class BtJob {
   public static final String OUTPUT_Q = "Q";
   public static final String OUTPUT_BT = "part";
   public static final String OUTPUT_BBT = "bbt";
+  public static final String OUTPUT_SQ = "sq";
+  public static final String OUTPUT_SB = "sb";
+
   public static final String PROP_QJOB_PATH = "ssvd.QJob.path";
   public static final String PROP_OUPTUT_BBT_PRODUCTS =
     "ssvd.BtJob.outputBBtProducts";
   public static final String PROP_OUTER_PROD_BLOCK_HEIGHT =
     "ssvd.outerProdBlockHeight";
   public static final String PROP_RHAT_BROADCAST = "ssvd.rhat.broadcast";
+
+  public static final String PROP_XI_PATH = "ssvdpca.xi.path";
 
   static final double SPARSE_ZEROS_PCT_THRESHOLD = 0.1;
 
@@ -105,16 +112,9 @@ public final class BtJob {
     private SparseRowBlockAccumulator btCollector;
     private Context mapContext;
 
-    @Override
-    protected void cleanup(Context context) throws IOException,
-      InterruptedException {
-      IOUtils.close(closeables);
-    }
-
-    @SuppressWarnings("unchecked")
-    private void outputQRow(Writable key, Writable value) throws IOException {
-      outputs.getCollector(OUTPUT_Q, null).collect(key, value);
-    }
+    // pca stuff
+    private Vector sqAccum;
+    private boolean computeSq;
 
     /**
      * We maintain A and QtHat inputs partitioned the same way, so we
@@ -135,6 +135,14 @@ public final class BtJob {
 
       // make sure Qs are inheriting A row labels.
       outputQRow(key, qRowValue);
+
+      // MAHOUT-817
+      if (computeSq) {
+        if (sqAccum == null) {
+          sqAccum = new DenseVector(kp);
+        }
+        sqAccum.assign(qRow, Functions.PLUS);
+      }
 
       if (btRow == null) {
         btRow = new DenseVector(kp);
@@ -166,7 +174,9 @@ public final class BtJob {
       InterruptedException {
       super.setup(context);
 
-      Path qJobPath = new Path(context.getConfiguration().get(PROP_QJOB_PATH));
+      Configuration conf = context.getConfiguration();
+
+      Path qJobPath = new Path(conf.get(PROP_QJOB_PATH));
 
       /*
        * actually this is kind of dangerous because this routine thinks we need
@@ -182,37 +192,35 @@ public final class BtJob {
       SequenceFileValueIterator<DenseBlockWritable> qhatInput =
         new SequenceFileValueIterator<DenseBlockWritable>(qInputPath,
                                                           true,
-                                                          context.getConfiguration());
+                                                          conf);
       closeables.addFirst(qhatInput);
 
       /*
        * read all r files _in order of task ids_, i.e. partitions (aka group
        * nums).
-       * 
+       *
        * Note: if broadcast option is used, this comes from distributed cache
        * files rather than hdfs path.
        */
 
       SequenceFileDirValueIterator<VectorWritable> rhatInput;
 
-      boolean distributedRHat =
-        context.getConfiguration().get(PROP_RHAT_BROADCAST) != null;
+      boolean distributedRHat = conf.get(PROP_RHAT_BROADCAST) != null;
       if (distributedRHat) {
 
-        Path[] rFiles =
-          DistributedCache.getLocalCacheFiles(context.getConfiguration());
+        Path[] rFiles = DistributedCache.getLocalCacheFiles(conf);
 
         Validate.notNull(rFiles,
                          "no RHat files in distributed cache job definition");
 
-        Configuration conf = new Configuration();
-        conf.set("fs.default.name", "file:///");
+        Configuration lconf = new Configuration();
+        lconf.set("fs.default.name", "file:///");
 
         rhatInput =
           new SequenceFileDirValueIterator<VectorWritable>(rFiles,
-                                                           SSVDSolver.PARTITION_COMPARATOR,
+                                                           SSVDHelper.PARTITION_COMPARATOR,
                                                            true,
-                                                           conf);
+                                                           lconf);
 
       } else {
         Path rPath = new Path(qJobPath, QJob.OUTPUT_RHAT + "-*");
@@ -220,15 +228,15 @@ public final class BtJob {
           new SequenceFileDirValueIterator<VectorWritable>(rPath,
                                                            PathType.GLOB,
                                                            null,
-                                                           SSVDSolver.PARTITION_COMPARATOR,
+                                                           SSVDHelper.PARTITION_COMPARATOR,
                                                            true,
-                                                           context.getConfiguration());
+                                                           conf);
       }
 
       Validate.isTrue(rhatInput.hasNext(), "Empty R-hat input!");
 
       closeables.addFirst(rhatInput);
-      outputs = new MultipleOutputs(new JobConf(context.getConfiguration()));
+      outputs = new MultipleOutputs(new JobConf(conf));
       closeables.addFirst(new IOUtils.MultipleOutputsCloseableAdapter(outputs));
 
       qr = new QRLastStep(qhatInput, rhatInput, blockNum);
@@ -258,12 +266,36 @@ public final class BtJob {
         };
 
       btCollector =
-        new SparseRowBlockAccumulator(context.getConfiguration()
-                                             .getInt(PROP_OUTER_PROD_BLOCK_HEIGHT,
-                                                     -1),
-                                      btBlockCollector);
+        new SparseRowBlockAccumulator(conf.getInt(PROP_OUTER_PROD_BLOCK_HEIGHT,
+                                                  -1), btBlockCollector);
       closeables.addFirst(btCollector);
 
+      // MAHOUT-817
+      computeSq = (conf.get(PROP_XI_PATH) != null);
+
+    }
+
+    @Override
+    protected void cleanup(Context context) throws IOException,
+      InterruptedException {
+      try {
+        if (sqAccum != null) {
+          /*
+           * hack: we will output sq partial sums with index -1 for summation.
+           */
+          SparseRowBlockWritable sbrw = new SparseRowBlockWritable(1);
+          sbrw.plusRow(0, sqAccum);
+          LongWritable lw = new LongWritable(-1);
+          context.write(lw, sbrw);
+        }
+      } finally {
+        IOUtils.close(closeables);
+      }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void outputQRow(Writable key, Writable value) throws IOException {
+      outputs.getCollector(OUTPUT_Q, null).collect(key, value);
     }
   }
 
@@ -316,28 +348,40 @@ public final class BtJob {
     private final IntWritable btKey = new IntWritable();
     private final VectorWritable btValue = new VectorWritable();
 
+    // MAHOUT-817
+    private Vector xi;
+    private final PlusMult pmult = new PlusMult(0);
+    private Vector sbAccum;
+
     @Override
     protected void setup(Context context) throws IOException,
       InterruptedException {
 
-      blockHeight =
-        context.getConfiguration().getInt(PROP_OUTER_PROD_BLOCK_HEIGHT, -1);
+      Configuration conf = context.getConfiguration();
+      blockHeight = conf.getInt(PROP_OUTER_PROD_BLOCK_HEIGHT, -1);
 
-      outputBBt =
-        context.getConfiguration().getBoolean(PROP_OUPTUT_BBT_PRODUCTS, false);
+      outputBBt = conf.getBoolean(PROP_OUPTUT_BBT_PRODUCTS, false);
 
       if (outputBBt) {
-        int k = context.getConfiguration().getInt(QJob.PROP_K, -1);
-        int p = context.getConfiguration().getInt(QJob.PROP_P, -1);
+        int k = conf.getInt(QJob.PROP_K, -1);
+        int p = conf.getInt(QJob.PROP_P, -1);
 
         Validate.isTrue(k > 0, "invalid k parameter");
         Validate.isTrue(p >= 0, "invalid p parameter");
         mBBt = new UpperTriangular(k + p);
 
-        outputs = new MultipleOutputs(new JobConf(context.getConfiguration()));
-        closeables.addFirst(new IOUtils.MultipleOutputsCloseableAdapter(outputs));
-
       }
+
+      String xiPathStr = conf.get(PROP_XI_PATH);
+      if (xiPathStr != null) {
+        xi = SSVDHelper.loadAndSumUpVectors(new Path(xiPathStr), conf);
+      }
+
+      if (outputBBt || xi != null) {
+        outputs = new MultipleOutputs(new JobConf(conf));
+        closeables.addFirst(new IOUtils.MultipleOutputsCloseableAdapter(outputs));
+      }
+
     }
 
     @Override
@@ -349,6 +393,19 @@ public final class BtJob {
       accum.clear();
       for (SparseRowBlockWritable bw : values) {
         accum.plusBlock(bw);
+      }
+
+      // MAHOUT-817:
+      if (key.get() == -1L) {
+
+        Vector sq = accum.getRows()[0];
+
+        @SuppressWarnings("unchecked")
+        OutputCollector<IntWritable, VectorWritable> sqOut =
+          outputs.getCollector(OUTPUT_SQ, null);
+
+        sqOut.collect(new IntWritable(0), new VectorWritable(sq));
+        return;
       }
 
       /*
@@ -378,6 +435,18 @@ public final class BtJob {
           }
         }
 
+        // MAHOUT-817
+        if (xi != null) {
+          // code defensively against shortened xi
+          int btIndex = btKey.get();
+          double xii = xi.size() > btIndex ? xi.getQuick(btIndex) : 0.0;
+          // compute s_b
+          pmult.setMultiplicator(xii);
+          if (sbAccum == null)
+            sbAccum = new DenseVector(btRow.size());
+          sbAccum.assign(btRow, pmult);
+        }
+
       }
     }
 
@@ -396,17 +465,27 @@ public final class BtJob {
           collector.collect(new IntWritable(),
                             new VectorWritable(new DenseVector(mBBt.getData())));
         }
+
+        // MAHOUT-817
+        if (sbAccum != null) {
+          @SuppressWarnings("unchecked")
+          OutputCollector<IntWritable, VectorWritable> collector =
+            outputs.getCollector(OUTPUT_SB, null);
+
+          collector.collect(new IntWritable(), new VectorWritable(sbAccum));
+
+        }
       } finally {
         IOUtils.close(closeables);
       }
 
     }
-
   }
 
   public static void run(Configuration conf,
                          Path[] inputPathA,
                          Path inputPathQJob,
+                         Path xiPath,
                          Path outputPath,
                          int minSplitSize,
                          int k,
@@ -429,6 +508,19 @@ public final class BtJob {
     if (outputBBtProducts) {
       MultipleOutputs.addNamedOutput(oldApiJob,
                                      OUTPUT_BBT,
+                                     org.apache.hadoop.mapred.SequenceFileOutputFormat.class,
+                                     IntWritable.class,
+                                     VectorWritable.class);
+    }
+    if (xiPath != null) {
+      // compute pca -related stuff as well
+      MultipleOutputs.addNamedOutput(oldApiJob,
+                                     OUTPUT_SQ,
+                                     org.apache.hadoop.mapred.SequenceFileOutputFormat.class,
+                                     IntWritable.class,
+                                     VectorWritable.class);
+      MultipleOutputs.addNamedOutput(oldApiJob,
+                                     OUTPUT_SB,
                                      org.apache.hadoop.mapred.SequenceFileOutputFormat.class,
                                      IntWritable.class,
                                      VectorWritable.class);
@@ -477,6 +569,13 @@ public final class BtJob {
     job.getConfiguration().setInt(PROP_OUTER_PROD_BLOCK_HEIGHT, btBlockHeight);
 
     job.setNumReduceTasks(numReduceTasks);
+
+    /*
+     * PCA-related options, MAHOUT-817
+     */
+    if (xiPath != null) {
+      job.getConfiguration().set(PROP_XI_PATH, xiPath.toString());
+    }
 
     /*
      * we can broadhast Rhat files since all of them are reuqired by each job,

@@ -24,8 +24,6 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Random;
 
-import com.google.common.io.Closeables;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -36,11 +34,14 @@ import org.apache.hadoop.io.compress.DefaultCodec;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
+import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.SingularValueDecomposition;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.junit.Test;
+
+import com.google.common.io.Closeables;
 
 /**
  * 
@@ -58,15 +59,15 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
    * removing from tests to reduce test running time
    */
   /* @Test */
-  public void testSSVDSolverSparse() throws IOException { 
+  public void testSSVDSolverSparse() throws IOException {
     runSSVDSolver(0);
   }
-  
+
   @Test
-  public void testSSVDSolverPowerIterations1() throws IOException { 
+  public void testSSVDSolverPowerIterations1() throws IOException {
     runSSVDSolver(1);
   }
-  
+
   public void runSSVDSolver(int q) throws IOException {
 
     Configuration conf = new Configuration();
@@ -142,45 +143,46 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
                      3);
     ssvd.setOuterBlockHeight(500);
     ssvd.setAbtBlockHeight(251);
-    
+
     /*
      * removing V,U jobs from this test to reduce running time. i will keep them
      * put in the dense test though.
      */
     ssvd.setComputeU(false);
     ssvd.setComputeV(false);
-    
+
     ssvd.setOverwrite(true);
     ssvd.setQ(q);
     ssvd.setBroadcast(true);
     ssvd.run();
 
-    double[] stochasticSValues = ssvd.getSingularValues();
+    Vector stochasticSValues = ssvd.getSingularValues();
     System.out.println("--SSVD solver singular values:");
     dumpSv(stochasticSValues);
     System.out.println("--Colt SVD solver singular values:");
 
     // try to run the same thing without stochastic algo
-    double[][] a = SSVDSolver.loadDistributedRowMatrix(fs, aPath, conf);
+    double[][] a = SSVDHelper.loadDistributedRowMatrix(fs, aPath, conf);
 
     // SingularValueDecompositionImpl svd=new SingularValueDecompositionImpl(new
     // Array2DRowRealMatrix(a));
     SingularValueDecomposition svd2 =
       new SingularValueDecomposition(new DenseMatrix(a));
 
-    double[] svalues2 = svd2.getSingularValues();
+    Vector svalues2 = new DenseVector(svd2.getSingularValues());
     dumpSv(svalues2);
 
     for (int i = 0; i < k + p; i++) {
-      assertTrue(Math.abs(svalues2[i] - stochasticSValues[i]) <= s_epsilon);
+      assertTrue(Math.abs(svalues2.getQuick(i) - stochasticSValues.getQuick(i)) <= s_epsilon);
     }
 
     double[][] mQ =
-      SSVDSolver.loadDistributedRowMatrix(fs, new Path(svdOutPath, "Bt-job/"
+      SSVDHelper.loadDistributedRowMatrix(fs, new Path(svdOutPath, "Bt-job/"
           + BtJob.OUTPUT_Q + "-*"), conf);
 
-    SSVDPrototypeTest
-      .assertOrthonormality(new DenseMatrix(mQ), false, s_epsilon);
+    SSVDCommonTest.assertOrthonormality(new DenseMatrix(mQ),
+                                           false,
+                                           s_epsilon);
 
     /*
      * removing tests on U and V to keep this test leaner. I will keep U,V
@@ -188,27 +190,22 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
      */
 
     /*
-    double[][] u =
-      SSVDSolver.loadDistributedRowMatrix(fs,
-                                          new Path(svdOutPath, "U/[^_]*"),
-                                          conf);
-
-    SSVDPrototypeTest
-      .assertOrthonormality(new DenseMatrix(u), false, s_epsilon);
-    double[][] v =
-      SSVDSolver.loadDistributedRowMatrix(fs,
-                                          new Path(svdOutPath, "V/[^_]*"),
-                                          conf);
-
-    SSVDPrototypeTest
-      .assertOrthonormality(new DenseMatrix(v), false, s_epsilon);
-    */
+     * double[][] u = SSVDSolver.loadDistributedRowMatrix(fs, new
+     * Path(svdOutPath, "U/[^_]*"), conf);
+     * 
+     * SSVDPrototypeTest .assertOrthonormality(new DenseMatrix(u), false,
+     * s_epsilon); double[][] v = SSVDSolver.loadDistributedRowMatrix(fs, new
+     * Path(svdOutPath, "V/[^_]*"), conf);
+     * 
+     * SSVDPrototypeTest .assertOrthonormality(new DenseMatrix(v), false,
+     * s_epsilon);
+     */
   }
 
-  static void dumpSv(double[] s) {
+  static void dumpSv(Vector s) {
     System.out.printf("svs: ");
-    for (double value : s) {
-      System.out.printf("%f  ", value);
+    for (Vector.Element el : s) {
+      System.out.printf("%f  ", el.get());
     }
     System.out.println();
 

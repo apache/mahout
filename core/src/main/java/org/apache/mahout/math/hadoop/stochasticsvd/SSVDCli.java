@@ -17,23 +17,18 @@
 package org.apache.mahout.math.hadoop.stochasticsvd;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
-import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.hadoop.MatrixColumnMeansJob;
 
 /**
  * Mahout CLI adapter for SSVDSolver
@@ -81,6 +76,13 @@ public class SSVDCli extends AbstractJob {
               "br",
               "whether use distributed cache to broadcast matrices wherever possible",
               String.valueOf(true));
+    addOption("pca",
+              "pca",
+              "run in pca mode: compute column-wise mean and subtract from input",
+              String.valueOf(false));
+    addOption("pcaOffset",
+              "xi",
+              "path(glob) of external pca mean (optional, dont compute, use external mean");
     addOption(DefaultOptionCreator.overwriteOption().create());
 
     Map<String, List<String>> pargs = parseArguments(args);
@@ -101,6 +103,10 @@ public class SSVDCli extends AbstractJob {
     boolean cVHalfSigma = Boolean.parseBoolean(getOption("vHalfSigma"));
     int reduceTasks = Integer.parseInt(getOption("reduceTasks"));
     boolean broadcast = Boolean.parseBoolean(getOption("broadcast"));
+    String xiPathStr = getOption("pcaOffset");
+    Path xiPath = xiPathStr == null ? null : new Path(xiPathStr);
+    boolean pca = Boolean.parseBoolean(getOption("pca")) || xiPath != null;
+
     boolean overwrite =
       pargs.containsKey(keyFor(DefaultOptionCreator.OVERWRITE_OPTION));
 
@@ -109,14 +115,17 @@ public class SSVDCli extends AbstractJob {
       throw new IOException("No Hadoop configuration present");
     }
 
+    Path[] inputPaths = new Path[] { getInputPath() };
+
+    // MAHOUT-817
+    if (pca && xiPath == null) {
+      xiPath = new Path(getTempPath(), "xi");
+      MatrixColumnMeansJob.run(conf, inputPaths[0], getTempPath());
+    }
+
     SSVDSolver solver =
-      new SSVDSolver(conf,
-                     new Path[] { getInputPath() },
-                     getTempPath(),
-                     r,
-                     k,
-                     p,
-                     reduceTasks);
+      new SSVDSolver(conf, inputPaths, getTempPath(), r, k, p, reduceTasks);
+
     solver.setMinSplitSize(minSplitSize);
     solver.setComputeU(computeU);
     solver.setComputeV(computeV);
@@ -127,6 +136,7 @@ public class SSVDCli extends AbstractJob {
     solver.setQ(q);
     solver.setBroadcast(broadcast);
     solver.setOverwrite(overwrite);
+    solver.setPcaMeanPath(xiPath);
 
     solver.run();
 
@@ -135,24 +145,8 @@ public class SSVDCli extends AbstractJob {
 
     fs.mkdirs(getOutputPath());
 
-    SequenceFile.Writer sigmaW = null;
-
-    try {
-      sigmaW =
-        SequenceFile.createWriter(fs,
-                                  conf,
-                                  getOutputPath("sigma"),
-                                  NullWritable.class,
-                                  VectorWritable.class);
-      Writable sValues =
-        new VectorWritable(new DenseVector(Arrays.copyOf(solver.getSingularValues(),
-                                                         k),
-                                           true));
-      sigmaW.append(NullWritable.get(), sValues);
-
-    } finally {
-      Closeables.closeQuietly(sigmaW);
-    }
+    Vector svalues = solver.getSingularValues().viewPart(0, k);
+    SSVDHelper.saveVector(svalues, getOutputPath("sigma"), conf);
 
     if (computeU) {
       FileStatus[] uFiles = fs.globStatus(new Path(solver.getUPath()));
@@ -169,7 +163,6 @@ public class SSVDCli extends AbstractJob {
           fs.rename(vf.getPath(), getOutputPath());
         }
       }
-
     }
     return 0;
   }

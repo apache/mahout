@@ -54,6 +54,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.hadoop.stochasticsvd.qr.QRFirstStep;
 
 /**
@@ -65,6 +66,9 @@ public class ABtDenseOutJob {
 
   public static final String PROP_BT_PATH = "ssvd.Bt.path";
   public static final String PROP_BT_BROADCAST = "ssvd.Bt.broadcast";
+  public static final String PROP_SB_PATH = "ssvdpca.sb.path";
+  public static final String PROP_SQ_PATH = "ssvdpca.sq.path";
+  public static final String PROP_XI_PATH = "ssvdpca.xi.path";
 
   private ABtDenseOutJob() {
   }
@@ -99,6 +103,11 @@ public class ABtDenseOutJob {
     private boolean distributedBt;
     private Path[] btLocalPath;
     private Configuration localFsConfig;
+    /*
+     * xi and s_q are PCA-related corrections, per MAHOUT-817
+     */
+    protected Vector xi;
+    protected Vector sq;
 
     @Override
     protected void map(Writable key, VectorWritable value, Context context)
@@ -257,8 +266,26 @@ public class ABtDenseOutJob {
               /*
                * assume btVec is dense
                */
-              for (int s = 0; s < kp; s++) {
-                yiCols[s][j - aRowBegin] += aEl.get() * btVec.getQuick(s);
+              if (xi != null) {
+                /*
+                 * MAHOUT-817: PCA correction for B'. I rewrite the whole
+                 * computation loop so i don't have to check if PCA correction
+                 * is needed at individual element level. It looks bulkier this
+                 * way but perhaps less wasteful on cpu.
+                 */
+                for (int s = 0; s < kp; s++) {
+                  // code defensively against shortened xi
+                  double xii = xi.size() > btIndex ? xi.get(btIndex) : 0.0;
+                  yiCols[s][j - aRowBegin] +=
+                    aEl.get() * (btVec.getQuick(s) - xii * sq.get(s));
+                }
+              } else {
+                /*
+                 * no PCA correction
+                 */
+                for (int s = 0; s < kp; s++) {
+                  yiCols[s][j - aRowBegin] += aEl.get() * btVec.getQuick(s);
+                }
               }
 
             }
@@ -287,25 +314,29 @@ public class ABtDenseOutJob {
     protected void setup(Context context) throws IOException,
       InterruptedException {
 
-      int k =
-        Integer.parseInt(context.getConfiguration().get(QRFirstStep.PROP_K));
-      int p =
-        Integer.parseInt(context.getConfiguration().get(QRFirstStep.PROP_P));
+      Configuration conf = context.getConfiguration();
+      int k = Integer.parseInt(conf.get(QRFirstStep.PROP_K));
+      int p = Integer.parseInt(conf.get(QRFirstStep.PROP_P));
       kp = k + p;
 
       outKey = new SplitPartitionedWritable(context);
 
-      blockHeight =
-        context.getConfiguration().getInt(BtJob.PROP_OUTER_PROD_BLOCK_HEIGHT,
-                                          -1);
-      distributedBt = context.getConfiguration().get(PROP_BT_BROADCAST) != null;
+      blockHeight = conf.getInt(BtJob.PROP_OUTER_PROD_BLOCK_HEIGHT, -1);
+      distributedBt = conf.get(PROP_BT_BROADCAST) != null;
       if (distributedBt) {
-
-        btLocalPath =
-          DistributedCache.getLocalCacheFiles(context.getConfiguration());
-
+        btLocalPath = DistributedCache.getLocalCacheFiles(conf);
         localFsConfig = new Configuration();
         localFsConfig.set("fs.default.name", "file:///");
+      }
+
+      /*
+       * PCA -related corrections (MAHOUT-817)
+       */
+      String xiPathStr = conf.get(PROP_XI_PATH);
+      if (xiPathStr != null) {
+        xi = SSVDHelper.loadAndSumUpVectors(new Path(xiPathStr), conf);
+        sq =
+          SSVDHelper.loadAndSumUpVectors(new Path(conf.get(PROP_SQ_PATH)), conf);
       }
 
     }
@@ -346,14 +377,21 @@ public class ABtDenseOutJob {
     protected OutputCollector<Writable, VectorWritable> rhatCollector;
     protected QRFirstStep qr;
     protected Vector yiRow;
+    protected Vector sb;
 
     @Override
     protected void setup(Context context) throws IOException,
       InterruptedException {
-      blockHeight =
-        context.getConfiguration().getInt(BtJob.PROP_OUTER_PROD_BLOCK_HEIGHT,
-                                          -1);
+      Configuration conf = context.getConfiguration();
+      blockHeight = conf.getInt(BtJob.PROP_OUTER_PROD_BLOCK_HEIGHT, -1);
+      String sbPathStr = conf.get(PROP_SB_PATH);
 
+      /*
+       * PCA -related corrections (MAHOUT-817)
+       */
+      if (sbPathStr != null) {
+        sb = SSVDHelper.loadAndSumUpVectors(new Path(sbPathStr), conf);
+      }
     }
 
     protected void setupBlock(Context context, SplitPartitionedWritable spw)
@@ -407,6 +445,12 @@ public class ABtDenseOutJob {
         }
 
         key.setTaskItemOrdinal(blockBase + k);
+
+        // pca offset correction if any
+        if (sb != null) {
+          yiRow.assign(sb, Functions.MINUS);
+        }
+
         qr.collect(key, yiRow);
       }
 
@@ -466,6 +510,9 @@ public class ABtDenseOutJob {
   public static void run(Configuration conf,
                          Path[] inputAPaths,
                          Path inputBtGlob,
+                         Path xiPath,
+                         Path sqPath,
+                         Path sbPath,
                          Path outputPath,
                          int aBlockRows,
                          int minSplitSize,
@@ -508,6 +555,15 @@ public class ABtDenseOutJob {
     job.getConfiguration().setInt(QRFirstStep.PROP_K, k);
     job.getConfiguration().setInt(QRFirstStep.PROP_P, p);
     job.getConfiguration().set(PROP_BT_PATH, inputBtGlob.toString());
+
+    /*
+     * PCA-related options, MAHOUT-817
+     */
+    if (xiPath != null) {
+      job.getConfiguration().set(PROP_XI_PATH, xiPath.toString());
+      job.getConfiguration().set(PROP_SB_PATH, sbPath.toString());
+      job.getConfiguration().set(PROP_SQ_PATH, sqPath.toString());
+    }
 
     job.setNumReduceTasks(numReduceTasks);
 

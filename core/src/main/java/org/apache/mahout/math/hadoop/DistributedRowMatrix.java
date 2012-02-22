@@ -17,8 +17,12 @@
 
 package org.apache.mahout.math.hadoop;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterators;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Iterator;
+
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -39,10 +43,8 @@ import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-import java.util.Iterator;
+import com.google.common.base.Function;
+import com.google.common.collect.Iterators;
 
 /**
  * DistributedRowMatrix is a FileSystem-backed VectorIterable in which the vectors live in a
@@ -64,7 +66,7 @@ import java.util.Iterator;
  */
 public class DistributedRowMatrix implements VectorIterable, Configurable {
   public static final String KEEP_TEMP_FILES = "DistributedMatrix.keep.temp.files";
-  
+
   private static final Logger log = LoggerFactory.getLogger(DistributedRowMatrix.class);
 
   private final Path inputPath;
@@ -176,18 +178,51 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
       throw new CardinalityException(numRows, other.numRows());
     }
     Path outPath = new Path(outputTmpBasePath.getParent(), "productWith-" + (System.nanoTime() & 0xFF));
-    
+
     Configuration initialConf = getConf() == null ? new Configuration() : getConf();
     Configuration conf =
-        MatrixMultiplicationJob.createMatrixMultiplyJobConf(initialConf, 
-                                                            rowPath, 
-                                                            other.rowPath, 
-                                                            outPath, 
+        MatrixMultiplicationJob.createMatrixMultiplyJobConf(initialConf,
+                                                            rowPath,
+                                                            other.rowPath,
+                                                            outPath,
                                                             other.numCols);
     JobClient.runJob(new JobConf(conf));
     DistributedRowMatrix out = new DistributedRowMatrix(outPath, outputTmpPath, numCols, other.numCols());
     out.setConf(conf);
     return out;
+  }
+
+  public Vector columnMeans() throws IOException, InterruptedException, ClassNotFoundException,
+  IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException,
+  InvocationTargetException, NoSuchMethodException {
+    return columnMeans("SequentialAccessSparseVector");
+  }
+
+  /**
+   * Returns the column-wise mean of a DistributedRowMatrix
+   *
+   * @param vectorClass
+   *          desired class for the column-wise mean vector e.g.
+   *          RandomAccessSparseVector, DenseVector
+   * @return Vector containing the column-wise mean of this
+   */
+  public Vector columnMeans(String vectorClass) throws IOException,
+      InterruptedException, IllegalArgumentException, SecurityException,
+      ClassNotFoundException, InstantiationException, IllegalAccessException,
+      InvocationTargetException, NoSuchMethodException {
+    Path outputVectorTmpPath =
+        new Path(outputTmpBasePath, new Path(Long.toString(System.nanoTime())));
+    Configuration initialConf =
+        getConf() == null ? new Configuration() : getConf();
+    String vectorClassFull = "org.apache.mahout.math." + vectorClass;
+    Vector mean =
+        MatrixColumnMeansJob.run(initialConf, rowPath, outputVectorTmpPath,
+            vectorClassFull);
+    if (!keepTempFiles) {
+      FileSystem fs = outputVectorTmpPath.getFileSystem(conf);
+      fs.delete(outputVectorTmpPath, true);
+    }
+    return mean;
   }
 
   public DistributedRowMatrix transpose() throws IOException {
@@ -207,7 +242,7 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
       Path outputVectorTmpPath = new Path(outputTmpBasePath,
                                           new Path(Long.toString(System.nanoTime())));
       Configuration conf =
-          TimesSquaredJob.createTimesJobConf(initialConf, 
+          TimesSquaredJob.createTimesJobConf(initialConf,
                                              v,
                                              numRows,
                                              rowPath,
@@ -325,7 +360,7 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
       col = in.readInt();
       val = in.readDouble();
     }
-    
+
     @Override
     public String toString() {
       return "(" + row + ',' + col + "):" + val;

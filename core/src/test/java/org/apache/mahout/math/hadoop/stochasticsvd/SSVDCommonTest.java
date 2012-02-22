@@ -28,20 +28,13 @@ import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.hadoop.stochasticsvd.qr.GivensThinSolver;
 import org.junit.Test;
 
-/** 
- * Tests parts of of Stochastic SVD solver code in local mode
- * using "prototype" code (class that simulates processes 
- * actually happenning in the MR jobs).
+/**
+ * Shared ssvd test code
  */
-public class SSVDPrototypeTest extends MahoutTestCase {
+public class SSVDCommonTest extends MahoutTestCase {
 
   private static final double SCALE = 1000;
   private static final double SVD_EPSILON = 1.0e-10;
-
-  @Test
-  public void testSSVDPrototype() throws Exception {
-    SSVDPrototype.main(null);
-  }
 
   @Test
   public void testGivensQR() throws Exception {
@@ -49,6 +42,7 @@ public class SSVDPrototypeTest extends MahoutTestCase {
     Matrix m = new DenseMatrix(3, 3);
     m.assign(new DoubleFunction() {
       private final Random rnd = RandomUtils.getRandom();
+
       @Override
       public double apply(double arg0) {
         return rnd.nextDouble() * SCALE;
@@ -65,21 +59,25 @@ public class SSVDPrototypeTest extends MahoutTestCase {
     m.setQuick(2, 1, 8);
     m.setQuick(2, 2, 9);
 
-    GivensThinSolver qrSolver = new GivensThinSolver(m.rowSize(), m.columnSize());
+    GivensThinSolver qrSolver =
+      new GivensThinSolver(m.rowSize(), m.columnSize());
     qrSolver.solve(m);
 
     Matrix qtm = new DenseMatrix(qrSolver.getThinQtTilde());
 
     assertOrthonormality(qtm.transpose(), false, SVD_EPSILON);
 
-    Matrix aClone = new DenseMatrix(qrSolver.getThinQtTilde()).transpose()
-        .times(qrSolver.getRTilde());
+    Matrix aClone =
+      new DenseMatrix(qrSolver.getThinQtTilde()).transpose()
+                                                .times(qrSolver.getRTilde());
 
     System.out.println("aclone : " + aClone);
 
   }
 
-  public static void assertOrthonormality(Matrix mtx, boolean insufficientRank, double epsilon) {
+  public static void assertOrthonormality(Matrix mtx,
+                                          boolean insufficientRank,
+                                          double epsilon) {
     int n = mtx.columnSize();
     int rank = 0;
     for (int i = 0; i < n; i++) {
@@ -99,7 +97,8 @@ public class SSVDPrototypeTest extends MahoutTestCase {
         assertTrue(Math.abs((i == j && rank > j ? 1 : 0) - dot) < epsilon);
       }
     }
-    assertTrue((!insufficientRank && rank == n) || (insufficientRank && rank < n));
+    assertTrue((!insufficientRank && rank == n)
+        || (insufficientRank && rank < n));
 
   }
 

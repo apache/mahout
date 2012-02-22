@@ -37,6 +37,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.function.Functions;
 
 /**
  * Computes U=Q*Uhat of SSVD (optionally adding x pow(Sigma, 0.5) )
@@ -51,7 +52,7 @@ public class UJob {
 
   private Job job;
 
-  public void start(Configuration conf, Path inputPathQ, Path inputUHatPath,
+  public void run(Configuration conf, Path inputPathQ, Path inputUHatPath,
       Path sigmaPath, Path outputPath, int k, int numReduceTasks,
       Class<? extends Writable> labelClass, boolean uHalfSigma)
     throws ClassNotFoundException, InterruptedException, IOException {
@@ -135,7 +136,7 @@ public class UJob {
       Path sigmaPath = new Path(context.getConfiguration().get(PROP_SIGMA_PATH));
       FileSystem fs = FileSystem.get(uHatPath.toUri(), context.getConfiguration());
 
-      uHat = new DenseMatrix(SSVDSolver.loadDistributedRowMatrix(fs,
+      uHat = new DenseMatrix(SSVDHelper.loadDistributedRowMatrix(fs,
           uHatPath, context.getConfiguration()));
       // since uHat is (k+p) x (k+p)
       kp = uHat.columnSize();
@@ -144,11 +145,8 @@ public class UJob {
       uRowWritable = new VectorWritable(uRow);
 
       if (context.getConfiguration().get(PROP_U_HALFSIGMA) != null) {
-        sValues = new DenseVector(SSVDSolver.loadDistributedRowMatrix(fs,
-            sigmaPath, context.getConfiguration())[0], true);
-        for (int i = 0; i < k; i++) {
-          sValues.setQuick(i, Math.sqrt(sValues.getQuick(i)));
-        }
+        sValues = SSVDHelper.loadVector(sigmaPath, context.getConfiguration());
+        sValues.assign(Functions.SQRT);
       }
 
     }

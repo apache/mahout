@@ -41,10 +41,12 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
 
   private static final double s_epsilon = 1.0E-10d;
 
-  // I actually never saw errors more than 3% worst case for this test,
-  // but since it's non-deterministic test, it still may occasionally produce
-  // bad results with a non-zero probability, so i put this pct% for error
-  // margin high enough so it (almost) never fails.
+  /*
+   * I actually never saw errors more than 3% worst case for this particular
+   * test, but since it's non-deterministic test, it still may occasionally
+   * produce bad results with a non-zero probability, so i put this pct% for
+   * error margin high enough so it (almost) never fails.
+   */
   private static final double s_precisionPct = 10;
 
   @Test
@@ -135,7 +137,7 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
     ssvd.setBroadcast(false);
     ssvd.run();
 
-    double[] stochasticSValues = ssvd.getSingularValues();
+    Vector stochasticSValues = ssvd.getSingularValues();
     System.out.println("--SSVD solver singular values:");
     dumpSv(stochasticSValues);
 
@@ -167,36 +169,36 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
     // used to generate surrogate input
 
     for (int i = 0; i < k; i++) {
-      assertTrue(Math.abs((singularValues.getQuick(i) - stochasticSValues[i])
+      assertTrue(Math.abs((singularValues.getQuick(i) - stochasticSValues.getQuick(i))
           / singularValues.getQuick(i)) <= s_precisionPct / 100);
     }
 
     double[][] mQ =
-      SSVDSolver.loadDistributedRowMatrix(fs, new Path(svdOutPath, "Bt-job/"
+      SSVDHelper.loadDistributedRowMatrix(fs, new Path(svdOutPath, "Bt-job/"
           + BtJob.OUTPUT_Q + "-*"), conf);
 
-    SSVDPrototypeTest.assertOrthonormality(new DenseMatrix(mQ),
+    SSVDCommonTest.assertOrthonormality(new DenseMatrix(mQ),
                                            false,
                                            s_epsilon);
 
     double[][] u =
-      SSVDSolver.loadDistributedRowMatrix(fs,
+      SSVDHelper.loadDistributedRowMatrix(fs,
                                           new Path(svdOutPath, "U/[^_]*"),
                                           conf);
 
-    SSVDPrototypeTest.assertOrthonormality(new DenseMatrix(u), false, s_epsilon);
+    SSVDCommonTest.assertOrthonormality(new DenseMatrix(u), false, s_epsilon);
     double[][] v =
-      SSVDSolver.loadDistributedRowMatrix(fs,
+      SSVDHelper.loadDistributedRowMatrix(fs,
                                           new Path(svdOutPath, "V/[^_]*"),
                                           conf);
 
-    SSVDPrototypeTest.assertOrthonormality(new DenseMatrix(v), false, s_epsilon);
+    SSVDCommonTest.assertOrthonormality(new DenseMatrix(v), false, s_epsilon);
   }
 
-  static void dumpSv(double[] s) {
+  static void dumpSv(Vector s) {
     System.out.printf("svs: ");
-    for (double value : s) {
-      System.out.printf("%f  ", value);
+    for (Vector.Element el : s) {
+      System.out.printf("%f  ", el.get());
     }
     System.out.println();
 

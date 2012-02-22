@@ -108,7 +108,7 @@ public class SSVDTestsHelper {
       }
     }
     GramSchmidt.orthonormalizeColumns(result);
-    SSVDPrototypeTest.assertOrthonormality(result, false, 1.0e-10);
+    SSVDCommonTest.assertOrthonormality(result, false, 1.0e-10);
     return result;
   }
 

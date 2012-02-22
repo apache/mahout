@@ -17,9 +17,19 @@
 
 package org.apache.mahout.math.hadoop.stochasticsvd;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
 
@@ -33,14 +43,14 @@ public class Omega {
   private final long seed;
   private final int kp;
 
-  public Omega(long seed, int k, int p) {
+  public Omega(long seed, int kp) {
     this.seed = seed;
-    kp = k + p;
+    this.kp = kp;
   }
 
   /**
    * Get omega element at (x,y) uniformly distributed within [-1...1)
-   * 
+   *
    * @param row
    *          omega row
    * @param column
@@ -95,6 +105,68 @@ public class Omega {
         Element el = iter.next();
         accumDots(el.index(), el.get(), yRowOut);
       }
+    }
+  }
+
+  /*
+   * computes t(Omega) %*% v in multithreaded fashion
+   */
+  public Vector mutlithreadedTRightMultiply(final Vector v) {
+
+    int nThreads = Runtime.getRuntime().availableProcessors();
+    ExecutorService es =
+      new ThreadPoolExecutor(nThreads,
+                             nThreads,
+                             1,
+                             TimeUnit.SECONDS,
+                             new ArrayBlockingQueue<Runnable>(kp));
+
+    try {
+
+      List<Future<Double>> dotFutures = new ArrayList<Future<Double>>(kp);
+
+      for (int i = 0; i < kp; i++) {
+        final int index = i;
+
+        Future<Double> dotFuture = es.submit(new Callable<Double>() {
+          @Override
+          public Double call() throws Exception {
+            double result = 0.0;
+            if (v.isDense()) {
+              for (int k = 0; k < v.size(); k++)
+                // it's ok, this is reentrant
+                result += getQuick(k, index) * v.getQuick(k);
+
+            } else {
+              for (Iterator<Vector.Element> iter = v.iterateNonZero(); iter.hasNext();) {
+                Vector.Element el = iter.next();
+                int k = el.index();
+                result += getQuick(k, index) * el.get();
+              }
+            }
+            return result;
+          }
+        });
+        dotFutures.add(dotFuture);
+      }
+
+      try {
+        Vector res = new DenseVector(kp);
+        for (int i = 0; i < kp; i++) {
+          res.setQuick(i, dotFutures.get(i).get());
+        }
+        return res;
+      } catch (InterruptedException exc) {
+        throw new RuntimeException("Interrupted", exc);
+      } catch (ExecutionException exc) {
+        if (exc.getCause() instanceof RuntimeException)
+          throw (RuntimeException) exc.getCause();
+        else
+          throw new RuntimeException(exc.getCause());
+      }
+
+    } finally {
+      es.shutdown();
     }
   }
 

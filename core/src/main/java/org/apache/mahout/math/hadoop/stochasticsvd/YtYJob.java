@@ -70,7 +70,7 @@ public class YtYJob {
 
     @Override
     protected void setup(Context context) throws IOException,
-        InterruptedException {
+      InterruptedException {
       int k = context.getConfiguration().getInt(PROP_K, -1);
       int p = context.getConfiguration().getInt(PROP_P, -1);
 
@@ -78,10 +78,10 @@ public class YtYJob {
       Validate.isTrue(p > 0, "invalid p parameter");
 
       kp = k + p;
-      long omegaSeed = Long.parseLong(context.getConfiguration()
-          .get(PROP_OMEGA_SEED));
+      long omegaSeed =
+        Long.parseLong(context.getConfiguration().get(PROP_OMEGA_SEED));
 
-      omega = new Omega(omegaSeed, k, p);
+      omega = new Omega(omegaSeed, k + p);
 
       mYtY = new UpperTriangular(kp);
 
@@ -92,7 +92,7 @@ public class YtYJob {
 
     @Override
     protected void map(Writable key, VectorWritable value, Context context)
-        throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
       omega.computeYRow(value.get(), yRow);
       // compute outer product update for YtY
 
@@ -115,12 +115,10 @@ public class YtYJob {
          * are creating some short-lived references) here is that we obviously
          * do two times more iterations then necessary if y row is pretty dense.
          */
-        for (Iterator<Vector.Element> iterI = yRow.iterateNonZero(); iterI
-            .hasNext();) {
+        for (Iterator<Vector.Element> iterI = yRow.iterateNonZero(); iterI.hasNext();) {
           Vector.Element eli = iterI.next();
           int i = eli.index();
-          for (Iterator<Vector.Element> iterJ = yRow.iterateNonZero(); iterJ
-              .hasNext();) {
+          for (Iterator<Vector.Element> iterJ = yRow.iterateNonZero(); iterJ.hasNext();) {
             Vector.Element elj = iterJ.next();
             int j = elj.index();
             if (j < i) {
@@ -134,9 +132,10 @@ public class YtYJob {
 
     @Override
     protected void cleanup(Context context) throws IOException,
-        InterruptedException {
+      InterruptedException {
       context.write(new IntWritable(context.getTaskAttemptID().getTaskID()
-          .getId()), new VectorWritable(new DenseVector(mYtY.getData())));
+                                           .getId()),
+                    new VectorWritable(new DenseVector(mYtY.getData())));
     }
   }
 
@@ -147,7 +146,7 @@ public class YtYJob {
 
     @Override
     protected void setup(Context context) throws IOException,
-        InterruptedException {
+      InterruptedException {
       int k = context.getConfiguration().getInt(PROP_K, -1);
       int p = context.getConfiguration().getInt(PROP_P, -1);
 
@@ -158,22 +157,28 @@ public class YtYJob {
 
     @Override
     protected void cleanup(Context context) throws IOException,
-        InterruptedException {
+      InterruptedException {
       context.write(new IntWritable(), accum);
     }
 
     @Override
-    protected void reduce(IntWritable key, Iterable<VectorWritable> values,
-        Context arg2) throws IOException, InterruptedException {
+    protected void reduce(IntWritable key,
+                          Iterable<VectorWritable> values,
+                          Context arg2) throws IOException,
+      InterruptedException {
       for (VectorWritable vw : values) {
         acc.addAll(vw.get());
       }
     }
   }
 
-  public static void run(Configuration conf, Path[] inputPaths,
-      Path outputPath, int k, int p, long seed)
-      throws ClassNotFoundException, InterruptedException, IOException {
+  public static void run(Configuration conf,
+                         Path[] inputPaths,
+                         Path outputPath,
+                         int k,
+                         int p,
+                         long seed) throws ClassNotFoundException,
+    InterruptedException, IOException {
 
     Job job = new Job(conf);
     job.setJobName("YtY-job");
