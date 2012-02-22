@@ -64,7 +64,7 @@ public class ClusterClassificationMapper extends
       if (clustersIn != null && !clustersIn.isEmpty()) {
         Path clustersInPath = new Path(clustersIn, "*");
         populateClusterModels(clustersInPath);
-        clusterClassifier = new ClusterClassifier(clusterModels);
+        clusterClassifier = new ClusterClassifier(clusterModels, null);
       }
       threshold = conf.getFloat(OUTLIER_REMOVAL_THRESHOLD, 0.0f);
       clusterId = new IntWritable();

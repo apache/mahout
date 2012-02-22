@@ -18,20 +18,27 @@ package org.apache.mahout.clustering;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
-import com.google.common.collect.Lists;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.classifier.OnlineLearner;
-import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansClusterer;
-import org.apache.mahout.clustering.fuzzykmeans.SoftCluster;
 import org.apache.mahout.common.ClassUtils;
-import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.function.TimesFunction;
+
+import com.google.common.collect.Lists;
+import com.google.common.io.Closeables;
 
 /**
  * This classifier works with any clustering Cluster. It is initialized with a
@@ -49,39 +56,33 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
   
   private String modelClass;
   
+  private ClusteringPolicy policy;
+  
   /**
    * The public constructor accepts a list of clusters to become the models
    * 
    * @param models
    *          a List<Cluster>
+   * @param policy
+   *          a ClusteringPolicy
    */
-  public ClusterClassifier(List<Cluster> models) {
+  public ClusterClassifier(List<Cluster> models, ClusteringPolicy policy) {
     this.models = models;
     modelClass = models.get(0).getClass().getName();
+    this.policy = policy;
   }
   
   // needed for serialization/deserialization
   public ClusterClassifier() {}
   
+  // only used by MR ClusterIterator
+  protected ClusterClassifier(ClusteringPolicy policy) {
+    this.policy = policy;
+  }
+  
   @Override
   public Vector classify(Vector instance) {
-    if (models.get(0) instanceof SoftCluster) {
-      Collection<SoftCluster> clusters = Lists.newArrayList();
-      List<Double> distances = Lists.newArrayList();
-      for (Cluster model : models) {
-        SoftCluster sc = (SoftCluster) model;
-        clusters.add(sc);
-        distances.add(sc.getMeasure().distance(instance, sc.getCenter()));
-      }
-      return new FuzzyKMeansClusterer().computePi(clusters, distances);
-    } else {
-      int i = 0;
-      Vector pdfs = new DenseVector(models.size());
-      for (Cluster model : models) {
-        pdfs.set(i++, model.pdf(new VectorWritable(instance)));
-      }
-      return pdfs.assign(new TimesFunction(), 1.0 / pdfs.zSum());
-    }
+    return policy.classify(instance, models);
   }
   
   @Override
@@ -103,6 +104,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
   public void write(DataOutput out) throws IOException {
     out.writeInt(models.size());
     out.writeUTF(modelClass);
+    new ClusteringPolicyWritable(policy).write(out);
     for (Cluster cluster : models) {
       cluster.write(out);
     }
@@ -113,6 +115,9 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
     int size = in.readInt();
     modelClass = in.readUTF();
     models = Lists.newArrayList();
+    ClusteringPolicyWritable clusteringPolicyWritable = new ClusteringPolicyWritable();
+    clusteringPolicyWritable.readFields(in);
+    policy = clusteringPolicyWritable.getValue();
     for (int i = 0; i < size; i++) {
       Cluster element = ClassUtils.instantiateAs(modelClass, Cluster.class);
       element.readFields(in);
@@ -158,5 +163,63 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
   
   public List<Cluster> getModels() {
     return models;
+  }
+  
+  public ClusteringPolicy getPolicy() {
+    return policy;
+  }
+  
+  public void writeToSeqFiles(Path path) throws IOException {
+    writePolicy(path);
+    Configuration config = new Configuration();
+    FileSystem fs = FileSystem.get(path.toUri(), config);
+    SequenceFile.Writer writer = null;
+    ClusterWritable cw = new ClusterWritable();
+    for (int i = 0; i < models.size(); i++) {
+      try {
+        Cluster cluster = models.get(i);
+        cw.setValue(cluster);
+        writer = new SequenceFile.Writer(fs, config,
+            new Path(path, "part-" + String.format(Locale.ENGLISH, "%05d", i)), IntWritable.class,
+            ClusterWritable.class);
+        Writable key = new IntWritable(i);
+        writer.append(key, cw);
+      } finally {
+        Closeables.closeQuietly(writer);
+      }
+    }
+  }
+  
+  public void readFromSeqFiles(Path path) throws IOException {
+    Configuration config = new Configuration();
+    List<Cluster> clusters = Lists.newArrayList();
+    for (ClusterWritable cw : new SequenceFileDirValueIterable<ClusterWritable>(path, PathType.LIST,
+        PathFilters.logsCRCFilter(), config)) {
+      clusters.add(cw.getValue());
+    }
+    this.models = clusters;
+    modelClass = models.get(0).getClass().getName();
+    this.policy = readPolicy(path);
+  }
+  
+  private ClusteringPolicy readPolicy(Path path) throws IOException {
+    Path policyPath = new Path(path, "_policy");
+    Configuration config = new Configuration();
+    FileSystem fs = FileSystem.get(policyPath.toUri(), config);
+    SequenceFile.Reader reader = new SequenceFile.Reader(fs, policyPath, config);
+    Text key = new Text();
+    ClusteringPolicyWritable cpw = new ClusteringPolicyWritable();
+    reader.next(key, cpw);
+    return cpw.getValue();
+  }
+  
+  protected void writePolicy(Path path) throws IOException {
+    Path policyPath = new Path(path, "_policy");
+    Configuration config = new Configuration();
+    FileSystem fs = FileSystem.get(policyPath.toUri(), config);
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs, config, policyPath, Text.class,
+        ClusteringPolicyWritable.class);
+    writer.append(new Text(), new ClusteringPolicyWritable(policy));
+    writer.close();
   }
 }

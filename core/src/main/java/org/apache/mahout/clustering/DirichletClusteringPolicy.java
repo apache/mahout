@@ -19,19 +19,21 @@ package org.apache.mahout.clustering;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.function.TimesFunction;
 
 public class DirichletClusteringPolicy implements ClusteringPolicy {
   
   public DirichletClusteringPolicy() {
     super();
   }
-
+  
   public DirichletClusteringPolicy(int k, double alpha0) {
     this.alpha0 = alpha0;
     this.mixture = UncommonDistributions.rDirichlet(new DenseVector(k), alpha0);
@@ -44,8 +46,12 @@ public class DirichletClusteringPolicy implements ClusteringPolicy {
   // Alpha_0 primes the Dirichlet distribution
   private double alpha0;
   
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.ClusteringPolicy#select(org.apache.mahout.math.Vector)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * org.apache.mahout.clustering.ClusteringPolicy#select(org.apache.mahout.
+   * math.Vector)
    */
   @Override
   public Vector select(Vector probabilities) {
@@ -56,8 +62,12 @@ public class DirichletClusteringPolicy implements ClusteringPolicy {
   }
   
   // update the total counts and then the mixture
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.ClusteringPolicy#update(org.apache.mahout.clustering.ClusterClassifier)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * org.apache.mahout.clustering.ClusteringPolicy#update(org.apache.mahout.
+   * clustering.ClusterClassifier)
    */
   @Override
   public void update(ClusterClassifier prior) {
@@ -67,8 +77,20 @@ public class DirichletClusteringPolicy implements ClusteringPolicy {
     }
     mixture = UncommonDistributions.rDirichlet(totalCounts, alpha0);
   }
+  
+  @Override
+  public Vector classify(Vector data, List<Cluster> models) {
+    int i = 0;
+    Vector pdfs = new DenseVector(models.size());
+    for (Cluster model : models) {
+      pdfs.set(i++, model.pdf(new VectorWritable(data)));
+    }
+    return pdfs.assign(new TimesFunction(), 1.0 / pdfs.zSum());
+  }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.hadoop.io.Writable#write(java.io.DataOutput)
    */
   @Override
@@ -76,8 +98,10 @@ public class DirichletClusteringPolicy implements ClusteringPolicy {
     out.writeDouble(alpha0);
     VectorWritable.writeVector(out, mixture);
   }
-
-  /* (non-Javadoc)
+  
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.hadoop.io.Writable#readFields(java.io.DataInput)
    */
   @Override

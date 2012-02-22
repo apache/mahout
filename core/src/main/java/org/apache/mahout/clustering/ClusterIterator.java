@@ -18,17 +18,12 @@ package org.apache.mahout.clustering;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
@@ -42,7 +37,6 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 
 /**
@@ -55,8 +49,6 @@ import com.google.common.io.Closeables;
 public class ClusterIterator {
   
   public static final String PRIOR_PATH_KEY = "org.apache.mahout.clustering.prior.path";
-  public static final String POLICY_PATH_KEY = "org.apache.mahout.clustering.policy.path";
-  
   public ClusterIterator(ClusteringPolicy policy) {
     this.policy = policy;
   }
@@ -111,7 +103,8 @@ public class ClusterIterator {
    * @throws IOException
    */
   public void iterateSeq(Path inPath, Path priorPath, Path outPath, int numIterations) throws IOException {
-    ClusterClassifier classifier = readClassifier(priorPath);
+    ClusterClassifier classifier = new ClusterClassifier();
+    classifier.readFromSeqFiles(priorPath);
     Configuration conf = new Configuration();
     for (int iteration = 1; iteration <= numIterations; iteration++) {
       for (VectorWritable vw : new SequenceFileDirValueIterable<VectorWritable>(inPath, PathType.LIST,
@@ -132,7 +125,7 @@ public class ClusterIterator {
       // update the policy
       policy.update(classifier);
       // output the classifier
-      writeClassifier(classifier, new Path(outPath, "classifier-" + iteration));
+      classifier.writeToSeqFiles(new Path(outPath, "classifier-" + iteration));
     }
   }
   
@@ -153,9 +146,7 @@ public class ClusterIterator {
       InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     HadoopUtil.delete(conf, outPath);
-    Path policyPath = new Path(outPath, "policy.seq");
-    writePolicy(policy, policyPath);
-    conf.set(POLICY_PATH_KEY, policyPath.toString());
+    ClusterClassifier classifier = new ClusterClassifier(policy);
     for (int iteration = 1; iteration <= numIterations; iteration++) {
       conf.set(PRIOR_PATH_KEY, priorPath.toString());
       
@@ -181,6 +172,7 @@ public class ClusterIterator {
       if (!job.waitForCompletion(true)) {
         throw new InterruptedException("Cluster Iteration " + iteration + " failed processing " + priorPath);
       }
+      classifier.writePolicy(clustersOut);
       FileSystem fs = FileSystem.get(outPath.toUri(), conf);
       if (isConverged(clustersOut, conf, fs)) {
         break;
@@ -211,54 +203,5 @@ public class ClusterIterator {
       }
     }
     return true;
-  }
-  
-  public static void writeClassifier(ClusterClassifier classifier, Path outPath) throws IOException {
-    Configuration config = new Configuration();
-    FileSystem fs = FileSystem.get(outPath.toUri(), config);
-    SequenceFile.Writer writer = null;
-    ClusterWritable cw = new ClusterWritable();
-    for (int i = 0; i < classifier.getModels().size(); i++) {
-      try {
-        Cluster cluster = classifier.getModels().get(i);
-        cw.setValue(cluster);
-        writer = new SequenceFile.Writer(fs, config, new Path(outPath, "part-"
-            + String.format(Locale.ENGLISH, "%05d", i)), IntWritable.class, ClusterWritable.class);
-        Writable key = new IntWritable(i);
-        writer.append(key, cw);
-      } finally {
-        Closeables.closeQuietly(writer);
-      }
-    }
-  }
-  
-  public static ClusterClassifier readClassifier(Path inPath) throws IOException {
-    Configuration config = new Configuration();
-    List<Cluster> clusters = Lists.newArrayList();
-    for (ClusterWritable cw : new SequenceFileDirValueIterable<ClusterWritable>(inPath, PathType.LIST,
-        PathFilters.logsCRCFilter(), config)) {
-      clusters.add(cw.getValue());
-    }
-    ClusterClassifier classifierOut = new ClusterClassifier(clusters);
-    return classifierOut;
-  }
-  
-  public static ClusteringPolicy readPolicy(Path policyPath) throws IOException {
-    Configuration config = new Configuration();
-    FileSystem fs = FileSystem.get(policyPath.toUri(), config);
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, policyPath, config);
-    Text key = new Text();
-    ClusteringPolicyWritable cpw = new ClusteringPolicyWritable();
-    reader.next(key, cpw);
-    return cpw.getValue();
-  }
-  
-  public static void writePolicy(ClusteringPolicy policy, Path policyPath) throws IOException {
-    Configuration config = new Configuration();
-    FileSystem fs = FileSystem.get(policyPath.toUri(), config);
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, config, policyPath, Text.class,
-        ClusteringPolicyWritable.class);
-    writer.append(new Text(), new ClusteringPolicyWritable(policy));
-    writer.close();
   }
 }

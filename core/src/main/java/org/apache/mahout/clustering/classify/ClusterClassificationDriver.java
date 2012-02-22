@@ -132,7 +132,7 @@ public class ClusterClassificationDriver extends AbstractJob {
 	  
 	  private static void classifyClusterSeq(Path input, Path clusters, Path output, Double clusterClassificationThreshold) throws IOException {
 	    List<Cluster> clusterModels = populateClusterModels(clusters);
-	    ClusterClassifier clusterClassifier = new ClusterClassifier(clusterModels);
+	    ClusterClassifier clusterClassifier = new ClusterClassifier(clusterModels, null);
       selectCluster(input, clusterModels, clusterClassifier, output, clusterClassificationThreshold);
       
 	  }

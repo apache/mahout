@@ -327,4 +327,8 @@ public class FuzzyKMeansClusterer {
     // System.out.println("cluster-" + clusterId + ": " + ClusterBase.formatVector(point, null));
     writer.append(new IntWritable(clusterId), new WeightedVectorWritable(clusterPdf, point));
   }
+
+  public void setM(double m) {
+    this.m = m;
+  }
 }

@@ -44,8 +44,7 @@ public class DisplayFuzzyKMeans extends DisplayClustering {
   
   DisplayFuzzyKMeans() {
     initialize();
-    this.setTitle("Fuzzy k-Means Clusters (>" + (int) (significance * 100)
-        + "% of population)");
+    this.setTitle("Fuzzy k-Means Clusters (>" + (int) (significance * 100) + "% of population)");
   }
   
   // Override the paint() method
@@ -68,21 +67,19 @@ public class DisplayFuzzyKMeans extends DisplayClustering {
     writeSampleData(samples);
     boolean runClusterer = false;
     int maxIterations = 10;
+    float threshold = 0.001F;
+    float m = 1.1F;
     if (runClusterer) {
-      runSequentialFuzzyKClusterer(conf, samples, output, measure, maxIterations);
+      runSequentialFuzzyKClusterer(conf, samples, output, measure, maxIterations, m, threshold);
     } else {
       int numClusters = 3;
-      runSequentialFuzzyKClassifier(conf, samples, output, measure, numClusters, maxIterations);
+      runSequentialFuzzyKClassifier(conf, samples, output, measure, numClusters, maxIterations, m, threshold);
     }
     new DisplayFuzzyKMeans();
   }
   
-  private static void runSequentialFuzzyKClassifier(Configuration conf,
-                                                    Path samples,
-                                                    Path output,
-                                                    DistanceMeasure measure,
-                                                    int numClusters,
-                                                    int maxIterations) throws IOException {
+  private static void runSequentialFuzzyKClassifier(Configuration conf, Path samples, Path output,
+      DistanceMeasure measure, int numClusters, int maxIterations, float m, double threshold) throws IOException {
     Collection<Vector> points = Lists.newArrayList();
     for (int i = 0; i < numClusters; i++) {
       points.add(SAMPLE_DATA.get(i).get());
@@ -92,30 +89,24 @@ public class DisplayFuzzyKMeans extends DisplayClustering {
     for (Vector point : points) {
       initialClusters.add(new SoftCluster(point, id++, measure));
     }
-    ClusterClassifier prior = new ClusterClassifier(initialClusters);
-    Path priorClassifier = new Path(output, "classifier-0");
-    ClusterIterator.writeClassifier(prior, priorClassifier);
+    ClusterClassifier prior = new ClusterClassifier(initialClusters, new FuzzyKMeansClusteringPolicy(m, threshold));
+    Path priorPath = new Path(output, "classifier-0");
+    prior.writeToSeqFiles(priorPath);
     
     ClusteringPolicy policy = new FuzzyKMeansClusteringPolicy(1.1, 0.001);
-    new ClusterIterator(policy).iterateSeq(samples, priorClassifier, output, maxIterations);
+    new ClusterIterator(policy).iterateSeq(samples, priorPath, output, maxIterations);
     for (int i = 1; i <= maxIterations; i++) {
-      ClusterClassifier posterior = ClusterIterator.readClassifier(new Path(output, "classifier-" + i));
+      ClusterClassifier posterior = new ClusterClassifier();
+      posterior.readFromSeqFiles(new Path(output, "classifier-" + i));
       CLUSTERS.add(posterior.getModels());
     }
   }
   
-  private static void runSequentialFuzzyKClusterer(Configuration conf,
-                                                   Path samples,
-                                                   Path output,
-                                                   DistanceMeasure measure,
-                                                   int maxIterations)
-    throws IOException, ClassNotFoundException, InterruptedException {
-    Path clusters = RandomSeedGenerator.buildRandom(conf, samples, new Path(
-        output, "clusters-0"), 3, measure);
-    double threshold = 0.001;
-    float m = 1.1F;
-    FuzzyKMeansDriver.run(samples, clusters, output, measure, threshold,
-        maxIterations, m, true, true, threshold, true);
+  private static void runSequentialFuzzyKClusterer(Configuration conf, Path samples, Path output,
+      DistanceMeasure measure, int maxIterations, float m, double threshold) throws IOException,
+      ClassNotFoundException, InterruptedException {
+    Path clusters = RandomSeedGenerator.buildRandom(conf, samples, new Path(output, "clusters-0"), 3, measure);
+    FuzzyKMeansDriver.run(samples, clusters, output, measure, threshold, maxIterations, m, true, true, threshold, true);
     
     loadClusters(output);
   }

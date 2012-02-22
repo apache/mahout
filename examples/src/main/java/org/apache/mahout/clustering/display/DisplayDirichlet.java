@@ -46,8 +46,8 @@ public class DisplayDirichlet extends DisplayClustering {
   
   public DisplayDirichlet() {
     initialize();
-    this.setTitle("Dirichlet Process Clusters - Normal Distribution (>"
-        + (int) (significance * 100) + "% of population)");
+    this.setTitle("Dirichlet Process Clusters - Normal Distribution (>" + (int) (significance * 100)
+        + "% of population)");
   }
   
   // Override the paint() method
@@ -74,37 +74,33 @@ public class DisplayDirichlet extends DisplayClustering {
     log.info(models.toString());
   }
   
-  protected static void generateResults(ModelDistribution<VectorWritable> modelDist,
-                                        int numClusters,
-                                        int numIterations,
-                                        double alpha0,
-                                        int thin,
-                                        int burnin) throws IOException {
+  protected static void generateResults(ModelDistribution<VectorWritable> modelDist, int numClusters,
+      int numIterations, double alpha0, int thin, int burnin) throws IOException {
     boolean runClusterer = false;
     if (runClusterer) {
       runSequentialDirichletClusterer(modelDist, numClusters, numIterations, alpha0, thin, burnin);
     } else {
-      runSequentialDirichletClassifier(modelDist, numClusters, numIterations);
+      runSequentialDirichletClassifier(modelDist, numClusters, numIterations, alpha0);
     }
   }
   
-  private static void runSequentialDirichletClassifier(ModelDistribution<VectorWritable> modelDist,
-                                                       int numClusters,
-                                                       int numIterations) throws IOException {
+  private static void runSequentialDirichletClassifier(ModelDistribution<VectorWritable> modelDist, int numClusters,
+      int numIterations, double alpha0) throws IOException {
     List<Cluster> models = Lists.newArrayList();
     for (Model<VectorWritable> cluster : modelDist.sampleFromPrior(numClusters)) {
       models.add((Cluster) cluster);
     }
-    ClusterClassifier prior = new ClusterClassifier(models);
+    ClusterClassifier prior = new ClusterClassifier(models, new DirichletClusteringPolicy(numClusters, alpha0));
     Path samples = new Path("samples");
     Path output = new Path("output");
-    Path priorClassifier = new Path(output, "clusters-0");
-    ClusterIterator.writeClassifier(prior, priorClassifier);
+    Path priorPath = new Path(output, "clusters-0");
+    prior.writeToSeqFiles(priorPath);
     
     ClusteringPolicy policy = new DirichletClusteringPolicy(numClusters, numIterations);
-    new ClusterIterator(policy).iterateSeq(samples, priorClassifier, output, numIterations);
+    new ClusterIterator(policy).iterateSeq(samples, priorPath, output, numIterations);
     for (int i = 1; i <= numIterations; i++) {
-      ClusterClassifier posterior = ClusterIterator.readClassifier(new Path(output, "classifier-" + i));
+      ClusterClassifier posterior = new ClusterClassifier();
+      posterior.readFromSeqFiles(new Path(output, "classifier-" + i));
       List<Cluster> clusters = Lists.newArrayList();
       for (Cluster cluster : posterior.getModels()) {
         if (isSignificant(cluster)) {
@@ -115,12 +111,8 @@ public class DisplayDirichlet extends DisplayClustering {
     }
   }
   
-  private static void runSequentialDirichletClusterer(ModelDistribution<VectorWritable> modelDist,
-                                                      int numClusters,
-                                                      int numIterations,
-                                                      double alpha0,
-                                                      int thin,
-                                                      int burnin) {
+  private static void runSequentialDirichletClusterer(ModelDistribution<VectorWritable> modelDist, int numClusters,
+      int numIterations, double alpha0, int thin, int burnin) {
     DirichletClusterer dc = new DirichletClusterer(SAMPLE_DATA, modelDist, alpha0, numClusters, thin, burnin);
     List<Cluster[]> result = dc.cluster(numIterations);
     printModels(result, burnin);

@@ -19,8 +19,14 @@ package org.apache.mahout.clustering;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 
+import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansClusterer;
+import org.apache.mahout.clustering.fuzzykmeans.SoftCluster;
 import org.apache.mahout.math.Vector;
+
+import com.google.common.collect.Lists;
 
 /**
  * This is a probability-weighted clustering policy, suitable for fuzzy k-means
@@ -33,9 +39,9 @@ public class FuzzyKMeansClusteringPolicy implements ClusteringPolicy {
     super();
   }
   
-  private double m;
+  private double m = 2;
   
-  private double convergenceDelta;
+  private double convergenceDelta = 0.05;
   
   public FuzzyKMeansClusteringPolicy(double m, double convergenceDelta) {
     this.m = m;
@@ -85,6 +91,20 @@ public class FuzzyKMeansClusteringPolicy implements ClusteringPolicy {
   public void readFields(DataInput in) throws IOException {
     this.m = in.readDouble();
     this.convergenceDelta = in.readDouble();
+  }
+  
+  @Override
+  public Vector classify(Vector data, List<Cluster> models) {
+    Collection<SoftCluster> clusters = Lists.newArrayList();
+    List<Double> distances = Lists.newArrayList();
+    for (Cluster model : models) {
+      SoftCluster sc = (SoftCluster) model;
+      clusters.add(sc);
+      distances.add(sc.getMeasure().distance(data, sc.getCenter()));
+    }
+    FuzzyKMeansClusterer fuzzyKMeansClusterer = new FuzzyKMeansClusterer();
+    fuzzyKMeansClusterer.setM(m);
+    return fuzzyKMeansClusterer.computePi(clusters, distances);
   }
   
 }
