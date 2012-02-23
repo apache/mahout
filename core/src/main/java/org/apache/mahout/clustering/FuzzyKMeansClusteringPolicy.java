@@ -71,6 +71,20 @@ public class FuzzyKMeansClusteringPolicy implements ClusteringPolicy {
     return probabilities;
   }
   
+  @Override
+  public Vector classify(Vector data, List<Cluster> models) {
+    Collection<SoftCluster> clusters = Lists.newArrayList();
+    List<Double> distances = Lists.newArrayList();
+    for (Cluster model : models) {
+      SoftCluster sc = (SoftCluster) model;
+      clusters.add(sc);
+      distances.add(sc.getMeasure().distance(data, sc.getCenter()));
+    }
+    FuzzyKMeansClusterer fuzzyKMeansClusterer = new FuzzyKMeansClusterer();
+    fuzzyKMeansClusterer.setM(m);
+    return fuzzyKMeansClusterer.computePi(clusters, distances);
+  }
+
   /*
    * (non-Javadoc)
    * 
@@ -91,20 +105,6 @@ public class FuzzyKMeansClusteringPolicy implements ClusteringPolicy {
   public void readFields(DataInput in) throws IOException {
     this.m = in.readDouble();
     this.convergenceDelta = in.readDouble();
-  }
-  
-  @Override
-  public Vector classify(Vector data, List<Cluster> models) {
-    Collection<SoftCluster> clusters = Lists.newArrayList();
-    List<Double> distances = Lists.newArrayList();
-    for (Cluster model : models) {
-      SoftCluster sc = (SoftCluster) model;
-      clusters.add(sc);
-      distances.add(sc.getMeasure().distance(data, sc.getCenter()));
-    }
-    FuzzyKMeansClusterer fuzzyKMeansClusterer = new FuzzyKMeansClusterer();
-    fuzzyKMeansClusterer.setM(m);
-    return fuzzyKMeansClusterer.computePi(clusters, distances);
   }
   
 }

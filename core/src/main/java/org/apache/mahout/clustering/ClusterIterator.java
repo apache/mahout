@@ -146,7 +146,6 @@ public class ClusterIterator {
       InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     HadoopUtil.delete(conf, outPath);
-    ClusterClassifier classifier = new ClusterClassifier(policy);
     for (int iteration = 1; iteration <= numIterations; iteration++) {
       conf.set(PRIOR_PATH_KEY, priorPath.toString());
       
@@ -172,7 +171,7 @@ public class ClusterIterator {
       if (!job.waitForCompletion(true)) {
         throw new InterruptedException("Cluster Iteration " + iteration + " failed processing " + priorPath);
       }
-      classifier.writePolicy(clustersOut);
+      ClusterClassifier.writePolicy(policy, clustersOut);
       FileSystem fs = FileSystem.get(outPath.toUri(), conf);
       if (isConverged(clustersOut, conf, fs)) {
         break;

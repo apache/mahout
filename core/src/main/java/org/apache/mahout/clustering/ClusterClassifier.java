@@ -170,7 +170,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
   }
   
   public void writeToSeqFiles(Path path) throws IOException {
-    writePolicy(path);
+    writePolicy(policy, path);
     Configuration config = new Configuration();
     FileSystem fs = FileSystem.get(path.toUri(), config);
     SequenceFile.Writer writer = null;
@@ -202,7 +202,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
     this.policy = readPolicy(path);
   }
   
-  private ClusteringPolicy readPolicy(Path path) throws IOException {
+  public static ClusteringPolicy readPolicy(Path path) throws IOException {
     Path policyPath = new Path(path, "_policy");
     Configuration config = new Configuration();
     FileSystem fs = FileSystem.get(policyPath.toUri(), config);
@@ -213,7 +213,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
     return cpw.getValue();
   }
   
-  protected void writePolicy(Path path) throws IOException {
+  public static void writePolicy(ClusteringPolicy policy, Path path) throws IOException {
     Path policyPath = new Path(path, "_policy");
     Configuration config = new Configuration();
     FileSystem fs = FileSystem.get(policyPath.toUri(), config);
