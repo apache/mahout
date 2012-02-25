@@ -24,14 +24,14 @@ import java.util.List;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.Cluster;
-import org.apache.mahout.clustering.ClusterClassifier;
-import org.apache.mahout.clustering.ClusterIterator;
-import org.apache.mahout.clustering.ClusteringPolicy;
-import org.apache.mahout.clustering.DirichletClusteringPolicy;
 import org.apache.mahout.clustering.Model;
 import org.apache.mahout.clustering.ModelDistribution;
+import org.apache.mahout.clustering.classify.ClusterClassifier;
 import org.apache.mahout.clustering.dirichlet.DirichletClusterer;
 import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
+import org.apache.mahout.clustering.iterator.ClusterIterator;
+import org.apache.mahout.clustering.iterator.ClusteringPolicy;
+import org.apache.mahout.clustering.iterator.DirichletClusteringPolicy;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.VectorWritable;

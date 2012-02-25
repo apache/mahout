@@ -20,7 +20,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.mahout.clustering.DistanceMeasureCluster;
+import org.apache.mahout.clustering.iterator.DistanceMeasureCluster;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 

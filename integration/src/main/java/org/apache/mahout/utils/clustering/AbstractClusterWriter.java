@@ -20,7 +20,7 @@ package org.apache.mahout.utils.clustering;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.apache.mahout.clustering.Cluster;
-import org.apache.mahout.clustering.WeightedVectorWritable;
+import org.apache.mahout.clustering.classify.WeightedVectorWritable;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;

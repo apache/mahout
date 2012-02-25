@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.clustering;
+package org.apache.mahout.clustering.classify;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 

@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.clustering;
+package org.apache.mahout.clustering.classify;
 
 import org.apache.hadoop.io.Text;
+import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.math.Vector;
 
 import java.io.DataInput;

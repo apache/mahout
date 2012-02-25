@@ -50,7 +50,7 @@ import org.apache.lucene.index.TermEnum;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.OpenBitSet;
-import org.apache.mahout.clustering.WeightedVectorWritable;
+import org.apache.mahout.clustering.classify.WeightedVectorWritable;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.NamedVector;

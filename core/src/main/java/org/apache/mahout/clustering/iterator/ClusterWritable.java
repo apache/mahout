@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.mahout.clustering;
+package org.apache.mahout.clustering.iterator;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -22,6 +22,7 @@ import java.io.IOException;
 
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.classifier.sgd.PolymorphicWritable;
+import org.apache.mahout.clustering.Cluster;
 
 public class ClusterWritable implements Writable {
   

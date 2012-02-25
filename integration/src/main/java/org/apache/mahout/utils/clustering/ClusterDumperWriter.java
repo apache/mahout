@@ -20,8 +20,8 @@ package org.apache.mahout.utils.clustering;
 import org.apache.hadoop.io.Text;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
-import org.apache.mahout.clustering.WeightedPropertyVectorWritable;
-import org.apache.mahout.clustering.WeightedVectorWritable;
+import org.apache.mahout.clustering.classify.WeightedPropertyVectorWritable;
+import org.apache.mahout.clustering.classify.WeightedVectorWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 
 import java.io.IOException;

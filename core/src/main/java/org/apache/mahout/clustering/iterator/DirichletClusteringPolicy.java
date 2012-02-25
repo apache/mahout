@@ -14,31 +14,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.mahout.clustering;
+package org.apache.mahout.clustering.iterator;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.clustering.classify.ClusterClassifier;
+import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.TimesFunction;
 
-/**
- * This is a simple maximum likelihood clustering policy, suitable for k-means
- * clustering
- * 
- */
-public class MeanShiftClusteringPolicy implements ClusteringPolicy {
+public class DirichletClusteringPolicy implements ClusteringPolicy {
   
-  public MeanShiftClusteringPolicy() {
+  public DirichletClusteringPolicy() {
     super();
   }
   
-  private double t1, t2, t3, t4;
+  public DirichletClusteringPolicy(int k, double alpha0) {
+    this.alpha0 = alpha0;
+    this.mixture = UncommonDistributions.rDirichlet(new DenseVector(k), alpha0);
+  }
+  
+  // The mixture is the Dirichlet distribution of the total Cluster counts over
+  // all iterations
+  private Vector mixture;
+  
+  // Alpha_0 primes the Dirichlet distribution
+  private double alpha0;
   
   /*
    * (non-Javadoc)
@@ -49,12 +57,13 @@ public class MeanShiftClusteringPolicy implements ClusteringPolicy {
    */
   @Override
   public Vector select(Vector probabilities) {
-    int maxValueIndex = probabilities.maxValueIndex();
+    int rMultinom = UncommonDistributions.rMultinom(probabilities.times(mixture));
     Vector weights = new SequentialAccessSparseVector(probabilities.size());
-    weights.set(maxValueIndex, 1.0);
+    weights.set(rMultinom, 1.0);
     return weights;
   }
   
+  // update the total counts and then the mixture
   /*
    * (non-Javadoc)
    * 
@@ -63,8 +72,12 @@ public class MeanShiftClusteringPolicy implements ClusteringPolicy {
    * clustering.ClusterClassifier)
    */
   @Override
-  public void update(ClusterClassifier posterior) {
-    // nothing to do here
+  public void update(ClusterClassifier prior) {
+    Vector totalCounts = new DenseVector(prior.getModels().size());
+    for (int i = 0; i < prior.getModels().size(); i++) {
+      totalCounts.set(i, prior.getModels().get(i).getTotalObservations());
+    }
+    mixture = UncommonDistributions.rDirichlet(totalCounts, alpha0);
   }
   
   @Override
@@ -76,7 +89,7 @@ public class MeanShiftClusteringPolicy implements ClusteringPolicy {
     }
     return pdfs.assign(new TimesFunction(), 1.0 / pdfs.zSum());
   }
-  
+
   /*
    * (non-Javadoc)
    * 
@@ -84,10 +97,8 @@ public class MeanShiftClusteringPolicy implements ClusteringPolicy {
    */
   @Override
   public void write(DataOutput out) throws IOException {
-    out.writeDouble(t1);
-    out.writeDouble(t2);
-    out.writeDouble(t3);
-    out.writeDouble(t4);
+    out.writeDouble(alpha0);
+    VectorWritable.writeVector(out, mixture);
   }
   
   /*
@@ -97,10 +108,7 @@ public class MeanShiftClusteringPolicy implements ClusteringPolicy {
    */
   @Override
   public void readFields(DataInput in) throws IOException {
-    this.t1 = in.readDouble();
-    this.t2 = in.readDouble();
-    this.t3 = in.readDouble();
-    this.t4 = in.readDouble();
+    this.alpha0 = in.readDouble();
+    this.mixture = VectorWritable.readVector(in);
   }
-  
 }

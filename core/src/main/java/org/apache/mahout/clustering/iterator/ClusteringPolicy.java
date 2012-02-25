@@ -14,11 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.mahout.clustering;
+package org.apache.mahout.clustering.iterator;
 
 import java.util.List;
 
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.clustering.classify.ClusterClassifier;
 import org.apache.mahout.math.Vector;
 
 /**

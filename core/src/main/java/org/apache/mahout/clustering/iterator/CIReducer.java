@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.clustering;
+package org.apache.mahout.clustering.iterator;
 
 import java.io.IOException;
 import java.util.Iterator;

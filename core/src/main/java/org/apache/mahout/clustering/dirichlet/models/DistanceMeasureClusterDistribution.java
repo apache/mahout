@@ -17,9 +17,9 @@
 
 package org.apache.mahout.clustering.dirichlet.models;
 
-import org.apache.mahout.clustering.DistanceMeasureCluster;
 import org.apache.mahout.clustering.Model;
 import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
+import org.apache.mahout.clustering.iterator.DistanceMeasureCluster;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.Vector;
