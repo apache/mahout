@@ -47,7 +47,8 @@ import com.google.common.collect.Lists;
 
 public class ClusterClassificationDriverTest extends MahoutTestCase {
   
-  private static final double[][] REFERENCE = { {1, 1}, {2, 1}, {1, 2}, {4, 4}, {5, 4}, {4, 5}, {5, 5}, {9, 9}, {8, 8}};
+  private static final double[][] REFERENCE = { {1, 1}, {2, 1}, {1, 2}, {4, 4},
+      {5, 4}, {4, 5}, {5, 5}, {9, 9}, {8, 8}};
   
   private FileSystem fs;
   
@@ -97,7 +98,8 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
     
     conf = new Configuration();
     
-    ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(points,
+        new Path(pointsPath, "file1"), fs, conf);
     runClustering(pointsPath, conf);
     runClassificationWithoutOutlierRemoval(conf);
     collectVectorsForAssertion();
@@ -114,35 +116,42 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
     
     conf = new Configuration();
     
-    ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(points,
+        new Path(pointsPath, "file1"), fs, conf);
     runClustering(pointsPath, conf);
     runClassificationWithOutlierRemoval(conf);
     collectVectorsForAssertion();
     assertVectorsWithOutlierRemoval();
   }
   
-  private void runClustering(Path pointsPath, Configuration conf) throws IOException, InterruptedException,
-      ClassNotFoundException {
-    CanopyDriver.run(conf, pointsPath, clusteringOutputPath, new ManhattanDistanceMeasure(), 3.1, 2.1, false, true);
+  private void runClustering(Path pointsPath, Configuration conf)
+      throws IOException, InterruptedException, ClassNotFoundException {
+    CanopyDriver.run(conf, pointsPath, clusteringOutputPath,
+        new ManhattanDistanceMeasure(), 3.1, 2.1, false, true);
     Path finalClustersPath = new Path(clusteringOutputPath, "clusters-0-final");
-    ClusterClassifier.writePolicy(new CanopyClusteringPolicy(), finalClustersPath);
+    ClusterClassifier.writePolicy(new CanopyClusteringPolicy(),
+        finalClustersPath);
   }
   
-  private void runClassificationWithoutOutlierRemoval(Configuration conf) throws IOException, InterruptedException,
-      ClassNotFoundException {
-    ClusterClassificationDriver.run(pointsPath, clusteringOutputPath, classifiedOutputPath, 0.0, true);
+  private void runClassificationWithoutOutlierRemoval(Configuration conf)
+      throws IOException, InterruptedException, ClassNotFoundException {
+    ClusterClassificationDriver.run(pointsPath, clusteringOutputPath,
+        classifiedOutputPath, 0.0, true, true);
   }
   
-  private void runClassificationWithOutlierRemoval(Configuration conf2) throws IOException, InterruptedException,
-      ClassNotFoundException {
-    ClusterClassificationDriver.run(pointsPath, clusteringOutputPath, classifiedOutputPath, 0.73, true);
+  private void runClassificationWithOutlierRemoval(Configuration conf2)
+      throws IOException, InterruptedException, ClassNotFoundException {
+    ClusterClassificationDriver.run(pointsPath, clusteringOutputPath,
+        classifiedOutputPath, 0.73, true, true);
   }
   
   private void collectVectorsForAssertion() throws IOException {
-    Path[] partFilePaths = FileUtil.stat2Paths(fs.globStatus(classifiedOutputPath));
+    Path[] partFilePaths = FileUtil.stat2Paths(fs
+        .globStatus(classifiedOutputPath));
     FileStatus[] listStatus = fs.listStatus(partFilePaths);
     for (FileStatus partFile : listStatus) {
-      SequenceFile.Reader classifiedVectors = new SequenceFile.Reader(fs, partFile.getPath(), conf);
+      SequenceFile.Reader classifiedVectors = new SequenceFile.Reader(fs,
+          partFile.getPath(), conf);
       Writable clusterIdAsKey = new IntWritable();
       VectorWritable point = new VectorWritable();
       while (classifiedVectors.next(clusterIdAsKey, point)) {
@@ -176,30 +185,33 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
   private void assertThirdClusterWithoutOutlierRemoval() {
     Assert.assertEquals(2, thirdCluster.size());
     for (Vector vector : thirdCluster) {
-      Assert.assertTrue(ArrayUtils.contains(new String[] {"{1:9.0,0:9.0}", "{1:8.0,0:8.0}"}, vector.asFormatString()));
+      Assert.assertTrue(ArrayUtils.contains(new String[] {"{1:9.0,0:9.0}",
+          "{1:8.0,0:8.0}"}, vector.asFormatString()));
     }
   }
   
   private void assertSecondClusterWithoutOutlierRemoval() {
     Assert.assertEquals(4, secondCluster.size());
     for (Vector vector : secondCluster) {
-      Assert.assertTrue(ArrayUtils.contains(new String[] {"{1:4.0,0:4.0}", "{1:4.0,0:5.0}", "{1:5.0,0:4.0}",
-          "{1:5.0,0:5.0}"}, vector.asFormatString()));
+      Assert.assertTrue(ArrayUtils.contains(new String[] {"{1:4.0,0:4.0}",
+          "{1:4.0,0:5.0}", "{1:5.0,0:4.0}", "{1:5.0,0:5.0}"},
+          vector.asFormatString()));
     }
   }
   
   private void assertFirstClusterWithoutOutlierRemoval() {
     Assert.assertEquals(3, firstCluster.size());
     for (Vector vector : firstCluster) {
-      Assert.assertTrue(ArrayUtils.contains(new String[] {"{1:1.0,0:1.0}", "{1:1.0,0:2.0}", "{1:2.0,0:1.0}"},
-          vector.asFormatString()));
+      Assert.assertTrue(ArrayUtils.contains(new String[] {"{1:1.0,0:1.0}",
+          "{1:1.0,0:2.0}", "{1:2.0,0:1.0}"}, vector.asFormatString()));
     }
   }
   
   private void assertThirdClusterWithOutlierRemoval() {
     Assert.assertEquals(1, thirdCluster.size());
     for (Vector vector : thirdCluster) {
-      Assert.assertTrue(ArrayUtils.contains(new String[] {"{1:9.0,0:9.0}"}, vector.asFormatString()));
+      Assert.assertTrue(ArrayUtils.contains(new String[] {"{1:9.0,0:9.0}"},
+          vector.asFormatString()));
     }
   }
   
@@ -210,7 +222,8 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
   private void assertFirstClusterWithOutlierRemoval() {
     Assert.assertEquals(1, firstCluster.size());
     for (Vector vector : firstCluster) {
-      Assert.assertTrue(ArrayUtils.contains(new String[] {"{1:1.0,0:1.0}"}, vector.asFormatString()));
+      Assert.assertTrue(ArrayUtils.contains(new String[] {"{1:1.0,0:1.0}"},
+          vector.asFormatString()));
     }
   }
   
