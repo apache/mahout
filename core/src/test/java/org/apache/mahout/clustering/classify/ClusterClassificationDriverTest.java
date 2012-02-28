@@ -35,8 +35,10 @@ import org.apache.hadoop.io.Writable;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.iterator.CanopyClusteringPolicy;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -89,6 +91,25 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
   }
   
   @Test
+  public void testVectorClassificationWithOutlierRemovalMR() throws Exception {
+    List<VectorWritable> points = getPointsWritable(REFERENCE);
+    
+    pointsPath = getTestTempDirPath("points");
+    clusteringOutputPath = getTestTempDirPath("output");
+    classifiedOutputPath = getTestTempDirPath("classifiedClusters");
+    HadoopUtil.delete(conf, classifiedOutputPath);
+    
+    conf = new Configuration();
+    
+    ClusteringTestUtils.writePointsToFile(points,
+        new Path(pointsPath, "file1"), fs, conf);
+    runClustering(pointsPath, conf, false);
+    runClassificationWithOutlierRemoval(conf, false);
+    collectVectorsForAssertion();
+    assertVectorsWithOutlierRemoval();
+  }
+  
+  @Test
   public void testVectorClassificationWithoutOutlierRemoval() throws Exception {
     List<VectorWritable> points = getPointsWritable(REFERENCE);
     
@@ -100,7 +121,7 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
     
     ClusteringTestUtils.writePointsToFile(points,
         new Path(pointsPath, "file1"), fs, conf);
-    runClustering(pointsPath, conf);
+    runClustering(pointsPath, conf, true);
     runClassificationWithoutOutlierRemoval(conf);
     collectVectorsForAssertion();
     assertVectorsWithoutOutlierRemoval();
@@ -118,16 +139,17 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
     
     ClusteringTestUtils.writePointsToFile(points,
         new Path(pointsPath, "file1"), fs, conf);
-    runClustering(pointsPath, conf);
-    runClassificationWithOutlierRemoval(conf);
+    runClustering(pointsPath, conf, true);
+    runClassificationWithOutlierRemoval(conf, true);
     collectVectorsForAssertion();
     assertVectorsWithOutlierRemoval();
   }
   
-  private void runClustering(Path pointsPath, Configuration conf)
-      throws IOException, InterruptedException, ClassNotFoundException {
+  private void runClustering(Path pointsPath, Configuration conf,
+      Boolean runSequential) throws IOException, InterruptedException,
+      ClassNotFoundException {
     CanopyDriver.run(conf, pointsPath, clusteringOutputPath,
-        new ManhattanDistanceMeasure(), 3.1, 2.1, false, true);
+        new ManhattanDistanceMeasure(), 3.1, 2.1, false, runSequential);
     Path finalClustersPath = new Path(clusteringOutputPath, "clusters-0-final");
     ClusterClassifier.writePolicy(new CanopyClusteringPolicy(),
         finalClustersPath);
@@ -139,23 +161,25 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
         classifiedOutputPath, 0.0, true, true);
   }
   
-  private void runClassificationWithOutlierRemoval(Configuration conf2)
-      throws IOException, InterruptedException, ClassNotFoundException {
+  private void runClassificationWithOutlierRemoval(Configuration conf2,
+      boolean runSequential) throws IOException, InterruptedException,
+      ClassNotFoundException {
     ClusterClassificationDriver.run(pointsPath, clusteringOutputPath,
-        classifiedOutputPath, 0.73, true, true);
+        classifiedOutputPath, 0.73, true, runSequential);
   }
   
   private void collectVectorsForAssertion() throws IOException {
     Path[] partFilePaths = FileUtil.stat2Paths(fs
         .globStatus(classifiedOutputPath));
-    FileStatus[] listStatus = fs.listStatus(partFilePaths);
+    FileStatus[] listStatus = fs.listStatus(partFilePaths,
+        PathFilters.partFilter());
     for (FileStatus partFile : listStatus) {
       SequenceFile.Reader classifiedVectors = new SequenceFile.Reader(fs,
           partFile.getPath(), conf);
       Writable clusterIdAsKey = new IntWritable();
-      VectorWritable point = new VectorWritable();
+      WeightedVectorWritable point = new WeightedVectorWritable();
       while (classifiedVectors.next(clusterIdAsKey, point)) {
-        collectVector(clusterIdAsKey.toString(), point.get());
+        collectVector(clusterIdAsKey.toString(), point.getVector());
       }
     }
   }

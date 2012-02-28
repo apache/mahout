@@ -17,6 +17,8 @@
 
 package org.apache.mahout.clustering.classify;
 
+import static org.apache.mahout.clustering.classify.ClusterClassificationConfigKeys.CLUSTERS_IN;
+import static org.apache.mahout.clustering.classify.ClusterClassificationConfigKeys.EMIT_MOST_LIKELY;
 import static org.apache.mahout.clustering.classify.ClusterClassificationConfigKeys.OUTLIER_REMOVAL_THRESHOLD;
 
 import java.io.IOException;
@@ -213,7 +215,7 @@ public class ClusterClassificationDriver extends AbstractJob {
     Configuration conf = new Configuration();
     SequenceFile.Writer writer = new SequenceFile.Writer(
         input.getFileSystem(conf), conf, new Path(output, "part-m-" + 0),
-        IntWritable.class, VectorWritable.class);
+        IntWritable.class, WeightedVectorWritable.class);
     for (VectorWritable vw : new SequenceFileDirValueIterable<VectorWritable>(
         input, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
       Vector pdfPerCluster = clusterClassifier.classify(vw.get());
@@ -231,7 +233,9 @@ public class ClusterClassificationDriver extends AbstractJob {
       throws IOException {
     if (emitMostLikely) {
       int maxValueIndex = pdfPerCluster.maxValueIndex();
-      write(clusterModels, writer, vw, maxValueIndex);
+      WeightedVectorWritable wvw = new WeightedVectorWritable(
+          pdfPerCluster.maxValue(), vw.get());
+      write(clusterModels, writer, wvw, maxValueIndex);
     } else {
       writeAllAboveThreshold(clusterModels, clusterClassificationThreshold,
           writer, vw, pdfPerCluster);
@@ -245,17 +249,19 @@ public class ClusterClassificationDriver extends AbstractJob {
     while (iterateNonZero.hasNext()) {
       Element pdf = iterateNonZero.next();
       if (pdf.get() >= clusterClassificationThreshold) {
+        WeightedVectorWritable wvw = new WeightedVectorWritable(pdf.get(),
+            vw.get());
         int clusterIndex = pdf.index();
-        write(clusterModels, writer, vw, clusterIndex);
+        write(clusterModels, writer, wvw, clusterIndex);
       }
     }
   }
   
   private static void write(List<Cluster> clusterModels,
-      SequenceFile.Writer writer, VectorWritable vw, int maxValueIndex)
+      SequenceFile.Writer writer, WeightedVectorWritable wvw, int maxValueIndex)
       throws IOException {
     Cluster cluster = clusterModels.get(maxValueIndex);
-    writer.append(new IntWritable(cluster.getId()), vw);
+    writer.append(new IntWritable(cluster.getId()), wvw);
   }
   
   /**
@@ -273,15 +279,16 @@ public class ClusterClassificationDriver extends AbstractJob {
   private static void classifyClusterMR(Configuration conf, Path input,
       Path clustersIn, Path output, Double clusterClassificationThreshold,
       boolean emitMostLikely) throws IOException, InterruptedException,
-      ClassNotFoundException {
-    Job job = new Job(conf,
-        "Cluster Classification Driver running over input: " + input);
-    job.setJarByClass(ClusterClassificationDriver.class);
+      ClassNotFoundException {    
     
     conf.setFloat(OUTLIER_REMOVAL_THRESHOLD,
         clusterClassificationThreshold.floatValue());
+    conf.setBoolean(EMIT_MOST_LIKELY, emitMostLikely);
+    conf.set(CLUSTERS_IN, clustersIn.toUri().toString());
     
-    conf.set(ClusterClassificationConfigKeys.CLUSTERS_IN, input.toString());
+    Job job = new Job(conf,
+        "Cluster Classification Driver running over input: " + input);
+    job.setJarByClass(ClusterClassificationDriver.class);
     
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);

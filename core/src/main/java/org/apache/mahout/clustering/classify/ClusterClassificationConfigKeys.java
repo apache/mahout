@@ -18,14 +18,14 @@
 package org.apache.mahout.clustering.classify;
 
 /**
- * Constants used in Cluster Classification. 
+ * Constants used in Cluster Classification.
  */
 public class ClusterClassificationConfigKeys {
-
+  
   public static final String CLUSTERS_IN = "clusters_in";
   
   public static final String OUTLIER_REMOVAL_THRESHOLD = "pdf_threshold";
   
+  public static final String EMIT_MOST_LIKELY = "emit_most_likely";
+  
 }
-
-
