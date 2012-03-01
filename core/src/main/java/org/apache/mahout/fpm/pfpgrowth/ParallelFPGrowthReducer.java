@@ -18,12 +18,10 @@
 package org.apache.mahout.fpm.pfpgrowth;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.common.collect.Lists;
@@ -40,8 +38,6 @@ import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.list.LongArrayList;
-import org.apache.mahout.math.map.OpenLongObjectHashMap;
-import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -144,7 +140,6 @@ public class ParallelFPGrowthReducer extends Reducer<IntWritable,TransactionTree
     super.setup(context);
     Parameters params = new Parameters(context.getConfiguration().get(PFPGrowth.PFP_PARAMETERS, ""));
     
-    int i = 0;
     for (Pair<String,Long> e : PFPGrowth.readFList(context.getConfiguration())) {
       featureReverseMap.add(e.getFirst());
       freqList.add(e.getSecond());

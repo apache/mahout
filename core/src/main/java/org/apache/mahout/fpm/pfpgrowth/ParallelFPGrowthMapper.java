@@ -18,12 +18,7 @@
 package org.apache.mahout.fpm.pfpgrowth;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
-
-import com.google.common.collect.Lists;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -33,7 +28,6 @@ import org.apache.mahout.common.Pair;
 
 import org.apache.mahout.common.Parameters;
 import org.apache.mahout.math.list.IntArrayList;
-import org.apache.mahout.math.map.OpenIntLongHashMap;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 import org.apache.mahout.math.set.OpenIntHashSet;
 
@@ -51,7 +45,6 @@ public class ParallelFPGrowthMapper extends Mapper<LongWritable,Text,IntWritable
 
   private final OpenObjectIntHashMap<String> fMap = new OpenObjectIntHashMap<String>();
   private Pattern splitter;
-  private int numGroups;
   private int maxPerGroup;
 
   private IntWritable wGroupID= new IntWritable();
@@ -107,8 +100,6 @@ public class ParallelFPGrowthMapper extends Mapper<LongWritable,Text,IntWritable
     splitter = Pattern.compile(params.get(PFPGrowth.SPLIT_PATTERN,
                                           PFPGrowth.SPLITTER.toString()));
     
-    numGroups = Integer.valueOf(params.getInt(PFPGrowth.NUM_GROUPS, 
-                                              PFPGrowth.NUM_GROUPS_DEFAULT));
     maxPerGroup = Integer.valueOf(params.getInt(PFPGrowth.MAX_PER_GROUP, 0));
   }
 }

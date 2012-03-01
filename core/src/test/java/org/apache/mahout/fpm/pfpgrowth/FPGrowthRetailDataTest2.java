@@ -18,7 +18,6 @@
 package org.apache.mahout.fpm.pfpgrowth;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -86,28 +85,4 @@ public final class FPGrowthRetailDataTest2 extends MahoutTestCase {
     
   }
 
-  private long bestResults(Map<Set<String>, Long> res, Set<String> feats) {
-    Long best = res.get(feats);
-    if (best != null) 
-      return best;
-    else 
-      best = -1L;
-    for (Map.Entry<Set<String>, Long> ent : res.entrySet()) { 
-      Set<String> r = ent.getKey();
-      Long supp = ent.getValue();
-      if (supp <= best) 
-        continue;
-      boolean hasAll = true;
-      for (String f : feats) {
-        if (!r.contains(f)) {
-          hasAll = false;
-          break;
-        }
-      }
-      if (hasAll) 
-        best = supp;
-    }
-    return best;
-  }
-  
 }

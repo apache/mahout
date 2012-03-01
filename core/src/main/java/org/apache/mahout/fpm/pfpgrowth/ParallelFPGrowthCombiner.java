@@ -18,7 +18,6 @@
 package org.apache.mahout.fpm.pfpgrowth;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.apache.mahout.math.list.IntArrayList;
 

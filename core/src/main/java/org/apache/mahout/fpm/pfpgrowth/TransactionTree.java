@@ -20,9 +20,6 @@ package org.apache.mahout.fpm.pfpgrowth;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -200,12 +197,6 @@ public final class TransactionTree implements Writable, Iterable<Pair<IntArrayLi
     Iterator<Pair<IntArrayList,Long>> it = iterator();
     final Map<Integer,MutableLong> fList = generateFList();
     int node = 0;
-    Comparator<Integer> comparator = new Comparator<Integer>() {
-      @Override
-      public int compare(Integer o1, Integer o2) {
-        return fList.get(o2).compareTo(fList.get(o1));
-      }
-    };
     int size = 0;
     List<Pair<IntArrayList,Long>> compressedTransactionSet = Lists.newArrayList();
     while (it.hasNext()) {

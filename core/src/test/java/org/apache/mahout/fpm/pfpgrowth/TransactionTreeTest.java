@@ -18,7 +18,6 @@
 package org.apache.mahout.fpm.pfpgrowth;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Random;
 
 import org.apache.mahout.common.MahoutTestCase;

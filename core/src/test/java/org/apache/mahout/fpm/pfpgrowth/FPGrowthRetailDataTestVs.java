@@ -31,7 +31,6 @@ import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.common.iterator.StringRecordIterator;
 import org.apache.mahout.fpm.pfpgrowth.convertors.StatusUpdater;
-import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth2.FPGrowthObj;
 import org.junit.Test;
 

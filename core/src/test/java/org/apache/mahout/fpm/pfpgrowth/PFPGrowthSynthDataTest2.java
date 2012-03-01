@@ -32,7 +32,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
@@ -41,7 +40,6 @@ import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.common.iterator.StringRecordIterator;
 import org.apache.mahout.fpm.pfpgrowth.convertors.StatusUpdater;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
-import org.apache.mahout.fpm.pfpgrowth.PFPGrowth;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth2.FPGrowthObj;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -91,31 +89,6 @@ public class PFPGrowthSynthDataTest2 extends MahoutTestCase {
     } finally {
       Closeables.closeQuietly(writer);
     }
-  }
-
-
-  private long highestSupport(Map<Set<String>, Long> res, Set<String> feats) {
-    Long best= res.get(feats);
-    if (best != null) 
-      return best;
-    else 
-      best= -1L;
-    for (Map.Entry<Set<String>, Long> ent : res.entrySet()) { 
-      Set<String> r= ent.getKey();
-      Long supp= ent.getValue();
-      if (supp <= best) 
-        continue;
-      boolean hasAll= true;
-      for (String f : feats) {
-        if (!r.contains(f)) {
-          hasAll= false;
-          break;
-        }
-      }
-      if (hasAll) 
-        best= supp;
-    }
-    return best;
   }
 
   @Test

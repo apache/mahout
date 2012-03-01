@@ -18,13 +18,11 @@
 package org.apache.mahout.fpm.pfpgrowth;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Stack;
 
 import org.apache.mahout.math.list.IntArrayList;
 
 import com.google.common.collect.AbstractIterator;
-import com.google.common.collect.Lists;
 import org.apache.mahout.common.Pair;
 
 /**

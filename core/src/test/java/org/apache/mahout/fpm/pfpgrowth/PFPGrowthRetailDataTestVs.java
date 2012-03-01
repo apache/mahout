@@ -52,30 +52,6 @@ public final class PFPGrowthRetailDataTestVs extends MahoutTestCase {
   private final Parameters paramsImpl2 = new Parameters();
   private static final Logger log = LoggerFactory.getLogger(PFPGrowthRetailDataTestVs.class);
 
-  private static long bestResults(Map<Set<String>, Long> res, Set<String> feats) {
-    Long best = res.get(feats);
-    if (best != null) 
-      return best;
-    else 
-      best = -1L;
-    for (Map.Entry<Set<String>, Long> ent : res.entrySet()) { 
-      Set<String> r = ent.getKey();
-      Long supp = ent.getValue();
-      if (supp <= best) 
-        continue;
-      boolean hasAll = true;
-      for (String f : feats) {
-        if (!r.contains(f)) {
-          hasAll = false;
-          break;
-        }
-      }
-      if (hasAll) 
-        best = supp;
-    }
-    return best;
-  }
-
   @Override
   public void setUp() throws Exception {
     super.setUp();

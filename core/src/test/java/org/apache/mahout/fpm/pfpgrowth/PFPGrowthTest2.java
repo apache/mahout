@@ -86,7 +86,6 @@ public final class PFPGrowthTest2 extends MahoutTestCase {
    */ 
   @Test
   public void testStartParallelFPGrowth() throws Exception {
-    Configuration conf = new Configuration();
     PFPGrowth.runPFPGrowth(params);
 
     List<Pair<String,TopKStringPatterns>> frequentPatterns = PFPGrowth.readFrequentPattern(params);

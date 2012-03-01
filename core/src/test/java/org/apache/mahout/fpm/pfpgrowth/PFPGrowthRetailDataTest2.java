@@ -39,7 +39,6 @@ import org.apache.mahout.common.Parameters;
 import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.common.iterator.StringRecordIterator;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
-import org.apache.mahout.fpm.pfpgrowth.PFPGrowth;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
