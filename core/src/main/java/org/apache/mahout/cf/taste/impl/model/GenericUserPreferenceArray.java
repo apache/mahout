@@ -34,7 +34,7 @@ import org.apache.mahout.common.iterator.CountingIterator;
  * </p>
  *
  * <p>
- * This implementation maintains two parallel arrays, of user IDs and values. The idea is to save allocating
+ * This implementation maintains two parallel arrays, of item IDs and values. The idea is to save allocating
  * {@link Preference} objects themselves. This saves the overhead of {@link Preference} objects but also
  * duplicating the user ID value.
  * </p>
