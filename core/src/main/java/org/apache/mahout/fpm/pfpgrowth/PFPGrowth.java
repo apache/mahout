@@ -179,11 +179,11 @@ public final class PFPGrowth {
     return fList;
   }
 
-  public static final int getGroup(int itemId, int maxPerGroup) {
+  public static int getGroup(int itemId, int maxPerGroup) {
     return itemId / maxPerGroup;
   }
 
-  public static final IntArrayList getGroupMembers(int groupId, 
+  public static IntArrayList getGroupMembers(int groupId, 
                                                    int maxPerGroup, 
                                                    int numFeatures) {
     IntArrayList ret = new IntArrayList();

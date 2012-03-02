@@ -113,8 +113,8 @@ public class FPTree {
     this.attrCountList = new LongArrayList();
     for (int i = 0; i < attrCounts.length; i++) 
       if (attrCounts[i] > 0) {
-        if (attrCountList.size() < (i+1)) {
-          attrCountList.setSize(i+1);
+        if (attrCountList.size() < (i + 1)) {
+          attrCountList.setSize(i + 1);
         }
         attrCountList.set(i, attrCounts[i]);
       }
@@ -248,7 +248,7 @@ public class FPTree {
       while (currNode != root) {
         int currAttr = currNode.attribute();
         if (counts.size() <= currAttr) {
-          counts.setSize(currAttr+1);
+          counts.setSize(currAttr + 1);
         }
         long count = counts.get(currAttr);
         counts.set(currNode.attribute(), count + pathCount);
@@ -257,9 +257,9 @@ public class FPTree {
     }
     if (counts.get(targetAttr) != attrCountList.get(targetAttr))
       throw new IllegalStateException("mismatched counts for targetAttr="
-                                      +targetAttr+", ("+counts.get(targetAttr)
-                                      +" != "+attrCountList.get(targetAttr)+"); "
-                                      +"thisTree="+this+"\n");
+                                      + targetAttr + ", (" + counts.get(targetAttr)
+                                      + " != " + attrCountList.get(targetAttr) + "); "
+                                      + "thisTree=" + this + "\n");
     counts.set(targetAttr, 0L);
 
     FPTree toRet = new FPTree(counts, minSupport);
@@ -280,7 +280,7 @@ public class FPTree {
   }
 
   // biggest count or smallest attr number goes first
-  private class AttrComparator implements Comparator<Integer>{
+  private class AttrComparator implements Comparator<Integer> {
     public int compare(Integer a, Integer b) {
 
       long aCnt = 0;
@@ -310,7 +310,7 @@ public class FPTree {
     while (currNode.numChildren() == 1) {
       currNode = currNode.children().iterator().next();
       if (pAttrCountList.size() <= currNode.attribute())
-        pAttrCountList.setSize(currNode.attribute()+1);
+        pAttrCountList.setSize(currNode.attribute() + 1);
       pAttrCountList.set(currNode.attribute(), currNode.count());
       qAttrCountList.set(currNode.attribute(), 0);
     }
@@ -336,13 +336,13 @@ public class FPTree {
       items.add(attribute);
     }
     for (FPNode child : node.children()) {
-      added+= recursivelyAddPrefixPats(pTree, qTree, child, items);
+      added += recursivelyAddPrefixPats(pTree, qTree, child, items);
     }
     if (added < count) {
       long toAdd = count - added;
       pTree.accumulate(items, toAdd);
       qTree.accumulate(items, toAdd);
-      added+= toAdd;
+      added += toAdd;
     }
     if (!(node == root)) {
       int lastIdx = items.size() - 1;

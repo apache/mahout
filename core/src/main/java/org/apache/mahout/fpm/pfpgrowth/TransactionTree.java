@@ -195,7 +195,6 @@ public final class TransactionTree implements Writable, Iterable<Pair<IntArrayLi
   public TransactionTree getCompressedTree() {
     TransactionTree ctree = new TransactionTree();
     Iterator<Pair<IntArrayList,Long>> it = iterator();
-    final Map<Integer,MutableLong> fList = generateFList();
     int node = 0;
     int size = 0;
     List<Pair<IntArrayList,Long>> compressedTransactionSet = Lists.newArrayList();

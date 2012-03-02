@@ -18,7 +18,6 @@
 package org.apache.mahout.fpm.pfpgrowth.fpgrowth2;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -42,7 +41,6 @@ import org.apache.mahout.fpm.pfpgrowth.convertors.StatusUpdater;
 import org.apache.mahout.fpm.pfpgrowth.convertors.TopKPatternsOutputConverter;
 import org.apache.mahout.fpm.pfpgrowth.convertors.TransactionIterator;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
-import org.apache.mahout.math.map.OpenIntIntHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,8 +174,8 @@ public class FPGrowthObj<A extends Comparable<? super A>> {
 
     log.info("Number of unique pruned items {}", attributeIdMapping.size());
     generateTopKFrequentPatterns(new TransactionIterator<A>(transactionStream,
-        attributeIdMapping), attributeFrequency, minSupport, k, reverseMapping
-        .size(), returnFeatures, new TopKPatternsOutputConverter<A>(output,
+        attributeIdMapping), attributeFrequency, minSupport, k, 
+        returnFeatures, new TopKPatternsOutputConverter<A>(output,
             reverseMapping), updater);
   }
 
@@ -250,7 +248,7 @@ public class FPGrowthObj<A extends Comparable<? super A>> {
     long[] attributeFrequency,
     long minSupport,
     int k,
-    int featureSetSize,
+    //int featureSetSize,
     Collection<Integer> returnFeatures, TopKPatternsOutputConverter<A> topKPatternsOutputCollector,
     StatusUpdater updater) throws IOException {
 
@@ -317,8 +315,7 @@ public class FPGrowthObj<A extends Comparable<? super A>> {
     }
 
     if (prefixPats != null) {
-      FrequentPatternMaxHeap toRet = cross(prefixPats, suffixPats, k);
-      return toRet;
+      return cross(prefixPats, suffixPats, k);
     }
 
     return suffixPats;

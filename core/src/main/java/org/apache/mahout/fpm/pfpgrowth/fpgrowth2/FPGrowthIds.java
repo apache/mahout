@@ -19,18 +19,13 @@ package org.apache.mahout.fpm.pfpgrowth.fpgrowth2;
 
 import java.io.IOException;
 import java.util.AbstractMap;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 import org.apache.commons.lang.mutable.MutableLong;
 import org.apache.hadoop.conf.Configuration;
@@ -39,14 +34,11 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
-import org.apache.mahout.fpm.pfpgrowth.CountDescendingPairComparator;
 import org.apache.mahout.fpm.pfpgrowth.convertors.StatusUpdater;
 import org.apache.mahout.fpm.pfpgrowth.convertors.TopKPatternsOutputConverter;
-import org.apache.mahout.fpm.pfpgrowth.convertors.TransactionIterator;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 import org.apache.mahout.math.list.LongArrayList;
 import org.apache.mahout.math.list.IntArrayList;
-import org.apache.mahout.math.map.OpenIntIntHashMap;
 import org.apache.mahout.math.set.OpenIntHashSet;
 
 import org.slf4j.Logger;
@@ -110,7 +102,6 @@ public class FPGrowthIds {
 
     log.info("Number of unique items {}", attributeFrequency.size());
 
-    OpenIntHashSet returnFeatures = new OpenIntHashSet();
     if (returnableFeatures == null || returnableFeatures.isEmpty()) {
       returnableFeatures = new IntArrayList();
       for (int j = 0; j < attributeFrequency.size(); j++) {
@@ -120,7 +111,7 @@ public class FPGrowthIds {
 
     log.info("Number of unique pruned items {}", attributeFrequency.size());
     generateTopKFrequentPatterns(transactionStream, attributeFrequency,
-        minSupport, k, attributeFrequency.size(), returnableFeatures,
+        minSupport, k, returnableFeatures,
         new TopKPatternsOutputConverter<Integer>(output, new IdentityMapping()), updater);
   }
 
@@ -206,7 +197,6 @@ public class FPGrowthIds {
     LongArrayList attributeFrequency,
     long minSupport,
     int k,
-    int featureSetSize,
     IntArrayList returnFeatures, 
     TopKPatternsOutputConverter<Integer> topKPatternsOutputCollector,
     StatusUpdater updater) throws IOException {
@@ -271,8 +261,7 @@ public class FPGrowthIds {
     }
 
     if (prefixPats != null) {
-      FrequentPatternMaxHeap toRet = cross(prefixPats, suffixPats, k);
-      return toRet;
+      return cross(prefixPats, suffixPats, k);
     }
 
     return suffixPats;
