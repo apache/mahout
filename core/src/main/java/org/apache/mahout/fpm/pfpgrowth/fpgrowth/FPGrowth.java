@@ -566,8 +566,8 @@ public class FPGrowth<A extends Comparable<? super A>> {
           int prevParent = conditionalTree.parent(prevConditional);
           if (prevParent == -1) {
             conditionalTree.setParent(prevConditional, conditional);
-	        } else if (prevParent != conditional) {
-	          throw new IllegalStateException();
+          } else if (prevParent != conditional) {
+            throw new IllegalStateException();
           }
         }
 
@@ -582,7 +582,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
         int prevParent = conditionalTree.parent(prevConditional);
         if (prevParent == -1) {
           conditionalTree.setParent(prevConditional, FPTree.ROOTNODEID);
-	      } else if (prevParent != FPTree.ROOTNODEID) {
+        } else if (prevParent != FPTree.ROOTNODEID) {
           throw new IllegalStateException();
         }
         if (conditionalTree.childCount(FPTree.ROOTNODEID) > 1 && conditionalTree.singlePath()) {

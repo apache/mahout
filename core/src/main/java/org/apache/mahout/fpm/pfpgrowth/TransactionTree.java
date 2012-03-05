@@ -175,13 +175,9 @@ public final class TransactionTree implements Writable, Iterable<Pair<IntArrayLi
   public Map<Integer,MutableLong> generateFList() {
     Map<Integer,MutableLong> frequencyList = Maps.newHashMap();
     Iterator<Pair<IntArrayList,Long>> it = iterator();
-    //int items = 0;
-    //int count = 0;
     while (it.hasNext()) {
       Pair<IntArrayList,Long> p = it.next();
-      //items += p.getFirst().size();
-      //count++;
-      IntArrayList items= p.getFirst();
+      IntArrayList items = p.getFirst();
       for (int idx = 0; idx < items.size(); idx++) {
         if (!frequencyList.containsKey(items.get(idx))) {
           frequencyList.put(items.get(idx), new MutableLong(0));

@@ -64,16 +64,18 @@ public final class FPGrowthDriver extends AbstractJob {
     addInputOption();
     addOutputOption();
 
-    addOption("minSupport", "s", "(Optional) The minimum number of times a co-occurrence must be present. Default Value: 3", "3");
-    addOption("maxHeapSize", "k", "(Optional) Maximum Heap Size k, to denote the requirement to mine top K items. Default value: 50", "50");
+    addOption("minSupport", "s", "(Optional) The minimum number of times a co-occurrence must be present."
+              + " Default Value: 3", "3");
+    addOption("maxHeapSize", "k", "(Optional) Maximum Heap Size k, to denote the requirement to mine top K items."
+              + " Default value: 50", "50");
     addOption("numGroups", "g", "(Optional) Number of groups the features should be divided in the map-reduce version."
-            + " Doesn't work in sequential version Default Value:" + PFPGrowth.NUM_GROUPS_DEFAULT,
-	      Integer.toString(PFPGrowth.NUM_GROUPS_DEFAULT));
-    addOption("splitterPattern", "regex", "Regular Expression pattern used to split given string transaction into itemsets."
-            + " Default value splits comma separated itemsets.  Default Value:"
+              + " Doesn't work in sequential version Default Value:" + PFPGrowth.NUM_GROUPS_DEFAULT,
+              Integer.toString(PFPGrowth.NUM_GROUPS_DEFAULT));
+    addOption("splitterPattern", "regex", "Regular Expression pattern used to split given string transaction into"
+            + " itemsets. Default value splits comma separated itemsets.  Default Value:"
             + " \"[ ,\\t]*[,|\\t][ ,\\t]*\" ", "[ ,\t]*[,|\t][ ,\t]*");
-    addOption("numTreeCacheEntries", "tc", "(Optional) Number of entries in the tree cache to prevent duplicate tree building. "
-            + "(Warning) a first level conditional FP-Tree might consume a lot of memory, "
+    addOption("numTreeCacheEntries", "tc", "(Optional) Number of entries in the tree cache to prevent duplicate"
+            + " tree building. (Warning) a first level conditional FP-Tree might consume a lot of memory, "
             + "so keep this value small, but big enough to prevent duplicate tree building. "
             + "Default Value:5 Recommended Values: [5-10]", "5");
     addOption("method", "method", "Method of processing: sequential|mapreduce", "sequential");
@@ -171,9 +173,9 @@ public final class FPGrowthDriver extends AbstractJob {
                 features,
                 new StringOutputConverter(new SequenceFileOutputCollector<Text, TopKStringPatterns>(writer)),
                 new ContextStatusUpdater(null));
-        } finally {
-          Closeables.closeQuietly(writer);
-        }
+      } finally {
+        Closeables.closeQuietly(writer);
+      }
     } else {
       FPGrowth<String> fp = new FPGrowth<String>();
       Collection<String> features = new HashSet<String>();

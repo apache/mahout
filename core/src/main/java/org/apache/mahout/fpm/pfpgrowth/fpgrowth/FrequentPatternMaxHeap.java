@@ -168,7 +168,7 @@ public final class FrequentPatternMaxHeap {
     String sep = "";
     for (Pattern p : getHeap()) {
       sb.append(sep).append(p);
-      sep= ", ";
+      sep = ", ";
     }
     return sb.toString();
   }

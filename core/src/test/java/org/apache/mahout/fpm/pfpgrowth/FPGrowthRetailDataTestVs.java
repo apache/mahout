@@ -67,6 +67,28 @@ public final class FPGrowthRetailDataTestVs extends MahoutTestCase {
     return best;
   }
 
+  private static class MapCollector implements OutputCollector<String,List<Pair<List<String>,Long>>> {
+    private Map<Set<String>,Long> results;
+
+    public MapCollector(Map<Set<String>,Long> results) {
+      this.results = results;
+    }
+
+    @Override
+    public void collect(String key, List<Pair<List<String>,Long>> value) {
+      for (Pair<List<String>,Long> v : value) {
+        List<String> l = v.getFirst();
+        results.put(new HashSet<String>(l), v.getSecond());
+        log.info("found pat ["+v.getSecond()+"]: "+ v.getFirst());
+      }
+    }
+  }
+
+  private class DummyUpdater implements StatusUpdater {
+    @Override
+    public void update(String status) { }
+  }
+
   @Test
   public void testVsWithRetailData() throws IOException {
     String inputFilename = "retail.dat";
@@ -76,7 +98,7 @@ public final class FPGrowthRetailDataTestVs extends MahoutTestCase {
     org.apache.mahout.fpm.pfpgrowth.fpgrowth.
       FPGrowth<String> fp1 = new org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth<String>();
 
-    final Map<Set<String>,Long> results1 = Maps.newHashMap();
+    Map<Set<String>,Long> results1 = Maps.newHashMap();
     
     fp1.generateTopKFrequentPatterns(
       new StringRecordIterator(new FileLineIterable(Resources.getResource(inputFilename).openStream()), "\\s+"),
@@ -84,49 +106,17 @@ public final class FPGrowthRetailDataTestVs extends MahoutTestCase {
       fp1.generateFList(new StringRecordIterator(new FileLineIterable(Resources.getResource(inputFilename)
            .openStream()), "\\s+"), minSupport), minSupport, 100000, 
       returnableFeatures,
-      new OutputCollector<String,List<Pair<List<String>,Long>>>() {
-        
-        @Override
-        public void collect(String key, List<Pair<List<String>,Long>> value) {
-          
-          for (Pair<List<String>,Long> v : value) {
-            List<String> l = v.getFirst();
-            results1.put(new HashSet<String>(l), v.getSecond());
-            log.info("found pat ["+v.getSecond()+"]: "+ v.getFirst());
-          }
-        }
-        
-      }, new StatusUpdater() {
-        
-        @Override
-        public void update(String status) {}
-      });
+      new MapCollector(results1), new DummyUpdater());
 
     FPGrowthObj<String> fp2 = new FPGrowthObj<String>();
-    final Map<Set<String>,Long> initialResults2 = Maps.newHashMap();
+    Map<Set<String>,Long> initialResults2 = Maps.newHashMap();
     fp2.generateTopKFrequentPatterns(
       new StringRecordIterator(new FileLineIterable(Resources.getResource(inputFilename).openStream()), "\\s+"),
 
       fp2.generateFList(new StringRecordIterator(new FileLineIterable(Resources.getResource(inputFilename)
            .openStream()), "\\s+"), minSupport), minSupport, 100000, 
       new HashSet<String>(),
-      new OutputCollector<String,List<Pair<List<String>,Long>>>() {
-        
-        @Override
-        public void collect(String key, List<Pair<List<String>,Long>> value) {
-          
-          for (Pair<List<String>,Long> v : value) {
-            List<String> l = v.getFirst();
-            initialResults2.put(new HashSet<String>(l), v.getSecond());
-            log.info("found pat ["+v.getSecond()+"]: "+ v.getFirst());
-          }
-        }
-        
-      }, new StatusUpdater() {
-        
-        @Override
-        public void update(String status) {}
-      });
+      new MapCollector(initialResults2), new DummyUpdater());
 
     Map<Set<String>, Long> results2 = new HashMap<Set<String>, Long>();    
     if (!returnableFeatures.isEmpty()) {
@@ -146,35 +136,31 @@ public final class FPGrowthRetailDataTestVs extends MahoutTestCase {
       results2 = tmpResult;
     } else {
       results2 = initialResults2;
-    }
+  }
 
     boolean allMatch = true;
-    int itemsetsChecked = 0;
-    for (Map.Entry<Set<String>, Long> result1 : results1.entrySet()) {
-      itemsetsChecked++;
-      Set<String> feats = result1.getKey();
-      long supp1 = result1.getValue();
-      long supp2 = bestResults(results2, feats);
-      if (supp1 != supp2) {
-        allMatch = false;
-        log.info("mismatch checking results1 ["+supp1+" vs "+supp2+"]: "+feats);
-      }
-    }
-    log.info("checked "+itemsetsChecked+" itemsets iterating through #1");
+    allMatch &= hasAll(results1, results2);
+    log.info("checked "+results1.size()+" itemsets iterating through #1");
 
-    itemsetsChecked = 0;
-    for (Map.Entry<Set<String>, Long> result2 : results2.entrySet()) { 
-      itemsetsChecked++;
-      Set<String> feats = result2.getKey();
-      long supp2 = result2.getValue();
-      long supp1 = bestResults(results1, feats);
-      if (supp1 != supp2) {
-        allMatch = false;
-        log.info("mismatch checking results2 [ "+supp1+" vs "+supp2+"]: "+feats);
-      }
-    }
-    log.info("checked "+itemsetsChecked+" itemsets iterating through #2");
+    allMatch &= hasAll(results2, results1);
+    log.info("checked "+results2.size()+" itemsets iterating through #2");
 
     assertEquals( "Had mismatches!", allMatch, true);
   }
+
+  public boolean hasAll(Map<Set<String>, Long> ref, Map<Set<String>, Long> other) {
+    boolean hasAll = true;
+    for (Map.Entry<Set<String>, Long> refEnt : ref.entrySet()) {
+      Set<String> feats = refEnt.getKey();
+      long supp1 = refEnt.getValue();
+      long supp2 = bestResults(other, feats);
+      if (supp1 != supp2) {
+        hasAll = false;
+        log.info("mismatch checking results ["+supp1+" vs "+supp2+"]: "+feats);
+      }
+    }
+
+    return hasAll;
+  }
+
 }

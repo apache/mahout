@@ -39,9 +39,6 @@ import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.list.LongArrayList;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  *  takes each group of transactions and runs Vanilla FPGrowth on it and
  * outputs the the Top K frequent Patterns for each group.
@@ -49,9 +46,6 @@ import org.slf4j.LoggerFactory;
  */
 public class ParallelFPGrowthReducer extends Reducer<IntWritable,TransactionTree,Text,TopKStringPatterns> {
 
-  private static final Logger log = 
-      LoggerFactory.getLogger(ParallelFPGrowthReducer.class);
-  
   private final List<String> featureReverseMap = Lists.newArrayList();
   private final LongArrayList freqList = new LongArrayList();
   
@@ -59,12 +53,12 @@ public class ParallelFPGrowthReducer extends Reducer<IntWritable,TransactionTree
   
   private int minSupport = 3;
 
-  private int numFeatures = 0;
-  private int maxPerGroup = 0;
+  private int numFeatures;
+  private int maxPerGroup;
 
-  private boolean useFP2 = false;
+  private boolean useFP2;
 
-  private class IteratorAdapter implements Iterator<Pair<List<Integer>,Long>> {
+  private static class IteratorAdapter implements Iterator<Pair<List<Integer>,Long>> {
     private Iterator<Pair<IntArrayList,Long>> innerIter;
 
     private IteratorAdapter(Iterator<Pair<IntArrayList,Long>> transactionIter) {
@@ -148,8 +142,8 @@ public class ParallelFPGrowthReducer extends Reducer<IntWritable,TransactionTree
     maxHeapSize = Integer.valueOf(params.get(PFPGrowth.MAX_HEAPSIZE, "50"));
     minSupport = Integer.valueOf(params.get(PFPGrowth.MIN_SUPPORT, "3"));
 
-    maxPerGroup= params.getInt(PFPGrowth.MAX_PER_GROUP, 0);
-    numFeatures= featureReverseMap.size();
+    maxPerGroup = params.getInt(PFPGrowth.MAX_PER_GROUP, 0);
+    numFeatures = featureReverseMap.size();
     useFP2 = "true".equals(params.get(PFPGrowth.USE_FPG2));
   }
 }

@@ -40,7 +40,7 @@ import com.google.common.io.Resources;
 public final class FPGrowthSyntheticDataTest extends MahoutTestCase {
 
   @Test
-    public void testSpecificCasesFromSynthData() throws IOException {
+  public void testSpecificCasesFromSynthData() throws IOException {
     FPGrowthObj<String> fp = new FPGrowthObj<String>();
     
     String inputFilename = "FPGsynth.dat";

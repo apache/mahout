@@ -37,10 +37,6 @@ import org.apache.mahout.common.iterator.StringRecordIterator;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 import org.junit.Test;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-
 import com.google.common.base.Charsets;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
@@ -50,7 +46,6 @@ public final class PFPGrowthRetailDataTestVs extends MahoutTestCase {
 
   private final Parameters paramsImpl1 = new Parameters();
   private final Parameters paramsImpl2 = new Parameters();
-  private static final Logger log = LoggerFactory.getLogger(PFPGrowthRetailDataTestVs.class);
 
   @Override
   public void setUp() throws Exception {

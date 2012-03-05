@@ -81,9 +81,7 @@ public final class PFPGrowth {
 
   public static final Pattern SPLITTER = Pattern.compile("[ ,\t]*[,|\t][ ,\t]*");
   
-  private static final Logger log = LoggerFactory.getLogger(PFPGrowth.class);
-  
-  private PFPGrowth() {}
+  private PFPGrowth() { }
   
   /**
    * Generates the fList from the serialized string representation
@@ -97,23 +95,23 @@ public final class PFPGrowth {
       throw new IOException("Cannot read Frequency list from Distributed Cache");
     }
     if (files.length != 1) {
-      throw new IOException("Cannot read Frequency list from Distributed Cache ("+files.length+")");
+      throw new IOException("Cannot read Frequency list from Distributed Cache (" + files.length + ")");
     }
     FileSystem fs = FileSystem.getLocal(conf);
     Path fListLocalPath = fs.makeQualified(files[0]);
     // Fallback if we are running locally.
-    if (! fs.exists(fListLocalPath)) {
+    if (!fs.exists(fListLocalPath)) {
       URI[] filesURIs = DistributedCache.getCacheFiles(conf);
       if (filesURIs == null) {
         throw new IOException("Cannot read Frequency list from Distributed Cache");
       }
       if (filesURIs.length != 1) {
-        throw new IOException("Cannot read Frequency list from Distributed Cache ("+files.length+")");
+        throw new IOException("Cannot read Frequency list from Distributed Cache (" + files.length + ")");
       }
       fListLocalPath = new Path(filesURIs[0].getPath());
     }
-    for (Pair<Text,LongWritable> record :
-         new SequenceFileIterable<Text,LongWritable>(fListLocalPath, true, conf)) {
+    for (Pair<Text,LongWritable> record
+         : new SequenceFileIterable<Text,LongWritable>(fListLocalPath, true, conf)) {
       list.add(new Pair<String,Long>(record.getFirst().toString(), record.getSecond().get()));
     }
     return list;
@@ -164,8 +162,8 @@ public final class PFPGrowth {
           }
         });
 
-    for (Pair<Text,LongWritable> record :
-         new SequenceFileDirIterable<Text,LongWritable>(new Path(parallelCountingPath, FILE_PATTERN),
+    for (Pair<Text,LongWritable> record
+         : new SequenceFileDirIterable<Text,LongWritable>(new Path(parallelCountingPath, FILE_PATTERN),
                                                         PathType.GLOB, null, null, true, conf)) {
       long value = record.getSecond().get();
       if (value >= minSupport) {
@@ -190,7 +188,7 @@ public final class PFPGrowth {
     int start = groupId * maxPerGroup;
     int end = start + maxPerGroup;
     if (end > numFeatures) 
-      end= numFeatures;
+      end = numFeatures;
     for (int i = start; i < end; i++) {
       ret.add(i);
     }

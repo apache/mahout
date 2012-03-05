@@ -22,9 +22,6 @@ import java.util.Comparator;
 import java.util.List;
 import com.google.common.collect.Lists;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.list.LongArrayList;
@@ -34,7 +31,6 @@ import org.apache.mahout.math.map.OpenIntObjectHashMap;
  * A straightforward implementation of FPTrees as described in Han et. al.
  */
 public class FPTree {
-  private static final Logger log = LoggerFactory.getLogger(FPTree.class);
 
   private final AttrComparator attrComparator = new AttrComparator();
   private FPNode root;
@@ -42,7 +38,7 @@ public class FPTree {
   private LongArrayList attrCountList;
   private OpenIntObjectHashMap attrNodeLists; 
 
-  public class FPNode {
+  public static final class FPNode {
     private FPNode parent;
     private OpenIntObjectHashMap childMap;
     private int attribute;

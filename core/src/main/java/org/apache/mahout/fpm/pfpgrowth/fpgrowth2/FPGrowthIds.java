@@ -39,7 +39,6 @@ import org.apache.mahout.fpm.pfpgrowth.convertors.TopKPatternsOutputConverter;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 import org.apache.mahout.math.list.LongArrayList;
 import org.apache.mahout.math.list.IntArrayList;
-import org.apache.mahout.math.set.OpenIntHashSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,7 +114,7 @@ public class FPGrowthIds {
         new TopKPatternsOutputConverter<Integer>(output, new IdentityMapping()), updater);
   }
 
-  private class IdentityMapping extends AbstractMap<Integer, Integer> {
+  private static class IdentityMapping extends AbstractMap<Integer, Integer> {
 
     public Set<Map.Entry<Integer,Integer>> entrySet() {
       throw new IllegalStateException();

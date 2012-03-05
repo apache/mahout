@@ -31,9 +31,6 @@ import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 import org.apache.mahout.math.set.OpenIntHashSet;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  *  maps each transaction to all unique items groups in the transaction. mapper
  * outputs the group id as key and the transaction as value
@@ -41,16 +38,14 @@ import org.slf4j.LoggerFactory;
  */
 public class ParallelFPGrowthMapper extends Mapper<LongWritable,Text,IntWritable,TransactionTree> {
 
-  private static final Logger log = LoggerFactory.getLogger(ParallelFPGrowthMapper.class);
-
   private final OpenObjectIntHashMap<String> fMap = new OpenObjectIntHashMap<String>();
   private Pattern splitter;
   private int maxPerGroup;
 
-  private IntWritable wGroupID= new IntWritable();
+  private IntWritable wGroupID = new IntWritable();
 
   @Override
-    protected void map(LongWritable offset, Text input, Context context)
+  protected void map(LongWritable offset, Text input, Context context)
     throws IOException, InterruptedException {
 
     String[] items = splitter.split(input.toString());
