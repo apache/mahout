@@ -35,7 +35,7 @@ import com.google.common.collect.Lists;
  * clustering
  * 
  */
-public class FuzzyKMeansClusteringPolicy implements ClusteringPolicy {
+public class FuzzyKMeansClusteringPolicy extends AbstractClusteringPolicy {
   
   public FuzzyKMeansClusteringPolicy() {
     super();
@@ -53,18 +53,6 @@ public class FuzzyKMeansClusteringPolicy implements ClusteringPolicy {
    * (non-Javadoc)
    * 
    * @see
-   * org.apache.mahout.clustering.ClusteringPolicy#update(org.apache.mahout.
-   * clustering.ClusterClassifier)
-   */
-  @Override
-  public void update(ClusterClassifier posterior) {
-    // nothing to do here
-  }
-  
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
    * org.apache.mahout.clustering.ClusteringPolicy#select(org.apache.mahout.
    * math.Vector)
    */
@@ -74,10 +62,10 @@ public class FuzzyKMeansClusteringPolicy implements ClusteringPolicy {
   }
   
   @Override
-  public Vector classify(Vector data, List<Cluster> models) {
+  public Vector classify(Vector data, ClusterClassifier prior) {
     Collection<SoftCluster> clusters = Lists.newArrayList();
     List<Double> distances = Lists.newArrayList();
-    for (Cluster model : models) {
+    for (Cluster model : prior.getModels()) {
       SoftCluster sc = (SoftCluster) model;
       clusters.add(sc);
       distances.add(sc.getMeasure().distance(data, sc.getCenter()));
@@ -86,7 +74,7 @@ public class FuzzyKMeansClusteringPolicy implements ClusteringPolicy {
     fuzzyKMeansClusterer.setM(m);
     return fuzzyKMeansClusterer.computePi(clusters, distances);
   }
-
+  
   /*
    * (non-Javadoc)
    * 
@@ -107,6 +95,15 @@ public class FuzzyKMeansClusteringPolicy implements ClusteringPolicy {
   public void readFields(DataInput in) throws IOException {
     this.m = in.readDouble();
     this.convergenceDelta = in.readDouble();
+  }
+
+  @Override
+  public void close(ClusterClassifier posterior) {
+    for (Cluster cluster : posterior.getModels()) {
+      ((org.apache.mahout.clustering.kmeans.Kluster) cluster).calculateConvergence(convergenceDelta);
+      cluster.computeParameters();
+    }
+    
   }
   
 }

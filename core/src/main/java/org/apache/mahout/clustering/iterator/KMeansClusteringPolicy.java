@@ -19,77 +19,58 @@ package org.apache.mahout.clustering.iterator;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.List;
 
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.classify.ClusterClassifier;
-import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.SequentialAccessSparseVector;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.function.TimesFunction;
 
 /**
  * This is a simple maximum likelihood clustering policy, suitable for k-means
  * clustering
  * 
  */
-public class KMeansClusteringPolicy implements ClusteringPolicy {
+public class KMeansClusteringPolicy extends AbstractClusteringPolicy {
   
   public KMeansClusteringPolicy() {
     super();
   }
-
+  
   public KMeansClusteringPolicy(double convergenceDelta) {
     super();
     this.convergenceDelta = convergenceDelta;
   }
-
-  private double convergenceDelta = 0.05;
   
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.ClusteringPolicy#select(org.apache.mahout.math.Vector)
-   */
-  @Override
-  public Vector select(Vector probabilities) {
-    int maxValueIndex = probabilities.maxValueIndex();
-    Vector weights = new SequentialAccessSparseVector(probabilities.size());
-    weights.set(maxValueIndex, 1.0);
-    return weights;
-  }
+  private double convergenceDelta = 0.001;
   
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.ClusteringPolicy#update(org.apache.mahout.clustering.ClusterClassifier)
-   */
-  @Override
-  public void update(ClusterClassifier posterior) {
-    // nothing to do here
-  }
-
-  @Override
-  public Vector classify(Vector data, List<Cluster> models) {
-    int i = 0;
-    Vector pdfs = new DenseVector(models.size());
-    for (Cluster model : models) {
-      pdfs.set(i++, model.pdf(new VectorWritable(data)));
-    }
-    return pdfs.assign(new TimesFunction(), 1.0 / pdfs.zSum());
-  }
-
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.hadoop.io.Writable#write(java.io.DataOutput)
    */
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeDouble(convergenceDelta);
   }
-
-  /* (non-Javadoc)
+  
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.hadoop.io.Writable#readFields(java.io.DataInput)
    */
   @Override
   public void readFields(DataInput in) throws IOException {
     this.convergenceDelta = in.readDouble();
+  }
+  
+  @Override
+  public void close(ClusterClassifier posterior) {
+    boolean allConverged = true;
+    for (Cluster cluster : posterior.getModels()) {
+      org.apache.mahout.clustering.kmeans.Kluster kluster = (org.apache.mahout.clustering.kmeans.Kluster) cluster;
+      boolean converged = kluster.calculateConvergence(convergenceDelta);
+      allConverged = allConverged && converged;
+      cluster.computeParameters();
+    }
+    
   }
   
 }

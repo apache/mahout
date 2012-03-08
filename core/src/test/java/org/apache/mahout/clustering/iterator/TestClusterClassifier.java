@@ -195,9 +195,8 @@ public final class TestClusterClassifier extends MahoutTestCase {
   @Test
   public void testClusterIteratorKMeans() {
     List<Vector> data = TestKmeansClustering.getPoints(TestKmeansClustering.REFERENCE);
-    ClusteringPolicy policy = new KMeansClusteringPolicy();
     ClusterClassifier prior = newKlusterClassifier();
-    ClusterIterator iterator = new ClusterIterator(policy);
+    ClusterIterator iterator = new ClusterIterator();
     ClusterClassifier posterior = iterator.iterate(data, prior, 5);
     assertEquals(3, posterior.getModels().size());
     for (Cluster cluster : posterior.getModels()) {
@@ -208,9 +207,8 @@ public final class TestClusterClassifier extends MahoutTestCase {
   @Test
   public void testClusterIteratorDirichlet() {
     List<Vector> data = TestKmeansClustering.getPoints(TestKmeansClustering.REFERENCE);
-    ClusteringPolicy policy = new DirichletClusteringPolicy(3, 1);
     ClusterClassifier prior = newKlusterClassifier();
-    ClusterIterator iterator = new ClusterIterator(policy);
+    ClusterIterator iterator = new ClusterIterator();
     ClusterClassifier posterior = iterator.iterate(data, prior, 5);
     assertEquals(3, posterior.getModels().size());
     for (Cluster cluster : posterior.getModels()) {
@@ -235,13 +233,13 @@ public final class TestClusterClassifier extends MahoutTestCase {
     for (Cluster cluster : prior.getModels()) {
       System.out.println(cluster.asFormatString(null));
     }
-    ClusterIterator iterator = new ClusterIterator(prior.getPolicy());
-    iterator.iterateSeq(pointsPath, path, outPath, 5);
+    new ClusterIterator().iterateSeq(pointsPath, path, outPath, 5);
     
-    for (int i = 1; i <= 5; i++) {
+    for (int i = 1; i <= 4; i++) {
       System.out.println("Classifier-" + i);
       ClusterClassifier posterior = new ClusterClassifier();
-      posterior.readFromSeqFiles(new Path(outPath, "classifier-" + i));
+      String name = i == 4 ? "clusters-4-final" : "clusters-" + i;
+      posterior.readFromSeqFiles(new Path(outPath, name));
       assertEquals(3, posterior.getModels().size());
       for (Cluster cluster : posterior.getModels()) {
         System.out.println(cluster.asFormatString(null));
@@ -262,19 +260,20 @@ public final class TestClusterClassifier extends MahoutTestCase {
     Path path = new Path(priorPath, "priorClassifier");
     ClusterClassifier prior = newKlusterClassifier();
     prior.writeToSeqFiles(path);
+    ClusteringPolicy policy = new KMeansClusteringPolicy();
+    ClusterClassifier.writePolicy(policy, path);
     assertEquals(3, prior.getModels().size());
     System.out.println("Prior");
     for (Cluster cluster : prior.getModels()) {
       System.out.println(cluster.asFormatString(null));
     }
-    ClusteringPolicy policy = new KMeansClusteringPolicy();
-    ClusterIterator iterator = new ClusterIterator(policy);
-    iterator.iterateMR(pointsPath, path, outPath, 3);
+    new ClusterIterator().iterateMR(pointsPath, path, outPath, 5);
     
-    for (int i = 1; i <= 3; i++) {
+    for (int i = 1; i <= 4; i++) {
       System.out.println("Classifier-" + i);
       ClusterClassifier posterior = new ClusterClassifier();
-      posterior.readFromSeqFiles(new Path(outPath, "clusters-" + i));
+      String name = i == 4 ? "clusters-4-final" : "clusters-" + i;
+      posterior.readFromSeqFiles(new Path(outPath, name));
       assertEquals(3, posterior.getModels().size());
       for (Cluster cluster : posterior.getModels()) {
         System.out.println(cluster.asFormatString(null));

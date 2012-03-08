@@ -25,28 +25,30 @@ import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 
 public class Kluster extends DistanceMeasureCluster {
-
+  
   /** Has the centroid converged with the center? */
   private boolean converged;
-
+  
   /** For (de)serialization as a Writable */
-  public Kluster() {
-  }
-
+  public Kluster() {}
+  
   /**
    * Construct a new cluster with the given point as its center
-   *
-   * @param center  the Vector center
-   * @param clusterId the int cluster id
-   * @param measure a DistanceMeasure
+   * 
+   * @param center
+   *          the Vector center
+   * @param clusterId
+   *          the int cluster id
+   * @param measure
+   *          a DistanceMeasure
    */
   public Kluster(Vector center, int clusterId, DistanceMeasure measure) {
     super(center, clusterId, measure);
   }
-
+  
   /**
    * Format the cluster for output
-   *
+   * 
    * @param cluster
    *          the Cluster
    * @return the String representation of the Cluster
@@ -54,33 +56,33 @@ public class Kluster extends DistanceMeasureCluster {
   public static String formatCluster(Kluster cluster) {
     return cluster.getIdentifier() + ": " + cluster.computeCentroid().asFormatString();
   }
-
+  
   public String asFormatString() {
     return formatCluster(this);
   }
-
+  
   @Override
   public void write(DataOutput out) throws IOException {
     super.write(out);
     out.writeBoolean(converged);
   }
-
+  
   @Override
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
     this.converged = in.readBoolean();
   }
-
+  
   @Override
   public String toString() {
     return asFormatString(null);
   }
-
+  
   @Override
   public String getIdentifier() {
     return (converged ? "VL-" : "CL-") + getId();
   }
-
+  
   /**
    * Return if the cluster is converged by comparing its center and centroid.
    * 
@@ -95,14 +97,20 @@ public class Kluster extends DistanceMeasureCluster {
     converged = measure.distance(centroid.getLengthSquared(), centroid, getCenter()) <= convergenceDelta;
     return converged;
   }
-
+  
   @Override
   public boolean isConverged() {
     return converged;
   }
-
+  
   protected void setConverged(boolean converged) {
     this.converged = converged;
   }
-
+  
+  public boolean calculateConvergence(double convergenceDelta) {
+    Vector centroid = computeCentroid();
+    converged = getMeasure().distance(centroid.getLengthSquared(), centroid, getCenter()) <= convergenceDelta;
+    return converged;
+  }
+  
 }

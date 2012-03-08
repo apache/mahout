@@ -45,6 +45,7 @@ import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.classify.WeightedVectorWritable;
 import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
@@ -342,11 +343,35 @@ public class DisplayClustering extends Frame {
     return clusters;
   }
   
+  protected static List<Cluster> readClustersWritable(Path clustersIn) {
+    List<Cluster> clusters = Lists.newArrayList();
+    Configuration conf = new Configuration();
+    for (ClusterWritable value : new SequenceFileDirValueIterable<ClusterWritable>(clustersIn, PathType.LIST,
+        PathFilters.logsCRCFilter(), conf)) {
+      Cluster cluster = value.getValue();
+      log.info(
+          "Reading Cluster:{} center:{} numPoints:{} radius:{}",
+          new Object[] {cluster.getId(), AbstractCluster.formatVector(cluster.getCenter(), null),
+              cluster.getNumObservations(), AbstractCluster.formatVector(cluster.getRadius(), null)});
+      clusters.add(cluster);
+    }
+    return clusters;
+  }
+  
   protected static void loadClusters(Path output) throws IOException {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
     for (FileStatus s : fs.listStatus(output, new ClustersFilter())) {
       List<Cluster> clusters = readClusters(s.getPath());
+      CLUSTERS.add(clusters);
+    }
+  }
+  
+  protected static void loadClustersWritable(Path output) throws IOException {
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.get(output.toUri(), conf);
+    for (FileStatus s : fs.listStatus(output, new ClustersFilter())) {
+      List<Cluster> clusters = readClustersWritable(s.getPath());
       CLUSTERS.add(clusters);
     }
   }

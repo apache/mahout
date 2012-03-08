@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
-import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.Cluster;
@@ -31,7 +30,6 @@ import org.apache.mahout.clustering.classify.ClusterClassifier;
 import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
 import org.apache.mahout.clustering.fuzzykmeans.SoftCluster;
 import org.apache.mahout.clustering.iterator.ClusterIterator;
-import org.apache.mahout.clustering.iterator.ClusteringPolicy;
 import org.apache.mahout.clustering.iterator.FuzzyKMeansClusteringPolicy;
 import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
 import org.apache.mahout.common.HadoopUtil;
@@ -39,6 +37,8 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.Vector;
+
+import com.google.common.collect.Lists;
 
 public class DisplayFuzzyKMeans extends DisplayClustering {
   
@@ -93,13 +93,8 @@ public class DisplayFuzzyKMeans extends DisplayClustering {
     Path priorPath = new Path(output, "classifier-0");
     prior.writeToSeqFiles(priorPath);
     
-    ClusteringPolicy policy = new FuzzyKMeansClusteringPolicy(1.1, 0.001);
-    new ClusterIterator(policy).iterateSeq(samples, priorPath, output, maxIterations);
-    for (int i = 1; i <= maxIterations; i++) {
-      ClusterClassifier posterior = new ClusterClassifier();
-      posterior.readFromSeqFiles(new Path(output, "classifier-" + i));
-      CLUSTERS.add(posterior.getModels());
-    }
+    new ClusterIterator().iterateSeq(samples, priorPath, output, maxIterations);
+    loadClustersWritable(output);
   }
   
   private static void runSequentialFuzzyKClusterer(Configuration conf, Path samples, Path output,

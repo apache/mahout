@@ -19,30 +19,24 @@ package org.apache.mahout.clustering.iterator;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.List;
 
+import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.clustering.classify.ClusterClassifier;
+import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.function.TimesFunction;
 
-/**
- * This is a simple maximum likelihood clustering policy, suitable for k-means
- * clustering
- * 
- */
-public class CanopyClusteringPolicy extends AbstractClusteringPolicy {
+public abstract class AbstractClusteringPolicy implements ClusteringPolicy {
   
-  public CanopyClusteringPolicy() {
-    super();
-  }
+  @Override
+  public abstract void write(DataOutput out) throws IOException;
   
-  private double t1, t2;
+  @Override
+  public abstract void readFields(DataInput in) throws IOException;
   
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * org.apache.mahout.clustering.ClusteringPolicy#select(org.apache.mahout.
-   * math.Vector)
-   */
   @Override
   public Vector select(Vector probabilities) {
     int maxValueIndex = probabilities.maxValueIndex();
@@ -51,26 +45,28 @@ public class CanopyClusteringPolicy extends AbstractClusteringPolicy {
     return weights;
   }
   
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.io.Writable#write(java.io.DataOutput)
-   */
   @Override
-  public void write(DataOutput out) throws IOException {
-    out.writeDouble(t1);
-    out.writeDouble(t2);
+  public void update(ClusterClassifier posterior) {
+    // nothing to do in general here
   }
   
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.io.Writable#readFields(java.io.DataInput)
-   */
   @Override
-  public void readFields(DataInput in) throws IOException {
-    this.t1 = in.readDouble();
-    this.t2 = in.readDouble();
+  public Vector classify(Vector data, ClusterClassifier prior) {
+    List<Cluster> models = prior.getModels();
+    int i = 0;
+    Vector pdfs = new DenseVector(models.size());
+    for (Cluster model : models) {
+      pdfs.set(i++, model.pdf(new VectorWritable(data)));
+    }
+    return pdfs.assign(new TimesFunction(), 1.0 / pdfs.zSum());
+  }
+  
+  @Override
+  public void close(ClusterClassifier posterior) {
+    for (Cluster cluster : posterior.getModels()) {
+      cluster.computeParameters();
+    }
+    
   }
   
 }

@@ -29,6 +29,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.classify.ClusterClassifier;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
@@ -50,25 +51,24 @@ import com.google.common.io.Closeables;
 public class ClusterIterator {
   
   public static final String PRIOR_PATH_KEY = "org.apache.mahout.clustering.prior.path";
-  public ClusterIterator(ClusteringPolicy policy) {
-    this.policy = policy;
-  }
-  
-  private final ClusteringPolicy policy;
   
   /**
    * Iterate over data using a prior-trained ClusterClassifier, for a number of
    * iterations
    * 
+   * @param policy
+   *          the ClusteringPolicy to use
    * @param data
    *          a {@code List<Vector>} of input vectors
    * @param classifier
    *          a prior ClusterClassifier
    * @param numIterations
    *          the int number of iterations to perform
+   * 
    * @return the posterior ClusterClassifier
    */
   public ClusterClassifier iterate(Iterable<Vector> data, ClusterClassifier classifier, int numIterations) {
+    ClusteringPolicy policy = classifier.getPolicy();
     for (int iteration = 1; iteration <= numIterations; iteration++) {
       for (Vector vector : data) {
         // update the policy based upon the prior
@@ -101,20 +101,24 @@ public class ClusterIterator {
    *          a Path of output directory
    * @param numIterations
    *          the int number of iterations to perform
+   * 
    * @throws IOException
    */
   public void iterateSeq(Path inPath, Path priorPath, Path outPath, int numIterations) throws IOException {
     ClusterClassifier classifier = new ClusterClassifier();
     classifier.readFromSeqFiles(priorPath);
     Configuration conf = new Configuration();
-    for (int iteration = 1; iteration <= numIterations; iteration++) {
+    HadoopUtil.delete(conf, outPath);
+    Path clustersOut = null;
+    int iteration = 1;
+    while (iteration <= numIterations) {
       for (VectorWritable vw : new SequenceFileDirValueIterable<VectorWritable>(inPath, PathType.LIST,
           PathFilters.logsCRCFilter(), conf)) {
         Vector vector = vw.get();
         // classification yields probabilities
         Vector probabilities = classifier.classify(vector);
         // policy selects weights for models given those probabilities
-        Vector weights = policy.select(probabilities);
+        Vector weights = classifier.getPolicy().select(probabilities);
         // training causes all models to observe data
         for (Iterator<Vector.Element> it = weights.iterateNonZero(); it.hasNext();) {
           int index = it.next().index();
@@ -124,10 +128,18 @@ public class ClusterIterator {
       // compute the posterior models
       classifier.close();
       // update the policy
-      policy.update(classifier);
+      classifier.getPolicy().update(classifier);
       // output the classifier
-      classifier.writeToSeqFiles(new Path(outPath, "classifier-" + iteration));
+      clustersOut = new Path(outPath, Cluster.CLUSTERS_DIR + iteration);
+      classifier.writeToSeqFiles(clustersOut);
+      FileSystem fs = FileSystem.get(outPath.toUri(), conf);
+      iteration++;
+      if (isConverged(clustersOut, conf, fs)) {
+        break;
+      }
     }
+    Path finalClustersIn = new Path(outPath, Cluster.CLUSTERS_DIR + (iteration - 1) + Cluster.FINAL_ITERATION_SUFFIX);
+    FileSystem.get(clustersOut.toUri(), conf).rename(clustersOut, finalClustersIn);
   }
   
   /**
@@ -147,7 +159,10 @@ public class ClusterIterator {
       InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     HadoopUtil.delete(conf, outPath);
-    for (int iteration = 1; iteration <= numIterations; iteration++) {
+    ClusteringPolicy policy = ClusterClassifier.readPolicy(priorPath);
+    Path clustersOut = null;
+    int iteration = 1;
+    while (iteration <= numIterations) {
       conf.set(PRIOR_PATH_KEY, priorPath.toString());
       
       String jobName = "Cluster Iterator running iteration " + iteration + " over priorPath: " + priorPath;
@@ -164,7 +179,7 @@ public class ClusterIterator {
       job.setReducerClass(CIReducer.class);
       
       FileInputFormat.addInputPath(job, inPath);
-      Path clustersOut = new Path(outPath, "clusters-" + iteration);
+      clustersOut = new Path(outPath, Cluster.CLUSTERS_DIR + iteration);
       priorPath = clustersOut;
       FileOutputFormat.setOutputPath(job, clustersOut);
       
@@ -174,10 +189,13 @@ public class ClusterIterator {
       }
       ClusterClassifier.writePolicy(policy, clustersOut);
       FileSystem fs = FileSystem.get(outPath.toUri(), conf);
+      iteration++;
       if (isConverged(clustersOut, conf, fs)) {
         break;
       }
     }
+    Path finalClustersIn = new Path(outPath, Cluster.CLUSTERS_DIR + (iteration - 1) + Cluster.FINAL_ITERATION_SUFFIX);
+    FileSystem.get(clustersOut.toUri(), conf).rename(clustersOut, finalClustersIn);
   }
   
   /**

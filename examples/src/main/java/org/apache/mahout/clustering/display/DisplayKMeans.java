@@ -23,13 +23,11 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
-import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.classify.ClusterClassifier;
 import org.apache.mahout.clustering.iterator.ClusterIterator;
-import org.apache.mahout.clustering.iterator.ClusteringPolicy;
 import org.apache.mahout.clustering.iterator.KMeansClusteringPolicy;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
@@ -38,6 +36,8 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.Vector;
+
+import com.google.common.collect.Lists;
 
 public class DisplayKMeans extends DisplayClustering {
   
@@ -85,13 +85,8 @@ public class DisplayKMeans extends DisplayClustering {
     prior.writeToSeqFiles(priorPath);
     
     int maxIter = 10;
-    ClusteringPolicy policy = new KMeansClusteringPolicy();
-    new ClusterIterator(policy).iterateSeq(samples, priorPath, output, maxIter);
-    for (int i = 1; i <= maxIter; i++) {
-      ClusterClassifier posterior = new ClusterClassifier();
-      posterior.readFromSeqFiles(new Path(output, "classifier-" + i));
-      CLUSTERS.add(posterior.getModels());
-    }
+    new ClusterIterator().iterateSeq(samples, priorPath, output, maxIter);
+    loadClustersWritable(output);
   }
   
   private static void runSequentialKMeansClusterer(Configuration conf, Path samples, Path output,

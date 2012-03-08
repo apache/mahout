@@ -19,65 +19,19 @@ package org.apache.mahout.clustering.iterator;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.List;
-
-import org.apache.mahout.clustering.Cluster;
-import org.apache.mahout.clustering.classify.ClusterClassifier;
-import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.SequentialAccessSparseVector;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.function.TimesFunction;
 
 /**
  * This is a simple maximum likelihood clustering policy, suitable for k-means
  * clustering
  * 
  */
-public class MeanShiftClusteringPolicy implements ClusteringPolicy {
+public class MeanShiftClusteringPolicy extends AbstractClusteringPolicy {
   
   public MeanShiftClusteringPolicy() {
     super();
   }
   
   private double t1, t2, t3, t4;
-  
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * org.apache.mahout.clustering.ClusteringPolicy#select(org.apache.mahout.
-   * math.Vector)
-   */
-  @Override
-  public Vector select(Vector probabilities) {
-    int maxValueIndex = probabilities.maxValueIndex();
-    Vector weights = new SequentialAccessSparseVector(probabilities.size());
-    weights.set(maxValueIndex, 1.0);
-    return weights;
-  }
-  
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * org.apache.mahout.clustering.ClusteringPolicy#update(org.apache.mahout.
-   * clustering.ClusterClassifier)
-   */
-  @Override
-  public void update(ClusterClassifier posterior) {
-    // nothing to do here
-  }
-  
-  @Override
-  public Vector classify(Vector data, List<Cluster> models) {
-    int i = 0;
-    Vector pdfs = new DenseVector(models.size());
-    for (Cluster model : models) {
-      pdfs.set(i++, model.pdf(new VectorWritable(data)));
-    }
-    return pdfs.assign(new TimesFunction(), 1.0 / pdfs.zSum());
-  }
   
   /*
    * (non-Javadoc)

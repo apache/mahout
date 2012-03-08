@@ -19,18 +19,15 @@ package org.apache.mahout.clustering.iterator;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.List;
 
-import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.classify.ClusterClassifier;
 import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.function.TimesFunction;
 
-public class DirichletClusteringPolicy implements ClusteringPolicy {
+public class DirichletClusteringPolicy extends AbstractClusteringPolicy {
   
   public DirichletClusteringPolicy() {
     super();
@@ -80,16 +77,6 @@ public class DirichletClusteringPolicy implements ClusteringPolicy {
     mixture = UncommonDistributions.rDirichlet(totalCounts, alpha0);
   }
   
-  @Override
-  public Vector classify(Vector data, List<Cluster> models) {
-    int i = 0;
-    Vector pdfs = new DenseVector(models.size());
-    for (Cluster model : models) {
-      pdfs.set(i++, model.pdf(new VectorWritable(data)));
-    }
-    return pdfs.assign(new TimesFunction(), 1.0 / pdfs.zSum());
-  }
-
   /*
    * (non-Javadoc)
    * 

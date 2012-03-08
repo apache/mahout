@@ -45,16 +45,26 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 
 /**
- * This classifier works with any clustering Cluster. It is initialized with a
- * list of compatible clusters and thereafter it can classify any new Vector
- * into one or more of the clusters based upon the pdf() function which each
- * cluster supports.
+ * This classifier works with any ClusteringPolicy and its associated Clusters.
+ * It is initialized with a policy and a list of compatible clusters and
+ * thereafter it can classify any new Vector into one or more of the clusters
+ * based upon the pdf() function which each cluster supports.
  * 
  * In addition, it is an OnlineLearner and can be trained. Training amounts to
  * asking the actual model to observe the vector and closing the classifier
  * causes all the models to computeParameters.
+ * 
+ * Because a ClusterClassifier implements Writable, it can be written-to and
+ * read-from a sequence file as a single entity. For sequential and mapreduce
+ * clustering in conjunction with a ClusterIterator; however, it utilizes an
+ * exploded file format. In this format, the iterator writes the policy to a
+ * single POLICY_FILE_NAME file in the clustersOut directory and the models are
+ * written to one or more part-n files so that multiple reducers may employed to
+ * produce them.
  */
 public class ClusterClassifier extends AbstractVectorClassifier implements OnlineLearner, Writable {
+  
+  private static final String POLICY_FILE_NAME = "_policy";
   
   private List<Cluster> models;
   
@@ -86,7 +96,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
   
   @Override
   public Vector classify(Vector instance) {
-    return policy.classify(instance, models);
+    return policy.classify(instance, this);
   }
   
   @Override
@@ -160,9 +170,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
   
   @Override
   public void close() {
-    for (Cluster cluster : models) {
-      cluster.computeParameters();
-    }
+    policy.close(this);
   }
   
   public List<Cluster> getModels() {
@@ -207,7 +215,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
   }
   
   public static ClusteringPolicy readPolicy(Path path) throws IOException {
-    Path policyPath = new Path(path, "_policy");
+    Path policyPath = new Path(path, POLICY_FILE_NAME);
     Configuration config = new Configuration();
     FileSystem fs = FileSystem.get(policyPath.toUri(), config);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, policyPath, config);
@@ -218,7 +226,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
   }
   
   public static void writePolicy(ClusteringPolicy policy, Path path) throws IOException {
-    Path policyPath = new Path(path, "_policy");
+    Path policyPath = new Path(path, POLICY_FILE_NAME);
     Configuration config = new Configuration();
     FileSystem fs = FileSystem.get(policyPath.toUri(), config);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, config, policyPath, Text.class,

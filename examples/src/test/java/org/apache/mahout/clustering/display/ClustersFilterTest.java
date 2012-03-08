@@ -49,8 +49,8 @@ public class ClustersFilterTest extends MahoutTestCase {
 
     PathFilter clustersFilter = new ClustersFilter();
 
-    assertFalse(clustersFilter.accept(path0));
-    assertFalse(clustersFilter.accept(path1));
+    assertTrue(clustersFilter.accept(path0));
+    assertTrue(clustersFilter.accept(path1));
   }
 
   @Test
@@ -67,9 +67,9 @@ public class ClustersFilterTest extends MahoutTestCase {
 
     PathFilter clustersFilter = new ClustersFilter();
 
-    assertFalse(clustersFilter.accept(path0));
-    assertFalse(clustersFilter.accept(path1));
-    assertFalse(clustersFilter.accept(path2));
+    assertTrue(clustersFilter.accept(path0));
+    assertTrue(clustersFilter.accept(path1));
+    assertTrue(clustersFilter.accept(path2));
     assertTrue(clustersFilter.accept(path3Final));
   }
 }

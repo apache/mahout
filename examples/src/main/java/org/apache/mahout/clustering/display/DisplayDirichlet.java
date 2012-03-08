@@ -96,11 +96,11 @@ public class DisplayDirichlet extends DisplayClustering {
     Path priorPath = new Path(output, "clusters-0");
     prior.writeToSeqFiles(priorPath);
     
-    ClusteringPolicy policy = new DirichletClusteringPolicy(numClusters, numIterations);
-    new ClusterIterator(policy).iterateSeq(samples, priorPath, output, numIterations);
+    new ClusterIterator().iterateSeq(samples, priorPath, output, numIterations);
     for (int i = 1; i <= numIterations; i++) {
       ClusterClassifier posterior = new ClusterClassifier();
-      posterior.readFromSeqFiles(new Path(output, "classifier-" + i));
+      String name = i == numIterations ? "clusters-" + i + "-final" : "clusters-" + i;
+      posterior.readFromSeqFiles(new Path(output, name));
       List<Cluster> clusters = Lists.newArrayList();
       for (Cluster cluster : posterior.getModels()) {
         if (isSignificant(cluster)) {

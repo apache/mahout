@@ -16,10 +16,7 @@
  */
 package org.apache.mahout.clustering.iterator;
 
-import java.util.List;
-
 import org.apache.hadoop.io.Writable;
-import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.classify.ClusterClassifier;
 import org.apache.mahout.math.Vector;
 
@@ -30,13 +27,25 @@ import org.apache.mahout.math.Vector;
 public interface ClusteringPolicy extends Writable {
   
   /**
+   * Classify the data vector given the classifier's models
+   * 
+   * @param data
+   *          a data Vector
+   * @param prior
+   *          a prior ClusterClassifier
+   * @return a Vector of probabilities that the data is described by each of the
+   *         models
+   */
+  public Vector classify(Vector data, ClusterClassifier prior);
+  
+  /**
    * Return a vector of weights for each of the models given those probabilities
    * 
    * @param probabilities
    *          a Vector of pdfs
    * @return a Vector of weights
    */
-  Vector select(Vector probabilities);
+  public Vector select(Vector probabilities);
   
   /**
    * Update the policy with the given classifier
@@ -44,16 +53,14 @@ public interface ClusteringPolicy extends Writable {
    * @param posterior
    *          a ClusterClassifier
    */
-  void update(ClusterClassifier posterior);
+  public void update(ClusterClassifier posterior);
   
   /**
-   * @param data
-   *          a data Vector
-   * @param models
-   *          a list of Cluster models
-   * @return a Vector of probabilities that the data is described by each of the
-   *         models
+   * Close the policy using the classifier's models
+   * 
+   * @param posterior
+   *          a posterior ClusterClassifier
    */
-  Vector classify(Vector data, List<Cluster> models);
+  public void close(ClusterClassifier posterior);
   
 }
