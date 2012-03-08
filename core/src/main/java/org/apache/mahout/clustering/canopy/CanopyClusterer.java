@@ -17,22 +17,19 @@
 
 package org.apache.mahout.clustering.canopy;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.AbstractCluster;
-import org.apache.mahout.clustering.classify.WeightedVectorWritable;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
 
 public class CanopyClusterer {
 
@@ -165,32 +162,6 @@ public class CanopyClusterer {
       }
       canopies.add(new Canopy(point, nextCanopyId++, measure));
     }
-  }
-
-  /**
-   * Emit the point to the closest Canopy
-   */
-  public void emitPointToClosestCanopy(Vector point,
-                                       Iterable<Canopy> canopies,
-                                       Mapper<?,?,IntWritable,WeightedVectorWritable>.Context context)
-    throws IOException, InterruptedException {
-    Canopy closest = findClosestCanopy(point, canopies);
-    context.write(new IntWritable(closest.getId()), new WeightedVectorWritable(1, point));
-    context.setStatus("Emit Closest Canopy ID:" + closest.getIdentifier());
-  }
-
-  protected Canopy findClosestCanopy(Vector point, Iterable<Canopy> canopies) {
-    double minDist = Double.MAX_VALUE;
-    Canopy closest = null;
-    // find closest canopy
-    for (Canopy canopy : canopies) {
-      double dist = measure.distance(canopy.getCenter().getLengthSquared(), canopy.getCenter(), point);
-      if (dist < minDist) {
-        minDist = dist;
-        closest = canopy;
-      }
-    }
-    return closest;
   }
 
   /**

@@ -17,19 +17,16 @@
 
 package org.apache.mahout.clustering.canopy;
 
+import static org.apache.mahout.clustering.topdown.PathDirectory.CLUSTERED_POINTS_DIRECTORY;
+
 import java.io.IOException;
 import java.util.Collection;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
@@ -38,7 +35,9 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
-import org.apache.mahout.clustering.classify.WeightedVectorWritable;
+import org.apache.mahout.clustering.classify.ClusterClassificationDriver;
+import org.apache.mahout.clustering.classify.ClusterClassifier;
+import org.apache.mahout.clustering.iterator.CanopyClusteringPolicy;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.HadoopUtil;
@@ -50,6 +49,9 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterab
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
+import com.google.common.io.Closeables;
 
 public class CanopyDriver extends AbstractJob {
 
@@ -354,81 +356,9 @@ public class CanopyDriver extends AbstractJob {
   public static void clusterData(Configuration conf, Path points,
       Path canopies, Path output, DistanceMeasure measure, double t1,
       double t2, boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException {
-    if (runSequential) {
-      clusterDataSeq(points, canopies, output, measure, t1, t2);
-    } else {
-      clusterDataMR(conf, points, canopies, output, measure, t1, t2);
-    }
+    ClusterClassifier.writePolicy(new CanopyClusteringPolicy(),
+        canopies);
+      ClusterClassificationDriver.run(points, output, new Path(output, CLUSTERED_POINTS_DIRECTORY), 0.0, true, runSequential);
   }
-
-  private static void clusterDataSeq(Path points, Path canopies, Path output,
-      DistanceMeasure measure, double t1, double t2) throws IOException {
-    CanopyClusterer clusterer = new CanopyClusterer(measure, t1, t2);
-
-    Collection<Canopy> clusters = Lists.newArrayList();
-    Configuration conf = new Configuration();
-
-    for (Canopy value : new SequenceFileDirValueIterable<Canopy>(canopies,
-        PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
-      clusters.add(value);
-    }
-
-    // iterate over all points, assigning each to the closest canopy and
-    // outputing that clustering
-    FileSystem fs = FileSystem.get(points.toUri(), conf);
-    FileStatus[] status = fs.listStatus(points, PathFilters.logsCRCFilter());
-    Path outPath = new Path(output, DEFAULT_CLUSTERED_POINTS_DIRECTORY);
-    int part = 0;
-    for (FileStatus s : status) {
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(),
-          conf);
-      SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, new Path(
-          outPath, "part-m-" + part), IntWritable.class,
-          WeightedVectorWritable.class);
-      try {
-        Writable key = ClassUtils.instantiateAs(reader.getKeyClassName(), Writable.class);
-        VectorWritable vw = ClassUtils.instantiateAs(reader.getValueClassName(), VectorWritable.class);
-        while (reader.next(key, vw)) {
-          Canopy closest = clusterer.findClosestCanopy(vw.get(), clusters);
-          writer.append(new IntWritable(closest.getId()),
-              new WeightedVectorWritable(1, vw.get()));
-          vw = ClassUtils.instantiateAs(reader.getValueClassName(), VectorWritable.class);
-        }
-      } finally {
-        Closeables.closeQuietly(reader);
-        Closeables.closeQuietly(writer);
-      }
-    }
-  }
-
-  private static void clusterDataMR(Configuration conf, Path points,
-      Path canopies, Path output, DistanceMeasure measure, double t1, double t2)
-      throws IOException, InterruptedException, ClassNotFoundException {
-    conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, measure.getClass()
-        .getName());
-    conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(t1));
-    conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(t2));
-    conf.set(CanopyConfigKeys.CANOPY_PATH_KEY, canopies.toString());
-
-    Job job = new Job(conf, "Canopy Driver running clusterData over input: "
-        + points);
-    job.setInputFormatClass(SequenceFileInputFormat.class);
-    job.setOutputFormatClass(SequenceFileOutputFormat.class);
-    job.setMapperClass(ClusterMapper.class);
-    job.setOutputKeyClass(IntWritable.class);
-    job.setOutputValueClass(WeightedVectorWritable.class);
-    job.setNumReduceTasks(0);
-    job.setJarByClass(CanopyDriver.class);
-
-    FileInputFormat.addInputPath(job, points);
-    Path outPath = new Path(output, DEFAULT_CLUSTERED_POINTS_DIRECTORY);
-    FileOutputFormat.setOutputPath(job, outPath);
-    HadoopUtil.delete(conf, outPath);
-
-    if (!job.waitForCompletion(true)) {
-      throw new InterruptedException("Canopy Clustering failed processing "
-          + canopies);
-    }
-  }
-
+  
 }

@@ -17,18 +17,12 @@
 
 package org.apache.mahout.clustering.canopy;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
@@ -37,7 +31,6 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.ClusteringTestUtils;
-import org.apache.mahout.clustering.classify.WeightedVectorWritable;
 import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
@@ -51,6 +44,9 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.common.collect.Lists;
+import com.google.common.io.Closeables;
 
 public final class TestCanopyCreation extends MahoutTestCase {
 
@@ -101,15 +97,6 @@ public final class TestCanopyCreation extends MahoutTestCase {
     for (Canopy canopy : canopies) {
       System.out.println(canopy.asFormatString(null));
     }
-  }
-
-  private static Canopy findCanopy(Integer key, Iterable<Canopy> canopies) {
-    for (Canopy c : canopies) {
-      if (c.getId() == key) {
-        return c;
-      }
-    }
-    return null;
   }
 
   @Override
@@ -392,93 +379,6 @@ public final class TestCanopyCreation extends MahoutTestCase {
       assertFalse("more to come", reader.next(key, value));
     } finally {
       Closeables.closeQuietly(reader);
-    }
-  }
-
-  /**
-   * Story: User can cluster a subset of the points using a ClusterMapper and a
-   * ManhattanDistanceMeasure.
-   */
-  @Test
-  public void testClusterMapperManhattan() throws Exception {
-    ClusterMapper mapper = new ClusterMapper();
-    Configuration conf = new Configuration();
-    conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY,
-        "org.apache.mahout.common.distance.ManhattanDistanceMeasure");
-    conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
-    conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
-    DummyRecordWriter<IntWritable, WeightedVectorWritable> writer = new DummyRecordWriter<IntWritable, WeightedVectorWritable>();
-    Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable>.Context context = DummyRecordWriter
-        .build(mapper, conf, writer);
-    mapper.setup(context);
-
-    Collection<Canopy> canopies = Lists.newArrayList();
-    int nextCanopyId = 0;
-    for (Vector centroid : manhattanCentroids) {
-      canopies.add(new Canopy(centroid, nextCanopyId++,
-          manhattanDistanceMeasure));
-    }
-    setField(mapper, "canopies", canopies);
-    List<VectorWritable> points = getPointsWritable();
-    // map the data
-    for (VectorWritable point : points) {
-      mapper.map(new Text(), point, context);
-    }
-    Map<IntWritable, List<WeightedVectorWritable>> data = writer.getData();
-    assertEquals("Number of map results", canopies.size(), data.size());
-    for (Entry<IntWritable, List<WeightedVectorWritable>> stringListEntry : data
-        .entrySet()) {
-      IntWritable key = stringListEntry.getKey();
-      Canopy canopy = findCanopy(key.get(), canopies);
-      List<WeightedVectorWritable> pts = stringListEntry.getValue();
-      for (WeightedVectorWritable ptDef : pts) {
-        assertTrue("Point not in canopy", mapper.canopyCovers(canopy, ptDef
-            .getVector()));
-      }
-    }
-  }
-
-  /**
-   * Story: User can cluster a subset of the points using a ClusterMapper and a
-   * EuclideanDistanceMeasure.
-   */
-  @Test
-  public void testClusterMapperEuclidean() throws Exception {
-    ClusterMapper mapper = new ClusterMapper();
-    Configuration conf = new Configuration();
-    conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY,
-        "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
-    conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
-    conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
-    DummyRecordWriter<IntWritable, WeightedVectorWritable> writer = new DummyRecordWriter<IntWritable, WeightedVectorWritable>();
-    Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable>.Context context = DummyRecordWriter
-        .build(mapper, conf, writer);
-    mapper.setup(context);
-
-    Collection<Canopy> canopies = Lists.newArrayList();
-    int nextCanopyId = 0;
-    for (Vector centroid : euclideanCentroids) {
-      canopies.add(new Canopy(centroid, nextCanopyId++,
-          euclideanDistanceMeasure));
-    }
-
-    setField(mapper, "canopies", canopies);
-    List<VectorWritable> points = getPointsWritable();
-    // map the data
-    for (VectorWritable point : points) {
-      mapper.map(new Text(), point, context);
-    }
-    Map<IntWritable, List<WeightedVectorWritable>> data = writer.getData();
-    assertEquals("Number of map results", canopies.size(), data.size());
-    for (Entry<IntWritable, List<WeightedVectorWritable>> stringListEntry : data
-        .entrySet()) {
-      IntWritable key = stringListEntry.getKey();
-      Canopy canopy = findCanopy(key.get(), canopies);
-      List<WeightedVectorWritable> pts = stringListEntry.getValue();
-      for (WeightedVectorWritable ptDef : pts) {
-        assertTrue("Point not in canopy", mapper.canopyCovers(canopy, ptDef
-            .getVector()));
-      }
     }
   }
 
