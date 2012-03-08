@@ -356,9 +356,9 @@ public class CanopyDriver extends AbstractJob {
   public static void clusterData(Configuration conf, Path points,
       Path canopies, Path output, DistanceMeasure measure, double t1,
       double t2, boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException {
-    ClusterClassifier.writePolicy(new CanopyClusteringPolicy(),
-        canopies);
-      ClusterClassificationDriver.run(points, output, new Path(output, CLUSTERED_POINTS_DIRECTORY), 0.0, true, runSequential);
+    ClusterClassifier.writePolicy(new CanopyClusteringPolicy(), canopies);
+    ClusterClassificationDriver.run(points, output, new Path(output, CLUSTERED_POINTS_DIRECTORY), 0.0, true,
+        runSequential);
   }
   
 }
