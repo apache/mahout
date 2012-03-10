@@ -190,7 +190,7 @@ public final class TestClusterDumper extends MahoutTestCase {
     
     Path output = getTestTempDirPath("output");
     CanopyDriver.run(new Configuration(), getTestTempDirPath("testdata"),
-        output, measure, 8, 4, true, true);
+        output, measure, 8, 4, true, 0.0, true);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output,
         "clusters-0"), new Path(output, "clusteredPoints"));
@@ -204,7 +204,7 @@ public final class TestClusterDumper extends MahoutTestCase {
     Path output = getTestTempDirPath("output");
     Configuration conf = new Configuration();
     CanopyDriver.run(conf, getTestTempDirPath("testdata"), output, measure, 8,
-        4, false, true);
+        4, false, 0.0, true);
     // now run the KMeans job
     KMeansDriver.run(conf, getTestTempDirPath("testdata"), new Path(output,
         "clusters-0-final"), output, measure, 0.001, 10, true, false);
@@ -221,7 +221,7 @@ public final class TestClusterDumper extends MahoutTestCase {
     Path output = getTestTempDirPath("output");
     Configuration conf = new Configuration();
     CanopyDriver.run(conf, getTestTempDirPath("testdata"), output, measure, 8,
-        4, false, true);
+        4, false, 0.0, true);
     // now run the Fuzzy KMeans job
     FuzzyKMeansDriver.run(conf, getTestTempDirPath("testdata"), new Path(
         output, "clusters-0-final"), output, measure, 0.001, 10, 1.1f, true,
@@ -334,7 +334,7 @@ public final class TestClusterDumper extends MahoutTestCase {
       Closeables.closeQuietly(writer);
     }
     // now run the Canopy job to prime kMeans canopies
-    CanopyDriver.run(conf, svdData, output, measure, 8, 4, false, true);
+    CanopyDriver.run(conf, svdData, output, measure, 8, 4, false, 0.0, true);
     // now run the KMeans job
     KMeansDriver.run(svdData, new Path(output, "clusters-0"), output, measure,
         0.001, 10, true, true);
@@ -375,7 +375,7 @@ public final class TestClusterDumper extends MahoutTestCase {
     
     // now run the Canopy job to prime kMeans canopies
     CanopyDriver.run(conf, sData.getRowPath(), output, measure, 8, 4, false,
-        true);
+        0.0, true);
     // now run the KMeans job
     KMeansDriver.run(sData.getRowPath(), new Path(output, "clusters-0"),
         output, measure, 0.001, 10, true, true);
@@ -419,7 +419,7 @@ public final class TestClusterDumper extends MahoutTestCase {
     
     // now run the Canopy job to prime kMeans canopies
     CanopyDriver.run(conf, sData.getRowPath(), output, measure, 8, 4, false,
-        true);
+        0.0, true);
     // now run the KMeans job
     KMeansDriver.run(sData.getRowPath(), new Path(output, "clusters-0"),
         output, measure, 0.001, 10, true, true);

@@ -161,7 +161,7 @@ public final class ClusterOutputPostProcessorTest extends MahoutTestCase {
       
       Path bottomLevelCluster = PathDirectory.getBottomLevelClusterPath(outputPath, clusterId);
       CanopyDriver.run(conf, topLevelclusterPath, bottomLevelCluster, new ManhattanDistanceMeasure(), 2.1,
-        2.0, true, true);
+        2.0, true, 0.0, true);
       assertBottomLevelCluster(bottomLevelCluster);
     }
   }
@@ -200,7 +200,7 @@ public final class ClusterOutputPostProcessorTest extends MahoutTestCase {
   private void topLevelClustering(Path pointsPath, Configuration conf) throws IOException,
                                                                       InterruptedException,
                                                                       ClassNotFoundException {
-    CanopyDriver.run(conf, pointsPath, outputPath, new ManhattanDistanceMeasure(), 3.1, 2.1, true, true);
+    CanopyDriver.run(conf, pointsPath, outputPath, new ManhattanDistanceMeasure(), 3.1, 2.1, true, 0.0, true);
   }
   
 }

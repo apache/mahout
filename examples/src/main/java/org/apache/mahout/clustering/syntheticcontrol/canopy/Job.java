@@ -85,7 +85,7 @@ public final class Job extends AbstractJob {
     InputDriver.runJob(input, directoryContainingConvertedInput,
         "org.apache.mahout.math.RandomAccessSparseVector");
     CanopyDriver.run(new Configuration(), directoryContainingConvertedInput,
-        output, measure, t1, t2, true, false);
+        output, measure, t1, t2, true, 0.0, false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output,
         "clusters-0"), new Path(output, "clusteredPoints"));

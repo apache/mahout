@@ -406,10 +406,10 @@ public static DefaultOptionBuilder clusterFilterOption() {
   }
   
   /**
-   * Returns a default command line option for specification of OUTLIER THRESHOLD value. Used by
+   * Returns a default command line option for specification of OUTLIER THRESHOLD value. Used for
    * Cluster Classification.
    */
-  public static DefaultOptionBuilder classificationThresholdOption() {
+  public static DefaultOptionBuilder outlierThresholdOption() {
     return new DefaultOptionBuilder()
         .withLongName(OUTLIER_THRESHOLD)
         .withRequired(false)

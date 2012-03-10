@@ -484,7 +484,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
     
     Path outputPath = getTestTempDirPath("output");
     // now run the Canopy job
-    CanopyDriver.run(conf, pointsPath, outputPath, new ManhattanDistanceMeasure(), 3.1, 2.1, false, false);
+    CanopyDriver.run(conf, pointsPath, outputPath, new ManhattanDistanceMeasure(), 3.1, 2.1, false, 0.0, false);
     
     // now run the KMeans job
     KMeansDriver.run(pointsPath, new Path(outputPath, "clusters-0-final"), outputPath, new EuclideanDistanceMeasure(),

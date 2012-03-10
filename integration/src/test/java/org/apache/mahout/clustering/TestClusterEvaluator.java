@@ -180,7 +180,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     Configuration conf = new Configuration();
     // run using MR reference point calculation
-    CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, true, true);
+    CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, true, 0.0, true);
     int numIterations = 2;
     Path clustersIn = new Path(output, "clusters-0-final");
     RepresentativePointsDriver.run(conf, clustersIn, new Path(output,
@@ -189,7 +189,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     ClusterEvaluator evaluatorMR = new ClusterEvaluator(conf, clustersIn);
     // now run again using sequential reference point calculation
     HadoopUtil.delete(conf, output);
-    CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, true, true);
+    CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, true, 0.0, true);
     RepresentativePointsDriver.run(conf, clustersIn, new Path(output,
         "clusteredPoints"), output, measure, numIterations, true);
     printRepPoints(numIterations);
@@ -318,7 +318,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
         "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     Configuration conf = new Configuration();
-    CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, true, true);
+    CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, true, 0.0, true);
     int numIterations = 10;
     Path clustersIn = new Path(output, "clusters-0-final");
     RepresentativePointsDriver.run(conf, clustersIn, new Path(output,
@@ -340,7 +340,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     // now run the Canopy job to prime kMeans canopies
     Configuration conf = new Configuration();
-    CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, false, true);
+    CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, false, 0.0, true);
     // now run the KMeans job
     KMeansDriver.run(testdata, new Path(output, "clusters-0-final"), output, measure,
         0.001, 10, true, true);
@@ -364,7 +364,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     // now run the Canopy job to prime kMeans canopies
     Configuration conf = new Configuration();
-    CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, false, true);
+    CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, false, 0.0, true);
     // now run the KMeans job
     FuzzyKMeansDriver.run(testdata, new Path(output, "clusters-0-final"), output,
         measure, 0.001, 10, 2, true, true, 0, true);

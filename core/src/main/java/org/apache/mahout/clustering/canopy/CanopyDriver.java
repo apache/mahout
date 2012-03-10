@@ -77,6 +77,7 @@ public class CanopyDriver extends AbstractJob {
     addOption(DefaultOptionCreator.overwriteOption().create());
     addOption(DefaultOptionCreator.clusteringOption().create());
     addOption(DefaultOptionCreator.methodOption().create());
+    addOption(DefaultOptionCreator.outlierThresholdOption().create());
 
     if (parseArguments(args) == null) {
       return -1;
@@ -108,8 +109,12 @@ public class CanopyDriver extends AbstractJob {
     boolean runSequential = getOption(DefaultOptionCreator.METHOD_OPTION)
         .equalsIgnoreCase(DefaultOptionCreator.SEQUENTIAL_METHOD);
     DistanceMeasure measure = ClassUtils.instantiateAs(measureClass, DistanceMeasure.class);
+    double clusterClassificationThreshold = 0.0;
+    if(hasOption(DefaultOptionCreator.OUTLIER_THRESHOLD)){
+      clusterClassificationThreshold = Double.parseDouble(getOption(DefaultOptionCreator.OUTLIER_THRESHOLD));
+    }
     run(conf, input, output, measure, t1, t2, t3, t4, clusterFilter,
-        runClustering, runSequential);
+        runClustering, clusterClassificationThreshold, runSequential );
     return 0;
   }
 
@@ -137,30 +142,32 @@ public class CanopyDriver extends AbstractJob {
    *          the minimum canopy size output by the mappers
    * @param runClustering
    *          cluster the input vectors if true
+   * @param clusterClassificationThreshold 
+   *          vectors having pdf below this value will not be clustered. Its value should be between 0 and 1.
    * @param runSequential
    *          execute sequentially if true
    */
   public static void run(Configuration conf, Path input, Path output,
       DistanceMeasure measure, double t1, double t2, double t3, double t4,
-      int clusterFilter, boolean runClustering, boolean runSequential)
+      int clusterFilter, boolean runClustering, double clusterClassificationThreshold, boolean runSequential)
       throws IOException, InterruptedException, ClassNotFoundException {
     Path clustersOut = buildClusters(conf, input, output, measure, t1, t2, t3,
         t4, clusterFilter, runSequential);
     if (runClustering) {
-      clusterData(conf, input, clustersOut, output, measure, t1, t2,
-          runSequential);
+      clusterData(conf, input, clustersOut, output, clusterClassificationThreshold, runSequential);
     }
   }
 
   /**
    * Convenience method to provide backward compatibility
+   * @param clusterClassificationThreshold TODO
    */
   public static void run(Configuration conf, Path input, Path output,
       DistanceMeasure measure, double t1, double t2, boolean runClustering,
-      boolean runSequential) throws IOException, InterruptedException,
+      double clusterClassificationThreshold, boolean runSequential) throws IOException, InterruptedException,
       ClassNotFoundException {
     run(conf, input, output, measure, t1, t2, t1, t2, 0, runClustering,
-        runSequential);
+        clusterClassificationThreshold, runSequential);
   }
 
   /**
@@ -178,14 +185,16 @@ public class CanopyDriver extends AbstractJob {
    *          the double T2 distance metric
    * @param runClustering
    *          cluster the input vectors if true
+   * @param clusterClassificationThreshold
+   *          vectors having pdf below this value will not be clustered. Its value should be between 0 and 1. 
    * @param runSequential
    *          execute sequentially if true
    */
   public static void run(Path input, Path output, DistanceMeasure measure,
-      double t1, double t2, boolean runClustering, boolean runSequential)
+      double t1, double t2, boolean runClustering, double clusterClassificationThreshold, boolean runSequential)
       throws IOException, InterruptedException, ClassNotFoundException {
     run(new Configuration(), input, output, measure, t1, t2, runClustering,
-        runSequential);
+        clusterClassificationThreshold, runSequential);
   }
 
   /**
@@ -353,12 +362,12 @@ public class CanopyDriver extends AbstractJob {
     return canopyOutputDir;
   }
 
-  public static void clusterData(Configuration conf, Path points,
-      Path canopies, Path output, DistanceMeasure measure, double t1,
-      double t2, boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException {
+  private static void clusterData(Configuration conf, Path points, Path canopies, Path output,
+      double clusterClassificationThreshold, boolean runSequential) throws IOException, InterruptedException,
+      ClassNotFoundException {
     ClusterClassifier.writePolicy(new CanopyClusteringPolicy(), canopies);
-    ClusterClassificationDriver.run(points, output, new Path(output, CLUSTERED_POINTS_DIRECTORY), 0.0, true,
-        runSequential);
+    ClusterClassificationDriver.run(points, output, new Path(output, CLUSTERED_POINTS_DIRECTORY),
+        clusterClassificationThreshold, true, runSequential);
   }
   
 }

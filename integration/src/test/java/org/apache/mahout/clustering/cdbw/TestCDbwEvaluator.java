@@ -327,7 +327,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
         getTestTempFilePath("testdata/file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     CanopyDriver.run(new Configuration(), testdata, output, measure, 3.1, 2.1,
-        true, true);
+        true, 0.0, true);
     int numIterations = 10;
     Path clustersIn = new Path(output, "clusters-0-final");
     RepresentativePointsDriver.run(conf, clustersIn, new Path(output,
@@ -350,7 +350,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     // now run the Canopy job to prime kMeans canopies
     CanopyDriver.run(new Configuration(), testdata, output, measure, 3.1, 2.1,
-        false, true);
+        false, 0.0, true);
     // now run the KMeans job
     KMeansDriver.run(testdata, new Path(output, "clusters-0-final"), output, measure,
         0.001, 10, true, true);
@@ -376,7 +376,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     // now run the Canopy job to prime kMeans canopies
     CanopyDriver.run(new Configuration(), testdata, output, measure, 3.1, 2.1,
-        false, true);
+        false, 0.0, true);
     // now run the KMeans job
     FuzzyKMeansDriver.run(testdata, new Path(output, "clusters-0-final"), output,
         measure, 0.001, 10, 2, true, true, 0, true);

@@ -317,7 +317,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     // now run the Canopy Driver
     Path output = getTestTempDirPath("output");
     CanopyDriver.run(config, getTestTempDirPath("testdata"), output,
-        manhattanDistanceMeasure, 3.1, 2.1, false, false);
+        manhattanDistanceMeasure, 3.1, 2.1, false, 0.0, false);
 
     // verify output from sequence file
     Path path = new Path(output, "clusters-0-final/part-r-00000");
@@ -357,7 +357,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     // now run the Canopy Driver
     Path output = getTestTempDirPath("output");
     CanopyDriver.run(config, getTestTempDirPath("testdata"), output,
-        euclideanDistanceMeasure, 3.1, 2.1, false, false);
+        euclideanDistanceMeasure, 3.1, 2.1, false, 0.0, false);
 
     // verify output from sequence file
     Path path = new Path(output, "clusters-0-final/part-r-00000");
@@ -392,7 +392,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     // now run the Canopy Driver in sequential mode
     Path output = getTestTempDirPath("output");
     CanopyDriver.run(config, getTestTempDirPath("testdata"), output,
-        manhattanDistanceMeasure, 3.1, 2.1, true, true);
+        manhattanDistanceMeasure, 3.1, 2.1, true, 0.0, true);
 
     // verify output from sequence file
     Path path = new Path(output, "clusters-0-final/part-r-00000");
@@ -446,6 +446,47 @@ public final class TestCanopyCreation extends MahoutTestCase {
     long count = HadoopUtil.countRecords(path, config);
     assertEquals("number of points", points.size(), count);
   }
+  
+  /** Story: User can remove outliers while clustering points using sequential execution */
+  @Test
+  public void testClusteringEuclideanWithOutlierRemovalSeq() throws Exception {
+    List<VectorWritable> points = getPointsWritable();
+    Configuration config = new Configuration();
+    ClusteringTestUtils.writePointsToFile(points,
+        getTestTempFilePath("testdata/file1"), fs, config);
+    // now run the Canopy Driver in sequential mode
+    Path output = getTestTempDirPath("output");
+    String[] args = { optKey(DefaultOptionCreator.INPUT_OPTION),
+        getTestTempDirPath("testdata").toString(),
+        optKey(DefaultOptionCreator.OUTPUT_OPTION), output.toString(),
+        optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION),
+        EuclideanDistanceMeasure.class.getName(),
+        optKey(DefaultOptionCreator.T1_OPTION), "3.1",
+        optKey(DefaultOptionCreator.T2_OPTION), "2.1",
+        optKey(DefaultOptionCreator.OUTLIER_THRESHOLD), "0.5",
+        optKey(DefaultOptionCreator.CLUSTERING_OPTION),
+        optKey(DefaultOptionCreator.OVERWRITE_OPTION),
+        optKey(DefaultOptionCreator.METHOD_OPTION),
+        DefaultOptionCreator.SEQUENTIAL_METHOD };
+    new CanopyDriver().run(args);
+
+    // verify output from sequence file
+    Path path = new Path(output, "clusters-0-final/part-r-00000");
+
+    int ix = 0;
+    for (Canopy value : new SequenceFileValueIterable<Canopy>(path, true,
+        config)) {
+      assertEquals("Center [" + ix + ']', euclideanCentroids.get(ix), value
+          .getCenter());
+      ix++;
+    }
+
+    path = new Path(output, "clusteredPoints/part-m-0");
+    long count = HadoopUtil.countRecords(path, config);
+    int expectedPointsHavingPDFGreaterThanThreshold = 6;
+    assertEquals("number of points", expectedPointsHavingPDFGreaterThanThreshold, count);
+  }
+
 
   /**
    * Story: User can produce final point clustering using a Hadoop map/reduce
@@ -462,7 +503,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     // now run the Job
     Path output = getTestTempDirPath("output");
     CanopyDriver.run(conf, getTestTempDirPath("testdata"), output,
-        manhattanDistanceMeasure, 3.1, 2.1, true, false);
+        manhattanDistanceMeasure, 3.1, 2.1, true, 0.0, false);
     Path path = new Path(output, "clusteredPoints/part-m-00000");
     long count = HadoopUtil.countRecords(path, conf);
     assertEquals("number of points", points.size(), count);
@@ -496,6 +537,38 @@ public final class TestCanopyCreation extends MahoutTestCase {
     long count = HadoopUtil.countRecords(path, conf);
     assertEquals("number of points", points.size(), count);
   }
+  
+  /**
+   * Story: User can produce final point clustering using a Hadoop map/reduce
+   * job and a EuclideanDistanceMeasure and outlier removal threshold.
+   */
+  @Test
+  public void testClusteringEuclideanWithOutlierRemovalMR() throws Exception {
+    List<VectorWritable> points = getPointsWritable();
+    Configuration conf = new Configuration();
+    ClusteringTestUtils.writePointsToFile(points,
+        getTestTempFilePath("testdata/file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(points,
+        getTestTempFilePath("testdata/file2"), fs, conf);
+    // now run the Job using the run() command. Others can use runJob().
+    Path output = getTestTempDirPath("output");
+    String[] args = { optKey(DefaultOptionCreator.INPUT_OPTION),
+        getTestTempDirPath("testdata").toString(),
+        optKey(DefaultOptionCreator.OUTPUT_OPTION), output.toString(),
+        optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION),
+        EuclideanDistanceMeasure.class.getName(),
+        optKey(DefaultOptionCreator.T1_OPTION), "3.1",
+        optKey(DefaultOptionCreator.T2_OPTION), "2.1",
+        optKey(DefaultOptionCreator.OUTLIER_THRESHOLD), "0.7",
+        optKey(DefaultOptionCreator.CLUSTERING_OPTION),
+        optKey(DefaultOptionCreator.OVERWRITE_OPTION) };
+    ToolRunner.run(new Configuration(), new CanopyDriver(), args);
+    Path path = new Path(output, "clusteredPoints/part-m-00000");
+    long count = HadoopUtil.countRecords(path, conf);
+    int expectedPointsAfterOutlierRemoval = 8;
+    assertEquals("number of points", expectedPointsAfterOutlierRemoval, count);
+  }
+
 
   /**
    * Story: User can set T3 and T4 values to be used by the reducer for its T1

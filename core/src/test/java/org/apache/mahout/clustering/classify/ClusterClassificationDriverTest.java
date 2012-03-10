@@ -149,7 +149,7 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
       Boolean runSequential) throws IOException, InterruptedException,
       ClassNotFoundException {
     CanopyDriver.run(conf, pointsPath, clusteringOutputPath,
-        new ManhattanDistanceMeasure(), 3.1, 2.1, false, runSequential);
+        new ManhattanDistanceMeasure(), 3.1, 2.1, false, 0.0, runSequential);
     Path finalClustersPath = new Path(clusteringOutputPath, "clusters-0-final");
     ClusterClassifier.writePolicy(new CanopyClusteringPolicy(),
         finalClustersPath);

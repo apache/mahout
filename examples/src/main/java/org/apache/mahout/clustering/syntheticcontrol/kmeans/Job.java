@@ -191,7 +191,7 @@ public final class Job extends AbstractJob {
         "org.apache.mahout.math.RandomAccessSparseVector");
     log.info("Running Canopy to get initial clusters");
     CanopyDriver.run(conf, directoryContainingConvertedInput, output, measure,
-        t1, t2, false, false);
+        t1, t2, false, 0.0, false);
     log.info("Running KMeans");
     KMeansDriver.run(conf, directoryContainingConvertedInput, new Path(output,
         Cluster.INITIAL_CLUSTERS_DIR), output, measure, convergenceDelta,
