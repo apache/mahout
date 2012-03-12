@@ -34,6 +34,7 @@ import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
@@ -126,8 +127,8 @@ public final class TestCanopyCreation extends MahoutTestCase {
       int[] expectedNumPoints = { 4, 4, 3 };
       double[][] expectedCentroids = { { 1.5, 1.5 }, { 4.0, 4.0 },
           { 4.666666666666667, 4.6666666666666667 } };
-      assertEquals("canopy points " + canopyIx, expectedNumPoints[canopyIx],
-          testCanopy.getNumObservations());
+      assertEquals("canopy points " + canopyIx, testCanopy.getNumObservations(),
+                   expectedNumPoints[canopyIx]);
       double[] refCentroid = expectedCentroids[canopyIx];
       Vector testCentroid = testCanopy.computeCentroid();
       for (int pointIx = 0; pointIx < refCentroid.length; pointIx++) {
@@ -151,8 +152,8 @@ public final class TestCanopyCreation extends MahoutTestCase {
         { 4.666666666666667, 4.666666666666667 } };
     for (int canopyIx = 0; canopyIx < referenceEuclidean.size(); canopyIx++) {
       Canopy testCanopy = referenceEuclidean.get(canopyIx);
-      assertEquals("canopy points " + canopyIx, expectedNumPoints[canopyIx],
-          testCanopy.getNumObservations());
+      assertEquals("canopy points " + canopyIx, testCanopy.getNumObservations(),
+                   expectedNumPoints[canopyIx]);
       double[] refCentroid = expectedCentroids[canopyIx];
       Vector testCentroid = testCanopy.computeCentroid();
       for (int pointIx = 0; pointIx < refCentroid.length; pointIx++) {
@@ -328,18 +329,34 @@ public final class TestCanopyCreation extends MahoutTestCase {
       Canopy canopy = new Canopy();
       assertTrue("more to come", reader.next(key, canopy));
       assertEquals("1st key", "C-0", key.toString());
-      assertEquals("1st x value", 1.5, canopy.getCenter().get(0), EPSILON);
-      assertEquals("1st y value", 1.5, canopy.getCenter().get(1), EPSILON);
+
+      List<Pair<Double,Double>> refCenters = Lists.newArrayList();
+      refCenters.add(new Pair<Double,Double>(1.5,1.5));
+      refCenters.add(new Pair<Double,Double>(4.333333333333334,4.333333333333334));
+      Pair<Double,Double> c = new Pair<Double,Double>(canopy.getCenter().get(0),
+                                                      canopy.getCenter().get(1));
+      assertTrue("center "+c+" not found", findAndRemove(c, refCenters, EPSILON));
       assertTrue("more to come", reader.next(key, canopy));
       assertEquals("2nd key", "C-1", key.toString());
-      assertEquals("2nd x value", 4.333333333333334, canopy.getCenter().get(0),
-          EPSILON);
-      assertEquals("2nd y value", 4.333333333333334, canopy.getCenter().get(1),
-          EPSILON);
+      c = new Pair<Double,Double>(canopy.getCenter().get(0),
+                                  canopy.getCenter().get(1));
+      assertTrue("center "+c+" not found", findAndRemove(c, refCenters, EPSILON));
       assertFalse("more to come", reader.next(key, canopy));
     } finally {
       Closeables.closeQuietly(reader);
     }
+  }
+
+  boolean findAndRemove(Pair<Double,Double> target, 
+                        List<Pair<Double,Double>> list, double epsilon) {
+    for (Pair<Double,Double> curr : list) {
+      if ( (Math.abs(target.getFirst() - curr.getFirst()) < epsilon) 
+           && (Math.abs(target.getSecond() - curr.getSecond()) < epsilon) ) {
+        list.remove(curr);
+        return true;
+      } 
+    }
+    return false;
   }
 
   /**
@@ -368,14 +385,18 @@ public final class TestCanopyCreation extends MahoutTestCase {
       Canopy value = new Canopy();
       assertTrue("more to come", reader.next(key, value));
       assertEquals("1st key", "C-0", key.toString());
-      assertEquals("1st x value", 1.8, value.getCenter().get(0), EPSILON);
-      assertEquals("1st y value", 1.8, value.getCenter().get(1), EPSILON);
+
+      List<Pair<Double,Double>> refCenters = Lists.newArrayList();
+      refCenters.add(new Pair<Double,Double>(1.8,1.8));
+      refCenters.add(new Pair<Double,Double>(4.433333333333334, 4.433333333333334));
+      Pair<Double,Double> c = new Pair<Double,Double>(value.getCenter().get(0),
+                                                      value.getCenter().get(1));
+      assertTrue("center "+c+" not found", findAndRemove(c, refCenters, EPSILON));
       assertTrue("more to come", reader.next(key, value));
       assertEquals("2nd key", "C-1", key.toString());
-      assertEquals("2nd x value", 4.433333333333334, value.getCenter().get(0),
-          EPSILON);
-      assertEquals("2nd y value", 4.433333333333334, value.getCenter().get(1),
-          EPSILON);
+      c = new Pair<Double,Double>(value.getCenter().get(0),
+                                  value.getCenter().get(1));
+      assertTrue("center "+c+" not found", findAndRemove(c, refCenters, EPSILON));
       assertFalse("more to come", reader.next(key, value));
     } finally {
       Closeables.closeQuietly(reader);

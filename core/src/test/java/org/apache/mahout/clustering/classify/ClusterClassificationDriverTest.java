@@ -20,6 +20,9 @@ package org.apache.mahout.clustering.classify;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import com.google.common.collect.Sets;
 
 import junit.framework.Assert;
 
@@ -195,9 +198,7 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
   }
   
   private void assertVectorsWithOutlierRemoval() {
-    assertFirstClusterWithOutlierRemoval();
-    assertSecondClusterWithOutlierRemoval();
-    assertThirdClusterWithOutlierRemoval();
+    checkClustersWithOutlierRemoval();
   }
   
   private void assertVectorsWithoutOutlierRemoval() {
@@ -230,25 +231,33 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
           "{1:1.0,0:2.0}", "{1:2.0,0:1.0}"}, vector.asFormatString()));
     }
   }
-  
-  private void assertThirdClusterWithOutlierRemoval() {
-    Assert.assertEquals(1, thirdCluster.size());
-    for (Vector vector : thirdCluster) {
-      Assert.assertTrue(ArrayUtils.contains(new String[] {"{1:9.0,0:9.0}"},
-          vector.asFormatString()));
-    }
+
+  private void checkClustersWithOutlierRemoval() {
+    Set<String> reference = Sets.newHashSet(new String[] {"{1:9.0,0:9.0}",
+                                                          "{1:1.0,0:1.0}"});
+    int singletonCnt = 0;
+    int emptyCnt = 0;
+
+    List<List<Vector>> clusters = Lists.newArrayList();
+    clusters.add(firstCluster);
+    clusters.add(secondCluster);
+    clusters.add(thirdCluster);
+
+    for (List<Vector> vList : clusters) {
+      if (vList.size() == 0) {
+        emptyCnt++;
+      } else {
+        singletonCnt++;
+        Assert.assertTrue("expecting only singleton clusters; got size=" + vList.size(),
+                          vList.size() == 1);
+        Assert.assertTrue("not expecting cluster:" + vList.get(0).asFormatString(),
+                          reference.contains(vList.get(0).asFormatString()));
+        reference.remove(vList.get(0).asFormatString());
+      }
+    } 
+    Assert.assertEquals("Different number of empty clusters than expected!", 1, emptyCnt);
+    Assert.assertEquals("Different number of singletons than expected!", 2, singletonCnt);
+    Assert.assertEquals("Didn't match all reference clusters!", 0, reference.size());
   }
-  
-  private void assertSecondClusterWithOutlierRemoval() {
-    Assert.assertEquals(0, secondCluster.size());
-  }
-  
-  private void assertFirstClusterWithOutlierRemoval() {
-    Assert.assertEquals(1, firstCluster.size());
-    for (Vector vector : firstCluster) {
-      Assert.assertTrue(ArrayUtils.contains(new String[] {"{1:1.0,0:1.0}"},
-          vector.asFormatString()));
-    }
-  }
-  
+
 }

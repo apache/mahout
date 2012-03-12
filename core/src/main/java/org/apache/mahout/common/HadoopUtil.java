@@ -17,6 +17,7 @@
 
 package org.apache.mahout.common;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -229,14 +230,30 @@ public final class HadoopUtil {
     FileStatus[] statuses;
     FileSystem fs = path.getFileSystem(conf);
     if (filter == null) {
-      statuses = pathType == PathType.GLOB ? fs.globStatus(path) : fs.listStatus(path);
+      statuses = pathType == PathType.GLOB ? fs.globStatus(path) : listStatus(fs, path);
     } else {
-      statuses = pathType == PathType.GLOB ? fs.globStatus(path, filter) : fs.listStatus(path, filter);
+      statuses = pathType == PathType.GLOB ? fs.globStatus(path, filter) : listStatus(fs, path, filter);
     }
     if (ordering != null) {
       Arrays.sort(statuses, ordering);
     }
     return statuses;
+  }
+
+  public static FileStatus[] listStatus(FileSystem fs, Path path) throws IOException {
+    try {
+      return fs.listStatus(path);
+    } catch (FileNotFoundException e) {
+      return new FileStatus[0];
+    }
+  }
+
+  public static FileStatus[] listStatus(FileSystem fs, Path path, PathFilter filter) throws IOException {
+    try {
+      return fs.listStatus(path, filter);
+    } catch (FileNotFoundException e) {
+      return new FileStatus[0];
+    }
   }
 
   public static void cacheFiles(Path fileToCache, Configuration conf) {

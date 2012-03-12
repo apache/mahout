@@ -17,21 +17,30 @@
 
 package org.apache.mahout.classifier.df.mapreduce.partial;
 
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.capture;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+
 import java.util.Random;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.TaskAttemptID;
-import org.apache.mahout.common.MahoutTestCase;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.classifier.df.builder.TreeBuilder;
 import org.apache.mahout.classifier.df.data.Data;
 import org.apache.mahout.classifier.df.data.DataLoader;
 import org.apache.mahout.classifier.df.data.Dataset;
 import org.apache.mahout.classifier.df.data.Utils;
+import org.apache.mahout.classifier.df.mapreduce.MapredOutput;
 import org.apache.mahout.classifier.df.node.Leaf;
 import org.apache.mahout.classifier.df.node.Node;
+import org.apache.mahout.common.MahoutTestCase;
+import org.easymock.Capture;
+import org.easymock.CaptureType;
 import org.junit.Test;
 
 public final class Step1MapperTest extends MahoutTestCase {
@@ -71,6 +80,17 @@ public final class Step1MapperTest extends MahoutTestCase {
     }
   }
 
+  private static class TreeIDCapture extends Capture<TreeID> {
+
+    public TreeIDCapture() {
+      super(CaptureType.ALL);
+    }
+
+    public void setValue(final TreeID value) {
+      super.setValue(value.clone());
+    }
+  }
+
   /** nb attributes per generated data instance */
   static final int NUM_ATTRIBUTES = 4;
 
@@ -83,6 +103,7 @@ public final class Step1MapperTest extends MahoutTestCase {
   /** nb mappers to use */
   static final int NUM_MAPPERS = 2;
 
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   @Test
   public void testMapper() throws Exception {
     Long seed = null;
@@ -109,8 +130,13 @@ public final class Step1MapperTest extends MahoutTestCase {
       // expected number of trees that this mapper will build
       int mapNbTrees = Step1Mapper.nbTrees(NUM_MAPPERS, NUM_TREES, partition);
 
-      MockContext context = new MockContext(new Step1Mapper(),
-          new Configuration(), new TaskAttemptID(), mapNbTrees);
+      Mapper.Context context =
+        createMock(Mapper.Context.class);
+      Capture<TreeID> capturedKeys = new TreeIDCapture();
+      context.write(capture(capturedKeys), anyObject());
+      expectLastCall().anyTimes();
+
+      replay(context);
 
       MockStep1Mapper mapper = new MockStep1Mapper(treeBuilder, dataset, seed,
           partition, NUM_MAPPERS, NUM_TREES);
@@ -125,12 +151,13 @@ public final class Step1MapperTest extends MahoutTestCase {
       }
 
       mapper.cleanup(context);
+      verify(context);
 
       // make sure the mapper built all its trees
-      assertEquals(mapNbTrees, context.nbOutputs());
+      assertEquals(mapNbTrees, capturedKeys.getValues().size());
 
       // check the returned keys
-      for (TreeID k : context.getKeys()) {
+      for (TreeID k : capturedKeys.getValues()) {
         assertEquals(partition, k.partition());
         assertEquals(treeIndex, k.treeId());
 

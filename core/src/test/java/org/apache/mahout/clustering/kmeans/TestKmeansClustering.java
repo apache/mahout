@@ -26,6 +26,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -38,6 +39,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.ClusterObservations;
 import org.apache.mahout.clustering.ClusteringTestUtils;
+import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.classify.WeightedVectorWritable;
 import org.apache.mahout.common.DummyOutputCollector;
@@ -486,6 +488,42 @@ public final class TestKmeansClustering extends MahoutTestCase {
     // now run the Canopy job
     CanopyDriver.run(conf, pointsPath, outputPath, new ManhattanDistanceMeasure(), 3.1, 2.1, false, 0.0, false);
     
+    DummyOutputCollector<Text, Canopy> collector1 =
+        new DummyOutputCollector<Text, Canopy>();
+
+    FileStatus[] outParts = FileSystem.get(conf).globStatus(
+                    new Path(outputPath, "clusters-0-final/*-0*"));
+    for (FileStatus outPartStat : outParts) {
+      for (Pair<Text,Canopy> record :
+               new SequenceFileIterable<Text,Canopy>(
+                 outPartStat.getPath(), conf)) {
+          collector1.collect(record.getFirst(), record.getSecond());
+      }
+    }
+
+    boolean got15 = false;
+    boolean got43 = false;
+    int count = 0;
+    for (Text k : collector1.getKeys()) {
+      count++;
+      List<Canopy> vl = collector1.getValue(k);
+      assertEquals("non-singleton centroid!", 1, vl.size());
+      Vector v = vl.get(0).getCenter();
+      assertEquals("cetriod vector is wrong length", 2, v.size());
+      if ( (Math.abs(v.get(0) - 1.5) < EPSILON) 
+                  && (Math.abs(v.get(1) - 1.5) < EPSILON)
+                  && !got15) {
+        got15 = true;
+      } else if ( (Math.abs(v.get(0) - 4.333333333333334) < EPSILON) 
+                  && (Math.abs(v.get(1) - 4.333333333333334) < EPSILON)
+                  && !got43) {
+        got43 = true;
+      } else {
+        assertTrue("got unexpected center: "+v+" ["+v.getClass().toString()+"]", false);
+      }
+    }
+    assertEquals("got unexpected number of centers", 2, count);
+
     // now run the KMeans job
     KMeansDriver.run(pointsPath, new Path(outputPath, "clusters-0-final"), outputPath, new EuclideanDistanceMeasure(),
         0.001, 10, true, false);
@@ -500,7 +538,28 @@ public final class TestKmeansClustering extends MahoutTestCase {
       collector.collect(record.getFirst(), record.getSecond());
     }
     
-    assertEquals("num points[0]", 4, collector.getValue(new IntWritable(0)).size());
-    assertEquals("num points[1]", 5, collector.getValue(new IntWritable(1)).size());
+    boolean gotLowClust = false;  // clusters should be [1, *] and [2, *] 
+    boolean gotHighClust = false; // vs [3 , *],  [4 , *] and [5, *] 
+    for (IntWritable k : collector.getKeys()) {
+      List<WeightedVectorWritable> wvList = collector.getValue(k);
+      assertTrue("empty cluster!", wvList.size() != 0);
+      if (wvList.get(0).getVector().get(0) <= 2.0) {
+        for (WeightedVectorWritable wv : wvList) {
+          Vector v = wv.getVector();
+          int idx = v.maxValueIndex();
+          assertTrue("bad cluster!", v.get(idx) <= 2.0);
+        }
+        assertEquals("Wrong size cluster", 4, wvList.size());
+        gotLowClust= true;
+      } else {
+        for (WeightedVectorWritable wv : wvList) {
+          Vector v = wv.getVector();
+          int idx = v.minValueIndex();
+          assertTrue("bad cluster!", v.get(idx) > 2.0);
+        }
+        assertEquals("Wrong size cluster", 5, wvList.size());
+        gotHighClust= true;
+      }
+    }
   }
 }

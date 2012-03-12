@@ -21,10 +21,12 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -350,7 +352,13 @@ public final class TestMeanShift extends MahoutTestCase {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(input.toUri(), conf);
     Collection<VectorWritable> points = Lists.newArrayList();
-    for (Vector v : raw) {
+    Random r = new Random(123);
+    Vector[] permutedRaw = new Vector[raw.length];
+    for (int i = 0; i < raw.length; i++)
+      permutedRaw = raw;
+    for (int i = 0; i < permutedRaw.length; i++)
+      permutedRaw[i] = permutedRaw[i + r.nextInt(raw.length - i)];
+    for (Vector v : permutedRaw) {
       points.add(new VectorWritable(v));
     }
     ClusteringTestUtils.writePointsToFile(points,
@@ -376,10 +384,12 @@ public final class TestMeanShift extends MahoutTestCase {
         optKey(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION), "0.2",
         optKey(DefaultOptionCreator.OVERWRITE_OPTION) };
     ToolRunner.run(conf, new MeanShiftCanopyDriver(), args);
-    Path outPart = new Path(output, "clusters-4-final/part-r-00000");
-    long count = HadoopUtil.countRecords(outPart, conf);
-    assertEquals("count", 3, count);
-    outPart = new Path(output, "clusters-0/part-m-00000");
+    FileStatus[] outParts = FileSystem.get(conf).globStatus(
+        new Path(output, "clusters-?-final/part-r-*"));
+    assertEquals("Wrong number of matching final parts", 1, outParts.length);
+    long count = HadoopUtil.countRecords(outParts[0].getPath(), conf);
+    assertEquals("count", 5, count);
+    Path outPart = new Path(output, "clusters-0/part-m-00000");
     Iterator<?> iterator = new SequenceFileValueIterator<Writable>(outPart,
         true, conf);
     // now test the initial clusters to ensure the type of their centers has

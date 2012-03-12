@@ -193,7 +193,7 @@ public final class TestClusterDumper extends MahoutTestCase {
         output, measure, 8, 4, true, 0.0, true);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output,
-        "clusters-0"), new Path(output, "clusteredPoints"));
+        "clusters-0-final"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
   

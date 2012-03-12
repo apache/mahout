@@ -19,6 +19,8 @@
 
 package org.apache.mahout.common;
 
+import static org.easymock.EasyMock.createMockBuilder;
+
 import java.util.Map;
 
 import com.google.common.collect.Maps;
@@ -30,10 +32,21 @@ public final class DummyStatusReporter extends StatusReporter {
   private final Map<Enum<?>, Counter> counters = Maps.newHashMap();
   private final Map<String, Counter> counterGroups = Maps.newHashMap();
 
+  private Counter newCounter() {
+    try {
+      // 0.23 case
+      String c = "org.apache.hadoop.mapreduce.counters.GenericCounter";
+      return (Counter) createMockBuilder(Class.forName(c)).createMock();
+    } catch (ClassNotFoundException e) {
+      // 0.20 case
+      return createMockBuilder(Counter.class).createMock();
+    }
+  }
+
   @Override
   public Counter getCounter(Enum<?> name) {
     if (!counters.containsKey(name)) {
-      counters.put(name, new DummyCounter());
+      counters.put(name, newCounter());
     }
     return counters.get(name);
   }
@@ -42,7 +55,7 @@ public final class DummyStatusReporter extends StatusReporter {
   @Override
   public Counter getCounter(String group, String name) {
     if (!counterGroups.containsKey(group + name)) {
-      counterGroups.put(group + name, new DummyCounter());
+      counterGroups.put(group + name, newCounter());
     }
     return counterGroups.get(group+name);
   }
@@ -53,6 +66,10 @@ public final class DummyStatusReporter extends StatusReporter {
 
   @Override
   public void setStatus(String status) {
+  }
+
+  public float getProgress() {
+    return 0;
   }
 
 }
