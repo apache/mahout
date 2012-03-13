@@ -79,7 +79,9 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
 
     Path tmpPath = getTestTempDirPath();
     m.setOutputTempPathString(tmpPath.toString());
-    mt.setOutputTempPathString(new Path(tmpPath, "/tmpOutTranspose").toString());
+    Path tmpOutPath = new Path(tmpPath, "/tmpOutTranspose");
+    mt.setOutputTempPathString(tmpOutPath.toString());
+    HadoopUtil.delete(new Configuration(), tmpOutPath);
     DistributedRowMatrix mtt = mt.transpose();
     assertEquals(m, mtt, EPSILON);
   }
