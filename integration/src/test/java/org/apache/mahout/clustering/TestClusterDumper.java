@@ -336,11 +336,12 @@ public final class TestClusterDumper extends MahoutTestCase {
     // now run the Canopy job to prime kMeans canopies
     CanopyDriver.run(conf, svdData, output, measure, 8, 4, false, 0.0, true);
     // now run the KMeans job
-    KMeansDriver.run(svdData, new Path(output, "clusters-0"), output, measure,
+    Path kmeansOutput = new Path(output, "kmeans");
+	KMeansDriver.run(svdData, new Path(output, "clusters-0"), kmeansOutput, measure,
         0.001, 10, true, true);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
-        output, 10), new Path(output, "clusteredPoints"));
+    		kmeansOutput, 10), new Path(kmeansOutput, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
   
@@ -377,11 +378,12 @@ public final class TestClusterDumper extends MahoutTestCase {
     CanopyDriver.run(conf, sData.getRowPath(), output, measure, 8, 4, false,
         0.0, true);
     // now run the KMeans job
-    KMeansDriver.run(sData.getRowPath(), new Path(output, "clusters-0"),
-        output, measure, 0.001, 10, true, true);
+    Path kmeansOutput = new Path(output, "kmeans");
+	KMeansDriver.run(sData.getRowPath(), new Path(output, "clusters-0"),
+        kmeansOutput, measure, 0.001, 10, true, true);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
-        output, 10), new Path(output, "clusteredPoints"));
+    		kmeansOutput, 10), new Path(kmeansOutput, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
   
@@ -421,11 +423,12 @@ public final class TestClusterDumper extends MahoutTestCase {
     CanopyDriver.run(conf, sData.getRowPath(), output, measure, 8, 4, false,
         0.0, true);
     // now run the KMeans job
-    KMeansDriver.run(sData.getRowPath(), new Path(output, "clusters-0"),
-        output, measure, 0.001, 10, true, true);
+    Path kmeansOutput = new Path(output, "kmeans");
+	KMeansDriver.run(sData.getRowPath(), new Path(output, "clusters-0"),
+        kmeansOutput, measure, 0.001, 10, true, true);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
-        output, 10), new Path(output, "clusteredPoints"));
+    		kmeansOutput, 10), new Path(kmeansOutput, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
 }

@@ -525,11 +525,12 @@ public final class TestKmeansClustering extends MahoutTestCase {
     assertEquals("got unexpected number of centers", 2, count);
 
     // now run the KMeans job
-    KMeansDriver.run(pointsPath, new Path(outputPath, "clusters-0-final"), outputPath, new EuclideanDistanceMeasure(),
+    Path kmeansOutput = new Path(outputPath, "kmeans");
+	KMeansDriver.run(pointsPath, new Path(outputPath, "clusters-0-final"), kmeansOutput, new EuclideanDistanceMeasure(),
         0.001, 10, true, false);
     
     // now compare the expected clusters with actual
-    Path clusteredPointsPath = new Path(outputPath, "clusteredPoints");
+    Path clusteredPointsPath = new Path(kmeansOutput, "clusteredPoints");
     DummyOutputCollector<IntWritable,WeightedVectorWritable> collector = new DummyOutputCollector<IntWritable,WeightedVectorWritable>();
     
     // The key is the clusterId, the value is the weighted vector
