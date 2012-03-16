@@ -33,6 +33,13 @@ public class DirichletClusteringPolicy extends AbstractClusteringPolicy {
     super();
   }
   
+  /**
+   * 
+   * @param k
+   *          The number of models to create from prior
+   * @param alpha0
+   *          The alpha_0 parameter to the Dirichlet Distribution.
+   */
   public DirichletClusteringPolicy(int k, double alpha0) {
     this.alpha0 = alpha0;
     this.mixture = UncommonDistributions.rDirichlet(new DenseVector(k), alpha0);

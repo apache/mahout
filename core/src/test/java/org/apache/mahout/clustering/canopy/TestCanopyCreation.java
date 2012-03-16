@@ -517,9 +517,9 @@ public final class TestCanopyCreation extends MahoutTestCase {
   public void testClusteringManhattanMR() throws Exception {
     List<VectorWritable> points = getPointsWritable();
     Configuration conf = new Configuration();
-    ClusteringTestUtils.writePointsToFile(points,
+    ClusteringTestUtils.writePointsToFile(points, true, 
         getTestTempFilePath("testdata/file1"), fs, conf);
-    ClusteringTestUtils.writePointsToFile(points,
+    ClusteringTestUtils.writePointsToFile(points, true, 
         getTestTempFilePath("testdata/file2"), fs, conf);
     // now run the Job
     Path output = getTestTempDirPath("output");
@@ -538,9 +538,9 @@ public final class TestCanopyCreation extends MahoutTestCase {
   public void testClusteringEuclideanMR() throws Exception {
     List<VectorWritable> points = getPointsWritable();
     Configuration conf = new Configuration();
-    ClusteringTestUtils.writePointsToFile(points,
+    ClusteringTestUtils.writePointsToFile(points, true, 
         getTestTempFilePath("testdata/file1"), fs, conf);
-    ClusteringTestUtils.writePointsToFile(points,
+    ClusteringTestUtils.writePointsToFile(points, true, 
         getTestTempFilePath("testdata/file2"), fs, conf);
     // now run the Job using the run() command. Others can use runJob().
     Path output = getTestTempDirPath("output");
@@ -567,9 +567,9 @@ public final class TestCanopyCreation extends MahoutTestCase {
   public void testClusteringEuclideanWithOutlierRemovalMR() throws Exception {
     List<VectorWritable> points = getPointsWritable();
     Configuration conf = new Configuration();
-    ClusteringTestUtils.writePointsToFile(points,
+    ClusteringTestUtils.writePointsToFile(points, true, 
         getTestTempFilePath("testdata/file1"), fs, conf);
-    ClusteringTestUtils.writePointsToFile(points,
+    ClusteringTestUtils.writePointsToFile(points, true, 
         getTestTempFilePath("testdata/file2"), fs, conf);
     // now run the Job using the run() command. Others can use runJob().
     Path output = getTestTempDirPath("output");

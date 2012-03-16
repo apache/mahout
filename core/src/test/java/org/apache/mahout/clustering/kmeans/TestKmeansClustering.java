@@ -367,8 +367,8 @@ public final class TestKmeansClustering extends MahoutTestCase {
     Path pointsPath = getTestTempDirPath("points");
     Path clustersPath = getTestTempDirPath("clusters");
     Configuration conf = new Configuration();
-    ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file1"), fs, conf);
-    ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file2"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(points, true, new Path(pointsPath, "file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(points, true, new Path(pointsPath, "file2"), fs, conf);
     for (int k = 1; k < points.size(); k++) {
       System.out.println("testKMeansMRJob k= " + k);
       // pick k initial cluster centers at random
@@ -423,8 +423,8 @@ public final class TestKmeansClustering extends MahoutTestCase {
     Path pointsPath = getTestTempDirPath("points");
     Path clustersPath = getTestTempDirPath("clusters");
     Configuration conf = new Configuration();
-    ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file1"), fs, conf);
-    ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file2"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(points, true, new Path(pointsPath, "file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(points, true, new Path(pointsPath, "file2"), fs, conf);
     for (int k = 1; k < points.size(); k += 3) {
       System.out.println("testKMeansMRJob k= " + k);
       // pick k initial cluster centers at random
@@ -481,8 +481,8 @@ public final class TestKmeansClustering extends MahoutTestCase {
     
     Path pointsPath = getTestTempDirPath("points");
     Configuration conf = new Configuration();
-    ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file1"), fs, conf);
-    ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file2"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(points, true, new Path(pointsPath, "file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(points, true, new Path(pointsPath, "file2"), fs, conf);
     
     Path outputPath = getTestTempDirPath("output");
     // now run the Canopy job

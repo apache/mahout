@@ -104,7 +104,7 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
     
     conf = new Configuration();
     
-    ClusteringTestUtils.writePointsToFile(points,
+    ClusteringTestUtils.writePointsToFile(points, true, 
         new Path(pointsPath, "file1"), fs, conf);
     runClustering(pointsPath, conf, false);
     runClassificationWithOutlierRemoval(conf, false);

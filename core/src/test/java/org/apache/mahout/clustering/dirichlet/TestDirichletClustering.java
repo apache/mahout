@@ -19,20 +19,29 @@ package org.apache.mahout.clustering.dirichlet;
 
 import java.util.List;
 
-import com.google.common.collect.Lists;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.dirichlet.models.DistanceMeasureClusterDistribution;
+import org.apache.mahout.clustering.dirichlet.models.DistributionDescription;
 import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.VectorWritable;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.common.collect.Lists;
+
 public final class TestDirichletClustering extends MahoutTestCase {
 
   private List<VectorWritable> sampleData;
-
+  
   @Override
   @Before
   public void setUp() throws Exception {
@@ -138,5 +147,60 @@ public final class TestDirichletClustering extends MahoutTestCase {
     printResults(result, 2);
     assertNotNull(result);
   }
+  
+  @Test
+  public void testDirichletClusteringSeq() throws Exception {
+    Path output = getTestTempDirPath("output");
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.get(new Configuration());
+    
+    generateSamples(40, 1, 1, 3);
+    generateSamples(30, 1, 0, 0.1);
+    generateSamples(30, 0, 1, 0.1);
 
+    ClusteringTestUtils.writePointsToFile(sampleData,
+            getTestTempFilePath("testdata/file1"), fs, conf);
+
+    DenseVector prototype = (DenseVector) sampleData.get(0).get();
+    
+    DistributionDescription description = new DistributionDescription(
+        DistanceMeasureClusterDistribution.class.getName(),
+        RandomAccessSparseVector.class.getName(),
+        ManhattanDistanceMeasure.class.getName(), prototype.size());
+    
+    DirichletDriver.run(conf, getTestTempDirPath("testdata"), output,
+        description, 10, 1, 1.0, true, true, 0, true);
+    
+    Path path = new Path(output, "clusteredPoints/part-m-0");
+    long count = HadoopUtil.countRecords(path, conf);
+    assertEquals("number of points", sampleData.size(), count);
+  }
+  
+  @Test
+  public void testDirichletClusteringMR() throws Exception {
+    Path output = getTestTempDirPath("output");
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.get(new Configuration());
+    
+    generateSamples(40, 1, 1, 3);
+    generateSamples(30, 1, 0, 0.1);
+
+    ClusteringTestUtils.writePointsToFile(sampleData, true,
+            getTestTempFilePath("testdata/file1"), fs, conf);
+
+    DenseVector prototype = (DenseVector) sampleData.get(0).get();
+    
+    DistributionDescription description = new DistributionDescription(
+        DistanceMeasureClusterDistribution.class.getName(),
+        RandomAccessSparseVector.class.getName(),
+        ManhattanDistanceMeasure.class.getName(), prototype.size());
+    
+    DirichletDriver.run(conf, getTestTempDirPath("testdata"), output,
+        description, 10, 1, 1.0, true, true, 0, false);
+    
+    Path path = new Path(output, "clusteredPoints/part-m-00000");
+    long count = HadoopUtil.countRecords(path, conf);
+    assertEquals("number of points", sampleData.size(), count);
+  }
+  
 }

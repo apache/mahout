@@ -282,7 +282,7 @@ public final class TestMapReduce extends MahoutTestCase {
     generateSamples(100, 2, 0, 0.2);
     generateSamples(100, 0, 2, 0.3);
     generateSamples(100, 2, 2, 1);
-    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data.txt"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(sampleData, true, getTestTempFilePath("input/data.txt"), fs, conf);
     // Now run the driver using the run() method. Others can use runJob() as
     // before
     Integer maxIterations = 5;
@@ -410,7 +410,7 @@ public final class TestMapReduce extends MahoutTestCase {
   public void testDriverIterationsMahalanobisMR() throws Exception {
     generateAsymmetricSamples(100, 0, 0, 0.5, 3.0);
     generateAsymmetricSamples(100, 0, 3, 0.3, 4.0);
-    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data.txt"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(sampleData,true, getTestTempFilePath("input/data.txt"), fs, conf);
     // Now run the driver using the run() method. Others can use runJob() as
     // before
     

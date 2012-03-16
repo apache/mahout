@@ -40,6 +40,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.clustering.dirichlet.DirichletCluster;
 import org.apache.mahout.clustering.iterator.ClusteringPolicy;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -131,25 +132,21 @@ public class ClusterClassificationDriver extends AbstractJob {
    * @throws InterruptedException
    * @throws ClassNotFoundException
    */
-  public static void run(Path input, Path clusteringOutputPath, Path output,
-      Double clusterClassificationThreshold, boolean emitMostLikely,
-      boolean runSequential) throws IOException, InterruptedException,
-      ClassNotFoundException {
+  public static void run(Path input, Path clusteringOutputPath, Path output, Double clusterClassificationThreshold,
+      boolean emitMostLikely, boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException {
+    Configuration conf = new Configuration();
     if (runSequential) {
-      classifyClusterSeq(input, clusteringOutputPath, output,
-          clusterClassificationThreshold, emitMostLikely);
+      classifyClusterSeq(conf, input, clusteringOutputPath, output, clusterClassificationThreshold, emitMostLikely);
     } else {
-      Configuration conf = new Configuration();
-      classifyClusterMR(conf, input, clusteringOutputPath, output,
-          clusterClassificationThreshold, emitMostLikely);
+      classifyClusterMR(conf, input, clusteringOutputPath, output, clusterClassificationThreshold, emitMostLikely);
     }
     
   }
   
-  private static void classifyClusterSeq(Path input, Path clusters,
-      Path output, Double clusterClassificationThreshold, boolean emitMostLikely)
+  private static void classifyClusterSeq(Configuration conf, Path input,
+      Path clusters, Path output, Double clusterClassificationThreshold, boolean emitMostLikely)
       throws IOException {
-    List<Cluster> clusterModels = populateClusterModels(clusters);
+    List<Cluster> clusterModels = populateClusterModels(clusters, conf);
     ClusteringPolicy policy = ClusterClassifier
         .readPolicy(finalClustersPath(clusters));
     ClusterClassifier clusterClassifier = new ClusterClassifier(clusterModels,
@@ -164,19 +161,24 @@ public class ClusterClassificationDriver extends AbstractJob {
    * 
    * @param clusterOutputPath
    *          The output path of the clustering.
+   * @param conf
+   *          The Hadoop Configuration
    * @return The list of clusters found by the clustering.
    * @throws IOException
    */
-  private static List<Cluster> populateClusterModels(Path clusterOutputPath)
+  private static List<Cluster> populateClusterModels(Path clusterOutputPath, Configuration conf)
       throws IOException {
     List<Cluster> clusterModels = new ArrayList<Cluster>();
     Cluster cluster = null;
     Path finalClustersPath = finalClustersPath(clusterOutputPath);
     Iterator<?> it = new SequenceFileDirValueIterator<Writable>(
         finalClustersPath, PathType.LIST, PathFilters.partFilter(), null,
-        false, new Configuration());
+        false, conf);
     while (it.hasNext()) {
       cluster = (Cluster) it.next();
+      if(cluster instanceof DirichletCluster){
+    	  ((DirichletCluster) cluster).getModel().configure(conf);
+      }
       clusterModels.add(cluster);
     }
     return clusterModels;
@@ -305,6 +307,17 @@ public class ClusterClassificationDriver extends AbstractJob {
       throw new InterruptedException(
           "Cluster Classification Driver Job failed processing " + input);
     }
+  }
+
+  public static void run(Configuration conf, Path input, Path clusteringOutputPath, Path output,
+      double clusterClassificationThreshold, boolean emitMostLikely, boolean runSequential) throws IOException,
+      InterruptedException, ClassNotFoundException {
+    if (runSequential) {
+      classifyClusterSeq(conf, input, clusteringOutputPath, output, clusterClassificationThreshold, emitMostLikely);
+    } else {
+      classifyClusterMR(conf, input, clusteringOutputPath, output, clusterClassificationThreshold, emitMostLikely);
+    }
+    
   }
   
 }

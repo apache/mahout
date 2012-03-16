@@ -17,23 +17,17 @@
 package org.apache.mahout.clustering.kmeans;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import com.google.common.collect.Lists;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.SequenceFile.Writer;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.ClusterObservations;
-import org.apache.mahout.clustering.classify.WeightedPropertyVectorWritable;
-import org.apache.mahout.clustering.classify.WeightedVectorWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
 
 /**
  * This class implements the k-means clustering algorithm. It uses {@link Kluster} as a cluster
@@ -116,52 +110,6 @@ public class KMeansClusterer {
       cluster.computeParameters();
     }
     return converged;
-  }
-
-  public void outputPointWithClusterInfo(Vector vector,
-                                         Iterable<Kluster> clusters,
-                                         Mapper<?,?,IntWritable,WeightedPropertyVectorWritable>.Context context)
-    throws IOException, InterruptedException {
-    AbstractCluster nearestCluster = null;
-    double nearestDistance = Double.MAX_VALUE;
-    for (AbstractCluster cluster : clusters) {
-      Vector clusterCenter = cluster.getCenter();
-      double distance = measure.distance(clusterCenter.getLengthSquared(), clusterCenter, vector);
-      if (distance < nearestDistance || nearestCluster == null) {
-        nearestCluster = cluster;
-        nearestDistance = distance;
-      }
-    }
-    Map<Text, Text> props = new HashMap<Text, Text>();
-    props.put(new Text("distance"), new Text(String.valueOf(nearestDistance)));
-    context.write(new IntWritable(nearestCluster.getId()), new WeightedPropertyVectorWritable(1, vector, props));
-  }
-
-  /**
-   * Iterates over all clusters and identifies the one closes to the given point. Distance measure used is
-   * configured at creation time.
-   * 
-   * @param point
-   *          a point to find a cluster for.
-   * @param clusters
-   *          a List<Cluster> to test.
-   */
-  protected void emitPointToNearestCluster(Vector point, Iterable<Kluster> clusters, Writer writer)
-    throws IOException {
-    AbstractCluster nearestCluster = null;
-    double nearestDistance = Double.MAX_VALUE;
-    for (AbstractCluster cluster : clusters) {
-      Vector clusterCenter = cluster.getCenter();
-      double distance = this.measure.distance(clusterCenter.getLengthSquared(), clusterCenter, point);
-      if (log.isDebugEnabled()) {
-        log.debug("{} Cluster: {}", distance, cluster.getId());
-      }
-      if (distance < nearestDistance || nearestCluster == null) {
-        nearestCluster = cluster;
-        nearestDistance = distance;
-      }
-    }
-    writer.append(new IntWritable(nearestCluster.getId()), new WeightedVectorWritable(1, point));
   }
 
   /**

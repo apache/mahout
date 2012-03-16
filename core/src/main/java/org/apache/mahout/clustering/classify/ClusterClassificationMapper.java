@@ -35,6 +35,7 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.clustering.dirichlet.DirichletCluster;
 import org.apache.mahout.clustering.iterator.ClusteringPolicy;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
@@ -47,7 +48,7 @@ import org.apache.mahout.math.VectorWritable;
  * Mapper for classifying vectors into clusters.
  */
 public class ClusterClassificationMapper extends
-    Mapper<LongWritable,VectorWritable,IntWritable,WeightedVectorWritable> {
+    Mapper<IntWritable,VectorWritable,IntWritable,WeightedVectorWritable> {
   
   private static double threshold;
   private List<Cluster> clusterModels;
@@ -70,7 +71,7 @@ public class ClusterClassificationMapper extends
     
     if (clustersIn != null && !clustersIn.isEmpty()) {
       Path clustersInPath = new Path(clustersIn);
-      clusterModels = populateClusterModels(clustersInPath);
+      clusterModels = populateClusterModels(clustersInPath, conf);
       ClusteringPolicy policy = ClusterClassifier
           .readPolicy(finalClustersPath(clustersInPath));
       clusterClassifier = new ClusterClassifier(clusterModels, policy);
@@ -83,7 +84,7 @@ public class ClusterClassificationMapper extends
    * Mapper which classifies the vectors to respective clusters.
    */
   @Override
-  protected void map(LongWritable key, VectorWritable vw, Context context)
+  protected void map(IntWritable key, VectorWritable vw, Context context)
       throws IOException, InterruptedException {
     if (!clusterModels.isEmpty()) {
       Vector pdfPerCluster = clusterClassifier.classify(vw.get());
@@ -118,10 +119,9 @@ public class ClusterClassificationMapper extends
     context.write(clusterId, weightedVW);
   }
   
-  public static List<Cluster> populateClusterModels(Path clusterOutputPath)
+  public static List<Cluster> populateClusterModels(Path clusterOutputPath, Configuration conf)
       throws IOException {
     List<Cluster> clusters = new ArrayList<Cluster>();
-    Configuration conf = new Configuration();
     Cluster cluster = null;
     FileSystem fileSystem = clusterOutputPath.getFileSystem(conf);
     FileStatus[] clusterFiles = fileSystem.listStatus(clusterOutputPath,
@@ -131,6 +131,9 @@ public class ClusterClassificationMapper extends
         null, false, conf);
     while (it.hasNext()) {
       cluster = (Cluster) it.next();
+      if(cluster instanceof DirichletCluster){
+        ((DirichletCluster) cluster).getModel().configure(conf);
+      }
       clusters.add(cluster);
     }
     return clusters;

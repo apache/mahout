@@ -16,16 +16,15 @@
  */
 package org.apache.mahout.clustering.kmeans;
 
+import static org.apache.mahout.clustering.topdown.PathDirectory.CLUSTERED_POINTS_DIRECTORY;
+
 import java.io.IOException;
 import java.util.Collection;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -36,8 +35,9 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.ClusterObservations;
-import org.apache.mahout.clustering.classify.WeightedPropertyVectorWritable;
-import org.apache.mahout.clustering.classify.WeightedVectorWritable;
+import org.apache.mahout.clustering.classify.ClusterClassificationDriver;
+import org.apache.mahout.clustering.classify.ClusterClassifier;
+import org.apache.mahout.clustering.iterator.KMeansClusteringPolicy;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.HadoopUtil;
@@ -47,11 +47,13 @@ import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
-import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
+import com.google.common.io.Closeables;
 
 public class KMeansDriver extends AbstractJob {
 
@@ -157,7 +159,7 @@ public class KMeansDriver extends AbstractJob {
       clusterData(conf,
           input,
           clustersOut,
-          new Path(output, AbstractCluster.CLUSTERED_POINTS_DIR),
+          output,
           measure,
           delta,
           runSequential);
@@ -428,73 +430,10 @@ public class KMeansDriver extends AbstractJob {
       log.info("Input: {} Clusters In: {} Out: {} Distance: {}", new Object[] {input, clustersIn, output, measure});
       log.info("convergence: {} Input Vectors: {}", convergenceDelta, VectorWritable.class.getName());
     }
-    if (runSequential) {
-      clusterDataSeq(conf, input, clustersIn, output, measure);
-    } else {
-      clusterDataMR(conf, input, clustersIn, output, measure, convergenceDelta);
-    }
+    Double clusterClassificationThreshold = 0.0;
+    ClusterClassifier.writePolicy(new KMeansClusteringPolicy(), clustersIn);
+    ClusterClassificationDriver.run(input, output, new Path(output, CLUSTERED_POINTS_DIRECTORY),
+        clusterClassificationThreshold, true, runSequential);
   }
-
-  private static void clusterDataSeq(Configuration conf,
-                                     Path input,
-                                     Path clustersIn,
-                                     Path output,
-                                     DistanceMeasure measure) throws IOException {
-
-    KMeansClusterer clusterer = new KMeansClusterer(measure);
-    Collection<Kluster> clusters = Lists.newArrayList();
-    KMeansUtil.configureWithClusterInfo(conf, clustersIn, clusters);
-    if (clusters.isEmpty()) {
-      throw new IllegalStateException("Clusters is empty!");
-    }
-    FileSystem fs = FileSystem.get(input.toUri(), conf);
-    FileStatus[] status = fs.listStatus(input, PathFilters.logsCRCFilter());
-    int part = 0;
-    for (FileStatus s : status) {
-      SequenceFile.Writer writer = new SequenceFile.Writer(fs,
-                                                           conf,
-                                                           new Path(output, "part-m-" + part),
-                                                           IntWritable.class,
-                                                           WeightedVectorWritable.class);
-      try {
-        for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(s.getPath(), conf)) {
-          clusterer.emitPointToNearestCluster(value.get(), clusters, writer);
-        }
-      } finally {
-        Closeables.closeQuietly(writer);
-      }
-    }
-
-  }
-
-  private static void clusterDataMR(Configuration conf,
-                                    Path input,
-                                    Path clustersIn,
-                                    Path output,
-                                    DistanceMeasure measure,
-                                    String convergenceDelta)
-    throws IOException, InterruptedException, ClassNotFoundException {
-
-    conf.set(KMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn.toString());
-    conf.set(KMeansConfigKeys.DISTANCE_MEASURE_KEY, measure.getClass().getName());
-    conf.set(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, convergenceDelta);
-
-    Job job = new Job(conf, "KMeans Driver running clusterData over input: " + input);
-    job.setInputFormatClass(SequenceFileInputFormat.class);
-    job.setOutputFormatClass(SequenceFileOutputFormat.class);
-    job.setOutputKeyClass(IntWritable.class);
-    job.setOutputValueClass(WeightedPropertyVectorWritable.class);
-
-    FileInputFormat.setInputPaths(job, input);
-    HadoopUtil.delete(conf, output);
-    FileOutputFormat.setOutputPath(job, output);
-
-    job.setMapperClass(KMeansClusterMapper.class);
-    job.setNumReduceTasks(0);
-    job.setJarByClass(KMeansDriver.class);
-
-    if (!job.waitForCompletion(true)) {
-      throw new InterruptedException("K-Means Clustering failed processing " + clustersIn);
-    }
-  }
+ 
 }

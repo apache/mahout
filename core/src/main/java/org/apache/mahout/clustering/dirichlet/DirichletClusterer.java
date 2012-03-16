@@ -17,21 +17,16 @@
 
 package org.apache.mahout.clustering.dirichlet;
 
-import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 
-import com.google.common.collect.Lists;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.SequenceFile.Writer;
-import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.Model;
 import org.apache.mahout.clustering.ModelDistribution;
-import org.apache.mahout.clustering.classify.WeightedVectorWritable;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+
+import com.google.common.collect.Lists;
 
 /**
  * Performs Bayesian mixture modeling.
@@ -105,10 +100,6 @@ public class DirichletClusterer {
 
   private final List<Cluster[]> clusterSamples = Lists.newArrayList();
 
-  private boolean emitMostLikely;
-
-  private double threshold;
-
   /**
    * Create a new instance on the sample data with the given additional parameters
    * 
@@ -171,18 +162,14 @@ public class DirichletClusterer {
 
   /**
    * This constructor only used by DirichletClusterMapper for setting up clustering params
-   * @param emitMostLikely
-   * @param threshold
    */
-  public DirichletClusterer(boolean emitMostLikely, double threshold) {
+  public DirichletClusterer() {
     this.sampleData = null;
     this.modelFactory = null;
     this.thin = 0;
     this.burnin = 0;
     this.numClusters = 0;
     this.state = null;
-    this.emitMostLikely = emitMostLikely;
-    this.threshold = threshold;
   }
 
   /**
@@ -275,139 +262,4 @@ public class DirichletClusterer {
     return cluster;
   }
 
-  /**
-   * Emit the point to one or more clusters depending upon clusterer state
-   * 
-   * @param vector a VectorWritable holding the Vector
-   * @param clusters a List of DirichletClusters
-   * @param context a Mapper.Context to emit to
-   */
-  public void emitPointToClusters(VectorWritable vector,
-                                  List<DirichletCluster> clusters,
-                                  Mapper<?,?,IntWritable,WeightedVectorWritable>.Context context)
-    throws IOException, InterruptedException {
-    Vector pi = new DenseVector(clusters.size());
-    for (int i = 0; i < clusters.size(); i++) {
-      pi.set(i, clusters.get(i).getModel().pdf(vector));
-    }
-    pi = pi.divide(pi.zSum());
-    if (emitMostLikely) {
-      emitMostLikelyCluster(vector, clusters, pi, context);
-    } else {
-      emitAllClusters(vector, clusters, pi, context);
-    }
-  }
-
-  /**
-   * Emit the point to the most likely cluster
-   * 
-   * @param point a VectorWritable holding the Vector
-   * @param clusters a List of DirichletClusters
-   * @param pi the normalized pdf Vector for the point
-   * @param context a Mapper.Context to emit to
-   */
-  private void emitMostLikelyCluster(VectorWritable point,
-                                     Collection<DirichletCluster> clusters,
-                                     Vector pi,
-                                     Mapper<?,?,IntWritable,WeightedVectorWritable>.Context context)
-    throws IOException, InterruptedException {
-    int clusterId = -1;
-    double clusterPdf = 0;
-    for (int i = 0; i < clusters.size(); i++) {
-      double pdf = pi.get(i);
-      if (pdf > clusterPdf) {
-        clusterId = i;
-        clusterPdf = pdf;
-      }
-    }
-    //System.out.println(clusterId + ": " + ClusterBase.formatVector(vector.get(), null));
-    context.write(new IntWritable(clusterId), new WeightedVectorWritable(clusterPdf, point.get()));
-  }
-
-  /**
-   * Emit the point to all clusters if pdf exceeds the threshold
-   * @param point a VectorWritable holding the Vector
-   * @param clusters a List of DirichletClusters
-   * @param pi the normalized pdf Vector for the point
-   * @param context a Mapper.Context to emit to
-   */
-  private void emitAllClusters(VectorWritable point,
-                               List<DirichletCluster> clusters,
-                               Vector pi,
-                               Mapper<?,?,IntWritable,WeightedVectorWritable>.Context context)
-    throws IOException, InterruptedException {
-    for (int i = 0; i < clusters.size(); i++) {
-      double pdf = pi.get(i);
-      if (pdf > threshold && clusters.get(i).getTotalObservations() > 0) {
-        //System.out.println(i + ": " + ClusterBase.formatVector(vector.get(), null));
-        context.write(new IntWritable(i), new WeightedVectorWritable(pdf, point.get()));
-      }
-    }
-  }
-
-  /**
-   * Emit the point to one or more clusters depending upon clusterer state
-   * 
-   * @param vector a VectorWritable holding the Vector
-   * @param clusters a List of DirichletClusters
-   * @param writer a SequenceFile.Writer to emit to
-   */
-  public void emitPointToClusters(VectorWritable vector, List<DirichletCluster> clusters, Writer writer)
-    throws IOException {
-    Vector pi = new DenseVector(clusters.size());
-    for (int i = 0; i < clusters.size(); i++) {
-      double pdf = clusters.get(i).getModel().pdf(vector);
-      pi.set(i, pdf);
-    }
-    pi = pi.divide(pi.zSum());
-    if (emitMostLikely) {
-      emitMostLikelyCluster(vector, clusters, pi, writer);
-    } else {
-      emitAllClusters(vector, clusters, pi, writer);
-    }
-  }
-
-  /**
-   * Emit the point to all clusters if pdf exceeds the threshold
-   * 
-   * @param vector a VectorWritable holding the Vector
-   * @param clusters a List of DirichletClusters
-   * @param pi the normalized pdf Vector for the point
-   * @param writer a SequenceFile.Writer to emit to
-   */
-  private void emitAllClusters(VectorWritable vector, List<DirichletCluster> clusters, Vector pi, Writer writer)
-    throws IOException {
-    for (int i = 0; i < clusters.size(); i++) {
-      double pdf = pi.get(i);
-      if (pdf > threshold && clusters.get(i).getTotalObservations() > 0) {
-        //System.out.println(i + ": " + ClusterBase.formatVector(vector.get(), null));
-        writer.append(new IntWritable(i), new WeightedVectorWritable(pdf, vector.get()));
-      }
-    }
-  }
-
-  /**
-   * Emit the point to the most likely cluster
-   * 
-   * @param vector a VectorWritable holding the Vector
-   * @param clusters a List of DirichletClusters
-   * @param pi the normalized pdf Vector for the point
-   * @param writer a SequenceFile.Writer to emit to
-   */
-  private static void emitMostLikelyCluster(VectorWritable vector,
-                                            Collection<DirichletCluster> clusters,
-                                            Vector pi,
-                                            Writer writer) throws IOException {
-    double maxPdf = 0;
-    int clusterId = -1;
-    for (int i = 0; i < clusters.size(); i++) {
-      double pdf = pi.get(i);
-      if (pdf > maxPdf) {
-        maxPdf = pdf;
-        clusterId = i;
-      }
-    }
-    //System.out.println(i + ": " + ClusterBase.formatVector(vector.get(), null));
-    writer.append(new IntWritable(clusterId), new WeightedVectorWritable(maxPdf, vector.get()));
-  }
 }

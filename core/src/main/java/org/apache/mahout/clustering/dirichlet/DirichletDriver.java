@@ -17,15 +17,15 @@
 
 package org.apache.mahout.clustering.dirichlet;
 
+import static org.apache.mahout.clustering.topdown.PathDirectory.CLUSTERED_POINTS_DIRECTORY;
+
 import java.io.IOException;
 import java.util.List;
 
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -35,9 +35,11 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.Cluster;
-import org.apache.mahout.clustering.classify.WeightedVectorWritable;
+import org.apache.mahout.clustering.classify.ClusterClassificationDriver;
+import org.apache.mahout.clustering.classify.ClusterClassifier;
 import org.apache.mahout.clustering.dirichlet.models.DistributionDescription;
 import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
+import org.apache.mahout.clustering.iterator.DirichletClusteringPolicy;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -49,6 +51,8 @@ import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.io.Closeables;
 
 public class DirichletDriver extends AbstractJob {
 
@@ -170,9 +174,11 @@ public class DirichletDriver extends AbstractJob {
       clusterData(conf,
                   input,
                   clustersOut,
-                  new Path(output, Cluster.CLUSTERED_POINTS_DIR),
-                  emitMostLikely,
-                  threshold,
+                  output,
+                  alpha0,
+                  numModels,
+                  emitMostLikely, 
+                  threshold, 
                   runSequential);
     }
   }
@@ -442,92 +448,32 @@ public class DirichletDriver extends AbstractJob {
   /**
    * Run the job using supplied arguments
    * @param conf 
-   * 
-   * @param input
+ * @param input
    *          the directory pathname for input points
-   * @param stateIn
+ * @param stateIn
    *          the directory pathname for input state
-   * @param output
+ * @param output
    *          the directory pathname for output points
-   * @param emitMostLikely
+ * @param alpha0 TODO
+ * @param numModels TODO
+ * @param emitMostLikely
    *          a boolean if true emit only most likely cluster for each point
-   * @param threshold 
+ * @param threshold 
    *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
-   * @param runSequential execute sequentially if true
+ * @param runSequential execute sequentially if true
    */
   public static void clusterData(Configuration conf,
                                  Path input,
                                  Path stateIn,
                                  Path output,
-                                 boolean emitMostLikely,
-                                 double threshold,
+                                 double alpha0,
+                                 int numModels,
+                                 boolean emitMostLikely, 
+                                 double threshold, 
                                  boolean runSequential)
     throws IOException, InterruptedException, ClassNotFoundException {
-    if (runSequential) {
-      clusterDataSeq(conf, input, stateIn, output, emitMostLikely, threshold);
-    } else {
-      clusterDataMR(conf, input, stateIn, output, emitMostLikely, threshold);
+	  ClusterClassifier.writePolicy(new DirichletClusteringPolicy(numModels, alpha0), stateIn);
+	  ClusterClassificationDriver.run(conf, input, output, new Path(output, CLUSTERED_POINTS_DIRECTORY), threshold, emitMostLikely, runSequential);
     }
-  }
-
-  private static void clusterDataSeq(Configuration conf,
-                                     Path input,
-                                     Path stateIn,
-                                     Path output,
-                                     boolean emitMostLikely,
-                                     double threshold) throws IOException {
-
-    List<DirichletCluster> clusters = DirichletClusterMapper.loadClusters(conf, stateIn);
-
-    for (DirichletCluster cluster : clusters) {
-      cluster.getModel().configure(conf);
-    }
-    
-    DirichletClusterer clusterer = new DirichletClusterer(emitMostLikely, threshold);
-    // iterate over all points, assigning each to the closest canopy and outputing that clustering
-    FileSystem fs = FileSystem.get(input.toUri(), conf);
-    FileStatus[] status = fs.listStatus(input, PathFilters.logsCRCFilter());
-    int part = 0;
-    for (FileStatus s : status) {
-      SequenceFile.Writer writer = new SequenceFile.Writer(fs,
-                                                           conf,
-                                                           new Path(output, "part-m-" + part++),
-                                                           IntWritable.class,
-                                                           WeightedVectorWritable.class);
-      try {
-        for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(s.getPath(), conf)) {
-          clusterer.emitPointToClusters(value, clusters, writer);
-        }
-      } finally {
-        Closeables.closeQuietly(writer);
-      }
-    }
-
-  }
-
-  private static void clusterDataMR(Configuration conf,
-                                    Path input,
-                                    Path stateIn,
-                                    Path output,
-                                    boolean emitMostLikely,
-                                    double threshold) throws IOException, InterruptedException, ClassNotFoundException {
-    conf.set(STATE_IN_KEY, stateIn.toString());
-    conf.set(EMIT_MOST_LIKELY_KEY, Boolean.toString(emitMostLikely));
-    conf.set(THRESHOLD_KEY, Double.toString(threshold));
-    Job job = new Job(conf, "Dirichlet Driver running clusterData over input: " + input);
-    job.setOutputKeyClass(IntWritable.class);
-    job.setOutputValueClass(WeightedVectorWritable.class);
-    job.setMapperClass(DirichletClusterMapper.class);
-    job.setInputFormatClass(SequenceFileInputFormat.class);
-    job.setOutputFormatClass(SequenceFileOutputFormat.class);
-    job.setNumReduceTasks(0);
-    job.setJarByClass(DirichletDriver.class);
-
-    FileInputFormat.addInputPath(job, input);
-    FileOutputFormat.setOutputPath(job, output);
-
-    if (!job.waitForCompletion(true)) {
-      throw new InterruptedException("Dirichlet Clustering failed processing " + stateIn);
-    }
-  }
+  
 }
