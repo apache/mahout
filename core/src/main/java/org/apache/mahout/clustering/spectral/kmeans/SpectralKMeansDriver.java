@@ -187,6 +187,7 @@ public class SpectralKMeansDriver extends AbstractJob {
                      convergenceDelta,
                      maxIterations,
                      true,
+                     0.0, 
                      false);
   }
 }

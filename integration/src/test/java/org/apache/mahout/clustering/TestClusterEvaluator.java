@@ -344,7 +344,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     // now run the KMeans job
     Path kmeansOutput = new Path(output, "kmeans");
 	KMeansDriver.run(testdata, new Path(output, "clusters-0-final"), kmeansOutput, measure,
-        0.001, 10, true, true);
+        0.001, 10, true, 0.0, true);
     int numIterations = 10;
     Path clustersIn = new Path(output, "clusters-2");
     RepresentativePointsDriver.run(conf, clustersIn, new Path(output,

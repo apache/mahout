@@ -207,7 +207,7 @@ public final class TestClusterDumper extends MahoutTestCase {
         4, false, 0.0, true);
     // now run the KMeans job
     KMeansDriver.run(conf, getTestTempDirPath("testdata"), new Path(output,
-        "clusters-0-final"), output, measure, 0.001, 10, true, false);
+        "clusters-0-final"), output, measure, 0.001, 10, true, 0.0, false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
         output, 10), new Path(output, "clusteredPoints"));
@@ -338,7 +338,7 @@ public final class TestClusterDumper extends MahoutTestCase {
     // now run the KMeans job
     Path kmeansOutput = new Path(output, "kmeans");
 	KMeansDriver.run(svdData, new Path(output, "clusters-0"), kmeansOutput, measure,
-        0.001, 10, true, true);
+        0.001, 10, true, 0.0, true);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
     		kmeansOutput, 10), new Path(kmeansOutput, "clusteredPoints"));
@@ -380,7 +380,7 @@ public final class TestClusterDumper extends MahoutTestCase {
     // now run the KMeans job
     Path kmeansOutput = new Path(output, "kmeans");
 	KMeansDriver.run(sData.getRowPath(), new Path(output, "clusters-0"),
-        kmeansOutput, measure, 0.001, 10, true, true);
+        kmeansOutput, measure, 0.001, 10, true, 0.0, true);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
     		kmeansOutput, 10), new Path(kmeansOutput, "clusteredPoints"));
@@ -425,7 +425,7 @@ public final class TestClusterDumper extends MahoutTestCase {
     // now run the KMeans job
     Path kmeansOutput = new Path(output, "kmeans");
 	KMeansDriver.run(sData.getRowPath(), new Path(output, "clusters-0"),
-        kmeansOutput, measure, 0.001, 10, true, true);
+        kmeansOutput, measure, 0.001, 10, true, 0.0, true);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
     		kmeansOutput, 10), new Path(kmeansOutput, "clusteredPoints"));

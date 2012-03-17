@@ -93,7 +93,7 @@ public class DisplayKMeans extends DisplayClustering {
       DistanceMeasure measure, int maxIterations, double convergenceDelta) throws IOException, InterruptedException,
       ClassNotFoundException {
     Path clusters = RandomSeedGenerator.buildRandom(conf, samples, new Path(output, "clusters-0"), 3, measure);
-    KMeansDriver.run(samples, clusters, output, measure, convergenceDelta, maxIterations, true, true);
+    KMeansDriver.run(samples, clusters, output, measure, convergenceDelta, maxIterations, true, 0.0, true);
     loadClusters(output);
   }
   

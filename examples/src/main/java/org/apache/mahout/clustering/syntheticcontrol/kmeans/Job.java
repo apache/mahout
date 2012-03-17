@@ -145,7 +145,7 @@ public final class Job extends AbstractJob {
         directoryContainingConvertedInput, clusters, k, measure);
     log.info("Running KMeans");
     KMeansDriver.run(conf, directoryContainingConvertedInput, clusters, output,
-        measure, convergenceDelta, maxIterations, true, false);
+        measure, convergenceDelta, maxIterations, true, 0.0, false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
         output, maxIterations), new Path(output, "clusteredPoints"));
@@ -195,7 +195,7 @@ public final class Job extends AbstractJob {
     log.info("Running KMeans");
     KMeansDriver.run(conf, directoryContainingConvertedInput, new Path(output,
         Cluster.INITIAL_CLUSTERS_DIR), output, measure, convergenceDelta,
-        maxIterations, true, false);
+        maxIterations, true, 0.0, false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
         output, maxIterations), new Path(output, "clusteredPoints"));
