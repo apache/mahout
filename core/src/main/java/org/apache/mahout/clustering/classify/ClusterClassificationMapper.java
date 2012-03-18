@@ -31,8 +31,8 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.dirichlet.DirichletCluster;
@@ -48,7 +48,7 @@ import org.apache.mahout.math.VectorWritable;
  * Mapper for classifying vectors into clusters.
  */
 public class ClusterClassificationMapper extends
-    Mapper<IntWritable,VectorWritable,IntWritable,WeightedVectorWritable> {
+    Mapper<WritableComparable<?>,VectorWritable,IntWritable,WeightedVectorWritable> {
   
   private static double threshold;
   private List<Cluster> clusterModels;
@@ -84,7 +84,7 @@ public class ClusterClassificationMapper extends
    * Mapper which classifies the vectors to respective clusters.
    */
   @Override
-  protected void map(IntWritable key, VectorWritable vw, Context context)
+  protected void map(WritableComparable<?> key, VectorWritable vw, Context context)
       throws IOException, InterruptedException {
     if (!clusterModels.isEmpty()) {
       Vector pdfPerCluster = clusterClassifier.classify(vw.get());
