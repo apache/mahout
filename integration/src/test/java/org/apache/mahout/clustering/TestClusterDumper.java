@@ -206,11 +206,12 @@ public final class TestClusterDumper extends MahoutTestCase {
     CanopyDriver.run(conf, getTestTempDirPath("testdata"), output, measure, 8,
         4, false, 0.0, true);
     // now run the KMeans job
-    KMeansDriver.run(conf, getTestTempDirPath("testdata"), new Path(output,
-        "clusters-0-final"), output, measure, 0.001, 10, true, 0.0, false);
+    Path kmeansOutput = new Path(output, "kmeans");
+	KMeansDriver.run(conf, getTestTempDirPath("testdata"), new Path(output,
+        "clusters-0-final"), kmeansOutput, measure, 0.001, 10, true, 0.0, false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
-        output, 10), new Path(output, "clusteredPoints"));
+        output, 10), new Path(kmeansOutput, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
   
@@ -223,12 +224,13 @@ public final class TestClusterDumper extends MahoutTestCase {
     CanopyDriver.run(conf, getTestTempDirPath("testdata"), output, measure, 8,
         4, false, 0.0, true);
     // now run the Fuzzy KMeans job
-    FuzzyKMeansDriver.run(conf, getTestTempDirPath("testdata"), new Path(
-        output, "clusters-0-final"), output, measure, 0.001, 10, 1.1f, true,
+    Path kmeansOutput = new Path(output, "kmeans");
+	FuzzyKMeansDriver.run(conf, getTestTempDirPath("testdata"), new Path(
+        output, "clusters-0-final"), kmeansOutput, measure, 0.001, 10, 1.1f, true,
         true, 0, true);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
-        output, 10), new Path(output, "clusteredPoints"));
+        output, 10), new Path(kmeansOutput, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
   
