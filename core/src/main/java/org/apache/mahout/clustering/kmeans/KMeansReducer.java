@@ -27,10 +27,11 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.clustering.ClusterObservations;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 
-public class KMeansReducer extends Reducer<Text, ClusterObservations, Text, Kluster> {
+public class KMeansReducer extends Reducer<Text, ClusterObservations, Text, ClusterWritable> {
 
   private Map<String, Kluster> clusterMap;
   private double convergenceDelta;
@@ -49,7 +50,9 @@ public class KMeansReducer extends Reducer<Text, ClusterObservations, Text, Klus
       context.getCounter("Clustering", "Converged Clusters").increment(1);
     }
     cluster.computeParameters();
-    context.write(new Text(cluster.getIdentifier()), cluster);
+    ClusterWritable clusterWritable = new ClusterWritable();
+    clusterWritable.setValue(cluster);
+    context.write(new Text(cluster.getIdentifier()), clusterWritable);
   }
 
   @Override

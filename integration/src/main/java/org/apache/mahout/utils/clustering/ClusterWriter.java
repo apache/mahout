@@ -17,10 +17,10 @@
 
 package org.apache.mahout.utils.clustering;
 
-import org.apache.mahout.clustering.Cluster;
-
 import java.io.Closeable;
 import java.io.IOException;
+
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 
 /**
  * Writes out clusters
@@ -33,7 +33,7 @@ public interface ClusterWriter extends Closeable {
    * @return the number of docs written
    * @throws java.io.IOException if there was a problem writing
    */
-  long write(Iterable<Cluster> iterable) throws IOException;
+  long write(Iterable<ClusterWritable> iterable) throws IOException;
 
   /**
    * Write out a Cluster
@@ -41,7 +41,7 @@ public interface ClusterWriter extends Closeable {
    * @param cluster The {@link org.apache.mahout.clustering.Cluster} to write
    * @throws IOException
    */
-  void write(Cluster cluster) throws IOException;
+  void write(ClusterWritable clusterWritable) throws IOException;
 
   /**
    * Write the first {@code maxDocs} to the output.
@@ -51,5 +51,5 @@ public interface ClusterWriter extends Closeable {
    * @return The number of docs written
    * @throws IOException if there was a problem writing
    */
-  long write(Iterable<Cluster> iterable, long maxDocs) throws IOException;
+  long write(Iterable<ClusterWritable> iterable, long maxDocs) throws IOException;
 }

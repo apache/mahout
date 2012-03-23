@@ -39,6 +39,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.classify.WeightedVectorWritable;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.Pair;
@@ -123,11 +124,12 @@ public final class RepresentativePointsDriver extends AbstractJob {
       Path path = new Path(output, inPart.getName());
       SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
       try {
-        for (Cluster value : new SequenceFileValueIterable<Cluster>(inPart, true, conf)) {
+        for (ClusterWritable clusterWritable : new SequenceFileValueIterable<ClusterWritable>(inPart, true, conf)) {
+          Cluster cluster = clusterWritable.getValue();
           if (log.isDebugEnabled()) {
-            log.debug("C-{}: {}", value.getId(), AbstractCluster.formatVector(value.getCenter(), null));
+			log.debug("C-{}: {}", cluster.getId(), AbstractCluster.formatVector(cluster.getCenter(), null));
           }
-          writer.append(new IntWritable(value.getId()), new VectorWritable(value.getCenter()));
+          writer.append(new IntWritable(cluster.getId()), new VectorWritable(cluster.getCenter()));
         }
       } finally {
         Closeables.closeQuietly(writer);

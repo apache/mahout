@@ -20,14 +20,16 @@ package org.apache.mahout.clustering.meanshift;
 import java.io.IOException;
 import java.util.Collection;
 
-import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 
-public class MeanShiftCanopyReducer extends Reducer<Text,MeanShiftCanopy,Text,MeanShiftCanopy> {
+import com.google.common.collect.Lists;
+
+public class MeanShiftCanopyReducer extends Reducer<Text,ClusterWritable,Text,ClusterWritable> {
   
   private final Collection<MeanShiftCanopy> canopies = Lists.newArrayList();
   private MeanShiftCanopyClusterer clusterer;
@@ -40,10 +42,11 @@ public class MeanShiftCanopyReducer extends Reducer<Text,MeanShiftCanopy,Text,Me
   }
 
   @Override
-  protected void reduce(Text key, Iterable<MeanShiftCanopy> values, Context context)
+  protected void reduce(Text key, Iterable<ClusterWritable> values, Context context)
     throws IOException, InterruptedException {
-    for (MeanShiftCanopy value : values) {
-      clusterer.mergeCanopy(value.shallowCopy(), canopies);
+    for (ClusterWritable clusterWritable : values) {
+    	MeanShiftCanopy canopy = (MeanShiftCanopy)clusterWritable.getValue();
+	    clusterer.mergeCanopy(canopy.shallowCopy(), canopies);
     }
     
     for (MeanShiftCanopy canopy : canopies) {
@@ -52,7 +55,9 @@ public class MeanShiftCanopyReducer extends Reducer<Text,MeanShiftCanopy,Text,Me
         context.getCounter("Clustering", "Converged Clusters").increment(1);
       }
       allConverged = converged && allConverged;
-      context.write(new Text(canopy.getIdentifier()), canopy);
+      ClusterWritable clusterWritable = new ClusterWritable();
+      clusterWritable.setValue(canopy);
+      context.write(new Text(canopy.getIdentifier()), clusterWritable);
     }
     
   }

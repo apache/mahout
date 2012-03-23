@@ -41,6 +41,7 @@ import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusterObservations;
 import org.apache.mahout.clustering.classify.WeightedVectorWritable;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.ClassUtils;
@@ -236,7 +237,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(ClusterObservations.class);
     job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(SoftCluster.class);
+    job.setOutputValueClass(ClusterWritable.class);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
 
@@ -379,8 +380,9 @@ public class FuzzyKMeansDriver extends AbstractJob {
                                                            conf,
                                                            new Path(clustersOut, "part-r-00000"),
                                                            Text.class,
-                                                           SoftCluster.class);
+                                                           ClusterWritable.class);
       try {
+    	ClusterWritable clusterWritable = new ClusterWritable();
         for (SoftCluster cluster : clusters) {
           if (log.isDebugEnabled()) {
             log.debug("Writing Cluster:{} center:{} numPoints:{} radius:{} to: {}",
@@ -392,7 +394,8 @@ public class FuzzyKMeansDriver extends AbstractJob {
                           clustersOut.getName()
                       });
           }
-          writer.append(new Text(cluster.getIdentifier()), cluster);
+          clusterWritable.setValue(cluster);
+          writer.append(new Text(cluster.getIdentifier()), clusterWritable);
         }
       } finally {
         Closeables.closeQuietly(writer);
@@ -566,10 +569,11 @@ public class FuzzyKMeansDriver extends AbstractJob {
     boolean converged = true;
 
     for (Path path : result) {
-      SequenceFileValueIterator<SoftCluster> iterator = new SequenceFileValueIterator<SoftCluster>(path, true, conf);
+      SequenceFileValueIterator<ClusterWritable> iterator = new SequenceFileValueIterator<ClusterWritable>(path, true, conf);
       try {
         while (converged && iterator.hasNext()) {
-          converged = iterator.next().isConverged();
+	      ClusterWritable next = iterator.next();
+	      converged = ((Cluster) next.getValue()).isConverged();
         }
       } finally {
         Closeables.closeQuietly(iterator);

@@ -38,6 +38,7 @@ import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.classify.ClusterClassificationDriver;
 import org.apache.mahout.clustering.classify.ClusterClassifier;
 import org.apache.mahout.clustering.iterator.CanopyClusteringPolicy;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.HadoopUtil;
@@ -283,7 +284,8 @@ public class CanopyDriver extends AbstractJob {
     Path canopyOutputDir = new Path(output, Cluster.CLUSTERS_DIR + '0'+ Cluster.FINAL_ITERATION_SUFFIX);
     Path path = new Path(canopyOutputDir, "part-r-00000");
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path,
-        Text.class, Canopy.class);
+        Text.class, ClusterWritable.class);
+    ClusterWritable clusterWritable = new ClusterWritable();
     try {
       for (Canopy canopy : canopies) {
         canopy.computeParameters();
@@ -295,7 +297,8 @@ public class CanopyDriver extends AbstractJob {
                   AbstractCluster.formatVector(canopy.getRadius(), null) });
         }
         if (canopy.getNumObservations() > clusterFilter) {
-          writer.append(new Text(canopy.getIdentifier()), canopy);
+        	clusterWritable.setValue(canopy);
+        	writer.append(new Text(canopy.getIdentifier()), clusterWritable);
         }
       }
     } finally {
@@ -349,7 +352,7 @@ public class CanopyDriver extends AbstractJob {
     job.setMapOutputValueClass(VectorWritable.class);
     job.setReducerClass(CanopyReducer.class);
     job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(Canopy.class);
+    job.setOutputValueClass(ClusterWritable.class);
     job.setNumReduceTasks(1);
     job.setJarByClass(CanopyDriver.class);
 

@@ -19,6 +19,7 @@ package org.apache.mahout.utils.clustering;
 
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.classify.WeightedVectorWritable;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
@@ -43,9 +44,10 @@ public class CSVClusterWriter extends AbstractClusterWriter {
   }
 
   @Override
-  public void write(Cluster cluster) throws IOException {
+  public void write(ClusterWritable clusterWritable) throws IOException {
     StringBuilder line = new StringBuilder();
-    line.append(cluster.getId());
+    Cluster cluster = clusterWritable.getValue();
+	line.append(cluster.getId());
     List<WeightedVectorWritable> points = getClusterIdToPoints().get(cluster.getId());
     if (points != null) {
       for (WeightedVectorWritable point : points) {

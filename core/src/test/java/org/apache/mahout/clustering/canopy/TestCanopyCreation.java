@@ -31,6 +31,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.ClusteringTestUtils;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
@@ -249,8 +250,8 @@ public final class TestCanopyCreation extends MahoutTestCase {
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
     conf.set(CanopyConfigKeys.CF_KEY, "0");
-    DummyRecordWriter<Text, Canopy> writer = new DummyRecordWriter<Text, Canopy>();
-    Reducer<Text, VectorWritable, Text, Canopy>.Context context = DummyRecordWriter
+    DummyRecordWriter<Text, ClusterWritable> writer = new DummyRecordWriter<Text, ClusterWritable>();
+    Reducer<Text, VectorWritable, Text, ClusterWritable>.Context context = DummyRecordWriter
         .build(reducer, conf, writer, Text.class, VectorWritable.class);
     reducer.setup(context);
 
@@ -260,11 +261,13 @@ public final class TestCanopyCreation extends MahoutTestCase {
     assertEquals("Number of centroids", 3, keys.size());
     int i = 0;
     for (Text key : keys) {
-      List<Canopy> data = writer.getValue(key);
-      assertEquals(manhattanCentroids.get(i).asFormatString()
+      List<ClusterWritable> data = writer.getValue(key);
+      ClusterWritable clusterWritable = data.get(0);
+	  Canopy canopy = (Canopy)clusterWritable.getValue();
+	  assertEquals(manhattanCentroids.get(i).asFormatString()
           + " is not equal to "
-          + data.get(0).computeCentroid().asFormatString(), manhattanCentroids
-          .get(i), data.get(0).computeCentroid());
+          + canopy.computeCentroid().asFormatString(), manhattanCentroids
+          .get(i), canopy.computeCentroid());
       i++;
     }
   }
@@ -283,8 +286,8 @@ public final class TestCanopyCreation extends MahoutTestCase {
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
     conf.set(CanopyConfigKeys.CF_KEY, "0");
-    DummyRecordWriter<Text, Canopy> writer = new DummyRecordWriter<Text, Canopy>();
-    Reducer<Text, VectorWritable, Text, Canopy>.Context context = DummyRecordWriter
+    DummyRecordWriter<Text, ClusterWritable> writer = new DummyRecordWriter<Text, ClusterWritable>();
+    Reducer<Text, VectorWritable, Text, ClusterWritable>.Context context = DummyRecordWriter
         .build(reducer, conf, writer, Text.class, VectorWritable.class);
     reducer.setup(context);
 
@@ -294,11 +297,13 @@ public final class TestCanopyCreation extends MahoutTestCase {
     assertEquals("Number of centroids", 3, keys.size());
     int i = 0;
     for (Text key : keys) {
-      List<Canopy> data = writer.getValue(key);
+      List<ClusterWritable> data = writer.getValue(key);
+      ClusterWritable clusterWritable = data.get(0);
+      Canopy canopy = (Canopy)clusterWritable.getValue();
       assertEquals(euclideanCentroids.get(i).asFormatString()
           + " is not equal to "
-          + data.get(0).computeCentroid().asFormatString(), euclideanCentroids
-          .get(i), data.get(0).computeCentroid());
+          + canopy.computeCentroid().asFormatString(), euclideanCentroids
+          .get(i), canopy.computeCentroid());
       i++;
     }
   }
@@ -326,22 +331,22 @@ public final class TestCanopyCreation extends MahoutTestCase {
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, config);
     try {
       Writable key = new Text();
-      Canopy canopy = new Canopy();
-      assertTrue("more to come", reader.next(key, canopy));
+      ClusterWritable clusterWritable = new ClusterWritable();
+	  assertTrue("more to come", reader.next(key, clusterWritable));
       assertEquals("1st key", "C-0", key.toString());
 
       List<Pair<Double,Double>> refCenters = Lists.newArrayList();
       refCenters.add(new Pair<Double,Double>(1.5,1.5));
       refCenters.add(new Pair<Double,Double>(4.333333333333334,4.333333333333334));
-      Pair<Double,Double> c = new Pair<Double,Double>(canopy.getCenter().get(0),
-                                                      canopy.getCenter().get(1));
+	  Pair<Double,Double> c = new Pair<Double,Double>(clusterWritable.getValue() .getCenter().get(0),
+			clusterWritable.getValue().getCenter().get(1));
       assertTrue("center "+c+" not found", findAndRemove(c, refCenters, EPSILON));
-      assertTrue("more to come", reader.next(key, canopy));
+      assertTrue("more to come", reader.next(key, clusterWritable));
       assertEquals("2nd key", "C-1", key.toString());
-      c = new Pair<Double,Double>(canopy.getCenter().get(0),
-                                  canopy.getCenter().get(1));
+      c = new Pair<Double,Double>(clusterWritable.getValue().getCenter().get(0),
+    		  clusterWritable.getValue().getCenter().get(1));
       assertTrue("center "+c+" not found", findAndRemove(c, refCenters, EPSILON));
-      assertFalse("more to come", reader.next(key, canopy));
+      assertFalse("more to come", reader.next(key, clusterWritable));
     } finally {
       Closeables.closeQuietly(reader);
     }
@@ -382,22 +387,22 @@ public final class TestCanopyCreation extends MahoutTestCase {
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, config);
     try {
       Writable key = new Text();
-      Canopy value = new Canopy();
-      assertTrue("more to come", reader.next(key, value));
+      ClusterWritable clusterWritable = new ClusterWritable();
+      assertTrue("more to come", reader.next(key, clusterWritable));
       assertEquals("1st key", "C-0", key.toString());
 
       List<Pair<Double,Double>> refCenters = Lists.newArrayList();
       refCenters.add(new Pair<Double,Double>(1.8,1.8));
       refCenters.add(new Pair<Double,Double>(4.433333333333334, 4.433333333333334));
-      Pair<Double,Double> c = new Pair<Double,Double>(value.getCenter().get(0),
-                                                      value.getCenter().get(1));
+      Pair<Double,Double> c = new Pair<Double,Double>(clusterWritable.getValue().getCenter().get(0),
+                                                      clusterWritable.getValue().getCenter().get(1));
       assertTrue("center "+c+" not found", findAndRemove(c, refCenters, EPSILON));
-      assertTrue("more to come", reader.next(key, value));
+      assertTrue("more to come", reader.next(key, clusterWritable));
       assertEquals("2nd key", "C-1", key.toString());
-      c = new Pair<Double,Double>(value.getCenter().get(0),
-                                  value.getCenter().get(1));
+      c = new Pair<Double,Double>(clusterWritable.getValue().getCenter().get(0),
+                                  clusterWritable.getValue().getCenter().get(1));
       assertTrue("center "+c+" not found", findAndRemove(c, refCenters, EPSILON));
-      assertFalse("more to come", reader.next(key, value));
+      assertFalse("more to come", reader.next(key, clusterWritable));
     } finally {
       Closeables.closeQuietly(reader);
     }
@@ -418,9 +423,9 @@ public final class TestCanopyCreation extends MahoutTestCase {
     // verify output from sequence file
     Path path = new Path(output, "clusters-0-final/part-r-00000");
     int ix = 0;
-    for (Canopy value : new SequenceFileValueIterable<Canopy>(path, true,
+    for (ClusterWritable clusterWritable : new SequenceFileValueIterable<ClusterWritable>(path, true,
         config)) {
-      assertEquals("Center [" + ix + ']', manhattanCentroids.get(ix), value
+      assertEquals("Center [" + ix + ']', manhattanCentroids.get(ix), clusterWritable.getValue()
           .getCenter());
       ix++;
     }
@@ -456,9 +461,9 @@ public final class TestCanopyCreation extends MahoutTestCase {
     Path path = new Path(output, "clusters-0-final/part-r-00000");
 
     int ix = 0;
-    for (Canopy value : new SequenceFileValueIterable<Canopy>(path, true,
+    for (ClusterWritable clusterWritable : new SequenceFileValueIterable<ClusterWritable>(path, true,
         config)) {
-      assertEquals("Center [" + ix + ']', euclideanCentroids.get(ix), value
+      assertEquals("Center [" + ix + ']', euclideanCentroids.get(ix), clusterWritable.getValue()
           .getCenter());
       ix++;
     }
@@ -495,9 +500,9 @@ public final class TestCanopyCreation extends MahoutTestCase {
     Path path = new Path(output, "clusters-0-final/part-r-00000");
 
     int ix = 0;
-    for (Canopy value : new SequenceFileValueIterable<Canopy>(path, true,
+    for (ClusterWritable clusterWritable : new SequenceFileValueIterable<ClusterWritable>(path, true,
         config)) {
-      assertEquals("Center [" + ix + ']', euclideanCentroids.get(ix), value
+      assertEquals("Center [" + ix + ']', euclideanCentroids.get(ix), clusterWritable.getValue()
           .getCenter());
       ix++;
     }
@@ -606,8 +611,8 @@ public final class TestCanopyCreation extends MahoutTestCase {
     conf.set(CanopyConfigKeys.T3_KEY, String.valueOf(1.1));
     conf.set(CanopyConfigKeys.T4_KEY, String.valueOf(0.1));
     conf.set(CanopyConfigKeys.CF_KEY, "0");
-    DummyRecordWriter<Text, Canopy> writer = new DummyRecordWriter<Text, Canopy>();
-    Reducer<Text, VectorWritable, Text, Canopy>.Context context = DummyRecordWriter
+    DummyRecordWriter<Text, ClusterWritable> writer = new DummyRecordWriter<Text, ClusterWritable>();
+    Reducer<Text, VectorWritable, Text, ClusterWritable>.Context context = DummyRecordWriter
         .build(reducer, conf, writer, Text.class, VectorWritable.class);
     reducer.setup(context);
     assertEquals(1.1, reducer.getCanopyClusterer().getT1(), EPSILON);
@@ -657,8 +662,8 @@ public final class TestCanopyCreation extends MahoutTestCase {
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
     conf.set(CanopyConfigKeys.CF_KEY, "3");
-    DummyRecordWriter<Text, Canopy> writer = new DummyRecordWriter<Text, Canopy>();
-    Reducer<Text, VectorWritable, Text, Canopy>.Context context = DummyRecordWriter
+    DummyRecordWriter<Text, ClusterWritable> writer = new DummyRecordWriter<Text, ClusterWritable>();
+    Reducer<Text, VectorWritable, Text, ClusterWritable>.Context context = DummyRecordWriter
         .build(reducer, conf, writer, Text.class, VectorWritable.class);
     reducer.setup(context);
 

@@ -21,13 +21,13 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusteringTestUtils;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
@@ -36,6 +36,8 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.common.collect.Lists;
 
 public final class TestRandomSeedGenerator extends MahoutTestCase {
   
@@ -77,13 +79,14 @@ public final class TestRandomSeedGenerator extends MahoutTestCase {
 
     int clusterCount = 0;
     Collection<Integer> set = new HashSet<Integer>();
-    for (Cluster value :
-         new SequenceFileValueIterable<Cluster>(new Path(output, "part-randomSeed"), true, conf)) {
+    for (ClusterWritable clusterWritable :
+         new SequenceFileValueIterable<ClusterWritable>(new Path(output, "part-randomSeed"), true, conf)) {
       clusterCount++;
-      int id = value.getId();
+      Cluster cluster = clusterWritable.getValue();
+      int id = cluster.getId();
       assertTrue(set.add(id)); // validate unique id's
       
-      Vector v = value.getCenter();
+      Vector v = cluster.getCenter();
       assertVectorEquals(RAW[id], v); // validate values match
     }
 

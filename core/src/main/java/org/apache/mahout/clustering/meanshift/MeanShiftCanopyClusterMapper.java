@@ -20,26 +20,29 @@ package org.apache.mahout.clustering.meanshift;
 import java.io.IOException;
 import java.util.List;
 
-import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.classify.WeightedVectorWritable;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
 
+import com.google.common.collect.Lists;
+
 public class MeanShiftCanopyClusterMapper
-  extends Mapper<WritableComparable<?>, MeanShiftCanopy, IntWritable, WeightedVectorWritable> {
+  extends Mapper<WritableComparable<?>, ClusterWritable, IntWritable, WeightedVectorWritable> {
 
   private List<MeanShiftCanopy> canopies;
 
   @Override
-  protected void map(WritableComparable<?> key, MeanShiftCanopy canopy, Context context)
+  protected void map(WritableComparable<?> key, ClusterWritable clusterWritable, Context context)
     throws IOException, InterruptedException {
     // canopies use canopyIds assigned when input vectors are processed as vectorIds too
+	MeanShiftCanopy canopy = (MeanShiftCanopy)clusterWritable.getValue();
     int vectorId = canopy.getId();
     for (MeanShiftCanopy msc : canopies) {
       for (int containedId : msc.getBoundPoints().toList()) {
@@ -61,9 +64,10 @@ public class MeanShiftCanopyClusterMapper
     String statePath = conf.get(MeanShiftCanopyDriver.STATE_IN_KEY);
     List<MeanShiftCanopy> canopies = Lists.newArrayList();
     Path path = new Path(statePath);
-    for (MeanShiftCanopy value 
-         : new SequenceFileDirValueIterable<MeanShiftCanopy>(path, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
-      canopies.add(value);
+    for (ClusterWritable clusterWritable 
+         : new SequenceFileDirValueIterable<ClusterWritable>(path, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+      MeanShiftCanopy canopy = (MeanShiftCanopy)clusterWritable.getValue();
+      canopies.add(canopy);
     }
     return canopies;
   }

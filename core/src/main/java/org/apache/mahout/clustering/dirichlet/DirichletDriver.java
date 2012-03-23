@@ -39,6 +39,7 @@ import org.apache.mahout.clustering.classify.ClusterClassificationDriver;
 import org.apache.mahout.clustering.classify.ClusterClassifier;
 import org.apache.mahout.clustering.dirichlet.models.DistributionDescription;
 import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.clustering.iterator.DirichletClusteringPolicy;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
@@ -282,11 +283,14 @@ public class DirichletDriver extends AbstractJob {
   private static void writeState(Path output, Path stateOut, int numModels, DirichletState state) throws IOException {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
+    ClusterWritable clusterWritable = new ClusterWritable();
     for (int i = 0; i < numModels; i++) {
       Path path = new Path(stateOut, "part-" + i);
-      SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, Text.class, DirichletCluster.class);
+      SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, Text.class, ClusterWritable.class);
       try {
-        writer.append(new Text(Integer.toString(i)), state.getClusters().get(i));
+        DirichletCluster dirichletCluster = state.getClusters().get(i);
+        clusterWritable.setValue(dirichletCluster);
+		writer.append(new Text(Integer.toString(i)), clusterWritable);
       } finally {
         Closeables.closeQuietly(writer);
       }
@@ -319,7 +323,7 @@ public class DirichletDriver extends AbstractJob {
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(DirichletCluster.class);
+    job.setOutputValueClass(ClusterWritable.class);
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(VectorWritable.class);
     job.setMapperClass(DirichletMapper.class);

@@ -26,6 +26,7 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.dirichlet.models.DistributionDescription;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
@@ -80,13 +81,14 @@ public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritabl
                                             int k) {
     DirichletState state = DirichletDriver.createState(description, k, alpha);
     Path path = new Path(statePath);
-    for (Pair<Writable,DirichletCluster> record
-         : new SequenceFileDirIterable<Writable,DirichletCluster>(path,
+    for (Pair<Writable,ClusterWritable> record
+         : new SequenceFileDirIterable<Writable,ClusterWritable>(path,
                                                                   PathType.LIST,
                                                                   PathFilters.logsCRCFilter(),
                                                                   conf)) {
       int index = Integer.parseInt(record.getFirst().toString());
-      state.getClusters().set(index, record.getSecond());
+      ClusterWritable clusterWritable = record.getSecond();
+	  state.getClusters().set(index, (DirichletCluster) clusterWritable.getValue());
     }
     // TODO: with more than one mapper, they will all have different mixtures. Will this matter?
     state.setMixture(UncommonDistributions.rDirichlet(state.totalCounts(), alpha));

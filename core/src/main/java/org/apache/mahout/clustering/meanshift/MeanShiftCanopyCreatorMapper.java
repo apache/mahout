@@ -20,16 +20,18 @@ package org.apache.mahout.clustering.meanshift;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
-import com.google.common.base.Preconditions;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.clustering.kmeans.KMeansConfigKeys;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.VectorWritable;
 
-public class MeanShiftCanopyCreatorMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, MeanShiftCanopy> {
+import com.google.common.base.Preconditions;
+
+public class MeanShiftCanopyCreatorMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, ClusterWritable> {
 
   private static final Pattern UNDERSCORE_PATTERN = Pattern.compile("_");
 
@@ -41,7 +43,9 @@ public class MeanShiftCanopyCreatorMapper extends Mapper<WritableComparable<?>, 
   protected void map(WritableComparable<?> key, VectorWritable point, Context context)
     throws IOException, InterruptedException {
     MeanShiftCanopy canopy = MeanShiftCanopy.initialCanopy(point.get(), nextCanopyId++, measure);
-    context.write(new Text(key.toString()), canopy);
+    ClusterWritable clusterWritable = new ClusterWritable();
+    clusterWritable.setValue(canopy);
+    context.write(new Text(key.toString()), clusterWritable);
   }
 
   @Override

@@ -22,9 +22,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -39,9 +36,9 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.ClusterObservations;
 import org.apache.mahout.clustering.ClusteringTestUtils;
-import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.classify.WeightedVectorWritable;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.DummyOutputCollector;
 import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.MahoutTestCase;
@@ -58,6 +55,10 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.io.Closeables;
 
 public final class TestKmeansClustering extends MahoutTestCase {
   
@@ -311,8 +312,8 @@ public final class TestKmeansClustering extends MahoutTestCase {
       // now reduce the data
       KMeansReducer reducer = new KMeansReducer();
       reducer.setup(clusters, measure);
-      DummyRecordWriter<Text,Kluster> reducerWriter = new DummyRecordWriter<Text,Kluster>();
-      Reducer<Text,ClusterObservations,Text,Kluster>.Context reducerContext = DummyRecordWriter.build(reducer, conf,
+      DummyRecordWriter<Text,ClusterWritable> reducerWriter = new DummyRecordWriter<Text,ClusterWritable>();
+      Reducer<Text,ClusterObservations,Text,ClusterWritable>.Context reducerContext = DummyRecordWriter.build(reducer, conf,
           reducerWriter, Text.class, ClusterObservations.class);
       for (Text key : combinerWriter.getKeys()) {
         reducer.reduce(new Text(key), combinerWriter.getValue(key), reducerContext);
@@ -341,8 +342,8 @@ public final class TestKmeansClustering extends MahoutTestCase {
       converged = true;
       for (Kluster ref : reference) {
         String key = ref.getIdentifier();
-        List<Kluster> values = reducerWriter.getValue(new Text(key));
-        Kluster cluster = values.get(0);
+        List<ClusterWritable> clusterWritables = reducerWriter.getValue(new Text(key));
+        Kluster cluster = (Kluster) clusterWritables.get(0).getValue();
         converged = converged && cluster.isConverged();
         // Since we aren't roundtripping through Writable, we need to compare
         // the reference center with the
@@ -488,14 +489,14 @@ public final class TestKmeansClustering extends MahoutTestCase {
     // now run the Canopy job
     CanopyDriver.run(conf, pointsPath, outputPath, new ManhattanDistanceMeasure(), 3.1, 2.1, false, 0.0, false);
     
-    DummyOutputCollector<Text, Canopy> collector1 =
-        new DummyOutputCollector<Text, Canopy>();
+    DummyOutputCollector<Text, ClusterWritable> collector1 =
+        new DummyOutputCollector<Text, ClusterWritable>();
 
     FileStatus[] outParts = FileSystem.get(conf).globStatus(
                     new Path(outputPath, "clusters-0-final/*-0*"));
     for (FileStatus outPartStat : outParts) {
-      for (Pair<Text,Canopy> record :
-               new SequenceFileIterable<Text,Canopy>(
+      for (Pair<Text,ClusterWritable> record :
+               new SequenceFileIterable<Text,ClusterWritable>(
                  outPartStat.getPath(), conf)) {
           collector1.collect(record.getFirst(), record.getSecond());
       }
@@ -506,9 +507,10 @@ public final class TestKmeansClustering extends MahoutTestCase {
     int count = 0;
     for (Text k : collector1.getKeys()) {
       count++;
-      List<Canopy> vl = collector1.getValue(k);
+      List<ClusterWritable> vl = collector1.getValue(k);
       assertEquals("non-singleton centroid!", 1, vl.size());
-      Vector v = vl.get(0).getCenter();
+      ClusterWritable clusterWritable = vl.get(0);
+      Vector v = clusterWritable.getValue().getCenter();
       assertEquals("cetriod vector is wrong length", 2, v.size());
       if ( (Math.abs(v.get(0) - 1.5) < EPSILON) 
                   && (Math.abs(v.get(1) - 1.5) < EPSILON)

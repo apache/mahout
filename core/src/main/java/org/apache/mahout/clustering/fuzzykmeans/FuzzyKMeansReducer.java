@@ -28,8 +28,9 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.clustering.ClusterObservations;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 
-public class FuzzyKMeansReducer extends Reducer<Text, ClusterObservations, Text, SoftCluster> {
+public class FuzzyKMeansReducer extends Reducer<Text, ClusterObservations, Text, ClusterWritable> {
 
   private final Map<String, SoftCluster> clusterMap = Maps.newHashMap();
 
@@ -52,7 +53,9 @@ public class FuzzyKMeansReducer extends Reducer<Text, ClusterObservations, Text,
       context.getCounter("Clustering", "Converged Clusters").increment(1);
     }
     cluster.computeParameters();
-    context.write(new Text(cluster.getIdentifier()), cluster);
+    ClusterWritable clusterWritable = new ClusterWritable();
+    clusterWritable.setValue(cluster);
+    context.write(new Text(cluster.getIdentifier()), clusterWritable);
   }
 
   @Override

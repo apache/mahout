@@ -30,6 +30,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.RandomUtils;
@@ -74,10 +75,10 @@ public final class RandomSeedGenerator {
       }
       
       FileStatus[] inputFiles = fs.globStatus(inputPathPattern, PathFilters.logsCRCFilter());
-      SequenceFile.Writer writer = SequenceFile.createWriter(fs, conf, outFile, Text.class, Kluster.class);
+      SequenceFile.Writer writer = SequenceFile.createWriter(fs, conf, outFile, Text.class, ClusterWritable.class);
       Random random = RandomUtils.getRandom();
       List<Text> chosenTexts = Lists.newArrayListWithCapacity(k);
-      List<Kluster> chosenClusters = Lists.newArrayListWithCapacity(k);
+      List<ClusterWritable> chosenClusters = Lists.newArrayListWithCapacity(k);
       int nextClusterId = 0;
       
       for (FileStatus fileStatus : inputFiles) {
@@ -94,13 +95,17 @@ public final class RandomSeedGenerator {
           int currentSize = chosenTexts.size();
           if (currentSize < k) {
             chosenTexts.add(newText);
-            chosenClusters.add(newCluster);
+            ClusterWritable clusterWritable = new ClusterWritable();
+            clusterWritable.setValue(newCluster);
+            chosenClusters.add(clusterWritable);
           } else if (random.nextInt(currentSize + 1) != 0) { // with chance 1/(currentSize+1) pick new element
             int indexToRemove = random.nextInt(currentSize); // evict one chosen randomly
             chosenTexts.remove(indexToRemove);
             chosenClusters.remove(indexToRemove);
             chosenTexts.add(newText);
-            chosenClusters.add(newCluster);
+            ClusterWritable clusterWritable = new ClusterWritable();
+            clusterWritable.setValue(newCluster);
+            chosenClusters.add(clusterWritable);
           }
         }
       }

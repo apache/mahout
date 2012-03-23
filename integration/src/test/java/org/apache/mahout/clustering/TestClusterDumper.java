@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
-import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -72,6 +71,7 @@ import org.apache.mahout.vectorizer.Weight;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 
 public final class TestClusterDumper extends MahoutTestCase {

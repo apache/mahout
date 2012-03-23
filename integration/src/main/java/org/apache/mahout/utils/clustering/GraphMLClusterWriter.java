@@ -17,13 +17,6 @@
 
 package org.apache.mahout.utils.clustering;
 
-import org.apache.mahout.clustering.Cluster;
-import org.apache.mahout.clustering.classify.WeightedVectorWritable;
-import org.apache.mahout.common.StringUtils;
-import org.apache.mahout.common.distance.DistanceMeasure;
-import org.apache.mahout.math.NamedVector;
-import org.apache.mahout.math.Vector;
-
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
@@ -31,6 +24,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.regex.Pattern;
+
+import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.clustering.classify.WeightedVectorWritable;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
+import org.apache.mahout.common.StringUtils;
+import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.math.NamedVector;
+import org.apache.mahout.math.Vector;
 
 /**
  * GraphML -- see http://gephi.org/users/supported-graph-formats/graphml-format/
@@ -93,9 +94,10 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
    */
 
   @Override
-  public void write(Cluster cluster) throws IOException {
+  public void write(ClusterWritable clusterWritable) throws IOException {
     StringBuilder line = new StringBuilder();
-    Color rgb = getColor(cluster.getId());
+    Cluster cluster = clusterWritable.getValue();
+	Color rgb = getColor(cluster.getId());
 
     String topTerms = "";
     if (dictionary != null) {

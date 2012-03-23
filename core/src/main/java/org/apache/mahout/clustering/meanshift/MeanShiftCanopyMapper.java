@@ -20,14 +20,15 @@ package org.apache.mahout.clustering.meanshift;
 import java.io.IOException;
 import java.util.Collection;
 
-import com.google.common.collect.Lists;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 
-public class MeanShiftCanopyMapper extends Mapper<WritableComparable<?>,MeanShiftCanopy,Text,MeanShiftCanopy> {
+import com.google.common.collect.Lists;
+
+public class MeanShiftCanopyMapper extends Mapper<WritableComparable<?>,ClusterWritable,Text,ClusterWritable> {
   
   private final Collection<MeanShiftCanopy> canopies = Lists.newArrayList();
   
@@ -44,9 +45,10 @@ private Integer numReducers;
   }
 
   @Override
-  protected void map(WritableComparable<?> key, MeanShiftCanopy canopy, Context context)
+  protected void map(WritableComparable<?> key, ClusterWritable clusterWritable, Context context)
     throws IOException, InterruptedException {
-    clusterer.mergeCanopy(canopy.shallowCopy(), canopies);
+	  MeanShiftCanopy canopy = (MeanShiftCanopy)clusterWritable.getValue();
+      clusterer.mergeCanopy(canopy.shallowCopy(), canopies);
   }
 
   @Override
@@ -54,7 +56,9 @@ private Integer numReducers;
 	int reducer = 0;
     for (MeanShiftCanopy canopy : canopies) {
       clusterer.shiftToMean(canopy);
-      context.write(new Text(String.valueOf(reducer)), canopy);
+      ClusterWritable clusterWritable = new ClusterWritable();
+      clusterWritable.setValue(canopy);
+      context.write(new Text(String.valueOf(reducer)), clusterWritable);
       reducer++;
       if (reducer >= numReducers){
     	  reducer=0;

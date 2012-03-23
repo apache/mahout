@@ -24,9 +24,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.math.VectorWritable;
 
-public class DirichletReducer extends Reducer<Text,VectorWritable,Text,DirichletCluster> {
+public class DirichletReducer extends Reducer<Text,VectorWritable,Text,ClusterWritable> {
   
   private DirichletClusterer clusterer;
   private Cluster[] newModels;
@@ -61,8 +62,10 @@ public class DirichletReducer extends Reducer<Text,VectorWritable,Text,Dirichlet
         model.observe(value);
       }
     }
+    ClusterWritable clusterWritable = new ClusterWritable();
     DirichletCluster cluster = clusterer.updateCluster(model, k);
-    context.write(new Text(String.valueOf(k)), cluster);
+    clusterWritable.setValue(cluster);
+    context.write(new Text(String.valueOf(k)), clusterWritable);
   }
 
   public void setup(DirichletState state) {

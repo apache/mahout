@@ -17,19 +17,24 @@
 
 package org.apache.mahout.utils.clustering;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
-import com.google.common.io.Files;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.cdbw.CDbwEvaluator;
 import org.apache.mahout.clustering.classify.WeightedVectorWritable;
 import org.apache.mahout.clustering.evaluation.ClusterEvaluator;
 import org.apache.mahout.clustering.evaluation.RepresentativePointsDriver;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.HadoopUtil;
@@ -44,14 +49,10 @@ import org.apache.mahout.utils.vectors.VectorHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
+import com.google.common.io.Closeables;
+import com.google.common.io.Files;
 
 public final class ClusterDumper extends AbstractJob {
 
@@ -183,7 +184,7 @@ public final class ClusterDumper extends AbstractJob {
     }
     ClusterWriter clusterWriter = createClusterWriter(writer, dictionary);
     try {
-      long numWritten = clusterWriter.write(new SequenceFileDirValueIterable<Cluster>(new Path(seqFileDir, "part-*"), PathType.GLOB, conf));
+      long numWritten = clusterWriter.write(new SequenceFileDirValueIterable<ClusterWritable>(new Path(seqFileDir, "part-*"), PathType.GLOB, conf));
 
       writer.flush();
       if (runEvaluation){

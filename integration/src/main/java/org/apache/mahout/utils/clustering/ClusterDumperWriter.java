@@ -22,6 +22,7 @@ import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.classify.WeightedPropertyVectorWritable;
 import org.apache.mahout.clustering.classify.WeightedVectorWritable;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 
 import java.io.IOException;
@@ -52,8 +53,9 @@ public class ClusterDumperWriter extends AbstractClusterWriter {
   }
 
   @Override
-  public void write(Cluster value) throws IOException {
-    String fmtStr = value.asFormatString(dictionary);
+  public void write(ClusterWritable clusterWritable) throws IOException {
+    Cluster cluster = clusterWritable.getValue();
+    String fmtStr = cluster.asFormatString(dictionary);
     Writer writer = getWriter();
     if (subString > 0 && fmtStr.length() > subString) {
       writer.write(':');
@@ -65,14 +67,14 @@ public class ClusterDumperWriter extends AbstractClusterWriter {
     writer.write('\n');
 
     if (dictionary != null) {
-      String topTerms = getTopFeatures(value.getCenter(), dictionary, numTopFeatures);
+      String topTerms = getTopFeatures(clusterWritable.getValue().getCenter(), dictionary, numTopFeatures);
       writer.write("\tTop Terms: ");
       writer.write(topTerms);
       writer.write('\n');
     }
 
     Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints = getClusterIdToPoints();
-    List<WeightedVectorWritable> points = clusterIdToPoints.get(value.getId());
+    List<WeightedVectorWritable> points = clusterIdToPoints.get(clusterWritable.getValue().getId());
     if (points != null) {
       writer.write("\tWeight : [props - optional]:  Point:\n\t");
       for (Iterator<WeightedVectorWritable> iterator = points.iterator(); iterator.hasNext(); ) {

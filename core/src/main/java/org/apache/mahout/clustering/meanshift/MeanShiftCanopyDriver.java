@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
-import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -39,6 +38,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.classify.WeightedVectorWritable;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.clustering.kmeans.KMeansConfigKeys;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.ClassUtils;
@@ -56,6 +56,7 @@ import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 
 /**
@@ -209,12 +210,15 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     int id = 0;
     for (FileStatus s : status) {
       SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, new Path(
-          output, "part-m-" + part++), Text.class, MeanShiftCanopy.class);
+          output, "part-m-" + part++), Text.class, ClusterWritable.class);
       try {
         for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(
             s.getPath(), conf)) {
-          writer.append(new Text(), MeanShiftCanopy.initialCanopy(value.get(),
-              id++, measure));
+          MeanShiftCanopy initialCanopy = MeanShiftCanopy.initialCanopy(value.get(),
+				      id++, measure);
+          ClusterWritable clusterWritable = new ClusterWritable();
+          clusterWritable.setValue(initialCanopy);
+		  writer.append(new Text(), clusterWritable);
         }
       } finally {
         Closeables.closeQuietly(writer);
@@ -233,7 +237,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     Job job = new Job(conf);
     job.setJarByClass(MeanShiftCanopyDriver.class);
     job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(MeanShiftCanopy.class);
+    job.setOutputValueClass(ClusterWritable.class);
     job.setMapperClass(MeanShiftCanopyCreatorMapper.class);
     job.setNumReduceTasks(0);
     job.setInputFormatClass(SequenceFileInputFormat.class);
@@ -302,9 +306,10 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     List<MeanShiftCanopy> clusters = Lists.newArrayList();
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(clustersIn.toUri(), conf);
-    for (MeanShiftCanopy value : new SequenceFileDirValueIterable<MeanShiftCanopy>(
+    for (ClusterWritable clusterWritable : new SequenceFileDirValueIterable<ClusterWritable>(
         clustersIn, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
-      clusterer.mergeCanopy(value, clusters);
+    	MeanShiftCanopy canopy = (MeanShiftCanopy)clusterWritable.getValue();
+	    clusterer.mergeCanopy(canopy, clusters);
     }
     boolean[] converged = { false };
     int iteration = 1;
@@ -313,7 +318,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
       clusters = clusterer.iterate(clusters, converged);
       Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
       SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, new Path(
-          clustersOut, "part-r-00000"), Text.class, MeanShiftCanopy.class);
+          clustersOut, "part-r-00000"), Text.class, ClusterWritable.class);
       try {
         for (MeanShiftCanopy cluster : clusters) {
           if (log.isDebugEnabled()) {
@@ -325,7 +330,9 @@ public class MeanShiftCanopyDriver extends AbstractJob {
                     AbstractCluster.formatVector(cluster.getRadius(), null),
                     clustersOut.getName() });
           }
-          writer.append(new Text(cluster.getIdentifier()), cluster);
+          ClusterWritable clusterWritable = new ClusterWritable();
+          clusterWritable.setValue(cluster);
+          writer.append(new Text(cluster.getIdentifier()), clusterWritable);
         }
       } finally {
         Closeables.closeQuietly(writer);
@@ -421,7 +428,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     Job job = new Job(conf,
         "Mean Shift Driver running runIteration over input: " + input);
     job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(MeanShiftCanopy.class);
+    job.setOutputValueClass(ClusterWritable.class);
 
     FileInputFormat.setInputPaths(job, input);
     FileOutputFormat.setOutputPath(job, output);
@@ -466,9 +473,10 @@ public class MeanShiftCanopyDriver extends AbstractJob {
       throws IOException {
     Collection<MeanShiftCanopy> clusters = Lists.newArrayList();
     Configuration conf = new Configuration();
-    for (MeanShiftCanopy value : new SequenceFileDirValueIterable<MeanShiftCanopy>(
+    for (ClusterWritable clusterWritable : new SequenceFileDirValueIterable<ClusterWritable>(
         clustersIn, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
-      clusters.add(value);
+      MeanShiftCanopy cluster = (MeanShiftCanopy) clusterWritable.getValue();
+	  clusters.add(cluster);
     }
     // iterate over all points, assigning each to the closest canopy and
     // outputting that clustering
@@ -480,9 +488,10 @@ public class MeanShiftCanopyDriver extends AbstractJob {
           output, "part-m-" + part++), IntWritable.class,
           WeightedVectorWritable.class);
       try {
-        for (Pair<Writable, MeanShiftCanopy> record : new SequenceFileIterable<Writable, MeanShiftCanopy>(
+        for (Pair<Writable, ClusterWritable> record : new SequenceFileIterable<Writable, ClusterWritable>(
             s.getPath(), conf)) {
-          MeanShiftCanopy canopy = record.getSecond();
+          ClusterWritable clusterWritable = record.getSecond();
+		  MeanShiftCanopy canopy = (MeanShiftCanopy) clusterWritable.getValue();
           MeanShiftCanopy closest = MeanShiftCanopyClusterer
               .findCoveringCanopy(canopy, clusters);
           writer.append(new IntWritable(closest.getId()),

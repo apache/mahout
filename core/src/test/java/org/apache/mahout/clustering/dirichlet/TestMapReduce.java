@@ -39,6 +39,7 @@ import org.apache.mahout.clustering.Model;
 import org.apache.mahout.clustering.dirichlet.models.DistanceMeasureClusterDistribution;
 import org.apache.mahout.clustering.dirichlet.models.DistributionDescription;
 import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -158,8 +159,8 @@ public final class TestMapReduce extends MahoutTestCase {
     
     DirichletReducer reducer = new DirichletReducer();
     reducer.setup(state);
-    RecordWriter<Text,DirichletCluster> reduceWriter = new DummyRecordWriter<Text,DirichletCluster>();
-    Reducer<Text,VectorWritable,Text,DirichletCluster>.Context reduceContext = DummyRecordWriter.build(reducer, conf,
+    RecordWriter<Text,ClusterWritable> reduceWriter = new DummyRecordWriter<Text,ClusterWritable>();
+    Reducer<Text,VectorWritable,Text,ClusterWritable>.Context reduceContext = DummyRecordWriter.build(reducer, conf,
         reduceWriter, Text.class, VectorWritable.class);
     for (Text key : mapWriter.getKeys()) {
       reducer.reduce(new Text(key), mapWriter.getValue(key), reduceContext);
@@ -193,8 +194,8 @@ public final class TestMapReduce extends MahoutTestCase {
       
       DirichletReducer reducer = new DirichletReducer();
       reducer.setup(state);
-      RecordWriter<Text,DirichletCluster> reduceWriter = new DummyRecordWriter<Text,DirichletCluster>();
-      Reducer<Text,VectorWritable,Text,DirichletCluster>.Context reduceContext = DummyRecordWriter.build(reducer, conf,
+      RecordWriter<Text,ClusterWritable> reduceWriter = new DummyRecordWriter<Text,ClusterWritable>();
+      Reducer<Text,VectorWritable,Text,ClusterWritable>.Context reduceContext = DummyRecordWriter.build(reducer, conf,
           reduceWriter, Text.class, VectorWritable.class);
       for (Text key : mapWriter.getKeys()) {
         reducer.reduce(new Text(key), mapWriter.getValue(key), reduceContext);

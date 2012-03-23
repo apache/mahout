@@ -25,6 +25,7 @@ import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
@@ -87,9 +88,10 @@ public class ClusterEvaluator {
    */
   private static List<Cluster> loadClusters(Configuration conf, Path clustersIn) {
     List<Cluster> clusters = Lists.newArrayList();
-    for (Cluster value :
-         new SequenceFileDirValueIterable<Cluster>(clustersIn, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
-      clusters.add(value);
+    for (ClusterWritable clusterWritable :
+         new SequenceFileDirValueIterable<ClusterWritable>(clustersIn, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+      Cluster cluster = clusterWritable.getValue();
+	  clusters.add(cluster);
     }
     return clusters;
   }

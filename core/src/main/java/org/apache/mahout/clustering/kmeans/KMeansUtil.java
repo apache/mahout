@@ -23,6 +23,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.clustering.canopy.Canopy;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
@@ -39,6 +40,12 @@ final class KMeansUtil {
     for (Writable value :
          new SequenceFileDirValueIterable<Writable>(clusterPath, PathType.LIST, PathFilters.partFilter(), conf)) {
       Class<? extends Writable> valueClass = value.getClass();
+      if(valueClass.equals(ClusterWritable.class)){
+    	  ClusterWritable clusterWritable = (ClusterWritable)value;
+    	  value = clusterWritable.getValue();
+    	  valueClass = value.getClass();
+      }
+      
       if (valueClass.equals(Kluster.class)) {
         // get the cluster info
         clusters.add((Kluster) value);

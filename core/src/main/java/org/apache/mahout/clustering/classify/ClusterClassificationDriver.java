@@ -41,6 +41,7 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.dirichlet.DirichletCluster;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.clustering.iterator.ClusteringPolicy;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -175,7 +176,8 @@ public class ClusterClassificationDriver extends AbstractJob {
         finalClustersPath, PathType.LIST, PathFilters.partFilter(), null,
         false, conf);
     while (it.hasNext()) {
-      cluster = (Cluster) it.next();
+      ClusterWritable next = (ClusterWritable)it.next();
+      cluster = (Cluster) next.getValue();
       if(cluster instanceof DirichletCluster){
     	  ((DirichletCluster) cluster).getModel().configure(conf);
       }

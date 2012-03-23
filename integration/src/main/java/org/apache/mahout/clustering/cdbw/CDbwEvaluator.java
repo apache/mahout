@@ -30,6 +30,7 @@ import org.apache.mahout.clustering.GaussianAccumulator;
 import org.apache.mahout.clustering.OnlineGaussianAccumulator;
 import org.apache.mahout.clustering.evaluation.RepresentativePointsDriver;
 import org.apache.mahout.clustering.evaluation.RepresentativePointsMapper;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
@@ -102,9 +103,10 @@ public class CDbwEvaluator {
    */
   private static List<Cluster> loadClusters(Configuration conf, Path clustersIn) {
     List<Cluster> clusters = Lists.newArrayList();
-    for (Cluster value :
-         new SequenceFileDirValueIterable<Cluster>(clustersIn, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
-      clusters.add(value);
+    for (ClusterWritable clusterWritable :
+         new SequenceFileDirValueIterable<ClusterWritable>(clustersIn, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+    	Cluster cluster = clusterWritable.getValue();    	
+        clusters.add(cluster);
     }
     return clusters;
   }

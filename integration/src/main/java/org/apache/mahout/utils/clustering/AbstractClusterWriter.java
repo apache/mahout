@@ -17,16 +17,6 @@
 
 package org.apache.mahout.utils.clustering;
 
-import com.google.common.collect.Lists;
-import org.apache.commons.lang.StringUtils;
-import org.apache.mahout.clustering.Cluster;
-import org.apache.mahout.clustering.classify.WeightedVectorWritable;
-import org.apache.mahout.common.Pair;
-import org.apache.mahout.common.distance.DistanceMeasure;
-import org.apache.mahout.math.Vector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
@@ -36,6 +26,17 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.mahout.clustering.classify.WeightedVectorWritable;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
+import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.math.Vector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
 
 /**
  * Base class for implementing ClusterWriter
@@ -151,7 +152,7 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
   }
 
   @Override
-  public long write(Iterable<Cluster> iterable) throws IOException {
+  public long write(Iterable<ClusterWritable> iterable) throws IOException {
     return write(iterable, Long.MAX_VALUE);
   }
 
@@ -161,9 +162,9 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
   }
 
   @Override
-  public long write(Iterable<Cluster> iterable, long maxDocs) throws IOException {
+  public long write(Iterable<ClusterWritable> iterable, long maxDocs) throws IOException {
     long result = 0;
-    Iterator<Cluster> iterator = iterable.iterator();
+    Iterator<ClusterWritable> iterator = iterable.iterator();
     while (result < maxDocs && iterator.hasNext()){
       write(iterator.next());
       result++;

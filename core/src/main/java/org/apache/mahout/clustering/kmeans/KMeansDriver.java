@@ -37,6 +37,7 @@ import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.ClusterObservations;
 import org.apache.mahout.clustering.classify.ClusterClassificationDriver;
 import org.apache.mahout.clustering.classify.ClusterClassifier;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.clustering.iterator.KMeansClusteringPolicy;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.ClassUtils;
@@ -296,19 +297,21 @@ public class KMeansDriver extends AbstractJob {
                                                            conf,
                                                            new Path(clustersOut, "part-r-00000"),
                                                            Text.class,
-                                                           Kluster.class);
+                                                           ClusterWritable.class);
       try {
-        for (Kluster cluster : clusters) {
+    	ClusterWritable clusterWritable = new ClusterWritable();
+        for (Kluster kluster : clusters) {
           if (log.isDebugEnabled()) {
             log.debug("Writing Cluster:{} center:{} numPoints:{} radius:{} to: {}",
                       new Object[] {
-                          cluster.getId(),
-                          AbstractCluster.formatVector(cluster.getCenter(), null),
-                          cluster.getNumObservations(),
-                          AbstractCluster.formatVector(cluster.getRadius(), null), clustersOut.getName()
+                          kluster.getId(),
+                          AbstractCluster.formatVector(kluster.getCenter(), null),
+                          kluster.getNumObservations(),
+                          AbstractCluster.formatVector(kluster.getRadius(), null), clustersOut.getName()
                       });
           }
-          writer.append(new Text(cluster.getIdentifier()), cluster);
+          clusterWritable.setValue(kluster);
+          writer.append(new Text(kluster.getIdentifier()), clusterWritable);
         }
       } finally {
         Closeables.closeQuietly(writer);
@@ -378,7 +381,7 @@ public class KMeansDriver extends AbstractJob {
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(ClusterObservations.class);
     job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(Kluster.class);
+    job.setOutputValueClass(ClusterWritable.class);
 
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
@@ -410,9 +413,10 @@ public class KMeansDriver extends AbstractJob {
    */
   private static boolean isConverged(Path filePath, Configuration conf, FileSystem fs) throws IOException {
     for (FileStatus part : fs.listStatus(filePath, PathFilters.partFilter())) {
-      SequenceFileValueIterator<Kluster> iterator = new SequenceFileValueIterator<Kluster>(part.getPath(), true, conf);
+      SequenceFileValueIterator<ClusterWritable> iterator = new SequenceFileValueIterator<ClusterWritable>(part.getPath(), true, conf);
       while (iterator.hasNext()) {
-        Kluster value = iterator.next();
+    	ClusterWritable next = iterator.next();
+        Kluster value = (Kluster) next.getValue();
         if (!value.isConverged()) {
           Closeables.closeQuietly(iterator);
           return false;

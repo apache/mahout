@@ -40,6 +40,7 @@ import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.ClusterObservations;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.classify.WeightedVectorWritable;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.clustering.kmeans.TestKmeansClustering;
 import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.HadoopUtil;
@@ -490,8 +491,8 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
 
       // run reducer
       FuzzyKMeansReducer reducer = new FuzzyKMeansReducer();
-      DummyRecordWriter<Text, SoftCluster> reducerWriter = new DummyRecordWriter<Text, SoftCluster>();
-      Reducer<Text, ClusterObservations, Text, SoftCluster>.Context reducerContext =
+      DummyRecordWriter<Text, ClusterWritable> reducerWriter = new DummyRecordWriter<Text, ClusterWritable>();
+      Reducer<Text, ClusterObservations, Text, ClusterWritable>.Context reducerContext =
           DummyRecordWriter.build(reducer, conf, reducerWriter, Text.class, ClusterObservations.class);
       reducer.setup(clusterList, conf);
 
@@ -519,8 +520,8 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
 
       for (SoftCluster key : reference) {
         String clusterId = key.getIdentifier();
-        List<SoftCluster> values = reducerWriter.getValue(new Text(clusterId));
-        SoftCluster cluster = values.get(0);
+        List<ClusterWritable> values = reducerWriter.getValue(new Text(clusterId));
+        SoftCluster cluster = (SoftCluster) values.get(0).getValue();
         System.out.println("ref= " + key.toString() + " cluster= " + cluster);
         cluster.computeParameters();
         assertEquals("key center: " + AbstractCluster.formatVector(key.getCenter(), null) + " does not equal cluster: "
@@ -582,8 +583,8 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
 
       // run reducer
       FuzzyKMeansReducer reducer = new FuzzyKMeansReducer();
-      DummyRecordWriter<Text, SoftCluster> reducerWriter = new DummyRecordWriter<Text, SoftCluster>();
-      Reducer<Text, ClusterObservations, Text, SoftCluster>.Context reducerContext =
+      DummyRecordWriter<Text, ClusterWritable> reducerWriter = new DummyRecordWriter<Text, ClusterWritable>();
+      Reducer<Text, ClusterObservations, Text, ClusterWritable>.Context reducerContext =
           DummyRecordWriter.build(reducer, conf, reducerWriter, Text.class, ClusterObservations.class);
       reducer.setup(clusterList, conf);
 
@@ -595,8 +596,8 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
       // run clusterMapper
       Collection<SoftCluster> reducerClusters = Lists.newArrayList();
       for (Text key : reducerWriter.getKeys()) {
-        List<SoftCluster> values = reducerWriter.getValue(key);
-        reducerClusters.add(values.get(0));
+        List<ClusterWritable> values = reducerWriter.getValue(key);
+        reducerClusters.add((SoftCluster) values.get(0).getValue());
       }
       for (SoftCluster softCluster : reducerClusters) {
         softCluster.computeParameters();

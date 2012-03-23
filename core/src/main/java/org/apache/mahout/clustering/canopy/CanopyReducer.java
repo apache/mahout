@@ -23,10 +23,11 @@ import java.util.Collection;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-public class CanopyReducer extends Reducer<Text, VectorWritable, Text, Canopy> {
+public class CanopyReducer extends Reducer<Text, VectorWritable, Text, ClusterWritable> {
 
   private final Collection<Canopy> canopies = Lists.newArrayList();
 
@@ -46,9 +47,11 @@ public class CanopyReducer extends Reducer<Text, VectorWritable, Text, Canopy> {
       canopyClusterer.addPointToCanopies(point, canopies);
     }
     for (Canopy canopy : canopies) {
+      ClusterWritable clusterWritable = new ClusterWritable();
       canopy.computeParameters();
       if (canopy.getNumObservations() > clusterFilter) {
-        context.write(new Text(canopy.getIdentifier()), canopy);
+    	clusterWritable.setValue(canopy);
+        context.write(new Text(canopy.getIdentifier()), clusterWritable);
       }
     }
   }
