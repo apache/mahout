@@ -366,13 +366,14 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     // now run the Canopy job to prime kMeans canopies
     Configuration conf = new Configuration();
     CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, false, 0.0, true);
-    // now run the KMeans job
-    FuzzyKMeansDriver.run(testdata, new Path(output, "clusters-0-final"), output,
+    Path fuzzyKMeansOutput = new Path(output, "fuzzyk");
+	// now run the KMeans job
+    FuzzyKMeansDriver.run(testdata, new Path(output, "clusters-0-final"), fuzzyKMeansOutput ,
         measure, 0.001, 10, 2, true, true, 0, true);
     int numIterations = 10;
     Path clustersIn = new Path(output, "clusters-4");
     RepresentativePointsDriver.run(conf, clustersIn, new Path(output,
-        "clusteredPoints"), output, measure, numIterations, true);
+        "clusteredPoints"), fuzzyKMeansOutput, measure, numIterations, true);
     ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
     // now print out the Results
     System.out.println("Intra-cluster density = "

@@ -17,18 +17,17 @@
 
 package org.apache.mahout.clustering.fuzzykmeans;
 
+import static org.apache.mahout.clustering.topdown.PathDirectory.CLUSTERED_POINTS_DIRECTORY;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -40,8 +39,10 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusterObservations;
-import org.apache.mahout.clustering.classify.WeightedVectorWritable;
+import org.apache.mahout.clustering.classify.ClusterClassificationDriver;
+import org.apache.mahout.clustering.classify.ClusterClassifier;
 import org.apache.mahout.clustering.iterator.ClusterWritable;
+import org.apache.mahout.clustering.iterator.FuzzyKMeansClusteringPolicy;
 import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.ClassUtils;
@@ -52,11 +53,13 @@ import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
-import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
+import com.google.common.io.Closeables;
 
 public class FuzzyKMeansDriver extends AbstractJob {
 
@@ -187,7 +190,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
       log.info("Clustering ");
       clusterData(input,
                   clustersOut,
-                  new Path(output, Cluster.CLUSTERED_POINTS_DIR),
+                  output,
                   measure,
                   convergenceDelta,
                   m,
@@ -299,7 +302,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
       log.info("Clustering");
       clusterData(input,
                   clustersOut,
-                  new Path(output, Cluster.CLUSTERED_POINTS_DIR),
+                  output,
                   measure,
                   convergenceDelta,
                   m,
@@ -467,82 +470,10 @@ public class FuzzyKMeansDriver extends AbstractJob {
                                  double threshold,
                                  boolean runSequential)
     throws IOException, ClassNotFoundException, InterruptedException {
-    if (runSequential) {
-      clusterDataSeq(input, clustersIn, output, measure, convergenceDelta, m);
-    } else {
-      clusterDataMR(input, clustersIn, output, measure, convergenceDelta, m, emitMostLikely, threshold);
-    }
-  }
-
-  private static void clusterDataSeq(Path input,
-                                     Path clustersIn,
-                                     Path output,
-                                     DistanceMeasure measure,
-                                     double convergenceDelta,
-                                     float m) throws IOException {
-    FuzzyKMeansClusterer clusterer = new FuzzyKMeansClusterer(measure, convergenceDelta, m);
-    List<SoftCluster> clusters = Lists.newArrayList();
-    FuzzyKMeansUtil.configureWithClusterInfo(clustersIn, clusters);
-    if (clusters.isEmpty()) {
-      throw new IllegalStateException("Clusters is empty!");
-    }
-    Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(input.toUri(), conf);
-    FileStatus[] status = fs.listStatus(input, PathFilters.logsCRCFilter());
-    int part = 0;
-    for (FileStatus s : status) {
-      SequenceFile.Writer writer = new SequenceFile.Writer(fs,
-                                                           conf,
-                                                           new Path(output, "part-m-" + part),
-                                                           IntWritable.class,
-                                                           WeightedVectorWritable.class);
-      try {
-        for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(s.getPath(), conf)) {
-          clusterer.emitPointToClusters(value, clusters, writer);
-        }
-      } finally {
-        Closeables.closeQuietly(writer);
-      }
-    }
-
-  }
-
-  private static void clusterDataMR(Path input,
-                                    Path clustersIn,
-                                    Path output,
-                                    DistanceMeasure measure,
-                                    double convergenceDelta,
-                                    float m,
-                                    boolean emitMostLikely,
-                                    double threshold) throws IOException, InterruptedException, ClassNotFoundException {
-    Configuration conf = new Configuration();
-    conf.set(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn.toString());
-    conf.set(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY, measure.getClass().getName());
-    conf.set(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, String.valueOf(convergenceDelta));
-    conf.set(FuzzyKMeansConfigKeys.M_KEY, String.valueOf(m));
-    conf.set(FuzzyKMeansConfigKeys.EMIT_MOST_LIKELY_KEY, Boolean.toString(emitMostLikely));
-    conf.set(FuzzyKMeansConfigKeys.THRESHOLD_KEY, Double.toString(threshold));
-
-    // Clear output
-    output.getFileSystem(conf).delete(output, true);
-
-    Job job = new Job(conf, "FuzzyKMeans Driver running clusterData over input: " + input);
-    job.setOutputKeyClass(IntWritable.class);
-    job.setOutputValueClass(WeightedVectorWritable.class);
-
-    FileInputFormat.setInputPaths(job, input);
-    FileOutputFormat.setOutputPath(job, output);
-
-    job.setMapperClass(FuzzyKMeansClusterMapper.class);
-
-    job.setInputFormatClass(SequenceFileInputFormat.class);
-    job.setOutputFormatClass(SequenceFileOutputFormat.class);
-    job.setNumReduceTasks(0);
-    job.setJarByClass(FuzzyKMeansDriver.class);
-
-    if (!job.waitForCompletion(true)) {
-      throw new InterruptedException("Fuzzy K-Means Clustering failed processing " + clustersIn);
-    }
+    
+    ClusterClassifier.writePolicy(new FuzzyKMeansClusteringPolicy(m, convergenceDelta), clustersIn);
+    ClusterClassificationDriver.run(input, output, new Path(output, CLUSTERED_POINTS_DIRECTORY), threshold, true,
+        runSequential);
   }
 
   /**

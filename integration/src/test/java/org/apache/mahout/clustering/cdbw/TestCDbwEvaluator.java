@@ -378,13 +378,14 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     // now run the Canopy job to prime kMeans canopies
     CanopyDriver.run(new Configuration(), testdata, output, measure, 3.1, 2.1,
         false, 0.0, true);
-    // now run the KMeans job
-    FuzzyKMeansDriver.run(testdata, new Path(output, "clusters-0-final"), output,
+    Path fuzzyKMeansOutput = new Path(output, "fuzzyk");
+	// now run the KMeans job
+    FuzzyKMeansDriver.run(testdata, new Path(output, "clusters-0-final"), fuzzyKMeansOutput ,
         measure, 0.001, 10, 2, true, true, 0, true);
     int numIterations = 10;
     Path clustersIn = new Path(output, "clusters-4");
     RepresentativePointsDriver.run(conf, clustersIn, new Path(output,
-        "clusteredPoints"), output, measure, numIterations, true);
+        "clusteredPoints"), fuzzyKMeansOutput, measure, numIterations, true);
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
     // printRepPoints(numIterations);
     // now print out the Results

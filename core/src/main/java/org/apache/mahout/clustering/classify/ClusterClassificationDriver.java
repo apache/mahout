@@ -141,7 +141,7 @@ public class ClusterClassificationDriver extends AbstractJob {
   private static void classifyClusterSeq(Configuration conf, Path input, Path clusters, Path output,
       Double clusterClassificationThreshold, boolean emitMostLikely) throws IOException {
     List<Cluster> clusterModels = populateClusterModels(clusters, conf);
-    ClusteringPolicy policy = ClusterClassifier.readPolicy(finalClustersPath(clusters));
+    ClusteringPolicy policy = ClusterClassifier.readPolicy(finalClustersPath(conf, clusters));
     ClusterClassifier clusterClassifier = new ClusterClassifier(clusterModels, policy);
     selectCluster(input, clusterModels, clusterClassifier, output, clusterClassificationThreshold, emitMostLikely);
     
@@ -160,7 +160,7 @@ public class ClusterClassificationDriver extends AbstractJob {
   private static List<Cluster> populateClusterModels(Path clusterOutputPath, Configuration conf) throws IOException {
     List<Cluster> clusterModels = new ArrayList<Cluster>();
     Cluster cluster = null;
-    Path finalClustersPath = finalClustersPath(clusterOutputPath);
+    Path finalClustersPath = finalClustersPath(conf, clusterOutputPath);
     Iterator<?> it = new SequenceFileDirValueIterator<Writable>(finalClustersPath, PathType.LIST,
         PathFilters.partFilter(), null, false, conf);
     while (it.hasNext()) {
@@ -174,8 +174,8 @@ public class ClusterClassificationDriver extends AbstractJob {
     return clusterModels;
   }
   
-  private static Path finalClustersPath(Path clusterOutputPath) throws IOException {
-    FileSystem fileSystem = clusterOutputPath.getFileSystem(new Configuration());
+  private static Path finalClustersPath(Configuration conf, Path clusterOutputPath) throws IOException {
+    FileSystem fileSystem = clusterOutputPath.getFileSystem(conf);
     FileStatus[] clusterFiles = fileSystem.listStatus(clusterOutputPath, PathFilters.finalPartFilter());
     Path finalClustersPath = clusterFiles[0].getPath();
     return finalClustersPath;
