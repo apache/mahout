@@ -17,10 +17,7 @@
 
 package org.apache.mahout.clustering.kmeans;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -29,18 +26,12 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.util.ToolRunner;
-import org.apache.mahout.clustering.AbstractCluster;
-import org.apache.mahout.clustering.ClusterObservations;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.classify.WeightedVectorWritable;
 import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.DummyOutputCollector;
-import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -48,7 +39,6 @@ import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
-import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -57,7 +47,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 
 public final class TestKmeansClustering extends MahoutTestCase {
@@ -102,7 +91,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
    * {@link KMeansClusterer#runKMeansIteration(Iterable, Iterable, DistanceMeasure, double)}
    * ) single run convergence with a given distance threshold.
    */
-  @Test
+  /*@Test
   public void testRunKMeansIterationConvergesInOneRunWithGivenDistanceThreshold() {
     double[][] rawPoints = { {0, 0}, {0, 0.25}, {0, 0.75}, {0, 1}};
     List<Vector> points = getPoints(rawPoints);
@@ -128,236 +117,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
     assertEquals(0.875, cluster2Center.get(1), EPSILON);
     
     assertTrue("KMeans iteration should be converged after a single run", converged);
-  }
-  
-  /** Story: Test the reference implementation */
-  @Test
-  public void testReferenceImplementation() throws Exception {
-    List<Vector> points = getPoints(REFERENCE);
-    DistanceMeasure measure = new EuclideanDistanceMeasure();
-    // try all possible values of k
-    for (int k = 0; k < points.size(); k++) {
-      System.out.println("Test k=" + (k + 1) + ':');
-      // pick k initial cluster centers at random
-      List<Kluster> clusters = Lists.newArrayList();
-      for (int i = 0; i < k + 1; i++) {
-        Vector vec = points.get(i);
-        clusters.add(new Kluster(vec, i, measure));
-      }
-      // iterate clusters until they converge
-      int maxIter = 10;
-      List<List<Kluster>> clustersList = KMeansClusterer.clusterPoints(points, clusters, measure, maxIter, 0.001);
-      clusters = clustersList.get(clustersList.size() - 1);
-      for (int c = 0; c < clusters.size(); c++) {
-        AbstractCluster cluster = clusters.get(c);
-        System.out.println(cluster.asFormatString(null));
-        assertEquals("Cluster " + c + " test " + (k + 1), EXPECTED_NUM_POINTS[k][c], cluster.getNumObservations());
-      }
-    }
-  }
-  
-  private static Map<String,Kluster> loadClusterMap(Iterable<Kluster> clusters) {
-    Map<String,Kluster> clusterMap = Maps.newHashMap();
-    
-    for (Kluster cluster : clusters) {
-      clusterMap.put(cluster.getIdentifier(), cluster);
-    }
-    return clusterMap;
-  }
-  
-  /** Story: test that the mapper will map input points to the nearest cluster */
-  @Test
-  public void testKMeansMapper() throws Exception {
-    KMeansMapper mapper = new KMeansMapper();
-    EuclideanDistanceMeasure measure = new EuclideanDistanceMeasure();
-    Configuration conf = new Configuration();
-    conf.set(KMeansConfigKeys.DISTANCE_MEASURE_KEY, measure.getClass().getName());
-    conf.set(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, "0.001");
-    conf.set(KMeansConfigKeys.CLUSTER_PATH_KEY, "");
-    List<VectorWritable> points = getPointsWritable(REFERENCE);
-    for (int k = 0; k < points.size(); k++) {
-      // pick k initial cluster centers at random
-      DummyRecordWriter<Text,ClusterObservations> mapWriter = new DummyRecordWriter<Text,ClusterObservations>();
-      Mapper<WritableComparable<?>,VectorWritable,Text,ClusterObservations>.Context mapContext = DummyRecordWriter
-          .build(mapper, conf, mapWriter);
-      Collection<Kluster> clusters = Lists.newArrayList();
-      
-      for (int i = 0; i < k + 1; i++) {
-        Kluster cluster = new Kluster(points.get(i).get(), i, measure);
-        // add the center so the centroid will be correct upon output
-        cluster.observe(cluster.getCenter(), 1);
-        clusters.add(cluster);
-      }
-      mapper.setup(clusters, measure);
-      
-      // map the data
-      for (VectorWritable point : points) {
-        mapper.map(new Text(), point, mapContext);
-      }
-      assertEquals("Number of map results", k + 1, mapWriter.getData().size());
-      Map<String,Kluster> clusterMap = loadClusterMap(clusters);
-      for (Text key : mapWriter.getKeys()) {
-        AbstractCluster cluster = clusterMap.get(key.toString());
-        List<ClusterObservations> values = mapWriter.getValue(key);
-        for (ClusterObservations value : values) {
-          double distance = measure.distance(cluster.getCenter(), value.getS1());
-          for (AbstractCluster c : clusters) {
-            assertTrue("distance error", distance <= measure.distance(value.getS1(), c.getCenter()));
-          }
-        }
-      }
-    }
-  }
-  
-  /**
-   * Story: test that the combiner will produce partial cluster totals for all
-   * of the clusters and points that it sees
-   */
-  @Test
-  public void testKMeansCombiner() throws Exception {
-    KMeansMapper mapper = new KMeansMapper();
-    EuclideanDistanceMeasure measure = new EuclideanDistanceMeasure();
-    Configuration conf = new Configuration();
-    conf.set(KMeansConfigKeys.DISTANCE_MEASURE_KEY, measure.getClass().getName());
-    conf.set(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, "0.001");
-    conf.set(KMeansConfigKeys.CLUSTER_PATH_KEY, "");
-    List<VectorWritable> points = getPointsWritable(REFERENCE);
-    for (int k = 0; k < points.size(); k++) {
-      // pick k initial cluster centers at random
-      DummyRecordWriter<Text,ClusterObservations> mapWriter = new DummyRecordWriter<Text,ClusterObservations>();
-      Mapper<WritableComparable<?>,VectorWritable,Text,ClusterObservations>.Context mapContext = DummyRecordWriter
-          .build(mapper, conf, mapWriter);
-      Collection<Kluster> clusters = Lists.newArrayList();
-      for (int i = 0; i < k + 1; i++) {
-        Vector vec = points.get(i).get();
-        
-        Kluster cluster = new Kluster(vec, i, measure);
-        // add the center so the centroid will be correct upon output
-        cluster.observe(cluster.getCenter(), 1);
-        clusters.add(cluster);
-      }
-      mapper.setup(clusters, measure);
-      // map the data
-      for (VectorWritable point : points) {
-        mapper.map(new Text(), point, mapContext);
-      }
-      // now combine the data
-      KMeansCombiner combiner = new KMeansCombiner();
-      DummyRecordWriter<Text,ClusterObservations> combinerWriter = new DummyRecordWriter<Text,ClusterObservations>();
-      Reducer<Text,ClusterObservations,Text,ClusterObservations>.Context combinerContext = DummyRecordWriter.build(
-          combiner, conf, combinerWriter, Text.class, ClusterObservations.class);
-      for (Text key : mapWriter.getKeys()) {
-        combiner.reduce(new Text(key), mapWriter.getValue(key), combinerContext);
-      }
-      
-      assertEquals("Number of map results", k + 1, combinerWriter.getData().size());
-      // now verify that all points are accounted for
-      int count = 0;
-      Vector total = new DenseVector(2);
-      for (Text key : combinerWriter.getKeys()) {
-        List<ClusterObservations> values = combinerWriter.getValue(key);
-        assertEquals("too many values", 1, values.size());
-        ClusterObservations info = values.get(0);
-        
-        count += (int) info.getS0();
-        total = total.plus(info.getS1());
-      }
-      assertEquals("total points", 9, count);
-      assertEquals("point total[0]", 27, (int) total.get(0));
-      assertEquals("point total[1]", 27, (int) total.get(1));
-    }
-  }
-  
-  /**
-   * Story: test that the reducer will sum the partial cluster totals for all of
-   * the clusters and points that it sees
-   */
-  @Test
-  public void testKMeansReducer() throws Exception {
-    KMeansMapper mapper = new KMeansMapper();
-    EuclideanDistanceMeasure measure = new EuclideanDistanceMeasure();
-    Configuration conf = new Configuration();
-    conf.set(KMeansConfigKeys.DISTANCE_MEASURE_KEY, measure.getClass().getName());
-    conf.set(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, "0.001");
-    conf.set(KMeansConfigKeys.CLUSTER_PATH_KEY, "");
-    List<VectorWritable> points = getPointsWritable(REFERENCE);
-    for (int k = 0; k < points.size(); k++) {
-      System.out.println("K = " + k);
-      // pick k initial cluster centers at random
-      DummyRecordWriter<Text,ClusterObservations> mapWriter = new DummyRecordWriter<Text,ClusterObservations>();
-      Mapper<WritableComparable<?>,VectorWritable,Text,ClusterObservations>.Context mapContext = DummyRecordWriter
-          .build(mapper, conf, mapWriter);
-      Collection<Kluster> clusters = Lists.newArrayList();
-      for (int i = 0; i < k + 1; i++) {
-        Vector vec = points.get(i).get();
-        Kluster cluster = new Kluster(vec, i, measure);
-        // add the center so the centroid will be correct upon output
-        // cluster.addPoint(cluster.getCenter());
-        clusters.add(cluster);
-      }
-      mapper.setup(clusters, new EuclideanDistanceMeasure());
-      // map the data
-      for (VectorWritable point : points) {
-        mapper.map(new Text(), point, mapContext);
-      }
-      // now combine the data
-      KMeansCombiner combiner = new KMeansCombiner();
-      DummyRecordWriter<Text,ClusterObservations> combinerWriter = new DummyRecordWriter<Text,ClusterObservations>();
-      Reducer<Text,ClusterObservations,Text,ClusterObservations>.Context combinerContext = DummyRecordWriter.build(
-          combiner, conf, combinerWriter, Text.class, ClusterObservations.class);
-      for (Text key : mapWriter.getKeys()) {
-        combiner.reduce(new Text(key), mapWriter.getValue(key), combinerContext);
-      }
-      
-      // now reduce the data
-      KMeansReducer reducer = new KMeansReducer();
-      reducer.setup(clusters, measure);
-      DummyRecordWriter<Text,ClusterWritable> reducerWriter = new DummyRecordWriter<Text,ClusterWritable>();
-      Reducer<Text,ClusterObservations,Text,ClusterWritable>.Context reducerContext = DummyRecordWriter.build(reducer, conf,
-          reducerWriter, Text.class, ClusterObservations.class);
-      for (Text key : combinerWriter.getKeys()) {
-        reducer.reduce(new Text(key), combinerWriter.getValue(key), reducerContext);
-      }
-      
-      assertEquals("Number of map results", k + 1, reducerWriter.getData().size());
-      
-      // compute the reference result after one iteration and compare
-      Collection<Kluster> reference = Lists.newArrayList();
-      for (int i = 0; i < k + 1; i++) {
-        Vector vec = points.get(i).get();
-        reference.add(new Kluster(vec, i, measure));
-      }
-      Collection<Vector> pointsVectors = Lists.newArrayList();
-      for (VectorWritable point : points) {
-        pointsVectors.add(point.get());
-      }
-      boolean converged = KMeansClusterer.runKMeansIteration(pointsVectors, reference, measure, 0.001);
-      if (k == 8) {
-        assertTrue("not converged? " + k, converged);
-      } else {
-        assertFalse("converged? " + k, converged);
-      }
-      
-      // now verify that all clusters have correct centers
-      converged = true;
-      for (Kluster ref : reference) {
-        String key = ref.getIdentifier();
-        List<ClusterWritable> clusterWritables = reducerWriter.getValue(new Text(key));
-        Kluster cluster = (Kluster) clusterWritables.get(0).getValue();
-        converged = converged && cluster.isConverged();
-        // Since we aren't roundtripping through Writable, we need to compare
-        // the reference center with the
-        // cluster centroid
-        cluster.computeParameters();
-        assertEquals(ref.getCenter(), cluster.getCenter());
-      }
-      if (k == 8) {
-        assertTrue("not converged? " + k, converged);
-      } else {
-        assertFalse("converged? " + k, converged);
-      }
-    }
-  }
+  }*/
   
   /** Story: User wishes to run kmeans job on reference data */
   @Test

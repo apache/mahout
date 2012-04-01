@@ -17,11 +17,12 @@
 
 package org.apache.mahout.clustering.fuzzykmeans;
 
-import java.util.Collection;
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.clustering.kmeans.Kluster;
@@ -35,7 +36,7 @@ final class FuzzyKMeansUtil {
   }
 
   /** Configure the mapper with the cluster info */
-  public static void configureWithClusterInfo(Path clusterPath, Collection<SoftCluster> clusters) {
+  public static void configureWithClusterInfo(Path clusterPath, List<Cluster> clusters) {
     for (Writable value :
          new SequenceFileDirValueIterable<Writable>(clusterPath,
                                                     PathType.LIST,

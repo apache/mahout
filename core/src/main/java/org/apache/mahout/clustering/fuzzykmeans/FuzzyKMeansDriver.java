@@ -20,6 +20,7 @@ package org.apache.mahout.clustering.fuzzykmeans;
 import static org.apache.mahout.clustering.topdown.PathDirectory.CLUSTERED_POINTS_DIRECTORY;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -28,21 +29,14 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
-import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
-import org.apache.mahout.clustering.ClusterObservations;
 import org.apache.mahout.clustering.classify.ClusterClassificationDriver;
 import org.apache.mahout.clustering.classify.ClusterClassifier;
+import org.apache.mahout.clustering.iterator.ClusterIterator;
 import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.clustering.iterator.FuzzyKMeansClusteringPolicy;
+import org.apache.mahout.clustering.iterator.KMeansClusteringPolicy;
 import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.ClassUtils;
@@ -51,10 +45,7 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
-import org.apache.mahout.common.iterator.sequencefile.PathType;
-import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
-import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -201,65 +192,6 @@ public class FuzzyKMeansDriver extends AbstractJob {
   }
 
   /**
-   * Run the iteration using supplied arguments
-   * @param input
-   *          the directory pathname for input points
-   * @param clustersIn
-   *          the directory pathname for input clusters
-   * @param clustersOut
-   *          the directory pathname for output clusters
-   * @param measureClass
-   *          the classname of the DistanceMeasure
-   * @param convergenceDelta
-   *          the convergence delta value
-   * @param m
-   *          the fuzzification factor - see
-   *          http://en.wikipedia.org/wiki/Data_clustering#Fuzzy_c-means_clustering
-   * 
-   * @return true if the iteration successfully runs
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
-   */
-  private static boolean runIteration(Configuration conf,
-                                      Path input,
-                                      Path clustersIn,
-                                      Path clustersOut,
-                                      String measureClass,
-                                      double convergenceDelta,
-                                      float m) throws IOException, InterruptedException, ClassNotFoundException {
-
-    conf.set(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn.toString());
-    conf.set(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY, measureClass);
-    conf.set(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, String.valueOf(convergenceDelta));
-    conf.set(FuzzyKMeansConfigKeys.M_KEY, String.valueOf(m));
-    // these values don't matter during iterations as only used for clustering if requested
-    conf.set(FuzzyKMeansConfigKeys.EMIT_MOST_LIKELY_KEY, Boolean.toString(true));
-    conf.set(FuzzyKMeansConfigKeys.THRESHOLD_KEY, Double.toString(0));
-
-    Job job = new Job(conf, "FuzzyKMeans Driver running runIteration over clustersIn: " + clustersIn);
-    job.setMapOutputKeyClass(Text.class);
-    job.setMapOutputValueClass(ClusterObservations.class);
-    job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(ClusterWritable.class);
-    job.setInputFormatClass(SequenceFileInputFormat.class);
-    job.setOutputFormatClass(SequenceFileOutputFormat.class);
-
-    job.setMapperClass(FuzzyKMeansMapper.class);
-    job.setCombinerClass(FuzzyKMeansCombiner.class);
-    job.setReducerClass(FuzzyKMeansReducer.class);
-    job.setJarByClass(FuzzyKMeansDriver.class);
-
-    FileInputFormat.addInputPath(job, input);
-    FileOutputFormat.setOutputPath(job, clustersOut);
-
-    if (!job.waitForCompletion(true)) {
-      throw new InterruptedException("Fuzzy K-Means Iteration failed processing " + clustersIn);
-    }
-    FileSystem fs = FileSystem.get(clustersOut.toUri(), conf);
-    return isConverged(clustersOut, conf, fs);
-  }
-
-  /**
    * Iterate over the input vectors to produce clusters and, if requested, use the
    * results of the final iteration to cluster the input vectors.
    * @param input
@@ -343,102 +275,26 @@ public class FuzzyKMeansDriver extends AbstractJob {
                                    float m,
                                    boolean runSequential)
     throws IOException, InterruptedException, ClassNotFoundException {
-    if (runSequential) {
-      return buildClustersSeq(input, clustersIn, output, measure, convergenceDelta, maxIterations, m);
-    } else {
-      return buildClustersMR(conf, input, clustersIn, output, measure, convergenceDelta, maxIterations, m);
-    }
-  }
-
-  private static Path buildClustersSeq(Path input,
-                                       Path clustersIn,
-                                       Path output,
-                                       DistanceMeasure measure,
-                                       double convergenceDelta,
-                                       int maxIterations,
-                                       float m) throws IOException {
-    FuzzyKMeansClusterer clusterer = new FuzzyKMeansClusterer(measure, convergenceDelta, m);
-    List<SoftCluster> clusters = Lists.newArrayList();
-
+    
+    List<Cluster> clusters = new ArrayList<Cluster>();
     FuzzyKMeansUtil.configureWithClusterInfo(clustersIn, clusters);
+    
     if (clusters.isEmpty()) {
       throw new IllegalStateException("Clusters is empty!");
     }
-    boolean converged = false;
-    int iteration = 1;
-    Configuration conf = new Configuration();
-    while (!converged && iteration <= maxIterations) {
-      log.info("Fuzzy k-Means Iteration: {}", iteration);
-      FileSystem fs = FileSystem.get(input.toUri(), conf);
-      for (VectorWritable value
-           : new SequenceFileDirValueIterable<VectorWritable>(input,
-                                                              PathType.LIST,
-                                                              PathFilters.logsCRCFilter(),
-                                                              conf)) {
-        clusterer.addPointToClusters(clusters,value.get());
-      }
-      converged = clusterer.testConvergence(clusters);
-      Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
-      SequenceFile.Writer writer = new SequenceFile.Writer(fs,
-                                                           conf,
-                                                           new Path(clustersOut, "part-r-00000"),
-                                                           Text.class,
-                                                           ClusterWritable.class);
-      try {
-    	ClusterWritable clusterWritable = new ClusterWritable();
-        for (SoftCluster cluster : clusters) {
-          if (log.isDebugEnabled()) {
-            log.debug("Writing Cluster:{} center:{} numPoints:{} radius:{} to: {}",
-                      new Object[] {
-                          cluster.getId(),
-                          AbstractCluster.formatVector(cluster.getCenter(), null),
-                          cluster.getNumObservations(),
-                          AbstractCluster.formatVector(cluster.getRadius(), null),
-                          clustersOut.getName()
-                      });
-          }
-          clusterWritable.setValue(cluster);
-          writer.append(new Text(cluster.getIdentifier()), clusterWritable);
-        }
-      } finally {
-        Closeables.closeQuietly(writer);
-      }
-      clustersIn = clustersOut;
-      iteration++;
+    
+    Path priorClustersPath = new Path(clustersIn, "clusters-0");
+    FuzzyKMeansClusteringPolicy policy = new FuzzyKMeansClusteringPolicy(m, convergenceDelta);
+    
+    ClusterClassifier prior = new ClusterClassifier(clusters, policy);
+    prior.writeToSeqFiles(priorClustersPath);
+    
+    if (runSequential) {
+      new ClusterIterator().iterateSeq(input, priorClustersPath, output, maxIterations);
+    } else {
+      new ClusterIterator().iterateMR(input, priorClustersPath, output, maxIterations);
     }
-    Path fromPath = new Path(output, Cluster.CLUSTERS_DIR + (iteration-1));
-    Path finalClustersIn = new Path(output, Cluster.CLUSTERS_DIR + (iteration-1) + Cluster.FINAL_ITERATION_SUFFIX);
-    FileSystem.get(fromPath.toUri(), conf).rename(fromPath, finalClustersIn);
-    return finalClustersIn;
-  }
-
-  private static Path buildClustersMR(Configuration conf,
-                                      Path input,
-                                      Path clustersIn,
-                                      Path output,
-                                      DistanceMeasure measure,
-                                      double convergenceDelta,
-                                      int maxIterations,
-                                      float m) throws IOException, InterruptedException, ClassNotFoundException {
-    boolean converged = false;
-    int iteration = 1;
-
-    // iterate until the clusters converge
-    while (!converged && iteration <= maxIterations) {
-      log.info("Fuzzy K-Means Iteration {}", iteration);
-
-      // point the output to a new directory per iteration
-      Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
-      converged = runIteration(conf, input, clustersIn, clustersOut, measure.getClass().getName(), convergenceDelta, m);
-
-      // now point the input to the old output directory
-      clustersIn = clustersOut;
-      iteration++;
-    }
-    Path fromPath = new Path(output, Cluster.CLUSTERS_DIR + (iteration-1));
-    Path finalClustersIn = new Path(output, Cluster.CLUSTERS_DIR + (iteration-1) + "-final");
-    FileSystem.get(fromPath.toUri(), conf).rename(fromPath, finalClustersIn);
-    return finalClustersIn;
+    return output;
   }
 
   /**
@@ -474,43 +330,5 @@ public class FuzzyKMeansDriver extends AbstractJob {
     ClusterClassifier.writePolicy(new FuzzyKMeansClusteringPolicy(m, convergenceDelta), clustersIn);
     ClusterClassificationDriver.run(input, output, new Path(output, CLUSTERED_POINTS_DIRECTORY), threshold, true,
         runSequential);
-  }
-
-  /**
-   * Return if all of the Clusters in the filePath have converged or not
-   * 
-   * @param filePath
-   *          the file path to the single file containing the clusters
-   * @return true if all Clusters are converged
-   * @throws IOException
-   *           if there was an IO error
-   */
-  private static boolean isConverged(Path filePath, Configuration conf, FileSystem fs) throws IOException {
-
-    Path clusterPath = new Path(filePath, "*");
-    Collection<Path> result = Lists.newArrayList();
-
-    FileStatus[] matches =
-        fs.listStatus(FileUtil.stat2Paths(fs.globStatus(clusterPath, PathFilters.partFilter())),
-                      PathFilters.partFilter());
-
-    for (FileStatus match : matches) {
-      result.add(fs.makeQualified(match.getPath()));
-    }
-    boolean converged = true;
-
-    for (Path path : result) {
-      SequenceFileValueIterator<ClusterWritable> iterator = new SequenceFileValueIterator<ClusterWritable>(path, true, conf);
-      try {
-        while (converged && iterator.hasNext()) {
-	      ClusterWritable next = iterator.next();
-	      converged = ((Cluster) next.getValue()).isConverged();
-        }
-      } finally {
-        Closeables.closeQuietly(iterator);
-      }
-    }
-
-    return converged;
   }
 }

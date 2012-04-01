@@ -19,25 +19,16 @@ package org.apache.mahout.clustering.kmeans;
 import static org.apache.mahout.clustering.topdown.PathDirectory.CLUSTERED_POINTS_DIRECTORY;
 
 import java.io.IOException;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
-import org.apache.mahout.clustering.AbstractCluster;
-import org.apache.mahout.clustering.ClusterObservations;
+import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.classify.ClusterClassificationDriver;
 import org.apache.mahout.clustering.classify.ClusterClassifier;
-import org.apache.mahout.clustering.iterator.ClusterWritable;
+import org.apache.mahout.clustering.iterator.ClusterIterator;
 import org.apache.mahout.clustering.iterator.KMeansClusteringPolicy;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.ClassUtils;
@@ -45,16 +36,9 @@ import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
-import org.apache.mahout.common.iterator.sequencefile.PathFilters;
-import org.apache.mahout.common.iterator.sequencefile.PathType;
-import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
-import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 
 public class KMeansDriver extends AbstractJob {
 
@@ -228,8 +212,10 @@ public class KMeansDriver extends AbstractJob {
   }
 
   /**
-   * Iterate over the input vectors to produce cluster directories for each iteration
-   * @param conf 
+   * Iterate over the input vectors to produce cluster directories for each
+   * iteration
+   * 
+   * @param conf
    *          the Configuration to use
    * @param input
    *          the directory pathname for input points
@@ -243,187 +229,38 @@ public class KMeansDriver extends AbstractJob {
    *          the maximum number of iterations
    * @param delta
    *          the convergence delta value
-   * @param runSequential if true execute sequential algorithm
+   * @param runSequential
+   *          if true execute sequential algorithm
    * 
    * @return the Path of the final clusters directory
    */
-  public static Path buildClusters(Configuration conf,
-                                   Path input,
-                                   Path clustersIn,
-                                   Path output,
-                                   DistanceMeasure measure,
-                                   int maxIterations,
-                                   String delta,
-                                   boolean runSequential)
-    throws IOException, InterruptedException, ClassNotFoundException {
-    if (runSequential) {
-      return buildClustersSeq(conf, input, clustersIn, output, measure, maxIterations, delta);
-    } else {
-      return buildClustersMR(conf, input, clustersIn, output, measure, maxIterations, delta);
-    }
-  }
-
-  private static Path buildClustersSeq(Configuration conf,
-                                       Path input,
-                                       Path clustersIn,
-                                       Path output,
-                                       DistanceMeasure measure,
-                                       int maxIterations,
-                                       String delta)
-    throws IOException {
-
-    KMeansClusterer clusterer = new KMeansClusterer(measure);
-    Collection<Kluster> clusters = Lists.newArrayList();
-
+  public static Path buildClusters(Configuration conf, Path input,
+      Path clustersIn, Path output, DistanceMeasure measure, int maxIterations,
+      String delta, boolean runSequential) throws IOException,
+      InterruptedException, ClassNotFoundException {
+    
+    double convergenceDelta = Double.parseDouble(delta);
+    List<Cluster> clusters = new ArrayList<Cluster>();
     KMeansUtil.configureWithClusterInfo(conf, clustersIn, clusters);
+    
     if (clusters.isEmpty()) {
       throw new IllegalStateException("Clusters is empty!");
     }
-    boolean converged = false;
-    int iteration = 1;
-    while (!converged && iteration <= maxIterations) {
-      log.info("K-Means Iteration: {}", iteration);
-      FileSystem fs = FileSystem.get(input.toUri(), conf);
-      for (VectorWritable value
-           : new SequenceFileDirValueIterable<VectorWritable>(input,
-                                                              PathType.LIST,
-                                                              PathFilters.logsCRCFilter(),
-                                                              conf)) {
-        clusterer.addPointToNearestCluster(value.get(), clusters);
-      }
-      converged = clusterer.testConvergence(clusters, Double.parseDouble(delta));
-      Path clustersOut = new Path(output, AbstractCluster.CLUSTERS_DIR + iteration);
-      SequenceFile.Writer writer = new SequenceFile.Writer(fs,
-                                                           conf,
-                                                           new Path(clustersOut, "part-r-00000"),
-                                                           Text.class,
-                                                           ClusterWritable.class);
-      try {
-    	ClusterWritable clusterWritable = new ClusterWritable();
-        for (Kluster kluster : clusters) {
-          if (log.isDebugEnabled()) {
-            log.debug("Writing Cluster:{} center:{} numPoints:{} radius:{} to: {}",
-                      new Object[] {
-                          kluster.getId(),
-                          AbstractCluster.formatVector(kluster.getCenter(), null),
-                          kluster.getNumObservations(),
-                          AbstractCluster.formatVector(kluster.getRadius(), null), clustersOut.getName()
-                      });
-          }
-          clusterWritable.setValue(kluster);
-          writer.append(new Text(kluster.getIdentifier()), clusterWritable);
-        }
-      } finally {
-        Closeables.closeQuietly(writer);
-      }
-      clustersIn = clustersOut;
-      iteration++;
+    
+    Path priorClustersPath = new Path(clustersIn, "clusters-0");
+    KMeansClusteringPolicy policy = new KMeansClusteringPolicy(convergenceDelta);
+    
+    ClusterClassifier prior = new ClusterClassifier(clusters, policy);
+    prior.writeToSeqFiles(priorClustersPath);
+    
+    if (runSequential) {
+      new ClusterIterator().iterateSeq(input, priorClustersPath, output,
+          maxIterations);
+    } else {
+      new ClusterIterator().iterateMR(input, priorClustersPath, output,
+          maxIterations);
     }
-    Path fromPath = new Path(output, AbstractCluster.CLUSTERS_DIR + (iteration-1));
-    Path finalClustersIn = new Path(output, AbstractCluster.CLUSTERS_DIR + (iteration-1) + org.apache.mahout.clustering.Cluster.FINAL_ITERATION_SUFFIX);
-    FileSystem.get(fromPath.toUri(), conf).rename(fromPath, finalClustersIn);
-    return finalClustersIn;
-  }
-
-  private static Path buildClustersMR(Configuration conf,
-                                      Path input,
-                                      Path clustersIn,
-                                      Path output,
-                                      DistanceMeasure measure,
-                                      int maxIterations,
-                                      String delta) throws IOException, InterruptedException, ClassNotFoundException {
-
-    boolean converged = false;
-    int iteration = 1;
-    while (!converged && iteration <= maxIterations) {
-      log.info("K-Means Iteration {}", iteration);
-      // point the output to a new directory per iteration
-      Path clustersOut = new Path(output, AbstractCluster.CLUSTERS_DIR + iteration);
-      converged = runIteration(conf, input, clustersIn, clustersOut, measure.getClass().getName(), delta);
-      // now point the input to the old output directory
-      clustersIn = clustersOut;
-      iteration++;
-    }
-    Path fromPath = new Path(output, AbstractCluster.CLUSTERS_DIR + (iteration-1));
-    Path finalClustersIn = new Path(output, AbstractCluster.CLUSTERS_DIR + (iteration-1) + "-final");
-    FileSystem.get(fromPath.toUri(), conf).rename(fromPath, finalClustersIn);
-    return finalClustersIn;
-  }
-
-  /**
-   * Run the job using supplied arguments
-   * @param input
-   *          the directory pathname for input points
-   * @param clustersIn
-   *          the directory pathname for input clusters
-   * @param clustersOut
-   *          the directory pathname for output clusters
-   * @param measureClass
-   *          the classname of the DistanceMeasure
-   * @param convergenceDelta
-   *          the convergence delta value
-   * 
-   * @return true if the iteration successfully runs
-   */
-  private static boolean runIteration(Configuration conf,
-                                      Path input,
-                                      Path clustersIn,
-                                      Path clustersOut,
-                                      String measureClass,
-                                      String convergenceDelta)
-    throws IOException, InterruptedException, ClassNotFoundException {
-
-    conf.set(KMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn.toString());
-    conf.set(KMeansConfigKeys.DISTANCE_MEASURE_KEY, measureClass);
-    conf.set(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, convergenceDelta);
-
-    Job job = new Job(conf, "KMeans Driver running runIteration over clustersIn: " + clustersIn);
-    job.setMapOutputKeyClass(Text.class);
-    job.setMapOutputValueClass(ClusterObservations.class);
-    job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(ClusterWritable.class);
-
-    job.setInputFormatClass(SequenceFileInputFormat.class);
-    job.setOutputFormatClass(SequenceFileOutputFormat.class);
-    job.setMapperClass(KMeansMapper.class);
-    job.setCombinerClass(KMeansCombiner.class);
-    job.setReducerClass(KMeansReducer.class);
-
-    FileInputFormat.addInputPath(job, input);
-    FileOutputFormat.setOutputPath(job, clustersOut);
-
-    job.setJarByClass(KMeansDriver.class);
-    HadoopUtil.delete(conf, clustersOut);
-    if (!job.waitForCompletion(true)) {
-      throw new InterruptedException("K-Means Iteration failed processing " + clustersIn);
-    }
-    FileSystem fs = FileSystem.get(clustersOut.toUri(), conf);
-
-    return isConverged(clustersOut, conf, fs);
-  }
-
-  /**
-   * Return if all of the Clusters in the parts in the filePath have converged or not
-   * 
-   * @param filePath
-   *          the file path to the single file containing the clusters
-   * @return true if all Clusters are converged
-   * @throws IOException
-   *           if there was an IO error
-   */
-  private static boolean isConverged(Path filePath, Configuration conf, FileSystem fs) throws IOException {
-    for (FileStatus part : fs.listStatus(filePath, PathFilters.partFilter())) {
-      SequenceFileValueIterator<ClusterWritable> iterator = new SequenceFileValueIterator<ClusterWritable>(part.getPath(), true, conf);
-      while (iterator.hasNext()) {
-    	ClusterWritable next = iterator.next();
-        Kluster value = (Kluster) next.getValue();
-        if (!value.isConverged()) {
-          Closeables.closeQuietly(iterator);
-          return false;
-        }
-      }
-    }
-    return true;
+    return output;
   }
 
   /**

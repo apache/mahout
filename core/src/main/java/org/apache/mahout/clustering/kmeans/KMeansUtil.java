@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 package org.apache.mahout.clustering.kmeans;
 
 import java.util.Collection;
@@ -22,6 +22,7 @@ import java.util.Collection;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
@@ -36,7 +37,7 @@ final class KMeansUtil {
   /** Configure the mapper with the cluster info */
   public static void configureWithClusterInfo(Configuration conf,
                                               Path clusterPath,
-                                              Collection<Kluster> clusters) {
+                                              Collection<Cluster> clusters) {
     for (Writable value :
          new SequenceFileDirValueIterable<Writable>(clusterPath, PathType.LIST, PathFilters.partFilter(), conf)) {
       Class<? extends Writable> valueClass = value.getClass();
