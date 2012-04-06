@@ -54,13 +54,14 @@ import com.google.common.base.Preconditions;
 public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
   
   public static final int NO_MAX_SIZE = Integer.MAX_VALUE;
-  private static final double ALLOWED_LOAD_FACTOR = 1.5;
+  private static final float DEFAULT_LOAD_FACTOR = 1.5f;
   
   /** Dummy object used to represent a key that has been removed. */
   private static final Object REMOVED = new Object();
   
   private K[] keys;
   private V[] values;
+  private float loadFactor;
   private int numEntries;
   private int numSlotsUsed;
   private final int maxSize;
@@ -80,25 +81,32 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
     this(other.size());
     putAll(other);
   }
+
+  public FastMap(int size, float loadFactor) {
+    this(size, NO_MAX_SIZE, loadFactor);
+  }
+
+  public FastMap(int size, int maxSize) {
+    this(size, maxSize, DEFAULT_LOAD_FACTOR);
+  }
   
   /**
-   * Creates a new  whose capacity can accommodate the given number of entries without
-   * rehash.</p>
+   * Creates a new  whose capacity can accommodate the given number of entries without rehash.
    * 
-   * @param size
-   *          desired capacity
-   * @param maxSize
-   *          max capacity
-   * @throws IllegalArgumentException
-   *           if size is less than 0, maxSize is less than 1, or at least half of
-   *           {@link RandomUtils#MAX_INT_SMALLER_TWIN_PRIME}
+   * @param size desired capacity
+   * @param maxSize max capacity
+   * @throws IllegalArgumentException if size is less than 0, maxSize is less than 1
+   *  or at least half of {@link RandomUtils#MAX_INT_SMALLER_TWIN_PRIME}, or
+   *  loadFactor is less than 1
    */
-  public FastMap(int size, int maxSize) {
+  public FastMap(int size, int maxSize, float loadFactor) {
     Preconditions.checkArgument(size >= 0, "size must be at least 0");
-    int max = (int) (RandomUtils.MAX_INT_SMALLER_TWIN_PRIME / ALLOWED_LOAD_FACTOR);
+    Preconditions.checkArgument(loadFactor >= 1.0f, "loadFactor must be at least 1.0");
+    this.loadFactor = loadFactor;
+    int max = (int) (RandomUtils.MAX_INT_SMALLER_TWIN_PRIME / loadFactor);
     Preconditions.checkArgument(size < max, "size must be less than " + max);
     Preconditions.checkArgument(maxSize >= 1, "maxSize must be at least 1");
-    int hashSize = RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * size));
+    int hashSize = RandomUtils.nextTwinPrime((int) (loadFactor * size));
     keys = (K[]) new Object[hashSize];
     values = (V[]) new Object[hashSize];
     this.maxSize = maxSize;
@@ -174,9 +182,9 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
       throw new NullPointerException();
     }
     // If less than half the slots are open, let's clear it up
-    if (numSlotsUsed * ALLOWED_LOAD_FACTOR >= keys.length) {
+    if (numSlotsUsed * loadFactor >= keys.length) {
       // If over half the slots used are actual entries, let's grow
-      if (numEntries * ALLOWED_LOAD_FACTOR >= numSlotsUsed) {
+      if (numEntries * loadFactor >= numSlotsUsed) {
         growAndRehash();
       } else {
         // Otherwise just rehash to clear REMOVED entries and don't grow
@@ -279,14 +287,14 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
   }
   
   public void rehash() {
-    rehash(RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * numEntries)));
+    rehash(RandomUtils.nextTwinPrime((int) (loadFactor * numEntries)));
   }
   
   private void growAndRehash() {
-    if (keys.length * ALLOWED_LOAD_FACTOR >= RandomUtils.MAX_INT_SMALLER_TWIN_PRIME) {
+    if (keys.length * loadFactor >= RandomUtils.MAX_INT_SMALLER_TWIN_PRIME) {
       throw new IllegalStateException("Can't grow any more");
     }
-    rehash(RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * keys.length)));
+    rehash(RandomUtils.nextTwinPrime((int) (loadFactor * keys.length)));
   }
   
   private void rehash(int newHashSize) {
