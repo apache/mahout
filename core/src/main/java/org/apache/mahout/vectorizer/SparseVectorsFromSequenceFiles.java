@@ -284,8 +284,9 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
          Path stdCalcDir = new Path(outputDir, HighDFWordsPruner.STD_CALC_DIR);
 
          // Calculate the standard deviation
-         double stdDev = BasicStats.stdDevForGivenMean(dfDir, stdCalcDir, 0.0D, conf);
-         maxDF = (int) (maxDFSigma * stdDev);
+         double stdDev = BasicStats.stdDevForGivenMean(dfDir, stdCalcDir, 0.0, conf);
+         long vectorCount = docFrequenciesFeatures.getFirst()[1];
+         maxDF = (int) (100.0 * maxDFSigma * stdDev / vectorCount);
 
          // Prune the term frequency vectors
          Path tfDir = new Path(outputDir, tfDirName);
