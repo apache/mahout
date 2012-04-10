@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.Cluster;
@@ -246,8 +247,15 @@ public class KMeansDriver extends AbstractJob {
     if (clusters.isEmpty()) {
       throw new IllegalStateException("Clusters is empty!");
     }
-    
+
     Path priorClustersPath = new Path(clustersIn, "clusters-0");
+    
+    FileSystem fileSystem = clustersIn.getFileSystem(conf);
+    if(fileSystem.isFile(clustersIn)){
+      priorClustersPath = new Path(clustersIn.getParent(), "prior");
+      fileSystem.mkdirs(priorClustersPath);
+    }
+    
     KMeansClusteringPolicy policy = new KMeansClusteringPolicy(convergenceDelta);
     
     ClusterClassifier prior = new ClusterClassifier(clusters, policy);

@@ -21,22 +21,17 @@ import static org.apache.mahout.clustering.topdown.PathDirectory.CLUSTERED_POINT
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.classify.ClusterClassificationDriver;
 import org.apache.mahout.clustering.classify.ClusterClassifier;
 import org.apache.mahout.clustering.iterator.ClusterIterator;
-import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.clustering.iterator.FuzzyKMeansClusteringPolicy;
-import org.apache.mahout.clustering.iterator.KMeansClusteringPolicy;
 import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.ClassUtils;
@@ -44,13 +39,8 @@ import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
-import org.apache.mahout.common.iterator.sequencefile.PathFilters;
-import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 
 public class FuzzyKMeansDriver extends AbstractJob {
 
@@ -279,11 +269,22 @@ public class FuzzyKMeansDriver extends AbstractJob {
     List<Cluster> clusters = new ArrayList<Cluster>();
     FuzzyKMeansUtil.configureWithClusterInfo(clustersIn, clusters);
     
+    if(conf==null){
+      conf = new Configuration();
+    }
+    
     if (clusters.isEmpty()) {
       throw new IllegalStateException("Clusters is empty!");
     }
     
     Path priorClustersPath = new Path(clustersIn, "clusters-0");
+    
+    FileSystem fileSystem = clustersIn.getFileSystem(conf);
+    
+    if(fileSystem.isFile(clustersIn)){
+      priorClustersPath = new Path(clustersIn.getParent(), "prior");
+      fileSystem.mkdirs(priorClustersPath);
+    }
     FuzzyKMeansClusteringPolicy policy = new FuzzyKMeansClusteringPolicy(m, convergenceDelta);
     
     ClusterClassifier prior = new ClusterClassifier(clusters, policy);
