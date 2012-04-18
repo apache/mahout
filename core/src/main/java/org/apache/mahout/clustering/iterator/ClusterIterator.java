@@ -42,19 +42,17 @@ import org.apache.mahout.math.VectorWritable;
 import com.google.common.io.Closeables;
 
 /**
- * This is an experimental clustering iterator which works with a
- * ClusteringPolicy and a prior ClusterClassifier which has been initialized
- * with a set of models. To date, it has been tested with k-means and Dirichlet
- * clustering. See examples DisplayKMeans and DisplayDirichlet which have been
- * switched over to use it.
+ * This is a clustering iterator which works with a set of Vector data and a prior ClusterClassifier which has been
+ * initialized with a set of models. Its implementation is algorithm-neutral and works for any iterative clustering
+ * algorithm (currently k-means, fuzzy-k-means and Dirichlet) that processes all the input vectors in each iteration.
+ * The cluster classifier is configured with a ClusteringPolicy to select the desired clustering algorithm.
  */
 public class ClusterIterator {
   
   public static final String PRIOR_PATH_KEY = "org.apache.mahout.clustering.prior.path";
   
   /**
-   * Iterate over data using a prior-trained ClusterClassifier, for a number of
-   * iterations
+   * Iterate over data using a prior-trained ClusterClassifier, for a number of iterations
    * 
    * @param policy
    *          the ClusteringPolicy to use
@@ -90,8 +88,8 @@ public class ClusterIterator {
   }
   
   /**
-   * Iterate over data using a prior-trained ClusterClassifier, for a number of
-   * iterations using a sequential implementation
+   * Iterate over data using a prior-trained ClusterClassifier, for a number of iterations using a sequential
+   * implementation
    * 
    * @param inPath
    *          a Path to input VectorWritables
@@ -143,8 +141,8 @@ public class ClusterIterator {
   }
   
   /**
-   * Iterate over data using a prior-trained ClusterClassifier, for a number of
-   * iterations using a mapreduce implementation
+   * Iterate over data using a prior-trained ClusterClassifier, for a number of iterations using a mapreduce
+   * implementation
    * 
    * @param inPath
    *          a Path to input VectorWritables
@@ -199,8 +197,7 @@ public class ClusterIterator {
   }
   
   /**
-   * Return if all of the Clusters in the parts in the filePath have converged
-   * or not
+   * Return if all of the Clusters in the parts in the filePath have converged or not
    * 
    * @param filePath
    *          the file path to the single file containing the clusters
