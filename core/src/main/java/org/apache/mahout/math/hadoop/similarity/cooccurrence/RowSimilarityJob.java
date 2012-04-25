@@ -387,14 +387,16 @@ public class RowSimilarityJob extends AbstractJob {
     protected void map(IntWritable row, VectorWritable similaritiesWritable, Context ctx)
         throws IOException, InterruptedException {
       Vector similarities = similaritiesWritable.get();
+      // For performance reasons moved transposedPartial creation out of the while loop and reusing the same vector
+      Vector transposedPartial = similarities.like();
       TopK<Vector.Element> topKQueue = new TopK<Vector.Element>(maxSimilaritiesPerRow, Vectors.BY_VALUE);
       Iterator<Vector.Element> nonZeroElements = similarities.iterateNonZero();
       while (nonZeroElements.hasNext()) {
         Vector.Element nonZeroElement = nonZeroElements.next();
         topKQueue.offer(new Vectors.TemporaryElement(nonZeroElement));
-        Vector transposedPartial = similarities.like();
         transposedPartial.setQuick(row.get(), nonZeroElement.get());
         ctx.write(new IntWritable(nonZeroElement.index()), new VectorWritable(transposedPartial));
+        transposedPartial.setQuick(row.get(), 0.0);
       }
       Vector topKSimilarities = similarities.like();
       for (Vector.Element topKSimilarity : topKQueue.retrieve()) {
