@@ -21,6 +21,8 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
@@ -91,6 +93,13 @@ public final class ConnectionPoolDataSource implements DataSource {
   @Override
   public boolean isWrapperFor(Class<?> iface) throws SQLException {
     return delegate.isWrapperFor(iface);
+  }
+
+  // This exists for compatibility with Java 7 / JDBC 4.1, but doesn't exist
+  // in Java 6. In Java 7 it would @Override, but not in 6.
+  // @Override
+  public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+    throw new SQLFeatureNotSupportedException();
   }
   
   private static class ConfiguringConnectionFactory implements ConnectionFactory {
