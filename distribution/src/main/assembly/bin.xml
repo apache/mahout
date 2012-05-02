@@ -17,6 +17,7 @@
       </includes>
       <excludes>
         <exclude>mahout-*</exclude>
+        <exclude>hadoop-*</exclude>
       </excludes>
       <outputDirectory>lib</outputDirectory>
     </fileSet>
@@ -26,6 +27,13 @@
         <include>mahout-collections*.jar</include>
       </includes>
       <outputDirectory>lib</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../examples/target/dependency</directory>
+      <includes>
+        <include>hadoop-*.jar</include>
+      </includes>
+      <outputDirectory>lib/hadoop</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>${project.basedir}/../math/target</directory>

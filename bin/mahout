@@ -121,7 +121,7 @@ CLASSPATH=${CLASSPATH}:$MAHOUT_CONF_DIR
 
 if [ "$MAHOUT_LOCAL" != "" ]; then
   echo "MAHOUT_LOCAL is set, so we don't add HADOOP_CONF_DIR to classpath."
-else
+elif [ -n "$HADOOP_CONF_DIR"  ] ; then
   echo "MAHOUT_LOCAL is not set; adding HADOOP_CONF_DIR to classpath."
   CLASSPATH=${CLASSPATH}:$HADOOP_CONF_DIR
 fi
@@ -199,13 +199,19 @@ done
 
 # run it
 
-if [ "$HADOOP_HOME" = "" ] || [ "$MAHOUT_LOCAL" != "" ] ; then
-  if [ "$HADOOP_HOME" = "" ] ; then
-    echo "no HADOOP_HOME set, running locally"
+HADOOP_BINARY=$(PATH="${HADOOP_HOME:-${HADOOP_PREFIX}}/bin:$PATH" which hadoop 2>/dev/null)
+if [ -x "$HADOOP_BINARY" ] ; then
+  HADOOP_BINARY_CLASSPATH=$("$HADOOP_BINARY" classpath)
+fi
+
+if [ ! -x "$HADOOP_BINARY" ] || [ "$MAHOUT_LOCAL" != "" ] ; then
+  if [ ! -x "$HADOOP_BINARY" ] ; then
+    echo "hadoop binary is not in PATH,HADOOP_HOME/bin,HADOOP_PREFIX/bin, running locally"
   elif [ "$MAHOUT_LOCAL" != "" ] ; then
     echo "MAHOUT_LOCAL is set, running locally"
   fi
 #  echo "CLASSPATH: $CLASSPATH"
+    CLASSPATH="${CLASSPATH}:${MAHOUT_HOME/lib/hadoop/*}"
     case $1 in
     (classpath)
       echo $CLASSPATH
@@ -214,13 +220,7 @@ if [ "$HADOOP_HOME" = "" ] || [ "$MAHOUT_LOCAL" != "" ] ; then
       exec "$JAVA" $JAVA_HEAP_MAX $MAHOUT_OPTS -classpath "$CLASSPATH" $CLASS "$@"
     esac
 else
-  echo "Running on hadoop, using HADOOP_HOME=$HADOOP_HOME"
-  if [ "$HADOOP_CONF_DIR" = "" ] ; then
-    HADOOP_CONF_DIR=$HADOOP_HOME/conf
-    echo "No HADOOP_CONF_DIR set, using $HADOOP_HOME/conf "
-  else
-    echo "HADOOP_CONF_DIR=$HADOOP_CONF_DIR"
-  fi
+  echo "Running on hadoop, using $HADOOP_BINARY and HADOOP_CONF_DIR=$HADOOP_CONF_DIR"
 	
   if [ "$MAHOUT_JOB" = "" ] ; then
     echo "ERROR: Could not find mahout-examples-*.job in $MAHOUT_HOME or $MAHOUT_HOME/examples/target, please run 'mvn install' to create the .job file"
@@ -228,8 +228,9 @@ else
   else
     case "$1" in
     (hadoop)
+      shift
       export HADOOP_CLASSPATH=$MAHOUT_CONF_DIR:${HADOOP_CLASSPATH}:$CLASSPATH
-      exec "$HADOOP_HOME/bin/$@"
+      exec "$HADOOP_BINARY" "$@"
       ;;
     (classpath)
       echo $CLASSPATH
@@ -237,7 +238,7 @@ else
     (*)
       echo "MAHOUT-JOB: $MAHOUT_JOB"
       export HADOOP_CLASSPATH=$MAHOUT_CONF_DIR:${HADOOP_CLASSPATH}
-      exec "$HADOOP_HOME/bin/hadoop" --config $HADOOP_CONF_DIR jar $MAHOUT_JOB $CLASS "$@"
+      exec "$HADOOP_BINARY" jar $MAHOUT_JOB $CLASS "$@"
     esac
   fi
 fi
