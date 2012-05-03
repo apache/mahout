@@ -23,9 +23,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorIterable;
 import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.PlusMult;
-import org.apache.mahout.math.matrix.DoubleMatrix1D;
-import org.apache.mahout.math.matrix.DoubleMatrix2D;
-import org.apache.mahout.math.matrix.linalg.EigenvalueDecomposition;
+import org.apache.mahout.math.solver.EigenDecomposition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +48,7 @@ import java.util.Map;
  * problems into floating point <em>underflow</em> (ie, very small singular values will become invisible, as they
  * will appear to be zero and the algorithm will terminate).
  * </p>
- * <p>This implementation uses {@link org.apache.mahout.math.matrix.linalg.EigenvalueDecomposition} to do the
+ * <p>This implementation uses {@link EigenDecomposition} to do the
  * eigenvalue extraction from the small (desiredRank x desiredRank) tridiagonal matrix.  Numerical stability is
  * achieved via brute-force: re-orthogonalization against all previous eigenvectors is computed after every pass.
  * This can be made smarter if (when!) this proves to be a major bottleneck.  Of course, this step can be parallelized
@@ -140,16 +138,16 @@ public class LanczosSolver {
 
     log.info("Lanczos iteration complete - now to diagonalize the tri-diagonal auxiliary matrix.");
     // at this point, have tridiag all filled out, and basis is all filled out, and orthonormalized
-    EigenvalueDecomposition decomp = new EigenvalueDecomposition(triDiag);
+    EigenDecomposition decomp = new EigenDecomposition(triDiag);
 
-    DoubleMatrix2D eigenVects = decomp.getV();
-    DoubleMatrix1D eigenVals = decomp.getRealEigenvalues();
+    Matrix eigenVects = decomp.getV();
+    Vector eigenVals = decomp.getRealEigenvalues();
     endTime(TimingSection.TRIDIAG_DECOMP);
     startTime(TimingSection.FINAL_EIGEN_CREATE);
     for (int row = 0; row < i; row++) {
       Vector realEigen = null;
       // the eigenvectors live as columns of V, in reverse order.  Weird but true.
-      DoubleMatrix1D ejCol = eigenVects.viewColumn(i - row - 1);
+      Vector ejCol = eigenVects.viewColumn(i - row - 1);
       int size = Math.min(ejCol.size(), state.getBasisSize());
       for (int j = 0; j < size; j++) {
         double d = ejCol.get(j);

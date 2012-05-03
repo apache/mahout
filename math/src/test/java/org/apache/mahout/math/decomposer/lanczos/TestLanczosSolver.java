@@ -21,8 +21,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.decomposer.SolverTest;
-import org.apache.mahout.math.matrix.DoubleMatrix1D;
-import org.apache.mahout.math.matrix.linalg.EigenvalueDecomposition;
+import org.apache.mahout.math.solver.EigenDecomposition;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,8 +44,8 @@ public final class TestLanczosSolver extends SolverTest {
     // set initial vector?
     solver.solve(state, desiredRank, true);
 
-    EigenvalueDecomposition decomposition = new EigenvalueDecomposition(m);
-    DoubleMatrix1D eigenvalues = decomposition.getRealEigenvalues();
+    EigenDecomposition decomposition = new EigenDecomposition(m);
+    Vector eigenvalues = decomposition.getRealEigenvalues();
 
     float fractionOfEigensExpectedGood = 0.6f;
     for(int i = 0; i < fractionOfEigensExpectedGood * desiredRank; i++) {
@@ -55,7 +54,7 @@ public final class TestLanczosSolver extends SolverTest {
       log.info("{} : L = {}, E = {}", new Object[] {i, s, e});
       assertTrue("Singular value differs from eigenvalue", Math.abs((s-e)/e) < ERROR_TOLERANCE);
       Vector v = state.getRightSingularVector(i);
-      Vector v2 = decomposition.getV().viewColumn(eigenvalues.size() - i - 1).toVector();
+      Vector v2 = decomposition.getV().viewColumn(eigenvalues.size() - i - 1);
       double error = 1 - Math.abs(v.dot(v2)/(v.norm(2) * v2.norm(2)));
       log.info("error: {}", error);
       assertTrue(i + ": 1 - cosAngle = " + error, error < ERROR_TOLERANCE);
