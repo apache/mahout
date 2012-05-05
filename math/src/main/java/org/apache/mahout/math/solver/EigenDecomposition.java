@@ -142,7 +142,7 @@ public class EigenDecomposition {
 
       // Scale to avoid under/overflow.
 
-      double scale = d.norm(1);
+      double scale = d.viewPart(0, i).norm(1);
       double h = 0.0;
 
 
@@ -875,8 +875,6 @@ public class EigenDecomposition {
       }
     }
   }
-
-
 
   private static boolean isSymmetric(Matrix a) {
     /*
