@@ -29,6 +29,8 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.cf.taste.common.TopK;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.ClassUtils;
+import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.mapreduce.VectorSumReducer;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -84,6 +86,7 @@ public class RowSimilarityJob extends AbstractJob {
         + DEFAULT_MAX_SIMILARITIES_PER_ROW + ')', String.valueOf(DEFAULT_MAX_SIMILARITIES_PER_ROW));
     addOption("excludeSelfSimilarity", "ess", "compute similarity of rows to themselves?", String.valueOf(false));
     addOption("threshold", "tr", "discard row pairs with a similarity value below this", false);
+    addOption(DefaultOptionCreator.overwriteOption().create());
 
     Map<String,List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
@@ -97,6 +100,14 @@ public class RowSimilarityJob extends AbstractJob {
       similarityClassname = VectorSimilarityMeasures.valueOf(similarityClassnameArg).getClassname();
     } catch (IllegalArgumentException iae) {
       similarityClassname = similarityClassnameArg;
+    }
+
+    // Clear the output and temp paths if the overwrite option has been set
+    if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
+      // Clear the temp path
+      HadoopUtil.delete(getConf(), getTempPath());
+      // Clear the output path
+      HadoopUtil.delete(getConf(), getOutputPath());
     }
 
     int maxSimilaritiesPerRow = Integer.parseInt(getOption("maxSimilaritiesPerRow"));
