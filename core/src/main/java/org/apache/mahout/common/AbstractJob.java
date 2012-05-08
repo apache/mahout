@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -39,6 +40,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
@@ -51,6 +53,8 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.vectorizer.DefaultAnalyzer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -420,6 +424,35 @@ public abstract class AbstractJob extends Configured implements Tool {
    */
   public boolean hasOption(String optionName) {
     return argMap.containsKey(keyFor(optionName));
+  }
+
+
+  /**
+   * Get the cardinality of the input vectors
+   *
+   * @param matrix
+   * @return the cardinality of the vector
+   */
+  public int getDimensions(Path matrix) throws IOException, InstantiationException, IllegalAccessException {
+
+    SequenceFile.Reader reader = null;
+    try {
+      reader = new SequenceFile.Reader(FileSystem.get(getConf()), matrix, getConf());
+
+      Writable row = (Writable) reader.getKeyClass().newInstance();
+      VectorWritable vectorWritable = new VectorWritable();
+
+      Preconditions.checkArgument(reader.getValueClass().equals(VectorWritable.class),
+          "value type of sequencefile must be a VectorWritable");
+
+      boolean hasAtLeastOneRow = reader.next(row, vectorWritable);
+      Preconditions.checkState(hasAtLeastOneRow, "matrix must have at least one row");
+
+      return vectorWritable.get().size();
+
+    } finally {
+      Closeables.closeQuietly(reader);
+    }
   }
 
   /** Obtain input and output directories from command-line options or hadoop

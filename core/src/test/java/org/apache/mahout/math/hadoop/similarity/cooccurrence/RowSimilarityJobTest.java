@@ -178,4 +178,26 @@ public class RowSimilarityJobTest extends MahoutTestCase {
     assertEquals(0.0, similarityMatrix.get(2, 2), EPSILON);
   }
 
+  @Test
+  public void testVectorDimensions() throws Exception {
+
+    File inputFile = getTestTempFile("rows");
+
+    Configuration conf = new Configuration();
+    Path inputPath = new Path(inputFile.getAbsolutePath());
+    FileSystem fs = FileSystem.get(inputPath.toUri(), conf);
+
+    MathHelper.writeDistributedRowMatrix(new double[][] {
+        new double[] { 1, 0, 1, 1, 0, 1 },
+        new double[] { 0, 1, 1, 1, 1, 1 },
+        new double[] { 1, 1, 0, 1, 0, 0 } },
+        fs, conf, inputPath);
+
+    RowSimilarityJob rowSimilarityJob = new RowSimilarityJob();
+    rowSimilarityJob.setConf(conf);
+
+    int numberOfColumns = rowSimilarityJob.getDimensions(inputPath);
+
+    assertEquals(6, numberOfColumns);
+  }
 }

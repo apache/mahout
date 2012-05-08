@@ -20,8 +20,10 @@ package org.apache.mahout.math.hadoop.similarity.cooccurrence;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Ints;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -79,7 +81,7 @@ public class RowSimilarityJob extends AbstractJob {
 
     addInputOption();
     addOutputOption();
-    addOption("numberOfColumns", "r", "Number of columns in the input matrix");
+    addOption("numberOfColumns", "r", "Number of columns in the input matrix", false);
     addOption("similarityClassname", "s", "Name of distributed similarity class to instantiate, alternatively use "
         + "one of the predefined similarities (" + VectorSimilarityMeasures.list() + ')');
     addOption("maxSimilaritiesPerRow", "m", "Number of maximum similarities per row (default: "
@@ -93,7 +95,16 @@ public class RowSimilarityJob extends AbstractJob {
       return -1;
     }
 
-    int numberOfColumns = Integer.parseInt(getOption("numberOfColumns"));
+    int numberOfColumns;
+
+    if (hasOption("numberOfColumns")) {
+      // Number of columns explicitly specified via CLI
+      numberOfColumns = Integer.parseInt(getOption("numberOfColumns"));
+    } else {
+      // else get the number of columns by determining the cardinality of a vector in the input matrix
+      numberOfColumns = getDimensions(getInputPath());
+    }
+
     String similarityClassnameArg = getOption("similarityClassname");
     String similarityClassname;
     try {
