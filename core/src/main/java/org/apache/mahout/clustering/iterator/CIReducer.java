@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -62,9 +63,10 @@ public class CIReducer extends Reducer<IntWritable,ClusterWritable,IntWritable,C
    */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
-    String priorClustersPath = context.getConfiguration().get(ClusterIterator.PRIOR_PATH_KEY);
+    Configuration conf = context.getConfiguration();
+    String priorClustersPath = conf.get(ClusterIterator.PRIOR_PATH_KEY);
     classifier = new ClusterClassifier();
-    classifier.readFromSeqFiles(new Path(priorClustersPath));
+    classifier.readFromSeqFiles(conf, new Path(priorClustersPath));
     policy = classifier.getPolicy();
     policy.update(classifier);
     super.setup(context);

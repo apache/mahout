@@ -55,9 +55,9 @@ public class DisplayKMeans extends DisplayClustering {
     HadoopUtil.delete(conf, output);
     
     RandomUtils.useTestSeed();
-    DisplayClustering.generateSamples();
+    generateSamples();
     writeSampleData(samples);
-    boolean runClusterer = false;
+    boolean runClusterer = true;
     double convergenceDelta = 0.001;
     if (runClusterer) {
       int numClusters = 3;
@@ -81,20 +81,21 @@ public class DisplayKMeans extends DisplayClustering {
       initialClusters.add(new org.apache.mahout.clustering.kmeans.Kluster(point, id++, measure));
     }
     ClusterClassifier prior = new ClusterClassifier(initialClusters, new KMeansClusteringPolicy(convergenceDelta));
-    Path priorPath = new Path(output, "clusters-0");
+    Path priorPath = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);
     prior.writeToSeqFiles(priorPath);
     
     int maxIter = 10;
-    new ClusterIterator().iterateSeq(samples, priorPath, output, maxIter);
+    new ClusterIterator().iterateSeq(conf, samples, priorPath, output, maxIter);
     loadClustersWritable(output);
   }
   
   private static void runSequentialKMeansClusterer(Configuration conf, Path samples, Path output,
       DistanceMeasure measure, int maxIterations, double convergenceDelta) throws IOException, InterruptedException,
       ClassNotFoundException {
-    Path clusters = RandomSeedGenerator.buildRandom(conf, samples, new Path(output, "clusters-0"), 3, measure);
-    KMeansDriver.run(samples, clusters, output, measure, convergenceDelta, maxIterations, true, 0.0, true);
-    loadClusters(output);
+    Path clustersIn = new Path(output, "random-seeds");
+    RandomSeedGenerator.buildRandom(conf, samples, clustersIn, 3, measure);
+    KMeansDriver.run(samples, clustersIn, output, measure, convergenceDelta, maxIterations, true, 0.0, true);
+    loadClustersWritable(output);
   }
   
   // Override the paint() method

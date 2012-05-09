@@ -21,64 +21,67 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 
-import com.google.common.base.Splitter;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.clustering.ModelDistribution;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
+import com.google.common.base.Splitter;
+
 /**
  * Simply describes parameters needs to create a {@link org.apache.mahout.clustering.ModelDistribution}.
  */
 public final class DistributionDescription {
-
+  
   private final String modelFactory;
   private final String modelPrototype;
   private final String distanceMeasure;
   private final int prototypeSize;
-
-  public DistributionDescription(String modelFactory,
-                                 String modelPrototype,
-                                 String distanceMeasure,
-                                 int prototypeSize) {
+  
+  public DistributionDescription(String modelFactory, String modelPrototype, String distanceMeasure, int prototypeSize) {
     this.modelFactory = modelFactory;
     this.modelPrototype = modelPrototype;
     this.distanceMeasure = distanceMeasure;
     this.prototypeSize = prototypeSize;
   }
-
+  
   public String getModelFactory() {
     return modelFactory;
   }
-
+  
   public String getModelPrototype() {
     return modelPrototype;
   }
-
+  
   public String getDistanceMeasure() {
     return distanceMeasure;
   }
-
+  
   public int getPrototypeSize() {
     return prototypeSize;
   }
-
+  
   /**
    * Create an instance of AbstractVectorModelDistribution from the given command line arguments
+   * 
+   * @param conf
+   *          the Configuration
    */
-  public ModelDistribution<VectorWritable> createModelDistribution() {
+  public ModelDistribution<VectorWritable> createModelDistribution(Configuration conf) {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     AbstractVectorModelDistribution modelDistribution;
     try {
       modelDistribution = ClassUtils.instantiateAs(modelFactory, AbstractVectorModelDistribution.class);
-
+      
       Class<? extends Vector> vcl = ccl.loadClass(modelPrototype).asSubclass(Vector.class);
       Constructor<? extends Vector> v = vcl.getConstructor(int.class);
       modelDistribution.setModelPrototype(new VectorWritable(v.newInstance(prototypeSize)));
-
+      
       if (modelDistribution instanceof DistanceMeasureClusterDistribution) {
         DistanceMeasure measure = ClassUtils.instantiateAs(distanceMeasure, DistanceMeasure.class);
+        measure.configure(conf);
         ((DistanceMeasureClusterDistribution) modelDistribution).setMeasure(measure);
       }
     } catch (ClassNotFoundException cnfe) {
@@ -94,12 +97,12 @@ public final class DistributionDescription {
     }
     return modelDistribution;
   }
-
+  
   @Override
   public String toString() {
     return modelFactory + ',' + modelPrototype + ',' + distanceMeasure + ',' + prototypeSize;
   }
-
+  
   public static DistributionDescription fromString(CharSequence s) {
     Iterator<String> tokens = Splitter.on(',').split(s).iterator();
     String modelFactory = tokens.next();
@@ -108,5 +111,5 @@ public final class DistributionDescription {
     int prototypeSize = Integer.parseInt(tokens.next());
     return new DistributionDescription(modelFactory, modelPrototype, distanceMeasure, prototypeSize);
   }
-
+  
 }

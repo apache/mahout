@@ -17,21 +17,20 @@
 
 package org.apache.mahout.clustering.display;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.PathFilter;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.DenseVector;
-
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.util.List;
 
 /**
  * Java desktop graphics class that runs canopy clustering and displays the results.
@@ -79,29 +78,8 @@ public class DisplayCanopy extends DisplayClustering {
     RandomUtils.useTestSeed();
     generateSamples();
     writeSampleData(samples);
-    //boolean b = true;
-    //if (b) {
     CanopyDriver.buildClusters(conf, samples, output, new ManhattanDistanceMeasure(), T1, T2, 0, true);
-    loadClusters(output, new PathFilter() {
-      @Override
-      public boolean accept(Path path) {
-        String pathString = path.toString();
-        return pathString.contains("/clusters-");
-      }
-    });
-    //} else {
-    //  List<Vector> points = new ArrayList<Vector>();
-    //  for (VectorWritable sample : SAMPLE_DATA) {
-    //    points.add(sample.get());
-    //  }
-    //  List<Canopy> canopies = CanopyClusterer.createCanopies(points, new ManhattanDistanceMeasure(), T1, T2);
-    //  CanopyClusterer.updateCentroids(canopies);
-    //  List<Cluster> clusters = new ArrayList<Cluster>();
-    //  for (Canopy canopy : canopies) {
-    //    clusters.add(canopy);
-    //  }
-    //  CLUSTERS.add(clusters);
-    //}
+    loadClustersWritable(output);
 
     new DisplayCanopy();
   }

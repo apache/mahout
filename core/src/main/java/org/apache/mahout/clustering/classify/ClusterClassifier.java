@@ -202,12 +202,14 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
     }
   }
   
-  public void readFromSeqFiles(Path path) throws IOException {
+  public void readFromSeqFiles(Configuration conf, Path path) throws IOException {
     Configuration config = new Configuration();
     List<Cluster> clusters = Lists.newArrayList();
     for (ClusterWritable cw : new SequenceFileDirValueIterable<ClusterWritable>(path, PathType.LIST,
         PathFilters.logsCRCFilter(), config)) {
-      clusters.add(cw.getValue());
+      Cluster cluster = cw.getValue();
+      cluster.configure(conf);
+      clusters.add(cluster);
     }
     this.models = clusters;
     modelClass = models.get(0).getClass().getName();

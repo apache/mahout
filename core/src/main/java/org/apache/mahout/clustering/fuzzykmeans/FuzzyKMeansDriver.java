@@ -24,13 +24,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.classify.ClusterClassificationDriver;
 import org.apache.mahout.clustering.classify.ClusterClassifier;
 import org.apache.mahout.clustering.iterator.ClusterIterator;
+import org.apache.mahout.clustering.iterator.ClusteringPolicy;
 import org.apache.mahout.clustering.iterator.FuzzyKMeansClusteringPolicy;
 import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
 import org.apache.mahout.common.AbstractJob;
@@ -239,7 +239,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
    * @param input
    *          the directory pathname for input points
    * @param clustersIn
-   *          the directory pathname for initial & computed clusters
+   *          the file pathname for initial cluster centers
    * @param output
    *          the directory pathname for output points
    * @param measure
@@ -274,26 +274,18 @@ public class FuzzyKMeansDriver extends AbstractJob {
     }
     
     if (clusters.isEmpty()) {
-      throw new IllegalStateException("Clusters is empty!");
+      throw new IllegalStateException("No input clusters found. Check your -c argument.");
     }
     
-    Path priorClustersPath = new Path(clustersIn, "clusters-0");
-    
-    FileSystem fileSystem = clustersIn.getFileSystem(conf);
-    
-    if(fileSystem.isFile(clustersIn)){
-      priorClustersPath = new Path(clustersIn.getParent(), "prior");
-      fileSystem.mkdirs(priorClustersPath);
-    }
-    FuzzyKMeansClusteringPolicy policy = new FuzzyKMeansClusteringPolicy(m, convergenceDelta);
-    
+    Path priorClustersPath = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);   
+    ClusteringPolicy policy = new FuzzyKMeansClusteringPolicy(m, convergenceDelta);
     ClusterClassifier prior = new ClusterClassifier(clusters, policy);
     prior.writeToSeqFiles(priorClustersPath);
     
     if (runSequential) {
-      new ClusterIterator().iterateSeq(input, priorClustersPath, output, maxIterations);
+      new ClusterIterator().iterateSeq(conf, input, priorClustersPath, output, maxIterations);
     } else {
-      new ClusterIterator().iterateMR(input, priorClustersPath, output, maxIterations);
+      new ClusterIterator().iterateMR(conf, input, priorClustersPath, output, maxIterations);
     }
     return output;
   }

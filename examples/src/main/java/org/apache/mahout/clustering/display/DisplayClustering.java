@@ -37,7 +37,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
@@ -329,20 +328,6 @@ public class DisplayClustering extends Frame {
     }
   }
   
-  protected static List<Cluster> readClusters(Path clustersIn) {
-    List<Cluster> clusters = Lists.newArrayList();
-    Configuration conf = new Configuration();
-    for (Cluster value : new SequenceFileDirValueIterable<Cluster>(clustersIn, PathType.LIST,
-        PathFilters.logsCRCFilter(), conf)) {
-      log.info(
-          "Reading Cluster:{} center:{} numPoints:{} radius:{}",
-          new Object[] {value.getId(), AbstractCluster.formatVector(value.getCenter(), null),
-              value.getNumObservations(), AbstractCluster.formatVector(value.getRadius(), null)});
-      clusters.add(value);
-    }
-    return clusters;
-  }
-  
   protected static List<Cluster> readClustersWritable(Path clustersIn) {
     List<Cluster> clusters = Lists.newArrayList();
     Configuration conf = new Configuration();
@@ -358,29 +343,11 @@ public class DisplayClustering extends Frame {
     return clusters;
   }
   
-  protected static void loadClusters(Path output) throws IOException {
-    Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(output.toUri(), conf);
-    for (FileStatus s : fs.listStatus(output, new ClustersFilter())) {
-      List<Cluster> clusters = readClusters(s.getPath());
-      CLUSTERS.add(clusters);
-    }
-  }
-  
   protected static void loadClustersWritable(Path output) throws IOException {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
     for (FileStatus s : fs.listStatus(output, new ClustersFilter())) {
       List<Cluster> clusters = readClustersWritable(s.getPath());
-      CLUSTERS.add(clusters);
-    }
-  }
-  
-  protected static void loadClusters(Path output, PathFilter filter) throws IOException {
-    Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(output.toUri(), conf);
-    for (FileStatus s : fs.listStatus(output, filter)) {
-      List<Cluster> clusters = readClusters(s.getPath());
       CLUSTERS.add(clusters);
     }
   }

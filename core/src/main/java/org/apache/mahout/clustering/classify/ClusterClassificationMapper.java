@@ -35,7 +35,6 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.Cluster;
-import org.apache.mahout.clustering.dirichlet.DirichletCluster;
 import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.clustering.iterator.ClusteringPolicy;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
@@ -133,9 +132,7 @@ public class ClusterClassificationMapper extends
     while (it.hasNext()) {
       ClusterWritable next = (ClusterWritable) it.next();
       cluster = next.getValue();
-      if(cluster instanceof DirichletCluster){
-        ((DirichletCluster) cluster).getModel().configure(conf);
-      }
+      cluster.configure(conf);
       clusters.add(cluster);
     }
     return clusters;

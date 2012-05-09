@@ -60,12 +60,12 @@ public class DisplayFuzzyKMeans extends DisplayClustering {
     Path samples = new Path("samples");
     Path output = new Path("output");
     Configuration conf = new Configuration();
-    HadoopUtil.delete(conf, samples);
     HadoopUtil.delete(conf, output);
+    HadoopUtil.delete(conf, samples);
     RandomUtils.useTestSeed();
     DisplayClustering.generateSamples();
     writeSampleData(samples);
-    boolean runClusterer = false;
+    boolean runClusterer = true;
     int maxIterations = 10;
     float threshold = 0.001F;
     float m = 1.1F;
@@ -93,16 +93,17 @@ public class DisplayFuzzyKMeans extends DisplayClustering {
     Path priorPath = new Path(output, "classifier-0");
     prior.writeToSeqFiles(priorPath);
     
-    new ClusterIterator().iterateSeq(samples, priorPath, output, maxIterations);
+    new ClusterIterator().iterateSeq(conf, samples, priorPath, output, maxIterations);
     loadClustersWritable(output);
   }
   
   private static void runSequentialFuzzyKClusterer(Configuration conf, Path samples, Path output,
       DistanceMeasure measure, int maxIterations, float m, double threshold) throws IOException,
       ClassNotFoundException, InterruptedException {
-    Path clusters = RandomSeedGenerator.buildRandom(conf, samples, new Path(output, "clusters-0"), 3, measure);
-    FuzzyKMeansDriver.run(samples, clusters, output, measure, threshold, maxIterations, m, true, true, threshold, true);
+    Path clustersIn = new Path(output, "random-seeds");
+    RandomSeedGenerator.buildRandom(conf, samples, clustersIn, 3, measure);
+    FuzzyKMeansDriver.run(samples, clustersIn, output, measure, threshold, maxIterations, m, true, true, threshold, true);
     
-    loadClusters(output);
+    loadClustersWritable(output);
   }
 }

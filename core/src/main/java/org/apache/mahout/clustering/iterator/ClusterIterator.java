@@ -31,7 +31,6 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.classify.ClusterClassifier;
-import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
@@ -91,6 +90,8 @@ public class ClusterIterator {
    * Iterate over data using a prior-trained ClusterClassifier, for a number of iterations using a sequential
    * implementation
    * 
+   * @param conf
+   *          the Configuration
    * @param inPath
    *          a Path to input VectorWritables
    * @param priorPath
@@ -102,11 +103,10 @@ public class ClusterIterator {
    * 
    * @throws IOException
    */
-  public void iterateSeq(Path inPath, Path priorPath, Path outPath, int numIterations) throws IOException {
+  public void iterateSeq(Configuration conf, Path inPath, Path priorPath, Path outPath, int numIterations)
+      throws IOException {
     ClusterClassifier classifier = new ClusterClassifier();
-    classifier.readFromSeqFiles(priorPath);
-    Configuration conf = new Configuration();
-    HadoopUtil.delete(conf, outPath);
+    classifier.readFromSeqFiles(conf, priorPath);
     Path clustersOut = null;
     int iteration = 1;
     while (iteration <= numIterations) {
@@ -144,6 +144,8 @@ public class ClusterIterator {
    * Iterate over data using a prior-trained ClusterClassifier, for a number of iterations using a mapreduce
    * implementation
    * 
+   * @param conf
+   *          the Configuration
    * @param inPath
    *          a Path to input VectorWritables
    * @param priorPath
@@ -153,10 +155,8 @@ public class ClusterIterator {
    * @param numIterations
    *          the int number of iterations to perform
    */
-  public void iterateMR(Path inPath, Path priorPath, Path outPath, int numIterations) throws IOException,
-      InterruptedException, ClassNotFoundException {
-    Configuration conf = new Configuration();
-    HadoopUtil.delete(conf, outPath);
+  public void iterateMR(Configuration conf, Path inPath, Path priorPath, Path outPath, int numIterations)
+      throws IOException, InterruptedException, ClassNotFoundException {
     ClusteringPolicy policy = ClusterClassifier.readPolicy(priorPath);
     Path clustersOut = null;
     int iteration = 1;

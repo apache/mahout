@@ -22,11 +22,9 @@ import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.dirichlet.models.DistanceMeasureClusterDistribution;
 import org.apache.mahout.clustering.dirichlet.models.DistributionDescription;
-import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
@@ -80,74 +78,6 @@ public final class TestDirichletClustering extends MahoutTestCase {
     generateSamples(num, mx, my, sd, 2);
   }
 
-  private static void printResults(Iterable<Cluster[]> result, int significant) {
-    int row = 0;
-    for (Cluster[] r : result) {
-      System.out.print("sample[" + row++ + "]= ");
-      for (Cluster model : r) {
-        if (model.getNumObservations() > significant) {
-          System.out.print(model.asFormatString(null) + ", ");
-        }
-      }
-      System.out.println();
-    }
-    System.out.println();
-  }
-
-  @Test
-  public void testDirichletCluster100() {
-    System.out.println("testDirichletCluster100");
-    generateSamples(40, 1, 1, 3);
-    generateSamples(30, 1, 0, 0.1);
-    generateSamples(30, 0, 1, 0.1);
-
-    DirichletClusterer dc = new DirichletClusterer(sampleData,
-                                                   new GaussianClusterDistribution(new VectorWritable(new DenseVector(2))),
-                                                   1.0,
-                                                   10,
-                                                   1,
-                                                   0);
-    List<Cluster[]> result = dc.cluster(30);
-    printResults(result, 2);
-    assertNotNull(result);
-  }
-
-  @Test
-  public void testDirichletGaussianCluster100() {
-    System.out.println("testDirichletGaussianCluster100");
-    generateSamples(40, 1, 1, 3);
-    generateSamples(30, 1, 0, 0.1);
-    generateSamples(30, 0, 1, 0.1);
-
-    DirichletClusterer dc = new DirichletClusterer(sampleData,
-                                                   new GaussianClusterDistribution(new VectorWritable(new DenseVector(2))),
-                                                   1.0,
-                                                   10,
-                                                   1,
-                                                   0);
-    List<Cluster[]> result = dc.cluster(30);
-    printResults(result, 2);
-    assertNotNull(result);
-  }
-
-  @Test  
-  public void testDirichletDMCluster100() {
-    System.out.println("testDirichletDMCluster100");
-    generateSamples(40, 1, 1, 3);
-    generateSamples(30, 1, 0, 0.1);
-    generateSamples(30, 0, 1, 0.1);
-
-    DirichletClusterer dc = new DirichletClusterer(sampleData,
-                                                   new DistanceMeasureClusterDistribution(new VectorWritable(new DenseVector(2))),
-                                                   1.0,
-                                                   10,
-                                                   1,
-                                                   0);
-    List<Cluster[]> result = dc.cluster(30);
-    printResults(result, 2);
-    assertNotNull(result);
-  }
-  
   @Test
   public void testDirichletClusteringSeq() throws Exception {
     Path output = getTestTempDirPath("output");

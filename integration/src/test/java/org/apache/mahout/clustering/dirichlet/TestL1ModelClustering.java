@@ -23,8 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -35,8 +34,16 @@ import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.Model;
+import org.apache.mahout.clustering.ModelDistribution;
+import org.apache.mahout.clustering.classify.ClusterClassifier;
 import org.apache.mahout.clustering.dirichlet.models.DistanceMeasureClusterDistribution;
+import org.apache.mahout.clustering.dirichlet.models.DistributionDescription;
 import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
+import org.apache.mahout.clustering.iterator.ClusterIterator;
+import org.apache.mahout.clustering.iterator.DirichletClusteringPolicy;
+import org.apache.mahout.common.distance.CosineDistanceMeasure;
+import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.utils.MahoutTestCase;
@@ -48,6 +55,9 @@ import org.apache.mahout.utils.vectors.lucene.VectorMapper;
 import org.apache.mahout.vectorizer.TFIDF;
 import org.apache.mahout.vectorizer.Weight;
 import org.junit.Test;
+
+import com.google.common.collect.Lists;
+import com.google.common.io.Closeables;
 
 public final class TestL1ModelClustering extends MahoutTestCase {
   
@@ -118,7 +128,7 @@ public final class TestL1ModelClustering extends MahoutTestCase {
       "The robber wore a white fleece jacket and a baseball cap.",
       "The English Springer Spaniel is the best of all dogs."};
   
-  private List<VectorWritable> sampleData;
+  private List<Vector> sampleData;
   
   private void getSampleData(String[] docs2) throws IOException {
     sampleData = Lists.newArrayList();
@@ -148,11 +158,11 @@ public final class TestL1ModelClustering extends MahoutTestCase {
     for (Vector vector : iterable) {
       assertNotNull(vector);
       System.out.println("Vector[" + i++ + "]=" + formatVector(vector));
-      sampleData.add(new VectorWritable(vector));
+      sampleData.add(vector);
     }
   }
   
-  private static String formatVector(Vector v) {
+  private String formatVector(Vector v) {
     StringBuilder buf = new StringBuilder();
     int nzero = 0;
     Iterator<Vector.Element> iterateNonZero = v.iterateNonZero();
@@ -179,7 +189,7 @@ public final class TestL1ModelClustering extends MahoutTestCase {
     return buf.toString();
   }
   
-  private static void printSamples(Iterable<Cluster[]> result, int significant) {
+  private void printSamples(Iterable<Cluster[]> result, int significant) {
     int row = 0;
     for (Cluster[] r : result) {
       int sig = 0;
@@ -199,19 +209,19 @@ public final class TestL1ModelClustering extends MahoutTestCase {
     System.out.println();
   }
   
-  private void printClusters(Model<VectorWritable>[] models, List<VectorWritable> samples, String[] docs) {
-    for (int m = 0; m < models.length; m++) {
-      Model<VectorWritable> model = models[m];
+  private void printClusters(List<Cluster> models, String[] docs) {
+    for (int m = 0; m < models.size(); m++) {
+      Cluster model = models.get(m);
       long count = model.getNumObservations();
       if (count == 0) {
         continue;
       }
-      System.out.println("Model[" + m + "] had " + count + " hits (!) and " + (samples.size() - count)
+      System.out.println("Model[" + m + "] had " + count + " hits (!) and " + (sampleData.size() - count)
           + " misses (? in pdf order) during the last iteration:");
-      MapElement[] map = new MapElement[samples.size()];
+      MapElement[] map = new MapElement[sampleData.size()];
       // sort the samples by pdf
-      for (int i = 0; i < samples.size(); i++) {
-        VectorWritable sample = samples.get(i);
+      for (int i = 0; i < sampleData.size(); i++) {
+        VectorWritable sample = new VectorWritable(sampleData.get(i));
         map[i] = new MapElement(model.pdf(sample), docs[i]);
       }
       Arrays.sort(map);
@@ -230,45 +240,81 @@ public final class TestL1ModelClustering extends MahoutTestCase {
   @Test
   public void testDocs() throws Exception {
     getSampleData(DOCS);
-    DirichletClusterer dc = new DirichletClusterer(sampleData, new GaussianClusterDistribution(sampleData.get(0)), 1.0,
-        15, 1, 0);
-    List<Cluster[]> result = dc.cluster(10);
-    assertNotNull(result);
-    printSamples(result, 0);
-    printClusters(result.get(result.size() - 1), sampleData, DOCS);
+    DistributionDescription description = new DistributionDescription(GaussianClusterDistribution.class.getName(),
+        RandomAccessSparseVector.class.getName(), ManhattanDistanceMeasure.class.getName(), sampleData.get(0).size());
+    
+    List<Cluster> models = Lists.newArrayList();
+    ModelDistribution<VectorWritable> modelDist = description.createModelDistribution(new Configuration());
+    for (Model<VectorWritable> cluster : modelDist.sampleFromPrior(15)) {
+      models.add((Cluster) cluster);
+    }
+    
+    ClusterIterator iterator = new ClusterIterator();
+    ClusterClassifier classifier = new ClusterClassifier(models, new DirichletClusteringPolicy(15, 1.0));
+    ClusterClassifier posterior = iterator.iterate(sampleData, classifier, 10);
+    
+    printClusters(posterior.getModels(), DOCS);
   }
   
   @Test
   public void testDMDocs() throws Exception {
+    
     getSampleData(DOCS);
-    DirichletClusterer dc = new DirichletClusterer(sampleData,
-        new DistanceMeasureClusterDistribution(sampleData.get(0)), 1.0, 15, 1, 0);
-    List<Cluster[]> result = dc.cluster(10);
-    assertNotNull(result);
-    printSamples(result, 0);
-    printClusters(result.get(result.size() - 1), sampleData, DOCS);
+    DistributionDescription description = new DistributionDescription(
+        DistanceMeasureClusterDistribution.class.getName(), RandomAccessSparseVector.class.getName(),
+        CosineDistanceMeasure.class.getName(), sampleData.get(0).size());
+    
+    List<Cluster> models = Lists.newArrayList();
+    ModelDistribution<VectorWritable> modelDist = description.createModelDistribution(new Configuration());
+    for (Model<VectorWritable> cluster : modelDist.sampleFromPrior(15)) {
+      models.add((Cluster) cluster);
+    }
+    
+    ClusterIterator iterator = new ClusterIterator();
+    ClusterClassifier classifier = new ClusterClassifier(models, new DirichletClusteringPolicy(15, 1.0));
+    ClusterClassifier posterior = iterator.iterate(sampleData, classifier, 10);
+    
+    printClusters(posterior.getModels(), DOCS);
   }
   
   @Test
   public void testDocs2() throws Exception {
     getSampleData(DOCS2);
-    DirichletClusterer dc = new DirichletClusterer(sampleData, new GaussianClusterDistribution(sampleData.get(0)), 1.0,
-        15, 1, 0);
-    List<Cluster[]> result = dc.cluster(10);
-    assertNotNull(result);
-    printSamples(result, 0);
-    printClusters(result.get(result.size() - 1), sampleData, DOCS2);
+    DistributionDescription description = new DistributionDescription(GaussianClusterDistribution.class.getName(),
+        RandomAccessSparseVector.class.getName(), ManhattanDistanceMeasure.class.getName(), sampleData.get(0).size());
+    
+    List<Cluster> models = Lists.newArrayList();
+    ModelDistribution<VectorWritable> modelDist = description.createModelDistribution(new Configuration());
+    for (Model<VectorWritable> cluster : modelDist.sampleFromPrior(15)) {
+      models.add((Cluster) cluster);
+    }
+    
+    ClusterIterator iterator = new ClusterIterator();
+    ClusterClassifier classifier = new ClusterClassifier(models, new DirichletClusteringPolicy(15, 1.0));
+    ClusterClassifier posterior = iterator.iterate(sampleData, classifier, 10);
+    
+    printClusters(posterior.getModels(), DOCS2);
   }
   
   @Test
   public void testDMDocs2() throws Exception {
-    getSampleData(DOCS2);
-    DirichletClusterer dc = new DirichletClusterer(sampleData,
-        new DistanceMeasureClusterDistribution(sampleData.get(0)), 1.0, 15, 1, 0);
-    List<Cluster[]> result = dc.cluster(10);
-    assertNotNull(result);
-    printSamples(result, 0);
-    printClusters(result.get(result.size() - 1), sampleData, DOCS2);
+    
+    getSampleData(DOCS);
+    DistributionDescription description = new DistributionDescription(
+        DistanceMeasureClusterDistribution.class.getName(), RandomAccessSparseVector.class.getName(),
+        CosineDistanceMeasure.class.getName(), sampleData.get(0).size());
+    
+    List<Cluster> models = Lists.newArrayList();
+    ModelDistribution<VectorWritable> modelDist = description.createModelDistribution(new Configuration());
+    for (Model<VectorWritable> cluster : modelDist.sampleFromPrior(15)) {
+      models.add((Cluster) cluster);
+    }
+    
+    ClusterIterator iterator = new ClusterIterator();
+    ClusterClassifier classifier = new ClusterClassifier(models, new DirichletClusteringPolicy(15, 1.0));
+    ClusterClassifier posterior = iterator.iterate(sampleData, classifier, 10);
+    
+    printClusters(posterior.getModels(), DOCS2);
   }
   
 }

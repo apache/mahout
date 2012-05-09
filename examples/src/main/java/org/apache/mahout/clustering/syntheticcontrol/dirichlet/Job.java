@@ -139,16 +139,8 @@ public final class Job extends AbstractJob {
           throws Exception{
     Path directoryContainingConvertedInput = new Path(output, DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
-    DirichletDriver.run(directoryContainingConvertedInput,
-                        output,
-                        description,
-                        numModels,
-                        maxIterations,
-                        alpha0,
-                        true,
-                        emitMostLikely,
-                        threshold,
-                        false);
+    DirichletDriver.run(new Configuration(), directoryContainingConvertedInput, output, description, numModels, maxIterations, alpha0, true,
+    emitMostLikely, threshold, false);
     // run ClusterDumper
     ClusterDumper clusterDumper =
         new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output, "clusteredPoints"));

@@ -91,7 +91,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     Path path = new Path(getTestTempDirPath(), "output");
     classifier.writeToSeqFiles(path);
     ClusterClassifier newClassifier = new ClusterClassifier();
-    newClassifier.readFromSeqFiles(path);
+    newClassifier.readFromSeqFiles(new Configuration(), path);
     return newClassifier;
   }
   
@@ -233,13 +233,13 @@ public final class TestClusterClassifier extends MahoutTestCase {
     for (Cluster cluster : prior.getModels()) {
       System.out.println(cluster.asFormatString(null));
     }
-    new ClusterIterator().iterateSeq(pointsPath, path, outPath, 5);
+    new ClusterIterator().iterateSeq(conf, pointsPath, path, outPath, 5);
     
     for (int i = 1; i <= 4; i++) {
       System.out.println("Classifier-" + i);
       ClusterClassifier posterior = new ClusterClassifier();
       String name = i == 4 ? "clusters-4-final" : "clusters-" + i;
-      posterior.readFromSeqFiles(new Path(outPath, name));
+      posterior.readFromSeqFiles(conf, new Path(outPath, name));
       assertEquals(3, posterior.getModels().size());
       for (Cluster cluster : posterior.getModels()) {
         System.out.println(cluster.asFormatString(null));
@@ -267,13 +267,13 @@ public final class TestClusterClassifier extends MahoutTestCase {
     for (Cluster cluster : prior.getModels()) {
       System.out.println(cluster.asFormatString(null));
     }
-    new ClusterIterator().iterateMR(pointsPath, path, outPath, 5);
+    new ClusterIterator().iterateMR(conf, pointsPath, path, outPath, 5);
     
     for (int i = 1; i <= 4; i++) {
       System.out.println("Classifier-" + i);
       ClusterClassifier posterior = new ClusterClassifier();
       String name = i == 4 ? "clusters-4-final" : "clusters-" + i;
-      posterior.readFromSeqFiles(new Path(outPath, name));
+      posterior.readFromSeqFiles(conf, new Path(outPath, name));
       assertEquals(3, posterior.getModels().size());
       for (Cluster cluster : posterior.getModels()) {
         System.out.println(cluster.asFormatString(null));

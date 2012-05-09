@@ -412,8 +412,8 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     DistributionDescription description = new DistributionDescription(
         GaussianClusterDistribution.class.getName(),
         DenseVector.class.getName(), null, 2);
-    DirichletDriver.run(testdata, output, description, 15, 5, 1.0, true, true,
-        0, true);
+    DirichletDriver.run(new Configuration(), testdata, output, description, 15, 5, 1.0, true,
+    true, (double) 0, true);
     int numIterations = 10;
     Configuration conf = new Configuration();
     Path clustersIn = new Path(output, "clusters-5-final");
