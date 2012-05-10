@@ -135,8 +135,8 @@ public final class RecommenderJob extends AbstractJob {
     int maxPrefsPerUserInItemSimilarity = Integer.parseInt(getOption("maxPrefsPerUserInItemSimilarity"));
     int maxSimilaritiesPerItem = Integer.parseInt(getOption("maxSimilaritiesPerItem"));
     String similarityClassname = getOption("similarityClassname");
-    double threshold = parsedArgs.containsKey("threshold") ?
-            Double.parseDouble(getOption("threshold")) : RowSimilarityJob.NO_THRESHOLD;
+    double threshold = hasOption("threshold") ?
+                 Double.parseDouble(getOption("threshold")) : RowSimilarityJob.NO_THRESHOLD;
 
 
     Path prepPath = getTempPath("preparePreferenceMatrix");
