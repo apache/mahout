@@ -50,7 +50,7 @@ public final class InformationGainRatioTest extends MahoutTestCase {
 
     // run the job
     InformationGainRatio job = new InformationGainRatio();
-    String[] args = { "-i", input.toString() };
+    String[] args = { "-i", input.toString(), "--tempDir", getTestTempDirPath("tmp").toString() };
     ToolRunner.run(job, args);
 
     // check the output

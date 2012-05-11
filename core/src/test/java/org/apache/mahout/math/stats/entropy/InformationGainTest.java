@@ -50,7 +50,7 @@ public final class InformationGainTest extends MahoutTestCase {
 
     // run the job
     InformationGain job = new InformationGain();
-    String[] args = { "-i", input.toString() };
+    String[] args = { "-i", input.toString(), "--tempDir", getTestTempDirPath("tmp").toString() };
     ToolRunner.run(job, args);
 
     // check the output

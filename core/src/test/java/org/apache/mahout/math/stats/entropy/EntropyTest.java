@@ -72,7 +72,8 @@ public final class EntropyTest extends MahoutTestCase {
     }
 
     // run the job
-    String[] args = { "-i", input.toString(), "-o", output.toString(), "-s", source };
+    String[] args = { "-i", input.toString(), "-o", output.toString(), "-s", source,
+        "--tempDir", getTestTempDirPath("tmp").toString() };
     Entropy job = new Entropy();
     ToolRunner.run(job, args);
 

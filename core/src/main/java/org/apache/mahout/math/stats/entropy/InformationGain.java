@@ -84,13 +84,15 @@ public final class InformationGain extends AbstractJob {
   }
 
   private void calculateEntropy() throws Exception {
-    String[] args = { "-i", getInputPath().toString(), "-o", entropyPath.toString(), "-s", "value" };
+    String[] args = { "-i", getInputPath().toString(), "-o", entropyPath.toString(), "-s", "value",
+        "--tempDir", getTempPath().toString() };
     ToolRunner.run(new Entropy(), args);
     entropy = readDoubleFromPath(entropyPath);
   }
 
   private void calculateConditionalEntropy() throws Exception {
-    String[] args = { "-i", getInputPath().toString(), "-o", conditionalEntropyPath.toString() };
+    String[] args = { "-i", getInputPath().toString(), "-o", conditionalEntropyPath.toString(),
+        "--tempDir", getTempPath().toString() };
     ToolRunner.run(new ConditionalEntropy(), args);
     conditionalEntropy = readDoubleFromPath(conditionalEntropyPath);
   }

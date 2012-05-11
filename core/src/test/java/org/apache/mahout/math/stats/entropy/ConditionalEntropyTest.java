@@ -58,7 +58,8 @@ public final class ConditionalEntropyTest extends MahoutTestCase {
 
     // run the job
     Tool job = new ConditionalEntropy();
-    String[] args = { "-i", input.toString(), "-o", output.toString() };
+    String[] args = { "-i", input.toString(), "-o", output.toString(),
+        "--tempDir", getTestTempDirPath("tmp").toString() };
     ToolRunner.run(job, args);
 
     // check the output
