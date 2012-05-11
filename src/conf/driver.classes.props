@@ -39,12 +39,6 @@ org.apache.mahout.clustering.topdown.postprocessor.ClusterOutputPostProcessorDri
 #Freq. Itemset Mining
 org.apache.mahout.fpm.pfpgrowth.FPGrowthDriver = fpg : Frequent Pattern Growth
 #Classification
-#old bayes
-org.apache.mahout.classifier.bayes.PrepareTwentyNewsgroups = prepare20newsgroups : Reformat 20 newsgroups data
-org.apache.mahout.classifier.bayes.WikipediaXmlSplitter = wikipediaXMLSplitter : Reads wikipedia data and creates ch
-org.apache.mahout.classifier.bayes.WikipediaDatasetCreatorDriver = wikipediaDataSetCreator : Splits data set of wikipedia wrt feature like country
-org.apache.mahout.classifier.bayes.TestClassifier = testclassifier : Test the text based Bayes Classifier
-org.apache.mahout.classifier.bayes.TrainClassifier = trainclassifier : Train the text based Bayes Classifier
 #new bayes
 org.apache.mahout.classifier.naivebayes.training.TrainNaiveBayesJob = trainnb : Train the Vector-based Bayes classifier
 org.apache.mahout.classifier.naivebayes.test.TestNaiveBayesDriver = testnb : Test the Vector-based Bayes classifier
@@ -69,7 +63,3 @@ org.apache.mahout.cf.taste.hadoop.similarity.item.ItemSimilarityJob = itemsimila
 org.apache.mahout.cf.taste.hadoop.item.RecommenderJob = recommenditembased : Compute recommendations using item-based collaborative filtering
 org.apache.mahout.cf.taste.hadoop.als.ParallelALSFactorizationJob = parallelALS : ALS-WR factorization of a rating matrix
 org.apache.mahout.cf.taste.hadoop.als.RecommenderJob = recommendfactorized : Compute recommendations using the factorization of a rating matrix
-
-#Link Analysis
-org.apache.mahout.graph.linkanalysis.PageRankJob = pagerank : compute the PageRank of a graph
-org.apache.mahout.graph.linkanalysis.RandomWalkWithRestartJob = randomwalkwithrestart : compute all other vertices' proximity to a source vertex in a graph

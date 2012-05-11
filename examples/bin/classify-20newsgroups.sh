@@ -23,7 +23,7 @@
 #  examples/bin/build-20news.sh
 
 if [ "$1" = "--help" ] || [ "$1" = "--?" ]; then
-  echo "This script runs SGD and Bayes classifiers over the classic 20 News Groups."
+  echo "This script runs the SGD classifier over the classic 20 News Groups."
   exit
 fi
 
@@ -34,14 +34,13 @@ fi
 START_PATH=`pwd`
 
 WORK_DIR=/tmp/mahout-work-${USER}
-algorithm=( naivebayes sgd clean)
+algorithm=( sgd clean)
 if [ -n "$1" ]; then
   choice=$1
 else
   echo "Please select a number to choose the corresponding task to run"
   echo "1. ${algorithm[0]}"
-  echo "2. ${algorithm[1]}"
-  echo "3. ${algorithm[2]} -- cleans up the work area in $WORK_DIR"
+  echo "2. ${algorithm[2]} -- cleans up the work area in $WORK_DIR"
   read -p "Enter your choice : " choice
 fi
 
@@ -68,62 +67,7 @@ cd ../..
 
 set -e
 
-if [ "x$alg" == "xnaivebayes" ]; then
-  echo "Preparing Training Data"
-  ./bin/mahout org.apache.mahout.classifier.bayes.PrepareTwentyNewsgroups \
-    -p ${WORK_DIR}/20news-bydate/20news-bydate-train \
-    -o ${WORK_DIR}/20news-bydate/bayes-train-input \
-    -a org.apache.mahout.vectorizer.DefaultAnalyzer \
-    -c UTF-8
-
-  echo "Preparing Test Data"
-
-  ./bin/mahout org.apache.mahout.classifier.bayes.PrepareTwentyNewsgroups \
-    -p ${WORK_DIR}/20news-bydate/20news-bydate-test \
-    -o ${WORK_DIR}/20news-bydate/bayes-test-input \
-    -a org.apache.mahout.vectorizer.DefaultAnalyzer \
-    -c UTF-8
-
-  TEST_METHOD="sequential"
-
-  # if we're set up to run on a cluster..
-  if [ "$HADOOP_HOME" != "" ]; then
-      # mapreduce test method used on hadoop
-      TEST_METHOD="mapreduce"
-
-      set +e
-      hadoop dfs -rmr \
-        ${WORK_DIR}/20news-bydate/bayes-train-input
-
-      hadoop dfs -rmr \
-        ${WORK_DIR}/20news-bydate/bayes-test-input
-
-      set -e
-      hadoop dfs -put \
-        ${WORK_DIR}/20news-bydate/bayes-train-input \
-        ${WORK_DIR}/20news-bydate/bayes-train-input
-
-      hadoop dfs -put \
-        ${WORK_DIR}/20news-bydate/bayes-test-input \
-        ${WORK_DIR}/20news-bydate/bayes-test-input
-  fi
-
-
-  ./bin/mahout trainclassifier \
-    -i ${WORK_DIR}/20news-bydate/bayes-train-input \
-    -o ${WORK_DIR}/20news-bydate/bayes-model \
-    -type bayes \
-    -ng 1 \
-    -source hdfs
-
-  ./bin/mahout testclassifier \
-    -m ${WORK_DIR}/20news-bydate/bayes-model \
-    -d ${WORK_DIR}/20news-bydate/bayes-test-input \
-    -type bayes \
-    -ng 1 \
-    -source hdfs \
-    -method ${TEST_METHOD}
-elif [ "x$alg" == "xsgd" ]; then
+if [ "x$alg" == "xsgd" ]; then
   if [ ! -e "/tmp/news-group.model" ]; then
     echo "Training on ${WORK_DIR}/20news-bydate/20news-bydate-train/"
     ./bin/mahout org.apache.mahout.classifier.sgd.TrainNewsGroups ${WORK_DIR}/20news-bydate/20news-bydate-train/
