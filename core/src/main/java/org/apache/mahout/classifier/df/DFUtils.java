@@ -17,18 +17,21 @@
 
 package org.apache.mahout.classifier.df;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.classifier.df.node.Node;
-import org.apache.mahout.ga.watchmaker.OutputUtils;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Utility class that contains various helper methods
@@ -116,14 +119,18 @@ public final class DFUtils {
    * @throws IOException if no file is found
    */
   public static Path[] listOutputFiles(FileSystem fs, Path outputPath) throws IOException {
-    Path[] outfiles = OutputUtils.listOutputFiles(fs, outputPath);
-    if (outfiles.length == 0) {
+    List<Path> outputFiles = Lists.newArrayList();
+    for (FileStatus s : fs.listStatus(outputPath, PathFilters.logsCRCFilter())) {
+      if (!s.isDir() && !s.getPath().getName().startsWith("_")) {
+        outputFiles.add(s.getPath());
+      }
+    }
+    if (outputFiles.isEmpty()) {
       throw new IOException("No output found !");
     }
-    
-    return outfiles;
+    return outputFiles.toArray(new Path[outputFiles.size()]);
   }
-  
+
   /**
    * Formats a time interval in milliseconds to a String in the form "hours:minutes:seconds:millis"
    */
