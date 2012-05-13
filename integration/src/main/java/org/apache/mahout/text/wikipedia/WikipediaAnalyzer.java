@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.analysis;
+package org.apache.mahout.text.wikipedia;
 
 import java.io.Reader;
 import java.util.Set;

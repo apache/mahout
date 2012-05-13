@@ -25,7 +25,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DefaultStringifier;
@@ -35,12 +34,12 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
-
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.mahout.analysis.WikipediaAnalyzer;
 import org.apache.mahout.common.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
 
 /**
  * Maps over Wikipedia xml format and output all document having the category listed in the input category

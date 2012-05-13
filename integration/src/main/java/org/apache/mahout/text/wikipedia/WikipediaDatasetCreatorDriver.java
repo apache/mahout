@@ -41,12 +41,11 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.mahout.analysis.WikipediaAnalyzer;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.iterator.FileLineIterable;
-import org.apache.mahout.common.HadoopUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
