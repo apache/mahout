@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.classifier.sgd;
+package org.apache.mahout.classifier;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ConcurrentHashMultiset;
@@ -45,7 +45,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
 
-final class NewsgroupHelper {
+public final class NewsgroupHelper {
 
   private static final SimpleDateFormat[] DATE_FORMATS = {
           new SimpleDateFormat("", Locale.ENGLISH),
@@ -63,19 +63,19 @@ final class NewsgroupHelper {
   private final FeatureVectorEncoder encoder = new StaticWordValueEncoder("body");
   private final FeatureVectorEncoder bias = new ConstantValueEncoder("Intercept");
   
-  FeatureVectorEncoder getEncoder() {
+  public FeatureVectorEncoder getEncoder() {
     return encoder;
   }
   
-  FeatureVectorEncoder getBias() {
+  public FeatureVectorEncoder getBias() {
     return bias;
   }
   
-  Random getRandom() {
+  public Random getRandom() {
     return rand;
   }
 
-  Vector encodeFeatureVector(File file, int actual, int leakType, Multiset<String> overallCounts)
+  public Vector encodeFeatureVector(File file, int actual, int leakType, Multiset<String> overallCounts)
     throws IOException {
     long date = (long) (1000 * (DATE_REFERENCE + actual * MONTH + 1 * WEEK * rand.nextDouble()));
     Multiset<String> words = ConcurrentHashMultiset.create();
@@ -113,7 +113,7 @@ final class NewsgroupHelper {
     return v;
   }
 
-  private static void countWords(Analyzer analyzer,
+  public static void countWords(Analyzer analyzer,
                                  Collection<String> words,
                                  Reader in,
                                  Multiset<String> overallCounts) throws IOException {

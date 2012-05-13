@@ -17,9 +17,14 @@
 
 package org.apache.mahout.classifier.sgd;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multiset;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+
+import org.apache.mahout.classifier.NewsgroupHelper;
 import org.apache.mahout.ep.State;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
@@ -27,12 +32,9 @@ import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.vectorizer.encoders.Dictionary;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multiset;
 
 public final class SGDHelper {
 

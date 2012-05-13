@@ -17,19 +17,21 @@
 
 package org.apache.mahout.classifier.sgd;
 
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multiset;
-import com.google.common.collect.Ordering;
-import org.apache.mahout.ep.State;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.vectorizer.encoders.Dictionary;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import org.apache.mahout.classifier.NewsgroupHelper;
+import org.apache.mahout.ep.State;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.vectorizer.encoders.Dictionary;
+
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multiset;
+import com.google.common.collect.Ordering;
 
 /**
  * Reads and trains an adaptive logistic regression model on the 20 newsgroups data.
