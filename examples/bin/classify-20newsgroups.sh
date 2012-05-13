@@ -23,7 +23,7 @@
 #  examples/bin/build-20news.sh
 
 if [ "$1" = "--help" ] || [ "$1" = "--?" ]; then
-  echo "This script runs the SGD classifier over the classic 20 News Groups."
+  echo "This script runs SGD and Bayes classifiers over the classic 20 News Groups."
   exit
 fi
 
@@ -34,13 +34,14 @@ fi
 START_PATH=`pwd`
 
 WORK_DIR=/tmp/mahout-work-${USER}
-algorithm=( sgd clean)
+algorithm=( naivebayes sgd clean)
 if [ -n "$1" ]; then
   choice=$1
 else
   echo "Please select a number to choose the corresponding task to run"
   echo "1. ${algorithm[0]}"
-  echo "2. ${algorithm[2]} -- cleans up the work area in $WORK_DIR"
+  echo "2. ${algorithm[1]}"
+  echo "3. ${algorithm[2]} -- cleans up the work area in $WORK_DIR"
   read -p "Enter your choice : " choice
 fi
 
@@ -67,7 +68,15 @@ cd ../..
 
 set -e
 
-if [ "x$alg" == "xsgd" ]; then
+if [ "x$alg" == "xnaivebayes" ]; then
+  if [ ! -e "/tmp/news-group.model" ]; then
+    echo "Training on ${WORK_DIR}/20news-bydate/20news-bydate-train/"
+    ./bin/mahout org.apache.mahout.classifier.naivebayes.TrainNewsGroups ${WORK_DIR}/20news-bydate/20news-bydate-train/ 0 \
+	--input /tmp/news-group-train/ --output ${WORK_DIR}/news-group.naivebayes.model -ls 20 --tempDir ${WORK_DIR}/tmp/ -ow
+  fi
+  echo "Testing on ${WORK_DIR}/20news-bydate/20news-bydate-test/ with model: /tmp/news-group.model"
+  # ./bin/mahout org.apache.mahout.classifier.sgd.TestNewsGroups --input ${WORK_DIR}/20news-bydate/20news-bydate-test/ --model /tmp/news-group.model
+elif [ "x$alg" == "xsgd" ]; then
   if [ ! -e "/tmp/news-group.model" ]; then
     echo "Training on ${WORK_DIR}/20news-bydate/20news-bydate-train/"
     ./bin/mahout org.apache.mahout.classifier.sgd.TrainNewsGroups ${WORK_DIR}/20news-bydate/20news-bydate-train/

@@ -17,23 +17,24 @@
 
 package org.apache.mahout.classifier.naivebayes;
 
-import com.google.common.io.Closeables;
+import java.io.File;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Text;
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.classifier.naivebayes.training.TrainNaiveBayesJob;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.MultiLabelVectorWritable;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.hadoop.MathHelper;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import com.google.common.io.Closeables;
 
 public class NaiveBayesTest extends MahoutTestCase {
 
@@ -42,8 +43,8 @@ public class NaiveBayesTest extends MahoutTestCase {
   private File outputDir;
   private File tempDir;
 
-  static final Text LABEL_STOLEN = new Text("stolen");
-  static final Text LABEL_NOT_STOLEN = new Text("not_stolen");
+  static final String LABEL_STOLEN = "stolen";
+  static final String LABEL_NOT_STOLEN = "not_stolen";
 
   static final Vector.Element COLOR_RED = MathHelper.elem(0, 1);
   static final Vector.Element COLOR_YELLOW = MathHelper.elem(1, 1);
@@ -66,19 +67,19 @@ public class NaiveBayesTest extends MahoutTestCase {
     tempDir = getTestTempDir("tmp");
 
     SequenceFile.Writer writer = new SequenceFile.Writer(FileSystem.get(conf), conf,
-        new Path(inputFile.getAbsolutePath()), Text.class, VectorWritable.class);
+        new Path(inputFile.getAbsolutePath()), IntWritable.class, MultiLabelVectorWritable.class);
 
     try {
-      writer.append(LABEL_STOLEN,      trainingInstance(COLOR_RED, TYPE_SPORTS, ORIGIN_DOMESTIC));
-      writer.append(LABEL_NOT_STOLEN, trainingInstance(COLOR_RED, TYPE_SPORTS, ORIGIN_DOMESTIC));
-      writer.append(LABEL_STOLEN,      trainingInstance(COLOR_RED, TYPE_SPORTS, ORIGIN_DOMESTIC));
-      writer.append(LABEL_NOT_STOLEN, trainingInstance(COLOR_YELLOW, TYPE_SPORTS, ORIGIN_DOMESTIC));
-      writer.append(LABEL_STOLEN,      trainingInstance(COLOR_YELLOW, TYPE_SPORTS, ORIGIN_IMPORTED));
-      writer.append(LABEL_NOT_STOLEN, trainingInstance(COLOR_YELLOW, TYPE_SUV, ORIGIN_IMPORTED));
-      writer.append(LABEL_STOLEN,      trainingInstance(COLOR_YELLOW, TYPE_SUV, ORIGIN_IMPORTED));
-      writer.append(LABEL_NOT_STOLEN, trainingInstance(COLOR_YELLOW, TYPE_SUV, ORIGIN_DOMESTIC));
-      writer.append(LABEL_NOT_STOLEN, trainingInstance(COLOR_RED, TYPE_SUV, ORIGIN_IMPORTED));
-      writer.append(LABEL_STOLEN,      trainingInstance(COLOR_RED, TYPE_SPORTS, ORIGIN_IMPORTED));
+      writer.append(new IntWritable(0), trainingInstance(LABEL_STOLEN, COLOR_RED, TYPE_SPORTS, ORIGIN_DOMESTIC));
+      writer.append(new IntWritable(0), trainingInstance(LABEL_NOT_STOLEN, COLOR_RED, TYPE_SPORTS, ORIGIN_DOMESTIC));
+      writer.append(new IntWritable(0), trainingInstance(LABEL_STOLEN, COLOR_RED, TYPE_SPORTS, ORIGIN_DOMESTIC));
+      writer.append(new IntWritable(0), trainingInstance(LABEL_NOT_STOLEN, COLOR_YELLOW, TYPE_SPORTS, ORIGIN_DOMESTIC));
+      writer.append(new IntWritable(0), trainingInstance(LABEL_STOLEN, COLOR_YELLOW, TYPE_SPORTS, ORIGIN_IMPORTED));
+      writer.append(new IntWritable(0), trainingInstance(LABEL_NOT_STOLEN, COLOR_YELLOW, TYPE_SUV, ORIGIN_IMPORTED));
+      writer.append(new IntWritable(0), trainingInstance(LABEL_STOLEN, COLOR_YELLOW, TYPE_SUV, ORIGIN_IMPORTED));
+      writer.append(new IntWritable(0), trainingInstance(LABEL_NOT_STOLEN, COLOR_YELLOW, TYPE_SUV, ORIGIN_DOMESTIC));
+      writer.append(new IntWritable(0), trainingInstance(LABEL_NOT_STOLEN, COLOR_RED, TYPE_SUV, ORIGIN_IMPORTED));
+      writer.append(new IntWritable(0), trainingInstance(LABEL_STOLEN, COLOR_RED, TYPE_SPORTS, ORIGIN_IMPORTED));
     } finally {
       Closeables.closeQuietly(writer);
     }
@@ -89,7 +90,7 @@ public class NaiveBayesTest extends MahoutTestCase {
     TrainNaiveBayesJob trainNaiveBayes = new TrainNaiveBayesJob();
     trainNaiveBayes.setConf(conf);
     trainNaiveBayes.run(new String[] { "--input", inputFile.getAbsolutePath(), "--output", outputDir.getAbsolutePath(),
-        "--labels", "stolen,not_stolen", "--tempDir", tempDir.getAbsolutePath() });
+        "--labelSize", "2", "--tempDir", tempDir.getAbsolutePath() });
 
     NaiveBayesModel naiveBayesModel = NaiveBayesModel.materialize(new Path(outputDir.getAbsolutePath()), conf);
 
@@ -97,7 +98,7 @@ public class NaiveBayesTest extends MahoutTestCase {
 
     assertEquals(2, classifier.numCategories());
 
-    Vector prediction = classifier.classify(trainingInstance(COLOR_RED, TYPE_SUV, ORIGIN_DOMESTIC).get());
+    Vector prediction = classifier.classify(trainingInstance("", COLOR_RED, TYPE_SUV, ORIGIN_DOMESTIC).getVector());
 
     // should be classified as not stolen
     assertTrue(prediction.get(0) < prediction.get(1));
@@ -108,7 +109,7 @@ public class NaiveBayesTest extends MahoutTestCase {
     TrainNaiveBayesJob trainNaiveBayes = new TrainNaiveBayesJob();
     trainNaiveBayes.setConf(conf);
     trainNaiveBayes.run(new String[] { "--input", inputFile.getAbsolutePath(), "--output", outputDir.getAbsolutePath(),
-        "--labels", "stolen,not_stolen", "--trainComplementary",
+        "--labelSize", "2", "--trainComplementary",
         "--tempDir", tempDir.getAbsolutePath() });
 
     NaiveBayesModel naiveBayesModel = NaiveBayesModel.materialize(new Path(outputDir.getAbsolutePath()), conf);
@@ -117,18 +118,18 @@ public class NaiveBayesTest extends MahoutTestCase {
 
     assertEquals(2, classifier.numCategories());
 
-    Vector prediction = classifier.classify(trainingInstance(COLOR_RED, TYPE_SUV, ORIGIN_DOMESTIC).get());
+    Vector prediction = classifier.classify(trainingInstance("", COLOR_RED, TYPE_SUV, ORIGIN_DOMESTIC).getVector());
 
     // should be classified as not stolen
     assertTrue(prediction.get(0) < prediction.get(1));
   }
 
-  static VectorWritable trainingInstance(Vector.Element... elems) {
+  static MultiLabelVectorWritable trainingInstance(String label, Vector.Element... elems) {
     DenseVector trainingInstance = new DenseVector(6);
     for (Vector.Element elem : elems) {
       trainingInstance.set(elem.index(), elem.get());
     }
-    return new VectorWritable(trainingInstance);
+    return new MultiLabelVectorWritable(trainingInstance, new int[] {label.equals("stolen") ? 0 : 1});
   }
 
 

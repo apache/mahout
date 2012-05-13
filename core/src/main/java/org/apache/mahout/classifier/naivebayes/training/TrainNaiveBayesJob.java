@@ -17,9 +17,10 @@
 
 package org.apache.mahout.classifier.naivebayes.training;
 
-import com.google.common.base.Splitter;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -31,15 +32,8 @@ import org.apache.mahout.classifier.naivebayes.NaiveBayesModel;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
-import org.apache.mahout.common.iterator.sequencefile.PathFilters;
-import org.apache.mahout.common.iterator.sequencefile.PathType;
-import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.common.mapreduce.VectorSumReducer;
 import org.apache.mahout.math.VectorWritable;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 /**
  * This class trains a Naive Bayes Classifier (Parameters for both Naive Bayes and Complementary Naive Bayes)
@@ -60,15 +54,11 @@ public final class TrainNaiveBayesJob extends AbstractJob {
 
   @Override
   public int run(String[] args) throws Exception {
-
     addInputOption();
     addOutputOption();
-    addOption("labels", "l", "comma-separated list of labels to include in training", false);
-
-    addOption(buildOption("extractLabels", "el", "Extract the labels from the input", false, false, ""));
+    addOption("labelSize", "ls", "Number of labels in the input data", String.valueOf(2));
     addOption("alphaI", "a", "smoothing parameter", String.valueOf(1.0f));
     addOption(buildOption("trainComplementary", "c", "train complementary?", false, false, String.valueOf(false)));
-    addOption("labelIndex", "li", "The path to store the label index in", false);
     addOption(DefaultOptionCreator.overwriteOption().create());
     Map<String, List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
@@ -78,21 +68,12 @@ public final class TrainNaiveBayesJob extends AbstractJob {
       HadoopUtil.delete(getConf(), getOutputPath());
       HadoopUtil.delete(getConf(), getTempPath());
     }
-    Path labPath;
-    String labPathStr = getOption("labelIndex");
-    if (labPathStr != null) {
-      labPath = new Path(labPathStr);
-    } else {
-      labPath = getTempPath("labelIndex");
-    }
-    long labelSize = createLabelIndex(labPath);
+    int labelSize = Integer.parseInt(getOption("labelSize"));
     float alphaI = Float.parseFloat(getOption("alphaI"));
     boolean trainComplementary = Boolean.parseBoolean(getOption("trainComplementary"));
 
-
     HadoopUtil.setSerializations(getConf());
-    HadoopUtil.cacheFiles(labPath, getConf());
-
+    
     //add up all the vectors with the same labels, while mapping the labels into our index
     Job indexInstances = prepareJob(getInputPath(), getTempPath(SUMMED_OBSERVATIONS), SequenceFileInputFormat.class,
             IndexInstancesMapper.class, IntWritable.class, VectorWritable.class, VectorSumReducer.class, IntWritable.class,
@@ -132,18 +113,4 @@ public final class TrainNaiveBayesJob extends AbstractJob {
 
     return 0;
   }
-
-  private long createLabelIndex(Path labPath) throws IOException {
-    long labelSize = 0;
-    if (hasOption("labels")) {
-      Iterable<String> labels = Splitter.on(",").split(getOption("labels"));
-      labelSize = BayesUtils.writeLabelIndex(getConf(), labels, labPath);
-    } else if (hasOption("extractLabels")) {
-      SequenceFileDirIterable<Text, IntWritable> iterable =
-              new SequenceFileDirIterable<Text, IntWritable>(getInputPath(), PathType.LIST, PathFilters.logsCRCFilter(), getConf());
-      labelSize = BayesUtils.writeLabelIndex(getConf(), labPath, iterable);
-    }
-    return labelSize;
-  }
-
 }

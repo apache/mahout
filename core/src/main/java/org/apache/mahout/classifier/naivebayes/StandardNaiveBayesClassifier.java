@@ -34,5 +34,4 @@ public class StandardNaiveBayesClassifier extends AbstractNaiveBayesClassifier {
 
     return -Math.log(numerator / denominator);
   }
-  
 }
