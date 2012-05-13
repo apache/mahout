@@ -276,37 +276,7 @@
     </licenses>
     </project>
   </supplement>
-  <!-- watchmaker framework  -->
-  <supplement>
-    <project>
-    <name>Watchmaker Framework</name>
-    <groupId>org.uncommons.watchmaker</groupId>
-    <artifactId>watchmaker-framework</artifactId>
-    <url>https://watchmaker.dev.java.net/</url>
-    <licenses>
-      <license>
-        <name>The Apache Software License, Version 2.0</name>
-        <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-      </license>
-    </licenses>
-    </project>
-   </supplement>
-   <!-- watchmaker swing  -->
-  <supplement>
-    <project>
-    <name>Watchmaker Swing</name>
-    <groupId>org.uncommons.watchmaker</groupId>
-    <artifactId>watchmaker-swing</artifactId>
-    <url>https://watchmaker.dev.java.net/</url>
-    <licenses>
-      <license>
-        <name>The Apache Software License, Version 2.0</name>
-        <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-      </license>
-    </licenses>
-    </project>
- </supplement>
-   <!-- Xpp3  -->
+  <!-- Xpp3  -->
   <supplement>
     <project>
     <name>Xml Pull Parser 3rd Edition</name>

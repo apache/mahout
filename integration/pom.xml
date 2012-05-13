@@ -100,13 +100,6 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>mahout-core</artifactId>
-      <exclusions>
-        <!-- This causes a weird runtime error -->
-        <exclusion>
-          <groupId>org.uncommons.watchmaker</groupId>
-          <artifactId>watchmaker-framework</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
