@@ -316,7 +316,7 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
          }
          HadoopUtil.delete(new Configuration(conf), tfDir);
        }
-      if (processIdf){
+      if (processIdf) {
           TFIDFConverter.processTfIdf(
                  new Path(outputDir, DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER),
                  outputDir, conf, docFrequenciesFeatures, minDf, maxDF, norm, logNormalize,

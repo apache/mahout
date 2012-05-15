@@ -178,7 +178,7 @@ public final class LDADriver extends AbstractJob {
     for (FileStatus fstatus : fs.globStatus(new Path(stateDir, "state-*"))) {
       try {
         int iteration = Integer.parseInt(fstatus.getPath().getName().split("-")[1]);
-        if(iteration > maxIteration) {
+        if (iteration > maxIteration) {
           maxIteration = iteration;
           lastPath = fstatus.getPath();
         }
@@ -260,7 +260,7 @@ public final class LDADriver extends AbstractJob {
       stateIn = stateOut;
       oldLL = ll;
     }
-    if(runSequential) {
+    if (runSequential) {
       computeDocumentTopicProbabilitiesSequential(conf, input, new Path(output, "docTopics"));
     } else {
       computeDocumentTopicProbabilities(conf,

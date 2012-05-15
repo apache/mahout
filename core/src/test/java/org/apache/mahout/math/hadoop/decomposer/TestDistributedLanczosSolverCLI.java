@@ -135,7 +135,7 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
       NamedVector v = (NamedVector) value.get();
       eigenVectors.assignRow(i, v);
       log.info(v.getName());
-      if(EigenVector.getCosAngleError(v.getName()) < 1.0e-3) {
+      if (EigenVector.getCosAngleError(v.getName()) < 1.0e-3) {
         eigenvalues.add(EigenVector.getEigenValue(v.getName()));
       }
       i++;
@@ -152,15 +152,15 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
     }
 
     Collection<Integer> oldEigensFound = Lists.newArrayList();
-    for(int row = 0; row < eigenVectors.numRows(); row++) {
+    for (int row = 0; row < eigenVectors.numRows(); row++) {
       Vector oldEigen = eigenVectors.viewRow(row);
-      if(oldEigen == null) {
+      if (oldEigen == null) {
         break;
       }
-      for(int newRow = 0; newRow < eigenVectors2.numRows(); newRow++) {
+      for (int newRow = 0; newRow < eigenVectors2.numRows(); newRow++) {
         Vector newEigen = eigenVectors2.viewRow(newRow);
-        if(newEigen != null) {
-          if(oldEigen.dot(newEigen) > 0.9) {
+        if (newEigen != null) {
+          if (oldEigen.dot(newEigen) > 0.9) {
             oldEigensFound.add(row);
             break;
           }
@@ -170,14 +170,14 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
     assertEquals("the number of new eigenvectors", 5, i);
 
     Collection<Double> oldEigenValuesNotFound = Lists.newArrayList();
-    for(double d : eigenvalues) {
+    for (double d : eigenvalues) {
       boolean found = false;
-      for(double newD : newEigenValues) {
-        if(Math.abs((d - newD)/d) < 0.1) {
+      for (double newD : newEigenValues) {
+        if (Math.abs((d - newD)/d) < 0.1) {
           found = true;
         }
       }
-      if(!found) {
+      if (!found) {
         oldEigenValuesNotFound.add(d);
       }
     }

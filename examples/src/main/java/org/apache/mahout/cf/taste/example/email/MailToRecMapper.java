@@ -66,7 +66,7 @@ public final class MailToRecMapper extends Mapper<Text, Text, Text, LongWritable
     String[] splits = StringUtils.splitByWholeSeparatorPreserveAllTokens(valStr, separator);
 
     if (splits != null && splits.length > 0) {
-      if (splits.length > refsIdx){
+      if (splits.length > refsIdx) {
         String from = EmailUtility.cleanUpEmailAddress(splits[fromIdx]);
         fromKey = fromDictionary.get(from);
       }

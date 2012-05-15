@@ -53,7 +53,7 @@ public class CSVClusterWriter extends AbstractClusterWriter {
       for (WeightedVectorWritable point : points) {
         Vector theVec = point.getVector();
         line.append(',');
-        if (theVec instanceof NamedVector){
+        if (theVec instanceof NamedVector) {
           line.append(((NamedVector)theVec).getName());
         } else {
           String vecStr = theVec.asFormatString();

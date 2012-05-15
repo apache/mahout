@@ -41,7 +41,7 @@ final class KMeansUtil {
     for (Writable value :
          new SequenceFileDirValueIterable<Writable>(clusterPath, PathType.LIST, PathFilters.partFilter(), conf)) {
       Class<? extends Writable> valueClass = value.getClass();
-      if(valueClass.equals(ClusterWritable.class)){
+      if (valueClass.equals(ClusterWritable.class)) {
     	  ClusterWritable clusterWritable = (ClusterWritable)value;
     	  value = clusterWritable.getValue();
     	  valueClass = value.getClass();

@@ -101,11 +101,11 @@ public class LanczosSolver {
       startTime(TimingSection.ITERATE);
       Vector nextVector = isSymmetric ? corpus.times(currentVector) : corpus.timesSquared(currentVector);
       log.info("{} passes through the corpus so far...", i);
-      if(state.getScaleFactor() <= 0) {
+      if (state.getScaleFactor() <= 0) {
         state.setScaleFactor(calculateScaleFactor(nextVector));
       }
       nextVector.assign(new Scale(1.0 / state.getScaleFactor()));
-      if(previousVector != null) {
+      if (previousVector != null) {
         nextVector.assign(previousVector, new PlusMult(-beta));
       }
       // now orthogonalize
@@ -152,7 +152,7 @@ public class LanczosSolver {
       for (int j = 0; j < size; j++) {
         double d = ejCol.get(j);
         Vector rowJ = state.getBasisVector(j);
-        if(realEigen == null) {
+        if (realEigen == null) {
           realEigen = rowJ.like();
         }
         realEigen.assign(rowJ, new PlusMult(d));
@@ -160,7 +160,7 @@ public class LanczosSolver {
       realEigen = realEigen.normalize();
       state.setRightSingularVector(row, realEigen);
       double e = eigenVals.get(row) * state.getScaleFactor();
-      if(!isSymmetric) {
+      if (!isSymmetric) {
         e = Math.sqrt(e);
       }
       log.info("Eigenvector {} found with eigenvalue {}", row, e);

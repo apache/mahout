@@ -59,7 +59,7 @@ public final class RandomVectorIterable implements Iterable<Vector> {
           public Vector apply(Integer dummy) {
             Vector result =
                 type == VectorType.SPARSE ? new RandomAccessSparseVector(numItems) : new DenseVector(numItems);
-            result.assign(new DoubleFunction(){
+            result.assign(new DoubleFunction() {
               @Override
               public double apply(double ignored) {
                 return random.nextDouble();

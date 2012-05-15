@@ -37,7 +37,7 @@ public class LDASampler {
   public LDASampler(Matrix model, Random random) {
     this.random = random;
     samplers = new Sampler[model.numRows()];
-    for(int i = 0; i < samplers.length; i++) {
+    for (int i = 0; i < samplers.length; i++) {
       samplers[i] = new Sampler(random, model.viewRow(i));
     }
   }
@@ -56,7 +56,7 @@ public class LDASampler {
         "topicDistribution must have same cardinality as the sampling model");
     int[] samples = new int[numSamples];
     Sampler topicSampler = new Sampler(random, topicDistribution);
-    for(int i = 0; i < numSamples; i++) {
+    for (int i = 0; i < numSamples; i++) {
       samples[i] = samplers[topicSampler.sample()].sample();
     }
     return samples;

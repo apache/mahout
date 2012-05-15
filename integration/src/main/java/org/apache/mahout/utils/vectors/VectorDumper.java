@@ -101,7 +101,7 @@ public final class VectorDumper extends AbstractJob {
     FileSystem fs = FileSystem.get(conf);
     Path input = getInputPath();
     FileStatus fileStatus = fs.getFileStatus(input);
-    if (fileStatus.isDir()){
+    if (fileStatus.isDir()) {
       pathArr = FileUtil.stat2Paths(fs.listStatus(input, new OutputFilesFilter()));
     } else {
       FileStatus[] inputPaths = fs.globStatus(input);
@@ -117,7 +117,7 @@ public final class VectorDumper extends AbstractJob {
 
     boolean sortVectors = hasOption("sortVectors");
     boolean quiet = hasOption("quiet");
-    if (quiet == false){
+    if (quiet == false) {
       log.info("Sort? " + sortVectors);
     }
 
@@ -172,7 +172,7 @@ public final class VectorDumper extends AbstractJob {
       Long numItems = null;
       if (hasOption("numItems")) {
         numItems = Long.parseLong(getOption("numItems"));
-        if (quiet){
+        if (quiet) {
           writer.append("#Max Items to dump: ").append(String.valueOf(numItems)).append('\n');
         }
       }

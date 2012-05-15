@@ -58,7 +58,7 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
   /*public MahalanobisDistanceMeasure(Vector meanVector,Matrix inputMatrix, boolean inversionNeeded)
   {
     this.meanVector=meanVector;
-    if(inversionNeeded)
+    if (inversionNeeded)
       setCovarianceMatrix(inputMatrix);
     else
       setInverseCovarianceMatrix(inputMatrix);  

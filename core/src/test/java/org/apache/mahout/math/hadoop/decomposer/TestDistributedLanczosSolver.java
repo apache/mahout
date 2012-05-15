@@ -72,7 +72,7 @@ public final class TestDistributedLanczosSolver extends MahoutTestCase {
     DistributedLanczosSolver solver = new DistributedLanczosSolver();
     Vector intitialVector = solver.getInitialVector(corpus);
     LanczosState state;
-    if(hdfsBackedState) {
+    if (hdfsBackedState) {
       HdfsBackedLanczosState hState = new HdfsBackedLanczosState(corpus,
           desiredRank, intitialVector, new Path(getTestTempDirPath(),
               "lanczosStateDir" + suf(symmetric) + counter));
@@ -83,7 +83,7 @@ public final class TestDistributedLanczosSolver extends MahoutTestCase {
     }
     solver.solve(state, desiredRank, symmetric);
     SolverTest.assertOrthonormal(state);
-    for(int i = 0; i < desiredRank/2; i++) {
+    for (int i = 0; i < desiredRank/2; i++) {
       SolverTest.assertEigen(i, state.getRightSingularVector(i), corpus, 0.1, symmetric);
     }
     counter++;
@@ -108,7 +108,7 @@ public final class TestDistributedLanczosSolver extends MahoutTestCase {
     solver.solve(state, rank, symmetric);
 
     LanczosState allAtOnceState = doTestDistributedLanczosSolver(symmetric, rank, false);
-    for(int i=0; i<state.getIterationNumber(); i++) {
+    for (int i=0; i<state.getIterationNumber(); i++) {
       Vector v = state.getBasisVector(i).normalize();
       Vector w = allAtOnceState.getBasisVector(i).normalize();
       double diff = v.minus(w).norm(2);

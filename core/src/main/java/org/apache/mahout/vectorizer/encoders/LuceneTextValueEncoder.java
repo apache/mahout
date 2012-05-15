@@ -86,7 +86,7 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
     @Override
     public int read(char[] cbuf, int off, int len) {
       int toRead = Math.min(len, buf.remaining());
-      if (toRead > 0){
+      if (toRead > 0) {
         buf.get(cbuf, off, toRead);
         return toRead;
       } else {

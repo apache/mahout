@@ -48,7 +48,7 @@ public final class TestLanczosSolver extends SolverTest {
     Vector eigenvalues = decomposition.getRealEigenvalues();
 
     float fractionOfEigensExpectedGood = 0.6f;
-    for(int i = 0; i < fractionOfEigensExpectedGood * desiredRank; i++) {
+    for (int i = 0; i < fractionOfEigensExpectedGood * desiredRank; i++) {
       double s = state.getSingularValue(desiredRank - i - 1);
       double e = eigenvalues.get(eigenvalues.size() - i - 1);
       log.info("{} : L = {}, E = {}", new Object[] {i, s, e});
@@ -74,7 +74,7 @@ public final class TestLanczosSolver extends SolverTest {
     long time = timeLanczos(corpus, state, rank, false);
     assertTrue("Lanczos taking too long!  Are you in the debugger? :)", time < 10000);
     assertOrthonormal(state);
-    for(int i = 0; i < rank/2; i++) {
+    for (int i = 0; i < rank/2; i++) {
       assertEigen(i, state.getRightSingularVector(i), corpus, ERROR_TOLERANCE, false);
     }
     //assertEigen(eigens, corpus, rank / 2, ERROR_TOLERANCE, false);

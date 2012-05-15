@@ -489,11 +489,11 @@ public final class SparseDoubleMatrix2D extends DoubleMatrix2D {
 
     // cache views
     final DoubleMatrix1D[] Brows = new DoubleMatrix1D[n];
-    for (int i = n; --i >= 0;) {
+    for (int i = n; --i >= 0; ) {
       Brows[i] = B.viewRow(i);
     }
     final DoubleMatrix1D[] Crows = new DoubleMatrix1D[m];
-    for (int i = m; --i >= 0;) {
+    for (int i = m; --i >= 0; ) {
       Crows[i] = C.viewRow(i);
     }
 

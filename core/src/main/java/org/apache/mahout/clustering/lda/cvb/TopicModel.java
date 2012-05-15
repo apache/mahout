@@ -135,9 +135,9 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     this.alpha = alpha;
     this.sampler = new Sampler(RandomUtils.getRandom());
     this.numThreads = numThreads;
-    if(modelWeight != 1) {
+    if (modelWeight != 1) {
       topicSums.assign(Functions.mult(modelWeight));
-      for(int x = 0; x < numTopics; x++) {
+      for (int x = 0; x < numTopics; x++) {
         topicTermCounts.viewRow(x).assign(Functions.mult(modelWeight));
       }
     }
@@ -146,7 +146,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
 
   private static Vector viewRowSums(Matrix m) {
     Vector v = new DenseVector(m.numRows());
-    for(MatrixSlice slice : m) {
+    for (MatrixSlice slice : m) {
       v.set(slice.index(), slice.vector().norm(1));
     }
     return v;
@@ -157,7 +157,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
                                                            new ArrayBlockingQueue<Runnable>(numThreads * 10));
     threadPool.allowCoreThreadTimeOut(false);
     updaters = new Updater[numThreads];
-    for(int i = 0; i < numThreads; i++) {
+    for (int i = 0; i < numThreads; i++) {
       updaters[i] = new Updater();
       threadPool.submit(updaters[i]);
     }
@@ -179,14 +179,14 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   private static Pair<Matrix,Vector> randomMatrix(int numTopics, int numTerms, Random random) {
     Matrix topicTermCounts = new DenseMatrix(numTopics, numTerms);
     Vector topicSums = new DenseVector(numTopics);
-    if(random != null) {
-      for(int x = 0; x < numTopics; x++) {
-        for(int term = 0; term < numTerms; term++) {
+    if (random != null) {
+      for (int x = 0; x < numTopics; x++) {
+        for (int term = 0; term < numTerms; term++) {
           topicTermCounts.viewRow(x).set(term, random.nextDouble());
         }
       }
     }
-    for(int x = 0; x < numTopics; x++) {
+    for (int x = 0; x < numTopics; x++) {
       topicSums.set(x, random == null ? 1.0 : topicTermCounts.viewRow(x).norm(1));
     }
     return Pair.of(topicTermCounts, topicSums);
@@ -197,23 +197,23 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     int numTopics = -1;
     int numTerms = -1;
     List<Pair<Integer, Vector>> rows = Lists.newArrayList();
-    for(Path modelPath : modelPaths) {
-      for(Pair<IntWritable, VectorWritable> row :
+    for (Path modelPath : modelPaths) {
+      for (Pair<IntWritable, VectorWritable> row :
           new SequenceFileIterable<IntWritable, VectorWritable>(modelPath, true, conf)) {
         rows.add(Pair.of(row.getFirst().get(), row.getSecond().get()));
         numTopics = Math.max(numTopics, row.getFirst().get());
-        if(numTerms < 0) {
+        if (numTerms < 0) {
           numTerms = row.getSecond().get().size();
         }
       }
     }
-    if(rows.isEmpty()) {
+    if (rows.isEmpty()) {
       throw new IOException(Arrays.toString(modelPaths) + " have no vectors in it");
     }
     numTopics++;
     Matrix model = new DenseMatrix(numTopics, numTerms);
     Vector topicSums = new DenseVector(numTopics);
-    for(Pair<Integer, Vector> pair : rows) {
+    for (Pair<Integer, Vector> pair : rows) {
       model.viewRow(pair.getFirst()).assign(pair.getSecond());
       topicSums.set(pair.getFirst(), pair.getSecond().norm(1));
     }
@@ -224,7 +224,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   @Override
   public String toString() {
     StringBuilder buf = new StringBuilder();
-    for(int x = 0; x < numTopics; x++) {
+    for (int x = 0; x < numTopics; x++) {
       String v = dictionary != null
           ? vectorToSortedString(topicTermCounts.viewRow(x).normalize(1), dictionary)
           : topicTermCounts.viewRow(x).asFormatString();
@@ -242,7 +242,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   public void reset() {
-    for(int x = 0; x < numTopics; x++) {
+    for (int x = 0; x < numTopics; x++) {
       topicTermCounts.assignRow(x, new SequentialAccessSparseVector(numTerms));
     }
     topicSums.assign(1.0);
@@ -250,13 +250,13 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   public void awaitTermination() {
-    for(Updater updater : updaters) {
+    for (Updater updater : updaters) {
       updater.shutdown();
     }
   }
 
   public void renormalize() {
-    for(int x = 0; x < numTopics; x++) {
+    for (int x = 0; x < numTopics; x++) {
       topicTermCounts.assignRow(x, topicTermCounts.viewRow(x).normalize(1));
       topicSums.assign(1.0);
     }
@@ -270,16 +270,16 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     // now multiply, term-by-term, by the document, to get the weighted distribution of
     // term-topic pairs from this document.
     Iterator<Vector.Element> it = original.iterateNonZero();
-    while(it.hasNext()) {
+    while (it.hasNext()) {
       Vector.Element e = it.next();
-      for(int x = 0; x < numTopics; x++) {
+      for (int x = 0; x < numTopics; x++) {
         Vector docTopicModelRow = docTopicModel.viewRow(x);
         docTopicModelRow.setQuick(e.index(), docTopicModelRow.getQuick(e.index()) * e.get());
       }
     }
     // now recalculate p(topic|doc) by summing contributions from all of pTopicGivenTerm
     topics.assign(0.0);
-    for(int x = 0; x < numTopics; x++) {
+    for (int x = 0; x < numTopics; x++) {
       topics.set(x, docTopicModel.viewRow(x).norm(1));
     }
     // now renormalize so that sum_x(p(x|doc)) = 1
@@ -289,12 +289,12 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   public Vector infer(Vector original, Vector docTopics) {
     Vector pTerm = original.like();
     Iterator<Vector.Element> it = original.iterateNonZero();
-    while(it.hasNext()) {
+    while (it.hasNext()) {
       Vector.Element e = it.next();
       int term = e.index();
       // p(a) = sum_x (p(a|x) * p(x|i))
       double pA = 0;
-      for(int x = 0; x < numTopics; x++) {
+      for (int x = 0; x < numTopics; x++) {
         pA += (topicTermCounts.viewRow(x).get(term) / topicSums.get(x)) * docTopics.get(x);
       }
       pTerm.set(term, pA);
@@ -303,7 +303,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   public void update(Matrix docTopicCounts) {
-    for(int x = 0; x < numTopics; x++) {
+    for (int x = 0; x < numTopics; x++) {
       updaters[x % updaters.length].update(x, docTopicCounts.viewRow(x));
     }
   }
@@ -314,7 +314,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   public void update(int termId, Vector topicCounts) {
-    for(int x = 0; x < numTopics; x++) {
+    for (int x = 0; x < numTopics; x++) {
       Vector v = topicTermCounts.viewRow(x);
       v.set(termId, v.get(termId) + topicCounts.get(x));
     }
@@ -323,7 +323,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
 
   public void persist(Path outputDir, boolean overwrite) throws IOException {
     FileSystem fs = outputDir.getFileSystem(conf);
-    if(overwrite) {
+    if (overwrite) {
       fs.delete(outputDir, true); // CHECK second arg
     }
     DistributedRowMatrixWriter.write(outputDir, conf, topicTermCounts);
@@ -341,7 +341,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
    */
   private void pTopicGivenTerm(Vector document, Vector docTopics, Matrix termTopicDist) {
     // for each topic x
-    for(int x = 0; x < numTopics; x++) {
+    for (int x = 0; x < numTopics; x++) {
       // get p(topic x | document i), or 1.0 if docTopics is null
       double topicWeight = docTopics == null ? 1.0 : docTopics.get(x);
       // get w(term a | topic x)
@@ -353,7 +353,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
 
       // for each term a in document i with non-zero weight
       Iterator<Vector.Element> it = document.iterateNonZero();
-      while(it.hasNext()) {
+      while (it.hasNext()) {
         Vector.Element e = it.next();
         int termIndex = e.index();
 
@@ -371,11 +371,11 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     double perplexity = 0;
     double norm = docTopics.norm(1) + (docTopics.size() * alpha);
     Iterator<Vector.Element> it = document.iterateNonZero();
-    while(it.hasNext()) {
+    while (it.hasNext()) {
       Vector.Element e = it.next();
       int term = e.index();
       double prob = 0;
-      for(int x = 0; x < numTopics; x++) {
+      for (int x = 0; x < numTopics; x++) {
         double d = (docTopics.get(x) + alpha) / norm;
         double p = d * (topicTermCounts.viewRow(x).get(term) + eta)
                    / (topicSums.get(x) + eta * numTerms);
@@ -389,14 +389,14 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   private void normalizeByTopic(Matrix perTopicSparseDistributions) {
     Iterator<Vector.Element> it = perTopicSparseDistributions.viewRow(0).iterateNonZero();
     // then make sure that each of these is properly normalized by topic: sum_x(p(x|t,d)) = 1
-    while(it.hasNext()) {
+    while (it.hasNext()) {
       Vector.Element e = it.next();
       int a = e.index();
       double sum = 0;
-      for(int x = 0; x < numTopics; x++) {
+      for (int x = 0; x < numTopics; x++) {
         sum += perTopicSparseDistributions.viewRow(x).get(a);
       }
-      for(int x = 0; x < numTopics; x++) {
+      for (int x = 0; x < numTopics; x++) {
         perTopicSparseDistributions.viewRow(x).set(a,
             perTopicSparseDistributions.viewRow(x).get(a) / sum);
       }
@@ -407,7 +407,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     List<Pair<String,Double>> vectorValues =
         new ArrayList<Pair<String, Double>>(vector.getNumNondefaultElements());
     Iterator<Vector.Element> it = vector.iterateNonZero();
-    while(it.hasNext()) {
+    while (it.hasNext()) {
       Vector.Element e = it.next();
       vectorValues.add(Pair.of(dictionary != null ? dictionary[e.index()] : String.valueOf(e.index()),
                                e.get()));
@@ -421,7 +421,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     StringBuilder bldr = new StringBuilder(2048);
     bldr.append('{');
     int i = 0;
-    while(listIt.hasNext() && i < 25) {
+    while (listIt.hasNext() && i < 25) {
       i++;
       Pair<String,Double> p = listIt.next();
       bldr.append(p.getFirst());
@@ -429,7 +429,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
       bldr.append(p.getSecond());
       bldr.append(',');
     }
-    if(bldr.length() > 1) {
+    if (bldr.length() > 1) {
       bldr.setCharAt(bldr.length() - 1, '}');
     }
     return bldr.toString();
@@ -454,7 +454,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     public void shutdown() {
       try {
         synchronized (this) {
-          while(!shutdownComplete) {
+          while (!shutdownComplete) {
             shutdown = true;
             wait(10000L); // Arbitrarily, wait 10 seconds rather than forever for this
           }
@@ -465,10 +465,10 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     }
 
     public boolean update(int topic, Vector v) {
-      if(shutdown) { // maybe don't do this?
+      if (shutdown) { // maybe don't do this?
         throw new IllegalStateException("In SHUTDOWN state: cannot submit tasks");
       }
-      while(true) { // keep trying if interrupted
+      while (true) { // keep trying if interrupted
         try {
           // start async operation by submitting to the queue
           queue.put(Pair.of(topic, v));
@@ -481,10 +481,10 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     }
 
     @Override public void run() {
-      while(!shutdown) {
+      while (!shutdown) {
         try {
           Pair<Integer, Vector> pair = queue.poll(1, TimeUnit.SECONDS);
-          if(pair != null) {
+          if (pair != null) {
             updateTopic(pair.getFirst(), pair.getSecond());
           }
         } catch (InterruptedException e) {
@@ -492,7 +492,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
         }
       }
       // in shutdown mode, finish remaining tasks!
-      for(Pair<Integer, Vector> pair : queue) {
+      for (Pair<Integer, Vector> pair : queue) {
         updateTopic(pair.getFirst(), pair.getSecond());
       }
       synchronized (this) {

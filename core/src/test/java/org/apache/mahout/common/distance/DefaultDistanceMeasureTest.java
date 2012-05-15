@@ -91,7 +91,7 @@ public abstract class DefaultDistanceMeasureTest extends MahoutTestCase {
                    ".distance("+ vectors[a].asFormatString() + ", " 
                    + vectors[b].asFormatString() + ')',
                    distanceMatrix[a][b] >= 0);
-        if(vectors[a].plus(vectors[b]).norm(2) == 0 && vectors[a].norm(2) > 0) {
+        if (vectors[a].plus(vectors[b]).norm(2) == 0 && vectors[a].norm(2) > 0) {
           assertTrue("Distance from v to -v is equal to zero" 
                      + vectors[a].asFormatString() + " = -" + vectors[b].asFormatString(), 
                      distanceMatrix[a][b] > 0);

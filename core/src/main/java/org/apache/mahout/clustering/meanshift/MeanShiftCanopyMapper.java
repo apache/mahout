@@ -60,7 +60,7 @@ private Integer numReducers;
       clusterWritable.setValue(canopy);
       context.write(new Text(String.valueOf(reducer)), clusterWritable);
       reducer++;
-      if (reducer >= numReducers){
+      if (reducer >= numReducers) {
     	  reducer=0;
       }
     }

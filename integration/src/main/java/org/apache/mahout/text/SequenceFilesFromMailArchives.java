@@ -227,7 +227,7 @@ public final class SequenceFilesFromMailArchives {
       if (cmdLine.hasOption(bodySeparatorOpt)) {
         options.setBodySeparator(cmdLine.getValue(bodySeparatorOpt).toString());
       }
-      if (cmdLine.hasOption(quotedRegexOpt)){
+      if (cmdLine.hasOption(quotedRegexOpt)) {
         options.setQuotedTextPattern(Pattern.compile(cmdLine.getValue(quotedRegexOpt).toString()));
       }
       long start = System.currentTimeMillis();

@@ -110,11 +110,11 @@ public final class TestHebbianSolver extends SolverTest {
     
     DoubleMatrix inMemoryMatrix = new HashMapDoubleMatrix(_corpusProjectionsVectorFactory, eigens);
     
-    for(Entry<Integer, MapVector> diskEntry : eigens)
+    for (Entry<Integer, MapVector> diskEntry : eigens)
     {
-      for(Entry<Integer, MapVector> inMemoryEntry : inMemoryMatrix)
+      for (Entry<Integer, MapVector> inMemoryEntry : inMemoryMatrix)
       {
-        if(diskEntry.getKey() - inMemoryEntry.getKey() == 0)
+        if (diskEntry.getKey() - inMemoryEntry.getKey() == 0)
         {
           assertTrue("vector with index : " + diskEntry.getKey() + " is not the same on disk as in memory", 
                      Math.abs(1 - diskEntry.getValue().dot(inMemoryEntry.getValue())) < 1e-6);
@@ -155,7 +155,7 @@ public final class TestHebbianSolver extends SolverTest {
     DoubleMatrix2D srm = asSparseDoubleMatrix2D(corpus);
     long timeA = System.nanoTime();
     EigenvalueDecomposition asSparseRealDecomp = new EigenvalueDecomposition(srm);
-    for(int i=0; i<desiredRank; i++)
+    for (int i=0; i<desiredRank; i++)
       asSparseRealDecomp.getEigenvector(i);
     System.out.println("CommonsMath time: " + (System.nanoTime() - timeA)/TimingConstants.NANOS_IN_MILLI + "ms");
     
@@ -168,7 +168,7 @@ public final class TestHebbianSolver extends SolverTest {
     LanczosSolver solver = new LanczosSolver();
     solver.solve(corpus, desiredRank*5, lanczosEigenVectors, lanczosEigenValues);
     
-    for(TimingSection section : LanczosSolver.TimingSection.values())
+    for (TimingSection section : LanczosSolver.TimingSection.values())
     {
       System.out.println("Lanczos " + section.toString() + " = " + (int)(solver.getTimeMillis(section)/1000) + " seconds");
     }
@@ -180,8 +180,8 @@ public final class TestHebbianSolver extends SolverTest {
   private DoubleMatrix2D asSparseDoubleMatrix2D(Matrix corpus)
   {
     DoubleMatrix2D result = new DenseDoubleMatrix2D(corpus.numRows(), corpus.numRows());
-    for(int i=0; i<corpus.numRows(); i++) {
-      for(int j=i; j<corpus.numRows(); j++) {
+    for (int i=0; i<corpus.numRows(); i++) {
+      for (int j=i; j<corpus.numRows(); j++) {
         double v = corpus.getRow(i).dot(corpus.getRow(j));
         result.set(i, j, v);
         result.set(j, i, v);
@@ -193,7 +193,7 @@ public final class TestHebbianSolver extends SolverTest {
 
   public static void printEigenVerify(DoubleMatrix eigens, DoubleMatrix corpus)
   {
-    for(Map.Entry<Integer, MapVector> entry : eigens)
+    for (Map.Entry<Integer, MapVector> entry : eigens)
     {
       MapVector eigen = entry.getValue();
       MapVector afterMultiply = corpus.timesSquared(eigen);

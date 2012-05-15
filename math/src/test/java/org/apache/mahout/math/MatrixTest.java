@@ -70,7 +70,7 @@ public abstract class MatrixTest extends MahoutTestCase {
   public void testIterate() {
     Iterator<MatrixSlice> it = test.iterator();
     MatrixSlice m;
-    while(it.hasNext() && (m = it.next()) != null) {
+    while (it.hasNext() && (m = it.next()) != null) {
       Vector v = m.vector();
       Vector w = test instanceof SparseColumnMatrix ? test.viewColumn(m.index()) : test.viewRow(m.index());
       assertEquals("iterator: " + v + ", randomAccess: " + w, v, w);

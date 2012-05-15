@@ -35,7 +35,7 @@ public final class DistributedRowMatrixWriter {
         IntWritable.class, VectorWritable.class);
     IntWritable topic = new IntWritable();
     VectorWritable vector = new VectorWritable();
-    for(MatrixSlice slice : matrix) {
+    for (MatrixSlice slice : matrix) {
       topic.set(slice.index());
       vector.set(slice.vector());
       writer.append(topic, vector);

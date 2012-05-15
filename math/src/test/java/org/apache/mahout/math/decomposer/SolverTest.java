@@ -55,7 +55,7 @@ public abstract class SolverTest extends MahoutTestCase {
         if (i == j) {
           assertTrue("not norm 1 : " + dot + " (eigen #" + i + ')', Math.abs(1.0 - dot) < errorMargin);
         } else {
-          if(Math.abs(dot) > errorMargin) {
+          if (Math.abs(dot) > errorMargin) {
             log.info("not orthogonal : {} (eigens {}, {})", new Object[] {dot, i, j});
             nonOrthogonals.add("(" + i + ',' + j + ')');
           }
@@ -79,7 +79,7 @@ public abstract class SolverTest extends MahoutTestCase {
         if (i == j) {
           assertTrue("not norm 1 : " + dot + " (eigen #" + i + ')', Math.abs(1.0 - dot) < errorMargin);
         } else {
-          if(Math.abs(dot) > errorMargin) {
+          if (Math.abs(dot) > errorMargin) {
             log.info("not orthogonal : {} (eigens {}, {})", new Object[] {dot, i, j});
             nonOrthogonals.add("(" + i + ',' + j + ')');
           }
@@ -156,16 +156,16 @@ public abstract class SolverTest extends MahoutTestCase {
     Matrix matrix = new DenseMatrix(numRows, numCols);
     // TODO rejigger tests so that it doesn't expect this particular seed
     Random r = new Random(1234L);
-    for(int row = 0; row < numRows; row++) {
+    for (int row = 0; row < numRows; row++) {
       Vector v = new DenseVector(numCols);
-      for(int col = 0; col < numCols; col++) {
+      for (int col = 0; col < numCols; col++) {
         double val = r.nextGaussian();
         v.set(col, val);
       }
       v.assign(Functions.MULT, 1/((row + 1) * v.norm(2)));
       matrix.assignRow(row, v);
     }
-    if(symmetric) {
+    if (symmetric) {
       return matrix.times(matrix.transpose());
     }
     return matrix;

@@ -59,10 +59,10 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
       MatrixSlice mtts = mttIt.next();
       mttMap.put(mtts.index(), mtts.vector());
     }
-    for(Map.Entry<Integer, Vector> entry : mMap.entrySet()) {
+    for (Map.Entry<Integer, Vector> entry : mMap.entrySet()) {
       Integer key = entry.getKey();
       Vector value = entry.getValue();
-      if(value == null || mttMap.get(key) == null) {
+      if (value == null || mttMap.get(key) == null) {
         assertTrue(value == null || value.norm(2) == 0);
         assertTrue(mttMap.get(key) == null || mttMap.get(key).norm(2) == 0);
       } else {
@@ -362,7 +362,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
                                                       String baseTmpDirSuffix) throws IOException {
     Path baseTmpDirPath = getTestTempDirPath(baseTmpDirSuffix);
     Matrix c = SolverTest.randomSequentialAccessSparseMatrix(numRows, nonNullRows, numCols, entriesPerRow, entryMean);
-    if(isSymmetric) {
+    if (isSymmetric) {
       c = c.times(c.transpose());
     }
     return saveToFs(c, baseTmpDirPath);

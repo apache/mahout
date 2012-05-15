@@ -43,7 +43,7 @@ public final class MatrixUtils {
         IntWritable.class, VectorWritable.class);
     IntWritable topic = new IntWritable();
     VectorWritable vector = new VectorWritable();
-    for(MatrixSlice slice : matrix) {
+    for (MatrixSlice slice : matrix) {
       topic.set(slice.index());
       vector.set(slice.vector());
       writer.append(topic, vector);
@@ -56,31 +56,31 @@ public final class MatrixUtils {
     int numCols = -1;
     boolean sparse = false;
     List<Pair<Integer, Vector>> rows = Lists.newArrayList();
-    for(Path modelPath : modelPaths) {
-      for(Pair<IntWritable, VectorWritable> row :
+    for (Path modelPath : modelPaths) {
+      for (Pair<IntWritable, VectorWritable> row :
           new SequenceFileIterable<IntWritable, VectorWritable>(modelPath, true, conf)) {
         rows.add(Pair.of(row.getFirst().get(), row.getSecond().get()));
         numRows = Math.max(numRows, row.getFirst().get());
         sparse = !row.getSecond().get().isDense();
-        if(numCols < 0) {
+        if (numCols < 0) {
           numCols = row.getSecond().get().size();
         }
       }
     }
-    if(rows.isEmpty()) {
+    if (rows.isEmpty()) {
       throw new IOException(Arrays.toString(modelPaths) + " have no vectors in it");
     }
     numRows++;
     Vector[] arrayOfRows = new Vector[numRows];
-    for(Pair<Integer, Vector> pair : rows) {
+    for (Pair<Integer, Vector> pair : rows) {
       arrayOfRows[pair.getFirst()] = pair.getSecond();
     }
     Matrix matrix;
-    if(sparse) {
+    if (sparse) {
       matrix = new SparseRowMatrix(numRows, numCols, arrayOfRows);
     } else {
       matrix = new DenseMatrix(numRows, numCols);
-      for(int i = 0; i < numRows; i++) {
+      for (int i = 0; i < numRows; i++) {
         matrix.assignRow(i, arrayOfRows[i]);
       }
     }
@@ -89,7 +89,7 @@ public final class MatrixUtils {
 
   public static OpenObjectIntHashMap<String> readDictionary(Configuration conf, Path... dictPath) {
     OpenObjectIntHashMap<String> dictionary = new OpenObjectIntHashMap<String>();
-    for(Path dictionaryFile : dictPath) {
+    for (Path dictionaryFile : dictPath) {
       for (Pair<Writable, IntWritable> record
               : new SequenceFileIterable<Writable, IntWritable>(dictionaryFile, true, conf)) {
         dictionary.put(record.getFirst().toString(), record.getSecond().get());
@@ -100,12 +100,12 @@ public final class MatrixUtils {
 
   public static String[] invertDictionary(OpenObjectIntHashMap<String> termIdMap) {
     int maxTermId = -1;
-    for(String term : termIdMap.keys()) {
+    for (String term : termIdMap.keys()) {
       maxTermId = Math.max(maxTermId, termIdMap.get(term));
     }
     maxTermId++;
     String[] dictionary = new String[maxTermId];
-    for(String term : termIdMap.keys()) {
+    for (String term : termIdMap.keys()) {
       dictionary[termIdMap.get(term)] = term;
     }
     return dictionary;

@@ -113,7 +113,7 @@ public class CsvRecordFactory implements RecordFactory {
     targetDictionary = new Dictionary();
   }
 
-  public CsvRecordFactory(String targetName, String idName, Map<String, String> typeMap){
+  public CsvRecordFactory(String targetName, String idName, Map<String, String> typeMap) {
     this(targetName, typeMap);
     this.idName = idName;
   }
@@ -176,7 +176,7 @@ public class CsvRecordFactory implements RecordFactory {
     target = vars.get(targetName);
     
     // record id column
-    if (idName != null){
+    if (idName != null) {
       id = vars.get(idName);
     }
 
@@ -317,7 +317,7 @@ public class CsvRecordFactory implements RecordFactory {
    * @param line the line of content read from CSV file
    * @return the id value of the CSV record
    */
-  public String getIdString(CharSequence line){
+  public String getIdString(CharSequence line) {
     List<String> values = Lists.newArrayList(COMMA.split(line));
     return values.get(id);
   }

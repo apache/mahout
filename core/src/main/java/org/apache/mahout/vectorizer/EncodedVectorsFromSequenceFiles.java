@@ -73,15 +73,15 @@ public final class EncodedVectorsFromSequenceFiles extends AbstractJob {
 
     boolean namedVectors = hasOption("namedVector");
     int cardinality = 5000;
-    if (hasOption("cardinality")){
+    if (hasOption("cardinality")) {
       cardinality = Integer.parseInt(getOption("cardinality"));
     }
     String encoderName = "text";
-    if (hasOption("encoderFieldName")){
+    if (hasOption("encoderFieldName")) {
       encoderName = getOption("encoderFieldName");
     }
     String encoderClass = LuceneTextValueEncoder.class.getName();
-    if (hasOption("encoderClass")){
+    if (hasOption("encoderClass")) {
       encoderClass = getOption("encoderClass");
       ClassUtils.instantiateAs(encoderClass, FeatureVectorEncoder.class, new Class[]{String.class}, new Object[]{encoderName});//try instantiating it
     }

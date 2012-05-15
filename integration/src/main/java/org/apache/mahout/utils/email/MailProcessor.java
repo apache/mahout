@@ -78,7 +78,7 @@ public class MailProcessor {
       boolean inBody = false;
       Pattern quotedTextPattern = options.getQuotedTextPattern();
       for (String nextLine : new FileLineIterable(mboxFile, options.getCharset(), false)) {
-        if (options.isStripQuotedText() && quotedTextPattern.matcher(nextLine).find()){
+        if (options.isStripQuotedText() && quotedTextPattern.matcher(nextLine).find()) {
           continue;
         }
         for (int i = 0; i < matchers.length; i++) {

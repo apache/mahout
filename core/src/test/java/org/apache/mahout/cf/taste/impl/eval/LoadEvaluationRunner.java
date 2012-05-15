@@ -49,7 +49,7 @@ public final class LoadEvaluationRunner {
     System.out.println("Run Items");
     ItemSimilarity similarity = new EuclideanDistanceSimilarity(model);
     Recommender recommender = new GenericItemBasedRecommender(model, similarity); // Use an item-item recommender
-    for (int i = 0; i < LOOPS; i++){
+    for (int i = 0; i < LOOPS; i++) {
       LoadStatistics loadStats = LoadEvaluator.runLoad(recommender, howMany);
       System.out.println(loadStats);
     }
@@ -58,7 +58,7 @@ public final class LoadEvaluationRunner {
     UserSimilarity userSim = new EuclideanDistanceSimilarity(model);
     UserNeighborhood neighborhood = new NearestNUserNeighborhood(10, userSim, model);
     recommender = new GenericUserBasedRecommender(model, neighborhood, userSim);
-    for (int i = 0; i < LOOPS; i++){
+    for (int i = 0; i < LOOPS; i++) {
       LoadStatistics loadStats = LoadEvaluator.runLoad(recommender, howMany);
       System.out.println(loadStats);
     }

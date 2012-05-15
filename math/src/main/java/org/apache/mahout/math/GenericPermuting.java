@@ -139,7 +139,7 @@ public final class GenericPermuting {
     if (pos == null || pos.length < s) {
       pos = new int[s];
     }
-    for (int i = s; --i >= 0;) {
+    for (int i = s; --i >= 0; ) {
       tracks[i] = i;
       pos[i] = i;
     }

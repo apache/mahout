@@ -138,11 +138,11 @@ public abstract class AbstractJob extends Configured implements Tool {
     return new Path(outputPath, path);
   }
 
-  protected File getInputFile(){
+  protected File getInputFile() {
     return inputFile;
   }
 
-  protected File getOutputFile(){
+  protected File getOutputFile() {
     return outputFile;
   }
 
@@ -288,9 +288,9 @@ public abstract class AbstractJob extends Configured implements Tool {
    * @param name The name of the option
    * @return the {@link org.apache.commons.cli2.Option} with the name, else null
    */
-  protected Option getCLIOption(String name){
+  protected Option getCLIOption(String name) {
     for (Option option : options) {
-      if (option.getPreferredName().equals(name)){
+      if (option.getPreferredName().equals(name)) {
         return option;
       }
     }
@@ -370,7 +370,7 @@ public abstract class AbstractJob extends Configured implements Tool {
 
     this.tempPath = new Path(getOption("tempDir"));
 
-    if (!hasOption("quiet")){
+    if (!hasOption("quiet")) {
       log.info("Command line arguments: {}", argMap);
     }
     return argMap;
@@ -388,7 +388,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    */
   public String getOption(String optionName) {
     List<String> list = argMap.get(keyFor(optionName));
-    if (list != null && list.isEmpty() == false){
+    if (list != null && list.isEmpty() == false) {
       return list.get(0);
     }
     return null;
@@ -400,7 +400,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    * @param defaultVal The default value.
    * @return The requested option, else the default value if it doesn't exist
    */
-  public String getOption(String optionName, String defaultVal){
+  public String getOption(String optionName, String defaultVal) {
     String res = getOption(optionName);
     if (res == null) {
       res = defaultVal;
@@ -413,7 +413,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    * @param optionName The unadorned (no "--" prefixing it) option name
    * @return The values, else null.  If the option is present, but has no values, then the result will be an empty list (Collections.emptyList())
    */
-  public List<String> getOptions(String optionName){
+  public List<String> getOptions(String optionName) {
     return argMap.get(keyFor(optionName));
   }
 
@@ -502,7 +502,7 @@ public abstract class AbstractJob extends Configured implements Tool {
 
         // nulls are ok, for cases where options are simple flags.
         List vo = cmdLine.getValues(o);
-        if (vo != null && vo.isEmpty() == false){
+        if (vo != null && vo.isEmpty() == false) {
           List<String> vals = new ArrayList<String>();
           for (Object o1 : vo) {
             vals.add(o1.toString());
@@ -521,9 +521,9 @@ public abstract class AbstractJob extends Configured implements Tool {
    * @param optName The adorned (including "--") option name
    * @return The first value in the match, else null
    */
-  public static String getOption(Map<String, List<String>> args, String optName){
+  public static String getOption(Map<String, List<String>> args, String optName) {
     List<String> res = args.get(optName);
-    if (res != null && res.isEmpty() == false){
+    if (res != null && res.isEmpty() == false) {
       return res.get(0);
     }
     return null;

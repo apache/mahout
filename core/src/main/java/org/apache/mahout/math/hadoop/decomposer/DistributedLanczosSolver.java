@@ -190,7 +190,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
     matrix.setConf(new Configuration(getConf() != null ? getConf() : new Configuration()));
 
     LanczosState state;
-    if(workingDirPath == null) {
+    if (workingDirPath == null) {
       state = new LanczosState(matrix, desiredRank, getInitialVector(matrix));
     } else {
       HdfsBackedLanczosState hState =

@@ -76,17 +76,17 @@ public final class MatrixDumper extends AbstractJob {
     if (doLabels) {
       ps.print("rowid,");
       ps.print(columnLabels[0]);
-      for(int c = 1; c < m.numCols(); c++) {
+      for (int c = 1; c < m.numCols(); c++) {
         ps.print(',' + columnLabels[c]);
       }
       ps.println();
     }
-    for(int r = 0; r < m.numRows(); r++) {
+    for (int r = 0; r < m.numRows(); r++) {
       if (doLabels) {
         ps.print(rowLabels[0] + ',');
       }
       ps.print(Double.toString(m.getQuick(r,0)));
-      for(int c = 1; c < m.numCols(); c++) {
+      for (int c = 1; c < m.numCols(); c++) {
         ps.print(",");
         ps.print(Double.toString(m.getQuick(r,c)));
       }
@@ -121,7 +121,7 @@ public final class MatrixDumper extends AbstractJob {
       return sortLabels(labels);
     }
     String[] sorted = new String[length];
-    for(int i = 1; i <= length; i++) {
+    for (int i = 1; i <= length; i++) {
       sorted[i] = start + i;
     }
     return sorted;
@@ -129,7 +129,7 @@ public final class MatrixDumper extends AbstractJob {
   
   private static String[] sortLabels(Map<String,Integer> labels) {
     String[] sorted = new String[labels.keySet().size()];
-    for(String label: labels.keySet()) {
+    for (String label: labels.keySet()) {
       Integer index = labels.get(label);
       sorted[index] = label;
     }

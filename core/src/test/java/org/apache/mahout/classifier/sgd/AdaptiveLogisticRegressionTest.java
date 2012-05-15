@@ -162,7 +162,7 @@ public final class AdaptiveLogisticRegressionTest extends MahoutTestCase {
     lr.setInterval(2000, 10000);
 
     // start with minimum step size
-    for (int i = 2000; i < 20000;i+=2000) {
+    for (int i = 2000; i < 20000; i+=2000) {
       assertEquals(i + 2000, lr.nextStep(i));
     }
 

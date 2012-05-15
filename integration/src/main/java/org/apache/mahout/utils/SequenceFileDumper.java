@@ -85,7 +85,7 @@ public final class SequenceFileDumper extends AbstractJob {
     }
     try {
       for (Path path : pathArr) {
-        if (!hasOption("quiet")){
+        if (!hasOption("quiet")) {
           writer.append("Input Path: ").append(String.valueOf(path)).append('\n');
         }
 
@@ -100,7 +100,7 @@ public final class SequenceFileDumper extends AbstractJob {
           writer.append(" Value Class: ").append(iterator.getValueClass().toString()).append('\n');
         }
         OpenObjectIntHashMap<String> facets = null;
-        if (hasOption("facets")){
+        if (hasOption("facets")) {
           facets = new OpenObjectIntHashMap<String>();
         }
         long count = 0;
@@ -108,7 +108,7 @@ public final class SequenceFileDumper extends AbstractJob {
           while (iterator.hasNext()) {
             Pair<?, ?> record = iterator.next();
             String key = record.getFirst().toString();
-            if (facets != null){
+            if (facets != null) {
               facets.adjustOrPutValue(key, 1, 1);//either insert or add 1
             }
             count++;
@@ -129,7 +129,7 @@ public final class SequenceFileDumper extends AbstractJob {
             writer.append(": Value: ").append(str.length() > sub 
                                               ? str.substring(0, sub) : str);
             writer.write('\n');
-            if (facets != null){
+            if (facets != null) {
               facets.adjustOrPutValue(key, 1, 1);//either insert or add 1
             }
             count++;

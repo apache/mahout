@@ -185,7 +185,7 @@ public final class GenericItemPreferenceArray implements PreferenceArray {
       }
       swapped = false;
       int max = length - gap;
-      for (int i = 0; i < max; i++){
+      for (int i = 0; i < max; i++) {
         int other = i + gap;
         if (isLess(other, i, type)) {
           swap(i, other);

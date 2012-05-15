@@ -145,7 +145,7 @@ public class ConfusionMatrix {
       }
     }
     Map<String,Integer> labels = Maps.newHashMap();
-    for(Map.Entry<String, Integer> entry : labelMap.entrySet()) {
+    for (Map.Entry<String, Integer> entry : labelMap.entrySet()) {
       labels.put(entry.getKey(), entry.getValue());
     }
     m.setRowLabelBindings(labels);
@@ -172,7 +172,7 @@ public class ConfusionMatrix {
       String[] sorted = sortLabels(labels);
       verifyLabels(length, sorted);
       labelMap.clear();
-      for(int i = 0; i < length; i++) {
+      for (int i = 0; i < length; i++) {
         labelMap.put(sorted[i], i);
       }
     }
@@ -180,7 +180,7 @@ public class ConfusionMatrix {
   
   private static String[] sortLabels(Map<String,Integer> labels) {
     String[] sorted = new String[labels.keySet().size()];
-    for(String label: labels.keySet()) {
+    for (String label: labels.keySet()) {
       Integer index = labels.get(label);
       sorted[index] = label;
     }

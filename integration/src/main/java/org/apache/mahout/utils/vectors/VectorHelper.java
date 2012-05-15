@@ -70,7 +70,7 @@ public final class VectorHelper {
       bldr.append(p.getSecond());
       bldr.append(',');
     }
-    if(bldr.length() > 1) {
+    if (bldr.length() > 1) {
       bldr.setCharAt(bldr.length() - 1, '}');
     }
     return bldr.toString();
@@ -83,14 +83,14 @@ public final class VectorHelper {
   public static List<Pair<Integer, Double>> topEntries(Vector vector, int maxEntries) {
     PriorityQueue<Pair<Integer,Double>> queue = new TDoublePQ<Integer>(-1, maxEntries);
     Iterator<Vector.Element> it = vector.iterateNonZero();
-    while(it.hasNext()) {
+    while (it.hasNext()) {
       Vector.Element e = it.next();
       queue.insertWithOverflow(Pair.of(e.index(), e.get()));
     }
     List<Pair<Integer, Double>> entries = Lists.newArrayList();
     Pair<Integer, Double> pair;
-    while((pair = queue.pop()) != null) {
-      if(pair.getFirst() > -1) {
+    while ((pair = queue.pop()) != null) {
+      if (pair.getFirst() > -1) {
         entries.add(pair);
       }
     }
@@ -102,7 +102,7 @@ public final class VectorHelper {
     List<Pair<Integer, Double>> entries = Lists.newArrayList();
     Iterator<Vector.Element> it = vector.iterateNonZero();
     int i = 0;
-    while(it.hasNext() && i++ < maxEntries) {
+    while (it.hasNext() && i++ < maxEntries) {
       Vector.Element e = it.next();
       entries.add(Pair.of(e.index(), e.get()));
     }
@@ -138,7 +138,7 @@ public final class VectorHelper {
   public static void vectorToCSVString(Vector vector,
                                        boolean namesAsComments,
                                        Appendable bldr) throws IOException {
-    if (namesAsComments && vector instanceof NamedVector){
+    if (namesAsComments && vector instanceof NamedVector) {
       bldr.append('#').append(((NamedVector) vector).getName()).append('\n');
     }
     Iterator<Vector.Element> iter = vector.iterator();

@@ -76,8 +76,8 @@ public final class MatrixWritableTest extends MahoutTestCase {
 	private static void compareMatrices(Matrix m, Matrix m2) {
 		assertEquals(m.numRows(), m2.numRows());
 		assertEquals(m.numCols(), m2.numCols());
-		for(int r = 0; r < m.numRows(); r++) {
-			for(int c = 0; c < m.numCols(); c++) {
+		for (int r = 0; r < m.numRows(); r++) {
+			for (int c = 0; c < m.numCols(); c++) {
 				assertEquals(m.get(r, c), m2.get(r, c), EPSILON);
 			}
 		}
@@ -87,7 +87,7 @@ public final class MatrixWritableTest extends MahoutTestCase {
 		if (bindings != null) {
 			assertEquals(bindings.size(), m.numRows());
 			assertEquals(bindings.size(), bindings2.size());
-			for(Map.Entry<String,Integer> entry : bindings.entrySet()) {
+			for (Map.Entry<String,Integer> entry : bindings.entrySet()) {
 				assertEquals(entry.getValue(), bindings2.get(entry.getKey()));
 			}
 		}
@@ -96,7 +96,7 @@ public final class MatrixWritableTest extends MahoutTestCase {
 		assertEquals(bindings == null, bindings2 == null);
 		if (bindings != null) {
 			assertEquals(bindings.size(), bindings2.size());
-			for(Map.Entry<String,Integer> entry : bindings.entrySet()) {
+			for (Map.Entry<String,Integer> entry : bindings.entrySet()) {
 				assertEquals(entry.getValue(), bindings2.get(entry.getKey()));
 			}
 		}

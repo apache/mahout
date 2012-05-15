@@ -41,7 +41,7 @@ public final class ConjugateGradientOptimizer implements Optimizer {
    *      a = (r'*w)/(w'*z);
    *      x = x + a*w;
    *      r = r - a*z;
-   *      if( norm(r) < 1e-10 )
+   *      if ( norm(r) < 1e-10 )
    *           break;
    *      end
    *      B = (r'*z)/(w'*z);

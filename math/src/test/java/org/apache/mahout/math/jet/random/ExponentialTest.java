@@ -53,7 +53,7 @@ public final class ExponentialTest extends MahoutTestCase {
     assertEquals(0, dist.pdf(-1), 0);
     double sum = 0;
     double dx = 0.001 / lambda;
-    for (double x = 0; x < 20/lambda;x+=dx) {
+    for (double x = 0; x < 20/lambda; x+=dx) {
       sum += x * dist.pdf(x) * dx;
       assertEquals(Math.exp(-x * lambda) * lambda, dist.pdf(x), 1.0e-9);
     }

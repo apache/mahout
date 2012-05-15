@@ -111,7 +111,7 @@ public class CanopyDriver extends AbstractJob {
         .equalsIgnoreCase(DefaultOptionCreator.SEQUENTIAL_METHOD);
     DistanceMeasure measure = ClassUtils.instantiateAs(measureClass, DistanceMeasure.class);
     double clusterClassificationThreshold = 0.0;
-    if(hasOption(DefaultOptionCreator.OUTLIER_THRESHOLD)){
+    if (hasOption(DefaultOptionCreator.OUTLIER_THRESHOLD)) {
       clusterClassificationThreshold = Double.parseDouble(getOption(DefaultOptionCreator.OUTLIER_THRESHOLD));
     }
     run(conf, input, output, measure, t1, t2, t3, t4, clusterFilter,

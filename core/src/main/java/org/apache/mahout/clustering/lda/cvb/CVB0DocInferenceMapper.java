@@ -35,7 +35,7 @@ public class CVB0DocInferenceMapper extends CachingCVB0Mapper {
     Matrix docModel = new SparseRowMatrix(numTopics, doc.get().size());
     int maxIters = getMaxIters();
     ModelTrainer modelTrainer = getModelTrainer();
-    for(int i = 0; i < maxIters; i++) {
+    for (int i = 0; i < maxIters; i++) {
       modelTrainer.getReadModel().trainDocTopicModel(doc.get(), docTopics, docModel);
     }
     context.write(docId, new VectorWritable(docTopics));

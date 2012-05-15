@@ -113,9 +113,9 @@ public class EncodedVectorsFromSequenceFilesTest extends MahoutTestCase {
     int seen = 0;
     while (iter.hasNext()) {
       Pair<Text, VectorWritable> next = iter.next();
-      if (sequential && !named){
+      if (sequential && !named) {
         assertTrue(next.getSecond().get() instanceof SequentialAccessSparseVector);
-      } else if (named){
+      } else if (named) {
         assertTrue(next.getSecond().get() instanceof NamedVector);
       }
       seen++;

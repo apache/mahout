@@ -165,7 +165,7 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
   public long write(Iterable<ClusterWritable> iterable, long maxDocs) throws IOException {
     long result = 0;
     Iterator<ClusterWritable> iterator = iterable.iterator();
-    while (result < maxDocs && iterator.hasNext()){
+    while (result < maxDocs && iterator.hasNext()) {
       write(iterator.next());
       result++;
     }

@@ -40,7 +40,7 @@ public class TestCVBModelTrainer extends MahoutTestCase {
   @Test
   public void testInMemoryCVB0() throws Exception {
     String[] terms = new String[26];
-    for(int i=0; i<terms.length; i++) {
+    for (int i=0; i<terms.length; i++) {
       terms[i] = String.valueOf((char) (i + 'a'));
     }
     int numGeneratingTopics = 3;
@@ -62,7 +62,7 @@ public class TestCVBModelTrainer extends MahoutTestCase {
     int numTrials = 1;
     for (int numTestTopics = 1; numTestTopics < 2 * numGeneratingTopics; numTestTopics++) {
       double[] perps = new double[numTrials];
-      for(int trial = 0; trial < numTrials; trial++) {
+      for (int trial = 0; trial < numTrials; trial++) {
         InMemoryCollapsedVariationalBayes0 cvb =
           new InMemoryCollapsedVariationalBayes0(sampledCorpus, terms, numTestTopics, ALPHA, ETA,
                                                  2, 1, 0, (trial+1) * 123456L);
@@ -101,7 +101,7 @@ public class TestCVBModelTrainer extends MahoutTestCase {
     List<Double> perplexities = Lists.newArrayList();
     int startTopic = numGeneratingTopics - 1;
     int numTestTopics = startTopic;
-    while(numTestTopics < numGeneratingTopics + 2) {
+    while (numTestTopics < numGeneratingTopics + 2) {
       Path topicModelStateTempPath = getTestTempDirPath("topicTemp" + numTestTopics);
       Configuration conf = new Configuration();
       CVB0Driver.run(conf, sampleCorpusPath, null, numTestTopics, numTerms,
@@ -112,8 +112,8 @@ public class TestCVBModelTrainer extends MahoutTestCase {
     }
     int bestTopic = -1;
     double lowestPerplexity = Double.MAX_VALUE;
-    for(int t = 0; t < perplexities.size(); t++) {
-      if(perplexities.get(t) < lowestPerplexity) {
+    for (int t = 0; t < perplexities.size(); t++) {
+      if (perplexities.get(t) < lowestPerplexity) {
         lowestPerplexity = perplexities.get(t);
         bestTopic = t + startTopic;
       }
@@ -128,7 +128,7 @@ public class TestCVBModelTrainer extends MahoutTestCase {
     double lowest = Double.MAX_VALUE;
     double current;
     int iteration = 2;
-    while(!Double.isNaN(current = CVB0Driver.readPerplexity(conf, topicModelTemp, iteration))) {
+    while (!Double.isNaN(current = CVB0Driver.readPerplexity(conf, topicModelTemp, iteration))) {
       lowest = Math.min(current, lowest);
       iteration++;
     }

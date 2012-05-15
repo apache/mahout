@@ -69,7 +69,7 @@ public class ResultAnalyzer {
       incorrectlyClassified++;
     }
     confusionMatrix.addInstance(correctLabel, classifiedResult);
-    if (classifiedResult.getLogLikelihood() != Double.MAX_VALUE){
+    if (classifiedResult.getLogLikelihood() != Double.MAX_VALUE) {
       summarizer.add(classifiedResult.getLogLikelihood());
       hasLL = true;
     }

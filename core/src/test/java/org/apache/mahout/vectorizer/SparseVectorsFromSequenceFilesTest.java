@@ -178,11 +178,11 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
     if (named) {
       argList.add("-nv");
     }
-    if (maxDFSigma >= 0){
+    if (maxDFSigma >= 0) {
       argList.add("--maxDFSigma");
       argList.add(String.valueOf(maxDFSigma));
     }
-    if (tfWeighting){
+    if (tfWeighting) {
       argList.add("--weight");
       argList.add("tf");
     }

@@ -71,9 +71,9 @@ public final class TestMapReduce extends MahoutTestCase {
     double topicSmoothing = 50.0 / numTopics; // whatever
     Matrix m = new DenseMatrix(numTopics,numWords);
     double[] logTotals = new double[numTopics];
-    for(int k = 0; k < numTopics; ++k) {
+    for (int k = 0; k < numTopics; ++k) {
       double total = 0.0; // total number of pseudo counts we made
-      for(int w = 0; w < numWords; ++w) {
+      for (int w = 0; w < numWords; ++w) {
         // A small amount of random noise, minimized by having a floor.
         double pseudocount = random.nextDouble() + 1.0E-10;
         total += pseudocount;
@@ -102,7 +102,7 @@ public final class TestMapReduce extends MahoutTestCase {
     LDAState state = generateRandomState(100,NUM_TOPICS);
     LDAWordTopicMapper mapper = new LDAWordTopicMapper();
     mapper.configure(state);
-    for(int i = 0; i < NUM_TESTS; ++i) {
+    for (int i = 0; i < NUM_TESTS; ++i) {
       RandomAccessSparseVector v = generateRandomDoc(100,0.3);
       int myNumWords = numNonZero(v);
       LDAWordTopicMapper.Context mock = EasyMock.createMock(LDAWordTopicMapper.Context.class);
@@ -144,7 +144,7 @@ public final class TestMapReduce extends MahoutTestCase {
     int startTopic = numGeneratingTopics - 2;
     int numTestTopics = startTopic;
     double eta = 0.1;
-    while(numTestTopics < numGeneratingTopics + 3) {
+    while (numTestTopics < numGeneratingTopics + 3) {
       LDADriver driver = new LDADriver();
       driver.setConf(new Configuration());
       Path outputPath = getTestTempDirPath("output" + numTestTopics);
@@ -155,8 +155,8 @@ public final class TestMapReduce extends MahoutTestCase {
     
     int bestTopic = -1;
     double lowestPerplexity = Double.MAX_VALUE;
-    for(int t = 0; t < perplexities.size(); t++) {
-      if(perplexities.get(t) < lowestPerplexity) {
+    for (int t = 0; t < perplexities.size(); t++) {
+      if (perplexities.get(t) < lowestPerplexity) {
         lowestPerplexity = perplexities.get(t);
         bestTopic = t + startTopic;
       }
@@ -168,7 +168,7 @@ public final class TestMapReduce extends MahoutTestCase {
 
   private static int numNonZero(Vector v) {
     int count = 0;
-    for(Iterator<Vector.Element> iter = v.iterateNonZero();
+    for (Iterator<Vector.Element> iter = v.iterateNonZero();
         iter.hasNext();iter.next() ) {
       count++;
     }

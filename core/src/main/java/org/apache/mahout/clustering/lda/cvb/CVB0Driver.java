@@ -152,7 +152,7 @@ public class CVB0Driver extends AbstractJob {
     addOption(buildOption(BACKFILL_PERPLEXITY, null,
         "enable backfilling of missing perplexity values", false, false, null));
 
-    if(parseArguments(args) == null) {
+    if (parseArguments(args) == null) {
       return -1;
     }
 
@@ -285,7 +285,7 @@ public class CVB0Driver extends AbstractJob {
     }
 
     long startTime = System.currentTimeMillis();
-    while(iterationNumber < maxIterations) {
+    while (iterationNumber < maxIterations) {
       // test convergence
       if (convergenceDelta > 0.0) {
         double delta = rateOfChange(perplexities);
@@ -305,7 +305,7 @@ public class CVB0Driver extends AbstractJob {
           maxIterations, numReduceTasks);
 
       // calculate perplexity
-      if(testFraction > 0 && iterationNumber % iterationBlockSize == 0) {
+      if (testFraction > 0 && iterationNumber % iterationBlockSize == 0) {
         perplexities.add(calculatePerplexity(conf, inputPath, modelOutputPath, iterationNumber));
         log.info("Current perplexity = {}", perplexities.get(perplexities.size() - 1));
         log.info("(p_{} - p_{}) / p_0 = {}; target = {}", new Object[]{
@@ -325,10 +325,10 @@ public class CVB0Driver extends AbstractJob {
     Job docInferenceJob = docTopicOutputPath != null
         ? writeDocTopicInference(conf, inputPath, finalIterationData, docTopicOutputPath)
         : null;
-    if(topicModelOutputJob != null && !topicModelOutputJob.waitForCompletion(true)) {
+    if (topicModelOutputJob != null && !topicModelOutputJob.waitForCompletion(true)) {
       return -1;
     }
-    if(docInferenceJob != null && !docInferenceJob.waitForCompletion(true)) {
+    if (docInferenceJob != null && !docInferenceJob.waitForCompletion(true)) {
       return -1;
     }
     return 0;
@@ -336,7 +336,7 @@ public class CVB0Driver extends AbstractJob {
 
   private static double rateOfChange(List<Double> perplexities) {
     int sz = perplexities.size();
-    if(sz < 2) {
+    if (sz < 2) {
       return Double.MAX_VALUE;
     }
     return Math.abs(perplexities.get(sz - 1) - perplexities.get(sz - 2)) / perplexities.get(0);
@@ -362,7 +362,7 @@ public class CVB0Driver extends AbstractJob {
     FileOutputFormat.setOutputPath(job, outputPath);
     setModelPaths(job, modelPath);
     HadoopUtil.delete(conf, outputPath);
-    if(!job.waitForCompletion(true)) {
+    if (!job.waitForCompletion(true)) {
       throw new InterruptedException("Failed to calculate perplexity for: " + modelPath);
     }
     return readPerplexity(conf, modelPath.getParent(), iteration);
@@ -458,7 +458,7 @@ public class CVB0Driver extends AbstractJob {
     if (modelInput != null && fs.exists(modelInput)) {
       FileStatus[] statuses = fs.listStatus(modelInput, PathFilters.partFilter());
       URI[] modelUris = new URI[statuses.length];
-      for(int i = 0; i < statuses.length; i++) {
+      for (int i = 0; i < statuses.length; i++) {
         modelUris[i] = statuses[i].getPath().toUri();
       }
       DistributedCache.setCacheFiles(modelUris, conf);
@@ -487,7 +487,7 @@ public class CVB0Driver extends AbstractJob {
     FileSystem fs = FileSystem.get(modelTempDir.toUri(), config);
     int iterationNumber = 1;
     Path iterationPath = modelPath(modelTempDir, iterationNumber);
-    while(fs.exists(iterationPath) && iterationNumber <= maxIterations) {
+    while (fs.exists(iterationPath) && iterationNumber <= maxIterations) {
       log.info("Found previous state: " + iterationPath);
       iterationNumber++;
       iterationPath = modelPath(modelTempDir, iterationNumber);
@@ -514,7 +514,7 @@ public class CVB0Driver extends AbstractJob {
     FileOutputFormat.setOutputPath(job, modelOutput);
     setModelPaths(job, modelInput);
     HadoopUtil.delete(conf, modelOutput);
-    if(!job.waitForCompletion(true)) {
+    if (!job.waitForCompletion(true)) {
       throw new InterruptedException(String.format("Failed to complete iteration %d stage 1",
           iterationNumber));
     }

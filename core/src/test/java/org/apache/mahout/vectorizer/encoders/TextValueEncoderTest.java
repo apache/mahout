@@ -88,7 +88,7 @@ public final class TextValueEncoderTest extends MahoutTestCase {
 
     v1 = new DenseVector(200);
     StringBuilder builder = new StringBuilder(5000);
-    for (int i = 0; i < 1000; i++){//lucene's internal buffer length request is 4096, so let's make sure we can handle larger size
+    for (int i = 0; i < 1000; i++) {//lucene's internal buffer length request is 4096, so let's make sure we can handle larger size
       builder.append("token_").append(i).append(' ');
     }
     enc.addToVector(builder.toString(), v1);

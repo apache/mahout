@@ -64,7 +64,7 @@ public class EncodingMapper extends Mapper<Text, Text, Text, VectorWritable> {
                                        FeatureVectorEncoder.class,
                                        new Class[]{String.class},
                                        new Object[]{encoderName});
-    if (encoder instanceof LuceneTextValueEncoder){
+    if (encoder instanceof LuceneTextValueEncoder) {
       ((LuceneTextValueEncoder) encoder).setAnalyzer(analyzer);
     }
   }
@@ -77,7 +77,7 @@ public class EncodingMapper extends Mapper<Text, Text, Text, VectorWritable> {
     } else {
       vector = new RandomAccessSparseVector(cardinality);
     }
-    if (namedVectors){
+    if (namedVectors) {
       vector = new NamedVector(vector, key.toString());
     }
     encoder.addToVector(value.toString(), vector);

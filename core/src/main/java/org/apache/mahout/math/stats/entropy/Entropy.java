@@ -90,7 +90,7 @@ public final class Entropy extends AbstractJob {
         , "key");
 
     Map<String, List<String>> arguments = parseArguments(args);
-    if (arguments == null){
+    if (arguments == null) {
       return;
     }
     source = getOption("source");

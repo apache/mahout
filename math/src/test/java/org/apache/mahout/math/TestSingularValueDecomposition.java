@@ -136,7 +136,7 @@ public final class TestSingularValueDecomposition extends MahoutTestCase {
     Matrix v = svd.getV();
     
     //pad with 0, to be able to check some properties if some singular values are equal to 0
-    if(s.numRows()<matrix.numRows()) {
+    if (s.numRows()<matrix.numRows()) {
       
       Matrix sp = new DenseMatrix(s.numRows()+1,s.numCols());
       Matrix up = new DenseMatrix(u.numRows(),u.numCols()+1);

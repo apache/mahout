@@ -73,12 +73,12 @@ public final class ClusteringTestUtils {
     Matrix corpus = new SparseRowMatrix(numDocs, matrix.numCols());
     LDASampler modelSampler = new LDASampler(matrix, random);
     Vector topicVector = new DenseVector(matrix.numRows());
-    for(int i = 0; i < numTopicsPerDoc; i++) {
+    for (int i = 0; i < numTopicsPerDoc; i++) {
       int topic = random.nextInt(topicVector.size());
       topicVector.set(topic, topicVector.get(topic) + 1);
     }
-    for(int docId = 0; docId < numDocs; docId++) {
-      for(int sample : modelSampler.sample(topicVector, numSamples)) {
+    for (int docId = 0; docId < numDocs; docId++) {
+      for (int sample : modelSampler.sample(topicVector, numSamples)) {
         corpus.set(docId, sample, corpus.get(docId, sample) + 1);
       }
     }
@@ -96,11 +96,11 @@ public final class ClusteringTestUtils {
   public static Matrix randomStructuredModel(int numTopics, int numTerms, DoubleFunction decay) {
     Matrix model = new DenseMatrix(numTopics, numTerms);
     int width = numTerms / numTopics;
-    for(int topic = 0; topic < numTopics; topic++) {
+    for (int topic = 0; topic < numTopics; topic++) {
       int topicCentroid = width * (1+topic);
-      for(int i = 0; i < numTerms; i++) {
+      for (int i = 0; i < numTerms; i++) {
         int distance = Math.abs(topicCentroid - i);
-        if(distance > numTerms / 2) {
+        if (distance > numTerms / 2) {
           distance = numTerms - distance;
         }
         double v = decay.apply(distance);

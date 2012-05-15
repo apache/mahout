@@ -140,7 +140,7 @@ public final class ClusterDumper extends AbstractJob {
     if (hasOption(OUTPUT_FORMAT_OPT)) {
       outputFormat = OUTPUT_FORMAT.valueOf(getOption(OUTPUT_FORMAT_OPT));
     }
-    if (hasOption(SAMPLE_POINTS)){
+    if (hasOption(SAMPLE_POINTS)) {
       maxPointsPerCluster = Long.parseLong(getOption(SAMPLE_POINTS));
     } else {
       maxPointsPerCluster = Long.MAX_VALUE;
@@ -187,7 +187,7 @@ public final class ClusterDumper extends AbstractJob {
       long numWritten = clusterWriter.write(new SequenceFileDirValueIterable<ClusterWritable>(new Path(seqFileDir, "part-*"), PathType.GLOB, conf));
 
       writer.flush();
-      if (runEvaluation){
+      if (runEvaluation) {
         HadoopUtil.delete(conf, new Path("tmp/representative"));
         int numIters = 5;
         RepresentativePointsDriver.main(new String[]{
@@ -214,7 +214,7 @@ public final class ClusterDumper extends AbstractJob {
       if (shouldClose) {
         Closeables.closeQuietly(clusterWriter);
       } else {
-        if (clusterWriter instanceof GraphMLClusterWriter){
+        if (clusterWriter instanceof GraphMLClusterWriter) {
           clusterWriter.close();
         }
       }
@@ -224,7 +224,7 @@ public final class ClusterDumper extends AbstractJob {
   ClusterWriter createClusterWriter(Writer writer, String[] dictionary) throws IOException {
     ClusterWriter result = null;
 
-    switch (outputFormat){
+    switch (outputFormat) {
       case TEXT:
         result = new ClusterDumperWriter(writer, clusterIdToPoints, measure, numTopFeatures, dictionary, subString);
         break;
@@ -301,7 +301,7 @@ public final class ClusterDumper extends AbstractJob {
         pointList = Lists.newArrayList();
         result.put(keyValue, pointList);
       }
-      if (pointList.size() < maxPointsPerCluster){
+      if (pointList.size() < maxPointsPerCluster) {
         pointList.add(record.getSecond());
       }
     }

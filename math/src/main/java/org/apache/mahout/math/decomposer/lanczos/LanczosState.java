@@ -80,7 +80,7 @@ public class LanczosState {
     return basis.get(i);
   }
 
-  public int getBasisSize(){
+  public int getBasisSize() {
     return basis.size();
   }
 

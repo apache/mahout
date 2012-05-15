@@ -128,7 +128,7 @@ public final class ValidateAdaptiveLogistic {
       if (showConfusion) {
         output.printf(Locale.ENGLISH, "\n%s\n\n", cm.toString());
         
-        if (collector != null){
+        if (collector != null) {
           Matrix m = collector.entropy();
           output.printf(Locale.ENGLISH,
               "Entropy Matrix: [[%.1f, %.1f], [%.1f, %.1f]]\n", m.get(0, 0),

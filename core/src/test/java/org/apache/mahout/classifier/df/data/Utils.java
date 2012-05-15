@@ -178,7 +178,7 @@ public final class Utils {
         vector[attr] = Double.NaN;
       } else if (attrs[attr].isNumerical()) {
         vector[attr] = rng.nextDouble();
-      } else if (attrs[attr].isCategorical()){
+      } else if (attrs[attr].isCategorical()) {
         vector[attr] = rng.nextInt(CATEGORICAL_RANGE);
       } else { // LABEL
       	if (regression) {

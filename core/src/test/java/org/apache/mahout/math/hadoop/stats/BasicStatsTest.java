@@ -83,7 +83,7 @@ public final class BasicStatsTest extends MahoutTestCase {
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, input, IntWritable.class, DoubleWritable.class);
     //Random random = new MersenneTwisterRNG();
     /*Normal normal = new Normal(5, 3, random);
-    for (int i = 0; i < 10000; i++){
+    for (int i = 0; i < 10000; i++) {
       writer.append(new IntWritable(i), new DoubleWritable((long)normal.nextDouble()));
     }*/
     int i = 0;

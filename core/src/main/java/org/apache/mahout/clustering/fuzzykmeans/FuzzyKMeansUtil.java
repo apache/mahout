@@ -44,7 +44,7 @@ final class FuzzyKMeansUtil {
                                                     new Configuration())) {
       Class<? extends Writable> valueClass = value.getClass();
       
-      if(valueClass.equals(ClusterWritable.class)){
+      if (valueClass.equals(ClusterWritable.class)) {
     	  ClusterWritable clusterWritable = (ClusterWritable)value;
     	  value = clusterWritable.getValue();
     	  valueClass = value.getClass();

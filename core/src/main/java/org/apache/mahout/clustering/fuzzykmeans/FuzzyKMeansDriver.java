@@ -269,7 +269,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     List<Cluster> clusters = new ArrayList<Cluster>();
     FuzzyKMeansUtil.configureWithClusterInfo(clustersIn, clusters);
     
-    if(conf==null){
+    if (conf==null) {
       conf = new Configuration();
     }
     

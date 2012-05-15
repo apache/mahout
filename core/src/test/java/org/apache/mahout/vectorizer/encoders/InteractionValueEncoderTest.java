@@ -50,7 +50,7 @@ public class InteractionValueEncoderTest extends MahoutTestCase {
   }
 
   @Test
-  public void testAddToVectorUsesProductOfWeights(){
+  public void testAddToVectorUsesProductOfWeights() {
     WordValueEncoder wv = new StaticWordValueEncoder("word");
     ContinuousValueEncoder cv = new ContinuousValueEncoder("cont");
     InteractionValueEncoder enc = new InteractionValueEncoder("interactions", wv, cv);
@@ -63,7 +63,7 @@ public class InteractionValueEncoderTest extends MahoutTestCase {
   }
 
   @Test
-  public void testAddToVectorWithTextValueEncoder(){
+  public void testAddToVectorWithTextValueEncoder() {
     WordValueEncoder wv = new StaticWordValueEncoder("word");
     TextValueEncoder tv = new TextValueEncoder("text");
     InteractionValueEncoder enc = new InteractionValueEncoder("interactions", wv, tv);

@@ -73,7 +73,7 @@ public class CachingCVB0PerplexityMapper extends
     log.info("Initializing read model");
     TopicModel readModel;
     Path[] modelPaths = CVB0Driver.getModelPaths(conf);
-    if(modelPaths != null && modelPaths.length > 0) {
+    if (modelPaths != null && modelPaths.length > 0) {
       readModel = new TopicModel(conf, eta, alpha, null, numUpdateThreads, modelWeight, modelPaths);
     } else {
       log.info("No model files found");

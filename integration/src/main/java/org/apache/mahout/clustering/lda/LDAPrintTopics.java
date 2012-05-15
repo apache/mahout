@@ -169,7 +169,7 @@ public final class LDAPrintTopics {
           out.write('\n');
         }
         List<Pair<String,Double>> topKasList = Lists.newArrayListWithCapacity(topK.size());
-        for(Pair<String,Double> wordWithScore : topK) {
+        for (Pair<String,Double> wordWithScore : topK) {
           topKasList.add(wordWithScore);
         }
         Collections.sort(topKasList, new Comparator<Pair<String,Double>>() {
@@ -178,7 +178,7 @@ public final class LDAPrintTopics {
             return pair2.getSecond().compareTo(pair1.getSecond());
           }
         });
-        for(Pair<String,Double> wordWithScore : topKasList) {
+        for (Pair<String,Double> wordWithScore : topKasList) {
           out.write(wordWithScore.getFirst() + " [p(" + wordWithScore.getFirst() + "|topic_" + i +") = "
            + wordWithScore.getSecond());
           out.write('\n');

@@ -39,7 +39,7 @@ public class StandardDeviationCalculatorMapper extends
     }
     //Kind of ugly, but such is life
     double df = Double.NaN;
-    if (value instanceof LongWritable){
+    if (value instanceof LongWritable) {
       df = ((LongWritable)value).get();
     } else if (value instanceof DoubleWritable) {
       df = ((DoubleWritable)value).get();

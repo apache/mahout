@@ -88,7 +88,7 @@ public final class SequenceFileDirIterator<K extends Writable,V extends Writable
 
   private void init(FileStatus[] statuses,
                     final boolean reuseKeyValueInstances,
-                    final Configuration conf){
+                    final Configuration conf) {
 
     /*
      * prevent NPEs. Unfortunately, Hadoop would return null for list if nothing
