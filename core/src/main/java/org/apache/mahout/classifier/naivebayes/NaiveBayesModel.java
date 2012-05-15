@@ -17,19 +17,21 @@
 
 package org.apache.mahout.classifier.naivebayes;
 
-import com.google.common.base.Preconditions;
-import com.google.common.io.Closeables;
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.SparseMatrix;
+import org.apache.mahout.math.SparseRowMatrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-import java.io.IOException;
+import com.google.common.base.Preconditions;
+import com.google.common.io.Closeables;
 
 /** NaiveBayesModel holds the weight Matrix, the feature and label sums and the weight normalizer vectors.*/
 public class NaiveBayesModel {
@@ -105,10 +107,10 @@ public class NaiveBayesModel {
     try {
       alphaI = in.readFloat();
       weightsPerFeature = VectorWritable.readVector(in);
-      weightsPerLabel = VectorWritable.readVector(in);
-      perLabelThetaNormalizer = VectorWritable.readVector(in);
+      weightsPerLabel = new DenseVector(VectorWritable.readVector(in));
+      perLabelThetaNormalizer = new DenseVector(VectorWritable.readVector(in));
 
-      weightsPerLabelAndFeature = new SparseMatrix(weightsPerLabel.size(), weightsPerFeature.size() );
+      weightsPerLabelAndFeature = new SparseRowMatrix(weightsPerLabel.size(), weightsPerFeature.size() );
       for (int label = 0; label < weightsPerLabelAndFeature.numRows(); label++) {
         weightsPerLabelAndFeature.assignRow(label, VectorWritable.readVector(in));
       }

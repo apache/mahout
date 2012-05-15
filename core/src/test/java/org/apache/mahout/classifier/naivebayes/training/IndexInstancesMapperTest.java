@@ -18,20 +18,22 @@
 package org.apache.mahout.classifier.naivebayes.training;
 
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.MultiLabelVectorWritable;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.map.OpenObjectIntHashMap;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 
-@SuppressWarnings("unchecked")
 public class IndexInstancesMapperTest extends MahoutTestCase {
-  private static final DenseVector VECTOR = new DenseVector(new double[] { 1, 0, 1, 1, 0 });
+
   private Mapper.Context ctx;
-  private MultiLabelVectorWritable instance;
+  private OpenObjectIntHashMap<String> labelIndex;
+  private VectorWritable instance;
 
   @Override
   @Before
@@ -39,16 +41,45 @@ public class IndexInstancesMapperTest extends MahoutTestCase {
     super.setUp();
 
     ctx = EasyMock.createMock(Mapper.Context.class);
-    instance = new MultiLabelVectorWritable(VECTOR,
-      new int[] {0});
+    instance = new VectorWritable(new DenseVector(new double[] { 1, 0, 1, 1, 0 }));
+
+    labelIndex = new OpenObjectIntHashMap<String>();
+    labelIndex.put("bird", 0);
+    labelIndex.put("cat", 1);
   }
-  
+
+
   @Test
   public void index() throws Exception {
-    ctx.write(new IntWritable(0), new VectorWritable(VECTOR));
+
+    ctx.write(new IntWritable(0), instance);
+
     EasyMock.replay(ctx);
+
     IndexInstancesMapper indexInstances = new IndexInstancesMapper();
-    indexInstances.map(new IntWritable(-1), instance, ctx);
+    setField(indexInstances, "labelIndex", labelIndex);
+
+    indexInstances.map(new Text("bird"), instance, ctx);
+
     EasyMock.verify(ctx);
   }
+
+  @Test
+  public void skip() throws Exception {
+
+    Counter skippedInstances = EasyMock.createMock(Counter.class);
+
+    EasyMock.expect(ctx.getCounter(IndexInstancesMapper.Counter.SKIPPED_INSTANCES)).andReturn(skippedInstances);
+    skippedInstances.increment(1);
+
+    EasyMock.replay(ctx, skippedInstances);
+
+    IndexInstancesMapper indexInstances = new IndexInstancesMapper();
+    setField(indexInstances, "labelIndex", labelIndex);
+
+    indexInstances.map(new Text("fish"), instance, ctx);
+
+    EasyMock.verify(ctx, skippedInstances);
+  }
+
 }

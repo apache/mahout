@@ -28,10 +28,10 @@ public class StandardNaiveBayesClassifier extends AbstractNaiveBayesClassifier {
   @Override
   public double getScoreForLabelFeature(int label, int feature) {
     NaiveBayesModel model = getModel();
-
     double numerator = model.weight(label, feature) + model.alphaI();
     double denominator = model.labelWeight(label) + model.alphaI() * model.numFeatures();
 
     return -Math.log(numerator / denominator);
   }
+  
 }

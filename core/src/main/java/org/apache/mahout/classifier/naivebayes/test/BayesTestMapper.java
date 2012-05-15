@@ -42,6 +42,8 @@ public class BayesTestMapper extends Mapper<Text, VectorWritable, Text, VectorWr
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    System.out.println("Setup");
     Configuration conf = context.getConfiguration();
     Path modelPath = HadoopUtil.cachedFile(conf);
     NaiveBayesModel model = NaiveBayesModel.materialize(modelPath, conf);
@@ -55,9 +57,8 @@ public class BayesTestMapper extends Mapper<Text, VectorWritable, Text, VectorWr
 
   @Override
   protected void map(Text key, VectorWritable value, Context context) throws IOException, InterruptedException {
-    Vector result = classifier.classify(value.get());
+    Vector result = classifier.classifyFull(value.get());
     //the key is the expected value
     context.write(key, new VectorWritable(result));
-
   }
 }

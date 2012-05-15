@@ -42,7 +42,8 @@ public abstract class AbstractNaiveBayesClassifier extends AbstractVectorClassif
     double result = 0.0;
     Iterator<Element> elements = instance.iterateNonZero();
     while (elements.hasNext()) {
-      result += getScoreForLabelFeature(label, elements.next().index());
+      Element e = elements.next();
+      result += e.get() * getScoreForLabelFeature(label, e.index());
     }
     return result / model.thetaNormalizer(label);
   }
@@ -53,12 +54,20 @@ public abstract class AbstractNaiveBayesClassifier extends AbstractVectorClassif
   }
 
   @Override
-  public Vector classify(Vector instance) {
+  public Vector classifyFull(Vector instance) {
+    System.out.println(1);
     Vector score = model.createScoringVector();
+    System.out.println(score.size());
     for (int label = 0; label < model.numLabels(); label++) {
       score.set(label, getScoreForLabelInstance(label, instance));
     }
     return score;
+  }
+  
+  @Override
+  public Vector classifyFull(Vector r, Vector instance) {
+    r = classifyFull(instance);
+    return r;
   }
 
   @Override
@@ -66,4 +75,8 @@ public abstract class AbstractNaiveBayesClassifier extends AbstractVectorClassif
     throw new UnsupportedOperationException("Not supported in Naive Bayes");
   }
   
+  @Override
+  public Vector classify(Vector instance) {
+    throw new UnsupportedOperationException("probabilites not supported in Naive Bayes");
+  }
 }

@@ -37,6 +37,7 @@ public class WeightsMapper extends Mapper<IntWritable, VectorWritable, Text, Vec
 
   @Override
   protected void setup(Context ctx) throws IOException, InterruptedException {
+    super.setup(ctx);
     int numLabels = Integer.parseInt(ctx.getConfiguration().get(NUM_LABELS));
     Preconditions.checkArgument(numLabels > 0);
     weightsPerLabel = new RandomAccessSparseVector(numLabels);

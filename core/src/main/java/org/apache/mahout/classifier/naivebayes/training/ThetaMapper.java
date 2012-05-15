@@ -37,6 +37,7 @@ public class ThetaMapper extends Mapper<IntWritable, VectorWritable, Text, Vecto
 
   @Override
   protected void setup(Context ctx) throws IOException, InterruptedException {
+    super.setup(ctx);
     Configuration conf = ctx.getConfiguration();
 
     float alphaI = conf.getFloat(ALPHA_I, 1.0f);
@@ -60,5 +61,6 @@ public class ThetaMapper extends Mapper<IntWritable, VectorWritable, Text, Vecto
   protected void cleanup(Context ctx) throws IOException, InterruptedException {
     ctx.write(new Text(TrainNaiveBayesJob.LABEL_THETA_NORMALIZER),
         new VectorWritable(trainer.retrievePerLabelThetaNormalizer()));
+    super.cleanup(ctx);
   }
 }
