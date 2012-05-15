@@ -91,7 +91,7 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
     int index = index(0);
     int s = this.stride;
     double[] elems = this.elements;
-    for (int i = size; --i >= 0; ) {
+    for (int i = size; --i >= 0;) {
       elems[index] = value;
       index += s;
     }
@@ -127,12 +127,12 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
       if (multiplicator == 1) {
         return;
       }
-      for (int k = size; --k >= 0; ) {
+      for (int k = size; --k >= 0;) {
         elems[i] *= multiplicator;
         i += s;
       }
     } else { // the general case x[i] = f(x[i])
-      for (int k = size; --k >= 0; ) {
+      for (int k = size; --k >= 0;) {
         elems[i] = function.apply(elems[i]);
         i += s;
       }
@@ -181,7 +181,7 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
 
     int index = index(0);
     int otherIndex = other.index(0);
-    for (int k = size; --k >= 0; ) {
+    for (int k = size; --k >= 0;) {
       elems[index] = otherElems[otherIndex];
       index += s;
       otherIndex += ys;
@@ -237,13 +237,13 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
 
     // specialized for speed
     if (function == Functions.MULT) {  // x[i] = x[i] * y[i]
-      for (int k = size; --k >= 0; ) {
+      for (int k = size; --k >= 0;) {
         elems[index] *= otherElems[otherIndex];
         index += s;
         otherIndex += ys;
       }
     } else if (function == Functions.DIV) { // x[i] = x[i] / y[i]
-      for (int k = size; --k >= 0; ) {
+      for (int k = size; --k >= 0;) {
         elems[index] /= otherElems[otherIndex];
         index += s;
         otherIndex += ys;
@@ -253,26 +253,26 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
       if (multiplicator == 0) { // x[i] = x[i] + 0*y[i]
         return this;
       } else if (multiplicator == 1) { // x[i] = x[i] + y[i]
-        for (int k = size; --k >= 0; ) {
+        for (int k = size; --k >= 0;) {
           elems[index] += otherElems[otherIndex];
           index += s;
           otherIndex += ys;
         }
       } else if (multiplicator == -1) { // x[i] = x[i] - y[i]
-        for (int k = size; --k >= 0; ) {
+        for (int k = size; --k >= 0;) {
           elems[index] -= otherElems[otherIndex];
           index += s;
           otherIndex += ys;
         }
       } else { // the general case x[i] = x[i] + mult*y[i]
-        for (int k = size; --k >= 0; ) {
+        for (int k = size; --k >= 0;) {
           elems[index] += multiplicator * otherElems[otherIndex];
           index += s;
           otherIndex += ys;
         }
       }
     } else { // the general case x[i] = f(x[i],y[i])
-      for (int k = size; --k >= 0; ) {
+      for (int k = size; --k >= 0;) {
         elems[index] = function.apply(elems[index], otherElems[otherIndex]);
         index += s;
         otherIndex += ys;
@@ -418,7 +418,7 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
 
     int index = index(0);
     int otherIndex = y.index(0);
-    for (int k = size; --k >= 0; ) {
+    for (int k = size; --k >= 0;) {
       double tmp = elems[index];
       elems[index] = otherElems[otherIndex];
       otherElems[otherIndex] = tmp;
@@ -497,7 +497,7 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
 
     /*
     // unoptimized
-    for (int k = min; --k >= 0; ) {
+    for (int k = min; --k >= 0;) {
       sum += elems[i] * yElems[j];
       i += s;
       j += ys;
@@ -509,13 +509,13 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
     i -= s;
     j -= ys;
     double sum = 0;
-    for (int k = min / 4; --k >= 0; ) {
+    for (int k = min / 4; --k >= 0;) {
       sum += elems[i += s] * yElems[j += ys]
           + elems[i += s] * yElems[j += ys]
           + elems[i += s] * yElems[j += ys]
           + elems[i += s] * yElems[j += ys];
     }
-    for (int k = min % 4; --k >= 0; ) {
+    for (int k = min % 4; --k >= 0;) {
       sum += elems[i += s] * yElems[j += ys];
     }
     return sum;
@@ -535,7 +535,7 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
       throw new IllegalStateException();
     }
     double sum = 0;
-    for (int k = size; --k >= 0; ) {
+    for (int k = size; --k >= 0;) {
       sum += elems[i];
       i += s;
     }

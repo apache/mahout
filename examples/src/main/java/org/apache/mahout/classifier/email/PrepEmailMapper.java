@@ -35,7 +35,7 @@ public class PrepEmailMapper extends Mapper<WritableComparable<?>, VectorWritabl
   private static final Pattern DASH_DOT = Pattern.compile("-|\\.");
   private static final Pattern SLASH = Pattern.compile("\\/");
 
-  private boolean useListName = false;//if true, use the project name and the list name in label creation
+  private boolean useListName = false; //if true, use the project name and the list name in label creation
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     useListName = Boolean.parseBoolean(context.getConfiguration().get(PrepEmailVectorsDriver.USE_LIST_NAME));

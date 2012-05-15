@@ -11,8 +11,8 @@ package org.apache.mahout.math;
 
 /**
  *  <p>
- *  This produces exactly the same hash values as the final C++
- *  version of MurmurHash3 and is thus suitable for producing the same hash values across
+ *  This produces exactly the same hash values as the final C+
+ + *  version of MurmurHash3 and is thus suitable for producing the same hash values across
  *  platforms.
  *  <p>
  *  The 32 bit x86 version of this hash should be the fastest variant for relatively short keys like ids.

@@ -118,7 +118,7 @@ public abstract class AbstractMatrix2D extends AbstractMatrix {
    * @throws IndexOutOfBoundsException if <tt>! (0 <= indexes[i] < columns())</tt> for any i=0..indexes.length()-1.
    */
   protected void checkColumnIndexes(int[] indexes) {
-    for (int i = indexes.length; --i >= 0; ) {
+    for (int i = indexes.length; --i >= 0;) {
       int index = indexes[i];
       if (index < 0 || index >= columns) {
         checkColumn(index);
@@ -143,7 +143,7 @@ public abstract class AbstractMatrix2D extends AbstractMatrix {
    * @throws IndexOutOfBoundsException if <tt>! (0 <= indexes[i] < rows())</tt> for any i=0..indexes.length()-1.
    */
   protected void checkRowIndexes(int[] indexes) {
-    for (int i = indexes.length; --i >= 0; ) {
+    for (int i = indexes.length; --i >= 0;) {
       int index = indexes[i];
       if (index < 0 || index >= rows) {
         checkRow(index);

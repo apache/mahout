@@ -109,7 +109,7 @@ public final class TopItemsTest extends TasteTestCase {
     List<GenericItemSimilarity.ItemItemSimilarity> res = TopItems.getTopItemItemSimilarities(10, sims.iterator());
     int gold = 99;
     for (GenericItemSimilarity.ItemItemSimilarity re : res) {
-      assertEquals(gold--, re.getItemID2());//the second id should be equal to 99 to start
+      assertEquals(gold--, re.getItemID2()); //the second id should be equal to 99 to start
     }
   }
 
@@ -123,7 +123,7 @@ public final class TopItemsTest extends TasteTestCase {
     List<GenericItemSimilarity.ItemItemSimilarity> res = TopItems.getTopItemItemSimilarities(10, sims.iterator());
     int gold = 0;
     for (GenericItemSimilarity.ItemItemSimilarity re : res) {
-      assertEquals(gold++, re.getItemID1());//the second id should be equal to 99 to start
+      assertEquals(gold++, re.getItemID1()); //the second id should be equal to 99 to start
     }
   }
 
@@ -137,7 +137,7 @@ public final class TopItemsTest extends TasteTestCase {
     List<GenericUserSimilarity.UserUserSimilarity> res = TopItems.getTopUserUserSimilarities(10, sims.iterator());
     int gold = 99;
     for (GenericUserSimilarity.UserUserSimilarity re : res) {
-      assertEquals(gold--, re.getUserID2());//the second id should be equal to 99 to start
+      assertEquals(gold--, re.getUserID2()); //the second id should be equal to 99 to start
     }
   }
 
@@ -151,7 +151,7 @@ public final class TopItemsTest extends TasteTestCase {
     List<GenericUserSimilarity.UserUserSimilarity> res = TopItems.getTopUserUserSimilarities(10, sims.iterator());
     int gold = 0;
     for (GenericUserSimilarity.UserUserSimilarity re : res) {
-      assertEquals(gold++, re.getUserID1());//the first id should be equal to 0 to start
+      assertEquals(gold++, re.getUserID1()); //the first id should be equal to 0 to start
     }
   }
 

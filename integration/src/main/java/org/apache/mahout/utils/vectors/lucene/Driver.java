@@ -179,8 +179,8 @@ public final class Driver {
 
     Option maxPercentErrorDocsOpt = obuilder.withLongName("maxPercentErrorDocs").withRequired(false).withArgument(
         abuilder.withName("maxPercentErrorDocs").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The max percentage of docs that can have a null term vector. These are noise document and can occur if the " +
-            "analyzer used strips out all terms in the target field. This percentage is expressed as a value between 0 and 1. " +
+        "The max percentage of docs that can have a null term vector. These are noise document and can occur if the " 
+            + "analyzer used strips out all terms in the target field. This percentage is expressed as a value between 0 and 1. " +
             "The default is 0.").withShortName("err").create();
 
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")

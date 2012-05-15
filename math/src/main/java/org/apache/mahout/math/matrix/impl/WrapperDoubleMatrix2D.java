@@ -326,13 +326,13 @@ class WrapperDoubleMatrix2D extends DoubleMatrix2D {
     // check for "all"
     if (rowIndexes == null) {
       rowIndexes = new int[rows];
-      for (int i = rows; --i >= 0; ) {
+      for (int i = rows; --i >= 0;) {
         rowIndexes[i] = i;
       }
     }
     if (columnIndexes == null) {
       columnIndexes = new int[columns];
-      for (int i = columns; --i >= 0; ) {
+      for (int i = columns; --i >= 0;) {
         columnIndexes[i] = i;
       }
     }

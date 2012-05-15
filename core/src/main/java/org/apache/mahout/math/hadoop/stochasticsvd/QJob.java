@@ -138,7 +138,7 @@ public final class QJob {
         };
 
       qr = new QRFirstStep(conf, qhatCollector, rhatCollector);
-      closeables.addFirst(qr);// important: qr closes first!!
+      closeables.addFirst(qr); // important: qr closes first!!
       yRow = new DenseVector(kp);
     }
 

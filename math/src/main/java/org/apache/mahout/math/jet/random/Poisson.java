@@ -112,7 +112,7 @@ public final class Poisson extends AbstractDiscreteDistribution {
         p = Math.exp(-theMean);
         q = p;
         p0 = p;
-        //for (k=pp.length; --k >=0; ) pp[k] = 0;
+        //for (k=pp.length; --k >=0;) pp[k] = 0;
       }
       m = theMean > 1.0 ? (int) theMean : 1;
       while (true) {

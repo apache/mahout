@@ -109,7 +109,7 @@ public final class SequenceFileDumper extends AbstractJob {
             Pair<?, ?> record = iterator.next();
             String key = record.getFirst().toString();
             if (facets != null) {
-              facets.adjustOrPutValue(key, 1, 1);//either insert or add 1
+              facets.adjustOrPutValue(key, 1, 1); //either insert or add 1
             }
             count++;
           }
@@ -130,7 +130,7 @@ public final class SequenceFileDumper extends AbstractJob {
                                               ? str.substring(0, sub) : str);
             writer.write('\n');
             if (facets != null) {
-              facets.adjustOrPutValue(key, 1, 1);//either insert or add 1
+              facets.adjustOrPutValue(key, 1, 1); //either insert or add 1
             }
             count++;
           }

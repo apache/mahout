@@ -62,7 +62,7 @@ public final class BasicStatsTest extends MahoutTestCase {
     produceTestData(input);
     
     double v = BasicStats.stdDev(input, output, conf);
-    assertEquals(1.56, v, 0.01);//sample std dev is 1.563, std. dev from a discrete set is 1.48
+    assertEquals(1.56, v, 0.01); //sample std dev is 1.563, std. dev from a discrete set is 1.48
 
   }
   
@@ -74,7 +74,7 @@ public final class BasicStatsTest extends MahoutTestCase {
     produceTestData(input);
     
     double v = BasicStats.stdDevForGivenMean(input, output, 0.0D, conf);
-    assertEquals(10.65, v, 0.01);//sample std dev is 10.65
+    assertEquals(10.65, v, 0.01); //sample std dev is 10.65
 
   }
   

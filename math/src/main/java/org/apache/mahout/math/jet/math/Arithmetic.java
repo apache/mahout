@@ -269,7 +269,7 @@ public final class Arithmetic {
     long a = n - k + 1;
     long b = 1;
     double binomial = 1;
-    for (long i = k; i-- > 0; ) {
+    for (long i = k; i-- > 0;) {
       binomial *= (double) a++ / b++;
     }
     return binomial;

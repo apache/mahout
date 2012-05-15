@@ -210,8 +210,8 @@ public class DecisionTreeBuilder implements TreeBuilder {
       return new Leaf(label);
     }
 
-    log.debug("best split attr:" + best.getAttr() + ", split:" + best.getSplit() + ", ig:" +
-        best.getIg());
+    log.debug("best split attr:" + best.getAttr() + ", split:" + best.getSplit() + ", ig:" 
+        + best.getIg());
 
     boolean alreadySelected = selected[best.getAttr()];
     if (alreadySelected) {

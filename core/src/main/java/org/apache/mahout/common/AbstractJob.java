@@ -97,11 +97,11 @@ public abstract class AbstractJob extends Configured implements Tool {
 
   /** input path, populated by {@link #parseArguments(String[])} */
   protected Path inputPath;
-  protected File inputFile;//the input represented as a file
+  protected File inputFile; //the input represented as a file
 
   /** output path, populated by {@link #parseArguments(String[]) */
   protected Path outputPath;
-  protected File outputFile;//the output represented as a file
+  protected File outputFile; //the output represented as a file
 
   /** temp path, populated by {@link #parseArguments(String[]) */
   protected Path tempPath;

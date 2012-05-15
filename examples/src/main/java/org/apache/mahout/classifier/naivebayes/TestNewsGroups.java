@@ -81,11 +81,11 @@ public final class TestNewsGroups {
 
       int actual = newsGroups.intern(ng);
       NewsgroupHelper helper = new NewsgroupHelper();
-      Vector input = helper.encodeFeatureVector(file, actual, 0, overallCounts);//no leak type ensures this is a normal vector
-      Vector result = null;// classifier.classifyFull(input);
+      Vector input = helper.encodeFeatureVector(file, actual, 0, overallCounts); //no leak type ensures this is a normal vector
+      Vector result = null; // classifier.classifyFull(input);
       int cat = result.maxValueIndex();
       double score = result.maxValue();
-      double ll = 0;// classifier.logLikelihood(actual, input);
+      double ll = 0; // classifier.logLikelihood(actual, input);
       ClassifierResult cr = new ClassifierResult(newsGroups.values().get(cat), score, ll);
       ra.addInstance(newsGroups.values().get(actual), cr);
 

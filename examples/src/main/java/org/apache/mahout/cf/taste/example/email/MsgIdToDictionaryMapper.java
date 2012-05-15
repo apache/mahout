@@ -32,7 +32,7 @@ public final class MsgIdToDictionaryMapper extends Mapper<Text, Text, Text, VarI
   protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
     //message id is in the key: /201008/AANLkTikvVnhNH+Y5AGEwqd2=u0CFv2mCm0ce6E6oBnj1@mail.gmail.com
     String keyStr = key.toString();
-    int idx = keyStr.lastIndexOf('@');//find the last @
+    int idx = keyStr.lastIndexOf('@'); //find the last @
     if (idx == -1) {
       context.getCounter(EmailUtility.Counters.NO_MESSAGE_ID).increment(1);
     } else {

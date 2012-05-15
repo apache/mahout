@@ -56,7 +56,7 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
   /** Constructs an identity matrix (having ones on the diagonal and zeros elsewhere). */
   public static DoubleMatrix2D identity(int rowsAndColumns) {
     DoubleMatrix2D matrix = new DenseDoubleMatrix2D(rowsAndColumns, rowsAndColumns);
-    for (int i = rowsAndColumns; --i >= 0; ) {
+    for (int i = rowsAndColumns; --i >= 0;) {
       matrix.setQuick(i, i, 1);
     }
     return matrix;
@@ -78,7 +78,7 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
         throw new IllegalArgumentException("Must have same number of rows: rows=" + values.length + "rows()=" + rows());
       }
       int i = columns * (rows - 1);
-      for (int row = rows; --row >= 0; ) {
+      for (int row = rows; --row >= 0;) {
         double[] currentRow = values[row];
         if (currentRow.length != columns) {
           throw new IllegalArgumentException(
@@ -104,8 +104,8 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
     int index = index(0, 0);
     int cs = this.columnStride;
     int rs = this.rowStride;
-    for (int row = rows; --row >= 0; ) {
-      for (int i = index, column = columns; --column >= 0; ) {
+    for (int row = rows; --row >= 0;) {
+      for (int i = index, column = columns; --column >= 0;) {
         elems[i] = value;
         i += cs;
       }
@@ -153,16 +153,16 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
         assign(0);
         return;
       }
-      for (int row = rows; --row >= 0; ) { // the general case
-        for (int i = index, column = columns; --column >= 0; ) {
+      for (int row = rows; --row >= 0;) { // the general case
+        for (int i = index, column = columns; --column >= 0;) {
           elems[i] *= multiplicator;
           i += cs;
         }
         index += rs;
       }
     } else { // the general case x[i] = f(x[i])
-      for (int row = rows; --row >= 0; ) {
-        for (int i = index, column = columns; --column >= 0; ) {
+      for (int row = rows; --row >= 0;) {
+        for (int i = index, column = columns; --column >= 0;) {
           elems[i] = function.apply(elems[i]);
           i += cs;
         }
@@ -218,8 +218,8 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
 
     int otherIndex = other.index(0, 0);
     int index = index(0, 0);
-    for (int row = rows; --row >= 0; ) {
-      for (int i = index, j = otherIndex, column = columns; --column >= 0; ) {
+    for (int row = rows; --row >= 0;) {
+      for (int i = index, j = otherIndex, column = columns; --column >= 0;) {
         elems[i] = otherElems[j];
         i += cs;
         j += ocs;
@@ -282,8 +282,8 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
 
     // specialized for speed
     if (function == Functions.MULT) { // x[i] = x[i] * y[i]
-      for (int row = rows; --row >= 0; ) {
-        for (int i = index, j = otherIndex, column = columns; --column >= 0; ) {
+      for (int row = rows; --row >= 0;) {
+        for (int i = index, j = otherIndex, column = columns; --column >= 0;) {
           elems[i] *= otherElems[j];
           i += cs;
           j += ocs;
@@ -292,8 +292,8 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
         otherIndex += ors;
       }
     } else if (function == Functions.DIV) { // x[i] = x[i] / y[i]
-      for (int row = rows; --row >= 0; ) {
-        for (int i = index, j = otherIndex, column = columns; --column >= 0; ) {
+      for (int row = rows; --row >= 0;) {
+        for (int i = index, j = otherIndex, column = columns; --column >= 0;) {
           elems[i] /= otherElems[j];
           i += cs;
           j += ocs;
@@ -306,8 +306,8 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
       if (multiplicator == 0) { // x[i] = x[i] + 0*y[i]
         return this;
       } else if (multiplicator == 1) { // x[i] = x[i] + y[i]
-        for (int row = rows; --row >= 0; ) {
-          for (int i = index, j = otherIndex, column = columns; --column >= 0; ) {
+        for (int row = rows; --row >= 0;) {
+          for (int i = index, j = otherIndex, column = columns; --column >= 0;) {
             elems[i] += otherElems[j];
             i += cs;
             j += ocs;
@@ -316,8 +316,8 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
           otherIndex += ors;
         }
       } else if (multiplicator == -1) { // x[i] = x[i] - y[i]
-        for (int row = rows; --row >= 0; ) {
-          for (int i = index, j = otherIndex, column = columns; --column >= 0; ) {
+        for (int row = rows; --row >= 0;) {
+          for (int i = index, j = otherIndex, column = columns; --column >= 0;) {
             elems[i] -= otherElems[j];
             i += cs;
             j += ocs;
@@ -326,8 +326,8 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
           otherIndex += ors;
         }
       } else { // the general case
-        for (int row = rows; --row >= 0; ) { // x[i] = x[i] + mult*y[i]
-          for (int i = index, j = otherIndex, column = columns; --column >= 0; ) {
+        for (int row = rows; --row >= 0;) { // x[i] = x[i] + mult*y[i]
+          for (int i = index, j = otherIndex, column = columns; --column >= 0;) {
             elems[i] += multiplicator * otherElems[j];
             i += cs;
             j += ocs;
@@ -337,8 +337,8 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
         }
       }
     } else { // the general case x[i] = f(x[i],y[i])
-      for (int row = rows; --row >= 0; ) {
-        for (int i = index, j = otherIndex, column = columns; --column >= 0; ) {
+      for (int row = rows; --row >= 0;) {
+        for (int i = index, j = otherIndex, column = columns; --column >= 0;) {
           elems[i] = function.apply(elems[i], otherElems[j]);
           i += cs;
           j += ocs;
@@ -512,15 +512,15 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
     int indexZ = zz.index(0);
 
     int cols = columns;
-    for (int row = rows; --row >= 0; ) {
+    for (int row = rows; --row >= 0;) {
       double sum = 0;
       // loop unrolled
       int i = indexA - As;
       int j = indexY - ys;
-      for (int k = cols % 4; --k >= 0; ) {
+      for (int k = cols % 4; --k >= 0;) {
         sum += AElems[i += As] * yElems[j += ys];
       }
-      for (int k = cols / 4; --k >= 0; ) {
+      for (int k = cols / 4; --k >= 0;) {
         sum += AElems[i += As] * yElems[j += ys]
             + AElems[i += As] * yElems[j += ys] 
             + AElems[i += As] * yElems[j += ys]
@@ -629,16 +629,16 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
         mOptimal += m - rr;
       }
 
-      for (int j = p; --j >= 0; ) {
+      for (int j = p; --j >= 0;) {
         int iA = indexA;
         int iC = jC;
-        for (int i = mOptimal; --i >= 0; ) {
+        for (int i = mOptimal; --i >= 0;) {
           int kA = iA;
           int kB = jB;
 
           /*
           // not unrolled:
-          for (int k = n; --k >= 0; ) {
+          for (int k = n; --k >= 0;) {
             //s += getQuick(i,k) * B.getQuick(k,j);
             s += AElems[kA] * BElems[kB];
             kB += rB;
@@ -651,10 +651,10 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
           kB -= rB;
 
           double s = 0;
-          for (int k = n % 4; --k >= 0; ) {
+          for (int k = n % 4; --k >= 0;) {
             s += AElems[kA += cA] * BElems[kB += rB];
           }
-          for (int k = n / 4; --k >= 0; ) {
+          for (int k = n / 4; --k >= 0;) {
             s += AElems[kA += cA] * BElems[kB += rB]
                 + AElems[kA += cA] * BElems[kB += rB] 
                 + AElems[kA += cA] * BElems[kB += rB]
@@ -687,8 +687,8 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
     int cs = this.columnStride;
     int rs = this.rowStride;
     double sum = 0;
-    for (int row = rows; --row >= 0; ) {
-      for (int i = index, column = columns; --column >= 0; ) {
+    for (int row = rows; --row >= 0;) {
+      for (int i = index, column = columns; --column >= 0;) {
         sum += elems[i];
         i += cs;
       }

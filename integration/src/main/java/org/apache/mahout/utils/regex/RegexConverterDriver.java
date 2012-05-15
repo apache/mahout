@@ -56,7 +56,7 @@ public class RegexConverterDriver extends AbstractJob {
 
     Configuration conf = getConf();
     //TODO: How to deal with command line escaping?
-    conf.set(RegexMapper.REGEX, getOption("regex"));//
+    conf.set(RegexMapper.REGEX, getOption("regex")); //
     String gtk = getOption("groupsToKeep");
     if (gtk != null) {
       conf.set(RegexMapper.GROUP_MATCHERS, gtk);

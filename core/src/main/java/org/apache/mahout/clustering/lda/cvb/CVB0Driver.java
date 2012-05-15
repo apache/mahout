@@ -231,12 +231,12 @@ public class CVB0Driver extends AbstractJob {
     Preconditions.checkArgument(!backfillPerplexity || testFraction > 0.0,
         "Expected 'testFraction' value in range (0, 1] but found value '%s'", testFraction);
 
-    String infoString = "Will run Collapsed Variational Bayes (0th-derivative approximation) " +
-      "learning for LDA on {} (numTerms: {}), finding {}-topics, with document/topic prior {}, " +
-      "topic/term prior {}.  Maximum iterations to run will be {}, unless the change in " +
-      "perplexity is less than {}.  Topic model output (p(term|topic) for each topic) will be " +
-      "stored {}.  Random initialization seed is {}, holding out {} of the data for perplexity " +
-      "check\n";
+    String infoString = "Will run Collapsed Variational Bayes (0th-derivative approximation) " 
+      + "learning for LDA on {} (numTerms: {}), finding {}-topics, with document/topic prior {}, " 
+      + "topic/term prior {}.  Maximum iterations to run will be {}, unless the change in " 
+      + "perplexity is less than {}.  Topic model output (p(term|topic) for each topic) will be " 
+      + "stored {}.  Random initialization seed is {}, holding out {} of the data for perplexity " 
+      + "check\n";
     log.info(infoString, new Object[] {inputPath, numTerms, numTopics, alpha, eta, maxIterations,
         convergenceDelta, topicModelOutputPath, randomSeed, testFraction});
     infoString = dictionaryPath == null

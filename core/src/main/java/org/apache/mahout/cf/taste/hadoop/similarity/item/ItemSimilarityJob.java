@@ -96,13 +96,13 @@ public final class ItemSimilarityJob extends AbstractJob {
 
     addInputOption();
     addOutputOption();
-    addOption("similarityClassname", "s", "Name of distributed similarity measures class to instantiate, " +
-        "alternatively use one of the predefined similarities (" + VectorSimilarityMeasures.list() + ')');
+    addOption("similarityClassname", "s", "Name of distributed similarity measures class to instantiate, " 
+        + "alternatively use one of the predefined similarities (" + VectorSimilarityMeasures.list() + ')');
     addOption("maxSimilaritiesPerItem", "m", "try to cap the number of similar items per item to this number "
         + "(default: " + DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM + ')',
         String.valueOf(DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM));
-    addOption("maxPrefsPerUser", "mppu", "max number of preferences to consider per user, " +
-        "users with more preferences will be sampled down (default: " + DEFAULT_MAX_PREFS_PER_USER + ')',
+    addOption("maxPrefsPerUser", "mppu", "max number of preferences to consider per user, " 
+        + "users with more preferences will be sampled down (default: " + DEFAULT_MAX_PREFS_PER_USER + ')',
         String.valueOf(DEFAULT_MAX_PREFS_PER_USER));
     addOption("minPrefsPerUser", "mp", "ignore users with less preferences than this "
         + "(default: " + DEFAULT_MIN_PREFS_PER_USER + ')', String.valueOf(DEFAULT_MIN_PREFS_PER_USER));

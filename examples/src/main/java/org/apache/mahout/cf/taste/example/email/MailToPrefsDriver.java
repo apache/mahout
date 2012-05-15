@@ -234,7 +234,7 @@ public final class MailToPrefsDriver extends AbstractJob {
     try {
       long currentChunkSize = 0;
       Path filesPattern = new Path(inputPath, OUTPUT_FILES_PATTERN);
-      int i = 1;//start at 1, since a miss in the OpenObjectIntHashMap returns a 0
+      int i = 1; //start at 1, since a miss in the OpenObjectIntHashMap returns a 0
       for (Pair<Writable, Writable> record
               : new SequenceFileDirIterable<Writable, Writable>(filesPattern, PathType.GLOB, null, null, true, conf)) {
         if (currentChunkSize > chunkSizeLimit) {

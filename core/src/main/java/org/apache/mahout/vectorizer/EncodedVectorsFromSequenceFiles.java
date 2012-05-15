@@ -83,7 +83,7 @@ public final class EncodedVectorsFromSequenceFiles extends AbstractJob {
     String encoderClass = LuceneTextValueEncoder.class.getName();
     if (hasOption("encoderClass")) {
       encoderClass = getOption("encoderClass");
-      ClassUtils.instantiateAs(encoderClass, FeatureVectorEncoder.class, new Class[]{String.class}, new Object[]{encoderName});//try instantiating it
+      ClassUtils.instantiateAs(encoderClass, FeatureVectorEncoder.class, new Class[]{String.class}, new Object[]{encoderName}); //try instantiating it
     }
 
     SimpleTextEncodingVectorizer vectorizer = new SimpleTextEncodingVectorizer();

@@ -52,7 +52,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D implements Cloneab
       return Double.NaN;
     }
     double a = f.apply(getQuick(size - 1));
-    for (int i = size - 1; --i >= 0; ) {
+    for (int i = size - 1; --i >= 0;) {
       a = aggr.apply(a, f.apply(getQuick(i)));
     }
     return a;
@@ -91,7 +91,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D implements Cloneab
       return Double.NaN;
     }
     double a = f.apply(getQuick(size - 1), other.getQuick(size - 1));
-    for (int i = size - 1; --i >= 0; ) {
+    for (int i = size - 1; --i >= 0;) {
       a = aggr.apply(a, f.apply(getQuick(i), other.getQuick(i)));
     }
     return a;
@@ -110,7 +110,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D implements Cloneab
       throw new IllegalArgumentException(
           "Must have same number of cells: length=" + values.length + "size()=" + size());
     }
-    for (int i = size; --i >= 0; ) {
+    for (int i = size; --i >= 0;) {
       setQuick(i, values[i]);
     }
   }
@@ -121,7 +121,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D implements Cloneab
    * @param value the value to be filled into the cells.
    */
   public void assign(double value) {
-    for (int i = size; --i >= 0; ) {
+    for (int i = size; --i >= 0;) {
       setQuick(i, value);
     }
   }
@@ -142,7 +142,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D implements Cloneab
    * @see org.apache.mahout.math.function.Functions
    */
   public void assign(DoubleFunction function) {
-    for (int i = size; --i >= 0; ) {
+    for (int i = size; --i >= 0;) {
       setQuick(i, function.apply(getQuick(i)));
     }
   }
@@ -165,7 +165,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D implements Cloneab
       other = other.copy();
     }
 
-    for (int i = size; --i >= 0; ) {
+    for (int i = size; --i >= 0;) {
       setQuick(i, other.getQuick(i));
     }
     return this;
@@ -200,7 +200,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D implements Cloneab
    */
   public DoubleMatrix1D assign(DoubleMatrix1D y, DoubleDoubleFunction function) {
     checkSize(y);
-    for (int i = size; --i >= 0; ) {
+    for (int i = size; --i >= 0;) {
       setQuick(i, function.apply(getQuick(i), y.getQuick(i)));
     }
     return this;
@@ -276,7 +276,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D implements Cloneab
   /** Returns the number of cells having non-zero values; ignores tolerance. */
   public int cardinality() {
     int cardinality = 0;
-    for (int i = size; --i >= 0; ) {
+    for (int i = size; --i >= 0;) {
       if (getQuick(i) != 0) {
         cardinality++;
       }
@@ -555,7 +555,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D implements Cloneab
    */
   public void swap(DoubleMatrix1D other) {
     checkSize(other);
-    for (int i = size; --i >= 0; ) {
+    for (int i = size; --i >= 0;) {
       double tmp = getQuick(i);
       setQuick(i, other.getQuick(i));
       other.setQuick(i, tmp);
@@ -586,7 +586,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D implements Cloneab
     if (values.length < size) {
       throw new IllegalArgumentException("values too small");
     }
-    for (int i = size; --i >= 0; ) {
+    for (int i = size; --i >= 0;) {
       values[i] = getQuick(i);
     }
   }

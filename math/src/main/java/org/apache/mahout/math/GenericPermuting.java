@@ -52,7 +52,7 @@ package org.apache.mahout.math;
  Swapper swapper = new Swapper() {
  &nbsp;&nbsp;&nbsp;public void swap(int a, int b) {
  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;String tmp; // reordering String[]
- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// int tmp; // reordering int[]
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // int tmp; // reordering int[]
  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tmp = array[a]; array[a] = array[b]; array[b] = tmp;
  &nbsp;&nbsp;&nbsp;}
  };
@@ -139,7 +139,7 @@ public final class GenericPermuting {
     if (pos == null || pos.length < s) {
       pos = new int[s];
     }
-    for (int i = s; --i >= 0; ) {
+    for (int i = s; --i >= 0;) {
       tracks[i] = i;
       pos[i] = i;
     }

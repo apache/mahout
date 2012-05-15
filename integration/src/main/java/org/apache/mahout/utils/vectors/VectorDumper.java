@@ -89,8 +89,8 @@ public final class VectorDumper extends AbstractJob {
     addOption("numItems", "ni", "Output at most <n> vecors", false);
     addOption("vectorSize", "vs", "Truncate vectors to <vs> length when dumping (most useful when in"
             + " conjunction with -sort", false);
-    addOption(buildOption("filter", "fi", "Only dump out those vectors whose name matches the filter." +
-            "  Multiple items may be specified by repeating the argument.", true, 1, 100, false, null));
+    addOption(buildOption("filter", "fi", "Only dump out those vectors whose name matches the filter." 
+            + "  Multiple items may be specified by repeating the argument.", true, 1, 100, false, null));
 
     if (parseArguments(args, false, true) == null) {
       return -1;

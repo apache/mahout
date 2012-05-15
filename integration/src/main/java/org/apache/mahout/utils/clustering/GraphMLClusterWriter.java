@@ -120,10 +120,10 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
         Vector theVec = point.getVector();
         double distance = 1;
         if (measure != null) {
-          distance = measure.distance(cluster.getCenter().getLengthSquared(), cluster.getCenter(), theVec) * 500;//scale the distance
+          distance = measure.distance(cluster.getCenter().getLengthSquared(), cluster.getCenter(), theVec) * 500; //scale the distance
         }
         String vecStr;
-        int angle = random.nextInt(360);//pick an angle at random and then scale along that angle
+        int angle = random.nextInt(360); //pick an angle at random and then scale along that angle
         double angleRads = Math.toRadians(angle);
 
         float targetX = x + (float) (distance * Math.cos(angleRads));
@@ -179,8 +179,8 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
   private static String createEdge(String left, String right, double distance) {
     left = StringUtils.escapeXML(left);
     right = StringUtils.escapeXML(right);
-    return "<edge id=\"" + left + '_' + right + "\" source=\"" + left + "\" target=\"" + right + "\">" +
-            "<data key=\"weight\">" + distance + "</data></edge>";
+    return "<edge id=\"" + left + '_' + right + "\" source=\"" + left + "\" target=\"" + right + "\">" 
+            + "<data key=\"weight\">" + distance + "</data></edge>";
   }
 
   private static String createNode(String s) {
@@ -191,16 +191,16 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
 
 
   private static String createNode(String s, Color rgb, float x, float y) {
-    return "<node id=\"" + StringUtils.escapeXML(s) + "\"><data key=\"r\">" + rgb.r +
-            "</data>" +
-            "<data key=\"g\">" + rgb.g +
-            "</data>" +
-            "<data key=\"b\">" + rgb.b +
-            "</data>" +
-            "<data key=\"x\">" + x +
-            "</data>" +
-            "<data key=\"y\">" + y +
-            "</data>"
+    return "<node id=\"" + StringUtils.escapeXML(s) + "\"><data key=\"r\">" + rgb.r 
+            + "</data>" +
+            "<data key=\"g\">" + rgb.g 
+            + "</data>" +
+            "<data key=\"b\">" + rgb.b 
+            + "</data>" +
+            "<data key=\"x\">" + x 
+            + "</data>" +
+            "<data key=\"y\">" + y 
+            + "</data>"
             + "</node>";
   }
 

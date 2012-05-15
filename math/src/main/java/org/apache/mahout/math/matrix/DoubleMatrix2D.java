@@ -53,8 +53,8 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D implements Cloneab
     }
     double a = f.apply(getQuick(rows - 1, columns - 1));
     int d = 1; // last cell already done
-    for (int row = rows; --row >= 0; ) {
-      for (int column = columns - d; --column >= 0; ) {
+    for (int row = rows; --row >= 0;) {
+      for (int column = columns - d; --column >= 0;) {
         a = aggr.apply(a, f.apply(getQuick(row, column)));
       }
       d = 0;
@@ -101,8 +101,8 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D implements Cloneab
     }
     double a = f.apply(getQuick(rows - 1, columns - 1), other.getQuick(rows - 1, columns - 1));
     int d = 1; // last cell already done
-    for (int row = rows; --row >= 0; ) {
-      for (int column = columns - d; --column >= 0; ) {
+    for (int row = rows; --row >= 0;) {
+      for (int column = columns - d; --column >= 0;) {
         a = aggr.apply(a, f.apply(getQuick(row, column), other.getQuick(row, column)));
       }
       d = 0;
@@ -123,13 +123,13 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D implements Cloneab
     if (values.length != rows) {
       throw new IllegalArgumentException("Must have same number of rows: rows=" + values.length + "rows()=" + rows());
     }
-    for (int row = rows; --row >= 0; ) {
+    for (int row = rows; --row >= 0;) {
       double[] currentRow = values[row];
       if (currentRow.length != columns) {
         throw new IllegalArgumentException(
             "Must have same number of columns in every row: columns=" + currentRow.length + "columns()=" + columns());
       }
-      for (int column = columns; --column >= 0; ) {
+      for (int column = columns; --column >= 0;) {
         setQuick(row, column, currentRow[column]);
       }
     }
@@ -144,8 +144,8 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D implements Cloneab
   public DoubleMatrix2D assign(double value) {
     int r = rows;
     int c = columns;
-    //for (int row=rows; --row >= 0; ) {
-    //  for (int column=columns; --column >= 0; ) {
+    //for (int row=rows; --row >= 0;) {
+    //  for (int column=columns; --column >= 0;) {
     for (int row = 0; row < r; row++) {
       for (int column = 0; column < c; column++) {
         setQuick(row, column, value);
@@ -174,8 +174,8 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D implements Cloneab
    * @see org.apache.mahout.math.function.Functions
    */
   public void assign(DoubleFunction function) {
-    for (int row = rows; --row >= 0; ) {
-      for (int column = columns; --column >= 0; ) {
+    for (int row = rows; --row >= 0;) {
+      for (int column = columns; --column >= 0;) {
         setQuick(row, column, function.apply(getQuick(row, column)));
       }
     }
@@ -202,8 +202,8 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D implements Cloneab
 
     //for (int row=0; row<rows; row++) {
     //for (int column=0; column<columns; column++) {
-    for (int row = rows; --row >= 0; ) {
-      for (int column = columns; --column >= 0; ) {
+    for (int row = rows; --row >= 0;) {
+      for (int column = columns; --column >= 0;) {
         setQuick(row, column, other.getQuick(row, column));
       }
     }
@@ -240,8 +240,8 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D implements Cloneab
    */
   public DoubleMatrix2D assign(DoubleMatrix2D y, DoubleDoubleFunction function) {
     checkShape(y);
-    for (int row = rows; --row >= 0; ) {
-      for (int column = columns; --column >= 0; ) {
+    for (int row = rows; --row >= 0;) {
+      for (int column = columns; --column >= 0;) {
         setQuick(row, column, function.apply(getQuick(row, column), y.getQuick(row, column)));
       }
     }
@@ -251,8 +251,8 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D implements Cloneab
   /** Returns the number of cells having non-zero values; ignores tolerance. */
   public int cardinality() {
     int cardinality = 0;
-    for (int row = rows; --row >= 0; ) {
-      for (int column = columns; --column >= 0; ) {
+    for (int row = rows; --row >= 0;) {
+      for (int column = columns; --column >= 0;) {
         if (getQuick(row, column) != 0) {
           cardinality++;
         }
@@ -315,8 +315,8 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D implements Cloneab
    * @param function a function object taking as argument the current non-zero cell's row, column and value.
    */
   public void forEachNonZero(IntIntDoubleFunction function) {
-    for (int row = rows; --row >= 0; ) {
-      for (int column = columns; --column >= 0; ) {
+    for (int row = rows; --row >= 0;) {
+      for (int column = columns; --column >= 0;) {
         double value = getQuick(row, column);
         if (value != 0) {
           double r = function.apply(row, column, value);
@@ -467,9 +467,9 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D implements Cloneab
    */
   public double[][] toArray() {
     double[][] values = new double[rows][columns];
-    for (int row = rows; --row >= 0; ) {
+    for (int row = rows; --row >= 0;) {
       double[] currentRow = values[row];
-      for (int column = columns; --column >= 0; ) {
+      for (int column = columns; --column >= 0;) {
         currentRow[column] = getQuick(row, column);
       }
     }
@@ -638,13 +638,13 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D implements Cloneab
     // check for "all"
     if (rowIndexes == null) {
       rowIndexes = new int[rows];
-      for (int i = rows; --i >= 0; ) {
+      for (int i = rows; --i >= 0;) {
         rowIndexes[i] = i;
       }
     }
     if (columnIndexes == null) {
       columnIndexes = new int[columns];
-      for (int i = columns; --i >= 0; ) {
+      for (int i = columns; --i >= 0;) {
         columnIndexes[i] = i;
       }
     }
@@ -653,10 +653,10 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D implements Cloneab
     checkColumnIndexes(columnIndexes);
     int[] rowOffsets = new int[rowIndexes.length];
     int[] columnOffsets = new int[columnIndexes.length];
-    for (int i = rowIndexes.length; --i >= 0; ) {
+    for (int i = rowIndexes.length; --i >= 0;) {
       rowOffsets[i] = rowOffset(rowRank(rowIndexes[i]));
     }
-    for (int i = columnIndexes.length; --i >= 0; ) {
+    for (int i = columnIndexes.length; --i >= 0;) {
       columnOffsets[i] = columnOffset(columnRank(columnIndexes[i]));
     }
     return viewSelectionLike(rowOffsets, columnOffsets);
@@ -739,9 +739,9 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D implements Cloneab
       throw new IllegalArgumentException("Incompatible args");
     }
 
-    for (int i = rows; --i >= 0; ) {
+    for (int i = rows; --i >= 0;) {
       double s = 0;
-      for (int j = columns; --j >= 0; ) {
+      for (int j = columns; --j >= 0;) {
         s += getQuick(i, j) * y.getQuick(j);
       }
       z.setQuick(i, alpha * s + beta * z.getQuick(i));
@@ -788,10 +788,10 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D implements Cloneab
       throw new IllegalArgumentException("Matrices must not be identical");
     }
 
-    for (int j = p; --j >= 0; ) {
-      for (int i = m; --i >= 0; ) {
+    for (int j = p; --j >= 0;) {
+      for (int i = m; --i >= 0;) {
         double s = 0;
-        for (int k = n; --k >= 0; ) {
+        for (int k = n; --k >= 0;) {
           s += getQuick(i, k) * B.getQuick(k, j);
         }
         C.setQuick(i, j, alpha * s + beta * C.getQuick(i, j));

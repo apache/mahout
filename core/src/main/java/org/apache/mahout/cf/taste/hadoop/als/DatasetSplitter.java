@@ -69,10 +69,10 @@ public class DatasetSplitter extends AbstractJob {
 
     addInputOption();
     addOutputOption();
-    addOption("trainingPercentage", "t", "percentage of the data to use as training set (default: " +
-        DEFAULT_TRAINING_PERCENTAGE + ')', String.valueOf(DEFAULT_TRAINING_PERCENTAGE));
-    addOption("probePercentage", "p", "percentage of the data to use as probe set (default: " +
-        DEFAULT_PROBE_PERCENTAGE + ')', String.valueOf(DEFAULT_PROBE_PERCENTAGE));
+    addOption("trainingPercentage", "t", "percentage of the data to use as training set (default: " 
+        + DEFAULT_TRAINING_PERCENTAGE + ')', String.valueOf(DEFAULT_TRAINING_PERCENTAGE));
+    addOption("probePercentage", "p", "percentage of the data to use as probe set (default: " 
+        + DEFAULT_PROBE_PERCENTAGE + ')', String.valueOf(DEFAULT_PROBE_PERCENTAGE));
 
     Map<String, List<String>> parsedArgs = parseArguments(args);
     double trainingPercentage = Double.parseDouble(getOption("trainingPercentage"));

@@ -39,7 +39,7 @@ public final class LogLikelihoodTest extends MahoutTestCase {
     assertEquals(0.0, LogLikelihood.entropy(1), 0.0);
     //TODO: more tests here
     try {
-      LogLikelihood.entropy(-1, -1);//exception
+      LogLikelihood.entropy(-1, -1); //exception
       fail();
     } catch (IllegalArgumentException e) {
 

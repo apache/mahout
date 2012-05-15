@@ -115,7 +115,7 @@ public final class Property {
     }
 
     double epsilon = tolerance();
-    for (int i = size; --i >= 0; ) {
+    for (int i = size; --i >= 0;) {
       //if (!(getQuick(i) == B.getQuick(i))) return false;
       //if (Math.abs(A.getQuick(i) - B.getQuick(i)) > epsilon) return false;
       double x = a.getQuick(i);
@@ -148,8 +148,8 @@ public final class Property {
     int columns = a.columns();
 
     double epsilon = tolerance();
-    for (int row = rows; --row >= 0; ) {
-      for (int column = columns; --column >= 0; ) {
+    for (int row = rows; --row >= 0;) {
+      for (int column = columns; --column >= 0;) {
         //if (!(A.getQuick(row,column) == value)) return false;
         //if (Math.abs(value - A.getQuick(row,column)) > epsilon) return false;
         double x = a.getQuick(row, column);
@@ -189,8 +189,8 @@ public final class Property {
     }
 
     double epsilon = tolerance();
-    for (int row = rows; --row >= 0; ) {
-      for (int column = columns; --column >= 0; ) {
+    for (int row = rows; --row >= 0;) {
+      for (int column = columns; --column >= 0;) {
         //if (!(A.getQuick(row,column) == B.getQuick(row,column))) return false;
         //if (Math.abs((A.getQuick(row,column) - B.getQuick(row,column)) > epsilon) return false;
         double x = a.getQuick(row, column);
@@ -215,8 +215,8 @@ public final class Property {
     double epsilon = tolerance();
     int rows = a.rows();
     int columns = a.columns();
-    for (int row = rows; --row >= 0; ) {
-      for (int column = columns; --column >= 0; ) {
+    for (int row = rows; --row >= 0;) {
+      for (int column = columns; --column >= 0;) {
         //if (row!=column && A.getQuick(row,column) != 0) return false;
         if (row != column && Math.abs(a.getQuick(row, column)) > epsilon) {
           return false;
@@ -235,7 +235,7 @@ public final class Property {
   public static boolean isDiagonallyDominantByColumn(DoubleMatrix2D a) {
     //double epsilon = tolerance();
     int min = Math.min(a.rows(), a.columns());
-    for (int i = min; --i >= 0; ) {
+    for (int i = min; --i >= 0;) {
       double diag = Math.abs(a.getQuick(i, i));
       diag += diag;
       if (diag <= a.viewColumn(i).aggregate(Functions.PLUS, Functions.ABS)) {
@@ -254,7 +254,7 @@ public final class Property {
   public static boolean isDiagonallyDominantByRow(DoubleMatrix2D a) {
     //double epsilon = tolerance();
     int min = Math.min(a.rows(), a.columns());
-    for (int i = min; --i >= 0; ) {
+    for (int i = min; --i >= 0;) {
       double diag = Math.abs(a.getQuick(i, i));
       diag += diag;
       if (diag <= a.viewRow(i).aggregate(Functions.PLUS, Functions.ABS)) {
@@ -272,8 +272,8 @@ public final class Property {
     double epsilon = tolerance();
     int rows = a.rows();
     int columns = a.columns();
-    for (int row = rows; --row >= 0; ) {
-      for (int column = columns; --column >= 0; ) {
+    for (int row = rows; --row >= 0;) {
+      for (int column = columns; --column >= 0;) {
         double v = a.getQuick(row, column);
         if (row == column) {
           if (Math.abs(1 - v) > epsilon) {
@@ -295,8 +295,8 @@ public final class Property {
     double epsilon = tolerance();
     int rows = a.rows();
     int columns = a.columns();
-    for (int row = rows; --row >= 0; ) {
-      for (int column = columns; --column >= 0; ) {
+    for (int row = rows; --row >= 0;) {
+      for (int column = columns; --column >= 0;) {
         if (!(row == column || row == column + 1) && Math.abs(a.getQuick(row, column)) > epsilon) {
           return false;
         }
@@ -313,7 +313,7 @@ public final class Property {
     double epsilon = tolerance();
     int rows = a.rows();
     int columns = a.columns();
-    for (int column = columns; --column >= 0; ) {
+    for (int column = columns; --column >= 0;) {
       for (int row = Math.min(column, rows); --row >= 0;) {
         //if (A.getQuick(row,column) != 0) return false;
         if (Math.abs(a.getQuick(row, column)) > epsilon) {
@@ -331,8 +331,8 @@ public final class Property {
   public static boolean isNonNegative(DoubleMatrix2D a) {
     int rows = a.rows();
     int columns = a.columns();
-    for (int row = rows; --row >= 0; ) {
-      for (int column = columns; --column >= 0; ) {
+    for (int row = rows; --row >= 0;) {
+      for (int column = columns; --column >= 0;) {
         if (a.getQuick(row, column) < 0) {
           return false;
         }
@@ -358,8 +358,8 @@ public final class Property {
   public static boolean isPositive(DoubleMatrix2D a) {
     int rows = a.rows();
     int columns = a.columns();
-    for (int row = rows; --row >= 0; ) {
-      for (int column = columns; --column >= 0; ) {
+    for (int row = rows; --row >= 0;) {
+      for (int column = columns; --column >= 0;) {
         if (a.getQuick(row, column) <= 0) {
           return false;
         }
@@ -379,8 +379,8 @@ public final class Property {
     double epsilon = tolerance();
     int rows = a.rows();
     //int columns = A.columns();
-    for (int row = rows; --row >= 0; ) {
-      for (int column = rows; --column >= 0; ) {
+    for (int row = rows; --row >= 0;) {
+      for (int column = rows; --column >= 0;) {
         //if (A.getQuick(row,column) != -A.getQuick(column,row)) return false;
         if (Math.abs(a.getQuick(row, column) + a.getQuick(column, row)) > epsilon) {
           return false;
@@ -403,7 +403,7 @@ public final class Property {
     double epsilon = tolerance();
     int rows = a.rows();
     int columns = a.columns();
-    for (int column = columns; --column >= 0; ) {
+    for (int column = columns; --column >= 0;) {
       for (int row = Math.min(rows, column + 1); --row >= 0;) {
         //if (A.getQuick(row,column) != 0) return false;
         if (Math.abs(a.getQuick(row, column)) > epsilon) {
@@ -441,8 +441,8 @@ public final class Property {
     double epsilon = tolerance();
     int rows = a.rows();
     int columns = a.columns();
-    for (int column = columns; --column >= 0; ) {
-      for (int row = rows; --row >= column; ) {
+    for (int column = columns; --column >= 0;) {
+      for (int row = rows; --row >= column;) {
         //if (A.getQuick(row,column) != 0) return false;
         if (Math.abs(a.getQuick(row, column)) > epsilon) {
           return false;
@@ -478,8 +478,8 @@ public final class Property {
     double epsilon = tolerance();
     int rows = a.rows();
     int columns = a.columns();
-    for (int row = rows; --row >= 0; ) {
-      for (int column = columns; --column >= 0; ) {
+    for (int row = rows; --row >= 0;) {
+      for (int column = columns; --column >= 0;) {
         if (Math.abs(row - column) > 1 && Math.abs(a.getQuick(row, column)) > epsilon) {
           return false;
         }
@@ -515,8 +515,8 @@ public final class Property {
     double epsilon = tolerance();
     int rows = a.rows();
     int columns = a.columns();
-    for (int row = rows; --row >= 0; ) {
-      for (int column = columns; --column >= 0; ) {
+    for (int row = rows; --row >= 0;) {
+      for (int column = columns; --column >= 0;) {
         if (!(row == column || row == column - 1) && Math.abs(a.getQuick(row, column)) > epsilon) {
           return false;
         }
@@ -533,8 +533,8 @@ public final class Property {
     double epsilon = tolerance();
     int rows = a.rows();
     int columns = a.columns();
-    for (int column = columns; --column >= 0; ) {
-      for (int row = rows; --row > column; ) {
+    for (int column = columns; --column >= 0;) {
+      for (int row = rows; --row > column;) {
         //if (A.getQuick(row,column) != 0) return false;
         if (Math.abs(a.getQuick(row, column)) > epsilon) {
           return false;
@@ -565,8 +565,8 @@ public final class Property {
     double epsilon = tolerance();
     int rows = a.rows();
 
-    for (int k = rows; --k >= 0; ) {
-      for (int i = rows - k; --i >= 0; ) {
+    for (int k = rows; --k >= 0;) {
+      for (int i = rows - k; --i >= 0;) {
         int j = i + k;
         //if (A.getQuick(j,i) != 0) return k;
         if (Math.abs(a.getQuick(j, i)) > epsilon) {
@@ -627,8 +627,8 @@ public final class Property {
     double epsilon = tolerance();
     int rows = a.rows();
 
-    for (int k = rows; --k >= 0; ) {
-      for (int i = rows - k; --i >= 0; ) {
+    for (int k = rows; --k >= 0;) {
+      for (int i = rows - k; --i >= 0;) {
         int j = i + k;
         //if (A.getQuick(j,i) != 0) return k+1;
         //if (A.getQuick(i,j) != 0) return k+1;
@@ -664,8 +664,8 @@ public final class Property {
     double epsilon = tolerance();
     int rows = a.rows();
 
-    for (int k = rows; --k >= 0; ) {
-      for (int i = rows - k; --i >= 0; ) {
+    for (int k = rows; --k >= 0;) {
+      for (int i = rows - k; --i >= 0;) {
         int j = i + k;
         //if (A.getQuick(i,j) != 0) return k;
         if (!(Math.abs(a.getQuick(i, j)) <= epsilon)) {

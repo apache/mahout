@@ -92,10 +92,10 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
 
     Option maxDFSigmaOpt = obuilder.withLongName("maxDFSigma").withRequired(false).withArgument(
       abuilder.withName("maxDFSigma").withMinimum(1).withMaximum(1).create()).withDescription(
-      "What portion of the tf (tf-idf) vectors to be used, expressed in times the standard deviation (sigma) of the document frequencies of these vectors." +
-              "  Can be used to remove really high frequency terms."
-          + " Expressed as a double value. Good value to be specified is 3.0. In case the value is less then 0 no vectors " +
-              "will be filtered out. Default is -1.0.  Overrides maxDFPercent").withShortName("xs").create();
+      "What portion of the tf (tf-idf) vectors to be used, expressed in times the standard deviation (sigma) of the document frequencies of these vectors." 
+              + "  Can be used to remove really high frequency terms."
+          + " Expressed as a double value. Good value to be specified is 3.0. In case the value is less then 0 no vectors " 
+              + "will be filtered out. Default is -1.0.  Overrides maxDFPercent").withShortName("xs").create();
     
     Option minLLROpt = obuilder.withLongName("minLLR").withRequired(false).withArgument(
       abuilder.withName("minLLR").withMinimum(1).withMaximum(1).create()).withDescription(
@@ -278,7 +278,7 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
                  outputDir, conf, chunkSize);
        }
 
-       long maxDF = maxDFPercent;//if we are pruning by std dev, then this will get changed
+       long maxDF = maxDFPercent; //if we are pruning by std dev, then this will get changed
        if (shouldPrune) {
          Path dfDir = new Path(outputDir, TFIDFConverter.WORDCOUNT_OUTPUT_FOLDER);
          Path stdCalcDir = new Path(outputDir, HighDFWordsPruner.STD_CALC_DIR);
