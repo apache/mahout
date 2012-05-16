@@ -31,13 +31,11 @@ import org.apache.mahout.math.Sorting;
 import org.apache.mahout.math.buffer.${valueTypeCap}BufferConsumer;
 import org.apache.mahout.math.function.${valueTypeCap}Comparator;
 import org.apache.mahout.math.function.${valueTypeCap}Procedure;
-import org.apache.mahout.math.jet.random.Uniform;
-import org.apache.mahout.math.jet.random.engine.DRand;
 //CHECKSTYLE:ON
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+
 /**
  Abstract base class for resizable lists holding <code>${valueType}</code> elements; abstract.
 */
@@ -85,6 +83,7 @@ public abstract class Abstract${valueTypeCap}List extends AbstractList implement
    * Appends the specified list to the end of this list.
    * @param other the list to be appended. 
    **/
+  @Override
   public void addAllOf(${valueTypeCap}ArrayList other) {
 	addAllOfFromTo(other, 0, other.size() - 1);
   }
@@ -799,29 +798,6 @@ public abstract class Abstract${valueTypeCap}List extends AbstractList implement
    */
   protected void setSizeRaw(int newSize) {
     size = newSize;
-  }
-
-  /**
-   * Randomly permutes the part of the receiver between <code>from</code> (inclusive) and <code>to</code> (inclusive).
-   *
-   * @param from the index of the first element (inclusive) to be permuted.
-   * @param to   the index of the last element (inclusive) to be permuted.
-   * @throws IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to ||
-   *                                   to&gt;=size())</tt>).
-   */
-  @Override
-  public void shuffleFromTo(int from, int to) {
-    checkRangeFromTo(from, to, size());
-
-    Uniform gen = new Uniform(new DRand(new Date()));
-    for (int i = from; i < to; i++) {
-      int random = gen.nextIntFromTo(i, to);
-
-      //swap(i, random)
-      ${valueType} tmpElement = getQuick(random);
-      setQuick(random, getQuick(i));
-      setQuick(i, tmpElement);
-    }
   }
 
   /** Returns the number of elements contained in the receiver. */

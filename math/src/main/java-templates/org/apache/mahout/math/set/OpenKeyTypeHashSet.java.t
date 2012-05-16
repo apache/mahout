@@ -42,13 +42,13 @@ public class Open${keyTypeCap}HashSet extends Abstract${keyTypeCap}Set {
 #end
 
   /** The hash table keys. */
-  protected ${keyType}[] table;
+  private ${keyType}[] table;
 
   /** The state of each hash table entry (FREE, FULL, REMOVED). */
-  protected byte[] state;
+  private byte[] state;
 
   /** The number of table entries in state==FREE. */
-  protected int freeEntries;
+  private int freeEntries;
 
 
   /** Constructs an empty map with default capacity and default load factors. */

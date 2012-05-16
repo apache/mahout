@@ -17,7 +17,9 @@
  limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -29,7 +31,8 @@
 
   <artifactId>mahout-math</artifactId>
   <name>Mahout Math</name>
-  <description>High performance scientific and technical computing data structures and methods, mostly based on CERN's
+  <description>High performance scientific and technical computing data structures and methods,
+    mostly based on CERN's
     Colt Java API
   </description>
 
@@ -46,6 +49,29 @@
           <source>1.6</source>
           <target>1.6</target>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.mahout</groupId>
+        <artifactId>mahout-collection-codegen-plugin</artifactId>
+        <version>1.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <!--<mainExcludes>-->
+              <!--<mainExclude>**/AbstractBooleanList.java</mainExclude>-->
+              <!--<mainExclude>**/BooleanArrayList.java</mainExclude>-->
+              <!--<mainExclude>**/BooleanBufferConsumer.java</mainExclude>-->
+              <!--</mainExcludes>-->
+              <!--<testExcludes>-->
+              <!--<testExclude>**/BooleanArrayListTest.java</testExclude>-->
+              <!--</testExcludes>-->
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
 
       <!-- create test jar so other modules can reuse the math test utility classes. -->
@@ -88,7 +114,7 @@
 
   <dependencies>
 
-    <!--  3rd-party -->  
+    <!--  3rd-party -->
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-math</artifactId>
@@ -102,13 +128,6 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-    </dependency>
-    
-    <!-- it's not a module even though it has same group id. 
-       Hence, considered a 3rd-party  -->
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-collections</artifactId>
     </dependency>
 
     <dependency>

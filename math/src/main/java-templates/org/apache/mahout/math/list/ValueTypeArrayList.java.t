@@ -27,10 +27,7 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.list;
 
 import org.apache.mahout.math.function.${valueTypeCap}Procedure;
-import org.apache.mahout.math.jet.random.Uniform;
-import org.apache.mahout.math.jet.random.engine.DRand;
 
-import java.util.Date;
 /**
  Resizable list holding <code>${valueType}</code> elements; implemented with arrays.
 */
@@ -432,7 +429,7 @@ public class ${valueTypeCap}ArrayList extends Abstract${valueTypeCap}List implem
 
     double N = (double) other.size();
     double M = (double) mySize;
-    if ((N + M) * org.apache.mahout.math.jet.math.Arithmetic.log2(N) < M * N) {
+    if ((N + M) * org.apache.mahout.collections.Arithmetic.log2(N) < M * N) {
       // it is faster to sort other before searching in it
       ${valueTypeCap}ArrayList sortedList = (${valueTypeCap}ArrayList) other.clone();
       sortedList.quickSort();
@@ -513,7 +510,7 @@ public class ${valueTypeCap}ArrayList extends Abstract${valueTypeCap}List implem
 
     double N = (double) other.size();
     double M = (double) mySize;
-    if ((N + M) * org.apache.mahout.math.jet.math.Arithmetic.log2(N) < M * N) {
+    if ((N + M) * org.apache.mahout.collections.Arithmetic.log2(N) < M * N) {
       // it is faster to sort other before searching in it
       ${valueTypeCap}ArrayList sortedList = (${valueTypeCap}ArrayList) other.clone();
       sortedList.quickSort();
@@ -590,25 +587,6 @@ public class ${valueTypeCap}ArrayList extends Abstract${valueTypeCap}List implem
    * @throws IndexOutOfBoundsException index is out of range (<tt>size()&gt;0 && (from&lt;0 || from&gt;to ||
    *                                   to&gt;=size())</tt>).
    */
-  @Override
-  public void shuffleFromTo(int from, int to) {
-    // overridden for performance only.
-    if (size == 0) {
-      return;
-    }
-    checkRangeFromTo(from, to, size);
-
-    Uniform gen = new Uniform(new DRand(new Date()));
-    ${valueType}[] theElements = elements;
-    for (int i = from; i < to; i++) {
-      int random = gen.nextIntFromTo(i, to);
-
-      //swap(i, random)
-      ${valueType} tmpElement = theElements[random];
-      theElements[random] = theElements[i];
-      theElements[i] = tmpElement;
-    }
-  }
 
   /**
    * Sorts the specified range of the receiver into ascending order.

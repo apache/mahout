@@ -52,7 +52,7 @@ public abstract class Abstract${keyTypeCap}${valueTypeCap}Map extends AbstractSe
   public boolean containsKey(final ${keyType} key) {
     return !forEachKey(
         new ${keyTypeCap}Procedure() {
-
+          @Override
           public boolean apply(${keyType} iterKey) {
             return (key != iterKey);
           }
@@ -162,7 +162,7 @@ public abstract class Abstract${keyTypeCap}${valueTypeCap}Map extends AbstractSe
 
   /**
    * Applies a procedure to each (key,value) pair of the receiver, if any. Iteration order is guaranteed to be
-   * <i>identical</i> to the order used by method {@link #forEachKey(IntProcedure)}.
+   * <i>identical</i> to the order used by method {@link #forEachKey(${keyTypeCap}Procedure)}.
    *
    * @param procedure the procedure to be applied. Stops iteration if the procedure returns <tt>false</tt>, otherwise
    *                  continues.
@@ -181,7 +181,7 @@ public abstract class Abstract${keyTypeCap}${valueTypeCap}Map extends AbstractSe
 
   /**
    * Returns the value associated with the specified key. It is often a good idea to first check with {@link
-   * #containsKey(int)} whether the given key has a value associated or not, i.e. whether there exists an association
+   * #containsKey(${keyType})} whether the given key has a value associated or not, i.e. whether there exists an association
    * for the given key or not.
    *
    * @param key the key to be searched for.
@@ -192,7 +192,7 @@ public abstract class Abstract${keyTypeCap}${valueTypeCap}Map extends AbstractSe
   /**
    * Returns a list filled with all keys contained in the receiver. The returned list has a size that equals
    * <tt>this.size()</tt>. Iteration order is guaranteed to be <i>identical</i> to the order used by method {@link
-   * #forEachKey(IntProcedure)}. <p> This method can be used to iterate over the keys of the receiver.
+   * #forEachKey(${keyTypeCap}Procedure)}. <p> This method can be used to iterate over the keys of the receiver.
    *
    * @return the keys.
    */
@@ -205,7 +205,7 @@ public abstract class Abstract${keyTypeCap}${valueTypeCap}Map extends AbstractSe
   /**
    * Fills all keys contained in the receiver into the specified list. Fills the list, starting at index 0. After this
    * call returns the specified list has a new size that equals <tt>this.size()</tt>. Iteration order is guaranteed to
-   * be <i>identical</i> to the order used by method {@link #forEachKey(IntProcedure)}. <p> This method can be used to
+   * be <i>identical</i> to the order used by method {@link #forEachKey(${keyTypeCap}Procedure)}. <p> This method can be used to
    * iterate over the keys of the receiver.
    *
    * @param list the list to be filled, can have any size.
@@ -239,7 +239,8 @@ public abstract class Abstract${keyTypeCap}${valueTypeCap}Map extends AbstractSe
   /**
    * Fills all pairs satisfying a given condition into the specified lists. Fills into the lists, starting at index 0.
    * After this call returns the specified lists both have a new size, the number of pairs satisfying the condition.
-   * Iteration order is guaranteed to be <i>identical</i> to the order used by method {@link #forEachKey(IntProcedure)}.
+   * Iteration order is guaranteed to be <i>identical</i> to the order used by method
+   * {@link #forEachKey(${keyTypeCap}Procedure)}.
    * <p> <b>Example:</b> <br>
    * <pre>
    * IntIntProcedure condition = new IntIntProcedure() { // match even keys only
@@ -398,7 +399,7 @@ public abstract class Abstract${keyTypeCap}${valueTypeCap}Map extends AbstractSe
   /**
    * Returns a list filled with all values contained in the receiver. The returned list has a size that equals
    * <tt>this.size()</tt>. Iteration order is guaranteed to be <i>identical</i> to the order used by method {@link
-   * #forEachKey(IntProcedure)}. <p> This method can be used to iterate over the values of the receiver.
+   * #forEachKey(${keyTypeCap}Procedure)}. <p> This method can be used to iterate over the values of the receiver.
    *
    * @return the values.
    */
@@ -411,7 +412,8 @@ public abstract class Abstract${keyTypeCap}${valueTypeCap}Map extends AbstractSe
   /**
    * Fills all values contained in the receiver into the specified list. Fills the list, starting at index 0. After this
    * call returns the specified list has a new size that equals <tt>this.size()</tt>. Iteration order is guaranteed to
-   * be <i>identical</i> to the order used by method {@link #forEachKey(IntProcedure)}. <p> This method can be used to
+   * be <i>identical</i> to the order used by method {@link #forEachKey(${keyTypeCap}Procedure)}.
+   * <p> This method can be used to
    * iterate over the values of the receiver.
    *
    * @param list the list to be filled, can have any size.

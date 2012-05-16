@@ -16,9 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-package org.apache.mahout.math.function;
-
 /*
 Copyright 1999 CERN - European Organization for Nuclear Research.
 Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose 
@@ -27,19 +24,32 @@ that both that copyright notice and this permission notice appear in supporting 
 CERN makes no representations about the suitability of this software for any purpose. 
 It is provided "as is" without expressed or implied warranty.
 */
+package org.apache.mahout.math;
 
 /**
- * Interface that represents a function object: a function that takes a single argument and returns a single value.
- * @see org.apache.mahout.math.map
+ * This empty class is the common root for all persistent capable classes.
+ * If this class inherits from <tt>java.lang.Object</tt> then all subclasses are serializable with the standard Java serialization mechanism.
+ * If this class inherits from <tt>com.objy.db.app.ooObj</tt> then all subclasses are <i>additionally</i> serializable with the Objectivity ODBMS persistance mechanism.
+ * Thus, by modifying the inheritance of this class the entire tree of subclasses can be switched to Objectivity compatibility (and back) with minimum effort.
  */
-public interface DoubleFunction {
+public abstract class PersistentObject implements java.io.Serializable, Cloneable {
+
+  /** Not yet commented. */
+  protected PersistentObject() {
+  }
 
   /**
-   * Apply the function to the argument and return the result
+   * Returns a copy of the receiver. This default implementation does not nothing except making the otherwise
+   * <tt>protected</tt> clone method <tt>public</tt>.
    *
-   * @param arg1 double for the argument
-   * @return the result of applying the function
+   * @return a copy of the receiver.
    */
-  double apply(double arg1);
-
+  @Override
+  public Object clone() {
+    try {
+      return super.clone();
+    } catch (CloneNotSupportedException exc) {
+      throw new InternalError(); //should never happen since we are cloneable
+    }
+  }
 }

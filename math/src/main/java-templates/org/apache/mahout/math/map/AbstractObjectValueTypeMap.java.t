@@ -52,7 +52,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
   public boolean containsKey(final T key) {
     return !forEachKey(
         new ObjectProcedure<T>() {
-
+          @Override
           public boolean apply(T iterKey) {
             return (key != iterKey);
           }
@@ -68,7 +68,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
   public boolean containsValue(final ${valueType} value) {
     return !forEachPair(
         new Object${valueTypeCap}Procedure<T>() {
-
+          @Override
           public boolean apply(T iterKey, ${valueType} iterValue) {
             return (value != iterValue);
           }
@@ -132,7 +132,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
     return
         forEachPair(
             new Object${valueTypeCap}Procedure<T>() {
-
+              @Override
               public boolean apply(T key, ${valueType} value) {
                 return other.containsKey(key) && other.get(key) == value;
               }
@@ -141,7 +141,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
             &&
             other.forEachPair(
                 new Object${valueTypeCap}Procedure<T>() {
-
+                  @Override
                   public boolean apply(T key, ${valueType} value) {
                     return containsKey(key) && get(key) == value;
                   }
@@ -164,7 +164,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
 
   /**
    * Applies a procedure to each (key,value) pair of the receiver, if any. Iteration order is guaranteed to be
-   * <i>identical</i> to the order used by method {@link #forEachKey(IntProcedure)}.
+   * <i>identical</i> to the order used by method {@link #forEachKey(ObjectProcedure)}.
    *
    * @param procedure the procedure to be applied. Stops iteration if the procedure returns <tt>false</tt>, otherwise
    *                  continues.
@@ -173,7 +173,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
   public boolean forEachPair(final Object${valueTypeCap}Procedure<T> procedure) {
     return forEachKey(
         new ObjectProcedure<T>() {
-
+          @Override
           public boolean apply(T key) {
             return procedure.apply(key, get(key));
           }
@@ -183,7 +183,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
 
   /**
    * Returns the value associated with the specified key. It is often a good idea to first check with {@link
-   * #containsKey(int)} whether the given key has a value associated or not, i.e. whether there exists an association
+   * #containsKey(Object)} whether the given key has a value associated or not, i.e. whether there exists an association
    * for the given key or not.
    *
    * @param key the key to be searched for.
@@ -194,7 +194,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
   /**
    * Returns a list filled with all keys contained in the receiver. The returned list has a size that equals
    * <tt>this.size()</tt>. Iteration order is guaranteed to be <i>identical</i> to the order used by method {@link
-   * #forEachKey(IntProcedure)}. <p> This method can be used to iterate over the keys of the receiver.
+   * #forEachKey(ObjectProcedure)}. <p> This method can be used to iterate over the keys of the receiver.
    *
    * @return the keys.
    */
@@ -207,7 +207,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
   /**
    * Fills all keys contained in the receiver into the specified list. Fills the list, starting at index 0. After this
    * call returns the specified list has a new size that equals <tt>this.size()</tt>. Iteration order is guaranteed to
-   * be <i>identical</i> to the order used by method {@link #forEachKey(IntProcedure)}. <p> This method can be used to
+   * be <i>identical</i> to the order used by method {@link #forEachKey(ObjectProcedure)}. <p> This method can be used to
    * iterate over the keys of the receiver.
    *
    * @param list the list to be filled, can have any size.
@@ -216,7 +216,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
     list.clear();
     forEachKey(
         new ObjectProcedure<T>() {
-
+          @Override
           public boolean apply(T key) {
             list.add(key);
             return true;
@@ -241,7 +241,8 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
   /**
    * Fills all pairs satisfying a given condition into the specified lists. Fills into the lists, starting at index 0.
    * After this call returns the specified lists both have a new size, the number of pairs satisfying the condition.
-   * Iteration order is guaranteed to be <i>identical</i> to the order used by method {@link #forEachKey(IntProcedure)}.
+   * Iteration order is guaranteed to be <i>identical</i> to the order used by method
+   * {@link #forEachKey(ObjectProcedure)}.
    * <p> <b>Example:</b> <br>
    * <pre>
    * IntIntProcedure condition = new IntIntProcedure() { // match even keys only
@@ -263,7 +264,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
 
     forEachPair(
         new Object${valueTypeCap}Procedure<T>() {
-
+          @Override
           public boolean apply(T key, ${valueType} value) {
             if (condition.apply(key, value)) {
               keyList.add(key);
@@ -317,7 +318,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
 
     final ${valueType}[] v = valueList.elements();
     Swapper swapper = new Swapper() {
-
+      @Override
       public void swap(int a, int b) {
         ${valueType} t1 = v[a];
         v[a] = v[b];
@@ -329,7 +330,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
     };
 
     IntComparator comp = new IntComparator() {
-
+      @Override
       public int compare(int a, int b) {
         return v[a] < v[b] ? -1 : v[a] > v[b] ? 1 : 0;
       }
@@ -407,7 +408,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
   /**
    * Returns a list filled with all values contained in the receiver. The returned list has a size that equals
    * <tt>this.size()</tt>. Iteration order is guaranteed to be <i>identical</i> to the order used by method {@link
-   * #forEachKey(IntProcedure)}. <p> This method can be used to iterate over the values of the receiver.
+   * #forEachKey(ObjectProcedure)}. <p> This method can be used to iterate over the values of the receiver.
    *
    * @return the values.
    */
@@ -420,7 +421,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
   /**
    * Fills all values contained in the receiver into the specified list. Fills the list, starting at index 0. After this
    * call returns the specified list has a new size that equals <tt>this.size()</tt>. Iteration order is guaranteed to
-   * be <i>identical</i> to the order used by method {@link #forEachKey(IntProcedure)}. <p> This method can be used to
+   * be <i>identical</i> to the order used by method {@link #forEachKey(ObjectProcedure)}. <p> This method can be used to
    * iterate over the values of the receiver.
    *
    * @param list the list to be filled, can have any size.
@@ -429,7 +430,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
     list.clear();
     forEachKey(
         new ObjectProcedure<T>() {
-
+          @Override
           public boolean apply(T key) {
             list.add(get(key));
             return true;
@@ -447,7 +448,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
   public void assign(final ${valueTypeCap}Function function) {
     copy().forEachPair(
         new  Object${valueTypeCap}Procedure<T>() {
-
+          @Override
           public boolean apply(T key, ${valueType} value) {
             put(key, function.apply(value));
             return true;
@@ -465,7 +466,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
     clear();
     other.forEachPair(
         new Object${valueTypeCap}Procedure<T>() {
-          
+          @Override
           public boolean apply(T key, ${valueType} value) {
             put(key, value);
             return true;

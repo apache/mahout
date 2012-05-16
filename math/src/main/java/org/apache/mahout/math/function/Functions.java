@@ -39,7 +39,7 @@ import java.util.Date;
  * {@link org.apache.mahout.math.function.DoubleFunction}, binary functions of type {@link
  * org.apache.mahout.math.function.DoubleDoubleFunction}. All can be retrieved via <tt>public static final</tt>
  * variables named after the function. Unary predicates are of type
- * {@link org.apache.mahout.math.function.DoubleProcedure},
+ * {@link DoubleProcedure},
  * binary predicates of type {@link org.apache.mahout.math.function.DoubleDoubleProcedure}. All can be retrieved via
  * <tt>public static final</tt> variables named <tt>isXXX</tt>.
  *
@@ -647,6 +647,8 @@ public final class Functions {
   /**
    * Constructs a function that returns <tt>from<=a && a<=to</tt>. <tt>a</tt> is a variable, <tt>from</tt> and
    * <tt>to</tt> are fixed.
+   *
+   * Note that DoubleProcedure is generated code and thus looks like an invalid reference unless you can see the generated stuff.
    */
   public static DoubleProcedure isBetween(final double from, final double to) {
     return new DoubleProcedure() {

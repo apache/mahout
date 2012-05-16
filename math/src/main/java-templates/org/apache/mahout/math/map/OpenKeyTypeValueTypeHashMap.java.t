@@ -198,8 +198,8 @@ public class Open${keyTypeCap}${valueTypeCap}HashMap extends Abstract${keyTypeCa
   }
 
   /**
-   * Returns the value associated with the specified key. It is often a good idea to first check with {@link
-   * #containsKey(double)} whether the given key has a value associated or not, i.e. whether there exists an association
+   * Returns the value associated with the specified key. It is often a good idea to first check with
+   * containsKey(${keyType}) whether the given key has a value associated or not, i.e. whether there exists an association
    * for the given key or not.
    *
    * @param key the key to be searched for.
