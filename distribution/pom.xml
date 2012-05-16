@@ -85,10 +85,6 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-collections</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-math</artifactId>
       <version>${project.version}</version>
     </dependency>

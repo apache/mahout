@@ -159,15 +159,7 @@
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
       </dependency>
-      
-      <!-- sibling projects -->
-      <dependency>
-        <groupId>org.apache.mahout</groupId>
-        <artifactId>mahout-collections</artifactId>
-        <version>1.0</version>
-      </dependency>
-    
-      
+
       <!-- 3rd party  -->
       <dependency>
         <groupId>org.apache.lucene</groupId>
