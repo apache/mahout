@@ -65,9 +65,10 @@ public final class IRStatisticsImpl implements IRStatistics, Serializable {
   }
   
   @Override
-  public double getFNMeasure(double n) {
-    double sum = n * precision + recall;
-    return sum == 0.0 ? Double.NaN : (1.0 + n) * precision * recall / sum;
+  public double getFNMeasure(double b) {
+    double b2 = b * b;
+    double sum = b2 * precision + recall;
+    return sum == 0.0 ? Double.NaN : (1.0 + b2) * precision * recall / sum;
   }
 
   @Override

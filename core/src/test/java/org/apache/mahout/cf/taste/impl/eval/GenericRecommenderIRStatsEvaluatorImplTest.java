@@ -44,7 +44,18 @@ public final class GenericRecommenderIRStatsEvaluatorImplTest extends TasteTestC
     assertEquals(0.75, stats.getPrecision(), EPSILON);
     assertEquals(0.75, stats.getRecall(), EPSILON);
     assertEquals(0.75, stats.getF1Measure(), EPSILON);
+    assertEquals(0.75, stats.getFNMeasure(2.0), EPSILON);
     assertEquals(0.75, stats.getNormalizedDiscountedCumulativeGain(), EPSILON);
+  }
+
+  @Test
+  public void testIRStats() {
+    IRStatistics stats = new IRStatisticsImpl(0.3, 0.1, 0.2, 0.05, 0.15);
+    assertEquals(0.3, stats.getPrecision(), EPSILON);
+    assertEquals(0.1, stats.getRecall(), EPSILON);
+    assertEquals(0.15, stats.getF1Measure(), EPSILON);
+    assertEquals(0.11538461538462, stats.getFNMeasure(2.0), EPSILON);
+    assertEquals(0.05, stats.getNormalizedDiscountedCumulativeGain(), EPSILON);
   }
 
 }
