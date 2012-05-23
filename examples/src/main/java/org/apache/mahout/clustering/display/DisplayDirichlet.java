@@ -101,7 +101,7 @@ public class DisplayDirichlet extends DisplayClustering {
         RandomAccessSparseVector.class.getName(), ManhattanDistanceMeasure.class.getName(), 2);
     
     DirichletDriver.run(new Configuration(), input, output, description, numClusters, numIterations, alpha0, true,
-        true, 0, false);
+        true, 0, true);
   }
   
   public static void main(String[] args) throws Exception {
