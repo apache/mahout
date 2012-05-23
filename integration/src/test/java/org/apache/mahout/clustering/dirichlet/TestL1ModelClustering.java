@@ -131,6 +131,7 @@ public final class TestL1ModelClustering extends MahoutTestCase {
   private List<Vector> sampleData;
   
   private void getSampleData(String[] docs2) throws IOException {
+    System.out.println();
     sampleData = Lists.newArrayList();
     RAMDirectory directory = new RAMDirectory();
     IndexWriter writer = new IndexWriter(directory, new StandardAnalyzer(Version.LUCENE_34), true,
@@ -157,7 +158,8 @@ public final class TestL1ModelClustering extends MahoutTestCase {
     int i = 0;
     for (Vector vector : iterable) {
       assertNotNull(vector);
-      System.out.println("Vector[" + i++ + "]=" + formatVector(vector));
+      System.out.println(i + ". " + docs2[i++]);
+      System.out.println("\t" + formatVector(vector));
       sampleData.add(vector);
     }
   }
@@ -189,50 +191,30 @@ public final class TestL1ModelClustering extends MahoutTestCase {
     return buf.toString();
   }
   
-  private void printSamples(Iterable<Cluster[]> result, int significant) {
-    int row = 0;
-    for (Cluster[] r : result) {
-      int sig = 0;
-      for (Cluster model : r) {
-        if (model.getNumObservations() > significant) {
-          sig++;
-        }
-      }
-      System.out.print("sample[" + row++ + "] (" + sig + ")= ");
-      for (Cluster model : r) {
-        if (model.getNumObservations() > significant) {
-          System.out.print(model.asFormatString(null) + ", ");
-        }
-      }
-      System.out.println();
-    }
-    System.out.println();
-  }
-  
   private void printClusters(List<Cluster> models, String[] docs) {
     for (int m = 0; m < models.size(); m++) {
       Cluster model = models.get(m);
-      long count = model.getNumObservations();
-      if (count == 0) {
+      long total = model.getTotalObservations();
+      if (total == 0) {
         continue;
       }
-      System.out.println("Model[" + m + "] had " + count + " hits (!) and " + (sampleData.size() - count)
-          + " misses (? in pdf order) during the last iteration:");
+      System.out.println();
+      System.out.println("Model[" + m + "] had " + total + " observations");
+      System.out.println("pdf           document");
       MapElement[] map = new MapElement[sampleData.size()];
       // sort the samples by pdf
+      double maxPdf = Double.MIN_NORMAL;
       for (int i = 0; i < sampleData.size(); i++) {
         VectorWritable sample = new VectorWritable(sampleData.get(i));
-        map[i] = new MapElement(model.pdf(sample), docs[i]);
+        double pdf = Math.abs(model.pdf(sample));
+        maxPdf = Math.max(maxPdf, pdf);
+        map[i] = new MapElement(pdf, docs[i]);
       }
       Arrays.sort(map);
-      // now find the n=model.count() most likely docs and output them
       for (int i = 0; i < map.length; i++) {
-        if (i < count) {
-          System.out.print("! ");
-        } else {
-          System.out.print("? ");
-        }
-        System.out.println(map[i].doc);
+        Double pdf = map[i].pdf;
+        double norm = pdf / maxPdf;
+        System.out.println(String.format(Locale.ENGLISH, "%.3f", norm) + " " + map[i].doc);
       }
     }
   }
