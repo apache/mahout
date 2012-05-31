@@ -601,4 +601,22 @@ public abstract class AbstractJob extends Configured implements Tool {
     }
     return analyzerClass;
   }
+  
+  /**
+   * Overrides the base implementation to install the Oozie action configuration resource
+   * into the provided Configuration object; note that ToolRunner calls setConf on the Tool
+   * before it invokes run.
+   */
+  @Override
+  public void setConf(Configuration conf) {
+    super.setConf(conf);
+      
+    // If running in an Oozie workflow as a Java action, need to add the
+    // Configuration resource provided by Oozie to this job's config.
+    String oozieActionConfXml = System.getProperty("oozie.action.conf.xml");
+    if (oozieActionConfXml != null) {
+      conf.addResource(new Path("file:///", oozieActionConfXml));
+      log.info("Added Oozie action Configuration resource {0} to the Hadoop Configuration", oozieActionConfXml);
+    }      
+  }
 }
