@@ -22,13 +22,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.TestClusterEvaluator;
@@ -44,12 +40,8 @@ import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.kmeans.TestKmeansClustering;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
 import org.apache.mahout.common.MahoutTestCase;
-import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
-import org.apache.mahout.common.iterator.sequencefile.PathFilters;
-import org.apache.mahout.common.iterator.sequencefile.PathType;
-import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.common.kernel.IKernelProfile;
 import org.apache.mahout.common.kernel.TriangularKernelProfile;
 import org.apache.mahout.math.DenseVector;
@@ -59,6 +51,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public final class TestCDbwEvaluator extends MahoutTestCase {
   
@@ -149,19 +144,6 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     generateSamples(500, 1, 1, 3);
     generateSamples(300, 1, 0, 0.5);
     generateSamples(300, 0, 2, 0.1);
-  }
-  
-  private void printRepPoints(Path output, int numIterations) throws IOException {
-    for (int i = 0; i <= numIterations; i++) {
-      Path out = new Path(output, "representativePoints-" + i);
-      System.out.println("Representative Points for iteration " + i);
-      Configuration conf = new Configuration();
-      for (Pair<IntWritable,VectorWritable> record : new SequenceFileDirIterable<IntWritable,VectorWritable>(out,
-          PathType.LIST, PathFilters.logsCRCFilter(), null, true, conf)) {
-        System.out.println("\tC-" + record.getFirst().get() + ": "
-            + AbstractCluster.formatVector(record.getSecond().get(), null));
-      }
-    }
   }
   
   @Test
@@ -318,7 +300,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     RepresentativePointsDriver.run(conf, clustersIn, new Path(kmeansOutput, "clusteredPoints"), kmeansOutput, measure,
         numIterations, true);
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
-    printRepPoints(kmeansOutput, numIterations);
+    RepresentativePointsDriver.printRepresentativePoints(kmeansOutput, numIterations);
     // now print out the Results
     System.out.println("K-Means CDbw = " + evaluator.getCDbw());
     System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
@@ -338,10 +320,10 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
         true, true, 0, true);
     int numIterations = 10;
     Path clustersIn = new Path(fuzzyKMeansOutput, "clusters-4");
-    RepresentativePointsDriver.run(conf, clustersIn, new Path(fuzzyKMeansOutput, "clusteredPoints"), fuzzyKMeansOutput, measure,
-        numIterations, true);
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(fuzzyKMeansOutput, "clusteredPoints"), fuzzyKMeansOutput,
+        measure, numIterations, true);
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
-    printRepPoints(fuzzyKMeansOutput, numIterations);
+    RepresentativePointsDriver.printRepresentativePoints(fuzzyKMeansOutput, numIterations);
     // now print out the Results
     System.out.println("Fuzzy K-Means CDbw = " + evaluator.getCDbw());
     System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
@@ -379,7 +361,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output,
         new EuclideanDistanceMeasure(), numIterations, true);
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
-    printRepPoints(output, numIterations);
+    RepresentativePointsDriver.printRepresentativePoints(output, numIterations);
     // now print out the Results
     System.out.println("Dirichlet CDbw = " + evaluator.getCDbw());
     System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());

@@ -21,12 +21,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.dirichlet.DirichletDriver;
@@ -41,12 +38,8 @@ import org.apache.mahout.clustering.kmeans.TestKmeansClustering;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
-import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
-import org.apache.mahout.common.iterator.sequencefile.PathFilters;
-import org.apache.mahout.common.iterator.sequencefile.PathType;
-import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.common.kernel.IKernelProfile;
 import org.apache.mahout.common.kernel.TriangularKernelProfile;
 import org.apache.mahout.math.DenseVector;
@@ -55,6 +48,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public final class TestClusterEvaluator extends MahoutTestCase {
   
@@ -119,20 +115,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
   }
   
   private void printRepPoints(int numIterations) throws IOException {
-    printRepPoints(output, numIterations);
-  }
-  
-  private void printRepPoints(Path output, int numIterations) throws IOException {
-    for (int i = 0; i <= numIterations; i++) {
-      Path out = new Path(output, "representativePoints-" + i);
-      System.out.println("Representative Points for iteration " + i);
-      Configuration conf = new Configuration();
-      for (Pair<IntWritable,VectorWritable> record : new SequenceFileDirIterable<IntWritable,VectorWritable>(out,
-          PathType.LIST, PathFilters.logsCRCFilter(), null, true, conf)) {
-        System.out.println("\tC-" + record.getFirst().get() + ": "
-            + AbstractCluster.formatVector(record.getSecond().get(), null));
-      }
-    }
+    RepresentativePointsDriver.printRepresentativePoints(output, numIterations);
   }
   
   /**
@@ -301,7 +284,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     Path clustersIn = new Path(kmeansOutput, "clusters-2");
     RepresentativePointsDriver.run(conf, clustersIn, new Path(kmeansOutput, "clusteredPoints"), kmeansOutput, measure,
         numIterations, true);
-    printRepPoints(kmeansOutput, numIterations);
+    RepresentativePointsDriver.printRepresentativePoints(kmeansOutput, numIterations);
     ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
     // now print out the Results
     System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
@@ -323,7 +306,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     Path clustersIn = new Path(fuzzyKMeansOutput, "clusters-4");
     RepresentativePointsDriver.run(conf, clustersIn, new Path(fuzzyKMeansOutput, "clusteredPoints"), fuzzyKMeansOutput,
         measure, numIterations, true);
-    printRepPoints(fuzzyKMeansOutput, numIterations);
+    RepresentativePointsDriver.printRepresentativePoints(fuzzyKMeansOutput, numIterations);
     ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
     // now print out the Results
     System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
