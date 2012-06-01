@@ -31,23 +31,28 @@ import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
 
 final class FuzzyKMeansUtil {
-
-  private FuzzyKMeansUtil() {
-  }
-
-  /** Configure the mapper with the cluster info */
-  public static void configureWithClusterInfo(Path clusterPath, List<Cluster> clusters) {
-    for (Writable value :
-         new SequenceFileDirValueIterable<Writable>(clusterPath,
-                                                    PathType.LIST,
-                                                    PathFilters.partFilter(),
-                                                    new Configuration())) {
+  
+  private FuzzyKMeansUtil() {}
+  
+  /**
+   * Create a list of SoftClusters from whatever type is passed in as the prior
+   * 
+   * @param conf
+   *          the Configuration
+   * @param clusterPath
+   *          the path to the prior Clusters
+   * @param clusters
+   *          a List<Cluster> to put values into
+   */
+  public static void configureWithClusterInfo(Configuration conf, Path clusterPath, List<Cluster> clusters) {
+    for (Writable value : new SequenceFileDirValueIterable<Writable>(clusterPath, PathType.LIST,
+        PathFilters.partFilter(), conf)) {
       Class<? extends Writable> valueClass = value.getClass();
       
       if (valueClass.equals(ClusterWritable.class)) {
-    	  ClusterWritable clusterWritable = (ClusterWritable)value;
-    	  value = clusterWritable.getValue();
-    	  valueClass = value.getClass();
+        ClusterWritable clusterWritable = (ClusterWritable) value;
+        value = clusterWritable.getValue();
+        valueClass = value.getClass();
       }
       
       if (valueClass.equals(Kluster.class)) {
@@ -65,7 +70,7 @@ final class FuzzyKMeansUtil {
         throw new IllegalStateException("Bad value class: " + valueClass);
       }
     }
-
+    
   }
-
+  
 }

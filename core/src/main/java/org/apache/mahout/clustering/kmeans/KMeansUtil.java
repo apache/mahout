@@ -34,7 +34,16 @@ final class KMeansUtil {
   private KMeansUtil() {
   }
 
-  /** Configure the mapper with the cluster info */
+  /**
+   * Create a list of Klusters from whatever type is passed in as the prior
+   * 
+   * @param conf
+   *          the Configuration
+   * @param clusterPath
+   *          the path to the prior Clusters
+   * @param clusters
+   *          a List<Cluster> to put values into
+   */
   public static void configureWithClusterInfo(Configuration conf,
                                               Path clusterPath,
                                               Collection<Cluster> clusters) {

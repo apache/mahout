@@ -267,7 +267,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     throws IOException, InterruptedException, ClassNotFoundException {
     
     List<Cluster> clusters = new ArrayList<Cluster>();
-    FuzzyKMeansUtil.configureWithClusterInfo(clustersIn, clusters);
+    FuzzyKMeansUtil.configureWithClusterInfo(conf, clustersIn, clusters);
     
     if (conf==null) {
       conf = new Configuration();
