@@ -109,6 +109,13 @@ public final class MahoutDriver {
       if (args.length > 0 && shortName(mainClasses.getProperty(keyString)).equals(args[0])) {
         foundShortName = true;
       }
+      if (args.length > 0 && keyString.equalsIgnoreCase(args[0]) && isDeprecated(mainClasses, keyString)) {
+        log.error(desc(mainClasses.getProperty(keyString)));
+        return;
+      }
+      if (isDeprecated(mainClasses, keyString)) {
+        continue;
+      }
       addClass(programDriver, keyString, mainClasses.getProperty(keyString));
     }
 
@@ -190,6 +197,10 @@ public final class MahoutDriver {
     if (log.isInfoEnabled()) {
       log.info("Program took {} ms (Minutes: {})", System.currentTimeMillis() - start, (System.currentTimeMillis() - start)/60000.0);
     }
+  }
+
+  private static boolean isDeprecated(Properties mainClasses, String keyString) {
+    return shortName(mainClasses.getProperty(keyString)).equalsIgnoreCase("deprecated");
   }
 
   private static Properties loadProperties(String resource) throws IOException {
