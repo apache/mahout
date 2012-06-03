@@ -36,5 +36,4 @@ public class ComplementaryNaiveBayesClassifier extends AbstractNaiveBayesClassif
 
     return Math.log(numerator / denominator);
   }
-
 }

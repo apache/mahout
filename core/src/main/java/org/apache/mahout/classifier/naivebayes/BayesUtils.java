@@ -116,7 +116,7 @@ public final class BayesUtils {
     int i = 0;
     try {
       for (Object label : labels) {
-        String theLabel = ((Pair<?,?>) label).getFirst().toString();
+        String theLabel = ((Pair<?,?>) label).getFirst().toString().split("/")[1];
         if (!seen.contains(theLabel)) {
           writer.append(new Text(theLabel), new IntWritable(i++));
           seen.add(theLabel);

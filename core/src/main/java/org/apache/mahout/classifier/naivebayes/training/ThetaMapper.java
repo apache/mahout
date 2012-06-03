@@ -41,7 +41,7 @@ public class ThetaMapper extends Mapper<IntWritable, VectorWritable, Text, Vecto
     Configuration conf = ctx.getConfiguration();
 
     float alphaI = conf.getFloat(ALPHA_I, 1.0f);
-    Map<String,Vector> scores = BayesUtils.readScoresFromCache(conf);
+    Map<String, Vector> scores = BayesUtils.readScoresFromCache(conf);
 
     if (conf.getBoolean(TRAIN_COMPLEMENTARY, false)) {
       trainer = new ComplementaryThetaTrainer(scores.get(TrainNaiveBayesJob.WEIGHTS_PER_FEATURE),

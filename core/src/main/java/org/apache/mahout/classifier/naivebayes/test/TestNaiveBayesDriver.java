@@ -99,7 +99,8 @@ public class TestNaiveBayesDriver extends AbstractJob {
       Text key = new Text();
       VectorWritable vw = new VectorWritable();
       while (reader.next(key, vw)) {
-        writer.append(key, new VectorWritable(classifier.classifyFull(vw.get())));
+        writer.append(new Text(key.toString().split("/")[1]),
+            new VectorWritable(classifier.classifyFull(vw.get())));
       }
       writer.close();
       reader.close();

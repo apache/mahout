@@ -112,8 +112,10 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     if (!succeeded) {
       return -1;
     }
+    
     //put the per label and per feature vectors into the cache
     HadoopUtil.cacheFiles(getTempPath(WEIGHTS), getConf());
+    
     //calculate the Thetas, write out to LABEL_THETA_NORMALIZER vectors -- TODO: add reference here to the part of the Rennie paper that discusses this
     Job thetaSummer = prepareJob(getTempPath(SUMMED_OBSERVATIONS), getTempPath(THETAS),
             SequenceFileInputFormat.class, ThetaMapper.class, Text.class, VectorWritable.class, VectorSumReducer.class,
@@ -125,6 +127,7 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     if (!succeeded) {
       return -1;
     }
+    
     //validate our model and then write it out to the official output
     NaiveBayesModel naiveBayesModel = BayesUtils.readModelFromDir(getTempPath(), getConf());
     naiveBayesModel.validate();

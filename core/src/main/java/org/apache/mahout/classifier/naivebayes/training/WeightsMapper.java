@@ -51,7 +51,6 @@ public class WeightsMapper extends Mapper<IntWritable, VectorWritable, Text, Vec
     }
 
     int label = index.get();
-//    instance.addTo(weightsPerFeature);
     weightsPerFeature.assign(instance, Functions.PLUS);
     weightsPerLabel.set(label, weightsPerLabel.get(label) + instance.zSum());
   }

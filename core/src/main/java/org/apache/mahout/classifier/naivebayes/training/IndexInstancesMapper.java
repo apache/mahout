@@ -40,7 +40,7 @@ public class IndexInstancesMapper extends Mapper<Text, VectorWritable, IntWritab
 
   @Override
   protected void map(Text labelText, VectorWritable instance, Context ctx) throws IOException, InterruptedException {
-    String label = labelText.toString();
+    String label = labelText.toString().split("/")[1]; 
     if (labelIndex.containsKey(label)) {
       ctx.write(new IntWritable(labelIndex.get(label)), instance);
     } else {
