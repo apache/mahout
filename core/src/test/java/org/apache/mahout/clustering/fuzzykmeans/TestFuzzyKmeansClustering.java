@@ -139,7 +139,7 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
           optKey(DefaultOptionCreator.METHOD_OPTION),
           DefaultOptionCreator.SEQUENTIAL_METHOD
       };
-      new FuzzyKMeansDriver().run(args);
+      FuzzyKMeansDriver.main(args);
       long count = HadoopUtil.countRecords(new Path(output, "clusteredPoints/part-m-0"), conf);
       assertTrue(count > 0);
     }
