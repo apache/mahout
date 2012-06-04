@@ -72,7 +72,7 @@ public class TestNaiveBayesDriver extends AbstractJob {
     addOption(addOption(DefaultOptionCreator.overwriteOption().create()));
     addOption("model", "m", "The path to the model built during training", true);
     addOption(buildOption("testComplementary", "c", "test complementary?", false, false, String.valueOf(false)));
-    addOption(buildOption("runSequential", "seq", "run sequential?", true, false, String.valueOf(false)));
+    addOption(buildOption("runSequential", "seq", "run sequential?", false, false, String.valueOf(false)));
     addOption("labelIndex", "l", "The path to the location of the label index", true);
     Map<String, List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
@@ -82,8 +82,8 @@ public class TestNaiveBayesDriver extends AbstractJob {
       HadoopUtil.delete(getConf(), getOutputPath());
     }
     
-    boolean complementary = parsedArgs.containsKey("testComplementary");
-    boolean sequential = Boolean.parseBoolean(getOption("runSequential"));
+    boolean complementary = hasOption("testComplementary");
+    boolean sequential = hasOption("runSequential");
     if (sequential) {
       FileSystem fs = FileSystem.get(getConf());
       NaiveBayesModel model = NaiveBayesModel.materialize(new Path(getOption("model")), getConf());

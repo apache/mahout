@@ -34,14 +34,15 @@ fi
 START_PATH=`pwd`
 
 WORK_DIR=/tmp/mahout-work-${USER}
-algorithm=( naivebayes sgd clean)
+algorithm=( cnaivebayes naivebayes sgd clean)
 if [ -n "$1" ]; then
   choice=$1
 else
   echo "Please select a number to choose the corresponding task to run"
   echo "1. ${algorithm[0]}"
   echo "2. ${algorithm[1]}"
-  echo "3. ${algorithm[2]} -- cleans up the work area in $WORK_DIR"
+  echo "2. ${algorithm[2]}"
+  echo "3. ${algorithm[3]} -- cleans up the work area in $WORK_DIR"
   read -p "Enter your choice : " choice
 fi
 
@@ -68,9 +69,15 @@ cd ../..
 
 set -e
 
-if [ "x$alg" == "xnaivebayes" ]; then
+if [ "x$alg" == "xnaivebayes"  -o  "x$alg" == "xcnaivebayes" ]; then
+  c=""
+  
+  if [ "x$alg" == "xcnaivebayes" ]; then
+    c=" -c"
+  fi
+  
   set -x
-  echo "Preparing Training Data"
+  echo "Preparing 20newsgroups data"
   rm -rf ${WORK_DIR}/20news-all
   mkdir ${WORK_DIR}/20news-all
   cp -R ${WORK_DIR}/20news-bydate/*/* ${WORK_DIR}/20news-all
@@ -85,7 +92,7 @@ if [ "x$alg" == "xnaivebayes" ]; then
     -i ${WORK_DIR}/20news-seq \
     -o ${WORK_DIR}/20news-vectors  -lnorm -nv  -wt tfidf
 
-  echo "Creating training and holdout set with a random 20% split of whole dataset"
+  echo "Creating training and holdout set with a random 80-20 split of the generated vector dataset"
   ./bin/mahout split \
     -i ${WORK_DIR}/20news-vectors/tfidf-vectors \
     --trainingOutput ${WORK_DIR}/20news-train-vectors \
@@ -97,7 +104,7 @@ if [ "x$alg" == "xnaivebayes" ]; then
     -i ${WORK_DIR}/20news-train-vectors -el \
     -o ${WORK_DIR}/model \
     -li ${WORK_DIR}/labelindex \
-    -ow -c
+    -ow $c
   
   echo "Self testing on training set"
 
@@ -105,7 +112,7 @@ if [ "x$alg" == "xnaivebayes" ]; then
     -i ${WORK_DIR}/20news-train-vectors\
     -m ${WORK_DIR}/model \
     -l ${WORK_DIR}/labelindex \
-    -ow -o ${WORK_DIR}/20news-testing 
+    -ow -o ${WORK_DIR}/20news-testing $c 
 
   echo "Testing on holdout set"
 
@@ -113,7 +120,7 @@ if [ "x$alg" == "xnaivebayes" ]; then
     -i ${WORK_DIR}/20news-test-vectors\
     -m ${WORK_DIR}/model \
     -l ${WORK_DIR}/labelindex \
-    -ow -o ${WORK_DIR}/20news-testing 
+    -ow -o ${WORK_DIR}/20news-testing $c
 
 elif [ "x$alg" == "xsgd" ]; then
   if [ ! -e "/tmp/news-group.model" ]; then
