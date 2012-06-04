@@ -38,6 +38,7 @@ public class NaiveBayesModel {
 
   private final Vector weightsPerLabel;
   private final Vector perlabelThetaNormalizer;
+  private final double minThetaNormalizer;
   private final Vector weightsPerFeature;
   private final Matrix weightsPerLabelAndFeature;
   private final float alphaI;
@@ -56,6 +57,7 @@ public class NaiveBayesModel {
     this.numFeatures = weightsPerFeature.getNumNondefaultElements();
     this.totalWeightSum = weightsPerLabel.zSum();
     this.alphaI = alphaI;
+    this.minThetaNormalizer = thetaNormalizer.maxValue();
   }
 
   public double labelWeight(int label) {
@@ -63,7 +65,7 @@ public class NaiveBayesModel {
   }
 
   public double thetaNormalizer(int label) {
-    return perlabelThetaNormalizer.get(label);
+    return perlabelThetaNormalizer.get(label) / minThetaNormalizer;
   }
 
   public double featureWeight(int feature) {
@@ -147,10 +149,17 @@ public class NaiveBayesModel {
     Preconditions.checkArgument(weightsPerLabel.getNumNondefaultElements() > 0,
         "the number of labels has to be greater than 0!");
     Preconditions.checkArgument(perlabelThetaNormalizer != null, "the theta normalizers have to be defined");
-    Preconditions.checkArgument(perlabelThetaNormalizer.getNumNondefaultElements() > 0,
-        "the number of theta normalizers has to be greater than 0!");
+    // Preconditions.checkArgument(perlabelThetaNormalizer.getNumNondefaultElements() > 0,
+    //    "the number of theta normalizers has to be greater than 0!");
     Preconditions.checkArgument(weightsPerFeature != null, "the feature sums have to be defined");
     Preconditions.checkArgument(weightsPerFeature.getNumNondefaultElements() > 0,
         "the feature sums have to be greater than 0!");
+    // Check if all thetas have same sign.
+    /*Iterator<Element> it = perlabelThetaNormalizer.iterateNonZero();
+    while (it.hasNext()) {
+      Element e = it.next();
+      Preconditions.checkArgument(Math.signum(e.get()) == Math.signum(minThetaNormalizer), e.get()
+          + "  " + minThetaNormalizer);
+    }*/
   }
 }

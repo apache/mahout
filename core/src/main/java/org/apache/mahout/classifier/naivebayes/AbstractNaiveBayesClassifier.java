@@ -45,7 +45,7 @@ public abstract class AbstractNaiveBayesClassifier extends AbstractVectorClassif
       Element e = elements.next();
       result += e.get() * getScoreForLabelFeature(label, e.index());
     }
-    return -result;
+    return result;
   }
   
   @Override

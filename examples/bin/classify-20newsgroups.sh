@@ -97,7 +97,7 @@ if [ "x$alg" == "xnaivebayes"  -o  "x$alg" == "xcnaivebayes" ]; then
     -i ${WORK_DIR}/20news-vectors/tfidf-vectors \
     --trainingOutput ${WORK_DIR}/20news-train-vectors \
     --testOutput ${WORK_DIR}/20news-test-vectors  \
-    --randomSelectionPct 20 --overwrite --sequenceFiles -xm sequential
+    --randomSelectionPct 40 --overwrite --sequenceFiles -xm sequential
 
   echo "Training Naive Bayes model"
   ./bin/mahout trainnb \

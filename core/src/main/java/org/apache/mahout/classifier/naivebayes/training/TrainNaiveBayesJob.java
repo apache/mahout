@@ -45,7 +45,11 @@ import java.util.Map;
  * This class trains a Naive Bayes Classifier (Parameters for both Naive Bayes and Complementary Naive Bayes)
  */
 public final class TrainNaiveBayesJob extends AbstractJob {
-
+  private static final String TRAIN_COMPLEMENTARY = "trainComplementary";
+  private static final String ALPHA_I = "alphaI";
+  private static final String LABEL_INDEX = "labelIndex";
+  private static final String EXTRACT_LABELS = "extractLabels";
+  private static final String LABELS = "labels";
   public static final String WEIGHTS_PER_FEATURE = "__SPF";
   public static final String WEIGHTS_PER_LABEL = "__SPL";
   public static final String LABEL_THETA_NORMALIZER = "_LTN";
@@ -63,12 +67,12 @@ public final class TrainNaiveBayesJob extends AbstractJob {
 
     addInputOption();
     addOutputOption();
-    addOption("labels", "l", "comma-separated list of labels to include in training", false);
+    addOption(LABELS, "l", "comma-separated list of labels to include in training", false);
 
-    addOption(buildOption("extractLabels", "el", "Extract the labels from the input", false, false, ""));
-    addOption("alphaI", "a", "smoothing parameter", String.valueOf(1.0f));
-    addOption(buildOption("trainComplementary", "c", "train complementary?", false, false, String.valueOf(false)));
-    addOption("labelIndex", "li", "The path to store the label index in", false);
+    addOption(buildOption(EXTRACT_LABELS, "el", "Extract the labels from the input", false, false, ""));
+    addOption(ALPHA_I, "a", "smoothing parameter", String.valueOf(1.0f));
+    addOption(buildOption(TRAIN_COMPLEMENTARY, "c", "train complementary?", false, false, String.valueOf(false)));
+    addOption(LABEL_INDEX, "li", "The path to store the label index in", false);
     addOption(DefaultOptionCreator.overwriteOption().create());
     Map<String, List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
@@ -79,15 +83,15 @@ public final class TrainNaiveBayesJob extends AbstractJob {
       HadoopUtil.delete(getConf(), getTempPath());
     }
     Path labPath;
-    String labPathStr = getOption("labelIndex");
+    String labPathStr = getOption(LABEL_INDEX);
     if (labPathStr != null) {
       labPath = new Path(labPathStr);
     } else {
-      labPath = getTempPath("labelIndex");
+      labPath = getTempPath(LABEL_INDEX);
     }
     long labelSize = createLabelIndex(labPath);
-    float alphaI = Float.parseFloat(getOption("alphaI"));
-    boolean trainComplementary = Boolean.parseBoolean(getOption("trainComplementary"));
+    float alphaI = Float.parseFloat(getOption(ALPHA_I));
+    boolean trainComplementary = Boolean.parseBoolean(getOption(TRAIN_COMPLEMENTARY));
 
 
     HadoopUtil.setSerializations(getConf());
@@ -123,10 +127,11 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     thetaSummer.setCombinerClass(VectorSumReducer.class);
     thetaSummer.getConfiguration().setFloat(ThetaMapper.ALPHA_I, alphaI);
     thetaSummer.getConfiguration().setBoolean(ThetaMapper.TRAIN_COMPLEMENTARY, trainComplementary);
+    /* TODO(robinanil): Enable this when thetanormalization works.
     succeeded = thetaSummer.waitForCompletion(true);
     if (!succeeded) {
       return -1;
-    }
+    }*/
     
     //validate our model and then write it out to the official output
     NaiveBayesModel naiveBayesModel = BayesUtils.readModelFromDir(getTempPath(), getConf());
@@ -138,10 +143,10 @@ public final class TrainNaiveBayesJob extends AbstractJob {
 
   private long createLabelIndex(Path labPath) throws IOException {
     long labelSize = 0;
-    if (hasOption("labels")) {
-      Iterable<String> labels = Splitter.on(",").split(getOption("labels"));
+    if (hasOption(LABELS)) {
+      Iterable<String> labels = Splitter.on(",").split(getOption(LABELS));
       labelSize = BayesUtils.writeLabelIndex(getConf(), labels, labPath);
-    } else if (hasOption("extractLabels")) {
+    } else if (hasOption(EXTRACT_LABELS)) {
       SequenceFileDirIterable<Text, IntWritable> iterable =
               new SequenceFileDirIterable<Text, IntWritable>(getInputPath(), PathType.LIST, PathFilters.logsCRCFilter(), getConf());
       labelSize = BayesUtils.writeLabelIndex(getConf(), labPath, iterable);

@@ -42,8 +42,8 @@ public class NaiveBayesTest extends MahoutTestCase {
   private File outputDir;
   private File tempDir;
 
-  static final Text LABEL_STOLEN = new Text("stolen");
-  static final Text LABEL_NOT_STOLEN = new Text("not_stolen");
+  static final Text LABEL_STOLEN = new Text("/stolen/");
+  static final Text LABEL_NOT_STOLEN = new Text("/not_stolen/");
 
   static final Vector.Element COLOR_RED = MathHelper.elem(0, 1);
   static final Vector.Element COLOR_YELLOW = MathHelper.elem(1, 1);
@@ -69,16 +69,16 @@ public class NaiveBayesTest extends MahoutTestCase {
         new Path(inputFile.getAbsolutePath()), Text.class, VectorWritable.class);
 
     try {
-      writer.append(LABEL_STOLEN,      trainingInstance(COLOR_RED, TYPE_SPORTS, ORIGIN_DOMESTIC));
+      writer.append(LABEL_STOLEN, trainingInstance(COLOR_RED, TYPE_SPORTS, ORIGIN_DOMESTIC));
       writer.append(LABEL_NOT_STOLEN, trainingInstance(COLOR_RED, TYPE_SPORTS, ORIGIN_DOMESTIC));
-      writer.append(LABEL_STOLEN,      trainingInstance(COLOR_RED, TYPE_SPORTS, ORIGIN_DOMESTIC));
+      writer.append(LABEL_STOLEN, trainingInstance(COLOR_RED, TYPE_SPORTS, ORIGIN_DOMESTIC));
       writer.append(LABEL_NOT_STOLEN, trainingInstance(COLOR_YELLOW, TYPE_SPORTS, ORIGIN_DOMESTIC));
-      writer.append(LABEL_STOLEN,      trainingInstance(COLOR_YELLOW, TYPE_SPORTS, ORIGIN_IMPORTED));
+      writer.append(LABEL_STOLEN, trainingInstance(COLOR_YELLOW, TYPE_SPORTS, ORIGIN_IMPORTED));
       writer.append(LABEL_NOT_STOLEN, trainingInstance(COLOR_YELLOW, TYPE_SUV, ORIGIN_IMPORTED));
-      writer.append(LABEL_STOLEN,      trainingInstance(COLOR_YELLOW, TYPE_SUV, ORIGIN_IMPORTED));
+      writer.append(LABEL_STOLEN, trainingInstance(COLOR_YELLOW, TYPE_SUV, ORIGIN_IMPORTED));
       writer.append(LABEL_NOT_STOLEN, trainingInstance(COLOR_YELLOW, TYPE_SUV, ORIGIN_DOMESTIC));
       writer.append(LABEL_NOT_STOLEN, trainingInstance(COLOR_RED, TYPE_SUV, ORIGIN_IMPORTED));
-      writer.append(LABEL_STOLEN,      trainingInstance(COLOR_RED, TYPE_SPORTS, ORIGIN_IMPORTED));
+      writer.append(LABEL_STOLEN, trainingInstance(COLOR_RED, TYPE_SPORTS, ORIGIN_IMPORTED));
     } finally {
       Closeables.closeQuietly(writer);
     }
@@ -89,7 +89,7 @@ public class NaiveBayesTest extends MahoutTestCase {
     TrainNaiveBayesJob trainNaiveBayes = new TrainNaiveBayesJob();
     trainNaiveBayes.setConf(conf);
     trainNaiveBayes.run(new String[] { "--input", inputFile.getAbsolutePath(), "--output", outputDir.getAbsolutePath(),
-        "--labels", "stolen,not_stolen", "--tempDir", tempDir.getAbsolutePath() });
+        "-el", "--tempDir", tempDir.getAbsolutePath() });
 
     NaiveBayesModel naiveBayesModel = NaiveBayesModel.materialize(new Path(outputDir.getAbsolutePath()), conf);
 
@@ -108,7 +108,7 @@ public class NaiveBayesTest extends MahoutTestCase {
     TrainNaiveBayesJob trainNaiveBayes = new TrainNaiveBayesJob();
     trainNaiveBayes.setConf(conf);
     trainNaiveBayes.run(new String[] { "--input", inputFile.getAbsolutePath(), "--output", outputDir.getAbsolutePath(),
-        "--labels", "stolen,not_stolen", "--trainComplementary",
+        "-el", "--trainComplementary",
         "--tempDir", tempDir.getAbsolutePath() });
 
     NaiveBayesModel naiveBayesModel = NaiveBayesModel.materialize(new Path(outputDir.getAbsolutePath()), conf);

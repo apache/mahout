@@ -78,16 +78,16 @@ public final class BayesUtils {
       scoresPerLabelAndFeature.assignRow(entry.getFirst().get(), entry.getSecond().get());
     }
 
-    Vector perlabelThetaNormalizer = null;
-    for (Pair<Text,VectorWritable> entry : new SequenceFileDirIterable<Text,VectorWritable>(
+    Vector perlabelThetaNormalizer = scoresPerLabel.like();
+    /* for (Pair<Text,VectorWritable> entry : new SequenceFileDirIterable<Text,VectorWritable>(
         new Path(base, TrainNaiveBayesJob.THETAS), PathType.LIST, PathFilters.partFilter(), conf)) {
       if (entry.getFirst().toString().equals(TrainNaiveBayesJob.LABEL_THETA_NORMALIZER)) {
         perlabelThetaNormalizer = entry.getSecond().get();
       }
-    }
+    } 
 
     Preconditions.checkNotNull(perlabelThetaNormalizer);
-
+    */
     return new NaiveBayesModel(scoresPerLabelAndFeature, scoresPerFeature, scoresPerLabel, perlabelThetaNormalizer,
         alphaI);
   }

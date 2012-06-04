@@ -19,6 +19,7 @@
 
 import java.util.Iterator;
 
+import org.apache.mahout.classifier.naivebayes.StandardNaiveBayesClassifier;
 import org.apache.mahout.math.Vector;
 
 public class StandardThetaTrainer extends AbstractThetaTrainer {
@@ -29,14 +30,12 @@ public class StandardThetaTrainer extends AbstractThetaTrainer {
 
   @Override
   public void train(int label, Vector perLabelWeight) {
-    double sigmaK = labelWeight(label);
+    double labelWeight = labelWeight(label);
     Iterator<Vector.Element> it = perLabelWeight.iterateNonZero();
     while (it.hasNext()) {
       Vector.Element e = it.next();
-      double numerator = e.get() + alphaI();
-      double denominator = sigmaK + numFeatures();
-      double weight = Math.log(numerator / denominator);
-      updatePerLabelThetaNormalizer(label, weight);
+      updatePerLabelThetaNormalizer(label,
+          StandardNaiveBayesClassifier.computeWeight(e.get(), labelWeight, alphaI(), numFeatures()));
     }
   }
 }

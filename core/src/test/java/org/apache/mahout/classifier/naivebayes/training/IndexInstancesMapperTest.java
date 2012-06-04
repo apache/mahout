@@ -59,7 +59,7 @@ public class IndexInstancesMapperTest extends MahoutTestCase {
     IndexInstancesMapper indexInstances = new IndexInstancesMapper();
     setField(indexInstances, "labelIndex", labelIndex);
 
-    indexInstances.map(new Text("bird"), instance, ctx);
+    indexInstances.map(new Text("/bird/"), instance, ctx);
 
     EasyMock.verify(ctx);
   }
@@ -77,7 +77,7 @@ public class IndexInstancesMapperTest extends MahoutTestCase {
     IndexInstancesMapper indexInstances = new IndexInstancesMapper();
     setField(indexInstances, "labelIndex", labelIndex);
 
-    indexInstances.map(new Text("fish"), instance, ctx);
+    indexInstances.map(new Text("/fish/"), instance, ctx);
 
     EasyMock.verify(ctx, skippedInstances);
   }
