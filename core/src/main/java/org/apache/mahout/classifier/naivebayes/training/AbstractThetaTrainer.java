@@ -61,7 +61,7 @@ public abstract class AbstractThetaTrainer {
   protected double featureWeight(int feature) {
     return weightsPerFeature.get(feature);
   }
-
+  
   protected void updatePerLabelThetaNormalizer(int label, double weight) {
     perLabelThetaNormalizer.set(label, perLabelThetaNormalizer.get(label) + weight);
   }

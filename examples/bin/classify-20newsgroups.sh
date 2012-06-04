@@ -23,7 +23,7 @@
 #  examples/bin/build-20news.sh
 
 if [ "$1" = "--help" ] || [ "$1" = "--?" ]; then
-  echo "This script runs the SGD classifier over the classic 20 News Groups."
+  echo "This script runs SGD and Bayes classifiers over the classic 20 News Groups."
   exit
 fi
 
@@ -34,13 +34,14 @@ fi
 START_PATH=`pwd`
 
 WORK_DIR=/tmp/mahout-work-${USER}
-algorithm=( sgd clean)
+algorithm=( naivebayes sgd clean)
 if [ -n "$1" ]; then
   choice=$1
 else
   echo "Please select a number to choose the corresponding task to run"
   echo "1. ${algorithm[0]}"
-  echo "2. ${algorithm[1]} -- cleans up the work area in $WORK_DIR"
+  echo "2. ${algorithm[1]}"
+  echo "3. ${algorithm[2]} -- cleans up the work area in $WORK_DIR"
   read -p "Enter your choice : " choice
 fi
 
@@ -67,7 +68,54 @@ cd ../..
 
 set -e
 
-if [ "x$alg" == "xsgd" ]; then
+if [ "x$alg" == "xnaivebayes" ]; then
+  set -x
+  echo "Preparing Training Data"
+  rm -rf ${WORK_DIR}/20news-all
+  mkdir ${WORK_DIR}/20news-all
+  cp -R ${WORK_DIR}/20news-bydate/*/* ${WORK_DIR}/20news-all
+
+  echo "Creating sequence files from 20newsgroups data"
+  ./bin/mahout seqdirectory \
+    -i ${WORK_DIR}/20news-all \
+    -o ${WORK_DIR}/20news-seq
+  
+  echo "Converting sequence files to vectors"
+  ./bin/mahout seq2sparse \
+    -i ${WORK_DIR}/20news-seq \
+    -o ${WORK_DIR}/20news-vectors  -lnorm -nv  -wt tfidf
+
+  echo "Creating training and holdout set with a random 20% split of whole dataset"
+  ./bin/mahout split \
+    -i ${WORK_DIR}/20news-vectors/tfidf-vectors \
+    --trainingOutput ${WORK_DIR}/20news-train-vectors \
+    --testOutput ${WORK_DIR}/20news-test-vectors  \
+    --randomSelectionPct 20 --overwrite --sequenceFiles -xm sequential
+
+  echo "Training Naive Bayes model"
+  ./bin/mahout trainnb \
+    -i ${WORK_DIR}/20news-train-vectors -el \
+    -o ${WORK_DIR}/model \
+    -li ${WORK_DIR}/labelindex \
+    -ow -c
+  
+  echo "Self testing on training set"
+
+  ./bin/mahout testnb \
+    -i ${WORK_DIR}/20news-train-vectors\
+    -m ${WORK_DIR}/model \
+    -l ${WORK_DIR}/labelindex \
+    -ow -o ${WORK_DIR}/20news-testing 
+
+  echo "Testing on holdout set"
+
+  ./bin/mahout testnb \
+    -i ${WORK_DIR}/20news-test-vectors\
+    -m ${WORK_DIR}/model \
+    -l ${WORK_DIR}/labelindex \
+    -ow -o ${WORK_DIR}/20news-testing 
+
+elif [ "x$alg" == "xsgd" ]; then
   if [ ! -e "/tmp/news-group.model" ]; then
     echo "Training on ${WORK_DIR}/20news-bydate/20news-bydate-train/"
     ./bin/mahout org.apache.mahout.classifier.sgd.TrainNewsGroups ${WORK_DIR}/20news-bydate/20news-bydate-train/

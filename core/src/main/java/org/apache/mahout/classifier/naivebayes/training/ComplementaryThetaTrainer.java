@@ -28,13 +28,13 @@ public class ComplementaryThetaTrainer extends AbstractThetaTrainer {
   }
 
   @Override
-  public void train(int label, Vector instance) {
+  public void train(int label, Vector perLabelWeight) {
     double sigmaK = labelWeight(label);
-    Iterator<Vector.Element> it = instance.iterateNonZero();
+    Iterator<Vector.Element> it = perLabelWeight.iterateNonZero();
     while (it.hasNext()) {
       Vector.Element e = it.next();
       double numerator = featureWeight(e.index()) - e.get() + alphaI();
-      double denominator = totalWeightSum() - sigmaK + alphaI() * numFeatures();
+      double denominator = totalWeightSum() - sigmaK + numFeatures() ;
       double weight = Math.log(numerator / denominator);
       updatePerLabelThetaNormalizer(label, weight);
     }

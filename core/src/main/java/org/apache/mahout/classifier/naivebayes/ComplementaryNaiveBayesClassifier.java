@@ -33,7 +33,6 @@ public class ComplementaryNaiveBayesClassifier extends AbstractNaiveBayesClassif
     NaiveBayesModel model = getModel();
     double numerator = model.featureWeight(feature) - model.weight(label, feature) + model.alphaI();
     double denominator =  model.totalWeightSum() - model.labelWeight(label) + model.alphaI() * model.numFeatures();
-
     return Math.log(numerator / denominator);
   }
 }

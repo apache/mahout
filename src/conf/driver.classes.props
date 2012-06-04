@@ -61,3 +61,6 @@ org.apache.mahout.cf.taste.hadoop.similarity.item.ItemSimilarityJob = itemsimila
 org.apache.mahout.cf.taste.hadoop.item.RecommenderJob = recommenditembased : Compute recommendations using item-based collaborative filtering
 org.apache.mahout.cf.taste.hadoop.als.ParallelALSFactorizationJob = parallelALS : ALS-WR factorization of a rating matrix
 org.apache.mahout.cf.taste.hadoop.als.RecommenderJob = recommendfactorized : Compute recommendations using the factorization of a rating matrix
+prepare20newsgroups = deprecated : Use new naivebayes classifier see examples/bin/classify-20newsgroups.sh 
+trainclassifier = deprecated : Use new naivebayes classifier see examples/bin/classify-20newsgroups.sh 
+testclassifier = deprecated : Use new naivebayes classifier see examples/bin/classify-20newsgroups.sh 
