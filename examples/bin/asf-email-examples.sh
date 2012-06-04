@@ -58,7 +58,6 @@ START_PATH=`pwd`
 MAHOUT="../../bin/mahout"
 ASF_ARCHIVES=$1
 OUT=$2
-export MAHOUT_HEAPSIZE=2048
 
 algorithm=( recommender clustering classification clean )
 if [ -n "$3" ]; then
@@ -182,10 +181,10 @@ elif [ "x$alg" == "xclassification" ]; then
   # the label is the project_name_mailing_list, as in tomcat.apache.org_dev
   #Convert to vectors
   if [ "x$classAlg" == "xstandard" ] || [ "x$classAlg" == "xcomplementary" ]; then
+	set -x
     CLASS="$OUT/classification/bayesian"
     MAIL_OUT="$CLASS/seq-files"
     SEQ2SP="$CLASS/seq2sparse"
-    SEQ2SPLABEL="$CLASS/labeled"
     SPLIT="$CLASS/splits"
     TRAIN="$SPLIT/train"
     TEST="$SPLIT/test"
@@ -193,19 +192,16 @@ elif [ "x$alg" == "xclassification" ]; then
     LABEL="$SPLIT/labels"
     if ! fileExists "$MAIL_OUT/chunk-0"; then
       echo "Converting Mail files to Sequence Files"
-      $MAHOUT org.apache.mahout.text.SequenceFilesFromMailArchives --charset "UTF-8" --subject --body --input $ASF_ARCHIVES --output $MAIL_OUT
+      $MAHOUT org.apache.mahout.text.SequenceFilesFromMailArchives --charset "UTF-8" --subject --body --input $ASF_ARCHIVES --output $MAIL_OUT -chunk 128
     fi
     if ! fileExists "$SEQ2SP/dictionary.file-0"; then
       echo "Converting the files to sparse vectors"
-      $MAHOUT seq2sparse --input $MAIL_OUT --output $SEQ2SP --norm 2 --weight TFIDF --namedVector --maxDFPercent 90 --minSupport 2 --analyzerName org.apache.mahout.text.MailArchivesClusteringAnalyzer
-      #We need to modify the vectors to have a better label
-      echo "Converting vector labels"
-      $MAHOUT org.apache.mahout.classifier.email.PrepEmailVectorsDriver --input "$SEQ2SP/tfidf-vectors" --output $SEQ2SPLABEL --overwrite --maxItemsPerLabel 1000
+      $MAHOUT seq2sparse --input $MAIL_OUT --output $SEQ2SP --norm 2 --weight TFIDF --namedVector -lnorm --maxDFPercent 90 --minSupport 2 --analyzerName org.apache.mahout.text.MailArchivesClusteringAnalyzer -chunk 1000
     fi
     if ! fileExists "$TRAIN/part-m-00000"; then
       #setup train/test files
       echo "Creating training and test inputs"
-      $MAHOUT split --input $SEQ2SPLABEL --trainingOutput $TRAIN --testOutput $TEST --randomSelectionPct 20 --overwrite --sequenceFiles
+      $MAHOUT split --input $SEQ2SP/tfidf-vectors --trainingOutput $TRAIN --testOutput $TEST --randomSelectionPct 20 --overwrite --sequenceFiles -xm sequential
     fi
     MODEL="$CLASS/model"
     if [ "x$classAlg" == "xstandard" ]; then

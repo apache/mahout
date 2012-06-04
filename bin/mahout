@@ -184,6 +184,7 @@ fi
 
 MAHOUT_OPTS="$MAHOUT_OPTS -Dhadoop.log.dir=$MAHOUT_LOG_DIR"
 MAHOUT_OPTS="$MAHOUT_OPTS -Dhadoop.log.file=$MAHOUT_LOGFILE"
+MAHOUT_OPTS="$MAHOUT_OPTS -Dmapred.min.split.size=256MB"
 
 if [ "x$JAVA_LIBRARY_PATH" != "x" ]; then
   MAHOUT_OPTS="$MAHOUT_OPTS -Djava.library.path=$JAVA_LIBRARY_PATH"
