@@ -143,7 +143,7 @@ public class SpectralKMeansDriver extends AbstractJob {
     // unnecessary vectors later
     int overshoot = (int) ((double) clusters * OVERSHOOT_MULTIPLIER);
     DistributedLanczosSolver solver = new DistributedLanczosSolver();
-    LanczosState state = new LanczosState(L, numDims, solver.getInitialVector(L));
+    LanczosState state = new LanczosState(L, clusters, solver.getInitialVector(L));
     Path lanczosSeqFiles = new Path(outputCalc, "eigenvectors-" + (System.nanoTime() & 0xFF));
     solver.runJob(conf,
                   state,
