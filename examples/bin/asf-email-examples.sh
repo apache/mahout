@@ -196,12 +196,13 @@ elif [ "x$alg" == "xclassification" ]; then
     fi
     if ! fileExists "$SEQ2SP/dictionary.file-0"; then
       echo "Converting the files to sparse vectors"
-      $MAHOUT seq2sparse --input $MAIL_OUT --output $SEQ2SP --norm 2 --weight TFIDF --namedVector -lnorm --maxDFPercent 90 --minSupport 2 --analyzerName org.apache.mahout.text.MailArchivesClusteringAnalyzer -chunk 1000
-    fi
+      # $MAHOUT seq2sparse --input $MAIL_OUT --output $SEQ2SP --norm 2 --weight TFIDF --namedVector -lnorm --maxDFPercent 90 --minSupport 2 --analyzerName org.apache.mahout.text.MailArchivesClusteringAnalyzer -chunk 1000
+      $MAHOUT seq2encoded --input $MAIL_OUT --output $SEQ2SP --analyzerName org.apache.mahout.text.MailArchivesClusteringAnalyzer --cardinality 100000 -ow
+	fi
     if ! fileExists "$TRAIN/part-m-00000"; then
       #setup train/test files
       echo "Creating training and test inputs"
-      $MAHOUT split --input $SEQ2SP/tfidf-vectors --trainingOutput $TRAIN --testOutput $TEST --randomSelectionPct 20 --overwrite --sequenceFiles -xm sequential
+      $MAHOUT split --input $SEQ2SP --trainingOutput $TRAIN --testOutput $TEST --randomSelectionPct 20 --overwrite --sequenceFiles -xm sequential
     fi
     MODEL="$CLASS/model"
     if [ "x$classAlg" == "xstandard" ]; then
