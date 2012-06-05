@@ -150,10 +150,6 @@ elif [ "x$alg" == "xclustering" ]; then
 elif [ "x$alg" == "xclassification" ]; then
   algorithm=( standard complementary sgd )
   echo ""
-  echo "!!!!!!!!!!!"
-  echo "NOTE: The classification examples are still experimental for this data set due to quality concerns likely due to preprocessing.  We are working to remedy these.  For more info, see https://issues.apache.org/jira/browse/MAHOUT-939"
-  echo "!!!!!!!!!!!"
-  echo ""
   if [ -n "$4" ]; then
     choice=$4
   else

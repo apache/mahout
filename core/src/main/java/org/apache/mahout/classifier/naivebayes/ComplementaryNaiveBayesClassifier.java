@@ -22,8 +22,7 @@ package org.apache.mahout.classifier.naivebayes;
  * Class implementing the Naive Bayes Classifier Algorithm
  * 
  */
-public class ComplementaryNaiveBayesClassifier extends AbstractNaiveBayesClassifier { 
- 
+public class ComplementaryNaiveBayesClassifier extends AbstractNaiveBayesClassifier {
   public ComplementaryNaiveBayesClassifier(NaiveBayesModel model) {
     super(model);
   }
