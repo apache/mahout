@@ -39,7 +39,7 @@ if [ ! -e $MAHOUT ]; then
   exit 1
 fi
 
-algorithm=( kmeans fuzzykmeans lda dirichlet minhash)
+algorithm=( kmeans fuzzykmeans dirichlet minhash)
 if [ -n "$1" ]; then
   choice=$1
 else
@@ -48,7 +48,6 @@ else
   echo "2. ${algorithm[1]} clustering"
   echo "3. ${algorithm[2]} clustering"
   echo "4. ${algorithm[3]} clustering"
-  echo "5. ${algorithm[4]} clustering"
   read -p "Enter your choice : " choice
 fi
 
@@ -107,10 +106,13 @@ if [ "x$clustertype" == "xkmeans" ]; then
     -x 10 -k 20 -ow --clustering \
   && \
   $MAHOUT clusterdump \
-    -s ${WORK_DIR}/reuters-kmeans/clusters-*-final \
+    -i ${WORK_DIR}/reuters-kmeans/clusters-*-final \
+    -o ${WORK_DIR}/reuters-kmeans/clusterdump \
     -d ${WORK_DIR}/reuters-out-seqdir-sparse-kmeans/dictionary.file-0 \
-    -dt sequencefile -b 100 -n 20 --evaluate -dm org.apache.mahout.common.distance.CosineDistanceMeasure \
-    --pointsDir ${WORK_DIR}/reuters-kmeans/clusteredPoints
+    -dt sequencefile -b 100 -n 20 --evaluate -dm org.apache.mahout.common.distance.CosineDistanceMeasure -sp 0 \
+    --pointsDir ${WORK_DIR}/reuters-kmeans/clusteredPoints \
+    && \
+  cat ${WORK_DIR}/reuters-kmeans/clusterdump
 elif [ "x$clustertype" == "xfuzzykmeans" ]; then
   $MAHOUT seq2sparse \
     -i ${WORK_DIR}/reuters-out-seqdir/ \
@@ -127,20 +129,13 @@ elif [ "x$clustertype" == "xfuzzykmeans" ]; then
     -s ${WORK_DIR}/reuters-fkmeans/clusters-*-final \
     -d ${WORK_DIR}/reuters-out-seqdir-sparse-fkmeans/dictionary.file-0 \
     -dt sequencefile -b 100 -n 20
-elif [ "x$clustertype" == "xlda" ]; then
-  $MAHOUT seq2sparse \
-    -i ${WORK_DIR}/reuters-out-seqdir/ \
-    -o ${WORK_DIR}/reuters-out-seqdir-sparse-lda \
-    -wt tf -seq -nr 3 --namedVector \
-  && \
-  $MAHOUT lda \
-    -i ${WORK_DIR}/reuters-out-seqdir-sparse-lda/tf-vectors \
-    -o ${WORK_DIR}/reuters-lda -k 20 -ow -x 20 \
-  && \
-  $MAHOUT ldatopics \
-    -i ${WORK_DIR}/reuters-lda/state-20 \
-    -d ${WORK_DIR}/reuters-out-seqdir-sparse-lda/dictionary.file-0 \
-    -dt sequencefile
+  $MAHOUT clusterdump \
+    -i ${WORK_DIR}/reuters-fkmeans/clusters-*-final \
+    -o ${WORK_DIR}/reuters-fkmeans/clusterdump \
+    -d ${WORK_DIR}/reuters-out-seqdir-sparse-fkmeans/dictionary.file-0 \
+    -dt sequencefile -b 100 -n 20 -sp 0 \
+    && \
+  cat ${WORK_DIR}/reuters-fkmeans/clusterdump
 elif [ "x$clustertype" == "xdirichlet" ]; then
   $MAHOUT seq2sparse \
     -i ${WORK_DIR}/reuters-out-seqdir/ \
@@ -157,6 +152,13 @@ elif [ "x$clustertype" == "xdirichlet" ]; then
     -s ${WORK_DIR}/reuters-dirichlet/clusters-*-final \
     -d ${WORK_DIR}/reuters-out-seqdir-sparse-dirichlet/dictionary.file-0 \
     -dt sequencefile -b 100 -n 20
+  $MAHOUT clusterdump \
+    -i ${WORK_DIR}/reuters-dirichlet/clusters-*-final \
+    -o ${WORK_DIR}/reuters-dirichlet/clusterdump \
+    -d ${WORK_DIR}/reuters-out-seqdir-sparse-dirichlet/dictionary.file-0 \
+    -dt sequencefile -b 100 -n 20 -sp 0 \
+    && \
+  cat ${WORK_DIR}/reuters-dirichlet/clusterdump
 elif [ "x$clustertype" == "xminhash" ]; then
   $MAHOUT seq2sparse \
     -i ${WORK_DIR}/reuters-out-seqdir/ \
