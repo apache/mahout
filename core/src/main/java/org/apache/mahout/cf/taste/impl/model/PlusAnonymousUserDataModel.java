@@ -156,18 +156,7 @@ public class PlusAnonymousUserDataModel implements DataModel {
     }
     for (int i = 0; i < tempPrefs.length(); i++) {
       if (tempPrefs.getItemID(i) == itemID) {
-        int length = delegatePrefs == null ? 0 : delegatePrefs.length();
-        PreferenceArray newPreferenceArray = new GenericItemPreferenceArray(length + 1);
-        for (int j = 0; j < length; j++) {
-          newPreferenceArray.setUserID(j, delegatePrefs.getUserID(j));
-          newPreferenceArray.setItemID(j, delegatePrefs.getItemID(j));
-          newPreferenceArray.setValue(j, delegatePrefs.getValue(j));
-        }
-        newPreferenceArray.setUserID(length, tempPrefs.getUserID(i));
-        newPreferenceArray.setItemID(length, tempPrefs.getItemID(i));
-        newPreferenceArray.setValue(length, tempPrefs.getValue(i));
-        newPreferenceArray.sortByUser();
-        return newPreferenceArray;
+        return cloneAndMergeInto(delegatePrefs, itemID, tempPrefs.getUserID(i), tempPrefs.getValue(i));
       }
     }
     if (delegatePrefs == null) {
@@ -175,6 +164,37 @@ public class PlusAnonymousUserDataModel implements DataModel {
       throw new NoSuchItemException(itemID);
     }
     return delegatePrefs;
+  }
+
+  private static PreferenceArray cloneAndMergeInto(PreferenceArray delegatePrefs,
+                                                   long itemID,
+                                                   long newUserID,
+                                                   float value) {
+
+    int length = delegatePrefs == null ? 0 : delegatePrefs.length();
+    int newLength = length + 1;
+    PreferenceArray newPreferenceArray = new GenericItemPreferenceArray(newLength);
+
+    // Set item ID once
+    newPreferenceArray.setItemID(0, itemID);
+
+    int positionToInsert = 0;
+    while (positionToInsert < length && newUserID > delegatePrefs.getUserID(positionToInsert)) {
+      positionToInsert++;
+    }
+
+    for (int i = 0; i < positionToInsert; i++) {
+      newPreferenceArray.setUserID(i, delegatePrefs.getUserID(i));
+      newPreferenceArray.setValue(i, delegatePrefs.getValue(i));
+    }
+    newPreferenceArray.setUserID(positionToInsert, newUserID);
+    newPreferenceArray.setValue(positionToInsert, value);
+    for (int i = positionToInsert + 1; i < newLength; i++) {
+      newPreferenceArray.setUserID(i, delegatePrefs.getUserID(i - 1));
+      newPreferenceArray.setValue(i, delegatePrefs.getValue(i - 1));
+    }
+
+    return newPreferenceArray;
   }
   
   @Override
