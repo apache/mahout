@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
  * Converts a given set of sequence files into SparseVectors
  */
 public final class EncodedVectorsFromSequenceFiles extends AbstractJob {
-
   private static final Logger log = LoggerFactory.getLogger(EncodedVectorsFromSequenceFiles.class);
 
   public static void main(String[] args) throws Exception {

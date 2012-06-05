@@ -31,7 +31,7 @@ import java.io.Reader;
  */
 public final class DefaultAnalyzer extends Analyzer {
 
-  private final StandardAnalyzer stdAnalyzer = new StandardAnalyzer(Version.LUCENE_31);
+  private final StandardAnalyzer stdAnalyzer = new StandardAnalyzer(Version.LUCENE_36);
 
   @Override
   public TokenStream tokenStream(String fieldName, Reader reader) {

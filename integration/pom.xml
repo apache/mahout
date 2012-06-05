@@ -118,11 +118,6 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-core</artifactId>
-    </dependency>
-
       <!-- 3rd party -->
 
     <dependency>
@@ -138,6 +133,7 @@
     <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-commons-csv</artifactId>
+      <version>3.5.0</version>
     </dependency>
 
     <dependency>

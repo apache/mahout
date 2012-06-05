@@ -43,11 +43,12 @@ import org.apache.lucene.util.Version;
  * stop words, excluding non-alpha-numeric tokens, and porter stemming.
  */
 public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
+  private static final Version LUCENE_VERSION = Version.LUCENE_36;
   
   // extended set of stop words composed of common mail terms like "hi",
   // HTML tags, and Java keywords asmany of the messages in the archives
   // are subversion check-in notifications
-  private static final Set<?> STOP_WORDS = new CharArraySet(Version.LUCENE_31, Arrays.asList(
+  private static final Set<?> STOP_WORDS = new CharArraySet(LUCENE_VERSION, Arrays.asList(
     "3d","7bit","a0","about","above","abstract","across","additional","after",
     "afterwards","again","against","align","all","almost","alone","along",
     "already","also","although","always","am","among","amongst","amoungst",
@@ -104,23 +105,24 @@ public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
 
   // Regex used to exclude non-alpha-numeric tokens
   private static final Pattern alphaNumeric = Pattern.compile("^[a-z][a-z0-9_]+$");
+  private final static Matcher matcher = alphaNumeric.matcher("");
 
   public MailArchivesClusteringAnalyzer() {
-    super(Version.LUCENE_31, STOP_WORDS);
+    super(LUCENE_VERSION, STOP_WORDS);
   }
 
   public MailArchivesClusteringAnalyzer(Set<?> stopSet) {
-    super(Version.LUCENE_31, stopSet);
+    super(LUCENE_VERSION, stopSet);
   }
   
   @Override
   protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
-    Tokenizer tokenizer = new StandardTokenizer(Version.LUCENE_31, reader);
-    TokenStream result = new StandardFilter(Version.LUCENE_31, tokenizer);
-    result = new LowerCaseFilter(Version.LUCENE_31, result);
+    Tokenizer tokenizer = new StandardTokenizer(LUCENE_VERSION, reader);
+    TokenStream result = new StandardFilter(LUCENE_VERSION, tokenizer);
+    result = new LowerCaseFilter(LUCENE_VERSION, result);
     result = new ASCIIFoldingFilter(result);
     result = new AlphaNumericMaxLengthFilter(result);
-    result = new StopFilter(Version.LUCENE_31, result, stopwords);
+    result = new StopFilter(LUCENE_VERSION, result, stopwords);
     result = new PorterStemFilter(result);
     return new TokenStreamComponents(tokenizer, result);
   }
@@ -131,12 +133,10 @@ public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
   static class AlphaNumericMaxLengthFilter extends TokenFilter {
     private final CharTermAttribute termAtt;
     private final char[] output = new char[28];
-    private final Matcher matcher;
 
     AlphaNumericMaxLengthFilter(TokenStream in) {
       super(in);
       termAtt = addAttribute(CharTermAttribute.class);
-      matcher = alphaNumeric.matcher("foo");
     }
 
     @Override

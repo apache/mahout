@@ -46,7 +46,8 @@ import java.util.Locale;
 import java.util.Random;
 
 public final class NewsgroupHelper {
-
+  private static final Version LUCENE_VERSION = Version.LUCENE_36;
+  
   private static final SimpleDateFormat[] DATE_FORMATS = {
           new SimpleDateFormat("", Locale.ENGLISH),
           new SimpleDateFormat("MMM-yyyy", Locale.ENGLISH),
@@ -59,7 +60,7 @@ public final class NewsgroupHelper {
   private static final long WEEK = 7 * 24 * 3600;
   
   private final Random rand = RandomUtils.getRandom();  
-  private final Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_31);
+  private final Analyzer analyzer = new StandardAnalyzer(LUCENE_VERSION);
   private final FeatureVectorEncoder encoder = new StaticWordValueEncoder("body");
   private final FeatureVectorEncoder bias = new ConstantValueEncoder("Intercept");
   
