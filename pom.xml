@@ -99,8 +99,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <hadoop.version>0.20.204.0</hadoop.version>
     <lucene.version>3.6.0</lucene.version>
-    <mongodb.version>2.5</mongodb.version>
-    <cassandra.version>0.8.1</cassandra.version>
   </properties>
   <issueManagement>
     <system>Jira</system>
@@ -438,31 +436,6 @@
         <version>2.5</version>
         <scope>provided</scope>
       </dependency>
-
-    <dependency>
-      <groupId>org.mongodb</groupId>
-      <artifactId>mongo-java-driver</artifactId>
-      <version>${mongodb.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.mongodb</groupId>
-      <artifactId>bson</artifactId>
-      <version>${mongodb.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.cassandra</groupId>
-      <artifactId>cassandra-all</artifactId>
-      <version>${cassandra.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>me.prettyprint</groupId>
-      <artifactId>hector-core</artifactId>
-      <version>0.8.0-2</version>
-    </dependency>
-
     </dependencies>
   </dependencyManagement>
   <build>
