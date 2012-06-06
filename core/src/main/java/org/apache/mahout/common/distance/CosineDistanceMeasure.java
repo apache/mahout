@@ -81,13 +81,18 @@ public class CosineDistanceMeasure implements DistanceMeasure {
       denominator = dotProduct;
     }
     
+    // correct for zero-vector corner case
+    if (denominator == 0 && dotProduct == 0) {
+      return 1;
+    }
+    
     return 1.0 - dotProduct / denominator;
   }
   
   @Override
   public double distance(double centroidLengthSquare, Vector centroid, Vector v) {
-
-    double lengthSquaredv =  v.getLengthSquared();
+    
+    double lengthSquaredv = v.getLengthSquared();
     
     double dotProduct = v.dot(centroid);
     double denominator = Math.sqrt(centroidLengthSquare) * Math.sqrt(lengthSquaredv);

@@ -30,17 +30,10 @@ import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.classify.ClusterClassifier;
 import org.apache.mahout.clustering.dirichlet.models.GaussianCluster;
 import org.apache.mahout.clustering.fuzzykmeans.SoftCluster;
-import org.apache.mahout.clustering.iterator.CanopyClusteringPolicy;
-import org.apache.mahout.clustering.iterator.ClusterIterator;
-import org.apache.mahout.clustering.iterator.ClusteringPolicy;
-import org.apache.mahout.clustering.iterator.DirichletClusteringPolicy;
-import org.apache.mahout.clustering.iterator.DistanceMeasureCluster;
-import org.apache.mahout.clustering.iterator.FuzzyKMeansClusteringPolicy;
-import org.apache.mahout.clustering.iterator.KMeansClusteringPolicy;
-import org.apache.mahout.clustering.iterator.MeanShiftClusteringPolicy;
 import org.apache.mahout.clustering.kmeans.TestKmeansClustering;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.distance.CosineDistanceMeasure;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.DenseVector;
@@ -70,6 +63,15 @@ public final class TestClusterClassifier extends MahoutTestCase {
     return new ClusterClassifier(models, new KMeansClusteringPolicy());
   }
   
+  private static ClusterClassifier newCosineKlusterClassifier() {
+    List<Cluster> models = Lists.newArrayList();
+    DistanceMeasure measure = new CosineDistanceMeasure();
+    models.add(new org.apache.mahout.clustering.kmeans.Kluster(new DenseVector(2).assign(1), 0, measure));
+    models.add(new org.apache.mahout.clustering.kmeans.Kluster(new DenseVector(2), 1, measure));
+    models.add(new org.apache.mahout.clustering.kmeans.Kluster(new DenseVector(2).assign(-1), 2, measure));
+    return new ClusterClassifier(models, new KMeansClusteringPolicy());
+  }
+
   private static ClusterClassifier newSoftClusterClassifier() {
     List<Cluster> models = Lists.newArrayList();
     DistanceMeasure measure = new ManhattanDistanceMeasure();
@@ -277,8 +279,16 @@ public final class TestClusterClassifier extends MahoutTestCase {
       assertEquals(3, posterior.getModels().size());
       for (Cluster cluster : posterior.getModels()) {
         System.out.println(cluster.asFormatString(null));
-      }
-      
+      }     
     }
+  }
+  
+  @Test
+  public void testCosineKlusterClassification() {
+    ClusterClassifier classifier = newCosineKlusterClassifier();
+    Vector pdf = classifier.classify(new DenseVector(2));
+    assertEquals("[0,0]", "[0.333, 0.333, 0.333]", AbstractCluster.formatVector(pdf, null));
+    pdf = classifier.classify(new DenseVector(2).assign(2));
+    assertEquals("[2,2]", "[0.545, 0.273, 0.182]", AbstractCluster.formatVector(pdf, null));
   }
 }
