@@ -62,6 +62,11 @@ public class CosineDistanceMeasure implements DistanceMeasure {
       denominator = dotProduct;
     }
     
+    // correct for zero-vector corner case
+    if (denominator == 0 && dotProduct == 0) {
+      return 1;
+    }
+    
     return 1.0 - dotProduct / denominator;
   }
   
@@ -100,6 +105,11 @@ public class CosineDistanceMeasure implements DistanceMeasure {
     // correct for floating-point rounding errors
     if (denominator < dotProduct) {
       denominator = dotProduct;
+    }
+    
+    // correct for zero-vector corner case
+    if (denominator == 0 && dotProduct == 0) {
+      return 1;
     }
     
     return 1.0 - dotProduct / denominator;
