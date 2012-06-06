@@ -31,7 +31,7 @@ function fileExists() {
 }
 
 function removeFolder() {
-  if [ "$MAHOUT_LOCAL" != "" ]; then
+  if [ "$MAHOUT_LOCAL" == "" ]; then
     rm -rf $1
   else
     if fileExists "$1"; then
@@ -188,7 +188,7 @@ elif [ "x$alg" == "xclassification" ]; then
     LABEL="$SPLIT/labels"
     if ! fileExists "$MAIL_OUT/chunk-0"; then
       echo "Converting Mail files to Sequence Files"
-      $MAHOUT org.apache.mahout.text.SequenceFilesFromMailArchives --charset "UTF-8" --subject --body --input $ASF_ARCHIVES --output $MAIL_OUT -chunk 128
+      $MAHOUT org.apache.mahout.text.SequenceFilesFromMailArchives --charset "UTF-8" --subject --body --input $ASF_ARCHIVES --output $MAIL_OUT -chunk 768 --stripQuoted
     fi
     if ! fileExists "$SEQ2SP/dictionary.file-0"; then
       echo "Converting the files to sparse vectors"
@@ -227,7 +227,7 @@ elif [ "x$alg" == "xclassification" ]; then
     LABEL="$SPLIT/labels"
     if ! fileExists "$MAIL_OUT/chunk-0"; then
       echo "Converting Mail files to Sequence Files"
-      $MAHOUT org.apache.mahout.text.SequenceFilesFromMailArchives --charset "UTF-8" --subject --body --input $ASF_ARCHIVES --output $MAIL_OUT --stripQuoted
+      $MAHOUT org.apache.mahout.text.SequenceFilesFromMailArchives --charset "UTF-8" --subject --body --input $ASF_ARCHIVES --output $MAIL_OUT --stripQuoted -chunk 768
     fi
     echo "Converting the files to sparse vectors in $SEQ2SP"
     if ! fileExists "$SEQ2SP/part-m-00000"; then
