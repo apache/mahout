@@ -37,7 +37,7 @@ public final class EncodedVectorsFromSequenceFiles extends AbstractJob {
   private static final Logger log = LoggerFactory.getLogger(EncodedVectorsFromSequenceFiles.class);
 
   public static void main(String[] args) throws Exception {
-    ToolRunner.run(new EncodedVectorsFromSequenceFiles(), args);
+    ToolRunner.run(new Configuration(), new EncodedVectorsFromSequenceFiles(), args);
   }
 
   @Override

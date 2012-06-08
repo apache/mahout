@@ -1,15 +1,15 @@
 #!/bin/bash
-# 
+#
 # The Mahout command script
 #
 # Environment Variables
 #
 #   MAHOUT_JAVA_HOME   The java implementation to use.  Overrides JAVA_HOME.
 #
-#   MAHOUT_HEAPSIZE    The maximum amount of heap to use, in MB. 
+#   MAHOUT_HEAPSIZE    The maximum amount of heap to use, in MB.
 #                      Default is 1000.
 #
-#   HADOOP_CONF_DIR  The location of a hadoop config directory 
+#   HADOOP_CONF_DIR  The location of a hadoop config directory
 #
 #   MAHOUT_OPTS        Extra Java runtime options.
 #
@@ -88,14 +88,14 @@ if [ "$MAHOUT_JAVA_HOME" != "" ]; then
   #echo "run java in $MAHOUT_JAVA_HOME"
   JAVA_HOME=$MAHOUT_JAVA_HOME
 fi
-  
+
 if [ "$JAVA_HOME" = "" ]; then
   echo "Error: JAVA_HOME is not set."
   exit 1
 fi
 
 JAVA=$JAVA_HOME/bin/java
-JAVA_HEAP_MAX=-Xmx3g 
+JAVA_HEAP_MAX=-Xmx3g
 
 # check envvars which might override default args
 if [ "$MAHOUT_HEAPSIZE" != "" ]; then
@@ -131,7 +131,7 @@ CLASSPATH=${CLASSPATH}:$JAVA_HOME/lib/tools.jar
 # so that filenames w/ spaces are handled correctly in loops below
 IFS=
 
-if [ $IS_CORE == 0 ] 
+if [ $IS_CORE == 0 ]
 then
   # add release dependencies to CLASSPATH
   for f in $MAHOUT_HOME/mahout-*.jar; do
@@ -215,6 +215,7 @@ if [ -x "$HADOOP_BINARY" ] ; then
 fi
 
 if [ ! -x "$HADOOP_BINARY" ] || [ "$MAHOUT_LOCAL" != "" ] ; then
+  set -x
   if [ ! -x "$HADOOP_BINARY" ] ; then
     echo "hadoop binary is not in PATH,HADOOP_HOME/bin,HADOOP_PREFIX/bin, running locally"
   elif [ "$MAHOUT_LOCAL" != "" ] ; then
@@ -231,7 +232,7 @@ if [ ! -x "$HADOOP_BINARY" ] || [ "$MAHOUT_LOCAL" != "" ] ; then
     esac
 else
   echo "Running on hadoop, using $HADOOP_BINARY and HADOOP_CONF_DIR=$HADOOP_CONF_DIR"
-	
+
   if [ "$MAHOUT_JOB" = "" ] ; then
     echo "ERROR: Could not find mahout-examples-*.job in $MAHOUT_HOME or $MAHOUT_HOME/examples/target, please run 'mvn install' to create the .job file"
     exit 1
