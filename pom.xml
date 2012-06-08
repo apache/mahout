@@ -20,7 +20,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout</artifactId>
-  <version>0.7-SNAPSHOT</version>
+  <version>0.7</version>
 
   <parent>
     <groupId>org.apache</groupId>
@@ -815,9 +815,9 @@
     </profile>
   </profiles>
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk</developerConnection>
-    <url>https://svn.apache.org/repos/asf/mahout</url>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.7</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.7</developerConnection>
+    <url>https://svn.apache.org/repos/asf/mahout/tags/mahout-0.7</url>
   </scm>
   <distributionManagement>
     <site>
