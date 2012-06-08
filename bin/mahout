@@ -215,7 +215,6 @@ if [ -x "$HADOOP_BINARY" ] ; then
 fi
 
 if [ ! -x "$HADOOP_BINARY" ] || [ "$MAHOUT_LOCAL" != "" ] ; then
-  set -x
   if [ ! -x "$HADOOP_BINARY" ] ; then
     echo "hadoop binary is not in PATH,HADOOP_HOME/bin,HADOOP_PREFIX/bin, running locally"
   elif [ "$MAHOUT_LOCAL" != "" ] ; then
