@@ -114,7 +114,7 @@ public final class RandomSeedGenerator {
         for (int i = 0; i < chosenTexts.size(); i++) {
           writer.append(chosenTexts.get(i), chosenClusters.get(i));
         }
-        log.info("Wrote {} vectors to {}", k, outFile);
+        log.info("Wrote {} Klusters to {}", k, outFile);
       } finally {
         Closeables.closeQuietly(writer);
       }

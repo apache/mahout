@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+
 package org.apache.mahout.clustering.kmeans;
 
 import java.util.Collection;
@@ -28,14 +28,17 @@ import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class KMeansUtil {
+  
+  private static final Logger log = LoggerFactory.getLogger(KMeansUtil.class);
 
-  private KMeansUtil() {
-  }
-
+  private KMeansUtil() {}
+  
   /**
-   * Create a list of Klusters from whatever type is passed in as the prior
+   * Create a list of Klusters from whatever Cluster type is passed in as the prior
    * 
    * @param conf
    *          the Configuration
@@ -44,17 +47,16 @@ final class KMeansUtil {
    * @param clusters
    *          a List<Cluster> to put values into
    */
-  public static void configureWithClusterInfo(Configuration conf,
-                                              Path clusterPath,
-                                              Collection<Cluster> clusters) {
-    for (Writable value :
-         new SequenceFileDirValueIterable<Writable>(clusterPath, PathType.LIST, PathFilters.partFilter(), conf)) {
+  public static void configureWithClusterInfo(Configuration conf, Path clusterPath, Collection<Cluster> clusters) {
+    for (Writable value : new SequenceFileDirValueIterable<Writable>(clusterPath, PathType.LIST,
+        PathFilters.partFilter(), conf)) {
       Class<? extends Writable> valueClass = value.getClass();
       if (valueClass.equals(ClusterWritable.class)) {
-    	  ClusterWritable clusterWritable = (ClusterWritable)value;
-    	  value = clusterWritable.getValue();
-    	  valueClass = value.getClass();
+        ClusterWritable clusterWritable = (ClusterWritable) value;
+        value = clusterWritable.getValue();
+        valueClass = value.getClass();
       }
+      log.info("Read 1 Cluster from {}", clusterPath);
       
       if (valueClass.equals(Kluster.class)) {
         // get the cluster info
@@ -68,5 +70,5 @@ final class KMeansUtil {
       }
     }
   }
-
+  
 }
