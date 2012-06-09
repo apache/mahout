@@ -56,7 +56,7 @@ final class KMeansUtil {
         value = clusterWritable.getValue();
         valueClass = value.getClass();
       }
-      log.info("Read 1 Cluster from {}", clusterPath);
+      log.debug("Read 1 Cluster from {}", clusterPath);
       
       if (valueClass.equals(Kluster.class)) {
         // get the cluster info
