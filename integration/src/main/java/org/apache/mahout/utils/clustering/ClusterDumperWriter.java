@@ -80,14 +80,15 @@ public class ClusterDumperWriter extends AbstractClusterWriter {
           WeightedPropertyVectorWritable tmp = (WeightedPropertyVectorWritable) point;
           Map<Text,Text> map = tmp.getProperties();
           // map can be null since empty maps when written are returned as null
-          if (map == null) break;
-          writer.write(" : [");
-          for (Map.Entry<Text,Text> entry : map.entrySet()) {
-            writer.write(entry.getKey().toString());
-            writer.write("=");
-            writer.write(entry.getValue().toString());
+          if (map != null) {
+            writer.write(" : [");
+            for (Map.Entry<Text,Text> entry : map.entrySet()) {
+              writer.write(entry.getKey().toString());
+              writer.write("=");
+              writer.write(entry.getValue().toString());
+            }
+            writer.write("]");
           }
-          writer.write("]");
         }
         
         writer.write(": ");
