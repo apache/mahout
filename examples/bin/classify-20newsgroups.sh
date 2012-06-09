@@ -28,7 +28,7 @@ if [ "$1" = "--help" ] || [ "$1" = "--?" ]; then
 fi
 
 SCRIPT_PATH=${0%/*}
-if [ "$0" != "$SCRIPT_PATH" ] && [ "$SCRIPT_PATH" != "" ]; then 
+if [ "$0" != "$SCRIPT_PATH" ] && [ "$SCRIPT_PATH" != "" ]; then
   cd $SCRIPT_PATH
 fi
 START_PATH=`pwd`
@@ -41,8 +41,8 @@ else
   echo "Please select a number to choose the corresponding task to run"
   echo "1. ${algorithm[0]}"
   echo "2. ${algorithm[1]}"
-  echo "2. ${algorithm[2]}"
-  echo "3. ${algorithm[3]} -- cleans up the work area in $WORK_DIR"
+  echo "3. ${algorithm[2]}"
+  echo "4. ${algorithm[3]} -- cleans up the work area in $WORK_DIR"
   read -p "Enter your choice : " choice
 fi
 
@@ -71,11 +71,11 @@ set -e
 
 if [ "x$alg" == "xnaivebayes"  -o  "x$alg" == "xcnaivebayes" ]; then
   c=""
-  
+
   if [ "x$alg" == "xcnaivebayes" ]; then
     c=" -c"
   fi
-  
+
   set -x
   echo "Preparing 20newsgroups data"
   rm -rf ${WORK_DIR}/20news-all
@@ -86,7 +86,7 @@ if [ "x$alg" == "xnaivebayes"  -o  "x$alg" == "xcnaivebayes" ]; then
   ./bin/mahout seqdirectory \
     -i ${WORK_DIR}/20news-all \
     -o ${WORK_DIR}/20news-seq
-  
+
   echo "Converting sequence files to vectors"
   ./bin/mahout seq2sparse \
     -i ${WORK_DIR}/20news-seq \
@@ -105,14 +105,14 @@ if [ "x$alg" == "xnaivebayes"  -o  "x$alg" == "xcnaivebayes" ]; then
     -o ${WORK_DIR}/model \
     -li ${WORK_DIR}/labelindex \
     -ow $c
-  
+
   echo "Self testing on training set"
 
   ./bin/mahout testnb \
     -i ${WORK_DIR}/20news-train-vectors\
     -m ${WORK_DIR}/model \
     -l ${WORK_DIR}/labelindex \
-    -ow -o ${WORK_DIR}/20news-testing $c 
+    -ow -o ${WORK_DIR}/20news-testing $c
 
   echo "Testing on holdout set"
 
