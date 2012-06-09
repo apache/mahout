@@ -20,7 +20,7 @@
 # Downloads the Reuters dataset and prepares it for clustering
 #
 # To run:  change into the mahout directory and type:
-#  examples/bin/build-reuters.sh
+#  examples/bin/cluster-reuters.sh
 
 if [ "$1" = "--help" ] || [ "$1" = "--?" ]; then
   echo "This script clusters the Reuters data set using a variety of algorithms.  The data set is downloaded automatically."
