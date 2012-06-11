@@ -33,7 +33,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
-import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
@@ -82,7 +82,7 @@ public final class InputDriver {
 
     Job job = new Job(conf, "Mean Shift Input Driver running over input: " + input);
     job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(MeanShiftCanopy.class);
+    job.setOutputValueClass(ClusterWritable.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setMapperClass(org.apache.mahout.clustering.conversion.meanshift.InputMapper.class);
     job.setReducerClass(Reducer.class);

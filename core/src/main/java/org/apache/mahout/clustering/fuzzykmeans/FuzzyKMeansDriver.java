@@ -274,7 +274,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     }
     
     if (clusters.isEmpty()) {
-      throw new IllegalStateException("No input clusters found. Check your -c argument.");
+      throw new IllegalStateException("No input clusters found in " + clustersIn + ". Check your -c argument.");
     }
     
     Path priorClustersPath = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);   
