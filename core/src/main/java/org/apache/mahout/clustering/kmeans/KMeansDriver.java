@@ -215,10 +215,10 @@ public class KMeansDriver extends AbstractJob {
     KMeansUtil.configureWithClusterInfo(conf, clustersIn, clusters);
     
     if (clusters.isEmpty()) {
-      throw new IllegalStateException("No input clusters found. Check your -c argument.");
+      throw new IllegalStateException("No input clusters found in " + clustersIn + ". Check your -c argument.");
     }
     
-    Path priorClustersPath = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);   
+    Path priorClustersPath = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);
     ClusteringPolicy policy = new KMeansClusteringPolicy(convergenceDelta);
     ClusterClassifier prior = new ClusterClassifier(clusters, policy);
     prior.writeToSeqFiles(priorClustersPath);

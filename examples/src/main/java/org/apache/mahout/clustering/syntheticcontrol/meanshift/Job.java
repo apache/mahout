@@ -142,7 +142,7 @@ public final class Job extends AbstractJob {
         true, false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output,
-        "clusters-" + maxIterations), new Path(output, "clusteredPoints"));
+        "clusters-*-final"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
   

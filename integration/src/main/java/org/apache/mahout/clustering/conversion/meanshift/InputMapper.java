@@ -21,21 +21,25 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
-import com.google.common.collect.Lists;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 
-public class InputMapper extends Mapper<LongWritable, Text, Text, MeanShiftCanopy> {
+import com.google.common.collect.Lists;
 
+public class InputMapper extends Mapper<LongWritable,Text,Text,ClusterWritable> {
+  
   private static final Pattern SPACE = Pattern.compile(" ");
-
+  
   private int nextCanopyId;
-
+  
+  private ClusterWritable cw = new ClusterWritable();
+  
   @Override
   protected void map(LongWritable key, Text values, Context context) throws IOException, InterruptedException {
     String[] numbers = SPACE.split(values.toString());
@@ -53,8 +57,8 @@ public class InputMapper extends Mapper<LongWritable, Text, Text, MeanShiftCanop
       for (Double d : doubles) {
         point.set(index++, d);
       }
-      MeanShiftCanopy canopy = new MeanShiftCanopy(point, nextCanopyId++, new EuclideanDistanceMeasure());
-      context.write(new Text(), canopy);
+      cw.setValue(new MeanShiftCanopy(point, nextCanopyId++, new EuclideanDistanceMeasure()));
+      context.write(new Text(), cw);
     }
   }
 }

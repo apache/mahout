@@ -88,7 +88,7 @@ public final class Job extends AbstractJob {
         output, measure, t1, t2, true, 0.0, false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output,
-        "clusters-0"), new Path(output, "clusteredPoints"));
+        "clusters-0-final"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
 

@@ -20,7 +20,7 @@
 # Downloads the Reuters dataset and prepares it for clustering
 #
 # To run:  change into the mahout directory and type:
-#  examples/bin/build-reuters.sh
+#  examples/bin/cluster-reuters.sh
 
 if [ "$1" = "--help" ] || [ "$1" = "--?" ]; then
   echo "This script clusters the Reuters data set using a variety of algorithms.  The data set is downloaded automatically."
@@ -126,10 +126,6 @@ elif [ "x$clustertype" == "xfuzzykmeans" ]; then
     -x 10 -k 20 -ow -m 1.1 \
   && \
   $MAHOUT clusterdump \
-    -s ${WORK_DIR}/reuters-fkmeans/clusters-*-final \
-    -d ${WORK_DIR}/reuters-out-seqdir-sparse-fkmeans/dictionary.file-0 \
-    -dt sequencefile -b 100 -n 20
-  $MAHOUT clusterdump \
     -i ${WORK_DIR}/reuters-fkmeans/clusters-*-final \
     -o ${WORK_DIR}/reuters-fkmeans/clusterdump \
     -d ${WORK_DIR}/reuters-out-seqdir-sparse-fkmeans/dictionary.file-0 \
@@ -148,10 +144,6 @@ elif [ "x$clustertype" == "xdirichlet" ]; then
     -mp org.apache.mahout.math.DenseVector \
     -dm org.apache.mahout.common.distance.CosineDistanceMeasure \
   && \
-  $MAHOUT clusterdump \
-    -s ${WORK_DIR}/reuters-dirichlet/clusters-*-final \
-    -d ${WORK_DIR}/reuters-out-seqdir-sparse-dirichlet/dictionary.file-0 \
-    -dt sequencefile -b 100 -n 20
   $MAHOUT clusterdump \
     -i ${WORK_DIR}/reuters-dirichlet/clusters-*-final \
     -o ${WORK_DIR}/reuters-dirichlet/clusterdump \
