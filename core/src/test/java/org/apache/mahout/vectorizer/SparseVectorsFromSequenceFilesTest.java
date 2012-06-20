@@ -194,7 +194,7 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
     Path tfidfVectors = new Path(outputPath, "tfidf-vectors");
     
     DictionaryVectorizerTest.validateVectors(conf, numDocs, tfVectors, sequential, named);
-    if (tfWeighting == false) {
+    if (!tfWeighting) {
       DictionaryVectorizerTest.validateVectors(conf, numDocs, tfidfVectors, sequential, named);
     }
     return outputPath;

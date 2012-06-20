@@ -48,7 +48,9 @@ import com.google.common.collect.Lists;
  * Intended to consume ConfusionMatrix SequenceFile output by Bayes TestClassifier class
  */
 public final class ConfusionMatrixDumper extends AbstractJob {
-  
+
+  private static final String TAB_SEPARATOR = "|";
+
   // HTML wrapper - default CSS
   private static final String HEADER = "<html>"
                                        + "<head>\n"
@@ -162,7 +164,6 @@ public final class ConfusionMatrixDumper extends AbstractJob {
   }
   
   private static void exportText(Path inputPath, PrintStream out) throws IOException {
-    String TAB_SEPARATOR = "|";
     MatrixWritable mw = new MatrixWritable();
     Text key = new Text();
     readSeqFile(inputPath, key, mw);

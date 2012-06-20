@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.io.BinaryComparable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
@@ -96,11 +97,7 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
    *          whether the gram is at the head of its text unit or tail or unigram
    */
   public Gram(String ngram, int frequency, Type type) {
-    
-    if (ngram == null) {
-      throw new NullPointerException();
-    }
-    
+    Preconditions.checkNotNull(ngram);
     try {  
       // extra character is used for storing type which is part 
       // of the sort key.

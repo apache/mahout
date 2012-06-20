@@ -360,12 +360,13 @@ public final class TestMeanShift extends MahoutTestCase {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(input.toUri(), conf);
     Collection<VectorWritable> points = Lists.newArrayList();
+    // TODO fix test so it doesn't need this random seed!
     Random r = new Random(123);
     Vector[] permutedRaw = new Vector[raw.length];
-    for (int i = 0; i < raw.length; i++)
-      permutedRaw = raw;
-    for (int i = 0; i < permutedRaw.length; i++)
+    System.arraycopy(raw, 0, permutedRaw, 0, raw.length);
+    for (int i = 0; i < permutedRaw.length; i++) {
       permutedRaw[i] = permutedRaw[i + r.nextInt(raw.length - i)];
+    }
     for (Vector v : permutedRaw) {
       points.add(new VectorWritable(v));
     }

@@ -22,10 +22,8 @@ import org.apache.mahout.math.function.DoubleFunction;
 
 /**
  * Gram Schmidt quick helper.
- * 
- * 
  */
-public class GramSchmidt {
+public final class GramSchmidt {
 
   private GramSchmidt() {
   }

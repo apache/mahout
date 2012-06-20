@@ -179,10 +179,9 @@ public class ConfusionMatrix {
   }
   
   private static String[] sortLabels(Map<String,Integer> labels) {
-    String[] sorted = new String[labels.keySet().size()];
-    for (String label: labels.keySet()) {
-      Integer index = labels.get(label);
-      sorted[index] = label;
+    String[] sorted = new String[labels.size()];
+    for (Map.Entry<String,Integer> entry : labels.entrySet()) {
+      sorted[entry.getValue()] = entry.getKey();
     }
     return sorted;
   }

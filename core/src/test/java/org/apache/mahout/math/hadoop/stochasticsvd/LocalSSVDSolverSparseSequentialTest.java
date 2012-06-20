@@ -31,6 +31,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.SequenceFile.CompressionType;
 import org.apache.hadoop.io.compress.DefaultCodec;
+import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
@@ -184,22 +185,7 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
                                            false,
                                            s_epsilon);
 
-    /*
-     * removing tests on U and V to keep this test leaner. I will keep U,V
-     * computation and assertions in the dense tests though.
-     */
-
-    /*
-     * double[][] u = SSVDSolver.loadDistributedRowMatrix(fs, new
-     * Path(svdOutPath, "U/[^_]*"), conf);
-     * 
-     * SSVDPrototypeTest .assertOrthonormality(new DenseMatrix(u), false,
-     * s_epsilon); double[][] v = SSVDSolver.loadDistributedRowMatrix(fs, new
-     * Path(svdOutPath, "V/[^_]*"), conf);
-     * 
-     * SSVDPrototypeTest .assertOrthonormality(new DenseMatrix(v), false,
-     * s_epsilon);
-     */
+    IOUtils.close(closeables);
   }
 
   static void dumpSv(Vector s) {

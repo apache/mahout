@@ -24,8 +24,6 @@ import java.util.Set;
 
 import com.google.common.collect.Sets;
 
-import junit.framework.Assert;
-
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -45,6 +43,7 @@ import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -56,19 +55,12 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
       {5, 4}, {4, 5}, {5, 5}, {9, 9}, {8, 8}};
   
   private FileSystem fs;
-  
   private Path clusteringOutputPath;
-  
   private Configuration conf;
-  
   private Path pointsPath;
-  
   private Path classifiedOutputPath;
-  
   private List<Vector> firstCluster;
-  
   private List<Vector> secondCluster;
-  
   private List<Vector> thirdCluster;
   
   @Override
@@ -107,7 +99,7 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(points, true, 
         new Path(pointsPath, "file1"), fs, conf);
     runClustering(pointsPath, conf, false);
-    runClassificationWithOutlierRemoval(conf, false);
+    runClassificationWithOutlierRemoval(false);
     collectVectorsForAssertion();
     assertVectorsWithOutlierRemoval();
   }
@@ -125,7 +117,7 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(points,
         new Path(pointsPath, "file1"), fs, conf);
     runClustering(pointsPath, conf, true);
-    runClassificationWithoutOutlierRemoval(conf);
+    runClassificationWithoutOutlierRemoval();
     collectVectorsForAssertion();
     assertVectorsWithoutOutlierRemoval();
   }
@@ -143,7 +135,7 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(points,
         new Path(pointsPath, "file1"), fs, conf);
     runClustering(pointsPath, conf, true);
-    runClassificationWithOutlierRemoval(conf, true);
+    runClassificationWithOutlierRemoval(true);
     collectVectorsForAssertion();
     assertVectorsWithOutlierRemoval();
   }
@@ -158,17 +150,14 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
         finalClustersPath);
   }
   
-  private void runClassificationWithoutOutlierRemoval(Configuration conf)
-      throws IOException, InterruptedException, ClassNotFoundException {
-    ClusterClassificationDriver.run(pointsPath, clusteringOutputPath,
-        classifiedOutputPath, 0.0, true, true);
+  private void runClassificationWithoutOutlierRemoval()
+    throws IOException, InterruptedException, ClassNotFoundException {
+    ClusterClassificationDriver.run(pointsPath, clusteringOutputPath, classifiedOutputPath, 0.0, true, true);
   }
   
-  private void runClassificationWithOutlierRemoval(Configuration conf2,
-      boolean runSequential) throws IOException, InterruptedException,
-      ClassNotFoundException {
-    ClusterClassificationDriver.run(pointsPath, clusteringOutputPath,
-        classifiedOutputPath, 0.73, true, runSequential);
+  private void runClassificationWithOutlierRemoval(boolean runSequential)
+    throws IOException, InterruptedException, ClassNotFoundException {
+    ClusterClassificationDriver.run(pointsPath, clusteringOutputPath, classifiedOutputPath, 0.73, true, runSequential);
   }
   
   private void collectVectorsForAssertion() throws IOException {
@@ -188,11 +177,11 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
   }
   
   private void collectVector(String clusterId, Vector vector) {
-    if (clusterId.equals("0")) {
+    if ("0".equals(clusterId)) {
       firstCluster.add(vector);
-    } else if (clusterId.equals("1")) {
+    } else if ("1".equals(clusterId)) {
       secondCluster.add(vector);
-    } else if (clusterId.equals("2")) {
+    } else if ("2".equals(clusterId)) {
       thirdCluster.add(vector);
     }
   }
@@ -233,23 +222,21 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
   }
 
   private void checkClustersWithOutlierRemoval() {
-    Set<String> reference = Sets.newHashSet(new String[] {"{1:9.0,0:9.0}",
-                                                          "{1:1.0,0:1.0}"});
-    int singletonCnt = 0;
-    int emptyCnt = 0;
+    Set<String> reference = Sets.newHashSet("{1:9.0,0:9.0}", "{1:1.0,0:1.0}");
 
     List<List<Vector>> clusters = Lists.newArrayList();
     clusters.add(firstCluster);
     clusters.add(secondCluster);
     clusters.add(thirdCluster);
 
+    int singletonCnt = 0;
+    int emptyCnt = 0;
     for (List<Vector> vList : clusters) {
-      if (vList.size() == 0) {
+      if (vList.isEmpty()) {
         emptyCnt++;
       } else {
         singletonCnt++;
-        Assert.assertTrue("expecting only singleton clusters; got size=" + vList.size(),
-                          vList.size() == 1);
+        assertEquals("expecting only singleton clusters; got size=" + vList.size(), 1, vList.size());
         Assert.assertTrue("not expecting cluster:" + vList.get(0).asFormatString(),
                           reference.contains(vList.get(0).asFormatString()));
         reference.remove(vList.get(0).asFormatString());

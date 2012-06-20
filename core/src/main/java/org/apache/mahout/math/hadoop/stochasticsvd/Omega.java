@@ -135,7 +135,9 @@ public class Omega {
             if (v.isDense()) {
               for (int k = 0; k < v.size(); k++)
                 // it's ok, this is reentrant
+              {
                 result += getQuick(k, index) * v.getQuick(k);
+              }
 
             } else {
               for (Iterator<Vector.Element> iter = v.iterateNonZero(); iter.hasNext();) {
@@ -157,12 +159,13 @@ public class Omega {
         }
         return res;
       } catch (InterruptedException exc) {
-        throw new RuntimeException("Interrupted", exc);
+        throw new IllegalStateException("Interrupted", exc);
       } catch (ExecutionException exc) {
-        if (exc.getCause() instanceof RuntimeException)
+        if (exc.getCause() instanceof RuntimeException) {
           throw (RuntimeException) exc.getCause();
-        else
-          throw new RuntimeException(exc.getCause());
+        } else {
+          throw new IllegalStateException(exc.getCause());
+        }
       }
 
     } finally {

@@ -39,11 +39,8 @@ public final class FullRunningAverageAndStdDevWritable implements Writable {
 
   @Override
   public String toString() {
-    return new StringBuilder()
-        .append(average.getAverage()).append('\t')
-        .append(average.getCount()).append('\t')
-        .append(average.getMk()).append('\t')
-        .append(average.getSk()).toString();
+    return String.valueOf(average.getAverage())
+        + '\t' + average.getCount() + '\t' + average.getMk() + '\t' + average.getSk();
   }
   
   @Override

@@ -159,12 +159,12 @@ public final class TestL1ModelClustering extends MahoutTestCase {
     for (Vector vector : iterable) {
       assertNotNull(vector);
       System.out.println(i + ". " + docs2[i++]);
-      System.out.println("\t" + formatVector(vector));
+      System.out.println('\t' + formatVector(vector));
       sampleData.add(vector);
     }
   }
   
-  private String formatVector(Vector v) {
+  private static String formatVector(Vector v) {
     StringBuilder buf = new StringBuilder();
     int nzero = 0;
     Iterator<Vector.Element> iterateNonZero = v.iterateNonZero();
@@ -211,10 +211,10 @@ public final class TestL1ModelClustering extends MahoutTestCase {
         map[i] = new MapElement(pdf, docs[i]);
       }
       Arrays.sort(map);
-      for (int i = 0; i < map.length; i++) {
-        Double pdf = map[i].pdf;
+      for (MapElement aMap : map) {
+        Double pdf = aMap.pdf;
         double norm = pdf / maxPdf;
-        System.out.println(String.format(Locale.ENGLISH, "%.3f", norm) + " " + map[i].doc);
+        System.out.println(String.format(Locale.ENGLISH, "%.3f", norm) + ' ' + aMap.doc);
       }
     }
   }
@@ -231,9 +231,8 @@ public final class TestL1ModelClustering extends MahoutTestCase {
       models.add((Cluster) cluster);
     }
     
-    ClusterIterator iterator = new ClusterIterator();
     ClusterClassifier classifier = new ClusterClassifier(models, new DirichletClusteringPolicy(15, 1.0));
-    ClusterClassifier posterior = iterator.iterate(sampleData, classifier, 10);
+    ClusterClassifier posterior = ClusterIterator.iterate(sampleData, classifier, 10);
     
     printClusters(posterior.getModels(), DOCS);
   }
@@ -252,9 +251,8 @@ public final class TestL1ModelClustering extends MahoutTestCase {
       models.add((Cluster) cluster);
     }
     
-    ClusterIterator iterator = new ClusterIterator();
     ClusterClassifier classifier = new ClusterClassifier(models, new DirichletClusteringPolicy(15, 1.0));
-    ClusterClassifier posterior = iterator.iterate(sampleData, classifier, 10);
+    ClusterClassifier posterior = ClusterIterator.iterate(sampleData, classifier, 10);
     
     printClusters(posterior.getModels(), DOCS);
   }
@@ -271,9 +269,8 @@ public final class TestL1ModelClustering extends MahoutTestCase {
       models.add((Cluster) cluster);
     }
     
-    ClusterIterator iterator = new ClusterIterator();
     ClusterClassifier classifier = new ClusterClassifier(models, new DirichletClusteringPolicy(15, 1.0));
-    ClusterClassifier posterior = iterator.iterate(sampleData, classifier, 10);
+    ClusterClassifier posterior = ClusterIterator.iterate(sampleData, classifier, 10);
     
     printClusters(posterior.getModels(), DOCS2);
   }
@@ -292,9 +289,8 @@ public final class TestL1ModelClustering extends MahoutTestCase {
       models.add((Cluster) cluster);
     }
     
-    ClusterIterator iterator = new ClusterIterator();
     ClusterClassifier classifier = new ClusterClassifier(models, new DirichletClusteringPolicy(15, 1.0));
-    ClusterClassifier posterior = iterator.iterate(sampleData, classifier, 10);
+    ClusterClassifier posterior = ClusterIterator.iterate(sampleData, classifier, 10);
     
     printClusters(posterior.getModels(), DOCS2);
   }

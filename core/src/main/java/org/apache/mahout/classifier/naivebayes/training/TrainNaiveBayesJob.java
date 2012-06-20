@@ -30,6 +30,7 @@ import org.apache.mahout.classifier.naivebayes.BayesUtils;
 import org.apache.mahout.classifier.naivebayes.NaiveBayesModel;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
@@ -98,18 +99,32 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     HadoopUtil.cacheFiles(labPath, getConf());
 
     //add up all the vectors with the same labels, while mapping the labels into our index
-    Job indexInstances = prepareJob(getInputPath(), getTempPath(SUMMED_OBSERVATIONS), SequenceFileInputFormat.class,
-            IndexInstancesMapper.class, IntWritable.class, VectorWritable.class, VectorSumReducer.class, IntWritable.class,
-            VectorWritable.class, SequenceFileOutputFormat.class);
+    Job indexInstances = prepareJob(getInputPath(),
+                                    getTempPath(SUMMED_OBSERVATIONS),
+                                    SequenceFileInputFormat.class,
+                                    IndexInstancesMapper.class,
+                                    IntWritable.class,
+                                    VectorWritable.class,
+                                    VectorSumReducer.class,
+                                    IntWritable.class,
+                                    VectorWritable.class,
+                                    SequenceFileOutputFormat.class);
     indexInstances.setCombinerClass(VectorSumReducer.class);
     boolean succeeded = indexInstances.waitForCompletion(true);
     if (!succeeded) {
       return -1;
     }
     //sum up all the weights from the previous step, per label and per feature
-    Job weightSummer = prepareJob(getTempPath(SUMMED_OBSERVATIONS), getTempPath(WEIGHTS),
-            SequenceFileInputFormat.class, WeightsMapper.class, Text.class, VectorWritable.class, VectorSumReducer.class,
-            Text.class, VectorWritable.class, SequenceFileOutputFormat.class);
+    Job weightSummer = prepareJob(getTempPath(SUMMED_OBSERVATIONS),
+                                  getTempPath(WEIGHTS),
+                                  SequenceFileInputFormat.class,
+                                  WeightsMapper.class,
+                                  Text.class,
+                                  VectorWritable.class,
+                                  VectorSumReducer.class,
+                                  Text.class,
+                                  VectorWritable.class,
+                                  SequenceFileOutputFormat.class);
     weightSummer.getConfiguration().set(WeightsMapper.NUM_LABELS, String.valueOf(labelSize));
     weightSummer.setCombinerClass(VectorSumReducer.class);
     succeeded = weightSummer.waitForCompletion(true);
@@ -120,10 +135,18 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     //put the per label and per feature vectors into the cache
     HadoopUtil.cacheFiles(getTempPath(WEIGHTS), getConf());
     
-    //calculate the Thetas, write out to LABEL_THETA_NORMALIZER vectors -- TODO: add reference here to the part of the Rennie paper that discusses this
-    Job thetaSummer = prepareJob(getTempPath(SUMMED_OBSERVATIONS), getTempPath(THETAS),
-            SequenceFileInputFormat.class, ThetaMapper.class, Text.class, VectorWritable.class, VectorSumReducer.class,
-            Text.class, VectorWritable.class, SequenceFileOutputFormat.class);
+    //calculate the Thetas, write out to LABEL_THETA_NORMALIZER vectors --
+    // TODO: add reference here to the part of the Rennie paper that discusses this
+    Job thetaSummer = prepareJob(getTempPath(SUMMED_OBSERVATIONS),
+                                 getTempPath(THETAS),
+                                 SequenceFileInputFormat.class,
+                                 ThetaMapper.class,
+                                 Text.class,
+                                 VectorWritable.class,
+                                 VectorSumReducer.class,
+                                 Text.class,
+                                 VectorWritable.class,
+                                 SequenceFileOutputFormat.class);
     thetaSummer.setCombinerClass(VectorSumReducer.class);
     thetaSummer.getConfiguration().setFloat(ThetaMapper.ALPHA_I, alphaI);
     thetaSummer.getConfiguration().setBoolean(ThetaMapper.TRAIN_COMPLEMENTARY, trainComplementary);
@@ -147,8 +170,11 @@ public final class TrainNaiveBayesJob extends AbstractJob {
       Iterable<String> labels = Splitter.on(",").split(getOption(LABELS));
       labelSize = BayesUtils.writeLabelIndex(getConf(), labels, labPath);
     } else if (hasOption(EXTRACT_LABELS)) {
-      SequenceFileDirIterable<Text, IntWritable> iterable =
-              new SequenceFileDirIterable<Text, IntWritable>(getInputPath(), PathType.LIST, PathFilters.logsCRCFilter(), getConf());
+      Iterable<Pair<Text,IntWritable>> iterable =
+          new SequenceFileDirIterable<Text, IntWritable>(getInputPath(),
+                                                         PathType.LIST,
+                                                         PathFilters.logsCRCFilter(),
+                                                         getConf());
       labelSize = BayesUtils.writeLabelIndex(getConf(), labPath, iterable);
     }
     return labelSize;

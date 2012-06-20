@@ -92,17 +92,16 @@ public class DisplayMinHash extends DisplayClustering {
     LINES, POINTS, SYMBOLS
   }
 
-  private static final long serialVersionUID = 1L;
-  private transient static Logger log = LoggerFactory
-      .getLogger(DisplayMinHash.class);
+  private static final Logger log = LoggerFactory.getLogger(DisplayMinHash.class);
 
-  private static Map<String, List<Vector>> clusters = new HashMap<String, List<Vector>>();
+  private static final int SYMBOLS_FONT_SIZE = 6;
+
+  private static final Map<String, List<Vector>> clusters = new HashMap<String, List<Vector>>();
   private static Iterator<Entry<String, List<Vector>>> currentCluster;
   private static List<Vector> currentClusterPoints;
   private static int updatePeriodTime;
   private static long lastUpdateTime = 0;
   private static boolean isSlideShowOnHold = false;
-  private static int symbolsFontSize = 6;
 
   private PlotType plotType = PlotType.POINTS;
 
@@ -138,25 +137,23 @@ public class DisplayMinHash extends DisplayClustering {
   private static void plotClusters(Graphics2D g2, PlotType plotType) {
     double sx = (double) res / DS;
     g2.setTransform(AffineTransform.getScaleInstance(sx, sx));
-    Font f = new Font("Dialog", Font.PLAIN, symbolsFontSize);
+    Font f = new Font("Dialog", Font.PLAIN, SYMBOLS_FONT_SIZE);
     g2.setFont(f);
     switch (plotType) {
-    case LINES:
-      plotLines(g2);
-      break;
-    case SYMBOLS:
-      plotSymbols(g2);
-      break;
-    case POINTS:
-      plotPoints(g2);
-      break;
-    default:
-      break;
+      case LINES:
+        plotLines(g2);
+        break;
+      case SYMBOLS:
+        plotSymbols(g2);
+        break;
+      case POINTS:
+        plotPoints(g2);
+        break;
     }
   }
 
   private static void plotLines(Graphics2D g2) {
-    Random rand = new Random();
+    Random rand = RandomUtils.getRandom();
     for (Map.Entry<String, List<Vector>> entry : clusters.entrySet()) {
       List<Vector> vecs = entry.getValue();
 
@@ -181,15 +178,15 @@ public class DisplayMinHash extends DisplayClustering {
 
   private static void plotSymbols(Graphics2D g2) {
     char symbol = 0;
-    Random rand = new Random();
+    Random rand = RandomUtils.getRandom();
     for (Map.Entry<String, List<Vector>> entry : clusters.entrySet()) {
       List<Vector> vecs = entry.getValue();
 
       g2.setColor(new Color(rand.nextInt()));
       symbol++;
 
-      for (int i = 0; i < vecs.size(); i++) {
-        plotSymbols(g2, vecs.get(i), symbol);
+      for (Vector vec : vecs) {
+        plotSymbols(g2, vec, symbol);
       }
     }
   }
@@ -200,7 +197,7 @@ public class DisplayMinHash extends DisplayClustering {
     }
 
     if (System.currentTimeMillis() - lastUpdateTime > updatePeriodTime) {
-      plotSampleData((Graphics2D) g2);
+      plotSampleData(g2);
       currentClusterPoints = currentCluster.next().getValue();
       lastUpdateTime = System.currentTimeMillis();
     }
@@ -208,8 +205,8 @@ public class DisplayMinHash extends DisplayClustering {
     g2.setColor(Color.RED);
     Vector dv = new DenseVector(2).assign(0.03);
 
-    for (int i = 0; i < currentClusterPoints.size(); i++) {
-      plotRectangle(g2, currentClusterPoints.get(i), dv);
+    for (Vector currentClusterPoint : currentClusterPoints) {
+      plotRectangle(g2, currentClusterPoint, dv);
     }
   }
 
@@ -238,8 +235,7 @@ public class DisplayMinHash extends DisplayClustering {
    * The entry point to the program.
    * 
    * @param args
-   *          The command-line arguments. See {@link DisplayMinHash} for
-   *          details.
+   *          The command-line arguments.
    * 
    * @throws Exception
    *           Thrown if an error occurs during the execution.
@@ -264,6 +260,7 @@ public class DisplayMinHash extends DisplayClustering {
 
     if (type == PlotType.POINTS) {
       Timer timer = new Timer(updatePeriodTime, new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           repaint(f);
         }
@@ -293,30 +290,28 @@ public class DisplayMinHash extends DisplayClustering {
   private static PlotType determinePlotType(String[] args) {
     PlotType type = PlotType.POINTS;
     if (args.length != 0) {
-      if (args[0].equals("-p")) {
+      if ("-p".equals(args[0])) {
         type = PlotType.POINTS;
-      } else if (args[0].equals("-l")) {
+      } else if ("-l".equals(args[0])) {
         type = PlotType.LINES;
-      } else if (args[0].equals("-s")) {
+      } else if ("-s".equals(args[0])) {
         type = PlotType.SYMBOLS;
       } else {
-        System.out
-            .println("Wrong parameter: -p (plot points); -l (plot lines); -s (plot symbols)");
+        System.out.println("Wrong parameter: -p (plot points); -l (plot lines); -s (plot symbols)");
       }
     }
     return type;
   }
 
   private static int determineUpdatePeriodTime(String[] args) {
-    int updatePeriodTimeInMinutes = 1;
     if (args.length >= 2) {
       try {
         updatePeriodTime = Integer.parseInt(args[1]);
-      } catch (Exception e) {
-        System.out.println(args[1]
-            + " isn't valid integer value. 1 second will be used.");
+      } catch (NumberFormatException nfe) {
+        System.out.println(args[1] + " isn't valid integer value. 1 second will be used.");
       }
     }
+    int updatePeriodTimeInMinutes = 1;
     return updatePeriodTimeInMinutes * 1000;
   }
 
@@ -334,15 +329,16 @@ public class DisplayMinHash extends DisplayClustering {
   private static void logClusters() {
     int i = 0;
     for (Map.Entry<String, List<Vector>> entry : clusters.entrySet()) {
-      String logStr = "Cluster N:" + ++i + ": ";
+      StringBuilder logStr = new StringBuilder();
+      logStr.append("Cluster N:").append(++i).append(": ");
       List<Vector> vecs = entry.getValue();
       for (Vector vector : vecs) {
-        logStr += vector.get(0);
-        logStr += ",";
-        logStr += vector.get(1);
-        logStr += "; ";
+        logStr.append(vector.get(0));
+        logStr.append(',');
+        logStr.append(vector.get(1));
+        logStr.append("; ");
       }
-      log.info(logStr);
+      log.info(logStr.toString());
     }
   }
 
@@ -365,9 +361,7 @@ public class DisplayMinHash extends DisplayClustering {
 
   private static void runMinHash(Configuration conf, Path samples, Path output)
       throws Exception {
-    MinHashDriver mhd = new MinHashDriver();
-
-    ToolRunner.run(conf, mhd, new String[] { "--input", samples.toString(),
+    ToolRunner.run(conf, new MinHashDriver(), new String[] { "--input", samples.toString(),
         "--hashType", HashFactory.HashType.MURMUR3.toString(), "--output",
         output.toString(), "--minVectorSize", "1", "--debugOutput"
 

@@ -36,7 +36,7 @@ public interface ClusteringPolicy extends Writable {
    * @return a Vector of probabilities that the data is described by each of the
    *         models
    */
-  public Vector classify(Vector data, ClusterClassifier prior);
+  Vector classify(Vector data, ClusterClassifier prior);
   
   /**
    * Return a vector of weights for each of the models given those probabilities
@@ -45,7 +45,7 @@ public interface ClusteringPolicy extends Writable {
    *          a Vector of pdfs
    * @return a Vector of weights
    */
-  public Vector select(Vector probabilities);
+  Vector select(Vector probabilities);
   
   /**
    * Update the policy with the given classifier
@@ -53,7 +53,7 @@ public interface ClusteringPolicy extends Writable {
    * @param posterior
    *          a ClusterClassifier
    */
-  public void update(ClusterClassifier posterior);
+  void update(ClusterClassifier posterior);
   
   /**
    * Close the policy using the classifier's models
@@ -61,6 +61,6 @@ public interface ClusteringPolicy extends Writable {
    * @param posterior
    *          a posterior ClusterClassifier
    */
-  public void close(ClusterClassifier posterior);
+  void close(ClusterClassifier posterior);
   
 }

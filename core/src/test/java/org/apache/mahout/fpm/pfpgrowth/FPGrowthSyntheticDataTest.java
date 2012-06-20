@@ -18,6 +18,7 @@
 package org.apache.mahout.fpm.pfpgrowth;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -44,10 +45,9 @@ public final class FPGrowthSyntheticDataTest extends MahoutTestCase {
     FPGrowthObj<String> fp = new FPGrowthObj<String>();
     
     String inputFilename = "FPGsynth.dat";
-    int minSupport = 50;
 
-    StringRecordIterator it = new StringRecordIterator(new FileLineIterable(Resources.getResource(
-                                                                                                  inputFilename).openStream()), "\\s+");
+    StringRecordIterator it =
+        new StringRecordIterator(new FileLineIterable(Resources.getResource(inputFilename).openStream()), "\\s+");
     int patternCnt_10_13_1669 = 0;
     int patternCnt_10_13 = 0;
     while (it.hasNext()) {
@@ -60,11 +60,13 @@ public final class FPGrowthSyntheticDataTest extends MahoutTestCase {
         }
       }
     }
-    
-    if (patternCnt_10_13_1669 < minSupport) 
+
+    int minSupport = 50;
+    if (patternCnt_10_13_1669 < minSupport) {
       throw new IllegalStateException("the test is broken or data is missing ("
-                                      + patternCnt_10_13_1669+", "
-                                      + patternCnt_10_13+")");
+                                          + patternCnt_10_13_1669 + ", "
+                                          + patternCnt_10_13 + ')');
+    }
 
     final Map<Set<String>,Long> results = Maps.newHashMap();
     
@@ -77,8 +79,7 @@ public final class FPGrowthSyntheticDataTest extends MahoutTestCase {
     returnableFeatures.add("13");
     returnableFeatures.add("1669");
     
-    fp.generateTopKFrequentPatterns(
-                                    new StringRecordIterator(new FileLineIterable(Resources.getResource(inputFilename).openStream()), "\\s+"),
+    fp.generateTopKFrequentPatterns(new StringRecordIterator(new FileLineIterable(Resources.getResource(inputFilename).openStream()), "\\s+"),
 
                                     fp.generateFList(new StringRecordIterator(new FileLineIterable(Resources.getResource(inputFilename)
                                                                                                    .openStream()), "\\s+"), minSupport), minSupport, 100000, 
@@ -106,17 +107,18 @@ public final class FPGrowthSyntheticDataTest extends MahoutTestCase {
     
   }
 
-  private long highestSupport(Map<Set<String>, Long> res, Set<String> feats) {
+  private static long highestSupport(Map<Set<String>, Long> res, Set<String> feats) {
     Long best= res.get(feats);
-    if (best != null) 
+    if (best != null) {
       return best;
-    else 
-      best= -1L;
-    for (Map.Entry<Set<String>, Long> ent : res.entrySet()) { 
+    }
+    best = -1L;
+    for (Map.Entry<Set<String>, Long> ent : res.entrySet()) {
       Set<String> r= ent.getKey();
       Long supp= ent.getValue();
-      if (supp <= best) 
+      if (supp <= best) {
         continue;
+      }
       boolean hasAll= true;
       for (String f : feats) {
         if (!r.contains(f)) {
@@ -124,17 +126,16 @@ public final class FPGrowthSyntheticDataTest extends MahoutTestCase {
           break;
         }
       }
-      if (hasAll) 
-        best= supp;
+      if (hasAll) {
+        best = supp;
+      }
     }
     return best;
   }
 
   @Test
-    public void testVsWithSynthData() throws IOException {
-    String inputFilename= "FPGsynth.dat";
-    int minSupport= 100;
-    Set<String> returnableFeatures = new HashSet<String>();
+  public void testVsWithSynthData() throws IOException {
+    Collection<String> returnableFeatures = new HashSet<String>();
 
     // not limiting features (or including too many) can cause
     // the test to run a very long time
@@ -145,9 +146,10 @@ public final class FPGrowthSyntheticDataTest extends MahoutTestCase {
     FPGrowth<String> fp1 = new FPGrowth<String>();
 
     final Map<Set<String>,Long> results1 = Maps.newHashMap();
-    
-    fp1.generateTopKFrequentPatterns(
-                                     new StringRecordIterator(new FileLineIterable(Resources.getResource(inputFilename).openStream()), "\\s+"),
+
+    String inputFilename = "FPGsynth.dat";
+    int minSupport = 100;
+    fp1.generateTopKFrequentPatterns(new StringRecordIterator(new FileLineIterable(Resources.getResource(inputFilename).openStream()), "\\s+"),
 
                                      fp1.generateFList(new StringRecordIterator(new FileLineIterable(Resources.getResource(inputFilename)
                                                                                                      .openStream()), "\\s+"), minSupport), minSupport, 1000000, 
@@ -172,8 +174,7 @@ public final class FPGrowthSyntheticDataTest extends MahoutTestCase {
 
     FPGrowthObj<String> fp2 = new FPGrowthObj<String>();
     final Map<Set<String>,Long> initialResults2 = Maps.newHashMap();
-    fp2.generateTopKFrequentPatterns(
-                                     new StringRecordIterator(new FileLineIterable(Resources.getResource(inputFilename).openStream()), "\\s+"),
+    fp2.generateTopKFrequentPatterns(new StringRecordIterator(new FileLineIterable(Resources.getResource(inputFilename).openStream()), "\\s+"),
 
                                      fp2.generateFList(new StringRecordIterator(new FileLineIterable(Resources.getResource(inputFilename)
                                                                                                      .openStream()), "\\s+"), minSupport), minSupport, 1000000, 
@@ -196,27 +197,28 @@ public final class FPGrowthSyntheticDataTest extends MahoutTestCase {
                                            public void update(String status) {}
                                        });
 
-    Map<Set<String>, Long> results2= new HashMap<Set<String>, Long>();    
-    if (!returnableFeatures.isEmpty()) {
-      Map<Set<String>, Long> tmpResult= new HashMap<Set<String>, Long>();
+    Map<Set<String>, Long> results2;
+    if (returnableFeatures.isEmpty()) {
+      results2 = initialResults2;
+    } else {
+      Map<Set<String>, Long> tmpResult = new HashMap<Set<String>, Long>();
       for (Map.Entry<Set<String>, Long> result2 : initialResults2.entrySet()) {
-        Set<String> r2feats= result2.getKey();
-        boolean hasSome= false;
+        Set<String> r2feats = result2.getKey();
+        boolean hasSome = false;
         for (String rf : returnableFeatures) {
           if (r2feats.contains(rf)) {
-            hasSome= true;
+            hasSome = true;
             break;
           }
         }
-        if (hasSome) 
+        if (hasSome) {
           tmpResult.put(result2.getKey(), result2.getValue());
+        }
       }
-      results2= tmpResult;
-    } else {
-      results2= initialResults2;
+      results2 = tmpResult;
     }
 
-    boolean allMatch= true;
+    boolean allMatch = true;
     int itemsetsChecked= 0;
     for (Map.Entry<Set<String>, Long> result1 : results1.entrySet()) {
       itemsetsChecked++;
@@ -243,7 +245,7 @@ public final class FPGrowthSyntheticDataTest extends MahoutTestCase {
     }
     System.out.println("checked "+itemsetsChecked+" itemsets iterating through #2");
 
-    assertEquals("Had mismatches!", allMatch, true);
+    assertTrue("Had mismatches!", allMatch);
   }
 
 }

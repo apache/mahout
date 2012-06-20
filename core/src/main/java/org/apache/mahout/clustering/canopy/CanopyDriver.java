@@ -17,8 +17,6 @@
 
 package org.apache.mahout.clustering.canopy;
 
-import static org.apache.mahout.clustering.topdown.PathDirectory.CLUSTERED_POINTS_DIRECTORY;
-
 import java.io.IOException;
 import java.util.Collection;
 
@@ -39,6 +37,7 @@ import org.apache.mahout.clustering.classify.ClusterClassificationDriver;
 import org.apache.mahout.clustering.classify.ClusterClassifier;
 import org.apache.mahout.clustering.iterator.CanopyClusteringPolicy;
 import org.apache.mahout.clustering.iterator.ClusterWritable;
+import org.apache.mahout.clustering.topdown.PathDirectory;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.HadoopUtil;
@@ -155,13 +154,12 @@ public class CanopyDriver extends AbstractJob {
     Path clustersOut = buildClusters(conf, input, output, measure, t1, t2, t3,
         t4, clusterFilter, runSequential);
     if (runClustering) {
-      clusterData(conf, input, clustersOut, output, clusterClassificationThreshold, runSequential);
+      clusterData(input, clustersOut, output, clusterClassificationThreshold, runSequential);
     }
   }
 
   /**
    * Convenience method to provide backward compatibility
-   * @param clusterClassificationThreshold TODO
    */
   public static void run(Configuration conf, Path input, Path output,
       DistanceMeasure measure, double t1, double t2, boolean runClustering,
@@ -365,12 +363,17 @@ public class CanopyDriver extends AbstractJob {
     return canopyOutputDir;
   }
 
-  private static void clusterData(Configuration conf, Path points, Path canopies, Path output,
-      double clusterClassificationThreshold, boolean runSequential) throws IOException, InterruptedException,
-      ClassNotFoundException {
+  private static void clusterData(Path points,
+                                  Path canopies,
+                                  Path output,
+                                  double clusterClassificationThreshold,
+                                  boolean runSequential)
+      throws IOException, InterruptedException, ClassNotFoundException {
     ClusterClassifier.writePolicy(new CanopyClusteringPolicy(), canopies);
-    ClusterClassificationDriver.run(points, output, new Path(output, CLUSTERED_POINTS_DIRECTORY),
-        clusterClassificationThreshold, true, runSequential);
+    ClusterClassificationDriver.run(points,
+                                    output,
+                                    new Path(output, PathDirectory.CLUSTERED_POINTS_DIRECTORY),
+                                    clusterClassificationThreshold, true, runSequential);
   }
   
 }

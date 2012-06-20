@@ -81,9 +81,16 @@ public class PreparePreferenceMatrixJob extends AbstractJob {
       return -1;
     }
     //convert user preferences into a vector per user
-    Job toUserVectors = prepareJob(getInputPath(), getOutputPath(USER_VECTORS), TextInputFormat.class,
-            ToItemPrefsMapper.class, VarLongWritable.class, booleanData ? VarLongWritable.class : EntityPrefWritable.class,
-            ToUserVectorsReducer.class, VarLongWritable.class, VectorWritable.class, SequenceFileOutputFormat.class);
+    Job toUserVectors = prepareJob(getInputPath(),
+                                   getOutputPath(USER_VECTORS),
+                                   TextInputFormat.class,
+                                   ToItemPrefsMapper.class,
+                                   VarLongWritable.class,
+                                   booleanData ? VarLongWritable.class : EntityPrefWritable.class,
+                                   ToUserVectorsReducer.class,
+                                   VarLongWritable.class,
+                                   VectorWritable.class,
+                                   SequenceFileOutputFormat.class);
     toUserVectors.getConfiguration().setBoolean(RecommenderJob.BOOLEAN_DATA, booleanData);
     toUserVectors.getConfiguration().setInt(ToUserVectorsReducer.MIN_PREFERENCES_PER_USER, minPrefsPerUser);
     toUserVectors.getConfiguration().set(ToEntityPrefsMapper.RATING_SHIFT, String.valueOf(ratingShift));

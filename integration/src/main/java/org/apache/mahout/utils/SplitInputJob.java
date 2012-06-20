@@ -151,10 +151,12 @@ public final class SplitInputJob {
     @Override
     public void run(Context context) throws IOException, InterruptedException {
       setup(context);
-      for (int i = 0; context.nextKeyValue(); i++) {
+      int i = 0;
+      while (context.nextKeyValue()) {
         if (i % downsamplingFactor == 0) {
           map(context.getCurrentKey(), context.getCurrentValue(), context);
         }
+        i++;
       }
       cleanup(context);
     }

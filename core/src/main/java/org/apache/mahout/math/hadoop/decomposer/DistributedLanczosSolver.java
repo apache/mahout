@@ -57,7 +57,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
    * For the distributed case, the best guess at a useful initialization state for Lanczos we'll chose to be
    * uniform over all input dimensions, L_2 normalized.
    */
-  public Vector getInitialVector(VectorIterable corpus) {
+  public static Vector getInitialVector(VectorIterable corpus) {
     Vector initialVector = new DenseVector(corpus.numCols());
     initialVector.assign(1.0 / Math.sqrt(corpus.numCols()));
     return initialVector;

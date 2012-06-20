@@ -44,7 +44,6 @@ public class SimpleLongArrayList extends AbstractLongList {
    *                        internal memory.
    */
   private SimpleLongArrayList(int initialCapacity) {
-    super();
     if (initialCapacity < 0) {
       throw new IllegalArgumentException("Illegal Capacity: " + initialCapacity);
     }

@@ -28,9 +28,12 @@ package org.apache.mahout.math;
 
 /**
  * This empty class is the common root for all persistent capable classes.
- * If this class inherits from <tt>java.lang.Object</tt> then all subclasses are serializable with the standard Java serialization mechanism.
- * If this class inherits from <tt>com.objy.db.app.ooObj</tt> then all subclasses are <i>additionally</i> serializable with the Objectivity ODBMS persistance mechanism.
- * Thus, by modifying the inheritance of this class the entire tree of subclasses can be switched to Objectivity compatibility (and back) with minimum effort.
+ * If this class inherits from <tt>java.lang.Object</tt> then all subclasses are serializable with
+ * the standard Java serialization mechanism.
+ * If this class inherits from <tt>com.objy.db.app.ooObj</tt> then all subclasses are
+ * <i>additionally</i> serializable with the Objectivity ODBMS persistance mechanism.
+ * Thus, by modifying the inheritance of this class the entire tree of subclasses can
+ * be switched to Objectivity compatibility (and back) with minimum effort.
  */
 public abstract class PersistentObject implements java.io.Serializable, Cloneable {
 

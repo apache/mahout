@@ -53,14 +53,7 @@ public class CIReducer extends Reducer<IntWritable,ClusterWritable,IntWritable,C
     classifier.close();
     context.write(key, first);
   }
-  
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper
-   * .Context)
-   */
+
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();

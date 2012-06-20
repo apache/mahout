@@ -17,8 +17,6 @@
 
 package org.apache.mahout.clustering.dirichlet;
 
-import static org.apache.mahout.clustering.topdown.PathDirectory.CLUSTERED_POINTS_DIRECTORY;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -36,6 +34,7 @@ import org.apache.mahout.clustering.dirichlet.models.DistributionDescription;
 import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
 import org.apache.mahout.clustering.iterator.ClusterIterator;
 import org.apache.mahout.clustering.iterator.DirichletClusteringPolicy;
+import org.apache.mahout.clustering.topdown.PathDirectory;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -200,9 +199,9 @@ public class DirichletDriver extends AbstractJob {
     prior.writeToSeqFiles(clustersIn);
     
     if (runSequential) {
-      new ClusterIterator().iterateSeq(conf, input, clustersIn, output, maxIterations);
+      ClusterIterator.iterateSeq(conf, input, clustersIn, output, maxIterations);
     } else {
-      new ClusterIterator().iterateMR(conf, input, clustersIn, output, maxIterations);
+      ClusterIterator.iterateMR(conf, input, clustersIn, output, maxIterations);
     }
     return output;
     
@@ -218,10 +217,6 @@ public class DirichletDriver extends AbstractJob {
    *          the directory pathname for input state
    * @param output
    *          the directory pathname for output points
-   * @param alpha0
-   *          TODO
-   * @param numModels
-   *          TODO
    * @param emitMostLikely
    *          a boolean if true emit only most likely cluster for each point
    * @param threshold
@@ -233,7 +228,7 @@ public class DirichletDriver extends AbstractJob {
       int numModels, boolean emitMostLikely, double threshold, boolean runSequential) throws IOException,
       InterruptedException, ClassNotFoundException {
     ClusterClassifier.writePolicy(new DirichletClusteringPolicy(numModels, alpha0), stateIn);
-    ClusterClassificationDriver.run(conf, input, output, new Path(output, CLUSTERED_POINTS_DIRECTORY), threshold,
+    ClusterClassificationDriver.run(conf, input, output, new Path(output, PathDirectory.CLUSTERED_POINTS_DIRECTORY), threshold,
         emitMostLikely, runSequential);
   }
   

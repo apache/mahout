@@ -93,7 +93,7 @@ public class DisplayFuzzyKMeans extends DisplayClustering {
     Path priorPath = new Path(output, "classifier-0");
     prior.writeToSeqFiles(priorPath);
     
-    new ClusterIterator().iterateSeq(conf, samples, priorPath, output, maxIterations);
+    ClusterIterator.iterateSeq(conf, samples, priorPath, output, maxIterations);
     loadClustersWritable(output);
   }
   

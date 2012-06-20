@@ -129,13 +129,14 @@ public final class ItemSimilarityJob extends AbstractJob {
     AtomicInteger currentPhase = new AtomicInteger();
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
-      ToolRunner.run(getConf(), new PreparePreferenceMatrixJob(), new String[]{
-          "--input", getInputPath().toString(),
-          "--output", prepPath.toString(),
-          "--maxPrefsPerUser", String.valueOf(maxPrefsPerUser),
-          "--minPrefsPerUser", String.valueOf(minPrefsPerUser),
-          "--booleanData", String.valueOf(booleanData),
-          "--tempDir", getTempPath().toString() });
+      ToolRunner.run(getConf(), new PreparePreferenceMatrixJob(), new String[] {
+        "--input", getInputPath().toString(),
+        "--output", prepPath.toString(),
+        "--maxPrefsPerUser", String.valueOf(maxPrefsPerUser),
+        "--minPrefsPerUser", String.valueOf(minPrefsPerUser),
+        "--booleanData", String.valueOf(booleanData),
+        "--tempDir", getTempPath().toString(),
+      });
     }
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
@@ -143,14 +144,15 @@ public final class ItemSimilarityJob extends AbstractJob {
           getConf());
 
       ToolRunner.run(getConf(), new RowSimilarityJob(), new String[] {
-          "--input", new Path(prepPath, PreparePreferenceMatrixJob.RATING_MATRIX).toString(),
-          "--output", similarityMatrixPath.toString(),
-          "--numberOfColumns", String.valueOf(numberOfUsers),
-          "--similarityClassname", similarityClassName,
-          "--maxSimilaritiesPerRow", String.valueOf(maxSimilarItemsPerItem),
-          "--excludeSelfSimilarity", String.valueOf(Boolean.TRUE),
-          "--threshold", String.valueOf(threshold),
-          "--tempDir", getTempPath().toString() });
+        "--input", new Path(prepPath, PreparePreferenceMatrixJob.RATING_MATRIX).toString(),
+        "--output", similarityMatrixPath.toString(),
+        "--numberOfColumns", String.valueOf(numberOfUsers),
+        "--similarityClassname", similarityClassName,
+        "--maxSimilaritiesPerRow", String.valueOf(maxSimilarItemsPerItem),
+        "--excludeSelfSimilarity", String.valueOf(Boolean.TRUE),
+        "--threshold", String.valueOf(threshold),
+        "--tempDir", getTempPath().toString(),
+      });
     }
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
@@ -217,7 +219,7 @@ public final class ItemSimilarityJob extends AbstractJob {
       extends Reducer<EntityEntityWritable,DoubleWritable,EntityEntityWritable,DoubleWritable> {
     @Override
     protected void reduce(EntityEntityWritable pair, Iterable<DoubleWritable> values, Context ctx)
-        throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
       ctx.write(pair, values.iterator().next());
     }
   }

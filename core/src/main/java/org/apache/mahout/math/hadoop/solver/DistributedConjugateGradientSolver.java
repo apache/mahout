@@ -55,9 +55,8 @@ public class DistributedConjugateGradientSolver extends ConjugateGradientSolver 
    * @param b              Vector b
    * @param preconditioner Optional preconditioner for the system
    * @param maxIterations  Maximum number of iterations to run, defaults to numCols
-   * @param maxError       Maximum error tolerated in the result. If the norm of the residual falls below this, then the 
-   *                       algorithm stops and returns. 
-
+   * @param maxError       Maximum error tolerated in the result. If the norm of the residual falls below this,
+   *                       then the algorithm stops and returns.
    * @return               The vector that solves the system.
    */
   public Vector runJob(Path inputPath, 
@@ -92,7 +91,9 @@ public class DistributedConjugateGradientSolver extends ConjugateGradientSolver 
     Path vectorPath = new Path(AbstractJob.getOption(parsedArgs, "--vector"));
     int numRows = Integer.parseInt(AbstractJob.getOption(parsedArgs, "--numRows"));
     int numCols = Integer.parseInt(AbstractJob.getOption(parsedArgs, "--numCols"));
-    int maxIterations = parsedArgs.containsKey("--maxIter") ? Integer.parseInt(AbstractJob.getOption(parsedArgs, "--maxIter")) : numCols;
+    int maxIterations = parsedArgs.containsKey("--maxIter")
+        ? Integer.parseInt(AbstractJob.getOption(parsedArgs, "--maxIter"))
+        : numCols;
     double maxError = parsedArgs.containsKey("--maxError") 
         ? Double.parseDouble(AbstractJob.getOption(parsedArgs, "--maxError"))
         : ConjugateGradientSolver.DEFAULT_MAX_ERROR;

@@ -20,9 +20,11 @@ package org.apache.mahout.classifier.sgd;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Locale;
 
+import com.google.common.base.Charsets;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -58,7 +60,7 @@ public final class ValidateAdaptiveLogistic {
   }
 
   public static void main(String[] args) throws IOException {
-    mainToOutput(args, new PrintWriter(System.out, true));
+    mainToOutput(args, new PrintWriter(new OutputStreamWriter(System.out, Charsets.UTF_8), true));
   }
 
   static void mainToOutput(String[] args, PrintWriter output) throws IOException {
@@ -83,8 +85,7 @@ public final class ValidateAdaptiveLogistic {
 
       State<Wrapper, CrossFoldLearner> best = lr.getBest();
       if (best == null) {
-        output.printf("%s\n",
-            "AdaptiveLogisticRegression has not be trained probably.");
+        output.println("AdaptiveLogisticRegression has not be trained probably.");
         return;
       }
       CrossFoldLearner learner = best.getPayload().getLearner();
@@ -94,8 +95,7 @@ public final class ValidateAdaptiveLogistic {
       csv.firstLine(line);
       line = in.readLine();
       if (showScores) {
-        output.printf(Locale.ENGLISH, "\"%s\", \"%s\", \"%s\", \"%s\"\n",
-            "target", "model-output", "log-likelihood", "average-likelihood");
+        output.println("\"target\", \"model-output\", \"log-likelihood\", \"average-likelihood\"");
       }
       while (line != null) {
         Vector v = new SequentialAccessSparseVector(lmp.getNumFeatures());

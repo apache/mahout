@@ -163,7 +163,8 @@ public final class FrequentPatternMaxHeap {
     return true;
   }
 
-  public String toString() { 
+  @Override
+  public String toString() {
     StringBuilder sb = new StringBuilder("FreqPatHeap{");
     String sep = "";
     for (Pattern p : getHeap()) {

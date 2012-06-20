@@ -159,11 +159,9 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
       }
       for (int newRow = 0; newRow < eigenVectors2.numRows(); newRow++) {
         Vector newEigen = eigenVectors2.viewRow(newRow);
-        if (newEigen != null) {
-          if (oldEigen.dot(newEigen) > 0.9) {
-            oldEigensFound.add(row);
-            break;
-          }
+        if (newEigen != null && oldEigen.dot(newEigen) > 0.9) {
+          oldEigensFound.add(row);
+          break;
         }
       }
     }

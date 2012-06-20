@@ -16,8 +16,6 @@
  */
 package org.apache.mahout.clustering.kmeans;
 
-import static org.apache.mahout.clustering.topdown.PathDirectory.CLUSTERED_POINTS_DIRECTORY;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +29,7 @@ import org.apache.mahout.clustering.classify.ClusterClassifier;
 import org.apache.mahout.clustering.iterator.ClusterIterator;
 import org.apache.mahout.clustering.iterator.ClusteringPolicy;
 import org.apache.mahout.clustering.iterator.KMeansClusteringPolicy;
+import org.apache.mahout.clustering.topdown.PathDirectory;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.HadoopUtil;
@@ -224,9 +223,9 @@ public class KMeansDriver extends AbstractJob {
     prior.writeToSeqFiles(priorClustersPath);
     
     if (runSequential) {
-      new ClusterIterator().iterateSeq(conf, input, priorClustersPath, output, maxIterations);
+      ClusterIterator.iterateSeq(conf, input, priorClustersPath, output, maxIterations);
     } else {
-      new ClusterIterator().iterateMR(conf, input, priorClustersPath, output, maxIterations);
+      ClusterIterator.iterateMR(conf, input, priorClustersPath, output, maxIterations);
     }
     return output;
   }
@@ -257,7 +256,7 @@ public class KMeansDriver extends AbstractJob {
       log.info("Input: {} Clusters In: {} Out: {} Distance: {}", new Object[] {input, clustersIn, output, measure});
     }
     ClusterClassifier.writePolicy(new KMeansClusteringPolicy(), clustersIn);
-    ClusterClassificationDriver.run(input, output, new Path(output, CLUSTERED_POINTS_DIRECTORY),
+    ClusterClassificationDriver.run(input, output, new Path(output, PathDirectory.CLUSTERED_POINTS_DIRECTORY),
         clusterClassificationThreshold, true, runSequential);
   }
   

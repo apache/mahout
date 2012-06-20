@@ -20,7 +20,6 @@ package org.apache.mahout.math.stats.entropy;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
@@ -31,7 +30,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 /**
- * Calculates the information gain for a {@link SequenceFile}.
+ * Calculates the information gain for a {@link org.apache.hadoop.io.SequenceFile}.
  * Computes, how 'useful' are the keys when predicting the values.
  * <ul>
  * <li>-i The input sequence file</li>
@@ -84,15 +83,22 @@ public final class InformationGain extends AbstractJob {
   }
 
   private void calculateEntropy() throws Exception {
-    String[] args = { "-i", getInputPath().toString(), "-o", entropyPath.toString(), "-s", "value",
-        "--tempDir", getTempPath().toString() };
+    String[] args = {
+      "-i", getInputPath().toString(),
+      "-o", entropyPath.toString(),
+      "-s", "value",
+      "--tempDir", getTempPath().toString(),
+    };
     ToolRunner.run(new Entropy(), args);
     entropy = readDoubleFromPath(entropyPath);
   }
 
   private void calculateConditionalEntropy() throws Exception {
-    String[] args = { "-i", getInputPath().toString(), "-o", conditionalEntropyPath.toString(),
-        "--tempDir", getTempPath().toString() };
+    String[] args = {
+      "-i", getInputPath().toString(),
+      "-o", conditionalEntropyPath.toString(),
+      "--tempDir", getTempPath().toString(),
+    };
     ToolRunner.run(new ConditionalEntropy(), args);
     conditionalEntropy = readDoubleFromPath(conditionalEntropyPath);
   }

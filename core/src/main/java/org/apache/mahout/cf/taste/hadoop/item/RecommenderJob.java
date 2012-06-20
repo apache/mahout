@@ -72,10 +72,12 @@ import java.util.regex.Pattern;
  * recommendations for that user (optional)</li>
  * <li>--numRecommendations (integer): Number of recommendations to compute per user (10)</li>
  * <li>--booleanData (boolean): Treat input data as having no pref values (false)</li>
- * <li>--maxPrefsPerUser (integer): Maximum number of preferences considered per user in  final recommendation phase (10)</li>
+ * <li>--maxPrefsPerUser (integer): Maximum number of preferences considered per user in final
+ *   recommendation phase (10)</li>
  * <li>--maxSimilaritiesPerItem (integer): Maximum number of similarities considered per item (100)</li>
  * <li>--minPrefsPerUser (integer): ignore users with less preferences than this in the similarity computation (1)</li>
- * <li>--maxPrefsPerUserInItemSimilarity (integer): max number of preferences to consider per user in the item similarity computation phase,
+ * <li>--maxPrefsPerUserInItemSimilarity (integer): max number of preferences to consider per user in
+ *   the item similarity computation phase,
  * users with more preferences will be sampled down (1000)</li>
  * <li>--threshold (double): discard item pairs with a similarity value below this</li>
  * </ol>
@@ -152,12 +154,13 @@ public final class RecommenderJob extends AbstractJob {
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
       ToolRunner.run(getConf(), new PreparePreferenceMatrixJob(), new String[]{
-              "--input", getInputPath().toString(),
-              "--output", prepPath.toString(),
-              "--maxPrefsPerUser", String.valueOf(maxPrefsPerUserInItemSimilarity),
-              "--minPrefsPerUser", String.valueOf(minPrefsPerUser),
-              "--booleanData", String.valueOf(booleanData),
-              "--tempDir", getTempPath().toString()});
+        "--input", getInputPath().toString(),
+        "--output", prepPath.toString(),
+        "--maxPrefsPerUser", String.valueOf(maxPrefsPerUserInItemSimilarity),
+        "--minPrefsPerUser", String.valueOf(minPrefsPerUser),
+        "--booleanData", String.valueOf(booleanData),
+        "--tempDir", getTempPath().toString(),
+      });
 
       numberOfUsers = HadoopUtil.readInt(new Path(prepPath, PreparePreferenceMatrixJob.NUM_USERS), getConf());
     }
@@ -175,14 +178,15 @@ public final class RecommenderJob extends AbstractJob {
        * new DistributedRowMatrix(...).rowSimilarity(...) */
       //calculate the co-occurrence matrix
       ToolRunner.run(getConf(), new RowSimilarityJob(), new String[]{
-              "--input", new Path(prepPath, PreparePreferenceMatrixJob.RATING_MATRIX).toString(),
-              "--output", similarityMatrixPath.toString(),
-              "--numberOfColumns", String.valueOf(numberOfUsers),
-              "--similarityClassname", similarityClassname,
-              "--maxSimilaritiesPerRow", String.valueOf(maxSimilaritiesPerItem),
-              "--excludeSelfSimilarity", String.valueOf(Boolean.TRUE),
-              "--threshold", String.valueOf(threshold),
-              "--tempDir", getTempPath().toString()});
+        "--input", new Path(prepPath, PreparePreferenceMatrixJob.RATING_MATRIX).toString(),
+        "--output", similarityMatrixPath.toString(),
+        "--numberOfColumns", String.valueOf(numberOfUsers),
+        "--similarityClassname", similarityClassname,
+        "--maxSimilaritiesPerRow", String.valueOf(maxSimilaritiesPerItem),
+        "--excludeSelfSimilarity", String.valueOf(Boolean.TRUE),
+        "--threshold", String.valueOf(threshold),
+        "--tempDir", getTempPath().toString(),
+      });
     }
 
     //start the multiplication of the co-occurrence matrix by the user vectors
@@ -193,21 +197,29 @@ public final class RecommenderJob extends AbstractJob {
               Reducer.class, VarIntWritable.class, VectorOrPrefWritable.class,
               SequenceFileOutputFormat.class);
       boolean succeeded = prePartialMultiply1.waitForCompletion(true);
-      if (!succeeded) 
+      if (!succeeded) {
         return -1;
+      }
       //continue the multiplication
       Job prePartialMultiply2 = prepareJob(new Path(prepPath, PreparePreferenceMatrixJob.USER_VECTORS),
-              prePartialMultiplyPath2, SequenceFileInputFormat.class, UserVectorSplitterMapper.class, VarIntWritable.class,
-              VectorOrPrefWritable.class, Reducer.class, VarIntWritable.class, VectorOrPrefWritable.class,
-              SequenceFileOutputFormat.class);
+                                           prePartialMultiplyPath2,
+                                           SequenceFileInputFormat.class,
+                                           UserVectorSplitterMapper.class,
+                                           VarIntWritable.class,
+                                           VectorOrPrefWritable.class,
+                                           Reducer.class,
+                                           VarIntWritable.class,
+                                           VectorOrPrefWritable.class,
+                                           SequenceFileOutputFormat.class);
       if (usersFile != null) {
         prePartialMultiply2.getConfiguration().set(UserVectorSplitterMapper.USERS_FILE, usersFile);
       }
       prePartialMultiply2.getConfiguration().setInt(UserVectorSplitterMapper.MAX_PREFS_PER_USER_CONSIDERED,
               maxPrefsPerUser);
       succeeded = prePartialMultiply2.waitForCompletion(true);
-      if (!succeeded) 
+      if (!succeeded) {
         return -1;
+      }
       //finish the job
       Job partialMultiply = prepareJob(
               new Path(prePartialMultiplyPath1 + "," + prePartialMultiplyPath2), partialMultiplyPath,
@@ -216,8 +228,9 @@ public final class RecommenderJob extends AbstractJob {
               SequenceFileOutputFormat.class);
       setS3SafeCombinedInputPath(partialMultiply, getTempPath(), prePartialMultiplyPath1, prePartialMultiplyPath2);
       succeeded = partialMultiply.waitForCompletion(true);
-      if (!succeeded) 
+      if (!succeeded) {
         return -1;
+      }
     }
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
@@ -229,8 +242,9 @@ public final class RecommenderJob extends AbstractJob {
                 ItemFilterAsVectorAndPrefsReducer.class, VarIntWritable.class, VectorAndPrefsWritable.class,
                 SequenceFileOutputFormat.class);
         boolean succeeded = itemFiltering.waitForCompletion(true);
-        if (!succeeded) 
+        if (!succeeded) {
           return -1;
+        }
       }
 
       String aggregateAndRecommendInput = partialMultiplyPath.toString();
@@ -257,8 +271,9 @@ public final class RecommenderJob extends AbstractJob {
       aggregateAndRecommendConf.setInt(AggregateAndRecommendReducer.NUM_RECOMMENDATIONS, numRecommendations);
       aggregateAndRecommendConf.setBoolean(BOOLEAN_DATA, booleanData);
       boolean succeeded = aggregateAndRecommend.waitForCompletion(true);
-      if (!succeeded) 
+      if (!succeeded) {
         return -1;
+      }
     }
 
     return 0;

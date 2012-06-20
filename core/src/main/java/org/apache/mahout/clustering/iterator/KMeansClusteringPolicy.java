@@ -31,31 +31,19 @@ import org.apache.mahout.clustering.classify.ClusterClassifier;
 public class KMeansClusteringPolicy extends AbstractClusteringPolicy {
   
   public KMeansClusteringPolicy() {
-    super();
   }
   
   public KMeansClusteringPolicy(double convergenceDelta) {
-    super();
     this.convergenceDelta = convergenceDelta;
   }
   
   private double convergenceDelta = 0.001;
-  
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.io.Writable#write(java.io.DataOutput)
-   */
+
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeDouble(convergenceDelta);
   }
-  
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.io.Writable#readFields(java.io.DataInput)
-   */
+
   @Override
   public void readFields(DataInput in) throws IOException {
     this.convergenceDelta = in.readDouble();

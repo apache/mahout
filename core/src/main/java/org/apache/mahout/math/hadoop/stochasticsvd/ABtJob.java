@@ -62,7 +62,7 @@ import org.apache.mahout.math.hadoop.stochasticsvd.qr.QRFirstStep;
  * 
  */
 @SuppressWarnings("deprecation")
-public class ABtJob {
+public final class ABtJob {
 
   public static final String PROP_BT_PATH = "ssvd.Bt.path";
   public static final String PROP_BT_BROADCAST = "ssvd.Bt.broadcast";
@@ -220,16 +220,16 @@ public class ABtJob {
         // DEBUG: stdout
         //System.out.printf("list of files: " + btFiles);
 
-        String btLocalPath = "";
+        StringBuilder btLocalPath = new StringBuilder();
         for (Path btFile : btFiles) {
-          if (!btLocalPath.isEmpty()) {
-            btLocalPath += Path.SEPARATOR_CHAR;
+          if (btLocalPath.length() > 0) {
+            btLocalPath.append(Path.SEPARATOR_CHAR);
           }
-          btLocalPath += btFile;
+          btLocalPath.append(btFile);
         }
 
         btInput =
-          new SequenceFileDirIterator<IntWritable, VectorWritable>(new Path(btLocalPath),
+          new SequenceFileDirIterator<IntWritable, VectorWritable>(new Path(btLocalPath.toString()),
                                                                    PathType.LIST,
                                                                    null,
                                                                    null,
@@ -379,16 +379,12 @@ public class ABtJob {
     /**
      * key doesn't matter here, only value does. key always gets substituted by
      * SPW.
-     * 
-     * @param <K>
-     *          bogus
      */
-    private <K, V> OutputCollector<K, V>
-        createOutputCollector(String name,
-                              final SplitPartitionedWritable spw,
-                              Context ctx,
-                              Class<V> valueClass) throws IOException,
-          InterruptedException {
+    private <K,V> OutputCollector<K,V> createOutputCollector(String name,
+                                                             final SplitPartitionedWritable spw,
+                                                             Context ctx,
+                                                             Class<V> valueClass)
+      throws IOException, InterruptedException {
       Path outputPath = getSplitFilePath(name, spw, ctx);
       final SequenceFile.Writer w =
         SequenceFile.createWriter(FileSystem.get(outputPath.toUri(), ctx.getConfiguration()),
@@ -406,9 +402,7 @@ public class ABtJob {
     }
 
     @Override
-    protected void cleanup(Context context) throws IOException,
-      InterruptedException {
-
+    protected void cleanup(Context context) throws IOException, InterruptedException {
       IOUtils.close(closeables);
     }
 

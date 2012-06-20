@@ -30,7 +30,6 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.Utils.OutputFileUtils.OutputFilesFilter;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.Pair;
-import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterator;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
@@ -62,7 +61,7 @@ public final class SequenceFileDumper extends AbstractJob {
       return -1;
     }
 
-    Path[] pathArr= null;
+    Path[] pathArr;
     Configuration conf = new Configuration();
     Path input = getInputPath();
     FileSystem fs = input.getFileSystem(conf);
@@ -118,8 +117,9 @@ public final class SequenceFileDumper extends AbstractJob {
           long numItems = Long.MAX_VALUE;
           if (hasOption("numItems")) {
             numItems = Long.parseLong(getOption("numItems"));
-            if (!hasOption("quiet"))
+            if (!hasOption("quiet")) {
               writer.append("Max Items to dump: ").append(String.valueOf(numItems)).append("\n");
+            }
           }
           while (iterator.hasNext() && count < numItems) {
             Pair<?, ?> record = iterator.next();
@@ -134,8 +134,9 @@ public final class SequenceFileDumper extends AbstractJob {
             }
             count++;
           }
-          if (!hasOption("quiet"))
+          if (!hasOption("quiet")) {
             writer.append("Count: ").append(String.valueOf(count)).append('\n');
+          }
         }
         if (facets != null) {
           List<String> keyList = new ArrayList<String>(facets.size());
@@ -166,9 +167,4 @@ public final class SequenceFileDumper extends AbstractJob {
     new SequenceFileDumper().run(args);
   }
 
-  private static void printHelp(Group group) {
-    HelpFormatter formatter = new HelpFormatter();
-    formatter.setGroup(group);
-    formatter.print();
-  }
 }

@@ -42,7 +42,7 @@ public final class CalculateEntropyReducer
 
   @Override
   protected void reduce(NullWritable key, Iterable<DoubleWritable> values, Context context)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     double entropy = 0.0;
     for (DoubleWritable value : values) {
       entropy += value.get();

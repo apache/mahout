@@ -47,10 +47,7 @@ public class GaussianCluster extends AbstractCluster {
   public Model<VectorWritable> sampleFromPosterior() {
     return new GaussianCluster(getCenter(), getRadius(), getId());
   }
-  
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.AbstractCluster#setRadius(org.apache.mahout.math.Vector)
-   */
+
   @Override
   protected void setRadius(Vector s2) {
     super.setRadius(s2);

@@ -20,7 +20,6 @@ package org.apache.mahout.math.stats.entropy;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -35,8 +34,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A Hadoop job to compute the entropy of keys or values in a {@link SequenceFile}. Format has to be {@link Text} for
- * key or value.
+ * A Hadoop job to compute the entropy of keys or values in a {@link org.apache.hadoop.io.SequenceFile}.
+ * Format has to be {@link Text} for key or value.
  * <p/>
  * <ul>
  * <li>-i The input sequence file</li>

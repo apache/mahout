@@ -17,8 +17,6 @@
 
 package org.apache.mahout.clustering.dirichlet.models;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 
 import org.apache.hadoop.conf.Configuration;
@@ -40,7 +38,10 @@ public final class DistributionDescription {
   private final String distanceMeasure;
   private final int prototypeSize;
   
-  public DistributionDescription(String modelFactory, String modelPrototype, String distanceMeasure, int prototypeSize) {
+  public DistributionDescription(String modelFactory,
+                                 String modelPrototype,
+                                 String distanceMeasure,
+                                 int prototypeSize) {
     this.modelFactory = modelFactory;
     this.modelPrototype = modelPrototype;
     this.distanceMeasure = distanceMeasure;
@@ -65,36 +66,24 @@ public final class DistributionDescription {
   
   /**
    * Create an instance of AbstractVectorModelDistribution from the given command line arguments
-   * 
-   * @param conf
-   *          the Configuration
    */
   public ModelDistribution<VectorWritable> createModelDistribution(Configuration conf) {
-    ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    AbstractVectorModelDistribution modelDistribution;
-    try {
-      modelDistribution = ClassUtils.instantiateAs(modelFactory, AbstractVectorModelDistribution.class);
+    AbstractVectorModelDistribution modelDistribution =
+        ClassUtils.instantiateAs(modelFactory, AbstractVectorModelDistribution.class);
+
+    Vector prototype = ClassUtils.instantiateAs(modelPrototype,
+                                                Vector.class,
+                                                new Class<?>[] {int.class},
+                                                new Object[] {prototypeSize});
       
-      Class<? extends Vector> vcl = ccl.loadClass(modelPrototype).asSubclass(Vector.class);
-      Constructor<? extends Vector> v = vcl.getConstructor(int.class);
-      modelDistribution.setModelPrototype(new VectorWritable(v.newInstance(prototypeSize)));
-      
-      if (modelDistribution instanceof DistanceMeasureClusterDistribution) {
-        DistanceMeasure measure = ClassUtils.instantiateAs(distanceMeasure, DistanceMeasure.class);
-        measure.configure(conf);
-        ((DistanceMeasureClusterDistribution) modelDistribution).setMeasure(measure);
-      }
-    } catch (ClassNotFoundException cnfe) {
-      throw new IllegalStateException(cnfe);
-    } catch (NoSuchMethodException nsme) {
-      throw new IllegalStateException(nsme);
-    } catch (InstantiationException ie) {
-      throw new IllegalStateException(ie);
-    } catch (IllegalAccessException iae) {
-      throw new IllegalStateException(iae);
-    } catch (InvocationTargetException ite) {
-      throw new IllegalStateException(ite);
+    modelDistribution.setModelPrototype(new VectorWritable(prototype));
+
+    if (modelDistribution instanceof DistanceMeasureClusterDistribution) {
+      DistanceMeasure measure = ClassUtils.instantiateAs(distanceMeasure, DistanceMeasure.class);
+      measure.configure(conf);
+      ((DistanceMeasureClusterDistribution) modelDistribution).setMeasure(measure);
     }
+
     return modelDistribution;
   }
   

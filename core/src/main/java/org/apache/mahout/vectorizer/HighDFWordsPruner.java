@@ -1,5 +1,4 @@
-package org.apache.mahout.vectorizer;
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -15,6 +14,8 @@ package org.apache.mahout.vectorizer;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.mahout.vectorizer;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
@@ -38,7 +39,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HighDFWordsPruner {
+public final class HighDFWordsPruner {
 
   public static final String OUT_DIR_SUFFIX = "-pruned";
   public static final String STD_CALC_DIR = "stdcalc";
@@ -47,14 +48,12 @@ public class HighDFWordsPruner {
   private HighDFWordsPruner() {
   }
 
-
   public static void pruneVectors(Path tfDir, Path prunedTFDir, Path prunedPartialTFDir, long maxDF,
                                   Configuration baseConf,
                                   Pair<Long[], List<Path>> docFrequenciesFeatures,
                                   float normPower,
                                   boolean logNormalize,
-                                  int numReducers) throws IOException, InterruptedException,
-          ClassNotFoundException {
+                                  int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
 
     int partialVectorIndex = 0;
     List<Path> partialVectorPaths = new ArrayList<Path>();
@@ -64,8 +63,7 @@ public class HighDFWordsPruner {
       pruneVectorsPartial(tfDir, partialVectorOutputPath, path, maxDF, baseConf);
     }
 
-    mergePartialVectors(partialVectorPaths, prunedTFDir, baseConf, normPower, logNormalize,
-            numReducers);
+    mergePartialVectors(partialVectorPaths, prunedTFDir, baseConf, normPower, logNormalize, numReducers);
     HadoopUtil.delete(new Configuration(baseConf), prunedPartialTFDir);
   }
 
@@ -93,8 +91,9 @@ public class HighDFWordsPruner {
     HadoopUtil.delete(conf, output);
 
     boolean succeeded = job.waitForCompletion(true);
-    if (!succeeded) 
+    if (!succeeded) {
       throw new IllegalStateException("Job failed!");
+    }
   }
 
   public static void mergePartialVectors(Iterable<Path> partialVectorPaths,
@@ -103,7 +102,7 @@ public class HighDFWordsPruner {
                                          float normPower,
                                          boolean logNormalize,
                                          int numReducers)
-          throws IOException, InterruptedException, ClassNotFoundException {
+    throws IOException, InterruptedException, ClassNotFoundException {
 
     Configuration conf = new Configuration(baseConf);
     // this conf parameter needs to be set enable serialisation of conf values
@@ -132,8 +131,9 @@ public class HighDFWordsPruner {
     HadoopUtil.delete(conf, output);
 
     boolean succeeded = job.waitForCompletion(true);
-    if (!succeeded) 
+    if (!succeeded) {
       throw new IllegalStateException("Job failed!");
+    }
   }
 
   private static String getCommaSeparatedPaths(Iterable<Path> paths) {

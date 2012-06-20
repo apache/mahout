@@ -46,8 +46,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public final class BayesUtils {
+
+  private static final Pattern SLASH = Pattern.compile("/");
 
   private BayesUtils() {}
 
@@ -116,7 +119,7 @@ public final class BayesUtils {
     int i = 0;
     try {
       for (Object label : labels) {
-        String theLabel = ((Pair<?,?>) label).getFirst().toString().split("/")[1];
+        String theLabel = SLASH.split(((Pair<?, ?>) label).getFirst().toString())[1];
         if (!seen.contains(theLabel)) {
           writer.append(new Text(theLabel), new IntWritable(i++));
           seen.add(theLabel);

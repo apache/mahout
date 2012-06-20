@@ -17,10 +17,6 @@
 
 package org.apache.mahout.clustering.classify;
 
-import static org.apache.mahout.clustering.classify.ClusterClassificationConfigKeys.CLUSTERS_IN;
-import static org.apache.mahout.clustering.classify.ClusterClassificationConfigKeys.EMIT_MOST_LIKELY;
-import static org.apache.mahout.clustering.classify.ClusterClassificationConfigKeys.OUTLIER_REMOVAL_THRESHOLD;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -50,7 +46,7 @@ import org.apache.mahout.math.VectorWritable;
 public class ClusterClassificationMapper extends
     Mapper<WritableComparable<?>,VectorWritable,IntWritable,WeightedVectorWritable> {
   
-  private static double threshold;
+  private double threshold;
   private List<Cluster> clusterModels;
   private ClusterClassifier clusterClassifier;
   private IntWritable clusterId;
@@ -58,14 +54,13 @@ public class ClusterClassificationMapper extends
   private boolean emitMostLikely;
   
   @Override
-  protected void setup(Context context) throws IOException,
-      InterruptedException {
+  protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     
     Configuration conf = context.getConfiguration();
-    String clustersIn = conf.get(CLUSTERS_IN);
-    threshold = conf.getFloat(OUTLIER_REMOVAL_THRESHOLD, 0.0f);
-    emitMostLikely = conf.getBoolean(EMIT_MOST_LIKELY, false);
+    String clustersIn = conf.get(ClusterClassificationConfigKeys.CLUSTERS_IN);
+    threshold = conf.getFloat(ClusterClassificationConfigKeys.OUTLIER_REMOVAL_THRESHOLD, 0.0f);
+    emitMostLikely = conf.getBoolean(ClusterClassificationConfigKeys.EMIT_MOST_LIKELY, false);
     
     clusterModels = new ArrayList<Cluster>();
     
@@ -119,37 +114,29 @@ public class ClusterClassificationMapper extends
     context.write(clusterId, weightedVW);
   }
   
-  public static List<Cluster> populateClusterModels(Path clusterOutputPath, Configuration conf)
-      throws IOException {
+  public static List<Cluster> populateClusterModels(Path clusterOutputPath, Configuration conf) throws IOException {
     List<Cluster> clusters = new ArrayList<Cluster>();
-    Cluster cluster = null;
     FileSystem fileSystem = clusterOutputPath.getFileSystem(conf);
-    FileStatus[] clusterFiles = fileSystem.listStatus(clusterOutputPath,
-        PathFilters.finalPartFilter());
+    FileStatus[] clusterFiles = fileSystem.listStatus(clusterOutputPath, PathFilters.finalPartFilter());
     Iterator<?> it = new SequenceFileDirValueIterator<Writable>(
         clusterFiles[0].getPath(), PathType.LIST, PathFilters.partFilter(),
         null, false, conf);
     while (it.hasNext()) {
       ClusterWritable next = (ClusterWritable) it.next();
-      cluster = next.getValue();
+      Cluster cluster = next.getValue();
       cluster.configure(conf);
       clusters.add(cluster);
     }
     return clusters;
   }
   
-  private static boolean shouldClassify(Vector pdfPerCluster) {
-    boolean isMaxPDFGreatherThanThreshold = pdfPerCluster.maxValue() >= threshold;
-    return isMaxPDFGreatherThanThreshold;
+  private boolean shouldClassify(Vector pdfPerCluster) {
+    return pdfPerCluster.maxValue() >= threshold;
   }
   
-  private static Path finalClustersPath(Path clusterOutputPath)
-      throws IOException {
-    FileSystem fileSystem = clusterOutputPath
-        .getFileSystem(new Configuration());
-    FileStatus[] clusterFiles = fileSystem.listStatus(clusterOutputPath,
-        PathFilters.finalPartFilter());
-    Path finalClustersPath = clusterFiles[0].getPath();
-    return finalClustersPath;
+  private static Path finalClustersPath(Path clusterOutputPath) throws IOException {
+    FileSystem fileSystem = clusterOutputPath.getFileSystem(new Configuration());
+    FileStatus[] clusterFiles = fileSystem.listStatus(clusterOutputPath, PathFilters.finalPartFilter());
+    return clusterFiles[0].getPath();
   }
 }

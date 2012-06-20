@@ -17,6 +17,7 @@
 
 package org.apache.mahout.classifier.sgd;
 
+import com.google.common.base.Charsets;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -32,10 +33,10 @@ import org.apache.mahout.math.Vector;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 public final class RunAdaptiveLogistic {
@@ -50,7 +51,7 @@ public final class RunAdaptiveLogistic {
   }
 
   public static void main(String[] args) throws Exception {
-    mainToOutput(args, new PrintWriter(System.out, true));
+    mainToOutput(args, new PrintWriter(new OutputStreamWriter(System.out, Charsets.UTF_8), true));
   }
 
   static void mainToOutput(String[] args, PrintWriter output) throws Exception {
@@ -67,14 +68,13 @@ public final class RunAdaptiveLogistic {
 
     State<Wrapper, CrossFoldLearner> best = lr.getBest();
     if (best == null) {
-      output.printf("%s\n",
-          "AdaptiveLogisticRegression has not be trained probably.");
+      output.println("AdaptiveLogisticRegression has not be trained probably.");
       return;
     }
     CrossFoldLearner learner = best.getPayload().getLearner();
 
     BufferedReader in = TrainAdaptiveLogistic.open(inputFile);
-    BufferedWriter out = new BufferedWriter(new FileWriter(outputFile));
+    BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), Charsets.UTF_8));
 
     out.write(idColumn + ",target,score");
     out.newLine();
@@ -104,13 +104,13 @@ public final class RunAdaptiveLogistic {
       }
       k++;
       if (k % 100 == 0) {
-        output.printf(Locale.ENGLISH, "%d records processed \n", k);
+        output.println(k + " records processed");
       }
       line = in.readLine();
     }
     out.flush();
     out.close();
-    output.printf(Locale.ENGLISH, "%d records processed totally.\n", k);
+    output.println(k + " records processed totally.");
   }
 
   private static boolean parseArgs(String[] args) {

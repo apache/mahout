@@ -220,8 +220,6 @@ public class FPGrowthObj<A extends Comparable<? super A>> {
     return patterns;
   }
 
-      
-
   /**
    * Internal TopKFrequentPattern Generation algorithm, which represents the A's
    * as integers and transforms features to use only integers
@@ -234,8 +232,6 @@ public class FPGrowthObj<A extends Comparable<? super A>> {
    *          minimum support of the pattern to be mined
    * @param k
    *          Max value of the Size of the Max-Heap in which Patterns are held
-   * @param featureSetSize
-   *          number of features
    * @param returnFeatures
    *          the id's of the features for which Top K patterns have to be mined
    * @param topKPatternsOutputCollector
@@ -248,29 +244,26 @@ public class FPGrowthObj<A extends Comparable<? super A>> {
     long[] attributeFrequency,
     long minSupport,
     int k,
-    //int featureSetSize,
     Collection<Integer> returnFeatures, TopKPatternsOutputConverter<A> topKPatternsOutputCollector,
     StatusUpdater updater) throws IOException {
 
     FPTree tree = new FPTree(attributeFrequency, minSupport);
 
     // Constructing initial FPTree from the list of transactions
-    int nodecount = 0;
     int i = 0;
     while (transactions.hasNext()) {
       Pair<int[],Long> transaction = transactions.next();
       List<Integer> iLst = Lists.newArrayList();
       int[] iArr = transaction.getFirst();
-      for (int j = 0; j < iArr.length; j++)
-        iLst.add(iArr[j]);
+      for (int anIArr : iArr) {
+        iLst.add(anIArr);
+      }
       tree.accumulate(iLst, transaction.getSecond());
       i++;
       if (i % 10000 == 0) {
         log.info("FPTree Building: Read {} Transactions", i);
       }
     }
-
-    log.info("Number of Nodes in the FP Tree: {}", nodecount);
 
     return fpGrowth(tree, minSupport, k, returnFeatures, topKPatternsOutputCollector, updater);
   }
@@ -337,10 +330,12 @@ public class FPGrowthObj<A extends Comparable<? super A>> {
         int[] qints = q.getPattern();
         
         Pattern pq = new Pattern();
-        for (int pi = 0; pi < p.length(); pi++) 
+        for (int pi = 0; pi < p.length(); pi++) {
           pq.add(pints[pi], p.support());
-        for (int qi = 0; qi < q.length(); qi++) 
+        }
+        for (int qi = 0; qi < q.length(); qi++) {
           pq.add(qints[qi], q.support());
+        }
         pats.insert(pq);
       }
     }
@@ -348,8 +343,9 @@ public class FPGrowthObj<A extends Comparable<? super A>> {
     for (Pattern q : qPats.getHeap()) {
       Pattern qq = new Pattern();
       int[] qints = q.getPattern();
-      for (int qi = 0; qi < q.length(); qi++) 
+      for (int qi = 0; qi < q.length(); qi++) {
         qq.add(qints[qi], q.support());
+      }
       pats.insert(qq);
     }
 

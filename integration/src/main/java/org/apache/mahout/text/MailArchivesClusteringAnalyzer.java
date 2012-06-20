@@ -105,7 +105,7 @@ public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
 
   // Regex used to exclude non-alpha-numeric tokens
   private static final Pattern alphaNumeric = Pattern.compile("^[a-z][a-z0-9_]+$");
-  private final static Matcher matcher = alphaNumeric.matcher("");
+  private static final Matcher matcher = alphaNumeric.matcher("");
 
   public MailArchivesClusteringAnalyzer() {
     super(LUCENE_VERSION, STOP_WORDS);

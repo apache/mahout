@@ -77,8 +77,8 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
   
   public GenericRecommenderIRStatsEvaluator(RelevantItemsDataSplitter dataSplitter) {
     Preconditions.checkNotNull(dataSplitter);
-	  random = RandomUtils.getRandom();
-	  this.dataSplitter = dataSplitter;
+    random = RandomUtils.getRandom();
+    this.dataSplitter = dataSplitter;
   }
   
   @Override

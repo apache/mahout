@@ -24,16 +24,15 @@ import org.apache.mahout.math.MatrixSlice;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.Functions;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-
 public class EigenDecompositionTest {
   @Test
   public void testDegenerateMatrix() {
-    double[][] m = new double[][]{
+    double[][] m = {
       new double[]{0.641284, 0.767303, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000},
       new double[]{0.767303, 3.050159, 2.561342, 0.000000, 0.000000, 0.000000, 0.000000},
       new double[]{0.000000, 2.561342, 5.000609, 0.810507, 0.000000, 0.000000, 0.000000},
@@ -51,8 +50,7 @@ public class EigenDecompositionTest {
   @Test
   public void testDeficientRank() {
     Matrix a = new DenseMatrix(10, 3).assign(new DoubleFunction() {
-      Random gen = RandomUtils.getRandom();
-
+      private final Random gen = RandomUtils.getRandom();
       @Override
       public double apply(double arg1) {
         return gen.nextGaussian();
@@ -66,17 +64,17 @@ public class EigenDecompositionTest {
     Matrix v = eig.getV();
     check("EigenvalueDecomposition (rank deficient)...", a.times(v), v.times(d));
 
-    assertEquals(0, eig.getImagEigenvalues().norm(1), 1e-10);
-    assertEquals(3, eig.getRealEigenvalues().norm(0), 1e-10);
+    Assert.assertEquals(0, eig.getImagEigenvalues().norm(1), 1.0e-10);
+    Assert.assertEquals(3, eig.getRealEigenvalues().norm(0), 1.0e-10);
   }
 
   @Test
   public void testEigen() {
     double[] evals =
-      {0., 1., 0., 0.,
-        1., 0., 2.e-7, 0.,
-        0., -2.e-7, 0., 1.,
-        0., 0., 1., 0.};
+      {0.0, 1.0, 0.0, 0.0,
+          1.0, 0.0, 2.0e-7, 0.0,
+          0.0, -2.0e-7, 0.0, 1.0,
+          0.0, 0.0, 1.0, 0.0};
     int i = 0;
     Matrix a = new DenseMatrix(4, 4);
     for (MatrixSlice row : a) {
@@ -94,7 +92,7 @@ public class EigenDecompositionTest {
   public void testSequential() {
     int validld = 3;
     Matrix A = new DenseMatrix(validld, validld);
-    double[] columnwise = {1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12.};
+    double[] columnwise = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0};
     int i = 0;
     for (MatrixSlice row : A) {
       for (Vector.Element element : row.vector()) {
@@ -115,8 +113,8 @@ public class EigenDecompositionTest {
 
   }
 
-  private void check(String msg, Matrix a, Matrix b) {
-    assertEquals(msg, 0, a.minus(b).aggregate(Functions.PLUS, Functions.ABS), 1e-10);
+  private static void check(String msg, Matrix a, Matrix b) {
+    Assert.assertEquals(msg, 0, a.minus(b).aggregate(Functions.PLUS, Functions.ABS), 1.0e-10);
   }
 
 }

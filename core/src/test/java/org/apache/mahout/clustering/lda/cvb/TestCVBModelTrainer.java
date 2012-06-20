@@ -64,8 +64,7 @@ public class TestCVBModelTrainer extends MahoutTestCase {
       double[] perps = new double[numTrials];
       for (int trial = 0; trial < numTrials; trial++) {
         InMemoryCollapsedVariationalBayes0 cvb =
-          new InMemoryCollapsedVariationalBayes0(sampledCorpus, terms, numTestTopics, ALPHA, ETA,
-                                                 2, 1, 0, (trial+1) * 123456L);
+          new InMemoryCollapsedVariationalBayes0(sampledCorpus, terms, numTestTopics, ALPHA, ETA, 2, 1, 0);
         cvb.setVerbose(true);
         perps[trial] = cvb.iterateUntilConvergence(0, 5, 0, 0.2);
         System.out.println(perps[trial]);

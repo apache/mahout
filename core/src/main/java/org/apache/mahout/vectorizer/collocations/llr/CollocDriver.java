@@ -235,8 +235,9 @@ public final class CollocDriver extends AbstractJob {
     job.setNumReduceTasks(reduceTasks);
     
     boolean succeeded = job.waitForCompletion(true);
-    if (!succeeded) 
+    if (!succeeded) {
       throw new IllegalStateException("Job failed!");
+    }
 
     return job.getCounters().findCounter(CollocMapper.Count.NGRAM_TOTAL).getValue();
   }
@@ -277,7 +278,8 @@ public final class CollocDriver extends AbstractJob {
     job.setNumReduceTasks(reduceTasks);
 
     boolean succeeded = job.waitForCompletion(true);
-    if (!succeeded) 
+    if (!succeeded) {
       throw new IllegalStateException("Job failed!");
+    }
   }
 }

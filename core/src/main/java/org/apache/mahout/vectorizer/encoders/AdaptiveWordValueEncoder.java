@@ -17,6 +17,7 @@
 
 package org.apache.mahout.vectorizer.encoders;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import org.apache.mahout.math.Vector;
@@ -57,7 +58,7 @@ public class AdaptiveWordValueEncoder extends WordValueEncoder {
     // the counts here are adjusted so that every observed value has an extra 0.5 count
     // as does a hypothetical unobserved value.  This smooths our estimates a bit and
     // allows the first word seen to have a non-zero weight of -log(1.5 / 2)
-    double thisWord = dictionary.count(new String(originalForm)) + 0.5;
+    double thisWord = dictionary.count(new String(originalForm, Charsets.UTF_8)) + 0.5;
     double allWords = dictionary.size() + dictionary.elementSet().size() * 0.5 + 0.5;
     return -Math.log(thisWord / allWords);
   }

@@ -18,6 +18,7 @@
 package org.apache.mahout.fpm.pfpgrowth;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -43,17 +44,18 @@ public final class FPGrowthRetailDataTestVs extends MahoutTestCase {
 
   private static final Logger log = LoggerFactory.getLogger(PFPGrowthRetailDataTestVs.class);
 
-  private long bestResults(Map<Set<String>, Long> res, Set<String> feats) {
+  private static long bestResults(Map<Set<String>, Long> res, Set<String> feats) {
     Long best = res.get(feats);
-    if (best != null) 
+    if (best != null) {
       return best;
-    else 
-      best = -1L;
+    }
+    best = -1L;
     for (Map.Entry<Set<String>, Long> ent : res.entrySet()) { 
       Set<String> r = ent.getKey();
       Long supp = ent.getValue();
-      if (supp <= best) 
+      if (supp <= best) {
         continue;
+      }
       boolean hasAll = true;
       for (String f : feats) {
         if (!r.contains(f)) {
@@ -61,16 +63,17 @@ public final class FPGrowthRetailDataTestVs extends MahoutTestCase {
           break;
         }
       }
-      if (hasAll) 
+      if (hasAll) {
         best = supp;
+      }
     }
     return best;
   }
 
   private static class MapCollector implements OutputCollector<String,List<Pair<List<String>,Long>>> {
-    private Map<Set<String>,Long> results;
+    private final Map<Set<String>,Long> results;
 
-    public MapCollector(Map<Set<String>,Long> results) {
+    private MapCollector(Map<Set<String>, Long> results) {
       this.results = results;
     }
 
@@ -84,7 +87,7 @@ public final class FPGrowthRetailDataTestVs extends MahoutTestCase {
     }
   }
 
-  private class DummyUpdater implements StatusUpdater {
+  private static class DummyUpdater implements StatusUpdater {
     @Override
     public void update(String status) { }
   }
@@ -93,7 +96,7 @@ public final class FPGrowthRetailDataTestVs extends MahoutTestCase {
   public void testVsWithRetailData() throws IOException {
     String inputFilename = "retail.dat";
     int minSupport = 500;
-    Set<String> returnableFeatures = new HashSet<String>();
+    Collection<String> returnableFeatures = new HashSet<String>();
     
     org.apache.mahout.fpm.pfpgrowth.fpgrowth.
       FPGrowth<String> fp1 = new org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth<String>();
@@ -118,8 +121,10 @@ public final class FPGrowthRetailDataTestVs extends MahoutTestCase {
       new HashSet<String>(),
       new MapCollector(initialResults2), new DummyUpdater());
 
-    Map<Set<String>, Long> results2 = new HashMap<Set<String>, Long>();    
-    if (!returnableFeatures.isEmpty()) {
+    Map<Set<String>, Long> results2;
+    if (returnableFeatures.isEmpty()) {
+      results2 = initialResults2;
+    } else {
       Map<Set<String>, Long> tmpResult = new HashMap<Set<String>, Long>();
       for (Map.Entry<Set<String>, Long> result2 : initialResults2.entrySet()) {
         Set<String> r2feats = result2.getKey();
@@ -130,25 +135,23 @@ public final class FPGrowthRetailDataTestVs extends MahoutTestCase {
             break;
           }
         }
-        if (hasSome) 
+        if (hasSome) {
           tmpResult.put(result2.getKey(), result2.getValue());
+        }
       }
       results2 = tmpResult;
-    } else {
-      results2 = initialResults2;
-  }
+    }
 
-    boolean allMatch = true;
-    allMatch &= hasAll(results1, results2);
+    boolean allMatch = hasAll(results1, results2);
     log.info("checked "+results1.size()+" itemsets iterating through #1");
 
     allMatch &= hasAll(results2, results1);
     log.info("checked "+results2.size()+" itemsets iterating through #2");
 
-    assertEquals( "Had mismatches!", allMatch, true);
+    assertTrue("Had mismatches!", allMatch);
   }
 
-  public boolean hasAll(Map<Set<String>, Long> ref, Map<Set<String>, Long> other) {
+  public static boolean hasAll(Map<Set<String>, Long> ref, Map<Set<String>, Long> other) {
     boolean hasAll = true;
     for (Map.Entry<Set<String>, Long> refEnt : ref.entrySet()) {
       Set<String> feats = refEnt.getKey();

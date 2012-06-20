@@ -114,8 +114,9 @@ public final class PFPGrowthTest extends MahoutTestCase {
     int numGroups = params.getInt(PFPGrowth.NUM_GROUPS, 
                                   PFPGrowth.NUM_GROUPS_DEFAULT);
     int maxPerGroup = fList.size() / numGroups;
-    if (fList.size() % numGroups != 0) 
+    if (fList.size() % numGroups != 0) {
       maxPerGroup++;
+    }
     params.set(PFPGrowth.MAX_PER_GROUP, Integer.toString(maxPerGroup));
 
     log.info("Starting Parallel FPGrowth Test: {}", params.get(PFPGrowth.MAX_HEAPSIZE));

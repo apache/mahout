@@ -45,11 +45,11 @@ public class ImplicitFeedbackAlternatingLeastSquaresSolver {
     this.lambda = lambda;
     this.alpha = alpha;
     this.Y = Y;
-    YtransposeY = YtransposeY(Y);
+    YtransposeY = getYtransposeY(Y);
   }
 
   public Vector solve(Vector ratings) {
-    return solve(YtransposeY.plus(YtransponseCuMinusIYPlusLambdaI(ratings)), YtransponseCuPu(ratings));
+    return solve(YtransposeY.plus(getYtransponseCuMinusIYPlusLambdaI(ratings)), getYtransponseCuPu(ratings));
   }
 
   private static Vector solve(Matrix A, Matrix y) {
@@ -61,7 +61,7 @@ public class ImplicitFeedbackAlternatingLeastSquaresSolver {
   }
 
   /* Y' Y */
-  private Matrix YtransposeY(OpenIntObjectHashMap<Vector> Y) {
+  private Matrix getYtransposeY(OpenIntObjectHashMap<Vector> Y) {
 
     Matrix compactedY = new DenseMatrix(Y.size(), numFeatures);
     IntArrayList indexes = Y.keys();
@@ -76,7 +76,7 @@ public class ImplicitFeedbackAlternatingLeastSquaresSolver {
   }
 
   /** Y' (Cu - I) Y + λ I */
-  private Matrix YtransponseCuMinusIYPlusLambdaI(Vector userRatings) {
+  private Matrix getYtransponseCuMinusIYPlusLambdaI(Vector userRatings) {
     Preconditions.checkArgument(userRatings.isSequentialAccess(), "need sequential access to ratings!");
 
     /* (Cu -I) Y */
@@ -108,7 +108,7 @@ public class ImplicitFeedbackAlternatingLeastSquaresSolver {
   }
 
   /** Y' Cu p(u) */
-  private Matrix YtransponseCuPu(Vector userRatings) {
+  private Matrix getYtransponseCuPu(Vector userRatings) {
     Preconditions.checkArgument(userRatings.isSequentialAccess(), "need sequential access to ratings!");
 
     Vector YtransponseCuPu = new DenseVector(numFeatures);

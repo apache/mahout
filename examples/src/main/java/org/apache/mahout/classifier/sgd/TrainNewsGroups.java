@@ -97,7 +97,8 @@ public final class TrainNewsGroups {
 
     NewsgroupHelper helper = new NewsgroupHelper();
     helper.getEncoder().setProbes(2);
-    AdaptiveLogisticRegression learningAlgorithm = new AdaptiveLogisticRegression(20, NewsgroupHelper.FEATURES, new L1());
+    AdaptiveLogisticRegression learningAlgorithm =
+        new AdaptiveLogisticRegression(20, NewsgroupHelper.FEATURES, new L1());
     learningAlgorithm.setInterval(800);
     learningAlgorithm.setAveragingWindow(500);
 
@@ -109,7 +110,7 @@ public final class TrainNewsGroups {
       }
     }
     Collections.shuffle(files);
-    System.out.printf("%d training files\n", files.size());
+    System.out.println(files.size() + " training files");
     SGDInfo info = new SGDInfo();
 
     int k = 0;
@@ -135,14 +136,14 @@ public final class TrainNewsGroups {
             learningAlgorithm.getBest().getPayload().getLearner().getModels().get(0));
 
     List<Integer> counts = Lists.newArrayList();
-    System.out.printf("Word counts\n");
+    System.out.println("Word counts");
     for (String count : overallCounts.elementSet()) {
       counts.add(overallCounts.count(count));
     }
     Collections.sort(counts, Ordering.natural().reverse());
     k = 0;
     for (Integer count : counts) {
-      System.out.printf("%d\t%d\n", k, count);
+      System.out.println(k + "\t" + count);
       k++;
       if (k > 1000) {
         break;

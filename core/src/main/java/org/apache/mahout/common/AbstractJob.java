@@ -232,8 +232,6 @@ public abstract class AbstractJob extends Configured implements Tool {
     this.outputOption = addOption(DefaultOptionCreator.outputOption().create());
   }
 
-
-
   /** Build an option with the given parameters. Name and description are
    *  required.
    * 
@@ -246,21 +244,21 @@ public abstract class AbstractJob extends Configured implements Tool {
    * @return the option.
    */
   protected static Option buildOption(String name,
-                                    String shortName,
-                                    String description,
-                                    boolean hasArg,
-                                    boolean required,
-                                    String defaultValue) {
+                                      String shortName,
+                                      String description,
+                                      boolean hasArg,
+                                      boolean required,
+                                      String defaultValue) {
 
     return buildOption(name, shortName, description, hasArg, 1, 1, required, defaultValue);
   }
 
   protected static Option buildOption(String name,
-                                    String shortName,
-                                    String description,
-                                    boolean hasArg, int min, int max,
-                                    boolean required,
-                                    String defaultValue) {
+                                      String shortName,
+                                      String description,
+                                      boolean hasArg, int min, int max,
+                                      boolean required,
+                                      String defaultValue) {
 
     DefaultOptionBuilder optBuilder = new DefaultOptionBuilder().withLongName(name).withDescription(description)
         .withRequired(required);
@@ -281,10 +279,8 @@ public abstract class AbstractJob extends Configured implements Tool {
 
     return optBuilder.create();
   }
-  //convenience method
 
   /**
-   *
    * @param name The name of the option
    * @return the {@link org.apache.commons.cli2.Option} with the name, else null
    */
@@ -311,7 +307,6 @@ public abstract class AbstractJob extends Configured implements Tool {
    *  names used for keys are the option name parameter prefixed by '--'.
    *
    * @see #parseArguments(String[], boolean, boolean)  -- passes in false, false for the optional args.
-   *
    */
   public Map<String, List<String>> parseArguments(String[] args) throws IOException {
     return parseArguments(args, false, false);
@@ -323,9 +318,9 @@ public abstract class AbstractJob extends Configured implements Tool {
    * @param inputOptional if false, then the input option, if set, need not be present.  If true and input is an option and there is no input, then throw an error
    * @param outputOptional if false, then the output option, if set, need not be present.  If true and output is an option and there is no output, then throw an error
    * @return the args parsed into a map.
-   * @throws IOException
    */
-  public Map<String, List<String>> parseArguments(String[] args, boolean inputOptional, boolean outputOptional) throws IOException{
+  public Map<String, List<String>> parseArguments(String[] args, boolean inputOptional, boolean outputOptional)
+    throws IOException {
     Option helpOpt = addOption(DefaultOptionCreator.helpOption());
     addOption("tempDir", null, "Intermediate output directory", "temp");
     addOption("startPhase", null, "First phase to run", "0");
@@ -388,7 +383,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    */
   public String getOption(String optionName) {
     List<String> list = argMap.get(keyFor(optionName));
-    if (list != null && list.isEmpty() == false) {
+    if (list != null && !list.isEmpty()) {
       return list.get(0);
     }
     return null;
@@ -411,7 +406,8 @@ public abstract class AbstractJob extends Configured implements Tool {
   /**
    * Options can occur multiple times, so return the list
    * @param optionName The unadorned (no "--" prefixing it) option name
-   * @return The values, else null.  If the option is present, but has no values, then the result will be an empty list (Collections.emptyList())
+   * @return The values, else null.  If the option is present, but has no values, then the result will be an
+   * empty list (Collections.emptyList())
    */
   public List<String> getOptions(String optionName) {
     return argMap.get(keyFor(optionName));
@@ -431,13 +427,14 @@ public abstract class AbstractJob extends Configured implements Tool {
    * @param matrix
    * @return the cardinality of the vector
    */
-  public int getDimensions(Path matrix) throws IOException, InstantiationException, IllegalAccessException {
+  public int getDimensions(Path matrix) throws IOException {
 
     SequenceFile.Reader reader = null;
     try {
       reader = new SequenceFile.Reader(FileSystem.get(getConf()), matrix, getConf());
 
-      Writable row = (Writable) reader.getKeyClass().newInstance();
+      Writable row = ClassUtils.instantiateAs(reader.getKeyClass().asSubclass(Writable.class), Writable.class);
+
       VectorWritable vectorWritable = new VectorWritable();
 
       Preconditions.checkArgument(reader.getValueClass().equals(VectorWritable.class),
@@ -453,7 +450,8 @@ public abstract class AbstractJob extends Configured implements Tool {
     }
   }
 
-  /** Obtain input and output directories from command-line options or hadoop
+  /**
+   * Obtain input and output directories from command-line options or hadoop
    *  properties. If {@code addInputOption} or {@code addOutputOption}
    *  has been called, this method will throw an {@code OptionException} if
    *  no source (command-line or property) for that value is present. 
@@ -461,7 +459,6 @@ public abstract class AbstractJob extends Configured implements Tool {
    *  non-null only if specified as a hadoop property. Command-line options
    *  take precedence over hadoop properties.
    *
-   * @param cmdLine
    * @throws IllegalArgumentException if either inputOption is present,
    *   and neither {@code --input} nor {@code -Dmapred.input dir} are
    *   specified or outputOption is present and neither {@code --output}
@@ -487,9 +484,9 @@ public abstract class AbstractJob extends Configured implements Tool {
       this.outputPath = new Path(conf.get("mapred.output.dir"));
     }
 
-    Preconditions.checkArgument(inputOptional == true || inputOption == null || inputPath != null,
+    Preconditions.checkArgument(inputOptional || inputOption == null || inputPath != null,
         "No input specified or -Dmapred.input.dir must be provided to specify input directory");
-    Preconditions.checkArgument(outputOptional == true || outputOption == null || outputPath != null,
+    Preconditions.checkArgument(outputOptional || outputOption == null || outputPath != null,
         "No output specified:  or -Dmapred.output.dir must be provided to specify output directory");
   }
 
@@ -498,11 +495,12 @@ public abstract class AbstractJob extends Configured implements Tool {
 
       // the option appeared on the command-line, or it has a value
       // (which is likely a default value). 
-      if (cmdLine.hasOption(o) || cmdLine.getValue(o) != null || (cmdLine.getValues(o) != null && cmdLine.getValues(o).isEmpty() == false)) {
+      if (cmdLine.hasOption(o) || cmdLine.getValue(o) != null ||
+          (cmdLine.getValues(o) != null && !cmdLine.getValues(o).isEmpty())) {
 
         // nulls are ok, for cases where options are simple flags.
-        List vo = cmdLine.getValues(o);
-        if (vo != null && vo.isEmpty() == false) {
+        List<?> vo = cmdLine.getValues(o);
+        if (vo != null && !vo.isEmpty()) {
           List<String> vals = new ArrayList<String>();
           for (Object o1 : vo) {
             vals.add(o1.toString());
@@ -523,7 +521,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    */
   public static String getOption(Map<String, List<String>> args, String optName) {
     List<String> res = args.get(optName);
-    if (res != null && res.isEmpty() == false) {
+    if (res != null && !res.isEmpty()) {
       return res.get(0);
     }
     return null;
@@ -581,8 +579,8 @@ public abstract class AbstractJob extends Configured implements Tool {
   }
 
   /**
-   * necessary to make this job (having a combined input path) work on Amazon S3, hopefully this is obsolete when MultipleInputs is available
-   * again
+   * necessary to make this job (having a combined input path) work on Amazon S3, hopefully this is
+   * obsolete when MultipleInputs is available again
    */
   public static void setS3SafeCombinedInputPath(Job job, Path referencePath, Path inputPathOne, Path inputPathTwo)
       throws IOException {

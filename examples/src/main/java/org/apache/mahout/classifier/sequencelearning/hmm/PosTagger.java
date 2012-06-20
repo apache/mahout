@@ -154,12 +154,9 @@ public final class PosTagger {
       // determine the IDs
       Integer wordID = wordIDs.get(tags[0]);
       Integer tagID = tagIDs.get(tags[1]);
-      // handle unknown values
-      wordID = wordID == null ? 0 : wordID;
-      tagID = tagID == null ? 0 : tagID;
       // now construct the current sequence
-      observedSequence.add(wordID);
-      hiddenSequence.add(tagID);
+      observedSequence.add(wordID == null ? 0 : wordID);
+      hiddenSequence.add(tagID == null ? 0 : tagID);
     }
 
     // if there is still something in the pipe, register it

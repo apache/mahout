@@ -178,13 +178,13 @@
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.8.2</version>
+        <version>4.10</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.easymock</groupId>
         <artifactId>easymock</artifactId>
-        <version>3.0</version>
+        <version>3.1</version>
         <scope>test</scope>
       </dependency>
 
@@ -356,12 +356,12 @@
       <dependency>
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-core-asl</artifactId>
-        <version>1.8.2</version>
+        <version>1.8.8</version>
       </dependency>
       <dependency>
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-mapper-asl</artifactId>
-        <version>1.8.2</version>
+        <version>1.8.8</version>
       </dependency>
 
       <dependency>
@@ -373,18 +373,18 @@
       <dependency>
         <groupId>commons-pool</groupId>
         <artifactId>commons-pool</artifactId>
-        <version>1.5.6</version>
+        <version>1.6</version>
       </dependency>
 
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
-        <version>1.6.1</version>
+        <version>1.6.6</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-jcl</artifactId>
-        <version>1.6.1</version>
+        <version>1.6.6</version>
         <scope>test</scope>
       </dependency>
       
@@ -415,13 +415,13 @@
       <dependency>
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream</artifactId>
-        <version>1.3.1</version>
+        <version>1.4.2</version>
       </dependency>
 
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>r09</version>
+        <version>12.0</version>
       </dependency>
       
       <dependency>
@@ -459,22 +459,22 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>2.8</version>
+          <version>2.8.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-antrun-plugin</artifactId>
-          <version>1.6</version>
+          <version>1.7</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
-          <version>2.2</version>
+          <version>2.3</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>2.3.1</version>
+          <version>2.4</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -484,12 +484,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
-          <version>2.4.3</version>
+          <version>2.5</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-eclipse-plugin</artifactId>
-          <version>2.8</version>
+          <version>2.9</version>
           <configuration>
             <outputDirectory>${eclipse.outputDirectory}</outputDirectory>
             <buildcommands>
@@ -529,7 +529,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
-          <version>2.1</version>
+          <version>2.3.1</version>
           <configuration>
             <useReleaseProfile>true</useReleaseProfile>
             <releaseProfiles>release,mahout_release</releaseProfiles>
@@ -542,7 +542,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.3.2</version>
+          <version>2.4</version>
           <configuration>
             <encoding>UTF-8</encoding>
             <source>1.6</source>
@@ -553,7 +553,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
-          <version>2.6</version>
+          <version>2.9.1</version>
           <dependencies>
             <dependency>
               <groupId>org.apache.mahout</groupId>
@@ -586,7 +586,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-pmd-plugin</artifactId>
-          <version>2.5</version>
+          <version>2.7.1</version>
           <dependencies>
             <dependency>
               <groupId>org.apache.mahout</groupId>
@@ -620,12 +620,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.8.1</version>
+          <version>2.12</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-remote-resources-plugin</artifactId>
-          <version>1.1</version>
+          <version>1.3</version>
           <configuration>
             <skipTests>${skipTests}</skipTests>
             <appendedResourcesDirectory>./src/main/appended-resources</appendedResourcesDirectory>
@@ -666,15 +666,14 @@
       <plugin>
         <groupId>com.atlassian.maven.plugins</groupId>
         <artifactId>maven-clover2-plugin</artifactId>
-        <version>2.6.3</version>
+        <version>3.1.4</version>
       </plugin>
     </plugins>
-
       <resources>
-          <resource>
-              <directory>src/main/resources</directory>
-              <filtering>true</filtering>
-          </resource>
+        <resource>
+          <directory>src/main/resources</directory>
+          <filtering>true</filtering>
+        </resource>
       </resources>
   </build>
   <modules>
@@ -723,6 +722,7 @@
             <inherited>true</inherited>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
+            <version>2.1.2</version>
             <executions>
               <execution>
                 <id>attach-sources</id>
@@ -736,6 +736,7 @@
             <inherited>true</inherited>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
+            <version>2.8.1</version>
             <executions>
               <execution>
                 <id>attach-javadocs</id>
@@ -749,7 +750,7 @@
             <inherited>true</inherited>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.1</version>
+            <version>1.4</version>
             <executions>
               <execution>
                 <goals>
@@ -768,6 +769,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
+            <version>2.4</version>
             <configuration>
               <showDeprecation>true</showDeprecation>
               <showWarnings>true</showWarnings>
@@ -777,10 +779,12 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-checkstyle-plugin</artifactId>
+            <version>2.9.1</version>
           </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-pmd-plugin</artifactId>
+            <version>2.7.1</version>
           </plugin>
         </plugins>
       </build>
@@ -799,7 +803,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-eclipse-plugin</artifactId>
-            <version>2.8</version>
+            <version>2.9</version>
             <executions>
               <execution>
                 <id>setup.eclipse.project</id>
@@ -831,13 +835,13 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
-        <version>2.8.1</version>
+        <version>2.12</version>
       </plugin>
       <!-- checkstyle -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>2.6</version>
+        <version>2.9.1</version>
         <configuration>
           <configLocation>${project.build.directory}/../../buildtools/src/main/resources/mahout-checkstyle.xml</configLocation>
           <consoleOutput>true</consoleOutput>
@@ -847,7 +851,7 @@
       <plugin>
         <groupId>com.atlassian.maven.plugins</groupId>
         <artifactId>maven-clover2-plugin</artifactId>
-        <version>2.6.3</version>
+        <version>3.1.4</version>
         <configuration>
           <generateHistorical>true</generateHistorical>
           <licenseLocation>buildtools/clover.license</licenseLocation>
@@ -860,13 +864,13 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.7</version>
+        <version>2.8.1</version>
       </plugin>
       <!-- code duplication - copy and paste detection -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-pmd-plugin</artifactId>
-        <version>2.5</version>
+        <version>2.7.1</version>
         <configuration>
           <rulesets>
             <ruleset>../buildtools/src/main/resources/mahout-pmd-ruleset.xml</ruleset>
@@ -894,7 +898,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
-        <version>2.3.1</version>
+        <version>2.5</version>
         <configuration>
           <xmlOutput>true</xmlOutput>
           <xmlOutputDirectory>target/findbugs</xmlOutputDirectory>
@@ -911,7 +915,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-changes-plugin</artifactId>
-        <version>2.4</version>
+        <version>2.7.1</version>
         <configuration>
           <onlyCurrentVersion>true</onlyCurrentVersion>
           <columnNames>Type,Key,Summary,Status,Resolution,Assignee</columnNames>
@@ -928,17 +932,17 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
-        <version>2.6</version>
+        <version>2.12</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.8</version>
+        <version>2.8.1</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>2.3.1</version>
+        <version>2.4</version>
         <reportSets>
           <reportSet>
             <reports>
@@ -953,7 +957,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-pmd-plugin</artifactId>
-        <version>2.5</version>
+        <version>2.7.1</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>

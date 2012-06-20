@@ -31,6 +31,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
@@ -44,15 +45,18 @@ import com.google.common.io.Closeables;
  * DistributedRowMatrix. This job can be accessed using
  * DistributedRowMatrix.columnMeans()
  */
-public class MatrixColumnMeansJob {
+public final class MatrixColumnMeansJob {
 
   public static final String VECTOR_CLASS =
     "DistributedRowMatrix.columnMeans.vector.class";
 
+  private MatrixColumnMeansJob() {
+  }
+
   public static Vector run(Configuration conf,
                            Path inputPath,
                            Path outputVectorTmpPath) throws IOException {
-    return run(conf, inputPath, outputVectorTmpPath);
+    return run(conf, inputPath, outputVectorTmpPath, VECTOR_CLASS);
   }
 
   /**
@@ -61,7 +65,7 @@ public class MatrixColumnMeansJob {
    * @param initialConf
    * @param inputPath
    *          path to DistributedRowMatrix input
-   * @param tmpPath
+   * @param outputVectorTmpPath
    *          path for temporary files created during job
    * @param vectorClass
    *          String of desired class for returned vector e.g. DenseVector,
@@ -116,10 +120,11 @@ public class MatrixColumnMeansJob {
         Closeables.closeQuietly(iterator);
       }
     } catch (Throwable thr) {
-      if (thr instanceof IOException)
+      if (thr instanceof IOException) {
         throw (IOException) thr;
-      else
+      } else {
         throw new IOException(thr);
+      }
     }
   }
 
@@ -129,8 +134,8 @@ public class MatrixColumnMeansJob {
   public static class MatrixColumnMeansMapper extends
       Mapper<IntWritable, VectorWritable, NullWritable, VectorWritable> {
 
-    private Vector runningSum = null;
-    private String vectorClass = null;
+    private Vector runningSum;
+    private String vectorClass;
 
     @Override
     public void setup(Context context) {
@@ -147,17 +152,14 @@ public class MatrixColumnMeansJob {
     public void map(IntWritable r, VectorWritable v, Context context)
       throws IOException {
       if (runningSum == null) {
-        try {
           /*
            * If this is the first vector the mapper has seen, instantiate a new
            * vector using the parameter VECTOR_CLASS
            */
-          runningSum =
-            (Vector) Class.forName(vectorClass).getConstructor(int.class)
-                          .newInstance(v.get().size() + 1);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
+        runningSum = ClassUtils.instantiateAs(vectorClass,
+                                              Vector.class,
+                                              new Class<?>[] { int.class },
+                                              new Object[] { v.get().size() + 1 });
         runningSum.set(0, 1);
         runningSum.viewPart(1, v.get().size()).assign(v.get());
       } else {
@@ -188,9 +190,10 @@ public class MatrixColumnMeansJob {
   public static class MatrixColumnMeansReducer extends
       Reducer<NullWritable, VectorWritable, IntWritable, VectorWritable> {
 
-    private static final IntWritable one = new IntWritable(1);
-    private String vectorClass = null;
-    Vector outputVector = null;
+    private static final IntWritable ONE = new IntWritable(1);
+
+    private String vectorClass;
+    Vector outputVector;
     VectorWritable outputVectorWritable = new VectorWritable();
 
     @Override
@@ -201,8 +204,7 @@ public class MatrixColumnMeansJob {
     @Override
     public void reduce(NullWritable n,
                        Iterable<VectorWritable> vectors,
-                       Context context) throws IOException,
-      InterruptedException {
+                       Context context) throws IOException, InterruptedException {
 
       /**
        * Add together partial column-wise sums from mappers
@@ -223,16 +225,13 @@ public class MatrixColumnMeansJob {
         outputVectorWritable.set(outputVector.viewPart(1,
                                                        outputVector.size() - 1)
                                              .divide(outputVector.get(0)));
-        context.write(one, outputVectorWritable);
+        context.write(ONE, outputVectorWritable);
       } else {
-        try {
-          Vector emptyVector =
-            (Vector) Class.forName(vectorClass).getConstructor(int.class)
-                          .newInstance(0);
-          context.write(one, new VectorWritable(emptyVector));
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
+        Vector emptyVector = ClassUtils.instantiateAs(vectorClass,
+                                                      Vector.class,
+                                                      new Class<?>[] { int.class },
+                                                      new Object[] { 0 });
+        context.write(ONE, new VectorWritable(emptyVector));
       }
     }
   }

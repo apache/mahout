@@ -66,7 +66,7 @@ public final class GenericRelevantItemsDataSplitter implements RelevantItemsData
       for (Preference pref : prefs2Array) {
         prefs2.add(pref);
       }
-      for (Iterator<Preference> iterator = prefs2.iterator(); iterator.hasNext(); ) {
+      for (Iterator<Preference> iterator = prefs2.iterator(); iterator.hasNext();) {
         Preference pref = iterator.next();
         if (relevantItemIDs.contains(pref.getItemID())) {
           iterator.remove();

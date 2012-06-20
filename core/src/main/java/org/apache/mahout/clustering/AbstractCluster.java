@@ -130,6 +130,7 @@ public abstract class AbstractCluster implements Cluster {
     this.id = id;
   }
   
+  @Override
   public long getNumObservations() {
     return numObservations;
   }
@@ -142,6 +143,7 @@ public abstract class AbstractCluster implements Cluster {
     this.numObservations = l;
   }
   
+  @Override
   public long getTotalObservations() {
     return totalObservations;
   }

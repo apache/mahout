@@ -73,9 +73,9 @@ public class DenseBlockWritable implements Writable {
 
     out.writeInt(m);
     out.writeInt(n);
-    for (int i = 0; i < m; i++) {
+    for (double[] aBlock : block) {
       for (int j = 0; j < n; j++) {
-        out.writeDouble(block[i][j]);
+        out.writeDouble(aBlock[j]);
       }
     }
   }

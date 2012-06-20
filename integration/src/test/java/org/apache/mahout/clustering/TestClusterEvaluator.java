@@ -114,7 +114,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     generateSamples(300, 0, 2, 0.1);
   }
   
-  private void printRepPoints(int numIterations) throws IOException {
+  private void printRepPoints(int numIterations) {
     RepresentativePointsDriver.printRepresentativePoints(output, numIterations);
   }
   

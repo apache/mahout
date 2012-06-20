@@ -175,9 +175,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
   
   public V put(long key, V value) {
     Preconditions.checkArgument(key != NULL && key != REMOVED);
-    if (value == null) {
-      throw new NullPointerException();
-    }
+    Preconditions.checkNotNull(value);
     // If less than half the slots are open, let's clear it up
     if (numSlotsUsed * loadFactor >= keys.length) {
       // If over half the slots used are actual entries, let's grow

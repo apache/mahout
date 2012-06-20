@@ -33,22 +33,22 @@ import org.apache.mahout.math.map.OpenIntObjectHashMap;
 public class FPTree {
 
   private final AttrComparator attrComparator = new AttrComparator();
-  private FPNode root;
-  private long minSupport;
-  private LongArrayList attrCountList;
-  private OpenIntObjectHashMap attrNodeLists; 
+  private final FPNode root;
+  private final long minSupport;
+  private final LongArrayList attrCountList;
+  private final OpenIntObjectHashMap<List<FPNode>> attrNodeLists;
 
   public static final class FPNode {
-    private FPNode parent;
-    private OpenIntObjectHashMap childMap;
-    private int attribute;
+    private final FPNode parent;
+    private final OpenIntObjectHashMap<FPNode> childMap;
+    private final int attribute;
     private long count;
 
     private FPNode(FPNode parent, int attribute, long count) {
       this.parent = parent;
       this.attribute = attribute;
       this.count = count;
-      this.childMap = new OpenIntObjectHashMap();
+      this.childMap = new OpenIntObjectHashMap<FPNode>();
     }
 
     private void addChild(FPNode child) {
@@ -68,7 +68,7 @@ public class FPTree {
     }
 
     public FPNode child(int attribute) {
-      return (FPNode) childMap.get(attribute);
+      return childMap.get(attribute);
     }
 
     public int attribute() {
@@ -76,7 +76,7 @@ public class FPTree {
     }
 
     public void accumulate(long incr) {
-      count = count + incr;
+      count += incr;
     }
 
     public long count() {
@@ -94,7 +94,7 @@ public class FPTree {
   public FPTree(LongArrayList attrCountList, long minSupport) {
     this.root = new FPNode(null, -1, 0);
     this.attrCountList = attrCountList;
-    this.attrNodeLists = new OpenIntObjectHashMap();
+    this.attrNodeLists = new OpenIntObjectHashMap<List<FPNode>>();
     this.minSupport = minSupport;
   }
 
@@ -107,14 +107,15 @@ public class FPTree {
   public FPTree(long[] attrCounts, long minSupport) {
     this.root = new FPNode(null, -1, 0);
     this.attrCountList = new LongArrayList();
-    for (int i = 0; i < attrCounts.length; i++) 
+    for (int i = 0; i < attrCounts.length; i++) {
       if (attrCounts[i] > 0) {
         if (attrCountList.size() < (i + 1)) {
           attrCountList.setSize(i + 1);
         }
         attrCountList.set(i, attrCounts[i]);
       }
-    this.attrNodeLists = new OpenIntObjectHashMap();
+    }
+    this.attrNodeLists = new OpenIntObjectHashMap<List<FPNode>>();
     this.minSupport = minSupport;
   }
 
@@ -145,13 +146,14 @@ public class FPTree {
     Collections.sort(items, attrComparator);
     
     FPNode currNode = root;
-    for (int i = 0; i < items.size(); i++) {
-      int item = items.get(i);
+    for (Integer item : items) {
       long attrCount = 0;
-      if (item < attrCountList.size())
+      if (item < attrCountList.size()) {
         attrCount = attrCountList.get(item);
-      if (attrCount < minSupport)
+      }
+      if (attrCount < minSupport) {
         continue;
+      }
 
       FPNode next = currNode.child(item);
       if (next == null) {
@@ -179,17 +181,17 @@ public class FPTree {
     Collections.sort(items, attrComparator);
     
     FPNode currNode = root;
-    for (int i = 0; i < items.size(); i++) {
-      int item = items.get(i);
+    for (Integer item : items) {
       long attrCount = attrCountList.get(item);
-      if (attrCount < minSupport)
+      if (attrCount < minSupport) {
         continue;
+      }
 
       FPNode next = currNode.child(item);
       if (next == null) {
         next = new FPNode(currNode, item, count);
         currNode.addChild(next);
-        List<FPNode> nodeList = (List<FPNode>) attrNodeLists.get(item);
+        List<FPNode> nodeList = attrNodeLists.get(item);
         if (nodeList == null) {
           nodeList = Lists.newArrayList();
           attrNodeLists.put(item, nodeList);
@@ -210,8 +212,9 @@ public class FPTree {
   public Iterable<Integer> attrIterable() {
     List<Integer> attrs = Lists.newArrayList();
     for (int i = 0; i < attrCountList.size(); i++) {
-      if (attrCountList.get(i) > 0)
+      if (attrCountList.get(i) > 0) {
         attrs.add(i);
+      }
     }
     Collections.sort(attrs, attrComparator);
     return attrs;
@@ -224,8 +227,9 @@ public class FPTree {
   public Iterable<Integer> attrIterableRev() {
     List<Integer> attrs = Lists.newArrayList();
     for (int i = 0; i < attrCountList.size(); i++) {
-      if (attrCountList.get(i) > 0)
+      if (attrCountList.get(i) > 0) {
         attrs.add(i);
+      }
     }
     Collections.sort(attrs, Collections.reverseOrder(attrComparator));
     return attrs;
@@ -237,7 +241,7 @@ public class FPTree {
    */
   public FPTree createMoreFreqConditionalTree(int targetAttr) {
     LongArrayList counts = new LongArrayList();
-    List<FPNode> nodeList = (List<FPNode>) attrNodeLists.get(targetAttr);
+    List<FPNode> nodeList = attrNodeLists.get(targetAttr);
 
     for (FPNode currNode : nodeList) {
       long pathCount = currNode.count();
@@ -251,21 +255,23 @@ public class FPTree {
         currNode = currNode.parent();
       }
     }
-    if (counts.get(targetAttr) != attrCountList.get(targetAttr))
+    if (counts.get(targetAttr) != attrCountList.get(targetAttr)) {
       throw new IllegalStateException("mismatched counts for targetAttr="
-                                      + targetAttr + ", (" + counts.get(targetAttr)
-                                      + " != " + attrCountList.get(targetAttr) + "); "
-                                      + "thisTree=" + this + "\n");
+                                          + targetAttr + ", (" + counts.get(targetAttr)
+                                          + " != " + attrCountList.get(targetAttr) + "); "
+                                          + "thisTree=" + this + '\n');
+    }
     counts.set(targetAttr, 0L);
 
     FPTree toRet = new FPTree(counts, minSupport);
     IntArrayList attrLst = new IntArrayList();
-    for (FPNode currNode : (List<FPNode>) attrNodeLists.get(targetAttr)) {
+    for (FPNode currNode : attrNodeLists.get(targetAttr)) {
       long count = currNode.count();
       attrLst.clear();
       while (currNode != root) {
-        if (currNode.count() < count) 
+        if (currNode.count() < count) {
           throw new IllegalStateException();
+        }
         attrLst.add(currNode.attribute());
         currNode = currNode.parent();
       }
@@ -277,16 +283,20 @@ public class FPTree {
 
   // biggest count or smallest attr number goes first
   private class AttrComparator implements Comparator<Integer> {
+    @Override
     public int compare(Integer a, Integer b) {
 
       long aCnt = 0;
-      if (a < attrCountList.size())
+      if (a < attrCountList.size()) {
         aCnt = attrCountList.get(a);
+      }
       long bCnt = 0;
-      if (b < attrCountList.size())
+      if (b < attrCountList.size()) {
         bCnt = attrCountList.get(b);
-      if (aCnt == bCnt)
+      }
+      if (aCnt == bCnt) {
         return a - b;
+      }
       return (bCnt - aCnt) < 0 ? -1 : 1;
     }
   }
@@ -305,8 +315,9 @@ public class FPTree {
     FPNode currNode = root;
     while (currNode.numChildren() == 1) {
       currNode = currNode.children().iterator().next();
-      if (pAttrCountList.size() <= currNode.attribute())
+      if (pAttrCountList.size() <= currNode.attribute()) {
         pAttrCountList.setSize(currNode.attribute() + 1);
+      }
       pAttrCountList.set(currNode.attribute(), currNode.count());
       qAttrCountList.set(currNode.attribute(), 0);
     }
@@ -320,17 +331,18 @@ public class FPTree {
 
   private long recursivelyAddPrefixPats(FPTree pTree, FPTree qTree, FPNode node,
                                         IntArrayList items) {
-    long added = 0;
     long count = node.count();
     int attribute = node.attribute();
     if (items == null) {
       // at root
-      if (!(node == root))
+      if (!(node == root)) {
         throw new IllegalStateException();
+      }
       items = new IntArrayList();
     } else {
       items.add(attribute);
     }
+    long added = 0;
     for (FPNode child : node.children()) {
       added += recursivelyAddPrefixPats(pTree, qTree, child, items);
     }
@@ -350,7 +362,7 @@ public class FPTree {
     return added;
   }
 
-  private void toStringHelper(StringBuilder sb, FPNode currNode, String prefix) {
+  private static void toStringHelper(StringBuilder sb, FPNode currNode, String prefix) {
     if (currNode.numChildren() == 0) {
       sb.append(prefix).append("-{attr:").append(currNode.attribute())
         .append(", cnt:").append(currNode.count()).append("}\n");
@@ -363,15 +375,17 @@ public class FPTree {
         fakePre.append(' ');
       }
       int i = 0;
-      for (FPNode child : currNode.children()) 
+      for (FPNode child : currNode.children()) {
         toStringHelper(sb, child, (i++ == 0 ? newPre : fakePre).toString() + '-' + i + "->");
+      }
     }
   }
 
+  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder("[FPTree\n");
     toStringHelper(sb, root, "  ");
-    sb.append("]");
+    sb.append(']');
     return sb.toString();
   }
 

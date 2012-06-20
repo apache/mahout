@@ -116,7 +116,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
     Wrapper w = new Wrapper(numCategories, numFeatures, prior);
     seed.setPayload(w);
 
-    w.setMappings(seed);
+    Wrapper.setMappings(seed);
     seed.setPayload(w);
     setPoolSize(this.poolSize);
   }
@@ -180,7 +180,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
         // mutation rates small and also hack their learning rate to be small
         // as well.
         for (State<Wrapper, CrossFoldLearner> state : ep.getPopulation().subList(0, SURVIVORS)) {
-          state.getPayload().freeze(state);
+          Wrapper.freeze(state);
         }
       }
     }
@@ -411,7 +411,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
       wrapped.decayExponent(0);
     }
 
-    public void freeze(State<Wrapper, CrossFoldLearner> s) {
+    public static void freeze(State<Wrapper, CrossFoldLearner> s) {
       // radically decrease learning rate
       s.getParams()[1] -= 10;
 
@@ -423,7 +423,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
       }
     }
 
-    public void setMappings(State<Wrapper, CrossFoldLearner> x) {
+    public static void setMappings(State<Wrapper, CrossFoldLearner> x) {
       int i = 0;
       // set the range for regularization (lambda)
       x.setMap(i++, Mapping.logLimit(1.0e-8, 0.1));

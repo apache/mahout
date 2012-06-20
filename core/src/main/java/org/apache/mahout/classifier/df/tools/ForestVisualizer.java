@@ -17,7 +17,10 @@
 
 package org.apache.mahout.classifier.df.tools;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.cli2.CommandLine;
@@ -46,17 +49,25 @@ public final class ForestVisualizer {
   private ForestVisualizer() {
   }
 
-  public static String toString(DecisionForest forest, Dataset dataset, String[] attrNames)
-    throws Exception {
-    Method getTrees = forest.getClass().getDeclaredMethod("getTrees");
-    getTrees.setAccessible(true);
-    @SuppressWarnings("unchecked")
-    List<Node> trees = (List<Node>) getTrees.invoke(forest);
-    
+  public static String toString(DecisionForest forest, Dataset dataset, String[] attrNames) {
+
+    List<Node> trees;
+    try {
+      Method getTrees = forest.getClass().getDeclaredMethod("getTrees");
+      getTrees.setAccessible(true);
+      trees = (List<Node>) getTrees.invoke(forest);
+    } catch (IllegalAccessException e) {
+      throw new IllegalStateException(e);
+    } catch (InvocationTargetException e) {
+      throw new IllegalStateException(e);
+    } catch (NoSuchMethodException e) {
+      throw new IllegalStateException(e);
+    }
+
     int cnt = 1;
     StringBuilder buff = new StringBuilder();
     for (Node tree : trees) {
-      buff.append("Tree[" + cnt + "]:");
+      buff.append("Tree[").append(cnt).append("]:");
       buff.append(TreeVisualizer.toString(tree, dataset, attrNames));
       buff.append('\n');
       cnt++;
@@ -73,8 +84,7 @@ public final class ForestVisualizer {
    * @param attrNames
    *          attribute names
    */
-  public static String toString(String forestPath, String datasetPath, String[] attrNames)
-    throws Exception {
+  public static String toString(String forestPath, String datasetPath, String[] attrNames) throws IOException {
     Configuration conf = new Configuration();
     DecisionForest forest = DecisionForest.load(conf, new Path(forestPath));
     Dataset dataset = Dataset.load(conf, new Path(datasetPath));
@@ -90,8 +100,7 @@ public final class ForestVisualizer {
    * @param attrNames
    *          attribute names
    */
-  public static void print(String forestPath, String datasetPath, String[] attrNames)
-    throws Exception {
+  public static void print(String forestPath, String datasetPath, String[] attrNames) throws IOException {
     System.out.println(toString(forestPath, datasetPath, attrNames));
   }
   
@@ -132,7 +141,7 @@ public final class ForestVisualizer {
       String modelName = cmdLine.getValue(modelOpt).toString();
       String[] attrNames = null;
       if (cmdLine.hasOption(attrNamesOpt)) {
-        List<String> names = (List<String>) cmdLine.getValues(attrNamesOpt);
+        Collection<String> names = (Collection<String>) cmdLine.getValues(attrNamesOpt);
         if (!names.isEmpty()) {
           attrNames = new String[names.size()];
           names.toArray(attrNames);

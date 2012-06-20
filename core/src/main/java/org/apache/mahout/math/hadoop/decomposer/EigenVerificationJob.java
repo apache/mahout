@@ -30,7 +30,6 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.MatrixSlice;
-import org.apache.mahout.math.OrthonormalityVerifier;
 import org.apache.mahout.math.SparseRowMatrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorIterable;
@@ -180,10 +179,6 @@ public class EigenVerificationJob extends AbstractJob {
     addOption("maxEigens", "max", "Maximum number of eigenvectors to keep (0 means all)", "0");
 
     return parseArguments(args);
-  }
-
-  private VectorIterable computePairwiseInnerProducts() {
-    return OrthonormalityVerifier.pairwiseInnerProducts(eigensToVerify);
   }
 
   private void saveCleanEigens(Configuration conf, Collection<Map.Entry<MatrixSlice, EigenStatus>> prunedEigenMeta)

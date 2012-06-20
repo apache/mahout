@@ -103,15 +103,15 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
       int j = 0;
       double value = 0.0;
       for (long jitem : itemNeighborhood) {
-      if (jitem == -1) {
-        continue;
-      }
-      for (long user : usersRatedNeighborhood) {
-        float prefVJ = dataModel.getPreferenceValue(user, iitem);
-        float prefVK = dataModel.getPreferenceValue(user, jitem);
+        if (jitem == -1) {
+          continue;
+        }
+        for (long user : usersRatedNeighborhood) {
+          float prefVJ = dataModel.getPreferenceValue(user, iitem);
+          float prefVK = dataModel.getPreferenceValue(user, jitem);
           value += prefVJ * prefVK;
         }
-        aMatrix[i][j] = value/numUsers;
+        aMatrix[i][j] = value / numUsers;
         j++;
       }
       i++;

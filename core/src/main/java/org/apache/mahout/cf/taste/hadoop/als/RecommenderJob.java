@@ -93,8 +93,9 @@ public class RecommenderJob extends AbstractJob {
     prediction.getConfiguration().set(ITEM_FEATURES_PATH, getOption("itemFeatures"));
     prediction.getConfiguration().set(MAX_RATING, getOption("maxRating"));
     boolean succeeded = prediction.waitForCompletion(true);
-    if (!succeeded)
+    if (!succeeded) {
       return -1;
+    }
 
 
     return 0;

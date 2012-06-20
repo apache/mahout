@@ -177,6 +177,7 @@ public class ObjectArrayList<T> extends AbstractObjectList<T> {
    * @param otherObj the Object to be compared for equality with the receiver.
    * @return true if the specified Object is equal to the receiver.
    */
+  @Override
   @SuppressWarnings("unchecked")
   public boolean equals(Object otherObj) { //delta
     // overridden for performance only.

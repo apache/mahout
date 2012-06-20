@@ -17,13 +17,7 @@
 
 package org.apache.mahout.classifier.df.mapreduce.partial;
 
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.capture;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-
+import static org.easymock.EasyMock.*;
 import java.util.Random;
 
 import org.apache.hadoop.io.LongWritable;
@@ -35,7 +29,6 @@ import org.apache.mahout.classifier.df.data.Data;
 import org.apache.mahout.classifier.df.data.DataLoader;
 import org.apache.mahout.classifier.df.data.Dataset;
 import org.apache.mahout.classifier.df.data.Utils;
-import org.apache.mahout.classifier.df.mapreduce.MapredOutput;
 import org.apache.mahout.classifier.df.node.Leaf;
 import org.apache.mahout.classifier.df.node.Node;
 import org.apache.mahout.common.MahoutTestCase;
@@ -82,10 +75,11 @@ public final class Step1MapperTest extends MahoutTestCase {
 
   private static class TreeIDCapture extends Capture<TreeID> {
 
-    public TreeIDCapture() {
+    private TreeIDCapture() {
       super(CaptureType.ALL);
     }
 
+    @Override
     public void setValue(final TreeID value) {
       super.setValue(value.clone());
     }

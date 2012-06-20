@@ -275,9 +275,9 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
     if (userIDs2 == null) {
       return 0;
     }
-    return userIDs1.size() < userIDs2.size() ?
-        userIDs2.intersectionSize(userIDs1) :
-        userIDs1.intersectionSize(userIDs2);
+    return userIDs1.size() < userIDs2.size()
+        ? userIDs2.intersectionSize(userIDs1)
+        : userIDs1.intersectionSize(userIDs2);
   }
   
   @Override

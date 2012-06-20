@@ -21,7 +21,6 @@
 
 package org.apache.mahout.math.solver;
 
-
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
@@ -41,23 +40,15 @@ import org.apache.mahout.math.function.Functions;
  * A.times(V) equals V.times(D).  The matrix V may be badly conditioned, or even singular, so the
  * validity of the equation A = V*D*inverse(V) depends upon V.cond().
  */
-
 public class EigenDecomposition {
-  /**
-   * Row and column dimension (square matrix).
-   */
-  private int n;
 
-  /**
-   * Arrays for internal storage of eigenvalues.
-   */
-  private Vector d;
-  private Vector e;
-
-  /**
-   * Array for internal storage of eigenvectors.
-   */
-  private Matrix v;
+  /** Row and column dimension (square matrix). */
+  private final int n;
+  /** Arrays for internal storage of eigenvalues. */
+  private final Vector d;
+  private final Vector e;
+  /** Array for internal storage of eigenvectors. */
+  private final Matrix v;
 
   public EigenDecomposition(Matrix x) {
     this(x, isSymmetric(x));
@@ -118,7 +109,7 @@ public class EigenDecomposition {
     x.assign(0);
     x.viewDiagonal().assign(d);
     for (int i = 0; i < n; i++) {
-      final double v = e.getQuick(i);
+      double v = e.getQuick(i);
       if (v > 0) {
         x.setQuick(i, i + 1, v);
       } else if (v < 0) {
@@ -168,7 +159,7 @@ public class EigenDecomposition {
           g = -g;
         }
         e.setQuick(i, scale * g);
-        h = h - f * g;
+        h -= f * g;
         d.setQuick(i - 1, f - g);
         for (int j = 0; j < i; j++) {
           e.setQuick(j, 0.0);
@@ -271,7 +262,7 @@ public class EigenDecomposition {
       if (m > l) {
         int iter = 0;
         do {
-          iter = iter + 1;  // (Could check iteration count here.)
+          iter++;  // (Could check iteration count here.)
 
           // Compute implicit shift
 
@@ -288,7 +279,7 @@ public class EigenDecomposition {
           for (int i = l + 2; i < n; i++) {
             d.setQuick(i, d.getQuick(i) - h);
           }
-          f = f + h;
+          f += h;
 
           // Implicit QL transformation.
 
@@ -373,7 +364,7 @@ public class EigenDecomposition {
 
       // Scale column.
 
-      final Vector hColumn = hessenBerg.viewColumn(m - 1).viewPart(m, high - m + 1);
+      Vector hColumn = hessenBerg.viewColumn(m - 1).viewPart(m, high - m + 1);
       double scale = hColumn.norm(1);
 
       if (scale != 0.0) {
@@ -386,7 +377,7 @@ public class EigenDecomposition {
         if (ort.getQuick(m) > 0) {
           g = -g;
         }
-        h = h - ort.getQuick(m) * g;
+        h -= ort.getQuick(m) * g;
         ort.setQuick(m, ort.getQuick(m) - g);
 
         // Apply Householder similarity transformation
@@ -418,7 +409,7 @@ public class EigenDecomposition {
         for (int j = m; j <= high; j++) {
           double g = ort.viewPart(m, high - m + 1).dot(v.viewColumn(j).viewPart(m, high - m + 1));
           // Double division avoids possible underflow
-          g = (g / ort.getQuick(m)) / hessenBerg.getQuick(m, m - 1);
+          g = g / ort.getQuick(m) / hessenBerg.getQuick(m, m - 1);
           v.viewColumn(j).viewPart(m, high - m + 1).assign(ort.viewPart(m, high - m + 1), Functions.plusMult(g));
         }
       }
@@ -428,8 +419,8 @@ public class EigenDecomposition {
 
 
   // Complex scalar division.
-  private transient double cdivr;
-  private transient double cdivi;
+  private double cdivr;
+  private double cdivi;
 
   private void cdiv(double xr, double xi, double yr, double yi) {
     double r;
@@ -459,13 +450,20 @@ public class EigenDecomposition {
 
     // Initialize
 
-    final int nn = this.n;
+    int nn = this.n;
     int n = nn - 1;
-    final int low = 0;
-    final int high = nn - 1;
+    int low = 0;
+    int high = nn - 1;
     double eps = Math.pow(2.0, -52.0);
     double exshift = 0.0;
-    double p = 0, q = 0, r = 0, s = 0, z = 0, t, w, x, y;
+    double p = 0;
+    double q = 0;
+    double r = 0;
+    double s = 0;
+    double z = 0;
+    double w;
+    double x;
+    double y;
 
     // Store roots isolated by balanc and compute matrix norm
 
@@ -530,8 +528,8 @@ public class EigenDecomposition {
           p = x / s;
           q = z / s;
           r = Math.sqrt(p * p + q * q);
-          p = p / r;
-          q = q / r;
+          p /= r;
+          q /= r;
 
           // Row modification
 
@@ -565,7 +563,7 @@ public class EigenDecomposition {
           e.setQuick(n - 1, z);
           e.setQuick(n, -z);
         }
-        n = n - 2;
+        n -= 2;
         iter = 0;
 
         // No convergence yet
@@ -613,7 +611,7 @@ public class EigenDecomposition {
           }
         }
 
-        iter = iter + 1;   // (Could check iteration count here.)
+        iter++;   // (Could check iteration count here.)
 
         // Look for two consecutive small sub-diagonal elements
 
@@ -626,14 +624,14 @@ public class EigenDecomposition {
           q = h.getQuick(m + 1, m + 1) - z - r - s;
           r = h.getQuick(m + 2, m + 1);
           s = Math.abs(p) + Math.abs(q) + Math.abs(r);
-          p = p / s;
-          q = q / s;
-          r = r / s;
+          p /= s;
+          q /= s;
+          r /= s;
           if (m == l) {
             break;
           }
-          final double hmag = Math.abs(h.getQuick(m - 1, m - 1)) + Math.abs(h.getQuick(m + 1, m + 1));
-          final double threshold = eps * Math.abs(p) * (Math.abs(z) + hmag);
+          double hmag = Math.abs(h.getQuick(m - 1, m - 1)) + Math.abs(h.getQuick(m + 1, m + 1));
+          double threshold = eps * Math.abs(p) * (Math.abs(z) + hmag);
           if (Math.abs(h.getQuick(m, m - 1)) * (Math.abs(q) + Math.abs(r)) < threshold) {
             break;
           }
@@ -657,9 +655,9 @@ public class EigenDecomposition {
             r = notlast ? h.getQuick(k + 2, k - 1) : 0.0;
             x = Math.abs(p) + Math.abs(q) + Math.abs(r);
             if (x != 0.0) {
-              p = p / x;
-              q = q / x;
-              r = r / x;
+              p /= x;
+              q /= x;
+              r /= x;
             }
           }
           if (x == 0.0) {
@@ -675,19 +673,19 @@ public class EigenDecomposition {
             } else if (l != m) {
               h.setQuick(k, k - 1, -h.getQuick(k, k - 1));
             }
-            p = p + s;
+            p += s;
             x = p / s;
             y = q / s;
             z = r / s;
-            q = q / p;
-            r = r / p;
+            q /= p;
+            r /= p;
 
             // Row modification
 
             for (int j = k; j < nn; j++) {
               p = h.getQuick(k, j) + q * h.getQuick(k + 1, j);
               if (notlast) {
-                p = p + r * h.getQuick(k + 2, j);
+                p += r * h.getQuick(k + 2, j);
                 h.setQuick(k + 2, j, h.getQuick(k + 2, j) - p * z);
               }
               h.setQuick(k, j, h.getQuick(k, j) - p * x);
@@ -699,7 +697,7 @@ public class EigenDecomposition {
             for (int i = 0; i <= Math.min(n, k + 3); i++) {
               p = x * h.getQuick(i, k) + y * h.getQuick(i, k + 1);
               if (notlast) {
-                p = p + z * h.getQuick(i, k + 2);
+                p += z * h.getQuick(i, k + 2);
                 h.setQuick(i, k + 2, h.getQuick(i, k + 2) - p * r);
               }
               h.setQuick(i, k, h.getQuick(i, k) - p);
@@ -711,7 +709,7 @@ public class EigenDecomposition {
             for (int i = low; i <= high; i++) {
               p = x * v.getQuick(i, k) + y * v.getQuick(i, k + 1);
               if (notlast) {
-                p = p + z * v.getQuick(i, k + 2);
+                p += z * v.getQuick(i, k + 2);
                 v.setQuick(i, k + 2, v.getQuick(i, k + 2) - p * r);
               }
               v.setQuick(i, k, v.getQuick(i, k) - p);
@@ -734,6 +732,7 @@ public class EigenDecomposition {
 
       // Real vector
 
+      double t;
       if (q == 0) {
         int l = n;
         h.setQuick(n, n, 1.0);
@@ -741,7 +740,7 @@ public class EigenDecomposition {
           w = h.getQuick(i, i) - p;
           r = 0.0;
           for (int j = l; j <= n; j++) {
-            r = r + h.getQuick(i, j) * h.getQuick(j, n);
+            r += h.getQuick(i, j) * h.getQuick(j, n);
           }
           if (e.getQuick(i) < 0.0) {
             z = w;
@@ -749,10 +748,10 @@ public class EigenDecomposition {
           } else {
             l = i;
             if (e.getQuick(i) == 0.0) {
-              if (w != 0.0) {
-                h.setQuick(i, n, -r / w);
-              } else {
+              if (w == 0.0) {
                 h.setQuick(i, n, -r / (eps * norm));
+              } else {
+                h.setQuick(i, n, -r / w);
               }
 
               // Solve real equations
@@ -773,7 +772,7 @@ public class EigenDecomposition {
             // Overflow control
 
             t = Math.abs(h.getQuick(i, n));
-            if ((eps * t) * t > 1) {
+            if (eps * t * t > 1) {
               for (int j = i; j <= n; j++) {
                 h.setQuick(j, n, h.getQuick(j, n) / t);
               }
@@ -799,12 +798,11 @@ public class EigenDecomposition {
         h.setQuick(n, n - 1, 0.0);
         h.setQuick(n, n, 1.0);
         for (int i = n - 2; i >= 0; i--) {
-          double ra, sa, vr, vi;
-          ra = 0.0;
-          sa = 0.0;
+          double ra = 0.0;
+          double sa = 0.0;
           for (int j = l; j <= n; j++) {
-            ra = ra + h.getQuick(i, j) * h.getQuick(j, n - 1);
-            sa = sa + h.getQuick(i, j) * h.getQuick(j, n);
+            ra += h.getQuick(i, j) * h.getQuick(j, n - 1);
+            sa += h.getQuick(i, j) * h.getQuick(j, n);
           }
           w = h.getQuick(i, i) - p;
 
@@ -824,10 +822,10 @@ public class EigenDecomposition {
 
               x = h.getQuick(i, i + 1);
               y = h.getQuick(i + 1, i);
-              vr = (d.getQuick(i) - p) * (d.getQuick(i) - p) + e.getQuick(i) * e.getQuick(i) - q * q;
-              vi = (d.getQuick(i) - p) * 2.0 * q;
-              if (vr == 0.0 & vi == 0.0) {
-                final double hmag = Math.abs(x) + Math.abs(y);
+              double vr = (d.getQuick(i) - p) * (d.getQuick(i) - p) + e.getQuick(i) * e.getQuick(i) - q * q;
+              double vi = (d.getQuick(i) - p) * 2.0 * q;
+              if (vr == 0.0 && vi == 0.0) {
+                double hmag = Math.abs(x) + Math.abs(y);
                 vr = eps * norm * (Math.abs(w) + Math.abs(q) + hmag + Math.abs(z));
               }
               cdiv(x * r - z * ra + q * sa, x * s - z * sa - q * ra, vr, vi);
@@ -846,7 +844,7 @@ public class EigenDecomposition {
             // Overflow control
 
             t = Math.max(Math.abs(h.getQuick(i, n - 1)), Math.abs(h.getQuick(i, n)));
-            if ((eps * t) * t > 1) {
+            if (eps * t * t > 1) {
               for (int j = i; j <= n; j++) {
                 h.setQuick(j, n - 1, h.getQuick(j, n - 1) / t);
                 h.setQuick(j, n, h.getQuick(j, n) / t);
@@ -873,7 +871,7 @@ public class EigenDecomposition {
       for (int i = low; i <= high; i++) {
         z = 0.0;
         for (int k = low; k <= Math.min(j, high); k++) {
-          z = z + v.getQuick(i, k) * h.getQuick(k, j);
+          z += v.getQuick(i, k) * h.getQuick(k, j);
         }
         v.setQuick(i, j, z);
       }
@@ -887,8 +885,8 @@ public class EigenDecomposition {
     int n = a.columnSize();
 
     boolean isSymmetric = true;
-    for (int j = 0; (j < n) & isSymmetric; j++) {
-      for (int i = 0; (i < n) & isSymmetric; i++) {
+    for (int j = 0; (j < n) && isSymmetric; j++) {
+      for (int i = 0; (i < n) && isSymmetric; i++) {
         isSymmetric = a.getQuick(i, j) == a.getQuick(j, i);
       }
     }

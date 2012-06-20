@@ -17,6 +17,7 @@
 
 package org.apache.mahout.classifier.sgd;
 
+import com.google.common.base.Charsets;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -41,6 +42,7 @@ import org.apache.mahout.vectorizer.encoders.Dictionary;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
 /**
@@ -57,7 +59,7 @@ public final class TestASFEmail {
   public static void main(String[] args) throws IOException {
     TestASFEmail runner = new TestASFEmail();
     if (runner.parseArgs(args)) {
-      runner.run(new PrintWriter(System.out, true));
+      runner.run(new PrintWriter(new OutputStreamWriter(System.out, Charsets.UTF_8), true));
     }
   }
 
@@ -70,7 +72,6 @@ public final class TestASFEmail {
 
 
     Dictionary asfDictionary = new Dictionary();
-    //<String> overallCounts = HashMultiset.create();
     Configuration conf = new Configuration();
     PathFilter testFilter = new PathFilter() {
       @Override
@@ -88,7 +89,7 @@ public final class TestASFEmail {
       numItems++;
     }
 
-    System.out.printf("%d test files\n", numItems);
+    System.out.println(numItems + " test files");
     ResultAnalyzer ra = new ResultAnalyzer(asfDictionary.values(), "DEFAULT");
     iter = new SequenceFileDirIterator<Text, VectorWritable>(new Path(base.toString()), PathType.LIST, testFilter,
             null, true, conf);
@@ -105,7 +106,7 @@ public final class TestASFEmail {
       ra.addInstance(asfDictionary.values().get(actual), cr);
 
     }
-    output.printf("%s\n\n", ra.toString());
+    output.println(ra);
   }
 
   boolean parseArgs(String[] args) {

@@ -29,7 +29,8 @@ public final class StringUtils {
   
   private static final XStream XSTREAM = new XStream();
   private static final Pattern NEWLINE_PATTERN = Pattern.compile("\n");
-  
+  private static final Pattern XMLRESERVED = Pattern.compile("\"|\\&|\\<|\\>|\'");
+
   private StringUtils() {
   // do nothing
   }
@@ -56,7 +57,7 @@ public final class StringUtils {
     return (T) XSTREAM.fromXML(str);
   }
 
-  public static String escapeXML(String input) {
-    return input.replaceAll("\"|\\&|\\<|\\>|\'", "_");
+  public static String escapeXML(CharSequence input) {
+    return XMLRESERVED.matcher(input).replaceAll("_");
   }
 }

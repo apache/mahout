@@ -28,14 +28,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
-import org.apache.mahout.cf.taste.common.Weighting;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
-import org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.slopeone.DiffStorage;
 import org.apache.mahout.common.iterator.FileLineIterator;
@@ -56,7 +54,8 @@ import com.google.common.base.Preconditions;
  * The fourth column is optional, and is a count representing the number of occurrences of the item-item pair
  * that contribute to the diff. It is assumed to be 1 if not present. The fifth and sixth arguments are
  * computed values used by {@link FullRunningAverageAndStdDev} implementations to compute a running standard deviation.
- * They are required if using {@link Weighting#WEIGHTED} with {@link SlopeOneRecommender}.
+ * They are required if using {@link org.apache.mahout.cf.taste.common.Weighting#WEIGHTED}
+ * with {@link org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender}.
  * </p>
  *
  * <p>
@@ -142,7 +141,7 @@ public final class FileDiffStorage implements DiffStorage {
     }
     
     String[] tokens = SEPARATOR.split(line);
-    Preconditions.checkArgument(tokens.length >=3 && tokens.length != 5, "Bad line: %s", line);
+    Preconditions.checkArgument(tokens.length >= 3 && tokens.length != 5, "Bad line: %s", line);
 
     long itemID1 = Long.parseLong(tokens[0]);
     long itemID2 = Long.parseLong(tokens[1]);

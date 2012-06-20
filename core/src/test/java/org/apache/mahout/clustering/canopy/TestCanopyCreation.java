@@ -17,6 +17,7 @@
 
 package org.apache.mahout.clustering.canopy;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -352,8 +353,9 @@ public final class TestCanopyCreation extends MahoutTestCase {
     }
   }
 
-  boolean findAndRemove(Pair<Double,Double> target, 
-                        List<Pair<Double,Double>> list, double epsilon) {
+  static boolean findAndRemove(Pair<Double, Double> target,
+                               Collection<Pair<Double, Double>> list,
+                               double epsilon) {
     for (Pair<Double,Double> curr : list) {
       if ( (Math.abs(target.getFirst() - curr.getFirst()) < epsilon) 
            && (Math.abs(target.getSecond() - curr.getSecond()) < epsilon) ) {

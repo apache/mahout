@@ -36,26 +36,18 @@ import com.google.common.collect.Lists;
  * 
  */
 public class FuzzyKMeansClusteringPolicy extends AbstractClusteringPolicy {
-  
-  public FuzzyKMeansClusteringPolicy() {
-    super();
-  }
-  
+
   private double m = 2;
-  
   private double convergenceDelta = 0.05;
-  
+
+  public FuzzyKMeansClusteringPolicy() {
+  }
+
   public FuzzyKMeansClusteringPolicy(double m, double convergenceDelta) {
     this.m = m;
+    this.convergenceDelta = convergenceDelta;
   }
-  
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * org.apache.mahout.clustering.ClusteringPolicy#select(org.apache.mahout.
-   * math.Vector)
-   */
+
   @Override
   public Vector select(Vector probabilities) {
     return probabilities;
@@ -74,23 +66,13 @@ public class FuzzyKMeansClusteringPolicy extends AbstractClusteringPolicy {
     fuzzyKMeansClusterer.setM(m);
     return fuzzyKMeansClusterer.computePi(clusters, distances);
   }
-  
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.io.Writable#write(java.io.DataOutput)
-   */
+
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeDouble(m);
     out.writeDouble(convergenceDelta);
   }
-  
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.io.Writable#readFields(java.io.DataInput)
-   */
+
   @Override
   public void readFields(DataInput in) throws IOException {
     this.m = in.readDouble();

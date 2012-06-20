@@ -201,7 +201,7 @@ public class RowSimilarityJob extends AbstractJob {
 
     @Override
     protected void map(IntWritable row, VectorWritable vectorWritable, Context ctx)
-        throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
 
       Vector rowVector = similarity.normalize(vectorWritable.get());
 
@@ -243,7 +243,7 @@ public class RowSimilarityJob extends AbstractJob {
   public static class MergeVectorsCombiner extends Reducer<IntWritable,VectorWritable,IntWritable,VectorWritable> {
     @Override
     protected void reduce(IntWritable row, Iterable<VectorWritable> partialVectors, Context ctx)
-        throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
       ctx.write(row, new VectorWritable(Vectors.merge(partialVectors)));
     }
   }
@@ -263,7 +263,7 @@ public class RowSimilarityJob extends AbstractJob {
 
     @Override
     protected void reduce(IntWritable row, Iterable<VectorWritable> partialVectors, Context ctx)
-        throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
       Vector partialVector = Vectors.merge(partialVectors);
 
       if (row.get() == NORM_VECTOR_MARKER) {
@@ -316,7 +316,7 @@ public class RowSimilarityJob extends AbstractJob {
 
     @Override
     protected void map(IntWritable column, VectorWritable occurrenceVector, Context ctx)
-        throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
       Vector.Element[] occurrences = Vectors.toArray(occurrenceVector);
       Arrays.sort(occurrences, BY_INDEX);
 
@@ -342,8 +342,7 @@ public class RowSimilarityJob extends AbstractJob {
   }
 
 
-  public static class SimilarityReducer
-      extends Reducer<IntWritable,VectorWritable,IntWritable,VectorWritable> {
+  public static class SimilarityReducer extends Reducer<IntWritable,VectorWritable,IntWritable,VectorWritable> {
 
     private VectorSimilarityMeasure similarity;
     private int numberOfColumns;
@@ -364,7 +363,7 @@ public class RowSimilarityJob extends AbstractJob {
 
     @Override
     protected void reduce(IntWritable row, Iterable<VectorWritable> partialDots, Context ctx)
-        throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
       Iterator<VectorWritable> partialDotsIterator = partialDots.iterator();
       Vector dots = partialDotsIterator.next().get();
       while (partialDotsIterator.hasNext()) {
@@ -405,7 +404,7 @@ public class RowSimilarityJob extends AbstractJob {
 
     @Override
     protected void map(IntWritable row, VectorWritable similaritiesWritable, Context ctx)
-        throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
       Vector similarities = similaritiesWritable.get();
       // For performance reasons moved transposedPartial creation out of the while loop and reusing the same vector
       Vector transposedPartial = similarities.like();

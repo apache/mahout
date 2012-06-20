@@ -18,6 +18,7 @@
 package org.apache.mahout.classifier.naivebayes.training;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -27,6 +28,8 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
 public class IndexInstancesMapper extends Mapper<Text, VectorWritable, IntWritable, VectorWritable> {
+
+  private static final Pattern SLASH = Pattern.compile("/");
 
   public enum Counter { SKIPPED_INSTANCES }
 
@@ -40,7 +43,7 @@ public class IndexInstancesMapper extends Mapper<Text, VectorWritable, IntWritab
 
   @Override
   protected void map(Text labelText, VectorWritable instance, Context ctx) throws IOException, InterruptedException {
-    String label = labelText.toString().split("/")[1]; 
+    String label = SLASH.split(labelText.toString())[1];
     if (labelIndex.containsKey(label)) {
       ctx.write(new IntWritable(labelIndex.get(label)), instance);
     } else {

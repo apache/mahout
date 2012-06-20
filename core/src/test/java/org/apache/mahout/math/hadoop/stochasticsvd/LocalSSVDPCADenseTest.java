@@ -31,6 +31,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.SequenceFile.CompressionType;
 import org.apache.hadoop.io.compress.DefaultCodec;
+import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
@@ -104,6 +105,7 @@ public class LocalSSVDPCADenseTest extends MahoutTestCase {
     closeables.remove(w);
     Closeables.close(w, true);
 
+    // TODO fix test so that 1.0/m works as intended!
     xi.assign(Functions.mult(1 / m));
 
     FileSystem fs = FileSystem.get(conf);
@@ -158,9 +160,11 @@ public class LocalSSVDPCADenseTest extends MahoutTestCase {
     double[][] a = SSVDHelper.loadDistributedRowMatrix(fs, aPath, conf);
 
     // subtract pseudo pca mean
-    for (int i = 0; i < m; i++)
-      for (int j = 0; j < n; j++)
+    for (int i = 0; i < m; i++) {
+      for (int j = 0; j < n; j++) {
         a[i][j] -= xi.getQuick(j);
+      }
+    }
 
     SingularValueDecomposition svd2 =
       new SingularValueDecomposition(new DenseMatrix(a));
@@ -180,6 +184,7 @@ public class LocalSSVDPCADenseTest extends MahoutTestCase {
                                            false,
                                            s_epsilon);
 
+    IOUtils.close(closeables);
   }
 
 }

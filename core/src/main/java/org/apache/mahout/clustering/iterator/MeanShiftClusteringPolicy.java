@@ -27,17 +27,11 @@ import java.io.IOException;
  */
 public class MeanShiftClusteringPolicy extends AbstractClusteringPolicy {
   
-  public MeanShiftClusteringPolicy() {
-    super();
-  }
-  
-  private double t1, t2, t3, t4;
-  
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.io.Writable#write(java.io.DataOutput)
-   */
+  private double t1;
+  private double t2;
+  private double t3;
+  private double t4;
+
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeDouble(t1);
@@ -45,12 +39,7 @@ public class MeanShiftClusteringPolicy extends AbstractClusteringPolicy {
     out.writeDouble(t3);
     out.writeDouble(t4);
   }
-  
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.io.Writable#readFields(java.io.DataInput)
-   */
+
   @Override
   public void readFields(DataInput in) throws IOException {
     this.t1 = in.readDouble();

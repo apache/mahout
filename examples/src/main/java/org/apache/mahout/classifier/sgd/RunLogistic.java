@@ -17,6 +17,7 @@
 
 package org.apache.mahout.classifier.sgd;
 
+import com.google.common.base.Charsets;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -32,6 +33,7 @@ import org.apache.mahout.classifier.evaluation.Auc;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Locale;
 
@@ -47,7 +49,7 @@ public final class RunLogistic {
   }
 
   public static void main(String[] args) throws Exception {
-    mainToOutput(args, new PrintWriter(System.out, true));
+    mainToOutput(args, new PrintWriter(new OutputStreamWriter(System.out, Charsets.UTF_8), true));
   }
 
   static void mainToOutput(String[] args, PrintWriter output) throws Exception {
@@ -67,7 +69,7 @@ public final class RunLogistic {
       csv.firstLine(line);
       line = in.readLine();
       if (showScores) {
-        output.printf(Locale.ENGLISH, "\"%s\",\"%s\",\"%s\"\n", "target", "model-output", "log-likelihood");
+        output.println("\"target\",\"model-output\",\"log-likelihood\"");
       }
       while (line != null) {
         Vector v = new SequentialAccessSparseVector(lmp.getNumFeatures());

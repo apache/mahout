@@ -159,7 +159,7 @@ public final class UDistrib {
     Path dataPath = new Path(dataStr);
     FileSystem ifs = dataPath.getFileSystem(conf);
     FSDataInputStream input = ifs.open(dataPath);
-    Scanner scanner = new Scanner(input);
+    Scanner scanner = new Scanner(input, "UTF-8");
     DataConverter converter = new DataConverter(dataset);
     int nbInstances = dataset.nbInstances();
     

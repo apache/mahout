@@ -32,7 +32,7 @@ public final class DummyStatusReporter extends StatusReporter {
   private final Map<Enum<?>, Counter> counters = Maps.newHashMap();
   private final Map<String, Counter> counterGroups = Maps.newHashMap();
 
-  private Counter newCounter() {
+  private static Counter newCounter() {
     try {
       // 0.23 case
       String c = "org.apache.hadoop.mapreduce.counters.GenericCounter";
@@ -69,7 +69,7 @@ public final class DummyStatusReporter extends StatusReporter {
   }
 
   public float getProgress() {
-    return 0;
+    return 0.0f;
   }
 
 }

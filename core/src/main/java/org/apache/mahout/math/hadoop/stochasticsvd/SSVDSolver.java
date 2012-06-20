@@ -337,16 +337,15 @@ public class SSVDSolver {
       Path vPath = new Path(outputPath, "V");
 
       Path pcaBasePath = new Path(outputPath, "pca");
-      Path sbPath = null;
-      Path sqPath = null;
 
-      double xisquaredlen = 0;
-
-      if (pcaMeanPath != null)
+      if (pcaMeanPath != null) {
         fs.mkdirs(pcaBasePath);
+      }
       Random rnd = RandomUtils.getRandom();
       long seed = rnd.nextLong();
 
+      Path sbPath = null;
+      double xisquaredlen = 0.0;
       if (pcaMeanPath != null) {
         /*
          * combute s_b0 if pca offset present.
@@ -392,8 +391,8 @@ public class SSVDSolver {
        * bit too many (I would be happy i that were ever the case though).
        */
 
-      sbPath = new Path(pcaBasePath, "sb0");
-      sqPath = new Path(pcaBasePath, "sq0");
+      //sbPath = new Path(pcaBasePath, "sb0");
+      //sqPath = new Path(pcaBasePath, "sq0");
 
       BtJob.run(conf,
                 inputPath,
@@ -410,7 +409,7 @@ public class SSVDSolver {
                 q <= 0);
 
       sbPath = new Path(btPath, BtJob.OUTPUT_SB + "-*");
-      sqPath = new Path(btPath, BtJob.OUTPUT_SQ + "-*");
+      Path sqPath = new Path(btPath, BtJob.OUTPUT_SQ + "-*");
 
       // power iterations
       for (int i = 0; i < q; i++) {
@@ -481,7 +480,6 @@ public class SSVDSolver {
 
         bbtSquare.assign(mC, Functions.MINUS);
         bbtSquare.assign(mC.transpose(), Functions.MINUS);
-        mC = null;
 
         Matrix outerSq = sq.cross(sq);
         outerSq.assign(Functions.mult(xisquaredlen));

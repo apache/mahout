@@ -62,11 +62,9 @@ public class AdaptiveLogisticModelParameters extends LogisticModelParameters {
 
   public void checkParameters() {
     if (prior != null) {
-      if ("TP".equals(prior.toUpperCase(Locale.ENGLISH).trim()) ||
-          "EBP".equals(prior.toUpperCase(Locale.ENGLISH).trim())) {
-        if (Double.isNaN(priorOption)) {
-          throw new IllegalArgumentException("You must specify a double value for TPrior and ElasticBandPrior.");
-        }
+      String priorUppercase = prior.toUpperCase(Locale.ENGLISH).trim();
+      if (("TP".equals(priorUppercase) || "EBP".equals(priorUppercase)) && Double.isNaN(priorOption)) {
+        throw new IllegalArgumentException("You must specify a double value for TPrior and ElasticBandPrior.");
       }
     }
   }

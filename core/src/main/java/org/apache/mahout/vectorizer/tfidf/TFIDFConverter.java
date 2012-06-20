@@ -58,36 +58,24 @@ import org.apache.mahout.vectorizer.term.TermDocumentCountReducer;
 public final class TFIDFConverter {
 
   public static final String VECTOR_COUNT = "vector.count";
-
   public static final String FEATURE_COUNT = "feature.count";
-
   public static final String MIN_DF = "min.df";
-
   public static final String MAX_DF = "max.df";
-
   //public static final String TFIDF_OUTPUT_FOLDER = "tfidf";
 
   private static final String DOCUMENT_VECTOR_OUTPUT_FOLDER = "tfidf-vectors";
-
   private static final String FREQUENCY_FILE = "frequency.file-";
-
   private static final int MAX_CHUNKSIZE = 10000;
-
   private static final int MIN_CHUNKSIZE = 100;
-
   private static final String OUTPUT_FILES_PATTERN = "part-*";
-
   private static final int SEQUENCEFILE_BYTE_OVERHEAD = 45;
-
   private static final String VECTOR_OUTPUT_FOLDER = "partial-vectors-";
-
   public static final String WORDCOUNT_OUTPUT_FOLDER = "df-count";
 
   /**
    * Cannot be initialized. Use the static functions
    */
   private TFIDFConverter() {
-
   }
 
   /**
@@ -182,10 +170,11 @@ public final class TFIDFConverter {
    *          recommend you use a split size of around 400-500MB so that two simultaneous reducers can create
    *          partial vectors without thrashing the system due to increased swapping
    */
-  public static Pair<Long[], List<Path>> calculateDF(Path input,
-                                  Path output,
-                                  Configuration baseConf,
-                                  int chunkSizeInMegabytes) throws IOException, InterruptedException, ClassNotFoundException {
+  public static Pair<Long[],List<Path>> calculateDF(Path input,
+                                                    Path output,
+                                                    Configuration baseConf,
+                                                    int chunkSizeInMegabytes)
+    throws IOException, InterruptedException, ClassNotFoundException {
 
     if (chunkSizeInMegabytes < MIN_CHUNKSIZE) {
       chunkSizeInMegabytes = MIN_CHUNKSIZE;
@@ -330,8 +319,9 @@ public final class TFIDFConverter {
     HadoopUtil.delete(conf, output);
 
     boolean succeeded = job.waitForCompletion(true);
-    if (!succeeded) 
+    if (!succeeded) {
       throw new IllegalStateException("Job failed!");
+    }
   }
 
   /**
@@ -366,7 +356,8 @@ public final class TFIDFConverter {
     HadoopUtil.delete(conf, output);
 
     boolean succeeded = job.waitForCompletion(true);
-    if (!succeeded) 
+    if (!succeeded) {
       throw new IllegalStateException("Job failed!");
+    }
   }
 }

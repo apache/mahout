@@ -17,7 +17,7 @@
 
 package org.apache.mahout.math.stats;
 
-import org.apache.mahout.math.DenseVector;
+import com.google.common.base.Preconditions;
 import org.apache.mahout.math.Vector;
 
 import java.util.Arrays;
@@ -55,15 +55,9 @@ public class Sampler {
   }
 
   public int sample() {
-    if (sampler == null) {
-      throw new NullPointerException("Sampler must have been constructed with a distribution, or"
-        + " else sample(Vector) should be used to sample");
-    }
+    Preconditions.checkNotNull(sampler,
+      "Sampler must have been constructed with a distribution, or else sample(Vector) should be used to sample");
     return sample(sampler);
-  }
-
-  private static double[] samplerFor(double[] distribution) {
-    return samplerFor(new DenseVector(distribution));
   }
 
   private static double[] samplerFor(Vector vectorDistribution) {

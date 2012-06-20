@@ -182,7 +182,7 @@ public final class AggregateAndRecommendReducer extends
    * find the top entries in recommendationVector, map them to the real itemIDs and write back the result
    */
   private void writeRecommendedItems(VarLongWritable userID, Vector recommendationVector, Context context)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
 
     TopK<RecommendedItem> topKItems = new TopK<RecommendedItem>(recommendationsPerUser, BY_PREFERENCE_VALUE);
 

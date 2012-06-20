@@ -48,9 +48,12 @@ import  org.apache.mahout.fpm.pfpgrowth.fpgrowth.FrequentPatternMaxHeap;
 /**
  * Implementation of PFGrowth Algorithm
  */
-public class FPGrowthIds {
+public final class FPGrowthIds {
 
   private static final Logger log = LoggerFactory.getLogger(FPGrowthIds.class);
+
+  private FPGrowthIds() {
+  }
 
   public static List<Pair<String,TopKStringPatterns>> readFrequentPattern(Configuration conf, Path path) {
     List<Pair<String,TopKStringPatterns>> ret = Lists.newArrayList();
@@ -68,7 +71,7 @@ public class FPGrowthIds {
    *
    * @param transactionStream
    *          Iterator of transaction
-   * @param frequencyList
+   * @param attributeFrequency
    *          list of frequent features and their support value
    * @param minSupport
    *          minimum support of the transactions
@@ -83,13 +86,13 @@ public class FPGrowthIds {
    *          written
    * @throws IOException
    */
-  public final void generateTopKFrequentPatterns(Iterator<Pair<IntArrayList,Long>> transactionStream,
-                                                 LongArrayList attributeFrequency,
-                                                 long minSupport,
-                                                 int k,
-                                                 IntArrayList returnableFeatures,
-                                                 OutputCollector<Integer,List<Pair<List<Integer>,Long>>> output,
-                                                 StatusUpdater updater) throws IOException {
+  public static void generateTopKFrequentPatterns(Iterator<Pair<IntArrayList, Long>> transactionStream,
+                                                  LongArrayList attributeFrequency,
+                                                  long minSupport,
+                                                  int k,
+                                                  IntArrayList returnableFeatures,
+                                                  OutputCollector<Integer, List<Pair<List<Integer>, Long>>> output,
+                                                  StatusUpdater updater) throws IOException {
 
     for (int i = 0; i < attributeFrequency.size(); i++) {
       if (attributeFrequency.get(i) < minSupport) {
@@ -116,10 +119,12 @@ public class FPGrowthIds {
 
   private static class IdentityMapping extends AbstractMap<Integer, Integer> {
 
+    @Override
     public Set<Map.Entry<Integer,Integer>> entrySet() {
       throw new IllegalStateException();
     }
 
+    @Override
     public Integer get(Object key) {
       return (Integer) key;
     }
@@ -142,12 +147,12 @@ public class FPGrowthIds {
    *          integer to A
    * @return Top K Frequent Patterns for each feature and their support
    */
-  private Map<Integer,FrequentPatternMaxHeap> fpGrowth(FPTree tree,
-                                                       long minSupportValue,
-                                                       int k,
-                                                       IntArrayList requiredFeatures,
-                                                       TopKPatternsOutputConverter<Integer> outputCollector,
-                                                       StatusUpdater updater) throws IOException {
+  private static Map<Integer,FrequentPatternMaxHeap> fpGrowth(FPTree tree,
+                                                              long minSupportValue,
+                                                              int k,
+                                                              IntArrayList requiredFeatures,
+                                                              TopKPatternsOutputConverter<Integer> outputCollector,
+                                                              StatusUpdater updater) throws IOException {
 
     Map<Integer,FrequentPatternMaxHeap> patterns = Maps.newHashMap();
     requiredFeatures.sort();
@@ -182,8 +187,6 @@ public class FPGrowthIds {
    *          minimum support of the pattern to be mined
    * @param k
    *          Max value of the Size of the Max-Heap in which Patterns are held
-   * @param featureSetSize
-   *          number of features
    * @param returnFeatures
    *          the id's of the features for which Top K patterns have to be mined
    * @param topKPatternsOutputCollector
@@ -191,19 +194,18 @@ public class FPGrowthIds {
    *          format to the corresponding A Format
    * @return Top K frequent patterns for each attribute
    */
-  private Map<Integer,FrequentPatternMaxHeap> generateTopKFrequentPatterns(
-    Iterator<Pair<IntArrayList,Long>> transactions,
-    LongArrayList attributeFrequency,
-    long minSupport,
-    int k,
-    IntArrayList returnFeatures, 
-    TopKPatternsOutputConverter<Integer> topKPatternsOutputCollector,
-    StatusUpdater updater) throws IOException {
+  private static Map<Integer,FrequentPatternMaxHeap> generateTopKFrequentPatterns(
+      Iterator<Pair<IntArrayList, Long>> transactions,
+      LongArrayList attributeFrequency,
+      long minSupport,
+      int k,
+      IntArrayList returnFeatures,
+      TopKPatternsOutputConverter<Integer> topKPatternsOutputCollector,
+      StatusUpdater updater) throws IOException {
 
     FPTree tree = new FPTree(attributeFrequency, minSupport);
 
     // Constructing initial FPTree from the list of transactions
-    int nodecount = 0;
     int i = 0;
     while (transactions.hasNext()) {
       Pair<IntArrayList,Long> transaction = transactions.next();
@@ -214,8 +216,6 @@ public class FPGrowthIds {
         log.info("FPTree Building: Read {} Transactions", i);
       }
     }
-
-    log.info("Number of Nodes in the FP Tree: {}", nodecount);
 
     return fpGrowth(tree, minSupport, k, returnFeatures, topKPatternsOutputCollector, updater);
   }
@@ -282,10 +282,12 @@ public class FPGrowthIds {
         int[] qints = q.getPattern();
         
         Pattern pq = new Pattern();
-        for (int pi = 0; pi < p.length(); pi++) 
+        for (int pi = 0; pi < p.length(); pi++) {
           pq.add(pints[pi], p.support());
-        for (int qi = 0; qi < q.length(); qi++) 
+        }
+        for (int qi = 0; qi < q.length(); qi++) {
           pq.add(qints[qi], q.support());
+        }
         pats.insert(pq);
       }
     }
@@ -293,8 +295,9 @@ public class FPGrowthIds {
     for (Pattern q : qPats.getHeap()) {
       Pattern qq = new Pattern();
       int[] qints = q.getPattern();
-      for (int qi = 0; qi < q.length(); qi++) 
+      for (int qi = 0; qi < q.length(); qi++) {
         qq.add(qints[qi], q.support());
+      }
       pats.insert(qq);
     }
 

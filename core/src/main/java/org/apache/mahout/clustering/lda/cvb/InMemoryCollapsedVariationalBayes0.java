@@ -71,19 +71,14 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
   private int numDocuments;
   private double alpha;
   private double eta;
-  private int minDfCt;
-  private double maxDfPct;
+  //private int minDfCt;
+  //private double maxDfPct;
   private boolean verbose = false;
-
-  private Map<String, Integer> termIdMap;
   private String[] terms;  // of length numTerms;
   private Matrix corpusWeights; // length numDocs;
   private double totalCorpusWeight;
   private double initialModelCorpusFraction;
   private Matrix docTopicCounts;
-  private long seed;
-  private TopicModel topicModel;
-  private TopicModel updatedModel;
   private int numTrainingThreads;
   private int numUpdatingThreads;
   private ModelTrainer modelTrainer;
@@ -96,26 +91,34 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
     this.verbose = verbose;
   }
 
-  public InMemoryCollapsedVariationalBayes0(Matrix corpus, String[] terms, int numTopics,
-      double alpha, double eta) {
-    this(corpus, terms, numTopics, alpha, eta, 1, 1, 0, 1234);
+  public InMemoryCollapsedVariationalBayes0(Matrix corpus,
+                                            String[] terms,
+                                            int numTopics,
+                                            double alpha,
+                                            double eta) {
+    this(corpus, terms, numTopics, alpha, eta, 1, 1, 0);
   }
     
-  public InMemoryCollapsedVariationalBayes0(Matrix corpus, String[] terms, int numTopics,
-      double alpha, double eta, int numTrainingThreads, int numUpdatingThreads,
-      double modelCorpusFraction, long seed) {
-    this.seed = seed;
+  public InMemoryCollapsedVariationalBayes0(Matrix corpus,
+                                            String[] terms,
+                                            int numTopics,
+                                            double alpha,
+                                            double eta,
+                                            int numTrainingThreads,
+                                            int numUpdatingThreads,
+                                            double modelCorpusFraction) {
+    //this.seed = seed;
     this.numTopics = numTopics;
     this.alpha = alpha;
     this.eta = eta;
-    this.minDfCt = 0;
-    this.maxDfPct = 1.0f;
+    //this.minDfCt = 0;
+    //this.maxDfPct = 1.0f;
     corpusWeights = corpus;
     numDocuments = corpus.numRows();
     this.terms = terms;
     this.initialModelCorpusFraction = modelCorpusFraction;
     numTerms = terms != null ? terms.length : corpus.numCols();
-    termIdMap = Maps.newHashMap();
+    Map<String, Integer> termIdMap = Maps.newHashMap();
     if (terms != null) {
       for (int t=0; t<terms.length; t++) {
         termIdMap.put(terms[t], t);
@@ -143,12 +146,12 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
   }
 
   private void initializeModel() {
-    topicModel = new TopicModel(numTopics, numTerms, eta, alpha, RandomUtils.getRandom(), terms,
-        numUpdatingThreads,
-        initialModelCorpusFraction == 0 ? 1 : initialModelCorpusFraction * totalCorpusWeight);
+    TopicModel topicModel = new TopicModel(numTopics, numTerms, eta, alpha, RandomUtils.getRandom(), terms,
+                                           numUpdatingThreads,
+                                           initialModelCorpusFraction == 0 ? 1 : initialModelCorpusFraction * totalCorpusWeight);
     topicModel.setConf(getConf());
 
-    updatedModel = initialModelCorpusFraction == 0
+    TopicModel updatedModel = initialModelCorpusFraction == 0
         ? new TopicModel(numTopics, numTerms, eta, alpha, null, terms, numUpdatingThreads, 1)
         : topicModel;
     updatedModel.setConf(getConf());
@@ -157,6 +160,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
     modelTrainer = new ModelTrainer(topicModel, updatedModel, numTrainingThreads, numTopics, numTerms);
   }
 
+  /*
   private void inferDocuments(double convergence, int maxIter, boolean recalculate) {
     for (int docId = 0; docId < corpusWeights.numRows() ; docId++) {
       Vector inferredDocument = topicModel.infer(corpusWeights.viewRow(docId),
@@ -164,6 +168,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
       // do what now?
     }
   }
+   */
 
   public void trainDocuments() {
     trainDocuments(0);
@@ -372,7 +377,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
       int numUpdateThreads = Integer.parseInt((String)cmdLine.getValue(numUpdateThreadsOpt));
       String topicOutFile = (String)cmdLine.getValue(outputTopicFileOpt);
       String docOutFile = (String)cmdLine.getValue(outputDocFileOpt);
-      String reInferDocTopics = (String)cmdLine.getValue(reInferDocTopicsOpt);
+      //String reInferDocTopics = (String)cmdLine.getValue(reInferDocTopicsOpt);
       boolean verbose = Boolean.parseBoolean((String) cmdLine.getValue(verboseOpt));
       double modelCorpusFraction = (Double) cmdLine.getValue(modelCorpusFractionOption);
 
@@ -390,7 +395,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
       start = System.nanoTime();
       InMemoryCollapsedVariationalBayes0 cvb0 =
           new InMemoryCollapsedVariationalBayes0(corpus, terms, numTopics, alpha, eta,
-                                                 numTrainThreads, numUpdateThreads, modelCorpusFraction, 1234);
+                                                 numTrainThreads, numUpdateThreads, modelCorpusFraction);
       logTime("cvb0 init", System.nanoTime() - start);
 
       start = System.nanoTime();
@@ -398,11 +403,13 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
       cvb0.iterateUntilConvergence(minFractionalErrorChange, maxIterations, burnInIterations);
       logTime("total training time", System.nanoTime() - start);
 
+      /*
       if ("randstart".equalsIgnoreCase(reInferDocTopics)) {
         cvb0.inferDocuments(0.0, 100, true);
       } else if ("continue".equalsIgnoreCase(reInferDocTopics)) {
         cvb0.inferDocuments(0.0, 100, false);
       }
+       */
 
       start = System.nanoTime();
       cvb0.writeModel(new Path(topicOutFile));

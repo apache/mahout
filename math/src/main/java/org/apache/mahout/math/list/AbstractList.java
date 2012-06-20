@@ -37,16 +37,18 @@ package org.apache.mahout.math.list;
 import org.apache.mahout.math.PersistentObject;
 
 /**
- Abstract base class for resizable lists holding objects or primitive data types such as <code>int</code>, <code>float</code>, etc.
- First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
- <p>
- <b>Note that this implementation is not synchronized.</b>
-
- @author wolfgang.hoschek@cern.ch
- @version 1.0, 09/24/99
- @see     java.util.ArrayList
- @see      java.util.Vector
- @see      java.util.Arrays
+ * Abstract base class for resizable lists holding objects or primitive data types such as
+ * {@code int}, {@code float}, etc.
+ * First see the <a href="package-summary.html">package summary</a> and javadoc
+ * <a href="package-tree.html">tree view</a> to get the broad picture.
+ * <p>
+ * <b>Note that this implementation is not synchronized.</b>
+ *
+ * @author wolfgang.hoschek@cern.ch
+ * @version 1.0, 09/24/99
+ * @see     java.util.ArrayList
+ * @see      java.util.Vector
+ * @see      java.util.Arrays
  */
 public abstract class AbstractList extends PersistentObject {
   

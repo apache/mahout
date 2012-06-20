@@ -200,7 +200,7 @@ public final class MahoutDriver {
   }
 
   private static boolean isDeprecated(Properties mainClasses, String keyString) {
-    return shortName(mainClasses.getProperty(keyString)).equalsIgnoreCase("deprecated");
+    return "deprecated".equalsIgnoreCase(shortName(mainClasses.getProperty(keyString)));
   }
 
   private static Properties loadProperties(String resource) throws IOException {

@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * <p>The Bayes example package provides some helper classes for training the Naive Bayes classifier
- * on the Twenty Newsgroups data. See {@link org.apache.mahout.examples.wikipedia.PrepareTwentyNewsgroups}
+ * on the Twenty Newsgroups data. See {@code PrepareTwentyNewsgroups}
  * for details on running the trainer and
  * formatting the Twenty Newsgroups data properly for the training.</p>
  *

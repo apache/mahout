@@ -20,7 +20,6 @@ import com.google.common.io.Closeables;
 
 import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
-import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
@@ -124,7 +123,7 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
   public int run(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
-    GroupBuilder gbuilder = new GroupBuilder();
+    //GroupBuilder gbuilder = new GroupBuilder();
 
     addInputOption();
     addOutputOption();

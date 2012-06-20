@@ -18,6 +18,7 @@
 
 package org.apache.mahout.classifier.sequencelearning.hmm;
 
+import com.google.common.base.Charsets;
 import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -33,6 +34,7 @@ import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
 /**
@@ -90,7 +92,7 @@ public final class RandomSequenceGenerator {
       int[] observations = HmmEvaluator.predict(model, length, System.currentTimeMillis());
 
       //writing output
-      PrintWriter writer = new PrintWriter(new FileOutputStream(output), true);
+      PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(output), Charsets.UTF_8), true);
       try {
         for (int observation : observations) {
           writer.print(observation);

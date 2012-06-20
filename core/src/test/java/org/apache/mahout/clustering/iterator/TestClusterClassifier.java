@@ -198,8 +198,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
   public void testClusterIteratorKMeans() {
     List<Vector> data = TestKmeansClustering.getPoints(TestKmeansClustering.REFERENCE);
     ClusterClassifier prior = newKlusterClassifier();
-    ClusterIterator iterator = new ClusterIterator();
-    ClusterClassifier posterior = iterator.iterate(data, prior, 5);
+    ClusterClassifier posterior = ClusterIterator.iterate(data, prior, 5);
     assertEquals(3, posterior.getModels().size());
     for (Cluster cluster : posterior.getModels()) {
       System.out.println(cluster.asFormatString(null));
@@ -210,8 +209,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
   public void testClusterIteratorDirichlet() {
     List<Vector> data = TestKmeansClustering.getPoints(TestKmeansClustering.REFERENCE);
     ClusterClassifier prior = newKlusterClassifier();
-    ClusterIterator iterator = new ClusterIterator();
-    ClusterClassifier posterior = iterator.iterate(data, prior, 5);
+    ClusterClassifier posterior = ClusterIterator.iterate(data, prior, 5);
     assertEquals(3, posterior.getModels().size());
     for (Cluster cluster : posterior.getModels()) {
       System.out.println(cluster.asFormatString(null));
@@ -235,7 +233,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     for (Cluster cluster : prior.getModels()) {
       System.out.println(cluster.asFormatString(null));
     }
-    new ClusterIterator().iterateSeq(conf, pointsPath, path, outPath, 5);
+    ClusterIterator.iterateSeq(conf, pointsPath, path, outPath, 5);
     
     for (int i = 1; i <= 4; i++) {
       System.out.println("Classifier-" + i);
@@ -251,7 +249,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
   }
   
   @Test
-  public void testMRFileClusterIteratorKMeans() throws IOException, InterruptedException, ClassNotFoundException {
+  public void testMRFileClusterIteratorKMeans() throws Exception {
     Path pointsPath = getTestTempDirPath("points");
     Path priorPath = getTestTempDirPath("prior");
     Path outPath = getTestTempDirPath("output");
@@ -269,7 +267,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     for (Cluster cluster : prior.getModels()) {
       System.out.println(cluster.asFormatString(null));
     }
-    new ClusterIterator().iterateMR(conf, pointsPath, path, outPath, 5);
+    ClusterIterator.iterateMR(conf, pointsPath, path, outPath, 5);
     
     for (int i = 1; i <= 4; i++) {
       System.out.println("Classifier-" + i);

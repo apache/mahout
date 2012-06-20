@@ -91,7 +91,7 @@ public class DisplayDirichlet extends DisplayClustering {
     Path priorPath = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);
     prior.writeToSeqFiles(priorPath);
     Configuration conf = new Configuration();
-    new ClusterIterator().iterateSeq(conf, input, priorPath, output, numIterations);
+    ClusterIterator.iterateSeq(conf, input, priorPath, output, numIterations);
   }
   
   private static void runSequentialDirichletClusterer(Path input, Path output,

@@ -27,7 +27,7 @@ public class ToItemVectorsReducer extends Reducer<IntWritable,VectorWritable,Int
 
   @Override
   protected void reduce(IntWritable row, Iterable<VectorWritable> vectors, Context ctx)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     VectorWritable vectorWritable = VectorWritable.merge(vectors.iterator());
     vectorWritable.setWritesLaxPrecision(true);
     ctx.write(row, vectorWritable);

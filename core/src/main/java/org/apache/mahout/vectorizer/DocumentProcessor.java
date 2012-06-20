@@ -91,8 +91,9 @@ public final class DocumentProcessor {
     HadoopUtil.delete(conf, output);
 
     boolean succeeded = job.waitForCompletion(true);
-    if (!succeeded) 
+    if (!succeeded) {
       throw new IllegalStateException("Job failed!");
+    }
 
   }
 }

@@ -480,7 +480,8 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
       }
     }
 
-    @Override public void run() {
+    @Override
+    public void run() {
       while (!shutdown) {
         try {
           Pair<Integer, Vector> pair = queue.poll(1, TimeUnit.SECONDS);

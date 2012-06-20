@@ -20,9 +20,6 @@ package org.apache.mahout.utils.vectors;
 import com.google.common.base.Charsets;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
-import org.apache.commons.cli2.Group;
-import org.apache.commons.cli2.OptionException;
-import org.apache.commons.cli2.util.HelpFormatter;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -64,7 +61,6 @@ public final class VectorDumper extends AbstractJob {
 
   @Override
   public int run(String[] args) throws Exception {
-    int result = 0;
     /**
      Option seqOpt = obuilder.withLongName("seqFile").withRequired(false).withArgument(
      abuilder.withName("seqFile").withMinimum(1).withMaximum(1).create()).withDescription(
@@ -96,7 +92,7 @@ public final class VectorDumper extends AbstractJob {
       return -1;
     }
 
-    Path[] pathArr = null;
+    Path[] pathArr;
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
     Path input = getInputPath();
@@ -117,7 +113,7 @@ public final class VectorDumper extends AbstractJob {
 
     boolean sortVectors = hasOption("sortVectors");
     boolean quiet = hasOption("quiet");
-    if (quiet == false) {
+    if (!quiet) {
       log.info("Sort? " + sortVectors);
     }
 
@@ -177,7 +173,7 @@ public final class VectorDumper extends AbstractJob {
         }
       }
       int maxIndexesPerVector = hasOption("numIndexesPerVector")
-              ? Integer.parseInt(getOption("numIndexesPerVector").toString())
+              ? Integer.parseInt(getOption("numIndexesPerVector"))
               : Integer.MAX_VALUE;
       long itemCount = 0;
       int fileCount = 0;
@@ -202,19 +198,19 @@ public final class VectorDumper extends AbstractJob {
             writer.write(notTheVectorWritable.toString());
             writer.write('\t');
           }
-          Vector vector = null;
+          Vector vector;
           try {
-            VectorWritable vectorWritable;
             vector = ((VectorWritable)
                     (transposeKeyValue ? keyWritable : valueWritable)).get();
           } catch (ClassCastException e) {
             if ((transposeKeyValue ? keyWritable : valueWritable)
-                    instanceof WeightedPropertyVectorWritable)
+                    instanceof WeightedPropertyVectorWritable) {
               vector =
-                      ((WeightedPropertyVectorWritable)
-                              (transposeKeyValue ? keyWritable : valueWritable)).getVector();
-            else
+                  ((WeightedPropertyVectorWritable)
+                      (transposeKeyValue ? keyWritable : valueWritable)).getVector();
+            } else {
               throw e;
+            }
           }
           if (filters != null
                   && vector instanceof NamedVector
@@ -258,17 +254,11 @@ public final class VectorDumper extends AbstractJob {
       }
     }
 
-    return result;
-
+    return 0;
   }
 
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(), new VectorDumper(), args);
   }
 
-  private static void printHelp(Group group) {
-    HelpFormatter formatter = new HelpFormatter();
-    formatter.setGroup(group);
-    formatter.print();
-  }
 }

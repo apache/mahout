@@ -130,7 +130,7 @@ public class EigencutsDriver extends AbstractJob {
       // eigendecomposition (step 3)
       int overshoot = (int) ((double) eigenrank * OVERSHOOT_MULTIPLIER);
       LanczosState state = new LanczosState(L, eigenrank,
-          new DistributedLanczosSolver().getInitialVector(L));
+          DistributedLanczosSolver.getInitialVector(L));
 
       DistributedRowMatrix U = performEigenDecomposition(conf, L, state, eigenrank, overshoot, outputCalc);
       U.setConf(new Configuration(conf));

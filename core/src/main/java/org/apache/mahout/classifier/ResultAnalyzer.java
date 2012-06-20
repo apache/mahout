@@ -31,8 +31,7 @@ public class ResultAnalyzer {
   
   private final ConfusionMatrix confusionMatrix;
   private final OnlineSummarizer summarizer;
-  private boolean hasLL = false;
-  
+  private boolean hasLL;
   /*
    * === Summary ===
    * 
@@ -41,7 +40,6 @@ public class ResultAnalyzer {
    * relative squared error 37.2742 % Total Number of Instances 683
    */
   private int correctlyClassified;
-  
   private int incorrectlyClassified;
   
   public ResultAnalyzer(Collection<String> labelSet, String defaultLabel) {
@@ -101,8 +99,8 @@ public class ResultAnalyzer {
     returnString.append(confusionMatrix);
     if (hasLL) {
       returnString.append("\n\n");
-      returnString.append("Avg. Log-likelihood: ").append(summarizer.getMean()).append(" 25%-ile: ").append(summarizer.getQuartile(1))
-              .append(" 75%-ile: ").append(summarizer.getQuartile(2));
+      returnString.append("Avg. Log-likelihood: ").append(summarizer.getMean()).append(" 25%-ile: ")
+          .append(summarizer.getQuartile(1)).append(" 75%-ile: ").append(summarizer.getQuartile(2));
     }
 
     return returnString.toString();

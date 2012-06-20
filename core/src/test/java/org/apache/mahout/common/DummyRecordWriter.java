@@ -19,7 +19,6 @@ package org.apache.mahout.common;
 
 import com.google.common.collect.Lists;
 
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -68,8 +67,7 @@ public final class DummyRecordWriter<K, V> extends RecordWriter<K, V> {
 
   public static <K1, V1, K2, V2> Mapper<K1, V1, K2, V2>.Context build(Mapper<K1, V1, K2, V2> mapper,
                                                                       Configuration configuration,
-                                                                      RecordWriter<K2, V2> output)
-    throws IOException, InterruptedException {
+                                                                      RecordWriter<K2, V2> output) {
 
     // Use reflection since the context types changed incompatibly between 0.20
     // and 0.23.
@@ -88,8 +86,7 @@ public final class DummyRecordWriter<K, V> extends RecordWriter<K, V> {
                                                                        Configuration configuration,
                                                                        RecordWriter<K2, V2> output,
                                                                        Class<K1> keyClass,
-                                                                       Class<V1> valueClass)
-    throws IOException, InterruptedException {
+                                                                       Class<V1> valueClass) {
 
     // Use reflection since the context types changed incompatibly between 0.20
     // and 0.23.
@@ -113,7 +110,7 @@ public final class DummyRecordWriter<K, V> extends RecordWriter<K, V> {
         new TaskAttemptID(), null, output, null, new DummyStatusReporter(), null);
 
     Class<?> wrappedMapperClass = Class.forName("org.apache.hadoop.mapreduce.lib.map.WrappedMapper");
-    Object wrappedMapper = wrappedMapperClass.newInstance();
+    Object wrappedMapper = wrappedMapperClass.getConstructor().newInstance();
     Method getMapContext = wrappedMapperClass.getMethod("getMapContext", MapContext.class);
     return (Mapper.Context) getMapContext.invoke(wrappedMapper, mapContextImpl);
   }
@@ -147,7 +144,7 @@ public final class DummyRecordWriter<K, V> extends RecordWriter<K, V> {
       valueClass);
 
     Class<?> wrappedReducerClass = Class.forName("org.apache.hadoop.mapreduce.lib.reduce.WrappedReducer");
-    Object wrappedReducer = wrappedReducerClass.newInstance();
+    Object wrappedReducer = wrappedReducerClass.getConstructor().newInstance();
     Method getReducerContext = wrappedReducerClass.getMethod("getReducerContext", ReduceContext.class);
     return (Reducer.Context) getReducerContext.invoke(wrappedReducer, reduceContextImpl);
   }

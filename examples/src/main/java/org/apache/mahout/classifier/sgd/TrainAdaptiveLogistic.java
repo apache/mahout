@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Locale;
@@ -60,7 +61,7 @@ public final class TrainAdaptiveLogistic {
   }
 
   public static void main(String[] args) throws Exception {
-    mainToOutput(args, new PrintWriter(System.out, true));
+    mainToOutput(args, new PrintWriter(new OutputStreamWriter(System.out, Charsets.UTF_8), true));
   }
 
   static void mainToOutput(String[] args, PrintWriter output) throws Exception {
@@ -117,8 +118,7 @@ public final class TrainAdaptiveLogistic {
         learner = best.getPayload().getLearner();
       }
       if (learner == null) {
-        output.printf(Locale.ENGLISH,
-                      "%s\n", "AdaptiveLogisticRegression has failed to train a model.");
+        output.println("AdaptiveLogisticRegression has failed to train a model.");
         return;
       }
 
@@ -131,8 +131,8 @@ public final class TrainAdaptiveLogistic {
       }
 
       OnlineLogisticRegression lr = learner.getModels().get(0);
-      output.printf(Locale.ENGLISH, "%d\n", lmp.getNumFeatures());
-      output.printf(Locale.ENGLISH, "%s ~ ", lmp.getTargetVariable());
+      output.println(lmp.getNumFeatures());
+      output.println(lmp.getTargetVariable() + " ~ ");
       String sep = "";
       for (String v : csv.getTraceDictionary().keySet()) {
         double weight = predictorWeight(lr, 0, csv, v);

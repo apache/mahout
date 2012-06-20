@@ -22,18 +22,18 @@ package org.apache.mahout.math;
  * SparseVectors.
  */
 public class SparseColumnMatrix extends AbstractMatrix {
+
   private Vector[] columnVectors;
 
   /**
    * Construct a matrix of the given cardinality with the given data columns
    *
-   * @param rows
    * @param columns     a RandomAccessSparseVector[] array of columns
    * @param columnVectors
    */
   public SparseColumnMatrix(int rows, int columns, RandomAccessSparseVector[] columnVectors) {
     super(rows, columns);
-    this.columnVectors = this.columnVectors.clone();
+    this.columnVectors = columnVectors.clone();
     for (int col = 0; col < columnSize(); col++) {
       this.columnVectors[col] = this.columnVectors[col].clone();
     }

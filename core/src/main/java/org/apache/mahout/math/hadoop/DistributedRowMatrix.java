@@ -20,7 +20,6 @@ package org.apache.mahout.math.hadoop;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 
 import org.apache.hadoop.conf.Configurable;
@@ -192,9 +191,7 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
     return out;
   }
 
-  public Vector columnMeans() throws IOException, InterruptedException, ClassNotFoundException,
-  IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException,
-  InvocationTargetException, NoSuchMethodException {
+  public Vector columnMeans() throws IOException {
     return columnMeans("SequentialAccessSparseVector");
   }
 
@@ -206,18 +203,13 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
    *          RandomAccessSparseVector, DenseVector
    * @return Vector containing the column-wise mean of this
    */
-  public Vector columnMeans(String vectorClass) throws IOException,
-      InterruptedException, IllegalArgumentException, SecurityException,
-      ClassNotFoundException, InstantiationException, IllegalAccessException,
-      InvocationTargetException, NoSuchMethodException {
+  public Vector columnMeans(String vectorClass) throws IOException {
     Path outputVectorTmpPath =
         new Path(outputTmpBasePath, new Path(Long.toString(System.nanoTime())));
     Configuration initialConf =
         getConf() == null ? new Configuration() : getConf();
     String vectorClassFull = "org.apache.mahout.math." + vectorClass;
-    Vector mean =
-        MatrixColumnMeansJob.run(initialConf, rowPath, outputVectorTmpPath,
-            vectorClassFull);
+    Vector mean = MatrixColumnMeansJob.run(initialConf, rowPath, outputVectorTmpPath, vectorClassFull);
     if (!keepTempFiles) {
       FileSystem fs = outputVectorTmpPath.getFileSystem(conf);
       fs.delete(outputVectorTmpPath, true);

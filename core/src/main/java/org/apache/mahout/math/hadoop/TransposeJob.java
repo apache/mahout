@@ -95,7 +95,6 @@ public class TransposeJob extends AbstractJob {
     FileInputFormat.addInputPath(conf, matrixInputPath);
     conf.setInputFormat(SequenceFileInputFormat.class);
     FileOutputFormat.setOutputPath(conf, matrixOutputPath);
-    System.out.println("OUTPUT --> " + matrixOutputPath.toString());
     conf.setMapperClass(TransposeMapper.class);
     conf.setMapOutputKeyClass(IntWritable.class);
     conf.setMapOutputValueClass(VectorWritable.class);
@@ -136,8 +135,10 @@ public class TransposeJob extends AbstractJob {
           implements Reducer<WritableComparable<?>, VectorWritable, WritableComparable<?>, VectorWritable> {
 
     @Override
-    public void reduce(WritableComparable<?> key, Iterator<VectorWritable> vectors,
-                       OutputCollector<WritableComparable<?>, VectorWritable> out, Reporter reporter) throws IOException {
+    public void reduce(WritableComparable<?> key,
+                       Iterator<VectorWritable> vectors,
+                       OutputCollector<WritableComparable<?>,VectorWritable> out,
+                       Reporter reporter) throws IOException {
       out.collect(key, VectorWritable.merge(vectors));
     }
   }
@@ -146,8 +147,10 @@ public class TransposeJob extends AbstractJob {
           implements Reducer<WritableComparable<?>, VectorWritable, WritableComparable<?>, VectorWritable> {
 
     @Override
-    public void reduce(WritableComparable<?> key, Iterator<VectorWritable> vectors,
-                       OutputCollector<WritableComparable<?>, VectorWritable> out, Reporter reporter) throws IOException {
+    public void reduce(WritableComparable<?> key,
+                       Iterator<VectorWritable> vectors,
+                       OutputCollector<WritableComparable<?>, VectorWritable> out,
+                       Reporter reporter) throws IOException {
       Vector merged = VectorWritable.merge(vectors).get();
       out.collect(key, new VectorWritable(new SequentialAccessSparseVector(merged)));
     }

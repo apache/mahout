@@ -22,6 +22,9 @@
     <Bug pattern="MS_PKGPROTECT"/>
   </Match>
   <Match>
+    <Bug pattern="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE"/>
+  </Match>
+  <Match>
     <Bug pattern="RV_RETURN_VALUE_IGNORED"/>
   </Match>
   <Match>

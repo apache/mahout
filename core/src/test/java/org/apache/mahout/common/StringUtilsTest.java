@@ -65,6 +65,6 @@ public final class StringUtilsTest extends MahoutTestCase {
   @Test
   public void testEscape() throws Exception {
     String res = StringUtils.escapeXML("\",\',&,>,<");
-    assertTrue(res.equals("_,_,_,_,_"));
+    assertEquals("_,_,_,_,_", res);
   }
 }

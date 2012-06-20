@@ -44,7 +44,6 @@ import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.common.mapreduce.VectorSumReducer;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.vectorizer.SparseVectorsFromSequenceFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +63,8 @@ import java.util.List;
  * <dl>
  * <dt>{@code --input path}</td>
  * <dd>Input path for {@code SequenceFile<IntWritable, VectorWritable>} document vectors. See
- * {@link SparseVectorsFromSequenceFiles} for details on how to generate this input format.</dd>
+ * {@link org.apache.mahout.vectorizer.SparseVectorsFromSequenceFiles}
+ *  for details on how to generate this input format.</dd>
  * <dt>{@code --dictionary path}</dt>
  * <dd>Path to dictionary file(s) generated during construction of input document vectors (glob
  * expression supported). If set, this data is scanned to determine an appropriate value for option
@@ -224,7 +224,7 @@ public class CVB0Driver extends AbstractJob {
                         int maxItersPerDoc,
                         int numReduceTasks,
                         boolean backfillPerplexity)
-      throws ClassNotFoundException, IOException, InterruptedException {
+    throws ClassNotFoundException, IOException, InterruptedException {
     // verify arguments
     Preconditions.checkArgument(testFraction >= 0.0 && testFraction <= 1.0,
         "Expected 'testFraction' value in range [0, 1] but found value '%s'", testFraction);
@@ -314,7 +314,7 @@ public class CVB0Driver extends AbstractJob {
       }
     }
     log.info("Completed {} iterations in {} seconds", iterationNumber,
-        (System.currentTimeMillis() - startTime)/1000);
+        (System.currentTimeMillis() - startTime) / 1000);
     log.info("Perplexities: ({})", Joiner.on(", ").join(perplexities));
 
     // write final topic-term and doc-topic distributions
@@ -343,8 +343,7 @@ public class CVB0Driver extends AbstractJob {
   }
 
   private static double calculatePerplexity(Configuration conf, Path corpusPath, Path modelPath, int iteration)
-      throws IOException,
-      ClassNotFoundException, InterruptedException {
+    throws IOException, ClassNotFoundException, InterruptedException {
     String jobName = "Calculating perplexity for " + modelPath;
     log.info("About to run: " + jobName);
     Job job = new Job(conf, jobName);
@@ -402,7 +401,7 @@ public class CVB0Driver extends AbstractJob {
    * @throws IOException
    */
   public static double readPerplexity(Configuration conf, Path topicModelStateTemp, int iteration)
-      throws IOException {
+    throws IOException {
     Path perplexityPath = perplexityPath(topicModelStateTemp, iteration);
     FileSystem fs = FileSystem.get(perplexityPath.toUri(), conf);
     if (!fs.exists(perplexityPath)) {
@@ -423,10 +422,9 @@ public class CVB0Driver extends AbstractJob {
     return perplexity / modelWeight;
   }
 
-  private static Job writeTopicModel(Configuration conf, Path modelInput, Path output) throws IOException,
-      InterruptedException, ClassNotFoundException {
-    String jobName = String.format("Writing final topic/term distributions from %s to %s", modelInput,
-        output);
+  private static Job writeTopicModel(Configuration conf, Path modelInput, Path output)
+    throws IOException, InterruptedException, ClassNotFoundException {
+    String jobName = String.format("Writing final topic/term distributions from %s to %s", modelInput, output);
     log.info("About to run: " + jobName);
     Job job = new Job(conf, jobName);
     job.setJarByClass(CVB0Driver.class);
@@ -443,9 +441,8 @@ public class CVB0Driver extends AbstractJob {
   }
 
   private static Job writeDocTopicInference(Configuration conf, Path corpus, Path modelInput, Path output)
-      throws IOException, ClassNotFoundException, InterruptedException {
-    String jobName = String.format("Writing final document/topic inference from %s to %s", corpus,
-        output);
+    throws IOException, ClassNotFoundException, InterruptedException {
+    String jobName = String.format("Writing final document/topic inference from %s to %s", corpus, output);
     log.info("About to run: " + jobName);
     Job job = new Job(conf, jobName);
     job.setMapperClass(CVB0DocInferenceMapper.class);
@@ -483,7 +480,7 @@ public class CVB0Driver extends AbstractJob {
   }
 
   private static int getCurrentIterationNumber(Configuration config, Path modelTempDir, int maxIterations)
-      throws IOException {
+    throws IOException {
     FileSystem fs = FileSystem.get(modelTempDir.toUri(), config);
     int iterationNumber = 1;
     Path iterationPath = modelPath(modelTempDir, iterationNumber);
@@ -496,7 +493,8 @@ public class CVB0Driver extends AbstractJob {
   }
 
   public static void runIteration(Configuration conf, Path corpusInput, Path modelInput, Path modelOutput,
-                                  int iterationNumber, int maxIterations, int numReduceTasks) throws IOException, ClassNotFoundException, InterruptedException {
+                                  int iterationNumber, int maxIterations, int numReduceTasks)
+    throws IOException, ClassNotFoundException, InterruptedException {
     String jobName = String.format("Iteration %d of %d, input path: %s",
         iterationNumber, maxIterations, modelInput);
     log.info("About to run: " + jobName);

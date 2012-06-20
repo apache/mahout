@@ -85,7 +85,7 @@ public class DisplayKMeans extends DisplayClustering {
     prior.writeToSeqFiles(priorPath);
     
     int maxIter = 10;
-    new ClusterIterator().iterateSeq(conf, samples, priorPath, output, maxIter);
+    ClusterIterator.iterateSeq(conf, samples, priorPath, output, maxIter);
     loadClustersWritable(output);
   }
   

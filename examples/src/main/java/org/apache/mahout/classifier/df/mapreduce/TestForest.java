@@ -19,6 +19,7 @@ package org.apache.mahout.classifier.df.mapreduce;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
@@ -254,8 +255,12 @@ public class TestForest extends Configured implements Tool {
     }
   }
 
-  private void testDirectory(Path outPath, DataConverter converter, DecisionForest forest,
-    Dataset dataset, List<double[]> results, Random rng) throws IOException {
+  private void testDirectory(Path outPath,
+                             DataConverter converter,
+                             DecisionForest forest,
+                             Dataset dataset,
+                             Collection<double[]> results,
+                             Random rng) throws IOException {
     Path[] infiles = DFUtils.listOutputFiles(dataFS, dataPath);
 
     for (Path path : infiles) {
@@ -265,8 +270,13 @@ public class TestForest extends Configured implements Tool {
     }
   }
 
-  private void testFile(Path inPath, Path outPath, DataConverter converter, DecisionForest forest,
-    Dataset dataset, List<double[]> results, Random rng) throws IOException {
+  private void testFile(Path inPath,
+                        Path outPath,
+                        DataConverter converter,
+                        DecisionForest forest,
+                        Dataset dataset,
+                        Collection<double[]> results,
+                        Random rng) throws IOException {
     // create the predictions file
     FSDataOutputStream ofile = null;
 
@@ -276,7 +286,7 @@ public class TestForest extends Configured implements Tool {
 
     FSDataInputStream input = dataFS.open(inPath);
     try {
-      Scanner scanner = new Scanner(input);
+      Scanner scanner = new Scanner(input, "UTF-8");
 
       while (scanner.hasNextLine()) {
         String line = scanner.nextLine();

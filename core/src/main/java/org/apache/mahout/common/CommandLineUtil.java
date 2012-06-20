@@ -18,8 +18,10 @@
 package org.apache.mahout.common;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
+import com.google.common.base.Charsets;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.OptionException;
@@ -51,7 +53,7 @@ public final class CommandLineUtil {
     fmt.printHelp("<command> [Generic Options] [Job-Specific Options]", 
         "Generic Options:", ops, "");
     
-    PrintWriter pw = new PrintWriter(System.out, true);
+    PrintWriter pw = new PrintWriter(new OutputStreamWriter(System.out, Charsets.UTF_8), true);
     HelpFormatter formatter = new HelpFormatter();
     formatter.setGroup(group);
     formatter.setPrintWriter(pw);
@@ -69,7 +71,7 @@ public final class CommandLineUtil {
     fmt.printHelp("<command> [Generic Options] [Job-Specific Options]",
         "Generic Options:", ops, "");
 
-    PrintWriter pw = new PrintWriter(System.out, true);
+    PrintWriter pw = new PrintWriter(new OutputStreamWriter(System.out, Charsets.UTF_8), true);
     HelpFormatter formatter = new HelpFormatter();
     formatter.setGroup(group);
     formatter.setPrintWriter(pw);

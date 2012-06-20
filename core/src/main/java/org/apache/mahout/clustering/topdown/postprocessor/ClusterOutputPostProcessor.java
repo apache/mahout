@@ -91,10 +91,9 @@ public final class ClusterOutputPostProcessor {
    * Creates the directory to put post processed clusters.
    */
   private void createPostProcessDirectory() throws IOException {
-    if (!fileSystem.exists(clusterPostProcessorOutput)) {
-      if (!fileSystem.mkdirs(clusterPostProcessorOutput)) {
-        throw new IOException("Error creating cluster post processor directory");
-      }
+    if (!fileSystem.exists(clusterPostProcessorOutput) &&
+        !fileSystem.mkdirs(clusterPostProcessorOutput)) {
+      throw new IOException("Error creating cluster post processor directory");
     }
   }
   

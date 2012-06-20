@@ -35,8 +35,10 @@ import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -78,7 +80,8 @@ public final class SimpleCsvExamples {
     long t0 = System.currentTimeMillis();
     Vector v = new DenseVector(1000);
     if ("--generate".equals(args[0])) {
-      PrintWriter out = new PrintWriter(new File(args[2]));
+      PrintWriter out =
+          new PrintWriter(new OutputStreamWriter(new FileOutputStream(new File(args[2])), Charsets.UTF_8));
       try {
         int n = Integer.parseInt(args[1]);
         for (int i = 0; i < n; i++) {

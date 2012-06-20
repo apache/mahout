@@ -59,29 +59,20 @@ import org.apache.mahout.vectorizer.term.TermCountReducer;
  * value containing the tokenized document. You may use {@link DocumentProcessor} to tokenize the document.
  * This is a dictionary based Vectorizer.
  */
-public final class DictionaryVectorizer implements Vectorizer{
+public final class DictionaryVectorizer implements Vectorizer {
   
   public static final String DOCUMENT_VECTOR_OUTPUT_FOLDER = "tf-vectors";
-  
   public static final String MIN_SUPPORT = "min.support";
-  
   public static final String MAX_NGRAMS = "max.ngrams";
-  
   public static final int DEFAULT_MIN_SUPPORT = 2;
   
   private static final String DICTIONARY_FILE = "dictionary.file-";
-  
   private static final int MAX_CHUNKSIZE = 10000;
-  
   private static final int MIN_CHUNKSIZE = 100;
-  
   private static final String OUTPUT_FILES_PATTERN = "part-*";
-  
   // 4 byte overhead for each entry in the OpenObjectIntHashMap
   private static final int DICTIONARY_BYTE_OVERHEAD = 4;
-  
   private static final String VECTOR_OUTPUT_FOLDER = "partial-vectors-";
-  
   private static final String DICTIONARY_JOB_FOLDER = "wordcount";
   
   /**
@@ -90,7 +81,8 @@ public final class DictionaryVectorizer implements Vectorizer{
   private DictionaryVectorizer() {
   }
 
-  //TODO: move more of SparseVectorsFromSequenceFile in here, and then fold SparseVectorsFrom with EncodedVectorsFrom to have one framework.
+  //TODO: move more of SparseVectorsFromSequenceFile in here, and then fold SparseVectorsFrom with
+  // EncodedVectorsFrom to have one framework.
 
   @Override
   public void createVectors(Path input, Path output, VectorizerConfig config)
@@ -325,8 +317,9 @@ public final class DictionaryVectorizer implements Vectorizer{
     HadoopUtil.delete(conf, output);
     
     boolean succeeded = job.waitForCompletion(true);
-    if (!succeeded) 
+    if (!succeeded) {
       throw new IllegalStateException("Job failed!");
+    }
   }
   
   /**
@@ -363,7 +356,8 @@ public final class DictionaryVectorizer implements Vectorizer{
     HadoopUtil.delete(conf, output);
     
     boolean succeeded = job.waitForCompletion(true);
-    if (!succeeded) 
+    if (!succeeded) {
       throw new IllegalStateException("Job failed!");
+    }
   }
 }

@@ -60,7 +60,7 @@ public final class ImplicitLinearRegressionFactorizer extends AbstractFactorizer
   private double[][] itemMatrix;
   private Matrix userTransUser;
   private Matrix itemTransItem;
-  Collection<Callable<Void>> fVectorCallables;
+  private Collection<Callable<Void>> fVectorCallables;
   private boolean recomputeUserFeatures;
   private RunningAverage avrChange;
 
@@ -177,13 +177,12 @@ public final class ImplicitLinearRegressionFactorizer extends AbstractFactorizer
     return ids;
   }
 
-  private Matrix ones(int size) {
+  private static Matrix ones(int size) {
     double[] vector = new double[size];
     for (int i = 0; i < size; i++) {
       vector[i] = 1;
     }
-    Matrix ones = new DiagonalMatrix(vector);
-    return ones;
+    return new DiagonalMatrix(vector);
   }
 
   private double getAveragePreference() throws TasteException {
@@ -191,9 +190,8 @@ public final class ImplicitLinearRegressionFactorizer extends AbstractFactorizer
     LongPrimitiveIterator it = dataModel.getUserIDs();
     while (it.hasNext()) {
       int count = 0;
-      PreferenceArray prefs;
       try {
-        prefs = dataModel.getPreferencesFromUser(it.nextLong());
+        PreferenceArray prefs = dataModel.getPreferencesFromUser(it.nextLong());
         for (Preference pref : prefs) {
           average.addDatum(pref.getValue());
           count++;
@@ -241,7 +239,7 @@ public final class ImplicitLinearRegressionFactorizer extends AbstractFactorizer
       }
     }
     /* calculating cosine similarity to determine when to stop the algorithm, this could be used to detect convergence */
-    double cosine = (aTb) / (Math.sqrt(normA) * Math.sqrt(normB));
+    double cosine = aTb / (Math.sqrt(normA) * Math.sqrt(normB));
     if (Double.isNaN(cosine)) {
       log.info("Cosine similarity is NaN, recomputeUserFeatures=" + recomputeUserFeatures + " id=" + id);
     } else {
@@ -258,7 +256,7 @@ public final class ImplicitLinearRegressionFactorizer extends AbstractFactorizer
     avrChange = new FullRunningAverage();
   }
 
-  public void buildCallables(Matrix C, Matrix prefVector, int id) throws TasteException {
+  public void buildCallables(Matrix C, Matrix prefVector, int id) {
     fVectorCallables.add(new FeatureVectorCallable(C, prefVector, id));
     if (fVectorCallables.size() % (200 * Runtime.getRuntime().availableProcessors()) == 0) {
       execute(fVectorCallables);
@@ -266,7 +264,7 @@ public final class ImplicitLinearRegressionFactorizer extends AbstractFactorizer
     }
   }
 
-  public void finishProcessing() throws TasteException {
+  public void finishProcessing() {
     /* run the remaining part */
     if (fVectorCallables != null) {
       execute(fVectorCallables);
@@ -280,11 +278,11 @@ public final class ImplicitLinearRegressionFactorizer extends AbstractFactorizer
     recomputeUserFeatures = !recomputeUserFeatures;
   }
 
-  public Matrix identityV(int size) {
+  public static Matrix identityV(int size) {
     return ones(size);
   }
 
-  void execute(Collection<Callable<Void>> callables) throws TasteException {
+  static void execute(Collection<Callable<Void>> callables) {
     callables = wrapWithStatsCallables(callables);
     int numProcessors = Runtime.getRuntime().availableProcessors();
     ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
@@ -303,7 +301,7 @@ public final class ImplicitLinearRegressionFactorizer extends AbstractFactorizer
     executor.shutdown();
   }
 
-  private Collection<Callable<Void>> wrapWithStatsCallables(Collection<Callable<Void>> callables) {
+  private static Collection<Callable<Void>> wrapWithStatsCallables(Collection<Callable<Void>> callables) {
     int size = callables.size();
     Collection<Callable<Void>> wrapped = Lists.newArrayListWithExpectedSize(size);
     int count = 1;
@@ -355,7 +353,7 @@ public final class ImplicitLinearRegressionFactorizer extends AbstractFactorizer
     }
   }
 
-  private Matrix solve(Matrix A, Matrix y) {
+  private static Matrix solve(Matrix A, Matrix y) {
     return new QRDecomposition(A).solve(y);
   }
 

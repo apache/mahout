@@ -42,10 +42,10 @@ public class TransactionIterator<T> extends ForwardingIterator<Pair<int[],Long>>
         new Function<Pair<List<T>,Long>, Pair<int[],Long>>() {
           @Override
           public Pair<int[],Long> apply(Pair<List<T>,Long> from) {
-            int index = 0;
-	    if (from == null) {
+            if (from == null) {
 	      return null;
 	    }
+            int index = 0;
             for (T attribute : from.getFirst()) {
               if (attributeIdMapping.containsKey(attribute)) {
                 transactionBuffer[index++] = attributeIdMapping.get(attribute);

@@ -432,6 +432,7 @@ public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
    * any other collection. Hypothetically, we should check for and permit
    * equals on other Sets.
    */
+  @Override
   @SuppressWarnings("unchecked")
   public boolean equals(Object obj) {
     if (obj == this) {
@@ -524,10 +525,8 @@ public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
   }
 
   @Override
-  public <T2> T2[] toArray(T2[] a) {
-    List<T> keys = new ArrayList<T>();
-    keys(keys);
-    return keys.toArray(a);
+  public <T> T[] toArray(T[] a) {
+    return keys().toArray(a);
   }
 
   public List<T> keys() {

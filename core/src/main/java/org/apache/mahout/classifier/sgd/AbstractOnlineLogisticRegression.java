@@ -82,7 +82,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
    *          of v is disturbed.
    * @return A version of v with the link function applied.
    */
-  public Vector link(Vector v) {
+  public static Vector link(Vector v) {
     double max = v.maxValue();
     if (max >= 40) {
       // if max > 40, we subtract the large offset first
@@ -101,7 +101,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
    * @param r The value to transform.
    * @return The logit of r.
    */
-  public double link(double r) {
+  public static double link(double r) {
     if (r < 0.0) {
       double s = Math.exp(r);
       return s / (1.0 + s);

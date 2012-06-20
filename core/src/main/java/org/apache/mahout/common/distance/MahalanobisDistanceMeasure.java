@@ -147,8 +147,6 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
     if (v1.size() != v2.size()) {
       throw new CardinalityException(v1.size(), v2.size());
     }
-    if (inverseCovarianceMatrix== null)
-      System.out.println();
     return Math.sqrt(v1.minus(v2).dot(Algebra.mult(inverseCovarianceMatrix, v1.minus(v2))));
   }
 

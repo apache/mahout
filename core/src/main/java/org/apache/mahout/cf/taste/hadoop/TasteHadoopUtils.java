@@ -38,7 +38,8 @@ public final class TasteHadoopUtils {
   /** Standard delimiter of textual preference data */
   private static final Pattern PREFERENCE_TOKEN_DELIMITER = Pattern.compile("[\t,]");
 
-  private TasteHadoopUtils() {}
+  private TasteHadoopUtils() {
+  }
 
   /**
    * Splits a preference data line into string tokens

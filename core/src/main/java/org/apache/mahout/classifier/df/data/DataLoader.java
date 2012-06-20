@@ -114,7 +114,7 @@ public final class DataLoader {
   
   public static Data loadData(Dataset dataset, FileSystem fs, Path fpath) throws IOException {
     FSDataInputStream input = fs.open(fpath);
-    Scanner scanner = new Scanner(input);
+    Scanner scanner = new Scanner(input, "UTF-8");
     
     List<Instance> instances = Lists.newArrayList();
     
@@ -188,7 +188,7 @@ public final class DataLoader {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
     
     FSDataInputStream input = fs.open(path);
-    Scanner scanner = new Scanner(input);
+    Scanner scanner = new Scanner(input, "UTF-8");
     
     // used to convert CATEGORICAL attribute to Integer
     @SuppressWarnings("unchecked")

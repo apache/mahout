@@ -30,7 +30,8 @@ public class Kluster extends DistanceMeasureCluster {
   private boolean converged;
   
   /** For (de)serialization as a Writable */
-  public Kluster() {}
+  public Kluster() {
+  }
   
   /**
    * Construct a new cluster with the given point as its center

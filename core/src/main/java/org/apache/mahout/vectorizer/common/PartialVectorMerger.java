@@ -127,8 +127,9 @@ public final class PartialVectorMerger {
     HadoopUtil.delete(conf, output);
 
     boolean succeeded = job.waitForCompletion(true);
-    if (!succeeded) 
+    if (!succeeded) {
       throw new IllegalStateException("Job failed!");
+    }
   }
 
   private static String getCommaSeparatedPaths(Iterable<Path> paths) {

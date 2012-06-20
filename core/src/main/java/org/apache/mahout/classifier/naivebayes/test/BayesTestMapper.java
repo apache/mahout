@@ -30,6 +30,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 /**
  * Run the input through the model and see if it matches.
@@ -38,12 +39,13 @@ import java.io.IOException;
  */
 public class BayesTestMapper extends Mapper<Text, VectorWritable, Text, VectorWritable> {
 
+  private static final Pattern SLASH = Pattern.compile("/");
+
   private AbstractNaiveBayesClassifier classifier;
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    System.out.println("Setup");
     Configuration conf = context.getConfiguration();
     Path modelPath = HadoopUtil.cachedFile(conf);
     NaiveBayesModel model = NaiveBayesModel.materialize(modelPath, conf);
@@ -59,6 +61,6 @@ public class BayesTestMapper extends Mapper<Text, VectorWritable, Text, VectorWr
   protected void map(Text key, VectorWritable value, Context context) throws IOException, InterruptedException {
     Vector result = classifier.classifyFull(value.get());
     //the key is the expected value
-    context.write(new Text(key.toString().split("/")[1]), new VectorWritable(result));
+    context.write(new Text(SLASH.split(key.toString())[1]), new VectorWritable(result));
   }
 }

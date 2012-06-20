@@ -115,7 +115,7 @@ public class SSVDCli extends AbstractJob {
       throw new IOException("No Hadoop configuration present");
     }
 
-    Path[] inputPaths = new Path[] { getInputPath() };
+    Path[] inputPaths = { getInputPath() };
 
     // MAHOUT-817
     if (pca && xiPath == null) {

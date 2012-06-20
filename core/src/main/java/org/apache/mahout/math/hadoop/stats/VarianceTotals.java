@@ -23,9 +23,9 @@ package org.apache.mahout.math.hadoop.stats;
  */
 public final class VarianceTotals {
 
-  private double sumOfSquares = 0.0;
-  private double sum = 0.0;
-  private double totalCount = 0.0;
+  private double sumOfSquares;
+  private double sum;
+  private double totalCount;
 
   public double getSumOfSquares() {
     return sumOfSquares;

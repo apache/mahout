@@ -136,7 +136,7 @@ public final class PFPGrowthRetailDataTestVs extends MahoutTestCase {
       } else {
         if (!results2.get(key).equals(results1.get(entry.getKey()))) {
           System.out.println("invalid (1): " + key + ", expected: " + results2.get(key) + ", got: "
-                             +                             + results1.get(entry.getKey()));
+                             + results1.get(entry.getKey()));
         } else {
           System.out.println("matched (1): " + key + ", with: " + results2.get(key));
         }

@@ -41,8 +41,7 @@ public class ParallelFPGrowthMapper extends Mapper<LongWritable,Text,IntWritable
   private final OpenObjectIntHashMap<String> fMap = new OpenObjectIntHashMap<String>();
   private Pattern splitter;
   private int maxPerGroup;
-
-  private IntWritable wGroupID = new IntWritable();
+  private final IntWritable wGroupID = new IntWritable();
 
   @Override
   protected void map(LongWritable offset, Text input, Context context)
@@ -95,6 +94,6 @@ public class ParallelFPGrowthMapper extends Mapper<LongWritable,Text,IntWritable
     splitter = Pattern.compile(params.get(PFPGrowth.SPLIT_PATTERN,
                                           PFPGrowth.SPLITTER.toString()));
     
-    maxPerGroup = Integer.valueOf(params.getInt(PFPGrowth.MAX_PER_GROUP, 0));
+    maxPerGroup = params.getInt(PFPGrowth.MAX_PER_GROUP, 0);
   }
 }

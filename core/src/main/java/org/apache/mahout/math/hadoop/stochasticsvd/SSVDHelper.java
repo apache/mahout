@@ -35,7 +35,6 @@ import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterator;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
-import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
@@ -49,8 +48,12 @@ import com.google.common.io.Closeables;
  * set of small file manipulation helpers.
  *
  */
+public final class SSVDHelper {
 
-public class SSVDHelper {
+  private static final Pattern OUTPUT_FILE_PATTERN = Pattern.compile("(\\w+)-(m|r)-(\\d+)(\\.\\w+)?");
+
+  private SSVDHelper() {
+  }
 
   /**
    * load single vector from an hdfs file (possibly presented as glob).
@@ -66,12 +69,14 @@ public class SSVDHelper {
                                                        conf);
 
     try {
-      if (!iter.hasNext())
+      if (!iter.hasNext()) {
         throw new IOException("Empty input while reading vector");
+      }
       VectorWritable vw = iter.next();
 
-      if (iter.hasNext())
+      if (iter.hasNext()) {
         throw new IOException("Unexpected data after the end of vector file");
+      }
 
       return vw.get();
 
@@ -83,11 +88,7 @@ public class SSVDHelper {
   /**
    * save single vector into hdfs file.
    *
-   * @param v
-   *          vector to save
-   * @param vectorFilePath
-   * @param conf
-   * @throws IOException
+   * @param v vector to save
    */
   public static void saveVector(Vector v,
                                 Path vectorFilePath,
@@ -125,11 +126,10 @@ public class SSVDHelper {
       }
 
       FileStatus firstSeqFile;
-      if (!fstats[0].isDir()) {
-        firstSeqFile = fstats[0];
+      if (fstats[0].isDir()) {
+        firstSeqFile = fs.listStatus(fstats[0].getPath(), PathFilters.logsCRCFilter())[0];
       } else {
-        firstSeqFile =
-          fs.listStatus(fstats[0].getPath(), PathFilters.logsCRCFilter())[0];
+        firstSeqFile = fstats[0];
       }
 
       SequenceFile.Reader r = null;
@@ -142,9 +142,6 @@ public class SSVDHelper {
     }
     throw new IOException("Unable to open input files to determine input label type.");
   }
-
-  private static final Pattern OUTPUT_FILE_PATTERN =
-    Pattern.compile("(\\w+)-(m|r)-(\\d+)(\\.\\w+)?");
 
   static final Comparator<FileStatus> PARTITION_COMPARATOR =
     new Comparator<FileStatus>() {
@@ -181,13 +178,8 @@ public class SSVDHelper {
    * @param conf
    *          configuration
    * @return Dense matrix array
-   * @throws IOException
-   *           when I/O occurs.
    */
-  public static double[][] loadDistributedRowMatrix(FileSystem fs,
-                                                    Path glob,
-                                                    Configuration conf)
-    throws IOException {
+  public static double[][] loadDistributedRowMatrix(FileSystem fs, Path glob, Configuration conf) throws IOException {
 
     FileStatus[] files = fs.globStatus(glob);
     if (files == null) {
@@ -221,28 +213,17 @@ public class SSVDHelper {
   }
 
   /**
-   * Load multiplel upper triangular matrices and sum them up.
+   * Load multiple upper triangular matrices and sum them up.
    *
-   * @param fs
-   * @param glob
-   * @param conf
    * @return the sum of upper triangular inputs.
-   * @throws IOException
    */
-  public static UpperTriangular
-      loadAndSumUpperTriangularMatrices(Path glob, Configuration conf)
-        throws IOException {
+  public static UpperTriangular loadAndSumUpperTriangularMatrices(Path glob, Configuration conf) throws IOException {
     Vector v = loadAndSumUpVectors(glob, conf);
     return v == null ? null : new UpperTriangular(v);
   }
 
   /**
-   * returns sum of all vectors in different files specified by glob
-   *
-   * @param glob
-   * @param conf
-   * @return
-   * @throws IOException
+   * @return sum of all vectors in different files specified by glob
    */
   public static Vector loadAndSumUpVectors(Path glob, Configuration conf)
     throws IOException {
@@ -258,10 +239,11 @@ public class SSVDHelper {
     try {
       Vector v = null;
       while (iter.hasNext()) {
-        if (v == null)
+        if (v == null) {
           v = new DenseVector(iter.next().get());
-        else
+        } else {
           v.assign(iter.next().get(), Functions.PLUS);
+        }
       }
       return v;
 
@@ -274,17 +256,8 @@ public class SSVDHelper {
   /**
    * Load only one upper triangular matrix and issue error if mroe than one is
    * found.
-   *
-   * @param fs
-   * @param glob
-   * @param conf
-   * @return
-   * @throws IOException
    */
-  public static UpperTriangular loadUpperTriangularMatrix(FileSystem fs,
-                                                          Path glob,
-                                                          Configuration conf)
-    throws IOException {
+  public static UpperTriangular loadUpperTriangularMatrix(Path glob, Configuration conf) throws IOException {
 
     /*
      * there still may be more than one file in glob and only one of them must
@@ -299,12 +272,14 @@ public class SSVDHelper {
                                                        true,
                                                        conf);
     try {
-      if (!iter.hasNext())
+      if (!iter.hasNext()) {
         throw new IOException("No triangular matrices found");
+      }
       Vector v = iter.next().get();
       UpperTriangular result = new UpperTriangular(v);
-      if (iter.hasNext())
+      if (iter.hasNext()) {
         throw new IOException("Unexpected overrun in upper triangular matrix files");
+      }
       return result;
 
     } finally {
@@ -314,11 +289,8 @@ public class SSVDHelper {
 
   /**
    * extracts row-wise raw data from a Mahout matrix for 3rd party solvers.
-   * Unfortunately values member is 100% encapsulated in {@link DenseMatrix} at
+   * Unfortunately values member is 100% encapsulated in {@link org.apache.mahout.math.DenseMatrix} at
    * this point, so we have to resort to abstract element-wise copying.
-   *
-   * @param m
-   * @return
    */
   public static double[][] extractRawData(Matrix m) {
     int rows = m.numRows();

@@ -38,8 +38,8 @@ public final class GramKeyGroupComparatorTest extends MahoutTestCase {
 
     assertEquals(0, cmp.compare(a, b));
     assertEquals(0, cmp.compare(a, c));
-    assertTrue(0 > cmp.compare(a, d));
-    assertTrue(0 < cmp.compare(a, e));
-    assertTrue(0 < cmp.compare(d, e));
+    assertTrue(cmp.compare(a, d) < 0);
+    assertTrue(cmp.compare(a, e) > 0);
+    assertTrue(cmp.compare(d, e) > 0);
   }
 }

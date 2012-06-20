@@ -34,7 +34,8 @@ import java.util.Iterator;
 
 final class ALSUtils {
 
-  private ALSUtils() {}
+  private ALSUtils() {
+  }
 
   static Vector readFirstRow(Path dir, Configuration conf) throws IOException {
     Iterator<VectorWritable> iterator = new SequenceFileDirValueIterator<VectorWritable>(dir,

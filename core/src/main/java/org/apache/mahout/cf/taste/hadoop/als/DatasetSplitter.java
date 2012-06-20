@@ -32,8 +32,6 @@ import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.RandomUtils;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 /**
@@ -74,7 +72,6 @@ public class DatasetSplitter extends AbstractJob {
     addOption("probePercentage", "p", "percentage of the data to use as probe set (default: " 
         + DEFAULT_PROBE_PERCENTAGE + ')', String.valueOf(DEFAULT_PROBE_PERCENTAGE));
 
-    Map<String, List<String>> parsedArgs = parseArguments(args);
     double trainingPercentage = Double.parseDouble(getOption("trainingPercentage"));
     double probePercentage = Double.parseDouble(getOption("probePercentage"));
     String tempDir = getOption("tempDir");
@@ -88,22 +85,25 @@ public class DatasetSplitter extends AbstractJob {
     markPreferences.getConfiguration().set(TRAINING_PERCENTAGE, String.valueOf(trainingPercentage));
     markPreferences.getConfiguration().set(PROBE_PERCENTAGE, String.valueOf(probePercentage));
     boolean succeeded = markPreferences.waitForCompletion(true);
-    if (!succeeded) 
+    if (!succeeded) {
       return -1;
+    }
 
     Job createTrainingSet = prepareJob(markedPrefs, trainingSetPath, SequenceFileInputFormat.class,
         WritePrefsMapper.class, NullWritable.class, Text.class, TextOutputFormat.class);
     createTrainingSet.getConfiguration().set(PART_TO_USE, INTO_TRAINING_SET.toString());
     succeeded = createTrainingSet.waitForCompletion(true);
-    if (!succeeded) 
+    if (!succeeded) {
       return -1;
+    }
 
     Job createProbeSet = prepareJob(markedPrefs, probeSetPath, SequenceFileInputFormat.class,
         WritePrefsMapper.class, NullWritable.class, Text.class, TextOutputFormat.class);
     createProbeSet.getConfiguration().set(PART_TO_USE, INTO_PROBE_SET.toString());
     succeeded = createProbeSet.waitForCompletion(true);
-    if (!succeeded) 
+    if (!succeeded) {
       return -1;
+    }
 
     return 0;
   }

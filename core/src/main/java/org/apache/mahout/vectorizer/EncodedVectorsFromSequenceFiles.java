@@ -27,14 +27,11 @@ import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.vectorizer.encoders.FeatureVectorEncoder;
 import org.apache.mahout.vectorizer.encoders.LuceneTextValueEncoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Converts a given set of sequence files into SparseVectors
  */
 public final class EncodedVectorsFromSequenceFiles extends AbstractJob {
-  private static final Logger log = LoggerFactory.getLogger(EncodedVectorsFromSequenceFiles.class);
 
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(), new EncodedVectorsFromSequenceFiles(), args);
@@ -45,11 +42,21 @@ public final class EncodedVectorsFromSequenceFiles extends AbstractJob {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.analyzerOption().create());
-    addOption(buildOption("sequentialAccessVector", "seq", "(Optional) Whether output vectors should be SequentialAccessVectors. If set true else false", false, false, null));
-    addOption(buildOption("namedVector", "nv", "Create named vectors using the key.  False by default", false, false, null));
-    addOption("cardinality", "c", "The cardinality to use for creating the vectors.  Default is 5000", String.valueOf(5000));
-    addOption("encoderFieldName", "en", "The name of the encoder to be passed to the FeatureVectorEncoder constructor.  Default is text.  Note this is not the class name of a FeatureValueEncoder, but is instead the construction argument.", "text");
-    addOption("encoderClass", "ec", "The class name of the encoder to be used. Default is " + LuceneTextValueEncoder.class.getName(), LuceneTextValueEncoder.class.getName());
+    addOption(buildOption("sequentialAccessVector", "seq",
+                          "(Optional) Whether output vectors should be SequentialAccessVectors. " +
+                              "If set true else false",
+                          false, false, null));
+    addOption(buildOption("namedVector", "nv",
+                          "Create named vectors using the key.  False by default", false, false, null));
+    addOption("cardinality", "c",
+              "The cardinality to use for creating the vectors.  Default is 5000", "5000");
+    addOption("encoderFieldName", "en",
+              "The name of the encoder to be passed to the FeatureVectorEncoder constructor. Default is text. " +
+                  "Note this is not the class name of a FeatureValueEncoder, but is instead the construction argument.",
+              "text");
+    addOption("encoderClass", "ec",
+              "The class name of the encoder to be used. Default is " + LuceneTextValueEncoder.class.getName(),
+              LuceneTextValueEncoder.class.getName());
     addOption(DefaultOptionCreator.overwriteOption().create());
     if (parseArguments(args) == null) {
       return -1;
@@ -64,11 +71,9 @@ public final class EncodedVectorsFromSequenceFiles extends AbstractJob {
 
     Class<? extends Analyzer> analyzerClass = getAnalyzerClassFromOption();
 
-
     Configuration conf = getConf();
 
     boolean sequentialAccessOutput = hasOption("sequentialAccessVector");
-
 
     boolean namedVectors = hasOption("namedVector");
     int cardinality = 5000;

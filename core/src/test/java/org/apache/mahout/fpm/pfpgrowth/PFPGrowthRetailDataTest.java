@@ -124,7 +124,7 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
       } else {
         if (!expectedResults.get(key).equals(results.get(entry.getKey()))) {
           System.out.println("invalid (1): " + key + ", expected: " + expectedResults.get(key) + ", got: "
-                             +                             + results.get(entry.getKey()));
+                             + results.get(entry.getKey()));
         } else {
           System.out.println("matched (1): " + key + ", with: " + expectedResults.get(key));
         }
@@ -165,8 +165,9 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
     int numGroups = params.getInt(PFPGrowth.NUM_GROUPS, 
                                   PFPGrowth.NUM_GROUPS_DEFAULT);
     int maxPerGroup = fList.size() / numGroups;
-    if (fList.size() % numGroups != 0) 
+    if (fList.size() % numGroups != 0) {
       maxPerGroup++;
+    }
     params.set(PFPGrowth.MAX_PER_GROUP, Integer.toString(maxPerGroup));
 
     PFPGrowth.startParallelFPGrowth(params, conf);

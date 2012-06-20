@@ -17,6 +17,7 @@
 
 package org.apache.mahout.classifier.sequencelearning.hmm;
 
+import com.google.common.base.Charsets;
 import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -33,6 +34,7 @@ import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -90,7 +92,7 @@ public final class ViterbiEvaluator {
 
       //reading observations
       List<Integer> observations = new ArrayList<Integer>();
-      Scanner scanner = new Scanner(new FileInputStream(input));
+      Scanner scanner = new Scanner(new FileInputStream(input), "UTF-8");
       try {
         while (scanner.hasNextInt()) {
           observations.add(scanner.nextInt());
@@ -108,7 +110,7 @@ public final class ViterbiEvaluator {
       int[] hiddenStates = HmmEvaluator.decode(model, observationsArray, true);
 
       //writing output
-      PrintWriter writer = new PrintWriter(new FileOutputStream(output), true);
+      PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(output), Charsets.UTF_8), true);
       try {
         for (int hiddenState : hiddenStates) {
           writer.print(hiddenState);

@@ -442,8 +442,9 @@ public final class BtJob {
           double xii = xi.size() > btIndex ? xi.getQuick(btIndex) : 0.0;
           // compute s_b
           pmult.setMultiplicator(xii);
-          if (sbAccum == null)
+          if (sbAccum == null) {
             sbAccum = new DenseVector(btRow.size());
+          }
           sbAccum.assign(btRow, pmult);
         }
 

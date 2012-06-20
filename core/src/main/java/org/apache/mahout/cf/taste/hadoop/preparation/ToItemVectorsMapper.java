@@ -47,7 +47,7 @@ public class ToItemVectorsMapper
 
   @Override
   protected void map(VarLongWritable rowIndex, VectorWritable vectorWritable, Context ctx)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     Vector userRatings = vectorWritable.get();
 
     int numElementsBeforeSampling = userRatings.getNumNondefaultElements();

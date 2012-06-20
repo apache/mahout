@@ -19,6 +19,7 @@ package org.apache.mahout.math;
 
 import java.util.Comparator;
 
+import com.google.common.base.Preconditions;
 import org.apache.mahout.math.function.ByteComparator;
 import org.apache.mahout.math.function.CharComparator;
 import org.apache.mahout.math.function.DoubleComparator;
@@ -54,8 +55,7 @@ public final class Sorting {
    * @return the non-negative index of the element, or a negative index which is
    *         {@code -index - 1} where the element would be inserted.
    */
-  public static int binarySearchFromTo(byte[] array, byte value, int from,
-      int to) {
+  public static int binarySearchFromTo(byte[] array, byte value, int from, int to) {
     int mid = -1;
     while (from <= to) {
       mid = (from + to) >>> 1;
@@ -91,8 +91,7 @@ public final class Sorting {
    * @return the non-negative index of the element, or a negative index which is
    *         {@code -index - 1} where the element would be inserted.
    */
-  public static int binarySearchFromTo(char[] array, char value, int from,
-      int to) {
+  public static int binarySearchFromTo(char[] array, char value, int from, int to) {
     int mid = -1;
     while (from <= to) {
       mid = (from + to) >>> 1;
@@ -127,8 +126,7 @@ public final class Sorting {
    * @return the non-negative index of the element, or a negative index which is
    *         {@code -index - 1} where the element would be inserted.
    */
-  public static int binarySearchFromTo(double[] array, double value, int from,
-      int to) {
+  public static int binarySearchFromTo(double[] array, double value, int from, int to) {
     long longBits = Double.doubleToLongBits(value);
     int mid = -1;
     while (from <= to) {
@@ -164,8 +162,7 @@ public final class Sorting {
    * @return the non-negative index of the element, or a negative index which is
    *         {@code -index - 1} where the element would be inserted.
    */
-  public static int binarySearchFromTo(float[] array, float value, int from,
-      int to) {
+  public static int binarySearchFromTo(float[] array, float value, int from, int to) {
     int intBits = Float.floatToIntBits(value);
     int mid = -1;
     while (from <= to) {
@@ -272,13 +269,13 @@ public final class Sorting {
    *         {@code -index - 1} where the element would be inserted.
    * 
    */
-  public static <T extends Comparable<T>> int binarySearchFromTo(T[] array,
-      T object, int from, int to) {
+  public static <T extends Comparable<T>> int binarySearchFromTo(T[] array, T object, int from, int to) {
     if (array.length == 0) {
       return -1;
     }
     
-    int mid = 0, result = 0;
+    int mid = 0;
+    int result = 0;
     while (from <= to) {
       mid = (from + to) >>> 1;
       if ((result = array[mid].compareTo(object)) < 0) {
@@ -311,9 +308,9 @@ public final class Sorting {
    *          the {@code Comparator} used to compare the elements.
    * @return the non-negative index of the element, or a negative index which
    */
-  public static <T> int binarySearchFromTo(T[] array, T object, int from,
-      int to, Comparator<? super T> comparator) {
-    int mid = 0, result = 0;
+  public static <T> int binarySearchFromTo(T[] array, T object, int from, int to, Comparator<? super T> comparator) {
+    int mid = 0;
+    int result = 0;
     while (from <= to) {
       mid = (from + to) >>> 1;
       if ((result = comparator.compare(array[mid], object)) < 0) {
@@ -380,7 +377,8 @@ public final class Sorting {
     // NaNs are equal to other NaNs and larger than any other double.
     if (Double.isNaN(double1)) {
       return false;
-    } else if (Double.isNaN(double2)) {
+    }
+    if (Double.isNaN(double2)) {
       return true;
     }
     
@@ -407,7 +405,8 @@ public final class Sorting {
     // NaNs are equal to other NaNs and larger than any other float
     if (Float.isNaN(float1)) {
       return false;
-    } else if (Float.isNaN(float2)) {
+    }
+    if (Float.isNaN(float2)) {
       return true;
     }
     
@@ -418,7 +417,9 @@ public final class Sorting {
   }
   
   private static <T> int med3(T[] array, int a, int b, int c, Comparator<T> comp) {
-    T x = array[a], y = array[b], z = array[c];
+    T x = array[a];
+    T y = array[b];
+    T z = array[c];
     int comparisonxy = comp.compare(x, y);
     int comparisonxz = comp.compare(x, z);
     int comparisonyz = comp.compare(y, z);
@@ -428,7 +429,9 @@ public final class Sorting {
   }
   
   private static int med3(byte[] array, int a, int b, int c, ByteComparator comp) {
-    byte x = array[a], y = array[b], z = array[c];
+    byte x = array[a];
+    byte y = array[b];
+    byte z = array[c];
     int comparisonxy = comp.compare(x, y);
     int comparisonxz = comp.compare(x, z);
     int comparisonyz = comp.compare(y, z);
@@ -438,7 +441,9 @@ public final class Sorting {
   }
   
   private static int med3(char[] array, int a, int b, int c, CharComparator comp) {
-    char x = array[a], y = array[b], z = array[c];
+    char x = array[a];
+    char y = array[b];
+    char z = array[c];
     int comparisonxy = comp.compare(x, y);
     int comparisonxz = comp.compare(x, z);
     int comparisonyz = comp.compare(y, z);
@@ -449,7 +454,9 @@ public final class Sorting {
   
   private static int med3(double[] array, int a, int b, int c,
       DoubleComparator comp) {
-    double x = array[a], y = array[b], z = array[c];
+    double x = array[a];
+    double y = array[b];
+    double z = array[c];
     int comparisonxy = comp.compare(x, y);
     int comparisonxz = comp.compare(x, z);
     int comparisonyz = comp.compare(y, z);
@@ -460,7 +467,9 @@ public final class Sorting {
   
   private static int med3(float[] array, int a, int b, int c,
       FloatComparator comp) {
-    float x = array[a], y = array[b], z = array[c];
+    float x = array[a];
+    float y = array[b];
+    float z = array[c];
     int comparisonxy = comp.compare(x, y);
     int comparisonxz = comp.compare(x, z);
     int comparisonyz = comp.compare(y, z);
@@ -470,7 +479,9 @@ public final class Sorting {
   }
   
   private static int med3(int[] array, int a, int b, int c, IntComparator comp) {
-    int x = array[a], y = array[b], z = array[c];
+    int x = array[a];
+    int y = array[b];
+    int z = array[c];
     int comparisonxy = comp.compare(x, y);
     int comparisonxz = comp.compare(x, z);
     int comparisonyz = comp.compare(y, z);
@@ -498,7 +509,9 @@ public final class Sorting {
   }
   
   private static int med3(long[] array, int a, int b, int c, LongComparator comp) {
-    long x = array[a], y = array[b], z = array[c];
+    long x = array[a];
+    long y = array[b];
+    long z = array[c];
     int comparisonxy = comp.compare(x, y);
     int comparisonxz = comp.compare(x, z);
     int comparisonyz = comp.compare(y, z);
@@ -509,7 +522,9 @@ public final class Sorting {
   
   private static int med3(short[] array, int a, int b, int c,
       ShortComparator comp) {
-    short x = array[a], y = array[b], z = array[c];
+    short x = array[a];
+    short y = array[b];
+    short z = array[c];
     int comparisonxy = comp.compare(x, y);
     int comparisonxz = comp.compare(x, z);
     int comparisonyz = comp.compare(y, z);
@@ -536,9 +551,7 @@ public final class Sorting {
    */
   public static void quickSort(byte[] array, int start, int end,
       ByteComparator comp) {
-    if (array == null) {
-      throw new NullPointerException();
-    }
+    Preconditions.checkNotNull(array);
     checkBounds(array.length, start, end);
     quickSort0(start, end, array, comp);
   }
@@ -559,8 +572,7 @@ public final class Sorting {
     }
   }
   
-  private static void quickSort0(int start, int end, byte[] array,
-      ByteComparator comp) {
+  private static void quickSort0(int start, int end, byte[] array, ByteComparator comp) {
     byte temp;
     int length = end - start;
     if (length < 7) {
@@ -587,9 +599,10 @@ public final class Sorting {
       middle = med3(array, bottom, middle, top, comp);
     }
     byte partionValue = array[middle];
-    int a, b, c, d;
-    a = b = start;
-    c = d = end - 1;
+    int a = start;
+    int b = a;
+    int c = end - 1;
+    int d = c;
     while (true) {
       int comparison;
       while (b <= c && (comparison = comp.compare(array[b], partionValue)) <= 0) {
@@ -683,9 +696,10 @@ public final class Sorting {
     int partitionIndex = middle; // an index, not a value.
     
     // regions from a to b and from c to d are what we will recursively sort
-    int a, b, c, d;
-    a = b = start;
-    c = d = end - 1;
+    int a = start;
+    int b = a;
+    int c = end - 1;
+    int d = c;
     while (b <= c) {
       // copy all values equal to the partition value to before a..b.  In the process, advance b
       // as long as values less than the partition or equal are found, also stop when a..b collides with c..d
@@ -805,9 +819,7 @@ public final class Sorting {
    */
   public static void quickSort(char[] array, int start, int end,
       CharComparator comp) {
-    if (array == null) {
-      throw new NullPointerException();
-    }
+    Preconditions.checkNotNull(array);
     checkBounds(array.length, start, end);
     quickSort0(start, end, array, comp);
   }
@@ -840,9 +852,10 @@ public final class Sorting {
       middle = med3(array, bottom, middle, top, comp);
     }
     char partionValue = array[middle];
-    int a, b, c, d;
-    a = b = start;
-    c = d = end - 1;
+    int a = start;
+    int b = a;
+    int c = end - 1;
+    int d = c;
     while (true) {
       int comparison;
       while (b <= c && (comparison = comp.compare(array[b], partionValue)) <= 0) {
@@ -911,9 +924,7 @@ public final class Sorting {
    */
   public static void quickSort(double[] array, int start, int end,
       DoubleComparator comp) {
-    if (array == null) {
-      throw new NullPointerException();
-    }
+    Preconditions.checkNotNull(array);
     checkBounds(array.length, start, end);
     quickSort0(start, end, array, comp);
   }
@@ -946,9 +957,10 @@ public final class Sorting {
       middle = med3(array, bottom, middle, top, comp);
     }
     double partionValue = array[middle];
-    int a, b, c, d;
-    a = b = start;
-    c = d = end - 1;
+    int a = start;
+    int b = a;
+    int c = end - 1;
+    int d = c;
     while (true) {
       int comparison;
       while (b <= c && (comparison = comp.compare(partionValue, array[b])) >= 0) {
@@ -1016,9 +1028,7 @@ public final class Sorting {
    */
   public static void quickSort(float[] array, int start, int end,
       FloatComparator comp) {
-    if (array == null) {
-      throw new NullPointerException();
-    }
+    Preconditions.checkNotNull(array);
     checkBounds(array.length, start, end);
     quickSort0(start, end, array, comp);
   }
@@ -1051,9 +1061,10 @@ public final class Sorting {
       middle = med3(array, bottom, middle, top, comp);
     }
     float partionValue = array[middle];
-    int a, b, c, d;
-    a = b = start;
-    c = d = end - 1;
+    int a = start;
+    int b = a;
+    int c = end - 1;
+    int d = c;
     while (true) {
       int comparison;
       while (b <= c && (comparison = comp.compare(partionValue, array[b])) >= 0) {
@@ -1121,9 +1132,7 @@ public final class Sorting {
    */
   public static void quickSort(int[] array, int start, int end,
       IntComparator comp) {
-    if (array == null) {
-      throw new NullPointerException();
-    }
+    Preconditions.checkNotNull(array);
     checkBounds(array.length, start, end);
     quickSort0(start, end, array, comp);
   }
@@ -1156,9 +1165,10 @@ public final class Sorting {
       middle = med3(array, bottom, middle, top, comp);
     }
     int partionValue = array[middle];
-    int a, b, c, d;
-    a = b = start;
-    c = d = end - 1;
+    int a = start;
+    int b = a;
+    int c = end - 1;
+    int d = c;
     while (true) {
       int comparison;
       while (b <= c && (comparison = comp.compare(array[b], partionValue)) <= 0) {
@@ -1226,9 +1236,7 @@ public final class Sorting {
    */
   public static void quickSort(long[] array, int start, int end,
       LongComparator comp) {
-    if (array == null) {
-      throw new NullPointerException();
-    }
+    Preconditions.checkNotNull(array);
     checkBounds(array.length, start, end);
     quickSort0(start, end, array, comp);
   }
@@ -1261,9 +1269,10 @@ public final class Sorting {
       middle = med3(array, bottom, middle, top, comp);
     }
     long partionValue = array[middle];
-    int a, b, c, d;
-    a = b = start;
-    c = d = end - 1;
+    int a = start;
+    int b = a;
+    int c = end - 1;
+    int d = c;
     while (true) {
       int comparison;
       while (b <= c && (comparison = comp.compare(array[b], partionValue)) <= 0) {
@@ -1331,9 +1340,7 @@ public final class Sorting {
    */
   public static <T> void quickSort(T[] array, int start, int end,
       Comparator<T> comp) {
-    if (array == null) {
-      throw new NullPointerException();
-    }
+    Preconditions.checkNotNull(array);
     checkBounds(array.length, start, end);
     quickSort0(start, end, array, comp);
   }
@@ -1389,9 +1396,10 @@ public final class Sorting {
       middle = med3(array, bottom, middle, top, comp);
     }
     T partionValue = array[middle];
-    int a, b, c, d;
-    a = b = start;
-    c = d = end - 1;
+    int a = start;
+    int b = a;
+    int c = end - 1;
+    int d = c;
     while (true) {
       int comparison;
       while (b <= c && (comparison = comp.compare(array[b], partionValue)) <= 0) {
@@ -1457,9 +1465,7 @@ public final class Sorting {
    */
   public static void quickSort(short[] array, int start, int end,
       ShortComparator comp) {
-    if (array == null) {
-      throw new NullPointerException();
-    }
+    Preconditions.checkNotNull(array);
     checkBounds(array.length, start, end);
     quickSort0(start, end, array, comp);
   }
@@ -1492,9 +1498,10 @@ public final class Sorting {
       middle = med3(array, bottom, middle, top, comp);
     }
     short partionValue = array[middle];
-    int a, b, c, d;
-    a = b = start;
-    c = d = end - 1;
+    int a = start;
+    int b = a;
+    int c = end - 1;
+    int d = c;
     while (true) {
       int comparison;
       while (b <= c && (comparison = comp.compare(array[b], partionValue)) < 0) {
@@ -1626,8 +1633,9 @@ public final class Sorting {
       System.arraycopy(in, start, out, start, len);
       return;
     }
-    int r = med, i = start;
-    
+    int r = med;
+    int i = start;
+
     // use merging with exponential search
     do {
       T fromVal = in[start];
@@ -1762,8 +1770,9 @@ public final class Sorting {
       System.arraycopy(in, start, out, start, len);
       return;
     }
-    int r = med, i = start;
-    
+    int r = med;
+    int i = start;
+
     // use merging with exponential search
     do {
       byte fromVal = in[start];
@@ -1878,8 +1887,9 @@ public final class Sorting {
       System.arraycopy(in, start, out, start, len);
       return;
     }
-    int r = med, i = start;
-    
+    int r = med;
+    int i = start;
+
     // use merging with exponential search
     do {
       char fromVal = in[start];
@@ -1995,8 +2005,9 @@ public final class Sorting {
       System.arraycopy(in, start, out, start, len);
       return;
     }
-    int r = med, i = start;
-    
+    int r = med;
+    int i = start;
+
     // use merging with exponential search
     do {
       short fromVal = in[start];
@@ -2112,8 +2123,9 @@ public final class Sorting {
       System.arraycopy(in, start, out, start, len);
       return;
     }
-    int r = med, i = start;
-    
+    int r = med;
+    int i = start;
+
     // use merging with exponential search
     do {
       int fromVal = in[start];
@@ -2229,8 +2241,9 @@ public final class Sorting {
       System.arraycopy(in, start, out, start, len);
       return;
     }
-    int r = med, i = start;
-    
+    int r = med;
+    int i = start;
+
     // use merging with exponential search
     do {
       long fromVal = in[start];
@@ -2345,8 +2358,9 @@ public final class Sorting {
       System.arraycopy(in, start, out, start, len);
       return;
     }
-    int r = med, i = start;
-    
+    int r = med;
+    int i = start;
+
     // use merging with exponential search
     do {
       float fromVal = in[start];
@@ -2462,8 +2476,9 @@ public final class Sorting {
       System.arraycopy(in, start, out, start, len);
       return;
     }
-    int r = med, i = start;
-    
+    int r = med;
+    int i = start;
+
     // use merging with exponential search
     do {
       double fromVal = in[start];
@@ -2521,11 +2536,11 @@ public final class Sorting {
   }
 
   /**
-   * Transforms two consecutive sorted ranges into a single sorted range.  The initial ranges are <code>[first,
-   * middle)</code> and <code>[middle, last)</code>, and the resulting range is <code>[first, last)</code>. Elements in
+   * Transforms two consecutive sorted ranges into a single sorted range.  The initial ranges are {@code [first,}
+   * middle)</code> and {@code [middle, last)}, and the resulting range is {@code [first, last)}. Elements in
    * the first input range will precede equal elements in the second.
    */
-  static void inplace_merge(int first, int middle, int last, IntComparator comp, Swapper swapper) {
+  static void inplaceMerge(int first, int middle, int last, IntComparator comp, Swapper swapper) {
     if (first >= middle || middle >= last) {
       return;
     }
@@ -2539,10 +2554,10 @@ public final class Sorting {
     int secondCut;
     if (middle - first > last - middle) {
       firstCut = first + (middle - first) / 2;
-      secondCut = lower_bound(middle, last, firstCut, comp);
+      secondCut = lowerBound(middle, last, firstCut, comp);
     } else {
       secondCut = middle + (last - middle) / 2;
-      firstCut = upper_bound(first, middle, secondCut, comp);
+      firstCut = upperBound(first, middle, secondCut, comp);
     }
   
     // rotate(firstCut, middle, secondCut, swapper);
@@ -2572,8 +2587,8 @@ public final class Sorting {
     // end inline
   
     middle = firstCut + (secondCut - middle);
-    inplace_merge(first, firstCut, middle, comp, swapper);
-    inplace_merge(middle, secondCut, last, comp, swapper);
+    inplaceMerge(first, firstCut, middle, comp, swapper);
+    inplaceMerge(middle, secondCut, last, comp, swapper);
   }
 
   /**
@@ -2584,12 +2599,11 @@ public final class Sorting {
    * @param last  One past the end of the range.
    * @param x     Element to be searched for.
    * @param comp  Comparison function.
-   * @return The largest index i such that, for every j in the range <code>[first, i)</code>, <code>comp.apply(array[j],
-   *         x)</code> is <code>true</code>.
-   * @see Sorting#upper_bound
+   * @return The largest index i such that, for every j in the range <code>[first, i)</code>, {@code comp.apply(array[j],}
+   *         x)</code> is {@code true}.
+   * @see Sorting#upperBound
    */
-  static int lower_bound(int first, int last, int x, IntComparator comp) {
-    //if (comp==null) throw new NullPointerException();
+  static int lowerBound(int first, int last, int x, IntComparator comp) {
     int len = last - first;
     while (len > 0) {
       int half = len / 2;
@@ -2653,7 +2667,7 @@ public final class Sorting {
     }
   
     // Merge sorted halves
-    inplace_merge(fromIndex, mid, toIndex, c, swapper);
+    inplaceMerge(fromIndex, mid, toIndex, c, swapper);
   }
 
   /**
@@ -2664,12 +2678,11 @@ public final class Sorting {
    * @param last  One past the end of the range.
    * @param x     Element to be searched for.
    * @param comp  Comparison function.
-   * @return The largest index i such that, for every j in the range <code>[first, i)</code>, <code>comp.apply(x,
-   *         array[j])</code> is <code>false</code>.
-   * @see Sorting#lower_bound
+   * @return The largest index i such that, for every j in the range <code>[first, i)</code>, {@code comp.apply(x,}
+   *         array[j])</code> is {@code false}.
+   * @see Sorting#lowerBound
    */
-  static int upper_bound(int first, int last, int x, IntComparator comp) {
-    //if (comp==null) throw new NullPointerException();
+  static int upperBound(int first, int last, int x, IntComparator comp) {
     int len = last - first;
     while (len > 0) {
       int half = len / 2;

@@ -24,21 +24,11 @@ import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.SparseMatrix;
 import org.apache.mahout.math.Vector;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
 
 public class AlternatingLeastSquaresSolverTest extends MahoutTestCase {
-
-  private AlternatingLeastSquaresSolver solver;
-
-  @Override
-  @Before
-  public void setUp() throws Exception {
-    super.setUp();
-    solver = new AlternatingLeastSquaresSolver();
-  }
 
   @Test
   public void addLambdaTimesNuiTimesE() {
@@ -46,7 +36,7 @@ public class AlternatingLeastSquaresSolverTest extends MahoutTestCase {
     double lambda = 0.2;
     Matrix matrix = new SparseMatrix(5, 5);
 
-    solver.addLambdaTimesNuiTimesE(matrix, lambda, nui);
+    AlternatingLeastSquaresSolver.addLambdaTimesNuiTimesE(matrix, lambda, nui);
 
     for (int n = 0; n < 5; n++) {
       assertEquals(1.0, matrix.getQuick(n, n), EPSILON);
@@ -58,7 +48,7 @@ public class AlternatingLeastSquaresSolverTest extends MahoutTestCase {
     Vector f1 = new DenseVector(new double[] { 1, 2, 3 });
     Vector f2 = new DenseVector(new double[] { 4, 5, 6 });
 
-    Matrix miIi = solver.createMiIi(Arrays.asList(f1, f2), 3);
+    Matrix miIi = AlternatingLeastSquaresSolver.createMiIi(Arrays.asList(f1, f2), 3);
 
     assertEquals(1.0, miIi.getQuick(0, 0), EPSILON);
     assertEquals(2.0, miIi.getQuick(1, 0), EPSILON);
@@ -75,7 +65,7 @@ public class AlternatingLeastSquaresSolverTest extends MahoutTestCase {
     ratings.setQuick(3, 3.0);
     ratings.setQuick(5, 5.0);
 
-    Matrix riIiMaybeTransposed = solver.createRiIiMaybeTransposed(ratings);
+    Matrix riIiMaybeTransposed = AlternatingLeastSquaresSolver.createRiIiMaybeTransposed(ratings);
     assertEquals(1, riIiMaybeTransposed.numCols(), 1);
     assertEquals(3, riIiMaybeTransposed.numRows(), 3);
 
@@ -92,7 +82,7 @@ public class AlternatingLeastSquaresSolverTest extends MahoutTestCase {
     ratings.setQuick(5, 5.0);
 
     try {
-      solver.createRiIiMaybeTransposed(ratings);
+      AlternatingLeastSquaresSolver.createRiIiMaybeTransposed(ratings);
       fail();
     } catch (IllegalArgumentException e) {}
   }

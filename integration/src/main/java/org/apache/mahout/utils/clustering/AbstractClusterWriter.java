@@ -145,7 +145,7 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
 
     for (Pair<String, Double> item : topTerms) {
       String term = item.getFirst();
-      sb.append(term).append("_");
+      sb.append(term).append('_');
     }
     sb.deleteCharAt(sb.length() - 1);
     return sb.toString();

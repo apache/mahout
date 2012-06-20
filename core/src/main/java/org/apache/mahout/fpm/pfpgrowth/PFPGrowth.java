@@ -50,8 +50,6 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth;
 import org.apache.mahout.math.list.IntArrayList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -95,7 +93,7 @@ public final class PFPGrowth {
       throw new IOException("Cannot read Frequency list from Distributed Cache");
     }
     if (files.length != 1) {
-      throw new IOException("Cannot read Frequency list from Distributed Cache (" + files.length + ")");
+      throw new IOException("Cannot read Frequency list from Distributed Cache (" + files.length + ')');
     }
     FileSystem fs = FileSystem.getLocal(conf);
     Path fListLocalPath = fs.makeQualified(files[0]);
@@ -106,7 +104,7 @@ public final class PFPGrowth {
         throw new IOException("Cannot read Frequency list from Distributed Cache");
       }
       if (filesURIs.length != 1) {
-        throw new IOException("Cannot read Frequency list from Distributed Cache (" + files.length + ")");
+        throw new IOException("Cannot read Frequency list from Distributed Cache (" + files.length + ')');
       }
       fListLocalPath = new Path(filesURIs[0].getPath());
     }
@@ -187,8 +185,9 @@ public final class PFPGrowth {
     IntArrayList ret = new IntArrayList();
     int start = groupId * maxPerGroup;
     int end = start + maxPerGroup;
-    if (end > numFeatures) 
+    if (end > numFeatures) {
       end = numFeatures;
+    }
     for (int i = start; i < end; i++) {
       ret.add(i);
     }
@@ -234,13 +233,12 @@ public final class PFPGrowth {
     saveFList(fList, params, conf);
 
     // set param to control group size in MR jobs
-    int numGroups = params.getInt(PFPGrowth.NUM_GROUPS, 
-                                  PFPGrowth.NUM_GROUPS_DEFAULT);
+    int numGroups = params.getInt(NUM_GROUPS, NUM_GROUPS_DEFAULT);
     int maxPerGroup = fList.size() / numGroups;
-    if (fList.size() % numGroups != 0) 
+    if (fList.size() % numGroups != 0) {
       maxPerGroup++;
+    }
     params.set(MAX_PER_GROUP, Integer.toString(maxPerGroup));
-    fList = null;
 
     startParallelFPGrowth(params, conf);
     startAggregating(params, conf);

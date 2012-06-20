@@ -46,15 +46,16 @@ import com.google.common.io.Closeables;
  * algorithm (currently k-means, fuzzy-k-means and Dirichlet) that processes all the input vectors in each iteration.
  * The cluster classifier is configured with a ClusteringPolicy to select the desired clustering algorithm.
  */
-public class ClusterIterator {
+public final class ClusterIterator {
   
   public static final String PRIOR_PATH_KEY = "org.apache.mahout.clustering.prior.path";
+
+  private ClusterIterator() {
+  }
   
   /**
    * Iterate over data using a prior-trained ClusterClassifier, for a number of iterations
-   * 
-   * @param policy
-   *          the ClusteringPolicy to use
+   *
    * @param data
    *          a {@code List<Vector>} of input vectors
    * @param classifier
@@ -64,7 +65,7 @@ public class ClusterIterator {
    * 
    * @return the posterior ClusterClassifier
    */
-  public ClusterClassifier iterate(Iterable<Vector> data, ClusterClassifier classifier, int numIterations) {
+  public static ClusterClassifier iterate(Iterable<Vector> data, ClusterClassifier classifier, int numIterations) {
     ClusteringPolicy policy = classifier.getPolicy();
     for (int iteration = 1; iteration <= numIterations; iteration++) {
       for (Vector vector : data) {
@@ -100,11 +101,9 @@ public class ClusterIterator {
    *          a Path of output directory
    * @param numIterations
    *          the int number of iterations to perform
-   * 
-   * @throws IOException
    */
-  public void iterateSeq(Configuration conf, Path inPath, Path priorPath, Path outPath, int numIterations)
-      throws IOException {
+  public static void iterateSeq(Configuration conf, Path inPath, Path priorPath, Path outPath, int numIterations)
+    throws IOException {
     ClusterClassifier classifier = new ClusterClassifier();
     classifier.readFromSeqFiles(conf, priorPath);
     Path clustersOut = null;
@@ -155,8 +154,8 @@ public class ClusterIterator {
    * @param numIterations
    *          the int number of iterations to perform
    */
-  public void iterateMR(Configuration conf, Path inPath, Path priorPath, Path outPath, int numIterations)
-      throws IOException, InterruptedException, ClassNotFoundException {
+  public static void iterateMR(Configuration conf, Path inPath, Path priorPath, Path outPath, int numIterations)
+    throws IOException, InterruptedException, ClassNotFoundException {
     ClusteringPolicy policy = ClusterClassifier.readPolicy(priorPath);
     Path clustersOut = null;
     int iteration = 1;
@@ -164,7 +163,6 @@ public class ClusterIterator {
       conf.set(PRIOR_PATH_KEY, priorPath.toString());
       
       String jobName = "Cluster Iterator running iteration " + iteration + " over priorPath: " + priorPath;
-      System.out.println(jobName);
       Job job = new Job(conf, jobName);
       job.setMapOutputKeyClass(IntWritable.class);
       job.setMapOutputValueClass(ClusterWritable.class);
@@ -205,7 +203,7 @@ public class ClusterIterator {
    * @throws IOException
    *           if there was an IO error
    */
-  private boolean isConverged(Path filePath, Configuration conf, FileSystem fs) throws IOException {
+  private static boolean isConverged(Path filePath, Configuration conf, FileSystem fs) throws IOException {
     for (FileStatus part : fs.listStatus(filePath, PathFilters.partFilter())) {
       SequenceFileValueIterator<ClusterWritable> iterator = new SequenceFileValueIterator<ClusterWritable>(
           part.getPath(), true, conf);

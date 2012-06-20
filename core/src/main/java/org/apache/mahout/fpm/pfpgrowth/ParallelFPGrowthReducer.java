@@ -36,6 +36,7 @@ import org.apache.mahout.fpm.pfpgrowth.convertors.ContextWriteOutputCollector;
 import org.apache.mahout.fpm.pfpgrowth.convertors.integer.IntegerStringOutputConverter;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth;
+import org.apache.mahout.fpm.pfpgrowth.fpgrowth2.FPGrowthIds;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.list.LongArrayList;
 
@@ -44,22 +45,18 @@ import org.apache.mahout.math.list.LongArrayList;
  * outputs the the Top K frequent Patterns for each group.
  * 
  */
-public class ParallelFPGrowthReducer extends Reducer<IntWritable,TransactionTree,Text,TopKStringPatterns> {
+public final class ParallelFPGrowthReducer extends Reducer<IntWritable,TransactionTree,Text,TopKStringPatterns> {
 
   private final List<String> featureReverseMap = Lists.newArrayList();
   private final LongArrayList freqList = new LongArrayList();
-  
   private int maxHeapSize = 50;
-  
   private int minSupport = 3;
-
   private int numFeatures;
   private int maxPerGroup;
-
   private boolean useFP2;
 
   private static class IteratorAdapter implements Iterator<Pair<List<Integer>,Long>> {
-    private Iterator<Pair<IntArrayList,Long>> innerIter;
+    private final Iterator<Pair<IntArrayList,Long>> innerIter;
 
     private IteratorAdapter(Iterator<Pair<IntArrayList,Long>> transactionIter) {
       innerIter = transactionIter;
@@ -73,7 +70,7 @@ public class ParallelFPGrowthReducer extends Reducer<IntWritable,TransactionTree
     @Override
     public Pair<List<Integer>,Long> next() {
       Pair<IntArrayList,Long> innerNext = innerIter.next();
-      return new Pair(innerNext.getFirst().toList(), innerNext.getSecond());
+      return new Pair<List<Integer>,Long>(innerNext.getFirst().toList(), innerNext.getSecond());
     }
 
     @Override
@@ -99,18 +96,16 @@ public class ParallelFPGrowthReducer extends Reducer<IntWritable,TransactionTree
     Collections.sort(localFList, new CountDescendingPairComparator<Integer,Long>());
     
     if (useFP2) {
-      org.apache.mahout.fpm.pfpgrowth.fpgrowth2.FPGrowthIds fpGrowth = 
-        new org.apache.mahout.fpm.pfpgrowth.fpgrowth2.FPGrowthIds();
-      fpGrowth.generateTopKFrequentPatterns(
+      FPGrowthIds.generateTopKFrequentPatterns(
           cTree.iterator(),
           freqList,
           minSupport,
           maxHeapSize,
           PFPGrowth.getGroupMembers(key.get(), maxPerGroup, numFeatures),
           new IntegerStringOutputConverter(
-              new ContextWriteOutputCollector<IntWritable,TransactionTree,Text,TopKStringPatterns>(context),
+              new ContextWriteOutputCollector<IntWritable, TransactionTree, Text, TopKStringPatterns>(context),
               featureReverseMap),
-          new ContextStatusUpdater<IntWritable,TransactionTree,Text,TopKStringPatterns>(context));
+          new ContextStatusUpdater<IntWritable, TransactionTree, Text, TopKStringPatterns>(context));
     } else {
       FPGrowth<Integer> fpGrowth = new FPGrowth<Integer>();
       fpGrowth.generateTopKFrequentPatterns(

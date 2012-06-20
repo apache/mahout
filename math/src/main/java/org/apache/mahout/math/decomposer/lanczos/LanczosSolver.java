@@ -170,7 +170,7 @@ public class LanczosSolver {
     endTime(TimingSection.FINAL_EIGEN_CREATE);
   }
 
-  protected double calculateScaleFactor(Vector nextVector) {
+  protected static double calculateScaleFactor(Vector nextVector) {
     return nextVector.norm(2);
   }
 
@@ -178,7 +178,7 @@ public class LanczosSolver {
     return Double.isNaN(d) || d > SAFE_MAX || -d > SAFE_MAX;
   }
 
-  protected void orthoganalizeAgainstAllButLast(Vector nextVector, LanczosState state) {
+  protected static void orthoganalizeAgainstAllButLast(Vector nextVector, LanczosState state) {
     for (int i = 0; i < state.getIterationNumber(); i++) {
       Vector basisVector = state.getBasisVector(i);
       double alpha;

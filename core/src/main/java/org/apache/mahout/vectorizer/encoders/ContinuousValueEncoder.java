@@ -17,12 +17,14 @@
 
 package org.apache.mahout.vectorizer.encoders;
 
+import com.google.common.base.Charsets;
 import org.apache.mahout.math.Vector;
 
 /**
  * Continuous values are stored in fixed randomized location in the feature vector.
  */
 public class ContinuousValueEncoder extends CachingValueEncoder {
+
   public ContinuousValueEncoder(String name) {
     super(name, CONTINUOUS_VALUE_HASH_SEED);
   }
@@ -48,11 +50,10 @@ public class ContinuousValueEncoder extends CachingValueEncoder {
 
   @Override
   protected double getWeight(byte[] originalForm, double w) {
-    if (originalForm != null) {
-      return w * Double.parseDouble(new String(originalForm));
-    } else {
+    if (originalForm == null) {
       return w;
     }
+    return w * Double.parseDouble(new String(originalForm, Charsets.UTF_8));
   }
 
   /**

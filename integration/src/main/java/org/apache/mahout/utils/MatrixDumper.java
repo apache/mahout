@@ -98,17 +98,16 @@ public final class MatrixDumper extends AbstractJob {
   }
   
   private static PrintStream getPrintStream(String outputPath) throws IOException {
-    if (outputPath != null) {
-      File outputFile = new File(outputPath);
-      if (outputFile.exists()) {
-        outputFile.delete();
-      }
-      outputFile.createNewFile();
-      OutputStream os = new FileOutputStream(outputFile);
-      return new PrintStream(os);
-    } else {
+    if (outputPath == null) {
       return System.out;
     }
+    File outputFile = new File(outputPath);
+    if (outputFile.exists()) {
+      outputFile.delete();
+    }
+    outputFile.createNewFile();
+    OutputStream os = new FileOutputStream(outputFile);
+    return new PrintStream(os);
   }
   
   /**
@@ -128,10 +127,9 @@ public final class MatrixDumper extends AbstractJob {
   }
   
   private static String[] sortLabels(Map<String,Integer> labels) {
-    String[] sorted = new String[labels.keySet().size()];
-    for (String label: labels.keySet()) {
-      Integer index = labels.get(label);
-      sorted[index] = label;
+    String[] sorted = new String[labels.size()];
+    for (Map.Entry<String,Integer> entry : labels.entrySet()) {
+      sorted[entry.getValue()] = entry.getKey();
     }
     return sorted;
   }

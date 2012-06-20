@@ -178,9 +178,8 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
    */
   @Override
   public V put(K key, V value) {
-    if (key == null || value == null) {
-      throw new NullPointerException();
-    }
+    Preconditions.checkNotNull(key);
+    Preconditions.checkNotNull(value);
     // If less than half the slots are open, let's clear it up
     if (numSlotsUsed * loadFactor >= keys.length) {
       // If over half the slots used are actual entries, let's grow

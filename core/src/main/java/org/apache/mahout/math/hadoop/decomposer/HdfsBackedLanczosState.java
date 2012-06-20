@@ -84,10 +84,8 @@ public class HdfsBackedLanczosState extends LanczosState implements Configurable
   }
 
   private void createDirIfNotExist(Path path) throws IOException {
-    if (!fs.exists(path)) {
-      if (!fs.mkdirs(path)) {
-        throw new IOException("Unable to create: " + path);
-      }
+    if (!fs.exists(path) && !fs.mkdirs(path)) {
+      throw new IOException("Unable to create: " + path);
     }
   }
 

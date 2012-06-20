@@ -74,8 +74,7 @@ public class BuildForest extends Configured implements Tool {
   private boolean isPartial; // use partial data implementation
 
   @Override
-  public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException,
-    InstantiationException, IllegalAccessException {
+  public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
     
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();

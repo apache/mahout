@@ -91,7 +91,7 @@ public class ALSWRFactorizerTest extends TasteTestCase {
   public void ratingVector() throws Exception {
     PreferenceArray prefs = dataModel.getPreferencesFromUser(1);
 
-    Vector ratingVector = factorizer.ratingVector(prefs);
+    Vector ratingVector = ALSWRFactorizer.ratingVector(prefs);
 
     assertEquals(prefs.length(), ratingVector.getNumNondefaultElements());
     assertEquals(prefs.get(0).getValue(), ratingVector.get(0), EPSILON);

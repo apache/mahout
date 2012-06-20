@@ -30,7 +30,6 @@ import org.apache.mahout.math.VectorWritable;
 public class DirichletClusteringPolicy extends AbstractClusteringPolicy {
   
   public DirichletClusteringPolicy() {
-    super();
   }
   
   /**
@@ -51,14 +50,7 @@ public class DirichletClusteringPolicy extends AbstractClusteringPolicy {
   
   // Alpha_0 primes the Dirichlet distribution
   private double alpha0;
-  
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * org.apache.mahout.clustering.ClusteringPolicy#select(org.apache.mahout.
-   * math.Vector)
-   */
+
   @Override
   public Vector select(Vector probabilities) {
     int rMultinom = UncommonDistributions.rMultinom(probabilities.times(mixture));
@@ -68,13 +60,7 @@ public class DirichletClusteringPolicy extends AbstractClusteringPolicy {
   }
   
   // update the total counts and then the mixture
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * org.apache.mahout.clustering.ClusteringPolicy#update(org.apache.mahout.
-   * clustering.ClusterClassifier)
-   */
+
   @Override
   public void update(ClusterClassifier prior) {
     Vector totalCounts = new DenseVector(prior.getModels().size());
@@ -83,23 +69,13 @@ public class DirichletClusteringPolicy extends AbstractClusteringPolicy {
     }
     mixture = UncommonDistributions.rDirichlet(totalCounts, alpha0);
   }
-  
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.io.Writable#write(java.io.DataOutput)
-   */
+
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeDouble(alpha0);
     VectorWritable.writeVector(out, mixture);
   }
-  
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.io.Writable#readFields(java.io.DataInput)
-   */
+
   @Override
   public void readFields(DataInput in) throws IOException {
     this.alpha0 = in.readDouble();

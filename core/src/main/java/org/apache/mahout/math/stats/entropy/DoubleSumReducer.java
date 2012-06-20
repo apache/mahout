@@ -32,7 +32,7 @@ public final class DoubleSumReducer extends Reducer<Writable, DoubleWritable, Wr
 
   @Override
   protected void reduce(Writable key, Iterable<DoubleWritable> values, Context context)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     double sum = 0.0;
     for (DoubleWritable value : values) {
       sum += value.get();

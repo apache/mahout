@@ -32,7 +32,10 @@ import java.util.Iterator;
  */
 public final class AlternatingLeastSquaresSolver {
 
-  public Vector solve(Iterable<Vector> featureVectors, Vector ratingVector, double lambda, int numFeatures) {
+  private AlternatingLeastSquaresSolver() {
+  }
+
+  public static Vector solve(Iterable<Vector> featureVectors, Vector ratingVector, double lambda, int numFeatures) {
 
     Preconditions.checkNotNull(featureVectors, "Feature vectors cannot be null");
     Preconditions.checkArgument(!Iterables.isEmpty(featureVectors));
@@ -53,11 +56,11 @@ public final class AlternatingLeastSquaresSolver {
     return solve(Ai, Vi);
   }
 
-  Vector solve(Matrix Ai, Matrix Vi) {
+  static Vector solve(Matrix Ai, Matrix Vi) {
     return new QRDecomposition(Ai).solve(Vi).viewColumn(0);
   }
 
-  Matrix addLambdaTimesNuiTimesE(Matrix matrix, double lambda, int nui) {
+  static Matrix addLambdaTimesNuiTimesE(Matrix matrix, double lambda, int nui) {
     Preconditions.checkArgument(matrix.numCols() == matrix.numRows());
     for (int n = 0; n < matrix.numCols(); n++) {
       matrix.setQuick(n, n, matrix.getQuick(n, n) + lambda * nui);
@@ -65,7 +68,7 @@ public final class AlternatingLeastSquaresSolver {
     return matrix;
   }
 
-  Matrix createMiIi(Iterable<Vector> featureVectors, int numFeatures) {
+  static Matrix createMiIi(Iterable<Vector> featureVectors, int numFeatures) {
     Matrix MiIi = new DenseMatrix(numFeatures, Iterables.size(featureVectors));
     int n = 0;
     for (Vector featureVector : featureVectors) {
@@ -77,7 +80,7 @@ public final class AlternatingLeastSquaresSolver {
     return MiIi;
   }
 
-  Matrix createRiIiMaybeTransposed(Vector ratingVector) {
+  static Matrix createRiIiMaybeTransposed(Vector ratingVector) {
     Preconditions.checkArgument(ratingVector.isSequentialAccess());
     Matrix RiIiMaybeTransposed = new DenseMatrix(ratingVector.getNumNondefaultElements(), 1);
     Iterator<Vector.Element> ratingsIterator = ratingVector.iterateNonZero();

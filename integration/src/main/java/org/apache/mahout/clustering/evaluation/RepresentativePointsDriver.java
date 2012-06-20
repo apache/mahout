@@ -101,7 +101,7 @@ public final class RepresentativePointsDriver extends AbstractJob {
    * @throws IOException
    *           if errors occur
    */
-  public static void printRepresentativePoints(Path output, int numIterations) throws IOException {
+  public static void printRepresentativePoints(Path output, int numIterations) {
     for (int i = 0; i <= numIterations; i++) {
       Path out = new Path(output, "representativePoints-" + i);
       System.out.println("Representative Points for iteration " + i);

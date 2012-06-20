@@ -64,9 +64,8 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
   }
 
   @Override
-  public RecordReader<IntWritable,NullWritable> createRecordReader(InputSplit split,
-                                                                   TaskAttemptContext context) throws IOException,
-                                                                                              InterruptedException {
+  public RecordReader<IntWritable,NullWritable> createRecordReader(InputSplit split, TaskAttemptContext context)
+    throws IOException, InterruptedException {
     Preconditions.checkArgument(split instanceof InMemInputSplit);
     return new InMemRecordReader((InMemInputSplit) split);
   }

@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.hadoop.als;
 
+import com.google.common.base.Charsets;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -89,15 +90,16 @@ public class FactorizationEvaluator extends AbstractJob {
     predictRatings.getConfiguration().set(USER_FEATURES_PATH, getOption("userFeatures"));
     predictRatings.getConfiguration().set(ITEM_FEATURES_PATH, getOption("itemFeatures"));
     boolean succeeded = predictRatings.waitForCompletion(true);
-    if (!succeeded)
+    if (!succeeded) {
       return -1;
+    }
 
     BufferedWriter writer  = null;
     try {
       FileSystem fs = FileSystem.get(getOutputPath().toUri(), getConf());
       FSDataOutputStream outputStream = fs.create(getOutputPath("rmse.txt"));
       double rmse = computeRmse(errors);
-      writer = new BufferedWriter(new OutputStreamWriter(outputStream));
+      writer = new BufferedWriter(new OutputStreamWriter(outputStream, Charsets.UTF_8));
       writer.write(String.valueOf(rmse));
     } finally {
       Closeables.closeQuietly(writer);

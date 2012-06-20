@@ -26,6 +26,7 @@ import org.apache.mahout.clustering.iterator.ClusterWritable;
  * Writes out clusters
  */
 public interface ClusterWriter extends Closeable {
+
   /**
    * Write all values in the Iterable to the output
    *
@@ -37,9 +38,6 @@ public interface ClusterWriter extends Closeable {
 
   /**
    * Write out a Cluster
-   *
-   * @param cluster The {@link org.apache.mahout.clustering.Cluster} to write
-   * @throws IOException
    */
   void write(ClusterWritable clusterWritable) throws IOException;
 

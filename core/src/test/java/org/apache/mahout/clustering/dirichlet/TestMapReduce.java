@@ -50,7 +50,7 @@ import com.google.common.io.Closeables;
 
 public final class TestMapReduce extends MahoutTestCase {
   
-  private Collection<VectorWritable> sampleData = Lists.newArrayList();
+  private final Collection<VectorWritable> sampleData = Lists.newArrayList();
   
   private FileSystem fs;
   
@@ -291,7 +291,7 @@ public final class TestMapReduce extends MahoutTestCase {
     printModels(getClusters(outputPath, maxIterations));
   }
   
-  private void printModels(List<List<Cluster>> result) {
+  private static void printModels(Iterable<List<Cluster>> result) {
     int row = 0;
     StringBuilder models = new StringBuilder(100);
     for (List<Cluster> r : result) {
@@ -306,7 +306,7 @@ public final class TestMapReduce extends MahoutTestCase {
     System.out.println(models.toString());
   }
   
-  private List<List<Cluster>> getClusters(Path output, int numIterations) throws IOException {
+  private Iterable<List<Cluster>> getClusters(Path output, int numIterations) throws IOException {
     List<List<Cluster>> result = new ArrayList<List<Cluster>>();
     for (int i = 1; i <= numIterations; i++) {
       ClusterClassifier posterior = new ClusterClassifier();

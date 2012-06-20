@@ -561,10 +561,6 @@ public class LSMR {
     this.localSize = localSize;
   }
 
-  private void setLambda(double lambda) {
-    this.lambda = lambda;
-  }
-
   public double getLambda() {
     return lambda;
   }

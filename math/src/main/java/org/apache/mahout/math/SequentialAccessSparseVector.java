@@ -88,7 +88,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
     OrderedElement[] sortableElements = new OrderedElement[elementCount];
     Iterator<Element> it = other.iterateNonZero();
     Element e;
-    int s=0;
+    int s = 0;
     while (it.hasNext() && (e = it.next()) != null) {
       sortableElements[s++] = new OrderedElement(e.index(), e.get());
     }

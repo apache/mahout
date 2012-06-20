@@ -281,7 +281,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
                   && !got43) {
         got43 = true;
       } else {
-        assertTrue("got unexpected center: "+v+" ["+v.getClass().toString()+"]", false);
+        fail("got unexpected center: " + v + " [" + v.getClass().toString() + ']');
       }
     }
     assertEquals("got unexpected number of centers", 2, count);
@@ -301,11 +301,11 @@ public final class TestKmeansClustering extends MahoutTestCase {
       collector.collect(record.getFirst(), record.getSecond());
     }
     
-    boolean gotLowClust = false;  // clusters should be [1, *] and [2, *] 
-    boolean gotHighClust = false; // vs [3 , *],  [4 , *] and [5, *] 
+    //boolean gotLowClust = false;  // clusters should be [1, *] and [2, *]
+    //boolean gotHighClust = false; // vs [3 , *],  [4 , *] and [5, *]
     for (IntWritable k : collector.getKeys()) {
       List<WeightedVectorWritable> wvList = collector.getValue(k);
-      assertTrue("empty cluster!", wvList.size() != 0);
+      assertTrue("empty cluster!", !wvList.isEmpty());
       if (wvList.get(0).getVector().get(0) <= 2.0) {
         for (WeightedVectorWritable wv : wvList) {
           Vector v = wv.getVector();
@@ -313,7 +313,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
           assertTrue("bad cluster!", v.get(idx) <= 2.0);
         }
         assertEquals("Wrong size cluster", 4, wvList.size());
-        gotLowClust= true;
+        //gotLowClust= true;
       } else {
         for (WeightedVectorWritable wv : wvList) {
           Vector v = wv.getVector();
@@ -321,7 +321,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
           assertTrue("bad cluster!", v.get(idx) > 2.0);
         }
         assertEquals("Wrong size cluster", 5, wvList.size());
-        gotHighClust= true;
+        //gotHighClust= true;
       }
     }
   }

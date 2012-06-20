@@ -29,20 +29,10 @@ import org.apache.mahout.math.Vector;
  * 
  */
 public class CanopyClusteringPolicy extends AbstractClusteringPolicy {
-  
-  public CanopyClusteringPolicy() {
-    super();
-  }
-  
-  private double t1, t2;
-  
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * org.apache.mahout.clustering.ClusteringPolicy#select(org.apache.mahout.
-   * math.Vector)
-   */
+
+  private double t1;
+  private double t2;
+
   @Override
   public Vector select(Vector probabilities) {
     int maxValueIndex = probabilities.maxValueIndex();
@@ -50,23 +40,13 @@ public class CanopyClusteringPolicy extends AbstractClusteringPolicy {
     weights.set(maxValueIndex, 1.0);
     return weights;
   }
-  
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.io.Writable#write(java.io.DataOutput)
-   */
+
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeDouble(t1);
     out.writeDouble(t2);
   }
-  
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.hadoop.io.Writable#readFields(java.io.DataInput)
-   */
+
   @Override
   public void readFields(DataInput in) throws IOException {
     this.t1 = in.readDouble();

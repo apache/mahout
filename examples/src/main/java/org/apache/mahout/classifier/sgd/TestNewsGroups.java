@@ -20,10 +20,12 @@ package org.apache.mahout.classifier.sgd;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.common.base.Charsets;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -56,7 +58,7 @@ public final class TestNewsGroups {
   public static void main(String[] args) throws IOException {
     TestNewsGroups runner = new TestNewsGroups();
     if (runner.parseArgs(args)) {
-      runner.run(new PrintWriter(System.out, true));
+      runner.run(new PrintWriter(new OutputStreamWriter(System.out, Charsets.UTF_8), true));
     }
   }
 
@@ -64,8 +66,8 @@ public final class TestNewsGroups {
 
     File base = new File(inputFile);
     //contains the best model
-    OnlineLogisticRegression classifier = ModelSerializer.readBinary(new FileInputStream(modelFile), OnlineLogisticRegression.class);
-
+    OnlineLogisticRegression classifier =
+        ModelSerializer.readBinary(new FileInputStream(modelFile), OnlineLogisticRegression.class);
 
     Dictionary newsGroups = new Dictionary();
     Multiset<String> overallCounts = HashMultiset.create();
@@ -77,7 +79,7 @@ public final class TestNewsGroups {
         files.addAll(Arrays.asList(newsgroup.listFiles()));
       }
     }
-    System.out.printf("%d test files\n", files.size());
+    System.out.println(files.size() + " test files");
     ResultAnalyzer ra = new ResultAnalyzer(newsGroups.values(), "DEFAULT");
     for (File file : files) {
       String ng = file.getParentFile().getName();
@@ -93,7 +95,7 @@ public final class TestNewsGroups {
       ra.addInstance(newsGroups.values().get(actual), cr);
 
     }
-    output.printf("%s\n\n", ra.toString());
+    output.println(ra);
   }
 
   boolean parseArgs(String[] args) {

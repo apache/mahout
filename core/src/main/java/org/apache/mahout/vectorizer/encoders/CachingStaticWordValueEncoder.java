@@ -17,6 +17,7 @@
 
 package org.apache.mahout.vectorizer.encoders;
 
+import com.google.common.base.Charsets;
 import org.apache.mahout.math.map.OpenIntIntHashMap;
 
 import com.google.common.base.Preconditions;
@@ -55,7 +56,7 @@ public class CachingStaticWordValueEncoder extends StaticWordValueEncoder {
     if (caches[probe].containsKey(originalForm.hashCode())) {
       return caches[probe].get(originalForm.hashCode());
     }
-    int hash = hashForProbe(originalForm.getBytes(), dataSize, name, probe);
+    int hash = hashForProbe(originalForm.getBytes(Charsets.UTF_8), dataSize, name, probe);
     caches[probe].put(originalForm.hashCode(), hash);
     return hash;
   }

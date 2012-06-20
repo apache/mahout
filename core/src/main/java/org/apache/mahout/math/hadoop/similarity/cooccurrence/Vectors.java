@@ -37,9 +37,10 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.Iterator;
 
-public class Vectors {
+public final class Vectors {
 
-  private Vectors() {}
+  private Vectors() {
+  }
 
   public static Vector maybeSample(Vector original, int sampleSize) {
     if (original.getNumNondefaultElements() <= sampleSize) {
@@ -165,7 +166,8 @@ public class Vectors {
   /* ugly optimization for loading sparse vectors containing ints only */
   public static OpenIntIntHashMap readAsIntMap(DataInput in) throws IOException {
     int flags = in.readByte();
-    Preconditions.checkArgument(flags >> VectorWritable.NUM_FLAGS == 0, "Unknown flags set: %d", Integer.toString(flags, 2));
+    Preconditions.checkArgument(flags >> VectorWritable.NUM_FLAGS == 0,
+                                "Unknown flags set: %d", Integer.toString(flags, 2));
     boolean dense = (flags & VectorWritable.FLAG_DENSE) != 0;
     boolean sequential = (flags & VectorWritable.FLAG_SEQUENTIAL) != 0;
     boolean laxPrecision = (flags & VectorWritable.FLAG_LAX_PRECISION) != 0;

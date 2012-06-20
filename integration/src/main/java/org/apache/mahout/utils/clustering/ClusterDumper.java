@@ -57,7 +57,7 @@ import com.google.common.io.Files;
 public final class ClusterDumper extends AbstractJob {
 
   public static final String SAMPLE_POINTS = "samplePoints";
-  protected DistanceMeasure measure;
+  DistanceMeasure measure;
 
   public enum OUTPUT_FORMAT {
     TEXT,

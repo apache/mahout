@@ -20,6 +20,7 @@ package org.apache.mahout.classifier.naivebayes.test;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -60,6 +61,7 @@ public class TestNaiveBayesDriver extends AbstractJob {
 
   public static final String LABEL_KEY = "labels";
   public static final String COMPLEMENTARY = "class"; //b for bayes, c for complementary
+  private static final Pattern SLASH = Pattern.compile("/");
 
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(), new TestNaiveBayesDriver(), args);
@@ -95,11 +97,11 @@ public class TestNaiveBayesDriver extends AbstractJob {
       }
       SequenceFile.Writer writer =
           new SequenceFile.Writer(fs, getConf(), getOutputPath(), Text.class, VectorWritable.class);
-      SequenceFile.Reader reader = new Reader(fs, getInputPath(), getConf());
+      Reader reader = new Reader(fs, getInputPath(), getConf());
       Text key = new Text();
       VectorWritable vw = new VectorWritable();
       while (reader.next(key, vw)) {
-        writer.append(new Text(key.toString().split("/")[1]),
+        writer.append(new Text(SLASH.split(key.toString())[1]),
             new VectorWritable(classifier.classifyFull(vw.get())));
       }
       writer.close();
@@ -137,8 +139,7 @@ public class TestNaiveBayesDriver extends AbstractJob {
     //testJob.getConfiguration().set(LABEL_KEY, getOption("--labels"));
     boolean complementary = parsedArgs.containsKey("testComplementary");
     testJob.getConfiguration().set(COMPLEMENTARY, String.valueOf(complementary));
-    boolean succeeded = testJob.waitForCompletion(true);
-    return succeeded;
+    return testJob.waitForCompletion(true);
   }
 
   private static void analyzeResults(Map<Integer, String> labelMap,

@@ -64,7 +64,8 @@ public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> 
     Preconditions.checkArgument(size < max, "size must be less than %d", max);
     int hashSize = RandomUtils.nextTwinPrime((int) (loadFactor * size));
     keys = new long[hashSize];
-    Arrays.fill(keys, NULL);  }
+    Arrays.fill(keys, NULL);
+  }
   
   /**
    * @see #findForAdd(long)
@@ -253,9 +254,7 @@ public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> 
     numSlotsUsed = 0;
     keys = new long[newHashSize];
     Arrays.fill(keys, NULL);
-    int length = oldKeys.length;
-    for (int i = 0; i < length; i++) {
-      long key = oldKeys[i];
+    for (long key : oldKeys) {
       if (key != NULL && key != REMOVED) {
         add(key);
       }
@@ -295,9 +294,7 @@ public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> 
   public int hashCode() {
     int hash = 0;
     long[] keys = this.keys;
-    int max = keys.length;
-    for (int i = 0; i < max; i++) {
-      long key = keys[i];
+    for (long key : keys) {
       if (key != NULL && key != REMOVED) {
         hash = 31 * hash + ((int) (key >> 32) ^ (int) key);
       }

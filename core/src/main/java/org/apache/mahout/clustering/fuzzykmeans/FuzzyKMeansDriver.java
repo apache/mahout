@@ -17,8 +17,6 @@
 
 package org.apache.mahout.clustering.fuzzykmeans;
 
-import static org.apache.mahout.clustering.topdown.PathDirectory.CLUSTERED_POINTS_DIRECTORY;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +31,7 @@ import org.apache.mahout.clustering.iterator.ClusterIterator;
 import org.apache.mahout.clustering.iterator.ClusteringPolicy;
 import org.apache.mahout.clustering.iterator.FuzzyKMeansClusteringPolicy;
 import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
+import org.apache.mahout.clustering.topdown.PathDirectory;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.HadoopUtil;
@@ -283,9 +282,9 @@ public class FuzzyKMeansDriver extends AbstractJob {
     prior.writeToSeqFiles(priorClustersPath);
     
     if (runSequential) {
-      new ClusterIterator().iterateSeq(conf, input, priorClustersPath, output, maxIterations);
+      ClusterIterator.iterateSeq(conf, input, priorClustersPath, output, maxIterations);
     } else {
-      new ClusterIterator().iterateMR(conf, input, priorClustersPath, output, maxIterations);
+      ClusterIterator.iterateMR(conf, input, priorClustersPath, output, maxIterations);
     }
     return output;
   }
@@ -321,7 +320,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     throws IOException, ClassNotFoundException, InterruptedException {
     
     ClusterClassifier.writePolicy(new FuzzyKMeansClusteringPolicy(m, convergenceDelta), clustersIn);
-    ClusterClassificationDriver.run(input, output, new Path(output, CLUSTERED_POINTS_DIRECTORY), threshold, true,
+    ClusterClassificationDriver.run(input, output, new Path(output, PathDirectory.CLUSTERED_POINTS_DIRECTORY), threshold, true,
         runSequential);
   }
 }

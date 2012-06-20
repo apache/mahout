@@ -348,8 +348,8 @@ public final class OrderBasedRecommenderEvaluator {
   private static double getMeanRank(int[] ranks) {
     int nitems = ranks.length;
     double sum = 0.0;
-    for (int i = 0; i < nitems; i++) {
-      sum += ranks[i];
+    for (int rank : ranks) {
+      sum += rank;
     }
     return sum / nitems;
   }
@@ -357,9 +357,9 @@ public final class OrderBasedRecommenderEvaluator {
   private static double getMeanWplus(double[] ranks) {
     int nitems = ranks.length;
     double sum = 0.0;
-    for (int i = 0; i < nitems; i++) {
-      if (ranks[i] > 0) {
-        sum += ranks[i];
+    for (double rank : ranks) {
+      if (rank > 0) {
+        sum += rank;
       }
     }
     return sum / nitems;
@@ -368,9 +368,9 @@ public final class OrderBasedRecommenderEvaluator {
   private static double getMeanWminus(double[] ranks) {
     int nitems = ranks.length;
     double sum = 0.0;
-    for (int i = 0; i < nitems; i++) {
-      if (ranks[i] < 0) {
-        sum -= ranks[i];
+    for (double rank : ranks) {
+      if (rank < 0) {
+        sum -= rank;
       }
     }
     return sum / nitems;

@@ -133,7 +133,6 @@ public class ALSWRFactorizer extends AbstractFactorizer {
   @Override
   public Factorization factorize() throws TasteException {
     log.info("starting to compute the factorization...");
-    final AlternatingLeastSquaresSolver solver = new AlternatingLeastSquaresSolver();
     final Features features = new Features(this);
 
     for (int iteration = 0; iteration < numIterations; iteration++) {
@@ -155,7 +154,8 @@ public class ALSWRFactorizer extends AbstractFactorizer {
                 long itemID = itemIDsFromUser.nextLong();
                 featureVectors.add(features.getItemFeatureColumn(itemIndex(itemID)));
               }
-              Vector userFeatures = solver.solve(featureVectors, ratingVector(userPrefs), lambda, numFeatures);
+              Vector userFeatures =
+                  AlternatingLeastSquaresSolver.solve(featureVectors, ratingVector(userPrefs), lambda, numFeatures);
               features.setFeatureColumnInU(userIndex(userID), userFeatures);
             }
           });
@@ -184,7 +184,8 @@ public class ALSWRFactorizer extends AbstractFactorizer {
                 long userID = pref.getUserID();
                 featureVectors.add(features.getUserFeatureColumn(userIndex(userID)));
               }
-              Vector itemFeatures = solver.solve(featureVectors, ratingVector(itemPrefs), lambda, numFeatures);
+              Vector itemFeatures =
+                  AlternatingLeastSquaresSolver.solve(featureVectors, ratingVector(itemPrefs), lambda, numFeatures);
               features.setFeatureColumnInM(itemIndex(itemID), itemFeatures);
             }
           });
@@ -203,11 +204,11 @@ public class ALSWRFactorizer extends AbstractFactorizer {
     return createFactorization(features.getU(), features.getM());
   }
 
-  protected ExecutorService createQueue() {
+  protected static ExecutorService createQueue() {
     return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
   }
 
-  protected Vector ratingVector(PreferenceArray prefs) {
+  protected static Vector ratingVector(PreferenceArray prefs) {
     double[] ratings = new double[prefs.length()];
     for (int n = 0; n < prefs.length(); n++) {
       ratings[n] = prefs.get(n).getValue();

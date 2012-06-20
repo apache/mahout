@@ -94,7 +94,7 @@ public class PFPGrowthSynthDataTest2 extends MahoutTestCase {
   @Test
   public void testVsSequential() throws Exception {
 
-    final Map<Set<String>,Long> parallelResult = Maps.newHashMap();
+    Map<Set<String>,Long> parallelResult = Maps.newHashMap();
 
     PFPGrowth.runPFPGrowth(params);
     List<Pair<String,TopKStringPatterns>> tmpParallel = PFPGrowth.readFrequentPattern(params);
@@ -106,8 +106,6 @@ public class PFPGrowthSynthDataTest2 extends MahoutTestCase {
         parallelResult.put(new HashSet<String>(entry.getFirst()), entry.getSecond());
       }
     }
-
-    //////
 
     String inputFilename= "FPGsynth.dat";
     int minSupport= 100;
@@ -143,11 +141,11 @@ public class PFPGrowthSynthDataTest2 extends MahoutTestCase {
       if (seqResult.get(key) == null) {
         log.info("spurious (1): " + key+ " with " +entry.getValue());
       } else {
-        if (!seqResult.get(key).equals(parallelResult.get(entry.getKey()))) {
-          log.info("invalid (1): " + key + ", expected: " + seqResult.get(key) + ", got: "
-                             +                             + parallelResult.get(entry.getKey()));
-        } else {
+        if (seqResult.get(key).equals(parallelResult.get(entry.getKey()))) {
           log.info("matched (1): " + key + ", with: " + seqResult.get(key));
+        } else {
+          log.info("invalid (1): " + key + ", expected: " + seqResult.get(key) + ", got: "
+                       + parallelResult.get(entry.getKey()));
         }
       }
     }

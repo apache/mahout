@@ -135,8 +135,9 @@ public class ParallelALSFactorizationJob extends AbstractJob {
         VectorWritable.class, SequenceFileOutputFormat.class);
     itemRatings.setCombinerClass(VectorSumReducer.class);
     boolean succeeded = itemRatings.waitForCompletion(true);
-    if (!succeeded) 
+    if (!succeeded) {
       return -1;
+    }
 
     /* create A */
     Job userRatings = prepareJob(pathToItemRatings(), pathToUserRatings(),
@@ -144,8 +145,9 @@ public class ParallelALSFactorizationJob extends AbstractJob {
         VectorWritable.class);
     userRatings.setCombinerClass(MergeVectorsCombiner.class);
     succeeded = userRatings.waitForCompletion(true);
-    if (!succeeded) 
+    if (!succeeded) {
       return -1;
+    }
 
     //TODO this could be fiddled into one of the upper jobs
     Job averageItemRatings = prepareJob(pathToItemRatings(), getTempPath("averageRatings"),
@@ -153,8 +155,9 @@ public class ParallelALSFactorizationJob extends AbstractJob {
         IntWritable.class, VectorWritable.class);
     averageItemRatings.setCombinerClass(MergeVectorsCombiner.class);
     succeeded = averageItemRatings.waitForCompletion(true);
-    if (!succeeded) 
+    if (!succeeded) {
       return -1;
+    }
 
     Vector averageRatings = ALSUtils.readFirstRow(getTempPath("averageRatings"), getConf());
 
@@ -226,24 +229,21 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     solverConf.setInt(NUM_FEATURES, numFeatures);
     solverConf.set(FEATURE_MATRIX, pathToUorI.toString());
     boolean succeeded = solverForUorI.waitForCompletion(true);
-    if (!succeeded) 
+    if (!succeeded) {
       throw new IllegalStateException("Job failed!");
+    }
   }
 
   static class SolveExplicitFeedbackMapper extends Mapper<IntWritable,VectorWritable,IntWritable,VectorWritable> {
 
     private double lambda;
     private int numFeatures;
-
     private OpenIntObjectHashMap<Vector> UorM;
-
-    private AlternatingLeastSquaresSolver solver;
 
     @Override
     protected void setup(Mapper.Context ctx) throws IOException, InterruptedException {
       lambda = Double.parseDouble(ctx.getConfiguration().get(LAMBDA));
       numFeatures = ctx.getConfiguration().getInt(NUM_FEATURES, -1);
-      solver = new AlternatingLeastSquaresSolver();
 
       Path UOrIPath = new Path(ctx.getConfiguration().get(FEATURE_MATRIX));
 
@@ -262,7 +262,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
         featureVectors.add(UorM.get(index));
       }
 
-      Vector uiOrmj = solver.solve(featureVectors, ratings, lambda, numFeatures);
+      Vector uiOrmj = AlternatingLeastSquaresSolver.solve(featureVectors, ratings, lambda, numFeatures);
 
       ctx.write(userOrItemID, new VectorWritable(uiOrmj));
     }

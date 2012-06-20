@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.classify.WeightedVectorWritable;
 import org.apache.mahout.clustering.iterator.ClusterWritable;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.StringUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.NamedVector;
@@ -39,14 +40,15 @@ import org.apache.mahout.math.Vector;
 public class GraphMLClusterWriter extends AbstractClusterWriter {
 
   private static final Pattern VEC_PATTERN = Pattern.compile("\\{|\\:|\\,|\\}");
-  private Map<Integer, Color> colors = new HashMap<Integer, Color>();
+  private final Map<Integer, Color> colors = new HashMap<Integer, Color>();
   private Color lastClusterColor;
-  private float lastX, lastY;
+  private float lastX;
+  private float lastY;
   private Random random;
   private int posStep;
   private final String[] dictionary;
   private final int numTopFeatures;
-  private int subString;
+  private final int subString;
 
   public GraphMLClusterWriter(Writer writer, Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints,
                               DistanceMeasure measure,
@@ -76,7 +78,7 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
     writer.append("<graph edgedefault=\"undirected\">");
     lastClusterColor = new Color();
     posStep = (int) (0.1 * clusterIdToPoints.size()) + 100;
-    random = new Random();
+    random = RandomUtils.getRandom();
   }
 
   /*
@@ -103,7 +105,7 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
     if (dictionary != null) {
       topTerms = getTopTerms(cluster.getCenter(), dictionary, numTopFeatures);
     }
-    String clusterLabel = String.valueOf(cluster.getId()) + "_" + topTerms;
+    String clusterLabel = String.valueOf(cluster.getId()) + '_' + topTerms;
     //do some positioning so that items are visible and grouped together
     //TODO: put in a real layout algorithm
     float x = lastX + 1000;
@@ -153,7 +155,9 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
     if (result == null) {
       result = new Color();
       //there is probably some better way to color a graph
-      int incR = 0, incG = 0, incB = 0;
+      int incR = 0;
+      int incG = 0;
+      int incB = 0;
       if (lastClusterColor.r + 20 < 256 && lastClusterColor.g + 20 < 256 && lastClusterColor.b + 20 < 256) {
         incR = 20;
         incG = 0;
@@ -183,13 +187,6 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
             + "<data key=\"weight\">" + distance + "</data></edge>";
   }
 
-  private static String createNode(String s) {
-    return "<node id=\"" + StringUtils.escapeXML(s) + "\"/>";
-  }
-
-
-
-
   private static String createNode(String s, Color rgb, float x, float y) {
     return "<node id=\"" + StringUtils.escapeXML(s) + "\"><data key=\"r\">" + rgb.r 
             + "</data>" +
@@ -210,7 +207,9 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
     super.close();
   }
 
-  private class Color {
-    int r, g, b;
+  private static class Color {
+    int r;
+    int g;
+    int b;
   }
 }

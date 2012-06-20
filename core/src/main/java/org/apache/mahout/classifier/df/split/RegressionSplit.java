@@ -20,7 +20,9 @@ package org.apache.mahout.classifier.df.split;
 import org.apache.mahout.classifier.df.data.Data;
 import org.apache.mahout.classifier.df.data.Instance;
 
+import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * Regression problem implementation of IgSplit.
@@ -31,7 +33,7 @@ public class RegressionSplit extends IgSplit {
   /**
    * Comparator for Instance sort
    */
-  private static class InstanceComparator implements java.util.Comparator<Instance> {
+  private static class InstanceComparator implements Comparator<Instance>, Serializable {
     private final int attr;
 
     InstanceComparator(int attr) {

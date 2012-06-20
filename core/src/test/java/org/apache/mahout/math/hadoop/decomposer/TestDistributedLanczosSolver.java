@@ -70,7 +70,7 @@ public final class TestDistributedLanczosSolver extends MahoutTestCase {
     Configuration conf = new Configuration();
     corpus.setConf(conf);
     DistributedLanczosSolver solver = new DistributedLanczosSolver();
-    Vector intitialVector = solver.getInitialVector(corpus);
+    Vector intitialVector = DistributedLanczosSolver.getInitialVector(corpus);
     LanczosState state;
     if (hdfsBackedState) {
       HdfsBackedLanczosState hState = new HdfsBackedLanczosState(corpus,
@@ -96,7 +96,7 @@ public final class TestDistributedLanczosSolver extends MahoutTestCase {
     corpus.setConf(conf);
     DistributedLanczosSolver solver = new DistributedLanczosSolver();
     int rank = 10;
-    Vector intitialVector = solver.getInitialVector(corpus);
+    Vector intitialVector = DistributedLanczosSolver.getInitialVector(corpus);
     HdfsBackedLanczosState state = new HdfsBackedLanczosState(corpus, rank,
         intitialVector, new Path(getTestTempDirPath(), "lanczosStateDir" + suf(symmetric) + counter));
     solver.solve(state, rank, symmetric);

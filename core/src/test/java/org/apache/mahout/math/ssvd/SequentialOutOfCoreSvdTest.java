@@ -148,12 +148,12 @@ public final class SequentialOutOfCoreSvdTest extends MahoutTestCase {
     assertEquals(u1, u2);
   }
 
-  private Matrix lowRankMatrixInMemory(int rows, int columns) throws IOException {
+  private static Matrix lowRankMatrixInMemory(int rows, int columns) throws IOException {
     return lowRankMatrix(null, null, 0, rows, columns);
   }
 
-  private void assertEquals(Matrix u1, Matrix u2) {
-    assertEquals(0.0, u1.minus(u2).aggregate(Functions.MAX, Functions.ABS), 1e-10);
+  private static void assertEquals(Matrix u1, Matrix u2) {
+    assertEquals(0.0, u1.minus(u2).aggregate(Functions.MAX, Functions.ABS), 1.0e-10);
   }
 
   @Test

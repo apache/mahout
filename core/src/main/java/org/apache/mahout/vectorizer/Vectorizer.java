@@ -23,6 +23,7 @@ import java.io.IOException;
 
 public interface Vectorizer {
 
-  void createVectors(Path input, Path output, VectorizerConfig config) throws IOException, ClassNotFoundException, InterruptedException;
+  void createVectors(Path input, Path output, VectorizerConfig config)
+    throws IOException, ClassNotFoundException, InterruptedException;
 
 }

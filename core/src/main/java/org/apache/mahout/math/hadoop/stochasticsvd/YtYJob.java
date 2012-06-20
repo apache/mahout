@@ -40,14 +40,14 @@ import org.apache.mahout.math.VectorWritable;
  * Job that accumulates Y'Y output
  * 
  */
-public class YtYJob {
+public final class YtYJob {
 
   public static final String PROP_OMEGA_SEED = "ssvd.omegaseed";
   public static final String PROP_K = "ssvd.k";
   public static final String PROP_P = "ssvd.p";
 
   // we have single output, so we use standard output
-  public static final String OUTPUT_YtY = "part-";
+  public static final String OUTPUT_YT_Y = "part-";
 
   private YtYJob() {
   }

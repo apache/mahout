@@ -121,7 +121,7 @@ public final class ClusteringTestUtils {
       private final Random random;
       private final Sampler[] samplers;
 
-      public LDASampler(Matrix model, Random random) {
+      LDASampler(Matrix model, Random random) {
           this.random = random;
           samplers = new Sampler[model.numRows()];
           for (int i = 0; i < samplers.length; i++) {
