@@ -22,7 +22,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
 import com.google.common.base.Charsets;
-import org.apache.commons.cli.Options;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.OptionException;
 import org.apache.commons.cli2.util.HelpFormatter;
@@ -47,37 +46,23 @@ public final class CommandLineUtil {
    * @param group job-specific command-line options.
    */
   public static void printHelpWithGenericOptions(Group group) throws IOException {
-    Options ops = new Options();
-    new GenericOptionsParser(new Configuration(), ops, new String[0]);
-    org.apache.commons.cli.HelpFormatter fmt = new org.apache.commons.cli.HelpFormatter();
-    fmt.printHelp("<command> [Generic Options] [Job-Specific Options]", 
-        "Generic Options:", ops, "");
-    
+    new GenericOptionsParser(new Configuration(), new org.apache.commons.cli.Options(), new String[0]);
     PrintWriter pw = new PrintWriter(new OutputStreamWriter(System.out, Charsets.UTF_8), true);
     HelpFormatter formatter = new HelpFormatter();
     formatter.setGroup(group);
     formatter.setPrintWriter(pw);
-    formatter.printHelp();
     formatter.setFooter("Specify HDFS directories while running on hadoop; else specify local file system directories");
-    formatter.printFooter();
-
-    pw.flush();
+    formatter.print();
   }
 
   public static void printHelpWithGenericOptions(Group group, OptionException oe) throws IOException {
-    Options ops = new Options();
-    new GenericOptionsParser(new Configuration(), ops, new String[0]);
-    org.apache.commons.cli.HelpFormatter fmt = new org.apache.commons.cli.HelpFormatter();
-    fmt.printHelp("<command> [Generic Options] [Job-Specific Options]",
-        "Generic Options:", ops, "");
-
+    new GenericOptionsParser(new Configuration(), new org.apache.commons.cli.Options(), new String[0]);
     PrintWriter pw = new PrintWriter(new OutputStreamWriter(System.out, Charsets.UTF_8), true);
     HelpFormatter formatter = new HelpFormatter();
     formatter.setGroup(group);
     formatter.setPrintWriter(pw);
     formatter.setException(oe);
     formatter.print();
-    pw.flush();
   }
 
 }
