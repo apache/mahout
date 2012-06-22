@@ -28,6 +28,7 @@ import java.util.Map;
  */
 public interface ARFFModel {
   String ARFF_SPARSE = "{"; //indicates the vector is sparse
+  String ARFF_SPARSE_END = "}";
   String ARFF_COMMENT = "%";
   String ATTRIBUTE = "@attribute";
   String DATA = "@data";

@@ -75,24 +75,36 @@ public final class ARFFVectorIterableTest extends MahoutTestCase {
   public void testDense() throws Exception {
     ARFFModel model = new MapBackedARFFModel();
     Iterable<Vector> iterable = new ARFFVectorIterable(SAMPLE_DENSE_ARFF, model);
+    Vector firstVector = iterable.iterator().next();
+    assertEquals(1.0, firstVector.get(0), 0);
+    assertEquals(65.0, firstVector.get(1), 0);
+    assertEquals(1.0, firstVector.get(3), 0);
+    assertEquals(1.0, firstVector.get(4), 0);
+    
     int count = 0;
     for (Vector vector : iterable) {
       assertTrue("Vector is not dense", vector instanceof DenseVector);
       count++;
     }
-    assertEquals(10, count);
+    assertEquals(5, count);
   }
 
   @Test
   public void testSparse() throws Exception {
     ARFFModel model = new MapBackedARFFModel();
     Iterable<Vector> iterable = new ARFFVectorIterable(SAMPLE_SPARSE_ARFF, model);
+    
+    Vector firstVector = iterable.iterator().next();
+    assertEquals(23.1, firstVector.get(1), 0);
+    assertEquals(3.23, firstVector.get(2), 0);
+    assertEquals(1.2, firstVector.get(3), 0);
+    
     int count = 0;
     for (Vector vector : iterable) {
       assertTrue("Vector is not dense", vector instanceof RandomAccessSparseVector);
       count++;
     }
-    assertEquals(10, count);
+    assertEquals(9, count);
   }
 
   @Test
@@ -212,17 +224,19 @@ public final class ARFFVectorIterableTest extends MahoutTestCase {
   }
   
   private static final String SAMPLE_DENSE_ARFF = "   % Comments\n" + "   % \n" + "   % Comments go here"
-                                                  + "   % \n" + "   @RELATION Mahout\n" + '\n'
-                                                  + "   @ATTRIBUTE foo  NUMERIC\n"
-                                                  + "   @ATTRIBUTE bar   NUMERIC\n"
-                                                  + "   @ATTRIBUTE hockey  NUMERIC\n"
-                                                  + "   @ATTRIBUTE football   NUMERIC\n" + "  \n" + '\n'
-                                                  + '\n' + "   @DATA\n" + "   23.1,3.23,1.2,0.2\n"
-                                                  + "   2.9,3.0,1.2,0.2\n" + "   2.7,3.2,1.3,0.2\n"
-                                                  + "   2.6,3.1,1.23,0.2\n" + "   23.0,3.6,1.2,0.2\n"
-                                                  + "   23.2,3.9,1.7,0.2\n" + "   2.6,3.2,1.2,0.3\n"
-                                                  + "   23.0,3.2,1.23,0.2\n" + "   2.2,2.9,1.2,0.2\n"
-                                                  + "   2.9,3.1,1.23,0.1\n";
+                                                  + "   % \n" + "   @RELATION golf\n" + '\n'
+                                                  + "   @ATTRIBUTE outlook {sunny,overcast, rain}\n"
+                                                  + "   @ATTRIBUTE temperature   NUMERIC\n"
+                                                  + "   @ATTRIBUTE humidity  NUMERIC\n"
+                                                  + "   @ATTRIBUTE windy {false, true}\n" 
+                                                  + "   @ATTRIBUTE class {dont_play, play}\n" + "  \n" + '\n'  
+                                                  + '\n' + "   @DATA\n" 
+                                                  + "   sunny,    65, ?, false, dont_play, {2} \n"
+                                                  + "   sunny,    80, 90,  true, dont_play\n" 
+                                                  + "   overcast, 83, 78, false, play ,{3} \n"
+                                                  + "   rain,     70, 96, false, play\n" 
+                                                  + "   rain,     68, 80, false, play\n"
+                                                  + "   rain,     65, 70, true, play\n";
   
   private static final String SAMPLE_SPARSE_ARFF = "   % Comments\n" + "   % \n" + "   % Comments go here"
                                                    + "   % \n" + "   @RELATION Mahout\n" + '\n'
@@ -231,8 +245,8 @@ public final class ARFFVectorIterableTest extends MahoutTestCase {
                                                    + "   @ATTRIBUTE hockey  NUMERIC\n"
                                                    + "   @ATTRIBUTE football   NUMERIC\n"
                                                    + "   @ATTRIBUTE tennis   NUMERIC\n" + "  \n" + '\n'
-                                                   + '\n' + "   @DATA\n" + "   {1 23.1,2 3.23,3 1.2,4 0.2}\n"
-                                                   + "   {0 2.9}\n" + "   {0 2.7,2 3.2,3 1.3,4 0.2}\n"
+                                                   + '\n' + "   @DATA\n" + "   {1 23.1,2 3.23,3 1.2,4 ?} {5}\n"
+                                                   + "   {0 2.9}\n" + "   {0 2.7,2 3.2,3 1.3,4 0.2} {10} \n"
                                                    + "   {1 2.6,2 3.1,3 1.23,4 0.2}\n"
                                                    + "   {1 23.0,2 3.6,3 1.2,4 0.2}\n"
                                                    + "   {0 23.2,1 3.9,3 1.7,4 0.2}\n"

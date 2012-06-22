@@ -32,6 +32,7 @@ final class ARFFIterator extends AbstractIterator<Vector> {
   // This pattern will make sure a , inside a string is not a point for split.
   // Ex: "Arizona" , "0:08 PM, PDT" , 110 will be split considering "0:08 PM, PDT" as one string
   private static final Pattern COMMA_PATTERN = Pattern.compile(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
+  private static final Pattern WORDS_WITHOUT_SPARSE = Pattern.compile("([\\w[^{]])*");
 
   private final BufferedReader reader;
   private final ARFFModel model;
@@ -60,7 +61,7 @@ final class ARFFIterator extends AbstractIterator<Vector> {
     }
     Vector result;
     if (line.startsWith(ARFFModel.ARFF_SPARSE)) {
-      line = line.substring(1, line.length() - 1);
+      line = line.substring(1, line.indexOf(ARFFModel.ARFF_SPARSE_END));
       String[] splits = COMMA_PATTERN.split(line);
       result = new RandomAccessSparseVector(model.getLabelSize());
       for (String split : splits) {
@@ -68,13 +69,19 @@ final class ARFFIterator extends AbstractIterator<Vector> {
         int idIndex = split.indexOf(' ');
         int idx = Integer.parseInt(split.substring(0, idIndex).trim());
         String data = split.substring(idIndex).trim();
-        result.setQuick(idx, model.getValue(data, idx));
+        if (!"?".equals(data)) {
+          result.setQuick(idx, model.getValue(data, idx));
+        }
       }
     } else {
       result = new DenseVector(model.getLabelSize());
       String[] splits = COMMA_PATTERN.split(line);
       for (int i = 0; i < splits.length; i++) {
-        result.setQuick(i, model.getValue(splits[i], i));
+        String split = splits[i];
+        split = split.trim();
+        if (WORDS_WITHOUT_SPARSE.matcher(split).matches() && !"?".equals(split)) {
+          result.setQuick(i, model.getValue(split, i));
+        }
       }
     }
     //result.setLabelBindings(labelBindings);
