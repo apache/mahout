@@ -18,6 +18,7 @@
 package org.apache.mahout.classifier.df;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Random;
 
 import org.apache.commons.cli2.CommandLine;
@@ -112,13 +113,26 @@ public class BreimanExample extends Configured implements Tool {
     
     // compute the test set error (Selection Error), and mean tree error (One Tree Error),
     double[] testLabels = test.extractLabels();
-    double[] predictions = new double[test.size()];
+    double[][] predictions = new double[test.size()][];
     
     forestM.classify(test, predictions);
-    sumTestErrM += ErrorEstimate.errorRate(testLabels, predictions);
+    double[] sumPredictions = new double[test.size()];
+    Arrays.fill(sumPredictions, 0.0);
+    for (int i = 0; i < predictions.length; i++) {
+      for (int j = 0; j < predictions[i].length; j++) {
+        sumPredictions[i] += predictions[i][j];
+      }
+    }
+    sumTestErrM += ErrorEstimate.errorRate(testLabels, sumPredictions);
     
     forestOne.classify(test, predictions);
-    sumTestErrOne += ErrorEstimate.errorRate(testLabels, predictions);
+    Arrays.fill(sumPredictions, 0.0);
+    for (int i = 0; i < predictions.length; i++) {
+      for (int j = 0; j < predictions[i].length; j++) {
+        sumPredictions[i] += predictions[i][j];
+      }
+    }
+    sumTestErrOne += ErrorEstimate.errorRate(testLabels, sumPredictions);
   }
   
   public static void main(String[] args) throws Exception {

@@ -61,17 +61,22 @@ public class DecisionForest implements Writable {
   /**
    * Classifies the data and calls callback for each classification
    */
-  public void classify(Data data, double[] predictions) {
+  public void classify(Data data, double[][] predictions) {
     Preconditions.checkArgument(data.size() == predictions.length, "predictions.length must be equal to data.size()");
 
     if (data.isEmpty()) {
       return; // nothing to classify
     }
 
+    int treeId = 0;
     for (Node tree : trees) {
       for (int index = 0; index < data.size(); index++) {
-        predictions[index] = tree.classify(data.get(index));
+        if (predictions[index] == null) {
+          predictions[index] = new double[trees.size()];
+        }
+        predictions[index][treeId] = tree.classify(data.get(index));
       }
+      treeId++;
     }
   }
   
@@ -80,7 +85,7 @@ public class DecisionForest implements Writable {
    * 
    * @param rng
    *          Random number generator, used to break ties randomly
-   * @return -1 if the label cannot be predicted
+   * @return NaN if the label cannot be predicted
    */
   public double classify(Dataset dataset, Random rng, Instance instance) {
     if (dataset.isNumerical(dataset.getLabelId())) {
@@ -88,25 +93,30 @@ public class DecisionForest implements Writable {
       int cnt = 0;
       for (Node tree : trees) {
         double prediction = tree.classify(instance);
-        if (prediction != -1) {
+        if (!Double.isNaN(prediction)) {
           sum += prediction;
           cnt++;
         }
       }
-      return sum / cnt;
+
+      if (cnt > 0) {
+        return sum / cnt;
+      } else {
+        return Double.NaN;
+      }
     } else {
       int[] predictions = new int[dataset.nblabels()];
       for (Node tree : trees) {
         double prediction = tree.classify(instance);
-        if (prediction != -1) {
+        if (!Double.isNaN(prediction)) {
           predictions[(int) prediction]++;
         }
       }
-      
+
       if (DataUtils.sum(predictions) == 0) {
-        return -1; // no prediction available
+        return Double.NaN; // no prediction available
       }
-      
+
       return DataUtils.maxindex(rng, predictions);
     }
   }

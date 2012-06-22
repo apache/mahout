@@ -77,30 +77,28 @@ public class RegressionResultAnalyzer {
     double sumActualSquared = 0.0;
     double sumResult = 0.0;
     double sumResultSquared = 0.0;
+    double sumActualResult = 0.0;
     double sumAbsolute = 0.0;
     double sumAbsoluteSquared = 0.0;
+    int predictable = 0;
+    int unpredictable = 0;
 
     for (Result res : results) {
       double actual = res.getActual();
       double result = res.getResult();
-      sumActual += actual;
-      sumActualSquared += actual * actual;
-      sumResult += result;
-      sumResultSquared += result * result;
-      double absolute = Math.abs(actual - result);
-      sumAbsolute += absolute;
-      sumAbsoluteSquared += absolute * absolute;
-    }
-    
-    double varActual = sumActualSquared - sumActual * sumActual / results.size();
-    double varResult = sumResultSquared - sumResult * sumResult / results.size();
-    double varAbsolute = sumResultSquared - sumActual * sumResult /  results.size();
-
-    double correlation;
-    if (varActual * varResult <= 0) {
-      correlation = 0.0;
-    } else {
-      correlation = varAbsolute / Math.sqrt(varActual * varResult);
+      if (Double.isNaN(result)) {
+        unpredictable++;
+      } else {
+        sumActual += actual;
+        sumActualSquared += actual * actual;
+        sumResult += result;
+        sumResultSquared += result * result;
+        sumActualResult += actual * result;
+        double absolute = Math.abs(actual - result);
+        sumAbsolute += absolute;
+        sumAbsoluteSquared += absolute * absolute;
+        predictable++;
+      }
     }
 
     StringBuilder returnString = new StringBuilder();
@@ -108,16 +106,33 @@ public class RegressionResultAnalyzer {
     returnString.append("=======================================================\n");
     returnString.append("Summary\n");
     returnString.append("-------------------------------------------------------\n");
-
-    NumberFormat decimalFormatter = new DecimalFormat("0.####");
     
-    returnString.append(StringUtils.rightPad("Correlation coefficient", 40)).append(": ").append(
-      StringUtils.leftPad(decimalFormatter.format(correlation), 10)).append('\n');
-    returnString.append(StringUtils.rightPad("Mean absolute error", 40)).append(": ").append(
-      StringUtils.leftPad(decimalFormatter.format(sumAbsolute / results.size()), 10)).append('\n');
-    returnString.append(StringUtils.rightPad("Root mean squared error", 40)).append(": ").append(
-      StringUtils.leftPad(decimalFormatter.format(Math.sqrt(sumAbsoluteSquared / results.size())),
-        10)).append('\n');
+    if (predictable > 0) {
+      double varActual = sumActualSquared - sumActual * sumActual / predictable;
+      double varResult = sumResultSquared - sumResult * sumResult / predictable;
+      double varCo = sumActualResult - sumActual * sumResult /  predictable;
+  
+      double correlation;
+      if (varActual * varResult <= 0) {
+        correlation = 0.0;
+      } else {
+        correlation = varCo / Math.sqrt(varActual * varResult);
+      }
+  
+      NumberFormat decimalFormatter = new DecimalFormat("0.####");
+      
+      returnString.append(StringUtils.rightPad("Correlation coefficient", 40)).append(": ").append(
+        StringUtils.leftPad(decimalFormatter.format(correlation), 10)).append('\n');
+      returnString.append(StringUtils.rightPad("Mean absolute error", 40)).append(": ").append(
+        StringUtils.leftPad(decimalFormatter.format(sumAbsolute / predictable), 10)).append('\n');
+      returnString.append(StringUtils.rightPad("Root mean squared error", 40)).append(": ").append(
+        StringUtils.leftPad(decimalFormatter.format(Math.sqrt(sumAbsoluteSquared / predictable)),
+          10)).append('\n');
+    }
+    returnString.append(StringUtils.rightPad("Predictable Instances", 40)).append(": ").append(
+      StringUtils.leftPad(Integer.toString(predictable), 10)).append('\n');
+    returnString.append(StringUtils.rightPad("Unpredictable Instances", 40)).append(": ").append(
+      StringUtils.leftPad(Integer.toString(unpredictable), 10)).append('\n');
     returnString.append(StringUtils.rightPad("Total Regressed Instances", 40)).append(": ").append(
       StringUtils.leftPad(Integer.toString(results.size()), 10)).append('\n');
     returnString.append('\n');

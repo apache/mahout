@@ -27,13 +27,13 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public class CategoricalNode extends Node {
+
   private int attr;
-  
   private double[] values;
-  
   private Node[] childs;
   
-  public CategoricalNode() { }
+  public CategoricalNode() {
+  }
   
   public CategoricalNode(int attr, double[] values, Node[] childs) {
     this.attr = attr;
@@ -46,7 +46,7 @@ public class CategoricalNode extends Node {
     int index = ArrayUtils.indexOf(values, instance.get(attr));
     if (index == -1) {
       // value not available, we cannot predict
-      return -1;
+      return Double.NaN;
     }
     return childs[index].classify(instance);
   }

@@ -57,7 +57,7 @@ public final class Step1MapperTest extends MahoutTestCase {
         assertTrue(expected.contains(data.get(index)));
       }
 
-      return new Leaf(-1);
+      return new Leaf(Double.NaN);
     }
   }
 

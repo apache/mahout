@@ -184,8 +184,8 @@ public class Dataset implements Writable {
    * @return label's value
    */
   public String getLabelString(double code) {
-    // handle the case (prediction == -1)
-    if (code == -1) {
+    // handle the case (prediction is NaN)
+    if (Double.isNaN(code)) {
       return "unknown";
     }
     return values[labelId][(int) code];

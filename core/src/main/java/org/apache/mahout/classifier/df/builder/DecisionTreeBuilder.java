@@ -120,7 +120,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
     }
 
     if (data.isEmpty()) {
-      return new Leaf(-1);
+      return new Leaf(Double.NaN);
     }
 
     double sum = 0.0;
