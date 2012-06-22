@@ -612,7 +612,7 @@ public abstract class AbstractJob extends Configured implements Tool {
     // If running in an Oozie workflow as a Java action, need to add the
     // Configuration resource provided by Oozie to this job's config.
     String oozieActionConfXml = System.getProperty("oozie.action.conf.xml");
-    if (oozieActionConfXml != null) {
+    if (oozieActionConfXml != null && conf != null) {
       conf.addResource(new Path("file:///", oozieActionConfXml));
       log.info("Added Oozie action Configuration resource {0} to the Hadoop Configuration", oozieActionConfXml);
     }      
