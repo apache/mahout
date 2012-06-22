@@ -69,7 +69,8 @@ public class ObjectArrayList<T> extends AbstractObjectList<T> {
    */
   @SuppressWarnings("unchecked")
   public ObjectArrayList(int initialCapacity) {
-    elements((T[])new Object[initialCapacity]);
+    elements = new Object[initialCapacity];
+    size = 0;
   }
 
   /**
