@@ -63,16 +63,26 @@ public class ImplicitFeedbackAlternatingLeastSquaresSolver {
   /* Y' Y */
   private Matrix getYtransposeY(OpenIntObjectHashMap<Vector> Y) {
 
-    Matrix compactedY = new DenseMatrix(Y.size(), numFeatures);
     IntArrayList indexes = Y.keys();
     indexes.quickSort();
 
-    int row = 0;
-    for (int index : indexes.elements()) {
-      compactedY.assignRow(row++, Y.get(index));
-    }
+    Matrix YTY = new DenseMatrix(numFeatures, numFeatures);
 
-    return compactedY.transpose().times(compactedY);
+    // Compute Y'Y by dot products between the 'columns' of Y
+    for (int i = 0; i < numFeatures; i++) {
+      for (int j = i; j < numFeatures; j++) {
+        double dot = 0;
+        for (int k = 0; k < indexes.size(); k++) {
+          Vector row = Y.get(indexes.getQuick(k));
+          dot += row.getQuick(i) * row.getQuick(j);
+        }
+        YTY.setQuick(i, j, dot);
+        if (i != j) {
+          YTY.setQuick(j, i, dot);
+        }
+      }
+    }
+    return YTY;
   }
 
   /** Y' (Cu - I) Y + λ I */
