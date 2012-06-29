@@ -21,6 +21,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -118,7 +119,8 @@ public class RegressionResultAnalyzer {
       } else {
         correlation = varCo / Math.sqrt(varActual * varResult);
       }
-  
+
+      Locale.setDefault(Locale.US);
       NumberFormat decimalFormatter = new DecimalFormat("0.####");
       
       returnString.append(StringUtils.rightPad("Correlation coefficient", 40)).append(": ").append(
