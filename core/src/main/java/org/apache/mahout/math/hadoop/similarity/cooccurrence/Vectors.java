@@ -27,6 +27,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.cf.taste.common.TopK;
 import org.apache.mahout.common.iterator.FixedSizeSamplingIterator;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Varint;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -46,7 +47,7 @@ public final class Vectors {
     if (original.getNumNondefaultElements() <= sampleSize) {
       return original;
     }
-    Vector sample = original.like();
+    Vector sample = new RandomAccessSparseVector(original.size(), sampleSize);
     Iterator<Vector.Element> sampledElements =
         new FixedSizeSamplingIterator<Vector.Element>(sampleSize, original.iterateNonZero());
     while (sampledElements.hasNext()) {
@@ -66,7 +67,7 @@ public final class Vectors {
       Vector.Element nonZeroElement = nonZeroElements.next();
       topKQueue.offer(new Vectors.TemporaryElement(nonZeroElement));
     }
-    Vector topKSimilarities = original.like();
+    Vector topKSimilarities = new RandomAccessSparseVector(original.size(), k);
     for (Vector.Element topKSimilarity : topKQueue.retrieve()) {
       topKSimilarities.setQuick(topKSimilarity.index(), topKSimilarity.get());
     }

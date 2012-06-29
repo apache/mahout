@@ -406,8 +406,8 @@ public class RowSimilarityJob extends AbstractJob {
     protected void map(IntWritable row, VectorWritable similaritiesWritable, Context ctx)
       throws IOException, InterruptedException {
       Vector similarities = similaritiesWritable.get();
-      // For performance reasons moved transposedPartial creation out of the while loop and reusing the same vector
-      Vector transposedPartial = similarities.like();
+      // For performance reasons, the creation of transposedPartial is moved out of the while loop and it is reused inside
+      Vector transposedPartial = new RandomAccessSparseVector(similarities.size(), 1);
       TopK<Vector.Element> topKQueue = new TopK<Vector.Element>(maxSimilaritiesPerRow, Vectors.BY_VALUE);
       Iterator<Vector.Element> nonZeroElements = similarities.iterateNonZero();
       while (nonZeroElements.hasNext()) {
@@ -417,7 +417,7 @@ public class RowSimilarityJob extends AbstractJob {
         ctx.write(new IntWritable(nonZeroElement.index()), new VectorWritable(transposedPartial));
         transposedPartial.setQuick(row.get(), 0.0);
       }
-      Vector topKSimilarities = similarities.like();
+      Vector topKSimilarities = new RandomAccessSparseVector(similarities.size(), maxSimilaritiesPerRow);
       for (Vector.Element topKSimilarity : topKQueue.retrieve()) {
         topKSimilarities.setQuick(topKSimilarity.index(), topKSimilarity.get());
       }
