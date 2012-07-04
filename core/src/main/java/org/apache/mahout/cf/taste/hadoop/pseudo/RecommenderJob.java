@@ -119,7 +119,7 @@ public final class RecommenderJob extends AbstractJob {
 
     Path inputFile = getInputPath();
     Path outputPath = getOutputPath();
-    Path usersFile = hasOption("usersFile") ? inputFile : new Path(getOption("usersFile"));
+    Path usersFile = hasOption("usersFile") ? new Path(getOption("usersFile")) : inputFile;
     
     String recommendClassName = getOption("recommenderClassName");
     int recommendationsPerUser = Integer.parseInt(getOption("numRecommendations"));
