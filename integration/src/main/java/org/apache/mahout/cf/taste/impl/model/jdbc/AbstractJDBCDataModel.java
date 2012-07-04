@@ -478,7 +478,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     ResultSet rs = null;
     try {
       conn = dataSource.getConnection();
-      stmt = conn.prepareStatement(getPreferenceSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      stmt = conn.prepareStatement(getPreferenceTimeSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(1);
       setLongParameter(stmt, 1, userID);
