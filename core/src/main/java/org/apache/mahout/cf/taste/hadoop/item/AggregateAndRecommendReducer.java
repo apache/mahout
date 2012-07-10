@@ -33,6 +33,7 @@ import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.DoubleFunction;
+import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
 
 import java.io.IOException;
@@ -122,13 +123,12 @@ public final class AggregateAndRecommendReducer extends
     /* having boolean data, each estimated preference can only be 1,
      * however we can't use this to rank the recommended items,
      * so we use the sum of similarities for that. */
-    Vector predictionVector = null;
-    for (PrefAndSimilarityColumnWritable prefAndSimilarityColumn : values) {
-      predictionVector = predictionVector == null
-          ? prefAndSimilarityColumn.getSimilarityColumn()
-          : predictionVector.plus(prefAndSimilarityColumn.getSimilarityColumn());
+    Iterator<PrefAndSimilarityColumnWritable> columns = values.iterator();
+    Vector predictions = columns.next().getSimilarityColumn();
+    while (columns.hasNext()) {
+      predictions.assign(columns.next().getSimilarityColumn(), Functions.PLUS);
     }
-    writeRecommendedItems(userID, predictionVector, context);
+    writeRecommendedItems(userID, predictions, context);
   }
 
   private void reduceNonBooleanData(VarLongWritable userID,
@@ -151,12 +151,25 @@ public final class AggregateAndRecommendReducer extends
         numberOfSimilarItemsUsed.setQuick(itemIDIndex, numberOfSimilarItemsUsed.getQuick(itemIDIndex) + 1);
       }
 
-      numerators = numerators == null
-          ? prefValue == BOOLEAN_PREF_VALUE ? simColumn.clone() : simColumn.times(prefValue)
-          : numerators.plus(prefValue == BOOLEAN_PREF_VALUE ? simColumn : simColumn.times(prefValue));
+      if (denominators == null) {
+        denominators = simColumn.clone();
+      } else {
+        denominators.assign(simColumn, Functions.PLUS_ABS);
+      }
 
-      simColumn.assign(ABSOLUTE_VALUES);
-      denominators = denominators == null ? simColumn : denominators.plus(simColumn);
+      if (numerators == null) {
+        numerators = simColumn.clone();
+        if (prefValue != BOOLEAN_PREF_VALUE) {
+          numerators.assign(Functions.MULT, prefValue);
+        }
+      } else {
+        Vector toAdd = simColumn;
+        if (prefValue != BOOLEAN_PREF_VALUE) {
+          toAdd.assign(Functions.MULT, prefValue);
+        }
+        numerators.assign(toAdd, Functions.PLUS);
+      }
+
     }
 
     if (numerators == null) {

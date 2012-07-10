@@ -829,7 +829,7 @@ public class RecommenderJobTest extends TasteTestCase {
    * check whether the explicit user/item filter works
    */
   @Test
-   public void testCompleteJobWithFiltering() throws Exception {
+  public void testCompleteJobWithFiltering() throws Exception {
 
      File inputFile = getTestTempFile("prefs.txt");
      File userFile = getTestTempFile("users.txt");

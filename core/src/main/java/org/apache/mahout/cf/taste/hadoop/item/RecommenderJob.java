@@ -194,7 +194,6 @@ public final class RecommenderJob extends AbstractJob {
       Job prePartialMultiply1 = prepareJob(
               similarityMatrixPath, prePartialMultiplyPath1, SequenceFileInputFormat.class,
               SimilarityMatrixRowWrapperMapper.class, VarIntWritable.class, VectorOrPrefWritable.class,
-              Reducer.class, VarIntWritable.class, VectorOrPrefWritable.class,
               SequenceFileOutputFormat.class);
       boolean succeeded = prePartialMultiply1.waitForCompletion(true);
       if (!succeeded) {
@@ -205,9 +204,6 @@ public final class RecommenderJob extends AbstractJob {
                                            prePartialMultiplyPath2,
                                            SequenceFileInputFormat.class,
                                            UserVectorSplitterMapper.class,
-                                           VarIntWritable.class,
-                                           VectorOrPrefWritable.class,
-                                           Reducer.class,
                                            VarIntWritable.class,
                                            VectorOrPrefWritable.class,
                                            SequenceFileOutputFormat.class);
