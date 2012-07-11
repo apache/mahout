@@ -220,8 +220,7 @@ if [ ! -x "$HADOOP_BINARY" ] || [ "$MAHOUT_LOCAL" != "" ] ; then
   elif [ "$MAHOUT_LOCAL" != "" ] ; then
     echo "MAHOUT_LOCAL is set, running locally"
   fi
-#  echo "CLASSPATH: $CLASSPATH"
-    CLASSPATH="${CLASSPATH}:${MAHOUT_HOME/lib/hadoop/*}"
+    CLASSPATH="${CLASSPATH}:${MAHOUT_HOME}/lib/hadoop/*"
     case $1 in
     (classpath)
       echo $CLASSPATH
