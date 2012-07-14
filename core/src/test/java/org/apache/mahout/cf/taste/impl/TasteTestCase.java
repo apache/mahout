@@ -19,6 +19,8 @@ package org.apache.mahout.cf.taste.impl;
 
 import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
+import org.apache.mahout.cf.taste.impl.model.GenericBooleanPrefDataModel;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
@@ -47,6 +49,22 @@ public abstract class TasteTestCase extends MahoutTestCase {
     return new GenericDataModel(result);
   }
 
+  public static DataModel getBooleanDataModel(long[] userIDs, boolean[][] prefs) {
+    FastByIDMap<FastIDSet> result = new FastByIDMap<FastIDSet>();
+    for (int i = 0; i < userIDs.length; i++) {
+      FastIDSet prefsSet = new FastIDSet();
+      for (int j = 0; j < prefs[i].length; j++) {
+        if (prefs[i][j]) {
+          prefsSet.add(j);
+        }
+      }
+      if (!prefsSet.isEmpty()) {
+        result.put(userIDs[i], prefsSet);
+      }
+    }
+    return new GenericBooleanPrefDataModel(result);
+  }
+
   protected static DataModel getDataModel() {
     return getDataModel(
             new long[] {1, 2, 3, 4},
@@ -56,6 +74,16 @@ public abstract class TasteTestCase extends MahoutTestCase {
                     {0.4, 0.3, 0.5},
                     {0.7, 0.3, 0.8},
             });
+  }
+
+  protected static DataModel getBooleanDataModel() {
+    return getBooleanDataModel(new long[] {1, 2, 3, 4},
+                               new boolean[][] {
+                                   {false, true,  false},
+                                   {false, true,  true,  false},
+                                   {true,  false, false, true},
+                                   {true,  false, true,  true},
+                               });
   }
 
   protected static boolean arrayContains(long[] array, long value) {
