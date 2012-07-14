@@ -93,19 +93,19 @@ public class MatrixView extends AbstractMatrix {
 
   @Override
   public Matrix viewPart(int[] offset, int[] size) {
-    if (offset[ROW] < ROW) {
-      throw new IndexException(offset[ROW], ROW);
+    if (offset[ROW] < 0) {
+      throw new IndexException(offset[ROW], 0);
     }
     if (offset[ROW] + size[ROW] > rowSize()) {
       throw new IndexException(offset[ROW] + size[ROW], rowSize());
     }
-    if (offset[COL] < ROW) {
-      throw new IndexException(offset[COL], ROW);
+    if (offset[COL] < 0) {
+      throw new IndexException(offset[COL], 0);
     }
     if (offset[COL] + size[COL] > columnSize()) {
       throw new IndexException(offset[COL] + size[COL], columnSize());
     }
-    int[] origin = offset.clone();
+    int[] origin = this.offset.clone();
     origin[ROW] += offset[ROW];
     origin[COL] += offset[COL];
     return new MatrixView(matrix, origin, size);

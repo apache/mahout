@@ -184,6 +184,15 @@ public abstract class MatrixTest extends MahoutTestCase {
     test.assign(new double[test.rowSize() + 1][test.columnSize()]);
   }
 
+  /** Tests MAHOUT-1046 */
+  @Test
+  public void testMatrixViewBug() {
+    Matrix m = test.viewPart(0, 3, 0, 2);
+    // old bug would blow cookies with an index exception here.
+    m = m.viewPart(2, 1, 0, 1);
+    assertEquals(5.5, m.zSum(), 0);
+  }
+
   @Test
   public void testAssignMatrixBinaryFunction() {
     test.assign(test, Functions.PLUS);
