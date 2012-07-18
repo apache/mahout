@@ -70,7 +70,7 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
  * PreferenceArray tempPrefs = ..
  * tempPrefs.setUserID(0, anonymousUserID);
  * tempPrefs.setItemID(0, itemID);
- * plusModel.setTempPrefs(tempPrefs);
+ * plusModel.setTempPrefs(tempPrefs, anonymousUserID);
  *
  * // Produce recommendations
  * recommender.recommend(anonymousUserID, howMany);
