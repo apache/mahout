@@ -172,8 +172,8 @@ public final class VectorDumper extends AbstractJob {
           writer.append("#Max Items to dump: ").append(String.valueOf(numItems)).append('\n');
         }
       }
-      int maxIndexesPerVector = hasOption("numIndexesPerVector")
-              ? Integer.parseInt(getOption("numIndexesPerVector"))
+      int maxIndexesPerVector = hasOption("vectorSize")
+              ? Integer.parseInt(getOption("vectorSize"))
               : Integer.MAX_VALUE;
       long itemCount = 0;
       int fileCount = 0;
