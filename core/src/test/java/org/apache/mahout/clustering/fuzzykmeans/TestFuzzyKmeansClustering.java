@@ -22,12 +22,9 @@ import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.DataInputBuffer;
-import org.apache.hadoop.io.DataOutputBuffer;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.util.ToolRunner;
-import org.apache.mahout.clustering.ClusterObservations;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.kmeans.TestKmeansClustering;
 import org.apache.mahout.common.HadoopUtil;
@@ -35,7 +32,6 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
-import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.junit.Before;
@@ -201,22 +197,6 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
       assertTrue(count > 0);
     }
 
-  }
-
-  @Test
-  public void testClusterObservationsSerialization() throws Exception {
-    double[] data = { 1.1, 2.2, 3.3 };
-    Vector vector = new DenseVector(data);
-    ClusterObservations reference = new ClusterObservations(1, 2.0, vector, vector);
-    DataOutputBuffer out = new DataOutputBuffer();
-    reference.write(out);
-    ClusterObservations info = new ClusterObservations();
-    DataInputBuffer in = new DataInputBuffer();
-    in.reset(out.getData(), out.getLength());
-    info.readFields(in);
-    assertEquals("probability", reference.getS0(), info.getS0(), EPSILON);
-    assertEquals("point total", reference.getS1(), info.getS1());
-    assertEquals("combiner", reference.getCombinerState(), info.getCombinerState());
   }
 
 }

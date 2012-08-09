@@ -219,20 +219,6 @@ public abstract class AbstractCluster implements Cluster {
     setS2(getS2().plus(cl.getS2()));
   }
   
-  public void observe(ClusterObservations observations) {
-    setS0(getS0() + observations.getS0());
-    if (getS1() == null) {
-      setS1(observations.getS1().clone());
-    } else {
-      getS1().assign(observations.getS1(), Functions.PLUS);
-    }
-    if (getS2() == null) {
-      setS2(observations.getS2().clone());
-    } else {
-      getS2().assign(observations.getS2(), Functions.PLUS);
-    }
-  }
-  
   @Override
   public void observe(VectorWritable x) {
     observe(x.get());
@@ -278,10 +264,6 @@ public abstract class AbstractCluster implements Cluster {
     }
   }
   
-  
-  public ClusterObservations getObservations() {
-    return new ClusterObservations(getS0(), getS1(), getS2());
-  }
   
   @Override
   public void computeParameters() {
