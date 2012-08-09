@@ -201,6 +201,12 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     assertEquals("intra cluster density", 0.3656854249492381, evaluator.intraClusterDensity(), EPSILON);
   }
   
+  /**
+   * adding an empty cluster should modify the inter cluster density but not change the intra-cluster density as that
+   * cluster would have NaN as its intra-cluster density and NaN values are ignored by the evaluator
+   * 
+   * @throws IOException
+   */
   @Test
   public void testEmptyCluster() throws IOException {
     ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata, "file1"), fs, conf);
@@ -211,10 +217,16 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     List<VectorWritable> points = Lists.newArrayList();
     representativePoints.put(cluster.getId(), points);
     ClusterEvaluator evaluator = new ClusterEvaluator(representativePoints, clusters, measure);
-    assertEquals("inter cluster density", 0.33333333333333315, evaluator.interClusterDensity(), EPSILON);
+    assertEquals("inter cluster density", 0.371534146934532, evaluator.interClusterDensity(), EPSILON);
     assertEquals("intra cluster density", 0.3656854249492381, evaluator.intraClusterDensity(), EPSILON);
   }
   
+  /**
+   * adding an single-valued cluster should modify the inter cluster density but not change the intra-cluster density as
+   * that cluster would have NaN as its intra-cluster density and NaN values are ignored by the evaluator
+   * 
+   * @throws IOException
+   */
   @Test
   public void testSingleValueCluster() throws IOException {
     ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata, "file1"), fs, conf);
@@ -226,13 +238,13 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     points.add(new VectorWritable(cluster.getCenter().plus(new DenseVector(new double[] {1, 1}))));
     representativePoints.put(cluster.getId(), points);
     ClusterEvaluator evaluator = new ClusterEvaluator(representativePoints, clusters, measure);
-    assertEquals("inter cluster density", 0.33333333333333315, evaluator.interClusterDensity(), EPSILON);
+    assertEquals("inter cluster density", 0.3656854249492381, evaluator.interClusterDensity(), EPSILON);
     assertEquals("intra cluster density", 0.3656854249492381, evaluator.intraClusterDensity(), EPSILON);
   }
   
   /**
    * Representative points extraction will duplicate the cluster center if the cluster has no assigned points. These
-   * clusters should be ignored like empty clusters above
+   * clusters are included in the inter-cluster density but their NaN intra-density values are ignored by the evaluator.
    * 
    * @throws IOException
    */
@@ -249,7 +261,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     points.add(new VectorWritable(cluster.getCenter()));
     representativePoints.put(cluster.getId(), points);
     ClusterEvaluator evaluator = new ClusterEvaluator(representativePoints, clusters, measure);
-    assertEquals("inter cluster density", 0.33333333333333315, evaluator.interClusterDensity(), EPSILON);
+    assertEquals("inter cluster density", 0.3656854249492381, evaluator.interClusterDensity(), EPSILON);
     assertEquals("intra cluster density", 0.3656854249492381, evaluator.intraClusterDensity(), EPSILON);
   }
   
@@ -262,8 +274,8 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     int numIterations = 10;
     Path clustersIn = new Path(output, "clusters-0-final");
     RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure,
-        numIterations, true);   
-    printRepPoints(numIterations);
+        numIterations, true);
+    //printRepPoints(numIterations);
     ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
     // now print out the Results
     System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
@@ -324,7 +336,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     Path clustersIn = new Path(output, "clusters-7-final");
     RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure,
         numIterations, true);
-    printRepPoints(numIterations);
+    //printRepPoints(numIterations);
     ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
     // now print out the Results
     System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
@@ -342,7 +354,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     Path clustersIn = new Path(output, "clusters-5-final");
     RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output,
         new EuclideanDistanceMeasure(), numIterations, true);
-    printRepPoints(numIterations);
+    //printRepPoints(numIterations);
     ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
     // now print out the Results
     System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());

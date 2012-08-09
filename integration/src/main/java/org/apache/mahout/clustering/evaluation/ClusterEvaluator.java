@@ -20,8 +20,8 @@ package org.apache.mahout.clustering.evaluation;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
-import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.Cluster;
@@ -31,124 +31,90 @@ import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
+
 public class ClusterEvaluator {
-
+  
   private static final Logger log = LoggerFactory.getLogger(ClusterEvaluator.class);
-
-  private final Map<Integer, List<VectorWritable>> representativePoints;
-
+  
+  private final Map<Integer,List<VectorWritable>> representativePoints;
+  
   private final List<Cluster> clusters;
-
+  
   private final DistanceMeasure measure;
-
-  private boolean pruned;
-
+  
   /**
    * For testing only
    * 
    * @param representativePoints
-   *            a Map<Integer,List<VectorWritable>> of representative points keyed by clusterId
+   *          a Map<Integer,List<VectorWritable>> of representative points keyed by clusterId
    * @param clusters
-   *            a Map<Integer,Cluster> of the clusters keyed by clusterId
+   *          a Map<Integer,Cluster> of the clusters keyed by clusterId
    * @param measure
-   *            an appropriate DistanceMeasure
+   *          an appropriate DistanceMeasure
    */
-  public ClusterEvaluator(Map<Integer, List<VectorWritable>> representativePoints,
-                          List<Cluster> clusters, DistanceMeasure measure) {
+  public ClusterEvaluator(Map<Integer,List<VectorWritable>> representativePoints, List<Cluster> clusters,
+      DistanceMeasure measure) {
     this.representativePoints = representativePoints;
     this.clusters = clusters;
     this.measure = measure;
   }
-
+  
   /**
    * Initialize a new instance from job information
    * 
    * @param conf
-   *            a Configuration with appropriate parameters
+   *          a Configuration with appropriate parameters
    * @param clustersIn
-   *            a String path to the input clusters directory
+   *          a String path to the input clusters directory
    */
   public ClusterEvaluator(Configuration conf, Path clustersIn) {
-    measure = ClassUtils.instantiateAs(conf.get(RepresentativePointsDriver.DISTANCE_MEASURE_KEY), DistanceMeasure.class);
+    measure = ClassUtils
+        .instantiateAs(conf.get(RepresentativePointsDriver.DISTANCE_MEASURE_KEY), DistanceMeasure.class);
     representativePoints = RepresentativePointsMapper.getRepresentativePoints(conf);
     clusters = loadClusters(conf, clustersIn);
   }
-
+  
   /**
    * Load the clusters from their sequence files
    * 
-   * @param clustersIn 
-   *            a String pathname to the directory containing input cluster files
+   * @param clustersIn
+   *          a String pathname to the directory containing input cluster files
    * @return a List<Cluster> of the clusters
    */
   private static List<Cluster> loadClusters(Configuration conf, Path clustersIn) {
     List<Cluster> clusters = Lists.newArrayList();
-    for (ClusterWritable clusterWritable :
-         new SequenceFileDirValueIterable<ClusterWritable>(clustersIn, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+    for (ClusterWritable clusterWritable : new SequenceFileDirValueIterable<ClusterWritable>(clustersIn, PathType.LIST,
+        PathFilters.logsCRCFilter(), conf)) {
       Cluster cluster = clusterWritable.getValue();
-	  clusters.add(cluster);
+      clusters.add(cluster);
     }
     return clusters;
   }
-
-  /**
-   * Return if the cluster is valid. Valid clusters must have more than 2 representative points,
-   * and at least one of them must be different than the cluster center. This is because the
-   * representative points extraction will duplicate the cluster center if it is empty.
-   * 
-   * @param clusterI a Cluster
-   * @return a boolean
-   */
-  private boolean invalidCluster(Cluster clusterI) {
-    List<VectorWritable> repPts = representativePoints.get(clusterI.getId());
-    if (repPts.size() < 2) {
-      return true;
-    }
-    for (VectorWritable vw : repPts) {
-      Vector vector = vw.get();
-      if (!vector.equals(clusterI.getCenter())) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  private void pruneInvalidClusters() {
-    if (pruned) {
-      return;
-    }
-    for (Iterator<Cluster> it = clusters.iterator(); it.hasNext();) {
-      Cluster cluster = it.next();
-      if (invalidCluster(cluster)) {
-        log.info("Pruning cluster Id={}", cluster.getId());
-        it.remove();
-        representativePoints.remove(cluster.getId());
-      }
-    }
-    pruned = true;
-  }
-
+  
   /**
    * Computes the inter-cluster density as defined in "Mahout In Action"
    * 
    * @return the interClusterDensity
    */
   public double interClusterDensity() {
-    pruneInvalidClusters();
-    double max = 0;
-    double min = Double.MAX_VALUE;
+    double max = Double.NEGATIVE_INFINITY;
+    double min = Double.POSITIVE_INFINITY;
     double sum = 0;
     int count = 0;
-    for (int i = 0; i < clusters.size(); i++) {
-      Cluster clusterI = clusters.get(i);
-      for (int j = i + 1; j < clusters.size(); j++) {
-        Cluster clusterJ = clusters.get(j);
-        double d = measure.distance(clusterI.getCenter(), clusterJ.getCenter());
+    Map<Integer,Vector> distances = interClusterDistances();
+    for (Vector row : distances.values()) {
+      Iterator<Element> elements = row.iterateNonZero();
+      while (elements.hasNext()) {
+        Element element = elements.next();
+        double d = element.get();
         min = Math.min(d, min);
         max = Math.max(d, max);
         sum += d;
@@ -156,28 +122,71 @@ public class ClusterEvaluator {
       }
     }
     double density = (sum / count - min) / (max - min);
-    log.info("Inter-Cluster Density = {}", density);
+    log.info("Scaled Inter-Cluster Density = {}", density);
     return density;
   }
-
+  
   /**
-   * Computes the intra-cluster density as the average distance of the representative points
-   * from each other
+   * Computes the inter-cluster distances
    * 
-   * @return the intraClusterDensity of the representativePoints
+   * @return a Map<Integer, Vector>
+   */
+  public Map<Integer,Vector> interClusterDistances() {
+    Map<Integer,Vector> distances = new TreeMap<Integer,Vector>();
+    for (int i = 0; i < clusters.size(); i++) {
+      Cluster clusterI = clusters.get(i);
+      RandomAccessSparseVector row = new RandomAccessSparseVector(Integer.MAX_VALUE);
+      distances.put(clusterI.getId(), row);
+      for (int j = i + 1; j < clusters.size(); j++) {
+        Cluster clusterJ = clusters.get(j);
+        double d = measure.distance(clusterI.getCenter(), clusterJ.getCenter());
+        row.set(clusterJ.getId(), d);
+      }
+    }
+    return distances;
+  }
+  
+  /**
+   * Computes the average intra-cluster density as the average of each cluster's intra-cluster density
+   * 
+   * @return the average intraClusterDensity
    */
   public double intraClusterDensity() {
-    pruneInvalidClusters();
     double avgDensity = 0;
+    int count = 0;
+    Iterator<Element> iter = intraClusterDensities().iterateNonZero();
+    while (iter.hasNext()) {
+      Element elem = iter.next();
+      double value = elem.get();
+      if (!Double.isNaN(value)) {
+        avgDensity += value;
+        count++;
+      }
+    }
+    avgDensity = clusters.isEmpty() ? 0 : avgDensity / count;
+    log.info("Average Intra-Cluster Density = {}", avgDensity);
+    return avgDensity;
+  }
+  
+  /**
+   * Computes the intra-cluster densities for all clusters as the average distance of the representative points from
+   * each other
+   * 
+   * @return a Vector of the intraClusterDensity of the representativePoints by clusterId
+   */
+  public Vector intraClusterDensities() {
+    Vector densities = new RandomAccessSparseVector(Integer.MAX_VALUE);
     for (Cluster cluster : clusters) {
       int count = 0;
-      double max = 0;
-      double min = Double.MAX_VALUE;
+      double max = Double.NEGATIVE_INFINITY;
+      double min = Double.POSITIVE_INFINITY;
       double sum = 0;
       List<VectorWritable> repPoints = representativePoints.get(cluster.getId());
       for (int i = 0; i < repPoints.size(); i++) {
         for (int j = i + 1; j < repPoints.size(); j++) {
-          double d = measure.distance(repPoints.get(i).get(), repPoints.get(j).get());
+          Vector v1 = repPoints.get(i).get();
+          Vector v2 = repPoints.get(j).get();
+          double d = measure.distance(v1, v2);
           min = Math.min(d, min);
           max = Math.max(d, max);
           sum += d;
@@ -185,12 +194,9 @@ public class ClusterEvaluator {
         }
       }
       double density = (sum / count - min) / (max - min);
-      avgDensity += density;
+      densities.set(cluster.getId(), density);
       log.info("Intra-Cluster Density[{}] = {}", cluster.getId(), density);
     }
-    avgDensity = clusters.isEmpty() ? 0 : avgDensity / clusters.size();
-    log.info("Intra-Cluster Density = {}", avgDensity);
-    return avgDensity;
-
+    return densities;
   }
 }
