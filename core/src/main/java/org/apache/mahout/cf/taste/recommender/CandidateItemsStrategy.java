@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.recommender;
 
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -25,7 +26,7 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
 /**
  * Used to retrieve all items that could possibly be recommended to the user
  */
-public interface CandidateItemsStrategy {
+public interface CandidateItemsStrategy extends Refreshable {
 
   /**
    * @return IDs of all items that could be recommended to the user

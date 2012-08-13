@@ -96,6 +96,8 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     });
     refreshHelper.addDependency(dataModel);
     refreshHelper.addDependency(similarity);
+    refreshHelper.addDependency(candidateItemsStrategy);
+    refreshHelper.addDependency(mostSimilarItemsCandidateItemsStrategy);
     capper = buildCapper();
   }
 

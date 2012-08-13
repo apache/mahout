@@ -17,12 +17,15 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.CandidateItemsStrategy;
 import org.apache.mahout.cf.taste.recommender.MostSimilarItemsCandidateItemsStrategy;
+
+import java.util.Collection;
 
 /**
  * Abstract base implementation for retrieving candidate items to recommend
@@ -42,4 +45,8 @@ public abstract class AbstractCandidateItemsStrategy implements CandidateItemsSt
   }
 
   abstract FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel) throws TasteException;
+
+  @Override
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
+  }
 }

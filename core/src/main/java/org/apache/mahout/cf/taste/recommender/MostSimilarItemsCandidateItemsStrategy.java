@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.recommender;
 
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -24,7 +25,7 @@ import org.apache.mahout.cf.taste.model.DataModel;
 /**
  * Used to retrieve all items that could possibly be similar
  */
-public interface MostSimilarItemsCandidateItemsStrategy {
+public interface MostSimilarItemsCandidateItemsStrategy extends Refreshable {
 
   FastIDSet getCandidateItems(long[] itemIDs, DataModel dataModel) throws TasteException;
 }

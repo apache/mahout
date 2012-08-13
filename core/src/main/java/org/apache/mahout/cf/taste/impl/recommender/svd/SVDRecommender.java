@@ -113,6 +113,7 @@ public final class SVDRecommender extends AbstractRecommender {
     });
     refreshHelper.addDependency(getDataModel());
     refreshHelper.addDependency(factorizer);
+    refreshHelper.addDependency(candidateItemsStrategy);
   }
 
   static PersistenceStrategy getDefaultPersistenceStrategy() {
