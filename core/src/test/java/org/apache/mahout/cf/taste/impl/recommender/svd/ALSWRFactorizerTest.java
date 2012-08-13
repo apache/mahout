@@ -29,26 +29,35 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.MatrixSlice;
+import org.apache.mahout.math.SparseRowMatrix;
 import org.apache.mahout.math.Vector;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Iterator;
 
 public class ALSWRFactorizerTest extends TasteTestCase {
 
   private ALSWRFactorizer factorizer;
   private DataModel dataModel;
 
-  /**
-   *  rating-matrix
-   *
-   *          burger  hotdog  berries  icecream
-   *  dog       5       5        2        -
-   *  rabbit    2       -        3        5
-   *  cow       -       5        -        3
-   *  donkey    3       -        -        5
-   */
+  private static final Logger log = LoggerFactory.getLogger(ALSWRFactorizerTest.class);
+
+      /**
+       *  rating-matrix
+       *
+       *          burger  hotdog  berries  icecream
+       *  dog       5       5        2        -
+       *  rabbit    2       -        3        5
+       *  cow       -       5        -        3
+       *  donkey    3       -        -        5
+       */
+
   @Override
   @Before
   public void setUp() throws Exception {
@@ -144,5 +153,53 @@ public class ALSWRFactorizerTest extends TasteTestCase {
 
     double rmse = Math.sqrt(avg.getAverage());
     assertTrue(rmse < 0.2);
+  }
+
+  @Test
+  public void toyExampleImplicit() throws Exception {
+
+    Matrix observations = new SparseRowMatrix(4, 4, new Vector[] {
+        new DenseVector(new double[] { 5.0, 5.0, 2.0, 0 }),
+        new DenseVector(new double[] { 2.0, 0,   3.0, 5.0 }),
+        new DenseVector(new double[] { 0,   5.0, 0,   3.0 }),
+        new DenseVector(new double[] { 3.0, 0,   0,   5.0 }) });
+
+    Matrix preferences = new SparseRowMatrix(4, 4, new Vector[] {
+        new DenseVector(new double[] { 1.0, 1.0, 1.0, 0 }),
+        new DenseVector(new double[] { 1.0, 0,   1.0, 1.0 }),
+        new DenseVector(new double[] { 0,   1.0, 0,   1.0 }),
+        new DenseVector(new double[] { 1.0, 0,   0,   1.0 }) });
+
+    double alpha = 20;
+
+    ALSWRFactorizer factorizer = new ALSWRFactorizer(dataModel, 3, 0.065, 5, true, alpha);
+
+    SVDRecommender svdRecommender = new SVDRecommender(dataModel, factorizer);
+
+    RunningAverage avg = new FullRunningAverage();
+    Iterator<MatrixSlice> sliceIterator = preferences.iterateAll();
+    while (sliceIterator.hasNext()) {
+      MatrixSlice slice = sliceIterator.next();
+      for (Vector.Element e : slice.vector()) {
+
+        long userID = slice.index() + 1;
+        long itemID = e.index() + 1;
+
+        if (!Double.isNaN(e.get())) {
+          double pref = e.get();
+          double estimate = svdRecommender.estimatePreference(userID, itemID);
+
+          double confidence = 1 + alpha * observations.getQuick(slice.index(), e.index());
+          double err = confidence * (pref - estimate) * (pref - estimate);
+          avg.addDatum(err);
+          log.info("Comparing preference of user [{}] towards item [{}], was [{}] with confidence [{}] "
+              + "estimate is [{}]", new Object[] { slice.index(), e.index(), pref, confidence, estimate });
+        }
+      }
+    }
+    double rmse = Math.sqrt(avg.getAverage());
+    log.info("RMSE: {}", rmse);
+
+    assertTrue(rmse < 0.4);
   }
 }
