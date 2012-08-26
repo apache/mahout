@@ -73,7 +73,7 @@ public class Factorization {
   }
 
   public int numFeatures() {
-    return userFeatures[0].length;
+    return userFeatures.length > 0 ? userFeatures[0].length : 0;
   }
 
   public int numUsers() {
