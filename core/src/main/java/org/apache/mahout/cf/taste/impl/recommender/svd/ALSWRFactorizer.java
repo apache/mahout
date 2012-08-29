@@ -65,12 +65,14 @@ public class ALSWRFactorizer extends AbstractFactorizer {
   /** confidence weighting parameter, only necessary when working with implicit feedback */
   private final double alpha;
 
+  private final int numTrainingThreads;
+
   private static final double DEFAULT_ALPHA = 40;
 
   private static final Logger log = LoggerFactory.getLogger(ALSWRFactorizer.class);
 
   public ALSWRFactorizer(DataModel dataModel, int numFeatures, double lambda, int numIterations,
-      boolean usesImplicitFeedback, double alpha) throws TasteException {
+      boolean usesImplicitFeedback, double alpha, int numTrainingThreads) throws TasteException {
     super(dataModel);
     this.dataModel = dataModel;
     this.numFeatures = numFeatures;
@@ -78,6 +80,13 @@ public class ALSWRFactorizer extends AbstractFactorizer {
     this.numIterations = numIterations;
     this.usesImplicitFeedback = usesImplicitFeedback;
     this.alpha = alpha;
+    this.numTrainingThreads = numTrainingThreads;
+  }
+
+  public ALSWRFactorizer(DataModel dataModel, int numFeatures, double lambda, int numIterations,
+                         boolean usesImplicitFeedback, double alpha) throws TasteException {
+    this(dataModel, numFeatures, lambda, numIterations, usesImplicitFeedback, alpha,
+        Runtime.getRuntime().availableProcessors());
   }
 
   public ALSWRFactorizer(DataModel dataModel, int numFeatures, double lambda, int numIterations) throws TasteException {
@@ -247,7 +256,7 @@ public class ALSWRFactorizer extends AbstractFactorizer {
   }
 
   protected ExecutorService createQueue() {
-    return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    return Executors.newFixedThreadPool(numTrainingThreads);
   }
 
   protected static Vector ratingVector(PreferenceArray prefs) {
