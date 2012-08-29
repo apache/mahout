@@ -48,12 +48,20 @@ public class Factorization {
     this.itemFeatures = itemFeatures;
   }
 
+  public double[][] allUserFeatures() {
+    return userFeatures;
+  }
+
   public double[] getUserFeatures(long userID) throws NoSuchUserException {
     Integer index = userIDMapping.get(userID);
     if (index == null) {
       throw new NoSuchUserException(userID);
     }
     return userFeatures[index];
+  }
+
+  public double[][] allItemFeatures() {
+    return itemFeatures;
   }
 
   public double[] getItemFeatures(long itemID) throws NoSuchItemException {
@@ -64,8 +72,24 @@ public class Factorization {
     return itemFeatures[index];
   }
 
+  public int userIndex(long userID) throws NoSuchUserException {
+    Integer index = userIDMapping.get(userID);
+    if (index == null) {
+      throw new NoSuchUserException(userID);
+    }
+    return index;
+  }
+
   public Iterable<Map.Entry<Long,Integer>> getUserIDMappings() {
     return userIDMapping.entrySet();
+  }
+
+  public int itemIndex(long itemID) throws NoSuchItemException {
+    Integer index = itemIDMapping.get(itemID);
+    if (index == null) {
+      throw new NoSuchItemException(itemID);
+    }
+    return index;
   }
 
   public Iterable<Map.Entry<Long,Integer>> getItemIDMappings() {
