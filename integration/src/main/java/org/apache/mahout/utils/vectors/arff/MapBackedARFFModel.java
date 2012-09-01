@@ -92,6 +92,8 @@ public class MapBackedARFFModel implements ARFFModel {
     double result;
     switch (type) {
       case NUMERIC:
+      case INTEGER:
+      case REAL:
         result = processNumeric(data);
         break;
       case DATE:

@@ -20,6 +20,8 @@ package org.apache.mahout.utils.vectors.arff;
 public enum ARFFType {
 
   NUMERIC("numeric"),
+  INTEGER("integer"),
+  REAL("real"),
   NOMINAL("{"),
   DATE("date"),
   STRING("string");

@@ -92,6 +92,12 @@ public class ARFFVectorIterable implements Iterable<Vector> {
         if (lower.contains(ARFFType.NUMERIC.getIndicator())) {
           label = ARFFType.NUMERIC.getLabel(lower);
           type = ARFFType.NUMERIC;
+        } else if (lower.contains(ARFFType.INTEGER.getIndicator())) {
+          label = ARFFType.INTEGER.getLabel(lower);
+          type = ARFFType.INTEGER;
+        } else if (lower.contains(ARFFType.REAL.getIndicator())) {
+          label = ARFFType.REAL.getLabel(lower);
+          type = ARFFType.REAL;
         } else if (lower.contains(ARFFType.STRING.getIndicator())) {
           label = ARFFType.STRING.getLabel(lower);
           type = ARFFType.STRING;
@@ -104,7 +110,6 @@ public class ARFFVectorIterable implements Iterable<Vector> {
           for (int i = 0; i < classes.length; i++) {
             model.addNominal(label, classes[i].trim(), i + 1);
           }
-
         } else if (lower.contains(ARFFType.DATE.getIndicator())) {
           label = ARFFType.DATE.getLabel(lower);
           type = ARFFType.DATE;
