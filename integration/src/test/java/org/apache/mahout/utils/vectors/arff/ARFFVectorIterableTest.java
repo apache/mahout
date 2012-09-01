@@ -222,7 +222,30 @@ public final class ARFFVectorIterableTest extends MahoutTestCase {
     assertNotNull("nominals for bar are null", noms);
     assertEquals(2, noms.size());
   }
-  
+
+  @Test
+  public void testNumerics() throws Exception {
+    String arff = "@RELATION numerics\n"
+      + "@ATTRIBUTE theNumeric NUMERIC\n"
+      + "@ATTRIBUTE theInteger INTEGER\n"
+      + "@ATTRIBUTE theReal REAL\n"
+      + "@DATA\n"
+      + "1.0,2,3.0";
+    ARFFModel model = new MapBackedARFFModel();
+    ARFFVectorIterable iterable = new ARFFVectorIterable(arff, model);
+    model = iterable.getModel();
+    assertNotNull(model);
+    assertEquals(3, model.getLabelSize());
+    assertEquals(ARFFType.NUMERIC, model.getARFFType(0));
+    assertEquals(ARFFType.INTEGER, model.getARFFType(1));
+    assertEquals(ARFFType.REAL, model.getARFFType(2));
+    Iterator<Vector> it = iterable.iterator();
+    Vector vector = it.next();
+    assertEquals(1.0, vector.get(0), EPSILON);
+    assertEquals(2.0, vector.get(1), EPSILON);
+    assertEquals(3.0, vector.get(2), EPSILON);
+  }
+
   private static final String SAMPLE_DENSE_ARFF = "   % Comments\n" + "   % \n" + "   % Comments go here"
                                                   + "   % \n" + "   @RELATION golf\n" + '\n'
                                                   + "   @ATTRIBUTE outlook {sunny,overcast, rain}\n"
