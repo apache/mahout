@@ -19,10 +19,8 @@ package org.apache.mahout.math;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 
-
-public class WeightedVectorTest {
+public class WeightedVectorTest extends AbstractVectorTest {
   @Test
   public void testLength() {
     Vector v = new DenseVector(new double[]{0.9921337470551008, 1.0031004325833064, 0.9963963182745947});
@@ -32,5 +30,10 @@ public class WeightedVectorTest {
     c.set(0, -1);
     System.out.printf("c = %.9f\nv = %.9f\n", c.getLengthSquared(), c.getVector().getLengthSquared());
     assertEquals(c.getVector().getLengthSquared(), c.getLengthSquared(), 1e-17);
+  }
+
+  @Override
+  public Vector vectorToTest(int size) {
+    return new WeightedVector(new DenseVector(size), 4.52, 345);
   }
 }

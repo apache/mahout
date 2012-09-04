@@ -21,9 +21,7 @@ import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.random.MultiNormal;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-
-public class CentroidTest {
+public class CentroidTest extends AbstractVectorTest {
   @Test
   public void testUpdate() {
     MultiNormal f = new MultiNormal(20);
@@ -55,5 +53,10 @@ public class CentroidTest {
 
     assertEquals(3, x1.getWeight(), 1e-8);
     assertEquals(1, x1.getIndex());
+  }
+
+  @Override
+  public Vector vectorToTest(int size) {
+    return new Centroid(new WeightedVector(new DenseVector(size), 3.15, 51));
   }
 }

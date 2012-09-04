@@ -180,33 +180,39 @@ public class DelegatingVector implements Vector {
 
     @Override
     public Vector assign(double value) {
-        return delegate.assign(value);
-    }
+    delegate.assign(value);
+    return this;
+  }
 
-    @Override
-    public Vector assign(double[] values) {
-        return delegate.assign(values);
-    }
+  @Override
+  public Vector assign(double[] values) {
+    delegate.assign(values);
+    return this;
+  }
 
-    @Override
-    public Vector assign(Vector other) {
-        return delegate.assign(other);
-    }
+  @Override
+  public Vector assign(Vector other) {
+    delegate.assign(other);
+    return this;
+  }
 
-    @Override
-    public Vector assign(DoubleDoubleFunction f, double y) {
-        return delegate.assign(f, y);
-    }
+  @Override
+  public Vector assign(DoubleDoubleFunction f, double y) {
+    delegate.assign(f, y);
+    return this;
+  }
 
-    @Override
-    public Vector assign(DoubleFunction function) {
-        return delegate.assign(function);
-    }
+  @Override
+  public Vector assign(DoubleFunction function) {
+    delegate.assign(function);
+    return this;
+  }
 
-    @Override
-    public Vector assign(Vector other, DoubleDoubleFunction function) {
-        return delegate.assign(other, function);
-    }
+  @Override
+  public Vector assign(Vector other, DoubleDoubleFunction function) {
+    delegate.assign(other, function);
+    return this;
+  }
 
     @Override
     public Matrix cross(Vector other) {
