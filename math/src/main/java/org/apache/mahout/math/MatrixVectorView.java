@@ -29,6 +29,12 @@ public class MatrixVectorView extends AbstractVector {
   private int column;
   private int rowStride;
   private int columnStride;
+  private boolean isDense = true;
+
+  public MatrixVectorView(Matrix matrix, int row, int column, int rowStride, int columnStride, boolean isDense) {
+    this(matrix, row, column, rowStride, columnStride);
+    this.isDense = isDense;
+  }
 
   public MatrixVectorView(Matrix matrix, int row, int column, int rowStride, int columnStride) {
     super(viewSize(matrix, row, column, rowStride, columnStride));
@@ -64,7 +70,7 @@ public class MatrixVectorView extends AbstractVector {
    */
   @Override
   public boolean isDense() {
-    return true;
+    return isDense;
   }
 
   /**

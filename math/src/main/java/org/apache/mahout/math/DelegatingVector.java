@@ -25,8 +25,11 @@ import java.util.Iterator;
 /**
  * A delegating vector provides an easy way to decorate vectors with weights or id's and such while
  * keeping all of the Vector functionality.
+ *
+ * This vector implements LengthCachingVector because almost all delegates cache the length and
+ * the cost of false positives is very low.
  */
-public class DelegatingVector implements Vector {
+public class DelegatingVector implements Vector, LengthCachingVector {
   protected Vector delegate;
 
   public DelegatingVector(int size) {
@@ -121,6 +124,17 @@ public class DelegatingVector implements Vector {
   @Override
   public double getLengthSquared() {
     return delegate.getLengthSquared();
+  }
+
+  // not normally called because the delegate vector is who would need this and
+  // they will call their own version of this method.  In fact, if the delegate is
+  // also a delegating vector the same logic will apply recursively down to the first
+  // non-delegating vector.  This makes this very hard to test except in trivial ways.
+  @Override
+  public void setLengthSquared(double d2) {
+    if (delegate instanceof LengthCachingVector) {
+      ((LengthCachingVector) delegate).setLengthSquared(d2);
+    }
   }
 
   @Override

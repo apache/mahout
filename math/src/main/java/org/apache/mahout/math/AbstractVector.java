@@ -25,7 +25,7 @@ import org.apache.mahout.math.function.Functions;
 import java.util.Iterator;
 
 /** Implementations of generic capabilities like sum of elements and dot products */
-public abstract class AbstractVector implements Vector {
+public abstract class AbstractVector implements Vector, LengthCachingVector {
   
   private static final double LOG2 = Math.log(2.0);
 
@@ -186,7 +186,18 @@ public abstract class AbstractVector implements Vector {
     }
 
     // TODO: check the numNonDefault elements to further optimize
-    Vector result = like().assign(this);
+    Vector result;
+    if (isDense()) {
+      result = like().assign(this);
+    } else {
+      result = like();
+      Iterator<Element> i = this.iterateNonZero();
+      while (i.hasNext()) {
+        final Element element = i.next();
+        result.setQuick(element.index(), element.get());
+      }
+    }
+
     Iterator<Element> iter = that.iterateNonZero();
     while (iter.hasNext()) {
       Element thatElement = iter.next();
@@ -282,33 +293,44 @@ public abstract class AbstractVector implements Vector {
   }
 
   @Override
+  public void setLengthSquared(double d2) {
+    lengthSquared = d2;
+  }
+
+  @Override
   public double getDistanceSquared(Vector v) {
     if (size != v.size()) {
       throw new CardinalityException(size, v.size());
     }
     // if this and v has a cached lengthSquared, dot product is quickest way to compute this.
-    if (lengthSquared >= 0 && v instanceof AbstractVector && ((AbstractVector)v).lengthSquared >= 0) {
+    if (lengthSquared >= 0 && v instanceof LengthCachingVector && v.getLengthSquared() >= 0) {
       return lengthSquared + v.getLengthSquared() - 2 * this.dot(v);
     }
+    Vector sparseAccessed;
     Vector randomlyAccessed;
-    Iterator<Element> it;
-    double d = 0.0;
     if (lengthSquared >= 0.0) {
-      it = v.iterateNonZero();
       randomlyAccessed = this;
-      d += lengthSquared;
+      sparseAccessed = v;
     } else { // TODO: could be further optimized, figure out which one is smaller, etc
-      it = iterateNonZero();
       randomlyAccessed = v;
-      d += v.getLengthSquared();
+      sparseAccessed = this;
     }
+
+    Iterator<Element> it = sparseAccessed.iterateNonZero();
+    double d = randomlyAccessed.getLengthSquared();
+    double d2 = 0;
+    double dot = 0;
     while (it.hasNext()) {
       Element e = it.next();
       double value = e.get();
-      d += value * (value - 2.0 * randomlyAccessed.getQuick(e.index()));
+      d2 += value * value;
+      dot += value * randomlyAccessed.getQuick(e.index());
+    }
+    if (sparseAccessed instanceof LengthCachingVector) {
+      ((LengthCachingVector) sparseAccessed).setLengthSquared(d2);
     }
     //assert d > -1.0e-9; // round-off errors should never be too far off!
-    return Math.abs(d);
+    return Math.abs(d + d2 - 2 * dot);
   }
 
   @Override
