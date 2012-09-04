@@ -17,43 +17,42 @@
 
 package org.apache.mahout.clustering.meanshift;
 
-import java.io.IOException;
-import java.util.Collection;
-
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.iterator.ClusterWritable;
 
-import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.util.Collection;
 
-public class MeanShiftCanopyMapper extends Mapper<WritableComparable<?>,ClusterWritable,Text,ClusterWritable> {
-  
+public class MeanShiftCanopyMapper extends Mapper<WritableComparable<?>, ClusterWritable, Text, ClusterWritable> {
+
   private final Collection<MeanShiftCanopy> canopies = Lists.newArrayList();
-  
+
   private MeanShiftCanopyClusterer clusterer;
 
-private Integer numReducers;
+  private Integer numReducers;
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
-	clusterer = new MeanShiftCanopyClusterer(conf);
+    clusterer = new MeanShiftCanopyClusterer(conf);
     numReducers = Integer.valueOf(conf.get(MeanShiftCanopyDriver.MAPRED_REDUCE_TASKS, "1"));
   }
 
   @Override
   protected void map(WritableComparable<?> key, ClusterWritable clusterWritable, Context context)
     throws IOException, InterruptedException {
-	  MeanShiftCanopy canopy = (MeanShiftCanopy)clusterWritable.getValue();
-      clusterer.mergeCanopy(canopy.shallowCopy(), canopies);
+    MeanShiftCanopy canopy = (MeanShiftCanopy) clusterWritable.getValue();
+    clusterer.mergeCanopy(canopy.shallowCopy(), canopies);
   }
 
   @Override
   protected void cleanup(Context context) throws IOException, InterruptedException {
-	int reducer = 0;
+    int reducer = 0;
     for (MeanShiftCanopy canopy : canopies) {
       clusterer.shiftToMean(canopy);
       ClusterWritable clusterWritable = new ClusterWritable();
@@ -61,7 +60,7 @@ private Integer numReducers;
       context.write(new Text(String.valueOf(reducer)), clusterWritable);
       reducer++;
       if (reducer >= numReducers) {
-    	  reducer=0;
+        reducer = 0;
       }
     }
     super.cleanup(context);

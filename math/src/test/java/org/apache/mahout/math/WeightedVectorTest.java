@@ -23,14 +23,14 @@ import static org.junit.Assert.assertEquals;
 
 
 public class WeightedVectorTest {
-    @Test
-    public void testLength() {
-        Vector v = new DenseVector(new double[]{0.9921337470551008, 1.0031004325833064, 0.9963963182745947});
-        Centroid c = new Centroid(3, new DenseVector(v), 2);
-        assertEquals(c.getVector().getLengthSquared(), c.getLengthSquared(), 1e-17);
-        // previously, this wouldn't clear the cached squared length value correctly which would cause bad distances
-        c.set(0, -1);
-        System.out.printf("c = %.9f\nv = %.9f\n", c.getLengthSquared(), c.getVector().getLengthSquared());
-        assertEquals(c.getVector().getLengthSquared(), c.getLengthSquared(), 1e-17);
-    }
+  @Test
+  public void testLength() {
+    Vector v = new DenseVector(new double[]{0.9921337470551008, 1.0031004325833064, 0.9963963182745947});
+    Centroid c = new Centroid(3, new DenseVector(v), 2);
+    assertEquals(c.getVector().getLengthSquared(), c.getLengthSquared(), 1e-17);
+    // previously, this wouldn't clear the cached squared length value correctly which would cause bad distances
+    c.set(0, -1);
+    System.out.printf("c = %.9f\nv = %.9f\n", c.getLengthSquared(), c.getVector().getLengthSquared());
+    assertEquals(c.getVector().getLengthSquared(), c.getLengthSquared(), 1e-17);
+  }
 }
