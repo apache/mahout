@@ -27,159 +27,159 @@ import java.util.Iterator;
  * keeping all of the Vector functionality.
  */
 public class DelegatingVector implements Vector {
-    protected Vector delegate;
+  protected Vector delegate;
 
-    public DelegatingVector(int size) {
-        delegate = new DenseVector(size);
+  public DelegatingVector(int size) {
+    delegate = new DenseVector(size);
+  }
+
+  public DelegatingVector(Vector v) {
+    delegate = v;
+  }
+
+  public Vector getVector() {
+    return delegate;
+  }
+
+  @Override
+  public double aggregate(DoubleDoubleFunction aggregator, DoubleFunction map) {
+    return delegate.aggregate(aggregator, map);
+  }
+
+  @Override
+  public double aggregate(Vector other, DoubleDoubleFunction aggregator, DoubleDoubleFunction combiner) {
+    return delegate.aggregate(other, aggregator, combiner);
+  }
+
+  @Override
+  public Vector viewPart(int offset, int length) {
+    return delegate.viewPart(offset, length);
+  }
+
+  @Override
+  public Vector clone() {
+    WeightedVector r;
+    try {
+      r = (WeightedVector) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new RuntimeException("Clone not supported for DelegatingVector, shouldn't be possible");
     }
+    r.delegate = delegate.clone();
+    return r;
+  }
 
-    public DelegatingVector(Vector v) {
-        delegate = v;
-    }
+  @Override
+  public Vector divide(double x) {
+    return delegate.divide(x);
+  }
 
-    public Vector getVector() {
-        return delegate;
-    }
+  @Override
+  public double dot(Vector x) {
+    return delegate.dot(x);
+  }
 
-    @Override
-    public double aggregate(DoubleDoubleFunction aggregator, DoubleFunction map) {
-        return delegate.aggregate(aggregator, map);
-    }
+  @Override
+  public double get(int index) {
+    return delegate.get(index);
+  }
 
-    @Override
-    public double aggregate(Vector other, DoubleDoubleFunction aggregator, DoubleDoubleFunction combiner) {
-        return delegate.aggregate(other, aggregator, combiner);
-    }
+  @Override
+  public Element getElement(int index) {
+    return delegate.getElement(index);
+  }
 
-    @Override
-    public Vector viewPart(int offset, int length) {
-        return delegate.viewPart(offset, length);
-    }
+  @Override
+  public Vector minus(Vector that) {
+    return delegate.minus(that);
+  }
 
-    @Override
-    public Vector clone() {
-        WeightedVector r;
-        try {
-            r = (WeightedVector) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException("Clone not supported for DelegatingVector, shouldn't be possible");
-        }
-        r.delegate = delegate.clone();
-        return r;
-    }
+  @Override
+  public Vector normalize() {
+    return delegate.normalize();
+  }
 
-    @Override
-    public Vector divide(double x) {
-        return delegate.divide(x);
-    }
+  @Override
+  public Vector normalize(double power) {
+    return delegate.normalize(power);
+  }
 
-    @Override
-    public double dot(Vector x) {
-        return delegate.dot(x);
-    }
+  @Override
+  public Vector logNormalize() {
+    return delegate.logNormalize();
+  }
 
-    @Override
-    public double get(int index) {
-        return delegate.get(index);
-    }
+  @Override
+  public Vector logNormalize(double power) {
+    return delegate.logNormalize(power);
+  }
 
-    @Override
-    public Element getElement(int index) {
-        return delegate.getElement(index);
-    }
+  @Override
+  public double norm(double power) {
+    return delegate.norm(power);
+  }
 
-    @Override
-    public Vector minus(Vector that) {
-        return delegate.minus(that);
-    }
+  @Override
+  public double getLengthSquared() {
+    return delegate.getLengthSquared();
+  }
 
-    @Override
-    public Vector normalize() {
-        return delegate.normalize();
-    }
+  @Override
+  public double getDistanceSquared(Vector v) {
+    return delegate.getDistanceSquared(v);
+  }
 
-    @Override
-    public Vector normalize(double power) {
-        return delegate.normalize(power);
-    }
+  @Override
+  public double maxValue() {
+    return delegate.maxValue();
+  }
 
-    @Override
-    public Vector logNormalize() {
-        return delegate.logNormalize();
-    }
+  @Override
+  public int maxValueIndex() {
+    return delegate.maxValueIndex();
+  }
 
-    @Override
-    public Vector logNormalize(double power) {
-        return delegate.logNormalize(power);
-    }
+  @Override
+  public double minValue() {
+    return delegate.minValue();
+  }
 
-    @Override
-    public double norm(double power) {
-        return delegate.norm(power);
-    }
+  @Override
+  public int minValueIndex() {
+    return delegate.minValueIndex();
+  }
 
-    @Override
-    public double getLengthSquared() {
-        return delegate.getLengthSquared();
-    }
+  @Override
+  public Vector plus(double x) {
+    return delegate.plus(x);
+  }
 
-    @Override
-    public double getDistanceSquared(Vector v) {
-        return delegate.getDistanceSquared(v);
-    }
+  @Override
+  public Vector plus(Vector x) {
+    return delegate.plus(x);
+  }
 
-    @Override
-    public double maxValue() {
-        return delegate.maxValue();
-    }
+  @Override
+  public void set(int index, double value) {
+    delegate.set(index, value);
+  }
 
-    @Override
-    public int maxValueIndex() {
-        return delegate.maxValueIndex();
-    }
+  @Override
+  public Vector times(double x) {
+    return delegate.times(x);
+  }
 
-    @Override
-    public double minValue() {
-        return delegate.minValue();
-    }
+  @Override
+  public Vector times(Vector x) {
+    return delegate.times(x);
+  }
 
-    @Override
-    public int minValueIndex() {
-        return delegate.minValueIndex();
-    }
+  @Override
+  public double zSum() {
+    return delegate.zSum();
+  }
 
-    @Override
-    public Vector plus(double x) {
-        return delegate.plus(x);
-    }
-
-    @Override
-    public Vector plus(Vector x) {
-        return delegate.plus(x);
-    }
-
-    @Override
-    public void set(int index, double value) {
-        delegate.set(index, value);
-    }
-
-    @Override
-    public Vector times(double x) {
-        return delegate.times(x);
-    }
-
-    @Override
-    public Vector times(Vector x) {
-        return delegate.times(x);
-    }
-
-    @Override
-    public double zSum() {
-        return delegate.zSum();
-    }
-
-    @Override
-    public Vector assign(double value) {
+  @Override
+  public Vector assign(double value) {
     delegate.assign(value);
     return this;
   }
@@ -214,73 +214,73 @@ public class DelegatingVector implements Vector {
     return this;
   }
 
-    @Override
-    public Matrix cross(Vector other) {
-        return delegate.cross(other);
-    }
+  @Override
+  public Matrix cross(Vector other) {
+    return delegate.cross(other);
+  }
 
-    @Override
-    public int size() {
-        return delegate.size();
-    }
+  @Override
+  public int size() {
+    return delegate.size();
+  }
 
-    @Override
-    public String asFormatString() {
-        return delegate.asFormatString();
-    }
+  @Override
+  public String asFormatString() {
+    return delegate.asFormatString();
+  }
 
-    @Override
-    public int hashCode() {
-        return delegate.hashCode();
-    }
+  @Override
+  public int hashCode() {
+    return delegate.hashCode();
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        return delegate.equals(o);
-    }
+  @Override
+  public boolean equals(Object o) {
+    return delegate.equals(o);
+  }
 
-    @Override
-    public String toString() {
-        return delegate.toString();
-    }
+  @Override
+  public String toString() {
+    return delegate.toString();
+  }
 
-    @Override
-    public boolean isDense() {
-        return delegate.isDense();
-    }
+  @Override
+  public boolean isDense() {
+    return delegate.isDense();
+  }
 
-    @Override
-    public boolean isSequentialAccess() {
-        return delegate.isSequentialAccess();
-    }
+  @Override
+  public boolean isSequentialAccess() {
+    return delegate.isSequentialAccess();
+  }
 
-    @Override
-    public double getQuick(int index) {
-        return delegate.getQuick(index);
-    }
+  @Override
+  public double getQuick(int index) {
+    return delegate.getQuick(index);
+  }
 
-    @Override
-    public Vector like() {
-        return delegate.like();
-    }
+  @Override
+  public Vector like() {
+    return delegate.like();
+  }
 
-    @Override
-    public void setQuick(int index, double value) {
-        delegate.setQuick(index, value);
-    }
+  @Override
+  public void setQuick(int index, double value) {
+    delegate.setQuick(index, value);
+  }
 
-    @Override
-    public int getNumNondefaultElements() {
-        return delegate.getNumNondefaultElements();
-    }
+  @Override
+  public int getNumNondefaultElements() {
+    return delegate.getNumNondefaultElements();
+  }
 
-    @Override
-    public Iterator<Element> iterateNonZero() {
-        return delegate.iterateNonZero();
-    }
+  @Override
+  public Iterator<Element> iterateNonZero() {
+    return delegate.iterateNonZero();
+  }
 
-    @Override
-    public Iterator<Element> iterator() {
-        return delegate.iterator();
-    }
+  @Override
+  public Iterator<Element> iterator() {
+    return delegate.iterator();
+  }
 }
