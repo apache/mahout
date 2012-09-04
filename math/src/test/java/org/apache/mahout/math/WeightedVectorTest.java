@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math;
 
+import org.apache.mahout.math.function.Functions;
 import org.junit.Test;
 
 
@@ -35,5 +36,42 @@ public class WeightedVectorTest extends AbstractVectorTest {
   @Override
   public Vector vectorToTest(int size) {
     return new WeightedVector(new DenseVector(size), 4.52, 345);
+  }
+
+  @Test
+  public void testOrdering() {
+    WeightedVector v1 = new WeightedVector(new DenseVector(new double[]{1, 2, 3}), 5.41, 31);
+    WeightedVector v2 = new WeightedVector(new DenseVector(new double[]{1, 2, 3}), 5.00, 31);
+    WeightedVector v3 = new WeightedVector(new DenseVector(new double[]{1, 3, 3}), 5.00, 31);
+    WeightedVector v4 = (WeightedVector) v1.clone();
+
+    assertTrue(v1.compareTo(v2) > 0);
+    assertTrue(v3.compareTo(v1) < 0);
+    assertTrue(v3.compareTo(v2) > 0);
+    assertTrue(v4.compareTo(v1) == 0);
+    assertTrue(v1.compareTo(v1) == 0);
+  }
+
+  @Test
+  public void testProjection() {
+    Vector v1 = new DenseVector(10).assign(Functions.random());
+    WeightedVector v2 = new WeightedVector(v1, v1, 31);
+    assertEquals(v1.dot(v1), v2.getWeight(), 1e-13);
+    assertEquals(31, v2.getIndex());
+
+    Matrix y = new DenseMatrix(10, 4).assign(Functions.random());
+    Matrix q = new QRDecomposition(y.viewPart(0, 10, 0, 3)).getQ();
+
+    Vector nullSpace = y.viewColumn(3).minus(q.times(q.transpose().times(y.viewColumn(3))));
+
+    WeightedVector v3 = new WeightedVector(q.viewColumn(0).plus(q.viewColumn(1)), nullSpace, 1);
+    assertEquals(0, v3.getWeight(), 1e-13);
+
+    final Vector qx = q.viewColumn(0).plus(q.viewColumn(1)).normalize();
+    WeightedVector v4 = new WeightedVector(qx, q.viewColumn(0), 2);
+    assertEquals(Math.sqrt(0.5), v4.getWeight(), 1e-13);
+
+    WeightedVector v5 = WeightedVector.project(q.viewColumn(0), qx);
+    assertEquals(Math.sqrt(0.5), v5.getWeight(), 1e-13);
   }
 }
