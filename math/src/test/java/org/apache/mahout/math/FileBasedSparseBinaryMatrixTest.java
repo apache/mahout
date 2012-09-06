@@ -36,7 +36,7 @@ public class FileBasedSparseBinaryMatrixTest {
   private static final int ROWS = 10 * 1000 * 1000;
   private static final int COLUMNS = 1000;
 
-  @Test
+  // @Test
   public void testBigMatrix() throws IOException {
     // only run this test if -DrunSlowTests is used.  Also requires 4GB or more of heap.
 //    assumeNotNull(System.getProperty("runSlowTests"));
