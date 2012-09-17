@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.impl.model.file;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
@@ -293,7 +294,13 @@ public class FileDataModel extends AbstractDataModel {
     String startName = period < 0 ? dataFileName : dataFileName.substring(0, period);
     File parentDir = dataFile.getParentFile();
     Map<Long, File> modTimeToUpdateFile = new TreeMap<Long,File>();
-    for (File updateFile : parentDir.listFiles()) {
+    FileFilter onlyFiles = new FileFilter() {
+      @Override
+      public boolean accept(File file) {
+        return !file.isDirectory();
+      }
+    };
+    for (File updateFile : parentDir.listFiles(onlyFiles)) {
       String updateFileName = updateFile.getName();
       if (updateFileName.startsWith(startName)
           && !updateFileName.equals(dataFileName)
