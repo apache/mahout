@@ -191,7 +191,9 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
           idealizedGain += discount;
         }
       }
-      nDCG.addDatum(cumulativeGain / idealizedGain);
+      if (idealizedGain > 0.0) {
+        nDCG.addDatum(cumulativeGain / idealizedGain);
+      }
       
       // Reach
       numUsersRecommendedFor++;
