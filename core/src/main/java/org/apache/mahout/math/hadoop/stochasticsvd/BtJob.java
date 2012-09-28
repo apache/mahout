@@ -49,6 +49,7 @@ import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterator;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.Functions;
@@ -91,8 +92,8 @@ public final class BtJob {
   public static final String PROP_OUTER_PROD_BLOCK_HEIGHT =
     "ssvd.outerProdBlockHeight";
   public static final String PROP_RHAT_BROADCAST = "ssvd.rhat.broadcast";
-
   public static final String PROP_XI_PATH = "ssvdpca.xi.path";
+  public static final String PROP_NV = "ssvd.nv";
 
   static final double SPARSE_ZEROS_PCT_THRESHOLD = 0.1;
 
@@ -111,6 +112,7 @@ public final class BtJob {
     private Vector btRow;
     private SparseRowBlockAccumulator btCollector;
     private Context mapContext;
+    private boolean nv;
 
     // pca stuff
     private Vector sqAccum;
@@ -131,10 +133,9 @@ public final class BtJob {
 
       Vector qRow = qr.next();
       int kp = qRow.size();
-      qRowValue.set(qRow);
 
       // make sure Qs are inheriting A row labels.
-      outputQRow(key, qRowValue);
+      outputQRow(key, qRow, aRow);
 
       // MAHOUT-817
       if (computeSq) {
@@ -273,6 +274,9 @@ public final class BtJob {
       // MAHOUT-817
       computeSq = (conf.get(PROP_XI_PATH) != null);
 
+      // MAHOUT-1067
+      nv = conf.getBoolean(PROP_NV, false);
+
     }
 
     @Override
@@ -294,8 +298,13 @@ public final class BtJob {
     }
 
     @SuppressWarnings("unchecked")
-    private void outputQRow(Writable key, Writable value) throws IOException {
-      outputs.getCollector(OUTPUT_Q, null).collect(key, value);
+    private void outputQRow(Writable key, Vector qRow, Vector aRow ) throws IOException {
+      if (nv && (aRow instanceof NamedVector)) {
+        qRowValue.set(new NamedVector(qRow, ((NamedVector) aRow).getName()));
+      } else {
+        qRowValue.set(qRow);
+      }
+      outputs.getCollector(OUTPUT_Q, null).collect(key, qRowValue);
     }
   }
 
@@ -512,6 +521,12 @@ public final class BtJob {
                                      org.apache.hadoop.mapred.SequenceFileOutputFormat.class,
                                      IntWritable.class,
                                      VectorWritable.class);
+      /*
+       * MAHOUT-1067: if we are asked to output BBT products then named vector
+       * names should be propagated to Q too so that UJob could pick them up
+       * from there.
+       */
+      oldApiJob.setBoolean(PROP_NV, true);
     }
     if (xiPath != null) {
       // compute pca -related stuff as well

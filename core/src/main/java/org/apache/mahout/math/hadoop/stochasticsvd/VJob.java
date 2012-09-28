@@ -43,7 +43,7 @@ public class VJob {
   private static final String OUTPUT_V = "v";
   private static final String PROP_UHAT_PATH = "ssvd.uhat.path";
   private static final String PROP_SIGMA_PATH = "ssvd.sigma.path";
-  private static final String PROP_V_HALFSIGMA = "ssvd.v.halfsigma";
+  private static final String PROP_OUTPUT_SCALING = "ssvd.v.output.scaling";
   private static final String PROP_K = "ssvd.k";
   public static final String PROP_SQ_PATH = "ssvdpca.sq.path";
   public static final String PROP_XI_PATH = "ssvdpca.xi.path";
@@ -110,8 +110,17 @@ public class VJob {
       vRowWritable = new VectorWritable(vRow);
 
       sValues = SSVDHelper.loadVector(sigmaPath, conf);
-      if (conf.get(PROP_V_HALFSIGMA) != null) {
+      SSVDSolver.OutputScalingEnum outputScaling =
+        SSVDSolver.OutputScalingEnum.valueOf(context.getConfiguration()
+                                                    .get(PROP_OUTPUT_SCALING));
+      switch (outputScaling) {
+      case SIGMA:
+        sValues.assign(1.0);
+        break;
+      case HALFSIGMA:
+        sValues = SSVDHelper.loadVector(sigmaPath, context.getConfiguration());
         sValues.assign(Functions.SQRT);
+        break;
       }
 
       /*
@@ -141,7 +150,7 @@ public class VJob {
    * @param outputPath
    * @param k
    * @param numReduceTasks
-   * @param vHalfSigma
+   * @param outputScaling output scaling: apply Sigma, or Sigma^0.5, or none
    * @throws ClassNotFoundException
    * @throws InterruptedException
    * @throws IOException
@@ -157,7 +166,7 @@ public class VJob {
                   Path outputPath,
                   int k,
                   int numReduceTasks,
-                  boolean vHalfSigma) throws ClassNotFoundException,
+                  SSVDSolver.OutputScalingEnum outputScaling ) throws ClassNotFoundException,
     InterruptedException, IOException {
 
     job = new Job(conf);
@@ -186,9 +195,7 @@ public class VJob {
 
     job.getConfiguration().set(PROP_UHAT_PATH, inputUHatPath.toString());
     job.getConfiguration().set(PROP_SIGMA_PATH, inputSigmaPath.toString());
-    if (vHalfSigma) {
-      job.getConfiguration().set(PROP_V_HALFSIGMA, "y");
-    }
+    job.getConfiguration().set(PROP_OUTPUT_SCALING, outputScaling.name());
     job.getConfiguration().setInt(PROP_K, k);
     job.setNumReduceTasks(0);
 

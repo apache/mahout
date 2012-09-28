@@ -35,6 +35,7 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.Functions;
@@ -47,14 +48,14 @@ public class UJob {
   private static final String OUTPUT_U = "u";
   private static final String PROP_UHAT_PATH = "ssvd.uhat.path";
   private static final String PROP_SIGMA_PATH = "ssvd.sigma.path";
-  private static final String PROP_U_HALFSIGMA = "ssvd.u.halfsigma";
+  private static final String PROP_OUTPUT_SCALING = "ssvd.u.output.scaling";
   private static final String PROP_K = "ssvd.k";
 
   private Job job;
 
   public void run(Configuration conf, Path inputPathQ, Path inputUHatPath,
       Path sigmaPath, Path outputPath, int k, int numReduceTasks,
-      Class<? extends Writable> labelClass, boolean uHalfSigma)
+      Class<? extends Writable> labelClass, SSVDSolver.OutputScalingEnum outputScaling)
     throws ClassNotFoundException, InterruptedException, IOException {
 
     job = new Job(conf);
@@ -81,9 +82,7 @@ public class UJob {
 
     job.getConfiguration().set(PROP_UHAT_PATH, inputUHatPath.toString());
     job.getConfiguration().set(PROP_SIGMA_PATH, sigmaPath.toString());
-    if (uHalfSigma) {
-      job.getConfiguration().set(PROP_U_HALFSIGMA, "y");
-    }
+    job.getConfiguration().set(PROP_OUTPUT_SCALING, outputScaling.name());
     job.getConfiguration().setInt(PROP_K, k);
     job.setNumReduceTasks(0);
     job.submit();
@@ -125,6 +124,14 @@ public class UJob {
         }
       }
 
+      /*
+       * MAHOUT-1067: inherit A names too.
+       */
+      if (qRow instanceof NamedVector) {
+        uRowWritable.set(new NamedVector(uRow, ((NamedVector) qRow).getName()));
+      } else
+        uRowWritable.set(uRow);
+
       context.write(key, uRowWritable); // U inherits original A row labels.
     }
 
@@ -144,11 +151,18 @@ public class UJob {
       uRow = new DenseVector(k);
       uRowWritable = new VectorWritable(uRow);
 
-      if (context.getConfiguration().get(PROP_U_HALFSIGMA) != null) {
+      SSVDSolver.OutputScalingEnum outputScaling =
+        SSVDSolver.OutputScalingEnum.valueOf(context.getConfiguration()
+                                                    .get(PROP_OUTPUT_SCALING));
+      switch (outputScaling) {
+      case SIGMA:
+        sValues = SSVDHelper.loadVector(sigmaPath, context.getConfiguration());
+        break;
+      case HALFSIGMA:
         sValues = SSVDHelper.loadVector(sigmaPath, context.getConfiguration());
         sValues.assign(Functions.SQRT);
+        break;
       }
-
     }
 
   }

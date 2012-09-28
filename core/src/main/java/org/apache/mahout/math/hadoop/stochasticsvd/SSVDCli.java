@@ -57,12 +57,16 @@ public class SSVDCli extends AbstractJob {
     addOption("computeU", "U", "compute U (true/false)", String.valueOf(true));
     addOption("uHalfSigma",
               "uhs",
-              "Compute U as UHat=U x pow(Sigma,0.5)",
+              "Compute U * Sigma^0.5",
+              String.valueOf(false));
+    addOption("uSigma",
+              "us",
+              "Compute U * Sigma",
               String.valueOf(false));
     addOption("computeV", "V", "compute V (true/false)", String.valueOf(true));
     addOption("vHalfSigma",
               "vhs",
-              "compute V as VHat= V x pow(Sigma,0.5)",
+              "compute V * Sigma^0.5",
               String.valueOf(false));
     addOption("reduceTasks",
               "t",
@@ -100,6 +104,7 @@ public class SSVDCli extends AbstractJob {
     boolean computeU = Boolean.parseBoolean(getOption("computeU"));
     boolean computeV = Boolean.parseBoolean(getOption("computeV"));
     boolean cUHalfSigma = Boolean.parseBoolean(getOption("uHalfSigma"));
+    boolean cUSigma = Boolean.parseBoolean(getOption("uSigma"));
     boolean cVHalfSigma = Boolean.parseBoolean(getOption("vHalfSigma"));
     int reduceTasks = Integer.parseInt(getOption("reduceTasks"));
     boolean broadcast = Boolean.parseBoolean(getOption("broadcast"));
@@ -131,6 +136,7 @@ public class SSVDCli extends AbstractJob {
     solver.setComputeV(computeV);
     solver.setcUHalfSigma(cUHalfSigma);
     solver.setcVHalfSigma(cVHalfSigma);
+    solver.setcUSigma(cUSigma);
     solver.setOuterBlockHeight(h);
     solver.setAbtBlockHeight(abh);
     solver.setQ(q);

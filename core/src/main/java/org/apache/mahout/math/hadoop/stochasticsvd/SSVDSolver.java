@@ -92,6 +92,10 @@ public class SSVDSolver {
   private boolean computeV = true;
   private String uPath;
   private String vPath;
+  private String uSigmaPath;
+  private String uHalfSigmaPath;
+  private String vSigmaPath;
+  private String vHalfSigmaPath;
   private int outerBlockHeight = 30000;
   private int abtBlockHeight = 200000;
 
@@ -106,7 +110,9 @@ public class SSVDSolver {
   private final int reduceTasks;
   private int minSplitSize = -1;
   private boolean cUHalfSigma;
+  private boolean cUSigma;
   private boolean cVHalfSigma;
+  private boolean cVSigma;
   private boolean overwrite;
   private boolean broadcast = true;
   private Path pcaMeanPath;
@@ -151,14 +157,6 @@ public class SSVDSolver {
     this.reduceTasks = reduceTasks;
   }
 
-  public void setcUHalfSigma(boolean cUHat) {
-    this.cUHalfSigma = cUHat;
-  }
-
-  public void setcVHalfSigma(boolean cVHat) {
-    this.cVHalfSigma = cVHat;
-  }
-
   public int getQ() {
     return q;
   }
@@ -175,6 +173,7 @@ public class SSVDSolver {
 
   /**
    * The setting controlling whether to compute U matrix of low rank SSVD.
+   * Default true.
    * 
    */
   public void setComputeU(boolean val) {
@@ -189,6 +188,37 @@ public class SSVDSolver {
    */
   public void setComputeV(boolean val) {
     computeV = val;
+  }
+
+  /**
+   * 
+   * @param cUHat whether produce U*Sigma^0.5 as well (default false)
+   */
+  public void setcUHalfSigma(boolean cUHat) {
+    this.cUHalfSigma = cUHat;
+  }
+
+  /**
+   * 
+   * @param cVHat whether produce V*Sigma^0.5 as well (default false)
+   */
+  public void setcVHalfSigma(boolean cVHat) {
+    this.cVHalfSigma = cVHat;
+  }
+
+  /**
+   * 
+   * @param cUSigma whether produce U*Sigma output as well (default false)
+   */
+  public void setcUSigma(boolean cUSigma) {
+    this.cUSigma = cUSigma;
+  }
+
+  /**
+   * @param cVSigma whether produce V*Sigma output as well (default false)
+   */
+  public void setcVSigma(boolean cVSigma) {
+    this.cVSigma = cVSigma;
   }
 
   /**
@@ -230,6 +260,22 @@ public class SSVDSolver {
    */
   public String getVPath() {
     return vPath;
+  }
+
+  public String getuSigmaPath() {
+    return uSigmaPath;
+  }
+
+  public String getuHalfSigmaPath() {
+    return uHalfSigmaPath;
+  }
+
+  public String getvSigmaPath() {
+    return vSigmaPath;
+  }
+
+  public String getvHalfSigmaPath() {
+    return vHalfSigmaPath;
   }
 
   public boolean isOverwrite() {
@@ -334,7 +380,11 @@ public class SSVDSolver {
       Path uHatPath = new Path(outputPath, "UHat");
       Path svPath = new Path(outputPath, "Sigma");
       Path uPath = new Path(outputPath, "U");
+      Path uSigmaPath = new Path(outputPath, "USigma");
+      Path uHalfSigmaPath = new Path(outputPath, "UHalfSigma");
       Path vPath = new Path(outputPath, "V");
+      Path vHalfSigmaPath = new Path(outputPath, "VHalfSigma");
+      Path vSigmaPath = new Path(outputPath, "VSigma");
 
       Path pcaBasePath = new Path(outputPath, "pca");
 
@@ -390,9 +440,6 @@ public class SSVDSolver {
        * last B' and BB' computations. The user may not realize that and gives a
        * bit too many (I would be happy i that were ever the case though).
        */
-
-      //sbPath = new Path(pcaBasePath, "sb0");
-      //sqPath = new Path(pcaBasePath, "sq0");
 
       BtJob.run(conf,
                 inputPath,
@@ -514,8 +561,36 @@ public class SSVDSolver {
                  k,
                  reduceTasks,
                  labelType,
-                 cUHalfSigma);
+                 OutputScalingEnum.NOSCALING);
         // actually this is map-only job anyway
+      }
+
+      UJob uhsjob = null;
+      if (cUHalfSigma) {
+        uhsjob = new UJob();
+        uhsjob.run(conf,
+                 new Path(btPath, BtJob.OUTPUT_Q + "-*"),
+                 uHatPath,
+                 svPath,
+                 uHalfSigmaPath,
+                 k,
+                 reduceTasks,
+                 labelType,
+                 OutputScalingEnum.HALFSIGMA);
+      }
+
+      UJob usjob = null;
+      if (cUSigma) {
+        usjob = new UJob();
+        usjob.run(conf,
+                 new Path(btPath, BtJob.OUTPUT_Q + "-*"),
+                 uHatPath,
+                 svPath,
+                 uSigmaPath,
+                 k,
+                 reduceTasks,
+                 labelType,
+                 OutputScalingEnum.SIGMA);
       }
 
       VJob vjob = null;
@@ -530,16 +605,62 @@ public class SSVDSolver {
                  vPath,
                  k,
                  reduceTasks,
-                 cVHalfSigma);
+                 OutputScalingEnum.NOSCALING);
+      }
+
+      VJob vhsjob = null;
+      if (cVHalfSigma) {
+        vhsjob = new VJob();
+        vhsjob.run(conf,
+                   new Path(btPath, BtJob.OUTPUT_BT + "-*"),
+                   pcaMeanPath,
+                   sqPath,
+                   uHatPath,
+                   svPath,
+                   vHalfSigmaPath,
+                   k,
+                   reduceTasks,
+                   OutputScalingEnum.HALFSIGMA);
+      }
+
+      VJob vsjob = null;
+      if (cVSigma) {
+        vsjob = new VJob();
+        vsjob.run(conf,
+                  new Path(btPath, BtJob.OUTPUT_BT + "-*"),
+                  pcaMeanPath,
+                  sqPath,
+                  uHatPath,
+                  svPath,
+                  vSigmaPath,
+                  k,
+                  reduceTasks,
+                  OutputScalingEnum.SIGMA);
       }
 
       if (ujob != null) {
         ujob.waitForCompletion();
         this.uPath = uPath.toString();
       }
+      if (uhsjob != null) {
+        uhsjob.waitForCompletion();
+        this.uHalfSigmaPath = uHalfSigmaPath.toString();
+      }
+      if (usjob != null) {
+        usjob.waitForCompletion();
+        this.uSigmaPath = uSigmaPath.toString();
+      }
       if (vjob != null) {
         vjob.waitForCompletion();
         this.vPath = vPath.toString();
+      }
+      if (vhsjob != null) {
+        vhsjob.waitForCompletion();
+        this.vHalfSigmaPath = vHalfSigmaPath.toString();
+      }
+      if (vsjob != null) {
+        vsjob.waitForCompletion();
+        this.vSigmaPath = vSigmaPath.toString();
       }
 
     } catch (InterruptedException exc) {
@@ -550,6 +671,9 @@ public class SSVDSolver {
     } finally {
       IOUtils.close(closeables);
     }
+  }
 
+  static enum OutputScalingEnum {
+    NOSCALING, SIGMA, HALFSIGMA
   }
 }
