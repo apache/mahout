@@ -28,6 +28,13 @@ public class ClusterWritable implements Writable {
   
   private Cluster value;
   
+  public ClusterWritable(Cluster first) {
+    value = first;
+  }
+
+  public ClusterWritable() {
+  }
+
   public Cluster getValue() {
     return value;
   }

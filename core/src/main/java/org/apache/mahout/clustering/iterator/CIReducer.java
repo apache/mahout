@@ -38,20 +38,16 @@ public class CIReducer extends Reducer<IntWritable,ClusterWritable,IntWritable,C
   protected void reduce(IntWritable key, Iterable<ClusterWritable> values, Context context) throws IOException,
       InterruptedException {
     Iterator<ClusterWritable> iter = values.iterator();
-    ClusterWritable first = null;
+    Cluster first = iter.next().getValue(); // there must always be at least one
     while (iter.hasNext()) {
-      ClusterWritable cw = iter.next();
-      if (first == null) {
-        first = cw;
-      } else {
-        first.getValue().observe(cw.getValue());
-      }
+      Cluster cluster = iter.next().getValue();
+      first.observe(cluster);
     }
     List<Cluster> models = new ArrayList<Cluster>();
-    models.add(first.getValue());
+    models.add(first);
     classifier = new ClusterClassifier(models, policy);
     classifier.close();
-    context.write(key, first);
+    context.write(key, new ClusterWritable(first));
   }
 
   @Override
