@@ -32,57 +32,55 @@ import org.apache.mahout.common.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Calculates the SVD using an Expectation Maximization algorithm. */
-public final class ExpectationMaximizationSVDFactorizer extends AbstractFactorizer {
+/**
+ * Implementation of Simon Funk's famous algorithm from the Netflix prize,,
+ * see http://sifter.org/~simon/journal/20061211.html for details
+ */
+public final class FunkSVDFactorizer extends AbstractFactorizer {
 
-  private static final Logger log = LoggerFactory.getLogger(ExpectationMaximizationSVDFactorizer.class);
+  private static final Logger log = LoggerFactory.getLogger(FunkSVDFactorizer.class);
 
   private final double learningRate;
-  /** Parameter used to prevent overfitting. 0.02 is a good value. */
-  private final double preventOverfitting;
+  /** used to prevent overfitting.*/
+  private final double regularization;
   /** number of features used to compute this factorization */
   private final int numFeatures;
   /** number of iterations */
   private final int numIterations;
   private final double randomNoise;
-  /** user singular vectors */
-  private double[][] leftVectors;
-  /** item singular vectors */
-  private double[][] rightVectors;
+  private double[][] userVectors;
+  private double[][] itemVectors;
   private final DataModel dataModel;
   private List<SVDPreference> cachedPreferences;
   private double defaultValue;
   private double interval;
 
-  public ExpectationMaximizationSVDFactorizer(DataModel dataModel,
-                                              int numFeatures,
-                                              int numIterations) throws TasteException {
-    // use the default parameters from the old SVDRecommender implementation
-    this(dataModel, numFeatures, 0.005, 0.02, 0.005, numIterations);
+  private static final double DEFAULT_LEARNING_RATE = 0.005;
+  private static final double DEFAULT_REGULARIZATION = 0.02;
+  private static final double DEFAULT_RANDOM_NOISE = 0.005;
+
+  public FunkSVDFactorizer(DataModel dataModel, int numFeatures, int numIterations) throws TasteException {
+    this(dataModel, numFeatures, DEFAULT_LEARNING_RATE, DEFAULT_REGULARIZATION, DEFAULT_RANDOM_NOISE,
+        numIterations);
   }
 
-  public ExpectationMaximizationSVDFactorizer(DataModel dataModel,
-                                              int numFeatures,
-                                              double learningRate,
-                                              double preventOverfitting,
-                                              double randomNoise,
-                                              int numIterations) throws TasteException {
+  public FunkSVDFactorizer(DataModel dataModel, int numFeatures, double learningRate, double regularization,
+      double randomNoise, int numIterations) throws TasteException {
     super(dataModel);
     this.dataModel = dataModel;
     this.numFeatures = numFeatures;
     this.numIterations = numIterations;
 
     this.learningRate = learningRate;
-    this.preventOverfitting = preventOverfitting;
+    this.regularization = regularization;
     this.randomNoise = randomNoise;
-
   }
 
   @Override
   public Factorization factorize() throws TasteException {
     Random random = RandomUtils.getRandom();
-    leftVectors = new double[dataModel.getNumUsers()][numFeatures];
-    rightVectors = new double[dataModel.getNumItems()][numFeatures];
+    userVectors = new double[dataModel.getNumUsers()][numFeatures];
+    itemVectors = new double[dataModel.getNumItems()][numFeatures];
 
     double average = getAveragePreference();
 
@@ -92,71 +90,70 @@ public final class ExpectationMaximizationSVDFactorizer extends AbstractFactoriz
 
     for (int feature = 0; feature < numFeatures; feature++) {
       for (int userIndex = 0; userIndex < dataModel.getNumUsers(); userIndex++) {
-        leftVectors[userIndex][feature] = defaultValue + (random.nextDouble() - 0.5) * interval * randomNoise;
+        userVectors[userIndex][feature] = defaultValue + (random.nextDouble() - 0.5) * interval * randomNoise;
       }
       for (int itemIndex = 0; itemIndex < dataModel.getNumItems(); itemIndex++) {
-        rightVectors[itemIndex][feature] = defaultValue + (random.nextDouble() - 0.5) * interval * randomNoise;
+        itemVectors[itemIndex][feature] = defaultValue + (random.nextDouble() - 0.5) * interval * randomNoise;
       }
     }
     cachedPreferences = Lists.newArrayListWithCapacity(dataModel.getNumUsers());
     cachePreferences();
     double rmse = dataModel.getMaxPreference() - dataModel.getMinPreference();
-    for (int ii = 0; ii < numFeatures; ii++) {
+    for (int feature = 0; feature < numFeatures; feature++) {
       Collections.shuffle(cachedPreferences, random);
       for (int i = 0; i < numIterations; i++) {
         double err = 0.0;
         for (SVDPreference pref : cachedPreferences) {
           int useridx = userIndex(pref.getUserID());
           int itemidx = itemIndex(pref.getItemID());
-          err += Math.pow(train(useridx, itemidx, ii, pref), 2.0);
+          err += Math.pow(train(useridx, itemidx, feature, pref), 2.0);
         }
         rmse = Math.sqrt(err / cachedPreferences.size());
       }
-      if (ii < numFeatures - 1) {
-        for (SVDPreference pref : cachedPreferences) {
-          int useridx = userIndex(pref.getUserID());
-          int itemidx = itemIndex(pref.getItemID());
-          buildCache(useridx, itemidx, ii, pref);
+      if (feature < numFeatures - 1) {
+        for (SVDPreference preference : cachedPreferences) {
+          int useridx = userIndex(preference.getUserID());
+          int itemidx = itemIndex(preference.getItemID());
+          buildCache(useridx, itemidx, feature, preference);
         }
       }
-      log.info("Finished training feature {} with RMSE {}.", ii, rmse);
+      log.info("Finished training feature {} with RMSE {}.", feature, rmse);
     }
-    return createFactorization(leftVectors, rightVectors);
+    return createFactorization(userVectors, itemVectors);
   }
 
   double getAveragePreference() throws TasteException {
     RunningAverage average = new FullRunningAverage();
-    LongPrimitiveIterator it = dataModel.getUserIDs();
-    while (it.hasNext()) {
-      for (Preference pref : dataModel.getPreferencesFromUser(it.nextLong())) {
-        average.addDatum(pref.getValue());
+    LongPrimitiveIterator userIDs = dataModel.getUserIDs();
+    while (userIDs.hasNext()) {
+      for (Preference preference : dataModel.getPreferencesFromUser(userIDs.nextLong())) {
+        average.addDatum(preference.getValue());
       }
     }
     return average.getAverage();
   }
 
-  private double train(int i, int j, int f, SVDPreference pref) {
-    double[] leftVectorI = leftVectors[i];
-    double[] rightVectorJ = rightVectors[j];
-    double prediction = predictRating(i, j, f, pref, true);
+  private double train(int userIndex, int itemIndex, int feature, SVDPreference pref) {
+    double[] userVector = userVectors[userIndex];
+    double[] itemVector = itemVectors[itemIndex];
+    double prediction = predictRating(userIndex, itemIndex, feature, pref, true);
     double err = pref.getValue() - prediction;
-    double leftVectorIF = leftVectorI[f];
-    leftVectorI[f] += learningRate * (err * rightVectorJ[f] - preventOverfitting * leftVectorI[f]);
-    rightVectorJ[f] += learningRate * (err * leftVectorIF - preventOverfitting * rightVectorJ[f]);
+    userVector[feature] += learningRate * (err * itemVector[feature] - regularization * userVector[feature]);
+    itemVector[feature] += learningRate * (err * userVector[feature] - regularization * itemVector[feature]);
     return err;
   }
 
-  private void buildCache(int i, int j, int k, SVDPreference pref) {
-    pref.setCache(predictRating(i, j, k, pref, false));
+  private void buildCache(int userIndex, int itemIndex, int k, SVDPreference pref) {
+    pref.setCache(predictRating(userIndex, itemIndex, k, pref, false));
   }
 
-  private double predictRating(int i, int j, int f, SVDPreference pref, boolean trailing) {
+  private double predictRating(int userIndex, int itemIndex, int feature, SVDPreference pref, boolean trailing) {
     float minPreference = dataModel.getMinPreference();
     float maxPreference = dataModel.getMaxPreference();
     double sum = pref.getCache();
-    sum += leftVectors[i][f] * rightVectors[j][f];
+    sum += userVectors[userIndex][feature] * itemVectors[itemIndex][feature];
     if (trailing) {
-      sum += (numFeatures - f - 1) * (defaultValue + interval) * (defaultValue + interval);
+      sum += (numFeatures - feature - 1) * (defaultValue + interval) * (defaultValue + interval);
       if (sum > maxPreference) {
         sum = maxPreference;
       } else if (sum < minPreference) {
@@ -168,9 +165,9 @@ public final class ExpectationMaximizationSVDFactorizer extends AbstractFactoriz
 
   private void cachePreferences() throws TasteException {
     cachedPreferences.clear();
-    LongPrimitiveIterator it = dataModel.getUserIDs();
-    while (it.hasNext()) {
-      for (Preference pref : dataModel.getPreferencesFromUser(it.nextLong())) {
+    LongPrimitiveIterator userIDs = dataModel.getUserIDs();
+    while (userIDs.hasNext()) {
+      for (Preference pref : dataModel.getPreferencesFromUser(userIDs.nextLong())) {
         cachedPreferences.add(new SVDPreference(pref.getUserID(), pref.getItemID(), pref.getValue(), 0.0));
       }
     }
