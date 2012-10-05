@@ -18,25 +18,26 @@
 package org.apache.mahout.math.random;
 
 import com.google.common.base.Preconditions;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.list.DoubleArrayList;
 
 import java.util.Random;
 
 /**
- * /**
+ *
  * Generates samples from a generalized Chinese restaurant process (or Pittman-Yor process).
  *
  * The number of values drawn exactly once will asymptotically be equal to the discount parameter
  * as the total number of draws T increases without bound.  The number of unique values sampled will
  * increase as O(alpha * log T) if discount = 0 or O(alpha * T^discount) for discount > 0.
  */
-public class ChineseRestaurant implements Sampler<Integer> {
-    private double alpha;
+public final class ChineseRestaurant implements Sampler<Integer> {
+
+    private final double alpha;
     private double weight = 0;
     private double discount = 0;
-    private DoubleArrayList weights = new DoubleArrayList();
-
-    private Random rand = new Random();
+    private final DoubleArrayList weights = new DoubleArrayList();
+    private final Random rand = RandomUtils.getRandom();
 
     /**
      * Constructs a Dirichlet process sampler.  This is done by setting discount = 0.
@@ -59,6 +60,7 @@ public class ChineseRestaurant implements Sampler<Integer> {
         this.discount = discount;
     }
 
+    @Override
     public Integer sample() {
         double u = rand.nextDouble() * (alpha + weight);
         for (int j = 0; j < weights.size(); j++) {

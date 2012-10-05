@@ -79,6 +79,7 @@ public class Centroid extends WeightedVector {
         setWeight(getWeight() + 1);
     }
 
+    @Override
     public String toString() {
         return String.format("key = %d, weight = %.2f, vector = %s", getIndex(), getWeight(), delegate);
     }

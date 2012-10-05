@@ -19,15 +19,14 @@ package org.apache.mahout.math.random;
 
 import com.google.common.collect.Lists;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.MahoutTestCase;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-
-public class EmpiricalTest {
+public class EmpiricalTest extends MahoutTestCase {
     @Test
     public void testSimpleDist() {
         RandomUtils.useTestSeed();
@@ -44,8 +43,8 @@ public class EmpiricalTest {
     @Test
     public void testZeros() {
         Empirical z = new Empirical(true, true, 3, 0, 1, 0.5, 2, 1, 3.0);
-        assertEquals(-16.52, z.sample(0), 1e-2);
-        assertEquals(20.47, z.sample(1), 1e-2);
+        assertEquals(-16.52, z.sample(0), 1.0e-2);
+        assertEquals(20.47, z.sample(1), 1.0e-2);
     }
 
     @Test

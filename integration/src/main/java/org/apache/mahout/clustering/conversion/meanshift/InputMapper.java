@@ -38,7 +38,7 @@ public class InputMapper extends Mapper<LongWritable,Text,Text,ClusterWritable> 
   
   private int nextCanopyId;
   
-  private ClusterWritable cw = new ClusterWritable();
+  private final ClusterWritable cw = new ClusterWritable();
   
   @Override
   protected void map(LongWritable key, Text values, Context context) throws IOException, InterruptedException {

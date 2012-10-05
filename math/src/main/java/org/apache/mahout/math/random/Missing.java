@@ -19,13 +19,15 @@ package org.apache.mahout.math.random;
 
 import java.util.Random;
 
+import org.apache.mahout.common.RandomUtils;
+
 /**
  * Models data with missing values.  Note that all variables with the same fraction of missing
  * values will have the same sequence of missing values.  Similarly, if two variables have
  * missing probabilities of p1 > p2, then all of the p2 missing values will also be missing for
  * p1.
  */
-public class Missing<T> implements Sampler<T> {
+public final class Missing<T> implements Sampler<T> {
   private final Random gen;
   private final double p;
   private final Sampler<T> delegate;
@@ -35,7 +37,7 @@ public class Missing<T> implements Sampler<T> {
     this.p = p;
     this.delegate = delegate;
     this.missingMarker = missingMarker;
-    gen = new Random(seed);
+    gen = RandomUtils.getRandom(seed);
   }
 
   public Missing(double p, Sampler<T> delegate, T missingMarker) {

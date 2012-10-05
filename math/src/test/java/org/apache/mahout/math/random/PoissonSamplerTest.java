@@ -20,12 +20,12 @@ package org.apache.mahout.math.random;
 import org.apache.commons.math.distribution.PoissonDistribution;
 import org.apache.commons.math.distribution.PoissonDistributionImpl;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.MahoutTestCase;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-
-public class PoissonSamplerTest {
+public class PoissonSamplerTest extends MahoutTestCase {
+    @Override
     @Before
     public void setUp() {
         RandomUtils.useTestSeed();
@@ -38,7 +38,7 @@ public class PoissonSamplerTest {
         }
     }
 
-    private void checkDistribution(PoissonSampler pd, double alpha) {
+    private static void checkDistribution(PoissonSampler pd, double alpha) {
         int[] count = new int[(int) Math.max(10, 5 * alpha)];
         for (int i = 0; i < 10000; i++) {
             count[pd.sample().intValue()]++;
@@ -46,7 +46,7 @@ public class PoissonSamplerTest {
 
         PoissonDistribution ref = new PoissonDistributionImpl(alpha);
         for (int i = 0; i < count.length; i++) {
-            assertEquals(ref.probability(i), count[i] / 10000.0, 2e-2);
+            assertEquals(ref.probability(i), count[i] / 10000.0, 2.0e-2);
         }
     }
 }

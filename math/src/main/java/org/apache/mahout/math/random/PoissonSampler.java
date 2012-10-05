@@ -28,7 +28,7 @@ import java.util.Random;
 /**
  * Samples from a Poisson distribution.  Should probably not be used for lambda > 1000 or so.
  */
-public class PoissonSampler extends AbstractSamplerFunction {
+public final class PoissonSampler extends AbstractSamplerFunction {
     private double limit = 1;
 
     private Multinomial<Integer> partial;
@@ -40,6 +40,7 @@ public class PoissonSampler extends AbstractSamplerFunction {
         pd = new PoissonDistributionImpl(lambda);
     }
 
+    @Override
     public Double sample() {
         return sample(gen.nextDouble());
     }
@@ -49,7 +50,7 @@ public class PoissonSampler extends AbstractSamplerFunction {
             List<WeightedThing<Integer>> steps = Lists.newArrayList();
             limit = 1;
             for (int i = 0; u / 20 < limit; i++) {
-                final double pdf = pd.probability(i);
+                double pdf = pd.probability(i);
                 limit -= pdf;
                 steps.add(new WeightedThing<Integer>(i, pdf));
             }

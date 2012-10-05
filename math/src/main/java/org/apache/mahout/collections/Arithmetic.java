@@ -29,7 +29,7 @@ package org.apache.mahout.collections;
 /**
  * Arithmetic functions.
  */
-public class Arithmetic extends Constants {
+public final class Arithmetic extends Constants {
   // for method stirlingCorrection(...)
   private static final double[] stirlingCorrection = {
     0.0,
@@ -319,7 +319,7 @@ public class Arithmetic extends Constants {
     long b = 1;
     double binomial = 1;
     for (long i = k; i-- > 0;) {
-      binomial *= ((double) (a++)) / (b++);
+      binomial *= (double) a++ / (b++);
     }
     return binomial;
   }
@@ -368,7 +368,7 @@ public class Arithmetic extends Constants {
       b0 = x * b1 - b2 + coef[p++];
     } while (--i > 0);
 
-    return (0.5 * (b0 - b2));
+    return 0.5 * (b0 - b2);
   }
 
   /**

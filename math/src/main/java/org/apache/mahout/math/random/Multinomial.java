@@ -36,12 +36,12 @@ import java.util.Random;
  * <p/>
  * In order to facilitate access by value, we maintain an additional map from value to tree node.
  */
-public class Multinomial<T> implements Sampler<T>, Iterable<T> {
+public final class Multinomial<T> implements Sampler<T>, Iterable<T> {
     // these lists use heap ordering.  Thus, the root is at location 1, first level children at 2 and 3, second level
     // at 4, 5 and 6, 7.
-    private DoubleArrayList weight = new DoubleArrayList();
-    private List<T> values = Lists.newArrayList();
-    private Map<T, Integer> items = Maps.newHashMap();
+    private final DoubleArrayList weight = new DoubleArrayList();
+    private final List<T> values = Lists.newArrayList();
+    private final Map<T, Integer> items = Maps.newHashMap();
     private Random rand = RandomUtils.getRandom();
 
     public Multinomial() {
@@ -51,7 +51,7 @@ public class Multinomial<T> implements Sampler<T>, Iterable<T> {
 
     public Multinomial(Multiset<T> counts) {
         this();
-        Preconditions.checkArgument(counts.size() > 0, "Need some data to build sampler");
+        Preconditions.checkArgument(!counts.isEmpty(), "Need some data to build sampler");
         rand = RandomUtils.getRandom();
         for (T t : counts.elementSet()) {
             add(t, counts.count(t));
@@ -138,7 +138,7 @@ public class Multinomial<T> implements Sampler<T>, Iterable<T> {
 
     @Override
     public T sample() {
-        Preconditions.checkArgument(weight.size() > 0);
+        Preconditions.checkArgument(!weight.isEmpty());
         return sample(rand.nextDouble());
     }
 
@@ -172,7 +172,7 @@ public class Multinomial<T> implements Sampler<T>, Iterable<T> {
             r.add(weight.get(i));
             i++;
         }
-        i = i / 2;
+        i /= 2;
         while (i < Integer.highestOneBit(weight.size())) {
             r.add(weight.get(i));
             i++;

@@ -49,7 +49,7 @@ import com.google.common.collect.Maps;
  * This class calculates the CDbw metric as defined in
  * http://www.db-net.aueb.gr/index.php/corporate/content/download/227/833/file/HV_poster2002.pdf
  */
-public class CDbwEvaluator {
+public final class CDbwEvaluator {
   
   private static final Logger log = LoggerFactory.getLogger(CDbwEvaluator.class);
   
@@ -188,7 +188,9 @@ public class CDbwEvaluator {
    * @return a double
    */
   public double intraClusterDensity() {
-    if (intraClusterDensity != null) return intraClusterDensity();
+    if (intraClusterDensity != null) {
+      return intraClusterDensity();
+    }
     Iterator<Element> iter = intraClusterDensities().iterateNonZero();
     double avgDensity = 0;
     int count = 0;
@@ -200,8 +202,7 @@ public class CDbwEvaluator {
         count++;
       }
     }
-    double intraClusterDensity = avgDensity / count;
-    return intraClusterDensity;
+    return avgDensity / count;
   }
   
   /**
@@ -211,7 +212,9 @@ public class CDbwEvaluator {
    * @return a Map<Integer,Map<Integer,Double>> of the inter-cluster densities
    */
   public Map<Integer,Map<Integer,Double>> interClusterDensities() {
-    if (interClusterDensities != null) return interClusterDensities;
+    if (interClusterDensities != null) {
+      return interClusterDensities;
+    }
     interClusterDensities = new TreeMap<Integer,Map<Integer,Double>>();
     // find the closest representative points between the clusters
     for (int i = 0; i < clusters.size(); i++) {
@@ -263,7 +266,9 @@ public class CDbwEvaluator {
    * @return a double
    */
   public double interClusterDensity() {
-    if (interClusterDensity != null) return interClusterDensity;
+    if (interClusterDensity != null) {
+      return interClusterDensity;
+    }
     double sum = 0.0;
     int count = 0;
     Map<Integer,Map<Integer,Double>> distances = interClusterDensities();
@@ -320,7 +325,9 @@ public class CDbwEvaluator {
    * @return a Map<Integer,Vector> of the closest distances, keyed by clusterId
    */
   private Map<Integer,Map<Integer,Double>> minimumDistances() {
-    if (minimumDistances != null) return minimumDistances;
+    if (minimumDistances != null) {
+      return minimumDistances;
+    }
     minimumDistances = new TreeMap<Integer,Map<Integer,Double>>();
     closestRepPointIndices = new TreeMap<Integer,Map<Integer,int[]>>();
     for (int i = 0; i < clusters.size(); i++) {
@@ -367,12 +374,16 @@ public class CDbwEvaluator {
     Map<Integer,Double> distances = minimumDistances().get(cI);
     if (distances != null) {
       int[] ks = closestRepPointIndices.get(cI).get(cJ);
-      if (ks == null) return null;
+      if (ks == null) {
+        return null;
+      }
       return representativePoints.get(cI).get(ks[0]).get().plus(representativePoints.get(cJ).get(ks[1]).get())
           .divide(2);
     } else {
       int[] ks = closestRepPointIndices.get(cJ).get(cI);
-      if (ks == null) return null;
+      if (ks == null) {
+        return null;
+      }
       return representativePoints.get(cJ).get(ks[1]).get().plus(representativePoints.get(cI).get(ks[0]).get())
           .divide(2);
     }

@@ -272,7 +272,7 @@ public final class BtJob {
       closeables.addFirst(btCollector);
 
       // MAHOUT-817
-      computeSq = (conf.get(PROP_XI_PATH) != null);
+      computeSq = conf.get(PROP_XI_PATH) != null;
 
       // MAHOUT-1067
       nv = conf.getBoolean(PROP_NV, false);

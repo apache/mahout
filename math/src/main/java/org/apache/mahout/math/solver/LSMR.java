@@ -98,11 +98,11 @@ import org.slf4j.LoggerFactory;
  * Michael Saunders                saunders@stanford.edu Systems Optimization Laboratory Dept of
  * MS&E, Stanford University. -----------------------------------------------------------------------
  */
-public class LSMR {
+public final class LSMR {
 
   private static final Logger log = LoggerFactory.getLogger(LSMR.class);
 
-  private double lambda;
+  private final double lambda;
   private int localSize;
   private int iterationLimit;
   private double conditionLimit;

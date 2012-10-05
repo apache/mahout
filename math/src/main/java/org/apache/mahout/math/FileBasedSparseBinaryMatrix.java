@@ -53,10 +53,10 @@ import java.util.List;
  * different row formats for different kinds of data.  For instance, Golay coding of column numbers
  * or compressed bit vectors might be good representations for some purposes.
  */
-public class FileBasedSparseBinaryMatrix extends AbstractMatrix {
+public final class FileBasedSparseBinaryMatrix extends AbstractMatrix {
   private static final int MAGIC_NUMBER_V0 = 0x12d7067d;
 
-  private List<IntBuffer> data = Lists.newArrayList();
+  private final List<IntBuffer> data = Lists.newArrayList();
   private int[] bufferIndex;
   private int[] rowOffset;
   private int[] rowSize;
@@ -125,7 +125,7 @@ public class FileBasedSparseBinaryMatrix extends AbstractMatrix {
 
     // compute offsets and write row headers
     for (MatrixSlice row : m) {
-      final int nondefaultElements = row.vector().getNumNondefaultElements();
+      int nondefaultElements = row.vector().getNumNondefaultElements();
       out.writeInt(nondefaultElements);
     }
 
@@ -194,11 +194,11 @@ public class FileBasedSparseBinaryMatrix extends AbstractMatrix {
   }
 
   private static double searchForIndex(IntBuffer row, int columnIndex) {
-    int low = 0;
     int high = row.limit();
     if (high == 0) {
       return 0;
     }
+    int low = 0;
     while (high > low) {
       int mid = (low + high) / 2;
       if (row.get(mid) < columnIndex) {
@@ -283,8 +283,8 @@ public class FileBasedSparseBinaryMatrix extends AbstractMatrix {
   }
 
   private static class SparseBinaryVector extends AbstractVector {
-    private IntBuffer buffer;
-    private int maxIndex;
+    private final IntBuffer buffer;
+    private final int maxIndex;
 
     private SparseBinaryVector(int size, IntBuffer buffer, int maxIndex) {
       super(maxIndex);
@@ -292,7 +292,7 @@ public class FileBasedSparseBinaryMatrix extends AbstractMatrix {
       this.maxIndex = maxIndex;
     }
 
-    public SparseBinaryVector(ByteBuffer row, int maxIndex, int offset, int size) {
+    SparseBinaryVector(ByteBuffer row, int maxIndex, int offset, int size) {
       super(maxIndex);
       row = row.asReadOnlyBuffer();
       row.position(offset);
@@ -451,7 +451,7 @@ public class FileBasedSparseBinaryMatrix extends AbstractMatrix {
   }
 
   public static class BinaryReadOnlyElement implements Vector.Element {
-    private int index;
+    private final int index;
 
     public BinaryReadOnlyElement(int index) {
       this.index = index;

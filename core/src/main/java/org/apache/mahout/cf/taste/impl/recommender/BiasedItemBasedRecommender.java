@@ -127,16 +127,13 @@ public class BiasedItemBasedRecommender extends GenericItemBasedRecommender {
     return null;
   }
 
-  protected double baselineEstimate(long userID, long itemID) throws TasteException {
+  protected double baselineEstimate(long userID, long itemID) {
     return averageRating + userBiases.get(userID) + itemBiases.get(itemID);
   }
 
   @Override
   protected float doEstimatePreference(long userID, PreferenceArray preferencesFromUser, long itemID)
       throws TasteException {
-    double preference = 0.0;
-    double totalSimilarity = 0.0;
-    int count = 0;
     long[] userIDs = preferencesFromUser.getIDs();
     float[] ratings = new float[userIDs.length];
     long[] itemIDs = new long[userIDs.length];
@@ -148,8 +145,11 @@ public class BiasedItemBasedRecommender extends GenericItemBasedRecommender {
       itemIDs[n] = preferencesFromUser.get(n).getItemID();
     }
 
-    quickSort(similarities, ratings, itemIDs, 0, (similarities.length - 1));
+    quickSort(similarities, ratings, itemIDs, 0, similarities.length - 1);
 
+    double preference = 0.0;
+    double totalSimilarity = 0.0;
+    int count = 0;
     for (int i = 0; i < Math.min(numSimilarItems, similarities.length); i++) {
       double theSimilarity = similarities[i];
       if (!Double.isNaN(theSimilarity)) {
@@ -170,7 +170,7 @@ public class BiasedItemBasedRecommender extends GenericItemBasedRecommender {
   }  
 
   //TODO is it possible to do this without recursion?
-  protected void quickSort(double[] similarities, float[] values, long[] otherValues, int start, int end) {
+  protected static void quickSort(double[] similarities, float[] values, long[] otherValues, int start, int end) {
     if (start < end) {
       double pivot = similarities[end];
       float pivotValue = values[end];
@@ -178,7 +178,7 @@ public class BiasedItemBasedRecommender extends GenericItemBasedRecommender {
       int j = end;
       while (i != j) {
         if (similarities[i] > pivot) {
-          i = i + 1;
+          i++;
         }
         else {
           similarities[j] = similarities[i];
@@ -187,7 +187,7 @@ public class BiasedItemBasedRecommender extends GenericItemBasedRecommender {
           similarities[i] = similarities[j - 1];
           values[i] = values[j - 1];
           otherValues[i] = otherValues[j - 1];
-          j = j - 1;
+          j--;
         }
       }
       similarities[j] = pivot;

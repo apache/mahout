@@ -25,7 +25,7 @@ import java.util.Random;
 /**
  * Samples from an empirical cumulative distribution.
  */
-public class Empirical extends AbstractSamplerFunction {
+public final class Empirical extends AbstractSamplerFunction {
     private final Random gen;
     private final boolean exceedMinimum;
     private final boolean exceedMaximum;
@@ -97,23 +97,23 @@ public class Empirical extends AbstractSamplerFunction {
         if (exceedMinimum && u < x[0]) {
             // generate from left tail
             if (u == 0) {
-                u = 1e-16;
+                u = 1.0e-16;
             }
             return y[0] + Math.log(u / x[0]) * x[0] * (y[1] - y[0]) / (x[1] - x[0]);
         } else if (exceedMaximum && u > x[n - 1]) {
             if (u == 1) {
-                u = 1 - 1e-16;
+                u = 1 - 1.0e-16;
             }
             // generate from right tail
-            final double dy = y[n - 1] - y[n - 2];
-            final double dx = x[n - 1] - x[n - 2];
+            double dy = y[n - 1] - y[n - 2];
+            double dx = x[n - 1] - x[n - 2];
             return y[n - 1] - Math.log((1 - u) / (1 - x[n - 1])) * (1 - x[n - 1]) * dy / dx;
         } else {
             // linear interpolation
             for (int i = 1; i < n; i++) {
                 if (x[i] > u) {
-                    final double dy = y[i] - y[i - 1];
-                    final double dx = x[i] - x[i - 1];
+                    double dy = y[i] - y[i - 1];
+                    double dx = x[i] - x[i - 1];
                     return y[i - 1] + (u - x[i - 1]) * dy / dx;
                 }
             }

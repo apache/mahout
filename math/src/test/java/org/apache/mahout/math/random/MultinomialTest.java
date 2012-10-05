@@ -21,8 +21,8 @@ import com.google.common.collect.HashMultiset;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multiset;
-import junit.framework.Assert;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.MahoutTestCase;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -30,10 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-public class MultinomialTest {
+public class MultinomialTest extends MahoutTestCase {
+    @Override
     @Before
     public void setUp() {
         RandomUtils.useTestSeed();
@@ -59,10 +57,10 @@ public class MultinomialTest {
     public void testEvenSplit() {
         Multiset<String> stuff = HashMultiset.create();
         for (int i = 0; i < 5; i++) {
-            stuff.add(i + "");
+            stuff.add(String.valueOf(i));
         }
         Multinomial<String> s = new Multinomial<String>(stuff);
-        final double EPSILON = 1e-15;
+        double EPSILON = 1.0e-15;
 
         Multiset<String> cnt = HashMultiset.create();
         for (int i = 0; i < 5; i++) {
@@ -108,12 +106,12 @@ public class MultinomialTest {
         Multinomial<String> s0 = new Multinomial<String>(stuff);
         Multinomial<String> s1 = new Multinomial<String>(stuff);
         Multinomial<String> s2 = new Multinomial<String>(stuff);
-        final double EPSILON = 1e-15;
+        double EPSILON = 1.0e-15;
 
         Multiset<String> cnt = HashMultiset.create();
         for (int i = 0; i < 50; i++) {
-            final double p0 = i * 0.02;
-            final double p1 = (i + 1) * 0.02;
+            double p0 = i * 0.02;
+            double p1 = (i + 1) * 0.02;
             cnt.add(s0.sample(p0));
             cnt.add(s0.sample(p0 + EPSILON));
             cnt.add(s0.sample(p1 - EPSILON));
@@ -151,7 +149,7 @@ public class MultinomialTest {
 
     @Test
     public void testInsert() {
-        Random rand = new Random();
+        Random rand = RandomUtils.getRandom();
         Multinomial<Integer> table = new Multinomial<Integer>();
 
         double[] p = new double[10];
@@ -163,15 +161,15 @@ public class MultinomialTest {
         checkSelfConsistent(table);
 
         for (int i = 0; i < 10; i++) {
-            Assert.assertEquals(p[i], table.getWeight(i), 0);
+            assertEquals(p[i], table.getWeight(i), 0);
         }
     }
 
     @Test
     public void testDeleteAndUpdate() {
-        Random rand = new Random();
+        Random rand = RandomUtils.getRandom();
         Multinomial<Integer> table = new Multinomial<Integer>();
-        assertEquals(0, table.getWeight(), 1e-9);
+        assertEquals(0, table.getWeight(), 1.0e-9);
 
         double total = 0;
         double[] p = new double[10];
@@ -179,10 +177,10 @@ public class MultinomialTest {
             p[i] = rand.nextDouble();
             table.add(i, p[i]);
             total += p[i];
-            assertEquals(total, table.getWeight(), 1e-9);
+            assertEquals(total, table.getWeight(), 1.0e-9);
         }
 
-        assertEquals(total, table.getWeight(), 1e-9);
+        assertEquals(total, table.getWeight(), 1.0e-9);
 
         checkSelfConsistent(table);
 
@@ -196,10 +194,10 @@ public class MultinomialTest {
 
         checkSelfConsistent(table);
 
-        assertEquals(total, table.getWeight(), 1e-9);
+        assertEquals(total, table.getWeight(), 1.0e-9);
         for (int i = 0; i < 10; i++) {
             assertEquals(p[i], table.getWeight(i), 0);
-            assertEquals(p[i] / total, table.getProbability(i), 1e-10);
+            assertEquals(p[i] / total, table.getProbability(i), 1.0e-10);
         }
 
         table.set(9, 5.1);
@@ -207,21 +205,21 @@ public class MultinomialTest {
         p[9] = 5.1;
         total += 5.1;
 
-        assertEquals(total , table.getWeight(), 1e-9);
+        assertEquals(total , table.getWeight(), 1.0e-9);
         for (int i = 0; i < 10; i++) {
             assertEquals(p[i], table.getWeight(i), 0);
-            assertEquals(p[i] / total, table.getProbability(i), 1e-10);
+            assertEquals(p[i] / total, table.getProbability(i), 1.0e-10);
         }
 
         checkSelfConsistent(table);
 
         for (int i = 0; i < 10; i++) {
-            Assert.assertEquals(p[i], table.getWeight(i), 0);
+            assertEquals(p[i], table.getWeight(i), 0);
         }
     }
 
-    private void checkSelfConsistent(Multinomial<Integer> table) {
-        final List<Double> weights = table.getWeights();
+    private static void checkSelfConsistent(Multinomial<Integer> table) {
+        List<Double> weights = table.getWeights();
 
         double totalWeight = table.getWeight();
 
@@ -230,18 +228,18 @@ public class MultinomialTest {
         for (double weight : weights) {
             if (weight > 0) {
                 if (p > 0) {
-                    k[table.sample(p - 1e-9)]++;
+                    k[table.sample(p - 1.0e-9)]++;
                 }
-                k[table.sample(p + 1e-9)]++;
+                k[table.sample(p + 1.0e-9)]++;
             }
             p += weight / totalWeight;
         }
-        k[table.sample(p - 1e-9)]++;
-        Assert.assertEquals(1, p, 1e-9);
+        k[table.sample(p - 1.0e-9)]++;
+        assertEquals(1, p, 1.0e-9);
 
         for (int i = 0; i < 10; i++) {
             if (table.getWeight(i) > 0) {
-                Assert.assertEquals(k[i], 2);
+                assertEquals(2, k[i]);
             }
         }
     }

@@ -35,7 +35,7 @@ import java.util.Random;
  *
  * See http://mlg.eng.cam.ac.uk/zoubin/talks/turin09.pdf for details
  */
-public class IndianBuffet<T> implements Sampler<List<T>> {
+public final class IndianBuffet<T> implements Sampler<List<T>> {
     private final List<Integer> count = Lists.newArrayList();
     private int documents = 0;
     private final double alpha;
@@ -56,6 +56,7 @@ public class IndianBuffet<T> implements Sampler<List<T>> {
         return new IndianBuffet<String>(alpha, new WordConverter());
     }
 
+    @Override
     public List<T> sample() {
         List<T> r = Lists.newArrayList();
         if (documents == 0) {
@@ -75,7 +76,7 @@ public class IndianBuffet<T> implements Sampler<List<T>> {
                 }
                 i++;
             }
-            final int newItems = new PoissonSampler(alpha / documents).sample().intValue();
+            int newItems = new PoissonSampler(alpha / documents).sample().intValue();
             for (int j = 0; j < newItems; j++) {
                 r.add(converter.convert(i + j));
                 count.add(1);
@@ -92,6 +93,7 @@ public class IndianBuffet<T> implements Sampler<List<T>> {
      * Just converts to an integer.
      */
     public static class IdentityConverter implements WordFunction<Integer> {
+        @Override
         public Integer convert(int i) {
             return i;
         }
@@ -101,8 +103,9 @@ public class IndianBuffet<T> implements Sampler<List<T>> {
      * Converts to a string.
      */
     public static class StringConverter implements WordFunction<String> {
+        @Override
         public String convert(int i) {
-            return "" + i;
+            return String.valueOf(i);
         }
     }
 
@@ -110,20 +113,22 @@ public class IndianBuffet<T> implements Sampler<List<T>> {
      * Converts to one of a list of common English words for reasonably small integers and converts
      * to a token like w_92463 for big integers.
      */
-    public static class WordConverter implements WordFunction<String> {
+    public static final class WordConverter implements WordFunction<String> {
         private final Splitter onSpace = Splitter.on(CharMatcher.WHITESPACE).omitEmptyStrings().trimResults();
-        private List<String> words;
+        private final List<String> words;
 
         public WordConverter() {
             try {
                 words = Resources.readLines(Resources.getResource("words.txt"), Charsets.UTF_8, new LineProcessor<List<String>>() {
                     final List<String> words = Lists.newArrayList();
 
-                    public boolean processLine(String line) throws IOException {
+                    @Override
+                    public boolean processLine(String line) {
                         Iterables.addAll(words, onSpace.split(line));
                         return true;
                     }
 
+                    @Override
                     public List<String> getResult() {
                         return words;
                     }
@@ -133,6 +138,7 @@ public class IndianBuffet<T> implements Sampler<List<T>> {
             }
         }
 
+        @Override
         public String convert(int i) {
             if (i < words.size()) {
                 return words.get(i);

@@ -74,7 +74,7 @@ public class RegressionResultAnalyzerTest extends MahoutTestCase {
   
   @Test
   public void testAnalyze() {
-    double results[][] = new double[10][2];
+    double[][] results = new double[10][2];
 
     for (int i = 0; i < results.length; i++) {
       results[i][0] = i;

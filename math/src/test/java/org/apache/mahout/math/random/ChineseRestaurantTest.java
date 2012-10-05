@@ -24,6 +24,7 @@ import com.google.common.collect.Multiset;
 import com.google.common.collect.Ordering;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.MahoutTestCase;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.QRDecomposition;
 import org.junit.Test;
@@ -32,9 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-
-public class ChineseRestaurantTest {
+public class ChineseRestaurantTest extends MahoutTestCase {
     @Test
     public void testDepth() {
         List<Integer> totals = Lists.newArrayList();
@@ -60,11 +59,11 @@ public class ChineseRestaurantTest {
         }
 
         // these are empirically derived values, not principled ones
-        assertEquals(20600.0, (double) totals.get(0), 1000);
-        assertEquals(13200.0, (double) totals.get(1), 1000);
-        assertEquals(9875.0, (double) totals.get(2), 200);
-        assertEquals(1475.0, (double) totals.get(15), 50);
-        assertEquals(880.0, (double) totals.get(20), 40);
+        assertEquals(25000.0, (double) totals.get(0), 1000);
+        assertEquals(16000.0, (double) totals.get(1), 1000);
+        assertEquals(11000.0, (double) totals.get(2), 200);
+        assertEquals(1000.0, (double) totals.get(15), 50);
+        assertEquals(1000.0, (double) totals.get(20), 40);
     }
 
     @Test
@@ -93,14 +92,14 @@ public class ChineseRestaurantTest {
         Matrix m5 = new DenseMatrix(20, 3);
         Matrix m9 = new DenseMatrix(20, 3);
         while (i <= 200000) {
-            final double n = i / Math.pow(10, Math.floor(Math.log10(i)));
+            double n = i / Math.pow(10, Math.floor(Math.log10(i)));
             if (splits.contains(n)) {
                 System.out.printf("%d\t%d\t%d\t%d\n", i, s0.size(), s5.size(), s9.size());
                 if (i > 900) {
-                    final double predict5 = predictSize(m5.viewPart(0, k, 0, 3), i, 0.5);
+                    double predict5 = predictSize(m5.viewPart(0, k, 0, 3), i, 0.5);
                     assertEquals(predict5, Math.log(s5.size()), 1);
 
-                    final double predict9 = predictSize(m9.viewPart(0, k, 0, 3), i, 0.9);
+                    double predict9 = predictSize(m9.viewPart(0, k, 0, 3), i, 0.9);
                     assertEquals(predict9, Math.log(s9.size()), 1);
 
 //                    assertEquals(10.5 * Math.log(i) - offset0, s0.size(), 10);
@@ -134,20 +133,20 @@ public class ChineseRestaurantTest {
      * @param expectedCoefficient  What slope do we expect.
      * @return The predicted value for log(currentIndex)
      */
-    private double predictSize(Matrix m, int currentIndex, double expectedCoefficient) {
-        final int rows = m.rowSize();
-        final Matrix a = m.viewPart(0, rows, 1, 2);
-        final Matrix b = m.viewPart(0, rows, 0, 1);
+    private static double predictSize(Matrix m, int currentIndex, double expectedCoefficient) {
+        int rows = m.rowSize();
+        Matrix a = m.viewPart(0, rows, 1, 2);
+        Matrix b = m.viewPart(0, rows, 0, 1);
 
-        final Matrix ata = a.transpose().times(a);
-        final Matrix atb = a.transpose().times(b);
+        Matrix ata = a.transpose().times(a);
+        Matrix atb = a.transpose().times(b);
         QRDecomposition s = new QRDecomposition(ata);
         Matrix r = s.solve(atb).transpose();
-        assertEquals(expectedCoefficient, r.get(0, 0), 0.15);
+        assertEquals(expectedCoefficient, r.get(0, 0), 0.2);
         return r.times(new DenseVector(new double[]{Math.log(currentIndex), 1})).get(0);
     }
 
-    private int hapaxCount(ChineseRestaurant s) {
+    private static int hapaxCount(ChineseRestaurant s) {
         int r = 0;
         for (int i = 0; i < s.size(); i++) {
             if (s.count(i) == 1) {

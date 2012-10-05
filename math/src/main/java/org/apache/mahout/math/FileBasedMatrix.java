@@ -35,9 +35,9 @@ import java.util.List;
  * data onto the Java heap.  Instead, the file is mapped into non-heap memory as a DoubleBuffer and we access
  * that instead.
  */
-public class FileBasedMatrix extends AbstractMatrix {
-    private int rowsPerBlock;
-    private List<DoubleBuffer> content = Lists.newArrayList();
+public final class FileBasedMatrix extends AbstractMatrix {
+    private final int rowsPerBlock;
+    private final List<DoubleBuffer> content = Lists.newArrayList();
 
     /**
      * Constructs an empty matrix of the given size.

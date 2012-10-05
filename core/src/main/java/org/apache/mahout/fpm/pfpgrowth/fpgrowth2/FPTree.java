@@ -30,7 +30,7 @@ import org.apache.mahout.math.map.OpenIntObjectHashMap;
 /**
  * A straightforward implementation of FPTrees as described in Han et. al.
  */
-public class FPTree {
+public final class FPTree {
 
   private final AttrComparator attrComparator = new AttrComparator();
   private final FPNode root;
@@ -159,7 +159,7 @@ public class FPTree {
       if (next == null) {
         next = new FPNode(currNode, item, count);
         currNode.addChild(next);
-        List<FPNode> nodeList = (List<FPNode>) attrNodeLists.get(item);
+        List<FPNode> nodeList = attrNodeLists.get(item);
         if (nodeList == null) {
           nodeList = Lists.newArrayList();
           attrNodeLists.put(item, nodeList);

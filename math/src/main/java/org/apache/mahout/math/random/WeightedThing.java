@@ -20,7 +20,7 @@ package org.apache.mahout.math.random;
 /**
  * Handy for creating multinomial distributions of things.
  */
-public class WeightedThing<T> implements Comparable<WeightedThing<T>> {
+public final class WeightedThing<T> implements Comparable<WeightedThing<T>> {
     private double weight;
     private final T value;
 
@@ -41,6 +41,7 @@ public class WeightedThing<T> implements Comparable<WeightedThing<T>> {
         this.weight = weight;
     }
 
+    @Override
     public int compareTo(WeightedThing<T> other) {
         return Double.compare(this.weight, other.weight);
     }

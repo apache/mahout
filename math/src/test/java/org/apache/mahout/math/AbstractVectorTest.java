@@ -17,22 +17,22 @@ import java.util.Random;
  */
 public abstract class AbstractVectorTest<T extends Vector> extends MahoutTestCase {
 
-  private static final double FUZZ = 1e-13;
+  private static final double FUZZ = 1.0e-13;
 
   public abstract T vectorToTest(int size);
 
   @Test
   public void testSimpleOps() {
 
-    final T v0 = vectorToTest(20);
-    final Random gen = RandomUtils.getRandom();
+    T v0 = vectorToTest(20);
+    Random gen = RandomUtils.getRandom();
     Vector v1 = v0.assign(new Normal(0, 1, gen));
     Vector v2 = vectorToTest(20).assign(new Normal(0, 1, gen));
 
     assertEquals(v0.get(12), v1.get(12), 0);
     v0.set(12, gen.nextDouble());
     assertEquals(v0.get(12), v1.get(12), 0);
-    assertTrue(v0 == v1);
+    assertSame(v0, v1);
 
     Vector dv1 = new DenseVector(v1);
     Vector dv2 = new DenseVector(v2);
@@ -55,9 +55,9 @@ public abstract class AbstractVectorTest<T extends Vector> extends MahoutTestCas
     assertEquals(0, dv1.minus(dv2).getDistanceSquared(sv1.minus(v2)), FUZZ);
 
     double z = gen.nextDouble();
-    assertEquals(0, dv1.divide(z).getDistanceSquared(v1.divide(z)), 1e-12);
-    assertEquals(0, dv1.times(z).getDistanceSquared(v1.times(z)), 1e-12);
-    assertEquals(0, dv1.plus(z).getDistanceSquared(v1.plus(z)), 1e-12);
+    assertEquals(0, dv1.divide(z).getDistanceSquared(v1.divide(z)), 1.0e-12);
+    assertEquals(0, dv1.times(z).getDistanceSquared(v1.times(z)), 1.0e-12);
+    assertEquals(0, dv1.plus(z).getDistanceSquared(v1.plus(z)), 1.0e-12);
 
     assertEquals(dv1.dot(dv2), v1.dot(v2), FUZZ);
     assertEquals(dv1.dot(dv2), v1.dot(dv2), FUZZ);
@@ -123,7 +123,7 @@ public abstract class AbstractVectorTest<T extends Vector> extends MahoutTestCas
 
     Vector v3 = v1.clone();
     assertEquals(0, v1.getDistanceSquared(v3), FUZZ);
-    assertFalse(v1 == v3);
+    assertNotSame(v1, v3);
     v3.assign(0);
     assertEquals(0, dv1.getDistanceSquared(v1), FUZZ);
     assertEquals(0, v3.getLengthSquared(), FUZZ);

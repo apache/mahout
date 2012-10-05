@@ -85,7 +85,7 @@ import com.google.common.collect.Lists;
  * 
  * </UL>
  */
-public class SSVDSolver {
+public final class SSVDSolver {
 
   private Vector svalues;
   private boolean computeU = true;
@@ -673,7 +673,7 @@ public class SSVDSolver {
     }
   }
 
-  static enum OutputScalingEnum {
+  enum OutputScalingEnum {
     NOSCALING, SIGMA, HALFSIGMA
   }
 }

@@ -19,14 +19,14 @@ package org.apache.mahout.math.random;
 
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.MahoutTestCase;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.stats.OnlineSummarizer;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-
-public class MultiNormalTest {
+public class MultiNormalTest extends MahoutTestCase {
+    @Override
     @Before
     public void setUp() {
         RandomUtils.useTestSeed();
@@ -34,7 +34,7 @@ public class MultiNormalTest {
 
     @Test
     public void testDiagonal() {
-        final DenseVector offset = new DenseVector(new double[]{6, 3, 0});
+        DenseVector offset = new DenseVector(new double[]{6, 3, 0});
         MultiNormal n = new MultiNormal(
                 new DenseVector(new double[]{1, 2, 5}), offset);
 

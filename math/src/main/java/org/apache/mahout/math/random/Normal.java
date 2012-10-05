@@ -21,7 +21,7 @@ import org.apache.mahout.common.RandomUtils;
 
 import java.util.Random;
 
-public class Normal extends AbstractSamplerFunction {
+public final class Normal extends AbstractSamplerFunction {
     private final Random rand = RandomUtils.getRandom();
     private double mean = 0;
     private double sd = 1;
@@ -34,6 +34,7 @@ public class Normal extends AbstractSamplerFunction {
         this.sd = sd;
     }
 
+    @Override
     public Double sample() {
         return rand.nextGaussian() * sd + mean;
     }

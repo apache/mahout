@@ -17,14 +17,11 @@
 
 package org.apache.mahout.math.list;
 
+import org.apache.mahout.math.MahoutTestCase;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 /** tests for {@link ObjectArrayList}*/
-public class ObjectArrayListTest {
+public class ObjectArrayListTest extends MahoutTestCase {
 
   @Test
   public void emptyOnCreation() {

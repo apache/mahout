@@ -21,15 +21,15 @@ import org.apache.commons.math.MathException;
 import org.apache.commons.math.distribution.NormalDistribution;
 import org.apache.commons.math.distribution.NormalDistributionImpl;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.MahoutTestCase;
 import org.apache.mahout.math.stats.OnlineSummarizer;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-
-public class NormalTest {
+public class NormalTest extends MahoutTestCase {
+    @Override
     @Before
     public void setUp() {
         RandomUtils.useTestSeed();
