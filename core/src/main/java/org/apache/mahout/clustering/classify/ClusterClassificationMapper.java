@@ -50,7 +50,6 @@ public class ClusterClassificationMapper extends
   private List<Cluster> clusterModels;
   private ClusterClassifier clusterClassifier;
   private IntWritable clusterId;
-  private WeightedVectorWritable weightedVW;
   private boolean emitMostLikely;
   
   @Override
@@ -72,7 +71,6 @@ public class ClusterClassificationMapper extends
       clusterClassifier = new ClusterClassifier(clusterModels, policy);
     }
     clusterId = new IntWritable();
-    weightedVW = new WeightedVectorWritable(1, null);
   }
   
   /**
@@ -86,7 +84,7 @@ public class ClusterClassificationMapper extends
       if (shouldClassify(pdfPerCluster)) {
         if (emitMostLikely) {
           int maxValueIndex = pdfPerCluster.maxValueIndex();
-          write(vw, context, maxValueIndex);
+          write(vw, context, maxValueIndex, 1.0);
         } else {
           writeAllAboveThreshold(vw, context, pdfPerCluster);
         }
@@ -101,17 +99,16 @@ public class ClusterClassificationMapper extends
       Element pdf = iterateNonZero.next();
       if (pdf.get() >= threshold) {
         int clusterIndex = pdf.index();
-        write(vw, context, clusterIndex);
+        write(vw, context, clusterIndex, pdf.get());
       }
     }
   }
   
-  private void write(VectorWritable vw, Context context, int clusterIndex)
+  private void write(VectorWritable vw, Context context, int clusterIndex, double weight)
       throws IOException, InterruptedException {
     Cluster cluster = clusterModels.get(clusterIndex);
     clusterId.set(cluster.getId());
-    weightedVW.setVector(vw.get());
-    context.write(clusterId, weightedVW);
+    context.write(clusterId, new WeightedVectorWritable(weight, vw.get()));
   }
   
   public static List<Cluster> populateClusterModels(Path clusterOutputPath, Configuration conf) throws IOException {
