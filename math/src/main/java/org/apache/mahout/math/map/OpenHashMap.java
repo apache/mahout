@@ -171,10 +171,8 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
   @SuppressWarnings("unchecked")
   public boolean forEachKey(ObjectProcedure<K> procedure) {
     for (int i = table.length; i-- > 0;) {
-      if (state[i] == FULL) {
-        if (!procedure.apply((K)table[i])) {
-          return false;
-        }
+      if (state[i] == FULL && !procedure.apply((K)table[i])) {
+        return false;
       }
     }
     return true;
@@ -191,10 +189,8 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
     @SuppressWarnings("unchecked")
   public boolean forEachPair(ObjectObjectProcedure<K,V> procedure) {
     for (int i = table.length; i-- > 0;) {
-      if (state[i] == FULL) {
-        if (!procedure.apply((K)table[i], (V)values[i])) {
-          return false;
-        }
+      if (state[i] == FULL && !procedure.apply((K)table[i], (V)values[i])) {
+        return false;
       }
     }
     return true;

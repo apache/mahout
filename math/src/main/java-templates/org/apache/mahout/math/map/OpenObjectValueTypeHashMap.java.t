@@ -161,10 +161,8 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
   @SuppressWarnings("unchecked")
   public boolean forEachKey(ObjectProcedure<T> procedure) {
     for (int i = table.length; i-- > 0;) {
-      if (state[i] == FULL) {
-        if (!procedure.apply((T)table[i])) {
-          return false;
-        }
+      if (state[i] == FULL && !procedure.apply((T)table[i])) {
+        return false;
       }
     }
     return true;
@@ -182,10 +180,8 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
   @SuppressWarnings("unchecked")
   public boolean forEachPair(Object${valueTypeCap}Procedure<T> procedure) {
     for (int i = table.length; i-- > 0;) {
-      if (state[i] == FULL) {
-        if (!procedure.apply((T)table[i], values[i])) {
-          return false;
-        }
+      if (state[i] == FULL && !procedure.apply((T)table[i], values[i])) {
+        return false;
       }
     }
     return true;
