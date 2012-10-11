@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
@@ -59,10 +58,7 @@ public class SSVDCli extends AbstractJob {
               "uhs",
               "Compute U * Sigma^0.5",
               String.valueOf(false));
-    addOption("uSigma",
-              "us",
-              "Compute U * Sigma",
-              String.valueOf(false));
+    addOption("uSigma", "us", "Compute U * Sigma", String.valueOf(false));
     addOption("computeV", "V", "compute V (true/false)", String.valueOf(true));
     addOption("vHalfSigma",
               "vhs",
@@ -149,26 +145,32 @@ public class SSVDCli extends AbstractJob {
     // housekeeping
     FileSystem fs = FileSystem.get(getOutputPath().toUri(), conf);
 
+    if (overwrite) {
+      fs.delete(getOutputPath(), true);
+    }
+
     fs.mkdirs(getOutputPath());
 
     Vector svalues = solver.getSingularValues().viewPart(0, k);
     SSVDHelper.saveVector(svalues, getOutputPath("sigma"), conf);
 
-    if (computeU) {
-      FileStatus[] uFiles = fs.globStatus(new Path(solver.getUPath()));
-      if (uFiles != null) {
-        for (FileStatus uf : uFiles) {
-          fs.rename(uf.getPath(), getOutputPath());
-        }
-      }
+    if (computeU && !fs.rename(new Path(solver.getUPath()), getOutputPath())) {
+      throw new IOException("Unable to move U results to the output path.");
     }
-    if (computeV) {
-      FileStatus[] vFiles = fs.globStatus(new Path(solver.getVPath()));
-      if (vFiles != null) {
-        for (FileStatus vf : vFiles) {
-          fs.rename(vf.getPath(), getOutputPath());
-        }
-      }
+    if (cUHalfSigma
+        && !fs.rename(new Path(solver.getuHalfSigmaPath()), getOutputPath())) {
+      throw new IOException("Unable to move U*Sigma^0.5 results to the output path.");
+    }
+    if (cUSigma
+        && !fs.rename(new Path(solver.getuSigmaPath()), getOutputPath())) {
+      throw new IOException("Unable to move U*Sigma results to the output path.");
+    }
+    if (computeV && !fs.rename(new Path(solver.getVPath()), getOutputPath())) {
+      throw new IOException("Unable to move V results to the output path.");
+    }
+    if (cVHalfSigma
+        && !fs.rename(new Path(solver.getvHalfSigmaPath()), getOutputPath())) {
+      throw new IOException("Unable to move V*Sigma^0.5 results to the output path.");
     }
     return 0;
   }
