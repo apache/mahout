@@ -117,15 +117,26 @@ public class SSVDCli extends AbstractJob {
     }
 
     Path[] inputPaths = { getInputPath() };
+    Path tempPath = getTempPath();
+    FileSystem fs = FileSystem.get(getOutputPath().toUri(), conf);
 
     // MAHOUT-817
     if (pca && xiPath == null) {
-      xiPath = new Path(getTempPath(), "xi");
-      MatrixColumnMeansJob.run(conf, inputPaths[0], getTempPath());
+      xiPath = new Path(tempPath, "xi");
+      if (overwrite) {
+        fs.delete(xiPath, true);
+      }
+      MatrixColumnMeansJob.run(conf, inputPaths[0], xiPath);
     }
 
     SSVDSolver solver =
-      new SSVDSolver(conf, inputPaths, getTempPath(), r, k, p, reduceTasks);
+      new SSVDSolver(conf,
+                     inputPaths,
+                     new Path(tempPath, "ssvd"),
+                     r,
+                     k,
+                     p,
+                     reduceTasks);
 
     solver.setMinSplitSize(minSplitSize);
     solver.setComputeU(computeU);
@@ -138,13 +149,14 @@ public class SSVDCli extends AbstractJob {
     solver.setQ(q);
     solver.setBroadcast(broadcast);
     solver.setOverwrite(overwrite);
-    solver.setPcaMeanPath(xiPath);
+
+    if (xiPath != null) {
+      solver.setPcaMeanPath(new Path(xiPath, "part-*"));
+    }
 
     solver.run();
 
     // housekeeping
-    FileSystem fs = FileSystem.get(getOutputPath().toUri(), conf);
-
     if (overwrite) {
       fs.delete(getOutputPath(), true);
     }

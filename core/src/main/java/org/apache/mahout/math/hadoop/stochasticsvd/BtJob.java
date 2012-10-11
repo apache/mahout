@@ -384,6 +384,10 @@ public final class BtJob {
       String xiPathStr = conf.get(PROP_XI_PATH);
       if (xiPathStr != null) {
         xi = SSVDHelper.loadAndSumUpVectors(new Path(xiPathStr), conf);
+        if (xi == null) {
+          throw new IOException(String.format("unable to load mean path xi from %s.",
+                                              xiPathStr));
+        }
       }
 
       if (outputBBt || xi != null) {

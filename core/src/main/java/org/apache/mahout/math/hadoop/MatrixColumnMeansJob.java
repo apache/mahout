@@ -23,7 +23,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -56,7 +56,7 @@ public final class MatrixColumnMeansJob {
   public static Vector run(Configuration conf,
                            Path inputPath,
                            Path outputVectorTmpPath) throws IOException {
-    return run(conf, inputPath, outputVectorTmpPath, VECTOR_CLASS);
+    return run(conf, inputPath, outputVectorTmpPath, null);
   }
 
   /**
@@ -82,12 +82,11 @@ public final class MatrixColumnMeansJob {
                       vectorClass == null ? DenseVector.class.getName()
                           : vectorClass);
 
-      @SuppressWarnings("deprecation")
-      JobConf oldApiConf = new JobConf(initialConf);
+      Job job = new Job(initialConf, "MatrixColumnMeansJob");
+      job.setJarByClass(MatrixColumnMeansJob.class);
 
-      org.apache.hadoop.mapred.FileOutputFormat.setOutputPath(oldApiConf,
-                                                              outputVectorTmpPath);
-      Job job = new Job(initialConf);
+      FileOutputFormat.setOutputPath(job, outputVectorTmpPath);
+      
       outputVectorTmpPath.getFileSystem(job.getConfiguration())
                          .delete(outputVectorTmpPath, true);
       job.setNumReduceTasks(1);
@@ -108,7 +107,7 @@ public final class MatrixColumnMeansJob {
 
       Path tmpFile = new Path(outputVectorTmpPath, "part-r-00000");
       SequenceFileValueIterator<VectorWritable> iterator =
-        new SequenceFileValueIterator<VectorWritable>(tmpFile, true, oldApiConf);
+        new SequenceFileValueIterator<VectorWritable>(tmpFile, true, initialConf);
       try {
         if (iterator.hasNext()) {
           return iterator.next().get();
@@ -132,7 +131,7 @@ public final class MatrixColumnMeansJob {
    * Mapper for calculation of column-wise mean.
    */
   public static class MatrixColumnMeansMapper extends
-      Mapper<IntWritable, VectorWritable, NullWritable, VectorWritable> {
+      Mapper<Writable, VectorWritable, NullWritable, VectorWritable> {
 
     private Vector runningSum;
     private String vectorClass;
@@ -149,7 +148,7 @@ public final class MatrixColumnMeansJob {
      * column-wise running sum. Nothing is written at this stage
      */
     @Override
-    public void map(IntWritable r, VectorWritable v, Context context)
+    public void map(Writable r, VectorWritable v, Context context)
       throws IOException {
       if (runningSum == null) {
           /*
