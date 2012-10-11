@@ -253,10 +253,16 @@ public class SequentialAccessSparseVector extends AbstractVector {
     protected Element computeNext() {
       int numMappings = values.getNumMappings();
       if (numMappings <= 0 || element.getNextIndex() > values.getIndices()[numMappings - 1]) {
-        return endOfData();
+        if (element.index() >= SequentialAccessSparseVector.this.size() - 1) {
+          return endOfData();
+        } else {
+          element.advanceIndex();
+          return element;
+        }
+      } else {
+        element.advanceIndex();
+        return element;
       }
-      element.advanceIndex();
-      return element;
     }
 
   }
@@ -297,7 +303,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
 
     void advanceIndex() {
       index++;
-      if (index > values.getIndices()[nextOffset]) {
+      if (nextOffset < values.getNumMappings() && index > values.getIndices()[nextOffset]) {
         nextOffset++;
       }
     }
@@ -308,10 +314,11 @@ public class SequentialAccessSparseVector extends AbstractVector {
 
     @Override
     public double get() {
-      if (index == values.getIndices()[nextOffset]) {
+      if (nextOffset < values.getNumMappings() && index == values.getIndices()[nextOffset]) {
         return values.getValues()[nextOffset];
+      } else {
+        return OrderedIntDoubleMapping.DEFAULT_VALUE;
       }
-      return OrderedIntDoubleMapping.DEFAULT_VALUE;
     }
 
     @Override
@@ -322,7 +329,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
     @Override
     public void set(double value) {
       invalidateCachedLength();
-      if (index == values.getIndices()[nextOffset]) {
+      if (nextOffset < values.getNumMappings() && index == values.getIndices()[nextOffset]) {
         values.getValues()[nextOffset] = value;
       } else {
         // Yes, this works; the offset into indices of the new value's index will still be nextOffset

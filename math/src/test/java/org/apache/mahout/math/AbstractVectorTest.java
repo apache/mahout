@@ -3,6 +3,7 @@ package org.apache.mahout.math;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.jet.random.Normal;
+import org.apache.mahout.math.random.MultiNormal;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -574,6 +575,54 @@ public abstract class AbstractVectorTest<T extends Vector> extends MahoutTestCas
       for (int col = 0; col < result.columnSize(); col++) {
         assertEquals("cross[" + row + "][" + col + ']', test.getQuick(row)
             * test.getQuick(col), result.getQuick(row, col), EPSILON);
+
+      }
+    }
+  }
+
+  @Test
+  public void testIterators() {
+    final T v0 = vectorToTest(20);
+
+    double sum = 0;
+    int elements = 0;
+    int nonZero = 0;
+    for (Vector.Element element : v0) {
+      elements++;
+      sum += element.get();
+      if (element.get() != 0) {
+        nonZero++;
+      }
+    }
+
+    int nonZeroIterated = 0;
+    final Iterator<Vector.Element> i = v0.iterateNonZero();
+    while (i.hasNext()) {
+      i.next();
+      nonZeroIterated++;
+    }
+    assertEquals(20, elements);
+    assertEquals(v0.size(), elements);
+    assertEquals(nonZeroIterated, nonZero);
+    assertEquals(v0.zSum(), sum, 0);
+  }
+
+  @Test
+  public void testSmallDistances() {
+    for (double fuzz : new double[]{1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10}) {
+      MultiNormal x = new MultiNormal(fuzz, new ConstantVector(0, 20));
+      for (int i = 0; i < 10000; i++) {
+        final T v1 = vectorToTest(20);
+        Vector v2 = v1.plus(x.sample());
+        if (1 + fuzz * fuzz > 1) {
+          String msg = String.format("fuzz = %.1g, >", fuzz);
+          assertTrue(msg, v1.getDistanceSquared(v2) > 0);
+          assertTrue(msg, v2.getDistanceSquared(v1) > 0);
+        } else {
+          String msg = String.format("fuzz = %.1g, >=", fuzz);
+          assertTrue(msg, v1.getDistanceSquared(v2) >= 0);
+          assertTrue(msg, v2.getDistanceSquared(v1) >= 0);
+        }
       }
     }
   }
