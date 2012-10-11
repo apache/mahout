@@ -140,7 +140,7 @@ public class OpenObject${valueTypeCap}HashMapTest extends Assert {
     OpenObject${valueTypeCap}HashMap<String> map = new OpenObject${valueTypeCap}HashMap<String>();
     map.put("Eleven", (${valueType})11);
     assertTrue(map.containsKey("Eleven"));
-    assertTrue(map.containsKey(new String("Eleven")));
+    assertTrue(map.containsKey("Eleven"));
     assertFalse(map.containsKey("Twelve"));
   }
   
@@ -265,7 +265,7 @@ public class OpenObject${valueTypeCap}HashMapTest extends Assert {
     map.put("Thirteen", (${valueType}) 13);
     map.put("Fourteen", (${valueType}) 14);
     map.adjustOrPutValue("Eleven", (${valueType})1, (${valueType})3);
-    assertEquals(14, map.get(new String("Eleven")) ${valueEpsilon});
+    assertEquals(14, map.get("Eleven") ${valueEpsilon});
     map.adjustOrPutValue("Fifteen", (${valueType})1, (${valueType})3);
     assertEquals(1, map.get("Fifteen") ${valueEpsilon});
   }
