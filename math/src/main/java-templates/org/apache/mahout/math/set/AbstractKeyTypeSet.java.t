@@ -21,6 +21,9 @@ package org.apache.mahout.math.set;
 
 import org.apache.mahout.math.function.${keyTypeCap}Procedure;
 import org.apache.mahout.math.list.${keyTypeCap}ArrayList;
+import java.util.Arrays;
+import java.nio.IntBuffer;
+import org.apache.mahout.math.set.HashUtils;
 
 public abstract class Abstract${keyTypeCap}Set extends AbstractSet {
 
@@ -71,6 +74,23 @@ public abstract class Abstract${keyTypeCap}Set extends AbstractSet {
               }
             }
         );
+  }
+
+  public int hashCode() {
+    final int[] buf = new int[size()];
+    forEachKey(
+      new ${keyTypeCap}Procedure() {
+        int i = 0;
+
+        @Override
+        public boolean apply(${keyType} iterKey) {
+          buf[i++] = HashUtils.hash(iterKey);
+          return true;
+        }
+      }
+    );
+    Arrays.sort(buf);
+    return IntBuffer.wrap(buf).hashCode();
   }
 
   /**

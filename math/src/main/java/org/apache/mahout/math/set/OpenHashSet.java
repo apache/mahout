@@ -19,6 +19,7 @@
 
 package org.apache.mahout.math.set;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.mahout.math.MurmurHash;
 import org.apache.mahout.math.function.ObjectProcedure;
 import org.apache.mahout.math.map.PrimeFinder;
 
@@ -457,7 +459,19 @@ public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
             }
         );
   }
-  
+
+  @Override
+  public int hashCode() {
+    ByteBuffer buf = ByteBuffer.allocate(size());
+    for (int i = 0; i < table.length; i++) {
+      Object v = table[i];
+      if (state[i] == FULL) {
+        buf.putInt(v.hashCode());
+      }
+    }
+    return MurmurHash.hash(buf, this.getClass().getName().hashCode());
+  }
+
   /**
    * Implement the standard Java Collections iterator. Note that 'remove' is silently
    * ineffectual here. This method is provided for convenience, only.

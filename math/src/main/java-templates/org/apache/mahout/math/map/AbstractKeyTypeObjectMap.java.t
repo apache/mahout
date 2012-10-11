@@ -28,9 +28,12 @@ package org.apache.mahout.math.map;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.nio.IntBuffer;
+import java.util.Arrays;
 
 import org.apache.mahout.math.Sorting;
 import org.apache.mahout.math.Swapper;
+import org.apache.mahout.math.set.HashUtils;
 import org.apache.mahout.math.function.IntComparator;
 
 import org.apache.mahout.math.function.${keyTypeCap}ObjectProcedure;
@@ -144,6 +147,25 @@ public abstract class Abstract${keyTypeCap}ObjectMap<T> extends AbstractSet {
                 }
             );
   }
+
+  public int hashCode() {
+    final int[] buf = new int[size()];
+    forEachPair(
+      new ${keyTypeCap}ObjectProcedure() {
+        int i = 0;
+
+        @Override
+        public boolean apply(${keyType} key, Object value) {
+          buf[i++] = HashUtils.hash(key) ^ value.hashCode();
+          return true;
+        }
+      }
+    );
+    Arrays.sort(buf);
+    return IntBuffer.wrap(buf).hashCode();
+  }
+
+
 
   /**
    * Applies a procedure to each key of the receiver, if any. Note: Iterates over the keys in no particular order.

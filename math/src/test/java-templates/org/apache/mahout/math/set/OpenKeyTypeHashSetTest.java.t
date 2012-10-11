@@ -166,11 +166,14 @@ public class Open${keyTypeCap}HashSetTest extends Assert {
     map.remove(($keyType) 13);
     Open${keyTypeCap}HashSet map2 = (Open${keyTypeCap}HashSet) map.copy();
     assertTrue(map.equals(map2));
+    assertTrue(map.hashCode() == map2.hashCode());
     assertTrue(map2.equals(map));
+    assertTrue(map.hashCode() == map2.hashCode());
     assertFalse("Hello Sailor".equals(map));
     assertFalse(map.equals("hello sailor"));
     map2.remove(($keyType) 11);
     assertFalse(map.equals(map2));
     assertFalse(map2.equals(map));
+    assertFalse(map.hashCode() == map2.hashCode());
   }
  }

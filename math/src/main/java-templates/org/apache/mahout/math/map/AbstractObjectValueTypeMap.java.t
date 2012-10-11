@@ -30,7 +30,10 @@ package org.apache.mahout.math.map;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.nio.IntBuffer;
+import java.util.Arrays;
 
+import org.apache.mahout.math.set.HashUtils;
 import org.apache.mahout.math.Sorting;
 import org.apache.mahout.math.Swapper;
 import org.apache.mahout.math.function.Object${valueTypeCap}Procedure;
@@ -147,6 +150,23 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
                   }
                 }
             );
+  }
+
+  public int hashCode() {
+    final int[] buf = new int[size()];
+    forEachPair(
+      new Object${valueTypeCap}Procedure() {
+        int i = 0;
+
+        @Override
+        public boolean apply(Object key, ${valueType} value) {
+          buf[i++] = key.hashCode() ^ HashUtils.hash(value);
+          return true;
+        }
+      }
+    );
+    Arrays.sort(buf);
+    return IntBuffer.wrap(buf).hashCode();
   }
 
   /**
