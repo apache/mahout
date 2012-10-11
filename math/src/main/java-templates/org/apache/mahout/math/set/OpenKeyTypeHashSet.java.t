@@ -363,7 +363,7 @@ public class Open${keyTypeCap}HashSet extends Abstract${keyTypeCap}Set {
    *                                  maxLoadFactor)</tt>.
    */
   @Override
-  final void setUp(int initialCapacity, double minLoadFactor, double maxLoadFactor) {
+  final protected void setUp(int initialCapacity, double minLoadFactor, double maxLoadFactor) {
     int capacity = initialCapacity;
     super.setUp(capacity, minLoadFactor, maxLoadFactor);
     capacity = nextPrime(capacity);
