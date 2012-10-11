@@ -132,7 +132,7 @@ public class RandomAccessSparseVector extends AbstractVector {
 
   @Override
   public void setQuick(int index, double value) {
-    lengthSquared = -1.0;
+    invalidateCachedLength();
     if (value == 0.0) {
       values.removeKey(index);
     } else {
@@ -225,7 +225,7 @@ public class RandomAccessSparseVector extends AbstractVector {
 
     @Override
     public void set(double value) {
-      lengthSquared = -1;
+      invalidateCachedLength();
       if (value == 0.0) {
         values.removeKey(index);
       } else {

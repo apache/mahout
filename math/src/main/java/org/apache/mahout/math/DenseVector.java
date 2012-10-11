@@ -56,7 +56,7 @@ public class DenseVector extends AbstractVector {
 
   /**
    * Copy-constructor (for use in turning a sparse vector into a dense one, for example)
-   * @param vector
+   * @param vector The vector to copy
    */
   public DenseVector(Vector vector) {
     super(vector.size());
@@ -95,7 +95,7 @@ public class DenseVector extends AbstractVector {
   }
 
   @Override
-  public double dotSelf() {
+  protected double dotSelf() {
     double result = 0.0;
     int max = size();
     for (int i = 0; i < max; i++) {
@@ -117,13 +117,13 @@ public class DenseVector extends AbstractVector {
 
   @Override
   public void setQuick(int index, double value) {
-    lengthSquared = -1.0;
+    invalidateCachedLength();
     values[index] = value;
   }
   
   @Override
   public Vector assign(double value) {
-    this.lengthSquared = -1;
+    invalidateCachedLength();
     Arrays.fill(values, value);
     return this;
   }
@@ -145,7 +145,7 @@ public class DenseVector extends AbstractVector {
         values[i] = function.apply(values[i], other.getQuick(i));
       }
     }
-    lengthSquared = -1;
+    invalidateCachedLength();
     return this;
   }
 
@@ -195,21 +195,6 @@ public class DenseVector extends AbstractVector {
       return Arrays.equals(values, ((DenseVector) o).values);
     }
     return super.equals(o);
-  }
-
-  @Override
-  public double getLengthSquared() {
-    if (lengthSquared >= 0.0) {
-      return lengthSquared;
-    }
-
-    double result = 0.0;
-    for (double value : values) {
-      result += value * value;
-
-    }
-    lengthSquared = result;
-    return result;
   }
 
   public void addAll(Vector v) {
@@ -281,7 +266,7 @@ public class DenseVector extends AbstractVector {
 
     @Override
     public void set(double value) {
-      lengthSquared = -1;
+      invalidateCachedLength();
       values[index] = value;
     }
   }

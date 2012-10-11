@@ -17,7 +17,9 @@
 
 package org.apache.mahout.math;
 
-public final class TestDenseVector extends AbstractTestVector {
+import org.apache.mahout.math.function.Functions;
+
+public final class TestDenseVector extends AbstractVectorTest<DenseVector> {
 
   @Override
   Vector generateTestVector(int cardinality) {
@@ -29,4 +31,10 @@ public final class TestDenseVector extends AbstractTestVector {
     assertEquals("size", 7, getTestVector().getNumNondefaultElements());
   }
 
+  @Override
+  public DenseVector vectorToTest(int size) {
+    DenseVector r = new DenseVector(size);
+    r.assign(Functions.random());
+    return r;
+  }
 }

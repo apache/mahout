@@ -492,7 +492,7 @@ public final class TestMeanShift extends MahoutTestCase {
     ToolRunner.run(conf, new MeanShiftCanopyDriver(), args);
     Path outPart = new Path(output, "clusters-3-final/part-r-00000");
     long count = HadoopUtil.countRecords(outPart, conf);
-    assertEquals("count", 4, count);
+    assertEquals("count", 3, count);
     Iterator<?> iterator = new SequenceFileValueIterator<Writable>(outPart,
         true, conf);
     while (iterator.hasNext()) {

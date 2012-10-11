@@ -21,12 +21,13 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.Functions;
+import org.apache.mahout.math.set.OpenIntHashSet;
 
 import java.util.Iterator;
 
 /** Implementations of generic capabilities like sum of elements and dot products */
 public abstract class AbstractVector implements Vector, LengthCachingVector {
-  
+
   private static final double LOG2 = Math.log(2.0);
 
   private int size;
@@ -155,12 +156,12 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
     }
     return result;
   }
-  
-  public double dotSelf() {
+
+  protected double dotSelf() {
     double result = 0.0;
-    Iterator<Element> iter = iterateNonZero();
-    while (iter.hasNext()) {
-      double value = iter.next().get();
+    Iterator<Element> i = iterateNonZero();
+    while (i.hasNext()) {
+      double value = i.next().get();
       result += value * value;
     }
     return result;
@@ -216,18 +217,18 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
   public Vector normalize(double power) {
     return divide(norm(power));
   }
-  
+
   @Override
   public Vector logNormalize() {
     return logNormalize(2.0, Math.sqrt(dotSelf()));
   }
-  
+
   @Override
   public Vector logNormalize(double power) {
     return logNormalize(power, norm(power));
   }
-  
-  public Vector logNormalize(double power, double normLength) {   
+
+  public Vector logNormalize(double power, double normLength) {
     // we can special case certain powers
     if (Double.isInfinite(power) || power <= 1.0) {
       throw new IllegalArgumentException("Power must be > 1 and < infinity");
@@ -293,8 +294,8 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
   }
 
   @Override
-  public void setLengthSquared(double d2) {
-    lengthSquared = d2;
+  public void invalidateCachedLength() {
+    lengthSquared = -1;
   }
 
   @Override
@@ -303,34 +304,189 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
       throw new CardinalityException(size, v.size());
     }
     // if this and v has a cached lengthSquared, dot product is quickest way to compute this.
-    if (lengthSquared >= 0 && v instanceof LengthCachingVector && v.getLengthSquared() >= 0) {
-      return lengthSquared + v.getLengthSquared() - 2 * this.dot(v);
-    }
-    Vector sparseAccessed;
-    Vector randomlyAccessed;
-    if (lengthSquared >= 0.0) {
-      randomlyAccessed = this;
-      sparseAccessed = v;
-    } else { // TODO: could be further optimized, figure out which one is smaller, etc
-      randomlyAccessed = v;
-      sparseAccessed = this;
+    double d1;
+    double d2;
+    double dot;
+    if (lengthSquared >= 0) {
+      // our length squared is cached.  use it
+      // the max is (slight) antidote to round-off errors
+      d1 = lengthSquared;
+      d2 = v.getLengthSquared();
+      dot = this.dot(v);
+    } else {
+      // our length is not cached... compute it and the dot product in one pass for speed
+      d1 = 0;
+      d2 = v.getLengthSquared();
+      dot = 0;
+      final Iterator<Element> i = iterateNonZero();
+      while (i.hasNext()) {
+        Element e = i.next();
+        double value = e.get();
+        d1 += value * value;
+        dot += value * v.getQuick(e.index());
+      }
+      lengthSquared = d1;
+      // again, round-off errors may be present
     }
 
-    Iterator<Element> it = sparseAccessed.iterateNonZero();
-    double d = randomlyAccessed.getLengthSquared();
-    double d2 = 0;
-    double dot = 0;
-    while (it.hasNext()) {
-      Element e = it.next();
-      double value = e.get();
-      d2 += value * value;
-      dot += value * randomlyAccessed.getQuick(e.index());
+    double r = d1 + d2 - 2 * dot;
+    if (r > 1e-3 * (d1 + d2)) {
+      return Math.max(0, r);
+    } else {
+      if (this.isSequentialAccess()) {
+        if (v.isSequentialAccess()) {
+          return mergeDiff(this, v);
+        } else {
+          return randomScanDiff(this, v);
+        }
+      } else {
+        return randomScanDiff(v, this);
+      }
     }
-    if (sparseAccessed instanceof LengthCachingVector) {
-      ((LengthCachingVector) sparseAccessed).setLengthSquared(d2);
+  }
+
+  /**
+   * Computes the squared difference of two vectors where iterateNonZero
+   * is efficient for each vector, but where the order of iteration is not
+   * known.  This forces us to access most elements of v2 via get(), which
+   * would be very inefficient for some kinds of vectors.
+   *
+   * Note that this static method is exposed at a package level for testing purposes only.
+   * @param v1  The vector that we access only via iterateNonZero
+   * @param v2  The vector that we access via iterateNonZero and via Element.get()
+   * @return The squared difference between v1 and v2.
+   */
+   static double randomScanDiff(Vector v1, Vector v2) {
+    // keeps a list of elements we visited by iterating over v1.  This should be
+    // almost all of the elements of v2 because we only call this method if the
+    // difference is small.
+    OpenIntHashSet visited = new OpenIntHashSet();
+
+    double r = 0;
+
+    // walk through non-zeros of v1
+    Iterator<Element> i = v1.iterateNonZero();
+    while (i.hasNext()) {
+      Element e1 = i.next();
+      visited.add(e1.index());
+      double x = e1.get() - v2.get(e1.index());
+      r += x * x;
     }
-    //assert d > -1.0e-9; // round-off errors should never be too far off!
-    return Math.abs(d + d2 - 2 * dot);
+
+    // now walk through neglected elements of v2
+    i = v2.iterateNonZero();
+    while (i.hasNext()) {
+      Element e2 = i.next();
+      if (!visited.contains(e2.index())) {
+        // if not visited already then v1's value here would be zero.
+        double x = e2.get();
+        r += x * x;
+      }
+    }
+
+    return r;
+  }
+
+  /**
+   * Computes the squared difference of two vectors where iterateNonZero returns
+   * elements in index order for both vectors.  This allows a merge to be used to
+   * compute the difference.  A merge allows a single sequential pass over each
+   * vector and should be faster than any alternative.
+   *
+   * Note that this static method is exposed at a package level for testing purposes only.
+   * @param v1  The first vector.
+   * @param v2  The second vector.
+   * @return The squared difference between the two vectors.
+   */
+  static double mergeDiff(Vector v1, Vector v2) {
+    Iterator<Element> i1 = v1.iterateNonZero();
+    Iterator<Element> i2 = v2.iterateNonZero();
+
+    // v1 is empty?
+    if (!i1.hasNext()) {
+      return v2.getLengthSquared();
+    }
+
+    // v2 is empty?
+    if (!i2.hasNext()) {
+      return v1.getLengthSquared();
+    }
+
+    Element e1 = i1.next();
+    Element e2 = i2.next();
+
+    double r = 0;
+    while (e1 != null && e2 != null) {
+      // eat elements of v1 that precede all in v2
+      while (e1 != null && e1.index() < e2.index()) {
+        double x = e1.get();
+        r += x * x;
+
+        if (i1.hasNext()) {
+          e1 = i1.next();
+        } else {
+          e1 = null;
+        }
+      }
+
+      // at this point we have three possibilities, e1 == null or e1 matches e2 or
+      // e2 precedes e1.  Here we handle the e2 < e1 case
+      while (e2 != null && (e1 == null || e2.index() < e1.index())) {
+        double x = e2.get();
+        r += x * x;
+
+        if (i2.hasNext()) {
+          e2 = i2.next();
+        } else {
+          e2 = null;
+        }
+      }
+
+      // and now we handle the e1 == e2 case.  For convenience, we
+      // grab as many of these as possible.  Given that we are called here
+      // only when v1 and v2 are nearly equal, this loop should dominate
+      while (e1 != null && e2 != null && e1.index() == e2.index()) {
+        double x = e1.get() - e2.get();
+        r += x * x;
+
+        if (i1.hasNext()) {
+          e1 = i1.next();
+        } else {
+          e1 = null;
+        }
+
+        if (i2.hasNext()) {
+          e2 = i2.next();
+        } else {
+          e2 = null;
+        }
+      }
+    }
+
+    // one of i1 or i2 is exhausted here, but the other may not be
+    while (e1 != null ) {
+      double x = e1.get();
+      r += x * x;
+
+      if (i1.hasNext()) {
+        e1 = i1.next();
+      } else {
+        e1 = null;
+      }
+    }
+
+    while (e2 != null) {
+      double x = e2.get();
+      r += x * x;
+
+      if (i2.hasNext()) {
+        e2 = i2.next();
+      } else {
+        e2 = null;
+      }
+    }
+    // both v1 and v2 have been completely processed
+    return r;
   }
 
   @Override
@@ -348,7 +504,7 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
     }
     return result;
   }
-  
+
   @Override
   public int maxValueIndex() {
     int result = -1;
@@ -473,7 +629,7 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
     if (x == 1.0) {
       return result;
     }
-    
+
     Iterator<Element> iter = result.iterateNonZero();
     while (iter.hasNext()) {
       Element element = iter.next();
@@ -600,7 +756,7 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
 
   @Override
   public final int size() {
-    return size;  
+    return size;
   }
 
   @Override

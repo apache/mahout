@@ -59,4 +59,15 @@ public class CentroidTest extends AbstractVectorTest {
   public Vector vectorToTest(int size) {
     return new Centroid(new WeightedVector(new DenseVector(size), 3.15, 51));
   }
+
+  @Override
+  public void testSize() {
+    assertEquals("size", 7, getTestVector().getNumNondefaultElements());
+  }
+
+  @Override
+  Vector generateTestVector(int cardinality) {
+    return new Centroid(new WeightedVector(new DenseVector(cardinality), 3.14, 53));
+  }
+
 }

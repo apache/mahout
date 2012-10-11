@@ -21,79 +21,84 @@ package org.apache.mahout.math;
  * Decorates a vector with a floating point weight and an index.
  */
 public class WeightedVector extends DelegatingVector implements Comparable<WeightedVector> {
-    private static final int INVALID_INDEX = -1;
-    private double weight;
-    private int index;
+  private static final int INVALID_INDEX = -1;
+  private double weight;
+  private int index;
 
-    protected WeightedVector(int size, double weight, int index) {
-        super(size);
-        this.weight = weight;
-        this.index = index;
+  protected WeightedVector(double weight, int index) {
+    super();
+    this.weight = weight;
+    this.index = index;
+  }
+
+  public WeightedVector(Vector v, double weight, int index) {
+    super(v);
+    this.weight = weight;
+    this.index = index;
+  }
+
+  public WeightedVector(Vector v, Vector projection, int index) {
+    super(v);
+    this.index = index;
+    this.weight = v.dot(projection);
+  }
+
+  public static WeightedVector project(Vector v, Vector projection) {
+    return project(v, projection, INVALID_INDEX);
+  }
+
+  public static WeightedVector project(Vector v, Vector projection, int index) {
+    return new WeightedVector(v, projection, index);
+  }
+
+  public double getWeight() {
+    return weight;
+  }
+
+
+  @Override
+  public int compareTo(WeightedVector other) {
+    if (this == other) {
+      return 0;
     }
-
-    public WeightedVector(Vector v, double weight, int index) {
-        super(v);
-        this.weight = weight;
-        this.index = index;
-    }
-
-    public WeightedVector(Vector v, Vector projection, int index) {
-        super(v);
-        this.index = index;
-        this.weight = v.dot(projection);
-    }
-
-    public static WeightedVector project(Vector v, Vector projection) {
-        return project(v, projection, INVALID_INDEX);
-    }
-
-    public static WeightedVector project(Vector v, Vector projection, int index) {
-        return new WeightedVector(v, projection, index);
-    }
-
-    public double getWeight() {
-        return weight;
-    }
-
-
-    @Override
-    public int compareTo(WeightedVector other) {
-        if (this == other) {
-            return 0;
-        }
-        int r = Double.compare(weight, other.getWeight());
-        if (r == 0 || Math.abs(weight - other.getWeight()) < 1.0e-8) {
-            double diff = this.minus(other).norm(1);
-            if (diff < 1.0e-12) {
-                return 0;
-            } else {
-                for (Vector.Element element : this) {
-                    r = Double.compare(element.get(), other.get(element.index()));
-                    if (r != 0) {
-                        return r;
-                    }
-                }
-                return 0;
-            }
-        } else {
+    int r = Double.compare(weight, other.getWeight());
+    if (r == 0 || Math.abs(weight - other.getWeight()) < 1e-8) {
+      double diff = this.minus(other).norm(1);
+      if (diff < 1e-12) {
+        return 0;
+      } else {
+        for (Vector.Element element : this) {
+          r = Double.compare(element.get(), other.get(element.index()));
+          if (r != 0) {
             return r;
+          }
         }
+        return 0;
+      }
+    } else {
+      return r;
     }
+  }
 
-    public int getIndex() {
-        return index;
-    }
+  public int getIndex() {
+    return index;
+  }
 
-    public void setWeight(double newWeight) {
-        this.weight = newWeight;
-    }
+  public void setWeight(double newWeight) {
+    this.weight = newWeight;
+  }
 
-    public void setIndex(int index) {
-        this.index = index;
-    }
+  public void setIndex(int index) {
+    this.index = index;
+  }
 
-    @Override
-    public String toString() {
-        return String.format("index=%d, weight=%.2f, v=%s", index, weight, getVector());
-    }
+  @Override
+  public Vector like() {
+    return new WeightedVector(getVector().like(), weight, index);
+  }
+
+  @Override
+  public String toString() {
+    return String.format("index=%d, weight=%.2f, v=%s", index, weight, getVector());
+  }
 }

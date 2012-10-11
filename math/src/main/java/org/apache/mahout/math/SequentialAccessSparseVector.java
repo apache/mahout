@@ -186,7 +186,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
 
   @Override
   public void setQuick(int index, double value) {
-    lengthSquared = -1;
+    invalidateCachedLength();
     values.set(index, value);
   }
 
@@ -285,7 +285,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
 
     @Override
     public void set(double value) {
-      lengthSquared = -1;
+      invalidateCachedLength();
       values.getValues()[offset] = value;
     }
   }
@@ -321,7 +321,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
 
     @Override
     public void set(double value) {
-      lengthSquared = -1;
+      invalidateCachedLength();
       if (index == values.getIndices()[nextOffset]) {
         values.getValues()[nextOffset] = value;
       } else {

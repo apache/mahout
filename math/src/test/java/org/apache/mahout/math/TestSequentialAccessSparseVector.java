@@ -17,18 +17,20 @@
 
 package org.apache.mahout.math;
 
+import org.apache.mahout.common.RandomUtils;
 import org.junit.Test;
 
-public final class TestSequentialAccessSparseVector extends AbstractTestVector {
+import java.util.Random;
+
+public final class TestSequentialAccessSparseVector extends AbstractVectorTest<SequentialAccessSparseVector> {
 
   @Override
   Vector generateTestVector(int cardinality) {
     return new SequentialAccessSparseVector(cardinality);
   }
 
-  @Override
   @Test
-  public void testDot2() {
+  public void testDotSuperBig() {
     Vector w = new SequentialAccessSparseVector(Integer.MAX_VALUE, 12);
     w.set(1, 0.4);
     w.set(2, 0.4);
@@ -37,6 +39,17 @@ public final class TestSequentialAccessSparseVector extends AbstractTestVector {
     Vector v = new SequentialAccessSparseVector(Integer.MAX_VALUE, 12);
     v.set(3, 1);
 
-    assertEquals("dot2", -0.666666667, v.dot(w), EPSILON);
+    assertEquals("super-big", -0.666666667, v.dot(w), EPSILON);
+  }
+
+
+  @Override
+  public SequentialAccessSparseVector vectorToTest(int size) {
+    SequentialAccessSparseVector r = new SequentialAccessSparseVector(size);
+    Random gen = RandomUtils.getRandom();
+    for (int i = 0; i < 3; i++) {
+      r.set(gen.nextInt(r.size()), gen.nextGaussian());
+    }
+    return r;
   }
 }

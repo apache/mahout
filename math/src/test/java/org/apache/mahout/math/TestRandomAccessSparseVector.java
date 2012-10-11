@@ -17,11 +17,26 @@
 
 package org.apache.mahout.math;
 
-public final class TestRandomAccessSparseVector extends AbstractTestVector {
+import org.apache.mahout.common.RandomUtils;
+
+import java.util.Random;
+
+public final class TestRandomAccessSparseVector extends AbstractVectorTest<RandomAccessSparseVector> {
 
   @Override
   Vector generateTestVector(int cardinality) {
     return new RandomAccessSparseVector(cardinality);
+  }
+
+
+  @Override
+  public RandomAccessSparseVector vectorToTest(int size) {
+    RandomAccessSparseVector r = new RandomAccessSparseVector(size);
+    Random gen = RandomUtils.getRandom();
+    for (int i = 0; i < 3; i++) {
+      r.set(gen.nextInt(r.size()), gen.nextGaussian());
+    }
+    return r;
   }
 
 }

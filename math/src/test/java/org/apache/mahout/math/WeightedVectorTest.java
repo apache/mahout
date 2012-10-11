@@ -74,4 +74,14 @@ public class WeightedVectorTest extends AbstractVectorTest {
     WeightedVector v5 = WeightedVector.project(q.viewColumn(0), qx);
     assertEquals(Math.sqrt(0.5), v5.getWeight(), 1.0e-13);
   }
+
+  @Override
+  public void testSize() {
+    assertEquals("size", 7, getTestVector().getNumNondefaultElements());
+  }
+
+  @Override
+  Vector generateTestVector(int cardinality) {
+    return new WeightedVector(new DenseVector(cardinality), 3.14, 53);
+  }
 }

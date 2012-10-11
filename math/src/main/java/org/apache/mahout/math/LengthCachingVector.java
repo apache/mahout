@@ -21,12 +21,15 @@ package org.apache.mahout.math;
  * Marker interface for vectors that may cache their squared length.
  */
 interface LengthCachingVector {
+  /**
+   * Gets the currently cached squared length or if there is none, recalculates
+   * the value and returns that.
+   * @return The sum of the squares of all elements in the vector.
+   */
   double getLengthSquared();
 
   /**
-   * This is a very dangerous method to call.  Passing in a wrong value can
-   * completely screw up distance computations and normalization.
-   * @param d2  The new value for the squared length cache.
+   * Invalidates the length cache.  This should be called by all mutators of the vector.
    */
-  void setLengthSquared(double d2);
+  void invalidateCachedLength();
 }

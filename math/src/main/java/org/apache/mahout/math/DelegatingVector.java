@@ -32,12 +32,11 @@ import java.util.Iterator;
 public class DelegatingVector implements Vector, LengthCachingVector {
   protected Vector delegate;
 
-  public DelegatingVector(int size) {
-    delegate = new DenseVector(size);
-  }
-
   public DelegatingVector(Vector v) {
     delegate = v;
+  }
+
+  protected DelegatingVector() {
   }
 
   public Vector getVector() {
@@ -126,14 +125,10 @@ public class DelegatingVector implements Vector, LengthCachingVector {
     return delegate.getLengthSquared();
   }
 
-  // not normally called because the delegate vector is who would need this and
-  // they will call their own version of this method.  In fact, if the delegate is
-  // also a delegating vector the same logic will apply recursively down to the first
-  // non-delegating vector.  This makes this very hard to test except in trivial ways.
   @Override
-  public void setLengthSquared(double d2) {
+  public void invalidateCachedLength() {
     if (delegate instanceof LengthCachingVector) {
-      ((LengthCachingVector) delegate).setLengthSquared(d2);
+      ((LengthCachingVector) delegate).invalidateCachedLength();
     }
   }
 
@@ -275,7 +270,7 @@ public class DelegatingVector implements Vector, LengthCachingVector {
 
   @Override
   public Vector like() {
-    return delegate.like();
+    return new DelegatingVector(delegate.like());
   }
 
   @Override
