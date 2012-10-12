@@ -358,7 +358,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
       // catch that case here and put it back into our queue
       for (FastIDSet cluster : clusters) {
         double similarity = clusterSimilarity.getSimilarity(merged, cluster);
-        if (similarity > queue.get(queue.size() - 1).getSimilarity()) {
+        if (queue.size() > 0 && similarity > queue.get(queue.size() - 1).getSimilarity()) {
           ListIterator<ClusterClusterPair> queueIterator = queue.listIterator();
           while (queueIterator.hasNext()) {
             if (similarity > queueIterator.next().getSimilarity()) {
