@@ -132,12 +132,18 @@ public final class RecommenderServlet extends HttpServlet {
     response.setHeader("Cache-Control", "no-cache");
     PrintWriter writer = response.getWriter();
     writer.print("{\"recommendedItems\":{\"item\":[");
+    boolean first = true;
     for (RecommendedItem recommendedItem : items) {
+      if (first) {
+        first = false;
+      } else {
+        writer.print(',');
+      }
       writer.print("{\"value\":\"");
       writer.print(recommendedItem.getValue());
       writer.print("\",\"id\":\"");
       writer.print(recommendedItem.getItemID());
-      writer.print("\"},");
+      writer.print("\"}");
     }
     writer.println("]}}");
   }
