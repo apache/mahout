@@ -46,7 +46,9 @@ public class EuclideanDistanceSimilarity implements VectorSimilarityMeasure {
 
   @Override
   public double similarity(double dots, double normA, double normB, int numberOfColumns) {
-    double euclideanDistance = Math.sqrt(normA - 2 * dots + normB);
+    // Arg can't be negative in theory, but can in practice due to rounding, so cap it.
+    // Also note that normA / normB are actually the squares of the norms.
+    double euclideanDistance = Math.sqrt(Math.max(0.0, normA - 2 * dots + normB));
     return 1.0 / (1.0 + euclideanDistance);
   }
 
