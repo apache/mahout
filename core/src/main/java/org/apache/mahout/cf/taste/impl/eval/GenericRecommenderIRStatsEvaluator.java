@@ -179,7 +179,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
       double idealizedGain = 0.0;
       for (int i = 0; i < recommendedItems.size(); i++) {
         RecommendedItem item = recommendedItems.get(i);
-        double discount = i == 0 ? 1.0 : 1.0 / log2(i + 1);
+        double discount = 1.0 / log2(i + 2.0); // Classical formulation says log(i+1), but i is 0-based here
         if (relevantItemIDs.contains(item.getItemID())) {
           cumulativeGain += discount;
         }
