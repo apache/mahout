@@ -23,7 +23,6 @@ import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 
-import javax.annotation.Nullable;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -134,7 +133,7 @@ public final class FileBasedSparseBinaryMatrix extends AbstractMatrix {
       List<Integer> columns = Lists.newArrayList(Iterators.transform(row.vector().iterateNonZero(),
         new Function<Vector.Element, Integer>() {
           @Override
-          public Integer apply(@Nullable Vector.Element element) {
+          public Integer apply(Vector.Element element) {
             return element.index();
           }
         }));
