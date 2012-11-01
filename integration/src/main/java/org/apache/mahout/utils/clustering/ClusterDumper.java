@@ -179,6 +179,7 @@ public final class ClusterDumper extends AbstractJob {
         FileSystem fs = FileSystem.get(p.toUri(), conf);
         writer = new OutputStreamWriter(fs.create(p), Charsets.UTF_8);
       } else {
+    	Files.createParentDirs(outputFile);
         writer = Files.newWriter(this.outputFile, Charsets.UTF_8);
       }
     }
