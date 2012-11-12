@@ -424,6 +424,7 @@ public class FileDataModel extends AbstractDataModel {
                   newPrefs.set(j, prefs.get(i));
                 }
               }
+              ((FastByIDMap<PreferenceArray>) data).put(userID, newPrefs);
             }
           }
         }
