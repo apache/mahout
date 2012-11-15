@@ -17,28 +17,37 @@
 
 package org.apache.mahout.classifier.sgd;
 
+import com.google.common.base.Charsets;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.io.Resources;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.vectorizer.encoders.Dictionary;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 public final class OnlineLogisticRegressionTest extends OnlineBaseTest {
 
   /**
    * The CrossFoldLearner is probably the best learner to use for new applications.
-    * @throws IOException If test resources aren't readable.
+   *
+   * @throws IOException If test resources aren't readable.
    */
   @Test
   public void crossValidation() throws IOException {
     Vector target = readStandardData();
 
     CrossFoldLearner lr = new CrossFoldLearner(5, 2, 8, new L1())
-            .lambda(1 * 1.0e-3)
-            .learningRate(50);
+      .lambda(1 * 1.0e-3)
+      .learningRate(50);
 
 
     train(getInput(), target, lr);
@@ -55,10 +64,10 @@ public final class OnlineLogisticRegressionTest extends OnlineBaseTest {
 
     Matrix data = readCsv("cancer.csv");
     CrossFoldLearner lr = new CrossFoldLearner(5, 2, 10, new L1())
-            .stepOffset(10)
-            .decayExponent(0.7)
-            .lambda(1 * 1.0e-3)
-            .learningRate(5);
+      .stepOffset(10)
+      .decayExponent(0.7)
+      .lambda(1 * 1.0e-3)
+      .learningRate(5);
     int k = 0;
     int[] ordering = permute(gen, data.numRows());
     for (int epoch = 0; epoch < 100; epoch++) {
@@ -132,6 +141,68 @@ public final class OnlineLogisticRegressionTest extends OnlineBaseTest {
   }
 
   @Test
+  public void iris() throws IOException {
+    Splitter onComma = Splitter.on(",");
+
+    // read the data
+    List<String> raw = Resources.readLines(Resources.getResource("iris.csv"), Charsets.UTF_8);
+
+    // holds features
+    List<Vector> data = Lists.newArrayList();
+
+    // holds target variable
+    List<Integer> target = Lists.newArrayList();
+
+    // for decoding target values
+    Dictionary dict = new Dictionary();
+
+    // for permuting data later
+    List<Integer> order = Lists.newArrayList();
+    for (String line : raw.subList(1,raw.size())) {
+      order.add(order.size());
+
+      Vector v = new DenseVector(5);
+      v.set(0, 1);
+      int i = 1;
+      Iterable<String> values = onComma.split(line);
+      for (String value : Iterables.limit(values, 4)) {
+        v.set(i++, Double.parseDouble(value));
+      }
+      data.add(v);
+      target.add(dict.intern(Iterables.get(values, 4)));
+    }
+
+    Collections.shuffle(order);
+    List<Integer> train = order.subList(0, 100);
+    List<Integer> test = order.subList(100, 150);
+
+    int total = 0;
+    int correct = 0;
+    for (int run = 0; run < 10; run++) {
+      OnlineLogisticRegression lr = new OnlineLogisticRegression(3, 5, new L2(1));
+      for (int pass = 0; pass < 20; pass++) {
+        Collections.shuffle(train);
+        for (int k : train) {
+          lr.train(target.get(k), data.get(k));
+        }
+
+        int x = 0;
+        int[] count = new int[3];
+        for (Integer k : test) {
+          int r = lr.classifyFull(data.get(k)).maxValueIndex();
+          count[r]++;
+          x += r == target.get(k) ? 1 : 0;
+          total++;
+        }
+
+//        System.out.printf("%d\t%.0f\t%d\t%d\t%d\n", pass, 2.0 * x, count[0], count[1], count[2]);
+        correct += x;
+      }
+    }
+    assertTrue("Accuracy should be >= 90% but is " + correct, (100.0 * correct / total) >= 90);
+  }
+
+  @Test
   public void testTrain() throws Exception {
     Vector target = readStandardData();
 
@@ -142,8 +213,8 @@ public final class OnlineLogisticRegressionTest extends OnlineBaseTest {
     // --passes 1 --rate 50 --lambda 0.001 --input sgd-y.csv --features 21 --output model --noBias
     //   --target y --categories 2 --predictors  V2 V3 V4 V5 V6 V7 --types n
     OnlineLogisticRegression lr = new OnlineLogisticRegression(2, 8, new L1())
-            .lambda(1 * 1.0e-3)
-            .learningRate(50);
+      .lambda(1 * 1.0e-3)
+      .learningRate(50);
 
     train(getInput(), target, lr);
     test(getInput(), target, lr, 0.05, 0.3);
