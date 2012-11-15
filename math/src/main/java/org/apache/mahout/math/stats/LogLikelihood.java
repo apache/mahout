@@ -121,8 +121,11 @@ public final class LogLikelihood {
    * @return The root log-likelihood ratio
    * 
    * <p/>
-   * See discussion of raw vs. root LLR at 
-   * http://www.lucidimagination.com/search/document/6dc8709e65a7ced1/llr_scoring_question
+   * There is some more discussion here:
+   * http://mail-archives.apache.org/mod_mbox/mahout-user/201001.mbox/%3Cc7d45fc71001121120r6b0482aat345014770ed32744@mail.gmail.com%3E
+   *
+   * And see the response to Wataru's comment here:
+   * http://tdunning.blogspot.com/2008/03/surprise-and-coincidence.html
    */
   public static double rootLogLikelihoodRatio(long k11, long k12, long k21, long k22) {
     double llr = logLikelihoodRatio(k11, k12, k21, k22);

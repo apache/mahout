@@ -58,12 +58,25 @@ public final class LogLikelihoodTest extends MahoutTestCase {
   }
 
   @Test
-  public void testRootLogLikelihood() throws Exception {
+  public void testRootLogLikelihood() {
     // positive where k11 is bigger than expected.
     assertTrue(LogLikelihood.rootLogLikelihoodRatio(904, 21060, 1144, 283012) > 0.0);
 
     // negative because k11 is lower than expected
     assertTrue(LogLikelihood.rootLogLikelihoodRatio(36, 21928, 60280, 623876) < 0.0);
+
+    assertEquals(Math.sqrt(2.772589), LogLikelihood.rootLogLikelihoodRatio(1, 0, 0, 1), 0.000001);
+    assertEquals(-Math.sqrt(2.772589), LogLikelihood.rootLogLikelihoodRatio(0, 1, 1, 0), 0.000001);
+    assertEquals(Math.sqrt(27.72589), LogLikelihood.rootLogLikelihoodRatio(10, 0, 0, 10), 0.00001);
+
+    assertEquals(Math.sqrt(39.33052), LogLikelihood.rootLogLikelihoodRatio(5, 1995, 0, 100000), 0.00001);
+    assertEquals(-Math.sqrt(39.33052), LogLikelihood.rootLogLikelihoodRatio(0, 100000, 5, 1995), 0.00001);
+
+    assertEquals(Math.sqrt(4730.737), LogLikelihood.rootLogLikelihoodRatio(1000, 1995, 1000, 100000), 0.001);
+    assertEquals(-Math.sqrt(4730.737), LogLikelihood.rootLogLikelihoodRatio(1000, 100000, 1000, 1995), 0.001);
+
+    assertEquals(Math.sqrt(5734.343), LogLikelihood.rootLogLikelihoodRatio(1000, 1000, 1000, 100000), 0.001);
+    assertEquals(Math.sqrt(5714.932), LogLikelihood.rootLogLikelihoodRatio(1000, 1000, 1000, 99000), 0.001);
   }
 
   @Test
