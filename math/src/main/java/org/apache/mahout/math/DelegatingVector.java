@@ -60,12 +60,13 @@ public class DelegatingVector implements Vector, LengthCachingVector {
 
   @Override
   public Vector clone() {
-    WeightedVector r;
+    DelegatingVector r;
     try {
-      r = (WeightedVector) super.clone();
+      r = (DelegatingVector) super.clone();
     } catch (CloneNotSupportedException e) {
       throw new RuntimeException("Clone not supported for DelegatingVector, shouldn't be possible");
     }
+    // delegate points to original without this
     r.delegate = delegate.clone();
     return r;
   }

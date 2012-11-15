@@ -137,6 +137,11 @@ public abstract class AbstractVectorTest<T extends Vector> extends MahoutTestCas
     assertEquals(dv1.viewPart(5, 10).zSum(), v1.viewPart(5, 10).zSum(), FUZZ);
 
     Vector v3 = v1.clone();
+
+    // must be the right type ... tricky to tell that in the face of type erasure
+    assertTrue(v0.getClass().isAssignableFrom(v3.getClass()));
+    assertTrue(v3.getClass().isAssignableFrom(v0.getClass()));
+
     assertEquals(0, v1.getDistanceSquared(v3), FUZZ);
     assertNotSame(v1, v3);
     v3.assign(0);

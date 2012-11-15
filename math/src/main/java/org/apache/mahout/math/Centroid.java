@@ -24,48 +24,48 @@ import org.apache.mahout.math.function.DoubleDoubleFunction;
  * to make it easy to use vector search classes and such.
  */
 public class Centroid extends WeightedVector {
-    public Centroid(WeightedVector original) {
-        super(original.getWeight(), original.getIndex());
-        delegate = original.getVector().like();
-        delegate.assign(original);
-    }
+  public Centroid(WeightedVector original) {
+    super(original.getWeight(), original.getIndex());
+    delegate = original.getVector().like();
+    delegate.assign(original);
+  }
 
-    public Centroid(int key, Vector initialValue) {
-        super(initialValue, 1, key);
-    }
+  public Centroid(int key, Vector initialValue) {
+    super(initialValue, 1, key);
+  }
 
-    public Centroid(int key, Vector initialValue, double weight) {
-        super(initialValue, weight, key);
-    }
+  public Centroid(int key, Vector initialValue, double weight) {
+    super(initialValue, weight, key);
+  }
 
-    public static Centroid create(int key, Vector initialValue) {
-        if (initialValue instanceof WeightedVector) {
-            return new Centroid(key, new DenseVector(initialValue), ((WeightedVector) initialValue).getWeight());
-        } else {
-            return new Centroid(key, new DenseVector(initialValue), 1);
-        }
+  public static Centroid create(int key, Vector initialValue) {
+    if (initialValue instanceof WeightedVector) {
+      return new Centroid(key, new DenseVector(initialValue), ((WeightedVector) initialValue).getWeight());
+    } else {
+      return new Centroid(key, new DenseVector(initialValue), 1);
     }
+  }
 
-    public void update(Vector v) {
-        if (v instanceof Centroid) {
-            Centroid c = (Centroid) v;
-            update(c.delegate, c.getWeight());
-        } else {
-            update(v, 1);
-        }
+  public void update(Vector v) {
+    if (v instanceof Centroid) {
+      Centroid c = (Centroid) v;
+      update(c.delegate, c.getWeight());
+    } else {
+      update(v, 1);
     }
+  }
 
-    public void update(Vector v, final double w) {
-        final double weight = getWeight();
-        final double totalWeight = weight + w;
-        delegate.assign(v, new DoubleDoubleFunction() {
-            @Override
-            public double apply(double v, double v1) {
-                return (weight * v + w * v1) / totalWeight;
-            }
-        });
-        setWeight(totalWeight);
-    }
+  public void update(Vector v, final double w) {
+    final double weight = getWeight();
+    final double totalWeight = weight + w;
+    delegate.assign(v, new DoubleDoubleFunction() {
+      @Override
+      public double apply(double v, double v1) {
+        return (weight * v + w * v1) / totalWeight;
+      }
+    });
+    setWeight(totalWeight);
+  }
 
   @Override
   public Vector like() {
@@ -73,20 +73,20 @@ public class Centroid extends WeightedVector {
   }
 
   /**
-     * Gets the index of this centroid.  Use getIndex instead to maintain standard names.
-     */
-    @Deprecated
-    public int getKey() {
-        return getIndex();
-    }
+   * Gets the index of this centroid.  Use getIndex instead to maintain standard names.
+   */
+  @Deprecated
+  public int getKey() {
+    return getIndex();
+  }
 
-    public void addWeight() {
-        setWeight(getWeight() + 1);
-    }
+  public void addWeight() {
+    setWeight(getWeight() + 1);
+  }
 
-    @Override
-    public String toString() {
-        return String.format("key = %d, weight = %.2f, vector = %s", getIndex(), getWeight(), delegate);
-    }
+  @Override
+  public String toString() {
+    return String.format("key = %d, weight = %.2f, vector = %s", getIndex(), getWeight(), delegate);
+  }
 
 }
