@@ -20,7 +20,7 @@ package org.apache.mahout.math;
 /**
  * Decorates a vector with a floating point weight and an index.
  */
-public class WeightedVector extends DelegatingVector implements Comparable<WeightedVector> {
+public class WeightedVector extends DelegatingVector {
   private static final int INVALID_INDEX = -1;
   private double weight;
   private int index;
@@ -53,31 +53,6 @@ public class WeightedVector extends DelegatingVector implements Comparable<Weigh
 
   public double getWeight() {
     return weight;
-  }
-
-
-  @Override
-  public int compareTo(WeightedVector other) {
-    if (this == other) {
-      return 0;
-    }
-    int r = Double.compare(weight, other.getWeight());
-    if (r == 0 || Math.abs(weight - other.getWeight()) < 1e-8) {
-      double diff = this.minus(other).norm(1);
-      if (diff < 1e-12) {
-        return 0;
-      } else {
-        for (Vector.Element element : this) {
-          r = Double.compare(element.get(), other.get(element.index()));
-          if (r != 0) {
-            return r;
-          }
-        }
-        return 0;
-      }
-    } else {
-      return r;
-    }
   }
 
   public int getIndex() {

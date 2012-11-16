@@ -44,12 +44,13 @@ public class WeightedVectorTest extends AbstractVectorTest {
     WeightedVector v2 = new WeightedVector(new DenseVector(new double[]{1, 2, 3}), 5.00, 31);
     WeightedVector v3 = new WeightedVector(new DenseVector(new double[]{1, 3, 3}), 5.00, 31);
     WeightedVector v4 = (WeightedVector) v1.clone();
+    WeightedVectorComparator comparator = new WeightedVectorComparator();
 
-    assertTrue(v1.compareTo(v2) > 0);
-    assertTrue(v3.compareTo(v1) < 0);
-    assertTrue(v3.compareTo(v2) > 0);
-    assertEquals(0, v4.compareTo(v1));
-    assertEquals(0, v1.compareTo(v1));
+    assertTrue(comparator.compare(v1, v2) > 0);
+    assertTrue(comparator.compare(v3, v1) < 0);
+    assertTrue(comparator.compare(v3, v2) > 0);
+    assertEquals(0, comparator.compare(v4, v1));
+    assertEquals(0, comparator.compare(v1, v1));
   }
 
   @Test
