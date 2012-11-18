@@ -121,15 +121,34 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
     int jump = 1 + theHashCode % (hashSize - 2);
     int index = theHashCode % hashSize;
     K currentKey = keys[index];
-    while (currentKey != null && (currentKey == REMOVED || !key.equals(currentKey))) {
-      if (index < jump) {
-        index += hashSize - jump;
-      } else {
-        index -= jump;
-      }
+    while (currentKey != null && !key.equals(currentKey)) {
+      index -= index < jump ? jump - hashSize : jump;
       currentKey = keys[index];
     }
     return index;
+  }
+
+  private int findForAdd(Object key) {
+    int theHashCode = key.hashCode() & 0x7FFFFFFF; // make sure it's positive
+    K[] keys = this.keys;
+    int hashSize = keys.length;
+    int jump = 1 + theHashCode % (hashSize - 2);
+    int index = theHashCode % hashSize;
+    K currentKey = keys[index];
+    while (currentKey != null && currentKey != REMOVED && key != currentKey) {
+      index -= index < jump ? jump - hashSize : jump;
+      currentKey = keys[index];
+    }
+    if (currentKey != REMOVED) {
+      return index;
+    }
+    // If we're adding, it's here, but, the key might have a value already later
+    int addIndex = index;
+    while (currentKey != null && key != currentKey) {
+      index -= index < jump ? jump - hashSize : jump;
+      currentKey = keys[index];
+    }
+    return key == currentKey ? index : addIndex;
   }
   
   @Override
@@ -191,23 +210,22 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
       }
     }
     // Here we may later consider implementing Brent's variation described on page 532
-    int index = find(key);
-    if (keys[index] == null) {
-      // If size is limited,
-      if (countingAccesses && numEntries >= maxSize) {
-        // and we're too large, clear some old-ish entry
-        clearStaleEntry(index);
-      }
-      keys[index] = key;
-      values[index] = value;
-      numEntries++;
-      numSlotsUsed++;
-      return null;
-    } else {
+    int index = findForAdd(key);
+    if (keys[index] == key) {
       V oldValue = values[index];
       values[index] = value;
       return oldValue;
     }
+    // If size is limited,
+    if (countingAccesses && numEntries >= maxSize) {
+      // and we're too large, clear some old-ish entry
+      clearStaleEntry(index);
+    }
+    keys[index] = key;
+    values[index] = value;
+    numEntries++;
+    numSlotsUsed++;
+    return null;
   }
   
   private void clearStaleEntry(int index) {

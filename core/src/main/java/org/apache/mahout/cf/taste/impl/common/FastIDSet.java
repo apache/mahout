@@ -78,11 +78,7 @@ public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> 
     int index = theHashCode % hashSize;
     long currentKey = keys[index];
     while (currentKey != NULL && key != currentKey) { // note: true when currentKey == REMOVED
-      if (index < jump) {
-        index += hashSize - jump;
-      } else {
-        index -= jump;
-      }
+      index -= index < jump ? jump - hashSize : jump;
       currentKey = keys[index];
     }
     return index;
@@ -98,15 +94,20 @@ public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> 
     int jump = 1 + theHashCode % (hashSize - 2);
     int index = theHashCode % hashSize;
     long currentKey = keys[index];
-    while (currentKey != NULL && currentKey != REMOVED && key != currentKey) { // Different here
-      if (index < jump) {
-        index += hashSize - jump;
-      } else {
-        index -= jump;
-      }
+    while (currentKey != NULL && currentKey != REMOVED && key != currentKey) {
+      index -= index < jump ? jump - hashSize : jump;
       currentKey = keys[index];
     }
-    return index;
+    if (currentKey != REMOVED) {
+      return index;
+    }
+    // If we're adding, it's here, but, the key might have a value already later
+    int addIndex = index;
+    while (currentKey != NULL && key != currentKey) {
+      index -= index < jump ? jump - hashSize : jump;
+      currentKey = keys[index];
+    }
+    return key == currentKey ? index : addIndex;
   }
   
   public int size() {
