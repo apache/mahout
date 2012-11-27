@@ -18,11 +18,11 @@
 package org.apache.mahout.common.iterator;
 
 import java.util.Iterator;
-import java.util.Random;
 
 import com.google.common.collect.AbstractIterator;
+import org.apache.commons.math.MathException;
+import org.apache.commons.math.distribution.PascalDistributionImpl;
 import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
-import org.apache.mahout.common.RandomUtils;
 
 /**
  * Wraps an {@link Iterator} and returns only some subset of the elements that it would, as determined by a
@@ -30,37 +30,35 @@ import org.apache.mahout.common.RandomUtils;
  */
 public final class SamplingIterator<T> extends AbstractIterator<T> {
   
-  private final Random random;
+  private final PascalDistributionImpl geometricDistribution;
   private final Iterator<? extends T> delegate;
-  private final double samplingRate;
-  
+
   public SamplingIterator(Iterator<? extends T> delegate, double samplingRate) {
-    random = RandomUtils.getRandom();
+    // Geometric distribution is special case of negative binomial (aka Pascal) with r=1:
+    geometricDistribution = new PascalDistributionImpl(1, samplingRate);
     this.delegate = delegate;
-    this.samplingRate = samplingRate;
   }
 
   @Override
   protected T computeNext() {
+    int toSkip;
+    try {
+      toSkip = geometricDistribution.sample();
+    } catch (MathException e) {
+      throw new IllegalStateException(e);
+    }
     if (delegate instanceof SkippingIterator<?>) {
       SkippingIterator<? extends T> skippingDelegate = (SkippingIterator<? extends T>) delegate;
-      int toSkip = 0;
-      while (random.nextDouble() >= samplingRate) {
-        toSkip++;
-      }
-      // Really, would be nicer to select value from geometric distribution, for small values of samplingRate
-      if (toSkip > 0) {
-        skippingDelegate.skip(toSkip);
-      }
+      skippingDelegate.skip(toSkip);
       if (skippingDelegate.hasNext()) {
         return skippingDelegate.next();
       }
     } else {
-      while (delegate.hasNext()) {
-        T delegateNext = delegate.next();
-        if (random.nextDouble() < samplingRate) {
-          return delegateNext;
-        }
+      for (int i = 0; i < toSkip && delegate.hasNext(); i++) {
+        delegate.next();
+      }
+      if (delegate.hasNext()) {
+        return delegate.next();
       }
     }
     return endOfData();

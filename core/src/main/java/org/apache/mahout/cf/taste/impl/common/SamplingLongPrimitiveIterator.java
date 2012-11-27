@@ -18,9 +18,9 @@
 package org.apache.mahout.cf.taste.impl.common;
 
 import java.util.NoSuchElementException;
-import java.util.Random;
 
-import org.apache.mahout.common.RandomUtils;
+import org.apache.commons.math.MathException;
+import org.apache.commons.math.distribution.PascalDistributionImpl;
 
 /**
  * Wraps a {@link LongPrimitiveIterator} and returns only some subset of the elements that it would,
@@ -28,16 +28,15 @@ import org.apache.mahout.common.RandomUtils;
  */
 public final class SamplingLongPrimitiveIterator extends AbstractLongPrimitiveIterator {
   
-  private final Random random;
+  private final PascalDistributionImpl geometricDistribution;
   private final LongPrimitiveIterator delegate;
-  private final double samplingRate;
   private long next;
   private boolean hasNext;
   
   public SamplingLongPrimitiveIterator(LongPrimitiveIterator delegate, double samplingRate) {
-    random = RandomUtils.getRandom();
+    // Geometric distribution is special case of negative binomial (aka Pascal) with r=1:
+    geometricDistribution = new PascalDistributionImpl(1, samplingRate);
     this.delegate = delegate;
-    this.samplingRate = samplingRate;
     this.hasNext = true;
     doNext();
   }
@@ -66,14 +65,13 @@ public final class SamplingLongPrimitiveIterator extends AbstractLongPrimitiveIt
   }
   
   private void doNext() {
-    int toSkip = 0;
-    while (random.nextDouble() >= samplingRate) {
-      toSkip++;
+    int toSkip;
+    try {
+      toSkip = geometricDistribution.sample();
+    } catch (MathException e) {
+      throw new IllegalStateException(e);
     }
-    // Really, would be nicer to select value from geometric distribution, for small values of samplingRate
-    if (toSkip > 0) {
-      delegate.skip(toSkip);
-    }
+    delegate.skip(toSkip);
     if (delegate.hasNext()) {
       next = delegate.next();
     } else {
@@ -91,7 +89,15 @@ public final class SamplingLongPrimitiveIterator extends AbstractLongPrimitiveIt
   
   @Override
   public void skip(int n) {
-    delegate.skip((int) (n / samplingRate)); // Kind of an approximation, but this is expected skip
+    int toSkip = 0;
+    try {
+      for (int i = 0; i < n; i++) {
+        toSkip += geometricDistribution.sample();
+      }
+    } catch (MathException e) {
+      throw new IllegalStateException(e);
+    }
+    delegate.skip(toSkip);
     if (delegate.hasNext()) {
       next = delegate.next();
     } else {
