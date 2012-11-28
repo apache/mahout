@@ -28,7 +28,6 @@ public final class TestSamplingIterator extends MahoutTestCase {
   public void testEmptyCase() {
     assertFalse(new SamplingIterator<Integer>(new CountingIterator(0), 0.9999).hasNext());
     assertFalse(new SamplingIterator<Integer>(new CountingIterator(0), 1).hasNext());
-    assertFalse(new SamplingIterator<Integer>(new CountingIterator(0), 2).hasNext());
   }
 
   @Test
@@ -39,10 +38,14 @@ public final class TestSamplingIterator extends MahoutTestCase {
     assertFalse(t.hasNext());
   }
 
-  @Test
-  public void testAbsurdSampleRate() {
-    Iterator<Integer> t = new SamplingIterator<Integer>(new CountingIterator(2), 0);
-    assertFalse(t.hasNext());
+  @Test(expected = IllegalArgumentException.class)
+  public void testBadRate1() {
+    new SamplingIterator<Integer>(new CountingIterator(1), 0.0);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBadRate2() {
+    new SamplingIterator<Integer>(new CountingIterator(1), 1.1);
   }
 
   @Test
@@ -57,7 +60,7 @@ public final class TestSamplingIterator extends MahoutTestCase {
 
   @Test
   public void testSample() {
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 1000; i++) {
       Iterator<Integer> t = new SamplingIterator<Integer>(new CountingIterator(1000), 0.1);
       int k = 0;
       while (t.hasNext()) {
@@ -67,8 +70,8 @@ public final class TestSamplingIterator extends MahoutTestCase {
         assertTrue(v < 1000);
       }
       double sd = Math.sqrt(0.9 * 0.1 * 1000);
-      assertTrue(k >= 100 - 3 * sd);
-      assertTrue(k <= 100 + 3 * sd);
+      assertTrue(k >= 100 - 4 * sd);
+      assertTrue(k <= 100 + 4 * sd);
     }
   }
 }

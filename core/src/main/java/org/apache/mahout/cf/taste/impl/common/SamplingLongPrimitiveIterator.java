@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.impl.common;
 
 import java.util.NoSuchElementException;
 
+import com.google.common.base.Preconditions;
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.distribution.PascalDistributionImpl;
 
@@ -34,6 +35,8 @@ public final class SamplingLongPrimitiveIterator extends AbstractLongPrimitiveIt
   private boolean hasNext;
   
   public SamplingLongPrimitiveIterator(LongPrimitiveIterator delegate, double samplingRate) {
+    Preconditions.checkNotNull(delegate);
+    Preconditions.checkArgument(samplingRate > 0.0 && samplingRate <= 1.0);
     // Geometric distribution is special case of negative binomial (aka Pascal) with r=1:
     geometricDistribution = new PascalDistributionImpl(1, samplingRate);
     this.delegate = delegate;

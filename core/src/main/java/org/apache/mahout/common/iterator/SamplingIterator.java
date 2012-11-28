@@ -19,6 +19,7 @@ package org.apache.mahout.common.iterator;
 
 import java.util.Iterator;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.AbstractIterator;
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.distribution.PascalDistributionImpl;
@@ -34,6 +35,8 @@ public final class SamplingIterator<T> extends AbstractIterator<T> {
   private final Iterator<? extends T> delegate;
 
   public SamplingIterator(Iterator<? extends T> delegate, double samplingRate) {
+    Preconditions.checkNotNull(delegate);
+    Preconditions.checkArgument(samplingRate > 0.0 && samplingRate <= 1.0);
     // Geometric distribution is special case of negative binomial (aka Pascal) with r=1:
     geometricDistribution = new PascalDistributionImpl(1, samplingRate);
     this.delegate = delegate;
