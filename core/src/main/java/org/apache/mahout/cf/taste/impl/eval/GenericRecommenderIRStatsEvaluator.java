@@ -141,7 +141,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
         continue; // Oops we excluded all prefs for the user -- just move on
       }
 
-      int size = relevantItemIDs.size() + trainingModel.getItemIDsFromUser(userID).size();
+      int size = numRelevantItems + trainingModel.getItemIDsFromUser(userID).size();
       if (size < 2 * at) {
         // Really not enough prefs to meaningfully evaluate this user
         continue;
@@ -177,7 +177,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
       // In computing, assume relevant IDs have relevance 1 and others 0
       double cumulativeGain = 0.0;
       double idealizedGain = 0.0;
-      for (int i = 0; i < recommendedItems.size(); i++) {
+      for (int i = 0; i < numRecommendedItems; i++) {
         RecommendedItem item = recommendedItems.get(i);
         double discount = 1.0 / log2(i + 2.0); // Classical formulation says log(i+1), but i is 0-based here
         if (relevantItemIDs.contains(item.getItemID())) {
@@ -187,7 +187,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
 
         // Ideally results would be ordered with all relevant ones first, so this theoretical
         // ideal list starts with number of relevant items equal to the total number of relevant items
-        if (i < relevantItemIDs.size()) {
+        if (i < numRelevantItems) {
           idealizedGain += discount;
         }
       }
@@ -204,19 +204,17 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
       long end = System.currentTimeMillis();
 
       log.info("Evaluated with user {} in {}ms", userID, end - start);
-      log.info("Precision/recall/fall-out/nDCG: {} / {} / {} / {}", new Object[] {
-          precision.getAverage(), recall.getAverage(), fallOut.getAverage(), nDCG.getAverage()
-      });
+      log.info("Precision/recall/fall-out/nDCG/reach: {} / {} / {} / {} / {}",
+               precision.getAverage(), recall.getAverage(), fallOut.getAverage(), nDCG.getAverage(),
+               (double) numUsersWithRecommendations / (double) numUsersRecommendedFor);
     }
-
-    double reach = (double) numUsersWithRecommendations / (double) numUsersRecommendedFor;
 
     return new IRStatisticsImpl(
         precision.getAverage(),
         recall.getAverage(),
         fallOut.getAverage(),
         nDCG.getAverage(),
-        reach);
+        (double) numUsersWithRecommendations / (double) numUsersRecommendedFor);
   }
   
   private static double computeThreshold(PreferenceArray prefs) {

@@ -32,11 +32,11 @@ public final class IRStatisticsImpl implements IRStatistics, Serializable {
   private final double reach;
   
   IRStatisticsImpl(double precision, double recall, double fallOut, double ndcg, double reach) {
-    Preconditions.checkArgument(precision >= 0.0 && precision <= 1.0, "Illegal precision: " + precision);
-    Preconditions.checkArgument(recall >= 0.0 && recall <= 1.0, "Illegal recall: " + recall);
-    Preconditions.checkArgument(fallOut >= 0.0 && fallOut <= 1.0, "Illegal fallOut: " + fallOut);
-    Preconditions.checkArgument(ndcg >= 0.0 && ndcg <= 1.0, "Illegal nDCG: " + ndcg);
-    Preconditions.checkArgument(reach >= 0.0 && reach <= 1.0, "Illegal reach: " + reach);
+    Preconditions.checkArgument(Double.isNaN(precision) || (precision >= 0.0 && precision <= 1.0), "Illegal precision: " + precision);
+    Preconditions.checkArgument(Double.isNaN(recall) || (recall >= 0.0 && recall <= 1.0), "Illegal recall: " + recall);
+    Preconditions.checkArgument(Double.isNaN(fallOut) || (fallOut >= 0.0 && fallOut <= 1.0), "Illegal fallOut: " + fallOut);
+    Preconditions.checkArgument(Double.isNaN(ndcg) || (ndcg >= 0.0 && ndcg <= 1.0), "Illegal nDCG: " + ndcg);
+    Preconditions.checkArgument(Double.isNaN(reach) || (reach >= 0.0 && reach <= 1.0), "Illegal reach: " + reach);
     this.precision = precision;
     this.recall = recall;
     this.fallOut = fallOut;
