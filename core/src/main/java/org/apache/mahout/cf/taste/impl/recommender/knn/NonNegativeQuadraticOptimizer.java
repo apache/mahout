@@ -23,6 +23,7 @@ import java.util.Arrays;
  * Non-negative Quadratic Optimization. Based on the paper of Robert M. Bell and Yehuda Koren in ICDM '07.
  * Thanks to Dan Tillberg for the hints in the implementation.
  */
+@Deprecated
 public final class NonNegativeQuadraticOptimizer implements Optimizer {
   
   private static final double EPSILON = 1.0e-10;

@@ -41,6 +41,7 @@ import org.apache.mahout.common.LongPair;
  * an {@link Optimizer}. This algorithm is based in the paper of Robert M. Bell and Yehuda Koren in ICDM '07.
  * </p>
  */
+@Deprecated
 public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
   
   private static final double BETA = 500.0;

@@ -35,6 +35,7 @@ import com.google.common.base.Preconditions;
  * is, it says that clusters are close when <em>some pair</em> of their members has high similarity.
  * </p>
  */
+@Deprecated
 public final class NearestNeighborClusterSimilarity implements ClusterSimilarity {
   
   private final UserSimilarity similarity;

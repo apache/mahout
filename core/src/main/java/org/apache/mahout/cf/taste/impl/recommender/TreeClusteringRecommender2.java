@@ -68,6 +68,7 @@ import com.google.common.base.Preconditions;
  * recommendation quality much, but it potentially speeds up the clustering process dramatically.
  * </p>
  */
+@Deprecated
 public final class TreeClusteringRecommender2 extends AbstractRecommender implements ClusteringRecommender {
   
   private static final Logger log = LoggerFactory.getLogger(TreeClusteringRecommender2.class);

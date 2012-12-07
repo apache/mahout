@@ -29,6 +29,7 @@ import org.apache.mahout.cf.taste.impl.common.FastIDSet;
  * 
  * @see TreeClusteringRecommender
  */
+@Deprecated
 public interface ClusterSimilarity extends Refreshable {
   
   /**

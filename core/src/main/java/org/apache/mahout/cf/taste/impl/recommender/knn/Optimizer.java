@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.recommender.knn;
 
+@Deprecated
 public interface Optimizer {
   
   double[] optimize(double[][] matrix, double[] b);

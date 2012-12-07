@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.impl.recommender.knn;
 
 import java.util.Arrays;
 
+@Deprecated
 public final class ConjugateGradientOptimizer implements Optimizer {
   
   private static final double CONVERGENCE_LIMIT = 0.1;

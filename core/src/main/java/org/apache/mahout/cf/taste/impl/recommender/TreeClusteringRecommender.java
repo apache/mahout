@@ -60,6 +60,7 @@ import com.google.common.base.Preconditions;
  * estimate preference for an item for which no preference is expressed in the users in the cluster.</li>
  * </ul>
  */
+@Deprecated
 public final class TreeClusteringRecommender extends AbstractRecommender implements ClusteringRecommender {
   
   private static final Logger log = LoggerFactory.getLogger(TreeClusteringRecommender.class);

@@ -45,6 +45,7 @@ import org.apache.mahout.math.SparseMatrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated
 public final class ImplicitLinearRegressionFactorizer extends AbstractFactorizer {
 
   private static final Logger log = LoggerFactory.getLogger(ImplicitLinearRegressionFactorizer.class);

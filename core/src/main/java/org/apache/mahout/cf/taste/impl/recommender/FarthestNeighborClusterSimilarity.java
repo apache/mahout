@@ -36,6 +36,7 @@ import com.google.common.base.Preconditions;
  * similarity.
  * </p>
  */
+@Deprecated
 public final class FarthestNeighborClusterSimilarity implements ClusterSimilarity {
   
   private final UserSimilarity similarity;

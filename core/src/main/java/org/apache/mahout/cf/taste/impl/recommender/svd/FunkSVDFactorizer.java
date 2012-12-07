@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
  * Implementation of Simon Funk's famous algorithm from the Netflix prize,,
  * see http://sifter.org/~simon/journal/20061211.html for details
  */
+@Deprecated
 public final class FunkSVDFactorizer extends AbstractFactorizer {
 
   private static final Logger log = LoggerFactory.getLogger(FunkSVDFactorizer.class);

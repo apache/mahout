@@ -25,6 +25,7 @@ import org.apache.mahout.cf.taste.impl.common.FastIDSet;
  * Interface implemented by "clustering" recommenders.
  * </p>
  */
+@Deprecated
 public interface ClusteringRecommender extends Recommender {
   
   /**
