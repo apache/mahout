@@ -213,7 +213,7 @@ public final class OnlineLogisticRegressionTest extends OnlineBaseTest {
     logger.warn("Test set = " + test);
 
     // now train many times and collect information on accuracy each time
-    int[] correct = new int[test.size()];
+    int[] correct = new int[test.size() + 1];
     for (int run = 0; run < 200; run++) {
       OnlineLogisticRegression lr = new OnlineLogisticRegression(3, 5, new L2(1));
       // 30 training passes should converge to > 95% accuracy nearly always but never to 100%
