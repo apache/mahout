@@ -33,7 +33,7 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
-public class DecisionForestTest extends MahoutTestCase {
+public final class DecisionForestTest extends MahoutTestCase {
 
   private static final String[] TRAIN_DATA = {"sunny,85,85,FALSE,no",
     "sunny,80,90,TRUE,no", "overcast,83,86,FALSE,yes",
@@ -141,9 +141,10 @@ public class DecisionForestTest extends MahoutTestCase {
     // Test data
     Data testData = DataLoader.loadData(datas[0].getDataset(), TEST_DATA);
 
-    for (int i = 0; i < testData.size(); i++) {
-      assertEquals(1.0, forest.classify(testData.getDataset(), rng, testData.get(i)), 0);
-    }
+    assertEquals(1.0, forest.classify(testData.getDataset(), rng, testData.get(0)), EPSILON);
+    // This one is tie-broken -- 1 is OK too
+    assertEquals(0.0, forest.classify(testData.getDataset(), rng, testData.get(1)), EPSILON);
+    assertEquals(1.0, forest.classify(testData.getDataset(), rng, testData.get(2)), EPSILON);
   }
 
   @Test
@@ -157,8 +158,8 @@ public class DecisionForestTest extends MahoutTestCase {
 
     double[][] predictions = new double[testData.size()][];
     forest.classify(testData, predictions);
-    assertArrayEquals(predictions, new double[][] {{1.0,Double.NaN,Double.NaN},
-      {1.0,0.0,Double.NaN},{1.0,1.0,Double.NaN}});
+    assertArrayEquals(new double[][]{{1.0, Double.NaN, Double.NaN},
+        {1.0, 0.0, Double.NaN}, {1.0, 1.0, Double.NaN}}, predictions);
   }
 
   @Test
@@ -179,21 +180,21 @@ public class DecisionForestTest extends MahoutTestCase {
     
     double[][] predictions = new double[datas[0].size()][];
     forests[0].classify(datas[0], predictions);
-    assertArrayEquals(predictions[0], new double[] {20.0, 20.0}, 0);
-    assertArrayEquals(predictions[1], new double[] {39.0, 29.0}, 0);
-    assertArrayEquals(predictions[2], new double[] {Double.NaN, 29.0}, 0);
-    assertArrayEquals(predictions[17], new double[] {Double.NaN, 23.0}, 0);
+    assertArrayEquals(new double[]{20.0, 20.0}, predictions[0], EPSILON);
+    assertArrayEquals(new double[]{39.0, 29.0}, predictions[1], EPSILON);
+    assertArrayEquals(new double[]{Double.NaN, 29.0}, predictions[2], EPSILON);
+    assertArrayEquals(new double[]{Double.NaN, 23.0}, predictions[17], EPSILON);
 
     predictions = new double[datas[1].size()][];
     forests[1].classify(datas[1], predictions);
-    assertArrayEquals(predictions[19], new double[] {30.0, 29.0}, 0);
+    assertArrayEquals(new double[]{30.0, 29.0}, predictions[19], EPSILON);
 
     predictions = new double[datas[2].size()][];
     forests[2].classify(datas[2], predictions);
-    assertArrayEquals(predictions[9], new double[] {29.0, 28.0}, 0);
+    assertArrayEquals(new double[]{29.0, 28.0}, predictions[9], EPSILON);
 
-    assertEquals(20.0, forests[0].classify(datas[0].getDataset(), rng, datas[0].get(0)), 0);
-    assertEquals(34.0, forests[0].classify(datas[0].getDataset(), rng, datas[0].get(1)), 0);
-    assertEquals(29.0, forests[0].classify(datas[0].getDataset(), rng, datas[0].get(2)), 0);
+    assertEquals(20.0, forests[0].classify(datas[0].getDataset(), rng, datas[0].get(0)), EPSILON);
+    assertEquals(34.0, forests[0].classify(datas[0].getDataset(), rng, datas[0].get(1)), EPSILON);
+    assertEquals(29.0, forests[0].classify(datas[0].getDataset(), rng, datas[0].get(2)), EPSILON);
   }
 }

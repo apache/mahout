@@ -261,21 +261,6 @@
     </licenses>
     </project>
   </supplement>
-  <!-- uncommons math  -->
-  <supplement>
-    <project>
-    <name>Uncommons Math</name>
-    <groupId>org.uncommons</groupId>
-    <artifactId>uncommons-maths</artifactId>
-    <url>https://uncommons-maths.dev.java.net/</url>
-    <licenses>
-      <license>
-        <name>The Apache Software License, Version 2.0</name>
-        <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-      </license>
-    </licenses>
-    </project>
-  </supplement>
   <!-- Xpp3  -->
   <supplement>
     <project>

@@ -17,67 +17,24 @@
 
 package org.apache.mahout.common;
 
-import com.google.common.base.Charsets;
-import org.uncommons.maths.random.MersenneTwisterRNG;
-import org.uncommons.maths.random.RepeatableRNG;
-import org.uncommons.maths.random.SeedException;
-import org.uncommons.maths.random.SeedGenerator;
+import org.apache.commons.math3.random.MersenneTwister;
+import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Random;
 
 public final class RandomWrapper extends Random {
 
-  private static final byte[] STANDARD_SEED = "Mahout=Hadoop+ML".getBytes(Charsets.US_ASCII);
-  private static final SeedGenerator SEED_GENERATOR = new FastRandomSeedGenerator();
+  private static final long STANDARD_SEED = 0xCAFEDEADBEEFBABEL;
 
-  private static boolean testSeed;
-
-  private Random random;
-  private final Long fixedSeed;
+  private final RandomGenerator random;
 
   RandomWrapper() {
-    this.fixedSeed = null;
-    random = buildRandom();
+    random = new MersenneTwister();
+    random.setSeed(System.currentTimeMillis() + System.identityHashCode(random));
   }
 
-  RandomWrapper(long fixedSeed) {
-    this.fixedSeed = fixedSeed;
-    random = buildRandom();
-  }
-
-  static void useTestSeed() {
-    testSeed = true;
-  }
-
-  private Random buildRandom() {
-    if (fixedSeed == null) {
-      if (testSeed) {
-        return new MersenneTwisterRNG(STANDARD_SEED);
-      } else {
-        // Force use of standard generator, and disallow use of those based on /dev/random since
-        // it causes hangs on Ubuntu
-        try {
-          return new MersenneTwisterRNG(SEED_GENERATOR);
-        } catch (SeedException se) {
-          // Can't happen
-          throw new IllegalStateException(se);
-        }
-      }
-    } else {
-      return new MersenneTwisterRNG(RandomUtils.longSeedtoBytes(fixedSeed));
-    }
-  }
-
-  public Random getRandom() {
-    return random;
-  }
-
-  void reset() {
-    random = buildRandom();
-  }
-
-  public long getSeed() {
-    return RandomUtils.seedBytesToLong(((RepeatableRNG) random).getSeed());
+  RandomWrapper(long seed) {
+    random = new MersenneTwister(seed);
   }
 
   @Override
@@ -85,7 +42,17 @@ public final class RandomWrapper extends Random {
     // Since this will be called by the java.util.Random() constructor before we construct
     // the delegate... and because we don't actually care about the result of this for our
     // purpose:
-    random = new MersenneTwisterRNG(RandomUtils.longSeedtoBytes(seed));
+    if (random != null) {
+      random.setSeed(seed);
+    }
+  }
+
+  void resetToTestSeed() {
+    setSeed(STANDARD_SEED);
+  }
+
+  public RandomGenerator getRandomGenerator() {
+    return random;
   }
 
   @Override
@@ -134,4 +101,5 @@ public final class RandomWrapper extends Random {
   public double nextGaussian() {
     return random.nextGaussian();
   }
+
 }

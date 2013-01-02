@@ -89,17 +89,6 @@ public final class RandomUtilsTest extends MahoutTestCase {
   }
 
   @Test
-  public void testLongToSeed() {
-    Random r = RandomUtils.getRandom();
-    for (int i = 0; i < 10000; i++) {
-      long l = r.nextLong();
-      byte[] bytes = RandomUtils.longSeedtoBytes(l);
-      long back = RandomUtils.seedBytesToLong(bytes);
-      assertEquals(l, back);
-    }
-  }
-
-  @Test
   public void testSetSeed() {
     Random rTest0 = RandomUtils.getRandom();
     Random rTest1 = RandomUtils.getRandom();

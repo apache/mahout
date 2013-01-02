@@ -32,7 +32,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-public class TestCVBModelTrainer extends MahoutTestCase {
+public final class TestCVBModelTrainer extends MahoutTestCase {
 
   private static final double ETA = 0.1;
   private static final double ALPHA = 0.1;
@@ -117,8 +117,7 @@ public class TestCVBModelTrainer extends MahoutTestCase {
         bestTopic = t + startTopic;
       }
     }
-    assertEquals("The optimal number of topics is not that of the generating distribution",
-        bestTopic, numGeneratingTopics);
+    assertEquals("The optimal number of topics is not that of the generating distribution", 4, bestTopic);
     System.out.println("Perplexities: " + Joiner.on(", ").join(perplexities));
   }
 

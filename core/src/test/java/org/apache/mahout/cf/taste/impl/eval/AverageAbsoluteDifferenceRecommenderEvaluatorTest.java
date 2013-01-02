@@ -40,7 +40,7 @@ public final class AverageAbsoluteDifferenceRecommenderEvaluatorTest extends Tas
     RecommenderEvaluator evaluator =
         new AverageAbsoluteDifferenceRecommenderEvaluator();
     double eval = evaluator.evaluate(builder, null, model, 0.85, 1.0);
-    assertEquals(0.3833333055178324, eval, EPSILON);
+    assertEquals(0.29906444251537323, eval, EPSILON);
   }
 
 }

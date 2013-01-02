@@ -20,9 +20,9 @@ package org.apache.mahout.math.random;
 import com.google.common.collect.Lists;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.common.RandomWrapper;
 
 import java.util.List;
-import java.util.Random;
 
 /**
  * Samples from a Poisson distribution.  Should probably not be used for lambda > 1000 or so.
@@ -31,13 +31,16 @@ public final class PoissonSampler extends AbstractSamplerFunction {
 
   private double limit;
   private Multinomial<Integer> partial;
-  private final Random gen;
+  private final RandomWrapper gen;
   private final PoissonDistribution pd;
 
   public PoissonSampler(double lambda) {
     limit = 1;
     gen = RandomUtils.getRandom();
-    pd = new PoissonDistribution(lambda);
+    pd = new PoissonDistribution(gen.getRandomGenerator(),
+                                 lambda,
+                                 PoissonDistribution.DEFAULT_EPSILON,
+                                 PoissonDistribution.DEFAULT_MAX_ITERATIONS);
   }
 
   @Override

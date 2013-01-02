@@ -28,7 +28,6 @@ import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SparseMatrix;
 import org.apache.mahout.math.Vector;
-import org.uncommons.maths.Maths;
 
 import com.google.common.base.Preconditions;
 
@@ -169,7 +168,7 @@ public final class HmmUtils {
         "Error: Initial probability of state %d is negative", i);
       sum += model.getInitialProbabilities().get(i);
     }
-    Preconditions.checkArgument(Maths.approxEquals(sum, 1, 0.00001),
+    Preconditions.checkArgument(Math.abs(sum - 1) <= 0.00001,
                                 "Error: Initial probabilities do not add up to 1");
     /*
      * The row size of the output matrix is equal to the number of the hidden
@@ -188,7 +187,7 @@ public final class HmmUtils {
             "The output state probability from hidden state " + i + " to output state " + j + " is negative");
         sum += model.getEmissionMatrix().get(i, j);
       }
-      Preconditions.checkArgument(Maths.approxEquals(sum, 1, 0.00001),
+      Preconditions.checkArgument(Math.abs(sum - 1) <= 0.00001,
         "Error: The output state probabilities for hidden state %d don't add up to 1", i);
     }
 
@@ -209,7 +208,7 @@ public final class HmmUtils {
           "Error: The transition probability from hidden state %d to hidden state %d is negative", i, j);
         sum += model.getTransitionMatrix().get(i, j);
       }
-      Preconditions.checkArgument(Maths.approxEquals(sum, 1, 0.00001),
+      Preconditions.checkArgument(Math.abs(sum - 1) <= 0.00001,
         "Error: The transition probabilities for hidden state " + i + " don't add up to 1.");
     }
   }

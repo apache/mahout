@@ -71,7 +71,7 @@ public abstract class SamplerCase extends MahoutTestCase {
     Iterator<Integer> t = createSampler(15, source);
 
     // this is just a regression test, not a real test
-    List<Integer> expectedValues = Arrays.asList(83, 56, 69, 96, 4, 59, 70, 7, 93, 52, 39, 11, 16, 67, 26);
+    List<Integer> expectedValues = Arrays.asList(52,28,2,60,50,32,65,79,78,9,40,33,96,25,48);
     if (isSorted()) {
       Collections.sort(expectedValues);
     }

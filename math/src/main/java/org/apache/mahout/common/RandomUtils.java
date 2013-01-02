@@ -41,20 +41,25 @@ public final class RandomUtils {
 
   private static final Map<RandomWrapper,Boolean> INSTANCES =
       Collections.synchronizedMap(new WeakHashMap<RandomWrapper,Boolean>());
-  
+
+  private static boolean testSeed = false;
+
   private RandomUtils() { }
   
   public static void useTestSeed() {
-    RandomWrapper.useTestSeed();
+    testSeed = true;
     synchronized (INSTANCES) {
       for (RandomWrapper rng : INSTANCES.keySet()) {
-        rng.reset();
+        rng.resetToTestSeed();
       }
     }
   }
   
-  public static Random getRandom() {
+  public static RandomWrapper getRandom() {
     RandomWrapper random = new RandomWrapper();
+    if (testSeed) {
+      random.resetToTestSeed();
+    }
     INSTANCES.put(random, Boolean.TRUE);
     return random;
   }
@@ -63,28 +68,6 @@ public final class RandomUtils {
     RandomWrapper random = new RandomWrapper(seed);
     INSTANCES.put(random, Boolean.TRUE);
     return random;
-  }
-  
-  public static byte[] longSeedtoBytes(long seed) {
-    byte[] seedBytes = new byte[16];
-    seedBytes[0] = (byte) (seed >>> 56);
-    seedBytes[1] = (byte) (seed >>> 48);
-    seedBytes[2] = (byte) (seed >>> 40);
-    seedBytes[3] = (byte) (seed >>> 32);
-    seedBytes[4] = (byte) (seed >>> 24);
-    seedBytes[5] = (byte) (seed >>> 16);
-    seedBytes[6] = (byte) (seed >>> 8);
-    seedBytes[7] = (byte) seed;
-    System.arraycopy(seedBytes, 0, seedBytes, 8, 8);
-    return seedBytes;
-  }
-  
-  public static long seedBytesToLong(byte[] seed) {
-    long result = 0L;
-    for (int i = 0; i < 8; i++) {
-      result |= (seed[i] & 0xFFL) << (long) (8 * (7 - i));
-    }
-    return result;
   }
   
   /** @return what {@link Double#hashCode()} would return for the same value */

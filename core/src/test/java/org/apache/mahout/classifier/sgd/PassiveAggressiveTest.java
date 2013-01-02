@@ -29,7 +29,7 @@ public final class PassiveAggressiveTest extends OnlineBaseTest {
     Vector target = readStandardData();
     PassiveAggressive pa = new PassiveAggressive(2,8).learningRate(0.1);
     train(getInput(), target, pa);
-    test(getInput(), target, pa, 0.1, 0.3);
+    test(getInput(), target, pa, 0.11, 0.31);
   }
 
 }

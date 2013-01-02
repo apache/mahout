@@ -42,7 +42,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-public class TestMinHashClustering extends MahoutTestCase {
+public final class TestMinHashClustering extends MahoutTestCase {
   
   private static final double[][] REFERENCE = { {1, 2, 3, 4, 5}, {2, 1, 3, 6, 7}, {3, 7, 6, 11, 8, 9},
                                               {4, 7, 8, 9, 6, 1}, {5, 8, 10, 4, 1}, {6, 17, 14, 15},
@@ -160,7 +160,7 @@ public class TestMinHashClustering extends MahoutTestCase {
     String[] args = makeArguments(2, 3, 20, 3, HashType.POLYNOMIAL.toString());
     int ret = ToolRunner.run(new Configuration(), new MinHashDriver(), args);
     assertEquals("Minhash MR Job failed for " + HashType.POLYNOMIAL, 0, ret);
-    verify(output, 0.3, "Hash Type: POLYNOMIAL");
+    verify(output, 0.27, "Hash Type: POLYNOMIAL");
   }
   
   @Test
@@ -168,7 +168,7 @@ public class TestMinHashClustering extends MahoutTestCase {
     String[] args = makeArguments(2, 3, 20, 4, HashType.MURMUR.toString());
     int ret = ToolRunner.run(new Configuration(), new MinHashDriver(), args);
     assertEquals("Minhash MR Job failed for " + HashType.MURMUR, 0, ret);
-    verify(output, 0.3, "Hash Type: MURMUR");
+    verify(output, 0.2, "Hash Type: MURMUR");
   }
 
   @Test
@@ -176,7 +176,7 @@ public class TestMinHashClustering extends MahoutTestCase {
     String[] args = makeArguments(2, 3, 20, 4, HashType.MURMUR3.toString());
     int ret = ToolRunner.run(new Configuration(), new MinHashDriver(), args);
     assertEquals("Minhash MR Job failed for " + HashType.MURMUR3, 0, ret);
-    verify(output, 0.3, "Hash Type: MURMUR");
+    verify(output, 0.2, "Hash Type: MURMUR");
   }
   
 }

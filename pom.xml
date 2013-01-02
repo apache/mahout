@@ -385,22 +385,6 @@
       </dependency>
       
       <dependency>
-        <groupId>org.uncommons.maths</groupId>
-        <artifactId>uncommons-maths</artifactId>
-        <version>1.2.2</version>
-        <exclusions>
-          <exclusion>
-            <groupId>jfree</groupId>
-            <artifactId>jfreechart</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>jfree</groupId>
-            <artifactId>jcommon</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      
-      <dependency>
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream</artifactId>
         <version>1.4.3</version>

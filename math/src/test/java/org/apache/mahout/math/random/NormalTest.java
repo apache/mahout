@@ -26,7 +26,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-public class NormalTest extends MahoutTestCase {
+public final class NormalTest extends MahoutTestCase {
 
   @Override
   @Before
@@ -54,8 +54,9 @@ public class NormalTest extends MahoutTestCase {
     }
     Arrays.sort(data);
 
-    NormalDistribution reference = new NormalDistribution();
-
+    NormalDistribution reference = new NormalDistribution(RandomUtils.getRandom().getRandomGenerator(),
+                                                          0, 1,
+                                                          NormalDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
     assertEquals("Median", reference.inverseCumulativeProbability(0.5), data[5000], 0.04);
   }
 }

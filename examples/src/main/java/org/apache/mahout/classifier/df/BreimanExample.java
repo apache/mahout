@@ -29,6 +29,7 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.commons.math3.util.FastMath;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
@@ -44,7 +45,6 @@ import org.apache.mahout.classifier.df.data.Dataset;
 import org.apache.mahout.classifier.df.ref.SequentialBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.uncommons.maths.Maths;
 
 /**
  * Test procedure as described in Breiman's paper.<br>
@@ -202,7 +202,7 @@ public class BreimanExample extends Configured implements Tool {
     
     // take m to be the first integer less than log2(M) + 1, where M is the
     // number of inputs
-    int m = (int) Math.floor(Maths.log(2, data.getDataset().nbAttributes()) + 1);
+    int m = (int) Math.floor(FastMath.log(2.0, data.getDataset().nbAttributes()) + 1);
     
     Random rng = RandomUtils.getRandom();
     for (int iteration = 0; iteration < nbIterations; iteration++) {

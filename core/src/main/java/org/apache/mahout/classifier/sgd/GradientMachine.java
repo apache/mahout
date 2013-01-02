@@ -106,14 +106,14 @@ public class GradientMachine extends AbstractVectorClassifier implements OnlineL
    * @param gen random number generator.
    */
   public void initWeights(Random gen) {
-    double hiddenFanIn = 1.0f / Math.sqrt(numFeatures);
+    double hiddenFanIn = 1.0 / Math.sqrt(numFeatures);
     for (int i = 0; i < numHidden; i++) {
       for (int j = 0; j < numFeatures; j++) {
         double val = (2.0 * gen.nextDouble() - 1.0) * hiddenFanIn;
         hiddenWeights[i].setQuick(j, val);
       }
     }
-    double outputFanIn = 1.0f / Math.sqrt(numHidden);
+    double outputFanIn = 1.0 / Math.sqrt(numHidden);
     for (int i = 0; i < numOutput; i++) {
       for (int j = 0; j < numHidden; j++) {
         double val = (2.0 * gen.nextDouble() - 1.0) * outputFanIn;

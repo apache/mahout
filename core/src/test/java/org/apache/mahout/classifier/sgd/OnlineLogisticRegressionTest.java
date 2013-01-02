@@ -37,7 +37,8 @@ import java.util.List;
 import java.util.Random;
 
 public final class OnlineLogisticRegressionTest extends OnlineBaseTest {
-  Logger logger = LoggerFactory.getLogger(OnlineLogisticRegressionTest.class);
+
+  private static final Logger logger = LoggerFactory.getLogger(OnlineLogisticRegressionTest.class);
 
   /**
    * The CrossFoldLearner is probably the best learner to use for new applications.
@@ -240,7 +241,7 @@ public final class OnlineLogisticRegressionTest extends OnlineBaseTest {
       assertEquals(String.format("%d trials had unacceptable accuracy of only %.0f%%: ", correct[i], 100.0 * i / test.size()), 0, correct[i]);
     }
     // nor perfect
-    assertEquals(String.format("%d trials had unrealistic accuracy of 100%%", correct[test.size() - 1]), 0, correct[test.size() - 1]);
+    assertEquals(String.format("%d trials had unrealistic accuracy of 100%%", correct[test.size() - 1]), 0, correct[test.size()]);
   }
 
   @Test
