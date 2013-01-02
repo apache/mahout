@@ -17,11 +17,9 @@
 
 package org.apache.mahout.math.jet.random;
 
-import org.apache.commons.math.ConvergenceException;
-import org.apache.commons.math.FunctionEvaluationException;
-import org.apache.commons.math.analysis.UnivariateRealFunction;
-import org.apache.commons.math.analysis.integration.RombergIntegrator;
-import org.apache.commons.math.analysis.integration.UnivariateRealIntegrator;
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.integration.RombergIntegrator;
+import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.junit.Assert;
 
 import java.util.Arrays;
@@ -40,7 +38,7 @@ public final class DistributionChecks {
                                        double[] x,
                                        double offset,
                                        double scale,
-                                       int n) throws ConvergenceException, FunctionEvaluationException {
+                                       int n) {
     double[] xs = Arrays.copyOf(x, x.length);
     for (int i = 0; i < xs.length; i++) {
       xs[i] = xs[i]*scale+ offset;
@@ -78,9 +76,9 @@ public final class DistributionChecks {
     k[k.length - 1] = n - lastJ;
 
     // now verify probabilities by comparing to integral of pdf
-    UnivariateRealIntegrator integrator = new RombergIntegrator();
+    UnivariateIntegrator integrator = new RombergIntegrator();
     for (int i = 0; i < xs.length - 1; i++) {
-      double delta = integrator.integrate(new UnivariateRealFunction() {
+      double delta = integrator.integrate(1000000, new UnivariateFunction() {
         @Override
         public double value(double v) {
           return dist.pdf(v);

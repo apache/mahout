@@ -16,10 +16,9 @@
  */
 package org.apache.mahout.math.ssvd;
 
-import org.apache.commons.math.linear.Array2DRowRealMatrix;
-import org.apache.commons.math.linear.EigenDecomposition;
-import org.apache.commons.math.linear.EigenDecompositionImpl;
-import org.apache.commons.math.linear.RealMatrix;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.EigenDecomposition;
+import org.apache.commons.math3.linear.RealMatrix;
 
 /**
  * wraps appropriate eigen solver for BBt matrix. Can be either colt or apache
@@ -44,8 +43,7 @@ public class EigenSolverWrapper {
 
   public EigenSolverWrapper(double[][] bbt) {
     int dim = bbt.length;
-    EigenDecomposition evd2 = new EigenDecompositionImpl(
-        new Array2DRowRealMatrix(bbt), 0);
+    EigenDecomposition evd2 = new EigenDecomposition(new Array2DRowRealMatrix(bbt));
     eigenvalues = evd2.getRealEigenvalues();
     RealMatrix uHatrm = evd2.getV();
     uHat = new double[dim][];

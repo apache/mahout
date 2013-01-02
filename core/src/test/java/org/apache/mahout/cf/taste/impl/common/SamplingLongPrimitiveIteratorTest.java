@@ -62,9 +62,11 @@ public final class SamplingLongPrimitiveIteratorTest extends TasteTestCase {
 
   @Test
   public void testSample() {
+    double p = 0.1;
+    int n = 1000;
+    double sd = Math.sqrt(n * p * (1.0 - p));
     for (int i = 0; i < 1000; i++) {
-      SamplingLongPrimitiveIterator t = new SamplingLongPrimitiveIterator(
-          countingIterator(1000), 0.1);
+      SamplingLongPrimitiveIterator t = new SamplingLongPrimitiveIterator(countingIterator(n), p);
       int k = 0;
       while (t.hasNext()) {
         long v = t.nextLong();
@@ -72,9 +74,9 @@ public final class SamplingLongPrimitiveIteratorTest extends TasteTestCase {
         assertTrue(v >= 0L);
         assertTrue(v < 1000L);
       }
-      double sd = Math.sqrt(0.9 * 0.1 * 1000);
-      assertTrue(k >= 100 - 4 * sd);
-      assertTrue(k <= 100 + 4 * sd);
+      // Should be +/- 5 standard deviations except in about 1 out of 1.7M cases
+      assertTrue(k >= 100 - 5 * sd);
+      assertTrue(k <= 100 + 5 * sd);
     }
   }
 
