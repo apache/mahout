@@ -425,7 +425,7 @@
                   <pluginExecutionFilter>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>2.5.1</version>
+                    <versionRange>2.5.1</versionRange>
                     <goals>
                       <goal>copy-dependencies</goal>
                     </goals>
@@ -444,7 +444,10 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <execute/>
+                    <execute>
+                    	<runOnIncremental>false</runOnIncremental>
+                    	<runOnConfiguration>true</runOnConfiguration>
+                    </execute>
                   </action>
                 </pluginExecution>
               </pluginExecutions>
