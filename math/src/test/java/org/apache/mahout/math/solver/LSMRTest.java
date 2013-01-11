@@ -21,7 +21,9 @@ import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.MahoutTestCase;
 import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.SingularValueDecomposition;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.function.Functions;
 import org.junit.Test;
 
 public final class LSMRTest extends MahoutTestCase {
@@ -58,6 +60,26 @@ public final class LSMRTest extends MahoutTestCase {
     assertEquals(m.transpose().times(m).times(x1).minus(m.transpose().times(b)).norm(2), r.getNormalEquationResidual(), 1.0e-9);
   }
   
+  @Test
+  public void random() {
+    Matrix m = new DenseMatrix(200, 30).assign(Functions.random());
+
+    Vector b = new DenseVector(200).assign(1);
+
+    LSMR r = new LSMR();
+    Vector x1 = r.solve(m, b);
+
+//    assertEquals(0, m.times(x1).minus(b).norm(2), 1.0e-2);
+    double norm = new SingularValueDecomposition(m).getS().viewDiagonal().norm(2);
+    double actual = m.transpose().times(m).times(x1).minus(m.transpose().times(b)).norm(2);
+    System.out.printf("%.4f\n", actual / norm * 1e6);
+    assertEquals(0, actual, norm * 1.0e-5);
+
+    // and we need to check that the error estimates are pretty good.
+    assertEquals(m.times(x1).minus(b).norm(2), r.getResidualNorm(), 1.0e-5);
+    assertEquals(actual, r.getNormalEquationResidual(), 1.0e-9);
+  }
+
   private static Matrix hilbert(int n) {
     Matrix r = new DenseMatrix(n, n);
     for (int i = 0; i < n; i++) {

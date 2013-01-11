@@ -453,7 +453,7 @@ public final class LSMR {
         stop = StopCode.TRIVIAL;
       }
 
-      if (stop != StopCode.CONTINUE && stop.ordinal() != istop + 1) {
+      if (stop != StopCode.CONTINUE && stop.ordinal() != istop) {
         throw new IllegalStateException(String.format("bad code match %d vs %d", istop, stop.ordinal()));
       }
 
