@@ -24,7 +24,7 @@ import java.io.IOException;
 import com.google.common.primitives.Longs;
 import org.apache.hadoop.io.WritableComparable;
 
-public class VarLongWritable implements WritableComparable<VarLongWritable>, Cloneable {
+public class VarLongWritable implements WritableComparable<VarLongWritable> {
 
   private long value;
 
@@ -56,11 +56,6 @@ public class VarLongWritable implements WritableComparable<VarLongWritable>, Clo
   @Override
   public String toString() {
     return String.valueOf(value);
-  }
-
-  @Override
-  public VarLongWritable clone() {
-    return new VarLongWritable(value);
   }
 
   @Override
