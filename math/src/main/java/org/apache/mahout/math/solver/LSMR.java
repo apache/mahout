@@ -291,7 +291,6 @@ public final class LSMR {
     double d = 0;
     double maxrbar = 0;
     double minrbar = 1.0e+100;
-    int istop = 0;
     StopCode stop = StopCode.CONTINUE;
     while (iteration <= iterationLimit && stop == StopCode.CONTINUE) {
 
@@ -422,45 +421,33 @@ public final class LSMR {
       // atol = eps,  btol = eps,  conlim = 1/eps.
 
       if (iteration > iterationLimit) {
-        istop = 7;
         stop = StopCode.ITERATION_LIMIT;
       }
       if (1 + test3 <= 1) {
-        istop = 6;
         stop = StopCode.CONDITION_MACHINE_TOLERANCE;
       }
       if (1 + test2 <= 1) {
-        istop = 5;
         stop = StopCode.LEAST_SQUARE_CONVERGED_MACHINE_TOLERANCE;
       }
       if (1 + t1 <= 1) {
-        istop = 4;
         stop = StopCode.CONVERGED_MACHINE_TOLERANCE;
       }
 
       // Allow for tolerances set by the user.
 
       if (test3 <= ctol) {
-        istop = 3;
         stop = StopCode.CONDITION;
       }
       if (test2 <= aTolerance) {
-        istop = 2;
         stop = StopCode.CONVERGED;
       }
       if (test1 <= rtol) {
-        istop = 1;
         stop = StopCode.TRIVIAL;
       }
 
-      if (stop != StopCode.CONTINUE && stop.ordinal() != istop) {
-        throw new IllegalStateException(String.format("bad code match %d vs %d", istop, stop.ordinal()));
-      }
-
       // See if it is time to print something.
-
       if (log.isDebugEnabled()) {
-        if ((n <= 40) || (iteration <= 10) || (iteration >= iterationLimit - 10) || ((iteration % 10) == 0) || (test3 <= 1.1 * ctol) || (test2 <= 1.1 * aTolerance) || (test1 <= 1.1 * rtol) || (istop != 0)) {
+        if ((n <= 40) || (iteration <= 10) || (iteration >= iterationLimit - 10) || ((iteration % 10) == 0) || (test3 <= 1.1 * ctol) || (test2 <= 1.1 * aTolerance) || (test1 <= 1.1 * rtol) || (stop != StopCode.CONTINUE)) {
           statusDump(x, normA, condA, test1, test2);
         }
       }
