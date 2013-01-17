@@ -32,6 +32,8 @@ import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.RandomUtils;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -71,6 +73,11 @@ public class DatasetSplitter extends AbstractJob {
         + DEFAULT_TRAINING_PERCENTAGE + ')', String.valueOf(DEFAULT_TRAINING_PERCENTAGE));
     addOption("probePercentage", "p", "percentage of the data to use as probe set (default: " 
         + DEFAULT_PROBE_PERCENTAGE + ')', String.valueOf(DEFAULT_PROBE_PERCENTAGE));
+
+    Map<String,List<String>> parsedArgs = parseArguments(args);
+    if (parsedArgs == null) {
+      return -1;
+    }
 
     double trainingPercentage = Double.parseDouble(getOption("trainingPercentage"));
     double probePercentage = Double.parseDouble(getOption("probePercentage"));
