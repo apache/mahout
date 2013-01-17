@@ -55,16 +55,14 @@ public abstract class AbstractNaiveBayesClassifier extends AbstractVectorClassif
 
   @Override
   public Vector classifyFull(Vector instance) {
-    Vector score = model.createScoringVector();
-    for (int label = 0; label < model.numLabels(); label++) {
-      score.set(label, getScoreForLabelInstance(label, instance));
-    }
-    return score;
+    return classifyFull(model.createScoringVector(), instance);
   }
   
   @Override
   public Vector classifyFull(Vector r, Vector instance) {
-    r = classifyFull(instance);
+    for (int label = 0; label < model.numLabels(); label++) {
+      r.setQuick(label, getScoreForLabelInstance(label, instance));
+    }
     return r;
   }
 
