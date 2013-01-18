@@ -157,6 +157,7 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     }*/
     
     //validate our model and then write it out to the official output
+    getConf().setFloat(ThetaMapper.ALPHA_I, alphaI);
     NaiveBayesModel naiveBayesModel = BayesUtils.readModelFromDir(getTempPath(), getConf());
     naiveBayesModel.validate();
     naiveBayesModel.serialize(getOutputPath(), getConf());
