@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.hadoop.item;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -27,8 +28,10 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.hadoop.preparation.PreparePreferenceMatrixJob;
+import org.apache.mahout.cf.taste.hadoop.similarity.item.ItemSimilarityJob;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
@@ -119,6 +122,8 @@ public final class RecommenderJob extends AbstractJob {
     addOption("similarityClassname", "s", "Name of distributed similarity measures class to instantiate, " 
             + "alternatively use one of the predefined similarities (" + VectorSimilarityMeasures.list() + ')', true);
     addOption("threshold", "tr", "discard item pairs with a similarity value below this", false);
+    addOption("outputPathForSimilarityMatrix", "opfsm", "write the item similarity matrix to this path (optional)",
+        false);
 
     Map<String, List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
@@ -186,6 +191,22 @@ public final class RecommenderJob extends AbstractJob {
         "--threshold", String.valueOf(threshold),
         "--tempDir", getTempPath().toString(),
       });
+
+      // write out the similarity matrix if the user specified that behavior
+      if (hasOption("outputPathForSimilarityMatrix")) {
+        Path outputPathForSimilarityMatrix = new Path(getOption("outputPathForSimilarityMatrix"));
+
+        Job outputSimilarityMatrix = prepareJob(similarityMatrixPath, outputPathForSimilarityMatrix,
+            SequenceFileInputFormat.class, ItemSimilarityJob.MostSimilarItemPairsMapper.class,
+            EntityEntityWritable.class, DoubleWritable.class, ItemSimilarityJob.MostSimilarItemPairsReducer.class,
+            EntityEntityWritable.class, DoubleWritable.class, TextOutputFormat.class);
+
+        Configuration mostSimilarItemsConf = outputSimilarityMatrix.getConfiguration();
+        mostSimilarItemsConf.set(ItemSimilarityJob.ITEM_ID_INDEX_PATH_STR,
+            new Path(prepPath, PreparePreferenceMatrixJob.ITEMID_INDEX).toString());
+        mostSimilarItemsConf.setInt(ItemSimilarityJob.MAX_SIMILARITIES_PER_ITEM, maxSimilaritiesPerItem);
+        outputSimilarityMatrix.waitForCompletion(true);
+      }
     }
 
     //start the multiplication of the co-occurrence matrix by the user vectors

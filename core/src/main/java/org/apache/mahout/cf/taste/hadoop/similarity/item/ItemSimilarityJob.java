@@ -80,8 +80,8 @@ import org.apache.mahout.math.map.OpenIntLongHashMap;
  */
 public final class ItemSimilarityJob extends AbstractJob {
 
-  static final String ITEM_ID_INDEX_PATH_STR = ItemSimilarityJob.class.getName() + ".itemIDIndexPathStr";
-  static final String MAX_SIMILARITIES_PER_ITEM = ItemSimilarityJob.class.getName() + ".maxSimilarItemsPerItem";
+  public static final String ITEM_ID_INDEX_PATH_STR = ItemSimilarityJob.class.getName() + ".itemIDIndexPathStr";
+  public static final String MAX_SIMILARITIES_PER_ITEM = ItemSimilarityJob.class.getName() + ".maxSimilarItemsPerItem";
 
   private static final int DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM = 100;
   private static final int DEFAULT_MAX_PREFS_PER_USER = 1000;
@@ -215,7 +215,7 @@ public final class ItemSimilarityJob extends AbstractJob {
     }
   }
 
-  static class MostSimilarItemPairsReducer
+  public static class MostSimilarItemPairsReducer
       extends Reducer<EntityEntityWritable,DoubleWritable,EntityEntityWritable,DoubleWritable> {
     @Override
     protected void reduce(EntityEntityWritable pair, Iterable<DoubleWritable> values, Context ctx)

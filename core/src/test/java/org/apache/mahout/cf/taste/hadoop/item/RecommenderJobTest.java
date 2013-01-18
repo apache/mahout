@@ -42,6 +42,7 @@ import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
+import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.VarIntWritable;
@@ -704,6 +705,8 @@ public class RecommenderJobTest extends TasteTestCase {
     File inputFile = getTestTempFile("prefs.txt");
     File outputDir = getTestTempDir("output");
     outputDir.delete();
+    File similaritiesOutputDir = getTestTempDir("outputSimilarities");
+    similaritiesOutputDir.delete();
     File tmpDir = getTestTempDir("tmp");
 
     writeLines(inputFile,
@@ -728,10 +731,10 @@ public class RecommenderJobTest extends TasteTestCase {
     recommenderJob.setConf(conf);
 
     recommenderJob.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--similarityClassname",
-       TanimotoCoefficientSimilarity.class.getName(), "--numRecommendations", "4" });
+       TanimotoCoefficientSimilarity.class.getName(), "--numRecommendations", "4",
+        "--outputPathForSimilarityMatrix", similaritiesOutputDir.getAbsolutePath() });
 
     Map<Long,List<RecommendedItem>> recommendations = readRecommendations(new File(outputDir, "part-r-00000"));
-
     assertEquals(4, recommendations.size());
 
     for (Entry<Long,List<RecommendedItem>> entry : recommendations.entrySet()) {
@@ -767,6 +770,16 @@ public class RecommenderJobTest extends TasteTestCase {
         assertEquals(3.5, item2.getValue(), 0.05);
       }
     }
+
+    Map<Pair<Long, Long>, Double> similarities = readSimilarities(new File(similaritiesOutputDir, "part-r-00000"));
+    assertEquals(6, similarities.size());
+
+    assertEquals(0.25, similarities.get(new Pair<Long, Long>(1l, 2l)), EPSILON);
+    assertEquals(0.6666666666666666, similarities.get(new Pair<Long, Long>(1l, 3l)), EPSILON);
+    assertEquals(0.5, similarities.get(new Pair<Long, Long>(1l, 4l)), EPSILON);
+    assertEquals(0.3333333333333333, similarities.get(new Pair<Long, Long>(2l, 3l)), EPSILON);
+    assertEquals(0.25, similarities.get(new Pair<Long, Long>(2l, 4l)), EPSILON);
+    assertEquals(0.25, similarities.get(new Pair<Long, Long>(3l, 4l)), EPSILON);
   }
 
   /**
@@ -880,11 +893,19 @@ public class RecommenderJobTest extends TasteTestCase {
      assertEquals(3.5, recommendedItem.getValue(), 0.05);
    }
 
+  static Map<Pair<Long,Long>, Double> readSimilarities(File file) throws IOException {
+    Map<Pair<Long,Long>, Double> similarities = Maps.newHashMap();
+    for (String line : new FileLineIterable(file)) {
+      String[] parts = line.split("\t");
+      similarities.put(new Pair<Long,Long>(Long.parseLong(parts[0]), Long.parseLong(parts[1])),
+          Double.parseDouble(parts[2]));
+    }
+    return similarities;
+  }
 
   static Map<Long,List<RecommendedItem>> readRecommendations(File file) throws IOException {
     Map<Long,List<RecommendedItem>> recommendations = Maps.newHashMap();
-    Iterable<String> lineIterable = new FileLineIterable(file);
-    for (String line : lineIterable) {
+    for (String line : new FileLineIterable(file)) {
 
       String[] keyValue = line.split("\t");
       long userID = Long.parseLong(keyValue[0]);
