@@ -97,7 +97,7 @@
     <skipTests>false</skipTests>
     <maven.clover.multiproject>true</maven.clover.multiproject>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <hadoop.version>1.0.4</hadoop.version>
+    <hadoop.version>1.1.1</hadoop.version>
     <lucene.version>3.6.0</lucene.version>
   </properties>
   <issueManagement>
@@ -184,7 +184,7 @@
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.10</version>
+        <version>4.11</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -334,12 +334,12 @@
       <dependency>
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-core-asl</artifactId>
-        <version>1.9.10</version>
+        <version>1.9.11</version>
       </dependency>
       <dependency>
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-mapper-asl</artifactId>
-        <version>1.9.10</version>
+        <version>1.9.11</version>
       </dependency>
 
       <dependency>
@@ -381,19 +381,19 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-math3</artifactId>
-        <version>3.1</version>
+        <version>3.1.1</version>
       </dependency>
       
       <dependency>
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream</artifactId>
-        <version>1.4.3</version>
+        <version>1.4.4</version>
       </dependency>
 
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>13.0</version>
+        <version>13.0.1</version>
       </dependency>
       
       <dependency>
@@ -481,7 +481,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
-          <version>2.3</version>
+          <version>2.4</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -491,7 +491,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>2.5.1</version>
+          <version>2.6</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -546,7 +546,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
-          <version>2.3.2</version>
+          <version>2.4</version>
           <configuration>
             <useReleaseProfile>true</useReleaseProfile>
             <releaseProfiles>release,mahout_release</releaseProfiles>
@@ -559,7 +559,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.5.1</version>
+          <version>3.0</version>
           <configuration>
             <encoding>UTF-8</encoding>
             <source>1.6</source>
@@ -637,7 +637,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.12.4</version>
+          <version>2.13</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -796,7 +796,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
-            <version>2.5.1</version>
+            <version>3.0</version>
             <configuration>
               <showDeprecation>true</showDeprecation>
               <showWarnings>true</showWarnings>
@@ -862,7 +862,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
-        <version>2.12.4</version>
+        <version>2.13</version>
       </plugin>
       <!-- checkstyle -->
       <plugin>
@@ -959,7 +959,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
-        <version>2.12.4</version>
+        <version>2.13</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
