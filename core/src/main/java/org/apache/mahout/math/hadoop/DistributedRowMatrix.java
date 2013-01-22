@@ -134,8 +134,12 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
   @Override
   public Iterator<MatrixSlice> iterateAll() {
     try {
+      Path pathPattern = rowPath;
+      if (FileSystem.get(conf).getFileStatus(rowPath).isDir()) {
+        pathPattern = new Path(rowPath, "*");
+      }
       return Iterators.transform(
-          new SequenceFileDirIterator<IntWritable,VectorWritable>(new Path(rowPath, "*"),
+          new SequenceFileDirIterator<IntWritable,VectorWritable>(pathPattern,
                                                                   PathType.GLOB,
                                                                   PathFilters.logsCRCFilter(),
                                                                   null,
