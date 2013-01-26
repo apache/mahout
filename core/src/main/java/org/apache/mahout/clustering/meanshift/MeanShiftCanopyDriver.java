@@ -324,11 +324,11 @@ public class MeanShiftCanopyDriver extends AbstractJob {
           if (log.isDebugEnabled()) {
             log.debug(
                 "Writing Cluster:{} center:{} numPoints:{} radius:{} to: {}",
-                new Object[] { cluster.getId(),
-                    AbstractCluster.formatVector(cluster.getCenter(), null),
-                    cluster.getNumObservations(),
-                    AbstractCluster.formatVector(cluster.getRadius(), null),
-                    clustersOut.getName() });
+                cluster.getId(),
+                AbstractCluster.formatVector(cluster.getCenter(), null),
+                cluster.getNumObservations(),
+                AbstractCluster.formatVector(cluster.getRadius(), null),
+                clustersOut.getName());
           }
           ClusterWritable clusterWritable = new ClusterWritable();
           clusterWritable.setValue(cluster);

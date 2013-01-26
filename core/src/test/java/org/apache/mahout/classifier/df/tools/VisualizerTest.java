@@ -94,9 +94,9 @@ public final class VisualizerTest extends MahoutTestCase {
     Node tree = builder.build(rng, data);
     
     String[] prediction = TreeVisualizer.predictTrace(tree, testData, ATTR_NAMES);
-    Assert.assertArrayEquals(prediction, new String[] {
-      "outlook = rainy -> windy = TRUE -> no", "outlook = overcast -> yes",
-      "outlook = sunny -> (humidity = 90) >= 85 -> no"});
+    Assert.assertArrayEquals(new String[]{
+        "outlook = rainy -> windy = TRUE -> no", "outlook = overcast -> yes",
+        "outlook = sunny -> (humidity = 90) >= 85 -> no"}, prediction);
   }
   
   @Test

@@ -69,8 +69,7 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
         long start = System.currentTimeMillis();
         long cnt = processor.parseMboxLineByLine(options.getInput());
         long finish = System.currentTimeMillis();
-        log.info("Parsed {} messages from {} in time: {}", new Object[] {
-            cnt, options.getInput().getAbsolutePath(), finish - start});
+        log.info("Parsed {} messages from {} in time: {}", cnt, options.getInput().getAbsolutePath(), finish - start);
       }
     } finally {
       Closeables.closeQuietly(writer);

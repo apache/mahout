@@ -26,7 +26,6 @@ public class WeightedVector extends DelegatingVector {
   private int index;
 
   protected WeightedVector(double weight, int index) {
-    super();
     this.weight = weight;
     this.index = index;
   }

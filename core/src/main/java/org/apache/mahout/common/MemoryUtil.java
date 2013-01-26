@@ -45,8 +45,8 @@ public final class MemoryUtil {
     long maxBytes = runtime.maxMemory();
     long totalBytes = runtime.totalMemory();
     long usedBytes = totalBytes - freeBytes;
-    log.info("Memory (bytes): {} used, {} heap, {} max", new Object[] { usedBytes, totalBytes,
-            maxBytes });
+    log.info("Memory (bytes): {} used, {} heap, {} max", usedBytes, totalBytes,
+             maxBytes);
   }
 
   private static ScheduledExecutorService scheduler;

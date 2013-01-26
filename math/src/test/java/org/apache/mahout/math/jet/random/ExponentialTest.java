@@ -26,7 +26,7 @@ import java.util.Arrays;
 public final class ExponentialTest extends MahoutTestCase {
 
   @Test
-  public void consistency() throws Exception {
+  public void consistency() {
     Exponential dist = new Exponential(1, RandomUtils.getRandom());
     // deciles computed using R
     double[] breaks = {0.1053605, 0.2231436, 0.3566749, 0.5108256, 0.6931472, 0.9162907, 1.2039728, 1.6094379, 2.3025851};

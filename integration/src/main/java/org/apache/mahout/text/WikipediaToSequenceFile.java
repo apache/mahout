@@ -159,9 +159,7 @@ public final class WikipediaToSequenceFile {
              + "org.apache.hadoop.io.serializer.WritableSerialization");
     
     Job job = new Job(conf);
-    if (log.isInfoEnabled()) {
-      log.info("Input: {} Out: {} Categories: {} All Files: {}", new Object[] {input, output, catFile, all});
-    }
+    log.info("Input: {} Out: {} Categories: {} All Files: {}", input, output, catFile, all);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(Text.class);
     FileInputFormat.setInputPaths(job, new Path(input));

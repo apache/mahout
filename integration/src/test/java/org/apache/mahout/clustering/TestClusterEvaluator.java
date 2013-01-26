@@ -101,7 +101,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
    *          double standard deviation of the samples
    */
   private void generateSamples(int num, double mx, double my, double sd) {
-    log.info("Generating {} samples m=[{}, {}] sd={}", new Object[] {num, mx, my, sd});
+    log.info("Generating {} samples m=[{}, {}] sd={}", num, mx, my, sd);
     for (int i = 0; i < num; i++) {
       sampleData.add(new VectorWritable(new DenseVector(new double[] {UncommonDistributions.rNorm(mx, sd),
           UncommonDistributions.rNorm(my, sd)})));

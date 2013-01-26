@@ -917,6 +917,6 @@ public final class VectorTest extends MahoutTestCase {
     right.set(7, 3.1);
     right.set(4, 1.2);
 
-    assertEquals(.1 * .1 + 2.1 * 2.1 + 3.1 * 3.1, AbstractVector.randomScanDiff(left, right), 0);
+    assertEquals(0.1 * 0.1 + 2.1 * 2.1 + 3.1 * 3.1, AbstractVector.randomScanDiff(left, right), 0);
   }
 }

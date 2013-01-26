@@ -127,7 +127,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
           double err = pref - estimate;
           avg.addDatum(err * err);
           log.info("Comparing preference of user [{}] towards item [{}], was [{}] estimate is [{}]",
-                   new Object[] { slice.index(), e.index(), pref, estimate });
+                   slice.index(), e.index(), pref, estimate);
         }
       }
     }
@@ -200,7 +200,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
           double err = confidence * (pref - estimate) * (pref - estimate);
           avg.addDatum(err);
           log.info("Comparing preference of user [{}] towards item [{}], was [{}] with confidence [{}] " 
-                       + "estimate is [{}]", new Object[]{slice.index(), e.index(), pref, confidence, estimate});
+                       + "estimate is [{}]", slice.index(), e.index(), pref, confidence, estimate);
         }
       }
     }

@@ -56,7 +56,7 @@ public abstract class SolverTest extends MahoutTestCase {
           assertTrue("not norm 1 : " + dot + " (eigen #" + i + ')', Math.abs(1.0 - dot) < errorMargin);
         } else {
           if (Math.abs(dot) > errorMargin) {
-            log.info("not orthogonal : {} (eigens {}, {})", new Object[] {dot, i, j});
+            log.info("not orthogonal : {} (eigens {}, {})", dot, i, j);
             nonOrthogonals.add("(" + i + ',' + j + ')');
           }
         }
@@ -80,7 +80,7 @@ public abstract class SolverTest extends MahoutTestCase {
           assertTrue("not norm 1 : " + dot + " (eigen #" + i + ')', Math.abs(1.0 - dot) < errorMargin);
         } else {
           if (Math.abs(dot) > errorMargin) {
-            log.info("not orthogonal : {} (eigens {}, {})", new Object[] {dot, i, j});
+            log.info("not orthogonal : {} (eigens {}, {})", dot, i, j);
             nonOrthogonals.add("(" + i + ',' + j + ')');
           }
         }

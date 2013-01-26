@@ -106,7 +106,7 @@ public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrate
     maxItems = computeMaxFrom(itemsFactor, numItems);
     maxUsersPerItem = computeMaxFrom(usersPerItemFactor, numUsers);
     maxItemsPerUser = computeMaxFrom(candidatesPerUserFactor, numItems);
-    log.debug("maxItems {}, maxUsersPerItem {}, maxItemsPerUser {}", new Object[] {maxItems, maxUsersPerItem, maxItemsPerUser});
+    log.debug("maxItems {}, maxUsersPerItem {}, maxItemsPerUser {}", maxItems, maxUsersPerItem, maxItemsPerUser);
   }
   
   private static int computeMaxFrom(int factor, int numThings) {

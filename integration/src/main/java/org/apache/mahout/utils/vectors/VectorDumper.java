@@ -182,8 +182,7 @@ public final class VectorDumper extends AbstractJob {
           break;
         }
         if (quiet) {
-          log.info("Processing file '{}' ({}/{})",
-                  new Object[]{path, ++fileCount, pathArr.length});
+          log.info("Processing file '{}' ({}/{})", path, ++fileCount, pathArr.length);
         }
         SequenceFileIterable<Writable, Writable> iterable =
                 new SequenceFileIterable<Writable, Writable>(path, true, conf);

@@ -43,7 +43,7 @@ public final class NormalTest extends MahoutTestCase {
   }
 
   @Test
-  public void consistency() throws Exception {
+  public void consistency() {
     Random gen = RandomUtils.getRandom();
     double offset = 0;
     double scale = 1;

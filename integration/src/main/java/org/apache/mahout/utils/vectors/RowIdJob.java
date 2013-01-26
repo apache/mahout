@@ -86,7 +86,7 @@ public class RowIdJob extends AbstractJob {
         numCols = value.get().size();
       }
 
-      log.info("Wrote out matrix with {} rows and {} columns to {}", new Object[] { i, numCols, matrixPath });
+      log.info("Wrote out matrix with {} rows and {} columns to {}", i, numCols, matrixPath);
       return 0;
     } finally {
       Closeables.closeQuietly(indexWriter);

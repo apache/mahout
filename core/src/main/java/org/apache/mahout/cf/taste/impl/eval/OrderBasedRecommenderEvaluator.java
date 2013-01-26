@@ -236,7 +236,7 @@ public final class OrderBasedRecommenderEvaluator {
     // case statement for requested value
     double variance = Math.sqrt(meanRank);
     log.info("{},{},{},{},{},{},{},{},{}",
-             new Object[] {tag, userID, samples, subset, hamming, bubble, meanRank, normalW, variance});
+             tag, userID, samples, subset, hamming, bubble, meanRank, normalW, variance);
     return variance;
   }
 

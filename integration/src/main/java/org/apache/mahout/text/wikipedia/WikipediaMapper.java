@@ -102,7 +102,7 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
     exactMatchOnly = conf.getBoolean("exact.match.only", false);
     all = conf.getBoolean("all.files", true);
     log.info("Configure: Input Categories size: {} All: {} Exact Match: {}",
-             new Object[] {inputCategories.size(), all, exactMatchOnly});
+             inputCategories.size(), all, exactMatchOnly);
   }
 
   private static String getDocument(String xml) {

@@ -166,9 +166,7 @@ public final class WikipediaDatasetCreatorDriver {
     conf.set("wikipedia.categories", categoriesStr);
     
     Job job = new Job(conf);
-    if (log.isInfoEnabled()) {
-      log.info("Input: {} Out: {} Categories: {}", new Object[] {input, output, catFile});
-    }
+    log.info("Input: {} Out: {} Categories: {}", input, output, catFile);
     job.setJarByClass(WikipediaDatasetCreatorDriver.class);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(Text.class);

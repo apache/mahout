@@ -19,7 +19,7 @@
 
 package org.apache.mahout.common;
 
-import static org.easymock.EasyMock.createMockBuilder;
+import org.easymock.EasyMock;
 
 import java.util.Map;
 
@@ -36,10 +36,10 @@ public final class DummyStatusReporter extends StatusReporter {
     try {
       // 0.23 case
       String c = "org.apache.hadoop.mapreduce.counters.GenericCounter";
-      return (Counter) createMockBuilder(Class.forName(c)).createMock();
+      return (Counter) EasyMock.createMockBuilder(Class.forName(c)).createMock();
     } catch (ClassNotFoundException e) {
       // 0.20 case
-      return createMockBuilder(Counter.class).createMock();
+      return EasyMock.createMockBuilder(Counter.class).createMock();
     }
   }
 

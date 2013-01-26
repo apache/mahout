@@ -107,7 +107,7 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
     }
 
     log.info("Configure: Input Categories size: {} Exact Match: {} Analyzer: {}",
-             new Object[] {inputCategories.size(), exactMatchOnly, analyzer.getClass().getName()});
+             inputCategories.size(), exactMatchOnly, analyzer.getClass().getName());
   }
 
   private String findMatchingCategory(String document) {

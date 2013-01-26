@@ -335,7 +335,7 @@ public class HebbianSolver {
     TrainingState finalState = solver.solve(corpus, rank);
     long time = (System.currentTimeMillis() - now) / 1000;
     log.info("Solved {} eigenVectors in {} seconds.  Persisted to {}",
-             new Object[] {finalState.getCurrentEigens().rowSize(), time, outputDir});
+             finalState.getCurrentEigens().rowSize(), time, outputDir);
   }
 
   

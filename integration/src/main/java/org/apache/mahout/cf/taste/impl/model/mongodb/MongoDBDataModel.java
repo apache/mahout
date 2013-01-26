@@ -488,7 +488,7 @@ public final class MongoDBDataModel implements DataModel {
       objectIdLong.put("long_value", longValue);
       collectionMap.insert(objectIdLong);
       log.info("Adding Translation {}: {} long_value: {}",
-               new Object[] {isUser ? "User ID" : "Item ID", id, longValue});
+               isUser ? "User ID" : "Item ID", id, longValue);
       return longValue;
     }
   }
@@ -619,7 +619,7 @@ public final class MongoDBDataModel implements DataModel {
       user.put(mongoPreference, preferenceIsString ? preferenceValue : Double.parseDouble(preferenceValue));
       user.put("created_at", mongoTimestamp);
       collection.insert(user);
-      log.info("Adding userID: {} itemID: {} preferenceValue: {}", new Object[] {userID, itemID, preferenceValue});
+      log.info("Adding userID: {} itemID: {} preferenceValue: {}", userID, itemID, preferenceValue);
     }
   }
 
@@ -698,7 +698,7 @@ public final class MongoDBDataModel implements DataModel {
         prefs.setUserID(0, userID);
         prefs.setItemID(0, itemID);
         prefs.setValue(0, preferenceValue);
-        log.info("Adding userID: {} itemID: {} preferenceValue: {}", new Object[] {userID, itemID, preferenceValue});
+        log.info("Adding userID: {} itemID: {} preferenceValue: {}", userID, itemID, preferenceValue);
         rawData.put(userID, prefs);
         if (mongoManage) {
           addMongoUserItem(Long.toString(userID),

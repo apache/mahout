@@ -237,8 +237,8 @@ public class CVB0Driver extends AbstractJob {
       + "perplexity is less than {}.  Topic model output (p(term|topic) for each topic) will be " 
       + "stored {}.  Random initialization seed is {}, holding out {} of the data for perplexity " 
       + "check\n";
-    log.info(infoString, new Object[] {inputPath, numTerms, numTopics, alpha, eta, maxIterations,
-        convergenceDelta, topicModelOutputPath, randomSeed, testFraction});
+    log.info(infoString, inputPath, numTerms, numTopics, alpha, eta, maxIterations,
+             convergenceDelta, topicModelOutputPath, randomSeed, testFraction);
     infoString = dictionaryPath == null
                ? "" : "Dictionary to be used located " + dictionaryPath.toString() + '\n';
     infoString += docTopicOutputPath == null
@@ -291,7 +291,7 @@ public class CVB0Driver extends AbstractJob {
         double delta = rateOfChange(perplexities);
         if (delta < convergenceDelta) {
           log.info("Convergence achieved at iteration {} with perplexity {} and delta {}",
-              new Object[]{iterationNumber, perplexities.get(perplexities.size() - 1), delta});
+                   iterationNumber, perplexities.get(perplexities.size() - 1), delta);
           break;
         }
       }
@@ -308,9 +308,7 @@ public class CVB0Driver extends AbstractJob {
       if (testFraction > 0 && iterationNumber % iterationBlockSize == 0) {
         perplexities.add(calculatePerplexity(conf, inputPath, modelOutputPath, iterationNumber));
         log.info("Current perplexity = {}", perplexities.get(perplexities.size() - 1));
-        log.info("(p_{} - p_{}) / p_0 = {}; target = {}", new Object[]{
-            iterationNumber , iterationNumber - iterationBlockSize, rateOfChange(perplexities), convergenceDelta
-        });
+        log.info("(p_{} - p_{}) / p_0 = {}; target = {}", iterationNumber, iterationNumber - iterationBlockSize, rateOfChange(perplexities), convergenceDelta);
       }
     }
     log.info("Completed {} iterations in {} seconds", iterationNumber,
@@ -417,8 +415,8 @@ public class CVB0Driver extends AbstractJob {
       perplexity += pair.getSecond().get();
       n++;
     }
-    log.info("Read {} entries with total perplexity {} and model weight {}", new Object[] { n,
-            perplexity, modelWeight });
+    log.info("Read {} entries with total perplexity {} and model weight {}", n,
+             perplexity, modelWeight);
     return perplexity / modelWeight;
   }
 

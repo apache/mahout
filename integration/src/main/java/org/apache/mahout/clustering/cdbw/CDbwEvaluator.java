@@ -58,7 +58,6 @@ public final class CDbwEvaluator {
   private final List<Cluster> clusters;
   private final DistanceMeasure measure;
   private Double interClusterDensity = null;
-  private Double intraClusterDensity = null;
   private Map<Integer,Map<Integer,Double>> minimumDistances = null; // these are symmetric so we only compute half of them
   private Map<Integer,Map<Integer,Double>> interClusterDensities = null; // these are symmetric too
   private Map<Integer,Map<Integer,int[]>> closestRepPointIndices = null; // these are symmetric too
@@ -188,9 +187,6 @@ public final class CDbwEvaluator {
    * @return a double
    */
   public double intraClusterDensity() {
-    if (intraClusterDensity != null) {
-      return intraClusterDensity();
-    }
     Iterator<Element> iter = intraClusterDensities().iterateNonZero();
     double avgDensity = 0;
     int count = 0;
@@ -230,9 +226,9 @@ public final class CDbwEvaluator {
         double interDensity = minDistance * density / stdSum;
         map.put(cJ, interDensity);
         if (log.isDebugEnabled()) {
-          log.debug("minDistance[{},{}]={}", new Object[] {cI, cJ, minDistance});
-          log.debug("interDensity[{},{}]={}", new Object[] {cI, cJ, density});
-          log.debug("density[{},{}]={}", new Object[] {cI, cJ, interDensity});
+          log.debug("minDistance[{},{}]={}", cI, cJ, minDistance);
+          log.debug("interDensity[{},{}]={}", cI, cJ, density);
+          log.debug("density[{},{}]={}", cI, cJ, interDensity);
         }
       }
     }

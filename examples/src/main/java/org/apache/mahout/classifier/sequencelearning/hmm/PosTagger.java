@@ -184,7 +184,7 @@ public final class PosTagger {
     double duration = (end - start) / 1000.0;
     log.info("Parsing done in {} seconds!", duration);
     log.info("Read {} lines containing {} sentences with a total of {} distinct words and {} distinct POS tags.",
-             new Object[] {readLines, hiddenSequences.size(), nextWordId - 1, nextTagId - 1});
+             readLines, hiddenSequences.size(), nextWordId - 1, nextTagId - 1);
     start = System.currentTimeMillis();
     taggingModel = HmmTrainer.trainSupervisedSequence(nextTagId, nextWordId,
         hiddenSequences, observedSequences, 0.05);

@@ -25,34 +25,10 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /** <p>Tests {@link TreeClusteringRecommender2}.</p> */
 public final class TreeClusteringRecommender2Test extends TasteTestCase {
-
-  // Ignore this test since there is an infinite loop in buildClusters:
-  // mergeClosestClusters never returns true for this dataset
-  @Ignore 
-  @Test
-  public void testNoRecommendations() throws Exception {
-    DataModel dataModel = getDataModel(
-            new long[] {1, 2, 3},
-            new Double[][] {
-                    {0.1},
-                    {0.2, 0.6},
-                    {0.4, 0.9},
-            });
-    UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
-    ClusterSimilarity clusterSimilarity = new FarthestNeighborClusterSimilarity(similarity);
-    Recommender recommender = new TreeClusteringRecommender2(dataModel, clusterSimilarity, 2);
-    List<RecommendedItem> recommended = recommender.recommend(1, 1);
-    assertNotNull(recommended);
-    assertEquals(0, recommended.size());
-    recommender.refresh(null);
-    assertNotNull(recommended);
-    assertEquals(0, recommended.size());
-  }
 
   @Test
   public void testHowMany() throws Exception {

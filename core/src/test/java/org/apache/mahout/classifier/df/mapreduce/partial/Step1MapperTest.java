@@ -17,7 +17,7 @@
 
 package org.apache.mahout.classifier.df.mapreduce.partial;
 
-import static org.easymock.EasyMock.*;
+import org.easymock.EasyMock;
 import java.util.Random;
 
 import org.apache.hadoop.io.LongWritable;
@@ -124,13 +124,12 @@ public final class Step1MapperTest extends MahoutTestCase {
       // expected number of trees that this mapper will build
       int mapNbTrees = Step1Mapper.nbTrees(NUM_MAPPERS, NUM_TREES, partition);
 
-      Mapper.Context context =
-        createMock(Mapper.Context.class);
+      Mapper.Context context = EasyMock.createMock(Mapper.Context.class);
       Capture<TreeID> capturedKeys = new TreeIDCapture();
-      context.write(capture(capturedKeys), anyObject());
-      expectLastCall().anyTimes();
+      context.write(EasyMock.capture(capturedKeys), EasyMock.anyObject());
+      EasyMock.expectLastCall().anyTimes();
 
-      replay(context);
+      EasyMock.replay(context);
 
       MockStep1Mapper mapper = new MockStep1Mapper(treeBuilder, dataset, seed,
           partition, NUM_MAPPERS, NUM_TREES);
@@ -145,7 +144,7 @@ public final class Step1MapperTest extends MahoutTestCase {
       }
 
       mapper.cleanup(context);
-      verify(context);
+      EasyMock.verify(context);
 
       // make sure the mapper built all its trees
       assertEquals(mapNbTrees, capturedKeys.getValues().size());

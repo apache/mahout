@@ -56,7 +56,7 @@ public final class LLRReducerTest extends MahoutTestCase {
     cl        = new LLCallback() {
       @Override
       public double logLikelihoodRatio(long k11, long k12, long k21, long k22) {
-        log.info("k11:{} k12:{} k21:{} k22:{}", new Object[] {k11, k12, k21, k22});
+        log.info("k11:{} k12:{} k21:{} k22:{}", k11, k12, k21, k22);
         return LogLikelihood.logLikelihoodRatio(k11, k12, k21, k22);
       }
     };

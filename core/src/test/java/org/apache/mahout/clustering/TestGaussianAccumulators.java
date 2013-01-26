@@ -63,7 +63,7 @@ public final class TestGaussianAccumulators extends MahoutTestCase {
     sampleStd = sampleVar.clone();
     sampleStd.assign(new SquareRootFunction());
     log.info("Observing {} samples m=[{}, {}] sd=[{}, {}]",
-             new Object[] { sampleN, sampleMean.get(0), sampleMean.get(1), sampleStd.get(0), sampleStd.get(1) });
+             sampleN, sampleMean.get(0), sampleMean.get(1), sampleStd.get(0), sampleStd.get(1));
   }
 
   /**
@@ -81,7 +81,7 @@ public final class TestGaussianAccumulators extends MahoutTestCase {
    *          double y-value standard deviation of the samples
    */
   private void generate2dSamples(int num, double mx, double my, double sdx, double sdy) {
-    log.info("Generating {} samples m=[{}, {}] sd=[{}, {}]", new Object[] { num, mx, my, sdx, sdy });
+    log.info("Generating {} samples m=[{}, {}] sd=[{}, {}]", num, mx, my, sdx, sdy);
     for (int i = 0; i < num; i++) {
       sampleData.add(new VectorWritable(new DenseVector(new double[] { UncommonDistributions.rNorm(mx, sdx),
           UncommonDistributions.rNorm(my, sdy) })));
@@ -125,13 +125,11 @@ public final class TestGaussianAccumulators extends MahoutTestCase {
     }
     accumulator.compute();
     log.info("OL Observed {} samples m=[{}, {}] sd=[{}, {}]",
-             new Object[] {
-                 accumulator.getN(),
-                 accumulator.getMean().get(0),
-                 accumulator.getMean().get(1),
-                 accumulator.getStd().get(0),
-                 accumulator.getStd().get(1)
-             });
+             accumulator.getN(),
+             accumulator.getMean().get(0),
+             accumulator.getMean().get(1),
+             accumulator.getStd().get(0),
+             accumulator.getStd().get(1));
     assertEquals("OL N", sampleN, accumulator.getN(), EPSILON);
     assertEquals("OL Mean", sampleMean.zSum(), accumulator.getMean().zSum(), EPSILON);
     assertEquals("OL Std", sampleStd.zSum(), accumulator.getStd().zSum(), EPSILON);
@@ -145,13 +143,11 @@ public final class TestGaussianAccumulators extends MahoutTestCase {
     }
     accumulator.compute();
     log.info("RS Observed {} samples m=[{}, {}] sd=[{}, {}]",
-             new Object[] {
-                 (int) accumulator.getN(),
-                 accumulator.getMean().get(0),
-                 accumulator.getMean().get(1),
-                 accumulator.getStd().get(0),
-                 accumulator.getStd().get(1)
-             });
+             (int) accumulator.getN(),
+             accumulator.getMean().get(0),
+             accumulator.getMean().get(1),
+             accumulator.getStd().get(0),
+             accumulator.getStd().get(1));
     assertEquals("OL N", sampleN, accumulator.getN(), EPSILON);
     assertEquals("OL Mean", sampleMean.zSum(), accumulator.getMean().zSum(), EPSILON);
     assertEquals("OL Std", sampleStd.zSum(), accumulator.getStd().zSum(), 0.0001);

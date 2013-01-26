@@ -334,7 +334,7 @@ public class SplitInput extends AbstractJob {
         testSplitSize = Math.round(lineCount * testRandomSelectionPct / 100.0f);
       }
       log.info("{} test split size is {} based on random selection percentage {}",
-              new Object[]{inputFile.getName(), testSplitSize, testRandomSelectionPct});
+               inputFile.getName(), testSplitSize, testRandomSelectionPct);
       long[] ridx = new long[testSplitSize];
       RandomSampler.sample(testSplitSize, lineCount - 1, testSplitSize, 0, ridx, 0, RandomUtils.getRandom());
       randomSel = new BitSet(lineCount);
@@ -345,7 +345,7 @@ public class SplitInput extends AbstractJob {
       if (testSplitPct > 0) { // calculate split size based on percentage
         testSplitSize = Math.round(lineCount * testSplitPct / 100.0f);
         log.info("{} test split size is {} based on percentage {}",
-                new Object[]{inputFile.getName(), testSplitSize, testSplitPct});
+                 inputFile.getName(), testSplitSize, testSplitPct);
       } else {
         log.info("{} test split size is {}", inputFile.getName(), testSplitSize);
       }
@@ -357,7 +357,7 @@ public class SplitInput extends AbstractJob {
           testSplitStart = lineCount - testSplitSize;
         }
         log.info("{} test split start is {} based on split location {}",
-                new Object[]{inputFile.getName(), testSplitStart, splitLocation});
+                 inputFile.getName(), testSplitStart, splitLocation);
       }
 
       if (testSplitStart < 0) {
@@ -366,7 +366,7 @@ public class SplitInput extends AbstractJob {
       } else if (lineCount - testSplitSize < testSplitSize) {
         log.warn("Test set size for {} may be too large, {} is larger than the number of "
                 + "lines remaining in the training set: {}",
-                new Object[]{inputFile, testSplitSize, lineCount - testSplitSize});
+                 inputFile, testSplitSize, lineCount - testSplitSize);
       }
     }
     int trainCount = 0;
@@ -448,7 +448,7 @@ public class SplitInput extends AbstractJob {
       }
     }
     log.info("file: {}, input: {} train: {}, test: {} starting at {}",
-            new Object[]{inputFile.getName(), lineCount, trainCount, testCount, testSplitStart});
+             inputFile.getName(), lineCount, trainCount, testCount, testSplitStart);
 
     // testing;
     if (callback != null) {

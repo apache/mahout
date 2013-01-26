@@ -72,7 +72,7 @@ public final class LSMRTest extends MahoutTestCase {
 //    assertEquals(0, m.times(x1).minus(b).norm(2), 1.0e-2);
     double norm = new SingularValueDecomposition(m).getS().viewDiagonal().norm(2);
     double actual = m.transpose().times(m).times(x1).minus(m.transpose().times(b)).norm(2);
-    System.out.printf("%.4f\n", actual / norm * 1e6);
+    System.out.printf("%.4f\n", actual / norm * 1.0e6);
     assertEquals(0, actual, norm * 1.0e-5);
 
     // and we need to check that the error estimates are pretty good.

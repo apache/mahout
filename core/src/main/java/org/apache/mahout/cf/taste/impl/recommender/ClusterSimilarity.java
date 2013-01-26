@@ -26,8 +26,6 @@ import org.apache.mahout.cf.taste.impl.common.FastIDSet;
  * Returns the "similarity" between two clusters of users, according to some definition of similarity.
  * Subclassses define different notions of similarity.
  * </p>
- * 
- * @see TreeClusteringRecommender
  */
 @Deprecated
 public interface ClusterSimilarity extends Refreshable {

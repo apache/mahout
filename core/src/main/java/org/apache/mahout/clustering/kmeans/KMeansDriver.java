@@ -140,10 +140,9 @@ public class KMeansDriver extends AbstractJob {
     // iterate until the clusters converge
     String delta = Double.toString(convergenceDelta);
     if (log.isInfoEnabled()) {
-      log.info("Input: {} Clusters In: {} Out: {} Distance: {}", new Object[] {input, clustersIn, output,
-          measure.getClass().getName()});
-      log.info("convergence: {} max Iterations: {} num Reduce Tasks: {} Input Vectors: {}", new Object[] {
-          convergenceDelta, maxIterations, VectorWritable.class.getName()});
+      log.info("Input: {} Clusters In: {} Out: {} Distance: {}", input, clustersIn, output,
+               measure.getClass().getName());
+      log.info("convergence: {} max Iterations: {} num Reduce Tasks: {} Input Vectors: {}", convergenceDelta, maxIterations, VectorWritable.class.getName());
     }
     Path clustersOut = buildClusters(conf, input, clustersIn, output, measure, maxIterations, delta, runSequential);
     if (runClustering) {
@@ -253,7 +252,7 @@ public class KMeansDriver extends AbstractJob {
     
     if (log.isInfoEnabled()) {
       log.info("Running Clustering");
-      log.info("Input: {} Clusters In: {} Out: {} Distance: {}", new Object[] {input, clustersIn, output, measure});
+      log.info("Input: {} Clusters In: {} Out: {} Distance: {}", input, clustersIn, output, measure);
     }
     ClusterClassifier.writePolicy(new KMeansClusteringPolicy(), clustersIn);
     ClusterClassificationDriver.run(input, output, new Path(output, PathDirectory.CLUSTERED_POINTS_DIRECTORY),

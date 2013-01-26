@@ -614,7 +614,7 @@ public abstract class AbstractVectorTest<T extends Vector> extends MahoutTestCas
 
   @Test
   public void testSmallDistances() {
-    for (double fuzz : new double[]{1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10}) {
+    for (double fuzz : new double[]{1.0e-5, 1.0e-6, 1.0e-7, 1.0e-8, 1.0e-9, 1.0e-10}) {
       MultiNormal x = new MultiNormal(fuzz, new ConstantVector(0, 20));
       for (int i = 0; i < 10000; i++) {
         final T v1 = vectorToTest(20);

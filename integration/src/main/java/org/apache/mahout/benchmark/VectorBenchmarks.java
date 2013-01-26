@@ -136,8 +136,8 @@ public class VectorBenchmarks {
                           int multiplier) {
     float speed = multiplier * loop * numVectors * sparsity * 1000.0f * 12 / stats.getSumTime();
     float opsPerSec = loop * numVectors * 1000000000.0f / stats.getSumTime();
-    log.info("{} {} \n{} {} \nSpeed: {} UnitsProcessed/sec {} MBytes/sec                                   ",
-      new Object[] {benchmarkName, implName, content, stats.toString(), opsPerSec, speed});
+    log.info("{} {} \n{} {} \nSpeed: {} UnitsProcessed/sec {} MBytes/sec",
+             benchmarkName, implName, content, stats.toString(), opsPerSec, speed);
 
     if (!implType.containsKey(implName)) {
       implType.put(implName, implType.size());

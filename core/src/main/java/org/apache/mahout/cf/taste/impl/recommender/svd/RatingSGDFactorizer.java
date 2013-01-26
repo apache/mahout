@@ -25,14 +25,13 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.common.RandomUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Random;
+import org.apache.mahout.common.RandomWrapper;
 
 /** Matrix factorization with user and item biases for rating prediction, trained with plain vanilla SGD  */
 public class RatingSGDFactorizer extends AbstractFactorizer {
 
+  protected static final int FEATURE_OFFSET = 3;
+  
   /** Multiplicative decay factor for learning_rate */
   protected final double learningRateDecay;
   /** Learning rate (step size) */
@@ -41,7 +40,6 @@ public class RatingSGDFactorizer extends AbstractFactorizer {
   protected final double preventOverfitting;
   /** Number of features used to compute this factorization */
   protected final int numFeatures;
-  protected final int featureOffset = 3;
   /** Number of iterations */
   private final int numIterations;
   /** Standard deviation for random initialization of features */
@@ -70,7 +68,7 @@ public class RatingSGDFactorizer extends AbstractFactorizer {
       double randomNoise, int numIterations, double learningRateDecay) throws TasteException {
     super(dataModel);
     this.dataModel = dataModel;
-    this.numFeatures = numFeatures + featureOffset;
+    this.numFeatures = numFeatures + FEATURE_OFFSET;
     this.numIterations = numIterations;
 
     this.learningRate = learningRate;
@@ -80,7 +78,7 @@ public class RatingSGDFactorizer extends AbstractFactorizer {
   }
 
   protected void prepareTraining() throws TasteException {
-    Random random = RandomUtils.getRandom();
+    RandomWrapper random = RandomUtils.getRandom();
     userVectors = new double[dataModel.getNumUsers()][numFeatures];
     itemVectors = new double[dataModel.getNumItems()][numFeatures];
 
@@ -89,7 +87,7 @@ public class RatingSGDFactorizer extends AbstractFactorizer {
       userVectors[userIndex][0] = globalAverage;
       userVectors[userIndex][USER_BIAS_INDEX] = 0; // will store user bias
       userVectors[userIndex][ITEM_BIAS_INDEX] = 1; // corresponding item feature contains item bias
-      for (int feature = featureOffset; feature < numFeatures; feature++) {
+      for (int feature = FEATURE_OFFSET; feature < numFeatures; feature++) {
         userVectors[userIndex][feature] = random.nextGaussian() * randomNoise;
       }
     }
@@ -97,7 +95,7 @@ public class RatingSGDFactorizer extends AbstractFactorizer {
       itemVectors[itemIndex][0] = 1; // corresponding user feature contains global average
       itemVectors[itemIndex][USER_BIAS_INDEX] = 1; // corresponding user feature contains user bias
       itemVectors[itemIndex][ITEM_BIAS_INDEX] = 0; // will store item bias
-      for (int feature = featureOffset; feature < numFeatures; feature++) {
+      for (int feature = FEATURE_OFFSET; feature < numFeatures; feature++) {
         itemVectors[itemIndex][feature] = random.nextGaussian() * randomNoise;
       }
     }
@@ -135,7 +133,7 @@ public class RatingSGDFactorizer extends AbstractFactorizer {
   }
 
   protected void shufflePreferences() {
-    Random random = RandomUtils.getRandom();
+    RandomWrapper random = RandomUtils.getRandom();
     /* Durstenfeld shuffle */
     for (int currentPos = cachedUserIDs.length - 1; currentPos > 0; currentPos--) {
       int swapPos = random.nextInt(currentPos + 1);
@@ -183,8 +181,7 @@ public class RatingSGDFactorizer extends AbstractFactorizer {
     return average.getAverage();
   }
 
-  protected void updateParameters(long userID, long itemID, float rating, double currentLearningRate)
-      throws TasteException {
+  protected void updateParameters(long userID, long itemID, float rating, double currentLearningRate) {
     int userIndex = userIndex(userID);
     int itemIndex = itemIndex(itemID);
 
@@ -202,7 +199,7 @@ public class RatingSGDFactorizer extends AbstractFactorizer {
         biasLearningRate * currentLearningRate * (err - biasReg * preventOverfitting * itemVector[ITEM_BIAS_INDEX]);
 
     // adjust features
-    for (int feature = featureOffset; feature < numFeatures; feature++) {
+    for (int feature = FEATURE_OFFSET; feature < numFeatures; feature++) {
       double userFeature = userVector[feature];
       double itemFeature = itemVector[feature];
 

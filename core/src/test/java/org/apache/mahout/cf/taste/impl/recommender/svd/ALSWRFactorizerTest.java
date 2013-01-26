@@ -193,7 +193,7 @@ public class ALSWRFactorizerTest extends TasteTestCase {
           double err = confidence * (pref - estimate) * (pref - estimate);
           avg.addDatum(err);
           log.info("Comparing preference of user [{}] towards item [{}], was [{}] with confidence [{}] "
-              + "estimate is [{}]", new Object[] { slice.index(), e.index(), pref, confidence, estimate });
+              + "estimate is [{}]", slice.index(), e.index(), pref, confidence, estimate);
         }
       }
     }

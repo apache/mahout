@@ -239,7 +239,7 @@ public class CanopyDriver extends AbstractJob {
       int clusterFilter, boolean runSequential) throws IOException,
       InterruptedException, ClassNotFoundException {
     log.info("Build Clusters Input: {} Out: {} Measure: {} t1: {} t2: {}",
-        new Object[] { input, output, measure, t1, t2 });
+             input, output, measure, t1, t2);
     if (runSequential) {
       return buildClustersSeq(input, output, measure, t1, t2, clusterFilter);
     } else {
@@ -289,10 +289,10 @@ public class CanopyDriver extends AbstractJob {
         canopy.computeParameters();
         if (log.isDebugEnabled()) {
           log.debug("Writing Canopy:{} center:{} numPoints:{} radius:{}",
-              new Object[] { canopy.getIdentifier(),
-                  AbstractCluster.formatVector(canopy.getCenter(), null),
-                  canopy.getNumObservations(),
-                  AbstractCluster.formatVector(canopy.getRadius(), null) });
+                    canopy.getIdentifier(),
+                    AbstractCluster.formatVector(canopy.getCenter(), null),
+                    canopy.getNumObservations(),
+                    AbstractCluster.formatVector(canopy.getRadius(), null));
         }
         if (canopy.getNumObservations() > clusterFilter) {
         	clusterWritable.setValue(canopy);

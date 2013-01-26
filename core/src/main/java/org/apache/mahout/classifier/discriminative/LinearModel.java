@@ -59,7 +59,7 @@ public class LinearModel {
     double product = this.hyperplane.dot(dataPoint);
     if (log.isDebugEnabled()) {
       log.debug("model: {} product: {} Bias: {} threshold: {}",
-                new Object[] {this, product, bias, threshold});
+                this, product, bias, threshold);
     }
     return product + this.bias > this.threshold;
   }

@@ -330,7 +330,7 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
     }
 
     double r = d1 + d2 - 2 * dot;
-    if (r > 1e-3 * (d1 + d2)) {
+    if (r > 1.0e-3 * (d1 + d2)) {
       return Math.max(0, r);
     } else {
       if (this.isSequentialAccess()) {

@@ -29,7 +29,6 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.model.DataModel;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Random;
 
 /**
@@ -65,20 +64,20 @@ public final class SVDPlusPlusFactorizer extends RatingSGDFactorizer {
 
     p = new double[dataModel.getNumUsers()][numFeatures];
     for (int i = 0; i < p.length; i++) {
-      for (int feature = 0; feature < featureOffset; feature++) {
+      for (int feature = 0; feature < FEATURE_OFFSET; feature++) {
         p[i][feature] = 0;
       }
-      for (int feature = featureOffset; feature < numFeatures; feature++) {
+      for (int feature = FEATURE_OFFSET; feature < numFeatures; feature++) {
         p[i][feature] = random.nextGaussian() * randomNoise;
       }
     }
 
     y = new double[dataModel.getNumItems()][numFeatures];
     for (int i = 0; i < y.length; i++) {
-      for (int feature = 0; feature < featureOffset; feature++) {
+      for (int feature = 0; feature < FEATURE_OFFSET; feature++) {
         y[i][feature] = 0;
       }
-      for (int feature = featureOffset; feature < numFeatures; feature++) {
+      for (int feature = FEATURE_OFFSET; feature < numFeatures; feature++) {
         y[i][feature] = random.nextGaussian() * randomNoise;
       }
     }
@@ -86,20 +85,16 @@ public final class SVDPlusPlusFactorizer extends RatingSGDFactorizer {
     /* get internal item IDs which we will need several times */
     itemsByUser = Maps.newHashMap();
     LongPrimitiveIterator userIDs = dataModel.getUserIDs();
-    try {
-      while (true) {
-        long userId = userIDs.nextLong();
-        int userIndex = userIndex(userId);
-        FastIDSet itemIDsFromUser = dataModel.getItemIDsFromUser(userId);
-        List<Integer> itemIndexes = Lists.newArrayListWithCapacity(itemIDsFromUser.size());
-        itemsByUser.put(userIndex, itemIndexes);
-        for (long itemID2 : itemIDsFromUser) {
-          int i2 = itemIndex(itemID2);
-          itemIndexes.add(i2);
-        }
+    while (userIDs.hasNext()) {
+      long userId = userIDs.nextLong();
+      int userIndex = userIndex(userId);
+      FastIDSet itemIDsFromUser = dataModel.getItemIDsFromUser(userId);
+      List<Integer> itemIndexes = Lists.newArrayListWithCapacity(itemIDsFromUser.size());
+      itemsByUser.put(userIndex, itemIndexes);
+      for (long itemID2 : itemIDsFromUser) {
+        int i2 = itemIndex(itemID2);
+        itemIndexes.add(i2);
       }
-    } catch (NoSuchElementException e) {
-      // do nothing
     }
   }
 
@@ -111,7 +106,7 @@ public final class SVDPlusPlusFactorizer extends RatingSGDFactorizer {
 
     for (int userIndex = 0; userIndex < userVectors.length; userIndex++) {
       for (int itemIndex : itemsByUser.get(userIndex)) {
-        for (int feature = featureOffset; feature < numFeatures; feature++) {
+        for (int feature = FEATURE_OFFSET; feature < numFeatures; feature++) {
           userVectors[userIndex][feature] += y[itemIndex][feature];
         }
       }
@@ -127,8 +122,7 @@ public final class SVDPlusPlusFactorizer extends RatingSGDFactorizer {
 
 
   @Override
-  protected void updateParameters(long userID, long itemID, float rating, double currentLearningRate)
-      throws TasteException {
+  protected void updateParameters(long userID, long itemID, float rating, double currentLearningRate) {
     int userIndex = userIndex(userID);
     int itemIndex = itemIndex(itemID);
 
@@ -137,13 +131,14 @@ public final class SVDPlusPlusFactorizer extends RatingSGDFactorizer {
 
     double[] pPlusY = new double[numFeatures];
     for (int i2 : itemsByUser.get(userIndex)) {
-        for (int f = featureOffset; f < numFeatures; f++) {
+        for (int f = FEATURE_OFFSET; f < numFeatures; f++) {
           pPlusY[f] += y[i2][f];
         }
     }
     double denominator = Math.sqrt(itemsByUser.size());
-    for (int feature = 0; feature < pPlusY.length; feature++)
+    for (int feature = 0; feature < pPlusY.length; feature++) {
       pPlusY[feature] = (float) (pPlusY[feature] / denominator + p[userIndex][feature]);
+    }
 
     double prediction = predictRating(pPlusY, itemIndex);
     double err = rating - prediction;
@@ -158,7 +153,7 @@ public final class SVDPlusPlusFactorizer extends RatingSGDFactorizer {
         biasLearningRate * currentLearningRate * (err - biasReg * preventOverfitting * itemVector[ITEM_BIAS_INDEX]);
 
     // adjust features
-    for (int feature = featureOffset; feature < numFeatures; feature++) {
+    for (int feature = FEATURE_OFFSET; feature < numFeatures; feature++) {
       double pF = userVector[feature];
       double iF = itemVector[feature];
 

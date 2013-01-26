@@ -51,7 +51,7 @@ public class AffinityMatrixInputReducer
       out.setQuick(element.getCol(), element.getVal());
       if (log.isDebugEnabled()) {
         log.debug("(DEBUG - REDUCE) Row[{}], Column[{}], Value[{}]",
-                  new Object[] {row.get(), element.getCol(), element.getVal()});
+                  row.get(), element.getCol(), element.getVal());
       }
     }
     SequentialAccessSparseVector output = new SequentialAccessSparseVector(out);

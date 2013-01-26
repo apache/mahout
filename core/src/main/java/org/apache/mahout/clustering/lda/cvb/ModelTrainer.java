@@ -157,7 +157,7 @@ public class ModelTrainer {
           batchTrain(batch, true, numDocTopicIters);
           long time = System.nanoTime();
           log.debug("trained {} docs with {} tokens, start time {}, end time {}",
-              new Object[] {numTrainThreads, numTokensInBatch, batchStart, time});
+                    numTrainThreads, numTokensInBatch, batchStart, time);
           batchStart = time;
           numTokensInBatch = 0;
         }

@@ -132,7 +132,7 @@ public class LLRReducer extends Reducer<Gram, Gram, Text, DoubleWritable> {
     this.emitUnigrams = conf.getBoolean(CollocDriver.EMIT_UNIGRAMS, CollocDriver.DEFAULT_EMIT_UNIGRAMS);
 
     log.info("NGram Total: {}, Min LLR value: {}, Emit Unigrams: {}",
-             new Object[] {ngramTotal, minLLRValue, emitUnigrams});
+             ngramTotal, minLLRValue, emitUnigrams);
 
     if (ngramTotal == -1) {
       throw new IllegalStateException("No NGRAM_TOTAL available in job config");

@@ -83,7 +83,7 @@ public class RegressionResultAnalyzerTest extends MahoutTestCase {
     RegressionResultAnalyzer analyzer = new RegressionResultAnalyzer();
     analyzer.setInstances(results);
     String analysis = analyzer.toString();
-    assertArrayEquals(parseAnalysis(analysis), new double[] {1.0, 1.0, 1.0}, 0);
+    assertArrayEquals(new double[]{1.0, 1.0, 1.0}, parseAnalysis(analysis), 0);
 
     for (int i = 0; i < results.length; i++) {
       results[i][1] = Math.sqrt(i);
@@ -91,7 +91,7 @@ public class RegressionResultAnalyzerTest extends MahoutTestCase {
     analyzer = new RegressionResultAnalyzer();
     analyzer.setInstances(results);
     analysis = analyzer.toString();
-    assertArrayEquals(parseAnalysis(analysis), new double[] {0.9573, 2.5694, 3.2848}, 0);
+    assertArrayEquals(new double[]{0.9573, 2.5694, 3.2848}, parseAnalysis(analysis), 0);
 
     for (int i = 0; i < results.length; i++) {
       results[i][0] = results.length - i;
@@ -99,7 +99,7 @@ public class RegressionResultAnalyzerTest extends MahoutTestCase {
     analyzer = new RegressionResultAnalyzer();
     analyzer.setInstances(results);
     analysis = analyzer.toString();
-    assertArrayEquals(parseAnalysis(analysis), new double[] {-0.9573, 4.1351, 5.1573}, 0);
+    assertArrayEquals(new double[]{-0.9573, 4.1351, 5.1573}, parseAnalysis(analysis), 0);
   }
 
   @Test
@@ -114,7 +114,7 @@ public class RegressionResultAnalyzerTest extends MahoutTestCase {
     analyzer.setInstances(results);
     String analysis = analyzer.toString();
     assertNull(parseAnalysis(analysis));
-    assertArrayEquals(parseAnalysisCount(analysis), new int[] {0, 10, 10});
+    assertArrayEquals(new int[]{0, 10, 10}, parseAnalysisCount(analysis));
 
     for (int i = 0; i < results.length - 3; i++) {
       results[i][1] = Math.sqrt(i);
@@ -122,7 +122,7 @@ public class RegressionResultAnalyzerTest extends MahoutTestCase {
     analyzer = new RegressionResultAnalyzer();
     analyzer.setInstances(results);
     analysis = analyzer.toString();
-    assertArrayEquals(parseAnalysis(analysis), new double[] {0.9552, 1.4526, 1.9345}, 0);
-    assertArrayEquals(parseAnalysisCount(analysis), new int[] {7, 3, 10});
+    assertArrayEquals(new double[]{0.9552, 1.4526, 1.9345}, parseAnalysis(analysis), 0);
+    assertArrayEquals(new int[]{7, 3, 10}, parseAnalysisCount(analysis));
   }
 }

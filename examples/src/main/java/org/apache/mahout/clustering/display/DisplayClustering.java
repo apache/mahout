@@ -307,7 +307,7 @@ public class DisplayClustering extends Frame {
   protected static void generateSamples(int num, double mx, double my, double sd) {
     double[] params = {mx, my, sd, sd};
     SAMPLE_PARAMS.add(new DenseVector(params));
-    log.info("Generating {} samples m=[{}, {}] sd={}", new Object[] {num, mx, my, sd});
+    log.info("Generating {} samples m=[{}, {}] sd={}", num, mx, my, sd);
     for (int i = 0; i < num; i++) {
       SAMPLE_DATA.add(new VectorWritable(new DenseVector(new double[] {UncommonDistributions.rNorm(mx, sd),
           UncommonDistributions.rNorm(my, sd)})));
@@ -336,8 +336,8 @@ public class DisplayClustering extends Frame {
       Cluster cluster = value.getValue();
       log.info(
           "Reading Cluster:{} center:{} numPoints:{} radius:{}",
-          new Object[] {cluster.getId(), AbstractCluster.formatVector(cluster.getCenter(), null),
-              cluster.getNumObservations(), AbstractCluster.formatVector(cluster.getRadius(), null)});
+          cluster.getId(), AbstractCluster.formatVector(cluster.getCenter(), null),
+          cluster.getNumObservations(), AbstractCluster.formatVector(cluster.getRadius(), null));
       clusters.add(cluster);
     }
     return clusters;
@@ -369,7 +369,7 @@ public class DisplayClustering extends Frame {
   protected static void generate2dSamples(int num, double mx, double my, double sdx, double sdy) {
     double[] params = {mx, my, sdx, sdy};
     SAMPLE_PARAMS.add(new DenseVector(params));
-    log.info("Generating {} samples m=[{}, {}] sd=[{}, {}]", new Object[] {num, mx, my, sdx, sdy});
+    log.info("Generating {} samples m=[{}, {}] sd=[{}, {}]", num, mx, my, sdx, sdy);
     for (int i = 0; i < num; i++) {
       SAMPLE_DATA.add(new VectorWritable(new DenseVector(new double[] {UncommonDistributions.rNorm(mx, sdx),
           UncommonDistributions.rNorm(my, sdy)})));
