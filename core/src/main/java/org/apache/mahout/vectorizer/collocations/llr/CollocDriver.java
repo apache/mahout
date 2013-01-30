@@ -33,11 +33,12 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
-import org.apache.mahout.vectorizer.DefaultAnalyzer;
+import org.apache.mahout.common.lucene.AnalyzerUtils;
 import org.apache.mahout.vectorizer.DocumentProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,14 +131,13 @@ public final class CollocDriver extends AbstractJob {
 
     if (argMap.containsKey("preprocess")) {
       log.info("Input will be preprocessed");
-
-      Class<? extends Analyzer> analyzerClass = DefaultAnalyzer.class;
+      Class<? extends Analyzer> analyzerClass = StandardAnalyzer.class;
       if (getOption("analyzerName") != null) {
         String className = getOption("analyzerName");
         analyzerClass = Class.forName(className).asSubclass(Analyzer.class);
         // try instantiating it, b/c there isn't any point in setting it if
         // you can't instantiate it
-        ClassUtils.instantiateAs(analyzerClass, Analyzer.class);
+        AnalyzerUtils.createAnalyzer(analyzerClass);
       }
 
       Path tokenizedPath = new Path(output, DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER);

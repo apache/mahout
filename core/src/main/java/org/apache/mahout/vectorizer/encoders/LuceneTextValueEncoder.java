@@ -22,7 +22,6 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.mahout.common.lucene.TokenStreamIterator;
 
-
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.CharBuffer;
@@ -30,6 +29,7 @@ import java.util.Iterator;
 
 /**
  * Encodes text using a lucene style tokenizer.
+ *
  * @see TextValueEncoder
  */
 public class LuceneTextValueEncoder extends TextValueEncoder {
@@ -50,9 +50,9 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
   @Override
   protected Iterable<String> tokenize(CharSequence originalForm) {
     try {
-      TokenStream ts = analyzer.reusableTokenStream(getName(), new CharSequenceReader(originalForm));
+      TokenStream ts = analyzer.tokenStream(getName(), new CharSequenceReader(originalForm));
       ts.addAttribute(CharTermAttribute.class);
-      return new LuceneTokenIterable(ts);
+      return new LuceneTokenIterable(ts, false);
     } catch (IOException ex) {
       throw new IllegalStateException(ex);
     }
@@ -95,17 +95,22 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
     }
 
     @Override
-    public void close()  {
+    public void close() {
       // do nothing
     }
   }
-
+  //GSI: TODO: we really need a way to make sure we call the TokenStream workflow here (i.e. end and close when we are done)
   private static final class LuceneTokenIterable implements Iterable<String> {
     private boolean firstTime = true;
     private final TokenStream tokenStream;
 
     private LuceneTokenIterable(TokenStream ts) {
       this.tokenStream = ts;
+    }
+
+    private LuceneTokenIterable(TokenStream ts, boolean firstTime) {
+      this.tokenStream = ts;
+      this.firstTime = firstTime;
     }
 
     /**

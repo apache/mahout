@@ -46,7 +46,6 @@ import java.util.Locale;
 import java.util.Random;
 
 public final class NewsgroupHelper {
-  private static final Version LUCENE_VERSION = Version.LUCENE_36;
   
   private static final SimpleDateFormat[] DATE_FORMATS = {
           new SimpleDateFormat("", Locale.ENGLISH),
@@ -60,7 +59,7 @@ public final class NewsgroupHelper {
   private static final long WEEK = 7 * 24 * 3600;
   
   private final Random rand = RandomUtils.getRandom();  
-  private final Analyzer analyzer = new StandardAnalyzer(LUCENE_VERSION);
+  private final Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_41);
   private final FeatureVectorEncoder encoder = new StaticWordValueEncoder("body");
   private final FeatureVectorEncoder bias = new ConstantValueEncoder("Intercept");
   
@@ -118,7 +117,7 @@ public final class NewsgroupHelper {
                                  Collection<String> words,
                                  Reader in,
                                  Multiset<String> overallCounts) throws IOException {
-    TokenStream ts = analyzer.reusableTokenStream("text", in);
+    TokenStream ts = analyzer.tokenStream("text", in);
     ts.addAttribute(CharTermAttribute.class);
     ts.reset();
     while (ts.incrementToken()) {
@@ -126,5 +125,7 @@ public final class NewsgroupHelper {
       words.add(s);
     }
     overallCounts.addAll(words);
+    ts.end();
+    Closeables.closeQuietly(ts);
   }
 }

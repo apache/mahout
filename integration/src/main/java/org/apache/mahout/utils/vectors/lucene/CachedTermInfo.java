@@ -17,58 +17,54 @@
 
 package org.apache.mahout.utils.vectors.lucene;
 
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.MultiFields;
+import org.apache.lucene.index.Terms;
+import org.apache.lucene.index.TermsEnum;
+import org.apache.lucene.util.BytesRef;
+import org.apache.mahout.utils.vectors.TermEntry;
+import org.apache.mahout.utils.vectors.TermInfo;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import com.google.common.io.Closeables;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.index.TermEnum;
-import org.apache.mahout.utils.vectors.TermEntry;
-import org.apache.mahout.utils.vectors.TermInfo;
 
 
 /**
  * Caches TermEntries from a single field.  Materializes all values in the TermEnum to memory (much like FieldCache)
  */
 public class CachedTermInfo implements TermInfo {
-  
+
   private final Map<String, TermEntry> termEntries;
   private final String field;
-  
+
   public CachedTermInfo(IndexReader reader, String field, int minDf, int maxDfPercent) throws IOException {
     this.field = field;
-    TermEnum te = reader.terms(new Term(field, ""));
-    try {
-      int numDocs = reader.numDocs();
-      double percent = numDocs * maxDfPercent / 100.0;
-      //Should we use a linked hash map so that we know terms are in order?
-      termEntries = new LinkedHashMap<String, TermEntry>();
-      int count = 0;
-      do {
-        Term term = te.term();
-        if (term == null || !term.field().equals(field)) {
-          break;
-        }
-        int df = te.docFreq();
-        if (df < minDf || df > percent) {
-          continue;
-        }
-        TermEntry entry = new TermEntry(term.text(), count++, df);
-        termEntries.put(entry.getTerm(), entry);
-      } while (te.next());
-    } finally {
-      Closeables.closeQuietly(te);
+    Terms t = MultiFields.getTerms(reader, field);
+    TermsEnum te = t.iterator(null);
+
+    int numDocs = reader.numDocs();
+    double percent = numDocs * maxDfPercent / 100.0;
+    //Should we use a linked hash map so that we know terms are in order?
+    termEntries = new LinkedHashMap<String, TermEntry>();
+    int count = 0;
+    BytesRef text;
+    while ((text = te.next()) != null) {
+      int df = te.docFreq();
+      if (df < minDf || df > percent) {
+        continue;
+      }
+      TermEntry entry = new TermEntry(text.utf8ToString(), count++, df);
+      termEntries.put(entry.getTerm(), entry);
     }
   }
-  
+
   @Override
   public int totalTerms(String field) {
     return termEntries.size();
   }
-  
+
   @Override
   public TermEntry getTermEntry(String field, String term) {
     if (!this.field.equals(field)) {
@@ -76,7 +72,7 @@ public class CachedTermInfo implements TermInfo {
     }
     return termEntries.get(term);
   }
-  
+
   @Override
   public Iterator<TermEntry> getAllEntries() {
     return termEntries.values().iterator();

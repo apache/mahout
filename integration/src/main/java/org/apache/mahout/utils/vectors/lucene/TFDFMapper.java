@@ -17,8 +17,7 @@
 
 package org.apache.mahout.utils.vectors.lucene;
 
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.TermVectorOffsetInfo;
+import org.apache.lucene.util.BytesRef;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.utils.vectors.TermEntry;
@@ -29,50 +28,37 @@ import org.apache.mahout.vectorizer.Weight;
 /**
  * Not thread-safe
  */
-public class TFDFMapper extends VectorMapper {
+public class TFDFMapper  {
 
   private Vector vector;
   
   private final Weight weight;
-  private int numTerms;
+  private long numTerms;
   private final TermInfo termInfo;
   private String field;
   private final int numDocs;
   
-  public TFDFMapper(IndexReader reader, Weight weight, TermInfo termInfo) {
+  public TFDFMapper(int numDocs, Weight weight, TermInfo termInfo) {
     this.weight = weight;
     this.termInfo = termInfo;
-    this.numDocs = reader.numDocs();
+    this.numDocs = numDocs;
   }
-  
-  @Override
-  public Vector getVector() {
-    return vector;
-  }
-  
-  @Override
-  public void setExpectations(String field, int numTerms, boolean storeOffsets, boolean storePositions) {
+
+  public void setExpectations(String field, long numTerms) {
     this.field = field;
     vector = new RandomAccessSparseVector(termInfo.totalTerms(field));
     this.numTerms = numTerms;
   }
   
-  @Override
-  public void map(String term, int frequency, TermVectorOffsetInfo[] offsets, int[] positions) {
-    TermEntry entry = termInfo.getTermEntry(field, term);
+  public void map(BytesRef term, int frequency) {
+    TermEntry entry = termInfo.getTermEntry(field, term.utf8ToString() );
     if (entry != null) {
-      vector.setQuick(entry.getTermIdx(), weight.calculate(frequency, entry.getDocFreq(), numTerms, numDocs));
+      vector.setQuick(entry.getTermIdx(), weight.calculate(frequency, entry.getDocFreq(), (int)numTerms, numDocs));
     }
   }
   
-  @Override
-  public boolean isIgnoringPositions() {
-    return true;
-  }
-  
-  @Override
-  public boolean isIgnoringOffsets() {
-    return true;
+  public Vector getVector() {
+      return this.vector;
   }
   
 }

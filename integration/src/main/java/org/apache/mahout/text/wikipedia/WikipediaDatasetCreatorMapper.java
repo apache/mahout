@@ -25,6 +25,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.google.common.io.Closeables;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DefaultStringifier;
@@ -67,7 +68,7 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
     String catMatch = findMatchingCategory(document);
     if (!"Unknown".equals(catMatch)) {
       StringBuilder contents = new StringBuilder(1000);
-      TokenStream stream = analyzer.reusableTokenStream(catMatch, new StringReader(document));
+      TokenStream stream = analyzer.tokenStream(catMatch, new StringReader(document));
       CharTermAttribute termAtt = stream.addAttribute(CharTermAttribute.class);
       stream.reset();
       while (stream.incrementToken()) {
@@ -76,6 +77,8 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
       context.write(
           new Text(SPACE_NON_ALPHA_PATTERN.matcher(catMatch).replaceAll("_")),
           new Text(contents.toString()));
+      stream.end();
+      Closeables.closeQuietly(stream);
     }
   }
 

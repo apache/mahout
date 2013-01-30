@@ -73,6 +73,7 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
 
     if (maxNGramSize >= 2) {
       ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.getEntries().iterator()), maxNGramSize);
+      sf.reset();
       try {
         do {
           String term = sf.getAttribute(CharTermAttribute.class).toString();

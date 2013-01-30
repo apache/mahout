@@ -20,10 +20,11 @@ package org.apache.mahout.common.commandline;
 import org.apache.commons.cli2.Option;
 import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.apache.mahout.common.kernel.TriangularKernelProfile;
-import org.apache.mahout.vectorizer.DefaultAnalyzer;
+
 
 public final class DefaultOptionCreator {
   
@@ -338,7 +339,7 @@ public static DefaultOptionBuilder clusterFilterOption() {
         .withDescription(
             "If present, the name of a Lucene analyzer class to use")
         .withArgument(
-                new ArgumentBuilder().withName(ANALYZER_NAME_OPTION).withDefault(DefaultAnalyzer.class.getName())
+                new ArgumentBuilder().withName(ANALYZER_NAME_OPTION).withDefault(StandardAnalyzer.class.getName())
                 .withMinimum(1).withMaximum(1).create()
         )
         .withShortName("an");

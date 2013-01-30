@@ -17,6 +17,7 @@
 
 package org.apache.mahout.utils.regex;
 
+import com.google.common.io.Closeables;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -33,7 +34,7 @@ public class AnalyzerTransformer implements RegexTransformer {
   private String fieldName = "text";
 
   public AnalyzerTransformer() {
-    this(new StandardAnalyzer(Version.LUCENE_34), "text");
+    this(new StandardAnalyzer(Version.LUCENE_41), "text");
   }
 
   public AnalyzerTransformer(Analyzer analyzer) {
@@ -48,15 +49,20 @@ public class AnalyzerTransformer implements RegexTransformer {
   @Override
   public String transformMatch(String match) {
     StringBuilder result = new StringBuilder();
+    TokenStream ts = null;
     try {
-      TokenStream ts = analyzer.reusableTokenStream(fieldName, new StringReader(match));
+      ts = analyzer.tokenStream(fieldName, new StringReader(match));
       ts.addAttribute(CharTermAttribute.class);
+      ts.reset();
       TokenStreamIterator iter = new TokenStreamIterator(ts);
       while (iter.hasNext()) {
         result.append(iter.next()).append(' ');
       }
+      ts.end();
     } catch (IOException e) {
       throw new IllegalStateException(e);
+    } finally {
+      Closeables.closeQuietly(ts);
     }
     return result.toString();
   }

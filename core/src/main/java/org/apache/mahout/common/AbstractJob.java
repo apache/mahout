@@ -52,12 +52,14 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.common.lucene.AnalyzerUtils;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.vectorizer.DefaultAnalyzer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.util.Version;
 
 /**
  * <p>Superclass of many Mahout Hadoop "jobs". A job drives configuration and launch of one or
@@ -589,13 +591,15 @@ public abstract class AbstractJob extends Configured implements Tool {
   }
 
   protected Class<? extends Analyzer> getAnalyzerClassFromOption() throws ClassNotFoundException {
-    Class<? extends Analyzer> analyzerClass = DefaultAnalyzer.class;
+    Class<? extends Analyzer> analyzerClass = StandardAnalyzer.class;
     if (hasOption(DefaultOptionCreator.ANALYZER_NAME_OPTION)) {
       String className = getOption(DefaultOptionCreator.ANALYZER_NAME_OPTION);
       analyzerClass = Class.forName(className).asSubclass(Analyzer.class);
       // try instantiating it, b/c there isn't any point in setting it if
       // you can't instantiate it
-      ClassUtils.instantiateAs(analyzerClass, Analyzer.class);
+      //ClassUtils.instantiateAs(analyzerClass, Analyzer.class);
+      AnalyzerUtils.createAnalyzer(analyzerClass);
+
     }
     return analyzerClass;
   }

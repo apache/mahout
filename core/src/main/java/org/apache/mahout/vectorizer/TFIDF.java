@@ -17,22 +17,24 @@
 
 package org.apache.mahout.vectorizer;
 
-import org.apache.lucene.search.DefaultSimilarity;
-import org.apache.lucene.search.Similarity;
-
+import org.apache.lucene.search.similarities.DefaultSimilarity;
+//TODO: add a new class that supports arbitrary Lucene similarity implementations
 public class TFIDF implements Weight {
-  
-  private Similarity sim = new DefaultSimilarity();
-  
-  public TFIDF() { }
-  
-  public TFIDF(Similarity sim) {
-    this.sim = sim;
+
+  private DefaultSimilarity sim = new DefaultSimilarity();
+
+  public TFIDF() {
   }
   
+/*  public TFIDF(Similarity sim) {
+    this.sim = sim;
+  }
+  */
+
+
   @Override
   public double calculate(int tf, int df, int length, int numDocs) {
-    // ignore length
+    // ignore length    
     return sim.tf(tf) * sim.idf(df, numDocs);
   }
 }

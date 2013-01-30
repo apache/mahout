@@ -53,12 +53,15 @@ public class MailArchivesClusteringAnalyzerTest extends MahoutTestCase {
     };
         
     TokenStream tokenStream = analyzer.tokenStream("test", reader);
-    assertNotNull(tokenStream);    
+    assertNotNull(tokenStream);
+    tokenStream.reset();
     CharTermAttribute termAtt = tokenStream.addAttribute(CharTermAttribute.class);
     int e = 0;
     while (tokenStream.incrementToken() && e < expectedTokens.length) {
       assertEquals(expectedTokens[e++], termAtt.toString());
     }
     assertEquals(e, expectedTokens.length);
+    tokenStream.end();
+    tokenStream.close();
   }
 }

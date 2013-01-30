@@ -18,7 +18,7 @@
 package org.apache.mahout.vectorizer.encoders;
 
 import com.google.common.collect.ImmutableMap;
-import org.apache.lucene.analysis.WhitespaceAnalyzer;
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.util.Version;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
@@ -70,7 +70,7 @@ public final class TextValueEncoderTest extends MahoutTestCase {
   @Test
   public void testLuceneEncoding() throws Exception {
     LuceneTextValueEncoder enc = new LuceneTextValueEncoder("text");
-    enc.setAnalyzer(new WhitespaceAnalyzer(Version.LUCENE_34));
+    enc.setAnalyzer(new WhitespaceAnalyzer(Version.LUCENE_41));
     Vector v1 = new DenseVector(200);
     enc.addToVector("test1 and more", v1);
     enc.flush(1, v1);

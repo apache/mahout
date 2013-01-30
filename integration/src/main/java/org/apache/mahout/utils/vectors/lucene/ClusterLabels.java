@@ -29,9 +29,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.lucene.util.BytesRef;
 import com.google.common.base.Charsets;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
+import java.util.Set;
+import java.util.TreeSet;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -41,14 +44,17 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.fs.Path;
-import org.apache.lucene.document.FieldSelector;
-import org.apache.lucene.document.SetBasedFieldSelector;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.index.TermDocs;
-import org.apache.lucene.index.TermEnum;
+import org.apache.lucene.index.Terms;
+import org.apache.lucene.index.TermsEnum;
+import org.apache.lucene.index.DocsEnum;
+import org.apache.lucene.index.MultiFields;
+import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.OpenBitSet;
 import org.apache.mahout.clustering.classify.WeightedVectorWritable;
 import org.apache.mahout.common.CommandLineUtil;
@@ -95,8 +101,6 @@ public class ClusterLabels {
     this.contentField = contentField;
     this.minNumIds = minNumIds;
     this.maxLabels = maxLabels;
-    this.minNumIds = DEFAULT_MIN_IDS;
-    this.maxLabels = DEFAULT_MAX_LABELS;
     ClusterDumper clusterDumper = new ClusterDumper(seqFileDir, pointsDir);
     this.clusterIdToPoints = clusterDumper.getClusterIdToPoints();
   }
@@ -153,8 +157,9 @@ public class ClusterLabels {
 
     log.info("Processing Cluster {} with {} documents", integer, wvws.size());
     Directory dir = FSDirectory.open(new File(this.indexDir));
-    IndexReader reader = IndexReader.open(dir, false);
-
+    IndexReader reader = DirectoryReader.open(dir);
+    
+    
     log.info("# of documents in the index {}", reader.numDocs());
 
     Collection<String> idSet = new HashSet<String>();
@@ -180,37 +185,32 @@ public class ClusterLabels {
      * frequencies in each document. The number of results of this call will be the in-cluster document
      * frequency.
      */
-
-    TermEnum te = reader.terms(new Term(contentField, ""));
+    Terms t = MultiFields.getTerms(reader, contentField);
+    TermsEnum te = t.iterator(null);
     Map<String, TermEntry> termEntryMap = new LinkedHashMap<String, TermEntry>();
+    Bits liveDocs = MultiFields.getLiveDocs(reader); //WARNING: returns null if there are no deletions
 
-    try {
-      int count = 0;
 
-      do {
-        Term term = te.term();
-        if (term == null || !term.field().equals(contentField)) {
-          break;
+    int count = 0;
+    BytesRef term;
+    while ((term = te.next()) != null) {
+      OpenBitSet termBitset = new OpenBitSet(reader.maxDoc());
+      DocsEnum docsEnum = MultiFields.getTermDocsEnum(reader, null, contentField, term);
+      int docID = 0;
+      while ((docID = docsEnum.nextDoc()) != DocIdSetIterator.NO_MORE_DOCS) {
+        if (liveDocs != null && !liveDocs.get(docID)) { //check to see if we don't have an deletions (null) or if document is live
+          // document is deleted...
+          termBitset.set(docsEnum.docID());
         }
-        OpenBitSet termBitset = new OpenBitSet(reader.maxDoc());
+      }
+      // AND the term's bitset with cluster doc bitset to get the term's in-cluster frequency.
+      // This modifies the termBitset, but that's fine as we are not using it anywhere else.
+      termBitset.and(clusterDocBitset);
+      int inclusterDF = (int) termBitset.cardinality();
 
-        // Generate bitset for the term
-        TermDocs termDocs = reader.termDocs(term);
+      TermEntry entry = new TermEntry(term.utf8ToString(), count++, inclusterDF);
+      termEntryMap.put(entry.getTerm(), entry);
 
-        while (termDocs.next()) {
-          termBitset.set(termDocs.doc());
-        }
-
-        // AND the term's bitset with cluster doc bitset to get the term's in-cluster frequency.
-        // This modifies the termBitset, but that's fine as we are not using it anywhere else.
-        termBitset.and(clusterDocBitset);
-        int inclusterDF = (int) termBitset.cardinality();
-
-        TermEntry entry = new TermEntry(term.text(), count++, inclusterDF);
-        termEntryMap.put(entry.getTerm(), entry);
-      } while (te.next());
-    } finally {
-      Closeables.closeQuietly(te);
     }
 
     List<TermInfoClusterInOut> clusteredTermInfo = new LinkedList<TermInfoClusterInOut>();
@@ -218,7 +218,8 @@ public class ClusterLabels {
     int clusterSize = wvws.size();
 
     for (TermEntry termEntry : termEntryMap.values()) {
-      int corpusDF = reader.terms(new Term(this.contentField, termEntry.getTerm())).docFreq();
+        
+      int corpusDF = reader.docFreq(new Term(this.contentField,termEntry.getTerm()));
       int outDF = corpusDF - termEntry.getDocFreq();
       int inDF = termEntry.getDocFreq();
       double logLikelihoodRatio = scoreDocumentFrequencies(inDF, outDF, clusterSize, numDocs);
@@ -241,10 +242,14 @@ public class ClusterLabels {
     int numDocs = reader.numDocs();
 
     OpenBitSet bitset = new OpenBitSet(numDocs);
-
-    FieldSelector idFieldSelector =
-        new SetBasedFieldSelector(Collections.singleton(idField), Collections.<String>emptySet());
-
+    
+    Set<String>  idFieldSelector= null;
+    if(idField !=null){
+      idFieldSelector= new TreeSet<String>();
+      idFieldSelector.add(idField);
+    }
+    
+    
     for (int i = 0; i < numDocs; i++) {
       String id;
       // Use Lucene's internal ID if idField is not specified. Else, get it from the document.

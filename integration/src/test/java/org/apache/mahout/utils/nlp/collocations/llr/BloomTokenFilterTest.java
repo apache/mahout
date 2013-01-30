@@ -33,7 +33,7 @@ import org.apache.hadoop.util.bloom.Key;
 import org.apache.hadoop.util.hash.Hash;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.WhitespaceAnalyzer;
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.shingle.ShingleFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.util.Version;
@@ -79,40 +79,52 @@ public final class BloomTokenFilterTest extends MahoutTestCase {
   @Test
   public void testAnalyzer() throws IOException {
     Reader reader = new StringReader(input);
-    Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_31);
+    Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_41);
     TokenStream ts = analyzer.tokenStream(null, reader);
+    ts.reset();
     validateTokens(allTokens, ts);
+    ts.end();
+    ts.close();
   }
   
   /** filtered analyzer */
   @Test
   public void testNonKeepdAnalyzer() throws IOException {
     Reader reader = new StringReader(input);
-    Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_31);
+    Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_41);
     TokenStream ts = analyzer.tokenStream(null, reader);
+    ts.reset();
     TokenStream f = new BloomTokenFilter(getFilter(filterTokens), false /* toss matching tokens */, ts);
     validateTokens(expectedNonKeepTokens, f);
+    ts.end();
+    ts.close();
   }
 
   /** keep analyzer */
   @Test
   public void testKeepAnalyzer() throws IOException {
     Reader reader = new StringReader(input);
-    Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_31);
+    Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_41);
     TokenStream ts = analyzer.tokenStream(null, reader);
+    ts.reset();
     TokenStream f = new BloomTokenFilter(getFilter(filterTokens), true /* keep matching tokens */, ts);
     validateTokens(expectedKeepTokens, f);
+    ts.end();
+    ts.close();
   }
   
   /** shingles, keep those matching whitelist */
   @Test
   public void testShingleFilteredAnalyzer() throws IOException {
     Reader reader = new StringReader(input);
-    Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_31);
+    Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_41);
     TokenStream ts = analyzer.tokenStream(null, reader);
+    ts.reset();
     ShingleFilter sf = new ShingleFilter(ts, 3);
     TokenStream f = new BloomTokenFilter(getFilter(shingleKeepTokens),  true, sf);
     validateTokens(expectedShingleTokens, f);
+    ts.end();
+    ts.close();
   }
   
   private static void setKey(Key k, String s) throws IOException {

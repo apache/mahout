@@ -20,15 +20,18 @@ package org.apache.mahout.vectorizer.document;
 import java.io.IOException;
 import java.io.StringReader;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.util.Version;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.StringTuple;
-import org.apache.mahout.vectorizer.DefaultAnalyzer;
+import org.apache.mahout.common.lucene.AnalyzerUtils;
 import org.apache.mahout.vectorizer.DocumentProcessor;
 
 /**
@@ -40,7 +43,8 @@ public class SequenceFileTokenizerMapper extends Mapper<Text, Text, Text, String
 
   @Override
   protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
-    TokenStream stream = analyzer.reusableTokenStream(key.toString(), new StringReader(value.toString()));
+    TokenStream stream = analyzer.tokenStream(key.toString(), new StringReader(value.toString()));
+    stream.reset();
     CharTermAttribute termAtt = stream.addAttribute(CharTermAttribute.class);
     StringTuple document = new StringTuple();
     stream.reset();
@@ -49,14 +53,21 @@ public class SequenceFileTokenizerMapper extends Mapper<Text, Text, Text, String
         document.add(new String(termAtt.buffer(), 0, termAtt.length()));
       }
     }
+    stream.end();
+    Closeables.closeQuietly(stream);
     context.write(key, document);
   }
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    analyzer = ClassUtils.instantiateAs(context.getConfiguration().get(DocumentProcessor.ANALYZER_CLASS,
-                                                                       DefaultAnalyzer.class.getName()),
-                                        Analyzer.class);
+
+    String analyzerClassName = context.getConfiguration().get(DocumentProcessor.ANALYZER_CLASS,
+            StandardAnalyzer.class.getName());
+    try {
+      analyzer = AnalyzerUtils.createAnalyzer(analyzerClassName);
+    } catch (ClassNotFoundException e) {
+      throw new IOException("Unable to create analyzer: " + analyzerClassName, e);
+    }
   }
 }

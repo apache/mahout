@@ -22,19 +22,19 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.lucene.analysis.ASCIIFoldingFilter;
-import org.apache.lucene.analysis.CharArraySet;
-import org.apache.lucene.analysis.LowerCaseFilter;
-import org.apache.lucene.analysis.PorterStemFilter;
-import org.apache.lucene.analysis.StopFilter;
-import org.apache.lucene.analysis.StopwordAnalyzerBase;
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.LowerCaseFilter;
+import org.apache.lucene.analysis.core.StopFilter;
+import org.apache.lucene.analysis.en.PorterStemFilter;
+import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
 import org.apache.lucene.analysis.standard.StandardFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
-
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.util.CharArraySet;
+import org.apache.lucene.analysis.util.StopwordAnalyzerBase;
 import org.apache.lucene.util.Version;
 
 /**
@@ -43,12 +43,13 @@ import org.apache.lucene.util.Version;
  * stop words, excluding non-alpha-numeric tokens, and porter stemming.
  */
 public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
-  private static final Version LUCENE_VERSION = Version.LUCENE_36;
+  private static final Version LUCENE_VERSION = Version.LUCENE_41;
   
   // extended set of stop words composed of common mail terms like "hi",
   // HTML tags, and Java keywords asmany of the messages in the archives
   // are subversion check-in notifications
-  private static final Set<?> STOP_WORDS = new CharArraySet(LUCENE_VERSION, Arrays.asList(
+    
+private static CharArraySet stopSet = new CharArraySet(LUCENE_VERSION, Arrays.asList(
     "3d","7bit","a0","about","above","abstract","across","additional","after",
     "afterwards","again","against","align","all","almost","alone","along",
     "already","also","although","always","am","among","amongst","amoungst",
@@ -108,11 +109,12 @@ public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
   private static final Matcher matcher = alphaNumeric.matcher("");
 
   public MailArchivesClusteringAnalyzer() {
-    super(LUCENE_VERSION, STOP_WORDS);
+    super(LUCENE_VERSION, stopSet);
   }
 
-  public MailArchivesClusteringAnalyzer(Set<?> stopSet) {
+  public MailArchivesClusteringAnalyzer(CharArraySet stopSet) {
     super(LUCENE_VERSION, stopSet);
+
   }
   
   @Override
@@ -122,7 +124,7 @@ public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
     result = new LowerCaseFilter(LUCENE_VERSION, result);
     result = new ASCIIFoldingFilter(result);
     result = new AlphaNumericMaxLengthFilter(result);
-    result = new StopFilter(LUCENE_VERSION, result, stopwords);
+    result = new StopFilter(LUCENE_VERSION, result, stopSet);
     result = new PorterStemFilter(result);
     return new TokenStreamComponents(tokenizer, result);
   }

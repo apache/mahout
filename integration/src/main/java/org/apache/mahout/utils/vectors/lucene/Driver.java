@@ -38,6 +38,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
@@ -81,7 +82,8 @@ public final class Driver {
     Preconditions.checkArgument(maxDFPercent <= 99, "maxDFPercent must be <= 99");
 
     Directory dir = FSDirectory.open(file);
-    IndexReader reader = IndexReader.open(dir, true);
+    IndexReader reader = DirectoryReader.open(dir);
+    
 
     Weight weight;
     if ("tf".equalsIgnoreCase(weightType)) {
@@ -93,13 +95,12 @@ public final class Driver {
     }
 
     TermInfo termInfo = new CachedTermInfo(reader, field, minDf, maxDFPercent);
-    VectorMapper mapper = new TFDFMapper(reader, weight, termInfo);
-
+    
     LuceneIterable iterable;
     if (norm == LuceneIterable.NO_NORMALIZING) {
-      iterable = new LuceneIterable(reader, idField, field, mapper, LuceneIterable.NO_NORMALIZING, maxPercentErrorDocs);
+      iterable = new LuceneIterable(reader, idField, field, termInfo,weight, LuceneIterable.NO_NORMALIZING, maxPercentErrorDocs);
     } else {
-      iterable = new LuceneIterable(reader, idField, field, mapper, norm, maxPercentErrorDocs);
+      iterable = new LuceneIterable(reader, idField, field, termInfo,weight, norm, maxPercentErrorDocs);
     }
 
     log.info("Output File: {}", outFile);

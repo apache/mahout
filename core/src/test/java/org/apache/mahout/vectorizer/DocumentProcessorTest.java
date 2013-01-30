@@ -31,6 +31,7 @@ import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.junit.Test;
 
 import java.util.Arrays;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 
 /**
  * Tests tokenizing of {@link SequenceFile}s containing document ID and text (both as {@link Text})
@@ -59,7 +60,7 @@ public class DocumentProcessorTest extends MahoutTestCase {
       Closeables.closeQuietly(writer);
     }
 
-    DocumentProcessor.tokenizeDocuments(input, DefaultAnalyzer.class, output, configuration);
+    DocumentProcessor.tokenizeDocuments(input, StandardAnalyzer.class, output, configuration);
 
     FileStatus[] statuses = fs.listStatus(output, PathFilters.logsCRCFilter());
     assertEquals(1, statuses.length);

@@ -27,6 +27,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
@@ -95,7 +96,7 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
   private void runTest(boolean sequential, boolean named)
     throws IOException, ClassNotFoundException, InterruptedException {
     
-    Class<? extends Analyzer> analyzer = DefaultAnalyzer.class;
+    Class<? extends Analyzer> analyzer = StandardAnalyzer.class;
     
     Path tokenizedDocuments = getTestTempDirPath("output/tokenized-documents");
     Path wordCount = getTestTempDirPath("output/wordcount");

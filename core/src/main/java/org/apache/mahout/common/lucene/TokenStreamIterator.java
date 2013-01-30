@@ -25,6 +25,9 @@ import java.io.IOException;
 
 /**
  * Provide an Iterator for the tokens in a TokenStream.
+ *
+ * Note, it is the responsibility of the instantiating class to properly consume the {@link org.apache.lucene.analysis.TokenStream}.  See
+ * the Lucene {@link org.apache.lucene.analysis.TokenStream} documentation for more information.
  */
 //TODO: consider using the char/byte arrays instead of strings, esp. when we upgrade to Lucene 4.0
 public final class TokenStreamIterator extends AbstractIterator<String> {

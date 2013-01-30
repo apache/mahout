@@ -29,8 +29,6 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.Fieldable;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
@@ -64,8 +62,6 @@ import org.apache.mahout.utils.vectors.TermEntry;
 import org.apache.mahout.utils.vectors.TermInfo;
 import org.apache.mahout.utils.vectors.lucene.CachedTermInfo;
 import org.apache.mahout.utils.vectors.lucene.LuceneIterable;
-import org.apache.mahout.utils.vectors.lucene.TFDFMapper;
-import org.apache.mahout.utils.vectors.lucene.VectorMapper;
 import org.apache.mahout.vectorizer.TFIDF;
 import org.apache.mahout.vectorizer.Weight;
 import org.junit.Before;
@@ -73,6 +69,9 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriterConfig;
 
 public final class TestClusterDumper extends MahoutTestCase {
   
@@ -112,16 +111,19 @@ public final class TestClusterDumper extends MahoutTestCase {
   private void getSampleData(String[] docs2) throws IOException {
     sampleData = Lists.newArrayList();
     RAMDirectory directory = new RAMDirectory();
-    IndexWriter writer = new IndexWriter(directory, new StandardAnalyzer(
-        Version.LUCENE_31), true, IndexWriter.MaxFieldLength.UNLIMITED);
+    
+    IndexWriter writer = new IndexWriter(directory, 
+           new IndexWriterConfig(Version.LUCENE_41,new StandardAnalyzer(
+        Version.LUCENE_41)));
+            
     try {
       for (int i = 0; i < docs2.length; i++) {
         Document doc = new Document();
-        Fieldable id = new Field("id", "doc_" + i, Field.Store.YES,
+        Field id = new Field("id", "doc_" + i, Field.Store.YES,
             Field.Index.NOT_ANALYZED_NO_NORMS);
         doc.add(id);
         // Store both position and offset information
-        Fieldable text = new Field("content", docs2[i], Field.Store.NO,
+        Field text = new Field("content", docs2[i], Field.Store.NO,
             Field.Index.ANALYZED, Field.TermVector.YES);
         doc.add(text);
         writer.addDocument(doc);
@@ -129,7 +131,10 @@ public final class TestClusterDumper extends MahoutTestCase {
     } finally {
       Closeables.closeQuietly(writer);
     }
-    IndexReader reader = IndexReader.open(directory, true);
+    
+    IndexReader reader = DirectoryReader.open(directory);
+   
+
     Weight weight = new TFIDF();
     TermInfo termInfo = new CachedTermInfo(reader, "content", 1, 100);
     
@@ -146,9 +151,8 @@ public final class TestClusterDumper extends MahoutTestCase {
       System.out.println(i + " " + term);
       i++;
     }
-    VectorMapper mapper = new TFDFMapper(reader, weight, termInfo);
     Iterable<Vector> iterable = new LuceneIterable(reader, "id", "content",
-        mapper);
+        termInfo,weight);
     
     i = 0;
     for (Vector vector : iterable) {

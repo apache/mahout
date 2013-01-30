@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.mahout.vectorizer;
 
 import org.apache.hadoop.conf.Configuration;
@@ -22,7 +21,9 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.util.Version;
 import org.apache.mahout.common.ClassUtils;
+import org.apache.mahout.common.lucene.AnalyzerUtils;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
@@ -44,7 +45,6 @@ public class EncodingMapper extends Mapper<Text, Text, Text, VectorWritable> {
   public static final String ENCODER_FIELD_NAME = "encoderFieldName";
   public static final String ENCODER_CLASS = "encoderClass";
   public static final String CARDINALITY = "cardinality";
-
   private boolean sequentialVecs;
   private boolean namedVectors;
   private FeatureVectorEncoder encoder;
@@ -56,14 +56,21 @@ public class EncodingMapper extends Mapper<Text, Text, Text, VectorWritable> {
     sequentialVecs = conf.getBoolean(USE_SEQUENTIAL, false);
     namedVectors = conf.getBoolean(USE_NAMED_VECTORS, false);
     String analyzerName = conf.get(ANALYZER_NAME, StandardAnalyzer.class.getName());
-    Analyzer analyzer = ClassUtils.instantiateAs(analyzerName, Analyzer.class);
+    Analyzer analyzer = null;
+    try {
+      analyzer = AnalyzerUtils.createAnalyzer(analyzerName);
+    } catch (ClassNotFoundException e) {
+      //TODO: hmmm, don't like this approach
+      throw new IOException("Unable to create Analyzer for name: " + analyzerName, e);
+    }
+
     String encoderName = conf.get(ENCODER_FIELD_NAME, "text");
     cardinality = conf.getInt(CARDINALITY, 5000);
     String encClass = conf.get(ENCODER_CLASS);
     encoder = ClassUtils.instantiateAs(encClass,
-                                       FeatureVectorEncoder.class,
-                                       new Class[]{String.class},
-                                       new Object[]{encoderName});
+            FeatureVectorEncoder.class,
+            new Class[]{String.class},
+            new Object[]{encoderName});
     if (encoder instanceof LuceneTextValueEncoder) {
       ((LuceneTextValueEncoder) encoder).setAnalyzer(analyzer);
     }

@@ -31,12 +31,14 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.common.lucene.AnalyzerUtils;
 import org.apache.mahout.math.hadoop.stats.BasicStats;
 import org.apache.mahout.vectorizer.collocations.llr.LLRReducer;
 import org.apache.mahout.vectorizer.common.PartialVectorMerger;
@@ -196,13 +198,13 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
       }
       log.info("Number of reduce tasks: {}", reduceTasks);
 
-      Class<? extends Analyzer> analyzerClass = DefaultAnalyzer.class;
+      Class<? extends Analyzer> analyzerClass = StandardAnalyzer.class;
       if (cmdLine.hasOption(analyzerNameOpt)) {
         String className = cmdLine.getValue(analyzerNameOpt).toString();
         analyzerClass = Class.forName(className).asSubclass(Analyzer.class);
         // try instantiating it, b/c there isn't any point in setting it if
         // you can't instantiate it
-        ClassUtils.instantiateAs(analyzerClass, Analyzer.class);
+        AnalyzerUtils.createAnalyzer(analyzerClass);
       }
       
       boolean processIdf;

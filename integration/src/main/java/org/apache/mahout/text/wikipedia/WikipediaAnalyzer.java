@@ -18,15 +18,15 @@
 package org.apache.mahout.text.wikipedia;
 
 import java.io.Reader;
-import java.util.Set;
-
-import org.apache.lucene.analysis.LowerCaseFilter;
-import org.apache.lucene.analysis.StopAnalyzer;
-import org.apache.lucene.analysis.StopFilter;
-import org.apache.lucene.analysis.StopwordAnalyzerBase;
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.LowerCaseFilter;
+import org.apache.lucene.analysis.core.StopAnalyzer;
+import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.standard.StandardFilter;
+import org.apache.lucene.analysis.util.CharArraySet;
+import org.apache.lucene.analysis.util.StopwordAnalyzerBase;
 import org.apache.lucene.analysis.wikipedia.WikipediaTokenizer;
 import org.apache.lucene.util.Version;
 
@@ -34,19 +34,19 @@ import org.apache.lucene.util.Version;
 public class WikipediaAnalyzer extends StopwordAnalyzerBase {
   
   public WikipediaAnalyzer() {
-    super(Version.LUCENE_31, StopAnalyzer.ENGLISH_STOP_WORDS_SET);
+    super(Version.LUCENE_41, StopAnalyzer.ENGLISH_STOP_WORDS_SET);
   }
   
-  public WikipediaAnalyzer(Set<?> stopSet) {
-    super(Version.LUCENE_31, stopSet);
+  public WikipediaAnalyzer(CharArraySet stopSet) {
+    super(Version.LUCENE_41, stopSet);
   }
-  
+
   @Override
   protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
     Tokenizer tokenizer = new WikipediaTokenizer(reader);
-    TokenStream result = new StandardFilter(Version.LUCENE_31, tokenizer);
-    result = new LowerCaseFilter(Version.LUCENE_31, result);
-    result = new StopFilter(Version.LUCENE_31, result, stopwords);
+    TokenStream result = new StandardFilter(Version.LUCENE_41, tokenizer);
+    result = new LowerCaseFilter(Version.LUCENE_41, result);
+    result = new StopFilter(Version.LUCENE_41, result, super.getStopwordSet());
     return new TokenStreamComponents(tokenizer, result);
   }
 }

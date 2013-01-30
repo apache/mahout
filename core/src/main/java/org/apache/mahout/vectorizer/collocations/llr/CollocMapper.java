@@ -91,7 +91,7 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
   protected void map(Text key, StringTuple value, final Context context) throws IOException, InterruptedException {
 
     ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.getEntries().iterator()), maxShingleSize);
-
+    sf.reset();
     try {
       int count = 0; // ngram count
 

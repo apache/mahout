@@ -18,12 +18,16 @@
 package org.apache.mahout.utils.vectors.lucene;
 
 import com.google.common.io.Closeables;
+import java.io.IOException;
+import java.util.Iterator;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.Fieldable;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.apache.mahout.math.NamedVector;
@@ -33,9 +37,6 @@ import org.apache.mahout.utils.vectors.TermInfo;
 import org.apache.mahout.vectorizer.TFIDF;
 import org.apache.mahout.vectorizer.Weight;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.util.Iterator;
 
 public final class LuceneIterableTest extends MahoutTestCase {
 
@@ -57,11 +58,10 @@ public final class LuceneIterableTest extends MahoutTestCase {
 
   @Test
   public void testIterable() throws Exception {
-    IndexReader reader = IndexReader.open(directory, true);
+    IndexReader reader = DirectoryReader.open(directory);
     Weight weight = new TFIDF();
     TermInfo termInfo = new CachedTermInfo(reader, "content", 1, 100);
-    VectorMapper mapper = new TFDFMapper(reader, weight, termInfo);
-    LuceneIterable iterable = new LuceneIterable(reader, "id", "content", mapper);
+    LuceneIterable iterable = new LuceneIterable(reader, "id", "content", termInfo,weight);
 
     //TODO: do something more meaningful here
     for (Vector vector : iterable) {
@@ -71,7 +71,7 @@ public final class LuceneIterableTest extends MahoutTestCase {
       assertTrue(((NamedVector) vector).getName().startsWith("doc_"));
     }
 
-    iterable = new LuceneIterable(reader, "id", "content", mapper, 3);
+    iterable = new LuceneIterable(reader, "id", "content", termInfo,weight, 3);
 
     //TODO: do something more meaningful here
     for (Vector vector : iterable) {
@@ -86,12 +86,12 @@ public final class LuceneIterableTest extends MahoutTestCase {
   @Test(expected = IllegalStateException.class)
   public void testIterable_noTermVectors() throws IOException {
     RAMDirectory directory = createTestIndex(Field.TermVector.NO);
-
-    IndexReader reader = IndexReader.open(directory, true);
+    IndexReader reader = DirectoryReader.open(directory);
+    
+    
     Weight weight = new TFIDF();
     TermInfo termInfo = new CachedTermInfo(reader, "content", 1, 100);
-    VectorMapper mapper = new TFDFMapper(reader, weight, termInfo);
-    LuceneIterable iterable = new LuceneIterable(reader, "id", "content", mapper);
+    LuceneIterable iterable = new LuceneIterable(reader, "id", "content",  termInfo,weight);
 
     Iterator<Vector> iterator = iterable.iterator();
     iterator.hasNext();
@@ -104,15 +104,14 @@ public final class LuceneIterableTest extends MahoutTestCase {
     RAMDirectory directory = createTestIndex(Field.TermVector.YES, new RAMDirectory(), true, 0);
     //get real vectors
     createTestIndex(Field.TermVector.NO, directory, false, 5);
-      
-    IndexReader reader = IndexReader.open(directory, true);
+    IndexReader reader = DirectoryReader.open(directory);
+
     Weight weight = new TFIDF();
     TermInfo termInfo = new CachedTermInfo(reader, "content", 1, 100);
-    VectorMapper mapper = new TFDFMapper(reader, weight, termInfo);
     
     boolean exceptionThrown;
     //0 percent tolerance
-    LuceneIterable iterable = new LuceneIterable(reader, "id", "content", mapper);
+    LuceneIterable iterable = new LuceneIterable(reader, "id", "content", termInfo,weight);
     try {
       for (Object a : iterable) {
       }
@@ -124,7 +123,7 @@ public final class LuceneIterableTest extends MahoutTestCase {
     assertTrue(exceptionThrown);
     
     //100 percent tolerance
-    iterable = new LuceneIterable(reader, "id", "content", mapper, -1, 1.0);
+    iterable = new LuceneIterable(reader, "id", "content", termInfo,weight, -1, 1.0);
     try {
       for (Object a : iterable) {
       }
@@ -136,7 +135,7 @@ public final class LuceneIterableTest extends MahoutTestCase {
     assertFalse(exceptionThrown);
     
     //50 percent tolerance
-    iterable = new LuceneIterable(reader, "id", "content", mapper, -1, 0.5);
+    iterable = new LuceneIterable(reader, "id", "content", termInfo,weight, -1, 0.5);
     Iterator<Vector> iterator = iterable.iterator();
     iterator.next();
     iterator.next();
@@ -156,28 +155,27 @@ public final class LuceneIterableTest extends MahoutTestCase {
     assertTrue(exceptionThrown);
   }
   
-  private static RAMDirectory createTestIndex(Field.TermVector termVector) throws IOException {
+  static RAMDirectory createTestIndex(Field.TermVector termVector) throws IOException {
       return createTestIndex(termVector, new RAMDirectory(), true, 0);
   }
   
-  private static RAMDirectory createTestIndex(Field.TermVector termVector,
+  static RAMDirectory createTestIndex(Field.TermVector termVector,
                                               RAMDirectory directory,
                                               boolean createNew,
                                               int startingId) throws IOException {
-    IndexWriter writer = new IndexWriter(
-        directory,
-        new StandardAnalyzer(Version.LUCENE_31),
-        createNew,
-        IndexWriter.MaxFieldLength.UNLIMITED);
+    IndexWriter writer = new IndexWriter( directory, new IndexWriterConfig(Version.LUCENE_41,new StandardAnalyzer(Version.LUCENE_41)));
+        
     try {
       for (int i = 0; i < DOCS.length; i++) {
         Document doc = new Document();
-        Fieldable id = new Field("id", "doc_" + (i + startingId), Field.Store.YES,
-            Field.Index.NOT_ANALYZED_NO_NORMS);
+        Field id = new StringField("id", "doc_" + (i + startingId), Field.Store.YES);
         doc.add(id);
         //Store both position and offset information
-        Fieldable text = new Field("content", DOCS[i], Field.Store.NO, Field.Index.ANALYZED, termVector);
+        //Says it is deprecated, but doesn't seem to offer an alternative that supports term vectors...
+        Field text = new Field("content", DOCS[i], Field.Store.NO, Field.Index.ANALYZED, termVector);
         doc.add(text);
+        Field text2 = new Field("content2", DOCS[i], Field.Store.NO, Field.Index.ANALYZED, termVector);
+        doc.add(text2);
         writer.addDocument(doc);
       }
     } finally {
