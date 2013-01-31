@@ -43,6 +43,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Comparator;
 import java.util.regex.Pattern;
 
 public final class VectorHelper {
@@ -95,7 +96,12 @@ public final class VectorHelper {
         entries.add(pair);
       }
     }
-    Collections.sort(entries, Ordering.natural().reverse());
+    Collections.sort(entries, new Comparator<Pair<Integer, Double>>() {
+        @Override
+        public int compare(Pair<Integer, Double> a, Pair<Integer, Double> b) {
+            return b.getSecond().compareTo(a.getSecond());
+        }
+    });
     return entries;
   }
 
