@@ -72,7 +72,6 @@ public final class TestLanczosSolver extends SolverTest {
     int rank = 50;
     LanczosState state = new LanczosState(corpus, rank, initialVector);
     long time = timeLanczos(corpus, state, rank, false);
-    assertTrue("Lanczos taking too long!  Are you in the debugger? :)", time < 10000);
     assertOrthonormal(state);
     for (int i = 0; i < rank/2; i++) {
       assertEigen(i, state.getRightSingularVector(i), corpus, ERROR_TOLERANCE, false);
@@ -89,7 +88,6 @@ public final class TestLanczosSolver extends SolverTest {
     int rank = 30;
     LanczosState state = new LanczosState(corpus, rank, initialVector);
     long time = timeLanczos(corpus, state, rank, true);
-    assertTrue("Lanczos taking too long!  Are you in the debugger? :)", time < 10000);
     //assertOrthonormal(state);
     //assertEigen(state, rank / 2, ERROR_TOLERANCE, true);
   }
