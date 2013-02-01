@@ -13,11 +13,9 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.apache.mahout.utils.MahoutTestCase;
-import org.apache.mahout.utils.vectors.TermEntry;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 /**
  *

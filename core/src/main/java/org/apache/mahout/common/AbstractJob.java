@@ -59,7 +59,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.util.Version;
 
 /**
  * <p>Superclass of many Mahout Hadoop "jobs". A job drives configuration and launch of one or

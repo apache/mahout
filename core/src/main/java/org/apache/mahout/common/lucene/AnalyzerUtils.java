@@ -30,16 +30,15 @@ public class AnalyzerUtils {
   /**
    * Create an Analyzer using the latest {@link org.apache.lucene.util.Version}.  Note, if you need to pass in parameters
    * to your constructor, you will need to wrap it in an implementation that does not take any arguments
-   * @param analyzerClassName
-   * @return
-   * @throws ClassNotFoundException
+   * @param analyzerClassName - Lucene Analyzer Name
+   * @return {@link Analyzer}
+   * @throws ClassNotFoundException - {@link ClassNotFoundException}
    */
   public static Analyzer createAnalyzer(String analyzerClassName) throws ClassNotFoundException {
     return createAnalyzer(analyzerClassName, Version.LUCENE_41);
   }
 
   public static Analyzer createAnalyzer(String analyzerClassName, Version version) throws ClassNotFoundException {
-    Analyzer analyzer = null;
     Class<? extends Analyzer> analyzerClass = Class.forName(analyzerClassName).asSubclass(Analyzer.class);
     //TODO: GSI: Not sure I like this, many analyzers in Lucene take in the version
 
@@ -50,14 +49,14 @@ public class AnalyzerUtils {
    * Create an Analyzer using the latest {@link org.apache.lucene.util.Version}.  Note, if you need to pass in parameters
    * to your constructor, you will need to wrap it in an implementation that does not take any arguments
    * @param analyzerClass The Analyzer Class to instantiate
-   * @return
+   * @return {@link Analyzer}
    */
   public static Analyzer createAnalyzer(Class<? extends Analyzer> analyzerClass){
     return createAnalyzer(analyzerClass, Version.LUCENE_41);
   }
 
   public static Analyzer createAnalyzer(Class<? extends Analyzer> analyzerClass, Version version){
-    Analyzer analyzer = null;
+    Analyzer analyzer;
     if (analyzerClass == StandardAnalyzer.class) {
       Class<?>[] params = new Class<?>[1];
       params[0] = Version.class;

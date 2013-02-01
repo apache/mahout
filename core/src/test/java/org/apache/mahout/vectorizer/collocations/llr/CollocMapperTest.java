@@ -17,18 +17,11 @@
 
 package org.apache.mahout.vectorizer.collocations.llr;
 
-import java.io.Reader;
-import java.util.Collections;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.Counters.Counter;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Mapper.Context;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.util.Version;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.vectorizer.collocations.llr.Gram.Type;

@@ -84,7 +84,7 @@ public final class LuceneIterableTest extends MahoutTestCase {
   }
 
   @Test(expected = IllegalStateException.class)
-  public void testIterable_noTermVectors() throws IOException {
+  public void testIterableNoTermVectors() throws IOException {
     RAMDirectory directory = createTestIndex(Field.TermVector.NO);
     IndexReader reader = DirectoryReader.open(directory);
     
@@ -99,7 +99,7 @@ public final class LuceneIterableTest extends MahoutTestCase {
   }
 
   @Test
-  public void testIterable_someNoiseTermVectors() throws IOException {
+  public void testIterableSomeNoiseTermVectors() throws IOException {
     //get noise vectors
     RAMDirectory directory = createTestIndex(Field.TermVector.YES, new RAMDirectory(), true, 0);
     //get real vectors

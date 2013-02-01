@@ -21,7 +21,6 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.util.Version;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.lucene.AnalyzerUtils;
 import org.apache.mahout.math.NamedVector;
@@ -45,7 +44,7 @@ public class EncodingMapper extends Mapper<Text, Text, Text, VectorWritable> {
   public static final String ENCODER_FIELD_NAME = "encoderFieldName";
   public static final String ENCODER_CLASS = "encoderClass";
   public static final String CARDINALITY = "cardinality";
-  private boolean sequentialVecs;
+  private boolean sequentialVectors;
   private boolean namedVectors;
   private FeatureVectorEncoder encoder;
   private int cardinality;
@@ -53,10 +52,10 @@ public class EncodingMapper extends Mapper<Text, Text, Text, VectorWritable> {
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();
-    sequentialVecs = conf.getBoolean(USE_SEQUENTIAL, false);
+    sequentialVectors = conf.getBoolean(USE_SEQUENTIAL, false);
     namedVectors = conf.getBoolean(USE_NAMED_VECTORS, false);
     String analyzerName = conf.get(ANALYZER_NAME, StandardAnalyzer.class.getName());
-    Analyzer analyzer = null;
+    Analyzer analyzer;
     try {
       analyzer = AnalyzerUtils.createAnalyzer(analyzerName);
     } catch (ClassNotFoundException e) {
@@ -79,7 +78,7 @@ public class EncodingMapper extends Mapper<Text, Text, Text, VectorWritable> {
   @Override
   protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
     Vector vector;
-    if (sequentialVecs) {
+    if (sequentialVectors) {
       vector = new SequentialAccessSparseVector(cardinality);
     } else {
       vector = new RandomAccessSparseVector(cardinality);

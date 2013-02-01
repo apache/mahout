@@ -19,7 +19,6 @@ package org.apache.mahout.utils.vectors.lucene;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.AbstractIterator;
-import org.apache.lucene.index.DocsEnum;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
@@ -51,11 +50,8 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
   private final Set<String> idFieldSelector;
   private final TermInfo terminfo;
   private final double normPower;
-  private DocsEnum termDocs = null;
 
-
-  private int nextDocid;
-
+  private int nextDocId;
 
   private int numErrorDocs = 0;
   private int maxErrorDocs = 0;
@@ -70,7 +66,10 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
    * @param indexReader {@link IndexReader} to read the documents from.
    * @param idField     field containing the id. May be null.
    * @param field       field to use for the Vector
+   * @param terminfo    terminfo
+   * @param weight      weight
    * @param normPower   the normalization value. Must be nonnegative, or {@link LuceneIterable#NO_NORMALIZING}
+   * @throws java.io.IOException - {@link java.io.IOException}
    */
   public LuceneIterator(IndexReader indexReader,
                         String idField,
@@ -82,8 +81,15 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
   }
 
   /**
+   * @param indexReader {@link IndexReader} to read the documents from.
+   * @param idField    field containing the id. May be null.
+   * @param field      field to use for the Vector
+   * @param terminfo   terminfo
+   * @param weight     weight
+   * @param normPower  the normalization value. Must be nonnegative, or {@link LuceneIterable#NO_NORMALIZING}
    * @param maxPercentErrorDocs most documents that will be tolerated without a term freq vector. In [0,1].
    * @see #LuceneIterator(org.apache.lucene.index.IndexReader, String, String, org.apache.mahout.utils.vectors.TermInfo, org.apache.mahout.vectorizer.Weight, double)
+   * @throws java.io.IOException - {@link java.io.IOException}
    */
   public LuceneIterator(IndexReader indexReader,
                         String idField,
@@ -97,7 +103,7 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
             "If specified normPower must be nonnegative", normPower);
     Preconditions.checkArgument(maxPercentErrorDocs >= 0.0 && maxPercentErrorDocs <= 1.0);
     if (idField != null) {
-      idFieldSelector = new TreeSet();
+      idFieldSelector = new TreeSet<String>();
       idFieldSelector.add(idField);
     } else {
       idFieldSelector = null; /*The field in the index  containing the index.  If
@@ -114,7 +120,7 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
     this.terminfo = terminfo;
     this.normPower = normPower;
     this.weight = weight;
-    this.nextDocid = 0;
+    this.nextDocId = 0;
     this.maxErrorDocs = (int) (maxPercentErrorDocs * indexReader.numDocs());
   }
 
@@ -125,8 +131,8 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
       Terms termFreqVector;
 
       do {
-        doc = this.nextDocid;
-        nextDocid++;
+        doc = this.nextDocId;
+        nextDocId++;
 
         if (doc >= indexReader.maxDoc()) {
           return endOfData();
