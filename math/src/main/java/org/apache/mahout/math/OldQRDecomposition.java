@@ -41,7 +41,7 @@ import java.util.Locale;
  */
 
 /** partially deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-public class OldQRDecomposition {
+public class OldQRDecomposition implements QR {
 
   /** Array for internal storage of decomposition. */
   private final Matrix qr;

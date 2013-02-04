@@ -23,10 +23,8 @@
  */
 package org.apache.mahout.math;
 
-import com.google.common.collect.Lists;
 import org.apache.mahout.math.function.Functions;
 
-import java.util.List;
 import java.util.Locale;
 
 
@@ -42,8 +40,7 @@ import java.util.Locale;
  returns <tt>false</tt>.
  */
 
-public class QRDecomposition {
-  private static final int N = 10;
+public class QRDecomposition implements QR {
   private final Matrix q, r;
   private final boolean fullRank;
   private final int rows;
@@ -111,6 +108,7 @@ public class QRDecomposition {
    *
    * @return <tt>Q</tt>
    */
+  @Override
   public Matrix getQ() {
     return q;
   }
@@ -120,6 +118,7 @@ public class QRDecomposition {
    *
    * @return <tt>R</tt>
    */
+  @Override
   public Matrix getR() {
     return r;
   }
@@ -129,6 +128,7 @@ public class QRDecomposition {
    *
    * @return true if <tt>R</tt>, and hence <tt>A</tt>, has full rank.
    */
+  @Override
   public boolean hasFullRank() {
     return fullRank;
   }
@@ -140,6 +140,7 @@ public class QRDecomposition {
    * @return <tt>X</tt> that minimizes the two norm of <tt>Q*R*X - B</tt>.
    * @throws IllegalArgumentException if <tt>B.rows() != A.rows()</tt>.
    */
+  @Override
   public Matrix solve(Matrix B) {
     if (B.numRows() != rows) {
       throw new IllegalArgumentException("Matrix row dimensions must agree.");
@@ -174,38 +175,5 @@ public class QRDecomposition {
   @Override
   public String toString() {
     return String.format(Locale.ENGLISH, "QR(%d x %d,fullRank=%s)", rows, columns, hasFullRank());
-  }
-
-  public static void main(String[] args) {
-    Matrix a = new DenseMatrix(60, 60).assign(Functions.random());
-
-    int n = 0;
-    List<Integer> counts = Lists.newArrayList(10, 20, 50, 100, 200, 500, 1000, 2000, 5000);
-    for (int k : counts) {
-      double warmup = 0;
-      double other = 0;
-
-      n += k;
-      for (int i = 0; i < k; i++) {
-        QRDecomposition qr = new QRDecomposition(a);
-        warmup = Math.max(warmup, qr.getQ().transpose().times(qr.getQ()).viewDiagonal().assign(Functions.plus(-1)).norm(1));
-        Matrix z = qr.getQ().times(qr.getR()).minus(a);
-        other = Math.max(other, z.aggregate(Functions.MIN, Functions.ABS));
-      }
-
-      double maxIdent = 0;
-      double maxError = 0;
-
-      long t0 = System.nanoTime();
-      for (int i = 0; i < N; i++) {
-        QRDecomposition qr = new QRDecomposition(a);
-
-        maxIdent = Math.max(maxIdent, qr.getQ().transpose().times(qr.getQ()).viewDiagonal().assign(Functions.plus(-1)).norm(1));
-        Matrix z = qr.getQ().times(qr.getR()).minus(a);
-        maxError = Math.max(maxError, z.aggregate(Functions.MIN, Functions.ABS));
-      }
-      System.out.printf("%d\t%.1f\t%g\t%g\t%g\n", n, (System.nanoTime() - t0) / 1e3 / N, maxIdent, maxError, warmup);
-//    System.out.printf("%g, %g\n", maxIdent, maxError);
-    }
   }
 }

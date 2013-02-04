@@ -17,9 +17,13 @@
 
 package org.apache.mahout.math;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.Functions;
+import org.apache.mahout.math.stats.OnlineSummarizer;
 import org.junit.Test;
+
+import java.util.List;
 
 public final class QRDecompositionTest extends MahoutTestCase {
   @Test
@@ -154,6 +158,71 @@ public final class QRDecompositionTest extends MahoutTestCase {
     assertEquals(xRef, x1, 1.0e-8);
 
     assertEquals(x, qr.getQ().times(qr.getR()), 1e-15);
+  }
+
+  @Test
+  public void fasterThanBefore() {
+
+    OnlineSummarizer s1 = new OnlineSummarizer();
+    OnlineSummarizer s2 = new OnlineSummarizer();
+
+    Matrix a = new DenseMatrix(60, 60).assign(Functions.random());
+
+    decompositionSpeedCheck(new Decomposer() {
+      @Override
+      public QR decompose(Matrix a) {
+        return new QRDecomposition(a);
+      }
+    }, s1, a, "new");
+
+    decompositionSpeedCheck(new Decomposer() {
+      @Override
+      public QR decompose(Matrix a) {
+        return new OldQRDecomposition(a);
+      }
+    }, s2, a, "old");
+
+    // should be much more than twice as fast.
+    System.out.printf("Speedup is about %.1f times\n", s2.getMedian() / s1.getMedian());
+    assertTrue(s1.getMedian() < 0.5 * s2.getMedian());
+  }
+
+  private interface Decomposer {
+    public QR decompose(Matrix a);
+  }
+
+  private void decompositionSpeedCheck(Decomposer qrf, OnlineSummarizer s1, Matrix a, String label) {
+    int n = 0;
+    List<Integer> counts = Lists.newArrayList(10, 20, 50, 100, 200, 500);
+    for (int k : counts) {
+      double warmup = 0;
+      double other = 0;
+
+      n += k;
+      for (int i = 0; i < k; i++) {
+        QR qr = qrf.decompose(a);
+        warmup = Math.max(warmup, qr.getQ().transpose().times(qr.getQ()).viewDiagonal().assign(Functions.plus(-1)).norm(1));
+        Matrix z = qr.getQ().times(qr.getR()).minus(a);
+        other = Math.max(other, z.aggregate(Functions.MIN, Functions.ABS));
+      }
+
+      double maxIdent = 0;
+      double maxError = 0;
+
+      long t0 = System.nanoTime();
+      for (int i = 0; i < n; i++) {
+        QR qr = qrf.decompose(a);
+
+        maxIdent = Math.max(maxIdent, qr.getQ().transpose().times(qr.getQ()).viewDiagonal().assign(Functions.plus(-1)).norm(1));
+        Matrix z = qr.getQ().times(qr.getR()).minus(a);
+        maxError = Math.max(maxError, z.aggregate(Functions.MIN, Functions.ABS));
+      }
+      long t1 = System.nanoTime();
+      if (k > 100) {
+        s1.add(t1 - t0);
+      }
+      System.out.printf("%s %d\t%.1f\t%g\t%g\t%g\n", label, n, (t1 - t0) / 1e3 / n, maxIdent, maxError, warmup);
+    }
   }
 
   private static void assertEquals(Matrix ref, Matrix actual, double epsilon) {
