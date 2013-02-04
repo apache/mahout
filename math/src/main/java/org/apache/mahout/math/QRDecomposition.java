@@ -23,8 +23,10 @@
  */
 package org.apache.mahout.math;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.math.function.Functions;
 
+import java.util.List;
 import java.util.Locale;
 
 
@@ -40,91 +42,68 @@ import java.util.Locale;
  returns <tt>false</tt>.
  */
 
-/** partially deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 public class QRDecomposition {
-
-  /** Array for internal storage of decomposition. */
-  private final Matrix qr;
-
-  /** Row and column dimensions. */
-  private final int originalRows;
-  private final int originalColumns;
-
-  /** Array for internal storage of diagonal of R. */
-  private final Vector rDiag;
+  private static final int N = 10;
+  private final Matrix q, r;
+  private final boolean fullRank;
+  private final int rows;
+  private final int columns;
 
   /**
-   * Constructs and returns a new QR decomposition object;  computed by Householder reflections; The decomposed matrices
-   * can be retrieved via instance methods of the returned decomposition object.
+   * Constructs and returns a new QR decomposition object;  computed by Householder reflections; The
+   * decomposed matrices can be retrieved via instance methods of the returned decomposition
+   * object.
    *
    * @param a A rectangular matrix.
    * @throws IllegalArgumentException if <tt>A.rows() < A.columns()</tt>.
    */
-
   public QRDecomposition(Matrix a) {
 
-    // Initialize.
-    qr = a.clone();
-    originalRows = a.numRows();
-    originalColumns = a.numCols();
-    rDiag = new DenseVector(originalColumns);
+    rows = a.rowSize();
+    int min = Math.min(a.rowSize(), a.columnSize());
+    columns = a.columnSize();
 
-    // precompute and cache some views to avoid regenerating them time and again
-    Vector[] QRcolumnsPart = new Vector[originalColumns];
-    for (int k = 0; k < originalColumns; k++) {
-      QRcolumnsPart[k] = qr.viewColumn(k).viewPart(k, originalRows - k);
-    }
+    Matrix qTmp = a.clone();
 
-    // Main loop.
-    for (int k = 0; k < originalColumns; k++) {
-      //DoubleMatrix1D QRcolk = QR.viewColumn(k).viewPart(k,m-k);
-      // Compute 2-norm of k-th column without under/overflow.
-      double nrm = 0;
-      //if (k<m) nrm = QRcolumnsPart[k].aggregate(hypot,F.identity);
+    boolean fullRank = true;
 
-      for (int i = k; i < originalRows; i++) { // fixes bug reported by hong.44@osu.edu
-        nrm = Algebra.hypot(nrm, qr.getQuick(i, k));
+    r = new DenseMatrix(min, columns);
+
+    for (int i = 0; i < min; i++) {
+      Vector qi = qTmp.viewColumn(i);
+      double alpha = qi.norm(2);
+      if (Math.abs(alpha) > Double.MIN_VALUE) {
+        qi.assign(Functions.div(alpha));
+      } else {
+        if (Double.isInfinite(alpha) || Double.isNaN(alpha)) {
+          throw new ArithmeticException("Invalid intermediate result");
+        }
+        fullRank = false;
       }
+      r.set(i, i, alpha);
 
-
-      if (nrm != 0.0) {
-        // Form k-th Householder vector.
-        if (qr.getQuick(k, k) < 0) {
-          nrm = -nrm;
-        }
-        QRcolumnsPart[k].assign(Functions.div(nrm));
-        /*
-        for (int i = k; i < m; i++) {
-           QR[i][k] /= nrm;
-        }
-        */
-
-        qr.setQuick(k, k, qr.getQuick(k, k) + 1);
-
-        // Apply transformation to remaining columns.
-        for (int j = k + 1; j < originalColumns; j++) {
-          Vector QRcolj = qr.viewColumn(j).viewPart(k, originalRows - k);
-          double s = QRcolumnsPart[k].dot(QRcolj);
-          /*
-          // fixes bug reported by John Chambers
-          DoubleMatrix1D QRcolj = QR.viewColumn(j).viewPart(k,m-k);
-          double s = QRcolumnsPart[k].zDotProduct(QRcolumns[j]);
-          double s = 0.0;
-          for (int i = k; i < m; i++) {
-            s += QR[i][k]*QR[i][j];
+      for (int j = i + 1; j < columns; j++) {
+        Vector qj = qTmp.viewColumn(j);
+        double norm = qj.norm(2);
+        if (Math.abs(norm) > Double.MIN_VALUE) {
+          double beta = qi.dot(qj);
+          r.set(i, j, beta);
+          if (j < min) {
+            qj.assign(qi, Functions.plusMult(-beta));
           }
-          */
-          s = -s / qr.getQuick(k, k);
-          //QRcolumnsPart[j].assign(QRcolumns[k], F.plusMult(s));
-
-          for (int i = k; i < originalRows; i++) {
-            qr.setQuick(i, j, qr.getQuick(i, j) + s * qr.getQuick(i, k));
+        } else {
+          if (Double.isInfinite(norm) || Double.isNaN(norm)) {
+            throw new ArithmeticException("Invalid intermediate result");
           }
-
         }
       }
-      rDiag.setQuick(k, -nrm);
     }
+    if (columns > min) {
+      q = qTmp.viewPart(0, rows, 0, min).clone();
+    } else {
+      q = qTmp;
+    }
+    this.fullRank = fullRank;
   }
 
   /**
@@ -133,19 +112,6 @@ public class QRDecomposition {
    * @return <tt>Q</tt>
    */
   public Matrix getQ() {
-    int columns = Math.min(originalColumns, originalRows);
-    Matrix q = qr.like(originalRows, columns);
-    for (int k = columns - 1; k >= 0; k--) {
-      Vector QRcolk = qr.viewColumn(k).viewPart(k, originalRows - k);
-      q.set(k, k, 1);
-      for (int j = k; j < columns; j++) {
-        if (qr.get(k, k) != 0) {
-          Vector Qcolj = q.viewColumn(j).viewPart(k, originalRows - k);
-          double s = -QRcolk.dot(Qcolj) / qr.get(k, k);
-          Qcolj.assign(QRcolk, Functions.plusMult(s));
-        }
-      }
-    }
     return q;
   }
 
@@ -155,19 +121,6 @@ public class QRDecomposition {
    * @return <tt>R</tt>
    */
   public Matrix getR() {
-    int rows = Math.min(originalRows, originalColumns);
-    Matrix r = qr.like(rows, originalColumns);
-    for (int i = 0; i < rows; i++) {
-      for (int j = 0; j < originalColumns; j++) {
-        if (i < j) {
-          r.setQuick(i, j, qr.getQuick(i, j));
-        } else if (i == j) {
-          r.setQuick(i, j, rDiag.getQuick(i));
-        } else {
-          r.setQuick(i, j, 0);
-        }
-      }
-    }
     return r;
   }
 
@@ -177,12 +130,7 @@ public class QRDecomposition {
    * @return true if <tt>R</tt>, and hence <tt>A</tt>, has full rank.
    */
   public boolean hasFullRank() {
-    for (int j = 0; j < originalColumns; j++) {
-      if (rDiag.getQuick(j) == 0) {
-        return false;
-      }
-    }
-    return true;
+    return fullRank;
   }
 
   /**
@@ -193,12 +141,12 @@ public class QRDecomposition {
    * @throws IllegalArgumentException if <tt>B.rows() != A.rows()</tt>.
    */
   public Matrix solve(Matrix B) {
-    if (B.numRows() != originalRows) {
+    if (B.numRows() != rows) {
       throw new IllegalArgumentException("Matrix row dimensions must agree.");
     }
 
-    int columns = B.numCols();
-    Matrix x = B.like(originalColumns, columns);
+    int cols = B.numCols();
+    Matrix x = B.like(columns, cols);
 
     // this can all be done a bit more efficiently if we don't actually
     // form explicit versions of Q^T and R but this code isn't soo bad
@@ -207,13 +155,13 @@ public class QRDecomposition {
     Matrix y = qt.times(B);
 
     Matrix r = getR();
-    for (int k = Math.min(originalColumns, originalRows) - 1; k >= 0; k--) {
+    for (int k = Math.min(columns, rows) - 1; k >= 0; k--) {
       // X[k,] = Y[k,] / R[k,k], note that X[k,] starts with 0 so += is same as =
       x.viewRow(k).assign(y.viewRow(k), Functions.plusMult(1 / r.get(k, k)));
 
       // Y[0:(k-1),] -= R[0:(k-1),k] * X[k,]
       Vector rColumn = r.viewColumn(k).viewPart(0, k);
-      for (int c = 0; c < columns; c++) {
+      for (int c = 0; c < cols; c++) {
         y.viewColumn(c).viewPart(0, k).assign(rColumn, Functions.plusMult(-x.get(k, c)));
       }
     }
@@ -225,6 +173,39 @@ public class QRDecomposition {
    */
   @Override
   public String toString() {
-    return String.format(Locale.ENGLISH, "QR(%d,%d,fullRank=%s)", originalColumns, originalRows, hasFullRank());
+    return String.format(Locale.ENGLISH, "QR(%d x %d,fullRank=%s)", rows, columns, hasFullRank());
+  }
+
+  public static void main(String[] args) {
+    Matrix a = new DenseMatrix(60, 60).assign(Functions.random());
+
+    int n = 0;
+    List<Integer> counts = Lists.newArrayList(10, 20, 50, 100, 200, 500, 1000, 2000, 5000);
+    for (int k : counts) {
+      double warmup = 0;
+      double other = 0;
+
+      n += k;
+      for (int i = 0; i < k; i++) {
+        QRDecomposition qr = new QRDecomposition(a);
+        warmup = Math.max(warmup, qr.getQ().transpose().times(qr.getQ()).viewDiagonal().assign(Functions.plus(-1)).norm(1));
+        Matrix z = qr.getQ().times(qr.getR()).minus(a);
+        other = Math.max(other, z.aggregate(Functions.MIN, Functions.ABS));
+      }
+
+      double maxIdent = 0;
+      double maxError = 0;
+
+      long t0 = System.nanoTime();
+      for (int i = 0; i < N; i++) {
+        QRDecomposition qr = new QRDecomposition(a);
+
+        maxIdent = Math.max(maxIdent, qr.getQ().transpose().times(qr.getQ()).viewDiagonal().assign(Functions.plus(-1)).norm(1));
+        Matrix z = qr.getQ().times(qr.getR()).minus(a);
+        maxError = Math.max(maxError, z.aggregate(Functions.MIN, Functions.ABS));
+      }
+      System.out.printf("%d\t%.1f\t%g\t%g\t%g\n", n, (System.nanoTime() - t0) / 1e3 / N, maxIdent, maxError, warmup);
+//    System.out.printf("%g, %g\n", maxIdent, maxError);
+    }
   }
 }
