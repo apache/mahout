@@ -114,7 +114,7 @@ public final class QRDecompositionTest extends MahoutTestCase {
   public void fullRankWide() {
     Matrix x = matrix().transpose();
     QRDecomposition qr = new QRDecomposition(x);
-    assertFalse(qr.hasFullRank());
+    assertTrue(qr.hasFullRank());
     Matrix rActual = qr.getR();
 
     Matrix rRef = reshape(new double[]{
