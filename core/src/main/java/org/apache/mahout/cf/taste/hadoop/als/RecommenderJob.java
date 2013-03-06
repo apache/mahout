@@ -118,6 +118,8 @@ public class RecommenderJob extends AbstractJob {
     private int recommendationsPerUser;
     private float maxRating;
 
+    private RecommendedItemsWritable result = new RecommendedItemsWritable();
+
     @Override
     protected void setup(Context ctx) throws IOException, InterruptedException {
       recommendationsPerUser = ctx.getConfiguration().getInt(NUM_RECOMMENDATIONS,
@@ -151,19 +153,25 @@ public class RecommenderJob extends AbstractJob {
         public boolean apply(int itemID, Vector itemFeatures) {
           if (!alreadyRatedItems.contains(itemID)) {
             double predictedRating = U.get(userID).dot(itemFeatures);
-            topKItems.offer(new GenericRecommendedItem(itemID, (float) predictedRating));
+
+            // manual check to avoid an object instantiation per unknown item
+            if (topKItems.size() < recommendationsPerUser || (float) predictedRating > topKItems.peek().getValue()) {
+              topKItems.offer(new GenericRecommendedItem(itemID, (float) predictedRating));
+            }
           }
           return true;
         }
       });
 
-      List<RecommendedItem> recommendedItems = Lists.newArrayListWithExpectedSize(recommendationsPerUser);
-      for (RecommendedItem topItem : topKItems.retrieve()) {
-        recommendedItems.add(new GenericRecommendedItem(topItem.getItemID(), Math.min(topItem.getValue(), maxRating)));
-      }
-
       if (!topKItems.isEmpty()) {
-        ctx.write(userIDWritable, new RecommendedItemsWritable(recommendedItems));
+
+        List<RecommendedItem> recommendedItems = topKItems.retrieve();
+        for (RecommendedItem topItem : topKItems.retrieve()) {
+          topItem.capToMaxValue(maxRating);
+        }
+
+        result.set(recommendedItems);
+        ctx.write(userIDWritable, result);
       }
     }
   }

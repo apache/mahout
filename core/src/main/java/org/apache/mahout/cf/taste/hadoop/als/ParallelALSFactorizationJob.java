@@ -201,6 +201,12 @@ public class ParallelALSFactorizationJob extends AbstractJob {
   }
 
   static class ItemRatingVectorsMapper extends Mapper<LongWritable,Text,IntWritable,VectorWritable> {
+
+    private IntWritable itemIDWritable = new IntWritable();
+    private VectorWritable ratingsWritable = new VectorWritable(true);
+
+    private Vector ratings = new SequentialAccessSparseVector(Integer.MAX_VALUE, 1);
+
     @Override
     protected void map(LongWritable offset, Text line, Context ctx) throws IOException, InterruptedException {
       String[] tokens = TasteHadoopUtils.splitPrefTokens(line.toString());
@@ -208,10 +214,15 @@ public class ParallelALSFactorizationJob extends AbstractJob {
       int itemID = Integer.parseInt(tokens[1]);
       float rating = Float.parseFloat(tokens[2]);
 
-      Vector ratings = new RandomAccessSparseVector(Integer.MAX_VALUE, 1);
-      ratings.set(userID, rating);
+      ratings.setQuick(userID, rating);
 
-      ctx.write(new IntWritable(itemID), new VectorWritable(ratings, true));
+      itemIDWritable.set(itemID);
+      ratingsWritable.set(ratings);
+
+      ctx.write(itemIDWritable, ratingsWritable);
+
+      // prepare instance for reuse
+      ratings.setQuick(userID, 0.0d);
     }
   }
 
@@ -240,6 +251,8 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     private int numFeatures;
     private OpenIntObjectHashMap<Vector> UorM;
 
+    private VectorWritable uiOrmjWritable = new VectorWritable();
+
     @Override
     protected void setup(Mapper.Context ctx) throws IOException, InterruptedException {
       lambda = Double.parseDouble(ctx.getConfiguration().get(LAMBDA));
@@ -254,7 +267,8 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     @Override
     protected void map(IntWritable userOrItemID, VectorWritable ratingsWritable, Context ctx)
         throws IOException, InterruptedException {
-      Vector ratings = new SequentialAccessSparseVector(ratingsWritable.get());
+      Vector ratings = ratingsWritable.get();
+
       List<Vector> featureVectors = Lists.newArrayList();
       Iterator<Vector.Element> interactions = ratings.iterateNonZero();
       while (interactions.hasNext()) {
@@ -264,13 +278,16 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
       Vector uiOrmj = AlternatingLeastSquaresSolver.solve(featureVectors, ratings, lambda, numFeatures);
 
-      ctx.write(userOrItemID, new VectorWritable(uiOrmj));
+      uiOrmjWritable.set(uiOrmj);
+      ctx.write(userOrItemID, uiOrmjWritable);
     }
   }
 
   static class SolveImplicitFeedbackMapper extends Mapper<IntWritable,VectorWritable,IntWritable,VectorWritable> {
 
     private ImplicitFeedbackAlternatingLeastSquaresSolver solver;
+
+    private VectorWritable uiOrmjWritable = new VectorWritable();
 
     @Override
     protected void setup(Mapper.Context ctx) throws IOException, InterruptedException {
@@ -289,15 +306,20 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     @Override
     protected void map(IntWritable userOrItemID, VectorWritable ratingsWritable, Context ctx)
         throws IOException, InterruptedException {
-      Vector ratings = new SequentialAccessSparseVector(ratingsWritable.get());
 
-      Vector uiOrmj = solver.solve(ratings);
+      Vector uiOrmj = solver.solve(ratingsWritable.get());
 
-      ctx.write(userOrItemID, new VectorWritable(uiOrmj));
+      uiOrmjWritable.set(uiOrmj);
+      ctx.write(userOrItemID, uiOrmjWritable);
     }
   }
 
   static class AverageRatingMapper extends Mapper<IntWritable,VectorWritable,IntWritable,VectorWritable> {
+
+    private IntWritable firstIndex = new IntWritable(0);
+    private Vector featureVector = new RandomAccessSparseVector(Integer.MAX_VALUE, 1);
+    private VectorWritable featureVectorWritable = new VectorWritable();
+
     @Override
     protected void map(IntWritable r, VectorWritable v, Context ctx) throws IOException, InterruptedException {
       RunningAverage avg = new FullRunningAverage();
@@ -305,9 +327,13 @@ public class ParallelALSFactorizationJob extends AbstractJob {
       while (elements.hasNext()) {
         avg.addDatum(elements.next().get());
       }
-      Vector vector = new RandomAccessSparseVector(Integer.MAX_VALUE, 1);
-      vector.setQuick(r.get(), avg.getAverage());
-      ctx.write(new IntWritable(0), new VectorWritable(vector));
+
+      featureVector.setQuick(r.get(), avg.getAverage());
+      featureVectorWritable.set(featureVector);
+      ctx.write(firstIndex, featureVectorWritable);
+
+      // prepare instance for reuse
+      featureVector.setQuick(r.get(), 0.0d);
     }
   }
 

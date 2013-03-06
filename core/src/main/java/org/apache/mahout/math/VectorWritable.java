@@ -41,6 +41,10 @@ public final class VectorWritable extends Configured implements Writable {
   public VectorWritable() {
   }
 
+  public VectorWritable(boolean writesLaxPrecision) {
+    setWritesLaxPrecision(writesLaxPrecision);
+  }
+
   public VectorWritable(Vector vector) {
     this.vector = vector;
   }

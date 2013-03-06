@@ -71,7 +71,7 @@ abstract class FixedSizePriorityQueue<T> {
     return topItems;
   }
 
-  protected T peek() {
+  public T peek() {
     return queue.peek();
   }
 }

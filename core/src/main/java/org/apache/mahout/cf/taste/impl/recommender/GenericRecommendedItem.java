@@ -32,7 +32,7 @@ import com.google.common.base.Preconditions;
 public final class GenericRecommendedItem implements RecommendedItem, Serializable {
   
   private final long itemID;
-  private final float value;
+  private float value;
   
   /**
    * @throws IllegalArgumentException
@@ -53,7 +53,14 @@ public final class GenericRecommendedItem implements RecommendedItem, Serializab
   public float getValue() {
     return value;
   }
-  
+
+  @Override
+  public void capToMaxValue(float maxValue) {
+    if (value > maxValue) {
+      value = maxValue;
+    }
+  }
+
   @Override
   public String toString() {
     return "RecommendedItem[item:" + itemID + ", value:" + value + ']';

@@ -37,5 +37,11 @@ public interface RecommendedItem {
    * @return strength of the preference
    */
   float getValue();
-  
+
+  /**
+   * set a maximum preference value
+   *
+   * @param maxValue
+   */
+  void capToMaxValue(float maxValue);
 }
