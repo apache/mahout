@@ -166,7 +166,7 @@ public class RecommenderJob extends AbstractJob {
       if (!topKItems.isEmpty()) {
 
         List<RecommendedItem> recommendedItems = topKItems.retrieve();
-        for (RecommendedItem topItem : topKItems.retrieve()) {
+        for (RecommendedItem topItem : recommendedItems) {
           topItem.capToMaxValue(maxRating);
         }
 
