@@ -269,7 +269,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
         throws IOException, InterruptedException {
       Vector ratings = ratingsWritable.get();
 
-      List<Vector> featureVectors = Lists.newArrayList();
+      List<Vector> featureVectors = Lists.newArrayListWithCapacity(ratings.getNumNondefaultElements());
       Iterator<Vector.Element> interactions = ratings.iterateNonZero();
       while (interactions.hasNext()) {
         int index = interactions.next().index();

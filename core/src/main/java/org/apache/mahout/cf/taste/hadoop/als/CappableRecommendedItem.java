@@ -15,62 +15,62 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.recommender;
+package org.apache.mahout.cf.taste.hadoop.als;
 
-import java.io.Serializable;
-
+import com.google.common.base.Preconditions;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.common.RandomUtils;
 
-import com.google.common.base.Preconditions;
-
 /**
- * <p>
- * A simple implementation of {@link RecommendedItem}.
- * </p>
+ * Mutable variant of {@link RecommendedItem} that allows to cap the preference to a max value
  */
-public final class GenericRecommendedItem implements RecommendedItem, Serializable {
-  
+class CappableRecommendedItem implements RecommendedItem {
+
   private final long itemID;
-  private final float value;
-  
+  private float value;
+
   /**
    * @throws IllegalArgumentException
    *           if item is null or value is NaN
    */
-  public GenericRecommendedItem(long itemID, float value) {
+  public CappableRecommendedItem(long itemID, float value) {
     Preconditions.checkArgument(!Float.isNaN(value), "value is NaN");
     this.itemID = itemID;
     this.value = value;
   }
-  
+
   @Override
   public long getItemID() {
     return itemID;
   }
-  
+
   @Override
   public float getValue() {
     return value;
   }
 
+  public void capToMaxValue(float maxValue) {
+    if (value > maxValue) {
+      value = maxValue;
+    }
+  }
+
   @Override
   public String toString() {
-    return "RecommendedItem[item:" + itemID + ", value:" + value + ']';
+    return "CappableRecommendedItem[item:" + itemID + ", value:" + value + ']';
   }
-  
+
   @Override
   public int hashCode() {
     return (int) itemID ^ RandomUtils.hashFloat(value);
   }
-  
+
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof GenericRecommendedItem)) {
+    if (!(o instanceof CappableRecommendedItem)) {
       return false;
     }
     RecommendedItem other = (RecommendedItem) o;
     return itemID == other.getItemID() && value == other.getValue();
   }
-  
 }

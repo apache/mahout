@@ -38,10 +38,12 @@ import org.apache.mahout.math.map.OpenIntObjectHashMap;
 import org.apache.mahout.math.set.OpenIntHashSet;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 
 /**
  * <p>Computes the top-N recommendations per user from a decomposition of the rating matrix</p>
@@ -97,7 +99,6 @@ public class RecommenderJob extends AbstractJob {
       return -1;
     }
 
-
     return 0;
   }
 
@@ -109,6 +110,9 @@ public class RecommenderJob extends AbstractJob {
         }
       };
 
+  private static final Comparator<RecommendedItem> DESCENDING_BY_PREFERENCE_VALUE =
+      Collections.reverseOrder(BY_PREFERENCE_VALUE);
+
   static class PredictionMapper
       extends Mapper<IntWritable,VectorWritable,IntWritable,RecommendedItemsWritable> {
 
@@ -118,7 +122,9 @@ public class RecommenderJob extends AbstractJob {
     private int recommendationsPerUser;
     private float maxRating;
 
-    private RecommendedItemsWritable result = new RecommendedItemsWritable();
+    private PriorityQueue<RecommendedItem> topKItems;
+
+    private RecommendedItemsWritable recommendations = new RecommendedItemsWritable();
 
     @Override
     protected void setup(Context ctx) throws IOException, InterruptedException {
@@ -132,6 +138,8 @@ public class RecommenderJob extends AbstractJob {
       M = ALSUtils.readMatrixByRows(pathToM, ctx.getConfiguration());
 
       maxRating = Float.parseFloat(ctx.getConfiguration().get(MAX_RATING));
+
+      topKItems = new PriorityQueue<RecommendedItem>(recommendationsPerUser + 1, BY_PREFERENCE_VALUE);
     }
 
     @Override
@@ -141,12 +149,13 @@ public class RecommenderJob extends AbstractJob {
       Vector ratings = ratingsWritable.get();
       final int userID = userIDWritable.get();
       final OpenIntHashSet alreadyRatedItems = new OpenIntHashSet(ratings.getNumNondefaultElements());
-      final TopK<RecommendedItem> topKItems = new TopK<RecommendedItem>(recommendationsPerUser, BY_PREFERENCE_VALUE);
 
       Iterator<Vector.Element> ratingsIterator = ratings.iterateNonZero();
       while (ratingsIterator.hasNext()) {
         alreadyRatedItems.add(ratingsIterator.next().index());
       }
+
+      topKItems.clear();
 
       M.forEachPair(new IntObjectProcedure<Vector>() {
         @Override
@@ -154,10 +163,13 @@ public class RecommenderJob extends AbstractJob {
           if (!alreadyRatedItems.contains(itemID)) {
             double predictedRating = U.get(userID).dot(itemFeatures);
 
-            // manual check to avoid an object instantiation per unknown item
-            if (topKItems.size() < recommendationsPerUser || (float) predictedRating > topKItems.peek().getValue()) {
-              topKItems.offer(new GenericRecommendedItem(itemID, (float) predictedRating));
+            if (topKItems.size() < recommendationsPerUser) {
+              topKItems.add(new CappableRecommendedItem(itemID, (float) predictedRating));
+            } else if (predictedRating > topKItems.peek().getValue()) {
+              topKItems.add(new CappableRecommendedItem(itemID, (float) predictedRating));
+              topKItems.poll();
             }
+
           }
           return true;
         }
@@ -165,13 +177,14 @@ public class RecommenderJob extends AbstractJob {
 
       if (!topKItems.isEmpty()) {
 
-        List<RecommendedItem> recommendedItems = topKItems.retrieve();
+        List<RecommendedItem> recommendedItems = Lists.newArrayList(topKItems);
+        Collections.sort(recommendedItems, DESCENDING_BY_PREFERENCE_VALUE);
         for (RecommendedItem topItem : recommendedItems) {
-          topItem.capToMaxValue(maxRating);
+          ((CappableRecommendedItem) topItem).capToMaxValue(maxRating);
         }
 
-        result.set(recommendedItems);
-        ctx.write(userIDWritable, result);
+        recommendations.set(recommendedItems);
+        ctx.write(userIDWritable, recommendations);
       }
     }
   }
