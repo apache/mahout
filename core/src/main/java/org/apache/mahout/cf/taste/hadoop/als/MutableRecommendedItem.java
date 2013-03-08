@@ -17,27 +17,17 @@
 
 package org.apache.mahout.cf.taste.hadoop.als;
 
-import com.google.common.base.Preconditions;
+import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.common.RandomUtils;
 
 /**
- * Mutable variant of {@link RecommendedItem} that allows to cap the preference to a max value
+ * Mutable variant of {@link RecommendedItem}
  */
-class CappableRecommendedItem implements RecommendedItem {
+class MutableRecommendedItem implements RecommendedItem {
 
-  private final long itemID;
+  private long itemID;
   private float value;
-
-  /**
-   * @throws IllegalArgumentException
-   *           if item is null or value is NaN
-   */
-  public CappableRecommendedItem(long itemID, float value) {
-    Preconditions.checkArgument(!Float.isNaN(value), "value is NaN");
-    this.itemID = itemID;
-    this.value = value;
-  }
 
   @Override
   public long getItemID() {
@@ -49,15 +39,24 @@ class CappableRecommendedItem implements RecommendedItem {
     return value;
   }
 
+  public void set(long itemID, float value) {
+    this.itemID = itemID;
+    this.value = value;
+  }
+
   public void capToMaxValue(float maxValue) {
     if (value > maxValue) {
       value = maxValue;
     }
   }
 
+  public RecommendedItem copy() {
+    return new GenericRecommendedItem(itemID, value);
+  }
+
   @Override
   public String toString() {
-    return "CappableRecommendedItem[item:" + itemID + ", value:" + value + ']';
+    return "MutableRecommendedItem[item:" + itemID + ", value:" + value + ']';
   }
 
   @Override
@@ -67,7 +66,7 @@ class CappableRecommendedItem implements RecommendedItem {
 
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof CappableRecommendedItem)) {
+    if (!(o instanceof MutableRecommendedItem)) {
       return false;
     }
     RecommendedItem other = (RecommendedItem) o;

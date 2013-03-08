@@ -60,7 +60,6 @@ public final class RecommendedItemsWritable implements Writable {
       Varint.writeSignedVarLong(item.getItemID(), out);
       out.writeFloat(item.getValue());
     }
-    
   }
   
   @Override

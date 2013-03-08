@@ -17,8 +17,7 @@
 
 package org.apache.mahout.cf.taste.hadoop.als;
 
-import com.google.common.collect.Lists;
-import com.google.common.primitives.Floats;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Job;
@@ -36,12 +35,9 @@ import org.apache.mahout.math.map.OpenIntObjectHashMap;
 import org.apache.mahout.math.set.OpenIntHashSet;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.PriorityQueue;
 
 /**
  * <p>Computes the top-N recommendations per user from a decomposition of the rating matrix</p>
@@ -53,7 +49,7 @@ import java.util.PriorityQueue;
  * <li>--output (path): path where output should go</li>
  * <li>--numRecommendations (int): maximum number of recommendations per user</li>
  * <li>--maxRating (double): maximum rating of an item</li>
- * <li>--numFeatures (int): number of features to use for decomposition </li>
+ * <li>--NUM_FEATURES (int): number of features to use for decomposition </li>
  * </ol>
  */
 public class RecommenderJob extends AbstractJob {
@@ -87,11 +83,13 @@ public class RecommenderJob extends AbstractJob {
 
     Job prediction = prepareJob(getInputPath(), getOutputPath(), SequenceFileInputFormat.class, PredictionMapper.class,
         IntWritable.class, RecommendedItemsWritable.class, TextOutputFormat.class);
-    prediction.getConfiguration().setInt(NUM_RECOMMENDATIONS,
-        Integer.parseInt(getOption("numRecommendations")));
-    prediction.getConfiguration().set(USER_FEATURES_PATH, getOption("userFeatures"));
-    prediction.getConfiguration().set(ITEM_FEATURES_PATH, getOption("itemFeatures"));
-    prediction.getConfiguration().set(MAX_RATING, getOption("maxRating"));
+    Configuration conf = prediction.getConfiguration();
+
+    conf.setInt(NUM_RECOMMENDATIONS, Integer.parseInt(getOption("numRecommendations")));
+    conf.set(USER_FEATURES_PATH, getOption("userFeatures"));
+    conf.set(ITEM_FEATURES_PATH, getOption("itemFeatures"));
+    conf.set(MAX_RATING, getOption("maxRating"));
+
     boolean succeeded = prediction.waitForCompletion(true);
     if (!succeeded) {
       return -1;
@@ -99,17 +97,6 @@ public class RecommenderJob extends AbstractJob {
 
     return 0;
   }
-
-  private static final Comparator<RecommendedItem> BY_PREFERENCE_VALUE =
-      new Comparator<RecommendedItem>() {
-        @Override
-        public int compare(RecommendedItem one, RecommendedItem two) {
-          return Floats.compare(one.getValue(), two.getValue());
-        }
-      };
-
-  private static final Comparator<RecommendedItem> DESCENDING_BY_PREFERENCE_VALUE =
-      Collections.reverseOrder(BY_PREFERENCE_VALUE);
 
   static class PredictionMapper
       extends Mapper<IntWritable,VectorWritable,IntWritable,RecommendedItemsWritable> {
@@ -120,14 +107,11 @@ public class RecommenderJob extends AbstractJob {
     private int recommendationsPerUser;
     private float maxRating;
 
-    private PriorityQueue<RecommendedItem> topKItems;
-
     private RecommendedItemsWritable recommendations = new RecommendedItemsWritable();
 
     @Override
     protected void setup(Context ctx) throws IOException, InterruptedException {
-      recommendationsPerUser = ctx.getConfiguration().getInt(NUM_RECOMMENDATIONS,
-          DEFAULT_NUM_RECOMMENDATIONS);
+      recommendationsPerUser = ctx.getConfiguration().getInt(NUM_RECOMMENDATIONS, DEFAULT_NUM_RECOMMENDATIONS);
 
       Path pathToU = new Path(ctx.getConfiguration().get(USER_FEATURES_PATH));
       Path pathToM = new Path(ctx.getConfiguration().get(ITEM_FEATURES_PATH));
@@ -136,8 +120,16 @@ public class RecommenderJob extends AbstractJob {
       M = ALSUtils.readMatrixByRows(pathToM, ctx.getConfiguration());
 
       maxRating = Float.parseFloat(ctx.getConfiguration().get(MAX_RATING));
+    }
 
-      topKItems = new PriorityQueue<RecommendedItem>(recommendationsPerUser + 1, BY_PREFERENCE_VALUE);
+    // we can use a simple dot product computation, as both vectors are dense
+    private double dot(Vector x, Vector y) {
+      int numFeatures = x.size();
+      double sum = 0;
+      for (int n = 0; n < numFeatures; n++) {
+        sum += x.getQuick(n) * y.getQuick(n);
+      }
+      return sum;
     }
 
     @Override
@@ -153,19 +145,19 @@ public class RecommenderJob extends AbstractJob {
         alreadyRatedItems.add(ratingsIterator.next().index());
       }
 
-      topKItems.clear();
+      final TopItemQueue topItemQueue = new TopItemQueue(recommendationsPerUser);
+      final Vector userFeatures = U.get(userID);
 
       M.forEachPair(new IntObjectProcedure<Vector>() {
         @Override
         public boolean apply(int itemID, Vector itemFeatures) {
           if (!alreadyRatedItems.contains(itemID)) {
-            double predictedRating = U.get(userID).dot(itemFeatures);
+            double predictedRating = dot(userFeatures, itemFeatures);
 
-            if (topKItems.size() < recommendationsPerUser) {
-              topKItems.add(new CappableRecommendedItem(itemID, (float) predictedRating));
-            } else if (predictedRating > topKItems.peek().getValue()) {
-              topKItems.add(new CappableRecommendedItem(itemID, (float) predictedRating));
-              topKItems.poll();
+            MutableRecommendedItem top = topItemQueue.top();
+            if (predictedRating > top.getValue()) {
+              top.set(itemID, (float) predictedRating);
+              topItemQueue.updateTop();
             }
 
           }
@@ -173,12 +165,13 @@ public class RecommenderJob extends AbstractJob {
         }
       });
 
-      if (!topKItems.isEmpty()) {
+      List<RecommendedItem> recommendedItems = topItemQueue.getTopItems();
 
-        List<RecommendedItem> recommendedItems = Lists.newArrayList(topKItems);
-        Collections.sort(recommendedItems, DESCENDING_BY_PREFERENCE_VALUE);
+      if (!recommendedItems.isEmpty()) {
+
+        // cap predictions to maxRating
         for (RecommendedItem topItem : recommendedItems) {
-          ((CappableRecommendedItem) topItem).capToMaxValue(maxRating);
+          ((MutableRecommendedItem) topItem).capToMaxValue(maxRating);
         }
 
         recommendations.set(recommendedItems);
