@@ -85,7 +85,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
       if (lower.startsWith(ARFFModel.ARFF_COMMENT)) {
         continue;
       } else if (lower.startsWith(ARFFModel.RELATION)) {
-        model.setRelation(line.substring(ARFFModel.RELATION.length()).trim());
+        model.setRelation(ARFFType.removeQuotes(line.substring(ARFFModel.RELATION.length())));
       } else if (lower.startsWith(ARFFModel.ATTRIBUTE)) {
         String label;
         ARFFType type;
@@ -108,7 +108,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
           int classIdx = lower.indexOf(ARFFType.NOMINAL.getIndicator());
           String[] classes = COMMA_PATTERN.split(line.substring(classIdx + 1, line.length() - 1));
           for (int i = 0; i < classes.length; i++) {
-            model.addNominal(label, classes[i].trim(), i + 1);
+            model.addNominal(label, ARFFType.removeQuotes(classes[i]), i + 1);
           }
         } else if (lower.contains(ARFFType.DATE.getIndicator())) {
           label = ARFFType.DATE.getLabel(lower);

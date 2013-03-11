@@ -117,7 +117,7 @@ public class MapBackedARFFModel implements ARFFModel {
     double result;
     Map<String,Integer> classes = nominalMap.get(label);
     if (classes != null) {
-      Integer ord = classes.get(data);
+      Integer ord = classes.get(ARFFType.removeQuotes(data));
       if (ord != null) {
         result = ord;
       } else {

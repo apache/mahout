@@ -246,6 +246,55 @@ public final class ARFFVectorIterableTest extends MahoutTestCase {
     assertEquals(3.0, vector.get(2), EPSILON);
   }
 
+  @Test
+  public void testQuotes() throws Exception {
+    
+    // ARFF allows quotes on identifiers
+    String arff = "@RELATION 'quotes'\n"
+        + "@ATTRIBUTE 'theNumeric' NUMERIC\n"
+        + "@ATTRIBUTE \"theInteger\" INTEGER\n"
+        + "@ATTRIBUTE theReal REAL\n"
+        + "@ATTRIBUTE theNominal {\"double-quote\", 'single-quote', no-quote}\n"
+        + "@DATA\n"
+        + "1.0,2,3.0,\"no-quote\"\n"
+        + "4.0,5,6.0,single-quote\n"
+        + "7.0,8,9.0,'double-quote'\n"
+      ;
+    ARFFModel model = new MapBackedARFFModel();
+    ARFFVectorIterable iterable = new ARFFVectorIterable(arff, model);
+    model = iterable.getModel();
+    assertNotNull(model);
+    assertEquals("quotes", model.getRelation());
+
+    // check attribute labels
+    assertEquals(4, model.getLabelSize());
+    assertEquals(ARFFType.NUMERIC, model.getARFFType(0));
+    assertEquals(ARFFType.INTEGER, model.getARFFType(1));
+    assertEquals(ARFFType.REAL, model.getARFFType(2));
+    assertEquals(ARFFType.NOMINAL, model.getARFFType(3));
+
+    Map<String, Integer> labelBindings = model.getLabelBindings();
+    assertTrue(labelBindings.keySet().contains("thenumeric"));
+    assertTrue(labelBindings.keySet().contains("theinteger"));
+    assertTrue(labelBindings.keySet().contains("thereal"));
+    assertTrue(labelBindings.keySet().contains("thenominal"));
+    
+    // check nominal values
+    Map<String, Integer> nominalMap = model.getNominalMap().get("thenominal");
+    assertNotNull(nominalMap);
+    assertEquals(3, nominalMap.size());
+    assertTrue(nominalMap.keySet().contains("double-quote"));
+    assertTrue(nominalMap.keySet().contains("single-quote"));
+    assertTrue(nominalMap.keySet().contains("no-quote"));
+
+    // check data values
+    Iterator<Vector> it = iterable.iterator();
+    Vector vector = it.next();
+    assertEquals(nominalMap.get("no-quote"), vector.get(3), EPSILON);
+    assertEquals(nominalMap.get("single-quote"), it.next().get(3), EPSILON);
+    assertEquals(nominalMap.get("double-quote"), it.next().get(3), EPSILON);
+  }
+
   private static final String SAMPLE_DENSE_ARFF = "   % Comments\n" + "   % \n" + "   % Comments go here"
                                                   + "   % \n" + "   @RELATION golf\n" + '\n'
                                                   + "   @ATTRIBUTE outlook {sunny,overcast, rain}\n"

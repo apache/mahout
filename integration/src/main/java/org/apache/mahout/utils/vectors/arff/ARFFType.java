@@ -38,6 +38,25 @@ public enum ARFFType {
   
   public String getLabel(String line) {
     int idx = line.lastIndexOf(indicator);
-    return line.substring(ARFFModel.ATTRIBUTE.length(), idx).trim();
+    return removeQuotes(line.substring(ARFFModel.ATTRIBUTE.length(), idx));
+  }
+
+  /**
+   * Remove quotes and leading/trailing whitespace from a single or double quoted string
+   * @param str quotes from
+   * @return  A string without quotes
+   */
+  public static String removeQuotes(String str) {
+    String cleaned = str;
+    if (cleaned != null) {
+        cleaned = cleaned.trim();
+        boolean isQuoted = cleaned.length() > 1 &&
+            (cleaned.startsWith("\"") &&  cleaned.endsWith("\"") ||
+            cleaned.startsWith("'") &&  cleaned.endsWith("'"));
+        if (isQuoted) {
+          cleaned = cleaned.substring(1, cleaned.length() - 1);
+        }
+      }
+    return cleaned;
   }
 }
