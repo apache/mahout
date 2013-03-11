@@ -22,8 +22,6 @@ import com.google.common.collect.Maps;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.common.RandomUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -41,7 +39,6 @@ import java.util.Random;
  */
 public final class SVDPlusPlusFactorizer extends RatingSGDFactorizer {
 
-  private static final Logger log = LoggerFactory.getLogger(SVDPlusPlusFactorizer.class);
   private double[][] p;
   private double[][] y;
   private Map<Integer, List<Integer>> itemsByUser;
@@ -110,7 +107,7 @@ public final class SVDPlusPlusFactorizer extends RatingSGDFactorizer {
           userVectors[userIndex][feature] += y[itemIndex][feature];
         }
       }
-      double denominator = Math.sqrt(itemsByUser.size());
+      double denominator = Math.sqrt(itemsByUser.get(userIndex).size());
       for (int feature = 0; feature < userVectors[userIndex].length; feature++) {
         userVectors[userIndex][feature] =
             (float) (userVectors[userIndex][feature] / denominator + p[userIndex][feature]);
@@ -135,7 +132,7 @@ public final class SVDPlusPlusFactorizer extends RatingSGDFactorizer {
           pPlusY[f] += y[i2][f];
         }
     }
-    double denominator = Math.sqrt(itemsByUser.size());
+    double denominator = Math.sqrt(itemsByUser.get(userIndex).size());
     for (int feature = 0; feature < pPlusY.length; feature++) {
       pPlusY[feature] = (float) (pPlusY[feature] / denominator + p[userIndex][feature]);
     }
