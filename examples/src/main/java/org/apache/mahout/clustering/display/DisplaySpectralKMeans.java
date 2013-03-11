@@ -38,6 +38,7 @@ public class DisplaySpectralKMeans extends DisplayClustering {
 
 	protected static final String SAMPLES = "samples";
 	protected static final String OUTPUT = "output";
+	protected static final String TEMP = "tmp";
 	protected static final String AFFINITIES = "affinities";
 	
   DisplaySpectralKMeans() {
@@ -49,6 +50,7 @@ public class DisplaySpectralKMeans extends DisplayClustering {
     DistanceMeasure measure = new ManhattanDistanceMeasure();
     Path samples = new Path(SAMPLES);
     Path output = new Path(OUTPUT);
+    Path tempDir = new Path(TEMP);
     Configuration conf = new Configuration();
     HadoopUtil.delete(conf, samples);
     HadoopUtil.delete(conf, output);
@@ -73,7 +75,7 @@ public class DisplaySpectralKMeans extends DisplayClustering {
     }
     int maxIter = 10;
     double convergenceDelta = 0.001;
-    SpectralKMeansDriver.run(new Configuration(), affinities, output, SAMPLE_DATA.size(), 3, measure, convergenceDelta, maxIter);
+    SpectralKMeansDriver.run(new Configuration(), affinities, output, SAMPLE_DATA.size(), 3, measure, convergenceDelta, maxIter, tempDir, false);
     new DisplaySpectralKMeans();
   }
 
