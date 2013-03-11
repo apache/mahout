@@ -114,6 +114,7 @@ public final class SplitInputJob {
 
     // Setup job with new API
     Job job = new Job(oldApiJob);
+    job.setJarByClass(SplitInputJob.class);
     FileInputFormat.addInputPath(job, inputPath);
     FileOutputFormat.setOutputPath(job, outputPath);
     job.setNumReduceTasks(1);
