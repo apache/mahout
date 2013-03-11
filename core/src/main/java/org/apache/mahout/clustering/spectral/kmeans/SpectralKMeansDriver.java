@@ -45,19 +45,8 @@ import org.apache.mahout.math.hadoop.stochasticsvd.SSVDSolver;
 
 
 /**
- * Implementation of the EigenCuts spectral clustering algorithm.
- * This implementation is for testing and debugging. 
- * 
- * Using the variables below the user can:
- * 		select to use either SSVDSolver or DistributedLanczosSolver for the Eigen decomposition. 
- * 		change the number of iterations in SSVD
- * 		choose whether to keep the temp files that are created during a job
- * 		have the output printed to a text file 
- * 
- * All of the steps involved in testing have timers built around them and the result is printed at
- * the top of the output text file. 
- * 
- * See the README file for a description of the algorithm, testing results, and other details.
+ * Performs spectral k-means clustering on the top k eigenvectors of the input
+ * affinity matrix. 
  */
 public class SpectralKMeansDriver extends AbstractJob {
 
