@@ -29,6 +29,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.common.parameters.Parameter;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.Functions;
@@ -312,44 +313,36 @@ public abstract class AbstractCluster implements Cluster {
    * intended to be complete nor usable as an input/output representation
    */
   public static String formatVector(Vector v, String[] bindings) {
-    StringBuilder buf = new StringBuilder();
+    StringBuilder buffer = new StringBuilder();
     if (v instanceof NamedVector) {
-      buf.append(((NamedVector) v).getName()).append(" = ");
+      buffer.append(((NamedVector) v).getName()).append(" = ");
     }
-    int nzero = 0;
-    Iterator<Vector.Element> iterateNonZero = v.iterateNonZero();
-    while (iterateNonZero.hasNext()) {
-      iterateNonZero.next();
-      nzero++;
-    }
-    // if vector is sparse or if we have bindings, use sparse notation
-    if (nzero < v.size() || bindings != null) {
-      buf.append('[');
-      for (int i = 0; i < v.size(); i++) {
-        double elem = v.get(i);
-        if (elem == 0.0) {
-          continue;
-        }
-        String label;
-        if (bindings != null && (label = bindings[i]) != null) {
-          buf.append(label).append(':');
-        } else {
-          buf.append(i).append(':');
-        }
-        buf.append(String.format(Locale.ENGLISH, "%.3f", elem)).append(", ");
+
+    boolean hasBindings = bindings != null;
+    boolean isSparse = !v.isDense() && v.getNumNondefaultElements() != v.size();
+
+    // we assume sequential access in the output
+    Vector provider = v.isSequentialAccess() ? v : new SequentialAccessSparseVector(v);
+
+    buffer.append('[');
+    Iterator<Vector.Element> elements = provider.iterateNonZero();
+    while (elements.hasNext()) {
+      Vector.Element elem = elements.next();
+
+      if (hasBindings && bindings.length >= elem.index() + 1 && bindings[elem.index()] != null) {
+        buffer.append(bindings[elem.index()]).append(':');
+      } else if (hasBindings || isSparse) {
+        buffer.append(elem.index()).append(':');
       }
-    } else {
-      buf.append('[');
-      for (int i = 0; i < v.size(); i++) {
-        double elem = v.get(i);
-        buf.append(String.format(Locale.ENGLISH, "%.3f", elem)).append(", ");
-      }
+
+      buffer.append(String.format(Locale.ENGLISH, "%.3f", elem.get())).append(", ");
     }
-    if (buf.length() > 1) {
-      buf.setLength(buf.length() - 2);
+
+    if (buffer.length() > 1) {
+      buffer.setLength(buffer.length() - 2);
     }
-    buf.append(']');
-    return buf.toString();
+    buffer.append(']');
+    return buffer.toString();
   }
   
   @Override
