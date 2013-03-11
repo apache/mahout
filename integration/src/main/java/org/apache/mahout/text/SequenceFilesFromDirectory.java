@@ -93,7 +93,7 @@ public class SequenceFilesFromDirectory extends AbstractJob {
                                            ChunkedWriter.class,
                                            Charset.class,
                                            FileSystem.class);
-        pathFilter = constructor.newInstance(conf, keyPrefix, options, writer, fs);
+        pathFilter = constructor.newInstance(conf, keyPrefix, options, writer, charset, fs);
       }
       fs.listStatus(input, pathFilter);
     } finally {
