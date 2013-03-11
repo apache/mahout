@@ -36,6 +36,8 @@ public final class VectorDistanceMapper
 
   private DistanceMeasure measure;
   private List<NamedVector> seedVectors;
+  private boolean usesThreshold = false;
+  private double maxDistance;
 
   @Override
   protected void map(WritableComparable<?> key, VectorWritable value, Context context)
@@ -47,12 +49,15 @@ public final class VectorDistanceMapper
     } else {
       keyName = key.toString();
     }
+    
     for (NamedVector seedVector : seedVectors) {
       double distance = measure.distance(seedVector, valVec);
-      StringTuple outKey = new StringTuple();
-      outKey.add(seedVector.getName());
-      outKey.add(keyName);
-      context.write(outKey, new DoubleWritable(distance));
+      if (!usesThreshold || distance <= maxDistance) {
+          StringTuple outKey = new StringTuple();
+          outKey.add(seedVector.getName());
+          outKey.add(keyName);
+          context.write(outKey, new DoubleWritable(distance));          
+      }
     }
   }
 
@@ -60,8 +65,15 @@ public final class VectorDistanceMapper
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
-    measure =
-        ClassUtils.instantiateAs(conf.get(VectorDistanceSimilarityJob.DISTANCE_MEASURE_KEY), DistanceMeasure.class);
+
+    String maxDistanceParam = conf.get(VectorDistanceSimilarityJob.MAX_DISTANCE);
+    if (maxDistanceParam != null) {
+      usesThreshold = true;
+      maxDistance = Double.parseDouble(maxDistanceParam);
+    }
+    
+    measure = ClassUtils.instantiateAs(conf.get(VectorDistanceSimilarityJob.DISTANCE_MEASURE_KEY),
+        DistanceMeasure.class);
     measure.configure(conf);
     seedVectors = SeedVectorUtil.loadSeedVectors(conf);
   }

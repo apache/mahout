@@ -36,6 +36,8 @@ import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.apache.mahout.math.VectorWritable;
 
+import com.google.common.base.Preconditions;
+
 import java.io.IOException;
 
 /**
@@ -48,6 +50,7 @@ public class VectorDistanceSimilarityJob extends AbstractJob {
   public static final String SEEDS_PATH_KEY = "seedsPath";
   public static final String DISTANCE_MEASURE_KEY = "vectorDistSim.measure";
   public static final String OUT_TYPE_KEY = "outType";
+  public static final String MAX_DISTANCE = "maxDistance";
 
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(), new VectorDistanceSimilarityJob(), args);
@@ -60,11 +63,13 @@ public class VectorDistanceSimilarityJob extends AbstractJob {
     addOutputOption();
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
     addOption(SEEDS, "s", "The set of vectors to compute distances against.  Must fit in memory on the mapper");
+    addOption(MAX_DISTANCE, "mx", "set an upper-bound on distance (double) such that any pair of vectors with a" +
+        " distance greater than this value is ignored in the output. Ignored for non pairwise output!");
     addOption(DefaultOptionCreator.overwriteOption().create());
-    addOption(OUT_TYPE_KEY, "ot",
-              "[pw|v] -- Define the output style: pairwise, the default, (pw) or vector (v).  Pairwise is a "
-                  + "tuple of <seed, other, distance>, vector is <other, <Vector of size the number of seeds>>.",
-              "pw");
+    addOption(OUT_TYPE_KEY, "ot", "[pw|v] -- Define the output style: pairwise, the default, (pw) or vector (v).  " +
+        "Pairwise is a tuple of <seed, other, distance>, vector is <other, <Vector of size the number of seeds>>.",
+        "pw");
+
     if (parseArguments(args) == null) {
       return -1;
     }
@@ -83,12 +88,19 @@ public class VectorDistanceSimilarityJob extends AbstractJob {
     if (getConf() == null) {
       setConf(new Configuration());
     }
-    String outType = getOption(OUT_TYPE_KEY);
-    if (outType == null) {
-      outType = "pw";
+    String outType = getOption(OUT_TYPE_KEY, "pw");
+    
+    Double maxDistance = null;
+
+    if ("pw".equals(outType)) {
+      String maxDistanceArg = getOption(MAX_DISTANCE);
+      if (maxDistanceArg != null) {
+        maxDistance = Double.parseDouble(maxDistanceArg);
+        Preconditions.checkArgument(maxDistance > 0d, "value for " + MAX_DISTANCE + " must be greater than zero");
+      }
     }
 
-    run(getConf(), input, seeds, output, measure, outType);
+    run(getConf(), input, seeds, output, measure, outType, maxDistance);
     return 0;
   }
 
@@ -98,6 +110,18 @@ public class VectorDistanceSimilarityJob extends AbstractJob {
                          Path output,
                          DistanceMeasure measure, String outType)
     throws IOException, ClassNotFoundException, InterruptedException {
+      run(conf, input, seeds, output, measure, outType, null);
+  }      
+  
+  public static void run(Configuration conf,
+          Path input,
+          Path seeds,
+          Path output,
+          DistanceMeasure measure, String outType, Double maxDistance)
+    throws IOException, ClassNotFoundException, InterruptedException {
+    if (maxDistance != null) {
+      conf.set(MAX_DISTANCE, String.valueOf(maxDistance));
+    }
     conf.set(DISTANCE_MEASURE_KEY, measure.getClass().getName());
     conf.set(SEEDS_PATH_KEY, seeds.toString());
     Job job = new Job(conf, "Vector Distance Similarity: seeds: " + seeds + " input: " + input);
@@ -118,7 +142,6 @@ public class VectorDistanceSimilarityJob extends AbstractJob {
     } else {
       throw new IllegalArgumentException("Invalid outType specified: " + outType);
     }
-
 
     job.setNumReduceTasks(0);
     FileInputFormat.addInputPath(job, input);
