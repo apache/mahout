@@ -123,7 +123,7 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
     record++;
     int k = 0;
     for (OnlineLogisticRegression model : models) {
-      if (k == trackingKey % models.size()) {
+      if (k == mod(trackingKey, models.size())) {
         Vector v = model.classifyFull(instance);
         double score = Math.max(v.get(actual), MIN_SCORE);
         logLikelihood += (Math.log(score) - logLikelihood) / Math.min(record, windowSize);
@@ -138,6 +138,11 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
       }
       k++;
     }
+  }
+
+  private long mod(long x, int y) {
+    long r = x % y;
+    return r < 0 ? r + y : r;
   }
 
   @Override
