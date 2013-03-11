@@ -91,6 +91,8 @@ public class MatrixMultiplicationJob extends AbstractJob {
     addOption("inputPathA", "ia", "Path to the first input matrix", true);
     addOption("inputPathB", "ib", "Path to the second input matrix", true);
 
+    addOption("outputPath", "op", "Path to the output matrix", false);
+
     Map<String, List<String>> argMap = parseArguments(strings);
     if (argMap == null) {
       return -1;
@@ -108,8 +110,12 @@ public class MatrixMultiplicationJob extends AbstractJob {
     a.setConf(new Configuration(getConf()));
     b.setConf(new Configuration(getConf()));
 
-    //DistributedRowMatrix c = a.times(b);
-    a.times(b);
+    if (hasOption("outputPath")) {
+      a.times(b, new Path(getOption("outputPath")));
+    } else {
+      a.times(b);
+    }
+
     return 0;
   }
 

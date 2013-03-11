@@ -171,16 +171,26 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
     return numCols;
   }
 
+
   /**
    * This implements matrix this.transpose().times(other)
    * @param other   a DistributedRowMatrix
    * @return    a DistributedRowMatrix containing the product
    */
   public DistributedRowMatrix times(DistributedRowMatrix other) throws IOException {
+    return times(other, new Path(outputTmpBasePath.getParent(), "productWith-" + (System.nanoTime() & 0xFF)));
+  }
+
+  /**
+   * This implements matrix this.transpose().times(other)
+   * @param other   a DistributedRowMatrix
+   * @param outPath path to write result to
+   * @return    a DistributedRowMatrix containing the product
+   */
+  public DistributedRowMatrix times(DistributedRowMatrix other, Path outPath) throws IOException {
     if (numRows != other.numRows()) {
       throw new CardinalityException(numRows, other.numRows());
     }
-    Path outPath = new Path(outputTmpBasePath.getParent(), "productWith-" + (System.nanoTime() & 0xFF));
 
     Configuration initialConf = getConf() == null ? new Configuration() : getConf();
     Configuration conf =
