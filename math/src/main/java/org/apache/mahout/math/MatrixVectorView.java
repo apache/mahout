@@ -171,18 +171,9 @@ public class MatrixVectorView extends AbstractVector {
     return size();
   }
 
-  /**
-   * Subclasses must override to return an appropriately sparse or dense result
-   *
-   * @param rows    the row cardinality
-   * @param columns the column cardinality
-   * @return a Matrix
-   */
   @Override
   protected Matrix matrixLike(int rows, int columns) {
-    int[] offset = {row, column};
-    int[] size = {rowStride == 0 ? 1 : rowStride, columnStride == 0 ? 1 : columnStride};
-    return matrix.viewPart(offset, size);
+    return matrix.like(rows, columns);
   }
 
   @Override
