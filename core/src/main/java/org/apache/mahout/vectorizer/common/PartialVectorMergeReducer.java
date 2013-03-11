@@ -67,9 +67,12 @@ public class PartialVectorMergeReducer extends
     if (namedVector) {
       vector = new NamedVector(vector, key.toString());
     }
-    
-    VectorWritable vectorWritable = new VectorWritable(vector);
-    context.write(key, vectorWritable);
+
+    // drop empty vectors.
+    if (vector.getNumNondefaultElements() > 0) {
+      VectorWritable vectorWritable = new VectorWritable(vector);
+      context.write(key, vectorWritable);
+    }
   }
 
   @Override
