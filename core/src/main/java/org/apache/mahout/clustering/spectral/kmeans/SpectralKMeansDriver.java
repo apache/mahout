@@ -51,6 +51,9 @@ import org.apache.mahout.math.hadoop.stochasticsvd.SSVDSolver;
 public class SpectralKMeansDriver extends AbstractJob {
 
 	public static final double OVERSHOOTMULTIPLIER = 2.0;
+	public static final int REDUCERS = 10;
+	public static final int BLOCKHEIGHT = 30000;
+	public static final int OVERSAMPLING = 15;
 
 	public static void main(String[] args) throws Exception {
 		ToolRunner.run(new SpectralKMeansDriver(), args);
@@ -70,6 +73,9 @@ public class SpectralKMeansDriver extends AbstractJob {
 		addOption(DefaultOptionCreator.maxIterationsOption().create());
 		addOption(DefaultOptionCreator.overwriteOption().create());
 		addFlag("usessvd", "ssvd", "Uses SSVD as the eigensolver. Default is the Lanczos solver.");
+		addOption("ssvdreducers", "r", "Number of reducers for SSVD", String.valueOf(REDUCERS));
+		addOption("ssvdblockheight", "h", "Block height for SSVD", String.valueOf(BLOCKHEIGHT));
+		addOption("ssvdoversampling", "p", "Oversampling parameter for SSVD", String.valueOf(OVERSAMPLING));
 		
 		Map<String, List<String>> parsedArgs = parseArguments(arg0);
 		if (parsedArgs == null) {
@@ -90,10 +96,33 @@ public class SpectralKMeansDriver extends AbstractJob {
 		
 		Path tempdir = new Path(getOption("tempDir"));
 		boolean ssvd = parsedArgs.containsKey("--usessvd");
-		
-		run(conf, input, output, numDims, clusters, measure, convergenceDelta, maxIterations, tempdir, ssvd);
+		if (ssvd) {
+		    int reducers = Integer.parseInt(getOption("ssvdreducers"));
+		    int blockheight = Integer.parseInt(getOption("ssvdblockheight"));
+		    int oversampling = Integer.parseInt(getOption("oversampling"));
+		    run(conf, input, output, numDims, clusters, measure, convergenceDelta,
+		            maxIterations, tempdir, true, reducers, blockheight, oversampling);
+		} else {
+		    run(conf, input, output, numDims, clusters, measure, convergenceDelta,
+		            maxIterations, tempdir, false);
+		}
 		
 		return 0;
+	}
+	
+	public static void run(
+	        Configuration conf,
+	        Path input,
+	        Path output,
+	        int numDims,
+	        int clusters,
+	        DistanceMeasure measure,
+	        double convergenceDelta,
+	        int maxIterations,
+	        Path tempDir,
+	        boolean ssvd) throws IOException, InterruptedException, ClassNotFoundException {
+	    run(conf, input, output, numDims, clusters, measure, convergenceDelta,
+	            maxIterations, tempDir, ssvd, REDUCERS, BLOCKHEIGHT, OVERSAMPLING);
 	}
 
   /**
@@ -120,7 +149,10 @@ public class SpectralKMeansDriver extends AbstractJob {
 		  double convergenceDelta,
 		  int maxIterations,
 		  Path tempDir,
-		  boolean ssvd)
+		  boolean ssvd,
+		  int numReducers,
+		  int blockHeight,
+		  int oversampling)
 				  throws IOException, InterruptedException, ClassNotFoundException {
     
 		Path outputCalc = new Path(tempDir, "calculations");
@@ -160,19 +192,15 @@ public class SpectralKMeansDriver extends AbstractJob {
 					depConf, 
 					LPath, 
 					SSVDout, 
-					1000, // Vertical height of a q-block
+					blockHeight,
 					clusters, 
-					15, // Oversampling 
-					10);
+					oversampling, 
+					numReducers);
 			
 			solveIt.setComputeV(false); 
 			solveIt.setComputeU(true);
 			solveIt.setOverwrite(true);
 			solveIt.setQ(0);
-			
-			// May want to update SSVD documentation on this one: method doc
-			// says "false" is the default, yet it's set to true in the 
-			// variable definition.
 			//solveIt.setBroadcast(false);
 			solveIt.run();
 			data = new Path(solveIt.getUPath());
