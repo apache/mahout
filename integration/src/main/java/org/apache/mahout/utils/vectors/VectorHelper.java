@@ -20,7 +20,6 @@ package org.apache.mahout.utils.vectors;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Ordering;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -76,10 +75,6 @@ public final class VectorHelper {
       bldr.setCharAt(bldr.length() - 1, '}');
     }
     return bldr.toString();
-  }
-
-  public static String vectorToSortedString(Vector vector, String[] dictionary) {
-    return vectorToJson(vector, dictionary, Integer.MAX_VALUE, true);
   }
 
   public static List<Pair<Integer, Double>> topEntries(Vector vector, int maxEntries) {
