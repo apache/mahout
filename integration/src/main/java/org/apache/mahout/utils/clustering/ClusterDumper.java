@@ -106,7 +106,7 @@ public final class ClusterDumper extends AbstractJob {
   public int run(String[] args) throws Exception {
     addInputOption();
     addOutputOption();
-    addOption(OUTPUT_FORMAT_OPT, "of", "The optional output format to write the results as.  Options: TEXT, CSV or GRAPH_ML", "TEXT");
+    addOption(OUTPUT_FORMAT_OPT, "of", "The optional output format for the results.  Options: TEXT, CSV or GRAPH_ML", "TEXT");
     addOption(SUBSTRING_OPTION, "b", "The number of chars of the asFormatString() to print");
     addOption(NUM_WORDS_OPTION, "n", "The number of top terms to print");
     addOption(POINTS_DIR_OPTION, "p",
@@ -117,7 +117,9 @@ public final class ClusterDumper extends AbstractJob {
     addOption(DICTIONARY_TYPE_OPTION, "dt", "The dictionary file type (text|sequencefile)", "text");
     addOption(buildOption(EVALUATE_CLUSTERS, "e", "Run ClusterEvaluator and CDbwEvaluator over the input.  The output will be appended to the rest of the output at the end.", false, false, null));
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
-    if (parseArguments(args) == null) {
+
+    // output is optional, will print to System.out per default
+    if (parseArguments(args, false, true) == null) {
       return -1;
     }
 
