@@ -23,7 +23,13 @@ import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
 
-/** Class implementing the Naive Bayes Classifier Algorithm */
+/**
+ * Class implementing the Naive Bayes Classifier Algorithm. Note that this class
+ * supports {@link #classifyFull}, but not <code>classify</code> or
+ * <code>classifyScalar</code>. The reason that these two methods are not
+ * supported is because the scores computed by a NaiveBayesClassifier do not
+ * represent probabilities.
+ */
 public abstract class AbstractNaiveBayesClassifier extends AbstractVectorClassifier {
 
   private final NaiveBayesModel model;
@@ -66,11 +72,13 @@ public abstract class AbstractNaiveBayesClassifier extends AbstractVectorClassif
     return r;
   }
 
+  /** Unsupported method. This implementation simply throws an {@link UnsupportedOperationException}. */
   @Override
   public double classifyScalar(Vector instance) {
     throw new UnsupportedOperationException("Not supported in Naive Bayes");
   }
   
+  /** Unsupported method. This implementation simply throws an {@link UnsupportedOperationException}. */
   @Override
   public Vector classify(Vector instance) {
     throw new UnsupportedOperationException("probabilites not supported in Naive Bayes");

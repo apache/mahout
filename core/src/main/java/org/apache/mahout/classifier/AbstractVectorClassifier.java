@@ -25,63 +25,108 @@ import org.apache.mahout.math.Vector;
 import com.google.common.base.Preconditions;
 
 /**
- * Defines the interface for classifiers that take input as a vector.  This is implemented
- * as an abstract class so that it can implement a number of handy convenience methods
- * related to classification of vectors.
+ * Defines the interface for classifiers that take a vector as input. This is
+ * implemented as an abstract class so that it can implement a number of handy
+ * convenience methods related to classification of vectors.
+ * 
+ * <p>
+ * A classifier takes an input vector and calculates the scores (usually
+ * probabilities) that the input vector belongs to one of <code>n</code>
+ * categories. In <code>AbstractVectorClassifier</code> each category is denoted
+ * by an integer <code>c</code> between <code>0</code> and <code>n-1</code>
+ * (inclusive).
+ * 
+ * <p>
+ * New users should start by looking at {@link #classifyFull} (not {@link #classify}).
+ * 
  */
 public abstract class AbstractVectorClassifier {
-  // ------ These are all that are necessary to define a vector classifier.
 
-  /**
-   * Returns the number of categories for the target variable.  A vector classifier
-   * will encode it's output using a zero-based 1 of numCategories encoding.
+  /** Minimum allowable log likelihood value. */
+  public static final double MIN_LOG_LIKELIHOOD = -100.0;
+
+   /**
+   * Returns the number of categories that a target variable can be assigned to.
+   * A vector classifier will encode it's output as an integer from
+   * <code>0</code> to <code>numCategories()-1</code> (inclusive).
+   * 
    * @return The number of categories.
    */
   public abstract int numCategories();
 
   /**
-   * Classify a vector returning a vector of numCategories-1 scores.  It is assumed that
-   * the score for the missing category is one minus the sum of the scores that are returned.
-   *
-   * Note that the missing score is the 0-th score.
+   * Compute and return a vector containing <code>n-1</code> scores, where
+   * <code>n</code> is equal to <code>numCategories()</code>, given an input
+   * vector <code>instance</code>. Higher scores indicate that the input vector
+   * is more likely to belong to that category. The categories are denoted by
+   * the integers <code>0</code> through <code>n-1</code> (inclusive), and the
+   * scores in the returned vector correspond to categories 1 through
+   * <code>n-1</code> (leaving out category 0). It is assumed that the score for
+   * category 0 is one minus the sum of the scores in the returned vector.
+   * 
    * @param instance  A feature vector to be classified.
-   * @return  A vector of probabilities in 1 of n-1 encoding.
+   * @return A vector of probabilities in 1 of <code>n-1</code> encoding.
    */
   public abstract Vector classify(Vector instance);
-
+  
   /**
-   * Classify a vector, but don't apply the inverse link function.  For logistic regression
-   * and other generalized linear models, this is just the linear part of the classification.
+   * Compute and return a vector of scores before applying the inverse link
+   * function. For logistic regression and other generalized linear models, this
+   * is just the linear part of the classification.
+   * 
+   * <p>
+   * The implementation of this method provided by {@link AbstractVectorClassifier} throws an
+   * {@link UnsupportedOperationException}. Your subclass must explicitly override this method to support
+   * this operation.
+   * 
    * @param features  A feature vector to be classified.
-   * @return  A vector of scores.  If transformed by the link function, these will become probabilities.
+   * @return A vector of scores. If transformed by the link function, these will become probabilities.
    */
   public Vector classifyNoLink(Vector features) {
-    throw new UnsupportedOperationException(
-        this.getClass().getName() + " doesn't support classification without a link");
+    throw new UnsupportedOperationException(this.getClass().getName()
+        + " doesn't support classification without a link");
   }
 
   /**
    * Classifies a vector in the special case of a binary classifier where
-   * {@link #classify(Vector)} would return a vector with only one element.  As such,
-   * using this method can void the allocation of a vector.
-   * @param instance   The feature vector to be classified.
+   * {@link #classify(Vector)} would return a vector with only one element. As
+   * such, using this method can avoid the allocation of a vector.
+   * 
+   * @param instance The feature vector to be classified.
    * @return The score for category 1.
-   *
+   * 
    * @see #classify(Vector)
    */
   public abstract double classifyScalar(Vector instance);
 
-  // ------- From here on, we have convenience methods that provide an easier API to use.
-
   /**
-   * Returns n probabilities, one for each category.  If you can use an n-1 coding, and are touchy
-   * about allocation performance, then the classify method is probably better to use.  The 0-th
-   * element of the score vector returned by this method is the missing score as computed by the
-   * classify method.
-   *
+   * Computes and returns a vector containing <code>n</code> scores, where
+   * <code>n</code> is <code>numCategories()</code>, given an input vector
+   * <code>instance</code>. Higher scores indicate that the input vector is more
+   * likely to belong to the corresponding category. The categories are denoted
+   * by the integers <code>0</code> through <code>n-1</code> (inclusive).
+   * 
+   * <p>
+   * Using this method it is possible to classify an input vector, for example,
+   * by selecting the category with the largest score. If
+   * <code>classifier</code> is an instance of
+   * <code>AbstractVectorClassifier</code> and <code>input</code> is a
+   * <code>Vector</code> of features describing an element to be classified,
+   * then the following code could be used to classify <code>input</code>.<br>
+   * <code>
+   * Vector scores = classifier.classifyFull(input);<br>
+   * int assignedCategory = scores.maxValueIndex();<br>
+   * </code> Here <code>assignedCategory</code> is the index of the category
+   * with the maximum score.
+   * 
+   * <p>
+   * If an <code>n-1</code> encoding is acceptable, and allocation performance
+   * is an issue, then the {@link #classify(Vector)} method is probably better
+   * to use.
+   * 
    * @see #classify(Vector)
    * @see #classifyFull(Vector r, Vector instance)
-   *
+   * 
    * @param instance A vector of features to be classified.
    * @return A vector of probabilities, one for each category.
    */
@@ -90,14 +135,32 @@ public abstract class AbstractVectorClassifier {
   }
 
   /**
-   * Returns n probabilities, one for each category into a pre-allocated vector.  One
-   * vector allocation is still done in the process of multiplying by the coefficient
-   * matrix, but that is hard to avoid.  The cost of such an ephemeral allocation is
-   * very small in any case compared to the multiplication itself.
-   *
-   * @param r        Where to put the results.
-   * @param instance A vector of features to be classified.
-   * @return A vector of probabilities, one for each category.
+   * Computes and returns a vector containing <code>n</code> scores, where
+   * <code>n</code> is <code>numCategories()</code>, given an input vector
+   * <code>instance</code>. Higher scores indicate that the input vector is more
+   * likely to belong to the corresponding category. The categories are denoted
+   * by the integers <code>0</code> through <code>n-1</code> (inclusive). The
+   * main difference between this method and {@link #classifyFull(Vector)} is
+   * that this method allows a user to provide a previously allocated
+   * <code>Vector r</code> to store the returned scores.
+   * 
+   * <p>
+   * Using this method it is possible to classify an input vector, for example,
+   * by selecting the category with the largest score. If
+   * <code>classifier</code> is an instance of
+   * <code>AbstractVectorClassifier</code>, <code>result</code> is a non-null
+   * <code>Vector</code>, and <code>input</code> is a <code>Vector</code> of
+   * features describing an element to be classified, then the following code
+   * could be used to classify <code>input</code>.<br>
+   * <code>
+   * Vector scores = classifier.classifyFull(result, input); // Notice that scores == result<br>
+   * int assignedCategory = scores.maxValueIndex();<br>
+   * </code> Here <code>assignedCategory</code> is the index of the category
+   * with the maximum score.
+   * 
+   * @param r Where to put the results.
+   * @param instance  A vector of features to be classified.
+   * @return A vector of scores/probabilities, one for each category.
    */
   public Vector classifyFull(Vector r, Vector instance) {
     r.viewPart(1, numCategories() - 1).assign(classify(instance));
@@ -107,12 +170,13 @@ public abstract class AbstractVectorClassifier {
 
 
   /**
-   * Returns n-1 probabilities, one for each category but the last, for each row of a matrix. The
-   * probability of the missing 0-th category is 1 - rowSum(this result).
-   *
-   * @param data The matrix whose rows are vectors to classify
-   * @return A matrix of scores, one row per row of the input matrix, one column for each but the
-   *         last category.
+   * Returns n-1 probabilities, one for each categories 1 through
+   * <code>n-1</code>, for each row of a matrix, where <code>n</code> is equal
+   * to <code>numCategories()</code>. The probability of the missing 0-th
+   * category is 1 - rowSum(this result).
+   * 
+   * @param data  The matrix whose rows are the input vectors to classify
+   * @return A matrix of scores, one row per row of the input matrix, one column for each but the last category.
    */
   public Matrix classify(Matrix data) {
     Matrix r = new DenseMatrix(data.numRows(), numCategories() - 1);
@@ -123,11 +187,10 @@ public abstract class AbstractVectorClassifier {
   }
 
   /**
-   * Returns n probabilities, one for each category, for each row of a matrix.
-   *
-   * @param data The matrix whose rows are vectors to classify
-   * @return A matrix of scores, one row per row of the input matrix, one column for each but the
-   *         last category.
+   * Returns a matrix where the rows of the matrix each contain <code>n</code> probabilities, one for each category.
+   * 
+   * @param data  The matrix whose rows are the input vectors to classify
+   * @return A matrix of scores, one row per row of the input matrix, one column for each but the last category.
    */
   public Matrix classifyFull(Matrix data) {
     Matrix r = new DenseMatrix(data.numRows(), numCategories());
@@ -138,11 +201,11 @@ public abstract class AbstractVectorClassifier {
   }
 
   /**
-   * Returns a vector of probabilities of the first category, one for each row of a matrix. This
-   * only makes sense if there are exactly two categories, but calling this method in that case can
-   * save a number of vector allocations.
-   *
-   * @param data The matrix whose rows are vectors to classify
+   * Returns a vector of probabilities of category 1, one for each row
+   * of a matrix. This only makes sense if there are exactly two categories, but
+   * calling this method in that case can save a number of vector allocations.
+   * 
+   * @param data  The matrix whose rows are vectors to classify
    * @return A vector of scores, with one value per row of the input matrix.
    */
   public Vector classifyScalar(Matrix data) {
@@ -156,28 +219,29 @@ public abstract class AbstractVectorClassifier {
   }
 
   /**
-   * Returns a measure of how good the classification for a particular example actually is.
-   *
-   * @param actual The correct category for the example.
-   * @param data   The vector to be classified.
-   * @return The log likelihood of the correct answer as estimated by the current model.  This will
-   *         always be <= 0 and larger (closer to 0) indicates better accuracy.  In order to simplify
-   *         code that maintains running averages, we bound this value at -100.
+   * Returns a measure of how good the classification for a particular example
+   * actually is.
+   * 
+   * @param actual  The correct category for the example.
+   * @param data  The vector to be classified.
+   * @return The log likelihood of the correct answer as estimated by the current model. This will always be <= 0
+   *  and larger (closer to 0) indicates better accuracy. In order to simplify code that maintains eunning averages,
+   *  we bound this value at -100.
    */
   public double logLikelihood(int actual, Vector data) {
     if (numCategories() == 2) {
       double p = classifyScalar(data);
       if (actual > 0) {
-        return Math.max(-100.0, Math.log(p));
+        return Math.max(MIN_LOG_LIKELIHOOD, Math.log(p));
       } else {
-        return Math.max(-100.0, Math.log1p(-p));
+        return Math.max(MIN_LOG_LIKELIHOOD, Math.log1p(-p));
       }
     } else {
       Vector p = classify(data);
       if (actual > 0) {
-        return Math.max(-100.0, Math.log(p.get(actual - 1)));
+        return Math.max(MIN_LOG_LIKELIHOOD, Math.log(p.get(actual - 1)));
       } else {
-        return Math.max(-100.0, Math.log1p(-p.zSum()));
+        return Math.max(MIN_LOG_LIKELIHOOD, Math.log1p(-p.zSum()));
       }
     }
   }
