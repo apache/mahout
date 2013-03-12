@@ -144,7 +144,7 @@ public class ConjugateGradientSolver
     Vector residual = b.minus(a.times(x));
     residualNormSquared = residual.dot(residual);
 
-    log.info("Conjugate gradient initial residual norm = " + Math.sqrt(residualNormSquared));
+    log.info("Conjugate gradient initial residual norm = {}", Math.sqrt(residualNormSquared));
     double previousConditionedNormSqr = 0.0;
     Vector updateDirection = null;
     while (Math.sqrt(residualNormSquared) > maxError && iterations < maxIterations) {
@@ -185,7 +185,7 @@ public class ConjugateGradientSolver
       previousConditionedNormSqr = conditionedNormSqr;
       residualNormSquared = residual.dot(residual);
       
-      log.info("Conjugate gradient iteration " + iterations + " residual norm = " + Math.sqrt(residualNormSquared));
+      log.info("Conjugate gradient iteration {} residual norm = {}", iterations, Math.sqrt(residualNormSquared));
     }
     return x;
   }

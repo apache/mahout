@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.hadoop.als;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
+import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
 import java.util.List;
@@ -28,33 +29,33 @@ public class TopItemQueueTest extends TasteTestCase {
   @Test
   public void topK() {
 
-    float[] ratings = { .5f, .6f, .7f, 2f, 0f };
+    float[] ratings = {0.5f, 0.6f, 0.7f, 2.0f, 0.0f};
 
     List<RecommendedItem> topItems = findTop(ratings, 2);
 
     assertEquals(2, topItems.size());
-    assertEquals(3l, topItems.get(0).getItemID());
-    assertEquals(2f, topItems.get(0).getValue(), TasteTestCase.EPSILON);
-    assertEquals(2l, topItems.get(1).getItemID());
-    assertEquals(.7f, topItems.get(1).getValue(), TasteTestCase.EPSILON);
+    assertEquals(3L, topItems.get(0).getItemID());
+    assertEquals(2.0f, topItems.get(0).getValue(), MahoutTestCase.EPSILON);
+    assertEquals(2L, topItems.get(1).getItemID());
+    assertEquals(0.7f, topItems.get(1).getValue(), MahoutTestCase.EPSILON);
   }
 
   @Test
   public void topKInputSmallerThanK() {
 
-    float[] ratings = {.7f, 2f};
+    float[] ratings = {0.7f, 2.0f};
 
     List<RecommendedItem> topItems = findTop(ratings, 3);
 
     assertEquals(2, topItems.size());
-    assertEquals(1l, topItems.get(0).getItemID());
-    assertEquals(2f, topItems.get(0).getValue(), TasteTestCase.EPSILON);
-    assertEquals(0l, topItems.get(1).getItemID());
-    assertEquals(.7f, topItems.get(1).getValue(), TasteTestCase.EPSILON);
+    assertEquals(1L, topItems.get(0).getItemID());
+    assertEquals(2.0f, topItems.get(0).getValue(), MahoutTestCase.EPSILON);
+    assertEquals(0L, topItems.get(1).getItemID());
+    assertEquals(0.7f, topItems.get(1).getValue(), MahoutTestCase.EPSILON);
   }
 
 
-  private List<RecommendedItem> findTop(float[] ratings, int k) {
+  private static List<RecommendedItem> findTop(float[] ratings, int k) {
     TopItemQueue queue = new TopItemQueue(k);
 
     for (int item = 0; item < ratings.length; item++) {

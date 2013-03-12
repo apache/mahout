@@ -114,7 +114,7 @@ public final class VectorDumper extends AbstractJob {
     boolean sortVectors = hasOption("sortVectors");
     boolean quiet = hasOption("quiet");
     if (!quiet) {
-      log.info("Sort? " + sortVectors);
+      log.info("Sort? {}", sortVectors);
     }
 
     String[] dictionary = null;

@@ -94,6 +94,7 @@ public final class NodeTest extends MahoutTestCase {
     assertEquals(node, readNode());
   }
 
+  @Test
   public void testCategoricalNode() throws Exception {
 
     Node node = new CategoricalNode(rng.nextInt(), new double[]{rng.nextDouble(),

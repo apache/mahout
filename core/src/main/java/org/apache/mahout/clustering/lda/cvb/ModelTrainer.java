@@ -96,7 +96,7 @@ public class ModelTrainer {
   }
 
   public void start() {
-    log.info("Starting training threadpool with " + numTrainThreads + " threads");
+    log.info("Starting training threadpool with {} threads", numTrainThreads);
     workQueue = new ArrayBlockingQueue<Runnable>(numTrainThreads * 10);
     threadPool = new ThreadPoolExecutor(numTrainThreads, numTrainThreads, 0, TimeUnit.SECONDS,
         workQueue);
@@ -169,10 +169,10 @@ public class ModelTrainer {
               (System.nanoTime() - start) /(1.0e6 * document.getNumNondefaultElements());
           if (i % 100 == 0) {
             long time = System.nanoTime() - startTime;
-            log.debug("trained " + i + " documents in " + (time / 1.0e6) + "ms");
+            log.debug("trained {} documents in {}ms", i, time / 1.0e6);
             if (i % 500 == 0) {
               Arrays.sort(times);
-              log.debug("training took median " + times[times.length / 2] + "ms per token-instance");
+              log.debug("training took median {}ms per token-instance", times[times.length / 2]);
             }
           }
         }
@@ -211,7 +211,7 @@ public class ModelTrainer {
             numTopics, numTerms, true), numDocTopicIters));
         return;
       } catch (InterruptedException e) {
-        log.warn("Interrupted waiting to submit document to work queue: " + document, e);
+        log.warn("Interrupted waiting to submit document to work queue: {}", document, e);
       }
     }
   }
@@ -239,11 +239,11 @@ public class ModelTrainer {
         log.warn("Threadpool timed out on await termination - jobs still running!");
       }
       long newTime = System.nanoTime();
-      log.info("threadpool took: " + (newTime - startTime) / 1.0e6 + "ms");
+      log.info("threadpool took: {}ms", (newTime - startTime) / 1.0e6);
       startTime = newTime;
       writeModel.awaitTermination();
       newTime = System.nanoTime();
-      log.info("writeModel.awaitTermination() took " + (newTime - startTime) / 1.0e6 + "ms");
+      log.info("writeModel.awaitTermination() took {}ms", (newTime - startTime) / 1.0e6);
       TopicModel tmpModel = writeModel;
       writeModel = readModel;
       readModel = tmpModel;

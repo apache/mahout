@@ -140,7 +140,7 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
     }
   }
 
-  private long mod(long x, int y) {
+  private static long mod(long x, int y) {
     long r = x % y;
     return r < 0 ? r + y : r;
   }

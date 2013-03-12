@@ -57,7 +57,7 @@ public class HashUtilsTest extends TestCase {
     }
   }
 
-  private <T> int checkCounts(Collection<T> original) {
+  private static <T> int checkCounts(Collection<T> original) {
     Multiset<T> hashCounts = HashMultiset.create();
     for (T v : original) {
       hashCounts.add(v);

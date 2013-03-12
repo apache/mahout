@@ -21,7 +21,7 @@ package org.apache.mahout.math.set;
  * Computes hashes of primitive values.  Providing these as statics allows the templated code
  * to compute hashes of sets.
  */
-public class HashUtils {
+public final class HashUtils {
 
   private HashUtils() {
   }

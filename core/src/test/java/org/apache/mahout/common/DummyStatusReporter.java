@@ -68,6 +68,7 @@ public final class DummyStatusReporter extends StatusReporter {
   public void setStatus(String status) {
   }
 
+  @Override
   public float getProgress() {
     return 0.0f;
   }

@@ -41,7 +41,8 @@ import java.util.Locale;
  */
 
 public class QRDecomposition implements QR {
-  private final Matrix q, r;
+  private final Matrix q;
+  private final Matrix r;
   private final boolean fullRank;
   private final int rows;
   private final int columns;

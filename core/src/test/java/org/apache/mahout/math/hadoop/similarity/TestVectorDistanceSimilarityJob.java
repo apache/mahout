@@ -226,7 +226,7 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
     }
   }
 
-  private List<VectorWritable> getPointsWritable(double[][] raw) {
+  private static List<VectorWritable> getPointsWritable(double[][] raw) {
     List<VectorWritable> points = Lists.newArrayList();
     for (double[] fr : raw) {
       Vector vec = new RandomAccessSparseVector(fr.length);

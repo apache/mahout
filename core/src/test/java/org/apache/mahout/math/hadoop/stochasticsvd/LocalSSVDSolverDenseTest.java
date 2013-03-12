@@ -59,13 +59,13 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
     runSSVDSolver(1);
   }
 
-  /*
-   * remove from active tests to save time.
-   */
-  /* @Test */
+  // remove from active tests to save time.
+  /* 
+  @Test
   public void testSSVDSolverPowerIterations2() throws IOException {
     runSSVDSolver(2);
   }
+   */
 
   public void runSSVDSolver(int q) throws IOException {
 

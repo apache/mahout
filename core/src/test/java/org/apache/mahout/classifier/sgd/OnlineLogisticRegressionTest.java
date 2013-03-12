@@ -210,8 +210,8 @@ public final class OnlineLogisticRegressionTest extends OnlineBaseTest {
     // select training and test data
     List<Integer> train = order.subList(0, 100);
     List<Integer> test = order.subList(100, 150);
-    logger.warn("Training set = " + train);
-    logger.warn("Test set = " + test);
+    logger.warn("Training set = {}", train);
+    logger.warn("Test set = {}", test);
 
     // now train many times and collect information on accuracy each time
     int[] correct = new int[test.size() + 1];

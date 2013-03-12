@@ -225,12 +225,12 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
     while (iter < minIter) {
       trainDocuments(testFraction);
       if (verbose) {
-        log.info("model after: " + iter + ": " + modelTrainer.getReadModel().toString());
+        log.info("model after: {}: {}", iter, modelTrainer.getReadModel());
       }
-      log.info("iteration " + iter + " complete");
+      log.info("iteration {} complete", iter);
       oldPerplexity = modelTrainer.calculatePerplexity(corpusWeights, docTopicCounts,
           testFraction);
-      log.info(oldPerplexity + " = perplexity");
+      log.info("{} = perplexity", oldPerplexity);
       iter++;
     }
     double newPerplexity = 0;
@@ -238,14 +238,14 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
     while (iter < maxIterations && fractionalChange > minFractionalErrorChange) {
       trainDocuments();
       if (verbose) {
-        log.info("model after: " + iter + ": " + modelTrainer.getReadModel().toString());
+        log.info("model after: {}: {}", iter, modelTrainer.getReadModel());
       }
       newPerplexity = modelTrainer.calculatePerplexity(corpusWeights, docTopicCounts,
           testFraction);
-      log.info(newPerplexity + " = perplexity");
+      log.info("{} = perplexity", newPerplexity);
       iter++;
       fractionalChange = Math.abs(newPerplexity - oldPerplexity) / oldPerplexity;
-      log.info(fractionalChange + " = fractionalChange");
+      log.info("{} = fractionalChange", fractionalChange);
       oldPerplexity = newPerplexity;
     }
     if (iter < maxIterations) {

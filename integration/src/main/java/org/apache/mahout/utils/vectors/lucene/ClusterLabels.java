@@ -88,8 +88,8 @@ public class ClusterLabels {
   private String idField;
   private final Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints;
   private String output;
-  private int minNumIds;
-  private int maxLabels;
+  private final int minNumIds;
+  private final int maxLabels;
 
   public ClusterLabels(Path seqFileDir,
                        Path pointsDir,

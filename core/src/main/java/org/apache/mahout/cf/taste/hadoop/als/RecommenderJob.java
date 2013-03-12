@@ -107,7 +107,7 @@ public class RecommenderJob extends AbstractJob {
     private int recommendationsPerUser;
     private float maxRating;
 
-    private RecommendedItemsWritable recommendations = new RecommendedItemsWritable();
+    private final RecommendedItemsWritable recommendations = new RecommendedItemsWritable();
 
     @Override
     protected void setup(Context ctx) throws IOException, InterruptedException {
@@ -123,7 +123,7 @@ public class RecommenderJob extends AbstractJob {
     }
 
     // we can use a simple dot product computation, as both vectors are dense
-    private double dot(Vector x, Vector y) {
+    private static double dot(Vector x, Vector y) {
       int numFeatures = x.size();
       double sum = 0;
       for (int n = 0; n < numFeatures; n++) {

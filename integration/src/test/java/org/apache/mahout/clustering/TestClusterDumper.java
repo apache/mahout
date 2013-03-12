@@ -24,8 +24,6 @@ import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -45,18 +43,12 @@ import org.apache.mahout.common.distance.CosineDistanceMeasure;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
-import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.common.kernel.IKernelProfile;
 import org.apache.mahout.common.kernel.TriangularKernelProfile;
-import org.apache.mahout.math.DenseMatrix;
-import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.hadoop.DistributedRowMatrix;
-import org.apache.mahout.math.hadoop.decomposer.DistributedLanczosSolver;
-import org.apache.mahout.math.hadoop.decomposer.EigenVerificationJob;
 import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.apache.mahout.utils.vectors.TermEntry;
 import org.apache.mahout.utils.vectors.TermInfo;
@@ -287,7 +279,8 @@ public final class TestClusterDumper extends MahoutTestCase {
     clusterDumper.printClusters(termDictionary);
   }
   
-  // @Test
+  /*
+  @Test
   public void testKmeansSVD() throws Exception {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     Path output = getTestTempDirPath("output");
@@ -351,7 +344,7 @@ public final class TestClusterDumper extends MahoutTestCase {
     clusterDumper.printClusters(termDictionary);
   }
   
-  // @Test
+  @Test
   public void testKmeansDSVD() throws Exception {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     Path output = getTestTempDirPath("output");
@@ -393,7 +386,7 @@ public final class TestClusterDumper extends MahoutTestCase {
     clusterDumper.printClusters(termDictionary);
   }
   
-  // @Test
+  @Test
   public void testKmeansDSVD2() throws Exception {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     Path output = getTestTempDirPath("output");
@@ -437,4 +430,5 @@ public final class TestClusterDumper extends MahoutTestCase {
     		kmeansOutput, 10), new Path(kmeansOutput, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
+   */
 }

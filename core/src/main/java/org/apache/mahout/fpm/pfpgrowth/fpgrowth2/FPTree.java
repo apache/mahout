@@ -335,7 +335,7 @@ public final class FPTree {
     int attribute = node.attribute();
     if (items == null) {
       // at root
-      if (!(node == root)) {
+      if (node != root) {
         throw new IllegalStateException();
       }
       items = new IntArrayList();
@@ -352,7 +352,7 @@ public final class FPTree {
       qTree.accumulate(items, toAdd);
       added += toAdd;
     }
-    if (!(node == root)) {
+    if (node != root) {
       int lastIdx = items.size() - 1;
       if (items.get(lastIdx) != attribute) {
         throw new IllegalStateException();

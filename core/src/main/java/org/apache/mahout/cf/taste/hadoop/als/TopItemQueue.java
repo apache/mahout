@@ -40,7 +40,7 @@ public class TopItemQueue extends PriorityQueue<MutableRecommendedItem> {
     while (size() > 0) {
       MutableRecommendedItem topItem = pop();
       // filter out "sentinel" objects necessary for maintaining an efficient priority queue
-      if (topItem.getItemID() != TopItemQueue.SENTINEL_ID) {
+      if (topItem.getItemID() != SENTINEL_ID) {
         recommendedItems.add(topItem);
       }
     }

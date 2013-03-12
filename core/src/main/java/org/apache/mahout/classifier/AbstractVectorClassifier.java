@@ -28,17 +28,17 @@ import com.google.common.base.Preconditions;
  * Defines the interface for classifiers that take a vector as input. This is
  * implemented as an abstract class so that it can implement a number of handy
  * convenience methods related to classification of vectors.
- * 
+ *
  * <p>
  * A classifier takes an input vector and calculates the scores (usually
- * probabilities) that the input vector belongs to one of <code>n</code>
- * categories. In <code>AbstractVectorClassifier</code> each category is denoted
- * by an integer <code>c</code> between <code>0</code> and <code>n-1</code>
+ * probabilities) that the input vector belongs to one of {@code n}
+ * categories. In {@code AbstractVectorClassifier} each category is denoted
+ * by an integer {@code c} between {@code 0} and {@code n-1}
  * (inclusive).
- * 
+ *
  * <p>
  * New users should start by looking at {@link #classifyFull} (not {@link #classify}).
- * 
+ *
  */
 public abstract class AbstractVectorClassifier {
 
@@ -46,26 +46,26 @@ public abstract class AbstractVectorClassifier {
   public static final double MIN_LOG_LIKELIHOOD = -100.0;
 
    /**
-   * Returns the number of categories that a target variable can be assigned to.
-   * A vector classifier will encode it's output as an integer from
-   * <code>0</code> to <code>numCategories()-1</code> (inclusive).
-   * 
-   * @return The number of categories.
-   */
+    * Returns the number of categories that a target variable can be assigned to.
+    * A vector classifier will encode it's output as an integer from
+    * {@code 0} to {@code numCategories()-1} (inclusive).
+    *
+    * @return The number of categories.
+    */
   public abstract int numCategories();
 
   /**
-   * Compute and return a vector containing <code>n-1</code> scores, where
-   * <code>n</code> is equal to <code>numCategories()</code>, given an input
-   * vector <code>instance</code>. Higher scores indicate that the input vector
+   * Compute and return a vector containing {@code n-1} scores, where
+   * {@code n} is equal to {@code numCategories()}, given an input
+   * vector {@code instance}. Higher scores indicate that the input vector
    * is more likely to belong to that category. The categories are denoted by
-   * the integers <code>0</code> through <code>n-1</code> (inclusive), and the
+   * the integers {@code 0} through {@code n-1} (inclusive), and the
    * scores in the returned vector correspond to categories 1 through
-   * <code>n-1</code> (leaving out category 0). It is assumed that the score for
+   * {@code n-1} (leaving out category 0). It is assumed that the score for
    * category 0 is one minus the sum of the scores in the returned vector.
-   * 
+   *
    * @param instance  A feature vector to be classified.
-   * @return A vector of probabilities in 1 of <code>n-1</code> encoding.
+   * @return A vector of probabilities in 1 of {@code n-1} encoding.
    */
   public abstract Vector classify(Vector instance);
   
@@ -75,7 +75,7 @@ public abstract class AbstractVectorClassifier {
    * is just the linear part of the classification.
    * 
    * <p>
-   * The implementation of this method provided by {@link AbstractVectorClassifier} throws an
+   * The implementation of this method provided by {@code AbstractVectorClassifier} throws an
    * {@link UnsupportedOperationException}. Your subclass must explicitly override this method to support
    * this operation.
    * 
@@ -100,33 +100,33 @@ public abstract class AbstractVectorClassifier {
   public abstract double classifyScalar(Vector instance);
 
   /**
-   * Computes and returns a vector containing <code>n</code> scores, where
-   * <code>n</code> is <code>numCategories()</code>, given an input vector
-   * <code>instance</code>. Higher scores indicate that the input vector is more
+   * Computes and returns a vector containing {@code n} scores, where
+   * {@code n} is {@code numCategories()}, given an input vector
+   * {@code instance}. Higher scores indicate that the input vector is more
    * likely to belong to the corresponding category. The categories are denoted
-   * by the integers <code>0</code> through <code>n-1</code> (inclusive).
-   * 
+   * by the integers {@code 0} through {@code n-1} (inclusive).
+   *
    * <p>
    * Using this method it is possible to classify an input vector, for example,
    * by selecting the category with the largest score. If
-   * <code>classifier</code> is an instance of
-   * <code>AbstractVectorClassifier</code> and <code>input</code> is a
-   * <code>Vector</code> of features describing an element to be classified,
-   * then the following code could be used to classify <code>input</code>.<br>
-   * <code>
+   * {@code classifier} is an instance of
+   * {@code AbstractVectorClassifier} and {@code input} is a
+   * {@code Vector} of features describing an element to be classified,
+   * then the following code could be used to classify {@code input}.<br>
+   * {@code
    * Vector scores = classifier.classifyFull(input);<br>
    * int assignedCategory = scores.maxValueIndex();<br>
-   * </code> Here <code>assignedCategory</code> is the index of the category
+   * } Here {@code assignedCategory} is the index of the category
    * with the maximum score.
-   * 
+   *
    * <p>
-   * If an <code>n-1</code> encoding is acceptable, and allocation performance
+   * If an {@code n-1} encoding is acceptable, and allocation performance
    * is an issue, then the {@link #classify(Vector)} method is probably better
    * to use.
-   * 
+   *
    * @see #classify(Vector)
    * @see #classifyFull(Vector r, Vector instance)
-   * 
+   *
    * @param instance A vector of features to be classified.
    * @return A vector of probabilities, one for each category.
    */
@@ -135,29 +135,29 @@ public abstract class AbstractVectorClassifier {
   }
 
   /**
-   * Computes and returns a vector containing <code>n</code> scores, where
-   * <code>n</code> is <code>numCategories()</code>, given an input vector
-   * <code>instance</code>. Higher scores indicate that the input vector is more
+   * Computes and returns a vector containing {@code n} scores, where
+   * {@code n} is {@code numCategories()}, given an input vector
+   * {@code instance}. Higher scores indicate that the input vector is more
    * likely to belong to the corresponding category. The categories are denoted
-   * by the integers <code>0</code> through <code>n-1</code> (inclusive). The
+   * by the integers {@code 0} through {@code n-1} (inclusive). The
    * main difference between this method and {@link #classifyFull(Vector)} is
    * that this method allows a user to provide a previously allocated
-   * <code>Vector r</code> to store the returned scores.
-   * 
+   * {@code Vector r} to store the returned scores.
+   *
    * <p>
    * Using this method it is possible to classify an input vector, for example,
    * by selecting the category with the largest score. If
-   * <code>classifier</code> is an instance of
-   * <code>AbstractVectorClassifier</code>, <code>result</code> is a non-null
-   * <code>Vector</code>, and <code>input</code> is a <code>Vector</code> of
+   * {@code classifier} is an instance of
+   * {@code AbstractVectorClassifier}, {@code result} is a non-null
+   * {@code Vector}, and {@code input} is a {@code Vector} of
    * features describing an element to be classified, then the following code
-   * could be used to classify <code>input</code>.<br>
-   * <code>
+   * could be used to classify {@code input}.<br>
+   * {@code
    * Vector scores = classifier.classifyFull(result, input); // Notice that scores == result<br>
    * int assignedCategory = scores.maxValueIndex();<br>
-   * </code> Here <code>assignedCategory</code> is the index of the category
+   * } Here {@code assignedCategory} is the index of the category
    * with the maximum score.
-   * 
+   *
    * @param r Where to put the results.
    * @param instance  A vector of features to be classified.
    * @return A vector of scores/probabilities, one for each category.
@@ -171,10 +171,10 @@ public abstract class AbstractVectorClassifier {
 
   /**
    * Returns n-1 probabilities, one for each categories 1 through
-   * <code>n-1</code>, for each row of a matrix, where <code>n</code> is equal
-   * to <code>numCategories()</code>. The probability of the missing 0-th
+   * {@code n-1}, for each row of a matrix, where {@code n} is equal
+   * to {@code numCategories()}. The probability of the missing 0-th
    * category is 1 - rowSum(this result).
-   * 
+   *
    * @param data  The matrix whose rows are the input vectors to classify
    * @return A matrix of scores, one row per row of the input matrix, one column for each but the last category.
    */
@@ -187,8 +187,8 @@ public abstract class AbstractVectorClassifier {
   }
 
   /**
-   * Returns a matrix where the rows of the matrix each contain <code>n</code> probabilities, one for each category.
-   * 
+   * Returns a matrix where the rows of the matrix each contain {@code n} probabilities, one for each category.
+   *
    * @param data  The matrix whose rows are the input vectors to classify
    * @return A matrix of scores, one row per row of the input matrix, one column for each but the last category.
    */

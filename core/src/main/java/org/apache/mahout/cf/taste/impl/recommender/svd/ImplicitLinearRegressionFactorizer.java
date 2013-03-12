@@ -242,7 +242,7 @@ public final class ImplicitLinearRegressionFactorizer extends AbstractFactorizer
     /* calculating cosine similarity to determine when to stop the algorithm, this could be used to detect convergence */
     double cosine = aTb / (Math.sqrt(normA) * Math.sqrt(normB));
     if (Double.isNaN(cosine)) {
-      log.info("Cosine similarity is NaN, recomputeUserFeatures=" + recomputeUserFeatures + " id=" + id);
+      log.info("Cosine similarity is NaN, recomputeUserFeatures={} id={}", recomputeUserFeatures, id);
     } else {
       avrChange.addDatum(cosine);
     }

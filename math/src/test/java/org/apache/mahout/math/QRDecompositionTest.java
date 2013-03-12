@@ -33,12 +33,12 @@ public final class QRDecompositionTest extends MahoutTestCase {
 
     // how close is Q to actually being orthornormal?
     double maxIdent = qr.getQ().transpose().times(qr.getQ()).viewDiagonal().assign(Functions.plus(-1)).norm(1);
-    assertEquals(0, maxIdent, 1e-13);
+    assertEquals(0, maxIdent, 1.0e-13);
 
     // how close is Q R to the original value of A?
     Matrix z = qr.getQ().times(qr.getR()).minus(a);
     double maxError = z.aggregate(Functions.MIN, Functions.ABS);
-    assertEquals(0, maxError, 1e-13);
+    assertEquals(0, maxError, 1.0e-13);
   }
 
   @Test
@@ -73,7 +73,7 @@ public final class QRDecompositionTest extends MahoutTestCase {
     Matrix r = qr.getR();
 
     // check identity down to sign
-    assertEquals(0, r.clone().assign(Functions.ABS).minus(rRef.clone().assign(Functions.ABS)).aggregate(Functions.PLUS, Functions.IDENTITY), 1e-12);
+    assertEquals(0, r.clone().assign(Functions.ABS).minus(rRef.clone().assign(Functions.ABS)).aggregate(Functions.PLUS, Functions.IDENTITY), 1.0e-12);
 
     Matrix qRef = reshape(new double[]{
       -0.165178287646573, 0.0510035857637869, 0.13985915987379, -0.120173729496501,
@@ -93,7 +93,7 @@ public final class QRDecompositionTest extends MahoutTestCase {
     Matrix q = qr.getQ();
     printMatrix("q", q);
 
-    assertEquals(0, q.clone().assign(Functions.ABS).minus(qRef.clone().assign(Functions.ABS)).aggregate(Functions.PLUS, Functions.IDENTITY), 1e-12);
+    assertEquals(0, q.clone().assign(Functions.ABS).minus(qRef.clone().assign(Functions.ABS)).aggregate(Functions.PLUS, Functions.IDENTITY), 1.0e-12);
 
     Matrix x1 = qr.solve(reshape(new double[]{
       -0.0178247686747641, 0.68631714634098, -0.335464858468858, 1.50249941751569,
@@ -129,7 +129,7 @@ public final class QRDecompositionTest extends MahoutTestCase {
     }, 5, 8);
     printMatrix("rRef", rRef);
     printMatrix("rActual", rActual);
-    assertEquals(0, rActual.clone().assign(Functions.ABS).minus(rRef.clone().assign(Functions.ABS)).aggregate(Functions.PLUS, Functions.IDENTITY), 1e-12);
+    assertEquals(0, rActual.clone().assign(Functions.ABS).minus(rRef.clone().assign(Functions.ABS)).aggregate(Functions.PLUS, Functions.IDENTITY), 1.0e-12);
 //    assertEquals(rRef, rActual, 1.0e-8);
 
     Matrix qRef = reshape(new double[]{
@@ -145,7 +145,7 @@ public final class QRDecompositionTest extends MahoutTestCase {
     printMatrix("qRef", qRef);
     printMatrix("q", q);
 
-    assertEquals(0, q.clone().assign(Functions.ABS).minus(qRef.clone().assign(Functions.ABS)).aggregate(Functions.PLUS, Functions.IDENTITY), 1e-12);
+    assertEquals(0, q.clone().assign(Functions.ABS).minus(qRef.clone().assign(Functions.ABS)).aggregate(Functions.PLUS, Functions.IDENTITY), 1.0e-12);
 //    assertEquals(qRef, q, 1.0e-8);
 
     Matrix x1 = qr.solve(b());
@@ -157,7 +157,7 @@ public final class QRDecompositionTest extends MahoutTestCase {
     printMatrix("x", x1);
     assertEquals(xRef, x1, 1.0e-8);
 
-    assertEquals(x, qr.getQ().times(qr.getR()), 1e-15);
+    assertEquals(x, qr.getQ().times(qr.getR()), 1.0e-15);
   }
 
   @Test
@@ -188,10 +188,10 @@ public final class QRDecompositionTest extends MahoutTestCase {
   }
 
   private interface Decomposer {
-    public QR decompose(Matrix a);
+    QR decompose(Matrix a);
   }
 
-  private void decompositionSpeedCheck(Decomposer qrf, OnlineSummarizer s1, Matrix a, String label) {
+  private static void decompositionSpeedCheck(Decomposer qrf, OnlineSummarizer s1, Matrix a, String label) {
     int n = 0;
     List<Integer> counts = Lists.newArrayList(10, 20, 50, 100, 200, 500);
     for (int k : counts) {
@@ -221,7 +221,7 @@ public final class QRDecompositionTest extends MahoutTestCase {
       if (k > 100) {
         s1.add(t1 - t0);
       }
-      System.out.printf("%s %d\t%.1f\t%g\t%g\t%g\n", label, n, (t1 - t0) / 1e3 / n, maxIdent, maxError, warmup);
+      System.out.printf("%s %d\t%.1f\t%g\t%g\t%g\n", label, n, (t1 - t0) / 1.0e3 / n, maxIdent, maxError, warmup);
     }
   }
 

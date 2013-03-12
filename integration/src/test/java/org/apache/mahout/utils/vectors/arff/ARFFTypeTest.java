@@ -19,12 +19,11 @@ package org.apache.mahout.utils.vectors.arff;
 import org.apache.mahout.utils.MahoutTestCase;
 import org.junit.Test;
 
-public class ARFFTypeTest extends MahoutTestCase{
+public final class ARFFTypeTest extends MahoutTestCase {
 
   @Test
   public void removeQuotes() {
-    
-    assertEquals(null, ARFFType.removeQuotes(null));
+    assertNull(ARFFType.removeQuotes(null));
     assertEquals("", ARFFType.removeQuotes("\"\""));
     assertEquals("", ARFFType.removeQuotes("''"));
     assertEquals("", ARFFType.removeQuotes(""));

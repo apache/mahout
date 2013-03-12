@@ -145,8 +145,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
 
       // variance is compared with minimum variance
       if ((var / data.size()) < minVariance) {
-        log.debug("variance(" + (var / data.size()) + ") < minVariance(" + minVariance + ") Leaf(" +
-            (sum / data.size()) + ')');
+        log.debug("variance({}) < minVariance({}) Leaf({})", var / data.size(), minVariance, sum / data.size());
         return new Leaf(sum / data.size());
       }
     } else {
@@ -210,8 +209,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
       return new Leaf(label);
     }
 
-    log.debug("best split attr:" + best.getAttr() + ", split:" + best.getSplit() + ", ig:" 
-        + best.getIg());
+    log.debug("best split attr:{}, split:{}, ig:{}", best.getIg(), best.getAttr(), best.getSplit(), best.getIg());
 
     boolean alreadySelected = selected[best.getAttr()];
     if (alreadySelected) {

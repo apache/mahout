@@ -20,7 +20,7 @@ package org.apache.mahout.cf.taste.example.kddcup.track1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EstimateConverter {
+public final class EstimateConverter {
 
   private static final Logger log = LoggerFactory.getLogger(EstimateConverter.class);
 

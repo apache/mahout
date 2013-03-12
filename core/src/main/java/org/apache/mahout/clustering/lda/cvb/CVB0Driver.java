@@ -343,7 +343,7 @@ public class CVB0Driver extends AbstractJob {
   private static double calculatePerplexity(Configuration conf, Path corpusPath, Path modelPath, int iteration)
     throws IOException, ClassNotFoundException, InterruptedException {
     String jobName = "Calculating perplexity for " + modelPath;
-    log.info("About to run: " + jobName);
+    log.info("About to run: {}", jobName);
     Job job = new Job(conf, jobName);
     job.setJarByClass(CachingCVB0PerplexityMapper.class);
     job.setMapperClass(CachingCVB0PerplexityMapper.class);
@@ -423,7 +423,7 @@ public class CVB0Driver extends AbstractJob {
   private static Job writeTopicModel(Configuration conf, Path modelInput, Path output)
     throws IOException, InterruptedException, ClassNotFoundException {
     String jobName = String.format("Writing final topic/term distributions from %s to %s", modelInput, output);
-    log.info("About to run: " + jobName);
+    log.info("About to run: {}", jobName);
     Job job = new Job(conf, jobName);
     job.setJarByClass(CVB0Driver.class);
     job.setInputFormatClass(SequenceFileInputFormat.class);
@@ -441,7 +441,7 @@ public class CVB0Driver extends AbstractJob {
   private static Job writeDocTopicInference(Configuration conf, Path corpus, Path modelInput, Path output)
     throws IOException, ClassNotFoundException, InterruptedException {
     String jobName = String.format("Writing final document/topic inference from %s to %s", corpus, output);
-    log.info("About to run: " + jobName);
+    log.info("About to run: {}", jobName);
     Job job = new Job(conf, jobName);
     job.setMapperClass(CVB0DocInferenceMapper.class);
     job.setNumReduceTasks(0);
@@ -483,7 +483,7 @@ public class CVB0Driver extends AbstractJob {
     int iterationNumber = 1;
     Path iterationPath = modelPath(modelTempDir, iterationNumber);
     while (fs.exists(iterationPath) && iterationNumber <= maxIterations) {
-      log.info("Found previous state: " + iterationPath);
+      log.info("Found previous state: {}", iterationPath);
       iterationNumber++;
       iterationPath = modelPath(modelTempDir, iterationNumber);
     }
@@ -495,7 +495,7 @@ public class CVB0Driver extends AbstractJob {
     throws IOException, ClassNotFoundException, InterruptedException {
     String jobName = String.format("Iteration %d of %d, input path: %s",
         iterationNumber, maxIterations, modelInput);
-    log.info("About to run: " + jobName);
+    log.info("About to run: {}", jobName);
     Job job = new Job(conf, jobName);
     job.setJarByClass(CVB0Driver.class);
     job.setMapperClass(CachingCVB0Mapper.class);

@@ -47,7 +47,7 @@ public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
   // HTML tags, and Java keywords asmany of the messages in the archives
   // are subversion check-in notifications
     
-private static CharArraySet stopSet = new CharArraySet(LUCENE_VERSION, Arrays.asList(
+  private static final CharArraySet stopSet = new CharArraySet(LUCENE_VERSION, Arrays.asList(
     "3d","7bit","a0","about","above","abstract","across","additional","after",
     "afterwards","again","against","align","all","almost","alone","along",
     "already","also","although","always","am","among","amongst","amoungst",

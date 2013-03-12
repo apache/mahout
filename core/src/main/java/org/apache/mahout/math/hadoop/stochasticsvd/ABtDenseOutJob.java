@@ -62,7 +62,7 @@ import org.apache.mahout.math.hadoop.stochasticsvd.qr.QRFirstStep;
  * reducer.
  */
 @SuppressWarnings("deprecation")
-public class ABtDenseOutJob {
+public final class ABtDenseOutJob {
 
   public static final String PROP_BT_PATH = "ssvd.Bt.path";
   public static final String PROP_BT_BROADCAST = "ssvd.Bt.broadcast";

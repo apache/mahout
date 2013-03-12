@@ -22,7 +22,7 @@ package org.apache.mahout.math;
  *  <p>
  *  See also http://github.com/yonik/java_util for future updates to this file.
  */
-public class MurmurHash3 {
+public final class MurmurHash3 {
 
   private MurmurHash3() {
   }

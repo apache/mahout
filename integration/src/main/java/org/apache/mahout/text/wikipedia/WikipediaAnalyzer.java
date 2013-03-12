@@ -45,7 +45,7 @@ public class WikipediaAnalyzer extends StopwordAnalyzerBase {
     Tokenizer tokenizer = new WikipediaTokenizer(reader);
     TokenStream result = new StandardFilter(Version.LUCENE_41, tokenizer);
     result = new LowerCaseFilter(Version.LUCENE_41, result);
-    result = new StopFilter(Version.LUCENE_41, result, super.getStopwordSet());
+    result = new StopFilter(Version.LUCENE_41, result, getStopwordSet());
     return new TokenStreamComponents(tokenizer, result);
   }
 }

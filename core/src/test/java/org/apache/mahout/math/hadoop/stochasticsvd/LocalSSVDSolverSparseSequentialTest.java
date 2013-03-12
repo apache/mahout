@@ -56,13 +56,13 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
 
   private static final double s_epsilon = 1.0E-10d;
 
-  /*
-   * removing from tests to reduce test running time
-   */
-  /* @Test */
+  // removing from tests to reduce test running time
+  /* 
+  @Test
   public void testSSVDSolverSparse() throws IOException {
     runSSVDSolver(0);
   }
+   */
 
   @Test
   public void testSSVDSolverPowerIterations1() throws IOException {

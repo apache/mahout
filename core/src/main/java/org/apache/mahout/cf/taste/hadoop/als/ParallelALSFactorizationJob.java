@@ -202,10 +202,9 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
   static class ItemRatingVectorsMapper extends Mapper<LongWritable,Text,IntWritable,VectorWritable> {
 
-    private IntWritable itemIDWritable = new IntWritable();
-    private VectorWritable ratingsWritable = new VectorWritable(true);
-
-    private Vector ratings = new SequentialAccessSparseVector(Integer.MAX_VALUE, 1);
+    private final IntWritable itemIDWritable = new IntWritable();
+    private final VectorWritable ratingsWritable = new VectorWritable(true);
+    private final Vector ratings = new SequentialAccessSparseVector(Integer.MAX_VALUE, 1);
 
     @Override
     protected void map(LongWritable offset, Text line, Context ctx) throws IOException, InterruptedException {
@@ -251,7 +250,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     private int numFeatures;
     private OpenIntObjectHashMap<Vector> UorM;
 
-    private VectorWritable uiOrmjWritable = new VectorWritable();
+    private final VectorWritable uiOrmjWritable = new VectorWritable();
 
     @Override
     protected void setup(Mapper.Context ctx) throws IOException, InterruptedException {
@@ -287,7 +286,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     private ImplicitFeedbackAlternatingLeastSquaresSolver solver;
 
-    private VectorWritable uiOrmjWritable = new VectorWritable();
+    private final VectorWritable uiOrmjWritable = new VectorWritable();
 
     @Override
     protected void setup(Mapper.Context ctx) throws IOException, InterruptedException {
@@ -316,9 +315,9 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
   static class AverageRatingMapper extends Mapper<IntWritable,VectorWritable,IntWritable,VectorWritable> {
 
-    private IntWritable firstIndex = new IntWritable(0);
-    private Vector featureVector = new RandomAccessSparseVector(Integer.MAX_VALUE, 1);
-    private VectorWritable featureVectorWritable = new VectorWritable();
+    private final IntWritable firstIndex = new IntWritable(0);
+    private final Vector featureVector = new RandomAccessSparseVector(Integer.MAX_VALUE, 1);
+    private final VectorWritable featureVectorWritable = new VectorWritable();
 
     @Override
     protected void map(IntWritable r, VectorWritable v, Context ctx) throws IOException, InterruptedException {

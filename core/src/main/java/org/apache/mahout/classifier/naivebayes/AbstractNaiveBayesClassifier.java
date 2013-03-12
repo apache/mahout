@@ -25,8 +25,8 @@ import org.apache.mahout.math.Vector.Element;
 
 /**
  * Class implementing the Naive Bayes Classifier Algorithm. Note that this class
- * supports {@link #classifyFull}, but not <code>classify</code> or
- * <code>classifyScalar</code>. The reason that these two methods are not
+ * supports {@link #classifyFull}, but not {@code classify} or
+ * {@code classifyScalar}. The reason that these two methods are not
  * supported is because the scores computed by a NaiveBayesClassifier do not
  * represent probabilities.
  */

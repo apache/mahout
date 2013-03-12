@@ -21,7 +21,7 @@ import org.apache.lucene.search.similarities.DefaultSimilarity;
 //TODO: add a new class that supports arbitrary Lucene similarity implementations
 public class TFIDF implements Weight {
 
-  private DefaultSimilarity sim = new DefaultSimilarity();
+  private final DefaultSimilarity sim = new DefaultSimilarity();
 
   public TFIDF() {
   }

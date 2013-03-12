@@ -22,7 +22,6 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.utils.vectors.TermInfo;
 import org.apache.mahout.vectorizer.Weight;
 
-import java.io.IOException;
 import java.util.Iterator;
 
 /**
@@ -75,10 +74,6 @@ public final class LuceneIterable implements Iterable<Vector> {
 
   @Override
   public Iterator<Vector> iterator() {
-    try {
-      return new LuceneIterator(indexReader, idField, field, terminfo, weight, normPower, maxPercentErrorDocs);
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
-    }
+    return new LuceneIterator(indexReader, idField, field, terminfo, weight, normPower, maxPercentErrorDocs);
   }
 }

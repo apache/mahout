@@ -21,11 +21,10 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
 import org.apache.mahout.common.ClassUtils;
 
-/**
- *
- *
- **/
-public class AnalyzerUtils {
+public final class AnalyzerUtils {
+
+  private AnalyzerUtils() {
+  }
 
   /**
    * Create an Analyzer using the latest {@link org.apache.lucene.util.Version}.  Note, if you need to pass in parameters

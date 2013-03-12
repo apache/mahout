@@ -132,6 +132,7 @@ public class OldQRDecomposition implements QR {
    *
    * @return <tt>Q</tt>
    */
+  @Override
   public Matrix getQ() {
     int columns = Math.min(originalColumns, originalRows);
     Matrix q = qr.like(originalRows, columns);
@@ -154,6 +155,7 @@ public class OldQRDecomposition implements QR {
    *
    * @return <tt>R</tt>
    */
+  @Override
   public Matrix getR() {
     int rows = Math.min(originalRows, originalColumns);
     Matrix r = qr.like(rows, originalColumns);
@@ -176,6 +178,7 @@ public class OldQRDecomposition implements QR {
    *
    * @return true if <tt>R</tt>, and hence <tt>A</tt>, has full rank.
    */
+  @Override
   public boolean hasFullRank() {
     for (int j = 0; j < originalColumns; j++) {
       if (rDiag.getQuick(j) == 0) {
@@ -192,6 +195,7 @@ public class OldQRDecomposition implements QR {
    * @return <tt>X</tt> that minimizes the two norm of <tt>Q*R*X - B</tt>.
    * @throws IllegalArgumentException if <tt>B.rows() != A.rows()</tt>.
    */
+  @Override
   public Matrix solve(Matrix B) {
     if (B.numRows() != originalRows) {
       throw new IllegalArgumentException("Matrix row dimensions must agree.");

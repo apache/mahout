@@ -35,7 +35,7 @@ import java.util.Arrays;
  * Memory requirements: 1 KB static memory.
  *
  */
-public class PrimeFinder {
+public final class PrimeFinder {
 
   /** The largest prime this class can generate; currently equal to <tt>Integer.MAX_VALUE</tt>. */
   public static final int largestPrime = Integer.MAX_VALUE; //yes, it is prime.

@@ -356,7 +356,7 @@ public class DisplayMinHash extends DisplayClustering {
       }
       list.add(next.getSecond().get());
     }
-    log.info("Loaded: " + clusters.size() + " clusters");
+    log.info("Loaded: {} clusters", clusters.size());
   }
 
   private static void runMinHash(Configuration conf, Path samples, Path output)

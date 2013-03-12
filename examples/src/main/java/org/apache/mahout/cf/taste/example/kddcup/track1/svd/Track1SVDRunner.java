@@ -44,7 +44,7 @@ import java.io.OutputStream;
  * needs at least 6-7GB of memory, tested with -Xms6700M -Xmx6700M
  *
  */
-public class Track1SVDRunner {
+public final class Track1SVDRunner {
 
   private static final Logger log = LoggerFactory.getLogger(Track1SVDRunner.class);
 

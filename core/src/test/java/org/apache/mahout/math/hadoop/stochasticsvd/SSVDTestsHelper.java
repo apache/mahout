@@ -35,7 +35,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.hadoop.stochasticsvd.qr.GramSchmidt;
 
-public class SSVDTestsHelper {
+public final class SSVDTestsHelper {
 
   private SSVDTestsHelper() {
   }

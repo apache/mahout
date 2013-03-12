@@ -96,7 +96,7 @@ public class VectorDistanceSimilarityJob extends AbstractJob {
       String maxDistanceArg = getOption(MAX_DISTANCE);
       if (maxDistanceArg != null) {
         maxDistance = Double.parseDouble(maxDistanceArg);
-        Preconditions.checkArgument(maxDistance > 0d, "value for " + MAX_DISTANCE + " must be greater than zero");
+        Preconditions.checkArgument(maxDistance > 0.0d, "value for " + MAX_DISTANCE + " must be greater than zero");
       }
     }
 

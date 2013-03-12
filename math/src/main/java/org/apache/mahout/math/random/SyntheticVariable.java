@@ -56,7 +56,7 @@ import java.util.Map;
  */
 public class SyntheticVariable extends AbstractSamplerFunction {
 
-    private Map<String, String> assign(Iterable<String> split) {
+  private static Map<String, String> assign(Iterable<String> split) {
     Iterable<String> labels = ImmutableList.of(
       "name", "type", "n", "missing", "missing%", "mean", "std", "min", "max",
       "q01", "q05", "q10", "q25", "q50", "q75", "q90", "q95", "q99");

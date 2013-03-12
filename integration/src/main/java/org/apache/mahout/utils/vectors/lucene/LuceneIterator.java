@@ -58,7 +58,7 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
   private final Bump125 bump = new Bump125();
   private long nextLogRecord = bump.increment();
   private int skippedErrorMessages = 0;
-  private Weight weight;
+  private final Weight weight;
 
   /**
    * Produce a LuceneIterable that can create the Vector plus normalize it.
@@ -76,7 +76,7 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
                         String field,
                         TermInfo terminfo,
                         Weight weight,
-                        double normPower) throws IOException {
+                        double normPower) {
     this(indexReader, idField, field, terminfo, weight, normPower, 0.0);
   }
 
@@ -97,7 +97,7 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
                         TermInfo terminfo,
                         Weight weight,
                         double normPower,
-                        double maxPercentErrorDocs) throws IOException {
+                        double maxPercentErrorDocs) {
     // term docs(null) is a better way of iterating all the docs in Lucene
     Preconditions.checkArgument(normPower == LuceneIterable.NO_NORMALIZING || normPower >= 0,
             "If specified normPower must be nonnegative", normPower);
