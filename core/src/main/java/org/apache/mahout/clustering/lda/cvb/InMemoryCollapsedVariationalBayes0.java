@@ -307,16 +307,16 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
         .withDescription("Smoothing parameter for p(term | topic)").withShortName("e").create();
 
     Option maxIterOpt = obuilder.withLongName("maxIterations").withRequired(false).withArgument(abuilder
-        .withName("maxIterations").withMinimum(1).withMaximum(1).withDefault(10).create())
+        .withName("maxIterations").withMinimum(1).withMaximum(1).withDefault("10").create())
         .withDescription("Maximum number of training passes").withShortName("m").create();
 
     Option modelCorpusFractionOption = obuilder.withLongName("modelCorpusFraction")
         .withRequired(false).withArgument(abuilder.withName("modelCorpusFraction").withMinimum(1)
-        .withMaximum(1).withDefault(0.0).create()).withShortName("mcf")
+        .withMaximum(1).withDefault("0.0").create()).withShortName("mcf")
         .withDescription("For online updates, initial value of |model|/|corpus|").create();
 
     Option burnInOpt = obuilder.withLongName("burnInIterations").withRequired(false).withArgument(abuilder
-        .withName("burnInIterations").withMinimum(1).withMaximum(1).withDefault(5).create())
+        .withName("burnInIterations").withMinimum(1).withMaximum(1).withDefault("5").create())
         .withDescription("Minimum number of iterations").withShortName("b").create();
 
     Option convergenceOpt = obuilder.withLongName("convergence").withRequired(false).withArgument(abuilder
@@ -372,7 +372,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
       double alpha = Double.parseDouble((String)cmdLine.getValue(alphaOpt));
       double eta = Double.parseDouble((String)cmdLine.getValue(etaOpt));
       int maxIterations = Integer.parseInt((String)cmdLine.getValue(maxIterOpt));
-      int burnInIterations = (Integer)cmdLine.getValue(burnInOpt);
+      int burnInIterations = Integer.parseInt((String)cmdLine.getValue(burnInOpt));
       double minFractionalErrorChange = Double.parseDouble((String) cmdLine.getValue(convergenceOpt));
       int numTrainThreads = Integer.parseInt((String)cmdLine.getValue(numTrainThreadsOpt));
       int numUpdateThreads = Integer.parseInt((String)cmdLine.getValue(numUpdateThreadsOpt));
@@ -380,7 +380,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
       String docOutFile = (String)cmdLine.getValue(outputDocFileOpt);
       //String reInferDocTopics = (String)cmdLine.getValue(reInferDocTopicsOpt);
       boolean verbose = Boolean.parseBoolean((String) cmdLine.getValue(verboseOpt));
-      double modelCorpusFraction = (Double) cmdLine.getValue(modelCorpusFractionOption);
+      double modelCorpusFraction = Double.parseDouble((String)cmdLine.getValue(modelCorpusFractionOption));
 
       long start = System.nanoTime();
 
