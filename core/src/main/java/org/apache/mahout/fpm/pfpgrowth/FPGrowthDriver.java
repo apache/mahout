@@ -157,7 +157,7 @@ public final class FPGrowthDriver extends AbstractJob {
 
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, Text.class, TopKStringPatterns.class);
 
-    if ("true".equals(params.get("useFPG2"))) {
+    if ("true".equals(params.get(PFPGrowth.USE_FPG2))) {
       org.apache.mahout.fpm.pfpgrowth.fpgrowth2.FPGrowthObj<String> fp 
         = new org.apache.mahout.fpm.pfpgrowth.fpgrowth2.FPGrowthObj<String>();
       Collection<String> features = new HashSet<String>();
