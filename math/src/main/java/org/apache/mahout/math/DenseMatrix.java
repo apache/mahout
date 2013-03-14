@@ -31,15 +31,28 @@ public class DenseMatrix extends AbstractMatrix {
    *          a double[][]
    */
   public DenseMatrix(double[][] values) {
+    this(values, false);
+  }
+
+  /**
+   * Construct a matrix from the given values
+   *
+   * @param values
+   *          a double[][]
+   * @param shallowCopy directly use the supplied array?
+   */
+  public DenseMatrix(double[][] values, boolean shallowCopy) {
     super(values.length, values[0].length);
-    // clone the rows
-    this.values = new double[values.length][];
-    // be careful, need to clone the columns too
-    for (int i = 0; i < values.length; i++) {
-      this.values[i] = values[i].clone();
+    if (shallowCopy) {
+      this.values = values;
+    } else {
+      this.values = new double[values.length][];
+      for (int i = 0; i < values.length; i++) {
+        this.values[i] = values[i].clone();
+      }
     }
   }
-  
+
   /**
    * Constructs an empty matrix of the given size.
    * @param rows  The number of rows in the result.

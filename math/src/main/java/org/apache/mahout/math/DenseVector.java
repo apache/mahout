@@ -69,6 +69,25 @@ public class DenseVector extends AbstractVector {
   }
 
   @Override
+  public double dot(Vector x) {
+    if (!x.isDense()) {
+      return super.dot(x);
+    } else {
+
+      int size = x.size();
+      if (values.length != size) {
+        throw new CardinalityException(values.length, size);
+      }
+
+      double sum = 0;
+      for (int n = 0; n < size; n++) {
+        sum += values[n] * x.getQuick(n);
+      }
+      return sum;
+    }
+  }
+
+  @Override
   protected Matrix matrixLike(int rows, int columns) {
     return new DenseMatrix(rows, columns);
   }
@@ -99,8 +118,7 @@ public class DenseVector extends AbstractVector {
     double result = 0.0;
     int max = size();
     for (int i = 0; i < max; i++) {
-      double value = this.getQuick(i);
-      result += value * value;
+      result += values[i] * values[i];
     }
     return result;
   }
