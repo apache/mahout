@@ -65,10 +65,9 @@ public final class TreeVisualizer {
           for (int j = 0; j < layer; j++) {
             buff.append("|   ");
           }
-          buff.append(attrNames == null ? attr : attrNames[attr]).append(" = ").append(attrValues[attr][i]);
-          int index = ArrayUtils.indexOf(values, i);
-          if (index >= 0) {
-            buff.append(toStringNode(childs[index], dataset, attrNames, fields, layer + 1));
+          if (values[i] < attrValues[attr].length) {
+            buff.append((attrNames == null ? attr : attrNames[attr]) + " = " + attrValues[attr][(int) values[i]]);
+            buff.append(toStringNode(childs[i], dataset, attrNames, fields, layer + 1));
           }
         }
       } else if (node instanceof NumericalNode) {

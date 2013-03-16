@@ -82,8 +82,8 @@ public final class VisualizerTest extends MahoutTestCase {
     
     assertEquals(TreeVisualizer.toString(tree, data.getDataset(), ATTR_NAMES),
       "\noutlook = rainy\n|   windy = FALSE : yes\n|   windy = TRUE : no\n"
-        + "outlook = sunny\n|   humidity < 85 : yes\n|   humidity >= 85 : no\n"
-        + "outlook = overcast : yes");
+        + "outlook = overcast : yes\n"
+        + "outlook = sunny\n|   humidity < 85 : yes\n|   humidity >= 85 : no");
   }
   
   @Test
