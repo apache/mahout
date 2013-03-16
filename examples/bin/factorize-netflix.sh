@@ -49,7 +49,7 @@ $MAHOUT org.apache.mahout.cf.taste.hadoop.example.als.netflix.NetflixDatasetConv
 
 # run distributed ALS-WR to factorize the rating matrix defined by the training set
 $MAHOUT parallelALS --input ${WORK_DIR}/trainingSet/ratings.tsv --output ${WORK_DIR}/als/out \
-    --tempDir ${WORK_DIR}/als/tmp --numFeatures 25 --numIterations 10 --lambda 0.065
+    --tempDir ${WORK_DIR}/als/tmp --numFeatures 25 --numIterations 10 --lambda 0.065 --numThreadsPerSolver 4
 
 # compute predictions against the probe set, measure the error
 $MAHOUT evaluateFactorization --input ${WORK_DIR}/probeSet/ratings.tsv --output ${WORK_DIR}/als/rmse/ \

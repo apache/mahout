@@ -57,6 +57,16 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
     conf = new Configuration();
   }
 
+  @Test
+  public void completeJobToyExample() throws Exception {
+    explicitExample(1);
+  }
+
+  @Test
+  public void completeJobToyExampleMultithreaded() throws Exception {
+    explicitExample(2);
+  }
+
   /**
    * small integration test that runs the full job
    *
@@ -72,8 +82,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
    *
    * </pre>
    */
-  @Test
-  public void completeJobToyExample() throws Exception {
+  private void explicitExample(int numThreads) throws Exception {
 
     Double na = Double.NaN;
     Matrix preferences = new SparseRowMatrix(4, 4, new Vector[] {
@@ -93,7 +102,8 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
 
     alsFactorization.run(new String[] { "--input", inputFile.getAbsolutePath(), "--output", outputDir.getAbsolutePath(),
         "--tempDir", tmpDir.getAbsolutePath(), "--lambda", String.valueOf(lambda),
-        "--numFeatures", String.valueOf(numFeatures), "--numIterations", String.valueOf(numIterations) });
+        "--numFeatures", String.valueOf(numFeatures), "--numIterations", String.valueOf(numIterations),
+        "--numThreadsPerSolver", String.valueOf(numThreads) });
 
     Matrix u = MathHelper.readMatrix(conf, new Path(outputDir.getAbsolutePath(), "U/part-m-00000"),
         preferences.numRows(), numFeatures);
@@ -139,7 +149,15 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
 
   @Test
   public void completeJobImplicitToyExample() throws Exception {
+    implicitExample(1);
+  }
 
+  @Test
+  public void completeJobImplicitToyExampleMultithreaded() throws Exception {
+    implicitExample(2);
+  }
+
+  public void implicitExample(int numThreads) throws Exception {
     Matrix observations = new SparseRowMatrix(4, 4, new Vector[] {
         new DenseVector(new double[] { 5.0, 5.0, 2.0, 0 }),
         new DenseVector(new double[] { 2.0, 0,   3.0, 5.0 }),
@@ -165,7 +183,8 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
     alsFactorization.run(new String[] { "--input", inputFile.getAbsolutePath(), "--output", outputDir.getAbsolutePath(),
         "--tempDir", tmpDir.getAbsolutePath(), "--lambda", String.valueOf(lambda),
         "--implicitFeedback", String.valueOf(true), "--alpha", String.valueOf(alpha),
-        "--numFeatures", String.valueOf(numFeatures), "--numIterations", String.valueOf(numIterations) });
+        "--numFeatures", String.valueOf(numFeatures), "--numIterations", String.valueOf(numIterations),
+        "--numThreadsPerSolver", String.valueOf(numThreads) });
 
     Matrix u = MathHelper.readMatrix(conf, new Path(outputDir.getAbsolutePath(), "U/part-m-00000"),
         observations.numRows(), numFeatures);

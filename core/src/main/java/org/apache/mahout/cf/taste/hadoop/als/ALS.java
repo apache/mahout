@@ -17,9 +17,11 @@
 
 package org.apache.mahout.cf.taste.hadoop.als;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
@@ -27,27 +29,25 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterator;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.als.AlternatingLeastSquaresSolver;
 import org.apache.mahout.math.map.OpenIntObjectHashMap;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 
-final class ALSUtils {
+public final class ALS {
 
-  private ALSUtils() {
+  private ALS() {
   }
 
   static Vector readFirstRow(Path dir, Configuration conf) throws IOException {
-    Iterator<VectorWritable> iterator = new SequenceFileDirValueIterator<VectorWritable>(dir,
-                                                                                         PathType.LIST,
-                                                                                         PathFilters.partFilter(),
-                                                                                         null,
-                                                                                         true,
-                                                                                         conf);
+    Iterator<VectorWritable> iterator = new SequenceFileDirValueIterator<VectorWritable>(dir, PathType.LIST,
+        PathFilters.partFilter(), null, true, conf);
     return iterator.hasNext() ? iterator.next().get() : null;
   }
 
-  static OpenIntObjectHashMap<Vector> readMatrixByRows(Path dir, Configuration conf) {
+  public static OpenIntObjectHashMap<Vector> readMatrixByRows(Path dir, Configuration conf) {
     OpenIntObjectHashMap<Vector> matrix = new OpenIntObjectHashMap<Vector>();
 
     for (Pair<IntWritable,VectorWritable> pair :
@@ -57,5 +57,19 @@ final class ALSUtils {
       matrix.put(rowIndex, row);
     }
     return matrix;
+  }
+
+  public static Vector solveExplicit(VectorWritable ratingsWritable, OpenIntObjectHashMap<Vector> uOrM,
+    double lambda, int numFeatures) throws IOException, InterruptedException {
+    Vector ratings = ratingsWritable.get();
+
+    List<Vector> featureVectors = Lists.newArrayListWithCapacity(ratings.getNumNondefaultElements());
+    Iterator<Vector.Element> interactions = ratings.iterateNonZero();
+    while (interactions.hasNext()) {
+      int index = interactions.next().index();
+      featureVectors.add(uOrM.get(index));
+    }
+
+    return AlternatingLeastSquaresSolver.solve(featureVectors, ratings, lambda, numFeatures);
   }
 }

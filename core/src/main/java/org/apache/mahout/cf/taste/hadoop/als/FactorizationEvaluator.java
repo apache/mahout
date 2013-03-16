@@ -130,8 +130,8 @@ public class FactorizationEvaluator extends AbstractJob {
       Path pathToU = new Path(ctx.getConfiguration().get(USER_FEATURES_PATH));
       Path pathToM = new Path(ctx.getConfiguration().get(ITEM_FEATURES_PATH));
 
-      U = ALSUtils.readMatrixByRows(pathToU, ctx.getConfiguration());
-      M = ALSUtils.readMatrixByRows(pathToM, ctx.getConfiguration());
+      U = ALS.readMatrixByRows(pathToU, ctx.getConfiguration());
+      M = ALS.readMatrixByRows(pathToM, ctx.getConfiguration());
     }
 
     @Override

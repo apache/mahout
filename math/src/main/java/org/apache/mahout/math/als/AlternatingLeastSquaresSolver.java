@@ -36,6 +36,7 @@ public final class AlternatingLeastSquaresSolver {
   private AlternatingLeastSquaresSolver() {
   }
 
+  //TODO make feature vectors a simple array
   public static Vector solve(Iterable<Vector> featureVectors, Vector ratingVector, double lambda, int numFeatures) {
 
     Preconditions.checkNotNull(featureVectors, "Feature vectors cannot be null");

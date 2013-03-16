@@ -53,7 +53,7 @@ $MAHOUT splitDataset --input ${WORK_DIR}/movielens/ratings.csv --output ${WORK_D
 
 # run distributed ALS-WR to factorize the rating matrix defined by the training set
 $MAHOUT parallelALS --input ${WORK_DIR}/dataset/trainingSet/ --output ${WORK_DIR}/als/out \
-    --tempDir ${WORK_DIR}/als/tmp --numFeatures 20 --numIterations 10 --lambda 0.065
+    --tempDir ${WORK_DIR}/als/tmp --numFeatures 20 --numIterations 10 --lambda 0.065 --numThreadsPerSolver 2
 
 # compute predictions against the probe set, measure the error
 $MAHOUT evaluateFactorization --input ${WORK_DIR}/dataset/probeSet/ --output ${WORK_DIR}/als/rmse/ \

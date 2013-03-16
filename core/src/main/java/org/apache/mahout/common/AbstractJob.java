@@ -548,10 +548,25 @@ public abstract class AbstractJob extends Configured implements Tool {
                            Class<? extends Writable> mapperKey,
                            Class<? extends Writable> mapperValue,
                            Class<? extends OutputFormat> outputFormat) throws IOException {
+    return prepareJob(inputPath, outputPath, inputFormat, mapper, mapperKey, mapperValue, outputFormat, null);
+
+  }
+  protected Job prepareJob(Path inputPath,
+                           Path outputPath,
+                           Class<? extends InputFormat> inputFormat,
+                           Class<? extends Mapper> mapper,
+                           Class<? extends Writable> mapperKey,
+                           Class<? extends Writable> mapperValue,
+                           Class<? extends OutputFormat> outputFormat,
+                           String jobname) throws IOException {
 
     Job job = HadoopUtil.prepareJob(inputPath, outputPath,
             inputFormat, mapper, mapperKey, mapperValue, outputFormat, getConf());
-    job.setJobName(HadoopUtil.getCustomJobName(getClass().getSimpleName(), job, mapper, Reducer.class));
+
+    String name =
+        jobname != null ? jobname : HadoopUtil.getCustomJobName(getClass().getSimpleName(), job, mapper, Reducer.class);
+
+    job.setJobName(name);
     return job;
 
   }
