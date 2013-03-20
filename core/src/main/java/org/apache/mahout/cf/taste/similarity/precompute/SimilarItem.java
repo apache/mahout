@@ -15,19 +15,28 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop.similarity.item;
+package org.apache.mahout.cf.taste.similarity.precompute;
 
-import java.io.Serializable;
+import com.google.common.primitives.Doubles;
+
 import java.util.Comparator;
 
-class SimilarItem {
+/**
+ * Modeling similarity towards another item
+ */
+public class SimilarItem {
 
-  static final Comparator<SimilarItem> COMPARE_BY_SIMILARITY = new BySimilaritySimilarItemComparator();
+  public static final Comparator<SimilarItem> COMPARE_BY_SIMILARITY = new Comparator<SimilarItem>() {
+    @Override
+    public int compare(SimilarItem s1, SimilarItem s2) {
+      return Doubles.compare(s1.similarity, s2.similarity);
+    }
+  };
 
   private final long itemID;
   private final double similarity;
 
-  SimilarItem(long itemID, double similarity) {
+  public SimilarItem(long itemID, double similarity) {
     this.itemID = itemID;
     this.similarity = similarity;
   }
@@ -40,10 +49,4 @@ class SimilarItem {
     return similarity;
   }
 
-  static class BySimilaritySimilarItemComparator implements Comparator<SimilarItem>, Serializable {
-    @Override
-    public int compare(SimilarItem s1, SimilarItem s2) {
-      return s1.similarity == s2.similarity ? 0 : s1.similarity < s2.similarity ? -1 : 1;
-    }
-  }
 }
