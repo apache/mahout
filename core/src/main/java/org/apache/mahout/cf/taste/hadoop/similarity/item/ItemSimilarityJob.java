@@ -66,13 +66,16 @@ import org.apache.mahout.math.map.OpenIntLongHashMap;
  * <p>Command line arguments specific to this class are:</p>
  *
  * <ol>
- * <li>-Dmapred.input.dir=(path): Directory containing one or more text files with the preference data</li>
- * <li>-Dmapred.output.dir=(path): output path where similarity data should be written</li>
- * <li>--similarityClassname (classname): Name of distributed similarity measure class to instantiate or a predefined similarity
- *  from {@link org.apache.mahout.math.hadoop.similarity.cooccurrence.measures.VectorSimilarityMeasure}</li>
+ * <li>--input (path): Directory containing one or more text files with the preference data</li>
+ * <li>--output (path): output path where similarity data should be written</li>
+ * <li>--similarityClassname (classname): Name of distributed similarity measure class to instantiate or a predefined
+ *  similarity from {@link org.apache.mahout.math.hadoop.similarity.cooccurrence.measures.VectorSimilarityMeasure}</li>
  * <li>--maxSimilaritiesPerItem (integer): Maximum number of similarities considered per item (100)</li>
- * <li>--maxCooccurrencesPerItem (integer): Maximum number of cooccurrences considered per item (100)</li>
+ * <li>--maxPrefsPerUser (integer): max number of preferences to consider per user, users with more preferences will
+ *  be sampled down (1000)</li>
+ * <li>--minPrefsPerUser (integer): ignore users with less preferences than this (1)</li>
  * <li>--booleanData (boolean): Treat input data as having no pref values (false)</li>
+ * <li>--threshold (double): discard item pairs with a similarity value below this</li>
  * </ol>
  *
  * <p>General command line options are documented in {@link AbstractJob}.</p>
@@ -86,7 +89,7 @@ public final class ItemSimilarityJob extends AbstractJob {
 
   private static final int DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM = 100;
   private static final int DEFAULT_MAX_PREFS_PER_USER = 1000;
-  private static final int DEFAULT_MIN_PREFS_PER_USER = 1;
+  private static final int DEFAULT_MIN_PREFS_PER_USER = 2;
 
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new ItemSimilarityJob(), args);

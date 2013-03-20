@@ -18,11 +18,11 @@
 package org.apache.mahout.cf.taste.similarity.precompute.example;
 
 import org.apache.mahout.cf.taste.example.grouplens.GroupLensDataModel;
-import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender;
 import org.apache.mahout.cf.taste.impl.similarity.LogLikelihoodSimilarity;
 import org.apache.mahout.cf.taste.impl.similarity.precompute.FileSimilarItemsWriter;
 import org.apache.mahout.cf.taste.impl.similarity.precompute.MultithreadedBatchItemSimilarities;
+import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.precompute.BatchItemSimilarities;
 
 import java.io.File;
@@ -48,7 +48,7 @@ public class BatchItemSimilaritiesGroupLens {
       resultFile.delete();
     }
 
-    FileDataModel dataModel = new GroupLensDataModel(new File(args[0]));
+    DataModel dataModel = new GroupLensDataModel(new File(args[0]));
     GenericItemBasedRecommender recommender = new GenericItemBasedRecommender(dataModel,
         new LogLikelihoodSimilarity(dataModel));
     BatchItemSimilarities batch = new MultithreadedBatchItemSimilarities(recommender, 5);
