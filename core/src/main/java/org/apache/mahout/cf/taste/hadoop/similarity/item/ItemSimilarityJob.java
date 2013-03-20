@@ -89,7 +89,7 @@ public final class ItemSimilarityJob extends AbstractJob {
 
   private static final int DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM = 100;
   private static final int DEFAULT_MAX_PREFS_PER_USER = 1000;
-  private static final int DEFAULT_MIN_PREFS_PER_USER = 2;
+  private static final int DEFAULT_MIN_PREFS_PER_USER = 1;
 
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new ItemSimilarityJob(), args);
