@@ -50,10 +50,6 @@ class MutableRecommendedItem implements RecommendedItem {
     }
   }
 
-  public RecommendedItem copy() {
-    return new GenericRecommendedItem(itemID, value);
-  }
-
   @Override
   public String toString() {
     return "MutableRecommendedItem[item:" + itemID + ", value:" + value + ']';

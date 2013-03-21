@@ -57,7 +57,7 @@ public class ImplicitFeedbackAlternatingLeastSquaresSolver {
     return new QRDecomposition(A).solve(y).viewColumn(0);
   }
 
-  protected double confidence(double rating) {
+  double confidence(double rating) {
     return 1 + alpha * rating;
   }
 

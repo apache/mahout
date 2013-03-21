@@ -50,11 +50,6 @@ public final class EntityPrefWritable extends VarLongWritable {
     return prefValue;
   }
 
-  public void set(long id, float prefValue) {
-    set(id);
-    this.prefValue = prefValue;
-  }
-  
   @Override
   public void write(DataOutput out) throws IOException {
     super.write(out);

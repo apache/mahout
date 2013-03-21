@@ -29,7 +29,7 @@ import org.apache.mahout.math.VarLongWritable;
 /**
  * Extracts and emits all user IDs from the users file, or input file.
  */
-public final class UserIDsMapper extends
+final class UserIDsMapper extends
     Mapper<LongWritable,Text, VarLongWritable,NullWritable> {
 
   private static final Pattern DELIMITER = Pattern.compile("[\t,]");

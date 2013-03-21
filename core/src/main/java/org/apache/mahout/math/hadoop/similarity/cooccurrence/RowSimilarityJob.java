@@ -51,16 +51,16 @@ public class RowSimilarityJob extends AbstractJob {
 
   public static final double NO_THRESHOLD = Double.MIN_VALUE;
 
-  static final String SIMILARITY_CLASSNAME = RowSimilarityJob.class + ".distributedSimilarityClassname";
-  static final String NUMBER_OF_COLUMNS = RowSimilarityJob.class + ".numberOfColumns";
-  static final String MAX_SIMILARITIES_PER_ROW = RowSimilarityJob.class + ".maxSimilaritiesPerRow";
-  static final String EXCLUDE_SELF_SIMILARITY = RowSimilarityJob.class + ".excludeSelfSimilarity";
+  private static final String SIMILARITY_CLASSNAME = RowSimilarityJob.class + ".distributedSimilarityClassname";
+  private static final String NUMBER_OF_COLUMNS = RowSimilarityJob.class + ".numberOfColumns";
+  private static final String MAX_SIMILARITIES_PER_ROW = RowSimilarityJob.class + ".maxSimilaritiesPerRow";
+  private static final String EXCLUDE_SELF_SIMILARITY = RowSimilarityJob.class + ".excludeSelfSimilarity";
 
-  static final String THRESHOLD = RowSimilarityJob.class + ".threshold";
-  static final String NORMS_PATH = RowSimilarityJob.class + ".normsPath";
-  static final String MAXVALUES_PATH = RowSimilarityJob.class + ".maxWeightsPath";
+  private static final String THRESHOLD = RowSimilarityJob.class + ".threshold";
+  private static final String NORMS_PATH = RowSimilarityJob.class + ".normsPath";
+  private static final String MAXVALUES_PATH = RowSimilarityJob.class + ".maxWeightsPath";
 
-  static final String NUM_NON_ZERO_ENTRIES_PATH = RowSimilarityJob.class + ".nonZeroEntriesPath";
+  private static final String NUM_NON_ZERO_ENTRIES_PATH = RowSimilarityJob.class + ".nonZeroEntriesPath";
   private static final int DEFAULT_MAX_SIMILARITIES_PER_ROW = 100;
 
   private static final int NORM_VECTOR_MARKER = Integer.MIN_VALUE;
@@ -240,7 +240,7 @@ public class RowSimilarityJob extends AbstractJob {
     }
   }
 
-  public static class MergeVectorsCombiner extends Reducer<IntWritable,VectorWritable,IntWritable,VectorWritable> {
+  private static class MergeVectorsCombiner extends Reducer<IntWritable,VectorWritable,IntWritable,VectorWritable> {
     @Override
     protected void reduce(IntWritable row, Iterable<VectorWritable> partialVectors, Context ctx)
       throws IOException, InterruptedException {

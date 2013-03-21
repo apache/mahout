@@ -26,7 +26,7 @@ import java.util.List;
 
 public class TopItemQueue extends PriorityQueue<MutableRecommendedItem> {
 
-  public static final long SENTINEL_ID = Long.MIN_VALUE;
+  private static final long SENTINEL_ID = Long.MIN_VALUE;
 
   private final int maxSize;
 

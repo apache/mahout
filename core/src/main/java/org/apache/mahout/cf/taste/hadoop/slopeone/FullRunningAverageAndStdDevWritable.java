@@ -25,16 +25,12 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public final class FullRunningAverageAndStdDevWritable implements Writable {
+final class FullRunningAverageAndStdDevWritable implements Writable {
   
   private FullRunningAverageAndStdDev average;
   
   public FullRunningAverageAndStdDevWritable(FullRunningAverageAndStdDev average) {
     this.average = average;
-  }
-  
-  public FullRunningAverageAndStdDev getAverage() {
-    return average;
   }
 
   @Override

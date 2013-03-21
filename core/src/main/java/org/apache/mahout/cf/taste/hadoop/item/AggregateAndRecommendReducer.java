@@ -99,13 +99,6 @@ public final class AggregateAndRecommendReducer extends
     }
   }
 
-  private static final DoubleFunction ABSOLUTE_VALUES = new DoubleFunction() {
-    @Override
-    public double apply(double value) {
-      return value < 0 ? value * -1 : value;
-    }
-  };
-
   @Override
   protected void reduce(VarLongWritable userID,
                         Iterable<PrefAndSimilarityColumnWritable> values,
@@ -163,11 +156,10 @@ public final class AggregateAndRecommendReducer extends
           numerators.assign(Functions.MULT, prefValue);
         }
       } else {
-        Vector toAdd = simColumn;
         if (prefValue != BOOLEAN_PREF_VALUE) {
-          toAdd.assign(Functions.MULT, prefValue);
+          simColumn.assign(Functions.MULT, prefValue);
         }
-        numerators.assign(toAdd, Functions.PLUS);
+        numerators.assign(simColumn, Functions.PLUS);
       }
 
     }

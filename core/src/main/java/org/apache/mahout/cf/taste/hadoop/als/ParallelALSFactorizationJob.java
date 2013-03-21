@@ -235,15 +235,15 @@ public class ParallelALSFactorizationJob extends AbstractJob {
       throws ClassNotFoundException, IOException, InterruptedException {
 
     int iterationNumber = currentIteration + 1;
-    Class<? extends Mapper<IntWritable,VectorWritable,IntWritable,VectorWritable>> solverMapperClassInternal = null;
-    String name = null;
+    Class<? extends Mapper<IntWritable,VectorWritable,IntWritable,VectorWritable>> solverMapperClassInternal;
+    String name;
 
     if (implicitFeedback) {
-      solverMapperClassInternal = SharingSolveImplicitFeedbackMapper.class;
+      solverMapperClassInternal = SolveImplicitFeedbackMapper.class;
       name = "Recompute " + matrixName +", iteration (" + iterationNumber + "/" + numIterations + "), " +
           "(" + numThreadsPerSolver + " threads, implicit feedback)";
     } else {
-      solverMapperClassInternal = SharingSolveExplicitFeedbackMapper.class;
+      solverMapperClassInternal = SolveExplicitFeedbackMapper.class;
       name = "Recompute " + matrixName +", iteration (" + iterationNumber + "/" + numIterations + "), " +
           "(" + numThreadsPerSolver + " threads, explicit feedback)";
     }

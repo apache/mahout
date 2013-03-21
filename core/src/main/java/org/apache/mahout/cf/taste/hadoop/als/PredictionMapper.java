@@ -36,7 +36,7 @@ import java.util.List;
  * a multithreaded mapper that loads the feature matrices U and M into memory. Afterwards it computes recommendations
  * from these. Can be executed by a {@link MultithreadedSharingMapper}.
  */
-class SharingPredictionMapper extends SharingMapper<IntWritable,VectorWritable,IntWritable,RecommendedItemsWritable,
+public class PredictionMapper extends SharingMapper<IntWritable,VectorWritable,IntWritable,RecommendedItemsWritable,
     Pair<OpenIntObjectHashMap<Vector>,OpenIntObjectHashMap<Vector>>> {
 
   private int recommendationsPerUser;

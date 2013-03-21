@@ -165,7 +165,7 @@ public final class Vectors {
   }
 
   /* ugly optimization for loading sparse vectors containing ints only */
-  public static OpenIntIntHashMap readAsIntMap(DataInput in) throws IOException {
+  private static OpenIntIntHashMap readAsIntMap(DataInput in) throws IOException {
     int flags = in.readByte();
     Preconditions.checkArgument(flags >> VectorWritable.NUM_FLAGS == 0,
                                 "Unknown flags set: %d", Integer.toString(flags, 2));

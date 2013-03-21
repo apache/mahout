@@ -33,8 +33,7 @@ import java.util.Iterator;
  */
 public final class AlternatingLeastSquaresSolver {
 
-  private AlternatingLeastSquaresSolver() {
-  }
+  private AlternatingLeastSquaresSolver() {}
 
   //TODO make feature vectors a simple array
   public static Vector solve(Iterable<Vector> featureVectors, Vector ratingVector, double lambda, int numFeatures) {
@@ -58,7 +57,7 @@ public final class AlternatingLeastSquaresSolver {
     return solve(Ai, Vi);
   }
 
-  static Vector solve(Matrix Ai, Matrix Vi) {
+  private static Vector solve(Matrix Ai, Matrix Vi) {
     return new QRDecomposition(Ai).solve(Vi).viewColumn(0);
   }
 
@@ -72,7 +71,7 @@ public final class AlternatingLeastSquaresSolver {
     return matrix;
   }
 
-  static Matrix MiTimesMiTransposePlusLambdaTimesNuiTimesE(Matrix MiIi, double lambda, int nui) {
+  private static Matrix MiTimesMiTransposePlusLambdaTimesNuiTimesE(Matrix MiIi, double lambda, int nui) {
 
     double lambdaTimesNui = lambda * nui;
     int rows = MiIi.numRows();

@@ -37,7 +37,7 @@ public abstract class SharingMapper<K1,V1,K2,V2,S> extends Mapper<K1,V1,K2,V2> {
   /**
    * Called before the multithreaded execution
    *
-   * @param context
+   * @param context mapper's context
    */
   abstract S createSharedInstance(Context context);
 
@@ -45,7 +45,7 @@ public abstract class SharingMapper<K1,V1,K2,V2,S> extends Mapper<K1,V1,K2,V2> {
     SHARED_INSTANCE = createSharedInstance(context);
   }
 
-  protected final S getSharedInstance() {
+  final S getSharedInstance() {
     return (S) SHARED_INSTANCE;
   }
 }

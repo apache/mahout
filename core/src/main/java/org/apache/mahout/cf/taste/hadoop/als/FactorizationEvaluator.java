@@ -108,7 +108,7 @@ public class FactorizationEvaluator extends AbstractJob {
     return 0;
   }
 
-  protected double computeRmse(Path errors) {
+  double computeRmse(Path errors) {
     RunningAverage average = new FullRunningAverage();
     for (Pair<DoubleWritable,NullWritable> entry :
       new SequenceFileDirIterable<DoubleWritable, NullWritable>(errors, PathType.LIST, PathFilters.logsCRCFilter(),

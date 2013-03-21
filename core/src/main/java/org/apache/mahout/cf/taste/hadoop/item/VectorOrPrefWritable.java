@@ -57,7 +57,7 @@ public final class VectorOrPrefWritable implements Writable {
     return value;
   }
 
-  public void set(Vector vector) {
+  void set(Vector vector) {
     this.vector = vector;
     this.userID = Long.MIN_VALUE;
     this.value = Float.NaN;

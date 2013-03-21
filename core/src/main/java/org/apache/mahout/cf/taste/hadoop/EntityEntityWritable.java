@@ -26,8 +26,7 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.mahout.math.Varint;
 
 /** A {@link WritableComparable} encapsulating two items. */
-public final class EntityEntityWritable
-    implements WritableComparable<EntityEntityWritable>, Cloneable {
+public final class EntityEntityWritable implements WritableComparable<EntityEntityWritable>, Cloneable {
   
   private long aID;
   private long bID;
@@ -41,19 +40,14 @@ public final class EntityEntityWritable
     this.bID = bID;
   }
   
-  public long getAID() {
+  long getAID() {
     return aID;
   }
   
-  public long getBID() {
+  long getBID() {
     return bID;
   }
 
-  public void set(long aID, long bID) {
-    this.aID = aID;
-    this.bID = bID;
-  }
-  
   @Override
   public void write(DataOutput out) throws IOException {
     Varint.writeSignedVarLong(aID, out);

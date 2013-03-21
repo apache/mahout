@@ -84,7 +84,7 @@ public class RecommenderJob extends AbstractJob {
     conf.set(ITEM_FEATURES_PATH, getOption("itemFeatures"));
     conf.set(MAX_RATING, getOption("maxRating"));
 
-    MultithreadedMapper.setMapperClass(prediction, SharingPredictionMapper.class);
+    MultithreadedMapper.setMapperClass(prediction, PredictionMapper.class);
     MultithreadedMapper.setNumberOfThreads(prediction, numThreads);
 
     boolean succeeded = prediction.waitForCompletion(true);

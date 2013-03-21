@@ -23,8 +23,8 @@ import java.io.IOException;
 
 public abstract class BatchItemSimilarities {
 
-  private ItemBasedRecommender recommender;
-  private int similarItemsPerItem;
+  private final ItemBasedRecommender recommender;
+  private final int similarItemsPerItem;
 
   /**
    * @param recommender recommender to use

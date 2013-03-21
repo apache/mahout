@@ -18,42 +18,41 @@
 package org.apache.mahout.cf.taste.hadoop.als;
 
 import com.google.common.base.Preconditions;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-
-import org.apache.mahout.math.map.OpenIntObjectHashMap;
+import org.apache.mahout.math.als.ImplicitFeedbackAlternatingLeastSquaresSolver;
 
 import java.io.IOException;
 
 /** Solving mapper that can be safely executed using multiple threads */
-public class SharingSolveExplicitFeedbackMapper
-    extends SharingMapper<IntWritable,VectorWritable,IntWritable,VectorWritable,OpenIntObjectHashMap<Vector>> {
+public class SolveImplicitFeedbackMapper
+    extends SharingMapper<IntWritable,VectorWritable,IntWritable,VectorWritable,
+    ImplicitFeedbackAlternatingLeastSquaresSolver> {
 
-  private double lambda;
-  private int numFeatures;
-  private VectorWritable uiOrmj = new VectorWritable();
-
-  @Override
-  OpenIntObjectHashMap<Vector> createSharedInstance(Context ctx) {
-    Path UOrIPath = new Path(ctx.getConfiguration().get(ParallelALSFactorizationJob.FEATURE_MATRIX));
-    return ALS.readMatrixByRows(UOrIPath, ctx.getConfiguration());
-  }
+  private final VectorWritable uiOrmj = new VectorWritable();
 
   @Override
-  protected void setup(Mapper.Context ctx) throws IOException, InterruptedException {
-    lambda = Double.parseDouble(ctx.getConfiguration().get(ParallelALSFactorizationJob.LAMBDA));
-    numFeatures = ctx.getConfiguration().getInt(ParallelALSFactorizationJob.NUM_FEATURES, -1);
+  ImplicitFeedbackAlternatingLeastSquaresSolver createSharedInstance(Context ctx) {
+    Configuration conf = ctx.getConfiguration();
+
+    double lambda = Double.parseDouble(conf.get(ParallelALSFactorizationJob.LAMBDA));
+    double alpha = Double.parseDouble(conf.get(ParallelALSFactorizationJob.ALPHA));
+    int numFeatures = conf.getInt(ParallelALSFactorizationJob.NUM_FEATURES, -1);
+    Path YPath = new Path(conf.get(ParallelALSFactorizationJob.FEATURE_MATRIX));
+
     Preconditions.checkArgument(numFeatures > 0, "numFeatures was not set correctly!");
+
+    return new ImplicitFeedbackAlternatingLeastSquaresSolver(numFeatures, lambda, alpha,
+        ALS.readMatrixByRows(YPath, conf));
   }
 
   @Override
   protected void map(IntWritable userOrItemID, VectorWritable ratingsWritable, Context ctx)
       throws IOException, InterruptedException {
-    OpenIntObjectHashMap<Vector> uOrM = getSharedInstance();
-    uiOrmj.set(ALS.solveExplicit(ratingsWritable, uOrM, lambda, numFeatures));
+    ImplicitFeedbackAlternatingLeastSquaresSolver solver = getSharedInstance();
+    uiOrmj.set(solver.solve(ratingsWritable.get()));
     ctx.write(userOrItemID, uiOrmj);
   }
 

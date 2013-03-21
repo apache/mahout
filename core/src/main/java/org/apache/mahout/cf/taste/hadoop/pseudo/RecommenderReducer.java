@@ -46,7 +46,7 @@ import org.apache.mahout.math.VarLongWritable;
  * 
  * @see RecommenderJob
  */
-public final class RecommenderReducer extends
+final class RecommenderReducer extends
     Reducer<VarLongWritable,NullWritable,VarLongWritable,RecommendedItemsWritable> {
   
   static final String RECOMMENDER_CLASS_NAME = "recommenderClassName";

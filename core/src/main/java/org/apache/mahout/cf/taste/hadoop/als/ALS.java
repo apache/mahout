@@ -21,7 +21,6 @@ import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
@@ -36,10 +35,9 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
-public final class ALS {
+final class ALS {
 
-  private ALS() {
-  }
+  private ALS() {}
 
   static Vector readFirstRow(Path dir, Configuration conf) throws IOException {
     Iterator<VectorWritable> iterator = new SequenceFileDirValueIterator<VectorWritable>(dir, PathType.LIST,
@@ -60,7 +58,7 @@ public final class ALS {
   }
 
   public static Vector solveExplicit(VectorWritable ratingsWritable, OpenIntObjectHashMap<Vector> uOrM,
-    double lambda, int numFeatures) throws IOException, InterruptedException {
+    double lambda, int numFeatures) {
     Vector ratings = ratingsWritable.get();
 
     List<Vector> featureVectors = Lists.newArrayListWithCapacity(ratings.getNumNondefaultElements());
