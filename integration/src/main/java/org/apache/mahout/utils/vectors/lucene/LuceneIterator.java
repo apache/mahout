@@ -40,27 +40,11 @@ import java.util.TreeSet;
  * An {@link Iterator} over {@link Vector}s that uses a Lucene index as the source for creating the
  * {@link Vector}s. The field used to create the vectors currently must have term vectors stored for it.
  */
-public final class LuceneIterator extends AbstractIterator<Vector> {
+public class LuceneIterator extends AbstractLuceneIterator {
+    protected final Set<String> idFieldSelector;
+    protected final String idField;
 
-  private static final Logger log = LoggerFactory.getLogger(LuceneIterator.class);
-
-  private final IndexReader indexReader;
-  private final String field;
-  private final String idField;
-  private final Set<String> idFieldSelector;
-  private final TermInfo terminfo;
-  private final double normPower;
-
-  private int nextDocId;
-
-  private int numErrorDocs = 0;
-  private int maxErrorDocs = 0;
-  private final Bump125 bump = new Bump125();
-  private long nextLogRecord = bump.increment();
-  private int skippedErrorMessages = 0;
-  private final Weight weight;
-
-  /**
+    /**
    * Produce a LuceneIterable that can create the Vector plus normalize it.
    *
    * @param indexReader {@link IndexReader} to read the documents from.
@@ -98,96 +82,34 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
                         Weight weight,
                         double normPower,
                         double maxPercentErrorDocs) {
-    // term docs(null) is a better way of iterating all the docs in Lucene
+      super(terminfo, normPower, indexReader, weight, maxPercentErrorDocs, field);
+      // term docs(null) is a better way of iterating all the docs in Lucene
     Preconditions.checkArgument(normPower == LuceneIterable.NO_NORMALIZING || normPower >= 0,
             "If specified normPower must be nonnegative", normPower);
     Preconditions.checkArgument(maxPercentErrorDocs >= 0.0 && maxPercentErrorDocs <= 1.0);
+    this.idField = idField;
     if (idField != null) {
       idFieldSelector = new TreeSet<String>();
       idFieldSelector.add(idField);
     } else {
       idFieldSelector = null; /*The field in the index  containing the index.  If
-                                                      null, then the Lucene
-                                                      internal doc id is used
-                                                      which is prone to error
-                                                      if the underlying index
-                                                      changes*/
+                                                          null, then the Lucene
+                                                          internal doc id is used
+                                                          which is prone to error
+                                                          if the underlying index
+                                                          changes*/
 
-    }
-    this.indexReader = indexReader;
-    this.idField = idField;
-    this.field = field;
-    this.terminfo = terminfo;
-    this.normPower = normPower;
-    this.weight = weight;
-    this.nextDocId = 0;
-    this.maxErrorDocs = (int) (maxPercentErrorDocs * indexReader.numDocs());
+      }
   }
 
-  @Override
-  protected Vector computeNext() {
-    try {
-      int doc;
-      Terms termFreqVector;
-
-      do {
-        doc = this.nextDocId;
-        nextDocId++;
-
-        if (doc >= indexReader.maxDoc()) {
-          return endOfData();
+    @Override
+    protected String getVectorName(int documentIndex) throws IOException {
+        String name;
+        if (idField != null) {
+            name = indexReader.document(documentIndex, idFieldSelector).get(idField);
+        } else {
+            name = String.valueOf(documentIndex);
         }
-
-        termFreqVector = indexReader.getTermVector(doc, field);
-        if (termFreqVector == null) {
-          numErrorDocs++;
-          if (numErrorDocs >= maxErrorDocs) {
-            log.error("There are too many documents that do not have a term vector for {}", field);
-            throw new IllegalStateException("There are too many documents that do not have a term vector for " + field);
-          }
-          if (numErrorDocs >= nextLogRecord) {
-            if (skippedErrorMessages == 0) {
-              log.warn("{} does not have a term vector for {}", indexReader.document(doc).get(idField), field);
-            } else {
-              log.warn("{} documents do not have a term vector for {}", numErrorDocs, field);
-            }
-            nextLogRecord = bump.increment();
-            skippedErrorMessages = 0;
-          } else {
-            skippedErrorMessages++;
-          }
-        }
-      } while (termFreqVector == null);
-
-
-      TermsEnum te = termFreqVector.iterator(null);
-      BytesRef term;
-      TFDFMapper mapper = new TFDFMapper(indexReader.numDocs(), weight, this.terminfo);
-      mapper.setExpectations(field, termFreqVector.size());
-      while ((term = te.next()) != null) {
-        mapper.map(term, (int) te.totalTermFreq());
-      }
-      Vector result = mapper.getVector();
-      if (result == null) {
-        // TODO is this right? last version would produce null in the iteration in this case, though it
-        // seems like that may not be desirable
-        return null;
-      }
-      String name;
-      if (idField != null) {
-        name = indexReader.document(doc, idFieldSelector).get(idField);
-      } else {
-        name = String.valueOf(doc);
-      }
-      if (normPower == LuceneIterable.NO_NORMALIZING) {
-        result = new NamedVector(result, name);
-      } else {
-        result = new NamedVector(result.normalize(normPower), name);
-      }
-      return result;
-    } catch (IOException ioe) {
-      throw new IllegalStateException(ioe);
+        return name;
     }
-  }
-
 }
