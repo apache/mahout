@@ -24,8 +24,8 @@ import org.apache.hadoop.util.ReflectionUtils;
 import java.io.IOException;
 
 /**
- * Multithreaded Mapper for {@link SharingMapper}s. Will call before() and after() once in the controlling thread
- * before and after executing the mappers using a thread pool.
+ * Multithreaded Mapper for {@link SharingMapper}s. Will call setupSharedInstance() once in the controlling thread
+ * before executing the mappers using a thread pool.
  *
  * @param <K1>
  * @param <V1>

@@ -62,7 +62,7 @@ $MAHOUT evaluateFactorization --input ${WORK_DIR}/dataset/probeSet/ --output ${W
 # compute recommendations
 $MAHOUT recommendfactorized --input ${WORK_DIR}/als/out/userRatings/ --output ${WORK_DIR}/recommendations/ \
     --userFeatures ${WORK_DIR}/als/out/U/ --itemFeatures ${WORK_DIR}/als/out/M/ \
-    --numRecommendations 6 --maxRating 5
+    --numRecommendations 6 --maxRating 5 --numThreads 2
 
 # print the error
 echo -e "\nRMSE is:\n"

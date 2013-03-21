@@ -73,7 +73,7 @@ import java.util.Random;
  * <li>--lambda (double): regularization parameter to avoid overfitting</li>
  * <li>--userFeatures (path): path to the user feature matrix</li>
  * <li>--itemFeatures (path): path to the item feature matrix</li>
- * <li>--numThreadsPerSolver (int): threads to use per solver mapper, default: 1 (no multithreading)</li>
+ * <li>--numThreadsPerSolver (int): threads to use per solver mapper, (default: 1)</li>
  * </ol>
  */
 public class ParallelALSFactorizationJob extends AbstractJob {
@@ -186,6 +186,9 @@ public class ParallelALSFactorizationJob extends AbstractJob {
       writer = new SequenceFile.Writer(fs, getConf(), new Path(pathToM(-1), "part-m-00000"), IntWritable.class,
           VectorWritable.class);
 
+      IntWritable index = new IntWritable();
+      VectorWritable featureVector = new VectorWritable();
+
       Iterator<Vector.Element> averages = averageRatings.iterateNonZero();
       while (averages.hasNext()) {
         Vector.Element e = averages.next();
@@ -194,7 +197,9 @@ public class ParallelALSFactorizationJob extends AbstractJob {
         for (int m = 1; m < numFeatures; m++) {
           row.setQuick(m, random.nextDouble());
         }
-        writer.append(new IntWritable(e.index()), new VectorWritable(row));
+        index.set(e.index());
+        featureVector.set(row);
+        writer.append(index, featureVector);
       }
     } finally {
       Closeables.closeQuietly(writer);
@@ -230,48 +235,29 @@ public class ParallelALSFactorizationJob extends AbstractJob {
       throws ClassNotFoundException, IOException, InterruptedException {
 
     int iterationNumber = currentIteration + 1;
-    Class<? extends Mapper> solverMapperClass;
     Class<? extends Mapper<IntWritable,VectorWritable,IntWritable,VectorWritable>> solverMapperClassInternal = null;
     String name = null;
-    // no multithreading
-    if (numThreadsPerSolver == 1) {
 
-      if (implicitFeedback) {
-        solverMapperClass = SolveImplicitFeedbackMapper.class;
-        name = "Recompute " + matrixName +", iteration (" + iterationNumber + "/" + numIterations + "), " +
-            "(single-threaded, implicit feedback)";
-      } else {
-        solverMapperClass = SolveExplicitFeedbackMapper.class;
-        name = "Recompute " + matrixName +", iteration (" + iterationNumber + "/" + numIterations + "), " +
-            "(single-threaded, explicit feedback)";
-      }
-
+    if (implicitFeedback) {
+      solverMapperClassInternal = SharingSolveImplicitFeedbackMapper.class;
+      name = "Recompute " + matrixName +", iteration (" + iterationNumber + "/" + numIterations + "), " +
+          "(" + numThreadsPerSolver + " threads, implicit feedback)";
     } else {
-      solverMapperClass = MultithreadedSharingMapper.class;
-
-      if (implicitFeedback) {
-        solverMapperClassInternal = SharingSolveImplicitFeedbackMapper.class;
-        name = "Recompute " + matrixName +", iteration (" + iterationNumber + "/" + numIterations + "), " +
-            "(" + numThreadsPerSolver + " threads, implicit feedback)";
-      } else {
-        solverMapperClassInternal = SharingSolveExplicitFeedbackMapper.class;
-        name = "Recompute " + matrixName +", iteration (" + iterationNumber + "/" + numIterations + "), " +
-            "(" + numThreadsPerSolver + " threads, explicit feedback)";
-      }
+      solverMapperClassInternal = SharingSolveExplicitFeedbackMapper.class;
+      name = "Recompute " + matrixName +", iteration (" + iterationNumber + "/" + numIterations + "), " +
+          "(" + numThreadsPerSolver + " threads, explicit feedback)";
     }
 
-    Job solverForUorI = prepareJob(ratings, output, SequenceFileInputFormat.class, solverMapperClass, IntWritable.class,
-        VectorWritable.class, SequenceFileOutputFormat.class, name);
+    Job solverForUorI = prepareJob(ratings, output, SequenceFileInputFormat.class, MultithreadedSharingMapper.class,
+        IntWritable.class, VectorWritable.class, SequenceFileOutputFormat.class, name);
     Configuration solverConf = solverForUorI.getConfiguration();
     solverConf.set(LAMBDA, String.valueOf(lambda));
     solverConf.set(ALPHA, String.valueOf(alpha));
     solverConf.setInt(NUM_FEATURES, numFeatures);
     solverConf.set(FEATURE_MATRIX, pathToUorI.toString());
 
-    if (numThreadsPerSolver > 1) {
-      MultithreadedMapper.setMapperClass(solverForUorI, solverMapperClassInternal);
-      MultithreadedMapper.setNumberOfThreads(solverForUorI, numThreadsPerSolver);
-    }
+    MultithreadedMapper.setMapperClass(solverForUorI, solverMapperClassInternal);
+    MultithreadedMapper.setNumberOfThreads(solverForUorI, numThreadsPerSolver);
 
     boolean succeeded = solverForUorI.waitForCompletion(true);
     if (!succeeded) {

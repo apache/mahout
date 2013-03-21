@@ -18,24 +18,15 @@
 package org.apache.mahout.cf.taste.hadoop.als;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.map.MultithreadedMapper;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
-import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.common.AbstractJob;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.function.IntObjectProcedure;
-import org.apache.mahout.math.map.OpenIntObjectHashMap;
-import org.apache.mahout.math.set.OpenIntHashSet;
 
-import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -47,17 +38,17 @@ import java.util.Map;
  * <ol>
  * <li>--input (path): Directory containing the vectorized user ratings</li>
  * <li>--output (path): path where output should go</li>
- * <li>--numRecommendations (int): maximum number of recommendations per user</li>
+ * <li>--numRecommendations (int): maximum number of recommendations per user (default: 10)</li>
  * <li>--maxRating (double): maximum rating of an item</li>
- * <li>--NUM_FEATURES (int): number of features to use for decomposition </li>
+ * <li>--numThreads (int): threads to use per mapper, (default: 1)</li>
  * </ol>
  */
 public class RecommenderJob extends AbstractJob {
 
-  private static final String NUM_RECOMMENDATIONS = RecommenderJob.class.getName() + ".numRecommendations";
-  private static final String USER_FEATURES_PATH = RecommenderJob.class.getName() + ".userFeatures";
-  private static final String ITEM_FEATURES_PATH = RecommenderJob.class.getName() + ".itemFeatures";
-  private static final String MAX_RATING = RecommenderJob.class.getName() + ".maxRating";
+  static final String NUM_RECOMMENDATIONS = RecommenderJob.class.getName() + ".numRecommendations";
+  static final String USER_FEATURES_PATH = RecommenderJob.class.getName() + ".userFeatures";
+  static final String ITEM_FEATURES_PATH = RecommenderJob.class.getName() + ".itemFeatures";
+  static final String MAX_RATING = RecommenderJob.class.getName() + ".maxRating";
 
   static final int DEFAULT_NUM_RECOMMENDATIONS = 10;
 
@@ -74,6 +65,7 @@ public class RecommenderJob extends AbstractJob {
     addOption("numRecommendations", null, "number of recommendations per user",
         String.valueOf(DEFAULT_NUM_RECOMMENDATIONS));
     addOption("maxRating", null, "maximum rating available", true);
+    addOption("numThreads", null, "threads per mapper", String.valueOf(1));
     addOutputOption();
 
     Map<String,List<String>> parsedArgs = parseArguments(args);
@@ -81,14 +73,19 @@ public class RecommenderJob extends AbstractJob {
       return -1;
     }
 
-    Job prediction = prepareJob(getInputPath(), getOutputPath(), SequenceFileInputFormat.class, PredictionMapper.class,
-        IntWritable.class, RecommendedItemsWritable.class, TextOutputFormat.class);
+    Job prediction = prepareJob(getInputPath(), getOutputPath(), SequenceFileInputFormat.class,
+        MultithreadedSharingMapper.class, IntWritable.class, RecommendedItemsWritable.class, TextOutputFormat.class);
     Configuration conf = prediction.getConfiguration();
+
+    int numThreads = Integer.parseInt(getOption("numThreads"));
 
     conf.setInt(NUM_RECOMMENDATIONS, Integer.parseInt(getOption("numRecommendations")));
     conf.set(USER_FEATURES_PATH, getOption("userFeatures"));
     conf.set(ITEM_FEATURES_PATH, getOption("itemFeatures"));
     conf.set(MAX_RATING, getOption("maxRating"));
+
+    MultithreadedMapper.setMapperClass(prediction, SharingPredictionMapper.class);
+    MultithreadedMapper.setNumberOfThreads(prediction, numThreads);
 
     boolean succeeded = prediction.waitForCompletion(true);
     if (!succeeded) {
@@ -98,85 +95,4 @@ public class RecommenderJob extends AbstractJob {
     return 0;
   }
 
-  static class PredictionMapper
-      extends Mapper<IntWritable,VectorWritable,IntWritable,RecommendedItemsWritable> {
-
-    private OpenIntObjectHashMap<Vector> U;
-    private OpenIntObjectHashMap<Vector> M;
-
-    private int recommendationsPerUser;
-    private float maxRating;
-
-    private final RecommendedItemsWritable recommendations = new RecommendedItemsWritable();
-
-    @Override
-    protected void setup(Context ctx) throws IOException, InterruptedException {
-      recommendationsPerUser = ctx.getConfiguration().getInt(NUM_RECOMMENDATIONS, DEFAULT_NUM_RECOMMENDATIONS);
-
-      Path pathToU = new Path(ctx.getConfiguration().get(USER_FEATURES_PATH));
-      Path pathToM = new Path(ctx.getConfiguration().get(ITEM_FEATURES_PATH));
-
-      U = ALS.readMatrixByRows(pathToU, ctx.getConfiguration());
-      M = ALS.readMatrixByRows(pathToM, ctx.getConfiguration());
-
-      maxRating = Float.parseFloat(ctx.getConfiguration().get(MAX_RATING));
-    }
-
-    // we can use a simple dot product computation, as both vectors are dense
-    private static double dot(Vector x, Vector y) {
-      int numFeatures = x.size();
-      double sum = 0;
-      for (int n = 0; n < numFeatures; n++) {
-        sum += x.getQuick(n) * y.getQuick(n);
-      }
-      return sum;
-    }
-
-    @Override
-    protected void map(IntWritable userIDWritable, VectorWritable ratingsWritable, Context ctx)
-        throws IOException, InterruptedException {
-
-      Vector ratings = ratingsWritable.get();
-      final int userID = userIDWritable.get();
-      final OpenIntHashSet alreadyRatedItems = new OpenIntHashSet(ratings.getNumNondefaultElements());
-
-      Iterator<Vector.Element> ratingsIterator = ratings.iterateNonZero();
-      while (ratingsIterator.hasNext()) {
-        alreadyRatedItems.add(ratingsIterator.next().index());
-      }
-
-      final TopItemQueue topItemQueue = new TopItemQueue(recommendationsPerUser);
-      final Vector userFeatures = U.get(userID);
-
-      M.forEachPair(new IntObjectProcedure<Vector>() {
-        @Override
-        public boolean apply(int itemID, Vector itemFeatures) {
-          if (!alreadyRatedItems.contains(itemID)) {
-            double predictedRating = dot(userFeatures, itemFeatures);
-
-            MutableRecommendedItem top = topItemQueue.top();
-            if (predictedRating > top.getValue()) {
-              top.set(itemID, (float) predictedRating);
-              topItemQueue.updateTop();
-            }
-
-          }
-          return true;
-        }
-      });
-
-      List<RecommendedItem> recommendedItems = topItemQueue.getTopItems();
-
-      if (!recommendedItems.isEmpty()) {
-
-        // cap predictions to maxRating
-        for (RecommendedItem topItem : recommendedItems) {
-          ((MutableRecommendedItem) topItem).capToMaxValue(maxRating);
-        }
-
-        recommendations.set(recommendedItems);
-        ctx.write(userIDWritable, recommendations);
-      }
-    }
-  }
 }
