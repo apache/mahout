@@ -140,7 +140,7 @@ public final class ClusterOutputPostProcessorTest extends MahoutTestCase {
   private List<Vector> getVectorsInCluster(Path clusterPath) throws IOException {
     Path[] partFilePaths = FileUtil.stat2Paths(fs.globStatus(clusterPath));
     FileStatus[] listStatus = fs.listStatus(partFilePaths);
-    List<Vector> vectors = new ArrayList<Vector>();
+    List<Vector> vectors = Lists.newArrayList();
     for (FileStatus partFile : listStatus) {
       SequenceFile.Reader topLevelClusterReader = new SequenceFile.Reader(fs, partFile.getPath(), conf);
       Writable clusterIdAsKey = new LongWritable();

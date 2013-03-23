@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -502,7 +503,7 @@ public abstract class AbstractJob extends Configured implements Tool {
         // nulls are ok, for cases where options are simple flags.
         List<?> vo = cmdLine.getValues(o);
         if (vo != null && !vo.isEmpty()) {
-          List<String> vals = new ArrayList<String>();
+          List<String> vals = Lists.newArrayList();
           for (Object o1 : vo) {
             vals.add(o1.toString());
           }

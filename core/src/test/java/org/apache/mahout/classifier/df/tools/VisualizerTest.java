@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.classifier.df.DecisionForest;
 import org.apache.mahout.classifier.df.builder.DecisionTreeBuilder;
 import org.apache.mahout.classifier.df.data.Data;
@@ -106,7 +107,7 @@ public final class VisualizerTest extends MahoutTestCase {
       new CategoricalNode(0, new double[] {0, 1, 2}, new Node[] {
         new NumericalNode(1, 71, new Leaf(0), new Leaf(1)), new Leaf(1),
         new Leaf(0)}));
-    List<Node> trees = new ArrayList<Node>();
+    List<Node> trees = Lists.newArrayList();
     trees.add(root);
     
     // Forest

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.mutable.MutableLong;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -113,7 +114,7 @@ public final class ParallelFPGrowthReducer extends Reducer<IntWritable,Transacti
           localFList,
           minSupport,
           maxHeapSize,
-          new HashSet<Integer>(PFPGrowth.getGroupMembers(key.get(), 
+          Sets.newHashSet(PFPGrowth.getGroupMembers(key.get(),
                                                          maxPerGroup, 
                                                          numFeatures).toList()),
           new IntegerStringOutputConverter(

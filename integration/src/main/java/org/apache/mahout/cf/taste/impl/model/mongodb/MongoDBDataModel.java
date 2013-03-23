@@ -554,7 +554,7 @@ public final class MongoDBDataModel implements DataModel {
     DB db = mongoDDBB.getDB(mongoDB);
     mongoTimestamp = new Date(0);
     FastByIDMap<Collection<Preference>> userIDPrefMap = new FastByIDMap<Collection<Preference>>();
-    if (!mongoAuth || (mongoAuth && db.authenticate(mongoUsername, mongoPassword.toCharArray()))) {
+    if (!mongoAuth || db.authenticate(mongoUsername, mongoPassword.toCharArray())) {
       collection = db.getCollection(mongoCollection);
       collectionMap = db.getCollection(mongoMapCollection);
       DBObject indexObj = new BasicDBObject();

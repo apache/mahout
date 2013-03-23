@@ -29,6 +29,7 @@ import java.util.Map.Entry;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.mutable.MutableLong;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -155,7 +156,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
 
     log.info("Number of unique items {}", frequencyList.size());
 
-    Collection<Integer> returnFeatures = new HashSet<Integer>();
+    Collection<Integer> returnFeatures = Sets.newHashSet();
     if (returnableFeatures != null && !returnableFeatures.isEmpty()) {
       for (A attrib : returnableFeatures) {
         if (attributeIdMapping.containsKey(attrib)) {
@@ -268,7 +269,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
    *          format to the corresponding A Format
    * @return Top K frequent patterns for each attribute
    */
-  private Map<Integer,FrequentPatternMaxHeap> generateTopKFrequentPatterns(
+  private void generateTopKFrequentPatterns(
     Iterator<Pair<int[],Long>> transactions,
     long[] attributeFrequency,
     long minSupport,
@@ -299,7 +300,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
 
     log.info("Number of Nodes in the FP Tree: {}", nodecount);
 
-    return fpGrowth(tree, minSupport, k, returnFeatures, topKPatternsOutputCollector, updater);
+    fpGrowth(tree, minSupport, k, returnFeatures, topKPatternsOutputCollector, updater);
   }
 
   private static FrequentPatternMaxHeap growth(FPTree tree,

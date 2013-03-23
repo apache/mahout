@@ -26,6 +26,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
@@ -79,7 +80,7 @@ final class Track2Callable implements Callable<UserResult> {
     } else if (topThree.size() < 3) {
       log.warn("Unable to recommend three items for {}", userID);
       // Some NaNs - just guess at the rest then
-      Collection<Long> newItemIDs = new HashSet<Long>(3);
+      Collection<Long> newItemIDs = Sets.newHashSetWithExpectedSize(3);
       newItemIDs.addAll(itemIDs);
       int i = 0;
       while (i < testSize && newItemIDs.size() < 3) {

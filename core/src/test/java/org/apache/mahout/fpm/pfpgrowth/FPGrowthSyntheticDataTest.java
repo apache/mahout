@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
@@ -70,11 +71,11 @@ public final class FPGrowthSyntheticDataTest extends MahoutTestCase {
 
     final Map<Set<String>,Long> results = Maps.newHashMap();
     
-    Set<String> features_10_13 = new HashSet<String>();
+    Set<String> features_10_13 = Sets.newHashSet();
     features_10_13.add("10");
     features_10_13.add("13");
 
-    Set<String> returnableFeatures = new HashSet<String>();
+    Set<String> returnableFeatures = Sets.newHashSet();
     returnableFeatures.add("10");
     returnableFeatures.add("13");
     returnableFeatures.add("1669");
@@ -91,7 +92,7 @@ public final class FPGrowthSyntheticDataTest extends MahoutTestCase {
           
                                         for (Pair<List<String>,Long> v : value) {
                                           List<String> l = v.getFirst();
-                                          results.put(new HashSet<String>(l), v.getSecond());
+                                          results.put(Sets.newHashSet(l), v.getSecond());
                                           System.out.println("found pat ["+v.getSecond()+"]: "+ v.getFirst());
                                         }
                                       }
@@ -135,7 +136,7 @@ public final class FPGrowthSyntheticDataTest extends MahoutTestCase {
 
   @Test
   public void testVsWithSynthData() throws IOException {
-    Collection<String> returnableFeatures = new HashSet<String>();
+    Collection<String> returnableFeatures = Sets.newHashSet();
 
     // not limiting features (or including too many) can cause
     // the test to run a very long time
@@ -161,7 +162,7 @@ public final class FPGrowthSyntheticDataTest extends MahoutTestCase {
           
                                          for (Pair<List<String>,Long> v : value) {
                                            List<String> l = v.getFirst();
-                                           results1.put(new HashSet<String>(l), v.getSecond());
+                                           results1.put(Sets.newHashSet(l), v.getSecond());
                                            System.out.println("found pat ["+v.getSecond()+"]: "+ v.getFirst());
                                          }
                                        }
@@ -177,8 +178,8 @@ public final class FPGrowthSyntheticDataTest extends MahoutTestCase {
     fp2.generateTopKFrequentPatterns(new StringRecordIterator(new FileLineIterable(Resources.getResource(inputFilename).openStream()), "\\s+"),
 
                                      fp2.generateFList(new StringRecordIterator(new FileLineIterable(Resources.getResource(inputFilename)
-                                                                                                     .openStream()), "\\s+"), minSupport), minSupport, 1000000, 
-                                     new HashSet<String>(),
+                                                                                                     .openStream()), "\\s+"), minSupport), minSupport, 1000000,
+                                     Sets.<String>newHashSet(),
                                      new OutputCollector<String,List<Pair<List<String>,Long>>>() {
         
                                        @Override
@@ -186,7 +187,7 @@ public final class FPGrowthSyntheticDataTest extends MahoutTestCase {
           
                                          for (Pair<List<String>,Long> v : value) {
                                            List<String> l = v.getFirst();
-                                           initialResults2.put(new HashSet<String>(l), v.getSecond());
+                                           initialResults2.put(Sets.newHashSet(l), v.getSecond());
                                            System.out.println("found pat ["+v.getSecond()+"]: "+ v.getFirst());
                                          }
                                        }

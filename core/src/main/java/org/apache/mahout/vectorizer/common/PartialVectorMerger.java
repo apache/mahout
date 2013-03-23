@@ -72,7 +72,7 @@ public final class PartialVectorMerger {
    *          job configuration
    * @param normPower
    *          The normalization value. Must be greater than or equal to 0 or equal to {@link #NO_NORMALIZING}
-   * @param dimension
+   * @param dimension cardinality of the vectors
    * @param sequentialAccess
    *          output vectors should be optimized for sequential access
    * @param namedVector

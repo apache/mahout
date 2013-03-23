@@ -17,6 +17,7 @@
 
 package org.apache.mahout.utils.regex;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -45,7 +46,7 @@ public class RegexMapper extends Mapper<LongWritable, Text, LongWritable, Text> 
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
-    groupsToKeep = new ArrayList<Integer>();
+    groupsToKeep = Lists.newArrayList();
     Configuration config = context.getConfiguration();
     String regexStr = config.get(REGEX);
     regex = Pattern.compile(regexStr);

@@ -61,7 +61,6 @@ public final class PFPGrowth {
   
   public static final String ENCODING = "encoding";
   public static final String F_LIST = "fList";
-  public static final String G_LIST = "gList";
   public static final String NUM_GROUPS = "numGroups";
   public static final int NUM_GROUPS_DEFAULT = 1000;
   public static final String MAX_PER_GROUP = "maxPerGroup";
@@ -87,7 +86,7 @@ public final class PFPGrowth {
    * @return Deserialized Feature Frequency List
    */
   public static List<Pair<String,Long>> readFList(Configuration conf) throws IOException {
-    List<Pair<String,Long>> list = new ArrayList<Pair<String,Long>>();
+    List<Pair<String,Long>> list = Lists.newArrayList();
     Path[] files = DistributedCache.getLocalCacheFiles(conf);
     if (files == null) {
       throw new IOException("Cannot read Frequency list from Distributed Cache");
@@ -117,8 +116,6 @@ public final class PFPGrowth {
   
   /**
    * Serializes the fList and returns the string representation of the List
-   * 
-   * @return Serialized String representation of List
    */
   public static void saveFList(Iterable<Pair<String,Long>> flist, Parameters params, Configuration conf)
     throws IOException {

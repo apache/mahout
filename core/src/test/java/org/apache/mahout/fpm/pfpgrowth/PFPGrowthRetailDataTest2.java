@@ -30,6 +30,7 @@ import java.util.Set;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.hadoop.conf.Configuration;
@@ -101,7 +102,7 @@ public class PFPGrowthRetailDataTest2 extends MahoutTestCase {
       List<String> items = Lists.newArrayList(next.getFirst());
       String supportString = items.remove(items.size() - 1);
       Long support = Long.parseLong(supportString.substring(1, supportString.length() - 1));
-      expectedResults.put(new HashSet<String>(items), support);
+      expectedResults.put(Sets.newHashSet(items), support);
     }
 
     PFPGrowth.runPFPGrowth(params);
@@ -113,7 +114,7 @@ public class PFPGrowthRetailDataTest2 extends MahoutTestCase {
       Iterator<Pair<List<String>,Long>> topKIt = topK.getSecond().iterator();
       while (topKIt.hasNext()) {
         Pair<List<String>,Long> entry = topKIt.next();
-        results.put(new HashSet<String>(entry.getFirst()), entry.getSecond());
+        results.put(Sets.newHashSet(entry.getFirst()), entry.getSecond());
       }
     }
     
@@ -153,7 +154,7 @@ public class PFPGrowthRetailDataTest2 extends MahoutTestCase {
       List<String> items = Lists.newArrayList(next.getFirst());
       String supportString = items.remove(items.size() - 1);
       Long support = Long.parseLong(supportString.substring(1, supportString.length() - 1));
-      expectedResults.put(new HashSet<String>(items), support);
+      expectedResults.put(Sets.newHashSet(items), support);
     }
     Configuration conf = new Configuration();
     log.info("Starting Parallel Counting Test: {}", params.get(PFPGrowth.MAX_HEAPSIZE));
@@ -181,7 +182,7 @@ public class PFPGrowthRetailDataTest2 extends MahoutTestCase {
       Iterator<Pair<List<String>,Long>> topKIt = topK.getSecond().iterator();
       while (topKIt.hasNext()) {
         Pair<List<String>,Long> entry = topKIt.next();
-        results.put(new HashSet<String>(entry.getFirst()), entry.getSecond());
+        results.put(Sets.newHashSet(entry.getFirst()), entry.getSecond());
       }
     }
     

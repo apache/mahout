@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math;
 
+import com.google.common.collect.Sets;
 import org.apache.mahout.math.function.Functions;
 import org.junit.Test;
 
@@ -340,7 +341,7 @@ public final class VectorTest extends MahoutTestCase {
   @Test
   public void testIterator() {
 
-    Collection<Integer> expectedIndices = new HashSet<Integer>();
+    Collection<Integer> expectedIndices = Sets.newHashSet();
     int i = 1;
     while (i <= 20) {
       expectedIndices.add(i * (i + 1) / 2);
@@ -367,7 +368,7 @@ public final class VectorTest extends MahoutTestCase {
   }
 
   private static void doTestIterators(Vector vector, Collection<Integer> expectedIndices) {
-    expectedIndices = new HashSet<Integer>(expectedIndices);
+    expectedIndices = Sets.newHashSet(expectedIndices);
     Iterator<Vector.Element> allIterator = vector.iterator();
     int index = 0;
     while (allIterator.hasNext()) {

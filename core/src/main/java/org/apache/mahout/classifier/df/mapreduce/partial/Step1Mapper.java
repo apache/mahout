@@ -158,7 +158,7 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
       
       key.set(partition, firstTreeId + treeId);
       
-      if (!isNoOutput()) {
+      if (isOutput()) {
         MapredOutput emOut = new MapredOutput(tree);
         context.write(key, emOut);
       }

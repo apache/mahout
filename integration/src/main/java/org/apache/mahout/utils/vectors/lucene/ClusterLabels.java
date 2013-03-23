@@ -29,6 +29,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Sets;
 import org.apache.lucene.util.BytesRef;
 import com.google.common.base.Charsets;
 import com.google.common.io.Closeables;
@@ -162,7 +163,7 @@ public class ClusterLabels {
     
     log.info("# of documents in the index {}", reader.numDocs());
 
-    Collection<String> idSet = new HashSet<String>();
+    Collection<String> idSet = Sets.newHashSet();
     for (WeightedVectorWritable wvw : wvws) {
       Vector vector = wvw.getVector();
       if (vector instanceof NamedVector) {

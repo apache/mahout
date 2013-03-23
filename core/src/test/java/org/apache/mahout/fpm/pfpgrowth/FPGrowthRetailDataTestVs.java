@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
@@ -81,7 +82,7 @@ public final class FPGrowthRetailDataTestVs extends MahoutTestCase {
     public void collect(String key, List<Pair<List<String>,Long>> value) {
       for (Pair<List<String>,Long> v : value) {
         List<String> l = v.getFirst();
-        results.put(new HashSet<String>(l), v.getSecond());
+        results.put(Sets.newHashSet(l), v.getSecond());
         log.info("found pat ["+v.getSecond()+"]: "+ v.getFirst());
       }
     }
@@ -96,7 +97,7 @@ public final class FPGrowthRetailDataTestVs extends MahoutTestCase {
   public void testVsWithRetailData() throws IOException {
     String inputFilename = "retail.dat";
     int minSupport = 500;
-    Collection<String> returnableFeatures = new HashSet<String>();
+    Collection<String> returnableFeatures = Sets.newHashSet();
     
     org.apache.mahout.fpm.pfpgrowth.fpgrowth.
       FPGrowth<String> fp1 = new org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth<String>();
@@ -117,8 +118,8 @@ public final class FPGrowthRetailDataTestVs extends MahoutTestCase {
       new StringRecordIterator(new FileLineIterable(Resources.getResource(inputFilename).openStream()), "\\s+"),
 
       fp2.generateFList(new StringRecordIterator(new FileLineIterable(Resources.getResource(inputFilename)
-           .openStream()), "\\s+"), minSupport), minSupport, 100000, 
-      new HashSet<String>(),
+           .openStream()), "\\s+"), minSupport), minSupport, 100000,
+        Sets.<String>newHashSet(),
       new MapCollector(initialResults2), new DummyUpdater());
 
     Map<Set<String>, Long> results2;

@@ -18,6 +18,7 @@
 package org.apache.mahout.classifier.sequencelearning.hmm;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -91,7 +92,7 @@ public final class ViterbiEvaluator {
       }
 
       //reading observations
-      List<Integer> observations = new ArrayList<Integer>();
+      List<Integer> observations = Lists.newArrayList();
       Scanner scanner = new Scanner(new FileInputStream(input), "UTF-8");
       try {
         while (scanner.hasNextInt()) {

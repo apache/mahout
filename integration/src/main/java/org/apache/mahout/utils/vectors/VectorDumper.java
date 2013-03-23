@@ -18,6 +18,7 @@
 package org.apache.mahout.utils.vectors;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.hadoop.conf.Configuration;
@@ -132,7 +133,7 @@ public final class VectorDumper extends AbstractJob {
 
     Set<String> filters;
     if (hasOption("filter")) {
-      filters = new HashSet<String>(getOptions("filter"));
+      filters = Sets.newHashSet(getOptions("filter"));
     } else {
       filters = null;
     }

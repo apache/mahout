@@ -104,10 +104,6 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
     private boolean firstTime = true;
     private final TokenStream tokenStream;
 
-    private LuceneTokenIterable(TokenStream ts) {
-      this.tokenStream = ts;
-    }
-
     private LuceneTokenIterable(TokenStream ts, boolean firstTime) {
       this.tokenStream = ts;
       this.firstTime = firstTime;

@@ -38,7 +38,7 @@ public class NaiveBayesModel {
 
   private final Vector weightsPerLabel;
   private final Vector perlabelThetaNormalizer;
-  private final double minThetaNormalizer;
+  //  private final double minThetaNormalizer;
   private final Vector weightsPerFeature;
   private final Matrix weightsPerLabelAndFeature;
   private final float alphaI;
@@ -57,16 +57,16 @@ public class NaiveBayesModel {
     this.numFeatures = weightsPerFeature.getNumNondefaultElements();
     this.totalWeightSum = weightsPerLabel.zSum();
     this.alphaI = alphaI;
-    this.minThetaNormalizer = thetaNormalizer.maxValue();
+//    this.minThetaNormalizer = thetaNormalizer.maxValue();
   }
 
   public double labelWeight(int label) {
     return weightsPerLabel.getQuick(label);
   }
 
-  public double thetaNormalizer(int label) {
-    return perlabelThetaNormalizer.get(label) / minThetaNormalizer;
-  }
+//  public double thetaNormalizer(int label) {
+//    return perlabelThetaNormalizer.get(label) / minThetaNormalizer;
+//  }
 
   public double featureWeight(int feature) {
     return weightsPerFeature.getQuick(feature);
@@ -145,13 +145,13 @@ public class NaiveBayesModel {
     Preconditions.checkState(alphaI > 0, "alphaI has to be greater than 0!");
     Preconditions.checkArgument(numFeatures > 0, "the vocab count has to be greater than 0!");
     Preconditions.checkArgument(totalWeightSum > 0, "the totalWeightSum has to be greater than 0!");
-    Preconditions.checkArgument(weightsPerLabel != null, "the number of labels has to be defined!");
+    Preconditions.checkNotNull(weightsPerLabel, "the number of labels has to be defined!");
     Preconditions.checkArgument(weightsPerLabel.getNumNondefaultElements() > 0,
         "the number of labels has to be greater than 0!");
     Preconditions.checkArgument(perlabelThetaNormalizer != null, "the theta normalizers have to be defined");
     // Preconditions.checkArgument(perlabelThetaNormalizer.getNumNondefaultElements() > 0,
     //    "the number of theta normalizers has to be greater than 0!");
-    Preconditions.checkArgument(weightsPerFeature != null, "the feature sums have to be defined");
+    Preconditions.checkNotNull(weightsPerFeature, "the feature sums have to be defined");
     Preconditions.checkArgument(weightsPerFeature.getNumNondefaultElements() > 0,
         "the feature sums have to be greater than 0!");
     // Check if all thetas have same sign.

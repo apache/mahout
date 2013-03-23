@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
@@ -214,7 +216,7 @@ public final class PlusAnonymousConcurrentUserDataModel extends PlusAnonymousUse
       // OK. Probably an item that only the anonymous user has
     }
 
-    List<Preference> anonymousPreferences = new ArrayList<Preference>();
+    List<Preference> anonymousPreferences = Lists.newArrayList();
 
     for (Map.Entry<Long, PreferenceArray> prefsMap : tempPrefs.entrySet()) {
       PreferenceArray singleUserTempPrefs = prefsMap.getValue();

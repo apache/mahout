@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DefaultStringifier;
@@ -91,7 +92,7 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
     super.setup(context);
     Configuration conf = context.getConfiguration();
     if (inputCategories == null) {
-      Set<String> newCategories = new HashSet<String>();
+      Set<String> newCategories = Sets.newHashSet();
 
       DefaultStringifier<Set<String>> setStringifier =
           new DefaultStringifier<Set<String>>(conf, GenericsUtil.getClass(newCategories));

@@ -239,7 +239,7 @@ public class FPGrowthObj<A extends Comparable<? super A>> {
    *          format to the corresponding A Format
    * @return Top K frequent patterns for each attribute
    */
-  private Map<Integer,FrequentPatternMaxHeap> generateTopKFrequentPatterns(
+  private void generateTopKFrequentPatterns(
     Iterator<Pair<int[],Long>> transactions,
     long[] attributeFrequency,
     long minSupport,
@@ -265,7 +265,7 @@ public class FPGrowthObj<A extends Comparable<? super A>> {
       }
     }
 
-    return fpGrowth(tree, minSupport, k, returnFeatures, topKPatternsOutputCollector, updater);
+    fpGrowth(tree, minSupport, k, returnFeatures, topKPatternsOutputCollector, updater);
   }
 
   /** 
@@ -372,19 +372,14 @@ public class FPGrowthObj<A extends Comparable<? super A>> {
     return pats;
   }
 
-  private static FrequentPatternMaxHeap mergeHeap(FrequentPatternMaxHeap frequentPatterns,
-                                                  FrequentPatternMaxHeap returnedPatterns,
-                                                  int attribute,
-                                                  long count,
-                                                  boolean addAttribute) {
+  private static void mergeHeap(FrequentPatternMaxHeap frequentPatterns, FrequentPatternMaxHeap returnedPatterns,
+      int attribute, long count, boolean addAttribute) {
     frequentPatterns.addAll(returnedPatterns, attribute, count);
     if (frequentPatterns.addable(count) && addAttribute) {
       Pattern p = new Pattern();
       p.add(attribute, count);
       frequentPatterns.insert(p);
     }
-
-    return frequentPatterns;
   }
 }
 

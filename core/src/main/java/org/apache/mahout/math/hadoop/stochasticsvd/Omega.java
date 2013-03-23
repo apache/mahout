@@ -29,6 +29,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
@@ -123,7 +124,7 @@ public class Omega {
 
     try {
 
-      List<Future<Double>> dotFutures = new ArrayList<Future<Double>>(kp);
+      List<Future<Double>> dotFutures = Lists.newArrayListWithCapacity(kp);
 
       for (int i = 0; i < kp; i++) {
         final int index = i;

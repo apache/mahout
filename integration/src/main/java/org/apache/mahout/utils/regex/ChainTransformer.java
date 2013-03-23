@@ -17,6 +17,8 @@
 
 package org.apache.mahout.utils.regex;
 
+import com.google.common.collect.Lists;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +28,7 @@ import java.util.List;
  */
 public class ChainTransformer implements RegexTransformer {
 
-  private List<RegexTransformer> chain = new ArrayList<RegexTransformer>();
+  private List<RegexTransformer> chain = Lists.newArrayList();
 
   public ChainTransformer() {
   }

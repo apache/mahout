@@ -17,6 +17,7 @@
 
 package org.apache.mahout.utils.regex;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
@@ -53,7 +54,7 @@ public final class RegexUtilsTest extends MahoutTestCase {
     assertEquals(res, "import statement 1", res);
 
     pattern = Pattern.compile("(start=1) HTTP");
-    Collection<Integer> groupsToKeep = new ArrayList<Integer>();
+    Collection<Integer> groupsToKeep = Lists.newArrayList();
     groupsToKeep.add(1);
     res = RegexUtils.extract(line, pattern, groupsToKeep, " ", RegexUtils.IDENTITY_TRANSFORMER);
     assertEquals(res, "start=1", res);

@@ -30,6 +30,7 @@ import java.util.Set;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -103,7 +104,7 @@ public class PFPGrowthSynthDataTest2 extends MahoutTestCase {
       Iterator<Pair<List<String>,Long>> topKIt = topK.getSecond().iterator();
       while (topKIt.hasNext()) {
         Pair<List<String>,Long> entry = topKIt.next();
-        parallelResult.put(new HashSet<String>(entry.getFirst()), entry.getSecond());
+        parallelResult.put(Sets.newHashSet(entry.getFirst()), entry.getSecond());
       }
     }
 
@@ -126,7 +127,7 @@ public class PFPGrowthSynthDataTest2 extends MahoutTestCase {
           
           for (Pair<List<String>,Long> v : value) {
             List<String> l = v.getFirst();
-            seqResult.put(new HashSet<String>(l), v.getSecond());
+            seqResult.put(Sets.newHashSet(l), v.getSecond());
           }
         }
         

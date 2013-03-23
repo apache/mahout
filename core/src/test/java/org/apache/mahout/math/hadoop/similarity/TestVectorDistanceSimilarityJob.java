@@ -87,7 +87,7 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
 
     VectorDistanceMapper mapper = new VectorDistanceMapper();
     setField(mapper, "measure", new EuclideanDistanceMeasure());
-    Collection<NamedVector> seedVectors = new ArrayList<NamedVector>();
+    Collection<NamedVector> seedVectors = Lists.newArrayList();
     Vector seed1 = new RandomAccessSparseVector(2);
     seed1.set(0, 1);
     seed1.set(1, 1);
@@ -117,7 +117,7 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
 
     VectorDistanceInvertedMapper mapper = new VectorDistanceInvertedMapper();
     setField(mapper, "measure", new EuclideanDistanceMeasure());
-    Collection<NamedVector> seedVectors = new ArrayList<NamedVector>();
+    Collection<NamedVector> seedVectors = Lists.newArrayList();
     Vector seed1 = new RandomAccessSparseVector(2);
     seed1.set(0, 1);
     seed1.set(1, 1);

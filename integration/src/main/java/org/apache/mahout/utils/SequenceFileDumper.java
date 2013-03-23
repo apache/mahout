@@ -18,6 +18,7 @@
 package org.apache.mahout.utils;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.hadoop.conf.Configuration;
@@ -137,7 +138,7 @@ public final class SequenceFileDumper extends AbstractJob {
           }
         }
         if (facets != null) {
-          List<String> keyList = new ArrayList<String>(facets.size());
+          List<String> keyList = Lists.newArrayListWithCapacity(facets.size());
 
           IntArrayList valueList = new IntArrayList(facets.size());
           facets.pairsSortedByKey(keyList, valueList);

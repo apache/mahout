@@ -17,6 +17,7 @@
 
 package org.apache.mahout.vectorizer;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.Path;
@@ -41,7 +42,6 @@ import java.util.List;
 
 public final class HighDFWordsPruner {
 
-  public static final String OUT_DIR_SUFFIX = "-pruned";
   public static final String STD_CALC_DIR = "stdcalc";
   public static final String MAX_DF = "max.df";
 
@@ -56,7 +56,7 @@ public final class HighDFWordsPruner {
                                   int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
 
     int partialVectorIndex = 0;
-    List<Path> partialVectorPaths = new ArrayList<Path>();
+    List<Path> partialVectorPaths = Lists.newArrayList();
     for (Path path : docFrequenciesFeatures.getSecond()) {
       Path partialVectorOutputPath = new Path(prunedPartialTFDir, "partial-" + partialVectorIndex++);
       partialVectorPaths.add(partialVectorOutputPath);

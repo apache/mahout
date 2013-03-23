@@ -67,16 +67,8 @@ public abstract class Builder {
     this.conf = new Configuration(conf);
   }
   
-  protected TreeBuilder getTreeBuilder() {
-    return treeBuilder;
-  }
-  
   protected Path getDataPath() {
     return dataPath;
-  }
-
-  protected Long getSeed() {
-    return seed;
   }
   
   /**

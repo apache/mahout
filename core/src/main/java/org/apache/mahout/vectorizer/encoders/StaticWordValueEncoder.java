@@ -54,7 +54,7 @@ public class StaticWordValueEncoder extends WordValueEncoder {
    */
   public void setDictionary(Map<String, Double> dictionary) {
     this.dictionary = dictionary;
-    missingValueWeight = Collections.min(dictionary.values()) / 2;
+    setMissingValueWeight(Collections.min(dictionary.values()) / 2);
   }
 
   /**

@@ -69,9 +69,9 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
     super.setUp();
     Configuration conf = new Configuration();
     fs = FileSystem.get(conf);
-    firstCluster = new ArrayList<Vector>();
-    secondCluster = new ArrayList<Vector>();
-    thirdCluster = new ArrayList<Vector>();
+    firstCluster = Lists.newArrayList();
+    secondCluster = Lists.newArrayList();
+    thirdCluster = Lists.newArrayList();
     
   }
   

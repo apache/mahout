@@ -202,22 +202,6 @@ public final class FPTree {
       }
       currNode = next;
     }
-  } 
-
-
-  /**
-   * Returns an Iterable over the attributes in the tree, sorted by
-   * frequency (low to high).
-   */
-  public Iterable<Integer> attrIterable() {
-    List<Integer> attrs = Lists.newArrayList();
-    for (int i = 0; i < attrCountList.size(); i++) {
-      if (attrCountList.get(i) > 0) {
-        attrs.add(i);
-      }
-    }
-    Collections.sort(attrs, attrComparator);
-    return attrs;
   }
 
   /**

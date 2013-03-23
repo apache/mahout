@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import com.google.common.collect.Sets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -78,7 +79,7 @@ public final class TestRandomSeedGenerator extends MahoutTestCase {
     RandomSeedGenerator.buildRandom(conf, input, output, 4, new ManhattanDistanceMeasure());
 
     int clusterCount = 0;
-    Collection<Integer> set = new HashSet<Integer>();
+    Collection<Integer> set = Sets.newHashSet();
     for (ClusterWritable clusterWritable :
          new SequenceFileValueIterable<ClusterWritable>(new Path(output, "part-randomSeed"), true, conf)) {
       clusterCount++;

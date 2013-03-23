@@ -50,10 +50,6 @@ public class LeastKCache<K extends Comparable<? super K>,V> {
     }
   }
   
-  public final long size() {
-    return cache.size();
-  }
-  
   public final boolean contains(K key) {
     return cache.containsKey(key);
   }

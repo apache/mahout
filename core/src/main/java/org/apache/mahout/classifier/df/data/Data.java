@@ -18,6 +18,7 @@
 package org.apache.mahout.classifier.df.data;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.mahout.classifier.df.data.conditions.Condition;
 
 import java.util.Collection;
@@ -190,7 +191,7 @@ public class Data implements Cloneable {
    * finds all distinct values of a given attribute
    */
   public double[] values(int attr) {
-    Collection<Double> result = new HashSet<Double>();
+    Collection<Double> result = Sets.newHashSet();
     
     for (Instance instance : instances) {
       result.add(instance.get(attr));

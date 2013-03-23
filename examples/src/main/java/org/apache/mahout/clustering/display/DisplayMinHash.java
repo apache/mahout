@@ -39,6 +39,7 @@ import java.util.Random;
 
 import javax.swing.Timer;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -351,7 +352,7 @@ public class DisplayMinHash extends DisplayClustering {
       String key = next.getFirst().toString();
       List<Vector> list = clusters.get(key);
       if (list == null) {
-        list = new ArrayList<Vector>();
+        list = Lists.newArrayList();
         clusters.put(key, list);
       }
       list.add(next.getSecond().get());

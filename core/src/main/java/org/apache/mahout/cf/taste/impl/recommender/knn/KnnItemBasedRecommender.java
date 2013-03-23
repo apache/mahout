@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
@@ -198,7 +199,7 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
     long[] theNeighborhood = new long[mostSimilar.size() + 1];
     theNeighborhood[0] = -1;
   
-    List<Long> usersRatedNeighborhood = new ArrayList<Long>();
+    List<Long> usersRatedNeighborhood = Lists.newArrayList();
     int nOffset = 0;
     for (RecommendedItem rec : mostSimilar) {
       theNeighborhood[nOffset++] = rec.getItemID();

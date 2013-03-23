@@ -95,8 +95,8 @@ public class RegressionSplit extends IgSplit {
 
     // computes the variance gain
     double ig = totalSk;
-    for (int i = 0; i < sk.length; i++) {
-      ig -= sk[i];
+    for (double aSk : sk) {
+      ig -= aSk;
     }
 
     return new Split(attr, ig);

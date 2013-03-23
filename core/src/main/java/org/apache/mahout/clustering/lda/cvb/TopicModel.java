@@ -404,8 +404,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   public static String vectorToSortedString(Vector vector, String[] dictionary) {
-    List<Pair<String,Double>> vectorValues =
-        new ArrayList<Pair<String, Double>>(vector.getNumNondefaultElements());
+    List<Pair<String,Double>> vectorValues = Lists.newArrayListWithCapacity(vector.getNumNondefaultElements());
     Iterator<Vector.Element> it = vector.iterateNonZero();
     while (it.hasNext()) {
       Vector.Element e = it.next();

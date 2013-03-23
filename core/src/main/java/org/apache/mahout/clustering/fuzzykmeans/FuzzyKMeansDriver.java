@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
@@ -265,7 +266,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
                                    boolean runSequential)
     throws IOException, InterruptedException, ClassNotFoundException {
     
-    List<Cluster> clusters = new ArrayList<Cluster>();
+    List<Cluster> clusters = Lists.newArrayList();
     FuzzyKMeansUtil.configureWithClusterInfo(conf, clustersIn, clusters);
     
     if (conf==null) {

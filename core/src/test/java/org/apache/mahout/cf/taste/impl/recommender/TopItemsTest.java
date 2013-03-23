@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveArrayIterator;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
@@ -101,7 +102,7 @@ public final class TopItemsTest extends TasteTestCase {
 
   @Test
   public void testTopItemItem() throws Exception {
-    List<GenericItemSimilarity.ItemItemSimilarity> sims = new ArrayList<GenericItemSimilarity.ItemItemSimilarity>();
+    List<GenericItemSimilarity.ItemItemSimilarity> sims = Lists.newArrayList();
     for (int i = 0; i < 99; i++) {
       sims.add(new GenericItemSimilarity.ItemItemSimilarity(i, i + 1, i / 99.0));
     }
@@ -115,7 +116,7 @@ public final class TopItemsTest extends TasteTestCase {
 
   @Test
   public void testTopItemItemAlt() throws Exception {
-    List<GenericItemSimilarity.ItemItemSimilarity> sims = new ArrayList<GenericItemSimilarity.ItemItemSimilarity>();
+    List<GenericItemSimilarity.ItemItemSimilarity> sims = Lists.newArrayList();
     for (int i = 0; i < 99; i++) {
       sims.add(new GenericItemSimilarity.ItemItemSimilarity(i, i + 1, 1 - (i / 99.0)));
     }
@@ -129,7 +130,7 @@ public final class TopItemsTest extends TasteTestCase {
 
   @Test
   public void testTopUserUser() throws Exception {
-    List<GenericUserSimilarity.UserUserSimilarity> sims = new ArrayList<GenericUserSimilarity.UserUserSimilarity>();
+    List<GenericUserSimilarity.UserUserSimilarity> sims = Lists.newArrayList();
     for (int i = 0; i < 99; i++) {
       sims.add(new GenericUserSimilarity.UserUserSimilarity(i, i + 1, i / 99.0));
     }
@@ -143,7 +144,7 @@ public final class TopItemsTest extends TasteTestCase {
 
   @Test
   public void testTopUserUserAlt() throws Exception {
-    List<GenericUserSimilarity.UserUserSimilarity> sims = new ArrayList<GenericUserSimilarity.UserUserSimilarity>();
+    List<GenericUserSimilarity.UserUserSimilarity> sims = Lists.newArrayList();
     for (int i = 0; i < 99; i++) {
       sims.add(new GenericUserSimilarity.UserUserSimilarity(i, i + 1, 1 - (i / 99.0)));
     }

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -56,7 +57,7 @@ public class RegressionResultAnalyzer {
    */
   public void addInstance(double actual, double result) {
     if (results == null) {
-      results = new ArrayList<Result>();
+      results = Lists.newArrayList();
     }
     results.add(new Result(actual, result));
   }

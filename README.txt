@@ -14,7 +14,7 @@ Getting Started
 
  See https://cwiki.apache.org/MAHOUT/quickstart.html
 
-To compile the sources run 'mvn clean install'
+To compile the sources run 'mvn -DskipTests clean install'
 To run all the tests run 'mvn test'
 To setup your ide run 'mvn eclipse:eclipse' or 'mvn idea:idea'
 For more info on maven see http://maven.apache.org

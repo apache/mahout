@@ -86,7 +86,7 @@ public class InMemMapper extends MapredMapper<IntWritable,NullWritable,IntWritab
     log.debug("Building...");
     Node tree = bagging.build(rng);
     
-    if (!isNoOutput()) {
+    if (isOutput()) {
       log.debug("Outputing...");
       MapredOutput mrOut = new MapredOutput(tree);
       

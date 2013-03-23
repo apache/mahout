@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Random;
 
+import com.google.common.collect.Sets;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.junit.Test;
@@ -48,7 +49,7 @@ public final class FrequentPatternMaxHeapTest extends MahoutTestCase {
   private static Pattern generateRandomPattern(Random gen) {
     int length = 1 + Math.abs(gen.nextInt() % 6);
     Pattern p = new Pattern();
-    Collection<Integer> set = new HashSet<Integer>();
+    Collection<Integer> set = Sets.newHashSet();
     for (int i = 0; i < length; i++) {
       int id = Math.abs(gen.nextInt() % 20);
       while (set.contains(id)) {

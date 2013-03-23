@@ -16,6 +16,7 @@
  */
 package org.apache.mahout.text;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 
 import org.apache.commons.cli2.builder.ArgumentBuilder;
@@ -207,7 +208,7 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
     options.setChunkSize(chunkSize);
     options.setCharset(charset);
 
-    List<Pattern> patterns = new ArrayList<Pattern>(5);
+    List<Pattern> patterns = Lists.newArrayListWithCapacity(5);
     // patternOrder is used downstream so that we can know what order the text
     // is in instead
     // of encoding it in the string, which

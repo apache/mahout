@@ -38,10 +38,10 @@ public class MapredMapper<KEYIN,VALUEIN,KEYOUT,VALUEOUT> extends Mapper<KEYIN,VA
   
   /**
    * 
-   * @return if false, the mapper does not estimate and output predictions
+   * @return whether the mapper does estimate and output predictions
    */
-  protected boolean isNoOutput() {
-    return noOutput;
+  protected boolean isOutput() {
+    return !noOutput;
   }
   
   protected TreeBuilder getTreeBuilder() {

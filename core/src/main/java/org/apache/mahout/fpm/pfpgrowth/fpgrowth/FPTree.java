@@ -94,12 +94,10 @@ public class FPTree {
     }
   }
   
-  public final boolean addCount(int nodeId, long count) {
+  public final void addCount(int nodeId, long count) {
     if (nodeId < nodes) {
       this.nodeCount[nodeId] += count;
-      return true;
     }
-    return false;
   }
   
   public final void addHeaderCount(int attributeValue, long count) {
@@ -206,7 +204,7 @@ public class FPTree {
     return childNodeId;
   }
   
-  public final int createRootNode() {
+  public final void createRootNode() {
     childCount[nodes] = 0;
     next[nodes] = -1;
     parent[nodes] = 0;
@@ -215,7 +213,7 @@ public class FPTree {
     if (nodeChildren[nodes] == null) {
       nodeChildren[nodes] = new int[DEFAULT_CHILDREN_INITIAL_SIZE];
     }
-    return nodes++;
+    nodes++;
   }
   
   public final int getAttributeAtIndex(int index) {
@@ -277,23 +275,19 @@ public class FPTree {
     }
   }
   
-  public final boolean setConditional(int nodeId, int conditionalNode) {
+  public final void setConditional(int nodeId, int conditionalNode) {
     if (nodeId < nodes) {
       this.conditional[nodeId] = conditionalNode;
-      return true;
     }
-    return false;
   }
   
-  public final boolean setNext(int nodeId, int nextNode) {
+  public final void setNext(int nodeId, int nextNode) {
     if (nodeId < nodes) {
       this.next[nodeId] = nextNode;
-      return true;
     }
-    return false;
   }
   
-  public final boolean setParent(int nodeId, int parentNode) {
+  public final void setParent(int nodeId, int parentNode) {
     if (nodeId < nodes) {
       this.parent[nodeId] = parentNode;
       
@@ -303,9 +297,7 @@ public class FPTree {
       }
       nodeChildren[parentNode][length++] = nodeId;
       childCount[parentNode] = length;
-      return true;
     }
-    return false;
   }
   
   public final void setSinglePath(boolean bit) {

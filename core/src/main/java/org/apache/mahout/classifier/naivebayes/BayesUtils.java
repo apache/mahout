@@ -19,6 +19,7 @@ package org.apache.mahout.classifier.naivebayes;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -115,7 +116,7 @@ public final class BayesUtils {
                                     Iterable<Pair<Text,IntWritable>> labels) throws IOException {
     FileSystem fs = FileSystem.get(indexPath.toUri(), conf);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, indexPath, Text.class, IntWritable.class);
-    Collection<String> seen = new HashSet<String>();
+    Collection<String> seen = Sets.newHashSet();
     int i = 0;
     try {
       for (Object label : labels) {

@@ -74,12 +74,6 @@ public final class TransactionTree implements Writable, Iterable<Pair<IntArrayLi
     createRootNode();
     representedAsList = false;
   }
-  
-  public TransactionTree(int[] items, Long support) {
-    representedAsList = true;
-    transactionSet = Lists.newArrayList();
-    transactionSet.add(new Pair<IntArrayList,Long>(new IntArrayList(items), support));
-  }
 
   public TransactionTree(IntArrayList items, Long support) {
     representedAsList = true;
@@ -102,12 +96,10 @@ public final class TransactionTree implements Writable, Iterable<Pair<IntArrayLi
     
   }
   
-  public boolean addCount(int nodeId, long nextNodeCount) {
+  public void addCount(int nodeId, long nextNodeCount) {
     if (nodeId < nodes) {
       this.nodeCount[nodeId] += nextNodeCount;
-      return true;
     }
-    return false;
   }
 
   public int addPattern(IntArrayList myList, long addCount) {
@@ -340,14 +332,14 @@ public final class TransactionTree implements Writable, Iterable<Pair<IntArrayLi
     return childNodeId;
   }
   
-  private int createRootNode() {
+  private void createRootNode() {
     childCount[nodes] = 0;
     attribute[nodes] = -1;
     nodeCount[nodes] = 0;
     if (nodeChildren[nodes] == null) {
       nodeChildren[nodes] = new int[DEFAULT_CHILDREN_INITIAL_SIZE];
     }
-    return nodes++;
+    nodes++;
   }
   
   private void resize() {

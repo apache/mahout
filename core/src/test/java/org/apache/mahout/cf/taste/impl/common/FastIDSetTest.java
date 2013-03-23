@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
+import com.google.common.collect.Sets;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.junit.Test;
@@ -117,7 +118,7 @@ public final class FastIDSetTest extends TasteTestCase {
   @Test
   public void testIterator() {
     FastIDSet set = buildTestFastSet();
-    Collection<Long> expected = new HashSet<Long>(3);
+    Collection<Long> expected = Sets.newHashSetWithExpectedSize(3);
     expected.add(1L);
     expected.add(2L);
     expected.add(3L);
@@ -131,7 +132,7 @@ public final class FastIDSetTest extends TasteTestCase {
   @Test
   public void testVersusHashSet() {
     FastIDSet actual = new FastIDSet(1);
-    Collection<Integer> expected = new HashSet<Integer>(1000000);
+    Collection<Integer> expected = Sets.newHashSetWithExpectedSize(1000000);
     Random r = RandomUtils.getRandom();
     for (int i = 0; i < 1000000; i++) {
       double d = r.nextDouble();

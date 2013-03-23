@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -68,7 +69,7 @@ public final class FPGrowthTest2 extends MahoutTestCase {
         fp.generateFList(transactions.iterator(), 3),
         3,
         100,
-        new HashSet<String>(),
+        Sets.<String>newHashSet(),
         new StringOutputConverter(new SequenceFileOutputCollector<Text,TopKStringPatterns>(writer)),
         new ContextStatusUpdater(null));
     } finally {
@@ -111,7 +112,7 @@ public final class FPGrowthTest2 extends MahoutTestCase {
           fp.generateFList(transactions.iterator(), 2),
           2,
           100,
-          new HashSet<String>(),
+          Sets.<String>newHashSet(),
           new StringOutputConverter(new SequenceFileOutputCollector<Text,TopKStringPatterns>(writer)),
           new ContextStatusUpdater(null));
     } finally {
@@ -149,7 +150,7 @@ public final class FPGrowthTest2 extends MahoutTestCase {
           fp.generateFList(transactions.iterator(), 2),
           2,
           100,
-          new HashSet<String>(),
+          Sets.<String>newHashSet(),
           new StringOutputConverter(new SequenceFileOutputCollector<Text,TopKStringPatterns>(writer)),
           new ContextStatusUpdater(null));
     } finally {

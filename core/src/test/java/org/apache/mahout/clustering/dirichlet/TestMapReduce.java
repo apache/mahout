@@ -307,7 +307,7 @@ public final class TestMapReduce extends MahoutTestCase {
   }
   
   private Iterable<List<Cluster>> getClusters(Path output, int numIterations) throws IOException {
-    List<List<Cluster>> result = new ArrayList<List<Cluster>>();
+    List<List<Cluster>> result = Lists.newArrayList();
     for (int i = 1; i <= numIterations; i++) {
       ClusterClassifier posterior = new ClusterClassifier();
       String name = i == numIterations ? "clusters-" + i + "-final" : "clusters-" + i;

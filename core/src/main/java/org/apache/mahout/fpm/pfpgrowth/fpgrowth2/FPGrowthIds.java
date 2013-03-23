@@ -55,16 +55,6 @@ public final class FPGrowthIds {
   private FPGrowthIds() {
   }
 
-  public static List<Pair<String,TopKStringPatterns>> readFrequentPattern(Configuration conf, Path path) {
-    List<Pair<String,TopKStringPatterns>> ret = Lists.newArrayList();
-    // key is feature value is count
-    for (Pair<Writable,TopKStringPatterns> record
-         : new SequenceFileIterable<Writable,TopKStringPatterns>(path, true, conf)) {
-      ret.add(new Pair<String,TopKStringPatterns>(record.getFirst().toString(),
-                                                  new TopKStringPatterns(record.getSecond().getPatterns())));
-    }
-    return ret;
-  }
  /**
    * Generate Top K Frequent Patterns for every feature in returnableFeatures
    * given a stream of transactions and the minimum support
@@ -194,7 +184,7 @@ public final class FPGrowthIds {
    *          format to the corresponding A Format
    * @return Top K frequent patterns for each attribute
    */
-  private static Map<Integer,FrequentPatternMaxHeap> generateTopKFrequentPatterns(
+  private static void generateTopKFrequentPatterns(
       Iterator<Pair<IntArrayList, Long>> transactions,
       LongArrayList attributeFrequency,
       long minSupport,
@@ -217,7 +207,7 @@ public final class FPGrowthIds {
       }
     }
 
-    return fpGrowth(tree, minSupport, k, returnFeatures, topKPatternsOutputCollector, updater);
+    fpGrowth(tree, minSupport, k, returnFeatures, topKPatternsOutputCollector, updater);
   }
 
   /** 
@@ -324,19 +314,17 @@ public final class FPGrowthIds {
     return pats;
   }
 
-  private static FrequentPatternMaxHeap mergeHeap(FrequentPatternMaxHeap frequentPatterns,
-                                                  FrequentPatternMaxHeap returnedPatterns,
-                                                  int attribute,
-                                                  long count,
-                                                  boolean addAttribute) {
+  private static void mergeHeap(FrequentPatternMaxHeap frequentPatterns,
+                                FrequentPatternMaxHeap returnedPatterns,
+                                int attribute,
+                                long count,
+                                boolean addAttribute) {
     frequentPatterns.addAll(returnedPatterns, attribute, count);
     if (frequentPatterns.addable(count) && addAttribute) {
       Pattern p = new Pattern();
       p.add(attribute, count);
       frequentPatterns.insert(p);
     }
-
-    return frequentPatterns;
   }
 }
 

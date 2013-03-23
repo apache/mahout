@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
+import com.google.common.collect.Sets;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -178,7 +179,7 @@ public final class WikipediaToSequenceFile {
      */
     HadoopUtil.delete(conf, outPath);
     
-    Set<String> categories = new HashSet<String>();
+    Set<String> categories = Sets.newHashSet();;
     if (!catFile.isEmpty()) {
       for (String line : new FileLineIterable(new File(catFile))) {
         categories.add(line.trim().toLowerCase(Locale.ENGLISH));

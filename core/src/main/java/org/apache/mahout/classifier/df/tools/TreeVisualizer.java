@@ -66,7 +66,14 @@ public final class TreeVisualizer {
             buff.append("|   ");
           }
           if (values[i] < attrValues[attr].length) {
-            buff.append((attrNames == null ? attr : attrNames[attr]) + " = " + attrValues[attr][(int) values[i]]);
+            if (attrNames == null) {
+              buff.append(attr);
+            } else {
+              buff.append(attrNames[attr]);
+            }
+            buff.append(" = ");
+            buff.append(attrValues[attr][(int) values[i]]);
+
             buff.append(toStringNode(childs[i], dataset, attrNames, fields, layer + 1));
           }
         }

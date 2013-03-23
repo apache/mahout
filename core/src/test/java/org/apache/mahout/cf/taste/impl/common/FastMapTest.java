@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.impl.common;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.junit.Test;
@@ -120,7 +121,7 @@ public final class FastMapTest extends TasteTestCase {
   @Test
   public void testKeySet() {
     FastMap<String, String> map = buildTestFastMap();
-    Collection<String> expected = new HashSet<String>(3);
+    Collection<String> expected = Sets.newHashSetWithExpectedSize(3);
     expected.add("foo");
     expected.add("baz");
     expected.add("alpha");
@@ -142,7 +143,7 @@ public final class FastMapTest extends TasteTestCase {
   @Test
   public void testValues() {
     FastMap<String, String> map = buildTestFastMap();
-    Collection<String> expected = new HashSet<String>(3);
+    Collection<String> expected = Sets.newHashSetWithExpectedSize(3);;
     expected.add("bar");
     expected.add("bang");
     expected.add("beta");
@@ -165,11 +166,11 @@ public final class FastMapTest extends TasteTestCase {
   public void testEntrySet() {
     FastMap<String, String> map = buildTestFastMap();
     Set<Map.Entry<String, String>> actual = map.entrySet();
-    Collection<String> expectedKeys = new HashSet<String>(3);
+    Collection<String> expectedKeys = Sets.newHashSetWithExpectedSize(3);
     expectedKeys.add("foo");
     expectedKeys.add("baz");
     expectedKeys.add("alpha");
-    Collection<String> expectedValues = new HashSet<String>(3);
+    Collection<String> expectedValues = Sets.newHashSetWithExpectedSize(3);
     expectedValues.add("bar");
     expectedValues.add("bang");
     expectedValues.add("beta");

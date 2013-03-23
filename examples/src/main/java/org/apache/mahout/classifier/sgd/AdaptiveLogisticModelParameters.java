@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.mahout.math.stats.GlobalOnlineAuc;
 import org.apache.mahout.math.stats.GroupedOnlineAuc;
@@ -155,7 +156,7 @@ public class AdaptiveLogisticModelParameters extends LogisticModelParameters {
     setNumFeatures(in.readInt());
     setMaxTargetCategories(in.readInt());
     int targetCategoriesSize = in.readInt();
-    List<String> targetCategories = new ArrayList<String>(targetCategoriesSize);
+    List<String> targetCategories = Lists.newArrayListWithCapacity(targetCategoriesSize);
     for (int i = 0; i < targetCategoriesSize; i++) {
       targetCategories.add(in.readUTF());
     }

@@ -144,7 +144,7 @@ public class VectorBenchmarks {
     }
     int implId = implType.get(implName);
     if (!statsMap.containsKey(benchmarkName)) {
-      statsMap.put(benchmarkName, new ArrayList<String[]>());
+      statsMap.put(benchmarkName, Lists.<String[]>newArrayList());
     }
     List<String[]> implStats = statsMap.get(benchmarkName);
     while (implStats.size() < implId + 1) {

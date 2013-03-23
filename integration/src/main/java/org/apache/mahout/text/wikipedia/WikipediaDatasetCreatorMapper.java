@@ -25,6 +25,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -89,7 +90,7 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
     Configuration conf = context.getConfiguration();
 
     if (inputCategories == null) {
-      Set<String> newCategories = new HashSet<String>();
+      Set<String> newCategories = Sets.newHashSet();
       DefaultStringifier<Set<String>> setStringifier =
           new DefaultStringifier<Set<String>>(conf, GenericsUtil.getClass(newCategories));
       String categoriesStr = conf.get("wikipedia.categories", setStringifier.toString(newCategories));

@@ -59,7 +59,6 @@ public class TestNaiveBayesDriver extends AbstractJob {
 
   private static final Logger log = LoggerFactory.getLogger(TestNaiveBayesDriver.class);
 
-  public static final String LABEL_KEY = "labels";
   public static final String COMPLEMENTARY = "class"; //b for bayes, c for complementary
   private static final Pattern SLASH = Pattern.compile("/");
 
