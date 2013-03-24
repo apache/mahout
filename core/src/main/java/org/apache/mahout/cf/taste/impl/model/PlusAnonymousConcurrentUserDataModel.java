@@ -18,7 +18,6 @@
 package org.apache.mahout.cf.taste.impl.model;
 
 import com.google.common.base.Preconditions;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;

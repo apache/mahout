@@ -21,7 +21,6 @@ import com.google.common.collect.Lists;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.regex.Pattern;

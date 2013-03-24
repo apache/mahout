@@ -23,7 +23,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -197,7 +196,7 @@ public class ClusterLabels {
     while ((term = te.next()) != null) {
       OpenBitSet termBitset = new OpenBitSet(reader.maxDoc());
       DocsEnum docsEnum = MultiFields.getTermDocsEnum(reader, null, contentField, term);
-      int docID = 0;
+      int docID;
       while ((docID = docsEnum.nextDoc()) != DocIdSetIterator.NO_MORE_DOCS) {
         if (liveDocs != null && !liveDocs.get(docID)) { //check to see if we don't have an deletions (null) or if document is live
           // document is deleted...

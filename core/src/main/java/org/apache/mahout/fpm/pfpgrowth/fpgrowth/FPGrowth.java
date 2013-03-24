@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -267,7 +266,6 @@ public class FPGrowth<A extends Comparable<? super A>> {
    * @param topKPatternsOutputCollector
    *          the outputCollector which transforms the given Pattern in integer
    *          format to the corresponding A Format
-   * @return Top K frequent patterns for each attribute
    */
   private void generateTopKFrequentPatterns(
     Iterator<Pair<int[],Long>> transactions,

@@ -39,7 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -330,7 +329,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   /**
-   * Computes {@code p(topic x|term a, document i)} distributions given input document {@code i}.
+   * Computes {@code p(topic x | term a, document i)} distributions given input document {@code i}.
    * {@code pTGT[x][a]} is the (un-normalized) {@code p(x|a,i)}, or if docTopics is {@code null},
    * {@code p(a|x)} (also un-normalized).
    *

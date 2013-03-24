@@ -17,7 +17,6 @@
 
 package org.apache.mahout.cf.taste.hadoop.als;
 
-import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.common.RandomUtils;
 

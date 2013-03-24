@@ -24,7 +24,6 @@ import org.apache.mahout.common.RandomUtils;
 import org.junit.Test;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
@@ -143,7 +142,7 @@ public final class FastMapTest extends TasteTestCase {
   @Test
   public void testValues() {
     FastMap<String, String> map = buildTestFastMap();
-    Collection<String> expected = Sets.newHashSetWithExpectedSize(3);;
+    Collection<String> expected = Sets.newHashSetWithExpectedSize(3);
     expected.add("bar");
     expected.add("bang");
     expected.add("beta");

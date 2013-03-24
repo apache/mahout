@@ -22,7 +22,6 @@ import com.google.common.collect.Sets;
 import org.apache.mahout.classifier.df.data.conditions.Condition;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 

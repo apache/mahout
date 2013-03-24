@@ -45,7 +45,6 @@ import org.apache.mahout.math.map.OpenObjectIntHashMap;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.regex.Pattern;
 

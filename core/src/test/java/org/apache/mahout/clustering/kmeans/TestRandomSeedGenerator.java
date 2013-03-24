@@ -18,7 +18,6 @@
 package org.apache.mahout.clustering.kmeans;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 import com.google.common.collect.Sets;

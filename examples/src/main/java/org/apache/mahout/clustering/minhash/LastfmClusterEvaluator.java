@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.HashSet;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;

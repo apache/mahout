@@ -18,7 +18,6 @@
 package org.apache.mahout.text.wikipedia;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;

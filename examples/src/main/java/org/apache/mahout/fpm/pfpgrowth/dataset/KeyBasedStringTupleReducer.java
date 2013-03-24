@@ -19,7 +19,6 @@ package org.apache.mahout.fpm.pfpgrowth.dataset;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashSet;
 
 import com.google.common.collect.Sets;
 import org.apache.hadoop.io.Text;

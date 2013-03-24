@@ -23,7 +23,6 @@ import org.apache.mahout.common.RandomUtils;
 import org.junit.Test;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Random;
 
 /** <p>Tests {@link FastIDSet}.</p> */

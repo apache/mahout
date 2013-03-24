@@ -24,19 +24,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import org.apache.commons.lang.mutable.MutableLong;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.common.Pair;
-import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.fpm.pfpgrowth.convertors.StatusUpdater;
 import org.apache.mahout.fpm.pfpgrowth.convertors.TopKPatternsOutputConverter;
-import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 import org.apache.mahout.math.list.LongArrayList;
 import org.apache.mahout.math.list.IntArrayList;
 
@@ -182,7 +176,6 @@ public final class FPGrowthIds {
    * @param topKPatternsOutputCollector
    *          the outputCollector which transforms the given Pattern in integer
    *          format to the corresponding A Format
-   * @return Top K frequent patterns for each attribute
    */
   private static void generateTopKFrequentPatterns(
       Iterator<Pair<IntArrayList, Long>> transactions,

@@ -40,11 +40,9 @@ import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 public final class FPGrowthDriver extends AbstractJob {

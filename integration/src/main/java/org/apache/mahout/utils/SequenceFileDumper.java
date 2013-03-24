@@ -36,7 +36,6 @@ import org.apache.mahout.math.map.OpenObjectIntHashMap;
 import java.io.File;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.List;
 
 public final class SequenceFileDumper extends AbstractJob {

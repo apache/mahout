@@ -23,7 +23,6 @@ import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.junit.Test;
 
 import java.util.Collection;
-import java.util.HashSet;
 
 /** Tests {@link RefreshHelper} */
 public final class RefreshHelperTest extends TasteTestCase {

@@ -20,7 +20,6 @@ package org.apache.mahout.cf.taste.impl.model.hbase;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;

@@ -19,7 +19,6 @@ package org.apache.mahout.utils.regex;
 
 import com.google.common.collect.Lists;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

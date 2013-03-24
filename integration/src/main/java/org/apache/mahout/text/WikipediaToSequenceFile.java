@@ -19,7 +19,6 @@ package org.apache.mahout.text;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
@@ -179,7 +178,7 @@ public final class WikipediaToSequenceFile {
      */
     HadoopUtil.delete(conf, outPath);
     
-    Set<String> categories = Sets.newHashSet();;
+    Set<String> categories = Sets.newHashSet();
     if (!catFile.isEmpty()) {
       for (String line : new FileLineIterable(new File(catFile))) {
         categories.add(line.trim().toLowerCase(Locale.ENGLISH));

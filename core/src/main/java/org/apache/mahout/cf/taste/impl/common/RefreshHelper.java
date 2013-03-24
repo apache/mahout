@@ -18,7 +18,6 @@
 package org.apache.mahout.cf.taste.impl.common;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.locks.ReentrantLock;

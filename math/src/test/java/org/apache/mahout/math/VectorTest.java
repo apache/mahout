@@ -22,7 +22,6 @@ import org.apache.mahout.math.function.Functions;
 import org.junit.Test;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 
 public final class VectorTest extends MahoutTestCase {
@@ -53,7 +52,7 @@ public final class VectorTest extends MahoutTestCase {
     }
 
     int elements = 0;
-    for (Vector.Element e : vector) {
+    for (Vector.Element ignore : vector) {
       elements++;
     }
     assertEquals(n, elements);

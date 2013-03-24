@@ -18,7 +18,6 @@ package org.apache.mahout.clustering.dirichlet;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 

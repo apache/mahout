@@ -18,7 +18,6 @@
 package org.apache.mahout.math.als;
 
 import com.google.common.base.Preconditions;
-import org.apache.mahout.math.CholeskyDecomposition;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
@@ -41,7 +40,7 @@ public class ImplicitFeedbackAlternatingLeastSquaresSolver {
   private final Matrix YtransposeY;
 
   public ImplicitFeedbackAlternatingLeastSquaresSolver(int numFeatures, double lambda, double alpha,
-      OpenIntObjectHashMap Y) {
+      OpenIntObjectHashMap<Vector> Y) {
     this.numFeatures = numFeatures;
     this.lambda = lambda;
     this.alpha = alpha;

@@ -19,7 +19,6 @@ package org.apache.mahout.classifier;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 

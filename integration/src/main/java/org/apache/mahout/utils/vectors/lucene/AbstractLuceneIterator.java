@@ -18,7 +18,6 @@
 package org.apache.mahout.utils.vectors.lucene;
 
 import com.google.common.collect.AbstractIterator;
-import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
@@ -32,8 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Iterate over a Lucene index, extracting term vectors.
@@ -82,7 +79,6 @@ public abstract class AbstractLuceneIterator extends AbstractIterator<Vector> {
         String name;
 
         do {
-          name = null;
           doc = this.nextDocId;
           nextDocId++;
 

@@ -18,7 +18,6 @@
 package org.apache.mahout.clustering.classify;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -119,7 +118,6 @@ public final class ClusterClassificationDriver extends AbstractJob {
    *          classified for the cluster.
    * @param runSequential
    *          Run the process sequentially or in a mapreduce way.
-   * @param runSequential
    * @throws IOException
    * @throws InterruptedException
    * @throws ClassNotFoundException

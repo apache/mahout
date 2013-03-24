@@ -17,7 +17,6 @@
 
 package org.apache.mahout.classifier.df.tools;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 

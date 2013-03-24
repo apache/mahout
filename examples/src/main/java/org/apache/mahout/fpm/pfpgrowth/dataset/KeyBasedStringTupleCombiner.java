@@ -18,7 +18,6 @@
 package org.apache.mahout.fpm.pfpgrowth.dataset;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Set;
 
 import com.google.common.collect.Sets;

@@ -17,7 +17,6 @@
 
 package org.apache.mahout.cf.taste.impl.recommender.knn;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
