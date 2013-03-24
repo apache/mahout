@@ -46,8 +46,8 @@ public final class CityBlockSimilarity extends AbstractItemSimilarity implements
 
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
-    alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
-    RefreshHelper.maybeRefresh(alreadyRefreshed, getDataModel());
+    Collection<Refreshable> refreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
+    RefreshHelper.maybeRefresh(refreshed, getDataModel());
   }
 
   @Override

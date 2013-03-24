@@ -79,7 +79,7 @@ public final class Job extends AbstractJob {
    *          the canopy T2 threshold
    */
   private static void run(Path input, Path output, DistanceMeasure measure,
-      double t1, double t2) throws Exception{
+      double t1, double t2) throws Exception {
     Path directoryContainingConvertedInput = new Path(output,
         DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput,

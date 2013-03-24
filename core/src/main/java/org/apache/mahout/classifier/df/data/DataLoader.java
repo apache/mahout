@@ -45,13 +45,13 @@ import java.util.regex.Pattern;
  * of the instance in the input data
  */
 public final class DataLoader {
-  
+
   private static final Logger log = LoggerFactory.getLogger(DataLoader.class);
 
   private static final Pattern COMMA_SPACE = Pattern.compile("[, ]");
 
   private DataLoader() { }
-  
+
   /**
    * Converts a comma-separated String to a Vector.
    * 
@@ -75,12 +75,12 @@ public final class DataLoader {
         return false; // missing value
       }
     }
-    
+
     for (int attr = 0; attr < attrs.length; attr++) {
       if (attrs[attr].isIgnored()) {
         continue;
       }
-      
+
       String token = tokens[attr];
 
       if (attrs[attr].isCategorical() || (!regression && attrs[attr].isLabel())) {
@@ -97,10 +97,10 @@ public final class DataLoader {
         }
       }
     }
-      
+
     return true;
   }
-  
+
   /**
    * Loads the data from a file
    * 
@@ -111,85 +111,81 @@ public final class DataLoader {
    * @throws IOException
    *           if any problem is encountered
    */
-  
+
   public static Data loadData(Dataset dataset, FileSystem fs, Path fpath) throws IOException {
     FSDataInputStream input = fs.open(fpath);
     Scanner scanner = new Scanner(input, "UTF-8");
-    
+
     List<Instance> instances = Lists.newArrayList();
-    
+
     DataConverter converter = new DataConverter(dataset);
-    
+
     while (scanner.hasNextLine()) {
       String line = scanner.nextLine();
       if (line.isEmpty()) {
         log.warn("{}: empty string", instances.size());
         continue;
       }
-      
+
       Instance instance = converter.convert(line);
       if (instance == null) {
         // missing values found
         log.warn("{}: missing values", instances.size());
         continue;
       }
-      
+
       instances.add(instance);
     }
-    
+
     scanner.close();
-    
+
     return new Data(dataset, instances);
   }
-  
+
   /**
    * Loads the data from a String array
    */
   public static Data loadData(Dataset dataset, String[] data) {
     List<Instance> instances = Lists.newArrayList();
-    
+
     DataConverter converter = new DataConverter(dataset);
-    
+
     for (String line : data) {
       if (line.isEmpty()) {
         log.warn("{}: empty string", instances.size());
         continue;
       }
-      
+
       Instance instance = converter.convert(line);
       if (instance == null) {
         // missing values found
         log.warn("{}: missing values", instances.size());
         continue;
       }
-      
+
       instances.add(instance);
     }
-    
+
     return new Data(dataset, instances);
   }
-  
+
   /**
    * Generates the Dataset by parsing the entire data
    * 
-   * @param descriptor
-   *          attributes description
-   * @param regression
-   * 					if true, the label is numerical
-   * @param fs
-   *          file system
-   * @param path
-   *          data path
+   * @param descriptor  attributes description
+   * @param regression  if true, the label is numerical
+   * @param fs  file system
+   * @param path  data path
    */
   public static Dataset generateDataset(CharSequence descriptor,
                                         boolean regression,
                                         FileSystem fs,
                                         Path path) throws DescriptorException, IOException {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
-    
+
     FSDataInputStream input = fs.open(path);
     Scanner scanner = new Scanner(input, "UTF-8");
-    
+
     // used to convert CATEGORICAL attribute to Integer
     @SuppressWarnings("unchecked")
     Set<String>[] valsets = new Set[attrs.length];
@@ -200,14 +196,14 @@ public final class DataLoader {
       if (line.isEmpty()) {
         continue;
       }
-      
+
       if (parseString(attrs, valsets, line, regression)) {
         size++;
       }
     }
-    
+
     scanner.close();
-    
+
     @SuppressWarnings("unchecked")
     List<String>[] values = new List[attrs.length];
     for (int i = 0; i < valsets.length; i++) {
@@ -218,7 +214,7 @@ public final class DataLoader {
 
     return new Dataset(attrs, values, size, regression);
   }
-  
+
   /**
    * Generates the Dataset by parsing the entire data
    * 
@@ -229,17 +225,17 @@ public final class DataLoader {
                                         boolean regression,
                                         String[] data) throws DescriptorException {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
-    
+
     // used to convert CATEGORICAL attributes to Integer
     @SuppressWarnings("unchecked")
     Set<String>[] valsets = new Set[attrs.length];
-    
+
     int size = 0;
     for (String aData : data) {
       if (aData.isEmpty()) {
         continue;
       }
-      
+
       if (parseString(attrs, valsets, aData, regression)) {
         size++;
       }
@@ -252,7 +248,7 @@ public final class DataLoader {
         values[i] = Lists.newArrayList(valsets[i]);
       }
     }
-    
+
     return new Dataset(attrs, values, size, regression);
   }
 

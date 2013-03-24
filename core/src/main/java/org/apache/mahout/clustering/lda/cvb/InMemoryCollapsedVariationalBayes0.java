@@ -121,7 +121,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
     numTerms = terms != null ? terms.length : corpus.numCols();
     Map<String, Integer> termIdMap = Maps.newHashMap();
     if (terms != null) {
-      for (int t=0; t<terms.length; t++) {
+      for (int t = 0; t < terms.length; t++) {
         termIdMap.put(terms[t], t);
       }
     }
@@ -134,7 +134,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
   private void postInitCorpus() {
     totalCorpusWeight = 0;
     int numNonZero = 0;
-    for (int i=0; i<numDocuments; i++) {
+    for (int i = 0; i < numDocuments; i++) {
       Vector v = corpusWeights.viewRow(i);
       double norm;
       if (v != null && (norm = v.norm(1)) != 0) {
@@ -148,8 +148,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
 
   private void initializeModel() {
     TopicModel topicModel = new TopicModel(numTopics, numTerms, eta, alpha, RandomUtils.getRandom(), terms,
-                                           numUpdatingThreads,
-                                           initialModelCorpusFraction == 0 ? 1 : initialModelCorpusFraction * totalCorpusWeight);
+        numUpdatingThreads, initialModelCorpusFraction == 0 ? 1 : initialModelCorpusFraction * totalCorpusWeight);
     topicModel.setConf(getConf());
 
     TopicModel updatedModel = initialModelCorpusFraction == 0
@@ -157,7 +156,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
         : topicModel;
     updatedModel.setConf(getConf());
     docTopicCounts = new DenseMatrix(numDocuments, numTopics);
-    docTopicCounts.assign(1.0/numTopics);
+    docTopicCounts.assign(1.0 / numTopics);
     modelTrainer = new ModelTrainer(topicModel, updatedModel, numTrainingThreads, numTopics, numTerms);
   }
 
@@ -179,8 +178,8 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
     long start = System.nanoTime();
     modelTrainer.start();
     for (int docId = 0; docId < corpusWeights.numRows(); docId++) {
-      if (testFraction == 0 || docId % (1/testFraction) != 0) {
-        Vector docTopics = new DenseVector(numTopics).assign(1.0/numTopics); // docTopicCounts.getRow(docId)
+      if (testFraction == 0 || docId % (1 / testFraction) != 0) {
+        Vector docTopics = new DenseVector(numTopics).assign(1.0 / numTopics); // docTopicCounts.getRow(docId)
         modelTrainer.trainSync(corpusWeights.viewRow(docId), docTopics , true, 10);
       }
     }

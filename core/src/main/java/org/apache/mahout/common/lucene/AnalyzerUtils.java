@@ -27,8 +27,8 @@ public final class AnalyzerUtils {
   }
 
   /**
-   * Create an Analyzer using the latest {@link org.apache.lucene.util.Version}.  Note, if you need to pass in parameters
-   * to your constructor, you will need to wrap it in an implementation that does not take any arguments
+   * Create an Analyzer using the latest {@link org.apache.lucene.util.Version}.  Note, if you need to pass in
+   * parameters to your constructor, you will need to wrap it in an implementation that does not take any arguments
    * @param analyzerClassName - Lucene Analyzer Name
    * @return {@link Analyzer}
    * @throws ClassNotFoundException - {@link ClassNotFoundException}
@@ -45,16 +45,16 @@ public final class AnalyzerUtils {
   }
 
   /**
-   * Create an Analyzer using the latest {@link org.apache.lucene.util.Version}.  Note, if you need to pass in parameters
-   * to your constructor, you will need to wrap it in an implementation that does not take any arguments
+   * Create an Analyzer using the latest {@link org.apache.lucene.util.Version}.  Note, if you need to pass in
+   * parameters to your constructor, you will need to wrap it in an implementation that does not take any arguments
    * @param analyzerClass The Analyzer Class to instantiate
    * @return {@link Analyzer}
    */
-  public static Analyzer createAnalyzer(Class<? extends Analyzer> analyzerClass){
+  public static Analyzer createAnalyzer(Class<? extends Analyzer> analyzerClass) {
     return createAnalyzer(analyzerClass, Version.LUCENE_41);
   }
 
-  public static Analyzer createAnalyzer(Class<? extends Analyzer> analyzerClass, Version version){
+  public static Analyzer createAnalyzer(Class<? extends Analyzer> analyzerClass, Version version) {
     Analyzer analyzer;
     if (analyzerClass == StandardAnalyzer.class) {
       Class<?>[] params = new Class<?>[1];

@@ -50,8 +50,8 @@ public final class CachingUserNeighborhood implements UserNeighborhood {
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     neighborhoodCache.clear();
-    alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
-    RefreshHelper.maybeRefresh(alreadyRefreshed, neighborhood);
+    Collection<Refreshable> refreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
+    RefreshHelper.maybeRefresh(refreshed, neighborhood);
   }
   
   private static final class NeighborhoodRetriever implements Retriever<Long,long[]> {

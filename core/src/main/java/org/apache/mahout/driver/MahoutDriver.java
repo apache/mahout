@@ -195,7 +195,8 @@ public final class MahoutDriver {
     programDriver.driver(argsList.toArray(new String[argsList.size()]));
 
     if (log.isInfoEnabled()) {
-      log.info("Program took {} ms (Minutes: {})", System.currentTimeMillis() - start, (System.currentTimeMillis() - start)/60000.0);
+      log.info("Program took {} ms (Minutes: {})", System.currentTimeMillis() - start,
+          (System.currentTimeMillis() - start) / 60000.0);
     }
   }
 

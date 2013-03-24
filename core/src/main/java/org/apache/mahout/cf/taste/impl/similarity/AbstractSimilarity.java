@@ -353,21 +353,22 @@ abstract class AbstractSimilarity extends AbstractItemSimilarity implements User
   }
   
   final double normalizeWeightResult(double result, int count, int num) {
+    double normalizedResult = result;
     if (weighted) {
       double scaleFactor = 1.0 - (double) count / (double) (num + 1);
-      if (result < 0.0) {
-        result = -1.0 + scaleFactor * (1.0 + result);
+      if (normalizedResult < 0.0) {
+        normalizedResult = -1.0 + scaleFactor * (1.0 + normalizedResult);
       } else {
-        result = 1.0 - scaleFactor * (1.0 - result);
+        normalizedResult = 1.0 - scaleFactor * (1.0 - normalizedResult);
       }
     }
     // Make sure the result is not accidentally a little outside [-1.0, 1.0] due to rounding:
-    if (result < -1.0) {
-      result = -1.0;
-    } else if (result > 1.0) {
-      result = 1.0;
+    if (normalizedResult < -1.0) {
+      normalizedResult = -1.0;
+    } else if (normalizedResult > 1.0) {
+      normalizedResult = 1.0;
     }
-    return result;
+    return normalizedResult;
   }
   
   @Override

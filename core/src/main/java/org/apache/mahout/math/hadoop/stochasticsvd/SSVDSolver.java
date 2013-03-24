@@ -514,7 +514,7 @@ public final class SSVDSolver {
        * we currently use a 3rd party in-core eigensolver. So we need just a
        * dense array representation for it.
        */
-      DenseMatrix bbtSquare = new DenseMatrix(k+p,k+p);
+      DenseMatrix bbtSquare = new DenseMatrix(k + p, k + p);
 
       for (int i = 0; i < k + p; i++) {
         for (int j = i; j < k + p; j++) {

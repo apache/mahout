@@ -142,7 +142,8 @@ public class KMeansDriver extends AbstractJob {
     if (log.isInfoEnabled()) {
       log.info("Input: {} Clusters In: {} Out: {} Distance: {}", input, clustersIn, output,
                measure.getClass().getName());
-      log.info("convergence: {} max Iterations: {} num Reduce Tasks: {} Input Vectors: {}", convergenceDelta, maxIterations, VectorWritable.class.getName());
+      log.info("convergence: {} max Iterations: {} num Reduce Tasks: {} Input Vectors: {}", convergenceDelta,
+          maxIterations, VectorWritable.class.getName());
     }
     Path clustersOut = buildClusters(conf, input, clustersIn, output, measure, maxIterations, delta, runSequential);
     if (runClustering) {

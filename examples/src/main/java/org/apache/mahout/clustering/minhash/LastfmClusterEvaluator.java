@@ -95,8 +95,8 @@ public final class LastfmClusterEvaluator {
     long similarListeners = 0;
     long allListeners = 0;
     int clustersProcessed = 0;
-    for (Pair<Text,VectorWritable> record :
-         new SequenceFileIterable<Text,VectorWritable>(clusterFile, true, conf)) {
+    for (Pair<Text,VectorWritable> record
+        : new SequenceFileIterable<Text,VectorWritable>(clusterFile, true, conf)) {
       Text cluster = record.getFirst();
       VectorWritable point = record.getSecond();
       if (!cluster.equals(prevCluster)) {

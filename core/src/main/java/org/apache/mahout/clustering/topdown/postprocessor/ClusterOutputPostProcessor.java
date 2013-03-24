@@ -104,7 +104,7 @@ public final class ClusterOutputPostProcessor {
   private void putVectorInRespectiveCluster(String clusterId, WeightedVectorWritable point) throws IOException {
     Writer writer = findWriterForVector(clusterId);
     postProcessedClusterDirectories.put(clusterId,
-                                        PathDirectory.getClusterPathForClusterId(clusterPostProcessorOutput, clusterId));
+        PathDirectory.getClusterPathForClusterId(clusterPostProcessorOutput, clusterId));
     writeVectorToCluster(writer, point);
   }
   

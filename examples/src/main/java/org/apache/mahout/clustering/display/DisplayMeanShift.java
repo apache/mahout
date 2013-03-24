@@ -38,7 +38,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.Functions;
 
-public class DisplayMeanShift extends DisplayClustering {
+public final class DisplayMeanShift extends DisplayClustering {
   
   private static double t1;
   

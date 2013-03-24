@@ -124,7 +124,7 @@ public class ModelTrainer {
       int docId = docSlice.index();
       Vector document = docSlice.vector();
       Vector topicDist = topicSlice.vector();
-      if (testFraction == 0 || docId % (1/testFraction) == 0) {
+      if (testFraction == 0 || docId % (1 / testFraction) == 0) {
         trainSync(document, topicDist, false, 10);
         perplexity += readModel.perplexity(document, topicDist);
         matrixNorm += document.norm(1);
@@ -166,7 +166,7 @@ public class ModelTrainer {
         train(document, topicDist, true, numDocTopicIters);
         if (log.isDebugEnabled()) {
           times[i % times.length] =
-              (System.nanoTime() - start) /(1.0e6 * document.getNumNondefaultElements());
+              (System.nanoTime() - start) / (1.0e6 * document.getNumNondefaultElements());
           if (i % 100 == 0) {
             long time = System.nanoTime() - startTime;
             log.debug("trained {} documents in {}ms", i, time / 1.0e6);
@@ -257,7 +257,7 @@ public class ModelTrainer {
     readModel.persist(outputPath, true);
   }
 
-  private static class TrainerRunnable implements Runnable, Callable<Double> {
+  private static final class TrainerRunnable implements Runnable, Callable<Double> {
     private final TopicModel readModel;
     private final TopicModel writeModel;
     private final Vector document;

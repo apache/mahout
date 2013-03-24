@@ -43,12 +43,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
- * factorizes the rating matrix using "Alternating-Least-Squares with Weighted-λ-Regularization" as described in the paper
+ * factorizes the rating matrix using "Alternating-Least-Squares with Weighted-λ-Regularization" as described in
  * <a href="http://www.hpl.hp.com/personal/Robert_Schreiber/papers/2008%20AAIM%20Netflix/netflix_aaim08(submitted).pdf">
  * "Large-scale Collaborative Filtering for the Netflix Prize"</a>
  *
- *  also supports the implicit feedback variant of this approach as described in "Collaborative Filtering for Implicit Feedback Datasets"
- *  available at http://research.yahoo.com/pub/2433
+ *  also supports the implicit feedback variant of this approach as described in "Collaborative Filtering for Implicit
+ *  Feedback Datasets" available at http://research.yahoo.com/pub/2433
  */
 public class ALSWRFactorizer extends AbstractFactorizer {
 

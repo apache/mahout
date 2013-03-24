@@ -43,7 +43,8 @@ public final class Job extends AbstractJob {
   
   private static final String DIRECTORY_CONTAINING_CONVERTED_INPUT = "data";
   
-  private Job() {}
+  private Job() {
+  }
   
   public static void main(String[] args) throws Exception {
     if (args.length > 0) {
@@ -113,7 +114,8 @@ public final class Job extends AbstractJob {
     boolean emitMostLikely = Boolean.parseBoolean(getOption(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION));
     double threshold = Double.parseDouble(getOption(DefaultOptionCreator.THRESHOLD_OPTION));
     double alpha0 = Double.parseDouble(getOption(DirichletDriver.ALPHA_OPTION));
-    DistributionDescription description = new DistributionDescription(modelFactory, modelPrototype, distanceMeasure, 60);
+    DistributionDescription description = new DistributionDescription(modelFactory, modelPrototype, distanceMeasure,
+        60);
     
     run(input, output, description, numModels, maxIterations, alpha0, emitMostLikely, threshold);
     return 0;

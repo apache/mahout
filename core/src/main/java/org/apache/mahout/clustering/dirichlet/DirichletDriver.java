@@ -228,8 +228,8 @@ public class DirichletDriver extends AbstractJob {
       int numModels, boolean emitMostLikely, double threshold, boolean runSequential) throws IOException,
       InterruptedException, ClassNotFoundException {
     ClusterClassifier.writePolicy(new DirichletClusteringPolicy(numModels, alpha0), stateIn);
-    ClusterClassificationDriver.run(conf, input, output, new Path(output, PathDirectory.CLUSTERED_POINTS_DIRECTORY), threshold,
-        emitMostLikely, runSequential);
+    ClusterClassificationDriver.run(conf, input, output, new Path(output, PathDirectory.CLUSTERED_POINTS_DIRECTORY),
+        threshold, emitMostLikely, runSequential);
   }
   
 }

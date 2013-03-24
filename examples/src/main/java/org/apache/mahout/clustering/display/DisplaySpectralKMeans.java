@@ -43,7 +43,7 @@ public class DisplaySpectralKMeans extends DisplayClustering {
 	
   DisplaySpectralKMeans() {
     initialize();
-    this.setTitle("Spectral k-Means Clusters (>" + (int) (significance * 100) + "% of population)");
+    setTitle("Spectral k-Means Clusters (>" + (int) (significance * 100) + "% of population)");
   }
 
   public static void main(String[] args) throws Exception {
@@ -63,8 +63,9 @@ public class DisplaySpectralKMeans extends DisplayClustering {
     if (!fs.exists(output)) {
       fs.mkdirs(output);
     }
-    Writer writer = Files.newWriter(new File(affinities.toString()), Charsets.UTF_8);
+    Writer writer = null;
     try {
+      writer = Files.newWriter(new File(affinities.toString()), Charsets.UTF_8);
       for (int i = 0; i < SAMPLE_DATA.size(); i++) {
         for (int j = 0; j < SAMPLE_DATA.size(); j++) {
           writer.write(i + "," + j + ',' + measure.distance(SAMPLE_DATA.get(i).get(), SAMPLE_DATA.get(j).get()) + '\n');
@@ -75,11 +76,11 @@ public class DisplaySpectralKMeans extends DisplayClustering {
     }
     int maxIter = 10;
     double convergenceDelta = 0.001;
-    SpectralKMeansDriver.run(new Configuration(), affinities, output, SAMPLE_DATA.size(), 3, measure, convergenceDelta, maxIter, tempDir, false);
+    SpectralKMeansDriver.run(new Configuration(), affinities, output, SAMPLE_DATA.size(), 3, measure, convergenceDelta,
+        maxIter, tempDir, false);
     new DisplaySpectralKMeans();
   }
 
-  // Override the paint() method
   @Override
   public void paint(Graphics g) {
   	plotClusteredSampleData((Graphics2D) g, new Path(OUTPUT));

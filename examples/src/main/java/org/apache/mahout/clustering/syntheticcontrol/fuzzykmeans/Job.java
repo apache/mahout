@@ -47,7 +47,8 @@ public final class Job extends AbstractJob {
   
   private static final String M_OPTION = FuzzyKMeansDriver.M_OPTION;
   
-  private Job() {}
+  private Job() {
+  }
   
   public static void main(String[] args) throws Exception {
     if (args.length > 0) {
@@ -135,8 +136,8 @@ public final class Job extends AbstractJob {
     CanopyDriver
         .run(new Configuration(), directoryContainingConvertedInput, canopyOutput, measure, t1, t2, false, 0.0, false);
     log.info("Running FuzzyKMeans");
-    FuzzyKMeansDriver.run(directoryContainingConvertedInput, new Path(canopyOutput, "clusters-0-final"), output, measure,
-        convergenceDelta, maxIterations, fuzziness, true, true, 0.0, false);
+    FuzzyKMeansDriver.run(directoryContainingConvertedInput, new Path(canopyOutput, "clusters-0-final"), output,
+        measure, convergenceDelta, maxIterations, fuzziness, true, true, 0.0, false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-*-final"), new Path(output,
         "clusteredPoints"));

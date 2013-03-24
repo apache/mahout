@@ -188,12 +188,12 @@ public abstract class AbstractDifferenceRecommenderEvaluator implements Recommen
                                 AtomicInteger noEstimateCounter,
                                 RunningAverageAndStdDev timing) throws TasteException {
 
-    callables = wrapWithStatsCallables(callables, noEstimateCounter, timing);
+    Collection<Callable<Void>> wrappedCallables = wrapWithStatsCallables(callables, noEstimateCounter, timing);
     int numProcessors = Runtime.getRuntime().availableProcessors();
     ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
-    log.info("Starting timing of {} tasks in {} threads", callables.size(), numProcessors);
+    log.info("Starting timing of {} tasks in {} threads", wrappedCallables.size(), numProcessors);
     try {
-      List<Future<Void>> futures = executor.invokeAll(callables);
+      List<Future<Void>> futures = executor.invokeAll(wrappedCallables);
       // Go look for exceptions here, really
       for (Future<Void> future : futures) {
         future.get();

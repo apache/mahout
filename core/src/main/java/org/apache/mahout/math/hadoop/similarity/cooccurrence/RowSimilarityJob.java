@@ -406,7 +406,7 @@ public class RowSimilarityJob extends AbstractJob {
     protected void map(IntWritable row, VectorWritable similaritiesWritable, Context ctx)
       throws IOException, InterruptedException {
       Vector similarities = similaritiesWritable.get();
-      // For performance reasons, the creation of transposedPartial is moved out of the while loop and it is reused inside
+      // For performance, the creation of transposedPartial is moved out of the while loop and it is reused inside
       Vector transposedPartial = new RandomAccessSparseVector(similarities.size(), 1);
       TopK<Vector.Element> topKQueue = new TopK<Vector.Element>(maxSimilaritiesPerRow, Vectors.BY_VALUE);
       Iterator<Vector.Element> nonZeroElements = similarities.iterateNonZero();

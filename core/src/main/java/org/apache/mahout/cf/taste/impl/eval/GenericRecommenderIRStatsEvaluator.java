@@ -56,7 +56,7 @@ import com.google.common.base.Preconditions;
  * </p>
  */
 public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRStatsEvaluator {
-  
+
   private static final Logger log = LoggerFactory.getLogger(GenericRecommenderIRStatsEvaluator.class);
 
   private static final double LOG2 = Math.log(2.0);
@@ -67,20 +67,20 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
    * have it attempt to compute a reasonable threshold. Note that this will impact performance.
    */
   public static final double CHOOSE_THRESHOLD = Double.NaN;
-  
+
   private final Random random;
   private final RelevantItemsDataSplitter dataSplitter;
 
   public GenericRecommenderIRStatsEvaluator() {
-	  this(new GenericRelevantItemsDataSplitter());
+    this(new GenericRelevantItemsDataSplitter());
   }
-  
+
   public GenericRecommenderIRStatsEvaluator(RelevantItemsDataSplitter dataSplitter) {
     Preconditions.checkNotNull(dataSplitter);
     random = RandomUtils.getRandom();
     this.dataSplitter = dataSplitter;
   }
-  
+
   @Override
   public IRStatistics evaluate(RecommenderBuilder recommenderBuilder,
                                DataModelBuilder dataModelBuilder,
@@ -194,7 +194,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
       if (idealizedGain > 0.0) {
         nDCG.addDatum(cumulativeGain / idealizedGain);
       }
-      
+
       // Reach
       numUsersRecommendedFor++;
       if (numRecommendedItems > 0) {
@@ -216,7 +216,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
         nDCG.getAverage(),
         (double) numUsersWithRecommendations / (double) numUsersRecommendedFor);
   }
-  
+
   private static double computeThreshold(PreferenceArray prefs) {
     if (prefs.length() < 2) {
       // Not enough data points -- return a threshold that allows everything
@@ -233,5 +233,5 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
   private static double log2(double value) {
     return Math.log(value) / LOG2;
   }
-  
+
 }

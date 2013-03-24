@@ -32,6 +32,8 @@ import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -90,6 +92,8 @@ public final class PlusAnonymousConcurrentUserDataModel extends PlusAnonymousUse
   private final Map<Long,FastIDSet> prefItemIDs;
   /** Pool of the users (FIFO) */
   private Queue<Long> usersPool;
+
+  private static final Logger log = LoggerFactory.getLogger(PlusAnonymousUserDataModel.class);
 
   /**
    * @param delegate Real model where anonymous users will be added to
@@ -213,6 +217,9 @@ public final class PlusAnonymousConcurrentUserDataModel extends PlusAnonymousUse
       delegatePrefs = getDelegate().getPreferencesForItem(itemID);
     } catch (NoSuchItemException nsie) {
       // OK. Probably an item that only the anonymous user has
+      if (log.isDebugEnabled()) {
+        log.debug("Item {} unknown", itemID);
+      }
     }
 
     List<Preference> anonymousPreferences = Lists.newArrayList();

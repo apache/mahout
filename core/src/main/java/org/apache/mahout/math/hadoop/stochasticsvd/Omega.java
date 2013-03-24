@@ -133,9 +133,8 @@ public class Omega {
           public Double call() throws Exception {
             double result = 0.0;
             if (v.isDense()) {
-              for (int k = 0; k < v.size(); k++)
+              for (int k = 0; k < v.size(); k++) {
                 // it's ok, this is reentrant
-              {
                 result += getQuick(k, index) * v.getQuick(k);
               }
 

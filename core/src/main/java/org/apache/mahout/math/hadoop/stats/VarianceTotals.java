@@ -52,7 +52,7 @@ public final class VarianceTotals {
   }
 
   public double computeMean() {
-    return sum/totalCount;
+    return sum / totalCount;
   }
 
   public double computeVariance() {

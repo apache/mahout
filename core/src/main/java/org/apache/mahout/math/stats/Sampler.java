@@ -74,6 +74,6 @@ public class Sampler {
 
   private int sample(double[] sampler) {
     int index = Arrays.binarySearch(sampler, random.nextDouble());
-    return index < 0 ? -(index+1) : index;
+    return index < 0 ? -(index + 1) : index;
   }
 }

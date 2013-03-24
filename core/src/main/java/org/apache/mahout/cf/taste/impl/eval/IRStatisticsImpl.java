@@ -24,17 +24,19 @@ import org.apache.mahout.cf.taste.eval.IRStatistics;
 import com.google.common.base.Preconditions;
 
 public final class IRStatisticsImpl implements IRStatistics, Serializable {
-  
+
   private final double precision;
   private final double recall;
   private final double fallOut;
   private final double ndcg;
   private final double reach;
-  
+
   IRStatisticsImpl(double precision, double recall, double fallOut, double ndcg, double reach) {
-    Preconditions.checkArgument(Double.isNaN(precision) || (precision >= 0.0 && precision <= 1.0), "Illegal precision: " + precision);
+    Preconditions.checkArgument(Double.isNaN(precision) || (precision >= 0.0 && precision <= 1.0),
+        "Illegal precision: " + precision);
     Preconditions.checkArgument(Double.isNaN(recall) || (recall >= 0.0 && recall <= 1.0), "Illegal recall: " + recall);
-    Preconditions.checkArgument(Double.isNaN(fallOut) || (fallOut >= 0.0 && fallOut <= 1.0), "Illegal fallOut: " + fallOut);
+    Preconditions.checkArgument(Double.isNaN(fallOut) || (fallOut >= 0.0 && fallOut <= 1.0),
+        "Illegal fallOut: " + fallOut);
     Preconditions.checkArgument(Double.isNaN(ndcg) || (ndcg >= 0.0 && ndcg <= 1.0), "Illegal nDCG: " + ndcg);
     Preconditions.checkArgument(Double.isNaN(reach) || (reach >= 0.0 && reach <= 1.0), "Illegal reach: " + reach);
     this.precision = precision;
@@ -43,27 +45,27 @@ public final class IRStatisticsImpl implements IRStatistics, Serializable {
     this.ndcg = ndcg;
     this.reach = reach;
   }
-  
+
   @Override
   public double getPrecision() {
     return precision;
   }
-  
+
   @Override
   public double getRecall() {
     return recall;
   }
-  
+
   @Override
   public double getFallOut() {
     return fallOut;
   }
-  
+
   @Override
   public double getF1Measure() {
     return getFNMeasure(1.0);
   }
-  
+
   @Override
   public double getFNMeasure(double b) {
     double b2 = b * b;
@@ -78,13 +80,13 @@ public final class IRStatisticsImpl implements IRStatistics, Serializable {
 
   @Override
   public double getReach() {
-	  return reach;
+    return reach;
   }
-  
+
   @Override
   public String toString() {
     return "IRStatisticsImpl[precision:" + precision + ",recall:" + recall + ",fallOut:"
         + fallOut + ",nDCG:" + ndcg + ",reach:" + reach + ']';
   }
-  
+
 }

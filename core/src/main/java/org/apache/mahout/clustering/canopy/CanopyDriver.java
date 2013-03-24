@@ -279,7 +279,7 @@ public class CanopyDriver extends AbstractJob {
       clusterer.addPointToCanopies(vw.get(), canopies);
     }
 
-    Path canopyOutputDir = new Path(output, Cluster.CLUSTERS_DIR + '0'+ Cluster.FINAL_ITERATION_SUFFIX);
+    Path canopyOutputDir = new Path(output, Cluster.CLUSTERS_DIR + '0' + Cluster.FINAL_ITERATION_SUFFIX);
     Path path = new Path(canopyOutputDir, "part-r-00000");
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path,
         Text.class, ClusterWritable.class);
@@ -295,8 +295,8 @@ public class CanopyDriver extends AbstractJob {
                     AbstractCluster.formatVector(canopy.getRadius(), null));
         }
         if (canopy.getNumObservations() > clusterFilter) {
-        	clusterWritable.setValue(canopy);
-        	writer.append(new Text(canopy.getIdentifier()), clusterWritable);
+          clusterWritable.setValue(canopy);
+          writer.append(new Text(canopy.getIdentifier()), clusterWritable);
         }
       }
     } finally {
@@ -375,5 +375,5 @@ public class CanopyDriver extends AbstractJob {
                                     new Path(output, PathDirectory.CLUSTERED_POINTS_DIRECTORY),
                                     clusterClassificationThreshold, true, runSequential);
   }
-  
+
 }

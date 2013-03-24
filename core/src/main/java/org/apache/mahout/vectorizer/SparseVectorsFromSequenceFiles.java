@@ -264,9 +264,9 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
       if (cmdLine.hasOption(namedVectorOpt)) {
         namedVectors = true;
       }
-      boolean shouldPrune = maxDFSigma >=0.0;
+      boolean shouldPrune = maxDFSigma >= 0.0;
       String tfDirName = shouldPrune
-          ? DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER+"-toprune"
+          ? DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER + "-toprune"
           : DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER;
 
       if (processIdf) {

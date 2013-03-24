@@ -34,7 +34,7 @@ public class TransactionIterator<T> extends ForwardingIterator<Pair<int[],Long>>
 
   private final int[] transactionBuffer;
   private final Iterator<Pair<int[],Long>> delegate;
-  
+
   public TransactionIterator(Iterator<Pair<List<T>,Long>> transactions, final Map<T,Integer> attributeIdMapping) {
     transactionBuffer = new int[attributeIdMapping.size()];
     delegate = Iterators.transform(
@@ -43,8 +43,8 @@ public class TransactionIterator<T> extends ForwardingIterator<Pair<int[],Long>>
           @Override
           public Pair<int[],Long> apply(Pair<List<T>,Long> from) {
             if (from == null) {
-	      return null;
-	    }
+        return null;
+      }
             int index = 0;
             for (T attribute : from.getFirst()) {
               if (attributeIdMapping.containsKey(attribute)) {

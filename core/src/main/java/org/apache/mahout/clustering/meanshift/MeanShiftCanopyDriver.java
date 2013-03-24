@@ -215,10 +215,10 @@ public class MeanShiftCanopyDriver extends AbstractJob {
         for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(
             s.getPath(), conf)) {
           MeanShiftCanopy initialCanopy = MeanShiftCanopy.initialCanopy(value.get(),
-				      id++, measure);
+              id++, measure);
           ClusterWritable clusterWritable = new ClusterWritable();
           clusterWritable.setValue(initialCanopy);
-		  writer.append(new Text(), clusterWritable);
+      writer.append(new Text(), clusterWritable);
         }
       } finally {
         Closeables.closeQuietly(writer);
@@ -308,8 +308,8 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     FileSystem fs = FileSystem.get(clustersIn.toUri(), conf);
     for (ClusterWritable clusterWritable : new SequenceFileDirValueIterable<ClusterWritable>(
         clustersIn, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
-    	MeanShiftCanopy canopy = (MeanShiftCanopy)clusterWritable.getValue();
-	    clusterer.mergeCanopy(canopy, clusters);
+      MeanShiftCanopy canopy = (MeanShiftCanopy)clusterWritable.getValue();
+      clusterer.mergeCanopy(canopy, clusters);
     }
     boolean[] converged = { false };
     int iteration = 1;
@@ -340,8 +340,8 @@ public class MeanShiftCanopyDriver extends AbstractJob {
       clustersIn = clustersOut;
       iteration++;
     }
-    Path fromPath = new Path(output, Cluster.CLUSTERS_DIR + (iteration-1));
-    Path finalClustersIn = new Path(output, Cluster.CLUSTERS_DIR + (iteration-1) + "-final");
+    Path fromPath = new Path(output, Cluster.CLUSTERS_DIR + (iteration - 1));
+    Path finalClustersIn = new Path(output, Cluster.CLUSTERS_DIR + (iteration - 1) + "-final");
     FileSystem.get(fromPath.toUri(), conf).rename(fromPath, finalClustersIn);
     return finalClustersIn;
   }
@@ -379,8 +379,8 @@ public class MeanShiftCanopyDriver extends AbstractJob {
         conf.set(MAPRED_REDUCE_TASKS, String.valueOf(numReducers));
       }
     }
-    Path fromPath = new Path(output, Cluster.CLUSTERS_DIR + (iteration-1));
-    Path finalClustersIn = new Path(output, Cluster.CLUSTERS_DIR + (iteration-1) + Cluster.FINAL_ITERATION_SUFFIX);
+    Path fromPath = new Path(output, Cluster.CLUSTERS_DIR + (iteration - 1));
+    Path finalClustersIn = new Path(output, Cluster.CLUSTERS_DIR + (iteration - 1) + Cluster.FINAL_ITERATION_SUFFIX);
     FileSystem.get(fromPath.toUri(), conf).rename(fromPath, finalClustersIn);
     return finalClustersIn;
   }
@@ -476,7 +476,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     for (ClusterWritable clusterWritable : new SequenceFileDirValueIterable<ClusterWritable>(
         clustersIn, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
       MeanShiftCanopy cluster = (MeanShiftCanopy) clusterWritable.getValue();
-	  clusters.add(cluster);
+    clusters.add(cluster);
     }
     // iterate over all points, assigning each to the closest canopy and
     // outputting that clustering
@@ -491,7 +491,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
         for (Pair<Writable, ClusterWritable> record : new SequenceFileIterable<Writable, ClusterWritable>(
             s.getPath(), conf)) {
           ClusterWritable clusterWritable = record.getSecond();
-		  MeanShiftCanopy canopy = (MeanShiftCanopy) clusterWritable.getValue();
+      MeanShiftCanopy canopy = (MeanShiftCanopy) clusterWritable.getValue();
           MeanShiftCanopy closest = MeanShiftCanopyClusterer
               .findCoveringCanopy(canopy, clusters);
           writer.append(new IntWritable(closest.getId()),

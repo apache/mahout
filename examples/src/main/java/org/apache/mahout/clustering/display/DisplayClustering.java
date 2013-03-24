@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -197,7 +198,7 @@ public class DisplayClustering extends Frame {
     
     Path clusteredPointsPath = new Path(data, "clusteredPoints");
     Path inputPath = new Path(clusteredPointsPath, "part-m-00000");
-    HashMap<Integer,Color> colors = new HashMap<Integer,Color>();
+    Map<Integer,Color> colors = new HashMap<Integer,Color>();
     int point = 0;
     for (Pair<IntWritable,WeightedVectorWritable> record : new SequenceFileIterable<IntWritable,WeightedVectorWritable>(
         inputPath, new Configuration())) {

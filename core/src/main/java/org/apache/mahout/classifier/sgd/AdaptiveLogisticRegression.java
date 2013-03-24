@@ -27,6 +27,8 @@ import org.apache.mahout.ep.State;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.stats.OnlineAuc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -36,7 +38,8 @@ import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 /**
- * This is a meta-learner that maintains a pool of ordinary {@link org.apache.mahout.classifier.sgd.OnlineLogisticRegression} learners. Each
+ * This is a meta-learner that maintains a pool of ordinary
+ * {@link org.apache.mahout.classifier.sgd.OnlineLogisticRegression} learners. Each
  * member of the pool has different learning rates.  Whichever of the learners in the pool falls
  * behind in terms of average log-likelihood will be tossed out and replaced with variants of the
  * survivors.  This will let us automatically derive an annealing schedule that optimizes learning
@@ -45,8 +48,9 @@ import java.util.concurrent.ExecutionException;
  * learn also decreases the number of learning rate parameters required and replaces the normal
  * hyper-parameter search.
  * <p/>
- * One wrinkle is that the pool of learners that we maintain is actually a pool of {@link org.apache.mahout.classifier.sgd.CrossFoldLearner}
- * which themselves contain several OnlineLogisticRegression objects.  These pools allow estimation
+ * One wrinkle is that the pool of learners that we maintain is actually a pool of
+ * {@link org.apache.mahout.classifier.sgd.CrossFoldLearner} which themselves contain several OnlineLogisticRegression
+ * objects.  These pools allow estimation
  * of performance on the fly even if we make many passes through the data.  This does, however,
  * increase the cost of training since if we are using 5-fold cross-validation, each vector is used
  * 4 times for training and once for classification.  If this becomes a problem, then we should
@@ -85,8 +89,9 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
 
   private boolean freezeSurvivors = true;
 
-  public AdaptiveLogisticRegression() {
-  }
+  private static final Logger log = LoggerFactory.getLogger(AdaptiveLogisticRegression.class);
+
+  public AdaptiveLogisticRegression() {}
 
   /**
    * Uses {@link #DEFAULT_THREAD_COUNT} and {@link #DEFAULT_POOL_SIZE}
@@ -108,7 +113,8 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
    * @param threadCount The number of threads to use for training
    * @param poolSize The number of {@link org.apache.mahout.classifier.sgd.CrossFoldLearner} to use.
    */
-  public AdaptiveLogisticRegression(int numCategories, int numFeatures, PriorFunction prior, int threadCount, int poolSize) {
+  public AdaptiveLogisticRegression(int numCategories, int numFeatures, PriorFunction prior, int threadCount,
+      int poolSize) {
     this.numFeatures = numFeatures;
     this.threadCount = threadCount;
     this.poolSize = poolSize;
@@ -164,6 +170,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
       });
     } catch (InterruptedException e) {
       // ignore ... shouldn't happen
+      log.warn("Ignoring exception", e);
     } catch (ExecutionException e) {
       throw new IllegalStateException(e.getCause());
     }
@@ -229,7 +236,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
       });
       ep.close();
     } catch (InterruptedException e) {
-      // ignore
+      log.warn("Ignoring exception", e);
     } catch (ExecutionException e) {
       throw new IllegalStateException(e);
     }

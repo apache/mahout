@@ -32,7 +32,7 @@ import org.apache.hadoop.mapreduce.Mapper;
  */
 public abstract class SharingMapper<K1,V1,K2,V2,S> extends Mapper<K1,V1,K2,V2> {
 
-  private static Object SHARED_INSTANCE;
+  private static Object sharedInstance;
 
   /**
    * Called before the multithreaded execution
@@ -42,10 +42,10 @@ public abstract class SharingMapper<K1,V1,K2,V2,S> extends Mapper<K1,V1,K2,V2> {
   abstract S createSharedInstance(Context context);
 
   final void setupSharedInstance(Context context) {
-    SHARED_INSTANCE = createSharedInstance(context);
+    sharedInstance = createSharedInstance(context);
   }
 
   final S getSharedInstance() {
-    return (S) SHARED_INSTANCE;
+    return (S) sharedInstance;
   }
 }

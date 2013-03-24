@@ -29,6 +29,8 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 
 import com.google.common.base.Preconditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -83,7 +85,9 @@ public class PlusAnonymousUserDataModel implements DataModel {
   private final DataModel delegate;
   private PreferenceArray tempPrefs;
   private final FastIDSet prefItemIDs;
-  
+
+  private static final Logger log = LoggerFactory.getLogger(PlusAnonymousUserDataModel.class);
+
   public PlusAnonymousUserDataModel(DataModel delegate) {
     this.delegate = delegate;
     this.prefItemIDs = new FastIDSet();
@@ -153,6 +157,9 @@ public class PlusAnonymousUserDataModel implements DataModel {
       delegatePrefs = delegate.getPreferencesForItem(itemID);
     } catch (NoSuchItemException nsie) {
       // OK. Probably an item that only the anonymous user has
+      if (log.isDebugEnabled()) {
+        log.debug("Item {} unknown", itemID);
+      }
     }
     for (int i = 0; i < tempPrefs.length(); i++) {
       if (tempPrefs.getItemID(i) == itemID) {

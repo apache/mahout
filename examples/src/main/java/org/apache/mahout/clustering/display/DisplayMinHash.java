@@ -96,12 +96,12 @@ public class DisplayMinHash extends DisplayClustering {
 
   private static final int SYMBOLS_FONT_SIZE = 6;
 
-  private static final Map<String, List<Vector>> clusters = new HashMap<String, List<Vector>>();
+  private static final Map<String, List<Vector>> CLUSTERS = new HashMap<String, List<Vector>>();
   private static Iterator<Entry<String, List<Vector>>> currentCluster;
   private static List<Vector> currentClusterPoints;
   private static int updatePeriodTime;
-  private static long lastUpdateTime = 0;
-  private static boolean isSlideShowOnHold = false;
+  private static long lastUpdateTime;
+  private static boolean isSlideShowOnHold;
 
   private PlotType plotType = PlotType.POINTS;
 
@@ -149,12 +149,14 @@ public class DisplayMinHash extends DisplayClustering {
       case POINTS:
         plotPoints(g2);
         break;
+      default:
+        throw new IllegalStateException("Unknown plot type: " + plotType);
     }
   }
 
   private static void plotLines(Graphics2D g2) {
     Random rand = RandomUtils.getRandom();
-    for (Map.Entry<String, List<Vector>> entry : clusters.entrySet()) {
+    for (Map.Entry<String, List<Vector>> entry : CLUSTERS.entrySet()) {
       List<Vector> vecs = entry.getValue();
 
       g2.setColor(new Color(rand.nextInt()));
@@ -179,7 +181,7 @@ public class DisplayMinHash extends DisplayClustering {
   private static void plotSymbols(Graphics2D g2) {
     char symbol = 0;
     Random rand = RandomUtils.getRandom();
-    for (Map.Entry<String, List<Vector>> entry : clusters.entrySet()) {
+    for (Map.Entry<String, List<Vector>> entry : CLUSTERS.entrySet()) {
       List<Vector> vecs = entry.getValue();
 
       g2.setColor(new Color(rand.nextInt()));
@@ -193,7 +195,7 @@ public class DisplayMinHash extends DisplayClustering {
 
   private static void plotPoints(Graphics2D g2) {
     if (currentCluster == null || !currentCluster.hasNext()) {
-      currentCluster = clusters.entrySet().iterator();
+      currentCluster = CLUSTERS.entrySet().iterator();
     }
 
     if (System.currentTimeMillis() - lastUpdateTime > updatePeriodTime) {
@@ -328,7 +330,7 @@ public class DisplayMinHash extends DisplayClustering {
 
   private static void logClusters() {
     int i = 0;
-    for (Map.Entry<String, List<Vector>> entry : clusters.entrySet()) {
+    for (Map.Entry<String, List<Vector>> entry : CLUSTERS.entrySet()) {
       StringBuilder logStr = new StringBuilder();
       logStr.append("Cluster N:").append(++i).append(": ");
       List<Vector> vecs = entry.getValue();
@@ -349,24 +351,21 @@ public class DisplayMinHash extends DisplayClustering {
     while (iterator.hasNext()) {
       Pair<Text, VectorWritable> next = iterator.next();
       String key = next.getFirst().toString();
-      List<Vector> list = clusters.get(key);
+      List<Vector> list = CLUSTERS.get(key);
       if (list == null) {
         list = Lists.newArrayList();
-        clusters.put(key, list);
+        CLUSTERS.put(key, list);
       }
       list.add(next.getSecond().get());
     }
-    log.info("Loaded: {} clusters", clusters.size());
+    log.info("Loaded: {} clusters", CLUSTERS.size());
   }
 
-  private static void runMinHash(Configuration conf, Path samples, Path output)
-      throws Exception {
+  private static void runMinHash(Configuration conf, Path samples, Path output) throws Exception {
     ToolRunner.run(conf, new MinHashDriver(), new String[] { "--input", samples.toString(),
-        "--hashType", HashFactory.HashType.MURMUR3.toString(), "--output",
-        output.toString(), "--minVectorSize", "1", "--debugOutput"
-
+        "--hashType", HashFactory.HashType.MURMUR3.toString(), "--output", output.toString(),
+        "--minVectorSize", "1", "--debugOutput"
     });
-
   }
 
 }

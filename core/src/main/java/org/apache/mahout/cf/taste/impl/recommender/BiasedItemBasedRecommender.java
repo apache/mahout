@@ -28,8 +28,8 @@ import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.math.map.OpenLongDoubleHashMap;
 
 /**
- * item-based recommender that uses weighted sum estimation enhanced by baseline estimates, porting baseline estimation from
- * the "UserItemBaseline" rating predictor from "mymedialite" https://github.com/zenogantner/MyMediaLite/
+ * item-based recommender that uses weighted sum estimation enhanced by baseline estimates, porting baseline estimation
+ * from the "UserItemBaseline" rating predictor from "mymedialite" https://github.com/zenogantner/MyMediaLite/
  */
 public class BiasedItemBasedRecommender extends GenericItemBasedRecommender {
   
@@ -179,8 +179,7 @@ public class BiasedItemBasedRecommender extends GenericItemBasedRecommender {
       while (i != j) {
         if (similarities[i] > pivot) {
           i++;
-        }
-        else {
+        } else {
           similarities[j] = similarities[i];
           values[j] = values[i];
           otherValues[j] = otherValues[i];
@@ -191,7 +190,7 @@ public class BiasedItemBasedRecommender extends GenericItemBasedRecommender {
         }
       }
       similarities[j] = pivot;
-      values[j] = pivotValue ;
+      values[j] = pivotValue;
       quickSort(similarities, values, otherValues, start, j - 1);
       quickSort(similarities, values, otherValues, j + 1, end);
     }

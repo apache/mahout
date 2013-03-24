@@ -45,7 +45,8 @@ public final class Job extends AbstractJob {
   
   private static final String DIRECTORY_CONTAINING_CONVERTED_INPUT = "data";
   
-  private Job() {}
+  private Job() {
+  }
   
   public static void main(String[] args) throws Exception {
     if (args.length > 0) {

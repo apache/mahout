@@ -240,11 +240,11 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     if (implicitFeedback) {
       solverMapperClassInternal = SolveImplicitFeedbackMapper.class;
-      name = "Recompute " + matrixName +", iteration (" + iterationNumber + "/" + numIterations + "), " +
+      name = "Recompute " + matrixName + ", iteration (" + iterationNumber + "/" + numIterations + "), " +
           "(" + numThreadsPerSolver + " threads, implicit feedback)";
     } else {
       solverMapperClassInternal = SolveExplicitFeedbackMapper.class;
-      name = "Recompute " + matrixName +", iteration (" + iterationNumber + "/" + numIterations + "), " +
+      name = "Recompute " + matrixName + ", iteration (" + iterationNumber + "/" + numIterations + "), " +
           "(" + numThreadsPerSolver + " threads, explicit feedback)";
     }
 

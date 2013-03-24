@@ -273,7 +273,8 @@ public class CVB0Driver extends AbstractJob {
         }
         log.info("Backfilling perplexity at iteration {}", i);
         if (!fs.exists(modelPath)) {
-          log.error("Model path '{}' does not exist; Skipping iteration {} perplexity calculation", modelPath.toString(), i);
+          log.error("Model path '{}' does not exist; Skipping iteration {} perplexity calculation",
+              modelPath.toString(), i);
           continue;
         }
         perplexity = calculatePerplexity(conf, inputPath, modelPath, i);
@@ -308,7 +309,8 @@ public class CVB0Driver extends AbstractJob {
       if (testFraction > 0 && iterationNumber % iterationBlockSize == 0) {
         perplexities.add(calculatePerplexity(conf, inputPath, modelOutputPath, iterationNumber));
         log.info("Current perplexity = {}", perplexities.get(perplexities.size() - 1));
-        log.info("(p_{} - p_{}) / p_0 = {}; target = {}", iterationNumber, iterationNumber - iterationBlockSize, rateOfChange(perplexities), convergenceDelta);
+        log.info("(p_{} - p_{}) / p_0 = {}; target = {}", iterationNumber, iterationNumber - iterationBlockSize,
+            rateOfChange(perplexities), convergenceDelta);
       }
     }
     log.info("Completed {} iterations in {} seconds", iterationNumber,

@@ -30,7 +30,7 @@ import org.apache.mahout.clustering.iterator.ClusterWritable;
 import com.google.common.collect.Lists;
 
 public class MeanShiftCanopyReducer extends Reducer<Text,ClusterWritable,Text,ClusterWritable> {
-  
+
   private final Collection<MeanShiftCanopy> canopies = Lists.newArrayList();
   private MeanShiftCanopyClusterer clusterer;
   private boolean allConverged = true;
@@ -45,10 +45,10 @@ public class MeanShiftCanopyReducer extends Reducer<Text,ClusterWritable,Text,Cl
   protected void reduce(Text key, Iterable<ClusterWritable> values, Context context)
     throws IOException, InterruptedException {
     for (ClusterWritable clusterWritable : values) {
-    	MeanShiftCanopy canopy = (MeanShiftCanopy)clusterWritable.getValue();
-	    clusterer.mergeCanopy(canopy.shallowCopy(), canopies);
+      MeanShiftCanopy canopy = (MeanShiftCanopy)clusterWritable.getValue();
+      clusterer.mergeCanopy(canopy.shallowCopy(), canopies);
     }
-    
+
     for (MeanShiftCanopy canopy : canopies) {
       boolean converged = clusterer.shiftToMean(canopy);
       if (converged) {
@@ -59,7 +59,7 @@ public class MeanShiftCanopyReducer extends Reducer<Text,ClusterWritable,Text,Cl
       clusterWritable.setValue(canopy);
       context.write(new Text(canopy.getIdentifier()), clusterWritable);
     }
-    
+
   }
 
   @Override

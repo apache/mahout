@@ -42,7 +42,7 @@ import org.apache.mahout.math.VectorWritable;
  * used for top down clustering. It can also be used if the clustering output needs to be grouped into their
  * respective clusters.
  */
-public class ClusterOutputPostProcessorDriver extends AbstractJob {
+public final class ClusterOutputPostProcessorDriver extends AbstractJob {
   
   /**
    * CLI to run clustering post processor. The input to post processor is the ouput path specified to the

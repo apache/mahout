@@ -55,7 +55,7 @@ public final class ParallelFPGrowthReducer extends Reducer<IntWritable,Transacti
   private int maxPerGroup;
   private boolean useFP2;
 
-  private static class IteratorAdapter implements Iterator<Pair<List<Integer>,Long>> {
+  private static final class IteratorAdapter implements Iterator<Pair<List<Integer>,Long>> {
     private final Iterator<Pair<IntArrayList,Long>> innerIter;
 
     private IteratorAdapter(Iterator<Pair<IntArrayList,Long>> transactionIter) {

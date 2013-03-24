@@ -98,8 +98,10 @@ public final class HadoopUtil {
    * @param outputPath The output {@link org.apache.hadoop.fs.Path}
    * @param inputFormat The {@link org.apache.hadoop.mapreduce.InputFormat}
    * @param mapper The {@link org.apache.hadoop.mapreduce.Mapper} class to use
-   * @param mapperKey The {@link org.apache.hadoop.io.Writable} key class.  If the Mapper is a no-op, this value may be null
-   * @param mapperValue The {@link org.apache.hadoop.io.Writable} value class.  If the Mapper is a no-op, this value may be null
+   * @param mapperKey The {@link org.apache.hadoop.io.Writable} key class.  If the Mapper is a no-op,
+   *                  this value may be null
+   * @param mapperValue The {@link org.apache.hadoop.io.Writable} value class.  If the Mapper is a no-op,
+   *                    this value may be null
    * @param reducer The {@link org.apache.hadoop.mapreduce.Reducer} to use
    * @param reducerKey The reducer key class.
    * @param reducerValue The reducer value class.
@@ -109,7 +111,8 @@ public final class HadoopUtil {
    * @throws IOException if there is a problem with the IO.
    *
    * @see #getCustomJobName(String, org.apache.hadoop.mapreduce.JobContext, Class, Class)
-   * @see #prepareJob(org.apache.hadoop.fs.Path, org.apache.hadoop.fs.Path, Class, Class, Class, Class, Class, org.apache.hadoop.conf.Configuration)
+   * @see #prepareJob(org.apache.hadoop.fs.Path, org.apache.hadoop.fs.Path, Class, Class, Class, Class, Class,
+   * org.apache.hadoop.conf.Configuration)
    */
   public static Job prepareJob(Path inputPath,
                            Path outputPath,
@@ -203,7 +206,9 @@ public final class HadoopUtil {
   }
 
   /**
-   * Count all the records in a directory using a {@link org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterator}
+   * Count all the records in a directory using a
+   * {@link org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterator}
+   *
    * @param path The {@link org.apache.hadoop.fs.Path} to count
    * @param pt The {@link org.apache.mahout.common.iterator.sequencefile.PathType}
    * @param filter Apply the {@link org.apache.hadoop.fs.PathFilter}.  May be null
@@ -226,7 +231,8 @@ public final class HadoopUtil {
     return fs.open(path.makeQualified(fs));
   }
 
-  public static FileStatus[] getFileStatus(Path path, PathType pathType, PathFilter filter, Comparator<FileStatus> ordering, Configuration conf) throws IOException {
+  public static FileStatus[] getFileStatus(Path path, PathType pathType, PathFilter filter,
+      Comparator<FileStatus> ordering, Configuration conf) throws IOException {
     FileStatus[] statuses;
     FileSystem fs = path.getFileSystem(conf);
     if (filter == null) {

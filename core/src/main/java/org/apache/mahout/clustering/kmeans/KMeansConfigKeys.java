@@ -20,12 +20,11 @@ package org.apache.mahout.clustering.kmeans;
 /**
  * This class holds all config keys that are relevant to be used in the KMeans MapReduce configuration.
  * */
-public interface KMeansConfigKeys {
+public final class KMeansConfigKeys {
+
+  private KMeansConfigKeys() {}
+
   /** Configuration key for distance measure to use. */
-  String DISTANCE_MEASURE_KEY = "org.apache.mahout.clustering.kmeans.measure";
-  /** Configuration key for convergence threshold. */
-  String CLUSTER_CONVERGENCE_KEY = "org.apache.mahout.clustering.kmeans.convergence";
-  /** Configuration key for iteration cluster path */
-  String CLUSTER_PATH_KEY = "org.apache.mahout.clustering.kmeans.path";
+  public static final String DISTANCE_MEASURE_KEY = "org.apache.mahout.clustering.kmeans.measure";
   
 }

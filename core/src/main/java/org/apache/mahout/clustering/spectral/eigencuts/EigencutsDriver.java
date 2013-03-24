@@ -135,7 +135,7 @@ public class EigencutsDriver extends AbstractJob {
       DistributedRowMatrix U = performEigenDecomposition(conf, L, state, eigenrank, overshoot, outputCalc);
       U.setConf(new Configuration(conf));
       List<Double> eigenValues = Lists.newArrayList();
-      for (int i=0; i<eigenrank; i++) {
+      for (int i = 0; i < eigenrank; i++) {
         eigenValues.set(i, state.getSingularValue(i));
       }
 

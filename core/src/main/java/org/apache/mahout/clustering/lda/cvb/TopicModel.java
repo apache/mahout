@@ -282,7 +282,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
       topics.set(x, docTopicModel.viewRow(x).norm(1));
     }
     // now renormalize so that sum_x(p(x|doc)) = 1
-    topics.assign(Functions.mult(1/topics.norm(1)));
+    topics.assign(Functions.mult(1 / topics.norm(1)));
   }
 
   public Vector infer(Vector original, Vector docTopics) {
@@ -357,7 +357,8 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
         int termIndex = e.index();
 
         // calc un-normalized p(topic x | term a, document i)
-        double termTopicLikelihood = (topicTermRow.get(termIndex) + eta) * (topicWeight + alpha) / (topicSum + eta * numTerms);
+        double termTopicLikelihood = (topicTermRow.get(termIndex) + eta) * (topicWeight + alpha) /
+            (topicSum + eta * numTerms);
         termTopicRow.set(termIndex, termTopicLikelihood);
       }
     }

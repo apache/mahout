@@ -95,3 +95,4 @@ public final class EntityEntityWritable implements WritableComparable<EntityEnti
   }
   
 }
+

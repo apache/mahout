@@ -59,7 +59,7 @@ import java.util.Iterator;
  */
 public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrategy {
 
-	private static final Logger log = LoggerFactory.getLogger(SamplingCandidateItemsStrategy.class);
+  private static final Logger log = LoggerFactory.getLogger(SamplingCandidateItemsStrategy.class);
 
   /**
    * Default factor used if not otherwise specified, for all limits. (30).
@@ -71,7 +71,7 @@ public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrate
   public static final int NO_LIMIT_FACTOR = Integer.MAX_VALUE;
   private static final int MAX_LIMIT = Integer.MAX_VALUE;
   private static final double LOG2 = Math.log(2.0);
-  
+
   private final int maxItems;
   private final int maxUsersPerItem;
   private final int maxItemsPerUser;
@@ -108,7 +108,7 @@ public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrate
     maxItemsPerUser = computeMaxFrom(candidatesPerUserFactor, numItems);
     log.debug("maxItems {}, maxUsersPerItem {}, maxItemsPerUser {}", maxItems, maxUsersPerItem, maxItemsPerUser);
   }
-  
+
   private static int computeMaxFrom(int factor, int numThings) {
     if (factor == NO_LIMIT_FACTOR) {
       return MAX_LIMIT;
@@ -146,7 +146,7 @@ public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrate
     possibleItemsIDs.removeAll(preferredItemIDs);
     return possibleItemsIDs;
   }
-  
+
   private void addSomeOf(FastIDSet possibleItemIDs, FastIDSet itemIDs) {
     if (itemIDs.size() > maxItemsPerUser) {
       LongPrimitiveIterator it =
@@ -158,5 +158,5 @@ public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrate
       possibleItemIDs.addAll(itemIDs);
     }
   }
-  
+
 }

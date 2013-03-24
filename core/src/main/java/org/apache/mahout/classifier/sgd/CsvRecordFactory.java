@@ -304,7 +304,7 @@ public class CsvRecordFactory implements RecordFactory {
    * @return the raw target label
    */  
   public String getTargetLabel(int code) {
-    for (String key: targetDictionary.values()) {
+    for (String key : targetDictionary.values()) {
       if (targetDictionary.intern(key) == code) {
         return key;
       }

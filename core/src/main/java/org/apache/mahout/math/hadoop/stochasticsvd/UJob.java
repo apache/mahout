@@ -156,13 +156,14 @@ public class UJob {
         SSVDSolver.OutputScalingEnum.valueOf(context.getConfiguration()
                                                     .get(PROP_OUTPUT_SCALING));
       switch (outputScaling) {
-      case SIGMA:
-        sValues = SSVDHelper.loadVector(sigmaPath, context.getConfiguration());
-        break;
-      case HALFSIGMA:
-        sValues = SSVDHelper.loadVector(sigmaPath, context.getConfiguration());
-        sValues.assign(Functions.SQRT);
-        break;
+        case SIGMA:
+          sValues = SSVDHelper.loadVector(sigmaPath, context.getConfiguration());
+          break;
+        case HALFSIGMA:
+          sValues = SSVDHelper.loadVector(sigmaPath, context.getConfiguration());
+          sValues.assign(Functions.SQRT);
+          break;
+        default:
       }
     }
 

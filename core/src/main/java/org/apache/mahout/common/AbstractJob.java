@@ -316,8 +316,10 @@ public abstract class AbstractJob extends Configured implements Tool {
   /**
    *
    * @param args  The args to parse
-   * @param inputOptional if false, then the input option, if set, need not be present.  If true and input is an option and there is no input, then throw an error
-   * @param outputOptional if false, then the output option, if set, need not be present.  If true and output is an option and there is no output, then throw an error
+   * @param inputOptional if false, then the input option, if set, need not be present.  If true and input is an option
+   *                      and there is no input, then throw an error
+   * @param outputOptional if false, then the output option, if set, need not be present.  If true and output is an
+   *                       option and there is no output, then throw an error
    * @return the args parsed into a map.
    */
   public Map<String, List<String>> parseArguments(String[] args, boolean inputOptional, boolean outputOptional)
