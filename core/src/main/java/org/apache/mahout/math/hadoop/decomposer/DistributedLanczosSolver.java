@@ -46,7 +46,7 @@ import java.util.Map;
 /**
  * See the SSVD code for a better option than using this:
  *
- * https://cwiki.apache.org/MAHOUT/stochastic-singular-value-decomposition.html
+ * https://cwiki.apache.org/confluence/display/MAHOUT/Stochastic+Singular+Value+Decomposition
  * @see org.apache.mahout.math.hadoop.stochasticsvd.SSVDSolver
  */
 public class DistributedLanczosSolver extends LanczosSolver implements Tool {

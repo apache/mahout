@@ -38,7 +38,7 @@ import java.util.Map;
  *
  * See the SSVD code for a better option
  * {@link org.apache.mahout.math.ssvd.SequentialBigSvd}
- * See also the docs on <a href=https://cwiki.apache.org/MAHOUT/stochastic-singular-value-decomposition.html>stochastic projection SVD</a>
+ * See also the docs on <a href=https://cwiki.apache.org/confluence/display/MAHOUT/Stochastic+Singular+Value+Decomposition>stochastic projection SVD</a>
  * <p>
  * To avoid floating point overflow problems which arise in power-methods like Lanczos, an initial pass is made
  * through the input matrix to
