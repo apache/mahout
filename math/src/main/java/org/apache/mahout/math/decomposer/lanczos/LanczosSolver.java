@@ -18,6 +18,7 @@
 package org.apache.mahout.math.decomposer.lanczos;
 
 
+import com.google.common.base.Preconditions;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorIterable;
@@ -34,6 +35,10 @@ import java.util.Map;
  * <p>Simple implementation of the <a href="http://en.wikipedia.org/wiki/Lanczos_algorithm">Lanczos algorithm</a> for
  * finding eigenvalues of a symmetric matrix, applied to non-symmetric matrices by applying Matrix.timesSquared(vector)
  * as the "matrix-multiplication" method.</p>
+ *
+ * See the SSVD code for a better option
+ * {@link org.apache.mahout.math.ssvd.SequentialBigSvd}
+ * See also the docs on <a href=https://cwiki.apache.org/MAHOUT/stochastic-singular-value-decomposition.html>stochastic projection SVD</a>
  * <p>
  * To avoid floating point overflow problems which arise in power-methods like Lanczos, an initial pass is made
  * through the input matrix to
@@ -54,6 +59,7 @@ import java.util.Map;
  * This can be made smarter if (when!) this proves to be a major bottleneck.  Of course, this step can be parallelized
  * as well.
  * </p>
+ * @see org.apache.mahout.math.ssvd.SequentialBigSvd
  */
 public class LanczosSolver {
 
@@ -157,6 +163,10 @@ public class LanczosSolver {
         }
         realEigen.assign(rowJ, new PlusMult(d));
       }
+
+      Preconditions.checkState(realEigen != null);
+      assert realEigen != null;
+
       realEigen = realEigen.normalize();
       state.setRightSingularVector(row, realEigen);
       double e = eigenVals.get(row) * state.getScaleFactor();
