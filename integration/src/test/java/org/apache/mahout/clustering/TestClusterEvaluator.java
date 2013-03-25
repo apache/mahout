@@ -33,6 +33,8 @@ import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution
 import org.apache.mahout.clustering.evaluation.ClusterEvaluator;
 import org.apache.mahout.clustering.evaluation.RepresentativePointsDriver;
 import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
+import org.apache.mahout.clustering.kernel.IKernelProfile;
+import org.apache.mahout.clustering.kernel.TriangularKernelProfile;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.kmeans.TestKmeansClustering;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
@@ -40,8 +42,6 @@ import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
-import org.apache.mahout.common.kernel.IKernelProfile;
-import org.apache.mahout.common.kernel.TriangularKernelProfile;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.VectorWritable;
 import org.junit.Before;

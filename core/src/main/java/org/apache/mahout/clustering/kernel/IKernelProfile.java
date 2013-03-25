@@ -15,23 +15,13 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.common.parameters;
+package org.apache.mahout.clustering.kernel;
 
-import org.apache.hadoop.conf.Configuration;
+public interface IKernelProfile {
 
-public class StringParameter extends AbstractParameter<String> {
-  
-  public StringParameter(String prefix, String name, Configuration conf, String defaultValue, String description) {
-    super(String.class, prefix, name, conf, defaultValue, description);
-  }
-  
-  @Override
-  public void setStringValue(String stringValue) {
-    set(stringValue);
-  }
-  
-  @Override
-  public String getStringValue() {
-    return get();
-  }
+  /**
+   * @return the calculated dervative value of the kernel
+   */
+  double calculateDerivativeValue(double distance, double h);
+
 }

@@ -30,7 +30,6 @@ import org.apache.mahout.clustering.minhash.HashFactory.HashType;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
-import org.apache.mahout.common.commandline.MinhashOptionCreator;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;

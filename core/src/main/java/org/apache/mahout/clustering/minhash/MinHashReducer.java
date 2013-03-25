@@ -22,7 +22,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.mahout.common.commandline.MinhashOptionCreator;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 

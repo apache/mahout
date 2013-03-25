@@ -34,6 +34,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.ClusteringTestUtils;
+import org.apache.mahout.clustering.kernel.TriangularKernelProfile;
 import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.HadoopUtil;
@@ -42,8 +43,7 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
-import org.apache.mahout.common.kernel.IKernelProfile;
-import org.apache.mahout.common.kernel.TriangularKernelProfile;
+import org.apache.mahout.clustering.kernel.IKernelProfile;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -194,10 +194,8 @@ public final class TestMeanShift extends MahoutTestCase {
     }
 
     Configuration conf = new Configuration();
-    conf.set(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY,
-        "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
-    conf.set(MeanShiftCanopyConfigKeys.KERNEL_PROFILE_KEY,
-        "org.apache.mahout.common.kernel.TriangularKernelProfile");
+    conf.set(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY, EuclideanDistanceMeasure.class.getName());
+    conf.set(MeanShiftCanopyConfigKeys.KERNEL_PROFILE_KEY, TriangularKernelProfile.class.getName());
     conf.set(MeanShiftCanopyConfigKeys.T1_KEY, "4");
     conf.set(MeanShiftCanopyConfigKeys.T2_KEY, "1");
     conf.set(MeanShiftCanopyConfigKeys.CLUSTER_CONVERGENCE_KEY, "0.5");
@@ -205,8 +203,8 @@ public final class TestMeanShift extends MahoutTestCase {
     // map the data
     MeanShiftCanopyMapper mapper = new MeanShiftCanopyMapper();
     DummyRecordWriter<Text, ClusterWritable> mapWriter = new DummyRecordWriter<Text, ClusterWritable>();
-    Mapper<WritableComparable<?>, ClusterWritable, Text, ClusterWritable>.Context mapContext = DummyRecordWriter
-        .build(mapper, conf, mapWriter);
+    Mapper<WritableComparable<?>, ClusterWritable, Text, ClusterWritable>.Context mapContext =
+        DummyRecordWriter.build(mapper, conf, mapWriter);
     mapper.setup(mapContext);
     for (MeanShiftCanopy canopy : canopies) {
     	ClusterWritable clusterWritable = new ClusterWritable();
@@ -281,10 +279,8 @@ public final class TestMeanShift extends MahoutTestCase {
     }
 
     Configuration conf = new Configuration();
-    conf.set(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY,
-        "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
-    conf.set(MeanShiftCanopyConfigKeys.KERNEL_PROFILE_KEY,
-        "org.apache.mahout.common.kernel.TriangularKernelProfile");
+    conf.set(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY, EuclideanDistanceMeasure.class.getName());
+    conf.set(MeanShiftCanopyConfigKeys.KERNEL_PROFILE_KEY, TriangularKernelProfile.class.getName());
     conf.set(MeanShiftCanopyConfigKeys.T1_KEY, "4");
     conf.set(MeanShiftCanopyConfigKeys.T2_KEY, "1");
     conf.set(MeanShiftCanopyConfigKeys.CLUSTER_CONVERGENCE_KEY, "0.5");

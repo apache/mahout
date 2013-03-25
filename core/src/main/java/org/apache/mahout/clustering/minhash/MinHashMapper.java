@@ -22,7 +22,6 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.minhash.HashFactory.HashType;
-import org.apache.mahout.common.commandline.MinhashOptionCreator;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;

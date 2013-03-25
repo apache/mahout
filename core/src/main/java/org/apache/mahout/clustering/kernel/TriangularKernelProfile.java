@@ -15,18 +15,13 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.common.kernel;
+package org.apache.mahout.clustering.kernel;
 
-public interface IKernelProfile {
-
-  /**
-   * @return calculated value of the kernel
-   */
-  double calculateValue(double distance, double h);
+public class TriangularKernelProfile implements IKernelProfile {
   
-  /**
-   * @return the calculated dervative value of the kernel
-   */
-  double calculateDerivativeValue(double distance, double h);
-
+  @Override
+  public double calculateDerivativeValue(double distance, double h) {
+    return distance < h ? 1.0 : 0.0;
+  }
+  
 }

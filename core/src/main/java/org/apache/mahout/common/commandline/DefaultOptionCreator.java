@@ -23,7 +23,7 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
-import org.apache.mahout.common.kernel.TriangularKernelProfile;
+import org.apache.mahout.clustering.kernel.TriangularKernelProfile;
 
 
 public final class DefaultOptionCreator {

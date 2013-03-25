@@ -32,7 +32,6 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
-import org.apache.mahout.common.commandline.MinhashOptionCreator;
 import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;

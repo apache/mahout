@@ -22,9 +22,9 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.mahout.clustering.kernel.IKernelProfile;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
-import org.apache.mahout.common.kernel.IKernelProfile;
 import org.apache.mahout.math.Vector;
 
 public class MeanShiftCanopyClusterer {
