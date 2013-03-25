@@ -19,13 +19,11 @@ package org.apache.mahout.math.hadoop.similarity.cooccurrence;
 
 import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
-import com.google.common.primitives.Doubles;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.mahout.cf.taste.common.TopK;
 import org.apache.mahout.common.iterator.FixedSizeSamplingIterator;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Varint;
@@ -35,13 +33,11 @@ import org.apache.mahout.math.map.OpenIntIntHashMap;
 
 import java.io.DataInput;
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.Iterator;
 
 public final class Vectors {
 
-  private Vectors() {
-  }
+  private Vectors() {}
 
   public static Vector maybeSample(Vector original, int sampleSize) {
     if (original.getNumNondefaultElements() <= sampleSize) {
@@ -61,14 +57,23 @@ public final class Vectors {
     if (original.getNumNondefaultElements() <= k) {
       return original;
     }
-    TopK<Vector.Element> topKQueue = new TopK<Vector.Element>(k, BY_VALUE);
+
+    TopElementsQueue topKQueue = new TopElementsQueue(k);
     Iterator<Vector.Element> nonZeroElements = original.iterateNonZero();
     while (nonZeroElements.hasNext()) {
       Vector.Element nonZeroElement = nonZeroElements.next();
-      topKQueue.offer(new Vectors.TemporaryElement(nonZeroElement));
+
+      MutableElement top = topKQueue.top();
+      double candidateValue = nonZeroElement.get();
+      if (candidateValue > top.get()) {
+        top.setIndex(nonZeroElement.index());
+        top.set(candidateValue);
+        topKQueue.updateTop();
+      }
     }
+
     Vector topKSimilarities = new RandomAccessSparseVector(original.size(), k);
-    for (Vector.Element topKSimilarity : topKQueue.retrieve()) {
+    for (Vector.Element topKSimilarity : topKQueue.getTopElements()) {
       topKSimilarities.setQuick(topKSimilarity.index(), topKSimilarity.get());
     }
     return topKSimilarities;
@@ -89,13 +94,6 @@ public final class Vectors {
     }
     return accumulator;
   }
-
-  static final Comparator<Vector.Element> BY_VALUE = new Comparator<Vector.Element>() {
-    @Override
-    public int compare(Vector.Element elem1, Vector.Element elem2) {
-      return Doubles.compare(elem1.get(), elem2.get());
-    }
-  };
 
   static class TemporaryElement implements Vector.Element {
 

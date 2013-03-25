@@ -19,7 +19,9 @@ package org.apache.mahout.cf.taste.hadoop.als;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.mahout.cf.taste.hadoop.MutableRecommendedItem;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
+import org.apache.mahout.cf.taste.hadoop.TopItemsQueue;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.math.Vector;
@@ -79,7 +81,7 @@ public class PredictionMapper extends SharingMapper<IntWritable,VectorWritable,I
       alreadyRatedItems.add(ratingsIterator.next().index());
     }
 
-    final TopItemQueue topItemQueue = new TopItemQueue(recommendationsPerUser);
+    final TopItemsQueue topItemsQueue = new TopItemsQueue(recommendationsPerUser);
     final Vector userFeatures = U.get(userID);
 
     M.forEachPair(new IntObjectProcedure<Vector>() {
@@ -88,17 +90,17 @@ public class PredictionMapper extends SharingMapper<IntWritable,VectorWritable,I
         if (!alreadyRatedItems.contains(itemID)) {
           double predictedRating = userFeatures.dot(itemFeatures);
 
-          MutableRecommendedItem top = topItemQueue.top();
+          MutableRecommendedItem top = topItemsQueue.top();
           if (predictedRating > top.getValue()) {
             top.set(itemID, (float) predictedRating);
-            topItemQueue.updateTop();
+            topItemsQueue.updateTop();
           }
         }
         return true;
       }
     });
 
-    List<RecommendedItem> recommendedItems = topItemQueue.getTopItems();
+    List<RecommendedItem> recommendedItems = topItemsQueue.getTopItems();
 
     if (!recommendedItems.isEmpty()) {
 

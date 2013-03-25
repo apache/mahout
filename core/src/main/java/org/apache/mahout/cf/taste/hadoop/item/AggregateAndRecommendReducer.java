@@ -21,11 +21,11 @@ import com.google.common.primitives.Floats;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.mahout.cf.taste.common.TopK;
+import org.apache.mahout.cf.taste.hadoop.MutableRecommendedItem;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
+import org.apache.mahout.cf.taste.hadoop.TopItemsQueue;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
-import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.iterator.FileLineIterable;
@@ -38,6 +38,7 @@ import org.apache.mahout.math.map.OpenIntLongHashMap;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -188,7 +189,7 @@ public final class AggregateAndRecommendReducer extends
   private void writeRecommendedItems(VarLongWritable userID, Vector recommendationVector, Context context)
     throws IOException, InterruptedException {
 
-    TopK<RecommendedItem> topKItems = new TopK<RecommendedItem>(recommendationsPerUser, BY_PREFERENCE_VALUE);
+    TopItemsQueue topKItems = new TopItemsQueue(recommendationsPerUser);
 
     Iterator<Vector.Element> recommendationVectorIterator = recommendationVector.iterateNonZero();
     while (recommendationVectorIterator.hasNext()) {
@@ -203,13 +204,19 @@ public final class AggregateAndRecommendReducer extends
       if (itemsToRecommendFor == null || itemsToRecommendFor.contains(itemID)) {
         float value = (float) element.get();
         if (!Float.isNaN(value)) {
-          topKItems.offer(new GenericRecommendedItem(itemID, value));
+
+          MutableRecommendedItem topItem = topKItems.top();
+          if (value > topItem.getValue()) {
+            topItem.set(itemID, value);
+            topKItems.updateTop();
+          }
         }
       }
     }
 
-    if (!topKItems.isEmpty()) {
-      context.write(userID, new RecommendedItemsWritable(topKItems.retrieve()));
+    List<RecommendedItem> topItems = topKItems.getTopItems();
+    if (!topItems.isEmpty()) {
+      context.write(userID, new RecommendedItemsWritable(topItems));
     }
   }
 

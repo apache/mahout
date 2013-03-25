@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop.als;
+package org.apache.mahout.cf.taste.hadoop;
 
 import com.google.common.collect.Lists;
 import org.apache.lucene.util.PriorityQueue;
@@ -24,13 +24,13 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import java.util.Collections;
 import java.util.List;
 
-public class TopItemQueue extends PriorityQueue<MutableRecommendedItem> {
+public class TopItemsQueue extends PriorityQueue<MutableRecommendedItem> {
 
   private static final long SENTINEL_ID = Long.MIN_VALUE;
 
   private final int maxSize;
 
-  public TopItemQueue(int maxSize) {
+  public TopItemsQueue(int maxSize) {
     super(maxSize);
     this.maxSize = maxSize;
   }
@@ -55,8 +55,6 @@ public class TopItemQueue extends PriorityQueue<MutableRecommendedItem> {
 
   @Override
   protected MutableRecommendedItem getSentinelObject() {
-    MutableRecommendedItem sentinel =  new MutableRecommendedItem();
-    sentinel.set(SENTINEL_ID, Float.MIN_VALUE);
-    return sentinel;
+    return new MutableRecommendedItem(SENTINEL_ID, Float.MIN_VALUE);
   }
 }

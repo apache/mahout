@@ -33,10 +33,14 @@ public class SimilarItem {
     }
   };
 
-  private final long itemID;
-  private final double similarity;
+  private long itemID;
+  private double similarity;
 
   public SimilarItem(long itemID, double similarity) {
+    set(itemID, similarity);
+  }
+
+  public void set(long itemID, double similarity) {
     this.itemID = itemID;
     this.similarity = similarity;
   }

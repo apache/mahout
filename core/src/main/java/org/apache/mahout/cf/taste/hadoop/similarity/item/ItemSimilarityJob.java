@@ -35,7 +35,6 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
-import org.apache.mahout.cf.taste.common.TopK;
 import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
 import org.apache.mahout.cf.taste.hadoop.preparation.PreparePreferenceMatrixJob;
@@ -197,18 +196,22 @@ public final class ItemSimilarityJob extends AbstractJob {
 
       int itemIDIndex = itemIDIndexWritable.get();
 
-      TopK<SimilarItem> topKMostSimilarItems =
-          new TopK<SimilarItem>(maxSimilarItemsPerItem, SimilarItem.COMPARE_BY_SIMILARITY);
+      TopSimilarItemsQueue topKMostSimilarItems = new TopSimilarItemsQueue(maxSimilarItemsPerItem);
 
       Iterator<Vector.Element> similarityVectorIterator = similarityVector.get().iterateNonZero();
 
       while (similarityVectorIterator.hasNext()) {
         Vector.Element element = similarityVectorIterator.next();
-        topKMostSimilarItems.offer(new SimilarItem(indexItemIDMap.get(element.index()), element.get()));
+        SimilarItem top = topKMostSimilarItems.top();
+        double candidateSimilarity = element.get();
+        if (candidateSimilarity > top.getSimilarity()) {
+          top.set(indexItemIDMap.get(element.index()), candidateSimilarity);
+          topKMostSimilarItems.updateTop();
+        }
       }
 
       long itemID = indexItemIDMap.get(itemIDIndex);
-      for (SimilarItem similarItem : topKMostSimilarItems.retrieve()) {
+      for (SimilarItem similarItem : topKMostSimilarItems.getTopItems()) {
         long otherItemID = similarItem.getItemID();
         if (itemID < otherItemID) {
           ctx.write(new EntityEntityWritable(itemID, otherItemID), new DoubleWritable(similarItem.getSimilarity()));

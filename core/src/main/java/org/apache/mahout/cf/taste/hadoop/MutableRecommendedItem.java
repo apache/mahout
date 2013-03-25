@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop.als;
+package org.apache.mahout.cf.taste.hadoop;
 
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.common.RandomUtils;
@@ -23,10 +23,17 @@ import org.apache.mahout.common.RandomUtils;
 /**
  * Mutable variant of {@link RecommendedItem}
  */
-class MutableRecommendedItem implements RecommendedItem {
+public class MutableRecommendedItem implements RecommendedItem {
 
   private long itemID;
   private float value;
+
+  public MutableRecommendedItem() {}
+
+  public MutableRecommendedItem(long itemID, float value) {
+    this.itemID = itemID;
+    this.value = value;
+  }
 
   @Override
   public long getItemID() {

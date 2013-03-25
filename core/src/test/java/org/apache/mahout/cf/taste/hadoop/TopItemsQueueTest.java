@@ -15,8 +15,10 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop.als;
+package org.apache.mahout.cf.taste.hadoop;
 
+import org.apache.mahout.cf.taste.hadoop.MutableRecommendedItem;
+import org.apache.mahout.cf.taste.hadoop.TopItemsQueue;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.common.MahoutTestCase;
@@ -24,7 +26,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-public class TopItemQueueTest extends TasteTestCase {
+public class TopItemsQueueTest extends TasteTestCase {
 
   @Test
   public void topK() {
@@ -56,7 +58,7 @@ public class TopItemQueueTest extends TasteTestCase {
 
 
   private static List<RecommendedItem> findTop(float[] ratings, int k) {
-    TopItemQueue queue = new TopItemQueue(k);
+    TopItemsQueue queue = new TopItemsQueue(k);
 
     for (int item = 0; item < ratings.length; item++) {
       MutableRecommendedItem top = queue.top();

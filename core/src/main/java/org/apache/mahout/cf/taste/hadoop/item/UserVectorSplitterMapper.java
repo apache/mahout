@@ -23,7 +23,7 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.mahout.cf.taste.common.TopK;
+import org.apache.lucene.util.PriorityQueue;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.math.VarIntWritable;
@@ -32,7 +32,6 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.Iterator;
 
 import org.slf4j.Logger;
@@ -120,19 +119,19 @@ public final class UserVectorSplitterMapper extends
 
   private float findSmallestLargeValue(Vector userVector) {
 
-    TopK<Float> topPrefValues = new TopK<Float>(maxPrefsPerUserConsidered, new Comparator<Float>() {
+    PriorityQueue<Float> topPrefValues = new PriorityQueue<Float>(maxPrefsPerUserConsidered) {
       @Override
-      public int compare(Float one, Float two) {
-        return one.compareTo(two);
+      protected boolean lessThan(Float f1, Float f2) {
+        return f1 < f2;
       }
-    });
+    };
 
     Iterator<Vector.Element> it = userVector.iterateNonZero();
     while (it.hasNext()) {
       float absValue = Math.abs((float) it.next().get());
-      topPrefValues.offer(absValue);
+      topPrefValues.insertWithOverflow(absValue);
     }
-    return topPrefValues.smallestGreat();
+    return topPrefValues.top();
   }
 
 }

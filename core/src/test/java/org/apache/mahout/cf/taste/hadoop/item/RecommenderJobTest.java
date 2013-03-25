@@ -35,6 +35,7 @@ import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
+import org.apache.mahout.cf.taste.hadoop.MutableRecommendedItem;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
@@ -537,8 +538,8 @@ public class RecommenderJobTest extends TasteTestCase {
     Reducer<VarLongWritable,PrefAndSimilarityColumnWritable,VarLongWritable,RecommendedItemsWritable>.Context context =
         EasyMock.createMock(Reducer.Context.class);
 
-    context.write(EasyMock.eq(new VarLongWritable(123L)), recommendationsMatch(new GenericRecommendedItem(1L, 2.8f),
-        new GenericRecommendedItem(2L, 2.0f)));
+    context.write(EasyMock.eq(new VarLongWritable(123L)), recommendationsMatch(new MutableRecommendedItem(1L, 2.8f),
+        new MutableRecommendedItem(2L, 2.0f)));
 
     EasyMock.replay(context);
 
@@ -576,7 +577,7 @@ public class RecommenderJobTest extends TasteTestCase {
     Reducer<VarLongWritable,PrefAndSimilarityColumnWritable,VarLongWritable,RecommendedItemsWritable>.Context context =
         EasyMock.createMock(Reducer.Context.class);
 
-    context.write(EasyMock.eq(new VarLongWritable(123L)), recommendationsMatch(new GenericRecommendedItem(1L, 2.8f)));
+    context.write(EasyMock.eq(new VarLongWritable(123L)), recommendationsMatch(new MutableRecommendedItem(1L, 2.8f)));
 
     EasyMock.replay(context);
 
@@ -613,7 +614,7 @@ public class RecommenderJobTest extends TasteTestCase {
     Reducer<VarLongWritable,PrefAndSimilarityColumnWritable,VarLongWritable,RecommendedItemsWritable>.Context context =
       EasyMock.createMock(Reducer.Context.class);
 
-    context.write(EasyMock.eq(new VarLongWritable(123L)), recommendationsMatch(new GenericRecommendedItem(1L, 2.8f)));
+    context.write(EasyMock.eq(new VarLongWritable(123L)), recommendationsMatch(new MutableRecommendedItem(1L, 2.8f)));
 
     EasyMock.replay(context);
 

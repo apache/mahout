@@ -26,7 +26,6 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.util.ToolRunner;
-import org.apache.mahout.cf.taste.common.TopK;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.HadoopUtil;
@@ -408,17 +407,25 @@ public class RowSimilarityJob extends AbstractJob {
       Vector similarities = similaritiesWritable.get();
       // For performance, the creation of transposedPartial is moved out of the while loop and it is reused inside
       Vector transposedPartial = new RandomAccessSparseVector(similarities.size(), 1);
-      TopK<Vector.Element> topKQueue = new TopK<Vector.Element>(maxSimilaritiesPerRow, Vectors.BY_VALUE);
+      TopElementsQueue topKQueue = new TopElementsQueue(maxSimilaritiesPerRow);
       Iterator<Vector.Element> nonZeroElements = similarities.iterateNonZero();
       while (nonZeroElements.hasNext()) {
         Vector.Element nonZeroElement = nonZeroElements.next();
-        topKQueue.offer(new Vectors.TemporaryElement(nonZeroElement));
-        transposedPartial.setQuick(row.get(), nonZeroElement.get());
+
+        MutableElement top = topKQueue.top();
+        double candidateValue = nonZeroElement.get();
+        if (candidateValue > top.get()) {
+          top.setIndex(nonZeroElement.index());
+          top.set(candidateValue);
+          topKQueue.updateTop();
+        }
+
+        transposedPartial.setQuick(row.get(), candidateValue);
         ctx.write(new IntWritable(nonZeroElement.index()), new VectorWritable(transposedPartial));
         transposedPartial.setQuick(row.get(), 0.0);
       }
       Vector topKSimilarities = new RandomAccessSparseVector(similarities.size(), maxSimilaritiesPerRow);
-      for (Vector.Element topKSimilarity : topKQueue.retrieve()) {
+      for (Vector.Element topKSimilarity : topKQueue.getTopElements()) {
         topKSimilarities.setQuick(topKSimilarity.index(), topKSimilarity.get());
       }
       ctx.write(row, new VectorWritable(topKSimilarities));
