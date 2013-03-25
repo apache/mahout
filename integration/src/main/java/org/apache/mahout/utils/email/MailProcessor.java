@@ -22,6 +22,8 @@ import org.apache.mahout.utils.io.ChunkedWriter;
 import org.apache.mahout.utils.io.ChunkedWrapper;
 import org.apache.mahout.utils.io.IOWriterWrapper;
 import org.apache.mahout.utils.io.WrappedWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -31,22 +33,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MailProcessor {
-  private static final Pattern MESSAGE_START =
-          Pattern.compile("^From \\S+@\\S.*\\d{4}$", Pattern.CASE_INSENSITIVE);
-  private static final Pattern MESSAGE_ID_PREFIX =
-          Pattern.compile("^message-id: <(.*)>$", Pattern.CASE_INSENSITIVE);
+
+  private static final Pattern MESSAGE_START = Pattern.compile("^From \\S+@\\S.*\\d{4}$", Pattern.CASE_INSENSITIVE);
+  private static final Pattern MESSAGE_ID_PREFIX = Pattern.compile("^message-id: <(.*)>$", Pattern.CASE_INSENSITIVE);
   // regular expressions used to parse individual messages
-  public static final Pattern SUBJECT_PREFIX =
-          Pattern.compile("^subject: (.*)$", Pattern.CASE_INSENSITIVE);
-  public static final Pattern FROM_PREFIX =
-                  Pattern.compile("^from: (\\S.*)$", Pattern.CASE_INSENSITIVE); //we need to have at least one character
-  public static final Pattern REFS_PREFIX =
-                          Pattern.compile("^references: (.*)$", Pattern.CASE_INSENSITIVE);
-  public static final Pattern TO_PREFIX =
-                                  Pattern.compile("^to: (.*)$", Pattern.CASE_INSENSITIVE);
+  public static final Pattern SUBJECT_PREFIX = Pattern.compile("^subject: (.*)$", Pattern.CASE_INSENSITIVE);
+  //we need to have at least one character
+  public static final Pattern FROM_PREFIX = Pattern.compile("^from: (\\S.*)$", Pattern.CASE_INSENSITIVE);
+  public static final Pattern REFS_PREFIX = Pattern.compile("^references: (.*)$", Pattern.CASE_INSENSITIVE);
+  public static final Pattern TO_PREFIX = Pattern.compile("^to: (.*)$", Pattern.CASE_INSENSITIVE);
+
   private final String prefix;
   private final MailOptions options;
   private final WrappedWriter writer;
+
+  private static final Logger log = LoggerFactory.getLogger(MailProcessor.class);
 
   public MailProcessor(MailOptions options, String prefix, Writer writer) {
     this.writer = new IOWriterWrapper(writer);
@@ -134,6 +135,7 @@ public class MailProcessor {
       }
     } catch (FileNotFoundException e) {
       // Skip file.
+      log.warn("Unable to process non-existing file", e);
     }
     // TODO: report exceptions and continue;
     return messageCount;

@@ -50,15 +50,16 @@ public abstract class AbstractLuceneIterator extends AbstractIterator<Vector> {
     protected long nextLogRecord = bump.increment();
     protected int skippedErrorMessages;
 
-    public AbstractLuceneIterator(TermInfo terminfo, double normPower, IndexReader indexReader, Weight weight, double maxPercentErrorDocs, String field) {
-        this.terminfo = terminfo;
-        this.normPower = normPower;
-        this.indexReader = indexReader;
+    public AbstractLuceneIterator(TermInfo terminfo, double normPower, IndexReader indexReader, Weight weight,
+        double maxPercentErrorDocs, String field) {
+      this.terminfo = terminfo;
+      this.normPower = normPower;
+      this.indexReader = indexReader;
 
-        this.weight = weight;
-        this.nextDocId = 0;
-        this.maxErrorDocs = (int) (maxPercentErrorDocs * indexReader.numDocs());
-        this.field = field;
+      this.weight = weight;
+      this.nextDocId = 0;
+      this.maxErrorDocs = (int) (maxPercentErrorDocs * indexReader.numDocs());
+      this.field = field;
     }
 
     /**
@@ -93,7 +94,8 @@ public abstract class AbstractLuceneIterator extends AbstractIterator<Vector> {
             numErrorDocs++;
             if (numErrorDocs >= maxErrorDocs) {
               log.error("There are too many documents that do not have a term vector for {}", field);
-              throw new IllegalStateException("There are too many documents that do not have a term vector for " + field);
+              throw new IllegalStateException("There are too many documents that do not have a term vector for " +
+                  field);
             }
             if (numErrorDocs >= nextLogRecord) {
               if (skippedErrorMessages == 0) {

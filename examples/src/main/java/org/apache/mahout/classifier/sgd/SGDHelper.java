@@ -91,7 +91,8 @@ public final class SGDHelper {
     return r;
   }
 
-  static void analyzeState(SGDInfo info, int leakType, int k, State<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner> best) throws IOException {
+  static void analyzeState(SGDInfo info, int leakType, int k, State<AdaptiveLogisticRegression.Wrapper,
+      CrossFoldLearner> best) throws IOException {
     int bump = info.getBumps()[(int) Math.floor(info.getStep()) % info.getBumps().length];
     int scale = (int) Math.pow(10, Math.floor(info.getStep() / info.getBumps().length));
     double maxBeta;

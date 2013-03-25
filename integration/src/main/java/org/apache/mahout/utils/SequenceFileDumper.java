@@ -52,7 +52,8 @@ public final class SequenceFileDumper extends AbstractJob {
     addOption("substring", "b", "The number of chars to print out per value", false);
     addOption(buildOption("count", "c", "Report the count only", false, false, null));
     addOption("numItems", "n", "Output at most <n> key value pairs", false);
-    addOption(buildOption("facets", "fa", "Output the counts per key.  Note, if there are a lot of unique keys, this can take up a fair amount of memory", false, false, null));
+    addOption(buildOption("facets", "fa", "Output the counts per key.  Note, if there are a lot of unique keys, " +
+        "this can take up a fair amount of memory", false, false, null));
     addOption(buildOption("quiet", "q", "Print only file contents.", false, false, null));
 
     if (parseArguments(args, false, true) == null) {

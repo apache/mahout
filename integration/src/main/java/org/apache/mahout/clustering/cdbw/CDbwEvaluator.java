@@ -58,9 +58,12 @@ public final class CDbwEvaluator {
   private final List<Cluster> clusters;
   private final DistanceMeasure measure;
   private Double interClusterDensity = null;
-  private Map<Integer,Map<Integer,Double>> minimumDistances = null; // these are symmetric so we only compute half of them
-  private Map<Integer,Map<Integer,Double>> interClusterDensities = null; // these are symmetric too
-  private Map<Integer,Map<Integer,int[]>> closestRepPointIndices = null; // these are symmetric too
+  // these are symmetric so we only compute half of them
+  private Map<Integer,Map<Integer,Double>> minimumDistances = null;
+  // these are symmetric too
+  private Map<Integer,Map<Integer,Double>> interClusterDensities = null;
+  // these are symmetric too
+  private Map<Integer,Map<Integer,int[]>> closestRepPointIndices = null;
   
   /**
    * For testing only

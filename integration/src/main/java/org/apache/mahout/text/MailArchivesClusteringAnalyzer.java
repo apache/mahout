@@ -147,7 +147,7 @@ public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
         if (length >= 2 && length <= 28) {
           char[] buf = termAtt.buffer();
           int at = 0;
-          for (int c=0; c < length; c++) {
+          for (int c = 0; c < length; c++) {
             char ch = buf[c];
             if (ch != '\'') {
               output[at++] = ch;

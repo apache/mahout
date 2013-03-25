@@ -198,7 +198,8 @@ public class ClusterLabels {
       DocsEnum docsEnum = MultiFields.getTermDocsEnum(reader, null, contentField, term);
       int docID;
       while ((docID = docsEnum.nextDoc()) != DocIdSetIterator.NO_MORE_DOCS) {
-        if (liveDocs != null && !liveDocs.get(docID)) { //check to see if we don't have an deletions (null) or if document is live
+        //check to see if we don't have an deletions (null) or if document is live
+        if (liveDocs != null && !liveDocs.get(docID)) {
           // document is deleted...
           termBitset.set(docsEnum.docID());
         }
@@ -243,9 +244,9 @@ public class ClusterLabels {
 
     OpenBitSet bitset = new OpenBitSet(numDocs);
     
-    Set<String>  idFieldSelector= null;
-    if(idField !=null){
-      idFieldSelector= new TreeSet<String>();
+    Set<String>  idFieldSelector = null;
+    if (idField != null) {
+      idFieldSelector = new TreeSet<String>();
       idFieldSelector.add(idField);
     }
     

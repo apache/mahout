@@ -36,11 +36,11 @@ import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 
 public class DisplaySpectralKMeans extends DisplayClustering {
 
-	protected static final String SAMPLES = "samples";
-	protected static final String OUTPUT = "output";
-	protected static final String TEMP = "tmp";
-	protected static final String AFFINITIES = "affinities";
-	
+  protected static final String SAMPLES = "samples";
+  protected static final String OUTPUT = "output";
+  protected static final String TEMP = "tmp";
+  protected static final String AFFINITIES = "affinities";
+
   DisplaySpectralKMeans() {
     initialize();
     setTitle("Spectral k-Means Clusters (>" + (int) (significance * 100) + "% of population)");
@@ -83,6 +83,6 @@ public class DisplaySpectralKMeans extends DisplayClustering {
 
   @Override
   public void paint(Graphics g) {
-  	plotClusteredSampleData((Graphics2D) g, new Path(OUTPUT));
+    plotClusteredSampleData((Graphics2D) g, new Path(OUTPUT));
   }
 }

@@ -75,11 +75,11 @@ public final class ValidateAdaptiveLogistic {
           .loadFromFile(new File(modelFile));
       CsvRecordFactory csv = lmp.getCsvRecordFactory();
       AdaptiveLogisticRegression lr = lmp.createAdaptiveLogisticRegression();      
-      
-      if (lmp.getTargetCategories().size() <=2 ) {
+
+      if (lmp.getTargetCategories().size() <= 2) {
         collector = new Auc();
       }
-      
+
       OnlineSummarizer slh = new OnlineSummarizer();
       ConfusionMatrix cm = new ConfusionMatrix(lmp.getTargetCategories(), defaultCategory);
 
@@ -103,10 +103,10 @@ public final class ValidateAdaptiveLogistic {
         int target = csv.processLine(line, v);
         double likelihood = learner.logLikelihood(target, v);
         double score = learner.classifyFull(v).maxValue();
-        
+
         slh.add(likelihood);
         cm.addInstance(csv.getTargetString(line), csv.getTargetLabel(target));        
-        
+
         if (showScores) {
           output.printf(Locale.ENGLISH, "%8d, %.12f, %.13f, %.13f\n", target,
               score, learner.logLikelihood(target, v), slh.getMean());
@@ -116,7 +116,7 @@ public final class ValidateAdaptiveLogistic {
         }
         line = in.readLine();
       }
-      
+
       output.printf(Locale.ENGLISH,"\nLog-likelihood:");
       output.printf(Locale.ENGLISH, "Min=%.2f, Max=%.2f, Mean=%.2f, Median=%.2f\n", 
           slh.getMin(), slh.getMax(), slh.getMean(), slh.getMedian());
@@ -124,10 +124,10 @@ public final class ValidateAdaptiveLogistic {
       if (collector != null) {        
         output.printf(Locale.ENGLISH, "\nAUC = %.2f\n", collector.auc());        
       }
-      
+
       if (showConfusion) {
         output.printf(Locale.ENGLISH, "\n%s\n\n", cm.toString());
-        
+
         if (collector != null) {
           Matrix m = collector.entropy();
           output.printf(Locale.ENGLISH,
@@ -135,7 +135,7 @@ public final class ValidateAdaptiveLogistic {
               m.get(1, 0), m.get(0, 1), m.get(1, 1));
         }        
       }
-      
+
     }
   }
 
@@ -155,7 +155,7 @@ public final class ValidateAdaptiveLogistic {
 
     Option scores = builder.withLongName("scores")
         .withDescription("print scores").create();
-  
+
     ArgumentBuilder argumentBuilder = new ArgumentBuilder();
     Option inputFileOption = builder
         .withLongName("input")
@@ -172,14 +172,14 @@ public final class ValidateAdaptiveLogistic {
             argumentBuilder.withName("model").withMaximum(1)
                 .create())
         .withDescription("where to get the trained model").create();
-    
+
     Option defaultCagetoryOption = builder
-    	.withLongName("defaultCategory")
-    	.withRequired(false)
-    	.withArgument(
-    			argumentBuilder.withName("defaultCategory").withMaximum(1).withDefault("unknown")
-    			.create())
-    	.withDescription("the default category value to use").create();
+      .withLongName("defaultCategory")
+      .withRequired(false)
+      .withArgument(
+          argumentBuilder.withName("defaultCategory").withMaximum(1).withDefault("unknown")
+          .create())
+      .withDescription("the default category value to use").create();
 
     Group normalArgs = new GroupBuilder().withOption(help)
         .withOption(quiet).withOption(auc).withOption(scores)

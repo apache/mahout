@@ -86,7 +86,8 @@ public final class TestNewsGroups {
 
       int actual = newsGroups.intern(ng);
       NewsgroupHelper helper = new NewsgroupHelper();
-      Vector input = helper.encodeFeatureVector(file, actual, 0, overallCounts); //no leak type ensures this is a normal vector
+      //no leak type ensures this is a normal vector
+      Vector input = helper.encodeFeatureVector(file, actual, 0, overallCounts);
       Vector result = classifier.classifyFull(input);
       int cat = result.maxValueIndex();
       double score = result.maxValue();

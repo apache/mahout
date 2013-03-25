@@ -24,7 +24,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
 
-public class MailToRecReducer extends Reducer<Text, LongWritable, Text, NullWritable>{
+public class MailToRecReducer extends Reducer<Text, LongWritable, Text, NullWritable> {
   //if true, then output weight
   private boolean useCounts = true;
   /**
@@ -38,7 +38,8 @@ public class MailToRecReducer extends Reducer<Text, LongWritable, Text, NullWrit
   }
 
   @Override
-  protected void reduce(Text key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException {
+  protected void reduce(Text key, Iterable<LongWritable> values, Context context)
+      throws IOException, InterruptedException {
     if (useCounts) {
       long sum = 0;
       for (LongWritable value : values) {

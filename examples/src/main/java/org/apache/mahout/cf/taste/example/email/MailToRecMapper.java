@@ -80,7 +80,8 @@ public final class MailToRecMapper extends Mapper<Text, Text, Text, LongWritable
         }
       }
     }
-    if (msgIdKey == Integer.MIN_VALUE) {//we don't have any references, so use the msg id
+    //we don't have any references, so use the msg id
+    if (msgIdKey == Integer.MIN_VALUE) {
       //get the msg id and the from and output the associated ids
       String keyStr = key.toString();
       int idx = keyStr.lastIndexOf('/');

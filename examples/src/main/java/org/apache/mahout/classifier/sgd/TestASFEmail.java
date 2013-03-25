@@ -53,8 +53,7 @@ public final class TestASFEmail {
   private String inputFile;
   private String modelFile;
 
-  private TestASFEmail() {
-  }
+  private TestASFEmail() {}
 
   public static void main(String[] args) throws IOException {
     TestASFEmail runner = new TestASFEmail();
@@ -79,8 +78,9 @@ public final class TestASFEmail {
         return path.getName().contains("test");
       }
     };
-    SequenceFileDirIterator<Text, VectorWritable> iter = new SequenceFileDirIterator<Text, VectorWritable>(new Path(base.toString()), PathType.LIST, testFilter,
-            null, true, conf);
+    SequenceFileDirIterator<Text, VectorWritable> iter =
+        new SequenceFileDirIterator<Text, VectorWritable>(new Path(base.toString()), PathType.LIST, testFilter,
+        null, true, conf);
 
     long numItems = 0;
     while (iter.hasNext()) {

@@ -94,7 +94,7 @@ abstract class AbstractJDBCInMemoryItemSimilarity extends AbstractJDBCComponent 
     }
   }
 
-  private static class JDBCSimilaritiesIterable implements Iterable<GenericItemSimilarity.ItemItemSimilarity> {
+  private static final class JDBCSimilaritiesIterable implements Iterable<GenericItemSimilarity.ItemItemSimilarity> {
 
     private final DataSource dataSource;
     private final String getAllItemSimilaritiesSQL;

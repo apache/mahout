@@ -43,7 +43,8 @@ public final class LuceneIterable implements Iterable<Vector> {
     this(reader, idField, field, terminfo, weight, NO_NORMALIZING);
   }
 
-  public LuceneIterable(IndexReader indexReader, String idField, String field, TermInfo terminfo, Weight weight, double normPower) {
+  public LuceneIterable(IndexReader indexReader, String idField, String field, TermInfo terminfo, Weight weight,
+      double normPower) {
     this(indexReader, idField, field, terminfo, weight, normPower, 0);
   }
 

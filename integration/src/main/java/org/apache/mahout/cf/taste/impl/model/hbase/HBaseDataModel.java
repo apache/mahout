@@ -234,7 +234,7 @@ public final class HBaseDataModel implements DataModel, Closeable {
 
     SortedMap<byte[],byte[]> families = result.getFamilyMap(ITEMS_CF);
     FastIDSet ids = new FastIDSet(families.size());
-    for (byte[] family: families.keySet()) {
+    for (byte[] family : families.keySet()) {
       ids.add(Bytes.toLong(family));
     }
     return ids;
@@ -495,7 +495,7 @@ public final class HBaseDataModel implements DataModel, Closeable {
 
     // Copy into FastIDSet
     FastIDSet userIDs = new FastIDSet(ids.size());
-    for(long l : ids) {
+    for (long l : ids) {
       userIDs.add(l);
     }
 

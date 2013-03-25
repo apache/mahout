@@ -99,7 +99,7 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
   public void write(ClusterWritable clusterWritable) throws IOException {
     StringBuilder line = new StringBuilder();
     Cluster cluster = clusterWritable.getValue();
-	Color rgb = getColor(cluster.getId());
+  Color rgb = getColor(cluster.getId());
 
     String topTerms = "";
     if (dictionary != null) {
@@ -122,7 +122,8 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
         Vector theVec = point.getVector();
         double distance = 1;
         if (measure != null) {
-          distance = measure.distance(cluster.getCenter().getLengthSquared(), cluster.getCenter(), theVec) * 500; //scale the distance
+          //scale the distance
+          distance = measure.distance(cluster.getCenter().getLengthSquared(), cluster.getCenter(), theVec) * 500;
         }
         String vecStr;
         int angle = random.nextInt(360); //pick an angle at random and then scale along that angle

@@ -21,14 +21,14 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.utils.email.MailProcessor;
 
 import java.io.IOException;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
 /**
- * Convert the labels created by the {@link MailProcessor} to one consumable by the classifiers
+ * Convert the labels created by the {@link org.apache.mahout.utils.email.MailProcessor} to one consumable
+ * by the classifiers
  */
 public class PrepEmailMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable> {
 

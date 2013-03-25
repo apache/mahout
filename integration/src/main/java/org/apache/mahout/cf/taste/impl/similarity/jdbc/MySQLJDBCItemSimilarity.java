@@ -101,3 +101,4 @@ public class MySQLJDBCItemSimilarity extends SQL92JDBCItemSimilarity {
   }
   
 }
+

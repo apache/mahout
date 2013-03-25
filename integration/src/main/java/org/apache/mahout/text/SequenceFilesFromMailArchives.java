@@ -23,7 +23,6 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -45,7 +44,7 @@ import java.util.regex.Pattern;
 /**
  * Converts a directory of gzipped mail archives into SequenceFiles of specified
  * chunkSize. This class is similar to {@link SequenceFilesFromDirectory} except
- * it uses block-compressed {@link SequenceFile}s and parses out the subject and
+ * it uses block-compressed {@link org.apache.hadoop.io.SequenceFile}s and parses out the subject and
  * body text of each mail message into a separate key/value pair.
  */
 public final class SequenceFilesFromMailArchives extends AbstractJob {
@@ -166,7 +165,8 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
         obuilder.withLongName("quotedRegex")
             .withRequired(false).withArgument(abuilder.withName("regex")
                 .withMinimum(1).withMaximum(1).create()).withDescription(
-                "Specify the regex that identifies quoted text.  Default is to look for > or | at the beginning of the line.")
+                "Specify the regex that identifies quoted text.  " +
+                "Default is to look for > or | at the beginning of the line.")
             .withShortName("q").create());
     addOption(
         obuilder.withLongName("separator")
@@ -179,7 +179,8 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
         obuilder.withLongName("bodySeparator")
             .withRequired(false).withArgument(abuilder.withName("bodySeparator")
                 .withMinimum(1).withMaximum(1).create()).withDescription(
-                "The separator to use between lines in the body.  Default is \\n.  Useful to change if you wish to have the message be on one line")
+                "The separator to use between lines in the body.  Default is \\n.  " +
+                "Useful to change if you wish to have the message be on one line")
             .withShortName("bodySep").create());
     addOption(DefaultOptionCreator.helpOption());
     Map<String, List<String>> parsedArgs = parseArguments(args);

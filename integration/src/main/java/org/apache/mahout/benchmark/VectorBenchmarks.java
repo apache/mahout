@@ -751,7 +751,7 @@ public class VectorBenchmarks {
         
       }    
       
-      int numClusters=25;
+      int numClusters = 25;
       if (cmdLine.hasOption(numClustersOpt)) {
         numClusters = Integer.parseInt((String) cmdLine.getValue(numClustersOpt));
       }

@@ -179,7 +179,7 @@ public final class LDAPrintTopics {
           }
         });
         for (Pair<String,Double> wordWithScore : topKasList) {
-          out.write(wordWithScore.getFirst() + " [p(" + wordWithScore.getFirst() + "|topic_" + i +") = "
+          out.write(wordWithScore.getFirst() + " [p(" + wordWithScore.getFirst() + "|topic_" + i + ") = "
            + wordWithScore.getSecond());
           out.write('\n');
         }

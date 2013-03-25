@@ -52,10 +52,13 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
   /**
    *
    * @param writer The underlying {@link java.io.Writer} to use
-   * @param clusterIdToPoints The map between cluster ids {@link org.apache.mahout.clustering.Cluster#getId()} and the points in the cluster
-   * @param measure The {@link org.apache.mahout.common.distance.DistanceMeasure} used to calculate the distance.  Some writers may wish to use it for calculating weights for display.  May be null.
+   * @param clusterIdToPoints The map between cluster ids {@link org.apache.mahout.clustering.Cluster#getId()} and the
+   *                          points in the cluster
+   * @param measure The {@link org.apache.mahout.common.distance.DistanceMeasure} used to calculate the distance.
+   *                Some writers may wish to use it for calculating weights for display.  May be null.
    */
-  protected AbstractClusterWriter(Writer writer, Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints, DistanceMeasure measure) {
+  protected AbstractClusterWriter(Writer writer, Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints,
+      DistanceMeasure measure) {
     this.writer = writer;
     this.clusterIdToPoints = clusterIdToPoints;
     this.measure = measure;

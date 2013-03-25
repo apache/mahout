@@ -26,7 +26,6 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.Utils.OutputFileUtils.OutputFilesFilter;
 import org.apache.hadoop.util.ToolRunner;
@@ -48,7 +47,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
- * Can read in a {@link SequenceFile} of {@link Vector}s and dump
+ * Can read in a {@link org.apache.hadoop.io.SequenceFile} of {@link Vector}s and dump
  * out the results using {@link Vector#asFormatString()} to either the console or to a
  * file.
  */
@@ -76,10 +75,13 @@ public final class VectorDumper extends AbstractJob {
     addOption("printKey", "p", "Print out the key as well, delimited by tab (or the value if useKey is true", false);
     addOption("dictionary", "d", "The dictionary file.", false);
     addOption("dictionaryType", "dt", "The dictionary file type (text|seqfile)", false);
-    addOption("csv", "c", "Output the Vector as CSV.  Otherwise it substitutes in the terms for vector cell entries", false);
-    addOption("namesAsComments", "n", "If using CSV output, optionally add a comment line for each NamedVector (if the vector is one) printing out the name", false);
+    addOption("csv", "c", "Output the Vector as CSV.  Otherwise it substitutes in the terms for vector cell entries",
+        false);
+    addOption("namesAsComments", "n", "If using CSV output, optionally add a comment line for each NamedVector " +
+        "(if the vector is one) printing out the name", false);
     addOption("nameOnly", "N", "Use the name as the value for each NamedVector (skip other vectors)", false);
-    addOption("sortVectors", "sort", "Sort output key/value pairs of the vector entries in abs magnitude descending order", false);
+    addOption("sortVectors", "sort", "Sort output key/value pairs of the vector entries in abs magnitude " +
+        "descending order", false);
     addOption("quiet", "q", "Print only file contents", false);
     addOption("sizeOnly", "sz", "Dump only the size of the vector", false);
     addOption("numItems", "ni", "Output at most <n> vecors", false);

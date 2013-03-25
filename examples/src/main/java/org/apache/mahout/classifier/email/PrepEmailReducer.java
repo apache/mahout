@@ -24,7 +24,7 @@ import org.apache.mahout.math.VectorWritable;
 import java.io.IOException;
 import java.util.Iterator;
 
-public class PrepEmailReducer extends Reducer<Text, VectorWritable, Text, VectorWritable>{
+public class PrepEmailReducer extends Reducer<Text, VectorWritable, Text, VectorWritable> {
 
   private long maxItemsPerLabel = 10000;
 

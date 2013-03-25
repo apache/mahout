@@ -29,7 +29,8 @@ import org.apache.mahout.math.Vector;
 /**
  * Iterates a CSV file and produces {@link org.apache.mahout.math.Vector}.
  * <br/>
- * The Iterator returned throws {@link UnsupportedOperationException} for the {@link java.util.Iterator#remove()} method.
+ * The Iterator returned throws {@link UnsupportedOperationException} for the {@link java.util.Iterator#remove()}
+ * method.
  * <p/>
  * Assumes DenseVector for now, but in the future may have the option of mapping columns to sparse format
  * <p/>

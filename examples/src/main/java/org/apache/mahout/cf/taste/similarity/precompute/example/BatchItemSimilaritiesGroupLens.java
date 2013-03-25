@@ -35,7 +35,9 @@ import java.io.File;
  * to the ratings.dat file as argument
  *
  */
-public class BatchItemSimilaritiesGroupLens {
+public final class BatchItemSimilaritiesGroupLens {
+
+  private BatchItemSimilaritiesGroupLens() {}
 
   public static void main(String[] args) throws Exception {
 

@@ -26,7 +26,6 @@ import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
@@ -36,9 +35,9 @@ import org.apache.mahout.utils.io.ChunkedWriter;
 /**
  * Converts a directory of text documents into SequenceFiles of Specified chunkSize. This class takes in a
  * parent directory containing sub folders of text documents and recursively reads the files and creates the
- * {@link SequenceFile}s of docid => content. The docid is set as the relative path of the document from the
- * parent directory prepended with a specified prefix. You can also specify the input encoding of the text
- * files. The content of the output SequenceFiles are encoded as UTF-8 text.
+ * {@link org.apache.hadoop.io.SequenceFile}s of docid => content. The docid is set as the relative path of the
+ * document from the parent directory prepended with a specified prefix. You can also specify the input encoding
+ * of the text files. The content of the output SequenceFiles are encoded as UTF-8 text.
  */
 public class SequenceFilesFromDirectory extends AbstractJob {
 

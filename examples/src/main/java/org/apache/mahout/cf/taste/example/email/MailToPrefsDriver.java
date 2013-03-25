@@ -57,11 +57,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Convert the Mail archives (see {@link org.apache.mahout.text.SequenceFilesFromMailArchives}) to a preference
  * file that can be consumed by the {@link org.apache.mahout.cf.taste.hadoop.pseudo.RecommenderJob}.
  * <p/>
- * This assumes the input is a Sequence File, that the key is: filename/message id and the value is a list (separated by the
- * user's choosing) containing the from email and any references
+ * This assumes the input is a Sequence File, that the key is: filename/message id and the value is a list
+ * (separated by the user's choosing) containing the from email and any references
  * <p/>
- * The output is a matrix where either the from or to are the rows (represented as longs) and the columns are the message ids
- * that the user has interacted with (as a VectorWritable).  This class currently does not account for thread hijacking.
+ * The output is a matrix where either the from or to are the rows (represented as longs) and the columns are the
+ * message ids that the user has interacted with (as a VectorWritable).  This class currently does not account for
+ * thread hijacking.
  * <p/>
  * It also outputs a side table mapping the row ids to their original and the message ids to the message thread id
  */
@@ -82,11 +83,15 @@ public final class MailToPrefsDriver extends AbstractJob {
     addOutputOption();
     addOption(DefaultOptionCreator.overwriteOption().create());
     addOption("chunkSize", "cs", "The size of chunks to write.  Default is 100 mb", "100");
-    addOption("separator", "sep", "The separator used in the input file to separate to, from, subject.  Default is \\n", "\n");
-    addOption("from", "f", "The position in the input text (value) where the from email is located, starting from zero (0).", "0");
-    addOption("refs", "r", "The position in the input text (value) where the reference ids are located, starting from zero (0).", "1");
-    addOption(buildOption("useCounts", "u", "If set, then use the number of times the user has interacted with a thread as an indication of their preference.  Otherwise, use boolean preferences.",
-            false, false, "true"));
+    addOption("separator", "sep", "The separator used in the input file to separate to, from, subject.  Default is \\n",
+        "\n");
+    addOption("from", "f", "The position in the input text (value) where the from email is located, starting from " +
+        "zero (0).", "0");
+    addOption("refs", "r", "The position in the input text (value) where the reference ids are located, " +
+        "starting from zero (0).", "1");
+    addOption(buildOption("useCounts", "u", "If set, then use the number of times the user has interacted with a " +
+        "thread as an indication of their preference.  Otherwise, use boolean preferences.", false, false,
+        String.valueOf(true)));
     Map<String, List<String>> parsedArgs = parseArguments(args);
 
     Path input = getInputPath();
@@ -106,7 +111,8 @@ public final class MailToPrefsDriver extends AbstractJob {
     boolean overwrite = hasOption(DefaultOptionCreator.OVERWRITE_OPTION);
     // create the dictionary between message ids and longs
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
-      //TODO: there seems to be a pattern emerging for dictionary creation -- sparse vectors from seq files also has this.
+      //TODO: there seems to be a pattern emerging for dictionary creation
+      // -- sparse vectors from seq files also has this.
       Path msgIdsPath = new Path(output, "msgIds");
       if (overwrite) {
         HadoopUtil.delete(conf, msgIdsPath);
@@ -128,7 +134,8 @@ public final class MailToPrefsDriver extends AbstractJob {
         return -1;
       }
       //write out the dictionary at the top level
-      msgIdChunks = createDictionaryChunks(msgIdsPath, output, "msgIds-dictionary-", createMsgIdDictionary.getConfiguration(), chunkSize, msgDim);
+      msgIdChunks = createDictionaryChunks(msgIdsPath, output, "msgIds-dictionary-",
+          createMsgIdDictionary.getConfiguration(), chunkSize, msgDim);
     }
     //create the dictionary between from email addresses and longs
     List<Path> fromChunks = null;
@@ -155,12 +162,14 @@ public final class MailToPrefsDriver extends AbstractJob {
       }
       //write out the dictionary at the top level
       int[] fromDim = new int[1];
-      fromChunks = createDictionaryChunks(fromIdsPath, output, "fromIds-dictionary-", createFromIdDictionary.getConfiguration(), chunkSize, fromDim);
+      fromChunks = createDictionaryChunks(fromIdsPath, output, "fromIds-dictionary-",
+          createFromIdDictionary.getConfiguration(), chunkSize, fromDim);
     }
     //OK, we have our dictionaries, let's output the real thing we need: <from_id -> <msgId, msgId, msgId, ...>>
     if (shouldRunNextPhase(parsedArgs, currentPhase) && fromChunks != null && msgIdChunks != null) {
       //Job map
-      //may be a way to do this so that we can load the from ids in memory, if they are small enough so that we don't need the double loop
+      //may be a way to do this so that we can load the from ids in memory, if they are small enough so that
+      // we don't need the double loop
       log.info("Creating recommendation matrix");
       Path vecPath = new Path(output, "recInput");
       if (overwrite) {
@@ -181,20 +190,23 @@ public final class MailToPrefsDriver extends AbstractJob {
           Path out = new Path(vecPath, "tmp-" + i + '-' + j);
           DistributedCache.setCacheFiles(new URI[]{fromChunk.toUri(), idChunk.toUri()}, conf);
           Job createRecMatrix = prepareJob(input, out, SequenceFileInputFormat.class,
-                  MailToRecMapper.class, Text.class, LongWritable.class, MailToRecReducer.class, Text.class, NullWritable.class,
-                  TextOutputFormat.class);
+                  MailToRecMapper.class, Text.class, LongWritable.class, MailToRecReducer.class, Text.class,
+                  NullWritable.class, TextOutputFormat.class);
           createRecMatrix.getConfiguration().set("mapred.output.compress", "false");
           boolean succeeded = createRecMatrix.waitForCompletion(true);
           if (!succeeded) {
             return -1;
           }
           //copy the results up a level
-          //HadoopUtil.copyMergeSeqFiles(out.getFileSystem(conf), out, vecPath.getFileSystem(conf), outPath, true, conf, "");
-          FileStatus[] fs = HadoopUtil.getFileStatus(new Path(out, "*"), PathType.GLOB, PathFilters.partFilter(), null, conf);
+          //HadoopUtil.copyMergeSeqFiles(out.getFileSystem(conf), out, vecPath.getFileSystem(conf), outPath, true,
+          // conf, "");
+          FileStatus[] fs = HadoopUtil.getFileStatus(new Path(out, "*"), PathType.GLOB, PathFilters.partFilter(), null,
+              conf);
           for (int k = 0; k < fs.length; k++) {
             FileStatus f = fs[k];
             Path outPath = new Path(vecPath, "chunk-" + i + '-' + j + '-' + k);
-            FileUtil.copy(f.getPath().getFileSystem(conf), f.getPath(), outPath.getFileSystem(conf), outPath, true, overwrite, conf);
+            FileUtil.copy(f.getPath().getFileSystem(conf), f.getPath(), outPath.getFileSystem(conf), outPath, true,
+                overwrite, conf);
           }
           HadoopUtil.delete(conf, out);
           j++;
@@ -207,7 +219,8 @@ public final class MailToPrefsDriver extends AbstractJob {
         HadoopUtil.delete(conf, mergePath);
       }
       log.info("Merging together output vectors to vectors.dat in {}", output);*/
-      //HadoopUtil.copyMergeSeqFiles(vecPath.getFileSystem(conf), vecPath, mergePath.getFileSystem(conf), mergePath, false, conf, "\n");
+      //HadoopUtil.copyMergeSeqFiles(vecPath.getFileSystem(conf), vecPath, mergePath.getFileSystem(conf), mergePath,
+      // false, conf, "\n");
     }
 
     return 0;
@@ -217,7 +230,8 @@ public final class MailToPrefsDriver extends AbstractJob {
                                                    Path dictionaryPathBase,
                                                    String name,
                                                    Configuration baseConf,
-                                                   int chunkSizeInMegabytes, int[] maxTermDimension) throws IOException {
+                                                   int chunkSizeInMegabytes, int[] maxTermDimension)
+      throws IOException {
     List<Path> chunkPaths = Lists.newArrayList();
 
     Configuration conf = new Configuration(baseConf);

@@ -19,18 +19,17 @@ package org.apache.mahout.utils.vectors.lucene;
 
 import com.google.common.base.Preconditions;
 import org.apache.lucene.index.IndexReader;
-import org.apache.mahout.math.Vector;
 import org.apache.mahout.utils.vectors.TermInfo;
 import org.apache.mahout.vectorizer.Weight;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * An {@link Iterator} over {@link Vector}s that uses a Lucene index as the source for creating the
- * {@link Vector}s. The field used to create the vectors currently must have term vectors stored for it.
+ * An {@link java.util.Iterator} over {@link org.apache.mahout.math.Vector}s that uses a Lucene index as the source
+ * for creating the {@link org.apache.mahout.math.Vector}s. The field used to create the vectors currently must have
+ * term vectors stored for it.
  */
 public class LuceneIterator extends AbstractLuceneIterator {
     protected final Set<String> idFieldSelector;
@@ -63,7 +62,8 @@ public class LuceneIterator extends AbstractLuceneIterator {
    * @param weight     weight
    * @param normPower  the normalization value. Must be nonnegative, or {@link LuceneIterable#NO_NORMALIZING}
    * @param maxPercentErrorDocs most documents that will be tolerated without a term freq vector. In [0,1].
-   * @see #LuceneIterator(org.apache.lucene.index.IndexReader, String, String, org.apache.mahout.utils.vectors.TermInfo, org.apache.mahout.vectorizer.Weight, double)
+   * @see #LuceneIterator(org.apache.lucene.index.IndexReader, String, String, org.apache.mahout.utils.vectors.TermInfo,
+   * org.apache.mahout.vectorizer.Weight, double)
    */
   public LuceneIterator(IndexReader indexReader,
                         String idField,

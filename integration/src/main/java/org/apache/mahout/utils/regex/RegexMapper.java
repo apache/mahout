@@ -56,15 +56,16 @@ public class RegexMapper extends Mapper<LongWritable, Text, LongWritable, Text> 
       }
     }
 
-    transformer = ClassUtils.instantiateAs(config.get(TRANSFORMER_CLASS, IdentityTransformer.class.getName()), RegexTransformer.class);
+    transformer = ClassUtils.instantiateAs(config.get(TRANSFORMER_CLASS, IdentityTransformer.class.getName()),
+        RegexTransformer.class);
     String analyzerName = config.get(ANALYZER_NAME);
     if (analyzerName != null && transformer instanceof AnalyzerTransformer) {
       Analyzer analyzer = ClassUtils.instantiateAs(analyzerName, Analyzer.class);
       ((AnalyzerTransformer)transformer).setAnalyzer(analyzer);
     }
 
-    formatter = ClassUtils.instantiateAs(config.get(FORMATTER_CLASS, IdentityFormatter.class.getName()), RegexFormatter.class);
-
+    formatter = ClassUtils.instantiateAs(config.get(FORMATTER_CLASS, IdentityFormatter.class.getName()),
+        RegexFormatter.class);
   }
 
 

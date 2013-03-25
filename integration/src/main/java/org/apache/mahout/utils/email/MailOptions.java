@@ -149,7 +149,8 @@ public class MailOptions {
   /**
    * @see #setStripQuotedText(boolean)
    *
-   * @param quotedTextPattern The {@link java.util.regex.Pattern} to use to identify lines that are quoted text.  Default is | and >
+   * @param quotedTextPattern The {@link java.util.regex.Pattern} to use to identify lines that are quoted text.
+   *                          Default is | and >
    */
   public void setQuotedTextPattern(Pattern quotedTextPattern) {
     this.quotedTextPattern = quotedTextPattern;
