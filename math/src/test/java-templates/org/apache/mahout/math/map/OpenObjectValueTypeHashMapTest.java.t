@@ -84,16 +84,16 @@ public class OpenObject${valueTypeCap}HashMapTest extends Assert {
     double[] maxLoadFactor = new double[1];
     
     map.getInternalFactors(capacity, minLoadFactor, maxLoadFactor);
-    assertEquals(AbstractSet.defaultCapacity, capacity[0]);
-    assertEquals(AbstractSet.defaultMaxLoadFactor, maxLoadFactor[0], 0.001);
-    assertEquals(AbstractSet.defaultMinLoadFactor, minLoadFactor[0], 0.001);
+    assertEquals(AbstractSet.DEFAULT_CAPACITY, capacity[0]);
+    assertEquals(AbstractSet.DEFAULT_MAX_LOAD_FACTOR, maxLoadFactor[0], 0.001);
+    assertEquals(AbstractSet.DEFAULT_MIN_LOAD_FACTOR, minLoadFactor[0], 0.001);
     int prime = PrimeFinder.nextPrime(907);
     map = new OpenObject${valueTypeCap}HashMap<String>(prime);
     
     map.getInternalFactors(capacity, minLoadFactor, maxLoadFactor);
     assertEquals(prime, capacity[0]);
-    assertEquals(AbstractSet.defaultMaxLoadFactor, maxLoadFactor[0], 0.001);
-    assertEquals(AbstractSet.defaultMinLoadFactor, minLoadFactor[0], 0.001);
+    assertEquals(AbstractSet.DEFAULT_MAX_LOAD_FACTOR, maxLoadFactor[0], 0.001);
+    assertEquals(AbstractSet.DEFAULT_MIN_LOAD_FACTOR, minLoadFactor[0], 0.001);
     
     map = new OpenObject${valueTypeCap}HashMap<String>(prime, 0.4, 0.8);
     map.getInternalFactors(capacity, minLoadFactor, maxLoadFactor);

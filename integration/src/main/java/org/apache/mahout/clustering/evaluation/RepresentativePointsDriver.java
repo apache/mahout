@@ -184,8 +184,8 @@ public final class RepresentativePointsDriver extends AbstractJob {
     Map<Integer,WeightedVectorWritable> mostDistantPoints = Maps.newHashMap();
     FileSystem fs = FileSystem.get(clusteredPointsIn.toUri(), conf);
     for (Pair<IntWritable,WeightedVectorWritable> record
-        : new SequenceFileDirIterable<IntWritable,WeightedVectorWritable>(
-        clusteredPointsIn, PathType.LIST, PathFilters.logsCRCFilter(), null, true, conf)) {
+        : new SequenceFileDirIterable<IntWritable,WeightedVectorWritable>(clusteredPointsIn, PathType.LIST,
+            PathFilters.logsCRCFilter(), null, true, conf)) {
       RepresentativePointsMapper.mapPoint(record.getFirst(), record.getSecond(), measure, repPoints, mostDistantPoints);
     }
     int part = 0;

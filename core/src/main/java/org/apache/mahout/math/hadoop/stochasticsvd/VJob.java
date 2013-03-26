@@ -167,7 +167,7 @@ public class VJob {
                   Path outputPath,
                   int k,
                   int numReduceTasks,
-                  SSVDSolver.OutputScalingEnum outputScaling ) throws ClassNotFoundException,
+                  SSVDSolver.OutputScalingEnum outputScaling) throws ClassNotFoundException,
     InterruptedException, IOException {
 
     job = new Job(conf);

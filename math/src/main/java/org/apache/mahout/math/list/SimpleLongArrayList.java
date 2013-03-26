@@ -9,7 +9,8 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.list;
 
 /**
- Resizable list holding <code>long</code> elements; implemented with arrays; not efficient; just to demonstrate which methods you must override to implement a fully functional list.
+ Resizable list holding <code>long</code> elements; implemented with arrays; not efficient; just to
+ demonstrate which methods you must override to implement a fully functional list.
  */
 public class SimpleLongArrayList extends AbstractLongList {
 

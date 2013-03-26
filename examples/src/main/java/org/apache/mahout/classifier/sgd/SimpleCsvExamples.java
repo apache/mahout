@@ -142,7 +142,7 @@ public final class SimpleCsvExamples {
     private static final Splitter ON_TABS = Splitter.on(SEPARATOR_CHAR).trimResults();
     public static final Joiner WITH_COMMAS = Joiner.on(SEPARATOR_CHAR);
 
-    public static final Random rand = RandomUtils.getRandom();
+    public static final Random RAND = RandomUtils.getRandom();
 
     private final List<String> data;
 
@@ -180,7 +180,7 @@ public final class SimpleCsvExamples {
      * @return
      */
     private static int randomValue(double mean) {
-      return (int) (-mean * Math.log1p(-rand.nextDouble()));
+      return (int) (-mean * Math.log1p(-RAND.nextDouble()));
     }
 
     @Override

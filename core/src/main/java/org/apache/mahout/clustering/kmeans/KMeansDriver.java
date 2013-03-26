@@ -178,7 +178,7 @@ public class KMeansDriver extends AbstractJob {
    */
   public static void run(Path input, Path clustersIn, Path output, DistanceMeasure measure, double convergenceDelta,
       int maxIterations, boolean runClustering, double clusterClassificationThreshold, boolean runSequential)
-      throws IOException, InterruptedException, ClassNotFoundException {
+    throws IOException, InterruptedException, ClassNotFoundException {
     run(new Configuration(), input, clustersIn, output, measure, convergenceDelta, maxIterations, runClustering,
         clusterClassificationThreshold, runSequential);
   }

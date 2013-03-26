@@ -28,7 +28,8 @@ import org.apache.mahout.math.Vector;
 import java.util.Iterator;
 
 /**
- * See <a href="http://www.hpl.hp.com/personal/Robert_Schreiber/papers/2008%20AAIM%20Netflix/netflix_aaim08(submitted).pdf">
+ * See
+ * <a href="http://www.hpl.hp.com/personal/Robert_Schreiber/papers/2008%20AAIM%20Netflix/netflix_aaim08(submitted).pdf">
  * this paper.</a>
  */
 public final class AlternatingLeastSquaresSolver {
@@ -50,7 +51,7 @@ public final class AlternatingLeastSquaresSolver {
     Matrix RiIiMaybeTransposed = createRiIiMaybeTransposed(ratingVector);
 
     /* compute Ai = MiIi * t(MiIi) + lambda * nui * E */
-    Matrix Ai = MiTimesMiTransposePlusLambdaTimesNuiTimesE(MiIi, lambda, nui);
+    Matrix Ai = miTimesMiTransposePlusLambdaTimesNuiTimesE(MiIi, lambda, nui);
     /* compute Vi = MiIi * t(R(i,Ii)) */
     Matrix Vi = MiIi.times(RiIiMaybeTransposed);
     /* compute Ai * ui = Vi */
@@ -71,7 +72,7 @@ public final class AlternatingLeastSquaresSolver {
     return matrix;
   }
 
-  private static Matrix MiTimesMiTransposePlusLambdaTimesNuiTimesE(Matrix MiIi, double lambda, int nui) {
+  private static Matrix miTimesMiTransposePlusLambdaTimesNuiTimesE(Matrix MiIi, double lambda, int nui) {
 
     double lambdaTimesNui = lambda * nui;
     int rows = MiIi.numRows();

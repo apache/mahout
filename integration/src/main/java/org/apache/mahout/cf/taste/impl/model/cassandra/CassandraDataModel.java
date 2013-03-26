@@ -246,9 +246,9 @@ public final class CassandraDataModel implements DataModel, Closeable {
   public int getNumUsersWithPreferenceFor(long itemID1, long itemID2) throws TasteException {
     FastIDSet userIDs1 = userIDsFromItemCache.get(itemID1);
     FastIDSet userIDs2 = userIDsFromItemCache.get(itemID2);
-    return userIDs1.size() < userIDs2.size() ?
-        userIDs2.intersectionSize(userIDs1) :
-        userIDs1.intersectionSize(userIDs2);
+    return userIDs1.size() < userIDs2.size()
+        ? userIDs2.intersectionSize(userIDs1)
+        : userIDs1.intersectionSize(userIDs2);
   }
 
   @Override

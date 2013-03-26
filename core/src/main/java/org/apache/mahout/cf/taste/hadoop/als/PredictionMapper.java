@@ -66,7 +66,7 @@ public class PredictionMapper extends SharingMapper<IntWritable,VectorWritable,I
 
   @Override
   protected void map(IntWritable userIDWritable, VectorWritable ratingsWritable, Context ctx)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
 
     Pair<OpenIntObjectHashMap<Vector>, OpenIntObjectHashMap<Vector>> uAndM = getSharedInstance();
     OpenIntObjectHashMap<Vector> U = uAndM.getFirst();

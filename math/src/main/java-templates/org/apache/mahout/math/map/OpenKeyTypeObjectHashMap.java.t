@@ -54,7 +54,7 @@ public class Open${keyTypeCap}ObjectHashMap<T> extends Abstract${keyTypeCap}Obje
 
   /** Constructs an empty map with default capacity and default load factors. */
   public Open${keyTypeCap}ObjectHashMap() {
-    this(defaultCapacity);
+    this(DEFAULT_CAPACITY);
   }
 
   /**
@@ -64,7 +64,7 @@ public class Open${keyTypeCap}ObjectHashMap<T> extends Abstract${keyTypeCap}Obje
    * @throws IllegalArgumentException if the initial capacity is less than zero.
    */
   public Open${keyTypeCap}ObjectHashMap(int initialCapacity) {
-    this(initialCapacity, defaultMinLoadFactor, defaultMaxLoadFactor);
+    this(initialCapacity, DEFAULT_MIN_LOAD_FACTOR, DEFAULT_MAX_LOAD_FACTOR);
   }
 
   /**
@@ -482,7 +482,7 @@ public class Open${keyTypeCap}ObjectHashMap<T> extends Abstract${keyTypeCap}Obje
 
     // memory will be exhausted long before this pathological case happens, anyway.
     this.minLoadFactor = minLoadFactor;
-    if (capacity == PrimeFinder.largestPrime) {
+    if (capacity == PrimeFinder.LARGEST_PRIME) {
       this.maxLoadFactor = 1.0;
     } else {
       this.maxLoadFactor = maxLoadFactor;

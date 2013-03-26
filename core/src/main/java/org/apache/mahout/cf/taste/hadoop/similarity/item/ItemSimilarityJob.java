@@ -123,8 +123,8 @@ public final class ItemSimilarityJob extends AbstractJob {
     int minPrefsPerUser = Integer.parseInt(getOption("minPrefsPerUser"));
     boolean booleanData = Boolean.valueOf(getOption("booleanData"));
 
-    double threshold = hasOption("threshold") ?
-        Double.parseDouble(getOption("threshold")) : RowSimilarityJob.NO_THRESHOLD;
+    double threshold = hasOption("threshold")
+        ? Double.parseDouble(getOption("threshold")) : RowSimilarityJob.NO_THRESHOLD;
 
     Path similarityMatrixPath = getTempPath("similarityMatrix");
     Path prepPath = getTempPath("prepareRatingMatrix");

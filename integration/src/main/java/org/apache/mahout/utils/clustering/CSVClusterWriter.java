@@ -48,7 +48,7 @@ public class CSVClusterWriter extends AbstractClusterWriter {
   public void write(ClusterWritable clusterWritable) throws IOException {
     StringBuilder line = new StringBuilder();
     Cluster cluster = clusterWritable.getValue();
-  line.append(cluster.getId());
+    line.append(cluster.getId());
     List<WeightedVectorWritable> points = getClusterIdToPoints().get(cluster.getId());
     if (points != null) {
       for (WeightedVectorWritable point : points) {

@@ -110,8 +110,8 @@ public class FactorizationEvaluator extends AbstractJob {
 
   double computeRmse(Path errors) {
     RunningAverage average = new FullRunningAverage();
-    for (Pair<DoubleWritable,NullWritable> entry :
-      new SequenceFileDirIterable<DoubleWritable, NullWritable>(errors, PathType.LIST, PathFilters.logsCRCFilter(),
+    for (Pair<DoubleWritable,NullWritable> entry
+        : new SequenceFileDirIterable<DoubleWritable, NullWritable>(errors, PathType.LIST, PathFilters.logsCRCFilter(),
           getConf())) {
       DoubleWritable error = entry.getFirst();
       average.addDatum(error.get() * error.get());

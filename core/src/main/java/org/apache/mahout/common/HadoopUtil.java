@@ -71,7 +71,7 @@ public final class HadoopUtil {
     Configuration jobConf = job.getConfiguration();
 
     if (mapper.equals(Mapper.class)) {
-        throw new IllegalStateException("Can't figure out the user class jar file from mapper/reducer");
+      throw new IllegalStateException("Can't figure out the user class jar file from mapper/reducer");
     }
     job.setJarByClass(mapper);
 

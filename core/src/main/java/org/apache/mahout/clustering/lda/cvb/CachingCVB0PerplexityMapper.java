@@ -95,7 +95,7 @@ public class CachingCVB0PerplexityMapper extends
 
   @Override
   public void map(IntWritable docId, VectorWritable document, Context context)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     if (testFraction < 1.0f && random.nextFloat() >= testFraction) {
       return;
     }

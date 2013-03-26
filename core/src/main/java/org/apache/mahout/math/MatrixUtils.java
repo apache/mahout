@@ -36,7 +36,7 @@ public final class MatrixUtils {
   }
 
   public static void write(Path outputDir, Configuration conf, VectorIterable matrix)
-      throws IOException {
+    throws IOException {
     FileSystem fs = outputDir.getFileSystem(conf);
     fs.delete(outputDir, true);
     SequenceFile.Writer writer = SequenceFile.createWriter(fs, conf, outputDir,
@@ -57,8 +57,8 @@ public final class MatrixUtils {
     boolean sparse = false;
     List<Pair<Integer, Vector>> rows = Lists.newArrayList();
     for (Path modelPath : modelPaths) {
-      for (Pair<IntWritable, VectorWritable> row :
-          new SequenceFileIterable<IntWritable, VectorWritable>(modelPath, true, conf)) {
+      for (Pair<IntWritable, VectorWritable> row
+          : new SequenceFileIterable<IntWritable, VectorWritable>(modelPath, true, conf)) {
         rows.add(Pair.of(row.getFirst().get(), row.getSecond().get()));
         numRows = Math.max(numRows, row.getFirst().get());
         sparse = !row.getSecond().get().isDense();

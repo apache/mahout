@@ -328,7 +328,7 @@ public final class ImplicitLinearRegressionFactorizer extends AbstractFactorizer
     }
 
     @Override
-      public Void call() throws Exception {
+    public Void call() throws Exception {
       Matrix XTCX;
       if (recomputeUserFeatures) {
         Matrix I = identityV(dataModel.getNumItems());
@@ -372,7 +372,7 @@ public final class ImplicitLinearRegressionFactorizer extends AbstractFactorizer
     }
 
     @Override
-      public Void call() throws Exception {
+    public Void call() throws Exception {
       long start = System.currentTimeMillis();
       delegate.call();
       long end = System.currentTimeMillis();

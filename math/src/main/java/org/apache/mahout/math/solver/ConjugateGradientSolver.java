@@ -52,12 +52,12 @@ import org.slf4j.LoggerFactory;
  * wikipedia article</a>.
  */
 
-public class ConjugateGradientSolver
-{
+public class ConjugateGradientSolver {
+
   public static final double DEFAULT_MAX_ERROR = 1.0e-9;
   
   private static final Logger log = LoggerFactory.getLogger(ConjugateGradientSolver.class);
-  private static final PlusMult plusMult = new PlusMult(1.0);
+  private static final PlusMult PLUS_MULT = new PlusMult(1.0);
 
   private int iterations;
   private double residualNormSquared;
@@ -175,12 +175,12 @@ public class ConjugateGradientSolver
       double alpha = conditionedNormSqr / updateDirection.dot(aTimesUpdate);
       
       // x = x + alpha * updateDirection
-      plusMult.setMultiplicator(alpha);
-      x.assign(updateDirection, plusMult);
+      PLUS_MULT.setMultiplicator(alpha);
+      x.assign(updateDirection, PLUS_MULT);
 
       // residual = residual - alpha * A * updateDirection
-      plusMult.setMultiplicator(-alpha);
-      residual.assign(aTimesUpdate, plusMult);
+      PLUS_MULT.setMultiplicator(-alpha);
+      residual.assign(aTimesUpdate, PLUS_MULT);
       
       previousConditionedNormSqr = conditionedNormSqr;
       residualNormSquared = residual.dot(residual);

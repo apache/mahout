@@ -117,23 +117,19 @@ public final class SequenceFileDirValueIterator<V extends Writable> extends
 
       Iterator<Iterator<V>> fsIterators =
         Iterators.transform(fileStatusIterator,
-                            new Function<FileStatus, Iterator<V>>() {
-                              @Override
-                              public Iterator<V> apply(FileStatus from) {
-                                try {
-                                  SequenceFileValueIterator<V> iterator =
-                                    new SequenceFileValueIterator<V>(from.getPath(),
-                                                                     reuseKeyValueInstances,
-                                                                     conf);
-                                  iterators.add(iterator);
-                                  return iterator;
-                                } catch (IOException ioe) {
-                                  throw new IllegalStateException(from.getPath()
-                                                                      .toString(),
-                                                                  ioe);
-                                }
-                              }
-                            });
+          new Function<FileStatus, Iterator<V>>() {
+            @Override
+            public Iterator<V> apply(FileStatus from) {
+              try {
+                SequenceFileValueIterator<V> iterator = new SequenceFileValueIterator<V>(from.getPath(),
+                    reuseKeyValueInstances, conf);
+                iterators.add(iterator);
+                return iterator;
+              } catch (IOException ioe) {
+                throw new IllegalStateException(from.getPath().toString(), ioe);
+              }
+            }
+          });
 
       Collections.reverse(iterators); // close later in reverse order
 

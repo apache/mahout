@@ -420,7 +420,8 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
 
     public static void freeze(State<Wrapper, CrossFoldLearner> s) {
       // radically decrease learning rate
-      s.getParams()[1] -= 10;
+      double[] params = s.getParams();
+      params[1] -= 10;
 
       // and cause evolution to hold (almost)
       s.setOmni(s.getOmni() / 20);

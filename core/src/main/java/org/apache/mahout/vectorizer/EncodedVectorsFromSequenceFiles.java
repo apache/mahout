@@ -43,16 +43,17 @@ public final class EncodedVectorsFromSequenceFiles extends AbstractJob {
     addOutputOption();
     addOption(DefaultOptionCreator.analyzerOption().create());
     addOption(buildOption("sequentialAccessVector", "seq",
-                          "(Optional) Whether output vectors should be SequentialAccessVectors. " +
-                              "If set true else false",
+                          "(Optional) Whether output vectors should be SequentialAccessVectors. "
+                              + "If set true else false",
                           false, false, null));
     addOption(buildOption("namedVector", "nv",
                           "Create named vectors using the key.  False by default", false, false, null));
     addOption("cardinality", "c",
               "The cardinality to use for creating the vectors.  Default is 5000", "5000");
     addOption("encoderFieldName", "en",
-              "The name of the encoder to be passed to the FeatureVectorEncoder constructor. Default is text. " +
-                  "Note this is not the class name of a FeatureValueEncoder, but is instead the construction argument.",
+              "The name of the encoder to be passed to the FeatureVectorEncoder constructor. Default is text. "
+                  + "Note this is not the class name of a FeatureValueEncoder, but is instead the construction "
+                  + "argument.",
               "text");
     addOption("encoderClass", "ec",
               "The class name of the encoder to be used. Default is " + LuceneTextValueEncoder.class.getName(),

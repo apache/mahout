@@ -298,7 +298,7 @@ public final class BtJob {
     }
 
     @SuppressWarnings("unchecked")
-    private void outputQRow(Writable key, Vector qRow, Vector aRow ) throws IOException {
+    private void outputQRow(Writable key, Vector qRow, Vector aRow) throws IOException {
       if (nv && (aRow instanceof NamedVector)) {
         qRowValue.set(new NamedVector(qRow, ((NamedVector) aRow).getName()));
       } else {

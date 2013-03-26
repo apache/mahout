@@ -91,8 +91,8 @@ public class BuildForest extends Configured implements Tool {
     Option selectionOpt = obuilder.withLongName("selection").withShortName("sl").withRequired(false)
         .withArgument(abuilder.withName("m").withMinimum(1).withMaximum(1).create())
         .withDescription("Optional, Number of variables to select randomly at each tree-node.\n" 
-        + "For classification problem, the default is square root of the number of explanatory variables.\n" +
-        "For regression problem, the default is 1/3 of the number of explanatory variables.").create();
+        + "For classification problem, the default is square root of the number of explanatory variables.\n"
+        + "For regression problem, the default is 1/3 of the number of explanatory variables.").create();
 
     Option noCompleteOpt = obuilder.withLongName("no-complete").withShortName("nc").withRequired(false)
         .withDescription("Optional, The tree is not complemented").create();
@@ -105,8 +105,8 @@ public class BuildForest extends Configured implements Tool {
     Option minPropOpt = obuilder.withLongName("minprop").withShortName("mp").withRequired(false)
         .withArgument(abuilder.withName("minprop").withMinimum(1).withMaximum(1).create())
         .withDescription("Optional, The tree-node is not divided, if the proportion of the " 
-        + "variance of branching data is smaller than this value.\n" +
-        "In the case of a regression problem, this value is used. " 
+        + "variance of branching data is smaller than this value.\n"
+        + "In the case of a regression problem, this value is used. "
         + "The default is 1/1000(0.001).").create();
 
     Option seedOpt = obuilder.withLongName("seed").withShortName("sd").withRequired(false)

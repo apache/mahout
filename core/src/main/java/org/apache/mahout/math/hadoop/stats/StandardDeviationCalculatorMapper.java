@@ -33,7 +33,7 @@ public class StandardDeviationCalculatorMapper extends
 
   @Override
   protected void map(IntWritable key, Writable value, Context context)
-          throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     if (key.get() == -1) {
       return;
     }

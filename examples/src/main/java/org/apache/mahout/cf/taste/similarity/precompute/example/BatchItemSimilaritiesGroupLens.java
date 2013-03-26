@@ -59,8 +59,8 @@ public final class BatchItemSimilaritiesGroupLens {
     int numSimilarities = batch.computeItemSimilarities(Runtime.getRuntime().availableProcessors(), 1,
         new FileSimilarItemsWriter(resultFile));
 
-    System.out.println("Computed " + numSimilarities + " similarities for " + dataModel.getNumItems() + " items " +
-        "and saved them to " + resultFile.getAbsolutePath());
+    System.out.println("Computed " + numSimilarities + " similarities for " + dataModel.getNumItems() + " items "
+        + "and saved them to " + resultFile.getAbsolutePath());
   }
 
 }

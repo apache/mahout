@@ -206,9 +206,9 @@ public class ModelTrainer {
   public void train(Vector document, Vector docTopicCounts, boolean update, int numDocTopicIters) {
     while (true) {
       try {
-        workQueue.put(new TrainerRunnable(readModel,
-            update ? writeModel : null, document, docTopicCounts, new SparseRowMatrix(
-            numTopics, numTerms, true), numDocTopicIters));
+        workQueue.put(new TrainerRunnable(readModel, update
+            ? writeModel
+            : null, document, docTopicCounts, new SparseRowMatrix(numTopics, numTerms, true), numDocTopicIters));
         return;
       } catch (InterruptedException e) {
         log.warn("Interrupted waiting to submit document to work queue: {}", document, e);
@@ -218,15 +218,14 @@ public class ModelTrainer {
 
   public void trainSync(Vector document, Vector docTopicCounts, boolean update,
       int numDocTopicIters) {
-    new TrainerRunnable(readModel,
-            update ? writeModel : null, document, docTopicCounts, new SparseRowMatrix(
-            numTopics, numTerms, true), numDocTopicIters).run();
+    new TrainerRunnable(readModel, update
+        ? writeModel
+        : null, document, docTopicCounts, new SparseRowMatrix(numTopics, numTerms, true), numDocTopicIters).run();
   }
 
   public double calculatePerplexity(Vector document, Vector docTopicCounts, int numDocTopicIters) {
-    TrainerRunnable runner =  new TrainerRunnable(readModel,
-            null, document, docTopicCounts, new SparseRowMatrix(
-            numTopics, numTerms, true), numDocTopicIters);
+    TrainerRunnable runner =  new TrainerRunnable(readModel, null, document, docTopicCounts,
+        new SparseRowMatrix(numTopics, numTerms, true), numDocTopicIters);
     return runner.call();
   }
 

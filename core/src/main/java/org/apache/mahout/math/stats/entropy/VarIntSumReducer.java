@@ -32,7 +32,7 @@ public final class VarIntSumReducer extends Reducer<Writable, VarIntWritable, Wr
 
   @Override
   protected void reduce(Writable key, Iterable<VarIntWritable> values, Context context)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     int sum = 0;
     for (VarIntWritable value : values) {
       sum += value.get();

@@ -55,8 +55,8 @@ public final class NetflixDatasetConverter {
   public static void main(String[] args) throws IOException {
 
     if (args.length != 4) {
-      System.err.println("Usage: NetflixDatasetConverter /path/to/training_set/ /path/to/qualifying.txt " +
-          "/path/to/judging.txt /path/to/destination");
+      System.err.println("Usage: NetflixDatasetConverter /path/to/training_set/ /path/to/qualifying.txt "
+          + "/path/to/judging.txt /path/to/destination");
       return;
     }
 

@@ -363,8 +363,8 @@ public class DisplayMinHash extends DisplayClustering {
 
   private static void runMinHash(Configuration conf, Path samples, Path output) throws Exception {
     ToolRunner.run(conf, new MinHashDriver(), new String[] { "--input", samples.toString(),
-        "--hashType", HashFactory.HashType.MURMUR3.toString(), "--output", output.toString(),
-        "--minVectorSize", "1", "--debugOutput"
+      "--hashType", HashFactory.HashType.MURMUR3.toString(), "--output", output.toString(),
+      "--minVectorSize", "1", "--debugOutput"
     });
   }
 

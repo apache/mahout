@@ -577,8 +577,8 @@ public final class MongoDBDataModel implements DataModel {
             userIDPrefMap.put(userID, userPrefs);
           }
           userPrefs.add(new GenericPreference(userID, itemID, ratingValue));
-          if (user.containsKey("created_at") &&
-              mongoTimestamp.compareTo(getDate(user.get("created_at"))) < 0) {
+          if (user.containsKey("created_at")
+              && mongoTimestamp.compareTo(getDate(user.get("created_at"))) < 0) {
             mongoTimestamp = getDate(user.get("created_at"));
           }
         }

@@ -85,12 +85,12 @@ public final class MailToPrefsDriver extends AbstractJob {
     addOption("chunkSize", "cs", "The size of chunks to write.  Default is 100 mb", "100");
     addOption("separator", "sep", "The separator used in the input file to separate to, from, subject.  Default is \\n",
         "\n");
-    addOption("from", "f", "The position in the input text (value) where the from email is located, starting from " +
-        "zero (0).", "0");
-    addOption("refs", "r", "The position in the input text (value) where the reference ids are located, " +
-        "starting from zero (0).", "1");
-    addOption(buildOption("useCounts", "u", "If set, then use the number of times the user has interacted with a " +
-        "thread as an indication of their preference.  Otherwise, use boolean preferences.", false, false,
+    addOption("from", "f", "The position in the input text (value) where the from email is located, starting from "
+        + "zero (0).", "0");
+    addOption("refs", "r", "The position in the input text (value) where the reference ids are located, "
+        + "starting from zero (0).", "1");
+    addOption(buildOption("useCounts", "u", "If set, then use the number of times the user has interacted with a "
+        + "thread as an indication of their preference.  Otherwise, use boolean preferences.", false, false,
         String.valueOf(true)));
     Map<String, List<String>> parsedArgs = parseArguments(args);
 
@@ -231,7 +231,7 @@ public final class MailToPrefsDriver extends AbstractJob {
                                                    String name,
                                                    Configuration baseConf,
                                                    int chunkSizeInMegabytes, int[] maxTermDimension)
-      throws IOException {
+    throws IOException {
     List<Path> chunkPaths = Lists.newArrayList();
 
     Configuration conf = new Configuration(baseConf);

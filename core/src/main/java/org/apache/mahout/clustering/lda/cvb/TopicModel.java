@@ -192,13 +192,13 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   public static Pair<Matrix, Vector> loadModel(Configuration conf, Path... modelPaths)
-      throws IOException {
+    throws IOException {
     int numTopics = -1;
     int numTerms = -1;
     List<Pair<Integer, Vector>> rows = Lists.newArrayList();
     for (Path modelPath : modelPaths) {
-      for (Pair<IntWritable, VectorWritable> row :
-          new SequenceFileIterable<IntWritable, VectorWritable>(modelPath, true, conf)) {
+      for (Pair<IntWritable, VectorWritable> row
+          : new SequenceFileIterable<IntWritable, VectorWritable>(modelPath, true, conf)) {
         rows.add(Pair.of(row.getFirst().get(), row.getSecond().get()));
         numTopics = Math.max(numTopics, row.getFirst().get());
         if (numTerms < 0) {
@@ -357,8 +357,8 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
         int termIndex = e.index();
 
         // calc un-normalized p(topic x | term a, document i)
-        double termTopicLikelihood = (topicTermRow.get(termIndex) + eta) * (topicWeight + alpha) /
-            (topicSum + eta * numTerms);
+        double termTopicLikelihood = (topicTermRow.get(termIndex) + eta) * (topicWeight + alpha)
+            / (topicSum + eta * numTerms);
         termTopicRow.set(termIndex, termTopicLikelihood);
       }
     }

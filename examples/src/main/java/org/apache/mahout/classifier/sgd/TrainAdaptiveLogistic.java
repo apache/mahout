@@ -229,13 +229,11 @@ public final class TrainAdaptiveLogistic {
          .create();
     
     Option targetCategories = builder
-    .withLongName("categories")
-    .withDescription("the number of target categories to be considered")
-    .withRequired(true)
-    .withArgument(
-        argumentBuilder.withName("categories").withMaximum(1)
-            .create())        
-    .create();
+      .withLongName("categories")
+      .withDescription("the number of target categories to be considered")
+      .withRequired(true)
+      .withArgument(argumentBuilder.withName("categories").withMaximum(1).create())
+      .create();
     
 
     Option features = builder
@@ -373,7 +371,7 @@ public final class TrainAdaptiveLogistic {
     return lmp;
   }
 
-   static BufferedReader open(String inputFile) throws IOException {
+  static BufferedReader open(String inputFile) throws IOException {
     InputStream in;
     try {
       in = Resources.getResource(inputFile).openStream();

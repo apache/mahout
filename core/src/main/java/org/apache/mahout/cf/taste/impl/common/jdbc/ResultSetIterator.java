@@ -34,16 +34,16 @@ public abstract class ResultSetIterator<T> extends ForwardingIterator<T> {
   protected ResultSetIterator(DataSource dataSource, String sqlQuery) throws SQLException {
     this.rowDelegate = new EachRowIterator(dataSource, sqlQuery);
     delegate = Iterators.transform(rowDelegate,
-                                   new Function<ResultSet, T>() {
-                                     @Override
-                                     public T apply(ResultSet from) {
-                                       try {
-                                         return parseElement(from);
-                                       } catch (SQLException sqle) {
-                                         throw new IllegalStateException(sqle);
-                                       }
-                                     }
-                                   });
+      new Function<ResultSet, T>() {
+        @Override
+        public T apply(ResultSet from) {
+          try {
+            return parseElement(from);
+          } catch (SQLException sqle) {
+            throw new IllegalStateException(sqle);
+          }
+        }
+      });
   }
 
   @Override

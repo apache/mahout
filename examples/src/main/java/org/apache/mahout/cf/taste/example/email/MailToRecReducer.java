@@ -39,7 +39,7 @@ public class MailToRecReducer extends Reducer<Text, LongWritable, Text, NullWrit
 
   @Override
   protected void reduce(Text key, Iterable<LongWritable> values, Context context)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     if (useCounts) {
       long sum = 0;
       for (LongWritable value : values) {

@@ -156,20 +156,20 @@ public class SplitInput extends AbstractJob {
     addOption("testOutput", "te", "The test data output directory", false);
     addOption("testSplitSize", "ss", "The number of documents held back as test data for each category", false);
     addOption("testSplitPct", "sp", "The % of documents held back as test data for each category", false);
-    addOption("splitLocation", "sl", "Location for start of test data expressed as a percentage of the input file " +
-        "size (0=start, 50=middle, 100=end", false);
+    addOption("splitLocation", "sl", "Location for start of test data expressed as a percentage of the input file "
+        + "size (0=start, 50=middle, 100=end", false);
     addOption("randomSelectionSize", "rs", "The number of items to be randomly selected as test data ", false);
-    addOption("randomSelectionPct", "rp", "Percentage of items to be randomly selected as test data when using " +
-        "mapreduce mode", false);
-    addOption("charset", "c", "The name of the character encoding of the input files (not needed if using " +
-        "SequenceFiles)", false);
+    addOption("randomSelectionPct", "rp", "Percentage of items to be randomly selected as test data when using "
+        + "mapreduce mode", false);
+    addOption("charset", "c", "The name of the character encoding of the input files (not needed if using "
+        + "SequenceFiles)", false);
     addOption(buildOption("sequenceFiles", "seq", "Set if the input files are sequence files.  Default is false",
         false, false, "false"));
     addOption(DefaultOptionCreator.methodOption().create());
     addOption(DefaultOptionCreator.overwriteOption().create());
     //TODO: extend this to sequential mode
-    addOption("keepPct", "k", "The percentage of total data to keep in map-reduce mode, the rest will be ignored.  " +
-        "Default is 100%", false);
+    addOption("keepPct", "k", "The percentage of total data to keep in map-reduce mode, the rest will be ignored.  "
+        + "Default is 100%", false);
     addOption("mapRedOutputDir", "mro", "Output directory for map reduce jobs", false);
 
     if (parseArguments(args) == null) {
@@ -227,8 +227,8 @@ public class SplitInput extends AbstractJob {
       }
 
       if (hasOption("testSplitSize") && hasOption("testSplitPct")) {
-        throw new OptionException(getCLIOption("testSplitPct"), "must have either split size or split percentage " +
-            "option, not BOTH");
+        throw new OptionException(getCLIOption("testSplitPct"), "must have either split size or split percentage "
+            + "option, not BOTH");
       }
 
       if (hasOption("testSplitSize")) {
@@ -644,8 +644,8 @@ public class SplitInput extends AbstractJob {
       count++;
     }
 
-    Preconditions.checkArgument(count == 1, "Exactly one of testSplitSize, testSplitPct, testRandomSelectionSize, " +
-        "testRandomSelectionPct should be set");
+    Preconditions.checkArgument(count == 1, "Exactly one of testSplitSize, testSplitPct, testRandomSelectionSize, "
+        + "testRandomSelectionPct should be set");
 
     if (!useMapRed) {
       Configuration conf = getConf();

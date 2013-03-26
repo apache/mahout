@@ -73,8 +73,8 @@ public final class ClusterOutputPostProcessor {
    */
   public void process() throws IOException {
     createPostProcessDirectory();
-    for (Pair<?,WeightedVectorWritable> record : 
-         new SequenceFileDirIterable<Writable,WeightedVectorWritable>(clusteredPoints,
+    for (Pair<?,WeightedVectorWritable> record
+        : new SequenceFileDirIterable<Writable,WeightedVectorWritable>(clusteredPoints,
                                                                       PathType.GLOB,
                                                                       PathFilters.partFilter(),
                                                                       null,
@@ -91,8 +91,8 @@ public final class ClusterOutputPostProcessor {
    * Creates the directory to put post processed clusters.
    */
   private void createPostProcessDirectory() throws IOException {
-    if (!fileSystem.exists(clusterPostProcessorOutput) &&
-        !fileSystem.mkdirs(clusterPostProcessorOutput)) {
+    if (!fileSystem.exists(clusterPostProcessorOutput)
+        && !fileSystem.mkdirs(clusterPostProcessorOutput)) {
       throw new IOException("Error creating cluster post processor directory");
     }
   }

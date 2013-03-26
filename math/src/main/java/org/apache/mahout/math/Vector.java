@@ -78,7 +78,8 @@ public interface Vector extends Cloneable, Iterable<Vector.Element> {
   Vector assign(Vector other, DoubleDoubleFunction function);
 
   /**
-   * Apply the function to each element of the receiver, using the y value as the second argument of the DoubleDoubleFunction
+   * Apply the function to each element of the receiver, using the y value as the second argument of the
+   * DoubleDoubleFunction
    *
    * @param f a DoubleDoubleFunction to be applied
    * @param y a double value to be argument to the function

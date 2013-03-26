@@ -75,8 +75,8 @@ public class DisplayClustering extends Frame {
   
   protected static final List<List<Cluster>> CLUSTERS = Lists.newArrayList();
   
-  static final Color[] COLORS = {Color.red, Color.orange, Color.yellow, Color.green, Color.blue, Color.magenta,
-      Color.lightGray};
+  static final Color[] COLORS = { Color.red, Color.orange, Color.yellow, Color.green, Color.blue, Color.magenta,
+    Color.lightGray };
   
   protected static final double T1 = 3.0;
   

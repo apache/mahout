@@ -29,16 +29,16 @@ package org.apache.mahout.utils;
  * and because early records all get messages, we get indications early.
  */
 public class Bump125 {
-  private static final int[] bumps = {1, 2, 5};
+  private static final int[] BUMPS = {1, 2, 5};
 
   static int scale(double value, double base) {
     double scale = value / base;
     // scan for correct step
     int i = 0;
-    while (i < bumps.length - 1 && bumps[i + 1] <= scale) {
+    while (i < BUMPS.length - 1 && BUMPS[i + 1] <= scale) {
       i++;
     }
-    return bumps[i];
+    return BUMPS[i];
   }
 
   static long base(double value) {

@@ -95,7 +95,7 @@ public final class HBaseDataModel implements DataModel, Closeable {
 
   private final HTablePool pool;
   private final String tableName;
-  public final boolean tableWasCreated;
+  private final boolean tableWasCreated;
 
   // Cache of user and item ids
   private volatile FastIDSet itemIDs;

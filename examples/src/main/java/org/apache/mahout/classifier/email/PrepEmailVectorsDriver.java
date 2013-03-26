@@ -51,10 +51,10 @@ public class PrepEmailVectorsDriver extends AbstractJob {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.overwriteOption().create());
-    addOption("maxItemsPerLabel", "mipl", "The maximum number of items per label.  Can be useful for making the " +
-        "training sets the same size", String.valueOf(100000));
-    addOption(buildOption("useListName", "ul", "Use the name of the list as part of the label.  If not set, then " +
-        "just use the project name", false, false, "false"));
+    addOption("maxItemsPerLabel", "mipl", "The maximum number of items per label.  Can be useful for making the "
+        + "training sets the same size", String.valueOf(100000));
+    addOption(buildOption("useListName", "ul", "Use the name of the list as part of the label.  If not set, then "
+        + "just use the project name", false, false, "false"));
     Map<String,List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;

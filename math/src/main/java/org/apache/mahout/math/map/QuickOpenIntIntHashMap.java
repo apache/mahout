@@ -27,7 +27,7 @@ class QuickOpenIntIntHashMap extends OpenIntIntHashMap {
 
   /** Constructs an empty map with default capacity and default load factors. */
   QuickOpenIntIntHashMap() {
-    this(defaultCapacity);
+    this(DEFAULT_CAPACITY);
   }
 
   /**
@@ -37,7 +37,7 @@ class QuickOpenIntIntHashMap extends OpenIntIntHashMap {
    * @throws IllegalArgumentException if the initial capacity is less than zero.
    */
   QuickOpenIntIntHashMap(int initialCapacity) {
-    this(initialCapacity, defaultMinLoadFactor, defaultMaxLoadFactor);
+    this(initialCapacity, DEFAULT_MIN_LOAD_FACTOR, DEFAULT_MAX_LOAD_FACTOR);
   }
 
   /**
@@ -67,7 +67,8 @@ class QuickOpenIntIntHashMap extends OpenIntIntHashMap {
   public boolean put(int key, int value) {
     /*
        This is open addressing with double hashing, using "Brent's variation".
-       Brent's variation slows insertions a bit down (not much) but reduces probes (collisions) for successful searches, in particular for large load factors.
+       Brent's variation slows insertions a bit down (not much) but reduces probes (collisions) for successful searches,
+       in particular for large load factors.
        (It does not improve unsuccessful searches.)
        See D. Knuth, Searching and Sorting, 3rd ed., p.533-545
 
@@ -118,7 +119,8 @@ class QuickOpenIntIntHashMap extends OpenIntIntHashMap {
     /*
     Brent's variation does a local reorganization to reduce probes. It essentially means:
     We test whether it is possible to move the association we probed first (table[p0]) out of the way.
-    If this is possible, it will reduce probes for the key to be inserted, since it takes its place; it gets hit earlier.
+    If this is possible, it will reduce probes for the key to be inserted, since it takes its place;
+    it gets hit earlier.
     However, future probes for the key that we move out of the way will increase.
     Thus we only move it out of the way, if we have a net gain, that is, if we save more probes than we loose.
     For the first probe we safe more than we loose if the number of probes we needed was >=2 (t>=2).

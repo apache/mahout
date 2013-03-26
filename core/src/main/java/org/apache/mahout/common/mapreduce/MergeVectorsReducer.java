@@ -32,7 +32,7 @@ public class MergeVectorsReducer extends
 
   @Override
   public void reduce(WritableComparable<?> key, Iterable<VectorWritable> vectors, Context ctx)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     Vector merged = VectorWritable.merge(vectors.iterator()).get();
     result.set(new SequentialAccessSparseVector(merged));
     ctx.write(key, result);

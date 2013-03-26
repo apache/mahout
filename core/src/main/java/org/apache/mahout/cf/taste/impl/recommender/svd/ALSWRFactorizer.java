@@ -180,8 +180,8 @@ public class ALSWRFactorizer extends AbstractFactorizer {
       LongPrimitiveIterator userIDsIterator = dataModel.getUserIDs();
       try {
 
-        final ImplicitFeedbackAlternatingLeastSquaresSolver implicitFeedbackSolver = usesImplicitFeedback ?
-            new ImplicitFeedbackAlternatingLeastSquaresSolver(numFeatures, lambda, alpha, itemY) : null;
+        final ImplicitFeedbackAlternatingLeastSquaresSolver implicitFeedbackSolver = usesImplicitFeedback
+            ? new ImplicitFeedbackAlternatingLeastSquaresSolver(numFeatures, lambda, alpha, itemY) : null;
 
         while (userIDsIterator.hasNext()) {
           final long userID = userIDsIterator.nextLong();
@@ -196,9 +196,9 @@ public class ALSWRFactorizer extends AbstractFactorizer {
                 featureVectors.add(features.getItemFeatureColumn(itemIndex(itemID)));
               }
 
-              Vector userFeatures = usesImplicitFeedback ?
-                  implicitFeedbackSolver.solve(sparseUserRatingVector(userPrefs)) :
-                  AlternatingLeastSquaresSolver.solve(featureVectors, ratingVector(userPrefs), lambda, numFeatures);
+              Vector userFeatures = usesImplicitFeedback
+                  ? implicitFeedbackSolver.solve(sparseUserRatingVector(userPrefs))
+                  : AlternatingLeastSquaresSolver.solve(featureVectors, ratingVector(userPrefs), lambda, numFeatures);
 
               features.setFeatureColumnInU(userIndex(userID), userFeatures);
             }
@@ -218,8 +218,8 @@ public class ALSWRFactorizer extends AbstractFactorizer {
       LongPrimitiveIterator itemIDsIterator = dataModel.getItemIDs();
       try {
 
-        final ImplicitFeedbackAlternatingLeastSquaresSolver implicitFeedbackSolver = usesImplicitFeedback ?
-            new ImplicitFeedbackAlternatingLeastSquaresSolver(numFeatures, lambda, alpha, userY) : null;
+        final ImplicitFeedbackAlternatingLeastSquaresSolver implicitFeedbackSolver = usesImplicitFeedback
+            ? new ImplicitFeedbackAlternatingLeastSquaresSolver(numFeatures, lambda, alpha, userY) : null;
 
         while (itemIDsIterator.hasNext()) {
           final long itemID = itemIDsIterator.nextLong();
@@ -233,9 +233,9 @@ public class ALSWRFactorizer extends AbstractFactorizer {
                 featureVectors.add(features.getUserFeatureColumn(userIndex(userID)));
               }
 
-              Vector itemFeatures = usesImplicitFeedback ?
-                  implicitFeedbackSolver.solve(sparseItemRatingVector(itemPrefs)) :
-                  AlternatingLeastSquaresSolver.solve(featureVectors, ratingVector(itemPrefs), lambda, numFeatures);
+              Vector itemFeatures = usesImplicitFeedback
+                  ? implicitFeedbackSolver.solve(sparseItemRatingVector(itemPrefs))
+                  : AlternatingLeastSquaresSolver.solve(featureVectors, ratingVector(itemPrefs), lambda, numFeatures);
 
               features.setFeatureColumnInM(itemIndex(itemID), itemFeatures);
             }

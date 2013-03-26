@@ -133,7 +133,7 @@ public class BiasedItemBasedRecommender extends GenericItemBasedRecommender {
 
   @Override
   protected float doEstimatePreference(long userID, PreferenceArray preferencesFromUser, long itemID)
-      throws TasteException {
+    throws TasteException {
     long[] userIDs = preferencesFromUser.getIDs();
     float[] ratings = new float[userIDs.length];
     long[] itemIDs = new long[userIDs.length];

@@ -240,7 +240,7 @@ public final class DefaultOptionCreator {
   /**
  * @return a DefaultOptionBuilder for the clusterFilter option
  */
-public static DefaultOptionBuilder clusterFilterOption() {
+  public static DefaultOptionBuilder clusterFilterOption() {
     return new DefaultOptionBuilder()
         .withLongName(CLUSTER_FILTER_OPTION)
         .withShortName("cf")
@@ -336,13 +336,10 @@ public static DefaultOptionBuilder clusterFilterOption() {
     return new DefaultOptionBuilder()
         .withLongName(ANALYZER_NAME_OPTION)
         .withRequired(false)
-        .withDescription(
-            "If present, the name of a Lucene analyzer class to use")
-        .withArgument(
-                new ArgumentBuilder().withName(ANALYZER_NAME_OPTION).withDefault(StandardAnalyzer.class.getName())
-                .withMinimum(1).withMaximum(1).create()
-        )
-        .withShortName("an");
+        .withDescription("If present, the name of a Lucene analyzer class to use")
+        .withArgument(new ArgumentBuilder().withName(ANALYZER_NAME_OPTION).withDefault(StandardAnalyzer.class.getName())
+            .withMinimum(1).withMaximum(1).create())
+       .withShortName("an");
   }
 
   

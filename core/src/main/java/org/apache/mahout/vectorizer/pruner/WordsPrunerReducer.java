@@ -43,7 +43,7 @@ public class WordsPrunerReducer extends
 
   @Override
   protected void reduce(WritableComparable<?> key, Iterable<VectorWritable> values, Context context)
-          throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     Iterator<VectorWritable> it = values.iterator();
     if (!it.hasNext()) {
       return;
@@ -81,8 +81,8 @@ public class WordsPrunerReducer extends
 
     Path dictionaryFile = new Path(localFiles[0].getPath());
     // key is feature, value is the document frequency
-    for (Pair<IntWritable, LongWritable> record :
-            new SequenceFileIterable<IntWritable, LongWritable>(dictionaryFile, true, conf)) {
+    for (Pair<IntWritable, LongWritable> record
+        : new SequenceFileIterable<IntWritable, LongWritable>(dictionaryFile, true, conf)) {
       dictionary.put(record.getFirst().get(), record.getSecond().get());
     }
   }

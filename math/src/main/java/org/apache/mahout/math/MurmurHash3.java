@@ -1,10 +1,12 @@
 /*
  *  This code is public domain.
  *
- *  The MurmurHash3 algorithm was created by Austin Appleby and put into the public domain.  See http://code.google.com/p/smhasher/
+ *  The MurmurHash3 algorithm was created by Austin Appleby and put into the public domain.
+ *  See http://code.google.com/p/smhasher/
  *
  *  This java port was authored by
- *  Yonik Seeley and was placed into the public domain per https://github.com/yonik/java_util/blob/master/src/util/hash/MurmurHash3.java.
+ *  Yonik Seeley and was placed into the public domain per
+ *  https://github.com/yonik/java_util/blob/master/src/util/hash/MurmurHash3.java.
  */
 
 package org.apache.mahout.math;
@@ -24,11 +26,10 @@ package org.apache.mahout.math;
  */
 public final class MurmurHash3 {
 
-  private MurmurHash3() {
-  }
+  private MurmurHash3() {}
 
   /** Returns the MurmurHash3_x86_32 hash. */
-  public static int murmurhash3_x86_32(byte[] data, int offset, int len, int seed) {
+  public static int murmurhash3x8632(byte[] data, int offset, int len, int seed) {
 
     int c1 = 0xcc9e2d51;
     int c2 = 0x1b873593;
@@ -36,16 +37,16 @@ public final class MurmurHash3 {
     int h1 = seed;
     int roundedEnd = offset + (len & 0xfffffffc);  // round down to 4 byte block
 
-    for (int i=offset; i<roundedEnd; i+=4) {
+    for (int i = offset; i < roundedEnd; i += 4) {
       // little endian load order
-      int k1 = (data[i] & 0xff) | ((data[i+1] & 0xff) << 8) | ((data[i+2] & 0xff) << 16) | (data[i+3] << 24);
+      int k1 = (data[i] & 0xff) | ((data[i + 1] & 0xff) << 8) | ((data[i + 2] & 0xff) << 16) | (data[i + 3] << 24);
       k1 *= c1;
       k1 = (k1 << 15) | (k1 >>> 17);  // ROTL32(k1,15);
       k1 *= c2;
 
       h1 ^= k1;
       h1 = (h1 << 13) | (h1 >>> 19);  // ROTL32(h1,13);
-      h1 = h1*5+0xe6546b64;
+      h1 = h1 * 5 + 0xe6546b64;
     }
 
     // tail
@@ -64,6 +65,7 @@ public final class MurmurHash3 {
         k1 = (k1 << 15) | (k1 >>> 17);  // ROTL32(k1,15);
         k1 *= c2;
         h1 ^= k1;
+      default:
     }
 
     // finalization

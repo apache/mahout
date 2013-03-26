@@ -648,7 +648,8 @@ public final class Functions {
    * Constructs a function that returns <tt>from<=a && a<=to</tt>. <tt>a</tt> is a variable, <tt>from</tt> and
    * <tt>to</tt> are fixed.
    *
-   * Note that DoubleProcedure is generated code and thus looks like an invalid reference unless you can see the generated stuff.
+   * Note that DoubleProcedure is generated code and thus looks like an invalid reference unless you can see
+   * the generated stuff.
    */
   public static DoubleProcedure isBetween(final double from, final double to) {
     return new DoubleProcedure() {

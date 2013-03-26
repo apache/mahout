@@ -206,7 +206,8 @@ public class CholeskyDecomposition {
           int i = L.rowUnpivot(internalI);
           x.set(j, k, x.get(j, k) - x.get(j, i) * L.get(k, i));
           if (Double.isInfinite(x.get(j, k)) || Double.isNaN(x.get(j, k))) {
-            throw new IllegalStateException(String.format("Invalid value found at %d,%d (should not be possible)", j, k));
+            throw new IllegalStateException(
+                String.format("Invalid value found at %d,%d (should not be possible)", j, k));
           }
         }
         if (L.get(k, k) != 0) {

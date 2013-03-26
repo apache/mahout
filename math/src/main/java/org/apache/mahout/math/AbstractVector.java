@@ -356,7 +356,7 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
    * @param v2  The vector that we access via iterateNonZero and via Element.get()
    * @return The squared difference between v1 and v2.
    */
-   static double randomScanDiff(Vector v1, Vector v2) {
+  static double randomScanDiff(Vector v1, Vector v2) {
     // keeps a list of elements we visited by iterating over v1.  This should be
     // almost all of the elements of v2 because we only call this method if the
     // difference is small.
@@ -464,7 +464,7 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
     }
 
     // one of i1 or i2 is exhausted here, but the other may not be
-    while (e1 != null ) {
+    while (e1 != null) {
       double x = e1.get();
       r += x * x;
 

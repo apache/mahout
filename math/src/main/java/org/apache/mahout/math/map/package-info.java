@@ -179,8 +179,10 @@
  * When it goes out of range, the map is automatically resized and memory consumption
  * changes proportionally.
  * <ul>
- * <li>To tune for memory at the expense of performance, both increase <tt>minLoadFactor</tt> and <tt>maxLoadFactor</tt>.
- * <li>To tune for performance at the expense of memory, both decrease <tt>minLoadFactor</tt> and <tt>maxLoadFactor</tt>.
+ * <li>To tune for memory at the expense of performance, both increase <tt>minLoadFactor</tt> and
+ * <tt>maxLoadFactor</tt>.
+ * <li>To tune for performance at the expense of memory, both decrease <tt>minLoadFactor</tt> and
+ * <tt>maxLoadFactor</tt>.
  * As as special case set <tt>minLoadFactor=0</tt> to avoid any automatic shrinking.
  * </ul>
  * Resizing large hash maps can be time consuming, <tt>O(size())</tt>, and should be avoided if possible (maintaining
@@ -220,8 +222,8 @@
  * more than 1.2-1.5 times slower than chaining.
  * <p><b>Further readings</b>:
  * <br>Knuth D., The Art of Computer Programming: Searching and Sorting, 3rd ed.
- * <br>Griswold W., Townsend G., The Design and Implementation of Dynamic Hashing for Sets and Tables in Icon, Software -
- * Practice and Experience, Vol. 23(4), 351-367 (April 1993).
+ * <br>Griswold W., Townsend G., The Design and Implementation of Dynamic Hashing for Sets and Tables in Icon,
+ * Software - Practice and Experience, Vol. 23(4), 351-367 (April 1993).
  * <br>Larson P., Dynamic hash tables, Comm. of the ACM, 31, (4), 1988.
  * <p>
  * <b>Performance:</b>

@@ -91,10 +91,10 @@ public final class VectorHelper {
       }
     }
     Collections.sort(entries, new Comparator<Pair<Integer, Double>>() {
-        @Override
-        public int compare(Pair<Integer, Double> a, Pair<Integer, Double> b) {
-            return b.getSecond().compareTo(a.getSecond());
-        }
+      @Override
+      public int compare(Pair<Integer, Double> a, Pair<Integer, Double> b) {
+        return b.getSecond().compareTo(a.getSecond());
+      }
     });
     return entries;
   }
@@ -114,20 +114,20 @@ public final class VectorHelper {
                                                            final String[] dictionary) {
     if (dictionary != null) {
       return Lists.newArrayList(Collections2.transform(entries,
-              new Function<Pair<Integer, Double>, Pair<String, Double>>() {
-                @Override
-                public Pair<String, Double> apply(Pair<Integer, Double> p) {
-                  return Pair.of(dictionary[p.getFirst()], p.getSecond());
-                }
-              }));
+        new Function<Pair<Integer, Double>, Pair<String, Double>>() {
+          @Override
+          public Pair<String, Double> apply(Pair<Integer, Double> p) {
+            return Pair.of(dictionary[p.getFirst()], p.getSecond());
+          }
+        }));
     } else {
       return Lists.newArrayList(Collections2.transform(entries,
-              new Function<Pair<Integer, Double>, Pair<String, Double>>() {
-                @Override
-                public Pair<String, Double> apply(Pair<Integer, Double> p) {
-                  return Pair.of(Integer.toString(p.getFirst()), p.getSecond());
-                }
-              }));
+        new Function<Pair<Integer, Double>, Pair<String, Double>>() {
+          @Override
+          public Pair<String, Double> apply(Pair<Integer, Double> p) {
+            return Pair.of(Integer.toString(p.getFirst()), p.getSecond());
+          }
+        }));
     }
   }
 
@@ -176,9 +176,9 @@ public final class VectorHelper {
    */
   public static String[] loadTermDictionary(Configuration conf, String filePattern) {
     OpenObjectIntHashMap<String> dict = new OpenObjectIntHashMap<String>();
-    for (Pair<Text, IntWritable> record :
-            new SequenceFileDirIterable<Text, IntWritable>(new Path(filePattern), PathType.GLOB,
-                    null, null, true, conf)) {
+    for (Pair<Text, IntWritable> record
+        : new SequenceFileDirIterable<Text, IntWritable>(new Path(filePattern), PathType.GLOB, null, null, true,
+                                                         conf)) {
       dict.put(record.getFirst().toString(), record.getSecond().get());
     }
     String[] dictionary = new String[dict.size()];

@@ -58,7 +58,7 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
 
   /** Constructs an empty map with default capacity and default load factors. */
   public OpenObject${valueTypeCap}HashMap() {
-    this(defaultCapacity);
+    this(DEFAULT_CAPACITY);
   }
 
   /**
@@ -68,7 +68,7 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
    * @throws IllegalArgumentException if the initial capacity is less than zero.
    */
   public OpenObject${valueTypeCap}HashMap(int initialCapacity) {
-    this(initialCapacity, defaultMinLoadFactor, defaultMaxLoadFactor);
+    this(initialCapacity, DEFAULT_MIN_LOAD_FACTOR, DEFAULT_MAX_LOAD_FACTOR);
   }
 
   /**
@@ -497,7 +497,7 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
 
     // memory will be exhausted long before this pathological case happens, anyway.
     this.minLoadFactor = minLoadFactor;
-    if (capacity == PrimeFinder.largestPrime) {
+    if (capacity == PrimeFinder.LARGEST_PRIME) {
       this.maxLoadFactor = 1.0;
     } else {
       this.maxLoadFactor = maxLoadFactor;

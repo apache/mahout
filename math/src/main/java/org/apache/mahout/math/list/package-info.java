@@ -110,7 +110,8 @@
  * <td class="PRE">
  * <pre>
  * int s = 1000000;<br>DoubleArrayList list = new DoubleArrayList(s); // list.size()==0, capacity==s
- * list.setSize(s); // list.size()==s<br>double[] values = list.elements(); // zero copy, values.length==s<br>for (int i=0; i&lt;s; i++) { values[i]=(double)i; }
+ * list.setSize(s); // list.size()==s<br>double[] values = list.elements();
+ * // zero copy, values.length==s<br>for (int i=0; i&lt;s; i++) { values[i]=(double)i; }
  * list.shuffle();
  * double sum = 0.0;
  * int limit = values.length/2;

@@ -109,8 +109,8 @@ public class HdfsBackedLanczosState extends LanczosState implements Configurable
       nextBasisVectorPath = new Path(basisPath, BASIS_PREFIX + '_' + ++numBasisVectorsOnDisk);
     }
     Vector nextVector;
-    while (numBasisVectorsOnDisk < iterationNumber &&
-          (nextVector = getBasisVector(numBasisVectorsOnDisk)) != null) {
+    while (numBasisVectorsOnDisk < iterationNumber
+        && (nextVector = getBasisVector(numBasisVectorsOnDisk)) != null) {
       persistVector(nextBasisVectorPath, numBasisVectorsOnDisk, nextVector);
       nextBasisVectorPath = new Path(basisPath, BASIS_PREFIX + '_' + ++numBasisVectorsOnDisk);
     }

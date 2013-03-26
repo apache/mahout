@@ -37,104 +37,104 @@ import java.io.IOException;
  * Subclasses define how much information to retrieve from the Lucene index.
  */
 public abstract class AbstractLuceneIterator extends AbstractIterator<Vector> {
-    private static final Logger log = LoggerFactory.getLogger(LuceneIterator.class);
-    protected final IndexReader indexReader;
-    protected final String field;
-    protected final TermInfo terminfo;
-    protected final double normPower;
-    protected final Weight weight;
-    protected final Bump125 bump = new Bump125();
-    protected int nextDocId;
-    protected int maxErrorDocs;
-    protected int numErrorDocs;
-    protected long nextLogRecord = bump.increment();
-    protected int skippedErrorMessages;
+  private static final Logger log = LoggerFactory.getLogger(LuceneIterator.class);
+  protected final IndexReader indexReader;
+  protected final String field;
+  protected final TermInfo terminfo;
+  protected final double normPower;
+  protected final Weight weight;
+  protected final Bump125 bump = new Bump125();
+  protected int nextDocId;
+  protected int maxErrorDocs;
+  protected int numErrorDocs;
+  protected long nextLogRecord = bump.increment();
+  protected int skippedErrorMessages;
 
-    public AbstractLuceneIterator(TermInfo terminfo, double normPower, IndexReader indexReader, Weight weight,
-        double maxPercentErrorDocs, String field) {
-      this.terminfo = terminfo;
-      this.normPower = normPower;
-      this.indexReader = indexReader;
+  public AbstractLuceneIterator(TermInfo terminfo, double normPower, IndexReader indexReader, Weight weight,
+      double maxPercentErrorDocs, String field) {
+    this.terminfo = terminfo;
+    this.normPower = normPower;
+    this.indexReader = indexReader;
 
-      this.weight = weight;
-      this.nextDocId = 0;
-      this.maxErrorDocs = (int) (maxPercentErrorDocs * indexReader.numDocs());
-      this.field = field;
-    }
+    this.weight = weight;
+    this.nextDocId = 0;
+    this.maxErrorDocs = (int) (maxPercentErrorDocs * indexReader.numDocs());
+    this.field = field;
+  }
 
-    /**
-     * Given the document name, derive a name for the vector. This may involve
-     * reading the document from Lucene and setting up any other state that the
-     * subclass wants. This will be called once for each document that the
-     * iterator processes.
-     * @param documentIndex the lucene document index.
-     * @return the name to store in the vector.
-     */
-    protected abstract String getVectorName(int documentIndex) throws IOException;
+  /**
+   * Given the document name, derive a name for the vector. This may involve
+   * reading the document from Lucene and setting up any other state that the
+   * subclass wants. This will be called once for each document that the
+   * iterator processes.
+   * @param documentIndex the lucene document index.
+   * @return the name to store in the vector.
+   */
+  protected abstract String getVectorName(int documentIndex) throws IOException;
 
-    @Override
-    protected Vector computeNext() {
-      try {
-        int doc;
-        Terms termFreqVector;
-        String name;
+  @Override
+  protected Vector computeNext() {
+    try {
+      int doc;
+      Terms termFreqVector;
+      String name;
 
-        do {
-          doc = this.nextDocId;
-          nextDocId++;
+      do {
+        doc = this.nextDocId;
+        nextDocId++;
 
-          if (doc >= indexReader.maxDoc()) {
-            return endOfData();
+        if (doc >= indexReader.maxDoc()) {
+          return endOfData();
+        }
+
+        termFreqVector = indexReader.getTermVector(doc, field);
+        name = getVectorName(doc);
+
+        if (termFreqVector == null) {
+          numErrorDocs++;
+          if (numErrorDocs >= maxErrorDocs) {
+            log.error("There are too many documents that do not have a term vector for {}", field);
+            throw new IllegalStateException("There are too many documents that do not have a term vector for "
+                + field);
           }
-
-          termFreqVector = indexReader.getTermVector(doc, field);
-          name = getVectorName(doc);
-
-          if (termFreqVector == null) {
-            numErrorDocs++;
-            if (numErrorDocs >= maxErrorDocs) {
-              log.error("There are too many documents that do not have a term vector for {}", field);
-              throw new IllegalStateException("There are too many documents that do not have a term vector for " +
-                  field);
-            }
-            if (numErrorDocs >= nextLogRecord) {
-              if (skippedErrorMessages == 0) {
-                log.warn("{} does not have a term vector for {}", name, field);
-              } else {
-                log.warn("{} documents do not have a term vector for {}", numErrorDocs, field);
-              }
-              nextLogRecord = bump.increment();
-              skippedErrorMessages = 0;
+          if (numErrorDocs >= nextLogRecord) {
+            if (skippedErrorMessages == 0) {
+              log.warn("{} does not have a term vector for {}", name, field);
             } else {
-              skippedErrorMessages++;
+              log.warn("{} documents do not have a term vector for {}", numErrorDocs, field);
             }
+            nextLogRecord = bump.increment();
+            skippedErrorMessages = 0;
+          } else {
+            skippedErrorMessages++;
           }
-        } while (termFreqVector == null);
-
-        // The loop exits with termFreqVector and name set.
-
-        TermsEnum te = termFreqVector.iterator(null);
-        BytesRef term;
-        TFDFMapper mapper = new TFDFMapper(indexReader.numDocs(), weight, this.terminfo);
-        mapper.setExpectations(field, termFreqVector.size());
-        while ((term = te.next()) != null) {
-          mapper.map(term, (int) te.totalTermFreq());
         }
-        Vector result = mapper.getVector();
-        if (result == null) {
-          // TODO is this right? last version would produce null in the iteration in this case, though it
-          // seems like that may not be desirable
-          return null;
-        }
+      } while (termFreqVector == null);
 
-        if (normPower == LuceneIterable.NO_NORMALIZING) {
-          result = new NamedVector(result, name);
-        } else {
-          result = new NamedVector(result.normalize(normPower), name);
-        }
-        return result;
-      } catch (IOException ioe) {
-        throw new IllegalStateException(ioe);
+      // The loop exits with termFreqVector and name set.
+
+      TermsEnum te = termFreqVector.iterator(null);
+      BytesRef term;
+      TFDFMapper mapper = new TFDFMapper(indexReader.numDocs(), weight, this.terminfo);
+      mapper.setExpectations(field, termFreqVector.size());
+      while ((term = te.next()) != null) {
+        mapper.map(term, (int) te.totalTermFreq());
       }
+      Vector result = mapper.getVector();
+      if (result == null) {
+        // TODO is this right? last version would produce null in the iteration in this case, though it
+        // seems like that may not be desirable
+        return null;
+      }
+
+      if (normPower == LuceneIterable.NO_NORMALIZING) {
+        result = new NamedVector(result, name);
+      } else {
+        result = new NamedVector(result.normalize(normPower), name);
+      }
+      return result;
+    } catch (IOException ioe) {
+      throw new IllegalStateException(ioe);
     }
+  }
 }

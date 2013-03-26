@@ -94,8 +94,8 @@ public class SequentialAccessSparseVector extends AbstractVector {
     }
     Arrays.sort(sortableElements);
     for (int i = 0; i < sortableElements.length; i++) {
-      values.getIndices()[i] = sortableElements[i].index;
-      values.getValues()[i] = sortableElements[i].value;
+      values.setIndexAt(i, sortableElements[i].index);
+      values.setValueAt(i, sortableElements[i].value);
     }
     values = new OrderedIntDoubleMapping(values.getIndices(), values.getValues(), elementCount);
     return elementCount;
@@ -292,7 +292,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
     @Override
     public void set(double value) {
       invalidateCachedLength();
-      values.getValues()[offset] = value;
+      values.setValueAt(offset, value);
     }
   }
 
@@ -329,8 +329,8 @@ public class SequentialAccessSparseVector extends AbstractVector {
     @Override
     public void set(double value) {
       invalidateCachedLength();
-      if (nextOffset < values.getNumMappings() && index == values.getIndices()[nextOffset]) {
-        values.getValues()[nextOffset] = value;
+      if (nextOffset < values.getNumMappings() && index == values.indexAt(nextOffset)) {
+        values.setValueAt(nextOffset, value);
       } else {
         // Yes, this works; the offset into indices of the new value's index will still be nextOffset
         values.set(index, value);

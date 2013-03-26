@@ -67,7 +67,7 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
 
   /** Constructs an empty map with default capacity and default load factors. */
   public OpenHashMap() {
-    this(defaultCapacity);
+    this(DEFAULT_CAPACITY);
   }
 
   /**
@@ -77,7 +77,7 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
    * @throws IllegalArgumentException if the initial capacity is less than zero.
    */
   public OpenHashMap(int initialCapacity) {
-    this(initialCapacity, defaultMinLoadFactor, defaultMaxLoadFactor);
+    this(initialCapacity, DEFAULT_MIN_LOAD_FACTOR, DEFAULT_MAX_LOAD_FACTOR);
   }
 
   /**
@@ -186,7 +186,7 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
    *                  continues.
    * @return <tt>false</tt> if the procedure stopped before all keys where iterated over, <tt>true</tt> otherwise.
    */
-    @SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked")
   public boolean forEachPair(ObjectObjectProcedure<K,V> procedure) {
     for (int i = table.length; i-- > 0;) {
       if (state[i] == FULL && !procedure.apply((K)table[i], (V)values[i])) {
@@ -477,7 +477,7 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
 
     // memory will be exhausted long before this pathological case happens, anyway.
     this.minLoadFactor = minLoadFactor;
-    if (capacity == PrimeFinder.largestPrime) {
+    if (capacity == PrimeFinder.LARGEST_PRIME) {
       this.maxLoadFactor = 1.0;
     } else {
       this.maxLoadFactor = maxLoadFactor;
@@ -555,12 +555,12 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
   public Set<java.util.Map.Entry<K,V>> entrySet() {
     final Set<Entry<K, V>> entries = new OpenHashSet<Map.Entry<K,V>>();
     forEachPair(new ObjectObjectProcedure<K,V>() {
-
       @Override
       public boolean apply(K key, V value) {
         entries.add(new MapEntry(key, value));
         return true;
-      }});
+      }
+    });
     return entries;
   }
 
@@ -572,12 +572,12 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
   public Set<K> keySet() {
     final Set<K> keys = new OpenHashSet<K>();
     forEachKey(new ObjectProcedure<K>() {
-
       @Override
       public boolean apply(K element) {
         keys.add(element);
         return true;
-      }});
+      }
+    });
     return keys;
   }
 
@@ -596,19 +596,19 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
   public Collection<V> values() {
     final List<V> valueList = new ArrayList<V>();
     forEachPair(new ObjectObjectProcedure<K,V>() {
-
       @Override
       public boolean apply(K key, V value) {
         valueList.add(value);
         return true;
-      }});
+      }
+    });
     return valueList;
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public boolean equals(Object obj) {
-    if (! (obj instanceof OpenHashMap)) {
+    if (!(obj instanceof OpenHashMap)) {
       return false;
     }
     final OpenHashMap<K,V> o = (OpenHashMap<K,V>) obj;
@@ -618,7 +618,6 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
     final boolean[] equal = new boolean[1];
     equal[0] = true;
     forEachPair(new ObjectObjectProcedure<K,V>() {
-
       @Override
       public boolean apply(K key, V value) {
         Object ov = o.get(key);
@@ -627,7 +626,8 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
           return false;
         }
         return true;
-      }});
+      }
+    });
     return equal[0];
   }
 
@@ -636,7 +636,6 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
     final StringBuilder sb = new StringBuilder();
     sb.append('{');
     forEachPair(new ObjectObjectProcedure<K,V>() {
-
       @Override
       public boolean apply(K key, V value) {
         sb.append('[');
@@ -645,7 +644,8 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
         sb.append(value);
         sb.append("] ");
         return true;
-      }});
+      }
+    });
     sb.append('}');
     return sb.toString();
   }

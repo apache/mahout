@@ -50,12 +50,12 @@ public class KDDCupFactorizablePreferences implements FactorizablePreferences {
   public Iterable<Preference> getPreferences() {
     Iterable<Iterable<Preference>> prefIterators =
         Iterables.transform(new DataFileIterable(dataFile),
-                            new Function<Pair<PreferenceArray,long[]>,Iterable<Preference>>() {
-                              @Override
-                              public Iterable<Preference> apply(Pair<PreferenceArray,long[]> from) {
-                                return from.getFirst();
-                              }
-                            });
+          new Function<Pair<PreferenceArray,long[]>,Iterable<Preference>>() {
+            @Override
+            public Iterable<Preference> apply(Pair<PreferenceArray,long[]> from) {
+              return from.getFirst();
+            }
+          });
     return Iterables.concat(prefIterators);
   }
 

@@ -498,8 +498,8 @@ public abstract class AbstractJob extends Configured implements Tool {
 
       // the option appeared on the command-line, or it has a value
       // (which is likely a default value). 
-      if (cmdLine.hasOption(o) || cmdLine.getValue(o) != null ||
-          (cmdLine.getValues(o) != null && !cmdLine.getValues(o).isEmpty())) {
+      if (cmdLine.hasOption(o) || cmdLine.getValue(o) != null
+          || (cmdLine.getValues(o) != null && !cmdLine.getValues(o).isEmpty())) {
 
         // nulls are ok, for cases where options are simple flags.
         List<?> vo = cmdLine.getValues(o);
@@ -601,7 +601,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    * obsolete when MultipleInputs is available again
    */
   public static void setS3SafeCombinedInputPath(Job job, Path referencePath, Path inputPathOne, Path inputPathTwo)
-      throws IOException {
+    throws IOException {
     FileSystem fs = FileSystem.get(referencePath.toUri(), job.getConfiguration());
     FileInputFormat.setInputPaths(job, inputPathOne.makeQualified(fs), inputPathTwo.makeQualified(fs));
   }

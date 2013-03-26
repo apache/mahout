@@ -36,121 +36,122 @@ import java.util.Random;
  * See http://mlg.eng.cam.ac.uk/zoubin/talks/turin09.pdf for details
  */
 public final class IndianBuffet<T> implements Sampler<List<T>> {
-    private final List<Integer> count = Lists.newArrayList();
-    private int documents = 0;
-    private final double alpha;
-    private WordFunction<T> converter = null;
-    private final Random gen;
+  private final List<Integer> count = Lists.newArrayList();
+  private int documents = 0;
+  private final double alpha;
+  private WordFunction<T> converter = null;
+  private final Random gen;
 
-    public IndianBuffet(double alpha, WordFunction<T> converter) {
-        this.alpha = alpha;
-        this.converter = converter;
-        gen = RandomUtils.getRandom();
+  public IndianBuffet(double alpha, WordFunction<T> converter) {
+    this.alpha = alpha;
+    this.converter = converter;
+    gen = RandomUtils.getRandom();
+  }
+
+  public static IndianBuffet<Integer> createIntegerDocumentSampler(double alpha) {
+    return new IndianBuffet<Integer>(alpha, new IdentityConverter());
+  }
+
+  public static IndianBuffet<String> createTextDocumentSampler(double alpha) {
+    return new IndianBuffet<String>(alpha, new WordConverter());
+  }
+
+  @Override
+  public List<T> sample() {
+    List<T> r = Lists.newArrayList();
+    if (documents == 0) {
+      double n = new PoissonSampler(alpha).sample();
+      for (int i = 0; i < n; i++) {
+        r.add(converter.convert(i));
+        count.add(1);
+      }
+      documents++;
+    } else {
+      documents++;
+      int i = 0;
+      for (double cnt : count) {
+        if (gen.nextDouble() < cnt / documents) {
+          r.add(converter.convert(i));
+          count.set(i, count.get(i) + 1);
+        }
+        i++;
+      }
+      int newItems = new PoissonSampler(alpha / documents).sample().intValue();
+      for (int j = 0; j < newItems; j++) {
+        r.add(converter.convert(i + j));
+        count.add(1);
+      }
     }
+    return r;
+  }
 
-    public static IndianBuffet<Integer> createIntegerDocumentSampler(double alpha) {
-        return new IndianBuffet<Integer>(alpha, new IdentityConverter());
+  private interface WordFunction<T> {
+    T convert(int i);
+  }
+
+  /**
+   * Just converts to an integer.
+   */
+  public static class IdentityConverter implements WordFunction<Integer> {
+    @Override
+    public Integer convert(int i) {
+      return i;
     }
+  }
 
-    public static IndianBuffet<String> createTextDocumentSampler(double alpha) {
-        return new IndianBuffet<String>(alpha, new WordConverter());
+  /**
+   * Converts to a string.
+   */
+  public static class StringConverter implements WordFunction<String> {
+    @Override
+    public String convert(int i) {
+      return String.valueOf(i);
+    }
+  }
+
+  /**
+   * Converts to one of a list of common English words for reasonably small integers and converts
+   * to a token like w_92463 for big integers.
+   */
+  public static final class WordConverter implements WordFunction<String> {
+    private final Splitter onSpace = Splitter.on(CharMatcher.WHITESPACE).omitEmptyStrings().trimResults();
+    private final List<String> words;
+
+    public WordConverter() {
+      try {
+        words = Resources.readLines(Resources.getResource("words.txt"), Charsets.UTF_8,
+                                    new LineProcessor<List<String>>() {
+            final List<String> words = Lists.newArrayList();
+
+            @Override
+            public boolean processLine(String line) {
+              Iterables.addAll(words, onSpace.split(line));
+              return true;
+            }
+
+            @Override
+            public List<String> getResult() {
+              return words;
+            }
+          });
+      } catch (IOException e) {
+        throw new ImpossibleException(e);
+      }
     }
 
     @Override
-    public List<T> sample() {
-        List<T> r = Lists.newArrayList();
-        if (documents == 0) {
-            double n = new PoissonSampler(alpha).sample();
-            for (int i = 0; i < n; i++) {
-                r.add(converter.convert(i));
-                count.add(1);
-            }
-            documents++;
-        } else {
-            documents++;
-            int i = 0;
-            for (double cnt : count) {
-                if (gen.nextDouble() < cnt / documents) {
-                    r.add(converter.convert(i));
-                    count.set(i, count.get(i) + 1);
-                }
-                i++;
-            }
-            int newItems = new PoissonSampler(alpha / documents).sample().intValue();
-            for (int j = 0; j < newItems; j++) {
-                r.add(converter.convert(i + j));
-                count.add(1);
-            }
-        }
-        return r;
+    public String convert(int i) {
+      if (i < words.size()) {
+        return words.get(i);
+      } else {
+        return "w_" + i;
+      }
     }
+  }
 
-    private interface WordFunction<T> {
-        T convert(int i);
+  public static class ImpossibleException extends RuntimeException {
+    public ImpossibleException(Throwable e) {
+      super(e);
     }
-
-    /**
-     * Just converts to an integer.
-     */
-    public static class IdentityConverter implements WordFunction<Integer> {
-        @Override
-        public Integer convert(int i) {
-            return i;
-        }
-    }
-
-    /**
-     * Converts to a string.
-     */
-    public static class StringConverter implements WordFunction<String> {
-        @Override
-        public String convert(int i) {
-            return String.valueOf(i);
-        }
-    }
-
-    /**
-     * Converts to one of a list of common English words for reasonably small integers and converts
-     * to a token like w_92463 for big integers.
-     */
-    public static final class WordConverter implements WordFunction<String> {
-        private final Splitter onSpace = Splitter.on(CharMatcher.WHITESPACE).omitEmptyStrings().trimResults();
-        private final List<String> words;
-
-        public WordConverter() {
-            try {
-                words = Resources.readLines(Resources.getResource("words.txt"), Charsets.UTF_8, new LineProcessor<List<String>>() {
-                    final List<String> words = Lists.newArrayList();
-
-                    @Override
-                    public boolean processLine(String line) {
-                        Iterables.addAll(words, onSpace.split(line));
-                        return true;
-                    }
-
-                    @Override
-                    public List<String> getResult() {
-                        return words;
-                    }
-                });
-            } catch (IOException e) {
-                throw new ImpossibleException(e);
-            }
-        }
-
-        @Override
-        public String convert(int i) {
-            if (i < words.size()) {
-                return words.get(i);
-            } else {
-                return "w_" + i;
-            }
-        }
-    }
-
-    public static class ImpossibleException extends RuntimeException {
-        public ImpossibleException(Throwable e) {
-            super(e);
-        }
-    }
+  }
 }

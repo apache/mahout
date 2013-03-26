@@ -47,7 +47,7 @@ public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
   // HTML tags, and Java keywords asmany of the messages in the archives
   // are subversion check-in notifications
     
-  private static final CharArraySet stopSet = new CharArraySet(LUCENE_VERSION, Arrays.asList(
+  private static final CharArraySet STOP_SET = new CharArraySet(LUCENE_VERSION, Arrays.asList(
     "3d","7bit","a0","about","above","abstract","across","additional","after",
     "afterwards","again","against","align","all","almost","alone","along",
     "already","also","although","always","am","among","amongst","amoungst",
@@ -103,11 +103,11 @@ public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
   ), false);
 
   // Regex used to exclude non-alpha-numeric tokens
-  private static final Pattern alphaNumeric = Pattern.compile("^[a-z][a-z0-9_]+$");
-  private static final Matcher matcher = alphaNumeric.matcher("");
+  private static final Pattern ALPHA_NUMERIC = Pattern.compile("^[a-z][a-z0-9_]+$");
+  private static final Matcher MATCHER = ALPHA_NUMERIC.matcher("");
 
   public MailArchivesClusteringAnalyzer() {
-    super(LUCENE_VERSION, stopSet);
+    super(LUCENE_VERSION, STOP_SET);
   }
 
   public MailArchivesClusteringAnalyzer(CharArraySet stopSet) {
@@ -122,7 +122,7 @@ public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
     result = new LowerCaseFilter(LUCENE_VERSION, result);
     result = new ASCIIFoldingFilter(result);
     result = new AlphaNumericMaxLengthFilter(result);
-    result = new StopFilter(LUCENE_VERSION, result, stopSet);
+    result = new StopFilter(LUCENE_VERSION, result, STOP_SET);
     result = new PorterStemFilter(result);
     return new TokenStreamComponents(tokenizer, result);
   }
@@ -154,8 +154,8 @@ public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
             }
           }
           String term = new String(output, 0, at);
-          matcher.reset(term);
-          if (matcher.matches() && !term.startsWith("a0")) {
+          MATCHER.reset(term);
+          if (MATCHER.matches() && !term.startsWith("a0")) {
             termAtt.setEmpty();
             termAtt.append(term);
             return true;

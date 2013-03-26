@@ -121,8 +121,7 @@ public final class LogLikelihood {
    * @return The root log-likelihood ratio
    * 
    * <p/>
-   * There is some more discussion here:
-   * http://mail-archives.apache.org/mod_mbox/mahout-user/201001.mbox/%3Cc7d45fc71001121120r6b0482aat345014770ed32744@mail.gmail.com%3E
+   * There is some more discussion here: http://s.apache.org/CGL
    *
    * And see the response to Wataru's comment here:
    * http://tdunning.blogspot.com/2008/03/surprise-and-coincidence.html

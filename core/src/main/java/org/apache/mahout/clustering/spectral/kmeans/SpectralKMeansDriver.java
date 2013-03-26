@@ -62,7 +62,7 @@ public class SpectralKMeansDriver extends AbstractJob {
 
   @Override
   public int run(String[] arg0)
-      throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, InterruptedException {
+    throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, InterruptedException {
 
     Configuration conf = getConf();
     addInputOption();
@@ -99,15 +99,14 @@ public class SpectralKMeansDriver extends AbstractJob {
     Path tempdir = new Path(getOption("tempDir"));
     boolean ssvd = parsedArgs.containsKey("--usessvd");
     if (ssvd) {
-        int reducers = Integer.parseInt(getOption("reduceTasks"));
-        int blockheight = Integer.parseInt(getOption("outerProdBlockHeight"));
-        int oversampling = Integer.parseInt(getOption("oversampling"));
-        int poweriters = Integer.parseInt(getOption("powerIter"));
-        run(conf, input, output, numDims, clusters, measure, convergenceDelta,
-                maxIterations, tempdir, true, reducers, blockheight, oversampling, poweriters);
+      int reducers = Integer.parseInt(getOption("reduceTasks"));
+      int blockheight = Integer.parseInt(getOption("outerProdBlockHeight"));
+      int oversampling = Integer.parseInt(getOption("oversampling"));
+      int poweriters = Integer.parseInt(getOption("powerIter"));
+      run(conf, input, output, numDims, clusters, measure, convergenceDelta, maxIterations, tempdir, true, reducers,
+          blockheight, oversampling, poweriters);
     } else {
-        run(conf, input, output, numDims, clusters, measure, convergenceDelta,
-                maxIterations, tempdir, false);
+      run(conf, input, output, numDims, clusters, measure, convergenceDelta, maxIterations, tempdir, false);
     }
 
     return 0;
@@ -124,8 +123,8 @@ public class SpectralKMeansDriver extends AbstractJob {
           int maxIterations,
           Path tempDir,
           boolean ssvd) throws IOException, InterruptedException, ClassNotFoundException {
-      run(conf, input, output, numDims, clusters, measure, convergenceDelta,
-              maxIterations, tempDir, ssvd, REDUCERS, BLOCKHEIGHT, OVERSAMPLING, POWERITERS);
+    run(conf, input, output, numDims, clusters, measure, convergenceDelta, maxIterations, tempDir, ssvd, REDUCERS,
+        BLOCKHEIGHT, OVERSAMPLING, POWERITERS);
   }
 
   /**
@@ -161,7 +160,7 @@ public class SpectralKMeansDriver extends AbstractJob {
       int blockHeight,
       int oversampling,
       int poweriters)
-          throws IOException, InterruptedException, ClassNotFoundException {
+    throws IOException, InterruptedException, ClassNotFoundException {
 
     Path outputCalc = new Path(tempDir, "calculations");
     Path outputTmp = new Path(tempDir, "temporary");
@@ -264,7 +263,6 @@ public class SpectralKMeansDriver extends AbstractJob {
 
         // Run the KMeansDriver
     Path answer = new Path(output, "kmeans_out");
-    KMeansDriver.run(conf, data, initialclusters, answer,
-        measure,convergenceDelta, maxIterations, true, 0.0, false);
-    }
+    KMeansDriver.run(conf, data, initialclusters, answer, measure,convergenceDelta, maxIterations, true, 0.0, false);
+  }
 }

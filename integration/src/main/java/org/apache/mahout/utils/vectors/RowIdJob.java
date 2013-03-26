@@ -71,13 +71,9 @@ public class RowIdJob extends AbstractJob {
       IntWritable docId = new IntWritable();
       int i = 0;
       int numCols = 0;
-      for (Pair<Text,VectorWritable> record :
-           new SequenceFileDirIterable<Text,VectorWritable>(getInputPath(),
-                                                            PathType.LIST,
-                                                            PathFilters.logsCRCFilter(),
-                                                            null,
-                                                            true,
-                                                            conf)) {
+      for (Pair<Text,VectorWritable> record
+          : new SequenceFileDirIterable<Text,VectorWritable>(getInputPath(), PathType.LIST, PathFilters.logsCRCFilter(),
+                                                             null, true, conf)) {
         VectorWritable value = record.getSecond();
         docId.set(i);
         indexWriter.append(docId, record.getFirst());

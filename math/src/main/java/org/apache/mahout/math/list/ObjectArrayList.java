@@ -141,7 +141,7 @@ public class ObjectArrayList<T> extends AbstractObjectList<T> {
    * @return the elements currently stored.
    */
   @SuppressWarnings("unchecked")
-  public<Q> Q[] elements() {
+  public <Q> Q[] elements() {
     return (Q[])elements;
   }
 

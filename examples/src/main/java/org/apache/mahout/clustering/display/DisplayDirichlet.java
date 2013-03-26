@@ -80,7 +80,7 @@ public class DisplayDirichlet extends DisplayClustering {
   
   private static void runSequentialDirichletClassifier(Path input, Path output,
       ModelDistribution<VectorWritable> modelDist, int numClusters, int numIterations, double alpha0)
-      throws IOException {
+    throws IOException {
     List<Cluster> models = Lists.newArrayList();
     for (Model<VectorWritable> cluster : modelDist.sampleFromPrior(numClusters)) {
       models.add((Cluster) cluster);
@@ -94,7 +94,7 @@ public class DisplayDirichlet extends DisplayClustering {
   
   private static void runSequentialDirichletClusterer(Path input, Path output,
       ModelDistribution<VectorWritable> modelDist, int numClusters, int numIterations, double alpha0)
-      throws IOException, ClassNotFoundException, InterruptedException {
+    throws IOException, ClassNotFoundException, InterruptedException {
     DistributionDescription description = new DistributionDescription(modelDist.getClass().getName(),
         RandomAccessSparseVector.class.getName(), ManhattanDistanceMeasure.class.getName(), 2);
     

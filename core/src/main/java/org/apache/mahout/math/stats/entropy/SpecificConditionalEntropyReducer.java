@@ -47,7 +47,7 @@ public final class SpecificConditionalEntropyReducer extends Reducer<Text, VarIn
 
   @Override
   protected void reduce(Text key, Iterable<VarIntWritable> values, Context context)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     double sum = 0.0;
     double entropy = 0.0;
     for (VarIntWritable value : values) {

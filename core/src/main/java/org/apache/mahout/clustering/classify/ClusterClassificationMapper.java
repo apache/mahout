@@ -78,7 +78,7 @@ public class ClusterClassificationMapper extends
    */
   @Override
   protected void map(WritableComparable<?> key, VectorWritable vw, Context context)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     if (!clusterModels.isEmpty()) {
       Vector pdfPerCluster = clusterClassifier.classify(vw.get());
       if (shouldClassify(pdfPerCluster)) {
@@ -105,7 +105,7 @@ public class ClusterClassificationMapper extends
   }
   
   private void write(VectorWritable vw, Context context, int clusterIndex, double weight)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     Cluster cluster = clusterModels.get(clusterIndex);
     clusterId.set(cluster.getId());
     context.write(clusterId, new WeightedVectorWritable(weight, vw.get()));

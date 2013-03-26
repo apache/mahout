@@ -32,8 +32,9 @@ import java.util.TreeSet;
  * term vectors stored for it.
  */
 public class LuceneIterator extends AbstractLuceneIterator {
-    protected final Set<String> idFieldSelector;
-    protected final String idField;
+
+  protected final Set<String> idFieldSelector;
+  protected final String idField;
 
     /**
    * Produce a LuceneIterable that can create the Vector plus normalize it.
@@ -45,11 +46,7 @@ public class LuceneIterator extends AbstractLuceneIterator {
    * @param weight      weight
    * @param normPower   the normalization value. Must be nonnegative, or {@link LuceneIterable#NO_NORMALIZING}
    */
-  public LuceneIterator(IndexReader indexReader,
-                        String idField,
-                        String field,
-                        TermInfo terminfo,
-                        Weight weight,
+  public LuceneIterator(IndexReader indexReader, String idField, String field, TermInfo terminfo, Weight weight,
                         double normPower) {
     this(indexReader, idField, field, terminfo, weight, normPower, 0.0);
   }
@@ -82,24 +79,20 @@ public class LuceneIterator extends AbstractLuceneIterator {
       idFieldSelector = new TreeSet<String>();
       idFieldSelector.add(idField);
     } else {
-      idFieldSelector = null; /*The field in the index  containing the index.  If
-                                                          null, then the Lucene
-                                                          internal doc id is used
-                                                          which is prone to error
-                                                          if the underlying index
-                                                          changes*/
-
-      }
+      /*The field in the index  containing the index. If null, then the Lucene internal doc id is used
+      which is prone to error if the underlying index changes*/
+      idFieldSelector = null;
+    }
   }
 
-    @Override
-    protected String getVectorName(int documentIndex) throws IOException {
-        String name;
-        if (idField != null) {
-            name = indexReader.document(documentIndex, idFieldSelector).get(idField);
-        } else {
-            name = String.valueOf(documentIndex);
-        }
-        return name;
+  @Override
+  protected String getVectorName(int documentIndex) throws IOException {
+    String name;
+    if (idField != null) {
+      name = indexReader.document(documentIndex, idFieldSelector).get(idField);
+    } else {
+      name = String.valueOf(documentIndex);
     }
+    return name;
+  }
 }

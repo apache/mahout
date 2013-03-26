@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
- package org.apache.mahout.classifier.naivebayes.training;
+package org.apache.mahout.classifier.naivebayes.training;
 
 import java.util.Iterator;
 

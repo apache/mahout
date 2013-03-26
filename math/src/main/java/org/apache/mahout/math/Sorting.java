@@ -503,9 +503,9 @@ public final class Sorting {
     int comparisonab = comp.compare(a, b);
     int comparisonac = comp.compare(a, c);
     int comparisonbc = comp.compare(b, c);
-    return comparisonab < 0 ?
-        (comparisonbc < 0 ? b : (comparisonac < 0 ? c : a)) :
-        (comparisonbc > 0 ? b : (comparisonac > 0 ? c : a));
+    return comparisonab < 0
+        ? (comparisonbc < 0 ? b : (comparisonac < 0 ? c : a))
+        : (comparisonbc > 0 ? b : (comparisonac > 0 ? c : a));
   }
   
   private static int med3(long[] array, int a, int b, int c, LongComparator comp) {
@@ -669,7 +669,7 @@ public final class Sorting {
    *           if {@code start < 0} or {@code end > array.length}.
    */
   public static void quickSort(int start, int end, IntComparator comp, Swapper swap) {
-    checkBounds(end+1, start, end);
+    checkBounds(end + 1, start, end);
     quickSort0(start, end, comp, swap);
   }
   
@@ -708,8 +708,7 @@ public final class Sorting {
         if (comparison == 0) {
           if (a == partitionIndex) {
             partitionIndex = b;
-          }
-          else if (b == partitionIndex) {
+          } else if (b == partitionIndex) {
             partitionIndex = a;
           }
           swap.swap(a, b);
@@ -770,7 +769,7 @@ public final class Sorting {
     length = Math.min(d - c, end - 1 - d);
     l = b;
     h = end - length;
-     while (length-- > 0) {
+    while (length-- > 0) {
       swap.swap(l, h);
       l++;
       h++;
@@ -1712,11 +1711,12 @@ public final class Sorting {
     return l - 1;
   }
   
-  private static final ByteComparator naturalByteComparison = new ByteComparator() {
+  private static final ByteComparator NATURAL_BYTE_COMPARISON = new ByteComparator() {
     @Override
     public int compare(byte o1, byte o2) {
       return o1 - o2;
-    }};
+    }
+  };
     
     /**
      * Perform a merge sort on a range of a byte array, using numerical order.
@@ -1725,7 +1725,7 @@ public final class Sorting {
      * @param end the last index (exclusive).
      */
   public static void mergeSort(byte[] array, int start, int end) {
-    mergeSort(array, start, end, naturalByteComparison);
+    mergeSort(array, start, end, NATURAL_BYTE_COMPARISON);
   }
   
   /**
@@ -1829,11 +1829,12 @@ public final class Sorting {
     return l - 1;
   }
   
-  private static final CharComparator naturalCharComparison = new CharComparator() {
+  private static final CharComparator NATURAL_CHAR_COMPARISON = new CharComparator() {
     @Override
     public int compare(char o1, char o2) {
       return o1 - o2;
-    }};
+    }
+  };
     
     /**
      * Perform a merge sort on a range of a char array, using numerical order.
@@ -1842,7 +1843,7 @@ public final class Sorting {
      * @param end the last index (exclusive).
      */
   public static void mergeSort(char[] array, int start, int end) {
-    mergeSort(array, start, end, naturalCharComparison);
+    mergeSort(array, start, end, NATURAL_CHAR_COMPARISON);
   }
 
   /**
@@ -1946,11 +1947,12 @@ public final class Sorting {
     return l - 1;
   }
   
-  private static final ShortComparator naturalShortComparison = new ShortComparator() {
+  private static final ShortComparator NATURAL_SHORT_COMPARISON = new ShortComparator() {
     @Override
     public int compare(short o1, short o2) {
       return o1 - o2;
-    }};
+    }
+  };
     
     /**
      * Perform a merge sort on a range of a short array, using numerical order.
@@ -1959,7 +1961,7 @@ public final class Sorting {
      * @param end the last index (exclusive).
      */
   public static void mergeSort(short[] array, int start, int end) {
-    mergeSort(array, start, end, naturalShortComparison);
+    mergeSort(array, start, end, NATURAL_SHORT_COMPARISON);
   }
   
   public static void mergeSort(short[] array, int start, int end, ShortComparator comp) {
@@ -2064,14 +2066,15 @@ public final class Sorting {
     return l - 1;
   }
   
-  private static final IntComparator naturalIntComparison = new IntComparator() {
+  private static final IntComparator NATURAL_INT_COMPARISON = new IntComparator() {
     @Override
     public int compare(int o1, int o2) {
       return o1 < o2 ? -1 : o1 > o2 ? 1 : 0;
-    }};
+    }
+  };
     
   public static void mergeSort(int[] array, int start, int end) {
-    mergeSort(array, start, end, naturalIntComparison);
+    mergeSort(array, start, end, NATURAL_INT_COMPARISON);
   }
 
   /**
@@ -2183,11 +2186,12 @@ public final class Sorting {
   }
   
   
-  private static final LongComparator naturalLongComparison = new LongComparator() {
+  private static final LongComparator NATURAL_LONG_COMPARISON = new LongComparator() {
     @Override
     public int compare(long o1, long o2) {
       return o1 < o2 ? -1 : o1 > o2 ? 1 : 0;
-    }};
+    }
+  };
     
     /**
      * Perform a merge sort on a range of a long array using numerical order.
@@ -2196,7 +2200,7 @@ public final class Sorting {
      * @param end the last index (exclusive).
      */
   public static void mergeSort(long[] array, int start, int end) {
-    mergeSort(array, start, end, naturalLongComparison);
+    mergeSort(array, start, end, NATURAL_LONG_COMPARISON);
   }
 
   /**
@@ -2300,11 +2304,12 @@ public final class Sorting {
     return l - 1;
   }
   
-  private static final FloatComparator naturalFloatComparison = new FloatComparator() {
+  private static final FloatComparator NATURAL_FLOAT_COMPARISON = new FloatComparator() {
     @Override
     public int compare(float o1, float o2) {
       return Float.compare(o1, o2);
-    }};
+    }
+  };
     
     /**
      * Perform a merge sort on a range of a float array using Float.compare for an ordering.
@@ -2313,7 +2318,7 @@ public final class Sorting {
      * @param end the last index (exclusive).
      */
   public static void mergeSort(float[] array, int start, int end) {
-    mergeSort(array, start, end, naturalFloatComparison);
+    mergeSort(array, start, end, NATURAL_FLOAT_COMPARISON);
   }
 
   /**
@@ -2417,11 +2422,12 @@ public final class Sorting {
     return l - 1;
   }
   
-  private static final DoubleComparator naturalDoubleComparison = new DoubleComparator() {
+  private static final DoubleComparator NATURAL_DOUBLE_COMPARISON = new DoubleComparator() {
     @Override
     public int compare(double o1, double o2) {
       return Double.compare(o1, o2);
-    }};
+    }
+  };
     
     
     /**
@@ -2431,7 +2437,7 @@ public final class Sorting {
      * @param end the last index (exclusive).
      */
   public static void mergeSort(double[] array, int start, int end) {
-    mergeSort(array, start, end, naturalDoubleComparison);
+    mergeSort(array, start, end, NATURAL_DOUBLE_COMPARISON);
   }
 
   /**
@@ -2561,7 +2567,8 @@ public final class Sorting {
     }
   
     // rotate(firstCut, middle, secondCut, swapper);
-    // is manually inlined for speed (jitter inlining seems to work only for small call depths, even if methods are "static private")
+    // is manually inlined for speed (jitter inlining seems to work only for small call depths, even if methods
+    // are "static private")
     // speedup = 1.7
     // begin inline
     int first2 = firstCut;
@@ -2599,8 +2606,8 @@ public final class Sorting {
    * @param last  One past the end of the range.
    * @param x     Element to be searched for.
    * @param comp  Comparison function.
-   * @return The largest index i such that, for every j in the range <code>[first, i)</code>, {@code comp.apply(array[j],}
-   *         x)</code> is {@code true}.
+   * @return The largest index i such that, for every j in the range <code>[first, i)</code>,
+   *        <code></code></codeA>{@code comp.apply(array[j], x)</code> is {@code true}.
    * @see Sorting#upperBound
    */
   static int lowerBound(int first, int last, int x, IntComparator comp) {
@@ -2640,7 +2647,8 @@ public final class Sorting {
     /*
       We retain the same method signature as quickSort.
       Given only a comparator and swapper we do not know how to copy and move elements from/to temporary arrays.
-      Hence, in contrast to the JDK mergesorts this is an "in-place" mergesort, i.e. does not allocate any temporary arrays.
+      Hence, in contrast to the JDK mergesorts this is an "in-place" mergesort, i.e. does not allocate any temporary
+      arrays.
       A non-inplace mergesort would perhaps be faster in most cases, but would require non-intuitive delegate objects...
     */
     int length = toIndex - fromIndex;

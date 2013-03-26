@@ -30,8 +30,8 @@ package org.apache.mahout.collections;
  * Arithmetic functions.
  */
 public final class Arithmetic extends Constants {
-  // for method stirlingCorrection(...)
-  private static final double[] stirlingCorrection = {
+  // for method STIRLING_CORRECTION(...)
+  private static final double[] STIRLING_CORRECTION = {
     0.0,
     8.106146679532726e-02, 4.134069595540929e-02,
     2.767792568499834e-02, 2.079067210376509e-02,
@@ -52,7 +52,7 @@ public final class Arithmetic extends Constants {
 
   // for method logFactorial(...)
   // log(k!) for k = 0, ..., 29
-  private static final double[] logFactorials = {
+  private static final double[] LOG_FACTORIALS = {
     0.00000000000000000, 0.00000000000000000, 0.69314718055994531,
     1.79175946922805500, 3.17805383034794562, 4.78749174278204599,
     6.57925121201010100, 8.52516136106541430, 10.60460290274525023,
@@ -66,7 +66,7 @@ public final class Arithmetic extends Constants {
   };
 
   // k! for k = 0, ..., 20
-  private static final long[] longFactorials = {
+  private static final long[] LONG_FACTORIALS = {
     1L,
     1L,
     2L,
@@ -91,7 +91,7 @@ public final class Arithmetic extends Constants {
   };
 
   // k! for k = 21, ..., 170
-  private static final double[] doubleFactorials = {
+  private static final double[] DOUBLE_FACTORIALS = {
     5.109094217170944E19,
     1.1240007277776077E21,
     2.585201673888498E22,
@@ -298,7 +298,7 @@ public final class Arithmetic extends Constants {
     // try quick version and see whether we get numeric overflows.
     // factorial(..) is O(1); requires no loop; only a table lookup.
     if (n > k) {
-      int max = longFactorials.length + doubleFactorials.length;
+      int max = LONG_FACTORIALS.length + DOUBLE_FACTORIALS.length;
       if (n < max) { // if (n! < inf && k! < inf)
         double n_fac = factorial((int) n);
         double k_fac = factorial((int) k);
@@ -381,23 +381,23 @@ public final class Arithmetic extends Constants {
       throw new IllegalArgumentException();
     }
 
-    int length1 = longFactorials.length;
+    int length1 = LONG_FACTORIALS.length;
     if (k < length1) {
-      return longFactorials[k];
+      return LONG_FACTORIALS[k];
     }
 
-    int length2 = doubleFactorials.length;
+    int length2 = DOUBLE_FACTORIALS.length;
     if (k < length1 + length2) {
-      return doubleFactorials[k - length1];
+      return DOUBLE_FACTORIALS[k - length1];
     } else {
       return Double.POSITIVE_INFINITY;
     }
   }
 
   /**
-   * Returns the largest <code>long &lt;= value</code>. <dt>Examples: {@code 1.0 -> 1, 1.2 -> 1, 1.9 -> 1 <dt> 2.0 -> 2,}
-   * 2.2 -> 2, 2.9 -> 2 </code><dt> This method is safer than using (long) Math.floor(value), because of possible
-   * rounding error.
+   * Returns the largest <code>long &lt;= value</code>.
+   * <dt>Examples: {@code 1.0 -> 1, 1.2 -> 1, 1.9 -> 1 <dt> 2.0 -> 2,} 2.2 -> 2, 2.9 -> 2 </code><dt>
+   * This method is safer than using (long) Math.floor(value), because of possible rounding error.
    */
   public static long floor(double value) {
     return Math.round(Math.floor(value));
@@ -438,7 +438,7 @@ public final class Arithmetic extends Constants {
       double C0 = 9.18938533204672742e-01;
       return (k + 0.5) * Math.log(k) - k + C0 + r * (C1 + rr * (C3 + rr * (C5 + rr * C7)));
     } else {
-      return logFactorials[k];
+      return LOG_FACTORIALS[k];
     }
   }
 
@@ -452,8 +452,8 @@ public final class Arithmetic extends Constants {
       throw new IllegalArgumentException("Negative k");
     }
 
-    if (k < longFactorials.length) {
-      return longFactorials[k];
+    if (k < LONG_FACTORIALS.length) {
+      return LONG_FACTORIALS[k];
     }
     throw new IllegalArgumentException("Overflow");
   }
@@ -461,8 +461,8 @@ public final class Arithmetic extends Constants {
   /**
    * Returns the StirlingCorrection. <p> Correction term of the Stirling approximation for <tt>log(k!)</tt> (series in
    * 1/k, or table values for small k) with int parameter k. <p> <tt> log k! = (k + 1/2)log(k + 1) - (k + 1) +
-   * (1/2)log(2Pi) + stirlingCorrection(k + 1) <p> log k! = (k + 1/2)log(k)     -  k      + (1/2)log(2Pi) +
-   * stirlingCorrection(k) </tt>
+   * (1/2)log(2Pi) + STIRLING_CORRECTION(k + 1) <p> log k! = (k + 1/2)log(k)     -  k      + (1/2)log(2Pi) +
+   * STIRLING_CORRECTION(k) </tt>
    */
   public static double stirlingCorrection(int k) {
 
@@ -475,7 +475,7 @@ public final class Arithmetic extends Constants {
       double C1 = 8.33333333333333333e-02;     //  +1/12
       return r * (C1 + rr * (C3 + rr * (C5 + rr * C7)));
     } else {
-      return stirlingCorrection[k];
+      return STIRLING_CORRECTION[k];
     }
   }
 

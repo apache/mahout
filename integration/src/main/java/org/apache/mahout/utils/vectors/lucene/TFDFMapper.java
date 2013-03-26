@@ -51,14 +51,14 @@ public class TFDFMapper  {
   }
   
   public void map(BytesRef term, int frequency) {
-    TermEntry entry = termInfo.getTermEntry(field, term.utf8ToString() );
+    TermEntry entry = termInfo.getTermEntry(field, term.utf8ToString());
     if (entry != null) {
       vector.setQuick(entry.getTermIdx(), weight.calculate(frequency, entry.getDocFreq(), (int)numTerms, numDocs));
     }
   }
   
   public Vector getVector() {
-      return this.vector;
+    return this.vector;
   }
   
 }

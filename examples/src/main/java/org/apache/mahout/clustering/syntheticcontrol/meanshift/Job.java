@@ -133,7 +133,7 @@ public final class Job extends AbstractJob {
                          double t2,
                          double convergenceDelta,
                          int maxIterations)
-      throws Exception {
+    throws Exception {
     Path directoryContainingConvertedInput = new Path(output,
         DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput);

@@ -347,8 +347,7 @@ public final class ABtDenseOutJob {
    * 
    */
   public static class QRReducer
-      extends
-      Reducer<SplitPartitionedWritable, DenseBlockWritable, SplitPartitionedWritable, VectorWritable> {
+    extends Reducer<SplitPartitionedWritable, DenseBlockWritable, SplitPartitionedWritable, VectorWritable> {
 
     /*
      * HACK: partition number formats in hadoop, copied. this may stop working
@@ -476,12 +475,10 @@ public final class ABtDenseOutJob {
      * @param <K>
      *          bogus
      */
-    private <K, V> OutputCollector<K, V>
-        createOutputCollector(String name,
+    private <K, V> OutputCollector<K, V> createOutputCollector(String name,
                               final SplitPartitionedWritable spw,
                               Context ctx,
-                              Class<V> valueClass) throws IOException,
-          InterruptedException {
+                              Class<V> valueClass) throws IOException, InterruptedException {
       Path outputPath = getSplitFilePath(name, spw, ctx);
       final SequenceFile.Writer w =
         SequenceFile.createWriter(FileSystem.get(outputPath.toUri(), ctx.getConfiguration()),

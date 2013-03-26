@@ -28,7 +28,7 @@ public class TanimotoCoefficientSimilarity extends CountbasedMeasure {
   @Override
   public boolean consider(int numNonZeroEntriesA, int numNonZeroEntriesB, double maxValueA, double maxValueB,
       double threshold) {
-    return numNonZeroEntriesA >= numNonZeroEntriesB * threshold &&
-        numNonZeroEntriesB >= numNonZeroEntriesA * threshold;
+    return numNonZeroEntriesA >= numNonZeroEntriesB * threshold
+        && numNonZeroEntriesB >= numNonZeroEntriesA * threshold;
   }
 }

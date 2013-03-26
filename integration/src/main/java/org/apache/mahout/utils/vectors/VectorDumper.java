@@ -77,11 +77,11 @@ public final class VectorDumper extends AbstractJob {
     addOption("dictionaryType", "dt", "The dictionary file type (text|seqfile)", false);
     addOption("csv", "c", "Output the Vector as CSV.  Otherwise it substitutes in the terms for vector cell entries",
         false);
-    addOption("namesAsComments", "n", "If using CSV output, optionally add a comment line for each NamedVector " +
-        "(if the vector is one) printing out the name", false);
+    addOption("namesAsComments", "n", "If using CSV output, optionally add a comment line for each NamedVector "
+        + "(if the vector is one) printing out the name", false);
     addOption("nameOnly", "N", "Use the name as the value for each NamedVector (skip other vectors)", false);
-    addOption("sortVectors", "sort", "Sort output key/value pairs of the vector entries in abs magnitude " +
-        "descending order", false);
+    addOption("sortVectors", "sort", "Sort output key/value pairs of the vector entries in abs magnitude "
+        + "descending order", false);
     addOption("quiet", "q", "Print only file contents", false);
     addOption("sizeOnly", "sz", "Dump only the size of the vector", false);
     addOption("numItems", "ni", "Output at most <n> vecors", false);

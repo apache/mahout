@@ -56,12 +56,12 @@ public class StableFixedSizeSamplingIterator<T> extends ForwardingIterator<T> {
 
     Collections.sort(buf);
     delegate = Iterators.transform(buf.iterator(),
-                                   new Function<Pair<Integer,T>,T>() {
-                                     @Override
-                                     public T apply(Pair<Integer,T> from) {
-                                       return from.getSecond();
-                                     }
-                                   });
+      new Function<Pair<Integer,T>,T>() {
+        @Override
+        public T apply(Pair<Integer,T> from) {
+          return from.getSecond();
+        }
+      });
   }
 
   @Override

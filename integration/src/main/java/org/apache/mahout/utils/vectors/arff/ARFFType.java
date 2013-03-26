@@ -49,14 +49,14 @@ public enum ARFFType {
   public static String removeQuotes(String str) {
     String cleaned = str;
     if (cleaned != null) {
-        cleaned = cleaned.trim();
-        boolean isQuoted = cleaned.length() > 1 &&
-            (cleaned.startsWith("\"") &&  cleaned.endsWith("\"") ||
-            cleaned.startsWith("'") &&  cleaned.endsWith("'"));
-        if (isQuoted) {
-          cleaned = cleaned.substring(1, cleaned.length() - 1);
-        }
+      cleaned = cleaned.trim();
+      boolean isQuoted = cleaned.length() > 1
+          && (cleaned.startsWith("\"") &&  cleaned.endsWith("\"")
+          || cleaned.startsWith("'") &&  cleaned.endsWith("'"));
+      if (isQuoted) {
+        cleaned = cleaned.substring(1, cleaned.length() - 1);
       }
+    }
     return cleaned;
   }
 }

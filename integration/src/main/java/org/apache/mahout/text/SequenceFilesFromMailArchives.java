@@ -165,8 +165,8 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
         obuilder.withLongName("quotedRegex")
             .withRequired(false).withArgument(abuilder.withName("regex")
                 .withMinimum(1).withMaximum(1).create()).withDescription(
-                "Specify the regex that identifies quoted text.  " +
-                "Default is to look for > or | at the beginning of the line.")
+                "Specify the regex that identifies quoted text.  "
+                    + "Default is to look for > or | at the beginning of the line.")
             .withShortName("q").create());
     addOption(
         obuilder.withLongName("separator")
@@ -179,8 +179,8 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
         obuilder.withLongName("bodySeparator")
             .withRequired(false).withArgument(abuilder.withName("bodySeparator")
                 .withMinimum(1).withMaximum(1).create()).withDescription(
-                "The separator to use between lines in the body.  Default is \\n.  " +
-                "Useful to change if you wish to have the message be on one line")
+                "The separator to use between lines in the body.  Default is \\n.  "
+                    + "Useful to change if you wish to have the message be on one line")
             .withShortName("bodySep").create());
     addOption(DefaultOptionCreator.helpOption());
     Map<String, List<String>> parsedArgs = parseArguments(args);

@@ -73,7 +73,7 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
 
   @Override
   public int computeItemSimilarities(int degreeOfParallelism, int maxDurationInHours, SimilarItemsWriter writer)
-      throws IOException {
+    throws IOException {
 
     ExecutorService executorService = Executors.newFixedThreadPool(degreeOfParallelism + 1);
 

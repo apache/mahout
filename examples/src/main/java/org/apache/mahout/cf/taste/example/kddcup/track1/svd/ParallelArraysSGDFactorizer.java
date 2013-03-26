@@ -171,7 +171,7 @@ public class ParallelArraysSGDFactorizer implements Factorizer {
     for (int feature = 0; feature < numFeatures; feature++) {
       log.info("Shuffling preferences...");
       shufflePreferences();
-     log.info("Starting training of feature {} ...", feature);
+      log.info("Starting training of feature {} ...", feature);
       for (int currentIteration = 0; currentIteration < numIterations; currentIteration++) {
         if (currentIteration == numIterations - 1) {
           double rmse = trainingIterationWithRmse(feature);

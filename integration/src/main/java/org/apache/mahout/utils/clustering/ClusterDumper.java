@@ -111,12 +111,12 @@ public final class ClusterDumper extends AbstractJob {
     addOption(POINTS_DIR_OPTION, "p",
             "The directory containing points sequence files mapping input vectors to their cluster.  "
                     + "If specified, then the program will output the points associated with a cluster");
-    addOption(SAMPLE_POINTS, "sp", "Specifies the maximum number of points to include _per_ cluster.  The default " +
-        "is to include all points");
+    addOption(SAMPLE_POINTS, "sp", "Specifies the maximum number of points to include _per_ cluster.  The default "
+        + "is to include all points");
     addOption(DICTIONARY_OPTION, "d", "The dictionary file");
     addOption(DICTIONARY_TYPE_OPTION, "dt", "The dictionary file type (text|sequencefile)", "text");
-    addOption(buildOption(EVALUATE_CLUSTERS, "e", "Run ClusterEvaluator and CDbwEvaluator over the input.  " +
-        "The output will be appended to the rest of the output at the end.", false, false, null));
+    addOption(buildOption(EVALUATE_CLUSTERS, "e", "Run ClusterEvaluator and CDbwEvaluator over the input.  "
+        + "The output will be appended to the rest of the output at the end.", false, false, null));
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
 
     // output is optional, will print to System.out per default
@@ -182,7 +182,7 @@ public final class ClusterDumper extends AbstractJob {
         FileSystem fs = FileSystem.get(p.toUri(), conf);
         writer = new OutputStreamWriter(fs.create(p), Charsets.UTF_8);
       } else {
-      Files.createParentDirs(outputFile);
+        Files.createParentDirs(outputFile);
         writer = Files.newWriter(this.outputFile, Charsets.UTF_8);
       }
     }
@@ -196,11 +196,11 @@ public final class ClusterDumper extends AbstractJob {
         HadoopUtil.delete(conf, new Path("tmp/representative"));
         int numIters = 5;
         RepresentativePointsDriver.main(new String[]{
-                "--input", seqFileDir.toString(),
-                "--output", "tmp/representative",
-                "--clusteredPoints", pointsDir.toString(),
-                "--distanceMeasure", measure.getClass().getName(),
-                "--maxIter", String.valueOf(numIters)//
+          "--input", seqFileDir.toString(),
+          "--output", "tmp/representative",
+          "--clusteredPoints", pointsDir.toString(),
+          "--distanceMeasure", measure.getClass().getName(),
+          "--maxIter", String.valueOf(numIters)
         });
         conf.set(RepresentativePointsDriver.DISTANCE_MEASURE_KEY, measure.getClass().getName());
         conf.set(RepresentativePointsDriver.STATE_IN_KEY, "tmp/representative/representativePoints-" + numIters);
@@ -296,9 +296,9 @@ public final class ClusterDumper extends AbstractJob {
   public static Map<Integer, List<WeightedVectorWritable>> readPoints(Path pointsPathDir, long maxPointsPerCluster,
       Configuration conf) {
     Map<Integer, List<WeightedVectorWritable>> result = new TreeMap<Integer, List<WeightedVectorWritable>>();
-    for (Pair<IntWritable, WeightedVectorWritable> record :
-            new SequenceFileDirIterable<IntWritable, WeightedVectorWritable>(
-                    pointsPathDir, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+    for (Pair<IntWritable, WeightedVectorWritable> record
+        : new SequenceFileDirIterable<IntWritable, WeightedVectorWritable>(pointsPathDir, PathType.LIST,
+            PathFilters.logsCRCFilter(), conf)) {
       // value is the cluster id as an int, key is the name/id of the
       // vector, but that doesn't matter because we only care about printing
       // it

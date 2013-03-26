@@ -208,8 +208,7 @@ public final class FileBasedSparseBinaryMatrix extends AbstractMatrix {
     }
     if (low >= row.limit()) {
       return 0;
-    }
-    else if (high == low && row.get(low) == columnIndex) {
+    } else if (high == low && row.get(low) == columnIndex) {
       return 1;
     } else {
       return 0;
@@ -397,13 +396,13 @@ public final class FileBasedSparseBinaryMatrix extends AbstractMatrix {
         @Override
         protected Element computeNext() {
           if (i < buffer.limit()) {
-          return new BinaryReadOnlyElement(buffer.get(i++));
-        } else {
-          return endOfData();
+            return new BinaryReadOnlyElement(buffer.get(i++));
+          } else {
+            return endOfData();
+          }
         }
-      }
-    };
-  }
+      };
+    }
 
   /**
      * Return the value at the given index, without checking bounds

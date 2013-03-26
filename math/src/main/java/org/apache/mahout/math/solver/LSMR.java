@@ -202,8 +202,8 @@ public final class LSMR {
     }
 
     if (log.isDebugEnabled()) {
-      log.debug("LSMR - Least-squares solution of  Ax = b, based on Matlab Version 1.02, 14 Apr 2010, Mahout version {}",
-        this.getClass().getPackage().getImplementationVersion());
+      log.debug("LSMR - Least-squares solution of  Ax = b, based on Matlab Version 1.02, 14 Apr 2010, "
+        +  "Mahout version {}", getClass().getPackage().getImplementationVersion());
       log.debug(String.format("The matrix A has %d rows  and %d cols, lambda = %.4g, atol = %g, btol = %g",
         m, n, lambda, aTolerance, bTolerance));
     }
@@ -447,7 +447,9 @@ public final class LSMR {
 
       // See if it is time to print something.
       if (log.isDebugEnabled()) {
-        if ((n <= 40) || (iteration <= 10) || (iteration >= iterationLimit - 10) || ((iteration % 10) == 0) || (test3 <= 1.1 * ctol) || (test2 <= 1.1 * aTolerance) || (test1 <= 1.1 * rtol) || (stop != StopCode.CONTINUE)) {
+        if ((n <= 40) || (iteration <= 10) || (iteration >= iterationLimit - 10) || ((iteration % 10) == 0)
+              || (test3 <= 1.1 * ctol) || (test2 <= 1.1 * aTolerance) || (test1 <= 1.1 * rtol)
+              || (stop != StopCode.CONTINUE)) {
           statusDump(x, normA, condA, test1, test2);
         }
       }
@@ -510,7 +512,8 @@ public final class LSMR {
   private enum StopCode {
     CONTINUE("Not done"),
     TRIVIAL("The exact solution is  x = 0"),
-    CONVERGED("Ax - b is small enough, given atol, btol"), LEAST_SQUARE_CONVERGED("The least-squares solution is good enough, given atol"),
+    CONVERGED("Ax - b is small enough, given atol, btol"),
+    LEAST_SQUARE_CONVERGED("The least-squares solution is good enough, given atol"),
     CONDITION("The estimate of cond(Abar) has exceeded condition limit"),
     CONVERGED_MACHINE_TOLERANCE("Ax - b is small enough for this machine"),
     LEAST_SQUARE_CONVERGED_MACHINE_TOLERANCE("The least-squares solution is good enough for this machine"),

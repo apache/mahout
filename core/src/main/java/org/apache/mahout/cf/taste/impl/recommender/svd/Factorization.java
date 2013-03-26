@@ -112,8 +112,8 @@ public class Factorization {
   public boolean equals(Object o) {
     if (o instanceof Factorization) {
       Factorization other = (Factorization) o;
-      return userIDMapping.equals(other.userIDMapping) && itemIDMapping.equals(other.itemIDMapping) &&
-          Arrays.deepEquals(userFeatures, other.userFeatures) && Arrays.deepEquals(itemFeatures, other.itemFeatures);
+      return userIDMapping.equals(other.userIDMapping) && itemIDMapping.equals(other.itemIDMapping)
+          && Arrays.deepEquals(userFeatures, other.userFeatures) && Arrays.deepEquals(itemFeatures, other.itemFeatures);
     }
     return false;
   }

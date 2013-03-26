@@ -28,7 +28,7 @@ public class MergeVectorsCombiner
 
   @Override
   public void reduce(WritableComparable<?> key, Iterable<VectorWritable> vectors, Context ctx)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     ctx.write(key, VectorWritable.merge(vectors.iterator()));
   }
 }

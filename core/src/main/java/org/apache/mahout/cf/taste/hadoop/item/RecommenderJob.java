@@ -117,8 +117,8 @@ public final class RecommenderJob extends AbstractJob {
     addOption("maxSimilaritiesPerItem", "m", "Maximum number of similarities considered per item ",
             String.valueOf(DEFAULT_MAX_SIMILARITIES_PER_ITEM));
     addOption("maxPrefsPerUserInItemSimilarity", "mppuiis", "max number of preferences to consider per user in the " 
-            + "item similarity computation phase, users with more preferences will be sampled down (default: " +
-            DEFAULT_MAX_PREFS_PER_USER + ')', String.valueOf(DEFAULT_MAX_PREFS_PER_USER));
+            + "item similarity computation phase, users with more preferences will be sampled down (default: "
+        + DEFAULT_MAX_PREFS_PER_USER + ')', String.valueOf(DEFAULT_MAX_PREFS_PER_USER));
     addOption("similarityClassname", "s", "Name of distributed similarity measures class to instantiate, " 
             + "alternatively use one of the predefined similarities (" + VectorSimilarityMeasures.list() + ')', true);
     addOption("threshold", "tr", "discard item pairs with a similarity value below this", false);
@@ -141,8 +141,8 @@ public final class RecommenderJob extends AbstractJob {
     int maxPrefsPerUserInItemSimilarity = Integer.parseInt(getOption("maxPrefsPerUserInItemSimilarity"));
     int maxSimilaritiesPerItem = Integer.parseInt(getOption("maxSimilaritiesPerItem"));
     String similarityClassname = getOption("similarityClassname");
-    double threshold = hasOption("threshold") ?
-                 Double.parseDouble(getOption("threshold")) : RowSimilarityJob.NO_THRESHOLD;
+    double threshold = hasOption("threshold")
+        ? Double.parseDouble(getOption("threshold")) : RowSimilarityJob.NO_THRESHOLD;
 
 
     Path prepPath = getTempPath("preparePreferenceMatrix");

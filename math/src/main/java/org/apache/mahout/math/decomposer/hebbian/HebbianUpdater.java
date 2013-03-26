@@ -50,11 +50,13 @@ public class HebbianUpdater implements EigenUpdater {
         currentState.getActivationNumerator()
             - currentState.getHelperVector().dot(currentState.currentTrainingProjection()));
 
-    double activation = currentState.getActivationNumerator() / Math.sqrt(currentState.getActivationDenominatorSquared());
+    double activation = currentState.getActivationNumerator()
+        / Math.sqrt(currentState.getActivationDenominatorSquared());
     currentState.setActivationDenominatorSquared(
         currentState.getActivationDenominatorSquared()
             + 2 * activation * currentState.getActivationNumerator()
-            + activation * activation * (trainingVector.getLengthSquared() - currentState.currentTrainingProjection().getLengthSquared()));
+            + activation * activation
+                * (trainingVector.getLengthSquared() - currentState.currentTrainingProjection().getLengthSquared()));
     if (numPreviousEigens > 0) {
       currentState.getHelperVector().assign(currentState.currentTrainingProjection(), new PlusMult(activation));
     }

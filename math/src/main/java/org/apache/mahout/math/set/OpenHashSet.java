@@ -52,7 +52,7 @@ public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
 
   /** Constructs an empty map with default capacity and default load factors. */
   public OpenHashSet() {
-    this(defaultCapacity);
+    this(DEFAULT_CAPACITY);
   }
 
   /**
@@ -62,7 +62,7 @@ public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
    * @throws IllegalArgumentException if the initial capacity is less than zero.
    */
   public OpenHashSet(int initialCapacity) {
-    this(initialCapacity, defaultMinLoadFactor, defaultMaxLoadFactor);
+    this(initialCapacity, DEFAULT_MIN_LOAD_FACTOR, DEFAULT_MAX_LOAD_FACTOR);
   }
 
   /**
@@ -379,7 +379,7 @@ public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
 
     // memory will be exhausted long before this pathological case happens, anyway.
     this.minLoadFactor = minLoadFactor;
-    if (capacity == PrimeFinder.largestPrime) {
+    if (capacity == PrimeFinder.LARGEST_PRIME) {
       this.maxLoadFactor = 1.0;
     } else {
       this.maxLoadFactor = maxLoadFactor;
@@ -449,15 +449,12 @@ public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
       return false;
     }
 
-    return
-        forEachKey(
-            new ObjectProcedure<T>() {
-              @Override
-              public boolean apply(T key) {
-                return other.contains(key);
-              }
-            }
-        );
+    return forEachKey(new ObjectProcedure<T>() {
+      @Override
+      public boolean apply(T key) {
+        return other.contains(key);
+      }
+    });
   }
 
   @Override
@@ -493,7 +490,7 @@ public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
   @Override
   public boolean addAll(Collection<? extends T> c) {
     boolean anyAdded = false;
-    for(T o : c) {
+    for (T o : c) {
       boolean added = add(o);
       anyAdded |= added;
     }
@@ -513,7 +510,7 @@ public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
   @Override
   public boolean removeAll(Collection<?> c) {
     boolean anyRemoved = false;
-    for(Object o : c) {
+    for (Object o : c) {
       boolean removed = remove(o);
       anyRemoved |= removed;
     }
@@ -526,7 +523,6 @@ public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
     final boolean[] modified = new boolean[1];
     modified[0] = false;
     forEachKey(new ObjectProcedure<T>() {
-
       @Override
       public boolean apply(T element) {
         if (!finalCollection.contains(element)) {
@@ -534,7 +530,8 @@ public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
           modified[0] = true;
         }
         return true;
-      }});
+      }
+    });
     return modified[0];
   }
 

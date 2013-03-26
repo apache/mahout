@@ -245,12 +245,12 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
   @Override
   public Iterator<Preference> iterator() {
     return Iterators.transform(new CountingIterator(length()),
-                               new Function<Integer, Preference>() {
-                                 @Override
-                                 public Preference apply(Integer from) {
-                                   return new PreferenceView(from);
-                                 }
-                               });
+      new Function<Integer, Preference>() {
+        @Override
+        public Preference apply(Integer from) {
+          return new PreferenceView(from);
+        }
+      });
   }
 
   @Override

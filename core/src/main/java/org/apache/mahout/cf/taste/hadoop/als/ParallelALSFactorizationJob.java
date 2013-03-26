@@ -232,7 +232,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
   }
 
   private void runSolver(Path ratings, Path output, Path pathToUorI, int currentIteration, String matrixName)
-      throws ClassNotFoundException, IOException, InterruptedException {
+    throws ClassNotFoundException, IOException, InterruptedException {
 
     int iterationNumber = currentIteration + 1;
     Class<? extends Mapper<IntWritable,VectorWritable,IntWritable,VectorWritable>> solverMapperClassInternal;
@@ -240,12 +240,12 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     if (implicitFeedback) {
       solverMapperClassInternal = SolveImplicitFeedbackMapper.class;
-      name = "Recompute " + matrixName + ", iteration (" + iterationNumber + "/" + numIterations + "), " +
-          "(" + numThreadsPerSolver + " threads, implicit feedback)";
+      name = "Recompute " + matrixName + ", iteration (" + iterationNumber + "/" + numIterations + "), "
+          + "(" + numThreadsPerSolver + " threads, implicit feedback)";
     } else {
       solverMapperClassInternal = SolveExplicitFeedbackMapper.class;
-      name = "Recompute " + matrixName + ", iteration (" + iterationNumber + "/" + numIterations + "), " +
-          "(" + numThreadsPerSolver + " threads, explicit feedback)";
+      name = "Recompute " + matrixName + ", iteration (" + iterationNumber + "/" + numIterations + "), "
+          + "(" + numThreadsPerSolver + " threads, explicit feedback)";
     }
 
     Job solverForUorI = prepareJob(ratings, output, SequenceFileInputFormat.class, MultithreadedSharingMapper.class,

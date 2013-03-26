@@ -63,11 +63,11 @@ public class VectorDistanceSimilarityJob extends AbstractJob {
     addOutputOption();
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
     addOption(SEEDS, "s", "The set of vectors to compute distances against.  Must fit in memory on the mapper");
-    addOption(MAX_DISTANCE, "mx", "set an upper-bound on distance (double) such that any pair of vectors with a" +
-        " distance greater than this value is ignored in the output. Ignored for non pairwise output!");
+    addOption(MAX_DISTANCE, "mx", "set an upper-bound on distance (double) such that any pair of vectors with a"
+        + " distance greater than this value is ignored in the output. Ignored for non pairwise output!");
     addOption(DefaultOptionCreator.overwriteOption().create());
-    addOption(OUT_TYPE_KEY, "ot", "[pw|v] -- Define the output style: pairwise, the default, (pw) or vector (v).  " +
-        "Pairwise is a tuple of <seed, other, distance>, vector is <other, <Vector of size the number of seeds>>.",
+    addOption(OUT_TYPE_KEY, "ot", "[pw|v] -- Define the output style: pairwise, the default, (pw) or vector (v).  "
+        + "Pairwise is a tuple of <seed, other, distance>, vector is <other, <Vector of size the number of seeds>>.",
         "pw");
 
     if (parseArguments(args) == null) {
@@ -110,7 +110,7 @@ public class VectorDistanceSimilarityJob extends AbstractJob {
                          Path output,
                          DistanceMeasure measure, String outType)
     throws IOException, ClassNotFoundException, InterruptedException {
-      run(conf, input, seeds, output, measure, outType, null);
+    run(conf, input, seeds, output, measure, outType, null);
   }      
   
   public static void run(Configuration conf,

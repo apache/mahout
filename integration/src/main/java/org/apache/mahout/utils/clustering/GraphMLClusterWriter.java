@@ -51,9 +51,8 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
   private final int subString;
 
   public GraphMLClusterWriter(Writer writer, Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints,
-                              DistanceMeasure measure,
-                              int numTopFeatures, String[] dictionary, int subString)
-          throws IOException {
+                              DistanceMeasure measure, int numTopFeatures, String[] dictionary, int subString)
+    throws IOException {
     super(writer, clusterIdToPoints, measure);
     this.dictionary = dictionary;
     this.numTopFeatures = numTopFeatures;
@@ -63,18 +62,18 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
 
   private void init(Writer writer) throws IOException {
     writer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-    writer.append("<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"\n" +
-            "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-            "xsi:schemaLocation=\"http://graphml.graphdrawing.org/xmlns\n" +
-            "http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd\">");
+    writer.append("<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"\n"
+                + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
+                + "xsi:schemaLocation=\"http://graphml.graphdrawing.org/xmlns\n"
+                + "http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd\">");
     //support rgb
-    writer.append("<key attr.name=\"r\" attr.type=\"int\" for=\"node\" id=\"r\"/>\n" +
-            "<key attr.name=\"g\" attr.type=\"int\" for=\"node\" id=\"g\"/>\n" +
-            "<key attr.name=\"b\" attr.type=\"int\" for=\"node\" id=\"b\"/>" +
-            "<key attr.name=\"size\" attr.type=\"int\" for=\"node\" id=\"size\"/>" +
-            "<key attr.name=\"weight\" attr.type=\"float\" for=\"edge\" id=\"weight\"/>" +
-            "<key attr.name=\"x\" attr.type=\"float\" for=\"node\" id=\"x\"/>" +
-            "<key attr.name=\"y\" attr.type=\"float\" for=\"node\" id=\"y\"/>");
+    writer.append("<key attr.name=\"r\" attr.type=\"int\" for=\"node\" id=\"r\"/>\n"
+                + "<key attr.name=\"g\" attr.type=\"int\" for=\"node\" id=\"g\"/>\n"
+                + "<key attr.name=\"b\" attr.type=\"int\" for=\"node\" id=\"b\"/>"
+                + "<key attr.name=\"size\" attr.type=\"int\" for=\"node\" id=\"size\"/>"
+                + "<key attr.name=\"weight\" attr.type=\"float\" for=\"edge\" id=\"weight\"/>"
+                + "<key attr.name=\"x\" attr.type=\"float\" for=\"node\" id=\"x\"/>"
+                + "<key attr.name=\"y\" attr.type=\"float\" for=\"node\" id=\"y\"/>");
     writer.append("<graph edgedefault=\"undirected\">");
     lastClusterColor = new Color();
     posStep = (int) (0.1 * clusterIdToPoints.size()) + 100;
@@ -99,7 +98,7 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
   public void write(ClusterWritable clusterWritable) throws IOException {
     StringBuilder line = new StringBuilder();
     Cluster cluster = clusterWritable.getValue();
-  Color rgb = getColor(cluster.getId());
+    Color rgb = getColor(cluster.getId());
 
     String topTerms = "";
     if (dictionary != null) {
@@ -190,14 +189,14 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
 
   private static String createNode(String s, Color rgb, float x, float y) {
     return "<node id=\"" + StringUtils.escapeXML(s) + "\"><data key=\"r\">" + rgb.r 
-            + "</data>" +
-            "<data key=\"g\">" + rgb.g 
-            + "</data>" +
-            "<data key=\"b\">" + rgb.b 
-            + "</data>" +
-            "<data key=\"x\">" + x 
-            + "</data>" +
-            "<data key=\"y\">" + y 
+            + "</data>"
+            + "<data key=\"g\">" + rgb.g
+            + "</data>"
+            + "<data key=\"b\">" + rgb.b
+            + "</data>"
+            + "<data key=\"x\">" + x
+            + "</data>"
+            + "<data key=\"y\">" + y
             + "</data>"
             + "</node>";
   }

@@ -53,10 +53,10 @@ public final class VectorDistanceMapper
     for (NamedVector seedVector : seedVectors) {
       double distance = measure.distance(seedVector, valVec);
       if (!usesThreshold || distance <= maxDistance) {
-          StringTuple outKey = new StringTuple();
-          outKey.add(seedVector.getName());
-          outKey.add(keyName);
-          context.write(outKey, new DoubleWritable(distance));          
+        StringTuple outKey = new StringTuple();
+        outKey.add(seedVector.getName());
+        outKey.add(keyName);
+        context.write(outKey, new DoubleWritable(distance));
       }
     }
   }

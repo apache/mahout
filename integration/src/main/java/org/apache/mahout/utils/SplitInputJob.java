@@ -82,7 +82,7 @@ public final class SplitInputJob {
   @SuppressWarnings("rawtypes")
   public static void run(Configuration initialConf, Path inputPath,
       Path outputPath, int keepPct, float randomSelectionPercent)
-      throws IOException, ClassNotFoundException, InterruptedException {
+    throws IOException, ClassNotFoundException, InterruptedException {
 
     int downsamplingFactor = (int) (100.0 / keepPct);
     initialConf.setInt(DOWNSAMPLING_FACTOR, downsamplingFactor);

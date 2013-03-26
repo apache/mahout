@@ -48,8 +48,8 @@ final class ALS {
   public static OpenIntObjectHashMap<Vector> readMatrixByRows(Path dir, Configuration conf) {
     OpenIntObjectHashMap<Vector> matrix = new OpenIntObjectHashMap<Vector>();
 
-    for (Pair<IntWritable,VectorWritable> pair :
-        new SequenceFileDirIterable<IntWritable,VectorWritable>(dir, PathType.LIST, PathFilters.partFilter(), conf)) {
+    for (Pair<IntWritable,VectorWritable> pair
+        : new SequenceFileDirIterable<IntWritable,VectorWritable>(dir, PathType.LIST, PathFilters.partFilter(), conf)) {
       int rowIndex = pair.getFirst().get();
       Vector row = pair.getSecond().get().clone();
       matrix.put(rowIndex, row);

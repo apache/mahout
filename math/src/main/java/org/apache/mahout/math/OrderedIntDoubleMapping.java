@@ -48,9 +48,22 @@ final class OrderedIntDoubleMapping implements Serializable, Cloneable {
     return indices;
   }
 
+  int indexAt(int offset) {
+    return indices[offset];
+  }
+
+  void setIndexAt(int offset, int index) {
+    indices[offset] = index;
+  }
+
   double[] getValues() {
     return values;
   }
+
+  void setValueAt(int offset, double value) {
+    values[offset] = value;
+  }
+
 
   int getNumMappings() {
     return numMappings;

@@ -33,7 +33,7 @@ public class SpecificConditionalEntropyMapper extends Mapper<StringTuple, VarInt
 
   @Override
   protected void map(StringTuple key, VarIntWritable value, Context context)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     resultKey.set(key.stringAt(0));
     context.write(resultKey, value);
   }

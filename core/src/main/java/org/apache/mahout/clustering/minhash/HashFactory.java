@@ -127,7 +127,7 @@ public final class HashFactory {
 
     @Override
     public int hash(byte[] bytes) {
-      long hashValue = MurmurHash3.murmurhash3_x86_32(bytes, 0, bytes.length, seed);
+      long hashValue = MurmurHash3.murmurhash3x8632(bytes, 0, bytes.length, seed);
       return Math.abs((int) (hashValue % RandomUtils.MAX_INT_SMALLER_TWIN_PRIME));
     }
   }

@@ -22,20 +22,19 @@ import org.apache.mahout.common.RandomUtils;
 import java.util.Random;
 
 public final class Normal extends AbstractSamplerFunction {
-    private final Random rand = RandomUtils.getRandom();
-    private double mean = 0;
-    private double sd = 1;
+  private final Random rand = RandomUtils.getRandom();
+  private double mean = 0;
+  private double sd = 1;
 
-    public Normal() {
-    }
+  public Normal() {}
 
-    public Normal(double mean, double sd) {
-        this.mean = mean;
-        this.sd = sd;
-    }
+  public Normal(double mean, double sd) {
+    this.mean = mean;
+    this.sd = sd;
+  }
 
-    @Override
-    public Double sample() {
-        return rand.nextGaussian() * sd + mean;
-    }
+  @Override
+  public Double sample() {
+    return rand.nextGaussian() * sd + mean;
+  }
 }

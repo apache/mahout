@@ -180,7 +180,7 @@ public final class LDAPrintTopics {
         });
         for (Pair<String,Double> wordWithScore : topKasList) {
           out.write(wordWithScore.getFirst() + " [p(" + wordWithScore.getFirst() + "|topic_" + i + ") = "
-           + wordWithScore.getSecond());
+            + wordWithScore.getSecond());
           out.write('\n');
         }
       } finally {
@@ -199,9 +199,9 @@ public final class LDAPrintTopics {
                                                                     int numWordsToPrint) {
     List<Queue<Pair<String,Double>>> queues = Lists.newArrayList();
     Map<Integer,Double> expSums = Maps.newHashMap();
-    for (Pair<IntPairWritable,DoubleWritable> record :
-         new SequenceFileDirIterable<IntPairWritable, DoubleWritable>(
-             new Path(dir, "part-*"), PathType.GLOB, null, null, true, job)) {
+    for (Pair<IntPairWritable,DoubleWritable> record
+        : new SequenceFileDirIterable<IntPairWritable, DoubleWritable>(
+            new Path(dir, "part-*"), PathType.GLOB, null, null, true, job)) {
       IntPairWritable key = record.getFirst();
       int topic = key.getFirst();
       int word = key.getSecond();

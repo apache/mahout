@@ -112,7 +112,7 @@ public class NaiveBayesModel {
       weightsPerLabel = new DenseVector(VectorWritable.readVector(in));
       perLabelThetaNormalizer = new DenseVector(VectorWritable.readVector(in));
 
-      weightsPerLabelAndFeature = new SparseRowMatrix(weightsPerLabel.size(), weightsPerFeature.size() );
+      weightsPerLabelAndFeature = new SparseRowMatrix(weightsPerLabel.size(), weightsPerFeature.size());
       for (int label = 0; label < weightsPerLabelAndFeature.numRows(); label++) {
         weightsPerLabelAndFeature.assignRow(label, VectorWritable.readVector(in));
       }

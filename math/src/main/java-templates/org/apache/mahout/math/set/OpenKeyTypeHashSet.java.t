@@ -53,7 +53,7 @@ public class Open${keyTypeCap}HashSet extends Abstract${keyTypeCap}Set {
 
   /** Constructs an empty map with default capacity and default load factors. */
   public Open${keyTypeCap}HashSet() {
-    this(defaultCapacity);
+    this(DEFAULT_CAPACITY);
   }
 
   /**
@@ -63,7 +63,7 @@ public class Open${keyTypeCap}HashSet extends Abstract${keyTypeCap}Set {
    * @throws IllegalArgumentException if the initial capacity is less than zero.
    */
   public Open${keyTypeCap}HashSet(int initialCapacity) {
-    this(initialCapacity, defaultMinLoadFactor, defaultMaxLoadFactor);
+    this(initialCapacity, DEFAULT_MIN_LOAD_FACTOR, DEFAULT_MAX_LOAD_FACTOR);
   }
 
   /**
@@ -376,7 +376,7 @@ public class Open${keyTypeCap}HashSet extends Abstract${keyTypeCap}Set {
 
     // memory will be exhausted long before this pathological case happens, anyway.
     this.minLoadFactor = minLoadFactor;
-    if (capacity == PrimeFinder.largestPrime) {
+    if (capacity == PrimeFinder.LARGEST_PRIME) {
       this.maxLoadFactor = 1.0;
     } else {
       this.maxLoadFactor = maxLoadFactor;

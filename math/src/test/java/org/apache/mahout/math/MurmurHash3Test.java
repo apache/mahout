@@ -32,7 +32,7 @@ public final class MurmurHash3Test extends MahoutTestCase {
       byte[] arr = new byte[bytes.length + offset];
       System.arraycopy(bytes, 0, arr, offset, bytes.length);
       for (int len = 0; len < bytes.length; len++) {
-        int h = MurmurHash3.murmurhash3_x86_32(arr, offset, len, len);
+        int h = MurmurHash3.murmurhash3x8632(arr, offset, len, len);
         assertEquals(ANSWERS[len], h);
       }
     }

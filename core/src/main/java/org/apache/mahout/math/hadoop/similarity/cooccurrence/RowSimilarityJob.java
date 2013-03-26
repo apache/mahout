@@ -120,8 +120,8 @@ public class RowSimilarityJob extends AbstractJob {
 
     int maxSimilaritiesPerRow = Integer.parseInt(getOption("maxSimilaritiesPerRow"));
     boolean excludeSelfSimilarity = Boolean.parseBoolean(getOption("excludeSelfSimilarity"));
-    double threshold = hasOption("threshold") ?
-        Double.parseDouble(getOption("threshold")) : NO_THRESHOLD;
+    double threshold = hasOption("threshold")
+        ? Double.parseDouble(getOption("threshold")) : NO_THRESHOLD;
 
     Path weightsPath = getTempPath("weights");
     Path normsPath = getTempPath("norms.bin");
@@ -445,7 +445,7 @@ public class RowSimilarityJob extends AbstractJob {
 
     @Override
     protected void reduce(IntWritable row, Iterable<VectorWritable> partials, Context ctx)
-        throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
       Vector allSimilarities = Vectors.merge(partials);
       Vector topKSimilarities = Vectors.topKElements(maxSimilaritiesPerRow, allSimilarities);
       ctx.write(row, new VectorWritable(topKSimilarities));

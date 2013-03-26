@@ -71,8 +71,8 @@ public final class Track1RecommenderEvaluator extends AbstractDifferenceRecommen
 
     Collection<Callable<Void>> estimateCallables = Lists.newArrayList();
     AtomicInteger noEstimateCounter = new AtomicInteger();
-    for (Pair<PreferenceArray,long[]> userData :
-         new DataFileIterable(KDDCupDataModel.getValidationFile(dataFileDirectory))) {
+    for (Pair<PreferenceArray,long[]> userData
+        : new DataFileIterable(KDDCupDataModel.getValidationFile(dataFileDirectory))) {
       PreferenceArray validationPrefs = userData.getFirst();
       long userID = validationPrefs.get(0).getUserID();
       estimateCallables.add(

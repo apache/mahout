@@ -49,10 +49,9 @@ public final class BasicStats {
    * @return The variance (based on sample estimation)
    */
   public static double variance(Path input, Path output,
-                                Configuration baseConf) throws IOException, InterruptedException,
-          ClassNotFoundException {
-
-  VarianceTotals varianceTotals = computeVarianceTotals(input, output, baseConf);
+                                Configuration baseConf)
+    throws IOException, InterruptedException, ClassNotFoundException {
+    VarianceTotals varianceTotals = computeVarianceTotals(input, output, baseConf);
     return varianceTotals.computeVariance();
   }
 
@@ -66,10 +65,9 @@ public final class BasicStats {
    * @return The variance (based on sample estimation)
    */
   public static double varianceForGivenMean(Path input, Path output, double mean,
-                                Configuration baseConf) throws IOException, InterruptedException,
-          ClassNotFoundException {
-
-  VarianceTotals varianceTotals = computeVarianceTotals(input, output, baseConf);
+                                Configuration baseConf)
+    throws IOException, InterruptedException, ClassNotFoundException {
+    VarianceTotals varianceTotals = computeVarianceTotals(input, output, baseConf);
     return varianceTotals.computeVarianceForGivenMean(mean);
   }
 

@@ -581,24 +581,22 @@
           <configuration>
             <encoding>UTF-8</encoding>
           </configuration>
-          <!--
-                  <executions>
-                      <execution>
-                          <id>validate</id>
-                          <phase>validate</phase>
-                          <configuration>
-                              <configLocation>../maven/src/main/resources/mahout-checkstyle.xml</configLocation>
-                              <consoleOutput>true</consoleOutput>
-                              <failsOnError>false</failsOnError>
-                              <linkXRef>false</linkXRef>
-                              <sourceDirectory>${basedir}/src</sourceDirectory>
-                          </configuration>
-                          <goals>
-                              <goal>checkstyle</goal>
-                          </goals>
-                      </execution>
-                  </executions>
-          -->
+            <executions>
+              <execution>
+                <id>validate</id>
+                <phase>validate</phase>
+                <configuration>
+                  <configLocation>../buildtools/src/main/resources/mahout-checkstyle.xml</configLocation>
+                  <consoleOutput>true</consoleOutput>
+                  <failsOnError>false</failsOnError>
+                  <linkXRef>false</linkXRef>
+                  <sourceDirectory>${basedir}/src</sourceDirectory>
+                </configuration>
+                <goals>
+                  <goal>checkstyle</goal>
+                </goals>
+              </execution>
+            </executions>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>

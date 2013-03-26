@@ -128,9 +128,9 @@ public final class SVDPlusPlusFactorizer extends RatingSGDFactorizer {
 
     double[] pPlusY = new double[numFeatures];
     for (int i2 : itemsByUser.get(userIndex)) {
-        for (int f = FEATURE_OFFSET; f < numFeatures; f++) {
-          pPlusY[f] += y[i2][f];
-        }
+      for (int f = FEATURE_OFFSET; f < numFeatures; f++) {
+        pPlusY[f] += y[i2][f];
+      }
     }
     double denominator = Math.sqrt(itemsByUser.get(userIndex).size());
     for (int feature = 0; feature < pPlusY.length; feature++) {

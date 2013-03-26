@@ -50,9 +50,9 @@ public abstract class AbstractSet extends PersistentObject {
   protected double maxLoadFactor;
 
   // these are public access for unit tests.
-  public static final int defaultCapacity = 277;
-  public static final double defaultMinLoadFactor = 0.2;
-  public static final double defaultMaxLoadFactor = 0.5;
+  public static final int DEFAULT_CAPACITY = 277;
+  public static final double DEFAULT_MIN_LOAD_FACTOR = 0.2;
+  public static final double DEFAULT_MAX_LOAD_FACTOR = 0.5;
 
   /**
    * Chooses a new prime table capacity optimized for growing that (approximately) satisfies the invariant <tt>c *
