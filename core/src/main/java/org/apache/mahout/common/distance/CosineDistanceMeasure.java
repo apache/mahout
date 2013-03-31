@@ -27,7 +27,8 @@ import org.apache.mahout.math.Vector;
 
 /**
  * This class implements a cosine distance metric by dividing the dot product of two vectors by the product of their
- * lengths
+ * lengths.  That gives the cosine of the angle between the two vectors.  To convert this to a usable distance,
+ * 1-cos(angle) is what is actually returned.
  */
 public class CosineDistanceMeasure implements DistanceMeasure {
   
