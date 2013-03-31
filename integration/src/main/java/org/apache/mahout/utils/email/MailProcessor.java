@@ -158,7 +158,7 @@ public class MailProcessor {
       if (match != null) {
         contents.append(match).append(separator);
       } else {
-        contents.append("").append(separator);
+        contents.append(separator);
       }
     }
     contents.append('\n').append(body);
