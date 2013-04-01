@@ -597,7 +597,7 @@ public abstract class AbstractMatrix implements Matrix {
     return new int[]{rowSize(), columnSize()};
   }
 
-  protected class TransposeViewVector extends AbstractVector {
+  protected static class TransposeViewVector extends AbstractVector {
 
     private final Matrix matrix;
     private final int transposeOffset;

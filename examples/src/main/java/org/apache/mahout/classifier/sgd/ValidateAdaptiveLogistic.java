@@ -108,7 +108,7 @@ public final class ValidateAdaptiveLogistic {
         cm.addInstance(csv.getTargetString(line), csv.getTargetLabel(target));        
 
         if (showScores) {
-          output.printf(Locale.ENGLISH, "%8d, %.12f, %.13f, %.13f\n", target,
+          output.printf(Locale.ENGLISH, "%8d, %.12f, %.13f, %.13f%n", target,
               score, learner.logLikelihood(target, v), slh.getMean());
         }
         if (collector != null) {
@@ -118,20 +118,20 @@ public final class ValidateAdaptiveLogistic {
       }
 
       output.printf(Locale.ENGLISH,"\nLog-likelihood:");
-      output.printf(Locale.ENGLISH, "Min=%.2f, Max=%.2f, Mean=%.2f, Median=%.2f\n", 
+      output.printf(Locale.ENGLISH, "Min=%.2f, Max=%.2f, Mean=%.2f, Median=%.2f%n",
           slh.getMin(), slh.getMax(), slh.getMean(), slh.getMedian());
 
       if (collector != null) {        
-        output.printf(Locale.ENGLISH, "\nAUC = %.2f\n", collector.auc());        
+        output.printf(Locale.ENGLISH, "%nAUC = %.2f%n", collector.auc());
       }
 
       if (showConfusion) {
-        output.printf(Locale.ENGLISH, "\n%s\n\n", cm.toString());
+        output.printf(Locale.ENGLISH, "%n%s%n%n", cm.toString());
 
         if (collector != null) {
           Matrix m = collector.entropy();
           output.printf(Locale.ENGLISH,
-              "Entropy Matrix: [[%.1f, %.1f], [%.1f, %.1f]]\n", m.get(0, 0),
+              "Entropy Matrix: [[%.1f, %.1f], [%.1f, %.1f]]%n", m.get(0, 0),
               m.get(1, 0), m.get(0, 1), m.get(1, 1));
         }        
       }

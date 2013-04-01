@@ -40,7 +40,7 @@ public class ClustersFilterTest extends MahoutTestCase {
   }
 
   @Test
-  public void testAccept_notFinal() throws Exception {
+  public void testAcceptNotFinal() throws Exception {
     Path path0 = new Path(output, "clusters-0");
     Path path1 = new Path(output, "clusters-1");
 
@@ -54,7 +54,7 @@ public class ClustersFilterTest extends MahoutTestCase {
   }
 
   @Test
-  public void testAccept_finalPath() throws IOException {
+  public void testAcceptFinalPath() throws IOException {
     Path path0 = new Path(output, "clusters-0");
     Path path1 = new Path(output, "clusters-1");
     Path path2 = new Path(output, "clusters-2");

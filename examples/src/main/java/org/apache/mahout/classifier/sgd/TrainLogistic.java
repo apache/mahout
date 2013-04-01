@@ -96,7 +96,7 @@ public final class TrainLogistic {
             }
             double p = lr.classifyScalar(input);
             if (scores) {
-              output.printf(Locale.ENGLISH, "%10d %2d %10.2f %2.4f %10.4f %10.4f\n",
+              output.printf(Locale.ENGLISH, "%10d %2d %10.2f %2.4f %10.4f %10.4f%n",
                 samples, targetValue, lr.currentLearningRate(), p, logP, logPEstimate);
             }
 
@@ -127,13 +127,13 @@ public final class TrainLogistic {
           sep = " + ";
         }
       }
-      output.printf("\n");
+      output.printf("%n");
       model = lr;
       for (int row = 0; row < lr.getBeta().numRows(); row++) {
         for (String key : csv.getTraceDictionary().keySet()) {
           double weight = predictorWeight(lr, row, csv, key);
           if (weight != 0) {
-            output.printf(Locale.ENGLISH, "%20s %.5f\n", key, weight);
+            output.printf(Locale.ENGLISH, "%20s %.5f%n", key, weight);
           }
         }
         for (int column = 0; column < lr.getBeta().numCols(); column++) {

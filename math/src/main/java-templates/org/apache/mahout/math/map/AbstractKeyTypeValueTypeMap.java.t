@@ -58,7 +58,7 @@ public abstract class Abstract${keyTypeCap}${valueTypeCap}Map extends AbstractSe
         new ${keyTypeCap}Procedure() {
           @Override
           public boolean apply(${keyType} iterKey) {
-            return (key != iterKey);
+            return key != iterKey;
           }
         }
     );

@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -243,7 +244,7 @@ public final class ConfusionMatrixDumper extends AbstractJob {
       }
       outputFile.createNewFile();
       OutputStream os = new FileOutputStream(outputFile);
-      return new PrintStream(os);
+      return new PrintStream(os, false, Charsets.UTF_8.displayName());
     } else {
       return System.out;
     }
@@ -386,14 +387,14 @@ public final class ConfusionMatrixDumper extends AbstractJob {
     int longest = getLongestHeader(labels);
     if (vertical) {
       // do vertical - rotation is a bitch
-      out.format("<tr class='%s' style='height:%dem'><th>&nbsp;</th>\n", CSS_TALL_HEADER, longest / 2);
+      out.format("<tr class='%s' style='height:%dem'><th>&nbsp;</th>%n", CSS_TALL_HEADER, longest / 2);
       for (String label : labels) {
         out.format("<th><div class='%s'>%s</div></th>", CSS_VERTICAL, label);
       }
       out.println("</tr>");
     } else {
       // header - empty cell in upper left
-      out.format("<tr class='%s'><td class='%s'></td>\n", CSS_TABLE, CSS_LABEL);
+      out.format("<tr class='%s'><td class='%s'></td>%n", CSS_TABLE, CSS_LABEL);
       for (String label : labels) {
         out.format("<td>%s</td>", label);
       }

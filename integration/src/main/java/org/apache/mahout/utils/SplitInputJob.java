@@ -18,6 +18,7 @@
 package org.apache.mahout.utils;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Random;
 
 import org.apache.hadoop.conf.Configuration;
@@ -215,7 +216,7 @@ public final class SplitInputJob {
   /**
    * Randomly permute key value pairs
    */
-  public static class SplitInputComparator extends WritableComparator {
+  public static class SplitInputComparator extends WritableComparator implements Serializable {
 
     private final Random rnd = RandomUtils.getRandom();
 

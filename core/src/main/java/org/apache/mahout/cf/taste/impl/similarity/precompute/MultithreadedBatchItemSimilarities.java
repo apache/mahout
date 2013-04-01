@@ -142,7 +142,7 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
   }
 
 
-  private class Output implements Runnable {
+  private static class Output implements Runnable {
 
     private final BlockingQueue<List<SimilarItems>> results;
     private final SimilarItemsWriter writer;

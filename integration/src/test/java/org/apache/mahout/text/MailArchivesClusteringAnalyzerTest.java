@@ -36,13 +36,13 @@ public class MailArchivesClusteringAnalyzerTest extends MahoutTestCase {
   public void testAnalysis() throws Exception {
     Analyzer analyzer = new MailArchivesClusteringAnalyzer();
     
-    String text = "A test message\n";
-    text += "atokenthatistoolongtobeusefulforclustertextanalysis\n";
-    text += "Mahout is a scalable, machine-learning LIBRARY\n";
-    text += "we've added some additional stopwords such as html, mailto, regards\t";
-    text += "apache_hadoop provides the foundation for scalability\n";
-    text += "www.nabble.com general-help@incubator.apache.org\n";
-    text += "public void int protected package";
+    String text = "A test message\n"
+                  + "atokenthatistoolongtobeusefulforclustertextanalysis\n"
+                  + "Mahout is a scalable, machine-learning LIBRARY\n"
+                  + "we've added some additional stopwords such as html, mailto, regards\t"
+                  + "apache_hadoop provides the foundation for scalability\n"
+                  + "www.nabble.com general-help@incubator.apache.org\n"
+                  + "public void int protected package";
     Reader reader = new StringReader(text);
     
     // if you change the text above, then you may need to change this as well

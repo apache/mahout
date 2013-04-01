@@ -17,12 +17,13 @@
 
 package org.apache.mahout.math;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 /**
  * Orders {@link WeightedVector} by {@link WeightedVector#getWeight()}.
  */
-public final class WeightedVectorComparator implements Comparator<WeightedVector> {
+public final class WeightedVectorComparator implements Comparator<WeightedVector>, Serializable {
 
   private static final double DOUBLE_EQUALITY_ERROR = 1.0e-8;
 

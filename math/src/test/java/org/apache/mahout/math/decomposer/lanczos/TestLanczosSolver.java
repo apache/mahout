@@ -71,7 +71,8 @@ public final class TestLanczosSolver extends SolverTest {
     initialVector.assign(1.0 / Math.sqrt(numColumns));
     int rank = 50;
     LanczosState state = new LanczosState(corpus, rank, initialVector);
-    long time = timeLanczos(corpus, state, rank, false);
+    LanczosSolver solver = new LanczosSolver();
+    solver.solve(state, rank, false);
     assertOrthonormal(state);
     for (int i = 0; i < rank/2; i++) {
       assertEigen(i, state.getRightSingularVector(i), corpus, ERROR_TOLERANCE, false);
@@ -87,20 +88,10 @@ public final class TestLanczosSolver extends SolverTest {
     initialVector.assign(1.0 / Math.sqrt(numCols));
     int rank = 30;
     LanczosState state = new LanczosState(corpus, rank, initialVector);
-    long time = timeLanczos(corpus, state, rank, true);
+    LanczosSolver solver = new LanczosSolver();
+    solver.solve(state, rank, true);
     //assertOrthonormal(state);
     //assertEigen(state, rank / 2, ERROR_TOLERANCE, true);
-  }
-
-  public static long timeLanczos(Matrix corpus, LanczosState state, int rank, boolean symmetric) {
-    long start = System.currentTimeMillis();
-
-    LanczosSolver solver = new LanczosSolver();
-    // initialize!
-    solver.solve(state, rank, symmetric);
-    
-    long end = System.currentTimeMillis();
-    return end - start;
   }
 
 }

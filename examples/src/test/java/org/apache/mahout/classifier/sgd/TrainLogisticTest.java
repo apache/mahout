@@ -40,7 +40,7 @@ import java.util.Set;
 public class TrainLogisticTest extends MahoutTestCase {
 
   @Test
-  public void example13_1() throws Exception {
+  public void example131() throws Exception {
     String outputFile = getTestTempFile("model").getAbsolutePath();
 
     StringWriter sw = new StringWriter();
@@ -100,7 +100,7 @@ public class TrainLogisticTest extends MahoutTestCase {
   }
 
   @Test
-  public void example13_2() throws Exception {
+  public void example132() throws Exception {
     String outputFile = getTestTempFile("model").getAbsolutePath();
 
     StringWriter sw = new StringWriter();

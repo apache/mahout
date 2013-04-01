@@ -145,7 +145,7 @@ public final class IntPairWritable extends BinaryComparable
     WritableComparator.define(IntPairWritable.class, new Comparator());
   }
 
-  public static final class Comparator extends WritableComparator {
+  public static final class Comparator extends WritableComparator implements Serializable {
     public Comparator() {
       super(IntPairWritable.class);
     }

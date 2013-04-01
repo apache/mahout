@@ -203,13 +203,14 @@ public class SQL92JDBCDataModel extends AbstractJDBCDataModel {
     PreparedStatement stmt1 = null;
     PreparedStatement stmt2 = null;
     PreparedStatement stmt3 = null;
+    ResultSet rs = null;
     try {
       conn = getDataSource().getConnection();
 
       stmt1 = conn.prepareStatement(verifyPreferenceSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       setLongParameter(stmt1, 1, userID);
       setLongParameter(stmt1, 2, itemID);
-      ResultSet rs = stmt1.executeQuery();
+      rs = stmt1.executeQuery();
 
       // test if the record exists already.
       if (rs.first()) {
@@ -236,6 +237,7 @@ public class SQL92JDBCDataModel extends AbstractJDBCDataModel {
       log.warn("Exception while setting preference", sqle);
       throw new TasteException(sqle);
     } finally {
+      IOUtils.quietClose(rs);
       IOUtils.quietClose(stmt1);
       IOUtils.quietClose(stmt2);
       IOUtils.quietClose(stmt3);

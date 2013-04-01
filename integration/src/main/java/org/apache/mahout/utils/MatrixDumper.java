@@ -25,6 +25,7 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Charsets;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
@@ -107,7 +108,7 @@ public final class MatrixDumper extends AbstractJob {
     }
     outputFile.createNewFile();
     OutputStream os = new FileOutputStream(outputFile);
-    return new PrintStream(os);
+    return new PrintStream(os, false, Charsets.UTF_8.displayName());
   }
   
   /**

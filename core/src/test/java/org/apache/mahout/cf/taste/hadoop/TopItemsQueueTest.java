@@ -17,8 +17,6 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
-import org.apache.mahout.cf.taste.hadoop.MutableRecommendedItem;
-import org.apache.mahout.cf.taste.hadoop.TopItemsQueue;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.common.MahoutTestCase;

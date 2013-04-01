@@ -95,7 +95,6 @@ public final class HBaseDataModel implements DataModel, Closeable {
 
   private final HTablePool pool;
   private final String tableName;
-  private final boolean tableWasCreated;
 
   // Cache of user and item ids
   private volatile FastIDSet itemIDs;
@@ -112,7 +111,8 @@ public final class HBaseDataModel implements DataModel, Closeable {
     HTableFactory tableFactory = new HTableFactory();
     this.pool = new HTablePool(conf, 8, tableFactory);
     this.tableName = tableName;
-    this.tableWasCreated = bootstrap(conf);
+
+    bootstrap(conf);
     // Warm the cache
     refresh(null);
   }
@@ -121,7 +121,8 @@ public final class HBaseDataModel implements DataModel, Closeable {
     log.info("Using HBase table {}", tableName);
     this.pool = pool;
     this.tableName = tableName;
-    this.tableWasCreated = bootstrap(conf);
+
+    bootstrap(conf);
 
     // Warm the cache
     refresh(null);
@@ -134,7 +135,7 @@ public final class HBaseDataModel implements DataModel, Closeable {
   /**
    * Create the table if it doesn't exist
    */
-  private boolean bootstrap(Configuration conf) throws IOException {
+  private void bootstrap(Configuration conf) throws IOException {
     HBaseAdmin admin = new HBaseAdmin(conf);
     HTableDescriptor tDesc = new HTableDescriptor(Bytes.toBytes(tableName));
     tDesc.addFamily(new HColumnDescriptor(USERS_CF));
@@ -142,10 +143,8 @@ public final class HBaseDataModel implements DataModel, Closeable {
     try {
       admin.createTable(tDesc);
       log.info("Created table {}", tableName);
-      return true;
     } catch (TableExistsException e) {
       log.info("Table {} alreay exists", tableName);
-      return false;
     } finally {
       admin.close();
     }

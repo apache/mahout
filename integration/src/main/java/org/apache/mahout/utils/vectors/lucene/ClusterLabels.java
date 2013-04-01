@@ -109,7 +109,7 @@ public class ClusterLabels {
 
     Writer writer;
     if (this.output == null) {
-      writer = new OutputStreamWriter(System.out);
+      writer = new OutputStreamWriter(System.out, Charsets.UTF_8);
     } else {
       writer = Files.newWriter(new File(this.output), Charsets.UTF_8);
     }

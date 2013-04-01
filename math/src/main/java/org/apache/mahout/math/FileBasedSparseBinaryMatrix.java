@@ -70,7 +70,7 @@ public final class FileBasedSparseBinaryMatrix extends AbstractMatrix {
     super(rows, columns);
   }
 
-  public void setData(File f, boolean loadNow) throws IOException {
+  public void setData(File f) throws IOException {
     List<ByteBuffer> buffers = Lists.newArrayList();
     FileChannel input = new FileInputStream(f).getChannel();
 
@@ -277,14 +277,14 @@ public final class FileBasedSparseBinaryMatrix extends AbstractMatrix {
     tmp.position(rowOffset[rowIndex]);
     tmp.limit(rowOffset[rowIndex] + rowSize[rowIndex]);
     tmp = tmp.slice();
-    return new SparseBinaryVector(rowSize[rowIndex], tmp, columnSize());
+    return new SparseBinaryVector(tmp, columnSize());
   }
 
   private static class SparseBinaryVector extends AbstractVector {
     private final IntBuffer buffer;
     private final int maxIndex;
 
-    private SparseBinaryVector(int size, IntBuffer buffer, int maxIndex) {
+    private SparseBinaryVector(IntBuffer buffer, int maxIndex) {
       super(maxIndex);
       this.buffer = buffer;
       this.maxIndex = maxIndex;
@@ -344,7 +344,6 @@ public final class FileBasedSparseBinaryMatrix extends AbstractMatrix {
     public Iterator<Element> iterator() {
       return new AbstractIterator<Element>() {
         int i = 0;
-        int index = 0;
 
         @Override
         protected Element computeNext() {

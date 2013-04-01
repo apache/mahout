@@ -49,7 +49,7 @@ public final class MemoryUtil {
              maxBytes);
   }
 
-  private static ScheduledExecutorService scheduler;
+  private static volatile ScheduledExecutorService scheduler;
 
   /**
    * Constructs and starts a memory logger thread.

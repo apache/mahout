@@ -153,7 +153,7 @@ public final class VectorDumper extends AbstractJob {
       writer = Files.newWriter(output, Charsets.UTF_8);
     } else {
       shouldClose = false;
-      writer = new OutputStreamWriter(System.out);
+      writer = new OutputStreamWriter(System.out, Charsets.UTF_8);
     }
     try {
       boolean printKey = hasOption("printKey");

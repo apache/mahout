@@ -174,7 +174,7 @@ public final class ClusterDumper extends AbstractJob {
     boolean shouldClose;
     if (this.outputFile == null) {
       shouldClose = false;
-      writer = new OutputStreamWriter(System.out);
+      writer = new OutputStreamWriter(System.out, Charsets.UTF_8);
     } else {
       shouldClose = true;
       if (outputFile.getName().startsWith("s3n://")) {

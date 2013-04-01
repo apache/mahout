@@ -29,12 +29,8 @@ public class HebbianUpdater implements EigenUpdater {
                      TrainingState currentState) {
     double trainingVectorNorm = trainingVector.norm(2);
     int numPreviousEigens = currentState.getNumEigensProcessed();
-    if (numPreviousEigens > 0) {
-      if (currentState.isFirstPass()) {
-        updateTrainingProjectionsVector(currentState,
-            trainingVector,
-            numPreviousEigens - 1);
-      }
+    if (numPreviousEigens > 0 && currentState.isFirstPass()) {
+      updateTrainingProjectionsVector(currentState, trainingVector, numPreviousEigens - 1);
     }
     if (currentState.getActivationDenominatorSquared() == 0 || trainingVectorNorm == 0) {
       if (currentState.getActivationDenominatorSquared() == 0) {

@@ -77,21 +77,21 @@ public final class RunLogistic {
 
         double score = lr.classifyScalar(v);
         if (showScores) {
-          output.printf(Locale.ENGLISH, "%d,%.3f,%.6f\n", target, score, lr.logLikelihood(target, v));
+          output.printf(Locale.ENGLISH, "%d,%.3f,%.6f%n", target, score, lr.logLikelihood(target, v));
         }
         collector.add(target, score);
         line = in.readLine();
       }
 
       if (showAuc) {
-        output.printf(Locale.ENGLISH, "AUC = %.2f\n", collector.auc());
+        output.printf(Locale.ENGLISH, "AUC = %.2f%n", collector.auc());
       }
       if (showConfusion) {
         Matrix m = collector.confusion();
-        output.printf(Locale.ENGLISH, "confusion: [[%.1f, %.1f], [%.1f, %.1f]]\n",
+        output.printf(Locale.ENGLISH, "confusion: [[%.1f, %.1f], [%.1f, %.1f]]%n",
           m.get(0, 0), m.get(1, 0), m.get(0, 1), m.get(1, 1));
         m = collector.entropy();
-        output.printf(Locale.ENGLISH, "entropy: [[%.1f, %.1f], [%.1f, %.1f]]\n",
+        output.printf(Locale.ENGLISH, "entropy: [[%.1f, %.1f], [%.1f, %.1f]]%n",
           m.get(0, 0), m.get(1, 0), m.get(0, 1), m.get(1, 1));
       }
     }

@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import com.google.common.primitives.Doubles;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
@@ -25,6 +26,9 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
+import org.apache.mahout.math.Sorting;
+import org.apache.mahout.math.Swapper;
+import org.apache.mahout.math.function.IntComparator;
 import org.apache.mahout.math.map.OpenLongDoubleHashMap;
 
 /**
@@ -138,14 +142,16 @@ public class BiasedItemBasedRecommender extends GenericItemBasedRecommender {
     float[] ratings = new float[userIDs.length];
     long[] itemIDs = new long[userIDs.length];
             
-    double[] similarities = similarity.itemSimilarities(itemID, userIDs);
+    final double[] similarities = similarity.itemSimilarities(itemID, userIDs);
 
     for (int n = 0; n < preferencesFromUser.length(); n++) {
       ratings[n] = preferencesFromUser.get(n).getValue();
       itemIDs[n] = preferencesFromUser.get(n).getItemID();
     }
 
-    quickSort(similarities, ratings, itemIDs, 0, similarities.length - 1);
+    // sort, so that we can only use the top similarities
+    Sorting.quickSort(0, similarities.length, new SimilaritiesComparator(similarities),
+        new SimilaritiesRatingsItemIDsSwapper(similarities, ratings, itemIDs));
 
     double preference = 0.0;
     double totalSimilarity = 0.0;
@@ -153,9 +159,6 @@ public class BiasedItemBasedRecommender extends GenericItemBasedRecommender {
     for (int i = 0; i < Math.min(numSimilarItems, similarities.length); i++) {
       double theSimilarity = similarities[i];
       if (!Double.isNaN(theSimilarity)) {
-        if (Double.isInfinite(theSimilarity)) {
-          throw new IllegalStateException();
-        }
         preference += theSimilarity * (ratings[i] - baselineEstimate(userID, itemIDs[i]));
         totalSimilarity += Math.abs(theSimilarity);
         count++;
@@ -167,32 +170,48 @@ public class BiasedItemBasedRecommender extends GenericItemBasedRecommender {
     }
 
     return (float) (baselineEstimate(userID, itemID) + (preference / totalSimilarity));
-  }  
+  }
 
-  //TODO is it possible to do this without recursion?
-  protected static void quickSort(double[] similarities, float[] values, long[] otherValues, int start, int end) {
-    if (start < end) {
-      double pivot = similarities[end];
-      float pivotValue = values[end];
-      int i = start;
-      int j = end;
-      while (i != j) {
-        if (similarities[i] > pivot) {
-          i++;
-        } else {
-          similarities[j] = similarities[i];
-          values[j] = values[i];
-          otherValues[j] = otherValues[i];
-          similarities[i] = similarities[j - 1];
-          values[i] = values[j - 1];
-          otherValues[i] = otherValues[j - 1];
-          j--;
-        }
-      }
-      similarities[j] = pivot;
-      values[j] = pivotValue;
-      quickSort(similarities, values, otherValues, start, j - 1);
-      quickSort(similarities, values, otherValues, j + 1, end);
+  static class SimilaritiesComparator implements IntComparator {
+
+    private final double[] similarities;
+
+    SimilaritiesComparator(double[] similarities) {
+      this.similarities = similarities;
     }
-  }  
+
+    @Override
+    public int compare(int pos1, int pos2) {
+      return -1 * Doubles.compare(similarities[pos1], similarities[pos2]);
+    }
+  }
+
+  static class SimilaritiesRatingsItemIDsSwapper implements Swapper {
+
+    private final double[] similarities;
+    private final float[] ratings;
+    private final long[] itemIDs;
+
+    SimilaritiesRatingsItemIDsSwapper(double[] similarities, float[] ratings, long[] itemIDs) {
+      this.similarities = similarities;
+      this.ratings = ratings;
+      this.itemIDs = itemIDs;
+    }
+
+    @Override
+    public void swap(int a, int b) {
+      double tempDouble = similarities[b];
+      similarities[b] = similarities[a];
+      similarities[a] = tempDouble;
+
+      float tempFloat = ratings[b];
+      ratings[b] = ratings[a];
+      ratings[a] = tempFloat;
+
+      long tempLong = itemIDs[b];
+      itemIDs[b] = itemIDs[a];
+      itemIDs[a] = tempLong;
+    }
+  }
+
 }

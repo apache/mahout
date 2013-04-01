@@ -23,7 +23,6 @@ import org.apache.mahout.math.function.${keyTypeCap}Procedure;
 import org.apache.mahout.math.list.${keyTypeCap}ArrayList;
 import java.util.Arrays;
 import java.nio.IntBuffer;
-import org.apache.mahout.math.set.HashUtils;
 
 public abstract class Abstract${keyTypeCap}Set extends AbstractSet {
 

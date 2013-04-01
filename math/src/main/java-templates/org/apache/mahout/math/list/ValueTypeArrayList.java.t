@@ -119,14 +119,14 @@ public class ${valueTypeCap}ArrayList extends Abstract${valueTypeCap}List implem
    *         the receiver: the index of the first element greater than the key, or <tt>receiver.size()</tt>, if all
    *         elements in the receiver are less than the specified key.  Note that this guarantees that the return value
    *         will be &gt;= 0 if and only if the key is found.
-   * @see org.apache.mahout.math.Sorting
+   * @see org.apache.mahout.math.BinarySearch
    * @see java.util.Arrays
    */
   @Override
   public int binarySearchFromTo(${valueType} key, int from, int to) {
-    return org.apache.mahout.math.Sorting.binarySearchFromTo(elements, key, from, to);
+    return org.apache.mahout.math.BinarySearch.binarySearchFromTo(elements, key, from, to);
   }
-  
+
   /**
    * Returns a deep copy of the receiver.
    *

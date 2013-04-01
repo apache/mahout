@@ -260,10 +260,7 @@ public class EigenDecomposition {
       // otherwise, iterate.
 
       if (m > l) {
-        int iter = 0;
         do {
-          iter++;  // (Could check iteration count here.)
-
           // Compute implicit shift
 
           double g = d.getQuick(l);

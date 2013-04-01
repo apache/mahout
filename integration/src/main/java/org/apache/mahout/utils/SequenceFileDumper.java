@@ -79,7 +79,7 @@ public final class SequenceFileDumper extends AbstractJob {
       writer = Files.newWriter(new File(getOption("output")), Charsets.UTF_8);
     } else {
       shouldClose = false;
-      writer = new OutputStreamWriter(System.out);
+      writer = new OutputStreamWriter(System.out, Charsets.UTF_8);
     }
     try {
       for (Path path : pathArr) {

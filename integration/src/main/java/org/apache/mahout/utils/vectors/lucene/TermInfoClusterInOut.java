@@ -52,7 +52,7 @@ class TermInfoClusterInOut implements Comparable<TermInfoClusterInOut> {
 
   @Override
   public int compareTo(TermInfoClusterInOut that) {
-    int res = -Double.compare(logLikelihoodRatio, that.logLikelihoodRatio);
+    int res = Double.compare(that.logLikelihoodRatio, logLikelihoodRatio);
     if (res == 0) {
       res = term.compareTo(that.term);
     }

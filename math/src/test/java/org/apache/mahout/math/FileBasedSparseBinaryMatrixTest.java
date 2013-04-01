@@ -81,7 +81,7 @@ public class FileBasedSparseBinaryMatrixTest extends MahoutTestCase {
     FileBasedSparseBinaryMatrix.writeMatrix(f, m0);
 
     FileBasedSparseBinaryMatrix m = new FileBasedSparseBinaryMatrix(10, 21);
-    m.setData(f, true);
+    m.setData(f);
 
     for (MatrixSlice row : m) {
       Vector diff = row.vector().minus(m0.viewRow(row.index()));

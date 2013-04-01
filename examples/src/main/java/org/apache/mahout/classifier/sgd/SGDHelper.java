@@ -71,7 +71,7 @@ public final class SGDHelper {
     System.out.println("============");
     System.out.println("Model Dissection");
     for (ModelDissector.Weight w : weights) {
-      System.out.printf("%s\t%.1f\t%s\t%.1f\t%s\t%.1f\t%s\n",
+      System.out.printf("%s\t%.1f\t%s\t%.1f\t%s\t%.1f\t%s%n",
                         w.getFeature(), w.getWeight(), ngNames.get(w.getMaxImpact() + 1),
                         w.getCategory(1), w.getWeight(1), w.getCategory(2), w.getWeight(2));
     }
@@ -144,7 +144,7 @@ public final class SGDHelper {
 
       info.setStep(info.getStep() + 0.25);
       System.out.printf("%.2f\t%.2f\t%.2f\t%.2f\t%.8g\t%.8g\t", maxBeta, nonZeros, positive, norm, lambda, mu);
-      System.out.printf("%d\t%.3f\t%.2f\t%s\n",
+      System.out.printf("%d\t%.3f\t%.2f\t%s%n",
         k, info.getAverageLL(), info.getAverageCorrect() * 100, LEAK_LABELS[leakType % 3]);
     }
   }

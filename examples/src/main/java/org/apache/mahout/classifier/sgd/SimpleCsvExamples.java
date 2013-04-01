@@ -134,7 +134,7 @@ public final class SimpleCsvExamples {
         separator = ",";
       }
     }
-    System.out.printf("\nElapsed time = %.3f\n", (System.currentTimeMillis() - t0) / 1000.0);
+    System.out.printf("\nElapsed time = %.3f%n", (System.currentTimeMillis() - t0) / 1000.0);
   }
 
 

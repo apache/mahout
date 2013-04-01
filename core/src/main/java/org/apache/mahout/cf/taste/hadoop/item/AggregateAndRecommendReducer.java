@@ -17,7 +17,6 @@
 
 package org.apache.mahout.cf.taste.hadoop.item;
 
-import com.google.common.primitives.Floats;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -36,7 +35,6 @@ import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
 
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -71,13 +69,6 @@ public final class AggregateAndRecommendReducer extends
   private OpenIntLongHashMap indexItemIDMap;
 
   private static final float BOOLEAN_PREF_VALUE = 1.0f;
-  private static final Comparator<RecommendedItem> BY_PREFERENCE_VALUE =
-      new Comparator<RecommendedItem>() {
-        @Override
-        public int compare(RecommendedItem one, RecommendedItem two) {
-          return Floats.compare(one.getValue(), two.getValue());
-        }
-      };
 
   @Override
   protected void setup(Context context) throws IOException {

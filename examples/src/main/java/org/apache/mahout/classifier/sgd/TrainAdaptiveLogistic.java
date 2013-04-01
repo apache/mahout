@@ -80,7 +80,6 @@ public final class TrainAdaptiveLogistic {
         csv.firstLine(in.readLine());
 
         String line = in.readLine();
-        int lineCount = 2;
         while (line != null) {
           // for each new line, get target and predictors
           Vector input = new RandomAccessSparseVector(lmp.getNumFeatures());
@@ -99,16 +98,15 @@ public final class TrainAdaptiveLogistic {
             if (learner != null) {
               double averageCorrect = learner.percentCorrect();
               double averageLL = learner.logLikelihood();
-              output.printf("%d\t%.3f\t%.2f\n",
+              output.printf("%d\t%.3f\t%.2f%n",
                             k, averageLL, averageCorrect * 100);
             } else {
               output.printf(Locale.ENGLISH,
-                            "%10d %2d %s\n", k, targetValue,
+                            "%10d %2d %s%n", k, targetValue,
                             "AdaptiveLogisticRegression has not found a good model ......");
             }
           }
           line = in.readLine();
-          lineCount++;
         }
         in.close();
       }
@@ -141,13 +139,13 @@ public final class TrainAdaptiveLogistic {
           sep = " + ";
         }
       }
-      output.printf("\n");
+      output.printf("%n");
 
       for (int row = 0; row < lr.getBeta().numRows(); row++) {
         for (String key : csv.getTraceDictionary().keySet()) {
           double weight = predictorWeight(lr, row, csv, key);
           if (weight != 0) {
-            output.printf(Locale.ENGLISH, "%20s %.5f\n", key, weight);
+            output.printf(Locale.ENGLISH, "%20s %.5f%n", key, weight);
           }
         }
         for (int column = 0; column < lr.getBeta().numCols(); column++) {

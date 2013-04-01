@@ -85,7 +85,7 @@ public abstract class Abstract${valueTypeCap}List extends AbstractList implement
    **/
   @Override
   public void addAllOf(${valueTypeCap}ArrayList other) {
-	addAllOfFromTo(other, 0, other.size() - 1);
+    addAllOfFromTo(other, 0, other.size() - 1);
   }
 
   /**
@@ -140,6 +140,7 @@ public abstract class Abstract${valueTypeCap}List extends AbstractList implement
       replaceFromToWithFrom(index + length, size - 1, this, index);
     }
   }
+
   /**
    * Searches the receiver for the specified value using the binary search algorithm.  The receiver must
    * <strong>must</strong> be sorted (as by the sort method) prior to making this call.  If it is not sorted, the
