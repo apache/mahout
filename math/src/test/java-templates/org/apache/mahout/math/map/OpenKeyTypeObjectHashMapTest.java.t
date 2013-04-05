@@ -140,17 +140,20 @@ public class Open${keyTypeCap}ObjectHashMapTest extends Assert {
     map.getInternalFactors(capacity, minLoadFactor, maxLoadFactor);
     assertEquals(prime, capacity[0]);
   }
-  
+
   @Test
   public void testClear() {
     Open${keyTypeCap}ObjectHashMap<TestClass> map = new Open${keyTypeCap}ObjectHashMap<TestClass>();
-    map.put((${keyType}) 11, item); 
-    assertEquals(1, map.size());
-    map.clear();
-    assertEquals(0, map.size());
-    assertSame(null, map.get((${keyType}) 11));
+    for (int i = 0; i < 100; i++) {
+      map.put((${keyType}) i, item);
+      assertEquals(1, map.size());
+      map.clear();
+      assertEquals(0, map.size());
+      assertFalse("Contains: " + i, map.containsKey((${keyType}) i));
+      assertSame(null, map.get((${keyType}) i));
+    }
   }
-  
+
   @Test
   public void testClone() {
     Open${keyTypeCap}ObjectHashMap<TestClass> map = new Open${keyTypeCap}ObjectHashMap<TestClass>();

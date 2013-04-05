@@ -84,8 +84,8 @@ public class Open${keyTypeCap}ObjectHashMap<T> extends Abstract${keyTypeCap}Obje
   /** Removes all (key,value) associations from the receiver. Implicitly calls <tt>trimToSize()</tt>. */
   @Override
   public void clear() {
-    Arrays.fill(state, 0, this.state.length - 1, FREE);
-    Arrays.fill(values, 0, state.length - 1, null); // delta
+    Arrays.fill(state, FREE);
+    Arrays.fill(values, null); // delta
 
     this.distinct = 0;
     this.freeEntries = table.length; // delta
