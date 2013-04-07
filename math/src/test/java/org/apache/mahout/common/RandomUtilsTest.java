@@ -44,32 +44,6 @@ public final class RandomUtilsTest extends MahoutTestCase {
   }
 
   @Test
-  public void testIsNotPrime() {
-    assertTrue(RandomUtils.isNotPrime(Integer.MIN_VALUE));
-    assertTrue(RandomUtils.isNotPrime(-1));
-    assertTrue(RandomUtils.isNotPrime(0));
-    assertTrue(RandomUtils.isNotPrime(1));
-    assertTrue(!RandomUtils.isNotPrime(2));
-    assertTrue(!RandomUtils.isNotPrime(3));
-    assertTrue(RandomUtils.isNotPrime(4));
-    assertTrue(!RandomUtils.isNotPrime(5));
-    assertTrue(RandomUtils.isNotPrime(Integer.MAX_VALUE - 1));   
-    assertTrue(!RandomUtils.isNotPrime(Integer.MAX_VALUE)); // 2^31 - 1
-  }
-
-  @Test
-  public void testNextPrime() {
-    assertEquals(2, RandomUtils.nextPrime(-1));
-    assertEquals(2, RandomUtils.nextPrime(1));
-    assertEquals(2, RandomUtils.nextPrime(2));
-    assertEquals(3, RandomUtils.nextPrime(3));
-    assertEquals(5, RandomUtils.nextPrime(4));
-    assertEquals(5, RandomUtils.nextPrime(5));
-    assertEquals(7, RandomUtils.nextPrime(6));    
-    assertEquals(Integer.MAX_VALUE, RandomUtils.nextPrime(Integer.MAX_VALUE - 1));
-  }
-
-  @Test
   public void testNextTwinPrime() {
     assertEquals(5, RandomUtils.nextTwinPrime(-1));
     assertEquals(5, RandomUtils.nextTwinPrime(1));
