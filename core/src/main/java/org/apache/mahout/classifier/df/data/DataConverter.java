@@ -18,7 +18,7 @@
 package org.apache.mahout.classifier.df.data;
 
 import com.google.common.base.Preconditions;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.mahout.math.DenseVector;
 
 import java.util.regex.Pattern;

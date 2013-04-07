@@ -17,7 +17,7 @@
 
 package org.apache.mahout.classifier.df.node;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.mahout.classifier.df.DFUtils;
 import org.apache.mahout.classifier.df.data.Instance;
 

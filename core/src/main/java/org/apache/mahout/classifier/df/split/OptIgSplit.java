@@ -17,7 +17,7 @@
 
 package org.apache.mahout.classifier.df.split;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.mahout.classifier.df.data.Data;
 import org.apache.mahout.classifier.df.data.DataUtils;
 import org.apache.mahout.classifier.df.data.Dataset;

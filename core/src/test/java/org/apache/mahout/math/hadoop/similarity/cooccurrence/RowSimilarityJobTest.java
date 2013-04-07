@@ -47,6 +47,7 @@ public class RowSimilarityJobTest extends MahoutTestCase {
    * 0.666, 1,     0
    * 0,     0,     1
    * </pre>
+   * @throws Exception
    */
   @Test
   public void toyIntegration() throws Exception {

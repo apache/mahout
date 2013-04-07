@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Locale;
 
 import com.google.common.collect.Lists;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * ResultAnalyzer captures the classification statistics and displays in a tabular manner

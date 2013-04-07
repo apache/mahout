@@ -24,7 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.common.collect.Sets;
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.LongWritable;
@@ -82,7 +82,7 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
         return;
       }
     }
-    document = StringEscapeUtils.unescapeHtml(document);
+    document = StringEscapeUtils.unescapeHtml4(document);
     context.write(new Text(SPACE_NON_ALPHA_PATTERN.matcher(title).replaceAll("_")), new Text(document));
   }
 

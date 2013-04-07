@@ -19,7 +19,7 @@ package org.apache.mahout.classifier.df.data;
 
 import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;

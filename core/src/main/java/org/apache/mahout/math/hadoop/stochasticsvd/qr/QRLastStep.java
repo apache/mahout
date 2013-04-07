@@ -23,7 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.apache.mahout.common.iterator.CopyConstructorIterator;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;

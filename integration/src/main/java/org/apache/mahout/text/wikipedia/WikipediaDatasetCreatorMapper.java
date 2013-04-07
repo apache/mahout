@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 
 import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.LongWritable;
@@ -63,7 +63,7 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
   @Override
   protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
     String document = value.toString();
-    document = StringEscapeUtils.unescapeHtml(CLOSE_TEXT_TAG_PATTERN.matcher(
+    document = StringEscapeUtils.unescapeHtml4(CLOSE_TEXT_TAG_PATTERN.matcher(
         OPEN_TEXT_TAG_PATTERN.matcher(document).replaceFirst("")).replaceAll(""));
     String catMatch = findMatchingCategory(document);
     if (!"Unknown".equals(catMatch)) {
