@@ -76,7 +76,7 @@ public class CachedTermInfoTest extends MahoutTestCase {
                                       RAMDirectory directory,
                                       boolean createNew,
                                       int startingId) throws IOException {
-    IndexWriter writer = new IndexWriter(directory, new IndexWriterConfig(Version.LUCENE_41, new WhitespaceAnalyzer(Version.LUCENE_41)));
+    IndexWriter writer = new IndexWriter(directory, new IndexWriterConfig(Version.LUCENE_42, new WhitespaceAnalyzer(Version.LUCENE_42)));
 
     try {
       for (int i = 0; i < DOCS.length; i++) {

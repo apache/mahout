@@ -105,8 +105,8 @@ public final class TestClusterDumper extends MahoutTestCase {
     RAMDirectory directory = new RAMDirectory();
     
     IndexWriter writer = new IndexWriter(directory, 
-           new IndexWriterConfig(Version.LUCENE_41,new StandardAnalyzer(
-        Version.LUCENE_41)));
+           new IndexWriterConfig(Version.LUCENE_42,new StandardAnalyzer(
+        Version.LUCENE_42)));
             
     try {
       for (int i = 0; i < docs2.length; i++) {

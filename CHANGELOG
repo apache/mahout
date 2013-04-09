@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+  MAHOUT-1188: Inconsistent reference to Lucene versions in code and POM (smarthi)
+
   MAHOUT-1161: Unable to run CJKAnalyzer for conversion of a sequence file to sparse vector due to instantiation
                exception (ssc)
 

@@ -60,7 +60,7 @@ public final class NewsgroupHelper {
   private static final long WEEK = 7 * 24 * 3600;
   
   private final Random rand = RandomUtils.getRandom();  
-  private final Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_41);
+  private final Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_42);
   private final FeatureVectorEncoder encoder = new StaticWordValueEncoder("body");
   private final FeatureVectorEncoder bias = new ConstantValueEncoder("Intercept");
   

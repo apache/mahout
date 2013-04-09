@@ -70,7 +70,7 @@ public final class TextValueEncoderTest extends MahoutTestCase {
   @Test
   public void testLuceneEncoding() throws Exception {
     LuceneTextValueEncoder enc = new LuceneTextValueEncoder("text");
-    enc.setAnalyzer(new WhitespaceAnalyzer(Version.LUCENE_41));
+    enc.setAnalyzer(new WhitespaceAnalyzer(Version.LUCENE_42));
     Vector v1 = new DenseVector(200);
     enc.addToVector("test1 and more", v1);
     enc.flush(1, v1);

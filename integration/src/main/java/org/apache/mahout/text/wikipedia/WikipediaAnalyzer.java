@@ -33,19 +33,19 @@ import org.apache.lucene.util.Version;
 public class WikipediaAnalyzer extends StopwordAnalyzerBase {
   
   public WikipediaAnalyzer() {
-    super(Version.LUCENE_41, StopAnalyzer.ENGLISH_STOP_WORDS_SET);
+    super(Version.LUCENE_42, StopAnalyzer.ENGLISH_STOP_WORDS_SET);
   }
   
   public WikipediaAnalyzer(CharArraySet stopSet) {
-    super(Version.LUCENE_41, stopSet);
+    super(Version.LUCENE_42, stopSet);
   }
 
   @Override
   protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
     Tokenizer tokenizer = new WikipediaTokenizer(reader);
-    TokenStream result = new StandardFilter(Version.LUCENE_41, tokenizer);
-    result = new LowerCaseFilter(Version.LUCENE_41, result);
-    result = new StopFilter(Version.LUCENE_41, result, getStopwordSet());
+    TokenStream result = new StandardFilter(Version.LUCENE_42, tokenizer);
+    result = new LowerCaseFilter(Version.LUCENE_42, result);
+    result = new StopFilter(Version.LUCENE_42, result, getStopwordSet());
     return new TokenStreamComponents(tokenizer, result);
   }
 }

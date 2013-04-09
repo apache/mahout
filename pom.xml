@@ -98,7 +98,7 @@
     <maven.clover.multiproject>true</maven.clover.multiproject>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <hadoop.version>1.1.2</hadoop.version>
-    <lucene.version>4.2.0</lucene.version>
+    <lucene.version>4.2.1</lucene.version>
   </properties>
   <issueManagement>
     <system>Jira</system>

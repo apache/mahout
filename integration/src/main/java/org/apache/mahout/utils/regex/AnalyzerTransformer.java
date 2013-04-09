@@ -34,7 +34,7 @@ public class AnalyzerTransformer implements RegexTransformer {
   private String fieldName = "text";
 
   public AnalyzerTransformer() {
-    this(new StandardAnalyzer(Version.LUCENE_41), "text");
+    this(new StandardAnalyzer(Version.LUCENE_42), "text");
   }
 
   public AnalyzerTransformer(Analyzer analyzer) {
