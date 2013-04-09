@@ -5,6 +5,8 @@ Release 0.8 - unreleased
   MAHOUT-1161: Unable to run CJKAnalyzer for conversion of a sequence file to sparse vector due to instantiation
                exception (ssc)
 
+  MAHOUT-1187: Update Commons Lang to Commons Lang3 (smarthi)
+
   MAHOUT-1184 Another take at pmd, findbugs and checkstyle (ssc)
 
   MAHOUT-1182: Remove useless append (Dave Brosius via tdunning)
