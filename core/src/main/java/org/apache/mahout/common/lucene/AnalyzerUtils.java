@@ -17,14 +17,12 @@ package org.apache.mahout.common.lucene;
  */
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
 import org.apache.mahout.common.ClassUtils;
 
 public final class AnalyzerUtils {
 
-  private AnalyzerUtils() {
-  }
+  private AnalyzerUtils() {}
 
   /**
    * Create an Analyzer using the latest {@link org.apache.lucene.util.Version}.  Note, if you need to pass in
@@ -39,8 +37,6 @@ public final class AnalyzerUtils {
 
   public static Analyzer createAnalyzer(String analyzerClassName, Version version) throws ClassNotFoundException {
     Class<? extends Analyzer> analyzerClass = Class.forName(analyzerClassName).asSubclass(Analyzer.class);
-    //TODO: GSI: Not sure I like this, many analyzers in Lucene take in the version
-
     return createAnalyzer(analyzerClass, version);
   }
 
@@ -55,18 +51,11 @@ public final class AnalyzerUtils {
   }
 
   public static Analyzer createAnalyzer(Class<? extends Analyzer> analyzerClass, Version version) {
-    Analyzer analyzer;
-    if (analyzerClass == StandardAnalyzer.class) {
-      Class<?>[] params = new Class<?>[1];
-      params[0] = Version.class;
-      Object[] args = new Object[1];
-      args[0] = version;
-      analyzer = ClassUtils.instantiateAs(analyzerClass,
-              Analyzer.class, params, args);
-
-    } else {
-      analyzer = ClassUtils.instantiateAs(analyzerClass, Analyzer.class);
+    try {
+      return ClassUtils.instantiateAs(analyzerClass, Analyzer.class,
+          new Class<?>[] { Version.class }, new Object[] { version });
+    } catch (IllegalStateException e) {
+      return ClassUtils.instantiateAs(analyzerClass, Analyzer.class);
     }
-    return analyzer;
   }
 }
