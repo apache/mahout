@@ -62,7 +62,7 @@ public class CentroidTest extends AbstractVectorTest<Centroid> {
 
   @Override
   public void testSize() {
-    assertEquals("size", 3, getTestVector().getNumNondefaultElements());
+    assertEquals("size", 3, getTestVector().getNumNonZeroElements());
   }
 
   @Override
