@@ -306,14 +306,14 @@ public abstract class Abstract${keyTypeCap}ObjectMap<T> extends AbstractSet {
     keys(keyList);
     keyList.sort();
     // the following is straightforward if not the most space-efficient possibility
-    T[] tempValueList = (T[]) new Object[keyList.size()];
+    Object[] tempValueList = new Object[keyList.size()];
 
     for (int i = keyList.size(); --i >= 0;) {
       tempValueList[i] = get(keyList.getQuick(i));
     }
     valueList.clear();
-    for (T value : tempValueList) {
-      valueList.add(value);
+    for (Object value : tempValueList) {
+      valueList.add((T) value);
     }
     
   }

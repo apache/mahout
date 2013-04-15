@@ -17,13 +17,13 @@
 
 package org.apache.mahout.math;
 
+import java.util.Iterator;
+
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.set.OpenIntHashSet;
-
-import java.util.Iterator;
 
 /** Implementations of generic capabilities like sum of elements and dot products */
 public abstract class AbstractVector implements Vector, LengthCachingVector {
@@ -142,7 +142,44 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
         }
         reverseDot = reverseDotCost < dotCost;
       }
+    } else if (this.isSequentialAccess()  && !this.isDense() && x.isSequentialAccess() && !x.isDense()) {
+      Element thisElement = null;
+      Element thatElement = null;
+      boolean advanceThis = true;
+      boolean advanceThat = true;
+
+      Iterator<Element> thisNonZero = this.iterateNonZero();
+      Iterator<Element> thatNonZero = x.iterateNonZero();
+
+      double result = 0.0;
+      while (true) {
+        if (advanceThis) {
+          if (!thisNonZero.hasNext()) {
+            break;
+          }
+          thisElement = thisNonZero.next();
+        }
+        if (advanceThat) {
+          if (!thatNonZero.hasNext()) {
+            break;
+          }
+          thatElement = thatNonZero.next();
+        }
+        if (thisElement.index() == thatElement.index()) {
+          result += thisElement.get() * thatElement.get();
+          advanceThis = true;
+          advanceThat = true;
+        } else if (thisElement.index() < thatElement.index()) {
+          advanceThis = true;
+          advanceThat = false;
+        } else {
+          advanceThis = false;
+          advanceThat = true;
+        }
+      }
+      return result;
     }
+
 
     if (reverseDot) {
       return x.dot(this);
@@ -648,7 +685,7 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
     Vector to = this;
     Vector from = x;
     // Clone and edit to the sparse one; if both are sparse, edit the more sparse one (more zeroes)
-    if (isDense() || (!x.isDense() && getNumNondefaultElements() > x.getNumNondefaultElements())) {
+    if (isDense() || !x.isDense() && getNumNondefaultElements() > x.getNumNondefaultElements()) {
       to = x;
       from = this;
     }
@@ -672,6 +709,18 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
     }
 
     return result;
+  }
+
+  @Override
+  public int getNumNonZeroElements() {
+    int count = 0;
+    Iterator<Element> it = iterateNonZero();
+    while (it.hasNext()) {
+      if (it.next().get() != 0.0) {
+        count++;
+      }
+    }
+    return count;
   }
 
   @Override

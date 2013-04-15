@@ -78,7 +78,7 @@ public class WeightedVectorTest extends AbstractVectorTest {
 
   @Override
   public void testSize() {
-    assertEquals("size", 7, getTestVector().getNumNondefaultElements());
+    assertEquals("size", 3, getTestVector().getNumNondefaultElements());
   }
 
   @Override

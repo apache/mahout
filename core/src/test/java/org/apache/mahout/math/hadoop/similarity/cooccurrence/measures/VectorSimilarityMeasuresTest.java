@@ -19,7 +19,9 @@ package org.apache.mahout.math.hadoop.similarity.cooccurrence.measures;
 
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.junit.Test;
 
@@ -28,10 +30,22 @@ public class VectorSimilarityMeasuresTest extends MahoutTestCase {
   static double distributedSimilarity(double[] one,
                                       double[] two,
                                       Class<? extends VectorSimilarityMeasure> similarityMeasureClass) {
+    double rand = computeSimilarity(one, two, similarityMeasureClass, new RandomAccessSparseVector(one.length));
+    double seq = computeSimilarity(one, two, similarityMeasureClass, new SequentialAccessSparseVector(one.length));
+    double dense = computeSimilarity(one, two, similarityMeasureClass, new DenseVector(one.length));
+    assertEquals(seq, rand, 1e-10);
+    assertEquals(seq, dense, 1e-10);
+    assertEquals(dense, rand, 1e-10);
+    return seq;
+  }
+
+  private static double computeSimilarity(double[] one, double[] two,
+      Class<? extends VectorSimilarityMeasure> similarityMeasureClass,
+      Vector like) {
     VectorSimilarityMeasure similarityMeasure = ClassUtils.instantiateAs(similarityMeasureClass,
         VectorSimilarityMeasure.class);
-    Vector oneNormalized = similarityMeasure.normalize(asSparseVector(one));
-    Vector twoNormalized = similarityMeasure.normalize(asSparseVector(two));
+    Vector oneNormalized = similarityMeasure.normalize(asVector(one, like));
+    Vector twoNormalized = similarityMeasure.normalize(asVector(two, like));
 
     double normOne = similarityMeasure.norm(oneNormalized);
     double normTwo = similarityMeasure.norm(twoNormalized);
@@ -42,15 +56,14 @@ public class VectorSimilarityMeasuresTest extends MahoutTestCase {
         dot += similarityMeasure.aggregate(oneNormalized.get(n), twoNormalized.get(n));
       }
     }
+
     return similarityMeasure.similarity(dot, normOne, normTwo, one.length);
   }
 
-  static Vector asSparseVector(double[] values) {
-    Vector vector = new RandomAccessSparseVector(Integer.MAX_VALUE);
+  static Vector asVector(double[] values, Vector like) {
+    Vector vector = like.like();
     for (int dim = 0; dim < values.length; dim++) {
-      if (values[dim] != 0) {
-        vector.setQuick(dim, values[dim]);
-      }
+      vector.set(dim, values[dim]);
     }
     return vector;
   }

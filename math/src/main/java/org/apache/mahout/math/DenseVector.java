@@ -19,10 +19,12 @@ package org.apache.mahout.math;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
-import com.google.common.collect.AbstractIterator;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.PlusMult;
+
+import com.google.common.base.Preconditions;
 
 /** Implements vector as an array of doubles */
 public class DenseVector extends AbstractVector {
@@ -138,14 +140,19 @@ public class DenseVector extends AbstractVector {
     invalidateCachedLength();
     values[index] = value;
   }
-  
+
   @Override
   public Vector assign(double value) {
     invalidateCachedLength();
     Arrays.fill(values, value);
     return this;
   }
-  
+
+  @Override
+  public int getNumNondefaultElements() {
+    return values.length;
+  }
+
   @Override
   public Vector assign(Vector other, DoubleDoubleFunction function) {
     if (size() != other.size()) {
@@ -175,11 +182,6 @@ public class DenseVector extends AbstractVector {
     // now copy the values
     System.arraycopy(vector.values, 0, this.values, 0, this.values.length);
     return this;
-  }
-
-  @Override
-  public int getNumNondefaultElements() {
-    return values.length;
   }
 
   @Override
@@ -219,7 +221,7 @@ public class DenseVector extends AbstractVector {
     if (size() != v.size()) {
       throw new CardinalityException(size(), v.size());
     }
-    
+
     Iterator<Element> iter = v.iterateNonZero();
     while (iter.hasNext()) {
       Element element = iter.next();
@@ -227,29 +229,50 @@ public class DenseVector extends AbstractVector {
     }
   }
 
-  private final class NonDefaultIterator extends AbstractIterator<Element> {
-
+  private final class NonDefaultIterator implements Iterator<Element> {
     private final DenseElement element = new DenseElement();
-    private int index = 0;
+    private int index = -1;
+    private int lookAheadIndex = -1;
 
     @Override
-    protected Element computeNext() {
-      while (index < size() && values[index] == 0.0) {
-        index++;
-      }
-      if (index < size()) {
-        element.index = index;
-        index++;
-        return element;
-      } else {
-        return endOfData();
+    public boolean hasNext() {
+      if (lookAheadIndex == index) {  // User calls hasNext() after a next()
+        lookAhead();
+      } // else user called hasNext() repeatedly.
+      return lookAheadIndex < size();
+    }
+
+    private void lookAhead() {
+      lookAheadIndex++;
+      while (lookAheadIndex < size() && values[lookAheadIndex] == 0.0) {
+        lookAheadIndex++;
       }
     }
 
+    @Override
+    public Element next() {
+      if (lookAheadIndex == index) { // If user called next() without checking hasNext().
+        lookAhead();
+      }
+
+      Preconditions.checkState(lookAheadIndex > index);
+      index = lookAheadIndex;
+
+      if (index >= size()) { // If the end is reached.
+        throw new NoSuchElementException();
+      }
+
+      element.index = index;
+      return element;
+    }
+
+    @Override
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
   }
 
-  private final class AllIterator extends AbstractIterator<Element> {
-
+  private final class AllIterator implements Iterator<Element> {
     private final DenseElement element = new DenseElement();
 
     private AllIterator() {
@@ -257,19 +280,26 @@ public class DenseVector extends AbstractVector {
     }
 
     @Override
-    protected Element computeNext() {
-      if (element.index + 1 < size()) {
-        element.index++;
-        return element;
-      } else {
-        return endOfData();
-      }
+    public boolean hasNext() {
+      return element.index + 1 < size();
     }
 
+    @Override
+    public Element next() {
+      if (element.index + 1 >= size()) { // If the end is reached.
+        throw new NoSuchElementException();
+      }
+      element.index++;
+      return element;
+    }
+
+    @Override
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
   }
 
   private final class DenseElement implements Element {
-
     int index;
 
     @Override
@@ -288,5 +318,4 @@ public class DenseVector extends AbstractVector {
       values[index] = value;
     }
   }
-
 }

@@ -17,16 +17,17 @@
 
 package org.apache.mahout.math;
 
-import com.google.common.collect.Maps;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Random;
+
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.VectorFunction;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Random;
+import com.google.common.collect.Maps;
 
 public abstract class MatrixTest extends MahoutTestCase {
 

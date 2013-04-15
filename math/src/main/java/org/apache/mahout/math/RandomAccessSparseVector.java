@@ -18,10 +18,10 @@
 package org.apache.mahout.math;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
-import com.google.common.collect.AbstractIterator;
-import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.map.OpenIntDoubleHashMap;
+import org.apache.mahout.math.map.OpenIntDoubleHashMap.MapElement;
 
 
 /** Implements vector that only stores non-zero doubles */
@@ -141,13 +141,13 @@ public class RandomAccessSparseVector extends AbstractVector {
   }
 
   @Override
-  public int getNumNondefaultElements() {
-    return values.size();
+  public RandomAccessSparseVector like() {
+    return new RandomAccessSparseVector(size(), values.size());
   }
 
   @Override
-  public RandomAccessSparseVector like() {
-    return new RandomAccessSparseVector(size(), values.size());
+  public int getNumNondefaultElements() {
+    return values.size();
   }
 
   /**
@@ -161,36 +161,59 @@ public class RandomAccessSparseVector extends AbstractVector {
   public Iterator<Element> iterateNonZero() {
     return new NonDefaultIterator();
   }
-  
+
   @Override
   public Iterator<Element> iterator() {
     return new AllIterator();
   }
 
-  private final class NonDefaultIterator extends AbstractIterator<Element> {
+  private final class NonDefaultIterator implements Iterator<Element> {
+    private final class NonDefaultElement implements Element {
+      @Override
+      public double get() {
+        return mapElement.get();
+      }
 
-    private final RandomAccessElement element = new RandomAccessElement();
-    private final IntArrayList indices = new IntArrayList();
-    private int offset;
+      @Override
+      public int index() {
+        return mapElement.index();
+      }
+
+      @Override
+      public void set(double value) {
+        invalidateCachedLength();
+        mapElement.set(value);
+      }
+    }
+
+
+    private MapElement mapElement;
+    private final NonDefaultElement element = new NonDefaultElement();
+
+    private final Iterator<MapElement> iterator;
 
     private NonDefaultIterator() {
-      values.keys(indices);
+      this.iterator = values.iterator();
     }
 
     @Override
-    protected Element computeNext() {
-      if (offset >= indices.size()) {
-        return endOfData();
-      }
-      element.index = indices.get(offset);
-      offset++;
+    public boolean hasNext() {
+      return iterator.hasNext();
+    }
+
+    @Override
+    public Element next() {
+      mapElement = iterator.next(); // This will throw an exception at the end of ennumeration.
       return element;
     }
 
+    @Override
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
   }
 
-  private final class AllIterator extends AbstractIterator<Element> {
-
+  private final class AllIterator implements Iterator<Element> {
     private final RandomAccessElement element = new RandomAccessElement();
 
     private AllIterator() {
@@ -198,19 +221,26 @@ public class RandomAccessSparseVector extends AbstractVector {
     }
 
     @Override
-    protected Element computeNext() {
-      if (element.index + 1 < size()) {
-        element.index++;
-        return element;
-      } else {
-        return endOfData();
-      }
+    public boolean hasNext() {
+      return element.index + 1 < size();
     }
 
+    @Override
+    public Element next() {
+      if (!hasNext()) {
+        throw new NoSuchElementException();
+      }
+      element.index++;
+      return element;
+    }
+
+    @Override
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
   }
 
   private final class RandomAccessElement implements Element {
-
     int index;
 
     @Override
@@ -233,5 +263,4 @@ public class RandomAccessSparseVector extends AbstractVector {
       }
     }
   }
-  
 }

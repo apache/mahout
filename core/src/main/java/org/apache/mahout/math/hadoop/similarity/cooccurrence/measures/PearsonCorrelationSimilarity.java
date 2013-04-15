@@ -17,9 +17,9 @@
 
 package org.apache.mahout.math.hadoop.similarity.cooccurrence.measures;
 
-import org.apache.mahout.math.Vector;
-
 import java.util.Iterator;
+
+import org.apache.mahout.math.Vector;
 
 public class PearsonCorrelationSimilarity extends CosineSimilarity {
 
@@ -28,12 +28,13 @@ public class PearsonCorrelationSimilarity extends CosineSimilarity {
     if (vector.getNumNondefaultElements() == 0) {
       return vector;
     }
+
     // center non-zero elements
-    double average = vector.norm(1) / vector.getNumNondefaultElements();
-    Iterator<Vector.Element> nonZeroElements = vector.iterateNonZero();
-    while (nonZeroElements.hasNext()) {
-      Vector.Element nonZeroElement = nonZeroElements.next();
-      vector.setQuick(nonZeroElement.index(), nonZeroElement.get() - average);
+    double average = vector.norm(1) / vector.getNumNonZeroElements();
+    Iterator<Vector.Element> it = vector.iterateNonZero();
+    while (it.hasNext()) {
+      Vector.Element e = it.next();
+      e.set(e.get() - average);
     }
     return super.normalize(vector);
   }

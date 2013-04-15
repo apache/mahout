@@ -28,14 +28,19 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.map;
 
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
+import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.function.${keyTypeCap}${valueTypeCap}Procedure;
 import org.apache.mahout.math.function.${keyTypeCap}Procedure;
+import org.apache.mahout.math.function.IntProcedure;
 import org.apache.mahout.math.list.${keyTypeCap}ArrayList;
 
 #if (${keyType} != ${valueType})
 import org.apache.mahout.math.list.${valueTypeCap}ArrayList;
 #end
+
 
 /**
   * Open hash map from ${keyType} keys to ${valueType} values.
@@ -335,7 +340,63 @@ public class Open${keyTypeCap}${valueTypeCap}HashMap extends Abstract${keyTypeCa
       }
     }
   }
+  
+  public Iterator<MapElement> iterator() {
+    return new MapIterator();
+  }
 
+  public final class MapElement {
+    private int offset = -1;
+    int seen = 0;
+
+    boolean advanceOffset() {
+      offset++;
+      while (offset < state.length && state[offset] != FULL) {
+        offset++;
+      }
+      if (offset < state.length) {
+        seen++;
+      }
+      return offset < state.length;
+    }
+    
+    public ${valueType} get() {
+      return values[offset];
+    }
+
+    public ${keyType} index() {
+      return table[offset];
+    }
+
+    public void set(${valueType} value) {
+      values[offset] = value;
+    }
+  }
+  
+  public final class MapIterator implements Iterator<MapElement> {
+    private final MapElement element = new MapElement();
+
+    private MapIterator() { }
+    
+    @Override
+    public boolean hasNext() {
+      return element.seen < distinct;
+    }
+
+    @Override
+    public MapElement next() {
+      if (element.advanceOffset()) {
+        return element;
+      }
+      throw new NoSuchElementException();
+    }
+
+    @Override
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
+  }
+  
   /**
    * Fills all pairs satisfying a given condition into the specified lists. Fills into the lists, starting at index 0.
    * After this call returns the specified lists both have a new size, the number of pairs satisfying the condition.
@@ -380,7 +441,7 @@ public class Open${keyTypeCap}${valueTypeCap}HashMap extends Abstract${keyTypeCa
   @Override
   public boolean put(${keyType} key, ${valueType} value) {
     int i = indexOfInsertion(key);
-    if (i < 0) { //already contained
+    if (i < 0) { // already contained
       i = -i - 1;
       this.values[i] = value;
       return false;

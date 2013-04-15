@@ -62,12 +62,11 @@ public class CentroidTest extends AbstractVectorTest<Centroid> {
 
   @Override
   public void testSize() {
-    assertEquals("size", 7, getTestVector().getNumNondefaultElements());
+    assertEquals("size", 3, getTestVector().getNumNondefaultElements());
   }
 
   @Override
   Vector generateTestVector(int cardinality) {
     return new Centroid(new WeightedVector(new DenseVector(cardinality), 3.14, 53));
   }
-
 }

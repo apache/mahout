@@ -1,14 +1,14 @@
 package org.apache.mahout.math;
 
+import java.util.Iterator;
+import java.util.Random;
+
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.jet.random.Normal;
 import org.apache.mahout.math.random.MultiNormal;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Iterator;
-import java.util.Random;
 
 /**
  * Makes sure that a vector under test acts the same as a DenseVector or RandomAccessSparseVector
@@ -180,7 +180,7 @@ public abstract class AbstractVectorTest<T extends Vector> extends MahoutTestCas
     super.setUp();
     test = generateTestVector(2 * values.length + 1);
     for (int i = 0; i < values.length; i++) {
-      test.set(2*i + 1, values[i]);
+      test.set(2 * i + 1, values[i]);
     }
   }
 
