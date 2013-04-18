@@ -298,6 +298,14 @@ public interface Vector extends Cloneable, Iterable<Vector.Element> {
   void setQuick(int index, double value);
 
   /**
+   * Increment the value at the given index by the given value.
+   *
+   * @param index an int index into the receiver
+   * @param increment sets the value at the given index to value + increment;
+   */
+  void incrementQuick(int index, double increment);
+
+  /**
    * Return the number of values in the recipient which are not the default value.  For instance, for a
    * sparse vector, this would be the number of non-zero values.
    *

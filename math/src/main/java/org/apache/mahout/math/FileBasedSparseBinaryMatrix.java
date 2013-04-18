@@ -17,12 +17,6 @@
 
 package org.apache.mahout.math;
 
-import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.AbstractIterator;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
-
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,6 +28,12 @@ import java.nio.channels.FileChannel;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.AbstractIterator;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 
 /**
  * Provides a way to get data from a file and treat it as if it were a matrix, but avoids putting
@@ -425,6 +425,16 @@ public final class FileBasedSparseBinaryMatrix extends AbstractMatrix {
     }
 
     /**
+     * Copy the vector for fast operations.
+     *
+     * @return a Vector
+     */
+    @Override
+    protected Vector createOptimizedCopy() {
+      return new RandomAccessSparseVector(size()).assign(this);
+    }
+
+    /**
      * Set the value at the given index, without checking bounds
      *
      * @param index an int index into the receiver
@@ -432,6 +442,17 @@ public final class FileBasedSparseBinaryMatrix extends AbstractMatrix {
      */
     @Override
     public void setQuick(int index, double value) {
+      throw new UnsupportedOperationException("Read-only view");
+    }
+
+    /**
+     * Set the value at the given index, without checking bounds
+     *
+     * @param index an int index into the receiver
+     * @param value a double value to set
+     */
+    @Override
+    public void incrementQuick(int index, double increment) {
       throw new UnsupportedOperationException("Read-only view");
     }
 

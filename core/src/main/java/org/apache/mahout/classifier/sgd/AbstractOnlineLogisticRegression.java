@@ -17,7 +17,8 @@
 
 package org.apache.mahout.classifier.sgd;
 
-import com.google.common.base.Preconditions;
+import java.util.Iterator;
+
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.classifier.OnlineLearner;
 import org.apache.mahout.math.DenseVector;
@@ -26,7 +27,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.Functions;
 
-import java.util.Iterator;
+import com.google.common.base.Preconditions;
 
 /**
  * Generic definition of a 1 of n logistic regression classifier that returns probabilities in
@@ -185,7 +186,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
       Vector.Element element = i.next();
       int j = element.index();
       updateSteps.setQuick(j, getStep());
-      updateCounts.setQuick(j, updateCounts.getQuick(j) + 1);
+      updateCounts.incrementQuick(j, 1);
     }
     nextStep();
 

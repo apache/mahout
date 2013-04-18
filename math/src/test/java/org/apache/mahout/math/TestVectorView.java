@@ -17,11 +17,11 @@
 
 package org.apache.mahout.math;
 
+import java.util.Iterator;
+
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.TimesFunction;
 import org.junit.Test;
-
-import java.util.Iterator;
 
 public final class TestVectorView extends MahoutTestCase {
 

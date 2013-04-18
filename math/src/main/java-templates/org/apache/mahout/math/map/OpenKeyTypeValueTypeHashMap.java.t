@@ -477,8 +477,8 @@ public class Open${keyTypeCap}${valueTypeCap}HashMap extends Abstract${keyTypeCa
       this.values[i] += incrValue;
       return this.values[i];
     } else {
-        put(key, newValue);
-        return newValue;
+      put(key, newValue);
+      return newValue;
     }
  }
   

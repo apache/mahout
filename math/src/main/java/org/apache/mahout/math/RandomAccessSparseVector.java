@@ -141,6 +141,13 @@ public class RandomAccessSparseVector extends AbstractVector {
   }
 
   @Override
+  public void incrementQuick(int index, double increment) {
+    invalidateCachedLength();
+    values.adjustOrPutValue(index, increment, increment);
+  }
+
+
+  @Override
   public RandomAccessSparseVector like() {
     return new RandomAccessSparseVector(size(), values.size());
   }

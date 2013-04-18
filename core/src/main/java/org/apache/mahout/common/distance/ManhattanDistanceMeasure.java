@@ -31,7 +31,7 @@ import org.apache.mahout.math.Vector;
  * between each coordinate
  */
 public class ManhattanDistanceMeasure implements DistanceMeasure {
-  
+
   public static double distance(double[] p1, double[] p2) {
     double result = 0.0;
     for (int i = 0; i < p1.length; i++) {
@@ -39,22 +39,22 @@ public class ManhattanDistanceMeasure implements DistanceMeasure {
     }
     return result;
   }
-  
+
   @Override
   public void configure(Configuration job) {
   // nothing to do
   }
-  
+
   @Override
   public Collection<Parameter<?>> getParameters() {
     return Collections.emptyList();
   }
-  
+
   @Override
   public void createParameters(String prefix, Configuration jobConf) {
   // nothing to do
   }
-  
+
   @Override
   public double distance(Vector v1, Vector v2) {
     if (v1.size() != v2.size()) {
@@ -62,7 +62,7 @@ public class ManhattanDistanceMeasure implements DistanceMeasure {
     }
     double result = 0;
     Vector vector = v1.minus(v2);
-    Iterator<Vector.Element> iter = vector.iterateNonZero(); 
+    Iterator<Vector.Element> iter = vector.iterateNonZero();
     // this contains all non zero elements between the two
     while (iter.hasNext()) {
       Vector.Element e = iter.next();
@@ -70,10 +70,9 @@ public class ManhattanDistanceMeasure implements DistanceMeasure {
     }
     return result;
   }
-  
+
   @Override
   public double distance(double centroidLengthSquare, Vector centroid, Vector v) {
     return distance(centroid, v); // TODO
   }
-  
 }

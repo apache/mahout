@@ -17,16 +17,16 @@
 
 package org.apache.mahout.math;
 
-import org.apache.mahout.common.RandomUtils;
-import org.junit.Test;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
+import org.apache.mahout.common.RandomUtils;
+import org.junit.Test;
+
 public class FileBasedSparseBinaryMatrixTest extends MahoutTestCase {
-  
-  /*  
+
+  /*
   // 10 million rows x 40 columns x 8 bytes = 3.2GB of data
   // we need >2GB to stress the file based matrix implementation
   private static final int ROWS = 10 * 1000 * 1000;
@@ -92,6 +92,4 @@ public class FileBasedSparseBinaryMatrixTest extends MahoutTestCase {
       assertEquals(0, error, 1.0e-14);
     }
   }
-
-
 }

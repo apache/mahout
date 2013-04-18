@@ -280,6 +280,11 @@ public class DelegatingVector implements Vector, LengthCachingVector {
   }
 
   @Override
+  public void incrementQuick(int index, double increment) {
+    delegate.incrementQuick(index, increment);
+  }
+
+  @Override
   public int getNumNondefaultElements() {
     return delegate.getNumNondefaultElements();
   }

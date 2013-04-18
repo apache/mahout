@@ -68,7 +68,7 @@ final class OrderedIntDoubleMapping implements Serializable, Cloneable {
   int getNumMappings() {
     return numMappings;
   }
-  
+
   private void growTo(int newCapacity) {
     if (newCapacity > indices.length) {
       int[] newIndices = new int[newCapacity];
@@ -84,7 +84,7 @@ final class OrderedIntDoubleMapping implements Serializable, Cloneable {
     int low = 0;
     int high = numMappings - 1;
     while (low <= high) {
-      int mid = low + ((high - low) >>> 1);
+      int mid = low + (high - low >>> 1);
       int midVal = indices[mid];
       if (midVal < index) {
         low = mid + 1;
@@ -105,31 +105,9 @@ final class OrderedIntDoubleMapping implements Serializable, Cloneable {
   public void set(int index, double value) {
     int offset = find(index);
     if (offset >= 0) {
-      if (value == DEFAULT_VALUE) {
-        for (int i = offset + 1, j = offset; i < numMappings; i++, j++) {
-          indices[j] = indices[i];
-          values[j] = values[i];
-        }
-        numMappings--;
-      } else {
-        values[offset] = value;
-      }
+      insertOrUpdateValueIfPresent(offset, value);
     } else {
-      if (value != DEFAULT_VALUE) {
-        if (numMappings >= indices.length) {
-          growTo(Math.max((int) (1.2 * numMappings), numMappings + 1));
-        }
-        int at = -offset - 1;
-        if (numMappings > at) {
-          for (int i = numMappings - 1, j = numMappings; i >= at; i--, j--) {
-            indices[j] = indices[i];
-            values[j] = values[i];
-          }
-        }
-        indices[at] = index;
-        values[at] = value;
-        numMappings++;
-      }
+      insertValueIfNotDefault(index, offset, value);
     }
   }
 
@@ -177,4 +155,44 @@ final class OrderedIntDoubleMapping implements Serializable, Cloneable {
     return new OrderedIntDoubleMapping(indices.clone(), values.clone(), numMappings);
   }
 
+  public void increment(int index, double increment) {
+    int offset = find(index);
+    if (offset >= 0) {
+      double newValue = values[offset] + increment;
+      insertOrUpdateValueIfPresent(offset, newValue);
+    } else {
+      double newValue = increment;
+      insertValueIfNotDefault(index, offset, newValue);
+    }
+  }
+
+  private void insertValueIfNotDefault(int index, int offset, double value) {
+    if (value != DEFAULT_VALUE) {
+      if (numMappings >= indices.length) {
+        growTo(Math.max((int) (1.2 * numMappings), numMappings + 1));
+      }
+      int at = -offset - 1;
+      if (numMappings > at) {
+        for (int i = numMappings - 1, j = numMappings; i >= at; i--, j--) {
+          indices[j] = indices[i];
+          values[j] = values[i];
+        }
+      }
+      indices[at] = index;
+      values[at] = value;
+      numMappings++;
+    }
+  }
+
+  private void insertOrUpdateValueIfPresent(int offset, double newValue) {
+    if (newValue == DEFAULT_VALUE) {
+      for (int i = offset + 1, j = offset; i < numMappings; i++, j++) {
+        indices[j] = indices[i];
+        values[j] = values[i];
+      }
+      numMappings--;
+    } else {
+      values[offset] = newValue;
+    }
+  }
 }

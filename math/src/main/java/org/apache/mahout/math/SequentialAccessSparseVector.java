@@ -191,6 +191,12 @@ public class SequentialAccessSparseVector extends AbstractVector {
   }
 
   @Override
+  public void incrementQuick(int index, double increment) {
+    invalidateCachedLength();
+    values.increment(index, increment);
+  }
+
+  @Override
   public SequentialAccessSparseVector like() {
     return new SequentialAccessSparseVector(size(), values.getNumMappings());
   }
