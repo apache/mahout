@@ -18,18 +18,21 @@
 package org.apache.mahout.common;
 
 import java.io.Serializable;
+import java.text.DecimalFormat;
 
 public final class TimingStatistics implements Serializable {
-  
+  private static final DecimalFormat DF = new DecimalFormat("#.##");
   private int nCalls;
   private long minTime;
   private long maxTime;
   private long sumTime;
+  private long leadSumTime;
   private double sumSquaredTime;
-  
+
+
   /** Creates a new instance of CallStats */
   public TimingStatistics() { }
-  
+
   public TimingStatistics(int nCalls, long minTime, long maxTime, long sumTime, double sumSquaredTime) {
     this.nCalls = nCalls;
     this.minTime = minTime;
@@ -37,31 +40,31 @@ public final class TimingStatistics implements Serializable {
     this.sumTime = sumTime;
     this.sumSquaredTime = sumSquaredTime;
   }
-  
+
   public synchronized int getNCalls() {
     return nCalls;
   }
-  
+
   public synchronized long getMinTime() {
     return Math.max(0, minTime);
   }
-  
+
   public synchronized long getMaxTime() {
     return maxTime;
   }
-  
+
   public synchronized long getSumTime() {
     return sumTime;
   }
-  
+
   public synchronized double getSumSquaredTime() {
     return sumSquaredTime;
   }
-  
+
   public synchronized long getMeanTime() {
     return nCalls == 0 ? 0 : sumTime / nCalls;
   }
-  
+
   public synchronized long getStdDevTime() {
     if (nCalls == 0) {
       return 0;
@@ -75,24 +78,59 @@ public final class TimingStatistics implements Serializable {
     }
     return (long) Math.sqrt(variance);
   }
-  
+
   @Override
   public synchronized String toString() {
-    return '\n' + "nCalls = " + nCalls + ";\n" + "sum = " + sumTime / 1000000000.0 + "s;\n"
-           + "min = " + minTime / 1000000.0 + "ms;\n" + "max = " + maxTime / 1000000.0 + "ms;\n"
-           + "mean = " + getMeanTime() / 1000000.0 + "ms;\n" + "stdDev = " + getStdDevTime()
-           / 1000000.0 + "ms;";
+    return '\n'
+        + "nCalls = " + nCalls + ";\n"
+        + "sum    = " + DF.format(sumTime / 1000000000.0) + "s;\n"
+        + "min    = " + DF.format(minTime / 1000000.0) + "ms;\n"
+        + "max    = " + DF.format(maxTime / 1000000.0) + "ms;\n"
+        + "mean   = " + DF.format(getMeanTime() / 1000.0) + "us;\n"
+        + "stdDev = " + DF.format(getStdDevTime() / 1000.0) + "us;";
   }
-  
+
   public Call newCall() {
     return new Call();
   }
-  
-  public final class Call {
-    private final long startTime = System.nanoTime();
-    
+
+  /** Ignores counting the performance metrics until leadTimeIsFinished The caller should enough time for the JIT to warm up. */
+  public Call newCall(long leadTimeUsec) {
+    if (leadSumTime > leadTimeUsec) {
+      return new Call();
+    } else {
+      return new LeadTimeCall();
+    }
+  }
+
+  /** Ignores counting the performance metrics. The caller should enough time for the JIT to warm up. */
+  public class LeadTimeCall extends Call {
+
+    private LeadTimeCall() { }
+
+    @Override
+    public void end() {
+      long elapsed = System.nanoTime() - startTime;
+      synchronized (TimingStatistics.this) {
+        leadSumTime += elapsed;
+      }
+    }
+
+    @Override
+    public boolean end(long sumMaxUsec) {
+      end();
+      return false;
+    }
+  }
+
+  /**
+   * A call object that can update performance metrics.
+   */
+  public class Call {
+    protected final long startTime = System.nanoTime();
+
     private Call() { }
-    
+
     public void end() {
       long elapsed = System.nanoTime() - startTime;
       synchronized (TimingStatistics.this) {
@@ -106,6 +144,14 @@ public final class TimingStatistics implements Serializable {
         sumTime += elapsed;
         sumSquaredTime += elapsed * elapsed;
       }
+    }
+
+    /**
+     * Returns true if the sumTime as reached this limit;
+     */
+    public boolean end(long sumMaxUsec) {
+      end();
+      return sumMaxUsec < sumTime;
     }
   }
 }
