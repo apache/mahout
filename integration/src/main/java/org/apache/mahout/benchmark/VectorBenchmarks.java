@@ -423,6 +423,9 @@ public class VectorBenchmarks {
     for (String benchmarkName : keys) {
       int i = 0;
       for (String[] stats : statsMap.get(benchmarkName)) {
+        if (stats.length < 8) {
+          continue;
+        }
         sb.append(benchmarkName + ",");
         sb.append(implMap.get(i++) + ",");
         sb.append(stats[7].trim().split("=|/")[1].trim());
