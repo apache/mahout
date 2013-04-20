@@ -19,14 +19,16 @@ package org.apache.mahout.classifier.naivebayes.training;
 
 import java.io.IOException;
 
-import com.google.common.base.Preconditions;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.Functions;
+
+import com.google.common.base.Preconditions;
 
 public class WeightsMapper extends Mapper<IntWritable, VectorWritable, Text, VectorWritable> {
 
@@ -40,7 +42,7 @@ public class WeightsMapper extends Mapper<IntWritable, VectorWritable, Text, Vec
     super.setup(ctx);
     int numLabels = Integer.parseInt(ctx.getConfiguration().get(NUM_LABELS));
     Preconditions.checkArgument(numLabels > 0);
-    weightsPerLabel = new RandomAccessSparseVector(numLabels);
+    weightsPerLabel = new DenseVector(numLabels);
   }
 
   @Override

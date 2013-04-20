@@ -17,7 +17,10 @@
 
 package org.apache.mahout.classifier.naivebayes.training;
 
-import com.google.common.base.Splitter;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -38,9 +41,7 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.common.mapreduce.VectorSumReducer;
 import org.apache.mahout.math.VectorWritable;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import com.google.common.base.Splitter;
 
 /**
  * This class trains a Naive Bayes Classifier (Parameters for both Naive Bayes and Complementary Naive Bayes)
@@ -131,10 +132,10 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     if (!succeeded) {
       return -1;
     }
-    
+
     //put the per label and per feature vectors into the cache
     HadoopUtil.cacheFiles(getTempPath(WEIGHTS), getConf());
-    
+
     //calculate the Thetas, write out to LABEL_THETA_NORMALIZER vectors --
     // TODO: add reference here to the part of the Rennie paper that discusses this
     Job thetaSummer = prepareJob(getTempPath(SUMMED_OBSERVATIONS),
@@ -155,7 +156,7 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     if (!succeeded) {
       return -1;
     }*/
-    
+
     //validate our model and then write it out to the official output
     getConf().setFloat(ThetaMapper.ALPHA_I, alphaI);
     NaiveBayesModel naiveBayesModel = BayesUtils.readModelFromDir(getTempPath(), getConf());
@@ -180,5 +181,4 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     }
     return labelSize;
   }
-
 }

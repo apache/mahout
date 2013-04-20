@@ -17,10 +17,12 @@
 
 package org.apache.mahout.classifier.naivebayes;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.common.io.Closeables;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -42,11 +44,10 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Pattern;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.common.io.Closeables;
 
 public final class BayesUtils {
 
@@ -87,7 +88,7 @@ public final class BayesUtils {
       if (entry.getFirst().toString().equals(TrainNaiveBayesJob.LABEL_THETA_NORMALIZER)) {
         perlabelThetaNormalizer = entry.getSecond().get();
       }
-    } 
+    }
 
     Preconditions.checkNotNull(perlabelThetaNormalizer);
     */
@@ -126,7 +127,7 @@ public final class BayesUtils {
         }
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
     return i;
   }
