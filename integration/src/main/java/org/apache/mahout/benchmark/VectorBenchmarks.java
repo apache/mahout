@@ -152,7 +152,7 @@ public class VectorBenchmarks {
 
   private void printStats(TimingStatistics stats, String benchmarkName, String implName,
       String content, int multiplier) {
-    float speed = multiplier * stats.getNCalls() * numNonZeros * 1000.0f * 12 / stats.getSumTime();
+    float speed = multiplier * stats.getNCalls() * (numNonZeros * 1000.0f * 12 / stats.getSumTime());
     float opsPerSec = stats.getNCalls() * 1000000000.0f / stats.getSumTime();
     log.info("{} {} \n{} {} \nOps    = {} Units/sec\nIOps   = {} MBytes/sec", benchmarkName,
         implName, content, stats.toString(), DF.format(opsPerSec), DF.format(speed));
@@ -369,6 +369,7 @@ public class VectorBenchmarks {
       runBenchmark(mark);
 
       log.info("\n{}", mark);
+      log.info("\n{}", mark.asCsvString());
     } catch (OptionException e) {
       CommandLineUtil.printHelp(group);
     }
@@ -408,6 +409,28 @@ public class VectorBenchmarks {
     centroidBenchmark.benchmark(new TanimotoDistanceMeasure());
     centroidBenchmark.benchmark(new ChebyshevDistanceMeasure());
     centroidBenchmark.benchmark(new MinkowskiDistanceMeasure());
+  }
+
+  private String asCsvString() {
+    StringBuilder sb = new StringBuilder(1000);
+    List<String> keys = Lists.newArrayList(statsMap.keySet());
+    Collections.sort(keys);
+    Map<Integer,String> implMap = Maps.newHashMap();
+    for (Entry<String,Integer> e : implType.entrySet()) {
+      implMap.put(e.getValue(), e.getKey());
+    }
+
+    for (String benchmarkName : keys) {
+      int i = 0;
+      for (String[] stats : statsMap.get(benchmarkName)) {
+        sb.append(benchmarkName + ",");
+        sb.append(implMap.get(i++) + ",");
+        sb.append(stats[7].trim().split("=|/")[1].trim());
+        sb.append('\n');
+      }
+    }
+    sb.append('\n');
+    return sb.toString();
   }
 
   @Override
