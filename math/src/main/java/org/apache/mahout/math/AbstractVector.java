@@ -808,7 +808,10 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
   @Override
   public Matrix cross(Vector other) {
     Matrix result = matrixLike(size, other.size());
-    for (int row = 0; row < size; row++) {
+    Iterator<Vector.Element> it = iterateNonZero();
+    while(it.hasNext()) {
+      Vector.Element e = it.next();
+      int row = e.index();
       result.assignRow(row, other.times(getQuick(row)));
     }
     return result;
