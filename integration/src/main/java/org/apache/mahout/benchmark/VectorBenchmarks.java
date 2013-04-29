@@ -60,8 +60,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class VectorBenchmarks {
-  private static final int MAX_TIME_MS = 500;
-  private static final int LEAD_TIME_MS = 100;
+  private static final int MAX_TIME_MS = 5000;
+  private static final int LEAD_TIME_MS = 15000;
   public static final String CLUSTERS = "Clusters";
   public static final String CREATE_INCREMENTALLY = "Create (incrementally)";
   public static final String CREATE_COPY = "Create (copy)";
@@ -312,8 +312,8 @@ public class VectorBenchmarks {
     Option numClustersOpt = obuilder
         .withLongName("numClusters")
         .withRequired(false)
-        .withArgument(abuilder.withName("nc").withDefault(25).create())
-        .withDescription("Number of clusters to create. Default: 25").withShortName("nc").create();
+        .withArgument(abuilder.withName("nc").withDefault(0).create())
+        .withDescription("Number of clusters to create. Set to non zero to run cluster benchmark. Default: 0").withShortName("nc").create();
     Option numOpsOpt = obuilder
         .withLongName("numOps")
         .withRequired(false)
@@ -344,7 +344,7 @@ public class VectorBenchmarks {
 
       }
 
-      int numClusters = 25;
+      int numClusters = 0;
       if (cmdLine.hasOption(numClustersOpt)) {
         numClusters = Integer.parseInt((String) cmdLine.getValue(numClustersOpt));
       }
@@ -368,7 +368,7 @@ public class VectorBenchmarks {
       VectorBenchmarks mark = new VectorBenchmarks(cardinality, numNonZero, numVectors, numClusters, numOps);
       runBenchmark(mark);
 
-      log.info("\n{}", mark);
+      // log.info("\n{}", mark);
       log.info("\n{}", mark.asCsvString());
     } catch (OptionException e) {
       CommandLineUtil.printHelp(group);
@@ -401,14 +401,16 @@ public class VectorBenchmarks {
     distanceBenchmark.benchmark(new ChebyshevDistanceMeasure());
     distanceBenchmark.benchmark(new MinkowskiDistanceMeasure());
 
-    ClosestCentroidBenchmark centroidBenchmark = new ClosestCentroidBenchmark(mark);
-    centroidBenchmark.benchmark(new CosineDistanceMeasure());
-    centroidBenchmark.benchmark(new SquaredEuclideanDistanceMeasure());
-    centroidBenchmark.benchmark(new EuclideanDistanceMeasure());
-    centroidBenchmark.benchmark(new ManhattanDistanceMeasure());
-    centroidBenchmark.benchmark(new TanimotoDistanceMeasure());
-    centroidBenchmark.benchmark(new ChebyshevDistanceMeasure());
-    centroidBenchmark.benchmark(new MinkowskiDistanceMeasure());
+    if (mark.numClusters > 0) {
+      ClosestCentroidBenchmark centroidBenchmark = new ClosestCentroidBenchmark(mark);
+      centroidBenchmark.benchmark(new CosineDistanceMeasure());
+      centroidBenchmark.benchmark(new SquaredEuclideanDistanceMeasure());
+      centroidBenchmark.benchmark(new EuclideanDistanceMeasure());
+      centroidBenchmark.benchmark(new ManhattanDistanceMeasure());
+      centroidBenchmark.benchmark(new TanimotoDistanceMeasure());
+      centroidBenchmark.benchmark(new ChebyshevDistanceMeasure());
+      centroidBenchmark.benchmark(new MinkowskiDistanceMeasure());
+    }
   }
 
   private String asCsvString() {
