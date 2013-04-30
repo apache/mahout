@@ -179,7 +179,9 @@ public class VectorBenchmarks {
       vectors[0][vIndex(i)] = new DenseVector(randomVectors.get(vIndex(i)));
       vectors[1][vIndex(i)] = new RandomAccessSparseVector(randomVectors.get(vIndex(i)));
       vectors[2][vIndex(i)] = new SequentialAccessSparseVector(randomVectors.get(vIndex(i)));
-      clusters[cIndex(i)] = new RandomAccessSparseVector(randomVectors.get(vIndex(i)));
+      if (numClusters > 0) {
+        clusters[cIndex(i)] = new RandomAccessSparseVector(randomVectors.get(vIndex(i)));
+      }
     }
   }
 
@@ -208,13 +210,15 @@ public class VectorBenchmarks {
       }
     }), CREATE_COPY, SEQ_SPARSE_VECTOR);
 
-    printStats(runner.benchmark(new BenchmarkFn() {
-      @Override
-      public Boolean apply(Integer i) {
-        clusters[cIndex(i)] = new RandomAccessSparseVector(randomVectors.get(vIndex(i)));
-        return depends(clusters[cIndex(i)]);
-      }
-    }), CREATE_COPY, CLUSTERS);
+    if (numClusters > 0) {
+      printStats(runner.benchmark(new BenchmarkFn() {
+        @Override
+        public Boolean apply(Integer i) {
+          clusters[cIndex(i)] = new RandomAccessSparseVector(randomVectors.get(vIndex(i)));
+          return depends(clusters[cIndex(i)]);
+        }
+      }), CREATE_COPY, CLUSTERS);
+    }
   }
 
   private boolean buildVectorIncrementally(TimingStatistics stats, int randomIndex, Vector v, boolean useSetQuick) {
@@ -271,14 +275,16 @@ public class VectorBenchmarks {
     }
     printStats(stats, CREATE_INCREMENTALLY, SEQ_SPARSE_VECTOR);
 
-    stats = new TimingStatistics();
-    for (int i = 0; i < loop; i++) {
-      clusters[cIndex(i)] = new RandomAccessSparseVector(cardinality);
-      if (buildVectorIncrementally(stats, vIndex(i), clusters[cIndex(i)], false)) {
-        break;
+    if (numClusters > 0) {
+      stats = new TimingStatistics();
+      for (int i = 0; i < loop; i++) {
+        clusters[cIndex(i)] = new RandomAccessSparseVector(cardinality);
+        if (buildVectorIncrementally(stats, vIndex(i), clusters[cIndex(i)], false)) {
+          break;
+        }
       }
+      printStats(stats, CREATE_INCREMENTALLY, CLUSTERS);
     }
-    printStats(stats, CREATE_INCREMENTALLY, CLUSTERS);
   }
 
   public int vIndex(int i) {
