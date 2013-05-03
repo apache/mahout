@@ -54,7 +54,7 @@ import org.apache.mahout.math.function.IntFunction;
  * @see MersenneTwister
  * @see java.util.Random
  */
-public abstract class RandomEngine implements DoubleFunction, IntFunction {
+public abstract class RandomEngine extends DoubleFunction implements IntFunction {
 
   /**
    * Equivalent to <tt>raw()</tt>. This has the effect that random engines can now be used as function objects,

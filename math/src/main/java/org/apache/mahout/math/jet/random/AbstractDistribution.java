@@ -25,12 +25,12 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random;
 
+import java.util.Random;
+
 import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.IntFunction;
 
-import java.util.Random;
-
-public abstract class AbstractDistribution implements DoubleFunction, IntFunction {
+public abstract class AbstractDistribution extends DoubleFunction implements IntFunction {
 
   private Random randomGenerator;
 

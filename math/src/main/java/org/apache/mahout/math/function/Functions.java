@@ -26,9 +26,12 @@ It is provided "as is" without expressed or implied warranty.
 
 package org.apache.mahout.math.function;
 
-import org.apache.mahout.math.jet.random.engine.MersenneTwister;
 
 import java.util.Date;
+
+import com.google.common.base.Preconditions;
+import org.apache.mahout.math.jet.random.engine.MersenneTwister;
+
 
 /**
  * Function objects to be passed to generic methods. Contains the functions of {@link java.lang.Math} as function
@@ -298,7 +301,6 @@ public final class Functions {
     }
   };
 
-
   /*
    * <H3>Binary functions</H3>
    */
@@ -328,6 +330,53 @@ public final class Functions {
     public double apply(double a, double b) {
       return a / b;
     }
+
+    /**
+     * x / 0 = infinity or undefined depending on x
+     * @return true iff f(x, 0) = x for any x
+     */
+    @Override
+    public boolean isLikeRightPlus() {
+      return false;
+    }
+
+    /**
+     * 0 / y = 0 unless y = 0
+     * @return true iff f(0, y) = 0 for any y
+     */
+    @Override
+    public boolean isLikeLeftMult() {
+      return false;
+    }
+
+    /**
+     * x / 0 = infinity or undefined depending on x
+     * @return true iff f(x, 0) = 0 for any x
+     */
+    @Override
+    public boolean isLikeRightMult() {
+      return false;
+    }
+
+    /**
+     * x / y != y / x
+     * @return true iff f(x, y) = f(y, x) for any x, y
+     */
+    @Override
+    public boolean isCommutative() {
+      return false;
+    }
+
+    /**
+     * x / (y / z) = x * z / y
+     * (x / y) / z = x / (y * z)
+     * @return true iff f(x, f(y, z)) = f(f(x, y), z) for any x, y, z
+     */
+    @Override
+    public boolean isAssociative() {
+      return false;
+    }
+
   };
 
   /** Function that returns <tt>a == b ? 1 : 0</tt>. */
@@ -336,6 +385,15 @@ public final class Functions {
     @Override
     public double apply(double a, double b) {
       return a == b ? 1 : 0;
+    }
+
+    /**
+     * x = y iff y = x
+     * @return true iff f(x, y) = f(y, x) for any x, y
+     */
+    @Override
+    public boolean isCommutative() {
+      return true;
     }
   };
 
@@ -409,6 +467,104 @@ public final class Functions {
     public double apply(double a, double b) {
       return Math.max(a, b);
     }
+
+    /**
+     * max(x, 0) = x or 0 depending on the sign of x
+     * @return true iff f(x, 0) = x for any x
+     */
+    @Override
+    public boolean isLikeRightPlus() {
+      return false;
+    }
+
+    /**
+     * max(0, y) = y or 0 depending on the sign of y
+     * @return true iff f(0, y) = 0 for any y
+     */
+    @Override
+    public boolean isLikeLeftMult() {
+      return false;
+    }
+
+    /**
+     * max(x, 0) = x or 0 depending on the sign of x
+     * @return true iff f(x, 0) = 0 for any x
+     */
+    @Override
+    public boolean isLikeRightMult() {
+      return false;
+    }
+
+    /**
+     * max(x, max(y, z)) = max(max(x, y), z)
+     * @return true iff f(x, f(y, z)) = f(f(x, y), z) for any x, y, z
+     */
+    @Override
+    public boolean isAssociative() {
+      return true;
+    }
+
+    /**
+     * max(x, y) = max(y, x)
+     * @return true iff f(x, y) = f(y, x) for any x, y
+     */
+    @Override
+    public boolean isCommutative() {
+      return true;
+    }
+  };
+
+  public static final DoubleDoubleFunction MAX_ABS = new DoubleDoubleFunction() {
+
+    @Override
+    public double apply(double a, double b) {
+      return Math.max(Math.abs(a), Math.abs(b));
+    }
+
+    /**
+     * max(|x|, 0) = |x|
+     * @return true iff f(x, 0) = x for any x
+     */
+    @Override
+    public boolean isLikeRightPlus() {
+      return true;
+    }
+
+    /**
+     * max(0, |y|) = |y|
+     * @return true iff f(0, y) = 0 for any y
+     */
+    @Override
+    public boolean isLikeLeftMult() {
+      return false;
+    }
+
+    /**
+     * max(|x|, 0) = |x|
+     * @return true iff f(x, 0) = 0 for any x
+     */
+    @Override
+    public boolean isLikeRightMult() {
+      return false;
+    }
+
+    /**
+     * max(|x|, max(|y|, |z|)) = max(max(|x|, |y|), |z|)
+     * @return true iff f(x, f(y, z)) = f(f(x, y), z) for any x, y, z
+     */
+    @Override
+    public boolean isAssociative() {
+      return true;
+    }
+
+    /**
+     * max(|x|, |y|) = max(|y\, |x\)
+     * @return true iff f(x, y) = f(y, x) for any x, y
+     */
+    @Override
+    public boolean isCommutative() {
+      return true;
+    }
   };
 
   /** Function that returns <tt>Math.min(a,b)</tt>. */
@@ -418,15 +574,107 @@ public final class Functions {
     public double apply(double a, double b) {
       return Math.min(a, b);
     }
+
+    /**
+     * min(x, 0) = x or 0 depending on the sign of x
+     * @return true iff f(x, 0) = x for any x
+     */
+    @Override
+    public boolean isLikeRightPlus() {
+      return false;
+    }
+
+    /**
+     * min(0, y) = y or 0 depending on the sign of y
+     * @return true iff f(0, y) = 0 for any y
+     */
+    @Override
+    public boolean isLikeLeftMult() {
+      return false;
+    }
+
+    /**
+     * min(x, 0) = x or 0 depending on the sign of x
+     * @return true iff f(x, 0) = 0 for any x
+     */
+    @Override
+    public boolean isLikeRightMult() {
+      return false;
+    }
+
+    /**
+     * min(x, min(y, z)) = min(min(x, y), z)
+     * @return true iff f(x, f(y, z)) = f(f(x, y), z) for any x, y, z
+     */
+    @Override
+    public boolean isAssociative() {
+      return true;
+    }
+
+    /**
+     * min(x, y) = min(y, x)
+     * @return true iff f(x, y) = f(y, x) for any x, y
+     */
+    @Override
+    public boolean isCommutative() {
+      return true;
+    }
   };
 
   /** Function that returns <tt>a - b</tt>. */
   public static final DoubleDoubleFunction MINUS = plusMult(-1);
-  /*
-  new DoubleDoubleFunction() {
-    public final double apply(double a, double b) { return a - b; }
-  };
+
+  public static final DoubleDoubleFunction MINUS_SQUARED = new DoubleDoubleFunction() {
+    @Override
+    public double apply(double x, double y) {
+      return (x - y) * (x - y);
+    }
+
+    /**
+     * (x - 0)^2 = x^2 != x
+     * @return true iff f(x, 0) = x for any x
   */
+    @Override
+    public boolean isLikeRightPlus() {
+      return false;
+    }
+
+    /**
+     * (0 - y)^2 != 0
+     * @return true iff f(0, y) = 0 for any y
+     */
+    @Override
+    public boolean isLikeLeftMult() {
+      return false;
+    }
+
+    /**
+     * (x - 0)^2 != x
+     * @return true iff f(x, 0) = 0 for any x
+     */
+    @Override
+    public boolean isLikeRightMult() {
+      return false;
+    }
+
+    /**
+     * (x - y)^2 = (y - x)^2
+     * @return true iff f(x, y) = f(y, x) for any x, y
+     */
+    @Override
+    public boolean isCommutative() {
+      return true;
+    }
+
+    /**
+     * (x - (y - z)^2)^2 != ((x - y)^2 - z)^2
+     * @return true iff f(x, f(y, z)) = f(f(x, y), z) for any x, y, z
+     */
+    @Override
+    public boolean isAssociative() {
+      return false;
+    }
+  };
 
   /** Function that returns <tt>a % b</tt>. */
   public static final DoubleDoubleFunction MOD = new DoubleDoubleFunction() {
@@ -438,22 +686,10 @@ public final class Functions {
   };
 
   /** Function that returns <tt>a * b</tt>. */
-  public static final DoubleDoubleFunction MULT = new DoubleDoubleFunction() {
+  public static final DoubleDoubleFunction MULT = new TimesFunction();
 
-    @Override
-    public double apply(double a, double b) {
-      return a * b;
-    }
-  };
-  
   /** Function that returns <tt>a + b</tt>. */
-  public static final DoubleDoubleFunction PLUS = new DoubleDoubleFunction() {
-    
-    @Override
-    public double apply(double a, double b) {
-      return a + b;
-    }
-  };
+  public static final DoubleDoubleFunction PLUS = plusMult(1);
 
   /** Function that returns <tt>Math.abs(a) + Math.abs(b)</tt>. */
   public static final DoubleDoubleFunction PLUS_ABS = new DoubleDoubleFunction() {
@@ -461,6 +697,104 @@ public final class Functions {
     @Override
     public double apply(double a, double b) {
       return Math.abs(a) + Math.abs(b);
+    }
+
+    /**
+     * abs(x) + abs(0) = abs(x) != x
+     * @return true iff f(x, 0) = x for any x
+     */
+    @Override
+    public boolean isLikeRightPlus() {
+      return false;
+    }
+    
+    /**
+     * abs(0) + abs(y) = abs(y) != 0 unless y = 0
+     * @return true iff f(0, y) = 0 for any y
+     */
+    @Override
+    public boolean isLikeLeftMult() {
+      return false;
+    }
+
+    /**
+     * abs(x) + abs(0) = abs(x) != 0 unless x = 0
+     * @return true iff f(x, 0) = 0 for any x
+     */
+    @Override
+    public boolean isLikeRightMult() {
+      return false;
+    }
+
+    /**
+     * abs(x) + abs(abs(y) + abs(z)) = abs(x) + abs(y) + abs(z)
+     * abs(abs(x) + abs(y)) + abs(z) = abs(x) + abs(y) + abs(z)
+     * @return true iff f(x, f(y, z)) = f(f(x, y), z) for any x, y, z
+     */
+    @Override
+    public boolean isAssociative() {
+      return true;
+    }
+
+    /**
+     * abs(x) + abs(y) = abs(y) + abs(x)
+     * @return true iff f(x, y) = f(y, x) for any x, y
+     */
+    @Override
+    public boolean isCommutative() {
+      return true;
+    }
+  };
+
+  public static final DoubleDoubleFunction MINUS_ABS = new DoubleDoubleFunction() {
+    @Override
+    public double apply(double x, double y) {
+      return Math.abs(x - y);
+    }
+
+    /**
+     * |x - 0| = |x|
+     * @return true iff f(x, 0) = x for any x
+     */
+    @Override
+    public boolean isLikeRightPlus() {
+      return false;
+    }
+
+    /**
+     * |0 - y| = |y|
+     * @return true iff f(0, y) = 0 for any y
+     */
+    @Override
+    public boolean isLikeLeftMult() {
+      return false;
+    }
+
+    /**
+     * |x - 0| = |x|
+     * @return true iff f(x, 0) = 0 for any x
+     */
+    @Override
+    public boolean isLikeRightMult() {
+      return false;
+    }
+
+    /**
+     * |x - y| = |y - x|
+     * @return true iff f(x, y) = f(y, x) for any x, y
+     */
+    @Override
+    public boolean isCommutative() {
+      return true;
+    }
+
+    /**
+     * |x - |y - z|| != ||x - y| - z| (|5 - |4 - 3|| = 1; ||5 - 4| - 3| = |1 - 3| = 2)
+     * @return true iff f(x, f(y, z)) = f(f(x, y), z) for any x, y, z
+     */
+    @Override
+    public boolean isAssociative() {
+      return false;
     }
   };
 
@@ -471,7 +805,328 @@ public final class Functions {
     public double apply(double a, double b) {
       return Math.pow(a, b);
     }
+
+    /**
+     * x^0 = 1 for any x unless x = 0 (undefined)
+     * @return true iff f(x, 0) = x for any x
+     */
+    @Override
+    public boolean isLikeRightPlus() {
+      return false;
+    }
+
+    /**
+     * 0^y = 0 for any y unless y = 0 (undefined, but Math.pow(0, 0) = 1)
+     * @return true iff f(0, y) = 0 for any y
+     */
+    @Override
+    public boolean isLikeLeftMult() {
+      return false;
+    }
+
+    /**
+     * x^0 = 1 for any x (even x = 0)
+     * @return true iff f(x, 0) = 0 for any x
+     */
+    @Override
+    public boolean isLikeRightMult() {
+      return false;
+    }
+
+    /**
+     * x^y != y^x (2^3 != 3^2)
+     * @return true iff f(x, y) = f(y, x) for any x, y
+     */
+    @Override
+    public boolean isCommutative() {
+      return false;
+    }
+
+    /**
+     * x^(y^z) != (x^y)^z ((2^3)^4 = 8^4 = 2^12 != 2^(3^4) = 2^81)
+     * @return true iff f(x, f(y, z)) = f(f(x, y), z) for any x, y, z
+     */
+    @Override
+    public boolean isAssociative() {
+      return false;
+    }
   };
+
+  public static final DoubleDoubleFunction SECOND = new DoubleDoubleFunction() {
+    @Override
+    public double apply(double x, double y) {
+      return y;
+    }
+
+    /**
+     * f(x, 0) = x for any x
+     * @return true iff f(x, 0) = x for any x
+     */
+    @Override
+    public boolean isLikeRightPlus() {
+      return false;
+    }
+
+    /**
+     * f(0, y) = y for any y
+     * @return true iff f(0, y) = 0 for any y
+     */
+    @Override
+    public boolean isLikeLeftMult() {
+      return false;
+    }
+
+    /**
+     * f(x, 0) = 0 for any x
+     * @return true iff f(x, 0) = 0 for any x
+     */
+    @Override
+    public boolean isLikeRightMult() {
+      return true;
+    }
+
+    /**
+     * f(x, y) = x != y = f(y, x) for any x, y unless x = y
+     * @return true iff f(x, y) = f(y, x) for any x, y
+     */
+    @Override
+    public boolean isCommutative() {
+      return false;
+    }
+
+    /**
+     * f(x, f(y, z)) = f(x, z) = z
+     * f(f(x, y), z) = z
+     * @return true iff f(x, f(y, z)) = f(f(x, y), z) for any x, y, z
+     */
+    @Override
+    public boolean isAssociative() {
+      return true;
+    }
+  };
+
+  /**
+   * This function is specifically designed to be used when assigning a vector to one that is all zeros (created
+   * by like()). It enables iteration only through the nonzeros of the right hand side by declaring isLikeRightPlus
+   * to be true. This is NOT generally true for SECOND (hence the other function above).
+   */
+  public static final DoubleDoubleFunction SECOND_LEFT_ZERO = new DoubleDoubleFunction() {
+    @Override
+    public double apply(double x, double y) {
+      Preconditions.checkArgument(x == 0, "This special version of SECOND needs x == 0");
+      return y;
+    }
+
+    /**
+     * f(x, 0) = 0 for any x; we're only assigning to left hand sides that are strictly 0
+     * @return true iff f(x, 0) = x for any x
+     */
+    @Override
+    public boolean isLikeRightPlus() {
+      return true;
+    }
+
+    /**
+     * f(0, y) = y for any y
+     * @return true iff f(0, y) = 0 for any y
+     */
+    @Override
+    public boolean isLikeLeftMult() {
+      return false;
+    }
+
+    /**
+     * f(x, 0) = 0 for any x
+     * @return true iff f(x, 0) = 0 for any x
+     */
+    @Override
+    public boolean isLikeRightMult() {
+      return true;
+    }
+
+    /**
+     * f(x, y) = x != y = f(y, x) for any x, y unless x = y
+     * @return true iff f(x, y) = f(y, x) for any x, y
+     */
+    @Override
+    public boolean isCommutative() {
+      return false;
+    }
+
+    /**
+     * f(x, f(y, z)) = f(x, z) = z
+     * f(f(x, y), z) = z
+     * @return true iff f(x, f(y, z)) = f(f(x, y), z) for any x, y, z
+     */
+    @Override
+    public boolean isAssociative() {
+      return true;
+    }
+  };
+  public static final DoubleDoubleFunction MULT_SQUARE_LEFT = new DoubleDoubleFunction() {
+    @Override
+    public double apply(double x, double y) {
+      return x * x * y;
+    }
+
+    /**
+     * x * x * 0 = 0
+     * @return true iff f(x, 0) = x for any x
+     */
+    @Override
+    public boolean isLikeRightPlus() {
+      return false;
+    }
+
+    /**
+     * 0 * 0 * y = 0
+     * @return true iff f(0, y) = 0 for any y
+     */
+    @Override
+    public boolean isLikeLeftMult() {
+      return true;
+    }
+
+    /**
+     * x * x * 0 = 0
+     * @return true iff f(x, 0) = 0 for any x
+     */
+    @Override
+    public boolean isLikeRightMult() {
+      return true;
+    }
+
+    /**
+     * x * x * y != y * y * x
+     * @return true iff f(x, y) = f(y, x) for any x, y
+     */
+    @Override
+    public boolean isCommutative() {
+      return false;
+    }
+
+    /**
+     * x * x * y * y * z != x * x * y * x * x * y * z
+     * @return true iff f(x, f(y, z)) = f(f(x, y), z) for any x, y, z
+     */
+    @Override
+    public boolean isAssociative() {
+      return false;
+    }
+  };
+
+  public static final DoubleDoubleFunction MULT_RIGHT_PLUS1 = new DoubleDoubleFunction() {
+
+    /**
+     * Apply the function to the arguments and return the result
+     *
+     * @param x a double for the first argument
+     * @param y a double for the second argument
+     * @return the result of applying the function
+     */
+    @Override
+    public double apply(double x, double y) {
+      return x * (y + 1);
+    }
+
+    /**
+     * x * 1 = x
+     * @return true iff f(x, 0) = x for any x
+     */
+    @Override
+    public boolean isLikeRightPlus() {
+      return true;
+    }
+
+    /**
+     * 0 * y = 0
+     * @return true iff f(0, y) = 0 for any y
+     */
+    @Override
+    public boolean isLikeLeftMult() {
+      return true;
+    }
+
+    /**
+     * x * 1 = x != 0
+     * @return true iff f(x, 0) = 0 for any x
+     */
+    @Override
+    public boolean isLikeRightMult() {
+      return false;
+    }
+
+    /**
+     * x * (y + 1) != y * (x + 1)
+     * @return true iff f(x, y) = f(y, x) for any x, y
+     */
+    @Override
+    public boolean isCommutative() {
+      return false;
+    }
+
+    /**
+     * @return true iff f(x, f(y, z)) = f(f(x, y), z) for any x, y, z
+     */
+    @Override
+    public boolean isAssociative() {
+      return false;
+    }
+  };
+
+  public static DoubleDoubleFunction reweigh(final double wx, final double wy) {
+    final double tw = wx + wy;
+    return new DoubleDoubleFunction() {
+      @Override
+      public double apply(double x, double y) {
+        return (wx * x + wy * y) / tw;
+      }
+
+      /**
+       * f(x, 0) = wx * x / tw = x iff wx = tw (practically, impossible, as tw = wx + wy and wy > 0)
+       * @return true iff f(x, 0) = x for any x
+       */
+      @Override
+      public boolean isLikeRightPlus() {
+        return wx == tw;
+      }
+
+      /**
+       * f(0, y) = wy * y / tw = 0 iff y = 0
+       * @return true iff f(0, y) = 0 for any y
+       */
+      @Override
+      public boolean isLikeLeftMult() {
+        return false;
+      }
+
+      /**
+       * f(x, 0) = wx * x / tw = 0 iff x = 0
+       * @return true iff f(x, 0) = 0 for any x
+       */
+      @Override
+      public boolean isLikeRightMult() {
+        return false;
+      }
+
+      /**
+       * wx * x + wy * y = wx * y + wy * x iff wx = wy
+       * @return true iff f(x, y) = f(y, x) for any x, y
+       */
+      @Override
+      public boolean isCommutative() {
+        return wx == wy;
+      }
+
+      /**
+       * @return true iff f(x, f(y, z)) = f(f(x, y), z) for any x, y, z
+       */
+      @Override
+      public boolean isAssociative() {
+        return false;
+      }
+    };
+  }
 
   private Functions() {
   }
@@ -540,6 +1195,59 @@ public final class Functions {
       public double apply(double a, double b) {
         return f.apply(g.apply(a), h.apply(b));
       }
+
+      /**
+       * fx(c, 0) = f(g(x), h(0)) = f(g(x), 0) = g(x) = x if h(0) = 0 and f isLikeRightPlus and g(x) = x
+       * Impossible to check whether g(x) = x for any x, so we return false.
+       * @return true iff f(x, 0) = x for any x
+       */
+      @Override
+      public boolean isLikeRightPlus() {
+        return false;
+      }
+
+      /**
+       * fc(0, y) = f(g(0), h(y)) = f(0, h(y)) = 0 if g(0) = 0 and f isLikeLeftMult
+       * @return true iff f(0, y) = 0 for any y
+       */
+      @Override
+      public boolean isLikeLeftMult() {
+        return g.apply(0) == 0 && f.isLikeLeftMult();
+      }
+
+      /**
+       * fc(x, 0) = f(g(x), h(0)) = f(g(x), 0) = 0 if h(0) = 0 and f isLikeRightMult
+       * @return true iff f(x, 0) = 0 for any x
+       */
+      @Override
+      public boolean isLikeRightMult() {
+        return h.apply(0) == 0 && f.isLikeRightMult();
+      }
+
+      /**
+       * fc(x, y) = f(g(x), h(y)) = f(h(y), g(x))
+       * fc(y, x) = f(g(y), h(x)) = f(h(x), g(y))
+       * Either g(x) = g(y) for any x, y and h(x) = h(y) for any x, y or g = h and f isCommutative.
+       * Can only check if g = h (reference equality, assuming they're both the same static function in
+       * this file) and f isCommutative. There are however other scenarios when this might happen that are NOT
+       * covered by this definition.
+       * @return true iff f(x, y) = f(y, x) for any x, y
+       */
+      @Override
+      public boolean isCommutative() {
+        return g.equals(h) && f.isCommutative();
+      }
+
+      /**
+       * fc(x, fc(y, z)) = f(g(x), h(f(g(y), h(z))))
+       * fc(fc(x, y), z) = f(g(f(g(x), h(y))), h(z))
+       * Impossible to check.
+       * @return true iff f(x, f(y, z)) = f(f(x, y), z) for any x, y, z
+       */
+      @Override
+      public boolean isAssociative() {
+        return false;
+      }
     };
   }
 
@@ -548,7 +1256,7 @@ public final class Functions {
    *
    * @param g a unary function.
    * @param h a binary function.
-   * @return the unary function <tt>g( h(a,b) )</tt>.
+   * @return the binary function <tt>g( h(a,b) )</tt>.
    */
   public static DoubleDoubleFunction chain(final DoubleFunction g, final DoubleDoubleFunction h) {
     return new DoubleDoubleFunction() {
@@ -556,6 +1264,54 @@ public final class Functions {
       @Override
       public double apply(double a, double b) {
         return g.apply(h.apply(a, b));
+      }
+
+      /**
+       * g(h(x, 0)) = g(x) = x for any x iff g(x) = x and h isLikeRightPlus
+       * Impossible to check.
+       * @return true iff f(x, 0) = x for any x
+       */
+      @Override
+      public boolean isLikeRightPlus() {
+        return false;
+      }
+
+      /**
+       * g(h(0, y)) = g(0) = 0 for any y iff g(0) = 0 and h isLikeLeftMult
+       * @return true iff f(0, y) = 0 for any y
+       */
+      @Override
+      public boolean isLikeLeftMult() {
+        return !g.isDensifying() && h.isLikeLeftMult();
+      }
+
+      /**
+       * g(h(x, 0)) = g(0) = 0 for any x iff g(0) = 0 and h isLikeRightMult
+       * @return true iff f(x, 0) = 0 for any x
+       */
+      @Override
+      public boolean isLikeRightMult() {
+        return !g.isDensifying() && h.isLikeRightMult();
+      }
+
+      /**
+       * fc(x, y) = g(h(x, y)) = g(h(y, x)) = fc(y, x) iff h isCommutative
+       * @return true iff f(x, y) = f(y, x) for any x, y
+       */
+      @Override
+      public boolean isCommutative() {
+        return h.isCommutative();
+      }
+
+      /**
+       * fc(x, fc(y, z)) = g(h(x, g(h(y, z)))
+       * fc(fc(x, y), z) = g(h(g(h(x, y)), z))
+       * Impossible to check.
+       * @return true iff f(x, f(y, z)) = f(f(x, y), z) for any x, y, z
+       */
+      @Override
+      public boolean isAssociative() {
+        return false;
       }
     };
   }
@@ -794,11 +1550,6 @@ public final class Functions {
    */
   public static DoubleDoubleFunction plusMult(double constant) {
     return new PlusMult(constant);
-    /*
-    return new DoubleDoubleFunction() {
-      public final double apply(double a, double b) { return a + b*constant; }
-    };
-    */
   }
 
   /** Constructs a function that returns <tt>Math.pow(a,b)</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
@@ -807,7 +1558,11 @@ public final class Functions {
 
       @Override
       public double apply(double a) {
+        if (b == 2) {
+          return a * a;
+        } else {
         return Math.pow(a, b);
+      }
       }
     };
   }
@@ -854,6 +1609,60 @@ public final class Functions {
       @Override
       public double apply(double a, double b) {
         return function.apply(b, a);
+      }
+    };
+  }
+
+  public static DoubleDoubleFunction minusAbsPow(final double exponent) {
+    return new DoubleDoubleFunction() {
+      @Override
+      public double apply(double x, double y) {
+        return Math.pow(Math.abs(x - y), exponent);
+      }
+
+      /**
+       * |x - 0|^p = |x|^p != x unless x > 0 and p = 1
+       * @return true iff f(x, 0) = x for any x
+       */
+      @Override
+      public boolean isLikeRightPlus() {
+        return false;
+      }
+
+      /**
+       * |0 - y|^p = |y|^p
+       * @return true iff f(0, y) = 0 for any y
+       */
+      @Override
+      public boolean isLikeLeftMult() {
+        return false;
+      }
+
+      /**
+       * |x - 0|^p = |x|^p
+       * @return true iff f(x, 0) = 0 for any x
+       */
+      @Override
+      public boolean isLikeRightMult() {
+        return false;
+      }
+
+      /**
+       * |x - y|^p = |y - x|^p
+       * @return true iff f(x, y) = f(y, x) for any x, y
+       */
+      @Override
+      public boolean isCommutative() {
+        return true;
+      }
+
+      /**
+       * |x - |y - z|^p|^p != ||x - y|^p - z|^p
+       * @return true iff f(x, f(y, z)) = f(f(x, y), z) for any x, y, z
+       */
+      @Override
+      public boolean isAssociative() {
+        return false;
       }
     };
   }

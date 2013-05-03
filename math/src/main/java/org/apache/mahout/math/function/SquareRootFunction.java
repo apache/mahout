@@ -17,7 +17,7 @@
 
 package org.apache.mahout.math.function;
 
-public final class SquareRootFunction implements DoubleFunction {
+public final class SquareRootFunction extends DoubleFunction {
 
   @Override
   public double apply(double arg1) {

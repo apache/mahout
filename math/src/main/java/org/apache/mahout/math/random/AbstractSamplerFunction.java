@@ -22,7 +22,7 @@ import org.apache.mahout.math.function.DoubleFunction;
 /**
  * This shim allows samplers to be used to initialize vectors.
  */
-public abstract class AbstractSamplerFunction implements Sampler<Double>, DoubleFunction {
+public abstract class AbstractSamplerFunction extends DoubleFunction implements Sampler<Double> {
   /**
    * Apply the function to the argument and return the result
    *
