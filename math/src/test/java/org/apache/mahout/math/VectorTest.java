@@ -784,18 +784,19 @@ public final class VectorTest extends MahoutTestCase {
         v.aggregate(w, Functions.PLUS, Functions.chain(Functions.pow(2), Functions.MINUS)), EPSILON);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testEmptyAggregate1() {
     assertEquals(1.0, new DenseVector(new double[]{1}).aggregate(Functions.MIN, Functions.IDENTITY), EPSILON);
     assertEquals(1.0, new DenseVector(new double[]{2, 1}).aggregate(Functions.MIN, Functions.IDENTITY), EPSILON);
-    new DenseVector(new double[0]).aggregate(Functions.MIN, Functions.IDENTITY);
+    assertEquals(0, new DenseVector(new double[0]).aggregate(Functions.MIN, Functions.IDENTITY), 0);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testEmptyAggregate2() {
     assertEquals(3.0, new DenseVector(new double[]{1}).aggregate(
-        new DenseVector(new double[]{2}),Functions.MIN, Functions.PLUS), EPSILON);
-    new DenseVector(new double[0]).aggregate(new DenseVector(new double[0]), Functions.MIN, Functions.PLUS);
+        new DenseVector(new double[]{2}), Functions.MIN, Functions.PLUS), EPSILON);
+    assertEquals(0,
+        new DenseVector(new double[0]).aggregate(new DenseVector(new double[0]), Functions.MIN, Functions.PLUS), 0);
   }
 
   private static void setUpFirstVector(Vector v) {
@@ -891,40 +892,6 @@ public final class VectorTest extends MahoutTestCase {
   }
 
   @Test
-  public void testMergeDiff() {
-    Vector left = new SequentialAccessSparseVector(20);
-    Vector right = new SequentialAccessSparseVector(20);
-
-    assertEquals(0, AbstractVector.mergeDiff(left, right), 0);
-
-    left.set(5, 1.5);
-    assertEquals(1.5 * 1.5, AbstractVector.mergeDiff(left, right), 0);
-
-    right.set(4, 3.1);
-    assertEquals(3.1 * 3.1 + 1.5 * 1.5, AbstractVector.mergeDiff(left, right), 0);
-
-    left.set(3, 1.2);
-    assertEquals(1.2 * 1.2 + 3.1 * 3.1 + 1.5 * 1.5, AbstractVector.mergeDiff(left, right), 0);
-
-    left.set(6, 2);
-    right.set(6, 2);
-    right.set(8, 2);
-    assertEquals(1.2 * 1.2 + 3.1 * 3.1 + 1.5 * 1.5 + 2 * 2, AbstractVector.mergeDiff(left, right), 0);
-  }
-
-  @Test
-  public void testRandomScanDiff() {
-    Vector left = new SequentialAccessSparseVector(20);
-    Vector right = new SequentialAccessSparseVector(20);
-    left.set(4, 1.1);
-    left.set(6, 2.1);
-    right.set(7, 3.1);
-    right.set(4, 1.2);
-
-    assertEquals(0.1 * 0.1 + 2.1 * 2.1 + 3.1 * 3.1, AbstractVector.randomScanDiff(left, right), 0);
-  }
-
-  @Test
   public void testIteratorRasv() {
     testIterator(new RandomAccessSparseVector(99));
     testEmptyAllIterator(new RandomAccessSparseVector(0));
@@ -966,6 +933,7 @@ public final class VectorTest extends MahoutTestCase {
       if (i % 2 == 0) {
         element = it.next();
       }
+      //noinspection ConstantConditions
       assertEquals(element.index(), 2* (i/2));
       assertEquals(element.get(), vector.get(2* (i/2)), 0);
       ++i;
@@ -980,6 +948,7 @@ public final class VectorTest extends MahoutTestCase {
       if (i % 2 == 0) {
         element = it.next();
       }
+      //noinspection ConstantConditions
       assertEquals(element.index(), i/2);
       assertEquals(element.get(), vector.get(i/2), 0);
       ++i;
@@ -996,7 +965,7 @@ public final class VectorTest extends MahoutTestCase {
 
     int i = 0;
     while (it.hasNext()) {  // hasNext is called more often than next
-      Element element = it.next();
+      it.next();
       ++i;
     }
     assertEquals(2, i);  // Last element is print only once.

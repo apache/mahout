@@ -17,13 +17,14 @@
 
 package org.apache.mahout.math;
 
+import java.util.List;
+
 import com.google.common.collect.Lists;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.stats.OnlineSummarizer;
+import org.junit.Ignore;
 import org.junit.Test;
-
-import java.util.List;
 
 public final class QRDecompositionTest extends MahoutTestCase {
   @Test
@@ -160,6 +161,8 @@ public final class QRDecompositionTest extends MahoutTestCase {
     assertEquals(x, qr.getQ().times(qr.getR()), 1.0e-15);
   }
 
+  // TODO: the speedup constant should be checked and oddly, the times don't increase as the counts increase
+  @Ignore
   @Test
   public void fasterThanBefore() {
 

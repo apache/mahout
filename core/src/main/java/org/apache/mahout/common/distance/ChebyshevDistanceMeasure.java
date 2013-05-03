@@ -19,12 +19,12 @@ package org.apache.mahout.common.distance;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.common.parameters.Parameter;
 import org.apache.mahout.math.CardinalityException;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.function.Functions;
 
 /**
  * This class implements a "Chebyshev distance" metric by finding the maximum difference
@@ -52,17 +52,7 @@ public class ChebyshevDistanceMeasure implements DistanceMeasure {
     if (v1.size() != v2.size()) {
       throw new CardinalityException(v1.size(), v2.size());
     }
-    double result = 0.0;
-    Vector vector = v1.minus(v2);
-    Iterator<Vector.Element> iter = vector.iterateNonZero(); 
-    while (iter.hasNext()) {
-      Vector.Element e = iter.next();
-      double d = Math.abs(e.get());
-      if (d > result) {
-        result = d;
-      }
-    }
-    return result;
+    return v1.aggregate(v2, Functions.MAX_ABS, Functions.MINUS);
   }
   
   @Override

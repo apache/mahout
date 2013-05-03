@@ -379,6 +379,7 @@ public abstract class AbstractMatrix implements Matrix {
 
   }
 
+  @SuppressWarnings("CloneDoesntDeclareCloneNotSupportedException")
   @Override
   public Matrix clone() {
     AbstractMatrix clone;
@@ -617,6 +618,7 @@ public abstract class AbstractMatrix implements Matrix {
       numCols = rowToColumn ? m.numCols() : m.numRows();
     }
 
+    @SuppressWarnings("CloneDoesntCallSuperClone")
     @Override
     public Vector clone() {
       Vector v = new DenseVector(size());
@@ -683,6 +685,19 @@ public abstract class AbstractMatrix implements Matrix {
       };
     }
 
+    /**
+     * Used internally by assign() to update multiple indices and values at once.
+     * Only really useful for sparse vectors (especially SequentialAccessSparseVector).
+     * <p/>
+     * If someone ever adds a new type of sparse vectors, this method must merge (index, value) pairs into the vector.
+     *
+     * @param updates a mapping of indices to values to merge in the vector.
+     */
+    @Override
+    public void mergeUpdates(OrderedIntDoubleMapping updates) {
+      throw new UnsupportedOperationException("Cannot mutate TransposeViewVector");
+    }
+
     @Override
     public double getQuick(int index) {
       Vector v = rowToColumn ? matrix.viewColumn(index) : matrix.viewRow(index);
@@ -724,6 +739,21 @@ public abstract class AbstractMatrix implements Matrix {
     @Override
     public int getNumNondefaultElements() {
       return size();
+    }
+
+    @Override
+    public double getLookupCost() {
+      return (rowToColumn ? matrix.viewColumn(0) : matrix.viewRow(0)).getLookupCost();
+    }
+
+    @Override
+    public double getIteratorAdvanceCost() {
+      return (rowToColumn ? matrix.viewColumn(0) : matrix.viewRow(0)).getIteratorAdvanceCost();
+    }
+
+    @Override
+    public boolean isAddConstantTime() {
+      return (rowToColumn ? matrix.viewColumn(0) : matrix.viewRow(0)).isAddConstantTime();
     }
   }
 

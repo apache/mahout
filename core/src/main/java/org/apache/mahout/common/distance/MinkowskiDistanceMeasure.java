@@ -18,7 +18,6 @@
 package org.apache.mahout.common.distance;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import com.google.common.collect.Lists;
@@ -26,7 +25,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.common.parameters.DoubleParameter;
 import org.apache.mahout.common.parameters.Parameter;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.Vector.Element;
+import org.apache.mahout.math.function.Functions;
 
 /** 
  * Implement Minkowski distance, a real-valued generalization of the 
@@ -82,14 +81,7 @@ public class MinkowskiDistanceMeasure implements DistanceMeasure {
    */
   @Override
   public double distance(Vector v1, Vector v2) {
-    Vector distVector = v1.minus(v2);
-    double sum = 0.0;
-    Iterator<Element> it = distVector.iterateNonZero();
-    while (it.hasNext()) {
-      Element e = it.next();
-      sum += Math.pow(Math.abs(e.get()), exponent);
-    }
-    return Math.pow(sum, 1.0 / exponent);
+    return Math.pow(v1.aggregate(v2, Functions.PLUS, Functions.minusAbsPow(exponent)), 1.0 / exponent);
   }
 
   // TODO: how?

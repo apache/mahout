@@ -198,4 +198,36 @@ public class VectorView extends AbstractVector {
     }
     return result;
   }
+
+  @Override
+  public double getLookupCost() {
+    return vector.getLookupCost();
+  }
+
+  @Override
+  public double getIteratorAdvanceCost() {
+    // TODO: remove the 2x after fixing the Element iterator
+    return 2 * vector.getIteratorAdvanceCost();
+  }
+
+  @Override
+  public boolean isAddConstantTime() {
+    return vector.isAddConstantTime();
+  }
+
+  /**
+   * Used internally by assign() to update multiple indices and values at once.
+   * Only really useful for sparse vectors (especially SequentialAccessSparseVector).
+   * <p/>
+   * If someone ever adds a new type of sparse vectors, this method must merge (index, value) pairs into the vector.
+   *
+   * @param updates a mapping of indices to values to merge in the vector.
+   */
+  @Override
+  public void mergeUpdates(OrderedIntDoubleMapping updates) {
+    for (int i = 0; i < updates.getNumMappings(); ++i) {
+      updates.setIndexAt(i, updates.indexAt(i) + offset);
+    }
+    vector.mergeUpdates(updates);
+  }
 }

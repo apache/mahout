@@ -59,11 +59,13 @@ public class NamedVector implements Vector {
   /**
    * To not break transitivity with other {@link Vector}s, this does not compare name.
    */
+  @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
   @Override
   public boolean equals(Object other) {
     return delegate.equals(other);
   }
 
+  @SuppressWarnings("CloneDoesntCallSuperClone")
   @Override
   public NamedVector clone() {
     return new NamedVector(delegate.clone(), name);
@@ -139,6 +141,16 @@ public class NamedVector implements Vector {
   @Override
   public Element getElement(int index) {
     return delegate.getElement(index);
+  }
+
+  /**
+   * Merge a set of (index, value) pairs into the vector.
+   *
+   * @param updates an ordered mapping of indices to values to be merged in.
+   */
+  @Override
+  public void mergeUpdates(OrderedIntDoubleMapping updates) {
+    delegate.mergeUpdates(updates);
   }
 
   @Override
@@ -294,5 +306,20 @@ public class NamedVector implements Vector {
   @Override
   public double getDistanceSquared(Vector v) {
     return delegate.getDistanceSquared(v);
+  }
+
+  @Override
+  public double getLookupCost() {
+    return delegate.getLookupCost();
+  }
+
+  @Override
+  public double getIteratorAdvanceCost() {
+    return delegate.getIteratorAdvanceCost();
+  }
+
+  @Override
+  public boolean isAddConstantTime() {
+    return delegate.isAddConstantTime();
   }
 }

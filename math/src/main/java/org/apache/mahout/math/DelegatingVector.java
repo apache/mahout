@@ -58,6 +58,7 @@ public class DelegatingVector implements Vector, LengthCachingVector {
     return delegate.viewPart(offset, length);
   }
 
+  @SuppressWarnings("CloneDoesntDeclareCloneNotSupportedException")
   @Override
   public Vector clone() {
     DelegatingVector r;
@@ -89,6 +90,16 @@ public class DelegatingVector implements Vector, LengthCachingVector {
   @Override
   public Element getElement(int index) {
     return delegate.getElement(index);
+  }
+
+  /**
+   * Merge a set of (index, value) pairs into the vector.
+   *
+   * @param updates an ordered mapping of indices to values to be merged in.
+   */
+  @Override
+  public void mergeUpdates(OrderedIntDoubleMapping updates) {
+    delegate.mergeUpdates(updates);
   }
 
   @Override
@@ -136,6 +147,21 @@ public class DelegatingVector implements Vector, LengthCachingVector {
   @Override
   public double getDistanceSquared(Vector v) {
     return delegate.getDistanceSquared(v);
+  }
+
+  @Override
+  public double getLookupCost() {
+    return delegate.getLookupCost();
+  }
+
+  @Override
+  public double getIteratorAdvanceCost() {
+    return delegate.getIteratorAdvanceCost();
+  }
+
+  @Override
+  public boolean isAddConstantTime() {
+    return delegate.isAddConstantTime();
   }
 
   @Override
@@ -244,6 +270,7 @@ public class DelegatingVector implements Vector, LengthCachingVector {
     return delegate.hashCode();
   }
 
+  @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
   @Override
   public boolean equals(Object o) {
     return delegate.equals(o);

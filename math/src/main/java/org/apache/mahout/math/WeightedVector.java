@@ -26,6 +26,7 @@ public class WeightedVector extends DelegatingVector {
   private int index;
 
   protected WeightedVector(double weight, int index) {
+    super();
     this.weight = weight;
     this.index = index;
   }
@@ -74,5 +75,13 @@ public class WeightedVector extends DelegatingVector {
   @Override
   public String toString() {
     return String.format("index=%d, weight=%.2f, v=%s", index, weight, getVector());
+  }
+
+  @Override
+  public WeightedVector clone() {
+    WeightedVector v = (WeightedVector)super.clone();
+    v.weight = weight;
+    v.index = index;
+    return v;
   }
 }

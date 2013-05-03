@@ -17,9 +17,9 @@
 
 package org.apache.mahout.math;
 
-import com.google.common.collect.AbstractIterator;
-
 import java.util.Iterator;
+
+import com.google.common.collect.AbstractIterator;
 
 /**
  * Provides a permuted view of a vector.
@@ -65,6 +65,22 @@ public class PermutedVectorView extends AbstractVector {
   }
 
   /**
+   * Used internally by assign() to update multiple indices and values at once.
+   * Only really useful for sparse vectors (especially SequentialAccessSparseVector).
+   * <p/>
+   * If someone ever adds a new type of sparse vectors, this method must merge (index, value) pairs into the vector.
+   *
+   * @param updates a mapping of indices to values to merge in the vector.
+   */
+  @Override
+  public void mergeUpdates(OrderedIntDoubleMapping updates) {
+    for (int i = 0; i < updates.getNumMappings(); ++i) {
+      updates.setIndexAt(i, pivot[updates.indexAt(i)]);
+    }
+    vector.mergeUpdates(updates);
+  }
+
+  /**
    * @return true iff this implementation should be considered dense -- that it explicitly
    *         represents every value
    */
@@ -74,13 +90,15 @@ public class PermutedVectorView extends AbstractVector {
   }
 
   /**
+   * If the view is permuted, the elements cannot be accessed in the same order.
+   *
    * @return true iff this implementation should be considered to be iterable in index order in an
    *         efficient way. In particular this implies that {@link #iterator()} and {@link
    *         #iterateNonZero()} return elements in ascending order by index.
    */
   @Override
   public boolean isSequentialAccess() {
-    return vector.isSequentialAccess();
+    return false;
   }
 
   /**
@@ -205,5 +223,20 @@ public class PermutedVectorView extends AbstractVector {
   @Override
   public int getNumNondefaultElements() {
     return vector.getNumNondefaultElements();
+  }
+
+  @Override
+  public double getLookupCost() {
+    return vector.getLookupCost();
+  }
+
+  @Override
+  public double getIteratorAdvanceCost() {
+    return vector.getIteratorAdvanceCost();
+  }
+
+  @Override
+  public boolean isAddConstantTime() {
+    return vector.isAddConstantTime();
   }
 }

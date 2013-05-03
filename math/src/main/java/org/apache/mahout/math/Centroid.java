@@ -17,7 +17,7 @@
 
 package org.apache.mahout.math;
 
-import org.apache.mahout.math.function.DoubleDoubleFunction;
+import org.apache.mahout.math.function.Functions;
 
 /**
  * A centroid is a weighted vector.  We have it delegate to the vector itself for lots of operations
@@ -25,9 +25,7 @@ import org.apache.mahout.math.function.DoubleDoubleFunction;
  */
 public class Centroid extends WeightedVector {
   public Centroid(WeightedVector original) {
-    super(original.getWeight(), original.getIndex());
-    delegate = original.getVector().like();
-    delegate.assign(original);
+    super(original.getVector().like().assign(original), original.getWeight(), original.getIndex());
   }
 
   public Centroid(int key, Vector initialValue) {
@@ -55,20 +53,14 @@ public class Centroid extends WeightedVector {
     }
   }
 
-  public void update(Vector v, final double w) {
-    final double weight = getWeight();
-    final double totalWeight = weight + w;
-    delegate.assign(v, new DoubleDoubleFunction() {
-      @Override
-      public double apply(double v, double v1) {
-        return (weight * v + w * v1) / totalWeight;
-      }
-    });
-    setWeight(totalWeight);
+  public void update(Vector other, final double wy) {
+    final double wx = getWeight();
+    delegate.assign(other, Functions.reweigh(wx, wy));
+    setWeight(wx + wy);
   }
 
   @Override
-  public Vector like() {
+  public Centroid like() {
     return new Centroid(getIndex(), getVector().like(), getWeight());
   }
 
@@ -80,8 +72,8 @@ public class Centroid extends WeightedVector {
     return getIndex();
   }
 
-  public void addWeight() {
-    setWeight(getWeight() + 1);
+  public void addWeight(double newWeight) {
+    setWeight(getWeight() + newWeight);
   }
 
   @Override
@@ -89,4 +81,9 @@ public class Centroid extends WeightedVector {
     return String.format("key = %d, weight = %.2f, vector = %s", getIndex(), getWeight(), delegate);
   }
 
+  @SuppressWarnings("CloneDoesntCallSuperClone")
+  @Override
+  public Centroid clone() {
+    return new Centroid(this);
+  }
 }

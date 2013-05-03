@@ -19,12 +19,12 @@ package org.apache.mahout.common.distance;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.common.parameters.Parameter;
 import org.apache.mahout.math.CardinalityException;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.function.Functions;
 
 /**
  * This class implements a "manhattan distance" metric by summing the absolute values of the difference
@@ -60,15 +60,7 @@ public class ManhattanDistanceMeasure implements DistanceMeasure {
     if (v1.size() != v2.size()) {
       throw new CardinalityException(v1.size(), v2.size());
     }
-    double result = 0;
-    Vector vector = v1.minus(v2);
-    Iterator<Vector.Element> iter = vector.iterateNonZero();
-    // this contains all non zero elements between the two
-    while (iter.hasNext()) {
-      Vector.Element e = iter.next();
-      result += Math.abs(e.get());
-    }
-    return result;
+    return v1.aggregate(v2, Functions.PLUS, Functions.MINUS_ABS);
   }
 
   @Override

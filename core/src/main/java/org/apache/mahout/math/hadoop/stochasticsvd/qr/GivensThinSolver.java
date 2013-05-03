@@ -25,6 +25,7 @@ import com.google.common.collect.Lists;
 import org.apache.mahout.math.AbstractVector;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.OrderedIntDoubleMapping;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.hadoop.stochasticsvd.UpperTriangular;
 
@@ -596,8 +597,40 @@ public class GivensThinSolver {
     }
 
     @Override
+    public double getLookupCost() {
+      return 1;
+    }
+
+    @Override
+    public double getIteratorAdvanceCost() {
+      return 1;
+    }
+
+    @Override
+    public boolean isAddConstantTime() {
+      return true;
+    }
+
+    @Override
     public Matrix matrixLike(int rows, int columns) {
       throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Used internally by assign() to update multiple indices and values at once.
+     * Only really useful for sparse vectors (especially SequentialAccessSparseVector).
+     * <p/>
+     * If someone ever adds a new type of sparse vectors, this method must merge (index, value) pairs into the vector.
+     *
+     * @param updates a mapping of indices to values to merge in the vector.
+     */
+    @Override
+    public void mergeUpdates(OrderedIntDoubleMapping updates) {
+      int indices[] = updates.getIndices();
+      double values[] = updates.getValues();
+      for (int i = 0; i < updates.getNumMappings(); ++i) {
+        viewed.setQuick(rowNum, indices[i], values[i]);
+      }
     }
 
   }

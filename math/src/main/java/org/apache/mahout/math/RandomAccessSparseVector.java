@@ -22,6 +22,7 @@ import java.util.NoSuchElementException;
 
 import org.apache.mahout.math.map.OpenIntDoubleHashMap;
 import org.apache.mahout.math.map.OpenIntDoubleHashMap.MapElement;
+import org.apache.mahout.math.set.AbstractSet;
 
 
 /** Implements vector that only stores non-zero doubles */
@@ -109,6 +110,13 @@ public class RandomAccessSparseVector extends AbstractVector {
     return this;
   }
 
+  @Override
+  public void mergeUpdates(OrderedIntDoubleMapping updates) {
+    for (int i = 0; i < updates.getNumMappings(); ++i) {
+      values.put(updates.getIndices()[i], updates.getValues()[i]);
+    }
+  }
+
   /**
    * @return false
    */
@@ -155,6 +163,30 @@ public class RandomAccessSparseVector extends AbstractVector {
   @Override
   public int getNumNondefaultElements() {
     return values.size();
+  }
+
+  @Override
+  public double getLookupCost() {
+    return 1;
+  }
+
+  @Override
+  public double getIteratorAdvanceCost() {
+    return 1 + (AbstractSet.DEFAULT_MAX_LOAD_FACTOR + AbstractSet.DEFAULT_MIN_LOAD_FACTOR) / 2;
+  }
+
+  /**
+   * This is "sort of" constant, but really it might resize the array.
+   */
+  @Override
+  public boolean isAddConstantTime() {
+    return true;
+  }
+
+  @Override
+  public Element getElement(int index) {
+    // TODO: this should return a MapElement so as to avoid hashing for both getQuick and setQuick.
+    return super.getElement(index);
   }
 
   /**
@@ -210,7 +242,7 @@ public class RandomAccessSparseVector extends AbstractVector {
 
     @Override
     public Element next() {
-      mapElement = iterator.next(); // This will throw an exception at the end of ennumeration.
+      mapElement = iterator.next(); // This will throw an exception at the end of enumeration.
       return element;
     }
 

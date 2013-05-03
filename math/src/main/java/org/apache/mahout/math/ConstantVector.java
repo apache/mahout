@@ -17,9 +17,9 @@
 
 package org.apache.mahout.math;
 
-import com.google.common.collect.AbstractIterator;
-
 import java.util.Iterator;
+
+import com.google.common.collect.AbstractIterator;
 
 /**
  * Implements a vector with all the same values.
@@ -42,6 +42,19 @@ public class ConstantVector extends AbstractVector {
   @Override
   protected Matrix matrixLike(int rows, int columns) {
     return new DenseMatrix(rows, columns);
+  }
+
+  /**
+   * Used internally by assign() to update multiple indices and values at once.
+   * Only really useful for sparse vectors (especially SequentialAccessSparseVector).
+   * <p/>
+   * If someone ever adds a new type of sparse vectors, this method must merge (index, value) pairs into the vector.
+   *
+   * @param updates a mapping of indices to values to merge in the vector.
+   */
+  @Override
+  public void mergeUpdates(OrderedIntDoubleMapping updates) {
+    throw new UnsupportedOperationException("Cannot mutate a ConstantVector");
   }
 
   /**
@@ -138,5 +151,20 @@ public class ConstantVector extends AbstractVector {
   @Override
   public int getNumNondefaultElements() {
     return size();
+  }
+
+  @Override
+  public double getLookupCost() {
+    return 1;
+  }
+
+  @Override
+  public double getIteratorAdvanceCost() {
+    return 1;
+  }
+
+  @Override
+  public boolean isAddConstantTime() {
+    throw new UnsupportedOperationException("Cannot mutate a ConstantVector");
   }
 }
