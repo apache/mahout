@@ -287,6 +287,6 @@ public final class TestClusterClassifier extends MahoutTestCase {
     Vector pdf = classifier.classify(new DenseVector(2));
     assertEquals("[0,0]", "[0.333, 0.333, 0.333]", AbstractCluster.formatVector(pdf, null));
     pdf = classifier.classify(new DenseVector(2).assign(2));
-    assertEquals("[2,2]", "[0.545, 0.273, 0.182]", AbstractCluster.formatVector(pdf, null));
+    assertEquals("[2,2]", "[0.429, 0.429, 0.143]", AbstractCluster.formatVector(pdf, null));
   }
 }
