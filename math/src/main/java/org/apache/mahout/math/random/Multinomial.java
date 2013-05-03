@@ -17,17 +17,19 @@
 
 package org.apache.mahout.math.random;
 
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
 import com.google.common.base.Preconditions;
+import com.google.common.collect.AbstractIterator;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multiset;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.list.DoubleArrayList;
-
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
 
 /**
  * Multinomial sampler that allows updates to element probabilities.  The basic idea is that sampling is
@@ -66,6 +68,7 @@ public final class Multinomial<T> implements Sampler<T>, Iterable<T> {
   }
 
   public void add(T value, double w) {
+    Preconditions.checkNotNull(value);
     Preconditions.checkArgument(!items.containsKey(value));
 
     int n = this.weight.size();
@@ -182,6 +185,18 @@ public final class Multinomial<T> implements Sampler<T>, Iterable<T> {
 
   @Override
   public Iterator<T> iterator() {
-    return items.keySet().iterator();
+    return new AbstractIterator<T>() {
+      Iterator<T> valuesIterator = Iterables.skip(values, 1).iterator();
+      @Override
+      protected T computeNext() {
+        while (valuesIterator.hasNext()) {
+          T next = valuesIterator.next();
+          if (items.containsKey(next)) {
+            return next;
+          }
+        }
+        return endOfData();
+      }
+    };
   }
 }

@@ -17,6 +17,10 @@
 
 package org.apache.mahout.math.random;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -25,10 +29,6 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.MahoutTestCase;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
 
 public class MultinomialTest extends MahoutTestCase {
     @Override
@@ -166,6 +166,27 @@ public class MultinomialTest extends MahoutTestCase {
     }
 
     @Test
+  public void testSetZeroWhileIterating() {
+    Multinomial<Integer> table = new Multinomial<Integer>();
+    for (int i = 0; i < 10000; ++i) {
+      table.add(i, i);
+    }
+    // Setting a sample's weight to 0 removes from the items map.
+    // If that map is used when iterating (it used to be), it will
+    // trigger a ConcurrentModificationException.
+    for (Integer sample : table) {
+      table.set(sample, 0);
+    }
+  }
+
+  @Test(expected=NullPointerException.class)
+  public void testNoNullValuesAllowed() {
+    Multinomial<Integer> table = new Multinomial<Integer>();
+    // No null values should be allowed.
+    table.add(null, 1);
+  }
+
+  @Test
     public void testDeleteAndUpdate() {
         Random rand = RandomUtils.getRandom();
         Multinomial<Integer> table = new Multinomial<Integer>();
