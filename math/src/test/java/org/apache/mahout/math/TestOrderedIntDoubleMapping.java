@@ -68,4 +68,37 @@ public final class TestOrderedIntDoubleMapping extends MahoutTestCase {
     assertEquals(0.0, clone.get(6), EPSILON);
   }
 
+  @Test
+  public void testAddDefaultElements() {
+    OrderedIntDoubleMapping mapping = new OrderedIntDoubleMapping(false);
+    mapping.set(1, 1.1);
+    assertEquals(1, mapping.getNumMappings());
+    mapping.set(2, 0);
+    assertEquals(2, mapping.getNumMappings());
+    mapping.set(0, 0);
+    assertEquals(3, mapping.getNumMappings());
+  }
+
+  @Test
+  public void testMerge() {
+    OrderedIntDoubleMapping mappingOne = new OrderedIntDoubleMapping(false);
+    mappingOne.set(0, 0);
+    mappingOne.set(2, 2);
+    mappingOne.set(4, 4);
+    mappingOne.set(10, 10);
+
+    OrderedIntDoubleMapping mappingTwo = new OrderedIntDoubleMapping();
+    mappingTwo.set(1, 1);
+    mappingTwo.set(3, 3);
+    mappingTwo.set(5, 5);
+    mappingTwo.set(10, 20);
+
+    mappingOne.merge(mappingTwo);
+
+    assertEquals(7, mappingOne.getNumMappings());
+    for (int i = 0; i < 6; ++i) {
+      assertEquals(i, mappingOne.get(i), i);
+    }
+    assertEquals(20, mappingOne.get(10), 0);
+  }
 }

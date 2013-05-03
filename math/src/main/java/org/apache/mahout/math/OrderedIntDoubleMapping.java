@@ -19,13 +19,22 @@ package org.apache.mahout.math;
 
 import java.io.Serializable;
 
-final class OrderedIntDoubleMapping implements Serializable, Cloneable {
+public final class OrderedIntDoubleMapping implements Serializable, Cloneable {
 
   static final double DEFAULT_VALUE = 0.0;
 
   private int[] indices;
   private double[] values;
   private int numMappings;
+
+  // If true, doesn't allow DEFAULT_VALUEs in the mapping (adding a zero discards it). Otherwise, a DEFAULT_VALUE is
+  // treated like any other value.
+  private boolean noDefault = true;
+
+  OrderedIntDoubleMapping(boolean noDefault) {
+    this();
+    this.noDefault = noDefault;
+  }
 
   OrderedIntDoubleMapping() {
     // no-arg constructor for deserializer
@@ -44,28 +53,28 @@ final class OrderedIntDoubleMapping implements Serializable, Cloneable {
     this.numMappings = numMappings;
   }
 
-  int[] getIndices() {
+  public int[] getIndices() {
     return indices;
   }
 
-  int indexAt(int offset) {
+  public int indexAt(int offset) {
     return indices[offset];
   }
 
-  void setIndexAt(int offset, int index) {
+  public void setIndexAt(int offset, int index) {
     indices[offset] = index;
   }
 
-  double[] getValues() {
+  public double[] getValues() {
     return values;
   }
 
-  void setValueAt(int offset, double value) {
+  public void setValueAt(int offset, double value) {
     values[offset] = value;
   }
 
 
-  int getNumMappings() {
+  public int getNumMappings() {
     return numMappings;
   }
 
@@ -103,12 +112,70 @@ final class OrderedIntDoubleMapping implements Serializable, Cloneable {
   }
 
   public void set(int index, double value) {
-    int offset = find(index);
-    if (offset >= 0) {
-      insertOrUpdateValueIfPresent(offset, value);
+    if (numMappings == 0 || index > indices[numMappings - 1]) {
+      if (!noDefault || value != DEFAULT_VALUE) {
+        if (numMappings >= indices.length) {
+          growTo(Math.max((int) (1.2 * numMappings), numMappings + 1));
+        }
+        indices[numMappings] = index;
+        values[numMappings] = value;
+        ++numMappings;
+      }
     } else {
-      insertValueIfNotDefault(index, offset, value);
+      int offset = find(index);
+      if (offset >= 0) {
+        insertOrUpdateValueIfPresent(offset, value);
+      } else {
+        insertValueIfNotDefault(index, offset, value);
+      }
     }
+  }
+
+  /**
+   * Merges the updates in linear time by allocating new arrays and iterating through the existing indices and values
+   * and the updates' indices and values at the same time while selecting the minimum index to set at each step.
+   * @param updates another list of mappings to be merged in.
+   */
+  public void merge(OrderedIntDoubleMapping updates) {
+    int updateIndices[] = updates.getIndices();
+    double updateValues[] = updates.getValues();
+
+    int newNumMappings = numMappings + updates.getNumMappings();
+    int newCapacity = Math.max((int) (1.2 * newNumMappings), newNumMappings + 1);
+    int newIndices[] = new int[newCapacity];
+    double newValues[] = new double[newCapacity];
+
+    int k = 0;
+    int i = 0, j = 0;
+    for (; i < numMappings && j < updates.getNumMappings(); ++k) {
+      if (indices[i] < updateIndices[j]) {
+        newIndices[k] = indices[i];
+        newValues[k] = values[i];
+        ++i;
+      } else if (indices[i] > updateIndices[j]) {
+        newIndices[k] = updateIndices[j];
+        newValues[k] = updateValues[j];
+        ++j;
+      } else {
+        newIndices[k] = updateIndices[j];
+        newValues[k] = updateValues[j];
+        ++i;
+        ++j;
+      }
+    }
+
+    for (; i < numMappings; ++i, ++k) {
+      newIndices[k] = indices[i];
+      newValues[k] = values[i];
+    }
+    for (; j < updates.getNumMappings(); ++j, ++k) {
+      newIndices[k] = updateIndices[j];
+      newValues[k] = updateValues[j];
+    }
+
+    indices = newIndices;
+    values = newValues;
+    numMappings = k;
   }
 
   @Override
@@ -150,6 +217,7 @@ final class OrderedIntDoubleMapping implements Serializable, Cloneable {
     return result.toString();
   }
 
+  @SuppressWarnings("CloneDoesntCallSuperClone")
   @Override
   public OrderedIntDoubleMapping clone() {
     return new OrderedIntDoubleMapping(indices.clone(), values.clone(), numMappings);
@@ -161,13 +229,12 @@ final class OrderedIntDoubleMapping implements Serializable, Cloneable {
       double newValue = values[offset] + increment;
       insertOrUpdateValueIfPresent(offset, newValue);
     } else {
-      double newValue = increment;
-      insertValueIfNotDefault(index, offset, newValue);
+      insertValueIfNotDefault(index, offset, increment);
     }
   }
 
   private void insertValueIfNotDefault(int index, int offset, double value) {
-    if (value != DEFAULT_VALUE) {
+    if (!noDefault || value != DEFAULT_VALUE) {
       if (numMappings >= indices.length) {
         growTo(Math.max((int) (1.2 * numMappings), numMappings + 1));
       }
@@ -185,7 +252,7 @@ final class OrderedIntDoubleMapping implements Serializable, Cloneable {
   }
 
   private void insertOrUpdateValueIfPresent(int offset, double newValue) {
-    if (newValue == DEFAULT_VALUE) {
+    if (noDefault && newValue == DEFAULT_VALUE) {
       for (int i = offset + 1, j = offset; i < numMappings; i++, j++) {
         indices[j] = indices[i];
         values[j] = values[i];
