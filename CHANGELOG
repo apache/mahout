@@ -2,6 +2,22 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+  MAHOUT-1156 Adding nearest neighbor Searchers (dfilimon)
+
+  MAHOUT-1202 Speed up Vector operations (dfilimon)
+
+  MAHOUT-1155 Make MatrixSlice a Vector (and fix Centroid cloning; MAHOUT-1202) (dfilimon)
+
+  MAHOUT-1189 CosineDistanceMeasure doesn't return 0 for two 0 vectors (dfilimon)
+
+  MAHOUT-1180 Multinomial<T> throws ConcurrentModificationException when iterating and setting probabilities (dfilimon)
+
+  MAHOUT-1192 Speed up Vector Operations (robinanil)
+
+  MAHOUT-1191 Cleanup Vector Benchmarks make it less variable (robinanil)
+
+  MAHOUT-1190 SequentialAccessSparseVector function assignment is very slow and other iterator woes (robinanil)
+
   MAHOUT-1188: Inconsistent reference to Lucene versions in code and POM (smarthi)
 
   MAHOUT-1161: Unable to run CJKAnalyzer for conversion of a sequence file to sparse vector due to instantiation
