@@ -17,10 +17,16 @@
 
 package org.apache.mahout.cf.taste.hadoop.als;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.filecache.DistributedCache;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
@@ -29,6 +35,7 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterat
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.als.AlternatingLeastSquaresSolver;
+import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.map.OpenIntObjectHashMap;
 
 import java.io.IOException;
@@ -45,13 +52,60 @@ final class ALS {
     return iterator.hasNext() ? iterator.next().get() : null;
   }
 
-  public static OpenIntObjectHashMap<Vector> readMatrixByRows(Path dir, Configuration conf) {
-    OpenIntObjectHashMap<Vector> matrix = new OpenIntObjectHashMap<Vector>();
+  /**
+   * assumes that first entry always exists
+   *
+   * @param vectors
+   */
+  public static Vector sum(Iterator<VectorWritable> vectors) {
+    Vector sum = vectors.next().get();
+    while (vectors.hasNext()) {
+      sum.assign(vectors.next().get(), Functions.PLUS);
+    }
+    return sum;
+  }
 
+  public static OpenIntObjectHashMap<Vector> readMatrixByRowsFromDistributedCache(int numEntities,
+      Configuration conf) throws IOException {
+
+    IntWritable rowIndex = new IntWritable();
+    VectorWritable row = new VectorWritable();
+
+    LocalFileSystem localFs = FileSystem.getLocal(conf);
+    Path[] cacheFiles = DistributedCache.getLocalCacheFiles(conf);
+
+    OpenIntObjectHashMap<Vector> featureMatrix = numEntities > 0
+        ? new OpenIntObjectHashMap<Vector>(numEntities) : new OpenIntObjectHashMap<Vector>();
+
+    for (int n = 0; n < cacheFiles.length; n++) {
+      Path localCacheFile = localFs.makeQualified(cacheFiles[n]);
+
+      // fallback for local execution
+      if (!localFs.exists(localCacheFile)) {
+        localCacheFile = new Path(DistributedCache.getCacheFiles(conf)[n].getPath());
+      }
+
+      SequenceFile.Reader reader = null;
+      try {
+        reader = new SequenceFile.Reader(localFs, localCacheFile, conf);
+        while (reader.next(rowIndex, row)) {
+          featureMatrix.put(rowIndex.get(), row.get());
+        }
+      } finally {
+        Closeables.close(reader, true);
+      }
+    }
+
+    Preconditions.checkState(!featureMatrix.isEmpty(), "Feature matrix is empty");
+    return featureMatrix;
+  }
+
+  public static OpenIntObjectHashMap<Vector> readMatrixByRows(Path dir, Configuration conf) {
+    OpenIntObjectHashMap matrix = new OpenIntObjectHashMap<Vector>();
     for (Pair<IntWritable,VectorWritable> pair
         : new SequenceFileDirIterable<IntWritable,VectorWritable>(dir, PathType.LIST, PathFilters.partFilter(), conf)) {
       int rowIndex = pair.getFirst().get();
-      Vector row = pair.getSecond().get().clone();
+      Vector row = pair.getSecond().get();
       matrix.put(rowIndex, row);
     }
     return matrix;

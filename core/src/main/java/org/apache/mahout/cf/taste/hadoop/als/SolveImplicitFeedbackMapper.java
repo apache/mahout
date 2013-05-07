@@ -34,18 +34,18 @@ public class SolveImplicitFeedbackMapper
   private final VectorWritable uiOrmj = new VectorWritable();
 
   @Override
-  ImplicitFeedbackAlternatingLeastSquaresSolver createSharedInstance(Context ctx) {
+  ImplicitFeedbackAlternatingLeastSquaresSolver createSharedInstance(Context ctx) throws IOException {
     Configuration conf = ctx.getConfiguration();
 
     double lambda = Double.parseDouble(conf.get(ParallelALSFactorizationJob.LAMBDA));
     double alpha = Double.parseDouble(conf.get(ParallelALSFactorizationJob.ALPHA));
     int numFeatures = conf.getInt(ParallelALSFactorizationJob.NUM_FEATURES, -1);
-    Path YPath = new Path(conf.get(ParallelALSFactorizationJob.FEATURE_MATRIX));
+    int numEntities = Integer.parseInt(conf.get(ParallelALSFactorizationJob.NUM_ENTITIES));
 
     Preconditions.checkArgument(numFeatures > 0, "numFeatures was not set correctly!");
 
     return new ImplicitFeedbackAlternatingLeastSquaresSolver(numFeatures, lambda, alpha,
-        ALS.readMatrixByRows(YPath, conf));
+        ALS.readMatrixByRowsFromDistributedCache(numEntities, conf));
   }
 
   @Override

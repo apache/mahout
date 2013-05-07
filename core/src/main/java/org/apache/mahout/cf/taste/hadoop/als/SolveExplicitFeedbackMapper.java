@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.hadoop.als;
 
 import com.google.common.base.Preconditions;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -37,9 +38,10 @@ public class SolveExplicitFeedbackMapper
   private final VectorWritable uiOrmj = new VectorWritable();
 
   @Override
-  OpenIntObjectHashMap<Vector> createSharedInstance(Context ctx) {
-    Path UOrIPath = new Path(ctx.getConfiguration().get(ParallelALSFactorizationJob.FEATURE_MATRIX));
-    return ALS.readMatrixByRows(UOrIPath, ctx.getConfiguration());
+  OpenIntObjectHashMap<Vector> createSharedInstance(Context ctx) throws IOException {
+    Configuration conf = ctx.getConfiguration();
+    int numEntities = Integer.parseInt(conf.get(ParallelALSFactorizationJob.NUM_ENTITIES));
+    return ALS.readMatrixByRowsFromDistributedCache(numEntities, conf);
   }
 
   @Override
