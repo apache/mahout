@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+  MAHOUT-1162: Adding BallKMeans and StreamingKMeans clustering algorithms (dfilimon)
+
   MAHOUT-1205: ParallelALSFactorizationJob should leverage the distributed cache (ssc)
 
   MAHOUT-1156: Adding nearest neighbor Searchers (dfilimon)
