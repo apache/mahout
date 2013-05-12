@@ -22,6 +22,10 @@ import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+/**
+ * Configuration options to be used by {@link MailProcessor}. Includes options controlling the exact output format 
+ * and which mail fields are included (body, to, from, subject, etc.)
+ */
 public class MailOptions {
 
   public static final String FROM = "FROM";
@@ -58,6 +62,9 @@ public class MailOptions {
     return outputDir;
   }
 
+  /**
+   * Sets the output directory where sequence files will be written.
+   */
   public void setOutputDir(String outputDir) {
     this.outputDir = outputDir;
   }
@@ -66,6 +73,10 @@ public class MailOptions {
     return prefix;
   }
 
+  /**
+   * Sets the prefix that is combined with the archive name and with message ids to create {@code SequenceFile} keys. 
+   * @param prefix The name of the directory containing the mail archive is commonly used.
+   */
   public void setPrefix(String prefix) {
     this.prefix = prefix;
   }
@@ -74,6 +85,9 @@ public class MailOptions {
     return chunkSize;
   }
 
+  /**
+   * Sets the size of each generated sequence file, in Megabytes.
+   */
   public void setChunkSize(int chunkSize) {
     this.chunkSize = chunkSize;
   }
@@ -82,6 +96,9 @@ public class MailOptions {
     return charset;
   }
 
+  /**
+   * Sets the encoding of the input
+   */
   public void setCharset(Charset charset) {
     this.charset = charset;
   }
@@ -90,6 +107,9 @@ public class MailOptions {
     return separator;
   }
 
+  /**
+   * Sets the separator to use in the output between metadata items (to, from, etc.).
+   */
   public void setSeparator(String separator) {
     this.separator = separator;
   }
@@ -98,6 +118,9 @@ public class MailOptions {
     return bodySeparator;
   }
 
+  /**
+   * Sets the separator to use in the output between lines in the body, the default is "\n".
+   */
   public void setBodySeparator(String bodySeparator) {
     this.bodySeparator = bodySeparator;
   }
@@ -106,6 +129,9 @@ public class MailOptions {
     return includeBody;
   }
 
+  /**
+   * Sets whether mail bodies are included in the output
+   */
   public void setIncludeBody(boolean includeBody) {
     this.includeBody = includeBody;
   }
@@ -114,6 +140,10 @@ public class MailOptions {
     return patternsToMatch;
   }
 
+  /**
+   * Sets the list of patterns to be applied in the given order to extract metadata fields (to, from, subject, etc.)
+   *  from the input 
+   */
   public void setPatternsToMatch(Pattern[] patternsToMatch) {
     this.patternsToMatch = patternsToMatch;
   }
@@ -136,7 +166,7 @@ public class MailOptions {
 
   /**
    *
-   * @param stripQuotedText if true, then strip off quoted text, such as lines starting with | or >
+   * Sets whether quoted text such as lines starting with | or > is striped off.
    */
   public void setStripQuotedText(boolean stripQuotedText) {
     this.stripQuotedText = stripQuotedText;
@@ -147,10 +177,8 @@ public class MailOptions {
   }
 
   /**
+   * Sets the {@link java.util.regex.Pattern} to use to identify lines that are quoted text. Default is | and >
    * @see #setStripQuotedText(boolean)
-   *
-   * @param quotedTextPattern The {@link java.util.regex.Pattern} to use to identify lines that are quoted text.
-   *                          Default is | and >
    */
   public void setQuotedTextPattern(Pattern quotedTextPattern) {
     this.quotedTextPattern = quotedTextPattern;

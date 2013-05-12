@@ -19,7 +19,9 @@ package org.apache.mahout.utils.io;
 
 import java.io.IOException;
 import java.io.Writer;
-
+/**
+ * Implementation of the {@link WrappedWriter} interface based on {@link java.io.Writer}.
+ */
 public class IOWriterWrapper implements WrappedWriter {
 
   private final Writer writer;
@@ -28,6 +30,9 @@ public class IOWriterWrapper implements WrappedWriter {
     this.writer = writer;
   }
 
+  /** Writes a new key and value, separating them with one space. The value must end with a
+   * new line or some other delimiter, as it is not automatically added by this method 
+   */
   @Override
   public void write(String key, String value) throws IOException {
     writer.write(key + ' ' + value);

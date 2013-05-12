@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+  MAHOUT-1199: Improve javadoc comments of mahout-integration (Angel Martinez Gonzalez via smarthi)  
+
   MAHOUT-1162: Adding BallKMeans and StreamingKMeans clustering algorithms (dfilimon)
 
   MAHOUT-1205: ParallelALSFactorizationJob should leverage the distributed cache (ssc)

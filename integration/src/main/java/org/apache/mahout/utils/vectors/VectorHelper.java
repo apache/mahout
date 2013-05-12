@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Comparator;
 import java.util.regex.Pattern;
 
+/** Static utility methods related to vectors. */
 public final class VectorHelper {
 
   private static final Pattern TAB_PATTERN = Pattern.compile("\t");

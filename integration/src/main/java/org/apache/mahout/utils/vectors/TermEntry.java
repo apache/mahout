@@ -17,6 +17,9 @@
 
 package org.apache.mahout.utils.vectors;
 
+/**
+ * Each entry in a {@link TermInfo} dictionary. Contains information about a term.
+ */
 public class TermEntry {
 
   private final String term;

@@ -25,6 +25,7 @@ import java.io.IOException;
  */
 public interface WrappedWriter extends Closeable {
 
+  /** Writes a new key-value pair.*/
   void write(String key, String value) throws IOException;
 
 }

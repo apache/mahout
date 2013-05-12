@@ -26,6 +26,11 @@ import org.apache.hadoop.io.Text;
 import java.io.Closeable;
 import java.io.IOException;
 
+/**
+ * Writes data splitted in multiple Hadoop sequence files of approximate equal size. The data must consist
+ * of key-value pairs, both of them of String type. All sequence files are created in the same
+ * directory and named "chunk-0", "chunk-1", etc. 
+ */
 public final class ChunkedWriter implements Closeable {
 
   private final int maxChunkSizeInBytes;
@@ -36,6 +41,12 @@ public final class ChunkedWriter implements Closeable {
   private final FileSystem fs;
   private final Configuration conf;
 
+  /** 
+   * @param conf    needed by Hadoop to know what filesystem implementation to use.
+   * @param chunkSizeInMB approximate size of each file, in Megabytes.
+   * @param output        directory where the sequence files will be created.
+   * @throws IOException
+   */
   public ChunkedWriter(Configuration conf, int chunkSizeInMB, Path output) throws IOException {
     this.output = output;
     this.conf = conf;
@@ -52,6 +63,7 @@ public final class ChunkedWriter implements Closeable {
     return new Path(output, "chunk-" + chunkID);
   }
 
+  /** Writes a new key-value pair, creating a new sequence file if necessary.*/
   public void write(String key, String value) throws IOException {
     if (currentChunkSize > maxChunkSizeInBytes) {
       Closeables.closeQuietly(writer);

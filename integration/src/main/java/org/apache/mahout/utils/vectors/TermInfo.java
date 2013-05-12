@@ -19,6 +19,10 @@ package org.apache.mahout.utils.vectors;
 
 import java.util.Iterator;
 
+/**
+ * Contains the term dictionary information associated with a vectorized collection of text documents
+ *
+ */
 public interface TermInfo {
   
   int totalTerms(String field);

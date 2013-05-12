@@ -32,6 +32,11 @@ import java.io.Writer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Converts an mbox mail archive into a group of Hadoop Sequence Files with equal size. The archive may optionally be gzipped or zipped.
+ * @see org.apache.mahout.text.SequenceFilesFromMailArchives
+ *
+ */
 public class MailProcessor {
 
   private static final Pattern MESSAGE_START = Pattern.compile("^From \\S+@\\S.*\\d{4}$", Pattern.CASE_INSENSITIVE);
@@ -49,18 +54,31 @@ public class MailProcessor {
 
   private static final Logger log = LoggerFactory.getLogger(MailProcessor.class);
 
+  /**
+   * Creates a {@code MailProcessor} that does not write to sequence files, but to a single text file.
+   * This constructor is for debugging and testing purposes.
+   */
   public MailProcessor(MailOptions options, String prefix, Writer writer) {
     this.writer = new IOWriterWrapper(writer);
     this.options = options;
     this.prefix = prefix;
   }
 
+  /**
+   * This is the main constructor of {@code MailProcessor}.
+   */
   public MailProcessor(MailOptions options, String prefix, ChunkedWriter writer) {
     this.writer = new ChunkedWrapper(writer);
     this.options = options;
     this.prefix = prefix;
   }
 
+  /**
+   * Parses one complete mail archive, writing output to the {@code writer} constructor parameter.
+   * @param mboxFile  mail archive to parse
+   * @return number of parsed mails
+   * @throws IOException
+   */
   public long parseMboxLineByLine(File mboxFile) throws IOException {
     long messageCount = 0;
     try {

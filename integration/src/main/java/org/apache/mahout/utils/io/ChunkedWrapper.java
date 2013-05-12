@@ -19,6 +19,9 @@ package org.apache.mahout.utils.io;
 
 import java.io.IOException;
 
+/**
+ * {@link ChunkedWriter} based implementation of the {@link WrappedWriter} interface.
+ */
 public class ChunkedWrapper implements WrappedWriter {
 
   private final ChunkedWriter writer;
