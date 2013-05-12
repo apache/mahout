@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+  MAHOUT-1207: Fix typos in description in parent pom (Stevo Slavic via smarthi)  
+
   MAHOUT-1199: Improve javadoc comments of mahout-integration (Angel Martinez Gonzalez via smarthi)  
 
   MAHOUT-1162: Adding BallKMeans and StreamingKMeans clustering algorithms (dfilimon)
