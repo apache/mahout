@@ -47,17 +47,6 @@
       </resource>
     </resources>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <encoding>UTF-8</encoding>
-          <source>1.6</source>
-          <target>1.6</target>
-          <optimize>true</optimize>
-        </configuration>
-      </plugin>
-
       <!-- create test jar so other modules can reuse the core test utility classes. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
