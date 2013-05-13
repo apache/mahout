@@ -1,7 +1,9 @@
 Mahout Change Log
 
 Release 0.8 - unreleased
- 
+
+  MAHOUT-1212: Incorrect classify-20newsgroups.sh file description (Julian Ortega via smarthi)
+   
   MAHOUT-1209: DRY out maven-compiler-plugin configuration (Stevo Slavic via smarthi) 
 
   MAHOUT-1207: Fix typos in description in parent pom (Stevo Slavic via smarthi)  

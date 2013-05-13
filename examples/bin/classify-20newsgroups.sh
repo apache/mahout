@@ -20,7 +20,7 @@
 # Downloads the 20newsgroups dataset, trains and tests a classifier.
 #
 # To run:  change into the mahout directory and type:
-#  examples/bin/build-20news.sh
+# examples/bin/classify-20newsgroups.sh
 
 if [ "$1" = "--help" ] || [ "$1" = "--?" ]; then
   echo "This script runs SGD and Bayes classifiers over the classic 20 News Groups."
