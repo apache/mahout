@@ -187,6 +187,13 @@
       <artifactId>easymock</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.apache.mrunit</groupId>
+      <artifactId>mrunit</artifactId>
+      <version>1.0.0</version>
+      <classifier>hadoop1</classifier>
+    </dependency>
   </dependencies>
   
   <profiles>

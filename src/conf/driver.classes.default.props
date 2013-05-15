@@ -34,6 +34,8 @@ org.apache.mahout.clustering.canopy.CanopyDriver = canopy : Canopy clustering
 org.apache.mahout.clustering.spectral.eigencuts.EigencutsDriver = eigencuts : Eigencuts spectral clustering
 org.apache.mahout.clustering.spectral.kmeans.SpectralKMeansDriver = spectralkmeans : Spectral k-means clustering
 org.apache.mahout.clustering.topdown.postprocessor.ClusterOutputPostProcessorDriver = clusterpp : Groups Clustering Output In Clusters
+org.apache.mahout.clustering.streaming.mapreduce.StreamingKMeansDriver = streamingkmeans : Streaming k-means clustering
+
 #Freq. Itemset Mining
 org.apache.mahout.fpm.pfpgrowth.FPGrowthDriver = fpg : Frequent Pattern Growth
 #Classification
