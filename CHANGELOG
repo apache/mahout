@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+__MAHOUT-1217: Nearest neighbor searchers sometimes fail to remove points: fix in FastProjectionSearch's searchFirst (dfilimon)
+
 __MAHOUT-1216: Add locality sensitive hashing and a LocalitySensitiveHash searcher (dfilimon)
 
 __MAHOUT-1181: Adding StreamingKMeans MapReduce classes (dfilimon)

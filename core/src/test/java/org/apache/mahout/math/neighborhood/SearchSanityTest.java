@@ -29,6 +29,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.MatrixSlice;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.jet.math.Constants;
 import org.apache.mahout.math.random.MultiNormal;
 import org.apache.mahout.math.random.WeightedThing;
 import org.junit.Test;
@@ -199,8 +200,27 @@ public class SearchSanityTest extends MahoutTestCase {
       assertEquals("First isn't self", 0, first.getWeight(), 0);
       assertEquals("First isn't self", datapoint, first.getValue());
       assertEquals("First doesn't match", first, firstTwo.get(0));
-      assertEquals(String.format("Second doesn't match got %f expected %f", second.getWeight(), firstTwo.get(1).getWeight()),
-          second, firstTwo.get(1));
+      assertEquals("Second doesn't match", second, firstTwo.get(1));
+    }
+  }
+
+  @Test
+  public void testRemove() {
+    searcher.clear();
+    for (int i = 0; i < dataPoints.rowSize(); ++i) {
+      Vector datapoint = dataPoints.viewRow(i);
+      searcher.add(datapoint);
+      // As long as points are not searched for right after being added, in FastProjectionSearch, points are not
+      // merged with the main list right away, so if a search for a point occurs before it's merged the pendingAdditions
+      // list also needs to be looked at.
+      // This used to not be the case for searchFirst(), thereby causing removal failures.
+      if (i % 2 == 0) {
+        assertTrue("Failed to find self [search]",
+            searcher.search(datapoint, 1).get(0).getWeight() < Constants.EPSILON);
+        assertTrue("Failed to find self [searchFirst]",
+            searcher.searchFirst(datapoint, false).getWeight() < Constants.EPSILON);
+        assertTrue("Failed to remove self", searcher.remove(datapoint, Constants.EPSILON));
+      }
     }
   }
 }

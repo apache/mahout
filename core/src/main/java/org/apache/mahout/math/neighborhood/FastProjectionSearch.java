@@ -10,10 +10,10 @@ import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.apache.mahout.math.random.RandomProjector;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.random.RandomProjector;
 import org.apache.mahout.math.random.WeightedThing;
 
 /**
@@ -185,6 +185,14 @@ public class FastProjectionSearch extends UpdatableSearcher {
       }
     }
 
+    for (Vector vector : pendingAdditions) {
+      double distance = distanceMeasure.distance(vector, query);
+      if (distance < bestDistance && (!differentThanQuery || !vector.equals(query))) {
+        bestDistance = distance;
+        bestVector = vector;
+      }
+    }
+
     return new WeightedThing<Vector>(bestVector, bestDistance);
   }
 
@@ -206,6 +214,8 @@ public class FastProjectionSearch extends UpdatableSearcher {
         break;
       }
       double oldWeight = currProjections.get(middle).getWeight();
+      // Elements to be removed are kept in the sorted array until the next reindex, but their inner vector
+      // is set to null.
       scalarProjections.get(i).set(middle, new WeightedThing<Vector>(oldWeight));
     }
     if (isProjected) {
