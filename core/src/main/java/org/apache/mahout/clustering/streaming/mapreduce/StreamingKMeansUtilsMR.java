@@ -20,6 +20,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.neighborhood.BruteSearch;
 import org.apache.mahout.math.neighborhood.FastProjectionSearch;
+import org.apache.mahout.math.neighborhood.LocalitySensitiveHashSearch;
 import org.apache.mahout.math.neighborhood.ProjectionSearch;
 import org.apache.mahout.math.neighborhood.UpdatableSearcher;
 
@@ -54,6 +55,10 @@ public class StreamingKMeansUtilsMR {
       return ClassUtils.instantiateAs(searcherClass, UpdatableSearcher.class,
           new Class[]{DistanceMeasure.class, int.class, int.class},
           new Object[]{distanceMeasure, numProjections, searchSize});
+    } else if (searcherClass.equals(LocalitySensitiveHashSearch.class.getName())) {
+      return ClassUtils.instantiateAs(searcherClass, LocalitySensitiveHashSearch.class,
+          new Class[]{DistanceMeasure.class, int.class},
+          new Object[]{distanceMeasure, searchSize});
     } else {
       throw new IllegalStateException("Unknown class instantiation requested");
     }

@@ -59,6 +59,10 @@ public class SearchQualityTest {
         // NUM_PROJECTIONS = 5
         // SEARCH_SIZE = 5
         {new ProjectionSearch(distanceMeasure, 5, 5), dataPoints, queries, reference, referenceSearchFirst},
+        {new FastProjectionSearch(distanceMeasure, 5, 5), dataPoints, queries, reference, referenceSearchFirst},
+        {new LocalitySensitiveHashSearch(distanceMeasure, 5), dataPoints, queries, reference, referenceSearchFirst},
+        // SEARCH_SIZE = 2
+        {new LocalitySensitiveHashSearch(distanceMeasure, 2), dataPoints, queries, reference, referenceSearchFirst},
     }
     );
   }
