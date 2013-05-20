@@ -29,7 +29,6 @@ import org.apache.mahout.math.Centroid;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.neighborhood.BruteSearch;
 import org.apache.mahout.math.neighborhood.FastProjectionSearch;
-import org.apache.mahout.math.neighborhood.LocalitySensitiveHashSearch;
 import org.apache.mahout.math.neighborhood.ProjectionSearch;
 import org.apache.mahout.math.neighborhood.Searcher;
 import org.apache.mahout.math.neighborhood.UpdatableSearcher;
@@ -67,11 +66,9 @@ public class StreamingKMeansTest {
         {new ProjectionSearch(new SquaredEuclideanDistanceMeasure(), NUM_PROJECTIONS, SEARCH_SIZE), true},
         {new FastProjectionSearch(new SquaredEuclideanDistanceMeasure(), NUM_PROJECTIONS, SEARCH_SIZE),
             true},
-        {new LocalitySensitiveHashSearch(new SquaredEuclideanDistanceMeasure(), SEARCH_SIZE), true},
         {new ProjectionSearch(new SquaredEuclideanDistanceMeasure(), NUM_PROJECTIONS, SEARCH_SIZE), false},
         {new FastProjectionSearch(new SquaredEuclideanDistanceMeasure(), NUM_PROJECTIONS, SEARCH_SIZE),
             false},
-        {new LocalitySensitiveHashSearch(new SquaredEuclideanDistanceMeasure(), SEARCH_SIZE), false},
     });
   }
 
