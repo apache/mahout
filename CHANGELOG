@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+  MAHOUT-1221: SparseMatrix.viewRow is sometimes readonly. (Maysam Yabandeh via smarthi)
+
 __MAHOUT-1219: Remove LSHSearcher from SearchQualityTest. It causes it to fail, but the failure is not very meaningful (dfilimon)
 
 __MAHOUT-1217: Nearest neighbor searchers sometimes fail to remove points: fix in FastProjectionSearch's searchFirst (dfilimon)

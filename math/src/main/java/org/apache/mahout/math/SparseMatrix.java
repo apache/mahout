@@ -175,6 +175,7 @@ public class SparseMatrix extends AbstractMatrix {
     Vector res = rowVectors.get(row);
     if (res == null) {
       res = new RandomAccessSparseVector(columnSize());
+      rowVectors.put(row, res);
     }
     return res;
   }
