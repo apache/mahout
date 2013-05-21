@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+__MAHOUT-1222: Fix total weight in FastProjectionSearch (dfilimon)
+
 __MAHOUT-1219: Remove LSHSearcher from StreamingKMeansTest. It causes it to sometimes fail (dfilimon)
 
   MAHOUT-1221: SparseMatrix.viewRow is sometimes readonly. (Maysam Yabandeh via smarthi)

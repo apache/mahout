@@ -52,11 +52,6 @@ public class FastProjectionSearch extends UpdatableSearcher {
   // happened or not so we only do it once.
   private boolean initialized = false;
 
-  // Whether the iterator returned from the searcher was used to modify any of the vectors. This
-  // flag must be set manually by calling setDirty after said modification so the internal
-  // structures can be updated.
-  private boolean dirty = false;
-
   // Removing vectors from the searcher is done lazily to avoid the linear time cost of removing
   // elements from an array. This member keeps track of the number of removed vectors (marked as
   // "impossible" values in the array) so they can be removed when updating the structure.
@@ -197,26 +192,25 @@ public class FastProjectionSearch extends UpdatableSearcher {
   }
 
   @Override
-  public boolean remove(Vector v, double epsilon) {
-    WeightedThing<Vector> closestPair = searchFirst(v, false);
-    if (distanceMeasure.distance(closestPair.getValue(), v) > epsilon) {
+  public boolean remove(Vector vector, double epsilon) {
+    WeightedThing<Vector> closestPair = searchFirst(vector, false);
+    if (distanceMeasure.distance(closestPair.getValue(), vector) > epsilon) {
       return false;
     }
 
     boolean isProjected = true;
-    final Vector projection = basisMatrix.times(v);
+    final Vector projection = basisMatrix.times(vector);
     for (int i = 0; i < basisMatrix.numRows(); ++i) {
       List<WeightedThing<Vector>> currProjections = scalarProjections.get(i);
-      int middle = Collections.binarySearch(currProjections,
-          new WeightedThing<Vector>(projection.get(i)));
+      WeightedThing<Vector> searchedThing = new WeightedThing<Vector>(projection.get(i));
+      int middle = Collections.binarySearch(currProjections, searchedThing);
       if (middle < 0) {
         isProjected = false;
         break;
       }
-      double oldWeight = currProjections.get(middle).getWeight();
       // Elements to be removed are kept in the sorted array until the next reindex, but their inner vector
       // is set to null.
-      scalarProjections.get(i).set(middle, new WeightedThing<Vector>(oldWeight));
+      scalarProjections.get(i).set(middle, searchedThing);
     }
     if (isProjected) {
       ++numPendingRemovals;
@@ -224,7 +218,7 @@ public class FastProjectionSearch extends UpdatableSearcher {
     }
 
     for (int i = 0; i < pendingAdditions.size(); ++i) {
-      if (distanceMeasure.distance(v, pendingAdditions.get(i)) < epsilon) {
+      if (pendingAdditions.get(i).equals(vector)) {
         pendingAdditions.remove(i);
         break;
       }
@@ -234,8 +228,8 @@ public class FastProjectionSearch extends UpdatableSearcher {
 
   private void reindex(boolean force) {
     int numProjected = scalarProjections.get(0).size();
-    if (force || dirty || pendingAdditions.size() > ADDITION_THRESHOLD * numProjected ||
-        numPendingRemovals > REMOVAL_THRESHOLD * numProjected) {
+    if (force || pendingAdditions.size() > ADDITION_THRESHOLD * numProjected
+        || numPendingRemovals > REMOVAL_THRESHOLD * numProjected) {
 
       // We only need to copy the first list because when iterating we use only that list for the Vector
       // references.
@@ -285,7 +279,6 @@ public class FastProjectionSearch extends UpdatableSearcher {
       scalarProjections.get(i).clear();
     }
     numPendingRemovals = 0;
-    dirty = false;
   }
 
   /**
@@ -298,30 +291,20 @@ public class FastProjectionSearch extends UpdatableSearcher {
   public Iterator<Vector> iterator() {
     reindex(true);
     return new AbstractIterator<Vector>() {
-          Iterator<WeightedThing<Vector>> data = scalarProjections.get(0).iterator();
-          @Override
-          protected Vector computeNext() {
-            WeightedThing<Vector> next;
-            do {
-              if (!data.hasNext()) {
-                return endOfData();
-              }
-              next = data.next();
-              if (next.getValue() != null) {
-                return next.getValue();
-              }
-            } while (true);
+      Iterator<WeightedThing<Vector>> data = scalarProjections.get(0).iterator();
+      @Override
+      protected Vector computeNext() {
+        WeightedThing<Vector> next;
+        do {
+          if (!data.hasNext()) {
+            return endOfData();
           }
-        };
-  }
-
-  /**
-   * When modifying an element of the searcher through the iterator,
-   * the user MUST CALL setDirty() to update the internal data structures. Otherwise,
-   * the internal order of the vectors will change and future results might be wrong.
-   */
-  @SuppressWarnings("unused")
-  public void setDirty() {
-    dirty = true;
+          next = data.next();
+          if (next.getValue() != null) {
+            return next.getValue();
+          }
+        } while (true);
+      }
+    };
   }
 }
