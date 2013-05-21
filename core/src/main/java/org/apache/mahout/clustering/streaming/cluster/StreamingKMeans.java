@@ -260,6 +260,11 @@ public class StreamingKMeans implements Iterable<Centroid> {
    * @return the UpdatableSearcher containing the resulting centroids.
    */
   private UpdatableSearcher clusterInternal(Iterable<Centroid> datapoints, boolean collapseClusters) {
+    Iterator<Centroid> datapointsIterator = datapoints.iterator();
+    if (!datapointsIterator.hasNext()) {
+      return centroids;
+    }
+
     int oldNumProcessedDataPoints = numProcessedDatapoints;
     // We clear the centroids we have in case of cluster collapse, the old clusters are the
     // datapoints but we need to re-cluster them.
@@ -268,19 +273,18 @@ public class StreamingKMeans implements Iterable<Centroid> {
       numProcessedDatapoints = 0;
     }
 
-    int numCentroidsToSkip = 0;
     if (centroids.size() == 0) {
       // Assign the first datapoint to the first cluster.
       // Adding a vector to a searcher would normally just reference the copy,
       // but we could potentially mutate it and so we need to make a clone.
-      centroids.add(Iterables.get(datapoints, 0).clone());
-      numCentroidsToSkip = 1;
+      centroids.add(datapointsIterator.next().clone());
       ++numProcessedDatapoints;
     }
 
     // To cluster, we scan the data and either add each point to the nearest group or create a new group.
     // when we get too many groups, we need to increase the threshold and rescan our current groups
-    for (Centroid row : Iterables.skip(datapoints, numCentroidsToSkip)) {
+    while (datapointsIterator.hasNext()) {
+      Centroid row = datapointsIterator.next();
       // Get the closest vector and its weight as a WeightedThing<Vector>.
       // The weight of the WeightedThing is the distance to the query and the value is a
       // reference to one of the vectors we added to the searcher previously.
