@@ -32,7 +32,6 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.TableExistsException;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
@@ -143,8 +142,6 @@ public final class HBaseDataModel implements DataModel, Closeable {
     try {
       admin.createTable(tDesc);
       log.info("Created table {}", tableName);
-    } catch (TableExistsException e) {
-      log.info("Table {} alreay exists", tableName);
     } finally {
       admin.close();
     }
