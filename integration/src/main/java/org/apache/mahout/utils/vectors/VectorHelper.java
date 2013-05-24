@@ -31,6 +31,7 @@ import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
 import java.io.File;
@@ -79,9 +80,7 @@ public final class VectorHelper {
 
   public static List<Pair<Integer, Double>> topEntries(Vector vector, int maxEntries) {
     PriorityQueue<Pair<Integer, Double>> queue = new TDoublePQ<Integer>(-1, maxEntries);
-    Iterator<Vector.Element> it = vector.iterateNonZero();
-    while (it.hasNext()) {
-      Vector.Element e = it.next();
+    for (Element e : vector.nonZeroes()) {
       queue.insertWithOverflow(Pair.of(e.index(), e.get()));
     }
     List<Pair<Integer, Double>> entries = Lists.newArrayList();
@@ -102,7 +101,7 @@ public final class VectorHelper {
 
   public static List<Pair<Integer, Double>> firstEntries(Vector vector, int maxEntries) {
     List<Pair<Integer, Double>> entries = Lists.newArrayList();
-    Iterator<Vector.Element> it = vector.iterateNonZero();
+    Iterator<Vector.Element> it = vector.nonZeroes().iterator();
     int i = 0;
     while (it.hasNext() && i++ < maxEntries) {
       Vector.Element e = it.next();
@@ -144,7 +143,7 @@ public final class VectorHelper {
     if (namesAsComments && vector instanceof NamedVector) {
       bldr.append('#').append(((NamedVector) vector).getName()).append('\n');
     }
-    Iterator<Vector.Element> iter = vector.iterator();
+    Iterator<Vector.Element> iter = vector.all().iterator();
     boolean first = true;
     while (iter.hasNext()) {
       if (first) {

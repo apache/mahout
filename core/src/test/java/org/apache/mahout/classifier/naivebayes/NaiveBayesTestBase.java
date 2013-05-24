@@ -124,7 +124,7 @@ public abstract class NaiveBayesTestBase extends MahoutTestCase {
   protected static int maxIndex(Vector instance) {
     int maxIndex = -1;
     double maxScore = Integer.MIN_VALUE;
-    for (Element label : instance) {
+    for (Element label : instance.all()) {
       if (label.get() >= maxScore) {
         maxIndex = label.index();
         maxScore = label.get();

@@ -82,7 +82,7 @@ public class MinHashMapper extends Mapper<Text, VectorWritable, Text, Writable> 
     }
 
     for (int i = 0; i < numHashFunctions; i++) {
-      for (Vector.Element ele : featureVector) {
+      for (Vector.Element ele : featureVector.nonZeroes()) {
         int value = (int) ele.get();
         bytesToHash[0] = (byte) (value >> 24);
         bytesToHash[1] = (byte) (value >> 16);

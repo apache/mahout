@@ -21,7 +21,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.Iterator;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.hadoop.conf.Configuration;
@@ -150,8 +149,7 @@ public final class BtJob {
       }
 
       if (!aRow.isDense()) {
-        for (Iterator<Vector.Element> iter = aRow.iterateNonZero(); iter.hasNext();) {
-          Vector.Element el = iter.next();
+        for (Vector.Element el : aRow.nonZeroes()) {
           double mul = el.get();
           for (int j = 0; j < kp; j++) {
             btRow.setQuick(j, mul * qRow.getQuick(j));

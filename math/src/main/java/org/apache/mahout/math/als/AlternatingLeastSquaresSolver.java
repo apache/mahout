@@ -24,9 +24,6 @@ import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.QRDecomposition;
 import org.apache.mahout.math.Vector;
 
-
-import java.util.Iterator;
-
 /**
  * See
  * <a href="http://www.hpl.hp.com/personal/Robert_Schreiber/papers/2008%20AAIM%20Netflix/netflix_aaim08(submitted).pdf">
@@ -110,10 +107,8 @@ public final class AlternatingLeastSquaresSolver {
     Preconditions.checkArgument(ratingVector.isSequentialAccess());
 
     double[][] RiIiMaybeTransposed = new double[ratingVector.getNumNondefaultElements()][1];
-    Iterator<Vector.Element> ratingsIterator = ratingVector.iterateNonZero();
     int index = 0;
-    while (ratingsIterator.hasNext()) {
-      Vector.Element elem = ratingsIterator.next();
+    for (Vector.Element elem : ratingVector.nonZeroes()) {
       RiIiMaybeTransposed[index++][0] = elem.get();
     }
     return new DenseMatrix(RiIiMaybeTransposed, true);

@@ -17,8 +17,6 @@
 
 package org.apache.mahout.classifier.naivebayes;
 
-import java.util.Iterator;
-
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
@@ -46,9 +44,7 @@ public abstract class AbstractNaiveBayesClassifier extends AbstractVectorClassif
 
   protected double getScoreForLabelInstance(int label, Vector instance) {
     double result = 0.0;
-    Iterator<Element> elements = instance.iterateNonZero();
-    while (elements.hasNext()) {
-      Element e = elements.next();
+    for (Element e : instance.nonZeroes()) {
       result += e.get() * getScoreForLabelFeature(label, e.index());
     }
     return result;

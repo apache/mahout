@@ -18,7 +18,6 @@
 package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -198,10 +197,7 @@ public final class ItemSimilarityJob extends AbstractJob {
 
       TopSimilarItemsQueue topKMostSimilarItems = new TopSimilarItemsQueue(maxSimilarItemsPerItem);
 
-      Iterator<Vector.Element> similarityVectorIterator = similarityVector.get().iterateNonZero();
-
-      while (similarityVectorIterator.hasNext()) {
-        Vector.Element element = similarityVectorIterator.next();
+      for (Vector.Element element : similarityVector.get().nonZeroes()) {
         SimilarItem top = topKMostSimilarItems.top();
         double candidateSimilarity = element.get();
         if (candidateSimilarity > top.getSimilarity()) {

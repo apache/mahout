@@ -23,11 +23,10 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.QRDecomposition;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.map.OpenIntObjectHashMap;
-
-import java.util.Iterator;
 
 /** see <a href="http://research.yahoo.com/pub/2433">Collaborative Filtering for Implicit Feedback Datasets</a> */
 public class ImplicitFeedbackAlternatingLeastSquaresSolver {
@@ -92,19 +91,15 @@ public class ImplicitFeedbackAlternatingLeastSquaresSolver {
 
     /* (Cu -I) Y */
     OpenIntObjectHashMap<Vector> CuMinusIY = new OpenIntObjectHashMap<Vector>(userRatings.getNumNondefaultElements());
-    Iterator<Vector.Element> ratings = userRatings.iterateNonZero();
-    while (ratings.hasNext()) {
-      Vector.Element e = ratings.next();
+    for (Element e : userRatings.nonZeroes()) {
       CuMinusIY.put(e.index(), Y.get(e.index()).times(confidence(e.get()) - 1));
     }
 
     Matrix YtransponseCuMinusIY = new DenseMatrix(numFeatures, numFeatures);
 
     /* Y' (Cu -I) Y by outer products */
-    ratings = userRatings.iterateNonZero();
-    while (ratings.hasNext()) {
-      Vector.Element e = ratings.next();
-      for (Vector.Element feature : Y.get(e.index())) {
+    for (Element e : userRatings.nonZeroes()) {
+      for (Vector.Element feature : Y.get(e.index()).all()) {
         Vector partial = CuMinusIY.get(e.index()).times(feature.get());
         YtransponseCuMinusIY.viewRow(feature.index()).assign(partial, Functions.PLUS);
       }
@@ -124,9 +119,7 @@ public class ImplicitFeedbackAlternatingLeastSquaresSolver {
 
     Vector YtransponseCuPu = new DenseVector(numFeatures);
 
-    Iterator<Vector.Element> ratings = userRatings.iterateNonZero();
-    while (ratings.hasNext()) {
-      Vector.Element e = ratings.next();
+    for (Element e : userRatings.nonZeroes()) {
       YtransponseCuPu.assign(Y.get(e.index()).times(confidence(e.get())), Functions.PLUS);
     }
 
@@ -135,7 +128,7 @@ public class ImplicitFeedbackAlternatingLeastSquaresSolver {
 
   private Matrix columnVectorAsMatrix(Vector v) {
     double[][] matrix =  new double[numFeatures][1];
-    for (Vector.Element e : v) {
+    for (Vector.Element e : v.all()) {
       matrix[e.index()][0] =  e.get();
     }
     return new DenseMatrix(matrix, true);

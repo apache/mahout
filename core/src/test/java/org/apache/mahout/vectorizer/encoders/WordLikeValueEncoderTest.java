@@ -35,7 +35,7 @@ public final class WordLikeValueEncoderTest extends MahoutTestCase {
     Vector v = new DenseVector(200);
     enc.addToVector("word1", v);
     enc.addToVector("word2", v);
-    Iterator<Vector.Element> i = v.iterateNonZero();
+    Iterator<Vector.Element> i = v.nonZeroes().iterator();
     Iterator<Integer> j = ImmutableList.of(7, 118, 119, 199).iterator();
     while (i.hasNext()) {
       Vector.Element element = i.next();
@@ -60,14 +60,14 @@ public final class WordLikeValueEncoderTest extends MahoutTestCase {
     enc.addToVector("word1", v);
     enc.addToVector("word2", v);
     enc.addToVector("word3", v);
-    Iterator<Vector.Element> i = v.iterateNonZero();
+    Iterator<Vector.Element> i = v.nonZeroes().iterator();
     Iterator<Integer> j = ImmutableList.of(7, 101, 118, 119, 152, 199).iterator();
     Iterator<Double> k = ImmutableList.of(3.0, 0.75, 1.5, 1.5, 0.75, 3.0).iterator();
     while (i.hasNext()) {
       Vector.Element element = i.next();
       assertEquals(j.next().intValue(), element.index());
     }
-    i = v.iterateNonZero();
+    i = v.nonZeroes().iterator();
     while (i.hasNext()) {
       Vector.Element element = i.next();
       assertEquals(String.format("checking v[%d]", element.index()), k.next(), element.get(), 0);
@@ -83,7 +83,7 @@ public final class WordLikeValueEncoderTest extends MahoutTestCase {
     enc.addToVector("word2", v);  // weight is log(3.5 / 1.5)
     enc.addToVector("word1", v);  // weight is log(4.5 / 2.5) (but overlays on first value)
     enc.addToVector("word3", v);  // weight is log(6 / 1.5)
-    Iterator<Vector.Element> i = v.iterateNonZero();
+    Iterator<Vector.Element> i = v.nonZeroes().iterator();
     Iterator<Integer> j = ImmutableList.of(7, 101, 118, 119, 152, 199).iterator();
     Iterator<Double> k = ImmutableList.of(Math.log(2 / 1.5) + Math.log(4.5 / 2.5),
                                           Math.log(6 / 1.5), Math.log(3.5 / 1.5),

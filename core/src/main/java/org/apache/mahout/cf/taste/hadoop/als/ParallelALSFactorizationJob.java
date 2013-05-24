@@ -50,12 +50,10 @@ import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.function.Functions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -206,9 +204,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
       IntWritable index = new IntWritable();
       VectorWritable featureVector = new VectorWritable();
 
-      Iterator<Vector.Element> averages = averageRatings.iterateNonZero();
-      while (averages.hasNext()) {
-        Vector.Element e = averages.next();
+      for (Vector.Element e : averageRatings.nonZeroes()) {
         Vector row = new DenseVector(numFeatures);
         row.setQuick(0, e.get());
         for (int m = 1; m < numFeatures; m++) {
@@ -345,9 +341,8 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     @Override
     protected void map(IntWritable r, VectorWritable v, Context ctx) throws IOException, InterruptedException {
       RunningAverage avg = new FullRunningAverage();
-      Iterator<Vector.Element> elements = v.get().iterateNonZero();
-      while (elements.hasNext()) {
-        avg.addDatum(elements.next().get());
+      for (Vector.Element e : v.get().nonZeroes()) {
+        avg.addDatum(e.get());
       }
 
       featureVector.setQuick(r.get(), avg.getAverage());

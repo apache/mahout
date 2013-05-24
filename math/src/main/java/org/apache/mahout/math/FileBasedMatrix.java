@@ -81,7 +81,7 @@ public final class FileBasedMatrix extends AbstractMatrix {
     ByteBuffer buf = ByteBuffer.allocate(m.columnSize() * 8);
     for (MatrixSlice row : m) {
       buf.clear();
-      for (Vector.Element element : row.vector()) {
+      for (Vector.Element element : row.vector().all()) {
         buf.putDouble(element.get());
       }
       buf.flip();

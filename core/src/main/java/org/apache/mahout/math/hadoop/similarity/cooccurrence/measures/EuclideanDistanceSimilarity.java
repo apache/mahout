@@ -19,8 +19,6 @@ package org.apache.mahout.math.hadoop.similarity.cooccurrence.measures;
 
 import org.apache.mahout.math.Vector;
 
-import java.util.Iterator;
-
 public class EuclideanDistanceSimilarity implements VectorSimilarityMeasure {
 
   @Override
@@ -31,9 +29,8 @@ public class EuclideanDistanceSimilarity implements VectorSimilarityMeasure {
   @Override
   public double norm(Vector vector) {
     double norm = 0;
-    Iterator<Vector.Element> nonZeroElements = vector.iterateNonZero();
-    while (nonZeroElements.hasNext()) {
-      double value = nonZeroElements.next().get();
+    for (Vector.Element e : vector.nonZeroes()) {
+      double value = e.get();
       norm += value * value;
     }
     return norm;

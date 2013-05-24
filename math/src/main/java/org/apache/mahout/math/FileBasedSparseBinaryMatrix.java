@@ -32,7 +32,7 @@ import java.util.List;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.AbstractIterator;
-import com.google.common.collect.Iterators;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 /**
@@ -130,13 +130,13 @@ public final class FileBasedSparseBinaryMatrix extends AbstractMatrix {
 
     // write rows
     for (MatrixSlice row : m) {
-      List<Integer> columns = Lists.newArrayList(Iterators.transform(row.vector().iterateNonZero(),
-        new Function<Vector.Element, Integer>() {
-          @Override
-          public Integer apply(Vector.Element element) {
-            return element.index();
-          }
-        }));
+      List<Integer> columns = Lists.newArrayList(Iterables.transform(row.vector().nonZeroes(),
+                                                 new Function<Vector.Element, Integer>() {
+                                                   @Override
+                                                   public Integer apply(Vector.Element element) {
+                                                     return element.index();
+                                                   }
+                                                 }));
       Collections.sort(columns);
 
       for (Integer column : columns) {

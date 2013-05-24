@@ -18,8 +18,6 @@
 package org.apache.mahout.math;
 
 
-import java.util.Iterator;
-
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.DoubleFunction;
 
@@ -28,7 +26,7 @@ import org.apache.mahout.math.function.DoubleFunction;
  * constructor that takes an int for cardinality and a no-arg constructor that can be used for marshalling the Writable
  * instance <p/> NOTE: Implementations may choose to reuse the Vector.Element in the Iterable methods
  */
-public interface Vector extends Cloneable, Iterable<Vector.Element> {
+public interface Vector extends Cloneable {
 
   /** @return a formatted String suitable for output */
   String asFormatString();
@@ -102,7 +100,7 @@ public interface Vector extends Cloneable, Iterable<Vector.Element> {
 
   /**
    * @return true iff this implementation should be considered to be iterable in index order in an efficient way.
-   *  In particular this implies that {@link #iterator()} and {@link #iterateNonZero()} return elements
+   *  In particular this implies that {@link #all()} and {@link #nonZeroes()} ()} return elements
    *  in ascending order by index.
    */
   boolean isSequentialAccess();
@@ -115,22 +113,9 @@ public interface Vector extends Cloneable, Iterable<Vector.Element> {
   @SuppressWarnings("CloneDoesntDeclareCloneNotSupportedException")
   Vector clone();
 
-  /**
-   * Iterates over all elements <p/> * NOTE: Implementations may choose to reuse the Element returned for performance
-   * reasons, so if you need a copy of it, you should call {@link #getElement(int)} for the given index
-   *
-   * @return An {@link Iterator} over all elements
-   */
-  @Override
-  Iterator<Element> iterator();
+  Iterable<Element> all();
 
-  /**
-   * Iterates over all non-zero elements. <p/> NOTE: Implementations may choose to reuse the Element returned for
-   * performance reasons, so if you need a copy of it, you should call {@link #getElement(int)} for the given index
-   *
-   * @return An {@link Iterator} over all non-zero elements
-   */
-  Iterator<Element> iterateNonZero();
+  Iterable<Element> nonZeroes();
 
   /**
    * Return an object of Vector.Element representing an element of this Vector. Useful when designing new iterator

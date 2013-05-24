@@ -17,9 +17,9 @@
 
 package org.apache.mahout.common.distance;
 
-import java.util.Iterator;
 
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.Vector.Element;
 
 /**
  * This class implements a Euclidean distance metric by summing the square root of the squared differences
@@ -33,15 +33,11 @@ public class WeightedEuclideanDistanceMeasure extends WeightedDistanceMeasure {
     Vector res = p2.minus(p1);
     Vector theWeights = getWeights();
     if (theWeights == null) {
-      Iterator<Vector.Element> iter = res.iterateNonZero();
-      while (iter.hasNext()) {
-        Vector.Element elt = iter.next();
+      for (Element elt : res.nonZeroes()) {
         result += elt.get() * elt.get();
       }
     } else {
-      Iterator<Vector.Element> iter = res.iterateNonZero();
-      while (iter.hasNext()) {
-        Vector.Element elt = iter.next();
+      for (Element elt : res.nonZeroes()) {
         result += elt.get() * elt.get() * theWeights.get(elt.index());
       }
     }

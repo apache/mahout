@@ -22,7 +22,6 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Locale;
 
 import org.apache.hadoop.conf.Configuration;
@@ -31,6 +30,7 @@ import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.SquareRootFunction;
@@ -325,9 +325,7 @@ public abstract class AbstractCluster implements Cluster {
     Vector provider = v.isSequentialAccess() ? v : new SequentialAccessSparseVector(v);
 
     buffer.append('[');
-    Iterator<Vector.Element> elements = provider.iterateNonZero();
-    while (elements.hasNext()) {
-      Vector.Element elem = elements.next();
+    for (Element elem : provider.nonZeroes()) {
 
       if (hasBindings && bindings.length >= elem.index() + 1 && bindings[elem.index()] != null) {
         buffer.append(bindings[elem.index()]).append(':');

@@ -27,6 +27,8 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.apache.mahout.math.Vector.Element;
+
 public final class VectorWritable extends Configured implements Writable {
 
   public static final int FLAG_DENSE = 0x01;
@@ -147,7 +149,7 @@ public final class VectorWritable extends Configured implements Writable {
 
     Varint.writeUnsignedVarInt(vector.size(), out);
     if (dense) {
-      for (Vector.Element element : vector) {
+      for (Vector.Element element : vector.all()) {
         if (laxPrecision) {
           out.writeFloat((float) element.get());
         } else {
@@ -156,7 +158,7 @@ public final class VectorWritable extends Configured implements Writable {
       }
     } else {
       Varint.writeUnsignedVarInt(vector.getNumNondefaultElements(), out);
-      Iterator<Vector.Element> iter = vector.iterateNonZero();
+      Iterator<Element> iter = vector.nonZeroes().iterator();
       if (sequential) {
         int lastIndex = 0;
         while (iter.hasNext()) {
@@ -200,7 +202,7 @@ public final class VectorWritable extends Configured implements Writable {
     while (vectors.hasNext()) {
       VectorWritable v = vectors.next();
       if (v != null) {
-        Iterator<Vector.Element> nonZeroElements = v.get().iterateNonZero();
+        Iterator<Element> nonZeroElements = v.get().nonZeroes().iterator();
         while (nonZeroElements.hasNext()) {
           Vector.Element nonZeroElement = nonZeroElements.next();
           accumulator.setQuick(nonZeroElement.index(), nonZeroElement.get());

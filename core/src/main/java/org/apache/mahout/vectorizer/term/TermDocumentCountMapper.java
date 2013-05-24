@@ -18,7 +18,6 @@
 package org.apache.mahout.vectorizer.term;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -36,15 +35,15 @@ public class TermDocumentCountMapper extends Mapper<WritableComparable<?>, Vecto
 
   private static final IntWritable TOTAL_COUNT = new IntWritable(-1);
 
+  private final IntWritable out = new IntWritable();
+
   @Override
   protected void map(WritableComparable<?> key, VectorWritable value, Context context)
     throws IOException, InterruptedException {
     Vector vector = value.get();
-    Iterator<Vector.Element> it = vector.iterateNonZero();
-
-    while (it.hasNext()) {
-      Vector.Element e = it.next();
-      context.write(new IntWritable(e.index()), ONE);
+    for (Vector.Element e : vector.nonZeroes()) {
+      out.set(e.index());
+      context.write(out, ONE);
     }
     context.write(TOTAL_COUNT, ONE);
   }

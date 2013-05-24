@@ -128,8 +128,7 @@ public final class ABtDenseOutJob {
           aCols[i].setQuick(aRowCount, vec.getQuick(i));
         }
       } else if (vec.size() > 0) {
-        for (Iterator<Vector.Element> vecIter = vec.iterateNonZero(); vecIter.hasNext();) {
-          Vector.Element vecEl = vecIter.next();
+        for (Vector.Element vecEl : vec.nonZeroes()) {
           int i = vecEl.index();
           extendAColIfNeeded(i, aRowCount + 1);
           aCols[i].setQuick(aRowCount, vecEl.get());
@@ -241,8 +240,7 @@ public final class ABtDenseOutJob {
               continue;
             }
             int j = -1;
-            for (Iterator<Vector.Element> aColIter = aCol.iterateNonZero(); aColIter.hasNext();) {
-              Vector.Element aEl = aColIter.next();
+            for (Vector.Element aEl : aCol.nonZeroes()) {
               j = aEl.index();
 
               /*

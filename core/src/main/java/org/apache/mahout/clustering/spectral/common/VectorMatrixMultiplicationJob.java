@@ -120,7 +120,7 @@ public final class VectorMatrixMultiplicationJob {
     protected void map(IntWritable key, VectorWritable row, Context ctx) 
       throws IOException, InterruptedException {
       
-      for (Vector.Element e : row.get()) {
+      for (Vector.Element e : row.get().all()) {
         double dii = Functions.SQRT.apply(diagonal.get(key.get()));
         double djj = Functions.SQRT.apply(diagonal.get(e.index()));
         double mij = e.get();

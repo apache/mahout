@@ -76,9 +76,7 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
 
     List<TermIndexWeight> vectorTerms = Lists.newArrayList();
 
-    Iterator<Vector.Element> iter = vector.iterateNonZero();
-    while (iter.hasNext()) {
-      Vector.Element elt = iter.next();
+    for (Vector.Element elt : vector.nonZeroes()) {
       vectorTerms.add(new TermIndexWeight(elt.index(), elt.get()));
     }
 
@@ -118,9 +116,7 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
 
     List<TermIndexWeight> vectorTerms = Lists.newArrayList();
 
-    Iterator<Vector.Element> iter = vector.iterateNonZero();
-    while (iter.hasNext()) {
-      Vector.Element elt = iter.next();
+    for (Vector.Element elt : vector.nonZeroes()) {
       vectorTerms.add(new TermIndexWeight(elt.index(), elt.get()));
     }
 

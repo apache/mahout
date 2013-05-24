@@ -17,7 +17,6 @@
 
 package org.apache.mahout.clustering.evaluation;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -111,9 +110,7 @@ public class ClusterEvaluator {
     int count = 0;
     Map<Integer,Vector> distances = interClusterDistances();
     for (Vector row : distances.values()) {
-      Iterator<Element> elements = row.iterateNonZero();
-      while (elements.hasNext()) {
-        Element element = elements.next();
+      for (Element element : row.nonZeroes()) {
         double d = element.get();
         min = Math.min(d, min);
         max = Math.max(d, max);
@@ -154,9 +151,7 @@ public class ClusterEvaluator {
   public double intraClusterDensity() {
     double avgDensity = 0;
     int count = 0;
-    Iterator<Element> iter = intraClusterDensities().iterateNonZero();
-    while (iter.hasNext()) {
-      Element elem = iter.next();
+    for (Element elem : intraClusterDensities().nonZeroes()) {
       double value = elem.get();
       if (!Double.isNaN(value)) {
         avgDensity += value;

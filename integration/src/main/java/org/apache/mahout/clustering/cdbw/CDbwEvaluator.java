@@ -17,7 +17,6 @@
 
 package org.apache.mahout.clustering.cdbw;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -190,11 +189,9 @@ public final class CDbwEvaluator {
    * @return a double
    */
   public double intraClusterDensity() {
-    Iterator<Element> iter = intraClusterDensities().iterateNonZero();
     double avgDensity = 0;
     int count = 0;
-    while (iter.hasNext()) {
-      Element elem = iter.next();
+    for (Element elem : intraClusterDensities().nonZeroes()) {
       double value = elem.get();
       if (!Double.isNaN(value)) {
         avgDensity += value;

@@ -31,6 +31,7 @@ import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
 
@@ -129,9 +130,8 @@ public final class AggregateAndRecommendReducer extends
       Vector simColumn = prefAndSimilarityColumn.getSimilarityColumn();
       float prefValue = prefAndSimilarityColumn.getPrefValue();
       /* count the number of items used for each prediction */
-      Iterator<Vector.Element> usedItemsIterator = simColumn.iterateNonZero();
-      while (usedItemsIterator.hasNext()) {
-        int itemIDIndex = usedItemsIterator.next().index();
+      for (Element e : simColumn.nonZeroes()) {
+        int itemIDIndex = e.index();
         numberOfSimilarItemsUsed.setQuick(itemIDIndex, numberOfSimilarItemsUsed.getQuick(itemIDIndex) + 1);
       }
 
@@ -160,9 +160,7 @@ public final class AggregateAndRecommendReducer extends
     }
 
     Vector recommendationVector = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
-    Iterator<Vector.Element> iterator = numerators.iterateNonZero();
-    while (iterator.hasNext()) {
-      Vector.Element element = iterator.next();
+    for (Element element : numerators.nonZeroes()) {
       int itemIDIndex = element.index();
       /* preference estimations must be based on at least 2 datapoints */
       if (numberOfSimilarItemsUsed.getQuick(itemIDIndex) > 1) {
@@ -182,9 +180,7 @@ public final class AggregateAndRecommendReducer extends
 
     TopItemsQueue topKItems = new TopItemsQueue(recommendationsPerUser);
 
-    Iterator<Vector.Element> recommendationVectorIterator = recommendationVector.iterateNonZero();
-    while (recommendationVectorIterator.hasNext()) {
-      Vector.Element element = recommendationVectorIterator.next();
+    for (Element element : recommendationVector.nonZeroes()) {
       int index = element.index();
       long itemID;
       if (indexItemIDMap != null && !indexItemIDMap.isEmpty()) {

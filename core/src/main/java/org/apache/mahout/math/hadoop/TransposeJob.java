@@ -120,9 +120,7 @@ public class TransposeJob extends AbstractJob {
     public void map(IntWritable r, VectorWritable v, OutputCollector<IntWritable, VectorWritable> out,
                     Reporter reporter) throws IOException {
       int row = r.get();
-      Iterator<Vector.Element> it = v.get().iterateNonZero();
-      while (it.hasNext()) {
-        Vector.Element e = it.next();
+      for (Vector.Element e : v.get().nonZeroes()) {
         RandomAccessSparseVector tmp = new RandomAccessSparseVector(newNumCols, 1);
         tmp.setQuick(row, e.get());
         r.set(e.index());

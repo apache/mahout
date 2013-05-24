@@ -94,9 +94,7 @@ public class ClusterClassificationMapper extends
   
   private void writeAllAboveThreshold(VectorWritable vw, Context context,
       Vector pdfPerCluster) throws IOException, InterruptedException {
-    Iterator<Element> iterateNonZero = pdfPerCluster.iterateNonZero();
-    while (iterateNonZero.hasNext()) {
-      Element pdf = iterateNonZero.next();
+    for (Element pdf : pdfPerCluster.nonZeroes()) {
       if (pdf.get() >= threshold) {
         int clusterIndex = pdf.index();
         write(vw, context, clusterIndex, pdf.get());

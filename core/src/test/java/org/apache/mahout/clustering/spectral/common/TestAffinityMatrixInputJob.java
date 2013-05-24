@@ -133,7 +133,7 @@ public class TestAffinityMatrixInputJob extends MahoutTestCase {
       assertEquals("Should only be one vector", 1, list.size());
       // check that the elements in the array are correctly ordered
       Vector v = list.get(0).get();
-      for (Vector.Element e : v) {
+      for (Vector.Element e : v.all()) {
         // find this value in the original map
         MatrixEntryWritable toCompare = new MatrixEntryWritable();
         toCompare.setRow(-1);

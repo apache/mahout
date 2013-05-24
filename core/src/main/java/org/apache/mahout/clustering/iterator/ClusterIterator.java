@@ -17,7 +17,6 @@
 package org.apache.mahout.clustering.iterator;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -76,8 +75,8 @@ public final class ClusterIterator {
         // policy selects weights for models given those probabilities
         Vector weights = policy.select(probabilities);
         // training causes all models to observe data
-        for (Iterator<Vector.Element> it = weights.iterateNonZero(); it.hasNext();) {
-          int index = it.next().index();
+        for (Vector.Element e : weights.nonZeroes()) {
+          int index = e.index();
           classifier.train(index, vector, weights.get(index));
         }
       }
@@ -117,8 +116,8 @@ public final class ClusterIterator {
         // policy selects weights for models given those probabilities
         Vector weights = classifier.getPolicy().select(probabilities);
         // training causes all models to observe data
-        for (Iterator<Vector.Element> it = weights.iterateNonZero(); it.hasNext();) {
-          int index = it.next().index();
+        for (Vector.Element e : weights.nonZeroes()) {
+          int index = e.index();
           classifier.train(index, vector, weights.get(index));
         }
       }

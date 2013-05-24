@@ -17,8 +17,6 @@
 
 package org.apache.mahout.clustering.dirichlet.models;
 
-import java.util.Iterator;
-
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Model;
 import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
@@ -63,8 +61,7 @@ public class GaussianCluster extends AbstractCluster {
    */
   private void computeProd2piR() {
     zProd2piR = 1.0;
-    for (Iterator<Element> it = getRadius().iterateNonZero(); it.hasNext();) {
-      Element radius = it.next();
+    for (Element radius : getRadius().nonZeroes()) {
       zProd2piR *= radius.get() * UncommonDistributions.SQRT2PI;
     }
   }
@@ -81,8 +78,7 @@ public class GaussianCluster extends AbstractCluster {
    */
   private double sumXminusCdivRsquared(Vector x) {
     double result = 0;
-    for (Iterator<Element> it = getRadius().iterateNonZero(); it.hasNext();) {
-      Element radiusElem = it.next();
+    for (Element radiusElem : getRadius().nonZeroes()) {
       int index = radiusElem.index();
       double quotient = (x.get(index) - getCenter().get(index))
           / radiusElem.get();

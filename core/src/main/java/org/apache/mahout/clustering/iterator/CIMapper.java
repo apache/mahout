@@ -1,7 +1,6 @@
 package org.apache.mahout.clustering.iterator;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -36,8 +35,7 @@ public class CIMapper extends Mapper<WritableComparable<?>,VectorWritable,IntWri
       InterruptedException {
     Vector probabilities = classifier.classify(value.get());
     Vector selections = policy.select(probabilities);
-    for (Iterator<Element> it = selections.iterateNonZero(); it.hasNext();) {
-      Element el = it.next();
+    for (Element el : selections.nonZeroes()) {
       classifier.train(el.index(), value.get(), el.get());
     }
   }

@@ -27,6 +27,7 @@ import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.MatrixSlice;
 import org.apache.mahout.math.SparseRowMatrix;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.hadoop.MathHelper;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Iterator;
 
 public class ParallelALSFactorizationJobTest extends TasteTestCase {
 
@@ -127,12 +127,8 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
     log.info(info.toString());
 
     RunningAverage avg = new FullRunningAverage();
-    Iterator<MatrixSlice> sliceIterator = preferences.iterateAll();
-    while (sliceIterator.hasNext()) {
-      MatrixSlice slice = sliceIterator.next();
-      Iterator<Vector.Element> elementIterator = slice.vector().iterateNonZero();
-      while (elementIterator.hasNext()) {
-        Vector.Element e = elementIterator.next();
+    for (MatrixSlice slice : preferences) {
+      for (Element e : slice.nonZeroes()) {
         if (!Double.isNaN(e.get())) {
           double pref = e.get();
           double estimate = u.viewRow(slice.index()).dot(m.viewRow(e.index()));
@@ -210,10 +206,8 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
     log.info(info.toString());
 
     RunningAverage avg = new FullRunningAverage();
-    Iterator<MatrixSlice> sliceIterator = preferences.iterateAll();
-    while (sliceIterator.hasNext()) {
-      MatrixSlice slice = sliceIterator.next();
-      for (Vector.Element e : slice.vector()) {
+    for (MatrixSlice slice : preferences) {
+      for (Element e : slice.nonZeroes()) {
         if (!Double.isNaN(e.get())) {
           double pref = e.get();
           double estimate = u.viewRow(slice.index()).dot(m.viewRow(e.index()));
@@ -234,14 +228,11 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
   protected static String preferencesAsText(Matrix preferences) {
     StringBuilder prefsAsText = new StringBuilder();
     String separator = "";
-    Iterator<MatrixSlice> sliceIterator = preferences.iterateAll();
-    while (sliceIterator.hasNext()) {
-      MatrixSlice slice = sliceIterator.next();
-      Iterator<Vector.Element> elementIterator = slice.vector().iterateNonZero();
-      while (elementIterator.hasNext()) {
-        Vector.Element e = elementIterator.next();
+    for (MatrixSlice slice : preferences) {
+      for (Element e : slice.nonZeroes()) {
         if (!Double.isNaN(e.get())) {
-          prefsAsText.append(separator).append(slice.index()).append(',').append(e.index()).append(',').append(e.get());
+          prefsAsText.append(separator)
+              .append(slice.index()).append(',').append(e.index()).append(',').append(e.get());
           separator = "\n";
         }
       }

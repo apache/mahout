@@ -17,8 +17,6 @@
 
 package org.apache.mahout.math.neighborhood;
 
-import java.util.Iterator;
-
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.WeightedVector;
@@ -55,10 +53,7 @@ public class HashedVector extends WeightedVector {
 
   public static long computeHash64(Vector vector, Matrix projection) {
     long hash = 0;
-    Iterator<Element> iterator = projection.times(vector).iterateNonZero();
-    Element element;
-    while (iterator.hasNext()) {
-      element = iterator.next();
+    for (Element element : projection.times(vector).nonZeroes()) {
       if (element.get() > 0) {
         hash += 1 << element.index();
       }

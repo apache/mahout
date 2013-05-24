@@ -27,7 +27,6 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.hadoop.similarity.cooccurrence.Vectors;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 public class ToItemVectorsMapper
     extends Mapper<VarLongWritable,VectorWritable,IntWritable,VectorWritable> {
@@ -58,9 +57,7 @@ public class ToItemVectorsMapper
     VectorWritable itemVector = new VectorWritable(new RandomAccessSparseVector(Integer.MAX_VALUE, 1));
     itemVector.setWritesLaxPrecision(true);
 
-    Iterator<Vector.Element> iterator = userRatings.iterateNonZero();
-    while (iterator.hasNext()) {
-      Vector.Element elem = iterator.next();
+    for (Vector.Element elem : userRatings.nonZeroes()) {
       itemVector.get().setQuick(column, elem.get());
       ctx.write(new IntWritable(elem.index()), itemVector);
     }

@@ -17,7 +17,6 @@
 package org.apache.mahout.math.hadoop.stochasticsvd;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.hadoop.conf.Configuration;
@@ -115,11 +114,9 @@ public final class YtYJob {
          * are creating some short-lived references) here is that we obviously
          * do two times more iterations then necessary if y row is pretty dense.
          */
-        for (Iterator<Vector.Element> iterI = yRow.iterateNonZero(); iterI.hasNext();) {
-          Vector.Element eli = iterI.next();
+        for (Vector.Element eli : yRow.nonZeroes()) {
           int i = eli.index();
-          for (Iterator<Vector.Element> iterJ = yRow.iterateNonZero(); iterJ.hasNext();) {
-            Vector.Element elj = iterJ.next();
+          for (Vector.Element elj : yRow.nonZeroes()) {
             int j = elj.index();
             if (j < i) {
               continue;

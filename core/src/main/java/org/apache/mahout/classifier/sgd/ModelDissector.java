@@ -171,7 +171,7 @@ public class ModelDissector {
       this.feature = feature;
       // pick out the weight with the largest abs value, but don't forget the sign
       Queue<Category> biggest = new PriorityQueue<Category>(n + 1, Ordering.natural());
-      for (Vector.Element element : weights) {
+      for (Vector.Element element : weights.all()) {
         biggest.add(new Category(element.index(), element.get()));
         while (biggest.size() > n) {
           biggest.poll();

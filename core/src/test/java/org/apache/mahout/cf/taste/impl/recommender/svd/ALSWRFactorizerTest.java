@@ -180,7 +180,7 @@ public class ALSWRFactorizerTest extends TasteTestCase {
     Iterator<MatrixSlice> sliceIterator = preferences.iterateAll();
     while (sliceIterator.hasNext()) {
       MatrixSlice slice = sliceIterator.next();
-      for (Vector.Element e : slice.vector()) {
+      for (Vector.Element e : slice.vector().all()) {
 
         long userID = slice.index() + 1;
         long itemID = e.index() + 1;

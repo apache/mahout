@@ -28,10 +28,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
-import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.function.Functions;
 
 /**
  * <p>Given a DistributedRowMatrix, this job normalizes each row to unit
@@ -75,28 +72,8 @@ public final class UnitVectorizerJob {
     @Override
     protected void map(IntWritable row, VectorWritable vector, Context context) 
       throws IOException, InterruptedException {
-      
-      // set up the return value and perform the computations
-      double norm = vectorNorm(vector.get());
-      Vector w = vector.get().assign(Functions.div(norm));
-      RandomAccessSparseVector out = new RandomAccessSparseVector(w);
-      
-      // finally write the output
-      context.write(row, new VectorWritable(out));
+      context.write(row, new VectorWritable(vector.get().normalize(2)));
     }
-    
-    /**
-     * Sums the squares of all elements together, then takes the square root
-     * of that sum.
-     * @param u
-     * @return
-     */
-    private static double vectorNorm(Iterable<Vector.Element> u) {
-      double retval = 0.0;
-      for (Vector.Element e : u) {
-        retval += Functions.POW.apply(e.get(), 2);
-      }
-      return Functions.SQRT.apply(retval);
-    }
+
   }
 }

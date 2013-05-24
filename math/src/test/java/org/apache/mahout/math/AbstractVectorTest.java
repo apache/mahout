@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.Random;
 
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.jet.random.Normal;
 import org.apache.mahout.math.random.MultiNormal;
@@ -159,7 +160,7 @@ public abstract class AbstractVectorTest<T extends Vector> extends MahoutTestCas
 
     // getNumNondefaultElements
 
-    for (Vector.Element element : v1) {
+    for (Vector.Element element : v1.all()) {
       assertEquals(dv1.get(element.index()), element.get(), 0);
       assertEquals(dv1.get(element.index()), v1.get(element.index()), 0);
       assertEquals(dv1.get(element.index()), v1.getQuick(element.index()), 0);
@@ -191,10 +192,10 @@ public abstract class AbstractVectorTest<T extends Vector> extends MahoutTestCas
 
   @Test
   public void testIterator() {
-    Iterator<Vector.Element> iterator = test.iterateNonZero();
+    Iterator<Vector.Element> iterator = test.nonZeroes().iterator();
     checkIterator(iterator, gold);
 
-    iterator = test.iterator();
+    iterator = test.all().iterator();
     checkIterator(iterator, gold);
 
     double[] doubles = {0.0, 5.0, 0, 3.0};
@@ -222,25 +223,17 @@ public abstract class AbstractVectorTest<T extends Vector> extends MahoutTestCas
   @Test
   public void testIteratorSet() {
     Vector clone = test.clone();
-    Iterator<Vector.Element> it = clone.iterateNonZero();
-    while (it.hasNext()) {
-      Vector.Element e = it.next();
+    for (Element e : clone.nonZeroes()) {
       e.set(e.get() * 2.0);
     }
-    it = clone.iterateNonZero();
-    while (it.hasNext()) {
-      Vector.Element e = it.next();
+    for (Element e : clone.nonZeroes()) {
       assertEquals(test.get(e.index()) * 2.0, e.get(), EPSILON);
     }
     clone = test.clone();
-    it = clone.iterator();
-    while (it.hasNext()) {
-      Vector.Element e = it.next();
+    for (Element e : clone.all()) {
       e.set(e.get() * 2.0);
     }
-    it = clone.iterator();
-    while (it.hasNext()) {
-      Vector.Element e = it.next();
+    for (Element e : clone.all()) {
       assertEquals(test.get(e.index()) * 2.0, e.get(), EPSILON);
     }
   }
@@ -592,7 +585,7 @@ public abstract class AbstractVectorTest<T extends Vector> extends MahoutTestCas
     double sum = 0;
     int elements = 0;
     int nonZero = 0;
-    for (Vector.Element element : v0) {
+    for (Element element : v0.all()) {
       elements++;
       sum += element.get();
       if (element.get() != 0) {
@@ -601,9 +594,8 @@ public abstract class AbstractVectorTest<T extends Vector> extends MahoutTestCas
     }
 
     int nonZeroIterated = 0;
-    final Iterator<Vector.Element> i = v0.iterateNonZero();
-    while (i.hasNext()) {
-      i.next();
+
+    for (Element ignored : v0.nonZeroes()) {
       nonZeroIterated++;
     }
     assertEquals(20, elements);

@@ -17,8 +17,6 @@
 
 package org.apache.mahout.math;
 
-import java.util.Iterator;
-
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.DoubleFunction;
 
@@ -70,6 +68,16 @@ public class DelegatingVector implements Vector, LengthCachingVector {
     // delegate points to original without this
     r.delegate = delegate.clone();
     return r;
+  }
+
+  @Override
+  public Iterable<Element> all() {
+    return delegate.all();
+  }
+
+  @Override
+  public Iterable<Element> nonZeroes() {
+    return delegate.nonZeroes();
   }
 
   @Override
@@ -319,15 +327,5 @@ public class DelegatingVector implements Vector, LengthCachingVector {
   @Override
   public int getNumNonZeroElements() {
     return delegate.getNumNonZeroElements();
-  }
-
-  @Override
-  public Iterator<Element> iterateNonZero() {
-    return delegate.iterateNonZero();
-  }
-
-  @Override
-  public Iterator<Element> iterator() {
-    return delegate.iterator();
   }
 }

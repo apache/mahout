@@ -147,7 +147,7 @@ public class TestNaiveBayesDriver extends AbstractJob {
     for (Pair<Text, VectorWritable> pair : dirIterable) {
       int bestIdx = Integer.MIN_VALUE;
       double bestScore = Long.MIN_VALUE;
-      for (Vector.Element element : pair.getSecond().get()) {
+      for (Vector.Element element : pair.getSecond().get().all()) {
         if (element.get() > bestScore) {
           bestScore = element.get();
           bestIdx = element.index();

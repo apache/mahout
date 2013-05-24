@@ -251,7 +251,7 @@ public class TestEigencutsAffinityCutsJob extends MahoutTestCase {
       // there should only be 1 vector
       assertEquals("Only one vector with a given row number", 1, results.size());
       Vector therow = results.get(0).get();
-      for (Vector.Element e : therow) {
+      for (Vector.Element e : therow.all()) {
         // check the diagonal
         if (row.get() == e.index()) {
           assertEquals("Correct diagonal sum of cuts", sumOfRowCuts(row.get(), 

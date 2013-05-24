@@ -34,7 +34,7 @@ public final class AdaptiveLogisticRegressionTest extends MahoutTestCase {
     Random gen = RandomUtils.getRandom();
     Exponential exp = new Exponential(0.5, gen);
     Vector beta = new DenseVector(200);
-    for (Vector.Element element : beta) {
+    for (Vector.Element element : beta.all()) {
       int sign = 1;
       if (gen.nextDouble() < 0.5) {
         sign = -1;
@@ -73,7 +73,7 @@ public final class AdaptiveLogisticRegressionTest extends MahoutTestCase {
   private static AdaptiveLogisticRegression.TrainingExample getExample(int i, Random gen, Vector beta) {
     Vector data = new DenseVector(200);
 
-    for (Vector.Element element : data) {
+    for (Vector.Element element : data.all()) {
       element.set(gen.nextDouble() < 0.3 ? 1 : 0);
     }
 
@@ -90,7 +90,7 @@ public final class AdaptiveLogisticRegressionTest extends MahoutTestCase {
     Random gen = RandomUtils.getRandom();
     Exponential exp = new Exponential(0.5, gen);
     Vector beta = new DenseVector(200);
-    for (Vector.Element element : beta) {
+    for (Vector.Element element : beta.all()) {
         int sign = 1;
         if (gen.nextDouble() < 0.5) {
           sign = -1;

@@ -35,6 +35,41 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
     this.size = size;
   }
 
+  @Override
+  public Iterable<Element> all() {
+    return new Iterable<Element>() {
+      @Override
+      public Iterator<Element> iterator() {
+        return AbstractVector.this.iterator();
+      }
+    };
+  }
+
+  @Override
+  public Iterable<Element> nonZeroes() {
+    return new Iterable<Element>() {
+      @Override
+      public Iterator<Element> iterator() {
+        return iterateNonZero();
+      }
+    };
+  }
+
+  /**
+   * Iterates over all elements <p/> * NOTE: Implementations may choose to reuse the Element returned for performance
+   * reasons, so if you need a copy of it, you should call {@link #getElement(int)} for the given index
+   *
+   * @return An {@link Iterator} over all elements
+   */
+  protected abstract Iterator<Element> iterator();
+
+  /**
+   * Iterates over all non-zero elements. <p/> NOTE: Implementations may choose to reuse the Element returned for
+   * performance reasons, so if you need a copy of it, you should call {@link #getElement(int)} for the given index
+   *
+   * @return An {@link Iterator} over all non-zero elements
+   */
+  protected abstract Iterator<Element> iterateNonZero();
   /**
    * Aggregates a vector by applying a mapping function fm(x) to every component and aggregating
    * the results with an aggregating function fa(x, y).
@@ -133,9 +168,7 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
       return clone();
     }
     Vector result = createOptimizedCopy();
-    Iterator<Element> iter = result.iterateNonZero();
-    while (iter.hasNext()) {
-      Element element = iter.next();
+    for (Element element : result.nonZeroes()) {
       element.set(element.get() / x);
     }
     return result;
@@ -196,9 +229,7 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
     } else {
       double denominator = normLength * Math.log(power);
       Vector result = createOptimizedCopy();
-      Iterator<Element> iter = result.iterateNonZero();
-      while (iter.hasNext()) {
-        Element element = iter.next();
+      for (Element element : result.nonZeroes()) {
         element.set(Math.log1p(element.get()) / denominator);
       }
       return result;
@@ -288,7 +319,7 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
     // unfilled element(0.0) could be the maxValue hence we need to
     // find one of those elements
     if (nonZeroElements < size && max < 0.0) {
-      for (Element element : this) {
+      for (Element element : all()) {
         if (element.get() == 0.0) {
           return element.index();
         }
@@ -324,7 +355,7 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
     // unfilled element(0.0) could be the maxValue hence we need to
     // find one of those elements
     if (nonZeroElements < size && min > 0.0) {
-      for (Element element : this) {
+      for (Element element : all()) {
         if (element.get() == 0.0) {
           return element.index();
         }

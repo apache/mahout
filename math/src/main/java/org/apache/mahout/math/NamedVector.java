@@ -17,8 +17,6 @@
 
 package org.apache.mahout.math;
 
-import java.util.Iterator;
-
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.DoubleFunction;
 
@@ -69,6 +67,16 @@ public class NamedVector implements Vector {
   @Override
   public NamedVector clone() {
     return new NamedVector(delegate.clone(), name);
+  }
+
+  @Override
+  public Iterable<Element> all() {
+    return delegate.all();
+  }
+
+  @Override
+  public Iterable<Element> nonZeroes() {
+    return delegate.nonZeroes();
   }
 
   @Override
@@ -126,16 +134,6 @@ public class NamedVector implements Vector {
   @Override
   public boolean isSequentialAccess() {
     return delegate.isSequentialAccess();
-  }
-
-  @Override
-  public Iterator<Element> iterator() {
-    return delegate.iterator();
-  }
-
-  @Override
-  public Iterator<Element> iterateNonZero() {
-    return delegate.iterateNonZero();
   }
 
   @Override

@@ -23,7 +23,6 @@ import java.text.NumberFormat;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
 
@@ -119,8 +118,7 @@ public final class ABtJob {
           aCols[i].setQuick(aRowCount, vec.getQuick(i));
         }
       } else {
-        for (Iterator<Vector.Element> vecIter = vec.iterateNonZero(); vecIter.hasNext();) {
-          Vector.Element vecEl = vecIter.next();
+        for (Vector.Element vecEl : vec.nonZeroes()) {
           int i = vecEl.index();
           extendAColIfNeeded(i, aRowCount + 1);
           aCols[i].setQuick(aRowCount, vecEl.get());
@@ -160,8 +158,7 @@ public final class ABtJob {
             continue;
           }
           int j = -1;
-          for (Iterator<Vector.Element> aColIter = aCol.iterateNonZero(); aColIter.hasNext();) {
-            Vector.Element aEl = aColIter.next();
+          for (Vector.Element aEl : aCol.nonZeroes()) {
             j = aEl.index();
 
             // outKey.setTaskItemOrdinal(j);

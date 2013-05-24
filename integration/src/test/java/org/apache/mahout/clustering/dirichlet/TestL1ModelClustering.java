@@ -174,12 +174,7 @@ public final class TestL1ModelClustering extends MahoutTestCase {
   
   private static String formatVector(Vector v) {
     StringBuilder buf = new StringBuilder();
-    int nzero = 0;
-    Iterator<Vector.Element> iterateNonZero = v.iterateNonZero();
-    while (iterateNonZero.hasNext()) {
-      iterateNonZero.next();
-      nzero++;
-    }
+    int nzero = v.getNumNondefaultElements();
     buf.append('(').append(nzero);
     buf.append("nz) [");
     // handle sparse Vectors gracefully, suppressing zero values

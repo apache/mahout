@@ -48,9 +48,7 @@ public class RandomAccessSparseVector extends AbstractVector {
 
   public RandomAccessSparseVector(Vector other) {
     this(other.size(), other.getNumNondefaultElements());
-    Iterator<Element> it = other.iterateNonZero();
-    Element e;
-    while (it.hasNext() && (e = it.next()) != null) {
+    for (Element e : other.nonZeroes()) {
       values.put(e.index(), e.get());
     }
   }
@@ -102,9 +100,7 @@ public class RandomAccessSparseVector extends AbstractVector {
       throw new CardinalityException(size(), other.size());
     }
     values.clear();
-    Iterator<Element> it = other.iterateNonZero();
-    Element e;
-    while (it.hasNext() && (e = it.next()) != null) {
+    for (Element e : other.nonZeroes()) {
       setQuick(e.index(), e.get());
     }
     return this;

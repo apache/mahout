@@ -51,9 +51,7 @@ public class WordsPrunerReducer extends
     Vector value = it.next().get();
     Vector vector = value.clone();
     if (maxDf > -1) {
-      Iterator<Vector.Element> it1 = value.iterateNonZero();
-      while (it1.hasNext()) {
-        Vector.Element e = it1.next();
+      for (Vector.Element e : value.nonZeroes()) {
         if (!dictionary.containsKey(e.index())) {
           vector.setQuick(e.index(), 0.0);
           continue;

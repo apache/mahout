@@ -1,5 +1,6 @@
 package org.apache.mahout.math;
 
+import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.set.OpenIntHashSet;
 
@@ -127,10 +128,7 @@ public abstract class VectorBinaryAssign {
 
     @Override
     public Vector assign(Vector x, Vector y, DoubleDoubleFunction f) {
-      Iterator<Vector.Element> xi = x.iterateNonZero();
-      Vector.Element xe;
-      while (xi.hasNext()) {
-        xe = xi.next();
+      for (Element xe : x.nonZeroes()) {
         xe.set(f.apply(xe.get(), y.getQuick(xe.index())));
       }
       return x;
@@ -155,10 +153,7 @@ public abstract class VectorBinaryAssign {
 
     @Override
     public Vector assign(Vector x, Vector y, DoubleDoubleFunction f) {
-      Iterator<Vector.Element> yi = y.iterateNonZero();
-      Vector.Element ye;
-      while (yi.hasNext()) {
-        ye = yi.next();
+      for (Element ye : y.nonZeroes()) {
         x.setQuick(ye.index(), f.apply(x.getQuick(ye.index()), ye.get()));
       }
       return x;
@@ -183,11 +178,8 @@ public abstract class VectorBinaryAssign {
 
     @Override
     public Vector assign(Vector x, Vector y, DoubleDoubleFunction f) {
-      Iterator<Vector.Element> yi = y.iterateNonZero();
-      Vector.Element ye;
       OrderedIntDoubleMapping updates = new OrderedIntDoubleMapping(false);
-      while (yi.hasNext()) {
-        ye = yi.next();
+      for (Element ye : y.nonZeroes()) {
         updates.set(ye.index(), f.apply(x.getQuick(ye.index()), ye.get()));
       }
       x.mergeUpdates(updates);
@@ -215,8 +207,8 @@ public abstract class VectorBinaryAssign {
 
     @Override
     public Vector assign(Vector x, Vector y, DoubleDoubleFunction f) {
-      Iterator<Vector.Element> xi = x.iterateNonZero();
-      Iterator<Vector.Element> yi = y.iterateNonZero();
+      Iterator<Vector.Element> xi = x.nonZeroes().iterator();
+      Iterator<Vector.Element> yi = y.nonZeroes().iterator();
       Vector.Element xe = null;
       Vector.Element ye = null;
       boolean advanceThis = true;
@@ -274,8 +266,8 @@ public abstract class VectorBinaryAssign {
 
     @Override
     public Vector assign(Vector x, Vector y, DoubleDoubleFunction f) {
-      Iterator<Vector.Element> xi = x.iterateNonZero();
-      Iterator<Vector.Element> yi = y.iterateNonZero();
+      Iterator<Vector.Element> xi = x.nonZeroes().iterator();
+      Iterator<Vector.Element> yi = y.nonZeroes().iterator();
       Vector.Element xe = null;
       Vector.Element ye = null;
       boolean advanceThis = true;
@@ -349,8 +341,8 @@ public abstract class VectorBinaryAssign {
 
     @Override
     public Vector assign(Vector x, Vector y, DoubleDoubleFunction f) {
-      Iterator<Vector.Element> xi = x.iterateNonZero();
-      Iterator<Vector.Element> yi = y.iterateNonZero();
+      Iterator<Vector.Element> xi = x.nonZeroes().iterator();
+      Iterator<Vector.Element> yi = y.nonZeroes().iterator();
       Vector.Element xe = null;
       Vector.Element ye = null;
       boolean advanceThis = true;
@@ -424,18 +416,12 @@ public abstract class VectorBinaryAssign {
     @Override
     public Vector assign(Vector x, Vector y, DoubleDoubleFunction f) {
       OpenIntHashSet visited = new OpenIntHashSet();
-      Iterator<Vector.Element> xi = x.iterateNonZero();
-      Vector.Element xe;
-      while (xi.hasNext()) {
-        xe = xi.next();
+      for (Element xe : x.nonZeroes()) {
         xe.set(f.apply(xe.get(), y.getQuick(xe.index())));
         visited.add(xe.index());
       }
-      Iterator<Vector.Element> yi = y.iterateNonZero();
-      Vector.Element ye;
       OrderedIntDoubleMapping updates = new OrderedIntDoubleMapping(false);
-      while (yi.hasNext()) {
-        ye = yi.next();
+      for (Element ye : y.nonZeroes()) {
         if (!visited.contains(ye.index())) {
           updates.set(ye.index(), f.apply(x.getQuick(ye.index()), ye.get()));
         }
@@ -466,17 +452,11 @@ public abstract class VectorBinaryAssign {
     @Override
     public Vector assign(Vector x, Vector y, DoubleDoubleFunction f) {
       OpenIntHashSet visited = new OpenIntHashSet();
-      Iterator<Vector.Element> xi = x.iterateNonZero();
-      Vector.Element xe;
-      while (xi.hasNext()) {
-        xe = xi.next();
+      for (Element xe : x.nonZeroes()) {
         xe.set(f.apply(xe.get(), y.getQuick(xe.index())));
         visited.add(xe.index());
       }
-      Iterator<Vector.Element> yi = y.iterateNonZero();
-      Vector.Element ye;
-      while (yi.hasNext()) {
-        ye = yi.next();
+      for (Element ye : y.nonZeroes()) {
         if (!visited.contains(ye.index())) {
           x.setQuick(ye.index(), f.apply(x.getQuick(ye.index()), ye.get()));
         }
@@ -499,8 +479,8 @@ public abstract class VectorBinaryAssign {
 
     @Override
     public Vector assign(Vector x, Vector y, DoubleDoubleFunction f) {
-      Iterator<Vector.Element> xi = x.iterator();
-      Iterator<Vector.Element> yi = y.iterator();
+      Iterator<Vector.Element> xi = x.all().iterator();
+      Iterator<Vector.Element> yi = y.all().iterator();
       Vector.Element xe;
       OrderedIntDoubleMapping updates = new OrderedIntDoubleMapping(false);
       while (xi.hasNext() && yi.hasNext()) {
@@ -527,8 +507,8 @@ public abstract class VectorBinaryAssign {
 
     @Override
     public Vector assign(Vector x, Vector y, DoubleDoubleFunction f) {
-      Iterator<Vector.Element> xi = x.iterator();
-      Iterator<Vector.Element> yi = y.iterator();
+      Iterator<Vector.Element> xi = x.all().iterator();
+      Iterator<Vector.Element> yi = y.all().iterator();
       Vector.Element xe;
       while (xi.hasNext() && yi.hasNext()) {
         xe = xi.next();
@@ -552,11 +532,8 @@ public abstract class VectorBinaryAssign {
 
     @Override
     public Vector assign(Vector x, Vector y, DoubleDoubleFunction f) {
-      Iterator<Vector.Element> xi = x.iterator();
-      Vector.Element xe;
       OrderedIntDoubleMapping updates = new OrderedIntDoubleMapping(false);
-      while (xi.hasNext()) {
-        xe = xi.next();
+      for (Element xe : x.all()) {
         updates.set(xe.index(), f.apply(xe.get(), y.getQuick(xe.index())));
       }
       x.mergeUpdates(updates);
@@ -578,10 +555,7 @@ public abstract class VectorBinaryAssign {
 
     @Override
     public Vector assign(Vector x, Vector y, DoubleDoubleFunction f) {
-      Iterator<Vector.Element> xi = x.iterator();
-      Vector.Element xe;
-      while (xi.hasNext()) {
-        xe = xi.next();
+      for (Element xe : x.all()) {
         x.setQuick(xe.index(), f.apply(xe.get(), y.getQuick(xe.index())));
       }
       return x;
@@ -602,11 +576,8 @@ public abstract class VectorBinaryAssign {
 
     @Override
     public Vector assign(Vector x, Vector y, DoubleDoubleFunction f) {
-      Iterator<Vector.Element> yi = y.iterator();
-      Vector.Element ye;
       OrderedIntDoubleMapping updates = new OrderedIntDoubleMapping(false);
-      while (yi.hasNext()) {
-        ye = yi.next();
+      for (Element ye : y.all()) {
         updates.set(ye.index(), f.apply(x.getQuick(ye.index()), ye.get()));
       }
       x.mergeUpdates(updates);
@@ -628,10 +599,7 @@ public abstract class VectorBinaryAssign {
 
     @Override
     public Vector assign(Vector x, Vector y, DoubleDoubleFunction f) {
-      Iterator<Vector.Element> yi = y.iterator();
-      Vector.Element ye;
-      while (yi.hasNext()) {
-        ye = yi.next();
+      for (Element ye : y.all()) {
         x.setQuick(ye.index(), f.apply(x.getQuick(ye.index()), ye.get()));
       }
       return x;

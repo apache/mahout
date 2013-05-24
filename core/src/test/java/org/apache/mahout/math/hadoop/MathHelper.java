@@ -20,7 +20,6 @@ package org.apache.mahout.math.hadoop;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.Iterator;
 import java.util.Locale;
 
 import com.google.common.io.Closeables;
@@ -37,6 +36,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix.MatrixEntryWritable;
 import org.easymock.IArgumentMatcher;
@@ -159,9 +159,7 @@ public final class MathHelper {
    */
   public static int numberOfNoNZeroNonNaNElements(Vector vector) {
     int elementsInVector = 0;
-    Iterator<Vector.Element> vectorIterator = vector.iterateNonZero();
-    while (vectorIterator.hasNext()) {
-      Vector.Element currentElement = vectorIterator.next();
+    for (Element currentElement : vector.nonZeroes()) {
       if (!Double.isNaN(currentElement.get())) {
         elementsInVector++;
       }      
@@ -181,9 +179,7 @@ public final class MathHelper {
       VectorWritable value = record.getSecond();
       readOneRow = true;
       int row = key.get();
-      Iterator<Vector.Element> elementsIterator = value.get().iterateNonZero();
-      while (elementsIterator.hasNext()) {
-        Vector.Element element = elementsIterator.next();
+      for (Element element : value.get().nonZeroes()) {
         matrix.set(row, element.index(), element.get());
       }
     }
@@ -233,7 +229,7 @@ public final class MathHelper {
 
     StringBuilder buffer = new StringBuilder("[");
     String separator = "";
-    for (Vector.Element e : v) {
+    for (Vector.Element e : v.all()) {
       buffer.append(separator);
       if (Double.isNaN(e.get())) {
         buffer.append("  -  ");

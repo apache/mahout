@@ -16,8 +16,6 @@
  */
 package org.apache.mahout.classifier.discriminative;
 
-import java.util.Iterator;
-
 import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,13 +52,15 @@ public class WinnowTrainer extends LinearTrainer {
   /**
    * {@inheritDoc} Winnow update works such that in case the predicted label
    * does not match the real label, the weight vector is updated as follows: In
-   * case the prediction was positiv but should have been negative, all entries
+   * case the prediction was positive but should have been negative, all entries
    * in the weight vector that correspond to non null features in the example
    * are doubled.
    * 
    * In case the prediction was negative but should have been positive, all
    * entries in the weight vector that correspond to non null features in the
-   * example are halfed.
+   * example are halved.
+   *
+   * NOTE: case 1 and case 2 below look _exactly_ the same.  Is this broken?
    */
   @Override
   protected void update(double label, Vector dataPoint, LinearModel model) {
@@ -68,9 +68,7 @@ public class WinnowTrainer extends LinearTrainer {
       // case one
       Vector updateVector = dataPoint.times(1 / this.promotionStep);
       log.info("Winnow update positive: {}", updateVector);
-      Iterator<Vector.Element> iter = updateVector.iterateNonZero();
-      while (iter.hasNext()) {
-        Vector.Element element = iter.next();
+      for (Vector.Element element : updateVector.nonZeroes()) {
         if (element.get() != 0) {
           model.timesDelta(element.index(), element.get());
         }
@@ -79,9 +77,7 @@ public class WinnowTrainer extends LinearTrainer {
       // case two
       Vector updateVector = dataPoint.times(1 / this.promotionStep);
       log.info("Winnow update negative: {}", updateVector);
-      Iterator<Vector.Element> iter = updateVector.iterateNonZero();
-      while (iter.hasNext()) {
-        Vector.Element element = iter.next();
+      for (Vector.Element element : updateVector.nonZeroes()) {
         if (element.get() != 0) {
           model.timesDelta(element.index(), element.get());
         }

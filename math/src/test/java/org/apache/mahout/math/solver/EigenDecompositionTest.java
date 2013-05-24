@@ -78,7 +78,7 @@ public class EigenDecompositionTest {
     int i = 0;
     Matrix a = new DenseMatrix(4, 4);
     for (MatrixSlice row : a) {
-      for (Vector.Element element : row.vector()) {
+      for (Vector.Element element : row.vector().all()) {
         element.set(evals[i++]);
       }
     }
@@ -95,7 +95,7 @@ public class EigenDecompositionTest {
     double[] columnwise = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0};
     int i = 0;
     for (MatrixSlice row : A) {
-      for (Vector.Element element : row.vector()) {
+      for (Vector.Element element : row.vector().all()) {
         element.set(columnwise[i++]);
       }
     }

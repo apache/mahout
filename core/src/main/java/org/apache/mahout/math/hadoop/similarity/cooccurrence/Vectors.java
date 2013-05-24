@@ -28,6 +28,7 @@ import org.apache.mahout.common.iterator.FixedSizeSamplingIterator;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Varint;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenIntIntHashMap;
 
@@ -44,10 +45,10 @@ public final class Vectors {
       return original;
     }
     Vector sample = new RandomAccessSparseVector(original.size(), sampleSize);
-    Iterator<Vector.Element> sampledElements =
-        new FixedSizeSamplingIterator<Vector.Element>(sampleSize, original.iterateNonZero());
+    Iterator<Element> sampledElements =
+        new FixedSizeSamplingIterator<Vector.Element>(sampleSize, original.nonZeroes().iterator());
     while (sampledElements.hasNext()) {
-      Vector.Element elem = sampledElements.next();
+      Element elem = sampledElements.next();
       sample.setQuick(elem.index(), elem.get());
     }
     return sample;
@@ -59,10 +60,7 @@ public final class Vectors {
     }
 
     TopElementsQueue topKQueue = new TopElementsQueue(k);
-    Iterator<Vector.Element> nonZeroElements = original.iterateNonZero();
-    while (nonZeroElements.hasNext()) {
-      Vector.Element nonZeroElement = nonZeroElements.next();
-
+    for (Element nonZeroElement : original.nonZeroes()) {
       MutableElement top = topKQueue.top();
       double candidateValue = nonZeroElement.get();
       if (candidateValue > top.get()) {
@@ -85,9 +83,7 @@ public final class Vectors {
     while (vectors.hasNext()) {
       VectorWritable v = vectors.next();
       if (v != null) {
-        Iterator<Vector.Element> nonZeroElements = v.get().iterateNonZero();
-        while (nonZeroElements.hasNext()) {
-          Vector.Element nonZeroElement = nonZeroElements.next();
+        for (Element nonZeroElement : v.get().nonZeroes()) {
           accumulator.setQuick(nonZeroElement.index(), nonZeroElement.get());
         }
       }
@@ -128,9 +124,7 @@ public final class Vectors {
   public static Vector.Element[] toArray(VectorWritable vectorWritable) {
     Vector.Element[] elements = new Vector.Element[vectorWritable.get().getNumNondefaultElements()];
     int k = 0;
-    Iterator<Vector.Element> nonZeroElements = vectorWritable.get().iterateNonZero();
-    while (nonZeroElements.hasNext()) {
-      Vector.Element nonZeroElement = nonZeroElements.next();
+    for (Element nonZeroElement : vectorWritable.get().nonZeroes()) {
       elements[k++] = new TemporaryElement(nonZeroElement.index(), nonZeroElement.get());
     }
     return elements;

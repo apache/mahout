@@ -216,9 +216,7 @@ public final class ClusterClassificationDriver extends AbstractJob {
   
   private static void writeAllAboveThreshold(List<Cluster> clusterModels, Double clusterClassificationThreshold,
       SequenceFile.Writer writer, VectorWritable vw, Vector pdfPerCluster) throws IOException {
-    Iterator<Element> iterateNonZero = pdfPerCluster.iterateNonZero();
-    while (iterateNonZero.hasNext()) {
-      Element pdf = iterateNonZero.next();
+    for (Element pdf : pdfPerCluster.nonZeroes()) {
       if (pdf.get() >= clusterClassificationThreshold) {
         WeightedVectorWritable wvw = new WeightedVectorWritable(pdf.get(), vw.get());
         int clusterIndex = pdf.index();

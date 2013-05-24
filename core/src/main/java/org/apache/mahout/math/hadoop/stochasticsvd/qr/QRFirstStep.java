@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -39,6 +38,7 @@ import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.common.iterator.CopyConstructorIterator;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.hadoop.stochasticsvd.DenseBlockWritable;
 import org.apache.mahout.math.hadoop.stochasticsvd.UpperTriangular;
@@ -191,9 +191,7 @@ public class QRFirstStep implements Closeable, OutputCollector<Writable, Vector>
       }
     } else {
       Arrays.fill(yRow, 0);
-      for (Iterator<Vector.Element> yIter = incomingYRow.iterateNonZero(); yIter
-        .hasNext();) {
-        Vector.Element yEl = yIter.next();
+      for (Element yEl : incomingYRow.nonZeroes()) {
         yRow[yEl.index()] = yEl.get();
       }
     }

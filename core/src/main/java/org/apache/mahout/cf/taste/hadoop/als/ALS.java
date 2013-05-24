@@ -116,9 +116,8 @@ final class ALS {
     Vector ratings = ratingsWritable.get();
 
     List<Vector> featureVectors = Lists.newArrayListWithCapacity(ratings.getNumNondefaultElements());
-    Iterator<Vector.Element> interactions = ratings.iterateNonZero();
-    while (interactions.hasNext()) {
-      int index = interactions.next().index();
+    for (Vector.Element e : ratings.nonZeroes()) {
+      int index = e.index();
       featureVectors.add(uOrM.get(index));
     }
 

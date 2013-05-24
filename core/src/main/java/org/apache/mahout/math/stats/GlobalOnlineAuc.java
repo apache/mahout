@@ -106,7 +106,7 @@ public class GlobalOnlineAuc implements OnlineAuc {
       Vector row = scores.viewRow(1 - category);
       double m = 0.0;
       double count = 0.0;
-      for (Vector.Element element : row) {
+      for (Vector.Element element : row.all()) {
         double v = element.get();
         if (Double.isNaN(v)) {
           continue;

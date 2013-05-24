@@ -123,7 +123,7 @@ public final class LastfmClusterEvaluator {
         System.out.print('\r' + usedMemory() + " Clusters processed: " + clustersProcessed);
       }
       List<Integer> listeners = Lists.newArrayList();
-      for (Vector.Element ele : point.get()) {
+      for (Vector.Element ele : point.get().nonZeroes()) {
         listeners.add((int) ele.get());
       }
       listenerVectors.add(listeners);

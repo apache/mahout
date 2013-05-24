@@ -18,7 +18,6 @@
 package org.apache.mahout.math.hadoop.stochasticsvd;
 
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
@@ -79,8 +78,7 @@ public class Omega {
         accumDots(j, aRow.getQuick(j), yRow);
       }
     } else {
-      for (Iterator<Element> iter = aRow.iterateNonZero(); iter.hasNext();) {
-        Element el = iter.next();
+      for (Element el : aRow.nonZeroes()) {
         accumDots(el.index(), el.get(), yRow);
       }
     }
@@ -101,8 +99,7 @@ public class Omega {
         accumDots(j, aRow.getQuick(j), yRowOut);
       }
     } else {
-      for (Iterator<Element> iter = aRow.iterateNonZero(); iter.hasNext();) {
-        Element el = iter.next();
+      for (Element el : aRow.nonZeroes()) {
         accumDots(el.index(), el.get(), yRowOut);
       }
     }
@@ -139,8 +136,7 @@ public class Omega {
               }
 
             } else {
-              for (Iterator<Vector.Element> iter = v.iterateNonZero(); iter.hasNext();) {
-                Vector.Element el = iter.next();
+              for (Element el : v.nonZeroes()) {
                 int k = el.index();
                 result += getQuick(k, index) * el.get();
               }

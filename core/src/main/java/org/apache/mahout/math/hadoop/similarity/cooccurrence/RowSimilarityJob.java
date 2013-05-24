@@ -33,6 +33,7 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.mapreduce.VectorSumReducer;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.hadoop.similarity.cooccurrence.measures.VectorSimilarityMeasures;
 import org.apache.mahout.math.hadoop.similarity.cooccurrence.measures.VectorSimilarityMeasure;
@@ -207,9 +208,7 @@ public class RowSimilarityJob extends AbstractJob {
       int numNonZeroEntries = 0;
       double maxValue = Double.MIN_VALUE;
 
-      Iterator<Vector.Element> nonZeroElements = rowVector.iterateNonZero();
-      while (nonZeroElements.hasNext()) {
-        Vector.Element element = nonZeroElements.next();
+      for (Vector.Element element : rowVector.nonZeroes()) {
         RandomAccessSparseVector partialColumnVector = new RandomAccessSparseVector(Integer.MAX_VALUE);
         partialColumnVector.setQuick(row.get(), element.get());
         ctx.write(new IntWritable(element.index()), new VectorWritable(partialColumnVector));
@@ -367,18 +366,14 @@ public class RowSimilarityJob extends AbstractJob {
       Vector dots = partialDotsIterator.next().get();
       while (partialDotsIterator.hasNext()) {
         Vector toAdd = partialDotsIterator.next().get();
-        Iterator<Vector.Element> nonZeroElements = toAdd.iterateNonZero();
-        while (nonZeroElements.hasNext()) {
-          Vector.Element nonZeroElement = nonZeroElements.next();
+        for (Element nonZeroElement : toAdd.nonZeroes()) {
           dots.setQuick(nonZeroElement.index(), dots.getQuick(nonZeroElement.index()) + nonZeroElement.get());
         }
       }
 
       Vector similarities = dots.like();
       double normA = norms.getQuick(row.get());
-      Iterator<Vector.Element> dotsWith = dots.iterateNonZero();
-      while (dotsWith.hasNext()) {
-        Vector.Element b = dotsWith.next();
+      for (Element b : dots.nonZeroes()) {
         double similarityValue = similarity.similarity(b.get(), normA, norms.getQuick(b.index()), numberOfColumns);
         if (similarityValue >= treshold) {
           similarities.set(b.index(), similarityValue);
@@ -408,10 +403,7 @@ public class RowSimilarityJob extends AbstractJob {
       // For performance, the creation of transposedPartial is moved out of the while loop and it is reused inside
       Vector transposedPartial = new RandomAccessSparseVector(similarities.size(), 1);
       TopElementsQueue topKQueue = new TopElementsQueue(maxSimilaritiesPerRow);
-      Iterator<Vector.Element> nonZeroElements = similarities.iterateNonZero();
-      while (nonZeroElements.hasNext()) {
-        Vector.Element nonZeroElement = nonZeroElements.next();
-
+      for (Element nonZeroElement : similarities.nonZeroes()) {
         MutableElement top = topKQueue.top();
         double candidateValue = nonZeroElement.get();
         if (candidateValue > top.get()) {

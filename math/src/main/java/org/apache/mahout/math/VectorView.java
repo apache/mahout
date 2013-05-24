@@ -114,7 +114,7 @@ public class VectorView extends AbstractVector {
     private final Iterator<Element> it;
 
     private NonZeroIterator() {
-      it = vector.iterateNonZero();
+      it = vector.nonZeroes().iterator();
     }
 
     @Override
@@ -136,7 +136,7 @@ public class VectorView extends AbstractVector {
     private final Iterator<Element> it;
 
     private AllIterator() {
-      it = vector.iterator();
+      it = vector.all().iterator();
     }
 
     @Override

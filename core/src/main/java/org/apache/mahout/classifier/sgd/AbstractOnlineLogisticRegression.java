@@ -17,13 +17,12 @@
 
 package org.apache.mahout.classifier.sgd;
 
-import java.util.Iterator;
-
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.classifier.OnlineLearner;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.Functions;
 
@@ -170,9 +169,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
       double gradientBase = gradient.get(i);
 
       // then we apply the gradientBase to the resulting element.
-      Iterator<Vector.Element> nonZeros = instance.iterateNonZero();
-      while (nonZeros.hasNext()) {
-        Vector.Element updateLocation = nonZeros.next();
+      for (Element updateLocation : instance.nonZeroes()) {
         int j = updateLocation.index();
 
         double newValue = beta.getQuick(i, j) + gradientBase * learningRate * perTermLearningRate(j) * instance.get(j);
@@ -181,9 +178,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
     }
 
     // remember that these elements got updated
-    Iterator<Vector.Element> i = instance.iterateNonZero();
-    while (i.hasNext()) {
-      Vector.Element element = i.next();
+    for (Element element : instance.nonZeroes()) {
       int j = element.index();
       updateSteps.setQuick(j, getStep());
       updateCounts.incrementQuick(j, 1);
@@ -212,9 +207,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
 
     // here we lazily apply the prior to make up for our neglect
     for (int i = 0; i < numCategories - 1; i++) {
-      Iterator<Vector.Element> nonZeros = instance.iterateNonZero();
-      while (nonZeros.hasNext()) {
-        Vector.Element updateLocation = nonZeros.next();
+      for (Element updateLocation : instance.nonZeroes()) {
         int j = updateLocation.index();
         double missingUpdates = getStep() - updateSteps.get(j);
         if (missingUpdates > 0) {

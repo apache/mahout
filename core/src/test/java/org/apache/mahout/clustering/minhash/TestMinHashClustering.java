@@ -37,7 +37,6 @@ import org.apache.mahout.math.VectorWritable;
 import org.junit.Test;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -98,10 +97,9 @@ public final class TestMinHashClustering extends MahoutTestCase {
   }
   
   private static Set<Integer> getValues(Vector vector) {
-    Iterator<Vector.Element> itr = vector.iterator();
     Set<Integer> values = Sets.newHashSet();
-    while (itr.hasNext()) {
-      values.add((int) itr.next().get());
+    for (Vector.Element e : vector.nonZeroes()) {
+      values.add((int) e.get());
     }
     return values;
   }

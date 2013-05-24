@@ -63,9 +63,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
     this(other.size(), other.getNumNondefaultElements());
 
     if (other.isSequentialAccess()) {
-      Iterator<Element> it = other.iterateNonZero();
-      Element e;
-      while (it.hasNext() && (e = it.next()) != null) {
+      for (Element e : other.nonZeroes()) {
         set(e.index(), e.get());
       }
     } else {
@@ -82,10 +80,8 @@ public class SequentialAccessSparseVector extends AbstractVector {
   private int copySortedRandomAccessSparseVector(Vector other) {
     int elementCount = other.getNumNondefaultElements();
     OrderedElement[] sortableElements = new OrderedElement[elementCount];
-    Iterator<Element> it = other.iterateNonZero();
-    Element e;
     int s = 0;
-    while (it.hasNext() && (e = it.next()) != null) {
+    for (Element e : other.nonZeroes()) {
       sortableElements[s++] = new OrderedElement(e.index(), e.get());
     }
     Arrays.sort(sortableElements);

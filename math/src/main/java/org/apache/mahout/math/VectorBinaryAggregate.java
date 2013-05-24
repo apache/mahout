@@ -110,7 +110,7 @@ public abstract class VectorBinaryAggregate {
 
     @Override
     public double aggregate(Vector x, Vector y, DoubleDoubleFunction fa, DoubleDoubleFunction fc) {
-      Iterator<Vector.Element> xi = x.iterateNonZero();
+      Iterator<Vector.Element> xi = x.nonZeroes().iterator();
       if (!xi.hasNext()) {
         return 0;
       }
@@ -139,7 +139,7 @@ public abstract class VectorBinaryAggregate {
 
     @Override
     public double aggregate(Vector x, Vector y, DoubleDoubleFunction fa, DoubleDoubleFunction fc) {
-      Iterator<Vector.Element> yi = y.iterateNonZero();
+      Iterator<Vector.Element> yi = y.nonZeroes().iterator();
       if (!yi.hasNext()) {
         return 0;
       }
@@ -168,8 +168,8 @@ public abstract class VectorBinaryAggregate {
 
     @Override
     public double aggregate(Vector x, Vector y, DoubleDoubleFunction fa, DoubleDoubleFunction fc) {
-      Iterator<Vector.Element> xi = x.iterateNonZero();
-      Iterator<Vector.Element> yi = y.iterateNonZero();
+      Iterator<Vector.Element> xi = x.nonZeroes().iterator();
+      Iterator<Vector.Element> yi = y.nonZeroes().iterator();
       Vector.Element xe = null;
       Vector.Element ye = null;
       boolean advanceThis = true;
@@ -232,8 +232,8 @@ public abstract class VectorBinaryAggregate {
 
     @Override
     public double aggregate(Vector x, Vector y, DoubleDoubleFunction fa, DoubleDoubleFunction fc) {
-      Iterator<Vector.Element> xi = x.iterateNonZero();
-      Iterator<Vector.Element> yi = y.iterateNonZero();
+      Iterator<Vector.Element> xi = x.nonZeroes().iterator();
+      Iterator<Vector.Element> yi = y.nonZeroes().iterator();
       Vector.Element xe = null;
       Vector.Element ye = null;
       boolean advanceThis = true;
@@ -311,7 +311,7 @@ public abstract class VectorBinaryAggregate {
     @Override
     public double aggregate(Vector x, Vector y, DoubleDoubleFunction fa, DoubleDoubleFunction fc) {
       OpenIntHashSet visited = new OpenIntHashSet();
-      Iterator<Vector.Element> xi = x.iterateNonZero();
+      Iterator<Vector.Element> xi = x.nonZeroes().iterator();
       Vector.Element xe;
       boolean validResult = false;
       double result = 0;
@@ -327,7 +327,7 @@ public abstract class VectorBinaryAggregate {
         }
         visited.add(xe.index());
       }
-      Iterator<Vector.Element> yi = y.iterateNonZero();
+      Iterator<Vector.Element> yi = y.nonZeroes().iterator();
       Vector.Element ye;
       while (yi.hasNext()) {
         ye = yi.next();
@@ -359,8 +359,8 @@ public abstract class VectorBinaryAggregate {
 
     @Override
     public double aggregate(Vector x, Vector y, DoubleDoubleFunction fa, DoubleDoubleFunction fc) {
-      Iterator<Vector.Element> xi = x.iterator();
-      Iterator<Vector.Element> yi = y.iterator();
+      Iterator<Vector.Element> xi = x.all().iterator();
+      Iterator<Vector.Element> yi = y.all().iterator();
       Vector.Element xe;
       boolean validResult = false;
       double result = 0;
@@ -394,7 +394,7 @@ public abstract class VectorBinaryAggregate {
 
     @Override
     public double aggregate(Vector x, Vector y, DoubleDoubleFunction fa, DoubleDoubleFunction fc) {
-      Iterator<Vector.Element> xi = x.iterator();
+      Iterator<Vector.Element> xi = x.all().iterator();
       Vector.Element xe;
       boolean validResult = false;
       double result = 0;
@@ -428,7 +428,7 @@ public abstract class VectorBinaryAggregate {
 
     @Override
     public double aggregate(Vector x, Vector y, DoubleDoubleFunction fa, DoubleDoubleFunction fc) {
-      Iterator<Vector.Element> yi = y.iterator();
+      Iterator<Vector.Element> yi = y.all().iterator();
       Vector.Element ye;
       boolean validResult = false;
       double result = 0;

@@ -29,10 +29,10 @@ import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,11 +84,9 @@ public final class UserVectorSplitterMapper extends
       return;
     }
     Vector userVector = maybePruneUserVector(value.get());
-    Iterator<Vector.Element> it = userVector.iterateNonZero();
     VarIntWritable itemIndexWritable = new VarIntWritable();
     VectorOrPrefWritable vectorOrPref = new VectorOrPrefWritable();
-    while (it.hasNext()) {
-      Vector.Element e = it.next();
+    for (Element e : userVector.nonZeroes()) {
       itemIndexWritable.set(e.index());
       vectorOrPref.set(userID, (float) e.get());
       context.write(itemIndexWritable, vectorOrPref);
@@ -105,9 +103,7 @@ public final class UserVectorSplitterMapper extends
     // "Blank out" small-sized prefs to reduce the amount of partial products
     // generated later. They're not zeroed, but NaN-ed, so they come through
     // and can be used to exclude these items from prefs.
-    Iterator<Vector.Element> it = userVector.iterateNonZero();
-    while (it.hasNext()) {
-      Vector.Element e = it.next();
+    for (Element e : userVector.nonZeroes()) {
       float absValue = Math.abs((float) e.get());
       if (absValue < smallestLargeValue) {
         e.set(Float.NaN);
@@ -126,9 +122,8 @@ public final class UserVectorSplitterMapper extends
       }
     };
 
-    Iterator<Vector.Element> it = userVector.iterateNonZero();
-    while (it.hasNext()) {
-      float absValue = Math.abs((float) it.next().get());
+    for (Element e : userVector.nonZeroes()) {
+      float absValue = Math.abs((float) e.get());
       topPrefValues.insertWithOverflow(absValue);
     }
     return topPrefValues.top();

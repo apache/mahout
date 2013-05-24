@@ -60,9 +60,7 @@ public class DenseVector extends AbstractVector {
   public DenseVector(Vector vector) {
     super(vector.size());
     values = new double[vector.size()];
-    Iterator<Element> it = vector.iterateNonZero();
-    while (it.hasNext()) {
-      Element e = it.next();
+    for (Element e : vector.nonZeroes()) {
       values[e.index()] = e.get();
     }
   }
@@ -229,9 +227,7 @@ public class DenseVector extends AbstractVector {
       throw new CardinalityException(size(), v.size());
     }
 
-    Iterator<Element> iter = v.iterateNonZero();
-    while (iter.hasNext()) {
-      Element element = iter.next();
+    for (Element element : v.nonZeroes()) {
       values[element.index()] += element.get();
     }
   }

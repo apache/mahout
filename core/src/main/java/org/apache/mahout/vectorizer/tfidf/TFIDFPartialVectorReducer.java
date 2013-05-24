@@ -70,10 +70,8 @@ public class TFIDFPartialVectorReducer extends
       return;
     }
     Vector value = it.next().get();
-    Iterator<Vector.Element> it1 = value.iterateNonZero();
     Vector vector = new RandomAccessSparseVector((int) featureCount, value.getNumNondefaultElements());
-    while (it1.hasNext()) {
-      Vector.Element e = it1.next();
+    for (Vector.Element e : value.nonZeroes()) {
       if (!dictionary.containsKey(e.index())) {
         continue;
       }

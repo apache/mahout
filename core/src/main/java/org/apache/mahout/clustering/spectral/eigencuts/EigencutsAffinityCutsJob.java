@@ -101,7 +101,7 @@ public final class EigencutsAffinityCutsJob {
       // and (3, 3) (which, incidentally, will also not be grouped together)
       String type = context.getWorkingDirectory().getName();
       Vector vector = row.get();
-      for (Vector.Element e : vector) {
+      for (Vector.Element e : vector.all()) {
         String newkey = Math.max(key.get(), e.index()) + "_" + Math.min(key.get(), e.index());
         context.write(new Text(newkey), new VertexWritable(key.get(), e.index(), e.get(), type));
       }

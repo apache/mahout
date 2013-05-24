@@ -197,7 +197,7 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
 
   static void dumpSv(Vector s) {
     System.out.printf("svs: ");
-    for (Vector.Element el : s) {
+    for (Vector.Element el : s.all()) {
       System.out.printf("%f  ", el.get());
     }
     System.out.println();

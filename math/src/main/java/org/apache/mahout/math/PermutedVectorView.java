@@ -111,7 +111,7 @@ public class PermutedVectorView extends AbstractVector {
   @Override
   public Iterator<Element> iterator() {
     return new AbstractIterator<Element>() {
-      private final Iterator<Element> i = vector.iterator();
+      private final Iterator<Element> i = vector.all().iterator();
 
       @Override
       protected Vector.Element computeNext() {
@@ -152,7 +152,7 @@ public class PermutedVectorView extends AbstractVector {
   @Override
   public Iterator<Element> iterateNonZero() {
     return new AbstractIterator<Element>() {
-      private final Iterator<Element> i = vector.iterateNonZero();
+      private final Iterator<Element> i = vector.nonZeroes().iterator();
 
       @Override
       protected Vector.Element computeNext() {

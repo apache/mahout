@@ -42,7 +42,7 @@ public final class WeightedVectorComparator implements Comparator<WeightedVector
     if (diff < 1.0e-12) {
       return 0;
     }
-    for (Vector.Element element : a) {
+    for (Vector.Element element : a.all()) {
       r = Double.compare(element.get(), b.get(element.index()));
       if (r != 0) {
         return r;

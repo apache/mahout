@@ -203,7 +203,7 @@ public class EigencutsDriver extends AbstractJob {
     if (v.size() < 100) {
       return v.zSum() / v.size();
     }
-    for (Vector.Element e : v) {
+    for (Vector.Element e : v.all()) {
       med.add(e.get());
     }
     return med.getMedian();

@@ -31,7 +31,6 @@ import org.apache.mahout.math.map.OpenIntObjectHashMap;
 import org.apache.mahout.math.set.OpenIntHashSet;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -76,9 +75,8 @@ public class PredictionMapper extends SharingMapper<IntWritable,VectorWritable,I
     final int userID = userIDWritable.get();
     final OpenIntHashSet alreadyRatedItems = new OpenIntHashSet(ratings.getNumNondefaultElements());
 
-    Iterator<Vector.Element> ratingsIterator = ratings.iterateNonZero();
-    while (ratingsIterator.hasNext()) {
-      alreadyRatedItems.add(ratingsIterator.next().index());
+    for (Vector.Element e : ratings.nonZeroes()) {
+      alreadyRatedItems.add(e.index());
     }
 
     final TopItemsQueue topItemsQueue = new TopItemsQueue(recommendationsPerUser);
