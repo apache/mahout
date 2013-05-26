@@ -25,6 +25,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.hadoop.MatrixColumnMeansJob;
@@ -108,8 +109,7 @@ public class SSVDCli extends AbstractJob {
     Path xiPath = xiPathStr == null ? null : new Path(xiPathStr);
     boolean pca = Boolean.parseBoolean(getOption("pca")) || xiPath != null;
 
-    boolean overwrite =
-      pargs.containsKey(keyFor(DefaultOptionCreator.OVERWRITE_OPTION));
+    boolean overwrite = hasOption(DefaultOptionCreator.OVERWRITE_OPTION);
 
     Configuration conf = getConf();
     if (conf == null) {
@@ -118,7 +118,17 @@ public class SSVDCli extends AbstractJob {
 
     Path[] inputPaths = { getInputPath() };
     Path tempPath = getTempPath();
-    FileSystem fs = FileSystem.get(getOutputPath().toUri(), conf);
+    FileSystem fs = FileSystem.get(getTempPath().toUri(), conf);
+
+    // housekeeping
+    if (overwrite) {
+      // clear the output path
+      HadoopUtil.delete(getConf(), getOutputPath());
+      // clear the temp path
+      HadoopUtil.delete(getConf(), getTempPath());
+    }
+
+    fs.mkdirs(getOutputPath());
 
     // MAHOUT-817
     if (pca && xiPath == null) {
@@ -156,13 +166,6 @@ public class SSVDCli extends AbstractJob {
 
     solver.run();
 
-    // housekeeping
-    if (overwrite) {
-      fs.delete(getOutputPath(), true);
-    }
-
-    fs.mkdirs(getOutputPath());
-
     Vector svalues = solver.getSingularValues().viewPart(0, k);
     SSVDHelper.saveVector(svalues, getOutputPath("sigma"), conf);
 
@@ -184,6 +187,10 @@ public class SSVDCli extends AbstractJob {
         && !fs.rename(new Path(solver.getvHalfSigmaPath()), getOutputPath())) {
       throw new IOException("Unable to move V*Sigma^0.5 results to the output path.");
     }
+
+    // Delete the temp path on exit
+    fs.deleteOnExit(getTempPath());
+
     return 0;
   }
 
