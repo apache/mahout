@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+  MAHOUT-1229: Conf directory content from Mahout distribution archives cannot be unpacked (Stevo Slavic via smarthi)
+  
   MAHOUT-1213: SSVD job doesn't clean it's temp dir, and fails when seeing it again (smarthi)
 
 __MAHOUT-1223: Fixed point skipped in StreamingKMeans when iterating through centroids from a reducer (dfilimon)

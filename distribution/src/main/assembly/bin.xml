@@ -132,6 +132,7 @@
       <directory>${project.basedir}/../src/conf</directory>
       <outputDirectory>conf</outputDirectory>
       <fileMode>0644</fileMode>
+      <directoryMode>0755</directoryMode>
     </fileSet>
     <fileSet>
       <directory>${project.basedir}/../examples/bin</directory>
