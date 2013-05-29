@@ -245,7 +245,7 @@ public class MultinomialTest extends MahoutTestCase {
         double totalWeight = table.getWeight();
 
         double p = 0;
-        int[] k = new int[10];
+        int[] k = new int[weights.size()];
         for (double weight : weights) {
             if (weight > 0) {
                 if (p > 0) {
@@ -258,9 +258,11 @@ public class MultinomialTest extends MahoutTestCase {
         k[table.sample(p - 1.0e-9)]++;
         assertEquals(1, p, 1.0e-9);
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < weights.size(); i++) {
             if (table.getWeight(i) > 0) {
                 assertEquals(2, k[i]);
+            } else {
+                assertEquals(0, k[i]);
             }
         }
     }

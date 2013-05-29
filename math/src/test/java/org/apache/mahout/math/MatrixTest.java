@@ -68,6 +68,19 @@ public abstract class MatrixTest extends MahoutTestCase {
   }
 
   @Test
+  public void testClone() {
+    double oldValue = 1.23;
+    double newValue = 2.34;
+    double[][] values = {{oldValue, 3}, {3, 5}, {7, 9}};
+    Matrix matrix = matrixFactory(values);
+    Matrix clone = matrix.clone();
+    clone.set(0, 0, newValue);
+    //test whether the update in the clone is reflected in the original matrix
+    assertEquals("Matrix clone is not independent of the original",
+      oldValue, matrix.get(0, 0), EPSILON);
+  }
+
+  @Test
   public void testIterate() {
     Iterator<MatrixSlice> it = test.iterator();
     MatrixSlice m;
@@ -528,6 +541,14 @@ public abstract class MatrixTest extends MahoutTestCase {
   public void testViewRow() {
     Vector row = test.viewRow(1);
     assertEquals("row size", 2, row.getNumNondefaultElements());
+
+    //create a matrix with an unassigned row 0
+    Matrix matrix = new SparseMatrix(1, 1);
+    Vector view = matrix.viewRow(0);
+    final double value = 1.23;
+    view.assign(value);
+    //test whether the update in the view is reflected in the matrix
+    assertEquals("Matrix value", view.getQuick(0), matrix.getQuick(0, 0), EPSILON);
   }
 
   @Test(expected = IndexException.class)

@@ -165,8 +165,8 @@ public final class Multinomial<T> implements Sampler<T>, Iterable<T> {
   /**
    * Exposed for testing only.  Returns a list of the leaf weights.  These are in an
    * order such that probing just before and after the cumulative sum of these weights
-   * will touch every element of the tree twice and thus will make every possible left/right
-   * decision in navigating the tree.
+   * will touch every element of the tree twice and thus will make it possible to test
+   * every possible left/right decision in navigating the tree.
    */
   List<Double> getWeights() {
     List<Double> r = Lists.newArrayList();

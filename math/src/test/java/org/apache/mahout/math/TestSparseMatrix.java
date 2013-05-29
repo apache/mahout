@@ -31,16 +31,4 @@ public final class TestSparseMatrix extends MatrixTest {
     }
     return matrix;
   }
-
-  @Test
-  public void testViewRow() {
-    //create a matrix with an unassigned row 0
-    Matrix matrix = new SparseMatrix(1, 1);
-    Vector view = matrix.viewRow(0);
-    final double value = 1.23;
-    view.assign(value);
-    //test whether the update in the view is reflected in the matrix
-    assertEquals("Matrix value", view.getQuick(0), matrix.getQuick(0, 0), EPSILON);
-  }
-
 }

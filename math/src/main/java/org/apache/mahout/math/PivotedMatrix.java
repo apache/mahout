@@ -24,11 +24,11 @@ import com.google.common.base.Preconditions;
  */
 public class PivotedMatrix extends AbstractMatrix {
 
-  private final Matrix base;
-  private final int[] rowPivot;
-  private final int[] rowUnpivot;
-  private final int[] columnPivot;
-  private final int[] columnUnpivot;
+  private Matrix base;
+  private int[] rowPivot;
+  private int[] rowUnpivot;
+  private int[] columnPivot;
+  private int[] columnUnpivot;
 
   public PivotedMatrix(Matrix base, int[] pivot) {
     this(base, pivot, java.util.Arrays.copyOf(pivot, pivot.length));
@@ -176,6 +176,21 @@ public class PivotedMatrix extends AbstractMatrix {
   public Matrix like() {
     return new PivotedMatrix(base.like());
   }
+
+
+  @Override
+  public Matrix clone() {
+    PivotedMatrix clone = (PivotedMatrix) super.clone();
+
+    base = base.clone();
+    rowPivot = rowPivot.clone();
+    rowUnpivot = rowUnpivot.clone();
+    columnPivot = columnPivot.clone();
+    columnUnpivot = columnUnpivot.clone();
+
+    return clone;
+  }
+
 
   /**
    * Returns an empty matrix of the same underlying class as the receiver and of the specified
