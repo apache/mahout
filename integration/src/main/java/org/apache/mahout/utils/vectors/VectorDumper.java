@@ -251,7 +251,7 @@ public final class VectorDumper extends AbstractJob {
       writer.flush();
     } finally {
       if (shouldClose) {
-        Closeables.closeQuietly(writer);
+        Closeables.close(writer, true);
       }
     }
 

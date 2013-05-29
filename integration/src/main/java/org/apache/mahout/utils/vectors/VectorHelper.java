@@ -19,6 +19,7 @@ package org.apache.mahout.utils.vectors;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -79,6 +80,12 @@ public final class VectorHelper {
   }
 
   public static List<Pair<Integer, Double>> topEntries(Vector vector, int maxEntries) {
+    // Get the size of nonZero elements in the input vector
+    int sizeOfNonZeroElementsInVector = Iterables.size(vector.nonZeroes());
+    // If the sizeOfNonZeroElementsInVector < maxEntries then set maxEntries to sizeOfNonZeroElementsInVector
+    // else the call to queue.pop() returns a Pair(null, null) and the subsequent
+    // call to pair.getFirst() throws a NullPointerException
+    maxEntries = (sizeOfNonZeroElementsInVector < maxEntries) ? sizeOfNonZeroElementsInVector : maxEntries;
     PriorityQueue<Pair<Integer, Double>> queue = new TDoublePQ<Integer>(-1, maxEntries);
     for (Element e : vector.nonZeroes()) {
       queue.insertWithOverflow(Pair.of(e.index(), e.get()));
