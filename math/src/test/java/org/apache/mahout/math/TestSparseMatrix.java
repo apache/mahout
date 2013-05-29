@@ -17,8 +17,6 @@
 
 package org.apache.mahout.math;
 
-import org.junit.Test;
-
 public final class TestSparseMatrix extends MatrixTest {
 
   @Override
