@@ -70,4 +70,18 @@ public final class VectorHelperTest extends MahoutTestCase {
     assertTrue(VectorHelper.topEntries(v, 5).size() < Iterables.size(v.nonZeroes()));
   }
 
+  @Test
+  public void testTopEntriesWhenAllZeros() throws Exception {
+    Vector v = new SequentialAccessSparseVector(10);
+    v.set(2, 0.0);
+    v.set(4, 0.0);
+    v.set(6, 0.0);
+    v.set(7, 0);
+    v.set(9, 0.0);
+    v.set(1, 0.0);
+    v.set(3, 0.0);
+    v.set(8, 0.0);
+    assertEquals(0, VectorHelper.topEntries(v, 6).size());
+  }
+
 }
