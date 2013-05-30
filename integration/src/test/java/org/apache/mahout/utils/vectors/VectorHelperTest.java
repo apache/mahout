@@ -63,10 +63,11 @@ public final class VectorHelperTest extends MahoutTestCase {
     v.set(1, 0.0);
     v.set(3, 0.0);
     v.set(8, 2.7);
+    // check if sizeOFNonZeroElementsInVector = maxEntries
     assertEquals(6, VectorHelper.topEntries(v, 6).size());
-    // when sizeOfNonZeroElementsInVector < maxEntries
+    // check if sizeOfNonZeroElementsInVector < maxEntries
     assertTrue(VectorHelper.topEntries(v, 9).size() < 9);
-    // when sizeOfNonZeroElementsInVector > maxEntries
+    // check if sizeOfNonZeroElementsInVector > maxEntries
     assertTrue(VectorHelper.topEntries(v, 5).size() < Iterables.size(v.nonZeroes()));
   }
 
@@ -83,5 +84,4 @@ public final class VectorHelperTest extends MahoutTestCase {
     v.set(8, 0.0);
     assertEquals(0, VectorHelper.topEntries(v, 6).size());
   }
-
 }

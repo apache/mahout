@@ -80,12 +80,16 @@ public final class VectorHelper {
   }
 
   public static List<Pair<Integer, Double>> topEntries(Vector vector, int maxEntries) {
+
     // Get the size of nonZero elements in the input vector
     int sizeOfNonZeroElementsInVector = Iterables.size(vector.nonZeroes());
-    // If the sizeOfNonZeroElementsInVector < maxEntries then set maxEntries to sizeOfNonZeroElementsInVector
-    // else the call to queue.pop() returns a Pair(null, null) and the subsequent
-    // call to pair.getFirst() throws a NullPointerException
-    maxEntries = (sizeOfNonZeroElementsInVector < maxEntries) ? sizeOfNonZeroElementsInVector : maxEntries;
+
+    // If the sizeOfNonZeroElementsInVector < maxEntries then set maxEntries = sizeOfNonZeroElementsInVector
+    // otherwise the call to queue.pop() returns a Pair(null, null) and the subsequent call
+    // to pair.getFirst() throws a NullPointerException
+    if (sizeOfNonZeroElementsInVector < maxEntries)
+      maxEntries = sizeOfNonZeroElementsInVector;
+
     PriorityQueue<Pair<Integer, Double>> queue = new TDoublePQ<Integer>(-1, maxEntries);
     for (Element e : vector.nonZeroes()) {
       queue.insertWithOverflow(Pair.of(e.index(), e.get()));
