@@ -211,17 +211,20 @@ public final class PFPGrowth {
   }
   
   /**
+   * @throws ClassNotFoundException 
+ * @throws InterruptedException 
+ * @throws IOException 
+ * @params
+   *    input, output locations, additional parameters like minSupport(3), maxHeapSize(50), numGroups(1000)
+   * @conf
+   *    initial Hadoop configuration to use.
    * 
-   * @param params
-   *          params should contain input and output locations as a string value, the additional parameters
-   *          include minSupport(3), maxHeapSize(50), numGroups(1000)
-   */
-  public static void runPFPGrowth(Parameters params) throws IOException,
-                                                    InterruptedException,
-                                                    ClassNotFoundException {
-    Configuration conf = new Configuration();
+   * */
+  public static void runPFPGrowth(Parameters params, Configuration conf) throws IOException,
+                                                                        InterruptedException,
+                                                                        ClassNotFoundException {
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
-                                  + "org.apache.hadoop.io.serializer.WritableSerialization");
+                + "org.apache.hadoop.io.serializer.WritableSerialization");
     startParallelCounting(params, conf);
 
     // save feature list to dcache
@@ -232,12 +235,25 @@ public final class PFPGrowth {
     int numGroups = params.getInt(NUM_GROUPS, NUM_GROUPS_DEFAULT);
     int maxPerGroup = fList.size() / numGroups;
     if (fList.size() % numGroups != 0) {
-      maxPerGroup++;
+        maxPerGroup++;
     }
     params.set(MAX_PER_GROUP, Integer.toString(maxPerGroup));
 
     startParallelFPGrowth(params, conf);
     startAggregating(params, conf);
+  }
+  
+  /**
+   * 
+   * @param params
+   *          params should contain input and output locations as a string value, the additional parameters
+   *          include minSupport(3), maxHeapSize(50), numGroups(1000)
+   */
+  public static void runPFPGrowth(Parameters params) throws IOException,
+                                                    InterruptedException,
+                                                    ClassNotFoundException {
+    Configuration conf = new Configuration();
+    runPFPGrowth(params, conf);
   }
   
   /**

@@ -172,7 +172,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
         kernelProfile, t1, t2, convergenceDelta, maxIterations, runSequential,
         runClustering);
     if (runClustering) {
-      clusterData(inputIsCanopies ? input : new Path(output, Cluster.INITIAL_CLUSTERS_DIR), clustersOut,
+      clusterData(conf, inputIsCanopies ? input : new Path(output, Cluster.INITIAL_CLUSTERS_DIR), clustersOut,
           new Path(output, Cluster.CLUSTERED_POINTS_DIR), runSequential);
     }
   }
@@ -443,6 +443,8 @@ public class MeanShiftCanopyDriver extends AbstractJob {
   /**
    * Run the job using supplied arguments
    * 
+   * @param conf
+   *          configuration for Hadoop job - set to null if running sequentially
    * @param input
    *          the directory pathname for input points
    * @param clustersIn
@@ -452,13 +454,13 @@ public class MeanShiftCanopyDriver extends AbstractJob {
    * @param runSequential
    *          if true run in sequential execution mode
    */
-  public static void clusterData(Path input, Path clustersIn, Path output,
+  public static void clusterData(Configuration conf, Path input, Path clustersIn, Path output,
       boolean runSequential) throws IOException, InterruptedException,
       ClassNotFoundException {
     if (runSequential) {
       clusterDataSeq(input, clustersIn, output);
     } else {
-      clusterDataMR(input, clustersIn, output);
+      clusterDataMR(conf, input, clustersIn, output);
     }
   }
 
@@ -499,9 +501,8 @@ public class MeanShiftCanopyDriver extends AbstractJob {
   /**
    * Cluster the data using Hadoop
    */
-  private static void clusterDataMR(Path input, Path clustersIn, Path output)
+  private static void clusterDataMR(Configuration conf, Path input, Path clustersIn, Path output)
     throws IOException, InterruptedException, ClassNotFoundException {
-    Configuration conf = new Configuration();
     conf.set(STATE_IN_KEY, clustersIn.toString());
     Job job = new Job(conf,
         "Mean Shift Driver running clusterData over input: " + input);

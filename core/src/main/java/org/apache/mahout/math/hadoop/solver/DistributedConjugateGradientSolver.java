@@ -162,7 +162,10 @@ public class DistributedConjugateGradientSolver extends ConjugateGradientSolver 
       if (DistributedConjugateGradientSolver.this.parsedArgs == null) {
         return -1;
       } else {
-        DistributedConjugateGradientSolver.this.setConf(new Configuration());
+        Configuration conf = getConf();
+        if (conf == null)
+          conf = new Configuration();
+        DistributedConjugateGradientSolver.this.setConf(conf);
         return DistributedConjugateGradientSolver.this.run(args);
       }
     }    

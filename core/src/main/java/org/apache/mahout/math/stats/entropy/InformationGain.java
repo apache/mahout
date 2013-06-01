@@ -89,7 +89,7 @@ public final class InformationGain extends AbstractJob {
       "-s", "value",
       "--tempDir", getTempPath().toString(),
     };
-    ToolRunner.run(new Entropy(), args);
+    ToolRunner.run(getConf(), new Entropy(), args);
     entropy = readDoubleFromPath(entropyPath);
   }
 
@@ -99,7 +99,7 @@ public final class InformationGain extends AbstractJob {
       "-o", conditionalEntropyPath.toString(),
       "--tempDir", getTempPath().toString(),
     };
-    ToolRunner.run(new ConditionalEntropy(), args);
+    ToolRunner.run(getConf(), new ConditionalEntropy(), args);
     conditionalEntropy = readDoubleFromPath(conditionalEntropyPath);
   }
 

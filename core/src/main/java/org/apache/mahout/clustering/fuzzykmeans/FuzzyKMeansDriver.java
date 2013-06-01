@@ -157,7 +157,8 @@ public class FuzzyKMeansDriver extends AbstractJob {
                          boolean emitMostLikely,
                          double threshold,
                          boolean runSequential) throws IOException, ClassNotFoundException, InterruptedException {
-    Path clustersOut = buildClusters(new Configuration(),
+	Configuration conf = new Configuration();
+    Path clustersOut = buildClusters(conf,
                                      input,
                                      clustersIn,
                                      output,
@@ -168,7 +169,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
                                      runSequential);
     if (runClustering) {
       log.info("Clustering ");
-      clusterData(input,
+      clusterData(conf, input,
                   clustersOut,
                   output,
                   measure,
@@ -221,7 +222,8 @@ public class FuzzyKMeansDriver extends AbstractJob {
         buildClusters(conf, input, clustersIn, output, measure, convergenceDelta, maxIterations, m, runSequential);
     if (runClustering) {
       log.info("Clustering");
-      clusterData(input,
+      clusterData(conf, 
+                  input,
                   clustersOut,
                   output,
                   measure,
@@ -308,7 +310,8 @@ public class FuzzyKMeansDriver extends AbstractJob {
    *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
    * @param runSequential if true run in sequential execution mode
    */
-  public static void clusterData(Path input,
+  public static void clusterData(Configuration conf,
+                                 Path input,
                                  Path clustersIn,
                                  Path output,
                                  DistanceMeasure measure,
@@ -320,7 +323,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     throws IOException, ClassNotFoundException, InterruptedException {
     
     ClusterClassifier.writePolicy(new FuzzyKMeansClusteringPolicy(m, convergenceDelta), clustersIn);
-    ClusterClassificationDriver.run(input, output, new Path(output, PathDirectory.CLUSTERED_POINTS_DIRECTORY),
+    ClusterClassificationDriver.run(conf, input, output, new Path(output, PathDirectory.CLUSTERED_POINTS_DIRECTORY),
         threshold, emitMostLikely, runSequential);
   }
 }

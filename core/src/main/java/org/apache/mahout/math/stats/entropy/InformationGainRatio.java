@@ -39,7 +39,7 @@ public final class InformationGainRatio extends AbstractJob {
   @Override
   public int run(String[] args) throws Exception {
     InformationGain job = new InformationGain();
-    ToolRunner.run(job, args);
+    ToolRunner.run(getConf(), job, args);
     informationGain = job.getInformationGain();
     entropy = job.getEntropy();
     informationGainRatio = informationGain / entropy;

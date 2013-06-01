@@ -159,6 +159,14 @@ public abstract class AbstractJob extends Configured implements Tool {
   protected Path getCombinedTempPath(String directory1, String directory2) {
     return new Path(new Path(tempPath, directory1) + "," + new Path(tempPath, directory2));
   }
+  
+  @Override
+  public Configuration getConf() {
+    Configuration result = super.getConf();
+    if (result == null)
+      return new Configuration();
+    return result;
+  }
 
   /** Add an option with no argument whose presence can be checked for using
    *  {@code containsKey} method on the map returned by {@link #parseArguments(String[])};
