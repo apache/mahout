@@ -18,6 +18,9 @@ w * Licensed to the Apache Software Foundation (ASF) under one or more
 package org.apache.mahout.fpm.pfpgrowth;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.hadoop.io.LongWritable;
@@ -42,7 +45,8 @@ public class ParallelCountingMapper extends Mapper<LongWritable,Text,Text,LongWr
                                                                       InterruptedException {
     
     String[] items = splitter.split(input.toString());
-    for (String item : items) {
+    Set<String> uniqueItems = new HashSet<String>(Arrays.asList(items));
+    for (String item : uniqueItems) {
       if (item.trim().isEmpty()) {
         continue;
       }

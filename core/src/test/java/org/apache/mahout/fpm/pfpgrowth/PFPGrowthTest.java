@@ -61,7 +61,7 @@ public final class PFPGrowthTest extends MahoutTestCase {
       transactions.add(Arrays.asList("D", "A", "C", "E", "B"));
       transactions.add(Arrays.asList("C", "A", "B", "E"));
       transactions.add(Arrays.asList("B", "A", "D"));
-      transactions.add(Arrays.asList("D"));
+      transactions.add(Arrays.asList("D", "D", "", "D", "D"));
       transactions.add(Arrays.asList("D", "B"));
       transactions.add(Arrays.asList("A", "D", "E"));
       transactions.add(Arrays.asList("B", "C"));
