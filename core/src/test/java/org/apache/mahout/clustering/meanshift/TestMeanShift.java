@@ -193,7 +193,7 @@ public final class TestMeanShift extends MahoutTestCase {
           euclideanDistanceMeasure), refCanopies);
     }
 
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     conf.set(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY, EuclideanDistanceMeasure.class.getName());
     conf.set(MeanShiftCanopyConfigKeys.KERNEL_PROFILE_KEY, TriangularKernelProfile.class.getName());
     conf.set(MeanShiftCanopyConfigKeys.T1_KEY, "4");
@@ -278,7 +278,7 @@ public final class TestMeanShift extends MahoutTestCase {
       clusterer.shiftToMean(canopy);
     }
 
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     conf.set(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY, EuclideanDistanceMeasure.class.getName());
     conf.set(MeanShiftCanopyConfigKeys.KERNEL_PROFILE_KEY, TriangularKernelProfile.class.getName());
     conf.set(MeanShiftCanopyConfigKeys.T1_KEY, "4");
@@ -353,7 +353,7 @@ public final class TestMeanShift extends MahoutTestCase {
   @Test
   public void testCanopyEuclideanMRJob() throws Exception {
     Path input = getTestTempDirPath("testdata");
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     FileSystem fs = FileSystem.get(input.toUri(), conf);
     Collection<VectorWritable> points = Lists.newArrayList();
     // TODO fix test so it doesn't need this random seed!
@@ -414,7 +414,7 @@ public final class TestMeanShift extends MahoutTestCase {
   @Test
   public void testCanopyEuclideanSeqJob() throws Exception {
     Path input = getTestTempDirPath("testdata");
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     FileSystem fs = FileSystem.get(input.toUri(), conf);
     Collection<VectorWritable> points = Lists.newArrayList();
     for (Vector v : raw) {
@@ -445,7 +445,7 @@ public final class TestMeanShift extends MahoutTestCase {
         optKey(DefaultOptionCreator.OVERWRITE_OPTION),
         optKey(DefaultOptionCreator.METHOD_OPTION),
         DefaultOptionCreator.SEQUENTIAL_METHOD };
-    ToolRunner.run(new Configuration(), new MeanShiftCanopyDriver(), args);
+    ToolRunner.run(getConfiguration(), new MeanShiftCanopyDriver(), args);
     Path outPart = new Path(output, "clusters-7-final/part-r-00000");
     long count = HadoopUtil.countRecords(outPart, conf);
     assertEquals("count", 3, count);
@@ -458,7 +458,7 @@ public final class TestMeanShift extends MahoutTestCase {
   @Test
   public void testCanopyEuclideanMRJobNoClustering() throws Exception {
     Path input = getTestTempDirPath("testdata");
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     FileSystem fs = FileSystem.get(input.toUri(), conf);
     Collection<VectorWritable> points = Lists.newArrayList();
     for (Vector v : raw) {
@@ -506,7 +506,7 @@ public final class TestMeanShift extends MahoutTestCase {
   @Test
   public void testCanopyEuclideanSeqJobNoClustering() throws Exception {
     Path input = getTestTempDirPath("testdata");
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     FileSystem fs = FileSystem.get(input.toUri(), conf);
     Collection<VectorWritable> points = Lists.newArrayList();
     for (Vector v : raw) {
@@ -536,7 +536,7 @@ public final class TestMeanShift extends MahoutTestCase {
         optKey(DefaultOptionCreator.OVERWRITE_OPTION),
         optKey(DefaultOptionCreator.METHOD_OPTION),
         DefaultOptionCreator.SEQUENTIAL_METHOD };
-    ToolRunner.run(new Configuration(), new MeanShiftCanopyDriver(), args);
+    ToolRunner.run(getConfiguration(), new MeanShiftCanopyDriver(), args);
     Path outPart = new Path(output, "clusters-7-final/part-r-00000");
     long count = HadoopUtil.countRecords(outPart, conf);
     assertEquals("count", 3, count);

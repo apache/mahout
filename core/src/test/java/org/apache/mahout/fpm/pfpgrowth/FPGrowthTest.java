@@ -57,7 +57,7 @@ public final class FPGrowthTest extends MahoutTestCase {
     transactions.add(new Pair<List<String>,Long>(Arrays.asList("B", "C"), 1L));
 
     Path path = getTestTempFilePath("fpgrowthTest.dat");
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     FileSystem fs = FileSystem.get(path.toUri(), conf);
 
     SequenceFile.Writer writer =
@@ -100,7 +100,7 @@ public final class FPGrowthTest extends MahoutTestCase {
     transactions.add(new Pair<List<String>,Long>(Arrays.asList("X", "Y"), 10L));
 
     Path path = getTestTempFilePath("fpgrowthTestData1.dat");
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     FileSystem fs = FileSystem.get(path.toUri(), conf);
     System.out.println(fp.generateFList(transactions.iterator(), 2));
     SequenceFile.Writer writer =
@@ -138,7 +138,7 @@ public final class FPGrowthTest extends MahoutTestCase {
     transactions.add(new Pair<List<String>,Long>(Arrays.asList("X", "Y", "Z"), 11L));
 
     Path path = getTestTempFilePath("fpgrowthTestData2.dat");
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     FileSystem fs = FileSystem.get(path.toUri(), conf);
     System.out.println(fp.generateFList(transactions.iterator(), 2));
     SequenceFile.Writer writer =

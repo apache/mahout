@@ -677,6 +677,9 @@
           <argLine>-Xms256m -Xmx1800m</argLine>
           <testFailureIgnore>false</testFailureIgnore>
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
+          <systemPropertyVariables>
+            <mahout.test.directory>${project.build.directory}</mahout.test.directory>
+          </systemPropertyVariables>
         </configuration>
       </plugin>
       <plugin>

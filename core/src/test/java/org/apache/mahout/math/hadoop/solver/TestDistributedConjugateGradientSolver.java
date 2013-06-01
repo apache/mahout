@@ -21,9 +21,9 @@ import java.io.File;
 import java.util.Random;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.MahoutTestCase;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 import org.apache.mahout.math.hadoop.TestDistributedRowMatrix;
@@ -47,7 +47,7 @@ public final class TestDistributedConjugateGradientSolver extends MahoutTestCase
     File testData = getTestTempDir("testdata");
     DistributedRowMatrix matrix = new TestDistributedRowMatrix().randomDistributedMatrix(
         10, 10, 10, 10, 10.0, true, testData.getAbsolutePath());
-    matrix.setConf(new Configuration());
+    matrix.setConf(getConfiguration());
     Vector vector = randomVector(matrix.numCols(), 10.0);
     
     DistributedConjugateGradientSolver solver = new DistributedConjugateGradientSolver();

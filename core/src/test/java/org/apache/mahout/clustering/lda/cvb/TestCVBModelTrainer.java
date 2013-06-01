@@ -95,14 +95,15 @@ public final class TestCVBModelTrainer extends MahoutTestCase {
                                                              numDocs, numSamples, numTopicsPerDoc);
 
     Path sampleCorpusPath = getTestTempDirPath("corpus");
-    MatrixUtils.write(sampleCorpusPath, new Configuration(), sampledCorpus);
+    Configuration configuration = getConfiguration();
+    MatrixUtils.write(sampleCorpusPath, configuration, sampledCorpus);
     int numIterations = 5;
     List<Double> perplexities = Lists.newArrayList();
     int startTopic = numGeneratingTopics - 1;
     int numTestTopics = startTopic;
     while (numTestTopics < numGeneratingTopics + 2) {
       Path topicModelStateTempPath = getTestTempDirPath("topicTemp" + numTestTopics);
-      Configuration conf = new Configuration();
+      Configuration conf = getConfiguration();
       CVB0Driver.run(conf, sampleCorpusPath, null, numTestTopics, numTerms,
                      ALPHA, ETA, numIterations, 1, 0, null, null, topicModelStateTempPath, 1234, 0.2f, 2,
                      1, 3, 1, false);

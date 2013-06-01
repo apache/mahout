@@ -42,7 +42,7 @@ public class DocumentProcessorTest extends MahoutTestCase {
 
   @Test
   public void testTokenizeDocuments() throws Exception {
-    Configuration configuration = new Configuration();
+    Configuration configuration = getConfiguration();
     Path input = new Path(getTestTempDirPath(), "inputDir");
     Path output = new Path(getTestTempDirPath(), "outputDir");
     FileSystem fs = FileSystem.get(input.toUri(), configuration);

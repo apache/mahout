@@ -27,6 +27,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
@@ -43,7 +44,7 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
   private Path inputPath;
 
   private void setupDocs() throws IOException {
-    conf = new Configuration();
+    conf = getConfiguration();
 
     inputPath = getTestTempFilePath("documents/docs.file");
     FileSystem fs = FileSystem.get(inputPath.toUri(), conf);
@@ -88,8 +89,7 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
 
   @Test
   public void testPruning() throws Exception {
-    conf = new Configuration();
-
+    conf = getConfiguration();
     inputPath = getTestTempFilePath("documents/docs.file");
     FileSystem fs = FileSystem.get(inputPath.toUri(), conf);
 
@@ -126,7 +126,7 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
 
   @Test
   public void testPruningTF() throws Exception {
-    conf = new Configuration();
+    conf = getConfiguration();
     FileSystem fs = FileSystem.get(conf);
 
     inputPath = getTestTempFilePath("documents/docs.file");
@@ -164,7 +164,6 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
   private Path runTest(boolean tfWeighting, boolean sequential, boolean named, double maxDFSigma, int numDocs) throws Exception {
     Path outputPath = getTestTempFilePath("output");
 
-    
     List<String> argList = new LinkedList<String>();
     argList.add("-i");
     argList.add(inputPath.toString());
@@ -188,7 +187,7 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
     }
     String[] args = argList.toArray(new String[argList.size()]);
     
-    SparseVectorsFromSequenceFiles.main(args);
+    ToolRunner.run(getConfiguration(), new SparseVectorsFromSequenceFiles(), args);
 
     Path tfVectors = new Path(outputPath, "tf-vectors");
     Path tfidfVectors = new Path(outputPath, "tfidf-vectors");

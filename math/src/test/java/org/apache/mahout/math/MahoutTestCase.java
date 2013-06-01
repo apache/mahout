@@ -51,10 +51,13 @@ public abstract class MahoutTestCase extends Assert {
 
   protected final File getTestTempDir() throws IOException {
     if (testTempDir == null) {
-      String systemTmpDir = System.getProperty("java.io.tmpdir");
+      String systemTmpDir = System.getProperty("mahout.test.directory");
+      if (systemTmpDir == null)
+    	systemTmpDir = "target/";
+      systemTmpDir += "test-data";
       long simpleRandomLong = (long) (Long.MAX_VALUE * Math.random());
       testTempDir = new File(systemTmpDir, "mahout-" + getClass().getSimpleName() + '-' + simpleRandomLong);
-      if (!testTempDir.mkdir()) {
+      if (!testTempDir.mkdirs()) {
         throw new IOException("Could not create " + testTempDir);
       }
       testTempDir.deleteOnExit();

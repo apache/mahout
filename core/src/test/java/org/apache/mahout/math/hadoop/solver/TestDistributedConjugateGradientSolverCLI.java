@@ -26,6 +26,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
@@ -76,7 +77,7 @@ public final class TestDistributedConjugateGradientSolverCLI extends MahoutTestC
 
   @Test
   public void testSolver() throws Exception {
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     Path testData = getTestTempDirPath("testdata");
     DistributedRowMatrix matrix = new TestDistributedRowMatrix().randomDistributedMatrix(
         10, 10, 10, 10, 10.0, true, testData.toString());
@@ -99,7 +100,7 @@ public final class TestDistributedConjugateGradientSolverCLI extends MahoutTestC
     };
     
     DistributedConjugateGradientSolver solver = new DistributedConjugateGradientSolver();
-    solver.job().run(args);
+    ToolRunner.run(getConfiguration(), solver.job(), args);
     
     Vector x = loadVector(conf, output);
     

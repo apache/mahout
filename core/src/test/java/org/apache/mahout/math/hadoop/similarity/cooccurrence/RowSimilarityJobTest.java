@@ -57,7 +57,7 @@ public class RowSimilarityJobTest extends MahoutTestCase {
     outputDir.delete();
     File tmpDir = getTestTempDir("tmp");
 
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     Path inputPath = new Path(inputFile.getAbsolutePath());
     FileSystem fs = FileSystem.get(inputPath.toUri(), conf);
 
@@ -98,7 +98,7 @@ public class RowSimilarityJobTest extends MahoutTestCase {
     outputDir.delete();
     File tmpDir = getTestTempDir("tmp");
 
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     Path inputPath = new Path(inputFile.getAbsolutePath());
     FileSystem fs = FileSystem.get(inputPath.toUri(), conf);
 
@@ -143,7 +143,7 @@ public class RowSimilarityJobTest extends MahoutTestCase {
     outputDir.delete();
     File tmpDir = getTestTempDir("tmp");
 
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     Path inputPath = new Path(inputFile.getAbsolutePath());
     FileSystem fs = FileSystem.get(inputPath.toUri(), conf);
 
@@ -184,7 +184,7 @@ public class RowSimilarityJobTest extends MahoutTestCase {
 
     File inputFile = getTestTempFile("rows");
 
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     Path inputPath = new Path(inputFile.getAbsolutePath());
     FileSystem fs = FileSystem.get(inputPath.toUri(), conf);
 

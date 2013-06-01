@@ -75,13 +75,15 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
   @Test
   public void testTranspose() throws Exception {
     DistributedRowMatrix m = randomDistributedMatrix(10, 9, 5, 4, 1.0, false);
+    m.setConf(getConfiguration());
     DistributedRowMatrix mt = m.transpose();
+    mt.setConf(getConfiguration());
 
     Path tmpPath = getTestTempDirPath();
     m.setOutputTempPathString(tmpPath.toString());
     Path tmpOutPath = new Path(tmpPath, "/tmpOutTranspose");
     mt.setOutputTempPathString(tmpOutPath.toString());
-    HadoopUtil.delete(new Configuration(), tmpOutPath);
+    HadoopUtil.delete(getConfiguration(), tmpOutPath);
     DistributedRowMatrix mtt = mt.transpose();
     assertEquals(m, mtt, EPSILON);
   }
@@ -92,6 +94,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
         SolverTest.randomSequentialAccessSparseMatrix(100, 90, 50, 20, 1.0);
     DistributedRowMatrix dm =
         randomDistributedMatrix(100, 90, 50, 20, 1.0, false);
+    dm.setConf(getConfiguration());
 
     Vector expected = new DenseVector(50);
     for (int i = 0; i < m.numRows(); i++) {
@@ -108,6 +111,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
         SolverTest.randomSequentialAccessSparseMatrix(100, 90, 0, 0, 1.0);
     DistributedRowMatrix dm =
         randomDistributedMatrix(100, 90, 0, 0, 1.0, false);
+    dm.setConf(getConfiguration());
 
     Vector expected = new DenseVector(0);
     for (int i = 0; i < m.numRows(); i++) {
@@ -124,6 +128,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     v.assign(1.0);
     Matrix m = SolverTest.randomSequentialAccessSparseMatrix(100, 90, 50, 20, 1.0);
     DistributedRowMatrix dm = randomDistributedMatrix(100, 90, 50, 20, 1.0, false);
+    dm.setConf(getConfiguration());
 
     Vector expected = m.times(v);
     Vector actual = dm.times(v);
@@ -136,6 +141,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     v.assign(1.0);
     Matrix m = SolverTest.randomSequentialAccessSparseMatrix(100, 90, 50, 20, 1.0);
     DistributedRowMatrix dm = randomDistributedMatrix(100, 90, 50, 20, 1.0, false);
+    dm.setConf(getConfiguration());
 
     Vector expected = m.timesSquared(v);
     Vector actual = dm.timesSquared(v);
@@ -149,7 +155,9 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     Matrix expected = inputA.transpose().times(inputB);
 
     DistributedRowMatrix distA = randomDistributedMatrix(20, 19, 15, 5, 10.0, false, "distA");
+    distA.setConf(getConfiguration());
     DistributedRowMatrix distB = randomDistributedMatrix(20, 13, 25, 10, 5.0, false, "distB");
+    distB.setConf(getConfiguration());
     DistributedRowMatrix product = distA.times(distB);
 
     assertEquals(expected, product, EPSILON);
@@ -247,10 +255,11 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
 
   @Test
   public void testTimesVectorTempDirDeletion() throws Exception {
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     Vector v = new RandomAccessSparseVector(50);
     v.assign(1.0);
     DistributedRowMatrix dm = randomDistributedMatrix(100, 90, 50, 20, 1.0, false);
+    dm.setConf(conf);
 
     Path outputPath = dm.getOutputTempPath();
     FileSystem fs = outputPath.getFileSystem(conf);
@@ -284,10 +293,11 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
 
   @Test
   public void testTimesSquaredVectorTempDirDeletion() throws Exception {
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     Vector v = new RandomAccessSparseVector(50);
     v.assign(1.0);
     DistributedRowMatrix dm = randomDistributedMatrix(100, 90, 50, 20, 1.0, false);
+    dm.setConf(getConfiguration());
 
     Path outputPath = dm.getOutputTempPath();
     FileSystem fs = outputPath.getFileSystem(conf);
@@ -319,8 +329,8 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     assertEquals(0.0, result1.getDistanceSquared(result2), EPSILON);
   }
 
-  public static Configuration createInitialConf() {
-    Configuration initialConf = new Configuration();
+  public Configuration createInitialConf() throws IOException {
+    Configuration initialConf = getConfiguration();
     initialConf.set(TEST_PROPERTY_KEY, TEST_PROPERTY_VALUE);
     return initialConf;
   }

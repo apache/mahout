@@ -62,7 +62,7 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    fs = FileSystem.get(new Configuration());
+    fs = FileSystem.get(getConfiguration());
   }
 
   @Test
@@ -143,7 +143,7 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
     List<VectorWritable> points = getPointsWritable(REFERENCE);
     List<VectorWritable> seeds = getPointsWritable(SEEDS);
 
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     ClusteringTestUtils.writePointsToFile(points, true, new Path(input, "file1"), fs, conf);
     ClusteringTestUtils.writePointsToFile(seeds, true, new Path(seedsPath, "part-seeds"), fs, conf);
 
@@ -152,7 +152,7 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
         output.toString(), optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION),
         EuclideanDistanceMeasure.class.getName() };
 
-    ToolRunner.run(new Configuration(), new VectorDistanceSimilarityJob(), args);
+    ToolRunner.run(getConfiguration(), new VectorDistanceSimilarityJob(), args);
 
     int expectedOutputSize = SEEDS.length * REFERENCE.length;
     int outputSize = Iterables.size(new SequenceFileIterable<StringTuple, DoubleWritable>(new Path(output,
@@ -182,7 +182,7 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
         EuclideanDistanceMeasure.class.getName(),
         optKey(VectorDistanceSimilarityJob.MAX_DISTANCE), String.valueOf(maxDistance) };
 
-    ToolRunner.run(new Configuration(), new VectorDistanceSimilarityJob(), args);
+    ToolRunner.run(getConfiguration(), new VectorDistanceSimilarityJob(), args);
 
     int outputSize = 0;
 
@@ -202,7 +202,7 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
     Path seedsPath = getTestTempDirPath("seeds");
     List<VectorWritable> points = getPointsWritable(REFERENCE);
     List<VectorWritable> seeds = getPointsWritable(SEEDS);
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     ClusteringTestUtils.writePointsToFile(points, true, new Path(input, "file1"), fs, conf);
     ClusteringTestUtils.writePointsToFile(seeds, true, new Path(seedsPath, "part-seeds"), fs, conf);
     String[] args = {optKey(DefaultOptionCreator.INPUT_OPTION), input.toString(),
@@ -211,7 +211,7 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
         EuclideanDistanceMeasure.class.getName(),
         optKey(VectorDistanceSimilarityJob.OUT_TYPE_KEY), "v"
     };
-    ToolRunner.run(new Configuration(), new VectorDistanceSimilarityJob(), args);
+    ToolRunner.run(getConfiguration(), new VectorDistanceSimilarityJob(), args);
 
     DummyOutputCollector<Text, VectorWritable> collector = new DummyOutputCollector<Text, VectorWritable>();
 

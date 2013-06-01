@@ -150,7 +150,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
   public void testRepresentativePoints() throws Exception {
     ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata, "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     // run using MR reference point calculation
     CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, true, 0.0, true);
     int numIterations = 2;

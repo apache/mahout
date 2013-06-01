@@ -724,7 +724,7 @@ public class RecommenderJobTest extends TasteTestCase {
 
     RecommenderJob recommenderJob = new RecommenderJob();
 
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     conf.set("mapred.input.dir", inputFile.getAbsolutePath());
     conf.set("mapred.output.dir", outputDir.getAbsolutePath());
     conf.setBoolean("mapred.output.compress", false);
@@ -810,7 +810,7 @@ public class RecommenderJobTest extends TasteTestCase {
 
     RecommenderJob recommenderJob = new RecommenderJob();
 
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     conf.set("mapred.input.dir", inputFile.getAbsolutePath());
     conf.set("mapred.output.dir", outputDir.getAbsolutePath());
     conf.setBoolean("mapred.output.compress", false);
@@ -871,7 +871,7 @@ public class RecommenderJobTest extends TasteTestCase {
 
      RecommenderJob recommenderJob = new RecommenderJob();
 
-     Configuration conf = new Configuration();
+     Configuration conf = getConfiguration();
      conf.set("mapred.input.dir", inputFile.getAbsolutePath());
      conf.set("mapred.output.dir", outputDir.getAbsolutePath());
      conf.setBoolean("mapred.output.compress", false);

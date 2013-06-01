@@ -48,7 +48,7 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     fs = FileSystem.get(conf);
   }
 
@@ -62,7 +62,7 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
 
     Path pointsPath = getTestTempDirPath("points");
     Path clustersPath = getTestTempDirPath("clusters");
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file1"), fs, conf);
 
     for (int k = 0; k < points.size(); k++) {
@@ -133,7 +133,7 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
 
     Path pointsPath = getTestTempDirPath("points");
     Path clustersPath = getTestTempDirPath("clusters");
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file1"), fs, conf);
 
     for (int k = 0; k < points.size(); k++) {
@@ -192,7 +192,7 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
           optKey(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION),
           optKey(DefaultOptionCreator.OVERWRITE_OPTION)
       };
-      ToolRunner.run(new Configuration(), new FuzzyKMeansDriver(), args);
+      ToolRunner.run(getConfiguration(), new FuzzyKMeansDriver(), args);
       long count = HadoopUtil.countRecords(new Path(output, "clusteredPoints/part-m-00000"), conf);
       assertTrue(count > 0);
     }

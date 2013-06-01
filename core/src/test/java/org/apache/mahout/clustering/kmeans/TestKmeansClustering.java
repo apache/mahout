@@ -62,7 +62,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     fs = FileSystem.get(conf);
   }
   
@@ -127,7 +127,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
     
     Path pointsPath = getTestTempDirPath("points");
     Path clustersPath = getTestTempDirPath("clusters");
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     ClusteringTestUtils.writePointsToFile(points, true, new Path(pointsPath, "file1"), fs, conf);
     ClusteringTestUtils.writePointsToFile(points, true, new Path(pointsPath, "file2"), fs, conf);
     for (int k = 1; k < points.size(); k++) {
@@ -160,7 +160,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
           optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION), "2", optKey(DefaultOptionCreator.CLUSTERING_OPTION),
           optKey(DefaultOptionCreator.OVERWRITE_OPTION), optKey(DefaultOptionCreator.METHOD_OPTION),
           DefaultOptionCreator.SEQUENTIAL_METHOD};
-      new KMeansDriver().run(args);
+      ToolRunner.run(conf, new KMeansDriver(), args);
       
       // now compare the expected clusters with actual
       Path clusteredPointsPath = new Path(outputPath, "clusteredPoints");
@@ -183,7 +183,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
     
     Path pointsPath = getTestTempDirPath("points");
     Path clustersPath = getTestTempDirPath("clusters");
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     ClusteringTestUtils.writePointsToFile(points, true, new Path(pointsPath, "file1"), fs, conf);
     ClusteringTestUtils.writePointsToFile(points, true, new Path(pointsPath, "file2"), fs, conf);
     for (int k = 1; k < points.size(); k += 3) {
@@ -216,7 +216,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
           optKey(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION), "0.001",
           optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION), "2", optKey(DefaultOptionCreator.CLUSTERING_OPTION),
           optKey(DefaultOptionCreator.OVERWRITE_OPTION)};
-      ToolRunner.run(new Configuration(), new KMeansDriver(), args);
+      ToolRunner.run(getConfiguration(), new KMeansDriver(), args);
       
       // now compare the expected clusters with actual
       Path clusteredPointsPath = new Path(outputPath, "clusteredPoints");
@@ -241,7 +241,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
     List<VectorWritable> points = getPointsWritable(REFERENCE);
     
     Path pointsPath = getTestTempDirPath("points");
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     ClusteringTestUtils.writePointsToFile(points, true, new Path(pointsPath, "file1"), fs, conf);
     ClusteringTestUtils.writePointsToFile(points, true, new Path(pointsPath, "file2"), fs, conf);
     
@@ -288,7 +288,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
 
     // now run the KMeans job
     Path kmeansOutput = new Path(outputPath, "kmeans");
-	KMeansDriver.run(pointsPath, new Path(outputPath, "clusters-0-final"), kmeansOutput, new EuclideanDistanceMeasure(),
+	KMeansDriver.run(getConfiguration(), pointsPath, new Path(outputPath, "clusters-0-final"), kmeansOutput, new EuclideanDistanceMeasure(),
         0.001, 10, true, 0.0, false);
     
     // now compare the expected clusters with actual

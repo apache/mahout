@@ -62,6 +62,7 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
     File input = new File(inputDir, "test.txt");
     params.set(PFPGrowth.INPUT, input.getAbsolutePath());
     params.set(PFPGrowth.OUTPUT, outputDir.getAbsolutePath());
+
     Writer writer = Files.newWriter(input, Charsets.UTF_8);
     try {
       StringRecordIterator it = new StringRecordIterator(new FileLineIterable(Resources.getResource(
@@ -104,7 +105,7 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
       expectedResults.put(Sets.newHashSet(items), support);
     }
 
-    PFPGrowth.runPFPGrowth(params);
+    PFPGrowth.runPFPGrowth(params, getConfiguration());
 
     List<Pair<String,TopKStringPatterns>> frequentPatterns = PFPGrowth.readFrequentPattern(params);
   
@@ -156,7 +157,7 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
       Long support = Long.parseLong(supportString.substring(1, supportString.length() - 1));
       expectedResults.put(Sets.newHashSet(items), support);
     }
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     log.info("Starting Parallel Counting Test: {}", params.get(PFPGrowth.MAX_HEAPSIZE));
     PFPGrowth.startParallelCounting(params, conf);
 

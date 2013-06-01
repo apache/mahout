@@ -55,7 +55,7 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
 
     inputPath = getTestTempFilePath("documents/docs.file");
     FileSystem fs = FileSystem.get(inputPath.toUri(), conf);
@@ -104,7 +104,7 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
     Path tfidf = getTestTempDirPath("output/tfidf");
     Path tfidfVectors = new Path(tfidf, "tfidf-vectors");
     
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     DocumentProcessor.tokenizeDocuments(inputPath, analyzer, tokenizedDocuments, conf);
     
     DictionaryVectorizer.createTermFrequencyVectors(tokenizedDocuments,

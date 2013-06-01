@@ -85,7 +85,7 @@ public final class PFPGrowthTest extends MahoutTestCase {
    */ 
   @Test
   public void testStartParallelFPGrowth() throws Exception {
-    PFPGrowth.runPFPGrowth(params);
+    PFPGrowth.runPFPGrowth(params, getConfiguration());
 
     List<Pair<String,TopKStringPatterns>> frequentPatterns = PFPGrowth.readFrequentPattern(params);
 
@@ -102,7 +102,7 @@ public final class PFPGrowthTest extends MahoutTestCase {
    */ 
   @Test
   public void testStartParallelFPGrowthInSteps() throws Exception {
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     log.info("Starting Parallel Counting Test: {}", params.get(PFPGrowth.MAX_HEAPSIZE));
     PFPGrowth.startParallelCounting(params, conf);
     log.info("Reading fList Test: {}", params.get(PFPGrowth.MAX_HEAPSIZE));

@@ -39,7 +39,7 @@ public final class BasicStatsTest extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    conf = new Configuration();
+    conf = getConfiguration();
   }
 
   @Test

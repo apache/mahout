@@ -23,6 +23,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
@@ -48,7 +49,7 @@ public class EncodedVectorsFromSequenceFilesTest extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    conf = new Configuration();
+    conf = getConfiguration();
 
     inputPath = getTestTempFilePath("documents/docs.file");
     FileSystem fs = FileSystem.get(inputPath.toUri(), conf);
@@ -107,7 +108,7 @@ public class EncodedVectorsFromSequenceFilesTest extends MahoutTestCase {
     
     String[] args = argList.toArray(new String[argList.size()]);
 
-    EncodedVectorsFromSequenceFiles.main(args);
+    ToolRunner.run(getConfiguration(), new EncodedVectorsFromSequenceFiles(), args);
 
     SequenceFileDirIterator<Text, VectorWritable> iter = new SequenceFileDirIterator<Text, VectorWritable>(outputPath, PathType.LIST, PathFilters.partFilter(), null, true, conf);
     int seen = 0;

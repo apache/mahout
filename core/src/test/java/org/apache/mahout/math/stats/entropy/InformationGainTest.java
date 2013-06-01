@@ -32,7 +32,7 @@ public final class InformationGainTest extends MahoutTestCase {
   @Test
   public void testInformationGain() throws Exception {
 
-    Configuration configuration = new Configuration();
+    Configuration configuration = getConfiguration();
     Path input = getTestTempFilePath("input");
     FileSystem fileSystem = FileSystem.get(input.toUri(), configuration);
 
@@ -51,7 +51,7 @@ public final class InformationGainTest extends MahoutTestCase {
     // run the job
     InformationGain job = new InformationGain();
     String[] args = { "-i", input.toString(), "--tempDir", getTestTempDirPath("tmp").toString() };
-    ToolRunner.run(job, args);
+    ToolRunner.run(configuration, job, args);
 
     // check the output
     assertEquals(1.0, job.getEntropy(), EPSILON);

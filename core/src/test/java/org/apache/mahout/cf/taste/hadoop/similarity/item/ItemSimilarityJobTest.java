@@ -127,16 +127,14 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
 
     ItemSimilarityJob similarityJob = new ItemSimilarityJob();
 
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     conf.set("mapred.input.dir", inputFile.getAbsolutePath());
     conf.set("mapred.output.dir", outputDir.getAbsolutePath());
     conf.setBoolean("mapred.output.compress", false);
 
     similarityJob.setConf(conf);
-
     similarityJob.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--similarityClassname",
        CosineSimilarity.class.getName() });
-
     File outPart = outputDir.listFiles(new FilenameFilter() {
       @Override
       public boolean accept(File dir, String name) {
@@ -223,16 +221,14 @@ public final class ItemSimilarityJobTest extends TasteTestCase {
 
     ItemSimilarityJob similarityJob =  new ItemSimilarityJob();
 
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     conf.set("mapred.input.dir", inputFile.getAbsolutePath());
     conf.set("mapred.output.dir", outputDir.getAbsolutePath());
     conf.setBoolean("mapred.output.compress", false);
 
     similarityJob.setConf(conf);
-
     similarityJob.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--similarityClassname",
         TanimotoCoefficientSimilarity.class.getName(), "--maxSimilaritiesPerItem", "1" });
-
     File outPart = outputDir.listFiles(new FilenameFilter() {
       @Override
       public boolean accept(File dir, String name) {

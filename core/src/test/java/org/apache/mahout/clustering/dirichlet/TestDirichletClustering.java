@@ -81,8 +81,8 @@ public final class TestDirichletClustering extends MahoutTestCase {
   @Test
   public void testDirichletClusteringSeq() throws Exception {
     Path output = getTestTempDirPath("output");
-    Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(new Configuration());
+    Configuration conf = getConfiguration();
+    FileSystem fs = FileSystem.get(getConfiguration());
     
     generateSamples(40, 1, 1, 3);
     generateSamples(30, 1, 0, 0.1);
@@ -109,8 +109,8 @@ public final class TestDirichletClustering extends MahoutTestCase {
   @Test
   public void testDirichletClusteringMR() throws Exception {
     Path output = getTestTempDirPath("output");
-    Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(new Configuration());
+    Configuration conf = getConfiguration();
+    FileSystem fs = FileSystem.get(getConfiguration());
     
     generateSamples(40, 1, 1, 3);
     generateSamples(30, 1, 0, 0.1);

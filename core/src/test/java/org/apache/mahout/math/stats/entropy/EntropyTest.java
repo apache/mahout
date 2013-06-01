@@ -50,7 +50,7 @@ public final class EntropyTest extends MahoutTestCase {
 
   private void calculateEntropy(String[] content, double expected, String source) throws Exception {
 
-    Configuration configuration = new Configuration();
+    Configuration configuration = getConfiguration();
     Path input = getTestTempFilePath("input");
     Path output = getTestTempFilePath("output");
     FileSystem fileSystem = FileSystem.get(input.toUri(), configuration);
@@ -75,7 +75,7 @@ public final class EntropyTest extends MahoutTestCase {
     String[] args = { "-i", input.toString(), "-o", output.toString(), "-s", source,
         "--tempDir", getTestTempDirPath("tmp").toString() };
     Entropy job = new Entropy();
-    ToolRunner.run(job, args);
+    ToolRunner.run(configuration, job, args);
 
     assertEquals(content.length, job.getNumberItems());
 
@@ -86,7 +86,7 @@ public final class EntropyTest extends MahoutTestCase {
                                                          PathFilters.logsCRCFilter(),
                                                          null,
                                                          false,
-                                                         new Configuration());
+                                                         getConfiguration());
     assertTrue(iteratorNodes.hasNext());
     assertEquals(expected, iteratorNodes.next().get(), EPSILON);
   }

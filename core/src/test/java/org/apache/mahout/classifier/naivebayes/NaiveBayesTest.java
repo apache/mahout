@@ -58,7 +58,7 @@ public class NaiveBayesTest extends MahoutTestCase {
   public void setUp() throws Exception {
     super.setUp();
 
-    conf = new Configuration();
+    conf = getConfiguration();
 
     inputFile = getTestTempFile("trainingInstances.seq");
     outputDir = getTestTempDir("output");

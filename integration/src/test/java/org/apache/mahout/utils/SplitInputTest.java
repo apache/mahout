@@ -33,6 +33,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.classifier.ClassifierData;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
@@ -60,7 +61,7 @@ public final class SplitInputTest extends MahoutTestCase {
   @Override
   @Before
   public void setUp() throws Exception {
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     fs = FileSystem.get(conf);
 
     super.setUp();
@@ -190,7 +191,7 @@ public final class SplitInputTest extends MahoutTestCase {
   private void writeVectorSequenceFile(Path path, int testPoints)
       throws IOException {
     Path tempSequenceFile = new Path(path, "part-00000");
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     IntWritable key = new IntWritable();
     VectorWritable value = new VectorWritable();
     SequenceFile.Writer writer = null;
@@ -219,7 +220,7 @@ public final class SplitInputTest extends MahoutTestCase {
   private void writeTextSequenceFile(Path path, int testPoints)
       throws IOException {
     Path tempSequenceFile = new Path(path, "part-00000");
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     Text key = new Text();
     Text value = new Text();
     SequenceFile.Writer writer = null;
@@ -241,8 +242,8 @@ public final class SplitInputTest extends MahoutTestCase {
    * Display contents of a SequenceFile
    * @param sequenceFilePath path to SequenceFile
    */
-  private static void displaySequenceFile(Path sequenceFilePath) {
-    for (Pair<?,?> record : new SequenceFileIterable<Writable,Writable>(sequenceFilePath, true, new Configuration())) {
+  private void displaySequenceFile(Path sequenceFilePath) throws IOException {
+    for (Pair<?,?> record : new SequenceFileIterable<Writable,Writable>(sequenceFilePath, true, getConfiguration())) {
       System.out.println(record.getFirst() + "\t" + record.getSecond());
     }
   }
@@ -252,9 +253,9 @@ public final class SplitInputTest extends MahoutTestCase {
    * @param sequenceFilePath path to SequenceFile
    * @return number of records
    */
-  private static int getNumberRecords(Path sequenceFilePath) {
+  private int getNumberRecords(Path sequenceFilePath) throws IOException {
     int numberRecords = 0;
-    for (Object value : new SequenceFileValueIterable<Writable>(sequenceFilePath, true, new Configuration())) {
+    for (Object value : new SequenceFileValueIterable<Writable>(sequenceFilePath, true, getConfiguration())) {
       numberRecords++;
     }
     return numberRecords;
@@ -311,7 +312,7 @@ public final class SplitInputTest extends MahoutTestCase {
             "--mapRedOutputDir", tempMapRedOutputDirectory.toString(),
             "--randomSelectionPct", Integer.toString(randomSelectionPct),
             "--keepPct", Integer.toString(keepPct), "-ow" };
-    SplitInput.main(args);
+    ToolRunner.run(getConfiguration(), new SplitInput(), args);
     validateSplitInputMapReduce(numPoints, randomSelectionPct, keepPct);
   }
 
@@ -325,7 +326,7 @@ public final class SplitInputTest extends MahoutTestCase {
     si.setKeepPct(keepPct);
     si.setMapRedOutputDirectory(tempMapRedOutputDirectory);
     si.setUseMapRed(true);
-    si.splitDirectory(tempSequenceDirectory);
+    si.splitDirectory(getConfiguration(), tempSequenceDirectory);
 
     validateSplitInputMapReduce(numPoints, randomSelectionPct, keepPct);
   }
@@ -334,7 +335,7 @@ public final class SplitInputTest extends MahoutTestCase {
    * Validate that number of test records and number of training records
    * are consistant with keepPct and randomSelectionPct
    */
-  private void validateSplitInputMapReduce(int numPoints, int randomSelectionPct, int keepPct) {
+  private void validateSplitInputMapReduce(int numPoints, int randomSelectionPct, int keepPct) throws IOException {
     Path testPath = new Path(tempMapRedOutputDirectory, "test-r-00000");
     Path trainingPath = new Path(tempMapRedOutputDirectory, "training-r-00000");
     int numberTestRecords = getNumberRecords(testPath);

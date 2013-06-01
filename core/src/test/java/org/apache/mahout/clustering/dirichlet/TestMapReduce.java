@@ -107,7 +107,7 @@ public final class TestMapReduce extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    conf = new Configuration();
+    conf = getConfiguration(); 
     fs = FileSystem.get(conf);
   }
   

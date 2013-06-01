@@ -39,7 +39,7 @@ public final class ConditionalEntropyTest extends MahoutTestCase {
   @Test
   public void testConditionalEntropy() throws Exception {
 
-    Configuration configuration = new Configuration();
+    Configuration configuration = getConfiguration();
     Path input = getTestTempFilePath("input");
     Path output = getTestTempFilePath("output");
     FileSystem fileSystem = FileSystem.get(input.toUri(), configuration);
@@ -60,7 +60,7 @@ public final class ConditionalEntropyTest extends MahoutTestCase {
     Tool job = new ConditionalEntropy();
     String[] args = { "-i", input.toString(), "-o", output.toString(),
         "--tempDir", getTestTempDirPath("tmp").toString() };
-    ToolRunner.run(job, args);
+    ToolRunner.run(configuration, job, args);
 
     // check the output
     Iterator<DoubleWritable> iteratorNodes =
@@ -69,7 +69,7 @@ public final class ConditionalEntropyTest extends MahoutTestCase {
                                                          PathFilters.logsCRCFilter(),
                                                          null,
                                                          false,
-                                                         new Configuration());
+                                                         getConfiguration());
     while (iteratorNodes.hasNext()) {
       assertEquals(0.5, iteratorNodes.next().get(), EPSILON);
     }

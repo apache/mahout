@@ -93,7 +93,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     Path path = new Path(getTestTempDirPath(), "output");
     classifier.writeToSeqFiles(path);
     ClusterClassifier newClassifier = new ClusterClassifier();
-    newClassifier.readFromSeqFiles(new Configuration(), path);
+    newClassifier.readFromSeqFiles(getConfiguration(), path);
     return newClassifier;
   }
   
@@ -221,7 +221,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     Path pointsPath = getTestTempDirPath("points");
     Path priorPath = getTestTempDirPath("prior");
     Path outPath = getTestTempDirPath("output");
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     FileSystem fs = FileSystem.get(pointsPath.toUri(), conf);
     List<VectorWritable> points = TestKmeansClustering.getPointsWritable(TestKmeansClustering.REFERENCE);
     ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file1"), fs, conf);
@@ -253,7 +253,7 @@ public final class TestClusterClassifier extends MahoutTestCase {
     Path pointsPath = getTestTempDirPath("points");
     Path priorPath = getTestTempDirPath("prior");
     Path outPath = getTestTempDirPath("output");
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     FileSystem fs = FileSystem.get(pointsPath.toUri(), conf);
     List<VectorWritable> points = TestKmeansClustering.getPointsWritable(TestKmeansClustering.REFERENCE);
     ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file1"), fs, conf);

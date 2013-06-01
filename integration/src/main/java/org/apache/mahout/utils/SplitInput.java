@@ -280,6 +280,13 @@ public class SplitInput extends AbstractJob {
     if (conf == null) {
       conf = new Configuration();
     }
+    splitDirectory(conf, inputDir);
+  }
+
+  /*
+   * See also splitDirectory(Path inputDir)
+   * */
+  public void splitDirectory(Configuration conf, Path inputDir) throws IOException, ClassNotFoundException, InterruptedException {
     FileSystem fs = inputDir.getFileSystem(conf);
     if (fs.getFileStatus(inputDir) == null) {
       throw new IOException(inputDir + " does not exist");
@@ -289,8 +296,8 @@ public class SplitInput extends AbstractJob {
     }
 
     if (useMapRed) {
-      SplitInputJob.run(new Configuration(), inputDir, mapRedOutputDirectory,
-              keepPct, testRandomSelectionPct);
+      SplitInputJob.run(conf, inputDir, mapRedOutputDirectory,
+            keepPct, testRandomSelectionPct);
     } else {
       // input dir contains one file per category.
       FileStatus[] fileStats = fs.listStatus(inputDir, PathFilters.logsCRCFilter());
@@ -301,7 +308,6 @@ public class SplitInput extends AbstractJob {
       }
     }
   }
-
 
   /**
    * Perform a split on the specified input file. Results will be written to files of the same name in the specified

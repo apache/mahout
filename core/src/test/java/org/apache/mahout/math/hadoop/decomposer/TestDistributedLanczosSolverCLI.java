@@ -20,6 +20,7 @@ package org.apache.mahout.math.hadoop.decomposer;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.math.DenseMatrix;
@@ -45,7 +46,7 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
     DistributedRowMatrix corpus =
         new TestDistributedRowMatrix().randomDenseHierarchicalDistributedMatrix(10, 9, false,
             testData.toString());
-    corpus.setConf(new Configuration());
+    corpus.setConf(getConfiguration());
     Path output = getTestTempDirPath("output");
     Path tmp = getTestTempDirPath("tmp");
     Path workingDir = getTestTempDirPath("working");
@@ -59,7 +60,7 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
         "--symmetric", "false",
         "--workingDir", workingDir.toString()
     };
-    new DistributedLanczosSolver().new DistributedLanczosSolverJob().run(args);
+    ToolRunner.run(getConfiguration(), new DistributedLanczosSolver().new DistributedLanczosSolverJob(), args);
 
     output = getTestTempDirPath("output2");
     tmp = getTestTempDirPath("tmp2");
@@ -73,11 +74,11 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
         "--symmetric", "false",
         "--workingDir", workingDir.toString()
     };
-    new DistributedLanczosSolver().new DistributedLanczosSolverJob().run(args);
+    ToolRunner.run(getConfiguration(), new DistributedLanczosSolver().new DistributedLanczosSolverJob(), args);
 
     Path rawEigenvectors = new Path(output, DistributedLanczosSolver.RAW_EIGENVECTORS);
     Matrix eigenVectors = new DenseMatrix(7, corpus.numCols());
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
 
     int i = 0;
     for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(rawEigenvectors, conf)) {
@@ -93,7 +94,7 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
     Path testData = getTestTempDirPath("testdata");
     DistributedRowMatrix corpus = new TestDistributedRowMatrix()
         .randomDenseHierarchicalDistributedMatrix(10, 9, false, testData.toString());
-    corpus.setConf(new Configuration());
+    corpus.setConf(getConfiguration());
     Path output = getTestTempDirPath("output");
     Path tmp = getTestTempDirPath("tmp");
     String[] args = {
@@ -106,7 +107,7 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
         "--symmetric", "false",
         "--cleansvd", "true"
     };
-    new DistributedLanczosSolver().new DistributedLanczosSolverJob().run(args);
+    ToolRunner.run(getConfiguration(), new DistributedLanczosSolver().new DistributedLanczosSolverJob(), args);
   
     Path cleanEigenvectors = new Path(output, EigenVerificationJob.CLEAN_EIGENVECTORS);
     Matrix eigenVectors = new DenseMatrix(6, corpus.numCols());
@@ -124,10 +125,10 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
         "--symmetric", "false",
         "--cleansvd", "true"
     };
-    new DistributedLanczosSolver().new DistributedLanczosSolverJob().run(args);
+    ToolRunner.run(getConfiguration(), new DistributedLanczosSolver().new DistributedLanczosSolverJob(), args);
     Path cleanEigenvectors2 = new Path(output, EigenVerificationJob.CLEAN_EIGENVECTORS);
     Matrix eigenVectors2 = new DenseMatrix(7, corpus.numCols());
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     Collection<Double> newEigenValues = Lists.newArrayList();
 
     int i = 0;
