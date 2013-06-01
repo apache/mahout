@@ -142,7 +142,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
         TextInputFormat.class, ItemRatingVectorsMapper.class, IntWritable.class,
         VectorWritable.class, VectorSumReducer.class, IntWritable.class,
         VectorWritable.class, SequenceFileOutputFormat.class);
-    itemRatings.setCombinerClass(VectorSumReducer.class);
+    itemRatings.setCombinerClass(VectorSumCombiner.class);
     boolean succeeded = itemRatings.waitForCompletion(true);
     if (!succeeded) {
       return -1;
@@ -298,11 +298,11 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     if (implicitFeedback) {
       solverMapperClassInternal = SolveImplicitFeedbackMapper.class;
-      name = "Recompute " + matrixName + ", iteration (" + iterationNumber + "/" + numIterations + "), "
+      name = "Recompute " + matrixName + ", iteration (" + (iterationNumber + 1) + "/" + numIterations + "), "
           + "(" + numThreadsPerSolver + " threads, " + numFeatures +" features, implicit feedback)";
     } else {
       solverMapperClassInternal = SolveExplicitFeedbackMapper.class;
-      name = "Recompute " + matrixName + ", iteration (" + iterationNumber + "/" + numIterations + "), "
+      name = "Recompute " + matrixName + ", iteration (" + (iterationNumber + 1) + "/" + numIterations + "), "
           + "(" + numThreadsPerSolver + " threads, " + numFeatures + " features, explicit feedback)";
     }
 

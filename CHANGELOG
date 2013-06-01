@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+  MAHOUT-1235: ParallelALSFactorizationJob does not use VectorSumCombiner (ssc)
+
   MAHOUT-1230: SparceMatrix.clone() is not deep copy (Maysam Yabandeh via tdunning)
   
   MAHOUT-1232: VectorHelper.topEntries() throws a NPE when number of NonZero elements in vector < maxEntries (smarthi)
