@@ -102,6 +102,7 @@ public class ModelTrainer {
         workQueue);
     threadPool.allowCoreThreadTimeOut(false);
     threadPool.prestartAllCoreThreads();
+    writeModel.reset();
   }
 
   public void train(VectorIterable matrix, VectorIterable docTopicCounts) {
@@ -240,13 +241,16 @@ public class ModelTrainer {
       long newTime = System.nanoTime();
       log.info("threadpool took: {}ms", (newTime - startTime) / 1.0e6);
       startTime = newTime;
-      writeModel.awaitTermination();
+      readModel.stop();
       newTime = System.nanoTime();
-      log.info("writeModel.awaitTermination() took {}ms", (newTime - startTime) / 1.0e6);
+      log.info("readModel.stop() took {}ms", (newTime - startTime) / 1.0e6);
+      startTime = newTime;
+      writeModel.stop();
+      newTime = System.nanoTime();
+      log.info("writeModel.stop() took {}ms", (newTime - startTime) / 1.0e6);
       TopicModel tmpModel = writeModel;
       writeModel = readModel;
       readModel = tmpModel;
-      writeModel.reset();
     } catch (InterruptedException e) {
       log.error("Interrupted shutting down!", e);
     }

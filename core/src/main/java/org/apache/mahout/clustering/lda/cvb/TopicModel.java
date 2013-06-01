@@ -77,6 +77,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
 
   private final Sampler sampler;
   private final int numThreads;
+  private ThreadPoolExecutor threadPool;
   private Updater[] updaters;
 
   public int getNumTerms() {
@@ -153,7 +154,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   private void initializeThreadPool() {
-    ThreadPoolExecutor threadPool = new ThreadPoolExecutor(numThreads, numThreads, 0, TimeUnit.SECONDS,
+    threadPool = new ThreadPoolExecutor(numThreads, numThreads, 0, TimeUnit.SECONDS,
                                                            new ArrayBlockingQueue<Runnable>(numThreads * 10));
     threadPool.allowCoreThreadTimeOut(false);
     updaters = new Updater[numThreads];
@@ -246,12 +247,22 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
       topicTermCounts.assignRow(x, new SequentialAccessSparseVector(numTerms));
     }
     topicSums.assign(1.0);
-    initializeThreadPool();
+    if(threadPool.isTerminated()) {
+      initializeThreadPool();
+    }
   }
 
-  public void awaitTermination() {
+  public void stop() {
     for (Updater updater : updaters) {
       updater.shutdown();
+    }
+    threadPool.shutdown();
+    try {
+      if (!threadPool.awaitTermination(60, TimeUnit.SECONDS)) {
+        log.warn("Threadpool timed out on await termination - jobs still running!");
+      }
+    } catch (InterruptedException e) {
+        log.error("Interrupted shutting down!", e);
     }
   }
 
@@ -275,12 +286,12 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
         docTopicModelRow.setQuick(e.index(), docTopicModelRow.getQuick(e.index()) * e.get());
       }
     }
-    // now recalculate p(topic|doc) by summing contributions from all of pTopicGivenTerm
+    // now recalculate \(p(topic|doc)\) by summing contributions from all of pTopicGivenTerm
     topics.assign(0.0);
     for (int x = 0; x < numTopics; x++) {
       topics.set(x, docTopicModel.viewRow(x).norm(1));
     }
-    // now renormalize so that sum_x(p(x|doc)) = 1
+    // now renormalize so that \(sum_x(p(x|doc))\) = 1
     topics.assign(Functions.mult(1 / topics.norm(1)));
   }
 
@@ -326,14 +337,14 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   /**
-   * Computes {@code p(topic x | term a, document i)} distributions given input document {@code i}.
-   * {@code pTGT[x][a]} is the (un-normalized) {@code p(x|a,i)}, or if docTopics is {@code null},
-   * {@code p(a|x)} (also un-normalized).
+   * Computes {@code \(p(topic x | term a, document i)\)} distributions given input document {@code i}.
+   * {@code \(pTGT[x][a]\)} is the (un-normalized) {@code \(p(x|a,i)\)}, or if docTopics is {@code null},
+   * {@code \(p(a|x)\)} (also un-normalized).
    *
-   * @param document doc-term vector encoding {@code w(term a|document i)}.
+   * @param document doc-term vector encoding {@code \(w(term a|document i)\)}.
    * @param docTopics {@code docTopics[x]} is the overall weight of topic {@code x} in given
    *          document. If {@code null}, a topic weight of {@code 1.0} is used for all topics.
-   * @param termTopicDist storage for output {@code p(x|a,i)} distributions.
+   * @param termTopicDist storage for output {@code \(p(x|a,i)\)} distributions.
    */
   private void pTopicGivenTerm(Vector document, Vector docTopics, Matrix termTopicDist) {
     // for each topic x
@@ -360,7 +371,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   /**
-   * sum_x sum_a (c_ai * log(p(x|i) * p(a|x)))
+   * \(sum_x sum_a (c_ai * log(p(x|i) * p(a|x)))\)
    */
   public double perplexity(Vector document, Vector docTopics) {
     double perplexity = 0;

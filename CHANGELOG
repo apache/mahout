@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+  MAHOUT-1047: CVB hangs after completion (Angel Martinez Gonzalez via smarthi)
+  
   MAHOUT-1235: ParallelALSFactorizationJob does not use VectorSumCombiner (ssc)
 
   MAHOUT-1230: SparceMatrix.clone() is not deep copy (Maysam Yabandeh via tdunning)
