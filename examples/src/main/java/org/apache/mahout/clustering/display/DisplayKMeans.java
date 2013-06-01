@@ -59,18 +59,18 @@ public class DisplayKMeans extends DisplayClustering {
     writeSampleData(samples);
     boolean runClusterer = true;
     double convergenceDelta = 0.001;
+    int numClusters = 3;
+    int maxIterations = 10;
     if (runClusterer) {
-      int numClusters = 3;
-      runSequentialKMeansClusterer(conf, samples, output, measure, numClusters, convergenceDelta);
+      runSequentialKMeansClusterer(conf, samples, output, measure, numClusters, maxIterations, convergenceDelta);
     } else {
-      int maxIterations = 10;
-      runSequentialKMeansClassifier(conf, samples, output, measure, maxIterations, convergenceDelta);
+      runSequentialKMeansClassifier(conf, samples, output, measure, numClusters, maxIterations, convergenceDelta);
     }
     new DisplayKMeans();
   }
   
   private static void runSequentialKMeansClassifier(Configuration conf, Path samples, Path output,
-      DistanceMeasure measure, int numClusters, double convergenceDelta) throws IOException {
+      DistanceMeasure measure, int numClusters, int maxIterations, double convergenceDelta) throws IOException {
     Collection<Vector> points = Lists.newArrayList();
     for (int i = 0; i < numClusters; i++) {
       points.add(SAMPLE_DATA.get(i).get());
@@ -84,16 +84,15 @@ public class DisplayKMeans extends DisplayClustering {
     Path priorPath = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);
     prior.writeToSeqFiles(priorPath);
     
-    int maxIter = 10;
-    ClusterIterator.iterateSeq(conf, samples, priorPath, output, maxIter);
+    ClusterIterator.iterateSeq(conf, samples, priorPath, output, maxIterations);
     loadClustersWritable(output);
   }
   
   private static void runSequentialKMeansClusterer(Configuration conf, Path samples, Path output,
-      DistanceMeasure measure, int maxIterations, double convergenceDelta) throws IOException, InterruptedException,
+      DistanceMeasure measure, int numClusters, int maxIterations, double convergenceDelta) throws IOException, InterruptedException,
       ClassNotFoundException {
     Path clustersIn = new Path(output, "random-seeds");
-    RandomSeedGenerator.buildRandom(conf, samples, clustersIn, 3, measure);
+    RandomSeedGenerator.buildRandom(conf, samples, clustersIn, numClusters, measure);
     KMeansDriver.run(samples, clustersIn, output, measure, convergenceDelta, maxIterations, true, 0.0, true);
     loadClustersWritable(output);
   }
