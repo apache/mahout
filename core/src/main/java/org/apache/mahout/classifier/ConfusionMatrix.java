@@ -22,8 +22,11 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
+import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.stats.OnlineSummarizer;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
@@ -38,6 +41,7 @@ import com.google.common.collect.Maps;
 public class ConfusionMatrix {
   private final Map<String,Integer> labelMap = Maps.newLinkedHashMap();
   private final int[][] confusionMatrix;
+  private int samples = 0;
   private String defaultLabel = "unknown";
   
   public ConfusionMatrix(Collection<String> labels, String defaultLabel) {
@@ -70,12 +74,87 @@ public class ConfusionMatrix {
     for (int i = 0; i < labelMap.size(); i++) {
       labelTotal += confusionMatrix[labelId][i];
       if (i == labelId) {
-        correct = confusionMatrix[labelId][i];
+        correct += confusionMatrix[labelId][i];
       }
     }
     return 100.0 * correct / labelTotal;
   }
+
+  // Producer accuracy
+  public double getAccuracy() {
+    int total = 0;
+    int correct = 0;
+    for (int i = 0; i < labelMap.size(); i++) {
+      for (int j = 0; j < labelMap.size(); j++) {
+        total += confusionMatrix[i][j];
+        if (i == j) {
+          correct += confusionMatrix[i][j];
+        }
+      }
+    }
+    return 100.0 * correct / total;
+  }
   
+  // User accuracy 
+  public double getReliability() {
+    int count = 0;
+    double accuracy = 0;
+    for (String label: labelMap.keySet()) {
+      if (! label.equals(defaultLabel)) {
+        accuracy += getAccuracy(label);
+      }
+      count++;
+    }
+    return accuracy / count;
+  }
+  
+  /**
+   * Accuracy v.s. randomly classifying all samples.
+   * kappa() = (totalAccuracy() - randomAccuracy()) / (1 - randomAccuracy())
+   * Cohen, Jacob. 1960. A coefficient of agreement for nominal scales. 
+   * Educational And Psychological Measurement 20:37-46.
+   * 
+   * Formula and variable names from:
+   * http://www.yale.edu/ceo/OEFS/Accuracy.pdf
+   * 
+   * @return double
+   */
+  public double getKappa() {
+    double a = 0.0;
+    double b = 0.0;
+    for(int i = 0; i < confusionMatrix.length; i++) {
+      a += confusionMatrix[i][i];
+      double br = 0;
+      for(int j = 0; j < confusionMatrix.length; j++) {
+        br += confusionMatrix[i][j];
+      }
+      double bc = 0;
+      for(int j = 0; j < confusionMatrix.length; j++) {
+        bc += confusionMatrix[j][i];
+      }
+      b += br * bc;
+    }
+    return (samples * a - b) / (samples * samples - b);
+  }
+  
+  /**
+   * Standard deviation of normalized producer accuracy
+   * Not a standard score
+   * @return double
+   */
+  public RunningAverageAndStdDev getNormalizedStats() {
+    RunningAverageAndStdDev summer = new FullRunningAverageAndStdDev();
+    for(int d = 0; d < confusionMatrix.length; d++) {
+      double total = 0;
+      for(int j = 0; j < confusionMatrix.length; j++) {
+        total += confusionMatrix[d][j];
+      }
+      summer.addDatum(confusionMatrix[d][d] / (total + 0.000001));
+    }
+    
+    return summer;
+  }
+   
   public int getCorrect(String label) {
     int labelId = labelMap.get(label);
     return confusionMatrix[labelId][labelId];
@@ -91,10 +170,12 @@ public class ConfusionMatrix {
   }
   
   public void addInstance(String correctLabel, ClassifierResult classifiedResult) {
+    samples++;
     incrementCount(correctLabel, classifiedResult.getLabel());
   }
   
   public void addInstance(String correctLabel, String classifiedLabel) {
+    samples++;
     incrementCount(correctLabel, classifiedLabel);
   }
   
@@ -111,6 +192,9 @@ public class ConfusionMatrix {
     Preconditions.checkArgument(labelMap.containsKey(classifiedLabel), "Label not found: " + classifiedLabel);
     int correctId = labelMap.get(correctLabel);
     int classifiedId = labelMap.get(classifiedLabel);
+    if (confusionMatrix[correctId][classifiedId] == 0.0 && count != 0) {
+      samples++;
+    }
     confusionMatrix[correctId][classifiedId] = count;
   }
   

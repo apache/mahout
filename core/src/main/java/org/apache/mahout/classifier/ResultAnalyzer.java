@@ -22,6 +22,7 @@ import java.text.NumberFormat;
 import java.util.Collection;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
 import org.apache.mahout.math.stats.OnlineSummarizer;
 
 /**
@@ -77,7 +78,8 @@ public class ResultAnalyzer {
   @Override
   public String toString() {
     StringBuilder returnString = new StringBuilder();
-    
+   
+    returnString.append("\n"); 
     returnString.append("=======================================================\n");
     returnString.append("Summary\n");
     returnString.append("-------------------------------------------------------\n");
@@ -97,10 +99,27 @@ public class ResultAnalyzer {
     returnString.append('\n');
     
     returnString.append(confusionMatrix);
+    returnString.append("=======================================================\n");
+    returnString.append("Statistics\n");
+    returnString.append("-------------------------------------------------------\n");
+    
+    RunningAverageAndStdDev normStats = confusionMatrix.getNormalizedStats();
+    returnString.append(StringUtils.rightPad("Kappa", 40)).append(
+      StringUtils.leftPad(decimalFormatter.format(confusionMatrix.getKappa()), 10)).append('\n');
+    returnString.append(StringUtils.rightPad("Accuracy", 40)).append(
+      StringUtils.leftPad(decimalFormatter.format(confusionMatrix.getAccuracy()), 10)).append("%\n");
+    returnString.append(StringUtils.rightPad("Reliability", 40)).append(
+      StringUtils.leftPad(decimalFormatter.format(normStats.getAverage() * 100.00000001), 10)).append("%\n");
+    returnString.append(StringUtils.rightPad("Reliability (standard deviation)", 40)).append(
+      StringUtils.leftPad(decimalFormatter.format(normStats.getStandardDeviation()), 10)).append("\n"); 
+    
     if (hasLL) {
-      returnString.append("\n\n");
-      returnString.append("Avg. Log-likelihood: ").append(summarizer.getMean()).append(" 25%-ile: ")
-          .append(summarizer.getQuartile(1)).append(" 75%-ile: ").append(summarizer.getQuartile(2));
+      returnString.append(StringUtils.rightPad("Log-likelihood", 30)).append("mean      : ").append(
+        StringUtils.leftPad(decimalFormatter.format(summarizer.getMean()), 10)).append('\n');
+      returnString.append(StringUtils.rightPad("", 30)).append(StringUtils.rightPad("25%-ile   : ", 10)).append(
+        StringUtils.leftPad(decimalFormatter.format(summarizer.getQuartile(1)), 10)).append('\n');
+      returnString.append(StringUtils.rightPad("", 30)).append(StringUtils.rightPad("75%-ile   : ", 10)).append(
+        StringUtils.leftPad(decimalFormatter.format(summarizer.getQuartile(3)), 10)).append('\n');
     }
 
     return returnString.toString();

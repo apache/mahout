@@ -30,6 +30,7 @@ public final class ConfusionMatrixTest extends MahoutTestCase {
 
   private static final int[][] VALUES = {{2, 3}, {10, 20}};
   private static final String[] LABELS = {"Label1", "Label2"};
+  private static final int[] OTHER = {3, 6};
   private static final String DEFAULT_LABEL = "other";
   
   @Test
@@ -63,8 +64,8 @@ public final class ConfusionMatrixTest extends MahoutTestCase {
     assertEquals(VALUES[1][0], counts[1][0]);
     assertEquals(VALUES[1][1], counts[1][1]);
     assertTrue(Arrays.equals(new int[3], counts[2])); // zeros
-    assertEquals(0, counts[0][2]);
-    assertEquals(0, counts[1][2]);
+    assertEquals(OTHER[0], counts[0][2]);
+    assertEquals(OTHER[1], counts[1][2]);
     assertEquals(3, cm.getLabels().size());
     assertTrue(cm.getLabels().contains(LABELS[0]));
     assertTrue(cm.getLabels().contains(LABELS[1]));
@@ -75,8 +76,8 @@ public final class ConfusionMatrixTest extends MahoutTestCase {
   private static void checkAccuracy(ConfusionMatrix cm) {
     Collection<String> labelstrs = cm.getLabels();
     assertEquals(3, labelstrs.size());
-    assertEquals(40.0, cm.getAccuracy("Label1"), EPSILON);
-    assertEquals(66.666666667, cm.getAccuracy("Label2"), EPSILON);
+    assertEquals(25.0, cm.getAccuracy("Label1"), EPSILON);
+    assertEquals(55.5555555, cm.getAccuracy("Label2"), EPSILON);
     assertTrue(Double.isNaN(cm.getAccuracy("other")));
   }
   
@@ -86,10 +87,12 @@ public final class ConfusionMatrixTest extends MahoutTestCase {
     labelList.add(labels[1]);
     ConfusionMatrix cm = new ConfusionMatrix(labelList, defaultLabel);
     int[][] v = cm.getConfusionMatrix();
-    v[0][0] = values[0][0];
-    v[0][1] = values[0][1];
-    v[1][0] = values[1][0];
-    v[1][1] = values[1][1];
+    cm.putCount("Label1", "Label1", values[0][0]);
+    cm.putCount("Label1", "Label2", values[0][1]);
+    cm.putCount("Label2", "Label1", values[1][0]);
+    cm.putCount("Label2", "Label2", values[1][1]);
+    cm.putCount("Label1", DEFAULT_LABEL, OTHER[0]);
+    cm.putCount("Label2", DEFAULT_LABEL, OTHER[1]);
     return cm;
   }
   
