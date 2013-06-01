@@ -38,6 +38,8 @@ public class L2 implements PriorFunction {
   }
 
   public L2() {
+    this.s = 1.0;
+    this.s2 = 1.0;	  
   }
 
   @Override
