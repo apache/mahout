@@ -89,6 +89,8 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
   @Override
   public void clear() {
     Arrays.fill(this.state, FREE);
+    Arrays.fill(this.table, null);
+
     distinct = 0;
     freeEntries = table.length; // delta
     trimToSize();

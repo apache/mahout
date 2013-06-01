@@ -1,0 +1,337 @@
+package org.apache.mahout.math.randomized;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.mahout.math.map.OpenIntIntHashMap;
+import org.apache.mahout.math.map.OpenIntObjectHashMap;
+import org.apache.mahout.math.map.OpenObjectIntHashMap;
+import org.apache.mahout.math.set.AbstractIntSet;
+import org.apache.mahout.math.set.OpenHashSet;
+import org.apache.mahout.math.set.OpenIntHashSet;
+import org.junit.Test;
+
+import com.carrotsearch.randomizedtesting.RandomizedTest;
+import com.carrotsearch.randomizedtesting.annotations.Repeat;
+import com.carrotsearch.randomizedtesting.annotations.Seed;
+
+/**
+ * Some randomized tests against Java Util Collections.
+ */
+public class RandomBlasting extends RandomizedTest {
+  private static enum Operation {
+    ADD, REMOVE, CLEAR, INDEXOF, ISEMPTY, SIZE
+  }
+
+  @Test
+  @Repeat(iterations = 20)
+  public void testAgainstReference_OpenObjectIntHashMap() {
+    OpenObjectIntHashMap<Integer> base = new OpenObjectIntHashMap<Integer>();
+    HashMap<Integer, Integer> reference = new HashMap<Integer, Integer>();
+
+    List<Operation> ops = new ArrayList<Operation>();
+    addOp(ops, Operation.ADD, 60);
+    addOp(ops, Operation.REMOVE, 30);
+    addOp(ops, Operation.INDEXOF, 30);
+    addOp(ops, Operation.CLEAR, 5);
+    addOp(ops, Operation.ISEMPTY, 2);
+    addOp(ops, Operation.SIZE, 2);
+
+    int max = randomIntBetween(1000, 20000);
+    for (int reps = 0; reps < max; reps++) {
+      // Ensure some collisions among keys.
+      int k = randomIntBetween(0, max / 4);
+      int v = randomInt();
+      switch (randomFrom(ops)) {
+        case ADD:
+          assertEquals(reference.put(k, v) == null, base.put(k, v));
+          break;
+
+        case REMOVE:
+          assertEquals(reference.remove(k) != null, base.removeKey(k));
+          break;
+
+        case INDEXOF:
+          assertEquals(reference.containsKey(k), base.containsKey(k));
+          break;
+
+        case CLEAR:
+          reference.clear();
+          base.clear();
+          break;
+
+        case ISEMPTY:
+          assertEquals(reference.isEmpty(), base.isEmpty());
+          break;
+
+        case SIZE:
+          assertEquals(reference.size(), base.size());
+          break;
+
+        default:
+          throw new RuntimeException();
+      }
+    }
+  }
+
+  @Test
+  @Repeat(iterations = 20)
+  public void testAgainstReference_OpenIntObjectHashMap() {
+    OpenIntObjectHashMap<Integer> base = new OpenIntObjectHashMap<Integer>();
+    HashMap<Integer, Integer> reference = new HashMap<Integer, Integer>();
+
+    List<Operation> ops = new ArrayList<Operation>();
+    addOp(ops, Operation.ADD, 60);
+    addOp(ops, Operation.REMOVE, 30);
+    addOp(ops, Operation.INDEXOF, 30);
+    addOp(ops, Operation.CLEAR, 5);
+    addOp(ops, Operation.ISEMPTY, 2);
+    addOp(ops, Operation.SIZE, 2);
+
+    int max = randomIntBetween(1000, 20000);
+    for (int reps = 0; reps < max; reps++) {
+      // Ensure some collisions among keys.
+      int k = randomIntBetween(0, max / 4);
+      int v = randomInt();
+      switch (randomFrom(ops)) {
+        case ADD:
+          assertEquals(reference.put(k, v) == null, base.put(k, v));
+          break;
+
+        case REMOVE:
+          assertEquals(reference.remove(k) != null, base.removeKey(k));
+          break;
+
+        case INDEXOF:
+          assertEquals(reference.containsKey(k), base.containsKey(k));
+          break;
+
+        case CLEAR:
+          reference.clear();
+          base.clear();
+          break;
+
+        case ISEMPTY:
+          assertEquals(reference.isEmpty(), base.isEmpty());
+          break;
+
+        case SIZE:
+          assertEquals(reference.size(), base.size());
+          break;
+
+        default:
+          throw new RuntimeException();
+      }
+    }
+  }
+
+  @Test
+  @Repeat(iterations = 20)
+  public void testAgainstReference_OpenIntIntHashMap() {
+    OpenIntIntHashMap base = new OpenIntIntHashMap();
+    HashMap<Integer, Integer> reference = new HashMap<Integer, Integer>();
+
+    List<Operation> ops = new ArrayList<Operation>();
+    addOp(ops, Operation.ADD, 60);
+    addOp(ops, Operation.REMOVE, 30);
+    addOp(ops, Operation.INDEXOF, 30);
+    addOp(ops, Operation.CLEAR, 5);
+    addOp(ops, Operation.ISEMPTY, 2);
+    addOp(ops, Operation.SIZE, 2);
+
+    int max = randomIntBetween(1000, 20000);
+    for (int reps = 0; reps < max; reps++) {
+      // Ensure some collisions among keys.
+      int k = randomIntBetween(0, max / 4);
+      int v = randomInt();
+      switch (randomFrom(ops)) {
+        case ADD:
+          Integer prevValue = reference.put(k, v);
+
+          if (prevValue == null) {
+            assertEquals(true, base.put(k, v));
+          } else {
+            assertEquals(prevValue.intValue(), base.get(k));
+            assertEquals(false, base.put(k, v));
+          }
+          break;
+
+        case REMOVE:
+          assertEquals(reference.containsKey(k), base.containsKey(k));
+
+          Integer removed = reference.remove(k);
+          if (removed == null) {
+            assertEquals(false, base.removeKey(k));
+          } else {
+            assertEquals(removed.intValue(), base.get(k));
+            assertEquals(true, base.removeKey(k));
+          }
+          break;
+
+        case INDEXOF:
+          assertEquals(reference.containsKey(k), base.containsKey(k));
+          break;
+
+        case CLEAR:
+          reference.clear();
+          base.clear();
+          break;
+
+        case ISEMPTY:
+          assertEquals(reference.isEmpty(), base.isEmpty());
+          break;
+
+        case SIZE:
+          assertEquals(reference.size(), base.size());
+          break;
+
+        default:
+          throw new RuntimeException();
+      }
+    }
+  }
+
+  @Test
+  @Repeat(iterations = 20)
+  public void testAgainstReference_OpenIntHashSet() {
+    AbstractIntSet base = new OpenIntHashSet();
+    HashSet<Integer> reference = new HashSet<Integer>();
+
+    List<Operation> ops = new ArrayList<Operation>();
+    addOp(ops, Operation.ADD, 60);
+    addOp(ops, Operation.REMOVE, 30);
+    addOp(ops, Operation.INDEXOF, 30);
+    addOp(ops, Operation.CLEAR, 5);
+    addOp(ops, Operation.ISEMPTY, 2);
+    addOp(ops, Operation.SIZE, 2);
+
+    int max = randomIntBetween(1000, 20000);
+    for (int reps = 0; reps < max; reps++) {
+      // Ensure some collisions among keys.
+      int k = randomIntBetween(0, max / 4);
+      switch (randomFrom(ops)) {
+        case ADD:
+          assertEquals(reference.add(k), base.add(k));
+          break;
+
+        case REMOVE:
+          assertEquals(reference.remove(k), base.remove(k));
+          break;
+
+        case INDEXOF:
+          assertEquals(reference.contains(k), base.contains(k));
+          break;
+
+        case CLEAR:
+          reference.clear();
+          base.clear();
+          break;
+
+        case ISEMPTY:
+          assertEquals(reference.isEmpty(), base.isEmpty());
+          break;
+
+        case SIZE:
+          assertEquals(reference.size(), base.size());
+          break;
+
+        default:
+          throw new RuntimeException();
+      }
+    }
+  }
+
+  @Seed("deadbeef")
+  @Test
+  @Repeat(iterations = 20)
+  public void testAgainstReference_OpenHashSet() {
+    Set<Integer> base = new OpenHashSet<Integer>();
+    Set<Integer> reference = new HashSet<Integer>();
+
+    List<Operation> ops = new ArrayList<Operation>();
+    addOp(ops, Operation.ADD, 60);
+    addOp(ops, Operation.REMOVE, 30);
+    addOp(ops, Operation.INDEXOF, 30);
+    addOp(ops, Operation.CLEAR, 5);
+    addOp(ops, Operation.ISEMPTY, 2);
+    addOp(ops, Operation.SIZE, 2);
+
+    int max = randomIntBetween(1000, 20000);
+    for (int reps = 0; reps < max; reps++) {
+      // Ensure some collisions among keys.
+      int k = randomIntBetween(0, max / 4);
+      switch (randomFrom(ops)) {
+        case ADD:
+          assertEquals(reference.contains(k), base.contains(k));
+          break;
+
+        case REMOVE:
+          assertEquals(reference.remove(k), base.remove(k));
+          break;
+
+        case INDEXOF:
+          assertEquals(reference.contains(k), base.contains(k));
+          break;
+
+        case CLEAR:
+          reference.clear();
+          base.clear();
+          break;
+
+        case ISEMPTY:
+          assertEquals(reference.isEmpty(), base.isEmpty());
+          break;
+
+        case SIZE:
+          assertEquals(reference.size(), base.size());
+          break;
+
+        default:
+          throw new RuntimeException();
+      }
+    }
+  }
+
+  /**
+   * @see "https://issues.apache.org/jira/browse/MAHOUT-1225"
+   */
+  @Test
+  public void testMahout1225() {
+    AbstractIntSet s = new OpenIntHashSet();
+    s.clear();
+    s.add(23);
+    s.add(46);
+    s.clear();
+    s.add(70);
+    s.add(93);
+    s.contains(100);
+  }
+
+  /** */
+  @Test
+  public void testClearTable() throws Exception {
+    OpenObjectIntHashMap<Integer> m = new OpenObjectIntHashMap<Integer>();
+    m.clear(); // rehash from the default capacity to the next prime after 1 (3).
+    m.put(1, 2);
+    m.clear(); // Should clear internal references.
+
+    Field tableField = m.getClass().getDeclaredField("table");
+    tableField.setAccessible(true);
+    Object[] table = (Object[]) tableField.get(m);
+
+    assertEquals(new HashSet<Object>(Arrays.asList(new Object[] {null})), new HashSet<Object>(
+        Arrays.asList(table)));
+  }
+
+  /** Add multiple repetitions of op to the list. */
+  private static void addOp(List<Operation> ops, Operation op, int reps) {
+    for (int i = 0; i < reps; i++) {
+      ops.add(op);
+    }
+  }
+}
