@@ -71,8 +71,13 @@ if [ ! -e ${WORK_DIR}/reuters-out-seqdir ]; then
   if [ ! -e ${WORK_DIR}/reuters-out ]; then
     if [ ! -e ${WORK_DIR}/reuters-sgm ]; then
       if [ ! -f ${WORK_DIR}/reuters21578.tar.gz ]; then
-        echo "Downloading Reuters-21578"
-        curl http://kdd.ics.uci.edu/databases/reuters21578/reuters21578.tar.gz -o ${WORK_DIR}/reuters21578.tar.gz
+	  if [ -n "$2" ]; then
+	      echo "Copying Reuters from local download"
+	      cp $2 ${WORK_DIR}/reuters21578.tar.gz
+	  else
+              echo "Downloading Reuters-21578"
+              curl http://kdd.ics.uci.edu/databases/reuters21578/reuters21578.tar.gz -o ${WORK_DIR}/reuters21578.tar.gz
+	  fi
       fi
       #make sure it was actually downloaded
       if [ ! -f ${WORK_DIR}/reuters21578.tar.gz ]; then
