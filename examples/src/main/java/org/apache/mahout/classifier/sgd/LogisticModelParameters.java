@@ -92,10 +92,8 @@ public class LogisticModelParameters implements Writable {
    * Saves a model to an output stream.
    */
   public void saveTo(OutputStream out) throws IOException {
-    if (lr != null) {
-      lr.close();
-    }
-    targetCategories = csv.getTargetCategories();
+    Closeables.close(lr, false);
+    targetCategories = getCsvRecordFactory().getTargetCategories();
     write(new DataOutputStream(out));
   }
 
@@ -133,9 +131,14 @@ public class LogisticModelParameters implements Writable {
     out.writeInt(numFeatures);
     out.writeBoolean(useBias);
     out.writeInt(maxTargetCategories);
-    out.writeInt(targetCategories.size());
-    for (String category : targetCategories) {
-      out.writeUTF(category);
+
+    if (targetCategories == null) {
+      out.writeInt(0);
+    } else {
+      out.writeInt(targetCategories.size());
+      for (String category : targetCategories) {
+        out.writeUTF(category);
+      }
     }
     out.writeDouble(lambda);
     out.writeDouble(learningRate);
