@@ -264,7 +264,7 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
       if (cmdLine.hasOption(namedVectorOpt)) {
         namedVectors = true;
       }
-      boolean shouldPrune = maxDFSigma >= 0.0;
+      boolean shouldPrune = maxDFSigma >= 0.0  || maxDFPercent > 0.00;
       String tfDirName = shouldPrune
           ? DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER + "-toprune"
           : DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER;
@@ -308,13 +308,17 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
 
       long maxDF = maxDFPercent; //if we are pruning by std dev, then this will get changed
       if (shouldPrune) {
-        Path dfDir = new Path(outputDir, TFIDFConverter.WORDCOUNT_OUTPUT_FOLDER);
-        Path stdCalcDir = new Path(outputDir, HighDFWordsPruner.STD_CALC_DIR);
+	long vectorCount = docFrequenciesFeatures.getFirst()[1];
+	if (maxDFSigma >= 0.0) {
+	  Path dfDir = new Path(outputDir, TFIDFConverter.WORDCOUNT_OUTPUT_FOLDER);
+	  Path stdCalcDir = new Path(outputDir, HighDFWordsPruner.STD_CALC_DIR);
 
-        // Calculate the standard deviation
-        double stdDev = BasicStats.stdDevForGivenMean(dfDir, stdCalcDir, 0.0, conf);
-        long vectorCount = docFrequenciesFeatures.getFirst()[1];
-        maxDF = (int) (100.0 * maxDFSigma * stdDev / vectorCount);
+	  // Calculate the standard deviation
+	  double stdDev = BasicStats.stdDevForGivenMean(dfDir, stdCalcDir, 0.0, conf);
+	  maxDF = (int) (100.0 * maxDFSigma * stdDev / vectorCount);
+	}
+
+	long maxDFThreshold = (long) (vectorCount * ((float) maxDF / 100f));
 
         // Prune the term frequency vectors
         Path tfDir = new Path(outputDir, tfDirName);
@@ -326,7 +330,8 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
           HighDFWordsPruner.pruneVectors(tfDir,
                                          prunedTFDir,
                                          prunedPartialTFDir,
-                                         maxDF,
+                                         maxDFThreshold,
+					 minDf,
                                          conf,
                                          docFrequenciesFeatures,
                                          -1.0f,
@@ -336,7 +341,8 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
           HighDFWordsPruner.pruneVectors(tfDir,
                                          prunedTFDir,
                                          prunedPartialTFDir,
-                                         maxDF,
+                                         maxDFThreshold,
+					 minDf,
                                          conf,
                                          docFrequenciesFeatures,
                                          norm,

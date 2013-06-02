@@ -43,12 +43,13 @@ public final class HighDFWordsPruner {
 
   public static final String STD_CALC_DIR = "stdcalc";
   public static final String MAX_DF = "max.df";
+  public static final String MIN_DF = "min.df";
 
   private HighDFWordsPruner() {
   }
 
   public static void pruneVectors(Path tfDir, Path prunedTFDir, Path prunedPartialTFDir, long maxDF,
-                                  Configuration baseConf,
+                                  long minDF, Configuration baseConf,
                                   Pair<Long[], List<Path>> docFrequenciesFeatures,
                                   float normPower,
                                   boolean logNormalize,
@@ -59,7 +60,7 @@ public final class HighDFWordsPruner {
     for (Path path : docFrequenciesFeatures.getSecond()) {
       Path partialVectorOutputPath = new Path(prunedPartialTFDir, "partial-" + partialVectorIndex++);
       partialVectorPaths.add(partialVectorOutputPath);
-      pruneVectorsPartial(tfDir, partialVectorOutputPath, path, maxDF, baseConf);
+      pruneVectorsPartial(tfDir, partialVectorOutputPath, path, maxDF, minDF, baseConf);
     }
 
     mergePartialVectors(partialVectorPaths, prunedTFDir, baseConf, normPower, logNormalize, numReducers);
@@ -67,7 +68,7 @@ public final class HighDFWordsPruner {
   }
 
   private static void pruneVectorsPartial(Path input, Path output, Path dictionaryFilePath, long maxDF,
-                                          Configuration baseConf) throws IOException, InterruptedException,
+                                          long minDF, Configuration baseConf) throws IOException, InterruptedException,
           ClassNotFoundException {
 
     Configuration conf = new Configuration(baseConf);
@@ -77,6 +78,7 @@ public final class HighDFWordsPruner {
             "org.apache.hadoop.io.serializer.JavaSerialization,"
                     + "org.apache.hadoop.io.serializer.WritableSerialization");
     conf.setLong(MAX_DF, maxDF);
+    conf.setLong(MIN_DF, minDF);
     DistributedCache.setCacheFiles(
             new URI[]{dictionaryFilePath.toUri()}, conf);
 

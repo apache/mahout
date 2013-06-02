@@ -39,7 +39,8 @@ public class WordsPrunerReducer extends
         Reducer<WritableComparable<?>, VectorWritable, WritableComparable<?>, VectorWritable> {
 
   private final OpenIntLongHashMap dictionary = new OpenIntLongHashMap();
-  private long maxDf = -1;
+  private long maxDf = Long.MAX_VALUE;
+  private long minDf = -1;
 
   @Override
   protected void reduce(WritableComparable<?> key, Iterable<VectorWritable> values, Context context)
@@ -50,14 +51,14 @@ public class WordsPrunerReducer extends
     }
     Vector value = it.next().get();
     Vector vector = value.clone();
-    if (maxDf > -1) {
+    if (maxDf != Long.MAX_VALUE || minDf > -1) {
       for (Vector.Element e : value.nonZeroes()) {
         if (!dictionary.containsKey(e.index())) {
           vector.setQuick(e.index(), 0.0);
           continue;
         }
         long df = dictionary.get(e.index());
-        if (df > maxDf) {
+        if (df > maxDf || df < minDf) {
           vector.setQuick(e.index(), 0.0);
         }
       }
@@ -75,7 +76,8 @@ public class WordsPrunerReducer extends
     Preconditions.checkArgument(localFiles != null && localFiles.length >= 1,
             "missing paths from the DistributedCache");
 
-    maxDf = conf.getLong(HighDFWordsPruner.MAX_DF, -1);
+    maxDf = conf.getLong(HighDFWordsPruner.MAX_DF, Long.MAX_VALUE);
+    minDf = conf.getLong(HighDFWordsPruner.MIN_DF, -1);
 
     Path dictionaryFile = new Path(localFiles[0].getPath());
     // key is feature, value is the document frequency
