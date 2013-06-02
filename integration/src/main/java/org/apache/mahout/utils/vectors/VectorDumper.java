@@ -55,8 +55,7 @@ public final class VectorDumper extends AbstractJob {
 
   private static final Logger log = LoggerFactory.getLogger(VectorDumper.class);
 
-  private VectorDumper() {
-  }
+  private VectorDumper() {}
 
   @Override
   public int run(String[] args) throws Exception {
@@ -71,19 +70,18 @@ public final class VectorDumper extends AbstractJob {
      */
     addInputOption();
     addOutputOption();
-    addOption("useKey", "u", "If the Key is a vector than dump that instead", false);
-    addOption("printKey", "p", "Print out the key as well, delimited by tab (or the value if useKey is true", false);
+    addOption("useKey", "u", "If the Key is a vector than dump that instead");
+    addOption("printKey", "p", "Print out the key as well, delimited by tab (or the value if useKey is true");
     addOption("dictionary", "d", "The dictionary file.", false);
     addOption("dictionaryType", "dt", "The dictionary file type (text|seqfile)", false);
-    addOption("csv", "c", "Output the Vector as CSV.  Otherwise it substitutes in the terms for vector cell entries",
-        false);
+    addOption("csv", "c", "Output the Vector as CSV.  Otherwise it substitutes in the terms for vector cell entries");
     addOption("namesAsComments", "n", "If using CSV output, optionally add a comment line for each NamedVector "
-        + "(if the vector is one) printing out the name", false);
-    addOption("nameOnly", "N", "Use the name as the value for each NamedVector (skip other vectors)", false);
+        + "(if the vector is one) printing out the name");
+    addOption("nameOnly", "N", "Use the name as the value for each NamedVector (skip other vectors)");
     addOption("sortVectors", "sort", "Sort output key/value pairs of the vector entries in abs magnitude "
-        + "descending order", false);
-    addOption("quiet", "q", "Print only file contents", false);
-    addOption("sizeOnly", "sz", "Dump only the size of the vector", false);
+        + "descending order");
+    addOption("quiet", "q", "Print only file contents");
+    addOption("sizeOnly", "sz", "Dump only the size of the vector");
     addOption("numItems", "ni", "Output at most <n> vecors", false);
     addOption("vectorSize", "vs", "Truncate vectors to <vs> length when dumping (most useful when in"
             + " conjunction with -sort", false);
