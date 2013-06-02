@@ -57,6 +57,14 @@ clustertype=${algorithm[$choice-1]}
 WORK_DIR=/tmp/mahout-work-${USER}
 echo "creating work directory at ${WORK_DIR}"
 
+if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
+  HADOOP="$HADOOP_HOME/bin/hadoop"
+  if [ ! -e $HADOOP ]; then
+    echo "Can't find hadoop in $HADOOP, exiting"
+    exit 1
+  fi
+fi
+
 mkdir -p ${WORK_DIR}
 
 if [ ! -e ${WORK_DIR}/reuters-out-seqdir ]; then
@@ -66,31 +74,26 @@ if [ ! -e ${WORK_DIR}/reuters-out-seqdir ]; then
         echo "Downloading Reuters-21578"
         curl http://kdd.ics.uci.edu/databases/reuters21578/reuters21578.tar.gz -o ${WORK_DIR}/reuters21578.tar.gz
       fi
+      #make sure it was actually downloaded
+      if [ ! -f ${WORK_DIR}/reuters21578.tar.gz ]; then
+	  echo "Failed to download reuters"
+	  exit 1
+      fi
       mkdir -p ${WORK_DIR}/reuters-sgm
       echo "Extracting..."
       tar xzf ${WORK_DIR}/reuters21578.tar.gz -C ${WORK_DIR}/reuters-sgm
     fi
-	
+  
+    if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
+        set +e
+        $HADOOP dfs -rmr ${WORK_DIR}/reuters-sgm
+        set -e
+        $HADOOP dfs -put ${WORK_DIR}/reuters-sgm ${WORK_DIR}/reuters-sgm 
+    fi 
     $MAHOUT org.apache.lucene.benchmark.utils.ExtractReuters ${WORK_DIR}/reuters-sgm ${WORK_DIR}/reuters-out
   fi
 
-  MAHOUT_LOCAL=true $MAHOUT seqdirectory -i ${WORK_DIR}/reuters-out -o ${WORK_DIR}/reuters-out-seqdir -c UTF-8 -chunk 5
-fi
-
-# we know reuters-out-seqdir exists on a local disk at
-# this point, if we're running in clustered mode, 
-# copy it up to hdfs
-if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
-  HADOOP="$HADOOP_HOME/bin/hadoop"
-  if [ ! -e $HADOOP ]; then
-    echo "Can't find hadoop in $HADOOP, exiting"
-    exit 1
-  fi
-
-  set +e
-  $HADOOP dfs -rmr ${WORK_DIR}/reuters-out-seqdir
-  set -e
-  $HADOOP dfs -put ${WORK_DIR}/reuters-out-seqdir ${WORK_DIR}/reuters-out-seqdir
+  $MAHOUT seqdirectory -i ${WORK_DIR}/reuters-out -o ${WORK_DIR}/reuters-out-seqdir -c UTF-8 -chunk 5
 fi
 
 if [ "x$clustertype" == "xkmeans" ]; then
