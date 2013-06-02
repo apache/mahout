@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+__MAHOUT-1237: Total cluster cost isn't computed properly (dfilimon)
+
   MAHOUT-1196: LogisticModelParameters uses csv.getTargetCategories() even if csv is not used. (Vineet Krishnan via ssc)
 
 __MAHOUT-1224: Add the option of running a StreamingKMeans pass in the Reducer before BallKMeans (dfilimon)

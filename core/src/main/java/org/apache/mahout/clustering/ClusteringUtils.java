@@ -69,8 +69,7 @@ public class ClusteringUtils {
   public static double totalClusterCost(Iterable<? extends Vector> datapoints, Searcher centroids) {
     double totalCost = 0;
     for (Vector vector : datapoints) {
-      Centroid closest = (Centroid) centroids.searchFirst(vector, false).getValue();
-      totalCost += closest.getWeight();
+      totalCost += centroids.searchFirst(vector, false).getWeight();
     }
     return totalCost;
   }
