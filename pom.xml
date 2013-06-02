@@ -95,6 +95,8 @@
   </mailingLists>
   <properties>
     <skipTests>false</skipTests>
+    <sourceJavaVersion>1.6</sourceJavaVersion>
+    <targetJavaVersion>1.6</targetJavaVersion>
     <maven.clover.multiproject>true</maven.clover.multiproject>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <hadoop.version>1.1.2</hadoop.version>
@@ -566,8 +568,8 @@
           <version>3.1</version>
           <configuration>
             <encoding>UTF-8</encoding>
-            <source>1.6</source>
-            <target>1.6</target>
+	    <source>${sourceJavaVersion}</source>
+	    <target>${targetJavaVersion}</target>
             <optimize>true</optimize>
           </configuration>
         </plugin>
@@ -619,7 +621,7 @@
               <ruleset>../buildtools/src/main/resources/mahout-pmd-ruleset.xml</ruleset>
             </rulesets>
             <sourceEncoding>UTF-8</sourceEncoding>
-            <targetJdk>1.6</targetJdk>
+	    <targetJdk>${targetJavaVersion}</targetJdk>
             <linkXRef>false</linkXRef>
             <includeTests>true</includeTests>
             <verbose>true</verbose>
@@ -910,7 +912,7 @@
             <ruleset>../buildtools/src/main/resources/mahout-pmd-ruleset.xml</ruleset>
           </rulesets>
           <sourceEncoding>UTF-8</sourceEncoding>
-          <targetJdk>1.6</targetJdk>
+	  <targetJdk>${targetJavaVersion}</targetJdk>
           <linkXRef>false</linkXRef>
           <includeTests>true</includeTests>
           <verbose>true</verbose>
