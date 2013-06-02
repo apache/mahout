@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+__MAHOUT-1224: Add the option of running a StreamingKMeans pass in the Reducer before BallKMeans (dfilimon)
+
   MAHOUT-993:  Some vector dumper flags are expecting arguments. (Andrew Look via robinanil)
 
   MAHOUT-1228: Cleanup .gitignore (Stevo Slavic via ssc)

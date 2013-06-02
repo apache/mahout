@@ -139,6 +139,12 @@ public final class StreamingKMeansDriver extends AbstractJob {
    */
   public static final String SEARCH_SIZE_OPTION = "searchSize";
 
+  /**
+   * Whether to run another pass of StreamingKMeans on the reducer's points before BallKMeans. On some data sets
+   * with a large number of mappers, the intermediate number of
+   */
+  public static final String REDUCE_STREAMING_KMEANS = "reduceStreamingKMeans";
+
   private static final Logger log = LoggerFactory.getLogger(StreamingKMeansDriver.class);
 
   private static final double INVALID_DISTANCE_CUTOFF = -1;
@@ -215,6 +221,10 @@ public final class StreamingKMeansDriver extends AbstractJob {
         "elements whose distances from the query vector is actually computer is proportional to " +
         "searchSize. If no value is given, defaults to 1.", String.valueOf(2));
 
+    addFlag(REDUCE_STREAMING_KMEANS, "rskm", "There might be too many intermediate clusters from the mapper " +
+        "to fit into memory, so the reducer can run another pass of StreamingKMeans to collapse them down to a " +
+        "fewer clusters");
+
     addOption(DefaultOptionCreator.methodOption().create());
 
     if (parseArguments(args) == null) {
@@ -277,6 +287,8 @@ public final class StreamingKMeansDriver extends AbstractJob {
       numProjections = Integer.parseInt(getOption(NUM_PROJECTIONS_OPTION));
     }
 
+    boolean reduceStreamingKMeans = hasOption(REDUCE_STREAMING_KMEANS);
+
     configureOptionsForWorkers(getConf(), numClusters,
         /* StreamingKMeans */
         estimatedNumMapClusters,  estimatedDistanceCutoff,
@@ -284,7 +296,8 @@ public final class StreamingKMeansDriver extends AbstractJob {
         maxNumIterations, trimFraction, randomInit, ignoreWeights, testProbability, numBallKMeansRuns,
         /* Searcher */
         measureClass, searcherClass,  searchSize, numProjections,
-        method);
+        method,
+        reduceStreamingKMeans);
   }
 
   /**
@@ -319,7 +332,8 @@ public final class StreamingKMeansDriver extends AbstractJob {
                                                 /* Searcher */
                                                 String measureClass, String searcherClass,
                                                 int searchSize, int numProjections,
-                                                String method) throws ClassNotFoundException {
+                                                String method,
+                                                boolean reduceStreamingKMeans) throws ClassNotFoundException {
     // Checking preconditions for the parameters.
     Preconditions.checkArgument(numClusters > 0, "Invalid number of clusters requested");
 
@@ -369,14 +383,17 @@ public final class StreamingKMeansDriver extends AbstractJob {
     conf.setInt(SEARCH_SIZE_OPTION, searchSize);
     conf.setInt(NUM_PROJECTIONS_OPTION, numProjections);
     conf.set(DefaultOptionCreator.METHOD_OPTION, method);
+
+    conf.setBoolean(REDUCE_STREAMING_KMEANS, reduceStreamingKMeans);
+
     log.info("Parameters are: [k] numClusters {}; " +
         "[SKM] estimatedNumMapClusters {}; estimatedDistanceCutoff {} " +
         "[BKM] maxNumIterations {}; trimFraction {}; randomInit {}; ignoreWeights {}; " +
         "testProbability {}; numBallKMeansRuns {}; " +
         "[S] measureClass {}; searcherClass {}; searcherSize {}; numProjections {}; " +
-        "method {}", numClusters, estimatedNumMapClusters, estimatedDistanceCutoff,
+        "method {}; reduceStreamingKMeans {}", numClusters, estimatedNumMapClusters, estimatedDistanceCutoff,
         maxNumIterations, trimFraction, randomInit, ignoreWeights, testProbability, numBallKMeansRuns,
-        measureClass, searcherClass, searchSize, numProjections, method);
+        measureClass, searcherClass, searchSize, numProjections, method, reduceStreamingKMeans);
   }
 
   /**

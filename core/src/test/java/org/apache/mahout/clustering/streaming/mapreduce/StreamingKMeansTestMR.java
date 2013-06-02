@@ -84,6 +84,9 @@ public class StreamingKMeansTestMR {
         (1 << NUM_DIMENSIONS) * (int)Math.log(NUM_DATA_POINTS));
     configuration.setFloat(StreamingKMeansDriver.ESTIMATED_DISTANCE_CUTOFF, (float) DISTANCE_CUTOFF);
     configuration.setInt(StreamingKMeansDriver.MAX_NUM_ITERATIONS, MAX_NUM_ITERATIONS);
+
+    // Collapse the Centroids in the reducer.
+    configuration.setBoolean(StreamingKMeansDriver.REDUCE_STREAMING_KMEANS, true);
   }
 
   @Parameterized.Parameters
