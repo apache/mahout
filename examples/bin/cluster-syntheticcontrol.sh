@@ -54,10 +54,17 @@ WORK_DIR=/tmp/mahout-work-${USER}
 echo "creating work directory at ${WORK_DIR}"
 mkdir -p ${WORK_DIR}
 if [ ! -f ${WORK_DIR}/synthetic_control.data ]; then
-  echo "Downloading Synthetic control data"
-  curl http://archive.ics.uci.edu/ml/databases/synthetic_control/synthetic_control.data  -o ${WORK_DIR}/synthetic_control.data
+  if [ -n "$2" ]; then
+    cp $2 ${WORK_DIR}/.
+  else
+    echo "Downloading Synthetic control data"
+    curl http://archive.ics.uci.edu/ml/databases/synthetic_control/synthetic_control.data  -o ${WORK_DIR}/synthetic_control.data
+  fi
 fi
-
+if [ ! -f ${WORK_DIR}/synthetic_control.data ]; then
+  echo "Couldn't download synthetic control"
+  exit 1
+fi
 if [ "$HADOOP_HOME" != "" ]; then
   echo "Checking the health of DFS..."
   $HADOOP_HOME/bin/hadoop fs -ls 
@@ -73,9 +80,13 @@ if [ "$HADOOP_HOME" != "" ]; then
   else
     echo " HADOOP is not running. Please make sure you hadoop is running. "
   fi
+elif [ "$MAHOUT_LOCAL" != "" ]; then
+  echo "running MAHOUT_LOCAL"
+  cp ${WORK_DIR}/synthetic_control.data testdata
+  ../../bin/mahout org.apache.mahout.clustering.syntheticcontrol."${clustertype}".Job
+  rm testdata
 else
   echo " HADOOP_HOME variable is not set. Please set this environment variable and rerun the script"
 fi
-
 # Remove the work directory
 rm -rf ${WORK_DIR}
