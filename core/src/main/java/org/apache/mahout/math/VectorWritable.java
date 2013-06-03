@@ -157,7 +157,7 @@ public final class VectorWritable extends Configured implements Writable {
         }
       }
     } else {
-      Varint.writeUnsignedVarInt(vector.getNumNondefaultElements(), out);
+      Varint.writeUnsignedVarInt(vector.getNumNonZeroElements(), out);
       Iterator<Element> iter = vector.nonZeroes().iterator();
       if (sequential) {
         int lastIndex = 0;

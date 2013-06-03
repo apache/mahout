@@ -30,6 +30,15 @@ import java.io.IOException;
 public final class VectorWritableTest extends MahoutTestCase {
 
   @Test
+  public void testViewSequentialAccessSparseVectorWritable() throws Exception {
+    Vector v = new SequentialAccessSparseVector(5);
+    v.set(1, 3.0);
+    v.set(3, 5.0);
+    Vector view = new VectorView(v,0,v.size());
+    doTestVectorWritableEquals(view);
+  }
+
+  @Test
   public void testSequentialAccessSparseVectorWritable() throws Exception {
     Vector v = new SequentialAccessSparseVector(5);
     v.set(1, 3.0);
