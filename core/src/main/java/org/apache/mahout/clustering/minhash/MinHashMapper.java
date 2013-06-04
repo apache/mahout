@@ -40,11 +40,13 @@ public class MinHashMapper extends Mapper<Text, VectorWritable, Text, Writable> 
   private boolean debugOutput;
   private int[] minHashValues;
   private byte[] bytesToHash;
+  private String dimensionToHash;
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
+    this.dimensionToHash = conf.get(MinhashOptionCreator.VECTOR_DIMENSION_TO_HASH, "value");
     this.numHashFunctions = conf.getInt(MinhashOptionCreator.NUM_HASH_FUNCTIONS, 10);
     this.minHashValues = new int[numHashFunctions];
     this.bytesToHash = new byte[4];
@@ -76,14 +78,14 @@ public class MinHashMapper extends Mapper<Text, VectorWritable, Text, Writable> 
     if (featureVector.size() < minVectorSize) {
       return;
     }
-    // Initialize the minhash values to highest
+    // Initialize the MinHash values to highest
     for (int i = 0; i < numHashFunctions; i++) {
       minHashValues[i] = Integer.MAX_VALUE;
     }
 
     for (int i = 0; i < numHashFunctions; i++) {
       for (Vector.Element ele : featureVector.nonZeroes()) {
-        int value = (int) ele.get();
+        int value = "value".equalsIgnoreCase(dimensionToHash) ? (int) ele.get() : ele.index();
         bytesToHash[0] = (byte) (value >> 24);
         bytesToHash[1] = (byte) (value >> 16);
         bytesToHash[2] = (byte) (value >> 8);

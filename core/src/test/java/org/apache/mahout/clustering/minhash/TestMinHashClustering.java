@@ -43,10 +43,10 @@ import java.util.Set;
 
 public final class TestMinHashClustering extends MahoutTestCase {
   
-  private static final double[][] REFERENCE = { {1, 2, 3, 4, 5}, {2, 1, 3, 6, 7}, {3, 7, 6, 11, 8, 9},
-                                              {4, 7, 8, 9, 6, 1}, {5, 8, 10, 4, 1}, {6, 17, 14, 15},
-                                              {8, 9, 11, 6, 12, 1, 7}, {10, 13, 9, 7, 4, 6, 3},
-                                              {3, 5, 7, 9, 2, 11}, {13, 7, 6, 8, 5}};
+  private static final double[][] REFERENCE = { {0, 0, 3, 4, 5}, {0, 0, 3, 6, 7}, {0, 7, 6, 11, 8, 9},
+                                              {0, 7, 8, 9, 6, 0}, {5, 8, 10, 0, 0}, {6, 17, 14, 15},
+                                              {8, 9, 11, 0, 12, 0, 7}, {10, 13, 9, 7, 0, 6, 0},
+                                              {0, 0, 7, 9, 0, 11}, {13, 7, 6, 8, 0}};
 
   private Path input;
   private Path output;
@@ -77,17 +77,18 @@ public final class TestMinHashClustering extends MahoutTestCase {
         writer.append(new Text("Id-" + id++), point);
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, false);
     }
   }
   
-  private String[] makeArguments(int minClusterSize,
+  private String[] makeArguments(String dimensionToHash, int minClusterSize,
                                  int minVectorSize,
                                  int numHashFunctions,
                                  int keyGroups,
                                  String hashType) {
     return new String[] {optKey(DefaultOptionCreator.INPUT_OPTION), input.toString(),
                          optKey(DefaultOptionCreator.OUTPUT_OPTION), output.toString(),
+                         optKey(MinhashOptionCreator.VECTOR_DIMENSION_TO_HASH), dimensionToHash,
                          optKey(MinhashOptionCreator.MIN_CLUSTER_SIZE), String.valueOf(minClusterSize),
                          optKey(MinhashOptionCreator.MIN_VECTOR_SIZE), String.valueOf(minVectorSize),
                          optKey(MinhashOptionCreator.HASH_TYPE), hashType,
@@ -97,20 +98,25 @@ public final class TestMinHashClustering extends MahoutTestCase {
                          optKey(MinhashOptionCreator.DEBUG_OUTPUT)};
   }
   
-  private static Set<Integer> getValues(Vector vector) {
+  private static Set<Integer> getValues(Vector vector, String dimensionToHash) {
     Set<Integer> values = Sets.newHashSet();
-    for (Vector.Element e : vector.nonZeroes()) {
-      values.add((int) e.get());
+    if ("value".equalsIgnoreCase(dimensionToHash)) {
+      for (Vector.Element e : vector.nonZeroes())
+        values.add((int) e.get());
+    } else {
+      for (Vector.Element e : vector.nonZeroes())
+        values.add(e.index());
     }
     return values;
   }
-  
-  private static void runPairwiseSimilarity(List<Vector> clusteredItems, double simThreshold, String msg) {
+
+  private static void runPairwiseSimilarity(List<Vector> clusteredItems, double simThreshold,
+                                            String dimensionToHash, String msg) {
     if (clusteredItems.size() > 1) {
       for (int i = 0; i < clusteredItems.size(); i++) {
-        Set<Integer> itemSet1 = getValues(clusteredItems.get(i));
+        Set<Integer> itemSet1 = getValues(clusteredItems.get(i), dimensionToHash);
         for (int j = i + 1; j < clusteredItems.size(); j++) {
-          Set<Integer> itemSet2 = getValues(clusteredItems.get(j));
+          Set<Integer> itemSet2 = getValues(clusteredItems.get(j), dimensionToHash);
           Collection<Integer> union = Sets.newHashSet();
           union.addAll(itemSet1);
           union.addAll(itemSet2);
@@ -125,7 +131,7 @@ public final class TestMinHashClustering extends MahoutTestCase {
     }
   }
   
-  private void verify(Path output, double simThreshold, String msg) throws IOException {
+  private void verify(Path output, double simThreshold, String dimensionToHash, String msg) throws IOException {
     Configuration conf = getConfiguration();
     Path outputFile = new Path(output, "part-r-00000");
     List<Vector> clusteredItems = Lists.newArrayList();
@@ -136,45 +142,77 @@ public final class TestMinHashClustering extends MahoutTestCase {
       if (prevClusterId.equals(clusterId.toString())) {
         clusteredItems.add(point.get());
       } else {
-        runPairwiseSimilarity(clusteredItems, simThreshold, msg);
+        runPairwiseSimilarity(clusteredItems, simThreshold, dimensionToHash, msg);
         clusteredItems.clear();
         prevClusterId = clusterId.toString();
         clusteredItems.add(point.get());
       }
     }
-    runPairwiseSimilarity(clusteredItems, simThreshold, msg);
+    runPairwiseSimilarity(clusteredItems, simThreshold, dimensionToHash, msg);
   }
   
   @Test
   public void testLinearMinHashMRJob() throws Exception {
-    String[] args = makeArguments(2, 3, 20, 3, HashType.LINEAR.toString());
+    String[] args = makeArguments("value", 2, 3, 20, 4, HashType.LINEAR.toString());
     int ret = ToolRunner.run(getConfiguration(), new MinHashDriver(), args);
-    assertEquals("Minhash MR Job failed for " + HashType.LINEAR, 0, ret);
-    verify(output, 0.2, "Hash Type: LINEAR");
+    assertEquals("MinHash MR Hash value Job failed for " + HashType.LINEAR, 0, ret);
+    verify(output, 0.2, "value", "Hash Type: LINEAR");
   }
   
   @Test
   public void testPolynomialMinHashMRJob() throws Exception {
-    String[] args = makeArguments(2, 3, 20, 3, HashType.POLYNOMIAL.toString());
+    String[] args = makeArguments("value", 2, 3, 20, 3, HashType.POLYNOMIAL.toString());
     int ret = ToolRunner.run(getConfiguration(), new MinHashDriver(), args);
-    assertEquals("Minhash MR Job failed for " + HashType.POLYNOMIAL, 0, ret);
-    verify(output, 0.27, "Hash Type: POLYNOMIAL");
+    assertEquals("MinHash MR Job Hash value failed for " + HashType.POLYNOMIAL, 0, ret);
+    verify(output, 0.27, "value", "Hash Type: POLYNOMIAL");
   }
   
   @Test
   public void testMurmurMinHashMRJob() throws Exception {
-    String[] args = makeArguments(2, 3, 20, 4, HashType.MURMUR.toString());
+    String[] args = makeArguments("value", 2, 3, 20, 4, HashType.MURMUR.toString());
     int ret = ToolRunner.run(getConfiguration(), new MinHashDriver(), args);
-    assertEquals("Minhash MR Job failed for " + HashType.MURMUR, 0, ret);
-    verify(output, 0.2, "Hash Type: MURMUR");
+    assertEquals("MinHash MR Job Hash value failed for " + HashType.MURMUR, 0, ret);
+    verify(output, 0.2, "value", "Hash Type: MURMUR");
   }
 
   @Test
   public void testMurmur3MinHashMRJob() throws Exception {
-    String[] args = makeArguments(2, 3, 20, 4, HashType.MURMUR3.toString());
+    String[] args = makeArguments("value", 2, 3, 20, 4, HashType.MURMUR3.toString());
     int ret = ToolRunner.run(getConfiguration(), new MinHashDriver(), args);
-    assertEquals("Minhash MR Job failed for " + HashType.MURMUR3, 0, ret);
-    verify(output, 0.2, "Hash Type: MURMUR");
+    assertEquals("MinHash MR Job Hash value failed for " + HashType.MURMUR3, 0, ret);
+    verify(output, 0.2, "value", "Hash Type: MURMUR");
   }
-  
+
+  @Test
+  public void testLinearMinHashMRJobHashIndex() throws Exception {
+    String[] args = makeArguments("index", 2, 3, 20, 3, HashType.LINEAR.toString());
+    int ret = ToolRunner.run(new Configuration(), new MinHashDriver(), args);
+    assertEquals("MinHash MR Job Hash Index failed for " + HashType.LINEAR, 0, ret);
+    verify(output, 0.2, "index", "Hash Type: LINEAR");
+  }
+
+  @Test
+  public void testPolynomialMinHashMRJobHashIndex() throws Exception {
+    String[] args = makeArguments("index", 2, 3, 20, 3, HashType.POLYNOMIAL.toString());
+    int ret = ToolRunner.run(new Configuration(), new MinHashDriver(), args);
+    assertEquals("MinHash MR Job Hash Index failed for " + HashType.POLYNOMIAL, 0, ret);
+    verify(output, 0.3, "index", "Hash Type: POLYNOMIAL");
+  }
+
+  @Test
+  public void testMurmurMinHashMRJobHashIndex() throws Exception {
+    String[] args = makeArguments("index", 2, 3, 20, 4, HashType.MURMUR.toString());
+    int ret = ToolRunner.run(new Configuration(), new MinHashDriver(), args);
+    assertEquals("MinHash MR Job Hash Index failed for " + HashType.MURMUR, 0, ret);
+    verify(output, 0.3, "index", "Hash Type: MURMUR");
+  }
+
+  @Test
+  public void testMurmur3MinHashMRJobHashIndex() throws Exception {
+    String[] args = makeArguments("index", 2, 3, 20, 4, HashType.MURMUR3.toString());
+    int ret = ToolRunner.run(new Configuration(), new MinHashDriver(), args);
+    assertEquals("MinHash MR Job Hash Index failed for " + HashType.MURMUR3, 0, ret);
+    verify(output, 0.3, "index", "Hash Type: MURMUR");
+  }
+
 }

@@ -28,6 +28,7 @@ public final class MinhashOptionCreator {
   public static final String MIN_VECTOR_SIZE = "minVectorSize";
   public static final String NUM_REDUCERS = "numReducers";
   public static final String DEBUG_OUTPUT = "debugOutput";
+  public static final String VECTOR_DIMENSION_TO_HASH  = "vectorDimensionToHash";
 
   private MinhashOptionCreator() {
   }
@@ -43,7 +44,7 @@ public final class MinhashOptionCreator {
     return new DefaultOptionBuilder()
         .withLongName(NUM_REDUCERS)
         .withRequired(false)
-        .withShortName("r")
+        .withShortName("nr")
         .withArgument(
             new ArgumentBuilder().withName(NUM_REDUCERS).withDefault("2")
                 .withMinimum(1).withMaximum(1).create())
@@ -125,4 +126,20 @@ public final class MinhashOptionCreator {
                 .withMinimum(1).withMaximum(1).create())
         .withDescription("Number of key groups to be used").withShortName("kg");
   }
+
+  /**
+   * Returns a default command line option for specifying the vector dimension to hash
+   * in MinHash clustering: Should be one of ("value","index")
+   */
+   public static DefaultOptionBuilder vectorDimensionToHashOption() {
+     return new DefaultOptionBuilder()
+        .withLongName(VECTOR_DIMENSION_TO_HASH)
+        .withRequired(false)
+        .withArgument(
+           new ArgumentBuilder().withName(VECTOR_DIMENSION_TO_HASH).withDefault("value")
+               .withMinimum(1).withMaximum(1).create())
+        .withDescription("Dimension of vector to hash. Available types: (value, index). Defaults to 'value' ")
+        .withShortName("vdh");
+   }
+
 }

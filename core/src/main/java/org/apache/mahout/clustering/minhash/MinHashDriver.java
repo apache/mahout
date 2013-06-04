@@ -18,14 +18,11 @@
 package org.apache.mahout.clustering.minhash;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
@@ -34,65 +31,19 @@ import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.VectorWritable;
 
-import java.io.IOException;
-
 public final class MinHashDriver extends AbstractJob {
 
   public static void main(String[] args) throws Exception {
-    ToolRunner.run(new Configuration(), new MinHashDriver(), args);
-  }
-
-  private void runJob(Path input, 
-                      Path output,
-                      int minClusterSize,
-                      int minVectorSize, 
-                      String hashType, 
-                      int numHashFunctions, 
-                      int keyGroups,
-                      int numReduceTasks, 
-                      boolean debugOutput) throws IOException, ClassNotFoundException, InterruptedException {
-    Configuration conf = getConf();
-
-    conf.setInt(MinhashOptionCreator.MIN_CLUSTER_SIZE, minClusterSize);
-    conf.setInt(MinhashOptionCreator.MIN_VECTOR_SIZE, minVectorSize);
-    conf.set(MinhashOptionCreator.HASH_TYPE, hashType);
-    conf.setInt(MinhashOptionCreator.NUM_HASH_FUNCTIONS, numHashFunctions);
-    conf.setInt(MinhashOptionCreator.KEY_GROUPS, keyGroups);
-    conf.setBoolean(MinhashOptionCreator.DEBUG_OUTPUT, debugOutput);
-
-    Class<? extends Writable> outputClass = debugOutput ? VectorWritable.class : Text.class;
-    Class<? extends OutputFormat> outputFormatClass =
-        debugOutput ? SequenceFileOutputFormat.class : TextOutputFormat.class;
-    
-    Job job = new Job(conf, "MinHash Clustering");
-    job.setJarByClass(MinHashDriver.class);
-
-    FileInputFormat.setInputPaths(job, input);
-    FileOutputFormat.setOutputPath(job, output);
-
-    job.setMapperClass(MinHashMapper.class);
-    job.setReducerClass(MinHashReducer.class);
-
-    job.setInputFormatClass(SequenceFileInputFormat.class);
-    job.setOutputFormatClass(outputFormatClass);
-
-    job.setMapOutputKeyClass(Text.class);
-    job.setMapOutputValueClass(outputClass);
-
-    job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(outputClass);
-
-    job.setNumReduceTasks(numReduceTasks);
-
-    job.waitForCompletion(true);
+    ToolRunner.run(new MinHashDriver(), args);
   }
 
   @Override
-  public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
+  public int run(String[] args) throws Exception {
     addInputOption();
     addOutputOption();
     addOption(MinhashOptionCreator.minClusterSizeOption().create());
     addOption(MinhashOptionCreator.minVectorSizeOption().create());
+    addOption(MinhashOptionCreator.vectorDimensionToHashOption().create());
     addOption(MinhashOptionCreator.hashTypeOption().create());
     addOption(MinhashOptionCreator.numHashFunctionsOption().create());
     addOption(MinhashOptionCreator.keyGroupsOption().create());
@@ -104,28 +55,41 @@ public final class MinHashDriver extends AbstractJob {
       return -1;
     }
 
-    Path input = getInputPath();
-    Path output = getOutputPath();
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
-      HadoopUtil.delete(getConf(), output);
+      HadoopUtil.delete(getConf(), getOutputPath());
     }
+
     int minClusterSize = Integer.valueOf(getOption(MinhashOptionCreator.MIN_CLUSTER_SIZE));
     int minVectorSize = Integer.valueOf(getOption(MinhashOptionCreator.MIN_VECTOR_SIZE));
+    String dimensionToHash = getOption(MinhashOptionCreator.VECTOR_DIMENSION_TO_HASH);
     String hashType = getOption(MinhashOptionCreator.HASH_TYPE);
     int numHashFunctions = Integer.valueOf(getOption(MinhashOptionCreator.NUM_HASH_FUNCTIONS));
     int keyGroups = Integer.valueOf(getOption(MinhashOptionCreator.KEY_GROUPS));
     int numReduceTasks = Integer.parseInt(getOption(MinhashOptionCreator.NUM_REDUCERS));
     boolean debugOutput = hasOption(MinhashOptionCreator.DEBUG_OUTPUT);
 
-    runJob(input,
-           output,
-           minClusterSize,
-           minVectorSize,
-           hashType,
-           numHashFunctions,
-           keyGroups,
-           numReduceTasks,
-           debugOutput);
+    Class<? extends Writable> outputClass = debugOutput ? VectorWritable.class : Text.class;
+    Class<? extends OutputFormat> outputFormatClass =
+        debugOutput ? SequenceFileOutputFormat.class : TextOutputFormat.class;
+
+    Job minHash = prepareJob(getInputPath(), getOutputPath(), SequenceFileInputFormat.class, MinHashMapper.class,
+            Text.class, outputClass, MinHashReducer.class, Text.class, VectorWritable.class, outputFormatClass);
+
+    Configuration minHashConfiguration = minHash.getConfiguration();
+    minHashConfiguration.setInt(MinhashOptionCreator.MIN_CLUSTER_SIZE, minClusterSize);
+    minHashConfiguration.setInt(MinhashOptionCreator.MIN_VECTOR_SIZE, minVectorSize);
+    minHashConfiguration.set(MinhashOptionCreator.VECTOR_DIMENSION_TO_HASH, dimensionToHash);
+    minHashConfiguration.set(MinhashOptionCreator.HASH_TYPE, hashType);
+    minHashConfiguration.setInt(MinhashOptionCreator.NUM_HASH_FUNCTIONS, numHashFunctions);
+    minHashConfiguration.setInt(MinhashOptionCreator.KEY_GROUPS, keyGroups);
+    minHashConfiguration.setBoolean(MinhashOptionCreator.DEBUG_OUTPUT, debugOutput);
+    minHash.setNumReduceTasks(numReduceTasks);
+
+    boolean succeeded = minHash.waitForCompletion(true);
+    if (!succeeded) {
+     return -1;
+    }
+
     return 0;
   }
 }
