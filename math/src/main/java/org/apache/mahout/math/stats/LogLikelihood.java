@@ -100,14 +100,14 @@ public final class LogLikelihood {
   public static double logLikelihoodRatio(long k11, long k12, long k21, long k22) {
     Preconditions.checkArgument(k11 >= 0 && k12 >= 0 && k21 >= 0 && k22 >= 0);
     // note that we have counts here, not probabilities, and that the entropy is not normalized.
-    double rowEntropy = entropy(k11, k12) + entropy(k21, k22);
-    double columnEntropy = entropy(k11, k21) + entropy(k12, k22);
+    double rowEntropy = entropy(k11 + k12, k21 + k22);
+    double columnEntropy = entropy(k11 + k21, k12 + k22);
     double matrixEntropy = entropy(k11, k12, k21, k22);
-    if (rowEntropy + columnEntropy > matrixEntropy) {
+    if (rowEntropy + columnEntropy < matrixEntropy) {
       // round off error
       return 0.0;
     }
-    return 2.0 * (matrixEntropy - rowEntropy - columnEntropy);
+    return 2.0 * (rowEntropy + columnEntropy - matrixEntropy);
   }
   
   /** 
