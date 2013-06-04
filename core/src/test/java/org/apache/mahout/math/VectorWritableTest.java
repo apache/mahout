@@ -20,10 +20,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.Random;
 
 import org.apache.hadoop.io.Writable;
-import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.Vector.Element;
 import org.junit.Test;
 
@@ -33,12 +31,11 @@ import com.google.common.io.Closeables;
 
 public final class VectorWritableTest extends RandomizedTest {
   private static final int MAX_VECTOR_SIZE = 100;
-  private final Random r = RandomUtils.getRandom();
 
   public void createRandom(Vector v) {
-    int size = r.nextInt(v.size());
+    int size = randomInt(v.size() - 1);
     for (int i = 0; i < size; ++i) {
-      v.set(r.nextInt(v.size()), r.nextDouble());
+      v.set(randomInt(v.size() - 1), randomDouble());
     }
 
     int zeros = Math.max(2, size / 4);
