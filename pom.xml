@@ -677,8 +677,10 @@
         <configuration>
           <forkCount>1.5C</forkCount>
           <reuseForks>false</reuseForks>
+          <threadCount>1</threadCount>
+          <perCoreThreadCount>false</perCoreThreadCount>
           <parallel>classes</parallel>
-          <argLine>-Xms256m -Xmx1800m</argLine>
+          <argLine>-Xmx512m</argLine>
           <testFailureIgnore>false</testFailureIgnore>
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <systemPropertyVariables>
