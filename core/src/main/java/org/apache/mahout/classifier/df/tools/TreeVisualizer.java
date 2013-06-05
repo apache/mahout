@@ -35,47 +35,42 @@ import org.apache.mahout.classifier.df.node.NumericalNode;
  * This tool is to visualize the Decision tree
  */
 public final class TreeVisualizer {
-
-  private TreeVisualizer() {
-  }
-
+  
+  private TreeVisualizer() {}
+  
   private static String doubleToString(double value) {
     DecimalFormat df = new DecimalFormat("0.##");
     return df.format(value);
   }
-
-  private static String toStringNode(Node node,
-                                     Dataset dataset,
-                                     String[] attrNames,
-                                     Map<String, Field> fields,
-                                     int layer) {
-
+  
+  private static String toStringNode(Node node, Dataset dataset,
+      String[] attrNames, Map<String,Field> fields, int layer) {
+    
     StringBuilder buff = new StringBuilder();
-
+    
     try {
-
       if (node instanceof CategoricalNode) {
         CategoricalNode cnode = (CategoricalNode) node;
         int attr = (Integer) fields.get("CategoricalNode.attr").get(cnode);
-        double[] values = (double[]) fields.get("CategoricalNode.values").get(cnode);
-        Node[] childs = (Node[]) fields.get("CategoricalNode.childs").get(cnode);
-        String[][] attrValues = (String[][]) fields.get("Dataset.values").get(dataset);
-        for (int i = 0; i < childs.length; i++) {
+        double[] values = (double[]) fields.get("CategoricalNode.values").get(
+            cnode);
+        Node[] childs = (Node[]) fields.get("CategoricalNode.childs")
+            .get(cnode);
+        String[][] attrValues = (String[][]) fields.get("Dataset.values").get(
+            dataset);
+        for (int i = 0; i < attrValues[attr].length; i++) {
+          int index = ArrayUtils.indexOf(values, i);
+          if (index < 0) {
+            continue;
+          }
           buff.append('\n');
           for (int j = 0; j < layer; j++) {
             buff.append("|   ");
           }
-          if (values[i] < attrValues[attr].length) {
-            if (attrNames == null) {
-              buff.append(attr);
-            } else {
-              buff.append(attrNames[attr]);
-            }
-            buff.append(" = ");
-            buff.append(attrValues[attr][(int) values[i]]);
-
-            buff.append(toStringNode(childs[i], dataset, attrNames, fields, layer + 1));
-          }
+          buff.append(attrNames == null ? attr : attrNames[attr]).append(" = ")
+              .append(attrValues[attr][i]);
+          buff.append(toStringNode(childs[index], dataset, attrNames, fields,
+              layer + 1));
         }
       } else if (node instanceof NumericalNode) {
         NumericalNode nnode = (NumericalNode) node;
@@ -87,13 +82,15 @@ public final class TreeVisualizer {
         for (int j = 0; j < layer; j++) {
           buff.append("|   ");
         }
-        buff.append(attrNames == null ? attr : attrNames[attr]).append(" < ").append(doubleToString(split));
+        buff.append(attrNames == null ? attr : attrNames[attr]).append(" < ")
+            .append(doubleToString(split));
         buff.append(toStringNode(loChild, dataset, attrNames, fields, layer + 1));
         buff.append('\n');
         for (int j = 0; j < layer; j++) {
           buff.append("|   ");
         }
-        buff.append(attrNames == null ? attr : attrNames[attr]).append(" >= ").append(doubleToString(split));
+        buff.append(attrNames == null ? attr : attrNames[attr]).append(" >= ")
+            .append(doubleToString(split));
         buff.append(toStringNode(hiChild, dataset, attrNames, fields, layer + 1));
       } else if (node instanceof Leaf) {
         Leaf leaf = (Leaf) node;
@@ -101,20 +98,19 @@ public final class TreeVisualizer {
         if (dataset.isNumerical(dataset.getLabelId())) {
           buff.append(" : ").append(doubleToString(label));
         } else {
-          buff.append(" : ").append(dataset.getLabelString((int) label));
+          buff.append(" : ").append(dataset.getLabelString(label));
         }
       }
-
     } catch (IllegalAccessException iae) {
       throw new IllegalStateException(iae);
     }
-
+    
     return buff.toString();
   }
-
-  private static Map<String, Field> getReflectMap() {
-    Map<String, Field> fields = new HashMap<String, Field>();
-
+  
+  private static Map<String,Field> getReflectMap() {
+    Map<String,Field> fields = new HashMap<String,Field>();
+    
     try {
       Field m = CategoricalNode.class.getDeclaredField("attr");
       m.setAccessible(true);
@@ -152,6 +148,7 @@ public final class TreeVisualizer {
   
   /**
    * Decision tree to String
+   * 
    * @param tree
    *          Node of tree
    * @param attrNames
@@ -160,37 +157,41 @@ public final class TreeVisualizer {
   public static String toString(Node tree, Dataset dataset, String[] attrNames) {
     return toStringNode(tree, dataset, attrNames, getReflectMap(), 0);
   }
-
+  
   /**
    * Print Decision tree
-   * @param tree  Node of tree
-   * @param attrNames attribute names
+   * 
+   * @param tree
+   *          Node of tree
+   * @param attrNames
+   *          attribute names
    */
   public static void print(Node tree, Dataset dataset, String[] attrNames) {
     System.out.println(toString(tree, dataset, attrNames));
   }
-
-  private static String toStringPredict(Node node,
-                                        Instance instance,
-                                        Dataset dataset,
-                                        String[] attrNames,
-                                        Map<String, Field> fields) {
+  
+  private static String toStringPredict(Node node, Instance instance,
+      Dataset dataset, String[] attrNames, Map<String,Field> fields) {
     StringBuilder buff = new StringBuilder();
-
+    
     try {
       if (node instanceof CategoricalNode) {
         CategoricalNode cnode = (CategoricalNode) node;
         int attr = (Integer) fields.get("CategoricalNode.attr").get(cnode);
-        double[] values = (double[]) fields.get("CategoricalNode.values").get(cnode);
-        Node[] childs = (Node[]) fields.get("CategoricalNode.childs").get(cnode);
-        String[][] attrValues = (String[][]) fields.get("Dataset.values").get(dataset);
-
+        double[] values = (double[]) fields.get("CategoricalNode.values").get(
+            cnode);
+        Node[] childs = (Node[]) fields.get("CategoricalNode.childs")
+            .get(cnode);
+        String[][] attrValues = (String[][]) fields.get("Dataset.values").get(
+            dataset);
+        
         int index = ArrayUtils.indexOf(values, instance.get(attr));
         if (index >= 0) {
           buff.append(attrNames == null ? attr : attrNames[attr]).append(" = ")
               .append(attrValues[attr][(int) instance.get(attr)]);
           buff.append(" -> ");
-          buff.append(toStringPredict(childs[index], instance, dataset, attrNames, fields));
+          buff.append(toStringPredict(childs[index], instance, dataset,
+              attrNames, fields));
         }
       } else if (node instanceof NumericalNode) {
         NumericalNode nnode = (NumericalNode) node;
@@ -198,17 +199,21 @@ public final class TreeVisualizer {
         double split = (Double) fields.get("NumericalNode.split").get(nnode);
         Node loChild = (Node) fields.get("NumericalNode.loChild").get(nnode);
         Node hiChild = (Node) fields.get("NumericalNode.hiChild").get(nnode);
-
+        
         if (instance.get(attr) < split) {
-          buff.append('(').append(attrNames == null ? attr : attrNames[attr]).append(" = ")
-              .append(doubleToString(instance.get(attr))).append(") < ").append(doubleToString(split));
+          buff.append('(').append(attrNames == null ? attr : attrNames[attr])
+              .append(" = ").append(doubleToString(instance.get(attr)))
+              .append(") < ").append(doubleToString(split));
           buff.append(" -> ");
-          buff.append(toStringPredict(loChild, instance, dataset, attrNames, fields));
+          buff.append(toStringPredict(loChild, instance, dataset, attrNames,
+              fields));
         } else {
-          buff.append('(').append(attrNames == null ? attr : attrNames[attr]).append(" = ")
-              .append(doubleToString(instance.get(attr))).append(") >= ").append(doubleToString(split));
+          buff.append('(').append(attrNames == null ? attr : attrNames[attr])
+              .append(" = ").append(doubleToString(instance.get(attr)))
+              .append(") >= ").append(doubleToString(split));
           buff.append(" -> ");
-          buff.append(toStringPredict(hiChild, instance, dataset, attrNames, fields));
+          buff.append(toStringPredict(hiChild, instance, dataset, attrNames,
+              fields));
         }
       } else if (node instanceof Leaf) {
         Leaf leaf = (Leaf) node;
@@ -216,43 +221,47 @@ public final class TreeVisualizer {
         if (dataset.isNumerical(dataset.getLabelId())) {
           buff.append(doubleToString(label));
         } else {
-          buff.append(dataset.getLabelString((int) label));
+          buff.append(dataset.getLabelString(label));
         }
       }
     } catch (IllegalAccessException iae) {
       throw new IllegalStateException(iae);
     }
-
+    
     return buff.toString();
   }
-
+  
   /**
    * Predict trace to String
+   * 
    * @param tree
    *          Node of tree
    * @param attrNames
    *          attribute names
    */
   public static String[] predictTrace(Node tree, Data data, String[] attrNames) {
-    Map<String, Field> reflectMap = getReflectMap();
+    Map<String,Field> reflectMap = getReflectMap();
     String[] prediction = new String[data.size()];
     for (int i = 0; i < data.size(); i++) {
-      prediction[i] = toStringPredict(tree, data.get(i), data.getDataset(), attrNames, reflectMap);
+      prediction[i] = toStringPredict(tree, data.get(i), data.getDataset(),
+          attrNames, reflectMap);
     }
     return prediction;
   }
-
+  
   /**
    * Print predict trace
+   * 
    * @param tree
    *          Node of tree
    * @param attrNames
    *          attribute names
    */
   public static void predictTracePrint(Node tree, Data data, String[] attrNames) {
-    Map<String, Field> reflectMap = getReflectMap();
+    Map<String,Field> reflectMap = getReflectMap();
     for (int i = 0; i < data.size(); i++) {
-      System.out.println(toStringPredict(tree, data.get(i), data.getDataset(), attrNames, reflectMap));
+      System.out.println(toStringPredict(tree, data.get(i), data.getDataset(),
+          attrNames, reflectMap));
     }
   }
 }

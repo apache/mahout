@@ -84,3 +84,5 @@ __MAHOUT-1181: Adding StreamingKMeans MapReduce classes (dfilimon)
   MAHOUT-1176: Introduce a changelog file to raise contributors attribution (ssc)
 
   MAHOUT-1108: Allows cluster-reuters.sh example to be executed on a cluster (elmer.garduno via gsingers) 
+
+  MAHOUT-961: Fix issue in decision forest tree visualizer to properly show stems of tree (Ikumasa Mukai via gsingers)
