@@ -118,12 +118,10 @@ public final class MatrixColumnMeansJob {
       } finally {
         Closeables.closeQuietly(iterator);
       }
+    } catch (IOException ioe) {
+      throw ioe;
     } catch (Throwable thr) {
-      if (thr instanceof IOException) {
-        throw (IOException) thr;
-      } else {
-        throw new IOException(thr);
-      }
+      throw new IOException(thr);
     }
   }
 

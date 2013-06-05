@@ -197,7 +197,7 @@ public final class Probability {
     if (k < 0) {
       return 0.0;
     }
-    return Gamma.incompleteGammaComplement((double) (k + 1), mean);
+    return Gamma.incompleteGammaComplement(k + 1, mean);
   }
 
 }

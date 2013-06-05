@@ -209,7 +209,7 @@ public class DecisionTreeBuilder implements TreeBuilder {
       return new Leaf(label);
     }
 
-    log.debug("best split attr:{}, split:{}, ig:{}", best.getIg(), best.getAttr(), best.getSplit(), best.getIg());
+    log.debug("best split attr:{}, split:{}, ig:{}", best.getAttr(), best.getSplit(), best.getIg());
 
     boolean alreadySelected = selected[best.getAttr()];
     if (alreadySelected) {

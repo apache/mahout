@@ -284,7 +284,7 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
     double thatLength = that.getLengthSquared();
     double dot = dot(that);
     double distanceEstimate = thisLength + thatLength - 2 * dot;
-    if (distanceEstimate > 1e-3 * (thisLength + thatLength)) {
+    if (distanceEstimate > 1.0e-3 * (thisLength + thatLength)) {
       // The vectors are far enough from each other that the formula is accurate.
       return Math.max(distanceEstimate, 0);
     } else {
@@ -471,10 +471,10 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
       }
     } else {
       if (isSequentialAccess() && !isAddConstantTime()) {
-        OrderedIntDoubleMapping updates = new OrderedIntDoubleMapping();
         // Update all the non-zero values and queue the updates for the zero vaues.
         // The vector will become dense.
         it = iterator();
+        OrderedIntDoubleMapping updates = new OrderedIntDoubleMapping();
         while (it.hasNext()) {
           Element element = it.next();
           if (element.get() == 0.0) {

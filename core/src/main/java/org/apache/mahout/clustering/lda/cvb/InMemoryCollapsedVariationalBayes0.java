@@ -262,7 +262,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
   }
 
   private static void logTime(String label, long nanos) {
-    log.info("{} time: {}ms", label, (double) nanos / 1.0e6);
+    log.info("{} time: {}ms", label, nanos / 1.0e6);
   }
 
   public static int main2(String[] args, Configuration conf) throws Exception {

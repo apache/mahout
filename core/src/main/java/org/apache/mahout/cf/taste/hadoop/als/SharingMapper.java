@@ -53,7 +53,7 @@ public abstract class SharingMapper<K1,V1,K2,V2,S> extends Mapper<K1,V1,K2,V2> {
     return (S) SHARED_INSTANCE;
   }
 
-  final static void reset() {
+  static void reset() {
     SHARED_INSTANCE = null;
   }
 }

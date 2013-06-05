@@ -66,7 +66,7 @@ public final class HmmTrainer {
     // given no prior knowledge, we have to assume that all initial hidden
     // states are equally likely
     DenseVector initialProbabilities = new DenseVector(nrOfHiddenStates);
-    initialProbabilities.assign(1.0 / (double) nrOfHiddenStates);
+    initialProbabilities.assign(1.0 / nrOfHiddenStates);
 
     // now loop over the sequences to count the number of transitions
     countTransitions(transitionMatrix, emissionMatrix, observedSequence,

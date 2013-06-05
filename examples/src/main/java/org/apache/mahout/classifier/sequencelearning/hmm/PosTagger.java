@@ -193,7 +193,7 @@ public final class PosTagger {
     // than anything else
     Matrix emissions = taggingModel.getEmissionMatrix();
     for (int i = 0; i < taggingModel.getNrOfHiddenStates(); ++i) {
-      emissions.setQuick(i, 0, 0.1 / (double) taggingModel.getNrOfHiddenStates());
+      emissions.setQuick(i, 0, 0.1 / taggingModel.getNrOfHiddenStates());
     }
     int nnptag = tagIDs.get("NNP");
     emissions.setQuick(nnptag, 0, 1 / (double) taggingModel.getNrOfHiddenStates());
@@ -234,7 +234,7 @@ public final class PosTagger {
     end = System.currentTimeMillis();
     duration = (end - start) / 1000.0;
     log.info("POS tagged test file in {} seconds!", duration);
-    double errorRate = (double) errorCount / (double) totalCount;
+    double errorRate = (double) errorCount / totalCount;
     log.info("Tagged the test file with an error rate of: {}", errorRate);
   }
 

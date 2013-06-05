@@ -318,7 +318,7 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
 	  maxDF = (int) (100.0 * maxDFSigma * stdDev / vectorCount);
 	}
 
-	long maxDFThreshold = (long) (vectorCount * ((float) maxDF / 100f));
+	long maxDFThreshold = (long) (vectorCount * (maxDF / 100.0f));
 
         // Prune the term frequency vectors
         Path tfDir = new Path(outputDir, tfDirName);

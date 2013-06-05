@@ -298,12 +298,12 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     if (implicitFeedback) {
       solverMapperClassInternal = SolveImplicitFeedbackMapper.class;
-      name = "Recompute " + matrixName + ", iteration (" + (iterationNumber + 1) + "/" + numIterations + "), "
-          + "(" + numThreadsPerSolver + " threads, " + numFeatures +" features, implicit feedback)";
+      name = "Recompute " + matrixName + ", iteration (" + (iterationNumber + 1) + '/' + numIterations + "), "
+          + '(' + numThreadsPerSolver + " threads, " + numFeatures +" features, implicit feedback)";
     } else {
       solverMapperClassInternal = SolveExplicitFeedbackMapper.class;
-      name = "Recompute " + matrixName + ", iteration (" + (iterationNumber + 1) + "/" + numIterations + "), "
-          + "(" + numThreadsPerSolver + " threads, " + numFeatures + " features, explicit feedback)";
+      name = "Recompute " + matrixName + ", iteration (" + (iterationNumber + 1) + '/' + numIterations + "), "
+          + '(' + numThreadsPerSolver + " threads, " + numFeatures + " features, explicit feedback)";
     }
 
     Job solverForUorI = prepareJob(ratings, output, SequenceFileInputFormat.class, MultithreadedSharingMapper.class,

@@ -199,12 +199,12 @@ public class ParallelArraysSGDFactorizer implements Factorizer {
   }
 
   private double trainingIterationWithRmse(int feature) {
-    double rmse = 0;
+    double rmse = 0.0;
     for (int index = 0; index < userIndexes.length; index++) {
       double error = train(userIndexes[index], itemIndexes[index], feature, values[index], cachedEstimates[index]);
       rmse += error * error;
     }
-    return Math.sqrt(rmse / (double) userIndexes.length);
+    return Math.sqrt(rmse / userIndexes.length);
   }
 
   private double estimate(int userIndex, int itemIndex, int feature, double cachedEstimate, boolean trailing) {

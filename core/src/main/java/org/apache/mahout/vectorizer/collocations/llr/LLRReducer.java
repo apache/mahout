@@ -112,7 +112,7 @@ public class LLRReducer extends Reducer<Gram, Gram, Text, DoubleWritable> {
     } catch (IllegalArgumentException ex) {
       context.getCounter(Skipped.LLR_CALCULATION_ERROR).increment(1);
       log.warn("Problem calculating LLR ratio for ngram {}, HEAD {}:{}, TAIL {}:{}, k11/k12/k21/k22: {}/{}/{}/{}",
-          new Object[] {ngram, gram[0], gramFreq[0], gram[1], gramFreq[1], k11, k12, k21, k22}, ex);
+          ngram, gram[0], gramFreq[0], gram[1], gramFreq[1], k11, k12, k21, k22, ex);
       return;
     }
     if (llr < minLLRValue) {

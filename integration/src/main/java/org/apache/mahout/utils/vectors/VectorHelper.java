@@ -87,8 +87,9 @@ public final class VectorHelper {
     // If the sizeOfNonZeroElementsInVector < maxEntries then set maxEntries = sizeOfNonZeroElementsInVector
     // otherwise the call to queue.pop() returns a Pair(null, null) and the subsequent call
     // to pair.getFirst() throws a NullPointerException
-    if (sizeOfNonZeroElementsInVector < maxEntries)
+    if (sizeOfNonZeroElementsInVector < maxEntries) {
       maxEntries = sizeOfNonZeroElementsInVector;
+    }
 
     PriorityQueue<Pair<Integer, Double>> queue = new TDoublePQ<Integer>(-1, maxEntries);
     for (Element e : vector.nonZeroes()) {
@@ -176,7 +177,12 @@ public final class VectorHelper {
    * </pre>
    */
   public static String[] loadTermDictionary(File dictFile) throws IOException {
-    return loadTermDictionary(new FileInputStream(dictFile));
+    InputStream in = new FileInputStream(dictFile);
+    try {
+      return loadTermDictionary(in);
+    } finally {
+      in.close();
+    }
   }
 
   /**

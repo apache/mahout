@@ -307,7 +307,7 @@ public final class Arithmetic {
   public static double logFactorial(int k) {
     if (k >= 30) {
 
-      double r = 1.0 / (double) k;
+      double r = 1.0 / k;
       double rr = r * r;
       double c7 = -5.95238095238095238e-04;
       double c5 = 7.93650793650793651e-04;

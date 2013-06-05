@@ -36,7 +36,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class SearchSanityTest extends MahoutTestCase {
   private static final int NUM_DATA_POINTS = 1 << 13;
   private static final int NUM_DIMENSIONS = 20;
@@ -85,7 +85,7 @@ public class SearchSanityTest extends MahoutTestCase {
 
     Vector q = Iterables.get(data, 0).vector();
     List<WeightedThing<Vector>> r = searcher.search(q, 2);
-    assertEquals(0, r.get(0).getValue().minus(q).norm(1), 1e-8);
+    assertEquals(0, r.get(0).getValue().minus(q).norm(1), 1.0e-8);
 
     final Iterable<MatrixSlice> batch2 = Iterables.limit(Iterables.skip(data, 300), 10);
     searcher.addAllMatrixSlices(batch2);
@@ -93,16 +93,16 @@ public class SearchSanityTest extends MahoutTestCase {
 
     q = Iterables.get(data, 302).vector();
     r = searcher.search(q, 2);
-    assertEquals(0, r.get(0).getValue().minus(q).norm(1), 1e-8);
+    assertEquals(0, r.get(0).getValue().minus(q).norm(1), 1.0e-8);
 
     searcher.addAllMatrixSlices(Iterables.skip(data, 310));
     assertEquals(dataPoints.numRows(), searcher.size());
 
     for (MatrixSlice query : queries) {
       r = searcher.search(query.vector(), 2);
-      assertEquals("Distance has to be about zero", 0, r.get(0).getWeight(), 1e-6);
+      assertEquals("Distance has to be about zero", 0, r.get(0).getWeight(), 1.0e-6);
       assertEquals("Answer must be substantially the same as query", 0,
-          r.get(0).getValue().minus(query.vector()).norm(1), 1e-8);
+          r.get(0).getValue().minus(query.vector()).norm(1), 1.0e-8);
       assertTrue("Wrong answer must have non-zero distance",
           r.get(1).getWeight() > r.get(0).getWeight());
     }
@@ -120,9 +120,9 @@ public class SearchSanityTest extends MahoutTestCase {
       final Vector epsilon = noise.sample();
       List<WeightedThing<Vector>> r = searcher.search(query, 2);
       query = query.plus(epsilon);
-      assertEquals("Distance has to be small", epsilon.norm(2), r.get(0).getWeight(), 1e-1);
+      assertEquals("Distance has to be small", epsilon.norm(2), r.get(0).getWeight(), 1.0e-1);
       assertEquals("Answer must be substantially the same as query", epsilon.norm(2),
-          r.get(0).getValue().minus(query).norm(2), 1e-1);
+          r.get(0).getValue().minus(query).norm(2), 1.0e-1);
       assertTrue("Wrong answer must be further away", r.get(1).getWeight() > r.get(0).getWeight());
     }
   }
@@ -158,15 +158,15 @@ public class SearchSanityTest extends MahoutTestCase {
 
       List<WeightedThing<Vector>> r0 = searcher.search(x.get(0), 2);
 
-      searcher.remove(x.get(0), 1e-7);
+      searcher.remove(x.get(0), 1.0e-7);
       assertEquals(size0 - 1, searcher.size());
 
       List<WeightedThing<Vector>> r = searcher.search(x.get(0), 1);
       assertTrue("Vector should be gone", r.get(0).getWeight() > 0);
       assertEquals("Previous second neighbor should be first", 0,
-          r.get(0).getValue().minus(r0.get(1).getValue()).norm (1), 1e-8);
+          r.get(0).getValue().minus(r0.get(1).getValue()).norm (1), 1.0e-8);
 
-      searcher.remove(x.get(1), 1e-7);
+      searcher.remove(x.get(1), 1.0e-7);
       assertEquals(size0 - 2, searcher.size());
 
       r = searcher.search(x.get(1), 1);
@@ -174,13 +174,13 @@ public class SearchSanityTest extends MahoutTestCase {
 
       // Vectors don't show up in iterator.
       for (Vector v : searcher) {
-        assertTrue(x.get(0).minus(v).norm(1) > 1e-6);
-        assertTrue(x.get(1).minus(v).norm(1) > 1e-6);
+        assertTrue(x.get(0).minus(v).norm(1) > 1.0e-6);
+        assertTrue(x.get(1).minus(v).norm(1) > 1.0e-6);
       }
     } else {
       try {
         List<Vector> x = Lists.newArrayList(Iterables.limit(searcher, 2));
-        searcher.remove(x.get(0), 1e-7);
+        searcher.remove(x.get(0), 1.0e-7);
         fail("Shouldn't be able to delete from " + searcher.getClass().getName());
       } catch (UnsupportedOperationException e) {
         // good enough that UOE is thrown

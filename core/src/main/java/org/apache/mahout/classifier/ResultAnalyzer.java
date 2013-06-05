@@ -79,7 +79,7 @@ public class ResultAnalyzer {
   public String toString() {
     StringBuilder returnString = new StringBuilder();
    
-    returnString.append("\n"); 
+    returnString.append('\n'); 
     returnString.append("=======================================================\n");
     returnString.append("Summary\n");
     returnString.append("-------------------------------------------------------\n");
@@ -111,7 +111,7 @@ public class ResultAnalyzer {
     returnString.append(StringUtils.rightPad("Reliability", 40)).append(
       StringUtils.leftPad(decimalFormatter.format(normStats.getAverage() * 100.00000001), 10)).append("%\n");
     returnString.append(StringUtils.rightPad("Reliability (standard deviation)", 40)).append(
-      StringUtils.leftPad(decimalFormatter.format(normStats.getStandardDeviation()), 10)).append("\n"); 
+      StringUtils.leftPad(decimalFormatter.format(normStats.getStandardDeviation()), 10)).append('\n'); 
     
     if (hasLL) {
       returnString.append(StringUtils.rightPad("Log-likelihood", 30)).append("mean      : ").append(

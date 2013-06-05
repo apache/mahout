@@ -24,7 +24,10 @@ import org.apache.mahout.math.neighborhood.LocalitySensitiveHashSearch;
 import org.apache.mahout.math.neighborhood.ProjectionSearch;
 import org.apache.mahout.math.neighborhood.UpdatableSearcher;
 
-public class StreamingKMeansUtilsMR {
+public final class StreamingKMeansUtilsMR {
+
+  private StreamingKMeansUtilsMR() {
+  }
 
   /**
    * Instantiates a searcher from a given configuration.
@@ -37,7 +40,7 @@ public class StreamingKMeansUtilsMR {
     DistanceMeasure distanceMeasure;
     String distanceMeasureClass = conf.get(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
     try {
-      distanceMeasure = (DistanceMeasure)Class.forName(distanceMeasureClass).newInstance();
+      distanceMeasure = (DistanceMeasure)Class.forName(distanceMeasureClass).getConstructor().newInstance();
     } catch (Exception e) {
       throw new RuntimeException("Failed to instantiate distanceMeasure", e);
     }
@@ -90,7 +93,7 @@ public class StreamingKMeansUtilsMR {
    * @param input Iterable of Vectors to cast
    * @return the new Centroids
    */
-  public static Iterable<Centroid> castVectorsToCentroids(final Iterable<Vector> input) {
+  public static Iterable<Centroid> castVectorsToCentroids(Iterable<Vector> input) {
     return Iterables.transform(input, new Function<Vector, Centroid>() {
       private int numVectors = 0;
       @Override

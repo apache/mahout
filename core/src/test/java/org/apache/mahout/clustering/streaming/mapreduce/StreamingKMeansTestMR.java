@@ -54,20 +54,20 @@ import org.junit.runners.Parameterized;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class StreamingKMeansTestMR {
   private static final int NUM_DATA_POINTS = 1 << 15;
   private static final int NUM_DIMENSIONS = 8;
   private static final int NUM_PROJECTIONS = 3;
   private static final int SEARCH_SIZE = 5;
   private static final int MAX_NUM_ITERATIONS = 10;
-  private static final double DISTANCE_CUTOFF = 1e-6;
+  private static final double DISTANCE_CUTOFF = 1.0e-6;
 
-  private static Pair<List<Centroid>, List<Centroid>> syntheticData =
-      DataUtils.sampleMultiNormalHypercube(NUM_DIMENSIONS, NUM_DATA_POINTS, 1e-4);
+  private static final Pair<List<Centroid>, List<Centroid>> syntheticData =
+      DataUtils.sampleMultiNormalHypercube(NUM_DIMENSIONS, NUM_DATA_POINTS, 1.0e-4);
 
-  private String searcherClassName;
-  private String distanceMeasureClassName;
+  private final String searcherClassName;
+  private final String distanceMeasureClassName;
 
   public StreamingKMeansTestMR(String searcherClassName, String distanceMeasureClassName) {
     this.searcherClassName = searcherClassName;
@@ -224,8 +224,7 @@ public class StreamingKMeansTestMR {
   }
 
   @Test
-  public void testHypercubeMapReduceRunSequentially()
-      throws IOException, InterruptedException, ExecutionException, ClassNotFoundException {
+  public void testHypercubeMapReduceRunSequentially() throws Exception {
     Configuration configuration = new Configuration();
     configure(configuration);
     configuration.set(DefaultOptionCreator.METHOD_OPTION, DefaultOptionCreator.SEQUENTIAL_METHOD);
@@ -251,10 +250,10 @@ public class StreamingKMeansTestMR {
             })));
   }
 
-  private void testReducerResults(int totalWeight, List<org.apache.hadoop.mrunit.types.Pair<IntWritable,
+  private static void testReducerResults(int totalWeight, List<org.apache.hadoop.mrunit.types.Pair<IntWritable,
       CentroidWritable>> results) {
     int expectedNumClusters = 1 << NUM_DIMENSIONS;
-    double expectedWeight = totalWeight / expectedNumClusters;
+    double expectedWeight = (double) totalWeight / expectedNumClusters;
     int numClusters = 0;
     int numUnbalancedClusters = 0;
     int totalReducerWeight = 0;

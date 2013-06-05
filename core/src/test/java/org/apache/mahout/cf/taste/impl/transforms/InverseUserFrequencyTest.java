@@ -44,7 +44,7 @@ public final class InverseUserFrequencyTest extends TransformTestCase {
     for (int i = 0; i < 5; i++) {
       Preference pref = user5Prefs.get(i);
       assertNotNull(pref);
-      assertEquals(Math.log(5.0 / (double) (5 - i)) / Math.log(iuf.getLogBase()),
+      assertEquals(Math.log(5.0 / (5.0 - i)) / Math.log(iuf.getLogBase()),
           iuf.getTransformedValue(pref),
           EPSILON);
     }

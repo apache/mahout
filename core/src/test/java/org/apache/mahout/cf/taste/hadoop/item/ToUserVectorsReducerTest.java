@@ -28,6 +28,7 @@ import org.easymock.EasyMock;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * tests {@link ToUserVectorsReducer}
@@ -44,7 +45,7 @@ public class ToUserVectorsReducerTest extends TasteTestCase {
 
     EasyMock.replay(context);
 
-    reducer.reduce(new VarLongWritable(123), Arrays.asList(new VarLongWritable(456)), context);
+    reducer.reduce(new VarLongWritable(123), Collections.singletonList(new VarLongWritable(456)), context);
 
     EasyMock.verify(context);
   }

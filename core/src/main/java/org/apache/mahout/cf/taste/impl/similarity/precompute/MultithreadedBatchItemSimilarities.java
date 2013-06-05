@@ -112,7 +112,7 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
     return output.getNumSimilaritiesProcessed();
   }
 
-  private BlockingQueue<long[]> queueItemIDsInBatches(DataModel dataModel, int batchSize) throws TasteException {
+  private static BlockingQueue<long[]> queueItemIDsInBatches(DataModel dataModel, int batchSize) throws TasteException {
 
     LongPrimitiveIterator itemIDs = dataModel.getItemIDs();
     int numItems = dataModel.getNumItems();

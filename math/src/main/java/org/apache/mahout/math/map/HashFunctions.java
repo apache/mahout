@@ -26,7 +26,7 @@ public final class HashFunctions {
    * @return a hash code value for the specified value.
    */
   public static int hash(char value) {
-    return (int) value;
+    return value;
   }
 
   /**
@@ -104,7 +104,7 @@ public final class HashFunctions {
    * @return a hash code value for the specified value.
    */
   public static int hash(short value) {
-    return (int) value;
+    return value;
   }
 
   /**

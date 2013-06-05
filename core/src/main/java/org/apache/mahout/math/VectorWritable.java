@@ -205,9 +205,7 @@ public final class VectorWritable extends Configured implements Writable {
     while (vectors.hasNext()) {
       VectorWritable v = vectors.next();
       if (v != null) {
-        Iterator<Element> nonZeroElements = v.get().nonZeroes().iterator();
-        while (nonZeroElements.hasNext()) {
-          Vector.Element nonZeroElement = nonZeroElements.next();
+        for (Element nonZeroElement : v.get().nonZeroes()) {
           accumulator.setQuick(nonZeroElement.index(), nonZeroElement.get());
         }
       }

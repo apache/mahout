@@ -27,7 +27,7 @@ import org.apache.mahout.math.random.WeightedThing;
  */
 public class FastProjectionSearch extends UpdatableSearcher {
   // The list of vectors that have not yet been projected (that are pending).
-  private List<Vector> pendingAdditions = Lists.newArrayList();
+  private final List<Vector> pendingAdditions = Lists.newArrayList();
 
   // The list of basis vectors. Populated when the first vector's dimension is know by calling
   // initialize once.
@@ -41,11 +41,11 @@ public class FastProjectionSearch extends UpdatableSearcher {
   private List<List<WeightedThing<Vector>>> scalarProjections;
 
   // The number of projection used for approximating the distance.
-  private int numProjections;
+  private final int numProjections;
 
   // The number of elements to keep on both sides of the closest estimated distance as possible
   // candidates for the best actual distance.
-  private int searchSize;
+  private final int searchSize;
 
   // Initially, the dimension of the vectors searched by this searcher is unknown. After adding
   // the first vector, the basis will be initialized. This marks whether initialization has
@@ -57,8 +57,8 @@ public class FastProjectionSearch extends UpdatableSearcher {
   // "impossible" values in the array) so they can be removed when updating the structure.
   private int numPendingRemovals = 0;
 
-  private final static double ADDITION_THRESHOLD = 0.05;
-  private final static double REMOVAL_THRESHOLD = 0.02;
+  private static final double ADDITION_THRESHOLD = 0.05;
+  private static final double REMOVAL_THRESHOLD = 0.02;
 
   public FastProjectionSearch(DistanceMeasure distanceMeasure, int numProjections, int searchSize) {
     super(distanceMeasure);
@@ -199,7 +199,7 @@ public class FastProjectionSearch extends UpdatableSearcher {
     }
 
     boolean isProjected = true;
-    final Vector projection = basisMatrix.times(vector);
+    Vector projection = basisMatrix.times(vector);
     for (int i = 0; i < basisMatrix.numRows(); ++i) {
       List<WeightedThing<Vector>> currProjections = scalarProjections.get(i);
       WeightedThing<Vector> searchedThing = new WeightedThing<Vector>(projection.get(i));
@@ -294,12 +294,11 @@ public class FastProjectionSearch extends UpdatableSearcher {
       Iterator<WeightedThing<Vector>> data = scalarProjections.get(0).iterator();
       @Override
       protected Vector computeNext() {
-        WeightedThing<Vector> next;
         do {
           if (!data.hasNext()) {
             return endOfData();
           }
-          next = data.next();
+          WeightedThing<Vector> next = data.next();
           if (next.getValue() != null) {
             return next.getValue();
           }

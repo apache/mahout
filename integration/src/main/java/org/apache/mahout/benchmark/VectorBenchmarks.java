@@ -420,7 +420,6 @@ public class VectorBenchmarks {
   }
 
   private String asCsvString() {
-    StringBuilder sb = new StringBuilder(1000);
     List<String> keys = Lists.newArrayList(statsMap.keySet());
     Collections.sort(keys);
     Map<Integer,String> implMap = Maps.newHashMap();
@@ -428,14 +427,15 @@ public class VectorBenchmarks {
       implMap.put(e.getValue(), e.getKey());
     }
 
+    StringBuilder sb = new StringBuilder(1000);
     for (String benchmarkName : keys) {
       int i = 0;
       for (String[] stats : statsMap.get(benchmarkName)) {
         if (stats.length < 8) {
           continue;
         }
-        sb.append(benchmarkName + ",");
-        sb.append(implMap.get(i++) + ",");
+        sb.append(benchmarkName).append(',');
+        sb.append(implMap.get(i++)).append(',');
         sb.append(stats[7].trim().split("=|/")[1].trim());
         sb.append('\n');
       }

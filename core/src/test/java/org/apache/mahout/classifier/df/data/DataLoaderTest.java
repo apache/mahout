@@ -224,7 +224,7 @@ public final class DataLoaderTest extends MahoutTestCase {
           if (!loaded.getDataset().isNumerical(aId)) {
             double nValue = instance.get(aId);
             String oValue = Double.toString(data[index][attr]);
-            assertEquals((double) loaded.getDataset().valueOf(aId, oValue), nValue, EPSILON);
+            assertEquals(loaded.getDataset().valueOf(aId, oValue), nValue, EPSILON);
           }
         } else {
           assertEquals(attrs[attr].isNumerical(), loaded.getDataset().isNumerical(aId));
@@ -232,7 +232,7 @@ public final class DataLoaderTest extends MahoutTestCase {
           if (attrs[attr].isCategorical()) {
             double nValue = instance.get(aId);
             String oValue = Double.toString(data[index][attr]);
-            assertEquals((double) loaded.getDataset().valueOf(aId, oValue), nValue, EPSILON);
+            assertEquals(loaded.getDataset().valueOf(aId, oValue), nValue, EPSILON);
           }
         }
         aId++;

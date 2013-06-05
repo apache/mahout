@@ -20,7 +20,7 @@ public final class BenchmarkRunner {
     leadTimeUsec = TimeUnit.MILLISECONDS.toNanos(leadTimeMs);
   }
 
-  public static abstract class BenchmarkFn implements Function<Integer, Boolean> {
+  public abstract static class BenchmarkFn implements Function<Integer, Boolean> {
     protected int randIndex() {
       return BenchmarkRunner.randIndex();
     }
@@ -37,7 +37,7 @@ public final class BenchmarkRunner {
     }
   }
 
-  public static abstract class BenchmarkFnD implements Function<Integer, Double> {
+  public abstract static class BenchmarkFnD implements Function<Integer, Double> {
     protected int randIndex() {
       return BenchmarkRunner.randIndex();
     }

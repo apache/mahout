@@ -83,7 +83,7 @@ public class BallKMeansTest {
     clusterer.cluster(syntheticData.getFirst());
     long endTime = System.currentTimeMillis();
 
-    assertEquals("Total weight not preserved", totalWeight(syntheticData.getFirst()), totalWeight(clusterer), 1e-9);
+    assertEquals("Total weight not preserved", totalWeight(syntheticData.getFirst()), totalWeight(clusterer), 1.0e-9);
 
     // Verify that each corner of the cube has a centroid very nearby.
     // This is probably FALSE for large-dimensional spaces!
@@ -98,7 +98,7 @@ public class BallKMeansTest {
     double clusterTime = (endTime - startTime) / 1000.0;
     System.out.printf("%s\n%.2f for clustering\n%.1f us per row\n\n",
         searcher.getClass().getName(), clusterTime,
-        clusterTime / syntheticData.getFirst().size() * 1e6);
+        clusterTime / syntheticData.getFirst().size() * 1.0e6);
 
     // Verify that the total weight of the centroids near each corner is correct.
     double[] cornerWeights = new double[1 << NUM_DIMENSIONS];
@@ -155,7 +155,7 @@ public class BallKMeansTest {
     assertEquals(5, s.norm(1), 0.05);
   }
 
-  private List<? extends WeightedVector> cubishTestData(double radius) {
+  private static List<? extends WeightedVector> cubishTestData(double radius) {
     List<WeightedVector> data = Lists.newArrayListWithCapacity(K1 + 5000);
     int row = 0;
 
@@ -166,7 +166,7 @@ public class BallKMeansTest {
 
     for (int i = 0; i < 5; i++) {
       Vector m = new DenseVector(10);
-      m.set(i, i == 0 ? 6 : 6);
+      m.set(i, 6); // This was originally i == 0 ? 6 : 6 which can't be right
       MultiNormal gx = new MultiNormal(radius, m);
       for (int j = 0; j < 1000; j++) {
         data.add(new WeightedVector(gx.sample(), 1, row++));

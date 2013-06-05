@@ -22,6 +22,7 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Compact representation of all similar items for an item
@@ -73,6 +74,9 @@ public class SimilarItems {
 
     @Override
     public SimilarItem next() {
+      if (!hasNext()) {
+        throw new NoSuchElementException();
+      }
       index++;
       return new SimilarItem(similarItemIDs[index], similarities[index]);
     }

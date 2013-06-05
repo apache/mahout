@@ -20,7 +20,6 @@ package org.apache.mahout.math.hadoop.solver;
 import java.io.File;
 import java.util.Random;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;

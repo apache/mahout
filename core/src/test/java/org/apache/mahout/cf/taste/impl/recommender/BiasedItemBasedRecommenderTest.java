@@ -27,24 +27,24 @@ public class BiasedItemBasedRecommenderTest {
   @Test
   public void sorting() {
 
-    double[] similarities = new double[] { 0.1, 1.0, 0.5 };
-    float[] ratings = new float[] { 3, 1, 2 };
-    long[] itemIDs = new long[] { 3, 1, 2 };
+    double[] similarities = { 0.1, 1.0, 0.5 };
+    float[] ratings = { 3, 1, 2 };
+    long[] itemIDs = { 3, 1, 2 };
 
     Sorting.quickSort(0, similarities.length, new BiasedItemBasedRecommender.SimilaritiesComparator(similarities),
         new BiasedItemBasedRecommender.SimilaritiesRatingsItemIDsSwapper(similarities, ratings, itemIDs));
 
-    assertEquals(1d, similarities[0], 0d);
-    assertEquals(0.5d, similarities[1], 0d);
-    assertEquals(0.1d, similarities[2], 0d);
+    assertEquals(1.0d, similarities[0], 0.0d);
+    assertEquals(0.5d, similarities[1], 0.0d);
+    assertEquals(0.1d, similarities[2], 0.0d);
 
-    assertEquals(1f, ratings[0], 0f);
-    assertEquals(2f, ratings[1], 0f);
-    assertEquals(3f, ratings[2], 0f);
+    assertEquals(1.0f, ratings[0], 0.0f);
+    assertEquals(2.0f, ratings[1], 0.0f);
+    assertEquals(3.0f, ratings[2], 0.0f);
 
-    assertEquals(1l, itemIDs[0]);
-    assertEquals(2l, itemIDs[1]);
-    assertEquals(3l, itemIDs[2]);
+    assertEquals(1L, itemIDs[0]);
+    assertEquals(2L, itemIDs[1]);
+    assertEquals(3L, itemIDs[2]);
   }
 
 }

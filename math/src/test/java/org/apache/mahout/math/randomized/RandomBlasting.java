@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.mahout.math.map.OpenIntIntHashMap;
@@ -32,7 +33,7 @@ public class RandomBlasting extends RandomizedTest {
   @Repeat(iterations = 20)
   public void testAgainstReference_OpenObjectIntHashMap() {
     OpenObjectIntHashMap<Integer> base = new OpenObjectIntHashMap<Integer>();
-    HashMap<Integer, Integer> reference = new HashMap<Integer, Integer>();
+    Map<Integer, Integer> reference = new HashMap<Integer, Integer>();
 
     List<Operation> ops = new ArrayList<Operation>();
     addOp(ops, Operation.ADD, 60);
@@ -83,7 +84,7 @@ public class RandomBlasting extends RandomizedTest {
   @Repeat(iterations = 20)
   public void testAgainstReference_OpenIntObjectHashMap() {
     OpenIntObjectHashMap<Integer> base = new OpenIntObjectHashMap<Integer>();
-    HashMap<Integer, Integer> reference = new HashMap<Integer, Integer>();
+    Map<Integer, Integer> reference = new HashMap<Integer, Integer>();
 
     List<Operation> ops = new ArrayList<Operation>();
     addOp(ops, Operation.ADD, 60);

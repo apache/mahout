@@ -86,7 +86,7 @@ public final class ConfusionMatrixTest extends MahoutTestCase {
     labelList.add(labels[0]);
     labelList.add(labels[1]);
     ConfusionMatrix cm = new ConfusionMatrix(labelList, defaultLabel);
-    int[][] v = cm.getConfusionMatrix();
+    //int[][] v = cm.getConfusionMatrix();
     cm.putCount("Label1", "Label1", values[0][0]);
     cm.putCount("Label1", "Label2", values[0][1]);
     cm.putCount("Label2", "Label1", values[1][0]);

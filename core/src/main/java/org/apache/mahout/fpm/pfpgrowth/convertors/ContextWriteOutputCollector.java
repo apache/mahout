@@ -51,7 +51,7 @@ public class ContextWriteOutputCollector<IK extends Writable,IV extends Writable
       context.setStatus("Writing Top K patterns for: " + key);
       context.write(key, value);
     } catch (InterruptedException e) {
-      log.error("{}", e);
+      log.error("{}", e.toString());
     }
   }
   

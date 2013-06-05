@@ -43,7 +43,7 @@ import java.util.Iterator;
  * explanation.
  */
 public abstract class VectorBinaryAssign {
-  public static final VectorBinaryAssign[] operations = new VectorBinaryAssign[] {
+  public static final VectorBinaryAssign[] operations = {
       new AssignNonzerosIterateThisLookupThat(),
       new AssignNonzerosIterateThatLookupThisMergeUpdates(),
       new AssignNonzerosIterateThatLookupThisInplaceUpdates(),
@@ -481,10 +481,9 @@ public abstract class VectorBinaryAssign {
     public Vector assign(Vector x, Vector y, DoubleDoubleFunction f) {
       Iterator<Vector.Element> xi = x.all().iterator();
       Iterator<Vector.Element> yi = y.all().iterator();
-      Vector.Element xe;
       OrderedIntDoubleMapping updates = new OrderedIntDoubleMapping(false);
       while (xi.hasNext() && yi.hasNext()) {
-        xe = xi.next();
+        Element xe = xi.next();
         updates.set(xe.index(), f.apply(xe.get(), yi.next().get()));
       }
       x.mergeUpdates(updates);
@@ -509,9 +508,8 @@ public abstract class VectorBinaryAssign {
     public Vector assign(Vector x, Vector y, DoubleDoubleFunction f) {
       Iterator<Vector.Element> xi = x.all().iterator();
       Iterator<Vector.Element> yi = y.all().iterator();
-      Vector.Element xe;
       while (xi.hasNext() && yi.hasNext()) {
-        xe = xi.next();
+        Element xe = xi.next();
         x.setQuick(xe.index(), f.apply(xe.get(), yi.next().get()));
       }
       return x;

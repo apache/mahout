@@ -74,7 +74,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     for (int i = 0; i < 6; i++) {
       for (int j = i + 1; j < 6; j++) {
         similarities.add(
-            new GenericItemSimilarity.ItemItemSimilarity(i, j, 1.0 / (1.0 + (double) i + (double) j)));
+            new GenericItemSimilarity.ItemItemSimilarity(i, j, 1.0 / (1.0 + i + j)));
       }
     }
     ItemSimilarity similarity = new GenericItemSimilarity(similarities);

@@ -37,7 +37,7 @@ public final class VectorBinaryAggregateCostTest {
   Vector sasv = EasyMock.createMock(Vector.class);
   Vector dense = EasyMock.createMock(Vector.class);
 
-  private void createStubs(Vector v, Vector realV) {
+  private static void createStubs(Vector v, Vector realV) {
     expect(v.getLookupCost())
         .andStubReturn(realV instanceof SequentialAccessSparseVector
             ? Math.round(Math.log(1000)) : realV.getLookupCost());

@@ -20,6 +20,7 @@ package org.apache.mahout.clustering.streaming.cluster;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 
 import com.google.common.base.Function;
@@ -127,7 +128,7 @@ public class StreamingKMeans implements Iterable<Centroid> {
   /**
    * Random object to sample values from.
    */
-  private Random random = RandomUtils.getRandom();
+  private final Random random = RandomUtils.getRandom();
 
   /**
    * Calls StreamingKMeans(searcher, numClusters, 1.3, 10, 2).
@@ -231,6 +232,9 @@ public class StreamingKMeans implements Iterable<Centroid> {
 
           @Override
           public Centroid next() {
+            if (!hasNext()) {
+              throw new NoSuchElementException();
+            }
             accessed = true;
             return datapoint;
           }

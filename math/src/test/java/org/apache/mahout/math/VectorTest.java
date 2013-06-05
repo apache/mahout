@@ -379,9 +379,7 @@ public final class VectorTest extends MahoutTestCase {
       index++;
     }
 
-    Iterator<Element> nonZeroIterator = vector.nonZeroes().iterator();
-    while (nonZeroIterator.hasNext()) {
-      Element element = nonZeroIterator.next();
+    for (Element element : vector.nonZeroes()) {
       index = element.index();
       assertTrue(expectedIndices.contains(index));
       assertEquals((double) index * 2, element.get(), EPSILON);
@@ -904,14 +902,14 @@ public final class VectorTest extends MahoutTestCase {
     testExample1NonZeroIterator(new DenseVector(13));
   }
 
-  private void testIterator(Vector vector) {
+  private static void testIterator(Vector vector) {
     testSkips(vector.like());
     testSkipsLast(vector.like());
     testEmptyNonZeroIterator(vector.like());
     testSingleNonZeroIterator(vector.like());
   }
 
-  private void testSkips(Vector vector) {
+  private static void testSkips(Vector vector) {
     vector.set(0, 1);
     vector.set(2, 2);
     vector.set(4, 3);
@@ -948,7 +946,7 @@ public final class VectorTest extends MahoutTestCase {
     assertEquals(197, i);  // Last element is print only once.
   }
 
-  private void testSkipsLast(Vector vector) {
+  private static void testSkipsLast(Vector vector) {
     vector.set(1, 6);
     vector.set(98, 6);
 
@@ -975,7 +973,7 @@ public final class VectorTest extends MahoutTestCase {
   }
 
   // Test NonZeroIterator on an list with 0 elements
-  private void testEmptyNonZeroIterator(Vector vector) {
+  private static void testEmptyNonZeroIterator(Vector vector) {
     // Test non zero iterator.
     Iterator<Element> it = vector.nonZeroes().iterator();
     int i = 0;
@@ -995,7 +993,7 @@ public final class VectorTest extends MahoutTestCase {
   }
 
   // Test AllIterator on an list with 0 cardinality
-  private void testEmptyAllIterator(Vector vector) {
+  private static void testEmptyAllIterator(Vector vector) {
     // Test non zero iterator.
     Iterator<Element> it = vector.all().iterator();
     int i = 0;
@@ -1024,7 +1022,7 @@ public final class VectorTest extends MahoutTestCase {
   }
 
   // Test NonZeroIterator on an list with 1 elements
-  private void testSingleNonZeroIterator(Vector vector) {
+  private static void testSingleNonZeroIterator(Vector vector) {
     vector.set(1, 6);
     // Test non zero iterator.
     Iterator<Element> it = vector.nonZeroes().iterator();
@@ -1046,8 +1044,8 @@ public final class VectorTest extends MahoutTestCase {
   }
 
   // Test NonZeroIterator on double[] { 0, 2, 0, 0, 8, 3, 0, 6, 0, 1, 1, 2, 1 }
-  private void testExample1NonZeroIterator(Vector vector) {
-    double[] val = new double[] { 0, 2, 0, 0, 8, 3, 0, 6, 0, 1, 1, 2, 1 };
+  private static void testExample1NonZeroIterator(Vector vector) {
+    double[] val = { 0, 2, 0, 0, 8, 3, 0, 6, 0, 1, 1, 2, 1 };
     for (int i = 0; i < val.length; ++i) {
       vector.set(i, val[i]);
     }

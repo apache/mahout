@@ -163,8 +163,9 @@ public abstract class AbstractJob extends Configured implements Tool {
   @Override
   public Configuration getConf() {
     Configuration result = super.getConf();
-    if (result == null)
+    if (result == null) {
       return new Configuration();
+    }
     return result;
   }
 
@@ -446,11 +447,10 @@ public abstract class AbstractJob extends Configured implements Tool {
 
       Writable row = ClassUtils.instantiateAs(reader.getKeyClass().asSubclass(Writable.class), Writable.class);
 
-      VectorWritable vectorWritable = new VectorWritable();
-
       Preconditions.checkArgument(reader.getValueClass().equals(VectorWritable.class),
           "value type of sequencefile must be a VectorWritable");
 
+      VectorWritable vectorWritable = new VectorWritable();
       boolean hasAtLeastOneRow = reader.next(row, vectorWritable);
       Preconditions.checkState(hasAtLeastOneRow, "matrix must have at least one row");
 
@@ -642,7 +642,7 @@ public abstract class AbstractJob extends Configured implements Tool {
     String oozieActionConfXml = System.getProperty("oozie.action.conf.xml");
     if (oozieActionConfXml != null && conf != null) {
       conf.addResource(new Path("file:///", oozieActionConfXml));
-      log.info("Added Oozie action Configuration resource {0} to the Hadoop Configuration", oozieActionConfXml);
+      log.info("Added Oozie action Configuration resource {} to the Hadoop Configuration", oozieActionConfXml);
     }      
   }
 }

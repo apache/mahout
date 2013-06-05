@@ -60,10 +60,10 @@ public final class FileBasedMatrix extends AbstractMatrix {
   }
 
   public void setData(File f, boolean loadNow) throws IOException {
-    Preconditions.checkArgument(f.length() == (long) rows * columns * 8L, "File " + f + " is wrong length");
+    Preconditions.checkArgument(f.length() == rows * columns * 8L, "File " + f + " is wrong length");
 
     for (int i = 0; i < (rows + rowsPerBlock - 1) / rowsPerBlock; i++) {
-      long start = (long) i * rowsPerBlock * columns * 8L;
+      long start = i * rowsPerBlock * columns * 8L;
       long size = rowsPerBlock * columns * 8L;
       MappedByteBuffer buf = new FileInputStream(f).getChannel().map(FileChannel.MapMode.READ_ONLY, start,
                                                                      Math.min(f.length() - start, size));
@@ -77,17 +77,19 @@ public final class FileBasedMatrix extends AbstractMatrix {
   public static void writeMatrix(File f, Matrix m) throws IOException {
     Preconditions.checkArgument(f.canWrite(), "Can't write to output file");
     FileOutputStream fos = new FileOutputStream(f);
-
-    ByteBuffer buf = ByteBuffer.allocate(m.columnSize() * 8);
-    for (MatrixSlice row : m) {
-      buf.clear();
-      for (Vector.Element element : row.vector().all()) {
-        buf.putDouble(element.get());
+    try {
+      ByteBuffer buf = ByteBuffer.allocate(m.columnSize() * 8);
+      for (MatrixSlice row : m) {
+        buf.clear();
+        for (Vector.Element element : row.vector().all()) {
+          buf.putDouble(element.get());
+        }
+        buf.flip();
+        fos.write(buf.array());
       }
-      buf.flip();
-      fos.write(buf.array());
+    } finally {
+      fos.close();
     }
-    fos.close();
   }
 
   /**

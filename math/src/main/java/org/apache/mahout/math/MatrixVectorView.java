@@ -215,8 +215,8 @@ public class MatrixVectorView extends AbstractVector {
    */
   @Override
   public void mergeUpdates(OrderedIntDoubleMapping updates) {
-    int indices[] = updates.getIndices();
-    double values[] = updates.getValues();
+    int[] indices = updates.getIndices();
+    double[] values = updates.getValues();
     for (int i = 0; i < updates.getNumMappings(); ++i) {
       matrix.setQuick(row + rowStride * indices[i], column + columnStride * indices[i], values[i]);
     }

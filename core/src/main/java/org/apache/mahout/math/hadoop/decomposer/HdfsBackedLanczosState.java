@@ -68,7 +68,7 @@ public class HdfsBackedLanczosState extends LanczosState implements Configurable
       setupDirs();
       updateHdfsState();
     } catch (IOException e) {
-      log.error("Could not retrieve filesystem: ", conf, e);
+      log.error("Could not retrieve filesystem: {}", conf, e);
     }
   }
 
@@ -174,7 +174,7 @@ public class HdfsBackedLanczosState extends LanczosState implements Configurable
         Vector v = fetchVector(new Path(basisPath, BASIS_PREFIX + '_' + i), i);
         basis.put(i, v);
       } catch (IOException e) {
-        log.error("Could not load basis vector: ", i, e);
+        log.error("Could not load basis vector: {}", i, e);
       }
     }
     return super.getBasisVector(i);
@@ -187,7 +187,7 @@ public class HdfsBackedLanczosState extends LanczosState implements Configurable
         Vector v = fetchVector(new Path(singularVectorPath, BASIS_PREFIX + '_' + i), i);
         singularVectors.put(i, v);
       } catch (IOException e) {
-        log.error("Could not load singular vector: ", i, e);
+        log.error("Could not load singular vector: {}", i, e);
       }
     }
     return super.getRightSingularVector(i);

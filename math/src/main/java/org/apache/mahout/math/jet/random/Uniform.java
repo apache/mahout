@@ -84,7 +84,7 @@ public class Uniform extends AbstractContinousDistribution {
    * and <tt>to</tt>). Pre conditions: <tt>from &lt;= to</tt>.
    */
   public int nextIntFromTo(int from, int to) {
-    return (int) ((long) from + (long) ((1L + (long) to - (long) from) * randomDouble()));
+    return (int) (from + (long) ((1L + to - from) * randomDouble()));
   }
 
   /**

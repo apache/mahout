@@ -17,7 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.common.collect.Lists;
@@ -59,7 +59,7 @@ public final class PreferredItemsNeighborhoodCandidateItemsStrategyTest extends 
     EasyMock.expect(dataModel.getItemIDsFromUser(456L)).andReturn(itemIDsFromUser456);
 
     PreferenceArray prefArrayOfUser123 =
-        new GenericUserPreferenceArray(Arrays.asList(new GenericPreference(123L, 1L, 1.0f)));
+        new GenericUserPreferenceArray(Collections.singletonList(new GenericPreference(123L, 1L, 1.0f)));
 
     CandidateItemsStrategy strategy = new PreferredItemsNeighborhoodCandidateItemsStrategy();
 

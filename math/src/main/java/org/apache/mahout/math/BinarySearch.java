@@ -19,7 +19,7 @@ package org.apache.mahout.math;
 
 import java.util.Comparator;
 
-public class BinarySearch {
+public final class BinarySearch {
 
   private BinarySearch() {}
 

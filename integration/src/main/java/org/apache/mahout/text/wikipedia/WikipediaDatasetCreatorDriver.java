@@ -34,6 +34,7 @@ import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DefaultStringifier;
+import org.apache.hadoop.io.Stringifier;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -158,7 +159,7 @@ public final class WikipediaDatasetCreatorDriver {
       categories.add(line.trim().toLowerCase(Locale.ENGLISH));
     }
     
-    DefaultStringifier<Set<String>> setStringifier =
+    Stringifier<Set<String>> setStringifier =
         new DefaultStringifier<Set<String>>(conf, GenericsUtil.getClass(categories));
     
     String categoriesStr = setStringifier.toString(categories);

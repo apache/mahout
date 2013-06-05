@@ -28,7 +28,7 @@ import org.apache.mahout.cf.taste.recommender.CandidateItemsStrategy;
 import org.easymock.EasyMock;
 import org.junit.Test;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * Tests {@link AllUnknownItemsCandidateItemsStrategyTest}
@@ -47,7 +47,7 @@ public final class AllUnknownItemsCandidateItemsStrategyTest extends TasteTestCa
     EasyMock.expect(dataModel.getNumItems()).andReturn(3);
     EasyMock.expect(dataModel.getItemIDs()).andReturn(allItemIDs.iterator());
 
-    PreferenceArray prefArrayOfUser123 = new GenericUserPreferenceArray(Arrays.asList(
+    PreferenceArray prefArrayOfUser123 = new GenericUserPreferenceArray(Collections.singletonList(
         new GenericPreference(123L, 2L, 1.0f)));
 
     CandidateItemsStrategy strategy = new AllUnknownItemsCandidateItemsStrategy();

@@ -26,7 +26,6 @@ import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.stats.OnlineSummarizer;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;

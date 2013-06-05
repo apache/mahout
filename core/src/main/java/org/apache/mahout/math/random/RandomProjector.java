@@ -11,7 +11,10 @@ import org.apache.mahout.math.MatrixSlice;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.DoubleFunction;
 
-public class RandomProjector {
+public final class RandomProjector {
+  private RandomProjector() {
+  }
+
   /**
    * Generates a basis matrix of size projectedVectorSize x vectorSize. Multiplying a a vector by
    * this matrix results in the projected vector.
@@ -50,7 +53,7 @@ public class RandomProjector {
     Matrix basisMatrix = new DenseMatrix(projectedVectorSize, vectorSize);
     for (int i = 0; i < projectedVectorSize; ++i) {
       for (int j = 0; j < vectorSize; ++j) {
-        basisMatrix.set(i, j, RandomUtils.nextInt(2) == 0 ? +1 : -1);
+        basisMatrix.set(i, j, RandomUtils.nextInt(2) == 0 ? 1 : -1);
       }
     }
     for (MatrixSlice row : basisMatrix) {
@@ -79,7 +82,7 @@ public class RandomProjector {
     Matrix basisMatrix = new DenseMatrix(projectedVectorSize, vectorSize);
     Multinomial<Double> choice = new Multinomial<Double>();
     choice.add(0.0, 2/3.0);
-    choice.add(+Math.sqrt(3.0), 1 / 6.0);
+    choice.add(Math.sqrt(3.0), 1 / 6.0);
     choice.add(-Math.sqrt(3.0), 1 / 6.0);
     for (int i = 0; i < projectedVectorSize; ++i) {
       for (int j = 0; j < vectorSize; ++j) {
@@ -100,7 +103,7 @@ public class RandomProjector {
    * @return a list of projection vectors
    */
   public static List<Vector> generateVectorBasis(int projectedVectorSize, int vectorSize) {
-    final DoubleFunction random = new Normal();
+    DoubleFunction random = new Normal();
     List<Vector> basisVectors = Lists.newArrayList();
     for (int i = 0; i < projectedVectorSize; ++i) {
       Vector basisVector = new DenseVector(vectorSize);

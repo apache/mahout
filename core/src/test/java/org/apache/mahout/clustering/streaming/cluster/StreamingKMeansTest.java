@@ -42,7 +42,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.runners.Parameterized.Parameters;
 
 
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class StreamingKMeansTest {
   private static final int NUM_DATA_POINTS = 1 << 16;
   private static final int NUM_DIMENSIONS = 6;
@@ -82,7 +82,7 @@ public class StreamingKMeansTest {
       searcher.clear();
       int numStreamingClusters = (int)Math.log(syntheticData.getFirst().size()) * (1 <<
           NUM_DIMENSIONS);
-      double distanceCutoff = 1e-6;
+      double distanceCutoff = 1.0e-6;
       double estimatedCutoff = ClusteringUtils.estimateDistanceCutoff(syntheticData.getFirst(),
           searcher.getDistanceMeasure(), 100);
       System.out.printf("[%d] Generated synthetic data [magic] %f [estimate] %f\n", i, distanceCutoff, estimatedCutoff);
@@ -125,7 +125,7 @@ public class StreamingKMeansTest {
     System.out.printf("Weights: %f %f\n", ClusteringUtils.totalWeight(syntheticData.getFirst()),
         ClusteringUtils.totalWeight(clusterer));
     assertEquals("Total weight not preserved", ClusteringUtils.totalWeight(syntheticData.getFirst()),
-        ClusteringUtils.totalWeight(clusterer), 1e-9);
+        ClusteringUtils.totalWeight(clusterer), 1.0e-9);
 
     // and verify that each corner of the cube has a centroid very nearby
     double maxWeight = 0;
@@ -137,7 +137,7 @@ public class StreamingKMeansTest {
     double clusterTime = (endTime - startTime) / 1000.0;
     System.out.printf("%s\n%.2f for clustering\n%.1f us per row\n\n",
         searcher.getClass().getName(), clusterTime,
-        clusterTime / syntheticData.getFirst().size() * 1e6);
+        clusterTime / syntheticData.getFirst().size() * 1.0e6);
 
     // verify that the total weight of the centroids near each corner is correct
     double[] cornerWeights = new double[1 << NUM_DIMENSIONS];

@@ -20,7 +20,7 @@ import org.junit.runners.Parameterized;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class SearchQualityTest {
   private static final int NUM_DATA_POINTS = 1 << 14;
   private static final int NUM_QUERIES = 1 << 10;

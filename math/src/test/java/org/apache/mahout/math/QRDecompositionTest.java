@@ -163,7 +163,6 @@ public final class QRDecompositionTest extends MahoutTestCase {
 
   // TODO: the speedup constant should be checked and oddly, the times don't increase as the counts increase
   @Ignore
-  @Test
   public void fasterThanBefore() {
 
     OnlineSummarizer s1 = new OnlineSummarizer();

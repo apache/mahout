@@ -48,7 +48,7 @@ public class StreamingKMeansMapper extends Mapper<Writable, VectorWritable, IntW
     int numClusters = conf.getInt(StreamingKMeansDriver.ESTIMATED_NUM_MAP_CLUSTERS, 1);
     // There is no way of estimating the distance cutoff unless we have some data.
     clusterer = new StreamingKMeans(searcher, numClusters,
-        conf.getFloat(StreamingKMeansDriver.ESTIMATED_DISTANCE_CUTOFF, 1e-4f));
+        conf.getFloat(StreamingKMeansDriver.ESTIMATED_DISTANCE_CUTOFF, 1.0e-4f));
   }
 
   @Override

@@ -137,13 +137,13 @@ public final class OrderedIntDoubleMapping implements Serializable, Cloneable {
    * @param updates another list of mappings to be merged in.
    */
   public void merge(OrderedIntDoubleMapping updates) {
-    int updateIndices[] = updates.getIndices();
-    double updateValues[] = updates.getValues();
+    int[] updateIndices = updates.getIndices();
+    double[] updateValues = updates.getValues();
 
     int newNumMappings = numMappings + updates.getNumMappings();
     int newCapacity = Math.max((int) (1.2 * newNumMappings), newNumMappings + 1);
-    int newIndices[] = new int[newCapacity];
-    double newValues[] = new double[newCapacity];
+    int[] newIndices = new int[newCapacity];
+    double[] newValues = new double[newCapacity];
 
     int k = 0;
     int i = 0, j = 0;

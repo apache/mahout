@@ -10,8 +10,6 @@ import static org.apache.mahout.benchmark.VectorBenchmarks.SEQ_FN_DENSE;
 import static org.apache.mahout.benchmark.VectorBenchmarks.SEQ_FN_RAND;
 import static org.apache.mahout.benchmark.VectorBenchmarks.SEQ_SPARSE_VECTOR;
 
-import java.io.IOException;
-
 import org.apache.mahout.benchmark.BenchmarkRunner.BenchmarkFn;
 import org.apache.mahout.benchmark.BenchmarkRunner.BenchmarkFnD;
 
@@ -167,7 +165,7 @@ public class DotBenchmark {
     }), DOT_PRODUCT, SEQ_FN_RAND);
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) {
     VectorBenchmarks mark = new VectorBenchmarks(1000000, 100, 1000, 10, 1);
     mark.createData();
     new DotBenchmark(mark).benchmarkNorm2();

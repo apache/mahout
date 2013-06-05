@@ -25,7 +25,7 @@ public final class GramKeyGroupComparatorTest extends MahoutTestCase {
   @Test
   public void testComparator() {
     byte[] foo   = new byte[1];
-    foo[0] = (byte) 1;
+    foo[0] = 1;
 
     byte[] empty = new byte[0];
     GramKey a = new GramKey(new Gram("foo", 1, Gram.Type.HEAD), empty); // base

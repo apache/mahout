@@ -39,7 +39,7 @@ import java.util.Iterator;
  * explanation.
  */
 public abstract class VectorBinaryAggregate {
-  public static final VectorBinaryAggregate[] operations = new VectorBinaryAggregate[] {
+  public static final VectorBinaryAggregate[] operations = {
       new AggregateNonzerosIterateThisLookupThat(),
       new AggregateNonzerosIterateThatLookupThis(),
 
@@ -176,7 +176,6 @@ public abstract class VectorBinaryAggregate {
       boolean advanceThat = true;
       boolean validResult = false;
       double result = 0;
-      double thisResult;
       while (true) {
         if (advanceThis) {
           if (xi.hasNext()) {
@@ -193,7 +192,7 @@ public abstract class VectorBinaryAggregate {
           }
         }
         if (xe.index() == ye.index()) {
-          thisResult = fc.apply(xe.get(), ye.get());
+          double thisResult = fc.apply(xe.get(), ye.get());
           if (validResult) {
             result = fa.apply(result, thisResult);
           } else {
@@ -240,7 +239,6 @@ public abstract class VectorBinaryAggregate {
       boolean advanceThat = true;
       boolean validResult = false;
       double result = 0;
-      double thisResult;
       while (true) {
         if (advanceThis) {
           if (xi.hasNext()) {
@@ -256,6 +254,7 @@ public abstract class VectorBinaryAggregate {
             ye = null;
           }
         }
+        double thisResult;
         if (xe != null && ye != null) { // both vectors have nonzero elements
           if (xe.index() == ye.index()) {
             thisResult = fc.apply(xe.get(), ye.get());
@@ -312,12 +311,11 @@ public abstract class VectorBinaryAggregate {
     public double aggregate(Vector x, Vector y, DoubleDoubleFunction fa, DoubleDoubleFunction fc) {
       OpenIntHashSet visited = new OpenIntHashSet();
       Iterator<Vector.Element> xi = x.nonZeroes().iterator();
-      Vector.Element xe;
       boolean validResult = false;
       double result = 0;
       double thisResult;
       while (xi.hasNext()) {
-        xe = xi.next();
+        Vector.Element xe = xi.next();
         thisResult = fc.apply(xe.get(), y.getQuick(xe.index()));
         if (validResult) {
           result = fa.apply(result, thisResult);
@@ -328,9 +326,8 @@ public abstract class VectorBinaryAggregate {
         visited.add(xe.index());
       }
       Iterator<Vector.Element> yi = y.nonZeroes().iterator();
-      Vector.Element ye;
       while (yi.hasNext()) {
-        ye = yi.next();
+        Vector.Element ye = yi.next();
         if (!visited.contains(ye.index())) {
           thisResult = fc.apply(x.getQuick(ye.index()), ye.get());
           if (validResult) {
@@ -361,13 +358,11 @@ public abstract class VectorBinaryAggregate {
     public double aggregate(Vector x, Vector y, DoubleDoubleFunction fa, DoubleDoubleFunction fc) {
       Iterator<Vector.Element> xi = x.all().iterator();
       Iterator<Vector.Element> yi = y.all().iterator();
-      Vector.Element xe;
       boolean validResult = false;
       double result = 0;
-      double thisResult;
       while (xi.hasNext() && yi.hasNext()) {
-        xe = xi.next();
-        thisResult = fc.apply(xe.get(), yi.next().get());
+        Vector.Element xe = xi.next();
+        double thisResult = fc.apply(xe.get(), yi.next().get());
         if (validResult) {
           result = fa.apply(result, thisResult);
         } else {
@@ -395,13 +390,11 @@ public abstract class VectorBinaryAggregate {
     @Override
     public double aggregate(Vector x, Vector y, DoubleDoubleFunction fa, DoubleDoubleFunction fc) {
       Iterator<Vector.Element> xi = x.all().iterator();
-      Vector.Element xe;
       boolean validResult = false;
       double result = 0;
-      double thisResult;
       while (xi.hasNext()) {
-        xe = xi.next();
-        thisResult = fc.apply(xe.get(), y.getQuick(xe.index()));
+        Vector.Element xe = xi.next();
+        double thisResult = fc.apply(xe.get(), y.getQuick(xe.index()));
         if (validResult) {
           result = fa.apply(result, thisResult);
         } else {
@@ -429,13 +422,11 @@ public abstract class VectorBinaryAggregate {
     @Override
     public double aggregate(Vector x, Vector y, DoubleDoubleFunction fa, DoubleDoubleFunction fc) {
       Iterator<Vector.Element> yi = y.all().iterator();
-      Vector.Element ye;
       boolean validResult = false;
       double result = 0;
-      double thisResult;
       while (yi.hasNext()) {
-        ye = yi.next();
-        thisResult = fc.apply(x.getQuick(ye.index()), ye.get());
+        Vector.Element ye = yi.next();
+        double thisResult = fc.apply(x.getQuick(ye.index()), ye.get());
         if (validResult) {
           result = fa.apply(result, thisResult);
         } else {

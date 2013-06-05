@@ -113,8 +113,8 @@ public class DistributedConjugateGradientSolver extends ConjugateGradientSolver 
   private Vector loadInputVector(Path path) throws IOException {
     FileSystem fs = path.getFileSystem(conf);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-    VectorWritable value = new VectorWritable();
     try {
+      VectorWritable value = new VectorWritable();
       if (!reader.next(new IntWritable(), value)) {
         throw new IOException("Input vector file is empty.");      
       }
@@ -163,8 +163,9 @@ public class DistributedConjugateGradientSolver extends ConjugateGradientSolver 
         return -1;
       } else {
         Configuration conf = getConf();
-        if (conf == null)
+        if (conf == null) {
           conf = new Configuration();
+        }
         DistributedConjugateGradientSolver.this.setConf(conf);
         return DistributedConjugateGradientSolver.this.run(args);
       }

@@ -30,7 +30,10 @@ import org.apache.mahout.math.random.MultiNormal;
  * A collection of miscellaneous utility functions for working with data to be clustered.
  * Includes methods for generating synthetic data and estimating distance cutoff.
  */
-public class DataUtils {
+public final class DataUtils {
+  private DataUtils() {
+  }
+
   /**
    * Samples numDatapoints vectors of numDimensions cardinality centered around the vertices of a
    * numDimensions order hypercube. The distribution of points around these vertices is

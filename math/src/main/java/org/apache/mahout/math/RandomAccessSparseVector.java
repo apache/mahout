@@ -179,11 +179,13 @@ public class RandomAccessSparseVector extends AbstractVector {
     return true;
   }
 
+  /*
   @Override
   public Element getElement(int index) {
     // TODO: this should return a MapElement so as to avoid hashing for both getQuick and setQuick.
     return super.getElement(index);
   }
+   */
 
   /**
    * NOTE: this implementation reuses the Vector.Element instance for each call of next(). If you need to preserve the

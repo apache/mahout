@@ -59,9 +59,9 @@ public class ProjectionSearch extends UpdatableSearcher implements Iterable<Vect
    * The number of elements to consider on both sides in the ball around the vector found by the
    * search in a TreeSet from scalarProjections.
    */
-  private int searchSize;
+  private final int searchSize;
 
-  private int numProjections;
+  private final int numProjections;
   private boolean initialized = false;
 
   private void initialize(int numDimensions) {
@@ -115,6 +115,7 @@ public class ProjectionSearch extends UpdatableSearcher implements Iterable<Vect
    * Returns the number of scalarProjections that we can search
    * @return  The number of scalarProjections added to the search so far.
    */
+  @Override
   public int size() {
     if (scalarProjections == null) {
       return 0;
@@ -130,7 +131,8 @@ public class ProjectionSearch extends UpdatableSearcher implements Iterable<Vect
    * @return a list of Vectors wrapped in WeightedThings where the "thing"'s weight is the
    * distance.
    */
-  public List<WeightedThing<Vector>> search(final Vector query, int limit) {
+  @Override
+  public List<WeightedThing<Vector>> search(Vector query, int limit) {
     Set<Vector> candidates = Sets.newHashSet();
 
     Iterator<? extends Vector> projections = basisMatrix.iterator();
@@ -192,7 +194,7 @@ public class ProjectionSearch extends UpdatableSearcher implements Iterable<Vect
   @Override
   public Iterator<Vector> iterator() {
     return new AbstractIterator<Vector>() {
-      private Iterator<WeightedThing<Vector>> projected = scalarProjections.get(0).iterator();
+      private final Iterator<WeightedThing<Vector>> projected = scalarProjections.get(0).iterator();
       @Override
       protected Vector computeNext() {
         if (!projected.hasNext()) {
@@ -203,6 +205,7 @@ public class ProjectionSearch extends UpdatableSearcher implements Iterable<Vect
     };
   }
 
+  @Override
   public boolean remove(Vector vector, double epsilon) {
     WeightedThing<Vector> toRemove = searchFirst(vector, false);
     if (toRemove.getWeight() < epsilon) {

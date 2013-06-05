@@ -32,7 +32,7 @@ public final class GramKeyPartitioner extends Partitioner<GramKey, Gram> {
     int length = key.getPrimaryLength();
     // Copied from WritableComparator.hashBytes(); skips first byte, type byte
     for (int i = 1; i < length; i++) {
-      hash = (31 * hash) + (int) bytes[i];
+      hash = (31 * hash) + bytes[i];
     }
     return (hash & Integer.MAX_VALUE) % numPartitions;
   }

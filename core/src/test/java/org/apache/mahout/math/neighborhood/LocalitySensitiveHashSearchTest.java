@@ -57,7 +57,7 @@ public class LocalitySensitiveHashSearchTest {
       cut.setRaiseHashLimitStrategy(strategy);
       OnlineSummarizer t1 = evaluateStrategy(testData, ref, cut);
       int evals = cut.resetEvaluationCount();
-      final double speedup = 10e6 / evals;
+      final double speedup = 10.0e6 / evals;
       System.out.printf("%.1f,%.2f,%.2f,%.2f\n", speedup, t1.getQuartile(1),
           t1.getQuartile(2), t1.getQuartile(3));
       assertTrue(t1.getQuartile(2) > 0.45);
@@ -66,8 +66,8 @@ public class LocalitySensitiveHashSearchTest {
     }
   }
 
-  private OnlineSummarizer evaluateStrategy(Matrix testData, BruteSearch ref,
-                                            LocalitySensitiveHashSearch cut) {
+  private static OnlineSummarizer evaluateStrategy(Matrix testData, BruteSearch ref,
+                                                   LocalitySensitiveHashSearch cut) {
     OnlineSummarizer t1 = new OnlineSummarizer();
 
     for (int i = 0; i < 100; i++) {

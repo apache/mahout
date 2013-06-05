@@ -61,8 +61,7 @@ public class SpectralKMeansDriver extends AbstractJob {
   }
 
   @Override
-  public int run(String[] arg0)
-    throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, InterruptedException {
+  public int run(String[] arg0) throws Exception {
 
     Configuration conf = getConf();
     addInputOption();
@@ -216,9 +215,9 @@ public class SpectralKMeansDriver extends AbstractJob {
       // since some of the eigen-output is spurious and will be eliminated
       // upon verification, we have to aim to overshoot and then discard
       // unnecessary vectors later
-      int overshoot = Math.min((int) ((double) clusters * OVERSHOOTMULTIPLIER), numDims);
+      int overshoot = Math.min((int) (clusters * OVERSHOOTMULTIPLIER), numDims);
       DistributedLanczosSolver solver = new DistributedLanczosSolver();
-      LanczosState state = new LanczosState(L, overshoot, solver.getInitialVector(L));
+      LanczosState state = new LanczosState(L, overshoot, DistributedLanczosSolver.getInitialVector(L));
       Path lanczosSeqFiles = new Path(outputCalc, "eigenvectors");
 
       solver.runJob(conf,

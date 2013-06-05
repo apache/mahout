@@ -29,7 +29,7 @@ final class FullRunningAverageAndStdDevWritable implements Writable {
   
   private FullRunningAverageAndStdDev average;
   
-  public FullRunningAverageAndStdDevWritable(FullRunningAverageAndStdDev average) {
+  FullRunningAverageAndStdDevWritable(FullRunningAverageAndStdDev average) {
     this.average = average;
   }
 

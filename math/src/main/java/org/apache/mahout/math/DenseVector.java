@@ -165,10 +165,11 @@ public class DenseVector extends AbstractVector {
     return this;
   }
 
+  @Override
   public void mergeUpdates(OrderedIntDoubleMapping updates) {
     int numUpdates = updates.getNumMappings();
-    int indices[] = updates.getIndices();
-    double values[] = updates.getValues();
+    int[] indices = updates.getIndices();
+    double[] values = updates.getValues();
     for (int i = 0; i < numUpdates; ++i) {
       this.values[indices[i]] = values[i];
     }

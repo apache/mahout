@@ -429,7 +429,7 @@ public final class Arithmetic extends Constants {
   public static double logFactorial(int k) {
     if (k >= 30) {
 
-      double r = 1.0 / (double) k;
+      double r = 1.0 / k;
       double rr = r * r;
       double C7 = -5.95238095238095238e-04;
       double C5 = 7.93650793650793651e-04;
@@ -467,7 +467,7 @@ public final class Arithmetic extends Constants {
   public static double stirlingCorrection(int k) {
 
     if (k > 30) {
-      double r = 1.0 / (double) k;
+      double r = 1.0 / k;
       double rr = r * r;
       double C7 = -5.95238095238095238e-04;     //  -1/1680
       double C5 = 7.93650793650793651e-04;     //  +1/1260

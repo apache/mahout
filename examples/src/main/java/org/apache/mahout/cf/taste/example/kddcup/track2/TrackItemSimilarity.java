@@ -72,7 +72,7 @@ final class TrackItemSimilarity implements ItemSimilarity {
       return 0.0;
     }
     int unionSize = genres1.size() + genres2.size() - intersectionSize;
-    return (double) intersectionSize / (4.0 * unionSize);
+    return intersectionSize / (4.0 * unionSize);
   }
 
   @Override

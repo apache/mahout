@@ -405,8 +405,7 @@ public final class StreamingKMeansDriver extends AbstractJob {
    * @return 0 on success, -1 on failure.
    */
   @SuppressWarnings("unchecked")
-  public static int run(Configuration conf, Path input, Path output)
-      throws IOException, InterruptedException, ClassNotFoundException, ExecutionException {
+  public static int run(Configuration conf, Path input, Path output) throws Exception {
     log.info("Starting StreamingKMeans clustering for vectors in {}; results are output to {}",
         input.toString(), output.toString());
 

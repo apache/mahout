@@ -357,7 +357,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     int iteration = 1;
     while (!converged && iteration <= maxIterations) {
       int numReducers = Integer.valueOf(conf.get(MAPRED_REDUCE_TASKS, "1"));
-      log.info("Mean Shift Iteration: {}, numReducers {}", new Object[] { iteration, numReducers });
+      log.info("Mean Shift Iteration: {}, numReducers {}", iteration, numReducers);
       // point the output to a new directory per iteration
       Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
       Path controlOut = new Path(output, CONTROL_CONVERGED);

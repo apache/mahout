@@ -55,7 +55,6 @@ import com.mongodb.Mongo;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
-import com.mongodb.MongoException;
 
 /**
  * <p>A {@link DataModel} backed by a MongoDB database. This class expects a
@@ -207,7 +206,7 @@ public final class MongoDBDataModel implements DataModel {
   /**
    * Creates a new MongoDBDataModel
    */
-  public MongoDBDataModel() throws UnknownHostException, MongoException {
+  public MongoDBDataModel() throws UnknownHostException {
     this.reloadLock = new ReentrantLock();
     buildModel();
   }
@@ -234,7 +233,7 @@ public final class MongoDBDataModel implements DataModel {
                           String collection,
                           boolean manage,
                           boolean finalRemove,
-                          DateFormat format) throws UnknownHostException, MongoException {
+                          DateFormat format) throws UnknownHostException {
     mongoHost = host;
     mongoPort = port;
     mongoDB = database;
@@ -266,7 +265,7 @@ public final class MongoDBDataModel implements DataModel {
                           String userIDField,
                           String itemIDField,
                           String preferenceField,
-                          String mappingCollection) throws UnknownHostException, MongoException {
+                          String mappingCollection) throws UnknownHostException {
     mongoHost = host;
     mongoPort = port;
     mongoDB = database;
@@ -299,7 +298,7 @@ public final class MongoDBDataModel implements DataModel {
                           boolean finalRemove,
                           DateFormat format,
                           String user,
-                          String password) throws UnknownHostException, MongoException {
+                          String password) throws UnknownHostException {
     mongoHost = host;
     mongoPort = port;
     mongoDB = database;
@@ -333,7 +332,7 @@ public final class MongoDBDataModel implements DataModel {
                           String userIDField,
                           String itemIDField,
                           String preferenceField,
-                          String mappingCollection) throws UnknownHostException, MongoException {
+                          String mappingCollection) throws UnknownHostException {
     mongoHost = host;
     mongoPort = port;
     mongoDB = database;
@@ -402,10 +401,10 @@ public final class MongoDBDataModel implements DataModel {
    */
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
-    Date ts = new Date(0);
     BasicDBObject query = new BasicDBObject();
     query.put("deleted_at", new BasicDBObject("$gt", mongoTimestamp));
     DBCursor cursor = collection.find(query);
+    Date ts = new Date(0);
     while (cursor.hasNext()) {
       Map<String,Object> user = (Map<String,Object>) cursor.next().toMap();
       String userID = getID(user.get(mongoUserID), true);
@@ -545,7 +544,7 @@ public final class MongoDBDataModel implements DataModel {
     return mongoTimestamp;
   }
 
-  private void buildModel() throws UnknownHostException, MongoException {
+  private void buildModel() throws UnknownHostException {
     userIsObject = false;
     itemIsObject = false;
     idCounter = 0;

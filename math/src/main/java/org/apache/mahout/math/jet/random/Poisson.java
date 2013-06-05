@@ -133,7 +133,7 @@ public final class Poisson extends AbstractDiscreteDistribution {
           }
         }
         for (k = llll + 1; k <= 35; k++) { // Step C. Creation of new prob.
-          p *= theMean / (double) k;
+          p *= theMean / k;
           q += p;
           pp[k] = q;
           if (u <= q) {
@@ -165,14 +165,14 @@ public final class Poisson extends AbstractDiscreteDistribution {
         k5 = k4 + k4 - m;
 
         // range width of the critical left and right centre region
-        dl = (double) (k2 - k1);
-        dr = (double) (k5 - k4);
+        dl = k2 - k1;
+        dr = k5 - k4;
 
         // recurrence constants r(k) = p(k)/p(k-1) at k = k1, k2, k4+1, k5+1
-        r1 = theMean / (double) k1;
-        r2 = theMean / (double) k2;
-        r4 = theMean / (double) (k4 + 1);
-        r5 = theMean / (double) (k5 + 1);
+        r1 = theMean / k1;
+        r2 = theMean / k2;
+        r4 = theMean / (k4 + 1);
+        r5 = theMean / (k5 + 1);
 
         // reciprocal values of the scale parameters of expon. tail envelopes
         ll = Math.log(r1);                     // expon. tail left

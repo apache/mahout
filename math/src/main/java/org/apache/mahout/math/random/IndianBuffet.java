@@ -121,17 +121,17 @@ public final class IndianBuffet<T> implements Sampler<List<T>> {
       try {
         words = Resources.readLines(Resources.getResource("words.txt"), Charsets.UTF_8,
                                     new LineProcessor<List<String>>() {
-            final List<String> words = Lists.newArrayList();
+            private final List<String> theWords = Lists.newArrayList();
 
             @Override
             public boolean processLine(String line) {
-              Iterables.addAll(words, onSpace.split(line));
+              Iterables.addAll(theWords, onSpace.split(line));
               return true;
             }
 
             @Override
             public List<String> getResult() {
-              return words;
+              return theWords;
             }
           });
       } catch (IOException e) {

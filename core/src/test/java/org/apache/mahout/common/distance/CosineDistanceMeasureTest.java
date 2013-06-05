@@ -57,8 +57,10 @@ public final class CosineDistanceMeasureTest extends MahoutTestCase {
     assertTrue(distanceMatrix[2][1] > distanceMatrix[2][2]);
 
     // Two equal vectors (despite them being zero) should have 0 distance.
-    assertEquals(distanceMeasure.distance(new SequentialAccessSparseVector(1),
-        new SequentialAccessSparseVector(1)), 0, EPSILON);
+    assertEquals(0, 
+                 distanceMeasure.distance(new SequentialAccessSparseVector(1),
+                                          new SequentialAccessSparseVector(1)), 
+                 EPSILON);
   }
 
 }

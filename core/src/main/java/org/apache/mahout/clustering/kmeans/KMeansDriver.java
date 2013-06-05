@@ -36,7 +36,6 @@ import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
-import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,8 +141,7 @@ public class KMeansDriver extends AbstractJob {
     if (log.isInfoEnabled()) {
       log.info("Input: {} Clusters In: {} Out: {} Distance: {}", input, clustersIn, output,
                measure.getClass().getName());
-      log.info("convergence: {} max Iterations: {} num Reduce Tasks: {} Input Vectors: {}", convergenceDelta,
-          maxIterations, VectorWritable.class.getName());
+      log.info("convergence: {} max Iterations: {}", convergenceDelta, maxIterations);
     }
     Path clustersOut = buildClusters(conf, input, clustersIn, output, measure, maxIterations, delta, runSequential);
     if (runClustering) {

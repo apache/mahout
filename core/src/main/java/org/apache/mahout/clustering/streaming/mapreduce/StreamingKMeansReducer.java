@@ -53,7 +53,7 @@ public class StreamingKMeansReducer extends Reducer<IntWritable, CentroidWritabl
     UpdatableSearcher searcher = StreamingKMeansUtilsMR.searcherFromConfiguration(conf);
     // There is no way of estimating the distance cutoff unless we have some data.
     return new StreamingKMeans(searcher, numClusters,
-        conf.getFloat(StreamingKMeansDriver.ESTIMATED_DISTANCE_CUTOFF, 1e-4f));
+        conf.getFloat(StreamingKMeansDriver.ESTIMATED_DISTANCE_CUTOFF, 1.0e-4f));
   }
 
   @Override

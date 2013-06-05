@@ -44,7 +44,7 @@ public final class MersenneTwisterTest extends MahoutTestCase {
    * @return A double in the range [0..1)
    */
   private static double toDouble(long y) {
-    return (double) (y & 0xffffffffL) * 2.3283064365386963e-10;
+    return (y & 0xffffffffL) * 2.3283064365386963e-10;
   }
 
   @Test

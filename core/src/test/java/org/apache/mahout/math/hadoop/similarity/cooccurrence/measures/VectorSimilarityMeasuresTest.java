@@ -33,9 +33,9 @@ public class VectorSimilarityMeasuresTest extends MahoutTestCase {
     double rand = computeSimilarity(one, two, similarityMeasureClass, new RandomAccessSparseVector(one.length));
     double seq = computeSimilarity(one, two, similarityMeasureClass, new SequentialAccessSparseVector(one.length));
     double dense = computeSimilarity(one, two, similarityMeasureClass, new DenseVector(one.length));
-    assertEquals(seq, rand, 1e-10);
-    assertEquals(seq, dense, 1e-10);
-    assertEquals(dense, rand, 1e-10);
+    assertEquals(seq, rand, 1.0e-10);
+    assertEquals(seq, dense, 1.0e-10);
+    assertEquals(dense, rand, 1.0e-10);
     return seq;
   }
 

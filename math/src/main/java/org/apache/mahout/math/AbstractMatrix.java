@@ -763,7 +763,7 @@ public abstract class AbstractMatrix implements Matrix {
     Iterator<MatrixSlice> it = iterator();
     while (it.hasNext()) {
       MatrixSlice next = it.next();
-      s += "  " + next.index() + "  =>\t" + next.vector() + "\n";
+      s += "  " + next.index() + "  =>\t" + next.vector() + '\n';
     }
     s += "}";
     return s;

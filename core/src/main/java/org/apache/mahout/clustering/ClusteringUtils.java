@@ -19,7 +19,10 @@ import org.apache.mahout.math.neighborhood.UpdatableSearcher;
 import org.apache.mahout.math.random.WeightedThing;
 import org.apache.mahout.math.stats.OnlineSummarizer;
 
-public class ClusteringUtils {
+public final class ClusteringUtils {
+  private ClusteringUtils() {
+  }
+
   /**
    * Computes the summaries for the distances in each cluster.
    * @param datapoints iterable of datapoints.
@@ -238,7 +241,6 @@ public class ClusteringUtils {
     int numRows = confusionMatrix.numRows();
     int numCols = confusionMatrix.numCols();
     double rowChoiceSum = 0;
-    double columnChoiceSum = 0;
     double totalChoiceSum = 0;
     double total = 0;
     for (int i = 0; i < numRows; ++i) {
@@ -250,6 +252,7 @@ public class ClusteringUtils {
       total += rowSum;
       rowChoiceSum += choose2(rowSum);
     }
+    double columnChoiceSum = 0;
     for (int j = 0; j < numCols; ++j) {
       double columnSum = 0;
       for (int i = 0; i < numRows; ++i) {

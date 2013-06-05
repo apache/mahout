@@ -101,11 +101,13 @@ public final class TestMinHashClustering extends MahoutTestCase {
   private static Set<Integer> getValues(Vector vector, String dimensionToHash) {
     Set<Integer> values = Sets.newHashSet();
     if ("value".equalsIgnoreCase(dimensionToHash)) {
-      for (Vector.Element e : vector.nonZeroes())
+      for (Vector.Element e : vector.nonZeroes()) {
         values.add((int) e.get());
+      }
     } else {
-      for (Vector.Element e : vector.nonZeroes())
+      for (Vector.Element e : vector.nonZeroes()) {
         values.add(e.index());
+      }
     }
     return values;
   }
