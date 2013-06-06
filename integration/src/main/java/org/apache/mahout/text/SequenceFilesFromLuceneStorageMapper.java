@@ -5,6 +5,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.DocumentStoredFieldVisitor;
 import org.apache.lucene.index.SegmentInfoPerCommit;
 import org.apache.lucene.index.SegmentReader;
 import org.apache.lucene.store.IOContext;
@@ -12,7 +13,7 @@ import org.apache.lucene.store.IOContext;
 import java.io.IOException;
 import java.util.List;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang.StringUtils.isBlank;
 
 /**
  * Maps document IDs to key value pairs with ID field as the key and the concatenated stored field(s)
@@ -20,66 +21,45 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
  */
 public class SequenceFilesFromLuceneStorageMapper extends Mapper<Text, NullWritable, Text, Text> {
 
-  public static final String SEPARATOR_FIELDS = " ";
-  public static final int USE_TERM_INFOS = 1;
+  public enum DataStatus {EMPTY_KEY, EMPTY_VALUE, EMPTY_BOTH};
 
-  private LuceneStorageConfiguration lucene2SeqConfiguration;
+  private LuceneStorageConfiguration l2sConf;
   private SegmentReader segmentReader;
-
-  private Text idKey;
-  private Text fieldValue;
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     Configuration configuration = context.getConfiguration();
-
-    lucene2SeqConfiguration = new LuceneStorageConfiguration(configuration);
-
+    l2sConf = new LuceneStorageConfiguration(configuration);
     LuceneSegmentInputSplit inputSplit = (LuceneSegmentInputSplit) context.getInputSplit();
-
     SegmentInfoPerCommit segmentInfo = inputSplit.getSegment(configuration);
-    segmentReader = new SegmentReader(segmentInfo, USE_TERM_INFOS, IOContext.READ);//nocommit: Should we use IOContext.READONCE?
-
-    idKey = new Text();
-    fieldValue = new Text();
+    segmentReader = new SegmentReader(segmentInfo, LuceneSeqFileHelper.USE_TERM_INFOS, IOContext.READ);
   }
 
   @Override
   protected void map(Text key, NullWritable text, Context context) throws IOException, InterruptedException {
     int docId = Integer.valueOf(key.toString());
-    Document document = segmentReader.document(docId);
-
-    String idString = document.get(lucene2SeqConfiguration.getIdField());
-
-    StringBuilder valueBuilder = new StringBuilder();
-    List<String> fields = lucene2SeqConfiguration.getFields();
-    for (int i = 0; i < fields.size(); i++) {
-      String field = fields.get(i);
-      String fieldValue = document.get(field);
-      if (isNotBlank(fieldValue)) {
-        valueBuilder.append(fieldValue);
-        if (i != fields.size() - 1) {
-          valueBuilder.append(SEPARATOR_FIELDS);
-        }
-      }
+    DocumentStoredFieldVisitor storedFieldVisitor = l2sConf.getStoredFieldVisitor();
+    segmentReader.document(docId, storedFieldVisitor);
+    Document document = storedFieldVisitor.getDocument();
+    List<String> fields = l2sConf.getFields();
+    Text theKey = new Text(LuceneSeqFileHelper.nullSafe(document.get(l2sConf.getIdField())));
+    Text theValue = new Text();
+    LuceneSeqFileHelper.populateValues(document, theValue, fields);
+    //if they are both empty, don't write
+    if (isBlank(theKey.toString()) && isBlank(theValue.toString())) {
+      context.getCounter(DataStatus.EMPTY_BOTH).increment(1);
+      return;
     }
-
-    idKey.set(nullSafe(idString));
-    fieldValue.set(nullSafe(valueBuilder.toString()));
-
-    context.write(idKey, fieldValue);
+    if (isBlank(theKey.toString())){
+      context.getCounter(DataStatus.EMPTY_KEY).increment(1);
+    } else if (isBlank(theValue.toString())){
+      context.getCounter(DataStatus.EMPTY_VALUE).increment(1);
+    }
+    context.write(theKey, theValue);
   }
 
   @Override
   protected void cleanup(Context context) throws IOException, InterruptedException {
     segmentReader.close();
-  }
-
-  private String nullSafe(String value) {
-    if (value == null) {
-      return "";
-    } else {
-      return value;
-    }
   }
 }

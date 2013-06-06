@@ -1,4 +1,5 @@
-/**
+package org.apache.mahout.text;
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -15,13 +16,12 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.text;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
@@ -32,6 +32,7 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 
@@ -144,7 +145,7 @@ public class LuceneStorageConfiguration implements Writable {
    * @return iterator
    */
   public Iterator<Pair<Text, Text>> getSequenceFileIterator() {
-    return new SequenceFileDirIterable<Text, Text>(sequenceFilesOutputPath, PathType.LIST, configuration).iterator();
+    return new SequenceFileDirIterable<Text, Text>(sequenceFilesOutputPath, PathType.LIST, PathFilters.logsCRCFilter(), configuration).iterator();
   }
 
   public Configuration getConfiguration() {

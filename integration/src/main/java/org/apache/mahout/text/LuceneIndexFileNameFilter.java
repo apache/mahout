@@ -1,11 +1,11 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+package org.apache.mahout.text;
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -16,12 +16,11 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.text;
-
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
-import org.apache.lucene.index.IndexFileNameFilter;
 import org.apache.lucene.index.IndexFileNames;
+
+import java.util.regex.Pattern;
 
 /**
  * A wrapper class to convert an IndexFileNameFilter which implements
@@ -41,18 +40,26 @@ class LuceneIndexFileNameFilter implements PathFilter {
     return singleton;
   }
 
-  //nocommit Not sure what the alternative is here
-  private final IndexFileNameFilter luceneFilter;
-
   private LuceneIndexFileNameFilter() {
-    luceneFilter = IndexFileNames.getFilter();
   }
+
+  //TODO: Lucene defines this in IndexFileNames, but it is package private, so make sure it doesn't change w/ new releases.
+  private static final Pattern CODEC_FILE_PATTERN = Pattern.compile("_[a-z0-9]+(_.*)?\\..*");
 
   /* (non-Javadoc)
   * @see org.apache.hadoop.fs.PathFilter#accept(org.apache.hadoop.fs.Path)
   */
   public boolean accept(Path path) {
-    return luceneFilter.accept(null, path.getName());
+    String name = path.getName();
+    if (CODEC_FILE_PATTERN.matcher(name).matches() || name.startsWith(IndexFileNames.SEGMENTS)) {
+      return true;
+    }
+    for (String extension : IndexFileNames.INDEX_EXTENSIONS) {
+      if (name.endsWith(extension)) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }

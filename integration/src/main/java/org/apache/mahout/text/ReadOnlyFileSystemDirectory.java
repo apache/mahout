@@ -35,10 +35,10 @@ import org.apache.lucene.store.Lock;
 import java.io.IOException;
 import java.util.Collection;
 
-//NOCOMMIT: Not sure if there isn't a better way of doing this in 4.x.  Don't we have a Hadoop Directory impl somewhere?
+//TODO: is there a better way of doing this in Lucene 4.x?
 
 /**
- * This class implements a Lucene Directory on top of a general FileSystem.
+ * This class implements a read-only Lucene Directory on top of a general FileSystem.
  * Currently it does not support locking.
  * <p/>
  * // TODO: Rename to FileSystemReadOnlyDirectory
@@ -105,10 +105,10 @@ public class ReadOnlyFileSystemDirectory extends Directory {
     // clear old index files
     FileStatus[] fileStatus =
             fs.listStatus(directory, LuceneIndexFileNameFilter.getFilter());
-    for (int i = 0; i < fileStatus.length; i++) {
-      if (!fs.delete(fileStatus[i].getPath(), true)) {
+    for (FileStatus status : fileStatus) {
+      if (!fs.delete(status.getPath(), true)) {
         throw new IOException("Cannot delete index file "
-                + fileStatus[i].getPath());
+                + status.getPath());
       }
     }
   }
@@ -177,7 +177,7 @@ public class ReadOnlyFileSystemDirectory extends Directory {
 
   @Override
   public IndexOutput createOutput(String name, IOContext context) throws IOException {
-    //nocommit What should we be doing with the IOContext here?
+    //TODO: What should we be doing with the IOContext here, if anything?
     Path file = new Path(directory, name);
     if (fs.exists(file) && !fs.delete(file, true)) {
       // delete the existing one if applicable
@@ -189,7 +189,7 @@ public class ReadOnlyFileSystemDirectory extends Directory {
 
   @Override
   public void sync(Collection<String> names) throws IOException {
-
+    // do nothing, as this is read-only
   }
 
   @Override

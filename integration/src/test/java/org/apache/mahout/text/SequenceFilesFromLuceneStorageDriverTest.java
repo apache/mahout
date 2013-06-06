@@ -49,7 +49,7 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
       + "org.apache.hadoop.io.serializer.WritableSerialization");
 
-    seqFilesOutputPath = new Path("seqfiles");
+    seqFilesOutputPath = new Path(getTestTempDirPath(), "seqfiles");
     idField = "id";
     fields = asList("field");
 
@@ -60,27 +60,26 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
         return lucene2SeqConf;
       }
     };
-
-    commitDocuments(new SingleFieldDocument("1", "Mahout is cool"));
-    commitDocuments(new SingleFieldDocument("2", "Mahout is cool"));
+    commitDocuments(getDirectory(getIndexPath1AsFile()), new SingleFieldDocument("1", "Mahout is cool"));
+    commitDocuments(getDirectory(getIndexPath1AsFile()), new SingleFieldDocument("2", "Mahout is cool"));
   }
 
   @After
   public void after() throws IOException {
     HadoopUtil.delete(conf, seqFilesOutputPath);
-    HadoopUtil.delete(conf, getIndexPath());
+    HadoopUtil.delete(conf, getIndexPath1());
   }
 
   @Test
   public void testNewLucene2SeqConfiguration() {
     lucene2SeqConf = driver.newLucene2SeqConfiguration(conf,
-      asList(new Path(getIndexPath().toString())),
+      asList(new Path(getIndexPath1().toString())),
       seqFilesOutputPath,
       idField,
       fields);
 
     assertEquals(conf, lucene2SeqConf.getConfiguration());
-    assertEquals(asList(getIndexPath()), lucene2SeqConf.getIndexPaths());
+    assertEquals(asList(getIndexPath1()), lucene2SeqConf.getIndexPaths());
     assertEquals(seqFilesOutputPath, lucene2SeqConf.getSequenceFilesOutputPath());
     assertEquals(idField, lucene2SeqConf.getIdField());
     assertEquals(fields, lucene2SeqConf.getFields());
@@ -94,10 +93,10 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
     String field1 = "field1";
     String field2 = "field2";
 
-    String[] args = new String[]{
-      "-d", getIndexPath().toString(),
+    String[] args = {
+      "-i", getIndexPath1AsFile().toString(),
       "-o", seqFilesOutputPath.toString(),
-      "-i", idField,
+      "-id", idField,
       "-f", field1 + "," + field2,
       "-q", queryField + ":" + queryTerm,
       "-n", maxHits,
@@ -106,8 +105,8 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
 
     driver.setConf(conf);
     driver.run(args);
-
-    assertEquals(asList(getIndexPath()), lucene2SeqConf.getIndexPaths());
+    assertEquals(1, lucene2SeqConf.getIndexPaths().size());
+    assertEquals(getIndexPath1().toUri().getPath(), lucene2SeqConf.getIndexPaths().get(0).toUri().getPath());
     assertEquals(seqFilesOutputPath, lucene2SeqConf.getSequenceFilesOutputPath());
     assertEquals(idField, lucene2SeqConf.getIdField());
     assertEquals(asList(field1, field2), lucene2SeqConf.getFields());
@@ -120,17 +119,18 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
 
   @Test
   public void testRun_optionalArguments() throws Exception {
-    String[] args = new String[]{
-      "-d", getIndexPath().toString(),
+    String[] args = {
+      "-i", getIndexPath1AsFile().toString(),
       "-o", seqFilesOutputPath.toString(),
-      "-i", idField,
+      "-id", idField,
       "-f", StringUtils.join(fields, SequenceFilesFromLuceneStorageDriver.SEPARATOR_FIELDS)
     };
 
     driver.setConf(conf);
     driver.run(args);
 
-    assertEquals(asList(getIndexPath()), lucene2SeqConf.getIndexPaths());
+    assertEquals(1, lucene2SeqConf.getIndexPaths().size());
+    assertEquals(getIndexPath1().toUri().getPath(), lucene2SeqConf.getIndexPaths().get(0).toUri().getPath());
     assertEquals(seqFilesOutputPath, lucene2SeqConf.getSequenceFilesOutputPath());
     assertEquals(idField, lucene2SeqConf.getIdField());
     assertEquals(fields, lucene2SeqConf.getFields());
@@ -142,10 +142,10 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
 
   @Test(expected = IllegalArgumentException.class)
   public void testRun_invalidQuery() throws Exception {
-    String[] args = new String[]{
-      "-d", getIndexPath().toString(),
+    String[] args = {
+      "-i", getIndexPath1AsFile().toString(),
       "-o", seqFilesOutputPath.toString(),
-      "-i", idField,
+      "-id", idField,
       "-f", StringUtils.join(fields, SequenceFilesFromLuceneStorageDriver.SEPARATOR_FIELDS),
       "-q", "inva:lid:query"
     };

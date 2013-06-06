@@ -17,7 +17,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertFalse;
@@ -26,10 +30,6 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
 
   private SequenceFilesFromLuceneStorage lucene2Seq;
   private LuceneStorageConfiguration lucene2SeqConf;
-
-  private SingleFieldDocument document1;
-  private SingleFieldDocument document2;
-  private SingleFieldDocument document3;
   private Path seqFilesOutputPath;
   private Configuration configuration;
 
@@ -37,18 +37,15 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
   @Before
   public void before() throws IOException {
     configuration = new Configuration();
-    seqFilesOutputPath = new Path("seqfiles");
+    seqFilesOutputPath = new Path(getTestTempDirPath(), "seqfiles");
 
     lucene2Seq = new SequenceFilesFromLuceneStorage();
     lucene2SeqConf = new LuceneStorageConfiguration(configuration,
-      asList(getIndexPath()),
+      asList(getIndexPath1(), getIndexPath2()),
       seqFilesOutputPath,
       SingleFieldDocument.ID_FIELD,
       asList(SingleFieldDocument.FIELD));
 
-    document1 = new SingleFieldDocument("1", "This is test document 1");
-    document2 = new SingleFieldDocument("2", "This is test document 2");
-    document3 = new SingleFieldDocument("3", "This is test document 3");
   }
 
   @After
@@ -57,55 +54,44 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
     HadoopUtil.delete(lucene2SeqConf.getConfiguration(), lucene2SeqConf.getIndexPaths());
   }
 
-  @SuppressWarnings("unchecked")
   @Test
-  public void testRun() throws Exception {
-    commitDocuments(document1, document2, document3);
+  public void testRun2Directories() throws Exception {
+    //Two commit points, each in two diff. Directories
+    commitDocuments(getDirectory(getIndexPath1AsFile()), docs.subList(0, 500));
+    commitDocuments(getDirectory(getIndexPath1AsFile()), docs.subList(1000, 1500));
 
+    commitDocuments(getDirectory(getIndexPath2AsFile()), docs.subList(500, 1000));
+    commitDocuments(getDirectory(getIndexPath2AsFile()), docs.subList(1500, 2000));
+
+    commitDocuments(getDirectory(getIndexPath1AsFile()), misshapenDocs);
     lucene2Seq.run(lucene2SeqConf);
 
     Iterator<Pair<Text, Text>> iterator = lucene2SeqConf.getSequenceFileIterator();
-
-    assertSimpleDocumentEquals(document1, iterator.next());
-    assertSimpleDocumentEquals(document2, iterator.next());
-    assertSimpleDocumentEquals(document3, iterator.next());
-  }
-
-  @SuppressWarnings("unchecked")
-  @Test
-  public void testRun_skipEmptyIdFieldDocs() throws IOException {
-    commitDocuments(document1, new SingleFieldDocument("", "This is a test document with no id"), document2);
-
-    lucene2Seq.run(lucene2SeqConf);
-
-    Iterator<Pair<Text, Text>> iterator = lucene2SeqConf.getSequenceFileIterator();
-
-    assertSimpleDocumentEquals(document1, iterator.next());
-    assertSimpleDocumentEquals(document2, iterator.next());
-    assertFalse(iterator.hasNext());
-  }
-
-  @SuppressWarnings("unchecked")
-  @Test
-  public void testRun_skipEmptyFieldDocs() throws IOException {
-    commitDocuments(document1, new SingleFieldDocument("4", ""), document2);
-
-    lucene2Seq.run(lucene2SeqConf);
-
-    Iterator<Pair<Text, Text>> iterator = lucene2SeqConf.getSequenceFileIterator();
-
-    assertSimpleDocumentEquals(document1, iterator.next());
-    assertSimpleDocumentEquals(document2, iterator.next());
-    assertFalse(iterator.hasNext());
+    Map<String, Text> map = new HashMap<String, Text>();
+    while (iterator.hasNext()) {
+      Pair<Text, Text> next = iterator.next();
+      map.put(next.getFirst().toString(), next.getSecond());
+    }
+    assertEquals(docs.size() + misshapenDocs.size(), map.size());
+    for (SingleFieldDocument doc : docs) {
+      Text value = map.get(doc.getId());
+      assertNotNull(value);
+      assertEquals(value.toString(), doc.getField());
+    }
+    for (SingleFieldDocument doc : misshapenDocs) {
+      Text value = map.get(doc.getId());
+      assertNotNull(value);
+      assertEquals(value.toString(), doc.getField());
+    }
   }
 
   @SuppressWarnings("unchecked")
   @Test
   public void testRun_skipUnstoredFields() throws IOException {
-    commitDocuments(new UnstoredFieldsDocument("5", "This is test document 5"));
+    commitDocuments(getDirectory(getIndexPath1AsFile()), new UnstoredFieldsDocument("5", "This is test document 5"));
 
-    lucene2SeqConf = new LuceneStorageConfiguration(configuration,
-      asList(getIndexPath()),
+    LuceneStorageConfiguration lucene2SeqConf = new LuceneStorageConfiguration(configuration,
+      asList(getIndexPath1()),
       seqFilesOutputPath,
       SingleFieldDocument.ID_FIELD,
       asList(UnstoredFieldsDocument.FIELD, UnstoredFieldsDocument.UNSTORED_FIELD));
@@ -121,39 +107,51 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
   @SuppressWarnings("unchecked")
   @Test
   public void testRun_maxHits() throws IOException {
-    commitDocuments(document1, document2, document3, new SingleFieldDocument("4", "This is test document 4"));
+    commitDocuments(getDirectory(getIndexPath1AsFile()), docs.subList(0, 500));
+    commitDocuments(getDirectory(getIndexPath1AsFile()), docs.subList(1000, 1500));
+
+    commitDocuments(getDirectory(getIndexPath2AsFile()), docs.subList(500, 1000));
+    commitDocuments(getDirectory(getIndexPath2AsFile()), docs.subList(1500, 2000));
 
     lucene2SeqConf.setMaxHits(3);
     lucene2Seq.run(lucene2SeqConf);
 
     Iterator<Pair<Text, Text>> iterator = lucene2SeqConf.getSequenceFileIterator();
-
-    assertSimpleDocumentEquals(document1, iterator.next());
-    assertSimpleDocumentEquals(document2, iterator.next());
-    assertSimpleDocumentEquals(document3, iterator.next());
+    assertTrue(iterator.hasNext());
+    iterator.next();
+    assertTrue(iterator.hasNext());
+    iterator.next();
+    assertTrue(iterator.hasNext());
+    iterator.next();
     assertFalse(iterator.hasNext());
   }
 
   @SuppressWarnings("unchecked")
   @Test
   public void testRun_query() throws IOException {
-    commitDocuments(document1, document2, document3, new SingleFieldDocument("4", "Mahout is cool"));
+    commitDocuments(getDirectory(getIndexPath1AsFile()), docs);
+    LuceneStorageConfiguration lucene2SeqConf = new LuceneStorageConfiguration(configuration,
+      asList(getIndexPath1()),
+      seqFilesOutputPath,
+      SingleFieldDocument.ID_FIELD,
+      asList(UnstoredFieldsDocument.FIELD, UnstoredFieldsDocument.UNSTORED_FIELD));
 
-    Query query = new TermQuery(new Term(lucene2SeqConf.getFields().get(0), "mahout"));
+    Query query = new TermQuery(new Term(lucene2SeqConf.getFields().get(0), "599"));
 
     lucene2SeqConf.setQuery(query);
     lucene2Seq.run(lucene2SeqConf);
 
     Iterator<Pair<Text, Text>> iterator = lucene2SeqConf.getSequenceFileIterator();
-
-    assertSimpleDocumentEquals(new SingleFieldDocument("4", "Mahout is cool"), iterator.next());
+    assertTrue(iterator.hasNext());
+    Pair<Text, Text> next = iterator.next();
+    assertTrue(next.getSecond().toString().contains("599"));
     assertFalse(iterator.hasNext());
   }
 
   @Test
   public void testRun_multipleFields() throws IOException {
-    lucene2SeqConf = new LuceneStorageConfiguration(configuration,
-      asList(getIndexPath()),
+    LuceneStorageConfiguration lucene2SeqConf = new LuceneStorageConfiguration(configuration,
+      asList(getIndexPath1()),
       seqFilesOutputPath,
       SingleFieldDocument.ID_FIELD,
       asList(MultipleFieldsDocument.FIELD, MultipleFieldsDocument.FIELD1, MultipleFieldsDocument.FIELD2));
@@ -161,7 +159,7 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
     MultipleFieldsDocument multipleFieldsDocument1 = new MultipleFieldsDocument("1", "This is field 1-1", "This is field 1-2", "This is field 1-3");
     MultipleFieldsDocument multipleFieldsDocument2 = new MultipleFieldsDocument("2", "This is field 2-1", "This is field 2-2", "This is field 2-3");
     MultipleFieldsDocument multipleFieldsDocument3 = new MultipleFieldsDocument("3", "This is field 3-1", "This is field 3-2", "This is field 3-3");
-    commitDocuments(multipleFieldsDocument1, multipleFieldsDocument2, multipleFieldsDocument3);
+    commitDocuments(getDirectory(getIndexPath1AsFile()), multipleFieldsDocument1, multipleFieldsDocument2, multipleFieldsDocument3);
 
     lucene2Seq.run(lucene2SeqConf);
 
@@ -174,8 +172,8 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
 
   @Test
   public void testRun_numericField() throws IOException {
-    lucene2SeqConf = new LuceneStorageConfiguration(configuration,
-      asList(getIndexPath()),
+    LuceneStorageConfiguration lucene2SeqConf = new LuceneStorageConfiguration(configuration,
+      asList(getIndexPath1()),
       seqFilesOutputPath,
       SingleFieldDocument.ID_FIELD,
       asList(NumericFieldDocument.FIELD, NumericFieldDocument.NUMERIC_FIELD));
@@ -184,7 +182,7 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
     NumericFieldDocument doc2 = new NumericFieldDocument("2", "This is field 2", 200);
     NumericFieldDocument doc3 = new NumericFieldDocument("3", "This is field 3", 300);
 
-    commitDocuments(doc1, doc2, doc3);
+    commitDocuments(getDirectory(getIndexPath1AsFile()), doc1, doc2, doc3);
 
     lucene2Seq.run(lucene2SeqConf);
 

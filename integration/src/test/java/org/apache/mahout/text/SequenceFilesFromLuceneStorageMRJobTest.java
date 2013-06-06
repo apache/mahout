@@ -6,40 +6,29 @@ import org.apache.hadoop.io.Text;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.text.doc.SingleFieldDocument;
-import org.apache.mahout.vectorizer.DefaultAnalyzer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 public class SequenceFilesFromLuceneStorageMRJobTest extends AbstractLuceneStorageTest {
 
   private SequenceFilesFromLuceneStorageMRJob lucene2seq;
   private LuceneStorageConfiguration lucene2SeqConf;
-  private SingleFieldDocument document1;
-  private SingleFieldDocument document2;
-  private SingleFieldDocument document3;
-  private SingleFieldDocument document4;
 
   @Before
-  public void before() {
+  public void before() throws IOException {
     lucene2seq = new SequenceFilesFromLuceneStorageMRJob();
-
     Configuration configuration = new Configuration();
-    Path seqOutputPath = new Path("seqOutputPath");
-
-    lucene2SeqConf = new LuceneStorageConfiguration(configuration, asList(getIndexPath()), seqOutputPath, SingleFieldDocument.ID_FIELD, asList(SingleFieldDocument.FIELD));
-
-    document1 = new SingleFieldDocument("1", "This is test document 1");
-    document2 = new SingleFieldDocument("2", "This is test document 2");
-    document3 = new SingleFieldDocument("3", "This is test document 3");
-    document4 = new SingleFieldDocument("4", "This is test document 4");
+    Path seqOutputPath = new Path(getTestTempDirPath(), "seqOutputPath");//don't make the output directory
+    lucene2SeqConf = new LuceneStorageConfiguration(configuration, asList(getIndexPath1(), getIndexPath2()),
+            seqOutputPath, SingleFieldDocument.ID_FIELD, asList(SingleFieldDocument.FIELD));
   }
 
   @After
@@ -50,15 +39,31 @@ public class SequenceFilesFromLuceneStorageMRJobTest extends AbstractLuceneStora
 
   @Test
   public void testRun() throws IOException {
-    commitDocuments(document1, document2, document3, document4);
+    //Two commit points, each in two diff. Directories
+    commitDocuments(getDirectory(getIndexPath1AsFile()), docs.subList(0, 500));
+    commitDocuments(getDirectory(getIndexPath1AsFile()), docs.subList(1000, 1500));
 
+    commitDocuments(getDirectory(getIndexPath2AsFile()), docs.subList(500, 1000));
+    commitDocuments(getDirectory(getIndexPath2AsFile()), docs.subList(1500, 2000));
+    commitDocuments(getDirectory(getIndexPath1AsFile()), misshapenDocs);
     lucene2seq.run(lucene2SeqConf);
 
     Iterator<Pair<Text, Text>> iterator = lucene2SeqConf.getSequenceFileIterator();
-
-    assertSimpleDocumentEquals(document1, iterator.next());
-    assertSimpleDocumentEquals(document2, iterator.next());
-    assertSimpleDocumentEquals(document3, iterator.next());
-    assertSimpleDocumentEquals(document4, iterator.next());
+    Map<String, Text> map = new HashMap<String, Text>();
+    while (iterator.hasNext()) {
+      Pair<Text, Text> next = iterator.next();
+      map.put(next.getFirst().toString(), next.getSecond());
+    }
+    assertEquals(docs.size() + misshapenDocs.size(), map.size());
+    for (SingleFieldDocument doc : docs) {
+      Text value = map.get(doc.getId());
+      assertNotNull(value);
+      assertEquals(value.toString(), doc.getField());
+    }
+    for (SingleFieldDocument doc : misshapenDocs) {
+      Text value = map.get(doc.getId());
+      assertNotNull(value);
+      assertEquals(value.toString(), doc.getField());
+    }
   }
 }

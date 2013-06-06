@@ -1,4 +1,5 @@
-/**
+package org.apache.mahout.text;
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -15,8 +16,6 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.text;
-
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -32,6 +31,7 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static java.util.Arrays.asList;
 
@@ -42,7 +42,6 @@ import static java.util.Arrays.asList;
  */
 public class SequenceFilesFromLuceneStorageDriver extends AbstractJob {
 
-  static final String OPTION_LUCENE_DIRECTORY = "dir";
   static final String OPTION_ID_FIELD = "idField";
   static final String OPTION_FIELD = "fields";
   static final String OPTION_QUERY = "query";
@@ -53,6 +52,7 @@ public class SequenceFilesFromLuceneStorageDriver extends AbstractJob {
 
   static final String SEPARATOR_FIELDS = ",";
   static final String QUERY_DELIMITER = "'";
+  private static final Pattern COMPILE = Pattern.compile(QUERY_DELIMITER);
 
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new SequenceFilesFromLuceneStorageDriver(), args);
@@ -61,9 +61,9 @@ public class SequenceFilesFromLuceneStorageDriver extends AbstractJob {
   @Override
   public int run(String[] args) throws Exception {
     addOutputOption();
-
-    addOption(OPTION_LUCENE_DIRECTORY, "d", "Lucene directory / directories. Comma separated.", true);
-    addOption(OPTION_ID_FIELD, "i", "The field in the index containing the id", true);
+    addInputOption();
+    //addOption(OPTION_LUCENE_DIRECTORY, "d", "Lucene directory / directories. Comma separated.", true);
+    addOption(OPTION_ID_FIELD, "id", "The field in the index containing the id", true);
     addOption(OPTION_FIELD, "f", "The stored field(s) in the index containing text", true);
 
     addOption(OPTION_QUERY, "q", "(Optional) Lucene query. Defaults to " + DEFAULT_QUERY.getClass().getSimpleName());
@@ -79,13 +79,13 @@ public class SequenceFilesFromLuceneStorageDriver extends AbstractJob {
       configuration = new Configuration();
     }
 
-    String[] paths = getOption(OPTION_LUCENE_DIRECTORY).split(",");
+    String[] paths = getInputPath().toString().split(",");
     List<Path> indexPaths = new ArrayList<Path>();
     for (String path : paths) {
       indexPaths.add(new Path(path));
     }
 
-    Path sequenceFilesOutputPath = new Path((getOption(DefaultOptionCreator.OUTPUT_OPTION)));
+    Path sequenceFilesOutputPath = getOutputPath();
 
     String idField = getOption(OPTION_ID_FIELD);
     String fields = getOption(OPTION_FIELD);
@@ -99,8 +99,8 @@ public class SequenceFilesFromLuceneStorageDriver extends AbstractJob {
     Query query = DEFAULT_QUERY;
     if (hasOption(OPTION_QUERY)) {
       try {
-        String queryString = getOption(OPTION_QUERY).replaceAll(QUERY_DELIMITER, "");
-        QueryParser queryParser = new QueryParser(Version.LUCENE_35, queryString, new StandardAnalyzer(Version.LUCENE_35));
+        String queryString = COMPILE.matcher(getOption(OPTION_QUERY)).replaceAll("");
+        QueryParser queryParser = new QueryParser(Version.LUCENE_43, queryString, new StandardAnalyzer(Version.LUCENE_43));
         query = queryParser.parse(queryString);
       } catch (ParseException e) {
         throw new IllegalArgumentException(e.getMessage(), e);
