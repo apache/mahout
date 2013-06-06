@@ -217,7 +217,14 @@
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
       <scope>test</scope>
-    </dependency><dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-core</artifactId><version>4.3.0</version></dependency><dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-core</artifactId><version>4.3.0</version></dependency><dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-core</artifactId><version>4.3.0</version></dependency>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+      <version>4.3.0</version>
+    </dependency>
+
 
   </dependencies>
 </project>
