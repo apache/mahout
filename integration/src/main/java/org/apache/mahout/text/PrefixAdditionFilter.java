@@ -66,7 +66,7 @@ public final class PrefixAdditionFilter extends SequenceFilesFromDirectoryFilter
             : current.getName() + Path.SEPARATOR + fst.getPath().getName();
         writer.write(getPrefix() + Path.SEPARATOR + name, file.toString());
       } finally {
-        Closeables.closeQuietly(in);
+        Closeables.close(in, false);
       }
     }
   }

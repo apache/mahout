@@ -31,8 +31,6 @@ import java.io.IOException;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStorageTest {
 
@@ -147,7 +145,7 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
       "-o", seqFilesOutputPath.toString(),
       "-id", idField,
       "-f", StringUtils.join(fields, SequenceFilesFromLuceneStorageDriver.SEPARATOR_FIELDS),
-      "-q", "inva:lid:query"
+      "-q", "invalid:query"
     };
 
     driver.setConf(conf);

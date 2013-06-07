@@ -59,7 +59,7 @@ public class LuceneSegmentInputFormat extends InputFormat {
       for (SegmentInfoPerCommit segmentInfo : segmentInfos) {
         LuceneSegmentInputSplit inputSplit = new LuceneSegmentInputSplit(indexPath, segmentInfo.info.name, segmentInfo.sizeInBytes());
         inputSplits.add(inputSplit);
-        LOG.info("Created {} byte input split for index '{}' segment {}", new Object[]{segmentInfo.sizeInBytes(), indexPath.toUri(), segmentInfo.info.name});
+        LOG.info("Created {} byte input split for index '{}' segment {}", segmentInfo.sizeInBytes(), indexPath.toUri(), segmentInfo.info.name);
       }
     }
 

@@ -21,7 +21,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
  */
 public class SequenceFilesFromLuceneStorageMapper extends Mapper<Text, NullWritable, Text, Text> {
 
-  public enum DataStatus {EMPTY_KEY, EMPTY_VALUE, EMPTY_BOTH};
+  public enum DataStatus {EMPTY_KEY, EMPTY_VALUE, EMPTY_BOTH}
 
   private LuceneStorageConfiguration l2sConf;
   private SegmentReader segmentReader;

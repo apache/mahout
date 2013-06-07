@@ -12,7 +12,6 @@ import org.apache.lucene.index.SegmentInfos;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * {@link InputSplit} implementation that represents a Lucene segment.

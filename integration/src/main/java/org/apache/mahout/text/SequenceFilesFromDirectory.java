@@ -96,7 +96,7 @@ public class SequenceFilesFromDirectory extends AbstractJob {
       }
       fs.listStatus(input, pathFilter);
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, false);
     }
     return 0;
   }

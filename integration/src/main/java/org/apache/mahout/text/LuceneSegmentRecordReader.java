@@ -37,11 +37,9 @@ import java.io.IOException;
  */
 public class LuceneSegmentRecordReader extends RecordReader<Text, NullWritable> {
 
-  public static final boolean READ_ONLY = true;
-  public static final int USE_TERM_INFOS = 1;
+  public static final int USE_TERM_INFO = 1;
 
   private SegmentReader segmentReader;
-  private IndexSearcher searcher;
   private Scorer scorer;
 
   private int nextDocId;
@@ -55,10 +53,10 @@ public class LuceneSegmentRecordReader extends RecordReader<Text, NullWritable> 
     LuceneStorageConfiguration lucene2SeqConfiguration = new LuceneStorageConfiguration(configuration);
 
     SegmentInfoPerCommit segmentInfo = inputSplit.getSegment(configuration);
-    segmentReader = new SegmentReader(segmentInfo, USE_TERM_INFOS, IOContext.READ);
+    segmentReader = new SegmentReader(segmentInfo, USE_TERM_INFO, IOContext.READ);
 
 
-    searcher = new IndexSearcher(segmentReader);
+      IndexSearcher searcher = new IndexSearcher(segmentReader);
     Weight weight = lucene2SeqConfiguration.getQuery().createWeight(searcher);
     scorer = weight.scorer(segmentReader.getContext(), false, false, null);
   }
