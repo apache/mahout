@@ -134,7 +134,7 @@ public final class TestL1ModelClustering extends MahoutTestCase {
     System.out.println();
     sampleData = Lists.newArrayList();
     RAMDirectory directory = new RAMDirectory();
-    IndexWriter writer = new IndexWriter( directory, new IndexWriterConfig(Version.LUCENE_42,new StandardAnalyzer(Version.LUCENE_42)));
+    IndexWriter writer = new IndexWriter( directory, new IndexWriterConfig(Version.LUCENE_43,new StandardAnalyzer(Version.LUCENE_43)));
 
     FieldType customType = new FieldType(TextField.TYPE_NOT_STORED);
     customType.setStoreTermVectors(true);
