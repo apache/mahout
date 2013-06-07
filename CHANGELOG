@@ -88,3 +88,5 @@ __MAHOUT-1181: Adding StreamingKMeans MapReduce classes (dfilimon)
   MAHOUT-961: Fix issue in decision forest tree visualizer to properly show stems of tree (Ikumasa Mukai via gsingers)
 
   MAHOUT-944: Create SequenceFiles out of Lucene document storage (no term vectors required) (Frank Scholten, gsingers)
+
+  MAHOUT-958: Fix issue with globs in RepresentativePointsDriver (Adam Baron, Vikram Dixit K, ehgjr via gsingers)

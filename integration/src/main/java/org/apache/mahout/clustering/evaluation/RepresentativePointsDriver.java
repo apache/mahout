@@ -136,20 +136,23 @@ public final class RepresentativePointsDriver extends AbstractJob {
   private static void writeInitialState(Path output, Path clustersIn) throws IOException {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
-    for (FileStatus part : fs.listStatus(clustersIn, PathFilters.logsCRCFilter())) {
-      Path inPart = part.getPath();
-      Path path = new Path(output, inPart.getName());
-      SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
-      try {
-        for (ClusterWritable clusterWritable : new SequenceFileValueIterable<ClusterWritable>(inPart, true, conf)) {
-          Cluster cluster = clusterWritable.getValue();
-          if (log.isDebugEnabled()) {
-            log.debug("C-{}: {}", cluster.getId(), AbstractCluster.formatVector(cluster.getCenter(), null));
+    for (FileStatus dir : fs.globStatus(clustersIn)) {
+      Path inPath = dir.getPath();
+      for (FileStatus part : fs.listStatus(inPath, PathFilters.logsCRCFilter())) {
+        Path inPart = part.getPath();
+        Path path = new Path(output, inPart.getName());
+        SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
+        try {
+          for (ClusterWritable clusterWritable : new SequenceFileValueIterable<ClusterWritable>(inPart, true, conf)) {
+            Cluster cluster = clusterWritable.getValue();
+            if (log.isDebugEnabled()) {
+              log.debug("C-{}: {}", cluster.getId(), AbstractCluster.formatVector(cluster.getCenter(), null));
+            }
+            writer.append(new IntWritable(cluster.getId()), new VectorWritable(cluster.getCenter()));
           }
-          writer.append(new IntWritable(cluster.getId()), new VectorWritable(cluster.getCenter()));
+        } finally {
+          Closeables.close(writer, false);
         }
-      } finally {
-        Closeables.closeQuietly(writer);
       }
     }
   }
