@@ -19,15 +19,22 @@ package org.apache.mahout.text;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.Writable;
 import org.apache.lucene.search.TermQuery;
 import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterator;
 import org.apache.mahout.text.doc.SingleFieldDocument;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -138,7 +145,7 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
     assertEquals(SequenceFilesFromLuceneStorageDriver.DEFAULT_MAX_HITS, lucene2SeqConf.getMaxHits());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testRun_invalidQuery() throws Exception {
     String[] args = {
       "-i", getIndexPath1AsFile().toString(),
@@ -150,6 +157,11 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
 
     driver.setConf(conf);
     driver.run(args);
+    assertTrue(FileSystem.get(conf).exists(seqFilesOutputPath));
+    //shouldn't be any real files in the seq files out path
+    SequenceFileDirIterator<Writable, Writable> iter = new SequenceFileDirIterator<Writable, Writable>(seqFilesOutputPath, PathType.LIST, PathFilters.logsCRCFilter(), null, false, conf);
+    assertFalse(iter.hasNext());
+
   }
 
   @Test
