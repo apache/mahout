@@ -211,10 +211,10 @@ public final class TimesSquaredJob {
     @Override
     public void configure(JobConf conf) {
       try {
-        URI[] localFiles = DistributedCache.getCacheFiles(conf);
+        Path[] localFiles = DistributedCache.getLocalCacheFiles(conf);
         Preconditions.checkArgument(localFiles != null && localFiles.length >= 1,
                                     "missing paths from the DistributedCache");
-        Path inputVectorPath = new Path(localFiles[0].getPath());
+        Path inputVectorPath = localFiles[0];//nocommit: is this the right pattern for use here?
 
         SequenceFileValueIterator<VectorWritable> iterator =
             new SequenceFileValueIterator<VectorWritable>(inputVectorPath, true, conf);

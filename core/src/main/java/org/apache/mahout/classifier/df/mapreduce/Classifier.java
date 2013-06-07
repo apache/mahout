@@ -199,17 +199,17 @@ public class Classifier {
 
       Configuration conf = context.getConfiguration();
 
-      URI[] files = DistributedCache.getCacheFiles(conf);
+      Path[] files = DistributedCache.getLocalCacheFiles(conf);
 
       if (files == null || files.length < 2) {
         throw new IOException("not enough paths in the DistributedCache");
       }
       
-      dataset = Dataset.load(conf, new Path(files[0].getPath()));
+      dataset = Dataset.load(conf, files[0]);
 
       converter = new DataConverter(dataset);
 
-      forest = DecisionForest.load(conf, new Path(files[1].getPath()));
+      forest = DecisionForest.load(conf, files[1]);
       if (forest == null) {
         throw new InterruptedException("DecisionForest not found!");
       }

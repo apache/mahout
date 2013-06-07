@@ -57,7 +57,7 @@ public class TestVectorCache extends MahoutTestCase {
       // test if the values are identical
       assertEquals("Saved vector is identical to original", old.get(), value);
     } finally {
-      Closeables.closeQuietly(iterator);
+      Closeables.close(iterator, true);
     }
   }
   
@@ -74,20 +74,20 @@ public class TestVectorCache extends MahoutTestCase {
     path = fs.makeQualified(path);
     fs.deleteOnExit(path);
     HadoopUtil.delete(conf, path);
-    DistributedCache.setCacheFiles(new URI[] {path.toUri()}, conf);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
     try {
       writer.append(key, new VectorWritable(value));
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, false);
     }
+    DistributedCache.setCacheFiles(new URI[] {path.toUri()}, conf);
 
     // load it
     Vector result = VectorCache.load(conf);
     
     // are they the same?
-    assertNotNull("Vector is not null", result);
-    assertEquals("Loaded vector is identical to original", result, value);
+    assertNotNull("Vector is null", result);
+    assertEquals("Loaded vector is not identical to original", result, value);
   }
   
   @Test
@@ -104,7 +104,7 @@ public class TestVectorCache extends MahoutTestCase {
     Vector v2 = VectorCache.load(conf);
     
     // are they the same?
-    assertNotNull("Vector is not null", v2);
-    assertEquals("Vectors are identical", v2, v);
+    assertNotNull("Vector is null", v2);
+    assertEquals("Vectors are not identical", v2, v);
   }
 }

@@ -17,14 +17,11 @@
 
 package org.apache.mahout.clustering.spectral.common;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Arrays;
-
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
@@ -35,6 +32,10 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.Arrays;
 
 
 /**
@@ -50,8 +51,7 @@ public final class VectorCache {
   }
 
   /**
-   * 
-   * @param key SequenceFile key
+   * @param key    SequenceFile key
    * @param vector Vector to save, to be wrapped as VectorWritable
    */
   public static void save(Writable key,
@@ -60,7 +60,7 @@ public final class VectorCache {
                           Configuration conf,
                           boolean overwritePath,
                           boolean deleteOnExit) throws IOException {
-    
+
     FileSystem fs = FileSystem.get(output.toUri(), conf);
     output = fs.makeQualified(output);
     if (overwritePath) {
@@ -68,11 +68,11 @@ public final class VectorCache {
     }
 
     // set the cache
-    DistributedCache.setCacheFiles(new URI[] {output.toUri()}, conf);
-    
+    DistributedCache.setCacheFiles(new URI[]{output.toUri()}, conf);
+
     // set up the writer
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, output, 
-        IntWritable.class, VectorWritable.class);
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, output,
+            IntWritable.class, VectorWritable.class);
     try {
       writer.append(key, new VectorWritable(vector));
     } finally {
@@ -83,7 +83,7 @@ public final class VectorCache {
       fs.deleteOnExit(output);
     }
   }
-  
+
   /**
    * Calls the save() method, setting the cache to overwrite any previous
    * Path and to delete the path after exiting
@@ -91,26 +91,52 @@ public final class VectorCache {
   public static void save(Writable key, Vector vector, Path output, Configuration conf) throws IOException {
     save(key, vector, output, conf, true, true);
   }
-  
+
   /**
    * Loads the vector from {@link DistributedCache}. Returns null if no vector exists.
    */
   public static Vector load(Configuration conf) throws IOException {
-    URI[] files = DistributedCache.getCacheFiles(conf);
+    Path[] files = DistributedCache.getLocalCacheFiles(conf);
     if (files == null || files.length < 1) {
-      return null;
+      log.debug("getLocalCacheFiles failed, trying getCacheFiles");
+      URI[] filesURIs = DistributedCache.getCacheFiles(conf);
+      if (filesURIs == null) {
+        throw new IOException("Cannot read Frequency list from Distributed Cache");
+      }
+      if (filesURIs.length != 1) {
+        throw new IOException("Cannot read Frequency list from Distributed Cache (" + files.length + ')');
+      }
+      files = new Path[1];
+      files[0] = new Path(filesURIs[0].getPath());
+    } else {
+      // Fallback if we are running locally.
+      LocalFileSystem localFs = FileSystem.getLocal(conf);
+      if (!localFs.exists(files[0])) {
+        URI[] filesURIs = DistributedCache.getCacheFiles(conf);
+        if (filesURIs == null) {
+          throw new IOException("Cannot read Frequency list from Distributed Cache");
+        }
+        if (filesURIs.length != 1) {
+          throw new IOException("Cannot read Frequency list from Distributed Cache (" + files.length + ')');
+        }
+        files[0] = new Path(filesURIs[0].getPath());
+      }
     }
-    log.info("Files are: {}", Arrays.toString(files));
-    return load(conf, new Path(files[0].getPath()));
+
+    if (log.isInfoEnabled()) {
+      log.info("Files are: {}", Arrays.toString(files));
+    }
+
+    return load(conf, files[0]);
   }
-  
+
   /**
    * Loads a Vector from the specified path. Returns null if no vector exists.
    */
   public static Vector load(Configuration conf, Path input) throws IOException {
     log.info("Loading vector from: {}", input);
     SequenceFileValueIterator<VectorWritable> iterator =
-        new SequenceFileValueIterator<VectorWritable>(input, true, conf);
+            new SequenceFileValueIterator<VectorWritable>(input, true, conf);
     try {
       return iterator.next().get();
     } finally {

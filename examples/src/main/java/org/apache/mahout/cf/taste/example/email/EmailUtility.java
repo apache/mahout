@@ -63,11 +63,11 @@ public final class EmailUtility {
                                       String msgIdPrefix,
                                       OpenObjectIntHashMap<String> msgIdDictionary) throws IOException {
 
-    URI[] localFiles = DistributedCache.getCacheFiles(conf);
+    Path[] localFiles = DistributedCache.getLocalCacheFiles(conf);
     Preconditions.checkArgument(localFiles != null,
             "missing paths from the DistributedCache");
-    for (URI localFile : localFiles) {
-      Path dictionaryFile = new Path(localFile.getPath());
+    for (Path dictionaryFile : localFiles) {
+
       // key is word value is id
 
       OpenObjectIntHashMap<String> dictionary = null;

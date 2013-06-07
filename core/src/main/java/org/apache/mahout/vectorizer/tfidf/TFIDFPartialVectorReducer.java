@@ -100,7 +100,7 @@ public class TFIDFPartialVectorReducer extends
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
-    URI[] localFiles = DistributedCache.getCacheFiles(conf);
+    Path[] localFiles = DistributedCache.getLocalCacheFiles(conf);
     Preconditions.checkArgument(localFiles != null && localFiles.length >= 1, 
         "missing paths from the DistributedCache");
 
@@ -111,7 +111,7 @@ public class TFIDFPartialVectorReducer extends
     sequentialAccess = conf.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
     namedVector = conf.getBoolean(PartialVectorMerger.NAMED_VECTOR, false);
 
-    Path dictionaryFile = new Path(localFiles[0].getPath());
+    Path dictionaryFile = localFiles[0];
     // key is feature, value is the document frequency
     for (Pair<IntWritable,LongWritable> record 
          : new SequenceFileIterable<IntWritable,LongWritable>(dictionaryFile, true, conf)) {

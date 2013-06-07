@@ -266,8 +266,15 @@ public final class HadoopUtil {
     DistributedCache.setCacheFiles(new URI[]{fileToCache.toUri()}, conf);
   }
 
+  /**
+   * Return the first cached file in the list, else null if thre are no cached files.
+   * @param conf
+   * @return
+   * @throws IOException
+   */
   public static Path cachedFile(Configuration conf) throws IOException {
-    return new Path(DistributedCache.getCacheFiles(conf)[0].getPath());
+    Path[] cacheFiles = DistributedCache.getLocalCacheFiles(conf);
+    return cacheFiles != null && cacheFiles.length > 0 ? cacheFiles[0] : null;
   }
 
   public static void setSerializations(Configuration conf) {

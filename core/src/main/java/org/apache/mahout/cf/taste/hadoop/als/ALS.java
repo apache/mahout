@@ -81,7 +81,7 @@ final class ALS {
       Path localCacheFile = localFs.makeQualified(cacheFiles[n]);
 
       // fallback for local execution
-      if (!localFs.exists(localCacheFile)) {
+      if (!localFs.exists(localCacheFile)) {//MAHOUT-992: this seems safe
         localCacheFile = new Path(DistributedCache.getCacheFiles(conf)[n].getPath());
       }
 

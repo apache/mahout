@@ -116,7 +116,7 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
-    URI[] localFiles = DistributedCache.getCacheFiles(conf);
+    Path[] localFiles = DistributedCache.getLocalCacheFiles(conf);
     Preconditions.checkArgument(localFiles != null && localFiles.length >= 1,
             "missing paths from the DistributedCache");
 
@@ -125,7 +125,7 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
     namedVector = conf.getBoolean(PartialVectorMerger.NAMED_VECTOR, false);
     maxNGramSize = conf.getInt(DictionaryVectorizer.MAX_NGRAMS, maxNGramSize);
 
-    Path dictionaryFile = new Path(localFiles[0].getPath());
+    Path dictionaryFile = localFiles[0];
     // key is word value is id
     for (Pair<Writable, IntWritable> record
             : new SequenceFileIterable<Writable, IntWritable>(dictionaryFile, true, conf)) {
