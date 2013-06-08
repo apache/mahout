@@ -39,7 +39,7 @@ if [ ! -e $MAHOUT ]; then
   exit 1
 fi
 
-algorithm=( kmeans fuzzykmeans dirichlet minhash)
+algorithm=( kmeans fuzzykmeans dirichlet lda minhash)
 if [ -n "$1" ]; then
   choice=$1
 else
@@ -47,7 +47,8 @@ else
   echo "1. ${algorithm[0]} clustering"
   echo "2. ${algorithm[1]} clustering"
   echo "3. ${algorithm[2]} clustering"
-  echo "4. ${algorithm[3]} clustering"
+  echo "4. ${algorithm[3]} clustering" 
+  echo "5. ${algorithm[4]} clustering"
   read -p "Enter your choice : " choice
 fi
 
@@ -159,6 +160,32 @@ elif [ "x$clustertype" == "xdirichlet" ]; then
     -dt sequencefile -b 100 -n 20 -sp 0 \
     && \
   cat ${WORK_DIR}/reuters-dirichlet/clusterdump
+elif [ "x$clustertype" == "xlda" ]; then
+  $MAHOUT seq2sparse \
+    -i ${WORK_DIR}/reuters-out-seqdir/ \
+    -o ${WORK_DIR}/reuters-out-seqdir-sparse-lda -ow --maxDFPercent 85 --namedVector \
+  && \
+  $MAHOUT rowid \
+    -i ${WORK_DIR}/reuters-out-seqdir-sparse-lda/tfidf-vectors \
+    -o ${WORK_DIR}/reuters-out-matrix \
+  && \
+  rm -rf ${WORK_DIR}/reuters-lda ${WORK_DIR}/reuters-lda-topics ${WORK_DIR}/reuters-lda-model \
+  && \
+  $MAHOUT cvb \
+    -i ${WORK_DIR}/reuters-out-matrix/matrix \
+    -o ${WORK_DIR}/reuters-lda -k 20 -ow -x 20 \
+    -dict ${WORK_DIR}/reuters-out-seqdir-sparse-lda/dictionary.file-* \
+    -dt ${WORK_DIR}/reuters-lda-topics \
+    -mt ${WORK_DIR}/reuters-lda-model \
+  && \
+  $MAHOUT vectordump \
+    -i ${WORK_DIR}/reuters-lda-topics/part-m-00000 \
+    -o ${WORK_DIR}/reuters-lda/vectordump \
+    -vs 10 -p true \
+    -d ${WORK_DIR}/reuters-out-seqdir-sparse-lda/dictionary.file-* \
+    -dt sequencefile -sort ${WORK_DIR}/reuters-lda-topics/part-m-00000 \
+    && \
+  cat ${WORK_DIR}/reuters-lda/vectordump
 elif [ "x$clustertype" == "xminhash" ]; then
   $MAHOUT seq2sparse \
     -i ${WORK_DIR}/reuters-out-seqdir/ \
