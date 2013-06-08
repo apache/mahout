@@ -129,14 +129,17 @@ public final class Job extends AbstractJob {
     log.info("Preparing Input");
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     log.info("Running random seed to get initial clusters");
-    Path clusters = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);
+    Path clusters = new Path(output, "random-seeds");
     clusters = RandomSeedGenerator.buildRandom(conf, directoryContainingConvertedInput, clusters, k, measure);
-    log.info("Running KMeans");
+    log.info("Running KMeans with k = {}", k);
     KMeansDriver.run(conf, directoryContainingConvertedInput, clusters, output, measure, convergenceDelta,
         maxIterations, true, 0.0, false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-*-final"), new Path(output,
-        "clusteredPoints"));
+    Path outGlob = new Path(output, "clusters-*-final");
+    Path clusteredPoints = new Path(output,
+            "clusteredPoints");
+    log.info("Dumping out clusters from clusters: {} and clusteredPoints: {}", outGlob, clusteredPoints);
+    ClusterDumper clusterDumper = new ClusterDumper(outGlob, clusteredPoints);
     clusterDumper.printClusters(null);
   }
   

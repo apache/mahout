@@ -93,3 +93,5 @@ Release 0.8 - unreleased
   MAHOUT-944: Create SequenceFiles out of Lucene document storage (no term vectors required) (Frank Scholten, gsingers)
 
   MAHOUT-958: Fix issue with globs in RepresentativePointsDriver (Adam Baron, Vikram Dixit K, ehgjr via gsingers)
+
+  MAHOUT-1084: Fixed issue with too many clusters in synthetic control example (liutengfei, gsingers)
