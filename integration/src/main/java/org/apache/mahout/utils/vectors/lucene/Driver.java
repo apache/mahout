@@ -116,7 +116,7 @@ public final class Driver {
       long numDocs = vectorWriter.write(iterable, maxDocs);
       log.info("Wrote: {} vectors", numDocs);
     } finally {
-      Closeables.closeQuietly(vectorWriter);
+      Closeables.close(vectorWriter, false);
     }
 
     File dictOutFile = new File(dictOut);
@@ -126,7 +126,7 @@ public final class Driver {
     try {
       tiWriter.write(termInfo);
     } finally {
-      Closeables.closeQuietly(tiWriter);
+      Closeables.close(tiWriter, false);
     }
 
     if (!"".equals(seqDictOut)) {
@@ -149,7 +149,7 @@ public final class Driver {
           seqWriter.append(term, termIndex);
         }
       } finally {
-        Closeables.closeQuietly(seqWriter);
+        Closeables.close(seqWriter, false);
       }
 
     }
