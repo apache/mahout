@@ -2,15 +2,17 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+  MAHOUT-1243: Dictionary file format in Lucene-Mahout integration is not in SequenceFileFormat (ssc)
+
   MAHOUT-974:  org.apache.mahout.cf.taste.hadoop.als.ParallelALSFactorizationJob use integer as userId and itemId (ssc)
 
   MAHOUT-1052: Add an option to MinHashDriver that specifies the dimension of vector to hash (indexes or values) (Elena Smirnova via smarthi)
 
-__MAHOUT-1237: Total cluster cost isn't computed properly (dfilimon)
+  MAHOUT-1237: Total cluster cost isn't computed properly (dfilimon)
 
   MAHOUT-1196: LogisticModelParameters uses csv.getTargetCategories() even if csv is not used. (Vineet Krishnan via ssc)
 
-__MAHOUT-1224: Add the option of running a StreamingKMeans pass in the Reducer before BallKMeans (dfilimon)
+  MAHOUT-1224: Add the option of running a StreamingKMeans pass in the Reducer before BallKMeans (dfilimon)
 
   MAHOUT-993:  Some vector dumper flags are expecting arguments. (Andrew Look via robinanil)
 
@@ -28,21 +30,21 @@ __MAHOUT-1224: Add the option of running a StreamingKMeans pass in the Reducer b
   
   MAHOUT-1213: SSVD job doesn't clean it's temp dir, and fails when seeing it again (smarthi)
 
-__MAHOUT-1223: Fixed point skipped in StreamingKMeans when iterating through centroids from a reducer (dfilimon)
+  MAHOUT-1223: Fixed point skipped in StreamingKMeans when iterating through centroids from a reducer (dfilimon)
 
-__MAHOUT-1222: Fix total weight in FastProjectionSearch (dfilimon)
+  MAHOUT-1222: Fix total weight in FastProjectionSearch (dfilimon)
 
-__MAHOUT-1219: Remove LSHSearcher from StreamingKMeansTest. It causes it to sometimes fail (dfilimon)
+  MAHOUT-1219: Remove LSHSearcher from StreamingKMeansTest. It causes it to sometimes fail (dfilimon)
 
   MAHOUT-1221: SparseMatrix.viewRow is sometimes readonly. (Maysam Yabandeh via smarthi)
 
-__MAHOUT-1219: Remove LSHSearcher from SearchQualityTest. It causes it to fail, but the failure is not very meaningful (dfilimon)
+  MAHOUT-1219: Remove LSHSearcher from SearchQualityTest. It causes it to fail, but the failure is not very meaningful (dfilimon)
 
-__MAHOUT-1217: Nearest neighbor searchers sometimes fail to remove points: fix in FastProjectionSearch's searchFirst (dfilimon)
+  MAHOUT-1217: Nearest neighbor searchers sometimes fail to remove points: fix in FastProjectionSearch's searchFirst (dfilimon)
 
-__MAHOUT-1216: Add locality sensitive hashing and a LocalitySensitiveHash searcher (dfilimon)
+  MAHOUT-1216: Add locality sensitive hashing and a LocalitySensitiveHash searcher (dfilimon)
 
-__MAHOUT-1181: Adding StreamingKMeans MapReduce classes (dfilimon)
+  MAHOUT-1181: Adding StreamingKMeans MapReduce classes (dfilimon)
 
   MAHOUT-1212: Incorrect classify-20newsgroups.sh file description (Julian Ortega via smarthi)
    
@@ -74,8 +76,7 @@ __MAHOUT-1181: Adding StreamingKMeans MapReduce classes (dfilimon)
 
   MAHOUT-1188: Inconsistent reference to Lucene versions in code and POM (smarthi)
 
-  MAHOUT-1161: Unable to run CJKAnalyzer for conversion of a sequence file to sparse vector due to instantiation
-               exception (ssc)
+  MAHOUT-1161: Unable to run CJKAnalyzer for conversion of a sequence file to sparse vector due to instantiation exception (ssc)
 
   MAHOUT-1187: Update Commons Lang to Commons Lang3 (smarthi)
 

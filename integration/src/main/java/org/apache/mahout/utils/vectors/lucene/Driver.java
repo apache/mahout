@@ -20,6 +20,7 @@ package org.apache.mahout.utils.vectors.lucene;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Iterator;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
@@ -36,14 +37,17 @@ import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Text;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.utils.vectors.TermEntry;
 import org.apache.mahout.utils.vectors.TermInfo;
 import org.apache.mahout.utils.vectors.io.DelimitedTermInfoWriter;
 import org.apache.mahout.utils.vectors.io.SequenceFileVectorWriter;
@@ -63,6 +67,7 @@ public final class Driver {
   private String field;
   private String idField;
   private String dictOut;
+  private String seqDictOut = "";
   private String weightType = "tfidf";
   private String delimiter = "\t";
   private double norm = LuceneIterable.NO_NORMALIZING;
@@ -98,10 +103,10 @@ public final class Driver {
     
     LuceneIterable iterable;
     if (norm == LuceneIterable.NO_NORMALIZING) {
-      iterable = new LuceneIterable(reader, idField, field, termInfo,weight, LuceneIterable.NO_NORMALIZING,
+      iterable = new LuceneIterable(reader, idField, field, termInfo, weight, LuceneIterable.NO_NORMALIZING,
           maxPercentErrorDocs);
     } else {
-      iterable = new LuceneIterable(reader, idField, field, termInfo,weight, norm, maxPercentErrorDocs);
+      iterable = new LuceneIterable(reader, idField, field, termInfo, weight, norm, maxPercentErrorDocs);
     }
 
     log.info("Output File: {}", outFile);
@@ -122,6 +127,31 @@ public final class Driver {
       tiWriter.write(termInfo);
     } finally {
       Closeables.closeQuietly(tiWriter);
+    }
+
+    if (!"".equals(seqDictOut)) {
+      log.info("SequenceFile Dictionary Output file: {}", seqDictOut);
+
+      Path path = new Path(seqDictOut);
+      Configuration conf = new Configuration();
+      FileSystem fs = FileSystem.get(conf);
+      SequenceFile.Writer seqWriter = null;
+      try {
+        seqWriter = SequenceFile.createWriter(fs, conf, path, Text.class, IntWritable.class);
+        Text term = new Text();
+        IntWritable termIndex = new IntWritable();
+
+        Iterator<TermEntry> termEntries = termInfo.getAllEntries();
+        while (termEntries.hasNext()) {
+          TermEntry termEntry = termEntries.next();
+          term.set(termEntry.getTerm());
+          termIndex.set(termEntry.getTermIdx());
+          seqWriter.append(term, termIndex);
+        }
+      } finally {
+        Closeables.closeQuietly(seqWriter);
+      }
+
     }
   }
 
@@ -151,6 +181,10 @@ public final class Driver {
     Option dictOutOpt = obuilder.withLongName("dictOut").withRequired(true).withArgument(
         abuilder.withName("dictOut").withMinimum(1).withMaximum(1).create()).withDescription(
         "The output of the dictionary").withShortName("t").create();
+
+    Option seqDictOutOpt = obuilder.withLongName("seqDictOut").withRequired(false).withArgument(
+        abuilder.withName("seqDictOut").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The output of the dictionary as sequence file").withShortName("st").create();
 
     Option weightOpt = obuilder.withLongName("weight").withRequired(false).withArgument(
         abuilder.withName("weight").withMinimum(1).withMaximum(1).create()).withDescription(
@@ -190,7 +224,7 @@ public final class Driver {
 
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(idFieldOpt).withOption(
         outputOpt).withOption(delimiterOpt).withOption(helpOpt).withOption(fieldOpt).withOption(maxOpt)
-        .withOption(dictOutOpt).withOption(powerOpt).withOption(maxDFPercentOpt)
+        .withOption(dictOutOpt).withOption(seqDictOutOpt).withOption(powerOpt).withOption(maxDFPercentOpt)
         .withOption(weightOpt).withOption(minDFOpt).withOption(maxPercentErrorDocsOpt).create();
 
     try {
@@ -248,6 +282,10 @@ public final class Driver {
         luceneDriver.setDelimiter(cmdLine.hasOption(delimiterOpt) ? cmdLine.getValue(delimiterOpt).toString() : "\t");
 
         luceneDriver.setDictOut(cmdLine.getValue(dictOutOpt).toString());
+
+        if (cmdLine.hasOption(seqDictOutOpt)) {
+          luceneDriver.setSeqDictOut(cmdLine.getValue(seqDictOutOpt).toString());
+        }
 
         luceneDriver.dumpVectors();
       }
@@ -311,6 +349,10 @@ public final class Driver {
 
   public void setDictOut(String dictOut) {
     this.dictOut = dictOut;
+  }
+
+  public void setSeqDictOut(String seqDictOut) {
+    this.seqDictOut = seqDictOut;
   }
 
   public void setMaxPercentErrorDocs(double maxPercentErrorDocs) {
