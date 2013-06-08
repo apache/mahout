@@ -49,6 +49,8 @@ public class RecommenderJob extends AbstractJob {
   static final String USER_FEATURES_PATH = RecommenderJob.class.getName() + ".userFeatures";
   static final String ITEM_FEATURES_PATH = RecommenderJob.class.getName() + ".itemFeatures";
   static final String MAX_RATING = RecommenderJob.class.getName() + ".maxRating";
+  static final String USER_INDEX_PATH = RecommenderJob.class.getName() + ".userIndex";
+  static final String ITEM_INDEX_PATH = RecommenderJob.class.getName() + ".itemIndex";
 
   static final int DEFAULT_NUM_RECOMMENDATIONS = 10;
 
@@ -66,6 +68,9 @@ public class RecommenderJob extends AbstractJob {
         String.valueOf(DEFAULT_NUM_RECOMMENDATIONS));
     addOption("maxRating", null, "maximum rating available", true);
     addOption("numThreads", null, "threads per mapper", String.valueOf(1));
+    addOption("usesLongIDs", null, "input contains long IDs that need to be translated");
+    addOption("userIDIndex", null, "index for user long IDs (necessary if usesLongIDs is true)");
+    addOption("itemIDIndex", null, "index for user long IDs (necessary if usesLongIDs is true)");
     addOutputOption();
 
     Map<String,List<String>> parsedArgs = parseArguments(args);
@@ -83,6 +88,13 @@ public class RecommenderJob extends AbstractJob {
     conf.set(USER_FEATURES_PATH, getOption("userFeatures"));
     conf.set(ITEM_FEATURES_PATH, getOption("itemFeatures"));
     conf.set(MAX_RATING, getOption("maxRating"));
+
+    boolean usesLongIDs = Boolean.parseBoolean(getOption("usesLongIDs"));
+    if (usesLongIDs) {
+      conf.set(ParallelALSFactorizationJob.USES_LONG_IDS, String.valueOf(true));
+      conf.set(USER_INDEX_PATH, getOption("userIDIndex"));
+      conf.set(ITEM_INDEX_PATH, getOption("itemIDIndex"));
+    }
 
     MultithreadedMapper.setMapperClass(prediction, PredictionMapper.class);
     MultithreadedMapper.setNumberOfThreads(prediction, numThreads);

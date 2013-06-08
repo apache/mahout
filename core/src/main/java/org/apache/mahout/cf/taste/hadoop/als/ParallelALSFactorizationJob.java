@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.hadoop.als;
 
+import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
@@ -48,6 +49,8 @@ import org.apache.mahout.common.mapreduce.TransposeMapper;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
+import org.apache.mahout.math.VarIntWritable;
+import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
@@ -88,12 +91,16 @@ public class ParallelALSFactorizationJob extends AbstractJob {
   static final String ALPHA = ParallelALSFactorizationJob.class.getName() + ".alpha";
   static final String NUM_ENTITIES = ParallelALSFactorizationJob.class.getName() + ".numEntities";
 
+  static final String USES_LONG_IDS = ParallelALSFactorizationJob.class.getName() + ".usesLongIDs";
+  static final String TOKEN_POS = ParallelALSFactorizationJob.class.getName() + ".tokenPos";
+
   private boolean implicitFeedback;
   private int numIterations;
   private int numFeatures;
   private double lambda;
   private double alpha;
   private int numThreadsPerSolver;
+  private boolean usesLongIDs;
 
   private int numItems;
   private int numUsers;
@@ -115,6 +122,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     addOption("numFeatures", null, "dimension of the feature space", true);
     addOption("numIterations", null, "number of iterations", true);
     addOption("numThreadsPerSolver", null, "threads per solver mapper", String.valueOf(1));
+    addOption("usesLongIDs", null, "input contains long IDs that need to be translated");
 
     Map<String,List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
@@ -128,6 +136,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     implicitFeedback = Boolean.parseBoolean(getOption("implicitFeedback"));
 
     numThreadsPerSolver = Integer.parseInt(getOption("numThreadsPerSolver"));
+    usesLongIDs = Boolean.parseBoolean(getOption("usesLongIDs", String.valueOf(false)));
 
     /*
     * compute the factorization A = U M'
@@ -137,12 +146,27 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     *           M (items x features) is the representation of items in the feature space
     */
 
+    if (usesLongIDs) {
+      Job mapUsers = prepareJob(getInputPath(), getOutputPath("userIDIndex"), TextInputFormat.class,
+          MapLongIDsMapper.class, VarIntWritable.class, VarLongWritable.class, IDMapReducer.class,
+          VarIntWritable.class, VarLongWritable.class, SequenceFileOutputFormat.class);
+      mapUsers.getConfiguration().set(TOKEN_POS, String.valueOf(TasteHadoopUtils.USER_ID_POS));
+      mapUsers.waitForCompletion(true);
+
+      Job mapItems = prepareJob(getInputPath(), getOutputPath("itemIDIndex"), TextInputFormat.class,
+          MapLongIDsMapper.class, VarIntWritable.class, VarLongWritable.class, IDMapReducer.class,
+          VarIntWritable.class, VarLongWritable.class, SequenceFileOutputFormat.class);
+      mapItems.getConfiguration().set(TOKEN_POS, String.valueOf(TasteHadoopUtils.ITEM_ID_POS));
+      mapItems.waitForCompletion(true);
+    }
+
    /* create A' */
     Job itemRatings = prepareJob(getInputPath(), pathToItemRatings(),
         TextInputFormat.class, ItemRatingVectorsMapper.class, IntWritable.class,
         VectorWritable.class, VectorSumReducer.class, IntWritable.class,
         VectorWritable.class, SequenceFileOutputFormat.class);
     itemRatings.setCombinerClass(VectorSumCombiner.class);
+    itemRatings.getConfiguration().set(USES_LONG_IDS, String.valueOf(usesLongIDs));
     boolean succeeded = itemRatings.waitForCompletion(true);
     if (!succeeded) {
       return -1;
@@ -267,11 +291,18 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     private final VectorWritable ratingsWritable = new VectorWritable(true);
     private final Vector ratings = new RandomAccessSparseVector(Integer.MAX_VALUE, 1);
 
+    private boolean usesLongIDs;
+
+    @Override
+    protected void setup(Context ctx) throws IOException, InterruptedException {
+      usesLongIDs = ctx.getConfiguration().getBoolean(USES_LONG_IDS, false);
+    }
+
     @Override
     protected void map(LongWritable offset, Text line, Context ctx) throws IOException, InterruptedException {
       String[] tokens = TasteHadoopUtils.splitPrefTokens(line.toString());
-      int userID = Integer.parseInt(tokens[0]);
-      int itemID = Integer.parseInt(tokens[1]);
+      int userID = TasteHadoopUtils.readID(tokens[TasteHadoopUtils.USER_ID_POS], usesLongIDs);
+      int itemID = TasteHadoopUtils.readID(tokens[TasteHadoopUtils.ITEM_ID_POS], usesLongIDs);
       float rating = Float.parseFloat(tokens[2]);
 
       ratings.setQuick(userID, rating);
@@ -351,6 +382,38 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
       // prepare instance for reuse
       featureVector.setQuick(r.get(), 0.0d);
+    }
+  }
+
+  static class MapLongIDsMapper extends Mapper<LongWritable,Text,VarIntWritable,VarLongWritable> {
+
+    private int tokenPos;
+    private VarIntWritable index = new VarIntWritable();
+    private VarLongWritable idWritable = new VarLongWritable();
+
+    @Override
+    protected void setup(Context ctx) throws IOException, InterruptedException {
+      tokenPos = ctx.getConfiguration().getInt(TOKEN_POS, -1);
+      Preconditions.checkState(tokenPos >= 0);
+    }
+
+    @Override
+    protected void map(LongWritable key, Text line, Context ctx) throws IOException, InterruptedException {
+      String[] tokens = TasteHadoopUtils.splitPrefTokens(line.toString());
+
+      long id = Long.parseLong(tokens[tokenPos]);
+
+      index.set(TasteHadoopUtils.idToIndex(id));
+      idWritable.set(id);
+      ctx.write(index, idWritable);
+    }
+  }
+
+  static class IDMapReducer extends Reducer<VarIntWritable,VarLongWritable,VarIntWritable,VarLongWritable> {
+    @Override
+    protected void reduce(VarIntWritable index, Iterable<VarLongWritable> ids, Context ctx)
+        throws IOException, InterruptedException {
+      ctx.write(index, ids.iterator().next());
     }
   }
 

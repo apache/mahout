@@ -45,6 +45,10 @@ public class MutableRecommendedItem implements RecommendedItem {
     return value;
   }
 
+  public void setItemID(long itemID) {
+    this.itemID = itemID;
+  }
+
   public void set(long itemID, float value) {
     this.itemID = itemID;
     this.value = value;

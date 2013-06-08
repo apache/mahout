@@ -76,7 +76,7 @@ public final class AggregateAndRecommendReducer extends
     Configuration conf = context.getConfiguration();
     recommendationsPerUser = conf.getInt(NUM_RECOMMENDATIONS, DEFAULT_NUM_RECOMMENDATIONS);
     booleanData = conf.getBoolean(RecommenderJob.BOOLEAN_DATA, false);
-    indexItemIDMap = TasteHadoopUtils.readItemIDIndexMap(conf.get(ITEMID_INDEX_PATH), conf);
+    indexItemIDMap = TasteHadoopUtils.readIDIndexMap(conf.get(ITEMID_INDEX_PATH), conf);
 
     String itemFilePathString = conf.get(ITEMS_FILE);
     if (itemFilePathString != null) {

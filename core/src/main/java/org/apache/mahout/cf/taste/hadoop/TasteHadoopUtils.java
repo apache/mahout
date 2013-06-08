@@ -35,11 +35,13 @@ import java.util.regex.Pattern;
  */
 public final class TasteHadoopUtils {
 
+  public static final int USER_ID_POS = 0;
+  public static final int ITEM_ID_POS = 1;
+
   /** Standard delimiter of textual preference data */
   private static final Pattern PREFERENCE_TOKEN_DELIMITER = Pattern.compile("[\t,]");
 
-  private TasteHadoopUtils() {
-  }
+  private TasteHadoopUtils() {}
 
   /**
    * Splits a preference data line into string tokens
@@ -55,12 +57,18 @@ public final class TasteHadoopUtils {
     return 0x7FFFFFFF & Longs.hashCode(id);
   }
 
+  public static int readID(String token, boolean usesLongIDs) {
+    return usesLongIDs ?
+        TasteHadoopUtils.idToIndex(Long.parseLong(token))
+        : Integer.parseInt(token);
+  }
+
   /**
    * Reads a binary mapping file
    */
-  public static OpenIntLongHashMap readItemIDIndexMap(String itemIDIndexPathStr, Configuration conf) {
-    OpenIntLongHashMap indexItemIDMap = new OpenIntLongHashMap();
-    Path itemIDIndexPath = new Path(itemIDIndexPathStr);
+  public static OpenIntLongHashMap readIDIndexMap(String idIndexPathStr, Configuration conf) {
+    OpenIntLongHashMap indexIDMap = new OpenIntLongHashMap();
+    Path itemIDIndexPath = new Path(idIndexPathStr);
     for (Pair<VarIntWritable,VarLongWritable> record
          : new SequenceFileDirIterable<VarIntWritable,VarLongWritable>(itemIDIndexPath,
                                                                        PathType.LIST,
@@ -68,9 +76,9 @@ public final class TasteHadoopUtils {
                                                                        null,
                                                                        true,
                                                                        conf)) {
-      indexItemIDMap.put(record.getFirst().get(), record.getSecond().get());
+      indexIDMap.put(record.getFirst().get(), record.getSecond().get());
     }
-    return indexItemIDMap;
+    return indexIDMap;
   }
 
 

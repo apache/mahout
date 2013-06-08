@@ -17,16 +17,20 @@
 
 package org.apache.mahout.cf.taste.hadoop.als;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.mahout.cf.taste.hadoop.MutableRecommendedItem;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
+import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
 import org.apache.mahout.cf.taste.hadoop.TopItemsQueue;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.IntObjectProcedure;
+import org.apache.mahout.math.map.OpenIntLongHashMap;
 import org.apache.mahout.math.map.OpenIntObjectHashMap;
 import org.apache.mahout.math.set.OpenIntHashSet;
 
@@ -37,34 +41,47 @@ import java.util.List;
  * a multithreaded mapper that loads the feature matrices U and M into memory. Afterwards it computes recommendations
  * from these. Can be executed by a {@link MultithreadedSharingMapper}.
  */
-public class PredictionMapper extends SharingMapper<IntWritable,VectorWritable,IntWritable,RecommendedItemsWritable,
+public class PredictionMapper extends SharingMapper<IntWritable,VectorWritable,LongWritable,RecommendedItemsWritable,
     Pair<OpenIntObjectHashMap<Vector>,OpenIntObjectHashMap<Vector>>> {
 
   private int recommendationsPerUser;
   private float maxRating;
 
+  private boolean usesLongIDs;
+  private OpenIntLongHashMap userIDIndex;
+  private OpenIntLongHashMap itemIDIndex;
+
+  private final LongWritable userIDWritable = new LongWritable();
   private final RecommendedItemsWritable recommendations = new RecommendedItemsWritable();
 
   @Override
   Pair<OpenIntObjectHashMap<Vector>, OpenIntObjectHashMap<Vector>> createSharedInstance(Context ctx) {
-    Path pathToU = new Path(ctx.getConfiguration().get(RecommenderJob.USER_FEATURES_PATH));
-    Path pathToM = new Path(ctx.getConfiguration().get(RecommenderJob.ITEM_FEATURES_PATH));
+    Configuration conf = ctx.getConfiguration();
+    Path pathToU = new Path(conf.get(RecommenderJob.USER_FEATURES_PATH));
+    Path pathToM = new Path(conf.get(RecommenderJob.ITEM_FEATURES_PATH));
 
-    OpenIntObjectHashMap<Vector> U = ALS.readMatrixByRows(pathToU, ctx.getConfiguration());
-    OpenIntObjectHashMap<Vector> M = ALS.readMatrixByRows(pathToM, ctx.getConfiguration());
+    OpenIntObjectHashMap<Vector> U = ALS.readMatrixByRows(pathToU, conf);
+    OpenIntObjectHashMap<Vector> M = ALS.readMatrixByRows(pathToM, conf);
 
     return new Pair<OpenIntObjectHashMap<Vector>, OpenIntObjectHashMap<Vector>>(U, M);
   }
 
   @Override
   protected void setup(Context ctx) throws IOException, InterruptedException {
-    recommendationsPerUser = ctx.getConfiguration().getInt(RecommenderJob.NUM_RECOMMENDATIONS,
-      RecommenderJob.DEFAULT_NUM_RECOMMENDATIONS);
-    maxRating = Float.parseFloat(ctx.getConfiguration().get(RecommenderJob.MAX_RATING));
+    Configuration conf = ctx.getConfiguration();
+    recommendationsPerUser = conf.getInt(RecommenderJob.NUM_RECOMMENDATIONS,
+        RecommenderJob.DEFAULT_NUM_RECOMMENDATIONS);
+    maxRating = Float.parseFloat(conf.get(RecommenderJob.MAX_RATING));
+
+    usesLongIDs = conf.getBoolean(ParallelALSFactorizationJob.USES_LONG_IDS, false);
+    if (usesLongIDs) {
+      userIDIndex = TasteHadoopUtils.readIDIndexMap(conf.get(RecommenderJob.USER_INDEX_PATH), conf);
+      itemIDIndex = TasteHadoopUtils.readIDIndexMap(conf.get(RecommenderJob.ITEM_INDEX_PATH), conf);
+    }
   }
 
   @Override
-  protected void map(IntWritable userIDWritable, VectorWritable ratingsWritable, Context ctx)
+  protected void map(IntWritable userIndexWritable, VectorWritable ratingsWritable, Context ctx)
     throws IOException, InterruptedException {
 
     Pair<OpenIntObjectHashMap<Vector>, OpenIntObjectHashMap<Vector>> uAndM = getSharedInstance();
@@ -72,7 +89,7 @@ public class PredictionMapper extends SharingMapper<IntWritable,VectorWritable,I
     OpenIntObjectHashMap<Vector> M = uAndM.getSecond();
 
     Vector ratings = ratingsWritable.get();
-    final int userID = userIDWritable.get();
+    final int userIndex = userIndexWritable.get();
     final OpenIntHashSet alreadyRatedItems = new OpenIntHashSet(ratings.getNumNondefaultElements());
 
     for (Vector.Element e : ratings.nonZeroes()) {
@@ -80,7 +97,7 @@ public class PredictionMapper extends SharingMapper<IntWritable,VectorWritable,I
     }
 
     final TopItemsQueue topItemsQueue = new TopItemsQueue(recommendationsPerUser);
-    final Vector userFeatures = U.get(userID);
+    final Vector userFeatures = U.get(userIndex);
 
     M.forEachPair(new IntObjectProcedure<Vector>() {
       @Override
@@ -105,6 +122,20 @@ public class PredictionMapper extends SharingMapper<IntWritable,VectorWritable,I
       // cap predictions to maxRating
       for (RecommendedItem topItem : recommendedItems) {
         ((MutableRecommendedItem) topItem).capToMaxValue(maxRating);
+      }
+
+      if (usesLongIDs) {
+        long userID = userIDIndex.get(userIndex);
+        userIDWritable.set(userID);
+
+        for (RecommendedItem topItem : recommendedItems) {
+          // remap item IDs
+          long itemID = itemIDIndex.get((int) topItem.getItemID());
+          ((MutableRecommendedItem) topItem).setItemID(itemID);
+        }
+
+      } else {
+        userIDWritable.set(userIndex);
       }
 
       recommendations.set(recommendedItems);

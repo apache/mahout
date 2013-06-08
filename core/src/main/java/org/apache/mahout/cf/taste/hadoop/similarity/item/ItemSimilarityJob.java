@@ -184,7 +184,7 @@ public final class ItemSimilarityJob extends AbstractJob {
     protected void setup(Context ctx) {
       Configuration conf = ctx.getConfiguration();
       maxSimilarItemsPerItem = conf.getInt(MAX_SIMILARITIES_PER_ITEM, -1);
-      indexItemIDMap = TasteHadoopUtils.readItemIDIndexMap(conf.get(ITEM_ID_INDEX_PATH_STR), conf);
+      indexItemIDMap = TasteHadoopUtils.readIDIndexMap(conf.get(ITEM_ID_INDEX_PATH_STR), conf);
 
       Preconditions.checkArgument(maxSimilarItemsPerItem > 0, "maxSimilarItemsPerItem was not correctly set!");
     }
