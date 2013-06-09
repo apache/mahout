@@ -19,6 +19,7 @@ package org.apache.mahout.vectorizer.pruner;
 import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -32,7 +33,6 @@ import org.apache.mahout.math.map.OpenIntLongHashMap;
 import org.apache.mahout.vectorizer.HighDFWordsPruner;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Iterator;
 
 public class WordsPrunerReducer extends
@@ -44,7 +44,7 @@ public class WordsPrunerReducer extends
 
   @Override
   protected void reduce(WritableComparable<?> key, Iterable<VectorWritable> values, Context context)
-    throws IOException, InterruptedException {
+          throws IOException, InterruptedException {
     Iterator<VectorWritable> it = values.iterator();
     if (!it.hasNext()) {
       return;
@@ -78,11 +78,16 @@ public class WordsPrunerReducer extends
 
     maxDf = conf.getLong(HighDFWordsPruner.MAX_DF, Long.MAX_VALUE);
     minDf = conf.getLong(HighDFWordsPruner.MIN_DF, -1);
-
-    Path dictionaryFile = localFiles[0];
+    FileSystem fs = FileSystem.getLocal(conf);
+    Path dictionaryFile;
+    if (fs.exists(localFiles[0])) {
+      dictionaryFile = fs.makeQualified(localFiles[0]);
+    } else {//MAHOUT-992: this seems safe
+      dictionaryFile = fs.makeQualified(new Path(DistributedCache.getCacheFiles(conf)[0].getPath()));
+    }
     // key is feature, value is the document frequency
     for (Pair<IntWritable, LongWritable> record
-        : new SequenceFileIterable<IntWritable, LongWritable>(dictionaryFile, true, conf)) {
+            : new SequenceFileIterable<IntWritable, LongWritable>(dictionaryFile, true, conf)) {
       dictionary.put(record.getFirst().get(), record.getSecond().get());
     }
   }

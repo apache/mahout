@@ -27,6 +27,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -203,11 +204,17 @@ public class Classifier {
       if (files == null || files.length < 2) {
         throw new IOException("not enough paths in the DistributedCache");
       }
-      
+      LocalFileSystem localFs = FileSystem.getLocal(conf);
+      if (!localFs.exists(files[0])) {//MAHOUT-992: this seems safe
+        files[0] = localFs.makeQualified(new Path(DistributedCache.getCacheFiles(conf)[0].getPath()));
+      }
+
       dataset = Dataset.load(conf, files[0]);
 
       converter = new DataConverter(dataset);
-
+      if (!localFs.exists(files[1])) {//MAHOUT-992: this seems safe
+        files[1] = localFs.makeQualified(new Path(DistributedCache.getCacheFiles(conf)[1].getPath()));
+      }
       forest = DecisionForest.load(conf, files[1]);
       if (forest == null) {
         throw new InterruptedException("DecisionForest not found!");

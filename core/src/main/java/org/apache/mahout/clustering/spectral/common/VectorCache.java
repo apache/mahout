@@ -97,6 +97,7 @@ public final class VectorCache {
    */
   public static Vector load(Configuration conf) throws IOException {
     Path[] files = DistributedCache.getLocalCacheFiles(conf);
+    LocalFileSystem localFs = FileSystem.getLocal(conf);
     if (files == null || files.length < 1) {
       log.debug("getLocalCacheFiles failed, trying getCacheFiles");
       URI[] filesURIs = DistributedCache.getCacheFiles(conf);
@@ -104,20 +105,19 @@ public final class VectorCache {
         throw new IOException("Cannot read Frequency list from Distributed Cache");
       }
       if (filesURIs.length != 1) {
-        throw new IOException("Cannot read Frequency list from Distributed Cache (" + files.length + ')');
+        throw new IOException("Cannot read Frequency list from Distributed Cache (" + filesURIs.length + ')');
       }
       files = new Path[1];
       files[0] = new Path(filesURIs[0].getPath());
     } else {
       // Fallback if we are running locally.
-      LocalFileSystem localFs = FileSystem.getLocal(conf);
       if (!localFs.exists(files[0])) {
         URI[] filesURIs = DistributedCache.getCacheFiles(conf);
         if (filesURIs == null) {
           throw new IOException("Cannot read Frequency list from Distributed Cache");
         }
         if (filesURIs.length != 1) {
-          throw new IOException("Cannot read Frequency list from Distributed Cache (" + files.length + ')');
+          throw new IOException("Cannot read Frequency list from Distributed Cache (" + filesURIs.length + ')');
         }
         files[0] = new Path(filesURIs[0].getPath());
       }
@@ -126,7 +126,7 @@ public final class VectorCache {
     if (log.isInfoEnabled()) {
       log.info("Files are: {}", Arrays.toString(files));
     }
-
+    files[0] = localFs.makeQualified(files[0]);
     return load(conf, files[0]);
   }
 

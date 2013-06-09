@@ -211,7 +211,7 @@ public final class BtJob {
 
         Validate.notNull(rFiles,
                          "no RHat files in distributed cache job definition");
-
+        //TODO: this probably can be replaced w/ local fs makeQualified
         Configuration lconf = new Configuration();
         lconf.set("fs.default.name", "file:///");
 

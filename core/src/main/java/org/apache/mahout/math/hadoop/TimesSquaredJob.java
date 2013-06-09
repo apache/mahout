@@ -214,7 +214,13 @@ public final class TimesSquaredJob {
         Path[] localFiles = DistributedCache.getLocalCacheFiles(conf);
         Preconditions.checkArgument(localFiles != null && localFiles.length >= 1,
                                     "missing paths from the DistributedCache");
-        Path inputVectorPath = localFiles[0];//nocommit: is this the right pattern for use here?
+        FileSystem fs = FileSystem.getLocal(conf);
+        Path inputVectorPath;
+        if (fs.exists(localFiles[0])) {
+          inputVectorPath = fs.makeQualified(localFiles[0]);
+        } else {//MAHOUT-992: this seems safe
+          inputVectorPath = fs.makeQualified(new Path(DistributedCache.getCacheFiles(conf)[0].getPath()));
+        }
 
         SequenceFileValueIterator<VectorWritable> iterator =
             new SequenceFileValueIterator<VectorWritable>(inputVectorPath, true, conf);

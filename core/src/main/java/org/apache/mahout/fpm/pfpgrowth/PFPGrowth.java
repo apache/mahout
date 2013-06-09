@@ -106,6 +106,7 @@ public final class PFPGrowth {
       }
       fListLocalPath = new Path(filesURIs[0].getPath());
     }
+    fListLocalPath = fs.makeQualified(fListLocalPath);
     for (Pair<Text,LongWritable> record
          : new SequenceFileIterable<Text,LongWritable>(fListLocalPath, true, conf)) {
       list.add(new Pair<String,Long>(record.getFirst().toString(), record.getSecond().get()));
