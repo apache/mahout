@@ -14,6 +14,7 @@ org.apache.mahout.vectorizer.EncodedVectorsFromSequenceFiles = seq2encoded: Enco
 org.apache.mahout.text.WikipediaToSequenceFile = seqwiki : Wikipedia xml dump to sequence file
 org.apache.mahout.text.SequenceFilesFromMailArchives = seqmailarchives : Creates SequenceFile from a directory containing gzipped mail archives
 org.apache.mahout.text.SequenceFilesFromLuceneStorageDriver = lucene2seq : Generate Text SequenceFiles from a Lucene index
+org.apache.mahout.utils.ConcatenateVectorsJob = concatvectors : Concatenates 2 matrices of same cardinality into a single matrix
 
 #Math
 org.apache.mahout.math.hadoop.TransposeJob = transpose : Take the transpose of a matrix

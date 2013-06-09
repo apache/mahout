@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+  MAHOUT-884: Matrix Concatenate Utility (Lance Norskog, smarthi)
+
   MAHOUT-1250: Deprecate unused algorithms (ssc)
 
   MAHOUT-1251: Optimize MinHashMapper (ssc)
