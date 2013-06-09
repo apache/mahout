@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -135,15 +136,19 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
       }
       localFiles[0] = new Path(filesURIs[0].getPath());
     }
+
     dimension = conf.getInt(PartialVectorMerger.DIMENSION, Integer.MAX_VALUE);
     sequentialAccess = conf.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
     namedVector = conf.getBoolean(PartialVectorMerger.NAMED_VECTOR, false);
     maxNGramSize = conf.getInt(DictionaryVectorizer.MAX_NGRAMS, maxNGramSize);
-
-    Path dictionaryFile = localFiles[0];
+    if (log.isInfoEnabled()) {
+      log.info("Cache Files: " + Arrays.asList(localFiles));
+    }
+    //MAHOUT-1247
+    localFiles[0] = localFs.makeQualified(localFiles[0]);
     // key is word value is id
     for (Pair<Writable, IntWritable> record
-            : new SequenceFileIterable<Writable, IntWritable>(dictionaryFile, true, conf)) {
+            : new SequenceFileIterable<Writable, IntWritable>(localFiles[0], true, conf)) {
       dictionary.put(record.getFirst().toString(), record.getSecond().get());
     }
   }

@@ -388,7 +388,7 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
     if (parseArguments(args) == null) {
       return -1;
     }
-    String tfDirName = getOption("tfDirName");
+    String tfDirName = getOption("tfDirName", "tfDir");
     int minSupport = getInt("minSupport", 2);
     int maxNGramSize = getInt("maxNGramSize", 1);
     float minLLRValue = getFloat("minLLR", LLRReducer.DEFAULT_MIN_LLR);
