@@ -185,7 +185,7 @@ public final class LDAPrintTopics {
         }
       } finally {
         if (!printingToSystemOut) {
-          Closeables.closeQuietly(out);
+          Closeables.close(out, true);
         } else {
           out.flush();
         }

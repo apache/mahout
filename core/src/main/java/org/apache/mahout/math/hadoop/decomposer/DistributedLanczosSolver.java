@@ -233,7 +233,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
         seqWriter.append(iw, vw);
       }
     } finally {
-      Closeables.closeQuietly(seqWriter);
+      Closeables.close(seqWriter, true);
     }
   }
 

@@ -117,7 +117,7 @@ public final class Track1SVDRunner {
         }
       }
     } finally {
-      Closeables.closeQuietly(out);
+      Closeables.close(out, true);
     }
     log.info("wrote estimates to {}, done.", resultFile.getAbsolutePath());
   }

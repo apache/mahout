@@ -62,7 +62,11 @@ public class AnalyzerTransformer implements RegexTransformer {
     } catch (IOException e) {
       throw new IllegalStateException(e);
     } finally {
-      Closeables.closeQuietly(ts);
+      try {
+        Closeables.close(ts, true);
+      } catch (IOException e) {
+        //nothing
+      }
     }
     return result.toString();
   }

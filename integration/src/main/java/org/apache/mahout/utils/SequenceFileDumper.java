@@ -154,7 +154,7 @@ public final class SequenceFileDumper extends AbstractJob {
 
     } finally {
       if (shouldClose) {
-        Closeables.closeQuietly(writer);
+        Closeables.close(writer, true);
       }
     }
 

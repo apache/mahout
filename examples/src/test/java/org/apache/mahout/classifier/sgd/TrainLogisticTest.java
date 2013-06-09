@@ -83,7 +83,7 @@ public class TrainLogisticTest extends MahoutTestCase {
       OnlineLogisticRegression lrOut = lmpOut.createRegression();
       verifyModel(lmpOut, csvOut, data, lrOut, expectedValues);
     } finally {
-      Closeables.closeQuietly(in);
+      Closeables.close(in, true);
     }
 
     sw = new StringWriter();

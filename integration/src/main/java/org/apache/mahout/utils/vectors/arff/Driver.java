@@ -162,7 +162,7 @@ public final class Driver {
         writeLabelBindings(writer, arffModel, delimiter);
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
   }
 
@@ -251,7 +251,7 @@ public final class Driver {
       writeLabelBindings(dictOut, model, delimiter, jsonDictonary);
       log.info("Wrote: {} vectors", numDocs);
     } finally {
-      Closeables.closeQuietly(vectorWriter);
+      Closeables.close(vectorWriter, true);
     }
   }
   

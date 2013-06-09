@@ -211,7 +211,7 @@ public class EigenVerificationJob extends AbstractJob {
         }
       }
     } finally {
-      Closeables.closeQuietly(seqWriter);
+      Closeables.close(seqWriter, true);
     }
     cleanedEigensPath = path;
   }

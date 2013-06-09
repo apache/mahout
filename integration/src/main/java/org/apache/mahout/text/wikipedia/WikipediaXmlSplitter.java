@@ -217,7 +217,7 @@ public final class WikipediaXmlSplitter {
           try {
             chunkWriter.write(content.toString(), 0, content.length());
           } finally {
-            Closeables.closeQuietly(chunkWriter);
+            Closeables.close(chunkWriter, true);
           }
           if (filenumber >= numChunks) {
             break;

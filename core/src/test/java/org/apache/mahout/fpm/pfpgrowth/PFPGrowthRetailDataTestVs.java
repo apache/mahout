@@ -94,7 +94,7 @@ public final class PFPGrowthRetailDataTestVs extends MahoutTestCase {
       }
       
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
   }
   

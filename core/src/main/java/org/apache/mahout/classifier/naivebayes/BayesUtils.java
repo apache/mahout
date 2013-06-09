@@ -107,7 +107,7 @@ public final class BayesUtils {
         writer.append(new Text(label), new IntWritable(i++));
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
     return i;
   }

@@ -70,7 +70,7 @@ public final class UserVectorSplitterMapper extends
           }
         }
       } finally {
-        Closeables.closeQuietly(in);
+        Closeables.close(in, true);
       }
     }
   }

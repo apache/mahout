@@ -300,7 +300,7 @@ public class CanopyDriver extends AbstractJob {
         }
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
     return canopyOutputDir;
   }

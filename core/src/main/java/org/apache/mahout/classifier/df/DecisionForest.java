@@ -227,7 +227,7 @@ public class DecisionForest implements Writable {
           forest.readFields(dataInput);
         }
       } finally {
-        Closeables.closeQuietly(dataInput);
+        Closeables.close(dataInput, true);
       }
     }
 

@@ -201,7 +201,7 @@ public final class RepresentativePointsDriver extends AbstractJob {
         }
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, false);
     }
     writer = new SequenceFile.Writer(fs, conf, new Path(stateOut, "part-m-" + part++), IntWritable.class,
         VectorWritable.class);
@@ -210,7 +210,7 @@ public final class RepresentativePointsDriver extends AbstractJob {
         writer.append(new IntWritable(entry.getKey()), new VectorWritable(entry.getValue().getVector()));
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, false);
     }
   }
   

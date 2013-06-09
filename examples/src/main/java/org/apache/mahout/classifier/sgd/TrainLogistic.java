@@ -106,7 +106,7 @@ public final class TrainLogistic {
             line = in.readLine();
           }
         } finally {
-          Closeables.closeQuietly(in);
+          Closeables.close(in, true);
         }
       }
 
@@ -114,7 +114,7 @@ public final class TrainLogistic {
       try {
         lmp.saveTo(modelOutput);
       } finally {
-        Closeables.closeQuietly(modelOutput);
+        Closeables.close(modelOutput, true);
       }
 
       output.println(lmp.getNumFeatures());

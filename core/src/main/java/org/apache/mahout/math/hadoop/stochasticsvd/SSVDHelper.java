@@ -81,7 +81,7 @@ public final class SSVDHelper {
       return vw.get();
 
     } finally {
-      Closeables.closeQuietly(iter);
+      Closeables.close(iter, true);
     }
   }
 
@@ -137,7 +137,7 @@ public final class SSVDHelper {
         r = new SequenceFile.Reader(fs, firstSeqFile.getPath(), conf);
         return r.getKeyClass().asSubclass(Writable.class);
       } finally {
-        Closeables.closeQuietly(r);
+        Closeables.close(r, true);
       }
     }
     throw new IOException("Unable to open input files to determine input label type.");
@@ -248,7 +248,7 @@ public final class SSVDHelper {
       return v;
 
     } finally {
-      Closeables.closeQuietly(iter);
+      Closeables.close(iter, true);
     }
 
   }

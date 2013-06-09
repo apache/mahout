@@ -418,9 +418,9 @@ public class SplitInput extends AbstractJob {
         }
 
       } finally {
-        Closeables.closeQuietly(reader);
-        Closeables.closeQuietly(trainingWriter);
-        Closeables.closeQuietly(testWriter);
+        Closeables.close(reader, true);
+        Closeables.close(trainingWriter, false);
+        Closeables.close(testWriter, false);
       }
     } else {
       SequenceFileIterator<Writable, Writable> iterator =
@@ -456,9 +456,9 @@ public class SplitInput extends AbstractJob {
         }
 
       } finally {
-        Closeables.closeQuietly(iterator);
-        Closeables.closeQuietly(trainingWriter);
-        Closeables.closeQuietly(testWriter);
+        Closeables.close(iterator, true);
+        Closeables.close(trainingWriter, false);
+        Closeables.close(testWriter, false);
       }
     }
     log.info("file: {}, input: {} train: {}, test: {} starting at {}",
@@ -684,7 +684,7 @@ public class SplitInput extends AbstractJob {
         lineCount++;
       }
     } finally {
-      Closeables.closeQuietly(reader);
+      Closeables.close(reader, true);
     }
 
     return lineCount;

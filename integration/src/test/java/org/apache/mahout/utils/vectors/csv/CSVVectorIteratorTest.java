@@ -47,7 +47,7 @@ public class CSVVectorIteratorTest extends MahoutTestCase {
       Iterable<Vector> iter = new RandomVectorIterable(50);
       writer.write(iter);
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
     Iterator<Vector> csvIter = new CSVVectorIterator(new StringReader(sWriter.getBuffer().toString()));
     int count = 0;

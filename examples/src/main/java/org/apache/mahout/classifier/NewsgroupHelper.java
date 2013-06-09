@@ -102,7 +102,7 @@ public final class NewsgroupHelper {
         countWords(analyzer, words, reader, overallCounts);
       }
     } finally {
-      Closeables.closeQuietly(reader);
+      Closeables.close(reader, true);
     }
 
     Vector v = new RandomAccessSparseVector(FEATURES);
@@ -127,6 +127,6 @@ public final class NewsgroupHelper {
     }
     overallCounts.addAll(words);
     ts.end();
-    Closeables.closeQuietly(ts);
+    Closeables.close(ts, true);
   }
 }

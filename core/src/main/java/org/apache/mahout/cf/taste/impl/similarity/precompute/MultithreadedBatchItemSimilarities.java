@@ -106,7 +106,7 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
       }
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
 
     return output.getNumSimilaritiesProcessed();

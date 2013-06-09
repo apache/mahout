@@ -252,7 +252,7 @@ public final class MailToPrefsDriver extends AbstractJob {
       for (Pair<Writable, Writable> record
               : new SequenceFileDirIterable<Writable, Writable>(filesPattern, PathType.GLOB, null, null, true, conf)) {
         if (currentChunkSize > chunkSizeLimit) {
-          Closeables.closeQuietly(dictWriter);
+          Closeables.close(dictWriter, true);
           chunkIndex++;
 
           chunkPath = new Path(dictionaryPathBase, name + chunkIndex);
@@ -269,7 +269,7 @@ public final class MailToPrefsDriver extends AbstractJob {
       }
       maxTermDimension[0] = i;
     } finally {
-      Closeables.closeQuietly(dictWriter);
+      Closeables.close(dictWriter, true);
     }
 
     return chunkPaths;

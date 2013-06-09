@@ -103,7 +103,7 @@ public class XmlInputFormat extends TextInputFormat {
 
     @Override
     public void close() throws IOException {
-      Closeables.closeQuietly(fsin);
+      Closeables.close(fsin, true);
     }
 
     @Override

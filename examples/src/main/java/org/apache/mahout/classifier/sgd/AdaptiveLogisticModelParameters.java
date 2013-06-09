@@ -184,7 +184,7 @@ public class AdaptiveLogisticModelParameters extends LogisticModelParameters {
     try {
       return loadFromStream(input);
     } finally {
-      Closeables.closeQuietly(input);
+      Closeables.close(input, true);
     }
   }
 

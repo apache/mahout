@@ -56,7 +56,11 @@ final class ARFFIterator extends AbstractIterator<Vector> {
       throw new IllegalStateException(ioe);
     }
     if (line == null) {
-      Closeables.closeQuietly(reader);
+      try {
+        Closeables.close(reader, true);
+      } catch (IOException e) {
+        throw new IllegalStateException(e);
+      }
       return endOfData();
     }
     Vector result;

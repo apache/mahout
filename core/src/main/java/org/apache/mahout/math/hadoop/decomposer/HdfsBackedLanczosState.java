@@ -148,7 +148,7 @@ public class HdfsBackedLanczosState extends LanczosState implements Configurable
           IntWritable.class, VectorWritable.class);
       writer.append(new IntWritable(key), new VectorWritable(vector));
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
   }
 

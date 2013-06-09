@@ -68,7 +68,7 @@ public final class EntropyTest extends MahoutTestCase {
 
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
 
     // run the job

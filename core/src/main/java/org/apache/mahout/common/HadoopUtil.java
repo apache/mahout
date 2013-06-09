@@ -288,7 +288,7 @@ public final class HadoopUtil {
     try {
       out.writeInt(value);
     } finally {
-      Closeables.closeQuietly(out);
+      Closeables.close(out, true);
     }
   }
 
@@ -298,7 +298,7 @@ public final class HadoopUtil {
     try {
       return in.readInt();
     } finally {
-      Closeables.closeQuietly(in);
+      Closeables.close(in, true);
     }
   }
 }

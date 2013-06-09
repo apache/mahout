@@ -80,7 +80,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
       try {
         writer.write(aData[1]);
       } finally {
-        Closeables.closeQuietly(writer);
+        Closeables.close(writer, true);
       }
     }
   }
@@ -113,7 +113,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
         assertEquals(retrievedData, record.getSecond().toString().trim());
       }
     } finally {
-      Closeables.closeQuietly(iterator);
+      Closeables.close(iterator, true);
     }
   }
   

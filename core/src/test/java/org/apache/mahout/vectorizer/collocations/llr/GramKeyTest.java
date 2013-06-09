@@ -85,7 +85,7 @@ public final class GramKeyTest extends MahoutTestCase {
     try {
       two.write(out);
     } finally {
-      Closeables.closeQuietly(out);
+      Closeables.close(out, true);
     }
     
     byte[] b = bout.toByteArray();
@@ -96,7 +96,7 @@ public final class GramKeyTest extends MahoutTestCase {
     try {
       one.readFields(din);
     } finally {
-      Closeables.closeQuietly(din);
+      Closeables.close(din, true);
     }
 
     assertTrue(Arrays.equals(two.getBytes(), one.getBytes()));

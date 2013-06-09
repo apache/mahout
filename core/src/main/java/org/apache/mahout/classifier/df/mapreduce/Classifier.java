@@ -164,7 +164,7 @@ public class Classifier {
           }
         }
       } finally {
-        Closeables.closeQuietly(ofile);
+        Closeables.close(ofile, true);
       }
     }
     results = new double[resList.size()][2];

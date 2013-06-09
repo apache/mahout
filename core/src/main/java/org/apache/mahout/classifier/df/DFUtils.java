@@ -157,7 +157,7 @@ public final class DFUtils {
     try {
       writable.write(out);
     } finally {
-      Closeables.closeQuietly(out);
+      Closeables.close(out, true);
     }
   }
   
@@ -174,7 +174,7 @@ public final class DFUtils {
       out = path.getFileSystem(conf).create(path);
       out.write(string.getBytes(Charset.defaultCharset()));
     } finally {
-      Closeables.closeQuietly(out);
+      Closeables.close(out, false);
     }
   }
   

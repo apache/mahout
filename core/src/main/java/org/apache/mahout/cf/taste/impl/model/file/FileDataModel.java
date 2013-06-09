@@ -176,7 +176,7 @@ public class FileDataModel extends AbstractDataModel {
       iterator.next();
       firstLine = iterator.peek();
     }
-    Closeables.closeQuietly(iterator);
+    Closeables.close(iterator, true);
 
     delimiter = determineDelimiter(firstLine);
     delimiterPattern = Splitter.on(delimiter);

@@ -40,7 +40,7 @@ public final class PrintResourceOrFile {
         System.out.println(line);
       }
     } finally {
-      Closeables.closeQuietly(in);
+      Closeables.close(in, true);
     }
   }
 }

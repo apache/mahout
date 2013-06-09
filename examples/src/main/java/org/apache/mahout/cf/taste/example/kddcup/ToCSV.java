@@ -75,7 +75,7 @@ public final class ToCSV {
         }
       }
     } finally {
-      Closeables.closeQuietly(outWriter);
+      Closeables.close(outWriter, true);
     }
   }
 

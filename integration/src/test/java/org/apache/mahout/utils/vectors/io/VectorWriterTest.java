@@ -47,7 +47,7 @@ public final class VectorWriterTest extends MahoutTestCase {
     try {
       writer.write(new RandomVectorIterable(50));
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
 
     long count = HadoopUtil.countRecords(path, conf);
@@ -64,7 +64,7 @@ public final class VectorWriterTest extends MahoutTestCase {
       vectors.add(new DenseVector(new double[]{1.3, 1.5, 3.5}));
       writer.write(vectors);
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
     String buffer = strWriter.toString();
     assertNotNull(buffer);

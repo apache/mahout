@@ -325,7 +325,7 @@ public class DisplayClustering extends Frame {
         writer.append(new Text("sample_" + i++), vw);
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
   }
   

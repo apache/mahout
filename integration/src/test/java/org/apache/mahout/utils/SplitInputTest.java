@@ -85,19 +85,21 @@ public final class SplitInputTest extends MahoutTestCase {
   private void writeMultipleInputFiles() throws IOException {
     Writer writer = null;
     String currentLabel = null;
-
-    for (String[] entry : ClassifierData.DATA) {
+    try {
+     for (String[] entry : ClassifierData.DATA) {
       if (!entry[0].equals(currentLabel)) {
         currentLabel = entry[0];
-        Closeables.closeQuietly(writer);
+        Closeables.close(writer, true);
 
         writer = new BufferedWriter(new OutputStreamWriter(fs.create(new Path(tempInputDirectory, currentLabel)),
             Charsets.UTF_8));
       }
       countMap.adjustOrPutValue(currentLabel, 1, 1);
       writer.write(currentLabel + '\t' + entry[1] + '\n');
+     }
+    }finally {
+     Closeables.close(writer, true);
     }
-    Closeables.closeQuietly(writer);
   }
 
   private void writeSingleInputFile() throws IOException {
@@ -107,7 +109,7 @@ public final class SplitInputTest extends MahoutTestCase {
         writer.write(entry[0] + '\t' + entry[1] + '\n');
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
   }
 

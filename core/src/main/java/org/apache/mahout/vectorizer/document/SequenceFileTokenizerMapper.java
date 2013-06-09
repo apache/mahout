@@ -52,7 +52,7 @@ public class SequenceFileTokenizerMapper extends Mapper<Text, Text, Text, String
       }
     }
     stream.end();
-    Closeables.closeQuietly(stream);
+    Closeables.close(stream, true);
     context.write(key, document);
   }
 

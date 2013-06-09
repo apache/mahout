@@ -76,7 +76,7 @@ public final class VectorCache {
     try {
       writer.append(key, new VectorWritable(vector));
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
 
     if (deleteOnExit) {
@@ -140,7 +140,7 @@ public final class VectorCache {
     try {
       return iterator.next().get();
     } finally {
-      Closeables.closeQuietly(iterator);
+      Closeables.close(iterator, true);
     }
   }
 }

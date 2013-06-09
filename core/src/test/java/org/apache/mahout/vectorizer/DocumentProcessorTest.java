@@ -57,7 +57,7 @@ public class DocumentProcessorTest extends MahoutTestCase {
       String text2 = "and another one";
       writer.append(new Text(documentId2), new Text(text2));
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
 
     DocumentProcessor.tokenizeDocuments(input, StandardAnalyzer.class, output, configuration);

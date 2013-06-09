@@ -65,7 +65,7 @@ public final class ClusteringTestUtils {
         writer.append(intWritable ? new IntWritable(recNum++) : new LongWritable(recNum++), point);
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
   }
 

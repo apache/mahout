@@ -89,7 +89,7 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
 
         sf.end();
       } finally {
-        Closeables.closeQuietly(sf);
+        Closeables.close(sf, true);
       }
     } else {
       for (String term : value.getEntries()) {
@@ -112,7 +112,7 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
       VectorWritable vectorWritable = new VectorWritable(vector);
       context.write(key, vectorWritable);
     } else {
-      context.getCounter("TFParticalVectorReducer", "emptyVectorCount").increment(1);
+      context.getCounter("TFPartialVectorReducer", "emptyVectorCount").increment(1);
     }
   }
 

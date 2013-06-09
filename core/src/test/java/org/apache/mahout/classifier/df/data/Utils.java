@@ -243,7 +243,7 @@ public final class Utils {
         output.write('\n');
       }
     } finally {
-      Closeables.closeQuietly(output);
+      Closeables.close(output, false);
     }
   
   }

@@ -212,7 +212,7 @@ public final class MahoutDriver {
         properties.load(propsStream);
         return properties;
       } finally {
-        Closeables.closeQuietly(propsStream);
+        Closeables.close(propsStream, true);
       }
     }
     return null;

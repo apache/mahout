@@ -129,7 +129,11 @@ public final class DataFileIterator
   @Override
   public void close() {
     endOfData();
-    Closeables.closeQuietly(lineIterator);
+    try {
+      Closeables.close(lineIterator, true);
+    } catch (IOException e) {
+      //nothing
+    }
   }
 
   /**

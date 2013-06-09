@@ -223,7 +223,7 @@ public final class TFIDFConverter {
                                                                    conf)) {
 
         if (currentChunkSize > chunkSizeLimit) {
-          Closeables.closeQuietly(freqWriter);
+          Closeables.close(freqWriter, true);
           chunkIndex++;
 
           chunkPath = new Path(dictionaryPathBase, FREQUENCY_FILE + chunkIndex);
@@ -249,7 +249,7 @@ public final class TFIDFConverter {
       Long[] counts = {featureCount, vectorCount};
       return new Pair<Long[], List<Path>>(counts, chunkPaths);
     } finally {
-      Closeables.closeQuietly(freqWriter);
+      Closeables.close(freqWriter, true);
     }
   }
 

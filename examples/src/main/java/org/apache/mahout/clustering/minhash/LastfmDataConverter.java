@@ -139,7 +139,7 @@ public final class LastfmDataConverter {
       msg = usedMemory() + "Converting data to internal vector format: ";
       System.out.print('\r' + msg + percentDone + "% Completed\n");
     } finally {
-      Closeables.closeQuietly(br);
+      Closeables.close(br, true);
     }
     return itemFeaturesMap;
   }
@@ -183,7 +183,7 @@ public final class LastfmDataConverter {
         }
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
     return true;
   }

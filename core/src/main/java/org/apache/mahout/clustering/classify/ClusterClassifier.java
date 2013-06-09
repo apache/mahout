@@ -197,7 +197,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
         Writable key = new IntWritable(i);
         writer.append(key, cw);
       } finally {
-        Closeables.closeQuietly(writer);
+        Closeables.close(writer, true);
       }
     }
   }

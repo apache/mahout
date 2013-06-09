@@ -142,7 +142,7 @@ public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCa
         writer.write('\n');
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
   }
 }

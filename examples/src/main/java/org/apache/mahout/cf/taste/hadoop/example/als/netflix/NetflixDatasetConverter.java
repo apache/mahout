@@ -98,12 +98,12 @@ public final class NetflixDatasetConverter {
             }
           }
         } finally {
-          Closeables.closeQuietly(lines);
+          Closeables.close(lines, true);
         }
       }
       log.info("{} ratings processed. done.", ratingsProcessed);
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
 
     log.info("Reading probes...");
@@ -142,7 +142,7 @@ public final class NetflixDatasetConverter {
       }
       log.info("{} ratings processed. done.", ratingsProcessed);
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
   }
 

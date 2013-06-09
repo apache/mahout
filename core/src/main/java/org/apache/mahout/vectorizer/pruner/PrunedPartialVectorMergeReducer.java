@@ -47,12 +47,8 @@ public class PrunedPartialVectorMergeReducer extends
       vector.assign(value.get(), Functions.PLUS);
     }
 
-    if (normPower != PartialVectorMerger.NO_NORMALIZING) {
-      if (logNormalize) {
-        vector = vector.logNormalize(normPower);
-      } else {
-        vector = vector.normalize(normPower);
-      }
+    if (vector != null && normPower != PartialVectorMerger.NO_NORMALIZING) {
+      vector = logNormalize ? vector.logNormalize(normPower) : vector.normalize(normPower);
     }
 
     VectorWritable vectorWritable = new VectorWritable(vector);

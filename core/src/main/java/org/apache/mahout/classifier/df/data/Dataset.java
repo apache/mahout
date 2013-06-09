@@ -328,7 +328,7 @@ public class Dataset {
     try {
       input.readFully(buff);
     } finally {
-      Closeables.closeQuietly(input);
+      Closeables.close(input, true);
     }
     String json = new String(buff, Charset.defaultCharset());
     return fromJSON(json);

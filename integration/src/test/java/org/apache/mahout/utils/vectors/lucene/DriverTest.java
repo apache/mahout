@@ -126,7 +126,7 @@ public class DriverTest extends MahoutTestCase {
         indexTerms.add(term.toString());
       }
     } finally {
-      Closeables.closeQuietly(reader);
+      Closeables.close(reader, true);
     }
 
     Set<String> expectedIndexTerms = Sets.newHashSet("all", "bind", "bring", "darkness", "find", "one", "ring", "rule");

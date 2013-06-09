@@ -45,7 +45,7 @@ public final class ModelSerializerTest extends MahoutTestCase {
     try {
       PolymorphicWritable.write(dos, m);
     } finally {
-      Closeables.closeQuietly(dos);
+      Closeables.close(dos, true);
     }
     return PolymorphicWritable.read(new DataInputStream(new ByteArrayInputStream(buf.toByteArray())), clazz);
   }

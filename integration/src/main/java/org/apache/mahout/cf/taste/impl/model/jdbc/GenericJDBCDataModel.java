@@ -136,7 +136,7 @@ public final class GenericJDBCDataModel extends AbstractJDBCDataModel {
         props.load(is);
         return props;
       } finally {
-        Closeables.closeQuietly(is);
+        Closeables.close(is, true);
       }
     } catch (IOException ioe) {
       throw new TasteException(ioe);

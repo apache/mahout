@@ -142,7 +142,7 @@ public final class Vectors {
       vectorWritable.setWritesLaxPrecision(laxPrecision);
       vectorWritable.write(out);
     } finally {
-      Closeables.closeQuietly(out);
+      Closeables.close(out, true);
     }
   }
 
@@ -152,7 +152,7 @@ public final class Vectors {
     try {
       return readAsIntMap(in);
     } finally {
-      Closeables.closeQuietly(in);
+      Closeables.close(in, true);
     }
   }
 
@@ -184,7 +184,7 @@ public final class Vectors {
     try {
       return VectorWritable.readVector(in);
     } finally {
-      Closeables.closeQuietly(in);
+      Closeables.close(in, true);
     }
   }
 }

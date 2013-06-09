@@ -78,7 +78,7 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
           new Text(SPACE_NON_ALPHA_PATTERN.matcher(catMatch).replaceAll("_")),
           new Text(contents.toString()));
       stream.end();
-      Closeables.closeQuietly(stream);
+      Closeables.close(stream, true);
     }
   }
 

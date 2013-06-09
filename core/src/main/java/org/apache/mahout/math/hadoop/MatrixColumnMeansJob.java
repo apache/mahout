@@ -116,7 +116,7 @@ public final class MatrixColumnMeansJob {
                                .newInstance(0);
         }
       } finally {
-        Closeables.closeQuietly(iterator);
+        Closeables.close(iterator, true);
       }
     } catch (IOException ioe) {
       throw ioe;

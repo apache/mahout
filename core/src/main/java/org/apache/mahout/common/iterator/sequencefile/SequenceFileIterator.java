@@ -72,10 +72,11 @@ public final class SequenceFileIterator<K extends Writable,V extends Writable>
   }
 
   @Override
-  public void close() {
+  public void close() throws IOException {
     key = null;
     value = null;
-    Closeables.closeQuietly(reader);
+    Closeables.close(reader, true);
+
     endOfData();
   }
 
@@ -100,7 +101,11 @@ public final class SequenceFileIterator<K extends Writable,V extends Writable>
       }
       return new Pair<K,V>(key, value);
     } catch (IOException ioe) {
-      close();
+      try {
+        close();
+      } catch (IOException e) {
+        //throwing next anyway
+      }
       throw new IllegalStateException(ioe);
     }
   }

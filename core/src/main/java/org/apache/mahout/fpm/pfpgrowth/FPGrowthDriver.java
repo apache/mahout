@@ -179,9 +179,9 @@ public final class FPGrowthDriver extends AbstractJob {
                 new StringOutputConverter(new SequenceFileOutputCollector<Text, TopKStringPatterns>(writer)),
                 new ContextStatusUpdater(null));
       } finally {
-        Closeables.closeQuietly(writer);
-        Closeables.closeQuietly(inputStream);
-        Closeables.closeQuietly(inputStreamAgain);
+        Closeables.close(writer, true);
+        Closeables.close(inputStream, true);
+        Closeables.close(inputStreamAgain, true);
       }
     } else {
       FPGrowth<String> fp = new FPGrowth<String>();
@@ -201,9 +201,9 @@ public final class FPGrowthDriver extends AbstractJob {
                 new StringOutputConverter(new SequenceFileOutputCollector<Text, TopKStringPatterns>(writer)),
                 new ContextStatusUpdater(null));
       } finally {
-        Closeables.closeQuietly(writer);
-        Closeables.closeQuietly(inputStream);
-        Closeables.closeQuietly(inputStreamAgain);
+        Closeables.close(writer, true);
+        Closeables.close(inputStream, true);
+        Closeables.close(inputStreamAgain, true);
       }
     }
 

@@ -233,7 +233,7 @@ public final class DictionaryVectorizer implements Vectorizer {
       for (Pair<Writable,Writable> record
            : new SequenceFileDirIterable<Writable,Writable>(filesPattern, PathType.GLOB, null, null, true, conf)) {
         if (currentChunkSize > chunkSizeLimit) {
-          Closeables.closeQuietly(dictWriter);
+          Closeables.close(dictWriter, true);
           chunkIndex++;
 
           chunkPath = new Path(dictionaryPathBase, DICTIONARY_FILE + chunkIndex);
@@ -250,7 +250,7 @@ public final class DictionaryVectorizer implements Vectorizer {
       }
       maxTermDimension[0] = i;
     } finally {
-      Closeables.closeQuietly(dictWriter);
+      Closeables.close(dictWriter, true);
     }
     
     return chunkPaths;

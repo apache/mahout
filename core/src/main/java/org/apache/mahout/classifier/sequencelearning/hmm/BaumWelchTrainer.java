@@ -121,7 +121,7 @@ public final class BaumWelchTrainer {
       try {
         LossyHmmSerializer.serialize(trainedModel, stream);
       } finally {
-        Closeables.closeQuietly(stream);
+        Closeables.close(stream, true);
       }
 
       //printing tranied model

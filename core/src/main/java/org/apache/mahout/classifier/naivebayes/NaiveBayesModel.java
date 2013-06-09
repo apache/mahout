@@ -117,7 +117,7 @@ public class NaiveBayesModel {
         weightsPerLabelAndFeature.assignRow(label, VectorWritable.readVector(in));
       }
     } finally {
-      Closeables.closeQuietly(in);
+      Closeables.close(in, true);
     }
     NaiveBayesModel model = new NaiveBayesModel(weightsPerLabelAndFeature, weightsPerFeature, weightsPerLabel,
         perLabelThetaNormalizer, alphaI);
@@ -137,7 +137,7 @@ public class NaiveBayesModel {
         VectorWritable.writeVector(out, weightsPerLabelAndFeature.viewRow(row));
       }
     } finally {
-      Closeables.closeQuietly(out);
+      Closeables.close(out, true);
     }
   }
   

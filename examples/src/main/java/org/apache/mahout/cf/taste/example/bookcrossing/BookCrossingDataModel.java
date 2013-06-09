@@ -86,7 +86,7 @@ public final class BookCrossingDataModel extends FileDataModel {
       resultFile.delete();
       throw ioe;
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
     return resultFile;
   }

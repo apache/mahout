@@ -63,7 +63,7 @@ public class EncodedVectorsFromSequenceFilesTest extends MahoutTestCase {
         writer.append(new Text("Document::ID::" + i), new Text(gen.getRandomDocument()));
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
   }
   

@@ -69,7 +69,7 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
         writer.append(new Text("Document::ID::" + i), new Text(gen.getRandomDocument()));
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
   }
   

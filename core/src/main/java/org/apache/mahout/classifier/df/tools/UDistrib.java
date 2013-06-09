@@ -188,7 +188,7 @@ public final class UDistrib {
     // close all the files.
     scanner.close();
     for (FSDataOutputStream file : files) {
-      Closeables.closeQuietly(file);
+      Closeables.close(file, true);
     }
     
     // merge all output files

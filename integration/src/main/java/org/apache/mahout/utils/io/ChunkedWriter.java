@@ -66,7 +66,7 @@ public final class ChunkedWriter implements Closeable {
   /** Writes a new key-value pair, creating a new sequence file if necessary.*/
   public void write(String key, String value) throws IOException {
     if (currentChunkSize > maxChunkSizeInBytes) {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, false);
       currentChunkID++;
       writer = new SequenceFile.Writer(fs, conf, getPath(currentChunkID), Text.class, Text.class);
       currentChunkSize = 0;
@@ -79,8 +79,8 @@ public final class ChunkedWriter implements Closeable {
   }
 
   @Override
-  public void close() {
-    Closeables.closeQuietly(writer);
+  public void close() throws IOException {
+    Closeables.close(writer, false);
   }
 }
 

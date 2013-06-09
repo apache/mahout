@@ -115,7 +115,7 @@ public class LogisticModelParameters implements Writable {
     try {
       return loadFrom(input);
     } finally {
-      Closeables.closeQuietly(input);
+      Closeables.close(input, true);
     }
   }
 

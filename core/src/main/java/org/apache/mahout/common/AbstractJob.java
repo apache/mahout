@@ -457,7 +457,7 @@ public abstract class AbstractJob extends Configured implements Tool {
       return vectorWritable.get().size();
 
     } finally {
-      Closeables.closeQuietly(reader);
+      Closeables.close(reader, true);
     }
   }
 

@@ -45,7 +45,7 @@ public final class InformationGainTest extends MahoutTestCase {
         writer.append(new Text(keys[i]), new Text(values[i]));
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
 
     // run the job

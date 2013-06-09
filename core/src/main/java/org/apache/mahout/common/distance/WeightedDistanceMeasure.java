@@ -77,7 +77,7 @@ public abstract class WeightedDistanceMeasure implements DistanceMeasure {
         try {
           weights.readFields(in);
         } finally {
-          Closeables.closeQuietly(in);
+          Closeables.close(in, true);
         }
         this.weights = weights.get();
       }

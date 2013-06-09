@@ -209,7 +209,7 @@ public final class ClusterIterator {
       while (iterator.hasNext()) {
         ClusterWritable value = iterator.next();
         if (!value.getValue().isConverged()) {
-          Closeables.closeQuietly(iterator);
+          Closeables.close(iterator, true);
           return false;
         }
       }

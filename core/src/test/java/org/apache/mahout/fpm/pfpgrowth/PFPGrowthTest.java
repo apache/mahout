@@ -74,7 +74,7 @@ public final class PFPGrowthTest extends MahoutTestCase {
         writer.write("\n");
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
     
   }

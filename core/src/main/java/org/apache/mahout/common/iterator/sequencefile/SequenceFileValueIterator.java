@@ -61,9 +61,9 @@ public final class SequenceFileValueIterator<V extends Writable> extends Abstrac
   }
 
   @Override
-  public void close() {
+  public void close() throws IOException {
     value = null;
-    Closeables.closeQuietly(reader);
+    Closeables.close(reader, true);
     endOfData();
   }
 
@@ -80,7 +80,11 @@ public final class SequenceFileValueIterator<V extends Writable> extends Abstrac
       }
       return value;
     } catch (IOException ioe) {
-      close();
+      try {
+        close();
+      } catch (IOException e) {
+        //throw the original exception next
+      }
       throw new IllegalStateException(ioe);
     }
   }

@@ -140,7 +140,7 @@ public class ClusterLabels {
         }
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
   }
 
@@ -231,7 +231,7 @@ public class ClusterLabels {
 
     Collections.sort(clusteredTermInfo);
     // Cleanup
-    Closeables.closeQuietly(reader);
+    Closeables.close(reader, true);
     termEntryMap.clear();
 
     return clusteredTermInfo.subList(0, Math.min(clusteredTermInfo.size(), maxLabels));

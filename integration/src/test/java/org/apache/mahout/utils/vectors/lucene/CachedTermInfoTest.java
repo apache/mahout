@@ -92,7 +92,7 @@ public class CachedTermInfoTest extends MahoutTestCase {
         writer.addDocument(doc);
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
     return directory;
   }

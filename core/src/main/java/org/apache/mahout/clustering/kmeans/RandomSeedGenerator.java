@@ -123,7 +123,7 @@ public final class RandomSeedGenerator {
         }
         log.info("Wrote {} Klusters to {}", k, outFile);
       } finally {
-        Closeables.closeQuietly(writer);
+        Closeables.close(writer, true);
       }
     }
     

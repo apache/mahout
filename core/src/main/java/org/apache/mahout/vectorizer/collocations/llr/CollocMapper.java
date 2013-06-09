@@ -165,7 +165,7 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
       context.getCounter(Count.NGRAM_TOTAL).increment(count);
       sf.end();
     } finally {
-      Closeables.closeQuietly(sf);
+      Closeables.close(sf, true);
     }
   }
 

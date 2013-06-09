@@ -193,7 +193,7 @@ public final class TestMapReduce extends MahoutTestCase {
     try {
       inverseCovarianceMatrix.write(out);
     } finally {
-      Closeables.closeQuietly(out);
+      Closeables.close(out, true);
     }
     
     Path meanVectorFile = new Path(getTestTempDirPath("mahalanobis"), "MahalanobisDistanceMeasureMeanVectorFile");
@@ -204,7 +204,7 @@ public final class TestMapReduce extends MahoutTestCase {
     try {
       meanVectorWritable.write(out);
     } finally {
-      Closeables.closeQuietly(out);
+      Closeables.close(out, true);
     }
     
     conf.set("MahalanobisDistanceMeasure.maxtrixClass", MatrixWritable.class.getName());
@@ -256,7 +256,7 @@ public final class TestMapReduce extends MahoutTestCase {
     try {
       inverseCovarianceMatrix.write(out);
     } finally {
-      Closeables.closeQuietly(out);
+      Closeables.close(out, true);
     }
     
     Path meanVectorFile = new Path(getTestTempDirPath("mahalanobis"), "MahalanobisDistanceMeasureMeanVectorFile");
@@ -267,7 +267,7 @@ public final class TestMapReduce extends MahoutTestCase {
     try {
       meanVectorWritable.write(out);
     } finally {
-      Closeables.closeQuietly(out);
+      Closeables.close(out, true);
     }
     
     conf.set("MahalanobisDistanceMeasure.maxtrixClass", MatrixWritable.class.getName());

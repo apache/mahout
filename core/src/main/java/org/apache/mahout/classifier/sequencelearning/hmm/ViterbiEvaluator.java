@@ -87,7 +87,7 @@ public final class ViterbiEvaluator {
       try {
         model = LossyHmmSerializer.deserialize(modelStream);
       } finally {
-        Closeables.closeQuietly(modelStream);
+        Closeables.close(modelStream, true);
       }
 
       //reading observations
@@ -117,7 +117,7 @@ public final class ViterbiEvaluator {
           writer.print(' ');
         }
       } finally {
-        Closeables.closeQuietly(writer);
+        Closeables.close(writer, true);
       }
 
       if (computeLikelihood) {

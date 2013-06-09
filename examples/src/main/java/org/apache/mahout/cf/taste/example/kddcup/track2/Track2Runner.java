@@ -94,7 +94,7 @@ public final class Track2Runner {
         out.write(result.getResultBytes());
       }
     } finally {
-      Closeables.closeQuietly(out);
+      Closeables.close(out, true);
     }
 
     end = System.currentTimeMillis();

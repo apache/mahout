@@ -189,7 +189,7 @@ public final class MathHelper {
         writer.append(new IntWritable(n), new VectorWritable(v));
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
   }
 

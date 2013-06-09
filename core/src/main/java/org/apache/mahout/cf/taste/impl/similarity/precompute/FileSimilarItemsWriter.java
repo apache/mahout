@@ -62,6 +62,6 @@ public class FileSimilarItemsWriter implements SimilarItemsWriter {
 
   @Override
   public void close() throws IOException {
-    Closeables.closeQuietly(writer);
+    Closeables.close(writer, true);
   }
 }

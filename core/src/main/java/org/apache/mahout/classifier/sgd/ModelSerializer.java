@@ -41,7 +41,7 @@ public final class ModelSerializer {
     try {
       PolymorphicWritable.write(out, model);
     } finally {
-      Closeables.closeQuietly(out);
+      Closeables.close(out, true);
     }
   }
 
@@ -50,7 +50,7 @@ public final class ModelSerializer {
     try {
       PolymorphicWritable.write(out, model);
     } finally {
-      Closeables.closeQuietly(out);
+      Closeables.close(out, true);
     }
   }
 
@@ -59,7 +59,7 @@ public final class ModelSerializer {
     try {
       PolymorphicWritable.write(out, model);
     } finally {
-      Closeables.closeQuietly(out);
+      Closeables.close(out, true);
     }
   }
 
@@ -68,7 +68,7 @@ public final class ModelSerializer {
     try {
       return PolymorphicWritable.read(dataIn, clazz);
     } finally {
-      Closeables.closeQuietly(in);
+      Closeables.close(in, true);
     }
   }
 

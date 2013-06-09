@@ -63,7 +63,7 @@ public class FilePersistenceStrategy implements PersistenceStrategy {
       in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
       return readBinary(in);
     } finally {
-      Closeables.closeQuietly(in);
+      Closeables.close(in, true);
     }
   }
 
@@ -75,7 +75,7 @@ public class FilePersistenceStrategy implements PersistenceStrategy {
       out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
       writeBinary(factorization, out);
     } finally {
-      Closeables.closeQuietly(out);
+      Closeables.close(out, true);
     }
   }
 

@@ -349,7 +349,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
       assertTrue("center "+c+" not found", findAndRemove(c, refCenters, EPSILON));
       assertFalse("more to come", reader.next(key, clusterWritable));
     } finally {
-      Closeables.closeQuietly(reader);
+      Closeables.close(reader, true);
     }
   }
 
@@ -406,7 +406,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
       assertTrue("center "+c+" not found", findAndRemove(c, refCenters, EPSILON));
       assertFalse("more to come", reader.next(key, clusterWritable));
     } finally {
-      Closeables.closeQuietly(reader);
+      Closeables.close(reader, true);
     }
   }
 

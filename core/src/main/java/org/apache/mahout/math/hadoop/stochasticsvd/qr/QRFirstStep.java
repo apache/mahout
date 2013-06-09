@@ -239,7 +239,7 @@ public class QRFirstStep implements Closeable, OutputCollector<Writable, Vector>
         flushSolver();
         assert tempQw != null;
         closeables.remove(tempQw);
-        Closeables.closeQuietly(tempQw);
+        Closeables.close(tempQw, true);
       }
       flushQBlocks();
 

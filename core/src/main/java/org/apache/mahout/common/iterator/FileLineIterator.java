@@ -112,7 +112,11 @@ public final class FileLineIterator extends AbstractIterator<String> implements 
     try {
       line = reader.readLine();
     } catch (IOException ioe) {
-      close();
+      try {
+        close();
+      } catch (IOException e) {
+        //we are throwing here anyway, so do nothing
+      }
       throw new IllegalStateException(ioe);
     }
     return line == null ? endOfData() : line;
@@ -128,14 +132,18 @@ public final class FileLineIterator extends AbstractIterator<String> implements 
         }
       }
     } catch (IOException ioe) {
-      close();
+      try {
+        close();
+      } catch (IOException e) {
+        throw new IllegalStateException(e);
+      }
     }
   }
   
   @Override
-  public void close() {
+  public void close() throws IOException {
     endOfData();
-    Closeables.closeQuietly(reader);
+    Closeables.close(reader, true);
   }
   
 }

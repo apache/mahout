@@ -307,7 +307,7 @@ public class TestForest extends Configured implements Tool {
 
       scanner.close();
     } finally {
-      Closeables.closeQuietly(input);
+      Closeables.close(input, true);
     }
   }
 

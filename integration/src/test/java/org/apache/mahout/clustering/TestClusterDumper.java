@@ -121,7 +121,7 @@ public final class TestClusterDumper extends MahoutTestCase {
         writer.addDocument(doc);
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
     
     IndexReader reader = DirectoryReader.open(directory);
@@ -330,7 +330,7 @@ public final class TestClusterDumper extends MahoutTestCase {
         writer.append(key, value);
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
     // now run the Canopy job to prime kMeans canopies
     CanopyDriver.run(conf, svdData, output, measure, 8, 4, false, 0.0, true);

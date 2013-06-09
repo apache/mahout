@@ -112,7 +112,7 @@ public class FactorizationEvaluator extends AbstractJob {
       writer = new BufferedWriter(new OutputStreamWriter(outputStream, Charsets.UTF_8));
       writer.write(String.valueOf(rmse));
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
 
     return 0;

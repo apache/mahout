@@ -116,7 +116,7 @@ public final class MatrixWritableTest extends MahoutTestCase {
 		try {
 			toWrite.write(dos);
 		} finally {
-			Closeables.closeQuietly(dos);
+			Closeables.close(dos, true);
 		}
 
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
@@ -124,7 +124,7 @@ public final class MatrixWritableTest extends MahoutTestCase {
 		try {
 			toRead.readFields(dis);
 		} finally {
-			Closeables.closeQuietly(dis);
+			Closeables.close(dis, true);
 		}
 	}
 

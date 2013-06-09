@@ -71,7 +71,7 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
         log.info("Parsed {} messages from {} in time: {}", cnt, options.getInput().getAbsolutePath(), finish - start);
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
   }
 

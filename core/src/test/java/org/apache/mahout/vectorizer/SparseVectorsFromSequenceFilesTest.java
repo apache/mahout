@@ -58,7 +58,7 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
         writer.append(new Text("Document::ID::" + i), new Text(gen.getRandomDocument()));
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
   }
 
@@ -102,7 +102,7 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
         writer.append(new Text("Document::ID::" + i), new Text(docs[i]));
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
     Path outPath = runTest(false, false, false, 2, docs.length);
     Path tfidfVectors = new Path(outPath, "tfidf-vectors");
@@ -139,7 +139,7 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
         writer.append(new Text("Document::ID::" + i), new Text(docs[i]));
       }
     } finally {
-      Closeables.closeQuietly(writer);
+      Closeables.close(writer, true);
     }
     Path outPath = runTest(true, false, false, 2, docs.length);
     Path tfVectors = new Path(outPath, "tf-vectors");

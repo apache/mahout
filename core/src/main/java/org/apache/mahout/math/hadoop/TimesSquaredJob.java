@@ -189,7 +189,7 @@ public final class TimesSquaredJob {
     try {
       return iterator.next().get();
     } finally {
-      Closeables.closeQuietly(iterator);
+      Closeables.close(iterator, true);
     }
   }
 
@@ -221,7 +221,7 @@ public final class TimesSquaredJob {
         try {
           inputVector = iterator.next().get();
         } finally {
-          Closeables.closeQuietly(iterator);
+          Closeables.close(iterator, true);
         }
 
         int outDim = conf.getInt(OUTPUT_VECTOR_DIMENSION, Integer.MAX_VALUE);
