@@ -56,8 +56,7 @@ public final class UDistrib {
   
   private static final Logger log = LoggerFactory.getLogger(UDistrib.class);
   
-  private UDistrib() {
-  }
+  private UDistrib() {}
   
   /**
    * Launch the uniform distribution tool. Requires the following command line arguments:<br>
@@ -161,12 +160,11 @@ public final class UDistrib {
     FSDataInputStream input = ifs.open(dataPath);
     Scanner scanner = new Scanner(input, "UTF-8");
     DataConverter converter = new DataConverter(dataset);
-    int nbInstances = dataset.nbInstances();
     
     int id = 0;
     while (scanner.hasNextLine()) {
       if (id % 1000 == 0) {
-        log.info("progress : {} / {}", id, nbInstances);
+        log.info("progress : {}", id);
       }
       
       String line = scanner.nextLine();

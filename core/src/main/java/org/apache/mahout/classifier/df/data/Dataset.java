@@ -18,26 +18,28 @@
 package org.apache.mahout.classifier.df.data;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableUtils;
-import org.apache.mahout.classifier.df.DFUtils;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 
-import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Contains informations about the attributes.
  */
-public class Dataset implements Writable {
+public class Dataset {
 
   /**
    * Attributes type
@@ -63,6 +65,19 @@ public class Dataset implements Writable {
     public boolean isIgnored() {
       return this == IGNORED;
     }
+    
+    private static Attribute fromString(String from) {
+      
+      Attribute toReturn = LABEL;
+      if(NUMERICAL.toString().equalsIgnoreCase(from)) {
+        toReturn = NUMERICAL;
+      } else if (CATEGORICAL.toString().equalsIgnoreCase(from)) {
+        toReturn = CATEGORICAL;
+      } else if (IGNORED.toString().equalsIgnoreCase(from)) {
+        toReturn = IGNORED;
+      }
+      return toReturn;
+    }
   }
 
   private Attribute[] attributes;
@@ -86,8 +101,16 @@ public class Dataset implements Writable {
    * number of instances in the dataset
    */
   private int nbInstances;
+  
+  /** JSON serial/de-serial-izer */
+  private static final ObjectMapper objectMapper = new ObjectMapper();
 
-  private Dataset() {
+  // Some literals for JSON representation
+  final static String TYPE = "type";
+  final static String VALUES = "values";
+  final static String LABEL = "label";
+
+  protected Dataset() {
   }
 
   /**
@@ -161,9 +184,9 @@ public class Dataset implements Writable {
   public double getLabel(Instance instance) {
     return instance.get(getLabelId());
   }
-
-  public int nbInstances() {
-    return nbInstances;
+  
+  public Attribute getAttribute(int attr) {
+	  return attributes[attr];
   }
 
   /**
@@ -190,11 +213,15 @@ public class Dataset implements Writable {
     }
     return values[labelId][(int) code];
   }
+  
+  public String toString() {
+	  return "attributes="+Arrays.toString(attributes);
+  }
 
   /**
-   * Converts a token to its corresponding int code for a given attribute
+   * Converts a token to its corresponding integer code for a given attribute
    *
-   * @param attr attribute's index
+   * @param attr attribute index
    */
   public int valueOf(int attr, String token) {
     Preconditions.checkArgument(!isNumerical(attr), "Only for CATEGORICAL attributes");
@@ -205,7 +232,6 @@ public class Dataset implements Writable {
   public int[] getIgnored() {
     return ignored;
   }
-
 
   /**
    * @return number of attributes that are not IGNORED
@@ -294,63 +320,110 @@ public class Dataset implements Writable {
    * @throws java.io.IOException
    */
   public static Dataset load(Configuration conf, Path path) throws IOException {
+
     FileSystem fs = path.getFileSystem(conf);
+    long bytesToRead = fs.getFileStatus(path).getLen();
+    byte[] buff = new byte[new Long(bytesToRead).intValue()];
     FSDataInputStream input = fs.open(path);
     try {
-      return read(input);
+      input.readFully(buff);
     } finally {
       Closeables.closeQuietly(input);
     }
+    String json = new String(buff, Charset.defaultCharset());
+    return fromJSON(json);
+  }
+  
+
+  /**
+   * Serialize this instance to JSON
+   * @return some JSON
+   */
+  public String toJSON() {
+
+    List<Map<String, Object>> toWrite = Lists.newLinkedList();
+    // attributes does not include ignored columns and it does include the class label
+    int ignoredCount = 0;
+    for (int i = 0; i < attributes.length + ignored.length; i++) {
+      Map<String, Object> attribute = null;
+      int attributesIndex = i - ignoredCount;
+      if (ignoredCount < ignored.length && i == ignored[ignoredCount]) {
+        // fill in ignored atttribute
+        attribute = getMap(Attribute.IGNORED, null, false);
+        ignoredCount++;
+      } else if (attributesIndex == labelId) {
+        // fill in the label
+        attribute = getMap(attributes[attributesIndex], values[attributesIndex], true);
+      } else  {
+        // normal attribute
+        attribute = getMap(attributes[attributesIndex], values[attributesIndex], false);
+      }
+      toWrite.add(attribute);
+    }
+    try {
+      return objectMapper.writeValueAsString(toWrite);
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
+    }
   }
 
-  public static Dataset read(DataInput in) throws IOException {
-    Dataset dataset = new Dataset();
+  /**
+   * De-serialize an instance from a string
+   * @param json From which an instance is created
+   * @return A shinny new Dataset
+   */
+  public static Dataset fromJSON(String json) {
 
-    dataset.readFields(in);
+    Dataset dataset = new Dataset();
+    List<Map<String, Object>> fromJSON;
+    try {
+       fromJSON = objectMapper.readValue(json, new TypeReference<List<Map<String, Object>>>() {});
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
+    }
+    List<Attribute> attributes = Lists.newLinkedList();
+    List<Integer> ignored = Lists.newLinkedList();
+    String[][] nominalValues = new String[fromJSON.size()][];
+    for (int i = 0; i < fromJSON.size(); i++) {
+      Map<String, Object> attribute = fromJSON.get(i);
+      if(Attribute.fromString((String) attribute.get(TYPE)) == Attribute.IGNORED) {
+        ignored.add(i);
+      } else {
+        Attribute asAttribute = Attribute.fromString((String) attribute.get(TYPE));
+        attributes.add(asAttribute);
+        if((Boolean) attribute.get(LABEL)) {
+          dataset.labelId = i - ignored.size();
+        }
+        if(attribute.get(VALUES) != null) {
+          List get = (List) attribute.get(VALUES);
+          String[] array = (String[]) get.toArray(new String[]{});
+          nominalValues[i] = array;
+        }
+      }
+    }
+    dataset.attributes = attributes.toArray(new Attribute[]{});
+    dataset.ignored = new int[ignored.size()];
+    dataset.values = nominalValues;
+    for(int i = 0; i < dataset.ignored.length; i++) {
+      dataset.ignored[i] = ignored.get(i);
+    }
     return dataset;
   }
+  
+  /**
+   * Generate a map to describe an attribute
+   * @param type The type
+   * @param values
+   * @param isLabel
+   * @return 
+   */
+  private Map<String, Object> getMap(Attribute type, String[] values, boolean isLabel) {
 
-  @Override
-  public void readFields(DataInput in) throws IOException {
-    int nbAttributes = in.readInt();
-    attributes = new Attribute[nbAttributes];
-    for (int attr = 0; attr < nbAttributes; attr++) {
-      String name = WritableUtils.readString(in);
-      attributes[attr] = Attribute.valueOf(name);
-    }
-
-    ignored = DFUtils.readIntArray(in);
-
-    // only CATEGORICAL attributes have values
-    values = new String[nbAttributes][];
-    for (int attr = 0; attr < nbAttributes; attr++) {
-      if (attributes[attr].isCategorical()) {
-        values[attr] = WritableUtils.readStringArray(in);
-      }
-    }
-
-    labelId = in.readInt();
-    nbInstances = in.readInt();
-  }
-
-  @Override
-  public void write(DataOutput out) throws IOException {
-    out.writeInt(attributes.length); // nb attributes
-    for (Attribute attr : attributes) {
-      WritableUtils.writeString(out, attr.name());
-    }
-
-    DFUtils.writeArray(out, ignored);
-
-    // only CATEGORICAL attributes have values
-    for (String[] vals : values) {
-      if (vals != null) {
-        WritableUtils.writeStringArray(out, vals);
-      }
-    }
-
-    out.writeInt(labelId);
-    out.writeInt(nbInstances);
+    Map<String, Object> attribute = Maps.newHashMap();
+    attribute.put(TYPE, type.toString().toLowerCase(Locale.getDefault()));
+    attribute.put(VALUES, values);
+    attribute.put(LABEL, isLabel);
+    return attribute;
   }
 
 }

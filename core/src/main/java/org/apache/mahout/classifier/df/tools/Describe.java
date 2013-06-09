@@ -49,8 +49,7 @@ public final class Describe {
 
   private static final Logger log = LoggerFactory.getLogger(Describe.class);
 
-  private Describe() {
-  }
+  private Describe() {}
 
   public static void main(String[] args) throws IOException, DescriptorException {
 
@@ -116,7 +115,8 @@ public final class Describe {
     Dataset dataset = generateDataset(descriptor, dataPath, regression);
 
     log.info("storing the dataset description");
-    DFUtils.storeWritable(new Configuration(), fPath, dataset);
+    String json = dataset.toJSON();
+    DFUtils.storeString(new Configuration(), fPath, json);
   }
 
   private static Dataset generateDataset(String descriptor, String dataPath, boolean regression) throws IOException,

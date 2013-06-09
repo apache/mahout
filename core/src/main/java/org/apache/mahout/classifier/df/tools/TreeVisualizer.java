@@ -52,12 +52,9 @@ public final class TreeVisualizer {
       if (node instanceof CategoricalNode) {
         CategoricalNode cnode = (CategoricalNode) node;
         int attr = (Integer) fields.get("CategoricalNode.attr").get(cnode);
-        double[] values = (double[]) fields.get("CategoricalNode.values").get(
-            cnode);
-        Node[] childs = (Node[]) fields.get("CategoricalNode.childs")
-            .get(cnode);
-        String[][] attrValues = (String[][]) fields.get("Dataset.values").get(
-            dataset);
+        double[] values = (double[]) fields.get("CategoricalNode.values").get(cnode);
+        Node[] childs = (Node[]) fields.get("CategoricalNode.childs").get(cnode);
+        String[][] attrValues = (String[][]) fields.get("Dataset.values").get(dataset);
         for (int i = 0; i < attrValues[attr].length; i++) {
           int index = ArrayUtils.indexOf(values, i);
           if (index < 0) {
@@ -69,8 +66,7 @@ public final class TreeVisualizer {
           }
           buff.append(attrNames == null ? attr : attrNames[attr]).append(" = ")
               .append(attrValues[attr][i]);
-          buff.append(toStringNode(childs[index], dataset, attrNames, fields,
-              layer + 1));
+          buff.append(toStringNode(childs[index], dataset, attrNames, fields, layer + 1));
         }
       } else if (node instanceof NumericalNode) {
         NumericalNode nnode = (NumericalNode) node;

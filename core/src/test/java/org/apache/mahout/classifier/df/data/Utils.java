@@ -38,8 +38,8 @@ import org.apache.mahout.classifier.df.data.Dataset.Attribute;
  *
  */
 public final class Utils {
-  private Utils() {
-  }
+
+  private Utils() {}
 
   /** Used when generating random CATEGORICAL values */
   private static final int CATEGORICAL_RANGE = 100;
@@ -82,8 +82,8 @@ public final class Utils {
   public static String generateDescriptor(char[] tokens) {
     StringBuilder builder = new StringBuilder();
 
-    for (char token1 : tokens) {
-      builder.append(token1).append(' ');
+    for (char token : tokens) {
+      builder.append(token).append(' ');
     }
 
     return builder.toString();
@@ -102,34 +102,14 @@ public final class Utils {
   }
 
   /**
-   * generates random data
-   * 
-   * @param rng Random number generator
-   * @param nbAttributes number of attributes
-   * @param regression true is the label is numerical
-   * @param number of data lines to generate
-   */
-  public static double[][] randomDoubles(Random rng, int nbAttributes, boolean regression, int number) throws DescriptorException {
-    String descriptor = randomDescriptor(rng, nbAttributes);
-    Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
-
-    double[][] data = new double[number][];
-
-    for (int index = 0; index < number; index++) {
-      data[index] = randomVector(rng, attrs, regression);
-    }
-
-    return data;
-  }
-
-  /**
    * generates random data based on the given descriptor
    * 
    * @param rng Random number generator
    * @param descriptor attributes description
    * @param number number of data lines to generate
    */
-  public static double[][] randomDoubles(Random rng, CharSequence descriptor, boolean regression, int number) throws DescriptorException {
+  public static double[][] randomDoubles(Random rng, CharSequence descriptor, boolean regression, int number)
+    throws DescriptorException {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
 
     double[][] data = new double[number][];
@@ -255,8 +235,9 @@ public final class Utils {
   }
 
   private static void writeDataToFile(String[] sData, Path path) throws IOException {
-    BufferedWriter output = Files.newWriter(new File(path.toString()), Charsets.UTF_8);
+    BufferedWriter output = null;
     try {
+      output = Files.newWriter(new File(path.toString()), Charsets.UTF_8);
       for (String line : sData) {
         output.write(line);
         output.write('\n');
@@ -281,25 +262,6 @@ public final class Utils {
     return path;
   }
 
-  public static Path writeDatasetToTestFile(Dataset dataset) throws IOException {
-    Path testData = new Path("testdata/Dataset");
-    FileSystem fs = testData.getFileSystem(new Configuration());
-    if (!fs.exists(testData)) {
-      fs.mkdirs(testData);
-    }
-  
-    Path datasetPath = new Path(testData, "dataset.info");
-    FSDataOutputStream out = fs.create(datasetPath);
-  
-    try {
-      dataset.write(out);
-    } finally {
-      Closeables.closeQuietly(out);
-    }
-  
-    return datasetPath;
-  }
-
   /**
    * Split the data into numMaps splits
    */
@@ -311,8 +273,7 @@ public final class Utils {
   
     for (int partition = 0; partition < numMaps; partition++) {
       int from = partition * partitionSize;
-      int to = partition == (numMaps - 1) ? nbInstances : (partition + 1)
-          * partitionSize;
+      int to = partition == (numMaps - 1) ? nbInstances : (partition + 1) * partitionSize;
   
       splits[partition] = Arrays.copyOfRange(sData, from, to);
     }

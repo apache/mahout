@@ -30,14 +30,17 @@ import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 
 import java.io.DataInput;
 import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.List;
 
 /**
  * Utility class that contains various helper methods
  */
 public final class DFUtils {
-  private DFUtils() { }
+
+  private DFUtils() {}
   
   /**
    * Writes an Node[] into a DataOutput
@@ -157,4 +160,22 @@ public final class DFUtils {
       Closeables.closeQuietly(out);
     }
   }
+  
+  /**
+   * Write a string to a path.
+   * @param conf From which the file system will be picked
+   * @param path Where the string will be written
+   * @param string The string to write
+   * @throws IOException if things go poorly
+   */
+  public static void storeString(Configuration conf, Path path, String string) throws IOException {
+    DataOutputStream out = null;
+    try {
+      out = path.getFileSystem(conf).create(path);
+      out.write(string.getBytes(Charset.defaultCharset()));
+    } finally {
+      Closeables.closeQuietly(out);
+    }
+  }
+  
 }
