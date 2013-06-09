@@ -70,8 +70,9 @@ public final class TestMinHashClustering extends MahoutTestCase {
     output = new Path(getTestTempDirPath(), "output");
     Path pointFile = new Path(input, "file1");
     FileSystem fs = FileSystem.get(pointFile.toUri(), conf);
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, pointFile, Text.class, VectorWritable.class);
+    SequenceFile.Writer writer = null;
     try {
+      writer = new SequenceFile.Writer(fs, conf, pointFile, Text.class, VectorWritable.class);
       int id = 0;
       for (VectorWritable point : points) {
         writer.append(new Text("Id-" + id++), point);
@@ -88,14 +89,14 @@ public final class TestMinHashClustering extends MahoutTestCase {
                                  String hashType) {
     return new String[] {optKey(DefaultOptionCreator.INPUT_OPTION), input.toString(),
                          optKey(DefaultOptionCreator.OUTPUT_OPTION), output.toString(),
-                         optKey(MinhashOptionCreator.VECTOR_DIMENSION_TO_HASH), dimensionToHash,
-                         optKey(MinhashOptionCreator.MIN_CLUSTER_SIZE), String.valueOf(minClusterSize),
-                         optKey(MinhashOptionCreator.MIN_VECTOR_SIZE), String.valueOf(minVectorSize),
-                         optKey(MinhashOptionCreator.HASH_TYPE), hashType,
-                         optKey(MinhashOptionCreator.NUM_HASH_FUNCTIONS), String.valueOf(numHashFunctions),
-                         optKey(MinhashOptionCreator.KEY_GROUPS), String.valueOf(keyGroups),
-                         optKey(MinhashOptionCreator.NUM_REDUCERS), "1",
-                         optKey(MinhashOptionCreator.DEBUG_OUTPUT)};
+                         optKey(MinHashDriver.VECTOR_DIMENSION_TO_HASH), dimensionToHash,
+                         optKey(MinHashDriver.MIN_CLUSTER_SIZE), String.valueOf(minClusterSize),
+                         optKey(MinHashDriver.MIN_VECTOR_SIZE), String.valueOf(minVectorSize),
+                         optKey(MinHashDriver.HASH_TYPE), hashType,
+                         optKey(MinHashDriver.NUM_HASH_FUNCTIONS), String.valueOf(numHashFunctions),
+                         optKey(MinHashDriver.KEY_GROUPS), String.valueOf(keyGroups),
+                         optKey(MinHashDriver.NUM_REDUCERS), String.valueOf(1),
+                         optKey(MinHashDriver.DEBUG_OUTPUT)};
   }
   
   private static Set<Integer> getValues(Vector vector, String dimensionToHash) {
@@ -152,7 +153,15 @@ public final class TestMinHashClustering extends MahoutTestCase {
     }
     runPairwiseSimilarity(clusteredItems, simThreshold, dimensionToHash, msg);
   }
-  
+
+
+  @Test
+  public void testFailOnNonExistingHashType() throws Exception {
+    String[] args = makeArguments("value", 2, 3, 20, 4, "xKrot37");
+    int ret = ToolRunner.run(getConfiguration(), new MinHashDriver(), args);
+    assertEquals(-1, ret);
+  }
+
   @Test
   public void testLinearMinHashMRJob() throws Exception {
     String[] args = makeArguments("value", 2, 3, 20, 4, HashType.LINEAR.toString());

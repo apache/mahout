@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+  MAHOUT-1251: Optimize MinHashMapper (ssc)
+
   MAHOUT-1211: Disabled swallowing of IOExceptions is Closeables.close for writers (dfilimon)
 
   MAHOUT-1164: Make ARFF integration generate meta-data in JSON format (Marty Kube via ssc)

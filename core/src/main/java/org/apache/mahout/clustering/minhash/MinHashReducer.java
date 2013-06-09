@@ -42,8 +42,8 @@ public class MinHashReducer extends Reducer<Text,Writable,Text,Writable> {
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
-    this.minClusterSize = conf.getInt(MinhashOptionCreator.MIN_CLUSTER_SIZE, 5);
-    this.debugOutput = conf.getBoolean(MinhashOptionCreator.DEBUG_OUTPUT, false);
+    minClusterSize = conf.getInt(MinHashDriver.MIN_CLUSTER_SIZE, 5);
+    debugOutput = conf.getBoolean(MinHashDriver.DEBUG_OUTPUT, false);
   }
   
   /**

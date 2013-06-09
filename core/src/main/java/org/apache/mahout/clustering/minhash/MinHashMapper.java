@@ -24,14 +24,10 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.minhash.HashFactory.HashType;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class MinHashMapper extends Mapper<Text, VectorWritable, Text, Writable> {
-
-  private static final Logger log = LoggerFactory.getLogger(MinHashMapper.class);
 
   private HashFunction[] hashFunction;
   private int numHashFunctions;
@@ -40,28 +36,26 @@ public class MinHashMapper extends Mapper<Text, VectorWritable, Text, Writable> 
   private boolean debugOutput;
   private int[] minHashValues;
   private byte[] bytesToHash;
-  private String dimensionToHash;
+  private boolean hashValue;
+
+  private Text cluster = new Text();
+  private VectorWritable vector = new VectorWritable();
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
-    this.dimensionToHash = conf.get(MinhashOptionCreator.VECTOR_DIMENSION_TO_HASH, "value");
-    this.numHashFunctions = conf.getInt(MinhashOptionCreator.NUM_HASH_FUNCTIONS, 10);
-    this.minHashValues = new int[numHashFunctions];
-    this.bytesToHash = new byte[4];
-    this.keyGroups = conf.getInt(MinhashOptionCreator.KEY_GROUPS, 1);
-    this.minVectorSize = conf.getInt(MinhashOptionCreator.MIN_VECTOR_SIZE, 5);
-    String htype = conf.get(MinhashOptionCreator.HASH_TYPE, "linear");
-    this.debugOutput = conf.getBoolean(MinhashOptionCreator.DEBUG_OUTPUT, false);
+    numHashFunctions = conf.getInt(MinHashDriver.NUM_HASH_FUNCTIONS, 10);
+    minHashValues = new int[numHashFunctions];
+    bytesToHash = new byte[4];
+    keyGroups = conf.getInt(MinHashDriver.KEY_GROUPS, 1);
+    minVectorSize = conf.getInt(MinHashDriver.MIN_VECTOR_SIZE, 5);
+    debugOutput = conf.getBoolean(MinHashDriver.DEBUG_OUTPUT, false);
 
-    HashType hashType;
-    try {
-      hashType = HashType.valueOf(htype);
-    } catch (IllegalArgumentException iae) {
-      log.warn("No valid hash type found in configuration for {}, assuming type: {}", htype, HashType.LINEAR);
-      hashType = HashType.LINEAR;
-    }
+    String dimensionToHash = conf.get(MinHashDriver.VECTOR_DIMENSION_TO_HASH);
+    hashValue = MinHashDriver.HASH_DIMENSION_VALUE.equalsIgnoreCase(dimensionToHash);
+
+    HashType hashType = HashType.valueOf(conf.get(MinHashDriver.HASH_TYPE));
     hashFunction = HashFactory.createHashFunctions(hashType, numHashFunctions);
   }
 
@@ -85,7 +79,7 @@ public class MinHashMapper extends Mapper<Text, VectorWritable, Text, Writable> 
 
     for (int i = 0; i < numHashFunctions; i++) {
       for (Vector.Element ele : featureVector.nonZeroes()) {
-        int value = "value".equalsIgnoreCase(dimensionToHash) ? (int) ele.get() : ele.index();
+        int value = hashValue ? (int) ele.get() : ele.index();
         bytesToHash[0] = (byte) (value >> 24);
         bytesToHash[1] = (byte) (value >> 16);
         bytesToHash[2] = (byte) (value >> 8);
@@ -105,14 +99,15 @@ public class MinHashMapper extends Mapper<Text, VectorWritable, Text, Writable> 
       }
       //remove the last dash
       clusterIdBuilder.deleteCharAt(clusterIdBuilder.length() - 1);
-      Text cluster = new Text(clusterIdBuilder.toString());
-      Writable point;
+
+      cluster.set(clusterIdBuilder.toString());
+
       if (debugOutput) {
-        point = new VectorWritable(featureVector.clone());
+        vector.set(featureVector);
+        context.write(cluster, vector);
       } else {
-        point = new Text(item.toString());
+        context.write(cluster, item);
       }
-      context.write(cluster, point);
     }
   }
 }
