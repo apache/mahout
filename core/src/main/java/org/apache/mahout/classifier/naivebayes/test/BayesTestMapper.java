@@ -47,7 +47,7 @@ public class BayesTestMapper extends Mapper<Text, VectorWritable, Text, VectorWr
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
-    Path modelPath = HadoopUtil.cachedFile(conf);
+    Path modelPath = HadoopUtil.getSingleCachedFile(conf);
     NaiveBayesModel model = NaiveBayesModel.materialize(modelPath, conf);
     boolean compl = Boolean.parseBoolean(conf.get(TestNaiveBayesDriver.COMPLEMENTARY));
     if (compl) {

@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
@@ -32,6 +33,7 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.Writable;
@@ -272,9 +274,46 @@ public final class HadoopUtil {
    * @return
    * @throws IOException
    */
-  public static Path cachedFile(Configuration conf) throws IOException {
+  public static Path getSingleCachedFile(Configuration conf) throws IOException {
+    return getCachedFiles(conf)[0];
+  }
+
+  /**
+   * Retrieves paths to cached files.
+   * @param conf
+   * @return
+   * @throws IOException
+   * @throws IllegalStateException if no cache files are found
+   */
+  public static Path[] getCachedFiles(Configuration conf) throws IOException {
+    LocalFileSystem localFs = FileSystem.getLocal(conf);
     Path[] cacheFiles = DistributedCache.getLocalCacheFiles(conf);
-    return cacheFiles != null && cacheFiles.length > 0 ? cacheFiles[0] : null;
+
+    URI[] fallbackFiles = DistributedCache.getCacheFiles(conf);
+
+    // fallback for local execution
+    if (cacheFiles == null) {
+
+      Preconditions.checkState(fallbackFiles != null, "Unable to find cached files!");
+
+      cacheFiles = new Path[fallbackFiles.length];
+      for (int n = 0; n < fallbackFiles.length; n++) {
+        cacheFiles[n] = new Path(fallbackFiles[n].getPath());
+      }
+    } else {
+
+      for (int n = 0; n < cacheFiles.length; n++) {
+        cacheFiles[n] = localFs.makeQualified(cacheFiles[n]);
+        // fallback for local execution
+        if (!localFs.exists(cacheFiles[n])) {
+          cacheFiles[n] = new Path(fallbackFiles[n].getPath());
+        }
+      }
+    }
+
+    Preconditions.checkState(cacheFiles.length > 0, "Unable to find cached files!");
+
+    return cacheFiles;
   }
 
   public static void setSerializations(Configuration conf) {

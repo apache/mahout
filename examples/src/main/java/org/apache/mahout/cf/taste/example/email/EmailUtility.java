@@ -17,19 +17,17 @@
 
 package org.apache.mahout.cf.taste.example.email;
 
-import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.regex.Pattern;
 
 public final class EmailUtility {
@@ -64,9 +62,7 @@ public final class EmailUtility {
                                       String msgIdPrefix,
                                       OpenObjectIntHashMap<String> msgIdDictionary) throws IOException {
 
-    Path[] localFiles = DistributedCache.getLocalCacheFiles(conf);
-    Preconditions.checkArgument(localFiles != null,
-            "missing paths from the DistributedCache");
+    Path[] localFiles = HadoopUtil.getCachedFiles(conf);
     FileSystem fs = FileSystem.getLocal(conf);
     for (Path dictionaryFile : localFiles) {
 

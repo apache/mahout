@@ -199,9 +199,9 @@ public class Classifier {
 
       Configuration conf = context.getConfiguration();
 
-      Path[] files = DistributedCache.getLocalCacheFiles(conf);
+      Path[] files = HadoopUtil.getCachedFiles(conf);
 
-      if (files == null || files.length < 2) {
+      if (files.length < 2) {
         throw new IOException("not enough paths in the DistributedCache");
       }
       LocalFileSystem localFs = FileSystem.getLocal(conf);

@@ -18,19 +18,15 @@
 package org.apache.mahout.vectorizer.tfidf;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Iterator;
 
-import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.filecache.DistributedCache;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.NamedVector;
@@ -102,20 +98,7 @@ public class TFIDFPartialVectorReducer extends
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
-    Path[] localFiles = DistributedCache.getLocalCacheFiles(conf);
-    Preconditions.checkArgument(localFiles != null && localFiles.length >= 1, 
-        "missing paths from the DistributedCache");
-    LocalFileSystem localFs = FileSystem.getLocal(conf);
-    if (!localFs.exists(localFiles[0])) {
-      URI[] filesURIs = DistributedCache.getCacheFiles(conf);
-      if (filesURIs == null) {
-        throw new IOException("Cannot read Frequency list from Distributed Cache");
-      }
-      if (filesURIs.length != 1) {
-        throw new IOException("Cannot read Frequency list from Distributed Cache (" + localFiles.length + ')');
-      }
-      localFiles[0] = new Path(filesURIs[0].getPath());
-    }
+
     vectorCount = conf.getLong(TFIDFConverter.VECTOR_COUNT, 1);
     featureCount = conf.getLong(TFIDFConverter.FEATURE_COUNT, 1);
     minDf = conf.getInt(TFIDFConverter.MIN_DF, 1);
@@ -123,7 +106,7 @@ public class TFIDFPartialVectorReducer extends
     sequentialAccess = conf.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
     namedVector = conf.getBoolean(PartialVectorMerger.NAMED_VECTOR, false);
 
-    Path dictionaryFile = localFs.makeQualified(localFiles[0]);
+    Path dictionaryFile = HadoopUtil.getSingleCachedFile(conf);
     // key is feature, value is the document frequency
     for (Pair<IntWritable,LongWritable> record 
          : new SequenceFileIterable<IntWritable,LongWritable>(dictionaryFile, true, conf)) {

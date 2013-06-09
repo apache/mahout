@@ -28,7 +28,6 @@ import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.classifier.df.data.Dataset.Attribute;

@@ -43,6 +43,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterator;
@@ -207,7 +208,7 @@ public final class BtJob {
       boolean distributedRHat = conf.get(PROP_RHAT_BROADCAST) != null;
       if (distributedRHat) {
 
-        Path[] rFiles = DistributedCache.getLocalCacheFiles(conf);
+        Path[] rFiles = HadoopUtil.getCachedFiles(conf);
 
         Validate.notNull(rFiles,
                          "no RHat files in distributed cache job definition");

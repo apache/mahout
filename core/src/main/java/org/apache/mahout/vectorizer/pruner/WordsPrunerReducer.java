@@ -16,15 +16,13 @@ package org.apache.mahout.vectorizer.pruner;
  * limitations under the License.
  */
 
-import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.filecache.DistributedCache;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.Vector;
@@ -72,19 +70,13 @@ public class WordsPrunerReducer extends
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
-    Path[] localFiles = DistributedCache.getLocalCacheFiles(conf);
-    Preconditions.checkArgument(localFiles != null && localFiles.length >= 1,
-            "missing paths from the DistributedCache");
+    Path[] localFiles = HadoopUtil.getCachedFiles(conf);
 
     maxDf = conf.getLong(HighDFWordsPruner.MAX_DF, Long.MAX_VALUE);
     minDf = conf.getLong(HighDFWordsPruner.MIN_DF, -1);
-    FileSystem fs = FileSystem.getLocal(conf);
-    Path dictionaryFile;
-    if (fs.exists(localFiles[0])) {
-      dictionaryFile = fs.makeQualified(localFiles[0]);
-    } else {//MAHOUT-992: this seems safe
-      dictionaryFile = fs.makeQualified(new Path(DistributedCache.getCacheFiles(conf)[0].getPath()));
-    }
+
+    Path dictionaryFile = HadoopUtil.getSingleCachedFile(conf);
+
     // key is feature, value is the document frequency
     for (Pair<IntWritable, LongWritable> record
             : new SequenceFileIterable<IntWritable, LongWritable>(dictionaryFile, true, conf)) {

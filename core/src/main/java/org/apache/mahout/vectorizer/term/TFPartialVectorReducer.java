@@ -17,12 +17,8 @@
 
 package org.apache.mahout.vectorizer.term;
 
-import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.filecache.DistributedCache;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -30,6 +26,7 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.lucene.analysis.shingle.ShingleFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
@@ -46,7 +43,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Iterator;
 
@@ -121,34 +117,17 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
-    Path[] localFiles = DistributedCache.getLocalCacheFiles(conf);
-    Preconditions.checkArgument(localFiles != null && localFiles.length >= 1,
-            "missing paths from the DistributedCache");
-    LocalFileSystem localFs = FileSystem.getLocal(conf);
-    if (!localFs.exists(localFiles[0])) {
-      log.info("Can't find dictionary dist. cache file, looking in .getCacheFiles");
-      URI[] filesURIs = DistributedCache.getCacheFiles(conf);
-      if (filesURIs == null) {
-        throw new IOException("Cannot read Frequency list from Distributed Cache");
-      }
-      if (filesURIs.length != 1) {
-        throw new IOException("Cannot read Frequency list from Distributed Cache (" + localFiles.length + ')');
-      }
-      localFiles[0] = new Path(filesURIs[0].getPath());
-    }
 
     dimension = conf.getInt(PartialVectorMerger.DIMENSION, Integer.MAX_VALUE);
     sequentialAccess = conf.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
     namedVector = conf.getBoolean(PartialVectorMerger.NAMED_VECTOR, false);
     maxNGramSize = conf.getInt(DictionaryVectorizer.MAX_NGRAMS, maxNGramSize);
-    if (log.isInfoEnabled()) {
-      log.info("Cache Files: " + Arrays.asList(localFiles));
-    }
+
     //MAHOUT-1247
-    localFiles[0] = localFs.makeQualified(localFiles[0]);
+    Path dictionaryFile = HadoopUtil.getSingleCachedFile(conf);
     // key is word value is id
     for (Pair<Writable, IntWritable> record
-            : new SequenceFileIterable<Writable, IntWritable>(localFiles[0], true, conf)) {
+            : new SequenceFileIterable<Writable, IntWritable>(dictionaryFile, true, conf)) {
       dictionary.put(record.getFirst().toString(), record.getSecond().get());
     }
   }

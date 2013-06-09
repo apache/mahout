@@ -18,7 +18,6 @@
 package org.apache.mahout.fpm.pfpgrowth;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -86,29 +85,14 @@ public final class PFPGrowth {
    */
   public static List<Pair<String,Long>> readFList(Configuration conf) throws IOException {
     List<Pair<String,Long>> list = Lists.newArrayList();
-    Path[] files = DistributedCache.getLocalCacheFiles(conf);
-    if (files == null) {
-      throw new IOException("Cannot read Frequency list from Distributed Cache");
-    }
+
+    Path[] files = HadoopUtil.getCachedFiles(conf);
     if (files.length != 1) {
       throw new IOException("Cannot read Frequency list from Distributed Cache (" + files.length + ')');
     }
-    FileSystem fs = FileSystem.getLocal(conf);
-    Path fListLocalPath = fs.makeQualified(files[0]);
-    // Fallback if we are running locally.
-    if (!fs.exists(fListLocalPath)) {
-      URI[] filesURIs = DistributedCache.getCacheFiles(conf);
-      if (filesURIs == null) {
-        throw new IOException("Cannot read Frequency list from Distributed Cache");
-      }
-      if (filesURIs.length != 1) {
-        throw new IOException("Cannot read Frequency list from Distributed Cache (" + files.length + ')');
-      }
-      fListLocalPath = new Path(filesURIs[0].getPath());
-    }
-    fListLocalPath = fs.makeQualified(fListLocalPath);
+
     for (Pair<Text,LongWritable> record
-         : new SequenceFileIterable<Text,LongWritable>(fListLocalPath, true, conf)) {
+         : new SequenceFileIterable<Text,LongWritable>(files[0], true, conf)) {
       list.add(new Pair<String,Long>(record.getFirst().toString(), record.getSecond().get()));
     }
     return list;

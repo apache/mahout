@@ -21,12 +21,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
@@ -71,23 +71,18 @@ final class ALS {
     IntWritable rowIndex = new IntWritable();
     VectorWritable row = new VectorWritable();
 
-    LocalFileSystem localFs = FileSystem.getLocal(conf);
-    Path[] cacheFiles = DistributedCache.getLocalCacheFiles(conf);
 
     OpenIntObjectHashMap<Vector> featureMatrix = numEntities > 0
         ? new OpenIntObjectHashMap<Vector>(numEntities) : new OpenIntObjectHashMap<Vector>();
 
-    for (int n = 0; n < cacheFiles.length; n++) {
-      Path localCacheFile = localFs.makeQualified(cacheFiles[n]);
+    Path[] cachedFiles = HadoopUtil.getCachedFiles(conf);
+    LocalFileSystem localFs = FileSystem.getLocal(conf);
 
-      // fallback for local execution
-      if (!localFs.exists(localCacheFile)) {//MAHOUT-992: this seems safe
-        localCacheFile = new Path(DistributedCache.getCacheFiles(conf)[n].getPath());
-      }
+    for (int n = 0; n < cachedFiles.length; n++) {
 
       SequenceFile.Reader reader = null;
       try {
-        reader = new SequenceFile.Reader(localFs, localCacheFile, conf);
+        reader = new SequenceFile.Reader(localFs, cachedFiles[n], conf);
         while (reader.next(rowIndex, row)) {
           featureMatrix.put(rowIndex.get(), row.get());
         }

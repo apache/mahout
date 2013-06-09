@@ -46,6 +46,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
@@ -322,7 +323,7 @@ public final class ABtDenseOutJob {
       blockHeight = conf.getInt(BtJob.PROP_OUTER_PROD_BLOCK_HEIGHT, -1);
       distributedBt = conf.get(PROP_BT_BROADCAST) != null;
       if (distributedBt) {
-        btLocalPath = DistributedCache.getLocalCacheFiles(conf);
+        btLocalPath = HadoopUtil.getCachedFiles(conf);
         localFsConfig = new Configuration();
         localFsConfig.set("fs.default.name", "file:///");
       }

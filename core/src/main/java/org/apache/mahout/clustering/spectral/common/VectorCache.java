@@ -25,7 +25,6 @@ import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
@@ -96,37 +95,15 @@ public final class VectorCache {
    * Loads the vector from {@link DistributedCache}. Returns null if no vector exists.
    */
   public static Vector load(Configuration conf) throws IOException {
-    Path[] files = DistributedCache.getLocalCacheFiles(conf);
-    LocalFileSystem localFs = FileSystem.getLocal(conf);
-    if (files == null || files.length < 1) {
-      log.debug("getLocalCacheFiles failed, trying getCacheFiles");
-      URI[] filesURIs = DistributedCache.getCacheFiles(conf);
-      if (filesURIs == null) {
-        throw new IOException("Cannot read Frequency list from Distributed Cache");
-      }
-      if (filesURIs.length != 1) {
-        throw new IOException("Cannot read Frequency list from Distributed Cache (" + filesURIs.length + ')');
-      }
-      files = new Path[1];
-      files[0] = new Path(filesURIs[0].getPath());
-    } else {
-      // Fallback if we are running locally.
-      if (!localFs.exists(files[0])) {
-        URI[] filesURIs = DistributedCache.getCacheFiles(conf);
-        if (filesURIs == null) {
-          throw new IOException("Cannot read Frequency list from Distributed Cache");
-        }
-        if (filesURIs.length != 1) {
-          throw new IOException("Cannot read Frequency list from Distributed Cache (" + filesURIs.length + ')');
-        }
-        files[0] = new Path(filesURIs[0].getPath());
-      }
+    Path[] files = HadoopUtil.getCachedFiles(conf);
+
+    if (files.length != 1) {
+      throw new IOException("Cannot read Frequency list from Distributed Cache (" + files.length + ')');
     }
 
     if (log.isInfoEnabled()) {
       log.info("Files are: {}", Arrays.toString(files));
     }
-    files[0] = localFs.makeQualified(files[0]);
     return load(conf, files[0]);
   }
 

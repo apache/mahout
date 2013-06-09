@@ -46,6 +46,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
@@ -211,8 +212,7 @@ public final class ABtJob {
 
       if (distributedBt) {
 
-        Path[] btFiles =
-          DistributedCache.getLocalCacheFiles(context.getConfiguration());
+        Path[] btFiles = HadoopUtil.getCachedFiles(context.getConfiguration());
 
         // DEBUG: stdout
         //System.out.printf("list of files: " + btFiles);

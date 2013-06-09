@@ -143,7 +143,7 @@ public final class BayesUtils {
   public static OpenObjectIntHashMap<String> readIndexFromCache(Configuration conf) throws IOException {
     OpenObjectIntHashMap<String> index = new OpenObjectIntHashMap<String>();
     for (Pair<Writable,IntWritable> entry
-        : new SequenceFileIterable<Writable,IntWritable>(HadoopUtil.cachedFile(conf), conf)) {
+        : new SequenceFileIterable<Writable,IntWritable>(HadoopUtil.getSingleCachedFile(conf), conf)) {
       index.put(entry.getFirst().toString(), entry.getSecond().get());
     }
     return index;
@@ -152,7 +152,7 @@ public final class BayesUtils {
   public static Map<String,Vector> readScoresFromCache(Configuration conf) throws IOException {
     Map<String,Vector> sumVectors = Maps.newHashMap();
     for (Pair<Text,VectorWritable> entry
-        : new SequenceFileDirIterable<Text,VectorWritable>(HadoopUtil.cachedFile(conf),
+        : new SequenceFileDirIterable<Text,VectorWritable>(HadoopUtil.getSingleCachedFile(conf),
           PathType.LIST, PathFilters.partFilter(), conf)) {
       sumVectors.put(entry.getFirst().toString(), entry.getSecond().get());
     }

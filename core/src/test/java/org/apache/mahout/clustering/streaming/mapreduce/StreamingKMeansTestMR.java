@@ -20,7 +20,6 @@ package org.apache.mahout.clustering.streaming.mapreduce;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;

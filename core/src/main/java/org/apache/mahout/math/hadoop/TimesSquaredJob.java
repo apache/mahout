@@ -37,6 +37,7 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -214,13 +215,8 @@ public final class TimesSquaredJob {
         Path[] localFiles = DistributedCache.getLocalCacheFiles(conf);
         Preconditions.checkArgument(localFiles != null && localFiles.length >= 1,
                                     "missing paths from the DistributedCache");
-        FileSystem fs = FileSystem.getLocal(conf);
-        Path inputVectorPath;
-        if (fs.exists(localFiles[0])) {
-          inputVectorPath = fs.makeQualified(localFiles[0]);
-        } else {//MAHOUT-992: this seems safe
-          inputVectorPath = fs.makeQualified(new Path(DistributedCache.getCacheFiles(conf)[0].getPath()));
-        }
+
+        Path inputVectorPath = HadoopUtil.getSingleCachedFile(conf);
 
         SequenceFileValueIterator<VectorWritable> iterator =
             new SequenceFileValueIterator<VectorWritable>(inputVectorPath, true, conf);
