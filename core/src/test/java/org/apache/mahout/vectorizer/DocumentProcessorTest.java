@@ -17,6 +17,8 @@
 
 package org.apache.mahout.vectorizer;
 
+import java.util.Arrays;
+
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -24,14 +26,12 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.junit.Test;
-
-import java.util.Arrays;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 
 /**
  * Tests tokenizing of {@link SequenceFile}s containing document ID and text (both as {@link Text})
@@ -57,7 +57,7 @@ public class DocumentProcessorTest extends MahoutTestCase {
       String text2 = "and another one";
       writer.append(new Text(documentId2), new Text(text2));
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
 
     DocumentProcessor.tokenizeDocuments(input, StandardAnalyzer.class, output, configuration);

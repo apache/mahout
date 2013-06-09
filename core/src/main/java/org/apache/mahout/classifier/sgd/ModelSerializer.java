@@ -17,15 +17,15 @@
 
 package org.apache.mahout.classifier.sgd;
 
-import com.google.common.io.Closeables;
-import org.apache.hadoop.io.Writable;
-
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
+import com.google.common.io.Closeables;
+import org.apache.hadoop.io.Writable;
 
 /**
  * Provides the ability to store SGD model-related objects as binary files.
@@ -41,7 +41,7 @@ public final class ModelSerializer {
     try {
       PolymorphicWritable.write(out, model);
     } finally {
-      Closeables.close(out, true);
+      Closeables.close(out, false);
     }
   }
 
@@ -50,7 +50,7 @@ public final class ModelSerializer {
     try {
       PolymorphicWritable.write(out, model);
     } finally {
-      Closeables.close(out, true);
+      Closeables.close(out, false);
     }
   }
 
@@ -59,7 +59,7 @@ public final class ModelSerializer {
     try {
       PolymorphicWritable.write(out, model);
     } finally {
-      Closeables.close(out, true);
+      Closeables.close(out, false);
     }
   }
 
@@ -68,7 +68,7 @@ public final class ModelSerializer {
     try {
       return PolymorphicWritable.read(dataIn, clazz);
     } finally {
-      Closeables.close(in, true);
+      Closeables.close(in, false);
     }
   }
 

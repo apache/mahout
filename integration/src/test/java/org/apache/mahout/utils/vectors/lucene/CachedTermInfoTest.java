@@ -1,6 +1,8 @@
 package org.apache.mahout.utils.vectors.lucene;
 
 
+import java.io.IOException;
+
 import com.google.common.io.Closeables;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
@@ -14,8 +16,6 @@ import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.apache.mahout.utils.MahoutTestCase;
 import org.junit.Test;
-
-import java.io.IOException;
 
 /**
  *
@@ -92,7 +92,7 @@ public class CachedTermInfoTest extends MahoutTestCase {
         writer.addDocument(doc);
       }
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
     return directory;
   }

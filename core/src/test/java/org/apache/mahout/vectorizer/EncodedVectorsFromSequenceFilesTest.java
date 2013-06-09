@@ -17,6 +17,9 @@
 
 package org.apache.mahout.vectorizer;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -34,9 +37,6 @@ import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.VectorWritable;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.LinkedList;
-import java.util.List;
 
 public class EncodedVectorsFromSequenceFilesTest extends MahoutTestCase {
 
@@ -63,7 +63,7 @@ public class EncodedVectorsFromSequenceFilesTest extends MahoutTestCase {
         writer.append(new Text("Document::ID::" + i), new Text(gen.getRandomDocument()));
       }
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
   }
   

@@ -103,7 +103,7 @@ public class LocalSSVDPCADenseTest extends MahoutTestCase {
       xi.assign(dv, Functions.PLUS);
     }
     closeables.remove(w);
-    Closeables.close(w, true);
+    Closeables.close(w, false);
 
     // TODO fix test so that 1.0/m works as intended!
     xi.assign(Functions.mult(1 / m));

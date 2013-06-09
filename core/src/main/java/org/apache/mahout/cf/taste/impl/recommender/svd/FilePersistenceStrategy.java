@@ -17,14 +17,6 @@
 
 package org.apache.mahout.cf.taste.impl.recommender.svd;
 
-import com.google.common.base.Preconditions;
-import com.google.common.io.Closeables;
-import org.apache.mahout.cf.taste.common.NoSuchItemException;
-import org.apache.mahout.cf.taste.common.NoSuchUserException;
-import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInput;
@@ -36,6 +28,14 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Map;
+
+import com.google.common.base.Preconditions;
+import com.google.common.io.Closeables;
+import org.apache.mahout.cf.taste.common.NoSuchItemException;
+import org.apache.mahout.cf.taste.common.NoSuchUserException;
+import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Provides a file-based persistent store. */
 public class FilePersistenceStrategy implements PersistenceStrategy {
@@ -75,7 +75,7 @@ public class FilePersistenceStrategy implements PersistenceStrategy {
       out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
       writeBinary(factorization, out);
     } finally {
-      Closeables.close(out, true);
+      Closeables.close(out, false);
     }
   }
 

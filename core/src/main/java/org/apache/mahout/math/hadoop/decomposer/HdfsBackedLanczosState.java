@@ -17,6 +17,9 @@
 
 package org.apache.mahout.math.hadoop.decomposer;
 
+import java.io.IOException;
+import java.util.Map;
+
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
@@ -33,9 +36,6 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.decomposer.lanczos.LanczosState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Map;
 
 public class HdfsBackedLanczosState extends LanczosState implements Configurable {
 
@@ -148,7 +148,7 @@ public class HdfsBackedLanczosState extends LanczosState implements Configurable
           IntWritable.class, VectorWritable.class);
       writer.append(new IntWritable(key), new VectorWritable(vector));
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
   }
 

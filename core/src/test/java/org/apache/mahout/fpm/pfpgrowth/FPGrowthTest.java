@@ -72,7 +72,7 @@ public final class FPGrowthTest extends MahoutTestCase {
         new StringOutputConverter(new SequenceFileOutputCollector<Text,TopKStringPatterns>(writer)),
         new ContextStatusUpdater(null));
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
 
     List<Pair<String, TopKStringPatterns>> frequentPatterns = FPGrowth.readFrequentPattern(conf, path);
@@ -115,7 +115,7 @@ public final class FPGrowthTest extends MahoutTestCase {
           new StringOutputConverter(new SequenceFileOutputCollector<Text,TopKStringPatterns>(writer)),
           new ContextStatusUpdater(null));
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
 
     List<Pair<String, TopKStringPatterns>> frequentPatterns = FPGrowth.readFrequentPattern(conf, path);
@@ -153,7 +153,7 @@ public final class FPGrowthTest extends MahoutTestCase {
           new StringOutputConverter(new SequenceFileOutputCollector<Text,TopKStringPatterns>(writer)),
           new ContextStatusUpdater(null));
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
 
     List<Pair<String, TopKStringPatterns>> frequentPatterns = FPGrowth.readFrequentPattern(conf, path);

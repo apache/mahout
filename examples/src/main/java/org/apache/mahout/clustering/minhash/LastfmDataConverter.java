@@ -17,6 +17,13 @@
 
 package org.apache.mahout.clustering.minhash;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -30,13 +37,6 @@ import org.apache.hadoop.io.Text;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 public final class LastfmDataConverter {
 
@@ -183,7 +183,7 @@ public final class LastfmDataConverter {
         }
       }
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
     return true;
   }

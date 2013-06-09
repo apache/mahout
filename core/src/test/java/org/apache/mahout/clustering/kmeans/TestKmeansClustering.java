@@ -146,7 +146,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
           writer.append(new Text(cluster.getIdentifier()), cluster);
         }
       } finally {
-        Closeables.close(writer, true);
+        Closeables.close(writer, false);
       }
       // now run the Job
       Path outputPath = getTestTempDirPath("output");
@@ -203,7 +203,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
           writer.append(new Text(cluster.getIdentifier()), cluster);
         }
       } finally {
-        Closeables.close(writer, true);
+        Closeables.close(writer, false);
       }
       // now run the Job
       Path outputPath = getTestTempDirPath("output");

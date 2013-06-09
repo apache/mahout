@@ -74,7 +74,7 @@ public final class GroupLensDataModel extends FileDataModel {
       resultFile.delete();
       throw ioe;
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
     return resultFile;
   }

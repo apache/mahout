@@ -115,7 +115,7 @@ public class LocalSSVDSolverSparseSequentialTest extends MahoutTestCase {
       w.append(roww, vw);
     }
     closeables.remove(w);
-    Closeables.close(w, true);
+    Closeables.close(w, false);
 
     FileSystem fs = FileSystem.get(aLocPath.toUri(), conf);
 

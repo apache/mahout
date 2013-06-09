@@ -66,7 +66,7 @@ public class SequenceFileVectorWriter implements VectorWriter {
   
   @Override
   public void close() throws IOException {
-    Closeables.close(writer, true);
+    Closeables.close(writer, false);
   }
   
   public SequenceFile.Writer getWriter() {

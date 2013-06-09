@@ -2,6 +2,10 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+  MAHOUT-1211: Disabled swallowing of IOExceptions is Closeables.close for writers (dfilimon)
+
+  MAHOUT-1164: Make ARFF integration generate meta-data in JSON format (Marty Kube via ssc)
+
   MAHOUT-1164: Make ARFF integration generate meta-data in JSON format (Marty Kube via ssc)
 
   MAHOUT-1163: Make random forest classifier meta-data file human readable (Marty Kube via ssc)

@@ -17,6 +17,8 @@
 
 package org.apache.mahout.math.stats.entropy;
 
+import java.util.Iterator;
+
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -31,8 +33,6 @@ import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterator;
 import org.junit.Test;
-
-import java.util.Iterator;
 
 public final class ConditionalEntropyTest extends MahoutTestCase {
 
@@ -53,7 +53,7 @@ public final class ConditionalEntropyTest extends MahoutTestCase {
         writer.append(new Text(keys[i]), new Text(values[i]));
       }
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
 
     // run the job

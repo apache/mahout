@@ -17,6 +17,11 @@
 
 package org.apache.mahout.cf.taste.example.kddcup.track1.svd;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+
 import com.google.common.io.Closeables;
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
@@ -32,11 +37,6 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.common.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 
 /**
  * run an SVD factorization of the KDD track1 data.
@@ -117,7 +117,7 @@ public final class Track1SVDRunner {
         }
       }
     } finally {
-      Closeables.close(out, true);
+      Closeables.close(out, false);
     }
     log.info("wrote estimates to {}, done.", resultFile.getAbsolutePath());
   }

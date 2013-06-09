@@ -17,9 +17,10 @@
 
 package org.apache.mahout.utils.vectors.lucene;
 
-import com.google.common.io.Closeables;
 import java.io.IOException;
 import java.util.Iterator;
+
+import com.google.common.io.Closeables;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -179,7 +180,7 @@ public final class LuceneIterableTest extends MahoutTestCase {
         writer.addDocument(doc);
       }
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
     return directory;
   }

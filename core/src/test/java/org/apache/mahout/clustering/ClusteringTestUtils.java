@@ -17,6 +17,9 @@
 
 package org.apache.mahout.clustering;
 
+import java.io.IOException;
+import java.util.Random;
+
 import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
@@ -33,9 +36,6 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.stats.Sampler;
-
-import java.io.IOException;
-import java.util.Random;
 
 public final class ClusteringTestUtils {
 
@@ -65,7 +65,7 @@ public final class ClusteringTestUtils {
         writer.append(intWritable ? new IntWritable(recNum++) : new LongWritable(recNum++), point);
       }
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
   }
 

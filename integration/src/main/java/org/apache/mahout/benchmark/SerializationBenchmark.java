@@ -1,11 +1,8 @@
 package org.apache.mahout.benchmark;
 
-import static org.apache.mahout.benchmark.VectorBenchmarks.DENSE_VECTOR;
-import static org.apache.mahout.benchmark.VectorBenchmarks.RAND_SPARSE_VECTOR;
-import static org.apache.mahout.benchmark.VectorBenchmarks.SEQ_SPARSE_VECTOR;
-
 import java.io.IOException;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -16,7 +13,9 @@ import org.apache.mahout.common.TimingStatistics;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.apache.mahout.math.VectorWritable;
 
-import com.google.common.io.Closeables;
+import static org.apache.mahout.benchmark.VectorBenchmarks.DENSE_VECTOR;
+import static org.apache.mahout.benchmark.VectorBenchmarks.RAND_SPARSE_VECTOR;
+import static org.apache.mahout.benchmark.VectorBenchmarks.SEQ_SPARSE_VECTOR;
 
 public class SerializationBenchmark {
   public static final String SERIALIZE = "Serialize";
@@ -52,7 +51,7 @@ public class SerializationBenchmark {
         }
       }
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
     mark.printStats(stats, SERIALIZE, DENSE_VECTOR);
 
@@ -69,7 +68,7 @@ public class SerializationBenchmark {
         }
       }
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
     mark.printStats(stats, SERIALIZE, RAND_SPARSE_VECTOR);
 
@@ -86,7 +85,7 @@ public class SerializationBenchmark {
         }
       }
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
     mark.printStats(stats, SERIALIZE, SEQ_SPARSE_VECTOR);
 

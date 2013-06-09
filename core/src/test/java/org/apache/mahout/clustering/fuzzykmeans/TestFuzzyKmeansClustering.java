@@ -83,7 +83,7 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
           writer.append(new Text(cluster.getIdentifier()), cluster);
         }
       } finally {
-        Closeables.close(writer, true);
+        Closeables.close(writer, false);
       }
 
       // now run the Job using the run() command line options.
@@ -156,7 +156,7 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
 
         }
       } finally {
-        Closeables.close(writer, true);
+        Closeables.close(writer, false);
       }
 
       // now run the Job using the run() command line options.

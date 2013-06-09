@@ -17,6 +17,11 @@
 
 package org.apache.mahout.cf.taste.hadoop.als;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
 import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
@@ -55,11 +60,6 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
 
 /**
  * <p>MapReduce implementation of the two factorization algorithms described in
@@ -239,7 +239,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
         writer.append(index, featureVector);
       }
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
   }
 

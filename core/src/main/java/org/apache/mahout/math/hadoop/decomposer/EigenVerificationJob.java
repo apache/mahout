@@ -17,6 +17,13 @@
 
 package org.apache.mahout.math.hadoop.decomposer;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
@@ -40,13 +47,6 @@ import org.apache.mahout.math.decomposer.SingularVectorVerifier;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * <p>Class for taking the output of an eigendecomposition (specified as a Path location), and verifies correctness,
@@ -211,7 +211,7 @@ public class EigenVerificationJob extends AbstractJob {
         }
       }
     } finally {
-      Closeables.close(seqWriter, true);
+      Closeables.close(seqWriter, false);
     }
     cleanedEigensPath = path;
   }

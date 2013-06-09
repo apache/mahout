@@ -17,6 +17,10 @@
 
 package org.apache.mahout.math.hadoop.similarity.cooccurrence;
 
+import java.io.DataInput;
+import java.io.IOException;
+import java.util.Iterator;
+
 import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
@@ -31,10 +35,6 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenIntIntHashMap;
-
-import java.io.DataInput;
-import java.io.IOException;
-import java.util.Iterator;
 
 public final class Vectors {
 
@@ -142,7 +142,7 @@ public final class Vectors {
       vectorWritable.setWritesLaxPrecision(laxPrecision);
       vectorWritable.write(out);
     } finally {
-      Closeables.close(out, true);
+      Closeables.close(out, false);
     }
   }
 

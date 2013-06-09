@@ -126,7 +126,7 @@ public final class StreamingKMeansUtilsMR {
         writer.append(new IntWritable(i++), new CentroidWritable(centroid));
       }
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
   }
 
@@ -141,7 +141,7 @@ public final class StreamingKMeansUtilsMR {
         writer.append(new IntWritable(i++), new VectorWritable(vector));
       }
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
   }
 }

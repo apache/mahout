@@ -16,6 +16,10 @@ package org.apache.mahout.text;
  * limitations under the License.
  */
 
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -34,10 +38,6 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
@@ -71,7 +71,7 @@ public class SequenceFilesFromLuceneStorage {
       searcher.search(lucene2seqConf.getQuery(), writerCollector);
       log.info("Wrote " + writerCollector.processedDocs + " documents in " + sequenceFilePath.toUri());
       processedDocs = writerCollector.processedDocs;
-      Closeables.close(sequenceFileWriter, true);
+      Closeables.close(sequenceFileWriter, false);
       directory.close();
       //searcher.close();
       reader.close();

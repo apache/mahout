@@ -17,6 +17,14 @@
 
 package org.apache.mahout.classifier.sequencelearning.hmm;
 
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Date;
+import java.util.List;
+import java.util.Scanner;
+
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
@@ -29,14 +37,6 @@ import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
-
-import java.io.DataOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Scanner;
 
 /**
  * A class for EM training of HMM from console
@@ -121,7 +121,7 @@ public final class BaumWelchTrainer {
       try {
         LossyHmmSerializer.serialize(trainedModel, stream);
       } finally {
-        Closeables.close(stream, true);
+        Closeables.close(stream, false);
       }
 
       //printing tranied model

@@ -74,7 +74,7 @@ public final class PartialBuilderTest extends MahoutTestCase {
         writer.append(keys[index], values[index]);
       }
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
 
     // load the output and make sure its valid

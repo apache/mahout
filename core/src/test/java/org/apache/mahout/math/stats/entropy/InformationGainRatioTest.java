@@ -45,7 +45,7 @@ public final class InformationGainRatioTest extends MahoutTestCase {
         writer.append(new Text(keys[i]), new Text(values[i]));
       }
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
 
     // run the job

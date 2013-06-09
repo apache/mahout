@@ -17,6 +17,15 @@
 
 package org.apache.mahout.classifier.sequencelearning.hmm;
 
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.util.List;
+import java.util.Scanner;
+
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
@@ -30,15 +39,6 @@ import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
-
-import java.io.DataInputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.util.List;
-import java.util.Scanner;
 
 /**
  * Command-line tool for Viterbi evaluating
@@ -117,7 +117,7 @@ public final class ViterbiEvaluator {
           writer.print(' ');
         }
       } finally {
-        Closeables.close(writer, true);
+        Closeables.close(writer, false);
       }
 
       if (computeLikelihood) {

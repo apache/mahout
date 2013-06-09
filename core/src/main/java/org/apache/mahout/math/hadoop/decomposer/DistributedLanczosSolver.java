@@ -17,6 +17,10 @@
 
 package org.apache.mahout.math.hadoop.decomposer;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
@@ -38,10 +42,6 @@ import org.apache.mahout.math.decomposer.lanczos.LanczosState;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 /**
  * See the SSVD code for a better option than using this:
@@ -233,7 +233,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
         seqWriter.append(iw, vw);
       }
     } finally {
-      Closeables.close(seqWriter, true);
+      Closeables.close(seqWriter, false);
     }
   }
 

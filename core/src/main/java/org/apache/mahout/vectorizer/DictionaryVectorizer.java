@@ -237,7 +237,7 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
       for (Pair<Writable,Writable> record
            : new SequenceFileDirIterable<Writable,Writable>(filesPattern, PathType.GLOB, null, null, true, conf)) {
         if (currentChunkSize > chunkSizeLimit) {
-          Closeables.close(dictWriter, true);
+          Closeables.close(dictWriter, false);
           chunkIndex++;
 
           chunkPath = new Path(dictionaryPathBase, DICTIONARY_FILE + chunkIndex);
@@ -254,7 +254,7 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
       }
       maxTermDimension[0] = i;
     } finally {
-      Closeables.close(dictWriter, true);
+      Closeables.close(dictWriter, false);
     }
     
     return chunkPaths;

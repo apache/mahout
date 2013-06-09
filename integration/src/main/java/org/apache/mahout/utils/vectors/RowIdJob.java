@@ -17,6 +17,9 @@
 
 package org.apache.mahout.utils.vectors;
 
+import java.util.List;
+import java.util.Map;
+
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -27,16 +30,12 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.Pair;
-import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Converts a vector representation of documents into a {@code document x terms} matrix.
@@ -98,8 +97,8 @@ public class RowIdJob extends AbstractJob {
       log.info("Wrote out matrix with {} rows and {} columns to {}", i, numCols, matrixPath);
       return 0;
     } finally {
-      Closeables.close(indexWriter, true);
-      Closeables.close(matrixWriter, true);
+      Closeables.close(indexWriter, false);
+      Closeables.close(matrixWriter, false);
     }
   }
 

@@ -59,7 +59,7 @@ public class DelimitedTermInfoWriter implements TermInfoWriter {
         writer.write('\n');
       }
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
   }
   

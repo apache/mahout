@@ -80,7 +80,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
       try {
         writer.write(aData[1]);
       } finally {
-        Closeables.close(writer, true);
+        Closeables.close(writer, false);
       }
     }
   }

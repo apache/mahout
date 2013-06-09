@@ -137,7 +137,7 @@ public class NaiveBayesModel {
         VectorWritable.writeVector(out, weightsPerLabelAndFeature.viewRow(row));
       }
     } finally {
-      Closeables.close(out, true);
+      Closeables.close(out, false);
     }
   }
   

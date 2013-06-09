@@ -17,6 +17,11 @@
 
 package org.apache.mahout.utils;
 
+import java.io.File;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.List;
+
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
@@ -32,11 +37,6 @@ import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterator;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
-
-import java.io.File;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.util.List;
 
 public final class SequenceFileDumper extends AbstractJob {
 
@@ -154,7 +154,7 @@ public final class SequenceFileDumper extends AbstractJob {
 
     } finally {
       if (shouldClose) {
-        Closeables.close(writer, true);
+        Closeables.close(writer, false);
       }
     }
 

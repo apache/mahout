@@ -89,7 +89,7 @@ public final class Track1Runner {
         }
       }
     } finally {
-      Closeables.close(out, true);
+      Closeables.close(out, false);
     }
 
     end = System.currentTimeMillis();

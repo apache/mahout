@@ -218,7 +218,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
           writer.append(new Text(), clusterWritable);
         }
       } finally {
-        Closeables.close(writer, true);
+        Closeables.close(writer, false);
       }
     }
   }
@@ -332,7 +332,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
           writer.append(new Text(cluster.getIdentifier()), clusterWritable);
         }
       } finally {
-        Closeables.close(writer, true);
+        Closeables.close(writer, false);
       }
       clustersIn = clustersOut;
       iteration++;
@@ -493,7 +493,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
           writer.append(new IntWritable(closest.getId()), new WeightedVectorWritable(1, canopy.getCenter()));
         }
       } finally {
-        Closeables.close(writer, true);
+        Closeables.close(writer, false);
       }
     }
   }

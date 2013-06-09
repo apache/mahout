@@ -17,17 +17,17 @@
 
 package org.apache.mahout.cf.taste.impl.similarity.precompute;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Closeables;
-import org.apache.mahout.cf.taste.similarity.precompute.SimilarItem;
-import org.apache.mahout.cf.taste.similarity.precompute.SimilarItems;
-import org.apache.mahout.cf.taste.similarity.precompute.SimilarItemsWriter;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+
+import com.google.common.base.Charsets;
+import com.google.common.io.Closeables;
+import org.apache.mahout.cf.taste.similarity.precompute.SimilarItem;
+import org.apache.mahout.cf.taste.similarity.precompute.SimilarItems;
+import org.apache.mahout.cf.taste.similarity.precompute.SimilarItemsWriter;
 
 /**
  * Persist the precomputed item similarities to a file that can later be used
@@ -62,6 +62,6 @@ public class FileSimilarItemsWriter implements SimilarItemsWriter {
 
   @Override
   public void close() throws IOException {
-    Closeables.close(writer, true);
+    Closeables.close(writer, false);
   }
 }

@@ -21,18 +21,18 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -162,7 +162,7 @@ public final class Driver {
         writeLabelBindings(writer, arffModel, delimiter);
       }
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
   }
 
@@ -251,7 +251,7 @@ public final class Driver {
       writeLabelBindings(dictOut, model, delimiter, jsonDictonary);
       log.info("Wrote: {} vectors", numDocs);
     } finally {
-      Closeables.close(vectorWriter, true);
+      Closeables.close(vectorWriter, false);
     }
   }
   

@@ -63,7 +63,7 @@ public final class SequenceFilesFromMailArchivesTest extends MahoutTestCase {
       gzOut.write(testMailMessages.getBytes("UTF-8"));
       gzOut.finish();
     } finally {
-      Closeables.close(gzOut, true);
+      Closeables.close(gzOut, false);
     }    
   }
 

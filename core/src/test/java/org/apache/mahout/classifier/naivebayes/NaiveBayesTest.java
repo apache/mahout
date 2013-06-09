@@ -17,6 +17,8 @@
 
 package org.apache.mahout.classifier.naivebayes;
 
+import java.io.File;
+
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -32,8 +34,6 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.hadoop.MathHelper;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
 
 public class NaiveBayesTest extends MahoutTestCase {
 
@@ -80,7 +80,7 @@ public class NaiveBayesTest extends MahoutTestCase {
       writer.append(LABEL_NOT_STOLEN, trainingInstance(COLOR_RED, TYPE_SUV, ORIGIN_IMPORTED));
       writer.append(LABEL_STOLEN, trainingInstance(COLOR_RED, TYPE_SPORTS, ORIGIN_IMPORTED));
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
   }
 

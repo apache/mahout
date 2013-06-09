@@ -288,7 +288,7 @@ public final class HadoopUtil {
     try {
       out.writeInt(value);
     } finally {
-      Closeables.close(out, true);
+      Closeables.close(out, false);
     }
   }
 

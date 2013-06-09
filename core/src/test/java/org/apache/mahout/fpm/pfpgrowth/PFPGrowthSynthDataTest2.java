@@ -87,7 +87,7 @@ public class PFPGrowthSynthDataTest2 extends MahoutTestCase {
       }
       
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
   }
 

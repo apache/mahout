@@ -121,7 +121,7 @@ public final class TestClusterDumper extends MahoutTestCase {
         writer.addDocument(doc);
       }
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
     
     IndexReader reader = DirectoryReader.open(directory);

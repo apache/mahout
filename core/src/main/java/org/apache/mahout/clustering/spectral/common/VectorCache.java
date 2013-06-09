@@ -17,6 +17,10 @@
 
 package org.apache.mahout.clustering.spectral.common;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.Arrays;
+
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
@@ -32,10 +36,6 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.Arrays;
 
 
 /**
@@ -76,7 +76,7 @@ public final class VectorCache {
     try {
       writer.append(key, new VectorWritable(vector));
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
 
     if (deleteOnExit) {

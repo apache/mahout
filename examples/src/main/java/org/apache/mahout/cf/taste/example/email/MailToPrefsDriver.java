@@ -17,6 +17,12 @@
 
 package org.apache.mahout.cf.taste.example.email;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
@@ -46,12 +52,6 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.math.VarIntWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Convert the Mail archives (see {@link org.apache.mahout.text.SequenceFilesFromMailArchives}) to a preference
@@ -252,7 +252,7 @@ public final class MailToPrefsDriver extends AbstractJob {
       for (Pair<Writable, Writable> record
               : new SequenceFileDirIterable<Writable, Writable>(filesPattern, PathType.GLOB, null, null, true, conf)) {
         if (currentChunkSize > chunkSizeLimit) {
-          Closeables.close(dictWriter, true);
+          Closeables.close(dictWriter, false);
           chunkIndex++;
 
           chunkPath = new Path(dictionaryPathBase, name + chunkIndex);
@@ -269,7 +269,7 @@ public final class MailToPrefsDriver extends AbstractJob {
       }
       maxTermDimension[0] = i;
     } finally {
-      Closeables.close(dictWriter, true);
+      Closeables.close(dictWriter, false);
     }
 
     return chunkPaths;

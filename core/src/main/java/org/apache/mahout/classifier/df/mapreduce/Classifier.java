@@ -17,6 +17,10 @@
 
 package org.apache.mahout.classifier.df.mapreduce;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Random;
+
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
@@ -46,11 +50,6 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.List;
-import java.util.Random;
 
 /**
  * Mapreduce implementation that classifies the Input data using a previousely built decision forest
@@ -164,7 +163,7 @@ public class Classifier {
           }
         }
       } finally {
-        Closeables.close(ofile, true);
+        Closeables.close(ofile, false);
       }
     }
     results = new double[resList.size()][2];

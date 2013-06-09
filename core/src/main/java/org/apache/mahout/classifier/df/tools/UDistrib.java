@@ -17,6 +17,12 @@
 
 package org.apache.mahout.classifier.df.tools;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Locale;
+import java.util.Random;
+import java.util.Scanner;
+
 import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
@@ -40,12 +46,6 @@ import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Locale;
-import java.util.Random;
-import java.util.Scanner;
 
 /**
  * This tool is used to uniformly distribute the class of all the tuples of the dataset over a given number of
@@ -188,7 +188,7 @@ public final class UDistrib {
     // close all the files.
     scanner.close();
     for (FSDataOutputStream file : files) {
-      Closeables.close(file, true);
+      Closeables.close(file, false);
     }
     
     // merge all output files

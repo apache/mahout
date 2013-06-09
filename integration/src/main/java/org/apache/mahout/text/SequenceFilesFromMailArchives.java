@@ -16,9 +16,17 @@
  */
 package org.apache.mahout.text;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
-
 import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.hadoop.conf.Configuration;
@@ -31,15 +39,6 @@ import org.apache.mahout.utils.email.MailProcessor;
 import org.apache.mahout.utils.io.ChunkedWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 /**
  * Converts a directory of gzipped mail archives into SequenceFiles of specified
@@ -71,7 +70,7 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
         log.info("Parsed {} messages from {} in time: {}", cnt, options.getInput().getAbsolutePath(), finish - start);
       }
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
   }
 

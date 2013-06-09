@@ -17,6 +17,13 @@
 
 package org.apache.mahout.cf.taste.hadoop.example.als.netflix;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.List;
+import java.util.regex.Pattern;
+
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -31,13 +38,6 @@ import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.common.iterator.FileLineIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.List;
-import java.util.regex.Pattern;
 
 /** converts the raw files provided by netflix to an appropriate input format */
 public final class NetflixDatasetConverter {
@@ -103,7 +103,7 @@ public final class NetflixDatasetConverter {
       }
       log.info("{} ratings processed. done.", ratingsProcessed);
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
 
     log.info("Reading probes...");
@@ -142,7 +142,7 @@ public final class NetflixDatasetConverter {
       }
       log.info("{} ratings processed. done.", ratingsProcessed);
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
   }
 

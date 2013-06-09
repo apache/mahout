@@ -18,6 +18,13 @@
 
 package org.apache.mahout.classifier.sequencelearning.hmm;
 
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+
 import com.google.common.base.Charsets;
 import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
@@ -29,13 +36,6 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.mahout.common.CommandLineUtil;
-
-import java.io.DataInputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 
 /**
  * Command-line tool for generating random sequences by given HMM
@@ -99,7 +99,7 @@ public final class RandomSequenceGenerator {
           writer.print(' ');
         }
       } finally {
-        Closeables.close(writer, true);
+        Closeables.close(writer, false);
       }
     } catch (OptionException e) {
       CommandLineUtil.printHelp(optionGroup);

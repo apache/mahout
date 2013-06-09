@@ -109,7 +109,7 @@ public final class VectorWritableTest extends RandomizedTest {
     try {
       toWrite.write(dos);
     } finally {
-      Closeables.close(dos, true);
+      Closeables.close(dos, false);
     }
 
     ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());

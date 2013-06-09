@@ -89,7 +89,7 @@ public final class SplitInputTest extends MahoutTestCase {
      for (String[] entry : ClassifierData.DATA) {
       if (!entry[0].equals(currentLabel)) {
         currentLabel = entry[0];
-        Closeables.close(writer, true);
+        Closeables.close(writer, false);
 
         writer = new BufferedWriter(new OutputStreamWriter(fs.create(new Path(tempInputDirectory, currentLabel)),
             Charsets.UTF_8));
@@ -98,7 +98,7 @@ public final class SplitInputTest extends MahoutTestCase {
       writer.write(currentLabel + '\t' + entry[1] + '\n');
      }
     }finally {
-     Closeables.close(writer, true);
+     Closeables.close(writer, false);
     }
   }
 

@@ -17,6 +17,11 @@
 
 package org.apache.mahout.utils.vectors.csv;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.Iterator;
+
 import com.google.common.io.Closeables;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.utils.MahoutTestCase;
@@ -24,11 +29,6 @@ import org.apache.mahout.utils.vectors.RandomVectorIterable;
 import org.apache.mahout.utils.vectors.VectorHelper;
 import org.apache.mahout.utils.vectors.io.TextualVectorWriter;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.Iterator;
 
 public class CSVVectorIteratorTest extends MahoutTestCase {
 
@@ -47,7 +47,7 @@ public class CSVVectorIteratorTest extends MahoutTestCase {
       Iterable<Vector> iter = new RandomVectorIterable(50);
       writer.write(iter);
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
     Iterator<Vector> csvIter = new CSVVectorIterator(new StringReader(sWriter.getBuffer().toString()));
     int count = 0;

@@ -17,6 +17,11 @@
 
 package org.apache.mahout.fpm.pfpgrowth;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.List;
+
 import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
@@ -39,11 +44,6 @@ import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.List;
 
 public final class FPGrowthDriver extends AbstractJob {
 
@@ -179,7 +179,7 @@ public final class FPGrowthDriver extends AbstractJob {
                 new StringOutputConverter(new SequenceFileOutputCollector<Text, TopKStringPatterns>(writer)),
                 new ContextStatusUpdater(null));
       } finally {
-        Closeables.close(writer, true);
+        Closeables.close(writer, false);
         Closeables.close(inputStream, true);
         Closeables.close(inputStreamAgain, true);
       }
@@ -201,7 +201,7 @@ public final class FPGrowthDriver extends AbstractJob {
                 new StringOutputConverter(new SequenceFileOutputCollector<Text, TopKStringPatterns>(writer)),
                 new ContextStatusUpdater(null));
       } finally {
-        Closeables.close(writer, true);
+        Closeables.close(writer, false);
         Closeables.close(inputStream, true);
         Closeables.close(inputStreamAgain, true);
       }

@@ -217,7 +217,7 @@ public final class ClusterDumper extends AbstractJob {
       log.info("Wrote {} clusters", numWritten);
     } finally {
       if (shouldClose) {
-        Closeables.close(clusterWriter, true);
+        Closeables.close(clusterWriter, false);
       } else {
         if (clusterWriter instanceof GraphMLClusterWriter) {
           clusterWriter.close();

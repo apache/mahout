@@ -17,6 +17,13 @@
 
 package org.apache.mahout.utils.vectors;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.Iterator;
+import java.util.Set;
+
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
@@ -38,13 +45,6 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.util.Iterator;
-import java.util.Set;
 
 /**
  * Can read in a {@link org.apache.hadoop.io.SequenceFile} of {@link Vector}s and dump
@@ -249,7 +249,7 @@ public final class VectorDumper extends AbstractJob {
       writer.flush();
     } finally {
       if (shouldClose) {
-        Closeables.close(writer, true);
+        Closeables.close(writer, false);
       }
     }
 

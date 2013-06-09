@@ -17,6 +17,12 @@
 
 package org.apache.mahout.cf.taste.hadoop.als;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.List;
+import java.util.Map;
+
 import com.google.common.base.Charsets;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
@@ -42,12 +48,6 @@ import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.map.OpenIntObjectHashMap;
-
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.List;
-import java.util.Map;
 
 /**
  * <p>Measures the root-mean-squared error of a ratring matrix factorization against a test set.</p>
@@ -112,7 +112,7 @@ public class FactorizationEvaluator extends AbstractJob {
       writer = new BufferedWriter(new OutputStreamWriter(outputStream, Charsets.UTF_8));
       writer.write(String.valueOf(rmse));
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
 
     return 0;

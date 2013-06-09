@@ -38,10 +38,9 @@ import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.hadoop.DistributedRowMatrix.MatrixEntryWritable;
 import org.apache.mahout.math.map.OpenIntObjectHashMap;
-import org.easymock.IArgumentMatcher;
 import org.easymock.EasyMock;
+import org.easymock.IArgumentMatcher;
 import org.junit.Assert;
 
 /**
@@ -189,7 +188,7 @@ public final class MathHelper {
         writer.append(new IntWritable(n), new VectorWritable(v));
       }
     } finally {
-      Closeables.close(writer, true);
+      Closeables.close(writer, false);
     }
   }
 
