@@ -90,15 +90,19 @@ if [ ! -e ${WORK_DIR}/reuters-out-seqdir ]; then
       tar xzf ${WORK_DIR}/reuters21578.tar.gz -C ${WORK_DIR}/reuters-sgm
     fi
   
+    echo "Extracting Reuters"
+    $MAHOUT org.apache.lucene.benchmark.utils.ExtractReuters ${WORK_DIR}/reuters-sgm ${WORK_DIR}/reuters-out
     if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
+        echo "Copying Reuters data to Hadoop"
         set +e
         $HADOOP dfs -rmr ${WORK_DIR}/reuters-sgm
+        $HADOOP dfs -rmr ${WORK_DIR}/reuters-out
         set -e
-        $HADOOP dfs -put ${WORK_DIR}/reuters-sgm ${WORK_DIR}/reuters-sgm 
-    fi 
-    $MAHOUT org.apache.lucene.benchmark.utils.ExtractReuters ${WORK_DIR}/reuters-sgm ${WORK_DIR}/reuters-out
+        $HADOOP dfs -put ${WORK_DIR}/reuters-sgm ${WORK_DIR}/reuters-sgm
+        $HADOOP dfs -put ${WORK_DIR}/reuters-out ${WORK_DIR}/reuters-out
+    fi
   fi
-
+  echo "Converting to Sequence Files from Directory"
   $MAHOUT seqdirectory -i ${WORK_DIR}/reuters-out -o ${WORK_DIR}/reuters-out-seqdir -c UTF-8 -chunk 5
 fi
 

@@ -17,8 +17,6 @@
 
 package org.apache.mahout.vectorizer;
 
-import java.util.List;
-
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -45,121 +43,123 @@ import org.apache.mahout.vectorizer.tfidf.TFIDFConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 /**
  * Converts a given set of sequence files into SparseVectors
  */
 public final class SparseVectorsFromSequenceFiles extends AbstractJob {
-  
+
   private static final Logger log = LoggerFactory.getLogger(SparseVectorsFromSequenceFiles.class);
-  
+
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new SparseVectorsFromSequenceFiles(), args);
   }
-  
+
   @Override
   public int run(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
-    
+
     Option inputDirOpt = DefaultOptionCreator.inputOption().create();
-    
+
     Option outputDirOpt = DefaultOptionCreator.outputOption().create();
-    
+
     Option minSupportOpt = obuilder.withLongName("minSupport").withArgument(
-      abuilder.withName("minSupport").withMinimum(1).withMaximum(1).create()).withDescription(
-      "(Optional) Minimum Support. Default Value: 2").withShortName("s").create();
-    
+            abuilder.withName("minSupport").withMinimum(1).withMaximum(1).create()).withDescription(
+            "(Optional) Minimum Support. Default Value: 2").withShortName("s").create();
+
     Option analyzerNameOpt = obuilder.withLongName("analyzerName").withArgument(
-      abuilder.withName("analyzerName").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The class name of the analyzer").withShortName("a").create();
-    
+            abuilder.withName("analyzerName").withMinimum(1).withMaximum(1).create()).withDescription(
+            "The class name of the analyzer").withShortName("a").create();
+
     Option chunkSizeOpt = obuilder.withLongName("chunkSize").withArgument(
-      abuilder.withName("chunkSize").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The chunkSize in MegaBytes. 100-10000 MB").withShortName("chunk").create();
-    
+            abuilder.withName("chunkSize").withMinimum(1).withMaximum(1).create()).withDescription(
+            "The chunkSize in MegaBytes. 100-10000 MB").withShortName("chunk").create();
+
     Option weightOpt = obuilder.withLongName("weight").withRequired(false).withArgument(
-      abuilder.withName("weight").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The kind of weight to use. Currently TF or TFIDF").withShortName("wt").create();
-    
+            abuilder.withName("weight").withMinimum(1).withMaximum(1).create()).withDescription(
+            "The kind of weight to use. Currently TF or TFIDF").withShortName("wt").create();
+
     Option minDFOpt = obuilder.withLongName("minDF").withRequired(false).withArgument(
-      abuilder.withName("minDF").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The minimum document frequency.  Default is 1").withShortName("md").create();
+            abuilder.withName("minDF").withMinimum(1).withMaximum(1).create()).withDescription(
+            "The minimum document frequency.  Default is 1").withShortName("md").create();
 
     Option maxDFPercentOpt = obuilder.withLongName("maxDFPercent").withRequired(false).withArgument(
-        abuilder.withName("maxDFPercent").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The max percentage of docs for the DF.  Can be used to remove really high frequency terms."
-            + " Expressed as an integer between 0 and 100. Default is 99.  If maxDFSigma is also set, "
-            + "it will override this value.").withShortName("x").create();
+            abuilder.withName("maxDFPercent").withMinimum(1).withMaximum(1).create()).withDescription(
+            "The max percentage of docs for the DF.  Can be used to remove really high frequency terms."
+                    + " Expressed as an integer between 0 and 100. Default is 99.  If maxDFSigma is also set, "
+                    + "it will override this value.").withShortName("x").create();
 
     Option maxDFSigmaOpt = obuilder.withLongName("maxDFSigma").withRequired(false).withArgument(
-      abuilder.withName("maxDFSigma").withMinimum(1).withMaximum(1).create()).withDescription(
-      "What portion of the tf (tf-idf) vectors to be used, expressed in times the standard deviation (sigma) "
-          + "of the document frequencies of these vectors. Can be used to remove really high frequency terms."
-          + " Expressed as a double value. Good value to be specified is 3.0. In case the value is less than 0 "
-          + "no vectors will be filtered out. Default is -1.0.  Overrides maxDFPercent").withShortName("xs").create();
-    
+            abuilder.withName("maxDFSigma").withMinimum(1).withMaximum(1).create()).withDescription(
+            "What portion of the tf (tf-idf) vectors to be used, expressed in times the standard deviation (sigma) "
+                    + "of the document frequencies of these vectors. Can be used to remove really high frequency terms."
+                    + " Expressed as a double value. Good value to be specified is 3.0. In case the value is less than 0 "
+                    + "no vectors will be filtered out. Default is -1.0.  Overrides maxDFPercent").withShortName("xs").create();
+
     Option minLLROpt = obuilder.withLongName("minLLR").withRequired(false).withArgument(
-      abuilder.withName("minLLR").withMinimum(1).withMaximum(1).create()).withDescription(
-      "(Optional)The minimum Log Likelihood Ratio(Float)  Default is " + LLRReducer.DEFAULT_MIN_LLR)
-        .withShortName("ml").create();
-    
+            abuilder.withName("minLLR").withMinimum(1).withMaximum(1).create()).withDescription(
+            "(Optional)The minimum Log Likelihood Ratio(Float)  Default is " + LLRReducer.DEFAULT_MIN_LLR)
+            .withShortName("ml").create();
+
     Option numReduceTasksOpt = obuilder.withLongName("numReducers").withArgument(
-      abuilder.withName("numReducers").withMinimum(1).withMaximum(1).create()).withDescription(
-      "(Optional) Number of reduce tasks. Default Value: 1").withShortName("nr").create();
-    
+            abuilder.withName("numReducers").withMinimum(1).withMaximum(1).create()).withDescription(
+            "(Optional) Number of reduce tasks. Default Value: 1").withShortName("nr").create();
+
     Option powerOpt = obuilder.withLongName("norm").withRequired(false).withArgument(
-      abuilder.withName("norm").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The norm to use, expressed as either a float or \"INF\" if you want to use the Infinite norm.  "
-          + "Must be greater or equal to 0.  The default is not to normalize").withShortName("n").create();
-    
+            abuilder.withName("norm").withMinimum(1).withMaximum(1).create()).withDescription(
+            "The norm to use, expressed as either a float or \"INF\" if you want to use the Infinite norm.  "
+                    + "Must be greater or equal to 0.  The default is not to normalize").withShortName("n").create();
+
     Option logNormalizeOpt = obuilder.withLongName("logNormalize").withRequired(false)
-    .withDescription(
-      "(Optional) Whether output vectors should be logNormalize. If set true else false")
-    .withShortName("lnorm").create();
-    
+            .withDescription(
+                    "(Optional) Whether output vectors should be logNormalize. If set true else false")
+            .withShortName("lnorm").create();
+
     Option maxNGramSizeOpt = obuilder.withLongName("maxNGramSize").withRequired(false).withArgument(
-      abuilder.withName("ngramSize").withMinimum(1).withMaximum(1).create())
-        .withDescription(
-          "(Optional) The maximum size of ngrams to create"
-              + " (2 = bigrams, 3 = trigrams, etc) Default Value:1").withShortName("ng").create();
-    
+            abuilder.withName("ngramSize").withMinimum(1).withMaximum(1).create())
+            .withDescription(
+                    "(Optional) The maximum size of ngrams to create"
+                            + " (2 = bigrams, 3 = trigrams, etc) Default Value:1").withShortName("ng").create();
+
     Option sequentialAccessVectorOpt = obuilder.withLongName("sequentialAccessVector").withRequired(false)
-        .withDescription(
-          "(Optional) Whether output vectors should be SequentialAccessVectors. If set true else false")
-        .withShortName("seq").create();
-    
+            .withDescription(
+                    "(Optional) Whether output vectors should be SequentialAccessVectors. If set true else false")
+            .withShortName("seq").create();
+
     Option namedVectorOpt = obuilder.withLongName("namedVector").withRequired(false)
-    .withDescription(
-      "(Optional) Whether output vectors should be NamedVectors. If set true else false")
-    .withShortName("nv").create();
-    
+            .withDescription(
+                    "(Optional) Whether output vectors should be NamedVectors. If set true else false")
+            .withShortName("nv").create();
+
     Option overwriteOutput = obuilder.withLongName("overwrite").withRequired(false).withDescription(
-      "If set, overwrite the output directory").withShortName("ow").create();
+            "If set, overwrite the output directory").withShortName("ow").create();
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
-        .create();
-    
+            .create();
+
     Group group = gbuilder.withName("Options").withOption(minSupportOpt).withOption(analyzerNameOpt)
-        .withOption(chunkSizeOpt).withOption(outputDirOpt).withOption(inputDirOpt).withOption(minDFOpt)
-        .withOption(maxDFSigmaOpt).withOption(maxDFPercentOpt).withOption(weightOpt).withOption(powerOpt)
-        .withOption(minLLROpt).withOption(numReduceTasksOpt).withOption(maxNGramSizeOpt).withOption(overwriteOutput)
-        .withOption(helpOpt).withOption(sequentialAccessVectorOpt).withOption(namedVectorOpt)
-        .withOption(logNormalizeOpt)
-        .create();
+            .withOption(chunkSizeOpt).withOption(outputDirOpt).withOption(inputDirOpt).withOption(minDFOpt)
+            .withOption(maxDFSigmaOpt).withOption(maxDFPercentOpt).withOption(weightOpt).withOption(powerOpt)
+            .withOption(minLLROpt).withOption(numReduceTasksOpt).withOption(maxNGramSizeOpt).withOption(overwriteOutput)
+            .withOption(helpOpt).withOption(sequentialAccessVectorOpt).withOption(namedVectorOpt)
+            .withOption(logNormalizeOpt)
+            .create();
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
       parser.setHelpOption(helpOpt);
       CommandLine cmdLine = parser.parse(args);
-      
+
       if (cmdLine.hasOption(helpOpt)) {
         CommandLineUtil.printHelp(group);
         return -1;
       }
-      
+
       Path inputDir = new Path((String) cmdLine.getValue(inputDirOpt));
       Path outputDir = new Path((String) cmdLine.getValue(outputDirOpt));
-      
+
       int chunkSize = 100;
       if (cmdLine.hasOption(chunkSizeOpt)) {
         chunkSize = Integer.parseInt((String) cmdLine.getValue(chunkSizeOpt));
@@ -169,9 +169,9 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
         String minSupportString = (String) cmdLine.getValue(minSupportOpt);
         minSupport = Integer.parseInt(minSupportString);
       }
-      
+
       int maxNGramSize = 1;
-      
+
       if (cmdLine.hasOption(maxNGramSizeOpt)) {
         try {
           maxNGramSize = Integer.parseInt(cmdLine.getValue(maxNGramSizeOpt).toString());
@@ -180,17 +180,17 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
         }
       }
       log.info("Maximum n-gram size is: {}", maxNGramSize);
-      
+
       if (cmdLine.hasOption(overwriteOutput)) {
         HadoopUtil.delete(getConf(), outputDir);
       }
-      
+
       float minLLRValue = LLRReducer.DEFAULT_MIN_LLR;
       if (cmdLine.hasOption(minLLROpt)) {
         minLLRValue = Float.parseFloat(cmdLine.getValue(minLLROpt).toString());
       }
       log.info("Minimum LLR value: {}", minLLRValue);
-      
+
       int reduceTasks = 1;
       if (cmdLine.hasOption(numReduceTasksOpt)) {
         reduceTasks = Integer.parseInt(cmdLine.getValue(numReduceTasksOpt).toString());
@@ -205,9 +205,9 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
         // you can't instantiate it
         AnalyzerUtils.createAnalyzer(analyzerClass);
       }
-      
+
       boolean processIdf;
-      
+
       if (cmdLine.hasOption(weightOpt)) {
         String wString = cmdLine.getValue(weightOpt).toString();
         if ("tf".equalsIgnoreCase(wString)) {
@@ -220,7 +220,7 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
       } else {
         processIdf = true;
       }
-      
+
       int minDf = 1;
       if (cmdLine.hasOption(minDFOpt)) {
         minDf = Integer.parseInt(cmdLine.getValue(minDFOpt).toString());
@@ -233,7 +233,7 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
       if (cmdLine.hasOption(maxDFSigmaOpt)) {
         maxDFSigma = Double.parseDouble(cmdLine.getValue(maxDFSigmaOpt).toString());
       }
-      
+
       float norm = PartialVectorMerger.NO_NORMALIZING;
       if (cmdLine.hasOption(powerOpt)) {
         String power = cmdLine.getValue(powerOpt).toString();
@@ -243,12 +243,12 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
           norm = Float.parseFloat(power);
         }
       }
-      
+
       boolean logNormalize = false;
       if (cmdLine.hasOption(logNormalizeOpt)) {
         logNormalize = true;
       }
-
+      log.info("Tokenizing documents in {}", inputDir);
       Configuration conf = getConf();
       Path tokenizedPath = new Path(outputDir, DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER);
       //TODO: move this into DictionaryVectorizer , and then fold SparseVectorsFrom with EncodedVectorsFrom
@@ -264,98 +264,99 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
       if (cmdLine.hasOption(namedVectorOpt)) {
         namedVectors = true;
       }
-      boolean shouldPrune = maxDFSigma >= 0.0  || maxDFPercent > 0.00;
+      boolean shouldPrune = maxDFSigma >= 0.0 || maxDFPercent > 0.00;
       String tfDirName = shouldPrune
-          ? DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER + "-toprune"
-          : DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER;
-
+              ? DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER + "-toprune"
+              : DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER;
+      log.info("Creating Term Frequency Vectors");
       if (processIdf) {
         DictionaryVectorizer.createTermFrequencyVectors(tokenizedPath,
-                                                        outputDir,
-                                                        tfDirName,
-                                                        conf,
-                                                        minSupport,
-                                                        maxNGramSize,
-                                                        minLLRValue,
-                                                        -1.0f,
-                                                        false,
-                                                        reduceTasks,
-                                                        chunkSize,
-                                                        sequentialAccessOutput,
-                                                        namedVectors);
+                outputDir,
+                tfDirName,
+                conf,
+                minSupport,
+                maxNGramSize,
+                minLLRValue,
+                -1.0f,
+                false,
+                reduceTasks,
+                chunkSize,
+                sequentialAccessOutput,
+                namedVectors);
       } else {
         DictionaryVectorizer.createTermFrequencyVectors(tokenizedPath,
-                                                        outputDir,
-                                                        tfDirName,
-                                                        conf,
-                                                        minSupport,
-                                                        maxNGramSize,
-                                                        minLLRValue,
-                                                        norm,
-                                                        logNormalize,
-                                                        reduceTasks,
-                                                        chunkSize,
-                                                        sequentialAccessOutput,
-                                                        namedVectors);
+                outputDir,
+                tfDirName,
+                conf,
+                minSupport,
+                maxNGramSize,
+                minLLRValue,
+                norm,
+                logNormalize,
+                reduceTasks,
+                chunkSize,
+                sequentialAccessOutput,
+                namedVectors);
       }
 
       Pair<Long[], List<Path>> docFrequenciesFeatures = null;
       // Should document frequency features be processed
       if (shouldPrune || processIdf) {
+        log.info("Calculating IDF");
         docFrequenciesFeatures =
-            TFIDFConverter.calculateDF(new Path(outputDir, tfDirName),outputDir, conf, chunkSize);
+                TFIDFConverter.calculateDF(new Path(outputDir, tfDirName), outputDir, conf, chunkSize);
       }
 
       long maxDF = maxDFPercent; //if we are pruning by std dev, then this will get changed
       if (shouldPrune) {
-	long vectorCount = docFrequenciesFeatures.getFirst()[1];
-	if (maxDFSigma >= 0.0) {
-	  Path dfDir = new Path(outputDir, TFIDFConverter.WORDCOUNT_OUTPUT_FOLDER);
-	  Path stdCalcDir = new Path(outputDir, HighDFWordsPruner.STD_CALC_DIR);
+        long vectorCount = docFrequenciesFeatures.getFirst()[1];
+        if (maxDFSigma >= 0.0) {
+          Path dfDir = new Path(outputDir, TFIDFConverter.WORDCOUNT_OUTPUT_FOLDER);
+          Path stdCalcDir = new Path(outputDir, HighDFWordsPruner.STD_CALC_DIR);
 
-	  // Calculate the standard deviation
-	  double stdDev = BasicStats.stdDevForGivenMean(dfDir, stdCalcDir, 0.0, conf);
-	  maxDF = (int) (100.0 * maxDFSigma * stdDev / vectorCount);
-	}
+          // Calculate the standard deviation
+          double stdDev = BasicStats.stdDevForGivenMean(dfDir, stdCalcDir, 0.0, conf);
+          maxDF = (int) (100.0 * maxDFSigma * stdDev / vectorCount);
+        }
 
-	long maxDFThreshold = (long) (vectorCount * (maxDF / 100.0f));
+        long maxDFThreshold = (long) (vectorCount * (maxDF / 100.0f));
 
         // Prune the term frequency vectors
         Path tfDir = new Path(outputDir, tfDirName);
         Path prunedTFDir = new Path(outputDir, DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER);
         Path prunedPartialTFDir =
-            new Path(outputDir, DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER + "-partial");
-
+                new Path(outputDir, DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER + "-partial");
+        log.info("Pruning");
         if (processIdf) {
           HighDFWordsPruner.pruneVectors(tfDir,
-                                         prunedTFDir,
-                                         prunedPartialTFDir,
-                                         maxDFThreshold,
-					 minDf,
-                                         conf,
-                                         docFrequenciesFeatures,
-                                         -1.0f,
-                                         false,
-                                         reduceTasks);
+                  prunedTFDir,
+                  prunedPartialTFDir,
+                  maxDFThreshold,
+                  minDf,
+                  conf,
+                  docFrequenciesFeatures,
+                  -1.0f,
+                  false,
+                  reduceTasks);
         } else {
           HighDFWordsPruner.pruneVectors(tfDir,
-                                         prunedTFDir,
-                                         prunedPartialTFDir,
-                                         maxDFThreshold,
-					 minDf,
-                                         conf,
-                                         docFrequenciesFeatures,
-                                         norm,
-                                         logNormalize,
-                                         reduceTasks);
+                  prunedTFDir,
+                  prunedPartialTFDir,
+                  maxDFThreshold,
+                  minDf,
+                  conf,
+                  docFrequenciesFeatures,
+                  norm,
+                  logNormalize,
+                  reduceTasks);
         }
         HadoopUtil.delete(new Configuration(conf), tfDir);
       }
       if (processIdf) {
         TFIDFConverter.processTfIdf(
-               new Path(outputDir, DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER),
-               outputDir, conf, docFrequenciesFeatures, minDf, maxDF, norm, logNormalize,
-               sequentialAccessOutput, namedVectors, reduceTasks);
+                new Path(outputDir, DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER),
+                outputDir, conf, docFrequenciesFeatures, minDf, maxDF, norm, logNormalize,
+                sequentialAccessOutput, namedVectors, reduceTasks);
       }
     } catch (OptionException e) {
       log.error("Exception", e);
@@ -363,5 +364,5 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
     }
     return 0;
   }
-  
+
 }

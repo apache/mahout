@@ -52,6 +52,8 @@ import org.apache.mahout.vectorizer.term.TFPartialVectorReducer;
 import org.apache.mahout.vectorizer.term.TermCountCombiner;
 import org.apache.mahout.vectorizer.term.TermCountMapper;
 import org.apache.mahout.vectorizer.term.TermCountReducer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class converts a set of input documents in the sequence file format to vectors. The Sequence file
@@ -60,6 +62,7 @@ import org.apache.mahout.vectorizer.term.TermCountReducer;
  * This is a dictionary based Vectorizer.
  */
 public final class DictionaryVectorizer implements Vectorizer {
+  private static Logger log = LoggerFactory.getLogger(DictionaryVectorizer.class);
   
   public static final String DOCUMENT_VECTOR_OUTPUT_FOLDER = "tf-vectors";
   public static final String MIN_SUPPORT = "min.support";
@@ -167,6 +170,7 @@ public final class DictionaryVectorizer implements Vectorizer {
     
     int[] maxTermDimension = new int[1];
     List<Path> dictionaryChunks;
+    log.info("Creating dictionary from {} and saving at {}", input, dictionaryJobPath);
     if (maxNGramSize == 1) {
       startWordCounting(input, dictionaryJobPath, baseConf, minSupport);
       dictionaryChunks =

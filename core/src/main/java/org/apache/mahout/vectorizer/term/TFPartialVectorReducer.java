@@ -21,6 +21,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -40,6 +42,8 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 import org.apache.mahout.vectorizer.DictionaryVectorizer;
 import org.apache.mahout.vectorizer.common.PartialVectorMerger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -49,7 +53,7 @@ import java.util.Iterator;
  * Converts a document in to a sparse vector
  */
 public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, VectorWritable> {
-
+  private transient static Logger log = LoggerFactory.getLogger(TFPartialVectorReducer.class);
   private final OpenObjectIntHashMap<String> dictionary = new OpenObjectIntHashMap<String>();
 
   private int dimension;
@@ -62,7 +66,7 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
 
   @Override
   protected void reduce(Text key, Iterable<StringTuple> values, Context context)
-    throws IOException, InterruptedException {
+          throws IOException, InterruptedException {
     Iterator<StringTuple> it = values.iterator();
     if (!it.hasNext()) {
       return;
@@ -119,7 +123,18 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
     Path[] localFiles = DistributedCache.getLocalCacheFiles(conf);
     Preconditions.checkArgument(localFiles != null && localFiles.length >= 1,
             "missing paths from the DistributedCache");
-
+    LocalFileSystem localFs = FileSystem.getLocal(conf);
+    if (!localFs.exists(localFiles[0])) {
+      log.info("Can't find dictionary dist. cache file, looking in .getCacheFiles");
+      URI[] filesURIs = DistributedCache.getCacheFiles(conf);
+      if (filesURIs == null) {
+        throw new IOException("Cannot read Frequency list from Distributed Cache");
+      }
+      if (filesURIs.length != 1) {
+        throw new IOException("Cannot read Frequency list from Distributed Cache (" + localFiles.length + ')');
+      }
+      localFiles[0] = new Path(filesURIs[0].getPath());
+    }
     dimension = conf.getInt(PartialVectorMerger.DIMENSION, Integer.MAX_VALUE);
     sequentialAccess = conf.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
     namedVector = conf.getBoolean(PartialVectorMerger.NAMED_VECTOR, false);

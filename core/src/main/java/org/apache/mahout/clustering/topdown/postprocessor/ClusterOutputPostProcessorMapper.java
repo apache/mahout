@@ -17,26 +17,41 @@
 
 package org.apache.mahout.clustering.topdown.postprocessor;
 
-import java.io.IOException;
-
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.classify.WeightedVectorWritable;
 import org.apache.mahout.math.VectorWritable;
+
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * Mapper for post processing cluster output.
  */
 public class ClusterOutputPostProcessorMapper extends
-    Mapper<IntWritable,WeightedVectorWritable,Text,VectorWritable> {
-  
-  /**
-   * The key is the cluster id and the value is the vector.
-   */
+        Mapper<IntWritable, WeightedVectorWritable, IntWritable, VectorWritable> {
+
+  private Map<Integer, Integer> newClusterMappings;
+  private VectorWritable outputVector;
+
+  //read the current cluster ids, and populate the cluster mapping hash table
   @Override
-  protected void map(IntWritable key, WeightedVectorWritable vector, Context context) throws IOException,
-                                                                                     InterruptedException {
-    context.write(new Text(key.toString().trim()), new VectorWritable(vector.getVector()));
+  public void setup(Context context) throws IOException {
+    Configuration conf = context.getConfiguration();
+    //this give the clusters-x-final directory where the cluster ids can be read
+    Path clusterOutputPath = new Path(conf.get("clusterOutputPath"));
+    //we want the key to be the cluster id, the value to be the index
+    newClusterMappings = ClusterCountReader.getClusterIDs(clusterOutputPath, conf, true);
+    outputVector = new VectorWritable();
+  }
+
+  @Override
+  public void map(IntWritable key, WeightedVectorWritable val, Context context) throws IOException, InterruptedException {
+    //by pivoting on the cluster mapping value, we can make sure that each unique cluster goes to it's own reducer, since they
+    //are numbered from 0 to k-1, where k is the number of clusters
+    outputVector.set(val.getVector());
+    context.write(new IntWritable(newClusterMappings.get(key.get())), outputVector);
   }
 }
