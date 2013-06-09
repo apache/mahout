@@ -1,0 +1,18 @@
+   % Comments
+   %
+   % Comments go here   %
+   @RELATION MahoutDateTest
+
+   @ATTRIBUTE junk  NUMERIC
+   @ATTRIBUTE date1
+   @ATTRIBUTE date2   date "yyyy.MM.dd G 'at' HH:mm:ss z"
+   @ATTRIBUTE date3   date "EEE, MMM d, ''yy"
+   @ATTRIBUTE date4   date "K:mm a, z"
+   @ATTRIBUTE date5   date "yyyyy.MMMMM.dd GGG hh:mm aaa"
+   @ATTRIBUTE date6   date "EEE, d MMM yyyy HH:mm:ss Z"
+
+
+
+   @DATA
+   {0 1,1 "2001-07-04T12:08:56",2 "2001.07.04 AD at 12:08:56 PDT",3 "Wed, Jul 4, '01,4 0:08 PM, PDT",4 "0:08 PM, PDT", 5 "02001.July.04 AD 12:08 PM" ,6 "Wed, 4 Jul 2001 12:08:56 -0700"  }
+   {0 2,1 "2001-08-04T12:09:56",2 "2011.07.04 AD at 12:08:56 PDT",3 "Mon, Jul 4, '11,4 0:08 PM, PDT",4 "0:08 PM, PDT", 5 "02001.July.14 AD 12:08 PM" ,6 "Mon, 4 Jul 2011 12:08:56 -0700"  }

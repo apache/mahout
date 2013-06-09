@@ -1,0 +1,9 @@
+@RELATION 'quotes'
+@ATTRIBUTE 'theNumeric' NUMERIC
+@ATTRIBUTE "theInteger" INTEGER
+@ATTRIBUTE theReal REAL
+@ATTRIBUTE theNominal {"double-quote", 'single-quote', no-quote}
+@DATA
+1.0,2,3.0,"no-quote"
+4.0,5,6.0,single-quote
+7.0,8,9.0,'double-quote'

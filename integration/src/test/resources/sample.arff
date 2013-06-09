@@ -1,0 +1,11 @@
+%comments
+@RELATION Mahout
+@ATTRIBUTE foo numeric
+@ATTRIBUTE bar numeric
+@ATTRIBUTE timestamp DATE "yyyy-MM-dd HH:mm:ss"
+@ATTRIBUTE junk string
+@ATTRIBUTE theNominal {c,b,a}
+@DATA
+1,2, "2009-01-01 5:55:55", foo, c
+2,3
+{0 5,1 23}

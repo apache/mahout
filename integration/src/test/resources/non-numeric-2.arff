@@ -1,0 +1,24 @@
+   % Comments
+   %
+   % Comments go here   %
+   @RELATION Mahout
+
+   @ATTRIBUTE junk  NUMERIC
+   @ATTRIBUTE foo  NUMERIC
+   @ATTRIBUTE test   {f,z}
+   @ATTRIBUTE hockey  string
+   @ATTRIBUTE football   date "yyyy-MM-dd"
+
+
+
+   @DATA
+   {2 f,3 gretzky,4 1973-10-23}
+   {1 2.9,2 z,3 orr,4 1973-11-23}
+   {2 f,3 bossy,4 1981-10-23}
+   {1 2.6,2 f,3 lefleur,4 1989-10-23}
+   {3 esposito,4 1973-04-23}
+   {1 23.2,2 z,3 chelios,4 1999-2-23}
+   {3 richard,4 1973-10-12}
+   {3 howe,4 1983-06-23}
+   {0 2.2,2 f,3 messier,4 2008-11-23}
+   {2 f,3 roy,4 1973-10-13}

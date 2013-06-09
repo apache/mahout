@@ -1,0 +1,20 @@
+   % Comments
+   %
+   % Comments go here   %
+   @RELATION golf
+
+   @ATTRIBUTE outlook {sunny,overcast, rain}
+   @ATTRIBUTE temperature   NUMERIC
+   @ATTRIBUTE humidity  NUMERIC
+   @ATTRIBUTE windy {false, true}
+   @ATTRIBUTE class {dont_play, play}
+
+
+
+   @DATA
+   sunny,    65, ?, false, dont_play, {2}
+   sunny,    80, 90,  true, dont_play
+   overcast, 83, 78, false, play ,{3}
+   rain,     70, 96, false, play
+   rain,     68, 80, false, play
+   rain,     65, 70, true, play

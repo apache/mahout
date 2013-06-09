@@ -1,0 +1,22 @@
+Label bindings for Relation golf
+humidity,2
+windy,3
+outlook,0
+class,4
+temperature,1
+
+Values for nominal attributes
+3
+windy
+2
+true,2
+false,1
+outlook
+3
+sunny,1
+overcast,2
+rain,3
+class
+2
+play,2
+dont_play,1

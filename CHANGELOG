@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+  MAHOUT-1164: Make ARFF integration generate meta-data in JSON format (Marty Kube via ssc)
+
   MAHOUT-1163: Make random forest classifier meta-data file human readable (Marty Kube via ssc)
 
   MAHOUT-1243: Dictionary file format in Lucene-Mahout integration is not in SequenceFileFormat (ssc)
