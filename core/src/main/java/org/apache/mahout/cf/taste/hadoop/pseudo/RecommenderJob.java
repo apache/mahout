@@ -101,6 +101,7 @@ import org.apache.mahout.math.VarLongWritable;
  *   --numRecommendations 10  *
  * }
  */
+@Deprecated
 public final class RecommenderJob extends AbstractJob {
   
   @Override

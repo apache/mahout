@@ -27,6 +27,7 @@ import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
 
+@Deprecated
 public class MinHashMapper extends Mapper<Text, VectorWritable, Text, Writable> {
 
   private HashFunction[] hashFunction;

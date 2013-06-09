@@ -36,6 +36,7 @@ import java.util.Iterator;
  * <li>-i The input sequence file</li>
  * </ul>
  */
+@Deprecated
 public final class InformationGain extends AbstractJob {
 
   private static final String ENTROPY_FILE = "entropy";

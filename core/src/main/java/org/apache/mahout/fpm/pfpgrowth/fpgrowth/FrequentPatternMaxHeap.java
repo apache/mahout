@@ -24,6 +24,7 @@ import com.google.common.collect.Sets;
 import org.apache.mahout.math.map.OpenLongObjectHashMap;
 
 /**  keeps top K Attributes in a TreeSet */
+@Deprecated
 public final class FrequentPatternMaxHeap {
   
   private int count;

@@ -30,6 +30,7 @@ import org.apache.mahout.math.VectorWritable;
  * DirichletCluster algorithm. Models use a DistanceMeasure to calculate pdf
  * values.
  */
+@Deprecated
 public class DistanceMeasureClusterDistribution extends AbstractVectorModelDistribution {
 
   private DistanceMeasure measure;

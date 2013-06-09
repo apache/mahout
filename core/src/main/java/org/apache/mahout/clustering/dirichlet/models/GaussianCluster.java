@@ -24,6 +24,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.VectorWritable;
 
+@Deprecated
 public class GaussianCluster extends AbstractCluster {
   
   public GaussianCluster() {}

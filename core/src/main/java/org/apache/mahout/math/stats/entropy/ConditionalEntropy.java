@@ -38,6 +38,7 @@ import java.io.IOException;
  * <li>-o The output sequence file</li>
  * </ul>
  */
+@Deprecated
 public final class ConditionalEntropy extends AbstractJob {
 
   private long numberItems;

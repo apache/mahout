@@ -25,6 +25,7 @@ import org.apache.mahout.math.Vector;
 import org.junit.Before;
 import org.junit.Test;
 
+@Deprecated
 public final class WinnowTrainerTest extends MahoutTestCase {
 
   private WinnowTrainer trainer;

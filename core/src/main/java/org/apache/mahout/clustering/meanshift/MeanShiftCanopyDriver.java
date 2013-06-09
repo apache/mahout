@@ -63,6 +63,7 @@ import com.google.common.io.Closeables;
  * This class implements the driver for Mean Shift Canopy clustering
  * 
  */
+@Deprecated
 public class MeanShiftCanopyDriver extends AbstractJob {
 
   public static final String MAPRED_REDUCE_TASKS = "mapred.reduce.tasks";

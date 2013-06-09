@@ -24,6 +24,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 
+@Deprecated
 final class SlopeOneDiffsToAveragesReducer extends
     Reducer<EntityEntityWritable,FloatWritable,EntityEntityWritable,FullRunningAverageAndStdDevWritable> {
   

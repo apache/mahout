@@ -32,6 +32,7 @@ import org.apache.mahout.common.Pair;
  * A class which collects Top K string patterns
  *
  */
+@Deprecated
 public final class TopKStringPatterns implements Writable {
   private final List<Pair<List<String>,Long>> frequentPatterns;
   

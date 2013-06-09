@@ -22,6 +22,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.junit.Test;
 
+@Deprecated
 public final class TestDistributions extends MahoutTestCase {
 
   @Test

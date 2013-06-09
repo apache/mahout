@@ -28,6 +28,7 @@ import java.io.IOException;
 /**
  * Calculates the entropy for the value with H(x) = x * log(x)
  */
+@Deprecated
 public final class CalculateEntropyMapper extends Mapper<Text, VarIntWritable, NullWritable, DoubleWritable> {
 
   private final DoubleWritable result = new DoubleWritable();

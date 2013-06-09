@@ -26,6 +26,7 @@ import java.util.Arrays;
  * support(the number of times the pattern is seen in the dataset)
  * 
  */
+@Deprecated
 public class Pattern implements Comparable<Pattern> {
   
   private static final int DEFAULT_INITIAL_SIZE = 2;

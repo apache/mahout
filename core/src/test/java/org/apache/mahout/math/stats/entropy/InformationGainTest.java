@@ -27,6 +27,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
+@Deprecated
 public final class InformationGainTest extends MahoutTestCase {
 
   @Test

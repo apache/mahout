@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.io.Resources;
 
+@Deprecated
 public class PFPGrowthSynthDataTest2 extends MahoutTestCase {
   
   private final Parameters params = new Parameters();

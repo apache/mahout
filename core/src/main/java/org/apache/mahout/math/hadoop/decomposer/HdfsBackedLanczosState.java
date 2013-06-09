@@ -37,6 +37,7 @@ import org.apache.mahout.math.decomposer.lanczos.LanczosState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated
 public class HdfsBackedLanczosState extends LanczosState implements Configurable {
 
   private static final Logger log = LoggerFactory.getLogger(HdfsBackedLanczosState.class);

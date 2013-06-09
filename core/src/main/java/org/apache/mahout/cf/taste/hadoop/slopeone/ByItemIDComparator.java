@@ -22,6 +22,7 @@ import java.util.Comparator;
 
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 
+@Deprecated
 final class ByItemIDComparator implements Comparator<EntityPrefWritable>, Serializable {
   
   private static final Comparator<EntityPrefWritable> INSTANCE = new ByItemIDComparator();

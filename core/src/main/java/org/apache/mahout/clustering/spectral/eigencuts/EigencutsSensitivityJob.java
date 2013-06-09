@@ -65,6 +65,7 @@ import org.apache.mahout.math.VectorWritable;
  * <p>Overall, this creates an n-by-n (possibly sparse) matrix with a maximum
  * of n^2 non-zero elements, minimum of n non-zero elements.</p>
  */
+@Deprecated
 public final class EigencutsSensitivityJob {
 
   private EigencutsSensitivityJob() {

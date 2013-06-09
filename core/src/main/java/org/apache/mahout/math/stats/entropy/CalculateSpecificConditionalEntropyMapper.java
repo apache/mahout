@@ -27,6 +27,7 @@ import java.io.IOException;
 /**
  * Drops the key.
  */
+@Deprecated
 public final class CalculateSpecificConditionalEntropyMapper
     extends Mapper<Text, DoubleWritable, NullWritable, DoubleWritable> {
 

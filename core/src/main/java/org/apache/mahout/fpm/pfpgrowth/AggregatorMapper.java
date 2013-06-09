@@ -32,6 +32,7 @@ import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
  * and select the top K frequent patterns
  * 
  */
+@Deprecated
 public class AggregatorMapper extends Mapper<Text,TopKStringPatterns,Text,TopKStringPatterns> {
   
   @Override

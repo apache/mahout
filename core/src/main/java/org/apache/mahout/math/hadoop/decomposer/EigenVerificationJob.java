@@ -66,6 +66,7 @@ import org.slf4j.LoggerFactory;
  * If all the eigenvectors can fit in memory, --inMemory allows for a speedier completion of this task by doing so.
  * </p>
  */
+@Deprecated
 public class EigenVerificationJob extends AbstractJob {
 
   public static final String CLEAN_EIGENVECTORS = "cleanEigenvectors";

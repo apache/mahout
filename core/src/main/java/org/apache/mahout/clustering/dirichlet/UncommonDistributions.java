@@ -24,6 +24,7 @@ import org.apache.mahout.common.RandomWrapper;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 
+@Deprecated
 public final class UncommonDistributions {
   
   public static final double SQRT2PI = Math.sqrt(2.0 * Math.PI);

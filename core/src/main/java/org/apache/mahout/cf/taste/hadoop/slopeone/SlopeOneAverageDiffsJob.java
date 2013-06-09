@@ -39,6 +39,7 @@ import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.math.VarLongWritable;
 
+@Deprecated
 public final class SlopeOneAverageDiffsJob extends AbstractJob {
   
   @Override

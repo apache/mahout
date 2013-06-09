@@ -26,6 +26,7 @@ import java.io.IOException;
 /**
  * Subtracts the partial entropy.
  */
+@Deprecated
 public final class CalculateEntropyReducer
     extends Reducer<NullWritable, DoubleWritable, NullWritable, DoubleWritable> {
 

@@ -29,6 +29,7 @@ import org.junit.Test;
 
 import java.util.List;
 
+@Deprecated
 public final class KnnItemBasedRecommenderTest extends TasteTestCase {
 
   @Test

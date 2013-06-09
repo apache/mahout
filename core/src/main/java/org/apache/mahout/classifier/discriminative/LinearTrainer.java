@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
  * into main memory - this should be the first thing to change when switching to
  * Hadoop.
  */
+@Deprecated
 public abstract class LinearTrainer {
   
   private static final Logger log = LoggerFactory.getLogger(LinearTrainer.class);

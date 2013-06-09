@@ -31,6 +31,7 @@ import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.VectorWritable;
 
+@Deprecated
 public final class MinHashDriver extends AbstractJob {
 
   public static final String NUM_HASH_FUNCTIONS = "numHashFunctions";

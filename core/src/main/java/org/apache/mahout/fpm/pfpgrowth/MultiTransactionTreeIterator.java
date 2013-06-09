@@ -26,6 +26,7 @@ import org.apache.mahout.math.list.IntArrayList;
 /**
  * Iterates over multiple transaction trees to produce a single iterator of transactions
  */
+@Deprecated
 public final class MultiTransactionTreeIterator extends AbstractIterator<IntArrayList> {
   
   private final Iterator<Pair<IntArrayList,Long>> pIterator;

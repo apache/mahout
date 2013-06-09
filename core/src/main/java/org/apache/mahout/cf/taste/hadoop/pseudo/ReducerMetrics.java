@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.hadoop.pseudo;
 
 /** Custom metrics collected by {@link RecommenderReducer}. */
+@Deprecated
 public enum ReducerMetrics {
   
   /** Number of unique users for which recommendations were produced */

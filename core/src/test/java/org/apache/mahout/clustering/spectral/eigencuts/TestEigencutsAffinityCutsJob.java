@@ -49,6 +49,7 @@ import org.junit.Test;
  * actual checks on the sensitivities and zeroes out the necessary affinities,
  * and at last the reducer reforms the affinity matrix.</p>
  */
+@Deprecated
 public class TestEigencutsAffinityCutsJob extends MahoutTestCase {
   
   private final double [][] affinity = { {0, 10, 2, 1}, {10, 0, 2, 2},

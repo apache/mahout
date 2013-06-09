@@ -27,6 +27,7 @@ import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 
+@Deprecated
 public class MeanShiftCanopyClusterer {
 
   private final double convergenceDelta;

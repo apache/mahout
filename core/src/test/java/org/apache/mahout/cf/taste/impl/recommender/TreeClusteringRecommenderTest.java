@@ -28,6 +28,7 @@ import org.junit.Test;
 import java.util.List;
 
 /** <p>Tests {@link TreeClusteringRecommender}.</p> */
+@Deprecated
 public final class TreeClusteringRecommenderTest extends TasteTestCase {
 
   @Test

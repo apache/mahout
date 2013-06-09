@@ -29,6 +29,7 @@ import org.apache.hadoop.mapred.OutputCollector;
  * @param <K>
  * @param <V>
  */
+@Deprecated
 public class SequenceFileOutputCollector<K extends Writable,V extends Writable> implements
     OutputCollector<K,V> {
   private final SequenceFile.Writer writer;

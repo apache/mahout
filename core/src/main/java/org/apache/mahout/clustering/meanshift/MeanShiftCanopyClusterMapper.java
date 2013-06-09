@@ -33,6 +33,7 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterab
 
 import com.google.common.collect.Lists;
 
+@Deprecated
 public class MeanShiftCanopyClusterMapper
   extends Mapper<WritableComparable<?>, ClusterWritable, IntWritable, WeightedVectorWritable> {
 

@@ -33,6 +33,7 @@ import org.apache.mahout.math.list.IntArrayList;
  * a point total which is the sum of all the points and is used to compute the
  * centroid when needed.
  */
+@Deprecated
 public class MeanShiftCanopy extends Kluster {
 
   // TODO: this is still problematic from a scalability perspective, but how

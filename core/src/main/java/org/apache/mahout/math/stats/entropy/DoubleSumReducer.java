@@ -26,6 +26,7 @@ import java.io.IOException;
 /**
  * Analog of {@link org.apache.hadoop.mapreduce.lib.reduce.IntSumReducer} which sums the double values.
  */
+@Deprecated
 public final class DoubleSumReducer extends Reducer<Writable, DoubleWritable, Writable, DoubleWritable> {
 
   private final DoubleWritable result = new DoubleWritable();

@@ -28,6 +28,7 @@ import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.junit.Test;
 
 /** <p>Tests {@link TreeClusteringRecommender2}.</p> */
+@Deprecated
 public final class TreeClusteringRecommender2Test extends TasteTestCase {
 
   @Test

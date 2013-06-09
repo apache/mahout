@@ -27,6 +27,7 @@ import java.io.IOException;
 /**
  * Converts the key from {@link StringTuple} with values [key, value] to {@link Text} with value key.
  */
+@Deprecated
 public class SpecificConditionalEntropyMapper extends Mapper<StringTuple, VarIntWritable, Text, VarIntWritable> {
 
   private final Text resultKey = new Text();

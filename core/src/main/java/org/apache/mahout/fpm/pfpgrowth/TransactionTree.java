@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
  * Map/Reduce of {@link PFPGrowth} algorithm by reducing data size passed from the Mapper to the reducer where
  * {@link org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth} mining is done
  */
+@Deprecated
 public final class TransactionTree implements Writable, Iterable<Pair<IntArrayList,Long>> {
 
   private static final Logger log = LoggerFactory.getLogger(TransactionTree.class);

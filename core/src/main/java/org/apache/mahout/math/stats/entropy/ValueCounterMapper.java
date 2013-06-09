@@ -26,6 +26,7 @@ import java.io.IOException;
 /**
  * Emits the value and the count of 1 as {@link VarIntWritable}.
  */
+@Deprecated
 public final class ValueCounterMapper extends Mapper<Object, Writable, Writable, VarIntWritable> {
 
   private static final VarIntWritable ONE = new VarIntWritable(1);

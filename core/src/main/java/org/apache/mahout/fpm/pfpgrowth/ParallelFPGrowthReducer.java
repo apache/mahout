@@ -45,6 +45,7 @@ import org.apache.mahout.math.list.LongArrayList;
  * outputs the the Top K frequent Patterns for each group.
  * 
  */
+@Deprecated
 public final class ParallelFPGrowthReducer extends Reducer<IntWritable,TransactionTree,Text,TopKStringPatterns> {
 
   private final List<String> featureReverseMap = Lists.newArrayList();

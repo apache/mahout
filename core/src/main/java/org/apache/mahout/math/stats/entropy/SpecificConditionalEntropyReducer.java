@@ -32,6 +32,7 @@ import java.io.IOException;
  * = (sum * log_2(sum) - sum_i(values_i * log_2(values_i))/n WITH sum = sum_i(values_i)
  * = (sum * log(sum) - sum_i(values_i * log(values_i)) / (n * log(2))
  */
+@Deprecated
 public final class SpecificConditionalEntropyReducer extends Reducer<Text, VarIntWritable, Text, DoubleWritable> {
   
   private static final double LOG2 = Math.log(2.0);

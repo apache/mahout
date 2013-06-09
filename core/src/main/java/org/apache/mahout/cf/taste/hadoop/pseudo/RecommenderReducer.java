@@ -46,6 +46,7 @@ import org.apache.mahout.math.VarLongWritable;
  * 
  * @see RecommenderJob
  */
+@Deprecated
 final class RecommenderReducer extends
     Reducer<VarLongWritable,NullWritable,VarLongWritable,RecommendedItemsWritable> {
   

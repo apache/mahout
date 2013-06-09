@@ -30,6 +30,7 @@ import org.junit.Before;
 import java.io.File;
 import java.io.IOException;
 
+@Deprecated
 public final class TestDistributedLanczosSolver extends MahoutTestCase {
 
   private int counter = 0;

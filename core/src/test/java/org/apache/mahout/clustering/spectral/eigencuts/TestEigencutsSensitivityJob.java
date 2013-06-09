@@ -39,6 +39,7 @@ import org.junit.Test;
  * For now, 
  *
  */
+@Deprecated
 public class TestEigencutsSensitivityJob extends MahoutTestCase {
   
   /*

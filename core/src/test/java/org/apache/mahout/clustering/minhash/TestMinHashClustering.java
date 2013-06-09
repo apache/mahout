@@ -41,6 +41,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+@Deprecated
 public final class TestMinHashClustering extends MahoutTestCase {
   
   private static final double[][] REFERENCE = { {0, 0, 3, 4, 5}, {0, 0, 3, 6, 7}, {0, 7, 6, 11, 8, 9},

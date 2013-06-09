@@ -26,6 +26,7 @@ import org.apache.mahout.common.AbstractJob;
  * <li>-i The input sequence file</li>
  * </ul>
  */
+@Deprecated
 public final class InformationGainRatio extends AbstractJob {
 
   private double entropy;

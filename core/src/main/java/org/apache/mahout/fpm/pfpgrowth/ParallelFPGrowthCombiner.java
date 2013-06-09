@@ -29,6 +29,7 @@ import org.apache.mahout.common.Pair;
  *  takes each group of dependent transactions and\ compacts it in a
  * TransactionTree structure
  */
+@Deprecated
 public class ParallelFPGrowthCombiner extends Reducer<IntWritable,TransactionTree,IntWritable,TransactionTree> {
   
   @Override

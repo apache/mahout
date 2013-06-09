@@ -19,6 +19,7 @@ package org.apache.mahout.clustering.dirichlet.models;
 import org.apache.mahout.clustering.ModelDistribution;
 import org.apache.mahout.math.VectorWritable;
 
+@Deprecated
 public abstract class AbstractVectorModelDistribution implements ModelDistribution<VectorWritable> {
 
   // a prototype instance used for creating prior model distributions using like(). It

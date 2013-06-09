@@ -17,6 +17,7 @@
 
 package org.apache.mahout.clustering.meanshift;
 
+@Deprecated
 public final class MeanShiftCanopyConfigKeys {
 
   private MeanShiftCanopyConfigKeys() {}

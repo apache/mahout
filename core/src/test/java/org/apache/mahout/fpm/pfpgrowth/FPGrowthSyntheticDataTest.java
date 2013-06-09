@@ -38,6 +38,7 @@ import org.junit.Test;
 
 import com.google.common.io.Resources;
 
+@Deprecated
 public final class FPGrowthSyntheticDataTest extends MahoutTestCase {
 
   @Test

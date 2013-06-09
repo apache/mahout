@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory;
  *
  * @param <A> object type used as the cell items in a transaction list
  */
+@Deprecated
 public class FPGrowth<A extends Comparable<? super A>> {
 
   private static final Logger log = LoggerFactory.getLogger(FPGrowth.class);

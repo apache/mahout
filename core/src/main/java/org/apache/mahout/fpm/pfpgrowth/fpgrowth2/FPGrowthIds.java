@@ -42,6 +42,7 @@ import  org.apache.mahout.fpm.pfpgrowth.fpgrowth.FrequentPatternMaxHeap;
 /**
  * Implementation of PFGrowth Algorithm
  */
+@Deprecated
 public final class FPGrowthIds {
 
   private static final Logger log = LoggerFactory.getLogger(FPGrowthIds.class);

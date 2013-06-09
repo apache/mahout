@@ -29,6 +29,7 @@ import org.apache.mahout.common.Pair;
  * Generates a List of transactions view of Transaction Tree by doing Depth First Traversal on the tree
  * structure
  */
+@Deprecated
 final class TransactionTreeIterator extends AbstractIterator<Pair<IntArrayList,Long>> {
 
   private final Stack<int[]> depth = new Stack<int[]>();

@@ -30,6 +30,7 @@ import org.apache.mahout.math.map.OpenIntObjectHashMap;
 /**
  * A straightforward implementation of FPTrees as described in Han et. al.
  */
+@Deprecated
 public final class FPTree {
 
   private final AttrComparator attrComparator = new AttrComparator();

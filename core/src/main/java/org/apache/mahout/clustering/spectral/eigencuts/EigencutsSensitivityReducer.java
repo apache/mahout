@@ -32,6 +32,7 @@ import org.apache.mahout.math.VectorWritable;
  * that, according to their (i, j) coordinates, overlap in the matrix,
  * the "winner" will be determined by whichever value is smaller.</p> 
  */
+@Deprecated
 public class EigencutsSensitivityReducer extends
     Reducer<IntWritable, EigencutsSensitivityNode, IntWritable, VectorWritable> {
 

@@ -45,6 +45,7 @@ import org.apache.mahout.math.VectorWritable;
 
 import com.google.common.collect.Lists;
 
+@Deprecated
 public class DirichletDriver extends AbstractJob {
   
   public static final String STATE_IN_KEY = "org.apache.mahout.clustering.dirichlet.stateIn";

@@ -28,6 +28,7 @@ import org.apache.mahout.math.VectorWritable;
 import java.io.IOException;
 import java.util.Collection;
 
+@Deprecated
 public class MinHashReducer extends Reducer<Text,Writable,Text,Writable> {
   
   private int minClusterSize;

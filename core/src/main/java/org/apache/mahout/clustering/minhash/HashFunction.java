@@ -16,6 +16,7 @@
  */
 package org.apache.mahout.clustering.minhash;
 
+@Deprecated
 public interface HashFunction {
 
   int hash(byte[] bytes);

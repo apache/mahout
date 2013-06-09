@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Implements training according to the perceptron update rule.
  */
+@Deprecated
 public class PerceptronTrainer extends LinearTrainer {
   
   private static final Logger log = LoggerFactory.getLogger(PerceptronTrainer.class);

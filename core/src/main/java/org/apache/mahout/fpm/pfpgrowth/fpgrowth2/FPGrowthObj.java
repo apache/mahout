@@ -52,6 +52,7 @@ import  org.apache.mahout.fpm.pfpgrowth.fpgrowth.FrequentPatternMaxHeap;
  *
  * @param <A> object type used as the cell items in a transaction list
  */
+@Deprecated
 public class FPGrowthObj<A extends Comparable<? super A>> {
 
   private static final Logger log = LoggerFactory.getLogger(FPGrowthObj.class);

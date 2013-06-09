@@ -28,6 +28,7 @@ import java.io.IOException;
  * Groups the input by key and value. Therefore it merges both to one key of type {@link StringTuple} and emits
  * {@link VarIntWritable}(1) as value.
  */
+@Deprecated
 public final class GroupAndCountByKeyAndValueMapper extends Mapper<Text, Text, StringTuple, VarIntWritable> {
 
   private static final VarIntWritable ONE = new VarIntWritable(1);

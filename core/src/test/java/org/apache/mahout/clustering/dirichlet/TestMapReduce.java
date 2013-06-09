@@ -47,6 +47,7 @@ import org.junit.Test;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 
+@Deprecated
 public final class TestMapReduce extends MahoutTestCase {
   
   private final Collection<VectorWritable> sampleData = Lists.newArrayList();

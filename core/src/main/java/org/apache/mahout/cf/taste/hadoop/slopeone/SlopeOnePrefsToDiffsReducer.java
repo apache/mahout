@@ -28,6 +28,7 @@ import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.math.VarLongWritable;
 
+@Deprecated
 final class SlopeOnePrefsToDiffsReducer extends
     Reducer<VarLongWritable,EntityPrefWritable,EntityEntityWritable,FloatWritable> {
   

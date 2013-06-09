@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Classifies a data point using a hyperplane.
  */
+@Deprecated
 public class LinearModel {
 
   private static final Logger log = LoggerFactory.getLogger(LinearModel.class);

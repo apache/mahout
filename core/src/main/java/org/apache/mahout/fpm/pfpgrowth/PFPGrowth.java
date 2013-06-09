@@ -55,6 +55,7 @@ import org.apache.mahout.math.list.IntArrayList;
  * http://infolab.stanford.edu/~echang/recsys08-69.pdf
  * 
  */
+@Deprecated
 public final class PFPGrowth {
   
   public static final String ENCODING = "encoding";

@@ -31,6 +31,7 @@ import com.google.common.base.Splitter;
 /**
  * Simply describes parameters needs to create a {@link org.apache.mahout.clustering.ModelDistribution}.
  */
+@Deprecated
 public final class DistributionDescription {
   
   private final String modelFactory;

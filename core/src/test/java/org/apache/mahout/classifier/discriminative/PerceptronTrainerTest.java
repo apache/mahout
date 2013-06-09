@@ -25,6 +25,7 @@ import org.apache.mahout.math.Vector;
 import org.junit.Before;
 import org.junit.Test;
 
+@Deprecated
 public final class PerceptronTrainerTest extends MahoutTestCase {
 
   private PerceptronTrainer trainer;

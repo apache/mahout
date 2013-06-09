@@ -26,6 +26,7 @@ import java.util.TreeSet;
  * {@link FPGrowth} algorithm
  * 
  */
+@Deprecated
 public class FPTree {
   
   public static final int ROOTNODEID = 0;

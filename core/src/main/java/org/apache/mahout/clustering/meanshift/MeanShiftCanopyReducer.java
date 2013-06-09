@@ -29,6 +29,7 @@ import org.apache.mahout.clustering.iterator.ClusterWritable;
 
 import com.google.common.collect.Lists;
 
+@Deprecated
 public class MeanShiftCanopyReducer extends Reducer<Text,ClusterWritable,Text,ClusterWritable> {
 
   private final Collection<MeanShiftCanopy> canopies = Lists.newArrayList();

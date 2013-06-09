@@ -52,6 +52,7 @@ import com.google.common.base.Preconditions;
  * This implementation can also be used as a "weighted slope one" recommender.
  * </p>
  */
+@Deprecated
 public final class SlopeOneRecommender extends AbstractRecommender {
   
   private static final Logger log = LoggerFactory.getLogger(SlopeOneRecommender.class);

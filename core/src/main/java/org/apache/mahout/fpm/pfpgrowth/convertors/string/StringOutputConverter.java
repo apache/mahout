@@ -28,6 +28,7 @@ import org.apache.mahout.common.Pair;
  * Collects a string pattern in a MaxHeap and outputs the top K patterns
  * 
  */
+@Deprecated
 public final class StringOutputConverter implements OutputCollector<String,List<Pair<List<String>,Long>>> {
   
   private final OutputCollector<Text,TopKStringPatterns> collector;

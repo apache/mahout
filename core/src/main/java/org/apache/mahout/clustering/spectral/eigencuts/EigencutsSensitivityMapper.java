@@ -31,6 +31,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.Functions;
 
+@Deprecated
 public class EigencutsSensitivityMapper extends
     Mapper<IntWritable, VectorWritable, IntWritable, EigencutsSensitivityNode> {
 

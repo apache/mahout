@@ -22,6 +22,7 @@ import org.apache.mahout.math.MurmurHash3;
 
 import java.util.Random;
 
+@Deprecated
 public final class HashFactory {
 
   private HashFactory() {

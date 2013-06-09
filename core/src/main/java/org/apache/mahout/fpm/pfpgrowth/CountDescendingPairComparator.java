@@ -27,6 +27,7 @@ import org.apache.mahout.common.Pair;
  * high count first (that is, descending), and for those of equal count, orders by the first element in the
  * pair, ascending. It is used in several places in the FPM code.
  */
+@Deprecated
 public final class CountDescendingPairComparator<A extends Comparable<? super A>,B extends Comparable<? super B>>
   implements Comparator<Pair<A,B>>, Serializable {
 

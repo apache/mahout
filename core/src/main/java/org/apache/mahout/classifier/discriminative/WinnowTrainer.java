@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This class implements training according to the winnow update algorithm.
  */
+@Deprecated
 public class WinnowTrainer extends LinearTrainer {
   
   private static final Logger log = LoggerFactory.getLogger(WinnowTrainer.class);

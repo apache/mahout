@@ -27,6 +27,7 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.junit.Test;
 
 /** Tests {@link MemoryDiffStorage}. */
+@Deprecated
 public final class MemoryDiffStorageTest extends TasteTestCase {
 
   @Test

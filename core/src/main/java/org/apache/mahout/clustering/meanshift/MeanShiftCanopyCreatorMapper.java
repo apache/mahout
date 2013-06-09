@@ -31,6 +31,7 @@ import org.apache.mahout.math.VectorWritable;
 
 import com.google.common.base.Preconditions;
 
+@Deprecated
 public class MeanShiftCanopyCreatorMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, ClusterWritable> {
 
   private static final Pattern UNDERSCORE_PATTERN = Pattern.compile("_");

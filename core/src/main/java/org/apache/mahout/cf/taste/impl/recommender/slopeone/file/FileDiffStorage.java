@@ -65,6 +65,7 @@ import com.google.common.base.Preconditions;
  *
  * <p>Note that the same item-item pair should not appear on multiple lines -- one line per item-item pair.</p>
  */
+@Deprecated
 public final class FileDiffStorage implements DiffStorage {
   
   private static final Logger log = LoggerFactory.getLogger(FileDiffStorage.class);

@@ -30,6 +30,7 @@ import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
  * Collects the Patterns with Integer id and Long support and converts them to Pattern of Strings based on a
  * reverse feature lookup map.
  */
+@Deprecated
 public final class IntegerStringOutputConverter implements
     OutputCollector<Integer,List<Pair<List<Integer>,Long>>> {
   

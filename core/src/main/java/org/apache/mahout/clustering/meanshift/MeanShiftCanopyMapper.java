@@ -27,6 +27,7 @@ import org.apache.mahout.clustering.iterator.ClusterWritable;
 import java.io.IOException;
 import java.util.Collection;
 
+@Deprecated
 public class MeanShiftCanopyMapper extends Mapper<WritableComparable<?>, ClusterWritable, Text, ClusterWritable> {
 
   private final Collection<MeanShiftCanopy> canopies = Lists.newArrayList();

@@ -25,6 +25,7 @@ import java.util.List;
  * Caches large FPTree {@link Object} for each level of the recursive
  * {@link FPGrowth} algorithm to reduce allocation overhead.
  */
+@Deprecated
 public class FPTreeDepthCache {
 
   private final LeastKCache<Integer,FPTree> firstLevelCache = new LeastKCache<Integer,FPTree>(5);

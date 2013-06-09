@@ -35,6 +35,7 @@ import org.junit.Test;
 
 import com.google.common.io.Resources;
 
+@Deprecated
 public final class FPGrowthRetailDataTest extends MahoutTestCase {
 
   @Test

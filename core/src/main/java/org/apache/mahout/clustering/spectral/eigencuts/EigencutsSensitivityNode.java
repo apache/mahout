@@ -29,6 +29,7 @@ import org.apache.hadoop.io.Writable;
  * own (i, j) coordinate. Thus these objects can be stored as elements
  * in any list or, in particular, Writable array.
  */
+@Deprecated
 public class EigencutsSensitivityNode implements Writable {
   
   private int row;

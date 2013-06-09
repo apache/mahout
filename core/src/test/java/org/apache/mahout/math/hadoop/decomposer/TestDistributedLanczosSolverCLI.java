@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 import java.util.Arrays;
 
+@Deprecated
 public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
   private static final Logger log = LoggerFactory.getLogger(TestDistributedLanczosSolverCLI.class);
 

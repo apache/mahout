@@ -48,6 +48,7 @@ import com.google.common.base.Preconditions;
  * consume a great deal of memory.
  * </p>
  */
+@Deprecated
 public final class MemoryDiffStorage implements DiffStorage {
   
   private static final Logger log = LoggerFactory.getLogger(MemoryDiffStorage.class);

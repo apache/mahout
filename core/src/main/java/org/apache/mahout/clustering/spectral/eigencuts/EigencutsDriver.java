@@ -40,6 +40,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+@Deprecated
 public class EigencutsDriver extends AbstractJob {
 
   public static final double EPSILON_DEFAULT = 0.25;

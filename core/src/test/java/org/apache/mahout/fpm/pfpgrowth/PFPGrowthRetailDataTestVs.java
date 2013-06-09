@@ -42,6 +42,7 @@ import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 
+@Deprecated
 public final class PFPGrowthRetailDataTestVs extends MahoutTestCase {
 
   private final Parameters paramsImpl1 = new Parameters();

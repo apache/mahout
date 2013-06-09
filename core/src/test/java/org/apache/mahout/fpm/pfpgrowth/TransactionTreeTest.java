@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated
 public final class TransactionTreeTest extends MahoutTestCase {
 
   private static final Logger log = LoggerFactory.getLogger(TransactionTreeTest.class);

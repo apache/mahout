@@ -53,6 +53,7 @@ import org.junit.Test;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+@Deprecated
 public final class TestMeanShift extends MahoutTestCase {
 
   private Vector[] raw = null;

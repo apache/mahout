@@ -39,6 +39,7 @@ import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth;
 import org.junit.Test;
 
+@Deprecated
 public final class FPGrowthTest extends MahoutTestCase {
 
   @Test

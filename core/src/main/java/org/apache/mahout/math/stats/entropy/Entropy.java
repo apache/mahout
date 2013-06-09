@@ -43,6 +43,7 @@ import java.util.Map;
  * <li>-s The source. Can be \<key\> or \<value\>. Default is \<key\></li>
  * </ul>
  */
+@Deprecated
 public final class Entropy extends AbstractJob {
 
   private Path tempPath;

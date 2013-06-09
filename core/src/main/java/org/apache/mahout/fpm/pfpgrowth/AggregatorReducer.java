@@ -30,6 +30,7 @@ import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
  * containing that particular item
  * 
  */
+@Deprecated
 public class AggregatorReducer extends Reducer<Text,TopKStringPatterns,Text,TopKStringPatterns> {
   
   private int maxHeapSize = 50;

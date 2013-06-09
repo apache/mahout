@@ -28,6 +28,7 @@ import org.junit.Test;
 import java.util.List;
 
 /** <p>Tests {@link SlopeOneRecommender}.</p> */
+@Deprecated
 public final class SlopeOneRecommenderTest extends TasteTestCase {
 
   @Test

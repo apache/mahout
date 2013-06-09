@@ -22,6 +22,7 @@ package org.apache.mahout.classifier.discriminative;
  * that can find linear separating hyperplanes only on a training set that is not
  * linearly separable.
  * */
+@Deprecated
 public class TrainingException extends Exception {
   
   /**

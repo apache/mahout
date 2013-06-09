@@ -30,6 +30,7 @@ import org.apache.mahout.common.Pair;
  * Iterates over a Transaction and outputs the transaction integer id mapping and the support of the
  * transaction
  */
+@Deprecated
 public class TransactionIterator<T> extends ForwardingIterator<Pair<int[],Long>> {
 
   private final int[] transactionBuffer;

@@ -26,6 +26,7 @@ import java.io.IOException;
 /**
  * The analog of {@link org.apache.hadoop.mapreduce.lib.reduce.IntSumReducer} which uses {@link VarIntWritable}.
  */
+@Deprecated
 public final class VarIntSumReducer extends Reducer<Writable, VarIntWritable, Writable, VarIntWritable> {
 
   private final VarIntWritable result = new VarIntWritable();

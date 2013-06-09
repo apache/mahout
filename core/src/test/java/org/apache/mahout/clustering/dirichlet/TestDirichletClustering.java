@@ -36,6 +36,7 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
+@Deprecated
 public final class TestDirichletClustering extends MahoutTestCase {
 
   private List<VectorWritable> sampleData;

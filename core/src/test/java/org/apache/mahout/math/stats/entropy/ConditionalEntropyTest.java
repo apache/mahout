@@ -34,6 +34,7 @@ import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterator;
 import org.junit.Test;
 
+@Deprecated
 public final class ConditionalEntropyTest extends MahoutTestCase {
 
   @Test

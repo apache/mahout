@@ -36,6 +36,7 @@ import org.apache.mahout.math.set.OpenIntHashSet;
  * outputs the group id as key and the transaction as value
  * 
  */
+@Deprecated
 public class ParallelFPGrowthMapper extends Mapper<LongWritable,Text,IntWritable,TransactionTree> {
 
   private final OpenObjectIntHashMap<String> fMap = new OpenObjectIntHashMap<String>();
