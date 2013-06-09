@@ -415,6 +415,22 @@ public abstract class AbstractJob extends Configured implements Tool {
     return res;
   }
 
+  public int getInt(String optionName){
+    return Integer.parseInt(getOption(optionName));
+  }
+
+  public int getInt(String optionName, int defaultVal){
+    return Integer.parseInt(getOption(optionName, String.valueOf(defaultVal)));
+  }
+
+  public float getFloat(String optionName){
+    return Float.parseFloat(getOption(optionName));
+  }
+
+  public float getFloat(String optionName, float defaultVal){
+    return Float.parseFloat(getOption(optionName, String.valueOf(defaultVal)));
+  }
+
   /**
    * Options can occur multiple times, so return the list
    * @param optionName The unadorned (no "--" prefixing it) option name

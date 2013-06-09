@@ -40,13 +40,17 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.util.ToolRunner;
+import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.StringTuple;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.vectorizer.collocations.llr.CollocDriver;
+import org.apache.mahout.vectorizer.collocations.llr.LLRReducer;
 import org.apache.mahout.vectorizer.common.PartialVectorMerger;
 import org.apache.mahout.vectorizer.term.TFPartialVectorReducer;
 import org.apache.mahout.vectorizer.term.TermCountCombiner;
@@ -61,7 +65,7 @@ import org.slf4j.LoggerFactory;
  * value containing the tokenized document. You may use {@link DocumentProcessor} to tokenize the document.
  * This is a dictionary based Vectorizer.
  */
-public final class DictionaryVectorizer implements Vectorizer {
+public final class DictionaryVectorizer extends AbstractJob implements Vectorizer {
   private static Logger log = LoggerFactory.getLogger(DictionaryVectorizer.class);
   
   public static final String DOCUMENT_VECTOR_OUTPUT_FOLDER = "tf-vectors";
@@ -363,5 +367,46 @@ public final class DictionaryVectorizer implements Vectorizer {
     if (!succeeded) {
       throw new IllegalStateException("Job failed!");
     }
+  }
+
+  @Override
+  public int run(String[] args) throws Exception {
+    addInputOption();
+    addOutputOption();
+    addOption("tfDirName", "tf", "The folder to store the TF calculations", "tfDirName");
+    addOption("minSupport", "s", "(Optional) Minimum Support. Default Value: 2", "2");
+    addOption("maxNGramSize", "ng", "(Optional) The maximum size of ngrams to create"
+                            + " (2 = bigrams, 3 = trigrams, etc) Default Value:1");
+    addOption("minLLR", "ml", "(Optional)The minimum Log Likelihood Ratio(Float)  Default is " + LLRReducer.DEFAULT_MIN_LLR);
+    addOption("norm", "n", "The norm to use, expressed as either a float or \"INF\" if you want to use the Infinite norm.  "
+                    + "Must be greater or equal to 0.  The default is not to normalize");
+    addOption("logNormalize", "lnorm", "(Optional) Whether output vectors should be logNormalize. If set true else false", "false");
+    addOption(DefaultOptionCreator.numReducersOption().create());
+    addOption("chunkSize", "chunk", "The chunkSize in MegaBytes. 100-10000 MB", "100");
+    addOption(DefaultOptionCreator.methodOption().create());
+    addOption("namedVector", "nv", "(Optional) Whether output vectors should be NamedVectors. If set true else false", "false");
+    if (parseArguments(args) == null) {
+      return -1;
+    }
+    String tfDirName = getOption("tfDirName");
+    int minSupport = getInt("minSupport", 2);
+    int maxNGramSize = getInt("maxNGramSize", 1);
+    float minLLRValue = getFloat("minLLR", LLRReducer.DEFAULT_MIN_LLR);
+    float normPower = getFloat("norm", PartialVectorMerger.NO_NORMALIZING);
+    boolean logNormalize = hasOption("logNormalize");
+    int numReducers = getInt(DefaultOptionCreator.MAX_REDUCERS_OPTION);
+    int chunkSizeInMegs = getInt("chunkSize", 100);
+    boolean sequential = hasOption("sequential");
+    boolean namedVecs = hasOption("namedVectors");
+    //TODO: add support for other paths
+    createTermFrequencyVectors(getInputPath(), getOutputPath(),
+            tfDirName,
+            getConf(), minSupport, maxNGramSize, minLLRValue,
+            normPower, logNormalize, numReducers, chunkSizeInMegs, sequential, namedVecs);
+    return 0;
+  }
+
+  public static void main(String[] args) throws Exception {
+    ToolRunner.run(new DictionaryVectorizer(), args);
   }
 }
