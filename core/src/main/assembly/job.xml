@@ -11,6 +11,12 @@
   <dependencySets>
     <dependencySet>
       <unpack>true</unpack>
+      <unpackOptions>
+        <!-- MAHOUT-1126 -->
+        <excludes>
+          <exclude>META-INF/LICENSE</exclude>
+        </excludes>
+      </unpackOptions>
       <scope>runtime</scope>
       <outputDirectory>/</outputDirectory>
       <excludes>
