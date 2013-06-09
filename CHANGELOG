@@ -99,3 +99,7 @@ Release 0.8 - unreleased
   MAHOUT-958: Fix issue with globs in RepresentativePointsDriver (Adam Baron, Vikram Dixit K, ehgjr via gsingers)
 
   MAHOUT-1084: Fixed issue with too many clusters in synthetic control example (liutengfei, gsingers)
+
+  MAHOUT-1103: Fixed issue with splitting clusters on Hadoop (Matt Molek, gsingers)
+
+  MAHOUT-1126: Filter out bad META-INF files in job packaging (Pat Ferrel, gsingers)
