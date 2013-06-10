@@ -17,6 +17,7 @@
 
 package org.apache.mahout.clustering.topdown.postprocessor;
 
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -34,7 +35,6 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -53,7 +53,7 @@ public final class ClusterOutputPostProcessor {
   private final FileSystem fileSystem;
   private final Configuration conf;
   private final Path clusterPostProcessorOutput;
-  private final Map<String, Path> postProcessedClusterDirectories = new HashMap<String, Path>();
+  private final Map<String, Path> postProcessedClusterDirectories = Maps.newHashMap();
   private long uniqueVectorId = 0L;
   private final Map<String, SequenceFile.Writer> writersForClusters;
 
@@ -63,7 +63,7 @@ public final class ClusterOutputPostProcessor {
     this.clusterPostProcessorOutput = output;
     this.clusteredPoints = PathDirectory.getClusterOutputClusteredPoints(clusterOutputToBeProcessed);
     this.conf = hadoopConfiguration;
-    this.writersForClusters = new HashMap<String, SequenceFile.Writer>();
+    this.writersForClusters = Maps.newHashMap();
     fileSystem = clusteredPoints.getFileSystem(conf);
   }
 
