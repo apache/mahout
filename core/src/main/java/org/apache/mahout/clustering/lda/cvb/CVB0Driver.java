@@ -459,6 +459,7 @@ public class CVB0Driver extends AbstractJob {
         modelUris[i] = statuses[i].getPath().toUri();
       }
       DistributedCache.setCacheFiles(modelUris, conf);
+      setModelPaths(job, modelInput);
     }
     FileInputFormat.addInputPath(job, corpus);
     FileOutputFormat.setOutputPath(job, output);
