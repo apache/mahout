@@ -16,6 +16,7 @@
  */
 package org.apache.mahout.text;
 
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -65,7 +66,7 @@ public class SequenceFilesFromLuceneStorageMRJobTest extends AbstractLuceneStora
     lucene2seq.run(lucene2SeqConf);
 
     Iterator<Pair<Text, Text>> iterator = lucene2SeqConf.getSequenceFileIterator();
-    Map<String, Text> map = new HashMap<String, Text>();
+    Map<String, Text> map = Maps.newHashMap();
     while (iterator.hasNext()) {
       Pair<Text, Text> next = iterator.next();
       map.put(next.getFirst().toString(), next.getSecond());
