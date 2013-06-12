@@ -16,6 +16,7 @@ package org.apache.mahout.vectorizer;
  * limitations under the License.
  */
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -88,7 +89,7 @@ public class HighDFWordsPrunerTest extends MahoutTestCase {
   private void runTest(boolean prune) throws Exception {
     Path outputPath = getTestTempFilePath("output");
 
-    List<String> argList = new LinkedList<String>();
+    List<String> argList = Lists.newLinkedList();
     argList.add("-i");
     argList.add(inputPath.toString());
     argList.add("-o");

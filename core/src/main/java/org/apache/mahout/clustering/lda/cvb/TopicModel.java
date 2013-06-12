@@ -247,7 +247,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
       topicTermCounts.assignRow(x, new SequentialAccessSparseVector(numTerms));
     }
     topicSums.assign(1.0);
-    if(threadPool.isTerminated()) {
+    if (threadPool.isTerminated()) {
       initializeThreadPool();
     }
   }
@@ -262,7 +262,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
         log.warn("Threadpool timed out on await termination - jobs still running!");
       }
     } catch (InterruptedException e) {
-        log.error("Interrupted shutting down!", e);
+      log.error("Interrupted shutting down!", e);
     }
   }
 

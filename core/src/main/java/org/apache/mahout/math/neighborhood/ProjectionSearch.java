@@ -100,12 +100,12 @@ public class ProjectionSearch extends UpdatableSearcher implements Iterable<Vect
     }
     int numVectors = scalarProjections.get(0).size();
     for (TreeMultiset<WeightedThing<Vector>> s : scalarProjections) {
-      Preconditions.checkArgument(s.size() == numVectors, "Number of vectors in projection sets " +
-          "differ");
+      Preconditions.checkArgument(s.size() == numVectors, "Number of vectors in projection sets "
+          + "differ");
       double firstWeight = s.firstEntry().getElement().getWeight();
       for (WeightedThing<Vector> w : s) {
-        Preconditions.checkArgument(firstWeight <= w.getWeight(), "Weights not in non-decreasing " +
-            "order");
+        Preconditions.checkArgument(firstWeight <= w.getWeight(), "Weights not in non-decreasing "
+            + "order");
         firstWeight = w.getWeight();
       }
     }

@@ -20,6 +20,7 @@ package org.apache.mahout.vectorizer;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -92,7 +93,7 @@ public class EncodedVectorsFromSequenceFilesTest extends MahoutTestCase {
     Path tmpPath = getTestTempDirPath();
     Path outputPath = new Path(tmpPath, "output");
     
-    List<String> argList = new LinkedList<String>();
+    List<String> argList = Lists.newLinkedList();;
     argList.add("-i");
     argList.add(inputPath.toString());
     argList.add("-o");

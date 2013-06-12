@@ -90,11 +90,8 @@ public final class TimingStatistics implements Serializable {
         + "stdDev = " + DF.format(getStdDevTime() / 1000.0) + "us;";
   }
 
-  public Call newCall() {
-    return new Call();
-  }
-
-  /** Ignores counting the performance metrics until leadTimeIsFinished The caller should enough time for the JIT to warm up. */
+  /** Ignores counting the performance metrics until leadTimeIsFinished The caller should enough time for the JIT
+   *  to warm up. */
   public Call newCall(long leadTimeUsec) {
     if (leadSumTime > leadTimeUsec) {
       return new Call();
@@ -104,7 +101,7 @@ public final class TimingStatistics implements Serializable {
   }
 
   /** Ignores counting the performance metrics. The caller should enough time for the JIT to warm up. */
-  public class LeadTimeCall extends Call {
+  public final class LeadTimeCall extends Call {
 
     private LeadTimeCall() { }
 

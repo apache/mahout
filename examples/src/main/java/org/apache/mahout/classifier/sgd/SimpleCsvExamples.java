@@ -30,6 +30,8 @@ import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.stats.OnlineSummarizer;
 import org.apache.mahout.vectorizer.encoders.ConstantValueEncoder;
 import org.apache.mahout.vectorizer.encoders.FeatureVectorEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -64,8 +66,9 @@ public final class SimpleCsvExamples {
   public static final char SEPARATOR_CHAR = '\t';
   private static final int FIELDS = 100;
 
-  private SimpleCsvExamples() {
-  }
+  private static final Logger log = LoggerFactory.getLogger(SimpleCsvExamples.class);
+
+  private SimpleCsvExamples() {}
 
   public static void main(String[] args) throws IOException {
     FeatureVectorEncoder[] encoder = new FeatureVectorEncoder[FIELDS];
@@ -280,7 +283,7 @@ public final class SimpleCsvExamples {
       try {
         Closeables.close(in, true);
       } catch (IOException e) {
-        //nothing
+        log.error(e.getMessage(), e);
       }
     }
   }

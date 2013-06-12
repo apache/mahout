@@ -250,7 +250,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     @Override
     protected void reduce(WritableComparable<?> key, Iterable<VectorWritable> values, Context ctx)
-        throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
       result.set(ALS.sum(values.iterator()));
       ctx.write(key, result);
     }
@@ -263,7 +263,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     @Override
     protected void reduce(WritableComparable<?> key, Iterable<VectorWritable> values, Context ctx)
-        throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
       Vector sum = ALS.sum(values.iterator());
       result.set(new SequentialAccessSparseVector(sum));
       ctx.write(key, result);
@@ -277,7 +277,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     @Override
     public void reduce(WritableComparable<?> key, Iterable<VectorWritable> vectors, Context ctx)
-        throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
       Vector merged = VectorWritable.merge(vectors.iterator()).get();
       result.set(new SequentialAccessSparseVector(merged));
       ctx.write(key, result);
@@ -330,7 +330,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     if (implicitFeedback) {
       solverMapperClassInternal = SolveImplicitFeedbackMapper.class;
       name = "Recompute " + matrixName + ", iteration (" + (iterationNumber + 1) + '/' + numIterations + "), "
-          + '(' + numThreadsPerSolver + " threads, " + numFeatures +" features, implicit feedback)";
+          + '(' + numThreadsPerSolver + " threads, " + numFeatures + " features, implicit feedback)";
     } else {
       solverMapperClassInternal = SolveExplicitFeedbackMapper.class;
       name = "Recompute " + matrixName + ", iteration (" + (iterationNumber + 1) + '/' + numIterations + "), "
@@ -412,7 +412,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
   static class IDMapReducer extends Reducer<VarIntWritable,VarLongWritable,VarIntWritable,VarLongWritable> {
     @Override
     protected void reduce(VarIntWritable index, Iterable<VarLongWritable> ids, Context ctx)
-        throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
       ctx.write(index, ids.iterator().next());
     }
   }

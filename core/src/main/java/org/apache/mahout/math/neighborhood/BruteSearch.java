@@ -71,7 +71,8 @@ public class BruteSearch extends UpdatableSearcher {
     limit = Math.min(limit, referenceVectors.size());
     // A priority queue of the best @limit elements, ordered from worst to best so that the worst
     // element is always on top and can easily be removed.
-    PriorityQueue<WeightedThing<Integer>> bestNeighbors = new PriorityQueue<WeightedThing<Integer>>(limit, Ordering.natural().reverse());
+    PriorityQueue<WeightedThing<Integer>> bestNeighbors =
+        new PriorityQueue<WeightedThing<Integer>>(limit, Ordering.natural().reverse());
     // The resulting list of weighted WeightedVectors (the weight is the distance from the query).
     List<WeightedThing<Vector>> results =
         Lists.newArrayListWithCapacity(limit);

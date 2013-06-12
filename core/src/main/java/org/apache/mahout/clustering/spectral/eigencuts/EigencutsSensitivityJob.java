@@ -32,7 +32,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 /**
- * <p>There are a quite a few operations bundled within this mapper. Gather 'round
+ * <p>There are a quite a few OPERATIONS bundled within this mapper. Gather 'round
  * and listen, all of ye.</p>
  * 
  * <p>The input to this job is eight items:</p>

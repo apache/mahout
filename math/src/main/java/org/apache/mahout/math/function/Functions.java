@@ -1561,8 +1561,8 @@ public final class Functions {
         if (b == 2) {
           return a * a;
         } else {
-        return Math.pow(a, b);
-      }
+          return Math.pow(a, b);
+        }
       }
     };
   }

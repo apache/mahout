@@ -69,7 +69,7 @@ public class Dataset {
     private static Attribute fromString(String from) {
       
       Attribute toReturn = LABEL;
-      if(NUMERICAL.toString().equalsIgnoreCase(from)) {
+      if (NUMERICAL.toString().equalsIgnoreCase(from)) {
         toReturn = NUMERICAL;
       } else if (CATEGORICAL.toString().equalsIgnoreCase(from)) {
         toReturn = CATEGORICAL;
@@ -103,15 +103,14 @@ public class Dataset {
   private int nbInstances;
   
   /** JSON serial/de-serial-izer */
-  private static final ObjectMapper objectMapper = new ObjectMapper();
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   // Some literals for JSON representation
-  final static String TYPE = "type";
-  final static String VALUES = "values";
-  final static String LABEL = "label";
+  static final String TYPE = "type";
+  static final String VALUES = "values";
+  static final String LABEL = "label";
 
-  protected Dataset() {
-  }
+  protected Dataset() {}
 
   /**
    * Should only be called by a DataLoader
@@ -186,7 +185,7 @@ public class Dataset {
   }
   
   public Attribute getAttribute(int attr) {
-	  return attributes[attr];
+    return attributes[attr];
   }
 
   /**
@@ -215,7 +214,7 @@ public class Dataset {
   }
   
   public String toString() {
-	  return "attributes="+Arrays.toString(attributes);
+    return "attributes=" + Arrays.toString(attributes);
   }
 
   /**
@@ -323,7 +322,7 @@ public class Dataset {
 
     FileSystem fs = path.getFileSystem(conf);
     long bytesToRead = fs.getFileStatus(path).getLen();
-    byte[] buff = new byte[new Long(bytesToRead).intValue()];
+    byte[] buff = new byte[Long.valueOf(bytesToRead).intValue()];
     FSDataInputStream input = fs.open(path);
     try {
       input.readFully(buff);
@@ -361,7 +360,7 @@ public class Dataset {
       toWrite.add(attribute);
     }
     try {
-      return objectMapper.writeValueAsString(toWrite);
+      return OBJECT_MAPPER.writeValueAsString(toWrite);
     } catch (Exception ex) {
       throw new RuntimeException(ex);
     }
@@ -377,7 +376,7 @@ public class Dataset {
     Dataset dataset = new Dataset();
     List<Map<String, Object>> fromJSON;
     try {
-       fromJSON = objectMapper.readValue(json, new TypeReference<List<Map<String, Object>>>() {});
+      fromJSON = OBJECT_MAPPER.readValue(json, new TypeReference<List<Map<String, Object>>>() {});
     } catch (Exception ex) {
       throw new RuntimeException(ex);
     }
@@ -386,15 +385,15 @@ public class Dataset {
     String[][] nominalValues = new String[fromJSON.size()][];
     for (int i = 0; i < fromJSON.size(); i++) {
       Map<String, Object> attribute = fromJSON.get(i);
-      if(Attribute.fromString((String) attribute.get(TYPE)) == Attribute.IGNORED) {
+      if (Attribute.fromString((String) attribute.get(TYPE)) == Attribute.IGNORED) {
         ignored.add(i);
       } else {
         Attribute asAttribute = Attribute.fromString((String) attribute.get(TYPE));
         attributes.add(asAttribute);
-        if((Boolean) attribute.get(LABEL)) {
+        if ((Boolean) attribute.get(LABEL)) {
           dataset.labelId = i - ignored.size();
         }
-        if(attribute.get(VALUES) != null) {
+        if (attribute.get(VALUES) != null) {
           List get = (List) attribute.get(VALUES);
           String[] array = (String[]) get.toArray(new String[]{});
           nominalValues[i] = array;
@@ -404,7 +403,7 @@ public class Dataset {
     dataset.attributes = attributes.toArray(new Attribute[]{});
     dataset.ignored = new int[ignored.size()];
     dataset.values = nominalValues;
-    for(int i = 0; i < dataset.ignored.length; i++) {
+    for (int i = 0; i < dataset.ignored.length; i++) {
       dataset.ignored[i] = ignored.get(i);
     }
     return dataset;

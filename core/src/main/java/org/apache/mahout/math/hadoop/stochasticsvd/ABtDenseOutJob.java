@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
@@ -252,7 +253,7 @@ public final class ABtDenseOutJob {
                * conditions will never kick in. Or, the only situation where we
                * can't fit Y_i block in memory is when A input is much sparser
                * than k+p per row. But if this is the case, then we'd be looking
-               * at very few elements without engaging them in any operations so
+               * at very few elements without engaging them in any OPERATIONS so
                * even then it should be ok.
                */
               if (j < aRowBegin) {
@@ -364,7 +365,7 @@ public final class ABtDenseOutJob {
       NUMBER_FORMAT.setGroupingUsed(false);
     }
 
-    private final Deque<Closeable> closeables = new LinkedList<Closeable>();
+    private final Deque<Closeable> closeables = Lists.newLinkedList();
 
     protected int blockHeight;
 

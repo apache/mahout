@@ -42,7 +42,7 @@ public abstract class Searcher implements Iterable<Vector> {
     this.distanceMeasure = distanceMeasure;
   }
 
-  public DistanceMeasure getDistanceMeasure(){
+  public DistanceMeasure getDistanceMeasure() {
     return distanceMeasure;
   }
 

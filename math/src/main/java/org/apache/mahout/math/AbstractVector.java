@@ -562,7 +562,7 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
   public Matrix cross(Vector other) {
     Matrix result = matrixLike(size, other.size());
     Iterator<Vector.Element> it = iterateNonZero();
-    while(it.hasNext()) {
+    while (it.hasNext()) {
       Vector.Element e = it.next();
       int row = e.index();
       result.assignRow(row, other.times(getQuick(row)));

@@ -47,7 +47,7 @@ import com.google.common.collect.Iterators;
 
 /**
  * DistributedRowMatrix is a FileSystem-backed VectorIterable in which the vectors live in a
- * SequenceFile<WritableComparable,VectorWritable>, and distributed operations are executed as M/R passes on
+ * SequenceFile<WritableComparable,VectorWritable>, and distributed OPERATIONS are executed as M/R passes on
  * Hadoop.  The usage is as follows: <p>
  * <p>
  * <pre>

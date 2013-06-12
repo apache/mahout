@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.CharStreams;
 import com.google.common.io.Resources;
@@ -114,13 +115,13 @@ public final class PosTagger {
    */
   private static void readFromURL(String url, boolean assignIDs) throws IOException {
     // initialize the data structure
-    hiddenSequences = new LinkedList<int[]>();
-    observedSequences = new LinkedList<int[]>();
+    hiddenSequences = Lists.newLinkedList();
+    observedSequences = Lists.newLinkedList();
     readLines = 0;
 
     // now read line by line of the input file
-    List<Integer> observedSequence = new LinkedList<Integer>();
-    List<Integer> hiddenSequence = new LinkedList<Integer>();
+    List<Integer> observedSequence = Lists.newLinkedList();
+    List<Integer> hiddenSequence = Lists.newLinkedList();
 
     for (String line : CharStreams.readLines(Resources.newReaderSupplier(new URL(url), Charsets.UTF_8))) {
       if (line.isEmpty()) {
@@ -155,8 +156,17 @@ public final class PosTagger {
       Integer wordID = wordIDs.get(tags[0]);
       Integer tagID = tagIDs.get(tags[1]);
       // now construct the current sequence
-      observedSequence.add(wordID == null ? 0 : wordID);
-      hiddenSequence.add(tagID == null ? 0 : tagID);
+      if (wordID == null) {
+        observedSequence.add(0);
+      } else {
+        observedSequence.add(wordID);
+      }
+
+      if (tagID == null) {
+        hiddenSequence.add(0);
+      } else {
+        hiddenSequence.add(tagID);
+      }
     }
 
     // if there is still something in the pipe, register it

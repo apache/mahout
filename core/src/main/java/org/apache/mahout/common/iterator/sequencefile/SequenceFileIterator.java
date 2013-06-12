@@ -30,6 +30,8 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.mahout.common.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>{@link java.util.Iterator} over a {@link SequenceFile}'s keys and values, as a {@link Pair}
@@ -47,9 +49,12 @@ public final class SequenceFileIterator<K extends Writable,V extends Writable>
   private V value;
   private final boolean reuseKeyValueInstances;
 
-  /**
-   * @throws IOException if path can't be read, or its key or value class can't be instantiated
-   */
+  private static final Logger log = LoggerFactory.getLogger(SequenceFileIterator.class);
+
+      /**
+       * @throws IOException if path can't be read, or its key or value class can't be instantiated
+       */
+
   public SequenceFileIterator(Path path, boolean reuseKeyValueInstances, Configuration conf) throws IOException {
     key = null;
     value = null;
@@ -104,7 +109,7 @@ public final class SequenceFileIterator<K extends Writable,V extends Writable>
       try {
         close();
       } catch (IOException e) {
-        //throwing next anyway
+        log.error(e.getMessage(), e);
       }
       throw new IllegalStateException(ioe);
     }

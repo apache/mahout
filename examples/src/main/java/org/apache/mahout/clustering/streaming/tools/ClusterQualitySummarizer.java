@@ -141,8 +141,7 @@ public class ClusterQualitySummarizer {
           ClusteringUtils.summarizeClusterDistances(datapoints, centroids, distanceMeasure);
       List<OnlineSummarizer> compareSummaries = null;
       if (centroidsCompare != null) {
-            compareSummaries =
-                ClusteringUtils.summarizeClusterDistances(datapoints, centroidsCompare, distanceMeasure);
+        compareSummaries = ClusteringUtils.summarizeClusterDistances(datapoints, centroidsCompare, distanceMeasure);
       }
       System.out.printf("[Dunn Index] First: %f", ClusteringUtils.dunnIndex(centroids, distanceMeasure, summaries));
       if (compareSummaries != null) {
@@ -198,8 +197,8 @@ public class ClusterQualitySummarizer {
         .withShortName("cc")
         .withRequired(false)
         .withArgument(argumentBuilder.withName("centroidsCompare").withMaximum(1).create())
-        .withDescription("where to get seq files with the second set of centroids (from Mahout KMeans or " +
-            "StreamingKMeansDriver)")
+        .withDescription("where to get seq files with the second set of centroids (from Mahout KMeans or "
+            + "StreamingKMeansDriver)")
         .create();
 
     Option outputFileOption = builder.withLongName("output")

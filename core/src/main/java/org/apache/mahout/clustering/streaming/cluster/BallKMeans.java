@@ -281,11 +281,11 @@ public class BallKMeans implements Iterable<Centroid> {
    * @param datapoints The datapoints to select from.  These datapoints should be WeightedVectors of some kind.
    */
   private void initializeSeedsKMeansPlusPlus(List<? extends WeightedVector> datapoints) {
-    Preconditions.checkArgument(datapoints.size() > 1, "Must have at least two datapoints points to cluster " +
-        "sensibly");
+    Preconditions.checkArgument(datapoints.size() > 1, "Must have at least two datapoints points to cluster "
+        + "sensibly");
     Preconditions.checkArgument(datapoints.size() >= numClusters,
         String.format("Must have more datapoints [%d] than clusters [%d]", datapoints.size(), numClusters));
-    // Compute the centroid of all of the datapoints.  This is then used to compute the squared radius of the datapoints.
+    // Compute the centroid of all of the datapoints. This is then used to compute the squared radius of the datapoints.
     Centroid center = new Centroid(datapoints.iterator().next());
     for (WeightedVector row : Iterables.skip(datapoints, 1)) {
       center.update(row);
@@ -446,8 +446,8 @@ public class BallKMeans implements Iterable<Centroid> {
     return Iterators.transform(centroids.iterator(), new Function<Vector, Centroid>() {
       @Override
       public Centroid apply(Vector input) {
-        Preconditions.checkArgument(input instanceof Centroid, "Non-centroid in centroids " +
-            "searcher");
+        Preconditions.checkArgument(input instanceof Centroid, "Non-centroid in centroids "
+            + "searcher");
         //noinspection ConstantConditions
         return (Centroid)input;
       }

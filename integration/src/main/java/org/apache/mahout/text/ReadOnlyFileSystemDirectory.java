@@ -31,6 +31,8 @@ import org.apache.lucene.store.IOContext;
 import org.apache.lucene.store.IndexInput;
 import org.apache.lucene.store.IndexOutput;
 import org.apache.lucene.store.Lock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -49,15 +51,18 @@ public class ReadOnlyFileSystemDirectory extends Directory {
   private final Path directory;
   private final int ioFileBufferSize;
 
-  /**
-   * Constructor
-   *
-   * @param fs
-   * @param directory
-   * @param create
-   * @param conf
-   * @throws IOException
-   */
+  private static final Logger log = LoggerFactory.getLogger(ReadOnlyFileSystemDirectory.class);
+
+      /**
+       * Constructor
+       *
+       * @param fs
+       * @param directory
+       * @param create
+       * @param conf
+       * @throws IOException
+       */
+
   public ReadOnlyFileSystemDirectory(FileSystem fs, Path directory, boolean create,
                                      Configuration conf) throws IOException {
 
@@ -76,7 +81,7 @@ public class ReadOnlyFileSystemDirectory extends Directory {
         isDir = status.isDir();
       }
     } catch (IOException e) {
-      // file does not exist, isDir already set to false
+      log.error(e.getMessage(), e);
     }
     if (!isDir) {
       throw new IOException(directory + " is not a directory");
@@ -96,7 +101,7 @@ public class ReadOnlyFileSystemDirectory extends Directory {
         isDir = status.isDir();
       }
     } catch (IOException e) {
-      // file does not exist, isDir already set to false
+      log.error(e.getMessage(), e);
     }
     if (!isDir) {
       throw new IOException(directory + " is not a directory");
@@ -113,9 +118,6 @@ public class ReadOnlyFileSystemDirectory extends Directory {
     }
   }
 
-  /* (non-Javadoc)
-  * @see org.apache.lucene.store.Directory#list()
-  */
   public String[] list() throws IOException {
     FileStatus[] fileStatus =
             fs.listStatus(directory, LuceneIndexFileNameFilter.getFilter());
@@ -131,48 +133,21 @@ public class ReadOnlyFileSystemDirectory extends Directory {
     return list();
   }
 
-  /* (non-Javadoc)
-  * @see org.apache.lucene.store.Directory#fileExists(java.lang.String)
-  */
+  @Override
   public boolean fileExists(String name) throws IOException {
     return fs.exists(new Path(directory, name));
   }
 
-  /* (non-Javadoc)
-  * @see org.apache.lucene.store.Directory#fileModified(java.lang.String)
-  */
-  public long fileModified(String name) {
-    throw new UnsupportedOperationException();
-  }
-
-  /* (non-Javadoc)
-  * @see org.apache.lucene.store.Directory#touchFile(java.lang.String)
-  */
-  public void touchFile(String name) {
-    throw new UnsupportedOperationException();
-  }
-
-  /* (non-Javadoc)
-  * @see org.apache.lucene.store.Directory#fileLength(java.lang.String)
-  */
+  @Override
   public long fileLength(String name) throws IOException {
     return fs.getFileStatus(new Path(directory, name)).getLen();
   }
 
-  /* (non-Javadoc)
-  * @see org.apache.lucene.store.Directory#deleteFile(java.lang.String)
-  */
+  @Override
   public void deleteFile(String name) throws IOException {
     if (!fs.delete(new Path(directory, name), true)) {
       throw new IOException("Cannot delete index file " + name);
     }
-  }
-
-  /* (non-Javadoc)
-  * @see org.apache.lucene.store.Directory#renameFile(java.lang.String, java.lang.String)
-  */
-  public void renameFile(String from, String to) throws IOException {
-    fs.rename(new Path(directory, from), new Path(directory, to));
   }
 
   @Override
@@ -197,10 +172,7 @@ public class ReadOnlyFileSystemDirectory extends Directory {
     return new FileSystemIndexInput(new Path(directory, name), ioFileBufferSize);
   }
 
-
-  /* (non-Javadoc)
-  * @see org.apache.lucene.store.Directory#makeLock(java.lang.String)
-  */
+  @Override
   public Lock makeLock(final String name) {
     return new Lock() {
       public boolean obtain() {
@@ -220,21 +192,17 @@ public class ReadOnlyFileSystemDirectory extends Directory {
     };
   }
 
-  /* (non-Javadoc)
-  * @see org.apache.lucene.store.Directory#close()
-  */
+  @Override
   public void close() throws IOException {
     // do not close the file system
   }
 
-  /* (non-Javadoc)
-  * @see java.lang.Object#toString()
-  */
+  @Override
   public String toString() {
     return this.getClass().getName() + "@" + directory;
   }
 
-  private class FileSystemIndexInput extends BufferedIndexInput {
+  private class FileSystemIndexInput extends BufferedIndexInput implements Cloneable {
 
     // shared by clones
     private class Descriptor {
@@ -253,7 +221,7 @@ public class ReadOnlyFileSystemDirectory extends Directory {
     private boolean isClone;
 
     public FileSystemIndexInput(Path path, int ioFileBufferSize)
-            throws IOException {
+      throws IOException {
       super("FSII_" + path.getName(), ioFileBufferSize);
       filePath = path;
       descriptor = new Descriptor(path, ioFileBufferSize);
@@ -261,8 +229,9 @@ public class ReadOnlyFileSystemDirectory extends Directory {
       isOpen = true;
     }
 
+    @Override
     protected void readInternal(byte[] b, int offset, int len)
-            throws IOException {
+      throws IOException {
       long position = getFilePointer();
       if (position != descriptor.position) {
         descriptor.in.seek(position);
@@ -279,6 +248,7 @@ public class ReadOnlyFileSystemDirectory extends Directory {
       } while (total < len);
     }
 
+    @Override
     public void close() throws IOException {
       if (!isClone) {
         if (isOpen) {
@@ -290,20 +260,24 @@ public class ReadOnlyFileSystemDirectory extends Directory {
       }
     }
 
+    @Override
     protected void seekInternal(long position) {
       // handled in readInternal()
     }
 
+    @Override
     public long length() {
       return length;
     }
 
+    @Override
     protected void finalize() throws IOException {
       if (!isClone && isOpen) {
         close(); // close the file
       }
     }
 
+    @Override
     public BufferedIndexInput clone() {
       FileSystemIndexInput clone = (FileSystemIndexInput) super.clone();
       clone.isClone = true;
@@ -318,17 +292,19 @@ public class ReadOnlyFileSystemDirectory extends Directory {
     private boolean isOpen;
 
     public FileSystemIndexOutput(Path path, int ioFileBufferSize)
-            throws IOException {
+      throws IOException {
       filePath = path;
       // overwrite is true by default
       out = fs.create(path, true, ioFileBufferSize);
       isOpen = true;
     }
 
+    @Override
     public void flushBuffer(byte[] b, int offset, int size) throws IOException {
       out.write(b, offset, size);
     }
 
+    @Override
     public void close() throws IOException {
       if (isOpen) {
         super.close();
@@ -339,14 +315,17 @@ public class ReadOnlyFileSystemDirectory extends Directory {
       }
     }
 
+    @Override
     public void seek(long pos) throws IOException {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public long length() throws IOException {
       return out.getPos();
     }
 
+    @Override
     protected void finalize() throws IOException {
       if (isOpen) {
         close(); // close the file

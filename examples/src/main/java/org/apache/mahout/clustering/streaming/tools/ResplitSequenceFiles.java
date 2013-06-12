@@ -25,12 +25,15 @@ import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 
 public class ResplitSequenceFiles {
+
   private String inputFile;
   private String outputFileBase;
   private int numSplits;
 
   private Configuration conf;
   private FileSystem fs;
+
+  private ResplitSequenceFiles() {}
 
   private void writeSplit(Iterator<Pair<Writable, Writable>> inputIterator,
                           int numSplit, int numEntriesPerSplit) throws IOException {
@@ -85,8 +88,8 @@ public class ResplitSequenceFiles {
         .withShortName("o")
         .withRequired(true)
         .withArgument(argumentBuilder.withName("output").withMaximum(1).create())
-        .withDescription("the base name of the file split that the files will be split it; the i'th split has the " +
-            "suffix -i")
+        .withDescription("the base name of the file split that the files will be split it; the i'th split has the "
+            + "suffix -i")
         .create();
 
     Option numSplitsOption = builder.withLongName("numSplits")

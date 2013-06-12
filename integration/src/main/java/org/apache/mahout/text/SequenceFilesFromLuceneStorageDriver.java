@@ -17,6 +17,7 @@ package org.apache.mahout.text;
  */
 
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
@@ -75,12 +76,9 @@ public class SequenceFilesFromLuceneStorageDriver extends AbstractJob {
     }
 
     Configuration configuration = getConf();
-    if (configuration == null) {
-      configuration = new Configuration();
-    }
 
     String[] paths = getInputPath().toString().split(",");
-    List<Path> indexPaths = new ArrayList<Path>();
+    List<Path> indexPaths = Lists.newArrayList();
     for (String path : paths) {
       indexPaths.add(new Path(path));
     }
@@ -100,7 +98,8 @@ public class SequenceFilesFromLuceneStorageDriver extends AbstractJob {
     if (hasOption(OPTION_QUERY)) {
       try {
         String queryString = COMPILE.matcher(getOption(OPTION_QUERY)).replaceAll("");
-        QueryParser queryParser = new QueryParser(Version.LUCENE_43, queryString, new StandardAnalyzer(Version.LUCENE_43));
+        QueryParser queryParser = new QueryParser(Version.LUCENE_43, queryString,
+            new StandardAnalyzer(Version.LUCENE_43));
         query = queryParser.parse(queryString);
       } catch (ParseException e) {
         throw new IllegalArgumentException(e.getMessage(), e);
@@ -115,7 +114,8 @@ public class SequenceFilesFromLuceneStorageDriver extends AbstractJob {
     }
     lucene2SeqConf.setMaxHits(maxHits);
 
-    if (hasOption(DefaultOptionCreator.METHOD_OPTION) && getOption(DefaultOptionCreator.METHOD_OPTION).equals("sequential")) {
+    if (hasOption(DefaultOptionCreator.METHOD_OPTION)
+        && getOption(DefaultOptionCreator.METHOD_OPTION).equals("sequential")) {
       new SequenceFilesFromLuceneStorage().run(lucene2SeqConf);
     } else {
       new SequenceFilesFromLuceneStorageMRJob().run(lucene2SeqConf);

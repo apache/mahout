@@ -277,16 +277,14 @@ public class SplitInput extends AbstractJob {
    */
   public void splitDirectory(Path inputDir) throws IOException, ClassNotFoundException, InterruptedException {
     Configuration conf = getConf();
-    if (conf == null) {
-      conf = new Configuration();
-    }
     splitDirectory(conf, inputDir);
   }
 
   /*
    * See also splitDirectory(Path inputDir)
    * */
-  public void splitDirectory(Configuration conf, Path inputDir) throws IOException, ClassNotFoundException, InterruptedException {
+  public void splitDirectory(Configuration conf, Path inputDir)
+    throws IOException, ClassNotFoundException, InterruptedException {
     FileSystem fs = inputDir.getFileSystem(conf);
     if (fs.getFileStatus(inputDir) == null) {
       throw new IOException(inputDir + " does not exist");
@@ -315,9 +313,6 @@ public class SplitInput extends AbstractJob {
    */
   public void splitFile(Path inputFile) throws IOException {
     Configuration conf = getConf();
-    if (conf == null) {
-      conf = new Configuration();
-    }
     FileSystem fs = inputFile.getFileSystem(conf);
     if (fs.getFileStatus(inputFile) == null) {
       throw new IOException(inputFile + " does not exist");
@@ -655,9 +650,6 @@ public class SplitInput extends AbstractJob {
 
     if (!useMapRed) {
       Configuration conf = getConf();
-      if (conf == null) {
-        conf = new Configuration();
-      }
       FileSystem fs = trainingOutputDirectory.getFileSystem(conf);
       FileStatus trainingOutputDirStatus = fs.getFileStatus(trainingOutputDirectory);
       Preconditions.checkArgument(trainingOutputDirStatus != null && trainingOutputDirStatus.isDir(),

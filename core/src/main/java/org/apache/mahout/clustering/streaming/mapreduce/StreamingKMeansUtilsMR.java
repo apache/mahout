@@ -53,8 +53,8 @@ public final class StreamingKMeansUtilsMR {
     if (searcherClass.equals(BruteSearch.class.getName())) {
       return ClassUtils.instantiateAs(searcherClass, UpdatableSearcher.class,
           new Class[]{DistanceMeasure.class}, new Object[]{distanceMeasure});
-    } else if (searcherClass.equals(FastProjectionSearch.class.getName()) ||
-        searcherClass.equals(ProjectionSearch.class.getName())) {
+    } else if (searcherClass.equals(FastProjectionSearch.class.getName())
+        || searcherClass.equals(ProjectionSearch.class.getName())) {
       return ClassUtils.instantiateAs(searcherClass, UpdatableSearcher.class,
           new Class[]{DistanceMeasure.class, int.class, int.class},
           new Object[]{distanceMeasure, numProjections, searchSize});
@@ -116,7 +116,7 @@ public final class StreamingKMeansUtilsMR {
    * @throws java.io.IOException
    */
   public static void writeCentroidsToSequenceFile(Iterable<Centroid> centroids, Path path, Configuration conf)
-      throws IOException {
+    throws IOException {
     SequenceFile.Writer writer = null;
     try {
       writer = SequenceFile.createWriter(FileSystem.get(conf), conf,
@@ -131,7 +131,7 @@ public final class StreamingKMeansUtilsMR {
   }
 
   public static void writeVectorsToSequenceFile(Iterable<? extends Vector> datapoints, Path path, Configuration conf)
-      throws IOException {
+    throws IOException {
     SequenceFile.Writer writer = null;
     try {
       writer = SequenceFile.createWriter(FileSystem.get(conf), conf,

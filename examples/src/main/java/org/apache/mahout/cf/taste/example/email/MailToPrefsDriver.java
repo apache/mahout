@@ -99,10 +99,6 @@ public final class MailToPrefsDriver extends AbstractJob {
     int chunkSize = Integer.parseInt(getOption("chunkSize"));
     String separator = getOption("separator");
     Configuration conf = getConf();
-    if (conf == null) {
-      setConf(new Configuration());
-      conf = getConf();
-    }
     boolean useCounts = hasOption("useCounts");
     AtomicInteger currentPhase = new AtomicInteger();
     int[] msgDim = new int[1];

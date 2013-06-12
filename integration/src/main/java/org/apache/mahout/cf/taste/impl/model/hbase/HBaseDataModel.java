@@ -458,7 +458,7 @@ public final class HBaseDataModel implements DataModel, Closeable {
     Scan scan = new Scan(new byte[]{0x69}, new byte[]{0x70});
     scan.setFilter(new FilterList(FilterList.Operator.MUST_PASS_ALL, new KeyOnlyFilter(), new FirstKeyOnlyFilter()));
     ResultScanner scanner = table.getScanner(scan);
-    Collection<Long> ids = new LinkedList<Long>();
+    Collection<Long> ids = Lists.newLinkedList();
     for (Result result : scanner) {
       ids.add(bytesToUserOrItemID(result.getRow()));
     }
@@ -483,7 +483,7 @@ public final class HBaseDataModel implements DataModel, Closeable {
     Scan scan = new Scan(new byte[]{0x75}, new byte[]{0x76});
     scan.setFilter(new FilterList(FilterList.Operator.MUST_PASS_ALL, new KeyOnlyFilter(), new FirstKeyOnlyFilter()));
     ResultScanner scanner = table.getScanner(scan);
-    Collection<Long> ids = new LinkedList<Long>();
+    Collection<Long> ids = Lists.newLinkedList();
     for (Result result : scanner) {
       ids.add(bytesToUserOrItemID(result.getRow()));
     }

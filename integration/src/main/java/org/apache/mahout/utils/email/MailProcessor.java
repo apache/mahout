@@ -33,9 +33,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Converts an mbox mail archive into a group of Hadoop Sequence Files with equal size. The archive may optionally be gzipped or zipped.
- * @see org.apache.mahout.text.SequenceFilesFromMailArchives
- *
+ * Converts an mbox mail archive into a group of Hadoop Sequence Files with equal size. The archive may optionally be
+ * gzipped or zipped. @see org.apache.mahout.text.SequenceFilesFromMailArchives
  */
 public class MailProcessor {
 

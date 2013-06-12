@@ -91,14 +91,6 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
   public void setVerbose(boolean verbose) {
     this.verbose = verbose;
   }
-
-  public InMemoryCollapsedVariationalBayes0(Matrix corpus,
-                                            String[] terms,
-                                            int numTopics,
-                                            double alpha,
-                                            double eta) {
-    this(corpus, terms, numTopics, alpha, eta, 1, 1, 0);
-  }
     
   public InMemoryCollapsedVariationalBayes0(Matrix corpus,
                                             String[] terms,
@@ -468,9 +460,6 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
 
   @Override
   public Configuration getConf() {
-    if (super.getConf() == null) {
-      setConf(new Configuration());
-    }
     return super.getConf();
   }
 

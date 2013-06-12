@@ -60,7 +60,8 @@ public class LuceneSegmentRecordReader extends RecordReader<Text, NullWritable> 
     Weight weight = lucene2SeqConfiguration.getQuery().createWeight(searcher);
     scorer = weight.scorer(segmentReader.getContext(), false, false, null);
     if (scorer == null) {
-      throw new IllegalArgumentException("Could not create query scorer for query: " + lucene2SeqConfiguration.getQuery());
+      throw new IllegalArgumentException("Could not create query scorer for query: "
+          + lucene2SeqConfiguration.getQuery());
     }
   }
 
@@ -84,7 +85,8 @@ public class LuceneSegmentRecordReader extends RecordReader<Text, NullWritable> 
 
   @Override
   public float getProgress() throws IOException, InterruptedException {
-    return scorer.cost() == 0 ? 0 : (float) nextDocId / scorer.cost();//this is a rough estimate, due to the possible inaccuracies of cost
+    //this is a rough estimate, due to the possible inaccuracies of cost
+    return scorer.cost() == 0 ? 0 : (float) nextDocId / scorer.cost();
   }
 
   @Override

@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -164,7 +165,7 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
   private Path runTest(boolean tfWeighting, boolean sequential, boolean named, double maxDFSigma, int numDocs) throws Exception {
     Path outputPath = getTestTempFilePath("output");
 
-    List<String> argList = new LinkedList<String>();
+    List<String> argList = Lists.newLinkedList();
     argList.add("-i");
     argList.add(inputPath.toString());
     argList.add("-o");

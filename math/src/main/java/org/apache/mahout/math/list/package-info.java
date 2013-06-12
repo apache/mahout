@@ -17,9 +17,9 @@
  * <tt>double</tt>, etc.
  * </li>
  * <li>Compact representations</li>
- * <li>A number of general purpose list operations including: adding, inserting,
+ * <li>A number of general purpose list OPERATIONS including: adding, inserting,
  * removing, iterating, searching, sorting, extracting ranges and copying. All
- * operations are designed to perform well on mass data.
+ * OPERATIONS are designed to perform well on mass data.
  * </li>
  * <li>Support for quick access to list elements. This is achieved by bounds-checking
  * and non-bounds-checking accessor methods as well as zero-copy transformations
@@ -90,7 +90,7 @@
  * </td>
  * </table>
  * <p> For efficiency, all classes provide back doors to enable getting/setting the
- * backing array directly. In this way, the high level operations of these classes
+ * backing array directly. In this way, the high level OPERATIONS of these classes
  * can be used where appropriate, and one can switch to <tt>[]</tt>-array index
  * notations where necessary. The key methods for this are <tt>public &lt;ElementType&gt;[]
  * elements()</tt> and <tt>public void elements(&lt;ElementType&gt;[])</tt>. The
@@ -101,7 +101,7 @@
  * algorithm (or other algorithm) can operate on the returned primitive array.
  * The latter method forces a list to internally hold a user provided array. Using
  * this approach one can avoid needing to copy the elements into the list.
- * <p>As a consequence, operations on primitive arrays, Colt lists and JAL algorithms
+ * <p>As a consequence, OPERATIONS on primitive arrays, Colt lists and JAL algorithms
  * can freely be mixed at zero-copy overhead.
  * <p> Note that such special treatment certainly breaks encapsulation. This functionality
  * is provided for performance reasons only and should only be used when absolutely

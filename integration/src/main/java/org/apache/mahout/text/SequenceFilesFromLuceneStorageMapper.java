@@ -21,7 +21,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
  */
 public class SequenceFilesFromLuceneStorageMapper extends Mapper<Text, NullWritable, Text, Text> {
 
-  public enum DataStatus {EMPTY_KEY, EMPTY_VALUE, EMPTY_BOTH}
+  public enum DataStatus { EMPTY_KEY, EMPTY_VALUE, EMPTY_BOTH }
 
   private LuceneStorageConfiguration l2sConf;
   private SegmentReader segmentReader;
@@ -50,9 +50,9 @@ public class SequenceFilesFromLuceneStorageMapper extends Mapper<Text, NullWrita
       context.getCounter(DataStatus.EMPTY_BOTH).increment(1);
       return;
     }
-    if (isBlank(theKey.toString())){
+    if (isBlank(theKey.toString())) {
       context.getCounter(DataStatus.EMPTY_KEY).increment(1);
-    } else if (isBlank(theValue.toString())){
+    } else if (isBlank(theValue.toString())) {
       context.getCounter(DataStatus.EMPTY_VALUE).increment(1);
     }
     context.write(theKey, theValue);

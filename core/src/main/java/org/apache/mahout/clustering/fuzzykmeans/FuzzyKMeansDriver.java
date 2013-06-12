@@ -157,7 +157,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
                          boolean emitMostLikely,
                          double threshold,
                          boolean runSequential) throws IOException, ClassNotFoundException, InterruptedException {
-	Configuration conf = new Configuration();
+    Configuration conf = new Configuration();
     Path clustersOut = buildClusters(conf,
                                      input,
                                      clustersIn,

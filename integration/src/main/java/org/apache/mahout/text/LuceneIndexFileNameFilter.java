@@ -26,10 +26,9 @@ import java.util.regex.Pattern;
  * A wrapper class to convert an IndexFileNameFilter which implements
  * java.io.FilenameFilter to an org.apache.hadoop.fs.PathFilter.
  */
-class LuceneIndexFileNameFilter implements PathFilter {
+final class LuceneIndexFileNameFilter implements PathFilter {
 
-  private static final LuceneIndexFileNameFilter singleton =
-          new LuceneIndexFileNameFilter();
+  private static final LuceneIndexFileNameFilter LUCENE_INDEX_FILE_NAME_FILTER = new LuceneIndexFileNameFilter();
 
   /**
    * Get a static instance.
@@ -37,18 +36,15 @@ class LuceneIndexFileNameFilter implements PathFilter {
    * @return the static instance
    */
   public static LuceneIndexFileNameFilter getFilter() {
-    return singleton;
+    return LUCENE_INDEX_FILE_NAME_FILTER;
   }
 
-  private LuceneIndexFileNameFilter() {
-  }
+  private LuceneIndexFileNameFilter() {}
 
-  //TODO: Lucene defines this in IndexFileNames, but it is package private, so make sure it doesn't change w/ new releases.
+  //TODO: Lucene defines this in IndexFileNames, but it is package private,
+  // so make sure it doesn't change w/ new releases.
   private static final Pattern CODEC_FILE_PATTERN = Pattern.compile("_[a-z0-9]+(_.*)?\\..*");
 
-  /* (non-Javadoc)
-  * @see org.apache.hadoop.fs.PathFilter#accept(org.apache.hadoop.fs.Path)
-  */
   public boolean accept(Path path) {
     String name = path.getName();
     if (CODEC_FILE_PATTERN.matcher(name).matches() || name.startsWith(IndexFileNames.SEGMENTS)) {

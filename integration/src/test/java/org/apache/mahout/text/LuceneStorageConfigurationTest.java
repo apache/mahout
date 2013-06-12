@@ -42,7 +42,7 @@ public class LuceneStorageConfigurationTest {
   }
   
   @Test(expected = IllegalArgumentException.class)
-  public void testSerialization_notSerialized() throws IOException {
+  public void testSerializationNotSerialized() throws IOException {
     new LuceneStorageConfiguration(new Configuration());
   }
 }

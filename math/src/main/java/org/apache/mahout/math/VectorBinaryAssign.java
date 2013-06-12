@@ -7,7 +7,7 @@ import org.apache.mahout.math.set.OpenIntHashSet;
 import java.util.Iterator;
 
 /**
- * Abstract class encapsulating different algorithms that perform the Vector operations assign().
+ * Abstract class encapsulating different algorithms that perform the Vector OPERATIONS assign().
  * x.assign(y, f), for x and y Vectors and f a DoubleDouble function:
  * - applies the function f to every element in x and y, f(xi, yi)
  * - assigns xi = f(xi, yi) for all indices i
@@ -43,26 +43,26 @@ import java.util.Iterator;
  * explanation.
  */
 public abstract class VectorBinaryAssign {
-  public static final VectorBinaryAssign[] operations = {
-      new AssignNonzerosIterateThisLookupThat(),
-      new AssignNonzerosIterateThatLookupThisMergeUpdates(),
-      new AssignNonzerosIterateThatLookupThisInplaceUpdates(),
+  public static final VectorBinaryAssign[] OPERATIONS = {
+    new AssignNonzerosIterateThisLookupThat(),
+    new AssignNonzerosIterateThatLookupThisMergeUpdates(),
+    new AssignNonzerosIterateThatLookupThisInplaceUpdates(),
 
-      new AssignIterateIntersection(),
+    new AssignIterateIntersection(),
 
-      new AssignIterateUnionSequentialMergeUpdates(),
-      new AssignIterateUnionSequentialInplaceUpdates(),
-      new AssignIterateUnionRandomMergeUpdates(),
-      new AssignIterateUnionRandomInplaceUpdates(),
+    new AssignIterateUnionSequentialMergeUpdates(),
+    new AssignIterateUnionSequentialInplaceUpdates(),
+    new AssignIterateUnionRandomMergeUpdates(),
+    new AssignIterateUnionRandomInplaceUpdates(),
 
-      new AssignAllIterateSequentialMergeUpdates(),
-      new AssignAllIterateSequentialInplaceUpdates(),
-      new AssignAllIterateThisLookupThatMergeUpdates(),
-      new AssignAllIterateThisLookupThatInplaceUpdates(),
-      new AssignAllIterateThatLookupThisMergeUpdates(),
-      new AssignAllIterateThatLookupThisInplaceUpdates(),
-      new AssignAllLoopMergeUpdates(),
-      new AssignAllLoopInplaceUpdates(),
+    new AssignAllIterateSequentialMergeUpdates(),
+    new AssignAllIterateSequentialInplaceUpdates(),
+    new AssignAllIterateThisLookupThatMergeUpdates(),
+    new AssignAllIterateThisLookupThatInplaceUpdates(),
+    new AssignAllIterateThatLookupThisMergeUpdates(),
+    new AssignAllIterateThatLookupThisInplaceUpdates(),
+    new AssignAllLoopMergeUpdates(),
+    new AssignAllLoopInplaceUpdates(),
   };
 
   /**
@@ -87,16 +87,16 @@ public abstract class VectorBinaryAssign {
   public static VectorBinaryAssign getBestOperation(Vector x, Vector y, DoubleDoubleFunction f) {
     int bestOperationIndex = -1;
     double bestCost = Double.POSITIVE_INFINITY;
-    for (int i = 0; i < operations.length; ++i) {
-      if (operations[i].isValid(x, y, f)) {
-        double cost = operations[i].estimateCost(x, y, f);
+    for (int i = 0; i < OPERATIONS.length; ++i) {
+      if (OPERATIONS[i].isValid(x, y, f)) {
+        double cost = OPERATIONS[i].estimateCost(x, y, f);
         if (cost < bestCost) {
           bestCost = cost;
           bestOperationIndex = i;
         }
       }
     }
-    return operations[bestOperationIndex];
+    return OPERATIONS[bestOperationIndex];
   }
 
   /**

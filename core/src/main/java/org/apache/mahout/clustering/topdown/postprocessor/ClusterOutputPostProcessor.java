@@ -74,12 +74,8 @@ public final class ClusterOutputPostProcessor {
   public void process() throws IOException {
     createPostProcessDirectory();
     for (Pair<?, WeightedVectorWritable> record
-            : new SequenceFileDirIterable<Writable, WeightedVectorWritable>(clusteredPoints,
-            PathType.GLOB,
-            PathFilters.partFilter(),
-            null,
-            false,
-            conf)) {
+        : new SequenceFileDirIterable<Writable, WeightedVectorWritable>(clusteredPoints, PathType.GLOB, PathFilters.partFilter(),
+                                                                        null, false, conf)) {
       String clusterId = record.getFirst().toString().trim();
       putVectorInRespectiveCluster(clusterId, record.getSecond());
     }

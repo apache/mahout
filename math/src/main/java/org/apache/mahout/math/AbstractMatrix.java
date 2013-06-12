@@ -759,13 +759,13 @@ public abstract class AbstractMatrix implements Matrix {
 
   @Override
   public String toString() {
-    String s = "{\n";
+    StringBuilder s = new StringBuilder("{\n");
     Iterator<MatrixSlice> it = iterator();
     while (it.hasNext()) {
       MatrixSlice next = it.next();
-      s += "  " + next.index() + "  =>\t" + next.vector() + '\n';
+      s.append("  ").append(next.index()).append("  =>\t").append(next.vector()).append('\n');
     }
-    s += "}";
-    return s;
+    s.append("}");
+    return s.toString();
   }
 }

@@ -28,8 +28,11 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
  *
  **/
 class LuceneSeqFileHelper {
+
   public static final String SEPARATOR_FIELDS = " ";
   public static final int USE_TERM_INFOS = 1;
+
+  private LuceneSeqFileHelper() {}
 
   public static void populateValues(Document document, Text theValue, List<String> fields) {
 

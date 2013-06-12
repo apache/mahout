@@ -221,7 +221,7 @@ public final class PFPGrowth {
     int numGroups = params.getInt(NUM_GROUPS, NUM_GROUPS_DEFAULT);
     int maxPerGroup = fList.size() / numGroups;
     if (fList.size() % numGroups != 0) {
-        maxPerGroup++;
+      maxPerGroup++;
     }
     params.set(MAX_PER_GROUP, Integer.toString(maxPerGroup));
 

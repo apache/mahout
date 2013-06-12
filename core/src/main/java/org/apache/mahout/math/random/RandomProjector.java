@@ -81,7 +81,7 @@ public final class RandomProjector {
   public static Matrix generateBasisZeroPlusMinusOne(int projectedVectorSize, int vectorSize) {
     Matrix basisMatrix = new DenseMatrix(projectedVectorSize, vectorSize);
     Multinomial<Double> choice = new Multinomial<Double>();
-    choice.add(0.0, 2/3.0);
+    choice.add(0.0, 2 / 3.0);
     choice.add(Math.sqrt(3.0), 1 / 6.0);
     choice.add(-Math.sqrt(3.0), 1 / 6.0);
     for (int i = 0; i < projectedVectorSize; ++i) {

@@ -131,12 +131,12 @@ public final class FileBasedSparseBinaryMatrix extends AbstractMatrix {
     // write rows
     for (MatrixSlice row : m) {
       List<Integer> columns = Lists.newArrayList(Iterables.transform(row.vector().nonZeroes(),
-                                                 new Function<Vector.Element, Integer>() {
-                                                   @Override
-                                                   public Integer apply(Vector.Element element) {
-                                                     return element.index();
-                                                   }
-                                                 }));
+        new Function<Vector.Element, Integer>() {
+          @Override
+          public Integer apply(Vector.Element element) {
+            return element.index();
+          }
+        }));
       Collections.sort(columns);
 
       for (Integer column : columns) {
@@ -438,7 +438,7 @@ public final class FileBasedSparseBinaryMatrix extends AbstractMatrix {
     }
 
     /**
-     * Copy the vector for fast operations.
+     * Copy the vector for fast OPERATIONS.
      *
      * @return a Vector
      */

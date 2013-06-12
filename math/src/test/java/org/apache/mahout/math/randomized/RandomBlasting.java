@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.mahout.math.map.OpenIntIntHashMap;
 import org.apache.mahout.math.map.OpenIntObjectHashMap;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
@@ -31,11 +33,11 @@ public class RandomBlasting extends RandomizedTest {
 
   @Test
   @Repeat(iterations = 20)
-  public void testAgainstReference_OpenObjectIntHashMap() {
+  public void testAgainstReferenceOpenObjectIntHashMap() {
     OpenObjectIntHashMap<Integer> base = new OpenObjectIntHashMap<Integer>();
     Map<Integer, Integer> reference = new HashMap<Integer, Integer>();
 
-    List<Operation> ops = new ArrayList<Operation>();
+    List<Operation> ops = Lists.newArrayList();
     addOp(ops, Operation.ADD, 60);
     addOp(ops, Operation.REMOVE, 30);
     addOp(ops, Operation.INDEXOF, 30);
@@ -82,11 +84,11 @@ public class RandomBlasting extends RandomizedTest {
 
   @Test
   @Repeat(iterations = 20)
-  public void testAgainstReference_OpenIntObjectHashMap() {
+  public void testAgainstReferenceOpenIntObjectHashMap() {
     OpenIntObjectHashMap<Integer> base = new OpenIntObjectHashMap<Integer>();
     Map<Integer, Integer> reference = new HashMap<Integer, Integer>();
 
-    List<Operation> ops = new ArrayList<Operation>();
+    List<Operation> ops = Lists.newArrayList();
     addOp(ops, Operation.ADD, 60);
     addOp(ops, Operation.REMOVE, 30);
     addOp(ops, Operation.INDEXOF, 30);
@@ -133,11 +135,11 @@ public class RandomBlasting extends RandomizedTest {
 
   @Test
   @Repeat(iterations = 20)
-  public void testAgainstReference_OpenIntIntHashMap() {
+  public void testAgainstReferenceOpenIntIntHashMap() {
     OpenIntIntHashMap base = new OpenIntIntHashMap();
     HashMap<Integer, Integer> reference = new HashMap<Integer, Integer>();
 
-    List<Operation> ops = new ArrayList<Operation>();
+    List<Operation> ops = Lists.newArrayList();
     addOp(ops, Operation.ADD, 60);
     addOp(ops, Operation.REMOVE, 30);
     addOp(ops, Operation.INDEXOF, 30);
@@ -199,11 +201,11 @@ public class RandomBlasting extends RandomizedTest {
 
   @Test
   @Repeat(iterations = 20)
-  public void testAgainstReference_OpenIntHashSet() {
+  public void testAgainstReferenceOpenIntHashSet() {
     AbstractIntSet base = new OpenIntHashSet();
-    HashSet<Integer> reference = new HashSet<Integer>();
+    HashSet<Integer> reference = Sets.newHashSet();
 
-    List<Operation> ops = new ArrayList<Operation>();
+    List<Operation> ops = Lists.newArrayList();
     addOp(ops, Operation.ADD, 60);
     addOp(ops, Operation.REMOVE, 30);
     addOp(ops, Operation.INDEXOF, 30);
@@ -250,11 +252,11 @@ public class RandomBlasting extends RandomizedTest {
   @Seed("deadbeef")
   @Test
   @Repeat(iterations = 20)
-  public void testAgainstReference_OpenHashSet() {
+  public void testAgainstReferenceOpenHashSet() {
     Set<Integer> base = new OpenHashSet<Integer>();
-    Set<Integer> reference = new HashSet<Integer>();
+    Set<Integer> reference = Sets.newHashSet();
 
-    List<Operation> ops = new ArrayList<Operation>();
+    List<Operation> ops = Lists.newArrayList();
     addOp(ops, Operation.ADD, 60);
     addOp(ops, Operation.REMOVE, 30);
     addOp(ops, Operation.INDEXOF, 30);
@@ -325,8 +327,7 @@ public class RandomBlasting extends RandomizedTest {
     tableField.setAccessible(true);
     Object[] table = (Object[]) tableField.get(m);
 
-    assertEquals(new HashSet<Object>(Arrays.asList(new Object[] {null})), new HashSet<Object>(
-        Arrays.asList(table)));
+    assertEquals(Sets.newHashSet(Arrays.asList(new Object[] {null})), Sets.newHashSet(Arrays.asList(table)));
   }
 
   /** Add multiple repetitions of op to the list. */

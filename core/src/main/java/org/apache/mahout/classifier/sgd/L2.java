@@ -33,13 +33,13 @@ public class L2 implements PriorFunction {
   private double s;
 
   public L2(double scale) {
-    this.s = scale;
-    this.s2 = scale * scale;
+    s = scale;
+    s2 = scale * scale;
   }
 
   public L2() {
-    this.s = 1.0;
-    this.s2 = 1.0;	  
+    s = 1.0;
+    s2 = 1.0;
   }
 
   @Override

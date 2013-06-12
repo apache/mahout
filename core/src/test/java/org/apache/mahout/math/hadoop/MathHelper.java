@@ -44,7 +44,7 @@ import org.easymock.IArgumentMatcher;
 import org.junit.Assert;
 
 /**
- * a collection of small helper methods useful for unit-testing mathematical operations
+ * a collection of small helper methods useful for unit-testing mathematical OPERATIONS
  */
 public final class MathHelper {
 
@@ -161,9 +161,7 @@ public final class MathHelper {
     for (Pair<IntWritable,VectorWritable> record :
         new SequenceFileIterable<IntWritable,VectorWritable>(path, true, conf)) {
       IntWritable key = record.getFirst();
-      VectorWritable value = record.getSecond();
       readOneRow = true;
-      int row = key.get();
       rows.put(key.get(), record.getSecond().get());
     }
     if (!readOneRow) {

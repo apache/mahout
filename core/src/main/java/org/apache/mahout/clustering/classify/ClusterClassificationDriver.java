@@ -124,12 +124,13 @@ public final class ClusterClassificationDriver extends AbstractJob {
    */
   public static void run(Path input, Path clusteringOutputPath, Path output, Double clusterClassificationThreshold,
       boolean emitMostLikely, boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException {
-	  Configuration conf = new Configuration();
-	  run(conf, input, clusteringOutputPath, output, clusterClassificationThreshold, emitMostLikely, runSequential);
+    Configuration conf = new Configuration();
+    run(conf, input, clusteringOutputPath, output, clusterClassificationThreshold, emitMostLikely, runSequential);
   }
 
-  public static void run(Configuration conf, Path input, Path clusteringOutputPath, Path output, Double clusterClassificationThreshold,
-      boolean emitMostLikely, boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException {
+  public static void run(Configuration conf, Path input, Path clusteringOutputPath, Path output,
+                         Double clusterClassificationThreshold, boolean emitMostLikely, boolean runSequential)
+    throws IOException, InterruptedException, ClassNotFoundException {
     if (runSequential) {
       classifyClusterSeq(conf, input, clusteringOutputPath, output, clusterClassificationThreshold, emitMostLikely);
     } else {

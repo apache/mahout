@@ -77,8 +77,9 @@ public class ConcatenateVectorsReducer extends Reducer<IntWritable, VectorWritab
 
     if (vOut == null) {
       vOut = new SequentialAccessSparseVector(dimsA + dimsB);
-      if (isNamed) 
+      if (isNamed) {
         vOut = new NamedVector(vOut, name);
+      }
     }
 
     if (vA != null) {
@@ -92,7 +93,8 @@ public class ConcatenateVectorsReducer extends Reducer<IntWritable, VectorWritab
   }
   
   private void appendVector(Vector vOut, Vector vIn, int offset) {
-    for (Vector.Element element : vIn.nonZeroes())
+    for (Vector.Element element : vIn.nonZeroes()) {
       vOut.set(element.index() + offset, element.get());
+    }
   }
 }

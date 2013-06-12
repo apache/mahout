@@ -396,12 +396,12 @@ public interface Vector extends Cloneable {
   double getDistanceSquared(Vector v);
 
   /**
-   * Gets an estimate of the cost (in number of operations) it takes to lookup a random element in this vector.
+   * Gets an estimate of the cost (in number of OPERATIONS) it takes to lookup a random element in this vector.
    */
   double getLookupCost();
 
   /**
-   * Gets an estimate of the cost (in number of operations) it takes to advance an iterator through the nonzero
+   * Gets an estimate of the cost (in number of OPERATIONS) it takes to advance an iterator through the nonzero
    * elements of this vector.
    */
   double getIteratorAdvanceCost();

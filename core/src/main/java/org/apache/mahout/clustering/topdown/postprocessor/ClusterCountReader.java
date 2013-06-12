@@ -71,7 +71,8 @@ public final class ClusterCountReader {
    * @param conf              The hadoop configuration.
    * @return An ArrayList containing the final cluster ids.
    */
-  public static Map<Integer, Integer> getClusterIDs(Path clusterOutputPath, Configuration conf, boolean keyIsClusterId) throws IOException {
+  public static Map<Integer, Integer> getClusterIDs(Path clusterOutputPath, Configuration conf, boolean keyIsClusterId)
+    throws IOException {
     Map<Integer, Integer> clusterIds = new HashMap<Integer, Integer>();
     FileSystem fileSystem = clusterOutputPath.getFileSystem(conf);
     FileStatus[] clusterFiles = fileSystem.listStatus(clusterOutputPath, PathFilters.finalPartFilter());
@@ -85,7 +86,7 @@ public final class ClusterCountReader {
     int i = 0;
     while (it.hasNext()) {
       Integer key, value;
-      if (keyIsClusterId == true) { // key is the cluster id, value is i, the index we will use
+      if (keyIsClusterId) { // key is the cluster id, value is i, the index we will use
         key = it.next().getValue().getId();
         value = i;
       } else {

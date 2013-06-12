@@ -54,8 +54,6 @@ public class ConcatenateVectorsJob extends AbstractJob {
   
   static final String MATRIXA_DIMS = "mahout.concatenatevectors.matrixA_dims";
   static final String MATRIXB_DIMS = "mahout.concatenatevectors.matrixB_dims";
-
-  private static final Logger LOG = LoggerFactory.getLogger(ConcatenateVectorsJob.class);
   
   private ConcatenateVectorsJob() {}
   

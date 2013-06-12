@@ -72,7 +72,8 @@ public class LuceneSegmentInputSplit extends InputSplit implements Writable {
    * @throws IOException if an error occurs when accessing the directory
    */
   public SegmentInfoPerCommit getSegment(Configuration configuration) throws IOException {
-    ReadOnlyFileSystemDirectory directory = new ReadOnlyFileSystemDirectory(FileSystem.get(configuration), indexPath, false, configuration);
+    ReadOnlyFileSystemDirectory directory = new ReadOnlyFileSystemDirectory(FileSystem.get(configuration), indexPath,
+                                                                            false, configuration);
 
     SegmentInfos segmentInfos = new SegmentInfos();
     segmentInfos.read(directory);
@@ -83,6 +84,7 @@ public class LuceneSegmentInputSplit extends InputSplit implements Writable {
       }
     }
 
-    throw new IllegalArgumentException("No such segment: '" + segmentInfoName + "' in directory " + directory.toString());
+    throw new IllegalArgumentException("No such segment: '" + segmentInfoName
+        + "' in directory " + directory.toString());
   }
 }

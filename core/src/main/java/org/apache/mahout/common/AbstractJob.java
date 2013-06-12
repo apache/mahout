@@ -114,7 +114,7 @@ public abstract class AbstractJob extends Configured implements Tool {
   private Group group;
 
   protected AbstractJob() {
-    options = new LinkedList<Option>();
+    options = Lists.newLinkedList();;
   }
 
   /** Returns the input path established by a call to {@link #parseArguments(String[])}.
@@ -415,19 +415,19 @@ public abstract class AbstractJob extends Configured implements Tool {
     return res;
   }
 
-  public int getInt(String optionName){
+  public int getInt(String optionName) {
     return Integer.parseInt(getOption(optionName));
   }
 
-  public int getInt(String optionName, int defaultVal){
+  public int getInt(String optionName, int defaultVal) {
     return Integer.parseInt(getOption(optionName, String.valueOf(defaultVal)));
   }
 
-  public float getFloat(String optionName){
+  public float getFloat(String optionName) {
     return Float.parseFloat(getOption(optionName));
   }
 
-  public float getFloat(String optionName, float defaultVal){
+  public float getFloat(String optionName, float defaultVal) {
     return Float.parseFloat(getOption(optionName, String.valueOf(defaultVal)));
   }
 

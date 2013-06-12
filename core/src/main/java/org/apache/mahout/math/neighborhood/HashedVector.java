@@ -29,7 +29,7 @@ import org.apache.mahout.math.WeightedVector;
  * http://www.cs.princeton.edu/courses/archive/spring04/cos598B/bib/CharikarEstim.pdf
  */
 public class HashedVector extends WeightedVector {
-  protected static int INVALID_INDEX = -1;
+  protected static final int INVALID_INDEX = -1;
 
   /**
    * Value of the locality sensitive hash. It is 64 bit.

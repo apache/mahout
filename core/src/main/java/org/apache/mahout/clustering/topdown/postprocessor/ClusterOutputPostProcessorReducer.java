@@ -29,8 +29,8 @@ import java.util.Map;
 /**
  * Reducer for post processing cluster output.
  */
-public class ClusterOutputPostProcessorReducer extends Reducer<IntWritable, VectorWritable, IntWritable, VectorWritable> {
-
+public class ClusterOutputPostProcessorReducer
+    extends Reducer<IntWritable, VectorWritable, IntWritable, VectorWritable> {
 
   private Map<Integer, Integer> reverseClusterMappings;
 

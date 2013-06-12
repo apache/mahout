@@ -85,9 +85,6 @@ public class VectorDistanceSimilarityJob extends AbstractJob {
       HadoopUtil.delete(getConf(), output);
     }
     DistanceMeasure measure = ClassUtils.instantiateAs(measureClass, DistanceMeasure.class);
-    if (getConf() == null) {
-      setConf(new Configuration());
-    }
     String outType = getOption(OUT_TYPE_KEY, "pw");
     
     Double maxDistance = null;

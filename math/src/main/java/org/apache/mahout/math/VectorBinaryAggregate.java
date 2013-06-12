@@ -6,7 +6,7 @@ import org.apache.mahout.math.set.OpenIntHashSet;
 import java.util.Iterator;
 
 /**
- * Abstract class encapsulating different algorithms that perform the Vector operations aggregate().
+ * Abstract class encapsulating different algorithms that perform the Vector OPERATIONS aggregate().
  * x.aggregte(y, fa, fc), for x and y Vectors and fa, fc DoubleDouble functions:
  * - applies the function fc to every element in x and y, fc(xi, yi)
  * - constructs a result iteratively, r0 = fc(x0, y0), ri = fc(r_{i-1}, fc(xi, yi)).
@@ -39,19 +39,19 @@ import java.util.Iterator;
  * explanation.
  */
 public abstract class VectorBinaryAggregate {
-  public static final VectorBinaryAggregate[] operations = {
-      new AggregateNonzerosIterateThisLookupThat(),
-      new AggregateNonzerosIterateThatLookupThis(),
+  public static final VectorBinaryAggregate[] OPERATIONS = {
+    new AggregateNonzerosIterateThisLookupThat(),
+    new AggregateNonzerosIterateThatLookupThis(),
 
-      new AggregateIterateIntersection(),
+    new AggregateIterateIntersection(),
 
-      new AggregateIterateUnionSequential(),
-      new AggregateIterateUnionRandom(),
+    new AggregateIterateUnionSequential(),
+    new AggregateIterateUnionRandom(),
 
-      new AggregateAllIterateSequential(),
-      new AggregateAllIterateThisLookupThat(),
-      new AggregateAllIterateThatLookupThis(),
-      new AggregateAllLoop(),
+    new AggregateAllIterateSequential(),
+    new AggregateAllIterateThisLookupThat(),
+    new AggregateAllIterateThatLookupThis(),
+    new AggregateAllLoop(),
   };
 
   /**
@@ -73,19 +73,20 @@ public abstract class VectorBinaryAggregate {
   /**
    * The best operation is the least expensive valid one.
    */
-  public static VectorBinaryAggregate getBestOperation(Vector x, Vector y, DoubleDoubleFunction fa, DoubleDoubleFunction fc) {
+  public static VectorBinaryAggregate getBestOperation(Vector x, Vector y, DoubleDoubleFunction fa,
+                                                       DoubleDoubleFunction fc) {
     int bestOperationIndex = -1;
     double bestCost = Double.POSITIVE_INFINITY;
-    for (int i = 0; i < operations.length; ++i) {
-      if (operations[i].isValid(x, y, fa, fc)) {
-        double cost = operations[i].estimateCost(x, y, fa, fc);
+    for (int i = 0; i < OPERATIONS.length; ++i) {
+      if (OPERATIONS[i].isValid(x, y, fa, fc)) {
+        double cost = OPERATIONS[i].estimateCost(x, y, fa, fc);
         if (cost < bestCost) {
           bestCost = cost;
           bestOperationIndex = i;
         }
       }
     }
-    return operations[bestOperationIndex];
+    return OPERATIONS[bestOperationIndex];
   }
 
   /**

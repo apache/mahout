@@ -16,6 +16,7 @@ package org.apache.mahout.text;
  * limitations under the License.
  */
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -48,18 +49,21 @@ public class LuceneSegmentInputFormat extends InputFormat {
 
     LuceneStorageConfiguration lucene2SeqConfiguration = new LuceneStorageConfiguration(configuration);
 
-    List<LuceneSegmentInputSplit> inputSplits = new ArrayList<LuceneSegmentInputSplit>();
+    List<LuceneSegmentInputSplit> inputSplits = Lists.newArrayList();
 
     List<Path> indexPaths = lucene2SeqConfiguration.getIndexPaths();
     for (Path indexPath : indexPaths) {
-      ReadOnlyFileSystemDirectory directory = new ReadOnlyFileSystemDirectory(FileSystem.get(configuration), indexPath, false, configuration);
+      ReadOnlyFileSystemDirectory directory = new ReadOnlyFileSystemDirectory(FileSystem.get(configuration), indexPath,
+                                                                              false, configuration);
       SegmentInfos segmentInfos = new SegmentInfos();
       segmentInfos.read(directory);
 
       for (SegmentInfoPerCommit segmentInfo : segmentInfos) {
-        LuceneSegmentInputSplit inputSplit = new LuceneSegmentInputSplit(indexPath, segmentInfo.info.name, segmentInfo.sizeInBytes());
+        LuceneSegmentInputSplit inputSplit = new LuceneSegmentInputSplit(indexPath, segmentInfo.info.name,
+                                                                         segmentInfo.sizeInBytes());
         inputSplits.add(inputSplit);
-        LOG.info("Created {} byte input split for index '{}' segment {}", segmentInfo.sizeInBytes(), indexPath.toUri(), segmentInfo.info.name);
+        LOG.info("Created {} byte input split for index '{}' segment {}", segmentInfo.sizeInBytes(), indexPath.toUri(),
+                 segmentInfo.info.name);
       }
     }
 
@@ -67,7 +71,8 @@ public class LuceneSegmentInputFormat extends InputFormat {
   }
 
   @Override
-  public RecordReader<Text, NullWritable> createRecordReader(InputSplit inputSplit, TaskAttemptContext context) throws IOException, InterruptedException {
+  public RecordReader<Text, NullWritable> createRecordReader(InputSplit inputSplit, TaskAttemptContext context)
+    throws IOException, InterruptedException {
     LuceneSegmentRecordReader luceneSegmentRecordReader = new LuceneSegmentRecordReader();
     luceneSegmentRecordReader.initialize(inputSplit, context);
     return luceneSegmentRecordReader;

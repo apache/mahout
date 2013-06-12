@@ -96,8 +96,9 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
             abuilder.withName("maxDFSigma").withMinimum(1).withMaximum(1).create()).withDescription(
             "What portion of the tf (tf-idf) vectors to be used, expressed in times the standard deviation (sigma) "
                     + "of the document frequencies of these vectors. Can be used to remove really high frequency terms."
-                    + " Expressed as a double value. Good value to be specified is 3.0. In case the value is less than 0 "
-                    + "no vectors will be filtered out. Default is -1.0.  Overrides maxDFPercent").withShortName("xs").create();
+                    + " Expressed as a double value. Good value to be specified is 3.0. In case the value is less "
+                    + "than 0 no vectors will be filtered out. Default is -1.0.  Overrides maxDFPercent")
+            .withShortName("xs").create();
 
     Option minLLROpt = obuilder.withLongName("minLLR").withRequired(false).withArgument(
             abuilder.withName("minLLR").withMinimum(1).withMaximum(1).create()).withDescription(

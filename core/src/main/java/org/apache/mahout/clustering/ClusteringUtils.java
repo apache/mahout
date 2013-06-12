@@ -133,8 +133,8 @@ public final class ClusteringUtils {
       double maxDBIndex = 0;
       for (int j = 0; j < n; ++j) {
         if (i != j) {
-          double dbIndex = (averageDistanceI + clusterDistanceSummaries.get(j).getMean()) /
-              distanceMeasure.distance(centroids.get(i), centroids.get(j));
+          double dbIndex = (averageDistanceI + clusterDistanceSummaries.get(j).getMean())
+              / distanceMeasure.distance(centroids.get(i), centroids.get(j));
           if (dbIndex > maxDBIndex) {
             maxDBIndex = dbIndex;
           }

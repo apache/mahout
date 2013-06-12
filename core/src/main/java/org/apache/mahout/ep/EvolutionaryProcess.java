@@ -66,7 +66,7 @@ import java.util.concurrent.Future;
  * @param <T> The payload class.
  */
 public class EvolutionaryProcess<T extends Payload<U>, U> implements Writable, Closeable {
-  // used to execute operations on the population in thread parallel.
+  // used to execute OPERATIONS on the population in thread parallel.
   private ExecutorService pool;
 
   // threadCount is serialized so that we can reconstruct the thread pool

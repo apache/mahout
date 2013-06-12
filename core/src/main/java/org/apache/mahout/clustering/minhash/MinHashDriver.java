@@ -57,8 +57,8 @@ public final class MinHashDriver extends AbstractJob {
 
     addOption(MIN_CLUSTER_SIZE, "mcs", "Minimum points inside a cluster", String.valueOf(10));
     addOption(MIN_VECTOR_SIZE, "mvs", "Minimum size of vector to be hashed", String.valueOf(5));
-    addOption(VECTOR_DIMENSION_TO_HASH, "vdh", "Dimension of vector to hash. Available types: (value, index). " +
-        "Defaults to 'value'", HASH_DIMENSION_VALUE);
+    addOption(VECTOR_DIMENSION_TO_HASH, "vdh", "Dimension of vector to hash. Available types: (value, index). "
+        + "Defaults to 'value'", HASH_DIMENSION_VALUE);
     addOption(HASH_TYPE, "ht", "Type of hash function to use. Available types: (linear, polynomial, murmur) ",
         HashFactory.HashType.MURMUR.toString());
     addOption(NUM_HASH_FUNCTIONS, "nh", "Number of hash functions to be used", String.valueOf(10));
@@ -110,7 +110,7 @@ public final class MinHashDriver extends AbstractJob {
 
     boolean succeeded = minHash.waitForCompletion(true);
     if (!succeeded) {
-     return -1;
+      return -1;
     }
 
     return 0;

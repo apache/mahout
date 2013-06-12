@@ -62,9 +62,6 @@ public final class ClusterOutputPostProcessorDriver extends AbstractJob {
     Path input = getInputPath();
     Path output = getOutputPath();
 
-    if (getConf() == null) {
-      setConf(new Configuration());
-    }
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.delete(getConf(), output);
     }
@@ -89,10 +86,10 @@ public final class ClusterOutputPostProcessorDriver extends AbstractJob {
    * Post processes the output of clustering algorithms and groups them into respective clusters. Each
    * cluster's vectors are written into a directory named after its clusterId.
    *
-   * @param input         The output path provided to the clustering algorithm, whose would be post processed. Hint : The
+   * @param input         The output path provided to the clustering algorithm, whose would be post processed. Hint: The
    *                      path of the directory containing clusters-*-final and clusteredPoints.
    * @param output        The post processed data would be stored at this path.
-   * @param runSequential If set to true, post processes it sequentially, else, uses. MapReduce. Hint : If the clustering
+   * @param runSequential If set to true, post processes it sequentially, else, uses. MapReduce. Hint: If the clustering
    *                      was done sequentially, make it sequential, else vice versa.
    */
   public static void run(Path input, Path output, boolean runSequential) throws IOException,
@@ -134,7 +131,8 @@ public final class ClusterOutputPostProcessorDriver extends AbstractJob {
   private static void postProcessMR(Configuration conf, Path input, Path output) throws IOException,
           InterruptedException,
           ClassNotFoundException {
-    System.out.println("WARNING: If you are running in Hadoop local mode, please use the --sequential option, as the MapReduce option will not work properly");
+    System.out.println("WARNING: If you are running in Hadoop local mode, please use the --sequential option, "
+        + "as the MapReduce option will not work properly");
     int numberOfClusters = ClusterCountReader.getNumberOfClusters(input, conf);
     conf.set("clusterOutputPath", input.toString());
     Job job = new Job(conf, "ClusterOutputPostProcessor Driver running over input: " + input);

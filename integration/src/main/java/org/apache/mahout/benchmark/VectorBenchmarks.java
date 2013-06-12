@@ -319,7 +319,8 @@ public class VectorBenchmarks {
         .withLongName("numClusters")
         .withRequired(false)
         .withArgument(abuilder.withName("nc").withDefault(0).create())
-        .withDescription("Number of clusters to create. Set to non zero to run cluster benchmark. Default: 0").withShortName("nc").create();
+        .withDescription("Number of clusters to create. Set to non zero to run cluster benchmark. Default: 0")
+        .withShortName("nc").create();
     Option numOpsOpt = obuilder
         .withLongName("numOps")
         .withRequired(false)

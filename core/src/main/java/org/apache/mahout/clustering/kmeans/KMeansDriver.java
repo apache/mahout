@@ -96,9 +96,6 @@ public class KMeansDriver extends AbstractJob {
     boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
     boolean runSequential = getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(
         DefaultOptionCreator.SEQUENTIAL_METHOD);
-    if (getConf() == null) {
-      setConf(new Configuration());
-    }
     double clusterClassificationThreshold = 0.0;
     if (hasOption(DefaultOptionCreator.OUTLIER_THRESHOLD)) {
       clusterClassificationThreshold = Double.parseDouble(getOption(DefaultOptionCreator.OUTLIER_THRESHOLD));

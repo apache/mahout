@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Records evolutionary state and provides a mutation operation for recorded-step meta-mutation.
  *
- * You provide the payload, this class provides the mutation operations.  During mutation,
+ * You provide the payload, this class provides the mutation OPERATIONS.  During mutation,
  * the payload is copied and after the state variables are changed, they are passed to the
  * payload.
  *

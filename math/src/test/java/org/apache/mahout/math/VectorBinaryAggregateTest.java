@@ -30,7 +30,7 @@ public final class VectorBinaryAggregateTest {
         ImmutableSet.of(Functions.PLUS, Functions.PLUS_ABS, Functions.MAX),
         ImmutableSet.of(Functions.PLUS, Functions.PLUS_ABS, Functions.MULT, Functions.MULT_RIGHT_PLUS1,
             Functions.MINUS),
-        ImmutableSet.copyOf(VectorBinaryAggregate.operations)))) {
+        ImmutableSet.copyOf(VectorBinaryAggregate.OPERATIONS)))) {
       data.add(entry.toArray());
     }
     return data;

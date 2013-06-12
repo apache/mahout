@@ -32,6 +32,8 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.AbstractIterator;
 import com.google.common.io.Closeables;
 import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Iterates over the lines of a text file. This assumes the text file's lines are delimited in a manner
@@ -43,14 +45,17 @@ public final class FileLineIterator extends AbstractIterator<String> implements 
 
   private final BufferedReader reader;
 
-  /**
-   * Creates a  over a given file, assuming a UTF-8 encoding.
-   * 
-   * @throws java.io.FileNotFoundException
-   *           if the file does not exist
-   * @throws IOException
-   *           if the file cannot be read
-   */
+  private static final Logger log = LoggerFactory.getLogger(FileLineIterator.class);
+
+      /**
+       * Creates a  over a given file, assuming a UTF-8 encoding.
+       *
+       * @throws java.io.FileNotFoundException
+       *           if the file does not exist
+       * @throws IOException
+       *           if the file cannot be read
+       */
+
   public FileLineIterator(File file) throws IOException {
     this(file, Charsets.UTF_8, false);
   }
@@ -115,7 +120,7 @@ public final class FileLineIterator extends AbstractIterator<String> implements 
       try {
         close();
       } catch (IOException e) {
-        //we are throwing here anyway, so do nothing
+        log.error(e.getMessage(), e);
       }
       throw new IllegalStateException(ioe);
     }

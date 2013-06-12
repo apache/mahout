@@ -17,6 +17,7 @@ package org.apache.mahout.text;
  */
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -77,7 +78,8 @@ public class LuceneStorageConfiguration implements Writable {
    * @param idField                 field used for the key of the sequence file
    * @param fields                  field(s) used for the value of the sequence file
    */
-  public LuceneStorageConfiguration(Configuration configuration, List<Path> indexPaths, Path sequenceFilesOutputPath, String idField, List<String> fields) {
+  public LuceneStorageConfiguration(Configuration configuration, List<Path> indexPaths, Path sequenceFilesOutputPath,
+                                    String idField, List<String> fields) {
     Preconditions.checkArgument(configuration != null, "Parameter 'configuration' cannot be null");
     Preconditions.checkArgument(indexPaths != null, "Parameter 'indexPaths' cannot be null");
     Preconditions.checkArgument(indexPaths != null && !indexPaths.isEmpty(), "Parameter 'indexPaths' cannot be empty");
@@ -144,7 +146,8 @@ public class LuceneStorageConfiguration implements Writable {
    * @return iterator
    */
   public Iterator<Pair<Text, Text>> getSequenceFileIterator() {
-    return new SequenceFileDirIterable<Text, Text>(sequenceFilesOutputPath, PathType.LIST, PathFilters.logsCRCFilter(), configuration).iterator();
+    return new SequenceFileDirIterable<Text, Text>(sequenceFilesOutputPath, PathType.LIST, PathFilters.logsCRCFilter(),
+                                                   configuration).iterator();
   }
 
   public Configuration getConfiguration() {
@@ -202,16 +205,16 @@ public class LuceneStorageConfiguration implements Writable {
   @Override
   public void readFields(DataInput in) throws IOException {
     try {
-      this.sequenceFilesOutputPath = new Path(in.readUTF());
-      this.indexPaths = new ArrayList<Path>();
+      sequenceFilesOutputPath = new Path(in.readUTF());
+      indexPaths = Lists.newArrayList();
       String[] indexPaths = in.readUTF().split(SEPARATOR_PATHS);
       for (String indexPath : indexPaths) {
         this.indexPaths.add(new Path(indexPath));
       }
-      this.idField = in.readUTF();
-      this.fields = Arrays.asList(in.readUTF().split(SEPARATOR_FIELDS));
-      this.query = new QueryParser(LUCENE_43, "query", new StandardAnalyzer(LUCENE_43)).parse(in.readUTF());
-      this.maxHits = in.readInt();
+      idField = in.readUTF();
+      fields = Arrays.asList(in.readUTF().split(SEPARATOR_FIELDS));
+      query = new QueryParser(LUCENE_43, "query", new StandardAnalyzer(LUCENE_43)).parse(in.readUTF());
+      maxHits = in.readInt();
     } catch (ParseException e) {
       throw new RuntimeException("Could not deserialize " + this.getClass().getName(), e);
     }
@@ -219,18 +222,35 @@ public class LuceneStorageConfiguration implements Writable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     LuceneStorageConfiguration that = (LuceneStorageConfiguration) o;
 
-    if (maxHits != that.maxHits) return false;
-    if (fields != null ? !fields.equals(that.fields) : that.fields != null) return false;
-    if (idField != null ? !idField.equals(that.idField) : that.idField != null) return false;
-    if (indexPaths != null ? !indexPaths.equals(that.indexPaths) : that.indexPaths != null) return false;
-    if (query != null ? !query.equals(that.query) : that.query != null) return false;
-    if (sequenceFilesOutputPath != null ? !sequenceFilesOutputPath.equals(that.sequenceFilesOutputPath) : that.sequenceFilesOutputPath != null)
+    if (maxHits != that.maxHits) {
       return false;
+    }
+    if (fields != null ? !fields.equals(that.fields) : that.fields != null) {
+      return false;
+    }
+    if (idField != null ? !idField.equals(that.idField) : that.idField != null) {
+      return false;
+    }
+    if (indexPaths != null ? !indexPaths.equals(that.indexPaths) : that.indexPaths != null) {
+      return false;
+    }
+    if (query != null ? !query.equals(that.query) : that.query != null) {
+      return false;
+    }
+    if (sequenceFilesOutputPath != null
+        ? !sequenceFilesOutputPath.equals(that.sequenceFilesOutputPath)
+        : that.sequenceFilesOutputPath != null) {
+      return false;
+    }
 
     return true;
   }

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.Deque;
 import java.util.LinkedList;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile.CompressionType;
@@ -76,7 +77,7 @@ public final class QJob {
       Mapper<Writable, VectorWritable, SplitPartitionedWritable, VectorWritable> {
 
     private MultipleOutputs outputs;
-    private final Deque<Closeable> closeables = new LinkedList<Closeable>();
+    private final Deque<Closeable> closeables = Lists.newLinkedList();
     private SplitPartitionedWritable qHatKey;
     private SplitPartitionedWritable rHatKey;
     private Vector yRow;

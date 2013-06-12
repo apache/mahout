@@ -62,7 +62,7 @@ public class LuceneSegmentInputSplitTest extends AbstractLuceneStorageTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testGetSegment_nonExistingSegment() throws Exception {
+  public void testGetSegmentNonExistingSegment() throws Exception {
     SingleFieldDocument doc1 = new SingleFieldDocument("1", "This is simple document 1");
     SingleFieldDocument doc2 = new SingleFieldDocument("2", "This is simple document 2");
     SingleFieldDocument doc3 = new SingleFieldDocument("3", "This is simple document 3");

@@ -10,6 +10,9 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 public class IOUtils {
+
+  private IOUtils() {}
+
   /**
    * Converts CentroidWritable values in a sequence file into Centroids lazily.
    * @param dirIterable the source iterable (comes from a SequenceFileDirIterable).

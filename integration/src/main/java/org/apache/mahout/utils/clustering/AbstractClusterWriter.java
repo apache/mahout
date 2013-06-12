@@ -88,7 +88,7 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
       }
     });
 
-    Collection<Pair<String, Double>> topTerms = new LinkedList<Pair<String, Double>>();
+    Collection<Pair<String, Double>> topTerms = Lists.newLinkedList();
 
     for (int i = 0; i < vectorTerms.size() && i < numTerms; i++) {
       int index = vectorTerms.get(i).index;
@@ -128,7 +128,7 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
       }
     });
 
-    Collection<Pair<String, Double>> topTerms = new LinkedList<Pair<String, Double>>();
+    Collection<Pair<String, Double>> topTerms = Lists.newLinkedList();
 
     for (int i = 0; i < vectorTerms.size() && i < numTerms; i++) {
       int index = vectorTerms.get(i).index;

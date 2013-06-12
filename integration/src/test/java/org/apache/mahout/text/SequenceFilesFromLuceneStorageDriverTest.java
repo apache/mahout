@@ -121,7 +121,7 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
   }
 
   @Test
-  public void testRun_optionalArguments() throws Exception {
+  public void testRunOptionalArguments() throws Exception {
     String[] args = {
       "-i", getIndexPath1AsFile().toString(),
       "-o", seqFilesOutputPath.toString(),
@@ -144,7 +144,7 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
   }
 
   @Test
-  public void testRun_invalidQuery() throws Exception {
+  public void testRunInvalidQuery() throws Exception {
     String[] args = {
       "-i", getIndexPath1AsFile().toString(),
       "-o", seqFilesOutputPath.toString(),

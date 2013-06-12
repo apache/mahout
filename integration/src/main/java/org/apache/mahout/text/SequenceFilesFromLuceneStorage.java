@@ -65,9 +65,11 @@ public class SequenceFilesFromLuceneStorage {
       Configuration configuration = lucene2seqConf.getConfiguration();
       FileSystem fileSystem = FileSystem.get(configuration);
       Path sequenceFilePath = new Path(lucene2seqConf.getSequenceFilesOutputPath(), indexPath.getName());
-      final SequenceFile.Writer sequenceFileWriter = new SequenceFile.Writer(fileSystem, configuration, sequenceFilePath, Text.class, Text.class);
+      final SequenceFile.Writer sequenceFileWriter = new SequenceFile.Writer(fileSystem, configuration,
+          sequenceFilePath, Text.class, Text.class);
 
-      SeqFileWriterCollector writerCollector = new SeqFileWriterCollector(lucene2seqConf, sequenceFileWriter, processedDocs);
+      SeqFileWriterCollector writerCollector = new SeqFileWriterCollector(lucene2seqConf, sequenceFileWriter,
+          processedDocs);
       searcher.search(lucene2seqConf.getQuery(), writerCollector);
       log.info("Wrote " + writerCollector.processedDocs + " documents in " + sequenceFilePath.toUri());
       processedDocs = writerCollector.processedDocs;
@@ -84,7 +86,8 @@ public class SequenceFilesFromLuceneStorage {
     public int processedDocs;
     AtomicReaderContext arc;
 
-    SeqFileWriterCollector(LuceneStorageConfiguration lucene2seqConf, SequenceFile.Writer sequenceFileWriter, int processedDocs) {
+    SeqFileWriterCollector(LuceneStorageConfiguration lucene2seqConf, SequenceFile.Writer sequenceFileWriter,
+                           int processedDocs) {
       this.lucene2seqConf = lucene2seqConf;
       this.sequenceFileWriter = sequenceFileWriter;
       this.processedDocs = processedDocs;

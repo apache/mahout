@@ -100,7 +100,7 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testRun_skipUnstoredFields() throws IOException {
+  public void testRunSkipUnstoredFields() throws IOException {
     commitDocuments(getDirectory(getIndexPath1AsFile()), new UnstoredFieldsDocument("5", "This is test document 5"));
 
     LuceneStorageConfiguration lucene2SeqConf = new LuceneStorageConfiguration(configuration,
@@ -119,7 +119,7 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testRun_maxHits() throws IOException {
+  public void testRunMaxHits() throws IOException {
     commitDocuments(getDirectory(getIndexPath1AsFile()), docs.subList(0, 500));
     commitDocuments(getDirectory(getIndexPath1AsFile()), docs.subList(1000, 1500));
 
@@ -141,7 +141,7 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testRun_query() throws IOException {
+  public void testRunQuery() throws IOException {
     commitDocuments(getDirectory(getIndexPath1AsFile()), docs);
     LuceneStorageConfiguration lucene2SeqConf = new LuceneStorageConfiguration(configuration,
       asList(getIndexPath1()),
@@ -162,7 +162,7 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
   }
 
   @Test
-  public void testRun_multipleFields() throws IOException {
+  public void testRunMultipleFields() throws IOException {
     LuceneStorageConfiguration lucene2SeqConf = new LuceneStorageConfiguration(configuration,
       asList(getIndexPath1()),
       seqFilesOutputPath,
@@ -184,7 +184,7 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
   }
 
   @Test
-  public void testRun_numericField() throws IOException {
+  public void testRunNumericField() throws IOException {
     LuceneStorageConfiguration lucene2SeqConf = new LuceneStorageConfiguration(configuration,
       asList(getIndexPath1()),
       seqFilesOutputPath,

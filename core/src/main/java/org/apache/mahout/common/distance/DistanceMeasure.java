@@ -35,7 +35,7 @@ public interface DistanceMeasure extends Parametered {
   double distance(Vector v1, Vector v2);
   
   /**
-   * Optimized version of distance metric for sparse vectors. This distance computation requires operations
+   * Optimized version of distance metric for sparse vectors. This distance computation requires OPERATIONS
    * proportional to the number of non-zero elements in the vector instead of the cardinality of the vector.
    * 
    * @param centroidLengthSquare

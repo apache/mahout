@@ -132,8 +132,8 @@ import java.util.Date;
  MersenneTwister generates random numbers in batches of 624 numbers at a time, so
  the caching and pipelining of modern systems is exploited.
  The generator is implemented to generate the output by using the fastest arithmetic
- operations only: 32-bit additions and bit operations (no division, no multiplication, no mod).
- These operations generate sequences of 32 random bits (<tt>int</tt>'s).
+ OPERATIONS only: 32-bit additions and bit OPERATIONS (no division, no multiplication, no mod).
+ These OPERATIONS generate sequences of 32 random bits (<tt>int</tt>'s).
  <tt>long</tt>'s are formed by concatenating two 32 bit <tt>int</tt>'s.
  <tt>float</tt>'s are formed by dividing the interval <tt>[0.0,1.0]</tt> into 2<sup>32</sup>
  sub intervals, then randomly choosing one subinterval.

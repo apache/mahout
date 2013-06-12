@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
@@ -106,7 +107,7 @@ public final class LLRReducerTest extends MahoutTestCase {
     reducer.setup(context);
     
     for (Gram[] ii: input) {
-      Collection<Gram> vv = new LinkedList<Gram>();
+      Collection<Gram> vv = Lists.newLinkedList();
       vv.addAll(Arrays.asList(ii).subList(1, ii.length));
       reducer.reduce(ii[0], vv, context);
     }

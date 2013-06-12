@@ -48,9 +48,10 @@ public class ClusterOutputPostProcessorMapper extends
   }
 
   @Override
-  public void map(IntWritable key, WeightedVectorWritable val, Context context) throws IOException, InterruptedException {
-    //by pivoting on the cluster mapping value, we can make sure that each unique cluster goes to it's own reducer, since they
-    //are numbered from 0 to k-1, where k is the number of clusters
+  public void map(IntWritable key, WeightedVectorWritable val, Context context)
+    throws IOException, InterruptedException {
+    // by pivoting on the cluster mapping value, we can make sure that each unique cluster goes to it's own reducer,
+    // since they are numbered from 0 to k-1, where k is the number of clusters
     outputVector.set(val.getVector());
     context.write(new IntWritable(newClusterMappings.get(key.get())), outputVector);
   }

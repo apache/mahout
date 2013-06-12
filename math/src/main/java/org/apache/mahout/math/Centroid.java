@@ -20,7 +20,7 @@ package org.apache.mahout.math;
 import org.apache.mahout.math.function.Functions;
 
 /**
- * A centroid is a weighted vector.  We have it delegate to the vector itself for lots of operations
+ * A centroid is a weighted vector.  We have it delegate to the vector itself for lots of OPERATIONS
  * to make it easy to use vector search classes and such.
  */
 public class Centroid extends WeightedVector {

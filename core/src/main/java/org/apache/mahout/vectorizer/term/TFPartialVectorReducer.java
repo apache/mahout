@@ -39,18 +39,15 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 import org.apache.mahout.vectorizer.DictionaryVectorizer;
 import org.apache.mahout.vectorizer.common.PartialVectorMerger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Iterator;
 
 /**
  * Converts a document in to a sparse vector
  */
 public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, VectorWritable> {
-  private transient static Logger log = LoggerFactory.getLogger(TFPartialVectorReducer.class);
+
   private final OpenObjectIntHashMap<String> dictionary = new OpenObjectIntHashMap<String>();
 
   private int dimension;
@@ -63,7 +60,7 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
 
   @Override
   protected void reduce(Text key, Iterable<StringTuple> values, Context context)
-          throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     Iterator<StringTuple> it = values.iterator();
     if (!it.hasNext()) {
       return;

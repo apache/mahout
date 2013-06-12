@@ -29,6 +29,8 @@ import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.common.iterator.FileLineIterator;
 import org.apache.mahout.common.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>An {@link java.util.Iterator} which iterates over any of the KDD Cup's rating files. These include the files
@@ -48,6 +50,8 @@ public final class DataFileIterator
   private static final Pattern TAB_PATTERN = Pattern.compile("\t");
 
   private final FileLineIterator lineIterator;
+
+  private static final Logger log = LoggerFactory.getLogger(DataFileIterator.class);
 
   public DataFileIterator(File dataFile) throws IOException {
     if (dataFile == null || dataFile.isDirectory() || !dataFile.exists()) {
@@ -132,7 +136,7 @@ public final class DataFileIterator
     try {
       Closeables.close(lineIterator, true);
     } catch (IOException e) {
-      //nothing
+      log.error(e.getMessage(), e);
     }
   }
 

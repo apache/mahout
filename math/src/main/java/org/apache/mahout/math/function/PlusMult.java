@@ -113,8 +113,8 @@ public final class PlusMult extends DoubleDoubleFunction {
    */
   @Override
   public boolean isAssociative() {
-    return Math.abs(multiplicator - 0.0) < Constants.EPSILON ||
-        Math.abs(multiplicator - 1.0) < Constants.EPSILON;
+    return Math.abs(multiplicator - 0.0) < Constants.EPSILON
+        || Math.abs(multiplicator - 1.0) < Constants.EPSILON;
   }
 
   public void setMultiplicator(double multiplicator) {

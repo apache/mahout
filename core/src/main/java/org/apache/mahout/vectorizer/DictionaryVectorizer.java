@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
  * This is a dictionary based Vectorizer.
  */
 public final class DictionaryVectorizer extends AbstractJob implements Vectorizer {
-  private static Logger log = LoggerFactory.getLogger(DictionaryVectorizer.class);
+  private static final Logger log = LoggerFactory.getLogger(DictionaryVectorizer.class);
   
   public static final String DOCUMENT_VECTOR_OUTPUT_FOLDER = "tf-vectors";
   public static final String MIN_SUPPORT = "min.support";
@@ -377,14 +377,18 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
     addOption("minSupport", "s", "(Optional) Minimum Support. Default Value: 2", "2");
     addOption("maxNGramSize", "ng", "(Optional) The maximum size of ngrams to create"
                             + " (2 = bigrams, 3 = trigrams, etc) Default Value:1");
-    addOption("minLLR", "ml", "(Optional)The minimum Log Likelihood Ratio(Float)  Default is " + LLRReducer.DEFAULT_MIN_LLR);
-    addOption("norm", "n", "The norm to use, expressed as either a float or \"INF\" if you want to use the Infinite norm.  "
+    addOption("minLLR", "ml", "(Optional)The minimum Log Likelihood Ratio(Float)  Default is "
+        + LLRReducer.DEFAULT_MIN_LLR);
+    addOption("norm", "n", "The norm to use, expressed as either a float or \"INF\" "
+        + "if you want to use the Infinite norm.  "
                     + "Must be greater or equal to 0.  The default is not to normalize");
-    addOption("logNormalize", "lnorm", "(Optional) Whether output vectors should be logNormalize. If set true else false", "false");
+    addOption("logNormalize", "lnorm", "(Optional) Whether output vectors should be logNormalize. "
+        + "If set true else false", "false");
     addOption(DefaultOptionCreator.numReducersOption().create());
     addOption("chunkSize", "chunk", "The chunkSize in MegaBytes. 100-10000 MB", "100");
     addOption(DefaultOptionCreator.methodOption().create());
-    addOption("namedVector", "nv", "(Optional) Whether output vectors should be NamedVectors. If set true else false", "false");
+    addOption("namedVector", "nv", "(Optional) Whether output vectors should be NamedVectors. "
+        + "If set true else false", "false");
     if (parseArguments(args) == null) {
       return -1;
     }

@@ -26,6 +26,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
@@ -293,7 +294,7 @@ public final class ABtJob {
       NUMBER_FORMAT.setGroupingUsed(false);
     }
 
-    private final Deque<Closeable> closeables = new LinkedList<Closeable>();
+    private final Deque<Closeable> closeables = Lists.newLinkedList();
     protected final SparseRowBlockWritable accum = new SparseRowBlockWritable();
 
     protected int blockHeight;

@@ -99,7 +99,7 @@ public class ConfusionMatrix {
     int count = 0;
     double accuracy = 0;
     for (String label: labelMap.keySet()) {
-      if (! label.equals(defaultLabel)) {
+      if (!label.equals(defaultLabel)) {
         accuracy += getAccuracy(label);
       }
       count++;
@@ -121,14 +121,14 @@ public class ConfusionMatrix {
   public double getKappa() {
     double a = 0.0;
     double b = 0.0;
-    for(int i = 0; i < confusionMatrix.length; i++) {
+    for (int i = 0; i < confusionMatrix.length; i++) {
       a += confusionMatrix[i][i];
       double br = 0;
-      for(int j = 0; j < confusionMatrix.length; j++) {
+      for (int j = 0; j < confusionMatrix.length; j++) {
         br += confusionMatrix[i][j];
       }
       double bc = 0;
-      for(int j = 0; j < confusionMatrix.length; j++) {
+      for (int j = 0; j < confusionMatrix.length; j++) {
         bc += confusionMatrix[j][i];
       }
       b += br * bc;
@@ -143,9 +143,9 @@ public class ConfusionMatrix {
    */
   public RunningAverageAndStdDev getNormalizedStats() {
     RunningAverageAndStdDev summer = new FullRunningAverageAndStdDev();
-    for(int d = 0; d < confusionMatrix.length; d++) {
+    for (int d = 0; d < confusionMatrix.length; d++) {
       double total = 0;
-      for(int j = 0; j < confusionMatrix.length; j++) {
+      for (int j = 0; j < confusionMatrix.length; j++) {
         total += confusionMatrix[d][j];
       }
       summer.addDatum(confusionMatrix[d][d] / (total + 0.000001));

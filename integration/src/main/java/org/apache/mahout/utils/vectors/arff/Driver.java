@@ -171,7 +171,7 @@ public final class Driver {
     // Turn the map of labels into a list order by order of appearance
     List<Entry<String, Integer>> attributes = Lists.newArrayList();
     attributes.addAll(arffModel.getLabelBindings().entrySet());
-    Collections.sort(attributes, new Comparator<Map.Entry<String, Integer>>(){
+    Collections.sort(attributes, new Comparator<Map.Entry<String, Integer>>() {
       @Override
       public int compare(Entry<String, Integer> t, Entry<String, Integer> t1) {
         return t.getValue().compareTo(t1.getValue());
@@ -219,13 +219,14 @@ public final class Driver {
     Map<String, Map<String, Integer>> nominalMap = arffModel.getNominalMap();
     // how many nominal attributes
     writer.write(String.valueOf(nominalMap.size()) + "\n");
-    for (String attribute : nominalMap.keySet()) {
+
+    for (Entry<String, Map<String, Integer>> entry : nominalMap.entrySet()) {
       // the label of this attribute
-      writer.write(attribute + "\n");
-      Set<Entry<String, Integer>> attributeValues = nominalMap.get(attribute).entrySet();
+      writer.write(entry.getKey() + "\n");
+      Set<Entry<String, Integer>> attributeValues = entry.getValue().entrySet();
       // how many values does this attribute have
       writer.write(attributeValues.size() + "\n");
-      for (Map.Entry<String, Integer> value : nominalMap.get(attribute).entrySet()) {
+      for (Map.Entry<String, Integer> value : attributeValues) {
         // the value and the value index
         writer.write(String.format("%s%s%s\n", value.getKey(), delimiter, value.getValue().toString()));
       }

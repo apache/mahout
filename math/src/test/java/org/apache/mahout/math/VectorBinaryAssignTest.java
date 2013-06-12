@@ -28,7 +28,7 @@ public final class VectorBinaryAssignTest {
     for (List entry : Sets.cartesianProduct(Lists.newArrayList(
         ImmutableSet.of(Functions.PLUS, Functions.PLUS_ABS, Functions.MULT, Functions.MULT_RIGHT_PLUS1,
             Functions.MINUS),
-        ImmutableSet.copyOf(VectorBinaryAssign.operations)))) {
+        ImmutableSet.copyOf(VectorBinaryAssign.OPERATIONS)))) {
       data.add(entry.toArray());
     }
     return data;

@@ -16,7 +16,7 @@
  * </li>
  * <li>Compact representations</li>
  * <li>Support for quick access to associations</li>
- * <li>A number of general purpose map operations</li>
+ * <li>A number of general purpose map OPERATIONS</li>
  * </ul>
  * <p>File-based I/O can be achieved through the standard Java built-in serialization
  * mechanism. All classes implement the {@link java.io.Serializable} interface.
@@ -187,7 +187,7 @@
  * </ul>
  * Resizing large hash maps can be time consuming, <tt>O(size())</tt>, and should be avoided if possible (maintaining
  * primes is not the reason).
- * Unnecessary growing operations can be avoided if the number of associations is known before they are added, or can be
+ * Unnecessary growing OPERATIONS can be avoided if the number of associations is known before they are added, or can be
  * estimated.<p>
  * In such a case good parameters are as follows:
  * <p>
@@ -229,7 +229,7 @@
  * <b>Performance:</b>
  * <p>
  * Time complexity:
- * <br>The classes offer <i>expected</i> time complexity <tt>O(1)</tt> (i.e. constant time) for the basic operations
+ * <br>The classes offer <i>expected</i> time complexity <tt>O(1)</tt> (i.e. constant time) for the basic OPERATIONS
  * <tt>put</tt>, <tt>get</tt>, <tt>removeKey</tt>, <tt>containsKey</tt> and <tt>size</tt>,
  * assuming the hash function disperses the elements properly among the buckets.
  * Otherwise, pathological cases, although highly improbable, can occur, degrading performance to <tt>O(N)</tt> in the
