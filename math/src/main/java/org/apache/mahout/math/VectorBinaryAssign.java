@@ -7,7 +7,7 @@ import org.apache.mahout.math.set.OpenIntHashSet;
 import java.util.Iterator;
 
 /**
- * Abstract class encapsulating different algorithms that perform the Vector OPERATIONS assign().
+ * Abstract class encapsulating different algorithms that perform the Vector operations assign().
  * x.assign(y, f), for x and y Vectors and f a DoubleDouble function:
  * - applies the function f to every element in x and y, f(xi, yi)
  * - assigns xi = f(xi, yi) for all indices i

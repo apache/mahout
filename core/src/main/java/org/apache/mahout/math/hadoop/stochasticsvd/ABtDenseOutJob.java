@@ -253,7 +253,7 @@ public final class ABtDenseOutJob {
                * conditions will never kick in. Or, the only situation where we
                * can't fit Y_i block in memory is when A input is much sparser
                * than k+p per row. But if this is the case, then we'd be looking
-               * at very few elements without engaging them in any OPERATIONS so
+               * at very few elements without engaging them in any operations so
                * even then it should be ok.
                */
               if (j < aRowBegin) {

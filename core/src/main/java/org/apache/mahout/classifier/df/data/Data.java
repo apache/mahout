@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Holds a list of vectors and their corresponding Dataset. contains various OPERATIONS that deals with the
+ * Holds a list of vectors and their corresponding Dataset. contains various operations that deals with the
  * vectors (subset, count,...)
  * 
  */

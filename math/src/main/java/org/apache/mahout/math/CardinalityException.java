@@ -18,7 +18,7 @@
 package org.apache.mahout.math;
 
 /**
- * Exception thrown when there is a cardinality mismatch in matrix or vector OPERATIONS.
+ * Exception thrown when there is a cardinality mismatch in matrix or vector operations.
  * For example, vectors of differing cardinality cannot be added.
  */
 public class CardinalityException extends IllegalArgumentException {

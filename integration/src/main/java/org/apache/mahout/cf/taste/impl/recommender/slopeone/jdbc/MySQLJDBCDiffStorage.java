@@ -25,7 +25,7 @@ import org.apache.mahout.cf.taste.impl.model.jdbc.AbstractJDBCDataModel;
  * MySQL-specific implementation. Should be used in conjunction with a
  * {@link org.apache.mahout.cf.taste.impl.model.jdbc.MySQLJDBCDataModel}. This
  * implementation stores item-item diffs in a MySQL database and encapsulates some other slope-one-specific
- * OPERATIONS that are needed on the preference data in the database. It assumes the database has a schema
+ * operations that are needed on the preference data in the database. It assumes the database has a schema
  * like:
  * </p>
  *

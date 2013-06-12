@@ -30,8 +30,8 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.hadoop.stochasticsvd.UpperTriangular;
 
 /**
- * Givens Thin solver. Standard Givens OPERATIONS are reordered in a way that
- * helps us to push them thru MapReduce OPERATIONS in a block fashion.
+ * Givens Thin solver. Standard Givens operations are reordered in a way that
+ * helps us to push them thru MapReduce operations in a block fashion.
  */
 public class GivensThinSolver {
 

@@ -438,7 +438,7 @@ public final class FileBasedSparseBinaryMatrix extends AbstractMatrix {
     }
 
     /**
-     * Copy the vector for fast OPERATIONS.
+     * Copy the vector for fast operations.
      *
      * @return a Vector
      */

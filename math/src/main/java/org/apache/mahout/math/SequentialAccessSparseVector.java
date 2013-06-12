@@ -30,7 +30,7 @@ import org.apache.mahout.math.function.Functions;
  * one int[], one double[].  If there are <b>k</b> non-zero elements in the vector, this implementation has
  * O(log(k)) random-access read performance, and O(k) random-access write performance, which is far below that
  * of the hashmap based {@link org.apache.mahout.math.RandomAccessSparseVector RandomAccessSparseVector}.  This
- * class is primarily used for OPERATIONS where the all the elements will be accessed in a read-only fashion
+ * class is primarily used for operations where the all the elements will be accessed in a read-only fashion
  * sequentially: methods which operate not via get() or set(), but via iterateNonZero(), such as (but not limited
  * to) :</p>
  * <ul>

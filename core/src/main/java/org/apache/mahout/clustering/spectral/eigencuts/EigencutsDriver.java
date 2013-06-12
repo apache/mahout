@@ -212,7 +212,7 @@ public class EigencutsDriver extends AbstractJob {
 
   /**
    * Iteratively loops through the list, converting it to a Vector of double
-   * primitives worthy of other Mahout OPERATIONS
+   * primitives worthy of other Mahout operations
    */
   private static Vector listToVector(Collection<Double> list) {
     Vector retval = new DenseVector(list.size());

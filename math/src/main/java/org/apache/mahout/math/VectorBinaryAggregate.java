@@ -6,7 +6,7 @@ import org.apache.mahout.math.set.OpenIntHashSet;
 import java.util.Iterator;
 
 /**
- * Abstract class encapsulating different algorithms that perform the Vector OPERATIONS aggregate().
+ * Abstract class encapsulating different algorithms that perform the Vector operations aggregate().
  * x.aggregte(y, fa, fc), for x and y Vectors and fa, fc DoubleDouble functions:
  * - applies the function fc to every element in x and y, fc(xi, yi)
  * - constructs a result iteratively, r0 = fc(x0, y0), ri = fc(r_{i-1}, fc(xi, yi)).

@@ -62,7 +62,7 @@ public final class YtYJob {
      * we keep yRow in a dense form here but keep an eye not to dense up while
      * doing YtY products. I am not sure that sparse vector would create much
      * performance benefits since we must to assume that y would be more often
-     * dense than sparse, so for bulk dense OPERATIONS that would perform
+     * dense than sparse, so for bulk dense operations that would perform
      * somewhat better than a RandomAccessSparse vector frequent updates.
      */
     private Vector yRow;

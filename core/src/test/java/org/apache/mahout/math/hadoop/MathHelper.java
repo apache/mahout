@@ -44,7 +44,7 @@ import org.easymock.IArgumentMatcher;
 import org.junit.Assert;
 
 /**
- * a collection of small helper methods useful for unit-testing mathematical OPERATIONS
+ * a collection of small helper methods useful for unit-testing mathematical operations
  */
 public final class MathHelper {
 

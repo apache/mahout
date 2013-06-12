@@ -13,7 +13,7 @@ import org.junit.Test;
 
 /**
  * Makes sure that a vector under test acts the same as a DenseVector or RandomAccessSparseVector
- * (according to whether it is dense or sparse).  Most OPERATIONS need to be done within a reasonable
+ * (according to whether it is dense or sparse).  Most operations need to be done within a reasonable
  * tolerance.
  *
  * The idea is that a new vector implementation can extend AbstractVectorTest to get pretty high
