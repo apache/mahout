@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+__MAHOUT-1253: Add experiment tools for StreamingKMeans, part 1 (dfilimon)
+
   MAHOUT-884: Matrix Concatenate Utility (Lance Norskog, smarthi)
 
   MAHOUT-1250: Deprecate unused algorithms (ssc)
