@@ -30,7 +30,6 @@ import org.apache.lucene.util.Version;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 

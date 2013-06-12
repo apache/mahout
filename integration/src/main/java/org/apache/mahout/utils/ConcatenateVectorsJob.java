@@ -34,8 +34,6 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.VectorWritable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /*
  * Map-reduce job to combine two matrices A and B to (a1,a2,...aN,b1,b2,...bN)
