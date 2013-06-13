@@ -136,9 +136,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
       result.append(e.get());
       result.append(',');
     }
-    if (result.length() > 1) {
-      result.setCharAt(result.length() - 1, '}');
-    }
+    result.append('}');
     return result.toString();
   }
 
