@@ -35,6 +35,7 @@ import org.apache.mahout.math.map.OpenLongDoubleHashMap;
  * item-based recommender that uses weighted sum estimation enhanced by baseline estimates, porting baseline estimation
  * from the "UserItemBaseline" rating predictor from "mymedialite" https://github.com/zenogantner/MyMediaLite/
  */
+@Deprecated
 public class BiasedItemBasedRecommender extends GenericItemBasedRecommender {
   
   private final int numSimilarItems;

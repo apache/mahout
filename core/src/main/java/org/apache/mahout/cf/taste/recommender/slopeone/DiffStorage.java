@@ -33,6 +33,7 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
  * 
  * @see org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender
  */
+@Deprecated
 public interface DiffStorage extends Refreshable {
   
   /**
