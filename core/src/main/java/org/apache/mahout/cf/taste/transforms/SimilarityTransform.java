@@ -25,6 +25,7 @@ import org.apache.mahout.cf.taste.common.Refreshable;
  * be IDs of users or items or something else.
  * </p>
  */
+@Deprecated
 public interface SimilarityTransform extends Refreshable {
   
   /**

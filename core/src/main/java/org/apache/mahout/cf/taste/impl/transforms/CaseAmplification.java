@@ -30,6 +30,7 @@ import com.google.common.base.Preconditions;
  * smaller by raising each score to a power. It could however be used to achieve the opposite effect.
  * </p>
  */
+@Deprecated
 public final class CaseAmplification implements SimilarityTransform {
   
   private final double factor;

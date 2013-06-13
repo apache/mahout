@@ -45,6 +45,7 @@ import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
  * scale used by the two users so that both have a mean preference of 0.0 and a standard deviation of 1.0.
  * </p>
  */
+@Deprecated
 public final class ZScore implements PreferenceTransform {
   
   private final DataModel dataModel;

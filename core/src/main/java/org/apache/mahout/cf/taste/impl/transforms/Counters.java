@@ -26,6 +26,7 @@ import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
  * A simple, fast utility class that maps keys to counts.
  * </p>
  */
+@Deprecated
 final class Counters {
   
   private final FastByIDMap<int[]> counts = new FastByIDMap<int[]>();

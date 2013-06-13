@@ -51,6 +51,7 @@ import com.google.common.base.Preconditions;
  * preferences on average, 100.0 is a good log base.
  * </p>
  */
+@Deprecated
 public final class InverseUserFrequency implements PreferenceTransform {
   
   private final DataModel dataModel;

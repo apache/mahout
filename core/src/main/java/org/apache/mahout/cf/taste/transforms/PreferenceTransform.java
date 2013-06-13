@@ -29,6 +29,7 @@ import org.apache.mahout.cf.taste.model.Preference;
  * transform like this to transform all of their preference values at the source.
  * </p>
  */
+@Deprecated
 public interface PreferenceTransform extends Refreshable {
   
   float getTransformedValue(Preference pref) throws TasteException;
