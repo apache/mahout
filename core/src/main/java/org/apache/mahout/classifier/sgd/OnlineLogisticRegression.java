@@ -135,6 +135,7 @@ public class OnlineLogisticRegression extends AbstractOnlineLogisticRegression i
   public void write(DataOutput out) throws IOException {
     out.writeInt(WRITABLE_VERSION);
     out.writeDouble(mu0);
+    out.writeDouble(getLambda()); 
     out.writeDouble(decayFactor);
     out.writeInt(stepOffset);
     out.writeInt(step);
@@ -152,6 +153,7 @@ public class OnlineLogisticRegression extends AbstractOnlineLogisticRegression i
     int version = in.readInt();
     if (version == WRITABLE_VERSION) {
       mu0 = in.readDouble();
+      lambda(in.readDouble()); 
       decayFactor = in.readDouble();
       stepOffset = in.readInt();
       step = in.readInt();

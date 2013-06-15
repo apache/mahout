@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+  MAHOUT-1263: Serialise/Deserialise Lambda value for OnlineLogisticRegression (Mike Davy via smarthi)  
+
   MAHOUT-1258: Another shot at findbugs and checkstyle (ssc)
 
   MAHOUT-1253: Add experiment tools for StreamingKMeans, part 1 (dfilimon)

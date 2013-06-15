@@ -27,14 +27,21 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.vectorizer.encoders.Dictionary;
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+
 
 public final class OnlineLogisticRegressionTest extends OnlineBaseTest {
 
@@ -184,7 +191,7 @@ public final class OnlineLogisticRegressionTest extends OnlineBaseTest {
     // for permuting data later
     List<Integer> order = Lists.newArrayList();
 
-    for (String line : raw.subList(1,raw.size())) {
+    for (String line : raw.subList(1, raw.size())) {
       // order gets a list of indexes
       order.add(order.size());
 
@@ -262,4 +269,58 @@ public final class OnlineLogisticRegressionTest extends OnlineBaseTest {
     test(getInput(), target, lr, 0.05, 0.3);
   }
 
+  /**
+   * Test for Serialization/DeSerialization
+   *
+   * @throws Exception
+   */
+  @Test
+  public void testSerializationAndDeSerialization() throws Exception {
+    OnlineLogisticRegression lr = new OnlineLogisticRegression(2, 8, new L1())
+      .lambda(1 * 1.0e-3)
+      .stepOffset(11)
+      .alpha(0.01)
+      .learningRate(50)
+      .decayExponent(-0.02);
+
+    lr.close();
+    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+    PolymorphicWritable.write(dataOutputStream, lr);
+    byte[] output = byteArrayOutputStream.toByteArray();
+    byteArrayOutputStream.close();
+
+    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(output);
+    DataInputStream dataInputStream = new DataInputStream(byteArrayInputStream);
+    OnlineLogisticRegression read = PolymorphicWritable.read(dataInputStream, OnlineLogisticRegression.class);
+    read.close();
+
+    //lambda
+    Assert.assertEquals((1.0e-3), read.getLambda(), 1.0e-7);
+
+    // Reflection to get private variables
+    //stepOffset
+    Field stepOffset = lr.getClass().getDeclaredField("stepOffset");
+    stepOffset.setAccessible(true);
+    int stepOffsetVal = (Integer) stepOffset.get(lr);
+    Assert.assertEquals(11, stepOffsetVal);
+
+    //decayFactor (alpha)
+    Field decayFactor = lr.getClass().getDeclaredField("decayFactor");
+    decayFactor.setAccessible(true);
+    double decayFactorVal = (Double) decayFactor.get(lr);
+    Assert.assertEquals(0.01, decayFactorVal, 1.0e-7);
+
+    //learning rate (mu0)
+    Field mu0 = lr.getClass().getDeclaredField("mu0");
+    mu0.setAccessible(true);
+    double mu0Val = (Double) mu0.get(lr);
+    Assert.assertEquals(50, mu0Val, 1.0e-7);
+
+    //forgettingExponent (decayExponent)
+    Field forgettingExponent = lr.getClass().getDeclaredField("forgettingExponent");
+    forgettingExponent.setAccessible(true);
+    double forgettingExponentVal = (Double) forgettingExponent.get(lr);
+    Assert.assertEquals(-0.02, forgettingExponentVal, 1.0e-7);
+  }
 }
