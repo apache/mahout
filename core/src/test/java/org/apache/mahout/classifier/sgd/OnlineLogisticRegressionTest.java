@@ -21,6 +21,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.io.Closer;
 import com.google.common.io.Resources;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
@@ -272,7 +273,6 @@ public final class OnlineLogisticRegressionTest extends OnlineBaseTest {
   /**
    * Test for Serialization/DeSerialization
    *
-   * @throws Exception
    */
   @Test
   public void testSerializationAndDeSerialization() throws Exception {
@@ -284,16 +284,28 @@ public final class OnlineLogisticRegressionTest extends OnlineBaseTest {
       .decayExponent(-0.02);
 
     lr.close();
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
-    PolymorphicWritable.write(dataOutputStream, lr);
-    byte[] output = byteArrayOutputStream.toByteArray();
-    byteArrayOutputStream.close();
 
-    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(output);
-    DataInputStream dataInputStream = new DataInputStream(byteArrayInputStream);
-    OnlineLogisticRegression read = PolymorphicWritable.read(dataInputStream, OnlineLogisticRegression.class);
-    read.close();
+    byte[] output;
+    Closer closer = Closer.create();
+
+    try {
+      ByteArrayOutputStream byteArrayOutputStream = closer.register(new ByteArrayOutputStream());
+      DataOutputStream dataOutputStream = closer.register(new DataOutputStream(byteArrayOutputStream));
+      PolymorphicWritable.write(dataOutputStream, lr);
+      output = byteArrayOutputStream.toByteArray();
+    } finally {
+      closer.close();
+    }
+
+    OnlineLogisticRegression read;
+
+    try {
+      ByteArrayInputStream byteArrayInputStream = closer.register(new ByteArrayInputStream(output));
+      DataInputStream dataInputStream = closer.register(new DataInputStream(byteArrayInputStream));
+      read = closer.register(PolymorphicWritable.read(dataInputStream, OnlineLogisticRegression.class));
+    } finally {
+      closer.close();
+    }
 
     //lambda
     Assert.assertEquals((1.0e-3), read.getLambda(), 1.0e-7);
