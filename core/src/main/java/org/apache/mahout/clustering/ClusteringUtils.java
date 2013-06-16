@@ -91,20 +91,23 @@ public final class ClusteringUtils {
    * @return the minimum distance between the first sampleLimit points
    * @see org.apache.mahout.clustering.streaming.cluster.StreamingKMeans#clusterInternal(Iterable, boolean)
    */
-  public static double estimateDistanceCutoff(Iterable<? extends Vector> data,
-                                              DistanceMeasure distanceMeasure, int sampleLimit) {
-    Iterable<? extends Vector> limitedData = Iterables.limit(data, sampleLimit);
-    ProjectionSearch searcher = new ProjectionSearch(distanceMeasure, 3, 1);
-    searcher.add(limitedData.iterator().next());
+  public static double estimateDistanceCutoff(List<? extends Vector> data, DistanceMeasure distanceMeasure) {
+    BruteSearch searcher = new BruteSearch(distanceMeasure);
+    searcher.addAll(data);
     double minDistance = Double.POSITIVE_INFINITY;
-    for (Vector vector : Iterables.skip(limitedData, 1)) {
-      double closest = searcher.searchFirst(vector, false).getWeight();
-      if (closest < minDistance) {
+    for (Vector vector : data) {
+      double closest = searcher.searchFirst(vector, true).getWeight();
+      if (minDistance > 0 && closest < minDistance) {
         minDistance = closest;
       }
       searcher.add(vector);
     }
     return minDistance;
+  }
+
+  public static double estimateDistanceCutoff(Iterable<? extends Vector> data, DistanceMeasure distanceMeasure,
+                                              int sampleLimit) {
+    return estimateDistanceCutoff(Lists.newArrayList(Iterables.limit(data, sampleLimit)), distanceMeasure);
   }
 
   /**
@@ -241,6 +244,7 @@ public final class ClusteringUtils {
     int numRows = confusionMatrix.numRows();
     int numCols = confusionMatrix.numCols();
     double rowChoiceSum = 0;
+    double columnChoiceSum = 0;
     double totalChoiceSum = 0;
     double total = 0;
     for (int i = 0; i < numRows; ++i) {
@@ -252,7 +256,6 @@ public final class ClusteringUtils {
       total += rowSum;
       rowChoiceSum += choose2(rowSum);
     }
-    double columnChoiceSum = 0;
     for (int j = 0; j < numCols; ++j) {
       double columnSum = 0;
       for (int i = 0; i < numRows; ++i) {

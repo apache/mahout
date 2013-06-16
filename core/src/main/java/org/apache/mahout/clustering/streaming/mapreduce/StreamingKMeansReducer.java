@@ -28,11 +28,9 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.clustering.streaming.cluster.BallKMeans;
-import org.apache.mahout.clustering.streaming.cluster.StreamingKMeans;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.Centroid;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.neighborhood.UpdatableSearcher;
 
 public class StreamingKMeansReducer extends Reducer<IntWritable, CentroidWritable, IntWritable, CentroidWritable> {
   /**
@@ -47,15 +45,6 @@ public class StreamingKMeansReducer extends Reducer<IntWritable, CentroidWritabl
     conf = context.getConfiguration();
   }
 
-  private StreamingKMeans getStreamingKMeans(int numClusters) {
-    // At this point the configuration received from the Driver is assumed to be valid.
-    // No other checks are made.
-    UpdatableSearcher searcher = StreamingKMeansUtilsMR.searcherFromConfiguration(conf);
-    // There is no way of estimating the distance cutoff unless we have some data.
-    return new StreamingKMeans(searcher, numClusters,
-        conf.getFloat(StreamingKMeansDriver.ESTIMATED_DISTANCE_CUTOFF, 1.0e-4f));
-  }
-
   @Override
   public void reduce(IntWritable key, Iterable<CentroidWritable> centroids,
                      Context context) throws IOException, InterruptedException {
@@ -63,16 +52,14 @@ public class StreamingKMeansReducer extends Reducer<IntWritable, CentroidWritabl
     // There might be too many intermediate centroids to fit into memory, in which case, we run another pass
     // of StreamingKMeans to collapse the clusters further.
     if (conf.getBoolean(StreamingKMeansDriver.REDUCE_STREAMING_KMEANS, false)) {
-      StreamingKMeans clusterer = getStreamingKMeans(conf.getInt(StreamingKMeansDriver.ESTIMATED_NUM_MAP_CLUSTERS, 1));
-      clusterer.cluster(Iterables.transform(centroids, new Function<CentroidWritable, Centroid>() {
+      intermediateCentroids = Lists.newArrayList(
+          new StreamingKMeansThread(Iterables.transform(centroids, new Function<CentroidWritable, Centroid>() {
         @Override
-        public Centroid apply(org.apache.mahout.clustering.streaming.mapreduce.CentroidWritable input) {
+            public Centroid apply(CentroidWritable input) {
           Preconditions.checkNotNull(input);
           return input.getCentroid();
         }
-      }));
-      clusterer.reindexCentroids();
-      intermediateCentroids = Lists.newArrayList(clusterer);
+          }), conf).call());
     } else {
       intermediateCentroids = centroidWritablesToList(centroids);
     }

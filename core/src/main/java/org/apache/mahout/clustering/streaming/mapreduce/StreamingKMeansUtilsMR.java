@@ -24,10 +24,7 @@ import org.apache.mahout.math.neighborhood.LocalitySensitiveHashSearch;
 import org.apache.mahout.math.neighborhood.ProjectionSearch;
 import org.apache.mahout.math.neighborhood.UpdatableSearcher;
 
-public final class StreamingKMeansUtilsMR {
-
-  private StreamingKMeansUtilsMR() {
-  }
+public class StreamingKMeansUtilsMR {
 
   /**
    * Instantiates a searcher from a given configuration.
@@ -40,7 +37,7 @@ public final class StreamingKMeansUtilsMR {
     DistanceMeasure distanceMeasure;
     String distanceMeasureClass = conf.get(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
     try {
-      distanceMeasure = (DistanceMeasure)Class.forName(distanceMeasureClass).getConstructor().newInstance();
+      distanceMeasure = (DistanceMeasure)Class.forName(distanceMeasureClass).newInstance();
     } catch (Exception e) {
       throw new RuntimeException("Failed to instantiate distanceMeasure", e);
     }
@@ -93,7 +90,7 @@ public final class StreamingKMeansUtilsMR {
    * @param input Iterable of Vectors to cast
    * @return the new Centroids
    */
-  public static Iterable<Centroid> castVectorsToCentroids(Iterable<Vector> input) {
+  public static Iterable<Centroid> castVectorsToCentroids(final Iterable<Vector> input) {
     return Iterables.transform(input, new Function<Vector, Centroid>() {
       private int numVectors = 0;
       @Override
@@ -126,7 +123,7 @@ public final class StreamingKMeansUtilsMR {
         writer.append(new IntWritable(i++), new CentroidWritable(centroid));
       }
     } finally {
-      Closeables.close(writer, false);
+      Closeables.close(writer, true);
     }
   }
 
@@ -141,7 +138,7 @@ public final class StreamingKMeansUtilsMR {
         writer.append(new IntWritable(i++), new VectorWritable(vector));
       }
     } finally {
-      Closeables.close(writer, false);
+      Closeables.close(writer, true);
     }
   }
 }

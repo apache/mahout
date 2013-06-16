@@ -141,13 +141,14 @@ public final class StreamingKMeansDriver extends AbstractJob {
 
   /**
    * Whether to run another pass of StreamingKMeans on the reducer's points before BallKMeans. On some data sets
-   * with a large number of mappers, the intermediate number of
+   * with a large number of mappers, the intermediate number of clusters passed to the reducer is too large to
+   * fit into memory directly, hence the option to collapse the clusters further with StreamingKMeans.
    */
   public static final String REDUCE_STREAMING_KMEANS = "reduceStreamingKMeans";
 
   private static final Logger log = LoggerFactory.getLogger(StreamingKMeansDriver.class);
 
-  private static final double INVALID_DISTANCE_CUTOFF = -1;
+  public static final float INVALID_DISTANCE_CUTOFF = -1;
 
   @Override
   public int run(String[] args) throws Exception {
@@ -405,7 +406,8 @@ public final class StreamingKMeansDriver extends AbstractJob {
    * @return 0 on success, -1 on failure.
    */
   @SuppressWarnings("unchecked")
-  public static int run(Configuration conf, Path input, Path output) throws Exception {
+  public static int run(Configuration conf, Path input, Path output)
+      throws IOException, InterruptedException, ClassNotFoundException, ExecutionException {
     log.info("Starting StreamingKMeans clustering for vectors in {}; results are output to {}",
         input.toString(), output.toString());
 

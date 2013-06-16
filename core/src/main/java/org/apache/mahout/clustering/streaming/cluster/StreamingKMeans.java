@@ -20,7 +20,6 @@ package org.apache.mahout.clustering.streaming.cluster;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Random;
 
 import com.google.common.base.Function;
@@ -28,6 +27,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Centroid;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.MatrixSlice;
@@ -128,7 +128,7 @@ public class StreamingKMeans implements Iterable<Centroid> {
   /**
    * Random object to sample values from.
    */
-  private final Random random = RandomUtils.getRandom();
+  private Random random = RandomUtils.getRandom();
 
   /**
    * Calls StreamingKMeans(searcher, numClusters, 1.3, 10, 2).
@@ -232,9 +232,6 @@ public class StreamingKMeans implements Iterable<Centroid> {
 
           @Override
           public Centroid next() {
-            if (!hasNext()) {
-              throw new NoSuchElementException();
-            }
             accessed = true;
             return datapoint;
           }
@@ -359,5 +356,13 @@ public class StreamingKMeans implements Iterable<Centroid> {
    */
   public double getDistanceCutoff() {
     return distanceCutoff;
+  }
+
+  public void setDistanceCutoff(double distanceCutoff) {
+    this.distanceCutoff = distanceCutoff;
+  }
+
+  public DistanceMeasure getDistanceMeasure() {
+    return centroids.getDistanceMeasure();
   }
 }
