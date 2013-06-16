@@ -54,11 +54,11 @@ public class StreamingKMeansReducer extends Reducer<IntWritable, CentroidWritabl
     if (conf.getBoolean(StreamingKMeansDriver.REDUCE_STREAMING_KMEANS, false)) {
       intermediateCentroids = Lists.newArrayList(
           new StreamingKMeansThread(Iterables.transform(centroids, new Function<CentroidWritable, Centroid>() {
-        @Override
+            @Override
             public Centroid apply(CentroidWritable input) {
-          Preconditions.checkNotNull(input);
-          return input.getCentroid();
-        }
+              Preconditions.checkNotNull(input);
+              return input.getCentroid();
+            }
           }), conf).call());
     } else {
       intermediateCentroids = centroidWritablesToList(centroids);

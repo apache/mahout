@@ -21,8 +21,12 @@ public class StreamingKMeansThread implements Callable<Iterable<Centroid>> {
   private Iterable<Centroid> datapoints;
 
   public StreamingKMeansThread(Path input, Configuration conf) {
-    this.datapoints = StreamingKMeansUtilsMR.getCentroidsFromVectorWritable(
-        new SequenceFileValueIterable<VectorWritable>(input, false, conf));
+    this(StreamingKMeansUtilsMR.getCentroidsFromVectorWritable(
+        new SequenceFileValueIterable<VectorWritable>(input, false, conf)), conf);
+  }
+
+  public StreamingKMeansThread(Iterable<Centroid> datapoints, Configuration conf) {
+    this.datapoints = datapoints;
     this.conf = conf;
   }
 
