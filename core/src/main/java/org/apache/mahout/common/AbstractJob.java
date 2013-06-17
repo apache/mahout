@@ -155,10 +155,6 @@ public abstract class AbstractJob extends Configured implements Tool {
   protected Path getTempPath(String directory) {
     return new Path(tempPath, directory);
   }
-
-  protected Path getCombinedTempPath(String directory1, String directory2) {
-    return new Path(new Path(tempPath, directory1) + "," + new Path(tempPath, directory2));
-  }
   
   @Override
   public Configuration getConf() {

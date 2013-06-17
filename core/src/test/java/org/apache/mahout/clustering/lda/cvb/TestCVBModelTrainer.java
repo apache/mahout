@@ -104,9 +104,10 @@ public final class TestCVBModelTrainer extends MahoutTestCase {
     while (numTestTopics < numGeneratingTopics + 2) {
       Path topicModelStateTempPath = getTestTempDirPath("topicTemp" + numTestTopics);
       Configuration conf = getConfiguration();
-      CVB0Driver.run(conf, sampleCorpusPath, null, numTestTopics, numTerms,
-                     ALPHA, ETA, numIterations, 1, 0, null, null, topicModelStateTempPath, 1234, 0.2f, 2,
-                     1, 3, 1, false);
+      CVB0Driver cvb0Driver = new CVB0Driver();
+      cvb0Driver.run(conf, sampleCorpusPath, null, numTestTopics, numTerms,
+          ALPHA, ETA, numIterations, 1, 0, null, null, topicModelStateTempPath, 1234, 0.2f, 2,
+          1, 3, 1, false);
       perplexities.add(lowestPerplexity(conf, topicModelStateTempPath));
       numTestTopics++;
     }

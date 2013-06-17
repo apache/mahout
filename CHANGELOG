@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+  MAHOUT-1262: Cleanup LDA code (ssc)
+
   MAHOUT-1255: Fix for weights in Multinomial sometimes overflowing in BallKMeans (dfilimon)
 
   MAHOUT-1254: Final round of cleanup for StreamingKMeans (dfilimon)

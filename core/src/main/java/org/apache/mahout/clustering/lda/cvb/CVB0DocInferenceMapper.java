@@ -27,18 +27,21 @@ import java.io.IOException;
 
 public class CVB0DocInferenceMapper extends CachingCVB0Mapper {
 
+  private final VectorWritable topics = new VectorWritable();
+
   @Override
   public void map(IntWritable docId, VectorWritable doc, Context context)
     throws IOException, InterruptedException {
     int numTopics = getNumTopics();
-    Vector docTopics = new DenseVector(new double[numTopics]).assign(1.0 / numTopics);
+    Vector docTopics = new DenseVector(numTopics).assign(1.0 / numTopics);
     Matrix docModel = new SparseRowMatrix(numTopics, doc.get().size());
     int maxIters = getMaxIters();
     ModelTrainer modelTrainer = getModelTrainer();
     for (int i = 0; i < maxIters; i++) {
       modelTrainer.getReadModel().trainDocTopicModel(doc.get(), docTopics, docModel);
     }
-    context.write(docId, new VectorWritable(docTopics));
+    topics.set(docTopics);
+    context.write(docId, topics);
   }
 
   @Override
