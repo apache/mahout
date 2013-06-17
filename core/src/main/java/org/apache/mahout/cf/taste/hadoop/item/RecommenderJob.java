@@ -22,7 +22,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
@@ -147,8 +147,6 @@ public final class RecommenderJob extends AbstractJob {
 
     Path prepPath = getTempPath("preparePreferenceMatrix");
     Path similarityMatrixPath = getTempPath("similarityMatrix");
-    Path prePartialMultiplyPath1 = getTempPath("prePartialMultiply1");
-    Path prePartialMultiplyPath2 = getTempPath("prePartialMultiply2");
     Path explicitFilterPath = getTempPath("explicitFilterPath");
     Path partialMultiplyPath = getTempPath("partialMultiply");
 
@@ -211,39 +209,29 @@ public final class RecommenderJob extends AbstractJob {
 
     //start the multiplication of the co-occurrence matrix by the user vectors
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
-      Job prePartialMultiply1 = prepareJob(
-              similarityMatrixPath, prePartialMultiplyPath1, SequenceFileInputFormat.class,
-              SimilarityMatrixRowWrapperMapper.class, VarIntWritable.class, VectorOrPrefWritable.class,
-              SequenceFileOutputFormat.class);
-      boolean succeeded = prePartialMultiply1.waitForCompletion(true);
-      if (!succeeded) {
-        return -1;
-      }
-      //continue the multiplication
-      Job prePartialMultiply2 = prepareJob(new Path(prepPath, PreparePreferenceMatrixJob.USER_VECTORS),
-                                           prePartialMultiplyPath2,
-                                           SequenceFileInputFormat.class,
-                                           UserVectorSplitterMapper.class,
-                                           VarIntWritable.class,
-                                           VectorOrPrefWritable.class,
-                                           SequenceFileOutputFormat.class);
+      Job partialMultiply = new Job(getConf(), "partialMultiply");
+      Configuration partialMultiplyConf = partialMultiply.getConfiguration();
+
+      MultipleInputs.addInputPath(partialMultiply, similarityMatrixPath, SequenceFileInputFormat.class,
+                                  SimilarityMatrixRowWrapperMapper.class);
+      MultipleInputs.addInputPath(partialMultiply, new Path(prepPath, PreparePreferenceMatrixJob.USER_VECTORS),
+          SequenceFileInputFormat.class, UserVectorSplitterMapper.class);
+      partialMultiply.setJarByClass(ToVectorAndPrefReducer.class);
+      partialMultiply.setMapOutputKeyClass(VarIntWritable.class);
+      partialMultiply.setMapOutputValueClass(VectorOrPrefWritable.class);
+      partialMultiply.setReducerClass(ToVectorAndPrefReducer.class);
+      partialMultiply.setOutputFormatClass(SequenceFileOutputFormat.class);
+      partialMultiply.setOutputKeyClass(VarIntWritable.class);
+      partialMultiply.setOutputValueClass(VectorAndPrefsWritable.class);
+      partialMultiplyConf.setBoolean("mapred.compress.map.output", true);
+      partialMultiplyConf.set("mapred.output.dir", partialMultiplyPath.toString());
+
       if (usersFile != null) {
-        prePartialMultiply2.getConfiguration().set(UserVectorSplitterMapper.USERS_FILE, usersFile);
+        partialMultiplyConf.set(UserVectorSplitterMapper.USERS_FILE, usersFile);
       }
-      prePartialMultiply2.getConfiguration().setInt(UserVectorSplitterMapper.MAX_PREFS_PER_USER_CONSIDERED,
-              maxPrefsPerUser);
-      succeeded = prePartialMultiply2.waitForCompletion(true);
-      if (!succeeded) {
-        return -1;
-      }
-      //finish the job
-      Job partialMultiply = prepareJob(
-              new Path(prePartialMultiplyPath1 + "," + prePartialMultiplyPath2), partialMultiplyPath,
-              SequenceFileInputFormat.class, Mapper.class, VarIntWritable.class, VectorOrPrefWritable.class,
-              ToVectorAndPrefReducer.class, VarIntWritable.class, VectorAndPrefsWritable.class,
-              SequenceFileOutputFormat.class);
-      setS3SafeCombinedInputPath(partialMultiply, getTempPath(), prePartialMultiplyPath1, prePartialMultiplyPath2);
-      succeeded = partialMultiply.waitForCompletion(true);
+      partialMultiplyConf.setInt(UserVectorSplitterMapper.MAX_PREFS_PER_USER_CONSIDERED, maxPrefsPerUser);
+
+      boolean succeeded = partialMultiply.waitForCompletion(true);
       if (!succeeded) {
         return -1;
       }

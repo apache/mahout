@@ -35,6 +35,10 @@ import java.util.List;
  */
 public class ItemFilterAsVectorAndPrefsReducer
     extends Reducer<VarLongWritable,VarLongWritable,VarIntWritable,VectorAndPrefsWritable> {
+
+  private final VarIntWritable itemIDIndexWritable = new VarIntWritable();
+  private final VectorAndPrefsWritable vectorAndPrefs = new VectorAndPrefsWritable();
+
   @Override
   protected void reduce(VarLongWritable itemID, Iterable<VarLongWritable> values, Context ctx)
     throws IOException, InterruptedException {
@@ -51,6 +55,8 @@ public class ItemFilterAsVectorAndPrefsReducer
       prefValues.add(1.0f);
     }
 
-    ctx.write(new VarIntWritable(itemIDIndex), new VectorAndPrefsWritable(vector, userIDs, prefValues));
+    itemIDIndexWritable.set(itemIDIndex);
+    vectorAndPrefs.set(vector, userIDs, prefValues);
+    ctx.write(itemIDIndexWritable, vectorAndPrefs);
   }
 }

@@ -49,6 +49,9 @@ public final class UserVectorSplitterMapper extends
   private int maxPrefsPerUserConsidered;
   private FastIDSet usersToRecommendFor;
 
+  private final VarIntWritable itemIndexWritable = new VarIntWritable();
+  private final VectorOrPrefWritable vectorOrPref = new VectorOrPrefWritable();
+
   @Override
   protected void setup(Context context) throws IOException {
     Configuration jobConf = context.getConfiguration();
@@ -84,8 +87,7 @@ public final class UserVectorSplitterMapper extends
       return;
     }
     Vector userVector = maybePruneUserVector(value.get());
-    VarIntWritable itemIndexWritable = new VarIntWritable();
-    VectorOrPrefWritable vectorOrPref = new VectorOrPrefWritable();
+
     for (Element e : userVector.nonZeroes()) {
       itemIndexWritable.set(e.index());
       vectorOrPref.set(userID, (float) e.get());

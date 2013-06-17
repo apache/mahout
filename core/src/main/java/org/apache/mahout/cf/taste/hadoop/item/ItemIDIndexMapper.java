@@ -33,6 +33,9 @@ public final class ItemIDIndexMapper extends
 
   private boolean transpose;
 
+  private final VarIntWritable indexWritable = new VarIntWritable();
+  private final VarLongWritable itemIDWritable = new VarLongWritable();
+
   @Override
   protected void setup(Context context) {
     Configuration jobConf = context.getConfiguration();
@@ -46,6 +49,8 @@ public final class ItemIDIndexMapper extends
     String[] tokens = TasteHadoopUtils.splitPrefTokens(value.toString());
     long itemID = Long.parseLong(tokens[transpose ? 0 : 1]);
     int index = TasteHadoopUtils.idToIndex(itemID);
-    context.write(new VarIntWritable(index), new VarLongWritable(itemID));
+    indexWritable.set(index);
+    itemIDWritable.set(itemID);
+    context.write(indexWritable, itemIDWritable);
   }  
 }

@@ -25,11 +25,12 @@ import java.io.IOException;
 
 class ToItemVectorsReducer extends Reducer<IntWritable,VectorWritable,IntWritable,VectorWritable> {
 
+  private final VectorWritable merged = new VectorWritable();
   @Override
   protected void reduce(IntWritable row, Iterable<VectorWritable> vectors, Context ctx)
     throws IOException, InterruptedException {
-    VectorWritable vectorWritable = VectorWritable.merge(vectors.iterator());
-    vectorWritable.setWritesLaxPrecision(true);
-    ctx.write(row, vectorWritable);
+    merged.setWritesLaxPrecision(true);
+    merged.set(VectorWritable.mergeToVector(vectors.iterator()));
+    ctx.write(row, merged);
   }
 }

@@ -54,6 +54,8 @@ public final class ToUserVectorsReducer extends
 
   public enum Counters { USERS }
 
+  private final VectorWritable userVectorWritable = new VectorWritable();
+
   @Override
   protected void setup(Context ctx) throws IOException, InterruptedException {
     super.setup(ctx);
@@ -72,10 +74,10 @@ public final class ToUserVectorsReducer extends
     }
 
     if (userVector.getNumNondefaultElements() >= minPreferences) {
-      VectorWritable vw = new VectorWritable(userVector);
-      vw.setWritesLaxPrecision(true);
+      userVectorWritable.set(userVector);
+      userVectorWritable.setWritesLaxPrecision(true);
       context.getCounter(Counters.USERS).increment(1);
-      context.write(userID, vw);
+      context.write(userID, userVectorWritable);
     }
   }
   

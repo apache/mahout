@@ -38,6 +38,10 @@ public final class VectorAndPrefsWritable implements Writable {
   }
 
   public VectorAndPrefsWritable(Vector vector, List<Long> userIDs, List<Float> values) {
+    set(vector, userIDs, values);
+  }
+
+  public void set(Vector vector, List<Long> userIDs, List<Float> values) {
     this.vector = vector;
     this.userIDs = userIDs;
     this.values = values;

@@ -32,11 +32,16 @@ public class ItemFilterMapper extends Mapper<LongWritable,Text,VarLongWritable,V
 
   private static final Pattern SEPARATOR = Pattern.compile("[\t,]");
 
+  private final VarLongWritable itemIDWritable = new VarLongWritable();
+  private final VarLongWritable userIDWritable = new VarLongWritable();
+
   @Override
   protected void map(LongWritable key, Text line, Context ctx) throws IOException, InterruptedException {
     String[] tokens = SEPARATOR.split(line.toString());
     long userID = Long.parseLong(tokens[0]);
     long itemID = Long.parseLong(tokens[1]);
-    ctx.write(new VarLongWritable(itemID), new VarLongWritable(userID));
+    itemIDWritable.set(itemID);
+    userIDWritable.set(userID);
+    ctx.write(itemIDWritable, userIDWritable);
   }
 }

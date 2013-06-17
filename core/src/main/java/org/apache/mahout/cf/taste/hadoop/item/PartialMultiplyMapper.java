@@ -31,6 +31,9 @@ import org.apache.mahout.math.Vector;
 public final class PartialMultiplyMapper extends
     Mapper<VarIntWritable,VectorAndPrefsWritable,VarLongWritable,PrefAndSimilarityColumnWritable> {
 
+  private final VarLongWritable userIDWritable = new VarLongWritable();
+  private final PrefAndSimilarityColumnWritable prefAndSimilarityColumn = new PrefAndSimilarityColumnWritable();
+
   @Override
   protected void map(VarIntWritable key,
                      VectorAndPrefsWritable vectorAndPrefsWritable,
@@ -39,9 +42,6 @@ public final class PartialMultiplyMapper extends
     Vector similarityMatrixColumn = vectorAndPrefsWritable.getVector();
     List<Long> userIDs = vectorAndPrefsWritable.getUserIDs();
     List<Float> prefValues = vectorAndPrefsWritable.getValues();
-
-    VarLongWritable userIDWritable = new VarLongWritable();
-    PrefAndSimilarityColumnWritable prefAndSimilarityColumn = new PrefAndSimilarityColumnWritable();
 
     for (int i = 0; i < userIDs.size(); i++) {
       long userID = userIDs.get(i);

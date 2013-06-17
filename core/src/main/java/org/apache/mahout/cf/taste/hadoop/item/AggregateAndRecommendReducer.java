@@ -69,6 +69,8 @@ public final class AggregateAndRecommendReducer extends
   private FastIDSet itemsToRecommendFor;
   private OpenIntLongHashMap indexItemIDMap;
 
+  private final RecommendedItemsWritable recommendedItems = new RecommendedItemsWritable();
+
   private static final float BOOLEAN_PREF_VALUE = 1.0f;
 
   @Override
@@ -203,7 +205,8 @@ public final class AggregateAndRecommendReducer extends
 
     List<RecommendedItem> topItems = topKItems.getTopItems();
     if (!topItems.isEmpty()) {
-      context.write(userID, new RecommendedItemsWritable(topItems));
+      recommendedItems.set(topItems);
+      context.write(userID, recommendedItems);
     }
   }
 

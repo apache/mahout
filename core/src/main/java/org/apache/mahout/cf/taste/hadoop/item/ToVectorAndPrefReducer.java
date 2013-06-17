@@ -28,6 +28,8 @@ import org.apache.mahout.math.Vector;
 public final class ToVectorAndPrefReducer extends
     Reducer<VarIntWritable,VectorOrPrefWritable,VarIntWritable,VectorAndPrefsWritable> {
 
+  private final VectorAndPrefsWritable vectorAndPrefs = new VectorAndPrefsWritable();
+
   @Override
   protected void reduce(VarIntWritable key,
                         Iterable<VectorOrPrefWritable> values,
@@ -54,7 +56,7 @@ public final class ToVectorAndPrefReducer extends
       return;
     }
 
-    VectorAndPrefsWritable vectorAndPrefs = new VectorAndPrefsWritable(similarityMatrixColumn, userIDs, prefValues);
+    vectorAndPrefs.set(similarityMatrixColumn, userIDs, prefValues);
     context.write(key, vectorAndPrefs);
   }
 

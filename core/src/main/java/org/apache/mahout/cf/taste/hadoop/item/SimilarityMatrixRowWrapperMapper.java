@@ -34,6 +34,9 @@ import org.apache.mahout.math.VectorWritable;
 public final class SimilarityMatrixRowWrapperMapper extends
     Mapper<IntWritable,VectorWritable,VarIntWritable,VectorOrPrefWritable> {
 
+  private final VarIntWritable index = new VarIntWritable();
+  private final VectorOrPrefWritable vectorOrPref = new VectorOrPrefWritable();
+
   @Override
   protected void map(IntWritable key,
                      VectorWritable value,
@@ -41,7 +44,11 @@ public final class SimilarityMatrixRowWrapperMapper extends
     Vector similarityMatrixRow = value.get();
     /* remove self similarity */
     similarityMatrixRow.set(key.get(), Double.NaN);
-    context.write(new VarIntWritable(key.get()), new VectorOrPrefWritable(similarityMatrixRow));
+
+    index.set(key.get());
+    vectorOrPref.set(similarityMatrixRow);
+
+    context.write(index, vectorOrPref);
   }
 
 }

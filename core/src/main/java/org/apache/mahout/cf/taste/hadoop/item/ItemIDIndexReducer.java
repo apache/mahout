@@ -25,7 +25,9 @@ import org.apache.mahout.math.VarLongWritable;
 
 public final class ItemIDIndexReducer extends
     Reducer<VarIntWritable, VarLongWritable, VarIntWritable,VarLongWritable> {
-  
+
+  private final VarLongWritable minimumItemIDWritable = new VarLongWritable();
+
   @Override
   protected void reduce(VarIntWritable index,
                         Iterable<VarLongWritable> possibleItemIDs,
@@ -38,7 +40,8 @@ public final class ItemIDIndexReducer extends
       }
     }
     if (minimumItemID != Long.MAX_VALUE) {
-      context.write(index, new VarLongWritable(minimumItemID));
+      minimumItemIDWritable.set(minimumItemID);
+      context.write(index, minimumItemIDWritable);
     }
   }
   

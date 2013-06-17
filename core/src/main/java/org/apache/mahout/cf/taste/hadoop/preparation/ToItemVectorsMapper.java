@@ -37,6 +37,9 @@ public class ToItemVectorsMapper
     USER_RATINGS_USED, USER_RATINGS_NEGLECTED
   }
 
+  private final IntWritable itemID = new IntWritable();
+  private final VectorWritable itemVectorWritable = new VectorWritable();
+
   private int sampleSize;
 
   @Override
@@ -54,12 +57,17 @@ public class ToItemVectorsMapper
     int numElementsAfterSampling = userRatings.getNumNondefaultElements();
 
     int column = TasteHadoopUtils.idToIndex(rowIndex.get());
-    VectorWritable itemVector = new VectorWritable(new RandomAccessSparseVector(Integer.MAX_VALUE, 1));
-    itemVector.setWritesLaxPrecision(true);
+    Vector itemVector = new RandomAccessSparseVector(Integer.MAX_VALUE, 1);
+
+    itemVectorWritable.setWritesLaxPrecision(true);
 
     for (Vector.Element elem : userRatings.nonZeroes()) {
-      itemVector.get().setQuick(column, elem.get());
-      ctx.write(new IntWritable(elem.index()), itemVector);
+      itemID.set(elem.index());
+      itemVector.setQuick(column, elem.get());
+      itemVectorWritable.set(itemVector);
+      ctx.write(itemID, itemVectorWritable);
+      // reset vector for reuse
+      itemVector.setQuick(elem.index(), 0.0);
     }
 
     ctx.getCounter(Elements.USER_RATINGS_USED).increment(numElementsAfterSampling);

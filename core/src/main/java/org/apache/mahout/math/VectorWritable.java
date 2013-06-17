@@ -201,6 +201,10 @@ public final class VectorWritable extends Configured implements Writable {
   }
 
   public static VectorWritable merge(Iterator<VectorWritable> vectors) {
+    return new VectorWritable(mergeToVector(vectors));
+  }
+
+  public static Vector mergeToVector(Iterator<VectorWritable> vectors) {
     Vector accumulator = vectors.next().get();
     while (vectors.hasNext()) {
       VectorWritable v = vectors.next();
@@ -210,7 +214,7 @@ public final class VectorWritable extends Configured implements Writable {
         }
       }
     }
-    return new VectorWritable(accumulator);
+    return accumulator;
   }
 
   @Override
