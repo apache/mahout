@@ -34,7 +34,7 @@ public class HashedVector extends WeightedVector {
   /**
    * Value of the locality sensitive hash. It is 64 bit.
    */
-  private long hash;
+  private final long hash;
 
   public HashedVector(Vector vector, long hash, int index) {
     super(vector, 1, index);
@@ -55,7 +55,7 @@ public class HashedVector extends WeightedVector {
     long hash = 0;
     for (Element element : projection.times(vector).nonZeroes()) {
       if (element.get() > 0) {
-        hash += 1 << element.index();
+        hash += 1L << element.index();
       }
     }
     return hash;
@@ -89,10 +89,9 @@ public class HashedVector extends WeightedVector {
     }
     if (!(o instanceof HashedVector)) {
       return o instanceof Vector && this.minus((Vector) o).norm(1) == 0;
-    } else {
-      HashedVector v = (HashedVector) o;
-      return v.hash == this.hash && this.minus(v).norm(1) == 0;
     }
+    HashedVector v = (HashedVector) o;
+    return v.hash == this.hash && this.minus(v).norm(1) == 0;
   }
 
   @Override

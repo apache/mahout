@@ -119,7 +119,6 @@ public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrate
 
   @Override
   protected FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel) throws TasteException {
-    FastIDSet possibleItemsIDs = new FastIDSet();
     LongPrimitiveIterator preferredItemIDsIterator = new LongPrimitiveArrayIterator(preferredItemIDs);
     if (preferredItemIDs.length > maxItems) {
       double samplingRate = (double) maxItems / preferredItemIDs.length;
@@ -127,6 +126,7 @@ public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrate
       preferredItemIDsIterator = 
           new SamplingLongPrimitiveIterator(preferredItemIDsIterator, samplingRate);
     }
+    FastIDSet possibleItemsIDs = new FastIDSet();
     while (preferredItemIDsIterator.hasNext()) {
       long itemID = preferredItemIDsIterator.nextLong();
       PreferenceArray prefs = dataModel.getPreferencesForItem(itemID);

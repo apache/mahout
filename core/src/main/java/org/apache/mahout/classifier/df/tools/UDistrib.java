@@ -114,12 +114,12 @@ public final class UDistrib {
   }
   
   private static void runTool(String dataStr, String datasetStr, String output, int numPartitions) throws IOException {
-    Configuration conf = new Configuration();
 
     Preconditions.checkArgument(numPartitions > 0, "numPartitions <= 0");
     
     // make sure the output file does not exist
     Path outputPath = new Path(output);
+    Configuration conf = new Configuration();
     FileSystem fs = outputPath.getFileSystem(conf);
 
     Preconditions.checkArgument(!fs.exists(outputPath), "Output path already exists");

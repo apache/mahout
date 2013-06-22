@@ -58,9 +58,7 @@ public final class TasteHadoopUtils {
   }
 
   public static int readID(String token, boolean usesLongIDs) {
-    return usesLongIDs
-        ? TasteHadoopUtils.idToIndex(Long.parseLong(token))
-        : Integer.parseInt(token);
+    return usesLongIDs ? idToIndex(Long.parseLong(token)) : Integer.parseInt(token);
   }
 
   /**

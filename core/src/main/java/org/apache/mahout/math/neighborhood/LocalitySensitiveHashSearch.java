@@ -24,7 +24,7 @@ import org.apache.mahout.math.stats.OnlineSummarizer;
  * is that it does an adaptive cutoff for the cutoff on the bitwise distance.  Making this
  * cutoff adaptive means that we only needs to make a single pass through the data.
  */
-public class LocalitySensitiveHashSearch extends UpdatableSearcher implements Iterable<Vector> {
+public class LocalitySensitiveHashSearch extends UpdatableSearcher {
   /**
    * Number of bits in the locality sensitive hash. 64 bits fix neatly into a long.
    */
@@ -51,7 +51,7 @@ public class LocalitySensitiveHashSearch extends UpdatableSearcher implements It
    */
   private static final int MIN_DISTRIBUTION_COUNT = 10;
 
-  private Multiset<HashedVector> trainingVectors = HashMultiset.create();
+  private final Multiset<HashedVector> trainingVectors = HashMultiset.create();
 
   /**
    * This matrix of BITS random vectors is used to compute the Locality Sensitive Hash
@@ -105,10 +105,6 @@ public class LocalitySensitiveHashSearch extends UpdatableSearcher implements It
     // We keep an approximation of the closest vectors here.
     PriorityQueue<WeightedThing<Vector>> top = Searcher.getCandidateQueue(getSearchSize());
 
-    // We keep the counts of the hash distances here.  This lets us accurately
-    // judge what hash distance cutoff we should use.
-    int[] hashCounts = new int[BITS + 1];
-
     // We scan the vectors using bit counts as an approximation of the dot product so we can do as few
     // full distance computations as possible.  Our goal is to only do full distance computations for
     // vectors with hash distance at most as large as the searchSize biggest hash distance seen so far.
@@ -118,12 +114,17 @@ public class LocalitySensitiveHashSearch extends UpdatableSearcher implements It
       distribution[i] = new OnlineSummarizer();
     }
 
+    distanceEvaluations = 0;
+    
+    // We keep the counts of the hash distances here.  This lets us accurately
+    // judge what hash distance cutoff we should use.
+    int[] hashCounts = new int[BITS + 1];
+    
     // Maximum number of different bits to still consider a vector a candidate for nearest neighbor.
     // Starts at the maximum number of bits, but decreases and can increase.
     int hashLimit = BITS;
     int limitCount = 0;
     double distanceLimit = Double.POSITIVE_INFINITY;
-    distanceEvaluations = 0;
 
     // In this loop, we have the invariants that:
     //
@@ -213,7 +214,7 @@ public class LocalitySensitiveHashSearch extends UpdatableSearcher implements It
     return removeHash(best);
   }
 
-  protected WeightedThing<Vector> removeHash(WeightedThing<Vector> input) {
+  protected static WeightedThing<Vector> removeHash(WeightedThing<Vector> input) {
     return new WeightedThing<Vector>(((HashedVector) input.getValue()).getVector(), input.getWeight());
   }
 
@@ -223,6 +224,7 @@ public class LocalitySensitiveHashSearch extends UpdatableSearcher implements It
     trainingVectors.add(new HashedVector(vector, projection, HashedVector.INVALID_INDEX, BIT_MASK));
   }
 
+  @Override
   public int size() {
     return trainingVectors.size();
   }

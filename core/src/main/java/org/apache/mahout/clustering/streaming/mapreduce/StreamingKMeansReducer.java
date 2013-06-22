@@ -71,7 +71,7 @@ public class StreamingKMeansReducer extends Reducer<IntWritable, CentroidWritabl
     }
   }
 
-  public List<Centroid> centroidWritablesToList(Iterable<CentroidWritable> centroids) {
+  public static List<Centroid> centroidWritablesToList(Iterable<CentroidWritable> centroids) {
     // A new list must be created because Hadoop iterators mutate the contents of the Writable in
     // place, without allocating new references when iterating through the centroids Iterable.
     return Lists.newArrayList(Iterables.transform(centroids, new Function<CentroidWritable, Centroid>() {

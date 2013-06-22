@@ -64,12 +64,12 @@ public final class AveragingPreferenceInferrer implements PreferenceInferrer {
     
     @Override
     public Float get(Long key) throws TasteException {
-      RunningAverage average = new FullRunningAverage();
       PreferenceArray prefs = dataModel.getPreferencesFromUser(key);
       int size = prefs.length();
       if (size == 0) {
         return ZERO;
       }
+      RunningAverage average = new FullRunningAverage();
       for (int i = 0; i < size; i++) {
         average.addDatum(prefs.getValue(i));
       }

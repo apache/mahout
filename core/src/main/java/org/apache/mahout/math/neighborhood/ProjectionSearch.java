@@ -38,7 +38,7 @@ import org.apache.mahout.math.random.WeightedThing;
 /**
  * Does approximate nearest neighbor dudes search by projecting the data.
  */
-public class ProjectionSearch extends UpdatableSearcher implements Iterable<Vector> {
+public class ProjectionSearch extends UpdatableSearcher {
 
   /**
    * A lists of tree sets containing the scalar projections of each vector.

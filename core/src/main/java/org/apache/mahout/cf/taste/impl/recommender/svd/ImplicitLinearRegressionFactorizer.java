@@ -213,12 +213,12 @@ public final class ImplicitLinearRegressionFactorizer extends AbstractFactorizer
    * @param recomputeUserFeatures
    */
   public void reCalculateTrans(boolean recomputeUserFeatures) {
-    if (!recomputeUserFeatures) {
-      Matrix uMatrix = new DenseMatrix(userMatrix);
-      userTransUser = uMatrix.transpose().times(uMatrix);
-    } else {
+    if (recomputeUserFeatures) {
       Matrix iMatrix = new DenseMatrix(itemMatrix);
       itemTransItem = iMatrix.transpose().times(iMatrix);
+    } else {
+      Matrix uMatrix = new DenseMatrix(userMatrix);
+      userTransUser = uMatrix.transpose().times(uMatrix);
     }
   }
 

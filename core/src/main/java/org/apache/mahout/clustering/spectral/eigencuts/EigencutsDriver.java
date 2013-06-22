@@ -200,10 +200,10 @@ public class EigencutsDriver extends AbstractJob {
    * @return
    */
   private static double median(Vector v) {
-    OnlineSummarizer med = new OnlineSummarizer();
     if (v.size() < 100) {
       return v.zSum() / v.size();
     }
+    OnlineSummarizer med = new OnlineSummarizer();
     for (Vector.Element e : v.all()) {
       med.add(e.get());
     }

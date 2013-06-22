@@ -388,8 +388,8 @@ public class ParallelALSFactorizationJob extends AbstractJob {
   static class MapLongIDsMapper extends Mapper<LongWritable,Text,VarIntWritable,VarLongWritable> {
 
     private int tokenPos;
-    private VarIntWritable index = new VarIntWritable();
-    private VarLongWritable idWritable = new VarLongWritable();
+    private final VarIntWritable index = new VarIntWritable();
+    private final VarLongWritable idWritable = new VarLongWritable();
 
     @Override
     protected void setup(Context ctx) throws IOException, InterruptedException {

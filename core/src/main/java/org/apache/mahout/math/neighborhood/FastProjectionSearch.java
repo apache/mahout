@@ -291,7 +291,7 @@ public class FastProjectionSearch extends UpdatableSearcher {
   public Iterator<Vector> iterator() {
     reindex(true);
     return new AbstractIterator<Vector>() {
-      Iterator<WeightedThing<Vector>> data = scalarProjections.get(0).iterator();
+      private final Iterator<WeightedThing<Vector>> data = scalarProjections.get(0).iterator();
       @Override
       protected Vector computeNext() {
         do {

@@ -40,7 +40,7 @@ public class BruteSearch extends UpdatableSearcher {
   /**
    * The list of reference vectors.
    */
-  private List<Vector> referenceVectors;
+  private final List<Vector> referenceVectors;
 
   public BruteSearch(DistanceMeasure distanceMeasure) {
     super(distanceMeasure);
@@ -66,6 +66,7 @@ public class BruteSearch extends UpdatableSearcher {
    * @param limit The number of results to returned; must be at least 1.
    * @return A list of the closest @limit neighbors for the given query.
    */
+  @Override
   public List<WeightedThing<Vector>> search(Vector query, int limit) {
     Preconditions.checkArgument(limit > 0);
     limit = Math.min(limit, referenceVectors.size());

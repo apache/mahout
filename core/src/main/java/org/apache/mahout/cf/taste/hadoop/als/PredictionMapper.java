@@ -89,7 +89,7 @@ public class PredictionMapper extends SharingMapper<IntWritable,VectorWritable,L
     OpenIntObjectHashMap<Vector> M = uAndM.getSecond();
 
     Vector ratings = ratingsWritable.get();
-    final int userIndex = userIndexWritable.get();
+    int userIndex = userIndexWritable.get();
     final OpenIntHashSet alreadyRatedItems = new OpenIntHashSet(ratings.getNumNondefaultElements());
 
     for (Vector.Element e : ratings.nonZeroes()) {

@@ -39,8 +39,8 @@ public class MinHashMapper extends Mapper<Text, VectorWritable, Text, Writable> 
   private byte[] bytesToHash;
   private boolean hashValue;
 
-  private Text cluster = new Text();
-  private VectorWritable vector = new VectorWritable();
+  private final Text cluster = new Text();
+  private final VectorWritable vector = new VectorWritable();
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {

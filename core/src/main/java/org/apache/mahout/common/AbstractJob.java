@@ -19,7 +19,6 @@ package org.apache.mahout.common;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -114,7 +113,7 @@ public abstract class AbstractJob extends Configured implements Tool {
   private Group group;
 
   protected AbstractJob() {
-    options = Lists.newLinkedList();;
+    options = Lists.newLinkedList();
   }
 
   /** Returns the input path established by a call to {@link #parseArguments(String[])}.

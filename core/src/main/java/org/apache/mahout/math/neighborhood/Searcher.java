@@ -38,7 +38,7 @@ import org.apache.mahout.math.random.WeightedThing;
 public abstract class Searcher implements Iterable<Vector> {
   protected DistanceMeasure distanceMeasure;
 
-  public Searcher(DistanceMeasure distanceMeasure) {
+  protected Searcher(DistanceMeasure distanceMeasure) {
     this.distanceMeasure = distanceMeasure;
   }
 

@@ -190,8 +190,8 @@ public final class MatrixColumnMeansJob {
     private static final IntWritable ONE = new IntWritable(1);
 
     private String vectorClass;
-    Vector outputVector;
-    VectorWritable outputVectorWritable = new VectorWritable();
+    private Vector outputVector;
+    private final VectorWritable outputVectorWritable = new VectorWritable();
 
     @Override
     public void setup(Context context) {

@@ -128,8 +128,8 @@ public class ConfusionMatrix {
         br += confusionMatrix[i][j];
       }
       double bc = 0;
-      for (int j = 0; j < confusionMatrix.length; j++) {
-        bc += confusionMatrix[j][i];
+      for (int[] vec : confusionMatrix) {
+        bc += vec[i];
       }
       b += br * bc;
     }

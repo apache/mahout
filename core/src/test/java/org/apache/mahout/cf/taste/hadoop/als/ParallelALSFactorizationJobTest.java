@@ -234,7 +234,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
   @Test
   public void exampleWithIDMapping() throws Exception {
 
-    String[] preferencesWithLongIDs = new String[] {
+    String[] preferencesWithLongIDs = {
         "5568227754922264005,-4758971626494767444,5.0",
         "5568227754922264005,3688396615879561990,5.0",
         "5568227754922264005,4594226737871995304,2.0",
@@ -318,7 +318,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
   @Test
   public void recommenderJobWithIDMapping() throws Exception {
 
-    String[] preferencesWithLongIDs = new String[] {
+    String[] preferencesWithLongIDs = {
         "5568227754922264005,-4758971626494767444,5.0",
         "5568227754922264005,3688396615879561990,5.0",
         "5568227754922264005,4594226737871995304,2.0",
@@ -349,7 +349,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
         "--numThreadsPerSolver", String.valueOf(1),
         "--usesLongIDs", String.valueOf(true) });
 
-    assertEquals(success, 0);
+    assertEquals(0, success);
 
     // reset as we run in the same JVM
     SharingMapper.reset();

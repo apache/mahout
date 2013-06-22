@@ -62,9 +62,9 @@ public class VJob {
     /*
      * xi and s_q are PCA-related corrections, per MAHOUT-817
      */
-    Vector xi;
-    Vector sq;
-    PlusMult plusMult = new PlusMult(0);
+    private Vector xi;
+    private Vector sq;
+    private final PlusMult plusMult = new PlusMult(0);
 
     @Override
     protected void map(IntWritable key, VectorWritable value, Context context)

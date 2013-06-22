@@ -25,7 +25,7 @@ import org.apache.mahout.math.Vector;
  */
 public abstract class UpdatableSearcher extends Searcher {
 
-  public UpdatableSearcher(DistanceMeasure distanceMeasure) {
+  protected UpdatableSearcher(DistanceMeasure distanceMeasure) {
    super(distanceMeasure);
   }
 

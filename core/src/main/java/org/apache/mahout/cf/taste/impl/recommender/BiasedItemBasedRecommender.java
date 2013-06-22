@@ -143,7 +143,7 @@ public class BiasedItemBasedRecommender extends GenericItemBasedRecommender {
     float[] ratings = new float[userIDs.length];
     long[] itemIDs = new long[userIDs.length];
             
-    final double[] similarities = similarity.itemSimilarities(itemID, userIDs);
+    double[] similarities = similarity.itemSimilarities(itemID, userIDs);
 
     for (int n = 0; n < preferencesFromUser.length(); n++) {
       ratings[n] = preferencesFromUser.get(n).getValue();

@@ -44,8 +44,8 @@ public class SequenceFileTokenizerMapper extends Mapper<Text, Text, Text, String
     TokenStream stream = analyzer.tokenStream(key.toString(), new StringReader(value.toString()));
     stream.reset();
     CharTermAttribute termAtt = stream.addAttribute(CharTermAttribute.class);
-    StringTuple document = new StringTuple();
     stream.reset();
+    StringTuple document = new StringTuple();
     while (stream.incrementToken()) {
       if (termAtt.length() > 0) {
         document.add(new String(termAtt.buffer(), 0, termAtt.length()));

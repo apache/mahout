@@ -20,7 +20,6 @@ package org.apache.mahout.math.hadoop.stochasticsvd;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Deque;
-import java.util.LinkedList;
 
 import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;

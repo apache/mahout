@@ -57,10 +57,10 @@ public class ToItemVectorsMapper
     int numElementsAfterSampling = userRatings.getNumNondefaultElements();
 
     int column = TasteHadoopUtils.idToIndex(rowIndex.get());
-    Vector itemVector = new RandomAccessSparseVector(Integer.MAX_VALUE, 1);
 
     itemVectorWritable.setWritesLaxPrecision(true);
 
+    Vector itemVector = new RandomAccessSparseVector(Integer.MAX_VALUE, 1);
     for (Vector.Element elem : userRatings.nonZeroes()) {
       itemID.set(elem.index());
       itemVector.setQuick(column, elem.get());

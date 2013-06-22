@@ -47,9 +47,9 @@ public class CanopyReducer extends Reducer<Text, VectorWritable, Text, ClusterWr
       canopyClusterer.addPointToCanopies(point, canopies);
     }
     for (Canopy canopy : canopies) {
-      ClusterWritable clusterWritable = new ClusterWritable();
       canopy.computeParameters();
       if (canopy.getNumObservations() > clusterFilter) {
+        ClusterWritable clusterWritable = new ClusterWritable();
         clusterWritable.setValue(canopy);
         context.write(new Text(canopy.getIdentifier()), clusterWritable);
       }

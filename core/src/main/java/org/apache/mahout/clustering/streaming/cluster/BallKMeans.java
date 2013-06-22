@@ -245,12 +245,12 @@ public class BallKMeans implements Iterable<Centroid> {
    * @param datapoints The datapoints to select from.  These datapoints should be WeightedVectors of some kind.
    */
   private void initializeSeedsRandomly(List<? extends WeightedVector> datapoints) {
-    Multinomial<Integer> seedSelector = new Multinomial<Integer>();
     int numDatapoints = datapoints.size();
     double totalWeight = 0;
     for (WeightedVector datapoint : datapoints) {
       totalWeight += datapoint.getWeight();
     }
+    Multinomial<Integer> seedSelector = new Multinomial<Integer>();
     for (int i = 0; i < numDatapoints; ++i) {
       seedSelector.add(i, datapoints.get(i).getWeight() / totalWeight);
     }
@@ -330,7 +330,7 @@ public class BallKMeans implements Iterable<Centroid> {
     // set to the squared distance from c_1
     for (int i = 0; i < datapoints.size(); ++i) {
       WeightedVector row = datapoints.get(i);
-      final double w = distanceMeasure.distance(c_1, row) * 2 * Math.log(1 + row.getWeight());
+      double w = distanceMeasure.distance(c_1, row) * 2 * Math.log(1 + row.getWeight());
       seedSelector.set(i, w);
     }
 

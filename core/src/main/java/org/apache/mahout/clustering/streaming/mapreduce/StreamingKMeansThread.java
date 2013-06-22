@@ -34,8 +34,8 @@ import org.apache.mahout.math.neighborhood.UpdatableSearcher;
 public class StreamingKMeansThread implements Callable<Iterable<Centroid>> {
   private static final int NUM_ESTIMATE_POINTS = 1000;
 
-  private Configuration conf;
-  private Iterable<Centroid> datapoints;
+  private final Configuration conf;
+  private final Iterable<Centroid> datapoints;
 
   public StreamingKMeansThread(Path input, Configuration conf) {
     this(StreamingKMeansUtilsMR.getCentroidsFromVectorWritable(

@@ -23,15 +23,6 @@ public class TFIDF implements Weight {
 
   private final DefaultSimilarity sim = new DefaultSimilarity();
 
-  public TFIDF() {
-  }
-  
-/*  public TFIDF(Similarity sim) {
-    this.sim = sim;
-  }
-  */
-
-
   @Override
   public double calculate(int tf, int df, int length, int numDocs) {
     // ignore length    

@@ -283,8 +283,8 @@ public class CanopyDriver extends AbstractJob {
     Path path = new Path(canopyOutputDir, "part-r-00000");
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path,
         Text.class, ClusterWritable.class);
-    ClusterWritable clusterWritable = new ClusterWritable();
     try {
+      ClusterWritable clusterWritable = new ClusterWritable();
       for (Canopy canopy : canopies) {
         canopy.computeParameters();
         if (log.isDebugEnabled()) {

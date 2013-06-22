@@ -213,6 +213,7 @@ public class Dataset {
     return values[labelId][(int) code];
   }
   
+  @Override
   public String toString() {
     return "attributes=" + Arrays.toString(attributes);
   }
@@ -373,7 +374,6 @@ public class Dataset {
    */
   public static Dataset fromJSON(String json) {
 
-    Dataset dataset = new Dataset();
     List<Map<String, Object>> fromJSON;
     try {
       fromJSON = OBJECT_MAPPER.readValue(json, new TypeReference<List<Map<String, Object>>>() {});
@@ -383,6 +383,7 @@ public class Dataset {
     List<Attribute> attributes = Lists.newLinkedList();
     List<Integer> ignored = Lists.newLinkedList();
     String[][] nominalValues = new String[fromJSON.size()][];
+    Dataset dataset = new Dataset();
     for (int i = 0; i < fromJSON.size(); i++) {
       Map<String, Object> attribute = fromJSON.get(i);
       if (Attribute.fromString((String) attribute.get(TYPE)) == Attribute.IGNORED) {
@@ -394,13 +395,13 @@ public class Dataset {
           dataset.labelId = i - ignored.size();
         }
         if (attribute.get(VALUES) != null) {
-          List get = (List) attribute.get(VALUES);
-          String[] array = (String[]) get.toArray(new String[]{});
+          List<String> get = (List<String>) attribute.get(VALUES);
+          String[] array = get.toArray(new String[get.size()]);
           nominalValues[i] = array;
         }
       }
     }
-    dataset.attributes = attributes.toArray(new Attribute[]{});
+    dataset.attributes = attributes.toArray(new Attribute[attributes.size()]);
     dataset.ignored = new int[ignored.size()];
     dataset.values = nominalValues;
     for (int i = 0; i < dataset.ignored.length; i++) {

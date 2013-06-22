@@ -1,3 +1,20 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.clustering.streaming.mapreduce;
 
 import java.io.IOException;
@@ -24,7 +41,10 @@ import org.apache.mahout.math.neighborhood.LocalitySensitiveHashSearch;
 import org.apache.mahout.math.neighborhood.ProjectionSearch;
 import org.apache.mahout.math.neighborhood.UpdatableSearcher;
 
-public class StreamingKMeansUtilsMR {
+public final class StreamingKMeansUtilsMR {
+
+  private StreamingKMeansUtilsMR() {
+  }
 
   /**
    * Instantiates a searcher from a given configuration.
@@ -37,7 +57,7 @@ public class StreamingKMeansUtilsMR {
     DistanceMeasure distanceMeasure;
     String distanceMeasureClass = conf.get(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
     try {
-      distanceMeasure = (DistanceMeasure)Class.forName(distanceMeasureClass).newInstance();
+      distanceMeasure = (DistanceMeasure) Class.forName(distanceMeasureClass).getConstructor().newInstance();
     } catch (Exception e) {
       throw new RuntimeException("Failed to instantiate distanceMeasure", e);
     }
@@ -72,8 +92,7 @@ public class StreamingKMeansUtilsMR {
    */
   public static Iterable<Centroid> getCentroidsFromVectorWritable(Iterable<VectorWritable> inputIterable) {
     return Iterables.transform(inputIterable, new Function<VectorWritable, Centroid>() {
-      int numVectors = 0;
-
+      private int numVectors = 0;
       @Override
       public Centroid apply(VectorWritable input) {
         Preconditions.checkNotNull(input);
@@ -90,7 +109,7 @@ public class StreamingKMeansUtilsMR {
    * @param input Iterable of Vectors to cast
    * @return the new Centroids
    */
-  public static Iterable<Centroid> castVectorsToCentroids(final Iterable<Vector> input) {
+  public static Iterable<Centroid> castVectorsToCentroids(Iterable<Vector> input) {
     return Iterables.transform(input, new Function<Vector, Centroid>() {
       private int numVectors = 0;
       @Override

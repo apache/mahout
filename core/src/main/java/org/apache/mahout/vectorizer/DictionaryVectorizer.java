@@ -172,9 +172,10 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
     
     Path dictionaryJobPath = new Path(output, DICTIONARY_JOB_FOLDER);
     
+    log.info("Creating dictionary from {} and saving at {}", input, dictionaryJobPath);
+    
     int[] maxTermDimension = new int[1];
     List<Path> dictionaryChunks;
-    log.info("Creating dictionary from {} and saving at {}", input, dictionaryJobPath);
     if (maxNGramSize == 1) {
       startWordCounting(input, dictionaryJobPath, baseConf, minSupport);
       dictionaryChunks =

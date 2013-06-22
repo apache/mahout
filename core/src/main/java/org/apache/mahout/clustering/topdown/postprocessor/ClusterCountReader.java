@@ -85,7 +85,8 @@ public final class ClusterCountReader {
             conf);
     int i = 0;
     while (it.hasNext()) {
-      Integer key, value;
+      Integer key;
+      Integer value;
       if (keyIsClusterId) { // key is the cluster id, value is i, the index we will use
         key = it.next().getValue().getId();
         value = i;

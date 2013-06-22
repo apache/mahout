@@ -78,11 +78,11 @@ final class ALS {
     Path[] cachedFiles = HadoopUtil.getCachedFiles(conf);
     LocalFileSystem localFs = FileSystem.getLocal(conf);
 
-    for (int n = 0; n < cachedFiles.length; n++) {
+    for (Path cachedFile : cachedFiles) {
 
       SequenceFile.Reader reader = null;
       try {
-        reader = new SequenceFile.Reader(localFs, cachedFiles[n], conf);
+        reader = new SequenceFile.Reader(localFs, cachedFile, conf);
         while (reader.next(rowIndex, row)) {
           featureMatrix.put(rowIndex.get(), row.get());
         }
@@ -96,7 +96,7 @@ final class ALS {
   }
 
   public static OpenIntObjectHashMap<Vector> readMatrixByRows(Path dir, Configuration conf) {
-    OpenIntObjectHashMap matrix = new OpenIntObjectHashMap<Vector>();
+    OpenIntObjectHashMap<Vector> matrix = new OpenIntObjectHashMap<Vector>();
     for (Pair<IntWritable,VectorWritable> pair
         : new SequenceFileDirIterable<IntWritable,VectorWritable>(dir, PathType.LIST, PathFilters.partFilter(), conf)) {
       int rowIndex = pair.getFirst().get();

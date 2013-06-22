@@ -70,7 +70,7 @@ public class WordsPrunerReducer extends
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
-    Path[] localFiles = HadoopUtil.getCachedFiles(conf);
+    //Path[] localFiles = HadoopUtil.getCachedFiles(conf);
 
     maxDf = conf.getLong(HighDFWordsPruner.MAX_DF, Long.MAX_VALUE);
     minDf = conf.getLong(HighDFWordsPruner.MIN_DF, -1);

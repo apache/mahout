@@ -93,8 +93,6 @@ public final class MahoutDriver {
 
   public static void main(String[] args) throws Throwable {
 
-    ProgramDriver programDriver = new ProgramDriver();
-
     Properties mainClasses = loadProperties("driver.classes.props");
     if (mainClasses == null) {
       mainClasses = loadProperties("driver.classes.default.props");
@@ -104,6 +102,7 @@ public final class MahoutDriver {
     }
 
     boolean foundShortName = false;
+    ProgramDriver programDriver = new ProgramDriver();
     for (Object key :  mainClasses.keySet()) {
       String keyString = (String) key;
       if (args.length > 0 && shortName(mainClasses.getProperty(keyString)).equals(args[0])) {

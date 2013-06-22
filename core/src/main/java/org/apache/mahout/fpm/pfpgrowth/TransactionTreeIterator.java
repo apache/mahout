@@ -68,9 +68,9 @@ final class TransactionTreeIterator extends AbstractIterator<Pair<IntArrayList,L
       }
     } while (sum == transactionTree.count(childId));
 
-    IntArrayList data = new IntArrayList();
     Iterator<int[]> it = depth.iterator();
     it.next();
+    IntArrayList data = new IntArrayList();
     while (it.hasNext()) {
       data.add(transactionTree.attribute(it.next()[0]));
     }

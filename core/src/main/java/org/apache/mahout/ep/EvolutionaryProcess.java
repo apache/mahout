@@ -215,7 +215,7 @@ public class EvolutionaryProcess<T extends Payload<U>, U> implements Writable, C
     int n = input.readInt();
     population = Lists.newArrayList();
     for (int i = 0; i < n; i++) {
-      State<T, U> state = PolymorphicWritable.read(input, State.class);
+      State<T, U> state = (State<T, U>) PolymorphicWritable.read(input, State.class);
       population.add(state);
     }
   }

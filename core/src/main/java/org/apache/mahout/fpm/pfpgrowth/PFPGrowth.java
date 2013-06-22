@@ -164,12 +164,12 @@ public final class PFPGrowth {
   public static IntArrayList getGroupMembers(int groupId, 
                                                    int maxPerGroup, 
                                                    int numFeatures) {
-    IntArrayList ret = new IntArrayList();
     int start = groupId * maxPerGroup;
     int end = start + maxPerGroup;
     if (end > numFeatures) {
       end = numFeatures;
     }
+    IntArrayList ret = new IntArrayList();
     for (int i = start; i < end; i++) {
       ret.add(i);
     }

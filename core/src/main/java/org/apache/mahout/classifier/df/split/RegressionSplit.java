@@ -107,7 +107,6 @@ public class RegressionSplit extends IgSplit {
    */
   private static Split numericalSplit(Data data, int attr) {
     FullRunningAverage[] ra = new FullRunningAverage[2];
-    double[] sk = new double[2];
     for (int i = 0; i < ra.length; i++) {
       ra[i] = new FullRunningAverage();
     }
@@ -119,6 +118,7 @@ public class RegressionSplit extends IgSplit {
     }
     Arrays.sort(instances, new InstanceComparator(attr));
 
+    double[] sk = new double[2];
     for (Instance instance : instances) {
       double xk = data.getDataset().getLabel(instance);
       if (ra[1].getCount() == 0) {
