@@ -36,6 +36,7 @@ import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
@@ -114,6 +115,34 @@ public abstract class AbstractJob extends Configured implements Tool {
 
   protected AbstractJob() {
     options = Lists.newLinkedList();
+  }
+
+  /**
+   * Builds a comma-separated list of input splits
+   */
+  public static String buildDirList(FileSystem fs, FileStatus fileStatus) throws IOException {
+    StringBuilder dirList = new StringBuilder();
+    boolean bContainsFiles = false;
+
+    for (FileStatus childFileStatus : fs.listStatus(fileStatus.getPath())) {
+      if (childFileStatus.isDir()) {
+        String subDirectoryList = buildDirList(fs, childFileStatus);
+        if (subDirectoryList.length() > 0 && dirList.length() > 0) {
+          dirList.append(",");
+        }
+        dirList.append(subDirectoryList);
+      } else {
+        bContainsFiles = true;
+      }
+    }
+
+    if (bContainsFiles) {
+      if (dirList.length() > 0) {
+        dirList.append(",");
+      }
+      dirList.append(fileStatus.getPath().toUri().getPath());
+    }
+    return dirList.toString();
   }
 
   /** Returns the input path established by a call to {@link #parseArguments(String[])}.
@@ -634,7 +663,6 @@ public abstract class AbstractJob extends Configured implements Tool {
       // you can't instantiate it
       //ClassUtils.instantiateAs(analyzerClass, Analyzer.class);
       AnalyzerUtils.createAnalyzer(analyzerClass);
-
     }
     return analyzerClass;
   }
