@@ -323,7 +323,7 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
     }
 
     FileSystem fs = FileSystem.get(jobConfig);
-    FileStatus fsFileStatus = HadoopUtil.listStatus(fs, inputPath)[0];
+    FileStatus fsFileStatus = fs.getFileStatus(inputPath);
 
     jobConfig.set("baseinputpath", inputPath.toString());
     String inputDirList = HadoopUtil.buildDirList(fs, fsFileStatus);
