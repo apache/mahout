@@ -39,7 +39,6 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
