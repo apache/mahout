@@ -31,10 +31,7 @@ import com.google.common.base.Charsets;
  * defines lines.
  * 
  * This class will uncompress files that end in .zip or .gz accordingly, too.
- * 
- * In case that you pass the class a stream of compressed bytes, simply pass the
- * original file name as well in the constructor and the system will decompress the bytes.
- * 
+ *
  */
 public final class FileLineIterable implements Iterable<String> {
 

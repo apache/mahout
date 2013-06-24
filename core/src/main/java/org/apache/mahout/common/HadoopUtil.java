@@ -340,4 +340,59 @@ public final class HadoopUtil {
       Closeables.close(in, true);
     }
   }
+
+  /**
+   * Builds a comma-separated list of input splits
+   */
+  public static String buildDirList(FileSystem fs, FileStatus fileStatus) throws IOException {
+    StringBuilder dirList = new StringBuilder();
+    boolean bContainsFiles = false;
+
+    for (FileStatus childFileStatus : fs.listStatus(fileStatus.getPath())) {
+      if (childFileStatus.isDir()) {
+        String subDirectoryList = buildDirList(fs, childFileStatus);
+        if (subDirectoryList.length() > 0 && dirList.length() > 0) {
+          dirList.append(",");
+        }
+        dirList.append(subDirectoryList);
+      } else {
+        bContainsFiles = true;
+      }
+    }
+
+    if (bContainsFiles) {
+      if (dirList.length() > 0) {
+        dirList.append(",");
+      }
+      dirList.append(fileStatus.getPath().toUri().getPath());
+    }
+    return dirList.toString();
+  }
+
+  /**
+   *
+   * @param conf  -  configuration
+   * @param filePath - Input File Path
+   * @return relative file Path
+   * @throws IOException
+   */
+  public static String calcRelativeFilePath(Configuration conf, Path filePath) throws IOException {
+    FileSystem fs = filePath.getFileSystem(conf);
+    FileStatus fst = fs.getFileStatus(filePath);
+    String currentPath = fst.getPath().toString().replaceFirst("file:", "");
+
+    String basePath = conf.get("baseinputpath");
+    if (!basePath.endsWith("/")) {
+      basePath += "/";
+    }
+    basePath = basePath.replaceFirst("file:", "");
+    String[] parts = currentPath.split(basePath);
+
+    if (parts.length == 2) {
+      return parts[1];
+    } else if (parts.length == 1) {
+      return parts[0];
+    }
+    return currentPath;
+  }
 }

@@ -17,6 +17,8 @@
 
 package org.apache.mahout.text;
 
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
@@ -24,8 +26,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.CombineFileSplit;
-
-import java.io.IOException;
+import org.apache.mahout.common.HadoopUtil;
 
 /**
  * Map class for SequenceFilesFromDirectory MR job
@@ -46,7 +47,7 @@ public class SequenceFilesFromDirectoryMapper extends Mapper<IntWritable, BytesW
 
     Configuration configuration = context.getConfiguration();
     Path filePath = ((CombineFileSplit) context.getInputSplit()).getPath(key.get());
-    String relativeFilePath = SequenceFilesFromMailArchivesMapper.calcRelativeFilePath(configuration, filePath);
+    String relativeFilePath = HadoopUtil.calcRelativeFilePath(configuration, filePath);
 
     String filename = this.keyPrefix.length() > 0 ?
       this.keyPrefix + Path.SEPARATOR + relativeFilePath :

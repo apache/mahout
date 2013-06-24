@@ -39,6 +39,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.utils.email.MailOptions;
 import org.apache.mahout.utils.email.MailProcessor;
@@ -322,10 +323,10 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
     }
 
     FileSystem fs = FileSystem.get(jobConfig);
-    FileStatus fsFileStatus = fs.getFileStatus(inputPath);
+    FileStatus fsFileStatus = HadoopUtil.listStatus(fs, inputPath)[0];
 
     jobConfig.set("baseinputpath", inputPath.toString());
-    String inputDirList = buildDirList(fs, fsFileStatus);
+    String inputDirList = HadoopUtil.buildDirList(fs, fsFileStatus);
     FileInputFormat.setInputPaths(job, inputDirList);
 
     long chunkSizeInBytes = chunkSize * 1024 * 1024;

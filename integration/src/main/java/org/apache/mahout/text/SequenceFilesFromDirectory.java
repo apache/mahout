@@ -133,8 +133,8 @@ public class SequenceFilesFromDirectory extends AbstractJob {
     Configuration jobConfig = job.getConfiguration();
     jobConfig.set("keyPrefix", keyPrefix);
     FileSystem fs = FileSystem.get(jobConfig);
-    FileStatus fsFileStatus = fs.getFileStatus(input);
-    String inputDirList = buildDirList(fs, fsFileStatus);
+    FileStatus fsFileStatus = HadoopUtil.listStatus(fs, input)[0];
+    String inputDirList = HadoopUtil.buildDirList(fs, fsFileStatus);
     jobConfig.set("baseinputpath", input.toString());
 
     long chunkSizeInBytes = chunkSizeInMB * 1024 * 1024;

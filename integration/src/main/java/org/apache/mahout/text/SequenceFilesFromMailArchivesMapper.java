@@ -34,11 +34,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.CombineFileSplit;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.utils.email.MailOptions;
 import org.apache.mahout.utils.email.MailProcessor;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
@@ -230,33 +229,12 @@ public class SequenceFilesFromMailArchivesMapper extends Mapper<IntWritable, Byt
     }
     contents.append(body);
   }
-  
-  public static String calcRelativeFilePath(Configuration conf, Path filePath) throws IOException {
-    FileSystem fs = filePath.getFileSystem(conf);
-    FileStatus fst = fs.getFileStatus(filePath);
-    String currentPath = fst.getPath().toString().replaceFirst("file:", "");
-
-    String basePath = conf.get("baseinputpath");
-    if (!basePath.endsWith("/")) {
-      basePath += "/";
-    }
-    basePath = basePath.replaceFirst("file:", "");
-    String[] parts = currentPath.split(basePath);
-
-    String hdfsStuffRemoved = currentPath; // default value
-    if (parts.length == 2) {
-      hdfsStuffRemoved = parts[1];
-    } else if (parts.length == 1) {
-      hdfsStuffRemoved = parts[0];
-    }
-    return hdfsStuffRemoved;
-  }
 
   public void map(IntWritable key, BytesWritable value, Context context)
     throws IOException, InterruptedException {
     Configuration configuration = context.getConfiguration();
     Path filePath = ((CombineFileSplit) context.getInputSplit()).getPath(key.get());
-    String relativeFilePath = calcRelativeFilePath(configuration, filePath);
+    String relativeFilePath = HadoopUtil.calcRelativeFilePath(configuration, filePath);
     ByteArrayInputStream is = new ByteArrayInputStream(value.getBytes());
     parseMboxLineByLine(relativeFilePath, is, context);
   }

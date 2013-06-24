@@ -31,7 +31,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.Text;
-import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterator;
 import org.apache.mahout.utils.MahoutTestCase;
@@ -90,7 +90,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     createRecursiveDirFilesFromArrays(conf, inputDirRecursive, DATA2);
 
     FileStatus fstInputPath = fs.getFileStatus(inputDirRecursive);
-    String dirs = AbstractJob.buildDirList(fs, fstInputPath);
+    String dirs = HadoopUtil.buildDirList(fs, fstInputPath);
 
     System.out.println("\n\n ----- recursive dirs: " + dirs);
     SequenceFilesFromDirectory.main(new String[]{
@@ -137,7 +137,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     createRecursiveDirFilesFromArrays(conf, inputDirRecur, DATA2);
 
     FileStatus fst_input_path = fs.getFileStatus(inputDirRecur);
-    String dirs = AbstractJob.buildDirList(fs, fst_input_path);
+    String dirs = HadoopUtil.buildDirList(fs, fst_input_path);
 
     logger.info("\n\n ---- recursive dirs: {}", dirs);
 
