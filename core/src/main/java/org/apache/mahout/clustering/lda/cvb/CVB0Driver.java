@@ -447,7 +447,7 @@ public class CVB0Driver extends AbstractJob {
     String jobName = String.format("Writing final document/topic inference from %s to %s", corpus, output);
     log.info("About to run: {}", jobName);
 
-    Job job = prepareJob(corpus, outputPath, SequenceFileInputFormat.class, CVB0DocInferenceMapper.class,
+    Job job = prepareJob(corpus, output, SequenceFileInputFormat.class, CVB0DocInferenceMapper.class,
         IntWritable.class, VectorWritable.class, SequenceFileOutputFormat.class, jobName);
 
     FileSystem fs = FileSystem.get(corpus.toUri(), conf);
