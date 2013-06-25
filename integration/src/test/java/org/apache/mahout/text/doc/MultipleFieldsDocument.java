@@ -18,6 +18,7 @@ package org.apache.mahout.text.doc;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.TextField;
 
 /**
  * Used for testing lucene2seq
@@ -48,11 +49,8 @@ public class MultipleFieldsDocument extends SingleFieldDocument {
   public Document asLuceneDocument() {
     Document document = super.asLuceneDocument();
 
-    Field field1 = new Field(FIELD1, this.field1, Field.Store.YES, Field.Index.ANALYZED);
-    Field field2 = new Field(FIELD2, this.field2, Field.Store.YES, Field.Index.ANALYZED);
-
-    document.add(field1);
-    document.add(field2);
+    document.add(new TextField(FIELD1, this.field1, Field.Store.YES));
+    document.add(new TextField(FIELD2, this.field2, Field.Store.YES));
 
     return document;
   }

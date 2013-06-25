@@ -33,16 +33,16 @@ import static java.util.Arrays.asList;
 
 public class LuceneSegmentInputSplitTest extends AbstractLuceneStorageTest {
 
-  private Configuration conf;
+  private Configuration configuration;
 
   @Before
   public void before() throws IOException {
-    conf = new Configuration();
+    configuration = new Configuration();
   }
 
   @After
   public void after() throws IOException {
-    HadoopUtil.delete(conf, indexPath1);
+    HadoopUtil.delete(configuration, indexPath1);
   }
 
   @Test
@@ -73,12 +73,12 @@ public class LuceneSegmentInputSplitTest extends AbstractLuceneStorageTest {
     }
 
     LuceneSegmentInputSplit inputSplit = new LuceneSegmentInputSplit(indexPath1, "_3", 1000);
-    inputSplit.getSegment(conf);
+    inputSplit.getSegment(configuration);
   }
 
   private void assertSegmentContainsOneDoc(String segmentName) throws IOException {
     LuceneSegmentInputSplit inputSplit = new LuceneSegmentInputSplit(indexPath1, segmentName, 1000);
-    SegmentInfoPerCommit segment = inputSplit.getSegment(conf);
+    SegmentInfoPerCommit segment = inputSplit.getSegment(configuration);
     SegmentReader segmentReader = new SegmentReader(segment, 1, IOContext.READ);//SegmentReader.get(true, segment, 1);
     assertEquals(segmentName, segment.info.name);
     assertEquals(1, segmentReader.numDocs());

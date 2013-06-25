@@ -29,16 +29,17 @@ public class LuceneStorageConfigurationTest {
   
   @Test
   public void testSerialization() throws Exception {
-    Configuration conf = new Configuration();
+    Configuration configuration = new Configuration();
     Path indexPath = new Path("indexPath");
     Path outputPath = new Path("outputPath");
-    LuceneStorageConfiguration luceneStorageConf = new LuceneStorageConfiguration(conf, asList(indexPath), outputPath, "id", asList("field"));
+    LuceneStorageConfiguration luceneStorageConfiguration =
+      new LuceneStorageConfiguration(configuration, asList(indexPath), outputPath, "id", asList("field"));
 
-    Configuration serializedConf = luceneStorageConf.serialize();
+    Configuration serializedConfiguration = luceneStorageConfiguration.serialize();
 
-    LuceneStorageConfiguration deserializedConf = new LuceneStorageConfiguration(serializedConf);
+    LuceneStorageConfiguration deSerializedConfiguration = new LuceneStorageConfiguration(serializedConfiguration);
 
-    assertEquals(luceneStorageConf, deserializedConf);
+    assertEquals(luceneStorageConfiguration, deSerializedConfiguration);
   }
   
   @Test(expected = IllegalArgumentException.class)

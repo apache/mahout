@@ -18,6 +18,7 @@ package org.apache.mahout.text.doc;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StringField;
 
 /**
  * Used for testing lucene2seq
@@ -34,9 +35,7 @@ public class UnstoredFieldsDocument extends SingleFieldDocument {
   public Document asLuceneDocument() {
     Document document = super.asLuceneDocument();
 
-    Field unStoredField = new Field(UNSTORED_FIELD, "", Field.Store.NO, Field.Index.NOT_ANALYZED);
-
-    document.add(unStoredField);
+    document.add(new StringField(UNSTORED_FIELD, "", Field.Store.NO));
 
     return document;
   }
