@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+  MAHOUT-833: Make conversion to sequence files map-reduce (Josh Patterson, smarthi)
+
   MAHOUT-1268: Wrong output directory for CVB (Mark Wicks via ssc)
 
   MAHOUT-1264: Performance optimizations in RecommenderJob (ssc)
