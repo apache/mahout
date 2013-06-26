@@ -24,8 +24,11 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
@@ -270,9 +273,9 @@ public final class HadoopUtil {
 
   /**
    * Return the first cached file in the list, else null if thre are no cached files.
-   * @param conf
-   * @return
-   * @throws IOException
+   * @param conf - MapReduce Configuration
+   * @return Path of Cached file
+   * @throws IOException - IO Exception
    */
   public static Path getSingleCachedFile(Configuration conf) throws IOException {
     return getCachedFiles(conf)[0];
@@ -280,9 +283,9 @@ public final class HadoopUtil {
 
   /**
    * Retrieves paths to cached files.
-   * @param conf
-   * @return
-   * @throws IOException
+   * @param conf - MapReduce Configuration
+   * @return Path[] of Cached Files
+   * @throws IOException - IO Exception
    * @throws IllegalStateException if no cache files are found
    */
   public static Path[] getCachedFiles(Configuration conf) throws IOException {
@@ -316,13 +319,13 @@ public final class HadoopUtil {
     return cacheFiles;
   }
 
-  public static void setSerializations(Configuration conf) {
-    conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
+  public static void setSerializations(Configuration configuration) {
+    configuration.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
         + "org.apache.hadoop.io.serializer.WritableSerialization");
   }
 
-  public static void writeInt(int value, Path path, Configuration conf) throws IOException {
-    FileSystem fs = FileSystem.get(path.toUri(), conf);
+  public static void writeInt(int value, Path path, Configuration configuration) throws IOException {
+    FileSystem fs = FileSystem.get(path.toUri(), configuration);
     FSDataOutputStream out = fs.create(path);
     try {
       out.writeInt(value);
@@ -331,8 +334,8 @@ public final class HadoopUtil {
     }
   }
 
-  public static int readInt(Path path, Configuration conf) throws IOException {
-    FileSystem fs = FileSystem.get(path.toUri(), conf);
+  public static int readInt(Path path, Configuration configuration) throws IOException {
+    FileSystem fs = FileSystem.get(path.toUri(), configuration);
     FSDataInputStream in = fs.open(path);
     try {
       return in.readInt();
@@ -343,45 +346,42 @@ public final class HadoopUtil {
 
   /**
    * Builds a comma-separated list of input splits
+   * @param fs - File System
+   * @param fileStatus - File Status
+   * @return list of directories as a comma-separated String
+   * @throws IOException - IO Exception
    */
   public static String buildDirList(FileSystem fs, FileStatus fileStatus) throws IOException {
-    StringBuilder dirList = new StringBuilder();
     boolean bContainsFiles = false;
-
+    List<String> directoriesList = Lists.newArrayList();
     for (FileStatus childFileStatus : fs.listStatus(fileStatus.getPath())) {
       if (childFileStatus.isDir()) {
         String subDirectoryList = buildDirList(fs, childFileStatus);
-        if (subDirectoryList.length() > 0 && dirList.length() > 0) {
-          dirList.append(",");
-        }
-        dirList.append(subDirectoryList);
+        directoriesList.add(subDirectoryList);
       } else {
         bContainsFiles = true;
       }
     }
 
     if (bContainsFiles) {
-      if (dirList.length() > 0) {
-        dirList.append(",");
-      }
-      dirList.append(fileStatus.getPath().toUri().getPath());
+      directoriesList.add(fileStatus.getPath().toUri().getPath());
     }
-    return dirList.toString();
+    return Joiner.on(',').skipNulls().join(directoriesList.iterator());
   }
 
   /**
    *
-   * @param conf  -  configuration
+   * @param configuration  -  configuration
    * @param filePath - Input File Path
    * @return relative file Path
-   * @throws IOException
+   * @throws IOException - IO Exception
    */
-  public static String calcRelativeFilePath(Configuration conf, Path filePath) throws IOException {
-    FileSystem fs = filePath.getFileSystem(conf);
+  public static String calcRelativeFilePath(Configuration configuration, Path filePath) throws IOException {
+    FileSystem fs = filePath.getFileSystem(configuration);
     FileStatus fst = fs.getFileStatus(filePath);
     String currentPath = fst.getPath().toString().replaceFirst("file:", "");
 
-    String basePath = conf.get("baseinputpath");
+    String basePath = configuration.get("baseinputpath");
     if (!basePath.endsWith("/")) {
       basePath += "/";
     }
