@@ -38,8 +38,6 @@ import org.junit.Test;
  */
 public final class SequenceFilesFromMailArchivesTest extends MahoutTestCase {
 
-  // TODO: Negative tests
-
   private File inputDir;
 
   /**

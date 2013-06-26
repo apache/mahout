@@ -17,120 +17,131 @@
 
 package org.apache.mahout.text;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.CombineFileSplit;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.utils.email.MailOptions;
 import org.apache.mahout.utils.email.MailProcessor;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.BytesWritable;
-import org.apache.hadoop.io.Text;
+
+import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.apache.mahout.text.SequenceFilesFromMailArchives.BODY_OPTION;
+import static org.apache.mahout.text.SequenceFilesFromMailArchives.BODY_SEPARATOR_OPTION;
+import static org.apache.mahout.text.SequenceFilesFromMailArchives.CHARSET_OPTION;
+import static org.apache.mahout.text.SequenceFilesFromMailArchives.CHUNK_SIZE_OPTION;
+import static org.apache.mahout.text.SequenceFilesFromMailArchives.FROM_OPTION;
+import static org.apache.mahout.text.SequenceFilesFromMailArchives.KEY_PREFIX_OPTION;
+import static org.apache.mahout.text.SequenceFilesFromMailArchives.QUOTED_REGEX_OPTION;
+import static org.apache.mahout.text.SequenceFilesFromMailArchives.REFERENCES_OPTION;
+import static org.apache.mahout.text.SequenceFilesFromMailArchives.SEPARATOR_OPTION;
+import static org.apache.mahout.text.SequenceFilesFromMailArchives.STRIP_QUOTED_OPTION;
+import static org.apache.mahout.text.SequenceFilesFromMailArchives.SUBJECT_OPTION;
+import static org.apache.mahout.text.SequenceFilesFromMailArchives.TO_OPTION;
 
 /**
- * 
  * Map Class for the SequenceFilesFromMailArchives job
- * 
  */
 public class SequenceFilesFromMailArchivesMapper extends Mapper<IntWritable, BytesWritable, Text, Text> {
-  
+
   private Text outKey = new Text();
   private Text outValue = new Text();
-  
+
   private static final Pattern MESSAGE_START = Pattern.compile(
-      "^From \\S+@\\S.*\\d{4}$", Pattern.CASE_INSENSITIVE);
+    "^From \\S+@\\S.*\\d{4}$", Pattern.CASE_INSENSITIVE);
   private static final Pattern MESSAGE_ID_PREFIX = Pattern.compile(
-      "^message-id: <(.*)>$", Pattern.CASE_INSENSITIVE);
+    "^message-id: <(.*)>$", Pattern.CASE_INSENSITIVE);
 
   private MailOptions options;
-  
+
   @Override
   public void setup(Context context) throws IOException, InterruptedException {
 
-    Configuration conf = context.getConfiguration();
+    Configuration configuration = context.getConfiguration();
+
     // absorb all of the options into the MailOptions object
-    
     this.options = new MailOptions();
 
-    options.setPrefix(conf.get("prefix", ""));
-    
-    if (!conf.get("chunkSize", "").equals("")) {
-      options.setChunkSize(conf.getInt("chunkSize", 64));
+    options.setPrefix(configuration.get(KEY_PREFIX_OPTION[1], ""));
+
+    if (!configuration.get(CHUNK_SIZE_OPTION[0], "").equals("")) {
+      options.setChunkSize(configuration.getInt(CHUNK_SIZE_OPTION[0], 64));
     }
-    
-    if (!conf.get("charset", "").equals("")) {
-      Charset charset = Charset.forName(conf.get("charset", "UTF-8"));
+
+    if (!configuration.get(CHARSET_OPTION[0], "").equals("")) {
+      Charset charset = Charset.forName(configuration.get(CHARSET_OPTION[0], "UTF-8"));
       options.setCharset(charset);
     } else {
       Charset charset = Charset.forName("UTF-8");
       options.setCharset(charset);
     }
-    
+
     List<Pattern> patterns = Lists.newArrayListWithCapacity(5);
     // patternOrder is used downstream so that we can know what order the
     // text is in instead
     // of encoding it in the string, which
     // would require more processing later to remove it pre feature
     // selection.
-    Map<String,Integer> patternOrder = Maps.newHashMap();
+    Map<String, Integer> patternOrder = Maps.newHashMap();
     int order = 0;
-    
-    if (!conf.get("fromOpt", "").equals("")) {
+    if (!configuration.get(FROM_OPTION[1], "").equals("")) {
       patterns.add(MailProcessor.FROM_PREFIX);
       patternOrder.put(MailOptions.FROM, order++);
     }
 
-    if (!conf.get("toOpt", "").equals("")) {
+    if (!configuration.get(TO_OPTION[1], "").equals("")) {
       patterns.add(MailProcessor.TO_PREFIX);
       patternOrder.put(MailOptions.TO, order++);
     }
 
-    if (!conf.get("refsOpt", "").equals("")) {
+    if (!configuration.get(REFERENCES_OPTION[1], "").equals("")) {
       patterns.add(MailProcessor.REFS_PREFIX);
       patternOrder.put(MailOptions.REFS, order++);
     }
-    
-    if (!conf.get("subjectOpt", "").equals("")) {
+
+    if (!configuration.get(SUBJECT_OPTION[1], "").equals("")) {
       patterns.add(MailProcessor.SUBJECT_PREFIX);
-      patternOrder.put(MailOptions.SUBJECT, order++);
+      patternOrder.put(MailOptions.SUBJECT, order += 1);
     }
-    
-    options.setStripQuotedText(conf.getBoolean("quotedOpt", false));
-    
+
+    options.setStripQuotedText(configuration.getBoolean(STRIP_QUOTED_OPTION[1], false));
+
     options.setPatternsToMatch(patterns.toArray(new Pattern[patterns.size()]));
     options.setPatternOrder(patternOrder);
-    
-    options.setIncludeBody(conf.getBoolean("bodyOpt", false));
-    
+
+    options.setIncludeBody(configuration.getBoolean(BODY_OPTION[1], false));
+
     options.setSeparator("\n");
-    if (!conf.get("separatorOpt", "").equals("")) {
-      options.setSeparator(conf.get("separatorOpt", ""));
+    if (!configuration.get(SEPARATOR_OPTION[1], "").equals("")) {
+      options.setSeparator(configuration.get(SEPARATOR_OPTION[1], ""));
     }
-    if (!conf.get("bodySeparatorOpt", "").equals("")) {
-      options.setBodySeparator(conf.get("bodySeparatorOpt", ""));
+    if (!configuration.get(BODY_SEPARATOR_OPTION[1], "").equals("")) {
+      options.setBodySeparator(configuration.get(BODY_SEPARATOR_OPTION[1], ""));
     }
-    if (!conf.get("quotedRegexOpt", "").equals("")) {
-      options.setQuotedTextPattern(Pattern.compile(conf.get("quotedRegexOpt", "")));
+    if (!configuration.get(QUOTED_REGEX_OPTION[1], "").equals("")) {
+      options.setQuotedTextPattern(Pattern.compile(configuration.get(QUOTED_REGEX_OPTION[1], "")));
     }
 
   }
-  
-  public long parseMboxLineByLine(String filename, InputStream mboxInputStream, Context context)
+
+  public long parseMailboxLineByLine(String filename, InputStream mailBoxInputStream, Context context)
     throws IOException, InterruptedException {
     long messageCount = 0;
     try {
@@ -139,19 +150,19 @@ public class SequenceFilesFromMailArchivesMapper extends Mapper<IntWritable, Byt
       Matcher messageIdMatcher = MESSAGE_ID_PREFIX.matcher("");
       Matcher messageBoundaryMatcher = MESSAGE_START.matcher("");
       String[] patternResults = new String[options.getPatternsToMatch().length];
-      Matcher[] matchers = new Matcher[options.getPatternsToMatch().length];
-      for (int i = 0; i < matchers.length; i++) {
-        matchers[i] = options.getPatternsToMatch()[i].matcher("");
+      Matcher[] matches = new Matcher[options.getPatternsToMatch().length];
+      for (int i = 0; i < matches.length; i++) {
+        matches[i] = options.getPatternsToMatch()[i].matcher("");
       }
-      
+
       String messageId = null;
       boolean inBody = false;
       Pattern quotedTextPattern = options.getQuotedTextPattern();
-      
-      for (String nextLine : new FileLineIterable(mboxInputStream, options.getCharset(), false, filename)) {
+
+      for (String nextLine : new FileLineIterable(mailBoxInputStream, options.getCharset(), false, filename)) {
         if (!options.isStripQuotedText() || !quotedTextPattern.matcher(nextLine).find()) {
-          for (int i = 0; i < matchers.length; i++) {
-            Matcher matcher = matchers[i];
+          for (int i = 0; i < matches.length; i++) {
+            Matcher matcher = matches[i];
             matcher.reset(nextLine);
             if (matcher.matches()) {
               patternResults[i] = matcher.group(1);
@@ -202,7 +213,6 @@ public class SequenceFilesFromMailArchivesMapper extends Mapper<IntWritable, Byt
       if (messageId != null) {
         String key = generateKey(filename, options.getPrefix(), messageId);
         writeContent(options.getSeparator(), contents, body, patternResults);
-        
         this.outKey.set(key);
         this.outValue.set(contents.toString());
         context.write(this.outKey, this.outValue);
@@ -211,23 +221,16 @@ public class SequenceFilesFromMailArchivesMapper extends Mapper<IntWritable, Byt
     } catch (FileNotFoundException ignored) {
 
     }
-    // TODO: report exceptions and continue;
     return messageCount;
   }
-  
+
   protected static String generateKey(String mboxFilename, String prefix, String messageId) {
-    return prefix + File.separator + mboxFilename + File.separator + messageId;
+    return Joiner.on(Path.SEPARATOR).join(Lists.newArrayList(prefix, mboxFilename, messageId).iterator());
   }
-  
+
   private static void writeContent(String separator, StringBuilder contents, CharSequence body, String[] matches) {
-    for (String match : matches) {
-      if (match != null) {
-        contents.append(match).append(separator);
-      } else {
-        contents.append("").append(separator);
-      }
-    }
-    contents.append(body);
+    String matchesString = Joiner.on(separator).useForNull("").join(Arrays.asList(matches).iterator());
+    contents.append(matchesString).append(separator).append(body);
   }
 
   public void map(IntWritable key, BytesWritable value, Context context)
@@ -236,6 +239,6 @@ public class SequenceFilesFromMailArchivesMapper extends Mapper<IntWritable, Byt
     Path filePath = ((CombineFileSplit) context.getInputSplit()).getPath(key.get());
     String relativeFilePath = HadoopUtil.calcRelativeFilePath(configuration, filePath);
     ByteArrayInputStream is = new ByteArrayInputStream(value.getBytes());
-    parseMboxLineByLine(relativeFilePath, is, context);
+    parseMailboxLineByLine(relativeFilePath, is, context);
   }
 }

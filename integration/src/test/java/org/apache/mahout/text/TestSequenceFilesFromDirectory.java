@@ -58,9 +58,9 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
   @Test
   public void testSequenceFileFromDirectoryBasic() throws Exception {
     // parameters
-    Configuration conf = new Configuration();
+    Configuration configuration = new Configuration();
 
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(configuration);
 
     // create
     Path tmpDir = this.getTestTempDirPath();
@@ -74,7 +74,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     fs.mkdirs(inputDirRecursive);
 
     // prepare input files
-    createFilesFromArrays(conf, inputDir, DATA1);
+    createFilesFromArrays(configuration, inputDir, DATA1);
 
     SequenceFilesFromDirectory.main(new String[]{
       "--input", inputDir.toString(),
@@ -85,9 +85,9 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
       "--method", "sequential"});
 
     // check output chunk files
-    checkChunkFiles(conf, outputDir, DATA1, "UID");
+    checkChunkFiles(configuration, outputDir, DATA1, "UID");
 
-    createRecursiveDirFilesFromArrays(conf, inputDirRecursive, DATA2);
+    createRecursiveDirFilesFromArrays(configuration, inputDirRecursive, DATA2);
 
     FileStatus fstInputPath = fs.getFileStatus(inputDirRecursive);
     String dirs = HadoopUtil.buildDirList(fs, fstInputPath);
@@ -101,7 +101,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
       "--keyPrefix", "UID",
       "--method", "sequential"});
 
-    checkRecursiveChunkFiles(conf, outputDirRecursive, DATA2, "UID");
+    checkRecursiveChunkFiles(configuration, outputDirRecursive, DATA2, "UID");
   }
 
   @Test
@@ -166,8 +166,9 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     }
   }
 
-  private static void createRecursiveDirFilesFromArrays(Configuration conf, Path inputDir, String[][] data) throws IOException {
-    FileSystem fs = FileSystem.get(conf);
+  private static void createRecursiveDirFilesFromArrays(Configuration configuration, Path inputDir,
+                                                        String[][] data) throws IOException {
+    FileSystem fs = FileSystem.get(configuration);
 
     logger.info("creativeRecursiveDirFilesFromArrays > based on: {}", inputDir.toString());
     Path curPath;
@@ -193,11 +194,11 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     }
   }
 
-  private static void checkChunkFiles(Configuration conf,
+  private static void checkChunkFiles(Configuration configuration,
                                       Path outputDir,
                                       String[][] data,
                                       String prefix) throws IOException {
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(configuration);
 
     // output exists?
     FileStatus[] fileStatuses = fs.listStatus(outputDir, new ExcludeDotFiles());
@@ -210,7 +211,8 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     }
 
     // read a chunk to check content
-    SequenceFileIterator<Text, Text> iterator = new SequenceFileIterator<Text, Text>(fileStatuses[0].getPath(), true, conf);
+    SequenceFileIterator<Text, Text> iterator =
+      new SequenceFileIterator<Text, Text>(fileStatuses[0].getPath(), true, configuration);
     try {
       while (iterator.hasNext()) {
         Pair<Text, Text> record = iterator.next();
@@ -233,11 +235,11 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     }
   }
 
-  private static void checkRecursiveChunkFiles(Configuration conf,
+  private static void checkRecursiveChunkFiles(Configuration configuration,
                                                Path outputDir,
                                                String[][] data,
                                                String prefix) throws IOException {
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(configuration);
 
     System.out.println(" ----------- check_Recursive_ChunkFiles ------------");
 
@@ -255,7 +257,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     }
 
     // read a chunk to check content
-    SequenceFileIterator<Text, Text> iterator = new SequenceFileIterator<Text, Text>(fileStatuses[0].getPath(), true, conf);
+    SequenceFileIterator<Text, Text> iterator = new SequenceFileIterator<Text, Text>(fileStatuses[0].getPath(), true, configuration);
     try {
       while (iterator.hasNext()) {
         Pair<Text, Text> record = iterator.next();
@@ -302,9 +304,9 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     }
   }
 
-  private static void checkMRResultFilesRecursive(Configuration conf, Path outputDir,
+  private static void checkMRResultFilesRecursive(Configuration configuration, Path outputDir,
                                                   String[][] data, String prefix) throws IOException {
-    FileSystem fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(configuration);
 
     // output exists?
     FileStatus[] fileStatuses = fs.listStatus(outputDir.suffix("/part-m-00000"), new ExcludeDotFiles());
@@ -320,7 +322,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
 
     // read a chunk to check content
     SequenceFileIterator<Text, Text> iterator = new SequenceFileIterator<Text, Text>(
-      fileStatuses[0].getPath(), true, conf);
+      fileStatuses[0].getPath(), true, configuration);
     try {
       while (iterator.hasNext()) {
         Pair<Text, Text> record = iterator.next();

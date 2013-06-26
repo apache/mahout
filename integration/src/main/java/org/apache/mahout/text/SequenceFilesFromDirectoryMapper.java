@@ -28,6 +28,8 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.CombineFileSplit;
 import org.apache.mahout.common.HadoopUtil;
 
+import static org.apache.mahout.text.SequenceFilesFromDirectory.KEY_PREFIX_OPTION;
+
 /**
  * Map class for SequenceFilesFromDirectory MR job
  */
@@ -39,7 +41,7 @@ public class SequenceFilesFromDirectoryMapper extends Mapper<IntWritable, BytesW
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    this.keyPrefix = context.getConfiguration().get("keyPrefix", "");
+    this.keyPrefix = context.getConfiguration().get(KEY_PREFIX_OPTION[0], "");
   }
 
   public void map(IntWritable key, BytesWritable value, Context context)

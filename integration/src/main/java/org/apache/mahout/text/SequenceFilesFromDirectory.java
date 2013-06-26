@@ -52,8 +52,12 @@ public class SequenceFilesFromDirectory extends AbstractJob {
 
   private static final String[] CHUNK_SIZE_OPTION = {"chunkSize", "chunk"};
   private static final String[] FILE_FILTER_CLASS_OPTION = {"fileFilterClass", "filter"};
-  private static final String[] KEY_PREFIX_OPTION = {"keyPrefix", "prefix"};
   private static final String[] CHARSET_OPTION = {"charset", "c"};
+
+  private static final int MAX_JOB_SPLIT_LOCATIONS = 1000000;
+
+  public static final String[] KEY_PREFIX_OPTION = {"keyPrefix", "prefix"};
+  public static final String BASE_INPUT_PATH = "baseinputpath";
 
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new SequenceFilesFromDirectory(), args);
@@ -131,16 +135,16 @@ public class SequenceFilesFromDirectory extends AbstractJob {
       SequenceFileOutputFormat.class, "SequenceFilesFromDirectory");
 
     Configuration jobConfig = job.getConfiguration();
-    jobConfig.set("keyPrefix", keyPrefix);
+    jobConfig.set(KEY_PREFIX_OPTION[0], keyPrefix);
     FileSystem fs = FileSystem.get(jobConfig);
     FileStatus fsFileStatus = fs.getFileStatus(input);
     String inputDirList = HadoopUtil.buildDirList(fs, fsFileStatus);
-    jobConfig.set("baseinputpath", input.toString());
+    jobConfig.set(BASE_INPUT_PATH, input.toString());
 
     long chunkSizeInBytes = chunkSizeInMB * 1024 * 1024;
 
     // set the max split locations, otherwise we get nasty debug stuff
-    jobConfig.set("mapreduce.job.max.split.locations", "1000000");
+    jobConfig.set("mapreduce.job.max.split.locations", String.valueOf(MAX_JOB_SPLIT_LOCATIONS));
 
     FileInputFormat.setInputPaths(job, inputDirList);
     // need to set this to a multiple of the block size, or no split happens
