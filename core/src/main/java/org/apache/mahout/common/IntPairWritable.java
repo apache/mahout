@@ -218,7 +218,7 @@ public final class IntPairWritable extends BinaryComparable
     
   }
   
-  /** A wrapper class that associates pairs with frequency (Occurences) */
+  /** A wrapper class that associates pairs with frequency (Occurrences) */
   public static class Frequency implements Comparable<Frequency>, Serializable {
     
     private final IntPairWritable pair;
