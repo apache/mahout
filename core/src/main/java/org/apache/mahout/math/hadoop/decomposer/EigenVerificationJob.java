@@ -230,15 +230,9 @@ public class EigenVerificationJob extends AbstractJob {
       @Override
       public int compare(Map.Entry<MatrixSlice,EigenStatus> e1, Map.Entry<MatrixSlice,EigenStatus> e2) {
         // sort eigens on eigenvalues in descending order
-        double eg1 = e1.getValue().getEigenValue();
-        double eg2 = e2.getValue().getEigenValue();
-        if (eg1 < eg2) {
-          return 1;
-        }
-        if (eg1 > eg2) {
-          return -1;
-        }
-        return 0;
+        Double eg1 = e1.getValue().getEigenValue();
+        Double eg2 = e2.getValue().getEigenValue();
+        return eg1.compareTo(eg2);
       }
     });
 

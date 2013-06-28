@@ -82,27 +82,26 @@ public final class EigenSeedGenerator {
       Map<Integer,ClusterWritable> chosenClusters = Maps.newHashMapWithExpectedSize(k);
 
       for (FileStatus fileStatus : inputFiles) {
-        if (fileStatus.isDir()) {
-          continue;
-        }
-        for (Pair<Writable,VectorWritable> record : new SequenceFileIterable<Writable,VectorWritable>(
-            fileStatus.getPath(), true, conf)) {
-          Writable key = record.getFirst();
-          VectorWritable value = record.getSecond();
+        if (!fileStatus.isDir()) {
+          for (Pair<Writable,VectorWritable> record : new SequenceFileIterable<Writable,VectorWritable>(
+              fileStatus.getPath(), true, conf)) {
+            Writable key = record.getFirst();
+            VectorWritable value = record.getSecond();
 
-          for (Vector.Element e : value.get().nonZeroes()) {
-            int index = e.index();
-            double v = Math.abs(e.get());
+            for (Vector.Element e : value.get().nonZeroes()) {
+              int index = e.index();
+              double v = Math.abs(e.get());
 
-            if (!maxEigens.containsKey(index) || v > maxEigens.get(index)) {
-              maxEigens.put(index, v);
-              Text newText = new Text(key.toString());
-              chosenTexts.put(index, newText);
-              Kluster newCluster = new Kluster(value.get(), index, measure);
-              newCluster.observe(value.get(), 1);
-              ClusterWritable clusterWritable = new ClusterWritable();
-              clusterWritable.setValue(newCluster);
-              chosenClusters.put(index, clusterWritable);
+              if (!maxEigens.containsKey(index) || v > maxEigens.get(index)) {
+                maxEigens.put(index, v);
+                Text newText = new Text(key.toString());
+                chosenTexts.put(index, newText);
+                Kluster newCluster = new Kluster(value.get(), index, measure);
+                newCluster.observe(value.get(), 1);
+                ClusterWritable clusterWritable = new ClusterWritable();
+                clusterWritable.setValue(newCluster);
+                chosenClusters.put(index, clusterWritable);
+              }
             }
           }
         }
