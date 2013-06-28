@@ -18,7 +18,6 @@
 package org.apache.mahout.clustering.kmeans;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
@@ -90,10 +89,8 @@ public final class EigenSeedGenerator {
             fileStatus.getPath(), true, conf)) {
           Writable key = record.getFirst();
           VectorWritable value = record.getSecond();
-          Iterator<Vector.Element> nonZeroElements = value.get().nonZeroes().iterator();
 
-          while (nonZeroElements.hasNext()) {
-            Vector.Element e = nonZeroElements.next();
+          for (Vector.Element e : value.get().nonZeroes()) {
             int index = e.index();
             double v = Math.abs(e.get());
 
@@ -112,9 +109,7 @@ public final class EigenSeedGenerator {
       }
 
       try {
-        Iterator<Integer> iter = maxEigens.keySet().iterator();
-        while (iter.hasNext()) {
-          int key = iter.next();
+        for (Integer key : maxEigens.keySet()) {
           writer.append(chosenTexts.get(key), chosenClusters.get(key));
         }
         log.info("EigenSeedGenerator:: Wrote {} Klusters to {}", chosenTexts.size(), outFile);

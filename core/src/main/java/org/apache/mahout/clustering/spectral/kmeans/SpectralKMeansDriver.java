@@ -255,7 +255,7 @@ public class SpectralKMeansDriver extends AbstractJob {
       Text mappingValue = new Text();
       IntWritable mappingIndex = new IntWritable();
       while (reader.next(mappingIndex, mappingValue)) {
-        String s = new String(mappingValue.toString());
+        String s = mappingValue.toString();
         mapping.add(s);
       }
       HadoopUtil.delete(conf, mappingPath);

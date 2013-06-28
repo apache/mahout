@@ -65,7 +65,6 @@ public final class TestEigenSeedGenerator extends MahoutTestCase {
     fs = FileSystem.get(conf);
   }
 
-  /** Story: test eigen seed generation generates 3 clusters with proper ids and data */
   @Test
   public void testEigenSeedGenerator() throws Exception {
     List<VectorWritable> points = getPoints();
