@@ -103,6 +103,7 @@
     <mpmd.version>3.0.1</mpmd.version>
     <mcheckstyle.version>2.10</mcheckstyle.version>
     <mfindbugs.version>2.5.2</mfindbugs.version>
+    <mjavadoc.version>2.9.1</mjavadoc.version>
     <hadoop.version>1.1.2</hadoop.version>
     <lucene.version>4.3.0</lucene.version>
   </properties>
@@ -481,7 +482,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>2.9</version>
+          <version>${mjavadoc.version}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -766,7 +767,7 @@
             <inherited>true</inherited>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.9</version>
+            <version>${mjavadoc.version}</version>
             <executions>
               <execution>
                 <id>attach-javadocs</id>
@@ -947,7 +948,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.9</version>
+        <version>${mjavadoc.version}</version>
       </plugin>
       <!-- code duplication - copy and paste detection -->
       <plugin>
@@ -1010,11 +1011,6 @@
             </reports>
           </reportSet>
         </reportSets>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.9</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
