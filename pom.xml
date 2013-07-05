@@ -618,6 +618,7 @@
               <!-- classpath -->
               <ruleset>../buildtools/src/main/resources/mahout-pmd-ruleset.xml</ruleset>
             </rulesets>
+            <!-- targetJdk is explicitly set until MPMD-170 is resolved -->
             <targetJdk>${maven.compiler.target}</targetJdk>
             <linkXRef>false</linkXRef>
             <includeTests>true</includeTests>
