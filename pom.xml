@@ -100,6 +100,7 @@
     <maven.clover.multiproject>true</maven.clover.multiproject>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <mpmd.version>3.0.1</mpmd.version>
+    <mcheckstyle.version>2.10</mcheckstyle.version>
     <hadoop.version>1.1.2</hadoop.version>
     <lucene.version>4.3.0</lucene.version>
   </properties>
@@ -578,7 +579,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
-          <version>2.10</version>
+          <version>${mcheckstyle.version}</version>
           <dependencies>
             <dependency>
               <groupId>org.apache.mahout</groupId>
@@ -815,7 +816,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-checkstyle-plugin</artifactId>
-            <version>2.10</version>
+            <version>${mcheckstyle.version}</version>
           </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -877,7 +878,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>2.10</version>
+        <version>${mcheckstyle.version}</version>
         <configuration>
           <configLocation>${project.build.directory}/../../buildtools/src/main/resources/mahout-checkstyle.xml</configLocation>
           <consoleOutput>true</consoleOutput>
