@@ -106,7 +106,7 @@
     <system>Jira</system>
     <url>https://issues.apache.org/jira/browse/MAHOUT</url>
   </issueManagement>
-  
+
   <repositories>
     <repository>
       <id>apache.snapshots</id>
@@ -117,16 +117,16 @@
       </releases>
     </repository>
   </repositories>
-  
+
   <prerequisites>
     <maven>3.0</maven>
   </prerequisites>
-  
+
   <dependencyManagement>
     <dependencies>
-    
+
       <!-- our modules -->
-      
+
       <dependency>
         <artifactId>mahout-core</artifactId>
         <groupId>${project.groupId}</groupId>
@@ -139,7 +139,7 @@
         <type>test-jar</type>
         <scope>test</scope>
       </dependency>
-      
+
       <dependency>
         <artifactId>mahout-math</artifactId>
         <groupId>${project.groupId}</groupId>
@@ -151,7 +151,7 @@
         <artifactId>mahout-math</artifactId>
         <type>test-jar</type>
       </dependency>
-      
+
       <dependency>
         <artifactId>mahout-integration</artifactId>
         <groupId>${project.groupId}</groupId>
@@ -377,19 +377,19 @@
         <artifactId>commons-io</artifactId>
         <version>2.4</version>
       </dependency>
-      
+
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
         <version>3.1</version>
       </dependency>
-      
+
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-math3</artifactId>
         <version>3.2</version>
       </dependency>
-      
+
       <dependency>
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream</artifactId>
@@ -401,7 +401,7 @@
         <artifactId>guava</artifactId>
         <version>14.0.1</version>
       </dependency>
-      
+
       <dependency>
         <groupId>org.apache.mahout.commons</groupId>
         <artifactId>commons-cli</artifactId>
@@ -451,8 +451,8 @@
                   </pluginExecutionFilter>
                   <action>
                     <execute>
-                    	<runOnIncremental>false</runOnIncremental>
-                    	<runOnConfiguration>true</runOnConfiguration>
+                      <runOnIncremental>false</runOnIncremental>
+                      <runOnConfiguration>true</runOnConfiguration>
                     </execute>
                   </action>
                 </pluginExecution>
@@ -568,8 +568,8 @@
           <version>3.1</version>
           <configuration>
             <encoding>UTF-8</encoding>
-	    <source>${sourceJavaVersion}</source>
-	    <target>${targetJavaVersion}</target>
+            <source>${sourceJavaVersion}</source>
+            <target>${targetJavaVersion}</target>
             <optimize>true</optimize>
           </configuration>
         </plugin>
@@ -621,21 +621,21 @@
               <ruleset>../buildtools/src/main/resources/mahout-pmd-ruleset.xml</ruleset>
             </rulesets>
             <sourceEncoding>UTF-8</sourceEncoding>
-	    <targetJdk>${targetJavaVersion}</targetJdk>
+            <targetJdk>${targetJavaVersion}</targetJdk>
             <linkXRef>false</linkXRef>
             <includeTests>true</includeTests>
             <verbose>true</verbose>
           </configuration>
           <!--
-                  <executions>
-                    <execution>
-                      <id>validate</id>
-                      <phase>validate</phase>
-                      <goals>
-                        <goal>check</goal>
-                      </goals>
-                    </execution>
-                  </executions>
+          <executions>
+            <execution>
+              <id>validate</id>
+              <phase>validate</phase>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
           -->
         </plugin>
         <plugin>
@@ -914,7 +914,7 @@
             <ruleset>../buildtools/src/main/resources/mahout-pmd-ruleset.xml</ruleset>
           </rulesets>
           <sourceEncoding>UTF-8</sourceEncoding>
-	  <targetJdk>${targetJavaVersion}</targetJdk>
+          <targetJdk>${targetJavaVersion}</targetJdk>
           <linkXRef>false</linkXRef>
           <includeTests>true</includeTests>
           <verbose>true</verbose>
