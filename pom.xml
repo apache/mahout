@@ -101,6 +101,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <mpmd.version>3.0.1</mpmd.version>
     <mcheckstyle.version>2.10</mcheckstyle.version>
+    <mfindbugs.version>2.5.2</mfindbugs.version>
     <hadoop.version>1.1.2</hadoop.version>
     <lucene.version>4.3.0</lucene.version>
   </properties>
@@ -578,68 +579,6 @@
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-checkstyle-plugin</artifactId>
-          <version>${mcheckstyle.version}</version>
-          <dependencies>
-            <dependency>
-              <groupId>org.apache.mahout</groupId>
-              <artifactId>mahout-buildtools</artifactId>
-              <version>${project.version}</version>
-            </dependency>
-          </dependencies>
-          <executions>
-            <execution>
-              <id>validate</id>
-              <phase>validate</phase>
-              <configuration>
-                <configLocation>../buildtools/src/main/resources/mahout-checkstyle.xml</configLocation>
-                <consoleOutput>true</consoleOutput>
-                <failsOnError>false</failsOnError>
-                <linkXRef>false</linkXRef>
-                <sourceDirectory>${basedir}/src</sourceDirectory>
-              </configuration>
-              <goals>
-                <goal>checkstyle</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-pmd-plugin</artifactId>
-          <version>${mpmd.version}</version>
-          <dependencies>
-            <dependency>
-              <groupId>org.apache.mahout</groupId>
-              <artifactId>mahout-buildtools</artifactId>
-              <version>${project.version}</version>
-            </dependency>
-          </dependencies>
-          <configuration>
-            <rulesets>
-              <!-- classpath -->
-              <ruleset>../buildtools/src/main/resources/mahout-pmd-ruleset.xml</ruleset>
-            </rulesets>
-            <!-- targetJdk is explicitly set until MPMD-170 is resolved -->
-            <targetJdk>${maven.compiler.target}</targetJdk>
-            <linkXRef>false</linkXRef>
-            <includeTests>true</includeTests>
-            <verbose>true</verbose>
-          </configuration>
-          <!--
-          <executions>
-            <execution>
-              <id>validate</id>
-              <phase>validate</phase>
-              <goals>
-                <goal>check</goal>
-              </goals>
-            </execution>
-          </executions>
-          -->
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.14.1</version>
         </plugin>
@@ -705,6 +644,53 @@
         <groupId>com.atlassian.maven.plugins</groupId>
         <artifactId>maven-clover2-plugin</artifactId>
         <version>3.1.11.1</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>${mcheckstyle.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-buildtools</artifactId>
+            <version>${project.version}</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>${mpmd.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-buildtools</artifactId>
+            <version>${project.version}</version>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <rulesets>
+            <!-- classpath -->
+            <ruleset>mahout-pmd-ruleset.xml</ruleset>
+          </rulesets>
+          <!-- targetJdk is explicitly set until MPMD-170 is resolved -->
+          <targetJdk>${maven.compiler.target}</targetJdk>
+          <linkXRef>false</linkXRef>
+          <includeTests>true</includeTests>
+          <verbose>true</verbose>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <version>${mfindbugs.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-buildtools</artifactId>
+            <version>${project.version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
     <resources>
@@ -816,12 +802,65 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-checkstyle-plugin</artifactId>
-            <version>${mcheckstyle.version}</version>
+            <executions>
+              <execution>
+                <id>sourcecheck</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>checkstyle</goal>
+                </goals>
+                <configuration>
+                  <failsOnError>false</failsOnError>
+                  <!-- classpath -->
+                  <configLocation>mahout-checkstyle.xml</configLocation>
+                  <consoleOutput>true</consoleOutput>
+                  <linkXRef>false</linkXRef>
+                  <sourceDirectory>${basedir}/src</sourceDirectory>
+                </configuration>
+              </execution>
+            </executions>
           </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-pmd-plugin</artifactId>
-            <version>${mpmd.version}</version>
+            <executions>
+              <execution>
+                <id>sourcecheck</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>check</goal>
+                  <goal>cpd-check</goal>
+                </goals>
+                <configuration>
+                  <failOnViolation>false</failOnViolation>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>findbugs-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>sourcecheck</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+                <configuration>
+                  <xmlOutput>true</xmlOutput>
+                  <threshold>Low</threshold>
+                  <effort>Default</effort>
+                  <!--visitors>FindDeadLocalStores,UnreadFields</visitors-->
+                  <!--omitVisitors>FindDeadLocalStores,UnreadFields</omitVisitors-->
+                  <debug>true</debug>
+                  <relaxed>true</relaxed>
+                  <!-- classpath -->
+                  <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
+                  <failOnError>false</failOnError>
+                </configuration>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
@@ -880,7 +919,8 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>${mcheckstyle.version}</version>
         <configuration>
-          <configLocation>${project.build.directory}/../../buildtools/src/main/resources/mahout-checkstyle.xml</configLocation>
+          <!-- classpath -->
+          <configLocation>mahout-checkstyle.xml</configLocation>
           <consoleOutput>true</consoleOutput>
         </configuration>
       </plugin>
@@ -910,7 +950,8 @@
         <version>${mpmd.version}</version>
         <configuration>
           <rulesets>
-            <ruleset>../buildtools/src/main/resources/mahout-pmd-ruleset.xml</ruleset>
+            <!-- classpath -->
+            <ruleset>mahout-pmd-ruleset.xml</ruleset>
           </rulesets>
           <targetJdk>${maven.compiler.target}</targetJdk>
           <linkXRef>false</linkXRef>
@@ -934,18 +975,17 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
-        <version>2.5.2</version>
+        <version>${mfindbugs.version}</version>
         <configuration>
           <xmlOutput>true</xmlOutput>
-          <xmlOutputDirectory>target/findbugs</xmlOutputDirectory>
-          <outputDirectory>target/site/findbugs</outputDirectory>
           <threshold>Low</threshold>
           <effort>Default</effort>
           <!--visitors>FindDeadLocalStores,UnreadFields</visitors-->
           <!--omitVisitors>FindDeadLocalStores,UnreadFields</omitVisitors-->
           <debug>true</debug>
           <relaxed>true</relaxed>
-          <excludeFilterFile>../buildtools/src/main/resources/findbugs-exclude.xml</excludeFilterFile>
+          <!-- classpath -->
+          <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
         </configuration>
       </plugin>
       <plugin>
