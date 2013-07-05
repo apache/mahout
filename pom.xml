@@ -95,8 +95,8 @@
   </mailingLists>
   <properties>
     <skipTests>false</skipTests>
-    <sourceJavaVersion>1.6</sourceJavaVersion>
-    <targetJavaVersion>1.6</targetJavaVersion>
+    <maven.compiler.source>1.6</maven.compiler.source>
+    <maven.compiler.target>1.6</maven.compiler.target>
     <maven.clover.multiproject>true</maven.clover.multiproject>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <hadoop.version>1.1.2</hadoop.version>
@@ -567,9 +567,10 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.1</version>
           <configuration>
-            <encoding>UTF-8</encoding>
-            <source>${sourceJavaVersion}</source>
-            <target>${targetJavaVersion}</target>
+            <!-- encoding, source and target are explicitly defined until MNGECLIPSE-966 is fixed -->
+            <encoding>${project.build.sourceEncoding}</encoding>
+            <source>${maven.compiler.source}</source>
+            <target>${maven.compiler.target}</target>
             <optimize>true</optimize>
           </configuration>
         </plugin>
@@ -584,9 +585,6 @@
               <version>${project.version}</version>
             </dependency>
           </dependencies>
-          <configuration>
-            <encoding>UTF-8</encoding>
-          </configuration>
           <executions>
             <execution>
               <id>validate</id>
@@ -620,8 +618,7 @@
               <!-- classpath -->
               <ruleset>../buildtools/src/main/resources/mahout-pmd-ruleset.xml</ruleset>
             </rulesets>
-            <sourceEncoding>UTF-8</sourceEncoding>
-            <targetJdk>${targetJavaVersion}</targetJdk>
+            <targetJdk>${maven.compiler.target}</targetJdk>
             <linkXRef>false</linkXRef>
             <includeTests>true</includeTests>
             <verbose>true</verbose>
@@ -913,8 +910,7 @@
           <rulesets>
             <ruleset>../buildtools/src/main/resources/mahout-pmd-ruleset.xml</ruleset>
           </rulesets>
-          <sourceEncoding>UTF-8</sourceEncoding>
-          <targetJdk>${targetJavaVersion}</targetJdk>
+          <targetJdk>${maven.compiler.target}</targetJdk>
           <linkXRef>false</linkXRef>
           <includeTests>true</includeTests>
           <verbose>true</verbose>
