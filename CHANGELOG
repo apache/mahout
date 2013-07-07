@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.8 - unreleased
 
+  MAHOUT-1272: Parallel SGD matrix factorizer for SVDrecommender (Peng Cheng via ssc)
+
   MAHOUT-1271: classify-20newsgroups.sh fails during the seqdirectory step (smarthi)
   
   MAHOUT-1269: Cleanup deprecated Lucene 3.x API calls in lucene2seq utility unit tests (smarthi)
