@@ -1,10 +1,6 @@
 Mahout Change Log
 
-Release 0.9 - unreleased
-
-  MAHOUT-1275: Dropped bz2 distribution format for source and binaries (sslavic)
-
-Release 0.8
+Release 0.8 - unreleased
 
   MAHOUT-1272: Parallel SGD matrix factorizer for SVDrecommender (Peng Cheng via ssc)
 
