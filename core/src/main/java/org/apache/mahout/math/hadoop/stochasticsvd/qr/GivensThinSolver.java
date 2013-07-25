@@ -27,7 +27,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.OrderedIntDoubleMapping;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.hadoop.stochasticsvd.UpperTriangular;
+import org.apache.mahout.math.UpperTriangular;
 
 /**
  * Givens Thin solver. Standard Givens operations are reordered in a way that

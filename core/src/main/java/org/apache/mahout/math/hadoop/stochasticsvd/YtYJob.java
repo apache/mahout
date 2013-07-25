@@ -16,8 +16,6 @@
  */
 package org.apache.mahout.math.hadoop.stochasticsvd;
 
-import java.io.IOException;
-
 import org.apache.commons.lang3.Validate;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -32,12 +30,14 @@ import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.UpperTriangular;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
+import java.io.IOException;
+
 /**
  * Job that accumulates Y'Y output
- * 
  */
 public final class YtYJob {
 
@@ -52,7 +52,7 @@ public final class YtYJob {
   }
 
   public static class YtYMapper extends
-      Mapper<Writable, VectorWritable, IntWritable, VectorWritable> {
+    Mapper<Writable, VectorWritable, IntWritable, VectorWritable> {
 
     private int kp;
     private Omega omega;
@@ -131,13 +131,13 @@ public final class YtYJob {
     protected void cleanup(Context context) throws IOException,
       InterruptedException {
       context.write(new IntWritable(context.getTaskAttemptID().getTaskID()
-                                           .getId()),
+                                      .getId()),
                     new VectorWritable(new DenseVector(mYtY.getData())));
     }
   }
 
   public static class YtYReducer extends
-      Reducer<IntWritable, VectorWritable, IntWritable, VectorWritable> {
+    Reducer<IntWritable, VectorWritable, IntWritable, VectorWritable> {
     private final VectorWritable accum = new VectorWritable();
     private DenseVector acc;
 

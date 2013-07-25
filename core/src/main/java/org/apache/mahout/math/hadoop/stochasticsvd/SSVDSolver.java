@@ -28,11 +28,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.math.DenseMatrix;
-import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.DistributedRowMatrixWriter;
-import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.*;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.ssvd.EigenSolverWrapper;
 
@@ -502,7 +498,7 @@ public final class SSVDSolver {
         sqPath = new Path(btPath, BtJob.OUTPUT_SQ + "-*");
       }
 
-      UpperTriangular bbtTriangular =
+      org.apache.mahout.math.UpperTriangular bbtTriangular =
         SSVDHelper.loadAndSumUpperTriangularMatrices(new Path(btPath,
                                                               BtJob.OUTPUT_BBT
                                                                   + "-*"), conf);

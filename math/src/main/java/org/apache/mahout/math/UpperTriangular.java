@@ -15,18 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math.hadoop.stochasticsvd;
-
-import org.apache.mahout.math.AbstractMatrix;
-import org.apache.mahout.math.DenseMatrix;
-import org.apache.mahout.math.IndexException;
-import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.MatrixView;
-import org.apache.mahout.math.Vector;
+package org.apache.mahout.math;
 
 /**
  * 
- * Quick and dirty implementation of some {@link Matrix} methods 
+ * Quick and dirty implementation of some {@link org.apache.mahout.math.Matrix} methods
  * over packed upper triangular matrix.
  *
  */
@@ -60,15 +53,13 @@ public class UpperTriangular extends AbstractMatrix {
   public UpperTriangular(Vector data) {
     this(elementsToMatrixSize(data.size()));
 
-    values = new double[rows * (rows + 1) / 2];
-    rows = data.size();
-    for (int i = 0; i < rows; i++) {
-      values[i] = data.getQuick(i);
+    for (Vector.Element el:data.nonZeroes()) {
+      values[el.index()] = el.get();
     }
   }
 
-  private static int elementsToMatrixSize(int size) {
-    return (int) Math.round((-1 + Math.sqrt(1 + 8 * size)) / 2);
+  private static int elementsToMatrixSize(int dataSize) {
+    return (int) Math.round((-1 + Math.sqrt(1 + 8 * dataSize)) / 2);
   }
 
   // copy-constructor

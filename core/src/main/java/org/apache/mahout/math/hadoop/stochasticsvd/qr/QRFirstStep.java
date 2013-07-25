@@ -41,7 +41,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.hadoop.stochasticsvd.DenseBlockWritable;
-import org.apache.mahout.math.hadoop.stochasticsvd.UpperTriangular;
+import org.apache.mahout.math.UpperTriangular;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;

@@ -17,11 +17,6 @@
 
 package org.apache.mahout.math.hadoop.stochasticsvd;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.Deque;
-
 import org.apache.commons.lang3.Validate;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
@@ -50,32 +45,37 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterat
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.NamedVector;
+import org.apache.mahout.math.UpperTriangular;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.PlusMult;
 import org.apache.mahout.math.hadoop.stochasticsvd.qr.QRLastStep;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.Deque;
+
 /**
  * Bt job. For details, see working notes in MAHOUT-376.
- * <P>
- * 
+ * <p/>
+ * <p/>
  * Uses hadoop deprecated API wherever new api has not been updated
  * (MAHOUT-593), hence @SuppressWarning("deprecation").
- * <P>
- * 
+ * <p/>
+ * <p/>
  * This job outputs either Bt in its standard output, or upper triangular
  * matrices representing BBt partial sums if that's requested . If the latter
  * mode is enabled, then we accumulate BBt outer product sums in upper
  * triangular accumulator and output it at the end of the job, thus saving space
  * and BBt job.
- * <P>
- * 
+ * <p/>
+ * <p/>
  * This job also outputs Q and Bt and optionally BBt. Bt is output to standard
  * job output (part-*) and Q and BBt use named multiple outputs.
- * 
- * <P>
- * 
+ * <p/>
+ * <p/>
  */
 @SuppressWarnings("deprecation")
 public final class BtJob {
@@ -101,7 +101,7 @@ public final class BtJob {
   }
 
   public static class BtMapper extends
-      Mapper<Writable, VectorWritable, LongWritable, SparseRowBlockWritable> {
+    Mapper<Writable, VectorWritable, LongWritable, SparseRowBlockWritable> {
 
     private QRLastStep qr;
     private final Deque<Closeable> closeables = new ArrayDeque<Closeable>();
@@ -308,8 +308,8 @@ public final class BtJob {
   }
 
   public static class OuterProductCombiner
-      extends
-      Reducer<Writable, SparseRowBlockWritable, Writable, SparseRowBlockWritable> {
+    extends
+    Reducer<Writable, SparseRowBlockWritable, Writable, SparseRowBlockWritable> {
 
     protected final SparseRowBlockWritable accum = new SparseRowBlockWritable();
     protected final Deque<Closeable> closeables = new ArrayDeque<Closeable>();
@@ -343,8 +343,8 @@ public final class BtJob {
   }
 
   public static class OuterProductReducer
-      extends
-      Reducer<LongWritable, SparseRowBlockWritable, IntWritable, VectorWritable> {
+    extends
+    Reducer<LongWritable, SparseRowBlockWritable, IntWritable, VectorWritable> {
 
     protected final SparseRowBlockWritable accum = new SparseRowBlockWritable();
     protected final Deque<Closeable> closeables = new ArrayDeque<Closeable>();
