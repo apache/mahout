@@ -326,7 +326,7 @@ public class EigenDecomposition {
       int k = i;
       double p = d.getQuick(i);
       for (int j = i + 1; j < n; j++) {
-        if (d.getQuick(j) < p) {
+        if (d.getQuick(j) > p) {
           k = j;
           p = d.getQuick(j);
         }

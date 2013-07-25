@@ -35,11 +35,8 @@ import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterator;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
-import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.*;
 import org.apache.mahout.math.UpperTriangular;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.Functions;
 
 import com.google.common.collect.Lists;
@@ -218,9 +215,9 @@ public final class SSVDHelper {
    *
    * @return the sum of upper triangular inputs.
    */
-  public static UpperTriangular loadAndSumUpperTriangularMatrices(Path glob, Configuration conf) throws IOException {
+  public static DenseSymmetricMatrix loadAndSumUpperTriangularMatricesAsSymmetric(Path glob, Configuration conf) throws IOException {
     Vector v = loadAndSumUpVectors(glob, conf);
-    return v == null ? null : new UpperTriangular(v);
+    return v == null ? null : new DenseSymmetricMatrix(v);
   }
 
   /**

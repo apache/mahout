@@ -154,8 +154,8 @@ public class LanczosSolver {
     startTime(TimingSection.FINAL_EIGEN_CREATE);
     for (int row = 0; row < i; row++) {
       Vector realEigen = null;
-      // the eigenvectors live as columns of V, in reverse order.  Weird but true.
-      Vector ejCol = eigenVects.viewColumn(i - row - 1);
+
+      Vector ejCol = eigenVects.viewColumn(row);
       int size = Math.min(ejCol.size(), state.getBasisSize());
       for (int j = 0; j < size; j++) {
         double d = ejCol.get(j);

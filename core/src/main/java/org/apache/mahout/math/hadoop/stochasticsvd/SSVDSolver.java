@@ -17,11 +17,7 @@
 
 package org.apache.mahout.math.hadoop.stochasticsvd;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.Deque;
-import java.util.Random;
-
+import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -30,18 +26,21 @@ import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.*;
 import org.apache.mahout.math.function.Functions;
-import org.apache.mahout.math.ssvd.EigenSolverWrapper;
+import org.apache.mahout.math.solver.EigenDecomposition;
 
-import com.google.common.collect.Lists;
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.Deque;
+import java.util.Random;
 
 /**
  * Stochastic SVD solver (API class).
- * <P>
- * 
+ * <p/>
+ * <p/>
  * Implementation details are in my working notes in MAHOUT-376
  * (https://issues.apache.org/jira/browse/MAHOUT-376).
- * <P>
- * 
+ * <p/>
+ * <p/>
  * As of the time of this writing, I don't have benchmarks for this method in
  * comparison to other methods. However, non-hadoop differentiating
  * characteristics of this method are thought to be :
@@ -52,9 +51,9 @@ import com.google.common.collect.Lists;
  * Lanczos unless full rank SVD decomposition is sought.
  * <LI>"more scale" -- can presumably take on larger problems than Lanczos one
  * (not confirmed by benchmark at this time)
- * <P>
- * <P>
- * 
+ * <p/>
+ * <p/>
+ * <p/>
  * Specifically in regards to this implementation, <i>I think</i> couple of
  * other differentiating points are:
  * <LI>no need to specify input matrix height or width in command line, it is
@@ -64,12 +63,12 @@ import com.google.common.collect.Lists;
  * <LI>can request U or V or U<sub>&sigma;</sub>=U* &Sigma;<sup>0.5</sup> or
  * V<sub>&sigma;</sub>=V* &Sigma;<sup>0.5</sup> none of which would require pass
  * over input A and these jobs are parallel map-only jobs.
- * <P>
- * <P>
- * 
+ * <p/>
+ * <p/>
+ * <p/>
  * This class is central public API for SSVD solver. The use pattern is as
  * follows:
- * 
+ * <p/>
  * <UL>
  * <LI>create the solver using constructor and supplying computation parameters.
  * <LI>set optional parameters thru setter methods.
@@ -78,7 +77,7 @@ import com.google.common.collect.Lists;
  * containing m x k U matrix file(s).
  * <LI> {@link #getVPath()} (if computed) returns the path to the directory
  * containing n x k V matrix file(s).
- * 
+ * <p/>
  * </UL>
  */
 public final class SSVDSolver {
@@ -116,26 +115,18 @@ public final class SSVDSolver {
   /**
    * create new SSVD solver. Required parameters are passed to constructor to
    * ensure they are set. Optional parameters can be set using setters .
-   * <P>
-   * 
-   * @param conf
-   *          hadoop configuration
-   * @param inputPath
-   *          Input path (should be compatible with DistributedRowMatrix as of
-   *          the time of this writing).
-   * @param outputPath
-   *          Output path containing U, V and singular values vector files.
-   * @param ablockRows
-   *          The vertical hight of a q-block (bigger value require more memory
-   *          in mappers+ perhaps larger {@code minSplitSize} values
-   * @param k
-   *          desired rank
-   * @param p
-   *          SSVD oversampling parameter
-   * @param reduceTasks
-   *          Number of reduce tasks (where applicable)
-   * @throws IOException
-   *           when IO condition occurs.
+   * <p/>
+   *
+   * @param conf        hadoop configuration
+   * @param inputPath   Input path (should be compatible with DistributedRowMatrix as of
+   *                    the time of this writing).
+   * @param outputPath  Output path containing U, V and singular values vector files.
+   * @param ablockRows  The vertical hight of a q-block (bigger value require more memory
+   *                    in mappers+ perhaps larger {@code minSplitSize} values
+   * @param k           desired rank
+   * @param p           SSVD oversampling parameter
+   * @param reduceTasks Number of reduce tasks (where applicable)
+   * @throws IOException when IO condition occurs.
    */
   public SSVDSolver(Configuration conf,
                     Path[] inputPath,
@@ -160,7 +151,7 @@ public final class SSVDSolver {
   /**
    * sets q, amount of additional power iterations to increase precision
    * (0..2!). Defaults to 0.
-   * 
+   *
    * @param q
    */
   public void setQ(int q) {
@@ -170,7 +161,6 @@ public final class SSVDSolver {
   /**
    * The setting controlling whether to compute U matrix of low rank SSVD.
    * Default true.
-   * 
    */
   public void setComputeU(boolean val) {
     computeU = val;
@@ -178,16 +168,14 @@ public final class SSVDSolver {
 
   /**
    * Setting controlling whether to compute V matrix of low-rank SSVD.
-   * 
-   * @param val
-   *          true if we want to output V matrix. Default is true.
+   *
+   * @param val true if we want to output V matrix. Default is true.
    */
   public void setComputeV(boolean val) {
     computeV = val;
   }
 
   /**
-   * 
    * @param cUHat whether produce U*Sigma^0.5 as well (default false)
    */
   public void setcUHalfSigma(boolean cUHat) {
@@ -195,7 +183,6 @@ public final class SSVDSolver {
   }
 
   /**
-   * 
    * @param cVHat whether produce V*Sigma^0.5 as well (default false)
    */
   public void setcVHalfSigma(boolean cVHat) {
@@ -203,7 +190,6 @@ public final class SSVDSolver {
   }
 
   /**
-   * 
    * @param cUSigma whether produce U*Sigma output as well (default false)
    */
   public void setcUSigma(boolean cUSigma) {
@@ -221,9 +207,8 @@ public final class SSVDSolver {
    * Sometimes, if requested A blocks become larger than a split, we may need to
    * use that to ensure at least k+p rows of A get into a split. This is
    * requirement necessary to obtain orthonormalized Q blocks of SSVD.
-   * 
-   * @param size
-   *          the minimum split size to use
+   *
+   * @param size the minimum split size to use
    */
   public void setMinSplitSize(int size) {
     minSplitSize = size;
@@ -231,7 +216,7 @@ public final class SSVDSolver {
 
   /**
    * This contains k+p singular values resulted from the solver run.
-   * 
+   *
    * @return singlular values (largest to smallest)
    */
   public Vector getSingularValues() {
@@ -240,7 +225,7 @@ public final class SSVDSolver {
 
   /**
    * returns U path (if computation were requested and successful).
-   * 
+   *
    * @return U output hdfs path, or null if computation was not completed for
    *         whatever reason.
    */
@@ -250,7 +235,7 @@ public final class SSVDSolver {
 
   /**
    * return V path ( if computation was requested and successful ) .
-   * 
+   *
    * @return V output hdfs path, or null if computation was not completed for
    *         whatever reason.
    */
@@ -280,7 +265,7 @@ public final class SSVDSolver {
 
   /**
    * if true, driver to clean output folder first if exists.
-   * 
+   *
    * @param overwrite
    */
   public void setOverwrite(boolean overwrite) {
@@ -296,7 +281,7 @@ public final class SSVDSolver {
    * to produce less keys for combining and shuffle and sort therefore somewhat
    * improving running time; but require larger blocks to be formed in RAM (so
    * setting this too high can lead to OOM).
-   * 
+   *
    * @param outerBlockHeight
    */
   public void setOuterBlockHeight(int outerBlockHeight) {
@@ -312,7 +297,7 @@ public final class SSVDSolver {
    * to set it higher than default 200,000 for extremely sparse inputs and when
    * more ram is available. y_i block height and ABt job would occupy approx.
    * abtBlockHeight x (k+p) x sizeof (double) (as dense).
-   * 
+   *
    * @param abtBlockHeight
    */
   public void setAbtBlockHeight(int abtBlockHeight) {
@@ -326,7 +311,7 @@ public final class SSVDSolver {
   /**
    * If this property is true, use DestributedCache mechanism to broadcast some
    * stuff around. May improve efficiency. Default is false.
-   * 
+   *
    * @param broadcast
    */
   public void setBroadcast(boolean broadcast) {
@@ -336,18 +321,17 @@ public final class SSVDSolver {
   /**
    * Optional. Single-vector file path for a vector (aka xi in MAHOUT-817
    * working notes) to be subtracted from each row of input.
-   * <P>
-   * 
+   * <p/>
+   * <p/>
    * Brute force approach would force would turn input into a dense input, which
    * is often not very desirable. By supplying this offset to SSVD solver, we
    * can avoid most of that overhead due to increased input density.
-   * <P>
-   * 
+   * <p/>
+   * <p/>
    * The vector size for this offest is n (width of A input). In PCA and R this
    * is known as "column means", but in this case it can be any offset of row
    * vectors of course to propagate into SSVD solution.
-   * <P>
-   * 
+   * <p/>
    */
   public Path getPcaMeanPath() {
     return pcaMeanPath;
@@ -359,9 +343,8 @@ public final class SSVDSolver {
 
   /**
    * run all SSVD jobs.
-   * 
-   * @throws IOException
-   *           if I/O condition occurs.
+   *
+   * @throws IOException if I/O condition occurs.
    */
   public void run() throws IOException {
 
@@ -498,28 +481,21 @@ public final class SSVDSolver {
         sqPath = new Path(btPath, BtJob.OUTPUT_SQ + "-*");
       }
 
-      org.apache.mahout.math.UpperTriangular bbtTriangular =
-        SSVDHelper.loadAndSumUpperTriangularMatrices(new Path(btPath,
-                                                              BtJob.OUTPUT_BBT
-                                                                  + "-*"), conf);
+      DenseSymmetricMatrix bbt =
+        SSVDHelper.loadAndSumUpperTriangularMatricesAsSymmetric(new Path(btPath,
+                                                                         BtJob.OUTPUT_BBT
+                                                                           + "-*"), conf);
 
       // convert bbt to something our eigensolver could understand
-      assert bbtTriangular.columnSize() == k + p;
+      assert bbt.columnSize() == k + p;
 
       /*
        * we currently use a 3rd party in-core eigensolver. So we need just a
        * dense array representation for it.
        */
-      DenseMatrix bbtSquare = new DenseMatrix(k + p, k + p);
+      Matrix bbtSquare = new DenseMatrix(k + p, k + p);
+      bbtSquare.assign(bbt);
 
-      for (int i = 0; i < k + p; i++) {
-        for (int j = i; j < k + p; j++) {
-          double val = bbtTriangular.getQuick(i, j);
-          bbtSquare.setQuick(i, j, val);
-          bbtSquare.setQuick(j, i, val);
-        }
-      }
-      
       // MAHOUT-817
       if (pcaMeanPath != null) {
         Vector sq = SSVDHelper.loadAndSumUpVectors(sqPath, conf);
@@ -535,16 +511,17 @@ public final class SSVDSolver {
 
       }
 
-      EigenSolverWrapper eigenWrapper = new EigenSolverWrapper(SSVDHelper.extractRawData(bbtSquare));
-      Matrix uHat = new DenseMatrix(eigenWrapper.getUHat());
-      svalues = new DenseVector(eigenWrapper.getEigenValues());
+      EigenDecomposition eigen = new EigenDecomposition(bbtSquare);
+
+      Matrix uHat = eigen.getV();
+      svalues = eigen.getRealEigenvalues().clone();
 
       svalues.assign(Functions.SQRT);
 
       // save/redistribute UHat
       fs.mkdirs(uHatPath);
       DistributedRowMatrixWriter.write(uHatPath =
-        new Path(uHatPath, "uhat.seq"), conf, uHat);
+                                         new Path(uHatPath, "uhat.seq"), conf, uHat);
 
       // save sigma.
       SSVDHelper.saveVector(svalues,
@@ -570,28 +547,28 @@ public final class SSVDSolver {
       if (cUHalfSigma) {
         uhsjob = new UJob();
         uhsjob.run(conf,
-                 new Path(btPath, BtJob.OUTPUT_Q + "-*"),
-                 uHatPath,
-                 svPath,
-                 uHalfSigmaPath,
-                 k,
-                 reduceTasks,
-                 labelType,
-                 OutputScalingEnum.HALFSIGMA);
+                   new Path(btPath, BtJob.OUTPUT_Q + "-*"),
+                   uHatPath,
+                   svPath,
+                   uHalfSigmaPath,
+                   k,
+                   reduceTasks,
+                   labelType,
+                   OutputScalingEnum.HALFSIGMA);
       }
 
       UJob usjob = null;
       if (cUSigma) {
         usjob = new UJob();
         usjob.run(conf,
-                 new Path(btPath, BtJob.OUTPUT_Q + "-*"),
-                 uHatPath,
-                 svPath,
-                 uSigmaPath,
-                 k,
-                 reduceTasks,
-                 labelType,
-                 OutputScalingEnum.SIGMA);
+                  new Path(btPath, BtJob.OUTPUT_Q + "-*"),
+                  uHatPath,
+                  svPath,
+                  uSigmaPath,
+                  k,
+                  reduceTasks,
+                  labelType,
+                  OutputScalingEnum.SIGMA);
       }
 
       VJob vjob = null;

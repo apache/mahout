@@ -49,12 +49,12 @@ public final class TestLanczosSolver extends SolverTest {
 
     float fractionOfEigensExpectedGood = 0.6f;
     for (int i = 0; i < fractionOfEigensExpectedGood * desiredRank; i++) {
-      double s = state.getSingularValue(desiredRank - i - 1);
-      double e = eigenvalues.get(eigenvalues.size() - i - 1);
+      double s = state.getSingularValue(i);
+      double e = eigenvalues.get(i);
       log.info("{} : L = {}, E = {}", i, s, e);
       assertTrue("Singular value differs from eigenvalue", Math.abs((s-e)/e) < ERROR_TOLERANCE);
       Vector v = state.getRightSingularVector(i);
-      Vector v2 = decomposition.getV().viewColumn(eigenvalues.size() - i - 1);
+      Vector v2 = decomposition.getV().viewColumn(i);
       double error = 1 - Math.abs(v.dot(v2)/(v.norm(2) * v2.norm(2)));
       log.info("error: {}", error);
       assertTrue(i + ": 1 - cosAngle = " + error, error < ERROR_TOLERANCE);
