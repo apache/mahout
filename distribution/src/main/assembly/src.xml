@@ -31,6 +31,7 @@
       <outputDirectory>bin</outputDirectory>
       <useDefaultExcludes>true</useDefaultExcludes>
       <fileMode>0755</fileMode>
+      <directoryMode>0755</directoryMode>
     </fileSet>
     <fileSet>
       <directory>${project.basedir}/../examples/bin</directory>

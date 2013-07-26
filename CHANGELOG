@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.9 - unreleased
 
+  MAHOUT-1293: Source distribution tar.gz archive cannot be unpacked on Linux (sslavic)
+
   MAHOUT-1275: Dropped bz2 distribution format for source and binaries (sslavic)
 
 Release 0.8
