@@ -4,9 +4,11 @@ Release 0.9 - unreleased
 
   MAHOUT-1293: Source distribution tar.gz archive cannot be unpacked on Linux (sslavic)
 
+  MAHOUT-1291: MahoutDriver yields cosmetically suboptimal exception when bin/mahout runs without args, on some Hadoop versions (srowen)
+
   MAHOUT-1275: Dropped bz2 distribution format for source and binaries (sslavic)
 
-Release 0.8
+Release 0.8 - 2013-07-25
 
   MAHOUT-1272: Parallel SGD matrix factorizer for SVDrecommender (Peng Cheng via ssc)
 
