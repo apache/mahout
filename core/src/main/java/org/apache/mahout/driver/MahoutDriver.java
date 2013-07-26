@@ -120,6 +120,7 @@ public final class MahoutDriver {
 
     if (args.length < 1 || args[0] == null || "-h".equals(args[0]) || "--help".equals(args[0])) {
       programDriver.driver(args);
+      return;
     }
 
     String progName = args[0];
