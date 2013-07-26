@@ -116,7 +116,7 @@
         <include>**/*.properties</include>
       </includes>
       <excludes>
-        <exclude>target/**</exclude>
+        <exclude>**/target/**</exclude>
       </excludes>
     </fileSet>
     <fileSet>

@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.9 - unreleased
 
+  MAHOUT-1295: Excluded all Maven's target directories from distribution archives (sslavic)
+
   MAHOUT-1294: Cleanup previously installed artifacts from CI server local repository (sslavic)
 
   MAHOUT-1293: Source distribution tar.gz archive cannot be unpacked on Linux (sslavic)
