@@ -920,6 +920,9 @@
                 <goals>
                   <goal>remove-project-artifact</goal>
                 </goals>
+                <configuration>
+                  <failOnError>false</failOnError>
+                </configuration>
               </execution>
             </executions>
           </plugin>
