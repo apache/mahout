@@ -6,6 +6,8 @@ Release 0.9 - unreleased
 
   MAHOUT-1291: MahoutDriver yields cosmetically suboptimal exception when bin/mahout runs without args, on some Hadoop versions (srowen)
 
+  MAHOUT-1290: Issue when running Mahout Recommender Demo (Helder Garay Martins via smarthi)
+
   MAHOUT-1275: Dropped bz2 distribution format for source and binaries (sslavic)
 
 Release 0.8 - 2013-07-25
