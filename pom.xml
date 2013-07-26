@@ -900,6 +900,32 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>ci</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.JENKINS_URL</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>remove-old-mahout-artifacts</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>remove-project-artifact</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
   <scm>
     <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk</connection>
