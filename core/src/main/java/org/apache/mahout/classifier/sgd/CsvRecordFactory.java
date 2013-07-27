@@ -17,14 +17,14 @@
 
 package org.apache.mahout.classifier.sgd;
 
-import com.google.common.base.CharMatcher;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
+import org.apache.commons.csv.CSVUtils;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.vectorizer.encoders.ConstantValueEncoder;
 import org.apache.mahout.vectorizer.encoders.ContinuousValueEncoder;
@@ -33,8 +33,10 @@ import org.apache.mahout.vectorizer.encoders.FeatureVectorEncoder;
 import org.apache.mahout.vectorizer.encoders.StaticWordValueEncoder;
 import org.apache.mahout.vectorizer.encoders.TextValueEncoder;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -68,10 +70,6 @@ import java.util.Set;
 public class CsvRecordFactory implements RecordFactory {
   private static final String INTERCEPT_TERM = "Intercept Term";
 
-  // crude CSV value splitter.  This will fail if any double quoted strings have
-  // commas inside.  Also, escaped quotes will not be unescaped.  Good enough for now.
-  private static final Splitter COMMA = Splitter.on(',').trimResults(CharMatcher.is('"'));
-
   private static final Map<String, Class<? extends FeatureVectorEncoder>> TYPE_DICTIONARY =
           ImmutableMap.<String, Class<? extends FeatureVectorEncoder>>builder()
                   .put("continuous", ContinuousValueEncoder.class)
@@ -101,6 +99,29 @@ public class CsvRecordFactory implements RecordFactory {
   private boolean includeBiasTerm;
   private static final String CANNOT_CONSTRUCT_CONVERTER =
       "Unable to construct type converter... shouldn't be possible";
+
+  /**
+   * Parse a single line of csv-formatted text.
+   *
+   * Separated to make changing this functionality for the entire class easier
+   * in the future.
+   * @param line - CSV formatted text
+   * @return List<String>
+   */
+  private List<String> parseCsvLine(String line) {
+    try {
+      return Arrays.asList(CSVUtils.parseLine(line));
+	   }
+	   catch (IOException e) {
+      List<String> list = Lists.newArrayList();
+      list.add(line);
+      return list;
+   	}
+  }
+
+  private List<String> parseCsvLine(CharSequence line) {
+    return parseCsvLine(line.toString());
+  }
 
   /**
    * Construct a parser for CSV lines that encodes the parsed data in vector form.
@@ -166,7 +187,7 @@ public class CsvRecordFactory implements RecordFactory {
   public void firstLine(String line) {
     // read variable names, build map of name -> column
     final Map<String, Integer> vars = Maps.newHashMap();
-    variableNames = Lists.newArrayList(COMMA.split(line));
+    variableNames = parseCsvLine(line);
     int column = 0;
     for (String var : variableNames) {
       vars.put(var, column++);
@@ -240,7 +261,7 @@ public class CsvRecordFactory implements RecordFactory {
    */
   @Override
   public int processLine(String line, Vector featureVector) {
-    List<String> values = Lists.newArrayList(COMMA.split(line));
+    List<String> values = parseCsvLine(line);
 
     int targetValue = targetDictionary.intern(values.get(target));
     if (targetValue >= maxTargetValue) {
@@ -271,7 +292,7 @@ public class CsvRecordFactory implements RecordFactory {
    * @return The value of the target variable.
    */
   public int processLine(CharSequence line, Vector featureVector, boolean returnTarget) {
-    List<String> values = Lists.newArrayList(COMMA.split(line));
+    List<String> values = parseCsvLine(line);
     int targetValue = -1;
     if (returnTarget) {
       targetValue = targetDictionary.intern(values.get(target));
@@ -293,7 +314,7 @@ public class CsvRecordFactory implements RecordFactory {
    * @return the raw target value in the corresponding column of CSV line 
    */
   public String getTargetString(CharSequence line) {
-    List<String> values = Lists.newArrayList(COMMA.split(line));
+    List<String> values = parseCsvLine(line);
     return values.get(target);
 
   }
@@ -318,7 +339,7 @@ public class CsvRecordFactory implements RecordFactory {
    * @return the id value of the CSV record
    */
   public String getIdString(CharSequence line) {
-    List<String> values = Lists.newArrayList(COMMA.split(line));
+    List<String> values = parseCsvLine(line);
     return values.get(id);
   }
 

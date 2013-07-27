@@ -12,6 +12,8 @@ Release 0.9 - unreleased
 
   MAHOUT-1290: Issue when running Mahout Recommender Demo (Helder Garay Martins via smarthi)
 
+  MAHOUT-1287: classifier.sgd.CsvRecordFactory incorrectly parses CSV format (Alex Franchuk via smarthi)
+
   MAHOUT-1275: Dropped bz2 distribution format for source and binaries (sslavic)
 
 Release 0.8 - 2013-07-25
