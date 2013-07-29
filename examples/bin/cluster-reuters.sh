@@ -39,7 +39,7 @@ if [ ! -e $MAHOUT ]; then
   exit 1
 fi
 
-algorithm=( kmeans fuzzykmeans dirichlet lda minhash)
+algorithm=( kmeans fuzzykmeans dirichlet lda)
 if [ -n "$1" ]; then
   choice=$1
 else
@@ -48,7 +48,6 @@ else
   echo "2. ${algorithm[1]} clustering"
   echo "3. ${algorithm[2]} clustering"
   echo "4. ${algorithm[3]} clustering" 
-  echo "5. ${algorithm[4]} clustering"
   read -p "Enter your choice : " choice
 fi
 
@@ -103,7 +102,7 @@ if [ ! -e ${WORK_DIR}/reuters-out-seqdir ]; then
     fi
   fi
   echo "Converting to Sequence Files from Directory"
-  $MAHOUT seqdirectory -i ${WORK_DIR}/reuters-out -o ${WORK_DIR}/reuters-out-seqdir -c UTF-8 -chunk 5
+  $MAHOUT seqdirectory -i ${WORK_DIR}/reuters-out -o ${WORK_DIR}/reuters-out-seqdir -c UTF-8 -chunk 64 -xm sequential
 fi
 
 if [ "x$clustertype" == "xkmeans" ]; then
@@ -190,14 +189,6 @@ elif [ "x$clustertype" == "xlda" ]; then
     -dt sequencefile -sort ${WORK_DIR}/reuters-lda-topics/part-m-00000 \
     && \
   cat ${WORK_DIR}/reuters-lda/vectordump
-elif [ "x$clustertype" == "xminhash" ]; then
-  $MAHOUT seq2sparse \
-    -i ${WORK_DIR}/reuters-out-seqdir/ \
-    -o ${WORK_DIR}/reuters-out-seqdir-sparse-minhash --maxDFPercent 85 --namedVector \
-  && \
-  $MAHOUT org.apache.mahout.clustering.minhash.MinHashDriver \
-    -i ${WORK_DIR}/reuters-out-seqdir-sparse-minhash/tfidf-vectors \
-    -o ${WORK_DIR}/reuters-minhash --overwrite
 else 
   echo "unknown cluster type: $clustertype"
 fi 
