@@ -21,7 +21,6 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.Deque;
-import java.util.LinkedList;
 import java.util.Random;
 
 import com.google.common.collect.Lists;

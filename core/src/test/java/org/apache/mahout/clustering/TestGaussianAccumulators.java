@@ -19,7 +19,6 @@ package org.apache.mahout.clustering;
 import java.util.Collection;
 
 import com.google.common.collect.Lists;
-import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
@@ -68,7 +67,7 @@ public final class TestGaussianAccumulators extends MahoutTestCase {
 
   /**
    * Generate random samples and add them to the sampleData
-   * 
+   *
    * @param num
    *          int number of samples to generate
    * @param mx

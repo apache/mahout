@@ -19,7 +19,6 @@ package org.apache.mahout.vectorizer.collocations.llr;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
 
 import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;

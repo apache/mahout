@@ -17,7 +17,6 @@
 
 package org.apache.mahout.cf.taste.similarity.precompute.example;
 
-import org.apache.mahout.cf.taste.example.grouplens.GroupLensDataModel;
 import org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender;
 import org.apache.mahout.cf.taste.impl.similarity.LogLikelihoodSimilarity;
 import org.apache.mahout.cf.taste.impl.similarity.precompute.FileSimilarItemsWriter;

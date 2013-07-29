@@ -36,7 +36,6 @@ import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterator;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.math.*;
-import org.apache.mahout.math.UpperTriangular;
 import org.apache.mahout.math.function.Functions;
 
 import com.google.common.collect.Lists;

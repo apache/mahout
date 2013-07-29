@@ -28,10 +28,8 @@ import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.classify.ClusterClassifier;
-import org.apache.mahout.clustering.dirichlet.models.GaussianCluster;
 import org.apache.mahout.clustering.fuzzykmeans.SoftCluster;
 import org.apache.mahout.clustering.kmeans.TestKmeansClustering;
-import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.CosineDistanceMeasure;
 import org.apache.mahout.common.distance.DistanceMeasure;
@@ -81,14 +79,6 @@ public final class TestClusterClassifier extends MahoutTestCase {
     return new ClusterClassifier(models, new FuzzyKMeansClusteringPolicy());
   }
   
-  private static ClusterClassifier newGaussianClassifier() {
-    List<Cluster> models = Lists.newArrayList();
-    models.add(new GaussianCluster(new DenseVector(2).assign(1), new DenseVector(2).assign(1), 0));
-    models.add(new GaussianCluster(new DenseVector(2), new DenseVector(2).assign(1), 1));
-    models.add(new GaussianCluster(new DenseVector(2).assign(-1), new DenseVector(2).assign(1), 2));
-    return new ClusterClassifier(models, new DirichletClusteringPolicy(3, 1.0));
-  }
-  
   private ClusterClassifier writeAndRead(ClusterClassifier classifier) throws IOException {
     Path path = new Path(getTestTempDirPath(), "output");
     classifier.writeToSeqFiles(path);
@@ -129,17 +119,6 @@ public final class TestClusterClassifier extends MahoutTestCase {
     assertEquals("[2,2]", "[0.493, 0.296, 0.211]", AbstractCluster.formatVector(pdf, null));
   }
   
-  @Test(expected = UnsupportedOperationException.class)
-  public void testMSCanopyClassification() {
-    List<Cluster> models = Lists.newArrayList();
-    DistanceMeasure measure = new ManhattanDistanceMeasure();
-    models.add(new MeanShiftCanopy(new DenseVector(2).assign(1), 0, measure));
-    models.add(new MeanShiftCanopy(new DenseVector(2), 1, measure));
-    models.add(new MeanShiftCanopy(new DenseVector(2).assign(-1), 2, measure));
-    ClusterClassifier classifier = new ClusterClassifier(models, new MeanShiftClusteringPolicy());
-    classifier.classify(new DenseVector(2));
-  }
-  
   @Test
   public void testSoftClusterClassification() {
     ClusterClassifier classifier = newSoftClusterClassifier();
@@ -147,15 +126,6 @@ public final class TestClusterClassifier extends MahoutTestCase {
     assertEquals("[0,0]", "[0.000, 1.000, 0.000]", AbstractCluster.formatVector(pdf, null));
     pdf = classifier.classify(new DenseVector(2).assign(2));
     assertEquals("[2,2]", "[0.735, 0.184, 0.082]", AbstractCluster.formatVector(pdf, null));
-  }
-  
-  @Test
-  public void testGaussianClusterClassification() {
-    ClusterClassifier classifier = newGaussianClassifier();
-    Vector pdf = classifier.classify(new DenseVector(2));
-    assertEquals("[0,0]", "[0.212, 0.576, 0.212]", AbstractCluster.formatVector(pdf, null));
-    pdf = classifier.classify(new DenseVector(2).assign(2));
-    assertEquals("[2,2]", "[0.952, 0.047, 0.000]", AbstractCluster.formatVector(pdf, null));
   }
   
   @Test
@@ -179,15 +149,6 @@ public final class TestClusterClassifier extends MahoutTestCase {
   @Test
   public void testSoftClusterClassifierSerialization() throws Exception {
     ClusterClassifier classifier = newSoftClusterClassifier();
-    ClusterClassifier classifierOut = writeAndRead(classifier);
-    assertEquals(classifier.getModels().size(), classifierOut.getModels().size());
-    assertEquals(classifier.getModels().get(0).getClass().getName(), classifierOut.getModels().get(0).getClass()
-        .getName());
-  }
-  
-  @Test
-  public void testGaussianClassifierSerialization() throws Exception {
-    ClusterClassifier classifier = newGaussianClassifier();
     ClusterClassifier classifierOut = writeAndRead(classifier);
     assertEquals(classifier.getModels().size(), classifierOut.getModels().size());
     assertEquals(classifier.getModels().get(0).getClass().getName(), classifierOut.getModels().get(0).getClass()

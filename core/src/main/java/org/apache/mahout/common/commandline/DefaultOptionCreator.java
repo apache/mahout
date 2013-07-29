@@ -21,7 +21,6 @@ import org.apache.commons.cli2.Option;
 import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.apache.mahout.clustering.kernel.TriangularKernelProfile;
 
@@ -388,19 +387,6 @@ public final class DefaultOptionCreator {
                 .withMinimum(1).withMaximum(1).create())
         .withDescription(
             "The classname of the IKernelProfile. Default is TriangularKernelProfile");
-  }
-  
-  public static DefaultOptionBuilder inputIsCanopiesOption() {
-    return new DefaultOptionBuilder()
-        .withLongName(MeanShiftCanopyDriver.INPUT_IS_CANOPIES_OPTION)
-        .withRequired(false)
-        .withShortName("ic")
-        .withArgument(
-            new ArgumentBuilder()
-                .withName(MeanShiftCanopyDriver.INPUT_IS_CANOPIES_OPTION)
-                .withMinimum(1).withMaximum(1).create())
-        .withDescription(
-            "If present, the input directory already contains MeanShiftCanopies");
   }
   
   /**

@@ -28,8 +28,6 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
-import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
-import org.apache.mahout.cf.taste.transforms.SimilarityTransform;
 
 import com.google.common.base.Preconditions;
 
@@ -37,8 +35,6 @@ import com.google.common.base.Preconditions;
 abstract class AbstractSimilarity extends AbstractItemSimilarity implements UserSimilarity {
 
   private PreferenceInferrer inferrer;
-  private PreferenceTransform prefTransform;
-  private SimilarityTransform similarityTransform;
   private final boolean weighted;
   private final boolean centerData;
   private int cachedNumItems;
@@ -76,26 +72,6 @@ abstract class AbstractSimilarity extends AbstractItemSimilarity implements User
     refreshHelper.addDependency(inferrer);
     refreshHelper.removeDependency(this.inferrer);
     this.inferrer = inferrer;
-  }
-  
-  public final PreferenceTransform getPrefTransform() {
-    return prefTransform;
-  }
-  
-  public final void setPrefTransform(PreferenceTransform prefTransform) {
-    refreshHelper.addDependency(prefTransform);
-    refreshHelper.removeDependency(this.prefTransform);
-    this.prefTransform = prefTransform;
-  }
-  
-  public final SimilarityTransform getSimilarityTransform() {
-    return similarityTransform;
-  }
-  
-  public final void setSimilarityTransform(SimilarityTransform similarityTransform) {
-    refreshHelper.addDependency(similarityTransform);
-    refreshHelper.removeDependency(this.similarityTransform);
-    this.similarityTransform = similarityTransform;
   }
   
   final boolean isWeighted() {
@@ -156,7 +132,6 @@ abstract class AbstractSimilarity extends AbstractItemSimilarity implements User
     int count = 0;
     
     boolean hasInferrer = inferrer != null;
-    boolean hasPrefTransform = prefTransform != null;
     
     while (true) {
       int compare = xIndex < yIndex ? -1 : xIndex > yIndex ? 1 : 0;
@@ -165,29 +140,20 @@ abstract class AbstractSimilarity extends AbstractItemSimilarity implements User
         double y;
         if (xIndex == yIndex) {
           // Both users expressed a preference for the item
-          if (hasPrefTransform) {
-            x = prefTransform.getTransformedValue(xPrefs.get(xPrefIndex));
-            y = prefTransform.getTransformedValue(yPrefs.get(yPrefIndex));
-          } else {
-            x = xPrefs.getValue(xPrefIndex);
-            y = yPrefs.getValue(yPrefIndex);
-          }
+          x = xPrefs.getValue(xPrefIndex);
+          y = yPrefs.getValue(yPrefIndex);
         } else {
           // Only one user expressed a preference, but infer the other one's preference and tally
           // as if the other user expressed that preference
           if (compare < 0) {
             // X has a value; infer Y's
-            x = hasPrefTransform
-                ? prefTransform.getTransformedValue(xPrefs.get(xPrefIndex))
-                : xPrefs.getValue(xPrefIndex);
+            x = xPrefs.getValue(xPrefIndex);
             y = inferrer.inferPreference(userID2, xIndex);
           } else {
             // compare > 0
             // Y has a value; infer X's
             x = inferrer.inferPreference(userID1, yIndex);
-            y = hasPrefTransform
-                ? prefTransform.getTransformedValue(yPrefs.get(yPrefIndex))
-                : yPrefs.getValue(yPrefIndex);
+            y = yPrefs.getValue(yPrefIndex);
           }
         }
         sumXY += x * y;
@@ -247,10 +213,6 @@ abstract class AbstractSimilarity extends AbstractItemSimilarity implements User
       result = computeResult(count, centeredSumXY, centeredSumX2, centeredSumY2, sumXYdiff2);
     } else {
       result = computeResult(count, sumXY, sumX2, sumY2, sumXYdiff2);
-    }
-    
-    if (similarityTransform != null) {
-      result = similarityTransform.transformSimilarity(userID1, userID2, result);
     }
     
     if (!Double.isNaN(result)) {
@@ -330,10 +292,6 @@ abstract class AbstractSimilarity extends AbstractItemSimilarity implements User
       result = computeResult(count, centeredSumXY, centeredSumX2, centeredSumY2, sumXYdiff2);
     } else {
       result = computeResult(count, sumXY, sumX2, sumY2, sumXYdiff2);
-    }
-    
-    if (similarityTransform != null) {
-      result = similarityTransform.transformSimilarity(itemID1, itemID2, result);
     }
     
     if (!Double.isNaN(result)) {

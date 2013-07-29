@@ -26,18 +26,11 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
-import org.apache.mahout.clustering.dirichlet.DirichletDriver;
-import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
-import org.apache.mahout.clustering.dirichlet.models.DistributionDescription;
-import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
 import org.apache.mahout.clustering.evaluation.ClusterEvaluator;
 import org.apache.mahout.clustering.evaluation.RepresentativePointsDriver;
 import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
-import org.apache.mahout.clustering.kernel.IKernelProfile;
-import org.apache.mahout.clustering.kernel.TriangularKernelProfile;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.kmeans.TestKmeansClustering;
-import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.DistanceMeasure;
@@ -319,42 +312,6 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     RepresentativePointsDriver.run(conf, clustersIn, new Path(fuzzyKMeansOutput, "clusteredPoints"), fuzzyKMeansOutput,
         measure, numIterations, true);
     RepresentativePointsDriver.printRepresentativePoints(fuzzyKMeansOutput, numIterations);
-    ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
-    // now print out the Results
-    System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
-    System.out.println("Inter-cluster density = " + evaluator.interClusterDensity());
-  }
-  
-  @Test
-  public void testMeanShift() throws Exception {
-    ClusteringTestUtils.writePointsToFile(sampleData, new Path(testdata, "file1"), fs, conf);
-    DistanceMeasure measure = new EuclideanDistanceMeasure();
-    IKernelProfile kernelProfile = new TriangularKernelProfile();
-    Configuration conf = new Configuration();
-    MeanShiftCanopyDriver.run(conf, testdata, output, measure, kernelProfile, 2.1, 1.0, 0.001, 10, false, true, true);
-    int numIterations = 10;
-    Path clustersIn = new Path(output, "clusters-8-final");
-    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure,
-        numIterations, true);
-    //printRepPoints(numIterations);
-    ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
-    // now print out the Results
-    System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
-    System.out.println("Inter-cluster density = " + evaluator.interClusterDensity());
-  }
-  
-  @Test
-  public void testDirichlet() throws Exception {
-    ClusteringTestUtils.writePointsToFile(sampleData, new Path(testdata, "file1"), fs, conf);
-    DistributionDescription description = new DistributionDescription(GaussianClusterDistribution.class.getName(),
-        DenseVector.class.getName(), null, 2);
-    DirichletDriver.run(new Configuration(), testdata, output, description, 15, 5, 1.0, true, true, 0.0, true);
-    int numIterations = 10;
-    Configuration conf = new Configuration();
-    Path clustersIn = new Path(output, "clusters-5-final");
-    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output,
-        new EuclideanDistanceMeasure(), numIterations, true);
-    //printRepPoints(numIterations);
     ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
     // now print out the Results
     System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());

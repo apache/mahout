@@ -18,7 +18,6 @@
 package org.apache.mahout.clustering;
 
 import org.apache.mahout.clustering.canopy.Canopy;
-import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
@@ -108,46 +107,6 @@ public final class TestClusterInterface extends MahoutTestCase {
     Cluster cluster = new org.apache.mahout.clustering.kmeans.Kluster(m, 123, measure);
     String formatString = cluster.asFormatString(null);
     assertEquals("CL-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
-  }
-
-  @Test
-  public void testMSCanopyAsFormatString() {
-    double[] d = { 1.1, 2.2, 3.3 };
-    Vector m = new DenseVector(d);
-    Cluster cluster = new MeanShiftCanopy(m, 123, measure);
-    String formatString = cluster.asFormatString(null);
-    assertEquals("MSC-123{n=0 c=[1.100, 2.200, 3.300] r=[]}", formatString);
-  }
-
-  @Test
-  public void testMSCanopyAsFormatStringSparse() {
-    double[] d = { 1.1, 0.0, 3.3 };
-    Vector m = new SequentialAccessSparseVector(3);
-    m.assign(d);
-    Cluster cluster = new MeanShiftCanopy(m, 123, measure);
-    String formatString = cluster.asFormatString(null);
-    assertEquals("MSC-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
-  }
-
-  @Test
-  public void testMSCanopyAsFormatStringWithBindings() {
-    double[] d = { 1.1, 2.2, 3.3 };
-    Vector m = new DenseVector(d);
-    Cluster cluster = new MeanShiftCanopy(m, 123, measure);
-    String[] bindings = { "fee", null, "foo" };
-    String formatString = cluster.asFormatString(bindings);
-    assertEquals("MSC-123{n=0 c=[fee:1.100, 1:2.200, foo:3.300] r=[]}", formatString);
-  }
-
-  @Test
-  public void testMSCanopyAsFormatStringSparseWithBindings() {
-    double[] d = { 1.1, 0.0, 3.3 };
-    Vector m = new SequentialAccessSparseVector(3);
-    m.assign(d);
-    Cluster cluster = new MeanShiftCanopy(m, 123, measure);
-    String[] bindings = { "fee", null, "foo" };
-    String formatString = cluster.asFormatString(bindings);
-    assertEquals("MSC-123{n=0 c=[fee:1.100, foo:3.300] r=[]}", formatString);
   }
 
 }

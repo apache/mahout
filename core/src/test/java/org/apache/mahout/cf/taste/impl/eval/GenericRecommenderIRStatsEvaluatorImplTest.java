@@ -17,7 +17,6 @@
 
 package org.apache.mahout.cf.taste.impl.eval;
 
-import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.eval.DataModelBuilder;
 import org.apache.mahout.cf.taste.eval.IRStatistics;
 import org.apache.mahout.cf.taste.eval.RecommenderBuilder;
@@ -26,7 +25,6 @@ import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.model.GenericBooleanPrefDataModel;
 import org.apache.mahout.cf.taste.impl.recommender.GenericBooleanPrefItemBasedRecommender;
-import org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender;
 import org.apache.mahout.cf.taste.impl.similarity.LogLikelihoodSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
@@ -34,25 +32,6 @@ import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.junit.Test;
 
 public final class GenericRecommenderIRStatsEvaluatorImplTest extends TasteTestCase {
-
-  @Test
-  public void testEvaluate() throws Exception {
-    DataModel model = getDataModel();
-    RecommenderBuilder builder = new RecommenderBuilder() {
-      @Override
-      public Recommender buildRecommender(DataModel dataModel) throws TasteException {
-        return new SlopeOneRecommender(dataModel);
-      }
-    };
-    RecommenderIRStatsEvaluator evaluator = new GenericRecommenderIRStatsEvaluator();
-    IRStatistics stats = evaluator.evaluate(builder, null, model, null, 1, 0.2, 1.0);
-    assertNotNull(stats);
-    assertEquals(0.75, stats.getPrecision(), EPSILON);
-    assertEquals(0.75, stats.getRecall(), EPSILON);
-    assertEquals(0.75, stats.getF1Measure(), EPSILON);
-    assertEquals(0.75, stats.getFNMeasure(2.0), EPSILON);
-    assertEquals(0.75, stats.getNormalizedDiscountedCumulativeGain(), EPSILON);
-  }
 
   @Test
   public void testBoolean() throws Exception {
