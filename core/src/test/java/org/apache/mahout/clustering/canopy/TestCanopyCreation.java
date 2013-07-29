@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.Iterables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -258,17 +259,16 @@ public final class TestCanopyCreation extends MahoutTestCase {
 
     List<VectorWritable> points = getPointsWritable();
     reducer.reduce(new Text("centroid"), points, context);
-    Set<Text> keys = writer.getKeys();
-    assertEquals("Number of centroids", 3, keys.size());
+    Iterable<Text> keys = writer.getKeysInInsertionOrder();
+    assertEquals("Number of centroids", 3, Iterables.size(keys));
     int i = 0;
     for (Text key : keys) {
       List<ClusterWritable> data = writer.getValue(key);
       ClusterWritable clusterWritable = data.get(0);
-	  Canopy canopy = (Canopy)clusterWritable.getValue();
-	  assertEquals(manhattanCentroids.get(i).asFormatString()
-          + " is not equal to "
-          + canopy.computeCentroid().asFormatString(), manhattanCentroids
-          .get(i), canopy.computeCentroid());
+      Canopy canopy = (Canopy) clusterWritable.getValue();
+      assertEquals(manhattanCentroids.get(i).asFormatString() + " is not equal to "
+          + canopy.computeCentroid().asFormatString(),
+          manhattanCentroids.get(i), canopy.computeCentroid());
       i++;
     }
   }
@@ -282,29 +282,27 @@ public final class TestCanopyCreation extends MahoutTestCase {
   public void testCanopyReducerEuclidean() throws Exception {
     CanopyReducer reducer = new CanopyReducer();
     Configuration conf = getConfiguration();
-    conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY,
-        "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
+    conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
     conf.set(CanopyConfigKeys.CF_KEY, "0");
     DummyRecordWriter<Text, ClusterWritable> writer = new DummyRecordWriter<Text, ClusterWritable>();
-    Reducer<Text, VectorWritable, Text, ClusterWritable>.Context context = DummyRecordWriter
-        .build(reducer, conf, writer, Text.class, VectorWritable.class);
+    Reducer<Text, VectorWritable, Text, ClusterWritable>.Context context =
+        DummyRecordWriter.build(reducer, conf, writer, Text.class, VectorWritable.class);
     reducer.setup(context);
 
     List<VectorWritable> points = getPointsWritable();
     reducer.reduce(new Text("centroid"), points, context);
-    Set<Text> keys = writer.getKeys();
-    assertEquals("Number of centroids", 3, keys.size());
+    Iterable<Text> keys = writer.getKeysInInsertionOrder();
+    assertEquals("Number of centroids", 3, Iterables.size(keys));
     int i = 0;
     for (Text key : keys) {
       List<ClusterWritable> data = writer.getValue(key);
       ClusterWritable clusterWritable = data.get(0);
-      Canopy canopy = (Canopy)clusterWritable.getValue();
-      assertEquals(euclideanCentroids.get(i).asFormatString()
-          + " is not equal to "
-          + canopy.computeCentroid().asFormatString(), euclideanCentroids
-          .get(i), canopy.computeCentroid());
+      Canopy canopy = (Canopy) clusterWritable.getValue();
+      assertEquals(euclideanCentroids.get(i).asFormatString() + " is not equal to "
+          + canopy.computeCentroid().asFormatString(),
+          euclideanCentroids.get(i), canopy.computeCentroid());
       i++;
     }
   }
@@ -333,29 +331,27 @@ public final class TestCanopyCreation extends MahoutTestCase {
     try {
       Writable key = new Text();
       ClusterWritable clusterWritable = new ClusterWritable();
-	  assertTrue("more to come", reader.next(key, clusterWritable));
+      assertTrue("more to come", reader.next(key, clusterWritable));
       assertEquals("1st key", "C-0", key.toString());
 
       List<Pair<Double,Double>> refCenters = Lists.newArrayList();
       refCenters.add(new Pair<Double,Double>(1.5,1.5));
       refCenters.add(new Pair<Double,Double>(4.333333333333334,4.333333333333334));
-	  Pair<Double,Double> c = new Pair<Double,Double>(clusterWritable.getValue() .getCenter().get(0),
-			clusterWritable.getValue().getCenter().get(1));
+      Pair<Double,Double> c = new Pair<Double,Double>(clusterWritable.getValue() .getCenter().get(0),
+      clusterWritable.getValue().getCenter().get(1));
       assertTrue("center "+c+" not found", findAndRemove(c, refCenters, EPSILON));
       assertTrue("more to come", reader.next(key, clusterWritable));
       assertEquals("2nd key", "C-1", key.toString());
       c = new Pair<Double,Double>(clusterWritable.getValue().getCenter().get(0),
-    		  clusterWritable.getValue().getCenter().get(1));
-      assertTrue("center "+c+" not found", findAndRemove(c, refCenters, EPSILON));
+          clusterWritable.getValue().getCenter().get(1));
+      assertTrue("center " + c + " not found", findAndRemove(c, refCenters, EPSILON));
       assertFalse("more to come", reader.next(key, clusterWritable));
     } finally {
       Closeables.close(reader, true);
     }
   }
 
-  static boolean findAndRemove(Pair<Double, Double> target,
-                               Collection<Pair<Double, Double>> list,
-                               double epsilon) {
+  static boolean findAndRemove(Pair<Double, Double> target, Collection<Pair<Double, Double>> list, double epsilon) {
     for (Pair<Double,Double> curr : list) {
       if ( (Math.abs(target.getFirst() - curr.getFirst()) < epsilon) 
            && (Math.abs(target.getSecond() - curr.getSecond()) < epsilon) ) {

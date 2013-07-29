@@ -35,7 +35,9 @@ public class EigencutsSensitivityNode implements Writable {
   private int row;
   private int column;
   private double sensitivity;
-  
+
+  public EigencutsSensitivityNode() {}
+
   public EigencutsSensitivityNode(int i, int j, double s) {
     row = i;
     column = j;

@@ -29,8 +29,6 @@ import org.apache.hadoop.mapreduce.ReduceContext;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -45,47 +43,47 @@ import java.util.Set;
 
 public final class DummyRecordWriter<K extends Writable, V extends Writable> extends RecordWriter<K, V> {
 
-  private static final Logger log = LoggerFactory.getLogger(DummyRecordWriter.class);
-
+  private final List<K> keysInInsertionOrder = Lists.newArrayList();
   private final Map<K, List<V>> data = Maps.newHashMap();
 
   @Override
   public void write(K key, V value) {
+
     // if the user reuses the same writable class, we need to create a new one
     // otherwise the Map content will be modified after the insert
     try {
-      if (!(key instanceof NullWritable)) {
-        K newKey = (K) key.getClass().newInstance();
-        cloneWritable(key, newKey);
-        key = newKey;
-      }
-      V newValue = (V) value.getClass().newInstance();
-      cloneWritable(value, newValue);
-      value = newValue;
-    } catch (InstantiationException e) {
-      log.error(e.getMessage());
-    } catch (IllegalAccessException e) {
-      log.error(e.getMessage());
-    } catch (IOException e) {
-      log.error(e.getMessage());
-    }
 
-    List<V> points = data.get(key);
-    if (points == null) {
-      points = Lists.newArrayList();
-      data.put(key, points);
+      K keyToUse = key instanceof NullWritable ? key : (K) cloneWritable(key);
+      V valueToUse = (V) cloneWritable(value);
+
+      keysInInsertionOrder.add(keyToUse);
+
+      List<V> points = data.get(key);
+      if (points == null) {
+        points = Lists.newArrayList();
+        data.put(keyToUse, points);
+      }
+      points.add(valueToUse);
+
+    } catch (IOException e) {
+      throw new RuntimeException(e.getMessage(), e);
     }
-    points.add(value);
   }
 
-  private void cloneWritable(Writable from, Writable to) throws IOException {
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    DataOutputStream dos = new DataOutputStream(baos);
-    from.write(dos);
-    dos.close();
-    ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-    DataInputStream dis = new DataInputStream(bais);
-    to.readFields(dis);
+  private Writable cloneWritable(Writable original) throws IOException {
+
+    Writable clone;
+    try {
+      clone = original.getClass().asSubclass(Writable.class).newInstance();
+    } catch (Exception e) {
+      throw new RuntimeException("Unable to instantiate writable!", e);
+    }
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
+    original.write(new DataOutputStream(bytes));
+    clone.readFields(new DataInputStream(new ByteArrayInputStream(bytes.toByteArray())));
+
+    return clone;
   }
 
   @Override
@@ -102,6 +100,10 @@ public final class DummyRecordWriter<K extends Writable, V extends Writable> ext
 
   public Set<K> getKeys() {
     return data.keySet();
+  }
+
+  public Iterable<K> getKeysInInsertionOrder() {
+    return keysInInsertionOrder;
   }
 
   public static <K1, V1, K2, V2> Mapper<K1, V1, K2, V2>.Context build(Mapper<K1, V1, K2, V2> mapper,
