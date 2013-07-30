@@ -24,6 +24,7 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.hadoop.MathHelper;
 import org.apache.mahout.math.hadoop.similarity.cooccurrence.measures.TanimotoCoefficientSimilarity;
+import org.apache.mahout.math.map.OpenIntIntHashMap;
 import org.junit.Test;
 
 import java.io.File;
@@ -72,6 +73,15 @@ public class RowSimilarityJobTest extends MahoutTestCase {
     rowSimilarityJob.run(new String[] { "--input", inputFile.getAbsolutePath(), "--output", outputDir.getAbsolutePath(),
         "--numberOfColumns", String.valueOf(5), "--similarityClassname", TanimotoCoefficientSimilarity.class.getName(),
         "--tempDir", tmpDir.getAbsolutePath() });
+
+
+    OpenIntIntHashMap observationsPerColumn =
+        Vectors.readAsIntMap(new Path(tmpDir.getAbsolutePath(), "observationsPerColumn.bin"), conf);
+    assertEquals(4, observationsPerColumn.size());
+    assertEquals(1, observationsPerColumn.get(0));
+    assertEquals(2, observationsPerColumn.get(2));
+    assertEquals(2, observationsPerColumn.get(3));
+    assertEquals(1, observationsPerColumn.get(4));
 
     Matrix similarityMatrix = MathHelper.readMatrix(conf, new Path(outputDir.getAbsolutePath(), "part-r-00000"), 3, 3);
 

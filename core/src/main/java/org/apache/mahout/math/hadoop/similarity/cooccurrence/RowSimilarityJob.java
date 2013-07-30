@@ -22,6 +22,7 @@ import com.google.common.primitives.Ints;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -29,7 +30,9 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.common.mapreduce.VectorSumCombiner;
 import org.apache.mahout.common.mapreduce.VectorSumReducer;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -45,11 +48,13 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class RowSimilarityJob extends AbstractJob {
 
   public static final double NO_THRESHOLD = Double.MIN_VALUE;
+  public static final long NO_FIXED_RANDOM_SEED = Long.MIN_VALUE;
 
   private static final String SIMILARITY_CLASSNAME = RowSimilarityJob.class + ".distributedSimilarityClassname";
   private static final String NUMBER_OF_COLUMNS = RowSimilarityJob.class + ".numberOfColumns";
@@ -63,16 +68,24 @@ public class RowSimilarityJob extends AbstractJob {
   private static final String NUM_NON_ZERO_ENTRIES_PATH = RowSimilarityJob.class + ".nonZeroEntriesPath";
   private static final int DEFAULT_MAX_SIMILARITIES_PER_ROW = 100;
 
+  private static final String OBSERVATIONS_PER_COLUMN_PATH = RowSimilarityJob.class + ".observationsPerColumnPath";
+
+  private static final String MAX_OBSERVATIONS_PER_ROW = RowSimilarityJob.class + ".maxObservationsPerRow";
+  private static final String MAX_OBSERVATIONS_PER_COLUMN = RowSimilarityJob.class + ".maxObservationsPerColumn";
+  private static final String RANDOM_SEED = RowSimilarityJob.class + ".randomSeed";
+
+  private static final int DEFAULT_MAX_OBSERVATIONS_PER_ROW = 500;
+  private static final int DEFAULT_MAX_OBSERVATIONS_PER_COLUMN = 500;
+
   private static final int NORM_VECTOR_MARKER = Integer.MIN_VALUE;
   private static final int MAXVALUE_VECTOR_MARKER = Integer.MIN_VALUE + 1;
   private static final int NUM_NON_ZERO_ENTRIES_VECTOR_MARKER = Integer.MIN_VALUE + 2;
 
-  enum Counters { ROWS, COOCCURRENCES, PRUNED_COOCCURRENCES }
+  enum Counters { ROWS, USED_OBSERVATIONS, NEGLECTED_OBSERVATIONS, COOCCURRENCES, PRUNED_COOCCURRENCES }
 
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new RowSimilarityJob(), args);
   }
-
 
   @Override
   public int run(String[] args) throws Exception {
@@ -86,6 +99,11 @@ public class RowSimilarityJob extends AbstractJob {
         + DEFAULT_MAX_SIMILARITIES_PER_ROW + ')', String.valueOf(DEFAULT_MAX_SIMILARITIES_PER_ROW));
     addOption("excludeSelfSimilarity", "ess", "compute similarity of rows to themselves?", String.valueOf(false));
     addOption("threshold", "tr", "discard row pairs with a similarity value below this", false);
+    addOption("maxObservationsPerRow", null, "sample rows down to this number of entries",
+        String.valueOf(DEFAULT_MAX_OBSERVATIONS_PER_ROW));
+    addOption("maxObservationsPerColumn", null, "sample columns down to this number of entries",
+        String.valueOf(DEFAULT_MAX_OBSERVATIONS_PER_COLUMN));
+    addOption("randomSeed", null, "use this seed for sampling", false);
     addOption(DefaultOptionCreator.overwriteOption().create());
 
     Map<String,List<String>> parsedArgs = parseArguments(args);
@@ -123,6 +141,11 @@ public class RowSimilarityJob extends AbstractJob {
     boolean excludeSelfSimilarity = Boolean.parseBoolean(getOption("excludeSelfSimilarity"));
     double threshold = hasOption("threshold")
         ? Double.parseDouble(getOption("threshold")) : NO_THRESHOLD;
+    long randomSeed = hasOption("randomSeed")
+        ? Long.parseLong(getOption("randomSeed")) : NO_FIXED_RANDOM_SEED;
+
+    int maxObservationsPerRow = Integer.parseInt(getOption("maxObservationsPerRow"));
+    int maxObservationsPerColumn = Integer.parseInt(getOption("maxObservationsPerColumn"));
 
     Path weightsPath = getTempPath("weights");
     Path normsPath = getTempPath("norms.bin");
@@ -130,7 +153,17 @@ public class RowSimilarityJob extends AbstractJob {
     Path maxValuesPath = getTempPath("maxValues.bin");
     Path pairwiseSimilarityPath = getTempPath("pairwiseSimilarity");
 
+    Path observationsPerColumnPath = getTempPath("observationsPerColumn.bin");
+
     AtomicInteger currentPhase = new AtomicInteger();
+
+    Job countObservations = prepareJob(getInputPath(), getTempPath("notUsed"), CountObservationsMapper.class,
+        NullWritable.class, VectorWritable.class, SumObservationsReducer.class, NullWritable.class,
+        VectorWritable.class);
+    countObservations.setCombinerClass(VectorSumCombiner.class);
+    countObservations.getConfiguration().set(OBSERVATIONS_PER_COLUMN_PATH, observationsPerColumnPath.toString());
+    countObservations.setNumReduceTasks(1);
+    countObservations.waitForCompletion(true);
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
       Job normsAndTranspose = prepareJob(getInputPath(), weightsPath, VectorNormMapper.class, IntWritable.class,
@@ -142,6 +175,11 @@ public class RowSimilarityJob extends AbstractJob {
       normsAndTransposeConf.set(NUM_NON_ZERO_ENTRIES_PATH, numNonZeroEntriesPath.toString());
       normsAndTransposeConf.set(MAXVALUES_PATH, maxValuesPath.toString());
       normsAndTransposeConf.set(SIMILARITY_CLASSNAME, similarityClassname);
+      normsAndTransposeConf.set(OBSERVATIONS_PER_COLUMN_PATH, observationsPerColumnPath.toString());
+      normsAndTransposeConf.set(MAX_OBSERVATIONS_PER_ROW, String.valueOf(maxObservationsPerRow));
+      normsAndTransposeConf.set(MAX_OBSERVATIONS_PER_COLUMN, String.valueOf(maxObservationsPerColumn));
+      normsAndTransposeConf.set(RANDOM_SEED, String.valueOf(randomSeed));
+
       boolean succeeded = normsAndTranspose.waitForCompletion(true);
       if (!succeeded) {
         return -1;
@@ -181,6 +219,35 @@ public class RowSimilarityJob extends AbstractJob {
     return 0;
   }
 
+  public static class CountObservationsMapper extends Mapper<IntWritable,VectorWritable,NullWritable,VectorWritable> {
+
+    private Vector columnCounts = new RandomAccessSparseVector(Integer.MAX_VALUE);
+
+    @Override
+    protected void map(IntWritable rowIndex, VectorWritable rowVectorWritable, Context ctx)
+      throws IOException, InterruptedException {
+
+      Vector row = rowVectorWritable.get();
+      for (Vector.Element elem : row.nonZeroes()) {
+        columnCounts.setQuick(elem.index(), columnCounts.getQuick(elem.index()) + 1);
+      }
+    }
+
+    @Override
+    protected void cleanup(Context ctx) throws IOException, InterruptedException {
+      ctx.write(NullWritable.get(), new VectorWritable(columnCounts));
+    }
+  }
+
+  public static class SumObservationsReducer extends Reducer<NullWritable,VectorWritable,NullWritable,VectorWritable> {
+    @Override
+    protected void reduce(NullWritable nullWritable, Iterable<VectorWritable> partialVectors, Context ctx)
+    throws IOException, InterruptedException {
+      Vector counts = Vectors.sum(partialVectors.iterator());
+      Vectors.write(counts, new Path(ctx.getConfiguration().get(OBSERVATIONS_PER_COLUMN_PATH)), ctx.getConfiguration());
+    }
+  }
+
   public static class VectorNormMapper extends Mapper<IntWritable,VectorWritable,IntWritable,VectorWritable> {
 
     private VectorSimilarityMeasure similarity;
@@ -189,21 +256,71 @@ public class RowSimilarityJob extends AbstractJob {
     private Vector maxValues;
     private double threshold;
 
+    private OpenIntIntHashMap observationsPerColumn;
+    private int maxObservationsPerRow;
+    private int maxObservationsPerColumn;
+
+    private Random random;
+
     @Override
     protected void setup(Context ctx) throws IOException, InterruptedException {
-      similarity = ClassUtils.instantiateAs(ctx.getConfiguration().get(SIMILARITY_CLASSNAME),
-          VectorSimilarityMeasure.class);
+
+      Configuration conf = ctx.getConfiguration();
+
+      similarity = ClassUtils.instantiateAs(conf.get(SIMILARITY_CLASSNAME), VectorSimilarityMeasure.class);
       norms = new RandomAccessSparseVector(Integer.MAX_VALUE);
       nonZeroEntries = new RandomAccessSparseVector(Integer.MAX_VALUE);
       maxValues = new RandomAccessSparseVector(Integer.MAX_VALUE);
-      threshold = Double.parseDouble(ctx.getConfiguration().get(THRESHOLD));
+      threshold = Double.parseDouble(conf.get(THRESHOLD));
+
+      observationsPerColumn = Vectors.readAsIntMap(new Path(conf.get(OBSERVATIONS_PER_COLUMN_PATH)), conf);
+      maxObservationsPerRow = conf.getInt(MAX_OBSERVATIONS_PER_ROW, DEFAULT_MAX_OBSERVATIONS_PER_ROW);
+      maxObservationsPerColumn = conf.getInt(MAX_OBSERVATIONS_PER_COLUMN, DEFAULT_MAX_OBSERVATIONS_PER_COLUMN);
+
+      long seed = Long.parseLong(conf.get(RANDOM_SEED));
+      if (seed == NO_FIXED_RANDOM_SEED) {
+        random = RandomUtils.getRandom();
+      } else {
+        random = RandomUtils.getRandom(seed);
+      }
+    }
+
+    private Vector sampleDown(Vector rowVector, Context ctx) {
+
+      int observationsPerRow = rowVector.getNumNondefaultElements();
+      double rowSampleRate = Math.min(maxObservationsPerRow, observationsPerRow) / observationsPerRow;
+
+      Vector downsampledRow = rowVector.like();
+      long usedObservations = 0;
+      long neglectedObservations = 0;
+
+      for (Vector.Element elem : rowVector.nonZeroes()) {
+
+        int columnCount = observationsPerColumn.get(elem.index());
+        double columnSampleRate = Math.min(maxObservationsPerColumn, columnCount) / columnCount;
+
+        if (random.nextDouble() <= Math.min(rowSampleRate, columnSampleRate)) {
+          downsampledRow.setQuick(elem.index(), elem.get());
+          usedObservations++;
+        } else {
+          neglectedObservations++;
+        }
+
+      }
+
+      ctx.getCounter(Counters.USED_OBSERVATIONS).increment(usedObservations);
+      ctx.getCounter(Counters.NEGLECTED_OBSERVATIONS).increment(neglectedObservations);
+
+      return downsampledRow;
     }
 
     @Override
     protected void map(IntWritable row, VectorWritable vectorWritable, Context ctx)
       throws IOException, InterruptedException {
 
-      Vector rowVector = similarity.normalize(vectorWritable.get());
+      Vector sampledRowVector = sampleDown(vectorWritable.get(), ctx);
+
+      Vector rowVector = similarity.normalize(sampledRowVector);
 
       int numNonZeroEntries = 0;
       double maxValue = Double.MIN_VALUE;
@@ -230,8 +347,6 @@ public class RowSimilarityJob extends AbstractJob {
 
     @Override
     protected void cleanup(Context ctx) throws IOException, InterruptedException {
-      super.cleanup(ctx);
-      // dirty trick
       ctx.write(new IntWritable(NORM_VECTOR_MARKER), new VectorWritable(norms));
       ctx.write(new IntWritable(NUM_NON_ZERO_ENTRIES_VECTOR_MARKER), new VectorWritable(nonZeroEntries));
       ctx.write(new IntWritable(MAXVALUE_VECTOR_MARKER), new VectorWritable(maxValues));

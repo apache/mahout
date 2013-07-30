@@ -24,37 +24,19 @@ import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.hadoop.similarity.cooccurrence.Vectors;
 
 import java.io.IOException;
 
 public class ToItemVectorsMapper
     extends Mapper<VarLongWritable,VectorWritable,IntWritable,VectorWritable> {
 
-  public static final String SAMPLE_SIZE = ToItemVectorsMapper.class + ".sampleSize";
-
-  enum Elements {
-    USER_RATINGS_USED, USER_RATINGS_NEGLECTED
-  }
-
   private final IntWritable itemID = new IntWritable();
   private final VectorWritable itemVectorWritable = new VectorWritable();
-
-  private int sampleSize;
-
-  @Override
-  protected void setup(Context ctx) throws IOException, InterruptedException {
-    sampleSize = ctx.getConfiguration().getInt(SAMPLE_SIZE, Integer.MAX_VALUE);
-  }
 
   @Override
   protected void map(VarLongWritable rowIndex, VectorWritable vectorWritable, Context ctx)
     throws IOException, InterruptedException {
     Vector userRatings = vectorWritable.get();
-
-    int numElementsBeforeSampling = userRatings.getNumNondefaultElements();
-    userRatings = Vectors.maybeSample(userRatings, sampleSize);
-    int numElementsAfterSampling = userRatings.getNumNondefaultElements();
 
     int column = TasteHadoopUtils.idToIndex(rowIndex.get());
 
@@ -69,9 +51,6 @@ public class ToItemVectorsMapper
       // reset vector for reuse
       itemVector.setQuick(elem.index(), 0.0);
     }
-
-    ctx.getCounter(Elements.USER_RATINGS_USED).increment(numElementsAfterSampling);
-    ctx.getCounter(Elements.USER_RATINGS_NEGLECTED).increment(numElementsBeforeSampling - numElementsAfterSampling);
   }
 
 }

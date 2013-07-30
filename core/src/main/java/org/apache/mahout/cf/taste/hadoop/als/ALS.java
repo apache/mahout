@@ -52,19 +52,6 @@ final class ALS {
     return iterator.hasNext() ? iterator.next().get() : null;
   }
 
-  /**
-   * assumes that first entry always exists
-   *
-   * @param vectors
-   */
-  public static Vector sum(Iterator<VectorWritable> vectors) {
-    Vector sum = vectors.next().get();
-    while (vectors.hasNext()) {
-      sum.assign(vectors.next().get(), Functions.PLUS);
-    }
-    return sum;
-  }
-
   public static OpenIntObjectHashMap<Vector> readMatrixByRowsFromDistributedCache(int numEntities,
       Configuration conf) throws IOException {
 

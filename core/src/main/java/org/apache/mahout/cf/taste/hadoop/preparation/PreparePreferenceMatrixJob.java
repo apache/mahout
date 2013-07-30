@@ -56,8 +56,6 @@ public class PreparePreferenceMatrixJob extends AbstractJob {
 
     addInputOption();
     addOutputOption();
-    addOption("maxPrefsPerUser", "mppu", "max number of preferences to consider per user, " 
-            + "users with more preferences will be sampled down");
     addOption("minPrefsPerUser", "mp", "ignore users with less preferences than this "
             + "(default: " + DEFAULT_MIN_PREFS_PER_USER + ')', String.valueOf(DEFAULT_MIN_PREFS_PER_USER));
     addOption("booleanData", "b", "Treat input as without pref values", Boolean.FALSE.toString());
@@ -106,12 +104,6 @@ public class PreparePreferenceMatrixJob extends AbstractJob {
             ToItemVectorsMapper.class, IntWritable.class, VectorWritable.class, ToItemVectorsReducer.class,
             IntWritable.class, VectorWritable.class);
     toItemVectors.setCombinerClass(ToItemVectorsReducer.class);
-
-    /* configure sampling regarding the uservectors */
-    if (hasOption("maxPrefsPerUser")) {
-      int samplingSize = Integer.parseInt(getOption("maxPrefsPerUser"));
-      toItemVectors.getConfiguration().setInt(ToItemVectorsMapper.SAMPLE_SIZE, samplingSize);
-    }
 
     succeeded = toItemVectors.waitForCompletion(true);
     if (!succeeded) {

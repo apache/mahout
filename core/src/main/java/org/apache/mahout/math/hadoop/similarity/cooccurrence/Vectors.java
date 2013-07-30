@@ -34,6 +34,7 @@ import org.apache.mahout.math.Varint;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.map.OpenIntIntHashMap;
 
 public final class Vectors {
@@ -89,6 +90,14 @@ public final class Vectors {
       }
     }
     return accumulator;
+  }
+
+  public static Vector sum(Iterator<VectorWritable> vectors) {
+    Vector sum = vectors.next().get();
+    while (vectors.hasNext()) {
+      sum.assign(vectors.next().get(), Functions.PLUS);
+    }
+    return sum;
   }
 
   static class TemporaryElement implements Vector.Element {
