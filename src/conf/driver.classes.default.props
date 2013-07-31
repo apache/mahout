@@ -29,19 +29,13 @@ org.apache.mahout.math.hadoop.stochasticsvd.SSVDCli = ssvd : Stochastic SVD
 #Clustering
 org.apache.mahout.clustering.kmeans.KMeansDriver = kmeans : K-means clustering
 org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver = fkmeans : Fuzzy K-means clustering
-org.apache.mahout.clustering.minhash.MinHashDriver = minhash : Run Minhash clustering
 org.apache.mahout.clustering.lda.cvb.CVB0Driver = cvb : LDA via Collapsed Variation Bayes (0th deriv. approx)
 org.apache.mahout.clustering.lda.cvb.InMemoryCollapsedVariationalBayes0 = cvb0_local : LDA via Collapsed Variation Bayes, in memory locally.
-org.apache.mahout.clustering.dirichlet.DirichletDriver = dirichlet : Dirichlet Clustering
-org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver = meanshift : Mean Shift clustering
 org.apache.mahout.clustering.canopy.CanopyDriver = canopy : Canopy clustering
-org.apache.mahout.clustering.spectral.eigencuts.EigencutsDriver = eigencuts : Eigencuts spectral clustering
 org.apache.mahout.clustering.spectral.kmeans.SpectralKMeansDriver = spectralkmeans : Spectral k-means clustering
 org.apache.mahout.clustering.topdown.postprocessor.ClusterOutputPostProcessorDriver = clusterpp : Groups Clustering Output In Clusters
 org.apache.mahout.clustering.streaming.mapreduce.StreamingKMeansDriver = streamingkmeans : Streaming k-means clustering
 
-#Freq. Itemset Mining
-org.apache.mahout.fpm.pfpgrowth.FPGrowthDriver = fpg : Frequent Pattern Growth
 #Classification
 #new bayes
 org.apache.mahout.classifier.naivebayes.training.TrainNaiveBayesJob = trainnb : Train the Vector-based Bayes classifier
