@@ -147,11 +147,6 @@
     </dependency>
 
     <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
     </dependency>
@@ -193,6 +188,7 @@
       <artifactId>mrunit</artifactId>
       <version>1.0.0</version>
       <classifier>hadoop1</classifier>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
