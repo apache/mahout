@@ -17,7 +17,7 @@
 
 package org.apache.mahout.math;
 
-public class DiagonalMatrix extends AbstractMatrix {
+public class DiagonalMatrix extends AbstractMatrix implements MatrixTimesOps {
   private final Vector diagonal;
 
   public DiagonalMatrix(Vector values) {
@@ -138,5 +138,31 @@ public class DiagonalMatrix extends AbstractMatrix {
   @Override
   public Matrix viewPart(int[] offset, int[] size) {
     return new MatrixView(this, offset, size);
+  }
+
+  @Override
+  public Matrix times(Matrix other) {
+    return timesRight(other);
+  }
+
+  @Override
+  public Matrix timesRight(Matrix that) {
+    if (that.numRows() != diagonal.size())
+      throw new IllegalArgumentException("Incompatible number of rows in the right operand of matrix multiplication.");
+    Matrix m = that.like();
+    for (int row = 0; row < diagonal.size(); row++)
+      m.assignRow(row, that.viewRow(row).times(diagonal.getQuick(row)));
+    return m;
+  }
+
+  @Override
+  public Matrix timesLeft(Matrix that) {
+    if (that.numCols() != diagonal.size())
+      throw new IllegalArgumentException(
+          "Incompatible number of rows in the left operand of matrix-matrix multiplication.");
+    Matrix m = that.like();
+    for (int col = 0; col < diagonal.size(); col++)
+      m.assignColumn(col, that.viewColumn(col).times(diagonal.getQuick(col)));
+    return m;
   }
 }
