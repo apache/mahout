@@ -28,7 +28,7 @@ public class SparseColumnMatrix extends AbstractMatrix {
   /**
    * Construct a matrix of the given cardinality with the given data columns
    *
-   * @param columns     a RandomAccessSparseVector[] array of columns
+   * @param columns       a RandomAccessSparseVector[] array of columns
    * @param columnVectors
    */
   public SparseColumnMatrix(int rows, int columns, RandomAccessSparseVector[] columnVectors) {
@@ -65,7 +65,8 @@ public class SparseColumnMatrix extends AbstractMatrix {
 
   /**
    * Abstracted out for the iterator
-   * @return {@link #numCols()} 
+   *
+   * @return {@link #numCols()}
    */
   @Override
   public int numSlices() {
@@ -101,7 +102,7 @@ public class SparseColumnMatrix extends AbstractMatrix {
     result[COL] = columnVectors.length;
     for (int col = 0; col < columnSize(); col++) {
       result[ROW] = Math.max(result[ROW], columnVectors[col]
-          .getNumNondefaultElements());
+        .getNumNondefaultElements());
     }
     return result;
   }
@@ -156,4 +157,17 @@ public class SparseColumnMatrix extends AbstractMatrix {
     }
     return columnVectors[column];
   }
+
+  @Override
+  public Matrix transpose() {
+    SparseRowMatrix srm = new SparseRowMatrix(columns, rows);
+    for (int i = 0; i < columns; i++) {
+      Vector col = columnVectors[i];
+      if (col.getNumNonZeroElements() > 0)
+        // this should already be optimized
+        srm.assignRow(i, col);
+    }
+    return srm;
+  }
+
 }

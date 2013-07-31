@@ -166,4 +166,15 @@ public class SparseRowMatrix extends AbstractMatrix {
     return rowVectors[row];
   }
 
+  @Override
+  public Matrix transpose() {
+    SparseColumnMatrix scm = new SparseColumnMatrix(columns, rows);
+    for (int i = 0; i < rows; i++) {
+      Vector row = rowVectors[i];
+      if ( row.getNumNonZeroElements() > 0)
+        scm.assignColumn(i, row);
+    }
+    return scm;
+  }
+
 }
