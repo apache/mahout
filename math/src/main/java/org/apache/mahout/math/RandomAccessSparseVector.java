@@ -75,23 +75,7 @@ public class RandomAccessSparseVector extends AbstractVector {
 
   @Override
   public String toString() {
-    StringBuilder result = new StringBuilder();
-    result.append('{');
-    Iterator<Element> it = iterateNonZero();
-    boolean first = true;
-    while (it.hasNext()) {
-      if (first) {
-        first = false;
-      } else {
-        result.append(',');
-      }
-      Element e = it.next();
-      result.append(e.index());
-      result.append(':');
-      result.append(e.get());
-    }
-    result.append('}');
-    return result.toString();
+    return sparseVectorToString();
   }
 
   @Override

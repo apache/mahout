@@ -633,6 +633,30 @@ public abstract class AbstractVector implements Vector, LengthCachingVector {
     return result.toString();
   }
 
+  /**
+   * toString() implementation for sparse vectors via {@link #nonZeroes()} method
+   * @return String representation of the vector
+   */
+  public String sparseVectorToString() {
+    Iterator<Element> it = iterateNonZero();
+    if (!it.hasNext()) {
+      return "{}";
+    }
+    else {
+      StringBuilder result = new StringBuilder();
+      result.append('{');
+      while (it.hasNext()) {
+        Vector.Element e = it.next();
+        result.append(e.index());
+        result.append(':');
+        result.append(e.get());
+        result.append(',');
+      }
+      result.setCharAt(result.length() - 1, '}');
+      return result.toString();
+    }
+  }
+
   protected final class LocalElement implements Element {
     int index;
 

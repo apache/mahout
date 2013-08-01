@@ -52,4 +52,11 @@ public final class TestSequentialAccessSparseVector extends AbstractVectorTest<S
     }
     return r;
   }
+
+
+  @Override
+  @Test
+  public void testToString() {
+    super.testToString();
+  }
 }

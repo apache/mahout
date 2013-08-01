@@ -3,6 +3,7 @@ package org.apache.mahout.math;
 import java.util.Iterator;
 import java.util.Random;
 
+import com.google.common.collect.Iterables;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.function.Functions;
@@ -593,11 +594,7 @@ public abstract class AbstractVectorTest<T extends Vector> extends MahoutTestCas
       }
     }
 
-    int nonZeroIterated = 0;
-
-    for (Element ignored : v0.nonZeroes()) {
-      nonZeroIterated++;
-    }
+    int nonZeroIterated = Iterables.size(v0.nonZeroes());
     assertEquals(20, elements);
     assertEquals(v0.size(), elements);
     assertEquals(nonZeroIterated, nonZero);
@@ -622,5 +619,23 @@ public abstract class AbstractVectorTest<T extends Vector> extends MahoutTestCas
         }
       }
     }
+  }
+
+
+  public void testToString() {
+    Vector w;
+
+    w = generateTestVector(20);
+    w.set(0, 1.1);
+    w.set(13, 100500.);
+    w.set(19, 3.141592);
+    assertEquals("{0:1.1,13:100500.0,19:3.141592}", w.toString());
+
+    w = generateTestVector(12);
+    w.set(10, 0.1);
+    assertEquals("{10:0.1}", w.toString());
+
+    w = generateTestVector(12);
+    assertEquals("{}", w.toString());
   }
 }

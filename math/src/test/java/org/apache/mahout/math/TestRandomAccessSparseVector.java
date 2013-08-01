@@ -18,6 +18,7 @@
 package org.apache.mahout.math;
 
 import org.apache.mahout.common.RandomUtils;
+import org.junit.Test;
 
 import java.util.Random;
 
@@ -39,4 +40,9 @@ public final class TestRandomAccessSparseVector extends AbstractVectorTest<Rando
     return r;
   }
 
+  @Override
+  @Test
+  public void testToString() {
+    super.testToString();
+  }
 }

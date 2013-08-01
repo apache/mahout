@@ -126,18 +126,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
 
   @Override
   public String toString() {
-    StringBuilder result = new StringBuilder();
-    result.append('{');
-    Iterator<Element> it = iterateNonZero();
-    while (it.hasNext()) {
-      Element e = it.next();
-      result.append(e.index());
-      result.append(':');
-      result.append(e.get());
-      result.append(',');
-    }
-    result.append('}');
-    return result.toString();
+    return sparseVectorToString();
   }
 
   /**

@@ -18,6 +18,7 @@
 package org.apache.mahout.math;
 
 import org.apache.mahout.math.function.Functions;
+import org.junit.Test;
 
 public final class TestDenseVector extends AbstractVectorTest<DenseVector> {
 
@@ -36,5 +37,11 @@ public final class TestDenseVector extends AbstractVectorTest<DenseVector> {
     DenseVector r = new DenseVector(size);
     r.assign(Functions.random());
     return r;
+  }
+
+  @Override
+  @Test
+  public void testToString() {
+    super.testToString();
   }
 }

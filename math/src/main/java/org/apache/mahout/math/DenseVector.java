@@ -33,7 +33,9 @@ public class DenseVector extends AbstractVector {
     super(0);
   }
 
-  /** Construct a new instance using provided values */
+  /** Construct a new instance using provided values
+   *  @param values - array of values
+   */
   public DenseVector(double[] values) {
     this(values, false);
   }
@@ -47,7 +49,9 @@ public class DenseVector extends AbstractVector {
     this(values.values, shallowCopy);
   }
 
-  /** Construct a new instance of the given cardinality */
+  /** Construct a new instance of the given cardinality
+   * @param cardinality - number of values in the vector
+   */
   public DenseVector(int cardinality) {
     super(cardinality);
     this.values = new double[cardinality];
