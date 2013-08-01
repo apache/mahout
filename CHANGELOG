@@ -2,7 +2,7 @@ Mahout Change Log
 
 Release 0.9 - unreleased
 
-  MAHOUT-1289: Move downsampling code into RowSimilarityJob (ssc)
+  MAHOUT-1301: toString() method of SequentialAccessSparseVector has excess comma at the end (Alexander Senov, smarthi)
 
   MAHOUT-1296: Remove deprecated algorithms (ssc)
 
@@ -15,6 +15,8 @@ Release 0.9 - unreleased
   MAHOUT-1291: MahoutDriver yields cosmetically suboptimal exception when bin/mahout runs without args, on some Hadoop versions (srowen)
 
   MAHOUT-1290: Issue when running Mahout Recommender Demo (Helder Garay Martins via smarthi)
+
+  MAHOUT-1289: Move downsampling code into RowSimilarityJob (ssc)
 
   MAHOUT-1287: classifier.sgd.CsvRecordFactory incorrectly parses CSV format (Alex Franchuk via smarthi)
 
