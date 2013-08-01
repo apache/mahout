@@ -39,15 +39,14 @@ if [ ! -e $MAHOUT ]; then
   exit 1
 fi
 
-algorithm=( kmeans fuzzykmeans dirichlet lda)
+algorithm=( kmeans fuzzykmeans lda)
 if [ -n "$1" ]; then
   choice=$1
 else
   echo "Please select a number to choose the corresponding clustering algorithm"
   echo "1. ${algorithm[0]} clustering"
   echo "2. ${algorithm[1]} clustering"
-  echo "3. ${algorithm[2]} clustering"
-  echo "4. ${algorithm[3]} clustering" 
+  echo "3. ${algorithm[2]} clustering" 
   read -p "Enter your choice : " choice
 fi
 
@@ -144,25 +143,6 @@ elif [ "x$clustertype" == "xfuzzykmeans" ]; then
     -dt sequencefile -b 100 -n 20 -sp 0 \
     && \
   cat ${WORK_DIR}/reuters-fkmeans/clusterdump
-elif [ "x$clustertype" == "xdirichlet" ]; then
-  $MAHOUT seq2sparse \
-    -i ${WORK_DIR}/reuters-out-seqdir/ \
-    -o ${WORK_DIR}/reuters-out-seqdir-sparse-dirichlet  --maxDFPercent 85 --namedVector \
-  && \
-  $MAHOUT dirichlet \
-    -i ${WORK_DIR}/reuters-out-seqdir-sparse-dirichlet/tfidf-vectors \
-    -o ${WORK_DIR}/reuters-dirichlet -k 20 -ow -x 20 -a0 2 \
-    -md org.apache.mahout.clustering.dirichlet.models.DistanceMeasureClusterDistribution \
-    -mp org.apache.mahout.math.DenseVector \
-    -dm org.apache.mahout.common.distance.CosineDistanceMeasure \
-  && \
-  $MAHOUT clusterdump \
-    -i ${WORK_DIR}/reuters-dirichlet/clusters-*-final \
-    -o ${WORK_DIR}/reuters-dirichlet/clusterdump \
-    -d ${WORK_DIR}/reuters-out-seqdir-sparse-dirichlet/dictionary.file-0 \
-    -dt sequencefile -b 100 -n 20 -sp 0 \
-    && \
-  cat ${WORK_DIR}/reuters-dirichlet/clusterdump
 elif [ "x$clustertype" == "xlda" ]; then
   $MAHOUT seq2sparse \
     -i ${WORK_DIR}/reuters-out-seqdir/ \
