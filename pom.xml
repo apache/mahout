@@ -104,7 +104,7 @@
     <mcheckstyle.version>2.10</mcheckstyle.version>
     <mfindbugs.version>2.5.2</mfindbugs.version>
     <mjavadoc.version>2.9.1</mjavadoc.version>
-    <hadoop.version>1.1.2</hadoop.version>
+    <hadoop.version>1.2.1</hadoop.version>
     <lucene.version>4.3.0</lucene.version>
   </properties>
   <issueManagement>
