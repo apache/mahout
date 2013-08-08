@@ -17,13 +17,15 @@
 
 package org.apache.mahout.math.hadoop.stochasticsvd;
 
+import java.io.Closeable;
 import java.io.IOException;
+import java.util.*;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterators;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -31,11 +33,11 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
-import org.apache.mahout.common.iterator.sequencefile.PathFilters;
-import org.apache.mahout.common.iterator.sequencefile.PathType;
-import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterator;
-import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
+import org.apache.mahout.common.IOUtils;
+import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.*;
 import org.apache.mahout.math.*;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
 
 import com.google.common.collect.Lists;
@@ -43,7 +45,6 @@ import com.google.common.io.Closeables;
 
 /**
  * set of small file manipulation helpers.
- *
  */
 public final class SSVDHelper {
 
@@ -149,13 +150,13 @@ public final class SSVDHelper {
         matcher.reset(o1.getPath().getName());
         if (!matcher.matches()) {
           throw new IllegalArgumentException("Unexpected file name, unable to deduce partition #:"
-              + o1.getPath());
+                                               + o1.getPath());
         }
         int p1 = Integer.parseInt(matcher.group(3));
         matcher.reset(o2.getPath().getName());
         if (!matcher.matches()) {
           throw new IllegalArgumentException("Unexpected file name, unable to deduce partition #:"
-              + o2.getPath());
+                                               + o2.getPath());
         }
 
         int p2 = Integer.parseInt(matcher.group(3));
@@ -164,49 +165,63 @@ public final class SSVDHelper {
 
     };
 
+  public static Iterator<Pair<Writable, Vector>> drmIterator(FileSystem fs, Path glob, Configuration conf,
+                                                             Deque<Closeable> closeables)
+    throws IOException {
+    SequenceFileDirIterator<Writable, VectorWritable> ret =
+      new SequenceFileDirIterator<Writable, VectorWritable>(glob,
+                                                            PathType.GLOB,
+                                                            PathFilters.logsCRCFilter(),
+                                                            PARTITION_COMPARATOR,
+                                                            true,
+                                                            conf);
+    closeables.addFirst(ret);
+    return Iterators.transform(ret, new Function<Pair<Writable, VectorWritable>, Pair<Writable, Vector>>() {
+      @Override
+      public Pair<Writable, Vector> apply(Pair<Writable, VectorWritable> p) {
+        return new Pair(p.getFirst(), p.getSecond().get());
+      }
+    });
+  }
+
   /**
    * helper capabiltiy to load distributed row matrices into dense matrix (to
    * support tests mainly).
    *
-   * @param fs
-   *          filesystem
-   * @param glob
-   *          FS glob
-   * @param conf
-   *          configuration
+   * @param fs   filesystem
+   * @param glob FS glob
+   * @param conf configuration
    * @return Dense matrix array
    */
-  public static double[][] loadDistributedRowMatrix(FileSystem fs, Path glob, Configuration conf) throws IOException {
+  public static DenseMatrix drmLoadAsDense(FileSystem fs, Path glob, Configuration conf) throws IOException {
 
-    FileStatus[] files = fs.globStatus(glob);
-    if (files == null) {
-      return null;
-    }
-
-    List<double[]> denseData = Lists.newArrayList();
-
-    /*
-     * assume it is partitioned output, so we need to read them up in order of
-     * partitions.
-     */
-    Arrays.sort(files, PARTITION_COMPARATOR);
-
-    for (FileStatus fstat : files) {
-      for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(fstat.getPath(),
-                                                                                true,
-                                                                                conf)) {
-        Vector v = value.get();
-        int size = v.size();
-        double[] row = new double[size];
-        for (int i = 0; i < size; i++) {
-          row[i] = v.get(i);
+    Deque<Closeable> closeables = new ArrayDeque<Closeable>();
+    try {
+      List<double[]> denseData = new ArrayList<double[]>();
+      for (Iterator<Pair<Writable, Vector>> iter = drmIterator(fs, glob, conf, closeables);
+           iter.hasNext(); ) {
+        Pair<Writable, Vector> p = iter.next();
+        Vector v = p.getSecond();
+        double[] dd = new double[v.size()];
+        if (v.isDense()) {
+          for (int i = 0; i < v.size(); i++) {
+            dd[i] = v.getQuick(i);
+          }
+        } else {
+          for (Vector.Element el : v.nonZeroes()) {
+            dd[el.index()] = el.get();
+          }
         }
-        // ignore row label.
-        denseData.add(row);
+        denseData.add(dd);
       }
+      if (denseData.size() == 0) {
+        return null;
+      } else {
+        return new DenseMatrix(denseData.toArray(new double[denseData.size()][]));
+      }
+    } finally {
+      IOUtils.close(closeables);
     }
-
-    return denseData.toArray(new double[denseData.size()][]);
   }
 
   /**

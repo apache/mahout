@@ -100,6 +100,8 @@ public final class QJob {
       String sbPathStr = conf.get(PROP_SB_PATH);
       if (sbPathStr != null) {
         sb = SSVDHelper.loadAndSumUpVectors(new Path(sbPathStr), conf);
+        if (sb == null)
+          throw new IOException(String.format("Unable to load s_omega from path %s.", sbPathStr));
       }
 
       outputs = new MultipleOutputs(new JobConf(conf));

@@ -101,8 +101,7 @@ public class VJob {
 
       Path sigmaPath = new Path(conf.get(PROP_SIGMA_PATH));
 
-      uHat =
-        new DenseMatrix(SSVDHelper.loadDistributedRowMatrix(fs, uHatPath, conf));
+      uHat = SSVDHelper.drmLoadAsDense(fs, uHatPath, conf);
       // since uHat is (k+p) x (k+p)
       kp = uHat.columnSize();
       k = context.getConfiguration().getInt(PROP_K, kp);

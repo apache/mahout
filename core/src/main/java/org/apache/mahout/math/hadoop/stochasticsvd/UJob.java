@@ -144,8 +144,7 @@ public class UJob {
       Path sigmaPath = new Path(context.getConfiguration().get(PROP_SIGMA_PATH));
       FileSystem fs = FileSystem.get(uHatPath.toUri(), context.getConfiguration());
 
-      uHat = new DenseMatrix(SSVDHelper.loadDistributedRowMatrix(fs,
-          uHatPath, context.getConfiguration()));
+      uHat = SSVDHelper.drmLoadAsDense(fs, uHatPath, context.getConfiguration());
       // since uHat is (k+p) x (k+p)
       kp = uHat.columnSize();
       k = context.getConfiguration().getInt(PROP_K, kp);

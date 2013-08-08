@@ -150,7 +150,7 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
      * System.out.println("--Colt SVD solver singular values:"); // try to run
      * 
      * the same thing without stochastic algo double[][] a =
-     * SSVDSolver.loadDistributedRowMatrix(fs, aPath, conf);
+     * SSVDSolver.drmLoadAsDense(fs, aPath, conf);
      * 
      * 
      * 
@@ -173,26 +173,25 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
           / singularValues.getQuick(i)) <= s_precisionPct / 100);
     }
 
-    double[][] mQ =
-      SSVDHelper.loadDistributedRowMatrix(fs, new Path(svdOutPath, "Bt-job/"
-          + BtJob.OUTPUT_Q + "-*"), conf);
+    DenseMatrix mQ =
+      SSVDHelper.drmLoadAsDense(fs, new Path(svdOutPath, "Bt-job/"
+        + BtJob.OUTPUT_Q + "-*"), conf);
 
-    SSVDCommonTest.assertOrthonormality(new DenseMatrix(mQ),
-                                           false,
-                                           s_epsilon);
+    SSVDCommonTest.assertOrthonormality(mQ,
+                                        false,
+                                        s_epsilon);
 
-    double[][] u =
-      SSVDHelper.loadDistributedRowMatrix(fs,
-                                          new Path(svdOutPath, "U/[^_]*"),
-                                          conf);
+    DenseMatrix u =
+      SSVDHelper.drmLoadAsDense(fs,
+                                new Path(svdOutPath, "U/*"),
+                                conf);
+    SSVDCommonTest.assertOrthonormality(u, false, s_epsilon);
 
-    SSVDCommonTest.assertOrthonormality(new DenseMatrix(u), false, s_epsilon);
-    double[][] v =
-      SSVDHelper.loadDistributedRowMatrix(fs,
-                                          new Path(svdOutPath, "V/[^_]*"),
-                                          conf);
-
-    SSVDCommonTest.assertOrthonormality(new DenseMatrix(v), false, s_epsilon);
+    DenseMatrix v =
+      SSVDHelper.drmLoadAsDense(fs,
+                                new Path(svdOutPath, "V/*"),
+                                conf);
+    SSVDCommonTest.assertOrthonormality(v, false, s_epsilon);
   }
 
   static void dumpSv(Vector s) {
@@ -202,15 +201,6 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
     }
     System.out.println();
 
-  }
-
-  static void dump(double[][] matrix) {
-    for (double[] aMatrix : matrix) {
-      for (double anAMatrix : aMatrix) {
-        System.out.printf("%f  ", anAMatrix);
-      }
-      System.out.println();
-    }
   }
 
 }

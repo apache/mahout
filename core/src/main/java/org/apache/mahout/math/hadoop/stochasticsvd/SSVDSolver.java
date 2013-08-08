@@ -112,6 +112,9 @@ public final class SSVDSolver {
   private boolean broadcast = true;
   private Path pcaMeanPath;
 
+  // for debugging
+  private long omegaSeed;
+
   /**
    * create new SSVD solver. Required parameters are passed to constructor to
    * ensure they are set. Optional parameters can be set using setters .
@@ -341,6 +344,10 @@ public final class SSVDSolver {
     this.pcaMeanPath = pcaMeanPath;
   }
 
+  long getOmegaSeed() {
+    return omegaSeed;
+  }
+
   /**
    * run all SSVD jobs.
    *
@@ -367,11 +374,15 @@ public final class SSVDSolver {
 
       Path pcaBasePath = new Path(outputPath, "pca");
 
+      if (overwrite) {
+        fs.delete(outputPath, true);
+      }
+
       if (pcaMeanPath != null) {
         fs.mkdirs(pcaBasePath);
       }
       Random rnd = RandomUtils.getRandom();
-      long seed = rnd.nextLong();
+      omegaSeed = rnd.nextLong();
 
       Path sbPath = null;
       double xisquaredlen = 0.0;
@@ -391,15 +402,10 @@ public final class SSVDSolver {
         }
 
         xisquaredlen = xi.dot(xi);
-        Omega omega = new Omega(seed, k + p);
+        Omega omega = new Omega(omegaSeed, k + p);
         Vector s_b0 = omega.mutlithreadedTRightMultiply(xi);
 
-        SSVDHelper.saveVector(s_b0, sbPath =
-          new Path(pcaBasePath, "somega.seq"), conf);
-      }
-
-      if (overwrite) {
-        fs.delete(outputPath, true);
+        SSVDHelper.saveVector(s_b0, sbPath = new Path(pcaBasePath, "somega.seq"), conf);
       }
 
       /*
@@ -415,7 +421,7 @@ public final class SSVDSolver {
                minSplitSize,
                k,
                p,
-               seed,
+               omegaSeed,
                reduceTasks);
 
       /*
