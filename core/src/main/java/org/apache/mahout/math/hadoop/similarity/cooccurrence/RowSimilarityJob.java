@@ -288,7 +288,7 @@ public class RowSimilarityJob extends AbstractJob {
     private Vector sampleDown(Vector rowVector, Context ctx) {
 
       int observationsPerRow = rowVector.getNumNondefaultElements();
-      double rowSampleRate = Math.min(maxObservationsPerRow, observationsPerRow) / observationsPerRow;
+      double rowSampleRate = (double) Math.min(maxObservationsPerRow, observationsPerRow) / (double) observationsPerRow;
 
       Vector downsampledRow = rowVector.like();
       long usedObservations = 0;
@@ -297,7 +297,7 @@ public class RowSimilarityJob extends AbstractJob {
       for (Vector.Element elem : rowVector.nonZeroes()) {
 
         int columnCount = observationsPerColumn.get(elem.index());
-        double columnSampleRate = Math.min(maxObservationsPerColumn, columnCount) / columnCount;
+        double columnSampleRate = (double) Math.min(maxObservationsPerColumn, columnCount) / (double) columnCount;
 
         if (random.nextDouble() <= Math.min(rowSampleRate, columnSampleRate)) {
           downsampledRow.setQuick(elem.index(), elem.get());
