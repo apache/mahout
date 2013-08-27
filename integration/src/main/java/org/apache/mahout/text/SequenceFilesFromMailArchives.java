@@ -19,6 +19,10 @@ package org.apache.mahout.text;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
+
+import org.apache.commons.io.comparator.CompositeFileComparator;
+import org.apache.commons.io.comparator.DirectoryFileComparator;
+import org.apache.commons.io.comparator.PathFileComparator;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -41,6 +45,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -71,13 +77,21 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
 
   private static final int MAX_JOB_SPLIT_LOCATIONS = 1000000;
 
+  @SuppressWarnings("unchecked")
+  private static final Comparator<File> FILE_COMPARATOR = new CompositeFileComparator(
+      DirectoryFileComparator.DIRECTORY_REVERSE, PathFileComparator.PATH_COMPARATOR);
+
   public void createSequenceFiles(MailOptions options) throws IOException {
     ChunkedWriter writer = new ChunkedWriter(getConf(), options.getChunkSize(), new Path(options.getOutputDir()));
     MailProcessor processor = new MailProcessor(options, options.getPrefix(), writer);
     try {
       if (options.getInput().isDirectory()) {
+        File[] inputFilesAndDirs = options.getInput().listFiles();
+        Arrays.sort(inputFilesAndDirs, FILE_COMPARATOR);
         PrefixAdditionFilter filter = new PrefixAdditionFilter(processor, writer);
-        options.getInput().listFiles(filter);
+        for (File aFile : inputFilesAndDirs) {
+          filter.accept(aFile);
+        }
         log.info("Parsed {} messages from {}", filter.getMessageCount(), options.getInput().getAbsolutePath());
       } else {
         long start = System.currentTimeMillis();
@@ -112,7 +126,11 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
         PrefixAdditionFilter nested = new PrefixAdditionFilter(
           new MailProcessor(processor.getOptions(), processor.getPrefix()
             + File.separator + current.getName(), writer), writer);
-        current.listFiles(nested);
+        File[] nestedInputFilesAndDirs = current.listFiles();
+        Arrays.sort(nestedInputFilesAndDirs, FILE_COMPARATOR);
+        for (File aFile : nestedInputFilesAndDirs) {
+          nested.accept(aFile);
+        }
         long dirCount = nested.getMessageCount();
         log.info("Parsed {} messages from directory {}", dirCount, current.getAbsolutePath());
         messageCount += dirCount;
