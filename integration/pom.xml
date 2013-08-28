@@ -116,6 +116,11 @@
     </dependency>
 
     <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-commons-csv</artifactId>
       <version>3.5.0</version>
