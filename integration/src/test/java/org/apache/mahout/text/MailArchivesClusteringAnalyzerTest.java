@@ -22,9 +22,8 @@ import java.io.StringReader;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
-
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.mahout.utils.MahoutTestCase;
+import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
 /**

@@ -25,6 +25,7 @@ import java.nio.charset.Charset;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Closeables;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -35,6 +36,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.classifier.ClassifierData;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;

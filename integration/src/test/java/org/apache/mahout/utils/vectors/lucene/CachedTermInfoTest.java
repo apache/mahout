@@ -4,6 +4,7 @@ package org.apache.mahout.utils.vectors.lucene;
 import java.io.IOException;
 
 import com.google.common.io.Closeables;
+
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -14,7 +15,7 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
-import org.apache.mahout.utils.MahoutTestCase;
+import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
 /**

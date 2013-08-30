@@ -16,7 +16,7 @@
 
 package org.apache.mahout.utils.vectors.arff;
 
-import org.apache.mahout.utils.MahoutTestCase;
+import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
 import java.util.Map;

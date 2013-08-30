@@ -22,16 +22,17 @@ import java.util.Collection;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.utils.MahoutTestCase;
 import org.apache.mahout.utils.vectors.RandomVectorIterable;
 import org.junit.Test;
 

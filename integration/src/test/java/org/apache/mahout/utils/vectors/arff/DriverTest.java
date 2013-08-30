@@ -20,7 +20,8 @@ import java.io.StringWriter;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import org.apache.mahout.utils.MahoutTestCase;
+
+import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
 /**

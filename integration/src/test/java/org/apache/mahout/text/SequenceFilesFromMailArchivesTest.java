@@ -21,14 +21,15 @@ import java.io.FileOutputStream;
 import java.util.zip.GZIPOutputStream;
 
 import com.google.common.io.Closeables;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterator;
-import org.apache.mahout.utils.MahoutTestCase;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

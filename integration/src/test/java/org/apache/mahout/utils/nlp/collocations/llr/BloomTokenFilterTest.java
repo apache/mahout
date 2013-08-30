@@ -27,6 +27,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.CharsetEncoder;
 
 import com.google.common.base.Charsets;
+
 import org.apache.hadoop.util.bloom.BloomFilter;
 import org.apache.hadoop.util.bloom.Filter;
 import org.apache.hadoop.util.bloom.Key;
@@ -37,7 +38,7 @@ import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.shingle.ShingleFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.util.Version;
-import org.apache.mahout.utils.MahoutTestCase;
+import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
 public final class BloomTokenFilterTest extends MahoutTestCase {

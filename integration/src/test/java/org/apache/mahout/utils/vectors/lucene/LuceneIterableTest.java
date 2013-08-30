@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import com.google.common.io.Closeables;
+
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -31,9 +32,9 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.utils.MahoutTestCase;
 import org.apache.mahout.utils.vectors.TermInfo;
 import org.apache.mahout.vectorizer.TFIDF;
 import org.apache.mahout.vectorizer.Weight;

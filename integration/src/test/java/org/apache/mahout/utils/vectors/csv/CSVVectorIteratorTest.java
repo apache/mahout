@@ -23,8 +23,9 @@ import java.io.StringWriter;
 import java.util.Iterator;
 
 import com.google.common.io.Closeables;
+
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.utils.MahoutTestCase;
 import org.apache.mahout.utils.vectors.RandomVectorIterable;
 import org.apache.mahout.utils.vectors.VectorHelper;
 import org.apache.mahout.utils.vectors.io.TextualVectorWriter;

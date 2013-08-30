@@ -18,9 +18,10 @@
 package org.apache.mahout.utils.vectors;
 
 import com.google.common.collect.Iterables;
+
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.utils.MahoutTestCase;
 import org.junit.Test;
 
 public final class VectorHelperTest extends MahoutTestCase {

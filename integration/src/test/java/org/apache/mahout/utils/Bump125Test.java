@@ -18,6 +18,8 @@
 package org.apache.mahout.utils;
 
 import com.google.common.collect.Lists;
+
+import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
 import java.util.Iterator;

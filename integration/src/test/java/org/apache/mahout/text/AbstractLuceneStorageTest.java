@@ -17,6 +17,7 @@
 package org.apache.mahout.text;
 
 import com.google.common.collect.Lists;
+
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -25,11 +26,11 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.text.doc.MultipleFieldsDocument;
 import org.apache.mahout.text.doc.NumericFieldDocument;
 import org.apache.mahout.text.doc.SingleFieldDocument;
-import org.apache.mahout.utils.MahoutTestCase;
 
 import java.io.File;
 import java.io.IOException;

@@ -27,10 +27,11 @@ import java.util.Map;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
+
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.utils.MahoutTestCase;
 import org.junit.Test;
 
 public final class ARFFVectorIterableTest extends MahoutTestCase {
