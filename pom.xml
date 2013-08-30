@@ -99,7 +99,7 @@
     <maven.compiler.target>1.6</maven.compiler.target>
     <maven.clover.multiproject>true</maven.clover.multiproject>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <msurefire.version>2.15</msurefire.version>
+    <msurefire.version>2.16</msurefire.version>
     <mpmd.version>3.0.1</mpmd.version>
     <mcheckstyle.version>2.10</mcheckstyle.version>
     <mfindbugs.version>2.5.2</mfindbugs.version>
