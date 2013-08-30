@@ -701,7 +701,6 @@
           <effort>Default</effort>
           <!--visitors>FindDeadLocalStores,UnreadFields</visitors-->
           <!--omitVisitors>FindDeadLocalStores,UnreadFields</omitVisitors-->
-          <debug>true</debug>
           <relaxed>true</relaxed>
           <!-- classpath -->
           <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
