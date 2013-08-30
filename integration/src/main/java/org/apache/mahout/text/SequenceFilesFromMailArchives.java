@@ -107,7 +107,7 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
 
     private final Deque<MailProcessor> processors = new ArrayDeque<MailProcessor>();
     private final ChunkedWriter writer;
-    private Deque<Long> messageCounts = new ArrayDeque<Long>();
+    private final Deque<Long> messageCounts = new ArrayDeque<Long>();
 
     public PrefixAdditionDirectoryWalker(MailProcessor processor, ChunkedWriter writer) {
       processors.addFirst(processor);
