@@ -63,9 +63,9 @@ public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCa
     }
     super.tearDown();
   }
-  
+
   protected final Configuration getConfiguration() throws IOException {
-	Configuration conf = new Configuration();
+    Configuration conf = new Configuration();
     conf.set("hadoop.tmp.dir", getTestTempDir("hadoop" + Math.random()).getAbsolutePath());
     return conf;
   }
