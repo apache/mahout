@@ -38,7 +38,7 @@ public class FullRunningAverage implements RunningAverage, Serializable {
 
   public FullRunningAverage(int count, double average) {
     this.count = count;
-    this.average = average;    
+    this.average = average;
   }
 
   /**
