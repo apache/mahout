@@ -184,7 +184,7 @@ abstract class AbstractSimilarity extends AbstractItemSimilarity implements User
       if (compare >= 0) {
         if (++yPrefIndex >= yLength) {
           if (hasInferrer) {
-            // Must count other Xs; pretend next Y is far away            
+            // Must count other Xs; pretend next Y is far away
             if (xIndex == Long.MAX_VALUE) {
               // ... but stop if both are done!
               break;
