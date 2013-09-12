@@ -33,9 +33,9 @@ import java.util.Locale;
  orthogonal matrix <tt>Q</tt> and an <tt>n x n</tt> upper triangular matrix <tt>R</tt> so that
  <tt>A = Q*R</tt>.
  <P>
- The QR decompostion always exists, even if the matrix does not have
+ The QR decomposition always exists, even if the matrix does not have
  full rank, so the constructor will never fail.  The primary use of the
- QR decomposition is in the least squares solution of nonsquare systems
+ QR decomposition is in the least squares solution of non-square systems
  of simultaneous linear equations.  This will fail if <tt>isFullRank()</tt>
  returns <tt>false</tt>.
  */
@@ -151,7 +151,7 @@ public class QRDecomposition implements QR {
     Matrix x = B.like(columns, cols);
 
     // this can all be done a bit more efficiently if we don't actually
-    // form explicit versions of Q^T and R but this code isn't soo bad
+    // form explicit versions of Q^T and R but this code isn't so bad
     // and it is much easier to understand
     Matrix qt = getQ().transpose();
     Matrix y = qt.times(B);
