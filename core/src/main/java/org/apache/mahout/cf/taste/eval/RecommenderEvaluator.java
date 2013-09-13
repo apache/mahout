@@ -44,7 +44,7 @@ public interface RecommenderEvaluator {
    * recommendations, and the rest of the data is compared against estimated preference values to see how much
    * the {@link org.apache.mahout.cf.taste.recommender.Recommender}'s predicted preferences match the user's
    * real preferences. Specifically, for each user, this percentage of the user's ratings are used to produce
-   * recommendatinos, and for each user, the remaining preferences are compared against the user's real
+   * recommendations, and for each user, the remaining preferences are compared against the user's real
    * preferences.
    * </p>
    *
