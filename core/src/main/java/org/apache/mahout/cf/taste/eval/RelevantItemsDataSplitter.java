@@ -51,7 +51,7 @@ public interface RelevantItemsDataSplitter {
    * @param relevantItemIDs IDs of items considered relevant to that user
    * @param trainingUsers   the database of training preferences to which we will
    *                        append the ones for otherUserID.
-   * @param otherUserID     for whom we are adding preferences to the trianing model
+   * @param otherUserID     for whom we are adding preferences to the training model
    */
   void processOtherUser(long userID,
                         FastIDSet relevantItemIDs,
