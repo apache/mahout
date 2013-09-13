@@ -50,7 +50,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.map.OpenIntObjectHashMap;
 
 /**
- * <p>Measures the root-mean-squared error of a ratring matrix factorization against a test set.</p>
+ * <p>Measures the root-mean-squared error of a rating matrix factorization against a test set.</p>
  *
  * <p>Command line arguments specific to this class are:</p>
  *
