@@ -175,7 +175,7 @@ public interface DataModel extends Refreshable, Serializable {
   void removePreference(long userID, long itemID) throws TasteException;
 
   /**
-   * @return true iff this implementation actually stores and returns distinct preference values;
+   * @return true if this implementation actually stores and returns distinct preference values;
    *  that is, if it is not a 'boolean' DataModel
    */
   boolean hasPreferenceValues();
