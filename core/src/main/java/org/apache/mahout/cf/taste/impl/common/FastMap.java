@@ -68,7 +68,7 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
   private BitSet recentlyAccessed;
   private final boolean countingAccesses;
   
-  /** Creates a new  with default capacity. */
+  /** Creates a new {@link FastMap} with default capacity. */
   public FastMap() {
     this(2, NO_MAX_SIZE);
   }

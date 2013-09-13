@@ -49,19 +49,18 @@ public final class FileLineIterator extends AbstractIterator<String> implements 
   private static final Logger log = LoggerFactory.getLogger(FileLineIterator.class);
 
   /**
-   * Creates a  over a given file, assuming a UTF-8 encoding.
+   * Creates a {@link FileLineIterator} over a given file, assuming a UTF-8 encoding.
    *
    * @throws java.io.FileNotFoundException if the file does not exist
-       * @throws IOException
-       *           if the file cannot be read
-       */
-
+   * @throws IOException
+   *           if the file cannot be read
+   */
   public FileLineIterator(File file) throws IOException {
     this(file, Charsets.UTF_8, false);
   }
 
   /**
-   * Creates a  over a given file, assuming a UTF-8 encoding.
+   * Creates a {@link FileLineIterator} over a given file, assuming a UTF-8 encoding.
    *
    * @throws java.io.FileNotFoundException if the file does not exist
    * @throws IOException                   if the file cannot be read
@@ -71,7 +70,7 @@ public final class FileLineIterator extends AbstractIterator<String> implements 
   }
 
   /**
-   * Creates a  over a given file, using the given encoding.
+   * Creates a {@link FileLineIterator} over a given file, using the given encoding.
    *
    * @throws java.io.FileNotFoundException if the file does not exist
    * @throws IOException                   if the file cannot be read

@@ -19,8 +19,8 @@ package org.apache.mahout.cf.taste.model;
 
 /**
  * <p>
- * A  encapsulates an item and a preference value, which indicates the strength of the
- * preference for it. s are associated to users.
+ * A {@link Preference} encapsulates an item and a preference value, which indicates the strength of the
+ * preference for it. {@link Preference}s are associated to users.
  * </p>
  */
 public interface Preference {

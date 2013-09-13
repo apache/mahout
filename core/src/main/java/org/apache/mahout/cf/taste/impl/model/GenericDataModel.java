@@ -57,7 +57,7 @@ public final class GenericDataModel extends AbstractDataModel {
   
   /**
    * <p>
-   * Creates a new  from the given users (and their preferences). This
+   * Creates a new {@link GenericDataModel} from the given users (and their preferences). This
    * {@link DataModel} retains all this information in memory and is effectively immutable.
    * </p>
    * 
@@ -69,7 +69,7 @@ public final class GenericDataModel extends AbstractDataModel {
 
   /**
    * <p>
-   * Creates a new  from the given users (and their preferences). This
+   * Creates a new {@link GenericDataModel} from the given users (and their preferences). This
    * {@link DataModel} retains all this information in memory and is effectively immutable.
    * </p>
    *
@@ -138,7 +138,7 @@ public final class GenericDataModel extends AbstractDataModel {
 
   /**
    * <p>
-   * Creates a new containing an immutable copy of the data from another given
+   * Creates a new {@link GenericDataModel} containing an immutable copy of the data from another given
    * {@link DataModel}.
    * </p>
    *

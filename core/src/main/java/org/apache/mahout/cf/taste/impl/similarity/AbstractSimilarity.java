@@ -43,7 +43,7 @@ abstract class AbstractSimilarity extends AbstractItemSimilarity implements User
 
   /**
    * <p>
-   * Creates a possibly weighted AbstractSimilarity.
+   * Creates a possibly weighted {@link AbstractSimilarity}.
    * </p>
    */
   AbstractSimilarity(final DataModel dataModel, Weighting weighting, boolean centerData) throws TasteException {

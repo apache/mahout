@@ -53,7 +53,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
   private BitSet recentlyAccessed;
   private final boolean countingAccesses;
   
-  /** Creates a new  with default capacity. */
+  /** Creates a new {@link FastByIDMap} with default capacity. */
   public FastByIDMap() {
     this(2, NO_MAX_SIZE);
   }
@@ -71,7 +71,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
   }
 
   /**
-   * Creates a new  whose capacity can accommodate the given number of entries without rehash.
+   * Creates a new {@link FastByIDMap} whose capacity can accommodate the given number of entries without rehash.
    * 
    * @param size desired capacity
    * @param maxSize max capacity

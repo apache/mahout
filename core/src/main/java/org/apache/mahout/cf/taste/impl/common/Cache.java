@@ -24,7 +24,7 @@ import java.util.Iterator;
 
 /**
  * <p>
- * An efficient Map-like class which caches values for keys. Values are not "put" into a ;
+ * An efficient Map-like class which caches values for keys. Values are not "put" into a {@link Cache};
  * instead the caller supplies the instance with an implementation of {@link Retriever} which can load the
  * value for a given key.
  * </p>

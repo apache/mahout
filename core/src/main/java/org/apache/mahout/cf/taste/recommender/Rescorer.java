@@ -19,14 +19,14 @@ package org.apache.mahout.cf.taste.recommender;
 
 /**
  * <p>
- * A  simply assigns a new "score" to a thing like an ID of an item or user which a
+ * A {@link Rescorer} simply assigns a new "score" to a thing like an ID of an item or user which a
  * {@link Recommender} is considering returning as a top recommendation. It may be used to arbitrarily re-rank
  * the results according to application-specific logic before returning recommendations. For example, an
  * application may want to boost the score of items in a certain category just for one request.
  * </p>
  *
  * <p>
- * A  can also exclude a thing from consideration entirely by returning {@code true} from
+ * A {@link Rescorer} can also exclude a thing from consideration entirely by returning {@code true} from
  * {@link #isFiltered(Object)}.
  * </p>
  */
