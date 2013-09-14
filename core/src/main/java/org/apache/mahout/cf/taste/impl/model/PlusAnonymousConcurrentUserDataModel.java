@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * To use it, you have to estimate the number of concurrent anonymous users of your application.
  * The pool of users with the given size will be created. For each anonymous recommendations request,
- * a user has to be taken from the pool and returned back immediately afterwars.
+ * a user has to be taken from the pool and returned back immediately afterwards.
  * </p>
  *
  * <p>
