@@ -93,8 +93,6 @@ public class HighDFWordsPrunerTest extends MahoutTestCase {
     argList.add(inputPath.toString());
     argList.add("-o");
     argList.add(outputPath.toString());
-    argList.add("--mapred");
-    argList.add(getTestTempDir("mapred" + Math.random()).getAbsolutePath());
     if (prune) {
       argList.add("-xs");
       argList.add("3"); // we prune all words that are outside 3*sigma
@@ -135,7 +133,8 @@ public class HighDFWordsPrunerTest extends MahoutTestCase {
     return highDFWordsDictionaryIndices;
   }
 
-  private void validateVectors(Path vectorPath, int[] highDFWordsDictionaryIndices, boolean prune) {
+  private void validateVectors(Path vectorPath, int[] highDFWordsDictionaryIndices, boolean prune) throws Exception {
+    assertTrue("Path does not exist", vectorPath.getFileSystem(getConfiguration()).exists(vectorPath));
     for (VectorWritable value : new SequenceFileDirValueIterable<VectorWritable>(vectorPath, PathType.LIST, PathFilters
             .partFilter(), null, true, conf)) {
       Vector v = ((NamedVector) value.get()).getDelegate();
