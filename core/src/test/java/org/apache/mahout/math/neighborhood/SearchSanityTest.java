@@ -22,7 +22,9 @@ import java.util.List;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
@@ -57,6 +59,7 @@ public class SearchSanityTest extends MahoutTestCase {
 
   @Parameterized.Parameters
   public static List<Object[]> generateData() {
+    RandomUtils.useTestSeed();
     Matrix dataPoints = multiNormalRandomData(NUM_DATA_POINTS, NUM_DIMENSIONS);
     return Arrays.asList(new Object[][]{
         {new ProjectionSearch(new EuclideanDistanceMeasure(), NUM_PROJECTIONS, SEARCH_SIZE), dataPoints},
