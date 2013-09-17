@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.mahout.clustering.ClusteringUtils;
 import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.apache.mahout.math.Centroid;
@@ -33,6 +34,7 @@ import org.apache.mahout.math.neighborhood.ProjectionSearch;
 import org.apache.mahout.math.neighborhood.Searcher;
 import org.apache.mahout.math.neighborhood.UpdatableSearcher;
 import org.apache.mahout.math.random.WeightedThing;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -49,8 +51,14 @@ public class StreamingKMeansTest {
   private static final int NUM_PROJECTIONS = 2;
   private static final int SEARCH_SIZE = 10;
 
-  private static final Pair<List<Centroid>, List<Centroid>> syntheticData =
+  private static Pair<List<Centroid>, List<Centroid>> syntheticData ;
+
+  @Before
+  public void setUp() {
+    RandomUtils.useTestSeed();
+    syntheticData =
       DataUtils.sampleMultiNormalHypercube(NUM_DIMENSIONS, NUM_DATA_POINTS);
+  }
 
   private UpdatableSearcher searcher;
   private boolean allAtOnce;

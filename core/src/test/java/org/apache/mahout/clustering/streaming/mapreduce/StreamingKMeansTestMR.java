@@ -35,6 +35,7 @@ import org.apache.mahout.clustering.ClusteringUtils;
 import org.apache.mahout.clustering.streaming.cluster.DataUtils;
 import org.apache.mahout.clustering.streaming.cluster.StreamingKMeans;
 import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
@@ -46,6 +47,7 @@ import org.apache.mahout.math.neighborhood.FastProjectionSearch;
 import org.apache.mahout.math.neighborhood.LocalitySensitiveHashSearch;
 import org.apache.mahout.math.neighborhood.ProjectionSearch;
 import org.apache.mahout.math.random.WeightedThing;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -62,8 +64,14 @@ public class StreamingKMeansTestMR {
   private static final int MAX_NUM_ITERATIONS = 10;
   private static final double DISTANCE_CUTOFF = 1.0e-6;
 
-  private static final Pair<List<Centroid>, List<Centroid>> syntheticData =
+  private static Pair<List<Centroid>, List<Centroid>> syntheticData;
+
+  @Before
+  public void setUp() {
+    RandomUtils.useTestSeed();
+    syntheticData =
       DataUtils.sampleMultiNormalHypercube(NUM_DIMENSIONS, NUM_DATA_POINTS, 1.0e-4);
+  }
 
   private final String searcherClassName;
   private final String distanceMeasureClassName;

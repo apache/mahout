@@ -41,6 +41,11 @@ public final class DataUtils {
    * A hypercube of numDimensions has 2^numDimensions vertices. Keep this in mind when clustering
    * the data.
    *
+   * Note that it is almost always the case that you want to call RandomUtils.useTestSeed() before
+   * generating test data.  This means that you can't generate data in the declaration of a static
+   * variable because such initializations happen before any @BeforeClass or @Before setup methods
+   * are called.
+   *
    *
    * @param numDimensions number of dimensions of the vectors to be generated.
    * @param numDatapoints number of data points to be generated.

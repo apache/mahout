@@ -22,6 +22,7 @@ import java.util.List;
 import com.google.common.collect.Lists;
 import org.apache.mahout.clustering.ClusteringUtils;
 import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.apache.mahout.math.Centroid;
@@ -40,6 +41,8 @@ import org.apache.mahout.math.neighborhood.UpdatableSearcher;
 import org.apache.mahout.math.random.MultiNormal;
 import org.apache.mahout.math.random.WeightedThing;
 import org.apache.mahout.math.stats.OnlineSummarizer;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.apache.mahout.clustering.ClusteringUtils.totalWeight;
@@ -52,9 +55,16 @@ public class BallKMeansTest {
   private static final int NUM_ITERATIONS = 20;
   private static final double DISTRIBUTION_RADIUS = 0.01;
 
-  private static Pair<List<Centroid>, List<Centroid>> syntheticData =
-      DataUtils.sampleMultiNormalHypercube(NUM_DIMENSIONS, NUM_DATA_POINTS, DISTRIBUTION_RADIUS);
+  @BeforeClass
+  public static void setUp() {
+    RandomUtils.useTestSeed();
+    syntheticData = DataUtils.sampleMultiNormalHypercube(NUM_DIMENSIONS, NUM_DATA_POINTS, DISTRIBUTION_RADIUS);
+
+  }
+
+  private static Pair<List<Centroid>, List<Centroid>> syntheticData;
   private static final int K1 = 100;
+
 
   @Test
   public void testClusteringMultipleRuns() {
@@ -80,8 +90,17 @@ public class BallKMeansTest {
     BallKMeans clusterer = new BallKMeans(searcher, 1 << NUM_DIMENSIONS, NUM_ITERATIONS);
 
     long startTime = System.currentTimeMillis();
-    clusterer.cluster(syntheticData.getFirst());
+    Pair<List<Centroid>, List<Centroid>> data = syntheticData;
+    clusterer.cluster(data.getFirst());
     long endTime = System.currentTimeMillis();
+
+    long hash = 0;
+    for (Centroid centroid : data.getFirst()) {
+      for (Vector.Element element : centroid.all()) {
+        hash = 31 * hash + 17 * element.index() + Double.toHexString(element.get()).hashCode();
+      }
+    }
+    System.out.printf("Hash = %08x\n", hash);
 
     assertEquals("Total weight not preserved", totalWeight(syntheticData.getFirst()), totalWeight(clusterer), 1.0e-9);
 
