@@ -126,6 +126,7 @@
         <include>mahout</include>
       </includes>
       <fileMode>0755</fileMode>
+      <directoryMode>0755</directoryMode>
     </fileSet>
     <fileSet>
       <directory>${project.basedir}/../src/conf</directory>
@@ -137,6 +138,7 @@
       <directory>${project.basedir}/../examples/bin</directory>
       <outputDirectory>examples/bin</outputDirectory>
       <fileMode>0755</fileMode>
+      <directoryMode>0755</directoryMode>
       <excludes>
         <exclude>work</exclude>
         <exclude>work/**</exclude>

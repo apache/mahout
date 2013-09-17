@@ -38,6 +38,7 @@
       <outputDirectory>examples/bin</outputDirectory>
       <useDefaultExcludes>true</useDefaultExcludes>
       <fileMode>0755</fileMode>
+      <directoryMode>0755</directoryMode>
       <excludes>
         <exclude>work</exclude>
         <exclude>work/**</exclude>
