@@ -46,7 +46,6 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
   private Path seqFilesOutputPath;
   private Configuration configuration;
 
-  @SuppressWarnings("unchecked")
   @Before
   public void before() throws IOException {
     configuration = new Configuration();
@@ -98,7 +97,6 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
     }
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void testRunSkipUnstoredFields() throws IOException {
     commitDocuments(getDirectory(getIndexPath1AsFile()), new UnstoredFieldsDocument("5", "This is test document 5"));
@@ -117,7 +115,6 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
     assertFalse(iterator.hasNext());
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void testRunMaxHits() throws IOException {
     commitDocuments(getDirectory(getIndexPath1AsFile()), docs.subList(0, 500));
@@ -139,7 +136,6 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
     assertFalse(iterator.hasNext());
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void testRunQuery() throws IOException {
     commitDocuments(getDirectory(getIndexPath1AsFile()), docs);
