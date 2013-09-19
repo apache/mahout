@@ -366,7 +366,7 @@ public interface Vector extends Cloneable {
 
   /**
    * Examples speak louder than words:  aggregate(plus, pow(2)) is another way to say
-   * getLengthSquared(), aggregate(max, abs) is norm(Double.POSITIVE_INFINITY).  To sum all of the postive values,
+   * getLengthSquared(), aggregate(max, abs) is norm(Double.POSITIVE_INFINITY).  To sum all of the positive values,
    * aggregate(plus, max(0)).
    * @param aggregator used to combine the current value of the aggregation with the result of map.apply(nextValue)
    * @param map a function to apply to each element of the vector in turn before passing to the aggregator
