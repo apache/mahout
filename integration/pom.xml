@@ -103,16 +103,18 @@
       <scope>test</scope>
     </dependency>
 
-      <!-- 3rd party -->
+    <!-- 3rd party -->
 
     <dependency>
       <groupId>commons-dbcp</groupId>
       <artifactId>commons-dbcp</artifactId>
+      <optional>true</optional>
     </dependency>
 
     <dependency>
       <groupId>commons-pool</groupId>
       <artifactId>commons-pool</artifactId>
+      <optional>true</optional>
     </dependency>
 
     <dependency>
@@ -127,52 +129,35 @@
     </dependency>
 
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-benchmark</artifactId>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-benchmark</artifactId>
+      <optional>true</optional>
     </dependency>
     <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-analyzers-common</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <scope>provided</scope>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers-common</artifactId>
+      <optional>true</optional>
     </dependency>
     
     <dependency>
       <groupId>org.mongodb</groupId>
       <artifactId>mongo-java-driver</artifactId>
       <version>2.11.2</version>
+      <optional>true</optional>
     </dependency>
 
     <dependency>
       <groupId>org.mongodb</groupId>
       <artifactId>bson</artifactId>
       <version>2.11.2</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.cassandra</groupId>
-      <artifactId>cassandra-all</artifactId>
-      <version>1.2.5</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
-        </exclusion>
-        <exclusion>
-         <groupId>log4j</groupId>
-         <artifactId>log4j</artifactId>
-       </exclusion>
-      </exclusions>
+      <optional>true</optional>
     </dependency>
 
     <dependency>
       <groupId>org.apache.hbase</groupId>
       <artifactId>hbase-client</artifactId>
       <version>0.95.1-hadoop1</version>
+      <optional>true</optional>
       <exclusions>
         <exclusion>
           <groupId>org.slf4j</groupId>
@@ -186,9 +171,10 @@
     </dependency>
 
     <dependency>
-      <groupId>me.prettyprint</groupId>
+      <groupId>org.hectorclient</groupId>
       <artifactId>hector-core</artifactId>
-      <version>1.0-5</version>
+      <version>1.1-4</version>
+      <optional>true</optional>
     </dependency>
 
     <dependency>
@@ -213,12 +199,6 @@
       <artifactId>easymock</artifactId>
       <scope>test</scope>
     </dependency>
-
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-core</artifactId>
-    </dependency>
-
 
   </dependencies>
 </project>

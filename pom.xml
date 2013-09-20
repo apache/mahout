@@ -161,18 +161,21 @@
         <artifactId>mahout-integration</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
+        <optional>true</optional>
       </dependency>
 
       <dependency>
         <artifactId>mahout-buildtools</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
+        <optional>true</optional>
       </dependency>
 
       <dependency>
         <artifactId>mahout-examples</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
+        <optional>true</optional>
       </dependency>
 
       <!-- 3rd party  -->
