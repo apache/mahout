@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * <p>Conjugate gradient requires the matrix A in the linear system Ax = b to be symmetric and positive
  * definite. For convenience, this implementation allows the input matrix to be be non-symmetric, in
  * which case the system A'Ax = b is solved. Because this requires only one pass through the matrix A, it
- * is faster than explictly computing A'A, then passing the results to the solver.
+ * is faster than explicitly computing A'A, then passing the results to the solver.
  * 
  * <p>For inputs that may be ill conditioned (often the case for highly sparse input), this solver
  * also accepts a parameter, lambda, which adds a scaled identity to the matrix A, solving the system
