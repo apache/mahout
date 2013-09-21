@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-Vpackage org.apache.mahout.math.set;
+package org.apache.mahout.math.set;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Lists;

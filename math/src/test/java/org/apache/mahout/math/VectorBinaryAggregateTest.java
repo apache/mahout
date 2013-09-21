@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-Vpackage org.apache.mahout.math;
+package org.apache.mahout.math;
 
 import static org.junit.Assert.assertEquals;
 
