@@ -710,6 +710,40 @@
           <failOnError>false</failOnError>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <version>0.10</version>
+        <configuration>
+          <licenses>
+            <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
+              <patterns>
+                <note>CERN license for Colt -- basically only requires attribution</note>
+                <pattern>1999 CERN - European Organization for Nuclear Research</pattern>
+              </patterns>
+            </license>
+            <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
+              <patterns>
+                <pattern>public domain</pattern>
+              </patterns>
+            </license>
+          </licenses>
+          <excludes>
+            <exclude>**/*.conf</exclude>
+            <exclude>**/*.iml</exclude>
+            <exclude>**/*.md</exclude>
+            <exclude>**/*.props</exclude>
+            <exclude>**/gen/**</exclude>
+            <exclude>**/resources/**</exclude>
+            <exclude>**/images/**</exclude>
+            <exclude>**/target/**</exclude>
+            <exclude>**/testdata/**</exclude>
+            <exclude>**/.idea/**</exclude>
+            <exclude>**/package-info.java</exclude>
+          </excludes>
+          <excludeSubProjects>false</excludeSubProjects>
+        </configuration>
+      </plugin>
     </plugins>
     <resources>
       <resource>

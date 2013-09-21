@@ -1,5 +1,12 @@
-/**
- * Public domain, just like the MurmurHash3 code.
+/*
+ *  This code is public domain.
+ *
+ *  The MurmurHash3 algorithm was created by Austin Appleby and put into the public domain.
+ *  See http://code.google.com/p/smhasher/
+ *
+ *  This java port was authored by
+ *  Yonik Seeley and was placed into the public domain per
+ *  https://github.com/yonik/java_util/blob/master/src/util/hash/MurmurHash3.java.
  */
 
 package org.apache.mahout.math;
