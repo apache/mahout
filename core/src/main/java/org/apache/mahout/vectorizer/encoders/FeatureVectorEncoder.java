@@ -83,7 +83,7 @@ public abstract class FeatureVectorEncoder {
    * @param data         The vector to which the value should be added.
    */
   public void addToVector(String originalForm, double weight, Vector data) {
-    addToVector(bytesForString(originalForm), weight, data);        
+    addToVector(bytesForString(originalForm), weight, data);
   }
 
   public abstract void addToVector(byte[] originalForm, double weight, Vector data);
