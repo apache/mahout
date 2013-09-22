@@ -163,7 +163,7 @@ public class CsvRecordFactory implements RecordFactory {
   /**
    * Defines the number of target variable categories, but allows this parser to
    * pick encodings for them as they appear.
-   * @param max  The number of categories that will be excpeted.  Once this many have been
+   * @param max  The number of categories that will be expected.  Once this many have been
    * seen, all others will get the encoding max-1.
    */
   @Override
