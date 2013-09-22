@@ -42,7 +42,7 @@ public class ContinuousValueEncoder extends CachingValueEncoder {
     for (int i = 0; i < probes; i++) {
       int n = hashForProbe(originalForm, data.size(), name, i);
       if (isTraceEnabled()) {
-        trace((String) null, n);        
+        trace((String) null, n);
       }
       data.set(n, data.get(n) + getWeight(originalForm,weight));
     }
