@@ -95,7 +95,7 @@ public abstract class FeatureVectorEncoder {
    * should not be used.
    *
    * @param originalForm  The original byte array value
-   * @param dataSize      The length of hte vector being encoded
+   * @param dataSize      The length of the vector being encoded
    * @param name          The name of the variable being encoded
    * @param probe             The probe number
    * @return              The hash of the current probe
