@@ -43,7 +43,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Converts csv data lines to vectors.
+ * Converts CSV data lines to vectors.
  *
  * Use of this class proceeds in a few steps.
  * <ul>
@@ -101,7 +101,7 @@ public class CsvRecordFactory implements RecordFactory {
       "Unable to construct type converter... shouldn't be possible";
 
   /**
-   * Parse a single line of csv-formatted text.
+   * Parse a single line of CSV-formatted text.
    *
    * Separated to make changing this functionality for the entire class easier
    * in the future.
@@ -250,7 +250,7 @@ public class CsvRecordFactory implements RecordFactory {
 
 
   /**
-   * Decodes a single line of csv data and records the target and predictor variables in a record.
+   * Decodes a single line of CSV data and records the target and predictor variables in a record.
    * As a side effect, features are added into the featureVector.  Returns the value of the target
    * variable.
    *
@@ -281,7 +281,7 @@ public class CsvRecordFactory implements RecordFactory {
   }
   
   /***
-   * Decodes a single line of csv data and records the target(if retrunTarget is true)
+   * Decodes a single line of CSV data and records the target(if retrunTarget is true)
    * and predictor variables in a record. As a side effect, features are added into the featureVector.
    * Returns the value of the target variable. When used during classify against production data without
    * target value, the method will be called with returnTarget = false. 
