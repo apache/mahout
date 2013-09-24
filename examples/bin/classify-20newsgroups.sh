@@ -49,18 +49,20 @@ fi
 echo "ok. You chose $choice and we'll use ${algorithm[$choice-1]}"
 alg=${algorithm[$choice-1]}
 
-echo "creating work directory at ${WORK_DIR}"
+if [ "x$alg" != "xclean" ]; then
+  echo "creating work directory at ${WORK_DIR}"
 
-mkdir -p ${WORK_DIR}
-if [ ! -e ${WORK_DIR}/20news-bayesinput ]; then
-  if [ ! -e ${WORK_DIR}/20news-bydate ]; then
-    if [ ! -f ${WORK_DIR}/20news-bydate.tar.gz ]; then
-      echo "Downloading 20news-bydate"
-      curl http://people.csail.mit.edu/jrennie/20Newsgroups/20news-bydate.tar.gz -o ${WORK_DIR}/20news-bydate.tar.gz
+  mkdir -p ${WORK_DIR}
+  if [ ! -e ${WORK_DIR}/20news-bayesinput ]; then
+    if [ ! -e ${WORK_DIR}/20news-bydate ]; then
+      if [ ! -f ${WORK_DIR}/20news-bydate.tar.gz ]; then
+        echo "Downloading 20news-bydate"
+        curl http://people.csail.mit.edu/jrennie/20Newsgroups/20news-bydate.tar.gz -o ${WORK_DIR}/20news-bydate.tar.gz
+      fi
+      mkdir -p ${WORK_DIR}/20news-bydate
+      echo "Extracting..."
+      cd ${WORK_DIR}/20news-bydate && tar xzf ../20news-bydate.tar.gz && cd .. && cd ..
     fi
-    mkdir -p ${WORK_DIR}/20news-bydate
-    echo "Extracting..."
-    cd ${WORK_DIR}/20news-bydate && tar xzf ../20news-bydate.tar.gz && cd .. && cd ..
   fi
 fi
 #echo $START_PATH
