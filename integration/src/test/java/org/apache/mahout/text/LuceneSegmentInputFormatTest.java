@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,12 +39,12 @@ public class LuceneSegmentInputFormatTest extends AbstractLuceneStorageTest {
   private Configuration conf;
 
   @Before
-  public void before() throws IOException {
+  public void before() throws Exception {
     inputFormat = new LuceneSegmentInputFormat();
     LuceneStorageConfiguration lucene2SeqConf = new LuceneStorageConfiguration(new Configuration(), Collections.singletonList(indexPath1), new Path("output"), "id", Collections.singletonList("field"));
     conf = lucene2SeqConf.serialize();
 
-    jobContext = new JobContext(conf, new JobID());
+    jobContext = getJobContext(conf, new JobID());
   }
 
   @After
@@ -64,5 +65,20 @@ public class LuceneSegmentInputFormatTest extends AbstractLuceneStorageTest {
 
     List<LuceneSegmentInputSplit> splits = inputFormat.getSplits(jobContext);
     Assert.assertEquals(3, splits.size());
+  }
+
+  // Use reflection to abstract this incompatibility between Hadoop 1 & 2 APIs.
+  private JobContext getJobContext(Configuration conf, JobID jobID) throws
+      ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
+      InvocationTargetException, InstantiationException {
+    Class<? extends JobContext> clazz = null;
+    if (!JobContext.class.isInterface()) {
+      clazz = JobContext.class;
+    } else {
+      clazz = (Class<? extends JobContext>)
+          Class.forName("org.apache.hadoop.mapreduce.task.JobContextImpl");
+    }
+    return clazz.getConstructor(Configuration.class, JobID.class)
+        .newInstance(conf, jobID);
   }
 }

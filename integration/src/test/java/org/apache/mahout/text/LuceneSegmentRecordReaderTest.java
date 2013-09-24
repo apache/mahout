@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 import static java.util.Arrays.asList;
 
@@ -58,7 +59,7 @@ public class LuceneSegmentRecordReaderTest extends AbstractLuceneStorageTest {
     for (SegmentInfoPerCommit segmentInfo : segmentInfos) {
       int docId = 0;
       LuceneSegmentInputSplit inputSplit = new LuceneSegmentInputSplit(getIndexPath1(), segmentInfo.info.name, segmentInfo.sizeInBytes());
-      TaskAttemptContext context = new TaskAttemptContext(configuration, new TaskAttemptID());
+      TaskAttemptContext context = getTaskAttemptContext(configuration, new TaskAttemptID());
       recordReader.initialize(inputSplit, context);
       for (int i = 0; i < 500; i++){
         recordReader.nextKeyValue();
@@ -68,5 +69,20 @@ public class LuceneSegmentRecordReaderTest extends AbstractLuceneStorageTest {
         docId++;
       }
     }
+  }
+
+  // Use reflection to abstract this incompatibility between Hadoop 1 & 2 APIs.
+  private TaskAttemptContext getTaskAttemptContext(Configuration conf, TaskAttemptID jobID) throws
+      ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
+      InvocationTargetException, InstantiationException {
+    Class<? extends TaskAttemptContext> clazz = null;
+    if (!TaskAttemptContext.class.isInterface()) {
+      clazz = TaskAttemptContext.class;
+    } else {
+      clazz = (Class<? extends TaskAttemptContext>)
+          Class.forName("org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl");
+    }
+    return clazz.getConstructor(Configuration.class, TaskAttemptID.class)
+        .newInstance(conf, jobID);
   }
 }
