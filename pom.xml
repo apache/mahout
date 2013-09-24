@@ -740,6 +740,11 @@
             <exclude>**/testdata/**</exclude>
             <exclude>**/.idea/**</exclude>
             <exclude>**/package-info.java</exclude>
+            <exclude>**/.git/**</exclude>
+            <exclude>**/.classpath</exclude>
+            <exclude>**/.project</exclude>
+            <exclude>**/.settings/**</exclude>
+            <exclude>**/*.patch</exclude>
           </excludes>
           <excludeSubProjects>false</excludeSubProjects>
         </configuration>
