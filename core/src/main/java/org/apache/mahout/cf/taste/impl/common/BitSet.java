@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.impl.common;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /** A simplified and streamlined version of {@link java.util.BitSet}. */
 final class BitSet implements Serializable, Cloneable {
@@ -60,7 +61,21 @@ final class BitSet implements Serializable, Cloneable {
   
   @Override
   public BitSet clone() {
-    return new BitSet(bits);
+    return new BitSet(bits.clone());
+  }
+
+  @Override
+  public int hashCode() {
+    return Arrays.hashCode(bits);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof BitSet)) {
+      return false;
+    }
+    BitSet other = (BitSet) o;
+    return Arrays.equals(bits, other.bits);
   }
   
   @Override
