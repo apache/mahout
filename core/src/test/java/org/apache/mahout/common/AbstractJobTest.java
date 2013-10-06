@@ -57,7 +57,7 @@ public final class AbstractJobTest extends MahoutTestCase {
       }
     };
     
-    // testFlag will only be present if speciied on the command-line
+    // testFlag will only be present if specified on the command-line
     
     ToolRunner.run(fact.getJob(), new String[0]);
     assertFalse("test map for absent flag", testMap.containsKey("--testFlag"));
