@@ -1334,6 +1334,24 @@ public final class Functions {
   }
 
   /**
+   * Constructs the function <tt>g( h(a) )</tt>.
+   *
+   * @param g a unary function.
+   * @param h an {@link IntIntFunction} function.
+   * @return the unary function <tt>g( h(a) )</tt>.
+   */
+  public static IntIntFunction chain(final DoubleFunction g, final IntIntFunction h) {
+    return new IntIntFunction() {
+
+      @Override
+      public double apply(int first, int second) {
+        return g.apply(h.apply(first, second));
+      }
+    };
+  }
+
+
+  /**
    * Constructs a function that returns <tt>a < b ? -1 : a > b ? 1 : 0</tt>. <tt>a</tt> is a variable, <tt>b</tt> is
    * fixed.
    */

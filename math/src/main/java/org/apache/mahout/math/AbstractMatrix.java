@@ -17,19 +17,16 @@
 
 package org.apache.mahout.math;
 
+import com.google.common.collect.AbstractIterator;
+import com.google.common.collect.Maps;
+import org.apache.mahout.math.function.*;
+
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.mahout.math.function.DoubleDoubleFunction;
-import org.apache.mahout.math.function.DoubleFunction;
-import org.apache.mahout.math.function.Functions;
-import org.apache.mahout.math.function.PlusMult;
-import org.apache.mahout.math.function.VectorFunction;
-
-import com.google.common.collect.AbstractIterator;
-import com.google.common.collect.Maps;
-
-/** A few universal implementations of convenience functions */
+/**
+ * A few universal implementations of convenience functions
+ */
 public abstract class AbstractMatrix implements Matrix {
 
   protected Map<String, Integer> columnLabelBindings;
@@ -61,6 +58,7 @@ public abstract class AbstractMatrix implements Matrix {
   public Iterator<MatrixSlice> iterateAll() {
     return new AbstractIterator<MatrixSlice>() {
       private int slice;
+
       @Override
       protected MatrixSlice computeNext() {
         if (slice >= numSlices()) {
@@ -74,6 +72,7 @@ public abstract class AbstractMatrix implements Matrix {
 
   /**
    * Abstracted out for the iterator
+   *
    * @return numRows() for row-based iterator, numColumns() for column-based.
    */
   @Override
@@ -228,7 +227,7 @@ public abstract class AbstractMatrix implements Matrix {
     for (int row = 0; row < rows; row++) {
       for (int col = 0; col < columns; col++) {
         setQuick(row, col, function.apply(getQuick(row, col), other.getQuick(
-            row, col)));
+          row, col)));
       }
     }
     return this;
@@ -282,7 +281,8 @@ public abstract class AbstractMatrix implements Matrix {
 
   /**
    * Returns a view of a row.  Changes to the view will affect the original.
-   * @param row  Which row to return.
+   *
+   * @param row Which row to return.
    * @return A vector that references the desired row.
    */
   @Override
@@ -293,6 +293,7 @@ public abstract class AbstractMatrix implements Matrix {
 
   /**
    * Returns a view of a row.  Changes to the view will affect the original.
+   *
    * @param column Which column to return.
    * @return A vector that references the desired column.
    */
@@ -433,7 +434,7 @@ public abstract class AbstractMatrix implements Matrix {
     for (int row = 0; row < rows; row++) {
       for (int col = 0; col < columns; col++) {
         result.setQuick(row, col, getQuick(row, col)
-            - other.getQuick(row, col));
+          - other.getQuick(row, col));
       }
     }
     return result;
@@ -466,7 +467,7 @@ public abstract class AbstractMatrix implements Matrix {
     for (int row = 0; row < rows; row++) {
       for (int col = 0; col < columns; col++) {
         result.setQuick(row, col, getQuick(row, col)
-            + other.getQuick(row, col));
+          + other.getQuick(row, col));
       }
     }
     return result;
@@ -584,6 +585,26 @@ public abstract class AbstractMatrix implements Matrix {
   }
 
   @Override
+  public Matrix viewPart(int[] offset, int[] size) {
+
+    if (offset[ROW] < 0) {
+      throw new IndexException(offset[ROW], 0);
+    }
+    if (offset[ROW] + size[ROW] > rowSize()) {
+      throw new IndexException(offset[ROW] + size[ROW], rowSize());
+    }
+    if (offset[COL] < 0) {
+      throw new IndexException(offset[COL], 0);
+    }
+    if (offset[COL] + size[COL] > columnSize()) {
+      throw new IndexException(offset[COL] + size[COL], columnSize());
+    }
+
+    return new MatrixView(this, offset, size);
+  }
+
+
+  @Override
   public double zSum() {
     double result = 0;
     for (int row = 0; row < rowSize(); row++) {
@@ -645,6 +666,7 @@ public abstract class AbstractMatrix implements Matrix {
     public Iterator<Element> iterator() {
       return new AbstractIterator<Element>() {
         private int i;
+
         @Override
         protected Element computeNext() {
           if (i >= size()) {
@@ -658,6 +680,7 @@ public abstract class AbstractMatrix implements Matrix {
     /**
      * Currently delegates to {@link #iterator()}.
      * TODO: This could be optimized to at least skip empty rows if there are many of them.
+     *
      * @return an iterator (currently dense).
      */
     @Override
