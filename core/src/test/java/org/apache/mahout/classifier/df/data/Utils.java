@@ -27,10 +27,10 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.classifier.df.data.Dataset.Attribute;
+import org.apache.mahout.common.MahoutTestCase;
 
 /**
  * Helper methods used by the tests
@@ -249,7 +249,8 @@ public final class Utils {
 
   public static Path writeDataToTestFile(String[] sData) throws IOException {
     Path testData = new Path("testdata/Data");
-    FileSystem fs = testData.getFileSystem(new Configuration());
+    MahoutTestCase ca = new MahoutTestCase();
+    FileSystem fs = testData.getFileSystem(ca.getConfiguration());
     if (!fs.exists(testData)) {
       fs.mkdirs(testData);
     }

@@ -71,7 +71,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    conf = new Configuration();
+    conf = getConfiguration();
     fs = FileSystem.get(conf);
     testdata = getTestTempDirPath("testdata");
     output = getTestTempDirPath("output");
@@ -262,7 +262,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
   public void testCanopy() throws Exception {
     ClusteringTestUtils.writePointsToFile(sampleData, new Path(testdata, "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, true, 0.0, true);
     int numIterations = 10;
     Path clustersIn = new Path(output, "clusters-0-final");
@@ -280,7 +280,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(sampleData, new Path(testdata, "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     // now run the Canopy job to prime kMeans canopies
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, false, 0.0, true);
     // now run the KMeans job
     Path kmeansOutput = new Path(output, "kmeans");
@@ -301,7 +301,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(sampleData, new Path(testdata, "file1"), fs, conf);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     // now run the Canopy job to prime kMeans canopies
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, false, 0.0, true);
     Path fuzzyKMeansOutput = new Path(output, "fuzzyk");
     // now run the KMeans job

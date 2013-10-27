@@ -54,7 +54,7 @@ public class TestMatrixDiagonalizeJob extends MahoutTestCase {
   @Test
   public void testMatrixDiagonalizeMapper() throws Exception {
     MatrixDiagonalizeMapper mapper = new MatrixDiagonalizeMapper();
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     conf.setInt(Keys.AFFINITY_DIMENSIONS, RAW_DIMENSIONS);
     
     // set up the dummy writers
@@ -78,7 +78,7 @@ public class TestMatrixDiagonalizeJob extends MahoutTestCase {
   @Test
  public void testMatrixDiagonalizeReducer() throws Exception {
     MatrixDiagonalizeMapper mapper = new MatrixDiagonalizeMapper();
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     conf.setInt(Keys.AFFINITY_DIMENSIONS, RAW_DIMENSIONS);
     
     // set up the dummy writers

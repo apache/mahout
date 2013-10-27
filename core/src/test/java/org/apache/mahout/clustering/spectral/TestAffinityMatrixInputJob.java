@@ -70,7 +70,7 @@ public class TestAffinityMatrixInputJob extends MahoutTestCase {
   @Test
   public void testAffinityMatrixInputMapper() throws Exception {
     AffinityMatrixInputMapper mapper = new AffinityMatrixInputMapper();
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     conf.setInt(Keys.AFFINITY_DIMENSIONS, RAW_DIMENSIONS);
     
     // set up the dummy writer and the M/R context
@@ -97,7 +97,7 @@ public class TestAffinityMatrixInputJob extends MahoutTestCase {
   @Test
   public void testAffinitymatrixInputReducer() throws Exception {
     AffinityMatrixInputMapper mapper = new AffinityMatrixInputMapper();
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     conf.setInt(Keys.AFFINITY_DIMENSIONS, RAW_DIMENSIONS);
     
     // set up the dummy writer and the M/R context

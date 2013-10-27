@@ -50,7 +50,7 @@ public class TestConcatenateVectorsJob extends MahoutTestCase {
   @Test
   public void testConcatenateVectorsReducer() throws Exception {
     
-    Configuration configuration = new Configuration();
+    Configuration configuration = getConfiguration();
     configuration.set(ConcatenateVectorsJob.MATRIXA_DIMS, "5");
     configuration.set(ConcatenateVectorsJob.MATRIXB_DIMS, "3");
     

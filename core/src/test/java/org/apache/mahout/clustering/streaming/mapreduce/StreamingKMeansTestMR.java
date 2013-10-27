@@ -34,6 +34,7 @@ import org.apache.hadoop.mrunit.mapreduce.ReduceDriver;
 import org.apache.mahout.clustering.ClusteringUtils;
 import org.apache.mahout.clustering.streaming.cluster.DataUtils;
 import org.apache.mahout.clustering.streaming.cluster.StreamingKMeans;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -56,7 +57,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
-public class StreamingKMeansTestMR {
+public class StreamingKMeansTestMR extends MahoutTestCase {
   private static final int NUM_DATA_POINTS = 1 << 15;
   private static final int NUM_DIMENSIONS = 8;
   private static final int NUM_PROJECTIONS = 3;
@@ -232,7 +233,7 @@ public class StreamingKMeansTestMR {
 
   @Test
   public void testHypercubeMapReduceRunSequentially() throws Exception {
-    Configuration configuration = new Configuration();
+    Configuration configuration = getConfiguration();
     configure(configuration);
     configuration.set(DefaultOptionCreator.METHOD_OPTION, DefaultOptionCreator.SEQUENTIAL_METHOD);
 

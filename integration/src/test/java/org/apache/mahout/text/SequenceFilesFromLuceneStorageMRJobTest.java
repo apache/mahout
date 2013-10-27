@@ -41,7 +41,7 @@ public class SequenceFilesFromLuceneStorageMRJobTest extends AbstractLuceneStora
   @Before
   public void before() throws IOException {
     lucene2seq = new SequenceFilesFromLuceneStorageMRJob();
-    Configuration configuration = new Configuration();
+    Configuration configuration = getConfiguration();
     Path seqOutputPath = new Path(getTestTempDirPath(), "seqOutputPath");//don't make the output directory
     lucene2SeqConf = new LuceneStorageConfiguration(configuration, asList(getIndexPath1(), getIndexPath2()),
             seqOutputPath, SingleFieldDocument.ID_FIELD, asList(SingleFieldDocument.FIELD));

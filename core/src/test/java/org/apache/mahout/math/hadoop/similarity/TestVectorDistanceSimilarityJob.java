@@ -170,7 +170,7 @@ public class TestVectorDistanceSimilarityJob extends MahoutTestCase {
     List<VectorWritable> points = getPointsWritable(REFERENCE);
     List<VectorWritable> seeds = getPointsWritable(SEEDS);
 
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     ClusteringTestUtils.writePointsToFile(points, true, new Path(input, "file1"), fs, conf);
     ClusteringTestUtils.writePointsToFile(seeds, true, new Path(seedsPath, "part-seeds"), fs, conf);
 

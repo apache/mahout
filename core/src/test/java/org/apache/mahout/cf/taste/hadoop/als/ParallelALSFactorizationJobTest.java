@@ -60,7 +60,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
     outputDir.delete();
     tmpDir = getTestTempDir("tmp");
 
-    conf = new Configuration();
+    conf = getConfiguration();
     // reset as we run all tests in the same JVM
     SharingMapper.reset();
   }

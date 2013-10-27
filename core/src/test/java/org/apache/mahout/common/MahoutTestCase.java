@@ -32,7 +32,7 @@ import org.apache.hadoop.fs.Path;
 import org.junit.After;
 import org.junit.Before;
 
-public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCase {
+public class MahoutTestCase extends org.apache.mahout.math.MahoutTestCase {
 
   /** "Close enough" value for floating-point comparisons. */
   public static final double EPSILON = 0.000001;
@@ -64,7 +64,7 @@ public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCa
     super.tearDown();
   }
 
-  protected final Configuration getConfiguration() throws IOException {
+  public final Configuration getConfiguration() throws IOException {
     Configuration conf = new Configuration();
     conf.set("hadoop.tmp.dir", getTestTempDir("hadoop" + Math.random()).getAbsolutePath());
     return conf;
@@ -72,7 +72,7 @@ public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCa
 
   protected final Path getTestTempDirPath() throws IOException {
     if (testTempDirPath == null) {
-      fs = FileSystem.get(new Configuration());
+      fs = FileSystem.get(getConfiguration());
       long simpleRandomLong = (long) (Long.MAX_VALUE * Math.random());
       testTempDirPath = fs.makeQualified(
           new Path("/tmp/mahout-" + getClass().getSimpleName() + '-' + simpleRandomLong));

@@ -69,7 +69,7 @@ public class LocalSSVDSolverDenseTest extends MahoutTestCase {
 
   public void runSSVDSolver(int q) throws IOException {
 
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     conf.set("mapred.job.tracker", "local");
     conf.set("fs.default.name", "file:///");
 

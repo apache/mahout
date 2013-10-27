@@ -378,8 +378,8 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     return saveToFs(c, baseTmpDirPath);
   }
 
-  private static DistributedRowMatrix saveToFs(final Matrix m, Path baseTmpDirPath) throws IOException {
-    Configuration conf = new Configuration();
+  private DistributedRowMatrix saveToFs(final Matrix m, Path baseTmpDirPath) throws IOException {
+    Configuration conf = getConfiguration();
     FileSystem fs = FileSystem.get(baseTmpDirPath.toUri(), conf);
 
     ClusteringTestUtils.writePointsToFile(new Iterable<VectorWritable>() {

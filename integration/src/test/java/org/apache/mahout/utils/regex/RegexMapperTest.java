@@ -32,7 +32,7 @@ public final class RegexMapperTest extends MahoutTestCase {
   @Test
   public void testRegex() throws Exception {
     RegexMapper mapper = new RegexMapper();
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     conf.set(RegexMapper.REGEX, "(?<=(\\?|&)q=).*?(?=&|$)");
     conf.set(RegexMapper.TRANSFORMER_CLASS, URLDecodeTransformer.class.getName());
     DummyRecordWriter<LongWritable, Text> mapWriter = new DummyRecordWriter<LongWritable, Text>();
@@ -56,7 +56,7 @@ public final class RegexMapperTest extends MahoutTestCase {
   @Test
   public void testGroups() throws Exception {
     RegexMapper mapper = new RegexMapper();
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     conf.set(RegexMapper.REGEX, "(\\d+)\\.(\\d+)\\.(\\d+)");
     conf.set(RegexMapper.TRANSFORMER_CLASS, URLDecodeTransformer.class.getName());
     conf.setStrings(RegexMapper.GROUP_MATCHERS, "1", "3");
@@ -79,7 +79,7 @@ public final class RegexMapperTest extends MahoutTestCase {
   @Test
   public void testFPGFormatter() throws Exception {
     RegexMapper mapper = new RegexMapper();
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     conf.set(RegexMapper.REGEX, "(?<=(\\?|&)q=).*?(?=&|$)");
     conf.set(RegexMapper.TRANSFORMER_CLASS, URLDecodeTransformer.class.getName());
     conf.set(RegexMapper.FORMATTER_CLASS, FPGFormatter.class.getName());

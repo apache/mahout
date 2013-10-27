@@ -90,7 +90,7 @@ public final class LLRReducerTest extends MahoutTestCase {
                             {1, 0, 1, 5}  // worst of
     };
     
-    Configuration config = new Configuration();
+    Configuration config = getConfiguration();
     config.set(LLRReducer.NGRAM_TOTAL, "7");
     EasyMock.expect(context.getConfiguration()).andReturn(config);
     

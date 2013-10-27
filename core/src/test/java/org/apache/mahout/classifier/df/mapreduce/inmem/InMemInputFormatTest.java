@@ -43,7 +43,7 @@ public final class InMemInputFormatTest extends MahoutTestCase {
       int numSplits = rng.nextInt(maxNumSplits) + 1;
       int nbTrees = rng.nextInt(maxNbTrees) + 1;
 
-      Configuration conf = new Configuration();
+      Configuration conf = getConfiguration();
       Builder.setNbTrees(conf, nbTrees);
 
       InMemInputFormat inputFormat = new InMemInputFormat();
@@ -86,7 +86,7 @@ public final class InMemInputFormatTest extends MahoutTestCase {
       int numSplits = rng.nextInt(maxNumSplits) + 1;
       int nbTrees = rng.nextInt(maxNbTrees) + 1;
 
-      Configuration conf = new Configuration();
+      Configuration conf = getConfiguration();
       Builder.setNbTrees(conf, nbTrees);
 
       InMemInputFormat inputFormat = new InMemInputFormat();

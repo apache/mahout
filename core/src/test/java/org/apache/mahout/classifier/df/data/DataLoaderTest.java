@@ -257,7 +257,7 @@ public final class DataLoaderTest extends MahoutTestCase {
     Dataset dataset = DataLoader.generateDataset(descriptor, false, sData);
 
     Path dataPath = Utils.writeDataToTestFile(sData);
-    FileSystem fs = dataPath.getFileSystem(new Configuration());
+    FileSystem fs = dataPath.getFileSystem(getConfiguration());
     Data loaded = DataLoader.loadData(dataset, fs, dataPath);
 
     testLoadedData(source, attrs, missings, loaded);
@@ -269,7 +269,7 @@ public final class DataLoaderTest extends MahoutTestCase {
     dataset = DataLoader.generateDataset(descriptor, true, sData);
 
     dataPath = Utils.writeDataToTestFile(sData);
-    fs = dataPath.getFileSystem(new Configuration());
+    fs = dataPath.getFileSystem(getConfiguration());
     loaded = DataLoader.loadData(dataset, fs, dataPath);
 
     testLoadedData(source, attrs, missings, loaded);
@@ -295,7 +295,7 @@ public final class DataLoaderTest extends MahoutTestCase {
     Dataset expected = DataLoader.generateDataset(descriptor, false, sData);
 
     Path path = Utils.writeDataToTestFile(sData);
-    FileSystem fs = path.getFileSystem(new Configuration());
+    FileSystem fs = path.getFileSystem(getConfiguration());
     
     Dataset dataset = DataLoader.generateDataset(descriptor, false, fs, path);
     
@@ -308,7 +308,7 @@ public final class DataLoaderTest extends MahoutTestCase {
     expected = DataLoader.generateDataset(descriptor, false, sData);
 
     path = Utils.writeDataToTestFile(sData);
-    fs = path.getFileSystem(new Configuration());
+    fs = path.getFileSystem(getConfiguration());
     
     dataset = DataLoader.generateDataset(descriptor, false, fs, path);
     

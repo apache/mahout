@@ -37,7 +37,7 @@ public class LuceneSegmentInputSplitTest extends AbstractLuceneStorageTest {
 
   @Before
   public void before() throws IOException {
-    configuration = new Configuration();
+    configuration = getConfiguration();
   }
 
   @After

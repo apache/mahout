@@ -35,7 +35,7 @@ public class ClustersFilterTest extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    configuration = new Configuration();
+    configuration = getConfiguration();
     output = getTestTempDirPath();
   }
 

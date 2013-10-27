@@ -41,7 +41,8 @@ public class LuceneSegmentInputFormatTest extends AbstractLuceneStorageTest {
   @Before
   public void before() throws Exception {
     inputFormat = new LuceneSegmentInputFormat();
-    LuceneStorageConfiguration lucene2SeqConf = new LuceneStorageConfiguration(new Configuration(), Collections.singletonList(indexPath1), new Path("output"), "id", Collections.singletonList("field"));
+    LuceneStorageConfiguration lucene2SeqConf = new
+    LuceneStorageConfiguration(getConfiguration(), Collections.singletonList(indexPath1), new Path("output"), "id", Collections.singletonList("field"));
     conf = lucene2SeqConf.serialize();
 
     jobContext = getJobContext(conf, new JobID());

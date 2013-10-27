@@ -39,7 +39,8 @@ public class LuceneSegmentRecordReaderTest extends AbstractLuceneStorageTest {
 
   @Before
   public void before() throws IOException, InterruptedException {
-    LuceneStorageConfiguration lucene2SeqConf = new LuceneStorageConfiguration(new Configuration(), asList(getIndexPath1()), new Path("output"), "id", asList("field"));
+    LuceneStorageConfiguration lucene2SeqConf = new
+    LuceneStorageConfiguration(getConfiguration(), asList(getIndexPath1()), new Path("output"), "id", asList("field"));
     configuration = lucene2SeqConf.serialize();
     commitDocuments(getDirectory(getIndexPath1AsFile()), docs.subList(0, 500));
     commitDocuments(getDirectory(getIndexPath1AsFile()), docs.subList(500, 1000));

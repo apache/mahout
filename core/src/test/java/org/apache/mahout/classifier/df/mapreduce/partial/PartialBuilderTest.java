@@ -50,7 +50,7 @@ public final class PartialBuilderTest extends MahoutTestCase {
 
   @Test
   public void testProcessOutput() throws Exception {
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     conf.setInt("mapred.map.tasks", NUM_MAPS);
 
     Random rng = RandomUtils.getRandom();

@@ -43,7 +43,7 @@ public class TestVectorMatrixMultiplicationJob extends MahoutTestCase {
   @Test
   public void testVectorMatrixMultiplicationMapper() throws Exception {
     VectorMatrixMultiplicationMapper mapper = new VectorMatrixMultiplicationMapper();
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     
     // set up all the parameters for the job
     Vector toSave = new DenseVector(VECTOR);

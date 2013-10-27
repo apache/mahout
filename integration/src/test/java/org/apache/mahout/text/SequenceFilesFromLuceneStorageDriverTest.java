@@ -48,7 +48,7 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
 
   @Before
   public void before() throws Exception {
-    conf = new Configuration();
+    conf = getConfiguration();
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
       + "org.apache.hadoop.io.serializer.WritableSerialization");
 

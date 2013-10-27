@@ -59,7 +59,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
   @Test
   public void testSequenceFileFromDirectoryBasic() throws Exception {
     // parameters
-    Configuration configuration = new Configuration();
+    Configuration configuration = getConfiguration();
 
     FileSystem fs = FileSystem.get(configuration);
 
@@ -108,7 +108,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
   @Test
   public void testSequenceFileFromDirectoryMapReduce() throws Exception {
 
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
 
     FileSystem fs = FileSystem.get(conf);
 

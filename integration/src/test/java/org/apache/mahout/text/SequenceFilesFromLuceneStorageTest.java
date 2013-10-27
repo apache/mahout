@@ -48,7 +48,7 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
 
   @Before
   public void before() throws IOException {
-    configuration = new Configuration();
+    configuration = getConfiguration();
     seqFilesOutputPath = new Path(getTestTempDirPath(), "seqfiles");
 
     lucene2Seq = new SequenceFilesFromLuceneStorage();

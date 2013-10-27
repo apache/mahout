@@ -59,7 +59,7 @@ public class DriverTest extends MahoutTestCase {
     outputDir = getTestTempDir("output");
     outputDir.delete();
 
-    conf = new Configuration();
+    conf = getConfiguration();
   }
 
   private Document asDocument(String line) {

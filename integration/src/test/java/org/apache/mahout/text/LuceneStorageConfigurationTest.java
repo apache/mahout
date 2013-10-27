@@ -18,6 +18,7 @@ package org.apache.mahout.text;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -25,11 +26,11 @@ import java.io.IOException;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 
-public class LuceneStorageConfigurationTest {
+public class LuceneStorageConfigurationTest extends MahoutTestCase {
   
   @Test
   public void testSerialization() throws Exception {
-    Configuration configuration = new Configuration();
+    Configuration configuration = getConfiguration();
     Path indexPath = new Path("indexPath");
     Path outputPath = new Path("outputPath");
     LuceneStorageConfiguration luceneStorageConfiguration =
@@ -44,6 +45,6 @@ public class LuceneStorageConfigurationTest {
   
   @Test(expected = IllegalArgumentException.class)
   public void testSerializationNotSerialized() throws IOException {
-    new LuceneStorageConfiguration(new Configuration());
+    new LuceneStorageConfiguration(getConfiguration());
   }
 }

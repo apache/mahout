@@ -41,7 +41,7 @@ public class TestVectorCache extends MahoutTestCase {
   
   @Test
   public void testSave() throws Exception {
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     Writable key = new IntWritable(0);
     Vector value = new DenseVector(VECTOR);
     Path path = getTestTempDirPath("output");
@@ -64,7 +64,7 @@ public class TestVectorCache extends MahoutTestCase {
   @Test
   public void testLoad() throws Exception {
     // save a vector manually
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     Writable key = new IntWritable(0);
     Vector value = new DenseVector(VECTOR);
     Path path = getTestTempDirPath("output");
@@ -92,7 +92,7 @@ public class TestVectorCache extends MahoutTestCase {
   
   @Test
   public void testAll() throws Exception {
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     Vector v = new DenseVector(VECTOR);
     Path toSave = getTestTempDirPath("output");
     Writable key = new IntWritable(0);

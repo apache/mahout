@@ -26,6 +26,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
@@ -115,7 +116,8 @@ public final class SSVDTestsHelper {
   // do not use. for internal consumption only.
   public static void main(String[] args) throws Exception {
     // create 1Gb input for distributed tests.
-    Configuration conf = new Configuration();
+    MahoutTestCase ca = new MahoutTestCase();
+    Configuration conf = ca.getConfiguration();
     FileSystem dfs = FileSystem.getLocal(conf);
     Path outputDir=new Path("/tmp/DRM");
     dfs.mkdirs(outputDir);

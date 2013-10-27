@@ -41,7 +41,7 @@ public final class VectorWriterTest extends MahoutTestCase {
   @Test
   public void testSFVW() throws Exception {
     Path path = getTestTempFilePath("sfvw");
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, path, LongWritable.class, VectorWritable.class);
     SequenceFileVectorWriter writer = new SequenceFileVectorWriter(seqWriter);

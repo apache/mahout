@@ -37,7 +37,7 @@ public class TestUnitVectorizerJob extends MahoutTestCase {
   @Test
   public void testUnitVectorizerMapper() throws Exception {
     UnitVectorizerMapper mapper = new UnitVectorizerMapper();
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     
     // set up the dummy writers
     DummyRecordWriter<IntWritable, VectorWritable> writer = new

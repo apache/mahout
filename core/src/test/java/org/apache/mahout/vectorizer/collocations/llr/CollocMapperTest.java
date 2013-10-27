@@ -72,7 +72,7 @@ public final class CollocMapperTest extends MahoutTestCase {
                           {"t_of", "worst of"},};
     // set up expectations for mocks. ngram max size = 2
     
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     conf.set(CollocMapper.MAX_SHINGLE_SIZE, "2");
     EasyMock.expect(context.getConfiguration()).andReturn(conf);
     
@@ -134,7 +134,7 @@ public final class CollocMapperTest extends MahoutTestCase {
                                          {"u_times", "times"},};
 
     // set up expectations for mocks. ngram max size = 2
-    Configuration conf = new Configuration();
+    Configuration conf = getConfiguration();
     conf.set(CollocMapper.MAX_SHINGLE_SIZE, "2");
     conf.setBoolean(CollocDriver.EMIT_UNIGRAMS, true);
     EasyMock.expect(context.getConfiguration()).andReturn(conf);
