@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.9 - unreleased
 
+  MAHOUT-1343: JSON output format support in cluster dumper (Telvis Calhoun via sslavic)
+
   MAHOUT-1333: Fixed examples bin directory permissions in distribution archives (Mike Percy via sslavic)
 
   MAHOUT-1313: Fixed unwanted integral division bug in RowSimilarityJob downsampling code where precision should have been retained (sslavic) 

@@ -201,6 +201,25 @@ public final class TestClusterDumper extends MahoutTestCase {
         output, 10), new Path(kmeansOutput, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
+
+  @Test
+  public void testJsonClusterDumper() throws Exception {
+    DistanceMeasure measure = new EuclideanDistanceMeasure();
+    // now run the Canopy job to prime kMeans canopies
+    Path output = getTestTempDirPath("output");
+    Configuration conf = getConfiguration();
+    CanopyDriver.run(conf, getTestTempDirPath("testdata"), output, measure, 8,
+        4, false, 0.0, true);
+    // now run the KMeans job
+    Path kmeansOutput = new Path(output, "kmeans");
+    KMeansDriver.run(conf, getTestTempDirPath("testdata"), new Path(output,
+        "clusters-0-final"), kmeansOutput, measure, 0.001, 10, true, 0.0, false);
+    // run ClusterDumper
+    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
+        output, 10), new Path(kmeansOutput, "clusteredPoints"));
+    clusterDumper.setOutputFormat(ClusterDumper.OUTPUT_FORMAT.JSON);
+    clusterDumper.printClusters(termDictionary);
+  }
   
   @Test
   public void testFuzzyKmeans() throws Exception {
