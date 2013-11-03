@@ -126,6 +126,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     createFilesFromArrays(conf, inputDir, DATA1);
 
     SequenceFilesFromDirectory.main(new String[]{
+      "-Dhadoop.tmp.dir=" + conf.get("hadoop.tmp.dir"),
       "--input", inputDir.toString(),
       "--output", mrOutputDir.toString(),
       "--chunkSize", "64",
@@ -143,6 +144,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     logger.info("\n\n ---- recursive dirs: {}", dirs);
 
     SequenceFilesFromDirectory.main(new String[]{
+      "-Dhadoop.tmp.dir=" + conf.get("hadoop.tmp.dir"),
       "--input", inputDirRecur.toString(),
       "--output", mrOutputDirRecur.toString(),
       "--chunkSize", "64",

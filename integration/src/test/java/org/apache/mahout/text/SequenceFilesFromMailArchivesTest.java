@@ -129,7 +129,7 @@ public final class SequenceFilesFromMailArchivesTest extends MahoutTestCase {
   @Test
   public void testMapReduce() throws Exception {
 
-    Path tmpDir = this.getTestTempDirPath();
+    Path tmpDir = getTestTempDirPath();
     Path mrOutputDir = new Path(tmpDir, "mail-archives-out-mr");
     Configuration configuration = getConfiguration();
     FileSystem fs = FileSystem.get(configuration);
@@ -137,6 +137,7 @@ public final class SequenceFilesFromMailArchivesTest extends MahoutTestCase {
     File expectedInputFile = new File(inputDir.toString());
 
     String[] args = {
+      "-Dhadoop.tmp.dir=" + configuration.get("hadoop.tmp.dir"),
       "--input", expectedInputFile.getAbsolutePath(),
       "--output", mrOutputDir.toString(),
       "--charset", "UTF-8",

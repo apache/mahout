@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.hadoop.als;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
@@ -339,7 +340,10 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
     int numIterations = 5;
     double lambda = 0.065;
 
-    int success = alsFactorization.run(new String[] {
+    Configuration conf = getConfiguration();
+
+    int success = ToolRunner.run(alsFactorization, new String[] {
+        "-Dhadoop.tmp.dir=" + conf.get("hadoop.tmp.dir"),
         "--input", inputFile.getAbsolutePath(),
         "--output", intermediateDir.getAbsolutePath(),
         "--tempDir", tmpDir.getAbsolutePath(),
@@ -356,7 +360,8 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
 
     RecommenderJob recommender = new RecommenderJob();
 
-    success = recommender.run(new String[] {
+    success = ToolRunner.run(recommender, new String[] {
+        "-Dhadoop.tmp.dir=" + conf.get("hadoop.tmp.dir"),
         "--input", intermediateDir.getAbsolutePath() + "/userRatings/",
         "--userFeatures", intermediateDir.getAbsolutePath() + "/U/",
         "--itemFeatures", intermediateDir.getAbsolutePath() + "/M/",
