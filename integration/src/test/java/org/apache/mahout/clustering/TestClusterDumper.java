@@ -24,7 +24,6 @@ import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.util.ToolRunner;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -193,12 +192,12 @@ public final class TestClusterDumper extends MahoutTestCase {
     CanopyDriver.run(conf, getTestTempDirPath("testdata"), output, measure, 8,
         4, false, 0.0, true);
     // now run the KMeans job
-    Path kmeansOutput = new Path(output, "kmeans");
+    Path kMeansOutput = new Path(output, "kmeans");
     KMeansDriver.run(conf, getTestTempDirPath("testdata"), new Path(output,
-        "clusters-0-final"), kmeansOutput, measure, 0.001, 10, true, 0.0, false);
+        "clusters-0-final"), kMeansOutput, measure, 0.001, 10, true, 0.0, false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
-        output, 10), new Path(kmeansOutput, "clusteredPoints"));
+        output, 10), new Path(kMeansOutput, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
 
@@ -230,13 +229,13 @@ public final class TestClusterDumper extends MahoutTestCase {
     CanopyDriver.run(conf, getTestTempDirPath("testdata"), output, measure, 8,
         4, false, 0.0, true);
     // now run the Fuzzy KMeans job
-    Path kmeansOutput = new Path(output, "kmeans");
+    Path kMeansOutput = new Path(output, "kmeans");
     FuzzyKMeansDriver.run(conf, getTestTempDirPath("testdata"), new Path(
-        output, "clusters-0-final"), kmeansOutput, measure, 0.001, 10, 1.1f, true,
+        output, "clusters-0-final"), kMeansOutput, measure, 0.001, 10, 1.1f, true,
         true, 0, true);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
-        output, 10), new Path(kmeansOutput, "clusteredPoints"));
+        output, 10), new Path(kMeansOutput, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
   

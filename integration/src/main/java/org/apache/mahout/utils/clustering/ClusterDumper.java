@@ -24,8 +24,8 @@ import java.io.Writer;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -306,7 +306,7 @@ public final class ClusterDumper extends AbstractJob {
 
   public static Map<Integer, List<WeightedVectorWritable>> readPoints(Path pointsPathDir, long maxPointsPerCluster,
       Configuration conf) {
-    Map<Integer, List<WeightedVectorWritable>> result = new TreeMap<Integer, List<WeightedVectorWritable>>();
+    Map<Integer, List<WeightedVectorWritable>> result = Maps.newTreeMap();
     for (Pair<IntWritable, WeightedVectorWritable> record
         : new SequenceFileDirIterable<IntWritable, WeightedVectorWritable>(pointsPathDir, PathType.LIST,
             PathFilters.logsCRCFilter(), conf)) {
