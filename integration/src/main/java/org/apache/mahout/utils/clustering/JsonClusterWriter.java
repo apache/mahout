@@ -20,11 +20,11 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.Maps;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.classify.WeightedVectorWritable;
@@ -67,7 +67,7 @@ public class JsonClusterWriter extends AbstractClusterWriter {
    */
   @Override
   public void write(ClusterWritable clusterWritable) throws IOException {
-    HashMap<String, Object> res = new HashMap<String, Object>();
+    Map<String, Object> res = Maps.newHashMap();
 
     // get top terms
     List<Object> topTerms = getTopFeaturesList(clusterWritable.getValue()
@@ -120,7 +120,7 @@ public class JsonClusterWriter extends AbstractClusterWriter {
         log.error("Dictionary entry missing for {}", index);
         continue;
       }
-      HashMap<String, Object> term_entry = new HashMap<String, Object>();
+      Map<String, Object> term_entry = Maps.newHashMap();
       term_entry.put("term", dictTerm);
       term_entry.put("weight", vectorTerms.get(i).weight);
       topTerms.add(term_entry);
@@ -141,7 +141,7 @@ public class JsonClusterWriter extends AbstractClusterWriter {
 
     if (points != null) {
       for (WeightedVectorWritable point : points) {
-        HashMap<String, Object> entry = new HashMap<String, Object>();
+        Map<String, Object> entry = Maps.newHashMap();
         Vector theVec = point.getVector();
         if (theVec instanceof NamedVector) {
           entry.put("vector_name", ((NamedVector) theVec).getName());
