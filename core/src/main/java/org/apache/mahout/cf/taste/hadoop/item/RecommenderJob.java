@@ -22,6 +22,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
@@ -126,6 +127,7 @@ public final class RecommenderJob extends AbstractJob {
     addOption("outputPathForSimilarityMatrix", "opfsm", "write the item similarity matrix to this path (optional)",
         false);
     addOption("randomSeed", null, "use this seed for sampling", false);
+    addFlag("sequencefileOutput", null, "write the output into a SequenceFile instead of a text file");
 
     Map<String, List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
@@ -259,12 +261,16 @@ public final class RecommenderJob extends AbstractJob {
       if (filterFile != null) {
         aggregateAndRecommendInput += "," + explicitFilterPath;
       }
+
+      Class<? extends OutputFormat> outputFormat = parsedArgs.containsKey("--sequencefileOutput")
+          ? SequenceFileOutputFormat.class : TextOutputFormat.class;
+
       //extract out the recommendations
       Job aggregateAndRecommend = prepareJob(
               new Path(aggregateAndRecommendInput), outputPath, SequenceFileInputFormat.class,
               PartialMultiplyMapper.class, VarLongWritable.class, PrefAndSimilarityColumnWritable.class,
               AggregateAndRecommendReducer.class, VarLongWritable.class, RecommendedItemsWritable.class,
-              TextOutputFormat.class);
+              outputFormat);
       Configuration aggregateAndRecommendConf = aggregateAndRecommend.getConfiguration();
       if (itemsFile != null) {
         aggregateAndRecommendConf.set(AggregateAndRecommendReducer.ITEMS_FILE, itemsFile);
