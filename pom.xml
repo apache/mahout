@@ -764,6 +764,7 @@
     <module>integration</module>
     <module>examples</module>
     <module>distribution</module>
+    <module>math-scala</module>
   </modules>
   <profiles>
     <profile>
