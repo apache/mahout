@@ -17,6 +17,12 @@
 
 package org.apache.mahout.vectorizer.encoders;
 
+import java.util.Map;
+import java.util.Set;
+
+import static com.google.common.collect.Iterables.getFirst;
+
+import com.google.common.collect.Maps;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
@@ -72,6 +78,26 @@ public class InteractionValueEncoderTest extends MahoutTestCase {
     int k = enc.getProbes();
     // should interact "a" with each of "some","text" and "here"
     assertEquals((float) k*3, v1.norm(1), 0);
+  }
+  
+  @Test
+  public void testTraceDictionary() {
+    StaticWordValueEncoder encoder1 = new StaticWordValueEncoder("first");
+    StaticWordValueEncoder encoder2 = new StaticWordValueEncoder("second");
+    
+    Map<String, Set<Integer>> traceDictionary = Maps.newHashMap();
+
+    InteractionValueEncoder interactions = new InteractionValueEncoder("interactions", encoder1, encoder2);
+    interactions.setProbes(1);
+    interactions.setTraceDictionary(traceDictionary);
+    
+    Vector v = new DenseVector(10);
+    interactions.addInteractionToVector("a", "b", 1, v);
+    
+    assertEquals(1, v.getNumNonZeroElements());
+    assertEquals(1, traceDictionary.size());
+    assertEquals("interactions=a:b", getFirst(traceDictionary.keySet(), null));
+
   }
 
 }

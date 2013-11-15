@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.9 - unreleased
 
+  MAHOUT-1355: InteractionValueEncoder produces wrong traceDictionary entries (Johannes Schulte via smarthi)
+
   MAHOUT-1343: JSON output format support in cluster dumper (Telvis Calhoun via sslavic)
 
   MAHOUT-1333: Fixed examples bin directory permissions in distribution archives (Mike Percy via sslavic)
