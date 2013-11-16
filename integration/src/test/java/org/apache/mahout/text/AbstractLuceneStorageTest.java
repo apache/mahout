@@ -74,11 +74,6 @@ public abstract class AbstractLuceneStorageTest extends MahoutTestCase {
     commitDocuments(directory, Arrays.asList(documents));
   }
 
-  protected void assertSimpleDocumentEquals(SingleFieldDocument expected, Pair<Text, Text> actual) {
-    assertEquals(expected.getId(), actual.getFirst().toString());
-    assertEquals(expected.getField(), actual.getSecond().toString());
-  }
-
   protected void assertMultipleFieldsDocumentEquals(MultipleFieldsDocument expected, Pair<Text, Text> actual) {
     assertEquals(expected.getId(), actual.getFirst().toString());
     assertEquals(expected.getField() + " " + expected.getField1() + " " + expected.getField2(), actual.getSecond().toString());

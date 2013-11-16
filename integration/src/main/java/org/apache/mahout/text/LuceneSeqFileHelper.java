@@ -16,6 +16,7 @@
  */
 package org.apache.mahout.text;
 
+import com.google.common.base.Strings;
 import org.apache.hadoop.io.Text;
 import org.apache.lucene.document.Document;
 
@@ -47,14 +48,6 @@ class LuceneSeqFileHelper {
         }
       }
     }
-    theValue.set(nullSafe(valueBuilder.toString()));
-  }
-
-  public static String nullSafe(String value) {
-    if (value == null) {
-      return "";
-    } else {
-      return value;
-    }
+    theValue.set(Strings.nullToEmpty(valueBuilder.toString()));
   }
 }

@@ -20,6 +20,8 @@ Release 0.9 - unreleased
 
   MAHOUT-1293: Source distribution tar.gz archive cannot be unpacked on Linux (sslavic)
 
+  MAHOUT-1292: lucene2seq should validate the 'id' field (Frank Scholten via smarthi)
+
   MAHOUT-1291: MahoutDriver yields cosmetically suboptimal exception when bin/mahout runs without args, on some Hadoop versions (srowen)
 
   MAHOUT-1290: Issue when running Mahout Recommender Demo (Helder Garay Martins via smarthi)

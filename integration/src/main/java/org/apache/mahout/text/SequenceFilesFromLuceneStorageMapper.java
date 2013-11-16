@@ -17,6 +17,7 @@
 
 package org.apache.mahout.text;
 
+import com.google.common.base.Strings;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
@@ -59,7 +60,7 @@ public class SequenceFilesFromLuceneStorageMapper extends Mapper<Text, NullWrita
     segmentReader.document(docId, storedFieldVisitor);
     Document document = storedFieldVisitor.getDocument();
     List<String> fields = l2sConf.getFields();
-    Text theKey = new Text(LuceneSeqFileHelper.nullSafe(document.get(l2sConf.getIdField())));
+    Text theKey = new Text(Strings.nullToEmpty(document.get(l2sConf.getIdField())));
     Text theValue = new Text();
     LuceneSeqFileHelper.populateValues(document, theValue, fields);
     //if they are both empty, don't write

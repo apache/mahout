@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import com.google.common.base.Strings;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -62,6 +63,12 @@ public class SequenceFilesFromLuceneStorage {
       Directory directory = FSDirectory.open(new File(indexPath.toUri().getPath()));
       IndexReader reader = DirectoryReader.open(directory);
       IndexSearcher searcher = new IndexSearcher(reader);
+
+      LuceneIndexHelper.fieldShouldExistInIndex(searcher, lucene2seqConf.getIdField());
+      for (String field : lucene2seqConf.getFields()) {
+        LuceneIndexHelper.fieldShouldExistInIndex(searcher, field);
+      }
+
       Configuration configuration = lucene2seqConf.getConfiguration();
       FileSystem fileSystem = FileSystem.get(configuration);
       Path sequenceFilePath = new Path(lucene2seqConf.getSequenceFilesOutputPath(), indexPath.getName());
@@ -106,7 +113,7 @@ public class SequenceFilesFromLuceneStorage {
 
         Document doc = storedFieldVisitor.getDocument();
         List<String> fields = lucene2seqConf.getFields();
-        Text theKey = new Text(LuceneSeqFileHelper.nullSafe(doc.get(lucene2seqConf.getIdField())));
+        Text theKey = new Text(Strings.nullToEmpty(doc.get(lucene2seqConf.getIdField())));
         Text theValue = new Text();
         LuceneSeqFileHelper.populateValues(doc, theValue, fields);
         //if they are both empty, don't write

@@ -32,19 +32,26 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import static java.util.Arrays.asList;
+import static org.apache.mahout.text.doc.SingleFieldDocument.*;
 
 public class LuceneSegmentRecordReaderTest extends AbstractLuceneStorageTest {
   private Configuration configuration;
 
+  private LuceneStorageConfiguration lucene2SeqConf;
+
+  private LuceneSegmentRecordReader recordReader;
+
+  private SegmentInfos segmentInfos;
 
   @Before
   public void before() throws IOException, InterruptedException {
-    LuceneStorageConfiguration lucene2SeqConf = new
-    LuceneStorageConfiguration(getConfiguration(), asList(getIndexPath1()), new Path("output"), "id", asList("field"));
+    lucene2SeqConf = new LuceneStorageConfiguration(getConfiguration(), asList(getIndexPath1()), new Path("output"), ID_FIELD, asList(FIELD));
     configuration = lucene2SeqConf.serialize();
+    recordReader = new LuceneSegmentRecordReader();
     commitDocuments(getDirectory(getIndexPath1AsFile()), docs.subList(0, 500));
     commitDocuments(getDirectory(getIndexPath1AsFile()), docs.subList(500, 1000));
-
+    segmentInfos = new SegmentInfos();
+    segmentInfos.read(getDirectory(getIndexPath1AsFile()));
   }
 
   @After
@@ -54,9 +61,6 @@ public class LuceneSegmentRecordReaderTest extends AbstractLuceneStorageTest {
 
   @Test
   public void testKey() throws Exception {
-    LuceneSegmentRecordReader recordReader = new LuceneSegmentRecordReader();
-    SegmentInfos segmentInfos = new SegmentInfos();
-    segmentInfos.read(getDirectory(getIndexPath1AsFile()));
     for (SegmentInfoPerCommit segmentInfo : segmentInfos) {
       int docId = 0;
       LuceneSegmentInputSplit inputSplit = new LuceneSegmentInputSplit(getIndexPath1(), segmentInfo.info.name, segmentInfo.sizeInBytes());
@@ -72,11 +76,29 @@ public class LuceneSegmentRecordReaderTest extends AbstractLuceneStorageTest {
     }
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void testNonExistingIdField() throws Exception {
+    configuration = new LuceneStorageConfiguration(getConfiguration(), asList(getIndexPath1()), new Path("output"), "nonExistingId", asList(FIELD)).serialize();
+    SegmentInfoPerCommit segmentInfo = segmentInfos.iterator().next();
+    LuceneSegmentInputSplit inputSplit = new LuceneSegmentInputSplit(getIndexPath1(), segmentInfo.info.name, segmentInfo.sizeInBytes());
+    TaskAttemptContext context = getTaskAttemptContext(configuration, new TaskAttemptID());
+    recordReader.initialize(inputSplit, context);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testNonExistingField() throws Exception {
+    configuration = new LuceneStorageConfiguration(getConfiguration(), asList(getIndexPath1()), new Path("output"), ID_FIELD, asList("nonExistingField")).serialize();
+    SegmentInfoPerCommit segmentInfo = segmentInfos.iterator().next();
+    LuceneSegmentInputSplit inputSplit = new LuceneSegmentInputSplit(getIndexPath1(), segmentInfo.info.name, segmentInfo.sizeInBytes());
+    TaskAttemptContext context = getTaskAttemptContext(configuration, new TaskAttemptID());
+    recordReader.initialize(inputSplit, context);
+  }
+
   // Use reflection to abstract this incompatibility between Hadoop 1 & 2 APIs.
   private TaskAttemptContext getTaskAttemptContext(Configuration conf, TaskAttemptID jobID) throws
       ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
       InvocationTargetException, InstantiationException {
-    Class<? extends TaskAttemptContext> clazz = null;
+    Class<? extends TaskAttemptContext> clazz;
     if (!TaskAttemptContext.class.isInterface()) {
       clazz = TaskAttemptContext.class;
     } else {

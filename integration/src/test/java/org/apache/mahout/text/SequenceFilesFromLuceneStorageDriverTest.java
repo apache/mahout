@@ -27,6 +27,7 @@ import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterator;
+import org.apache.mahout.text.doc.MultipleFieldsDocument;
 import org.apache.mahout.text.doc.SingleFieldDocument;
 import org.junit.After;
 import org.junit.Before;
@@ -53,7 +54,7 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
       + "org.apache.hadoop.io.serializer.WritableSerialization");
 
     seqFilesOutputPath = new Path(getTestTempDirPath(), "seqfiles");
-    idField = "id";
+    idField = SingleFieldDocument.ID_FIELD;
     fields = asList("field");
 
     driver = new SequenceFilesFromLuceneStorageDriver() {
@@ -90,6 +91,9 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
 
   @Test
   public void testRun() throws Exception {
+    List<MultipleFieldsDocument> docs = asList(new MultipleFieldsDocument("123", "test 1", "test 2", "test 3"));
+    commitDocuments(getDirectory(getIndexPath1AsFile()), docs.get(0));
+
     String queryField = "queryfield";
     String queryTerm = "queryterm";
     String maxHits = "500";

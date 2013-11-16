@@ -57,6 +57,12 @@ public class LuceneSegmentRecordReader extends RecordReader<Text, NullWritable> 
 
 
     IndexSearcher searcher = new IndexSearcher(segmentReader);
+    String idField = lucene2SeqConfiguration.getIdField();
+    LuceneIndexHelper.fieldShouldExistInIndex(searcher, idField);
+    for (String field : lucene2SeqConfiguration.getFields()) {
+        LuceneIndexHelper.fieldShouldExistInIndex(searcher, field);
+    }
+
     Weight weight = lucene2SeqConfiguration.getQuery().createWeight(searcher);
     scorer = weight.scorer(segmentReader.getContext(), false, false, null);
     if (scorer == null) {
