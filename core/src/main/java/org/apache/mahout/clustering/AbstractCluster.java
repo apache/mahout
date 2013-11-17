@@ -60,7 +60,7 @@ public abstract class AbstractCluster implements Cluster {
   protected AbstractCluster(Vector point, int id2) {
     setNumObservations(0);
     setTotalObservations(0);
-    setCenter(new RandomAccessSparseVector(point));
+    setCenter(point.clone());
     setRadius(center.like());
     setS0(0);
     setS1(center.like());

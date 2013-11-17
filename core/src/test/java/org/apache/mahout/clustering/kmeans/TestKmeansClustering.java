@@ -39,6 +39,7 @@ import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
+import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -70,6 +71,16 @@ public final class TestKmeansClustering extends MahoutTestCase {
     List<VectorWritable> points = Lists.newArrayList();
     for (double[] fr : raw) {
       Vector vec = new RandomAccessSparseVector(fr.length);
+      vec.assign(fr);
+      points.add(new VectorWritable(vec));
+    }
+    return points;
+  }
+  
+  public static List<VectorWritable> getPointsWritableDenseVector(double[][] raw) {
+    List<VectorWritable> points = Lists.newArrayList();
+    for (double[] fr : raw) {
+      Vector vec = new DenseVector(fr.length);
       vec.assign(fr);
       points.add(new VectorWritable(vec));
     }
@@ -124,6 +135,62 @@ public final class TestKmeansClustering extends MahoutTestCase {
   public void testKMeansSeqJob() throws Exception {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     List<VectorWritable> points = getPointsWritable(REFERENCE);
+    
+    Path pointsPath = getTestTempDirPath("points");
+    Path clustersPath = getTestTempDirPath("clusters");
+    Configuration conf = getConfiguration();
+    ClusteringTestUtils.writePointsToFile(points, true, new Path(pointsPath, "file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(points, true, new Path(pointsPath, "file2"), fs, conf);
+    for (int k = 1; k < points.size(); k++) {
+      System.out.println("testKMeansMRJob k= " + k);
+      // pick k initial cluster centers at random
+      Path path = new Path(clustersPath, "part-00000");
+      FileSystem fs = FileSystem.get(path.toUri(), conf);
+      SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, Text.class, Kluster.class);
+      try {
+        for (int i = 0; i < k + 1; i++) {
+          Vector vec = points.get(i).get();
+          
+          Kluster cluster = new Kluster(vec, i, measure);
+          // add the center so the centroid will be correct upon output
+          cluster.observe(cluster.getCenter(), 1);
+          writer.append(new Text(cluster.getIdentifier()), cluster);
+        }
+      } finally {
+        Closeables.close(writer, false);
+      }
+      // now run the Job
+      Path outputPath = getTestTempDirPath("output");
+      // KMeansDriver.runJob(pointsPath, clustersPath, outputPath,
+      // EuclideanDistanceMeasure.class.getName(), 0.001, 10, k + 1, true);
+      String[] args = {optKey(DefaultOptionCreator.INPUT_OPTION), pointsPath.toString(),
+          optKey(DefaultOptionCreator.CLUSTERS_IN_OPTION), clustersPath.toString(),
+          optKey(DefaultOptionCreator.OUTPUT_OPTION), outputPath.toString(),
+          optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION), EuclideanDistanceMeasure.class.getName(),
+          optKey(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION), "0.001",
+          optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION), "2", optKey(DefaultOptionCreator.CLUSTERING_OPTION),
+          optKey(DefaultOptionCreator.OVERWRITE_OPTION), optKey(DefaultOptionCreator.METHOD_OPTION),
+          DefaultOptionCreator.SEQUENTIAL_METHOD};
+      ToolRunner.run(conf, new KMeansDriver(), args);
+      
+      // now compare the expected clusters with actual
+      Path clusteredPointsPath = new Path(outputPath, "clusteredPoints");
+      int[] expect = EXPECTED_NUM_POINTS[k];
+      DummyOutputCollector<IntWritable,WeightedVectorWritable> collector = new DummyOutputCollector<IntWritable,WeightedVectorWritable>();
+      // The key is the clusterId, the value is the weighted vector
+      for (Pair<IntWritable,WeightedVectorWritable> record : new SequenceFileIterable<IntWritable,WeightedVectorWritable>(
+          new Path(clusteredPointsPath, "part-m-0"), conf)) {
+        collector.collect(record.getFirst(), record.getSecond());
+      }
+      assertEquals("clusters[" + k + ']', expect.length, collector.getKeys().size());
+    }
+  }
+  
+  /** Story: User wishes to run kmeans job on reference data (DenseVector test) */
+  @Test
+  public void testKMeansSeqJobDenseVector() throws Exception {
+    DistanceMeasure measure = new EuclideanDistanceMeasure();
+    List<VectorWritable> points = getPointsWritableDenseVector(REFERENCE);
     
     Path pointsPath = getTestTempDirPath("points");
     Path clustersPath = getTestTempDirPath("clusters");
