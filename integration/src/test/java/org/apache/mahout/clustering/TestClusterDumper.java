@@ -27,6 +27,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.FieldType;
+import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
@@ -101,12 +103,18 @@ public final class TestClusterDumper extends MahoutTestCase {
     try {
       for (int i = 0; i < docs2.length; i++) {
         Document doc = new Document();
-        Field id = new Field("id", "doc_" + i, Field.Store.YES,
-            Field.Index.NOT_ANALYZED_NO_NORMS);
+        Field id = new StringField("id", "doc_" + i, Field.Store.YES);
         doc.add(id);
         // Store both position and offset information
-        Field text = new Field("content", docs2[i], Field.Store.NO,
-            Field.Index.ANALYZED, Field.TermVector.YES);
+        FieldType fieldType = new FieldType();
+        fieldType.setStored(false);
+        fieldType.setIndexed(true);
+        fieldType.setTokenized(true);
+        fieldType.setStoreTermVectors(true);
+        fieldType.setStoreTermVectorPositions(true);
+        fieldType.setStoreTermVectorOffsets(true);
+        fieldType.freeze();
+        Field text = new Field("content", docs2[i], fieldType);
         doc.add(text);
         writer.addDocument(doc);
       }
