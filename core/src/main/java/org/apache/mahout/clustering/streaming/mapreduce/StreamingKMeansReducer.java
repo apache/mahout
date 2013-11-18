@@ -31,8 +31,13 @@ import org.apache.mahout.clustering.streaming.cluster.BallKMeans;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.Centroid;
 import org.apache.mahout.math.Vector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StreamingKMeansReducer extends Reducer<IntWritable, CentroidWritable, IntWritable, CentroidWritable> {
+
+  private static final Logger log = LoggerFactory.getLogger(StreamingKMeansReducer.class);
+
   /**
    * Configuration for the MapReduce job.
    */
@@ -57,7 +62,7 @@ public class StreamingKMeansReducer extends Reducer<IntWritable, CentroidWritabl
             @Override
             public Centroid apply(CentroidWritable input) {
               Preconditions.checkNotNull(input);
-              return input.getCentroid();
+              return input.getCentroid().clone();
             }
           }), conf).call());
     } else {
@@ -66,7 +71,7 @@ public class StreamingKMeansReducer extends Reducer<IntWritable, CentroidWritabl
 
     int index = 0;
     for (Vector centroid : getBestCentroids(intermediateCentroids, conf)) {
-      context.write(new IntWritable(index), new CentroidWritable((Centroid)centroid));
+      context.write(new IntWritable(index), new CentroidWritable((Centroid) centroid));
       ++index;
     }
   }
@@ -84,6 +89,11 @@ public class StreamingKMeansReducer extends Reducer<IntWritable, CentroidWritabl
   }
 
   public static Iterable<Vector> getBestCentroids(List<Centroid> centroids, Configuration conf) {
+
+    if (log.isInfoEnabled()) {
+      log.info("Number of Centroids: {}", centroids.size());
+    }
+
     int numClusters = conf.getInt(DefaultOptionCreator.NUM_CLUSTERS_OPTION, 1);
     int maxNumIterations = conf.getInt(StreamingKMeansDriver.MAX_NUM_ITERATIONS, 10);
     float trimFraction = conf.getFloat(StreamingKMeansDriver.TRIM_FRACTION, 0.9f);
@@ -92,8 +102,8 @@ public class StreamingKMeansReducer extends Reducer<IntWritable, CentroidWritabl
     float testProbability = conf.getFloat(StreamingKMeansDriver.TEST_PROBABILITY, 0.1f);
     int numRuns = conf.getInt(StreamingKMeansDriver.NUM_BALLKMEANS_RUNS, 3);
 
-    BallKMeans clusterer = new BallKMeans(StreamingKMeansUtilsMR.searcherFromConfiguration(conf),
+    BallKMeans ballKMeansCluster = new BallKMeans(StreamingKMeansUtilsMR.searcherFromConfiguration(conf),
         numClusters, maxNumIterations, trimFraction, kMeansPlusPlusInit, correctWeights, testProbability, numRuns);
-    return clusterer.cluster(centroids);
+    return ballKMeansCluster.cluster(centroids);
   }
 }

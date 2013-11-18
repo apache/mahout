@@ -10,6 +10,8 @@ Release 0.9 - unreleased
 
   MAHOUT-1333: Fixed examples bin directory permissions in distribution archives (Mike Percy via sslavic)
 
+  MAHOUT-1314: StreamingKMeansReducer throws NullPointerException when REDUCE_STREAMING_KMEANS is set to true (smarthi)
+
   MAHOUT-1313: Fixed unwanted integral division bug in RowSimilarityJob downsampling code where precision should have been retained (sslavic) 
 
   MAHOUT-1301: toString() method of SequentialAccessSparseVector has excess comma at the end (Alexander Senov, smarthi)
