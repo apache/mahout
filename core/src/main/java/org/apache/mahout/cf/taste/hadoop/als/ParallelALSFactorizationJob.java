@@ -312,17 +312,16 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     // necessary for local execution in the same JVM only
     SharingMapper.reset();
 
-    int iterationNumber = currentIteration + 1;
     Class<? extends Mapper<IntWritable,VectorWritable,IntWritable,VectorWritable>> solverMapperClassInternal;
     String name;
 
     if (implicitFeedback) {
       solverMapperClassInternal = SolveImplicitFeedbackMapper.class;
-      name = "Recompute " + matrixName + ", iteration (" + (iterationNumber + 1) + '/' + numIterations + "), "
+      name = "Recompute " + matrixName + ", iteration (" + currentIteration + '/' + numIterations + "), "
           + '(' + numThreadsPerSolver + " threads, " + numFeatures + " features, implicit feedback)";
     } else {
       solverMapperClassInternal = SolveExplicitFeedbackMapper.class;
-      name = "Recompute " + matrixName + ", iteration (" + (iterationNumber + 1) + '/' + numIterations + "), "
+      name = "Recompute " + matrixName + ", iteration (" + currentIteration + '/' + numIterations + "), "
           + '(' + numThreadsPerSolver + " threads, " + numFeatures + " features, explicit feedback)";
     }
 
