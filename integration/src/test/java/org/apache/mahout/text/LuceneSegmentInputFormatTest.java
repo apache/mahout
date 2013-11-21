@@ -72,7 +72,7 @@ public class LuceneSegmentInputFormatTest extends AbstractLuceneStorageTest {
   private JobContext getJobContext(Configuration conf, JobID jobID) throws
       ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
       InvocationTargetException, InstantiationException {
-    Class<? extends JobContext> clazz = null;
+    Class<? extends JobContext> clazz;
     if (!JobContext.class.isInterface()) {
       clazz = JobContext.class;
     } else {
