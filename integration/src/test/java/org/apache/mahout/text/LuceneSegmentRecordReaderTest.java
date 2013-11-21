@@ -37,15 +37,13 @@ import static org.apache.mahout.text.doc.SingleFieldDocument.*;
 public class LuceneSegmentRecordReaderTest extends AbstractLuceneStorageTest {
   private Configuration configuration;
 
-  private LuceneStorageConfiguration lucene2SeqConf;
-
   private LuceneSegmentRecordReader recordReader;
 
   private SegmentInfos segmentInfos;
 
   @Before
   public void before() throws IOException, InterruptedException {
-    lucene2SeqConf = new LuceneStorageConfiguration(getConfiguration(), asList(getIndexPath1()), new Path("output"), ID_FIELD, asList(FIELD));
+    LuceneStorageConfiguration lucene2SeqConf = new LuceneStorageConfiguration(getConfiguration(), asList(getIndexPath1()), new Path("output"), ID_FIELD, asList(FIELD));
     configuration = lucene2SeqConf.serialize();
     recordReader = new LuceneSegmentRecordReader();
     commitDocuments(getDirectory(getIndexPath1AsFile()), docs.subList(0, 500));
