@@ -30,8 +30,8 @@ public class TreeID extends LongWritable implements Cloneable {
   public TreeID() { }
   
   public TreeID(int partition, int treeId) {
-    Preconditions.checkArgument(partition >= 0, "partition < 0");
-    Preconditions.checkArgument(treeId >= 0, "treeId < 0");
+    Preconditions.checkArgument(partition >= 0, "Wrong partition: " + partition + ". Partition must be >= 0!");
+    Preconditions.checkArgument(treeId >= 0, "Wrong treeId: " + treeId + ". TreeId must be >= 0!");
     set(partition, treeId);
   }
   

@@ -98,7 +98,7 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
     }
     
     // mapper's partition
-    Preconditions.checkArgument(partition >= 0, "Wrong partition ID");
+    Preconditions.checkArgument(partition >= 0, "Wrong partition ID: " + partition + ". Partition must be >= 0!");
     this.partition = partition;
     
     // compute number of trees to build

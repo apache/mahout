@@ -468,7 +468,7 @@ public class RowSimilarityJob extends AbstractJob {
       similarity = ClassUtils.instantiateAs(ctx.getConfiguration().get(SIMILARITY_CLASSNAME),
           VectorSimilarityMeasure.class);
       numberOfColumns = ctx.getConfiguration().getInt(NUMBER_OF_COLUMNS, -1);
-      Preconditions.checkArgument(numberOfColumns > 0, "Incorrect number of columns!");
+      Preconditions.checkArgument(numberOfColumns > 0, "Number of columns must be greater then 0! But numberOfColumns = " + numberOfColumns);
       excludeSelfSimilarity = ctx.getConfiguration().getBoolean(EXCLUDE_SELF_SIMILARITY, false);
       norms = Vectors.read(new Path(ctx.getConfiguration().get(NORMS_PATH)), ctx.getConfiguration());
       treshold = Double.parseDouble(ctx.getConfiguration().get(THRESHOLD));
@@ -508,7 +508,7 @@ public class RowSimilarityJob extends AbstractJob {
     @Override
     protected void setup(Mapper.Context ctx) throws IOException, InterruptedException {
       maxSimilaritiesPerRow = ctx.getConfiguration().getInt(MAX_SIMILARITIES_PER_ROW, 0);
-      Preconditions.checkArgument(maxSimilaritiesPerRow > 0, "Incorrect maximum number of similarities per row!");
+      Preconditions.checkArgument(maxSimilaritiesPerRow > 0, "Maximum number of similarities per row must be greater then 0!");
     }
 
     @Override
@@ -547,7 +547,7 @@ public class RowSimilarityJob extends AbstractJob {
     @Override
     protected void setup(Context ctx) throws IOException, InterruptedException {
       maxSimilaritiesPerRow = ctx.getConfiguration().getInt(MAX_SIMILARITIES_PER_ROW, 0);
-      Preconditions.checkArgument(maxSimilaritiesPerRow > 0, "Incorrect maximum number of similarities per row!");
+      Preconditions.checkArgument(maxSimilaritiesPerRow > 0, "Maximum number of similarities per row must be greater then 0!");
     }
 
     @Override

@@ -65,7 +65,8 @@ public final class KDDCupDataModel implements DataModel {
    */
   public KDDCupDataModel(File dataFile, boolean storeDates, double samplingRate) throws IOException {
 
-    Preconditions.checkArgument(!Double.isNaN(samplingRate) && samplingRate > 0.0 && samplingRate <= 1.0);
+    Preconditions.checkArgument(!Double.isNaN(samplingRate) && samplingRate > 0.0 && samplingRate <= 1.0,
+        "Must be: 0.0 < samplingRate <= 1.0");
 
     dataFileDirectory = dataFile.getParentFile();
 

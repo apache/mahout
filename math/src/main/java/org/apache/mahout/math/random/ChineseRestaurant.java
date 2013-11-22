@@ -54,8 +54,8 @@ public final class ChineseRestaurant implements Sampler<Integer> {
    * @param discount  The discount parameter that drives the percentage of values that occur once in a large sample.
    */
   public ChineseRestaurant(double alpha, double discount) {
-    Preconditions.checkArgument(alpha > 0);
-    Preconditions.checkArgument(discount >= 0 && discount <= 1);
+    Preconditions.checkArgument(alpha > 0, "Strength Parameter, alpha must be greater then 0!");
+    Preconditions.checkArgument(discount >= 0 && discount <= 1, "Must be: 0 <= discount <= 1");
     this.alpha = alpha;
     this.discount = discount;
   }

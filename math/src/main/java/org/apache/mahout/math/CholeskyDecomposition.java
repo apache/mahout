@@ -40,7 +40,7 @@ public class CholeskyDecomposition {
     L = new PivotedMatrix(new DenseMatrix(rows, rows));
 
     // must be square
-    Preconditions.checkArgument(rows == a.columnSize());
+    Preconditions.checkArgument(rows == a.columnSize(), "Must be a Square Matrix");
 
     if (pivot) {
       decomposeWithPivoting(a);

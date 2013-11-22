@@ -79,7 +79,7 @@ public class ProjectionSearch extends UpdatableSearcher {
   public ProjectionSearch(DistanceMeasure distanceMeasure, int numProjections,  int searchSize) {
     super(distanceMeasure);
     Preconditions.checkArgument(numProjections > 0 && numProjections < 100,
-        "Unreasonable value for number of projections");
+        "Unreasonable value for number of projections. Must be: 0 < numProjections < 100");
 
     this.searchSize = searchSize;
     this.numProjections = numProjections;

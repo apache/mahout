@@ -336,13 +336,14 @@ public final class StreamingKMeansDriver extends AbstractJob {
                                                 String method,
                                                 boolean reduceStreamingKMeans) throws ClassNotFoundException {
     // Checking preconditions for the parameters.
-    Preconditions.checkArgument(numClusters > 0, "Invalid number of clusters requested");
+    Preconditions.checkArgument(numClusters > 0, 
+        "Invalid number of clusters requested: " + numClusters + ". Must be: numClusters > 0!");
 
     // StreamingKMeans
     Preconditions.checkArgument(estimatedNumMapClusters > numClusters, "Invalid number of estimated map "
         + "clusters; There must be more than the final number of clusters (k log n vs k)");
     Preconditions.checkArgument(estimatedDistanceCutoff == INVALID_DISTANCE_CUTOFF || estimatedDistanceCutoff > 0,
-        "estimatedDistanceCutoff cannot be negative");
+        "estimatedDistanceCutoff must be equal to -1 or must be greater then 0!");
 
     // BallKMeans
     Preconditions.checkArgument(maxNumIterations > 0, "Must have at least one BallKMeans iteration");

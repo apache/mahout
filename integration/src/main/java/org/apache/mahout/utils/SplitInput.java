@@ -615,16 +615,14 @@ public class SplitInput extends AbstractJob {
    */
   public void validate() throws IOException {
     Preconditions.checkArgument(testSplitSize >= 1 || testSplitSize == -1,
-            "Invalid testSplitSize", testSplitSize);
+        "Invalid testSplitSize: " + testSplitSize + ". Must be: testSplitSize >= 1 or testSplitSize = -1");
     Preconditions.checkArgument(splitLocation >= 0 && splitLocation <= 100 || splitLocation == -1,
-            "Invalid splitLocation percentage", splitLocation);
+        "Invalid splitLocation percentage: " + splitLocation + ". Must be: 0 <= splitLocation <= 100 or splitLocation = -1");
     Preconditions.checkArgument(testSplitPct >= 0 && testSplitPct <= 100 || testSplitPct == -1,
-            "Invalid testSplitPct percentage", testSplitPct);
-    Preconditions.checkArgument(splitLocation >= 0 && splitLocation <= 100 || splitLocation == -1,
-            "Invalid splitLocation percentage", splitLocation);
+        "Invalid testSplitPct percentage: " + testSplitPct + ". Must be: 0 <= testSplitPct <= 100 or testSplitPct = -1");
     Preconditions.checkArgument(testRandomSelectionPct >= 0 && testRandomSelectionPct <= 100
-            || testRandomSelectionPct == -1,
-            "Invalid testRandomSelectionPct percentage", testRandomSelectionPct);
+            || testRandomSelectionPct == -1,"Invalid testRandomSelectionPct percentage: " + testRandomSelectionPct +
+        ". Must be: 0 <= testRandomSelectionPct <= 100 or testRandomSelectionPct = -1");
 
     Preconditions.checkArgument(trainingOutputDirectory != null || useMapRed,
         "No training output directory was specified");
@@ -653,10 +651,10 @@ public class SplitInput extends AbstractJob {
       FileSystem fs = trainingOutputDirectory.getFileSystem(conf);
       FileStatus trainingOutputDirStatus = fs.getFileStatus(trainingOutputDirectory);
       Preconditions.checkArgument(trainingOutputDirStatus != null && trainingOutputDirStatus.isDir(),
-              "%s is not a directory", trainingOutputDirectory);
+          "%s is not a directory", trainingOutputDirectory);
       FileStatus testOutputDirStatus = fs.getFileStatus(testOutputDirectory);
       Preconditions.checkArgument(testOutputDirStatus != null && testOutputDirStatus.isDir(),
-              "%s is not a directory", testOutputDirectory);
+          "%s is not a directory", testOutputDirectory);
     }
   }
 

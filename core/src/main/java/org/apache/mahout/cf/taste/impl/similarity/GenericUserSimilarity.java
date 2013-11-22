@@ -146,7 +146,7 @@ public final class GenericUserSimilarity implements UserSimilarity {
     private final double value;
     
     public UserUserSimilarity(long userID1, long userID2, double value) {
-      Preconditions.checkArgument(value >= -1.0 && value <= 1.0, "Illegal value: %s", value);
+      Preconditions.checkArgument(value >= -1.0 && value <= 1.0, "Illegal value: " + value + ". Must be: -1.0 <= value <= 1.0");
       this.userID1 = userID1;
       this.userID2 = userID2;
       this.value = value;

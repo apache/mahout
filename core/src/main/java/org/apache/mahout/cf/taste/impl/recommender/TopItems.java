@@ -50,8 +50,8 @@ public final class TopItems {
                                                   LongPrimitiveIterator possibleItemIDs,
                                                   IDRescorer rescorer,
                                                   Estimator<Long> estimator) throws TasteException {
-    Preconditions.checkArgument(possibleItemIDs != null, "argument is null");
-    Preconditions.checkArgument(estimator != null, "argument is null");
+    Preconditions.checkArgument(possibleItemIDs != null, "possibleItemIDs is null");
+    Preconditions.checkArgument(estimator != null, "estimator is null");
 
     Queue<RecommendedItem> topItems = new PriorityQueue<RecommendedItem>(howMany + 1,
       Collections.reverseOrder(ByValueRecommendedItemComparator.getInstance()));

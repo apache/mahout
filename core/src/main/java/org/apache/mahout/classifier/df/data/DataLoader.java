@@ -64,36 +64,31 @@ public final class DataLoader {
   private static boolean parseString(Attribute[] attrs, Set<String>[] values, CharSequence string,
     boolean regression) {
     String[] tokens = COMMA_SPACE.split(string);
-    Preconditions.checkArgument(tokens.length == attrs.length, "Wrong number of attributes in the string");
+    Preconditions.checkArgument(tokens.length == attrs.length,
+        "Wrong number of attributes in the string: " + tokens.length + ". Must be: " + attrs.length);
 
     // extract tokens and check is there is any missing value
     for (int attr = 0; attr < attrs.length; attr++) {
-      if (attrs[attr].isIgnored()) {
-        continue;
-      }
-      if ("?".equals(tokens[attr])) {
+      if (!attrs[attr].isIgnored() && "?".equals(tokens[attr])) {
         return false; // missing value
       }
     }
 
     for (int attr = 0; attr < attrs.length; attr++) {
-      if (attrs[attr].isIgnored()) {
-        continue;
-      }
-
-      String token = tokens[attr];
-
-      if (attrs[attr].isCategorical() || (!regression && attrs[attr].isLabel())) {
-        // update values
-        if (values[attr] == null) {
-          values[attr] = Sets.newHashSet();
-        }
-        values[attr].add(token);
-      } else {
-        try {
-          Double.parseDouble(token);
-        } catch (NumberFormatException e) {
-          return false;
+      if (!attrs[attr].isIgnored()) {
+        String token = tokens[attr];
+        if (attrs[attr].isCategorical() || (!regression && attrs[attr].isLabel())) {
+          // update values
+          if (values[attr] == null) {
+            values[attr] = Sets.newHashSet();
+          }
+          values[attr].add(token);
+        } else {
+          try {
+            Double.parseDouble(token);
+          } catch (NumberFormatException e) {
+            return false;
+          }
         }
       }
     }
@@ -122,23 +117,20 @@ public final class DataLoader {
 
     while (scanner.hasNextLine()) {
       String line = scanner.nextLine();
-      if (line.isEmpty()) {
+      if (!line.isEmpty()) {
+        Instance instance = converter.convert(line);
+        if (instance != null) {
+          instances.add(instance);
+        } else {
+          // missing values found
+          log.warn("{}: missing values", instances.size());
+        }
+      } else {
         log.warn("{}: empty string", instances.size());
-        continue;
       }
-
-      Instance instance = converter.convert(line);
-      if (instance == null) {
-        // missing values found
-        log.warn("{}: missing values", instances.size());
-        continue;
-      }
-
-      instances.add(instance);
     }
 
     scanner.close();
-
     return new Data(dataset, instances);
   }
 
@@ -151,19 +143,17 @@ public final class DataLoader {
     DataConverter converter = new DataConverter(dataset);
 
     for (String line : data) {
-      if (line.isEmpty()) {
+      if (!line.isEmpty()) {
+        Instance instance = converter.convert(line);
+        if (instance != null) {
+          instances.add(instance);
+        } else {
+          // missing values found
+          log.warn("{}: missing values", instances.size());
+        }
+      } else {
         log.warn("{}: empty string", instances.size());
-        continue;
       }
-
-      Instance instance = converter.convert(line);
-      if (instance == null) {
-        // missing values found
-        log.warn("{}: missing values", instances.size());
-        continue;
-      }
-
-      instances.add(instance);
     }
 
     return new Data(dataset, instances);
@@ -193,12 +183,10 @@ public final class DataLoader {
     int size = 0;
     while (scanner.hasNextLine()) {
       String line = scanner.nextLine();
-      if (line.isEmpty()) {
-        continue;
-      }
-
-      if (parseString(attrs, valsets, line, regression)) {
-        size++;
+      if (!line.isEmpty()) {
+        if (parseString(attrs, valsets, line, regression)) {
+          size++;
+        }
       }
     }
 
@@ -232,12 +220,10 @@ public final class DataLoader {
 
     int size = 0;
     for (String aData : data) {
-      if (aData.isEmpty()) {
-        continue;
-      }
-
-      if (parseString(attrs, valsets, aData, regression)) {
-        size++;
+      if (!aData.isEmpty()) {
+        if (parseString(attrs, valsets, aData, regression)) {
+          size++;
+        }
       }
     }
 

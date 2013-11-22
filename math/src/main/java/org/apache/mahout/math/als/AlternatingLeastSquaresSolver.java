@@ -36,10 +36,10 @@ public final class AlternatingLeastSquaresSolver {
   //TODO make feature vectors a simple array
   public static Vector solve(Iterable<Vector> featureVectors, Vector ratingVector, double lambda, int numFeatures) {
 
-    Preconditions.checkNotNull(featureVectors, "Feature vectors cannot be null");
+    Preconditions.checkNotNull(featureVectors, "Feature Vectors cannot be null");
     Preconditions.checkArgument(!Iterables.isEmpty(featureVectors));
-    Preconditions.checkNotNull(ratingVector, "rating vector cannot be null");
-    Preconditions.checkArgument(ratingVector.getNumNondefaultElements() > 0, "Rating vector cannot be empty");
+    Preconditions.checkNotNull(ratingVector, "Rating Vector cannot be null");
+    Preconditions.checkArgument(ratingVector.getNumNondefaultElements() > 0, "Rating Vector cannot be empty");
     Preconditions.checkArgument(Iterables.size(featureVectors) == ratingVector.getNumNondefaultElements());
 
     int nui = ratingVector.getNumNondefaultElements();
@@ -60,7 +60,7 @@ public final class AlternatingLeastSquaresSolver {
   }
 
   static Matrix addLambdaTimesNuiTimesE(Matrix matrix, double lambda, int nui) {
-    Preconditions.checkArgument(matrix.numCols() == matrix.numRows());
+    Preconditions.checkArgument(matrix.numCols() == matrix.numRows(), "Must be a Square Matrix");
     double lambdaTimesNui = lambda * nui;
     int numCols = matrix.numCols();
     for (int n = 0; n < numCols; n++) {
@@ -104,7 +104,7 @@ public final class AlternatingLeastSquaresSolver {
   }
 
   static Matrix createRiIiMaybeTransposed(Vector ratingVector) {
-    Preconditions.checkArgument(ratingVector.isSequentialAccess());
+    Preconditions.checkArgument(ratingVector.isSequentialAccess(), "Ratings should be iterable in Index or Sequential Order");
 
     double[][] RiIiMaybeTransposed = new double[ratingVector.getNumNondefaultElements()][1];
     int index = 0;

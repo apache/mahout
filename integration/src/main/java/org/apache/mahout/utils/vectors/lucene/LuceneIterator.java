@@ -18,13 +18,13 @@
 package org.apache.mahout.utils.vectors.lucene;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import org.apache.lucene.index.IndexReader;
 import org.apache.mahout.utils.vectors.TermInfo;
 import org.apache.mahout.vectorizer.Weight;
 
 import java.io.IOException;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * An {@link java.util.Iterator} over {@link org.apache.mahout.math.Vector}s that uses a Lucene index as the source
@@ -42,22 +42,22 @@ public class LuceneIterator extends AbstractLuceneIterator {
    * @param indexReader {@link IndexReader} to read the documents from.
    * @param idField     field containing the id. May be null.
    * @param field       field to use for the Vector
-   * @param terminfo    terminfo
+   * @param termInfo    termInfo
    * @param weight      weight
-   * @param normPower   the normalization value. Must be nonnegative, or {@link LuceneIterable#NO_NORMALIZING}
+   * @param normPower   the normalization value. Must be non-negative, or {@link LuceneIterable#NO_NORMALIZING}
    */
-  public LuceneIterator(IndexReader indexReader, String idField, String field, TermInfo terminfo, Weight weight,
+  public LuceneIterator(IndexReader indexReader, String idField, String field, TermInfo termInfo, Weight weight,
                         double normPower) {
-    this(indexReader, idField, field, terminfo, weight, normPower, 0.0);
+    this(indexReader, idField, field, termInfo, weight, normPower, 0.0);
   }
 
   /**
    * @param indexReader {@link IndexReader} to read the documents from.
    * @param idField    field containing the id. May be null.
    * @param field      field to use for the Vector
-   * @param terminfo   terminfo
+   * @param termInfo   termInfo
    * @param weight     weight
-   * @param normPower  the normalization value. Must be nonnegative, or {@link LuceneIterable#NO_NORMALIZING}
+   * @param normPower  the normalization value. Must be non-negative, or {@link LuceneIterable#NO_NORMALIZING}
    * @param maxPercentErrorDocs most documents that will be tolerated without a term freq vector. In [0,1].
    * @see #LuceneIterator(org.apache.lucene.index.IndexReader, String, String, org.apache.mahout.utils.vectors.TermInfo,
    * org.apache.mahout.vectorizer.Weight, double)
@@ -65,18 +65,19 @@ public class LuceneIterator extends AbstractLuceneIterator {
   public LuceneIterator(IndexReader indexReader,
                         String idField,
                         String field,
-                        TermInfo terminfo,
+                        TermInfo termInfo,
                         Weight weight,
                         double normPower,
                         double maxPercentErrorDocs) {
-      super(terminfo, normPower, indexReader, weight, maxPercentErrorDocs, field);
+      super(termInfo, normPower, indexReader, weight, maxPercentErrorDocs, field);
       // term docs(null) is a better way of iterating all the docs in Lucene
     Preconditions.checkArgument(normPower == LuceneIterable.NO_NORMALIZING || normPower >= 0,
-            "If specified normPower must be nonnegative", normPower);
-    Preconditions.checkArgument(maxPercentErrorDocs >= 0.0 && maxPercentErrorDocs <= 1.0);
+        "normPower must be non-negative or -1, but normPower = " + normPower);
+    Preconditions.checkArgument(maxPercentErrorDocs >= 0.0 && maxPercentErrorDocs <= 1.0,
+        "Must be: 0.0 <= maxPercentErrorDocs <= 1.0");
     this.idField = idField;
     if (idField != null) {
-      idFieldSelector = new TreeSet<String>();
+      idFieldSelector = Sets.newTreeSet();
       idFieldSelector.add(idField);
     } else {
       /*The field in the index  containing the index. If null, then the Lucene internal doc id is used

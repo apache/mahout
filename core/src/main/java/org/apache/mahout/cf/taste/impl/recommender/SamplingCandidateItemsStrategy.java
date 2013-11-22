@@ -98,11 +98,11 @@ public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrate
                                         int candidatesPerUserFactor,
                                         int numUsers,
                                         int numItems) {
-    Preconditions.checkArgument(itemsFactor > 0);
-    Preconditions.checkArgument(usersPerItemFactor > 0);
-    Preconditions.checkArgument(candidatesPerUserFactor > 0);
-    Preconditions.checkArgument(numUsers > 0);
-    Preconditions.checkArgument(numItems > 0);
+    Preconditions.checkArgument(itemsFactor > 0, "itemsFactor must be greater then 0!");
+    Preconditions.checkArgument(usersPerItemFactor > 0, "usersPerItemFactor must be greater then 0!");
+    Preconditions.checkArgument(candidatesPerUserFactor > 0, "candidatesPerUserFactor must be greater then 0!");
+    Preconditions.checkArgument(numUsers > 0, "numUsers must be greater then 0!");
+    Preconditions.checkArgument(numItems > 0, "numItems must be greater then 0!");
     maxItems = computeMaxFrom(itemsFactor, numItems);
     maxUsersPerItem = computeMaxFrom(usersPerItemFactor, numUsers);
     maxItemsPerUser = computeMaxFrom(candidatesPerUserFactor, numItems);

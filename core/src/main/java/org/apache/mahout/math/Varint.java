@@ -125,7 +125,7 @@ public final class Varint {
     while (((b = in.readByte()) & 0x80L) != 0) {
       value |= (b & 0x7F) << i;
       i += 7;
-      Preconditions.checkArgument(i <= 63, "Variable length quantity is too long");
+      Preconditions.checkArgument(i <= 63, "Variable length quantity is too long (must be <= 63)");
     }
     return value | (b << i);
   }
@@ -159,7 +159,7 @@ public final class Varint {
     while (((b = in.readByte()) & 0x80) != 0) {
       value |= (b & 0x7F) << i;
       i += 7;
-      Preconditions.checkArgument(i <= 35, "Variable length quantity is too long");
+      Preconditions.checkArgument(i <= 35, "Variable length quantity is too long (must be <= 35)");
     }
     return value | (b << i);
   }

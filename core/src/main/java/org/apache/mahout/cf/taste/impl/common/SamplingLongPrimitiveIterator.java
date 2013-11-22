@@ -41,7 +41,7 @@ public final class SamplingLongPrimitiveIterator extends AbstractLongPrimitiveIt
 
   public SamplingLongPrimitiveIterator(RandomWrapper random, LongPrimitiveIterator delegate, double samplingRate) {
     Preconditions.checkNotNull(delegate);
-    Preconditions.checkArgument(samplingRate > 0.0 && samplingRate <= 1.0);
+    Preconditions.checkArgument(samplingRate > 0.0 && samplingRate <= 1.0, "Must be: 0.0 < samplingRate <= 1.0");
     // Geometric distribution is special case of negative binomial (aka Pascal) with r=1:
     geometricDistribution = new PascalDistribution(random.getRandomGenerator(), 1, samplingRate);
     this.delegate = delegate;

@@ -126,7 +126,7 @@ public final class CassandraDataModel implements DataModel, Closeable {
   public CassandraDataModel(String host, int port, String keyspaceName) {
     
     Preconditions.checkNotNull(host);
-    Preconditions.checkArgument(port > 0);
+    Preconditions.checkArgument(port > 0, "port must be greater then 0!");
     Preconditions.checkNotNull(keyspaceName);
 
     cluster = HFactory.getOrCreateCluster(CassandraDataModel.class.getSimpleName(), host + ':' + port);

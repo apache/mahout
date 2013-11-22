@@ -37,7 +37,7 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Contains informations about the attributes.
+ * Contains information about the attributes.
  */
 public class Dataset {
 
@@ -225,7 +225,7 @@ public class Dataset {
    */
   public int valueOf(int attr, String token) {
     Preconditions.checkArgument(!isNumerical(attr), "Only for CATEGORICAL attributes");
-    Preconditions.checkArgument(values != null, "Values not found");
+    Preconditions.checkArgument(values != null, "Values not found (equals null)");
     return ArrayUtils.indexOf(values[attr], token);
   }
 

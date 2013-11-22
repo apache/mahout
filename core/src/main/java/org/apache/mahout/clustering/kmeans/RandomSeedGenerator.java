@@ -64,7 +64,7 @@ public final class RandomSeedGenerator {
                                  int k,
                                  DistanceMeasure measure) throws IOException {
 
-    Preconditions.checkArgument(k > 0);
+    Preconditions.checkArgument(k > 0, "Must be: k > 0, but k = " + k);
     // delete the output directory
     FileSystem fs = FileSystem.get(output.toUri(), conf);
     HadoopUtil.delete(conf, output);

@@ -49,8 +49,8 @@ public final class Empirical extends AbstractSamplerFunction {
    *                       the 0-th (1.0-th) quantile if the left (right) tail is not allowed.
    */
   public Empirical(boolean exceedMinimum, boolean exceedMaximum, int samples, double... ecdf) {
-    Preconditions.checkArgument(ecdf.length % 2 == 0);
-    Preconditions.checkArgument(samples >= 3);
+    Preconditions.checkArgument(ecdf.length % 2 == 0, "ecdf must have an even count of values");
+    Preconditions.checkArgument(samples >= 3, "Sample size must be >= 3");
 
     // if we can't exceed the observed bounds, then we have to be given the bounds.
     Preconditions.checkArgument(exceedMinimum || ecdf[0] == 0);

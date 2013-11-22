@@ -42,7 +42,7 @@ public class DataConverter {
 
     String[] tokens = COMMA_SPACE.split(string);
     Preconditions.checkArgument(tokens.length == nball,
-        "Wrong number of attributes in the string");
+        "Wrong number of attributes in the string: " + tokens.length + ". Must be " + nball);
 
     int nbattrs = dataset.nbAttributes();
     DenseVector vector = new DenseVector(nbattrs);

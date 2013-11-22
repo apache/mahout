@@ -68,7 +68,7 @@ public class BruteSearch extends UpdatableSearcher {
    */
   @Override
   public List<WeightedThing<Vector>> search(Vector query, int limit) {
-    Preconditions.checkArgument(limit > 0);
+    Preconditions.checkArgument(limit > 0, "limit must be greater then 0!");
     limit = Math.min(limit, referenceVectors.size());
     // A priority queue of the best @limit elements, ordered from worst to best so that the worst
     // element is always on top and can easily be removed.

@@ -80,7 +80,7 @@ public class FastProjectionSearch extends UpdatableSearcher {
   public FastProjectionSearch(DistanceMeasure distanceMeasure, int numProjections, int searchSize) {
     super(distanceMeasure);
     Preconditions.checkArgument(numProjections > 0 && numProjections < 100,
-        "Unreasonable value for number of projections");
+        "Unreasonable value for number of projections. Must be: 0 < numProjections < 100");
     this.numProjections = numProjections;
     this.searchSize = searchSize;
     scalarProjections = Lists.newArrayListWithCapacity(numProjections);

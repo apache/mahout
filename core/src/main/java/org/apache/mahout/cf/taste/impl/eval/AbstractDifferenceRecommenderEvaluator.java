@@ -98,9 +98,9 @@ public abstract class AbstractDifferenceRecommenderEvaluator implements Recommen
     Preconditions.checkNotNull(recommenderBuilder);
     Preconditions.checkNotNull(dataModel);
     Preconditions.checkArgument(trainingPercentage >= 0.0 && trainingPercentage <= 1.0,
-      "Invalid trainingPercentage: " + trainingPercentage);
+      "Invalid trainingPercentage: " + trainingPercentage + ". Must be: 0.0 <= trainingPercentage <= 1.0");
     Preconditions.checkArgument(evaluationPercentage >= 0.0 && evaluationPercentage <= 1.0,
-      "Invalid evaluationPercentage: " + evaluationPercentage);
+      "Invalid evaluationPercentage: " + evaluationPercentage + ". Must be: 0.0 <= evaluationPercentage <= 1.0");
 
     log.info("Beginning evaluation using {} of {}", trainingPercentage, dataModel);
     

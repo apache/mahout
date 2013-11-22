@@ -94,7 +94,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
     Preconditions.checkArgument(dataModel != null, "dataModel is null");
     Preconditions.checkArgument(at >= 1, "at must be at least 1");
     Preconditions.checkArgument(evaluationPercentage > 0.0 && evaluationPercentage <= 1.0,
-      "Invalid evaluationPercentage: %s", evaluationPercentage);
+        "Invalid evaluationPercentage: " + evaluationPercentage + ". Must be: 0.0 < evaluationPercentage <= 1.0");
 
     int numItems = dataModel.getNumItems();
     RunningAverage precision = new FullRunningAverage();

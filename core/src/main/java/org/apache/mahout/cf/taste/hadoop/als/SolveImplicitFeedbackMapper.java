@@ -41,7 +41,7 @@ public class SolveImplicitFeedbackMapper
     int numFeatures = conf.getInt(ParallelALSFactorizationJob.NUM_FEATURES, -1);
     int numEntities = Integer.parseInt(conf.get(ParallelALSFactorizationJob.NUM_ENTITIES));
 
-    Preconditions.checkArgument(numFeatures > 0, "numFeatures was not set correctly!");
+    Preconditions.checkArgument(numFeatures > 0, "numFeatures must be greater then 0!");
 
     return new ImplicitFeedbackAlternatingLeastSquaresSolver(numFeatures, lambda, alpha,
         ALS.readMatrixByRowsFromDistributedCache(numEntities, conf));

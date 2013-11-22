@@ -261,7 +261,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
      *           if value is NaN, less than -1.0 or greater than 1.0
      */
     public ItemItemSimilarity(long itemID1, long itemID2, double value) {
-      Preconditions.checkArgument(value >= -1.0 && value <= 1.0, "Illegal value: %s", value);
+      Preconditions.checkArgument(value >= -1.0 && value <= 1.0, "Illegal value: " + value + ". Must be: -1.0 <= value <= 1.0");
       this.itemID1 = itemID1;
       this.itemID2 = itemID2;
       this.value = value;

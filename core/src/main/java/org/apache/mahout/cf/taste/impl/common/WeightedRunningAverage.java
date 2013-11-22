@@ -68,7 +68,7 @@ public class WeightedRunningAverage implements RunningAverage, Serializable {
   }
 
   public synchronized void changeDatum(double delta, double weight) {
-    Preconditions.checkArgument(weight <= totalWeight);
+    Preconditions.checkArgument(weight <= totalWeight, "weight must be <= totalWeight");
     average += delta * weight / totalWeight;
   }
 
