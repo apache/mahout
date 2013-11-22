@@ -44,7 +44,7 @@ public abstract class AbstractCandidateItemsStrategy implements CandidateItemsSt
     return doGetCandidateItems(itemIDs, dataModel);
   }
 
-  abstract FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel) throws TasteException;
+  protected abstract FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel) throws TasteException;
 
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
