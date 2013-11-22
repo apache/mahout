@@ -36,7 +36,7 @@ public class AllSimilarItemsCandidateItemsStrategy extends AbstractCandidateItem
   }
 
   @Override
-  FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel) throws TasteException {
+  protected FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel) throws TasteException {
     FastIDSet candidateItemIDs = new FastIDSet();
     for (long itemID : preferredItemIDs) {
       candidateItemIDs.addAll(similarity.allSimilarItemIDs(itemID));
