@@ -1,20 +1,3 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.apache.mahout.math.stats;
 
 import com.google.common.collect.Lists;
@@ -32,13 +15,13 @@ public class GroupTreeTest {
     @Test
     public void testSimpleAdds() {
         GroupTree x = new GroupTree();
-        assertNull(x.floor(new Histo.Group(34)));
-        assertNull(x.ceiling(new Histo.Group(34)));
+        assertNull(x.floor(new TDigest.Group(34)));
+        assertNull(x.ceiling(new TDigest.Group(34)));
         assertEquals(0, x.size());
         assertEquals(0, x.sum());
 
-        x.add(new Histo.Group(1));
-        Histo.Group group = new Histo.Group(2);
+        x.add(new TDigest.Group(1));
+        TDigest.Group group = new TDigest.Group(2);
         group.add(3, 1);
         group.add(4, 1);
         x.add(group);
@@ -51,7 +34,7 @@ public class GroupTreeTest {
     public void testBalancing() {
         GroupTree x = new GroupTree();
         for (int i = 0; i < 101; i++) {
-            x.add(new Histo.Group(i));
+            x.add(new TDigest.Group(i));
         }
 
         assertEquals(101, x.sum());
@@ -64,59 +47,59 @@ public class GroupTreeTest {
     public void testIterators() {
         GroupTree x = new GroupTree();
         for (int i = 0; i < 101; i++) {
-            x.add(new Histo.Group(i / 2));
+            x.add(new TDigest.Group(i / 2));
         }
 
         assertEquals(0, x.first().mean(), 0);
         assertEquals(50, x.last().mean(), 0);
 
-        Iterator<Histo.Group> ix = x.iterator();
+        Iterator<TDigest.Group> ix = x.iterator();
         for (int i = 0; i < 101; i++) {
             assertTrue(ix.hasNext());
-            Histo.Group z = ix.next();
+            TDigest.Group z = ix.next();
             assertEquals(i / 2, z.mean(), 0);
         }
         assertFalse(ix.hasNext());
 
         // 34 is special since it is the smallest element of the right hand sub-tree
-        Iterable<Histo.Group> z = x.tailSet(new Histo.Group(34, 0));
+        Iterable<TDigest.Group> z = x.tailSet(new TDigest.Group(34, 0));
         ix = z.iterator();
         for (int i = 68; i < 101; i++) {
             assertTrue(ix.hasNext());
-            Histo.Group v = ix.next();
+            TDigest.Group v = ix.next();
             assertEquals(i / 2, v.mean(), 0);
         }
         assertFalse(ix.hasNext());
 
         ix = z.iterator();
         for (int i = 68; i < 101; i++) {
-            Histo.Group v = ix.next();
+            TDigest.Group v = ix.next();
             assertEquals(i / 2, v.mean(), 0);
         }
 
-        z = x.tailSet(new Histo.Group(33, 0));
+        z = x.tailSet(new TDigest.Group(33, 0));
         ix = z.iterator();
         for (int i = 66; i < 101; i++) {
             assertTrue(ix.hasNext());
-            Histo.Group v = ix.next();
+            TDigest.Group v = ix.next();
             assertEquals(i / 2, v.mean(), 0);
         }
         assertFalse(ix.hasNext());
 
-        z = x.tailSet(x.ceiling(new Histo.Group(34, 0)));
+        z = x.tailSet(x.ceiling(new TDigest.Group(34, 0)));
         ix = z.iterator();
         for (int i = 68; i < 101; i++) {
             assertTrue(ix.hasNext());
-            Histo.Group v = ix.next();
+            TDigest.Group v = ix.next();
             assertEquals(i / 2, v.mean(), 0);
         }
         assertFalse(ix.hasNext());
 
-        z = x.tailSet(x.floor(new Histo.Group(34, 0)));
+        z = x.tailSet(x.floor(new TDigest.Group(34, 0)));
         ix = z.iterator();
         for (int i = 67; i < 101; i++) {
             assertTrue(ix.hasNext());
-            Histo.Group v = ix.next();
+            TDigest.Group v = ix.next();
             assertEquals(i / 2, v.mean(), 0);
         }
         assertFalse(ix.hasNext());
@@ -127,10 +110,10 @@ public class GroupTreeTest {
         // mostly tested in other tests
         GroupTree x = new GroupTree();
         for (int i = 0; i < 101; i++) {
-            x.add(new Histo.Group(i / 2));
+            x.add(new TDigest.Group(i / 2));
         }
 
-        assertNull(x.floor(new Histo.Group(-30)));
+        assertNull(x.floor(new TDigest.Group(-30)));
     }
 
 
@@ -138,40 +121,40 @@ public class GroupTreeTest {
     public void testRemoveAndSums() {
         GroupTree x = new GroupTree();
         for (int i = 0; i < 101; i++) {
-            x.add(new Histo.Group(i / 2));
+            x.add(new TDigest.Group(i / 2));
         }
-        Histo.Group g = x.ceiling(new Histo.Group(2, 0));
+        TDigest.Group g = x.ceiling(new TDigest.Group(2, 0));
         x.remove(g);
         g.add(3, 1);
         x.add(g);
 
-        assertEquals(0, x.headCount(new Histo.Group(-1)));
-        assertEquals(0, x.headSum(new Histo.Group(-1)));
-        assertEquals(0, x.headCount(new Histo.Group(0, 0)));
-        assertEquals(0, x.headSum(new Histo.Group(0, 0)));
-        assertEquals(0, x.headCount(x.ceiling(new Histo.Group(0, 0))));
-        assertEquals(0, x.headSum(x.ceiling(new Histo.Group(0, 0))));
-        assertEquals(2, x.headCount(new Histo.Group(1, 0)));
-        assertEquals(2, x.headSum(new Histo.Group(1, 0)));
+        assertEquals(0, x.headCount(new TDigest.Group(-1)));
+        assertEquals(0, x.headSum(new TDigest.Group(-1)));
+        assertEquals(0, x.headCount(new TDigest.Group(0, 0)));
+        assertEquals(0, x.headSum(new TDigest.Group(0, 0)));
+        assertEquals(0, x.headCount(x.ceiling(new TDigest.Group(0, 0))));
+        assertEquals(0, x.headSum(x.ceiling(new TDigest.Group(0, 0))));
+        assertEquals(2, x.headCount(new TDigest.Group(1, 0)));
+        assertEquals(2, x.headSum(new TDigest.Group(1, 0)));
 
-        g = x.tailSet(new Histo.Group(2.1)).iterator().next();
+        g = x.tailSet(new TDigest.Group(2.1)).iterator().next();
         assertEquals(2.5, g.mean(), 1e-9);
 
         int i = 0;
-        for (Histo.Group gx : x) {
+        for (TDigest.Group gx : x) {
             if (i > 10) {
                 break;
             }
             System.out.printf("%d:%.1f(%d)\t", i++, gx.mean(), gx.count());
         }
-        assertEquals(5, x.headCount(new Histo.Group(2.1, 0)));
-        assertEquals(5, x.headSum(new Histo.Group(2.1, 0)));
+        assertEquals(5, x.headCount(new TDigest.Group(2.1, 0)));
+        assertEquals(5, x.headSum(new TDigest.Group(2.1, 0)));
 
-        assertEquals(6, x.headCount(new Histo.Group(2.7, 0)));
-        assertEquals(7, x.headSum(new Histo.Group(2.7, 0)));
+        assertEquals(6, x.headCount(new TDigest.Group(2.7, 0)));
+        assertEquals(7, x.headSum(new TDigest.Group(2.7, 0)));
 
-        assertEquals(101, x.headCount(new Histo.Group(200)));
-        assertEquals(102, x.headSum(new Histo.Group(200)));
+        assertEquals(101, x.headCount(new TDigest.Group(200)));
+        assertEquals(102, x.headSum(new TDigest.Group(200)));
     }
 
     @Test
@@ -182,7 +165,7 @@ public class GroupTreeTest {
         List<Double> y = Lists.newArrayList();
         for (int i = 0; i < 1000; i++) {
             double v = gen.nextDouble();
-            x.add(new Histo.Group(v));
+            x.add(new TDigest.Group(v));
             y.add(v);
             x.checkBalance();
         }
@@ -190,26 +173,26 @@ public class GroupTreeTest {
         Collections.sort(y);
 
         Iterator<Double> i = y.iterator();
-        for (Histo.Group group : x) {
+        for (TDigest.Group group : x) {
             assertEquals(i.next(), group.mean(), 0.0);
         }
 
         for (int j = 0; j < 100; j++) {
             double v = y.get(gen.nextInt(y.size()));
             y.remove(v);
-            x.remove(x.floor(new Histo.Group(v)));
+            x.remove(x.floor(new TDigest.Group(v)));
         }
 
         Collections.sort(y);
         i = y.iterator();
-        for (Histo.Group group : x) {
+        for (TDigest.Group group : x) {
             assertEquals(i.next(), group.mean(), 0.0);
         }
 
         for (int j = 0; j < y.size(); j++) {
             double v = y.get(j);
             y.set(j, v + 10);
-            Histo.Group g = x.floor(new Histo.Group(v));
+            TDigest.Group g = x.floor(new TDigest.Group(v));
             x.remove(g);
             x.checkBalance();
             g.add(g.mean() + 20, 1);
@@ -218,7 +201,7 @@ public class GroupTreeTest {
         }
 
         i = y.iterator();
-        for (Histo.Group group : x) {
+        for (TDigest.Group group : x) {
             assertEquals(i.next(), group.mean(), 0.0);
         }
     }

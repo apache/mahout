@@ -18,6 +18,7 @@
 package org.apache.mahout.math.stats;
 
 import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multiset;
 import org.apache.mahout.common.RandomUtils;
@@ -39,7 +40,7 @@ import java.util.Random;
 
 import static org.junit.Assert.*;
 
-public class HistoTest {
+public class TDigestTest {
 
     private static PrintWriter sizeDump;
     private static PrintWriter errorDump;
@@ -136,7 +137,7 @@ public class HistoTest {
             }
         };
 
-        Histo dist = new Histo((double) 1000);
+        TDigest dist = new TDigest((double) 1000);
         long t0 = System.nanoTime();
         Multiset<Double> data = HashMultiset.create();
         for (int i1 = 0; i1 < 100000; i1++) {
@@ -185,7 +186,7 @@ public class HistoTest {
     @Test
     public void testSerialization() {
         Random gen = RandomUtils.getRandom();
-        Histo dist = new Histo(100);
+        TDigest dist = new TDigest(100);
         for (int i = 0; i < 100000; i++) {
             double x = gen.nextDouble();
             dist.add(x);
@@ -195,20 +196,27 @@ public class HistoTest {
         ByteBuffer buf = ByteBuffer.allocate(20000);
         dist.asBytes(buf);
         assertTrue(buf.position() < 11000);
+        assertEquals(buf.position(), dist.byteSize());
+        buf.clear();
+
+        dist.asSmallBytes(buf);
+        assertTrue(buf.position() < 6000);
+        assertEquals(buf.position(), dist.smallByteSize());
+
         System.out.printf("# big %d bytes\n", buf.position());
 
         buf.flip();
-        Histo dist2 = Histo.fromBytes(buf);
+        TDigest dist2 = TDigest.fromBytes(buf);
         assertEquals(dist.centroidCount(), dist2.centroidCount());
         assertEquals(dist.compression(), dist2.compression(), 0);
         assertEquals(dist.size(), dist2.size());
 
         for (double q = 0; q < 1; q += 0.01) {
-            assertEquals(dist.quantile(q), dist2.quantile(q), 1e-9);
+            assertEquals(dist.quantile(q), dist2.quantile(q), 1e-8);
         }
 
-        Iterator<? extends Histo.Group> ix = dist2.centroids().iterator();
-        for (Histo.Group group : dist.centroids()) {
+        Iterator<? extends TDigest.Group> ix = dist2.centroids().iterator();
+        for (TDigest.Group group : dist.centroids()) {
             assertTrue(ix.hasNext());
             assertEquals(group.count(), ix.next().count());
         }
@@ -220,7 +228,7 @@ public class HistoTest {
         System.out.printf("# small %d bytes\n", buf.position());
 
         buf.flip();
-        dist2 = Histo.fromBytes(buf);
+        dist2 = TDigest.fromBytes(buf);
         assertEquals(dist.centroidCount(), dist2.centroidCount());
         assertEquals(dist.compression(), dist2.compression(), 0);
         assertEquals(dist.size(), dist2.size());
@@ -230,7 +238,7 @@ public class HistoTest {
         }
 
         ix = dist2.centroids().iterator();
-        for (Histo.Group group : dist.centroids()) {
+        for (TDigest.Group group : dist.centroids()) {
             assertTrue(ix.hasNext());
             assertEquals(group.count(), ix.next().count());
         }
@@ -246,13 +254,13 @@ public class HistoTest {
             int n = gen.nextInt();
             n = n >>> (i / 100);
             ref.add(n);
-            Histo.encode(buf, n);
+            TDigest.encode(buf, n);
         }
 
         buf.flip();
 
         for (int i = 0; i < 3000; i++) {
-            int n = Histo.decode(buf);
+            int n = TDigest.decode(buf);
             assertEquals(String.format("%d:", i), ref.get(i).intValue(), n);
         }
     }
@@ -260,13 +268,13 @@ public class HistoTest {
     //@Test()
     // very slow running data generator
     public void testSizeControl() {
-      RandomWrapper gen = RandomUtils.getRandom();
-      System.out.printf("k\tsamples\tcompression\tsize1\tsize2\n");
+        RandomWrapper gen = RandomUtils.getRandom();
+        System.out.printf("k\tsamples\tcompression\tsize1\tsize2\n");
         for (int k = 0; k < 40; k++) {
             for (int size : new int[]{10, 100, 1000, 10000}) {
                 for (double compression : new double[]{2, 5, 10, 20, 50, 100, 200, 500, 1000}) {
-                    Histo dist = new Histo(compression);
-                    for (int i = 0; i < size*1000; i++) {
+                    TDigest dist = new TDigest(compression);
+                    for (int i = 0; i < size * 1000; i++) {
                         dist.add(gen.nextDouble());
                     }
                     System.out.printf("%d\t%d\t%.0f\t%d\t%d\n", k, size, compression, dist.smallByteSize(), dist.byteSize());
@@ -281,7 +289,8 @@ public class HistoTest {
         RandomWrapper gen = RandomUtils.getRandom();
 
         System.out.printf("pass\tcompression\tq\terror\tsize\n");
-        for (int k = 0; k < 40; k++) {
+        // change to 50 passes for better graphs
+        for (int k = 0; k < 3; k++) {
             List<Double> data = Lists.newArrayList();
             for (int i = 0; i < 100000; i++) {
                 data.add(gen.nextDouble());
@@ -289,7 +298,7 @@ public class HistoTest {
             Collections.sort(data);
 
             for (double compression : new double[]{2, 5, 10, 20, 50, 100, 200, 500, 1000}) {
-                Histo dist = new Histo(compression);
+                TDigest dist = new TDigest(compression);
                 for (Double x : data) {
                     dist.add(x);
                 }
@@ -316,7 +325,7 @@ public class HistoTest {
      *                      diagnostic purposes.
      */
     private void runTest(AbstractContinousDistribution gen, double sizeGuide, double[] qValues, String tag, boolean recordAllData) {
-        Histo dist = new Histo(sizeGuide);
+        TDigest dist = new TDigest(sizeGuide);
         if (recordAllData) {
             dist.recordAllData();
         }
@@ -341,7 +350,7 @@ public class HistoTest {
 
         double qz = 0;
         int iz = 0;
-        for (Histo.Group group : dist.centroids()) {
+        for (TDigest.Group group : dist.centroids()) {
             double q = (qz + group.count() / 2.0) / dist.size();
             sizeDump.printf("%s\t%d\t%.6f\t%.3f\t%d\n", tag, iz, q, 4 * q * (1 - q) * dist.size() / dist.compression(), group.count());
             qz += group.count();
@@ -365,12 +374,12 @@ public class HistoTest {
         }
 
         if (recordAllData) {
-            Iterator<? extends Histo.Group> ix = dist.centroids().iterator();
-            Histo.Group b = ix.next();
-            Histo.Group c = ix.next();
+            Iterator<? extends TDigest.Group> ix = dist.centroids().iterator();
+            TDigest.Group b = ix.next();
+            TDigest.Group c = ix.next();
             qz = b.count();
             while (ix.hasNext()) {
-                Histo.Group a = b;
+                TDigest.Group a = b;
                 b = c;
                 c = ix.next();
                 double left = (b.mean() - a.mean()) / 2;
@@ -385,6 +394,74 @@ public class HistoTest {
         }
     }
 
+    @Test
+    public void testMerge() {
+        RandomWrapper gen = RandomUtils.getRandom();
+
+        for (int parts : new int[]{2, 5, 10, 20, 50, 100}) {
+            List<Double> data = Lists.newArrayList();
+
+            TDigest dist = new TDigest(100);
+            dist.recordAllData();
+
+            List<TDigest> many = Lists.newArrayList();
+            for (int i = 0; i < 100; i++) {
+                many.add(new TDigest(100).recordAllData());
+            }
+
+            // we accumulate the data into multiple sub-digests
+            List<TDigest> subs = Lists.newArrayList();
+            for (int i = 0; i < parts; i++) {
+                subs.add(new TDigest(50).recordAllData());
+            }
+
+            for (int i = 0; i < 100000; i++) {
+                double x = gen.nextDouble();
+                data.add(x);
+                dist.add(x);
+                subs.get(i % parts).add(x);
+            }
+            dist.compress();
+            Collections.sort(data);
+
+            // collect the raw data from the sub-digests
+            List<Double> data2 = Lists.newArrayList();
+            for (TDigest digest : subs) {
+                for (TDigest.Group group : digest.centroids()) {
+                    Iterables.addAll(data2, group.data());
+                }
+            }
+            Collections.sort(data2);
+
+            // verify that the raw data all got recorded
+            assertEquals(data.size(), data2.size());
+            Iterator<Double> ix = data.iterator();
+            for (Double x : data2) {
+                assertEquals(ix.next(), x);
+            }
+
+            // now merge the sub-digests
+            TDigest dist2 = TDigest.merge(50, subs);
+
+            for (double q : new double[]{0.001, 0.01, 0.1, 0.2, 0.3, 0.5}) {
+                double z = quantile(q, data);
+                double e1 = dist.quantile(q) - z;
+                double e2 = dist2.quantile(q) - z;
+                System.out.printf("quantile\t%d\t%.6f\t%.6f\t%.6f\t%.6f\t%.6f\n", parts, q, z - q, e1, e2, Math.abs(e2) / q);
+                assertTrue(String.format("parts=%d, q=%.4f, e1=%.5f, e2=%.5f, rel=%.4f", parts, q, e1, e2, Math.abs(e2) / q), Math.abs(e2) / q < 0.1 && Math.abs(e2) < 0.01);
+            }
+
+            for (double x : new double[]{0.001, 0.01, 0.1, 0.2, 0.3, 0.5}) {
+                double z = cdf(x, data);
+                double e1 = dist.cdf(x) - z;
+                double e2 = dist2.cdf(x) - z;
+
+                System.out.printf("cdf\t%d\t%.6f\t%.6f\t%.6f\t%.6f\t%.6f\n", parts, x, z - x, e1, e2, Math.abs(e2) / x);
+                assertTrue(String.format("parts=%d, x=%.4f, e1=%.5f, e2=%.5f", parts, x, e1, e2), Math.abs(e2) / x < 0.1 && Math.abs(e2) < 0.01);
+            }
+        }
+    }
+
     private double cdf(final double x, List<Double> data) {
         int n1 = 0;
         int n2 = 0;
@@ -393,6 +470,10 @@ public class HistoTest {
             n2 += (v <= x) ? 1 : 0;
         }
         return (n1 + n2) / 2.0 / data.size();
+    }
+
+    private double quantile(final double q, List<Double> data) {
+        return data.get((int) Math.floor(data.size() * q));
     }
 
     @Before

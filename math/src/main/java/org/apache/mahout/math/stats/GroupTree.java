@@ -1,20 +1,3 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.apache.mahout.math.stats;
 
 import com.google.common.base.Preconditions;
@@ -25,14 +8,14 @@ import java.util.Deque;
 import java.util.Iterator;
 
 /**
- * A tree containing Histo.Group.  This adds to the normal NavigableSet the
+ * A tree containing TDigest.Group.  This adds to the normal NavigableSet the
  * ability to sum up the size of elements to the left of a particular group.
  */
-public class GroupTree implements Iterable<Histo.Group> {
+public class GroupTree implements Iterable<TDigest.Group> {
     private int count;
     private int size;
     private int depth;
-    private Histo.Group leaf;
+    private TDigest.Group leaf;
     private GroupTree left, right;
 
     public GroupTree() {
@@ -41,7 +24,7 @@ public class GroupTree implements Iterable<Histo.Group> {
         left = right = null;
     }
 
-    public GroupTree(Histo.Group leaf) {
+    public GroupTree(TDigest.Group leaf) {
         size = depth = 1;
         this.leaf = leaf;
         count = leaf.count();
@@ -57,7 +40,7 @@ public class GroupTree implements Iterable<Histo.Group> {
         leaf = this.right.first();
     }
 
-    public void add(Histo.Group group) {
+    public void add(TDigest.Group group) {
         if (size == 0) {
             leaf = group;
             depth = 1;
@@ -126,7 +109,7 @@ public class GroupTree implements Iterable<Histo.Group> {
     /**
      * @return the number of items strictly before the current element
      */
-    public int headCount(Histo.Group base) {
+    public int headCount(TDigest.Group base) {
         if (size == 0) {
             return 0;
         } else if (left == null) {
@@ -143,7 +126,7 @@ public class GroupTree implements Iterable<Histo.Group> {
     /**
      * @return the sum of the size() function for all elements strictly before the current element.
      */
-    public int headSum(Histo.Group base) {
+    public int headSum(TDigest.Group base) {
         if (size == 0) {
             return 0;
         } else if (left == null) {
@@ -160,7 +143,7 @@ public class GroupTree implements Iterable<Histo.Group> {
     /**
      * @return the first Group in this set
      */
-    public Histo.Group first() {
+    public TDigest.Group first() {
         Preconditions.checkState(size > 0, "No first element of empty set");
         if (left == null) {
             return leaf;
@@ -172,7 +155,7 @@ public class GroupTree implements Iterable<Histo.Group> {
     /**
      * Iteratres through all groups in the tree.
      */
-    public Iterator<Histo.Group> iterator() {
+    public Iterator<TDigest.Group> iterator() {
         return iterator(null);
     }
 
@@ -182,8 +165,8 @@ public class GroupTree implements Iterable<Histo.Group> {
      * @return An iterator that goes through the groups in order of mean and id starting at or after the
      * specified Group.
      */
-    private Iterator<Histo.Group> iterator(final Histo.Group start) {
-        return new AbstractIterator<Histo.Group>() {
+    private Iterator<TDigest.Group> iterator(final TDigest.Group start) {
+        return new AbstractIterator<TDigest.Group>() {
             {
                 stack = Queues.newArrayDeque();
                 push(GroupTree.this, start);
@@ -193,7 +176,7 @@ public class GroupTree implements Iterable<Histo.Group> {
 
             // recurses down to the leaf that is >= start
             // pending right hand branches on the way are put on the stack
-            private void push(GroupTree z, Histo.Group start) {
+            private void push(GroupTree z, TDigest.Group start) {
                 while (z.left != null) {
                     if (start == null || start.compareTo(z.leaf) < 0) {
                         // remember we will have to process the right hand branch later
@@ -212,7 +195,7 @@ public class GroupTree implements Iterable<Histo.Group> {
             }
 
             @Override
-            protected Histo.Group computeNext() {
+            protected TDigest.Group computeNext() {
                 GroupTree r = stack.poll();
                 while (r != null && r.left != null) {
                     // unpack r onto the stack
@@ -231,7 +214,7 @@ public class GroupTree implements Iterable<Histo.Group> {
         };
     }
 
-    public void remove(Histo.Group base) {
+    public void remove(TDigest.Group base) {
         Preconditions.checkState(size > 0, "Cannot remove from empty set");
         if (size == 1) {
             Preconditions.checkArgument(base.compareTo(leaf) == 0, "Element %s not found", base);
@@ -274,7 +257,7 @@ public class GroupTree implements Iterable<Histo.Group> {
     /**
      * @return the largest element less than or equal to base
      */
-    public Histo.Group floor(Histo.Group base) {
+    public TDigest.Group floor(TDigest.Group base) {
         if (size == 0) {
             return null;
         } else {
@@ -284,7 +267,7 @@ public class GroupTree implements Iterable<Histo.Group> {
                 if (base.compareTo(leaf) < 0) {
                     return left.floor(base);
                 } else {
-                    Histo.Group floor = right.floor(base);
+                    TDigest.Group floor = right.floor(base);
                     if (floor == null) {
                         floor = left.last();
                     }
@@ -294,7 +277,7 @@ public class GroupTree implements Iterable<Histo.Group> {
         }
     }
 
-    public Histo.Group last() {
+    public TDigest.Group last() {
         Preconditions.checkState(size > 0, "Cannot find last element of empty set");
         if (size == 1) {
             return leaf;
@@ -306,14 +289,14 @@ public class GroupTree implements Iterable<Histo.Group> {
     /**
      * @return the smallest element greater than or equal to base.
      */
-    public Histo.Group ceiling(Histo.Group base) {
+    public TDigest.Group ceiling(TDigest.Group base) {
         if (size == 0) {
             return null;
         } else if (size == 1) {
             return base.compareTo(leaf) <= 0 ? leaf : null;
         } else {
             if (base.compareTo(leaf) < 0) {
-                Histo.Group r = left.ceiling(base);
+                TDigest.Group r = left.ceiling(base);
                 if (r == null) {
                     r = right.first();
                 }
@@ -327,10 +310,10 @@ public class GroupTree implements Iterable<Histo.Group> {
     /**
      * @return the subset of elements equal to or greater than base.
      */
-    public Iterable<Histo.Group> tailSet(final Histo.Group start) {
-        return new Iterable<Histo.Group>() {
+    public Iterable<TDigest.Group> tailSet(final TDigest.Group start) {
+        return new Iterable<TDigest.Group>() {
             @Override
-            public Iterator<Histo.Group> iterator() {
+            public Iterator<TDigest.Group> iterator() {
                 return GroupTree.this.iterator(start);
             }
         };
