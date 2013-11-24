@@ -154,7 +154,8 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
       "-o", seqFilesOutputPath.toString(),
       "-id", idField,
       "-f", StringUtils.join(fields, SequenceFilesFromLuceneStorageDriver.SEPARATOR_FIELDS),
-      "-q", "invalid:query"
+      "-q", "invalid:query",
+      "-xm", "sequential"
     };
 
     driver.setConf(conf);
