@@ -17,6 +17,7 @@
 
 package org.apache.mahout.text;
 
+import com.google.common.collect.Iterators;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -162,8 +163,9 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
     driver.run(args);
     assertTrue(FileSystem.get(conf).exists(seqFilesOutputPath));
     //shouldn't be any real files in the seq files out path
-    SequenceFileDirIterator<Writable, Writable> iter = new SequenceFileDirIterator<Writable, Writable>(seqFilesOutputPath, PathType.LIST, PathFilters.logsCRCFilter(), null, false, conf);
-    assertFalse(iter.hasNext());
+    SequenceFileDirIterator<Writable, Writable> iter =
+        new SequenceFileDirIterator<Writable, Writable>(seqFilesOutputPath, PathType.LIST, PathFilters.logsCRCFilter(), null, false, conf);
+    assertFalse(Iterators.size(iter) > 0);
 
   }
 
