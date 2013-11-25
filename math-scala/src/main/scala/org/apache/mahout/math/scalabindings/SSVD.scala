@@ -15,12 +15,13 @@
  * limitations under the License.
  */
 
-package mahout.math
+package org.apache.mahout.math.scalabindings
 
-import math._
+import scala.math._
 import org.apache.mahout.math.{Matrices, Matrix}
 import RLikeOps._
 import org.apache.mahout.common.RandomUtils
+import scala._
 
 private[math] object SSVD {
 

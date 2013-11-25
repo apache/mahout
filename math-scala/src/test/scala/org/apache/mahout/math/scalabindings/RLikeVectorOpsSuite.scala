@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,51 +15,25 @@
  * limitations under the License.
  */
 
-package mahout.math
+package org.apache.mahout.math.scalabindings
 
 import org.scalatest.FunSuite
+import org.apache.mahout.math.Vector
 import RLikeOps._
 
-class RLikeMatrixOpsSuite extends FunSuite {
-
-  test("multiplication") {
-
-    val a = dense((1, 2, 3), (3, 4, 5))
-    val b = dense(1, 4, 5)
-    val m = a %*% b
-
-    assert(m(0, 0) == 24)
-    assert(m(1, 0) == 44)
-    println(m.toString)
-  }
+/**
+ *
+ * @author dmitriy
+ */
+class RLikeVectorOpsSuite extends FunSuite {
 
   test("Hadamard") {
-    val a = dense(
-      (1, 2, 3),
-      (3, 4, 5)
-    )
-    val b = dense(
-      (1, 1, 2),
-      (2, 1, 1)
-    )
+    val a: Vector = (1, 2, 3)
+    val b = (3, 4, 5)
 
     val c = a * b
-
-    printf("C=\n%s\n", c)
-
-    assert(c(0, 0) == 1)
-    assert(c(1, 2) == 5)
-    println(c.toString)
-
-    val d = a * 5.0
-    assert(d(0, 0) == 5)
-    assert(d(1, 1) == 20)
-
-    a *= b
-    assert(a(0, 0) == 1)
-    assert(a(1, 2) == 5)
-    println(a.toString)
-
+    println(c)
+    assert(c ===(3, 8, 15))
   }
 
 }

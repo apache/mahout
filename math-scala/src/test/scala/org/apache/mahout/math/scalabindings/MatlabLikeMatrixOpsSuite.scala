@@ -15,14 +15,52 @@
  * limitations under the License.
  */
 
-package mahout.math
+package org.apache.mahout.math.scalabindings
 
-import org.apache.mahout.math.{Matrix, MatrixTimesOps}
+import org.scalatest.FunSuite
+import MatlabLikeOps._
+import scala.Predef._
 
-class MatlabLikeTimesOps(m: MatrixTimesOps) {
+class MatlabLikeMatrixOpsSuite extends FunSuite {
 
-  def :*(that: Matrix) = m.timesRight(that)
+  test("multiplication") {
 
-  def *:(that: Matrix) = m.timesLeft(that)
+    val a = dense((1, 2, 3), (3, 4, 5))
+    val b = dense(1, 4, 5)
+    val m = a * b
+
+    assert(m(0, 0) == 24)
+    assert(m(1, 0) == 44)
+    println(m.toString)
+  }
+
+  test("Hadamard") {
+    val a = dense(
+      (1, 2, 3),
+      (3, 4, 5)
+    )
+    val b = dense(
+      (1, 1, 2),
+      (2, 1, 1)
+    )
+
+    val c = a *@ b
+
+    printf("C=\n%s\n", c)
+
+    assert(c(0, 0) == 1)
+    assert(c(1, 2) == 5)
+    println(c.toString)
+
+    val d = a *@ 5.0
+    assert(d(0, 0) == 5)
+    assert(d(1, 1) == 20)
+
+    a *@= b
+    assert(a(0, 0) == 1)
+    assert(a(1, 2) == 5)
+    println(a.toString)
+
+  }
 
 }

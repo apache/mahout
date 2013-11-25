@@ -1,9 +1,10 @@
-package mahout.math
+package org.apache.mahout.math.scalabindings
 
 import org.scalatest.FunSuite
 import org.apache.mahout.math.DenseSymmetricMatrix
-import math._
+import scala.math._
 import RLikeOps._
+import scala._
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package mahout.math
+package org.apache.mahout.math.scalabindings
 
 import org.apache.mahout.math.{Matrix, MatrixTimesOps}
 

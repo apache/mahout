@@ -15,19 +15,21 @@
  * limitations under the License.
  */
 
-package mahout.math
+package org.apache.mahout.math.scalabindings
 
 import org.apache.mahout.math.{Vector, MatrixTimesOps, Matrix}
 
 /**
- * R-like operators. Declare <code>import RLikeOps._</code> to enable.
+ * Matlab-like operators. Declare <code>import MatlabLikeOps._</code> to enable.
+ *
+ * (This option is mutually exclusive to other translations such as RLikeOps).
  */
-object RLikeOps {
+object MatlabLikeOps {
 
-  implicit def v2vOps(v: Vector) = new RLikeVectorOps(v)
+  implicit def v2vOps(v: Vector) = new MatlabLikeVectorOps(v)
 
-  implicit def times2timesOps(m: MatrixTimesOps) = new RLikeTimesOps(m)
+  implicit def times2timesOps(m: MatrixTimesOps) = new MatlabLikeTimesOps(m)
 
-  implicit def m2mOps(m: Matrix) = new RLikeMatrixOps(m)
+  implicit def m2mOps(m: Matrix) = new MatlabLikeMatrixOps(m)
 
 }

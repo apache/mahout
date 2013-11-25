@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package mahout.math
+package org.apache.mahout.math.scalabindings
 
 import org.apache.mahout.math.{Vector, Matrix}
 import scala.collection.JavaConversions._

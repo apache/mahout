@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,25 +15,19 @@
  * limitations under the License.
  */
 
-package mahout.math
+package org.apache.mahout.math.scalabindings
 
-import org.scalatest.FunSuite
-import org.apache.mahout.math.Vector
-import RLikeOps._
+import org.apache.mahout.math.{Vector, MatrixTimesOps, Matrix}
 
 /**
- *
- * @author dmitriy
+ * R-like operators. Declare <code>import RLikeOps._</code> to enable.
  */
-class RLikeVectorOpsSuite extends FunSuite {
+object RLikeOps {
 
-  test("Hadamard") {
-    val a: Vector = (1, 2, 3)
-    val b = (3, 4, 5)
+  implicit def v2vOps(v: Vector) = new RLikeVectorOps(v)
 
-    val c = a * b
-    println(c)
-    assert(c ===(3, 8, 15))
-  }
+  implicit def times2timesOps(m: MatrixTimesOps) = new RLikeTimesOps(m)
+
+  implicit def m2mOps(m: Matrix) = new RLikeMatrixOps(m)
 
 }

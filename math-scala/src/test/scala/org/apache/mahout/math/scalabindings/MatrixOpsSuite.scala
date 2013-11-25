@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 
-package mahout.math
+package org.apache.mahout.math.scalabindings
 
 import org.scalatest.FunSuite
-import org.apache.mahout.math.DenseSymmetricMatrix
-import scala.math._
 import MatrixOps._
+import scala._
 
 
 class MatrixOpsSuite extends FunSuite {

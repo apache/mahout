@@ -15,16 +15,15 @@
  * limitations under the License.
  */
 
-package mahout
+package org.apache.mahout.math
 
 import org.apache.mahout.math._
-import scala.Tuple2
 import org.apache.mahout.math.solver.EigenDecomposition
 
 /**
  * Mahout matrices and vectors' scala syntactic sugar
  */
-package object math {
+package object scalabindings {
 
   // Reserved "ALL" range
   final val `::`: Range = null
