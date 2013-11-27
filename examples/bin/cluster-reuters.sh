@@ -39,14 +39,15 @@ if [ ! -e $MAHOUT ]; then
   exit 1
 fi
 
-algorithm=( kmeans fuzzykmeans lda)
+algorithm=( kmeans fuzzykmeans lda streamingkmeans)
 if [ -n "$1" ]; then
   choice=$1
 else
   echo "Please select a number to choose the corresponding clustering algorithm"
   echo "1. ${algorithm[0]} clustering"
   echo "2. ${algorithm[1]} clustering"
-  echo "3. ${algorithm[2]} clustering" 
+  echo "3. ${algorithm[2]} clustering"
+  echo "4. ${algorithm[3]} clustering"
   read -p "Enter your choice : " choice
 fi
 
@@ -169,6 +170,23 @@ elif [ "x$clustertype" == "xlda" ]; then
     -dt sequencefile -sort ${WORK_DIR}/reuters-lda-topics/part-m-00000 \
     && \
   cat ${WORK_DIR}/reuters-lda/vectordump
+elif [ "x$clustertype" == "xstreamingkmeans" ]; then
+  $MAHOUT seq2sparse \
+    -i ${WORK_DIR}/reuters-out-seqdir/ \
+    -o ${WORK_DIR}/reuters-out-seqdir-sparse-streamingkmeans -ow --maxDFPercent 85 --namedVector \
+  && \
+  rm -rf ${WORK_DIR}/reuters-streamingkmeans \
+  && \
+  $MAHOUT streamingkmeans \
+    -i ${WORK_DIR}/reuters-out-seqdir-sparse-streamingkmeans/tfidf-vectors/ \
+    --tempDir ${WORK_DIR}/tmp \
+    -o ${WORK_DIR}/reuters-streamingkmeans \
+    -sc org.apache.mahout.math.neighborhood.FastProjectionSearch \
+    -dm org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure \
+    -k 20 -km 200 -rskm \
+  && \
+  $MAHOUT seqdumper \
+    -i ${WORK_DIR}/reuters-streamingkmeans
 else 
   echo "unknown cluster type: $clustertype"
 fi 
