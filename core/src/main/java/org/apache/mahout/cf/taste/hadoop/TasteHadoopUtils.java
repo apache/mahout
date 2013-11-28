@@ -51,10 +51,10 @@ public final class TasteHadoopUtils {
   }
 
   /**
-   * Maps a long to an int
+   * Maps a long to an int with range of 0 to Integer.MAX_VALUE-1
    */
   public static int idToIndex(long id) {
-    return 0x7FFFFFFF & Longs.hashCode(id);
+    return 0x7FFFFFFF & Longs.hashCode(id) % 0x7FFFFFFE;
   }
 
   public static int readID(String token, boolean usesLongIDs) {

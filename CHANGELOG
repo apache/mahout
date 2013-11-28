@@ -50,6 +50,8 @@ Release 0.9 - unreleased
 
   MAHOUT-1275: Dropped bz2 distribution format for source and binaries (sslavic)
 
+  MAHOUT-1261: TasteHadoopUtils.idToIndex can return an int that has size Integer.MAX_VALUE (Carl Clark, smarthi)
+
 Release 0.8 - 2013-07-25
 
   MAHOUT-1272: Parallel SGD matrix factorizer for SVDrecommender (Peng Cheng via ssc)
