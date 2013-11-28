@@ -25,6 +25,7 @@ import com.google.common.io.Closeables;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
@@ -33,6 +34,7 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.apache.mahout.common.MahoutTestCase;
+import org.junit.Before;
 import org.junit.Test;
 
 public class CachedTermInfoTest extends MahoutTestCase {
@@ -57,11 +59,20 @@ public class CachedTermInfoTest extends MahoutTestCase {
           "e"
   };
 
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void before() throws IOException {
     directory = new RAMDirectory();
-    directory = createTestIndex(Field.TermVector.NO, directory, true, 0);
+
+    FieldType fieldType = new FieldType();
+    fieldType.setStored(false);
+    fieldType.setIndexed(true);
+    fieldType.setTokenized(true);
+    fieldType.setStoreTermVectors(false);
+    fieldType.setStoreTermVectorPositions(false);
+    fieldType.setStoreTermVectorOffsets(false);
+    fieldType.freeze();
+
+    directory = createTestIndex(fieldType, directory, 0);
   }
 
   @Test
@@ -86,9 +97,8 @@ public class CachedTermInfoTest extends MahoutTestCase {
 
   }
 
-  static RAMDirectory createTestIndex(Field.TermVector termVector,
+  static RAMDirectory createTestIndex(FieldType fieldType,
                                       RAMDirectory directory,
-                                      boolean createNew,
                                       int startingId) throws IOException {
     IndexWriter writer = new IndexWriter(directory, new IndexWriterConfig(Version.LUCENE_43, new WhitespaceAnalyzer(Version.LUCENE_43)));
 
@@ -97,11 +107,9 @@ public class CachedTermInfoTest extends MahoutTestCase {
         Document doc = new Document();
         Field id = new StringField("id", "doc_" + (i + startingId), Field.Store.YES);
         doc.add(id);
-        //Store both position and offset information
-        //Says it is deprecated, but doesn't seem to offer an alternative that supports term vectors...
-        Field text = new Field("content", DOCS[i], Field.Store.NO, Field.Index.ANALYZED, termVector);
+        Field text = new Field("content", DOCS[i], fieldType);
         doc.add(text);
-        Field text2 = new Field("content2", DOCS2[i], Field.Store.NO, Field.Index.ANALYZED, termVector);
+        Field text2 = new Field("content2", DOCS2[i], fieldType);
         doc.add(text2);
         writer.addDocument(doc);
       }

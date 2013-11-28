@@ -17,6 +17,7 @@
 
 package org.apache.mahout.utils.vectors.lucene;
 
+import com.google.common.collect.Maps;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.MultiFields;
 import org.apache.lucene.index.Terms;
@@ -27,7 +28,6 @@ import org.apache.mahout.utils.vectors.TermInfo;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 
@@ -47,16 +47,15 @@ public class CachedTermInfo implements TermInfo {
     int numDocs = reader.numDocs();
     double percent = numDocs * maxDfPercent / 100.0;
     //Should we use a linked hash map so that we know terms are in order?
-    termEntries = new LinkedHashMap<String, TermEntry>();
+    termEntries = Maps.newLinkedHashMap();
     int count = 0;
     BytesRef text;
     while ((text = te.next()) != null) {
       int df = te.docFreq();
-      if (df < minDf || df > percent) {
-        continue;
+      if (df >= minDf && df <= percent) {
+        TermEntry entry = new TermEntry(text.utf8ToString(), count++, df);
+        termEntries.put(entry.getTerm(), entry);
       }
-      TermEntry entry = new TermEntry(text.utf8ToString(), count++, df);
-      termEntries.put(entry.getTerm(), entry);
     }
   }
 
