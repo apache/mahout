@@ -148,7 +148,7 @@ public class MapBackedARFFModel implements ARFFModel {
     if (isNumeric(data)) {
       return Double.parseDouble(data);
     }
-    return 0.0;
+    return Double.NaN;
   }
 
   public static boolean isNumeric(String str) {

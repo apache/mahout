@@ -45,7 +45,7 @@ public class MapBackedARFFModelTest extends MahoutTestCase {
     ARFFModel model = new MapBackedARFFModel();
     model.addLabel("b1shkt70694difsmmmdv0ikmoh", 77);
     model.addType(77, ARFFType.REAL);
-    assertTrue(0.0 == model.getValue("b1shkt70694difsmmmdv0ikmoh", 77));
+    assertTrue(Double.isNaN(model.getValue("b1shkt70694difsmmmdv0ikmoh", 77)));
   }
 
   @Test
