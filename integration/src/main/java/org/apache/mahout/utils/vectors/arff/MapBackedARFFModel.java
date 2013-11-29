@@ -20,7 +20,9 @@ package org.apache.mahout.utils.vectors.arff;
 import com.google.common.collect.Maps;
 
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.text.ParseException;
+import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -143,9 +145,19 @@ public class MapBackedARFFModel implements ARFFModel {
   }
   
   protected static double processNumeric(String data) {
-    return Double.parseDouble(data);
+    if (isNumeric(data)) {
+      return Double.parseDouble(data);
+    }
+    return 0.0;
   }
-  
+
+  public static boolean isNumeric(String str) {
+    NumberFormat formatter = NumberFormat.getInstance();
+    ParsePosition parsePosition = new ParsePosition(0);
+    formatter.parse(str, parsePosition);
+    return str.length() == parsePosition.getIndex();
+  }
+
   protected double processDate(String data, int idx) {
     DateFormat format = dateMap.get(idx);
     if (format == null) {

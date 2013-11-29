@@ -39,4 +39,23 @@ public class MapBackedARFFModelTest extends MahoutTestCase {
     Map<String, Integer> windyValues = nominalMap.get(windy);
     assertEquals(77, windyValues.get(breezy).intValue());
   }
+
+  @Test
+  public void processBadNumeric() {
+    ARFFModel model = new MapBackedARFFModel();
+    model.addLabel("b1shkt70694difsmmmdv0ikmoh", 77);
+    model.addType(77, ARFFType.REAL);
+    assertTrue(0.0 == model.getValue("b1shkt70694difsmmmdv0ikmoh", 77));
+  }
+
+  @Test
+  public void processGoodNumeric() {
+    ARFFModel model = new MapBackedARFFModel();
+    model.addLabel("1234", 77);
+    model.addType(77, ARFFType.INTEGER);
+    assertTrue(1234 == model.getValue("1234", 77));
+    model.addLabel("131.34", 78);
+    model.addType(78, ARFFType.REAL);
+    assertTrue(131.34 == model.getValue("131.34", 78));
+  }
 }

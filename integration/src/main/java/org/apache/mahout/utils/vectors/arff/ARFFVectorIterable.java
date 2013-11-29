@@ -82,59 +82,59 @@ public class ARFFVectorIterable implements Iterable<Vector> {
       line = line.trim();
       String lower = line.toLowerCase(Locale.ENGLISH);
       Integer labelNumInt = labelNumber;
-      if (lower.startsWith(ARFFModel.ARFF_COMMENT)) {
-        continue;
-      } else if (lower.startsWith(ARFFModel.RELATION)) {
-        model.setRelation(ARFFType.removeQuotes(line.substring(ARFFModel.RELATION.length())));
-      } else if (lower.startsWith(ARFFModel.ATTRIBUTE)) {
-        String label;
-        ARFFType type;
-        if (lower.contains(ARFFType.NUMERIC.getIndicator())) {
-          label = ARFFType.NUMERIC.getLabel(lower);
-          type = ARFFType.NUMERIC;
-        } else if (lower.contains(ARFFType.INTEGER.getIndicator())) {
-          label = ARFFType.INTEGER.getLabel(lower);
-          type = ARFFType.INTEGER;
-        } else if (lower.contains(ARFFType.REAL.getIndicator())) {
-          label = ARFFType.REAL.getLabel(lower);
-          type = ARFFType.REAL;
-        } else if (lower.contains(ARFFType.STRING.getIndicator())) {
-          label = ARFFType.STRING.getLabel(lower);
-          type = ARFFType.STRING;
-        } else if (lower.contains(ARFFType.NOMINAL.getIndicator())) {
-          label = ARFFType.NOMINAL.getLabel(lower);
-          type = ARFFType.NOMINAL;
-          //@ATTRIBUTE class        {Iris-setosa,Iris-versicolor,Iris-virginica}
-          int classIdx = lower.indexOf(ARFFType.NOMINAL.getIndicator());
-          String[] classes = COMMA_PATTERN.split(line.substring(classIdx + 1, line.length() - 1));
-          for (int i = 0; i < classes.length; i++) {
-            model.addNominal(label, ARFFType.removeQuotes(classes[i]), i + 1);
-          }
-        } else if (lower.contains(ARFFType.DATE.getIndicator())) {
-          label = ARFFType.DATE.getLabel(lower);
-          type = ARFFType.DATE;
-          //TODO: DateFormatter map
-          DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH);
-          int idx = lower.lastIndexOf(ARFFType.DATE.getIndicator());
-          String[] split = SPACE_PATTERN.split(line);
-          if (split.length >= 4) { //we have a date format
-            String formStr = line.substring(idx + ARFFType.DATE.getIndicator().length()).trim();
-            if (formStr.startsWith("\"")) {
-              formStr = formStr.substring(1, formStr.length() - 1);
+      if (!lower.startsWith(ARFFModel.ARFF_COMMENT)) {
+        if (lower.startsWith(ARFFModel.RELATION)) {
+          model.setRelation(ARFFType.removeQuotes(line.substring(ARFFModel.RELATION.length())));
+        } else if (lower.startsWith(ARFFModel.ATTRIBUTE)) {
+          String label;
+          ARFFType type;
+          if (lower.contains(ARFFType.NUMERIC.getIndicator())) {
+            label = ARFFType.NUMERIC.getLabel(lower);
+            type = ARFFType.NUMERIC;
+          } else if (lower.contains(ARFFType.INTEGER.getIndicator())) {
+            label = ARFFType.INTEGER.getLabel(lower);
+            type = ARFFType.INTEGER;
+          } else if (lower.contains(ARFFType.REAL.getIndicator())) {
+            label = ARFFType.REAL.getLabel(lower);
+            type = ARFFType.REAL;
+          } else if (lower.contains(ARFFType.STRING.getIndicator())) {
+            label = ARFFType.STRING.getLabel(lower);
+            type = ARFFType.STRING;
+          } else if (lower.contains(ARFFType.NOMINAL.getIndicator())) {
+            label = ARFFType.NOMINAL.getLabel(lower);
+            type = ARFFType.NOMINAL;
+            //@ATTRIBUTE class        {Iris-setosa,Iris-versicolor,Iris-virginica}
+            int classIdx = lower.indexOf(ARFFType.NOMINAL.getIndicator());
+            String[] classes = COMMA_PATTERN.split(line.substring(classIdx + 1, line.length() - 1));
+            for (int i = 0; i < classes.length; i++) {
+              model.addNominal(label, ARFFType.removeQuotes(classes[i]), i + 1);
             }
-            format = new SimpleDateFormat(formStr, Locale.ENGLISH);
+          } else if (lower.contains(ARFFType.DATE.getIndicator())) {
+            label = ARFFType.DATE.getLabel(lower);
+            type = ARFFType.DATE;
+            //TODO: DateFormatter map
+            DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH);
+            int idx = lower.lastIndexOf(ARFFType.DATE.getIndicator());
+            String[] split = SPACE_PATTERN.split(line);
+            if (split.length >= 4) { //we have a date format
+              String formStr = line.substring(idx + ARFFType.DATE.getIndicator().length()).trim();
+              if (formStr.startsWith("\"")) {
+                formStr = formStr.substring(1, formStr.length() - 1);
+              }
+              format = new SimpleDateFormat(formStr, Locale.ENGLISH);
+            }
+            model.addDateFormat(labelNumInt, format);
+            //@attribute <name> date [<date-format>]
+          } else {
+            throw new UnsupportedOperationException("Invalid attribute: " + line);
           }
-          model.addDateFormat(labelNumInt, format);
-          //@attribute <name> date [<date-format>]
-        } else {
-          throw new UnsupportedOperationException("Invalid attribute: " + line);
+          model.addLabel(label, labelNumInt);
+          model.addType(labelNumInt, type);
+          labelNumber++;
+        } else if (lower.startsWith(ARFFModel.DATA)) {
+          //inData = true;
+          break; //skip it
         }
-        model.addLabel(label, labelNumInt);
-        model.addType(labelNumInt, type);
-        labelNumber++;
-      } else if (lower.startsWith(ARFFModel.DATA)) {
-        //inData = true;
-        break; //skip it
       }
     }
 
