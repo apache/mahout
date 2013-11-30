@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.9 - unreleased
 
+  MAHOUT-1312: LocalitySensitiveHashSearch does not limit search results (sslavic)
+
   MAHOUT-1362: Remove examples/bin/build-reuters.sh (smarthi)
 
   MAHOUT-1361: Online algorithm for computing accurate Quantiles using 1-D clustering (tdunning)

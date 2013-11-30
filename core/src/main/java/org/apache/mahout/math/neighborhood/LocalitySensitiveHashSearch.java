@@ -188,12 +188,15 @@ public class LocalitySensitiveHashSearch extends UpdatableSearcher {
   @Override
   public List<WeightedThing<Vector>> search(Vector query, int limit) {
     PriorityQueue<WeightedThing<Vector>> top = searchInternal(query);
-    List<WeightedThing<Vector>> results = Lists.newArrayListWithExpectedSize(limit);
-    while (limit > 0 && top.size() != 0) {
+    List<WeightedThing<Vector>> results = Lists.newArrayListWithExpectedSize(top.size());
+    while (top.size() != 0) {
       WeightedThing<Vector> wv = top.pop();
       results.add(new WeightedThing<Vector>(((HashedVector) wv.getValue()).getVector(), wv.getWeight()));
     }
     Collections.reverse(results);
+    if (limit < results.size()) {
+      results = results.subList(0, limit);
+    }
     return results;
   }
 

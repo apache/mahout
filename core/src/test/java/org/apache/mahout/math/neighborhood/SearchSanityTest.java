@@ -17,6 +17,8 @@
 
 package org.apache.mahout.math.neighborhood;
 
+import static org.hamcrest.Matchers.*;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -204,6 +206,17 @@ public class SearchSanityTest extends MahoutTestCase {
       assertEquals("First isn't self", datapoint, first.getValue());
       assertEquals("First doesn't match", first, firstTwo.get(0));
       assertEquals("Second doesn't match", second, firstTwo.get(1));
+    }
+  }
+
+  @Test
+  public void testSearchLimiting() {
+    searcher.clear();
+    searcher.addAll(dataPoints);
+    for (Vector datapoint : dataPoints) {
+      List<WeightedThing<Vector>> firstTwo = searcher.search(datapoint, 2);
+
+      assertThat("Search limit isn't respected", firstTwo.size(), is(lessThanOrEqualTo(2)));
     }
   }
 
