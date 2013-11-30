@@ -17,7 +17,6 @@
 
 package org.apache.mahout.math.neighborhood;
 
-import static org.hamcrest.Matchers.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,6 +38,9 @@ import org.apache.mahout.math.random.WeightedThing;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 
 @RunWith(Parameterized.class)
 public class SearchSanityTest extends MahoutTestCase {
