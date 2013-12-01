@@ -105,7 +105,7 @@
     <mfindbugs.version>2.5.2</mfindbugs.version>
     <mjavadoc.version>2.9.1</mjavadoc.version>
     <hadoop.version>1.2.1</hadoop.version>
-    <lucene.version>4.3.0</lucene.version>
+    <lucene.version>4.5.1</lucene.version>
   </properties>
   <issueManagement>
     <system>Jira</system>
@@ -194,7 +194,7 @@
         <artifactId>lucene-benchmark</artifactId>
         <version>${lucene.version}</version>
       </dependency>
-      
+
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
@@ -211,6 +211,12 @@
         <groupId>org.easymock</groupId>
         <artifactId>easymock</artifactId>
         <version>3.2</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.carrotsearch.randomizedtesting</groupId>
+        <artifactId>randomizedtesting-runner</artifactId>
+        <version>2.0.10</version>
         <scope>test</scope>
       </dependency>
 
