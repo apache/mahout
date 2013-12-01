@@ -23,13 +23,14 @@ import java.io.IOException;
 
 import org.apache.mahout.common.RandomUtils;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
+
+import com.carrotsearch.randomizedtesting.RandomizedTest;
 
 /**
  * Superclass of all Mahout test cases.
  */
-public abstract class MahoutTestCase extends Assert {
+public abstract class MahoutTestCase extends RandomizedTest {
 
   /** "Close enough" value for floating-point comparisons. */
   public static final double EPSILON = 0.000001;

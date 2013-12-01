@@ -1,3 +1,7 @@
+output-asf-email-examples/
+.checkstyle
+.ruleset
+.pmd
 .classpath
 .project
 .settings/

@@ -24,10 +24,13 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.jet.random.Exponential;
 import org.junit.Test;
 
+import com.carrotsearch.randomizedtesting.annotations.ThreadLeakLingering;
+
 import java.util.Random;
 
 public final class AdaptiveLogisticRegressionTest extends MahoutTestCase {
 
+  @ThreadLeakLingering(linger=1000)
   @Test
   public void testTrain() {
 
@@ -49,25 +52,25 @@ public final class AdaptiveLogisticRegressionTest extends MahoutTestCase {
       AdaptiveLogisticRegression.TrainingExample r = getExample(i, gen, beta);
       cl.train(r);
       if (i % 1000 == 0) {
-//        cl.close();
         System.out.printf("%10d %10.3f\n", i, cl.getLearner().auc());
       }
     }
     assertEquals(1, cl.getLearner().auc(), 0.1);
 
-    AdaptiveLogisticRegression x = new AdaptiveLogisticRegression(2, 200, new L1());
-    x.setInterval(1000);
+    AdaptiveLogisticRegression adaptiveLogisticRegression = new AdaptiveLogisticRegression(2, 200, new L1());
+    adaptiveLogisticRegression.setInterval(1000);
 
     for (int i = 0; i < 20000; i++) {
       AdaptiveLogisticRegression.TrainingExample r = getExample(i, gen, beta);
-      x.train(r.getKey(), r.getActual(), r.getInstance());
-      if (i % 1000 == 0 && x.getBest() != null) {
+      adaptiveLogisticRegression.train(r.getKey(), r.getActual(), r.getInstance());
+      if (i % 1000 == 0 && adaptiveLogisticRegression.getBest() != null) {
         System.out.printf("%10d %10.4f %10.8f %.3f\n",
-                          i, x.auc(),
-                          Math.log10(x.getBest().getMappedParams()[0]), x.getBest().getMappedParams()[1]);
+                          i, adaptiveLogisticRegression.auc(),
+                          Math.log10(adaptiveLogisticRegression.getBest().getMappedParams()[0]), adaptiveLogisticRegression.getBest().getMappedParams()[1]);
       }
     }
-    assertEquals(1, x.auc(), 0.1);
+    assertEquals(1, adaptiveLogisticRegression.auc(), 0.1);
+    adaptiveLogisticRegression.close();
   }
 
   private static AdaptiveLogisticRegression.TrainingExample getExample(int i, Random gen, Vector beta) {
@@ -146,6 +149,7 @@ public final class AdaptiveLogisticRegressionTest extends MahoutTestCase {
   }
 
   @Test
+  @ThreadLeakLingering(linger = 1000)
   public void constantStep() {
     AdaptiveLogisticRegression lr = new AdaptiveLogisticRegression(2, 1000, new L1());
     lr.setInterval(5000);
@@ -153,10 +157,12 @@ public final class AdaptiveLogisticRegressionTest extends MahoutTestCase {
     assertEquals(20000, lr.nextStep(15001));
     assertEquals(20000, lr.nextStep(16500));
     assertEquals(20000, lr.nextStep(19999));
+    lr.close(); 
   }
     
 
   @Test
+  @ThreadLeakLingering(linger = 1000)
   public void growingStep() {
     AdaptiveLogisticRegression lr = new AdaptiveLogisticRegression(2, 1000, new L1());
     lr.setInterval(2000, 10000);
@@ -175,5 +181,6 @@ public final class AdaptiveLogisticRegressionTest extends MahoutTestCase {
     for (int i = 50000; i < 500000; i += 10000) {
       assertEquals(i + 10000, lr.nextStep(i));
     }
+    lr.close();
   }
 }

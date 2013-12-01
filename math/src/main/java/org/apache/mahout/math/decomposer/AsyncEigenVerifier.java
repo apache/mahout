@@ -17,16 +17,16 @@
 
 package org.apache.mahout.math.decomposer;
 
-import java.util.concurrent.Executor;
+import java.io.Closeable;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorIterable;
 
+public class AsyncEigenVerifier extends SimpleEigenVerifier implements Closeable {
 
-public class AsyncEigenVerifier extends SimpleEigenVerifier {
-
-  private final Executor threadPool;
+  private final ExecutorService threadPool;
   private EigenStatus status;
   private boolean finished;
   private boolean started;
@@ -50,6 +50,10 @@ public class AsyncEigenVerifier extends SimpleEigenVerifier {
     return status;
   }
 
+  @Override
+  public void close() {
+	  this.threadPool.shutdownNow();
+  }
   protected EigenStatus innerVerify(VectorIterable corpus, Vector vector) {
     return super.verify(corpus, vector);
   }

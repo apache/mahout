@@ -153,7 +153,15 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     return v;
   }
 
-  private void initializeThreadPool() {
+  private synchronized void initializeThreadPool() {
+    if (threadPool != null) {
+      threadPool.shutdown();
+      try {
+        threadPool.awaitTermination(100, TimeUnit.SECONDS);
+      } catch (InterruptedException e) {
+        log.error("Could not terminate all threads for TopicModel in time.", e);
+      }
+    }
     threadPool = new ThreadPoolExecutor(numThreads, numThreads, 0, TimeUnit.SECONDS,
                                                            new ArrayBlockingQueue<Runnable>(numThreads * 10));
     threadPool.allowCoreThreadTimeOut(false);
@@ -242,7 +250,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     return sampler.sample(topicTermCounts.viewRow(topic));
   }
 
-  public void reset() {
+  public synchronized void reset() {
     for (int x = 0; x < numTopics; x++) {
       topicTermCounts.assignRow(x, new SequentialAccessSparseVector(numTerms));
     }
@@ -252,7 +260,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
     }
   }
 
-  public void stop() {
+  public synchronized void stop() {
     for (Updater updater : updaters) {
       updater.shutdown();
     }

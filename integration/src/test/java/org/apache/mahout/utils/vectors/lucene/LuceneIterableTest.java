@@ -185,7 +185,7 @@ public final class LuceneIterableTest extends MahoutTestCase {
   static RAMDirectory createTestIndex(FieldType fieldType,
                                               RAMDirectory directory,
                                               int startingId) throws IOException {
-    IndexWriter writer = new IndexWriter(directory, new IndexWriterConfig(Version.LUCENE_43,new StandardAnalyzer(Version.LUCENE_43)));
+    IndexWriter writer = new IndexWriter(directory, new IndexWriterConfig(Version.LUCENE_45,new StandardAnalyzer(Version.LUCENE_45)));
 
     try {
       for (int i = 0; i < DOCS.length; i++) {

@@ -91,8 +91,8 @@ public class DriverTest extends MahoutTestCase {
   public void sequenceFileDictionary() throws IOException {
 
     Directory index = new SimpleFSDirectory(indexDir);
-    Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_43);
-    IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_43, analyzer);
+    Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_45);
+    IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_45, analyzer);
     final IndexWriter writer = new IndexWriter(index, config);
 
     try {

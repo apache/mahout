@@ -106,7 +106,7 @@ public class HighDFWordsPrunerTest extends MahoutTestCase {
 
     String[] args = argList.toArray(new String[argList.size()]);
 
-    ToolRunner.run(getConfiguration(), new SparseVectorsFromSequenceFiles(), args);
+    ToolRunner.run(conf, new SparseVectorsFromSequenceFiles(), args);
 
     Path dictionary = new Path(outputPath, "dictionary.file-0");
     Path tfVectors = new Path(outputPath, "tf-vectors");
@@ -134,7 +134,7 @@ public class HighDFWordsPrunerTest extends MahoutTestCase {
   }
 
   private void validateVectors(Path vectorPath, int[] highDFWordsDictionaryIndices, boolean prune) throws Exception {
-    assertTrue("Path does not exist", vectorPath.getFileSystem(getConfiguration()).exists(vectorPath));
+    assertTrue("Path does not exist", vectorPath.getFileSystem(conf).exists(vectorPath));
     for (VectorWritable value : new SequenceFileDirValueIterable<VectorWritable>(vectorPath, PathType.LIST, PathFilters
             .partFilter(), null, true, conf)) {
       Vector v = ((NamedVector) value.get()).getDelegate();

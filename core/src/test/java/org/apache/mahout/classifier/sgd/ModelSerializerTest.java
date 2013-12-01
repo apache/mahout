@@ -24,6 +24,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Random;
 
+import com.carrotsearch.randomizedtesting.annotations.ThreadLeakLingering;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.classifier.OnlineLearner;
@@ -87,6 +88,8 @@ public final class ModelSerializerTest extends MahoutTestCase {
     train(olr3, 100);
 
     assertEquals(0, olr.getBeta().minus(olr3.getBeta()).aggregate(Functions.MAX, Functions.IDENTITY), 1.0e-6);
+    olr.close();
+    olr3.close();
   }
 
   @Test
@@ -107,8 +110,11 @@ public final class ModelSerializerTest extends MahoutTestCase {
     assertEquals(learner.auc(), olr3.auc(), 0.02);
     double auc2 = learner.auc();
     assertTrue(auc2 > auc1);
+    learner.close();
+    olr3.close();
   }
 
+  @ThreadLeakLingering(linger = 1000)
   @Test
   public void adaptiveLogisticRegressionRoundTrip() throws IOException {
     AdaptiveLogisticRegression learner = new AdaptiveLogisticRegression(2, 5, new L1());
@@ -128,6 +134,8 @@ public final class ModelSerializerTest extends MahoutTestCase {
     assertEquals(learner.auc(), olr3.auc(), 0.005);
     double auc2 = learner.auc();
     assertTrue(String.format("%.3f > %.3f", auc2, auc1), auc2 > auc1);
+    learner.close();
+    olr3.close();
   }
 
   private static void train(OnlineLearner olr, int n) {

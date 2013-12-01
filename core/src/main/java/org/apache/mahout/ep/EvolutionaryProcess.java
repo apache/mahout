@@ -33,6 +33,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Allows evolutionary optimization where the state function can't be easily
@@ -191,6 +192,11 @@ public class EvolutionaryProcess<T extends Payload<U>, U> implements Writable, C
   @Override
   public void close() {
     List<Runnable> remainingTasks = pool.shutdownNow();
+    try {
+      pool.awaitTermination(10, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      throw new IllegalStateException("Had to forcefully shut down " + remainingTasks.size() + " tasks");
+    }
     if (!remainingTasks.isEmpty()) {
       throw new IllegalStateException("Had to forcefully shut down " + remainingTasks.size() + " tasks");
     }

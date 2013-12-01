@@ -234,11 +234,12 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
           return learner.logLikelihood();
         }
       });
-      ep.close();
     } catch (InterruptedException e) {
       log.warn("Ignoring exception", e);
     } catch (ExecutionException e) {
       throw new IllegalStateException(e);
+    } finally {
+      ep.close();
     }
   }
 

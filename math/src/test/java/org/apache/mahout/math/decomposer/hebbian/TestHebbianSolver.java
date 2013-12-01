@@ -21,7 +21,6 @@ import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 
 import org.apache.mahout.math.decomposer.AsyncEigenVerifier;
-import org.apache.mahout.math.decomposer.SingularVectorVerifier;
 import org.apache.mahout.math.decomposer.SolverTest;
 import org.junit.Test;
 
@@ -50,7 +49,7 @@ public final class TestHebbianSolver extends SolverTest {
                                 int desiredRank,
                                 TrainingState state) {
     HebbianUpdater updater = new HebbianUpdater();
-    SingularVectorVerifier verifier = new AsyncEigenVerifier();
+    AsyncEigenVerifier verifier = new AsyncEigenVerifier();
     HebbianSolver solver = new HebbianSolver(updater,
                                              verifier,
                                              convergence,
@@ -62,6 +61,7 @@ public final class TestHebbianSolver extends SolverTest {
     state.setCurrentEigenValues(finalState.getCurrentEigenValues());
     long time = 0L;
     time += System.nanoTime() - start;
+    verifier.close();
     assertEquals(state.getCurrentEigens().numRows(), desiredRank);
     return time / 1000000L;
   }

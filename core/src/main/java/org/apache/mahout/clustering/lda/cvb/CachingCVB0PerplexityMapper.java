@@ -44,6 +44,7 @@ public class CachingCVB0PerplexityMapper extends
   private static final Logger log = LoggerFactory.getLogger(CachingCVB0PerplexityMapper.class);
 
   private ModelTrainer modelTrainer;
+  private TopicModel readModel;
   private int maxIters;
   private int numTopics;
   private float testFraction;
@@ -71,7 +72,6 @@ public class CachingCVB0PerplexityMapper extends
     testFraction = conf.getFloat(CVB0Driver.TEST_SET_FRACTION, 0.1f);
 
     log.info("Initializing read model");
-    TopicModel readModel;
     Path[] modelPaths = CVB0Driver.getModelPaths(conf);
     if (modelPaths != null && modelPaths.length > 0) {
       readModel = new TopicModel(conf, eta, alpha, null, numUpdateThreads, modelWeight, modelPaths);
@@ -90,6 +90,7 @@ public class CachingCVB0PerplexityMapper extends
 
   @Override
   protected void cleanup(Context context) throws IOException, InterruptedException {
+    readModel.stop();
     MemoryUtil.stopMemoryLogger();
   }
 

@@ -97,8 +97,8 @@ public class SequenceFilesFromLuceneStorageDriver extends AbstractJob {
     if (hasOption(OPTION_QUERY)) {
       try {
         String queryString = COMPILE.matcher(getOption(OPTION_QUERY)).replaceAll("");
-        QueryParser queryParser = new QueryParser(Version.LUCENE_43, queryString,
-            new StandardAnalyzer(Version.LUCENE_43));
+        QueryParser queryParser = new QueryParser(Version.LUCENE_45, queryString,
+            new StandardAnalyzer(Version.LUCENE_45));
         query = queryParser.parse(queryString);
       } catch (ParseException e) {
         throw new IllegalArgumentException(e.getMessage(), e);

@@ -52,6 +52,7 @@ public final class EvolutionaryProcessTest extends MahoutTestCase {
       System.out.printf("%10.3f %.3f\n", best.getValue(), best.getOmni());
     }
 
+    ep.close();
     assertNotNull(best);
     assertEquals(0.0, best.getValue(), 0.02);
   }

@@ -60,7 +60,7 @@ public abstract class AbstractLuceneStorageTest extends MahoutTestCase {
   }
 
   protected void commitDocuments(Directory directory, Iterable<SingleFieldDocument> theDocs) throws IOException{
-    IndexWriter indexWriter = new IndexWriter(directory, new IndexWriterConfig(Version.LUCENE_43, new StandardAnalyzer(Version.LUCENE_43)));
+    IndexWriter indexWriter = new IndexWriter(directory, new IndexWriterConfig(Version.LUCENE_45, new StandardAnalyzer(Version.LUCENE_45)));
 
     for (SingleFieldDocument singleFieldDocument : theDocs) {
       indexWriter.addDocument(singleFieldDocument.asLuceneDocument());

@@ -20,6 +20,7 @@ package org.apache.mahout.cf.taste.impl.recommender.svd;
 import java.util.Arrays;
 import java.util.List;
 
+import com.carrotsearch.randomizedtesting.annotations.ThreadLeakLingering;
 import com.google.common.collect.Lists;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
@@ -184,6 +185,7 @@ public class ParallelSGDFactorizerTest extends TasteTestCase {
     assertEquals(index, shuffler.size());
   }
 
+  @ThreadLeakLingering(linger = 1000)
   @Test
   public void testFactorizerWithToyData() throws Exception {
 
@@ -240,6 +242,7 @@ public class ParallelSGDFactorizerTest extends TasteTestCase {
     assertTrue(rmse < 0.2);
   }
 
+  @ThreadLeakLingering(linger = 1000)
   @Test
   public void testRecommenderWithToyData() throws Exception {
 

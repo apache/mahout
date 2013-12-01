@@ -16,6 +16,8 @@ Release 0.9 - unreleased
 
   MAHOUT-1347: Add Streaming K-Means clustering algorithm to examples/bin/cluster-reuters.sh (smarthi)
 
+  MAHOUT-1345: Enable randomised testing for all Mahout modules (Isabel, sslavic, Frank Scholten ,smarthi)
+
   MAHOUT-1343: JSON output format support in cluster dumper (Telvis Calhoun via sslavic)
 
   MAHOUT-1333: Fixed examples bin directory permissions in distribution archives (Mike Percy via sslavic)

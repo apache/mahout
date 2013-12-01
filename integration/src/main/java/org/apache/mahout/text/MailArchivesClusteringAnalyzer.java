@@ -41,7 +41,7 @@ import org.apache.lucene.util.Version;
  * stop words, excluding non-alpha-numeric tokens, and porter stemming.
  */
 public final class MailArchivesClusteringAnalyzer extends StopwordAnalyzerBase {
-  private static final Version LUCENE_VERSION = Version.LUCENE_43;
+  private static final Version LUCENE_VERSION = Version.LUCENE_45;
   
   // extended set of stop words composed of common mail terms like "hi",
   // HTML tags, and Java keywords asmany of the messages in the archives

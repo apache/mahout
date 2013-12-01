@@ -34,21 +34,21 @@ import java.io.IOException;
  * Run ensemble learning via loading the {@link ModelTrainer} with two {@link TopicModel} instances:
  * one from the previous iteration, the other empty.  Inference is done on the first, and the
  * learning updates are stored in the second, and only emitted at cleanup().
- *
+ * <p/>
  * In terms of obvious performance improvements still available, the memory footprint in this
  * Mapper could be dropped by half if we accumulated model updates onto the model we're using
  * for inference, which might also speed up convergence, as we'd be able to take advantage of
  * learning <em>during</em> iteration, not just after each one is done.  Most likely we don't
  * really need to accumulate double values in the model either, floats would most likely be
  * sufficient.  Between these two, we could squeeze another factor of 4 in memory efficiency.
- *
+ * <p/>
  * In terms of CPU, we're re-learning the p(topic|doc) distribution on every iteration, starting
  * from scratch.  This is usually only 10 fixed-point iterations per doc, but that's 10x more than
  * only 1.  To avoid having to do this, we would need to do a map-side join of the unchanging
  * corpus with the continually-improving p(topic|doc) matrix, and then emit multiple outputs
  * from the mappers to make sure we can do the reduce model averaging as well.  Tricky, but
  * possibly worth it.
- *
+ * <p/>
  * {@link ModelTrainer} already takes advantage (in maybe the not-nice way) of multi-core
  * availability by doing multithreaded learning, see that class for details.
  */
@@ -58,17 +58,19 @@ public class CachingCVB0Mapper
   private static final Logger log = LoggerFactory.getLogger(CachingCVB0Mapper.class);
 
   private ModelTrainer modelTrainer;
+  private TopicModel readModel;
+  private TopicModel writeModel;
   private int maxIters;
   private int numTopics;
 
   protected ModelTrainer getModelTrainer() {
     return modelTrainer;
   }
-  
+
   protected int getMaxIters() {
     return maxIters;
   }
-  
+
   protected int getNumTopics() {
     return numTopics;
   }
@@ -88,7 +90,6 @@ public class CachingCVB0Mapper
     float modelWeight = conf.getFloat(CVB0Driver.MODEL_WEIGHT, 1.0f);
 
     log.info("Initializing read model");
-    TopicModel readModel;
     Path[] modelPaths = CVB0Driver.getModelPaths(conf);
     if (modelPaths != null && modelPaths.length > 0) {
       readModel = new TopicModel(conf, eta, alpha, null, numUpdateThreads, modelWeight, modelPaths);
@@ -99,7 +100,7 @@ public class CachingCVB0Mapper
     }
 
     log.info("Initializing write model");
-    TopicModel writeModel = modelWeight == 1
+    writeModel = modelWeight == 1
         ? new TopicModel(numTopics, numTerms, eta, alpha, null, numUpdateThreads)
         : readModel;
 
@@ -110,7 +111,7 @@ public class CachingCVB0Mapper
 
   @Override
   public void map(IntWritable docId, VectorWritable document, Context context)
-    throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
     /* where to get docTopics? */
     Vector topicVector = new DenseVector(numTopics).assign(1.0 / numTopics);
     modelTrainer.train(document.get(), topicVector, true, maxIters);
@@ -122,9 +123,11 @@ public class CachingCVB0Mapper
     modelTrainer.stop();
 
     log.info("Writing model");
-    TopicModel model = modelTrainer.getReadModel();
-    for (MatrixSlice topic : model) {
+    TopicModel readFrom = modelTrainer.getReadModel();
+    for (MatrixSlice topic : readFrom) {
       context.write(new IntWritable(topic.index()), new VectorWritable(topic.vector()));
     }
+    readModel.stop();
+    writeModel.stop();
   }
 }
