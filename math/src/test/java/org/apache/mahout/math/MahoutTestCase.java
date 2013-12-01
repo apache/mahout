@@ -21,6 +21,12 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 
+import com.carrotsearch.randomizedtesting.annotations.ThreadLeakAction;
+import com.carrotsearch.randomizedtesting.annotations.ThreadLeakLingering;
+import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope;
+import com.carrotsearch.randomizedtesting.annotations.ThreadLeakZombies;
+import com.carrotsearch.randomizedtesting.annotations.TimeoutSuite;
+import org.apache.lucene.util.TimeUnits;
 import org.apache.mahout.common.RandomUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -30,6 +36,11 @@ import com.carrotsearch.randomizedtesting.RandomizedTest;
 /**
  * Superclass of all Mahout test cases.
  */
+@ThreadLeakScope(ThreadLeakScope.Scope.SUITE)
+@ThreadLeakAction({ThreadLeakAction.Action.WARN, ThreadLeakAction.Action.INTERRUPT})
+@ThreadLeakLingering(linger = 20000) // Wait a bit longer for leaked threads to die.
+@ThreadLeakZombies(ThreadLeakZombies.Consequence.IGNORE_REMAINING_TESTS)
+@TimeoutSuite(millis = 2 * TimeUnits.HOUR)
 public abstract class MahoutTestCase extends RandomizedTest {
 
   /** "Close enough" value for floating-point comparisons. */
