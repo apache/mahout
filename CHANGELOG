@@ -2,7 +2,7 @@ Mahout Change Log
 
 Release 0.9 - unreleased
 
-  MAHOUT-1312: LocalitySensitiveHashSearch does not limit search results (sslavic)
+  MAHOUT-1367: WikipediaXmlSplitter --> Exception in thread "main" java.lang.NullPointerException (smarthi)
 
   MAHOUT-1362: Remove examples/bin/build-reuters.sh (smarthi)
 
@@ -24,7 +24,9 @@ Release 0.9 - unreleased
 
   MAHOUT-1314: StreamingKMeansReducer throws NullPointerException when REDUCE_STREAMING_KMEANS is set to true (smarthi)
 
-  MAHOUT-1313: Fixed unwanted integral division bug in RowSimilarityJob downsampling code where precision should have been retained (sslavic) 
+  MAHOUT-1313: Fixed unwanted integral division bug in RowSimilarityJob downsampling code where precision should have been retained (sslavic)
+
+  MAHOUT-1312: LocalitySensitiveHashSearch does not limit search results (sslavic)
 
   MAHOUT-1308: Cannot extend CandidateItemsStrategy due to restricted visibility (David Geiger, smarthi)
 
