@@ -184,7 +184,6 @@ public final class ClusterClassificationDriver extends AbstractJob {
    *          the path to store classified data
    * @param clusterClassificationThreshold
    * @param emitMostLikely
-   *          TODO
    * @throws IOException
    */
   private static void selectCluster(Path input, List<Cluster> clusterModels, ClusterClassifier clusterClassifier,
