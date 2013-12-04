@@ -183,7 +183,7 @@ elif [ "x$clustertype" == "xstreamingkmeans" ]; then
     -o ${WORK_DIR}/reuters-streamingkmeans \
     -sc org.apache.mahout.math.neighborhood.FastProjectionSearch \
     -dm org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure \
-    -k 20 -km 200 -rskm -ow \
+    -k 10 -km 100 -rskm -ow \
   && \
   $MAHOUT qualcluster \
     -i ${WORK_DIR}/reuters-out-seqdir-sparse-streamingkmeans/tfidf-vectors/part-r-00000 \
