@@ -148,6 +148,8 @@ public final class VectorDumper extends AbstractJob {
     File output = getOutputFile();
     if (output != null) {
       shouldClose = true;
+      log.info("Output file: {}", output);
+      Files.createParentDirs(output);
       writer = Files.newWriter(output, Charsets.UTF_8);
     } else {
       shouldClose = false;
