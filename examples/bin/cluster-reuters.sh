@@ -185,8 +185,12 @@ elif [ "x$clustertype" == "xstreamingkmeans" ]; then
     -dm org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure \
     -k 20 -km 200 -rskm -ow \
   && \
-  $MAHOUT seqdumper \
-    -i ${WORK_DIR}/reuters-streamingkmeans
+  $MAHOUT qualcluster \
+    -i ${WORK_DIR}/reuters-out-seqdir-sparse-streamingkmeans/tfidf-vectors/part-r-00000 \
+    -c ${WORK_DIR}/reuters-streamingkmeans/part-r-00000   \
+    -o ${WORK_DIR}/reuters-cluster-distance.csv \
+    && \
+  cat ${WORK_DIR}/reuters-cluster-distance.csv
 else 
   echo "unknown cluster type: $clustertype"
 fi 
