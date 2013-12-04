@@ -4,6 +4,8 @@ Release 0.9 - unreleased
 
   MAHOUT-1370: Vectordump doesn't write to output file in MapReduce Mode (smarthi)
 
+  MAHOUT-1368: Convert OnlineSummarizer to use the new TDigest (tdunning)
+
   MAHOUT-1367: WikipediaXmlSplitter --> Exception in thread "main" java.lang.NullPointerException (smarthi)
 
   MAHOUT-1362: Remove examples/bin/build-reuters.sh (smarthi)

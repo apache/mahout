@@ -70,23 +70,23 @@ public class ClusterQualitySummarizer {
     double maxDistance = 0;
     for (int i = 0; i < summarizers.size(); ++i) {
       OnlineSummarizer summarizer = summarizers.get(i);
-      if (summarizer.getCount() == 0) {
+      if (summarizer.getCount() != 0) {
+        maxDistance = Math.max(maxDistance, summarizer.getMax());
+        System.out.printf("Average distance in cluster %d [%d]: %f\n", i, summarizer.getCount(), summarizer.getMean());
+        // If there is just one point in the cluster, quartiles cannot be estimated. We'll just assume all the quartiles
+        // equal the only value.
+        boolean moreThanOne = summarizer.getCount() > 1;
+        if (fileOut != null) {
+          fileOut.printf("%d,%f,%f,%f,%f,%f,%f,%f,%d,%s\n", i, summarizer.getMean(),
+              summarizer.getSD(),
+              summarizer.getQuartile(0),
+              moreThanOne ? summarizer.getQuartile(1) : summarizer.getQuartile(0),
+              moreThanOne ? summarizer.getQuartile(2) : summarizer.getQuartile(0),
+              moreThanOne ? summarizer.getQuartile(3) : summarizer.getQuartile(0),
+              summarizer.getQuartile(4), summarizer.getCount(), type);
+        }
+      } else {
         System.out.printf("Cluster %d is empty\n", i);
-        continue;
-      }
-      maxDistance = Math.max(maxDistance, summarizer.getMax());
-      System.out.printf("Average distance in cluster %d [%d]: %f\n", i, summarizer.getCount(), summarizer.getMean());
-      // If there is just one point in the cluster, quartiles cannot be estimated. We'll just assume all the quartiles
-      // equal the only value.
-      boolean moreThanOne = summarizer.getCount() > 1;
-      if (fileOut != null) {
-        fileOut.printf("%d,%f,%f,%f,%f,%f,%f,%f,%d,%s\n", i, summarizer.getMean(),
-            summarizer.getSD(),
-            summarizer.getQuartile(0),
-            moreThanOne ? summarizer.getQuartile(1) : summarizer.getQuartile(0),
-            moreThanOne ? summarizer.getQuartile(2) : summarizer.getQuartile(0),
-            moreThanOne ? summarizer.getQuartile(3) : summarizer.getQuartile(0),
-            summarizer.getQuartile(4), summarizer.getCount(), type);
       }
     }
     System.out.printf("Num clusters: %d; maxDistance: %f\n", summarizers.size(), maxDistance);

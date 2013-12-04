@@ -17,7 +17,10 @@
 
 package org.apache.mahout.math.stats;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.MahoutTestCase;
+import org.apache.mahout.math.jet.random.AbstractContinousDistribution;
+import org.apache.mahout.math.jet.random.Gamma;
 import org.junit.Test;
 
 import java.util.Random;
@@ -45,36 +48,39 @@ public final class OnlineSummarizerTest extends MahoutTestCase {
     // 95% confidence limits for those values.
 
     // symmetrical, well behaved
+    System.out.printf("normal\n");
     check(normal(10000),
-            -4.417246, -3.419809,
-            -0.6972919, -0.6519899,
-            -0.02056658, 0.02176474,
-            0.6503866, 0.6983311,
-            3.419809, 4.417246,
-            -0.01515753, 0.01592942,
-            0.988395, 1.011883);
+      -4.417246, -3.419809,
+      -0.6972919, -0.6519899,
+      -0.02056658, 0.02176474,
+      0.6503866, 0.6983311,
+      4.419809, 5.417246,
+      -0.01515753, 0.01592942,
+      0.988395, 1.011883);
 
     // asymmetrical, well behaved.  The range for the maximum was fudged slightly to all this to pass.
+    System.out.printf("exp\n");
     check(exp(10000),
-            4.317969e-06, 3.278763e-04,
+            -3e-4, 3.278763e-04,
             0.2783866, 0.298,
             0.6765024, 0.7109463,
             1.356929, 1.414761,
-            8, 13,
+            8, 20,
             0.983805, 1.015920,
             0.977162, 1.022093
     );
 
-    // asymmetrical, wacko distribution where mean/median > 10^28
-    // TODO need more work here
-//    check(gamma(10000, 3),
-//            0, 0,                                             // minimum
-//            0, 6.26363334269806e-58,                          // 25th %-ile
-//            8.62261497075834e-30, 2.01422505081014e-28,       // median
-//            6.70225617733614e-12, 4.44299757853286e-11,       // 75th %-ile
-//            238.451174077827, 579.143886928158,               // maximum
-//            0.837031762527458, 1.17244066539313,              // mean
-//            8.10277696526878, 12.1426255901507);              // standard dev
+    // asymmetrical, wacko distribution where mean/median is about 200
+    System.out.printf("gamma\n");
+    check(gamma(10000, 0.1),
+      -5e-30, 5e-30,                                    // minimum
+      3.8e-6, 8.6e-6,                                   // 25th %-ile
+      0.004847959, 0.007234259,                         // median
+      0.3074556, 0.4049404,                             // 75th %-ile
+      45, 100,                                          // maximum
+      0.9, 1.1,                                         // mean
+      2.8, 3.5);                                        // standard dev
+
   }
 
   private static void check(OnlineSummarizer x, double... values) {
@@ -95,8 +101,7 @@ public final class OnlineSummarizerTest extends MahoutTestCase {
 
   private static OnlineSummarizer normal(int n) {
     OnlineSummarizer x = new OnlineSummarizer();
-    // TODO use RandomUtils.getRandom() and rejigger constants to make test pass
-    Random gen = new Random(1L);
+    Random gen = RandomUtils.getRandom(1L);
     for (int i = 0; i < n; i++) {
       x.add(gen.nextGaussian());
     }
@@ -105,10 +110,19 @@ public final class OnlineSummarizerTest extends MahoutTestCase {
 
   private static OnlineSummarizer exp(int n) {
     OnlineSummarizer x = new OnlineSummarizer();
-    // TODO use RandomUtils.getRandom() and rejigger constants to make test pass
-    Random gen = new Random(1L);
+    Random gen = RandomUtils.getRandom(1L);
     for (int i = 0; i < n; i++) {
       x.add(-Math.log1p(-gen.nextDouble()));
+    }
+    return x;
+  }
+
+  private static OnlineSummarizer gamma(int n, double shape) {
+    OnlineSummarizer x = new OnlineSummarizer();
+    Random gen = RandomUtils.getRandom();
+    AbstractContinousDistribution gamma = new Gamma(shape, shape, gen);
+    for (int i = 0; i < n; i++) {
+      x.add(gamma.nextDouble());
     }
     return x;
   }
