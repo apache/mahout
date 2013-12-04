@@ -8,9 +8,9 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.map;
 
+
 /**
  * Provides various hash functions.
- *
  */
 public final class HashFunctions {
 
@@ -54,22 +54,19 @@ public final class HashFunctions {
 
   /**
    * Returns a hashcode for the specified value.
+   * The hashcode computation is similar to the last step
+   * of MurMurHash3.
    *
    * @return a hash code value for the specified value.
    */
   public static int hash(int value) {
-    return value;
-
-    //return value * 0x278DDE6D; // see org.apache.mahout.math.jet.random.engine.DRand
-
-    /*
-    value &= 0x7FFFFFFF; // make it >=0
-    int hashCode = 0;
-    do hashCode = 31*hashCode + value%10;
-    while ((value /= 10) > 0);
-
-    return 28629151*hashCode; // spread even further; h*31^5
-    */
+    int h = value;
+    h ^= h >>> 16;
+    h *= 0x85ebca6b;
+    h ^= h >>> 13;
+    h *= 0xc2b2ae35;
+    h ^= h >>> 16;
+    return h;
   }
 
   /**
