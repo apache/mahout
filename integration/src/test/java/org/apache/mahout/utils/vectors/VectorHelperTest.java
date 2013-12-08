@@ -19,12 +19,63 @@ package org.apache.mahout.utils.vectors;
 
 import com.google.common.collect.Iterables;
 
+import com.google.common.io.Closeables;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Text;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Random;
+
 public final class VectorHelperTest extends MahoutTestCase {
+
+  private static final int NUM_DOCS = 100;
+
+  private Path inputPathOne;
+  private Path inputPathTwo;
+
+  private Configuration conf;
+
+  @Override
+  @Before
+  public void setUp() throws Exception {
+    super.setUp();
+    conf = getConfiguration();
+
+    inputPathOne = getTestTempFilePath("documents/docs-one.file");
+    FileSystem fs = FileSystem.get(inputPathOne.toUri(), conf);
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, inputPathOne, Text.class, IntWritable.class);
+    try {
+      Random rd = RandomUtils.getRandom();
+      for (int i = 0; i < NUM_DOCS; i++) {
+        // Make all indices higher than dictionary size
+        writer.append(new Text("Document::ID::" + i), new IntWritable(NUM_DOCS + rd.nextInt(NUM_DOCS)));
+      }
+    } finally {
+      Closeables.close(writer, false);
+    }
+
+    inputPathTwo = getTestTempFilePath("documents/docs-two.file");
+    fs = FileSystem.get(inputPathTwo.toUri(), conf);
+    writer = new SequenceFile.Writer(fs, conf, inputPathTwo, Text.class, IntWritable.class);
+    try {
+      Random rd = RandomUtils.getRandom();
+      for (int i = 0; i < NUM_DOCS; i++) {
+        // Keep indices within number of documents
+        writer.append(new Text("Document::ID::" + i), new IntWritable(rd.nextInt(NUM_DOCS)));
+      }
+    } finally {
+      Closeables.close(writer, false);
+    }
+  }
 
   @Test
   public void testJsonFormatting() throws Exception {
@@ -84,5 +135,13 @@ public final class VectorHelperTest extends MahoutTestCase {
     v.set(3, 0.0);
     v.set(8, 0.0);
     assertEquals(0, VectorHelper.topEntries(v, 6).size());
+  }
+
+  @Test
+  public void testLoadTermDictionary() throws Exception {
+    // With indices higher than dictionary size
+    VectorHelper.loadTermDictionary(conf, inputPathOne.toString());
+    // With dictionary size higher than indices
+    VectorHelper.loadTermDictionary(conf, inputPathTwo.toString());
   }
 }

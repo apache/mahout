@@ -193,12 +193,18 @@ public final class VectorHelper {
    */
   public static String[] loadTermDictionary(Configuration conf, String filePattern) {
     OpenObjectIntHashMap<String> dict = new OpenObjectIntHashMap<String>();
+    int maxIndexValue = 0;
     for (Pair<Text, IntWritable> record
         : new SequenceFileDirIterable<Text, IntWritable>(new Path(filePattern), PathType.GLOB, null, null, true,
                                                          conf)) {
       dict.put(record.getFirst().toString(), record.getSecond().get());
+      if (record.getSecond().get() > maxIndexValue) {
+        maxIndexValue = record.getSecond().get();
+      }
     }
-    String[] dictionary = new String[dict.size()];
+    // Set dictionary size to greater of (maxIndexValue + 1, dict.size())
+    int maxDictionarySize = maxIndexValue + 1 > dict.size() ? maxIndexValue + 1 : dict.size();
+    String[] dictionary = new String[maxDictionarySize];
     for (String feature : dict.keys()) {
       dictionary[dict.get(feature)] = feature;
     }

@@ -64,6 +64,8 @@ Release 0.9 - unreleased
 
   MAHOUT-1261: TasteHadoopUtils.idToIndex can return an int that has size Integer.MAX_VALUE (Carl Clark, smarthi)
 
+  MAHOUT-1249: Clusterdumper/loadTermDictionary crashes when highest index in (sparse) dictionary vector is larger than dictionary vector size (Andrew Musselman via smarthi)
+
   MAHOUT-1242: No key redistribution function for associative maps (Tharindu Rusira via smarthi)
 
   MAHOUT-1030: Regression: Clustered Points Should be WeightedPropertyVectorWritable not WeightedVectorWritable (Andrew Musselman, Pat Ferrel, Jeff Eastman, Lars Norskog, smarthi)
