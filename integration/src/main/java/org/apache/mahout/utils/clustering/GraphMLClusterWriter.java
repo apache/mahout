@@ -26,6 +26,7 @@ import java.util.Random;
 import java.util.regex.Pattern;
 
 import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.clustering.classify.WeightedPropertyVectorWritable;
 import org.apache.mahout.clustering.classify.WeightedVectorWritable;
 import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.RandomUtils;
@@ -50,7 +51,7 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
   private final int numTopFeatures;
   private final int subString;
 
-  public GraphMLClusterWriter(Writer writer, Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints,
+  public GraphMLClusterWriter(Writer writer, Map<Integer, List<WeightedPropertyVectorWritable>> clusterIdToPoints,
                               DistanceMeasure measure, int numTopFeatures, String[] dictionary, int subString)
     throws IOException {
     super(writer, clusterIdToPoints, measure);
@@ -115,7 +116,7 @@ public class GraphMLClusterWriter extends AbstractClusterWriter {
     }
 
     line.append(createNode(clusterLabel, rgb, x, y));
-    List<WeightedVectorWritable> points = clusterIdToPoints.get(cluster.getId());
+    List<WeightedPropertyVectorWritable> points = clusterIdToPoints.get(cluster.getId());
     if (points != null) {
       for (WeightedVectorWritable point : points) {
         Vector theVec = point.getVector();

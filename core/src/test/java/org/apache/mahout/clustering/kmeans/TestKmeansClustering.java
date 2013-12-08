@@ -29,7 +29,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
-import org.apache.mahout.clustering.classify.WeightedVectorWritable;
+import org.apache.mahout.clustering.classify.WeightedPropertyVectorWritable;
 import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.DummyOutputCollector;
 import org.apache.mahout.common.MahoutTestCase;
@@ -106,30 +106,30 @@ public final class TestKmeansClustering extends MahoutTestCase {
   public void testRunKMeansIterationConvergesInOneRunWithGivenDistanceThreshold() {
     double[][] rawPoints = { {0, 0}, {0, 0.25}, {0, 0.75}, {0, 1}};
     List<Vector> points = getPoints(rawPoints);
-    
+
     ManhattanDistanceMeasure distanceMeasure = new ManhattanDistanceMeasure();
     List<Kluster> clusters = Arrays.asList(new Kluster(points.get(0), 0, distanceMeasure), new Kluster(points.get(3),
         3, distanceMeasure));
-    
+
     // To converge in a single run, the given distance threshold should be
     // greater than or equal to 0.125,
     // since 0.125 will be the distance between center and centroid for the
     // initial two clusters after one run.
     double distanceThreshold = 0.25;
-    
+
     boolean converged = KMeansClusterer.runKMeansIteration(points, clusters, distanceMeasure, distanceThreshold);
-    
+
     Vector cluster1Center = clusters.get(0).getCenter();
     assertEquals(0, cluster1Center.get(0), EPSILON);
     assertEquals(0.125, cluster1Center.get(1), EPSILON);
-    
+
     Vector cluster2Center = clusters.get(1).getCenter();
     assertEquals(0, cluster2Center.get(0), EPSILON);
     assertEquals(0.875, cluster2Center.get(1), EPSILON);
-    
+
     assertTrue("KMeans iteration should be converged after a single run", converged);
   }*/
-  
+
   /** Story: User wishes to run kmeans job on reference data */
   @Test
   public void testKMeansSeqJob() throws Exception {
@@ -161,8 +161,6 @@ public final class TestKmeansClustering extends MahoutTestCase {
       }
       // now run the Job
       Path outputPath = getTestTempDirPath("output");
-      // KMeansDriver.runJob(pointsPath, clustersPath, outputPath,
-      // EuclideanDistanceMeasure.class.getName(), 0.001, 10, k + 1, true);
       String[] args = {optKey(DefaultOptionCreator.INPUT_OPTION), pointsPath.toString(),
           optKey(DefaultOptionCreator.CLUSTERS_IN_OPTION), clustersPath.toString(),
           optKey(DefaultOptionCreator.OUTPUT_OPTION), outputPath.toString(),
@@ -176,9 +174,9 @@ public final class TestKmeansClustering extends MahoutTestCase {
       // now compare the expected clusters with actual
       Path clusteredPointsPath = new Path(outputPath, "clusteredPoints");
       int[] expect = EXPECTED_NUM_POINTS[k];
-      DummyOutputCollector<IntWritable,WeightedVectorWritable> collector = new DummyOutputCollector<IntWritable,WeightedVectorWritable>();
+      DummyOutputCollector<IntWritable,WeightedPropertyVectorWritable> collector = new DummyOutputCollector<IntWritable,WeightedPropertyVectorWritable>();
       // The key is the clusterId, the value is the weighted vector
-      for (Pair<IntWritable,WeightedVectorWritable> record : new SequenceFileIterable<IntWritable,WeightedVectorWritable>(
+      for (Pair<IntWritable,WeightedPropertyVectorWritable> record : new SequenceFileIterable<IntWritable,WeightedPropertyVectorWritable>(
           new Path(clusteredPointsPath, "part-m-0"), conf)) {
         collector.collect(record.getFirst(), record.getSecond());
       }
@@ -217,8 +215,6 @@ public final class TestKmeansClustering extends MahoutTestCase {
       }
       // now run the Job
       Path outputPath = getTestTempDirPath("output");
-      // KMeansDriver.runJob(pointsPath, clustersPath, outputPath,
-      // EuclideanDistanceMeasure.class.getName(), 0.001, 10, k + 1, true);
       String[] args = {optKey(DefaultOptionCreator.INPUT_OPTION), pointsPath.toString(),
           optKey(DefaultOptionCreator.CLUSTERS_IN_OPTION), clustersPath.toString(),
           optKey(DefaultOptionCreator.OUTPUT_OPTION), outputPath.toString(),
@@ -232,9 +228,9 @@ public final class TestKmeansClustering extends MahoutTestCase {
       // now compare the expected clusters with actual
       Path clusteredPointsPath = new Path(outputPath, "clusteredPoints");
       int[] expect = EXPECTED_NUM_POINTS[k];
-      DummyOutputCollector<IntWritable,WeightedVectorWritable> collector = new DummyOutputCollector<IntWritable,WeightedVectorWritable>();
+      DummyOutputCollector<IntWritable,WeightedPropertyVectorWritable> collector = new DummyOutputCollector<IntWritable,WeightedPropertyVectorWritable>();
       // The key is the clusterId, the value is the weighted vector
-      for (Pair<IntWritable,WeightedVectorWritable> record : new SequenceFileIterable<IntWritable,WeightedVectorWritable>(
+      for (Pair<IntWritable,WeightedPropertyVectorWritable> record : new SequenceFileIterable<IntWritable,WeightedPropertyVectorWritable>(
           new Path(clusteredPointsPath, "part-m-0"), conf)) {
         collector.collect(record.getFirst(), record.getSecond());
       }
@@ -274,8 +270,6 @@ public final class TestKmeansClustering extends MahoutTestCase {
       }
       // now run the Job
       Path outputPath = getTestTempDirPath("output");
-      // KMeansDriver.runJob(pointsPath, clustersPath, outputPath,
-      // EuclideanDistanceMeasure.class.getName(), 0.001, 10, k + 1, true);
       String[] args = {optKey(DefaultOptionCreator.INPUT_OPTION), pointsPath.toString(),
           optKey(DefaultOptionCreator.CLUSTERS_IN_OPTION), clustersPath.toString(),
           optKey(DefaultOptionCreator.OUTPUT_OPTION), outputPath.toString(),
@@ -289,9 +283,9 @@ public final class TestKmeansClustering extends MahoutTestCase {
       Path clusteredPointsPath = new Path(outputPath, "clusteredPoints");
       // assertEquals("output dir files?", 4, outFiles.length);
       int[] expect = EXPECTED_NUM_POINTS[k];
-      DummyOutputCollector<IntWritable,WeightedVectorWritable> collector = new DummyOutputCollector<IntWritable,WeightedVectorWritable>();
+      DummyOutputCollector<IntWritable,WeightedPropertyVectorWritable> collector = new DummyOutputCollector<IntWritable,WeightedPropertyVectorWritable>();
       // The key is the clusterId, the value is the weighted vector
-      for (Pair<IntWritable,WeightedVectorWritable> record : new SequenceFileIterable<IntWritable,WeightedVectorWritable>(
+      for (Pair<IntWritable,WeightedPropertyVectorWritable> record : new SequenceFileIterable<IntWritable,WeightedPropertyVectorWritable>(
           new Path(clusteredPointsPath, "part-m-00000"), conf)) {
         collector.collect(record.getFirst(), record.getSecond());
       }
@@ -360,35 +354,31 @@ public final class TestKmeansClustering extends MahoutTestCase {
     
     // now compare the expected clusters with actual
     Path clusteredPointsPath = new Path(kmeansOutput, "clusteredPoints");
-    DummyOutputCollector<IntWritable,WeightedVectorWritable> collector = new DummyOutputCollector<IntWritable,WeightedVectorWritable>();
+    DummyOutputCollector<IntWritable,WeightedPropertyVectorWritable> collector = new DummyOutputCollector<IntWritable,WeightedPropertyVectorWritable>();
     
     // The key is the clusterId, the value is the weighted vector
-    for (Pair<IntWritable,WeightedVectorWritable> record : new SequenceFileIterable<IntWritable,WeightedVectorWritable>(
+    for (Pair<IntWritable,WeightedPropertyVectorWritable> record : new SequenceFileIterable<IntWritable,WeightedPropertyVectorWritable>(
         new Path(clusteredPointsPath, "part-m-00000"), conf)) {
       collector.collect(record.getFirst(), record.getSecond());
     }
     
-    //boolean gotLowClust = false;  // clusters should be [1, *] and [2, *]
-    //boolean gotHighClust = false; // vs [3 , *],  [4 , *] and [5, *]
     for (IntWritable k : collector.getKeys()) {
-      List<WeightedVectorWritable> wvList = collector.getValue(k);
-      assertTrue("empty cluster!", !wvList.isEmpty());
-      if (wvList.get(0).getVector().get(0) <= 2.0) {
-        for (WeightedVectorWritable wv : wvList) {
+      List<WeightedPropertyVectorWritable> wpvList = collector.getValue(k);
+      assertTrue("empty cluster!", !wpvList.isEmpty());
+      if (wpvList.get(0).getVector().get(0) <= 2.0) {
+        for (WeightedPropertyVectorWritable wv : wpvList) {
           Vector v = wv.getVector();
           int idx = v.maxValueIndex();
           assertTrue("bad cluster!", v.get(idx) <= 2.0);
         }
-        assertEquals("Wrong size cluster", 4, wvList.size());
-        //gotLowClust= true;
+        assertEquals("Wrong size cluster", 4, wpvList.size());
       } else {
-        for (WeightedVectorWritable wv : wvList) {
+        for (WeightedPropertyVectorWritable wv : wpvList) {
           Vector v = wv.getVector();
           int idx = v.minValueIndex();
           assertTrue("bad cluster!", v.get(idx) > 2.0);
         }
-        assertEquals("Wrong size cluster", 5, wvList.size());
-        //gotHighClust= true;
+        assertEquals("Wrong size cluster", 5, wpvList.size());
       }
     }
   }

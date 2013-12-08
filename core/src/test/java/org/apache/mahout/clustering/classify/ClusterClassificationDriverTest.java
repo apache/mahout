@@ -167,7 +167,7 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
       SequenceFile.Reader classifiedVectors = new SequenceFile.Reader(fs,
           partFile.getPath(), conf);
       Writable clusterIdAsKey = new IntWritable();
-      WeightedVectorWritable point = new WeightedVectorWritable();
+      WeightedPropertyVectorWritable point = new WeightedPropertyVectorWritable();
       while (classifiedVectors.next(clusterIdAsKey, point)) {
         collectVector(clusterIdAsKey.toString(), point.getVector());
       }

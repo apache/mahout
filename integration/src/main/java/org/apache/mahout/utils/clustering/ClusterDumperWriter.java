@@ -21,7 +21,6 @@ import org.apache.hadoop.io.Text;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.classify.WeightedPropertyVectorWritable;
-import org.apache.mahout.clustering.classify.WeightedVectorWritable;
 import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 
@@ -40,7 +39,7 @@ public class ClusterDumperWriter extends AbstractClusterWriter {
   private final String[] dictionary;
   private final int numTopFeatures;
   
-  public ClusterDumperWriter(Writer writer, Map<Integer,List<WeightedVectorWritable>> clusterIdToPoints,
+  public ClusterDumperWriter(Writer writer, Map<Integer,List<WeightedPropertyVectorWritable>> clusterIdToPoints,
       DistanceMeasure measure, int numTopFeatures, String[] dictionary, int subString) {
     super(writer, clusterIdToPoints, measure);
     this.numTopFeatures = numTopFeatures;
@@ -69,27 +68,24 @@ public class ClusterDumperWriter extends AbstractClusterWriter {
       writer.write('\n');
     }
     
-    Map<Integer,List<WeightedVectorWritable>> clusterIdToPoints = getClusterIdToPoints();
-    List<WeightedVectorWritable> points = clusterIdToPoints.get(clusterWritable.getValue().getId());
+    Map<Integer,List<WeightedPropertyVectorWritable>> clusterIdToPoints = getClusterIdToPoints();
+    List<WeightedPropertyVectorWritable> points = clusterIdToPoints.get(clusterWritable.getValue().getId());
     if (points != null) {
       writer.write("\tWeight : [props - optional]:  Point:\n\t");
-      for (Iterator<WeightedVectorWritable> iterator = points.iterator(); iterator.hasNext();) {
-        WeightedVectorWritable point = iterator.next();
+      for (Iterator<WeightedPropertyVectorWritable> iterator = points.iterator(); iterator.hasNext();) {
+        WeightedPropertyVectorWritable point = iterator.next();
         writer.write(String.valueOf(point.getWeight()));
-        if (point instanceof WeightedPropertyVectorWritable) {
-          WeightedPropertyVectorWritable tmp = (WeightedPropertyVectorWritable) point;
-          Map<Text,Text> map = tmp.getProperties();
-          // map can be null since empty maps when written are returned as null
-          writer.write(" : [");
-          if (map != null) {
-            for (Map.Entry<Text,Text> entry : map.entrySet()) {
-              writer.write(entry.getKey().toString());
-              writer.write("=");
-              writer.write(entry.getValue().toString());
-            }
+        Map<Text,Text> map = point.getProperties();
+        // map can be null since empty maps when written are returned as null
+        writer.write(" : [");
+        if (map != null) {
+          for (Map.Entry<Text,Text> entry : map.entrySet()) {
+            writer.write(entry.getKey().toString());
+            writer.write("=");
+            writer.write(entry.getValue().toString());
           }
-          writer.write("]");
         }
+        writer.write("]");
         
         writer.write(": ");
         

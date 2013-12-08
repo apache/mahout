@@ -18,7 +18,7 @@
 package org.apache.mahout.utils.clustering;
 
 import org.apache.mahout.clustering.Cluster;
-import org.apache.mahout.clustering.classify.WeightedVectorWritable;
+import org.apache.mahout.clustering.classify.WeightedPropertyVectorWritable;
 import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.NamedVector;
@@ -39,7 +39,7 @@ public class CSVClusterWriter extends AbstractClusterWriter {
 
   private static final Pattern VEC_PATTERN = Pattern.compile("\\{|\\:|\\,|\\}");
 
-  public CSVClusterWriter(Writer writer, Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints,
+  public CSVClusterWriter(Writer writer, Map<Integer, List<WeightedPropertyVectorWritable>> clusterIdToPoints,
       DistanceMeasure measure) {
     super(writer, clusterIdToPoints, measure);
   }
@@ -49,9 +49,9 @@ public class CSVClusterWriter extends AbstractClusterWriter {
     StringBuilder line = new StringBuilder();
     Cluster cluster = clusterWritable.getValue();
     line.append(cluster.getId());
-    List<WeightedVectorWritable> points = getClusterIdToPoints().get(cluster.getId());
+    List<WeightedPropertyVectorWritable> points = getClusterIdToPoints().get(cluster.getId());
     if (points != null) {
-      for (WeightedVectorWritable point : points) {
+      for (WeightedPropertyVectorWritable point : points) {
         Vector theVec = point.getVector();
         line.append(',');
         if (theVec instanceof NamedVector) {

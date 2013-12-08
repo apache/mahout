@@ -66,6 +66,8 @@ Release 0.9 - unreleased
 
   MAHOUT-1242: No key redistribution function for associative maps (Tharindu Rusira via smarthi)
 
+  MAHOUT-1030: Regression: Clustered Points Should be WeightedPropertyVectorWritable not WeightedVectorWritable (Andrew Musselman, Pat Ferrel, Jeff Eastman, Lars Norskog, smarthi)
+
 Release 0.8 - 2013-07-25
 
   MAHOUT-1272: Parallel SGD matrix factorizer for SVDrecommender (Peng Cheng via ssc)

@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.mahout.clustering.classify.WeightedVectorWritable;
+import org.apache.mahout.clustering.classify.WeightedPropertyVectorWritable;
 import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.distance.DistanceMeasure;
@@ -45,7 +45,7 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
   private static final Logger log = LoggerFactory.getLogger(AbstractClusterWriter.class);
 
   protected final Writer writer;
-  protected final Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints;
+  protected final Map<Integer, List<WeightedPropertyVectorWritable>> clusterIdToPoints;
   protected final DistanceMeasure measure;
 
   /**
@@ -56,7 +56,7 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
    * @param measure The {@link org.apache.mahout.common.distance.DistanceMeasure} used to calculate the distance.
    *                Some writers may wish to use it for calculating weights for display.  May be null.
    */
-  protected AbstractClusterWriter(Writer writer, Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints,
+  protected AbstractClusterWriter(Writer writer, Map<Integer, List<WeightedPropertyVectorWritable>> clusterIdToPoints,
       DistanceMeasure measure) {
     this.writer = writer;
     this.clusterIdToPoints = clusterIdToPoints;
@@ -67,7 +67,7 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
     return writer;
   }
 
-  protected Map<Integer, List<WeightedVectorWritable>> getClusterIdToPoints() {
+  protected Map<Integer, List<WeightedPropertyVectorWritable>> getClusterIdToPoints() {
     return clusterIdToPoints;
   }
 

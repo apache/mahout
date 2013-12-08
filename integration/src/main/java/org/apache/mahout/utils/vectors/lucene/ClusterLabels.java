@@ -56,7 +56,7 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.OpenBitSet;
-import org.apache.mahout.clustering.classify.WeightedVectorWritable;
+import org.apache.mahout.clustering.classify.WeightedPropertyVectorWritable;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.NamedVector;
@@ -86,7 +86,7 @@ public class ClusterLabels {
   private final String indexDir;
   private final String contentField;
   private String idField;
-  private final Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints;
+  private final Map<Integer, List<WeightedPropertyVectorWritable>> clusterIdToPoints;
   private String output;
   private final int minNumIds;
   private final int maxLabels;
@@ -114,15 +114,15 @@ public class ClusterLabels {
       writer = Files.newWriter(new File(this.output), Charsets.UTF_8);
     }
     try {
-      for (Map.Entry<Integer, List<WeightedVectorWritable>> integerListEntry : clusterIdToPoints.entrySet()) {
-        List<WeightedVectorWritable> wvws = integerListEntry.getValue();
-        List<TermInfoClusterInOut> termInfos = getClusterLabels(integerListEntry.getKey(), wvws);
+      for (Map.Entry<Integer, List<WeightedPropertyVectorWritable>> integerListEntry : clusterIdToPoints.entrySet()) {
+        List<WeightedPropertyVectorWritable> wpvws = integerListEntry.getValue();
+        List<TermInfoClusterInOut> termInfos = getClusterLabels(integerListEntry.getKey(), wpvws);
         if (termInfos != null) {
           writer.write('\n');
           writer.write("Top labels for Cluster ");
           writer.write(String.valueOf(integerListEntry.getKey()));
           writer.write(" containing ");
-          writer.write(String.valueOf(wvws.size()));
+          writer.write(String.valueOf(wpvws.size()));
           writer.write(" vectors");
           writer.write('\n');
           writer.write("Term \t\t LLR \t\t In-ClusterDF \t\t Out-ClusterDF ");
@@ -148,14 +148,14 @@ public class ClusterLabels {
    * Get the list of labels, sorted by best score.
    */
   protected List<TermInfoClusterInOut> getClusterLabels(Integer integer,
-                                                        Collection<WeightedVectorWritable> wvws) throws IOException {
+                                                        Collection<WeightedPropertyVectorWritable> wpvws) throws IOException {
 
-    if (wvws.size() < minNumIds) {
-      log.info("Skipping small cluster {} with size: {}", integer, wvws.size());
+    if (wpvws.size() < minNumIds) {
+      log.info("Skipping small cluster {} with size: {}", integer, wpvws.size());
       return null;
     }
 
-    log.info("Processing Cluster {} with {} documents", integer, wvws.size());
+    log.info("Processing Cluster {} with {} documents", integer, wpvws.size());
     Directory dir = FSDirectory.open(new File(this.indexDir));
     IndexReader reader = DirectoryReader.open(dir);
     
@@ -163,8 +163,8 @@ public class ClusterLabels {
     log.info("# of documents in the index {}", reader.numDocs());
 
     Collection<String> idSet = Sets.newHashSet();
-    for (WeightedVectorWritable wvw : wvws) {
-      Vector vector = wvw.getVector();
+    for (WeightedPropertyVectorWritable wpvw : wpvws) {
+      Vector vector = wpvw.getVector();
       if (vector instanceof NamedVector) {
         idSet.add(((NamedVector) vector).getName());
       }
@@ -216,7 +216,7 @@ public class ClusterLabels {
 
     List<TermInfoClusterInOut> clusteredTermInfo = Lists.newLinkedList();
 
-    int clusterSize = wvws.size();
+    int clusterSize = wpvws.size();
 
     for (TermEntry termEntry : termEntryMap.values()) {
         

@@ -20,13 +20,16 @@ package org.apache.mahout.clustering.classify;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -106,7 +109,10 @@ public class ClusterClassificationMapper extends
     throws IOException, InterruptedException {
     Cluster cluster = clusterModels.get(clusterIndex);
     clusterId.set(cluster.getId());
-    context.write(clusterId, new WeightedVectorWritable(weight, vw.get()));
+    double d = cluster.getCenter().getDistanceSquared(vw.get());
+    Map<Text, Text> props = Maps.newHashMap();
+    props.put(new Text("distance-squared"), new Text(Double.toString(d)));
+    context.write(clusterId, new WeightedPropertyVectorWritable(weight, vw.get(), props));
   }
   
   public static List<Cluster> populateClusterModels(Path clusterOutputPath, Configuration conf) throws IOException {

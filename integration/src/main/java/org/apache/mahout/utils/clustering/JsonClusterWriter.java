@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 import com.google.common.collect.Maps;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
-import org.apache.mahout.clustering.classify.WeightedVectorWritable;
+import org.apache.mahout.clustering.classify.WeightedPropertyVectorWritable;
 import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.NamedVector;
@@ -53,7 +53,7 @@ public class JsonClusterWriter extends AbstractClusterWriter {
   private static final Pattern VEC_PATTERN = Pattern.compile("\\{|\\:|\\,|\\}");
 
   public JsonClusterWriter(Writer writer,
-      Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints,
+      Map<Integer, List<WeightedPropertyVectorWritable>> clusterIdToPoints,
       DistanceMeasure measure, int numTopFeatures, String[] dictionary) {
     super(writer, clusterIdToPoints, measure);
     this.numTopFeatures = numTopFeatures;
@@ -136,11 +136,11 @@ public class JsonClusterWriter extends AbstractClusterWriter {
    */
   public List<Object> getPoints(Cluster cluster, String[] dictionary) {
     List<Object> vectorObjs = Lists.newLinkedList();
-    List<WeightedVectorWritable> points = getClusterIdToPoints().get(
+    List<WeightedPropertyVectorWritable> points = getClusterIdToPoints().get(
         cluster.getId());
 
     if (points != null) {
-      for (WeightedVectorWritable point : points) {
+      for (WeightedPropertyVectorWritable point : points) {
         Map<String, Object> entry = Maps.newHashMap();
         Vector theVec = point.getVector();
         if (theVec instanceof NamedVector) {

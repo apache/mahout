@@ -31,7 +31,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.mahout.clustering.cdbw.CDbwEvaluator;
-import org.apache.mahout.clustering.classify.WeightedVectorWritable;
+import org.apache.mahout.clustering.classify.WeightedPropertyVectorWritable;
 import org.apache.mahout.clustering.evaluation.ClusterEvaluator;
 import org.apache.mahout.clustering.evaluation.RepresentativePointsDriver;
 import org.apache.mahout.clustering.iterator.ClusterWritable;
@@ -83,7 +83,7 @@ public final class ClusterDumper extends AbstractJob {
   private String dictionaryFormat;
   private int subString = Integer.MAX_VALUE;
   private int numTopFeatures = 10;
-  private Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints;
+  private Map<Integer, List<WeightedPropertyVectorWritable>> clusterIdToPoints;
   private OUTPUT_FORMAT outputFormat = OUTPUT_FORMAT.TEXT;
   private boolean runEvaluation;
 
@@ -275,7 +275,7 @@ public final class ClusterDumper extends AbstractJob {
     this.subString = subString;
   }
 
-  public Map<Integer, List<WeightedVectorWritable>> getClusterIdToPoints() {
+  public Map<Integer, List<WeightedPropertyVectorWritable>> getClusterIdToPoints() {
     return clusterIdToPoints;
   }
 
@@ -304,18 +304,17 @@ public final class ClusterDumper extends AbstractJob {
     this.maxPointsPerCluster = maxPointsPerCluster;
   }
 
-  public static Map<Integer, List<WeightedVectorWritable>> readPoints(Path pointsPathDir, long maxPointsPerCluster,
+  public static Map<Integer, List<WeightedPropertyVectorWritable>> readPoints(Path pointsPathDir, long maxPointsPerCluster,
       Configuration conf) {
-    Map<Integer, List<WeightedVectorWritable>> result = Maps.newTreeMap();
-    for (Pair<IntWritable, WeightedVectorWritable> record
-        : new SequenceFileDirIterable<IntWritable, WeightedVectorWritable>(pointsPathDir, PathType.LIST,
+    Map<Integer, List<WeightedPropertyVectorWritable>> result = Maps.newTreeMap();
+    for (Pair<IntWritable, WeightedPropertyVectorWritable> record
+        : new SequenceFileDirIterable<IntWritable, WeightedPropertyVectorWritable>(pointsPathDir, PathType.LIST,
             PathFilters.logsCRCFilter(), conf)) {
       // value is the cluster id as an int, key is the name/id of the
-      // vector, but that doesn't matter because we only care about printing
-      // it
+      // vector, but that doesn't matter because we only care about printing it
       //String clusterId = value.toString();
       int keyValue = record.getFirst().get();
-      List<WeightedVectorWritable> pointList = result.get(keyValue);
+      List<WeightedPropertyVectorWritable> pointList = result.get(keyValue);
       if (pointList == null) {
         pointList = Lists.newArrayList();
         result.put(keyValue, pointList);
