@@ -87,7 +87,7 @@ if [ "x$alg" == "xnaivebayes"  -o  "x$alg" == "xcnaivebayes" ]; then
   echo "Creating sequence files from 20newsgroups data"
   ./bin/mahout seqdirectory \
     -i ${WORK_DIR}/20news-all \
-    -o ${WORK_DIR}/20news-seq -ow
+    -o ${WORK_DIR}/20news-seq -ow -xm sequential
 
   echo "Converting sequence files to vectors"
   ./bin/mahout seq2sparse \
