@@ -8,6 +8,8 @@ Release 0.9 - unreleased
 
   MAHOUT-1378: Running Random Forest with Ignored features fails when loading feature descriptor from JSON file (Sam Wu via smarthi)
 
+  MAHOUT-1377: Exclude JUnit.jar from tarball (Sergey Svinarchuk via smarthi)
+
   MAHOUT-1370: Vectordump doesn't write to output file in MapReduce Mode (smarthi)
 
   MAHOUT-1368: Convert OnlineSummarizer to use the new TDigest (tdunning)

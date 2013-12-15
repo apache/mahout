@@ -34,6 +34,7 @@
       <excludes>
         <exclude>mahout-*</exclude>
         <exclude>hadoop-*</exclude>
+		<exclude>junit-*</exclude>
       </excludes>
       <outputDirectory>lib</outputDirectory>
     </fileSet>
