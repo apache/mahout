@@ -40,6 +40,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.math.Centroid;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.neighborhood.BruteSearch;
@@ -426,7 +427,7 @@ public final class StreamingKMeansDriver extends AbstractJob {
     // Run StreamingKMeans step in parallel by spawning 1 thread per input path to process.
     ExecutorService pool = Executors.newCachedThreadPool();
     List<Future<Iterable<Centroid>>> intermediateCentroidFutures = Lists.newArrayList();
-    for (FileStatus status : HadoopUtil.listStatus(FileSystem.get(conf), input)) {
+    for (FileStatus status : HadoopUtil.listStatus(FileSystem.get(conf), input, PathFilters.logsCRCFilter())) {
       intermediateCentroidFutures.add(pool.submit(new StreamingKMeansThread(status.getPath(), conf)));
     }
     log.info("Finished running Mappers");
