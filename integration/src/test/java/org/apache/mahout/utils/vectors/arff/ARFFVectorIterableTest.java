@@ -124,7 +124,7 @@ public final class ARFFVectorIterableTest extends MahoutTestCase {
     assertEquals(1, nominalMap.size());
     Map<String, Integer> noms = nominalMap.get("bar");
     assertNotNull("nominals for bar are null", noms);
-    assertEquals(2, noms.size());
+    assertEquals(5, noms.size());
     Map<Integer, ARFFType> integerARFFTypeMap = model.getTypeMap();
     assertNotNull("Type map null", integerARFFTypeMap);
     assertEquals(5, integerARFFTypeMap.size());
@@ -189,7 +189,7 @@ public final class ARFFVectorIterableTest extends MahoutTestCase {
     assertEquals(1, nominalMap.size());
     Map<String,Integer> noms = nominalMap.get("bar");
     assertNotNull("nominals for bar are null", noms);
-    assertEquals(2, noms.size());
+    assertEquals(5, noms.size());
     Map<Integer,ARFFType> integerARFFTypeMap = model.getTypeMap();
     assertNotNull("Type map null", integerARFFTypeMap);
     assertEquals(5, integerARFFTypeMap.size());

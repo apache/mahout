@@ -31,7 +31,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 /**
  * Read in ARFF (http://www.cs.waikato.ac.nz/~ml/weka/arff.html) and create {@link Vector}s
@@ -48,9 +47,6 @@ import java.util.regex.Pattern;
  * bindings, call {@link MapBackedARFFModel#getLabelBindings()}, as they are the same for every vector.
  */
 public class ARFFVectorIterable implements Iterable<Vector> {
-
-  private static final Pattern COMMA_PATTERN = Pattern.compile(",");
-  private static final Pattern SPACE_PATTERN = Pattern.compile(" ");
 
   private final BufferedReader buff;
   private final ARFFModel model;
@@ -80,44 +76,48 @@ public class ARFFVectorIterable implements Iterable<Vector> {
     String line;
     while ((line = buff.readLine()) != null) {
       line = line.trim();
-      String lower = line.toLowerCase(Locale.ENGLISH);
-      Integer labelNumInt = labelNumber;
-      if (!lower.startsWith(ARFFModel.ARFF_COMMENT)) {
-        if (lower.startsWith(ARFFModel.RELATION)) {
-          model.setRelation(ARFFType.removeQuotes(line.substring(ARFFModel.RELATION.length())));
-        } else if (lower.startsWith(ARFFModel.ATTRIBUTE)) {
+      if (!line.startsWith(ARFFModel.ARFF_COMMENT) && !line.isEmpty()) {
+        Integer labelNumInt = labelNumber;
+        String[] lineParts = line.split("[\\s\\t]+", 2);
+
+        // is it a relation name?
+        if (lineParts[0].equalsIgnoreCase(ARFFModel.RELATION)) {
+          model.setRelation(ARFFType.removeQuotes(lineParts[1]));
+        }
+        // or an attribute
+        else if (lineParts[0].equalsIgnoreCase(ARFFModel.ATTRIBUTE)) {
           String label;
           ARFFType type;
-          if (lower.contains(ARFFType.NUMERIC.getIndicator())) {
-            label = ARFFType.NUMERIC.getLabel(lower);
+
+          // split the name of the attribute and its description
+          String[] attrParts = lineParts[1].split("[\\s\\t]+", 2);
+          if (attrParts.length < 2)
+            throw new UnsupportedOperationException("No type for attribute found: " + lineParts[1]);
+
+          // label is attribute name
+          label = ARFFType.removeQuotes(attrParts[0].toLowerCase());
+          if (attrParts[1].equalsIgnoreCase(ARFFType.NUMERIC.getIndicator())) {
             type = ARFFType.NUMERIC;
-          } else if (lower.contains(ARFFType.INTEGER.getIndicator())) {
-            label = ARFFType.INTEGER.getLabel(lower);
+          } else if (attrParts[1].equalsIgnoreCase(ARFFType.INTEGER.getIndicator())) {
             type = ARFFType.INTEGER;
-          } else if (lower.contains(ARFFType.REAL.getIndicator())) {
-            label = ARFFType.REAL.getLabel(lower);
+          } else if (attrParts[1].equalsIgnoreCase(ARFFType.REAL.getIndicator())) {
             type = ARFFType.REAL;
-          } else if (lower.contains(ARFFType.STRING.getIndicator())) {
-            label = ARFFType.STRING.getLabel(lower);
+          } else if (attrParts[1].equalsIgnoreCase(ARFFType.STRING.getIndicator())) {
             type = ARFFType.STRING;
-          } else if (lower.contains(ARFFType.NOMINAL.getIndicator())) {
-            label = ARFFType.NOMINAL.getLabel(lower);
+          } else if (attrParts[1].toLowerCase().startsWith(ARFFType.NOMINAL.getIndicator())) {
             type = ARFFType.NOMINAL;
-            //@ATTRIBUTE class        {Iris-setosa,Iris-versicolor,Iris-virginica}
-            int classIdx = lower.indexOf(ARFFType.NOMINAL.getIndicator());
-            String[] classes = COMMA_PATTERN.split(line.substring(classIdx + 1, line.length() - 1));
+            // nominal example:
+            // @ATTRIBUTE class        {Iris-setosa,'Iris versicolor',Iris-virginica}
+            String[] classes = ARFFIterator.splitCSV(attrParts[1].substring(1, attrParts[1].length() - 1));
             for (int i = 0; i < classes.length; i++) {
               model.addNominal(label, ARFFType.removeQuotes(classes[i]), i + 1);
             }
-          } else if (lower.contains(ARFFType.DATE.getIndicator())) {
-            label = ARFFType.DATE.getLabel(lower);
+          } else if (attrParts[1].toLowerCase().startsWith(ARFFType.DATE.getIndicator())) {
             type = ARFFType.DATE;
             //TODO: DateFormatter map
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH);
-            int idx = lower.lastIndexOf(ARFFType.DATE.getIndicator());
-            String[] split = SPACE_PATTERN.split(line);
-            if (split.length >= 4) { //we have a date format
-              String formStr = line.substring(idx + ARFFType.DATE.getIndicator().length()).trim();
+            String formStr = attrParts[1].substring(ARFFType.DATE.getIndicator().length()).trim();
+            if (!formStr.isEmpty()) {
               if (formStr.startsWith("\"")) {
                 formStr = formStr.substring(1, formStr.length() - 1);
               }
@@ -126,13 +126,12 @@ public class ARFFVectorIterable implements Iterable<Vector> {
             model.addDateFormat(labelNumInt, format);
             //@attribute <name> date [<date-format>]
           } else {
-            throw new UnsupportedOperationException("Invalid attribute: " + line);
+            throw new UnsupportedOperationException("Invalid attribute: " + attrParts[1]);
           }
           model.addLabel(label, labelNumInt);
           model.addType(labelNumInt, type);
           labelNumber++;
-        } else if (lower.startsWith(ARFFModel.DATA)) {
-          //inData = true;
+        } else if (lineParts[0].equalsIgnoreCase(ARFFModel.DATA)) {
           break; //skip it
         }
       }

@@ -19,9 +19,12 @@ package org.apache.mahout.utils.vectors.arff;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.List;
 
 import com.google.common.collect.AbstractIterator;
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -31,8 +34,8 @@ final class ARFFIterator extends AbstractIterator<Vector> {
 
   // This pattern will make sure a , inside a string is not a point for split.
   // Ex: "Arizona" , "0:08 PM, PDT" , 110 will be split considering "0:08 PM, PDT" as one string
-  private static final Pattern COMMA_PATTERN = Pattern.compile(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
   private static final Pattern WORDS_WITHOUT_SPARSE = Pattern.compile("([\\w[^{]])*");
+  private static final Pattern DATA_PATTERN = Pattern.compile("^\\"+ARFFModel.ARFF_SPARSE+"(.*)\\"+ARFFModel.ARFF_SPARSE_END+"$");
 
   private final BufferedReader reader;
   private final ARFFModel model;
@@ -64,12 +67,12 @@ final class ARFFIterator extends AbstractIterator<Vector> {
       return endOfData();
     }
     Vector result;
-    if (line.startsWith(ARFFModel.ARFF_SPARSE)) {
-      line = line.substring(1, line.indexOf(ARFFModel.ARFF_SPARSE_END));
-      String[] splits = COMMA_PATTERN.split(line);
+    Matcher contents = DATA_PATTERN.matcher(line);
+    if (contents.find()) {
+      line = contents.group(1);
+      String[] splits = splitCSV(line);
       result = new RandomAccessSparseVector(model.getLabelSize());
       for (String split : splits) {
-        split = split.trim();
         int idIndex = split.indexOf(' ');
         int idx = Integer.parseInt(split.substring(0, idIndex).trim());
         String data = split.substring(idIndex).trim();
@@ -79,7 +82,7 @@ final class ARFFIterator extends AbstractIterator<Vector> {
       }
     } else {
       result = new DenseVector(model.getLabelSize());
-      String[] splits = COMMA_PATTERN.split(line);
+      String[] splits = splitCSV(line);
       for (int i = 0; i < splits.length; i++) {
         String split = splits[i];
         split = split.trim();
@@ -88,8 +91,54 @@ final class ARFFIterator extends AbstractIterator<Vector> {
         }
       }
     }
-    //result.setLabelBindings(labelBindings);
     return result;
+  }
+
+  /**
+   * Splits a string by comma, ignores commas inside quotes and escaped quotes.
+   * As quotes are both double and single possible, because there is no exact definition
+   * for ARFF files
+   * @param line -
+   * @return String[]
+   */
+  public static String[] splitCSV(String line) {
+    StringBuilder sb = new StringBuilder(128);
+    List<String> tokens = Lists.newArrayList();
+    char escapeChar = '\0';
+    for (int i = 0; i < line.length(); i++) {
+      char c = line.charAt(i);
+      if (c == '\\') {
+        i++;
+        sb.append(line.charAt(i));
+      }
+      else if (c == '"' || c == '\'') {
+        // token is closed
+        if (c == escapeChar) {
+          escapeChar = '\0';
+        }
+        else if (escapeChar == '\0') {
+          escapeChar = c;
+        }
+        sb.append(c);
+      }
+      else if (c == ',') {
+        if (escapeChar == '\0') {
+          tokens.add(sb.toString().trim());
+          sb.setLength(0); // start work on next token
+        }
+        else {
+          sb.append(c);
+        }
+      }
+      else {
+        sb.append(c);
+      }
+    }
+    if (sb.length() > 0) {
+      tokens.add(sb.toString().trim());
+    }
+
+    return tokens.toArray(new String[tokens.size()]);
   }
 
 }

@@ -4,7 +4,7 @@
    @RELATION MahoutDateTest
 
    @ATTRIBUTE junk  NUMERIC
-   @ATTRIBUTE date1
+   @ATTRIBUTE date1   date
    @ATTRIBUTE date2   date "yyyy.MM.dd G 'at' HH:mm:ss z"
    @ATTRIBUTE date3   date "EEE, MMM d, ''yy"
    @ATTRIBUTE date4   date "K:mm a, z"

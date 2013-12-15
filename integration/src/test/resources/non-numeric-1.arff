@@ -5,7 +5,7 @@
 
    @ATTRIBUTE junk  NUMERIC
    @ATTRIBUTE foo  NUMERIC
-   @ATTRIBUTE bar   {c,d}
+   @ATTRIBUTE bar   {c,d,'xy, numeric','marc o\'polo', e}
    @ATTRIBUTE hockey  string
    @ATTRIBUTE football   date "yyyy-MM-dd"
 
