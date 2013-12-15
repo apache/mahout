@@ -19,12 +19,12 @@ package org.apache.mahout.clustering.streaming.tools;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.List;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.io.Closeables;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -38,6 +38,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.clustering.ClusteringUtils;
 import org.apache.mahout.clustering.streaming.mapreduce.CentroidWritable;
+import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
@@ -47,9 +48,8 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.stats.OnlineSummarizer;
 
-public class ClusterQualitySummarizer {
+public class ClusterQualitySummarizer extends AbstractJob {
   private String outputFile;
-
 
   private PrintWriter fileOut;
 
@@ -70,36 +70,36 @@ public class ClusterQualitySummarizer {
     double maxDistance = 0;
     for (int i = 0; i < summarizers.size(); ++i) {
       OnlineSummarizer summarizer = summarizers.get(i);
-      if (summarizer.getCount() != 0) {
+      if (summarizer.getCount() > 1) {
         maxDistance = Math.max(maxDistance, summarizer.getMax());
         System.out.printf("Average distance in cluster %d [%d]: %f\n", i, summarizer.getCount(), summarizer.getMean());
         // If there is just one point in the cluster, quartiles cannot be estimated. We'll just assume all the quartiles
         // equal the only value.
-        boolean moreThanOne = summarizer.getCount() > 1;
         if (fileOut != null) {
           fileOut.printf("%d,%f,%f,%f,%f,%f,%f,%f,%d,%s\n", i, summarizer.getMean(),
               summarizer.getSD(),
               summarizer.getQuartile(0),
-              moreThanOne ? summarizer.getQuartile(1) : summarizer.getQuartile(0),
-              moreThanOne ? summarizer.getQuartile(2) : summarizer.getQuartile(0),
-              moreThanOne ? summarizer.getQuartile(3) : summarizer.getQuartile(0),
+              summarizer.getQuartile(1),
+              summarizer.getQuartile(2),
+              summarizer.getQuartile(3),
               summarizer.getQuartile(4), summarizer.getCount(), type);
         }
       } else {
-        System.out.printf("Cluster %d is empty\n", i);
+        System.out.printf("Cluster %d is has %d data point. Need atleast 2 data points in a cluster for" +
+            " OnlineSummarizer.\n", i, summarizer.getCount());
       }
     }
     System.out.printf("Num clusters: %d; maxDistance: %f\n", summarizers.size(), maxDistance);
   }
 
-  public void run(String[] args) {
+  public int run(String[] args) throws IOException {
     if (!parseArgs(args)) {
-      return;
+      return -1;
     }
 
     Configuration conf = new Configuration();
     try {
-      Configuration.dumpConfiguration(conf, new OutputStreamWriter(System.out));
+//      Configuration.dumpConfiguration(conf, new OutputStreamWriter(System.out));
 
       fileOut = new PrintWriter(new FileOutputStream(outputFile));
       fileOut.printf("cluster,distance.mean,distance.sd,distance.q0,distance.q1,distance.q2,distance.q3,"
@@ -162,8 +162,7 @@ public class ClusterQualitySummarizer {
       }
       System.out.printf("[Dunn Index] First: %f", ClusteringUtils.dunnIndex(centroids, distanceMeasure, summaries));
       if (compareSummaries != null) {
-        System.out.printf(" Second: %f\n",
-            ClusteringUtils.dunnIndex(centroidsCompare, distanceMeasure, compareSummaries));
+        System.out.printf(" Second: %f\n", ClusteringUtils.dunnIndex(centroidsCompare, distanceMeasure, compareSummaries));
       } else {
         System.out.printf("\n");
       }
@@ -175,13 +174,12 @@ public class ClusterQualitySummarizer {
       } else {
         System.out.printf("\n");
       }
-
-      if (outputFile != null) {
-        fileOut.close();
-      }
     } catch (IOException e) {
       System.out.println(e.getMessage());
+    } finally {
+      Closeables.close(fileOut, false);
     }
+    return 0;
   }
 
   private boolean parseArgs(String[] args) {
@@ -277,7 +275,7 @@ public class ClusterQualitySummarizer {
     return true;
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     new ClusterQualitySummarizer().run(args);
   }
 }

@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.9 - unreleased
 
+  MAHOUT-1379: ClusterQualitySummarizer fails with the new T-Digest for clusters with 1 data point (smarthi)
+
   MAHOUT-1370: Vectordump doesn't write to output file in MapReduce Mode (smarthi)
 
   MAHOUT-1368: Convert OnlineSummarizer to use the new TDigest (tdunning)
