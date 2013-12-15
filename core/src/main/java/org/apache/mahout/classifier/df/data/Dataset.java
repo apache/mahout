@@ -67,7 +67,6 @@ public class Dataset {
     }
     
     private static Attribute fromString(String from) {
-      
       Attribute toReturn = LABEL;
       if (NUMERICAL.toString().equalsIgnoreCase(from)) {
         toReturn = NUMERICAL;
@@ -238,13 +237,11 @@ public class Dataset {
    */
   private static int countAttributes(Attribute[] attrs) {
     int nbattrs = 0;
-
     for (Attribute attr : attrs) {
       if (!attr.isIgnored()) {
         nbattrs++;
       }
     }
-
     return nbattrs;
   }
 
@@ -320,7 +317,6 @@ public class Dataset {
    * @throws java.io.IOException
    */
   public static Dataset load(Configuration conf, Path path) throws IOException {
-
     FileSystem fs = path.getFileSystem(conf);
     long bytesToRead = fs.getFileStatus(path).getLen();
     byte[] buff = new byte[Long.valueOf(bytesToRead).intValue()];
@@ -340,12 +336,11 @@ public class Dataset {
    * @return some JSON
    */
   public String toJSON() {
-
     List<Map<String, Object>> toWrite = Lists.newLinkedList();
     // attributes does not include ignored columns and it does include the class label
     int ignoredCount = 0;
     for (int i = 0; i < attributes.length + ignored.length; i++) {
-      Map<String, Object> attribute = null;
+      Map<String, Object> attribute;
       int attributesIndex = i - ignoredCount;
       if (ignoredCount < ignored.length && i == ignored[ignoredCount]) {
         // fill in ignored atttribute
@@ -370,10 +365,9 @@ public class Dataset {
   /**
    * De-serialize an instance from a string
    * @param json From which an instance is created
-   * @return A shinny new Dataset
+   * @return A shiny new Dataset
    */
   public static Dataset fromJSON(String json) {
-
     List<Map<String, Object>> fromJSON;
     try {
       fromJSON = OBJECT_MAPPER.readValue(json, new TypeReference<List<Map<String, Object>>>() {});
@@ -397,7 +391,7 @@ public class Dataset {
         if (attribute.get(VALUES) != null) {
           List<String> get = (List<String>) attribute.get(VALUES);
           String[] array = get.toArray(new String[get.size()]);
-          nominalValues[i] = array;
+          nominalValues[i - ignored.size()] = array;
         }
       }
     }
@@ -413,17 +407,15 @@ public class Dataset {
   /**
    * Generate a map to describe an attribute
    * @param type The type
-   * @param values
-   * @param isLabel
-   * @return 
+   * @param values - values
+   * @param isLabel - is a label
+   * @return map of (AttributeTypes, Values)
    */
   private Map<String, Object> getMap(Attribute type, String[] values, boolean isLabel) {
-
     Map<String, Object> attribute = Maps.newHashMap();
     attribute.put(TYPE, type.toString().toLowerCase(Locale.getDefault()));
     attribute.put(VALUES, values);
     attribute.put(LABEL, isLabel);
     return attribute;
   }
-
 }
