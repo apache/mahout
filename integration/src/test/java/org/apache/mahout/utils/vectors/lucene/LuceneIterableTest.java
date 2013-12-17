@@ -20,6 +20,8 @@ package org.apache.mahout.utils.vectors.lucene;
 import java.io.IOException;
 import java.util.Iterator;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 import com.google.common.io.Closeables;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -110,15 +112,13 @@ public final class LuceneIterableTest extends MahoutTestCase {
   public void testIterableNoTermVectors() throws IOException {
     RAMDirectory directory = createTestIndex(TYPE_NO_TERM_VECTORS);
     IndexReader reader = DirectoryReader.open(directory);
-    
-    
+
     Weight weight = new TFIDF();
     TermInfo termInfo = new CachedTermInfo(reader, "content", 1, 100);
     LuceneIterable iterable = new LuceneIterable(reader, "id", "content",  termInfo,weight);
 
     Iterator<Vector> iterator = iterable.iterator();
-    iterator.hasNext();
-    iterator.next();
+    Iterators.advance(iterator, 1);
   }
 
   @Test
@@ -136,8 +136,7 @@ public final class LuceneIterableTest extends MahoutTestCase {
     //0 percent tolerance
     LuceneIterable iterable = new LuceneIterable(reader, "id", "content", termInfo, weight);
     try {
-      for (Object a : iterable) {
-      }
+      Iterables.skip(iterable, Iterables.size(iterable));
       exceptionThrown = false;
     }
     catch(IllegalStateException ise) {
@@ -148,8 +147,7 @@ public final class LuceneIterableTest extends MahoutTestCase {
     //100 percent tolerance
     iterable = new LuceneIterable(reader, "id", "content", termInfo,weight, -1, 1.0);
     try {
-      for (Object a : iterable) {
-      }
+      Iterables.skip(iterable, Iterables.size(iterable));
       exceptionThrown = false;
     }
     catch(IllegalStateException ise) {
@@ -160,20 +158,14 @@ public final class LuceneIterableTest extends MahoutTestCase {
     //50 percent tolerance
     iterable = new LuceneIterable(reader, "id", "content", termInfo,weight, -1, 0.5);
     Iterator<Vector> iterator = iterable.iterator();
-    iterator.next();
-    iterator.next();
-    iterator.next();
-    iterator.next();
-    iterator.next();
+    Iterators.advance(iterator, 5);
 
     try {
-        while (iterator.hasNext()) {
-            iterator.next();
-        }
-        exceptionThrown = false;
+      Iterators.advance(iterator, Iterators.size(iterator));
+      exceptionThrown = false;
     }
     catch(IllegalStateException ise) {
-        exceptionThrown = true;
+      exceptionThrown = true;
     }
     assertTrue(exceptionThrown);
   }
@@ -193,7 +185,6 @@ public final class LuceneIterableTest extends MahoutTestCase {
         Field id = new StringField("id", "doc_" + (i + startingId), Field.Store.YES);
         doc.add(id);
         //Store both position and offset information
-        //Says it is deprecated, but doesn't seem to offer an alternative that supports term vectors...
         Field text = new Field("content", DOCS[i], fieldType);
         doc.add(text);
         Field text2 = new Field("content2", DOCS[i], fieldType);
