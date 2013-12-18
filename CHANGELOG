@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.9 - unreleased
 
+  MAHOUT-1382: Upgrade Mahout third party jars for 0.9 Release (smarthi)
+
   MAHOUT-1380: Streaming KMeans fails when executed in Sequential Mode (smarthi)
 
   MAHOUT-1379: ClusterQualitySummarizer fails with the new T-Digest for clusters with 1 data point (smarthi)
