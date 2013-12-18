@@ -45,6 +45,8 @@ public final class TokenStreamIterator extends AbstractIterator<String> {
       if (tokenStream.incrementToken()) {
         return tokenStream.getAttribute(CharTermAttribute.class).toString();
       } else {
+        tokenStream.end();
+        tokenStream.close();
         return endOfData();
       }
     } catch (IOException e) {

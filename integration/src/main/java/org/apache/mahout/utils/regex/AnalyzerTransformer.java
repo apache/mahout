@@ -38,7 +38,7 @@ public class AnalyzerTransformer implements RegexTransformer {
   private static final Logger log = LoggerFactory.getLogger(AnalyzerTransformer.class);
 
   public AnalyzerTransformer() {
-    this(new StandardAnalyzer(Version.LUCENE_45), "text");
+    this(new StandardAnalyzer(Version.LUCENE_46), "text");
   }
 
   public AnalyzerTransformer(Analyzer analyzer) {

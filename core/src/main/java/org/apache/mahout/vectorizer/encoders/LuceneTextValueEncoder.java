@@ -99,7 +99,7 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
       // do nothing
     }
   }
-  //GSI: TODO: we really need a way to make sure we call the TokenStream workflow here (i.e. end and close when done)
+
   private static final class LuceneTokenIterable implements Iterable<String> {
     private boolean firstTime = true;
     private final TokenStream tokenStream;

@@ -21,8 +21,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.lucene.index.SegmentCommitInfo;
 import org.apache.lucene.index.SegmentInfo;
-import org.apache.lucene.index.SegmentInfoPerCommit;
 import org.apache.lucene.index.SegmentInfos;
 
 import java.io.DataInput;
@@ -87,14 +87,14 @@ public class LuceneSegmentInputSplit extends InputSplit implements Writable {
    * @return the segment info or throws exception if not found
    * @throws IOException if an error occurs when accessing the directory
    */
-  public SegmentInfoPerCommit getSegment(Configuration configuration) throws IOException {
+  public SegmentCommitInfo getSegment(Configuration configuration) throws IOException {
     ReadOnlyFileSystemDirectory directory = new ReadOnlyFileSystemDirectory(FileSystem.get(configuration), indexPath,
                                                                             false, configuration);
 
     SegmentInfos segmentInfos = new SegmentInfos();
     segmentInfos.read(directory);
 
-    for (SegmentInfoPerCommit segmentInfo : segmentInfos) {
+    for (SegmentCommitInfo segmentInfo : segmentInfos) {
       if (segmentInfo.info.name.equals(segmentInfoName)) {
         return segmentInfo;
       }

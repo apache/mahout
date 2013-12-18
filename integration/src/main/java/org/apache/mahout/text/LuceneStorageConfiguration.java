@@ -44,7 +44,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static org.apache.lucene.util.Version.LUCENE_45;
+import static org.apache.lucene.util.Version.LUCENE_46;
 
 /**
  * Holds all the configuration for {@link SequenceFilesFromLuceneStorage}, which generates a sequence file
@@ -212,7 +212,7 @@ public class LuceneStorageConfiguration implements Writable {
       }
       idField = in.readUTF();
       fields = Arrays.asList(in.readUTF().split(SEPARATOR_FIELDS));
-      query = new QueryParser(LUCENE_45, "query", new StandardAnalyzer(LUCENE_45)).parse(in.readUTF());
+      query = new QueryParser(LUCENE_46, "query", new StandardAnalyzer(LUCENE_46)).parse(in.readUTF());
       maxHits = in.readInt();
     } catch (ParseException e) {
       throw new RuntimeException("Could not deserialize " + this.getClass().getName(), e);

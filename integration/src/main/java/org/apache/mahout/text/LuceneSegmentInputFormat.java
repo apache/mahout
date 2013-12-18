@@ -27,7 +27,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.lucene.index.SegmentInfoPerCommit;
+import org.apache.lucene.index.SegmentCommitInfo;
 import org.apache.lucene.index.SegmentInfos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +57,7 @@ public class LuceneSegmentInputFormat extends InputFormat {
       SegmentInfos segmentInfos = new SegmentInfos();
       segmentInfos.read(directory);
 
-      for (SegmentInfoPerCommit segmentInfo : segmentInfos) {
+      for (SegmentCommitInfo segmentInfo : segmentInfos) {
         LuceneSegmentInputSplit inputSplit = new LuceneSegmentInputSplit(indexPath, segmentInfo.info.name,
                                                                          segmentInfo.sizeInBytes());
         inputSplits.add(inputSplit);

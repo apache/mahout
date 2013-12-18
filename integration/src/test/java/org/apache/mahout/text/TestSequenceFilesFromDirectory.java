@@ -132,7 +132,9 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
       "--chunkSize", "64",
       "--charset", Charsets.UTF_8.name(),
       "--method", "mapreduce",
-      "--keyPrefix", "UID"});
+      "--keyPrefix", "UID",
+      "--fileFilterClass", ""
+    });
 
     checkMRResultFiles(conf, mrOutputDir, DATA1, "UID");
 

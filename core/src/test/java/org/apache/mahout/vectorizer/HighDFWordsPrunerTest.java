@@ -16,6 +16,7 @@ package org.apache.mahout.vectorizer;
  * limitations under the License.
  */
 
+import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -39,6 +40,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
+@ThreadLeakScope(ThreadLeakScope.Scope.NONE)
 public class HighDFWordsPrunerTest extends MahoutTestCase {
   private static final int NUM_DOCS = 100;
 

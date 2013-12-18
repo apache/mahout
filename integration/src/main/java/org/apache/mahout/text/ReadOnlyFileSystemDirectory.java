@@ -24,13 +24,7 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.lucene.store.BufferedIndexInput;
-import org.apache.lucene.store.BufferedIndexOutput;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.IOContext;
-import org.apache.lucene.store.IndexInput;
-import org.apache.lucene.store.IndexOutput;
-import org.apache.lucene.store.Lock;
+import org.apache.lucene.store.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -193,8 +187,23 @@ public class ReadOnlyFileSystemDirectory extends Directory {
   }
 
   @Override
+  public void clearLock(String name) throws IOException {
+    // do nothing
+  }
+
+  @Override
   public void close() throws IOException {
     // do not close the file system
+  }
+
+  @Override
+  public void setLockFactory(LockFactory lockFactory) throws IOException {
+    // do nothing
+  }
+
+  @Override
+  public LockFactory getLockFactory() {
+    return null;
   }
 
   @Override

@@ -17,7 +17,7 @@
 package org.apache.mahout.text;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.lucene.index.SegmentInfoPerCommit;
+import org.apache.lucene.index.SegmentCommitInfo;
 import org.apache.lucene.index.SegmentReader;
 import org.apache.lucene.store.IOContext;
 import org.apache.mahout.common.HadoopUtil;
@@ -78,7 +78,7 @@ public class LuceneSegmentInputSplitTest extends AbstractLuceneStorageTest {
 
   private void assertSegmentContainsOneDoc(String segmentName) throws IOException {
     LuceneSegmentInputSplit inputSplit = new LuceneSegmentInputSplit(indexPath1, segmentName, 1000);
-    SegmentInfoPerCommit segment = inputSplit.getSegment(configuration);
+    SegmentCommitInfo segment = inputSplit.getSegment(configuration);
     SegmentReader segmentReader = new SegmentReader(segment, 1, IOContext.READ);//SegmentReader.get(true, segment, 1);
     assertEquals(segmentName, segment.info.name);
     assertEquals(1, segmentReader.numDocs());

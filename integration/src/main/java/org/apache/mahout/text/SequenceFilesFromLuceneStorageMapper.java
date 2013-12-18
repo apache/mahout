@@ -24,7 +24,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.DocumentStoredFieldVisitor;
-import org.apache.lucene.index.SegmentInfoPerCommit;
+import org.apache.lucene.index.SegmentCommitInfo;
 import org.apache.lucene.index.SegmentReader;
 import org.apache.lucene.store.IOContext;
 
@@ -49,7 +49,7 @@ public class SequenceFilesFromLuceneStorageMapper extends Mapper<Text, NullWrita
     Configuration configuration = context.getConfiguration();
     l2sConf = new LuceneStorageConfiguration(configuration);
     LuceneSegmentInputSplit inputSplit = (LuceneSegmentInputSplit) context.getInputSplit();
-    SegmentInfoPerCommit segmentInfo = inputSplit.getSegment(configuration);
+    SegmentCommitInfo segmentInfo = inputSplit.getSegment(configuration);
     segmentReader = new SegmentReader(segmentInfo, LuceneSeqFileHelper.USE_TERM_INFOS, IOContext.READ);
   }
 
