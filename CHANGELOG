@@ -20,6 +20,8 @@ Release 0.9 - unreleased
 
   MAHOUT-1367: WikipediaXmlSplitter --> Exception in thread "main" java.lang.NullPointerException (smarthi)
 
+  MAHOUT-1364: Upgrade Mahout codebase to Lucene 4.6 (Frank Scholten)
+
   MAHOUT-1362: Remove examples/bin/build-reuters.sh (smarthi)
 
   MAHOUT-1361: Online algorithm for computing accurate Quantiles using 1-D clustering (tdunning)
