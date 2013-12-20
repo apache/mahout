@@ -33,6 +33,14 @@ if [ "$0" != "$SCRIPT_PATH" ] && [ "$SCRIPT_PATH" != "" ]; then
 fi
 START_PATH=`pwd`
 
+if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
+  HADOOP="$HADOOP_HOME/bin/hadoop"
+  if [ ! -e $HADOOP ]; then
+    echo "Can't find hadoop in $HADOOP, exiting"
+    exit 1
+  fi
+fi
+
 WORK_DIR=/tmp/mahout-work-${USER}
 algorithm=( cnaivebayes naivebayes sgd clean)
 if [ -n "$1" ]; then
@@ -84,10 +92,18 @@ if [ "x$alg" == "xnaivebayes"  -o  "x$alg" == "xcnaivebayes" ]; then
   mkdir ${WORK_DIR}/20news-all
   cp -R ${WORK_DIR}/20news-bydate/*/* ${WORK_DIR}/20news-all
 
+  if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
+    echo "Copying 20newsgroups data to HDFS"
+    set +e
+    $HADOOP dfs -rmr ${WORK_DIR}/20news-all
+    set -e
+    $HADOOP dfs -put ${WORK_DIR}/20news-all ${WORK_DIR}/20news-all
+  fi
+
   echo "Creating sequence files from 20newsgroups data"
   ./bin/mahout seqdirectory \
     -i ${WORK_DIR}/20news-all \
-    -o ${WORK_DIR}/20news-seq -ow -xm sequential
+    -o ${WORK_DIR}/20news-seq -ow
 
   echo "Converting sequence files to vectors"
   ./bin/mahout seq2sparse \

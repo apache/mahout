@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.9 - unreleased
 
+  MAHOUT-1384: Executing the MR version of Naive Bayes/CNB of classify_20newgroups.sh fails in seqdirectory step (smarthi)
+
   MAHOUT-1382: Upgrade Mahout third party jars for 0.9 Release (smarthi)
 
   MAHOUT-1380: Streaming KMeans fails when executed in Sequential Mode (smarthi)
