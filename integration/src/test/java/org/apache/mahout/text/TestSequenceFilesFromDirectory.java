@@ -30,11 +30,11 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.Text;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterator;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -133,7 +133,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
       "--charset", Charsets.UTF_8.name(),
       "--method", "mapreduce",
       "--keyPrefix", "UID",
-      "--fileFilterClass", ""
+      "--fileFilterClass", "org.apache.mahout.text.TestPathFilter"
     });
 
     checkMRResultFiles(conf, mrOutputDir, DATA1, "UID");
@@ -152,7 +152,9 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
       "--chunkSize", "64",
       "--charset", Charsets.UTF_8.name(),
       "--method", "mapreduce",
-      "--keyPrefix", "UID"});
+      "--keyPrefix", "UID",
+      "--fileFilterClass", "org.apache.mahout.text.TestPathFilter"
+    });
 
     checkMRResultFilesRecursive(conf, mrOutputDirRecur, DATA2, "UID");
   }
@@ -206,7 +208,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     FileSystem fs = FileSystem.get(configuration);
 
     // output exists?
-    FileStatus[] fileStatuses = fs.listStatus(outputDir, new ExcludeDotFiles());
+    FileStatus[] fileStatuses = fs.listStatus(outputDir, PathFilters.logsCRCFilter());
     assertEquals(1, fileStatuses.length); // only one
     assertEquals("chunk-0", fileStatuses[0].getPath().getName());
 
@@ -230,16 +232,6 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     }
   }
 
-  /**
-   * exclude hidden (starting with dot) files
-   */
-  private static class ExcludeDotFiles implements PathFilter {
-    @Override
-    public boolean accept(Path file) {
-      return !file.getName().startsWith(".") && !file.getName().startsWith("_");
-    }
-  }
-
   private static void checkRecursiveChunkFiles(Configuration configuration,
                                                Path outputDir,
                                                String[][] data,
@@ -249,7 +241,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     System.out.println(" ----------- check_Recursive_ChunkFiles ------------");
 
     // output exists?
-    FileStatus[] fileStatuses = fs.listStatus(outputDir, new ExcludeDotFiles());
+    FileStatus[] fileStatuses = fs.listStatus(outputDir, PathFilters.logsCRCFilter());
     assertEquals(1, fileStatuses.length); // only one
     assertEquals("chunk-0", fileStatuses[0].getPath().getName());
 
@@ -283,7 +275,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     FileSystem fs = FileSystem.get(conf);
 
     // output exists?
-    FileStatus[] fileStatuses = fs.listStatus(outputDir.suffix("/part-m-00000"), new ExcludeDotFiles());
+    FileStatus[] fileStatuses = fs.listStatus(outputDir.suffix("/part-m-00000"), PathFilters.logsCRCFilter());
     assertEquals(1, fileStatuses.length); // only one
     assertEquals("part-m-00000", fileStatuses[0].getPath().getName());
     Map<String, String> fileToData = Maps.newHashMap();
@@ -314,7 +306,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     FileSystem fs = FileSystem.get(configuration);
 
     // output exists?
-    FileStatus[] fileStatuses = fs.listStatus(outputDir.suffix("/part-m-00000"), new ExcludeDotFiles());
+    FileStatus[] fileStatuses = fs.listStatus(outputDir.suffix("/part-m-00000"), PathFilters.logsCRCFilter());
     assertEquals(1, fileStatuses.length); // only one
     assertEquals("part-m-00000", fileStatuses[0].getPath().getName());
     Map<String, String> fileToData = Maps.newHashMap();

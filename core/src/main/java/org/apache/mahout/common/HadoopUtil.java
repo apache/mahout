@@ -352,18 +352,44 @@ public final class HadoopUtil {
    * @throws IOException - IO Exception
    */
   public static String buildDirList(FileSystem fs, FileStatus fileStatus) throws IOException {
-    boolean bContainsFiles = false;
+    boolean containsFiles = false;
     List<String> directoriesList = Lists.newArrayList();
     for (FileStatus childFileStatus : fs.listStatus(fileStatus.getPath())) {
       if (childFileStatus.isDir()) {
         String subDirectoryList = buildDirList(fs, childFileStatus);
         directoriesList.add(subDirectoryList);
       } else {
-        bContainsFiles = true;
+        containsFiles = true;
       }
     }
 
-    if (bContainsFiles) {
+    if (containsFiles) {
+      directoriesList.add(fileStatus.getPath().toUri().getPath());
+    }
+    return Joiner.on(',').skipNulls().join(directoriesList.iterator());
+  }
+
+  /**
+   * Builds a comma-separated list of input splits
+   * @param fs - File System
+   * @param fileStatus - File Status
+   * @param pathFilter - path filter
+   * @return list of directories as a comma-separated String
+   * @throws IOException - IO Exception
+   */
+  public static String buildDirList(FileSystem fs, FileStatus fileStatus, PathFilter pathFilter) throws IOException {
+    boolean containsFiles = false;
+    List<String> directoriesList = Lists.newArrayList();
+    for (FileStatus childFileStatus : fs.listStatus(fileStatus.getPath(), pathFilter)) {
+      if (childFileStatus.isDir()) {
+        String subDirectoryList = buildDirList(fs, childFileStatus);
+        directoriesList.add(subDirectoryList);
+      } else {
+        containsFiles = true;
+      }
+    }
+
+    if (containsFiles) {
       directoriesList.add(fileStatus.getPath().toUri().getPath());
     }
     return Joiner.on(',').skipNulls().join(directoriesList.iterator());

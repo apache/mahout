@@ -23,10 +23,12 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -51,7 +53,7 @@ public class SequenceFilesFromDirectory extends AbstractJob {
   private static final String PREFIX_ADDITION_FILTER = PrefixAdditionFilter.class.getName();
 
   private static final String[] CHUNK_SIZE_OPTION = {"chunkSize", "chunk"};
-  private static final String[] FILE_FILTER_CLASS_OPTION = {"fileFilterClass", "filter"};
+  public static final String[] FILE_FILTER_CLASS_OPTION = {"fileFilterClass", "filter"};
   private static final String[] CHARSET_OPTION = {"charset", "c"};
 
   private static final int MAX_JOB_SPLIT_LOCATIONS = 1000000;
@@ -107,8 +109,8 @@ public class SequenceFilesFromDirectory extends AbstractJob {
         pathFilter = new PrefixAdditionFilter(conf, keyPrefix, options, writer, charset, fs);
       } else {
         pathFilter = ClassUtils.instantiateAs(fileFilterClassName, SequenceFilesFromDirectoryFilter.class,
-          new Class[]{Configuration.class, String.class, Map.class, ChunkedWriter.class, Charset.class, FileSystem.class},
-          new Object[]{conf, keyPrefix, options, writer, charset, fs});
+          new Class[] {Configuration.class, String.class, Map.class, ChunkedWriter.class, Charset.class, FileSystem.class},
+          new Object[] {conf, keyPrefix, options, writer, charset, fs});
       }
       fs.listStatus(input, pathFilter);
     } finally {
@@ -129,6 +131,24 @@ public class SequenceFilesFromDirectory extends AbstractJob {
       keyPrefix = getOption(KEY_PREFIX_OPTION[0]);
     }
 
+    String fileFilterClassName = null;
+    if (hasOption(FILE_FILTER_CLASS_OPTION[0])) {
+      fileFilterClassName = getOption(FILE_FILTER_CLASS_OPTION[0]);
+    }
+
+    PathFilter pathFilter = null;
+    // Prefix Addition is presently handled in the Mapper and unlike runsequential()
+    // need not be done via a pathFilter
+    if (!StringUtils.isBlank(fileFilterClassName) && !PrefixAdditionFilter.class.getName().equals(fileFilterClassName)) {
+      try {
+        pathFilter = (PathFilter) Class.forName(fileFilterClassName).newInstance();
+      } catch (InstantiationException e) {
+        throw new IllegalStateException(e);
+      } catch (IllegalAccessException e) {
+        throw new IllegalStateException(e);
+      }
+    }
+
     // Prepare Job for submission.
     Job job = prepareJob(input, output, MultipleTextFileInputFormat.class,
       SequenceFilesFromDirectoryMapper.class, Text.class, Text.class,
@@ -136,9 +156,18 @@ public class SequenceFilesFromDirectory extends AbstractJob {
 
     Configuration jobConfig = job.getConfiguration();
     jobConfig.set(KEY_PREFIX_OPTION[0], keyPrefix);
+    jobConfig.set(FILE_FILTER_CLASS_OPTION[0], fileFilterClassName);
+
     FileSystem fs = FileSystem.get(jobConfig);
     FileStatus fsFileStatus = fs.getFileStatus(input);
-    String inputDirList = HadoopUtil.buildDirList(fs, fsFileStatus);
+
+    String inputDirList;
+    if (pathFilter != null) {
+      inputDirList = HadoopUtil.buildDirList(fs, fsFileStatus, pathFilter);
+    } else {
+      inputDirList = HadoopUtil.buildDirList(fs, fsFileStatus);
+    }
+
     jobConfig.set(BASE_INPUT_PATH, input.toString());
 
     long chunkSizeInBytes = chunkSizeInMB * 1024 * 1024;

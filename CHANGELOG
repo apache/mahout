@@ -42,6 +42,8 @@ Release 0.9 - unreleased
 
   MAHOUT-1333: Fixed examples bin directory permissions in distribution archives (Mike Percy via sslavic)
 
+  MAHOUT-1319: seqdirectory -filter argument silently ignored when run as MR (smarthi)
+
   MAHOUT-1317: Clarify some of the messages in Preconditions.checkArgument (Nikolai Grinko, smarthi)
 
   MAHOUT-1314: StreamingKMeansReducer throws NullPointerException when REDUCE_STREAMING_KMEANS is set to true (smarthi)
