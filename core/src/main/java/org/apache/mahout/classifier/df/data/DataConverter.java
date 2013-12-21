@@ -49,22 +49,20 @@ public class DataConverter {
 
     int aId = 0;
     for (int attr = 0; attr < nball; attr++) {
-      if (ArrayUtils.contains(dataset.getIgnored(), attr)) {
-        continue; // IGNORED
-      }
+      if (!ArrayUtils.contains(dataset.getIgnored(), attr)) {
+        String token = tokens[attr].trim();
 
-      String token = tokens[attr].trim();
+        if ("?".equals(token)) {
+          // missing value
+          return null;
+        }
 
-      if ("?".equals(token)) {
-        // missing value
-        return null;
-      }
-
-      if (dataset.isNumerical(aId)) {
-        vector.set(aId++, Double.parseDouble(token));
-      } else { // CATEGORICAL
-        vector.set(aId, dataset.valueOf(aId, token));
-        aId++;
+        if (dataset.isNumerical(aId)) {
+          vector.set(aId++, Double.parseDouble(token));
+        } else { // CATEGORICAL
+          vector.set(aId, dataset.valueOf(aId, token));
+          aId++;
+        }
       }
     }
 
