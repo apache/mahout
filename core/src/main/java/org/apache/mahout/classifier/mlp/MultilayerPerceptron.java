@@ -24,7 +24,7 @@ import org.apache.mahout.math.Vector;
 /**
  * A Multilayer Perceptron (MLP) is a kind of feed-forward artificial neural
  * network, which is a mathematical model inspired by the biological neural
- * network. The multilayer perceptron can be used for various machine learning
+ * network. The Multilayer Perceptron can be used for various machine learning
  * tasks such as classification and regression.
  * 
  * A detailed introduction about MLP can be found at
@@ -33,7 +33,7 @@ import org.apache.mahout.math.Vector;
  * For this particular implementation, the users can freely control the topology
  * of the MLP, including: 1. The size of the input layer; 2. The number of
  * hidden layers; 3. The size of each hidden layer; 4. The size of the output
- * later. 5. The cost function. 6. The squashing function.
+ * layer. 5. The cost function. 6. The squashing function.
  * 
  * The model is trained in an online learning approach, where the weights of
  * neurons in the MLP is updated incremented using backPropagation algorithm
