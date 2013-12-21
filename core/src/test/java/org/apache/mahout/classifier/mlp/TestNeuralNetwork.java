@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.csv.CSVUtils;
 import org.apache.mahout.classifier.mlp.NeuralNetwork.TrainingMethod;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseMatrix;
@@ -220,7 +221,7 @@ public class TestNeuralNetwork extends MahoutTestCase {
     // skip the header line, hence remove the first element in the list
     cancerDataSetList.remove(0);
     for (String line : cancerDataSetList) {
-      String[] tokens = line.split(",");
+      String[] tokens = CSVUtils.parseLine(line);
       double[] values = new double[tokens.length];
       for (int i = 0; i < tokens.length; ++i) {
         values[i] = Double.parseDouble(tokens[i]);
@@ -272,7 +273,7 @@ public class TestNeuralNetwork extends MahoutTestCase {
     irisDataSetList.remove(0);
 
     for (String line : irisDataSetList) {
-      String[] tokens = line.split(",");
+      String[] tokens = CSVUtils.parseLine(line);
       // last three dimensions represent the labels
       double[] values = new double[tokens.length + numOfClasses - 1];
       Arrays.fill(values, 0.0);
