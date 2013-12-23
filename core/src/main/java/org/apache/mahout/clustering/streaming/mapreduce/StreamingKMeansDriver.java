@@ -407,7 +407,6 @@ public final class StreamingKMeansDriver extends AbstractJob {
    * @param output the directory pathname for output points.
    * @return 0 on success, -1 on failure.
    */
-  @SuppressWarnings("unchecked")
   public static int run(Configuration conf, Path input, Path output)
       throws IOException, InterruptedException, ClassNotFoundException, ExecutionException {
     log.info("Starting StreamingKMeans clustering for vectors in {}; results are output to {}",
@@ -455,7 +454,6 @@ public final class StreamingKMeansDriver extends AbstractJob {
     return 0;
   }
 
-  @SuppressWarnings("unchecked")
   public static int runMapReduce(Configuration conf, Path input, Path output)
     throws IOException, ClassNotFoundException, InterruptedException {
     // Prepare Job for submission.

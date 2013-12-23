@@ -80,7 +80,7 @@ public class StreamingKMeansMapper extends Mapper<Writable, VectorWritable, IntW
         estimatePoints.add(centroid);
       } else if (numPoints == NUM_ESTIMATE_POINTS) {
         clusterEstimatePoints();
-  }
+      }
     } else {
       clusterer.cluster(centroid);
     }

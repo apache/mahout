@@ -21,7 +21,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -60,28 +59,32 @@ public class StreamingKMeansThread implements Callable<Iterable<Centroid>> {
         StreamingKMeansDriver.INVALID_DISTANCE_CUTOFF);
 
     Iterator<Centroid> dataPointsIterator = dataPoints.iterator();
-    List<Centroid> dataPointsList = Lists.newArrayList();
+
     if (estimateDistanceCutoff == StreamingKMeansDriver.INVALID_DISTANCE_CUTOFF) {
       List<Centroid> estimatePoints = Lists.newArrayListWithExpectedSize(NUM_ESTIMATE_POINTS);
       while (dataPointsIterator.hasNext() && estimatePoints.size() < NUM_ESTIMATE_POINTS) {
         Centroid centroid = dataPointsIterator.next();
         estimatePoints.add(centroid);
-        dataPointsList.add(centroid);
       }
 
       if (log.isInfoEnabled()) {
         log.info("Estimated Points: {}", estimatePoints.size());
       }
       estimateDistanceCutoff = ClusteringUtils.estimateDistanceCutoff(estimatePoints, searcher.getDistanceMeasure());
-
-    } else {
-      Iterators.addAll(dataPointsList, dataPointsIterator);
     }
 
     StreamingKMeans streamingKMeans = new StreamingKMeans(searcher, numClusters, estimateDistanceCutoff);
-    for (Centroid aDataPoints : dataPointsList) {
-      streamingKMeans.cluster(aDataPoints);
+
+    // datapointsIterator could be empty if no estimate distance was initially provided
+    // hence creating the iterator again here for the clustering
+    if (!dataPointsIterator.hasNext()) {
+      dataPointsIterator = dataPoints.iterator();
     }
+
+    while (dataPointsIterator.hasNext()) {
+      streamingKMeans.cluster(dataPointsIterator.next());
+    }
+
     streamingKMeans.reindexCentroids();
     return streamingKMeans;
   }
