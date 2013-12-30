@@ -136,7 +136,9 @@ public class TestNaiveBayesDriver extends AbstractJob {
     Job testJob = prepareJob(getInputPath(), getOutputPath(), SequenceFileInputFormat.class, BayesTestMapper.class,
             Text.class, VectorWritable.class, SequenceFileOutputFormat.class);
     //testJob.getConfiguration().set(LABEL_KEY, getOption("--labels"));
-    boolean complementary = parsedArgs.containsKey("testComplementary");
+    
+    //boolean complementary = parsedArgs.containsKey("testComplementary"); //always result to false as key in hash map is "--testComplementary"
+    boolean complementary = hasOption("testComplementary"); //or  complementary = parsedArgs.containsKey("--testComplementary");
     testJob.getConfiguration().set(COMPLEMENTARY, String.valueOf(complementary));
     return testJob.waitForCompletion(true);
   }

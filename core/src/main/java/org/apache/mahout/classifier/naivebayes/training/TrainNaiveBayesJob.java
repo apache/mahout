@@ -93,8 +93,8 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     }
     long labelSize = createLabelIndex(labPath);
     float alphaI = Float.parseFloat(getOption(ALPHA_I));
-    boolean trainComplementary = Boolean.parseBoolean(getOption(TRAIN_COMPLEMENTARY));
-
+    //boolean trainComplementary = Boolean.parseBoolean(getOption(TRAIN_COMPLEMENTARY)); //always result to false
+    boolean trainComplementary = hasOption(TRAIN_COMPLEMENTARY);
 
     HadoopUtil.setSerializations(getConf());
     HadoopUtil.cacheFiles(labPath, getConf());
