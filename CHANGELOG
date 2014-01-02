@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.9 - unreleased
 
+  MAHOUT-1390: SVD hangs for certain inputs (tdunning)
+
   MAHOUT-1389: Complementary Naive Bayes Classifier not getting called when "-c" option is activated (Gouri Shankar Majumdar via smarthi)
 
   MAHOUT-1384: Executing the MR version of Naive Bayes/CNB of classify_20newgroups.sh fails in seqdirectory step (smarthi)
