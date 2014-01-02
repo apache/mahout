@@ -268,8 +268,9 @@ public class SingularValueDecomposition implements java.io.Serializable {
     // Main iteration loop for the singular values.
     
     int pp = p - 1;
-    //int iter = 0;
+    int iter = 0;
     double eps = Math.pow(2.0, -52.0);
+    double tiny = Math.pow(2.0,-966.0);
     while (p > 0) {
       int k;
       
@@ -289,7 +290,7 @@ public class SingularValueDecomposition implements java.io.Serializable {
         if (k == -1) {
           break;
         }
-        if (Math.abs(e[k]) <= eps * (Math.abs(s[k]) + Math.abs(s[k + 1]))) {
+        if (Math.abs(e[k]) <= tiny +eps * (Math.abs(s[k]) + Math.abs(s[k + 1]))) {
           e[k] = 0.0;
           break;
         }
@@ -303,8 +304,10 @@ public class SingularValueDecomposition implements java.io.Serializable {
           if (ks == k) {
             break;
           }
-          double t = (ks == p ? 0.0 : Math.abs(e[ks])) + (ks == k + 1 ? 0.0 : Math.abs(e[ks - 1]));
-          if (Math.abs(s[ks]) <= eps * t) {
+          double t =
+            (ks != p ?  Math.abs(e[ks]) : 0.) +
+            (ks != k + 1 ?  Math.abs(e[ks-1]) : 0.);
+          if (Math.abs(s[ks]) <= tiny + eps * t) {
             s[ks] = 0.0;
             break;
           }
@@ -436,7 +439,7 @@ public class SingularValueDecomposition implements java.io.Serializable {
             }
           }
           e[p - 2] = f;
-          //iter += 1;
+          iter = iter + 1;
         }
           break;
         
@@ -480,7 +483,7 @@ public class SingularValueDecomposition implements java.io.Serializable {
             }
             k++;
           }
-          //iter = 0;
+          iter = 0;
           p--;
         }
           break;
