@@ -36,7 +36,13 @@ Release 0.9 - unreleased
 
   MAHOUT-1355: InteractionValueEncoder produces wrong traceDictionary entries (Johannes Schulte via smarthi)
 
+  MAHOUT-1353: Visibility of preparePreferenceMatrix directory location (Pat Ferrel, ssc)
+
+  MAHOUT-1352: Option to change RecommenderJob output format (Pat Ferrel, ssc)
+
   MAHOUT-1351: Adding DenseVector support to AbstractCluster (David DeBarr via smarthi)
+
+  MAHOUT-1349: Clusterdumper/loadTermDictionary crashes when highest index in (sparse) dictionary vector is larger than dictionary vector size (Andrew Musselman via smarthi)
 
   MAHOUT-1347: Add Streaming K-Means clustering algorithm to examples/bin/cluster-reuters.sh (smarthi)
 
@@ -87,8 +93,6 @@ Release 0.9 - unreleased
   MAHOUT-1265: Multilayer Perceptron (Yexi Jiang via smarthi)
 
   MAHOUT-1261: TasteHadoopUtils.idToIndex can return an int that has size Integer.MAX_VALUE (Carl Clark, smarthi)
-
-  MAHOUT-1249: Clusterdumper/loadTermDictionary crashes when highest index in (sparse) dictionary vector is larger than dictionary vector size (Andrew Musselman via smarthi)
 
   MAHOUT-1242: No key redistribution function for associative maps (Tharindu Rusira via smarthi)
 
