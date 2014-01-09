@@ -62,7 +62,7 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
     this.clusterIdToPoints = clusterIdToPoints;
     this.measure = measure;
   }
-  
+
   protected Writer getWriter() {
     return writer;
   }
@@ -73,35 +73,9 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
 
   public static String getTopFeatures(Vector vector, String[] dictionary, int numTerms) {
 
-    List<TermIndexWeight> vectorTerms = Lists.newArrayList();
-
-    for (Vector.Element elt : vector.nonZeroes()) {
-      vectorTerms.add(new TermIndexWeight(elt.index(), elt.get()));
-    }
-
-    // Sort results in reverse order (ie weight in descending order)
-    Collections.sort(vectorTerms, new Comparator<TermIndexWeight>() {
-      @Override
-      public int compare(TermIndexWeight one, TermIndexWeight two) {
-        return Double.compare(two.weight, one.weight);
-      }
-    });
-
-    Collection<Pair<String, Double>> topTerms = Lists.newLinkedList();
-
-    for (int i = 0; i < vectorTerms.size() && i < numTerms; i++) {
-      int index = vectorTerms.get(i).index;
-      String dictTerm = dictionary[index];
-      if (dictTerm == null) {
-        log.error("Dictionary entry missing for {}", index);
-        continue;
-      }
-      topTerms.add(new Pair<String, Double>(dictTerm, vectorTerms.get(i).weight));
-    }
-
     StringBuilder sb = new StringBuilder(100);
 
-    for (Pair<String, Double> item : topTerms) {
+    for (Pair<String, Double> item : getTopPairs(vector, dictionary, numTerms)) {
       String term = item.getFirst();
       sb.append("\n\t\t");
       sb.append(StringUtils.rightPad(term, 40));
@@ -113,35 +87,9 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
 
   public static String getTopTerms(Vector vector, String[] dictionary, int numTerms) {
 
-    List<TermIndexWeight> vectorTerms = Lists.newArrayList();
-
-    for (Vector.Element elt : vector.nonZeroes()) {
-      vectorTerms.add(new TermIndexWeight(elt.index(), elt.get()));
-    }
-
-    // Sort results in reverse order (ie weight in descending order)
-    Collections.sort(vectorTerms, new Comparator<TermIndexWeight>() {
-      @Override
-      public int compare(TermIndexWeight one, TermIndexWeight two) {
-        return Double.compare(two.weight, one.weight);
-      }
-    });
-
-    Collection<Pair<String, Double>> topTerms = Lists.newLinkedList();
-
-    for (int i = 0; i < vectorTerms.size() && i < numTerms; i++) {
-      int index = vectorTerms.get(i).index;
-      String dictTerm = dictionary[index];
-      if (dictTerm == null) {
-        log.error("Dictionary entry missing for {}", index);
-        continue;
-      }
-      topTerms.add(new Pair<String, Double>(dictTerm, vectorTerms.get(i).weight));
-    }
-
     StringBuilder sb = new StringBuilder(100);
 
-    for (Pair<String, Double> item : topTerms) {
+    for (Pair<String, Double> item : getTopPairs(vector, dictionary, numTerms)) {
       String term = item.getFirst();
       sb.append(term).append('_');
     }
@@ -168,6 +116,36 @@ public abstract class AbstractClusterWriter implements ClusterWriter {
       result++;
     }
     return result;
+  }
+
+  private static Collection<Pair<String, Double>> getTopPairs(Vector vector, String[] dictionary, int numTerms) {
+    List<TermIndexWeight> vectorTerms = Lists.newArrayList();
+
+    for (Vector.Element elt : vector.nonZeroes()) {
+      vectorTerms.add(new TermIndexWeight(elt.index(), elt.get()));
+    }
+
+    // Sort results in reverse order (ie weight in descending order)
+    Collections.sort(vectorTerms, new Comparator<TermIndexWeight>() {
+      @Override
+      public int compare(TermIndexWeight one, TermIndexWeight two) {
+        return Double.compare(two.weight, one.weight);
+      }
+    });
+
+    Collection<Pair<String, Double>> topTerms = Lists.newLinkedList();
+
+    for (int i = 0; i < vectorTerms.size() && i < numTerms; i++) {
+      int index = vectorTerms.get(i).index;
+      String dictTerm = dictionary[index];
+      if (dictTerm == null) {
+        log.error("Dictionary entry missing for {}", index);
+        continue;
+      }
+      topTerms.add(new Pair<String, Double>(dictTerm, vectorTerms.get(i).weight));
+    }
+
+    return topTerms;
   }
 
   private static class TermIndexWeight {
