@@ -440,7 +440,7 @@ public final class StreamingKMeansDriver extends AbstractJob {
     pool.shutdown();
     pool.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
     log.info("Finished StreamingKMeans");
-    SequenceFile.Writer writer = SequenceFile.createWriter(FileSystem.get(conf), conf, output, IntWritable.class,
+    SequenceFile.Writer writer = SequenceFile.createWriter(FileSystem.get(conf), conf, new Path(output, "part-r-00000"), IntWritable.class,
         CentroidWritable.class);
     int numCentroids = 0;
     // Run BallKMeans on the intermediate centroids.

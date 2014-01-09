@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.9 - unreleased
 
+  MAHOUT-1392: Streaming KMeans should write centroid output to a 'part-r-xxxx' file when executed in sequential mode (smarthi)
+
   MAHOUT-1390: SVD hangs for certain inputs (tdunning)
 
   MAHOUT-1389: Complementary Naive Bayes Classifier not getting called when "-c" option is activated (Gouri Shankar Majumdar via smarthi)
