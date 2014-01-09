@@ -30,6 +30,8 @@ Release 0.9 - unreleased
 
   MAHOUT-1364: Upgrade Mahout codebase to Lucene 4.6 (Frank Scholten)
 
+  MAHOUT-1363: Rebase packages in mahout-scala (dlyubimov)
+
   MAHOUT-1362: Remove examples/bin/build-reuters.sh (smarthi)
 
   MAHOUT-1361: Online algorithm for computing accurate Quantiles using 1-D clustering (tdunning)
@@ -67,6 +69,8 @@ Release 0.9 - unreleased
   MAHOUT-1308: Cannot extend CandidateItemsStrategy due to restricted visibility (David Geiger, smarthi)
 
   MAHOUT-1301: toString() method of SequentialAccessSparseVector has excess comma at the end (Alexander Senov, smarthi)
+
+  MAHOUT-1297: New module for linear algebra scala DSL (dlyubimov)
 
   MAHOUT-1296: Remove deprecated algorithms (ssc)
 
