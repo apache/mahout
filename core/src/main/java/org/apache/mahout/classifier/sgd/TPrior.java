@@ -17,7 +17,7 @@
 
 package org.apache.mahout.classifier.sgd;
 
-import org.apache.commons.math.special.Gamma;
+import org.apache.commons.math3.special.Gamma;
 
 import java.io.DataInput;
 import java.io.DataOutput;
