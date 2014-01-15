@@ -49,7 +49,6 @@ import org.slf4j.LoggerFactory;
  * https://cwiki.apache.org/confluence/display/MAHOUT/Stochastic+Singular+Value+Decomposition
  * @see org.apache.mahout.math.hadoop.stochasticsvd.SSVDSolver
  */
-@Deprecated
 public class DistributedLanczosSolver extends LanczosSolver implements Tool {
 
   public static final String RAW_EIGENVECTORS = "rawEigenvectors";
