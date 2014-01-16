@@ -4,6 +4,8 @@ Release 0.9 - unreleased
 
   MAHOUT-1396: Accidental use of commons-math won't work with next Hadoop 2 release (srowen)
 
+  MAHOUT-1394: Undeprecate Lanczos (ssc)
+
   MAHOUT-1393: Remove duplicated code from getTopTerms and getTopFeatures in AbstractClusterWriter (Diego Carrion via smarthi)
 
   MAHOUT-1392: Streaming KMeans should write centroid output to a 'part-r-xxxx' file when executed in sequential mode (smarthi)
