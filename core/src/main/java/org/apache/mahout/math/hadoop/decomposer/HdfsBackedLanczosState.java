@@ -37,14 +37,13 @@ import org.apache.mahout.math.decomposer.lanczos.LanczosState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Deprecated
 public class HdfsBackedLanczosState extends LanczosState implements Configurable {
 
   private static final Logger log = LoggerFactory.getLogger(HdfsBackedLanczosState.class);
 
   public static final String BASIS_PREFIX = "basis";
   public static final String SINGULAR_PREFIX = "singular";
-  public static final String METADATA_FILE = "metadata";
+ //public static final String METADATA_FILE = "metadata";
 
   private Configuration conf;
   private final Path baseDir;

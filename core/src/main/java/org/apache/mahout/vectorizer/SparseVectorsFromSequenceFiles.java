@@ -76,11 +76,11 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
 
     Option chunkSizeOpt = obuilder.withLongName("chunkSize").withArgument(
             abuilder.withName("chunkSize").withMinimum(1).withMaximum(1).create()).withDescription(
-            "The chunkSize in MegaBytes. 100-10000 MB").withShortName("chunk").create();
+            "The chunkSize in MegaBytes. Default Value: 100MB").withShortName("chunk").create();
 
     Option weightOpt = obuilder.withLongName("weight").withRequired(false).withArgument(
             abuilder.withName("weight").withMinimum(1).withMaximum(1).create()).withDescription(
-            "The kind of weight to use. Currently TF or TFIDF").withShortName("wt").create();
+            "The kind of weight to use. Currently TF or TFIDF. Default: TFIDF").withShortName("wt").create();
 
     Option minDFOpt = obuilder.withLongName("minDF").withRequired(false).withArgument(
             abuilder.withName("minDF").withMinimum(1).withMaximum(1).create()).withDescription(
