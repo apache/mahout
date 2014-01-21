@@ -17,6 +17,9 @@
 
 package org.apache.mahout.cf.taste.impl.model.file;
 
+import java.io.File;
+import java.util.NoSuchElementException;
+
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
@@ -32,9 +35,6 @@ import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
-import java.util.NoSuchElementException;
 
 /** <p>Tests {@link FileDataModel}.</p> */
 public final class FileDataModelTest extends TasteTestCase {
@@ -55,6 +55,23 @@ public final class FileDataModelTest extends TasteTestCase {
       "456,789,0.5",
       "456,654,0.0",
       "456,999,0.2",};
+  
+  private static final String[] DATA_SPLITTED_WITH_TWO_SPACES = {
+      "123  456  0.1",
+      "123  789  0.6",
+      "123  654  0.7",
+      "234  123  0.5",
+      "234  234  1.0",
+      "234  999  0.9",
+      "345  789  0.6",
+      "345  654  0.7",
+      "345  123  1.0",
+      "345  234  0.5",
+      "345  999  0.5",
+      "456  456  0.1",
+      "456  789  0.5",
+      "456  654  0.0",
+      "456  999  0.2",};
 
   private DataModel model;
   private File testFile;
@@ -66,6 +83,15 @@ public final class FileDataModelTest extends TasteTestCase {
     testFile = getTestTempFile("test.txt");
     writeLines(testFile, DATA);
     model = new FileDataModel(testFile);
+  }
+  
+  @Test
+  public void testReadRegexSplittedFile() throws Exception {
+    File testFile = getTestTempFile("testRegex.txt");
+    writeLines(testFile, DATA_SPLITTED_WITH_TWO_SPACES);
+    FileDataModel model = new FileDataModel(testFile,"\\s+");
+    assertEquals(model.getItemIDsFromUser(123).size(), 3);
+    assertEquals(model.getItemIDsFromUser(456).size(), 4);
   }
 
   @Test
