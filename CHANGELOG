@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 0.9 - unreleased
 
+  MAHOUT-1400: Remove references to deprecated and removed algorithms from examples scripts (ssc)
+
   MAHOUT-1396: Accidental use of commons-math won't work with next Hadoop 2 release (srowen)
 
   MAHOUT-1394: Undeprecate Lanczos (ssc)
