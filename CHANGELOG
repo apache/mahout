@@ -2,9 +2,11 @@ Mahout Change Log
 
 Release 0.9 - unreleased
 
-  MAHOUT-1398: FileDataModel should provide a constructor with a delimiterPattern (Roy Guo via ssc)
+  MAHOUT-1401: Resurrect Frequent Pattern mining (smarthi)
 
   MAHOUT-1400: Remove references to deprecated and removed algorithms from examples scripts (ssc)
+
+  MAHOUT-1398: FileDataModel should provide a constructor with a delimiterPattern (Roy Guo via ssc)
 
   MAHOUT-1396: Accidental use of commons-math won't work with next Hadoop 2 release (srowen)
 
