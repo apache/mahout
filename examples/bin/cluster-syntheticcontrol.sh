@@ -27,7 +27,7 @@ if [ "$1" = "--help" ] || [ "$1" = "--?" ]; then
   exit
 fi
 
-algorithm=( canopy kmeans fuzzykmeans dirichlet meanshift )
+algorithm=( canopy kmeans fuzzykmeans )
 if [ -n "$1" ]; then
   choice=$1
 else
@@ -35,8 +35,6 @@ else
   echo "1. ${algorithm[0]} clustering"
   echo "2. ${algorithm[1]} clustering"
   echo "3. ${algorithm[2]} clustering"
-  echo "4. ${algorithm[3]} clustering"
-  echo "5. ${algorithm[4]} clustering"
   read -p "Enter your choice : " choice
 fi
 echo "ok. You chose $choice and we'll use ${algorithm[$choice-1]} Clustering"

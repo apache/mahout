@@ -28,9 +28,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
@@ -49,6 +46,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
+import com.google.common.io.Closeables;
 
 /**
  * <p>
@@ -148,7 +148,15 @@ public class FileDataModel extends AbstractDataModel {
   public FileDataModel(File dataFile) throws IOException {
     this(dataFile, false, DEFAULT_MIN_RELOAD_INTERVAL_MS);
   }
-
+  
+  /**
+   * @param delimiterRegex If your data file don't use '\t' or ',' as delimiter, you can specify 
+   * a custom regex pattern.
+   */
+  public FileDataModel(File dataFile, String delimiterRegex) throws IOException {
+    this(dataFile, false, DEFAULT_MIN_RELOAD_INTERVAL_MS, delimiterRegex);
+  }
+  
   /**
    * @param transpose
    *          transposes user IDs and item IDs -- convenient for 'flipping' the data model this way
@@ -158,6 +166,17 @@ public class FileDataModel extends AbstractDataModel {
    * @see #FileDataModel(File)
    */
   public FileDataModel(File dataFile, boolean transpose, long minReloadIntervalMS) throws IOException {
+    this(dataFile, transpose, minReloadIntervalMS, null);
+  }
+  
+  /**
+   * @param delimiterRegex If your data file don't use '\t' or ',' as delimiters, you can specify 
+   * user own using regex pattern.
+   * @throws IOException
+   */
+  public FileDataModel(File dataFile, boolean transpose, long minReloadIntervalMS, String delimiterRegex)
+    throws IOException {
+
     this.dataFile = Preconditions.checkNotNull(dataFile.getAbsoluteFile());
     if (!dataFile.exists() || dataFile.isDirectory()) {
       throw new FileNotFoundException(dataFile.toString());
@@ -178,8 +197,16 @@ public class FileDataModel extends AbstractDataModel {
     }
     Closeables.close(iterator, true);
 
-    delimiter = determineDelimiter(firstLine);
-    delimiterPattern = Splitter.on(delimiter);
+    if (delimiterRegex == null) {
+      delimiter = determineDelimiter(firstLine);
+      delimiterPattern = Splitter.on(delimiter);
+    } else {
+      delimiter = '\0';
+      delimiterPattern = Splitter.onPattern(delimiterRegex);
+      if (!delimiterPattern.split(firstLine).iterator().hasNext()) {
+        throw new IllegalArgumentException("Did not find a delimiter(pattern) in first line");
+      }
+    }
     List<String> firstLineSplit = Lists.newArrayList();
     for (String token : delimiterPattern.split(firstLine)) {
       firstLineSplit.add(token);
@@ -196,10 +223,6 @@ public class FileDataModel extends AbstractDataModel {
 
   public File getDataFile() {
     return dataFile;
-  }
-
-  public char getDelimiter() {
-    return delimiter;
   }
 
   protected void reload() {
