@@ -38,10 +38,10 @@ public class MatrixVectorView extends AbstractVector {
 
   public MatrixVectorView(Matrix matrix, int row, int column, int rowStride, int columnStride) {
     super(viewSize(matrix, row, column, rowStride, columnStride));
-    if (row < 0 || row > matrix.rowSize()) {
+    if (row < 0 || row >= matrix.rowSize()) {
       throw new IndexException(row, matrix.rowSize());
     }
-    if (column < 0 || column > matrix.columnSize()) {
+    if (column < 0 || column >= matrix.columnSize()) {
       throw new IndexException(column, matrix.columnSize());
     }
 
