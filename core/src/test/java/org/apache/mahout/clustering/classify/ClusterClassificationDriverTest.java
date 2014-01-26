@@ -37,6 +37,7 @@ import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -235,9 +236,15 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
       } else {
         singletonCnt++;
         assertEquals("expecting only singleton clusters; got size=" + vList.size(), 1, vList.size());
-        Assert.assertTrue("not expecting cluster:" + vList.get(0).asFormatString(),
-                          reference.contains(vList.get(0).asFormatString()));
-        reference.remove(vList.get(0).asFormatString());
+        if (vList.get(0) instanceof NamedVector) {
+          Assert.assertTrue("not expecting cluster:" + ((NamedVector) vList.get(0)).getDelegate().asFormatString(),
+                  reference.contains(((NamedVector)  vList.get(0)).getDelegate().asFormatString()));
+          reference.remove(((NamedVector)vList.get(0)).getDelegate().asFormatString());
+        } else if (vList.get(0) instanceof RandomAccessSparseVector) {
+          Assert.assertTrue("not expecting cluster:" + vList.get(0).asFormatString(),
+                  reference.contains(vList.get(0).asFormatString()));
+          reference.remove(vList.get(0).asFormatString());
+        }
       }
     }
     Assert.assertEquals("Different number of empty clusters than expected!", 1, emptyCnt);
