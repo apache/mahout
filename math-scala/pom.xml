@@ -164,7 +164,6 @@
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-math</artifactId>
-      <version>${pom.version}</version>
     </dependency>
 
 
