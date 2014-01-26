@@ -21,8 +21,6 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
-import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.function.Functions;
 import org.junit.Test;
@@ -30,15 +28,8 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import static org.junit.Assert.assertEquals;
 
 //To launch this test only : mvn test -Dtest=org.apache.mahout.math.TestSingularValueDecomposition
 public final class TestSingularValueDecomposition extends MahoutTestCase {
@@ -244,7 +235,7 @@ public final class TestSingularValueDecomposition extends MahoutTestCase {
     assertEquals(3.0, svd.cond(), 1.5e-15);
   }
 
-  @Test(timeout=1000)
+  @Test
   public void testSvdHang() throws IOException, InterruptedException, ExecutionException, TimeoutException {
     System.out.printf("starting hanging-svd\n");
     final Matrix m = readTsv("hanging-svd.tsv");
