@@ -202,6 +202,8 @@ public final class ClusterClassificationDriver extends AbstractJob {
         "part-m-" + 0), IntWritable.class, WeightedPropertyVectorWritable.class);
     for (Pair<Writable, VectorWritable> vw : new SequenceFileDirIterable<Writable, VectorWritable>(input, PathType.LIST,
         PathFilters.logsCRCFilter(), conf)) {
+      // Converting to NamedVectors to preserve the vectorId else its not obvious as to which point
+      // belongs to which cluster - fix for MAHOUT-1410
       Writable key = vw.getFirst();
       Vector vector = vw.getSecond().get();
       if (!(vector instanceof NamedVector)) {

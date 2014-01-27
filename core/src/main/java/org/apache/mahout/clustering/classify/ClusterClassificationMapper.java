@@ -84,6 +84,8 @@ public class ClusterClassificationMapper extends
   protected void map(WritableComparable<?> key, VectorWritable vw, Context context)
     throws IOException, InterruptedException {
     if (!clusterModels.isEmpty()) {
+      // Converting to NamedVectors to preserve the vectorId else its not obvious as to which point
+      // belongs to which cluster - fix for MAHOUT-1410
       Vector vector = vw.get();
       if (!(vector instanceof NamedVector)) {
         if (key instanceof Text) {
