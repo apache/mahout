@@ -152,6 +152,7 @@ public class SpectralKMeansDriver extends AbstractJob {
    * @param ssvd
    *          Flag to indicate the eigensolver to use
    * @param numReducers
+   *          Number of reducers
    * @param blockHeight
    * @param oversampling
    * @param poweriters
@@ -244,7 +245,7 @@ public class SpectralKMeansDriver extends AbstractJob {
 
     // Run the KMeansDriver
     Path answer = new Path(output, "kmeans_out");
-    KMeansDriver.run(conf, data, initialclusters, answer, measure, convergenceDelta, maxIterations, true, 0.0, false);
+    KMeansDriver.run(conf, data, initialclusters, answer, convergenceDelta, maxIterations, true, 0.0, false);
 
     // Restore name to id mapping and read through the cluster assignments
     Path mappingPath = new Path(new Path(conf.get("hadoop.tmp.dir")), "generic_input_mapping");

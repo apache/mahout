@@ -133,14 +133,12 @@ public final class Job extends AbstractJob {
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     log.info("Running Canopy to get initial clusters");
     Path canopyOutput = new Path(output, "canopies");
-    CanopyDriver
-        .run(new Configuration(), directoryContainingConvertedInput, canopyOutput, measure, t1, t2, false, 0.0, false);
+    CanopyDriver.run(new Configuration(), directoryContainingConvertedInput, canopyOutput, measure, t1, t2, false, 0.0, false);
     log.info("Running FuzzyKMeans");
     FuzzyKMeansDriver.run(directoryContainingConvertedInput, new Path(canopyOutput, "clusters-0-final"), output,
-        measure, convergenceDelta, maxIterations, fuzziness, true, true, 0.0, false);
+        convergenceDelta, maxIterations, fuzziness, true, true, 0.0, false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-*-final"), new Path(output,
-        "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-*-final"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
 }
