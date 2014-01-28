@@ -236,11 +236,11 @@ public class ClusterClassificationDriverTest extends MahoutTestCase {
       } else {
         singletonCnt++;
         assertEquals("expecting only singleton clusters; got size=" + vList.size(), 1, vList.size());
-        if (vList.get(0) instanceof NamedVector) {
+        if (vList.get(0).getClass().equals(NamedVector.class)) {
           Assert.assertTrue("not expecting cluster:" + ((NamedVector) vList.get(0)).getDelegate().asFormatString(),
                   reference.contains(((NamedVector)  vList.get(0)).getDelegate().asFormatString()));
           reference.remove(((NamedVector)vList.get(0)).getDelegate().asFormatString());
-        } else if (vList.get(0) instanceof RandomAccessSparseVector) {
+        } else if (vList.get(0).getClass().equals(RandomAccessSparseVector.class)) {
           Assert.assertTrue("not expecting cluster:" + vList.get(0).asFormatString(),
                   reference.contains(vList.get(0).asFormatString()));
           reference.remove(vList.get(0).asFormatString());

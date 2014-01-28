@@ -86,11 +86,12 @@ public class ClusterClassificationMapper extends
     if (!clusterModels.isEmpty()) {
       // Converting to NamedVectors to preserve the vectorId else its not obvious as to which point
       // belongs to which cluster - fix for MAHOUT-1410
+      Class<? extends Vector> vectorClass = vw.get().getClass();
       Vector vector = vw.get();
-      if (!(vector instanceof NamedVector)) {
-        if (key instanceof Text) {
+      if (!vectorClass.equals(NamedVector.class)) {
+        if (key.getClass().equals(Text.class)) {
           vector = new NamedVector(vector, key.toString());
-        } else if (key instanceof IntWritable) {
+        } else if (key.getClass().equals(IntWritable.class)) {
           vector = new NamedVector(vector, Integer.toString(((IntWritable) key).get()));
         }
       }

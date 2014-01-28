@@ -204,13 +204,13 @@ public final class ClusterClassificationDriver extends AbstractJob {
         PathFilters.logsCRCFilter(), conf)) {
       // Converting to NamedVectors to preserve the vectorId else its not obvious as to which point
       // belongs to which cluster - fix for MAHOUT-1410
-      Writable key = vw.getFirst();
+      Class<? extends Writable> keyClass = vw.getFirst().getClass();
       Vector vector = vw.getSecond().get();
-      if (!(vector instanceof NamedVector)) {
-        if (key instanceof Text) {
-          vector = new NamedVector(vector, key.toString());
-        } else if (key instanceof IntWritable) {
-          vector = new NamedVector(vector, Integer.toString(((IntWritable) key).get()));
+      if (!keyClass.equals(NamedVector.class)) {
+        if (keyClass.equals(Text.class)) {
+          vector = new NamedVector(vector, vw.getFirst().toString());
+        } else if (keyClass.equals(IntWritable.class)) {
+          vector = new NamedVector(vector, Integer.toString(((IntWritable) vw.getFirst()).get()));
         }
       }
       Vector pdfPerCluster = clusterClassifier.classify(vector);
