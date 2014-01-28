@@ -36,6 +36,8 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.clustering.iterator.ClusteringPolicy;
+import org.apache.mahout.clustering.iterator.DistanceMeasureCluster;
+import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterator;
@@ -121,9 +123,13 @@ public class ClusterClassificationMapper extends
     throws IOException, InterruptedException {
     Cluster cluster = clusterModels.get(clusterIndex);
     clusterId.set(cluster.getId());
-    double d = Math.sqrt(cluster.getCenter().getDistanceSquared(vw.get()));
+
+    DistanceMeasureCluster distanceMeasureCluster = (DistanceMeasureCluster) cluster;
+    DistanceMeasure distanceMeasure = distanceMeasureCluster.getMeasure();
+    double distance = distanceMeasure.distance(cluster.getCenter(), vw.get());
+
     Map<Text, Text> props = Maps.newHashMap();
-    props.put(new Text("distance"), new Text(Double.toString(d)));
+    props.put(new Text("distance"), new Text(Double.toString(distance)));
     context.write(clusterId, new WeightedPropertyVectorWritable(weight, vw.get(), props));
   }
   

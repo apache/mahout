@@ -41,9 +41,11 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.clustering.iterator.ClusteringPolicy;
+import org.apache.mahout.clustering.iterator.DistanceMeasureCluster;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
@@ -250,8 +252,12 @@ public final class ClusterClassificationDriver extends AbstractJob {
       WeightedPropertyVectorWritable weightedPropertyVectorWritable,
       int maxValueIndex) throws IOException {
     Cluster cluster = clusterModels.get(maxValueIndex);
-    double d = Math.sqrt(cluster.getCenter().getDistanceSquared(weightedPropertyVectorWritable.getVector()));
-    weightedPropertyVectorWritable.getProperties().put(new Text("distance"), new Text(Double.toString(d)));
+
+    DistanceMeasureCluster distanceMeasureCluster = (DistanceMeasureCluster) cluster;
+    DistanceMeasure distanceMeasure = distanceMeasureCluster.getMeasure();
+    double distance = distanceMeasure.distance(cluster.getCenter(), weightedPropertyVectorWritable.getVector());
+
+    weightedPropertyVectorWritable.getProperties().put(new Text("distance"), new Text(Double.toString(distance)));
     writer.append(new IntWritable(cluster.getId()), weightedPropertyVectorWritable);
   }
   
