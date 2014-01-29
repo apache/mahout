@@ -366,11 +366,11 @@ public class TDigestTest {
             double q = qValues[i];
             double estimate = dist.cdf(x);
             errorDump.printf("%s\t%s\t%.8g\t%.8f\t%.8f\n", tag, "cdf", x, q, estimate - q);
-            assertEquals(q, estimate, 0.005);
+            assertEquals(q, estimate, 0.006);
 
             estimate = cdf(dist.quantile(q), data);
             errorDump.printf("%s\t%s\t%.8g\t%.8f\t%.8f\n", tag, "quantile", x, q, estimate - q);
-            assertEquals(q, estimate, 0.005);
+            assertEquals(q, estimate, 0.006);
         }
 
         if (recordAllData) {

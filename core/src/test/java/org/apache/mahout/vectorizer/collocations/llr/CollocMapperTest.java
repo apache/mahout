@@ -177,18 +177,4 @@ public final class CollocMapperTest extends MahoutTestCase {
     
     EasyMock.verify(context);
   }
-  
-  /** A lucene 2.9 standard analyzer with no stopwords. */
- /* public static class TestAnalyzer extends DefaultAnalyzer {
-    private final Analyzer a;
-    
-    public TestAnalyzer() {
-      a = new StandardAnalyzer(Version.LUCENE_40, Collections.emptySet());
-    }
-    
-    @Override
-    public TokenStream tokenStream(String arg0, Reader arg1) {
-      return a.tokenStream(arg0, arg1);
-    }
- }*/
 }

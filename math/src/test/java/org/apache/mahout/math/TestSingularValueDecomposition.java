@@ -21,8 +21,6 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
-import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.function.Functions;
 import org.junit.Test;
@@ -30,15 +28,8 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import static org.junit.Assert.assertEquals;
 
 //To launch this test only : mvn test -Dtest=org.apache.mahout.math.TestSingularValueDecomposition
 public final class TestSingularValueDecomposition extends MahoutTestCase {
@@ -246,33 +237,11 @@ public final class TestSingularValueDecomposition extends MahoutTestCase {
 
   @Test
   public void testSvdHang() throws IOException, InterruptedException, ExecutionException, TimeoutException {
-    for (String s : new String[]{"hanging-svd", }) {
-      System.out.printf("starting %s\n", s);
-      final Matrix m = readTsv(s + ".tsv");
-      try {
-        SingularValueDecomposition svd = timeout(2000, new Callable<SingularValueDecomposition>() {
-          @Override
-          public SingularValueDecomposition call() throws Exception {
-            return new SingularValueDecomposition(m);
-          }
-        });
-        assertEquals(0, m.minus(svd.getU().times(svd.getS()).times(svd.getV().transpose())).aggregate(Functions.PLUS, Functions.ABS), 1e-10);
-        System.out.printf("%s worked\n", s);
-      } catch (ExecutionException e) {
-        System.out.printf("Failed during %s\n", s);
-        throw e;
-      } catch (TimeoutException e) {
-        System.out.printf("%s timed out\n", s);
-        throw e;
-      }
-    }
-  }
-
-  <T> T timeout(int timeLimit, Callable<T> toDo) throws InterruptedException, ExecutionException, TimeoutException {
-    ExecutorService pool = Executors.newFixedThreadPool(1);
-    Future<T> f = pool.submit(toDo);
-    pool.shutdown();
-    return f.get(timeLimit, TimeUnit.MILLISECONDS);
+    System.out.printf("starting hanging-svd\n");
+    final Matrix m = readTsv("hanging-svd.tsv");
+    SingularValueDecomposition svd = new SingularValueDecomposition(m);
+    assertEquals(0, m.minus(svd.getU().times(svd.getS()).times(svd.getV().transpose())).aggregate(Functions.PLUS, Functions.ABS), 1e-10);
+    System.out.printf("No hang\n");
   }
 
   Matrix readTsv(String name) throws IOException {

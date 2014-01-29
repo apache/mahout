@@ -24,7 +24,14 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.lucene.store.*;
+import org.apache.lucene.store.BaseDirectory;
+import org.apache.lucene.store.BufferedIndexInput;
+import org.apache.lucene.store.BufferedIndexOutput;
+import org.apache.lucene.store.IOContext;
+import org.apache.lucene.store.IndexInput;
+import org.apache.lucene.store.IndexOutput;
+import org.apache.lucene.store.Lock;
+import org.apache.lucene.store.LockFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +46,7 @@ import java.util.Collection;
  * <p/>
  * // TODO: Rename to FileSystemReadOnlyDirectory
  */
-public class ReadOnlyFileSystemDirectory extends Directory {
+public class ReadOnlyFileSystemDirectory extends BaseDirectory {
 
   private final FileSystem fs;
   private final Path directory;
@@ -50,10 +57,10 @@ public class ReadOnlyFileSystemDirectory extends Directory {
       /**
        * Constructor
        *
-       * @param fs
-       * @param directory
-       * @param create
-       * @param conf
+       * @param fs - filesystem
+       * @param directory - directory path
+       * @param create - if true create the directory
+       * @param conf - MR Job Configuration
        * @throws IOException
        */
 
@@ -280,7 +287,8 @@ public class ReadOnlyFileSystemDirectory extends Directory {
     }
 
     @Override
-    protected void finalize() throws IOException {
+    protected void finalize() throws Throwable {
+      super.finalize();
       if (!isClone && isOpen) {
         close(); // close the file
       }
@@ -335,7 +343,8 @@ public class ReadOnlyFileSystemDirectory extends Directory {
     }
 
     @Override
-    protected void finalize() throws IOException {
+    protected void finalize() throws Throwable {
+      super.finalize();
       if (isOpen) {
         close(); // close the file
       }

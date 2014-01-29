@@ -102,7 +102,7 @@ public class DisplayFuzzyKMeans extends DisplayClustering {
       ClassNotFoundException, InterruptedException {
     Path clustersIn = new Path(output, "random-seeds");
     RandomSeedGenerator.buildRandom(conf, samples, clustersIn, 3, measure);
-    FuzzyKMeansDriver.run(samples, clustersIn, output, measure, threshold, maxIterations, m, true, true, threshold,
+    FuzzyKMeansDriver.run(samples, clustersIn, output, threshold, maxIterations, m, true, true, threshold,
         true);
     
     loadClustersWritable(output);

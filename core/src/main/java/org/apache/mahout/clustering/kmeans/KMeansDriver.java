@@ -100,7 +100,7 @@ public class KMeansDriver extends AbstractJob {
     if (hasOption(DefaultOptionCreator.OUTLIER_THRESHOLD)) {
       clusterClassificationThreshold = Double.parseDouble(getOption(DefaultOptionCreator.OUTLIER_THRESHOLD));
     }
-    run(getConf(), input, clusters, output, measure, convergenceDelta, maxIterations, runClustering,
+    run(getConf(), input, clusters, output, convergenceDelta, maxIterations, runClustering,
         clusterClassificationThreshold, runSequential);
     return 0;
   }
@@ -108,15 +108,13 @@ public class KMeansDriver extends AbstractJob {
   /**
    * Iterate over the input vectors to produce clusters and, if requested, use the results of the final iteration to
    * cluster the input vectors.
-   * 
+   *
    * @param input
    *          the directory pathname for input points
    * @param clustersIn
    *          the directory pathname for initial & computed clusters
    * @param output
    *          the directory pathname for output points
-   * @param measure
-   *          the DistanceMeasure to use
    * @param convergenceDelta
    *          the convergence delta value
    * @param maxIterations
@@ -129,36 +127,33 @@ public class KMeansDriver extends AbstractJob {
    * @param runSequential
    *          if true execute sequential algorithm
    */
-  public static void run(Configuration conf, Path input, Path clustersIn, Path output, DistanceMeasure measure,
-      double convergenceDelta, int maxIterations, boolean runClustering, double clusterClassificationThreshold,
-      boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException {
+  public static void run(Configuration conf, Path input, Path clustersIn, Path output,
+    double convergenceDelta, int maxIterations, boolean runClustering, double clusterClassificationThreshold,
+    boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException {
     
     // iterate until the clusters converge
     String delta = Double.toString(convergenceDelta);
     if (log.isInfoEnabled()) {
-      log.info("Input: {} Clusters In: {} Out: {} Distance: {}", input, clustersIn, output,
-               measure.getClass().getName());
+      log.info("Input: {} Clusters In: {} Out: {}", input, clustersIn, output);
       log.info("convergence: {} max Iterations: {}", convergenceDelta, maxIterations);
     }
-    Path clustersOut = buildClusters(conf, input, clustersIn, output, measure, maxIterations, delta, runSequential);
+    Path clustersOut = buildClusters(conf, input, clustersIn, output, maxIterations, delta, runSequential);
     if (runClustering) {
       log.info("Clustering data");
-      clusterData(conf, input, clustersOut, output, measure, clusterClassificationThreshold, runSequential);
+      clusterData(conf, input, clustersOut, output, clusterClassificationThreshold, runSequential);
     }
   }
   
   /**
    * Iterate over the input vectors to produce clusters and, if requested, use the results of the final iteration to
    * cluster the input vectors.
-   * 
+   *
    * @param input
    *          the directory pathname for input points
    * @param clustersIn
    *          the directory pathname for initial & computed clusters
    * @param output
    *          the directory pathname for output points
-   * @param measure
-   *          the DistanceMeasure to use
    * @param convergenceDelta
    *          the convergence delta value
    * @param maxIterations
@@ -166,21 +161,22 @@ public class KMeansDriver extends AbstractJob {
    * @param runClustering
    *          true if points are to be clustered after iterations are completed
    * @param clusterClassificationThreshold
-   *          Is a clustering strictness / outlier removal parrameter. Its value should be between 0 and 1. Vectors
+   *          Is a clustering strictness / outlier removal parameter. Its value should be between 0 and 1. Vectors
    *          having pdf below this value will not be clustered.
    * @param runSequential
    *          if true execute sequential algorithm
    */
-  public static void run(Path input, Path clustersIn, Path output, DistanceMeasure measure, double convergenceDelta,
-      int maxIterations, boolean runClustering, double clusterClassificationThreshold, boolean runSequential)
+  public static void run(Path input, Path clustersIn, Path output, double convergenceDelta,
+    int maxIterations, boolean runClustering, double clusterClassificationThreshold, boolean runSequential)
     throws IOException, InterruptedException, ClassNotFoundException {
-    run(new Configuration(), input, clustersIn, output, measure, convergenceDelta, maxIterations, runClustering,
+    run(new Configuration(), input, clustersIn, output, convergenceDelta, maxIterations, runClustering,
         clusterClassificationThreshold, runSequential);
   }
   
   /**
    * Iterate over the input vectors to produce cluster directories for each iteration
    * 
+   *
    * @param conf
    *          the Configuration to use
    * @param input
@@ -189,20 +185,18 @@ public class KMeansDriver extends AbstractJob {
    *          the directory pathname for initial & computed clusters
    * @param output
    *          the directory pathname for output points
-   * @param measure
-   *          the classname of the DistanceMeasure
    * @param maxIterations
    *          the maximum number of iterations
    * @param delta
    *          the convergence delta value
    * @param runSequential
    *          if true execute sequential algorithm
-   * 
+   *
    * @return the Path of the final clusters directory
    */
   public static Path buildClusters(Configuration conf, Path input, Path clustersIn, Path output,
-      DistanceMeasure measure, int maxIterations, String delta, boolean runSequential) throws IOException,
-      InterruptedException, ClassNotFoundException {
+    int maxIterations, String delta, boolean runSequential) throws IOException,
+    InterruptedException, ClassNotFoundException {
     
     double convergenceDelta = Double.parseDouble(delta);
     List<Cluster> clusters = Lists.newArrayList();
@@ -227,28 +221,26 @@ public class KMeansDriver extends AbstractJob {
   
   /**
    * Run the job using supplied arguments
-   * 
+   *
    * @param input
    *          the directory pathname for input points
    * @param clustersIn
    *          the directory pathname for input clusters
    * @param output
    *          the directory pathname for output points
-   * @param measure
-   *          the classname of the DistanceMeasure
    * @param clusterClassificationThreshold
-   *          Is a clustering strictness / outlier removal parrameter. Its value should be between 0 and 1. Vectors
+   *          Is a clustering strictness / outlier removal parameter. Its value should be between 0 and 1. Vectors
    *          having pdf below this value will not be clustered.
    * @param runSequential
    *          if true execute sequential algorithm
    */
-  public static void clusterData(Configuration conf, Path input, Path clustersIn, Path output, DistanceMeasure measure,
-      double clusterClassificationThreshold, boolean runSequential) throws IOException, InterruptedException,
-      ClassNotFoundException {
+  public static void clusterData(Configuration conf, Path input, Path clustersIn, Path output,
+    double clusterClassificationThreshold, boolean runSequential) throws IOException, InterruptedException,
+    ClassNotFoundException {
     
     if (log.isInfoEnabled()) {
       log.info("Running Clustering");
-      log.info("Input: {} Clusters In: {} Out: {} Distance: {}", input, clustersIn, output, measure);
+      log.info("Input: {} Clusters In: {} Out: {}", input, clustersIn, output);
     }
     ClusterClassifier.writePolicy(new KMeansClusteringPolicy(), clustersIn);
     ClusterClassificationDriver.run(conf, input, output, new Path(output, PathDirectory.CLUSTERED_POINTS_DIRECTORY),

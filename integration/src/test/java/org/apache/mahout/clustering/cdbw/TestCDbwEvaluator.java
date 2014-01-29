@@ -124,7 +124,6 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
    *          double y-value of the sample mean
    * @param sd
    *          double standard deviation of the samples
-   * @throws Exception
    */
   private void generateSamples(int num, double mx, double my, double sd) {
     log.info("Generating {} samples m=[{}, {}] sd={}", num, mx, my, sd);
@@ -288,7 +287,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     CanopyDriver.run(getConfiguration(), testdata, output, measure, 3.1, 2.1, false, 0.0, true);
     // now run the KMeans job
     Path kmeansOutput = new Path(output, "kmeans");
-    KMeansDriver.run(testdata, new Path(output, "clusters-0-final"), kmeansOutput, measure, 0.001, 10, true, 0.0, true);
+    KMeansDriver.run(testdata, new Path(output, "clusters-0-final"), kmeansOutput, 0.001, 10, true, 0.0, true);
     int numIterations = 10;
     Path clustersIn = new Path(kmeansOutput, "clusters-10-final");
     RepresentativePointsDriver.run(conf, clustersIn, new Path(kmeansOutput, "clusteredPoints"), kmeansOutput, measure,
@@ -310,7 +309,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     CanopyDriver.run(getConfiguration(), testdata, output, measure, 3.1, 2.1, false, 0.0, true);
     Path fuzzyKMeansOutput = new Path(output, "fuzzyk");
     // now run the KMeans job
-    FuzzyKMeansDriver.run(testdata, new Path(output, "clusters-0-final"), fuzzyKMeansOutput, measure, 0.001, 10, 2,
+    FuzzyKMeansDriver.run(testdata, new Path(output, "clusters-0-final"), fuzzyKMeansOutput, 0.001, 10, 2,
         true, true, 0, true);
     int numIterations = 10;
     Path clustersIn = new Path(fuzzyKMeansOutput, "clusters-4");

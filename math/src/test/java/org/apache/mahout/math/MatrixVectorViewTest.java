@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math;
 
+import org.apache.mahout.math.function.Functions;
 import org.junit.Test;
 
 public class MatrixVectorViewTest extends MahoutTestCase {
@@ -33,5 +34,25 @@ public class MatrixVectorViewTest extends MahoutTestCase {
 
     assertEquals(matrix.numRows(), outerProduct.numRows());
     assertEquals(matrix.numRows(), outerProduct.numCols());
+  }
+
+  /**
+   * Test for out of range column or row access.
+   */
+  @Test
+  public void testIndexRange() {
+    Matrix m = new DenseMatrix(20, 30).assign(Functions.random());
+    try {
+      m.viewColumn(30);
+      fail("Should have thrown exception");
+    } catch (IllegalArgumentException e) {
+      assertTrue(e.getMessage().startsWith("Index 30 is outside allowable"));
+    }
+    try {
+      m.viewRow(20);
+      fail("Should have thrown exception");
+    } catch (IllegalArgumentException e) {
+      assertTrue(e.getMessage().startsWith("Index 20 is outside allowable"));
+    }
   }
 }

@@ -110,7 +110,6 @@ public class FuzzyKMeansDriver extends AbstractJob {
         input,
         clusters,
         output,
-        measure,
         convergenceDelta,
         maxIterations,
         fuzziness,
@@ -124,32 +123,31 @@ public class FuzzyKMeansDriver extends AbstractJob {
   /**
    * Iterate over the input vectors to produce clusters and, if requested, use the
    * results of the final iteration to cluster the input vectors.
-   * 
+   *
    * @param input
    *          the directory pathname for input points
    * @param clustersIn
    *          the directory pathname for initial & computed clusters
    * @param output
-   *          the directory pathname for output points
+ *          the directory pathname for output points
    * @param convergenceDelta
-   *          the convergence delta value
+*          the convergence delta value
    * @param maxIterations
-   *          the maximum number of iterations
+*          the maximum number of iterations
    * @param m
-   *          the fuzzification factor, see
-   *          http://en.wikipedia.org/wiki/Data_clustering#Fuzzy_c-means_clustering
-   * @param runClustering 
-   *          true if points are to be clustered after iterations complete
+*          the fuzzification factor, see
+*          http://en.wikipedia.org/wiki/Data_clustering#Fuzzy_c-means_clustering
+   * @param runClustering
+*          true if points are to be clustered after iterations complete
    * @param emitMostLikely
-   *          a boolean if true emit only most likely cluster for each point
-   * @param threshold 
-   *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
+*          a boolean if true emit only most likely cluster for each point
+   * @param threshold
+*          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
    * @param runSequential if true run in sequential execution mode
    */
   public static void run(Path input,
                          Path clustersIn,
                          Path output,
-                         DistanceMeasure measure,
                          double convergenceDelta,
                          int maxIterations,
                          float m,
@@ -162,7 +160,6 @@ public class FuzzyKMeansDriver extends AbstractJob {
                                      input,
                                      clustersIn,
                                      output,
-                                     measure,
                                      convergenceDelta,
                                      maxIterations,
                                      m,
@@ -172,7 +169,6 @@ public class FuzzyKMeansDriver extends AbstractJob {
       clusterData(conf, input,
                   clustersOut,
                   output,
-                  measure,
                   convergenceDelta,
                   m,
                   emitMostLikely,
@@ -189,27 +185,26 @@ public class FuzzyKMeansDriver extends AbstractJob {
    * @param clustersIn
    *          the directory pathname for initial & computed clusters
    * @param output
-   *          the directory pathname for output points
+ *          the directory pathname for output points
    * @param convergenceDelta
-   *          the convergence delta value
+*          the convergence delta value
    * @param maxIterations
-   *          the maximum number of iterations
+*          the maximum number of iterations
    * @param m
-   *          the fuzzification factor, see
-   *          http://en.wikipedia.org/wiki/Data_clustering#Fuzzy_c-means_clustering
-   * @param runClustering 
-   *          true if points are to be clustered after iterations complete
+*          the fuzzification factor, see
+*          http://en.wikipedia.org/wiki/Data_clustering#Fuzzy_c-means_clustering
+   * @param runClustering
+*          true if points are to be clustered after iterations complete
    * @param emitMostLikely
-   *          a boolean if true emit only most likely cluster for each point
-   * @param threshold 
-   *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
+*          a boolean if true emit only most likely cluster for each point
+   * @param threshold
+*          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
    * @param runSequential if true run in sequential execution mode
    */
   public static void run(Configuration conf,
                          Path input,
                          Path clustersIn,
                          Path output,
-                         DistanceMeasure measure,
                          double convergenceDelta,
                          int maxIterations,
                          float m,
@@ -219,14 +214,13 @@ public class FuzzyKMeansDriver extends AbstractJob {
                          boolean runSequential)
     throws IOException, ClassNotFoundException, InterruptedException {
     Path clustersOut =
-        buildClusters(conf, input, clustersIn, output, measure, convergenceDelta, maxIterations, m, runSequential);
+        buildClusters(conf, input, clustersIn, output, convergenceDelta, maxIterations, m, runSequential);
     if (runClustering) {
       log.info("Clustering");
       clusterData(conf, 
                   input,
                   clustersOut,
                   output,
-                  measure,
                   convergenceDelta,
                   m,
                   emitMostLikely,
@@ -237,14 +231,13 @@ public class FuzzyKMeansDriver extends AbstractJob {
 
   /**
    * Iterate over the input vectors to produce cluster directories for each iteration
+   *
    * @param input
    *          the directory pathname for input points
    * @param clustersIn
    *          the file pathname for initial cluster centers
    * @param output
    *          the directory pathname for output points
-   * @param measure
-   *          the classname of the DistanceMeasure
    * @param convergenceDelta
    *          the convergence delta value
    * @param maxIterations
@@ -253,14 +246,13 @@ public class FuzzyKMeansDriver extends AbstractJob {
    *          the fuzzification factor, see
    *          http://en.wikipedia.org/wiki/Data_clustering#Fuzzy_c-means_clustering
    * @param runSequential if true run in sequential execution mode
-   * 
+   *
    * @return the Path of the final clusters directory
    */
   public static Path buildClusters(Configuration conf,
                                    Path input,
                                    Path clustersIn,
                                    Path output,
-                                   DistanceMeasure measure,
                                    double convergenceDelta,
                                    int maxIterations,
                                    float m,
@@ -293,28 +285,25 @@ public class FuzzyKMeansDriver extends AbstractJob {
 
   /**
    * Run the job using supplied arguments
-   * 
+   *
    * @param input
    *          the directory pathname for input points
    * @param clustersIn
    *          the directory pathname for input clusters
    * @param output
-   *          the directory pathname for output points
-   * @param measure
-   *          the classname of the DistanceMeasure
+ *          the directory pathname for output points
    * @param convergenceDelta
-   *          the convergence delta value
+*          the convergence delta value
    * @param emitMostLikely
-   *          a boolean if true emit only most likely cluster for each point
+*          a boolean if true emit only most likely cluster for each point
    * @param threshold
-   *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
+*          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
    * @param runSequential if true run in sequential execution mode
    */
   public static void clusterData(Configuration conf,
                                  Path input,
                                  Path clustersIn,
                                  Path output,
-                                 DistanceMeasure measure,
                                  double convergenceDelta,
                                  float m,
                                  boolean emitMostLikely,

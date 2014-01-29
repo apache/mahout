@@ -36,6 +36,7 @@
       </unpackOptions>
       <scope>runtime</scope>
       <outputDirectory>/</outputDirectory>
+      <useTransitiveFiltering>true</useTransitiveFiltering>
       <excludes>
         <exclude>org.apache.hadoop:hadoop-core</exclude>
       </excludes>
