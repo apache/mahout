@@ -155,7 +155,7 @@ public abstract class AbstractObject${valueTypeCap}Map<T> extends AbstractSet {
   public int hashCode() {
     final int[] buf = new int[size()];
     forEachPair(
-      new Object${valueTypeCap}Procedure() {
+      new Object${valueTypeCap}Procedure<T>() {
         int i = 0;
 
         @Override
