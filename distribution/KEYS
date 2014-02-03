@@ -826,7 +826,8 @@ vrLwOCHjd2apZDC8b5cTkPeI3ZPuyml1uzBzIplj6PNFfEEo8H/H2pe+zdnqn0Gc
 aQNM1OGlRMbmORowHGkymnSLoj3UnifvlPMEDSdK69xSHYrB4JwPrzl1Q2ebXriF
 P2Zv+KoST7zypBalLlnh
 =Bwm8
------END PGP PUBLIC KEY BLOCK-----pub   4096R/D3541808 2014-01-09
+-----END PGP PUBLIC KEY BLOCK-----
+pub   4096R/D3541808 2014-01-09
 uid                  Suneel Marthi (CODE SIGNING KEY) <smarthi@apache.org>
 sig 3        D3541808 2014-01-09  Suneel Marthi (CODE SIGNING KEY) <smarthi@apache.org>
 sub   4096R/AF46E2DE 2014-01-09
