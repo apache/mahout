@@ -17,6 +17,10 @@
 
 package org.apache.mahout.math;
 
+import java.util.Iterator;
+
+import org.junit.Test;
+
 public final class TestSparseMatrix extends MatrixTest {
 
   @Override
@@ -28,5 +32,40 @@ public final class TestSparseMatrix extends MatrixTest {
       }
     }
     return matrix;
+  }
+
+  /** Test copy method of sparse matrices which have empty non-initialized rows */
+  @Test
+  public void testSparseCopy() {
+    SparseMatrix matrix = createSparseMatrixWithEmptyRow();
+    Matrix copy = matrix.clone();
+
+    assertSame("wrong class", copy.getClass(), matrix.getClass());
+
+    SparseMatrix castedCopy = (SparseMatrix) copy;
+        
+    Iterator<MatrixSlice> originalSlices = matrix.iterator();
+    Iterator<MatrixSlice> copySlices = castedCopy.iterator();
+    
+    while (originalSlices.hasNext() && copySlices.hasNext()) {
+      MatrixSlice originalSlice = originalSlices.next();
+      MatrixSlice copySlice = copySlices.next();
+      assertEquals("Wrong row indices.", originalSlice.index(), copySlice.index());
+      assertEquals("Slices are not equal.", originalSlice, copySlice);
+    }
+    
+    assertSame("Number of rows of original and copy are not equal.", originalSlices.hasNext(), copySlices.hasNext());
+  }
+  
+  /**
+   * @return Sparse matrix whose last row is empty. Since no entry is set in the last row, there is no vector instance
+   * initialized in the underlying map.
+   */
+  private SparseMatrix createSparseMatrixWithEmptyRow() {
+    SparseMatrix result = new SparseMatrix(3, 3);
+    result.setQuick(0, 0, 1);
+    result.setQuick(1, 1 ,1);
+    result.setQuick(1, 2, 1);
+    return result;
   }
 }

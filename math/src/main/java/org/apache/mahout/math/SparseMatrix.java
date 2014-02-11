@@ -55,10 +55,9 @@ public class SparseMatrix extends AbstractMatrix {
 
   @Override
   public Matrix clone() {
-    SparseMatrix clone = (SparseMatrix) super.clone();
-    clone.rowVectors = rowVectors.clone();
-    for (int i = 0; i < numRows(); i++) {
-      clone.rowVectors.put(i, rowVectors.get(i).clone());
+    SparseMatrix clone = new SparseMatrix(numRows(), numCols());
+    for (MatrixSlice slice : this) {
+      clone.rowVectors.put(slice.index(), slice.clone());
     }
     return clone;
   }
