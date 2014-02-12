@@ -198,7 +198,13 @@ public class DecisionForest implements Writable {
     }
   }
 
-  private static DecisionForest read(DataInput dataInput) throws IOException {
+  /**
+   * Read the forest from inputStream
+   * @param dataInput - input forest
+   * @return {@link org.apache.mahout.classifier.df.DecisionForest}
+   * @throws IOException
+   */
+  public static DecisionForest read(DataInput dataInput) throws IOException {
     DecisionForest forest = new DecisionForest();
     forest.readFields(dataInput);
     return forest;
