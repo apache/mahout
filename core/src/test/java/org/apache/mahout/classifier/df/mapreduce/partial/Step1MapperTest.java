@@ -100,7 +100,6 @@ public final class Step1MapperTest extends MahoutTestCase {
   @SuppressWarnings({ "rawtypes", "unchecked" })
   @Test
   public void testMapper() throws Exception {
-    Long seed = null;
     Random rng = RandomUtils.getRandom();
 
     // prepare the data
@@ -124,14 +123,14 @@ public final class Step1MapperTest extends MahoutTestCase {
       // expected number of trees that this mapper will build
       int mapNbTrees = Step1Mapper.nbTrees(NUM_MAPPERS, NUM_TREES, partition);
 
-      Mapper.Context context = EasyMock.createMock(Mapper.Context.class);
+      Mapper.Context context = EasyMock.createNiceMock(Mapper.Context.class);
       Capture<TreeID> capturedKeys = new TreeIDCapture();
       context.write(EasyMock.capture(capturedKeys), EasyMock.anyObject());
       EasyMock.expectLastCall().anyTimes();
 
       EasyMock.replay(context);
 
-      MockStep1Mapper mapper = new MockStep1Mapper(treeBuilder, dataset, seed,
+      MockStep1Mapper mapper = new MockStep1Mapper(treeBuilder, dataset, null,
           partition, NUM_MAPPERS, NUM_TREES);
 
       // make sure the mapper computed firstTreeId correctly
