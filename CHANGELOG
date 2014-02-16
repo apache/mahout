@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 1.0 - unreleased
 
+  MAHOUT-1417: Random decision forest implementation fails in Hadoop 2 (srowen)
+
   MAHOUT-1416: Make access of DecisionForest.read(dataInput) less restricted (Manoj Awasthi via smarthi)
   
   MAHOUT-1415: Clone method on sparse matrices fails if there is an empty row which has not been set explicitly (till.rohrmann via ssc)

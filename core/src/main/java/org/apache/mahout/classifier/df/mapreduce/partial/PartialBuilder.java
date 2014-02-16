@@ -35,14 +35,19 @@ import org.apache.mahout.classifier.df.mapreduce.MapredOutput;
 import org.apache.mahout.classifier.df.node.Node;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Builds a random forest using partial data. Each mapper uses only the data given by its InputSplit
  */
 public class PartialBuilder extends Builder {
+
+  private static final Logger log = LoggerFactory.getLogger(PartialBuilder.class);
 
   public PartialBuilder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath, Long seed) {
     this(treeBuilder, dataPath, datasetPath, seed, new Configuration());
@@ -73,6 +78,18 @@ public class PartialBuilder extends Builder {
     
     job.setInputFormatClass(TextInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
+
+    // For this implementation to work, mapred.map.tasks needs to be set to the actual
+    // number of mappers Hadoop will use:
+    TextInputFormat inputFormat = new TextInputFormat();
+    List<?> splits = inputFormat.getSplits(job);
+    if (splits == null || splits.isEmpty()) {
+      log.warn("Unable to compute number of splits?");
+    } else {
+      int numSplits = splits.size();
+      log.info("Setting mapred.map.tasks = {}", numSplits);
+      conf.setInt("mapred.map.tasks", numSplits);
+    }
   }
   
   @Override

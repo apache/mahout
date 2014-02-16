@@ -116,8 +116,8 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
   }
   
   /**
-   * Compute the number of trees for a given partition. The first partition (0) may be longer than the rest of
-   * partition because of the remainder.
+   * Compute the number of trees for a given partition. The first partitions may be longer
+   * than the rest because of the remainder.
    * 
    * @param numMaps
    *          total number of maps (partitions)
@@ -127,12 +127,9 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
    *          partition to compute the number of trees for
    */
   public static int nbTrees(int numMaps, int numTrees, int partition) {
-    int nbTrees = numTrees / numMaps;
-    if (partition == 0) {
-      nbTrees += numTrees - nbTrees * numMaps;
-    }
-    
-    return nbTrees;
+    int treesPerMapper = numTrees / numMaps;
+    int remainder = numTrees - numMaps * treesPerMapper;
+    return treesPerMapper + (partition < remainder ? 1 : 0);
   }
   
   @Override
@@ -162,6 +159,8 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
         MapredOutput emOut = new MapredOutput(tree);
         context.write(key, emOut);
       }
+
+      context.progress();
     }
   }
   
