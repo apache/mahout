@@ -184,6 +184,32 @@
 
   <profiles>
     <profile>
+      <id>hadoop2</id>
+      <activation>
+        <property>
+          <name>hadoop.profile</name>
+          <value>200</value>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-common</artifactId>
+          <version>${hadoop.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-mapreduce-client-common</artifactId>
+          <version>${hadoop.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-mapreduce-client-core</artifactId>
+          <version>${hadoop.version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
       <id>release.prepare</id>
       <properties>
         <mahout.skip.example>true</mahout.skip.example>
