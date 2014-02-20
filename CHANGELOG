@@ -8,8 +8,6 @@ Release 1.0 - unreleased
   
   MAHOUT-1415: Clone method on sparse matrices fails if there is an empty row which has not been set explicitly (till.rohrmann via ssc)
 
-  MAHOUT-1329: Mahout for Hadoop 2 (Sergey Svinarchuk via smarthi)
-
 Release 0.9 - 2014-02-01
 
   MAHOUT-1411: Random test failures from TDigestTest (smarthi)
