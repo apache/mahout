@@ -226,6 +226,9 @@ public class BuildForest extends Configured implements Tool {
     long time = System.currentTimeMillis();
     
     DecisionForest forest = forestBuilder.build(nbTrees);
+    if (forest == null) {
+      return;
+    }
     
     time = System.currentTimeMillis() - time;
     log.info("Build Time: {}", DFUtils.elapsedTime(time));

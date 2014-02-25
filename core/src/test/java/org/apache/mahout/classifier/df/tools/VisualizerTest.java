@@ -86,7 +86,7 @@ public final class VisualizerTest extends MahoutTestCase {
     Node tree = builder.build(rng, data);
     
     assertEquals("\noutlook = rainy\n|   windy = FALSE : yes\n|   windy = TRUE : no\n"
-            + "outlook = sunny\n|   humidity < 85 : yes\n|   humidity >= 85 : no\n"
+            + "outlook = sunny\n|   humidity < 77.5 : yes\n|   humidity >= 77.5 : no\n"
             + "outlook = overcast : yes", TreeVisualizer.toString(tree, data.getDataset(), ATTR_NAMES));
   }
   
@@ -101,7 +101,7 @@ public final class VisualizerTest extends MahoutTestCase {
         ATTR_NAMES);
     Assert.assertArrayEquals(new String[] {
         "outlook = rainy -> windy = TRUE -> no", "outlook = overcast -> yes",
-        "outlook = sunny -> (humidity = 90) >= 85 -> no"}, prediction);
+        "outlook = sunny -> (humidity = 90) >= 77.5 -> no"}, prediction);
   }
   
   @Test
@@ -142,7 +142,7 @@ public final class VisualizerTest extends MahoutTestCase {
     builder.setComplemented(false);
     Node tree = builder.build(rng, lessData);
 
-    assertEquals("\noutlook = sunny\n|   humidity < 85 : yes\n|   humidity >= 85 : no\noutlook = overcast : yes", TreeVisualizer.toString(tree, data.getDataset(), ATTR_NAMES));
+    assertEquals("\noutlook = sunny\n|   humidity < 77.5 : yes\n|   humidity >= 77.5 : no\noutlook = overcast : yes", TreeVisualizer.toString(tree, data.getDataset(), ATTR_NAMES));
   }
   
   @Test
