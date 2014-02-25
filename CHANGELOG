@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 1.0 - unreleased
 
+  MAHOUT-1329: Mahout for hadoop 2  (gcapan, Sergey Svinarchuk)
+
   MAHOUT-1417: Random decision forest implementation fails in Hadoop 2 (srowen)
 
   MAHOUT-1416: Make access of DecisionForest.read(dataInput) less restricted (Manoj Awasthi via smarthi)
