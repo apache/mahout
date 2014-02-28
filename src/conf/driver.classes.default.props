@@ -17,6 +17,7 @@ org.apache.mahout.text.SequenceFilesFromLuceneStorageDriver = lucene2seq : Gener
 org.apache.mahout.utils.ConcatenateVectorsJob = concatmatrices : Concatenates 2 matrices of same cardinality into a single matrix
 org.apache.mahout.clustering.streaming.tools.ResplitSequenceFiles = resplit : Splits a set of SequenceFiles into a number of equal splits
 org.apache.mahout.clustering.streaming.tools.ClusterQualitySummarizer = qualcluster : Runs clustering experiments and summarizes results in a CSV
+org.apache.mahout.classifier.df.tools.Describe = describe : Describe the fields and target variable in a data set
 
 #Math
 org.apache.mahout.math.hadoop.TransposeJob = transpose : Take the transpose of a matrix
@@ -26,6 +27,7 @@ org.apache.mahout.math.hadoop.decomposer.EigenVerificationJob = cleansvd : Clean
 org.apache.mahout.math.hadoop.similarity.cooccurrence.RowSimilarityJob = rowsimilarity : Compute the pairwise similarities of the rows of a matrix
 org.apache.mahout.math.hadoop.similarity.VectorDistanceSimilarityJob =  vecdist : Compute the distances between a set of Vectors (or Cluster or Canopy, they must fit in memory) and a list of Vectors
 org.apache.mahout.math.hadoop.stochasticsvd.SSVDCli = ssvd : Stochastic SVD
+
 #Clustering
 org.apache.mahout.clustering.kmeans.KMeansDriver = kmeans : K-means clustering
 org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver = fkmeans : Fuzzy K-means clustering
@@ -40,6 +42,9 @@ org.apache.mahout.clustering.streaming.mapreduce.StreamingKMeansDriver = streami
 #new bayes
 org.apache.mahout.classifier.naivebayes.training.TrainNaiveBayesJob = trainnb : Train the Vector-based Bayes classifier
 org.apache.mahout.classifier.naivebayes.test.TestNaiveBayesDriver = testnb : Test the Vector-based Bayes classifier
+org.apache.mahout.classifier.df.mapreduce.BuildForest = buildforest : Build the random forest classifier
+org.apache.mahout.classifier.df.mapreduce.TestForest = testforest : Test the random forest classifier
+
 #SGD
 org.apache.mahout.classifier.sgd.TrainLogistic = trainlogistic : Train a logistic regression using stochastic gradient descent
 org.apache.mahout.classifier.sgd.RunLogistic = runlogistic : Run a logistic regression model against CSV data
