@@ -44,7 +44,7 @@ public class SolveImplicitFeedbackMapper
     Preconditions.checkArgument(numFeatures > 0, "numFeatures must be greater then 0!");
 
     return new ImplicitFeedbackAlternatingLeastSquaresSolver(numFeatures, lambda, alpha,
-        ALS.readMatrixByRowsFromDistributedCache(numEntities, conf));
+        ALS.readMatrixByRowsFromDistributedCache(numEntities, conf), 1);
   }
 
   @Override

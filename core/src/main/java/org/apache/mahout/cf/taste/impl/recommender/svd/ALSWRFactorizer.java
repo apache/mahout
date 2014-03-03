@@ -181,7 +181,8 @@ public class ALSWRFactorizer extends AbstractFactorizer {
       try {
 
         final ImplicitFeedbackAlternatingLeastSquaresSolver implicitFeedbackSolver = usesImplicitFeedback
-            ? new ImplicitFeedbackAlternatingLeastSquaresSolver(numFeatures, lambda, alpha, itemY) : null;
+            ? new ImplicitFeedbackAlternatingLeastSquaresSolver(numFeatures, lambda, alpha, itemY, numTrainingThreads)
+            : null;
 
         while (userIDsIterator.hasNext()) {
           final long userID = userIDsIterator.nextLong();
@@ -219,7 +220,8 @@ public class ALSWRFactorizer extends AbstractFactorizer {
       try {
 
         final ImplicitFeedbackAlternatingLeastSquaresSolver implicitFeedbackSolver = usesImplicitFeedback
-            ? new ImplicitFeedbackAlternatingLeastSquaresSolver(numFeatures, lambda, alpha, userY) : null;
+            ? new ImplicitFeedbackAlternatingLeastSquaresSolver(numFeatures, lambda, alpha, userY, numTrainingThreads)
+            : null;
 
         while (itemIDsIterator.hasNext()) {
           final long itemID = itemIDsIterator.nextLong();

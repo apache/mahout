@@ -17,7 +17,10 @@
 
 package org.apache.mahout.math.als;
 
-import com.google.common.base.Preconditions;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
@@ -27,6 +30,10 @@ import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.map.OpenIntObjectHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
 
 /** see <a href="http://research.yahoo.com/pub/2433">Collaborative Filtering for Implicit Feedback Datasets</a> */
 public class ImplicitFeedbackAlternatingLeastSquaresSolver {
@@ -34,16 +41,20 @@ public class ImplicitFeedbackAlternatingLeastSquaresSolver {
   private final int numFeatures;
   private final double alpha;
   private final double lambda;
+  private final int numTrainingThreads;
 
   private final OpenIntObjectHashMap<Vector> Y;
   private final Matrix YtransposeY;
+  
+  private static final Logger log = LoggerFactory.getLogger(ImplicitFeedbackAlternatingLeastSquaresSolver.class);
 
   public ImplicitFeedbackAlternatingLeastSquaresSolver(int numFeatures, double lambda, double alpha,
-      OpenIntObjectHashMap<Vector> Y) {
+      OpenIntObjectHashMap<Vector> Y, int numTrainingThreads) {
     this.numFeatures = numFeatures;
     this.lambda = lambda;
     this.alpha = alpha;
     this.Y = Y;
+    this.numTrainingThreads = numTrainingThreads;
     YtransposeY = getYtransposeY(Y);
   }
 
@@ -60,28 +71,48 @@ public class ImplicitFeedbackAlternatingLeastSquaresSolver {
   }
 
   /* Y' Y */
-  private Matrix getYtransposeY(OpenIntObjectHashMap<Vector> Y) {
-
-    IntArrayList indexes = Y.keys();
+  private Matrix getYtransposeY(final OpenIntObjectHashMap<Vector> Y) {
+  
+    ExecutorService queue = Executors.newFixedThreadPool(numTrainingThreads);
+    log.info("starting Y transpose Y");
+    long startTime = System.nanoTime();
+    final IntArrayList indexes = Y.keys();
     indexes.quickSort();
-    int numIndexes = indexes.size();
-
-    double[][] YtY = new double[numFeatures][numFeatures];
-
+    final int numIndexes = indexes.size();
+  
+    final double[][] YtY = new double[numFeatures][numFeatures];
+  
     // Compute Y'Y by dot products between the 'columns' of Y
     for (int i = 0; i < numFeatures; i++) {
       for (int j = i; j < numFeatures; j++) {
-        double dot = 0;
-        for (int k = 0; k < numIndexes; k++) {
-          Vector row = Y.get(indexes.getQuick(k));
-          dot += row.getQuick(i) * row.getQuick(j);
-        }
-        YtY[i][j] = dot;
-        if (i != j) {
-          YtY[j][i] = dot;
-        }
+  
+        final int ii = i;
+        final int jj = j;
+        queue.execute(new Runnable() {
+          @Override
+          public void run() {
+            double dot = 0;
+            for (int k = 0; k < numIndexes; k++) {
+              Vector row = Y.get(indexes.getQuick(k));
+              dot += row.getQuick(ii) * row.getQuick(jj);
+            }
+            YtY[ii][jj] = dot;
+            if (ii != jj) {
+              YtY[jj][ii] = dot;
+            }
+          }
+        });
+  
       }
     }
+    queue.shutdown();
+    try {
+      queue.awaitTermination(1, TimeUnit.DAYS);
+    } catch (InterruptedException e) {
+      log.error("Error during YtY queue shutdown", e);
+      throw new RuntimeException("Error during YtY queue shutdown");
+    }
+    log.info("done yty in " + (System.nanoTime() - startTime) / 1000000.0 + " ms" );
     return new DenseMatrix(YtY, true);
   }
 
