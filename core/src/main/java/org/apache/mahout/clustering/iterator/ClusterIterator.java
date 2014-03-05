@@ -42,7 +42,7 @@ import com.google.common.io.Closeables;
 /**
  * This is a clustering iterator which works with a set of Vector data and a prior ClusterClassifier which has been
  * initialized with a set of models. Its implementation is algorithm-neutral and works for any iterative clustering
- * algorithm (currently k-means, fuzzy-k-means and Dirichlet) that processes all the input vectors in each iteration.
+ * algorithm (currently k-means and fuzzy-k-means) that processes all the input vectors in each iteration.
  * The cluster classifier is configured with a ClusteringPolicy to select the desired clustering algorithm.
  */
 public final class ClusterIterator {
