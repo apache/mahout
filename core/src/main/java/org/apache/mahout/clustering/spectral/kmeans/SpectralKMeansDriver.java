@@ -30,7 +30,6 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.classify.WeightedVectorWritable;
-import org.apache.mahout.clustering.kmeans.EigenSeedGenerator;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.spectral.AffinityMatrixInputJob;
 import org.apache.mahout.clustering.spectral.MatrixDiagonalizeJob;

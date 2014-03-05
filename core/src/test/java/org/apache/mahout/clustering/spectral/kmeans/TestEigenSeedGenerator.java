@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.clustering.kmeans;
+package org.apache.mahout.clustering.spectral.kmeans;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -28,6 +28,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.iterator.ClusterWritable;
+import org.apache.mahout.clustering.spectral.kmeans.EigenSeedGenerator;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
