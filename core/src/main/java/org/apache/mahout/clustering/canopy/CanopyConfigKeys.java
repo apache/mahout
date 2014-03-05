@@ -17,6 +17,10 @@
 
 package org.apache.mahout.clustering.canopy;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.mahout.common.ClassUtils;
+import org.apache.mahout.common.distance.DistanceMeasure;
+
 public final class CanopyConfigKeys {
 
   private CanopyConfigKeys() {}
@@ -33,5 +37,33 @@ public final class CanopyConfigKeys {
   public static final String DISTANCE_MEASURE_KEY = "org.apache.mahout.clustering.canopy.measure";
 
   public static final String CF_KEY = "org.apache.mahout.clustering.canopy.canopyFilter";
+
+  /**
+   * Create a {@link CanopyClusterer} from the Hadoop configuration.
+   *
+   * @param configuration Hadoop configuration
+   *
+   * @return CanopyClusterer
+   */
+  public static CanopyClusterer configureCanopyClusterer(Configuration configuration) {
+    double t1 = Double.parseDouble(configuration.get(T1_KEY));
+    double t2 = Double.parseDouble(configuration.get(T2_KEY));
+
+    DistanceMeasure measure = ClassUtils.instantiateAs(configuration.get(DISTANCE_MEASURE_KEY), DistanceMeasure.class);
+    measure.configure(configuration);
+
+    CanopyClusterer canopyClusterer = new CanopyClusterer(measure, t1, t2);
+
+    String d = configuration.get(T3_KEY);
+    if (d != null) {
+      canopyClusterer.setT3(Double.parseDouble(d));
+    }
+
+    d = configuration.get(T4_KEY);
+    if (d != null) {
+      canopyClusterer.setT4(Double.parseDouble(d));
+    }
+    return canopyClusterer;
+  }
 
 }

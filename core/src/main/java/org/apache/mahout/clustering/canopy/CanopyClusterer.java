@@ -21,9 +21,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.clustering.AbstractCluster;
-import org.apache.mahout.common.ClassUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
@@ -76,59 +74,12 @@ public class CanopyClusterer {
     return t4;
   }
 
-  public CanopyClusterer(Configuration config) {
-    this.configure(config);
-  }
-
-  /**
-   * Configure the Canopy and its distance measure
-   * 
-   * @param configuration
-   *            the Configuration
-   */
-  public void configure(Configuration configuration) {
-    measure = ClassUtils.instantiateAs(configuration.get(CanopyConfigKeys.DISTANCE_MEASURE_KEY),
-                                       DistanceMeasure.class);
-    measure.configure(configuration);
-    t1 = Double.parseDouble(configuration.get(CanopyConfigKeys.T1_KEY));
-    t2 = Double.parseDouble(configuration.get(CanopyConfigKeys.T2_KEY));
-    t3 = t1;
-    String d = configuration.get(CanopyConfigKeys.T3_KEY);
-    if (d != null) {
-      t3 = Double.parseDouble(d);
-    }
-    t4 = t2;
-    d = configuration.get(CanopyConfigKeys.T4_KEY);
-    if (d != null) {
-      t4 = Double.parseDouble(d);
-    }
-    nextCanopyId = 0;
-  }
-
   /**
    * Used by CanopyReducer to set t1=t3 and t2=t4 configuration values
    */
   public void useT3T4() {
     t1 = t3;
     t2 = t4;
-  }
-
-  /**
-   * Configure the Canopy for unit tests
-   * 
-   * @param aMeasure
-   *            the DistanceMeasure
-   * @param aT1
-   *            the T1 distance threshold
-   * @param aT2
-   *            the T2 distance threshold
-   * */
-  public void config(DistanceMeasure aMeasure, double aT1, double aT2) {
-    measure = aMeasure;
-    t1 = aT1;
-    t2 = aT2;
-    t3 = t1;
-    t4 = t2;
   }
 
   /**
@@ -258,4 +209,11 @@ public class CanopyClusterer {
     }
   }
 
+  public void setT3(double t3) {
+    this.t3 = t3;
+  }
+
+  public void setT4(double t4) {
+    this.t4 = t4;
+  }
 }

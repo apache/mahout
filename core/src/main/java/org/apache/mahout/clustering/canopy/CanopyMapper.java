@@ -45,7 +45,7 @@ class CanopyMapper extends
   protected void setup(Context context) throws IOException,
       InterruptedException {
     super.setup(context);
-    canopyClusterer = new CanopyClusterer(context.getConfiguration());
+    canopyClusterer = CanopyConfigKeys.configureCanopyClusterer(context.getConfiguration());
     clusterFilter = Integer.parseInt(context.getConfiguration().get(
         CanopyConfigKeys.CF_KEY));
   }
