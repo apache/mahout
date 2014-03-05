@@ -28,6 +28,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.recommender.AbstractRecommender;
+import org.apache.mahout.cf.taste.impl.recommender.AllUnknownItemsCandidateItemsStrategy;
 import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
@@ -51,7 +52,7 @@ public final class SVDRecommender extends AbstractRecommender {
   private static final Logger log = LoggerFactory.getLogger(SVDRecommender.class);
 
   public SVDRecommender(DataModel dataModel, Factorizer factorizer) throws TasteException {
-    this(dataModel, factorizer, getDefaultCandidateItemsStrategy(), getDefaultPersistenceStrategy());
+    this(dataModel, factorizer, new AllUnknownItemsCandidateItemsStrategy(), getDefaultPersistenceStrategy());
   }
 
   public SVDRecommender(DataModel dataModel, Factorizer factorizer, CandidateItemsStrategy candidateItemsStrategy)
