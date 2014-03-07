@@ -42,7 +42,7 @@ private[math] object SSVD {
         "k cannot be greater than smaller of m,n")
     val pfxed = min(p, min(m, n) - k)
 
-    // actual decomposition rank
+    // Actual decomposition rank
     val r = k + pfxed
 
     val rnd = RandomUtils.getRandom
@@ -52,10 +52,10 @@ private[math] object SSVD {
     var yty = y.t %*% y
     val at = a.t
     var ch = chol(yty)
+    assert(ch.isPositiveDefinite, "Rank-deficiency detected during s-SVD")
     var bt = ch.solveRight(at %*% y)
 
-
-    // power iterations
+    // Power iterations
     for (i <- 0 until q) {
       y = a %*% bt
       yty = y.t %*% y

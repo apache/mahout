@@ -47,6 +47,13 @@ class RLikeMatrixOps(_m: Matrix) extends MatrixOps(_m) {
 
   def *(that: Double) = cloned *= that
 
+  def /(that:Matrix) = cloned /= that
+
+  def /(that:Double) = cloned /= that
+
+  /** 1.0 /: A is eqivalent to R's 1.0/A */
+  def /:(that:Double) = that /=: cloned
+
   /**
    * in-place Hadamard product. We probably don't want to use assign
    * to optimize for sparse operations, in case of Hadamard product
@@ -58,8 +65,25 @@ class RLikeMatrixOps(_m: Matrix) extends MatrixOps(_m) {
     m
   }
 
+  /** Elementwise deletion */
+  def /=(that: Matrix) = {
+    m.zip(that).foreach(t => t._1.vector() /= t._2.vector)
+    m
+  }
+
   def *=(that: Double) = {
     m.foreach(_.vector() *= that)
+    m
+  }
+
+  def /=(that: Double) = {
+    m.foreach(_.vector() /= that)
+    m
+  }
+
+  /** 1.0 /=: A is equivalent to A = 1.0/A in R */
+  def /=:(that:Double) = {
+    m.foreach(that /=: _.vector())
     m
   }
 }

@@ -43,6 +43,10 @@ class MatrixOps(val m: Matrix) {
 
   def -=(that: Double) = +=(-that)
 
+  def -=:(that: Double) = m.assign(new DoubleFunction {
+    def apply(x: Double): Double = that - x
+  })
+
   def +(that: Matrix) = cloned += that
 
   def -(that: Matrix) = cloned -= that
@@ -52,6 +56,8 @@ class MatrixOps(val m: Matrix) {
   def +(that: Double) = cloned += that
 
   def -(that: Double) = cloned -= that
+
+  def -:(that:Double) = that -=: cloned
 
 
   def norm = sqrt(m.aggregate(Functions.PLUS, Functions.SQUARE))

@@ -1,11 +1,3 @@
-package org.apache.mahout.math.scalabindings
-
-import org.scalatest.FunSuite
-import org.apache.mahout.math.DenseSymmetricMatrix
-import scala.math._
-import RLikeOps._
-import scala._
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,6 +14,14 @@ import scala._
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.apache.mahout.math.scalabindings
+
+import org.scalatest.FunSuite
+import org.apache.mahout.math.DenseSymmetricMatrix
+import scala.math._
+import RLikeOps._
+import scala._
 
 class MathSuite extends FunSuite {
 

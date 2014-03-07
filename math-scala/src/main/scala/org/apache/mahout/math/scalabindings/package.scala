@@ -135,6 +135,10 @@ package object scalabindings {
         else
           throw new IllegalArgumentException(
             "double[][] data parameter can be the only argumentn for dense()")
+        case t:Array[Vector] =>
+          val m = new DenseMatrix(t.size,t.head.length)
+          t.view.zipWithIndex.foreach({case(v,idx) => m(idx,::) := v})
+          return m
         case _ => throw new IllegalArgumentException("unsupported type in the inline Matrix initializer")
       }
     }
@@ -181,7 +185,7 @@ package object scalabindings {
 
   def dvec(numbers: Number*) = new DenseVector(numbers.map(_.doubleValue()).toArray)
 
-  def chol(m: Matrix, typ: Boolean = false) = new CholeskyDecomposition(m, typ)
+  def chol(m: Matrix, pivoting: Boolean = false) = new CholeskyDecomposition(m, pivoting)
 
   /**
    * computes SVD

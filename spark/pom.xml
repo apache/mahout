@@ -17,7 +17,8 @@
  limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -27,11 +28,10 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-math-scala</artifactId>
-  <name>Mahout Math/Scala wrappers</name>
-  <description>High performance scientific and technical computing data structures and methods,
-    mostly based on CERN's
-    Colt Java API
+  <artifactId>mahout-spark</artifactId>
+  <name>Mahout Spark bindings</name>
+  <description>
+    Mahout Bindings for Apache Spark
   </description>
 
   <packaging>jar</packaging>
@@ -108,7 +108,6 @@
       <plugin>
         <groupId>org.scala-tools</groupId>
         <artifactId>maven-scala-plugin</artifactId>
-        <version>2.15.2</version>
         <executions>
           <execution>
             <goals>
@@ -130,12 +129,12 @@
 
       <!-- disable surefire -->
       <!--<plugin>-->
-        <!--<groupId>org.apache.maven.plugins</groupId>-->
-        <!--<artifactId>maven-surefire-plugin</artifactId>-->
-        <!--<version>2.7</version>-->
-        <!--<configuration>-->
-          <!--<skipTests>true</skipTests>-->
-        <!--</configuration>-->
+      <!--<groupId>org.apache.maven.plugins</groupId>-->
+      <!--<artifactId>maven-surefire-plugin</artifactId>-->
+      <!--<version>2.7</version>-->
+      <!--<configuration>-->
+      <!--<skipTests>true</skipTests>-->
+      <!--</configuration>-->
       <!--</plugin>-->
       <!-- enable scalatest -->
       <plugin>
@@ -160,22 +159,99 @@
     </plugins>
   </build>
 
+  <profiles>
+    <profile>
+      <id>2.0-CDH</id>
+      <properties>
+        <cdh.version>2.0.0-cdh4.3.0</cdh.version>
+      </properties>
+
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-client</artifactId>
+          <version>${cdh.version}</version>
+          <exclusions>
+            <exclusion>
+              <groupId>asm</groupId>
+              <artifactId>asm</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.mahout</groupId>
+          <artifactId>mahout-core</artifactId>
+          <version>${pom.version}</version>
+          <exclusions>
+            <exclusion>
+              <groupId>asm</groupId>
+              <artifactId>asm</artifactId>
+            </exclusion>
+            <exclusion>
+              <groupId>org.apache.hadoop</groupId>
+              <artifactId>hadoop-core</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+
+
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-common</artifactId>
+          <version>${cdh.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-mapreduce-client-core</artifactId>
+          <version>${cdh.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-mapreduce-client-common</artifactId>
+          <version>${cdh.version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
   <dependencies>
+
+    <!-- spark stuff -->
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-core_2.10</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-bagel_2.10</artifactId>
+      <version>0.9.0-incubating</version>
+    </dependency>
+
+    <dependency>
+
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-core</artifactId>
+      <version>${pom.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>asm</groupId>
+          <artifactId>asm</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-math</artifactId>
+      <artifactId>mahout-math-scala</artifactId>
+      <version>${pom.version}</version>
     </dependency>
 
 
     <!--  3rd-party -->
 
+
     <!-- scala stuff -->
-    <dependency>
-      <groupId>org.scala-lang</groupId>
-      <artifactId>scala-library</artifactId>
-      <version>2.10.3</version>
-    </dependency>
 
     <dependency>
       <groupId>org.scalatest</groupId>

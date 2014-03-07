@@ -29,7 +29,7 @@ import org.apache.mahout.math.function.Functions;
  */
 public class CholeskyDecomposition {
   private final PivotedMatrix L;
-  private boolean isPositiveDefinite;
+  private boolean isPositiveDefinite = true;
 
   public CholeskyDecomposition(Matrix a) {
     this(a, true);
