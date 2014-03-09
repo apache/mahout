@@ -10,13 +10,15 @@ Release 1.0 - unreleased
 
   MAHOUT-1419: Random decision forest is excessively slow on numeric features (srowen)
 
-  MAHOUT-1329: Mahout for hadoop 2  (gcapan, Sergey Svinarchuk)
-
   MAHOUT-1417: Random decision forest implementation fails in Hadoop 2 (srowen)
 
   MAHOUT-1416: Make access of DecisionForest.read(dataInput) less restricted (Manoj Awasthi via smarthi)
   
   MAHOUT-1415: Clone method on sparse matrices fails if there is an empty row which has not been set explicitly (till.rohrmann via ssc)
+
+  MAHOUT-1413: Rework Algorithms page (ssc)
+
+  MAHOUT-1329: Mahout for hadoop 2 (gcapan, Sergey Svinarchuk)
 
 Release 0.9 - 2014-02-01
 
