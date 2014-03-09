@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 1.0 - unreleased
 
+  MAHOUT-1438: "quickstart" tutorial for building a simple recommender (Maciej Mazur and Steve Cook via ssc)
+
   MAHOUT-1433: Make SVDRecommender look at all unknown items of a user per default (ssc)
 
   MAHOUT-1429: Parallelize YtransposeY in ImplicitFeedbackAlternatingLeastSquaresSolver (Adam Ilardi via ssc)
