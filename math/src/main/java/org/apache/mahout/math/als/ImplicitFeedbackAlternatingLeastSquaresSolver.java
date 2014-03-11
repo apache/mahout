@@ -47,7 +47,7 @@ public class ImplicitFeedbackAlternatingLeastSquaresSolver {
   private final Matrix YtransposeY;
   
   private static final Logger log = LoggerFactory.getLogger(ImplicitFeedbackAlternatingLeastSquaresSolver.class);
-
+  
   public ImplicitFeedbackAlternatingLeastSquaresSolver(int numFeatures, double lambda, double alpha,
       OpenIntObjectHashMap<Vector> Y, int numTrainingThreads) {
     this.numFeatures = numFeatures;
@@ -71,13 +71,14 @@ public class ImplicitFeedbackAlternatingLeastSquaresSolver {
   }
 
   /* Y' Y */
-  private Matrix getYtransposeY(final OpenIntObjectHashMap<Vector> Y) {
+  Matrix getYtransposeY(final OpenIntObjectHashMap<Vector> Y) {
   
     ExecutorService queue = Executors.newFixedThreadPool(numTrainingThreads);
-    log.info("starting Y transpose Y");
+    if (log.isInfoEnabled()) {
+      log.info("Starting the computation of Y'Y");
+    }
     long startTime = System.nanoTime();
     final IntArrayList indexes = Y.keys();
-    indexes.quickSort();
     final int numIndexes = indexes.size();
   
     final double[][] YtY = new double[numFeatures][numFeatures];
@@ -109,10 +110,12 @@ public class ImplicitFeedbackAlternatingLeastSquaresSolver {
     try {
       queue.awaitTermination(1, TimeUnit.DAYS);
     } catch (InterruptedException e) {
-      log.error("Error during YtY queue shutdown", e);
-      throw new RuntimeException("Error during YtY queue shutdown");
+      log.error("Error during Y'Y queue shutdown", e);
+      throw new RuntimeException("Error during Y'Y queue shutdown");
     }
-    log.info("done yty in " + (System.nanoTime() - startTime) / 1000000.0 + " ms" );
+    if (log.isInfoEnabled()) {
+      log.info("Computed Y'Y in " + (System.nanoTime() - startTime) / 1000000.0 + " ms" );
+    }
     return new DenseMatrix(YtY, true);
   }
 

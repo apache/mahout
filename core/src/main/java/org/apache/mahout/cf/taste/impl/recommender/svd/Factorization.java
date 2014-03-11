@@ -24,6 +24,7 @@ import com.google.common.base.Preconditions;
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 
 /**
  * a factorization of the rating matrix
@@ -83,6 +84,10 @@ public class Factorization {
   public Iterable<Map.Entry<Long,Integer>> getUserIDMappings() {
     return userIDMapping.entrySet();
   }
+  
+  public LongPrimitiveIterator getUserIDMappingKeys() {
+    return userIDMapping.keySetIterator();
+  }
 
   public int itemIndex(long itemID) throws NoSuchItemException {
     Integer index = itemIDMapping.get(itemID);
@@ -94,6 +99,10 @@ public class Factorization {
 
   public Iterable<Map.Entry<Long,Integer>> getItemIDMappings() {
     return itemIDMapping.entrySet();
+  }
+  
+  public LongPrimitiveIterator getItemIDMappingKeys() {
+    return itemIDMapping.keySetIterator();
   }
 
   public int numFeatures() {

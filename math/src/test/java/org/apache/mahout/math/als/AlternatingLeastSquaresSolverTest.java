@@ -17,6 +17,9 @@
 
 package org.apache.mahout.math.als;
 
+import java.util.Arrays;
+
+import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.MahoutTestCase;
 import org.apache.mahout.math.Matrix;
@@ -24,12 +27,70 @@ import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.SparseMatrix;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.map.OpenIntObjectHashMap;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 public class AlternatingLeastSquaresSolverTest extends MahoutTestCase {
 
+  @Test
+  public void testYtY() {
+      
+      double[][] testMatrix = new double[][] {
+          new double[] { 1, 2, 3, 4, 5 },
+          new double[] { 1, 2, 3, 4, 5 },
+          new double[] { 1, 2, 3, 4, 5 },
+          new double[] { 1, 2, 3, 4, 5 },
+          new double[] { 1, 2, 3, 4, 5 }};
+      
+      double[][] testMatrix2 = new double[][] {
+          new double[] { 1, 2, 3, 4, 5, 6 },
+          new double[] { 5, 4, 3, 2, 1, 7 },
+          new double[] { 1, 2, 3, 4, 5, 8 },
+          new double[] { 1, 2, 3, 4, 5, 8 },
+          new double[] { 11, 12, 13, 20, 27, 8 }};
+      
+      double[][][] testData = new double[][][] {
+          testMatrix,
+          testMatrix2 };
+      
+    for (int i = 0; i < testData.length; i++) {
+      Matrix matrixToTest = new DenseMatrix(testData[i]);
+      
+      //test for race conditions by trying a few times
+      for (int j = 0; j < 100; j++) {
+        validateYtY(matrixToTest, 4);
+      }
+      
+      //one thread @ a time test
+      validateYtY(matrixToTest, 1);
+    }
+    
+  }
+
+  private void validateYtY(Matrix matrixToTest, int numThreads) {
+
+    OpenIntObjectHashMap<Vector> matrixToTestAsRowVectors = asRowVectors(matrixToTest);
+    ImplicitFeedbackAlternatingLeastSquaresSolver solver = new ImplicitFeedbackAlternatingLeastSquaresSolver(
+        matrixToTest.columnSize(), 1, 1, matrixToTestAsRowVectors, numThreads);
+
+    Matrix yTy = matrixToTest.transpose().times(matrixToTest);
+    Matrix shouldMatchyTy = solver.getYtransposeY(matrixToTestAsRowVectors);
+    
+    for (int row = 0; row < yTy.rowSize(); row++) {
+      for (int column = 0; column < yTy.columnSize(); column++) {
+        assertEquals(yTy.getQuick(row, column), shouldMatchyTy.getQuick(row, column), 0);
+      }
+    }
+  }
+
+  private OpenIntObjectHashMap<Vector> asRowVectors(Matrix matrix) {
+    OpenIntObjectHashMap<Vector> rows = new OpenIntObjectHashMap<Vector>();
+    for (int row = 0; row < matrix.numRows(); row++) {
+      rows.put(row, matrix.viewRow(row).clone());
+    }
+    return rows;
+  }
+  
   @Test
   public void addLambdaTimesNuiTimesE() {
     int nui = 5;
