@@ -48,9 +48,9 @@ public final class DataLoader {
 
   private static final Logger log = LoggerFactory.getLogger(DataLoader.class);
 
-  private static final Pattern COMMA_SPACE = Pattern.compile("[, ]");
+  private static final Pattern SEPARATORS = Pattern.compile("[, ]");
 
-  private DataLoader() { }
+  private DataLoader() {}
 
   /**
    * Converts a comma-separated String to a Vector.
@@ -63,7 +63,7 @@ public final class DataLoader {
    */
   private static boolean parseString(Attribute[] attrs, Set<String>[] values, CharSequence string,
     boolean regression) {
-    String[] tokens = COMMA_SPACE.split(string);
+    String[] tokens = SEPARATORS.split(string);
     Preconditions.checkArgument(tokens.length == attrs.length,
         "Wrong number of attributes in the string: " + tokens.length + ". Must be: " + attrs.length);
 
@@ -134,9 +134,21 @@ public final class DataLoader {
     return new Data(dataset, instances);
   }
 
-  /**
-   * Loads the data from a String array
-   */
+
+  /** Loads the data from multiple paths specified by pathes */
+  public static Data loadData(Dataset dataset, FileSystem fs, Path[] pathes) throws IOException {
+    List<Instance> instances = Lists.newArrayList();
+
+    for (Path path : pathes) {
+      Data loadedData = loadData(dataset, fs, path);
+      for (int index = 0; index <= loadedData.size(); index++) {
+        instances.add(loadedData.get(index));
+      }
+    }
+    return new Data(dataset, instances);
+  }
+
+  /** Loads the data from a String array */
   public static Data loadData(Dataset dataset, String[] data) {
     List<Instance> instances = Lists.newArrayList();
 
