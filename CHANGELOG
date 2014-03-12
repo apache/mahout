@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 1.0 - unreleased
 
+  MAHOUT-1449: Update the Known Issues in Random Forests Page (Manoj Awasthi via ssc)
+
   MAHOUT-1448: In Random Forest, the training does not support multiple input files. The input dataset must be one single file. (Manoj Awasthi via ssc)
 
   MAHOUT-1447: ImplicitFeedbackAlternatingLeastSquaresSolver tests and features (Adam Ilardi via ssc)
