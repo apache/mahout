@@ -2,6 +2,16 @@ Mahout Change Log
 
 Release 1.0 - unreleased
 
+  MAHOUT-1460: Remove reference to Dirichlet in ClusterIterator (frankscholten)
+
+  MAHOUT-1459: Move Hadoop related code out of CanopyClusterer (frankscholten)
+
+  MAHOUT-1458: Remove KMeansConfigKeys and FuzzyKMeansConfigKeys (frankscholten)
+
+  MAHOUT-1457: Move EigenSeedGenerator into spectral kmeans package (frankscholten)
+
+  MAHOUT-1455: Forkcount config causes JVM crashes during build (frankscholten)
+
   MAHOUT-1451: Cleaning up the examples for clustering on the website (Gaurav Misra via ssc)
 
   MAHOUT-1449: Update the Known Issues in Random Forests Page (Manoj Awasthi via ssc)
