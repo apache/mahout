@@ -17,7 +17,7 @@
 
 package org.apache.mahout.math.scalabindings
 
-import org.apache.mahout.math.Vector
+import org.apache.mahout.math._
 import scala.collection.JavaConversions._
 import org.apache.mahout.math.function.Functions
 
@@ -27,7 +27,7 @@ import org.apache.mahout.math.function.Functions
  */
 class VectorOps(val v: Vector) {
 
-  import VectorOps.v2ops
+  import RLikeOps._
 
   def apply(i: Int) = v.get(i)
 
@@ -105,8 +105,18 @@ class VectorOps(val v: Vector) {
 
   def sqrt = v.cloned.assign(Functions.SQRT)
 
+  /** Convert to a single column matrix */
+  def toColMatrix: Matrix = {
+    import RLikeOps._
+    v match {
+
+      case vd: Vector if (vd.isDense) => dense(vd).t
+      case srsv: RandomAccessSparseVector => new SparseColumnMatrix(srsv.length, 1, Array(srsv))
+      case _ => sparse(v).t
+    }
+  }
+
 }
 
 object VectorOps {
-  private implicit def v2ops(v: Vector): VectorOps = new VectorOps(v)
 }

@@ -22,6 +22,10 @@ import org.apache.mahout.sparkbindings.test.MahoutLocalContext
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.mahout.sparkbindings.drm._
+import RLikeDrmOps._
+import scala.util.Random
+import org.apache.mahout.math.{Matrices, SparseRowMatrix}
+import org.apache.spark.storage.StorageLevel
 
 /**
  *
@@ -78,22 +82,31 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
     (rControl2 - inCoreR).norm should be < 1E-10
     (qControl2 - inCoreQ).norm should be < 1E-10
 
+    // Assert orhtogonality:
+    // (a) Q[,j] dot Q[,j] == 1.0 for all j
+    // (b) Q[,i] dot Q[,j] == 0.0 for all i != j
+    for (col <- 0 until inCoreQ.ncol)
+      ((inCoreQ(::, col) dot inCoreQ(::, col)) - 1.0).abs should be < 1e-10
+    for (col1 <- 0 until inCoreQ.ncol - 1; col2 <- col1 + 1 until inCoreQ.ncol)
+      (inCoreQ(::, col1) dot inCoreQ(::, col2)).abs should be < 1e-10
+
+
   }
 
   test("dssvd - the naive-est - q=0") {
-    ddsvdNaive(q = 0)
+    dssvdNaive(q = 0)
   }
 
   test("ddsvd - naive - q=1") {
-    ddsvdNaive(q = 1)
+    dssvdNaive(q = 1)
   }
 
   test("ddsvd - naive - q=2") {
-    ddsvdNaive(q = 2)
+    dssvdNaive(q = 2)
   }
 
 
-  def ddsvdNaive(q: Int) {
+  def dssvdNaive(q: Int) {
     val inCoreA = dense(
       (1, 2, 3, 4),
       (2, 3, 4, 5),
@@ -111,6 +124,55 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
     printf("Sigma:\n%s\n", s)
 
     (inCoreA - (inCoreU %*%: diagv(s)) %*% inCoreV.t).norm should be < 1E-5
+  }
+
+  test("dspca") {
+
+    import math._
+
+    val rnd = new Random(1234L)
+
+    // Number of points
+    val m = 200
+    // Length of actual spectrum
+    val spectrumLen = 100
+
+    val spectrum = dvec((0 until spectrumLen).map(pos => 300 * exp(-pos)))
+
+    val (u, _) = qr(new SparseRowMatrix(m, spectrumLen) :=
+        ((r, c, v) => if (rnd.nextDouble() < 0.2) 0 else rnd.nextDouble()))
+    // Normalize.Compute col-lens and divide by it.
+    val pcaLens = dvec((0 until spectrumLen).map(c => u(::, c) dot (u(::, c))))
+    for (r <- 0 until m) u(r, ::) /= pcaLens
+
+    // PCA Rotation matrix -- should also be orthonormal.
+    val (tr, _) = qr(Matrices.symmetricUniformView(spectrumLen, spectrumLen, rnd.nextInt))
+    val tlens = dvec((0 until spectrumLen).map(c => tr(::, c) dot tr(::, c)))
+    for (r <- 0 until spectrumLen) tr(r, ::) /= tlens
+
+    val input = (u %*%: diagv(spectrum)) %*% tr.t
+
+    val drmInput = drmParallelize(m = input, numPartitions = 2)
+
+    // Calculate just first 10 principal factors and reduce dimensionality.
+    var (drmPCA, _, s) = dspca(A = drmInput, k = 10, q = 1)
+    // Un-normalized pca data:
+    drmPCA = drmPCA %*% diagv(s)
+
+    val pca = drmPCA.checkpoint(sLevel = StorageLevel.NONE).collect
+
+    // Of course, once we calculated the pca, the spectrum is going to be different since our originally
+    // generated input was not centered. So here, we'd just brute-solve pca to verify
+    val xi = input.colMeans()
+    for (r <- 0 until input.nrow) input(r, ::) -= xi
+    var (pcaControl, _, sControl) = svd(m = input)
+    pcaControl = pcaControl %*%: diagv(sControl)
+
+    printf("pca:\n%s\n", pca(0 until 10, 0 until 10))
+    printf("pcaControl:\n%s\n", pcaControl(0 until 10, 0 until 10))
+
+    (pca(0 until 10, 0 until 10).norm - pcaControl(0 until 10, 0 until 10).norm).abs should be < 1E-5
+
   }
 
 

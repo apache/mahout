@@ -37,8 +37,7 @@ class CheckpointedDrmBase[K : ClassTag](
     val rdd: DrmRdd[K],
     private var _nrow: Long = -1L,
     private var _ncol: Int = -1,
-    private var _nNonZero: Long = -1L,
-    private val _cacheStorageLevel: StorageLevel = StorageLevel.MEMORY_AND_DISK,
+    private val _cacheStorageLevel: StorageLevel = StorageLevel.MEMORY_ONLY,
     private[sparkbindings] val partitioningTag: Long = Random.nextLong()
 
     ) extends CheckpointedDrm[K] {
@@ -46,7 +45,6 @@ class CheckpointedDrmBase[K : ClassTag](
 
   lazy val nrow = if (_nrow >= 0) _nrow else computeNRow
   lazy val ncol = if (_ncol >= 0) _ncol else computeNCol
-  lazy val nNonZero = if (_nNonZero >= 0) _nNonZero else computeNNonZero
 
   private var cached: Boolean = false
 
@@ -153,6 +151,5 @@ class CheckpointedDrmBase[K : ClassTag](
 
   protected def computeNNonZero =
     cache().rdd.map(_._2.getNumNonZeroElements.toLong).sum().toLong
-
 
 }

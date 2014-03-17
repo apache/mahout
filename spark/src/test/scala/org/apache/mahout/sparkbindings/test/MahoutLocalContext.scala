@@ -1,13 +1,14 @@
 package org.apache.mahout.sparkbindings.test
 
-import org.scalatest.{BeforeAndAfterEach, Suite}
+import org.scalatest.Suite
 import org.apache.spark.SparkContext
 import org.apache.mahout.sparkbindings._
+import org.apache.mahout.test.MahoutSuite
 
 /**
  * @author dmitriy
  */
-trait MahoutLocalContext extends BeforeAndAfterEach with LoggerConfiguration {
+trait MahoutLocalContext extends MahoutSuite with LoggerConfiguration {
   this: Suite =>
 
   protected implicit var mahoutCtx: SparkContext = _
@@ -17,7 +18,6 @@ trait MahoutLocalContext extends BeforeAndAfterEach with LoggerConfiguration {
 
   override protected def beforeEach() {
     super.beforeEach()
-
     mahoutCtx = mahoutSparkContext(masterUrl = "local", appName = "MahoutLocalContext", customJars = buildJars)
   }
 

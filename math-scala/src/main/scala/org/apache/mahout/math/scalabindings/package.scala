@@ -181,6 +181,8 @@ package object scalabindings {
     sv
   }
 
+  def dvec(fromV: Vector) = new DenseVector(fromV)
+
   def dvec(ddata: TraversableOnce[Double]) = new DenseVector(ddata.toArray)
 
   def dvec(numbers: Number*) = new DenseVector(numbers.map(_.doubleValue()).toArray)
@@ -235,5 +237,25 @@ package object scalabindings {
   }
 
   def ssvd(a: Matrix, k: Int, p: Int = 15, q: Int = 0) = SSVD.ssvd(a, k, p, q)
+
+  /**
+   * PCA based on SSVD that runs without forming an always-dense A-(colMeans(A)) input for SVD. This
+   * follows the solution outlined in MAHOUT-817. For in-core version it, for most part, is supposed
+   * to save some memory for sparse inputs by removing direct mean subtraction.<P>
+   *
+   * Hint: Usually one wants to use AV which is approsimately USigma, i.e.<code>u %*%: diagv(s)</code>.
+   * If retaining distances and orignal scaled variances not that important, the normalized PCA space
+   * is just U.
+   *
+   * Important: data points are considered to be rows.
+   *
+   * @param a input matrix A
+   * @param k request SSVD rank
+   * @param p oversampling parameter
+   * @param q number of power iterations
+   * @return (U,V,s)
+   */
+  def spca(a: Matrix, k: Int, p: Int = 15, q: Int = 0) =
+    SSVD.spca(a = a, k = k, p = p, q = q)
 
 }

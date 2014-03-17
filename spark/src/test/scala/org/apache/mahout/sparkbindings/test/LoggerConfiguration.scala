@@ -6,13 +6,11 @@ import org.apache.log4j.{Level, Logger, BasicConfigurator}
 /**
  * @author dmitriy
  */
-trait LoggerConfiguration {
-
+trait LoggerConfiguration extends org.apache.mahout.test.LoggerConfiguration {
   this: Suite =>
 
-  BasicConfigurator.resetConfiguration()
-  BasicConfigurator.configure()
-  Logger.getRootLogger.setLevel(Level.ERROR)
-  Logger.getLogger("org.apache.mahout.sparkbindings").setLevel(Level.DEBUG)
-
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
+    Logger.getLogger("org.apache.mahout.sparkbindings").setLevel(Level.DEBUG)
+  }
 }

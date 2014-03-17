@@ -17,12 +17,13 @@
 
 package org.apache.mahout.math.scalabindings
 
-import org.scalatest.FunSuite
+import org.scalatest.{Matchers, FunSuite}
 import MatrixOps._
 import scala._
+import org.apache.mahout.test.MahoutSuite
 
 
-class MatrixOpsSuite extends FunSuite {
+class MatrixOpsSuite extends FunSuite with MahoutSuite {
 
 
   test("equivalence") {
@@ -68,8 +69,13 @@ class MatrixOpsSuite extends FunSuite {
     // or
     a(0 to 1, 0 to 1) = dense((1, 1), (2, 2.5))
 
-    println(a.toString)
+    println(a)
     println(a.sum)
+
+    val b = dense((1, 2, 3), (3, 4, 5))
+    b(0, ::) -= dvec(1, 2, 3)
+    println(b)
+    b(0, ::) should equal(dvec(0, 0, 0))
 
   }
 
@@ -95,14 +101,25 @@ class MatrixOpsSuite extends FunSuite {
 
   }
 
-
-
   test("sparse") {
 
     val a = sparse((1, 3) :: Nil,
       (0, 2) ::(1, 2.5) :: Nil
     )
     println(a.toString)
+  }
+
+  test("colSums, rowSums, colMeans, rowMeans") {
+    val a = dense(
+      (2, 3, 4),
+      (3, 4, 5)
+    )
+
+    a.colSums() should equal(dvec(5, 7, 9))
+    a.rowSums() should equal(dvec(9, 12))
+    a.colMeans() should equal(dvec(2.5, 3.5, 4.5))
+    a.rowMeans() should equal(dvec(3, 4))
+
   }
 
 }

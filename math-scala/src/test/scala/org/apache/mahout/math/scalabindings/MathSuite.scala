@@ -17,13 +17,15 @@
 
 package org.apache.mahout.math.scalabindings
 
-import org.scalatest.FunSuite
-import org.apache.mahout.math.DenseSymmetricMatrix
+import org.scalatest.{Matchers, FunSuite}
+import org.apache.mahout.math._
 import scala.math._
 import RLikeOps._
 import scala._
+import scala.util.Random
+import org.apache.mahout.test.MahoutSuite
 
-class MathSuite extends FunSuite {
+class MathSuite extends FunSuite with MahoutSuite {
 
   test("chol") {
 
@@ -59,7 +61,7 @@ class MathSuite extends FunSuite {
 
     printf("AX - B = \n%s\n", axmb.toString)
 
-    assert(axmb.norm < 1e-10)
+    axmb.norm should be < 1e-10
 
   }
 
@@ -144,22 +146,94 @@ class MathSuite extends FunSuite {
   }
 
   test("ssvd") {
+    val a = dense(
+      (1, 2, 3),
+      (3, 4, 5),
+      (-2, 6, 7),
+      (-3, 8, 9)
+    )
 
-    val a = dense((1, 2, 3), (3, 4, 5))
+    val rank = 2
+    val (u, v, s) = ssvd(a, k = rank, q = 1)
 
-    val (u, v, s) = ssvd(a, 2, q = 1)
+    val (uControl, vControl, sControl) = svd(a)
 
     printf("U:\n%s\n", u)
+    printf("U-control:\n%s\n", uControl)
     printf("V:\n%s\n", v)
+    printf("V-control:\n%s\n", vControl)
     printf("Sigma:\n%s\n", s)
+    printf("Sigma-control:\n%s\n", sControl)
 
-    val aBar = u %*% diagv(s) %*% v.t
+    (s - sControl(0 until rank)).norm(2) should be < 1E-7
 
-    val amab = a - aBar
+    // Singular vectors may be equivalent down to a sign only.
+    (u.norm - uControl(::, 0 until rank).norm).abs should be < 1E-7
+    (v.norm - vControl(::, 0 until rank).norm).abs should be < 1E-7
 
-    printf("A-USV'=\n%s\n", amab)
+  }
 
-    assert(amab.norm < 1e-10)
+  test("spca") {
+
+    import math._
+
+    val rnd = new Random(1234L)
+
+    // Number of points
+    val m = 200
+    // Length of actual spectrum
+    val spectrumLen = 100
+
+    val spectrum = dvec((0 until spectrumLen).map(pos => 300 * exp(-pos)))
+
+    val (u, _) = qr(new SparseRowMatrix(m, spectrumLen) :=
+        ((r, c, v) => if (rnd.nextDouble() < 0.2) 0 else rnd.nextDouble()))
+    // Normalize.Compute col-lens and divide by it.
+    val pcaLens = dvec((0 until spectrumLen).map(c => u(::, c) dot (u(::, c))))
+    for (r <- 0 until m) u(r, ::) /= pcaLens
+
+    // PCA Rotation matrix -- should also be orthonormal.
+    val (tr, _) = qr(Matrices.symmetricUniformView(spectrumLen, spectrumLen, rnd.nextInt))
+    val tlens = dvec((0 until spectrumLen).map(c => tr(::, c) dot tr(::, c)))
+    for (r <- 0 until spectrumLen) tr(r, ::) /= tlens
+
+    val input = (u %*%: diagv(spectrum)) %*% tr.t
+    printf("Input=\n%s\n", input)
+
+    // Calculate just first 10 principal factors and reduce dimensionality.
+    var (pca, _, s) = spca(a = input, k = 10, q = 1)
+    // Un-normalized pca data:
+    pca = pca %*%: diagv(s)
+
+    // Of course, once we calculated the pca, the spectrum is going to be different since our originally
+    // generated input was not centered. So here, we'd just brute-solve pca to verify
+    val xi = input.colMeans()
+    for (r <- 0 until input.nrow) input(r, ::) -= xi
+    var (pcaControl, _, sControl) = svd(m = input)
+    pcaControl = pcaControl %*%: diagv(sControl)
+
+    printf("pca:\n%s\n", pca(0 until 10, 0 until 10))
+    printf("pcaControl:\n%s\n", pcaControl(0 until 10, 0 until 10))
+
+    (pca(0 until 10, 0 until 10).norm - pcaControl(0 until 10, 0 until 10).norm).abs should be < 1E-5
+
+  }
+
+  test("random uniform") {
+    val omega1 = Matrices.symmetricUniformView(2, 3, 1234)
+    val omega2 = Matrices.symmetricUniformView(2, 3, 1234)
+
+    val a = sparse(
+      0 -> 1 :: 1 -> 2 :: Nil,
+      0 -> 3 :: 1 -> 4 :: Nil,
+      0 -> 2 :: 1 -> 0.0 :: Nil
+    )
+
+    val block = a(0 to 0, ::).cloned
+    val block2 = a(1 to 1, ::).cloned
+
+    (block %*% omega1 - (a %*% omega2)(0 to 0, ::)).norm should be < 1e-7
+    (block2 %*% omega1 - (a %*% omega2)(1 to 1, ::)).norm should be < 1e-7
 
   }
 

@@ -41,9 +41,6 @@ class OpMapBlock[S: ClassTag, R: ClassTag](
   /** R-like syntax for number of columns */
   def ncol: Int = if (_ncol >= 0) _ncol else A.ncol
 
-  /** Non-zero element count */
-  def nNonZero: Long = A.nNonZero
-
   def exec(src: DrmRddInput[S]): DrmRddInput[R] = {
 
     // We can't use attributes to avoid putting the whole this into closure.
@@ -51,14 +48,13 @@ class OpMapBlock[S: ClassTag, R: ClassTag](
     val ncol = this.ncol
 
     val rdd = src.toBlockifiedDrmRdd()
-        .map({
-      case blockTuple =>
-        val out = bmf(blockTuple)
+        .map(blockTuple => {
+      val out = bmf(blockTuple)
 
-        assert(out._2.nrow == blockTuple._2.nrow, "block mapping must return same number of rows.")
-        assert(out._2.ncol == ncol, "block map must return %d number of columns.".format(ncol))
+      assert(out._2.nrow == blockTuple._2.nrow, "block mapping must return same number of rows.")
+      assert(out._2.ncol == ncol, "block map must return %d number of columns.".format(ncol))
 
-        out
+      out
     })
     new DrmRddInput(blockifiedSrc = Some(rdd))
   }

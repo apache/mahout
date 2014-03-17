@@ -20,12 +20,13 @@ package org.apache.mahout.math.scalabindings
 import org.scalatest.FunSuite
 import org.apache.mahout.math.Vector
 import RLikeOps._
+import org.apache.mahout.test.MahoutSuite
 
 /**
  *
  * @author dmitriy
  */
-class RLikeVectorOpsSuite extends FunSuite {
+class RLikeVectorOpsSuite extends FunSuite with MahoutSuite {
 
   test("Hadamard") {
     val a: Vector = (1, 2, 3)

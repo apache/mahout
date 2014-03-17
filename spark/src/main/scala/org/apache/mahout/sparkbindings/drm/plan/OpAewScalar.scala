@@ -35,6 +35,4 @@ case class OpAewScalar[K: ClassTag](
   /** R-like syntax for number of columns */
   def ncol: Int = A.ncol
 
-  /** Non-zero element count */
-  def nNonZero: Long = A.nNonZero
 }

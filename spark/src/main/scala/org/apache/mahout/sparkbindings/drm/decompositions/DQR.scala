@@ -46,9 +46,9 @@ object DQR {
     // decompose A'A in the backend again.
 
     // Compute Q = A*inv(L') -- we can do it blockwise.
-    val Q = A.mapBlock()({
+    val Q = A.mapBlock() {
       case (keys, block) => keys -> chol(bcastAtA).solveRight(block)
-    })
+    }
 
     Q -> inCoreR
   }

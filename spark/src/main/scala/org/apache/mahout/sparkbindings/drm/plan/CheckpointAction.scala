@@ -46,23 +46,17 @@ abstract class CheckpointAction[K: ClassTag] extends DrmLike[K] {
   def checkpoint(sLevel: StorageLevel): CheckpointedDrm[K] = cp.getOrElse({
     // Non-zero count is sparsely supported by logical operators now. So assume we have no knowledge
     // if it is unsupported, instead of failing.
-    val nzCount = try {
-      nNonZero
-    } catch {
-      case e: UnsupportedOperationException => -1L
-    }
     val plan = optimize(this)
     val rdd = exec(plan)
     val newcp = new CheckpointedDrmBase(
       rdd = rdd,
       _nrow = nrow,
       _ncol = ncol,
-      _nNonZero = nzCount,
       _cacheStorageLevel = sLevel,
       partitioningTag = plan.partitioningTag
     )
     cp = Some(newcp)
-    newcp
+    newcp.cache()
   })
 
 }
@@ -70,7 +64,7 @@ abstract class CheckpointAction[K: ClassTag] extends DrmLike[K] {
 object CheckpointAction {
 
   /** Perform expression optimization. Return physical plan that we can pass to exec() */
-  def optimize[K: ClassTag](action: DrmLike[K]): DrmLike[K] = pass2(pass1(action))
+  def optimize[K: ClassTag](action: DrmLike[K]): DrmLike[K] = pass3(pass2(pass1(action)))
 
 
   /** This is mostly multiplication operations rewrites */
@@ -79,19 +73,6 @@ object CheckpointAction {
     action match {
       case OpAB(OpAt(a), b) if (a == b) => OpAtA(pass1(a))
       case OpABAnyKey(OpAtAnyKey(a), b) if (a == b) => OpAtA(pass1(a))
-
-        // matrix products.
-      case OpAB(a, OpAt(b)) => OpABt(pass1(a), pass1(b))
-
-        // AtB cases that make sense.
-      case OpAB(OpAt(a), b) if (a.partitioningTag == b.partitioningTag) => OpAtB(pass1(a),pass1(b))
-      case OpABAnyKey(OpAtAnyKey(a), b) => OpAtB(pass1(a), pass1(b))
-
-      // Need some cost to choose between the following.
-
-      case OpAB(OpAt(a), b)  => OpAtB(pass1(a),pass1(b))
-//      case OpAB(OpAt(a), b) => OpAt(OpABt(OpAt(pass1(b)), pass1(a)))
-      case OpAB(a, b) => OpABt(pass1(a), OpAt(pass1(b)))
 
       // For now, rewrite left-multiply via transpositions, i.e.
       // inCoreA %*% B = (B' %*% inCoreA')'
@@ -115,17 +96,15 @@ object CheckpointAction {
   /** This would remove stuff like A.t.t that previous step may have created */
   private def pass2[K: ClassTag](action: DrmLike[K]): DrmLike[K] = {
     action match {
-      case OpAt(OpAt(a)) => pass2(a)
+      // A.t.t => A
+      case OpAt(top@OpAt(a)) => pass2(a)(top.classTagA)
 
-      // If there are any such cases, they must go away in pass1. If they were not, then it wasn't
-      // the A'A case but actual transposition intent which should be removed from consideration
-      // (we cannot do actual flip for non-int-keyed arguments)
-      case OpAtAnyKey(_) =>
-        throw new IllegalArgumentException("\"A\" must be Int-keyed in this A.t expression.")
+      // A.t.t => A
+//      case OpAt(top@OpAtAnyKey(a)) => pass2(a)(top.classTagA)
+
 
       // Stop at checkpoints
       case cd: CheckpointedDrm[_] => action
-
 
       // For everything else we just pass-thru the operator arguments to optimizer
       case uop: AbstractUnaryOp[_, K] =>
@@ -138,17 +117,58 @@ object CheckpointAction {
     }
   }
 
+ /** Some further rewrites that are conditioned on A.t.t removal */
+  private def pass3[K: ClassTag](action: DrmLike[K]): DrmLike[K] = {
+    action match {
+
+      // matrix products.
+      case OpAB(a, OpAt(b)) => OpABt(pass3(a), pass3(b))
+
+      // AtB cases that make sense.
+      case OpAB(OpAt(a), b) if (a.partitioningTag == b.partitioningTag) => OpAtB(pass3(a), pass3(b))
+      case OpABAnyKey(OpAtAnyKey(a), b) => OpAtB(pass3(a), pass3(b))
+
+      // Need some cost to choose between the following.
+
+      case OpAB(OpAt(a), b) => OpAtB(pass3(a), pass3(b))
+      //      case OpAB(OpAt(a), b) => OpAt(OpABt(OpAt(pass1(b)), pass1(a)))
+      case OpAB(a, b) => OpABt(pass3(a), OpAt(pass3(b)))
+      // Rewrite A'x
+      case op@OpAx(op1@OpAt(a), x) => OpAtx(pass3(a)(op1.classTagA), x)
+
+      // Stop at checkpoints
+      case cd: CheckpointedDrm[_] => action
+
+      // For everything else we just pass-thru the operator arguments to optimizer
+      case uop: AbstractUnaryOp[_, K] =>
+        uop.A = pass3(uop.A)(uop.classTagA)
+        uop
+      case bop: AbstractBinaryOp[_, _, K] =>
+        bop.A = pass3(bop.A)(bop.classTagA)
+        bop.B = pass3(bop.B)(bop.classTagB)
+        bop
+    }
+  }
+
+
   /** Execute previously optimized physical plan */
   def exec[K: ClassTag](oper: DrmLike[K]): DrmRddInput[K] = {
     // I do explicit evidence propagation here since matching via case classes seems to be loosing
     // it and subsequently may cause something like DrmRddInput[Any] instead of [Int] or [String].
     // Hence you see explicit evidence attached to all recursive exec() calls.
     oper match {
+      // If there are any such cases, they must go away in pass1. If they were not, then it wasn't
+      // the A'A case but actual transposition intent which should be removed from consideration
+      // (we cannot do actual flip for non-int-keyed arguments)
+      case OpAtAnyKey(_) =>
+        throw new IllegalArgumentException("\"A\" must be Int-keyed in this A.t expression.")
       case op@OpAt(a) => At.at(op, exec(a)(op.classTagA))
       case op@OpABt(a, b) => ABt.abt(op, exec(a)(op.classTagA), exec(b)(op.classTagB))
       case op@OpAtB(a, b) => AtB.atb_nograph(op, exec(a)(op.classTagA), exec(b)(op.classTagB),
         zippable = a.partitioningTag == b.partitioningTag)
       case op@OpAtA(a) => AtA.at_a(op, exec(a)(op.classTagA))
+      case op@OpAx(a, x) => Ax.ax_with_broadcast(op, exec(a)(op.classTagA))
+      case op@OpAtx(a, x) => Ax.atx_with_broadcast(op, exec(a)(op.classTagA))
       case op@OpAewB(a, b, '+') => AewB.a_plus_b(op, exec(a)(op.classTagA), exec(b)(op.classTagB))
       case op@OpAewB(a, b, '-') => AewB.a_minus_b(op, exec(a)(op.classTagA), exec(b)(op.classTagB))
       case op@OpAewB(a, b, '*') => AewB.a_hadamard_b(op, exec(a)(op.classTagA), exec(b)(op.classTagB))

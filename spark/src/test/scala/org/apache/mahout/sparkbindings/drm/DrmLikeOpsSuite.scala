@@ -25,15 +25,15 @@ import org.scalatest.{Matchers, FunSuite}
 import org.apache.mahout.sparkbindings.test.MahoutLocalContext
 
 /** Tests for DrmLikeOps */
-class DrmLikeOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
+class DrmLikeOpsSuite extends FunSuite with MahoutLocalContext {
 
   test("mapBlock") {
 
     val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5), (4, 5, 6))
     val A = drmParallelize(m = inCoreA, numPartitions = 2)
-    val B = A.mapBlock(/* Inherit width */)({
+    val B = A.mapBlock(/* Inherit width */) {
       case (keys, block) => keys -> (block += 1.0)
-    })
+    }
 
     val inCoreB = B.collect
     val inCoreBControl = inCoreA + 1.0

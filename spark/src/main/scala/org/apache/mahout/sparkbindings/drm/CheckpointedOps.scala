@@ -17,15 +17,20 @@
 
 package org.apache.mahout.sparkbindings.drm
 
-import org.apache.hadoop.io.Writable
 import scala.reflect.ClassTag
+import org.apache.mahout.math.{DenseVector, Vector}
+import org.apache.mahout.math.scalabindings._
+import RLikeOps._
+import RLikeDrmOps._
+import org.apache.spark.SparkContext._
+
 
 /**
  * Additional experimental operations over CheckpointedDRM implementation. I will possibly move them up to
  * the DRMBase once they stabilize.
  *
  */
-class CheckpointedOps[K <% Writable : ClassTag](val drm: CheckpointedDrm[K]) {
+class CheckpointedOps[K: ClassTag](val drm: CheckpointedDrm[K]) {
 
   /**
    * Reorganize every partition into a single in-core matrix
@@ -33,6 +38,26 @@ class CheckpointedOps[K <% Writable : ClassTag](val drm: CheckpointedDrm[K]) {
    */
   def blockify(): BlockifiedDrmRdd[K] =
     org.apache.mahout.sparkbindings.drm.blockify(rdd = drm.rdd, blockncol = drm.ncol)
+
+  /** Column sums. At this point this runs on checkpoint and collects in-core vector. */
+  def colSums(): Vector = {
+    val n = drm.ncol
+
+    drm.rdd
+        // Throw away keys
+        .map(_._2)
+        // Fold() doesn't work with kryo still. So work around it.
+        .mapPartitions(iter => {
+      val acc = ((new DenseVector(n): Vector) /: iter)((acc, v) => acc += v)
+      Iterator(acc)
+    })
+        // Since we preallocated new accumulator vector per partition, this must not cause any side
+        // effects now.
+        .reduce(_ += _)
+
+  }
+
+  def colMeans(): Vector = if (drm.nrow == 0) drm.colSums() else drm.colSums() /= drm.nrow
 
 }
 

@@ -15,32 +15,28 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.sparkbindings.drm
+package org.apache.mahout.sparkbindings.drm.plan
 
-import org.apache.spark.storage.StorageLevel
+import scala.reflect.ClassTag
+import org.apache.mahout.math.{Vector, Matrix}
+import org.apache.mahout.math.scalabindings._
+import RLikeOps._
+import org.apache.mahout.sparkbindings.drm.DrmLike
 
-/**
- *
- * Basic spark DRM trait.
- *
- * Since we already call the package "sparkbindings", I will not use stem "spark" with classes in
- * this package. Spark backing is already implied.
- *
- */
-trait DrmLike[K] {
+/** Logical Ax. */
+case class OpAx[K: ClassTag](
+    override var A: DrmLike[K],
+    val x: Vector
+    ) extends AbstractUnaryOp[K, K] {
 
-  private[sparkbindings] def partitioningTag:Long
+  override private[sparkbindings] lazy val partitioningTag: Long = A.partitioningTag
+
+  assert(A.ncol == x.length, "Incompatible operand geometry")
 
   /** R-like syntax for number of rows. */
-  def nrow: Long
+  def nrow: Long = A.nrow
 
   /** R-like syntax for number of columns */
-  def ncol: Int
-
-  /**
-   * Action operator -- does not necessary means Spark action; but does mean running BLAS optimizer
-   * and writing down Spark graph lineage since last checkpointed DRM.
-   */
-  def checkpoint(sLevel: StorageLevel = StorageLevel.MEMORY_ONLY): CheckpointedDrm[K]
+  def ncol: Int = 1
 
 }

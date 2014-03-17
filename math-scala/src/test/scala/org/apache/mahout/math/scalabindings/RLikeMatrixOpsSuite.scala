@@ -19,8 +19,9 @@ package org.apache.mahout.math.scalabindings
 
 import org.scalatest.FunSuite
 import RLikeOps._
+import org.apache.mahout.test.MahoutSuite
 
-class RLikeMatrixOpsSuite extends FunSuite {
+class RLikeMatrixOpsSuite extends FunSuite with MahoutSuite {
 
   test("multiplication") {
 

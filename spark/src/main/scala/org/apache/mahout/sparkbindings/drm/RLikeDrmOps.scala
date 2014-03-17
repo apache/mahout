@@ -19,7 +19,7 @@ package org.apache.mahout.sparkbindings.drm
 
 import scala.reflect.ClassTag
 import org.apache.mahout.sparkbindings.drm.plan._
-import org.apache.mahout.math.Matrix
+import org.apache.mahout.math.{Matrices, SparseColumnMatrix, Vector, Matrix}
 import org.apache.mahout.sparkbindings.drm.plan.OpTimesLeftMatrix
 import org.apache.mahout.sparkbindings.drm.plan.OpAt
 import org.apache.mahout.sparkbindings.drm.plan.OpAB
@@ -64,6 +64,10 @@ class RLikeDrmOps[K: ClassTag](drm: DrmLike[K]) extends DrmLikeOps[K](drm) {
 
   def %*%(that: Matrix): DrmLike[K] = this :%*% that
 
+  def :%*%(that: Vector): DrmLike[K] = OpAx(A = this.drm, x = that)
+
+  def %*%(that: Vector): DrmLike[K] = :%*%(that)
+
   def t: DrmLike[Int] = OpAtAnyKey(A = drm)
 }
 
@@ -86,4 +90,12 @@ object RLikeDrmOps {
   implicit def rlikeOps2Drm[K: ClassTag](ops: RLikeDrmOps[K]): DrmLike[K] = ops.drm
 
   implicit def ops2Drm[K: ClassTag](ops: DrmLikeOps[K]): DrmLike[K] = ops.drm
+
+  implicit def cp2cpops[K:ClassTag](cp:CheckpointedDrm[K]):CheckpointedOps[K] = new CheckpointedOps(cp)
+
+  /**
+   * This is probably dangerous since it triggers implicit checkpointing with default storage level
+   * setting.
+   */
+  implicit def drm2cpops[K:ClassTag](drm:DrmLike[K]):CheckpointedOps[K] = new CheckpointedOps(drm.checkpoint())
 }

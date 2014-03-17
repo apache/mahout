@@ -47,7 +47,7 @@ object AtB {
 
       s_log.debug("A and B for A'B are identically distributed, performing row-wise zip.")
 
-      rddA.zip(other=srcB.toDrmRdd())
+      rddA.zip(other = srcB.toDrmRdd())
 
     } else {
 

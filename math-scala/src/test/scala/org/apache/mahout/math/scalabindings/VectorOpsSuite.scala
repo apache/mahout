@@ -20,15 +20,10 @@ package org.apache.mahout.math.scalabindings
 import org.scalatest.FunSuite
 import org.apache.mahout.math.{RandomAccessSparseVector, Vector}
 import MatrixOps._
+import org.apache.mahout.test.MahoutSuite
 
-/**
- * Created with IntelliJ IDEA.
- * User: dmitriy
- * Date: 6/21/13
- * Time: 10:26 PM
- * To change this template use File | Settings | File Templates.
- */
-class VectorOpsSuite extends FunSuite {
+/** VectorOps Suite */
+class VectorOpsSuite extends FunSuite with MahoutSuite {
 
   test("inline create") {
 

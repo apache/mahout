@@ -29,12 +29,12 @@ import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import SparkContext._
 import org.apache.spark.broadcast.Broadcast
-import org.apache.mahout.sparkbindings.drm.decompositions.{DSSVD, DQR}
+import org.apache.mahout.sparkbindings.drm.decompositions.{DSPCA, DSSVD, DQR}
 
 
 package object drm {
 
-  final val s_log = Logger.getLogger("mahout.spark.drm");
+  private[drm] final val s_log = Logger.getLogger("org.apache.mahout.sparkbindings");
 
   /** Drm row-wise tuple */
   type DrmTuple[K] = (K, Vector)
@@ -187,6 +187,13 @@ package object drm {
       _ncol = ncol
     )
 
+
+  /** Broadcast vector (Mahout vectors are not closure-friendly, use this instead. */
+  def drmBroadcast(x: Vector)(implicit sc: SparkContext): Broadcast[Vector] = sc.broadcast(x)
+
+  /** Broadcast in-core Mahout matrix. Use this instead of closure. */
+  def drmBroadcast(m: Matrix)(implicit sc: SparkContext): Broadcast[Matrix] = sc.broadcast(m)
+
   def safeToNonNegInt(x: Long): Int = {
     assert(x == x << -31 >>> -31, "transformation from long to Int is losing signficant bits, or is a negative number")
     x.toInt
@@ -262,6 +269,20 @@ package object drm {
    */
   def dssvd[K: ClassTag](A: DrmLike[K], k: Int, p: Int = 15, q: Int = 0):
   (DrmLike[K], DrmLike[Int], Vector) = DSSVD.dssvd(A, k, p, q)
+
+  /**
+   * Distributed Stochastic PCA decomposition algorithm. A logical reflow of the "SSVD-PCA options.pdf"
+   * document of the MAHOUT-817.
+   *
+   * @param A input matrix A
+   * @param k request SSVD rank
+   * @param p oversampling parameter
+   * @param q number of power iterations (hint: use either 0 or 1)
+   * @return (U,V,s). Note that U, V are non-checkpointed matrices (i.e. one needs to actually use them
+   *         e.g. save them to hdfs in order to trigger their computation.
+   */
+  def dspca[K: ClassTag](A: DrmLike[K], k: Int, p: Int = 15, q: Int = 0):
+  (DrmLike[K], DrmLike[Int], Vector) = DSPCA.dspca(A, k, p, q)
 
 
 }

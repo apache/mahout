@@ -20,8 +20,9 @@ package org.apache.mahout.math.scalabindings
 import org.scalatest.FunSuite
 import MatlabLikeOps._
 import scala.Predef._
+import org.apache.mahout.test.MahoutSuite
 
-class MatlabLikeMatrixOpsSuite extends FunSuite {
+class MatlabLikeMatrixOpsSuite extends FunSuite with MahoutSuite {
 
   test("multiplication") {
 

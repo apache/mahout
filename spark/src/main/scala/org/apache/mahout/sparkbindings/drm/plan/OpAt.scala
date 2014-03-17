@@ -31,7 +31,4 @@ case class OpAt(
   /** R-like syntax for number of columns */
   def ncol: Int = safeToNonNegInt(A.nrow)
 
-  /** Non-zero element count */
-  def nNonZero: Long = A.nNonZero
-
 }
