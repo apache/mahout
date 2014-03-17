@@ -24,6 +24,7 @@ import RLikeOps._
 import scala._
 import scala.util.Random
 import org.apache.mahout.test.MahoutSuite
+import org.apache.mahout.common.RandomUtils
 
 class MathSuite extends FunSuite with MahoutSuite {
 
@@ -177,31 +178,31 @@ class MathSuite extends FunSuite with MahoutSuite {
 
     import math._
 
-    val rnd = new Random(1234L)
+    val rnd = RandomUtils.getRandom
 
     // Number of points
-    val m = 200
+    val m =  500
     // Length of actual spectrum
-    val spectrumLen = 100
+    val spectrumLen = 40
 
-    val spectrum = dvec((0 until spectrumLen).map(pos => 300 * exp(-pos)))
+    val spectrum = dvec((0 until spectrumLen).map(x => 300.0 * exp(-x) max 1e-3))
+    printf("spectrum:%s\n", spectrum)
 
     val (u, _) = qr(new SparseRowMatrix(m, spectrumLen) :=
-        ((r, c, v) => if (rnd.nextDouble() < 0.2) 0 else rnd.nextDouble()))
-    // Normalize.Compute col-lens and divide by it.
-    val pcaLens = dvec((0 until spectrumLen).map(c => u(::, c) dot (u(::, c))))
-    for (r <- 0 until m) u(r, ::) /= pcaLens
+        ((r, c, v) => if (rnd.nextDouble() < 0.2) 0 else rnd.nextDouble() + 5.0))
 
     // PCA Rotation matrix -- should also be orthonormal.
-    val (tr, _) = qr(Matrices.symmetricUniformView(spectrumLen, spectrumLen, rnd.nextInt))
-    val tlens = dvec((0 until spectrumLen).map(c => tr(::, c) dot tr(::, c)))
-    for (r <- 0 until spectrumLen) tr(r, ::) /= tlens
+    val (tr, _) = qr(Matrices.symmetricUniformView(spectrumLen, spectrumLen, rnd.nextInt) - 10.0)
 
     val input = (u %*%: diagv(spectrum)) %*% tr.t
-    printf("Input=\n%s\n", input)
 
     // Calculate just first 10 principal factors and reduce dimensionality.
-    var (pca, _, s) = spca(a = input, k = 10, q = 1)
+    // Since we assert just validity of the s-pca, not stochastic error, we bump p parameter to
+    // ensure to zero stochastic error and assert only functional correctness of the method's pca-
+    // specific additions.
+    val k = 10
+    var (pca, _, s) = spca(a = input, k = k, p=spectrumLen, q = 1)
+    printf("Svs:%s\n",s)
     // Un-normalized pca data:
     pca = pca %*%: diagv(s)
 
@@ -210,7 +211,9 @@ class MathSuite extends FunSuite with MahoutSuite {
     val xi = input.colMeans()
     for (r <- 0 until input.nrow) input(r, ::) -= xi
     var (pcaControl, _, sControl) = svd(m = input)
-    pcaControl = pcaControl %*%: diagv(sControl)
+
+    printf("Svs-control:%s\n",sControl)
+    pcaControl = (pcaControl %*%: diagv(sControl))(::,0 until k)
 
     printf("pca:\n%s\n", pca(0 until 10, 0 until 10))
     printf("pcaControl:\n%s\n", pcaControl(0 until 10, 0 until 10))
