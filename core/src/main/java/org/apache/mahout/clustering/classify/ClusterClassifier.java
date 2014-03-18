@@ -55,7 +55,7 @@ import com.google.common.io.Closeables;
  * causes all the models to computeParameters.
  * 
  * Because a ClusterClassifier implements Writable, it can be written-to and
- * read-from a sequence file as a single entity. For sequential and mapreduce
+ * read-from a sequence file as a single entity. For sequential and MapReduce
  * clustering in conjunction with a ClusterIterator; however, it utilizes an
  * exploded file format. In this format, the iterator writes the policy to a
  * single POLICY_FILE_NAME file in the clustersOut directory and the models are
@@ -86,7 +86,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
     this.policy = policy;
   }
   
-  // needed for serialization/deserialization
+  // needed for serialization/De-serialization
   public ClusterClassifier() {}
   
   // only used by MR ClusterIterator
@@ -224,6 +224,7 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
     Text key = new Text();
     ClusteringPolicyWritable cpw = new ClusteringPolicyWritable();
     reader.next(key, cpw);
+    Closeables.close(reader, true);
     return cpw.getValue();
   }
   
@@ -234,6 +235,6 @@ public class ClusterClassifier extends AbstractVectorClassifier implements Onlin
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, config, policyPath, Text.class,
         ClusteringPolicyWritable.class);
     writer.append(new Text(), new ClusteringPolicyWritable(policy));
-    writer.close();
+    Closeables.close(writer, false);
   }
 }
