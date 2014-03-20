@@ -210,13 +210,7 @@ package object drm {
         val keys = data.map(t => t._1).toArray[K]
         val vectors = data.map(t => t._2).toArray
 
-        val block = if (vectors.head.isDense) {
-          dense(vectors)
-        } else {
-          val mtx = new SparseMatrix(vectors.size, blockncol)
-          for (i <- 0 until vectors.size) mtx(i, ::) := vectors(i)
-          mtx
-        }
+        val block = new SparseRowMatrix(vectors.size, blockncol, vectors)
 
         Iterator(keys -> block)
       }
