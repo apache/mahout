@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 /**
  * See the SSVD code for a better option than using this:
  *
- * https://cwiki.apache.org/confluence/display/MAHOUT/Stochastic+Singular+Value+Decomposition
+ * http://mahout.apache.org/users/dim-reduction/ssvd.html
  * @see org.apache.mahout.math.hadoop.stochasticsvd.SSVDSolver
  */
 public class DistributedLanczosSolver extends LanczosSolver implements Tool {
