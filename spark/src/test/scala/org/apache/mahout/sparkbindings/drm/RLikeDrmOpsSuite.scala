@@ -26,6 +26,8 @@ import org.apache.mahout.sparkbindings.drm.plan.{OpAtx, OpAtB, OpAtA, Checkpoint
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.SparkContext
 import scala.collection.mutable.ArrayBuffer
+import org.apache.mahout.math.Matrices
+import org.apache.mahout.sparkbindings.blas
 
 /** R-like DRM DSL operation tests */
 class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
@@ -250,6 +252,25 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
     val inCoreAtAControl = inCoreA.t %*% inCoreA
 
     (inCoreAtA - inCoreAtAControl).norm should be < 1E-10
+  }
+
+  test("C = A.t %*% A fat non-graph") {
+    // Hack the max in-mem size for this test
+    System.setProperty(blas.AtA.PROPERTY_ATA_MAXINMEMNCOL, "540")
+
+    val inCoreA = Matrices.uniformView(400, 550, 1234)
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+
+    val AtA = A.t %*% A
+
+    // Assert optimizer detects square
+    CheckpointAction.optimize(action = AtA) should equal(OpAtA(A))
+
+    val inCoreAtA = AtA.collect
+    val inCoreAtAControl = inCoreA.t %*% inCoreA
+
+    (inCoreAtA - inCoreAtAControl).norm should be < 1E-10
+    s_log.debug("test done.")
   }
 
 

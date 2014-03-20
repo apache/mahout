@@ -47,7 +47,10 @@ package object sparkbindings {
 
     try {
 
-      val conf = if (masterUrl != "local") {
+      val conf = if (!masterUrl.startsWith("local")
+          || System.getProperties.contains("mahout.home")
+          || System.getenv("MAHOUT_HOME") != null
+      ) {
         var mhome = System.getenv("MAHOUT_HOME")
         if (mhome == null) mhome = System.getProperty("mahout.home")
 

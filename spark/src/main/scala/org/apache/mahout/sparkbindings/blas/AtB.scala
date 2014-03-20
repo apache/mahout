@@ -77,6 +77,7 @@ object AtB {
   /** Given already zipped, joined rdd of rows of A' and B, compute their product A'B */
   private[sparkbindings] def computeAtBZipped[A: ClassTag](zipped:RDD[(DrmTuple[A], DrmTuple[A])],
       nrow:Long, ancol:Int, bncol:Int, blockHeight: Int) = {
+
     // Since Q and A are partitioned same way,we can just zip their rows and proceed from there by
     // forming outer products. Our optimizer lacks this primitive, so we will implement it using RDDs
     // directly. We try to compile B' = A'Q now by collecting outer products of rows of A and Q. At
@@ -85,32 +86,30 @@ object AtB {
     val btNumParts = safeToNonNegInt((nrow - 1) / blockHeight + 1)
 
     val rddBt = zipped
-        
 
         // Produce outer product blocks
-        .flatMap({
+        .flatMap {
       case ((aKey, aRow), (qKey, qRow)) =>
-        for (blockKey <- 0 until btNumParts) yield {
+        for (blockKey <- Stream.range(0, btNumParts)) yield {
           val blockStart = blockKey * blockHeight
           val blockEnd = ancol min (blockStart + blockHeight)
 
           // Create block by cross product of proper slice of aRow and qRow
           blockKey -> (aRow(blockStart until blockEnd) cross qRow)
         }
-    })
-
+    }
         // Combine blocks by just summing them up
-        .reduceByKey({
+        .reduceByKey {
       case (block1, block2) => block1 += block2
-    })
+    }
 
         // Throw away block key, generate row keys instead.
-        .map({
+        .map {
       case (blockKey, block) =>
         val blockStart = blockKey * blockHeight
         val rowKeys = Array.tabulate(block.nrow)(blockStart + _)
         rowKeys -> block
-    })
+    }
 
     new DrmRddInput[Int](blockifiedSrc = Some(rddBt))
   }

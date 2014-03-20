@@ -18,7 +18,13 @@ trait MahoutLocalContext extends MahoutSuite with LoggerConfiguration {
 
   override protected def beforeEach() {
     super.beforeEach()
-    mahoutCtx = mahoutSparkContext(masterUrl = "local", appName = "MahoutLocalContext", customJars = buildJars)
+
+    System.setProperty("spark.kryoserializer.buffer.mb","15")
+    System.setProperty("spark.akka.frameSize","30")
+    mahoutCtx = mahoutSparkContext(masterUrl = "local[3]",
+      appName = "MahoutLocalContext",
+      customJars = buildJars
+    )
   }
 
   override protected def afterEach() {
