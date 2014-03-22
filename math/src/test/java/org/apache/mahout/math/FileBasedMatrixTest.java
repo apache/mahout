@@ -43,7 +43,7 @@ public class FileBasedMatrixTest extends MahoutTestCase {
     for (int i = 0; i < 1000; i++) {
       m0.set(gen.nextInt(ROWS), gen.nextInt(COLUMNS), matrixValue(i));
     }
-    File f = File.createTempFile("foo", ".m");
+    File f = File.createTempFile("foo", ".m", getTestTempDir());
     f.deleteOnExit();
     System.out.printf("Starting to write to %s\n", f.getAbsolutePath());
     FileBasedMatrix.writeMatrix(f, m0);
@@ -66,7 +66,7 @@ public class FileBasedMatrixTest extends MahoutTestCase {
 
   @Test
   public void testSetData() throws IOException {
-    File f = File.createTempFile("matrix", ".m");
+    File f = File.createTempFile("matrix", ".m", getTestTempDir());
     f.deleteOnExit();
 
     Matrix m0 = new DenseMatrix(100000, 30);

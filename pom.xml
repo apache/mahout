@@ -531,7 +531,9 @@
         <configuration>
           <forkCount>2</forkCount>
           <reuseForks>false</reuseForks>
-          <argLine>-Xmx1024m</argLine>
+          <argLine>-Xmx512m -Djava.security.manager
+          -Djava.security.policy=${project.build.directory}/../../buildtools/src/test/resources/java.policy</argLine>
+          <argLine>-Djava.security.auth.login.config=${project.build.directory}/../../buildtools/src/test/resources/jaas.config</argLine>
           <testFailureIgnore>false</testFailureIgnore>
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <systemPropertyVariables>

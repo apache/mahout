@@ -1,0 +1,134 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one or more
+// contributor license agreements.  See the NOTICE file distributed with
+// this work for additional information regarding copyright ownership.
+// The ASF licenses this file to You under the Apache License, Version 2.0
+// (the "License"); you may not use this file except in compliance with
+// the License.  You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+// Allows unit tests to run with a Java Security Manager
+// Tested from Maven 3.0.3 with the Surfire 2.8.1 configuration:
+//
+// <argLine>-Djava.security.manager -Djava.security.policy=${basedir}/src/test/resources/java.policy</argLine>
+//
+// This policy file documents why each permission is granted by listing exceptions in comments.
+//
+// This policy file grants permission as narrowly as possible.
+ 
+grant {
+
+  permission java.io.FilePermission "${user.dir}/target/-", "read, write, delete";
+
+  permission java.util.PropertyPermission "user.dir", "write";
+  permission java.util.PropertyPermission "localRepository", "write";
+  permission java.util.PropertyPermission "mahout.test.directory", "write";
+  permission java.util.PropertyPermission "basedir", "write";
+  permission java.util.PropertyPermission "java.class.path", "read";
+  permission java.util.PropertyPermission "surefire.real.class.path", "write";
+  permission java.util.PropertyPermission "java.class.path", "write";
+  permission java.util.PropertyPermission "surefire.test.class.path", "write";
+  permission java.util.PropertyPermission "surefire.junit4.upgradecheck", "read";
+  permission java.util.PropertyPermission "*", "read,write";
+
+  permission java.lang.RuntimePermission "setIO";
+  permission java.lang.RuntimePermission "accessDeclaredMembers";
+  permission java.lang.RuntimePermission "exitVM.0";
+  permission java.lang.RuntimePermission "exitVM.1";
+  permission java.lang.RuntimePermission "exitVM.2";
+  permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
+  permission javax.security.auth.AuthPermission "getSubject";
+  permission javax.security.auth.AuthPermission "createLoginContext.*";
+  permission java.lang.RuntimePermission "setContextClassLoader";
+  permission java.lang.RuntimePermission "createClassLoader";
+  permission java.lang.RuntimePermission "getClassLoader";
+  permission java.lang.RuntimePermission "enableContextClasLoaderOverride";
+  permission java.lang.RuntimePermission "modifyThread";
+  permission java.lang.RuntimePermission "getProtectionDomain";
+  permission java.lang.RuntimePermission "getenv.*";
+  permission java.lang.RuntimePermission "accessClassInPackage.sun.reflect";
+  permission javax.security.auth.AuthPermission "doAs";
+  permission javax.security.auth.AuthPermission "doAsPriviledged";
+  permission javax.security.auth.AuthPermission "getSubject";
+  permission javax.security.auth.kerberos.ServicePermission "*", "initiate";
+  permission javax.security.auth.kerberos.ServicePermission "*", "accept";
+  permission java.lang.RuntimePermission "setDefaultUncaughtExceptionHandler";
+  permission java.lang.RuntimePermission "modifyThreadGroup";
+  permission java.lang.RuntimePermission "getStackTrace";
+};
+
+//
+// Licensed to the Apache Software Foundation (ASF) under one or more
+// contributor license agreements.  See the NOTICE file distributed with
+// this work for additional information regarding copyright ownership.
+// The ASF licenses this file to You under the Apache License, Version 2.0
+// (the "License"); you may not use this file except in compliance with
+// the License.  You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+// Allows unit tests to run with a Java Security Manager
+// Tested from Maven 3.0.3 with the Surfire 2.8.1 configuration:
+//
+// <argLine>-Djava.security.manager -Djava.security.policy=${basedir}/src/test/resources/java.policy</argLine>
+//
+// This policy file documents why each permission is granted by listing exceptions in comments.
+//
+// This policy file grants permission as narrowly as possible.
+ 
+grant {
+
+  permission java.io.FilePermission "${user.dir}/target/-", "read, write, delete";
+
+  permission java.util.PropertyPermission "user.dir", "write";
+  permission java.util.PropertyPermission "localRepository", "write";
+  permission java.util.PropertyPermission "mahout.test.directory", "write";
+  permission java.util.PropertyPermission "basedir", "write";
+  permission java.util.PropertyPermission "java.class.path", "read";
+  permission java.util.PropertyPermission "surefire.real.class.path", "write";
+  permission java.util.PropertyPermission "java.class.path", "write";
+  permission java.util.PropertyPermission "surefire.test.class.path", "write";
+  permission java.util.PropertyPermission "surefire.junit4.upgradecheck", "read";
+  permission java.util.PropertyPermission "*", "read,write";
+
+  permission java.lang.RuntimePermission "setIO";
+  permission java.lang.RuntimePermission "accessDeclaredMembers";
+  permission java.lang.RuntimePermission "exitVM.0";
+  permission java.lang.RuntimePermission "exitVM.1";
+  permission java.lang.RuntimePermission "exitVM.2";
+  permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
+  permission javax.security.auth.AuthPermission "getSubject";
+  permission javax.security.auth.AuthPermission "createLoginContext.*";
+  permission java.lang.RuntimePermission "setContextClassLoader";
+  permission java.lang.RuntimePermission "createClassLoader";
+  permission java.lang.RuntimePermission "getClassLoader";
+  permission java.lang.RuntimePermission "enableContextClasLoaderOverride";
+  permission java.lang.RuntimePermission "modifyThread";
+  permission java.lang.RuntimePermission "getProtectionDomain";
+  permission java.lang.RuntimePermission "getenv.*";
+  permission java.lang.RuntimePermission "accessClassInPackage.sun.reflect";
+  permission javax.security.auth.AuthPermission "doAs";
+  permission javax.security.auth.AuthPermission "doAsPriviledged";
+  permission javax.security.auth.AuthPermission "getSubject";
+  permission javax.security.auth.kerberos.ServicePermission "*", "initiate";
+  permission javax.security.auth.kerberos.ServicePermission "*", "accept";
+  permission java.lang.RuntimePermission "setDefaultUncaughtExceptionHandler";
+  permission java.lang.RuntimePermission "modifyThreadGroup";
+  permission java.lang.RuntimePermission "getStackTrace";
+};
+

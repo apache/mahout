@@ -67,7 +67,7 @@ public class FileBasedSparseBinaryMatrixTest extends MahoutTestCase {
   @Test
   public void testSetData() throws IOException {
 
-    File f = File.createTempFile("matrix", ".m");
+    File f = File.createTempFile("matrix", ".m", getTestTempDir());
     f.deleteOnExit();
 
     Random gen = RandomUtils.getRandom();
