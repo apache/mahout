@@ -150,7 +150,7 @@ private[math] object SSVD {
     val c = s_q cross s_b
 
     // BB' computation becomes
-    val bbt = bt.t %*% bt -c - c.t +  (s_q cross s_q) * (xi * xi).sum
+    val bbt = bt.t %*% bt -c - c.t +  (s_q cross s_q) * (xi dot xi)
 
     val (uhat, d) = eigen(bbt)
 

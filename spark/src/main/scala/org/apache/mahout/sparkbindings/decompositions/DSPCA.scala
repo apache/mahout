@@ -139,7 +139,7 @@ object DSPCA {
 
     val c = s_q cross s_b
     val inCoreBBt = (drmBt.t %*% drmBt).checkpoint(StorageLevel.NONE).collect -
-        c - c.t + (s_q cross s_q) * (xi * xi).sum
+        c - c.t + (s_q cross s_q) * (xi dot xi)
     val (inCoreUHat, d) = eigen(inCoreBBt)
     val s = d.sqrt
 
