@@ -6,6 +6,8 @@ Release 1.0 - unreleased
 
   MAHOUT-1472: Cleanup website on fuzzy kmeans (smarthi)
 
+  MAHOUT-1471: Cleanup website for Canopy clustering (smarthi)
+
   MAHOUT-1467: ClusterClassifier readPolicy leaks file handles (Avi Shinnar, smarthi)
 
   MAHOUT-1466: Cluster visualization fails to execute (ssc)
