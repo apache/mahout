@@ -5,7 +5,7 @@ output-asf-email-examples/
 .classpath
 .project
 .settings/
-.idea/*
+.idea/
 *.iml
 target/
 examples/bin/tmp
