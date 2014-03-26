@@ -83,6 +83,6 @@ public class DisplaySpectralKMeans extends DisplayClustering {
 
   @Override
   public void paint(Graphics g) {
-    plotClusteredSampleData((Graphics2D) g, new Path(OUTPUT));
+    plotClusteredSampleData((Graphics2D) g, new Path(new Path(OUTPUT), "kmeans_out"));
   }
 }
