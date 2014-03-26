@@ -30,12 +30,12 @@ object DQR {
     val inCoreAtA = AtA.collect
     implicit val sc = AtA.rdd.sparkContext
 
-    s_log.debug("A'A=\n%s\n".format(inCoreAtA))
+    if (s_log.isDebugEnabled) s_log.debug("A'A=\n%s\n".format(inCoreAtA))
 
     val ch = chol(inCoreAtA)
     val inCoreR = (ch.getL cloned) t
 
-    s_log.debug("R=\n%s\n".format(inCoreR))
+    if (s_log.isDebugEnabled) s_log.debug("R=\n%s\n".format(inCoreR))
 
     if (checkRankDeficiency && !ch.isPositiveDefinite)
       throw new IllegalArgumentException("R is rank-deficient.")
