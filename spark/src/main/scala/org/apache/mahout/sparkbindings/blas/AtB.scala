@@ -28,7 +28,7 @@ import org.apache.log4j.Logger
 
 object AtB {
 
-  private val s_log = Logger.getLogger(AtB.getClass)
+  private val log = Logger.getLogger(AtB.getClass)
 
   /**
    * The logic for computing A'B is pretty much map-side generation of partial outer product blocks
@@ -45,13 +45,13 @@ object AtB {
     val rddA = srcA.toDrmRdd()
     val zipped = if ( zippable ) {
 
-      s_log.debug("A and B for A'B are identically distributed, performing row-wise zip.")
+      log.debug("A and B for A'B are identically distributed, performing row-wise zip.")
 
       rddA.zip(other = srcB.toDrmRdd())
 
     } else {
 
-      s_log.debug("A and B for A'B are not identically partitioned, performing inner join.")
+      log.debug("A and B for A'B are not identically partitioned, performing inner join.")
 
       rddA.join(other=srcB.toDrmRdd()).map({
         case (key,(v1,v2) ) => (key -> v1) -> (key -> v2)

@@ -26,7 +26,7 @@ import org.apache.log4j.Logger
 
 private[math] object SSVD {
 
-  private val s_log = Logger.getLogger(SSVD.getClass)
+  private val log = Logger.getLogger(SSVD.getClass)
 
   /**
    * In-core SSVD algorithm.
@@ -110,7 +110,7 @@ private[math] object SSVD {
     // Dataset mean
     val xi = a.colMeans()
 
-    if (s_log.isDebugEnabled) s_log.debug("xi=%s".format(xi))
+    if (log.isDebugEnabled) log.debug("xi=%s".format(xi))
 
     var y = a %*% omega
 

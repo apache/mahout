@@ -270,7 +270,7 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
     val inCoreAtAControl = inCoreA.t %*% inCoreA
 
     (inCoreAtA - inCoreAtAControl).norm should be < 1E-10
-    s_log.debug("test done.")
+    log.debug("test done.")
   }
 
 

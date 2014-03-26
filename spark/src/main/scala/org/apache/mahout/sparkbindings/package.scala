@@ -32,7 +32,7 @@ import org.apache.mahout.sparkbindings.drm.DrmLike
  */
 package object sparkbindings {
 
-  private[sparkbindings] val s_log = Logger.getLogger("org.apache.mahout.sparkbindings")
+  private[sparkbindings] val log = Logger.getLogger("org.apache.mahout.sparkbindings")
 
   /**
    * Create proper spark context that includes local Mahout jars
@@ -108,9 +108,9 @@ package object sparkbindings {
         ).filter(!_.matches(".*-tests.jar")) ++
             SparkContext.jarOfClass(classOf[DrmLike[_]]) ++ customJars
 
-        if (s_log.isDebugEnabled) {
-          s_log.debug("Mahout jars:")
-          mcjars.foreach(j => s_log.debug(j))
+        if (log.isDebugEnabled) {
+          log.debug("Mahout jars:")
+          mcjars.foreach(j => log.debug(j))
         }
 
         new SparkConf().setJars(jars = mcjars.toSeq)

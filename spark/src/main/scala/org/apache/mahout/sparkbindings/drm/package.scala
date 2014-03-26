@@ -34,7 +34,7 @@ import org.apache.mahout.sparkbindings.drm.decompositions.{DSPCA, DSSVD, DQR}
 
 package object drm {
 
-  private[drm] final val s_log = Logger.getLogger("org.apache.mahout.sparkbindings");
+  private[drm] final val log = Logger.getLogger("org.apache.mahout.sparkbindings");
 
   /** Drm row-wise tuple */
   type DrmTuple[K] = (K, Vector)

@@ -32,7 +32,7 @@ import org.apache.log4j.Logger
  */
 object AtA {
 
-  final val s_log = Logger.getLogger(AtA.getClass)
+  final val log = Logger.getLogger(AtA.getClass)
 
   final val PROPERTY_ATA_MAXINMEMNCOL = "mahout.math.AtA.maxInMemNCol"
 
@@ -62,7 +62,7 @@ object AtA {
    */
   def at_a_slim(operator: OpAtA[_], srcRdd: DrmRdd[_]): Matrix = {
 
-    s_log.debug("Applying slim A'A.")
+    log.debug("Applying slim A'A.")
 
     val ncol = operator.ncol
     // Compute backing vector of tiny-upper-triangular accumulator accross all the data.
@@ -125,7 +125,7 @@ object AtA {
   /** The version of A'A that does not use GraphX */
   def at_a_nongraph(op: OpAtA[_], srcRdd: DrmRdd[_]): DrmRdd[Int] = {
 
-    s_log.debug("Applying non-slim non-graph A'A.")
+    log.debug("Applying non-slim non-graph A'A.")
 
     // Determine how many partitions the new matrix would need approximately. We base that on 
     // geometry only, but it may eventually not be that adequate. Indeed, A'A tends to be much more
