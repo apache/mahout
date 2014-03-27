@@ -95,7 +95,8 @@ public class SpectralKMeansDriver extends AbstractJob {
     Path input = getInputPath();
     Path output = getOutputPath();
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
-      HadoopUtil.delete(conf, output);
+      HadoopUtil.delete(conf, getTempPath());
+      HadoopUtil.delete(conf, getOutputPath());
     }
     int numDims = Integer.parseInt(getOption("dimensions"));
     int clusters = Integer.parseInt(getOption("clusters"));
@@ -161,6 +162,7 @@ public class SpectralKMeansDriver extends AbstractJob {
       int blockHeight, int oversampling, int poweriters) throws IOException, InterruptedException,
       ClassNotFoundException {
 
+    HadoopUtil.delete(conf, tempDir);
     Path outputCalc = new Path(tempDir, "calculations");
     Path outputTmp = new Path(tempDir, "temporary");
 
