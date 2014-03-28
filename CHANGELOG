@@ -6,6 +6,8 @@ Release 1.0 - unreleased
 
   MAHOUT-1488: DisplaySpectralKMeans fails: examples/output/clusteredPoints/part-m-00000 does not exist (Saleem Ansari via smarthi)
 
+  MAHOUT-1476: Cleanup website on Hidden Markov Models
+
   MAHOUT-1475: Cleanup website on Naive Bayes (smarthi)
 
   MAHOUT-1472: Cleanup website on fuzzy kmeans (smarthi)
