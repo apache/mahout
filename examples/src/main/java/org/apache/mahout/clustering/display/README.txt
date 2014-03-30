@@ -6,11 +6,9 @@ DisplayClustering - generates 1000 samples from three, symmetric distributions. 
     and superimposes the model parameters that were used to generate the points. You can edit the
     generateSamples() method to change the sample points used by these programs.
     
-  * DisplayDirichlet - uses Dirichlet Process clustering
   * DisplayCanopy - uses Canopy clustering
   * DisplayKMeans - uses k-Means clustering
   * DisplayFuzzyKMeans - uses Fuzzy k-Means clustering
-  * DisplayMeanShift - uses MeanShift clustering
   
   * NOTE: some of these programs display the sample points and then superimpose all of the clusters
     from each iteration. The last iteration's clusters are in bold red and the previous several are 
