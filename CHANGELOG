@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 1.0 - unreleased
 
+  MAHOUT-1482: Rework quickstart website (Jian Wang via ssc)
+
   MAHOUT-1491: Spectral KMeans Clustering doesn't clean its /tmp dir and fails when seeing it again (smarthi)
 
   MAHOUT-1488: DisplaySpectralKMeans fails: examples/output/clusteredPoints/part-m-00000 does not exist (Saleem Ansari via smarthi)
