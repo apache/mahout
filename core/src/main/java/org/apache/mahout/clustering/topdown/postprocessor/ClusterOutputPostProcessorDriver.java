@@ -72,12 +72,6 @@ public final class ClusterOutputPostProcessorDriver extends AbstractJob {
 
   }
 
-  /**
-   * Constructor to be used by the ToolRunner.
-   */
-  private ClusterOutputPostProcessorDriver() {
-  }
-
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(), new ClusterOutputPostProcessorDriver(), args);
   }
