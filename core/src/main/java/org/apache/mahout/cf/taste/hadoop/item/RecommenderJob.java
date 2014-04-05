@@ -110,6 +110,9 @@ public final class RecommenderJob extends AbstractJob {
     addOption("itemsFile", null, "File of items to recommend for", null);
     addOption("filterFile", "f", "File containing comma-separated userID,itemID pairs. Used to exclude the item from "
             + "the recommendations for that user (optional)", null);
+    addOption("userItemFile", "uif", "File containing comma-separated userID,itemID pairs (optional). "
+            + "Used to include only these items into recommendations. "
+            + "Cannot be used together with usersFile or itemsFile", null);
     addOption("booleanData", "b", "Treat input as without pref values", Boolean.FALSE.toString());
     addOption("maxPrefsPerUser", "mxp",
             "Maximum number of preferences considered per user in final recommendation phase",
@@ -139,6 +142,7 @@ public final class RecommenderJob extends AbstractJob {
     String usersFile = getOption("usersFile");
     String itemsFile = getOption("itemsFile");
     String filterFile = getOption("filterFile");
+    String userItemFile = getOption("userItemFile");
     boolean booleanData = Boolean.valueOf(getOption("booleanData"));
     int maxPrefsPerUser = Integer.parseInt(getOption("maxPrefsPerUser"));
     int minPrefsPerUser = Integer.parseInt(getOption("minPrefsPerUser"));
@@ -235,6 +239,11 @@ public final class RecommenderJob extends AbstractJob {
       if (usersFile != null) {
         partialMultiplyConf.set(UserVectorSplitterMapper.USERS_FILE, usersFile);
       }
+      
+      if (userItemFile != null) {
+        partialMultiplyConf.set(IDReader.USER_ITEM_FILE, userItemFile);
+      }
+      
       partialMultiplyConf.setInt(UserVectorSplitterMapper.MAX_PREFS_PER_USER_CONSIDERED, maxPrefsPerUser);
 
       boolean succeeded = partialMultiply.waitForCompletion(true);
@@ -274,6 +283,10 @@ public final class RecommenderJob extends AbstractJob {
       Configuration aggregateAndRecommendConf = aggregateAndRecommend.getConfiguration();
       if (itemsFile != null) {
         aggregateAndRecommendConf.set(AggregateAndRecommendReducer.ITEMS_FILE, itemsFile);
+      }
+      
+      if (userItemFile != null) {
+        aggregateAndRecommendConf.set(IDReader.USER_ITEM_FILE, userItemFile);
       }
 
       if (filterFile != null) {

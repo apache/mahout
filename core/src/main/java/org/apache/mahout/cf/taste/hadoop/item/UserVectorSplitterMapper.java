@@ -17,15 +17,10 @@
 
 package org.apache.mahout.cf.taste.hadoop.item;
 
-import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.lucene.util.PriorityQueue;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
-import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
@@ -56,26 +51,10 @@ public final class UserVectorSplitterMapper extends
   protected void setup(Context context) throws IOException {
     Configuration jobConf = context.getConfiguration();
     maxPrefsPerUserConsidered = jobConf.getInt(MAX_PREFS_PER_USER_CONSIDERED, DEFAULT_MAX_PREFS_PER_USER_CONSIDERED);
-    String usersFilePathString = jobConf.get(USERS_FILE);
-    if (usersFilePathString != null) {
-      FSDataInputStream in = null;
-      try {
-        Path unqualifiedUsersFilePath = new Path(usersFilePathString);
-        FileSystem fs = FileSystem.get(unqualifiedUsersFilePath.toUri(), jobConf);
-        usersToRecommendFor = new FastIDSet();
-        Path usersFilePath = unqualifiedUsersFilePath.makeQualified(fs);
-        in = fs.open(usersFilePath);
-        for (String line : new FileLineIterable(in)) {
-          try {
-            usersToRecommendFor.add(Long.parseLong(line));
-          } catch (NumberFormatException nfe) {
-            log.warn("usersFile line ignored: {}", line);
-          }
-        }
-      } finally {
-        Closeables.close(in, true);
-      }
-    }
+    
+    IDReader idReader = new IDReader (jobConf);
+    idReader.readIDs();
+    usersToRecommendFor = idReader.getUserIds();    
   }
 
   @Override

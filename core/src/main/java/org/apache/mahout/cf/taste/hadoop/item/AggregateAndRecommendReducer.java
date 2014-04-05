@@ -18,7 +18,6 @@
 package org.apache.mahout.cf.taste.hadoop.item;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.cf.taste.hadoop.MutableRecommendedItem;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
@@ -26,8 +25,6 @@ import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
 import org.apache.mahout.cf.taste.hadoop.TopItemsQueue;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
-import org.apache.mahout.common.HadoopUtil;
-import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
@@ -66,6 +63,7 @@ public final class AggregateAndRecommendReducer extends
 
   private boolean booleanData;
   private int recommendationsPerUser;
+  private IDReader idReader;
   private FastIDSet itemsToRecommendFor;
   private OpenIntLongHashMap indexItemIDMap;
 
@@ -80,17 +78,9 @@ public final class AggregateAndRecommendReducer extends
     booleanData = conf.getBoolean(RecommenderJob.BOOLEAN_DATA, false);
     indexItemIDMap = TasteHadoopUtils.readIDIndexMap(conf.get(ITEMID_INDEX_PATH), conf);
 
-    String itemFilePathString = conf.get(ITEMS_FILE);
-    if (itemFilePathString != null) {
-      itemsToRecommendFor = new FastIDSet();
-      for (String line : new FileLineIterable(HadoopUtil.openStream(new Path(itemFilePathString), conf))) {
-        try {
-          itemsToRecommendFor.add(Long.parseLong(line));
-        } catch (NumberFormatException nfe) {
-          log.warn("itemsFile line ignored: {}", line);
-        }
-      }
-    }
+    idReader = new IDReader(conf);
+    idReader.readIDs();
+    itemsToRecommendFor = idReader.getItemIds();
   }
 
   @Override
@@ -119,8 +109,8 @@ public final class AggregateAndRecommendReducer extends
   }
 
   private void reduceNonBooleanData(VarLongWritable userID,
-                        Iterable<PrefAndSimilarityColumnWritable> values,
-                        Context context) throws IOException, InterruptedException {
+                                    Iterable<PrefAndSimilarityColumnWritable> values,
+                                    Context context) throws IOException, InterruptedException {
     /* each entry here is the sum in the numerator of the prediction formula */
     Vector numerators = null;
     /* each entry here is the sum in the denominator of the prediction formula */
@@ -179,18 +169,24 @@ public final class AggregateAndRecommendReducer extends
    */
   private void writeRecommendedItems(VarLongWritable userID, Vector recommendationVector, Context context)
     throws IOException, InterruptedException {
-
     TopItemsQueue topKItems = new TopItemsQueue(recommendationsPerUser);
+    FastIDSet itemsForUser = null;
+
+    if (idReader != null && idReader.isUserItemFilterSpecified()) {
+      itemsForUser = idReader.getItemsToRecommendForUser(userID.get());
+    }
 
     for (Element element : recommendationVector.nonZeroes()) {
       int index = element.index();
       long itemID;
       if (indexItemIDMap != null && !indexItemIDMap.isEmpty()) {
         itemID = indexItemIDMap.get(index);
-      } else { //we don't have any mappings, so just use the original
+      } else { // we don't have any mappings, so just use the original
         itemID = index;
       }
-      if (itemsToRecommendFor == null || itemsToRecommendFor.contains(itemID)) {
+
+      if (shouldIncludeItemIntoRecommendations(itemID, itemsToRecommendFor, itemsForUser)) {
+
         float value = (float) element.get();
         if (!Float.isNaN(value)) {
 
@@ -207,6 +203,19 @@ public final class AggregateAndRecommendReducer extends
     if (!topItems.isEmpty()) {
       recommendedItems.set(topItems);
       context.write(userID, recommendedItems);
+    }
+  }
+
+  private boolean shouldIncludeItemIntoRecommendations(long itemID, FastIDSet allItemsToRecommendFor,
+                                                       FastIDSet itemsForUser) {
+    if (allItemsToRecommendFor == null && itemsForUser == null) {
+      return true;
+    } else if (itemsForUser != null) {
+      return itemsForUser.contains(itemID);
+    } else if (allItemsToRecommendFor != null) {
+      return allItemsToRecommendFor.contains(itemID);
+    } else {
+      return false;
     }
   }
 
