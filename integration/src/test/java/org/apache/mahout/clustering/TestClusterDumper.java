@@ -17,10 +17,8 @@
 
 package org.apache.mahout.clustering;
 
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-
+import com.google.common.collect.Lists;
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -29,7 +27,10 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.StringField;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
@@ -51,11 +52,9 @@ import org.apache.mahout.vectorizer.Weight;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.IndexWriterConfig;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
 
 public final class TestClusterDumper extends MahoutTestCase {
   
@@ -245,157 +244,4 @@ public final class TestClusterDumper extends MahoutTestCase {
         output, 10), new Path(kMeansOutput, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
-  
-  /*
-  @Test
-  public void testKmeansSVD() throws Exception {
-    DistanceMeasure measure = new EuclideanDistanceMeasure();
-    Path output = getTestTempDirPath("output");
-    Path tmp = getTestTempDirPath("tmp");
-    DistributedLanczosSolver solver = new DistributedLanczosSolver();
-    Configuration conf = new Configuration();
-    solver.setConf(conf);
-    Path testData = getTestTempDirPath("testdata");
-    int sampleDimension = sampleData.get(0).get().size();
-    int desiredRank = 15;
-    solver.run(testData, output, tmp, null, sampleData.size(), sampleDimension,
-        false, desiredRank, 0.5, 0.0, true);
-    Path cleanEigenvectors = new Path(output,
-        EigenVerificationJob.CLEAN_EIGENVECTORS);
-    
-    // build in-memory data matrix A
-    Matrix a = new DenseMatrix(sampleData.size(), sampleDimension);
-    int i = 0;
-    for (VectorWritable vw : sampleData) {
-      a.assignRow(i++, vw.get());
-    }
-    // extract the eigenvectors into P
-    Matrix p = new DenseMatrix(39, desiredRank - 1);
-    FileSystem fs = FileSystem.get(cleanEigenvectors.toUri(), conf);
-    
-    i = 0;
-    for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(
-        cleanEigenvectors, conf)) {
-      Vector v = value.get();
-      p.assignColumn(i, v);
-      i++;
-    }
-    // sData = A P
-    Matrix sData = a.times(p);
-    
-    // now write sData back to file system so clustering can run against it
-    Path svdData = new Path(output, "svddata");
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, svdData,
-        IntWritable.class, VectorWritable.class);
-    try {
-      IntWritable key = new IntWritable();
-      VectorWritable value = new VectorWritable();
-      
-      for (int row = 0; row < sData.numRows(); row++) {
-        key.set(row);
-        value.set(sData.viewRow(row));
-        writer.append(key, value);
-      }
-    } finally {
-      Closeables.close(writer, true);
-    }
-    // now run the Canopy job to prime kMeans canopies
-    CanopyDriver.run(conf, svdData, output, measure, 8, 4, false, 0.0, true);
-    // now run the KMeans job
-    Path kmeansOutput = new Path(output, "kmeans");
-    KMeansDriver.run(svdData, new Path(output, "clusters-0"), kmeansOutput, measure,
-        0.001, 10, true, 0.0, true);
-    // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
-        kmeansOutput, 10), new Path(kmeansOutput, "clusteredPoints"));
-    clusterDumper.printClusters(termDictionary);
-  }
-  
-  @Test
-  public void testKmeansDSVD() throws Exception {
-    DistanceMeasure measure = new EuclideanDistanceMeasure();
-    Path output = getTestTempDirPath("output");
-    Path tmp = getTestTempDirPath("tmp");
-    DistributedLanczosSolver solver = new DistributedLanczosSolver();
-    Configuration config = new Configuration();
-    solver.setConf(config);
-    Path testData = getTestTempDirPath("testdata");
-    int sampleDimension = sampleData.get(0).get().size();
-    // Run EigenVerificationJob from within DistributedLanczosSolver.run(...)
-    int desiredRank = 13;
-    solver.run(testData, output, tmp, null, sampleData.size(), sampleDimension,
-        false, desiredRank, 0.5, 0.0, false);
-    
-    Path cleanEigenvectors = new Path(output,
-        EigenVerificationJob.CLEAN_EIGENVECTORS);
-    
-    // now multiply the testdata matrix and the eigenvector matrix
-    DistributedRowMatrix svdT = new DistributedRowMatrix(cleanEigenvectors,
-        tmp, desiredRank, sampleDimension);
-    Configuration conf = new Configuration(config);
-    svdT.setConf(conf);
-    DistributedRowMatrix a = new DistributedRowMatrix(testData, tmp,
-        sampleData.size(), sampleDimension);
-    a.setConf(conf);
-    DistributedRowMatrix sData = a.transpose().times(svdT.transpose());
-    sData.setConf(conf);
-    
-    // now run the Canopy job to prime kMeans canopies
-    CanopyDriver.run(conf, sData.getRowPath(), output, measure, 8, 4, false,
-        0.0, true);
-    // now run the KMeans job
-    Path kmeansOutput = new Path(output, "kmeans");
-    KMeansDriver.run(sData.getRowPath(), new Path(output, "clusters-0"),
-        kmeansOutput, measure, 0.001, 10, true, 0.0, true);
-    // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
-        kmeansOutput, 10), new Path(kmeansOutput, "clusteredPoints"));
-    clusterDumper.printClusters(termDictionary);
-  }
-  
-  @Test
-  public void testKmeansDSVD2() throws Exception {
-    DistanceMeasure measure = new EuclideanDistanceMeasure();
-    Path output = getTestTempDirPath("output");
-    Path tmp = getTestTempDirPath("tmp");
-    DistributedLanczosSolver solver = new DistributedLanczosSolver();
-    Configuration config = new Configuration();
-    solver.setConf(config);
-    Path testData = getTestTempDirPath("testdata");
-    int sampleDimension = sampleData.get(0).get().size();
-    // call EigenVerificationJob separately
-    int desiredRank = 13;
-    solver.run(testData, output, tmp, null, sampleData.size(), sampleDimension,
-        false, desiredRank);
-    Path rawEigenvectors = new Path(output,
-        DistributedLanczosSolver.RAW_EIGENVECTORS);
-    Configuration conf = new Configuration(config);
-    new EigenVerificationJob().run(testData, rawEigenvectors, output, tmp, 0.5,
-        0.0, true, conf);
-    Path cleanEigenvectors = new Path(output,
-        EigenVerificationJob.CLEAN_EIGENVECTORS);
-    
-    // now multiply the testdata matrix and the eigenvector matrix
-    DistributedRowMatrix svdT = new DistributedRowMatrix(cleanEigenvectors,
-        tmp, desiredRank, sampleDimension);
-    svdT.setConf(conf);
-    DistributedRowMatrix a = new DistributedRowMatrix(testData, tmp,
-        sampleData.size(), sampleDimension);
-    a.setConf(conf);
-    DistributedRowMatrix sData = a.transpose().times(svdT.transpose());
-    sData.setConf(conf);
-    
-    // now run the Canopy job to prime kMeans canopies
-    CanopyDriver.run(conf, sData.getRowPath(), output, measure, 8, 4, false,
-        0.0, true);
-    // now run the KMeans job
-    Path kmeansOutput = new Path(output, "kmeans");
-    KMeansDriver.run(sData.getRowPath(), new Path(output, "clusters-0"),
-        kmeansOutput, measure, 0.001, 10, true, 0.0, true);
-    // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
-        kmeansOutput, 10), new Path(kmeansOutput, "clusteredPoints"));
-    clusterDumper.printClusters(termDictionary);
-  }
-   */
 }
