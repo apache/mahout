@@ -19,6 +19,7 @@ package org.apache.mahout.math;
 
 import java.util.Iterator;
 
+import org.apache.mahout.math.function.Functions;
 import org.junit.Test;
 
 public final class TestSparseMatrix extends MatrixTest {
@@ -32,6 +33,35 @@ public final class TestSparseMatrix extends MatrixTest {
       }
     }
     return matrix;
+  }
+
+  /** test optimized addition of sparse matrices */
+  @Test
+  public void add() {
+
+    Matrix a = new SparseMatrix(3, 3);
+    a.set(0, 0, 1);
+    a.set(0, 2, 3);
+    a.set(2, 0, 1);
+    a.set(2, 1, 2);
+
+    Matrix b = new SparseMatrix(3, 3);
+    b.set(0, 0, 3);
+    b.set(0, 2, 1);
+    b.set(1, 1, 5);
+    b.set(2, 2, 2);
+
+    a.assign(b, Functions.PLUS);
+
+    assertEquals(4, a.getQuick(0, 0), 0.0);
+    assertEquals(0, a.getQuick(0, 1), 0.0);
+    assertEquals(4, a.getQuick(0, 2), 0.0);
+    assertEquals(0, a.getQuick(1, 0), 0.0);
+    assertEquals(5, a.getQuick(1, 1), 0.0);
+    assertEquals(0, a.getQuick(1, 2), 0.0);
+    assertEquals(1, a.getQuick(2, 0), 0.0);
+    assertEquals(2, a.getQuick(2, 1), 0.0);
+    assertEquals(2, a.getQuick(2, 2), 0.0);
   }
 
   /** Test copy method of sparse matrices which have empty non-initialized rows */

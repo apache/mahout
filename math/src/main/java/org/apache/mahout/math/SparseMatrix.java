@@ -18,6 +18,9 @@
 package org.apache.mahout.math;
 
 import com.google.common.collect.AbstractIterator;
+import org.apache.mahout.math.function.DoubleDoubleFunction;
+import org.apache.mahout.math.function.Functions;
+import org.apache.mahout.math.function.IntObjectProcedure;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.map.OpenIntObjectHashMap;
 
@@ -111,9 +114,8 @@ public class SparseMatrix extends AbstractMatrix {
   public int[] getNumNondefaultElements() {
     int[] result = new int[2];
     result[ROW] = rowVectors.size();
-    for (Vector vectorEntry : rowVectors.values()) {
-      result[COL] = Math.max(result[COL], vectorEntry
-          .getNumNondefaultElements());
+    for (Vector row : rowVectors.values()) {
+      result[COL] = Math.max(result[COL], row.getNumNondefaultElements());
     }
     return result;
   }
@@ -134,7 +136,39 @@ public class SparseMatrix extends AbstractMatrix {
     }
     return new MatrixView(this, offset, size);
   }
-  
+
+  @Override
+  public Matrix assign(Matrix other, DoubleDoubleFunction function) {
+    //TODO generalize to other kinds of functions
+    if (Functions.PLUS.equals(function) && other instanceof SparseMatrix) {
+      int rows = rowSize();
+      if (rows != other.rowSize()) {
+        throw new CardinalityException(rows, other.rowSize());
+      }
+      int columns = columnSize();
+      if (columns != other.columnSize()) {
+        throw new CardinalityException(columns, other.columnSize());
+      }
+
+      SparseMatrix otherSparse = (SparseMatrix) other;
+      otherSparse.rowVectors.forEachPair(new IntObjectProcedure<Vector>() {
+        @Override
+        public boolean apply(int rowIndex, Vector otherRow) {
+          Vector row = rowVectors.get(rowIndex);
+          if (row == null) {
+            rowVectors.put(rowIndex, otherRow.clone());
+          } else {
+            row.assign(otherRow, Functions.PLUS);
+          }
+          return true;
+        }
+      });
+      return this;
+    } else {
+      return super.assign(other, function);
+    }
+  }
+
   @Override
   public Matrix assignColumn(int column, Vector other) {
     if (rowSize() != other.size()) {
@@ -181,5 +215,10 @@ public class SparseMatrix extends AbstractMatrix {
     }
     return res;
   }
-  
+
+  /** special method necessary for efficient serialization */
+  public IntArrayList nonZeroRowIndices() {
+    return rowVectors.keys();
+  }
+
 }

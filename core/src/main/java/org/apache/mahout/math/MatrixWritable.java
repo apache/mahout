@@ -20,6 +20,7 @@ package org.apache.mahout.math;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.math.list.IntArrayList;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -31,12 +32,12 @@ public class MatrixWritable implements Writable {
   private static final int FLAG_DENSE = 0x01;
   private static final int FLAG_SEQUENTIAL = 0x02;
   private static final int FLAG_LABELS = 0x04;
-  private static final int NUM_FLAGS = 3;
+  private static final int FLAG_SPARSE_ROW = 0x08;
+  private static final int NUM_FLAGS = 4;
 
   private Matrix matrix;
 
-  public MatrixWritable() {
-  }
+  public MatrixWritable() {}
 
   public MatrixWritable(Matrix m) {
     set(m);
@@ -107,19 +108,33 @@ public class MatrixWritable implements Writable {
     boolean dense = (flags & FLAG_DENSE) != 0;
     boolean sequential = (flags & FLAG_SEQUENTIAL) != 0;
     boolean hasLabels = (flags & FLAG_LABELS) != 0;
+    boolean isSparseRowMatrix = (flags & FLAG_SPARSE_ROW) != 0;
 
     int rows = in.readInt();
     int columns = in.readInt();
 
-    Matrix r;
+    Matrix matrix;
     if (dense) {
-      r = new DenseMatrix(rows, columns);
+      matrix = new DenseMatrix(rows, columns);
     } else {
-      r = new SparseRowMatrix(rows, columns, !sequential);
+      if (isSparseRowMatrix) {
+        matrix = new SparseRowMatrix(rows, columns, sequential);
+      } else {
+        matrix = new SparseMatrix(rows, columns);
+      }
     }
 
-    for (int row = 0; row < rows; row++) {
-      r.viewRow(row).assign(VectorWritable.readVector(in));
+    if (dense || isSparseRowMatrix) {
+      for (int row = 0; row < rows; row++) {
+        matrix.assignRow(row, VectorWritable.readVector(in));
+      }
+    } else {
+      int numNonZeroRows = in.readInt();
+      int rowsRead = 0;
+      while (rowsRead++ < numNonZeroRows) {
+        int rowIndex = in.readInt();
+        matrix.assignRow(rowIndex, VectorWritable.readVector(in));
+      }
     }
 
     if (hasLabels) {
@@ -127,21 +142,22 @@ public class MatrixWritable implements Writable {
       Map<String,Integer> rowLabelBindings = Maps.newHashMap();
       readLabels(in, columnLabelBindings, rowLabelBindings);
       if (!columnLabelBindings.isEmpty()) {
-        r.setColumnLabelBindings(columnLabelBindings);
+        matrix.setColumnLabelBindings(columnLabelBindings);
       }
       if (!rowLabelBindings.isEmpty()) {
-        r.setRowLabelBindings(rowLabelBindings);
+        matrix.setRowLabelBindings(rowLabelBindings);
       }
     }
 
-    return r;
+    return matrix;
   }
 
   /** Writes a typed Matrix instance to the output stream */
-  public static void writeMatrix(DataOutput out, Matrix matrix) throws IOException {
+  public static void writeMatrix(final DataOutput out, Matrix matrix) throws IOException {
     int flags = 0;
     Vector row = matrix.viewRow(0);
-    if (row.isDense()) {
+    boolean isDense = row.isDense();
+    if (isDense) {
       flags |= FLAG_DENSE;
     }
     if (row.isSequentialAccess()) {
@@ -150,14 +166,31 @@ public class MatrixWritable implements Writable {
     if (matrix.getRowLabelBindings() != null || matrix.getColumnLabelBindings() != null) {
       flags |= FLAG_LABELS;
     }
+    boolean isSparseRowMatrix = matrix instanceof SparseRowMatrix;
+    if (isSparseRowMatrix) {
+      flags |= FLAG_SPARSE_ROW;
+    }
+
     out.writeInt(flags);
 
     out.writeInt(matrix.rowSize());
     out.writeInt(matrix.columnSize());
 
-    for (int i = 0; i < matrix.rowSize(); i++) {
-      VectorWritable.writeVector(out, matrix.viewRow(i), false);
+    if (isDense || isSparseRowMatrix) {
+      for (int i = 0; i < matrix.rowSize(); i++) {
+        VectorWritable.writeVector(out, matrix.viewRow(i), false);
+      }
+    } else {
+      IntArrayList rowIndices = ((SparseMatrix) matrix).nonZeroRowIndices();
+      int numNonZeroRows = rowIndices.size();
+      out.writeInt(numNonZeroRows);
+      for (int i = 0; i < numNonZeroRows; i++) {
+        int rowIndex = rowIndices.getQuick(i);
+        out.writeInt(rowIndex);
+        VectorWritable.writeVector(out, matrix.viewRow(rowIndex), false);
+      }
     }
+
     if ((flags & FLAG_LABELS) != 0) {
       writeLabelBindings(out, matrix.getColumnLabelBindings(), matrix.getRowLabelBindings());
     }

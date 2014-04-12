@@ -31,76 +31,92 @@ import org.junit.Test;
 
 public final class MatrixWritableTest extends MahoutTestCase {
 
-	@Test
-	public void testSparseMatrixWritable() throws Exception {
-		Matrix m = new SparseMatrix(5, 5);
-		m.set(1, 2, 3.0);
-		m.set(3, 4, 5.0);
-		Map<String, Integer> bindings = Maps.newHashMap();
-		bindings.put("A", 0);
-		bindings.put("B", 1);
-		bindings.put("C", 2);
-		bindings.put("D", 3);
-		bindings.put("default", 4);
-		m.setRowLabelBindings(bindings);
-    m.setColumnLabelBindings(bindings);
-		doTestMatrixWritableEquals(m);
-	}
-
-	@Test
-	public void testDenseMatrixWritable() throws Exception {
-		Matrix m = new DenseMatrix(5,5);
-		m.set(1, 2, 3.0);
-		m.set(3, 4, 5.0);
-		Map<String, Integer> bindings = Maps.newHashMap();
-		bindings.put("A", 0);
-		bindings.put("B", 1);
-		bindings.put("C", 2);
-		bindings.put("D", 3);
-		bindings.put("default", 4);
+  @Test
+  public void testSparseMatrixWritable() throws Exception {
+    Matrix m = new SparseMatrix(5, 5);
+    m.set(1, 2, 3.0);
+    m.set(3, 4, 5.0);
+    Map<String, Integer> bindings = Maps.newHashMap();
+    bindings.put("A", 0);
+    bindings.put("B", 1);
+    bindings.put("C", 2);
+    bindings.put("D", 3);
+    bindings.put("default", 4);
     m.setRowLabelBindings(bindings);
-		m.setColumnLabelBindings(bindings);
-		doTestMatrixWritableEquals(m);
-	}
+    m.setColumnLabelBindings(bindings);
+    doTestMatrixWritableEquals(m);
+  }
 
-	private static void doTestMatrixWritableEquals(Matrix m) throws IOException {
-		Writable matrixWritable = new MatrixWritable(m);
-		MatrixWritable matrixWritable2 = new MatrixWritable();
-		writeAndRead(matrixWritable, matrixWritable2);
-		Matrix m2 = matrixWritable2.get();
-		compareMatrices(m, m2); 
+  @Test
+  public void testSparseRowMatrixWritable() throws Exception {
+    Matrix m = new SparseRowMatrix(5, 5);
+    m.set(1, 2, 3.0);
+    m.set(3, 4, 5.0);
+    Map<String, Integer> bindings = Maps.newHashMap();
+    bindings.put("A", 0);
+    bindings.put("B", 1);
+    bindings.put("C", 2);
+    bindings.put("D", 3);
+    bindings.put("default", 4);
+    m.setRowLabelBindings(bindings);
+    m.setColumnLabelBindings(bindings);
+    doTestMatrixWritableEquals(m);
+  }
+
+  @Test
+  public void testDenseMatrixWritable() throws Exception {
+    Matrix m = new DenseMatrix(5,5);
+    m.set(1, 2, 3.0);
+    m.set(3, 4, 5.0);
+    Map<String, Integer> bindings = Maps.newHashMap();
+    bindings.put("A", 0);
+    bindings.put("B", 1);
+    bindings.put("C", 2);
+    bindings.put("D", 3);
+    bindings.put("default", 4);
+    m.setRowLabelBindings(bindings);
+    m.setColumnLabelBindings(bindings);
+    doTestMatrixWritableEquals(m);
+  }
+
+  private static void doTestMatrixWritableEquals(Matrix m) throws IOException {
+    Writable matrixWritable = new MatrixWritable(m);
+    MatrixWritable matrixWritable2 = new MatrixWritable();
+    writeAndRead(matrixWritable, matrixWritable2);
+    Matrix m2 = matrixWritable2.get();
+    compareMatrices(m, m2); 
     doCheckBindings(m2.getRowLabelBindings());
     doCheckBindings(m2.getColumnLabelBindings());    
-	}
+  }
 
-	private static void compareMatrices(Matrix m, Matrix m2) {
-		assertEquals(m.numRows(), m2.numRows());
-		assertEquals(m.numCols(), m2.numCols());
-		for (int r = 0; r < m.numRows(); r++) {
-			for (int c = 0; c < m.numCols(); c++) {
-				assertEquals(m.get(r, c), m2.get(r, c), EPSILON);
-			}
-		}
-		Map<String,Integer> bindings = m.getRowLabelBindings();
-		Map<String, Integer> bindings2 = m2.getRowLabelBindings();
-		assertEquals(bindings == null, bindings2 == null);
-		if (bindings != null) {
-			assertEquals(bindings.size(), m.numRows());
-			assertEquals(bindings.size(), bindings2.size());
-			for (Map.Entry<String,Integer> entry : bindings.entrySet()) {
-				assertEquals(entry.getValue(), bindings2.get(entry.getKey()));
-			}
-		}
-		bindings = m.getColumnLabelBindings();
-		bindings2 = m2.getColumnLabelBindings();
-		assertEquals(bindings == null, bindings2 == null);
-		if (bindings != null) {
-			assertEquals(bindings.size(), bindings2.size());
-			for (Map.Entry<String,Integer> entry : bindings.entrySet()) {
-				assertEquals(entry.getValue(), bindings2.get(entry.getKey()));
-			}
-		}
-	}
+  private static void compareMatrices(Matrix m, Matrix m2) {
+    assertEquals(m.numRows(), m2.numRows());
+    assertEquals(m.numCols(), m2.numCols());
+    for (int r = 0; r < m.numRows(); r++) {
+      for (int c = 0; c < m.numCols(); c++) {
+        assertEquals(m.get(r, c), m2.get(r, c), EPSILON);
+      }
+    }
+    Map<String,Integer> bindings = m.getRowLabelBindings();
+    Map<String, Integer> bindings2 = m2.getRowLabelBindings();
+    assertEquals(bindings == null, bindings2 == null);
+    if (bindings != null) {
+      assertEquals(bindings.size(), m.numRows());
+      assertEquals(bindings.size(), bindings2.size());
+      for (Map.Entry<String,Integer> entry : bindings.entrySet()) {
+        assertEquals(entry.getValue(), bindings2.get(entry.getKey()));
+      }
+    }
+    bindings = m.getColumnLabelBindings();
+    bindings2 = m2.getColumnLabelBindings();
+    assertEquals(bindings == null, bindings2 == null);
+    if (bindings != null) {
+      assertEquals(bindings.size(), bindings2.size());
+      for (Map.Entry<String,Integer> entry : bindings.entrySet()) {
+        assertEquals(entry.getValue(), bindings2.get(entry.getKey()));
+      }
+    }
+  }
 
   private static void doCheckBindings(Map<String,Integer> labels) {
     assertTrue("Missing label", labels.keySet().contains("A"));
@@ -110,23 +126,23 @@ public final class MatrixWritableTest extends MahoutTestCase {
     assertTrue("Missing label", labels.keySet().contains("default"));
   }
 
-	private static void writeAndRead(Writable toWrite, Writable toRead) throws IOException {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		DataOutputStream dos = new DataOutputStream(baos);
-		try {
-			toWrite.write(dos);
-		} finally {
-			Closeables.close(dos, false);
-		}
+  private static void writeAndRead(Writable toWrite, Writable toRead) throws IOException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    DataOutputStream dos = new DataOutputStream(baos);
+    try {
+      toWrite.write(dos);
+    } finally {
+      Closeables.close(dos, false);
+    }
 
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		DataInputStream dis = new DataInputStream(bais);
-		try {
-			toRead.readFields(dis);
-		} finally {
-			Closeables.close(dis, true);
-		}
-	}
+    ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+    DataInputStream dis = new DataInputStream(bais);
+    try {
+      toRead.readFields(dis);
+    } finally {
+      Closeables.close(dis, true);
+    }
+  }
 
 
 }
