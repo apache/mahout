@@ -12,6 +12,8 @@ Release 1.0 - unreleased
 
   MAHOUT-1488: DisplaySpectralKMeans fails: examples/output/clusteredPoints/part-m-00000 does not exist (Saleem Ansari via smarthi)
 
+  MAHOUT-1483: Organize links in web site navigation bar (akm)
+
   MAHOUT-1482: Rework quickstart website (Jian Wang via ssc)
 
   MAHOUT-1476: Cleanup website on Hidden Markov Models (akm)
@@ -56,7 +58,7 @@ Release 1.0 - unreleased
 
   MAHOUT-1429: Parallelize YtransposeY in ImplicitFeedbackAlternatingLeastSquaresSolver (Adam Ilardi via ssc)
 
-  MAHOUT-1420: Add solr-recommender to examples
+  MAHOUT-1420: Add solr-recommender to examples (Pat Ferrel via akm)
 
   MAHOUT-1419: Random decision forest is excessively slow on numeric features (srowen)
 
