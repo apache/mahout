@@ -43,9 +43,7 @@ import org.apache.mahout.math.VectorWritable;
 
 import com.google.common.base.Splitter;
 
-/**
- * This class trains a Naive Bayes Classifier (Parameters for both Naive Bayes and Complementary Naive Bayes)
- */
+/** Trains a Naive Bayes Classifier (parameters for both Naive Bayes and Complementary Naive Bayes) */
 public final class TrainNaiveBayesJob extends AbstractJob {
   private static final String TRAIN_COMPLEMENTARY = "trainComplementary";
   private static final String ALPHA_I = "alphaI";
@@ -93,13 +91,12 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     }
     long labelSize = createLabelIndex(labPath);
     float alphaI = Float.parseFloat(getOption(ALPHA_I));
-    //boolean trainComplementary = Boolean.parseBoolean(getOption(TRAIN_COMPLEMENTARY)); //always result to false
     boolean trainComplementary = hasOption(TRAIN_COMPLEMENTARY);
 
     HadoopUtil.setSerializations(getConf());
     HadoopUtil.cacheFiles(labPath, getConf());
 
-    //add up all the vectors with the same labels, while mapping the labels into our index
+    // Add up all the vectors with the same labels, while mapping the labels into our index
     Job indexInstances = prepareJob(getInputPath(),
                                     getTempPath(SUMMED_OBSERVATIONS),
                                     SequenceFileInputFormat.class,
@@ -115,7 +112,7 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     if (!succeeded) {
       return -1;
     }
-    //sum up all the weights from the previous step, per label and per feature
+    // Sum up all the weights from the previous step, per label and per feature
     Job weightSummer = prepareJob(getTempPath(SUMMED_OBSERVATIONS),
                                   getTempPath(WEIGHTS),
                                   SequenceFileInputFormat.class,
@@ -133,11 +130,10 @@ public final class TrainNaiveBayesJob extends AbstractJob {
       return -1;
     }
 
-    //put the per label and per feature vectors into the cache
+    // Put the per label and per feature vectors into the cache
     HadoopUtil.cacheFiles(getTempPath(WEIGHTS), getConf());
 
-    // calculate the per label theta normalizers, write out to LABEL_THETA_NORMALIZER vector --
-    // Rennie 3.2      
+    // Calculate the per label theta normalizers, write out to LABEL_THETA_NORMALIZER vector -- Rennie 3.2
     Job thetaSummer = prepareJob(getTempPath(SUMMED_OBSERVATIONS),
                                  getTempPath(THETAS),
                                  SequenceFileInputFormat.class,
@@ -156,10 +152,10 @@ public final class TrainNaiveBayesJob extends AbstractJob {
       return -1;
     }
     
-    //put the per label theta normalizers into the cache 
+    // Put the per label theta normalizers into the cache
     HadoopUtil.cacheFiles(getTempPath(THETAS), getConf());
     
-    //validate our model and then write it out to the official output
+    // Validate our model and then write it out to the official output
     getConf().setFloat(ThetaMapper.ALPHA_I, alphaI);
     NaiveBayesModel naiveBayesModel = BayesUtils.readModelFromDir(getTempPath(), getConf());
     naiveBayesModel.validate();

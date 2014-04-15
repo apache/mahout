@@ -33,12 +33,11 @@ import org.apache.mahout.math.VectorWritable;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
 
-/** NaiveBayesModel holds the weight Matrix, the feature and label sums and the weight normalizer vectors.*/
+/** NaiveBayesModel holds the weight matrix, the feature and label sums and the weight normalizer vectors.*/
 public class NaiveBayesModel {
 
   private final Vector weightsPerLabel;
   private final Vector perlabelThetaNormalizer;
-  //  private final double minThetaNormalizer;
   private final Vector weightsPerFeature;
   private final Matrix weightsPerLabelAndFeature;
   private final float alphaI;
@@ -57,7 +56,6 @@ public class NaiveBayesModel {
     this.numFeatures = weightsPerFeature.getNumNondefaultElements();
     this.totalWeightSum = weightsPerLabel.zSum();
     this.alphaI = alphaI;
-//    this.minThetaNormalizer = thetaNormalizer.maxValue();
   }
 
   public double labelWeight(int label) {

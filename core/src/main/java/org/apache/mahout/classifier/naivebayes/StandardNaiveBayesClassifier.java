@@ -18,7 +18,7 @@
 package org.apache.mahout.classifier.naivebayes;
 
 
-/** Class implementing the Naive Bayes Classifier Algorithm */
+/** Implementation of the Naive Bayes Classifier Algorithm */
 public class StandardNaiveBayesClassifier extends AbstractNaiveBayesClassifier { 
  
   public StandardNaiveBayesClassifier(NaiveBayesModel model) {
@@ -28,9 +28,8 @@ public class StandardNaiveBayesClassifier extends AbstractNaiveBayesClassifier {
   @Override
   public double getScoreForLabelFeature(int label, int feature) {
     NaiveBayesModel model = getModel();
-    // Standard Naive Bayes does not use weight normalization
-    // uncomment following line for weight normalized NB
-    // weight=weight/model.thetaNormalizer(label);
+    // Standard Naive Bayes does not use weight normalization, uncomment following line for weight normalized NB
+    // weight = weight / model.thetaNormalizer(label);
     return computeWeight(model.weight(label, feature), model.labelWeight(label), model.alphaI(), model.numFeatures());
   }
 
