@@ -2,7 +2,7 @@ Mahout Change Log
 
 Release 1.0 - unreleased
 
-  MAHOUT-1450: Cleaning up clustering documentation on mahout website (Pavan Kumar)
+  MAHOUT-1509: Invalid URL in link from "quick start/basics" page (Nick Martin, smarthi)
 
   MAHOUT-1508: Performance problems with sparse matrices (ssc)
 
@@ -43,6 +43,8 @@ Release 1.0 - unreleased
   MAHOUT-1455: Forkcount config causes JVM crashes during build (frankscholten)
 
   MAHOUT-1451: Cleaning up the examples for clustering on the website (Gaurav Misra via ssc)
+
+  MAHOUT-1450: Cleaning up clustering documentation on mahout website (Pavan Kumar)
 
   MAHOUT-1449: Update the Known Issues in Random Forests Page (Manoj Awasthi via ssc)
 
