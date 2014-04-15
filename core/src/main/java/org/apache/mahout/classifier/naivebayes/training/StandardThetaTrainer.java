@@ -29,9 +29,12 @@ public class StandardThetaTrainer extends AbstractThetaTrainer {
   @Override
   public void train(int label, Vector perLabelWeight) {
     double labelWeight = labelWeight(label);
-    for (Vector.Element e : perLabelWeight.nonZeroes()) {
+    // sum weights for each label including those with zero word counts
+    // unused in Standard Naive Bayes
+    for(int i=0; i < perLabelWeight.size(); i++){
+      Vector.Element perLabelWeightElement = perLabelWeight.getElement(i);
       updatePerLabelThetaNormalizer(label,
-          StandardNaiveBayesClassifier.computeWeight(e.get(), labelWeight, alphaI(), numFeatures()));
+          StandardNaiveBayesClassifier.computeWeight(perLabelWeightElement.get(), labelWeight, alphaI(), numFeatures()));
     }
   }
 }

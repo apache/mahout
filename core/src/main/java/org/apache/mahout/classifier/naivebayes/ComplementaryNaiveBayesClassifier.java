@@ -30,10 +30,13 @@ public class ComplementaryNaiveBayesClassifier extends AbstractNaiveBayesClassif
   @Override
   public double getScoreForLabelFeature(int label, int feature) {
     NaiveBayesModel model = getModel();
-    return computeWeight(model.featureWeight(feature), model.weight(label, feature),
+    double weight=computeWeight(model.featureWeight(feature), model.weight(label, feature),
         model.totalWeightSum(), model.labelWeight(label), model.alphaI(), model.numFeatures());
+    // http://people.csail.mit.edu/jrennie/papers/icml03-nb.pdf - Section 3.2, Weight Magnitude Errors
+    return weight/model.thetaNormalizer(label);
   }
 
+  // http://people.csail.mit.edu/jrennie/papers/icml03-nb.pdf - Section 3.1, Skewed Data bias
   public static double computeWeight(double featureWeight, double featureLabelWeight,
       double totalWeight, double labelWeight, double alphaI, double numFeatures) {
     double numerator = featureWeight - featureLabelWeight + alphaI;

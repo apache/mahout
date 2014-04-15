@@ -61,9 +61,10 @@ public abstract class AbstractThetaTrainer {
   protected double featureWeight(int feature) {
     return weightsPerFeature.get(feature);
   }
-  
+
+  // http://people.csail.mit.edu/jrennie/papers/icml03-nb.pdf - Section 3.2, Weight Magnitude Errors
   protected void updatePerLabelThetaNormalizer(int label, double weight) {
-    perLabelThetaNormalizer.set(label, perLabelThetaNormalizer.get(label) + weight);
+    perLabelThetaNormalizer.set(label, perLabelThetaNormalizer.get(label) + Math.abs(weight));
   }
 
   public Vector retrievePerLabelThetaNormalizer() {

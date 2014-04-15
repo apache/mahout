@@ -64,9 +64,9 @@ public class NaiveBayesModel {
     return weightsPerLabel.getQuick(label);
   }
 
-//  public double thetaNormalizer(int label) {
-//    return perlabelThetaNormalizer.get(label) / minThetaNormalizer;
-//  }
+  public double thetaNormalizer(int label) {
+    return perlabelThetaNormalizer.get(label); 
+  }
 
   public double featureWeight(int feature) {
     return weightsPerFeature.getQuick(feature);
@@ -148,18 +148,18 @@ public class NaiveBayesModel {
     Preconditions.checkNotNull(weightsPerLabel, "the number of labels has to be defined!");
     Preconditions.checkArgument(weightsPerLabel.getNumNondefaultElements() > 0,
         "the number of labels has to be greater than 0!");
-    Preconditions.checkArgument(perlabelThetaNormalizer != null, "the theta normalizers have to be defined");
-    // Preconditions.checkArgument(perlabelThetaNormalizer.getNumNondefaultElements() > 0,
-    //    "the number of theta normalizers has to be greater than 0!");
     Preconditions.checkNotNull(weightsPerFeature, "the feature sums have to be defined");
     Preconditions.checkArgument(weightsPerFeature.getNumNondefaultElements() > 0,
         "the feature sums have to be greater than 0!");
-    // Check if all thetas have same sign.
-    /*Iterator<Element> it = perlabelThetaNormalizer.iterateNonZero();
-    while (it.hasNext()) {
-      Element e = it.next();
-      Preconditions.checkArgument(Math.signum(e.get()) == Math.signum(minThetaNormalizer), e.get()
-          + "  " + minThetaNormalizer);
-    }*/
+    Preconditions.checkArgument(perlabelThetaNormalizer != null, "the theta normalizers have to be defined");
+    Preconditions.checkArgument(perlabelThetaNormalizer.getNumNondefaultElements() > 0,
+        "the number of theta normalizers has to be greater than 0!");    
+    Preconditions.checkArgument(Math.signum(perlabelThetaNormalizer.minValue()) 
+            == Math.signum(perlabelThetaNormalizer.maxValue()), 
+       "Theta normalizers do not all have the same sign");            
+    Preconditions.checkArgument(perlabelThetaNormalizer.getNumNonZeroElements() 
+            == perlabelThetaNormalizer.size(), 
+       "Theta normalizers can not have zero value.");
+    
   }
 }

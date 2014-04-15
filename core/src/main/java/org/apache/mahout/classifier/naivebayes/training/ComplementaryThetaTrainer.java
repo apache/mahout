@@ -29,9 +29,11 @@ public class ComplementaryThetaTrainer extends AbstractThetaTrainer {
   @Override
   public void train(int label, Vector perLabelWeight) {
     double labelWeight = labelWeight(label);
-    for (Vector.Element e : perLabelWeight.nonZeroes()) {
+    // sum weights for each label including those with zero word counts
+    for(int i=0; i < perLabelWeight.size(); i++){
+      Vector.Element perLabelWeightElement = perLabelWeight.getElement(i);
       updatePerLabelThetaNormalizer(label,
-          ComplementaryNaiveBayesClassifier.computeWeight(featureWeight(e.index()), e.get(),
+          ComplementaryNaiveBayesClassifier.computeWeight(featureWeight(perLabelWeightElement.index()), perLabelWeightElement.get(),
               totalWeightSum(), labelWeight, alphaI(), numFeatures()));
     }
   }

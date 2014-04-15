@@ -52,7 +52,7 @@ public abstract class NaiveBayesTestBase extends MahoutTestCase {
       double totalSum = featureSum.zSum();
       double numerator = fSum - score + alpha;
       double denominator = totalSum - lSum + featureSum.size();
-      weight += Math.log(numerator / denominator);
+      weight += Math.abs(Math.log(numerator / denominator));
     }
     return weight;
   }
@@ -68,7 +68,7 @@ public abstract class NaiveBayesTestBase extends MahoutTestCase {
       double lSum = labelSum.get(label);
       double numerator = score + alpha;
       double denominator = lSum + featureSum.size();
-      weight += Math.log(numerator / denominator);
+      weight += Math.abs(Math.log(numerator / denominator));
     }
     return weight;
   }

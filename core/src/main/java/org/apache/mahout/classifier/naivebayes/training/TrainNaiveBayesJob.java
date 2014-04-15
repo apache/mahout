@@ -136,8 +136,8 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     //put the per label and per feature vectors into the cache
     HadoopUtil.cacheFiles(getTempPath(WEIGHTS), getConf());
 
-    //calculate the Thetas, write out to LABEL_THETA_NORMALIZER vectors --
-    // TODO: add reference here to the part of the Rennie paper that discusses this
+    // calculate the per label theta normalizers, write out to LABEL_THETA_NORMALIZER vector --
+    // Rennie 3.2      
     Job thetaSummer = prepareJob(getTempPath(SUMMED_OBSERVATIONS),
                                  getTempPath(THETAS),
                                  SequenceFileInputFormat.class,
@@ -151,12 +151,14 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     thetaSummer.setCombinerClass(VectorSumReducer.class);
     thetaSummer.getConfiguration().setFloat(ThetaMapper.ALPHA_I, alphaI);
     thetaSummer.getConfiguration().setBoolean(ThetaMapper.TRAIN_COMPLEMENTARY, trainComplementary);
-    /* TODO(robinanil): Enable this when thetanormalization works.
     succeeded = thetaSummer.waitForCompletion(true);
     if (!succeeded) {
       return -1;
-    }*/
-
+    }
+    
+    //put the per label theta normalizers into the cache 
+    HadoopUtil.cacheFiles(getTempPath(THETAS), getConf());
+    
     //validate our model and then write it out to the official output
     getConf().setFloat(ThetaMapper.ALPHA_I, alphaI);
     NaiveBayesModel naiveBayesModel = BayesUtils.readModelFromDir(getTempPath(), getConf());
