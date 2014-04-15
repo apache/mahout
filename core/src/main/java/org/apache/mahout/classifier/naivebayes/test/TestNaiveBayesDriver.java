@@ -22,11 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
@@ -82,61 +82,66 @@ public class TestNaiveBayesDriver extends AbstractJob {
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.delete(getConf(), getOutputPath());
     }
-    
-    boolean complementary = hasOption("testComplementary");
+
     boolean sequential = hasOption("runSequential");
+    boolean succeeded;
     if (sequential) {
-      FileSystem fs = FileSystem.get(getConf());
-      NaiveBayesModel model = NaiveBayesModel.materialize(new Path(getOption("model")), getConf());
-      AbstractNaiveBayesClassifier classifier;
-      if (complementary) {
-        classifier = new ComplementaryNaiveBayesClassifier(model);
-      } else {
-        classifier = new StandardNaiveBayesClassifier(model);
-      }
-      SequenceFile.Writer writer =
-          new SequenceFile.Writer(fs, getConf(), getOutputPath(), Text.class, VectorWritable.class);
-      Reader reader = new Reader(fs, getInputPath(), getConf());
-      Text key = new Text();
-      VectorWritable vw = new VectorWritable();
-      while (reader.next(key, vw)) {
-        writer.append(new Text(SLASH.split(key.toString())[1]),
-            new VectorWritable(classifier.classifyFull(vw.get())));
-      }
-      writer.close();
-      reader.close();
+       runSequential();
     } else {
-      boolean succeeded = runMapReduce(parsedArgs);
+      succeeded = runMapReduce();
       if (!succeeded) {
         return -1;
       }
     }
-    
+
     //load the labels
     Map<Integer, String> labelMap = BayesUtils.readLabelIndex(getConf(), new Path(getOption("labelIndex")));
 
     //loop over the results and create the confusion matrix
     SequenceFileDirIterable<Text, VectorWritable> dirIterable =
-        new SequenceFileDirIterable<Text, VectorWritable>(getOutputPath(),
-                                                          PathType.LIST,
-                                                          PathFilters.partFilter(),
-                                                          getConf());
+        new SequenceFileDirIterable<Text, VectorWritable>(getOutputPath(), PathType.LIST, PathFilters.partFilter(), getConf());
     ResultAnalyzer analyzer = new ResultAnalyzer(labelMap.values(), "DEFAULT");
     analyzeResults(labelMap, dirIterable, analyzer);
 
-    log.info("{} Results: {}", complementary ? "Complementary" : "Standard NB", analyzer);
+    log.info("{} Results: {}", hasOption("testComplementary") ? "Complementary" : "Standard NB", analyzer);
     return 0;
   }
 
-  private boolean runMapReduce(Map<String, List<String>> parsedArgs) throws IOException,
+  private void runSequential() throws IOException {
+    boolean complementary = hasOption("testComplementary");
+    FileSystem fs = FileSystem.get(getConf());
+    NaiveBayesModel model = NaiveBayesModel.materialize(new Path(getOption("model")), getConf());
+    AbstractNaiveBayesClassifier classifier;
+    if (complementary) {
+      classifier = new ComplementaryNaiveBayesClassifier(model);
+    } else {
+      classifier = new StandardNaiveBayesClassifier(model);
+    }
+    SequenceFile.Writer writer =
+        SequenceFile.createWriter(fs, getConf(), new Path(getOutputPath(), "part-r-00000"), Text.class, VectorWritable.class);
+
+    try {
+      SequenceFileDirIterable<Text, VectorWritable> dirIterable =
+          new SequenceFileDirIterable<Text, VectorWritable>(getInputPath(), PathType.LIST, PathFilters.partFilter(), getConf());
+      // loop through the part-r-* files in getInputPath() and get classification scores for all entries
+      for (Pair<Text, VectorWritable> pair : dirIterable) {
+        writer.append(new Text(SLASH.split(pair.getFirst().toString())[1]),
+            new VectorWritable(classifier.classifyFull(pair.getSecond().get())));
+      }
+    } finally {
+      Closeables.close(writer, false);
+    }
+  }
+
+  private boolean runMapReduce() throws IOException,
       InterruptedException, ClassNotFoundException {
     Path model = new Path(getOption("model"));
     HadoopUtil.cacheFiles(model, getConf());
     //the output key is the expected value, the output value are the scores for all the labels
     Job testJob = prepareJob(getInputPath(), getOutputPath(), SequenceFileInputFormat.class, BayesTestMapper.class,
-            Text.class, VectorWritable.class, SequenceFileOutputFormat.class);
+        Text.class, VectorWritable.class, SequenceFileOutputFormat.class);
     //testJob.getConfiguration().set(LABEL_KEY, getOption("--labels"));
-    
+
     //boolean complementary = parsedArgs.containsKey("testComplementary"); //always result to false as key in hash map is "--testComplementary"
     boolean complementary = hasOption("testComplementary"); //or  complementary = parsedArgs.containsKey("--testComplementary");
     testJob.getConfiguration().set(COMPLEMENTARY, String.valueOf(complementary));
