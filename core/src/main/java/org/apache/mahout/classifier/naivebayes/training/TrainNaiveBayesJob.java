@@ -133,7 +133,8 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     // Put the per label and per feature vectors into the cache
     HadoopUtil.cacheFiles(getTempPath(WEIGHTS), getConf());
 
-    // Calculate the per label theta normalizers, write out to LABEL_THETA_NORMALIZER vector -- Rennie 3.2
+    // Calculate the per label theta normalizers, write out to LABEL_THETA_NORMALIZER vector
+    // see http://people.csail.mit.edu/jrennie/papers/icml03-nb.pdf - Section 3.2, Weight Magnitude Errors
     Job thetaSummer = prepareJob(getTempPath(SUMMED_OBSERVATIONS),
                                  getTempPath(THETAS),
                                  SequenceFileInputFormat.class,
