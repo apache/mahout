@@ -84,6 +84,8 @@ Release 1.0 - unreleased
 
 Release 0.9 - 2014-02-01
 
+  MAHOUT-1387: Create page for release notes (ssc)
+
   MAHOUT-1411: Random test failures from TDigestTest (smarthi)
 
   MAHOUT-1410: clusteredPoints do not contain a vector id (smarthi, Andrew Musselman)
