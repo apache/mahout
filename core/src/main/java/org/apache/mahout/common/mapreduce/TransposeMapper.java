@@ -27,11 +27,20 @@ import java.io.IOException;
 
 public class TransposeMapper extends Mapper<IntWritable,VectorWritable,IntWritable,VectorWritable> {
 
+  public static final String NEW_NUM_COLS_PARAM = TransposeMapper.class.getName() + ".newNumCols";
+
+  private int newNumCols;
+
+  @Override
+  protected void setup(Context ctx) throws IOException, InterruptedException {
+    newNumCols = ctx.getConfiguration().getInt(NEW_NUM_COLS_PARAM, Integer.MAX_VALUE);
+  }
+
   @Override
   protected void map(IntWritable r, VectorWritable v, Context ctx) throws IOException, InterruptedException {
     int row = r.get();
     for (Vector.Element e : v.get().nonZeroes()) {
-      RandomAccessSparseVector tmp = new RandomAccessSparseVector(Integer.MAX_VALUE, 1);
+      RandomAccessSparseVector tmp = new RandomAccessSparseVector(newNumCols, 1);
       tmp.setQuick(row, e.get());
       r.set(e.index());
       ctx.write(r, new VectorWritable(tmp));

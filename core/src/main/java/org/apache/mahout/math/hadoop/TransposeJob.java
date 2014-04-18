@@ -18,38 +18,25 @@
 package org.apache.mahout.math.hadoop;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
-import org.apache.hadoop.mapred.SequenceFileInputFormat;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
-import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.SequentialAccessSparseVector;
-import org.apache.mahout.math.Vector;
+import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.mapreduce.MergeVectorsCombiner;
+import org.apache.mahout.common.mapreduce.MergeVectorsReducer;
+import org.apache.mahout.common.mapreduce.TransposeMapper;
 import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Transpose a matrix
- */
+/** Transpose a matrix */
 public class TransposeJob extends AbstractJob {
-
-  public static final String NUM_ROWS_KEY = "SparseRowMatrix.numRows";
 
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new TransposeJob(), args);
@@ -75,82 +62,24 @@ public class TransposeJob extends AbstractJob {
     return 0;
   }
 
-  public static Configuration buildTransposeJobConf(Path matrixInputPath,
-                                                    Path matrixOutputPath,
-                                                    int numInputRows) throws IOException {
-    return buildTransposeJobConf(new Configuration(), matrixInputPath, matrixOutputPath, numInputRows);
+  public static Job buildTransposeJob(Path matrixInputPath, Path matrixOutputPath, int numInputRows)
+    throws IOException {
+    return buildTransposeJob(new Configuration(), matrixInputPath, matrixOutputPath, numInputRows);
   }
 
-  public static Configuration buildTransposeJobConf(Configuration initialConf,
-                                                    Path matrixInputPath,
-                                                    Path matrixOutputPath,
-                                                    int numInputRows) throws IOException {
-    JobConf conf = new JobConf(initialConf, TransposeJob.class);
-    conf.setJobName("TransposeJob: " + matrixInputPath + " transpose -> " + matrixOutputPath);
-    FileSystem fs = FileSystem.get(matrixInputPath.toUri(), conf);
-    matrixInputPath = fs.makeQualified(matrixInputPath);
-    matrixOutputPath = fs.makeQualified(matrixOutputPath);
-    conf.setInt(NUM_ROWS_KEY, numInputRows);
+  public static Job buildTransposeJob(Configuration initialConf, Path matrixInputPath, Path matrixOutputPath,
+      int numInputRows) throws IOException {
 
-    FileInputFormat.addInputPath(conf, matrixInputPath);
-    conf.setInputFormat(SequenceFileInputFormat.class);
-    FileOutputFormat.setOutputPath(conf, matrixOutputPath);
-    conf.setMapperClass(TransposeMapper.class);
-    conf.setMapOutputKeyClass(IntWritable.class);
-    conf.setMapOutputValueClass(VectorWritable.class);
-    conf.setCombinerClass(MergeVectorsCombiner.class);
-    conf.setReducerClass(MergeVectorsReducer.class);
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
-    conf.setOutputKeyClass(IntWritable.class);
-    conf.setOutputValueClass(VectorWritable.class);
-    return conf;
+    Job job = HadoopUtil.prepareJob(matrixInputPath, matrixOutputPath, SequenceFileInputFormat.class,
+        TransposeMapper.class, IntWritable.class, VectorWritable.class, MergeVectorsReducer.class, IntWritable.class,
+        VectorWritable.class, SequenceFileOutputFormat.class, initialConf);
+    job.setCombinerClass(MergeVectorsCombiner.class);
+    job.getConfiguration().setInt(TransposeMapper.NEW_NUM_COLS_PARAM, numInputRows);
+
+    job.setJobName("TransposeJob: " + matrixInputPath);
+
+    return job;
   }
 
-  public static class TransposeMapper extends MapReduceBase
-          implements Mapper<IntWritable, VectorWritable, IntWritable, VectorWritable> {
 
-    private int newNumCols;
-
-    @Override
-    public void configure(JobConf conf) {
-      newNumCols = conf.getInt(NUM_ROWS_KEY, Integer.MAX_VALUE);
-    }
-
-    @Override
-    public void map(IntWritable r, VectorWritable v, OutputCollector<IntWritable, VectorWritable> out,
-                    Reporter reporter) throws IOException {
-      int row = r.get();
-      for (Vector.Element e : v.get().nonZeroes()) {
-        RandomAccessSparseVector tmp = new RandomAccessSparseVector(newNumCols, 1);
-        tmp.setQuick(row, e.get());
-        r.set(e.index());
-        out.collect(r, new VectorWritable(tmp));
-      }
-    }
-  }
-
-  public static class MergeVectorsCombiner extends MapReduceBase
-          implements Reducer<WritableComparable<?>, VectorWritable, WritableComparable<?>, VectorWritable> {
-
-    @Override
-    public void reduce(WritableComparable<?> key,
-                       Iterator<VectorWritable> vectors,
-                       OutputCollector<WritableComparable<?>,VectorWritable> out,
-                       Reporter reporter) throws IOException {
-      out.collect(key, VectorWritable.merge(vectors));
-    }
-  }
-
-  public static class MergeVectorsReducer extends MapReduceBase
-          implements Reducer<WritableComparable<?>, VectorWritable, WritableComparable<?>, VectorWritable> {
-
-    @Override
-    public void reduce(WritableComparable<?> key,
-                       Iterator<VectorWritable> vectors,
-                       OutputCollector<WritableComparable<?>, VectorWritable> out,
-                       Reporter reporter) throws IOException {
-      Vector merged = VectorWritable.merge(vectors).get();
-      out.collect(key, new VectorWritable(new SequentialAccessSparseVector(merged)));
-    }
-  }
 }

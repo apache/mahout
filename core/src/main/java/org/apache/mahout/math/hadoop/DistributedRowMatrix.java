@@ -30,6 +30,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
@@ -234,8 +235,14 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
   public DistributedRowMatrix transpose() throws IOException {
     Path outputPath = new Path(rowPath.getParent(), "transpose-" + (System.nanoTime() & 0xFF));
     Configuration initialConf = getConf() == null ? new Configuration() : getConf();
-    Configuration conf = TransposeJob.buildTransposeJobConf(initialConf, rowPath, outputPath, numRows);
-    JobClient.runJob(new JobConf(conf));
+    Job transposeJob = TransposeJob.buildTransposeJob(initialConf, rowPath, outputPath, numRows);
+
+    try {
+      transposeJob.waitForCompletion(true);
+    } catch (Exception e) {
+      throw new IllegalStateException("transposition failed", e);
+    }
+
     DistributedRowMatrix m = new DistributedRowMatrix(outputPath, outputTmpPath, numCols, numRows);
     m.setConf(this.conf);
     return m;
@@ -245,16 +252,17 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
   public Vector times(Vector v) {
     try {
       Configuration initialConf = getConf() == null ? new Configuration() : getConf();
-      Path outputVectorTmpPath = new Path(outputTmpBasePath,
-                                          new Path(Long.toString(System.nanoTime())));
-      Configuration conf =
-          TimesSquaredJob.createTimesJobConf(initialConf,
-                                             v,
-                                             numRows,
-                                             rowPath,
-                                             outputVectorTmpPath);
-      JobClient.runJob(new JobConf(conf));
-      Vector result = TimesSquaredJob.retrieveTimesSquaredOutputVector(conf);
+      Path outputVectorTmpPath = new Path(outputTmpBasePath, new Path(Long.toString(System.nanoTime())));
+
+      Job job = TimesSquaredJob.createTimesJob(initialConf, v, numRows, rowPath, outputVectorTmpPath);
+
+      try {
+        job.waitForCompletion(true);
+      } catch (Exception e) {
+        throw new IllegalStateException("times failed", e);
+      }
+
+      Vector result = TimesSquaredJob.retrieveTimesSquaredOutputVector(outputVectorTmpPath, conf);
       if (!keepTempFiles) {
         FileSystem fs = outputVectorTmpPath.getFileSystem(conf);
         fs.delete(outputVectorTmpPath, true);
@@ -269,15 +277,17 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
   public Vector timesSquared(Vector v) {
     try {
       Configuration initialConf = getConf() == null ? new Configuration() : getConf();
-      Path outputVectorTmpPath = new Path(outputTmpBasePath,
-               new Path(Long.toString(System.nanoTime())));
-      Configuration conf =
-          TimesSquaredJob.createTimesSquaredJobConf(initialConf,
-                                                    v,
-                                                    rowPath,
-                                                    outputVectorTmpPath);
-      JobClient.runJob(new JobConf(conf));
-      Vector result = TimesSquaredJob.retrieveTimesSquaredOutputVector(conf);
+      Path outputVectorTmpPath = new Path(outputTmpBasePath, new Path(Long.toString(System.nanoTime())));
+
+      Job job = TimesSquaredJob.createTimesSquaredJob(initialConf, v, rowPath, outputVectorTmpPath);
+
+      try {
+        job.waitForCompletion(true);
+      } catch (Exception e) {
+        throw new IllegalStateException("timesSquared failed", e);
+      }
+
+      Vector result = TimesSquaredJob.retrieveTimesSquaredOutputVector(outputVectorTmpPath, conf);
       if (!keepTempFiles) {
         FileSystem fs = outputVectorTmpPath.getFileSystem(conf);
         fs.delete(outputVectorTmpPath, true);

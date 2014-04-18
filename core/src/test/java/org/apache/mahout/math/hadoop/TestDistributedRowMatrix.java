@@ -25,6 +25,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
@@ -191,8 +192,10 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     Path inputPath = new Path(baseTmpDirPath, "input");
     Path outputPath = new Path(baseTmpDirPath, "output");
 
-    Configuration transposeJobConf = TransposeJob.buildTransposeJobConf(inputPath, outputPath, 10);
-    Configuration transposeCustomJobConf = TransposeJob.buildTransposeJobConf(initialConf, inputPath, outputPath, 10);
+    Configuration transposeJobConf = TransposeJob.buildTransposeJob(inputPath, outputPath, 10).getConfiguration();
+
+    Configuration transposeCustomJobConf = TransposeJob.buildTransposeJob(initialConf, inputPath, outputPath, 10)
+                                                       .getConfiguration();
 
     assertNull(transposeJobConf.get(TEST_PROPERTY_KEY));
     assertEquals(TEST_PROPERTY_VALUE, transposeCustomJobConf.get(TEST_PROPERTY_KEY));
@@ -208,49 +211,36 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
     Vector v = new RandomAccessSparseVector(50);
     v.assign(1.0);
 
-    Configuration timesSquaredJobConf1 = TimesSquaredJob.createTimesSquaredJobConf(v, inputPath, outputPath);
-    Configuration customTimesSquaredJobConf1 = TimesSquaredJob.createTimesSquaredJobConf(initialConf, v, inputPath, outputPath);
+    Job timesSquaredJob1 = TimesSquaredJob.createTimesSquaredJob(v, inputPath, outputPath);
+    Job customTimesSquaredJob1 = TimesSquaredJob.createTimesSquaredJob(initialConf, v, inputPath, outputPath);
 
-    assertNull(timesSquaredJobConf1.get(TEST_PROPERTY_KEY));
-    assertEquals(TEST_PROPERTY_VALUE, customTimesSquaredJobConf1.get(TEST_PROPERTY_KEY));
+    assertNull(timesSquaredJob1.getConfiguration().get(TEST_PROPERTY_KEY));
+    assertEquals(TEST_PROPERTY_VALUE, customTimesSquaredJob1.getConfiguration().get(TEST_PROPERTY_KEY));
 
-    Configuration timesJobConf = TimesSquaredJob.createTimesJobConf(v, 50, inputPath, outputPath);
-    Configuration customTimesJobConf = TimesSquaredJob.createTimesJobConf(initialConf, v, 50, inputPath, outputPath);
+    Job timesJob = TimesSquaredJob.createTimesJob(v, 50, inputPath, outputPath);
+    Job customTimesJob = TimesSquaredJob.createTimesJob(initialConf, v, 50, inputPath, outputPath);
 
-    assertNull(timesJobConf.get(TEST_PROPERTY_KEY));
-    assertEquals(TEST_PROPERTY_VALUE, customTimesJobConf.get(TEST_PROPERTY_KEY));
+    assertNull(timesJob.getConfiguration().get(TEST_PROPERTY_KEY));
+    assertEquals(TEST_PROPERTY_VALUE, customTimesJob.getConfiguration().get(TEST_PROPERTY_KEY));
 
-    Configuration timesSquaredJobConf2 = TimesSquaredJob.createTimesSquaredJobConf(v,
-                                                                                   inputPath,
-                                                                                   outputPath,
-                                                                                   TimesSquaredJob.TimesSquaredMapper.class,
-                                                                                   TimesSquaredJob.VectorSummingReducer.class);
-    Configuration customTimesSquaredJobConf2 = TimesSquaredJob.createTimesSquaredJobConf(initialConf,
-                                                                                         v,
-                                                                                         inputPath,
-                                                                                         outputPath,
-                                                                                         TimesSquaredJob.TimesSquaredMapper.class,
-                                                                                         TimesSquaredJob.VectorSummingReducer.class);
+    Job timesSquaredJob2 = TimesSquaredJob.createTimesSquaredJob(v, inputPath, outputPath,
+        TimesSquaredJob.TimesSquaredMapper.class, TimesSquaredJob.VectorSummingReducer.class);
 
-    assertNull(timesSquaredJobConf2.get(TEST_PROPERTY_KEY));
-    assertEquals(TEST_PROPERTY_VALUE, customTimesSquaredJobConf2.get(TEST_PROPERTY_KEY));
+    Job customTimesSquaredJob2 = TimesSquaredJob.createTimesSquaredJob(initialConf, v, inputPath,
+        outputPath, TimesSquaredJob.TimesSquaredMapper.class, TimesSquaredJob.VectorSummingReducer.class);
 
-    Configuration timesSquaredJobConf3 = TimesSquaredJob.createTimesSquaredJobConf(v,
-                                                                                   50,
-                                                                                   inputPath,
-                                                                                   outputPath,
-                                                                                   TimesSquaredJob.TimesSquaredMapper.class,
-                                                                                   TimesSquaredJob.VectorSummingReducer.class);
-    Configuration customTimesSquaredJobConf3 = TimesSquaredJob.createTimesSquaredJobConf(initialConf,
-                                                                                         v,
-                                                                                         50,
-                                                                                         inputPath,
-                                                                                         outputPath,
-                                                                                         TimesSquaredJob.TimesSquaredMapper.class,
-                                                                                         TimesSquaredJob.VectorSummingReducer.class);
+    assertNull(timesSquaredJob2.getConfiguration().get(TEST_PROPERTY_KEY));
+    assertEquals(TEST_PROPERTY_VALUE, customTimesSquaredJob2.getConfiguration().get(TEST_PROPERTY_KEY));
 
-    assertNull(timesSquaredJobConf3.get(TEST_PROPERTY_KEY));
-    assertEquals(TEST_PROPERTY_VALUE, customTimesSquaredJobConf3.get(TEST_PROPERTY_KEY));
+    Job timesSquaredJob3 = TimesSquaredJob.createTimesSquaredJob(v, 50, inputPath, outputPath,
+        TimesSquaredJob.TimesSquaredMapper.class, TimesSquaredJob.VectorSummingReducer.class);
+
+    Job customTimesSquaredJob3 = TimesSquaredJob.createTimesSquaredJob(initialConf,
+        v, 50, inputPath, outputPath, TimesSquaredJob.TimesSquaredMapper.class,
+        TimesSquaredJob.VectorSummingReducer.class);
+
+    assertNull(timesSquaredJob3.getConfiguration().get(TEST_PROPERTY_KEY));
+    assertEquals(TEST_PROPERTY_VALUE, customTimesSquaredJob3.getConfiguration().get(TEST_PROPERTY_KEY));
   }
 
   @Test
