@@ -64,13 +64,14 @@ public class KMeansDriver extends AbstractJob {
         .withDescription(
             "The k in k-Means.  If specified, then a random selection of k Vectors will be chosen"
                 + " as the Centroid and written to the clusters input path.").create());
+    addOption(DefaultOptionCreator.useSetRandomSeedOption().create());
     addOption(DefaultOptionCreator.convergenceOption().create());
     addOption(DefaultOptionCreator.maxIterationsOption().create());
     addOption(DefaultOptionCreator.overwriteOption().create());
     addOption(DefaultOptionCreator.clusteringOption().create());
     addOption(DefaultOptionCreator.methodOption().create());
     addOption(DefaultOptionCreator.outlierThresholdOption().create());
-    
+   
     if (parseArguments(args) == null) {
       return -1;
     }
@@ -90,8 +91,14 @@ public class KMeansDriver extends AbstractJob {
     DistanceMeasure measure = ClassUtils.instantiateAs(measureClass, DistanceMeasure.class);
     
     if (hasOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)) {
-      clusters = RandomSeedGenerator.buildRandom(getConf(), input, clusters,
-          Integer.parseInt(getOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)), measure);
+      int numClusters = Integer.parseInt(getOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION));
+
+      Long seed = null;
+      if (hasOption(DefaultOptionCreator.RANDOM_SEED)) {
+        seed = Long.parseLong(getOption(DefaultOptionCreator.RANDOM_SEED));
+      }
+
+      clusters = RandomSeedGenerator.buildRandom(getConf(), input, clusters, numClusters, measure, seed);
     }
     boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
     boolean runSequential = getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(

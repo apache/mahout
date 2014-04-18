@@ -55,14 +55,19 @@ public final class RandomSeedGenerator {
   
   public static final String K = "k";
   
-  private RandomSeedGenerator() {
+  private RandomSeedGenerator() {}
+
+  public static Path buildRandom(Configuration conf, Path input, Path output, int k, DistanceMeasure measure)
+    throws IOException {
+    return buildRandom(conf, input, output, k, measure, null);
   }
-  
+
   public static Path buildRandom(Configuration conf,
                                  Path input,
                                  Path output,
                                  int k,
-                                 DistanceMeasure measure) throws IOException {
+                                 DistanceMeasure measure,
+                                 Long seed) throws IOException {
 
     Preconditions.checkArgument(k > 0, "Must be: k > 0, but k = " + k);
     // delete the output directory
@@ -81,7 +86,9 @@ public final class RandomSeedGenerator {
       
       FileStatus[] inputFiles = fs.globStatus(inputPathPattern, PathFilters.logsCRCFilter());
       SequenceFile.Writer writer = SequenceFile.createWriter(fs, conf, outFile, Text.class, ClusterWritable.class);
-      Random random = RandomUtils.getRandom();
+
+      Random random = (seed != null) ? RandomUtils.getRandom(seed) : RandomUtils.getRandom();
+
       List<Text> chosenTexts = Lists.newArrayListWithCapacity(k);
       List<ClusterWritable> chosenClusters = Lists.newArrayListWithCapacity(k);
       int nextClusterId = 0;

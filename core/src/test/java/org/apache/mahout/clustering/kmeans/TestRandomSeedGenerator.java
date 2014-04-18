@@ -1,4 +1,4 @@
-/**
+   /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -84,6 +84,35 @@ public final class TestRandomSeedGenerator extends MahoutTestCase {
       clusterCount++;
       Cluster cluster = clusterWritable.getValue();
       int id = cluster.getId();
+      assertTrue(set.add(id)); // Validate unique id's
+      
+      Vector v = cluster.getCenter();
+      assertVectorEquals(RAW[id], v); // Validate values match
+    }
+
+    assertEquals(4, clusterCount); // Validate sample count
+  }
+  
+  /** Be sure that the buildRandomSeeded works in the same way as RandomSeedGenerator.buildRandom */
+  @Test
+  public void testRandomSeedGeneratorSeeded() throws Exception {
+    List<VectorWritable> points = getPoints();
+    Job job = new Job();
+    Configuration conf = job.getConfiguration();
+    job.setMapOutputValueClass(VectorWritable.class);
+    Path input = getTestTempFilePath("random-input");
+    Path output = getTestTempDirPath("random-output");
+    ClusteringTestUtils.writePointsToFile(points, input, fs, conf);
+    
+    RandomSeedGenerator.buildRandom(conf, input, output, 4, new ManhattanDistanceMeasure(), 1L);
+
+    int clusterCount = 0;
+    Collection<Integer> set = Sets.newHashSet();
+    for (ClusterWritable clusterWritable :
+         new SequenceFileValueIterable<ClusterWritable>(new Path(output, "part-randomSeed"), true, conf)) {
+      clusterCount++;
+      Cluster cluster = clusterWritable.getValue();
+      int id = cluster.getId();
       assertTrue(set.add(id)); // validate unique id's
       
       Vector v = cluster.getCenter();
@@ -93,9 +122,47 @@ public final class TestRandomSeedGenerator extends MahoutTestCase {
     assertEquals(4, clusterCount); // validate sample count
   }
   
+  /** Test that initial clusters built with same random seed are reproduced  */
+ @Test
+ public void testBuildRandomSeededSameInitalClusters() throws Exception {
+    List<VectorWritable> points = getPoints();
+    Job job = new Job();
+    Configuration conf = job.getConfiguration();
+    job.setMapOutputValueClass(VectorWritable.class);
+    Path input = getTestTempFilePath("random-input");
+    Path output = getTestTempDirPath("random-output");
+    ClusteringTestUtils.writePointsToFile(points, input, fs, conf);
+    long randSeed=1;
+    
+    RandomSeedGenerator.buildRandom(conf, input, output, 4, new ManhattanDistanceMeasure(), randSeed);
+    
+    int[] clusterIDSeq = new int[4];
+    
+    /** run through all clusters once and set sequence of IDs  */  
+    int clusterCount = 0;
+    for (ClusterWritable clusterWritable :
+         new SequenceFileValueIterable<ClusterWritable>(new Path(output, "part-randomSeed"), true, conf)) {      
+      Cluster cluster = clusterWritable.getValue();
+      clusterIDSeq[clusterCount] = cluster.getId();
+      clusterCount++; 
+    }
+    
+    /* Rebuild cluster and run through again making sure all IDs are in the same random sequence
+     * Needs a better test because in this case passes when seeded with 1 and 2  fails with 1, 3
+     * passes when set to two */
+    RandomSeedGenerator.buildRandom(conf, input, output, 4, new ManhattanDistanceMeasure(), randSeed);     clusterCount = 0;    
+    for (ClusterWritable clusterWritable :
+         new SequenceFileValueIterable<ClusterWritable>(new Path(output, "part-randomSeed"), true, conf)) {       
+      Cluster cluster = clusterWritable.getValue();
+      // Make sure cluster ids are in same random sequence
+      assertEquals(clusterIDSeq[clusterCount], cluster.getId());
+      clusterCount++;
+    }
+ }
+  
   private static void assertVectorEquals(double[] raw, Vector v) {
     assertEquals(raw.length, v.size());
-    for (int i=0; i < raw.length; i++) {
+    for (int i = 0; i < raw.length; i++) {
       assertEquals(raw[i], v.getQuick(i), EPSILON);
     }
   }

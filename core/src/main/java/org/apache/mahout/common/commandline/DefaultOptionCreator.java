@@ -72,6 +72,8 @@ public final class DefaultOptionCreator {
   public static final String KERNEL_PROFILE_OPTION = "kernelProfile";
 
   public static final String ANALYZER_NAME_OPTION = "analyzerName";
+ 
+  public static final String RANDOM_SEED = "randomSeed";
   
   private DefaultOptionCreator() {}
   
@@ -279,6 +281,15 @@ public final class DefaultOptionCreator {
             new ArgumentBuilder().withName("k").withMinimum(1).withMaximum(1)
                 .create()).withDescription("The number of clusters to create")
         .withShortName("k");
+  }
+
+  public static DefaultOptionBuilder useSetRandomSeedOption() {
+    return new DefaultOptionBuilder()
+        .withLongName(RANDOM_SEED)
+        .withRequired(false)
+        .withArgument(new ArgumentBuilder().withName(RANDOM_SEED).create())
+        .withDescription("Seed to initaize Random Number Generator with")
+        .withShortName("rs");
   }
   
   /**
