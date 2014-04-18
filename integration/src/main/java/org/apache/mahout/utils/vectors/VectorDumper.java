@@ -34,11 +34,11 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapred.Utils.OutputFileUtils.OutputFilesFilter;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.classify.WeightedPropertyVectorWritable;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
@@ -98,7 +98,7 @@ public final class VectorDumper extends AbstractJob {
     Path input = getInputPath();
     FileStatus fileStatus = fs.getFileStatus(input);
     if (fileStatus.isDir()) {
-      pathArr = FileUtil.stat2Paths(fs.listStatus(input, new OutputFilesFilter()));
+      pathArr = FileUtil.stat2Paths(fs.listStatus(input, PathFilters.logsCRCFilter()));
     } else {
       FileStatus[] inputPaths = fs.globStatus(input);
       pathArr = new Path[inputPaths.length];

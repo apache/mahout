@@ -27,15 +27,13 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.lib.MultipleOutputs;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.RandomUtils;
@@ -43,7 +41,6 @@ import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterator;
 
-@SuppressWarnings("deprecation")
 /**
  * Class which implements a map reduce version of SplitInput.
  * This class takes a SequenceFile input, e.g. a set of training data
@@ -52,15 +49,12 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterator;
  */
 public final class SplitInputJob {
 
-  private static final String DOWNSAMPLING_FACTOR =
-      "SplitInputJob.downsamplingFactor";
-  private static final String RANDOM_SELECTION_PCT =
-      "SplitInputJob.randomSelectionPct";
+  private static final String DOWNSAMPLING_FACTOR = "SplitInputJob.downsamplingFactor";
+  private static final String RANDOM_SELECTION_PCT = "SplitInputJob.randomSelectionPct";
   private static final String TRAINING_TAG = "training";
   private static final String TEST_TAG = "test";
 
-  private SplitInputJob() {
-  }
+  private SplitInputJob() {}
 
   /**
    * Run job to downsample, randomly permute and split data into test and
@@ -104,17 +98,11 @@ public final class SplitInputJob {
     } else {
       throw new IllegalStateException("Couldn't determine class of the input values");
     }
-    // Use old API for multiple outputs
-    JobConf oldApiJob = new JobConf(initialConf);
-    MultipleOutputs.addNamedOutput(oldApiJob, TRAINING_TAG,
-        org.apache.hadoop.mapred.SequenceFileOutputFormat.class,
-        keyClass, valueClass);
-    MultipleOutputs.addNamedOutput(oldApiJob, TEST_TAG,
-        org.apache.hadoop.mapred.SequenceFileOutputFormat.class,
-        keyClass, valueClass);
 
-    // Setup job with new API
-    Job job = new Job(oldApiJob);
+    Job job = new Job(new Configuration(initialConf));
+
+    MultipleOutputs.addNamedOutput(job, TRAINING_TAG, SequenceFileOutputFormat.class, keyClass, valueClass);
+    MultipleOutputs.addNamedOutput(job, TEST_TAG, SequenceFileOutputFormat.class, keyClass, valueClass);
     job.setJarByClass(SplitInputJob.class);
     FileInputFormat.addInputPath(job, inputPath);
     FileOutputFormat.setOutputPath(job, outputPath);
@@ -133,23 +121,18 @@ public final class SplitInputJob {
     }
   }
 
-  /**
-   * Mapper which downsamples the input by downsamplingFactor
-   */
+  /** Mapper which downsamples the input by downsamplingFactor */
   public static class SplitInputMapper extends
       Mapper<WritableComparable<?>, Writable, WritableComparable<?>, Writable> {
 
     private int downsamplingFactor;
 
     @Override
-    public void setup(Context context) {
-      downsamplingFactor =
-          context.getConfiguration().getInt(DOWNSAMPLING_FACTOR, 1);
+    public void setup(Context ctx) {
+      downsamplingFactor = ctx.getConfiguration().getInt(DOWNSAMPLING_FACTOR, 1);
     }
 
-    /**
-     * Only run map() for one out of every downsampleFactor inputs
-     */
+    /** Only run map() for one out of every downsampleFactor inputs */
     @Override
     public void run(Context context) throws IOException, InterruptedException {
       setup(context);
@@ -165,28 +148,18 @@ public final class SplitInputJob {
 
   }
 
-  /**
-   * Reducer which uses MultipleOutputs to randomly allocate key value pairs
-   * between test and training outputs
-   */
+  /** Reducer which uses MultipleOutputs to randomly allocate key value pairs between test and training outputs */
   public static class SplitInputReducer extends
       Reducer<WritableComparable<?>, Writable, WritableComparable<?>, Writable> {
 
     private MultipleOutputs multipleOutputs;
-    private OutputCollector<WritableComparable<?>, Writable> trainingCollector = null;
-    private OutputCollector<WritableComparable<?>, Writable> testCollector = null;
     private final Random rnd = RandomUtils.getRandom();
     private float randomSelectionPercent;
 
-    @SuppressWarnings("unchecked")
     @Override
-    protected void setup(Context context) throws IOException {
-      randomSelectionPercent =
-          context.getConfiguration().getFloat(RANDOM_SELECTION_PCT, 0);
-      multipleOutputs =
-          new MultipleOutputs(new JobConf(context.getConfiguration()));
-      trainingCollector = multipleOutputs.getCollector(TRAINING_TAG, null);
-      testCollector = multipleOutputs.getCollector(TEST_TAG, null);
+    protected void setup(Context ctx) throws IOException {
+      randomSelectionPercent = ctx.getConfiguration().getFloat(RANDOM_SELECTION_PCT, 0);
+      multipleOutputs = new MultipleOutputs(ctx);
     }
 
     /**
@@ -198,9 +171,9 @@ public final class SplitInputJob {
         Context context) throws IOException, InterruptedException {
       for (Writable value : values) {
         if (rnd.nextInt(100) < randomSelectionPercent) {
-          testCollector.collect(key, value);
+          multipleOutputs.write(TEST_TAG, key, value);
         } else {
-          trainingCollector.collect(key, value);
+          multipleOutputs.write(TRAINING_TAG, key, value);
         }
       }
 
@@ -208,14 +181,16 @@ public final class SplitInputJob {
 
     @Override
     protected void cleanup(Context context) throws IOException {
-      multipleOutputs.close();
+      try {
+        multipleOutputs.close();
+      } catch (InterruptedException e) {
+        throw new IOException(e);
+      }
     }
 
   }
 
-  /**
-   * Randomly permute key value pairs
-   */
+  /** Randomly permute key value pairs */
   public static class SplitInputComparator extends WritableComparator implements Serializable {
 
     private final Random rnd = RandomUtils.getRandom();

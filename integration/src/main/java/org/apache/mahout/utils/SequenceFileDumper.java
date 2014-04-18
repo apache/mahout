@@ -31,9 +31,9 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapred.Utils.OutputFileUtils.OutputFilesFilter;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterator;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
@@ -65,7 +65,7 @@ public final class SequenceFileDumper extends AbstractJob {
     Path input = getInputPath();
     FileSystem fs = input.getFileSystem(conf);
     if (fs.getFileStatus(input).isDir()) {
-      pathArr = FileUtil.stat2Paths(fs.listStatus(input, new OutputFilesFilter()));
+      pathArr = FileUtil.stat2Paths(fs.listStatus(input, PathFilters.logsCRCFilter()));
     } else {
       pathArr = new Path[1];
       pathArr[0] = input;

@@ -200,9 +200,7 @@ public final class SplitInputTest extends MahoutTestCase {
     VectorWritable value = new VectorWritable();
     SequenceFile.Writer writer = null;
     try {
-      writer =
-          SequenceFile.createWriter(fs, conf, tempSequenceFile,
-              IntWritable.class, VectorWritable.class);
+      writer = SequenceFile.createWriter(fs, conf, tempSequenceFile, IntWritable.class, VectorWritable.class);
       for (int i = 0; i < testPoints; i++) {
         key.set(i);
         Vector v = new SequentialAccessSparseVector(4);
@@ -216,13 +214,11 @@ public final class SplitInputTest extends MahoutTestCase {
   }
 
   /**
-   * Create a Sequencefile for testing consisting of IntWritable
-   * keys and Text values
+   * Create a Sequencefile for testing consisting of IntWritable keys and Text values
    * @param path path for test SequenceFile
    * @param testPoints number of records in test SequenceFile
    */
-  private void writeTextSequenceFile(Path path, int testPoints)
-      throws IOException {
+  private void writeTextSequenceFile(Path path, int testPoints) throws IOException {
     Path tempSequenceFile = new Path(path, "part-00000");
     Configuration conf = getConfiguration();
     Text key = new Text();
@@ -275,10 +271,7 @@ public final class SplitInputTest extends MahoutTestCase {
     testSplitInputMapReduce(1000);
   }
 
-  /**
-   * Test map reduce version of split input with Text, Text key value
-   * pairs in input called from command line
-   */
+  /** Test map reduce version of split input with Text, Text key value pairs in input called from command line */
   @Test
   public void testSplitInputMapReduceTextCli() throws Exception {
     writeTextSequenceFile(tempSequenceDirectory, 1000);
