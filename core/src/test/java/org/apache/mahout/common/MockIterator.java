@@ -17,9 +17,8 @@
 
 package org.apache.mahout.common;
 
-import org.apache.hadoop.io.DataOutputBuffer;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.SequenceFile.Sorter.RawKeyValueIterator;
+import org.apache.hadoop.io.DataInputBuffer;
+import org.apache.hadoop.mapred.RawKeyValueIterator;
 import org.apache.hadoop.util.Progress;
 
 public final class MockIterator implements RawKeyValueIterator {
@@ -29,7 +28,7 @@ public final class MockIterator implements RawKeyValueIterator {
   }
 
   @Override
-  public DataOutputBuffer getKey() {
+  public DataInputBuffer getKey() {
     return null;
   }
 
@@ -39,7 +38,8 @@ public final class MockIterator implements RawKeyValueIterator {
   }
 
   @Override
-  public SequenceFile.ValueBytes getValue() {
+  public DataInputBuffer getValue() {
+
     return null;
   }
 
