@@ -35,6 +35,7 @@ import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated
 public final class Job extends AbstractJob {
 
   private static final String DIRECTORY_CONTAINING_CONVERTED_INPUT = "data";
