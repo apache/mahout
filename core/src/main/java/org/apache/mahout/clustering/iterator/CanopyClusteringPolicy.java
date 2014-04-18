@@ -23,11 +23,7 @@ import java.io.IOException;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 
-/**
- * This is a simple maximum likelihood clustering policy, suitable for k-means
- * clustering
- * 
- */
+@Deprecated
 public class CanopyClusteringPolicy extends AbstractClusteringPolicy {
 
   private double t1;

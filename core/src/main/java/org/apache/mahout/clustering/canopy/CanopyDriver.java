@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 
+@Deprecated
 public class CanopyDriver extends AbstractJob {
 
   public static final String DEFAULT_CLUSTERED_POINTS_DIRECTORY = "clusteredPoints";

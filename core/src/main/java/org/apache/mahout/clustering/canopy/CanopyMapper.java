@@ -26,6 +26,7 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.VectorWritable;
 
+@Deprecated
 class CanopyMapper extends
     Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable> {
 

@@ -26,6 +26,7 @@ import org.apache.mahout.math.Vector;
  * to the application of some distance metric, and a point total which is the sum of all the points and is
  * used to compute the centroid when needed.
  */
+@Deprecated
 public class Canopy extends DistanceMeasureCluster {
   
   /** Used for deserialization as a writable */

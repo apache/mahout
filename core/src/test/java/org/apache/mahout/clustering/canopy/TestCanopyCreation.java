@@ -52,6 +52,7 @@ import org.junit.Test;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 
+@Deprecated
 public final class TestCanopyCreation extends MahoutTestCase {
 
   private static final double[][] RAW = { { 1, 1 }, { 2, 1 }, { 1, 2 },

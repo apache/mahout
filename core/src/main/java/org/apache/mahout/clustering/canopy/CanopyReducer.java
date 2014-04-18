@@ -27,6 +27,7 @@ import org.apache.mahout.clustering.iterator.ClusterWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
+@Deprecated
 public class CanopyReducer extends Reducer<Text, VectorWritable, Text, ClusterWritable> {
 
   private final Collection<Canopy> canopies = Lists.newArrayList();
