@@ -26,7 +26,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 
-import org.apache.hadoop.mapred.lib.MultipleOutputs;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,12 +141,8 @@ public final class IOUtils {
         throw (IOException) lastThr;
       } else if (lastThr instanceof RuntimeException) {
         throw (RuntimeException) lastThr;
-      } else if (lastThr instanceof Error) {
-        throw (Error) lastThr;
       } else {
-        // should not happen
-        throw (IOException) new IOException("Unexpected exception during close")
-            .initCause(lastThr);
+        throw (Error) lastThr;
       }
     }
 
@@ -190,7 +186,11 @@ public final class IOUtils {
     @Override
     public void close() throws IOException {
       if (mo != null) {
-        mo.close();
+        try {
+          mo.close();
+        } catch (Throwable throwable) {
+          log.error(throwable.getMessage(), throwable);
+        }
       }
     }
   }
