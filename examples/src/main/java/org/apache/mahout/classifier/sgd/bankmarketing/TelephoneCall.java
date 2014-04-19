@@ -66,7 +66,9 @@ public class TelephoneCall {
         v = Double.parseDouble(fieldValue);
         featureEncoder.addToVector(name, Math.log(v + 2), vector);
 
-      } else if (name.equals("job") || name.equals("marital") || name.equals("education") || name.equals("default") || name.equals("housing") || name.equals("loan") || name.equals("contact") || name.equals("campaign") || name.equals("previous") || name.equals("poutcome")) {
+      } else if (name.equals("job") || name.equals("marital") || name.equals("education") || name.equals("default") ||
+                 name.equals("housing") || name.equals("loan") || name.equals("contact") || name.equals("campaign") ||
+                 name.equals("previous") || name.equals("poutcome")) {
         featureEncoder.addToVector(name + ":" + fieldValue, 1, vector);
 
       } else if (name.equals("day") || name.equals("month") || name.equals("y")) {
