@@ -160,11 +160,11 @@ then
   done
 else
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/math/target/classes
-  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/core/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/mrlegacy/target/classes
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/integration/target/classes
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/examples/target/classes
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/math-scala/target/classes
-  #CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/core/src/main/resources
+  #CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/mrlegacy/src/main/resources
 fi
 
 # add development dependencies to CLASSPATH

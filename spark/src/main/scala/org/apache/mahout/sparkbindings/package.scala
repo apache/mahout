@@ -103,7 +103,7 @@ package object sparkbindings {
         val mcjars = jars.filter(j =>
           j.matches(".*mahout-math-.*\\.jar") ||
               j.matches(".*mahout-math-scala-.*\\.jar") ||
-              j.matches(".*mahout-core-.*\\.jar") ||
+              j.matches(".*mahout-mrlegacy-.*\\.jar") ||
               j.matches(".*mahout-spark-.*\\.jar")
         ).filter(!_.matches(".*-tests.jar")) ++
             SparkContext.jarOfClass(classOf[DrmLike[_]]) ++ customJars

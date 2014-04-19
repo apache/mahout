@@ -108,11 +108,11 @@
     <!-- our modules -->
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-core</artifactId>
+      <artifactId>mahout-mrlegacy</artifactId>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-core</artifactId>
+      <artifactId>mahout-mrlegacy</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>

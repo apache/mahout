@@ -65,7 +65,7 @@
       <outputDirectory/>
     </fileSet>
     <fileSet>
-      <directory>${project.basedir}/../core/target</directory>
+      <directory>${project.basedir}/../mrlegacy/target</directory>
       <includes>
         <include>mahout-*.job</include>
         <include>mahout-*.jar</include>
@@ -112,8 +112,8 @@
       <outputDirectory>docs/mahout-math</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>${project.basedir}/../core/target/apidocs</directory>
-      <outputDirectory>docs/mahout-core</outputDirectory>
+      <directory>${project.basedir}/../mrlegacy/target/apidocs</directory>
+      <outputDirectory>docs/mahout-mrlegacy</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>${project.basedir}/../integration/target/apidocs</directory>

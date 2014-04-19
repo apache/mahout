@@ -10,11 +10,11 @@ output-asf-email-examples/
 target/
 examples/bin/tmp
 output
-core/build/
-core/input/
-core/output/
-core/testdata/
-core/temp
+mrlegacy/build/
+mrlegacy/input/
+mrlegacy/output/
+mrlegacy/testdata/
+mrlegacy/temp
 temp
 foo
 math-tests/

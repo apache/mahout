@@ -134,14 +134,14 @@
       <!-- our modules -->
 
       <dependency>
-        <artifactId>mahout-core</artifactId>
+        <artifactId>mahout-mrlegacy</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
-        <artifactId>mahout-core</artifactId>
+        <artifactId>mahout-mrlegacy</artifactId>
         <type>test-jar</type>
         <scope>test</scope>
       </dependency>
@@ -667,7 +667,7 @@
   <modules>
     <module>buildtools</module>
     <module>math</module>
-    <module>core</module>
+    <module>mrlegacy</module>
     <module>integration</module>
     <module>examples</module>
     <module>distribution</module>
