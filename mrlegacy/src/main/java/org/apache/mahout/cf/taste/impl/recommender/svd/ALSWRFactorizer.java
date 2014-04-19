@@ -275,7 +275,8 @@ public class ALSWRFactorizer extends AbstractFactorizer {
     OpenIntObjectHashMap<Vector> mapping = new OpenIntObjectHashMap<Vector>(numItems);
     while (itemIDs.hasNext()) {
       long itemID = itemIDs.next();
-      mapping.put((int) itemID, new DenseVector(featureMatrix[itemIndex(itemID)], true));
+      int itemIndex = itemIndex(itemID);
+      mapping.put(itemIndex, new DenseVector(featureMatrix[itemIndex(itemID)], true));
     }
 
     return mapping;
@@ -287,7 +288,8 @@ public class ALSWRFactorizer extends AbstractFactorizer {
 
     while (userIDs.hasNext()) {
       long userID = userIDs.next();
-      mapping.put((int) userID, new DenseVector(featureMatrix[userIndex(userID)], true));
+      int userIndex = userIndex(userID);
+      mapping.put(userIndex, new DenseVector(featureMatrix[userIndex(userID)], true));
     }
 
     return mapping;
@@ -296,7 +298,7 @@ public class ALSWRFactorizer extends AbstractFactorizer {
   protected Vector sparseItemRatingVector(PreferenceArray prefs) {
     SequentialAccessSparseVector ratings = new SequentialAccessSparseVector(Integer.MAX_VALUE, prefs.length());
     for (Preference preference : prefs) {
-      ratings.set((int) preference.getUserID(), preference.getValue());
+      ratings.set(userIndex(preference.getUserID()), preference.getValue());
     }
     return ratings;
   }
@@ -304,7 +306,7 @@ public class ALSWRFactorizer extends AbstractFactorizer {
   protected Vector sparseUserRatingVector(PreferenceArray prefs) {
     SequentialAccessSparseVector ratings = new SequentialAccessSparseVector(Integer.MAX_VALUE, prefs.length());
     for (Preference preference : prefs) {
-      ratings.set((int) preference.getItemID(), preference.getValue());
+      ratings.set(itemIndex(preference.getItemID()), preference.getValue());
     }
     return ratings;
   }
