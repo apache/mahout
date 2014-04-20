@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 1.0 - unreleased
 
+  MAHOUT-1496: Create a website describing the distributed ALS recommender (Jian Wang via ssc)
+
   MAHOUT-1502: Update Naive Bayes Webpage to Current Implementation (Andrew Palumbo via ssc)
 
   MAHOUT-1517: Remove casts to int in ALSWRFactorizer (ssc)
