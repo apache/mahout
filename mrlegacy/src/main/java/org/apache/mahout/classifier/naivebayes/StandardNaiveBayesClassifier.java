@@ -28,8 +28,7 @@ public class StandardNaiveBayesClassifier extends AbstractNaiveBayesClassifier {
   @Override
   public double getScoreForLabelFeature(int label, int feature) {
     NaiveBayesModel model = getModel();
-    // Standard Naive Bayes does not use weight normalization, uncomment following line for weight normalized NB
-    // weight = weight / model.thetaNormalizer(label);
+    // Standard Naive Bayes does not use weight normalization
     return computeWeight(model.weight(label, feature), model.labelWeight(label), model.alphaI(), model.numFeatures());
   }
 

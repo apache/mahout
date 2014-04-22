@@ -24,9 +24,13 @@ public class NaiveBayesModelTest extends NaiveBayesTestBase {
   @Test
   public void testRandomModelGeneration() {
     // make sure we generate a valid random model
-    NaiveBayesModel model = getModel();
+    NaiveBayesModel standardModel = getStandardModel();
     // check whether the model is valid
-    model.validate();
+    standardModel.validate();
+    
+    // same for Complementary
+    NaiveBayesModel complementaryModel = getComplementaryModel();
+    complementaryModel.validate();
   }
 
 }

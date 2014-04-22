@@ -17,6 +17,7 @@
 
 package org.apache.mahout.classifier.naivebayes.test;
 
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -111,14 +112,23 @@ public class TestNaiveBayesDriver extends AbstractJob {
     boolean complementary = hasOption("testComplementary");
     FileSystem fs = FileSystem.get(getConf());
     NaiveBayesModel model = NaiveBayesModel.materialize(new Path(getOption("model")), getConf());
+    
+    // Ensure that if we are testing in complementary mode, the model has been
+    // trained complementary. a complementarty model will work for standard classification
+    // a standard model will not work for complementary classification
+    if (complementary){
+        Preconditions.checkArgument((model.isComplemtary() == complementary),
+            "Complementary mode in model is different from test mode");
+    }
+    
     AbstractNaiveBayesClassifier classifier;
     if (complementary) {
       classifier = new ComplementaryNaiveBayesClassifier(model);
     } else {
       classifier = new StandardNaiveBayesClassifier(model);
     }
-    SequenceFile.Writer writer =
-        SequenceFile.createWriter(fs, getConf(), new Path(getOutputPath(), "part-r-00000"), Text.class, VectorWritable.class);
+    SequenceFile.Writer writer = SequenceFile.createWriter(fs, getConf(), new Path(getOutputPath(), "part-r-00000"),
+        Text.class, VectorWritable.class);
 
     try {
       SequenceFileDirIterable<Text, VectorWritable> dirIterable =
@@ -142,8 +152,8 @@ public class TestNaiveBayesDriver extends AbstractJob {
         Text.class, VectorWritable.class, SequenceFileOutputFormat.class);
     //testJob.getConfiguration().set(LABEL_KEY, getOption("--labels"));
 
-    //boolean complementary = parsedArgs.containsKey("testComplementary"); //always result to false as key in hash map is "--testComplementary"
-    boolean complementary = hasOption("testComplementary"); //or  complementary = parsedArgs.containsKey("--testComplementary");
+
+    boolean complementary = hasOption("testComplementary");
     testJob.getConfiguration().set(COMPLEMENTARY, String.valueOf(complementary));
     return testJob.waitForCompletion(true);
   }

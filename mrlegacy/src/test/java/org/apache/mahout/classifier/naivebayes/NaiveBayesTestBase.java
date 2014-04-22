@@ -26,17 +26,23 @@ import org.apache.mahout.math.Vector.Element;
 
 public abstract class NaiveBayesTestBase extends MahoutTestCase {
   
-  private NaiveBayesModel model;
+  private NaiveBayesModel standardModel;
+  private NaiveBayesModel complementaryModel;
   
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    model = createNaiveBayesModel();
-    model.validate();
+    standardModel = createStandardNaiveBayesModel();
+    standardModel.validate();
+    complementaryModel = createComplementaryNaiveBayesModel();
+    complementaryModel.validate();
   }
   
-  protected NaiveBayesModel getModel() {
-    return model;
+  protected NaiveBayesModel getStandardModel() {
+    return standardModel;
+  }
+  protected NaiveBayesModel getComplementaryModel() {
+    return complementaryModel;
   }
   
   protected static double complementaryNaiveBayesThetaWeight(int label,
@@ -73,7 +79,7 @@ public abstract class NaiveBayesTestBase extends MahoutTestCase {
     return weight;
   }
 
-  protected static NaiveBayesModel createNaiveBayesModel() {
+  protected static NaiveBayesModel createStandardNaiveBayesModel() {
     double[][] matrix = {
         { 0.7, 0.1, 0.1, 0.3 },
         { 0.4, 0.4, 0.1, 0.1 },
@@ -85,16 +91,10 @@ public abstract class NaiveBayesTestBase extends MahoutTestCase {
     
     DenseMatrix weightMatrix = new DenseMatrix(matrix);
     DenseVector labelSum = new DenseVector(labelSumArray);
-    DenseVector featureSum = new DenseVector(featureSumArray);
+    DenseVector featureSum = new DenseVector(featureSumArray);    
     
-    double[] thetaNormalizerSum = {
-        naiveBayesThetaWeight(0, weightMatrix, labelSum, featureSum),
-        naiveBayesThetaWeight(1, weightMatrix, labelSum, featureSum),
-        naiveBayesThetaWeight(2, weightMatrix, labelSum, featureSum),
-        naiveBayesThetaWeight(3, weightMatrix, labelSum, featureSum) };
-
     // now generate the model
-    return new NaiveBayesModel(weightMatrix, featureSum, labelSum, new DenseVector(thetaNormalizerSum), 1.0f);
+    return new NaiveBayesModel(weightMatrix, featureSum, labelSum, null, 1.0f, false);
   }
   
   protected static NaiveBayesModel createComplementaryNaiveBayesModel() {
@@ -118,7 +118,7 @@ public abstract class NaiveBayesTestBase extends MahoutTestCase {
         complementaryNaiveBayesThetaWeight(3, weightMatrix, labelSum, featureSum) };
 
     // now generate the model
-    return new NaiveBayesModel(weightMatrix, featureSum, labelSum, new DenseVector(thetaNormalizerSum), 1.0f);
+    return new NaiveBayesModel(weightMatrix, featureSum, labelSum, new DenseVector(thetaNormalizerSum), 1.0f, true);
   }
   
   protected static int maxIndex(Vector instance) {

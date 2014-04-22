@@ -31,7 +31,7 @@ public final class StandardNaiveBayesClassifierTest extends NaiveBayesTestBase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    NaiveBayesModel model = createNaiveBayesModel();
+    NaiveBayesModel model = createStandardNaiveBayesModel();
     classifier = new StandardNaiveBayesClassifier(model);
   }
   
@@ -42,7 +42,6 @@ public final class StandardNaiveBayesClassifierTest extends NaiveBayesTestBase {
     assertEquals(1, maxIndex(classifier.classifyFull(new DenseVector(new double[] { 0.0, 1.0, 0.0, 0.0 }))));
     assertEquals(2, maxIndex(classifier.classifyFull(new DenseVector(new double[] { 0.0, 0.0, 1.0, 0.0 }))));
     assertEquals(3, maxIndex(classifier.classifyFull(new DenseVector(new double[] { 0.0, 0.0, 0.0, 1.0 }))));
-    
   }
   
 }

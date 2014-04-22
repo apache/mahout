@@ -133,24 +133,26 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     // Put the per label and per feature vectors into the cache
     HadoopUtil.cacheFiles(getTempPath(WEIGHTS), getConf());
 
-    // Calculate the per label theta normalizers, write out to LABEL_THETA_NORMALIZER vector
-    // see http://people.csail.mit.edu/jrennie/papers/icml03-nb.pdf - Section 3.2, Weight Magnitude Errors
-    Job thetaSummer = prepareJob(getTempPath(SUMMED_OBSERVATIONS),
-                                 getTempPath(THETAS),
-                                 SequenceFileInputFormat.class,
-                                 ThetaMapper.class,
-                                 Text.class,
-                                 VectorWritable.class,
-                                 VectorSumReducer.class,
-                                 Text.class,
-                                 VectorWritable.class,
-                                 SequenceFileOutputFormat.class);
-    thetaSummer.setCombinerClass(VectorSumReducer.class);
-    thetaSummer.getConfiguration().setFloat(ThetaMapper.ALPHA_I, alphaI);
-    thetaSummer.getConfiguration().setBoolean(ThetaMapper.TRAIN_COMPLEMENTARY, trainComplementary);
-    succeeded = thetaSummer.waitForCompletion(true);
-    if (!succeeded) {
-      return -1;
+    if (trainComplementary){
+      // Calculate the per label theta normalizers, write out to LABEL_THETA_NORMALIZER vector
+      // see http://people.csail.mit.edu/jrennie/papers/icml03-nb.pdf - Section 3.2, Weight Magnitude Errors
+      Job thetaSummer = prepareJob(getTempPath(SUMMED_OBSERVATIONS),
+                                   getTempPath(THETAS),
+                                   SequenceFileInputFormat.class,
+                                   ThetaMapper.class,
+                                   Text.class,
+                                   VectorWritable.class,
+                                   VectorSumReducer.class,
+                                   Text.class,
+                                   VectorWritable.class,
+                                   SequenceFileOutputFormat.class);
+      thetaSummer.setCombinerClass(VectorSumReducer.class);
+      thetaSummer.getConfiguration().setFloat(ThetaMapper.ALPHA_I, alphaI);
+      thetaSummer.getConfiguration().setBoolean(ThetaMapper.TRAIN_COMPLEMENTARY, trainComplementary);
+      succeeded = thetaSummer.waitForCompletion(true);
+      if (!succeeded) {
+        return -1;
+      }
     }
     
     // Put the per label theta normalizers into the cache
@@ -158,6 +160,7 @@ public final class TrainNaiveBayesJob extends AbstractJob {
     
     // Validate our model and then write it out to the official output
     getConf().setFloat(ThetaMapper.ALPHA_I, alphaI);
+    getConf().setBoolean(NaiveBayesModel.COMPLEMENTARY_MODEL, trainComplementary);
     NaiveBayesModel naiveBayesModel = BayesUtils.readModelFromDir(getTempPath(), getConf());
     naiveBayesModel.validate();
     naiveBayesModel.serialize(getOutputPath(), getConf());

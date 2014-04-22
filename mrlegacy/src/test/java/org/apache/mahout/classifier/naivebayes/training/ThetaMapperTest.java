@@ -33,7 +33,7 @@ public class ThetaMapperTest extends MahoutTestCase {
   public void standard() throws Exception {
 
     Mapper.Context ctx = EasyMock.createMock(Mapper.Context.class);
-    AbstractThetaTrainer trainer = EasyMock.createMock(AbstractThetaTrainer.class);
+    ComplementaryThetaTrainer trainer = EasyMock.createMock(ComplementaryThetaTrainer.class);
 
     Vector instance1 = new DenseVector(new double[] { 1, 2, 3 });
     Vector instance2 = new DenseVector(new double[] { 4, 5, 6 });

@@ -33,7 +33,7 @@ public class ThetaMapper extends Mapper<IntWritable, VectorWritable, Text, Vecto
   public static final String ALPHA_I = ThetaMapper.class.getName() + ".alphaI";
   static final String TRAIN_COMPLEMENTARY = ThetaMapper.class.getName() + ".trainComplementary";
 
-  private AbstractThetaTrainer trainer;
+  private ComplementaryThetaTrainer trainer;
 
   @Override
   protected void setup(Context ctx) throws IOException, InterruptedException {
@@ -41,15 +41,10 @@ public class ThetaMapper extends Mapper<IntWritable, VectorWritable, Text, Vecto
     Configuration conf = ctx.getConfiguration();
 
     float alphaI = conf.getFloat(ALPHA_I, 1.0f);
-    Map<String, Vector> scores = BayesUtils.readScoresFromCache(conf);
-
-    if (conf.getBoolean(TRAIN_COMPLEMENTARY, false)) {
-      trainer = new ComplementaryThetaTrainer(scores.get(TrainNaiveBayesJob.WEIGHTS_PER_FEATURE),
-                                              scores.get(TrainNaiveBayesJob.WEIGHTS_PER_LABEL), alphaI);
-    } else {
-      trainer = new StandardThetaTrainer(scores.get(TrainNaiveBayesJob.WEIGHTS_PER_FEATURE),
-                                         scores.get(TrainNaiveBayesJob.WEIGHTS_PER_LABEL), alphaI);
-    }
+    Map<String, Vector> scores = BayesUtils.readScoresFromCache(conf);    
+    
+    trainer = new ComplementaryThetaTrainer(scores.get(TrainNaiveBayesJob.WEIGHTS_PER_FEATURE),
+                                            scores.get(TrainNaiveBayesJob.WEIGHTS_PER_LABEL), alphaI);
   }
 
   @Override

@@ -17,24 +17,67 @@
 
 package org.apache.mahout.classifier.naivebayes.training;
 
+import com.google.common.base.Preconditions;
 import org.apache.mahout.classifier.naivebayes.ComplementaryNaiveBayesClassifier;
 import org.apache.mahout.math.Vector;
 
-public class ComplementaryThetaTrainer extends AbstractThetaTrainer {
+public class ComplementaryThetaTrainer {
+
+  private final Vector weightsPerFeature;
+  private final Vector weightsPerLabel;
+  private final Vector perLabelThetaNormalizer;
+  private final double alphaI;
+  private final double totalWeightSum;
+  private final double numFeatures;
 
   public ComplementaryThetaTrainer(Vector weightsPerFeature, Vector weightsPerLabel, double alphaI) {
-    super(weightsPerFeature, weightsPerLabel, alphaI);
+    Preconditions.checkNotNull(weightsPerFeature);
+    Preconditions.checkNotNull(weightsPerLabel);
+    this.weightsPerFeature = weightsPerFeature;
+    this.weightsPerLabel = weightsPerLabel;
+    this.alphaI = alphaI;
+    perLabelThetaNormalizer = weightsPerLabel.like();
+    totalWeightSum = weightsPerLabel.zSum();
+    numFeatures = weightsPerFeature.getNumNondefaultElements();
   }
 
-  @Override
   public void train(int label, Vector perLabelWeight) {
     double labelWeight = labelWeight(label);
     // sum weights for each label including those with zero word counts
-    for(int i=0; i < perLabelWeight.size(); i++){
+    for(int i = 0; i < perLabelWeight.size(); i++){
       Vector.Element perLabelWeightElement = perLabelWeight.getElement(i);
       updatePerLabelThetaNormalizer(label,
-          ComplementaryNaiveBayesClassifier.computeWeight(featureWeight(perLabelWeightElement.index()), perLabelWeightElement.get(),
-              totalWeightSum(), labelWeight, alphaI(), numFeatures()));
+          ComplementaryNaiveBayesClassifier.computeWeight(featureWeight(perLabelWeightElement.index()),
+              perLabelWeightElement.get(), totalWeightSum(), labelWeight, alphaI(), numFeatures()));
     }
+  }
+
+  protected double alphaI() {
+    return alphaI;
+  }
+
+  protected double numFeatures() {
+    return numFeatures;
+  }
+
+  protected double labelWeight(int label) {
+    return weightsPerLabel.get(label);
+  }
+
+  protected double totalWeightSum() {
+    return totalWeightSum;
+  }
+
+  protected double featureWeight(int feature) {
+    return weightsPerFeature.get(feature);
+  }
+
+  // http://people.csail.mit.edu/jrennie/papers/icml03-nb.pdf - Section 3.2, Weight Magnitude Errors
+  protected void updatePerLabelThetaNormalizer(int label, double weight) {
+    perLabelThetaNormalizer.set(label, perLabelThetaNormalizer.get(label) + Math.abs(weight));
+  }
+
+  public Vector retrievePerLabelThetaNormalizer() {
+    return perLabelThetaNormalizer.clone();
   }
 }

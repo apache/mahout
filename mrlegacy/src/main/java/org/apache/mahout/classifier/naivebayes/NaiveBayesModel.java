@@ -43,12 +43,12 @@ public class NaiveBayesModel {
   private final float alphaI;
   private final double numFeatures;
   private final double totalWeightSum;
+  private final boolean isComplementary;  
+   
+  public final static String COMPLEMENTARY_MODEL = "COMPLEMENTARY_MODEL";
 
-  public NaiveBayesModel(Matrix weightMatrix,
-                         Vector weightsPerFeature,
-                         Vector weightsPerLabel,
-                         Vector thetaNormalizer,
-                         float alphaI) {
+  public NaiveBayesModel(Matrix weightMatrix, Vector weightsPerFeature, Vector weightsPerLabel, Vector thetaNormalizer,
+                         float alphaI, boolean isComplementary) {
     this.weightsPerLabelAndFeature = weightMatrix;
     this.weightsPerFeature = weightsPerFeature;
     this.weightsPerLabel = weightsPerLabel;
@@ -56,6 +56,7 @@ public class NaiveBayesModel {
     this.numFeatures = weightsPerFeature.getNumNondefaultElements();
     this.totalWeightSum = weightsPerLabel.zSum();
     this.alphaI = alphaI;
+    this.isComplementary=isComplementary;
   }
 
   public double labelWeight(int label) {
@@ -93,7 +94,11 @@ public class NaiveBayesModel {
   public Vector createScoringVector() {
     return weightsPerLabel.like();
   }
-
+  
+  public boolean isComplemtary(){
+      return isComplementary;
+  }
+  
   public static NaiveBayesModel materialize(Path output, Configuration conf) throws IOException {
     FileSystem fs = output.getFileSystem(conf);
 
@@ -102,14 +107,17 @@ public class NaiveBayesModel {
     Vector weightsPerFeature = null;
     Matrix weightsPerLabelAndFeature;
     float alphaI;
+    boolean isComplementary;
 
     FSDataInputStream in = fs.open(new Path(output, "naiveBayesModel.bin"));
     try {
       alphaI = in.readFloat();
+      isComplementary = in.readBoolean();
       weightsPerFeature = VectorWritable.readVector(in);
       weightsPerLabel = new DenseVector(VectorWritable.readVector(in));
-      perLabelThetaNormalizer = new DenseVector(VectorWritable.readVector(in));
-
+      if (isComplementary){
+        perLabelThetaNormalizer = new DenseVector(VectorWritable.readVector(in));
+      }
       weightsPerLabelAndFeature = new SparseRowMatrix(weightsPerLabel.size(), weightsPerFeature.size());
       for (int label = 0; label < weightsPerLabelAndFeature.numRows(); label++) {
         weightsPerLabelAndFeature.assignRow(label, VectorWritable.readVector(in));
@@ -118,7 +126,7 @@ public class NaiveBayesModel {
       Closeables.close(in, true);
     }
     NaiveBayesModel model = new NaiveBayesModel(weightsPerLabelAndFeature, weightsPerFeature, weightsPerLabel,
-        perLabelThetaNormalizer, alphaI);
+        perLabelThetaNormalizer, alphaI, isComplementary);
     model.validate();
     return model;
   }
@@ -128,9 +136,12 @@ public class NaiveBayesModel {
     FSDataOutputStream out = fs.create(new Path(output, "naiveBayesModel.bin"));
     try {
       out.writeFloat(alphaI);
+      out.writeBoolean(isComplementary);
       VectorWritable.writeVector(out, weightsPerFeature);
-      VectorWritable.writeVector(out, weightsPerLabel);
-      VectorWritable.writeVector(out, perlabelThetaNormalizer);
+      VectorWritable.writeVector(out, weightsPerLabel); 
+      if (isComplementary){
+        VectorWritable.writeVector(out, perlabelThetaNormalizer);
+      }
       for (int row = 0; row < weightsPerLabelAndFeature.numRows(); row++) {
         VectorWritable.writeVector(out, weightsPerLabelAndFeature.viewRow(row));
       }
@@ -149,15 +160,17 @@ public class NaiveBayesModel {
     Preconditions.checkNotNull(weightsPerFeature, "the feature sums have to be defined");
     Preconditions.checkArgument(weightsPerFeature.getNumNondefaultElements() > 0,
         "the feature sums have to be greater than 0!");
-    Preconditions.checkArgument(perlabelThetaNormalizer != null, "the theta normalizers have to be defined");
-    Preconditions.checkArgument(perlabelThetaNormalizer.getNumNondefaultElements() > 0,
-        "the number of theta normalizers has to be greater than 0!");    
-    Preconditions.checkArgument(Math.signum(perlabelThetaNormalizer.minValue()) 
-            == Math.signum(perlabelThetaNormalizer.maxValue()), 
-       "Theta normalizers do not all have the same sign");            
-    Preconditions.checkArgument(perlabelThetaNormalizer.getNumNonZeroElements() 
-            == perlabelThetaNormalizer.size(), 
-       "Theta normalizers can not have zero value.");
+    if (isComplementary){
+        Preconditions.checkArgument(perlabelThetaNormalizer != null, "the theta normalizers have to be defined");
+        Preconditions.checkArgument(perlabelThetaNormalizer.getNumNondefaultElements() > 0,
+            "the number of theta normalizers has to be greater than 0!");    
+        Preconditions.checkArgument(Math.signum(perlabelThetaNormalizer.minValue()) 
+                == Math.signum(perlabelThetaNormalizer.maxValue()), 
+           "Theta normalizers do not all have the same sign");            
+        Preconditions.checkArgument(perlabelThetaNormalizer.getNumNonZeroElements() 
+                == perlabelThetaNormalizer.size(), 
+           "Theta normalizers can not have zero value.");
+    }
     
   }
 }

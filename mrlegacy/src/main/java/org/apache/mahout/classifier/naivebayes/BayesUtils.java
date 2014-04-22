@@ -58,6 +58,7 @@ public final class BayesUtils {
   public static NaiveBayesModel readModelFromDir(Path base, Configuration conf) {
 
     float alphaI = conf.getFloat(ThetaMapper.ALPHA_I, 1.0f);
+    boolean isComplementary = conf.getBoolean(NaiveBayesModel.COMPLEMENTARY_MODEL, true);
 
     // read feature sums and label sums
     Vector scoresPerLabel = null;
@@ -81,19 +82,22 @@ public final class BayesUtils {
         new Path(base, TrainNaiveBayesJob.SUMMED_OBSERVATIONS), PathType.LIST, PathFilters.partFilter(), conf)) {
       scoresPerLabelAndFeature.assignRow(entry.getFirst().get(), entry.getSecond().get());
     }
-
-    Vector perLabelThetaNormalizer = scoresPerLabel.like();
-     for (Pair<Text,VectorWritable> entry : new SequenceFileDirIterable<Text,VectorWritable>(
-        new Path(base, TrainNaiveBayesJob.THETAS), PathType.LIST, PathFilters.partFilter(), conf)) {
-      if (entry.getFirst().toString().equals(TrainNaiveBayesJob.LABEL_THETA_NORMALIZER)) {
-        perLabelThetaNormalizer = entry.getSecond().get();
-      }
-    }
-
-    Preconditions.checkNotNull(perLabelThetaNormalizer);
     
+    // perLabelThetaNormalizer is only used by the complementary model, we do not instantiate it for the standard model
+    Vector perLabelThetaNormalizer = null;
+    if (isComplementary) {
+      perLabelThetaNormalizer=scoresPerLabel.like();    
+      for (Pair<Text,VectorWritable> entry : new SequenceFileDirIterable<Text,VectorWritable>(
+          new Path(base, TrainNaiveBayesJob.THETAS), PathType.LIST, PathFilters.partFilter(), conf)) {
+        if (entry.getFirst().toString().equals(TrainNaiveBayesJob.LABEL_THETA_NORMALIZER)) {
+          perLabelThetaNormalizer = entry.getSecond().get();
+        }
+      }
+      Preconditions.checkNotNull(perLabelThetaNormalizer);
+    }
+     
     return new NaiveBayesModel(scoresPerLabelAndFeature, scoresPerFeature, scoresPerLabel, perLabelThetaNormalizer,
-        alphaI);
+        alphaI, isComplementary);
   }
 
   /** Write the list of labels into a map file */

@@ -17,6 +17,7 @@
 
 package org.apache.mahout.classifier.naivebayes.test;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -49,8 +50,17 @@ public class BayesTestMapper extends Mapper<Text, VectorWritable, Text, VectorWr
     Configuration conf = context.getConfiguration();
     Path modelPath = HadoopUtil.getSingleCachedFile(conf);
     NaiveBayesModel model = NaiveBayesModel.materialize(modelPath, conf);
-    boolean compl = Boolean.parseBoolean(conf.get(TestNaiveBayesDriver.COMPLEMENTARY));
-    if (compl) {
+    boolean isComplementary = Boolean.parseBoolean(conf.get(TestNaiveBayesDriver.COMPLEMENTARY));
+    
+    // ensure that if we are testing in complementary mode, the model has been
+    // trained complementary. a complementarty model will work for standard classification
+    // a standard model will not work for complementary classification
+    if (isComplementary) {
+      Preconditions.checkArgument((model.isComplemtary() == isComplementary),
+          "Complementary mode in model is different than test mode");
+    }
+    
+    if (isComplementary) {
       classifier = new ComplementaryNaiveBayesClassifier(model);
     } else {
       classifier = new StandardNaiveBayesClassifier(model);
