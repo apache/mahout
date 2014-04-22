@@ -213,23 +213,16 @@
       </dependencies>
     </profile>
   </profiles>
-  <dependencies>
 
+  <dependencies>
     <!-- spark stuff -->
     <dependency>
       <groupId>org.apache.spark</groupId>
-      <artifactId>spark-core_2.10</artifactId>
-      <version>0.9.0-incubating</version>
+      <artifactId>spark-core_${scala.major}</artifactId>
+      <version>${spark.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>org.apache.spark</groupId>
-      <artifactId>spark-bagel_2.10</artifactId>
-      <version>0.9.0-incubating</version>
-    </dependency>
-
-    <dependency>
-
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-mrlegacy</artifactId>
       <version>${pom.version}</version>
@@ -263,7 +256,7 @@
 
     <dependency>
       <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_2.10</artifactId>
+      <artifactId>scalatest_${scala.major}</artifactId>
       <version>2.0</version>
       <scope>test</scope>
     </dependency>

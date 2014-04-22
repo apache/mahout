@@ -27,9 +27,6 @@ import org.apache.mahout.common.IOUtils
 import org.apache.log4j.Logger
 import org.apache.mahout.sparkbindings.drm.DrmLike
 
-/**
- * @author dmitriy
- */
 package object sparkbindings {
 
   private[sparkbindings] val log = Logger.getLogger("org.apache.mahout.sparkbindings")
@@ -42,15 +39,15 @@ package object sparkbindings {
    * @return
    */
   def mahoutSparkContext(masterUrl: String, appName: String,
-      customJars: TraversableOnce[String] = Nil): SparkContext = {
+      customJars: TraversableOnce[String] = Nil,
+      sparkConf: SparkConf = new SparkConf(),
+      addMahoutJars: Boolean = true
+      ): SparkContext = {
     val closeables = new java.util.ArrayDeque[Closeable]()
 
     try {
 
-      val conf = if (!masterUrl.startsWith("local")
-          || System.getProperties.contains("mahout.home")
-          || System.getenv("MAHOUT_HOME") != null
-      ) {
+      if (addMahoutJars) {
         var mhome = System.getenv("MAHOUT_HOME")
         if (mhome == null) mhome = System.getProperty("mahout.home")
 
@@ -65,7 +62,7 @@ package object sparkbindings {
         if (!exec.canExecute)
           throw new IllegalArgumentException("Cannot execute %s.".format(exec.getAbsolutePath))
 
-        val p = Runtime.getRuntime.exec(Array(exec.getAbsolutePath, "classpath"))
+        val p = Runtime.getRuntime.exec(Array(exec.getAbsolutePath, "-spark", "classpath"))
 
         closeables.addFirst(new Closeable {
           def close() {
@@ -105,23 +102,30 @@ package object sparkbindings {
               j.matches(".*mahout-math-scala-.*\\.jar") ||
               j.matches(".*mahout-mrlegacy-.*\\.jar") ||
               j.matches(".*mahout-spark-.*\\.jar")
-        ).filter(!_.matches(".*-tests.jar")) ++
-            SparkContext.jarOfClass(classOf[DrmLike[_]]) ++ customJars
+        ).filter(n => !n.matches(".*-tests.jar") && !n.matches(".*-sources.jar")) ++
+            SparkContext.jarOfClass(classOf[DrmLike[_]])
 
         if (log.isDebugEnabled) {
           log.debug("Mahout jars:")
           mcjars.foreach(j => log.debug(j))
         }
 
-        new SparkConf().setJars(jars = mcjars.toSeq)
+        sparkConf.setJars(jars = mcjars.toSeq ++ customJars)
 
-      } else new SparkConf()
+      } else {
+        // In local mode we don't care about jars, do we?
+        sparkConf.setJars(customJars.toSeq)
+      }
 
-      conf.setAppName(appName).setMaster(masterUrl)
+      sparkConf.setAppName(appName).setMaster(masterUrl)
           .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
           .set("spark.kryo.registrator", "org.apache.mahout.sparkbindings.io.MahoutKryoRegistrator")
 
-      new SparkContext(config = conf)
+      if (System.getenv("SPARK_HOME") != null) {
+        sparkConf.setSparkHome(System.getenv("SPARK_HOME"))
+      }
+
+      new SparkContext(config = sparkConf)
 
     } finally {
       IOUtils.close(closeables)

@@ -75,6 +75,16 @@ if [ "$1" == "-core" ] ; then
   shift
 fi
 
+if [ "$1" == "-spark" ]; then
+  SPARK=1
+  shift
+fi
+
+if [ "$1" == "spark-shell" ]; then
+  SPARK=1
+fi
+
+
 if [ "$MAHOUT_CORE" != "" ]; then
   IS_CORE=1
 fi
@@ -116,6 +126,7 @@ if [ "x$MAHOUT_CONF_DIR" = "x" ]; then
   fi
 fi
 
+
 # CLASSPATH initially contains $MAHOUT_CONF_DIR, or defaults to $MAHOUT_HOME/src/conf
 CLASSPATH=${CLASSPATH}:$MAHOUT_CONF_DIR
 
@@ -138,21 +149,45 @@ then
     CLASSPATH=${CLASSPATH}:$f;
   done
 
-  # add dev targets if they exist
-  for f in $MAHOUT_HOME/examples/target/mahout-examples-*-job.jar $MAHOUT_HOME/mahout-examples-*-job.jar ; do
-    CLASSPATH=${CLASSPATH}:$f;
-  done
+  if [ "$SPARK" != "1" ]; then
+
+    # add dev targets if they exist
+    for f in $MAHOUT_HOME/examples/target/mahout-examples-*-job.jar $MAHOUT_HOME/mahout-examples-*-job.jar ; do
+      CLASSPATH=${CLASSPATH}:$f;
+    done
+  fi
   
-  # add scala dev target since it is not currently used in examples
+  # add scala dev target
   for f in $MAHOUT_HOME/math-scala/target/mahout-math-scala-*.jar ; do 
     CLASSPATH=${CLASSPATH}:$f;
   done
 
-  # add mahout-spark since it is currently not used in examples
-  for f in $MAHOUT_HOME/spark/target/mahout-spark-*.jar ; do 
-    CLASSPATH=${CLASSPATH}:$f;
-  done
-  
+
+  # add spark-shell -- if we requested shell
+  if [ "$SPARK" == "1" ]; then
+
+    for f in $MAHOUT_HOME/core/target/mahout-core-*.jar ; do
+      CLASSPATH=${CLASSPATH}:$f;
+    done
+
+    for f in $MAHOUT_HOME/spark/target/mahout-spark-*.jar ; do
+      CLASSPATH=${CLASSPATH}:$f;
+    done
+
+    for f in $MAHOUT_HOME/spark-shell/target/mahout-spark-shell-*.jar ; do
+       CLASSPATH=${CLASSPATH}:$f;
+    done
+
+    SPARK_CP_BIN="${SPARK_HOME}/bin/compute-classpath.sh"
+    if [ -x "${SPARK_CP_BIN}" ]; then
+       SPARK_CLASSPATH=$("${SPARK_CP_BIN}" 2>/dev/null)
+       CLASSPATH="${CLASSPATH}:${SPARK_CLASSPATH}"
+    else
+      echo "Cannot find Spark classpath."
+      exit -1
+    fi
+
+  fi
 
   # add release dependencies to CLASSPATH
   for f in $MAHOUT_HOME/lib/*.jar; do
@@ -165,12 +200,16 @@ else
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/examples/target/classes
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/math-scala/target/classes
   #CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/mrlegacy/src/main/resources
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/spark/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/spark-shell/target/classes
 fi
 
 # add development dependencies to CLASSPATH
-for f in $MAHOUT_HOME/examples/target/dependency/*.jar; do
-  CLASSPATH=${CLASSPATH}:$f;
-done
+if [ "$SPARK" == "" ]; then
+  for f in $MAHOUT_HOME/examples/target/dependency/*.jar; do
+    CLASSPATH=${CLASSPATH}:$f;
+  done
+fi
 
 
 # cygwin path translation
@@ -181,85 +220,95 @@ fi
 # restore ordinary behaviour
 unset IFS
 
-# default log directory & file
-if [ "$MAHOUT_LOG_DIR" = "" ]; then
-  MAHOUT_LOG_DIR="$MAHOUT_HOME/logs"
-fi
-if [ "$MAHOUT_LOGFILE" = "" ]; then
-  MAHOUT_LOGFILE='mahout.log'
-fi
 
-#Fix log path under cygwin
-if $cygwin; then
-  MAHOUT_LOG_DIR=`cygpath -p -w "$MAHOUT_LOG_DIR"`
-fi
 
-MAHOUT_OPTS="$MAHOUT_OPTS -Dhadoop.log.dir=$MAHOUT_LOG_DIR"
-MAHOUT_OPTS="$MAHOUT_OPTS -Dhadoop.log.file=$MAHOUT_LOGFILE"
-MAHOUT_OPTS="$MAHOUT_OPTS -Dmapred.min.split.size=512MB"
-MAHOUT_OPTS="$MAHOUT_OPTS -Dmapred.map.child.java.opts=-Xmx4096m"
-MAHOUT_OPTS="$MAHOUT_OPTS -Dmapred.reduce.child.java.opts=-Xmx4096m"
-MAHOUT_OPTS="$MAHOUT_OPTS -Dmapred.output.compress=true"
-MAHOUT_OPTS="$MAHOUT_OPTS -Dmapred.compress.map.output=true"
-MAHOUT_OPTS="$MAHOUT_OPTS -Dmapred.map.tasks=1"
-MAHOUT_OPTS="$MAHOUT_OPTS -Dmapred.reduce.tasks=1"
-MAHOUT_OPTS="$MAHOUT_OPTS -Dio.sort.factor=30"
-MAHOUT_OPTS="$MAHOUT_OPTS -Dio.sort.mb=1024"
-MAHOUT_OPTS="$MAHOUT_OPTS -Dio.file.buffer.size=32786"
+case "$1" in
+  (spark-shell)
+    exec "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.sparkbindings.shell.Main" $@
+    ;;
+  (*)
 
-if [ "x$JAVA_LIBRARY_PATH" != "x" ]; then
-  MAHOUT_OPTS="$MAHOUT_OPTS -Djava.library.path=$JAVA_LIBRARY_PATH"
-fi
+    # default log directory & file
+    if [ "$MAHOUT_LOG_DIR" = "" ]; then
+      MAHOUT_LOG_DIR="$MAHOUT_HOME/logs"
+    fi
+    if [ "$MAHOUT_LOGFILE" = "" ]; then
+      MAHOUT_LOGFILE='mahout.log'
+    fi
 
-CLASS=org.apache.mahout.driver.MahoutDriver
+    #Fix log path under cygwin
+    if $cygwin; then
+      MAHOUT_LOG_DIR=`cygpath -p -w "$MAHOUT_LOG_DIR"`
+    fi
 
-for f in $MAHOUT_HOME/examples/target/mahout-examples-*-job.jar $MAHOUT_HOME/mahout-examples-*-job.jar ; do
-  if [ -e "$f" ]; then
-    MAHOUT_JOB=$f
-  fi
-done
+    MAHOUT_OPTS="$MAHOUT_OPTS -Dhadoop.log.dir=$MAHOUT_LOG_DIR"
+    MAHOUT_OPTS="$MAHOUT_OPTS -Dhadoop.log.file=$MAHOUT_LOGFILE"
+    MAHOUT_OPTS="$MAHOUT_OPTS -Dmapred.min.split.size=512MB"
+    MAHOUT_OPTS="$MAHOUT_OPTS -Dmapred.map.child.java.opts=-Xmx4096m"
+    MAHOUT_OPTS="$MAHOUT_OPTS -Dmapred.reduce.child.java.opts=-Xmx4096m"
+    MAHOUT_OPTS="$MAHOUT_OPTS -Dmapred.output.compress=true"
+    MAHOUT_OPTS="$MAHOUT_OPTS -Dmapred.compress.map.output=true"
+    MAHOUT_OPTS="$MAHOUT_OPTS -Dmapred.map.tasks=1"
+    MAHOUT_OPTS="$MAHOUT_OPTS -Dmapred.reduce.tasks=1"
+    MAHOUT_OPTS="$MAHOUT_OPTS -Dio.sort.factor=30"
+    MAHOUT_OPTS="$MAHOUT_OPTS -Dio.sort.mb=1024"
+    MAHOUT_OPTS="$MAHOUT_OPTS -Dio.file.buffer.size=32786"
 
-# run it
+    if [ "x$JAVA_LIBRARY_PATH" != "x" ]; then
+      MAHOUT_OPTS="$MAHOUT_OPTS -Djava.library.path=$JAVA_LIBRARY_PATH"
+    fi
 
-HADOOP_BINARY=$(PATH="${HADOOP_HOME:-${HADOOP_PREFIX}}/bin:$PATH" which hadoop 2>/dev/null)
-if [ -x "$HADOOP_BINARY" ] ; then
-  HADOOP_BINARY_CLASSPATH=$("$HADOOP_BINARY" classpath)
-fi
+    CLASS=org.apache.mahout.driver.MahoutDriver
 
-if [ ! -x "$HADOOP_BINARY" ] || [ "$MAHOUT_LOCAL" != "" ] ; then
-  if [ ! -x "$HADOOP_BINARY" ] ; then
-    echo "hadoop binary is not in PATH,HADOOP_HOME/bin,HADOOP_PREFIX/bin, running locally"
-  elif [ "$MAHOUT_LOCAL" != "" ] ; then
-    echo "MAHOUT_LOCAL is set, running locally"
-  fi
-    CLASSPATH="${CLASSPATH}:${MAHOUT_HOME}/lib/hadoop/*"
-    case $1 in
-    (classpath)
-      echo $CLASSPATH
-      ;;
-    (*)
-      exec "$JAVA" $JAVA_HEAP_MAX $MAHOUT_OPTS -classpath "$CLASSPATH" $CLASS "$@"
-    esac
-else
-  echo "Running on hadoop, using $HADOOP_BINARY and HADOOP_CONF_DIR=$HADOOP_CONF_DIR"
+    for f in $MAHOUT_HOME/examples/target/mahout-examples-*-job.jar $MAHOUT_HOME/mahout-examples-*-job.jar ; do
+      if [ -e "$f" ]; then
+        MAHOUT_JOB=$f
+      fi
+    done
 
-  if [ "$MAHOUT_JOB" = "" ] ; then
-    echo "ERROR: Could not find mahout-examples-*.job in $MAHOUT_HOME or $MAHOUT_HOME/examples/target, please run 'mvn install' to create the .job file"
-    exit 1
-  else
-    case "$1" in
-    (hadoop)
-      shift
-      export HADOOP_CLASSPATH=$MAHOUT_CONF_DIR:${HADOOP_CLASSPATH}:$CLASSPATH
-      exec "$HADOOP_BINARY" "$@"
-      ;;
-    (classpath)
-      echo $CLASSPATH
-      ;;
-    (*)
-      echo "MAHOUT-JOB: $MAHOUT_JOB"
-      export HADOOP_CLASSPATH=$MAHOUT_CONF_DIR:${HADOOP_CLASSPATH}
-      exec "$HADOOP_BINARY" jar $MAHOUT_JOB $CLASS "$@"
-    esac
-  fi
-fi
+    # run it
+
+    HADOOP_BINARY=$(PATH="${HADOOP_HOME:-${HADOOP_PREFIX}}/bin:$PATH" which hadoop 2>/dev/null)
+    if [ -x "$HADOOP_BINARY" ] ; then
+      HADOOP_BINARY_CLASSPATH=$("$HADOOP_BINARY" classpath)
+    fi
+    if [ ! -x "$HADOOP_BINARY" ] || [ "$MAHOUT_LOCAL" != "" ] ; then
+      if [ ! -x "$HADOOP_BINARY" ] ; then
+        echo "hadoop binary is not in PATH,HADOOP_HOME/bin,HADOOP_PREFIX/bin, running locally"
+      elif [ "$MAHOUT_LOCAL" != "" ] ; then
+        echo "MAHOUT_LOCAL is set, running locally"
+      fi
+      CLASSPATH="${CLASSPATH}:${MAHOUT_HOME}/lib/hadoop/*"
+      case $1 in
+      (classpath)
+        echo $CLASSPATH
+        ;;
+      (*)
+        exec "$JAVA" $JAVA_HEAP_MAX $MAHOUT_OPTS -classpath "$CLASSPATH" $CLASS "$@"
+      esac
+    else
+      echo "Running on hadoop, using $HADOOP_BINARY and HADOOP_CONF_DIR=$HADOOP_CONF_DIR"
+
+      if [ "$MAHOUT_JOB" = "" ] ; then
+        echo "ERROR: Could not find mahout-examples-*.job in $MAHOUT_HOME or $MAHOUT_HOME/examples/target, please run 'mvn install' to create the .job file"
+        exit 1
+      else
+        case "$1" in
+        (hadoop)
+          shift
+          export HADOOP_CLASSPATH=$MAHOUT_CONF_DIR:${HADOOP_CLASSPATH}:$CLASSPATH
+          exec "$HADOOP_BINARY" "$@"
+          ;;
+        (classpath)
+          echo $CLASSPATH
+          ;;
+        (*)
+          echo "MAHOUT-JOB: $MAHOUT_JOB"
+          export HADOOP_CLASSPATH=$MAHOUT_CONF_DIR:${HADOOP_CLASSPATH}
+          exec "$HADOOP_BINARY" jar $MAHOUT_JOB $CLASS "$@"
+        esac
+      fi
+    fi
+    ;;
+esac
+

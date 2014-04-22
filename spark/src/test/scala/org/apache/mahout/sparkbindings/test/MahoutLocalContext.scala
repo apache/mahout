@@ -1,7 +1,7 @@
 package org.apache.mahout.sparkbindings.test
 
 import org.scalatest.Suite
-import org.apache.spark.SparkContext
+import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.mahout.sparkbindings._
 import org.apache.mahout.test.MahoutSuite
 
@@ -13,17 +13,16 @@ trait MahoutLocalContext extends MahoutSuite with LoggerConfiguration {
 
   protected implicit var mahoutCtx: SparkContext = _
 
-  // Additional jars?
-  protected val buildJars = Traversable.empty[String]
-
   override protected def beforeEach() {
     super.beforeEach()
 
-    System.setProperty("spark.kryoserializer.buffer.mb","15")
-    System.setProperty("spark.akka.frameSize","30")
     mahoutCtx = mahoutSparkContext(masterUrl = "local[3]",
       appName = "MahoutLocalContext",
-      customJars = buildJars
+      // Do not run MAHOUT_HOME jars in unit tests.
+      addMahoutJars = false,
+      sparkConf = new SparkConf()
+          .set("spark.kryoserializer.buffer.mb", "15")
+          .set("spark.akka.frameSize", "30")
     )
   }
 

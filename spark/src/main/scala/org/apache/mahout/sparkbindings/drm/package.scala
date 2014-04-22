@@ -88,7 +88,7 @@ package object drm {
    *
    * @return DRM[Any] where Any is automatically translated to value type
    */
-  def drmFromHDFS(path: String)(implicit sc: SparkContext): CheckpointedDrmBase[Any] = {
+  def drmFromHDFS (path: String)(implicit sc: SparkContext): CheckpointedDrmBase[_] = {
     val rdd = sc.sequenceFile(path, classOf[Writable], classOf[VectorWritable]).map(t => (t._1, t._2.get()))
 
     val key = rdd.map(_._1).take(1)(0)
@@ -108,10 +108,16 @@ package object drm {
       case xx: Writable => (x: Any) => x.asInstanceOf[Writable]
     }
 
+    val  km = key match {
+      case xx: IntWritable => implicitly[ClassTag[Int]]
+      case xx: Text => implicitly[ClassTag[String]]
+      case xx: LongWritable => implicitly[ClassTag[Long]]
+      case xx: Writable => ClassTag(classOf[Writable])
+    }
+
     {
-      implicit val km: ClassManifest[AnyRef] = ClassManifest.classType(key.getClass)
       implicit def getWritable(x: Any): Writable = val2key()
-      new CheckpointedDrmBase[Any](rdd.map(t => (key2val(t._1), t._2)))
+      new CheckpointedDrmBase(rdd.map(t => (key2val(t._1), t._2)))(km.asInstanceOf[ClassTag[Any]])
     }
   }
 

@@ -23,17 +23,16 @@ import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import scala.collection.JavaConversions._
 import org.apache.spark.storage.StorageLevel
-import org.apache.spark.rdd.RDD
-import org.apache.hadoop.io.Writable
 import org.apache.spark.SparkContext._
 import reflect._
 import scala.util.Random
+import org.apache.hadoop.io.{LongWritable, Text, IntWritable, Writable}
 
 /**
  *
  * @author dmitriy
  */
-class CheckpointedDrmBase[K : ClassTag](
+class CheckpointedDrmBase[K: ClassTag](
     val rdd: DrmRdd[K],
     private var _nrow: Long = -1L,
     private var _ncol: Int = -1,
@@ -53,7 +52,7 @@ class CheckpointedDrmBase[K : ClassTag](
    * Action operator -- does not necessary means Spark action; but does mean running BLAS optimizer
    * and writing down Spark graph lineage since last checkpointed DRM.
    */
-  def checkpoint(sLevel:StorageLevel): CheckpointedDrm[K] =
+  def checkpoint(sLevel: StorageLevel): CheckpointedDrm[K] =
   // We are already checkpointed in a sense that we already have Spark lineage. So just return self.
     this
 
@@ -95,7 +94,7 @@ class CheckpointedDrmBase[K : ClassTag](
    */
   def collect: Matrix = {
 
-    val intRowIndices = implicitly[ClassManifest[K]] == classManifest[Int]
+    val intRowIndices = implicitly[ClassTag[K]] == implicitly[ClassTag[Int]]
 
     val cols = rdd.map(_._2.length).fold(0)(max(_, _))
     val rows = if (intRowIndices) rdd.map(_._1.asInstanceOf[Int]).fold(-1)(max(_, _)) + 1 else rdd.count().toInt
@@ -134,7 +133,18 @@ class CheckpointedDrmBase[K : ClassTag](
    * Dump matrix as computed Mahout's DRM into specified (HD)FS path
    * @param path
    */
-  def writeDRM(path: String)(implicit ev: K => Writable) = rdd.saveAsSequenceFile(path)
+  def writeDRM(path: String) = {
+    val ktag = implicitly[ClassTag[K]]
+
+    implicit val k2wFunc: (K) => Writable =
+      if (ktag.runtimeClass == classOf[Int]) (x: K) => new IntWritable(x.asInstanceOf[Int])
+      else if (ktag.runtimeClass == classOf[String]) (x: K) => new Text(x.asInstanceOf[String])
+      else if (ktag.runtimeClass == classOf[Long]) (x: K) => new LongWritable(x.asInstanceOf[Long])
+      else if (classOf[Writable].isAssignableFrom(ktag.runtimeClass)) (x: K) => x.asInstanceOf[Writable]
+      else throw new IllegalArgumentException("Do not know how to convert class tag %s to Writable.".format(ktag))
+//    implicit def any2w(k: Any): Writable = k2wFunc(k)
+    rdd.saveAsSequenceFile(path)
+  }
 
   protected def computeNRow = {
 

@@ -1,0 +1,23 @@
+import org.apache.mahout.sparkbindings._
+import drm._
+import RLikeDrmOps._
+
+import org.apache.spark.storage.StorageLevel
+
+val a = dense((1,2,3),(3,4,5))
+val drmA = drmParallelize(a,numPartitions = 2)
+val drmAtA = drmA.t %*% drmA
+
+val r = drmAtA.mapBlock() {
+  case (keys, block) =>
+    block += 1.0
+    keys -> block
+}.checkpoint(/*StorageLevel.NONE*/)
+
+r.collect
+
+// local write
+r.writeDRM("file:///home/dmitriy/A")
+
+// hdfs write
+r.writeDRM("hdfs://localhost:11010/A")
