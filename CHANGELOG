@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 1.0 - unreleased
 
+  MAHOUT-1510: Goodbye MapReduce (ssc)
+
   MAHOUT-1519: Remove StandardThetaTrainer (Andrew Palumbo via ssc)
 
   MAHOUT-1496: Create a website describing the distributed ALS recommender (Jian Wang via ssc)
