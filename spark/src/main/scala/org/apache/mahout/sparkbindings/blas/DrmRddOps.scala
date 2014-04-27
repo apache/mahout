@@ -23,10 +23,6 @@ import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.mahout.math.{SequentialAccessSparseVector, DenseVector}
 
-/**
- *
- * @author dmitriy
- */
 class DrmRddOps[K: ClassTag](private[blas] val rdd: DrmRdd[K]) {
 
   def densify(threshold: Double = 0.80): DrmRdd[K] = rdd.map({

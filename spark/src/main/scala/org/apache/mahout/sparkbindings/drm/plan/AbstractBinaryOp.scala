@@ -21,9 +21,6 @@ import scala.reflect.ClassTag
 import org.apache.mahout.sparkbindings.drm.DrmLike
 import scala.util.Random
 
-/**
- * @author dmitriy
- */
 abstract class AbstractBinaryOp[A : ClassTag, B : ClassTag, K : ClassTag]
     extends CheckpointAction[K] with DrmLike[K] {
 

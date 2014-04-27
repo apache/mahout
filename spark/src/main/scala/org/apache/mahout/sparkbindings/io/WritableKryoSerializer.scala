@@ -22,10 +22,6 @@ import com.esotericsoftware.kryo.io.{Input, Output}
 import org.apache.hadoop.io.{DataInputBuffer, DataOutputBuffer, Writable}
 import scala.reflect.ClassTag
 
-/**
- *
- * @author dmitriy
- */
 class WritableKryoSerializer[V <% Writable, W <: Writable <% V : ClassTag] extends Serializer[V] {
 
   def write(kryo: Kryo, out: Output, v: V) = {

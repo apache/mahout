@@ -5,9 +5,6 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.mahout.sparkbindings._
 import org.apache.mahout.test.MahoutSuite
 
-/**
- * @author dmitriy
- */
 trait MahoutLocalContext extends MahoutSuite with LoggerConfiguration {
   this: Suite =>
 

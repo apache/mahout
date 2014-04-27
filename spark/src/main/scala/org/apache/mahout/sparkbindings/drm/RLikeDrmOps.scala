@@ -27,9 +27,6 @@ import org.apache.mahout.sparkbindings.drm.plan.OpTimesRightMatrix
 import org.apache.hadoop.io.Writable
 import org.apache.spark.SparkContext._
 
-/**
- * @author dmitriy
- */
 class RLikeDrmOps[K: ClassTag](drm: DrmLike[K]) extends DrmLikeOps[K](drm) {
 
   import RLikeDrmOps._

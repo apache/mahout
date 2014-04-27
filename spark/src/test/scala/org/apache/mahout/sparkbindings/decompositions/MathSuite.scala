@@ -28,10 +28,6 @@ import org.apache.mahout.math.{Matrices, SparseRowMatrix}
 import org.apache.spark.storage.StorageLevel
 import org.apache.mahout.common.RandomUtils
 
-/**
- *
- * @author dmitriy
- */
 class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
 
   test("thin distributed qr") {

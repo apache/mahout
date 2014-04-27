@@ -28,10 +28,6 @@ import reflect._
 import scala.util.Random
 import org.apache.hadoop.io.{LongWritable, Text, IntWritable, Writable}
 
-/**
- *
- * @author dmitriy
- */
 class CheckpointedDrmBase[K: ClassTag](
     val rdd: DrmRdd[K],
     private var _nrow: Long = -1L,

@@ -3,9 +3,6 @@ package org.apache.mahout.test
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, BeforeAndAfter, Suite}
 import org.apache.log4j.{Level, Logger, BasicConfigurator}
 
-/**
- * @author dmitriy
- */
 trait LoggerConfiguration extends BeforeAndAfterAll {
   this: Suite =>
 

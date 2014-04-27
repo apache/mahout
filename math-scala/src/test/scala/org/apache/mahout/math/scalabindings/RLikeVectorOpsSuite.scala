@@ -22,10 +22,6 @@ import org.apache.mahout.math.Vector
 import RLikeOps._
 import org.apache.mahout.test.MahoutSuite
 
-/**
- *
- * @author dmitriy
- */
 class RLikeVectorOpsSuite extends FunSuite with MahoutSuite {
 
   test("Hadamard") {

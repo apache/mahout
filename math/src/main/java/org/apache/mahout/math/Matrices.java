@@ -24,9 +24,6 @@ import org.apache.mahout.math.function.IntIntFunction;
 
 import java.util.Random;
 
-/**
- * @author dmitriy
- */
 public final class Matrices {
 
   /**

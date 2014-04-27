@@ -22,9 +22,6 @@ import org.apache.mahout.sparkbindings.drm.{DrmRddInput, BlockMapFunc, DrmLike}
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 
-/**
- * @author dmitriy
- */
 class OpMapBlock[S: ClassTag, R: ClassTag](
     override var A: DrmLike[S],
     val bmf: BlockMapFunc[S, R],
