@@ -44,6 +44,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This still uses the old MR api and as with all things in Mahout that are MapReduce is now part of 'mrlegacy'.
+ * There is no plan to convert the old MR api used here to the new MR api.
+ * This will be replaced by the new Spark based Linear Algebra bindings.
+ */
+
 public class MatrixMultiplicationJob extends AbstractJob {
 
   private static final String OUT_CARD = "output.vector.cardinality";
