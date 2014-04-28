@@ -138,8 +138,8 @@ public final class SGDHelper {
     }
     if (k % (bump * scale) == 0) {
       if (best != null) {
-        ModelSerializer.writeBinary("/tmp/news-group-" + k + ".model",
-                best.getPayload().getLearner().getModels().get(0));
+        File modelFile = new File(System.getProperty("java.io.tmpdir"), "news-group-" + k + ".model");
+        ModelSerializer.writeBinary(modelFile.getAbsolutePath(), best.getPayload().getLearner().getModels().get(0));
       }
 
       info.setStep(info.getStep() + 0.25);

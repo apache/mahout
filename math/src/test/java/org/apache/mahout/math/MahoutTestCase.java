@@ -36,7 +36,7 @@ import com.carrotsearch.randomizedtesting.RandomizedTest;
 /**
  * Superclass of all Mahout test cases.
  */
-@ThreadLeakScope(ThreadLeakScope.Scope.SUITE)
+@ThreadLeakScope(ThreadLeakScope.Scope.NONE)
 @ThreadLeakAction({ThreadLeakAction.Action.WARN, ThreadLeakAction.Action.INTERRUPT})
 @ThreadLeakLingering(linger = 20000) // Wait a bit longer for leaked threads to die.
 @ThreadLeakZombies(ThreadLeakZombies.Consequence.IGNORE_REMAINING_TESTS)

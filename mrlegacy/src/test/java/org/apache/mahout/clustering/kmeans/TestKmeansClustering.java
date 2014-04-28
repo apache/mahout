@@ -160,7 +160,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
         Closeables.close(writer, false);
       }
       // now run the Job
-      Path outputPath = getTestTempDirPath("output");
+      Path outputPath = getTestTempDirPath("output" + k);
       String[] args = {optKey(DefaultOptionCreator.INPUT_OPTION), pointsPath.toString(),
           optKey(DefaultOptionCreator.CLUSTERS_IN_OPTION), clustersPath.toString(),
           optKey(DefaultOptionCreator.OUTPUT_OPTION), outputPath.toString(),
@@ -214,7 +214,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
         Closeables.close(writer, false);
       }
       // now run the Job
-      Path outputPath = getTestTempDirPath("output");
+      Path outputPath = getTestTempDirPath("output" + k);
       String[] args = {optKey(DefaultOptionCreator.INPUT_OPTION), pointsPath.toString(),
           optKey(DefaultOptionCreator.CLUSTERS_IN_OPTION), clustersPath.toString(),
           optKey(DefaultOptionCreator.OUTPUT_OPTION), outputPath.toString(),
@@ -269,7 +269,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
         Closeables.close(writer, false);
       }
       // now run the Job
-      Path outputPath = getTestTempDirPath("output");
+      Path outputPath = getTestTempDirPath("output" + k);
       String[] args = {optKey(DefaultOptionCreator.INPUT_OPTION), pointsPath.toString(),
           optKey(DefaultOptionCreator.CLUSTERS_IN_OPTION), clustersPath.toString(),
           optKey(DefaultOptionCreator.OUTPUT_OPTION), outputPath.toString(),

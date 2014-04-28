@@ -87,7 +87,7 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
       }
 
       // now run the Job using the run() command line options.
-      Path output = getTestTempDirPath("output");
+      Path output = getTestTempDirPath("output" + k);
       /*      FuzzyKMeansDriver.runJob(pointsPath,
                                      clustersPath,
                                      output,
@@ -160,7 +160,7 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
       }
 
       // now run the Job using the run() command line options.
-      Path output = getTestTempDirPath("output");
+      Path output = getTestTempDirPath("output" + k);
       /*      FuzzyKMeansDriver.runJob(pointsPath,
                                      clustersPath,
                                      output,

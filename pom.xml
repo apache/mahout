@@ -534,7 +534,7 @@
         <configuration>
           <forkCount>2</forkCount>
           <reuseForks>false</reuseForks>
-          <argLine>-Xmx512m -Djava.security.manager
+          <argLine>-Xmx512m -Djava.security.manager -Djava.library.path=${env.HADOOP_HOME}\bin
           -Djava.security.policy=${project.build.directory}/../../buildtools/src/test/resources/java.policy</argLine>
           <argLine>-Djava.security.auth.login.config=${project.build.directory}/../../buildtools/src/test/resources/jaas.config</argLine>
           <testFailureIgnore>false</testFailureIgnore>
