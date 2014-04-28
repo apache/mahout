@@ -166,7 +166,7 @@ then
   # add spark-shell -- if we requested shell
   if [ "$SPARK" == "1" ]; then
 
-    for f in $MAHOUT_HOME/core/target/mahout-core-*.jar ; do
+    for f in $MAHOUT_HOME/mrlegacy/target/mahout-mrlegacy-*.jar ; do
       CLASSPATH=${CLASSPATH}:$f;
     done
 
