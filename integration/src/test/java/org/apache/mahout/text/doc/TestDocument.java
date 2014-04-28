@@ -1,5 +1,4 @@
-package org.apache.mahout.text;
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -15,26 +14,16 @@ package org.apache.mahout.text;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.mahout.text.doc;
 
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.IndexableField;
+import org.apache.lucene.document.Document;
 
-import java.io.IOException;
+public interface TestDocument {
 
-/**
- * Utility for checking if a field is stored in a Lucene index.
- */
-public class LuceneIndexHelper {
+  String getId();
 
-  private LuceneIndexHelper() {
+  String getField();
 
-  }
-
-  public static void fieldShouldExistInIndex(IndexReader reader, String fieldName) throws IOException {
-    IndexableField field = reader.document(0).getField(fieldName);
-    if (field == null || !field.fieldType().stored()) {
-      throw new IllegalArgumentException("Field '" + fieldName + "' is possibly not stored since first document in index does not contain this field.");
-    }
-  }
+  Document asLuceneDocument();
 
 }

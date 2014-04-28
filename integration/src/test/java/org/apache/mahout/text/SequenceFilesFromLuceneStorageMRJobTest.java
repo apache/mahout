@@ -23,6 +23,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.text.doc.SingleFieldDocument;
+import org.apache.mahout.text.doc.TestDocument;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -71,12 +72,12 @@ public class SequenceFilesFromLuceneStorageMRJobTest extends AbstractLuceneStora
       map.put(next.getFirst().toString(), next.getSecond());
     }
     assertEquals(docs.size() + misshapenDocs.size(), map.size());
-    for (SingleFieldDocument doc : docs) {
+    for (TestDocument doc : docs) {
       Text value = map.get(doc.getId());
       assertNotNull(value);
       assertEquals(value.toString(), doc.getField());
     }
-    for (SingleFieldDocument doc : misshapenDocs) {
+    for (TestDocument doc : misshapenDocs) {
       Text value = map.get(doc.getId());
       assertNotNull(value);
       assertEquals(value.toString(), doc.getField());

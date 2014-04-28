@@ -31,6 +31,7 @@ import org.apache.mahout.common.Pair;
 import org.apache.mahout.text.doc.MultipleFieldsDocument;
 import org.apache.mahout.text.doc.NumericFieldDocument;
 import org.apache.mahout.text.doc.SingleFieldDocument;
+import org.apache.mahout.text.doc.TestDocument;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,8 +45,8 @@ public abstract class AbstractLuceneStorageTest extends MahoutTestCase {
 
   protected Path indexPath1;
   protected Path indexPath2;
-  protected List<SingleFieldDocument> docs = Lists.newArrayList();
-  protected List<SingleFieldDocument> misshapenDocs = Lists.newArrayList();
+  protected List<TestDocument> docs = Lists.newArrayList();
+  protected List<TestDocument> misshapenDocs = Lists.newArrayList();
 
   @Override
   public void setUp() throws Exception {
@@ -59,10 +60,10 @@ public abstract class AbstractLuceneStorageTest extends MahoutTestCase {
     misshapenDocs.add(new SingleFieldDocument("empty_value", ""));
   }
 
-  protected void commitDocuments(Directory directory, Iterable<SingleFieldDocument> theDocs) throws IOException{
+  protected void commitDocuments(Directory directory, Iterable<TestDocument> theDocs) throws IOException{
     IndexWriter indexWriter = new IndexWriter(directory, new IndexWriterConfig(Version.LUCENE_46, new StandardAnalyzer(Version.LUCENE_46)));
 
-    for (SingleFieldDocument singleFieldDocument : theDocs) {
+    for (TestDocument singleFieldDocument : theDocs) {
       indexWriter.addDocument(singleFieldDocument.asLuceneDocument());
     }
 
@@ -70,7 +71,7 @@ public abstract class AbstractLuceneStorageTest extends MahoutTestCase {
     indexWriter.close();
   }
 
-  protected void commitDocuments(Directory directory, SingleFieldDocument... documents) throws IOException {
+  protected void commitDocuments(Directory directory, TestDocument... documents) throws IOException {
     commitDocuments(directory, Arrays.asList(documents));
   }
 

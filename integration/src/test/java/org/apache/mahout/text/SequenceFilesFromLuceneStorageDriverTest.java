@@ -65,8 +65,6 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
         return lucene2SeqConf;
       }
     };
-    commitDocuments(getDirectory(getIndexPath1AsFile()), new SingleFieldDocument("1", "Mahout is cool"));
-    commitDocuments(getDirectory(getIndexPath1AsFile()), new SingleFieldDocument("2", "Mahout is cool"));
   }
 
   @After
@@ -127,6 +125,9 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
 
   @Test
   public void testRunOptionalArguments() throws Exception {
+    commitDocuments(getDirectory(getIndexPath1AsFile()), new SingleFieldDocument("1", "Mahout is cool"));
+    commitDocuments(getDirectory(getIndexPath1AsFile()), new SingleFieldDocument("2", "Mahout is cool"));
+
     String[] args = {
       "-i", getIndexPath1AsFile().toString(),
       "-o", seqFilesOutputPath.toString(),
@@ -150,6 +151,9 @@ public class SequenceFilesFromLuceneStorageDriverTest extends AbstractLuceneStor
 
   @Test
   public void testRunInvalidQuery() throws Exception {
+    commitDocuments(getDirectory(getIndexPath1AsFile()), new SingleFieldDocument("1", "Mahout is cool"));
+    commitDocuments(getDirectory(getIndexPath1AsFile()), new SingleFieldDocument("2", "Mahout is cool"));
+
     String[] args = {
       "-i", getIndexPath1AsFile().toString(),
       "-o", seqFilesOutputPath.toString(),

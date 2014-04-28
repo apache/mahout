@@ -20,6 +20,9 @@ import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
@@ -28,6 +31,7 @@ import org.apache.mahout.common.Pair;
 import org.apache.mahout.text.doc.MultipleFieldsDocument;
 import org.apache.mahout.text.doc.NumericFieldDocument;
 import org.apache.mahout.text.doc.SingleFieldDocument;
+import org.apache.mahout.text.doc.TestDocument;
 import org.apache.mahout.text.doc.UnstoredFieldsDocument;
 import org.junit.After;
 import org.junit.Before;
@@ -85,20 +89,20 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
       map.put(next.getFirst().toString(), next.getSecond());
     }
     assertEquals(docs.size() + misshapenDocs.size(), map.size());
-    for (SingleFieldDocument doc : docs) {
+    for (TestDocument doc : docs) {
       Text value = map.get(doc.getId());
       assertNotNull(value);
       assertEquals(value.toString(), doc.getField());
     }
-    for (SingleFieldDocument doc : misshapenDocs) {
+    for (TestDocument doc : misshapenDocs) {
       Text value = map.get(doc.getId());
       assertNotNull(value);
       assertEquals(value.toString(), doc.getField());
     }
   }
 
-  @Test
-  public void testRunSkipUnstoredFields() throws IOException {
+  @Test(expected = IllegalArgumentException.class)
+  public void testRun_UnstoredFields() throws IOException {
     commitDocuments(getDirectory(getIndexPath1AsFile()), new UnstoredFieldsDocument("5", "This is test document 5"));
 
     LuceneStorageConfiguration lucene2SeqConf = new LuceneStorageConfiguration(configuration,
@@ -108,11 +112,6 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
       asList(UnstoredFieldsDocument.FIELD, UnstoredFieldsDocument.UNSTORED_FIELD));
 
     lucene2Seq.run(lucene2SeqConf);
-
-    Iterator<Pair<Text, Text>> iterator = lucene2SeqConf.getSequenceFileIterator();
-
-    assertFalse(iterator.next().getSecond().toString().contains("null"));
-    assertFalse(iterator.hasNext());
   }
 
   @Test
@@ -224,6 +223,27 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
         seqFilesOutputPath,
         SingleFieldDocument.ID_FIELD,
         asList(SingleFieldDocument.FIELD, "nonExistingField"));
+
+    lucene2Seq.run(lucene2SeqConf);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testIndexedButNotStoredField() throws IOException {
+    SingleFieldDocument document = new SingleFieldDocument("id", "field") {
+      @Override
+      public Document asLuceneDocument() {
+        Document document = super.asLuceneDocument();
+        document.add(new TextField("indexed", "This text is indexed", Field.Store.NO));
+        return document;
+      }
+    };
+    commitDocuments(getDirectory(getIndexPath1AsFile()), document);
+
+    lucene2SeqConf = new LuceneStorageConfiguration(configuration,
+        asList(getIndexPath1()),
+        seqFilesOutputPath,
+        SingleFieldDocument.ID_FIELD,
+        asList(SingleFieldDocument.FIELD, "indexed"));
 
     lucene2Seq.run(lucene2SeqConf);
   }

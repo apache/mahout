@@ -64,9 +64,9 @@ public class SequenceFilesFromLuceneStorage {
       IndexReader reader = DirectoryReader.open(directory);
       IndexSearcher searcher = new IndexSearcher(reader);
 
-      LuceneIndexHelper.fieldShouldExistInIndex(searcher, lucene2seqConf.getIdField());
+      LuceneIndexHelper.fieldShouldExistInIndex(reader, lucene2seqConf.getIdField());
       for (String field : lucene2seqConf.getFields()) {
-        LuceneIndexHelper.fieldShouldExistInIndex(searcher, field);
+        LuceneIndexHelper.fieldShouldExistInIndex(reader, field);
       }
 
       Configuration configuration = lucene2seqConf.getConfiguration();

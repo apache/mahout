@@ -24,7 +24,7 @@ import org.apache.lucene.document.TextField;
 /**
  * Used for testing lucene2seq
  */
-public class SingleFieldDocument {
+public class SingleFieldDocument implements TestDocument {
 
   public static final String ID_FIELD = "idField";
   public static final String FIELD = "field";
@@ -37,14 +37,17 @@ public class SingleFieldDocument {
     this.field = field;
   }
 
+  @Override
   public String getId() {
     return id;
   }
 
+  @Override
   public String getField() {
     return field;
   }
 
+  @Override
   public Document asLuceneDocument() {
     Document document = new Document();
 
