@@ -3,6 +3,8 @@ package org.apache.mahout.sparkbindings.shell
 import org.apache.spark.repl.SparkILoop
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.mahout.sparkbindings._
+import scala.tools.nsc.Properties
+import scala.Some
 
 class MahoutSparkILoop extends SparkILoop {
 
@@ -51,4 +53,23 @@ class MahoutSparkILoop extends SparkILoop {
     sparkContext
   }
 
+  override def prompt: String = "mahout>"
+
+  override def printWelcome(): Unit = {
+    echo(
+      """
+                         _                 _
+         _ __ ___   __ _| |__   ___  _   _| |_
+        | '_ ` _ \ / _` | '_ \ / _ \| | | | __|
+        | | | | | | (_| | | | | (_) | |_| | |_
+        |_| |_| |_|\__,_|_| |_|\___/ \__,_|\__|  version 1.0
+
+      """)
+    import Properties._
+    val welcomeMsg = "Using Scala %s (%s, Java %s)".format(
+      versionString, javaVmName, javaVersion)
+    echo(welcomeMsg)
+    echo("Type in expressions to have them evaluated.")
+    echo("Type :help for more information.")
+  }
 }
