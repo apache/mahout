@@ -53,7 +53,7 @@ class MahoutSparkILoop extends SparkILoop {
     sparkContext
   }
 
-  override def prompt: String = "mahout>"
+  override def prompt: String = "mahout> "
 
   override def printWelcome(): Unit = {
     echo(
