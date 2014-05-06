@@ -126,6 +126,53 @@ class MathSuite extends FunSuite with MahoutSuite {
       assert(abs(q(::, i) dot q(::, j)) < 1e-10)
   }
 
+  test("solve matrix-vector") {
+    val a = dense((1, 3), (4, 2))
+    val b = dvec(11, 14)
+    val x = solve(a, b)
+
+    val control = dvec(2, 3)
+
+    (control - x).norm(2) should be < 1e-10
+  }
+
+  test("solve matrix-matrix") {
+    val a = dense((1, 3), (4, 2))
+    val b = dense((11), (14))
+    val x = solve(a, b)
+
+    val control = dense((2), (3))
+
+    (control - x).norm should be < 1e-10
+  }
+
+  test("solve to obtain inverse") {
+    val a = dense((1, 3), (4, 2))
+    val x = solve(a)
+
+    val identity = a %*% x
+
+    val control = eye(identity.ncol)
+
+    (control - identity).norm should be < 1e-10
+  }
+
+  test("solve rejects non-square matrix") {
+    intercept[IllegalArgumentException] {
+      val a = dense((1, 2, 3), (4, 5, 6))
+      val b = dvec(1, 2)
+      solve(a, b)
+    }
+  }
+
+  test("solve rejects singular matrix") {
+    intercept[IllegalArgumentException] {
+      val a = dense((1, 2), (2 , 4))
+      val b = dvec(1, 2)
+      solve(a, b)
+    }
+  }
+
   test("svd") {
 
     val a = dense((1, 2, 3), (3, 4, 5))

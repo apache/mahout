@@ -134,7 +134,7 @@ package object scalabindings {
           return new DenseMatrix(t)
         else
           throw new IllegalArgumentException(
-            "double[][] data parameter can be the only argumentn for dense()")
+            "double[][] data parameter can be the only argument for dense()")
         case t:Array[Vector] =>
           val m = new DenseMatrix(t.size,t.head.length)
           t.view.zipWithIndex.foreach({case(v,idx) => m(idx,::) := v})
@@ -234,6 +234,50 @@ package object scalabindings {
     import MatrixOps._
     val qrdec = new QRDecomposition(m cloned)
     (qrdec.getQ, qrdec.getR)
+  }
+
+ /**
+  * Solution <tt>X</tt> of <tt>A*X = B</tt> using QR-Decomposition, where <tt>A</tt> is a square, non-singular matrix.
+   *
+   * @param a
+   * @param b
+   * @return (X)
+   */
+  def solve(a: Matrix, b: Matrix): Matrix = {
+   import MatrixOps._
+   if (a.nrow != a.ncol) {
+     throw new IllegalArgumentException("supplied matrix A is not square")
+   }
+   val qr = new QRDecomposition(a cloned)
+   if (!qr.hasFullRank) {
+     throw new IllegalArgumentException("supplied matrix A is singular")
+   }
+   qr.solve(b)
+  }
+
+  /**
+   * Solution <tt>A^{-1}</tt> of <tt>A*A^{-1} = I</tt> using QR-Decomposition, where <tt>A</tt> is a square,
+   * non-singular matrix. Here only for compatibility with R semantics.
+   *
+   * @param a
+   * @return (A^{-1})
+   */
+  def solve(a: Matrix): Matrix = {
+    import MatrixOps._
+    solve(a, eye(a.nrow))
+  }
+
+  /**
+   * Solution <tt>x</tt> of <tt>A*x = b</tt> using QR-Decomposition, where <tt>A</tt> is a square, non-singular matrix.
+   *
+   * @param a
+   * @param b
+   * @return (x)
+   */
+  def solve(a: Matrix, b: Vector): Vector = {
+    import MatrixOps._
+    val x = solve(a, b.toColMatrix)
+    x(::, 0)
   }
 
   def ssvd(a: Matrix, k: Int, p: Int = 15, q: Int = 0) = SSVD.ssvd(a, k, p, q)
