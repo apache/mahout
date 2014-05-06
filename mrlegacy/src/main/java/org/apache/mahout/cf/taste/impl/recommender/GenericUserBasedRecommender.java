@@ -79,7 +79,8 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
   }
   
   @Override
-  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException {
+  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer, boolean includeKnownItems)
+    throws TasteException {
     Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
 
     log.debug("Recommending items for user ID '{}'", userID);
@@ -90,7 +91,7 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
       return Collections.emptyList();
     }
 
-    FastIDSet allItemIDs = getAllOtherItems(theNeighborhood, userID);
+    FastIDSet allItemIDs = getAllOtherItems(theNeighborhood, userID, includeKnownItems);
 
     TopItems.Estimator<Long> estimator = new Estimator(userID, theNeighborhood);
 
@@ -165,13 +166,16 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
     return estimate;
   }
   
-  protected FastIDSet getAllOtherItems(long[] theNeighborhood, long theUserID) throws TasteException {
+  protected FastIDSet getAllOtherItems(long[] theNeighborhood, long theUserID, boolean includeKnownItems)
+    throws TasteException {
     DataModel dataModel = getDataModel();
     FastIDSet possibleItemIDs = new FastIDSet();
     for (long userID : theNeighborhood) {
       possibleItemIDs.addAll(dataModel.getItemIDsFromUser(userID));
     }
-    possibleItemIDs.removeAll(dataModel.getItemIDsFromUser(theUserID));
+    if (!includeKnownItems) {
+      possibleItemIDs.removeAll(dataModel.getItemIDsFromUser(theUserID));
+    }
     return possibleItemIDs;
   }
   

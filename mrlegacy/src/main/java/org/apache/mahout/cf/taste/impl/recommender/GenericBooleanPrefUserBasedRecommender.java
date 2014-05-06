@@ -61,13 +61,16 @@ public final class GenericBooleanPrefUserBasedRecommender extends GenericUserBas
   }
   
   @Override
-  protected FastIDSet getAllOtherItems(long[] theNeighborhood, long theUserID) throws TasteException {
+  protected FastIDSet getAllOtherItems(long[] theNeighborhood, long theUserID, boolean includeKnownItems)
+      throws TasteException {
     DataModel dataModel = getDataModel();
     FastIDSet possibleItemIDs = new FastIDSet();
     for (long userID : theNeighborhood) {
       possibleItemIDs.addAll(dataModel.getItemIDsFromUser(userID));
     }
-    possibleItemIDs.removeAll(dataModel.getItemIDsFromUser(theUserID));
+    if (!includeKnownItems) {
+      possibleItemIDs.removeAll(dataModel.getItemIDsFromUser(theUserID));
+    }
     return possibleItemIDs;
   }
   

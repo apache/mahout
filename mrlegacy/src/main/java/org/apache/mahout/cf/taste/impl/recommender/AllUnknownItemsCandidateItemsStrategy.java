@@ -24,17 +24,18 @@ import org.apache.mahout.cf.taste.model.DataModel;
 
 public final class AllUnknownItemsCandidateItemsStrategy extends AbstractCandidateItemsStrategy {
 
-  /**
-   * return all items the user has not yet seen
-   */
+  /** return all items the user has not yet seen */
   @Override
-  protected FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel) throws TasteException {
+  protected FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel, boolean includeKnownItems)
+    throws TasteException {
     FastIDSet possibleItemIDs = new FastIDSet(dataModel.getNumItems());
     LongPrimitiveIterator allItemIDs = dataModel.getItemIDs();
     while (allItemIDs.hasNext()) {
       possibleItemIDs.add(allItemIDs.nextLong());
     }
-    possibleItemIDs.removeAll(preferredItemIDs);
+    if (!includeKnownItems) {
+      possibleItemIDs.removeAll(preferredItemIDs);
+    }
     return possibleItemIDs;
   }
 }

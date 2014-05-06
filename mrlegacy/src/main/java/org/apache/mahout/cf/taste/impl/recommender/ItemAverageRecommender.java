@@ -72,12 +72,13 @@ public final class ItemAverageRecommender extends AbstractRecommender {
   }
   
   @Override
-  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException {
+  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer, boolean includeKnownItems)
+    throws TasteException {
     Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
     log.debug("Recommending items for user ID '{}'", userID);
 
     PreferenceArray preferencesFromUser = getDataModel().getPreferencesFromUser(userID);
-    FastIDSet possibleItemIDs = getAllOtherItems(userID, preferencesFromUser);
+    FastIDSet possibleItemIDs = getAllOtherItems(userID, preferencesFromUser, includeKnownItems);
 
     TopItems.Estimator<Long> estimator = new Estimator();
 

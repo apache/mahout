@@ -62,9 +62,10 @@ public final class RandomRecommender extends AbstractRecommender {
     this.minPref = minPref;
     this.maxPref = maxPref;
   }
-  
+
   @Override
-  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException {
+  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer, boolean includeKnownItems)
+    throws TasteException {
     DataModel dataModel = getDataModel();
     int numItems = dataModel.getNumItems();
     List<RecommendedItem> result = Lists.newArrayListWithCapacity(howMany);
@@ -72,7 +73,7 @@ public final class RandomRecommender extends AbstractRecommender {
       LongPrimitiveIterator it = dataModel.getItemIDs();
       it.skip(random.nextInt(numItems));
       long itemID = it.next();
-      if (dataModel.getPreferenceValue(userID, itemID) == null) {
+      if (includeKnownItems || dataModel.getPreferenceValue(userID, itemID) == null) {
         result.add(new GenericRecommendedItem(itemID, randomPref()));
       }
     }

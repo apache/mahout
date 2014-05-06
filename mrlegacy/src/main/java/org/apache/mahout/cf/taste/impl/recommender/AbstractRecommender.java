@@ -19,11 +19,13 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.CandidateItemsStrategy;
+
 import java.util.List;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.model.DataModel;
+import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.slf4j.Logger;
@@ -51,6 +53,7 @@ public abstract class AbstractRecommender implements Recommender {
     return new PreferredItemsNeighborhoodCandidateItemsStrategy();
   }
 
+
   /**
    * <p>
    * Default implementation which just calls
@@ -60,7 +63,27 @@ public abstract class AbstractRecommender implements Recommender {
    */
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany) throws TasteException {
-    return recommend(userID, howMany, null);
+    return recommend(userID, howMany, null, false);
+  }
+
+  /**
+   * <p>
+   * Default implementation which just calls
+   * {@link Recommender#recommend(long, int, org.apache.mahout.cf.taste.recommender.IDRescorer)}, with a
+   * {@link org.apache.mahout.cf.taste.recommender.Rescorer} that does nothing.
+   * </p>
+   */
+  @Override
+  public List<RecommendedItem> recommend(long userID, int howMany, boolean includeKnownItems) throws TasteException {
+    return recommend(userID, howMany, null, includeKnownItems);
+  }
+  
+  /**
+   * <p> Delegates to {@link Recommender#recommend(long, int, IDRescorer, boolean)}
+   */
+  @Override
+  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException{
+    return recommend(userID, howMany,rescorer, false);  
   }
   
   /**
@@ -96,19 +119,22 @@ public abstract class AbstractRecommender implements Recommender {
   public DataModel getDataModel() {
     return dataModel;
   }
-  
+
   /**
    * @param userID
    *          ID of user being evaluated
    * @param preferencesFromUser
    *          the preferences from the user
+   * @param includeKnownItems
+   *          whether to include items already known by the user in recommendations
    * @return all items in the {@link DataModel} for which the user has not expressed a preference and could
    *         possibly be recommended to the user
    * @throws TasteException
    *           if an error occurs while listing items
    */
-  protected FastIDSet getAllOtherItems(long userID, PreferenceArray preferencesFromUser) throws TasteException {
-    return candidateItemsStrategy.getCandidateItems(userID, preferencesFromUser, dataModel);
+  protected FastIDSet getAllOtherItems(long userID, PreferenceArray preferencesFromUser, boolean includeKnownItems)
+      throws TasteException {
+    return candidateItemsStrategy.getCandidateItems(userID, preferencesFromUser, dataModel, includeKnownItems);
   }
   
 }

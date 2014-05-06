@@ -63,7 +63,7 @@ public class SVDRecommenderTest extends TasteTestCase {
 
     EasyMock.expect(factorizer.factorize()).andReturn(factorization);
     EasyMock.expect(dataModel.getPreferencesFromUser(1L)).andReturn(preferencesFromUser);
-    EasyMock.expect(candidateItemsStrategy.getCandidateItems(1L, preferencesFromUser, dataModel))
+    EasyMock.expect(candidateItemsStrategy.getCandidateItems(1L, preferencesFromUser, dataModel, false))
         .andReturn(candidateItems);
     EasyMock.expect(factorization.getUserFeatures(1L)).andReturn(new double[] { 0.4, 2 });
     EasyMock.expect(factorization.getItemFeatures(5L)).andReturn(new double[] { 1, 0.3 });

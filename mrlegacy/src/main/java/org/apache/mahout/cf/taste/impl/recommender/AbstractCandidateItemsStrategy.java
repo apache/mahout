@@ -33,20 +33,25 @@ import java.util.Collection;
 public abstract class AbstractCandidateItemsStrategy implements CandidateItemsStrategy,
     MostSimilarItemsCandidateItemsStrategy {
 
+  protected FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel) throws TasteException{
+      return doGetCandidateItems(preferredItemIDs, dataModel, false);
+  }
+  
   @Override
-  public FastIDSet getCandidateItems(long userID, PreferenceArray preferencesFromUser, DataModel dataModel)
+  public FastIDSet getCandidateItems(long userID, PreferenceArray preferencesFromUser, DataModel dataModel,
+      boolean includeKnownItems) throws TasteException {
+    return doGetCandidateItems(preferencesFromUser.getIDs(), dataModel, includeKnownItems);
+  }
+  
+  @Override
+  public FastIDSet getCandidateItems(long[] itemIDs, DataModel dataModel)
     throws TasteException {
-    return doGetCandidateItems(preferencesFromUser.getIDs(), dataModel);
+    return doGetCandidateItems(itemIDs, dataModel, false);
   }
-
+     
+  protected abstract FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel,
+      boolean includeKnownItems) throws TasteException;
+  
   @Override
-  public FastIDSet getCandidateItems(long[] itemIDs, DataModel dataModel) throws TasteException {
-    return doGetCandidateItems(itemIDs, dataModel);
-  }
-
-  protected abstract FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel) throws TasteException;
-
-  @Override
-  public void refresh(Collection<Refreshable> alreadyRefreshed) {
-  }
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {}
 }

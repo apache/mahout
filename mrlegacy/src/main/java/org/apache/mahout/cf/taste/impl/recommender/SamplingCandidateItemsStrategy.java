@@ -118,7 +118,8 @@ public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrate
   }
 
   @Override
-  protected FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel) throws TasteException {
+  protected FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel, boolean includeKnownItems)
+    throws TasteException {
     LongPrimitiveIterator preferredItemIDsIterator = new LongPrimitiveArrayIterator(preferredItemIDs);
     if (preferredItemIDs.length > maxItems) {
       double samplingRate = (double) maxItems / preferredItemIDs.length;
@@ -143,7 +144,9 @@ public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrate
         }
       }
     }
-    possibleItemsIDs.removeAll(preferredItemIDs);
+    if (!includeKnownItems) {
+      possibleItemsIDs.removeAll(preferredItemIDs);
+    }
     return possibleItemsIDs;
   }
 

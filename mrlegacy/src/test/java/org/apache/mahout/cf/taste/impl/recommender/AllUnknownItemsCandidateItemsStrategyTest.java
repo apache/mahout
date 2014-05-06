@@ -54,7 +54,7 @@ public final class AllUnknownItemsCandidateItemsStrategyTest extends TasteTestCa
 
     EasyMock.replay(dataModel);
 
-    FastIDSet candidateItems = strategy.getCandidateItems(123L, prefArrayOfUser123, dataModel);
+    FastIDSet candidateItems = strategy.getCandidateItems(123L, prefArrayOfUser123, dataModel, false);
     assertEquals(2, candidateItems.size());
     assertTrue(candidateItems.contains(1L));
     assertTrue(candidateItems.contains(3L));

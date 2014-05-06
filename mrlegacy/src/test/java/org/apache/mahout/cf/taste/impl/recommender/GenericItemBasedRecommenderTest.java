@@ -122,6 +122,36 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
   }
 
   @Test
+  public void testIncludeKnownItems() throws Exception {
+
+    DataModel dataModel = getDataModel(
+            new long[] {1, 2, 3},
+            new Double[][] {
+                    {0.1, 0.2},
+                    {0.2, 0.3, 0.3, 0.6},
+                    {0.4, 0.4, 0.5, 0.9},
+            });
+
+    Collection<GenericItemSimilarity.ItemItemSimilarity> similarities = Lists.newArrayList();
+    similarities.add(new GenericItemSimilarity.ItemItemSimilarity(0, 1, 0.8));
+    similarities.add(new GenericItemSimilarity.ItemItemSimilarity(0, 2, 0.5));
+    similarities.add(new GenericItemSimilarity.ItemItemSimilarity(0, 3, 0.2));
+    similarities.add(new GenericItemSimilarity.ItemItemSimilarity(1, 2, 0.7));
+    similarities.add(new GenericItemSimilarity.ItemItemSimilarity(1, 3, 0.5));
+    similarities.add(new GenericItemSimilarity.ItemItemSimilarity(2, 3, 0.9));
+    ItemSimilarity similarity = new GenericItemSimilarity(similarities);
+    Recommender recommender = new GenericItemBasedRecommender(dataModel, similarity);
+    List<RecommendedItem> originalRecommended = recommender.recommend(1, 4, null, true);
+    List<RecommendedItem> rescoredRecommended = recommender.recommend(1, 4, new ReversingRescorer<Long>(), true);
+    assertNotNull(originalRecommended);
+    assertNotNull(rescoredRecommended);
+    assertEquals(4, originalRecommended.size());
+    assertEquals(4, rescoredRecommended.size());
+    assertEquals(originalRecommended.get(0).getItemID(), rescoredRecommended.get(3).getItemID());
+    assertEquals(originalRecommended.get(3).getItemID(), rescoredRecommended.get(0).getItemID());
+  }
+  
+  @Test
   public void testEstimatePref() throws Exception {
     Recommender recommender = buildRecommender();
     assertEquals(0.1f, recommender.estimatePreference(1, 2), EPSILON);
@@ -274,7 +304,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     EasyMock.expect(dataModel.getMaxPreference()).andReturn(Float.NaN);
 
     EasyMock.expect(dataModel.getPreferencesFromUser(1L)).andReturn(preferencesFromUser);
-    EasyMock.expect(candidateItemsStrategy.getCandidateItems(1L, preferencesFromUser, dataModel))
+    EasyMock.expect(candidateItemsStrategy.getCandidateItems(1L, preferencesFromUser, dataModel, false))
         .andReturn(new FastIDSet(new long[] { 3L, 4L }));
 
     EasyMock.expect(itemSimilarity.itemSimilarities(3L, preferencesFromUser.getIDs()))

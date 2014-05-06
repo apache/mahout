@@ -50,10 +50,21 @@ public final class Track2Recommender implements Recommender {
   public List<RecommendedItem> recommend(long userID, int howMany) throws TasteException {
     return recommender.recommend(userID, howMany);
   }
-  
+
+  @Override
+  public List<RecommendedItem> recommend(long userID, int howMany, boolean includeKnownItems) throws TasteException {
+    return recommend(userID, howMany, null, includeKnownItems);
+  }
+
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException {
-    return recommender.recommend(userID, howMany, rescorer);
+    return recommender.recommend(userID, howMany, rescorer, false);
+  }
+  
+  @Override
+  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer, boolean includeKnownItems)
+    throws TasteException {
+    return recommender.recommend(userID, howMany, rescorer, includeKnownItems);
   }
   
   @Override

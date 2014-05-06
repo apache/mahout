@@ -41,6 +41,8 @@ import com.google.common.base.Preconditions;
 /**
  * <p>
  * A {@link Recommender} which caches the results from another {@link Recommender} in memory.
+ *
+ * TODO: Should be checked for thread safety
  * </p>
  */
 public final class CachingRecommender implements Recommender {
@@ -54,6 +56,7 @@ public final class CachingRecommender implements Recommender {
   private final Cache<LongPair,Float> estimatedPrefCache;
   private final RefreshHelper refreshHelper;
   private IDRescorer currentRescorer;
+  private boolean currentlyIncludeKnownItems;
   
   public CachingRecommender(Recommender recommender) throws TasteException {
     Preconditions.checkArgument(recommender != null, "recommender is null");
@@ -87,14 +90,29 @@ public final class CachingRecommender implements Recommender {
       }
     }
   }
-  
+
+  public void setCurrentlyIncludeKnownItems(boolean currentlyIncludeKnownItems) {
+    this.currentlyIncludeKnownItems = currentlyIncludeKnownItems;
+  }
+
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany) throws TasteException {
-    return recommend(userID, howMany, null);
+    return recommend(userID, howMany, null, false);
   }
-  
+
   @Override
-  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException {
+  public List<RecommendedItem> recommend(long userID, int howMany, boolean includeKnownItems) throws TasteException {
+    return recommend(userID, howMany, null, includeKnownItems);
+  }
+
+  @Override
+  public List<RecommendedItem> recommend(long userID, int howMany,IDRescorer rescorer) throws TasteException {
+      return recommend(userID, howMany, rescorer, false);
+  }
+ 
+  @Override
+  public List<RecommendedItem> recommend(long userID, int howMany,IDRescorer rescorer, boolean includeKnownItems)
+    throws TasteException {
     Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
     synchronized (maxHowMany) {
       if (howMany > maxHowMany[0]) {
@@ -108,6 +126,7 @@ public final class CachingRecommender implements Recommender {
     }
 
     setCurrentRescorer(rescorer);
+    setCurrentlyIncludeKnownItems(includeKnownItems);
 
     Recommendations recommendations = recommendationCache.get(userID);
     if (recommendations.getItems().size() < howMany && !recommendations.isNoMoreRecommendableItems()) {
@@ -191,7 +210,8 @@ public final class CachingRecommender implements Recommender {
       int howMany = maxHowMany[0];
       IDRescorer rescorer = currentRescorer;
       List<RecommendedItem> recommendations =
-          rescorer == null ? recommender.recommend(key, howMany) : recommender.recommend(key, howMany, rescorer);
+          rescorer == null ? recommender.recommend(key, howMany, null, currentlyIncludeKnownItems) :
+              recommender.recommend(key, howMany, rescorer, currentlyIncludeKnownItems);
       return new Recommendations(Collections.unmodifiableList(recommendations));
     }
   }

@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 1.0 - unreleased
 
+  MAHOUT-1428: Recommending already consumed items (Dodi Hakim via ssc)
+
   MAHOUT-1533: Remove Frequent Pattern Mining (ssc)
 
   MAHOUT-1526: Ant file in examples (ssc)

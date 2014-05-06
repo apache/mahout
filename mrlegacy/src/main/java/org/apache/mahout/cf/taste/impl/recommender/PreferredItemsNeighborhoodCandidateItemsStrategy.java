@@ -29,7 +29,8 @@ public final class PreferredItemsNeighborhoodCandidateItemsStrategy extends Abst
    * that has preferred at least one item that the current user has preferred too
    */
   @Override
-  protected FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel) throws TasteException {
+  protected FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel, boolean includeKnownItems)
+    throws TasteException {
     FastIDSet possibleItemsIDs = new FastIDSet();
     for (long itemID : preferredItemIDs) {
       PreferenceArray itemPreferences = dataModel.getPreferencesForItem(itemID);
@@ -38,7 +39,9 @@ public final class PreferredItemsNeighborhoodCandidateItemsStrategy extends Abst
         possibleItemsIDs.addAll(dataModel.getItemIDsFromUser(itemPreferences.getUserID(index)));
       }
     }
-    possibleItemsIDs.removeAll(preferredItemIDs);
+    if (!includeKnownItems) {
+      possibleItemsIDs.removeAll(preferredItemIDs);
+    }
     return possibleItemsIDs;
   }
 

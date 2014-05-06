@@ -97,6 +97,28 @@ public final class GenericUserBasedRecommenderTest extends TasteTestCase {
   }
 
   @Test
+  public void testIncludeKnownItems() throws Exception {
+    DataModel dataModel = getDataModel(
+            new long[] {1, 2, 3},
+            new Double[][] {
+                    {0.1, 0.2},
+                    {0.2, 0.3, 0.3, 0.6},
+                    {0.4, 0.5, 0.5, 0.9},
+            });
+    UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
+    UserNeighborhood neighborhood = new NearestNUserNeighborhood(2, similarity, dataModel);
+    Recommender recommender = new GenericUserBasedRecommender(dataModel, neighborhood, similarity);
+    List<RecommendedItem> originalRecommended = recommender.recommend(1, 4, null, true);
+    List<RecommendedItem> rescoredRecommended = recommender.recommend(1, 4, new ReversingRescorer<Long>(), true);
+    assertNotNull(originalRecommended);
+    assertNotNull(rescoredRecommended);
+    assertEquals(4, originalRecommended.size());
+    assertEquals(4, rescoredRecommended.size());
+    assertEquals(originalRecommended.get(0).getItemID(), rescoredRecommended.get(3).getItemID());
+    assertEquals(originalRecommended.get(3).getItemID(), rescoredRecommended.get(0).getItemID());
+  }
+
+  @Test
   public void testEstimatePref() throws Exception {
     Recommender recommender = buildRecommender();
     assertEquals(0.1f, recommender.estimatePreference(1, 2), EPSILON);

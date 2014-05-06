@@ -42,7 +42,21 @@ public interface Recommender extends Refreshable {
    *           if an error occurs while accessing the {@link DataModel}
    */
   List<RecommendedItem> recommend(long userID, int howMany) throws TasteException;
-  
+
+  /**
+   * @param userID
+   *          user for which recommendations are to be computed
+   * @param howMany
+   *          desired number of recommendations
+   * @return {@link List} of recommended {@link RecommendedItem}s, ordered from most strongly recommend to
+   *         least
+   * @param includeKnownItems
+   *          whether to include items already known by the user in recommendations
+   * @throws TasteException
+   *           if an error occurs while accessing the {@link DataModel}
+   */
+  List<RecommendedItem> recommend(long userID, int howMany, boolean includeKnownItems) throws TasteException;
+
   /**
    * @param userID
    *          user for which recommendations are to be computed
@@ -56,6 +70,24 @@ public interface Recommender extends Refreshable {
    *           if an error occurs while accessing the {@link DataModel}
    */
   List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException;
+  
+  /**
+   * @param userID
+   *          user for which recommendations are to be computed
+   * @param howMany
+   *          desired number of recommendations
+   * @param rescorer
+   *          rescoring function to apply before final list of recommendations is determined
+   * @param includeKnownItems
+   *          whether to include items already known by the user in recommendations
+   * @return {@link List} of recommended {@link RecommendedItem}s, ordered from most strongly recommend to
+   *         least
+   * @throws TasteException
+   *           if an error occurs while accessing the {@link DataModel}
+   */
+  
+  List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer, boolean includeKnownItems)
+      throws TasteException;
   
   /**
    * @param userID

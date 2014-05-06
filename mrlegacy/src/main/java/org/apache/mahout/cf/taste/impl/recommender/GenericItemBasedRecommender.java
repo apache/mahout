@@ -117,7 +117,8 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   }
   
   @Override
-  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException {
+  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer, boolean includeKnownItems)
+    throws TasteException {
     Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
     log.debug("Recommending items for user ID '{}'", userID);
 
@@ -126,7 +127,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
       return Collections.emptyList();
     }
 
-    FastIDSet possibleItemIDs = getAllOtherItems(userID, preferencesFromUser);
+    FastIDSet possibleItemIDs = getAllOtherItems(userID, preferencesFromUser, includeKnownItems);
 
     TopItems.Estimator<Long> estimator = new Estimator(userID, preferencesFromUser);
 

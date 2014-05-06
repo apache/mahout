@@ -65,7 +65,7 @@ public final class PreferredItemsNeighborhoodCandidateItemsStrategyTest extends 
 
     EasyMock.replay(dataModel);
 
-    FastIDSet candidateItems = strategy.getCandidateItems(123L, prefArrayOfUser123, dataModel);
+    FastIDSet candidateItems = strategy.getCandidateItems(123L, prefArrayOfUser123, dataModel, false);
     assertEquals(1, candidateItems.size());
     assertTrue(candidateItems.contains(2L));
 

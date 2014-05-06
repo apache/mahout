@@ -46,7 +46,17 @@ final class MockRecommender implements Recommender {
   }
 
   @Override
+  public List<RecommendedItem> recommend(long userID, int howMany, boolean includeKnownItems) {
+    return recommend(userID, howMany);
+  }
+
+  @Override
   public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) {
+    return recommend(userID, howMany);
+  }
+  
+  @Override
+  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer, boolean includeKnownItems) {
     return recommend(userID, howMany);
   }
 
@@ -74,8 +84,6 @@ final class MockRecommender implements Recommender {
   }
 
   @Override
-  public void refresh(Collection<Refreshable> alreadyRefreshed) {
-    // do nothing
-  }
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {}
 
 }
