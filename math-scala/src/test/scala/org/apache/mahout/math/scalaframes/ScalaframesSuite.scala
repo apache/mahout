@@ -9,7 +9,7 @@ class ScalaframesSuite extends FunSuite with MahoutSuite {
     val testFrame = new BaseDFrame()
 
     val mutatedFrame = testFrame.mutate(
-      "ACol" := col("5") + col("4"),
+      "ACol" := col("5") + col(4),
       "BCol" := col("AAA") + 3
     )
   }
@@ -17,10 +17,9 @@ class ScalaframesSuite extends FunSuite with MahoutSuite {
   test("select") {
     val testFrame = new BaseDFrame()
 
+    // Mixing integral and named subscripts
     val selectedFrame = testFrame.select(
-      "ACol",
-      "BCol",
-      -"CCol"
+      "ACol", 5, "BCol", -"CCol", -4
     )
 
   }
