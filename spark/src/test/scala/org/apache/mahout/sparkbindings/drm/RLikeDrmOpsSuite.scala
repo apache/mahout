@@ -23,11 +23,11 @@ import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.sparkbindings.drm._
 import RLikeDrmOps._
 import org.apache.mahout.sparkbindings.drm.plan.{OpAtx, OpAtB, OpAtA, CheckpointAction}
-import org.apache.spark.storage.StorageLevel
 import org.apache.spark.SparkContext
 import scala.collection.mutable.ArrayBuffer
 import org.apache.mahout.math.Matrices
 import org.apache.mahout.sparkbindings.blas
+import org.apache.spark.storage.StorageLevel
 
 /** R-like DRM DSL operation tests */
 class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
@@ -99,7 +99,7 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
         keys -> block
     }
 
-    val inCoreC = C checkpoint StorageLevel.NONE collect;
+    val inCoreC = C checkpoint CacheHint.NONE collect;
     println(inCoreC)
 
     (inCoreC - inCoreCControl).norm should be < 1E-10
@@ -355,8 +355,8 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
     val inCoreB = dense((3, 5), (4, 6))
 
     val B = drmParallelize(inCoreB, numPartitions = 2)
-//    val A = (drmParallelize(inCoreA, numPartitions = 2) + B).checkpoint(StorageLevel.MEMORY_ONLY_SER)
-    val A = (drmParallelize(inCoreA, numPartitions = 2) + B).checkpoint(StorageLevel.MEMORY_ONLY)
+//    val A = (drmParallelize(inCoreA, numPartitions = 2) + B).checkpoint(CacheHint.MEMORY_ONLY_SER)
+    val A = (drmParallelize(inCoreA, numPartitions = 2) + B).checkpoint(CacheHint.MEMORY_ONLY)
 
     val C = A + B
     val inCoreC = C.collect

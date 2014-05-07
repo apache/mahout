@@ -48,7 +48,7 @@ class CheckpointedDrmBase[K: ClassTag](
    * Action operator -- does not necessary means Spark action; but does mean running BLAS optimizer
    * and writing down Spark graph lineage since last checkpointed DRM.
    */
-  def checkpoint(sLevel: StorageLevel): CheckpointedDrm[K] =
+  def checkpoint(cacheHint: CacheHint.CacheHint): CheckpointedDrm[K] =
   // We are already checkpointed in a sense that we already have Spark lineage. So just return self.
     this
 

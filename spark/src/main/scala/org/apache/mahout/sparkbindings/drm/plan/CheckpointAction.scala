@@ -43,7 +43,7 @@ abstract class CheckpointAction[K: ClassTag] extends DrmLike[K] {
    * Action operator -- does not necessary means Spark action; but does mean running BLAS optimizer
    * and writing down Spark graph lineage since last checkpointed DRM.
    */
-  def checkpoint(sLevel: StorageLevel): CheckpointedDrm[K] = cp.getOrElse({
+  def checkpoint(cacheHint: CacheHint.CacheHint): CheckpointedDrm[K] = cp.getOrElse({
     // Non-zero count is sparsely supported by logical operators now. So assume we have no knowledge
     // if it is unsupported, instead of failing.
     val plan = optimize(this)
@@ -52,7 +52,7 @@ abstract class CheckpointAction[K: ClassTag] extends DrmLike[K] {
       rdd = rdd,
       _nrow = nrow,
       _ncol = ncol,
-      _cacheStorageLevel = sLevel,
+      _cacheStorageLevel = cacheHint2Spark(cacheHint),
       partitioningTag = plan.partitioningTag
     )
     cp = Some(newcp)
@@ -65,6 +65,20 @@ object CheckpointAction {
 
   /** Perform expression optimization. Return physical plan that we can pass to exec() */
   def optimize[K: ClassTag](action: DrmLike[K]): DrmLike[K] = pass3(pass2(pass1(action)))
+
+  private def cacheHint2Spark(cacheHint: CacheHint.CacheHint): StorageLevel = cacheHint match {
+    case CacheHint.NONE => StorageLevel.NONE
+    case CacheHint.DISK_ONLY => StorageLevel.DISK_ONLY
+    case CacheHint.DISK_ONLY_2 => StorageLevel.DISK_ONLY_2
+    case CacheHint.MEMORY_ONLY => StorageLevel.MEMORY_ONLY
+    case CacheHint.MEMORY_ONLY_2 => StorageLevel.MEMORY_ONLY_2
+    case CacheHint.MEMORY_ONLY_SER => StorageLevel.MEMORY_ONLY_SER
+    case CacheHint.MEMORY_ONLY_SER_2 => StorageLevel.MEMORY_ONLY_SER_2
+    case CacheHint.MEMORY_AND_DISK => StorageLevel.MEMORY_AND_DISK
+    case CacheHint.MEMORY_AND_DISK_2 => StorageLevel.MEMORY_AND_DISK_2
+    case CacheHint.MEMORY_AND_DISK_SER => StorageLevel.MEMORY_AND_DISK_SER
+    case CacheHint.MEMORY_AND_DISK_SER_2 => StorageLevel.MEMORY_AND_DISK_SER_2
+  }
 
 
   /** This is mostly multiplication operations rewrites */

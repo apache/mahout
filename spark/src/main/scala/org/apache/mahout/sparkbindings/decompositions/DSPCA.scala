@@ -23,7 +23,6 @@ import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.mahout.sparkbindings.drm._
 import RLikeDrmOps._
-import org.apache.spark.storage.StorageLevel
 import org.apache.mahout.common.RandomUtils
 
 object DSPCA {
@@ -138,7 +137,7 @@ object DSPCA {
     }
 
     val c = s_q cross s_b
-    val inCoreBBt = (drmBt.t %*% drmBt).checkpoint(StorageLevel.NONE).collect -
+    val inCoreBBt = (drmBt.t %*% drmBt).checkpoint(CacheHint.NONE).collect -
         c - c.t + (s_q cross s_q) * (xi dot xi)
     val (inCoreUHat, d) = eigen(inCoreBBt)
     val s = d.sqrt

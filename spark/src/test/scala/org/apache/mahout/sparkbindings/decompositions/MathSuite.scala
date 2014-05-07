@@ -23,9 +23,7 @@ import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.mahout.sparkbindings.drm._
 import RLikeDrmOps._
-import scala.util.Random
 import org.apache.mahout.math.{Matrices, SparseRowMatrix}
-import org.apache.spark.storage.StorageLevel
 import org.apache.mahout.common.RandomUtils
 
 class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
@@ -157,7 +155,7 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
     // Un-normalized pca data:
     drmPCA = drmPCA %*% diagv(s)
 
-    val pca = drmPCA.checkpoint(sLevel = StorageLevel.NONE).collect
+    val pca = drmPCA.checkpoint(CacheHint.NONE).collect
 
     // Of course, once we calculated the pca, the spectrum is going to be different since our originally
     // generated input was not centered. So here, we'd just brute-solve pca to verify

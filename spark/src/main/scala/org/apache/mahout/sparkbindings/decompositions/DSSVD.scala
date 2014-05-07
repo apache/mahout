@@ -6,9 +6,6 @@ import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.mahout.sparkbindings.drm._
 import RLikeDrmOps._
-import scala.util.Random
-import org.apache.spark.SparkContext._
-import org.apache.spark.storage.StorageLevel
 import org.apache.mahout.common.RandomUtils
 
 object DSSVD {
@@ -71,7 +68,7 @@ object DSSVD {
       if (i == q - 1) drmBt = drmBt.checkpoint()
     }
 
-    val inCoreBBt = (drmBt.t %*% drmBt).checkpoint(StorageLevel.NONE).collect
+    val inCoreBBt = (drmBt.t %*% drmBt).checkpoint(CacheHint.NONE).collect
     val (inCoreUHat, d) = eigen(inCoreBBt)
     val s = d.sqrt
 

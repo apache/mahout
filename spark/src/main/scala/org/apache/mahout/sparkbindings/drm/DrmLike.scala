@@ -41,6 +41,6 @@ trait DrmLike[K] {
    * Action operator -- does not necessary means Spark action; but does mean running BLAS optimizer
    * and writing down Spark graph lineage since last checkpointed DRM.
    */
-  def checkpoint(sLevel: StorageLevel = StorageLevel.MEMORY_ONLY): CheckpointedDrm[K]
+  def checkpoint(cacheHint: CacheHint.CacheHint = CacheHint.MEMORY_ONLY): CheckpointedDrm[K]
 
 }

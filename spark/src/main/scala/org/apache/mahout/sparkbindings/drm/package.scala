@@ -54,6 +54,9 @@ package object drm {
   /** Block-map func */
   type BlockMapFunc[S, R] = BlockifiedDrmTuple[S] => BlockifiedDrmTuple[R]
 
+  /** CacheHint type */
+//  type CacheHint = CacheHint.CacheHint
+
   implicit def input2drmRdd[K](input: DrmRddInput[K]): DrmRdd[K] = input.toDrmRdd()
 
   implicit def input2blockifiedDrmRdd[K](input: DrmRddInput[K]): BlockifiedDrmRdd[K] = input.toBlockifiedDrmRdd()
