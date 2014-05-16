@@ -1,13 +1,9 @@
 package org.apache.mahout.math
 
-/**
- *
- * @author dmitriy
- */
 package object scalaframes {
 
-  implicit def frame2Dplyr(f:DFrameLike):DplyrOps = new DplyrOps(f)
-  implicit def dplyr2Frame(dplyr:DplyrOps):DFrameLike = dplyr.frame
+  implicit def frame2Dplyr(f:DataFrameLike):DplyrLikeOps = new DplyrLikeOps(f)
+  implicit def dplyr2Frame(dplyr:DplyrLikeOps):DataFrameLike = dplyr.frame
 
   implicit def lhs(name:String):LHS = new LHS(name)
   implicit def nf(name:String):Subscripted = new Subscripted(name)
@@ -15,5 +11,10 @@ package object scalaframes {
 
   def col(nf:Subscripted):CellOps = null
 
+  /** Data Frame object type */
+  object DFType extends Enumeration {
+    val int64, long, double, string, bytes = Value
+    type DFType = Value
+  }
 
 }
