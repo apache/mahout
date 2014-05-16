@@ -6,8 +6,6 @@ import java.nio.ByteBuffer
 import scala.util.Random
 import concurrent._
 import scala.concurrent.duration.Duration
-import sun.misc.Unsafe
-import java.lang.reflect.Field
 
 class ScalaframesSuite extends FunSuite with MahoutSuite {
 
@@ -88,6 +86,75 @@ class ScalaframesSuite extends FunSuite with MahoutSuite {
 
     printf("N random %d ms.\n", ms)
 
+  }
+  test("memory unsafe access speed") {
+
+    import ExecutionContext.Implicits.global
+
+    val rnd = new Random(1234L)
+
+    val s = 1 << 30
+    val blockSize = 1 << 6
+    val numBlocks = s / blockSize
+    val reads = 10 * (s / blockSize)
+
+    val memchunk = ByteBuffer.allocate(s)
+
+    // fill the chunk with random stuff
+    while (memchunk.remaining() > 0) memchunk.put(rnd.nextInt().toByte)
+
+    val arr = memchunk.array()
+
+    var ms = System.currentTimeMillis()
+
+    val futures = (0 until 4).map((s) => future {
+      var sum = 0.0
+      var i = 0
+      var blockBase = 0
+      while (i < reads) {
+        var j = 0
+        var l = 0d
+        while (j < blockSize) {
+          l = UnsafeUtil.getUnsafeDouble(arr=arr,offset=blockBase)
+          sum += l
+          j += 8
+        }
+        val k = java.lang.Double.doubleToLongBits(l)
+        blockBase = blockSize * math.abs(((k ^ (k >> s + 1)).toInt) % numBlocks)
+        i += 1
+      }
+    })
+    futures.foreach(Await.result(_, atMost = Duration.Inf))
+    ms = System.currentTimeMillis() - ms
+
+    printf("N random %d ms.\n", ms)
+
+  }
+
+  test("Unsafe put, get Double") {
+
+    val rnd = new Random(124)
+    val control = rnd.nextDouble()
+
+    val buff = new Array[Byte](8)
+
+    UnsafeUtil.setUnsafeDouble(arr = buff, x = control, offset = 0l)
+    val x = UnsafeUtil.getUnsafeDouble(arr = buff, offset = 0l)
+
+    control should equal(x)
+  }
+
+  test("Unsafe put, get long") {
+
+    val rnd = new Random(124)
+    val control = rnd.nextLong()
+
+    val buff = new Array[Byte](8)
+
+    UnsafeUtil.setUnsafeLong(arr = buff, x = control, offset = 0l)
+    val x = UnsafeUtil.getUnsafeLong(arr = buff, offset = 0l)
+
+    control should equal(x)
   }
 
 }
