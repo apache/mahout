@@ -17,15 +17,13 @@
 
 package org.apache.mahout.vectorizer.encoders;
 
-import com.google.common.base.Charsets;
 import org.apache.mahout.math.map.OpenIntIntHashMap;
-
 import com.google.common.base.Preconditions;
 
 public class CachingStaticWordValueEncoder extends StaticWordValueEncoder {
+
   private final int dataSize;
   private OpenIntIntHashMap[] caches;
-//  private TIntIntHashMap[] caches;
 
   public CachingStaticWordValueEncoder(String name, int dataSize) {
     super(name);
@@ -34,13 +32,13 @@ public class CachingStaticWordValueEncoder extends StaticWordValueEncoder {
   }
 
   private void initCaches() {
-    this.caches = new OpenIntIntHashMap[getProbes()];
-    for (int ii = 0; ii < getProbes(); ii++) {
-      caches[ii] = new OpenIntIntHashMap();
+    caches = new OpenIntIntHashMap[getProbes()];
+    for (int probe = 0; probe < getProbes(); probe++) {
+      caches[probe] = new OpenIntIntHashMap();
     }
   }
 
-  protected OpenIntIntHashMap[] getCaches() {
+  OpenIntIntHashMap[] getCaches() {
     return caches;
   }
 
@@ -50,14 +48,16 @@ public class CachingStaticWordValueEncoder extends StaticWordValueEncoder {
     initCaches();
   }
 
-  protected int hashForProbe(String originalForm, int dataSize, String name, int probe) {
+  @Override
+  protected int hashForProbe(byte[] originalForm, int dataSize, String name, int probe) {
     Preconditions.checkArgument(dataSize == this.dataSize,
         "dataSize argument [" + dataSize + "] does not match expected dataSize [" + this.dataSize + ']');
-    if (caches[probe].containsKey(originalForm.hashCode())) {
-      return caches[probe].get(originalForm.hashCode());
+    int originalHashcode = originalForm.hashCode();
+    if (caches[probe].containsKey(originalHashcode)) {
+      return caches[probe].get(originalHashcode);
     }
-    int hash = hashForProbe(originalForm.getBytes(Charsets.UTF_8), dataSize, name, probe);
-    caches[probe].put(originalForm.hashCode(), hash);
+    int hash = super.hashForProbe(originalForm, dataSize, name, probe);
+    caches[probe].put(originalHashcode, hash);
     return hash;
   }
 }
