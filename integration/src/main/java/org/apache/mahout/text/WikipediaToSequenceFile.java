@@ -68,7 +68,7 @@ public final class WikipediaToSequenceFile {
    * {@link org.apache.hadoop.io.SequenceFile}</li>
    * </ol>
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args)  throws IOException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
@@ -159,6 +159,19 @@ public final class WikipediaToSequenceFile {
              "org.apache.hadoop.io.serializer.JavaSerialization,"
              + "org.apache.hadoop.io.serializer.WritableSerialization");
     
+    Set<String> categories = Sets.newHashSet();
+    if (!catFile.isEmpty()) {
+      for (String line : new FileLineIterable(new File(catFile))) {
+        categories.add(line.trim().toLowerCase(Locale.ENGLISH));
+      }
+    }
+    
+    Stringifier<Set<String>> setStringifier =
+        new DefaultStringifier<Set<String>>(conf, GenericsUtil.getClass(categories));
+    
+    String categoriesStr = setStringifier.toString(categories);    
+    conf.set("wikipedia.categories", categoriesStr);
+    
     Job job = new Job(conf);
     log.info("Input: {} Out: {} Categories: {} All Files: {}", input, output, catFile, all);
     job.setOutputKeyClass(Text.class);
@@ -178,24 +191,11 @@ public final class WikipediaToSequenceFile {
      * "BLOCK"); conf.set("mapred.output.compression.codec", "org.apache.hadoop.io.compress.GzipCodec");
      */
     HadoopUtil.delete(conf, outPath);
-    
-    Set<String> categories = Sets.newHashSet();
-    if (!catFile.isEmpty()) {
-      for (String line : new FileLineIterable(new File(catFile))) {
-        categories.add(line.trim().toLowerCase(Locale.ENGLISH));
-      }
-    }
-    
-    Stringifier<Set<String>> setStringifier =
-        new DefaultStringifier<Set<String>>(conf, GenericsUtil.getClass(categories));
-    
-    String categoriesStr = setStringifier.toString(categories);
-    
-    conf.set("wikipedia.categories", categoriesStr);
-    
+
     boolean succeeded = job.waitForCompletion(true);
     if (!succeeded) {
       throw new IllegalStateException("Job failed!");
     }
+  
   }
 }

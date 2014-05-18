@@ -82,23 +82,27 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
         return;
       }
     }
-    document = StringEscapeUtils.unescapeHtml4(document);
-    context.write(new Text(SPACE_NON_ALPHA_PATTERN.matcher(title).replaceAll("_")), new Text(document));
+    String catMatch = findMatchingCategory(document);
+    document = StringEscapeUtils.unescapeHtml4(document);    
+    // write out in Bayes input style: key: /Category/document_name
+
+    String category = "/" + catMatch.toLowerCase(Locale.ENGLISH) + "/" +
+        SPACE_NON_ALPHA_PATTERN.matcher(title).replaceAll("_");
+
+    context.write(new Text(category), new Text(document));
   }
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
-    if (inputCategories == null) {
-      Set<String> newCategories = Sets.newHashSet();
-
-      DefaultStringifier<Set<String>> setStringifier =
+ 
+    Set<String> newCategories = Sets.newHashSet();
+    DefaultStringifier<Set<String>> setStringifier =
           new DefaultStringifier<Set<String>>(conf, GenericsUtil.getClass(newCategories));
 
-      String categoriesStr = conf.get("wikipedia.categories", setStringifier.toString(newCategories));
-      inputCategories = setStringifier.fromString(categoriesStr);
-    }
+    String categoriesStr = conf.get("wikipedia.categories");
+    inputCategories = setStringifier.fromString(categoriesStr);
     exactMatchOnly = conf.getBoolean("exact.match.only", false);
     all = conf.getBoolean("all.files", true);
     log.info("Configure: Input Categories size: {} All: {} Exact Match: {}",
@@ -127,12 +131,12 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
       }
       String category = document.substring(categoryIndex, endIndex).toLowerCase(Locale.ENGLISH).trim();
       if (exactMatchOnly && inputCategories.contains(category)) {
-        return category;
+        return category.toLowerCase(Locale.ENGLISH);
       }
       if (!exactMatchOnly) {
         for (String inputCategory : inputCategories) {
           if (category.contains(inputCategory)) { // we have an inexact match
-            return inputCategory;
+            return inputCategory.toLowerCase(Locale.ENGLISH);
           }
         }
       }
