@@ -21,6 +21,8 @@ import org.apache.mahout.classifier.OnlineLearner;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 
+import java.io.IOException;
+
 /**
  * A Multilayer Perceptron (MLP) is a kind of feed-forward artificial neural
  * network, which is a mathematical model inspired by the biological neural
@@ -54,7 +56,7 @@ public class MultilayerPerceptron extends NeuralNetwork implements OnlineLearner
    * 
    * @param modelPath The path of the model.
    */
-  public MultilayerPerceptron(String modelPath) {
+  public MultilayerPerceptron(String modelPath) throws IOException {
     super(modelPath);
   }
 

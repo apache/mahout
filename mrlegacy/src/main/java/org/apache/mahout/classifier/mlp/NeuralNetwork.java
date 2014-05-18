@@ -38,6 +38,8 @@ import org.apache.mahout.math.MatrixWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.DoubleFunction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -49,22 +51,22 @@ import com.google.common.io.Closeables;
  * and Autoencoder consist of neurons and the weights between neurons.
  */
 public abstract class NeuralNetwork {
+  
+  private static final Logger log = LoggerFactory.getLogger(NeuralNetwork.class);
 
   /* The default learning rate */
-  private static final double DEFAULT_LEARNING_RATE = 0.5;
+  public static final double DEFAULT_LEARNING_RATE = 0.5;
   /* The default regularization weight */
-  private static final double DEFAULT_REGULARIZATION_WEIGHT = 0;
+  public static final double DEFAULT_REGULARIZATION_WEIGHT = 0;
   /* The default momentum weight */
-  private static final double DEFAULT_MOMENTUM_WEIGHT = 0.1;
+  public static final double DEFAULT_MOMENTUM_WEIGHT = 0.1;
 
-  public static enum TrainingMethod {
-    GRADIENT_DESCENT
-  }
+  public static enum TrainingMethod { GRADIENT_DESCENT }
 
-  /* the name of the model */
+  /* The name of the model */
   protected String modelType;
 
-  /* the path to store the model */
+  /* The path to store the model */
   protected String modelPath;
 
   protected double learningRate;
@@ -94,25 +96,26 @@ public abstract class NeuralNetwork {
   protected List<String> squashingFunctionList;
 
   /* The index of the final layer */
-  protected int finalLayerIdx;
+  protected int finalLayerIndex;
 
   /**
    * The default constructor that initializes the learning rate, regularization
    * weight, and momentum weight by default.
    */
   public NeuralNetwork() {
-    this.learningRate = DEFAULT_LEARNING_RATE;
-    this.regularizationWeight = DEFAULT_REGULARIZATION_WEIGHT;
-    this.momentumWeight = DEFAULT_MOMENTUM_WEIGHT;
-    this.trainingMethod = TrainingMethod.GRADIENT_DESCENT;
-    this.costFunctionName = "Minus_Squared";
-    this.modelType = this.getClass().getSimpleName();
+    log.info("Initialize model...");
+    learningRate = DEFAULT_LEARNING_RATE;
+    regularizationWeight = DEFAULT_REGULARIZATION_WEIGHT;
+    momentumWeight = DEFAULT_MOMENTUM_WEIGHT;
+    trainingMethod = TrainingMethod.GRADIENT_DESCENT;
+    costFunctionName = "Minus_Squared";
+    modelType = getClass().getSimpleName();
 
-    this.layerSizeList = Lists.newArrayList();
-    this.layerSizeList = Lists.newArrayList();
-    this.weightMatrixList = Lists.newArrayList();
-    this.prevWeightUpdatesList = Lists.newArrayList();
-    this.squashingFunctionList = Lists.newArrayList();
+    layerSizeList = Lists.newArrayList();
+    layerSizeList = Lists.newArrayList();
+    weightMatrixList = Lists.newArrayList();
+    prevWeightUpdatesList = Lists.newArrayList();
+    squashingFunctionList = Lists.newArrayList();
   }
 
   /**
@@ -125,9 +128,9 @@ public abstract class NeuralNetwork {
    */
   public NeuralNetwork(double learningRate, double momentumWeight, double regularizationWeight) {
     this();
-    this.setLearningRate(learningRate);
-    this.setMomentumWeight(momentumWeight);
-    this.setRegularizationWeight(regularizationWeight);
+    setLearningRate(learningRate);
+    setMomentumWeight(momentumWeight);
+    setRegularizationWeight(regularizationWeight);
   }
 
   /**
@@ -135,13 +138,9 @@ public abstract class NeuralNetwork {
    * 
    * @param modelPath The location that the model is stored.
    */
-  public NeuralNetwork(String modelPath) {
-    try {
-      this.modelPath = modelPath;
-      this.readFromModel();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+  public NeuralNetwork(String modelPath) throws IOException {
+    this.modelPath = modelPath;
+    readFromModel();
   }
 
   /**
@@ -173,7 +172,7 @@ public abstract class NeuralNetwork {
    * @return The value of learning rate.
    */
   public double getLearningRate() {
-    return this.learningRate;
+    return learningRate;
   }
 
   /**
@@ -196,7 +195,7 @@ public abstract class NeuralNetwork {
    * @return The weight of regularization.
    */
   public double getRegularizationWeight() {
-    return this.regularizationWeight;
+    return regularizationWeight;
   }
 
   /**
@@ -218,7 +217,7 @@ public abstract class NeuralNetwork {
    * @return The value of momentum.
    */
   public double getMomentumWeight() {
-    return this.momentumWeight;
+    return momentumWeight;
   }
 
   /**
@@ -238,7 +237,7 @@ public abstract class NeuralNetwork {
    * @return The training method enumeration.
    */
   public TrainingMethod getTrainingMethod() {
-    return this.trainingMethod;
+    return trainingMethod;
   }
 
   /**
@@ -265,26 +264,25 @@ public abstract class NeuralNetwork {
    */
   public int addLayer(int size, boolean isFinalLayer, String squashingFunctionName) {
     Preconditions.checkArgument(size > 0, "Size of layer must be larger than 0.");
+    log.info("Add layer with size {} and squashing function {}", size, squashingFunctionName);
     int actualSize = size;
     if (!isFinalLayer) {
       actualSize += 1;
     }
 
-    this.layerSizeList.add(actualSize);
-    int layerIdx = this.layerSizeList.size() - 1;
+    layerSizeList.add(actualSize);
+    int layerIndex = layerSizeList.size() - 1;
     if (isFinalLayer) {
-      this.finalLayerIdx = layerIdx;
+      finalLayerIndex = layerIndex;
     }
 
-    // add weights between current layer and previous layer, and input layer has
-    // no squashing function
-    if (layerIdx > 0) {
-      int sizePrevLayer = this.layerSizeList.get(layerIdx - 1);
-      // row count equals to size of current size and column count equal to
-      // size of previous layer
+    // Add weights between current layer and previous layer, and input layer has no squashing function
+    if (layerIndex > 0) {
+      int sizePrevLayer = layerSizeList.get(layerIndex - 1);
+      // Row count equals to size of current size and column count equal to size of previous layer
       int row = isFinalLayer ? actualSize : actualSize - 1;
       Matrix weightMatrix = new DenseMatrix(row, sizePrevLayer);
-      // initialize weights
+      // Initialize weights
       final RandomWrapper rnd = RandomUtils.getRandom();
       weightMatrix.assign(new DoubleFunction() {
         @Override
@@ -292,11 +290,11 @@ public abstract class NeuralNetwork {
           return rnd.nextDouble() - 0.5;
         }
       });
-      this.weightMatrixList.add(weightMatrix);
-      this.prevWeightUpdatesList.add(new DenseMatrix(row, sizePrevLayer));
-      this.squashingFunctionList.add(squashingFunctionName);
+      weightMatrixList.add(weightMatrix);
+      prevWeightUpdatesList.add(new DenseMatrix(row, sizePrevLayer));
+      squashingFunctionList.add(squashingFunctionName);
     }
-    return layerIdx;
+    return layerIndex;
   }
 
   /**
@@ -308,7 +306,7 @@ public abstract class NeuralNetwork {
   public int getLayerSize(int layer) {
     Preconditions.checkArgument(layer >= 0 && layer < this.layerSizeList.size(),
         String.format("Input must be in range [0, %d]\n", this.layerSizeList.size() - 1));
-    return this.layerSizeList.get(layer);
+    return layerSizeList.get(layer);
   }
 
   /**
@@ -317,17 +315,17 @@ public abstract class NeuralNetwork {
    * @return The sizes of the layers.
    */
   protected List<Integer> getLayerSizeList() {
-    return this.layerSizeList;
+    return layerSizeList;
   }
 
   /**
-   * Get the weights between layer layerIdx and layerIdx + 1
+   * Get the weights between layer layerIndex and layerIndex + 1
    * 
-   * @param layerIdx The index of the layer.
+   * @param layerIndex The index of the layer.
    * @return The weights in form of {@link Matrix}.
    */
-  public Matrix getWeightsByLayer(int layerIdx) {
-    return this.weightMatrixList.get(layerIdx);
+  public Matrix getWeightsByLayer(int layerIndex) {
+    return weightMatrixList.get(layerIndex);
   }
 
   /**
@@ -338,8 +336,8 @@ public abstract class NeuralNetwork {
    */
   public void updateWeightMatrices(Matrix[] matrices) {
     for (int i = 0; i < matrices.length; ++i) {
-      Matrix matrix = this.weightMatrixList.get(i);
-      this.weightMatrixList.set(i, matrix.plus(matrices[i]));
+      Matrix matrix = weightMatrixList.get(i);
+      weightMatrixList.set(i, matrix.plus(matrices[i]));
     }
   }
 
@@ -350,8 +348,8 @@ public abstract class NeuralNetwork {
    *          existing matrices.
    */
   public void setWeightMatrices(Matrix[] matrices) {
-    this.weightMatrixList = Lists.newArrayList();
-    Collections.addAll(this.weightMatrixList, matrices);
+    weightMatrixList = Lists.newArrayList();
+    Collections.addAll(weightMatrixList, matrices);
   }
 
   /**
@@ -361,9 +359,9 @@ public abstract class NeuralNetwork {
    * @param matrix The instance of {@link Matrix}.
    */
   public void setWeightMatrix(int index, Matrix matrix) {
-    Preconditions.checkArgument(0 <= index && index < this.weightMatrixList.size(),
-        String.format("index [%s] should be in range [%s, %s).", index, 0, this.weightMatrixList.size()));
-    this.weightMatrixList.set(index, matrix);
+    Preconditions.checkArgument(0 <= index && index < weightMatrixList.size(),
+        String.format("index [%s] should be in range [%s, %s).", index, 0, weightMatrixList.size()));
+    weightMatrixList.set(index, matrix);
   }
 
   /**
@@ -372,8 +370,8 @@ public abstract class NeuralNetwork {
    * @return The weight matrices.
    */
   public Matrix[] getWeightMatrices() {
-    Matrix[] matrices = new Matrix[this.weightMatrixList.size()];
-    this.weightMatrixList.toArray(matrices);
+    Matrix[] matrices = new Matrix[weightMatrixList.size()];
+    weightMatrixList.toArray(matrices);
     return matrices;
   }
 
@@ -384,9 +382,9 @@ public abstract class NeuralNetwork {
    * @return The output vector.
    */
   public Vector getOutput(Vector instance) {
-    Preconditions.checkArgument(this.layerSizeList.get(0) == instance.size() + 1,
+    Preconditions.checkArgument(layerSizeList.get(0) == instance.size() + 1,
         String.format("The dimension of input instance should be %d, but the input has dimension %d.",
-            this.layerSizeList.get(0) - 1, instance.size()));
+            layerSizeList.get(0) - 1, instance.size()));
 
     // add bias feature
     Vector instanceWithBias = new DenseVector(instance.size() + 1);
@@ -416,7 +414,7 @@ public abstract class NeuralNetwork {
     Vector intermediateOutput = instance;
     outputCache.add(intermediateOutput);
 
-    for (int i = 0; i < this.layerSizeList.size() - 1; ++i) {
+    for (int i = 0; i < layerSizeList.size() - 1; ++i) {
       intermediateOutput = forward(i, intermediateOutput);
       outputCache.add(intermediateOutput);
     }
@@ -431,10 +429,10 @@ public abstract class NeuralNetwork {
    * @return The intermediate results of the current layer.
    */
   protected Vector forward(int fromLayer, Vector intermediateOutput) {
-    Matrix weightMatrix = this.weightMatrixList.get(fromLayer);
+    Matrix weightMatrix = weightMatrixList.get(fromLayer);
 
     Vector vec = weightMatrix.times(intermediateOutput);
-    vec = vec.assign(NeuralNetworkFunctions.getDoubleFunction(this.squashingFunctionList.get(fromLayer)));
+    vec = vec.assign(NeuralNetworkFunctions.getDoubleFunction(squashingFunctionList.get(fromLayer)));
 
     // add bias
     Vector vecWithBias = new DenseVector(vec.size() + 1);
@@ -453,8 +451,8 @@ public abstract class NeuralNetwork {
    *          of the output layer (a.k.a. the dimension of the labels).
    */
   public void trainOnline(Vector trainingInstance) {
-    Matrix[] matrices = this.trainByInstance(trainingInstance);
-    this.updateWeightMatrices(matrices);
+    Matrix[] matrices = trainByInstance(trainingInstance);
+    updateWeightMatrices(matrices);
   }
 
   /**
@@ -467,16 +465,16 @@ public abstract class NeuralNetwork {
    */
   public Matrix[] trainByInstance(Vector trainingInstance) {
     // validate training instance
-    int inputDimension = this.layerSizeList.get(0) - 1;
-    int outputDimension = this.layerSizeList.get(this.layerSizeList.size() - 1);
+    int inputDimension = layerSizeList.get(0) - 1;
+    int outputDimension = layerSizeList.get(this.layerSizeList.size() - 1);
     Preconditions.checkArgument(inputDimension + outputDimension == trainingInstance.size(),
         String.format("The dimension of training instance is %d, but requires %d.", trainingInstance.size(),
             inputDimension + outputDimension));
 
-    if (this.trainingMethod.equals(TrainingMethod.GRADIENT_DESCENT)) {
-      return this.trainByInstanceGradientDescent(trainingInstance);
+    if (trainingMethod.equals(TrainingMethod.GRADIENT_DESCENT)) {
+      return trainByInstanceGradientDescent(trainingInstance);
     }
-    throw new IllegalArgumentException(String.format("Training method is not supported."));
+    throw new IllegalArgumentException("Training method is not supported.");
   }
 
   /**
@@ -489,48 +487,51 @@ public abstract class NeuralNetwork {
    * @return The weight update matrices.
    */
   private Matrix[] trainByInstanceGradientDescent(Vector trainingInstance) {
-    int inputDimension = this.layerSizeList.get(0) - 1;
+    int inputDimension = layerSizeList.get(0) - 1;
 
-    Vector inputInstance = new DenseVector(this.layerSizeList.get(0));
+    Vector inputInstance = new DenseVector(layerSizeList.get(0));
     inputInstance.set(0, 1); // add bias
     for (int i = 0; i < inputDimension; ++i) {
       inputInstance.set(i + 1, trainingInstance.get(i));
     }
 
-    Vector labels = trainingInstance.viewPart(inputInstance.size() - 1, trainingInstance.size() - inputInstance.size() + 1);
+    Vector labels =
+        trainingInstance.viewPart(inputInstance.size() - 1, trainingInstance.size() - inputInstance.size() + 1);
 
     // initialize weight update matrices
-    Matrix[] weightUpdateMatrices = new Matrix[this.weightMatrixList.size()];
+    Matrix[] weightUpdateMatrices = new Matrix[weightMatrixList.size()];
     for (int m = 0; m < weightUpdateMatrices.length; ++m) {
-      weightUpdateMatrices[m] = new DenseMatrix(this.weightMatrixList.get(m).rowSize(), this.weightMatrixList.get(m).columnSize());
+      weightUpdateMatrices[m] =
+          new DenseMatrix(weightMatrixList.get(m).rowSize(), weightMatrixList.get(m).columnSize());
     }
 
-    List<Vector> internalResults = this.getOutputInternal(inputInstance);
+    List<Vector> internalResults = getOutputInternal(inputInstance);
 
-    Vector deltaVec = new DenseVector(this.layerSizeList.get(this.layerSizeList.size() - 1));
+    Vector deltaVec = new DenseVector(layerSizeList.get(layerSizeList.size() - 1));
     Vector output = internalResults.get(internalResults.size() - 1);
 
     final DoubleFunction derivativeSquashingFunction =
-        NeuralNetworkFunctions.getDerivativeDoubleFunction(this.squashingFunctionList.get(this.squashingFunctionList.size() - 1));
+        NeuralNetworkFunctions.getDerivativeDoubleFunction(squashingFunctionList.get(squashingFunctionList.size() - 1));
 
-    final DoubleDoubleFunction costFunction = NeuralNetworkFunctions.getDerivativeDoubleDoubleFunction(this.costFunctionName);
+    final DoubleDoubleFunction costFunction =
+        NeuralNetworkFunctions.getDerivativeDoubleDoubleFunction(costFunctionName);
 
-    Matrix lastWeightMatrix = this.weightMatrixList.get(this.weightMatrixList.size() - 1);
+    Matrix lastWeightMatrix = weightMatrixList.get(weightMatrixList.size() - 1);
 
     for (int i = 0; i < deltaVec.size(); ++i) {
       double costFuncDerivative = costFunction.apply(labels.get(i), output.get(i + 1));
-      // add regularization
-      costFuncDerivative += this.regularizationWeight * lastWeightMatrix.viewRow(i).zSum();
+      // Add regularization
+      costFuncDerivative += regularizationWeight * lastWeightMatrix.viewRow(i).zSum();
       deltaVec.set(i, costFuncDerivative);
       deltaVec.set(i, deltaVec.get(i) * derivativeSquashingFunction.apply(output.get(i + 1)));
     }
 
-    // start from previous layer of output layer
-    for (int layer = this.layerSizeList.size() - 2; layer >= 0; --layer) {
+    // Start from previous layer of output layer
+    for (int layer = layerSizeList.size() - 2; layer >= 0; --layer) {
       deltaVec = backPropagate(layer, deltaVec, internalResults, weightUpdateMatrices[layer]);
     }
 
-    this.prevWeightUpdatesList = Arrays.asList(weightUpdateMatrices);
+    prevWeightUpdatesList = Arrays.asList(weightUpdateMatrices);
 
     return weightUpdateMatrices;
   }
@@ -540,24 +541,24 @@ public abstract class NeuralNetwork {
    * updated information will be stored in the weightUpdateMatrices, and the
    * delta of the prevLayer will be returned.
    * 
-   * @param curLayerIdx Index of current layer.
+   * @param currentLayerIndex Index of current layer.
    * @param nextLayerDelta Delta of next layer.
    * @param outputCache The output cache to store intermediate results.
    * @param weightUpdateMatrix  The weight update, in form of {@link Matrix}.
    * @return The weight updates.
    */
-  private Vector backPropagate(int curLayerIdx, Vector nextLayerDelta,
+  private Vector backPropagate(int currentLayerIndex, Vector nextLayerDelta,
                                List<Vector> outputCache, Matrix weightUpdateMatrix) {
 
-    // get layer related information
+    // Get layer related information
     final DoubleFunction derivativeSquashingFunction =
-        NeuralNetworkFunctions.getDerivativeDoubleFunction(this.squashingFunctionList.get(curLayerIdx));
-    Vector curLayerOutput = outputCache.get(curLayerIdx);
-    Matrix weightMatrix = this.weightMatrixList.get(curLayerIdx);
-    Matrix prevWeightMatrix = this.prevWeightUpdatesList.get(curLayerIdx);
+        NeuralNetworkFunctions.getDerivativeDoubleFunction(squashingFunctionList.get(currentLayerIndex));
+    Vector curLayerOutput = outputCache.get(currentLayerIndex);
+    Matrix weightMatrix = weightMatrixList.get(currentLayerIndex);
+    Matrix prevWeightMatrix = prevWeightUpdatesList.get(currentLayerIndex);
 
-    // next layer is not output layer, remove the delta of bias neuron
-    if (curLayerIdx != this.layerSizeList.size() - 2) {
+    // Next layer is not output layer, remove the delta of bias neuron
+    if (currentLayerIndex != layerSizeList.size() - 2) {
       nextLayerDelta = nextLayerDelta.viewPart(1, nextLayerDelta.size() - 1);
     }
 
@@ -570,7 +571,7 @@ public abstract class NeuralNetwork {
       }
     });
 
-    // update weights
+    // Update weights
     for (int i = 0; i < weightUpdateMatrix.rowSize(); ++i) {
       for (int j = 0; j < weightUpdateMatrix.columnSize(); ++j) {
         weightUpdateMatrix.set(i, j, -learningRate * nextLayerDelta.get(i) *
@@ -587,13 +588,14 @@ public abstract class NeuralNetwork {
    * @throws IOException
    */
   protected void readFromModel() throws IOException {
-    Preconditions.checkArgument(this.modelPath != null, "Model path has not been set.");
+    log.info("Load model from {}", modelPath);
+    Preconditions.checkArgument(modelPath != null, "Model path has not been set.");
     FSDataInputStream is = null;
     try {
-      Path path = new Path(this.modelPath);
+      Path path = new Path(modelPath);
       FileSystem fs = path.getFileSystem(new Configuration());
       is = new FSDataInputStream(fs.open(path));
-      this.readFields(is);
+      readFields(is);
     } finally {
       Closeables.close(is, true);
     }
@@ -605,13 +607,14 @@ public abstract class NeuralNetwork {
    * @throws IOException
    */
   public void writeModelToFile() throws IOException {
-    Preconditions.checkArgument(this.modelPath != null, "Model path has not been set.");
+    log.info("Write model to {}.", modelPath);
+    Preconditions.checkArgument(modelPath != null, "Model path has not been set.");
     FSDataOutputStream stream = null;
     try {
-      Path path = new Path(this.modelPath);
+      Path path = new Path(modelPath);
       FileSystem fs = path.getFileSystem(new Configuration());
       stream = fs.create(path, true);
-      this.write(stream);
+      write(stream);
     } finally {
       Closeables.close(stream, false);
     }
@@ -632,7 +635,7 @@ public abstract class NeuralNetwork {
    * @return The path of the model.
    */
   public String getModelPath() {
-    return this.modelPath;
+    return modelPath;
   }
 
   /**
@@ -642,42 +645,42 @@ public abstract class NeuralNetwork {
    * @throws IOException
    */
   public void write(DataOutput output) throws IOException {
-    // write model type
+    // Write model type
     WritableUtils.writeString(output, modelType);
-    // write learning rate
+    // Write learning rate
     output.writeDouble(learningRate);
-    // write model path
-    if (this.modelPath != null) {
+    // Write model path
+    if (modelPath != null) {
       WritableUtils.writeString(output, modelPath);
     } else {
       WritableUtils.writeString(output, "null");
     }
 
-    // write regularization weight
-    output.writeDouble(this.regularizationWeight);
-    // write momentum weight
-    output.writeDouble(this.momentumWeight);
+    // Write regularization weight
+    output.writeDouble(regularizationWeight);
+    // Write momentum weight
+    output.writeDouble(momentumWeight);
 
-    // write cost function
-    WritableUtils.writeString(output, this.costFunctionName);
+    // Write cost function
+    WritableUtils.writeString(output, costFunctionName);
 
-    // write layer size list
-    output.writeInt(this.layerSizeList.size());
-    for (Integer aLayerSizeList : this.layerSizeList) {
+    // Write layer size list
+    output.writeInt(layerSizeList.size());
+    for (Integer aLayerSizeList : layerSizeList) {
       output.writeInt(aLayerSizeList);
     }
 
-    WritableUtils.writeEnum(output, this.trainingMethod);
+    WritableUtils.writeEnum(output, trainingMethod);
 
-    // write squashing functions
-    output.writeInt(this.squashingFunctionList.size());
-    for (String aSquashingFunctionList : this.squashingFunctionList) {
+    // Write squashing functions
+    output.writeInt(squashingFunctionList.size());
+    for (String aSquashingFunctionList : squashingFunctionList) {
       WritableUtils.writeString(output, aSquashingFunctionList);
     }
 
-    // write weight matrices
+    // Write weight matrices
     output.writeInt(this.weightMatrixList.size());
-    for (Matrix aWeightMatrixList : this.weightMatrixList) {
+    for (Matrix aWeightMatrixList : weightMatrixList) {
       MatrixWritable.writeMatrix(output, aWeightMatrixList);
     }
   }
@@ -689,51 +692,51 @@ public abstract class NeuralNetwork {
    * @throws IOException
    */
   public void readFields(DataInput input) throws IOException {
-    // read model type
-    this.modelType = WritableUtils.readString(input);
-    if (!this.modelType.equals(this.getClass().getSimpleName())) {
+    // Read model type
+    modelType = WritableUtils.readString(input);
+    if (!modelType.equals(this.getClass().getSimpleName())) {
       throw new IllegalArgumentException("The specified location does not contains the valid NeuralNetwork model.");
     }
-    // read learning rate
-    this.learningRate = input.readDouble();
-    // read model path
-    this.modelPath = WritableUtils.readString(input);
-    if (this.modelPath.equals("null")) {
-      this.modelPath = null;
+    // Read learning rate
+    learningRate = input.readDouble();
+    // Read model path
+    modelPath = WritableUtils.readString(input);
+    if (modelPath.equals("null")) {
+      modelPath = null;
     }
 
-    // read regularization weight
-    this.regularizationWeight = input.readDouble();
-    // read momentum weight
-    this.momentumWeight = input.readDouble();
+    // Read regularization weight
+    regularizationWeight = input.readDouble();
+    // Read momentum weight
+    momentumWeight = input.readDouble();
 
-    // read cost function
-    this.costFunctionName = WritableUtils.readString(input);
+    // Read cost function
+    costFunctionName = WritableUtils.readString(input);
 
-    // read layer size list
+    // Read layer size list
     int numLayers = input.readInt();
-    this.layerSizeList = Lists.newArrayList();
+    layerSizeList = Lists.newArrayList();
     for (int i = 0; i < numLayers; i++) {
-      this.layerSizeList.add(input.readInt());
+      layerSizeList.add(input.readInt());
     }
 
-    this.trainingMethod = WritableUtils.readEnum(input, TrainingMethod.class);
+    trainingMethod = WritableUtils.readEnum(input, TrainingMethod.class);
 
-    // read squash functions
+    // Read squash functions
     int squashingFunctionSize = input.readInt();
-    this.squashingFunctionList = Lists.newArrayList();
+    squashingFunctionList = Lists.newArrayList();
     for (int i = 0; i < squashingFunctionSize; i++) {
-      this.squashingFunctionList.add(WritableUtils.readString(input));
+      squashingFunctionList.add(WritableUtils.readString(input));
     }
 
-    // read weights and construct matrices of previous updates
+    // Read weights and construct matrices of previous updates
     int numOfMatrices = input.readInt();
-    this.weightMatrixList = Lists.newArrayList();
-    this.prevWeightUpdatesList = Lists.newArrayList();
+    weightMatrixList = Lists.newArrayList();
+    prevWeightUpdatesList = Lists.newArrayList();
     for (int i = 0; i < numOfMatrices; i++) {
       Matrix matrix = MatrixWritable.readMatrix(input);
-      this.weightMatrixList.add(matrix);
-      this.prevWeightUpdatesList.add(new DenseMatrix(matrix.rowSize(), matrix.columnSize()));
+      weightMatrixList.add(matrix);
+      prevWeightUpdatesList.add(new DenseMatrix(matrix.rowSize(), matrix.columnSize()));
     }
   }
 

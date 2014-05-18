@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.mahout.classifier.mlp;
 
 import java.io.File;
@@ -35,10 +36,9 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
-/**
- * Test the functionality of {@link NeuralNetwork}.
- */
+/** Test the functionality of {@link NeuralNetwork}. */
 public class TestNeuralNetwork extends MahoutTestCase {
+
 
   @Test
   public void testReadWrite() throws IOException {
@@ -50,9 +50,11 @@ public class TestNeuralNetwork extends MahoutTestCase {
     double learningRate = 0.2;
     double momentumWeight = 0.5;
     double regularizationWeight = 0.05;
-    ann.setLearningRate(learningRate).setMomentumWeight(momentumWeight).setRegularizationWeight(regularizationWeight);
+    ann.setLearningRate(learningRate)
+       .setMomentumWeight(momentumWeight)
+       .setRegularizationWeight(regularizationWeight);
 
-    // manually set weights
+    // Manually set weights
     Matrix[] matrices = new DenseMatrix[2];
     matrices[0] = new DenseMatrix(5, 3);
     matrices[0].assign(0.2);
@@ -60,47 +62,45 @@ public class TestNeuralNetwork extends MahoutTestCase {
     matrices[1].assign(0.8);
     ann.setWeightMatrices(matrices);
 
-    // write to file
+    // Write to file
     String modelFilename = "testNeuralNetworkReadWrite";
     File tmpModelFile = this.getTestTempFile(modelFilename);
     ann.setModelPath(tmpModelFile.getAbsolutePath());
     ann.writeModelToFile();
 
-    // read from file
+    // Read from file
     NeuralNetwork annCopy = new MultilayerPerceptron(tmpModelFile.getAbsolutePath());
     assertEquals(annCopy.getClass().getSimpleName(), annCopy.getModelType());
     assertEquals(tmpModelFile.getAbsolutePath(), annCopy.getModelPath());
-    assertEquals(learningRate, annCopy.getLearningRate(), 0.000001);
-    assertEquals(momentumWeight, annCopy.getMomentumWeight(), 0.000001);
-    assertEquals(regularizationWeight, annCopy.getRegularizationWeight(), 0.000001);
+    assertEquals(learningRate, annCopy.getLearningRate(), EPSILON);
+    assertEquals(momentumWeight, annCopy.getMomentumWeight(), EPSILON);
+    assertEquals(regularizationWeight, annCopy.getRegularizationWeight(), EPSILON);
     assertEquals(TrainingMethod.GRADIENT_DESCENT, annCopy.getTrainingMethod());
 
-    // compare weights
+    // Compare weights
     Matrix[] weightsMatrices = annCopy.getWeightMatrices();
     for (int i = 0; i < weightsMatrices.length; ++i) {
       Matrix expectMat = matrices[i];
       Matrix actualMat = weightsMatrices[i];
       for (int j = 0; j < expectMat.rowSize(); ++j) {
         for (int k = 0; k < expectMat.columnSize(); ++k) {
-          assertEquals(expectMat.get(j, k), actualMat.get(j, k), 0.000001);
+          assertEquals(expectMat.get(j, k), actualMat.get(j, k), EPSILON);
         }
       }
     }
   }
 
-  /**
-   * Test the forward functionality.
-   */
+  /** Test the forward functionality. */
   @Test
   public void testOutput() {
-    // first network
+    // First network
     NeuralNetwork ann = new MultilayerPerceptron();
     ann.addLayer(2, false, "Identity");
     ann.addLayer(5, false, "Identity");
     ann.addLayer(1, true, "Identity");
     ann.setCostFunction("Minus_Squared").setLearningRate(0.1);
 
-    // intentionally initialize all weights to 0.5
+    // Intentionally initialize all weights to 0.5
     Matrix[] matrices = new Matrix[2];
     matrices[0] = new DenseMatrix(5, 3);
     matrices[0].assign(0.5);
@@ -108,12 +108,12 @@ public class TestNeuralNetwork extends MahoutTestCase {
     matrices[1].assign(0.5);
     ann.setWeightMatrices(matrices);
 
-    double[] arr = new double[]{0, 1};
+    double[] arr = new double[] { 0, 1 };
     Vector training = new DenseVector(arr);
     Vector result = ann.getOutput(training);
     assertEquals(1, result.size());
 
-    // second network
+    // Second network
     NeuralNetwork ann2 = new MultilayerPerceptron();
     ann2.addLayer(2, false, "Sigmoid");
     ann2.addLayer(3, false, "Sigmoid");
@@ -121,7 +121,7 @@ public class TestNeuralNetwork extends MahoutTestCase {
     ann2.setCostFunction("Minus_Squared");
     ann2.setLearningRate(0.3);
 
-    // intentionally initialize all weights to 0.5
+    // Intentionally initialize all weights to 0.5
     Matrix[] matrices2 = new Matrix[2];
     matrices2[0] = new DenseMatrix(3, 3);
     matrices2[0].assign(0.5);
@@ -129,15 +129,15 @@ public class TestNeuralNetwork extends MahoutTestCase {
     matrices2[1].assign(0.5);
     ann2.setWeightMatrices(matrices2);
 
-    double[] test = {0, 0};
-    double[] result2 = {0.807476};
+    double[] test = { 0, 0 };
+    double[] result2 = { 0.807476 };
 
     Vector vec = ann2.getOutput(new DenseVector(test));
     double[] arrVec = new double[vec.size()];
     for (int i = 0; i < arrVec.length; ++i) {
       arrVec[i] = vec.getQuick(i);
     }
-    assertArrayEquals(result2, arrVec, 0.000001);
+    assertArrayEquals(result2, arrVec, EPSILON);
 
     NeuralNetwork ann3 = new MultilayerPerceptron();
     ann3.addLayer(2, false, "Sigmoid");
@@ -145,7 +145,7 @@ public class TestNeuralNetwork extends MahoutTestCase {
     ann3.addLayer(1, true, "Sigmoid");
     ann3.setCostFunction("Minus_Squared").setLearningRate(0.3);
 
-    // intentionally initialize all weights to 0.5
+    // Intentionally initialize all weights to 0.5
     Matrix[] initMatrices = new Matrix[2];
     initMatrices[0] = new DenseMatrix(3, 3);
     initMatrices[0].assign(0.5);
@@ -155,7 +155,7 @@ public class TestNeuralNetwork extends MahoutTestCase {
 
     double[] instance = {0, 1};
     Vector output = ann3.getOutput(new DenseVector(instance));
-    assertEquals(0.8315410, output.get(0), 0.000001);
+    assertEquals(0.8315410, output.get(0), EPSILON);
   }
 
   @Test
@@ -181,7 +181,7 @@ public class TestNeuralNetwork extends MahoutTestCase {
       ann.setRegularizationWeight(0.01);
     }
 
-    double[][] instances = {{0, 1, 1}, {0, 0, 0}, {1, 0, 1}, {1, 1, 0}};
+    double[][] instances = { { 0, 1, 1 }, { 0, 0, 0 }, { 1, 0, 1 }, { 1, 1, 0 } };
     for (int i = 0; i < iterations; ++i) {
       for (double[] instance : instances) {
         ann.trainOnline(new DenseVector(instance));
@@ -190,22 +190,22 @@ public class TestNeuralNetwork extends MahoutTestCase {
 
     for (double[] instance : instances) {
       Vector input = new DenseVector(instance).viewPart(0, instance.length - 1);
-      // the expected output is the last element in array
+      // The expected output is the last element in array
       double actual = instance[2];
       double expected = ann.getOutput(input).get(0);
       assertTrue(actual < 0.5 && expected < 0.5 || actual >= 0.5 && expected >= 0.5);
     }
 
-    // write model into file and read out
+    // Write model into file and read out
     File tmpModelFile = this.getTestTempFile(modelFilename);
     ann.setModelPath(tmpModelFile.getAbsolutePath());
     ann.writeModelToFile();
 
     NeuralNetwork annCopy = new MultilayerPerceptron(tmpModelFile.getAbsolutePath());
-    // test on instances
+    // Test on instances
     for (double[] instance : instances) {
       Vector input = new DenseVector(instance).viewPart(0, instance.length - 1);
-      // the expected output is the last element in array
+      // The expected output is the last element in array
       double actual = instance[2];
       double expected = annCopy.getOutput(input).get(0);
       assertTrue(actual < 0.5 && expected < 0.5 || actual >= 0.5 && expected >= 0.5);
@@ -214,11 +214,14 @@ public class TestNeuralNetwork extends MahoutTestCase {
 
   @Test
   public void testWithCancerDataSet() throws IOException {
-    String dataSetPath = "src/test/resources/cancer.csv";
+
+    File cancerDataset = getTestTempFile("cancer.csv");
+    writeLines(cancerDataset, Datasets.CANCER);
+
     List<Vector> records = Lists.newArrayList();
     // Returns a mutable list of the data
-    List<String> cancerDataSetList = Files.readLines(new File(dataSetPath), Charsets.UTF_8);
-    // skip the header line, hence remove the first element in the list
+    List<String> cancerDataSetList = Files.readLines(cancerDataset, Charsets.UTF_8);
+    // Skip the header line, hence remove the first element in the list
     cancerDataSetList.remove(0);
     for (String line : cancerDataSetList) {
       String[] tokens = CSVUtils.parseLine(line);
@@ -264,23 +267,26 @@ public class TestNeuralNetwork extends MahoutTestCase {
 
   @Test
   public void testWithIrisDataSet() throws IOException {
-    String dataSetPath = "src/test/resources/iris.csv";
+
+    File irisDataset = getTestTempFile("iris.csv");
+    writeLines(irisDataset, Datasets.IRIS);
+
     int numOfClasses = 3;
     List<Vector> records = Lists.newArrayList();
     // Returns a mutable list of the data
-    List<String> irisDataSetList = Files.readLines(new File(dataSetPath), Charsets.UTF_8);
-    // skip the header line, hence remove the first element in the list
+    List<String> irisDataSetList = Files.readLines(irisDataset, Charsets.UTF_8);
+    // Skip the header line, hence remove the first element in the list
     irisDataSetList.remove(0);
 
     for (String line : irisDataSetList) {
       String[] tokens = CSVUtils.parseLine(line);
-      // last three dimensions represent the labels
+      // Last three dimensions represent the labels
       double[] values = new double[tokens.length + numOfClasses - 1];
       Arrays.fill(values, 0.0);
       for (int i = 0; i < tokens.length - 1; ++i) {
         values[i] = Double.parseDouble(tokens[i]);
       }
-      // add label values
+      // Add label values
       String label = tokens[tokens.length - 1];
       if (label.equalsIgnoreCase("setosa")) {
         values[values.length - 3] = 1;
@@ -298,7 +304,7 @@ public class TestNeuralNetwork extends MahoutTestCase {
     List<Vector> trainingSet = records.subList(0, splitPoint);
     List<Vector> testSet = records.subList(splitPoint, records.size());
 
-    // initialize neural network model
+    // Initialize neural network model
     NeuralNetwork ann = new MultilayerPerceptron();
     int featureDimension = records.get(0).size() - numOfClasses;
     ann.addLayer(featureDimension, false, "Sigmoid");
@@ -340,7 +346,8 @@ public class TestNeuralNetwork extends MahoutTestCase {
     double accuracy = (double) correctInstances / testSet.size() * 100;
     assertTrue("The model is even worse than a random guesser.", accuracy > 50);
     
-    System.out.printf("Iris DataSet. Classification precision: %d/%d = %f%%\n", correctInstances, testSet.size(), accuracy);
+    System.out.printf("Iris DataSet. Classification precision: %d/%d = %f%%\n",
+                      correctInstances, testSet.size(), accuracy);
   }
   
 }
