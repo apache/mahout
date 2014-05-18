@@ -18,9 +18,11 @@
 package org.apache.mahout.vectorizer.tfidf;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Iterator;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -39,25 +41,19 @@ import org.apache.mahout.vectorizer.TFIDF;
 import org.apache.mahout.vectorizer.common.PartialVectorMerger;
 
 /**
- * Converts a document in to a sparse vector
+ * Converts a document into a sparse vector
  */
 public class TFIDFPartialVectorReducer extends
     Reducer<WritableComparable<?>, VectorWritable, WritableComparable<?>, VectorWritable> {
 
   private final OpenIntLongHashMap dictionary = new OpenIntLongHashMap();
-
   private final TFIDF tfidf = new TFIDF();
 
   private int minDf = 1;
-
   private long maxDf = -1;
-
   private long vectorCount = 1;
-
   private long featureCount;
-
   private boolean sequentialAccess;
-
   private boolean namedVector;
   
   @Override
@@ -106,7 +102,8 @@ public class TFIDFPartialVectorReducer extends
     sequentialAccess = conf.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
     namedVector = conf.getBoolean(PartialVectorMerger.NAMED_VECTOR, false);
 
-    Path dictionaryFile = HadoopUtil.getSingleCachedFile(conf);
+    URI[] localFiles = DistributedCache.getCacheFiles(conf);
+    Path dictionaryFile = HadoopUtil.findInCacheByPartOfFilename(TFIDFConverter.FREQUENCY_FILE, localFiles);
     // key is feature, value is the document frequency
     for (Pair<IntWritable,LongWritable> record 
          : new SequenceFileIterable<IntWritable,LongWritable>(dictionaryFile, true, conf)) {

@@ -17,11 +17,6 @@
 
 package org.apache.mahout.vectorizer;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Collection;
-import java.util.List;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
@@ -59,6 +54,10 @@ import org.apache.mahout.vectorizer.term.TermCountReducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+
 /**
  * This class converts a set of input documents in the sequence file format to vectors. The Sequence file
  * input should have a {@link Text} key containing the unique document identifier and a {@link StringTuple}
@@ -72,8 +71,8 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
   public static final String MIN_SUPPORT = "min.support";
   public static final String MAX_NGRAMS = "max.ngrams";
   public static final int DEFAULT_MIN_SUPPORT = 2;
-  
-  private static final String DICTIONARY_FILE = "dictionary.file-";
+  public static final String DICTIONARY_FILE = "dictionary.file-";
+
   private static final int MAX_CHUNKSIZE = 10000;
   private static final int MIN_CHUNKSIZE = 100;
   private static final String OUTPUT_FILES_PATTERN = "part-*";
@@ -301,8 +300,8 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
     conf.setInt(PartialVectorMerger.DIMENSION, dimension);
     conf.setBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, sequentialAccess);
     conf.setBoolean(PartialVectorMerger.NAMED_VECTOR, namedVectors);
-    conf.setInt(MAX_NGRAMS, maxNGramSize);   
-    DistributedCache.setCacheFiles(new URI[] {dictionaryFilePath.toUri()}, conf);
+    conf.setInt(MAX_NGRAMS, maxNGramSize);
+    DistributedCache.addCacheFile(dictionaryFilePath.toUri(), conf);
     
     Job job = new Job(conf);
     job.setJobName("DictionaryVectorizer::MakePartialVectors: input-folder: " + input

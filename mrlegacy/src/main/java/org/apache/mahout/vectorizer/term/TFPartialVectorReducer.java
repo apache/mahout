@@ -19,6 +19,7 @@ package org.apache.mahout.vectorizer.term;
 
 import com.google.common.io.Closeables;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -41,6 +42,7 @@ import org.apache.mahout.vectorizer.DictionaryVectorizer;
 import org.apache.mahout.vectorizer.common.PartialVectorMerger;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Iterator;
 
 /**
@@ -51,11 +53,8 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
   private final OpenObjectIntHashMap<String> dictionary = new OpenObjectIntHashMap<String>();
 
   private int dimension;
-
   private boolean sequentialAccess;
-
   private boolean namedVector;
-
   private int maxNGramSize = 1;
 
   @Override
@@ -120,8 +119,8 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
     namedVector = conf.getBoolean(PartialVectorMerger.NAMED_VECTOR, false);
     maxNGramSize = conf.getInt(DictionaryVectorizer.MAX_NGRAMS, maxNGramSize);
 
-    //MAHOUT-1247
-    Path dictionaryFile = HadoopUtil.getSingleCachedFile(conf);
+    URI[] localFiles = DistributedCache.getCacheFiles(conf);
+    Path dictionaryFile = HadoopUtil.findInCacheByPartOfFilename(DictionaryVectorizer.DICTIONARY_FILE, localFiles);
     // key is word value is id
     for (Pair<Writable, IntWritable> record
             : new SequenceFileIterable<Writable, IntWritable>(dictionaryFile, true, conf)) {

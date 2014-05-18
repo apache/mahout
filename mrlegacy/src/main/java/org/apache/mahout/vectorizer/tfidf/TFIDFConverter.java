@@ -17,10 +17,6 @@
 
 package org.apache.mahout.vectorizer.tfidf;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.List;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
@@ -47,6 +43,9 @@ import org.apache.mahout.vectorizer.common.PartialVectorMerger;
 import org.apache.mahout.vectorizer.term.TermDocumentCountMapper;
 import org.apache.mahout.vectorizer.term.TermDocumentCountReducer;
 
+import java.io.IOException;
+import java.util.List;
+
 /**
  * This class converts a set of input vectors with term frequencies to TfIdf vectors. The Sequence file input
  * should have a {@link org.apache.hadoop.io.WritableComparable} key containing and a
@@ -64,7 +63,7 @@ public final class TFIDFConverter {
   //public static final String TFIDF_OUTPUT_FOLDER = "tfidf";
 
   private static final String DOCUMENT_VECTOR_OUTPUT_FOLDER = "tfidf-vectors";
-  private static final String FREQUENCY_FILE = "frequency.file-";
+  public static final String FREQUENCY_FILE = "frequency.file-";
   private static final int MAX_CHUNKSIZE = 10000;
   private static final int MIN_CHUNKSIZE = 100;
   private static final String OUTPUT_FILES_PATTERN = "part-*";
@@ -75,8 +74,7 @@ public final class TFIDFConverter {
   /**
    * Cannot be initialized. Use the static functions
    */
-  private TFIDFConverter() {
-  }
+  private TFIDFConverter() {}
 
   /**
    * Create Term Frequency-Inverse Document Frequency (Tf-Idf) Vectors from the input set of vectors in
@@ -299,7 +297,7 @@ public final class TFIDFConverter {
     conf.setLong(MAX_DF, maxDF);
     conf.setBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, sequentialAccess);
     conf.setBoolean(PartialVectorMerger.NAMED_VECTOR, namedVector);
-    DistributedCache.setCacheFiles(new URI[] {dictionaryFilePath.toUri()}, conf);
+    DistributedCache.addCacheFile(dictionaryFilePath.toUri(), conf);
 
     Job job = new Job(conf);
     job.setJobName(": MakePartialVectors: input-folder: " + input + ", dictionary-file: "

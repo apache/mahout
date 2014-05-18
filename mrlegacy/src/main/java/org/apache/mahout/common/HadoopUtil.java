@@ -421,4 +421,22 @@ public final class HadoopUtil {
     }
     return currentPath;
   }
+
+  /**
+   * Finds a file in the DistributedCache
+   *
+   * @param partOfFilename a substring of the file name
+   * @param localFiles holds references to files stored in distributed cache
+   * @return Path to first matched file or null if nothing was found
+   **/
+  public static Path findInCacheByPartOfFilename(String partOfFilename, URI[] localFiles) {
+    for (URI distCacheFile : localFiles) {
+      log.info("trying find a file in distributed cache containing [{}] in its name", partOfFilename);
+      if (distCacheFile != null && distCacheFile.toString().contains(partOfFilename)) {
+        log.info("found file [{}] containing [{}]", distCacheFile.toString(), partOfFilename);
+        return new Path(distCacheFile.getPath());
+      }
+    }
+    return null;
+  }
 }
