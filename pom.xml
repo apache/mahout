@@ -182,6 +182,24 @@
         <optional>true</optional>
       </dependency>
 
+      <dependency>
+        <artifactId>mahout-math-scala</artifactId>
+        <groupId>${project.groupId}</groupId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <version>${project.version}</version>
+        <artifactId>mahout-math-scala</artifactId>
+        <classifier>tests</classifier>
+      </dependency>
+
+      <dependency>
+        <artifactId>mahout-spark</artifactId>
+        <groupId>${project.groupId}</groupId>
+        <version>${project.version}</version>
+      </dependency>
+
       <!-- 3rd party  -->
       <dependency>
         <groupId>org.apache.lucene</groupId>
@@ -524,6 +542,11 @@
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>build-helper-maven-plugin</artifactId>
           <version>1.8</version>
+        </plugin>
+        <plugin>
+          <groupId>org.scala-tools</groupId>
+          <artifactId>maven-scala-plugin</artifactId>
+          <version>2.15.2</version>
         </plugin>
       </plugins>
     </pluginManagement>
