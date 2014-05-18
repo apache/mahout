@@ -9,14 +9,15 @@ import scala.Some
 class MahoutSparkILoop extends SparkILoop {
 
   private val postInitScript =
-    "import org.apache.mahout.math.scalabindings._" ::
-        "import RLikeOps._" ::
-        "import org.apache.mahout.sparkbindings._" ::
-        "import drm._" ::
-        "import RLikeDrmOps._" ::
-        "org.apache.spark.storage.StorageLevel" ::
-        "implicit val _sc = sc" ::
-        Nil
+      "import org.apache.mahout.math.Vector" ::
+      "import org.apache.mahout.math.scalabindings._" ::
+      "import RLikeOps._" ::
+      "import org.apache.mahout.sparkbindings._" ::
+      "import drm._" ::
+      "import RLikeDrmOps._" ::
+      "org.apache.spark.storage.StorageLevel" ::
+      "implicit val _sc = sc" ::
+      Nil
 
   override protected def postInitialization() {
     super.postInitialization()
