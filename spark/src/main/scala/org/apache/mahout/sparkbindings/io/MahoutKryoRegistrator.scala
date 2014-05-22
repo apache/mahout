@@ -23,9 +23,7 @@ import org.apache.spark.serializer.KryoRegistrator
 import org.apache.mahout.sparkbindings.drm._
 
 
-/**
- *
- */
+
 class MahoutKryoRegistrator extends KryoRegistrator {
 
   override def registerClasses(kryo: Kryo) = {
