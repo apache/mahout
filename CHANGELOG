@@ -2,57 +2,35 @@ Mahout Change Log
 
 Release 1.0 - unreleased
 
-  MAHOUT-1388: Add command line support and logging for MLP (Yexi Jiang via ssc)
-
-  MAHOUT-1498: DistributedCache.setCacheFiles in DictionaryVectorizer overwrites jars pushed using oozie (Sergey via ssc)
-
-  MAHOUT-1385: Caching Encoders don't cache (Johannes Schulte, Manoj Awasthi via ssc)
-
-  MAHOUT-1527: Fix wikipedia classifier example (Andrew Palumbo via ssc)
+  MAHOUT-1548: Fix broken links in quickstart webpage (Andrew Palumbo via ssc)
 
   MAHOUT-1542: Tutorial for playing with Mahout's Spark shell (ssc)
 
-  MAHOUT-1532: Add solve() function to the Scala DSL (ssc)
-
-  MAHOUT-1548: Fix broken links in quickstart webpage (Andrew Palumbo via ssc)
-
-  MAHOUT-1428: Recommending already consumed items (Dodi Hakim via ssc)
-
   MAHOUT-1533: Remove Frequent Pattern Mining (ssc)
 
-  MAHOUT-1526: Ant file in examples (ssc)
+  MAHOUT-1532: Add solve() function to the Scala DSL (ssc)
 
   MAHOUT-1530: Custom prompt and welcome message for the Spark Shell (ssc)
 
-  MAHOUT-1521: lucene2seq - Error trying to load data from stored field (when non-indexed) (Terry Blankers via frankscholten)
+  MAHOUT-1527: Fix wikipedia classifier example (Andrew Palumbo via ssc)
 
-  MAHOUT-1310: Mahout support windows (Sergey Svinarchuk via ssc)
-
-  MAHOUT-1520: Fix links in Mahout website documentation (Saleem Ansari via smarthi)
+  MAHOUT-1526: Ant file in examples (ssc)
 
   MAHOUT-1523: Remove @author tags in sparkbindings (ssc)
 
-  MAHOUT-1510: Goodbye MapReduce (ssc)
+  MAHOUT-1521: lucene2seq - Error trying to load data from stored field (when non-indexed) (Terry Blankers via frankscholten)
+
+  MAHOUT-1520: Fix links in Mahout website documentation (Saleem Ansari via smarthi)
 
   MAHOUT-1519: Remove StandardThetaTrainer (Andrew Palumbo via ssc)
 
-  MAHOUT-1496: Create a website describing the distributed ALS recommender (Jian Wang via ssc)
-
-  MAHOUT-1502: Update Naive Bayes Webpage to Current Implementation (Andrew Palumbo via ssc)
-
   MAHOUT-1517: Remove casts to int in ALSWRFactorizer (ssc)
   
-  MAHOUT-1425: SGD classifier example with bank marketing dataset. (frankscholten)
+  MAHOUT-1513: Deprecate Canopy Clustering (ssc)
 
   MAHOUT-1511: Renaming core to mrlegacy (frankscholten)
 
-  MAHOUT-1497: mahout resplit not producing splited files (ssc)
-
-  MAHOUT-1513: Deprecate Canopy Clustering (ssc)
-
-  MAHOUT-1440: Add option to set the RNG seed for inital cluster generation in Kmeans/fKmeans (Andrew Palumbo via ssc)
-
-  MAHOUT-1445: Create an intro for item based recommender (Nick Martin via ssc)
+  MAHOUT-1510: Goodbye MapReduce (ssc)
 
   MAHOUT-1509: Invalid URL in link from "quick start/basics" page (Nick Martin, smarthi)
 
@@ -62,7 +40,15 @@ Release 1.0 - unreleased
 
   MAHOUT-1503: TestNaiveBayesDriver fails in sequential mode (Andrew Palumbo, smarthi)
 
+  MAHOUT-1502: Update Naive Bayes Webpage to Current Implementation (Andrew Palumbo via ssc)
+
   MAHOUT-1501: ClusterOutputPostProcessorDriver has private default constructor (ssc)
+
+  MAHOUT-1498: DistributedCache.setCacheFiles in DictionaryVectorizer overwrites jars pushed using oozie (Sergey via ssc)
+
+  MAHOUT-1497: mahout resplit not producing splited files (ssc)
+
+  MAHOUT-1496: Create a website describing the distributed ALS recommender (Jian Wang via ssc)
 
   MAHOUT-1491: Spectral KMeans Clustering doesn't clean its /tmp dir and fails when seeing it again (smarthi)
 
@@ -110,6 +96,10 @@ Release 1.0 - unreleased
 
   MAHOUT-1447: ImplicitFeedbackAlternatingLeastSquaresSolver tests and features (Adam Ilardi via ssc)
 
+  MAHOUT-1445: Create an intro for item based recommender (Nick Martin via ssc)
+
+  MAHOUT-1440: Add option to set the RNG seed for inital cluster generation in Kmeans/fKmeans (Andrew Palumbo via ssc)
+
   MAHOUT-1438: "quickstart" tutorial for building a simple recommender (Maciej Mazur and Steve Cook via ssc)
 
   MAHOUT-1434: Dead links on the web ste (Kevin Moulart, smarthi)
@@ -117,6 +107,10 @@ Release 1.0 - unreleased
   MAHOUT-1433: Make SVDRecommender look at all unknown items of a user per default (ssc)
 
   MAHOUT-1429: Parallelize YtransposeY in ImplicitFeedbackAlternatingLeastSquaresSolver (Adam Ilardi via ssc)
+
+  MAHOUT-1428: Recommending already consumed items (Dodi Hakim via ssc)
+
+  MAHOUT-1425: SGD classifier example with bank marketing dataset. (frankscholten)
 
   MAHOUT-1420: Add solr-recommender to examples (Pat Ferrel via akm)
 
@@ -130,9 +124,15 @@ Release 1.0 - unreleased
 
   MAHOUT-1413: Rework Algorithms page (ssc)
 
+  MAHOUT-1388: Add command line support and logging for MLP (Yexi Jiang via ssc)
+
+  MAHOUT-1385: Caching Encoders don't cache (Johannes Schulte, Manoj Awasthi via ssc)
+
   MAHOUT-1356: Ensure unit tests fail fast when writing outside mvn target directory (isabel, smarthi, dweiss, frankscholten, akm)
 
   MAHOUT-1329: Mahout for hadoop 2 (gcapan, Sergey Svinarchuk)
+
+  MAHOUT-1310: Mahout support windows (Sergey Svinarchuk via ssc)
 
 Release 0.9 - 2014-02-01
 
