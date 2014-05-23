@@ -47,14 +47,15 @@ if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
   fi
 fi
 
-WORK_DIR=/tmp/mahout-work-wiki-${USER}
-algorithm=( CBayes clean)
+WORK_DIR=/tmp/mahout-work-${USER}
+algorithm=( CBayes BinaryCBayes clean)
 if [ -n "$1" ]; then
   choice=$1
 else
   echo "Please select a number to choose the corresponding task to run"
   echo "1. ${algorithm[0]}"
-  echo "2. ${algorithm[1]} -- cleans up the work area in $WORK_DIR"
+  echo "2. ${algorithm[1]}"
+  echo "3. ${algorithm[2]} -- cleans up the work area in $WORK_DIR"
   read -p "Enter your choice : " choice
 fi
 
@@ -67,14 +68,17 @@ if [ "x$alg" != "xclean" ]; then
   mkdir -p ${WORK_DIR}
     if [ ! -e ${WORK_DIR}/wikixml ]; then
         mkdir -p ${WORK_DIR}/wikixml
-        echo "Downloading wikipedia XML dump"        
-        ########## partial small
-         #curl http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles1.xml-p000000010p000010000.bz2 -o ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml.bz2        
-         ########## partial larger - uncomment and cle
-         curl http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles10.xml-p000925001p001325000.bz2 -o ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml.bz2
-      
-         ######### Uncomment for full wikipedia dump: 10G zipped
-         #curl http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2 -o ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml.bz2
+        echo "Downloading wikipedia XML dump"
+        ########################################################   
+        #  Datasets: uncomment and run "clean" to change dataset   
+        ########################################################
+  	########## partial small 42.5M zipped 
+        #curl http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles1.xml-p000000010p000010000.bz2 -o ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml.bz2        
+        ########## partial larger 256M zipped
+        curl http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles10.xml-p000925001p001325000.bz2 -o ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml.bz2
+        ######### full wikipedia dump: 10G zipped
+        #curl http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2 -o ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml.bz2
+        ########################################################
       
       echo "Extracting..."
        
@@ -82,19 +86,27 @@ if [ "x$alg" != "xclean" ]; then
     fi
 
 echo $START_PATH
-#cd $START_PATH
-#cd ../..
 
 set -e
 
-if [ "x$alg" == "xCBayes" ]; then
+if [ "x$alg" == "xCBayes" ] || [ "x$alg" == "xBinaryCBayes" ] ; then
 
   set -x
   echo "Preparing wikipedia data"
   rm -rf ${WORK_DIR}/wiki
   mkdir ${WORK_DIR}/wiki
-  cp $MAHOUT_HOME/examples/src/test/resources/country10.txt ${WORK_DIR}/country10.txt
-  chmod 666 ${WORK_DIR}/country10.txt
+  
+  if [ "x$alg" == "xCBayes" ] ; then
+    # use a list of 10 countries as categories
+    cp $MAHOUT_HOME/examples/src/test/resources/country10.txt ${WORK_DIR}/country.txt
+    chmod 666 ${WORK_DIR}/country.txt
+  fi
+  
+  if [ "x$alg" == "xBinaryCBayes" ] ; then
+    # use United States and United Kingdom as categories
+    cp $MAHOUT_HOME/examples/src/test/resources/country2.txt ${WORK_DIR}/country.txt
+    chmod 666 ${WORK_DIR}/country.txt
+  fi
 
   if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ] ; then
     echo "Copying wikipedia data to HDFS"
@@ -105,13 +117,22 @@ if [ "x$alg" == "xCBayes" ]; then
   fi
 
   echo "Creating sequence files from wikiXML"
-  $MAHOUT_HOME/bin/mahout seqwiki -c ${WORK_DIR}/country10.txt -i ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml -o ${WORK_DIR}/wikipediainput
-
-  echo "Converting sequence files to vectors using bi-grams"
-  $MAHOUT_HOME/bin/mahout seq2sparse -i ${WORK_DIR}/wikipediainput -o ${WORK_DIR}/wikipedidaVecs -wt tfidf -lnorm -nv -ow -ng 2
-
+  $MAHOUT_HOME/bin/mahout seqwiki -c ${WORK_DIR}/country.txt -i ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml -o ${WORK_DIR}/wikipediainput
+   
+  # if using the 10 class problem use bigrams
+  if [ "x$alg" == "xCBayes" ] ; then
+    echo "Converting sequence files to vectors using bigrams"
+    $MAHOUT_HOME/bin/mahout seq2sparse -i ${WORK_DIR}/wikipediainput -o ${WORK_DIR}/wikipediaVecs -wt tfidf -lnorm -nv -ow -ng 2
+  fi
+  
+  # if using the 2 class problem try different options
+  if [ "x$alg" == "xBinaryCBayes" ] ; then
+    echo "Converting sequence files to vectors using 4-grams and a max Document Frequenct of 30"
+    $MAHOUT_HOME/bin/mahout seq2sparse -i ${WORK_DIR}/wikipediainput -o ${WORK_DIR}/wikipediaVecs -wt tfidf -lnorm -nv -ow -ng 4 -x 30 
+  fi
+  
   echo "Creating training and holdout set with a random 80-20 split of the generated vector dataset"
-  $MAHOUT_HOME/bin/mahout split -i ${WORK_DIR}/wikipedidaVecs/tfidf-vectors/ --trainingOutput ${WORK_DIR}/training --testOutput ${WORK_DIR}/testing -rp 20 -ow -seq -xm sequential
+  $MAHOUT_HOME/bin/mahout split -i ${WORK_DIR}/wikipediaVecs/tfidf-vectors/ --trainingOutput ${WORK_DIR}/training --testOutput ${WORK_DIR}/testing -rp 20 -ow -seq -xm sequential
 
   echo "Training Naive Bayes model"
   $MAHOUT_HOME/bin/mahout trainnb -i ${WORK_DIR}/training -el -o ${WORK_DIR}/model -li ${WORK_DIR}/labelindex -ow -c
@@ -125,9 +146,8 @@ if [ "x$alg" == "xCBayes" ]; then
  echo "Testing on holdout set: CBayes"
   $MAHOUT_HOME/bin/mahout testnb -i ${WORK_DIR}/testing -m ${WORK_DIR}/model -l ${WORK_DIR}/labelindex -ow -o ${WORK_DIR}/output  -c -seq
 fi
+
 elif [ "x$alg" == "xclean" ]; then
   rm -rf ${WORK_DIR}
-  rm -rf /tmp/news-group.model
 fi
 # Remove the work directory
-#
