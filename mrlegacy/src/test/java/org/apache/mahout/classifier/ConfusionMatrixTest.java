@@ -35,24 +35,45 @@ public final class ConfusionMatrixTest extends MahoutTestCase {
   
   @Test
   public void testBuild() {
-    ConfusionMatrix cm = fillCM(VALUES, LABELS, DEFAULT_LABEL);
-    checkValues(cm);
-    checkAccuracy(cm);
+    ConfusionMatrix confusionMatrix = fillConfusionMatrix(VALUES, LABELS, DEFAULT_LABEL);
+    checkValues(confusionMatrix);
+    checkAccuracy(confusionMatrix);
   }
 
   @Test
   public void testGetMatrix() {
-	    ConfusionMatrix cm = fillCM(VALUES, LABELS, DEFAULT_LABEL);
-	    Matrix m = cm.getMatrix();
-	    Map<String, Integer> rowLabels = m.getRowLabelBindings();
-	    assertEquals(cm.getLabels().size(), m.numCols());
-	    assertTrue(rowLabels.keySet().contains(LABELS[0]));
-	    assertTrue(rowLabels.keySet().contains(LABELS[1]));
-	    assertTrue(rowLabels.keySet().contains(DEFAULT_LABEL));
-	    assertEquals(2, cm.getCorrect(LABELS[0]));
-	    assertEquals(20, cm.getCorrect(LABELS[1]));
-	    assertEquals(0, cm.getCorrect(DEFAULT_LABEL));
+    ConfusionMatrix confusionMatrix = fillConfusionMatrix(VALUES, LABELS, DEFAULT_LABEL);
+    Matrix m = confusionMatrix.getMatrix();
+    Map<String, Integer> rowLabels = m.getRowLabelBindings();
+
+    assertEquals(confusionMatrix.getLabels().size(), m.numCols());
+    assertTrue(rowLabels.keySet().contains(LABELS[0]));
+    assertTrue(rowLabels.keySet().contains(LABELS[1]));
+    assertTrue(rowLabels.keySet().contains(DEFAULT_LABEL));
+    assertEquals(2, confusionMatrix.getCorrect(LABELS[0]));
+    assertEquals(20, confusionMatrix.getCorrect(LABELS[1]));
+    assertEquals(0, confusionMatrix.getCorrect(DEFAULT_LABEL));
   }
+
+    /**
+     * Example taken from
+     * http://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html
+     */
+    @Test
+    public void testPrecisionRecallAndF1ScoreAsScikitLearn() {
+      Collection<String> labelList = Arrays.asList("0", "1", "2");
+
+      ConfusionMatrix confusionMatrix = new ConfusionMatrix(labelList, "DEFAULT");
+      confusionMatrix.putCount("0", "0", 2);
+      confusionMatrix.putCount("1", "0", 1);
+      confusionMatrix.putCount("1", "2", 1);
+      confusionMatrix.putCount("2", "1", 2);
+
+      double delta = 0.001;
+      assertEquals(0.222, confusionMatrix.getWeightedPrecision(), delta);
+      assertEquals(0.333, confusionMatrix.getWeightedRecall(), delta);
+      assertEquals(0.266, confusionMatrix.getWeightedF1score(), delta);
+    }
 
   private static void checkValues(ConfusionMatrix cm) {
     int[][] counts = cm.getConfusionMatrix();
@@ -70,7 +91,6 @@ public final class ConfusionMatrixTest extends MahoutTestCase {
     assertTrue(cm.getLabels().contains(LABELS[0]));
     assertTrue(cm.getLabels().contains(LABELS[1]));
     assertTrue(cm.getLabels().contains(DEFAULT_LABEL));
-
   }
 
   private static void checkAccuracy(ConfusionMatrix cm) {
@@ -81,19 +101,19 @@ public final class ConfusionMatrixTest extends MahoutTestCase {
     assertTrue(Double.isNaN(cm.getAccuracy("other")));
   }
   
-  private static ConfusionMatrix fillCM(int[][] values, String[] labels, String defaultLabel) {
+  private static ConfusionMatrix fillConfusionMatrix(int[][] values, String[] labels, String defaultLabel) {
     Collection<String> labelList = Lists.newArrayList();
     labelList.add(labels[0]);
     labelList.add(labels[1]);
-    ConfusionMatrix cm = new ConfusionMatrix(labelList, defaultLabel);
-    //int[][] v = cm.getConfusionMatrix();
-    cm.putCount("Label1", "Label1", values[0][0]);
-    cm.putCount("Label1", "Label2", values[0][1]);
-    cm.putCount("Label2", "Label1", values[1][0]);
-    cm.putCount("Label2", "Label2", values[1][1]);
-    cm.putCount("Label1", DEFAULT_LABEL, OTHER[0]);
-    cm.putCount("Label2", DEFAULT_LABEL, OTHER[1]);
-    return cm;
+    ConfusionMatrix confusionMatrix = new ConfusionMatrix(labelList, defaultLabel);
+
+    confusionMatrix.putCount("Label1", "Label1", values[0][0]);
+    confusionMatrix.putCount("Label1", "Label2", values[0][1]);
+    confusionMatrix.putCount("Label2", "Label1", values[1][0]);
+    confusionMatrix.putCount("Label2", "Label2", values[1][1]);
+    confusionMatrix.putCount("Label1", DEFAULT_LABEL, OTHER[0]);
+    confusionMatrix.putCount("Label2", DEFAULT_LABEL, OTHER[1]);
+    return confusionMatrix;
   }
   
 }

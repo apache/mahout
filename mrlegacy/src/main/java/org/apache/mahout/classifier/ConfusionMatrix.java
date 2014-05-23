@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
 import org.apache.mahout.math.DenseMatrix;
@@ -65,12 +66,16 @@ public class ConfusionMatrix {
   public Collection<String> getLabels() {
     return Collections.unmodifiableCollection(labelMap.keySet());
   }
-  
+
+  private int numLabels() {
+    return labelMap.size();
+  }
+
   public double getAccuracy(String label) {
     int labelId = labelMap.get(label);
     int labelTotal = 0;
     int correct = 0;
-    for (int i = 0; i < labelMap.size(); i++) {
+    for (int i = 0; i < numLabels(); i++) {
       labelTotal += confusionMatrix[labelId][i];
       if (i == labelId) {
         correct += confusionMatrix[labelId][i];
@@ -83,8 +88,8 @@ public class ConfusionMatrix {
   public double getAccuracy() {
     int total = 0;
     int correct = 0;
-    for (int i = 0; i < labelMap.size(); i++) {
-      for (int j = 0; j < labelMap.size(); j++) {
+    for (int i = 0; i < numLabels(); i++) {
+      for (int j = 0; j < numLabels(); j++) {
         total += confusionMatrix[i][j];
         if (i == j) {
           correct += confusionMatrix[i][j];
@@ -93,7 +98,99 @@ public class ConfusionMatrix {
     }
     return 100.0 * correct / total;
   }
-  
+
+  /** Sum of true positives and false negatives */
+  private int getActualNumberOfTestExamplesForClass(String label) {
+    int labelId = labelMap.get(label);
+    int sum = 0;
+    for (int i = 0; i < numLabels(); i++) {
+      sum += confusionMatrix[labelId][i];
+    }
+    return sum;
+  }
+
+  public double getPrecision(String label) {
+    int labelId = labelMap.get(label);
+    int truePositives = confusionMatrix[labelId][labelId];
+    int falsePositives = 0;
+    for (int i = 0; i < numLabels(); i++) {
+      if (i == labelId) {
+        continue;
+      }
+      falsePositives += confusionMatrix[i][labelId];
+    }
+
+    if (truePositives + falsePositives == 0) {
+      return 0;
+    }
+
+    return ((double) truePositives) / (truePositives + falsePositives);
+  }
+
+  public double getWeightedPrecision() {
+    double[] precisions = new double[numLabels()];
+    double[] weights = new double[numLabels()];
+
+    int index = 0;
+    for (String label : labelMap.keySet()) {
+      precisions[index] = getPrecision(label);
+      weights[index] = getActualNumberOfTestExamplesForClass(label);
+      index++;
+    }
+    return new Mean().evaluate(precisions, weights);
+  }
+
+  public double getRecall(String label) {
+    int labelId = labelMap.get(label);
+    int truePositives = confusionMatrix[labelId][labelId];
+    int falseNegatives = 0;
+    for (int i = 0; i < numLabels(); i++) {
+      if (i == labelId) {
+        continue;
+      }
+      falseNegatives += confusionMatrix[labelId][i];
+    }
+    if (truePositives + falseNegatives == 0) {
+      return 0;
+    }
+    return ((double) truePositives) / (truePositives + falseNegatives);
+  }
+
+  public double getWeightedRecall() {
+    double[] recalls = new double[numLabels()];
+    double[] weights = new double[numLabels()];
+
+    int index = 0;
+    for (String label : labelMap.keySet()) {
+      recalls[index] = getRecall(label);
+      weights[index] = getActualNumberOfTestExamplesForClass(label);
+      index++;
+    }
+    return new Mean().evaluate(recalls, weights);
+  }
+
+  public double getF1score(String label) {
+    double precision = getPrecision(label);
+    double recall = getRecall(label);
+    if (precision + recall == 0) {
+      return 0;
+    }
+    return 2 * precision * recall / (precision + recall);
+  }
+
+  public double getWeightedF1score() {
+    double[] f1Scores = new double[numLabels()];
+    double[] weights = new double[numLabels()];
+
+    int index = 0;
+    for (String label : labelMap.keySet()) {
+      f1Scores[index] = getF1score(label);
+      weights[index] = getActualNumberOfTestExamplesForClass(label);
+      index++;
+    }
+    return new Mean().evaluate(f1Scores, weights);
+  }
+
   // User accuracy 
   public double getReliability() {
     int count = 0;

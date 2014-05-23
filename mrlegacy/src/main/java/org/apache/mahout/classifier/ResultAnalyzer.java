@@ -25,14 +25,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev;
 import org.apache.mahout.math.stats.OnlineSummarizer;
 
-/**
- * ResultAnalyzer captures the classification statistics and displays in a tabular manner
- */
+/** ResultAnalyzer captures the classification statistics and displays in a tabular manner */
 public class ResultAnalyzer {
   
   private final ConfusionMatrix confusionMatrix;
   private final OnlineSummarizer summarizer;
   private boolean hasLL;
+
   /*
    * === Summary ===
    * 
@@ -111,7 +110,13 @@ public class ResultAnalyzer {
     returnString.append(StringUtils.rightPad("Reliability", 40)).append(
       StringUtils.leftPad(decimalFormatter.format(normStats.getAverage() * 100.00000001), 10)).append("%\n");
     returnString.append(StringUtils.rightPad("Reliability (standard deviation)", 40)).append(
-      StringUtils.leftPad(decimalFormatter.format(normStats.getStandardDeviation()), 10)).append('\n'); 
+      StringUtils.leftPad(decimalFormatter.format(normStats.getStandardDeviation()), 10)).append('\n');
+    returnString.append(StringUtils.rightPad("Weighted precision", 40)).append(
+      StringUtils.leftPad(decimalFormatter.format(confusionMatrix.getWeightedPrecision()), 10)).append('\n');
+    returnString.append(StringUtils.rightPad("Weighted recall", 40)).append(
+      StringUtils.leftPad(decimalFormatter.format(confusionMatrix.getWeightedRecall()), 10)).append('\n');
+    returnString.append(StringUtils.rightPad("Weighted F1 score", 40)).append(
+      StringUtils.leftPad(decimalFormatter.format(confusionMatrix.getWeightedF1score()), 10)).append('\n');
     
     if (hasLL) {
       returnString.append(StringUtils.rightPad("Log-likelihood", 30)).append("mean      : ").append(
