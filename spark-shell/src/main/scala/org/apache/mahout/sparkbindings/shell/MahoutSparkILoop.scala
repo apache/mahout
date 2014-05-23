@@ -2,22 +2,20 @@ package org.apache.mahout.sparkbindings.shell
 
 import org.apache.spark.repl.SparkILoop
 import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.mahout.sparkbindings._
 import scala.tools.nsc.Properties
 import scala.Some
+import org.apache.mahout.sparkbindings._
 
 class MahoutSparkILoop extends SparkILoop {
 
   private val postInitScript =
-      "import org.apache.mahout.math.Vector" ::
-      "import org.apache.mahout.math.scalabindings._" ::
-      "import RLikeOps._" ::
-      "import org.apache.mahout.sparkbindings._" ::
-      "import drm._" ::
-      "import RLikeDrmOps._" ::
-      "org.apache.spark.storage.StorageLevel" ::
-      "implicit val _sc = sc" ::
-      Nil
+    "import org.apache.mahout.math._" ::
+        "import scalabindings._" ::
+        "import RLikeOps._" ::
+        "import drm._" ::
+        "import RLikeDrmOps._" ::
+        "import org.apache.mahout.sparkbindings._" ::
+        Nil
 
   override protected def postInitialization() {
     super.postInitialization()
@@ -50,8 +48,23 @@ class MahoutSparkILoop extends SparkILoop {
       customJars = jars,
       sparkConf = conf
     )
+
     echo("Created spark context..")
     sparkContext
+  }
+
+  override def initializeSpark() {
+    intp.beQuietDuring {
+      command("""
+
+         @transient implicit val sdc: org.apache.mahout.math.drm.DistributedContext =
+            new org.apache.mahout.sparkbindings.SparkDistributedContext(
+            org.apache.spark.repl.Main.interp.createSparkContext())
+
+              """)
+      command("import org.apache.spark.SparkContext._")
+      echo("Mahout distributed context is available as \"implicit val sdc\".")
+    }
   }
 
   override def prompt: String = "mahout> "
