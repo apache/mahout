@@ -19,6 +19,7 @@ package org.apache.mahout.math
 
 import org.apache.mahout.math._
 import org.apache.mahout.math.solver.EigenDecomposition
+import org.apache.mahout.math.decompositions.SSVD
 
 /**
  * Mahout matrices and vectors' scala syntactic sugar

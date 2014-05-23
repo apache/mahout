@@ -18,16 +18,18 @@
 package org.apache.mahout.sparkbindings.drm
 
 import org.scalatest.{Matchers, FunSuite}
-import org.apache.mahout.sparkbindings.test.MahoutLocalContext
-import org.apache.mahout.math.scalabindings._
-import org.apache.mahout.sparkbindings.drm._
+import org.apache.mahout.math._
+import scalabindings._
+import drm._
+import RLikeOps._
 import RLikeDrmOps._
-import org.apache.mahout.sparkbindings.drm.plan.{OpAtx, OpAtB, OpAtA, CheckpointAction}
-import org.apache.spark.SparkContext
+import org.apache.mahout.sparkbindings._
+import test.MahoutLocalContext
 import scala.collection.mutable.ArrayBuffer
 import org.apache.mahout.math.Matrices
-import org.apache.mahout.sparkbindings.blas
+import org.apache.mahout.sparkbindings.{SparkEngine, blas}
 import org.apache.spark.storage.StorageLevel
+import org.apache.mahout.math.drm.logical.{OpAtx, OpAtB, OpAtA}
 
 /** R-like DRM DSL operation tests */
 class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
@@ -150,7 +152,7 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
 
     val C = A.t %*% B
 
-    CheckpointAction.optimize(C) should equal (OpAtB[Int](A,B))
+    SparkEngine.optimizerRewrite(C) should equal (OpAtB[Int](A,B))
 
     val inCoreC = C.collect
     val inCoreControlC = inCoreA.t %*% inCoreB
@@ -176,7 +178,7 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
 
     val C = A.t %*% B
 
-    CheckpointAction.optimize(C) should equal (OpAtB[String](A,B))
+    SparkEngine.optimizerRewrite(C) should equal (OpAtB[String](A,B))
 
     val inCoreC = C.collect
     val inCoreControlC = inCoreA.t %*% inCoreB
@@ -198,7 +200,7 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
 
     val C = A.t %*% B
 
-    CheckpointAction.optimize(C) should equal (OpAtB[String](A,B))
+    SparkEngine.optimizerRewrite(C) should equal (OpAtB[String](A,B))
 
     val inCoreC = C.collect
     val inCoreControlC = inCoreA.t %*% (inCoreA + 1.0)
@@ -246,7 +248,7 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
     val AtA = A.t %*% A
 
     // Assert optimizer detects square
-    CheckpointAction.optimize(action = AtA) should equal(OpAtA(A))
+    SparkEngine.optimizerRewrite(action = AtA) should equal(OpAtA(A))
 
     val inCoreAtA = AtA.collect
     val inCoreAtAControl = inCoreA.t %*% inCoreA
@@ -264,7 +266,7 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
     val AtA = A.t %*% A
 
     // Assert optimizer detects square
-    CheckpointAction.optimize(action = AtA) should equal(OpAtA(A))
+    SparkEngine.optimizerRewrite(action = AtA) should equal(OpAtA(A))
 
     val inCoreAtA = AtA.collect
     val inCoreAtAControl = inCoreA.t %*% inCoreA
@@ -284,7 +286,7 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
     val AtA = A.t %*% A
 
     // Assert optimizer detects square
-    CheckpointAction.optimize(action = AtA) should equal(OpAtA(A))
+    SparkEngine.optimizerRewrite(action = AtA) should equal(OpAtA(A))
 
     val inCoreAtA = AtA.collect
     val inCoreAtAControl = inCoreA.t %*% inCoreA
@@ -371,7 +373,7 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
   }
 
   test ("general side")  {
-    val sc = implicitly[SparkContext]
+    val sc = implicitly[DistributedContext]
     val k1 = sc.parallelize(Seq(ArrayBuffer(0,1,2,3)))
 //      .persist(StorageLevel.MEMORY_ONLY)   // -- this will demonstrate immutability side effect!
       .persist(StorageLevel.MEMORY_ONLY_SER)
@@ -405,7 +407,7 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
 
     val drmA = drmParallelize(inCoreA, numPartitions = 2)
 
-    CheckpointAction.optimize(drmA.t %*% x) should equal (OpAtx(drmA, x))
+    SparkEngine.optimizerRewrite(drmA.t %*% x) should equal (OpAtx(drmA, x))
 
     val atx = (drmA.t %*% x).collect(::, 0)
 
