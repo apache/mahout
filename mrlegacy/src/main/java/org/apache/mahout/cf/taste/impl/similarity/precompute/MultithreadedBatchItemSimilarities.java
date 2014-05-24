@@ -83,7 +83,7 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
 
       DataModel dataModel = getRecommender().getDataModel();
 
-      BlockingQueue<long[]> itemsIDsInBatches = queueItemIDsInBatches(dataModel, batchSize);
+      BlockingQueue<long[]> itemsIDsInBatches = queueItemIDsInBatches(dataModel, batchSize, degreeOfParallelism);
       BlockingQueue<List<SimilarItems>> results = new LinkedBlockingQueue<List<SimilarItems>>();
 
       AtomicInteger numActiveWorkers = new AtomicInteger(degreeOfParallelism);
@@ -112,7 +112,8 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
     return output.getNumSimilaritiesProcessed();
   }
 
-  private static BlockingQueue<long[]> queueItemIDsInBatches(DataModel dataModel, int batchSize) throws TasteException {
+  private static BlockingQueue<long[]> queueItemIDsInBatches(DataModel dataModel, int batchSize,
+      int degreeOfParallelism) throws TasteException {
 
     LongPrimitiveIterator itemIDs = dataModel.getItemIDs();
     int numItems = dataModel.getNumItems();
@@ -122,18 +123,23 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
     long[] batch = new long[batchSize];
     int pos = 0;
     while (itemIDs.hasNext()) {
+      batch[pos] = itemIDs.nextLong();
+      pos++;
       if (pos == batchSize) {
         itemIDBatches.add(batch.clone());
         pos = 0;
       }
-      batch[pos] = itemIDs.nextLong();
-      pos++;
     }
-    int nonQueuedItemIDs = batchSize - pos;
-    if (nonQueuedItemIDs > 0) {
-      long[] lastBatch = new long[nonQueuedItemIDs];
-      System.arraycopy(batch, 0, lastBatch, 0, nonQueuedItemIDs);
+
+    if (pos > 0) {
+      long[] lastBatch = new long[pos];
+      System.arraycopy(batch, 0, lastBatch, 0, pos);
       itemIDBatches.add(lastBatch);
+    }
+
+    if (itemIDBatches.size() < degreeOfParallelism) {
+      throw new IllegalStateException("Degree of parallelism [" + degreeOfParallelism + "] " +
+          " is larger than number of batches [" + itemIDBatches.size() +"].");
     }
 
     log.info("Queued {} items in {} batches", numItems, itemIDBatches.size());

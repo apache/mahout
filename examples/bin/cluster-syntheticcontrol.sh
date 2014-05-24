@@ -63,7 +63,7 @@ if [ ! -f ${WORK_DIR}/synthetic_control.data ]; then
   echo "Couldn't download synthetic control"
   exit 1
 fi
-if [ "$HADOOP_HOME" != "" ]; then
+if [ "$HADOOP_HOME" != "" ] && [ "$MAHOUT_LOCAL" == "" ]; then
   echo "Checking the health of DFS..."
   $HADOOP_HOME/bin/hadoop fs -ls 
   if [ $? -eq 0 ];then 

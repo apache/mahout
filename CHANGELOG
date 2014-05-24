@@ -2,7 +2,11 @@ Mahout Change Log
 
 Release 1.0 - unreleased
 
-  MAHOUT-1558: Clean up classify-wiki.sh and add in a binary classification problem (Andrew Palumbo)
+  MAHOUT-1561: cluster-syntheticcontrol.sh not running locally with MAHOUT_LOCAL=true (Andrew Palumbo via ssc)
+
+  MAHOUT-1558: Clean up classify-wiki.sh and add in a binary classification problem (Andrew Palumbo via ssc)
+
+  MAHOUT-1560: Last batch is not filled correctly in MultithreadedBatchItemSimilarities (Jarosław Bojar)
 
   MAHOUT-1554: Provide more comprehensive classification statistics (Karol Grzegorczyk via ssc)
 

@@ -72,7 +72,7 @@ if [ "x$alg" != "xclean" ]; then
         ########################################################   
         #  Datasets: uncomment and run "clean" to change dataset   
         ########################################################
-  	########## partial small 42.5M zipped 
+        ########## partial small 42.5M zipped
         #curl http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles1.xml-p000000010p000010000.bz2 -o ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml.bz2        
         ########## partial larger 256M zipped
         curl http://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles10.xml-p000925001p001325000.bz2 -o ${WORK_DIR}/wikixml/enwiki-latest-pages-articles.xml.bz2
