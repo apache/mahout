@@ -30,6 +30,8 @@ import org.apache.mahout.math.Matrix;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The ConfusionMatrix Class stores the result of Classification of a Test Dataset.
@@ -39,6 +41,7 @@ import com.google.common.collect.Maps;
  * See http://en.wikipedia.org/wiki/Confusion_matrix for background
  */
 public class ConfusionMatrix {
+  private static final Logger LOG = LoggerFactory.getLogger(ConfusionMatrix.class);
   private final Map<String,Integer> labelMap = Maps.newLinkedHashMap();
   private final int[][] confusionMatrix;
   private int samples = 0;
@@ -276,7 +279,10 @@ public class ConfusionMatrix {
   }
   
   public int getCount(String correctLabel, String classifiedLabel) {
-    Preconditions.checkArgument(labelMap.containsKey(correctLabel), "Label not found: " + correctLabel);
+    if(!labelMap.containsKey(correctLabel)) {
+      LOG.warn("Label {} did not appear in the training examples", correctLabel);
+      return 0;
+    }
     Preconditions.checkArgument(labelMap.containsKey(classifiedLabel), "Label not found: " + classifiedLabel);
     int correctId = labelMap.get(correctLabel);
     int classifiedId = labelMap.get(classifiedLabel);
@@ -284,7 +290,10 @@ public class ConfusionMatrix {
   }
   
   public void putCount(String correctLabel, String classifiedLabel, int count) {
-    Preconditions.checkArgument(labelMap.containsKey(correctLabel), "Label not found: " + correctLabel);
+    if(!labelMap.containsKey(correctLabel)) {
+      LOG.warn("Label {} did not appear in the training examples", correctLabel);
+      return;
+    }
     Preconditions.checkArgument(labelMap.containsKey(classifiedLabel), "Label not found: " + classifiedLabel);
     int correctId = labelMap.get(correctLabel);
     int classifiedId = labelMap.get(classifiedLabel);
