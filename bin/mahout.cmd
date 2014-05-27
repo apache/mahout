@@ -161,6 +161,16 @@ set MAHOUT_OPTS=%MAHOUT_OPTS% -Dio.sort.mb=1024
 set MAHOUT_OPTS=%MAHOUT_OPTS% -Dio.file.buffer.size=32786
 set HADOOP_OPTS=%HADOOP_OPTS% -Djava.library.path=%HADOOP_HOME%\bin
 
+set MAHOUT_OPTS=%MAHOUT_OPTS% -Dmapreduce.input.fileinputformat.split.minsize=512MB
+set MAHOUT_OPTS=%MAHOUT_OPTS% -Dmapreduce.map.java.opts=-Xmx4096m
+set MAHOUT_OPTS=%MAHOUT_OPTS% -Dmapreduce.reduce.java.opts=-Xmx4096m
+set MAHOUT_OPTS=%MAHOUT_OPTS% -Dmapreduce.output.fileoutputformat.compress=true
+set MAHOUT_OPTS=%MAHOUT_OPTS% -Dmapreduce.map.output.compress=true
+set MAHOUT_OPTS=%MAHOUT_OPTS% -Dmapreduce.job.maps=1
+set MAHOUT_OPTS=%MAHOUT_OPTS% -Dmapreduce.job.reduces=1
+set MAHOUT_OPTS=%MAHOUT_OPTS% -Dmapreduce.task.io.sort.factor=30
+set MAHOUT_OPTS=%MAHOUT_OPTS% -Dmapreduce.task.io.sort.mb=1024
+
 if not [%JAVA_LIBRARY_PATH%] == [] (
 set MAHOUT_OPTS=%MAHOUT_OPTS% -Djava.library.path=%JAVA_LIBRARY_PATH%
 )
