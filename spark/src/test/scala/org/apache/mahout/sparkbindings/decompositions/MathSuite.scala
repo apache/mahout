@@ -19,11 +19,12 @@ package org.apache.mahout.sparkbindings.drm.decompositions
 
 import org.scalatest.{Matchers, FunSuite}
 import org.apache.mahout.sparkbindings.test.MahoutLocalContext
-import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math._
+import drm._
+import scalabindings._
 import RLikeOps._
-import org.apache.mahout.sparkbindings.drm._
 import RLikeDrmOps._
-import org.apache.mahout.math.{Matrices, SparseRowMatrix}
+import org.apache.mahout.sparkbindings._
 import org.apache.mahout.common.RandomUtils
 
 class MathSuite extends FunSuite with Matchers with MahoutLocalContext {

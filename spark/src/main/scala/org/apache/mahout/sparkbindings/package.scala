@@ -17,19 +17,32 @@
 
 package org.apache.mahout
 
-import org.apache.spark.rdd.RDD
-import org.apache.mahout.math.{Matrix, Vector}
-import scala.reflect.ClassTag
 import org.apache.spark.{SparkConf, SparkContext}
 import java.io._
 import scala.collection.mutable.ArrayBuffer
 import org.apache.mahout.common.IOUtils
 import org.apache.log4j.Logger
-import org.apache.mahout.sparkbindings.drm.DrmLike
+import org.apache.mahout.math.drm._
+import scala.reflect.ClassTag
+import org.apache.mahout.sparkbindings.drm.{SparkBCast, CheckpointedDrmSparkOps, CheckpointedDrmSpark}
+import org.apache.spark.rdd.RDD
+import org.apache.spark.broadcast.Broadcast
+import org.apache.mahout.math.{VectorWritable, Vector, MatrixWritable, Matrix}
+import org.apache.hadoop.io.Writable
 
+/** Public api for Spark-specific operators */
 package object sparkbindings {
 
   private[sparkbindings] val log = Logger.getLogger("org.apache.mahout.sparkbindings")
+
+  /** Row-wise organized DRM rdd type */
+  type DrmRdd[K] = RDD[DrmTuple[K]]
+
+  /**
+   * Blockifed DRM rdd (keys of original DRM are grouped into array corresponding to rows of Matrix
+   * object value
+   */
+  type BlockifiedDrmRdd[K] = RDD[BlockifiedDrmTuple[K]]
 
   /**
    * Create proper spark context that includes local Mahout jars
@@ -42,7 +55,7 @@ package object sparkbindings {
       customJars: TraversableOnce[String] = Nil,
       sparkConf: SparkConf = new SparkConf(),
       addMahoutJars: Boolean = true
-      ): SparkContext = {
+      ): SparkDistributedContext = {
     val closeables = new java.util.ArrayDeque[Closeable]()
 
     try {
@@ -125,13 +138,49 @@ package object sparkbindings {
         sparkConf.setSparkHome(System.getenv("SPARK_HOME"))
       }
 
-      new SparkContext(config = sparkConf)
+      new SparkDistributedContext(new SparkContext(config = sparkConf))
 
     } finally {
       IOUtils.close(closeables)
     }
-
   }
+
+  implicit def sdc2sc(sdc: SparkDistributedContext): SparkContext = sdc.sc
+
+  implicit def sc2sdc(sc: SparkContext): SparkDistributedContext = new SparkDistributedContext(sc)
+
+  implicit def dc2sc(dc:DistributedContext):SparkContext = {
+    assert (dc.isInstanceOf[SparkDistributedContext],"distributed context must be Spark-specific.")
+    sdc2sc(dc.asInstanceOf[SparkDistributedContext])
+  }
+
+  /** Broadcast transforms */
+  implicit def sb2bc[T](b:Broadcast[T]):BCast[T] = new SparkBCast(b)
+
+  /** Adding Spark-specific ops */
+  implicit def cpDrm2cpDrmSparkOps[K: ClassTag](drm: CheckpointedDrm[K]): CheckpointedDrmSparkOps[K] =
+    new CheckpointedDrmSparkOps[K](drm)
+
+  implicit def drm2cpDrmSparkOps[K:ClassTag](drm:DrmLike[K]):CheckpointedDrmSparkOps[K] = drm:CheckpointedDrm[K]
+
+  private[sparkbindings] implicit def m2w(m: Matrix): MatrixWritable = new MatrixWritable(m)
+
+  private[sparkbindings] implicit def w2m(w: MatrixWritable): Matrix = w.get()
+
+  private[sparkbindings] implicit def v2w(v: Vector): VectorWritable = new VectorWritable(v)
+
+  private[sparkbindings] implicit def w2v(w:VectorWritable):Vector = w.get()
+
+  def drmWrap[K : ClassTag](
+      rdd: DrmRdd[K],
+      nrow: Int = -1,
+      ncol: Int = -1
+      ): CheckpointedDrm[K] =
+    new CheckpointedDrmSpark[K](
+      rdd = rdd,
+      _nrow = nrow,
+      _ncol = ncol
+    )
 
 
 }

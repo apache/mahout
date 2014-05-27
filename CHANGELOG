@@ -2,6 +2,20 @@ Mahout Change Log
 
 Release 1.0 - unreleased
 
+  MAHOUT-1537: Minor fixes to spark-shell (Anand Avati via dlyubimov)
+
+  MAHOUT-1529: Finalize abstraction of distributed logical plans from backend operations (dlyubimov)
+
+  MAHOUT-1489: Interactive Scala & Spark Bindings Shell & Script processor (dlyubimov)
+
+  MAHOUT-1346: Spark Bindings (DRM) (dlyubimov)
+
+  MAHOUT-1555: Exception thrown when a test example has the label not present in training examples (Karol Grzegorczyk via smarthi)
+
+  MAHOUT-1446: Create an intro for matrix factorization (Jian Wang via ssc)
+
+  MAHOUT-1480: Clean up website on 20 newsgroups (Andrew Palumbo via ssc)
+  
   MAHOUT-1561: cluster-syntheticcontrol.sh not running locally with MAHOUT_LOCAL=true (Andrew Palumbo via ssc)
 
   MAHOUT-1558: Clean up classify-wiki.sh and add in a binary classification problem (Andrew Palumbo via ssc)

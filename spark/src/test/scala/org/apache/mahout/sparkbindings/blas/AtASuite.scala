@@ -21,10 +21,10 @@ import org.scalatest.FunSuite
 import org.apache.mahout.sparkbindings.test.MahoutLocalContext
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
+import org.apache.mahout.math.drm._
 import org.apache.mahout.sparkbindings._
-import drm._
-import org.apache.mahout.sparkbindings.drm.plan.OpAtA
 import org.apache.spark.SparkContext._
+import org.apache.mahout.math.drm.logical.OpAtA
 
 /** Tests for {@link XtX} */
 class AtASuite extends FunSuite with MahoutLocalContext {

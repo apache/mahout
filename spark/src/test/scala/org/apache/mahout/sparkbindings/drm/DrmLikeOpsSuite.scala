@@ -18,10 +18,12 @@ package org.apache.mahout.sparkbindings.drm
  */
 
 
-import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math._
+import scalabindings._
+import drm._
 import RLikeOps._
 import RLikeDrmOps._
-import org.scalatest.{Matchers, FunSuite}
+import org.scalatest.FunSuite
 import org.apache.mahout.sparkbindings.test.MahoutLocalContext
 
 /** Tests for DrmLikeOps */

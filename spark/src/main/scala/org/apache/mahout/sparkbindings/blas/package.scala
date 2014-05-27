@@ -17,7 +17,6 @@
 
 package org.apache.mahout.sparkbindings
 
-import org.apache.mahout.sparkbindings.drm.DrmRdd
 import scala.reflect.ClassTag
 
 /**
