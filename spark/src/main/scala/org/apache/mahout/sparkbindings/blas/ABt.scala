@@ -19,11 +19,12 @@ package org.apache.mahout.sparkbindings.blas
 
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
-import org.apache.mahout.sparkbindings.drm.plan.OpABt
 import scala.reflect.ClassTag
-import org.apache.mahout.sparkbindings.drm._
+import org.apache.mahout.sparkbindings._
+import drm._
 import org.apache.mahout.math.{Matrix, SparseRowMatrix}
 import org.apache.spark.SparkContext._
+import org.apache.mahout.math.drm.logical.OpABt
 
 /** Contains RDD plans for ABt operator */
 object ABt {

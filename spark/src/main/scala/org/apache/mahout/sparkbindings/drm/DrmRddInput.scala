@@ -20,6 +20,7 @@ package org.apache.mahout.sparkbindings.drm
 import scala.reflect.ClassTag
 import org.apache.spark.SparkContext
 import org.apache.spark.storage.StorageLevel
+import org.apache.mahout.sparkbindings._
 
 /** Encapsulates either DrmRdd[K] or BlockifiedDrmRdd[K] */
 class DrmRddInput[K: ClassTag](

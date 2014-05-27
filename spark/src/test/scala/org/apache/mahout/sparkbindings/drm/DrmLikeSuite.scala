@@ -18,11 +18,11 @@
 package org.apache.mahout.sparkbindings.drm
 
 import org.scalatest.FunSuite
-import org.apache.log4j.{Level, Logger, BasicConfigurator}
-import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math._
+import scalabindings._
+import drm._
 import RLikeOps._
 import org.apache.mahout.sparkbindings.test.MahoutLocalContext
-import org.apache.spark.SparkContext._
 
 
 /**

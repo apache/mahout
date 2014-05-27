@@ -21,26 +21,24 @@ import org.scalatest.FunSuite
 import org.apache.mahout.sparkbindings.test.MahoutLocalContext
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
-import org.apache.mahout.sparkbindings._
-import drm._
-import org.apache.mahout.sparkbindings.drm.plan.OpAt
-import org.apache.spark.SparkContext._
+import org.apache.mahout.math.drm._
+import org.apache.mahout.math.drm.logical.OpAt
+import org.apache.mahout.sparkbindings.drm.CheckpointedDrmSpark
 
 /** Tests for A' algorithms */
 class AtSuite extends FunSuite with MahoutLocalContext {
 
   test("At") {
     val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5))
-    val A = drmParallelize(m=inCoreA, numPartitions = 2)
+    val A = drmParallelize(m = inCoreA, numPartitions = 2)
 
     val op = new OpAt(A)
-    val AtDrm = new CheckpointedDrmBase(rdd= At.at(op,srcA=A),_nrow=op.nrow,_ncol=op.ncol)
+    val AtDrm = new CheckpointedDrmSpark(rdd = At.at(op, srcA = A), _nrow = op.nrow, _ncol = op.ncol)
     val inCoreAt = AtDrm.collect
     val inCoreControlAt = inCoreA.t
 
     println(inCoreAt)
     assert((inCoreAt - inCoreControlAt).norm < 1E-5)
-
 
 
   }

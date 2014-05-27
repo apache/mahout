@@ -20,11 +20,12 @@ package org.apache.mahout.sparkbindings.blas
 import org.apache.mahout.sparkbindings.test.MahoutLocalContext
 import org.scalatest.FunSuite
 import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math.drm._
 import org.apache.mahout.sparkbindings._
-import drm._
+import org.apache.mahout.sparkbindings.drm._
 import RLikeOps._
-import org.apache.mahout.sparkbindings.drm.plan.OpABt
 import org.apache.spark.SparkContext._
+import org.apache.mahout.math.drm.logical.OpABt
 
 /** Tests for AB' operator algorithms */
 class ABtSuite extends FunSuite with MahoutLocalContext {
@@ -37,7 +38,7 @@ class ABtSuite extends FunSuite with MahoutLocalContext {
 
     val op = new OpABt(A, B)
 
-    val drm = new CheckpointedDrmBase(ABt.abt(op, srcA = A, srcB = B), op.nrow, op.ncol)
+    val drm = new CheckpointedDrmSpark(ABt.abt(op, srcA = A, srcB = B), op.nrow, op.ncol)
 
     val inCoreMControl = inCoreA %*% inCoreB.t
     val inCoreM = drm.collect
