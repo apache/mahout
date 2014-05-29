@@ -14,7 +14,8 @@ class ScalaframesSuite extends FunSuite with MahoutSuite {
 
     val mutatedFrame = testFrame.mutate(
       "ACol" := col("5") + col(4),
-      "BCol" := col("AAA") + 3
+      "BCol" := col("AAA") + 3,
+      "CCol" := 1e-10
     )
   }
 

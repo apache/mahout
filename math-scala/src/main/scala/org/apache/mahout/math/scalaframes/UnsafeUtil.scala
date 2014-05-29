@@ -1,7 +1,5 @@
 package org.apache.mahout.math.scalaframes
 
-import sun.misc.Unsafe
-import java.lang.reflect.Field
 
 /**
  *
@@ -9,19 +7,21 @@ import java.lang.reflect.Field
  */
 object UnsafeUtil {
   lazy val arrayOffset = unsafe.arrayBaseOffset(classOf[Array[Byte]])
-  lazy val unsafe: Unsafe = {
+  lazy val unsafe = concurrent.util.Unsafe.instance
 
-    if (this.getClass.getClassLoader() == null)
-      Unsafe.getUnsafe();
-
-    try {
-      val fld: Field = classOf[Unsafe].getDeclaredField("theUnsafe");
-      fld.setAccessible(true);
-      fld.get(classOf[Unsafe]).asInstanceOf[Unsafe];
-    } catch {
-      case e: Throwable => throw new RuntimeException("no sun.misc.Unsafe", e);
-    }
-  }
+  //  lazy val unsafe: Unsafe = {
+  //
+  //    if (this.getClass.getClassLoader() == null)
+  //      Unsafe.getUnsafe();
+  //
+  //    try {
+  //      val fld: Field = classOf[Unsafe].getDeclaredField("theUnsafe");
+  //      fld.setAccessible(true);
+  //      fld.get(classOf[Unsafe]).asInstanceOf[Unsafe];
+  //    } catch {
+  //      case e: Throwable => throw new RuntimeException("no sun.misc.Unsafe", e);
+  //    }
+  //  }
 
   def setUnsafeDouble(arr: Array[Byte], x: Double, offset: Long): this.type = {
     unsafe.putDouble(arr, arrayOffset + offset, x)

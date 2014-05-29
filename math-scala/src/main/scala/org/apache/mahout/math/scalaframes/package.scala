@@ -2,6 +2,8 @@ package org.apache.mahout.math
 
 package object scalaframes {
 
+  lazy val NA = new DoubleCellOps(Double.NaN)
+
   implicit def frame2Dplyr(f:DataFrameLike):DplyrLikeOps = new DplyrLikeOps(f)
   implicit def dplyr2Frame(dplyr:DplyrLikeOps):DataFrameLike = dplyr.frame
 
@@ -17,7 +19,7 @@ package object scalaframes {
 
   /** Data Frame object type */
   object DFType extends Enumeration {
-    val int64, long, double, string, bytes = Value
+    val int, long, double, string, bytes = Value
     type DFType = Value
   }
 
