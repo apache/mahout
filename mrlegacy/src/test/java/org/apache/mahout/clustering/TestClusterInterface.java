@@ -25,19 +25,25 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.util.Map;
 
 public final class TestClusterInterface extends MahoutTestCase {
 
   private static final DistanceMeasure measure = new ManhattanDistanceMeasure();
 
+  private final ObjectMapper jxn = new ObjectMapper();
+
   @Test
-  public void testCanopyAsFormatString() {
+  public void testCanopyAsFormatString() throws IOException {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
     Cluster cluster = new Canopy(m, 123, measure);
     String formatString = cluster.asFormatString(null);
-    assertEquals("C-123{n=0 c=[1.100, 2.200, 3.300] r=[]}", formatString);
+    assertEquals("{\"r\":[],\"c\":[1.1,2.2,3.3],\"n\":0,\"identifier\":\"C-123\"}", formatString);
   }
 
   @Test
@@ -47,7 +53,7 @@ public final class TestClusterInterface extends MahoutTestCase {
     m.assign(d);
     Cluster cluster = new Canopy(m, 123, measure);
     String formatString = cluster.asFormatString(null);
-    assertEquals("C-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
+    assertEquals("{\"r\":[],\"c\":[{\"0\":1.1},{\"2\":3.3}],\"n\":0,\"identifier\":\"C-123\"}", formatString);
   }
 
   @Test
@@ -57,7 +63,7 @@ public final class TestClusterInterface extends MahoutTestCase {
     Cluster cluster = new Canopy(m, 123, measure);
     String[] bindings = { "fee", null, null };
     String formatString = cluster.asFormatString(bindings);
-    assertEquals("C-123{n=0 c=[fee:1.100, 1:2.200, 2:3.300] r=[]}", formatString);
+    assertEquals("{\"r\":[],\"c\":[{\"fee\":1.1},{\"1\":2.2},{\"2\":3.3}],\"n\":0,\"identifier\":\"C-123\"}", formatString);
   }
 
   @Test
@@ -67,7 +73,7 @@ public final class TestClusterInterface extends MahoutTestCase {
     m.assign(d);
     Cluster cluster = new Canopy(m, 123, measure);
     String formatString = cluster.asFormatString(null);
-    assertEquals("C-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
+    assertEquals("{\"r\":[],\"c\":[{\"0\":1.1},{\"2\":3.3}],\"n\":0,\"identifier\":\"C-123\"}", formatString);
   }
 
   @Test
@@ -76,7 +82,7 @@ public final class TestClusterInterface extends MahoutTestCase {
     Vector m = new DenseVector(d);
     Cluster cluster = new org.apache.mahout.clustering.kmeans.Kluster(m, 123, measure);
     String formatString = cluster.asFormatString(null);
-    assertEquals("CL-123{n=0 c=[1.100, 2.200, 3.300] r=[]}", formatString);
+    assertEquals("{\"r\":[],\"c\":[1.1,2.2,3.3],\"n\":0,\"identifier\":\"CL-123\"}", formatString);
   }
 
   @Test
@@ -86,7 +92,7 @@ public final class TestClusterInterface extends MahoutTestCase {
     m.assign(d);
     Cluster cluster = new org.apache.mahout.clustering.kmeans.Kluster(m, 123, measure);
     String formatString = cluster.asFormatString(null);
-    assertEquals("CL-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
+    assertEquals("{\"r\":[],\"c\":[{\"0\":1.1},{\"2\":3.3}],\"n\":0,\"identifier\":\"CL-123\"}", formatString);
   }
 
   @Test
@@ -96,7 +102,7 @@ public final class TestClusterInterface extends MahoutTestCase {
     Cluster cluster = new org.apache.mahout.clustering.kmeans.Kluster(m, 123, measure);
     String[] bindings = { "fee", null, "foo" };
     String formatString = cluster.asFormatString(bindings);
-    assertEquals("CL-123{n=0 c=[fee:1.100, 1:2.200, foo:3.300] r=[]}", formatString);
+    assertEquals("{\"r\":[],\"c\":[{\"fee\":1.1},{\"1\":2.2},{\"foo\":3.3}],\"n\":0,\"identifier\":\"CL-123\"}", formatString);
   }
 
   @Test
@@ -106,7 +112,7 @@ public final class TestClusterInterface extends MahoutTestCase {
     m.assign(d);
     Cluster cluster = new org.apache.mahout.clustering.kmeans.Kluster(m, 123, measure);
     String formatString = cluster.asFormatString(null);
-    assertEquals("CL-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
+    assertEquals("{\"r\":[],\"c\":[{\"0\":1.1},{\"2\":3.3}],\"n\":0,\"identifier\":\"CL-123\"}", formatString);
   }
 
 }
