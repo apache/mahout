@@ -78,7 +78,14 @@ package object drm {
   implicit def drm2drmCpOps[K: ClassTag](drm: CheckpointedDrm[K]): CheckpointedOps[K] =
     new CheckpointedOps[K](drm)
 
-  implicit def drm2Checkpointed[K](drm: DrmLike[K]): CheckpointedDrm[K] = drm.checkpoint()
+  /**
+   * We assume that whenever computational action is invoked without explicit checkpoint, the user
+   * doesn't imply caching
+   */
+  implicit def drm2Checkpointed[K:ClassTag](drm: DrmLike[K]): CheckpointedDrm[K] = drm.checkpoint(CacheHint.NONE)
+
+  /** Implicit conversion to in-core with NONE caching of the result. */
+  implicit def drm2InCore[K:ClassTag](drm:DrmLike[K]):Matrix = drm.collect
 
   // ============== Decompositions ===================
 

@@ -1,7 +1,7 @@
 package org.apache.mahout.math.drm.decompositions
 
 import scala.reflect.ClassTag
-import org.apache.mahout.math.{Matrices, Vector}
+import org.apache.mahout.math.{Matrix, Matrices, Vector}
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.mahout.math.drm._
@@ -68,8 +68,7 @@ object DSSVD {
       if (i == q - 1) drmBt = drmBt.checkpoint()
     }
 
-    val inCoreBBt = (drmBt.t %*% drmBt).checkpoint(CacheHint.NONE).collect
-    val (inCoreUHat, d) = eigen(inCoreBBt)
+    val (inCoreUHat, d) = eigen(drmBt.t %*% drmBt)
     val s = d.sqrt
 
     // Since neither drmU nor drmV are actually computed until actually used, we don't need the flags

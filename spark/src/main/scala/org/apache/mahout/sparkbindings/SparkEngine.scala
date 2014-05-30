@@ -17,9 +17,9 @@
 
 package org.apache.mahout.sparkbindings
 
-import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math._
+import scalabindings._
 import RLikeOps._
-import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.logical._
 import org.apache.mahout.sparkbindings.drm.{CheckpointedDrmSpark, DrmRddInput}
 import org.apache.mahout.math._
@@ -30,9 +30,12 @@ import org.apache.hadoop.io.{LongWritable, Text, IntWritable, Writable}
 import scala.Some
 import scala.collection.JavaConversions._
 import org.apache.spark.SparkContext
+import org.apache.mahout.math.drm._
+import org.apache.mahout.math.drm.RLikeDrmOps._
 
 /** Spark-specific non-drm-method operations */
 object SparkEngine extends DistributedEngine {
+
 
   def colSums[K:ClassTag](drm: CheckpointedDrm[K]): Vector = {
     val n = drm.ncol
@@ -51,7 +54,17 @@ object SparkEngine extends DistributedEngine {
   }
 
   /** Engine-specific colMeans implementation based on a checkpoint. */
-  def colMeans[K:ClassTag](drm: CheckpointedDrm[K]): Vector = if (drm.nrow == 0) drm.colSums() else drm.colSums() /= drm.nrow
+  override def colMeans[K:ClassTag](drm: CheckpointedDrm[K]): Vector =
+    if (drm.nrow == 0) drm.colSums() else drm.colSums() /= drm.nrow
+
+  override def norm[K: ClassTag](drm: CheckpointedDrm[K]): Double =
+    drm.rdd
+        // Compute sum of squares of each vector
+        .map {
+      case (key, v) => v dot v
+    }
+        .reduce(_ + _)
+
 
   /**
    * Perform default expression rewrite. Return physical plan that we can pass to exec(). <P>
@@ -123,7 +136,10 @@ object SparkEngine extends DistributedEngine {
 
     {
       implicit def getWritable(x: Any): Writable = val2key()
-      new CheckpointedDrmSpark(rdd.map(t => (key2val(t._1), t._2)))(km.asInstanceOf[ClassTag[Any]])
+      new CheckpointedDrmSpark(
+        rdd = rdd.map(t => (key2val(t._1), t._2)),
+        _cacheStorageLevel = StorageLevel.MEMORY_ONLY
+      )(km.asInstanceOf[ClassTag[Any]])
     }
   }
 
