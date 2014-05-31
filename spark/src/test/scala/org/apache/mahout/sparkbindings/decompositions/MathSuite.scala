@@ -192,10 +192,8 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
         qr(Matrices.symmetricUniformView(n, spectrumLen, 2345))._1.t
     val drmA = drmParallelize(inCoreA, numPartitions = 2)
 
-    printf ("t-parts:%d\n",drmA.t.rdd.partitions.size)
-
     // Decompose using ALS
-    val (drmU, drmV, rmse) = ALS.train(drmInput = drmA, k=20, maxIterations = 1).toTuple
+    val (drmU, drmV, rmse) = ALS.train(drmInput = drmA, k = 20).toTuple
     val inCoreU = drmU.collect
     val inCoreV = drmV.collect
 
@@ -206,7 +204,7 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
 
     val err = (inCoreA - predict).norm
     printf ("norm of residuals %f\n",err)
-    printf ("train iteration rmses: %s\n", err)
+    printf ("train iteration rmses: %s\n", rmse)
 
     err should be < 1e-2
 
