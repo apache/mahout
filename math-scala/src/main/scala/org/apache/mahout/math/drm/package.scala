@@ -19,6 +19,8 @@ package org.apache.mahout.math
 
 import scala.reflect.ClassTag
 import org.apache.mahout.math.drm.decompositions.{DSPCA, DSSVD, DQR}
+import org.apache.mahout.math.scalabindings._
+import RLikeOps._
 
 package object drm {
 
@@ -70,10 +72,10 @@ package object drm {
       (implicit ctx: DistributedContext): CheckpointedDrm[Long] = ctx.drmParallelizeEmptyLong(nrow, ncol, numPartitions)
 
   /** Implicit broadcast -> value conversion. */
-  implicit def bcast2val[T](bcast:BCast[T]):T = bcast.value
+  implicit def bcast2val[T](bcast: BCast[T]): T = bcast.value
 
   /** Just throw all engine operations into context as well. */
-  implicit def ctx2engine(ctx:DistributedContext):DistributedEngine = ctx.engine
+  implicit def ctx2engine(ctx: DistributedContext): DistributedEngine = ctx.engine
 
   implicit def drm2drmCpOps[K: ClassTag](drm: CheckpointedDrm[K]): CheckpointedOps[K] =
     new CheckpointedOps[K](drm)
@@ -82,10 +84,34 @@ package object drm {
    * We assume that whenever computational action is invoked without explicit checkpoint, the user
    * doesn't imply caching
    */
-  implicit def drm2Checkpointed[K:ClassTag](drm: DrmLike[K]): CheckpointedDrm[K] = drm.checkpoint(CacheHint.NONE)
+  implicit def drm2Checkpointed[K: ClassTag](drm: DrmLike[K]): CheckpointedDrm[K] = drm.checkpoint(CacheHint.NONE)
 
   /** Implicit conversion to in-core with NONE caching of the result. */
-  implicit def drm2InCore[K:ClassTag](drm:DrmLike[K]):Matrix = drm.collect
+  implicit def drm2InCore[K: ClassTag](drm: DrmLike[K]): Matrix = drm.collect
+
+  /** Do vertical concatenation of collection of blockified tuples */
+  def rbind[K: ClassTag](blocks: Iterable[BlockifiedDrmTuple[K]]): BlockifiedDrmTuple[K] = {
+    assert(blocks.nonEmpty, "rbind: 0 blocks passed in")
+    if (blocks.size == 1) {
+      // No coalescing required.
+      blocks.head
+    } else {
+      // compute total number of rows in a new block
+      val m = blocks.view.map(_._2.nrow).sum
+      val n = blocks.head._2.ncol
+      val coalescedBlock = blocks.head._2.like(m, n)
+      val coalescedKeys = new Array[K](m)
+      var row = 0
+      for (elem <- blocks.view) {
+        val block = elem._2
+        val rowEnd = row + block.nrow
+        coalescedBlock(row until rowEnd, ::) := block
+        elem._1.copyToArray(coalescedKeys, row)
+        row = rowEnd
+      }
+      coalescedKeys -> coalescedBlock
+    }
+  }
 
   // ============== Decompositions ===================
 

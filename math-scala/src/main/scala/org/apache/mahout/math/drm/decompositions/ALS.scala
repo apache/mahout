@@ -8,6 +8,7 @@ import RLikeDrmOps._
 import RLikeOps._
 import scala.util.Random
 import org.apache.log4j.Logger
+import math._
 
 /** Simple ALS factorization algotithm. To solve, use train() method. */
 object ALS {
@@ -34,7 +35,7 @@ object ALS {
    * Example:
    *
    * <pre>
-   *   val (u,v,errors) = train(input, k).toTuple
+   * val (u,v,errors) = train(input, k).toTuple
    * </pre>
    *
    * ALS runs until (rmse[i-1]-rmse[i])/rmse[i-1] < convergenceThreshold, or i==maxIterations,
@@ -57,48 +58,55 @@ object ALS {
       ): Result[K] = {
 
     assert(convergenceThreshold < 1.0, "convergenceThreshold")
+    assert(maxIterations >= 1, "maxIterations")
 
     val drmA = drmInput
     val drmAt = drmInput.t
 
     // Initialize U and V so that they are identically distributed to A or A'
-    var drmU = drmA.mapBlock() {
+    var drmU = drmA.mapBlock(ncol = k) {
       case (keys, block) =>
         val uBlock = Matrices.symmetricUniformView(block.nrow, k, Random.nextInt()) * 0.01
         keys -> uBlock
     }
 
-    var drmV:DrmLike[Int] = null
-    var rmseIterations:List[Double] = Nil
+    var drmV: DrmLike[Int] = null
+    var rmseIterations: List[Double] = Nil
 
     // ALS iterator
     var stop = false
     var i = 0
-    while (! stop && i < maxIterations) {
-      drmV = drmAt %*% drmU %*% solve(drmU.t %*% drmU)
-      drmU = drmA %*% drmV %*% solve(drmV.t %*% drmV)
-      i += 1
+    while (!stop && i < maxIterations) {
 
-      // Check if we are requested to do a convergence test.
-      if (convergenceThreshold>0) {
-        // Compute rmse and test convergence
-        val rmse = (drmA - drmU %*% drmV.t).norm
+      // Alternate. This is really what ALS is.
+      if ( drmV != null) drmV.uncache()
+      drmV = (drmAt %*% drmU %*% solve(drmU.t %*% drmU)).checkpoint()
 
-        if (i > 0 ) {
+      drmU.uncache()
+      drmU = (drmA %*% drmV %*% solve(drmV.t %*% drmV)).checkpoint()
+
+      // Check if we are requested to do a convergence test; and do it if yes.
+      if (convergenceThreshold > 0) {
+
+        val rmse = (drmA - drmU %*% drmV.t).norm / sqrt(drmA.ncol * drmA.nrow)
+
+        if (i > 0) {
           val rmsePrev = rmseIterations.last
           val convergence = (rmsePrev - rmse) / rmsePrev
 
-          if (convergence <0 ) {
+          if (convergence < 0) {
             log.warn("Rmse increase of %f. Should not happen.".format(convergence))
-          } else if ( convergence < convergenceThreshold ) {
-            stop=true
+          } else if (convergence < convergenceThreshold) {
+            stop = true
           }
         }
         rmseIterations :+= rmse
       }
+
+      i += 1
     }
 
-    new Result(drmU,drmV,rmseIterations)
+    new Result(drmU, drmV, rmseIterations)
   }
 
 

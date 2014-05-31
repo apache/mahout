@@ -33,12 +33,14 @@ class ABtSuite extends FunSuite with MahoutLocalContext {
   test("ABt") {
     val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5))
     val inCoreB = dense((3, 4, 5), (5, 6, 7))
-    val A = drmParallelize(m = inCoreA, numPartitions = 2)
-    val B = drmParallelize(m = inCoreB)
+    val A = drmParallelize(m = inCoreA, numPartitions = 3)
+    val B = drmParallelize(m = inCoreB, numPartitions = 2)
 
     val op = new OpABt(A, B)
 
     val drm = new CheckpointedDrmSpark(ABt.abt(op, srcA = A, srcB = B), op.nrow, op.ncol)
+
+    printf("AB' num partitions = %d.\n", drm.rdd.partitions.size)
 
     val inCoreMControl = inCoreA %*% inCoreB.t
     val inCoreM = drm.collect
