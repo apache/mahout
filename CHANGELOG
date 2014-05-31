@@ -58,6 +58,8 @@ Release 1.0 - unreleased
 
   MAHOUT-1508: Performance problems with sparse matrices (ssc)
 
+  MAHOUT-1505: structure of clusterdump's JSON output (akm)
+
   MAHOUT-1504: Enable/fix thetaSummer job in TrainNaiveBayesJob (Andrew Palumbo, smarthi)
 
   MAHOUT-1503: TestNaiveBayesDriver fails in sequential mode (Andrew Palumbo, smarthi)

@@ -57,7 +57,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public final class TestClusterDumper extends MahoutTestCase {
-  
+
   private static final String[] DOCS = {
       "The quick red fox jumped over the lazy brown dogs.",
       "The quick brown fox jumped over the lazy red dogs.",
@@ -74,9 +74,9 @@ public final class TestClusterDumper extends MahoutTestCase {
       "The robber wore a red fleece jacket and a baseball cap.",
       "The robber wore a white fleece jacket and a baseball cap.",
       "The English Springer Spaniel is the best of all dogs."};
-  
+
   private List<VectorWritable> sampleData;
-  
+
   private String[] termDictionary;
 
   @Override
@@ -90,14 +90,14 @@ public final class TestClusterDumper extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(sampleData, true,
         getTestTempFilePath("testdata/file1"), fs, conf);
   }
-  
+
   private void getSampleData(String[] docs2) throws IOException {
     sampleData = Lists.newArrayList();
     RAMDirectory directory = new RAMDirectory();
-    
-    IndexWriter writer = new IndexWriter(directory, 
+
+    IndexWriter writer = new IndexWriter(directory,
            new IndexWriterConfig(Version.LUCENE_46, new StandardAnalyzer(Version.LUCENE_46)));
-            
+
     try {
       for (int i = 0; i < docs2.length; i++) {
         Document doc = new Document();
@@ -119,13 +119,13 @@ public final class TestClusterDumper extends MahoutTestCase {
     } finally {
       Closeables.close(writer, false);
     }
-    
+
     IndexReader reader = DirectoryReader.open(directory);
-   
+
 
     Weight weight = new TFIDF();
     TermInfo termInfo = new CachedTermInfo(reader, "content", 1, 100);
-    
+
     int numTerms = 0;
     for (Iterator<TermEntry> it = termInfo.getAllEntries(); it.hasNext();) {
       it.next();
@@ -141,7 +141,7 @@ public final class TestClusterDumper extends MahoutTestCase {
     }
     Iterable<Vector> iterable = new LuceneIterable(reader, "id", "content",
         termInfo,weight);
-    
+
     i = 0;
     for (Vector vector : iterable) {
       assertNotNull(vector);
@@ -150,7 +150,7 @@ public final class TestClusterDumper extends MahoutTestCase {
         // rename it for testing purposes
         namedVector = new NamedVector(((NamedVector) vector).getDelegate(),
             "P(" + i + ')');
-        
+
       } else {
         namedVector = new NamedVector(vector, "P(" + i + ')');
       }
@@ -160,7 +160,7 @@ public final class TestClusterDumper extends MahoutTestCase {
       i++;
     }
   }
-  
+
   /**
    * Return the path to the final iteration's clusters
    */
@@ -175,11 +175,11 @@ public final class TestClusterDumper extends MahoutTestCase {
     }
     return null;
   }
-  
+
   @Test
   public void testCanopy() throws Exception { // now run the Job
     DistanceMeasure measure = new EuclideanDistanceMeasure();
-    
+
     Path output = getTestTempDirPath("output");
     CanopyDriver.run(getConfiguration(), getTestTempDirPath("testdata"),
         output, measure, 8, 4, true, 0.0, true);
@@ -188,7 +188,7 @@ public final class TestClusterDumper extends MahoutTestCase {
         "clusters-0-final"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
-  
+
   @Test
   public void testKmeans() throws Exception {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
@@ -225,7 +225,7 @@ public final class TestClusterDumper extends MahoutTestCase {
     clusterDumper.setOutputFormat(ClusterDumper.OUTPUT_FORMAT.JSON);
     clusterDumper.printClusters(termDictionary);
   }
-  
+
   @Test
   public void testFuzzyKmeans() throws Exception {
     DistanceMeasure measure = new EuclideanDistanceMeasure();

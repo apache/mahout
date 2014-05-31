@@ -23,7 +23,12 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.common.parameters.Parameter;
 import org.apache.mahout.math.NamedVector;
@@ -34,6 +39,7 @@ import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.SquareRootFunction;
+import org.codehaus.jackson.map.ObjectMapper;
 
 public abstract class AbstractCluster implements Cluster {
   
@@ -54,6 +60,8 @@ public abstract class AbstractCluster implements Cluster {
   private Vector s1;
   
   private Vector s2;
+
+  private static final ObjectMapper jxn = new ObjectMapper();
   
   protected AbstractCluster() {}
   
@@ -282,19 +290,37 @@ public abstract class AbstractCluster implements Cluster {
     setS1(center.like());
     setS2(center.like());
   }
-  
+
   @Override
   public String asFormatString(String[] bindings) {
-    StringBuilder buf = new StringBuilder(50);
-    buf.append(getIdentifier()).append("{n=").append(getNumObservations());
+    String fmtString = "";
+    try {
+      fmtString = jxn.writeValueAsString(asJson(bindings));
+    } catch (IOException e) {
+      log.error("Error writing JSON as String.", e);
+    }
+    return fmtString;
+  }
+
+  public Map<String,Object> asJson(String[] bindings) {
+    Map<String,Object> dict = new HashMap<String,Object>();
+    dict.put("identifier", getIdentifier());
+    dict.put("n", getNumObservations());
     if (getCenter() != null) {
-      buf.append(" c=").append(formatVector(getCenter(), bindings));
+      try {
+        dict.put("c", formatVectorAsJson(getCenter(), bindings));
+      } catch (IOException e) {
+        log.error("IOException:  ", e);
+      }
     }
     if (getRadius() != null) {
-      buf.append(" r=").append(formatVector(getRadius(), bindings));
+      try {
+        dict.put("r", formatVectorAsJson(getRadius(), bindings));
+      } catch (IOException e) {
+        log.error("IOException:  ", e);
+      }
     }
-    buf.append('}');
-    return buf.toString();
+    return dict;
   }
   
   public abstract String getIdentifier();
@@ -307,16 +333,29 @@ public abstract class AbstractCluster implements Cluster {
   public Vector computeCentroid() {
     return getS0() == 0 ? getCenter() : getS1().divide(getS0());
   }
-  
+
   /**
    * Return a human-readable formatted string representation of the vector, not
    * intended to be complete nor usable as an input/output representation
    */
   public static String formatVector(Vector v, String[] bindings) {
-    StringBuilder buffer = new StringBuilder();
-    if (v instanceof NamedVector) {
-      buffer.append(((NamedVector) v).getName()).append(" = ");
+    String fmtString = "";
+    try {
+      fmtString = jxn.writeValueAsString(formatVectorAsJson(v, bindings));
+    } catch (IOException e) {
+      log.error("Error writing JSON as String.", e);
     }
+    return fmtString;
+  }
+
+  /**
+   * Create a List of HashMaps containing vector terms and weights
+   *
+   * @return List<Object>
+   */
+  public static List<Object> formatVectorAsJson(Vector v, String[] bindings) throws IOException {
+
+    List<TermIndexWeight> vectorTerms = Lists.newArrayList();
 
     boolean hasBindings = bindings != null;
     boolean isSparse = !v.isDense() && v.getNumNondefaultElements() != v.size();
@@ -324,25 +363,48 @@ public abstract class AbstractCluster implements Cluster {
     // we assume sequential access in the output
     Vector provider = v.isSequentialAccess() ? v : new SequentialAccessSparseVector(v);
 
-    buffer.append('[');
+    for (Vector.Element elt : v.nonZeroes()) {
+      vectorTerms.add(new TermIndexWeight(elt.index(), elt.get()));
+    }
+
+    List<Object> terms = Lists.newLinkedList();
+    String term = "";
+
     for (Element elem : provider.nonZeroes()) {
 
       if (hasBindings && bindings.length >= elem.index() + 1 && bindings[elem.index()] != null) {
-        buffer.append(bindings[elem.index()]).append(':');
+        term = bindings[elem.index()];
       } else if (hasBindings || isSparse) {
-        buffer.append(elem.index()).append(':');
+        term = String.valueOf(elem.index());
       }
 
-      buffer.append(String.format(Locale.ENGLISH, "%.3f", elem.get())).append(", ");
+      Map<String, Object> term_entry = Maps.newHashMap();
+      double roundedWeight = (double) Math.round(elem.get() * 1000) / 1000;
+      if (hasBindings || isSparse) {
+        term_entry.put(term, roundedWeight);
+        terms.add(term_entry);
+      } else {
+        terms.add(roundedWeight);
+      }
     }
 
-    if (buffer.length() > 1) {
-      buffer.setLength(buffer.length() - 2);
-    }
-    buffer.append(']');
-    return buffer.toString();
+    return terms;
   }
-  
+
+  /**
+   * Convenience class for sorting terms
+   *
+   */
+  private static class TermIndexWeight {
+    private final int index;
+    private final double weight;
+
+    TermIndexWeight(int index, double weight) {
+      this.index = index;
+      this.weight = weight;
+    }
+  }
+
   @Override
   public boolean isConverged() {
     // Convergence has no meaning yet, perhaps in subclasses
