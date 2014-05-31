@@ -34,7 +34,6 @@ else
   echo "Please select a number to choose the corresponding clustering algorithm"
   echo "1. ${algorithm[0]} clustering"
   echo "2. ${algorithm[1]} clustering"
-  echo "3. ${algorithm[2]} clustering"
   read -p "Enter your choice : " choice
 fi
 echo "ok. You chose $choice and we'll use ${algorithm[$choice-1]} Clustering"

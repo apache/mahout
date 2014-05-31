@@ -17,64 +17,17 @@
 
 package org.apache.mahout.clustering;
 
-import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
-
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.util.Map;
 
 public final class TestClusterInterface extends MahoutTestCase {
 
   private static final DistanceMeasure measure = new ManhattanDistanceMeasure();
-
-  private final ObjectMapper jxn = new ObjectMapper();
-
-  @Test
-  public void testCanopyAsFormatString() throws IOException {
-    double[] d = { 1.1, 2.2, 3.3 };
-    Vector m = new DenseVector(d);
-    Cluster cluster = new Canopy(m, 123, measure);
-    String formatString = cluster.asFormatString(null);
-    assertEquals("{\"r\":[],\"c\":[1.1,2.2,3.3],\"n\":0,\"identifier\":\"C-123\"}", formatString);
-  }
-
-  @Test
-  public void testCanopyAsFormatStringSparse() {
-    double[] d = { 1.1, 0.0, 3.3 };
-    Vector m = new SequentialAccessSparseVector(3);
-    m.assign(d);
-    Cluster cluster = new Canopy(m, 123, measure);
-    String formatString = cluster.asFormatString(null);
-    assertEquals("{\"r\":[],\"c\":[{\"0\":1.1},{\"2\":3.3}],\"n\":0,\"identifier\":\"C-123\"}", formatString);
-  }
-
-  @Test
-  public void testCanopyAsFormatStringWithBindings() {
-    double[] d = { 1.1, 2.2, 3.3 };
-    Vector m = new DenseVector(d);
-    Cluster cluster = new Canopy(m, 123, measure);
-    String[] bindings = { "fee", null, null };
-    String formatString = cluster.asFormatString(bindings);
-    assertEquals("{\"r\":[],\"c\":[{\"fee\":1.1},{\"1\":2.2},{\"2\":3.3}],\"n\":0,\"identifier\":\"C-123\"}", formatString);
-  }
-
-  @Test
-  public void testCanopyAsFormatStringSparseWithBindings() {
-    double[] d = { 1.1, 0.0, 3.3 };
-    Vector m = new SequentialAccessSparseVector(3);
-    m.assign(d);
-    Cluster cluster = new Canopy(m, 123, measure);
-    String formatString = cluster.asFormatString(null);
-    assertEquals("{\"r\":[],\"c\":[{\"0\":1.1},{\"2\":3.3}],\"n\":0,\"identifier\":\"C-123\"}", formatString);
-  }
 
   @Test
   public void testClusterAsFormatString() {
