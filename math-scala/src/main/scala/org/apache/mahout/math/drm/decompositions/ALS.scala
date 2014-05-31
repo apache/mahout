@@ -113,6 +113,8 @@ object ALS {
 
           if (convergence < 0) {
             log.warn("Rmse increase of %f. Should not happen.".format(convergence))
+            // I guess error growth can happen in ideal data case?
+            stop = true
           } else if (convergence < convergenceThreshold) {
             stop = true
           }
