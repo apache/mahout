@@ -27,10 +27,7 @@ import java.util.Map;
  * 
  */
 public interface Cluster extends Model<VectorWritable>, Parametered {
-  
-  // default directory for all clustered points
-  String CLUSTERED_POINTS_DIR = "clusteredPoints";
-  
+
   // default directory for initial clusters to prime iterative clustering
   // algorithms
   String INITIAL_CLUSTERS_DIR = "clusters-0";

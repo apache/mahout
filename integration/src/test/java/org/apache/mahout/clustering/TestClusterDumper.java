@@ -33,9 +33,9 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
-import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
+import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
@@ -177,49 +177,42 @@ public final class TestClusterDumper extends MahoutTestCase {
   }
 
   @Test
-  public void testCanopy() throws Exception { // now run the Job
-    DistanceMeasure measure = new EuclideanDistanceMeasure();
-
-    Path output = getTestTempDirPath("output");
-    CanopyDriver.run(getConfiguration(), getTestTempDirPath("testdata"),
-        output, measure, 8, 4, true, 0.0, true);
-    // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output,
-        "clusters-0-final"), new Path(output, "clusteredPoints"));
-    clusterDumper.printClusters(termDictionary);
-  }
-
-  @Test
   public void testKmeans() throws Exception {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
-    // now run the Canopy job to prime kMeans canopies
+    Path input = getTestTempFilePath("input");
     Path output = getTestTempDirPath("output");
+    Path initialPoints = new Path(output, Cluster.CLUSTERS_DIR + '0' + Cluster.FINAL_ITERATION_SUFFIX);
     Configuration conf = getConfiguration();
-    CanopyDriver.run(conf, getTestTempDirPath("testdata"), output, measure, 8,
-        4, false, 0.0, true);
-    // now run the KMeans job
+    FileSystem fs = FileSystem.get(conf);
+    // Write test data to file
+    ClusteringTestUtils.writePointsToFile(sampleData, input, fs, conf);
+    // Select initial centroids
+    RandomSeedGenerator.buildRandom(conf, input, initialPoints, 8, measure, 1L);
+    // Run k-means
     Path kMeansOutput = new Path(output, "kmeans");
-    KMeansDriver.run(conf, getTestTempDirPath("testdata"), new Path(output,
-        "clusters-0-final"), kMeansOutput, 0.001, 10, true, 0.0, false);
-    // run ClusterDumper
+    KMeansDriver.run(conf, getTestTempDirPath("testdata"), initialPoints, kMeansOutput, 0.001, 10, true, 0.0, false);
+    // Print out clusters
     ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
-        output, 10), new Path(kMeansOutput, "clusteredPoints"));
+            output, 10), new Path(kMeansOutput, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
 
   @Test
   public void testJsonClusterDumper() throws Exception {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
-    // now run the Canopy job to prime kMeans canopies
+    Path input = getTestTempFilePath("input");
     Path output = getTestTempDirPath("output");
+    Path initialPoints = new Path(output, Cluster.CLUSTERS_DIR + '0' + Cluster.FINAL_ITERATION_SUFFIX);
     Configuration conf = getConfiguration();
-    CanopyDriver.run(conf, getTestTempDirPath("testdata"), output, measure, 8,
-        4, false, 0.0, true);
-    // now run the KMeans job
+    FileSystem fs = FileSystem.get(conf);
+    // Write test data to file
+    ClusteringTestUtils.writePointsToFile(sampleData, input, fs, conf);
+    // Select initial centroids
+    RandomSeedGenerator.buildRandom(conf, input, initialPoints, 8, measure, 1L);
+    // Run k-means
     Path kmeansOutput = new Path(output, "kmeans");
-    KMeansDriver.run(conf, getTestTempDirPath("testdata"), new Path(output,
-        "clusters-0-final"), kmeansOutput, 0.001, 10, true, 0.0, false);
-    // run ClusterDumper
+    KMeansDriver.run(conf, getTestTempDirPath("testdata"), initialPoints, kmeansOutput, 0.001, 10, true, 0.0, false);
+    // Print out clusters
     ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,
         output, 10), new Path(kmeansOutput, "clusteredPoints"));
     clusterDumper.setOutputFormat(ClusterDumper.OUTPUT_FORMAT.JSON);
@@ -229,15 +222,18 @@ public final class TestClusterDumper extends MahoutTestCase {
   @Test
   public void testFuzzyKmeans() throws Exception {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
-    // now run the Canopy job to prime kMeans canopies
+    Path input = getTestTempFilePath("input");
     Path output = getTestTempDirPath("output");
+    Path initialPoints = new Path(output, Cluster.CLUSTERS_DIR + '0' + Cluster.FINAL_ITERATION_SUFFIX);
     Configuration conf = getConfiguration();
-    CanopyDriver.run(conf, getTestTempDirPath("testdata"), output, measure, 8,
-        4, false, 0.0, true);
-    // now run the Fuzzy KMeans job
+    FileSystem fs = FileSystem.get(conf);
+    // Write test data to file
+    ClusteringTestUtils.writePointsToFile(sampleData, input, fs, conf);
+    // Select initial centroids
+    RandomSeedGenerator.buildRandom(conf, input, initialPoints, 8, measure, 1L);
+    // Run k-means
     Path kMeansOutput = new Path(output, "kmeans");
-    FuzzyKMeansDriver.run(conf, getTestTempDirPath("testdata"), new Path(
-        output, "clusters-0-final"), kMeansOutput, 0.001, 10, 1.1f, true,
+    FuzzyKMeansDriver.run(conf, getTestTempDirPath("testdata"), initialPoints, kMeansOutput, 0.001, 10, 1.1f, true,
         true, 0, true);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf,

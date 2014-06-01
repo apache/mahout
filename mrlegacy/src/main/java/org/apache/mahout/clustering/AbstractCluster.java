@@ -355,17 +355,11 @@ public abstract class AbstractCluster implements Cluster {
    */
   public static List<Object> formatVectorAsJson(Vector v, String[] bindings) throws IOException {
 
-    List<TermIndexWeight> vectorTerms = Lists.newArrayList();
-
     boolean hasBindings = bindings != null;
     boolean isSparse = !v.isDense() && v.getNumNondefaultElements() != v.size();
 
     // we assume sequential access in the output
     Vector provider = v.isSequentialAccess() ? v : new SequentialAccessSparseVector(v);
-
-    for (Vector.Element elt : v.nonZeroes()) {
-      vectorTerms.add(new TermIndexWeight(elt.index(), elt.get()));
-    }
 
     List<Object> terms = Lists.newLinkedList();
     String term = "";
@@ -389,20 +383,6 @@ public abstract class AbstractCluster implements Cluster {
     }
 
     return terms;
-  }
-
-  /**
-   * Convenience class for sorting terms
-   *
-   */
-  private static class TermIndexWeight {
-    private final int index;
-    private final double weight;
-
-    TermIndexWeight(int index, double weight) {
-      this.index = index;
-      this.weight = weight;
-    }
   }
 
   @Override
