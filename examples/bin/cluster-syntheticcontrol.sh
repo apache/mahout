@@ -27,7 +27,7 @@ if [ "$1" = "--help" ] || [ "$1" = "--?" ]; then
   exit
 fi
 
-algorithm=( canopy kmeans fuzzykmeans )
+algorithm=( kmeans fuzzykmeans )
 if [ -n "$1" ]; then
   choice=$1
 else
