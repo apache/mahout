@@ -17,13 +17,18 @@
 
 package org.apache.mahout.cf
 
+import org.apache.mahout.math._
+import scalabindings._
+import RLikeOps._
+import drm._
+import RLikeDrmOps._
+import org.apache.mahout.sparkbindings._
+
 import scala.collection.JavaConversions._
-import org.apache.mahout.math.drm.DrmLike
 import org.apache.mahout.math.stats.LogLikelihood
-import org.apache.spark.broadcast.Broadcast
-import scala.collection.parallel.mutable
+import collection._
+// import scala.collection.parallel.mutable
 import org.apache.mahout.common.RandomUtils
-import org.apache.mahout.math.{MurmurHash, Vector}
 
 
 /**
@@ -42,8 +47,7 @@ object CooccurrenceAnalysis extends Serializable {
   def cooccurrences(drmARaw: DrmLike[Int], randomSeed: Int = 0xdeadbeef, maxInterestingItemsPerThing: Int = 50,
                     maxNumInteractions: Int = 500, drmBs: Array[DrmLike[Int]] = Array()): List[DrmLike[Int]] = {
 
-    //TODO any chance to get rid of the spark-specific code here?
-    implicit val sc = drmARaw.rdd.sparkContext
+    implicit val disributedContext = drmARaw.context
 
     // Apply selective downsampling, pin resulting matrix
     val drmA = sampleDownAndBinarize(drmARaw, randomSeed, maxNumInteractions).checkpoint()
@@ -105,8 +109,8 @@ object CooccurrenceAnalysis extends Serializable {
   }
 
   def computeIndicators(drmBtA: DrmLike[Int], numUsers: Int, maxInterestingItemsPerThing: Int,
-                        bcastNumInteractionsB: Broadcast[Vector], bcastNumInteractionsA: Broadcast[Vector],
-                        crossCooccurrence: Boolean = true) = {
+      bcastNumInteractionsB: BCast[Vector], bcastNumInteractionsA: BCast[Vector],
+      crossCooccurrence: Boolean = true) = {
     drmBtA.mapBlock() {
       case (keys, block) =>
 
@@ -158,8 +162,7 @@ object CooccurrenceAnalysis extends Serializable {
    */
   def sampleDownAndBinarize(drmM: DrmLike[Int], seed: Int, maxNumInteractions: Int) = {
 
-    //TODO any chance to get rid of the spark specific code here?
-    implicit val sc = drmM.rdd.sparkContext
+    implicit val distributedContext = drmM.context
 
     // Pin raw interaction matrix
     val drmI = drmM.checkpoint()

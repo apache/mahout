@@ -17,12 +17,14 @@
 
 package org.apache.mahout.cf.examples
 
-import org.apache.mahout.sparkbindings.drm._
-import org.apache.mahout.sparkbindings._
 import scala.io.Source
-import org.apache.mahout.math.SparseMatrix
-import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math._
+import scalabindings._
 import RLikeOps._
+import drm._
+import RLikeDrmOps._
+import org.apache.mahout.sparkbindings._
+
 import org.apache.mahout.cf.CooccurrenceAnalysis._
 import scala.collection.JavaConversions._
 
@@ -78,7 +80,7 @@ object RunCrossCooccurrenceAnalysisOnEpinions {
     System.setProperty("spark.kryo.referenceTracking", "false")
     System.setProperty("spark.kryoserializer.buffer.mb", "100")
 
-    implicit val sc = mahoutSparkContext(masterUrl = "local", appName = "MahoutLocalContext",
+    implicit val distributedContext = mahoutSparkContext(masterUrl = "local", appName = "MahoutLocalContext",
       customJars = Traversable.empty[String])
 
     val drmEpinionsRatings = drmParallelize(epinionsRatings, numPartitions = 2)
@@ -92,7 +94,7 @@ object RunCrossCooccurrenceAnalysisOnEpinions {
     RecommendationExamplesHelper.saveIndicatorMatrix(indicatorMatrices(1),
         "/tmp/co-occurrence-on-epinions/indicators-trust-item/")
 
-    sc.stop()
+    distributedContext.close()
 
     println("Saved indicators to /tmp/co-occurrence-on-epinions/")
   }
