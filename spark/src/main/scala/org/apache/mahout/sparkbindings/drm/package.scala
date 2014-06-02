@@ -85,21 +85,21 @@ package object drm {
   private[sparkbindings] def deblockify[K: ClassTag](rdd: BlockifiedDrmRdd[K]): DrmRdd[K] =
 
   // Just flat-map rows, connect with the keys
-    rdd.flatMap({
+    rdd.flatMap {
       case (blockKeys: Array[K], block: Matrix) =>
 
         blockKeys.ensuring(blockKeys.size == block.nrow)
-        blockKeys.view.zipWithIndex.map({
+        blockKeys.view.zipWithIndex.map {
           case (key, idx) =>
-            var v = block(idx, ::)
+            var v = block(idx, ::) // This is just a view!
 
             // If a view rather than a concrete vector, clone into a concrete vector in order not to
             // attempt to serialize outer matrix when we save it (Although maybe most often this
             // copying is excessive?)
             // if (v.isInstanceOf[MatrixVectorView]) v = v.cloned
             key -> v
-        })
+        }
+    }
 
-    })
 
 }

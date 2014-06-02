@@ -24,9 +24,13 @@ import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.mahout.math.{Matrix, Vector}
 import org.apache.mahout.math.drm.logical.{OpAewScalar, OpAewB}
+import org.apache.log4j.Logger
 
 /** Elementwise drm-drm operators */
 object AewB {
+
+
+  private val log = Logger.getLogger(AewB.getClass)
 
   @inline
   def a_plus_b[K: ClassTag](op: OpAewB[K], srcA: DrmRddInput[K], srcB: DrmRddInput[K]): DrmRddInput[K] =
@@ -73,12 +77,37 @@ object AewB {
       reduceFunc: (Vector, Vector) => Vector): DrmRddInput[K] = {
     val a = srcA.toDrmRdd()
     val b = srcB.toDrmRdd()
-    val rdd = a
-        .cogroup(b, numPartitions = a.partitions.size max b.partitions.size)
-        .map({
-      case (key, (vectorSeqA, vectorSeqB)) =>
-        key -> reduceFunc(vectorSeqA.reduce(reduceFunc), vectorSeqB.reduce(reduceFunc))
-    })
+
+    // Check if A and B are identically partitioned AND keyed. if they are, then just perform zip
+    // instead of join, and apply the op map-side. Otherwise, perform join and apply the op
+    // reduce-side.
+    val rdd = if (op.isIdenticallyPartitioned(op.A)) {
+
+      log.debug("applying zipped elementwise")
+
+      a
+          .zip(b)
+          .map {
+        case ((keyA, vectorA), (keyB, vectorB)) =>
+          assert(keyA == keyB, "inputs are claimed identically partitioned, but they are not identically keyed")
+
+          printf("A=%s,B=%s\n",vectorA,vectorB)
+          val v = vectorA + vectorB //reduceFunc(vectorA,vectorB)
+          printf("A+B=%s\n",v)
+
+          keyA -> v //reduceFunc(vectorA, vectorB)
+      }
+    } else {
+
+      log.debug("applying elementwise as join")
+
+      a
+          .cogroup(b, numPartitions = a.partitions.size max b.partitions.size)
+          .map({
+        case (key, (vectorSeqA, vectorSeqB)) =>
+          key -> reduceFunc(vectorSeqA.reduce(reduceFunc), vectorSeqB.reduce(reduceFunc))
+      })
+    }
 
     new DrmRddInput(rowWiseSrc = Some(op.ncol -> rdd))
   }
