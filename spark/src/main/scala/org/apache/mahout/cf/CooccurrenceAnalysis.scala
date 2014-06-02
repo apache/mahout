@@ -17,17 +17,13 @@
 
 package org.apache.mahout.cf
 
-import org.apache.mahout.sparkbindings.drm.RLikeDrmOps._
-import org.apache.mahout.sparkbindings.drm._
 import scala.collection.JavaConversions._
-import org.apache.mahout.math.{MurmurHash, Vector}
-import org.apache.mahout.math.stats.LogLikelihood
-import org.apache.mahout.math.scalabindings._
-import RLikeOps._
-import scala.collection.mutable
-import org.apache.spark.broadcast.Broadcast
-import org.apache.mahout.common.RandomUtils
 import org.apache.mahout.math.drm.DrmLike
+import org.apache.mahout.math.stats.LogLikelihood
+import org.apache.spark.broadcast.Broadcast
+import scala.collection.parallel.mutable
+import org.apache.mahout.common.RandomUtils
+import org.apache.mahout.math.{MurmurHash, Vector}
 
 
 /**
