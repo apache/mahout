@@ -314,7 +314,7 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
 
   test("C = A + B, identically partitioned") {
 
-    val inCoreA = dense((1, 2), (3, 4))
+    val inCoreA = dense((1, 2, 3), (3, 4, 5), (5, 6, 7))
 
     val A = drmParallelize(inCoreA, numPartitions = 2)
 
@@ -323,7 +323,7 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
     // Create B which would be identically partitioned to A. mapBlock() by default will do the trick.
     val B = A.mapBlock() {
       case (keys, block) =>
-        val bBlock = block.like() := ((r,c,v) => Random.nextDouble())
+        val bBlock = block.like() := ((r,c,v) => util.Random.nextDouble())
         keys -> bBlock
     }
         // Prevent repeated computation non-determinism

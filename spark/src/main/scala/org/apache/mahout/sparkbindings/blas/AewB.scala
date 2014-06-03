@@ -90,12 +90,7 @@ object AewB {
           .map {
         case ((keyA, vectorA), (keyB, vectorB)) =>
           assert(keyA == keyB, "inputs are claimed identically partitioned, but they are not identically keyed")
-
-          printf("A=%s,B=%s\n",vectorA,vectorB)
-          val v = vectorA + vectorB //reduceFunc(vectorA,vectorB)
-          printf("A+B=%s\n",v)
-
-          keyA -> v //reduceFunc(vectorA, vectorB)
+          keyA -> reduceFunc(vectorA, vectorB)
       }
     } else {
 
