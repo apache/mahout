@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math.drm.decompositions
+package org.apache.mahout.math.decompositions
 
 import scala.reflect.ClassTag
 import org.apache.mahout.math._
@@ -52,7 +52,7 @@ object ALS {
    * Example:
    *
    * <pre>
-   * val (u,v,errors) = train(input, k).toTuple
+   * val (u,v,errors) = als(input, k).toTuple
    * </pre>
    *
    * ALS runs until (rmse[i-1]-rmse[i])/rmse[i-1] < convergenceThreshold, or i==maxIterations,
@@ -63,13 +63,15 @@ object ALS {
    * @param k required rank of decomposition (number of cols in U and V results)
    * @param convergenceThreshold stop sooner if (rmse[i-1] - rmse[i])/rmse[i - 1] is less than this
    *                             value. If <=0 then we won't compute RMSE and use convergence test.
+   * @param lambda regularization rate
    * @param maxIterations maximum iterations to run regardless of convergence
    * @tparam K row key type of the input (100 is probably more than enough)
    * @return { @link org.apache.mahout.math.drm.decompositions.ALS.Result}
    */
-  def train[K: ClassTag](
+  def als[K: ClassTag](
       drmInput: DrmLike[K],
       k: Int = 50,
+      lambda: Double = 0.0,
       maxIterations: Int = 10,
       convergenceThreshold: Double = 0.10
       ): Result[K] = {
@@ -97,10 +99,10 @@ object ALS {
 
       // Alternate. This is really what ALS is.
       if ( drmV != null) drmV.uncache()
-      drmV = (drmAt %*% drmU %*% solve(drmU.t %*% drmU)).checkpoint()
+      drmV = (drmAt %*% drmU %*% solve(drmU.t %*% drmU -: diag(lambda, k))).checkpoint()
 
       drmU.uncache()
-      drmU = (drmA %*% drmV %*% solve(drmV.t %*% drmV)).checkpoint()
+      drmU = (drmA %*% drmV %*% solve(drmV.t %*% drmV -: diag(lambda, k))).checkpoint()
 
       // Check if we are requested to do a convergence test; and do it if yes.
       if (convergenceThreshold > 0) {

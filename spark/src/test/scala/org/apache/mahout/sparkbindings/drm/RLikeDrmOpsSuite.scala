@@ -19,6 +19,7 @@ package org.apache.mahout.sparkbindings.drm
 
 import org.scalatest.{Matchers, FunSuite}
 import org.apache.mahout.math._
+import decompositions._
 import scalabindings._
 import drm._
 import RLikeOps._

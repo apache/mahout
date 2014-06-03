@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.sparkbindings.drm.decompositions
+package org.apache.mahout.math.decompositions
 
 import org.scalatest.{Matchers, FunSuite}
 import org.apache.mahout.sparkbindings.test.MahoutLocalContext
@@ -27,7 +27,6 @@ import RLikeDrmOps._
 import org.apache.mahout.sparkbindings._
 import org.apache.mahout.common.RandomUtils
 import scala.math._
-import org.apache.mahout.math.drm.decompositions.ALS
 
 class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
 
@@ -193,7 +192,7 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
     val drmA = drmParallelize(inCoreA, numPartitions = 2)
 
     // Decompose using ALS
-    val (drmU, drmV, rmse) = ALS.train(drmInput = drmA, k = 20).toTuple
+    val (drmU, drmV, rmse) = als(drmInput = drmA, k = 20).toTuple
     val inCoreU = drmU.collect
     val inCoreV = drmV.collect
 
