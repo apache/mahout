@@ -110,6 +110,7 @@ package object decompositions {
    * @param k required rank of decomposition (number of cols in U and V results)
    * @param convergenceThreshold stop sooner if (rmse[i-1] - rmse[i])/rmse[i - 1] is less than this
    *                             value. If <=0 then we won't compute RMSE and use convergence test.
+   * @param lambda regularization rate
    * @param maxIterations maximum iterations to run regardless of convergence
    * @tparam K row key type of the input (100 is probably more than enough)
    * @return { @link org.apache.mahout.math.drm.decompositions.ALS.Result}
