@@ -25,7 +25,7 @@ import scala.util.Random
 case class OpAewB[K: ClassTag](
     override var A: DrmLike[K],
     override var B: DrmLike[K],
-    val op: Char
+    val op: String
     ) extends AbstractBinaryOp[K, K, K] {
 
 
