@@ -32,6 +32,10 @@ object AewB {
 
   private val log = Logger.getLogger(AewB.getClass)
 
+  /**
+   * Set to false to disallow in-place elementwise operations in case side-effects and non-idempotent
+   * computations become a problem.
+   */
   final val PROPERTY_AEWB_INPLACE = "mahout.math.AewB.inplace"
 
   type ReduceFunc = (Vector, Vector) => Vector
@@ -39,7 +43,7 @@ object AewB {
   type ReduceFuncScalar = (Matrix, Double) => Matrix
 
   private[blas] def getEWOps() = {
-    val inplaceProp = System.getProperty(PROPERTY_AEWB_INPLACE, "false").toBoolean
+    val inplaceProp = System.getProperty(PROPERTY_AEWB_INPLACE, "true").toBoolean
     if (inplaceProp) InplaceEWOps else CloningEWOps
   }
 
