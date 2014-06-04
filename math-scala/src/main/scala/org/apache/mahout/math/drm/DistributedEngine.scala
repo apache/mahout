@@ -19,10 +19,11 @@ package org.apache.mahout.math.drm
 
 import scala.reflect.ClassTag
 import logical._
-import org.apache.mahout.math.{Matrix, Vector}
+import org.apache.mahout.math._
+import scalabindings._
+import RLikeOps._
 import DistributedEngine._
 import org.apache.mahout.math.scalabindings._
-import RLikeOps._
 
 /** Abstraction of optimizer/distributed engine */
 trait DistributedEngine {
@@ -43,10 +44,12 @@ trait DistributedEngine {
   def toPhysical[K: ClassTag](plan: DrmLike[K], ch: CacheHint.CacheHint): CheckpointedDrm[K]
 
   /** Engine-specific colSums implementation based on a checkpoint. */
-  def colSums[K:ClassTag](drm:CheckpointedDrm[K]):Vector
+  def colSums[K: ClassTag](drm: CheckpointedDrm[K]): Vector
 
   /** Engine-specific colMeans implementation based on a checkpoint. */
-  def colMeans[K:ClassTag](drm:CheckpointedDrm[K]):Vector
+  def colMeans[K: ClassTag](drm: CheckpointedDrm[K]): Vector
+
+  def norm[K: ClassTag](drm: CheckpointedDrm[K]): Double
 
   /** Broadcast support */
   def drmBroadcast(v: Vector)(implicit dc: DistributedContext): BCast[Vector]
