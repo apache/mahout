@@ -107,7 +107,7 @@ object ALS {
       // Check if we are requested to do a convergence test; and do it if yes.
       if (convergenceThreshold > 0) {
 
-        val rmse = (drmA - drmU %*% drmV.t).norm / sqrt(drmA.ncol * drmA.nrow)
+        val rmse = (drmA - drmU %*% drmV.t).norm / sqrt(drmA.ncol.toDouble * drmA.nrow)
 
         if (i > 0) {
           val rmsePrev = rmseIterations.last

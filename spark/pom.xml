@@ -295,6 +295,12 @@
       <version>${spark.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-graphx_${scala.major}</artifactId>
+      <version>${spark.version}</version>
+    </dependency>
+
     <!-- scala stuff -->
 
     <dependency>
