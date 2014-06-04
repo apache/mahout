@@ -77,5 +77,13 @@ class FunctionalMatrixView extends AbstractMatrix {
     throw new UnsupportedOperationException("Assignment to a matrix view not supported");
   }
 
+  @Override
+  public Vector viewRow(int row) {
+    return new MatrixVectorView(this, row, 0, 0, 1, denseLike);
+  }
 
+  @Override
+  public Vector viewColumn(int column) {
+    return new MatrixVectorView(this, 0, column, 1, 0, denseLike);
+  }
 }
