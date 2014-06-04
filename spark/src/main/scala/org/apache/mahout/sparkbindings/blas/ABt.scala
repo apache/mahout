@@ -65,22 +65,16 @@ object ABt {
     // Blockify everything.
     val blocksA = srcA.toBlockifiedDrmRdd()
 
-        // Mark row-blocks with group id
+        // mark row-blocks with group id
         .mapPartitionsWithIndex((part, iter) => {
+      val rowBlockId = part
+      val (blockKeys, block) = iter.next()
 
-      if (iter.isEmpty) {
-        Iterator.empty
-      } else {
+      // Each partition must have exactly one block due to implementation guarantees of blockify()
+      iter.ensuring(!_.hasNext)
 
-        val rowBlockId = part
-        val (blockKeys, block) = iter.next()
-
-        // Each partition must have exactly one block due to implementation guarantees of blockify()
-        assert(!iter.hasNext, "Partition #%d is expected to have at most 1 block at AB'.".format(part))
-
-        // the output is (row block id, array of row keys, and the matrix representing the block).
-        Iterator((rowBlockId, blockKeys, block))
-      }
+      // the output is (row block id, array of row keys, and the matrix representing the block).
+      Iterator((rowBlockId, blockKeys, block))
     })
 
     val blocksB = srcB.toBlockifiedDrmRdd()
@@ -102,7 +96,7 @@ object ABt {
 
 
     // The plan.
-    var blockifiedRdd :BlockifiedDrmRdd[K] = blocksA
+    val blockifiedRdd :BlockifiedDrmRdd[K] = blocksA
 
         // Build Cartesian. It may require a bit more memory there at tasks.
         .cartesian(blocksB)
@@ -125,7 +119,7 @@ object ABt {
         // Combine -- this is probably the most efficient
         .combineByKey[(Array[K],Matrix)](
 
-          createCombiner = (t: (Array[K], Array[Int], Matrix)) => t match {
+          createCombiner = (t:(Array[K],Array[Int],Matrix)) => t match {
             case (rowKeys, colKeys, blockProd) =>
 
               // Accumulator is a row-wise block of sparse vectors.
@@ -154,19 +148,10 @@ object ABt {
           mergeCombiners = (c1: (Array[K], Matrix), c2: (Array[K], Matrix)) => {
             c1._2 += c2._2
             c1
-          },
-
-          // Cartesian will tend to produce much more partitions that we actually need for co-grouping,
-          // and as a result, we may see empty partitions than we actually need.
-          numPartitions = numProductPartitions
-        )
+          })
 
         // Combine leaves residual block key -- we don't need that.
         .map(_._2)
-
-    // This may produce more than one block per partition. Most implementation rely on convention of
-    // having at most one block per partition.
-    blockifiedRdd = rbind(blockifiedRdd)
 
     new DrmRddInput(blockifiedSrc = Some(blockifiedRdd))
   }

@@ -24,91 +24,67 @@ import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.mahout.math.{Matrix, Vector}
 import org.apache.mahout.math.drm.logical.{OpAewScalar, OpAewB}
-import org.apache.log4j.Logger
-import org.apache.mahout.sparkbindings.blas.AewB.{ReduceFuncScalar, ReduceFunc}
 
 /** Elementwise drm-drm operators */
 object AewB {
 
-  private val log = Logger.getLogger(AewB.getClass)
+  @inline
+  def a_plus_b[K: ClassTag](op: OpAewB[K], srcA: DrmRddInput[K], srcB: DrmRddInput[K]): DrmRddInput[K] =
+    a_ew_b(op, srcA, srcB, reduceFunc = (a, b) => a += b)
 
-  /**
-   * Set to false to disallow in-place elementwise operations in case side-effects and non-idempotent
-   * computations become a problem.
-   */
-  final val PROPERTY_AEWB_INPLACE = "mahout.math.AewB.inplace"
+  @inline
+  def a_minus_b[K: ClassTag](op: OpAewB[K], srcA: DrmRddInput[K], srcB: DrmRddInput[K]): DrmRddInput[K] =
+    a_ew_b(op, srcA, srcB, reduceFunc = (a, b) => a -= b)
 
-  type ReduceFunc = (Vector, Vector) => Vector
+  @inline
+  def a_hadamard_b[K: ClassTag](op: OpAewB[K], srcA: DrmRddInput[K], srcB: DrmRddInput[K]): DrmRddInput[K] =
+    a_ew_b(op, srcA, srcB, reduceFunc = (a, b) => a *= b)
 
-  type ReduceFuncScalar = (Matrix, Double) => Matrix
+  @inline
+  def a_eldiv_b[K: ClassTag](op: OpAewB[K], srcA: DrmRddInput[K], srcB: DrmRddInput[K]): DrmRddInput[K] =
+    a_ew_b(op, srcA, srcB, reduceFunc = (a, b) => a /= b)
 
-  private[blas] def getEWOps() = {
-    val inplaceProp = System.getProperty(PROPERTY_AEWB_INPLACE, "true").toBoolean
-    if (inplaceProp) InplaceEWOps else CloningEWOps
-  }
+  @inline
+  def a_plus_scalar[K: ClassTag](op: OpAewScalar[K], srcA: DrmRddInput[K], scalar: Double): DrmRddInput[K] =
+    a_ew_scalar(op, srcA, scalar, reduceFunc = (A, s) => A += s)
 
-  /** Elementwise matrix-matrix operator, now handles both non- and identically partitioned */
-  def a_ew_b[K: ClassTag](op: OpAewB[K], srcA: DrmRddInput[K], srcB: DrmRddInput[K]): DrmRddInput[K] = {
+  @inline
+  def a_minus_scalar[K: ClassTag](op: OpAewScalar[K], srcA: DrmRddInput[K], scalar: Double): DrmRddInput[K] =
+    a_ew_scalar(op, srcA, scalar, reduceFunc = (A, s) => A -= s)
 
-    val ewOps = getEWOps()
-    val opId = op.op
+  @inline
+  def scalar_minus_a[K: ClassTag](op: OpAewScalar[K], srcA: DrmRddInput[K], scalar: Double): DrmRddInput[K] =
+    a_ew_scalar(op, srcA, scalar, reduceFunc = (A, s) => s -=: A)
 
-    val reduceFunc = opId match {
-      case "+" => ewOps.plus
-      case "-" => ewOps.minus
-      case "*" => ewOps.hadamard
-      case "/" => ewOps.eldiv
-      case default => throw new IllegalArgumentException("Unsupported elementwise operator:%s.".format(opId))
-    }
+  @inline
+  def a_times_scalar[K: ClassTag](op: OpAewScalar[K], srcA: DrmRddInput[K], scalar: Double): DrmRddInput[K] =
+    a_ew_scalar(op, srcA, scalar, reduceFunc = (A, s) => A *= s)
 
+  @inline
+  def a_div_scalar[K: ClassTag](op: OpAewScalar[K], srcA: DrmRddInput[K], scalar: Double): DrmRddInput[K] =
+    a_ew_scalar(op, srcA, scalar, reduceFunc = (A, s) => A /= s)
+
+  @inline
+  def scalar_div_a[K: ClassTag](op: OpAewScalar[K], srcA: DrmRddInput[K], scalar: Double): DrmRddInput[K] =
+    a_ew_scalar(op, srcA, scalar, reduceFunc = (A, s) => s /=: A)
+
+  /** Parallel way of this operation (this assumes different partitioning of the sources */
+  private[blas] def a_ew_b[K: ClassTag](op: OpAewB[K], srcA: DrmRddInput[K], srcB: DrmRddInput[K],
+      reduceFunc: (Vector, Vector) => Vector): DrmRddInput[K] = {
     val a = srcA.toDrmRdd()
     val b = srcB.toDrmRdd()
-
-    // Check if A and B are identically partitioned AND keyed. if they are, then just perform zip
-    // instead of join, and apply the op map-side. Otherwise, perform join and apply the op
-    // reduce-side.
-    val rdd = if (op.isIdenticallyPartitioned(op.A)) {
-
-      log.debug("applying zipped elementwise")
-
-      a
-          .zip(b)
-          .map {
-        case ((keyA, vectorA), (keyB, vectorB)) =>
-          assert(keyA == keyB, "inputs are claimed identically partitioned, but they are not identically keyed")
-          keyA -> reduceFunc(vectorA, vectorB)
-      }
-    } else {
-
-      log.debug("applying elementwise as join")
-
-      a
-          .cogroup(b, numPartitions = a.partitions.size max b.partitions.size)
-          .map({
-        case (key, (vectorSeqA, vectorSeqB)) =>
-          key -> reduceFunc(vectorSeqA.reduce(reduceFunc), vectorSeqB.reduce(reduceFunc))
-      })
-    }
+    val rdd = a
+        .cogroup(b, numPartitions = a.partitions.size max b.partitions.size)
+        .map({
+      case (key, (vectorSeqA, vectorSeqB)) =>
+        key -> reduceFunc(vectorSeqA.reduce(reduceFunc), vectorSeqB.reduce(reduceFunc))
+    })
 
     new DrmRddInput(rowWiseSrc = Some(op.ncol -> rdd))
   }
 
-  /** Physical algorithm to handle matrix-scalar operators like A - s or s -: A */
-  def a_ew_scalar[K: ClassTag](op: OpAewScalar[K], srcA: DrmRddInput[K], scalar: Double):
-  DrmRddInput[K] = {
-
-    val ewOps = getEWOps()
-    val opId = op.op
-
-    val reduceFunc = opId match {
-      case "+" => ewOps.plusScalar
-      case "-" => ewOps.minusScalar
-      case "*" => ewOps.timesScalar
-      case "/" => ewOps.divScalar
-      case "-:" => ewOps.scalarMinus
-      case "/:" => ewOps.scalarDiv
-      case default => throw new IllegalArgumentException("Unsupported elementwise operator:%s.".format(opId))
-    }
+  private[blas] def a_ew_scalar[K: ClassTag](op: OpAewScalar[K], srcA: DrmRddInput[K], scalar: Double,
+      reduceFunc: (Matrix, Double) => Matrix): DrmRddInput[K] = {
     val a = srcA.toBlockifiedDrmRdd()
     val rdd = a
         .map({
@@ -116,55 +92,6 @@ object AewB {
     })
     new DrmRddInput[K](blockifiedSrc = Some(rdd))
   }
-}
 
-trait EWOps {
-
-  val plus: ReduceFunc
-
-  val minus: ReduceFunc
-
-  val hadamard: ReduceFunc
-
-  val eldiv: ReduceFunc
-
-  val plusScalar: ReduceFuncScalar
-
-  val minusScalar: ReduceFuncScalar
-
-  val scalarMinus: ReduceFuncScalar
-
-  val timesScalar: ReduceFuncScalar
-
-  val divScalar: ReduceFuncScalar
-
-  val scalarDiv: ReduceFuncScalar
 
 }
-
-object InplaceEWOps extends EWOps {
-  val plus: ReduceFunc = (a, b) => a += b
-  val minus: ReduceFunc = (a, b) => a -= b
-  val hadamard: ReduceFunc = (a, b) => a *= b
-  val eldiv: ReduceFunc = (a, b) => a /= b
-  val plusScalar: ReduceFuncScalar = (A, s) => A += s
-  val minusScalar: ReduceFuncScalar = (A, s) => A -= s
-  val scalarMinus: ReduceFuncScalar = (A, s) => s -=: A
-  val timesScalar: ReduceFuncScalar = (A, s) => A *= s
-  val divScalar: ReduceFuncScalar = (A, s) => A /= s
-  val scalarDiv: ReduceFuncScalar = (A, s) => s /=: A
-}
-
-object CloningEWOps extends EWOps {
-  val plus: ReduceFunc = (a, b) => a + b
-  val minus: ReduceFunc = (a, b) => a - b
-  val hadamard: ReduceFunc = (a, b) => a * b
-  val eldiv: ReduceFunc = (a, b) => a / b
-  val plusScalar: ReduceFuncScalar = (A, s) => A + s
-  val minusScalar: ReduceFuncScalar = (A, s) => A - s
-  val scalarMinus: ReduceFuncScalar = (A, s) => s -: A
-  val timesScalar: ReduceFuncScalar = (A, s) => A * s
-  val divScalar: ReduceFuncScalar = (A, s) => A / s
-  val scalarDiv: ReduceFuncScalar = (A, s) => s /: A
-}
-

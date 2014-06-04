@@ -18,9 +18,7 @@
 package org.apache.mahout.math
 
 import scala.reflect.ClassTag
-import org.apache.mahout.math.scalabindings._
-import RLikeOps._
-import org.apache.mahout.math.decompositions.{DSSVD, DSPCA, DQR}
+import org.apache.mahout.math.drm.decompositions.{DSPCA, DSSVD, DQR}
 
 package object drm {
 
@@ -72,45 +70,56 @@ package object drm {
       (implicit ctx: DistributedContext): CheckpointedDrm[Long] = ctx.drmParallelizeEmptyLong(nrow, ncol, numPartitions)
 
   /** Implicit broadcast -> value conversion. */
-  implicit def bcast2val[T](bcast: BCast[T]): T = bcast.value
+  implicit def bcast2val[T](bcast:BCast[T]):T = bcast.value
 
   /** Just throw all engine operations into context as well. */
-  implicit def ctx2engine(ctx: DistributedContext): DistributedEngine = ctx.engine
+  implicit def ctx2engine(ctx:DistributedContext):DistributedEngine = ctx.engine
 
   implicit def drm2drmCpOps[K: ClassTag](drm: CheckpointedDrm[K]): CheckpointedOps[K] =
     new CheckpointedOps[K](drm)
 
+  implicit def drm2Checkpointed[K](drm: DrmLike[K]): CheckpointedDrm[K] = drm.checkpoint()
+
+  // ============== Decompositions ===================
+
   /**
-   * We assume that whenever computational action is invoked without explicit checkpoint, the user
-   * doesn't imply caching
+   * Distributed _thin_ QR. A'A must fit in a memory, i.e. if A is m x n, then n should be pretty
+   * controlled (<5000 or so). <P>
+   *
+   * It is recommended to checkpoint A since it does two passes over it. <P>
+   *
+   * It also guarantees that Q is partitioned exactly the same way (and in same key-order) as A, so
+   * their RDD should be able to zip successfully.
    */
-  implicit def drm2Checkpointed[K: ClassTag](drm: DrmLike[K]): CheckpointedDrm[K] = drm.checkpoint(CacheHint.NONE)
+  def dqrThin[K: ClassTag](A: DrmLike[K], checkRankDeficiency: Boolean = true): (DrmLike[K], Matrix) =
+    DQR.dqrThin(A, checkRankDeficiency)
 
-  /** Implicit conversion to in-core with NONE caching of the result. */
-  implicit def drm2InCore[K: ClassTag](drm: DrmLike[K]): Matrix = drm.collect
+  /**
+   * Distributed Stochastic Singular Value decomposition algorithm.
+   *
+   * @param A input matrix A
+   * @param k request SSVD rank
+   * @param p oversampling parameter
+   * @param q number of power iterations
+   * @return (U,V,s). Note that U, V are non-checkpointed matrices (i.e. one needs to actually use them
+   *         e.g. save them to hdfs in order to trigger their computation.
+   */
+  def dssvd[K: ClassTag](A: DrmLike[K], k: Int, p: Int = 15, q: Int = 0):
+  (DrmLike[K], DrmLike[Int], Vector) = DSSVD.dssvd(A, k, p, q)
 
-  /** Do vertical concatenation of collection of blockified tuples */
-  def rbind[K: ClassTag](blocks: Iterable[BlockifiedDrmTuple[K]]): BlockifiedDrmTuple[K] = {
-    assert(blocks.nonEmpty, "rbind: 0 blocks passed in")
-    if (blocks.size == 1) {
-      // No coalescing required.
-      blocks.head
-    } else {
-      // compute total number of rows in a new block
-      val m = blocks.view.map(_._2.nrow).sum
-      val n = blocks.head._2.ncol
-      val coalescedBlock = blocks.head._2.like(m, n)
-      val coalescedKeys = new Array[K](m)
-      var row = 0
-      for (elem <- blocks.view) {
-        val block = elem._2
-        val rowEnd = row + block.nrow
-        coalescedBlock(row until rowEnd, ::) := block
-        elem._1.copyToArray(coalescedKeys, row)
-        row = rowEnd
-      }
-      coalescedKeys -> coalescedBlock
-    }
-  }
+  /**
+   * Distributed Stochastic PCA decomposition algorithm. A logical reflow of the "SSVD-PCA options.pdf"
+   * document of the MAHOUT-817.
+   *
+   * @param A input matrix A
+   * @param k request SSVD rank
+   * @param p oversampling parameter
+   * @param q number of power iterations (hint: use either 0 or 1)
+   * @return (U,V,s). Note that U, V are non-checkpointed matrices (i.e. one needs to actually use them
+   *         e.g. save them to hdfs in order to trigger their computation.
+   */
+  def dspca[K: ClassTag](A: DrmLike[K], k: Int, p: Int = 15, q: Int = 0):
+  (DrmLike[K], DrmLike[Int], Vector) = DSPCA.dspca(A, k, p, q)
+
 
 }

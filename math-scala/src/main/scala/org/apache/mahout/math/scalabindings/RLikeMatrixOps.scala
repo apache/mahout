@@ -20,7 +20,7 @@ import org.apache.mahout.math.{Vector, Matrix}
 import scala.collection.JavaConversions._
 import RLikeOps._
 
-class RLikeMatrixOps(m: Matrix) extends MatrixOps(m) {
+class RLikeMatrixOps(_m: Matrix) extends MatrixOps(_m) {
 
   /**
    * matrix-matrix multiplication
@@ -47,14 +47,12 @@ class RLikeMatrixOps(m: Matrix) extends MatrixOps(m) {
 
   def *(that: Double) = cloned *= that
 
-  def /(that: Matrix) = cloned /= that
+  def /(that:Matrix) = cloned /= that
 
-  def /:(that: Matrix) = that / m
-
-  def /(that: Double) = cloned /= that
+  def /(that:Double) = cloned /= that
 
   /** 1.0 /: A is eqivalent to R's 1.0/A */
-  def /:(that: Double) = that /=: cloned
+  def /:(that:Double) = that /=: cloned
 
   /**
    * in-place Hadamard product. We probably don't want to use assign
@@ -84,7 +82,7 @@ class RLikeMatrixOps(m: Matrix) extends MatrixOps(m) {
   }
 
   /** 1.0 /=: A is equivalent to A = 1.0/A in R */
-  def /=:(that: Double) = {
+  def /=:(that:Double) = {
     m.foreach(that /=: _.vector())
     m
   }

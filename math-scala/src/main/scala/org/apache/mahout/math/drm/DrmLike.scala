@@ -28,7 +28,7 @@ package org.apache.mahout.math.drm
  */
 trait DrmLike[K] {
 
-  protected[mahout] def partitioningTag: Long
+  protected[mahout] def partitioningTag:Long
 
   protected[mahout] val context:DistributedContext
 

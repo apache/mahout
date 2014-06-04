@@ -36,9 +36,9 @@ class AewBSuite extends FunSuite with MahoutLocalContext {
     val A = drmParallelize(m = inCoreA, numPartitions = 2)
     val B = drmParallelize(m = inCoreB)
 
-    val op = new OpAewB(A, B, "*")
+    val op = new OpAewB(A, B, '*')
 
-    val M = new CheckpointedDrmSpark(AewB.a_ew_b(op, srcA = A, srcB = B), op.nrow, op.ncol)
+    val M = new CheckpointedDrmSpark(AewB.a_hadamard_b(op, srcA = A, srcB = B), op.nrow, op.ncol)
 
     val inCoreM = M.collect
     val inCoreMControl = inCoreA * inCoreB
@@ -53,9 +53,9 @@ class AewBSuite extends FunSuite with MahoutLocalContext {
     val A = drmParallelize(m = inCoreA, numPartitions = 2)
     val B = drmParallelize(m = inCoreB)
 
-    val op = new OpAewB(A, B, "+")
+    val op = new OpAewB(A, B, '+')
 
-    val M = new CheckpointedDrmSpark(AewB.a_ew_b(op, srcA = A, srcB = B), op.nrow, op.ncol)
+    val M = new CheckpointedDrmSpark(AewB.a_plus_b(op, srcA = A, srcB = B), op.nrow, op.ncol)
 
     val inCoreM = M.collect
     val inCoreMControl = inCoreA + inCoreB
@@ -70,9 +70,9 @@ class AewBSuite extends FunSuite with MahoutLocalContext {
     val A = drmParallelize(m = inCoreA, numPartitions = 2)
     val B = drmParallelize(m = inCoreB)
 
-    val op = new OpAewB(A, B, "-")
+    val op = new OpAewB(A, B, '-')
 
-    val M = new CheckpointedDrmSpark(AewB.a_ew_b(op, srcA = A, srcB = B), op.nrow, op.ncol)
+    val M = new CheckpointedDrmSpark(AewB.a_minus_b(op, srcA = A, srcB = B), op.nrow, op.ncol)
 
     val inCoreM = M.collect
     val inCoreMControl = inCoreA - inCoreB
@@ -87,9 +87,9 @@ class AewBSuite extends FunSuite with MahoutLocalContext {
     val A = drmParallelize(m = inCoreA, numPartitions = 2)
     val B = drmParallelize(m = inCoreB)
 
-    val op = new OpAewB(A, B, "/")
+    val op = new OpAewB(A, B, '/')
 
-    val M = new CheckpointedDrmSpark(AewB.a_ew_b(op, srcA = A, srcB = B), op.nrow, op.ncol)
+    val M = new CheckpointedDrmSpark(AewB.a_eldiv_b(op, srcA = A, srcB = B), op.nrow, op.ncol)
 
     val inCoreM = M.collect
     val inCoreMControl = inCoreA / inCoreB
