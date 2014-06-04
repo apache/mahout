@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.sparkbindings.drm.decompositions
+package org.apache.mahout.math.decompositions
 
 import org.scalatest.{Matchers, FunSuite}
 import org.apache.mahout.sparkbindings.test.MahoutLocalContext
@@ -26,6 +26,7 @@ import RLikeOps._
 import RLikeDrmOps._
 import org.apache.mahout.sparkbindings._
 import org.apache.mahout.common.RandomUtils
+import scala.math._
 
 class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
 
@@ -43,7 +44,7 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
     val (drmQ, inCoreR) = dqrThin(A, checkRankDeficiency = false)
 
     // Assert optimizer still knows Q and A are identically partitioned
-    drmQ.partitioningTag should equal (A.partitioningTag)
+    drmQ.partitioningTag should equal(A.partitioningTag)
 
     drmQ.rdd.partitions.size should be(A.rdd.partitions.size)
 
@@ -124,12 +125,10 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
 
   test("dspca") {
 
-    import math._
-
     val rnd = RandomUtils.getRandom
 
     // Number of points
-    val m =  500
+    val m = 500
     // Length of actual spectrum
     val spectrumLen = 40
 
@@ -172,5 +171,42 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
 
   }
 
+  test("als") {
+
+    val rnd = RandomUtils.getRandom
+
+    // Number of points
+    val m = 500
+    val n = 500
+
+    // Length of actual spectrum
+    val spectrumLen = 40
+
+    // Create singluar values with decay
+    val spectrum = dvec((0 until spectrumLen).map(x => 300.0 * exp(-x) max 1e-3))
+    printf("spectrum:%s\n", spectrum)
+
+    // Create A as an ideal input
+    val inCoreA = (qr(Matrices.symmetricUniformView(m, spectrumLen, 1234))._1 %*%: diagv(spectrum)) %*%
+        qr(Matrices.symmetricUniformView(n, spectrumLen, 2345))._1.t
+    val drmA = drmParallelize(inCoreA, numPartitions = 2)
+
+    // Decompose using ALS
+    val (drmU, drmV, rmse) = als(drmInput = drmA, k = 20).toTuple
+    val inCoreU = drmU.collect
+    val inCoreV = drmV.collect
+
+    val predict = inCoreU %*% inCoreV.t
+
+    printf("Control block:\n%s\n", inCoreA(0 until 3, 0 until 3))
+    printf("ALS factorized approximation block:\n%s\n", predict(0 until 3, 0 until 3))
+
+    val err = (inCoreA - predict).norm
+    printf ("norm of residuals %f\n",err)
+    printf ("train iteration rmses: %s\n", rmse)
+
+    err should be < 1e-2
+
+  }
 
 }

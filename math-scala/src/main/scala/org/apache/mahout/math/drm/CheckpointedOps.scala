@@ -18,7 +18,7 @@
 package org.apache.mahout.math.drm
 
 import scala.reflect.ClassTag
-import org.apache.mahout.math.Vector
+import org.apache.mahout.math._
 
 
 /**
@@ -35,5 +35,6 @@ class CheckpointedOps[K: ClassTag](val drm: CheckpointedDrm[K]) {
   /** Column Means */
   def colMeans(): Vector = drm.context.colMeans(drm)
 
+  def norm():Double = drm.context.norm(drm)
 }
 

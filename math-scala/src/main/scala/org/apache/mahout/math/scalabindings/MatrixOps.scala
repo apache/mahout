@@ -51,6 +51,8 @@ class MatrixOps(val m: Matrix) {
 
   def -(that: Matrix) = cloned -= that
 
+  def -:(that: Matrix) = that - m
+
   // m.plus(that)?
 
   def +(that: Double) = cloned += that
