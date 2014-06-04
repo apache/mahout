@@ -19,8 +19,9 @@ package org.apache.mahout.sparkbindings.drm
 
 import org.apache.mahout.math._
 import math._
-import org.apache.mahout.math.scalabindings._
+import scalabindings._
 import RLikeOps._
+import drm._
 import scala.collection.JavaConversions._
 import org.apache.spark.storage.StorageLevel
 import reflect._
@@ -95,8 +96,9 @@ class CheckpointedDrmSpark[K: ClassTag](
 
     val intRowIndices = implicitly[ClassTag[K]] == implicitly[ClassTag[Int]]
 
-    val cols = rdd.map(_._2.length).fold(0)(max(_, _))
-    val rows = if (intRowIndices) rdd.map(_._1.asInstanceOf[Int]).fold(-1)(max(_, _)) + 1 else rdd.count().toInt
+    val cols = ncol
+    val rows = safeToNonNegInt(nrow)
+
 
     // since currently spark #collect() requires Serializeable support,
     // we serialize DRM vectors into byte arrays on backend and restore Vector
