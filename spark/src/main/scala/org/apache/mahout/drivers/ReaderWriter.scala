@@ -149,6 +149,10 @@ trait TDIndexedDatasetWriter extends Writer[IndexedDataset]{
       val matrix: DrmLike[Int] = indexedDataset.matrix
       val rowIDDictionary: BiMap[String, Int] = indexedDataset.rowIDs
       val columnIDDictionary: BiMap[String, Int] = indexedDataset.columnIDs
+      // below doesn't compile because the rdd is not in a CheckpointedDrmSpark also I don't know how to turn a
+      // CheckpointedDrmSpark[Int] into a DrmLike[Int], which I need to pass in the CooccurrenceAnalysis#cooccurrence
+      // This seems to be about the refacotring to abstract away from Spark but the Read and Write are Spark specific
+      // and the non-specific DrmLike is no longer attached to a CheckpointedDrmSpark, could be missing something though
       matrix.rdd.map({ case (rowID, itemVector) =>
         var line: String = rowIDDictionary.inverse.get(rowID) + outDelim1
         for (item <- itemVector.nonZeroes()) {
