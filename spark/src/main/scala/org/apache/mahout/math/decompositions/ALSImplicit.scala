@@ -13,9 +13,48 @@ import org.apache.spark.SparkContext._
 
 object ALSImplicit {
 
+  /**
+   * See MAHOUT-1365 for details.
+   *
+   * Implicit feedback has two inputs: the preference matrix and confidence matrix. Preference on
+   * user/item interaciton is always 1 (prefer) or 0 (do not prefer). Confidence encodes informal
+   * weighing on how confident we are about preference. Things we don't have any observations for
+   * are usually encoded with baseline confidence (c0 parameter).Things we do get observations for
+   * have higher confidence. Thus, it is assumed that all confidence cells are greater or equal c0.
+   * <P/>
+   *
+   * Next, for the purposes of compactness of input, we sparsify and combine both inputs in the
+   * following way.
+   * <P/>
+   *
+   * First, we assume that we don't have observations for every combination of user/item pair, so
+   * (C-c0) matrix is sparse.
+   * <P/>
+   *
+   * Second, we can use sign to encode preferences, i.e.
+   * <pre>
+   *    C*(i,j) = (C(i,j)-c0) if P(i,j)==1;
+   *       and
+   *    C*(i,j) = -(C(i,j)-c0) if P(i,j)=0.
+   * </pre>
+   *
+   * Note in that we assume all entries with baseline confidence having P = 0 (no preference).
+   * <P/>
+   *
+   * In reality this input vectorizes without need to ever form dense inputs since we only encode
+   * entries that do have any observations.
+   * <P/>
+   *
+   * @param drmC confidence/preference encoded input C* as explained above
+   * @param c0 baseline confidence value.
+   * @param k factorization rank (~50...100 is probably enough)
+   * @param lambda regularization for this iteration
+   * @param maxIterations maximum iterations to run
+   * @param convergenceTreshold reserved, not used at this point
+   */
   def alsImplicit(
       drmC: DrmLike[Int],
-      c0: Double,
+      c0: Double = 1.0,
       k: Int = 50,
       lambda: Double = 0.01,
       maxIterations: Int = 10,
