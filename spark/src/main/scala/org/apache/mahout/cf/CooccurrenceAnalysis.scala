@@ -23,11 +23,9 @@ import RLikeOps._
 import drm._
 import RLikeDrmOps._
 import org.apache.mahout.sparkbindings._
-
 import scala.collection.JavaConversions._
 import org.apache.mahout.math.stats.LogLikelihood
 import collection._
-// import scala.collection.parallel.mutable
 import org.apache.mahout.common.RandomUtils
 
 

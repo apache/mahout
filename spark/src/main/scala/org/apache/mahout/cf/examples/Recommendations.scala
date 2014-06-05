@@ -79,29 +79,32 @@ object RunCrossCooccurrenceAnalysisOnEpinions {
 
     System.setProperty("spark.kryo.referenceTracking", "false")
     System.setProperty("spark.kryoserializer.buffer.mb", "100")
-
-//    implicit val distributedContext = mahoutSparkContext(masterUrl = "local", appName = "MahoutLocalContext",
-//      customJars = Traversable.empty[String])
-    implicit val distributedContext = mahoutSparkContext(masterUrl = "spark://occam4:7077", appName = "MahoutClusteredContext",
+/* to run on local, can provide number of core by changing to local[4] */
+    implicit val distributedContext = mahoutSparkContext(masterUrl = "local", appName = "MahoutLocalContext",
       customJars = Traversable.empty[String])
 
+    /* to run on a Spark cluster provide the Spark Master URL
+    implicit val distributedContext = mahoutSparkContext(masterUrl = "spark://occam4:7077", appName = "MahoutClusteredContext",
+      customJars = Traversable.empty[String])
+*/
     val drmEpinionsRatings = drmParallelize(epinionsRatings, numPartitions = 2)
     val drmEpinionsTrustNetwork = drmParallelize(epinionsTrustNetwork, numPartitions = 2)
 
     val indicatorMatrices = cooccurrences(drmEpinionsRatings, randomSeed = 0xdeadbeef,
         maxInterestingItemsPerThing = 100, maxNumInteractions = 500, Array(drmEpinionsTrustNetwork))
-//hdfs://occam4:54310/user/pat/xrsj/
-/*
+
+/* local storage */
     RecommendationExamplesHelper.saveIndicatorMatrix(indicatorMatrices(0),
         "/tmp/co-occurrence-on-epinions/indicators-item-item/")
     RecommendationExamplesHelper.saveIndicatorMatrix(indicatorMatrices(1),
         "/tmp/co-occurrence-on-epinions/indicators-trust-item/")
-*/
+
+/*  To run on HDFS put your path to the data here, example of fully qualified path on my cluster provided
     RecommendationExamplesHelper.saveIndicatorMatrix(indicatorMatrices(0),
       "hdfs://occam4:54310/user/pat/xrsj/indicators-item-item/")
     RecommendationExamplesHelper.saveIndicatorMatrix(indicatorMatrices(1),
       "hdfs://occam4:54310/user/pat/xrsj/indicators-trust-item/")
-
+*/
     distributedContext.close()
 
     println("Saved indicators to /tmp/co-occurrence-on-epinions/")
