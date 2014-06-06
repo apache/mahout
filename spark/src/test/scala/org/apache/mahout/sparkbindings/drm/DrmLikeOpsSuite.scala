@@ -98,13 +98,17 @@ class DrmLikeOpsSuite extends FunSuite with MahoutLocalContext {
 
     A.rdd.partitions.size should equal(2)
 
-    (A exact_|| 4).rdd.partitions.size should equal(4)
+    (A + 1.0 exact_|| 4).rdd.partitions.size should equal(4)
     (A exact_|| 2).rdd.partitions.size should equal(2)
     (A exact_|| 1).rdd.partitions.size should equal(1)
     (A exact_|| 0).rdd.partitions.size should equal(2) // No effect for par <= 0
     (A min_|| 4).rdd.partitions.size should equal(4)
     (A min_|| 2).rdd.partitions.size should equal(2)
     (A min_|| 1).rdd.partitions.size should equal(2)
+    (A auto_||).rdd.partitions.size should equal(10)
+    (A exact_|| 10).auto_||.rdd.partitions.size should equal(10)
+    (A exact_|| 11).auto_||.rdd.partitions.size should equal(19)
+    (A exact_|| 20).auto_||.rdd.partitions.size should equal(20)
   }
 
 }

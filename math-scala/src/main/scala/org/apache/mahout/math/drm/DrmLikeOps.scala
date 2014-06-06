@@ -31,6 +31,15 @@ class DrmLikeOps[K : ClassTag](protected[drm] val drm: DrmLike[K]) {
   def exact_||(numPartitions: Int) = OpPar(drm, exactSplits = numPartitions)
 
   /**
+   * Adjusted parallelism automatically to 0.95 or 1.9x default paralelism specific to a distributed
+   * engine.
+   * <P/>
+   *
+   * @return repartitioned Matrix adjusted for default engine parallelism set.
+   */
+  def auto_||() = OpPar(drm)
+
+  /**
    * Map matrix block-wise vertically. Blocks of the new matrix can be modified original block
    * matrices; or they could be completely new matrices with new keyset. In the latter case, output
    * matrix width must be specified with <code>ncol</code> parameter.<P>
