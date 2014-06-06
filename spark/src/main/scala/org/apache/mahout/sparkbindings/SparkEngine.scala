@@ -32,6 +32,7 @@ import scala.collection.JavaConversions._
 import org.apache.spark.SparkContext
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.RLikeDrmOps._
+import org.apache.spark.rdd.RDD
 
 /** Spark-specific non-drm-method operations */
 object SparkEngine extends DistributedEngine {
@@ -105,32 +106,38 @@ object SparkEngine extends DistributedEngine {
    *
    * @return DRM[Any] where Any is automatically translated to value type
    */
-  def drmFromHDFS (path: String)(implicit sc: DistributedContext): CheckpointedDrm[_] = {
-    implicit val scc:SparkContext = sc
-    val rdd = sc.sequenceFile(path, classOf[Writable], classOf[VectorWritable]).map(t => (t._1, t._2.get()))
+  def drmFromHDFS (path: String, minSplits:Int = 0)(implicit sc: DistributedContext): CheckpointedDrm[_] = {
 
-    val key = rdd.map(_._1).take(1)(0)
-    val keyWClass = key.getClass.asSubclass(classOf[Writable])
+    val rdd = sc.sequenceFile(path, classOf[Writable], classOf[VectorWritable], minSplits = minSplits)
+        // Get rid of VectorWritable
+        .map(t => (t._1, t._2.get()))
 
-    val key2val = key match {
-      case xx: IntWritable => (v: AnyRef) => v.asInstanceOf[IntWritable].get
-      case xx: Text => (v: AnyRef) => v.asInstanceOf[Text].toString
-      case xx: LongWritable => (v: AnyRef) => v.asInstanceOf[LongWritable].get
-      case xx: Writable => (v: AnyRef) => v
-    }
+    def getKeyClassTag[K: ClassTag, V](rdd: RDD[(K, V)]) = implicitly[ClassTag[K]]
 
-    val val2key = key match {
-      case xx: IntWritable => (x: Any) => new IntWritable(x.asInstanceOf[Int])
-      case xx: Text => (x: Any) => new Text(x.toString)
-      case xx: LongWritable => (x: Any) => new LongWritable(x.asInstanceOf[Int])
-      case xx: Writable => (x: Any) => x.asInstanceOf[Writable]
-    }
+    // Spark should've loaded the type info from the header, right?
+    val keyTag = getKeyClassTag(rdd)
 
-    val  km = key match {
-      case xx: IntWritable => implicitly[ClassTag[Int]]
-      case xx: Text => implicitly[ClassTag[String]]
-      case xx: LongWritable => implicitly[ClassTag[Long]]
-      case xx: Writable => ClassTag(classOf[Writable])
+    val (key2val, val2key, km) = keyTag match {
+
+      case xx: ClassTag[Writable] if (xx == implicitly[ClassTag[IntWritable]]) => (
+          (v: AnyRef) => v.asInstanceOf[IntWritable].get,
+          (x: Any) => new IntWritable(x.asInstanceOf[Int]),
+          implicitly[ClassTag[Int]])
+
+      case xx: ClassTag[Writable] if (xx == implicitly[ClassTag[Text]]) => (
+          (v: AnyRef) => v.asInstanceOf[Text].toString,
+          (x: Any) => new Text(x.toString),
+          implicitly[ClassTag[String]])
+
+      case xx: ClassTag[Writable] if (xx == implicitly[ClassTag[LongWritable]]) => (
+          (v: AnyRef) => v.asInstanceOf[LongWritable].get,
+          (x: Any) => new LongWritable(x.asInstanceOf[Int]),
+          implicitly[ClassTag[Long]])
+
+      case xx: ClassTag[Writable] => (
+          (v: AnyRef) => v,
+          (x: Any) => x.asInstanceOf[Writable],
+          ClassTag(classOf[Writable]))
     }
 
     {
