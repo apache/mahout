@@ -14,7 +14,7 @@ trait MahoutLocalContext extends MahoutSuite with LoggerConfiguration {
   override protected def beforeEach() {
     super.beforeEach()
 
-    mahoutCtx = mahoutSparkContext(masterUrl = "local[3]",
+    mahoutCtx = mahoutSparkContext(masterUrl = "local[2]",
       appName = "MahoutLocalContext",
       // Do not run MAHOUT_HOME jars in unit tests.
       addMahoutJars = false,
