@@ -25,7 +25,7 @@ import org.apache.mahout.math.drm._
 import org.apache.mahout.math._
 import org.apache.mahout.sparkbindings.test.MahoutLocalContext
 
-/*
+/* values 
 A =
 1	1	0	0	0
 0	0	1	1	0
@@ -46,13 +46,8 @@ class CooccurrenceAnalysisSuite extends FunSuite with MahoutSuite with MahoutLoc
     val b = dense((1, 1, 1, 1, 0), (1, 1, 1, 1, 0), (0, 0, 1, 0, 1), (1, 1, 0, 1, 0))
     val drmA = drmParallelize(m = a, numPartitions = 2)
     val drmB = drmParallelize(m = b, numPartitions = 2)
-    /* correct cooccurrence with LLR
-    Key: 0: Value: {1:1.7260924347106847}
-Key: 1: Value: {0:1.7260924347106847}
-Key: 2: Value: {3:1.7260924347106847}
-Key: 3: Value: {2:1.7260924347106847}
-Key: 4: Value: {}
-     */
+
+    // correct cooccurrence with LLR
     val matrixLLRCoocAtAControl = dense(
       (0.0, 1.7260924347106847, 0, 0, 0),
       (1.7260924347106847, 0, 0, 0, 0),
@@ -60,13 +55,8 @@ Key: 4: Value: {}
       (0, 0, 1.7260924347106847, 0, 0),
       (0, 0, 0, 0, 0)
     )
-    /* correct cross-cooccurrence with LLR
-    Key: 0: Value: {2:0.6795961471815897,3:1.7260924347106847,1:0.6795961471815897,0:1.7260924347106847}
-Key: 1: Value: {2:0.6795961471815897,3:1.7260924347106847,1:0.6795961471815897,0:1.7260924347106847}
-Key: 2: Value: {2:0.6795961471815897,3:1.7260924347106847,1:0.6795961471815897,4:0.6795961471815897,0:1.7260924347106847}
-Key: 3: Value: {2:0.6795961471815897,3:1.7260924347106847,1:0.6795961471815897,0:1.7260924347106847}
-Key: 4: Value: {4:4.498681156950466}
-     */
+
+    // correct cross-cooccurrence with LLR
     val matrixLLRCoocBtAControl = dense(
       (1.7260924347106847, 0.6795961471815897, 0.6795961471815897, 1.7260924347106847, 0),
       (1.7260924347106847, 0.6795961471815897, 0.6795961471815897, 1.7260924347106847, 0),
@@ -109,7 +99,7 @@ Key: 4: Value: {4:4.498681156950466}
     val drmA: DrmLike[Int] = drmParallelize(m = a, numPartitions = 2)
 
     val downSampledDrm = CooccurrenceAnalysis.sampleDownAndBinarize(drmA, 0xdeadbeef, 2)
-    //cound non-zero values, should be == 7
+    //count non-zero values, should be == 7
     var numValues = 0
     val m = downSampledDrm.collect
     val it = m.iterator()
