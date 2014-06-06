@@ -19,10 +19,16 @@ package org.apache.mahout.math.drm
 
 import scala.reflect.ClassTag
 import org.apache.mahout.math.scalabindings._
-import org.apache.mahout.math.drm.logical.{OpMapBlock, OpRowRange}
+import org.apache.mahout.math.drm.logical.{OpPar, OpMapBlock, OpRowRange}
 
 /** Common Drm ops */
 class DrmLikeOps[K : ClassTag](protected[drm] val drm: DrmLike[K]) {
+
+  /** Establishes minimum parallelism */
+  def min_||(minSplits: Int) = OpPar(drm, minSplits = minSplits)
+
+  /** Establishes exact parallelism */
+  def exact_||(numPartitions: Int) = OpPar(drm, exactSplits = numPartitions)
 
   /**
    * Map matrix block-wise vertically. Blocks of the new matrix can be modified original block

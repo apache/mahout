@@ -242,6 +242,7 @@ object SparkEngine extends DistributedEngine {
         ncol = blockOp.ncol,
         bmf = blockOp.bmf
       )
+      case op@OpPar(a,_,_) => Par.exec(op,tr2phys(a)(op.classTagA))
       case cp: CheckpointedDrm[K] => new DrmRddInput[K](rowWiseSrc = Some((cp.ncol, cp.rdd)))
       case _ => throw new IllegalArgumentException("Internal:Optimizer has no exec policy for operator %s."
           .format(oper))

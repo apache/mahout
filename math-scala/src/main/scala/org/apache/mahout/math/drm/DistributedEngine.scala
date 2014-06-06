@@ -24,6 +24,7 @@ import scalabindings._
 import RLikeOps._
 import DistributedEngine._
 import org.apache.mahout.math.scalabindings._
+import org.apache.log4j.Logger
 
 /** Abstraction of optimizer/distributed engine */
 trait DistributedEngine {
@@ -78,6 +79,8 @@ trait DistributedEngine {
 }
 
 object DistributedEngine {
+
+  private val log = Logger.getLogger(DistributedEngine.getClass)
 
   /** This is mostly multiplication operations rewrites */
   private def pass1[K: ClassTag](action: DrmLike[K]): DrmLike[K] = {
@@ -143,6 +146,14 @@ object DistributedEngine {
       case OpAB(a, b) => OpABt(pass3(a), OpAt(pass3(b)))
       // Rewrite A'x
       case op@OpAx(op1@OpAt(a), x) => OpAtx(pass3(a)(op1.classTagA), x)
+
+      case op@OpPar(a,_,_) =>
+        // We will just issue a warning if parallelism is applied on top of anything other than a
+        // checkpoint. Since we are doing anything special with parallelism instructions, they may
+        // prevent some optimizer actions from occurring, if not applied directly to a checkpoint.
+        if (!a.isInstanceOf[CheckpointedDrm[_]])
+          log.warn("Parallelism instruction on a logical argument which is not a checkpoint.")
+        op
 
       // Stop at checkpoints
       case cd: CheckpointedDrm[_] => action
