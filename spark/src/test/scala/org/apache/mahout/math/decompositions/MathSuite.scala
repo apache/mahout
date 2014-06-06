@@ -209,4 +209,43 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
 
   }
 
+  test ("ALS implicit") {
+
+    val rnd = RandomUtils.getRandom()
+
+    val m = 500
+    val n = 400
+
+    val spectrumLen = 40
+    val k = 15
+    val observedRatio = 0.2
+
+    // Create singluar values with decay
+    val spectrum = dvec((0 until spectrumLen).map(x => 300.0 * exp(-x) max 1e-3))
+    printf("spectrum:%s\n", spectrum)
+
+    // Create A as an ideal input
+    val inCoreCControl = (qr(Matrices.symmetricUniformView(m, spectrumLen, 1234))._1 %*%: diagv(spectrum)) %*%
+        qr(Matrices.symmetricUniformView(n, spectrumLen, 2345))._1.t
+
+    // Encode input, simulating nonobservations
+    var inCoreCStar = (inCoreCControl cloned) := ((r, c, v) => if (rnd.nextDouble() > observedRatio)
+      0.0
+    else
+      v * 40.0
+        )
+
+    // Make sure input is sparsified
+    inCoreCStar = new SparseMatrix(m,n) := inCoreCStar
+
+    val drmC = drmParallelize(m = inCoreCStar, numPartitions = 4)
+
+    val (drmU, drmV, _) = ALSImplicit.alsImplicit(drmC, k=k, maxIterations = 5).toTuple
+    val predict = (drmU %*% drmV.t) collect
+
+    printf ("Control1=\n%s\n",inCoreCControl(0,::))
+    printf("Predict1=\n%s\n", predict(0,::))
+
+  }
+
 }

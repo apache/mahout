@@ -7,9 +7,9 @@ import RLikeOps._
 import drm._
 import RLikeDrmOps._
 import org.apache.mahout.sparkbindings._
-import scala.util.Random
 import scala.collection.JavaConversions._
 import org.apache.spark.SparkContext._
+import org.apache.mahout.common.RandomUtils
 
 object ALSImplicit {
 
@@ -33,9 +33,9 @@ object ALSImplicit {
    *
    * Second, we can use sign to encode preferences, i.e.
    * <pre>
-   *    C*(i,j) = (C(i,j)-c0) if P(i,j)==1;
-   *       and
-   *    C*(i,j) = -(C(i,j)-c0) if P(i,j)=0.
+   *     C*(i,j) = (C(i,j)-c0) if P(i,j)==1;
+   *          and
+   *     C*(i,j) = -(C(i,j)-c0) if P(i,j)=0.
    * </pre>
    *
    * Note in that we assume all entries with baseline confidence having P = 0 (no preference).
@@ -59,7 +59,7 @@ object ALSImplicit {
       lambda: Double = 0.01,
       maxIterations: Int = 10,
       convergenceTreshold: Double = 0.10
-      ) = {
+      ): ALS.Result[Int] = {
     val drmA = drmC
     val drmAt = drmC.t
 
@@ -67,7 +67,8 @@ object ALSImplicit {
     var drmUA = drmA.mapBlock(ncol = k + drmA.ncol) {
       case (keys, block) =>
         val uaBlock = block.like(block.nrow, block.ncol + k)
-        uaBlock(::, 0 until k) := Matrices.symmetricUniformView(uaBlock.nrow, k, Random.nextInt()) * 0.01
+        uaBlock(::, 0 until k) :=
+            Matrices.symmetricUniformView(uaBlock.nrow, k, RandomUtils.getRandom().nextInt()) * 0.01
         uaBlock(::, k until uaBlock.ncol) := block
         keys -> uaBlock
     }
@@ -84,22 +85,25 @@ object ALSImplicit {
     var i = 0
     var stop = false
 
-    var drmVAtOld:DrmLike[Int] = null
-    var drmUAOld:DrmLike[Int] = null
+    var drmVAtOld: DrmLike[Int] = null
+    var drmUAOld: DrmLike[Int] = null
+
     while (i < maxIterations && !stop) {
 
-      // Update U-A, relinquish stuff explicitly from block manager to alleviate GC concernts and swaps
-      if (drmUAOld != null ) drmUAOld.uncache()
+      // Update U-A, relinquish stuff explicitly from block manager to alleviate GC concerns and swaps
+      if (drmUAOld != null) drmUAOld.uncache()
       drmUAOld = drmUA
       drmUA = updateUA(drmUA, drmVAt, k, c0)
 
       // Update V-A'
-      if ( drmVAtOld!= null) drmVAtOld.uncache()
+      if (drmVAtOld != null) drmVAtOld.uncache()
       drmVAtOld = drmVAt
       drmVAt = updateUA(drmVAt, drmUA, k, c0)
 
       i += 1
     }
+
+    new ALS.Result[Int](drmU = drmUA(::, 0 until k), drmV = drmVAt(::, 0 until k), iterationsRMSE = Iterable())
   }
 
   private def updateUA(drmUA: DrmLike[Int], drmVAt: DrmLike[Int], k: Int, c0: Double): DrmLike[Int] = {
