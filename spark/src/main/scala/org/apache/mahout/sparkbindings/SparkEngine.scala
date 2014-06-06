@@ -117,7 +117,7 @@ object SparkEngine extends DistributedEngine {
     // Spark should've loaded the type info from the header, right?
     val keyTag = getKeyClassTag(rdd)
 
-    val (key2val, val2key, km) = keyTag match {
+    val (key2valFunc, val2keyFunc, unwrappedKeyTag) = keyTag match {
 
       case xx: ClassTag[Writable] if (xx == implicitly[ClassTag[IntWritable]]) => (
           (v: AnyRef) => v.asInstanceOf[IntWritable].get,
@@ -141,11 +141,11 @@ object SparkEngine extends DistributedEngine {
     }
 
     {
-      implicit def getWritable(x: Any): Writable = val2key()
+      implicit def getWritable(x: Any): Writable = val2keyFunc()
       new CheckpointedDrmSpark(
-        rdd = rdd.map(t => (key2val(t._1), t._2)),
+        rdd = rdd.map(t => (key2valFunc(t._1), t._2)),
         _cacheStorageLevel = StorageLevel.MEMORY_ONLY
-      )(km.asInstanceOf[ClassTag[Any]])
+      )(unwrappedKeyTag.asInstanceOf[ClassTag[Any]])
     }
   }
 
