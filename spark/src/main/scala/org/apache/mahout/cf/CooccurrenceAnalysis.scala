@@ -153,7 +153,7 @@ object CooccurrenceAnalysis extends Serializable {
   }
 
   /**
-   * Selectively downsample users and things with an anormalous amount of interactions, inspired by
+   * Selectively downsample users and things with an anomalous amount of interactions, inspired by
    * https://github.com/tdunning/in-memory-cooccurrence/blob/master/src/main/java/com/tdunning/cooc/Analyze.java
    *
    * additionally binarizes input matrix, as we're only interesting in knowing whether interactions happened or not

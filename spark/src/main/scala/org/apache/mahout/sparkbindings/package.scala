@@ -94,7 +94,7 @@ package object sparkbindings {
         do {
           val cp = r.readLine()
           if (cp == null)
-            throw new IllegalArgumentException("Unable to read output from \"mahout classpath\"")
+            throw new IllegalArgumentException("Unable to read output from \"mahout -spark classpath\". Is SPARK_HOME defined?")
 
           val j = cp.split(File.pathSeparatorChar)
           if (j.size > 10) {
