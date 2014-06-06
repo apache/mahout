@@ -19,16 +19,23 @@ package org.apache.mahout.math.drm.logical
 
 import scala.reflect.ClassTag
 import org.apache.mahout.math.drm.DrmLike
+import scala.util.Random
 
 /** DRM elementwise operator */
 case class OpAewB[K: ClassTag](
     override var A: DrmLike[K],
     override var B: DrmLike[K],
-    val op: Char
+    val op: String
     ) extends AbstractBinaryOp[K, K, K] {
+
+
 
   assert(A.ncol == B.ncol, "arguments must have same number of columns")
   assert(A.nrow == B.nrow, "arguments must have same number of rows")
+
+  override protected[mahout] lazy val partitioningTag: Long =
+    if (A.partitioningTag == B.partitioningTag) A.partitioningTag
+    else Random.nextLong()
 
   /** R-like syntax for number of rows. */
   def nrow: Long = A.nrow

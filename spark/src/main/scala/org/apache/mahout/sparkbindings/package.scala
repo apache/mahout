@@ -29,6 +29,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.broadcast.Broadcast
 import org.apache.mahout.math.{VectorWritable, Vector, MatrixWritable, Matrix}
 import org.apache.hadoop.io.Writable
+import org.apache.spark.storage.StorageLevel
 
 /** Public api for Spark-specific operators */
 package object sparkbindings {
@@ -179,7 +180,8 @@ package object sparkbindings {
     new CheckpointedDrmSpark[K](
       rdd = rdd,
       _nrow = nrow,
-      _ncol = ncol
+      _ncol = ncol,
+      _cacheStorageLevel = StorageLevel.NONE
     )
 
 

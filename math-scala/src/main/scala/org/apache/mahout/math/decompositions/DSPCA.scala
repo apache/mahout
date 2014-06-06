@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math.drm.decompositions
+package org.apache.mahout.math.decompositions
 
 import scala.reflect.ClassTag
 import org.apache.mahout.math.{Matrices, Vector}
