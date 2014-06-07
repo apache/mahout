@@ -17,11 +17,12 @@
 
 package org.apache.mahout.math;
 
+import com.google.common.base.Preconditions;
 import org.apache.mahout.math.function.Functions;
 
 /**
- * sparse matrix with general element values whose rows are accessible quickly. Implemented as a row array of
- * either SequentialAccessSparseVectors or RandomAccessSparseVectors.
+ * sparse matrix with general element values whose rows are accessible quickly. Implemented as a row
+ * array of either SequentialAccessSparseVectors or RandomAccessSparseVectors.
  */
 public class SparseRowMatrix extends AbstractMatrix {
   private Vector[] rowVectors;
@@ -31,9 +32,9 @@ public class SparseRowMatrix extends AbstractMatrix {
   /**
    * Construct a sparse matrix starting with the provided row vectors.
    *
-   * @param rows              The number of rows in the result
-   * @param columns           The number of columns in the result
-   * @param rowVectors        a Vector[] array of rows
+   * @param rows       The number of rows in the result
+   * @param columns    The number of columns in the result
+   * @param rowVectors a Vector[] array of rows
    */
   public SparseRowMatrix(int rows, int columns, Vector[] rowVectors) {
     this(rows, columns, rowVectors, false, rowVectors instanceof RandomAccessSparseVector[]);
@@ -41,12 +42,12 @@ public class SparseRowMatrix extends AbstractMatrix {
 
   public SparseRowMatrix(int rows, int columns, boolean randomAccess) {
     this(rows, columns, randomAccess
-                    ? new RandomAccessSparseVector[rows]
-                    : new SequentialAccessSparseVector[rows],
-        true,
-        randomAccess);
+        ? new RandomAccessSparseVector[rows]
+        : new SequentialAccessSparseVector[rows],
+      true,
+      randomAccess);
   }
-  
+
   public SparseRowMatrix(int rows, int columns, Vector[] vectors, boolean shallowCopy, boolean randomAccess) {
     super(rows, columns);
     this.randomAccessRows = randomAccess;
@@ -63,7 +64,8 @@ public class SparseRowMatrix extends AbstractMatrix {
   }
 
   /**
-   * Construct a matrix of the given cardinality, with rows defaulting to RandomAccessSparseVector implementation
+   * Construct a matrix of the given cardinality, with rows defaulting to RandomAccessSparseVector
+   * implementation
    *
    * @param rows
    * @param columns
@@ -156,9 +158,9 @@ public class SparseRowMatrix extends AbstractMatrix {
   }
 
   /**
-   *
    * @param row an int row index
-   * @return a shallow view of the Vector at specified row (ie you may mutate the original matrix using this row)
+   * @return a shallow view of the Vector at specified row (ie you may mutate the original matrix
+   * using this row)
    */
   @Override
   public Vector viewRow(int row) {
@@ -173,14 +175,19 @@ public class SparseRowMatrix extends AbstractMatrix {
     SparseColumnMatrix scm = new SparseColumnMatrix(columns, rows);
     for (int i = 0; i < rows; i++) {
       Vector row = rowVectors[i];
-      if ( row.getNumNonZeroElements() > 0)
+      if (row.getNumNonZeroElements() > 0) {
         scm.assignColumn(i, row);
+      }
     }
     return scm;
   }
 
   @Override
   public Matrix times(Matrix other) {
+    if (columnSize() != other.rowSize()) {
+      throw new CardinalityException(columnSize(), other.rowSize());
+    }
+
     if (other instanceof SparseRowMatrix) {
       SparseRowMatrix y = (SparseRowMatrix) other;
       SparseRowMatrix result = (SparseRowMatrix) like(rowSize(), other.columnSize());
