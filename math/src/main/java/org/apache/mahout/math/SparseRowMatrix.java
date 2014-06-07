@@ -17,6 +17,8 @@
 
 package org.apache.mahout.math;
 
+import org.apache.mahout.math.function.Functions;
+
 /**
  * sparse matrix with general element values whose rows are accessible quickly. Implemented as a row array of
  * either SequentialAccessSparseVectors or RandomAccessSparseVectors.
@@ -177,4 +179,45 @@ public class SparseRowMatrix extends AbstractMatrix {
     return scm;
   }
 
+  @Override
+  public Matrix times(Matrix other) {
+    if (other instanceof SparseRowMatrix) {
+      SparseRowMatrix y = (SparseRowMatrix) other;
+      SparseRowMatrix result = (SparseRowMatrix) like(rowSize(), other.columnSize());
+
+      for (int i = 0; i < rows; i++) {
+        Vector row = rowVectors[i];
+        for (Vector.Element element : row.nonZeroes()) {
+          result.rowVectors[i].assign(y.rowVectors[element.index()], Functions.plusMult(element.get()));
+        }
+      }
+      return result;
+    } else {
+      if (other.viewRow(0).isDense()) {
+        // result is dense, but can be computed relatively cheaply
+        Matrix result = other.like(rowSize(), other.columnSize());
+
+        for (int i = 0; i < rows; i++) {
+          Vector row = rowVectors[i];
+          Vector r = new DenseVector(other.columnSize());
+          for (Vector.Element element : row.nonZeroes()) {
+            r.assign(other.viewRow(element.index()), Functions.plusMult(element.get()));
+          }
+          result.viewRow(i).assign(r);
+        }
+        return result;
+      } else {
+        // other is sparse, but not something we understand intimately
+        SparseRowMatrix result = (SparseRowMatrix) like(rowSize(), other.columnSize());
+
+        for (int i = 0; i < rows; i++) {
+          Vector row = rowVectors[i];
+          for (Vector.Element element : row.nonZeroes()) {
+            result.rowVectors[i].assign(other.viewRow(element.index()), Functions.plusMult(element.get()));
+          }
+        }
+        return result;
+      }
+    }
+  }
 }
