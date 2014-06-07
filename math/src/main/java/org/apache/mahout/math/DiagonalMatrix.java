@@ -17,6 +17,9 @@
 
 package org.apache.mahout.math;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 public class DiagonalMatrix extends AbstractMatrix implements MatrixTimesOps {
   private final Vector diagonal;
 
@@ -58,6 +61,195 @@ public class DiagonalMatrix extends AbstractMatrix implements MatrixTimesOps {
   @Override
   public Matrix assignRow(int row, Vector other) {
     throw new UnsupportedOperationException("Can't assign a row to a diagonal matrix");
+  }
+
+  @Override
+  public Vector viewRow(int row) {
+    return new SingleElementVector(row);
+  }
+
+  @Override
+  public Vector viewColumn(int row) {
+    return new SingleElementVector(row);
+  }
+
+  /**
+   * Special class to implement views of rows and columns of a diagonal matrix.
+   */
+  public class SingleElementVector extends AbstractVector {
+    private int index;
+
+    public SingleElementVector(int index) {
+      super(diagonal.size());
+      this.index = index;
+    }
+
+    @Override
+    public double getQuick(int index) {
+      if (index == this.index) {
+        return diagonal.get(index);
+      } else {
+        return 0;
+      }
+    }
+
+    @Override
+    public void set(int index, double value) {
+      if (index == this.index) {
+        diagonal.set(index, value);
+      } else {
+        throw new IllegalArgumentException("Can't set off-diagonal element of diagonal matrix");
+      }
+    }
+
+    @Override
+    protected Iterator<Element> iterateNonZero() {
+      return new Iterator<Element>() {
+        boolean more = true;
+
+        @Override
+        public boolean hasNext() {
+          return more;
+        }
+
+        @Override
+        public Element next() {
+          if (more) {
+            more = false;
+            return new Element() {
+              @Override
+              public double get() {
+                return diagonal.get(index);
+              }
+
+              @Override
+              public int index() {
+                return index;
+              }
+
+              @Override
+              public void set(double value) {
+                diagonal.set(index, value);
+              }
+            };
+          } else {
+            throw new NoSuchElementException("Only one non-zero element in a row or column of a diagonal matrix");
+          }
+        }
+
+        @Override
+        public void remove() {
+          throw new UnsupportedOperationException("Can't remove from vector view");
+        }
+      };
+    }
+
+    @Override
+    protected Iterator<Element> iterator() {
+      return new Iterator<Element>() {
+        int i = 0;
+
+        Element r = new Element() {
+          @Override
+          public double get() {
+            if (i == index) {
+              return diagonal.get(index);
+            } else {
+              return 0;
+            }
+          }
+
+          @Override
+          public int index() {
+            return i;
+          }
+
+          @Override
+          public void set(double value) {
+            if (i == index) {
+              diagonal.set(index, value);
+            } else {
+              throw new IllegalArgumentException("Can't set any element but diagonal");
+            }
+          }
+        };
+
+        @Override
+        public boolean hasNext() {
+          return i < diagonal.size() - 1;
+        }
+
+        @Override
+        public Element next() {
+          if (i < SingleElementVector.this.size() - 1) {
+            i++;
+            return r;
+          } else {
+            throw new NoSuchElementException("Attempted to access passed last element of vector");
+          }
+        }
+
+
+        @Override
+        public void remove() {
+          throw new UnsupportedOperationException("Default operation");
+        }
+      };
+    }
+
+    @Override
+    protected Matrix matrixLike(int rows, int columns) {
+      return new DiagonalMatrix(rows, columns);
+    }
+
+    @Override
+    public boolean isDense() {
+      return false;
+    }
+
+    @Override
+    public boolean isSequentialAccess() {
+      return true;
+    }
+
+    @Override
+    public void mergeUpdates(OrderedIntDoubleMapping updates) {
+      throw new UnsupportedOperationException("Default operation");
+    }
+
+    @Override
+    public Vector like() {
+      return new DenseVector(size());
+    }
+
+    @Override
+    public void setQuick(int index, double value) {
+      if (index == this.index) {
+        diagonal.set(this.index, value);
+      } else {
+        throw new IllegalArgumentException("Can't set off-diagonal element of DiagonalMatrix");
+      }
+    }
+
+    @Override
+    public int getNumNondefaultElements() {
+      return 1;
+    }
+
+    @Override
+    public double getLookupCost() {
+      return 0;
+    }
+
+    @Override
+    public double getIteratorAdvanceCost() {
+      return 1;
+    }
+
+    @Override
+    public boolean isAddConstantTime() {
+      return false;
+    }
   }
 
   /**
@@ -147,22 +339,26 @@ public class DiagonalMatrix extends AbstractMatrix implements MatrixTimesOps {
 
   @Override
   public Matrix timesRight(Matrix that) {
-    if (that.numRows() != diagonal.size())
+    if (that.numRows() != diagonal.size()) {
       throw new IllegalArgumentException("Incompatible number of rows in the right operand of matrix multiplication.");
+    }
     Matrix m = that.like();
-    for (int row = 0; row < diagonal.size(); row++)
+    for (int row = 0; row < diagonal.size(); row++) {
       m.assignRow(row, that.viewRow(row).times(diagonal.getQuick(row)));
+    }
     return m;
   }
 
   @Override
   public Matrix timesLeft(Matrix that) {
-    if (that.numCols() != diagonal.size())
+    if (that.numCols() != diagonal.size()) {
       throw new IllegalArgumentException(
-          "Incompatible number of rows in the left operand of matrix-matrix multiplication.");
+        "Incompatible number of rows in the left operand of matrix-matrix multiplication.");
+    }
     Matrix m = that.like();
-    for (int col = 0; col < diagonal.size(); col++)
+    for (int col = 0; col < diagonal.size(); col++) {
       m.assignColumn(col, that.viewColumn(col).times(diagonal.getQuick(col)));
+    }
     return m;
   }
 }

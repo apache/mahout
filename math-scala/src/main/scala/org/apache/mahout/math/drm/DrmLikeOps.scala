@@ -36,9 +36,14 @@ class DrmLikeOps[K : ClassTag](protected[drm] val drm: DrmLike[K]) {
    * @tparam R
    * @return
    */
-  def mapBlock[R : ClassTag](ncol: Int = -1)
+  def mapBlock[R: ClassTag](ncol: Int = -1, identicallyParitioned: Boolean = true)
       (bmf: BlockMapFunc[K, R]): DrmLike[R] =
-    new OpMapBlock[K, R](A = drm, bmf = bmf, _ncol = ncol)
+    new OpMapBlock[K, R](
+      A = drm,
+      bmf = bmf,
+      _ncol = ncol,
+      identicallyPartitioned = identicallyParitioned
+    )
 
 
   /**
