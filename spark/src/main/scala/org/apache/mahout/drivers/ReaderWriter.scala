@@ -25,6 +25,7 @@ import com.google.common.collect.{BiMap, HashBiMap}
 import scala.collection.JavaConversions._
 import org.apache.mahout.sparkbindings.DrmRdd
 import org.apache.mahout.math.drm.DrmLike
+import org.apache.mahout.sparkbindings._
 
 
 /** Reader trait is abstract in the sense that the reader function must be defined by an extending trait, which also defines the type to be read.
@@ -108,7 +109,8 @@ trait TDIndexedDatasetReader extends Reader[IndexedDataset]{
         }).asInstanceOf[DrmRdd[Int]]
 
       //todo: old API, val drmInteractions = new CheckpointedDrmBase[Int](indexedInteractions, numRows, numColumns)
-      val drmInteractions = new CheckpointedDrmSpark[Int](indexedInteractions, numRows, numColumns)
+      //val drmInteractions = new CheckpointedDrmSpark[Int](indexedInteractions, numRows, numColumns)
+      val drmInteractions = drmWrap[Int](indexedInteractions, numRows, numColumns)
 
       IndexedDataset(drmInteractions, rowIDDictionary, columnIDDictionary)
 

@@ -18,7 +18,7 @@
 package org.apache.mahout.drivers
 
 import com.google.common.collect.BiMap
-import org.apache.mahout.math.drm.DrmLike
+import org.apache.mahout.math.drm.{CheckpointedDrm, DrmLike}
 
 /**
   * Wraps a [[org.apache.mahout.sparkbindings.drm.DrmLike]] object with two [[com.google.common.collect.BiMap]]s to store ID/label translation dictionaries.
@@ -37,7 +37,7 @@ import org.apache.mahout.math.drm.DrmLike
   *                  ID to and from the ordinal Mahout Int ID. This one holds column labels
   */
 
-case class IndexedDataset(matrix: DrmLike[Int], rowIDs: BiMap[String,Int], columnIDs: BiMap[String,Int]) {
+case class IndexedDataset(matrix: CheckpointedDrm[Int], rowIDs: BiMap[String,Int], columnIDs: BiMap[String,Int]) {
 }
 
 /**
