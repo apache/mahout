@@ -147,14 +147,6 @@ object DistributedEngine {
       // Rewrite A'x
       case op@OpAx(op1@OpAt(a), x) => OpAtx(pass3(a)(op1.classTagA), x)
 
-      case op@OpPar(a,_,_) =>
-        // We will just issue a warning if parallelism is applied on top of anything other than a
-        // checkpoint. Since we are doing anything special with parallelism instructions, they may
-        // prevent some optimizer actions from occurring, if not applied directly to a checkpoint.
-        if (!a.isInstanceOf[CheckpointedDrm[_]])
-          log.warn("Parallelism instruction on a logical argument which is not a checkpoint.")
-        op
-
       // Stop at checkpoints
       case cd: CheckpointedDrm[_] => action
 
