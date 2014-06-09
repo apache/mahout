@@ -17,7 +17,6 @@
 
 package org.apache.mahout.math;
 
-import com.google.common.base.Preconditions;
 import org.apache.mahout.math.function.Functions;
 
 /**
@@ -67,8 +66,8 @@ public class SparseRowMatrix extends AbstractMatrix {
    * Construct a matrix of the given cardinality, with rows defaulting to RandomAccessSparseVector
    * implementation
    *
-   * @param rows
-   * @param columns
+   * @param rows      Number of rows in result
+   * @param columns   Number of columns in result
    */
   public SparseRowMatrix(int rows, int columns) {
     this(rows, columns, true);
