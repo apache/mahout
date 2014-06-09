@@ -366,7 +366,7 @@ public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
    *                                  maxLoadFactor)</tt>.
    */
   @Override
-  protected void setUp(int initialCapacity, double minLoadFactor, double maxLoadFactor) {
+  protected final void setUp(int initialCapacity, double minLoadFactor, double maxLoadFactor) {
     int capacity = initialCapacity;
     super.setUp(capacity, minLoadFactor, maxLoadFactor);
     capacity = nextPrime(capacity);
@@ -536,7 +536,7 @@ public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
   }
 
   @Override
-  public <T> T[] toArray(T[] a) {
+  public <T1> T1[] toArray(T1[] a) {
     return keys().toArray(a);
   }
 

@@ -40,7 +40,7 @@ public class MatrixWritable implements Writable {
   public MatrixWritable() {}
 
   public MatrixWritable(Matrix m) {
-    set(m);
+    this.matrix = m;
   }
 
   public Matrix get() {

@@ -160,7 +160,7 @@ public abstract class NeuralNetwork {
    * @param learningRate Learning rate must be a non-negative value. Recommend in range (0, 0.5).
    * @return The model instance.
    */
-  public NeuralNetwork setLearningRate(double learningRate) {
+  public final NeuralNetwork setLearningRate(double learningRate) {
     Preconditions.checkArgument(learningRate > 0, "Learning rate must be larger than 0.");
     this.learningRate = learningRate;
     return this;
@@ -182,7 +182,7 @@ public abstract class NeuralNetwork {
    * @param regularizationWeight regularization must be in the range [0, 0.1).
    * @return The model instance.
    */
-  public NeuralNetwork setRegularizationWeight(double regularizationWeight) {
+  public final NeuralNetwork setRegularizationWeight(double regularizationWeight) {
     Preconditions.checkArgument(regularizationWeight >= 0
         && regularizationWeight < 0.1, "Regularization weight must be in range [0, 0.1)");
     this.regularizationWeight = regularizationWeight;
@@ -204,7 +204,7 @@ public abstract class NeuralNetwork {
    * @param momentumWeight momentumWeight must be in range [0, 0.5].
    * @return The model instance.
    */
-  public NeuralNetwork setMomentumWeight(double momentumWeight) {
+  public final NeuralNetwork setMomentumWeight(double momentumWeight) {
     Preconditions.checkArgument(momentumWeight >= 0 && momentumWeight <= 1.0,
         "Momentum weight must be in range [0, 1.0]");
     this.momentumWeight = momentumWeight;
