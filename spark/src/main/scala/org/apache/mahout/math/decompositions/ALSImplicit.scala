@@ -188,19 +188,24 @@ object ALSImplicit {
         val arow = uavec(k until n)
 
         val vsum = new DenseVector(k)
-        val m: Matrix = c0vtvBcast
+
+        // We will modify m here; so we must clone the broadcast value to avoid side effects.
+        // The modifications to the broadcast value seem to be visible in other closures, at least
+        // in the "local" master tests.
+        val m: Matrix = c0vtvBcast.value cloned
 
         var n_u = 0
         msgs.foreach {
           case (vKey, vrow) =>
-            val c_u = arow(vKey)
+            val c_star = arow(vKey)
+            assert(c_star != 0.0)
 
             // (1) if arow[vKey] > 0 means p == 1, in which case we update accumulator vsum.
-            if (c_u > 0) vsum += vrow * (c0 + c_u)
+            if (c_star > 0) vsum += vrow * (c0 + c_star)
 
-            // (2) Update m
-            vrow *= abs(c_u)
-            m += vrow cross vrow
+            // (2) Update m: confidence value is absolute of c*.
+            // We probably could do that more efficiently here?
+            m+= vrow * abs(c_star) cross vrow
             n_u += 1
         }
 

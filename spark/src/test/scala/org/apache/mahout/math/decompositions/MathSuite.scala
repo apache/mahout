@@ -209,7 +209,7 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
 
   }
 
-  test("dALS implicit") {
+  test("ALS implicit") {
 
     val rnd = RandomUtils.getRandom()
 
@@ -219,7 +219,51 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
     val spectrumLen = 40
     val k = 15
     val observedRatio = 1.0
-    val lambda = 0
+    val lambda = 0.0001
+
+    // Create singluar values with decay
+    val spectrum = dvec((0 until spectrumLen).map(x => 300.0 * exp(-x) max 1e-3))
+    printf("spectrum:%s\n", spectrum)
+
+    // Create A as an ideal input
+    val inCoreCControl = (qr(Matrices.symmetricUniformView(m, spectrumLen, 1234))._1 %*%: diagv(spectrum)) %*%
+        qr(Matrices.symmetricUniformView(n, spectrumLen, 2345))._1.t
+
+    // Encode input, simulating nonobservations
+    var inCoreCStar = (inCoreCControl cloned) := ((r, c, v) => if (rnd.nextDouble() > observedRatio)
+      0.0
+    else
+      v * 40.0
+        )
+
+    // Make sure input is sparsified
+    inCoreCStar = new SparseMatrix(m, n) := inCoreCStar
+
+    val (inCoreU, inCoreV, _) = ALSImplicit.alsImplicit(inCoreCStar, k = k, lambda = lambda, maxIterations = 3).toTuple
+
+
+    printf("Ul(0)=%s\n", inCoreU(0, ::))
+    printf("Vl(0)=%s\n", inCoreV(0, ::))
+    val predict = inCoreU %*% inCoreV.t
+
+
+    printf("Control1=\n%s\n", inCoreCControl(0, 0 until 10))
+    printf("C*Control=\n%s\n", inCoreCStar(0, 0 until 10))
+    printf("Predict1=\n%s\n", predict(0, 0 until 10))
+
+  }
+
+  test("dALS implicit") {
+
+    val rnd = RandomUtils.getRandom()
+
+    val m = 500
+    val n = 400
+
+    val spectrumLen = 40
+    val k = 15
+    val observedRatio = 0.5
+    val lambda = 0.0001
 
     // Create singluar values with decay
     val spectrum = dvec((0 until spectrumLen).map(x => 300.0 * exp(-x) max 1e-3))
@@ -241,10 +285,9 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
 
     val drmC = drmParallelize(m = inCoreCStar, numPartitions = 4)
 
-    val (drmU, drmV, _) = ALSImplicit.dalsImplicit(drmC, k = k, lambda = 0.0, maxIterations = 3).toTuple
+    val (drmU, drmV, _) = ALSImplicit.dalsImplicit(drmC, k = k, lambda = lambda, maxIterations = 5).toTuple
 
-    val (inCoreU, inCoreV, _) = ALSImplicit.alsImplicit(inCoreCStar,k=k,lambda=0.0, maxIterations=3).toTuple
-
+    val (inCoreU, inCoreV, _) = ALSImplicit.alsImplicit(inCoreCStar, k = k, lambda = lambda, maxIterations = 5).toTuple
 
     printf("Ud(0)=%s\n", drmU.collect(0, ::))
     printf("Ul(0)=%s\n", inCoreU(0, ::))
@@ -256,54 +299,18 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
 
     printf("Control1=\n%s\n", inCoreCControl(0, 0 until 10))
     printf("C*Control=\n%s\n", inCoreCStar(0, 0 until 10))
-    printf("Predict1=\n%s\n", predict(0, 0 until 10))
+    printf("Predict =\n%s\n", predict(0, 0 until 10))
     printf("PredictL=\n%s\n", predictL(0, 0 until 10))
 
-  }
+    // Error per matrix element in predictions of in-core and distributed
+    val err = (predict - predictL).norm / m / n
 
-  test("ALS implicit") {
+    printf("mean square residual of in-core and distributed predictions: %f\n", err)
 
-    val rnd = RandomUtils.getRandom()
-
-    val m = 500
-    val n = 400
-
-    val spectrumLen = 40
-    val k = 15
-    val observedRatio = 1.0
-    val lambda = 0
-
-    // Create singluar values with decay
-    val spectrum = dvec((0 until spectrumLen).map(x => 300.0 * exp(-x) max 1e-3))
-    printf("spectrum:%s\n", spectrum)
-
-    // Create A as an ideal input
-    val inCoreCControl = (qr(Matrices.symmetricUniformView(m, spectrumLen, 1234))._1 %*%: diagv(spectrum)) %*%
-        qr(Matrices.symmetricUniformView(n, spectrumLen, 2345))._1.t
-
-    // Encode input, simulating nonobservations
-    var inCoreCStar = (inCoreCControl cloned) := ((r, c, v) => if (rnd.nextDouble() > observedRatio)
-      0.0
-    else
-      v * 40.0
-        )
-
-    // Make sure input is sparsified
-    inCoreCStar = new SparseMatrix(m, n) := inCoreCStar
-
-
-    val (inCoreU, inCoreV, _) = ALSImplicit.alsImplicit(inCoreCStar,k=k,lambda=0.0, maxIterations=3).toTuple
-
-
-    printf("Ul(0)=%s\n", inCoreU(0, ::))
-    printf("Vl(0)=%s\n", inCoreV(0, ::))
-    val predict = inCoreU %*% inCoreV.t
-
-
-    printf("Control1=\n%s\n", inCoreCControl(0, 0 until 10))
-    printf("C*Control=\n%s\n", inCoreCStar(0, 0 until 10))
-    printf("Predict1=\n%s\n", predict(0, 0 until 10))
+    // Lots of stochasticity here still, so we will be conservative enough on error here.
+    err should be < 1e-3
 
   }
+
 
 }
