@@ -67,8 +67,8 @@ object ALSImplicit {
     var drmUA = drmA.mapBlock(ncol = k + drmA.ncol) {
       case (keys, block) =>
         val uaBlock = block.like(block.nrow, block.ncol + k)
-        uaBlock(::, 0 until k) :=
-            Matrices.symmetricUniformView(uaBlock.nrow, k, RandomUtils.getRandom().nextInt()) * 0.01
+//        uaBlock(::, 0 until k) :=
+//            Matrices.symmetricUniformView(uaBlock.nrow, k, RandomUtils.getRandom().nextInt()) * 0.01
         uaBlock(::, k until uaBlock.ncol) := block
         keys -> uaBlock
     }
@@ -77,6 +77,8 @@ object ALSImplicit {
     var drmVAt = drmAt.mapBlock(ncol = k + drmAt.ncol) {
       case (keys, block) =>
         val vatBlock = block.like(block.nrow, block.ncol + k)
+        vatBlock(::, 0 until k) :=
+            Matrices.symmetricUniformView(vatBlock.nrow, k, RandomUtils.getRandom().nextInt()) * 0.01
         vatBlock(::, k until vatBlock.ncol) := block
         keys -> vatBlock
     }
