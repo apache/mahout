@@ -263,6 +263,20 @@
 
   <dependencies>
 
+    <!-- spark stuff -->
+    <!-- Spark Hadoop dependencies should override Mahout's dependencies, it seems, for tests to start fine -->
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-core_${scala.major}</artifactId>
+      <version>${spark.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-graphx_${scala.major}</artifactId>
+      <version>${spark.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-math-scala</artifactId>
@@ -288,18 +302,6 @@
 
 
     <!--  3rd-party -->
-    <!-- spark stuff -->
-    <dependency>
-      <groupId>org.apache.spark</groupId>
-      <artifactId>spark-core_${scala.major}</artifactId>
-      <version>${spark.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.spark</groupId>
-      <artifactId>spark-graphx_${scala.major}</artifactId>
-      <version>${spark.version}</version>
-    </dependency>
 
     <!-- scala stuff -->
 
