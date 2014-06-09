@@ -19,16 +19,15 @@ import org.apache.mahout.common.parameters.Parametered;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
+import java.util.Map;
+
 /**
  * Implementations of this interface have a printable representation and certain
  * attributes that are common across all clustering implementations
  * 
  */
 public interface Cluster extends Model<VectorWritable>, Parametered {
-  
-  // default directory for all clustered points
-  String CLUSTERED_POINTS_DIR = "clusteredPoints";
-  
+
   // default directory for initial clusters to prime iterative clustering
   // algorithms
   String INITIAL_CLUSTERS_DIR = "clusters-0";
@@ -71,7 +70,17 @@ public interface Cluster extends Model<VectorWritable>, Parametered {
    * @return a String
    */
   String asFormatString(String[] bindings);
-  
+
+  /**
+   * Produce a JSON representation of the Cluster.
+   *
+   * @param bindings
+   *          an optional String[] containing labels used to format the primary
+   *          Vector/s of this implementation.
+   * @return a Map
+   */
+  Map<String,Object> asJson(String[] bindings);
+
   /**
    * @return if the receiver has converged, or false if that has no meaning for
    *         the implementation

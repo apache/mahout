@@ -121,7 +121,7 @@ public class ParallelSGDFactorizer extends AbstractFactorizer {
       }
     }
 
-    public void shuffle() {
+    public final void shuffle() {
       unstagedPreferences = preferences.clone();
       /* Durstenfeld shuffle */
       for (int i = unstagedPreferences.length - 1; i > 0; i--) {
@@ -138,7 +138,7 @@ public class ParallelSGDFactorizer extends AbstractFactorizer {
       unstagedPreferences[y] = p;
     }
 
-    public void stage() {
+    public final void stage() {
       preferences = unstagedPreferences;
     }
 

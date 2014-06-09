@@ -76,7 +76,7 @@ public class JsonClusterWriter extends AbstractClusterWriter {
 
     // get human-readable cluster representation
     Cluster cluster = clusterWritable.getValue();
-    String fmtStr = cluster.asFormatString(dictionary);
+    Map<String,Object> fmtStr = cluster.asJson(dictionary);
     res.put("cluster_id", cluster.getId());
     res.put("cluster", fmtStr);
 
@@ -121,8 +121,7 @@ public class JsonClusterWriter extends AbstractClusterWriter {
         continue;
       }
       Map<String, Object> term_entry = Maps.newHashMap();
-      term_entry.put("term", dictTerm);
-      term_entry.put("weight", vectorTerms.get(i).weight);
+      term_entry.put(dictTerm, vectorTerms.get(i).weight);
       topTerms.add(term_entry);
     }
 
@@ -152,8 +151,12 @@ public class JsonClusterWriter extends AbstractClusterWriter {
           entry.put("vector_name", vecStr);
         }
         entry.put("weight", String.valueOf(point.getWeight()));
-        entry.put("point",
-            AbstractCluster.formatVector(point.getVector(), dictionary));
+        try {
+          entry.put("point",
+                  AbstractCluster.formatVectorAsJson(point.getVector(), dictionary));
+        } catch (IOException e) {
+          log.error("IOException:  ", e);
+        }
         vectorObjs.add(entry);
       }
     }

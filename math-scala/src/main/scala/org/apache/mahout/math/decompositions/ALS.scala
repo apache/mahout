@@ -91,7 +91,8 @@ object ALS {
     // Initialize U and V so that they are identically distributed to A or A'
     var drmU = drmA.mapBlock(ncol = k) {
       case (keys, block) =>
-        val uBlock = Matrices.symmetricUniformView(block.nrow, k, RandomUtils.getRandom().nextInt()) * 0.01
+        val rnd = RandomUtils.getRandom()
+        val uBlock = Matrices.symmetricUniformView(block.nrow, k, rnd.nextInt()) * 0.01
         keys -> uBlock
     }
 
@@ -113,7 +114,7 @@ object ALS {
       // Check if we are requested to do a convergence test; and do it if yes.
       if (convergenceThreshold > 0) {
 
-        val rmse = (drmA - drmU %*% drmV.t).norm / sqrt(drmA.ncol.toDouble * drmA.nrow)
+        val rmse = (drmA - drmU %*% drmV.t).norm / sqrt(drmA.ncol * drmA.nrow)
 
         if (i > 0) {
           val rmsePrev = rmseIterations.last

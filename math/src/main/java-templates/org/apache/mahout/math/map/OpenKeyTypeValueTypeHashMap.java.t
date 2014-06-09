@@ -31,10 +31,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.function.${keyTypeCap}${valueTypeCap}Procedure;
 import org.apache.mahout.math.function.${keyTypeCap}Procedure;
-import org.apache.mahout.math.function.IntProcedure;
 import org.apache.mahout.math.list.${keyTypeCap}ArrayList;
 
 #if (${keyType} != ${valueType})

@@ -18,7 +18,10 @@
 package org.apache.mahout.math;
 
 import org.apache.mahout.math.function.Functions;
+import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Iterator;
 
 public class DiagonalMatrixTest extends MahoutTestCase {
   @Test
@@ -46,4 +49,44 @@ public class DiagonalMatrixTest extends MahoutTestCase {
     assertEquals(100, a.times(m.transpose()).aggregate(Functions.PLUS, Functions.ABS), 1.0e-10);
   }
 
+  @Test
+  public void testSparsity() {
+    Vector d = new DenseVector(10);
+    for (int i = 0; i < 10; i++) {
+      d.set(i, i * i);
+    }
+    DiagonalMatrix m = new DiagonalMatrix(d);
+
+    Assert.assertFalse(m.viewRow(0).isDense());
+    Assert.assertFalse(m.viewColumn(0).isDense());
+
+    for (int i = 0; i < 10; i++) {
+      assertEquals(i * i, m.viewRow(i).zSum(), 0);
+      assertEquals(i * i, m.viewRow(i).get(i), 0);
+
+      assertEquals(i * i, m.viewColumn(i).zSum(), 0);
+      assertEquals(i * i, m.viewColumn(i).get(i), 0);
+    }
+
+    Iterator<Vector.Element> ix = m.viewRow(7).nonZeroes().iterator();
+    assertTrue(ix.hasNext());
+    Vector.Element r = ix.next();
+    assertEquals(7, r.index());
+    assertEquals(49, r.get(), 0);
+    assertFalse(ix.hasNext());
+
+    assertEquals(0, m.viewRow(5).get(3), 0);
+    assertEquals(0, m.viewColumn(8).get(3), 0);
+
+    m.viewRow(3).set(3, 1);
+    assertEquals(1, m.get(3, 3), 0);
+
+    for (Vector.Element element : m.viewRow(6).all()) {
+      if (element.index() == 6) {
+        assertEquals(36, element.get(), 0);
+      }                                    else {
+        assertEquals(0, element.get(), 0);
+      }
+    }
+  }
 }

@@ -312,5 +312,42 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
 
   }
 
+  test("als") {
+
+    val rnd = RandomUtils.getRandom
+
+    // Number of points
+    val m = 500
+    val n = 500
+
+    // Length of actual spectrum
+    val spectrumLen = 40
+
+    // Create singluar values with decay
+    val spectrum = dvec((0 until spectrumLen).map(x => 300.0 * exp(-x) max 1e-3))
+    printf("spectrum:%s\n", spectrum)
+
+    // Create A as an ideal input
+    val inCoreA = (qr(Matrices.symmetricUniformView(m, spectrumLen, 1234))._1 %*%: diagv(spectrum)) %*%
+        qr(Matrices.symmetricUniformView(n, spectrumLen, 2345))._1.t
+    val drmA = drmParallelize(inCoreA, numPartitions = 2)
+
+    // Decompose using ALS
+    val (drmU, drmV, rmse) = als(drmInput = drmA, k = 20).toTuple
+    val inCoreU = drmU.collect
+    val inCoreV = drmV.collect
+
+    val predict = inCoreU %*% inCoreV.t
+
+    printf("Control block:\n%s\n", inCoreA(0 until 3, 0 until 3))
+    printf("ALS factorized approximation block:\n%s\n", predict(0 until 3, 0 until 3))
+
+    val err = (inCoreA - predict).norm
+    printf ("norm of residuals %f\n",err)
+    printf ("train iteration rmses: %s\n", rmse)
+
+    err should be < 1e-2
+
+  }
 
 }

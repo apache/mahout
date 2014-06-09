@@ -2,6 +2,8 @@ Mahout Change Log
 
 Release 1.0 - unreleased
 
+  MAHOUT-1566: (Experimental) Regular ALS factorizer with conversion tests, optimizer enhancements and bug fixes (dlyubimov)
+
   MAHOUT-1537: Minor fixes to spark-shell (Anand Avati via dlyubimov)
 
   MAHOUT-1529: Finalize abstraction of distributed logical plans from backend operations (dlyubimov)
@@ -57,6 +59,8 @@ Release 1.0 - unreleased
   MAHOUT-1509: Invalid URL in link from "quick start/basics" page (Nick Martin, smarthi)
 
   MAHOUT-1508: Performance problems with sparse matrices (ssc)
+
+  MAHOUT-1505: structure of clusterdump's JSON output (akm)
 
   MAHOUT-1504: Enable/fix thetaSummer job in TrainNaiveBayesJob (Andrew Palumbo, smarthi)
 

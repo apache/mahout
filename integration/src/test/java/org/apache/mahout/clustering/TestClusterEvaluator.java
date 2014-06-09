@@ -138,7 +138,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
       points.add(new VectorWritable(cluster.getCenter().plus(new DenseVector(new double[] {-dP, dP}))));
     }
   }
-  
+
   @Test
   public void testRepresentativePoints() throws Exception {
     ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata, "file1"), fs, conf);
