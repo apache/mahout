@@ -10,8 +10,70 @@ import org.apache.mahout.sparkbindings._
 import scala.collection.JavaConversions._
 import org.apache.spark.SparkContext._
 import org.apache.mahout.common.RandomUtils
+import org.apache.spark.storage.StorageLevel
+import org.apache.mahout.math.decompositions.ALS.InCoreResult
 
 object ALSImplicit {
+
+  /**
+   * In-core version of ALS implicit.
+   * <P/>
+   * This is not really performance-optimized method at this point; more like a validation prototype
+   * for the distributed one (dalsImplicit).
+   * <P/>
+   */
+  def alsImplicit(
+      inCoreC:Matrix,
+      c0: Double = 1.0,
+      k: Int = 50,
+      lambda: Double = 0.0001,
+      maxIterations: Int = 10,
+      convergenceTreshold: Double = 0.10
+      ): ALS.InCoreResult = {
+
+    val rnd = RandomUtils.getRandom()
+    val m = inCoreC.nrow
+    val n = inCoreC.ncol
+    var inCoreV = Matrices.symmetricUniformView(n, k, rnd.nextInt()) * 0.01
+    var inCoreU:Matrix = null
+
+    var inCoreD = (inCoreC cloned)
+    inCoreD := ((r,c,v) => abs(v))
+
+    var inCoreP = (inCoreC cloned)
+    inCoreP :=((r,c,v) => if(v > 0) 1.0 else 0.0)
+
+    var i = 0
+    while (i < maxIterations) {
+      inCoreU = updateU(inCoreV, inCoreD, inCoreP, k, lambda, c0)
+      inCoreV = updateU(inCoreU, inCoreD.t, inCoreP.t, k, lambda, c0)
+
+      i+=1
+    }
+    new InCoreResult(inCoreU, inCoreV, Nil)
+  }
+  
+  private def updateU(inCoreV: Matrix, inCoreD: Matrix, inCoreP:Matrix, k: Int, lambda:Double, c0: Double):Matrix = {
+    val m = inCoreD.nrow
+
+    val c0vtv = (inCoreV.t %*% inCoreV) * c0
+
+    val inCoreU = new DenseMatrix(m, k)
+
+    var i = 0
+    while (i < m) {
+      val d_i = inCoreD(i, ::)
+      val p_i = inCoreP(i, ::)
+      val n_u = d_i.getNumNonZeroElements
+      inCoreU(i,::) = solve(
+        a = c0vtv + (inCoreV.t %*%: diagv(inCoreD(i, ::))) %*% inCoreV + diag(n_u * lambda, k),
+        b = (inCoreV.t %*%: diagv(d_i + c0)) %*% p_i
+      )
+
+      i += 1
+    }
+    inCoreU
+  }
 
   /**
    * See MAHOUT-1365 for details.
@@ -52,11 +114,11 @@ object ALSImplicit {
    * @param maxIterations maximum iterations to run
    * @param convergenceTreshold reserved, not used at this point
    */
-  def alsImplicit(
+  def dalsImplicit(
       drmC: DrmLike[Int],
       c0: Double = 1.0,
       k: Int = 50,
-      lambda: Double = 0.01,
+      lambda: Double = 0.0001,
       maxIterations: Int = 10,
       convergenceTreshold: Double = 0.10
       ): ALS.Result[Int] = {
@@ -77,8 +139,9 @@ object ALSImplicit {
     var drmVAt = drmAt.mapBlock(ncol = k + drmAt.ncol) {
       case (keys, block) =>
         val vatBlock = block.like(block.nrow, block.ncol + k)
+        val rnd = RandomUtils.getRandom()
         vatBlock(::, 0 until k) :=
-            Matrices.symmetricUniformView(vatBlock.nrow, k, RandomUtils.getRandom().nextInt()) * 0.01
+            Matrices.symmetricUniformView(vatBlock.nrow, k, rnd.nextInt()) * 0.01
         vatBlock(::, k until vatBlock.ncol) := block
         keys -> vatBlock
     }
@@ -95,12 +158,12 @@ object ALSImplicit {
       // Update U-A, relinquish stuff explicitly from block manager to alleviate GC concerns and swaps
       if (drmUAOld != null) drmUAOld.uncache()
       drmUAOld = drmUA
-      drmUA = updateUA(drmUA, drmVAt, k, c0)
+      drmUA = updateUA(drmUA, drmVAt, k, lambda, c0)
 
       // Update V-A'
       if (drmVAtOld != null) drmVAtOld.uncache()
       drmVAtOld = drmVAt
-      drmVAt = updateUA(drmVAt, drmUA, k, c0)
+      drmVAt = updateUA(drmVAt, drmUA, k, lambda, c0)
 
       i += 1
     }
@@ -108,14 +171,14 @@ object ALSImplicit {
     new ALS.Result[Int](drmU = drmUA(::, 0 until k), drmV = drmVAt(::, 0 until k), iterationsRMSE = Iterable())
   }
 
-  private def updateUA(drmUA: DrmLike[Int], drmVAt: DrmLike[Int], k: Int, c0: Double): DrmLike[Int] = {
+  private def updateUA(drmUA: DrmLike[Int], drmVAt: DrmLike[Int], k: Int, lambda:Double, c0: Double): DrmLike[Int] = {
 
     implicit val ctx = drmUA.context
 
     val n = drmUA.ncol
     val drmV = drmVAt(::, 0 until k)
 
-    val vtvBcast = drmBroadcast(drmV.t %*% drmV)
+    val c0vtvBcast = drmBroadcast((drmV.t %*% drmV).collect * c0)
 
     val uaRdd = drmUA.rdd.cogroup(other = generateMessages(drmVAt, k)).map {
       case (uKey, (uavecs, msgs)) =>
@@ -125,8 +188,9 @@ object ALSImplicit {
         val arow = uavec(k until n)
 
         val vsum = new DenseVector(k)
-        val m: Matrix = vtvBcast
+        val m: Matrix = c0vtvBcast
 
+        var n_u = 0
         msgs.foreach {
           case (vKey, vrow) =>
             val c_u = arow(vKey)
@@ -137,6 +201,11 @@ object ALSImplicit {
             // (2) Update m
             vrow *= abs(c_u)
             m += vrow cross vrow
+            n_u += 1
+        }
+
+        if (n_u > 0) {
+          m += diag(n_u * lambda, k)
         }
 
         // Update u-vec
@@ -144,7 +213,7 @@ object ALSImplicit {
         uKey -> uavec
     }
 
-    drmWrap(uaRdd, ncol = n)
+    drmWrap(uaRdd, ncol = n, cacheHint = CacheHint.MEMORY_AND_DISK)
   }
 
   // This generates RDD of messages in a form RDD[destVIndex ->(srcUIindex,u-row-vec)]

@@ -46,8 +46,13 @@ object ALS {
     def toTuple = (drmU, drmV, iterationsRMSE)
   }
 
+  /** Result class for in-core results */
+  class InCoreResult(val inCoreU: Matrix, inCoreV: Matrix, val iterationsRMSE: Iterable[Double]) {
+    def toTuple = (inCoreU, inCoreV, iterationsRMSE)
+  }
+
   /**
-   * Run ALS.
+   * Run Distributed ALS.
    * <P>
    *
    * Example:
@@ -69,7 +74,7 @@ object ALS {
    * @tparam K row key type of the input (100 is probably more than enough)
    * @return { @link org.apache.mahout.math.drm.decompositions.ALS.Result}
    */
-  def als[K: ClassTag](
+  def dals[K: ClassTag](
       drmInput: DrmLike[K],
       k: Int = 50,
       lambda: Double = 0.0,

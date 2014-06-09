@@ -193,7 +193,7 @@ object SparkEngine extends DistributedEngine {
     new CheckpointedDrmSpark[Long](rdd, nrow, ncol)
   }
 
-  private def cacheHint2Spark(cacheHint: CacheHint.CacheHint): StorageLevel = cacheHint match {
+  private[mahout] def cacheHint2Spark(cacheHint: CacheHint.CacheHint): StorageLevel = cacheHint match {
     case CacheHint.NONE => StorageLevel.NONE
     case CacheHint.DISK_ONLY => StorageLevel.DISK_ONLY
     case CacheHint.DISK_ONLY_2 => StorageLevel.DISK_ONLY_2
