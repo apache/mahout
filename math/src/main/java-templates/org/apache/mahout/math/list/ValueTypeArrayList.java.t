@@ -215,7 +215,7 @@ public class ${valueTypeCap}ArrayList extends Abstract${valueTypeCap}List implem
    * @param elements the new elements to be stored.
    * @return the receiver itself.
    */
-  public Abstract${valueTypeCap}List elements(${valueType}[] elements) {
+  public final Abstract${valueTypeCap}List elements(${valueType}[] elements) {
     this.elements = elements;
     this.size = elements.length;
     return this;

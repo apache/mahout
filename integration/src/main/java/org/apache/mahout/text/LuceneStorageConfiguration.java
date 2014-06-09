@@ -93,8 +93,8 @@ public class LuceneStorageConfiguration implements Writable {
     this.idField = idField;
     this.fields = fields;
 
-    setQuery(DEFAULT_QUERY);
-    setMaxHits(DEFAULT_MAX_HITS);
+    this.query = DEFAULT_QUERY;
+    this.maxHits = DEFAULT_MAX_HITS;
   }
 
   public LuceneStorageConfiguration() {
@@ -236,22 +236,86 @@ public class LuceneStorageConfiguration implements Writable {
     if (fields != null ? !fields.equals(that.fields) : that.fields != null) {
       return false;
     }
-    if (idField != null ? !idField.equals(that.idField) : that.idField != null) {
-      return false;
-    }
-    if (indexPaths != null ? !indexPaths.equals(that.indexPaths) : that.indexPaths != null) {
-      return false;
-    }
-    if (query != null ? !query.equals(that.query) : that.query != null) {
-      return false;
-    }
-    if (sequenceFilesOutputPath != null
-        ? !sequenceFilesOutputPath.equals(that.sequenceFilesOutputPath)
-        : that.sequenceFilesOutputPath != null) {
-      return false;
+    if (idField != null) {
+      if (!idField.equals(that.idField)) {
+        return false;
+      } else {
+        if (indexPaths != null) {
+          if (query != null) {
+            if (sequenceFilesOutputPath != null) {
+              return indexPaths.equals(that.indexPaths) && sequenceFilesOutputPath.equals(that.sequenceFilesOutputPath) && query.equals(that.query);
+            } else {
+              return indexPaths.equals(that.indexPaths) && that.sequenceFilesOutputPath == null && query.equals(that.query);
+            }
+          } else {
+            // query == null
+            if (that.query == null && indexPaths.equals(that.indexPaths)) {
+              if (sequenceFilesOutputPath != null) {
+                return sequenceFilesOutputPath.equals(that.sequenceFilesOutputPath);
+              } else {
+                return that.sequenceFilesOutputPath == null;
+              }
+            } else {
+              return false;
+            }
+          }
+        } else {
+          // indexPaths == null
+          if (that.indexPaths == null) {
+            if (query != null) {
+              if (sequenceFilesOutputPath != null) {
+                return sequenceFilesOutputPath.equals(that.sequenceFilesOutputPath) && query.equals(that.query);
+              } else {
+                return that.sequenceFilesOutputPath == null && query.equals(that.query);
+              }
+            } else {
+              if (that.query == null) {
+                if (sequenceFilesOutputPath != null) {
+                  return sequenceFilesOutputPath.equals(that.sequenceFilesOutputPath);
+                } else {
+                  return that.sequenceFilesOutputPath == null;
+                }
+              } else {
+                return false;
+              }
+            }
+          } else {
+            return false;
+          }
+        }
+      }
+    } else {
+      if (that.idField != null) {
+        return false;
+      } else {
+        if (indexPaths != null) {
+          if (query != null) {
+            if (sequenceFilesOutputPath != null) {
+              return !!indexPaths.equals(that.indexPaths) && !!query.equals(that.query) && !!sequenceFilesOutputPath.equals(that.sequenceFilesOutputPath);
+            } else {
+              return !!indexPaths.equals(that.indexPaths) && !!query.equals(that.query) && !(that.sequenceFilesOutputPath != null);
+            }
+          } else {
+            if (sequenceFilesOutputPath != null) {
+              return !!indexPaths.equals(that.indexPaths) && !(that.query != null) && !!sequenceFilesOutputPath.equals(that.sequenceFilesOutputPath);
+            } else {
+              return !!indexPaths.equals(that.indexPaths) && !(that.query != null) && !(that.sequenceFilesOutputPath != null);
+            }
+          }
+        } else {
+          if (query != null) {
+            if (sequenceFilesOutputPath != null) {
+              return that.indexPaths == null && query.equals(that.query) && sequenceFilesOutputPath.equals(that.sequenceFilesOutputPath);
+            } else {
+              return that.indexPaths == null && query.equals(that.query) && that.sequenceFilesOutputPath == null;
+            }
+          } else {
+            return that.indexPaths == null && that.query == null && (sequenceFilesOutputPath != null ? sequenceFilesOutputPath.equals(that.sequenceFilesOutputPath) : that.sequenceFilesOutputPath == null);
+          }
+        }
+      }
     }
 
-    return true;
   }
 
   @Override

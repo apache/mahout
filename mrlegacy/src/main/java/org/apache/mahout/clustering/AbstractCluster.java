@@ -22,7 +22,6 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Locale;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -31,7 +30,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.common.parameters.Parameter;
-import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -66,24 +64,24 @@ public abstract class AbstractCluster implements Cluster {
   protected AbstractCluster() {}
   
   protected AbstractCluster(Vector point, int id2) {
-    setNumObservations(0);
-    setTotalObservations(0);
-    setCenter(point.clone());
-    setRadius(center.like());
-    setS0(0);
-    setS1(center.like());
-    setS2(center.like());
+    this.numObservations = (long) 0;
+    this.totalObservations = (long) 0;
+    this.center = point.clone();
+    this.radius = center.like();
+    this.s0 = (double) 0;
+    this.s1 = center.like();
+    this.s2 = center.like();
     this.id = id2;
   }
   
   protected AbstractCluster(Vector center2, Vector radius2, int id2) {
-    setNumObservations(0);
-    setTotalObservations(0);
-    setCenter(new RandomAccessSparseVector(center2));
-    setRadius(new RandomAccessSparseVector(radius2));
-    setS0(0);
-    setS1(center.like());
-    setS2(center.like());
+    this.numObservations = (long) 0;
+    this.totalObservations = (long) 0;
+    this.center = new RandomAccessSparseVector(center2);
+    this.radius = new RandomAccessSparseVector(radius2);
+    this.s0 = (double) 0;
+    this.s1 = center.like();
+    this.s2 = center.like();
     this.id = id2;
   }
   

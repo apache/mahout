@@ -268,7 +268,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
     bufferSize = Math.min(minInterval, bufferSize);
   }
 
-  public void setPoolSize(int poolSize) {
+  public final void setPoolSize(int poolSize) {
     this.poolSize = poolSize;
     setupOptimizer(poolSize);
   }

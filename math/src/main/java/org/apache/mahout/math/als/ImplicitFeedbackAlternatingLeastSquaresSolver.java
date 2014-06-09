@@ -71,8 +71,8 @@ public class ImplicitFeedbackAlternatingLeastSquaresSolver {
   }
 
   /* Y' Y */
-  Matrix getYtransposeY(final OpenIntObjectHashMap<Vector> Y) {
-  
+  public Matrix getYtransposeY(final OpenIntObjectHashMap<Vector> Y) {
+
     ExecutorService queue = Executors.newFixedThreadPool(numTrainingThreads);
     if (log.isInfoEnabled()) {
       log.info("Starting the computation of Y'Y");

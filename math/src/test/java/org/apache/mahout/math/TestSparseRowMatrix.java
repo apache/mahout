@@ -158,4 +158,24 @@ public final class TestSparseRowMatrix extends MatrixTest {
       }
     }
   }
+
+
+  @Test(timeout=5000)
+  public void testTimesCorrect() {
+    Random raw = RandomUtils.getRandom();
+    Gamma gen = new Gamma(0.1, 0.1, raw);
+
+    // build two large sequential sparse matrices and multiply them
+    Matrix x = new SparseRowMatrix(100, 2000, false)
+      .assign(Functions.random());
+
+    Matrix y = new SparseRowMatrix(2000, 100, false)
+      .assign(Functions.random());
+
+    Matrix xd = new DenseMatrix(100, 2000).assign(x);
+    Matrix yd = new DenseMatrix(2000, 100).assign(y);
+    assertEquals(0, xd.times(yd).minus(x.times(y)).aggregate(Functions.PLUS, Functions.ABS), 1e-15);
+    assertEquals(0, x.times(yd).minus(x.times(y)).aggregate(Functions.PLUS, Functions.ABS), 1e-15);
+    assertEquals(0, xd.times(y).minus(x.times(y)).aggregate(Functions.PLUS, Functions.ABS), 1e-15);
+  }
 }
