@@ -17,6 +17,8 @@
 
 package org.apache.mahout.math;
 
+import com.google.common.primitives.Ints;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -29,7 +31,16 @@ import java.nio.ByteOrder;
  */
 public final class MurmurHash {
 
-  private MurmurHash() {
+  private MurmurHash() {}
+
+  /**
+   * Hashes an int.
+   * @param data The int to hash.
+   * @param seed The seed for the hash.
+   * @return The 32 bit hash of the bytes in question.
+   */
+  public static int hash(int data, int seed) {
+    return hash(ByteBuffer.wrap(Ints.toByteArray(data)), seed);
   }
 
   /**
