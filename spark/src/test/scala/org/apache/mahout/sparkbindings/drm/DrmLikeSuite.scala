@@ -22,6 +22,7 @@ import org.apache.mahout.math._
 import scalabindings._
 import drm._
 import RLikeOps._
+import RLikeDrmOps._
 import org.apache.mahout.sparkbindings.test.MahoutLocalContext
 
 
@@ -51,6 +52,35 @@ class DrmLikeSuite extends FunSuite with MahoutLocalContext {
     // Print out to see what it is we collected:
     println(inCoreB)
 
+  }
+  
+  test("DRM blockify dense") {
+
+    val inCoreA = dense((1, 2, 3), (3, 4, 5))
+    val drmA = drmParallelize(inCoreA, numPartitions = 2)
+
+    (inCoreA - drmA.mapBlock() {
+      case (keys, block) =>
+        if (!block.isInstanceOf[DenseMatrix])
+          throw new AssertionError("Block must be dense.")
+        keys -> block
+    }).norm should be < 1e-4
+  }
+
+  test("DRM blockify sparse -> SRM") {
+
+    val inCoreA = sparse(
+      (1, 2, 3),
+      0 -> 3 :: 2 -> 5 :: Nil
+    )
+    val drmA = drmParallelize(inCoreA, numPartitions = 2)
+
+    (inCoreA - drmA.mapBlock() {
+      case (keys, block) =>
+        if (!block.isInstanceOf[SparseRowMatrix])
+          throw new AssertionError("Block must be dense.")
+        keys -> block
+    }).norm should be < 1e-4
   }
 
   test("DRM parallelizeEmpty") {
