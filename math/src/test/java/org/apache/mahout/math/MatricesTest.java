@@ -60,6 +60,23 @@ public class MatricesTest extends MahoutTestCase {
   }
 
   @Test
+  public void testViewDenseSparseReporting() {
+    Matrix m = new SparseMatrix(1000, 1000);
+    m.set(1, 1, 33.0);
+    Matrix mt = Matrices.transposedView(m);
+
+    assertTrue(!mt.viewColumn(0).isDense());
+    assertTrue(!mt.viewRow(0).isDense());
+
+    m = new DenseMatrix(10,10);
+    m.set(1, 1, 33.0);
+    mt = Matrices.transposedView(m);
+
+    assertTrue(mt.viewColumn(0).isDense());
+    assertTrue(mt.viewRow(0).isDense());
+  }
+
+  @Test
   public void testUniformView() {
     Matrix m1 = Matrices.uniformView(5, 6, 1234);
     Matrix m2 = Matrices.uniformView(5, 6, 1234);
