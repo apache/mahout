@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <FindBugsFilter>
   <Match>
+    <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE"/>
+  </Match>
+  <Match>
+    <Bug pattern="OBL_UNSATISFIED_EXCEPTION_EDGE"/>
+  </Match>
+  <Match>
     <Bug pattern="CN_IDIOM_NO_SUPER_CALL"/>
   </Match>
   <Match>

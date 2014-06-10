@@ -102,7 +102,7 @@ public class SequenceFilesFromLuceneStorageTest extends AbstractLuceneStorageTes
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testRun_UnstoredFields() throws IOException {
+  public void testRunUnstoredFields() throws IOException {
     commitDocuments(getDirectory(getIndexPath1AsFile()), new UnstoredFieldsDocument("5", "This is test document 5"));
 
     LuceneStorageConfiguration lucene2SeqConf = new LuceneStorageConfiguration(configuration,
