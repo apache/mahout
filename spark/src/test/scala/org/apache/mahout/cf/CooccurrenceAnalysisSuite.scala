@@ -39,7 +39,7 @@ B =
 1	1	0	1	0
  */
 
-class CooccurrenceAnalysisSuite extends FunSuite with MahoutSuite with MahoutLocalContext{
+class CooccurrenceAnalysisSuite extends FunSuite with MahoutSuite with MahoutLocalContext {
 
   test("cooccurrence [A'A], [B'A] boolbean data using LLR") {
     val a = dense((1, 1, 0, 0, 0), (0, 0, 1, 1, 0), (0, 0, 0, 0, 1), (1, 0, 0, 1, 0))
@@ -157,22 +157,22 @@ class CooccurrenceAnalysisSuite extends FunSuite with MahoutSuite with MahoutLoc
     n should be < 1E-10
   }
 
-  test("LLR calc"){
+  test("LLR calc") {
     val numInteractionsWithAandB = 10L
     val numInteractionsWithA = 100L
     val numInteractionsWithB = 200L
     val numInteractions = 10000l
 
-    val llr = CooccurrenceAnalysis.loglikelihoodRatio(numInteractionsWithA, numInteractionsWithB, numInteractionsWithAandB,numInteractions)
+    val llr = CooccurrenceAnalysis.loglikelihoodRatio(numInteractionsWithA, numInteractionsWithB, numInteractionsWithAandB, numInteractions)
 
     assert(llr == 17.19462327013025)
   }
 
-  test("downsampling by number per row"){
+  test("downsampling by number per row") {
     val a = dense((1, 1, 1, 1, 0),
-                  (1, 1, 1, 1, 1),
-                  (0, 0, 0, 0, 1),
-                  (1, 1, 0, 1, 0)
+      (1, 1, 1, 1, 1),
+      (0, 0, 0, 0, 1),
+      (1, 1, 0, 1, 0)
     )
     val drmA: DrmLike[Int] = drmParallelize(m = a, numPartitions = 2)
 
@@ -181,15 +181,15 @@ class CooccurrenceAnalysisSuite extends FunSuite with MahoutSuite with MahoutLoc
     var numValues = 0
     val m = downSampledDrm.collect
     val it = m.iterator()
-    while(it.hasNext){
+    while (it.hasNext) {
       val v = it.next().vector()
       val nonZeroIt = v.nonZeroes().iterator()
-      while(nonZeroIt.hasNext){
+      while (nonZeroIt.hasNext) {
         numValues += 1
         nonZeroIt.next()
       }
     }
 
-    assert( numValues == 8)//Don't change the random seed or this may fail.
+    assert(numValues == 8) //Don't change the random seed or this may fail.
   }
 }

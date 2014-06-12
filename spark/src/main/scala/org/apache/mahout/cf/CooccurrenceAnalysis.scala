@@ -41,7 +41,7 @@ import org.apache.mahout.math.function.{VectorFunction, Functions}
 object CooccurrenceAnalysis extends Serializable {
 
   /** Compares (Int,Double) pairs by the second value */
-  private val orderByScore = Ordering.fromLessThan[(Int, Double)] { case ((_, score1), (_, score2)) => score1 > score2 }
+  private val orderByScore = Ordering.fromLessThan[(Int, Double)] { case ((_, score1), (_, score2)) => score1 > score2}
 
   def cooccurrences(drmARaw: DrmLike[Int], randomSeed: Int = 0xdeadbeef, maxInterestingItemsPerThing: Int = 50,
                     maxNumInteractions: Int = 500, drmBs: Array[DrmLike[Int]] = Array()): List[DrmLike[Int]] = {
@@ -62,7 +62,7 @@ object CooccurrenceAnalysis extends Serializable {
 
     // Compute loglikelihood scores and sparsify the resulting matrix to get the indicator matrix
     val drmIndicatorsAtA = computeIndicators(drmAtA, numUsers, maxInterestingItemsPerThing, bcastInteractionsPerItemA,
-                                             bcastInteractionsPerItemA, crossCooccurrence = false)
+      bcastInteractionsPerItemA, crossCooccurrence = false)
 
     var indicatorMatrices = List(drmIndicatorsAtA)
 
@@ -76,9 +76,9 @@ object CooccurrenceAnalysis extends Serializable {
 
       // Compute cross-co-occurrence matrix B'A
       val drmBtA = drmB.t %*% drmA
-      
+
       val drmIndicatorsBtA = computeIndicators(drmBtA, numUsers, maxInterestingItemsPerThing,
-                                               bcastInteractionsPerThingB, bcastInteractionsPerItemA)
+        bcastInteractionsPerThingB, bcastInteractionsPerItemA)
 
       indicatorMatrices = indicatorMatrices :+ drmIndicatorsBtA
 
@@ -108,8 +108,8 @@ object CooccurrenceAnalysis extends Serializable {
   }
 
   def computeIndicators(drmBtA: DrmLike[Int], numUsers: Int, maxInterestingItemsPerThing: Int,
-      bcastNumInteractionsB: BCast[Vector], bcastNumInteractionsA: BCast[Vector],
-      crossCooccurrence: Boolean = true) = {
+                        bcastNumInteractionsB: BCast[Vector], bcastNumInteractionsA: BCast[Vector],
+                        crossCooccurrence: Boolean = true) = {
     drmBtA.mapBlock() {
       case (keys, block) =>
 
@@ -122,7 +122,7 @@ object CooccurrenceAnalysis extends Serializable {
           val thingB = keys(index)
 
           // PriorityQueue to select the top-k items
-          val topItemsPerThing = new mutable.PriorityQueue[(Int,Double)]()(orderByScore)
+          val topItemsPerThing = new mutable.PriorityQueue[(Int, Double)]()(orderByScore)
 
           block(index, ::).nonZeroes().foreach { elem =>
             val thingA = elem.index
@@ -132,7 +132,7 @@ object CooccurrenceAnalysis extends Serializable {
             if (crossCooccurrence || thingB != thingA) {
               // Compute loglikelihood ratio
               val llrRatio = loglikelihoodRatio(numInteractionsB(thingB).toLong, numInteractionsA(thingA).toLong,
-                                                cooccurrences.toLong, numUsers)
+                cooccurrences.toLong, numUsers)
               val candidate = thingA -> llrRatio
 
               // Enqueue item with score, if belonging to the top-k
@@ -201,9 +201,9 @@ object CooccurrenceAnalysis extends Serializable {
               downsampledBlock(userIndex, elem.index) = 1
             }
           }
-      }
+        }
 
-      keys -> downsampledBlock
+        keys -> downsampledBlock
     }
 
     // Unpin raw interaction matrix
