@@ -186,7 +186,7 @@ object CooccurrenceAnalysis extends Serializable {
 
           val interactionsOfUser = block(userIndex, ::)
 
-          val numInteractionsOfUser = interactionsOfUser.numNonZeroElementsPerColumn()
+          val numInteractionsOfUser = interactionsOfUser.getNumNonZeroElements()
 
           val perUserSampleRate = math.min(maxNumInteractions, numInteractionsOfUser) / numInteractionsOfUser
 
