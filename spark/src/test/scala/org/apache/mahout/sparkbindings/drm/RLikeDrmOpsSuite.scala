@@ -463,7 +463,7 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
     drmA.colMeans() should equal (inCoreA.colMeans())
   }
 
-  test("colCounts") {
+  test("getNumNonZeroElements") {
     val inCoreA = dense(
       (0, 2),
       (3, 4),
@@ -471,7 +471,7 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
     )
     val drmA = drmParallelize(inCoreA, numPartitions = 2)
 
-    drmA.colCounts() should equal (inCoreA.colCounts())
+    drmA.getNumNonZeroElements() should equal (inCoreA.getNumNonZeroElements())
   }
 
 }

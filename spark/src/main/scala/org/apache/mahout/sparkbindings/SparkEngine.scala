@@ -52,7 +52,7 @@ object SparkEngine extends DistributedEngine {
       .reduce(_ += _)
   }
 
-  def colCounts[K:ClassTag](drm: CheckpointedDrm[K]): Vector = {
+  def getNumNonZeroElements[K:ClassTag](drm: CheckpointedDrm[K]): Vector = {
     val n = drm.ncol
 
     drm.rdd
