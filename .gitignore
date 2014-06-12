@@ -6,6 +6,7 @@ output-asf-email-examples/
 .project
 .settings/
 .idea/
+.DS_Store
 *.iml
 target/
 examples/bin/tmp
