@@ -55,7 +55,7 @@ object CooccurrenceAnalysis extends Serializable {
     val numUsers = drmA.nrow.toInt
 
     // Compute & broadcast the number of interactions per thing in A
-    val bcastInteractionsPerItemA = drmBroadcast(drmA.getNumNonZeroElements)
+    val bcastInteractionsPerItemA = drmBroadcast(drmA.numNonZeroElementsPerColumn)
 
     // Compute co-occurrence matrix A'A
     val drmAtA = drmA.t %*% drmA
@@ -72,7 +72,7 @@ object CooccurrenceAnalysis extends Serializable {
       val drmB = sampleDownAndBinarize(drmBRaw, randomSeed, maxNumInteractions).checkpoint()
 
       // Compute & broadcast the number of interactions per thing in B
-      val bcastInteractionsPerThingB = drmBroadcast(drmB.getNumNonZeroElements)
+      val bcastInteractionsPerThingB = drmBroadcast(drmB.numNonZeroElementsPerColumn)
 
       // Compute cross-co-occurrence matrix B'A
       val drmBtA = drmB.t %*% drmA
@@ -170,7 +170,7 @@ object CooccurrenceAnalysis extends Serializable {
     val drmI = drmM.checkpoint()
 
     // Broadcast vector containing the number of interactions with each thing
-    val bcastNumInteractions = drmBroadcast(drmI.getNumNonZeroElements)
+    val bcastNumInteractions = drmBroadcast(drmI.numNonZeroElementsPerColumn)
 
     val downSampledDrmI = drmI.mapBlock() {
       case (keys, block) =>
@@ -186,7 +186,7 @@ object CooccurrenceAnalysis extends Serializable {
 
           val interactionsOfUser = block(userIndex, ::)
 
-          val numInteractionsOfUser = interactionsOfUser.getNumNonZeroElements()
+          val numInteractionsOfUser = interactionsOfUser.numNonZeroElementsPerColumn()
 
           val perUserSampleRate = math.min(maxNumInteractions, numInteractionsOfUser) / numInteractionsOfUser
 

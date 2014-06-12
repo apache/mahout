@@ -46,8 +46,8 @@ trait DistributedEngine {
   /** Engine-specific colSums implementation based on a checkpoint. */
   def colSums[K: ClassTag](drm: CheckpointedDrm[K]): Vector
 
-  /** Engine-specific getNumNonZeroElements implementation based on a checkpoint. */
-  def getNumNonZeroElements[K: ClassTag](drm: CheckpointedDrm[K]): Vector
+  /** Engine-specific numNonZeroElementsPerColumn implementation based on a checkpoint. */
+  def numNonZeroElementsPerColumn[K: ClassTag](drm: CheckpointedDrm[K]): Vector
 
   /** Engine-specific colMeans implementation based on a checkpoint. */
   def colMeans[K: ClassTag](drm: CheckpointedDrm[K]): Vector
