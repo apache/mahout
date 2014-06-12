@@ -26,6 +26,7 @@ import RLikeOps._
 import scala.util.Random
 import org.apache.log4j.Logger
 import math._
+import org.apache.mahout.common.RandomUtils
 
 /** Simple ALS factorization algotithm. To solve, use train() method. */
 object ALS {
@@ -79,13 +80,15 @@ object ALS {
     assert(convergenceThreshold < 1.0, "convergenceThreshold")
     assert(maxIterations >= 1, "maxIterations")
 
+
     val drmA = drmInput
     val drmAt = drmInput.t
 
     // Initialize U and V so that they are identically distributed to A or A'
     var drmU = drmA.mapBlock(ncol = k) {
       case (keys, block) =>
-        val uBlock = Matrices.symmetricUniformView(block.nrow, k, Random.nextInt()) * 0.01
+        val rnd = RandomUtils.getRandom()
+        val uBlock = Matrices.symmetricUniformView(block.nrow, k, rnd.nextInt()) * 0.01
         keys -> uBlock
     }
 

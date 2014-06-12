@@ -67,6 +67,13 @@ class MahoutSparkILoop extends SparkILoop {
     }
   }
 
+  override def sparkCleanUp() {
+    echo("Stopping Spark context.")
+    intp.beQuietDuring {
+      command("sdc.stop()")
+    }
+  }
+
   override def prompt: String = "mahout> "
 
   override def printWelcome(): Unit = {
