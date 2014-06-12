@@ -113,27 +113,28 @@ public class MatrixWritable implements Writable {
     int rows = in.readInt();
     int columns = in.readInt();
 
+    byte vectorFlags = in.readByte();
+
     Matrix matrix;
+
     if (dense) {
       matrix = new DenseMatrix(rows, columns);
-    } else {
-      if (isSparseRowMatrix) {
-        matrix = new SparseRowMatrix(rows, columns, sequential);
-      } else {
-        matrix = new SparseMatrix(rows, columns);
-      }
-    }
-
-    if (dense || isSparseRowMatrix) {
       for (int row = 0; row < rows; row++) {
-        matrix.assignRow(row, VectorWritable.readVector(in));
+        matrix.assignRow(row, VectorWritable.readVector(in, vectorFlags, columns));
       }
+    } else if (isSparseRowMatrix) {
+      Vector[] rowVectors = new Vector[rows];
+      for (int row = 0; row < rows; row++) {
+        rowVectors[row] = VectorWritable.readVector(in, vectorFlags, columns);
+      }
+      matrix = new SparseRowMatrix(rows, columns, rowVectors, true, !sequential);
     } else {
+      matrix = new SparseMatrix(rows, columns);
       int numNonZeroRows = in.readInt();
       int rowsRead = 0;
       while (rowsRead++ < numNonZeroRows) {
         int rowIndex = in.readInt();
-        matrix.assignRow(rowIndex, VectorWritable.readVector(in));
+        matrix.assignRow(rowIndex, VectorWritable.readVector(in, vectorFlags, columns));
       }
     }
 
@@ -172,13 +173,16 @@ public class MatrixWritable implements Writable {
     }
 
     out.writeInt(flags);
-
     out.writeInt(matrix.rowSize());
     out.writeInt(matrix.columnSize());
 
+    // We only use vectors of the same type, so we write out the type information only once!
+    byte vectorFlags = VectorWritable.flags(matrix.viewRow(0), false);
+    out.writeByte(vectorFlags);
+
     if (isDense || isSparseRowMatrix) {
       for (int i = 0; i < matrix.rowSize(); i++) {
-        VectorWritable.writeVector(out, matrix.viewRow(i), false);
+        VectorWritable.writeVectorContents(out, matrix.viewRow(i), vectorFlags);
       }
     } else {
       IntArrayList rowIndices = ((SparseMatrix) matrix).nonZeroRowIndices();
@@ -187,7 +191,7 @@ public class MatrixWritable implements Writable {
       for (int i = 0; i < numNonZeroRows; i++) {
         int rowIndex = rowIndices.getQuick(i);
         out.writeInt(rowIndex);
-        VectorWritable.writeVector(out, matrix.viewRow(rowIndex), false);
+        VectorWritable.writeVectorContents(out, matrix.viewRow(rowIndex), vectorFlags);
       }
     }
 
