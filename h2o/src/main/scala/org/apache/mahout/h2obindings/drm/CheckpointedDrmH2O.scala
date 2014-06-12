@@ -1,7 +1,6 @@
 package org.apache.mahout.h2obindings.drm
 
-import org.apache.mahout.math.{SparseMatrix, DenseMatrix, Matrix, Vector}
-import math._
+import org.apache.mahout.math.{Matrix, Vector}
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.mahout.math.drm._
@@ -14,17 +13,23 @@ import scala.reflect._
 
 /** H2O-specific optimizer-checkpointed DRM. */
 class CheckpointedDrmH2O[K: ClassTag](
-    val frame: Frame
+  val frame: Frame,
+  protected[mahout] val context: DistributedContext
 ) extends CheckpointedDrm[K] {
 
-  def collect: Matrix = ???
-  def uncache(): Unit = ???
+  /* XXX: Row index not supported. Numerical index generated on the fly (for mapBlock etc.) */
+  def collect: Matrix = H2OHelper.matrix_from_frame(frame)
+  /* XXX: call frame.remove */
+  def uncache(): Unit = return
+  /* XXX: H2O does not support seqfile format yet */
   def writeDRM(path: String): Unit = ???
 
 
-  def checkpoint(cacheHint: CacheHint.CacheHint): CheckpointedDrm[K] = ???
-  protected[mahout] val context: DistributedContext = ???
-  def ncol: Int = ???
-  def nrow: Long = ???
-  protected[mahout] def partitioningTag: Long = ???
+  def checkpoint(cacheHint: CacheHint.CacheHint): CheckpointedDrm[K] = this
+
+  def ncol: Int = frame.numCols
+
+  def nrow: Long = frame.numRows
+
+  protected[mahout] def partitioningTag: Long = frame.vecs()(0).group.hashCode
 }

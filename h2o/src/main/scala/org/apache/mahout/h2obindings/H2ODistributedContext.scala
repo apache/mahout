@@ -20,6 +20,7 @@ package org.apache.mahout.h2obindings
 import org.apache.mahout.math.drm._
 
 class H2ODistributedContext(val masterUrl: String) extends DistributedContext {
+  val h2octx = new H2OContext("local");
 
   def close(): Unit = return
 

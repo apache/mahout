@@ -188,6 +188,13 @@
       <version>${project.version}</version>
     </dependency>
 
+    <dependency>
+      <!-- for MatrixWritable and VectorWritable -->
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-mrlegacy</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
    <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-math-scala</artifactId>
