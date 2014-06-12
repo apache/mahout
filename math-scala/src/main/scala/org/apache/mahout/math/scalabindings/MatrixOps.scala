@@ -176,7 +176,7 @@ class MatrixOps(val m: Matrix) {
 
   def rowMeans() = if (m.ncol == 0) rowSums() else rowSums() /= m.ncol
 
-
+  def colCounts() = m.aggregateColumns(vectorCountFunc)
 }
 
 object MatrixOps {
@@ -186,6 +186,10 @@ object MatrixOps {
 
   private def vectorSumFunc = new VectorFunction {
     def apply(f: Vector): Double = f.sum
+  }
+
+  private def vectorCountFunc = new VectorFunction {
+    def apply(f: Vector): Double = f.aggregate(Functions.PLUS, Functions.greater(0))
   }
 
 }

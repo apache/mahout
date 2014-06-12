@@ -27,6 +27,7 @@ import scala.collection.JavaConversions._
 import org.apache.mahout.math.stats.LogLikelihood
 import collection._
 import org.apache.mahout.common.RandomUtils
+import org.apache.mahout.math.function.{VectorFunction, Functions}
 
 
 /**
@@ -45,16 +46,16 @@ object CooccurrenceAnalysis extends Serializable {
   def cooccurrences(drmARaw: DrmLike[Int], randomSeed: Int = 0xdeadbeef, maxInterestingItemsPerThing: Int = 50,
                     maxNumInteractions: Int = 500, drmBs: Array[DrmLike[Int]] = Array()): List[DrmLike[Int]] = {
 
-    implicit val disributedContext = drmARaw.context
+    implicit val distributedContext = drmARaw.context
 
     // Apply selective downsampling, pin resulting matrix
-    val drmA = sampleDownAndBinarize(drmARaw, randomSeed, maxNumInteractions).checkpoint()
+    val drmA = sampleDownAndBinarize(drmARaw, randomSeed, maxNumInteractions)
 
     // num users, which equals the maximum number of interactions per item
     val numUsers = drmA.nrow.toInt
 
     // Compute & broadcast the number of interactions per thing in A
-    val bcastInteractionsPerItemA = drmBroadcast(drmA.colSums)
+    val bcastInteractionsPerItemA = drmBroadcast(drmA.colCounts)
 
     // Compute co-occurrence matrix A'A
     val drmAtA = drmA.t %*% drmA
@@ -71,7 +72,7 @@ object CooccurrenceAnalysis extends Serializable {
       val drmB = sampleDownAndBinarize(drmBRaw, randomSeed, maxNumInteractions).checkpoint()
 
       // Compute & broadcast the number of interactions per thing in B
-      val bcastInteractionsPerThingB = drmBroadcast(drmB.colSums)
+      val bcastInteractionsPerThingB = drmBroadcast(drmB.colCounts)
 
       // Compute cross-co-occurrence matrix B'A
       val drmBtA = drmB.t %*% drmA
@@ -145,7 +146,10 @@ object CooccurrenceAnalysis extends Serializable {
           }
 
           // Add top-k interesting items to the output matrix
-          topItemsPerThing.dequeueAll.foreach { case (otherThing, llrScore) => llrBlock(index, otherThing) = llrScore }
+          topItemsPerThing.dequeueAll.foreach {
+            case (otherThing, llrScore) =>
+              llrBlock(index, otherThing) = llrScore
+          }
         }
 
         keys -> llrBlock
@@ -166,7 +170,7 @@ object CooccurrenceAnalysis extends Serializable {
     val drmI = drmM.checkpoint()
 
     // Broadcast vector containing the number of interactions with each thing
-    val bcastNumInteractions = drmBroadcast(drmI.colSums)
+    val bcastNumInteractions = drmBroadcast(drmI.colCounts)
 
     val downSampledDrmI = drmI.mapBlock() {
       case (keys, block) =>
@@ -181,7 +185,9 @@ object CooccurrenceAnalysis extends Serializable {
         for (userIndex <- 0 until keys.size) {
 
           val interactionsOfUser = block(userIndex, ::)
-          val numInteractionsOfUser = interactionsOfUser.sum
+
+          //todo: can we trust getNumNonZeroElements or is this the upper limit? May have to actually count them?
+          val numInteractionsOfUser = interactionsOfUser.getNumNonZeroElements()
 
           val perUserSampleRate = math.min(maxNumInteractions, numInteractionsOfUser) / numInteractionsOfUser
 
