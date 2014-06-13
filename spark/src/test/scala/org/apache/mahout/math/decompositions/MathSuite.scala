@@ -239,7 +239,7 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
     // Make sure input is sparsified
     inCoreCStar = new SparseMatrix(m, n) := inCoreCStar
 
-    val (inCoreU, inCoreV, _) = ALSImplicit.alsImplicit(inCoreCStar, k = k, lambda = lambda, maxIterations = 3).toTuple
+    val (inCoreU, inCoreV, mse) = ALSImplicit.alsImplicit(inCoreCStar, k = k, lambda = lambda).toTuple
 
 
     printf("Ul(0)=%s\n", inCoreU(0, ::))
@@ -250,6 +250,8 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
     printf("Control1=\n%s\n", inCoreCControl(0, 0 until 10))
     printf("C*Control=\n%s\n", inCoreCStar(0, 0 until 10))
     printf("Predict1=\n%s\n", predict(0, 0 until 10))
+
+    printf ("mse:%s\n", mse)
 
   }
 

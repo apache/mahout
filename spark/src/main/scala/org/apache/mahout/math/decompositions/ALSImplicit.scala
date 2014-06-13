@@ -27,7 +27,6 @@ import org.apache.mahout.sparkbindings._
 import scala.collection.JavaConversions._
 import org.apache.spark.SparkContext._
 import org.apache.mahout.common.RandomUtils
-import org.apache.spark.storage.StorageLevel
 import org.apache.mahout.math.decompositions.ALS.InCoreResult
 
 object ALSImplicit {
@@ -40,12 +39,12 @@ object ALSImplicit {
    * <P/>
    */
   def alsImplicit(
-      inCoreC:Matrix,
+      inCoreC: Matrix,
       c0: Double = 1.0,
       k: Int = 50,
       lambda: Double = 0.0001,
       maxIterations: Int = 10,
-      convergenceTreshold: Double = 0.10
+      convergenceThreshold: Double = 0.05
       ): ALS.InCoreResult = {
 
     val rnd = RandomUtils.getRandom()
@@ -55,19 +54,40 @@ object ALSImplicit {
     var inCoreU = new DenseMatrix(m, k)
 
     var inCoreD = (inCoreC cloned)
-    inCoreD := ((r,c,v) => abs(v))
+    inCoreD := ((r, c, v) => abs(v))
 
     var inCoreP = (inCoreC cloned)
-    inCoreP :=((r,c,v) => if(v > 0) 1.0 else 0.0)
+    inCoreP := ((r, c, v) => if (v > 0) 1.0 else 0.0)
+
+    // Num non-base confidence entries
+    val numPoints = if (convergenceThreshold > 0) inCoreC.foldLeft(0)(_ + _.getNumNonZeroElements) else 0
+    var rmseList = List.empty[Double]
 
     var i = 0
-    while (i < maxIterations) {
+    var stop =  false
+    while (i < maxIterations && !stop) {
       updateU(inCoreU, inCoreV, inCoreD, inCoreP, k, lambda, c0)
       updateU(inCoreV, inCoreU, inCoreD.t, inCoreP.t, k, lambda, c0)
 
-      i+=1
+      if ( convergenceThreshold > 0 ) {
+
+        // MSE , weighed by confidence of measurement
+        val mse = ((inCoreP - inCoreU %*% inCoreV.t) * inCoreC).norm / numPoints
+        val rmse = sqrt(mse)
+
+        // Measure relative improvement over previous iteration and bail out if it doesn't exceed
+        // minimum convergence threshold.
+        if (! rmseList.isEmpty && (rmseList.last - rmse) / rmseList.last <= convergenceThreshold ) {
+          stop = true
+        }
+
+        // Augment mse list.
+        rmseList :+= rmse
+      }
+
+      i += 1
     }
-    new InCoreResult(inCoreU, inCoreV, Nil)
+    new InCoreResult(inCoreU, inCoreV, rmseList)
   }
 
   private def updateU(inCoreU: Matrix, inCoreV: Matrix, inCoreD: Matrix, inCoreP: Matrix, k: Int, lambda: Double,
@@ -82,7 +102,7 @@ object ALSImplicit {
       val d_i = inCoreD(i, ::)
       val p_i = inCoreP(i, ::)
       val n_u = d_i.getNumNonZeroElements
-      inCoreU(i,::) = solve(
+      inCoreU(i, ::) = solve(
         a = c0vtv + (inCoreV.t %*%: diagv(inCoreD(i, ::))) %*% inCoreV + diag(n_u * lambda, k),
         b = (inCoreV.t %*%: diagv(d_i + c0)) %*% p_i
       )
@@ -112,9 +132,9 @@ object ALSImplicit {
    *
    * Second, we can use sign to encode preferences, i.e.
    * <pre>
-   *     C*(i,j) = (C(i,j)-c0) if P(i,j)==1;
-   *          and
-   *     C*(i,j) = -(C(i,j)-c0) if P(i,j)=0.
+   * C*(i,j) = (C(i,j)-c0) if P(i,j)==1;
+   * and
+   * C*(i,j) = -(C(i,j)-c0) if P(i,j)=0.
    * </pre>
    *
    * Note in that we assume all entries with baseline confidence having P = 0 (no preference).
@@ -146,8 +166,8 @@ object ALSImplicit {
     var drmUA = drmA.mapBlock(ncol = k + drmA.ncol) {
       case (keys, block) =>
         val uaBlock = block.like(block.nrow, block.ncol + k)
-//        uaBlock(::, 0 until k) :=
-//            Matrices.symmetricUniformView(uaBlock.nrow, k, RandomUtils.getRandom().nextInt()) * 0.01
+        //        uaBlock(::, 0 until k) :=
+        //            Matrices.symmetricUniformView(uaBlock.nrow, k, RandomUtils.getRandom().nextInt()) * 0.01
         uaBlock(::, k until uaBlock.ncol) := block
         keys -> uaBlock
     }
@@ -188,7 +208,7 @@ object ALSImplicit {
     new ALS.Result[Int](drmU = drmUA(::, 0 until k), drmV = drmVAt(::, 0 until k), iterationsRMSE = Iterable())
   }
 
-  private def updateUA(drmUA: DrmLike[Int], drmVAt: DrmLike[Int], k: Int, lambda:Double, c0: Double): DrmLike[Int] = {
+  private def updateUA(drmUA: DrmLike[Int], drmVAt: DrmLike[Int], k: Int, lambda: Double, c0: Double): DrmLike[Int] = {
 
     implicit val ctx = drmUA.context
 
@@ -222,7 +242,7 @@ object ALSImplicit {
 
             // (2) Update m: confidence value is absolute of c*.
             // We probably could do that more efficiently here?
-            m+= vrow * abs(c_star) cross vrow
+            m += vrow * abs(c_star) cross vrow
             n_u += 1
         }
 
