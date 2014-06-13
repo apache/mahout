@@ -463,4 +463,15 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
     drmA.colMeans() should equal (inCoreA.colMeans())
   }
 
+  test("numNonZeroElementsPerColumn") {
+    val inCoreA = dense(
+      (0, 2),
+      (3, 4),
+      (0, 30)
+    )
+    val drmA = drmParallelize(inCoreA, numPartitions = 2)
+
+    drmA.numNonZeroElementsPerColumn() should equal (inCoreA.numNonZeroElementsPerColumn())
+  }
+
 }
