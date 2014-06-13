@@ -85,13 +85,18 @@ public final class VectorWritable extends Configured implements Writable {
   @Override
   public void readFields(DataInput in) throws IOException {
     int flags = in.readByte();
+    int size = Varint.readUnsignedVarInt(in);
+    readFields(in, (byte) flags, size);
+  }
+
+  private void readFields(DataInput in, byte flags, int size) throws IOException {
+
     Preconditions.checkArgument(flags >> NUM_FLAGS == 0, "Unknown flags set: %d", Integer.toString(flags, 2));
     boolean dense = (flags & FLAG_DENSE) != 0;
     boolean sequential = (flags & FLAG_SEQUENTIAL) != 0;
     boolean named = (flags & FLAG_NAMED) != 0;
     boolean laxPrecision = (flags & FLAG_LAX_PRECISION) != 0;
 
-    int size = Varint.readUnsignedVarInt(in);
     Vector v;
     if (dense) {
       double[] values = new double[size];
@@ -133,17 +138,39 @@ public final class VectorWritable extends Configured implements Writable {
     writeVector(out, vector, false);
   }
 
-  public static void writeVector(DataOutput out, Vector vector, boolean laxPrecision) throws IOException {
+  public static byte flags(Vector vector, boolean laxPrecision) {
     boolean dense = vector.isDense();
     boolean sequential = vector.isSequentialAccess();
     boolean named = vector instanceof NamedVector;
 
-    out.writeByte((dense ? FLAG_DENSE : 0)
-        | (sequential ? FLAG_SEQUENTIAL : 0)
-        | (named ? FLAG_NAMED : 0)
-        | (laxPrecision ? FLAG_LAX_PRECISION : 0));
+    return (byte) ((dense ? FLAG_DENSE : 0)
+            | (sequential ? FLAG_SEQUENTIAL : 0)
+            | (named ? FLAG_NAMED : 0)
+            | (laxPrecision ? FLAG_LAX_PRECISION : 0));
+  }
 
-    Varint.writeUnsignedVarInt(vector.size(), out);
+  /** Write out type information and size of the vector */
+  public static void writeVectorFlagsAndSize(DataOutput out, byte flags, int size) throws IOException {
+    out.writeByte(flags);
+    Varint.writeUnsignedVarInt(size, out);
+  }
+
+  public static void writeVector(DataOutput out, Vector vector, boolean laxPrecision) throws IOException {
+
+    byte flags = flags(vector, laxPrecision);
+
+    writeVectorFlagsAndSize(out, flags, vector.size());
+    writeVectorContents(out, vector, flags);
+  }
+
+  /** Write out contents of the vector */
+  public static void writeVectorContents(DataOutput out, Vector vector, byte flags) throws IOException {
+
+    boolean dense = (flags & FLAG_DENSE) != 0;
+    boolean sequential = (flags & FLAG_SEQUENTIAL) != 0;
+    boolean named = (flags & FLAG_NAMED) != 0;
+    boolean laxPrecision = (flags & FLAG_LAX_PRECISION) != 0;
+
     if (dense) {
       for (Vector.Element element : vector.all()) {
         if (laxPrecision) {
@@ -197,6 +224,12 @@ public final class VectorWritable extends Configured implements Writable {
   public static Vector readVector(DataInput in) throws IOException {
     VectorWritable v = new VectorWritable();
     v.readFields(in);
+    return v.get();
+  }
+
+  public static Vector readVector(DataInput in, byte vectorFlags, int size) throws IOException {
+    VectorWritable v = new VectorWritable();
+    v.readFields(in, vectorFlags, size);
     return v.get();
   }
 
