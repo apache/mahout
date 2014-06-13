@@ -468,6 +468,7 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
       (0, 2),
       (3, 0),
       (0, -30)
+
     )
     val drmA = drmParallelize(inCoreA, numPartitions = 2)
 
