@@ -118,8 +118,8 @@ class CooccurrenceAnalysisSuite extends FunSuite with MahoutSuite with MahoutLoc
   }
 
   test("cooccurrence [A'A], [B'A] integer data using LLR") {
-    val a = dense((1000, 10, 0, 0, 0), (0, 0, 10000, 10, 0), (0, 0, 0, 0, 100), (10000, 0, 0, 1000, 0))
-    val b = dense((100, 1000, 10000, 10000, 0), (10000, 1000, 100, 10, 0), (0, 0, 10, 0, 100), (10, 100, 0, 1000, 0))
+    val a = dense((1000, 10, 0, 0, 0), (0, 0, -10000, 10, 0), (0, 0, 0, 0, 100), (10000, 0, 0, 1000, 0))
+    val b = dense((100, 1000, -10000, 10000, 0), (10000, 1000, 100, 10, 0), (0, 0, 10, 0, -100), (10, 100, 0, 1000, 0))
     val drmA = drmParallelize(m = a, numPartitions = 2)
     val drmB = drmParallelize(m = b, numPartitions = 2)
 

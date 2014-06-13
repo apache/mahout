@@ -62,7 +62,7 @@ object SparkEngine extends DistributedEngine {
       .mapPartitions(iter => {
       val acc = ((new DenseVector(n): Vector) /: iter){(acc, v) =>
         v.nonZeroes().foreach { elem =>
-          if (elem.get() > 0) acc(elem.index) += 1
+         acc(elem.index) += 1
         }
         acc
       }
