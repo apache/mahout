@@ -51,8 +51,8 @@ object ALSImplicit {
     val rnd = RandomUtils.getRandom()
     val m = inCoreC.nrow
     val n = inCoreC.ncol
-    var inCoreV = Matrices.symmetricUniformView(n, k, rnd.nextInt()) * 0.01
-    var inCoreU:Matrix = null
+    var inCoreV = new DenseMatrix(n, k) := Matrices.symmetricUniformView(n, k, rnd.nextInt()) * 0.01
+    var inCoreU = new DenseMatrix(m, k)
 
     var inCoreD = (inCoreC cloned)
     inCoreD := ((r,c,v) => abs(v))
@@ -62,20 +62,20 @@ object ALSImplicit {
 
     var i = 0
     while (i < maxIterations) {
-      inCoreU = updateU(inCoreV, inCoreD, inCoreP, k, lambda, c0)
-      inCoreV = updateU(inCoreU, inCoreD.t, inCoreP.t, k, lambda, c0)
+      updateU(inCoreU, inCoreV, inCoreD, inCoreP, k, lambda, c0)
+      updateU(inCoreV, inCoreU, inCoreD.t, inCoreP.t, k, lambda, c0)
 
       i+=1
     }
     new InCoreResult(inCoreU, inCoreV, Nil)
   }
-  
-  private def updateU(inCoreV: Matrix, inCoreD: Matrix, inCoreP:Matrix, k: Int, lambda:Double, c0: Double):Matrix = {
+
+  private def updateU(inCoreU: Matrix, inCoreV: Matrix, inCoreD: Matrix, inCoreP: Matrix, k: Int, lambda: Double,
+      c0: Double) = {
+
     val m = inCoreD.nrow
 
     val c0vtv = (inCoreV.t %*% inCoreV) * c0
-
-    val inCoreU = new DenseMatrix(m, k)
 
     var i = 0
     while (i < m) {

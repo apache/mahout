@@ -209,7 +209,7 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
 
   }
 
-  test("ALS implicit") {
+  test("als, implicit") {
 
     val rnd = RandomUtils.getRandom()
 
@@ -253,7 +253,7 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
 
   }
 
-  test("dALS implicit") {
+  test("dals, implicit") {
 
     val rnd = RandomUtils.getRandom()
 
