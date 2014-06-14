@@ -60,10 +60,8 @@ object SparkEngine extends DistributedEngine {
       .map(_._2)
       // Fold() doesn't work with kryo still. So work around it.
       .mapPartitions(iter => {
-      val acc = ((new DenseVector(n): Vector) /: iter){(acc, v) =>
-        v.nonZeroes().foreach { elem =>
-          if (elem.get() > 0) acc(elem.index) += 1
-        }
+      val acc = ((new DenseVector(n): Vector) /: iter) { (acc, v) =>
+        v.nonZeroes().foreach { elem => acc(elem.index) += 1}
         acc
       }
       Iterator(acc)

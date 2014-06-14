@@ -123,4 +123,16 @@ class MatrixOpsSuite extends FunSuite with MahoutSuite {
 
   }
 
+  test("numNonZeroElementsPerColumn") {
+    val a = dense(
+      (2, 3, 4),
+      (3, 4, 5),
+      (-5, 0, -1),
+      (0, 0, 1)
+    )
+
+    a.numNonZeroElementsPerColumn() should equal(dvec(3,2,4))
+
+  }
+
 }
