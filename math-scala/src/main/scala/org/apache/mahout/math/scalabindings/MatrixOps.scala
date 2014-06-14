@@ -189,7 +189,8 @@ object MatrixOps {
   }
 
   private def vectorCountNonZeroElementsFunc = new VectorFunction {
-    def apply(f: Vector): Double = f.aggregate(Functions.PLUS, Functions.notEqual(0))
+    //def apply(f: Vector): Double = f.aggregate(Functions.PLUS, Functions.notEqual(0))
+    def apply(f: Vector): Double = f.getNumNonZeroElements().toDouble
   }
 
 }
