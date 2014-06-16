@@ -44,7 +44,8 @@ object ALSImplicit {
       k: Int = 50,
       lambda: Double = 0.0001,
       maxIterations: Int = 10,
-      convergenceThreshold: Double = 0.05
+      convergenceThreshold: Double = 0.05,
+      wr: Boolean = true
       ): ALS.InCoreResult = {
 
     val rnd = RandomUtils.getRandom()
@@ -66,12 +67,12 @@ object ALSImplicit {
     var i = 0
     var stop =  false
     while (i < maxIterations && !stop) {
-      updateU(inCoreU, inCoreV, inCoreD, inCoreP, k, lambda, c0)
-      updateU(inCoreV, inCoreU, inCoreD.t, inCoreP.t, k, lambda, c0)
+      updateU(inCoreU, inCoreV, inCoreD, inCoreP, k, lambda, c0, wr)
+      updateU(inCoreV, inCoreU, inCoreD.t, inCoreP.t, k, lambda, c0, wr)
 
       if ( convergenceThreshold > 0 ) {
 
-        // MSE , weighed by confidence of measurement
+        // MSE , weighed by confidence of measurement and ifnoring no-observation c0 items
         val mse = ((inCoreP - inCoreU %*% inCoreV.t) * inCoreC).norm / numPoints
         val rmse = sqrt(mse)
 
@@ -91,7 +92,7 @@ object ALSImplicit {
   }
 
   private def updateU(inCoreU: Matrix, inCoreV: Matrix, inCoreD: Matrix, inCoreP: Matrix, k: Int, lambda: Double,
-      c0: Double) = {
+      c0: Double, wr:Boolean) = {
 
     val m = inCoreD.nrow
 
@@ -101,7 +102,7 @@ object ALSImplicit {
     while (i < m) {
       val d_i = inCoreD(i, ::)
       val p_i = inCoreP(i, ::)
-      val n_u = d_i.getNumNonZeroElements
+      val n_u = if (wr) d_i.getNumNonZeroElements else 1.0
       inCoreU(i, ::) = solve(
         a = c0vtv + (inCoreV.t %*%: diagv(inCoreD(i, ::))) %*% inCoreV + diag(n_u * lambda, k),
         b = (inCoreV.t %*%: diagv(d_i + c0)) %*% p_i
@@ -150,6 +151,7 @@ object ALSImplicit {
    * @param lambda regularization for this iteration
    * @param maxIterations maximum iterations to run
    * @param convergenceTreshold reserved, not used at this point
+   * @param wr use/do not use weighed regularization
    */
   def dalsImplicit(
       drmC: DrmLike[Int],
@@ -157,7 +159,8 @@ object ALSImplicit {
       k: Int = 50,
       lambda: Double = 0.0001,
       maxIterations: Int = 10,
-      convergenceTreshold: Double = 0.10
+      convergenceTreshold: Double = 0.10,
+      wr: Boolean = true
       ): ALS.Result[Int] = {
     val drmA = drmC
     val drmAt = drmC.t
@@ -195,12 +198,12 @@ object ALSImplicit {
       // Update U-A, relinquish stuff explicitly from block manager to alleviate GC concerns and swaps
       if (drmUAOld != null) drmUAOld.uncache()
       drmUAOld = drmUA
-      drmUA = updateUA(drmUA, drmVAt, k, lambda, c0)
+      drmUA = updateUA(drmUA, drmVAt, k, lambda, c0, wr)
 
       // Update V-A'
       if (drmVAtOld != null) drmVAtOld.uncache()
       drmVAtOld = drmVAt
-      drmVAt = updateUA(drmVAt, drmUA, k, lambda, c0)
+      drmVAt = updateUA(drmVAt, drmUA, k, lambda, c0, wr)
 
       i += 1
     }
@@ -208,7 +211,8 @@ object ALSImplicit {
     new ALS.Result[Int](drmU = drmUA(::, 0 until k), drmV = drmVAt(::, 0 until k), iterationsRMSE = Iterable())
   }
 
-  private def updateUA(drmUA: DrmLike[Int], drmVAt: DrmLike[Int], k: Int, lambda: Double, c0: Double): DrmLike[Int] = {
+  private def updateUA(drmUA: DrmLike[Int], drmVAt: DrmLike[Int], k: Int, lambda: Double, c0: Double,
+      wr: Boolean): DrmLike[Int] = {
 
     implicit val ctx = drmUA.context
 
@@ -247,6 +251,8 @@ object ALSImplicit {
         }
 
         if (n_u > 0) {
+          // If we are asked not to use weighed regularization, don't.
+          if (!wr) n_u = 1.0
           m += diag(n_u * lambda, k)
         }
 
