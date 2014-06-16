@@ -86,7 +86,7 @@ public class HadoopFSDataModel extends FileDataModel {
     FSDataInputStream fsin = fs.open(file);
     FileLineIterator iterator = new FileLineIterator(fsin);
     
-    initilize(iterator, transpose, minReloadIntervalMS, delimiterRegex);
+    initialize(iterator, transpose, minReloadIntervalMS, delimiterRegex);
   }
   
   public FileSystem getFileSystem() {

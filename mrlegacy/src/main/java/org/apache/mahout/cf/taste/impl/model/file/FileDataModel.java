@@ -199,10 +199,10 @@ public class FileDataModel extends AbstractDataModel {
 
     FileLineIterator iterator = new FileLineIterator(dataFile, false);
 
-    initilize(iterator, transpose, minReloadIntervalMS, delimiterRegex);
+    initialize(iterator, transpose, minReloadIntervalMS, delimiterRegex);
   }
 
-  protected void initilize(FileLineIterator iterator, boolean transpose,
+  protected void initialize(FileLineIterator iterator, boolean transpose,
       long minReloadIntervalMS, String delimiterRegex) throws IOException {
     String firstLine = iterator.peek();
     while (firstLine.isEmpty() || firstLine.charAt(0) == COMMENT_CHAR) {
