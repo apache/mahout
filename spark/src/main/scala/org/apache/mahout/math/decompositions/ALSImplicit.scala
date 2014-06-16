@@ -65,12 +65,12 @@ object ALSImplicit {
     var rmseList = List.empty[Double]
 
     var i = 0
-    var stop =  false
+    var stop = false
     while (i < maxIterations && !stop) {
       updateU(inCoreU, inCoreV, inCoreD, inCoreP, k, lambda, c0, wr)
       updateU(inCoreV, inCoreU, inCoreD.t, inCoreP.t, k, lambda, c0, wr)
 
-      if ( convergenceThreshold > 0 ) {
+      if (convergenceThreshold > 0) {
 
         // MSE , weighed by confidence of measurement and ifnoring no-observation c0 items
         val mse = ((inCoreP - inCoreU %*% inCoreV.t) * inCoreC).norm / numPoints
@@ -78,7 +78,7 @@ object ALSImplicit {
 
         // Measure relative improvement over previous iteration and bail out if it doesn't exceed
         // minimum convergence threshold.
-        if (! rmseList.isEmpty && (rmseList.last - rmse) / rmseList.last <= convergenceThreshold ) {
+        if (!rmseList.isEmpty && (rmseList.last - rmse) / rmseList.last <= convergenceThreshold) {
           stop = true
         }
 
@@ -92,7 +92,7 @@ object ALSImplicit {
   }
 
   private def updateU(inCoreU: Matrix, inCoreV: Matrix, inCoreD: Matrix, inCoreP: Matrix, k: Int, lambda: Double,
-      c0: Double, wr:Boolean) = {
+      c0: Double, wr: Boolean) = {
 
     val m = inCoreD.nrow
 
@@ -169,8 +169,6 @@ object ALSImplicit {
     var drmUA = drmA.mapBlock(ncol = k + drmA.ncol) {
       case (keys, block) =>
         val uaBlock = block.like(block.nrow, block.ncol + k)
-        //        uaBlock(::, 0 until k) :=
-        //            Matrices.symmetricUniformView(uaBlock.nrow, k, RandomUtils.getRandom().nextInt()) * 0.01
         uaBlock(::, k until uaBlock.ncol) := block
         keys -> uaBlock
     }
@@ -209,6 +207,21 @@ object ALSImplicit {
     }
 
     new ALS.Result[Int](drmU = drmUA(::, 0 until k), drmV = drmVAt(::, 0 until k), iterationsRMSE = Iterable())
+  }
+
+  /**
+   * Compute distributed MSE for non-zero elements of A only, which are interpreted the same way as
+   * in dalsImplicit()
+   *
+   * @param drmC hybrid-encoded confidence/preference matrix with nonzero entries for holdout data
+   *             only
+   * @param drmU U matrix
+   * @param drmV V matrix
+   */
+  def computeDMSE(drmC: DrmLike[Int], drmU: DrmLike[Int], drmV: DrmLike[Int]) = {
+
+    // Not so subtle problem here is that U %*% V.t would create a matrix much larger than we need.
+    // We don't want to compute data points for the entire U %*% V.t to be able to derive RMSE.
   }
 
   private def updateUA(drmUA: DrmLike[Int], drmVAt: DrmLike[Int], k: Int, lambda: Double, c0: Double,
@@ -258,6 +271,9 @@ object ALSImplicit {
 
         // Update u-vec
         urow := solve(a = m, b = vsum)
+
+
+
         uKey -> uavec
     }
 
