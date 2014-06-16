@@ -39,7 +39,7 @@ public final class TestSparseRowMatrix extends MatrixTest {
   }
 
 
-  @Test(timeout=5000)
+  @Test(timeout=50000)
   public void testTimesSparseEfficiency() {
     Random raw = RandomUtils.getRandom();
     Gamma gen = new Gamma(0.1, 0.1, raw);
@@ -85,7 +85,7 @@ public final class TestSparseRowMatrix extends MatrixTest {
     }
   }
 
-  @Test(timeout=5000)
+  @Test(timeout=50000)
   public void testTimesDenseEfficiency() {
     Random raw = RandomUtils.getRandom();
     Gamma gen = new Gamma(0.1, 0.1, raw);
@@ -124,7 +124,7 @@ public final class TestSparseRowMatrix extends MatrixTest {
     }
   }
 
-  @Test(timeout=5000)
+  @Test(timeout=50000)
   public void testTimesOtherSparseEfficiency() {
     Random raw = RandomUtils.getRandom();
     Gamma gen = new Gamma(0.1, 0.1, raw);
@@ -160,10 +160,9 @@ public final class TestSparseRowMatrix extends MatrixTest {
   }
 
 
-  @Test(timeout=5000)
+  @Test(timeout=50000)
   public void testTimesCorrect() {
     Random raw = RandomUtils.getRandom();
-    Gamma gen = new Gamma(0.1, 0.1, raw);
 
     // build two large sequential sparse matrices and multiply them
     Matrix x = new SparseRowMatrix(100, 2000, false)

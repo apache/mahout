@@ -32,6 +32,9 @@ class CheckpointedOps[K: ClassTag](val drm: CheckpointedDrm[K]) {
   /** Column sums. At this point this runs on checkpoint and collects in-core vector. */
   def colSums(): Vector = drm.context.colSums(drm)
 
+  /** Column clounts. Counts the non-zero values. At this point this runs on checkpoint and collects in-core vector. */
+  def numNonZeroElementsPerColumn(): Vector = drm.context.numNonZeroElementsPerColumn(drm)
+
   /** Column Means */
   def colMeans(): Vector = drm.context.colMeans(drm)
 
