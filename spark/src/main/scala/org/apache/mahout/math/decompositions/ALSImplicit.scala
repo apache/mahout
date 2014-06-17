@@ -66,6 +66,15 @@ object ALSImplicit {
 
     var i = 0
     var stop = false
+
+    // A sparse matrix that contains true confidences (C_0 + C*) except where no observations. We
+    // need this for computing RMSE the same way we do for the distributed version.
+    val inCoreCC0 = if (convergenceThreshold > 0) {
+      (inCoreD cloned) := ((r, c, v) => if (v > 0.0) v + c0 else 0.0)
+    } else {
+      null: Matrix
+    }
+
     while (i < maxIterations && !stop) {
       updateU(inCoreU, inCoreV, inCoreD, inCoreP, k, lambda, c0, wr)
       updateU(inCoreV, inCoreU, inCoreD.t, inCoreP.t, k, lambda, c0, wr)
@@ -73,7 +82,7 @@ object ALSImplicit {
       if (convergenceThreshold > 0) {
 
         // MSE , weighed by confidence of measurement and ifnoring no-observation c0 items
-        val mse = ((inCoreP - inCoreU %*% inCoreV.t) * inCoreC).norm / numPoints
+        val mse = ((inCoreP - inCoreU %*% inCoreV.t) * inCoreCC0).norm / numPoints
         val rmse = sqrt(mse)
 
         // Measure relative improvement over previous iteration and bail out if it doesn't exceed
@@ -150,7 +159,7 @@ object ALSImplicit {
    * @param k factorization rank (~50...100 is probably enough)
    * @param lambda regularization for this iteration
    * @param maxIterations maximum iterations to run
-   * @param convergenceTreshold reserved, not used at this point
+   * @param convergenceThreshold reserved, not used at this point
    * @param wr use/do not use weighed regularization
    */
   def dalsImplicit(
@@ -159,7 +168,7 @@ object ALSImplicit {
       k: Int = 50,
       lambda: Double = 0.0001,
       maxIterations: Int = 10,
-      convergenceTreshold: Double = 0.10,
+      convergenceThreshold: Double = 0.05,
       wr: Boolean = true
       ): ALS.Result[Int] = {
     val drmA = drmC
@@ -190,6 +199,7 @@ object ALSImplicit {
 
     var drmVAtOld: DrmLike[Int] = null
     var drmUAOld: DrmLike[Int] = null
+    var rmseList = List.empty[Double]
 
     while (i < maxIterations && !stop) {
 
@@ -203,34 +213,71 @@ object ALSImplicit {
       drmVAtOld = drmVAt
       drmVAt = updateUA(drmVAt, drmUA, k, lambda, c0, wr)
 
+      if (convergenceThreshold > 0) {
+
+        val rmse = drmse(
+          drmUC = drmUA,
+          drmVCt = drmVAt,
+          c0 = c0,
+          k = k
+        )
+
+        // Measure relative improvement over previous iteration and bail out if it doesn't exceed
+        // minimum convergence threshold.
+        if (!rmseList.isEmpty && (rmseList.last - rmse) / rmseList.last <= convergenceThreshold) {
+          stop = true
+        }
+
+        // Augment mse list.
+        rmseList :+= rmse
+      }
+
+
       i += 1
     }
 
-    new ALS.Result[Int](drmU = drmUA(::, 0 until k), drmV = drmVAt(::, 0 until k), iterationsRMSE = Iterable())
+    new ALS.Result[Int](drmU = drmUA(::, 0 until k), drmV = drmVAt(::, 0 until k), iterationsRMSE = rmseList)
   }
 
   // Returns (P,C) tuple out of encoded hybrid C/P value
   private def decodePC(chybrid: Double) = if (chybrid > 0) 1.0 -> chybrid else 0.0 -> -chybrid
 
+
   /**
-   * Compute distributed MSE for non-zero elements of A only, which are interpreted the same way as
+   * Compute distributed rmse for non-zero elemenst of C only, which are interpreted the same way as
    * in dalsImplicit()
    *
-   * @param drmC hybrid-encoded confidence/preference matrix with nonzero entries for holdout data
-   *             only
-   * @param drmU U matrix
-   * @param drmV V matrix
+   * @param drmC Confidence matrix in hybrid encoding (same incoding as the input to implicit feedback)
+   * @param drmU U matrix, m x k
+   * @param drmV V matrix, n x k
+   * @param c0 baseline confidence
+   * @return rmse
    */
-  def computeD_MSE(drmC: DrmLike[Int], drmU: DrmLike[Int], drmV: DrmLike[Int], c0: Double) = {
+  def drmse(drmC: DrmLike[Int], drmU: DrmLike[Int], drmV: DrmLike[Int], c0: Double): Double =
+    drmse(
+      drmUC = drmU cbind drmC,
+      drmVCt = drmV cbind drmC.t,
+      k = drmU.ncol,
+      c0 = c0
+    )
+
+  /**
+   * Compute distributed RMSE for non-zero elements of C only, which are interpreted the same way as
+   * in dalsImplicit().
+   * <P/>
+   *
+   * Slightly different api. Sometimes U cbind C and V cbind C' are already available.
+   * <P/>
+   *
+   * @param drmUC drmU cbind drmC
+   * @param drmVCt drmV cbind drmC.t
+   */
+  def drmse(drmUC: DrmLike[Int], drmVCt: DrmLike[Int], k: Int, c0: Double): Double = {
 
     // Not so subtle problem here is that U %*% V.t would create a matrix much larger than we need.
     // We don't want to compute data points for the entire U %*% V.t to be able to derive RMSE.
-    val k = drmU.ncol
-    val m = safeToNonNegInt(drmC.nrow)
-    val n = drmC.ncol
-
-    val drmUC = drmU cbind drmC
-    val drmVCt = drmV cbind drmC.t
+    val m = safeToNonNegInt(drmUC.nrow)
+    val n = safeToNonNegInt(drmVCt.nrow)
 
     // Sum squared residuals and count:
     val (sse, cnt) = drmUC.rdd
@@ -256,11 +303,11 @@ object ALSImplicit {
         .map {
       case (vkey, (msgs, vctSeq)) =>
 
-        if ( vctSeq.isEmpty) {
+        if (vctSeq.isEmpty) {
           0.0 -> 0
         } else {
           val vvec = vctSeq.head(0 until k)
-          val ccol = vctSeq.head(k until m)
+          val ccol = vctSeq.head(k until k + m)
 
           // Squared residuals
           ((0.0, 0) /: msgs) {
@@ -287,7 +334,7 @@ object ALSImplicit {
     assert(cnt > 0)
 
     // This would be MSE
-    sse / cnt
+    sqrt(sse / cnt)
   }
 
   private def updateUA(drmUA: DrmLike[Int], drmVAt: DrmLike[Int], k: Int, lambda: Double, c0: Double,

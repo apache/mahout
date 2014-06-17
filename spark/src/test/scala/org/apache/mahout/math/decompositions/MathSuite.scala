@@ -251,7 +251,7 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
     printf("C*Control=\n%s\n", inCoreCStar(0, 0 until 10))
     printf("Predict1=\n%s\n", predict(0, 0 until 10))
 
-    printf ("mse:%s\n", mse)
+    printf("mse:%s\n", mse)
 
   }
 
@@ -289,8 +289,10 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
 
     val (drmU, drmV, _) = ALSImplicit.dalsImplicit(drmC, k = k, lambda = lambda, maxIterations = 5).toTuple
 
-    val (inCoreU, inCoreV, _) = ALSImplicit.alsImplicit(inCoreCStar, k = k, lambda = lambda, maxIterations = 5).toTuple
+    val (inCoreU, inCoreV, rmses) = ALSImplicit.alsImplicit(inCoreCStar, k = k, lambda = lambda, maxIterations = 5)
+        .toTuple
 
+    printf("rmse: %s\n", rmses)
     printf("Ud(0)=%s\n", drmU.collect(0, ::))
     printf("Ul(0)=%s\n", inCoreU(0, ::))
     printf("Vd(0)=%s\n", drmV.collect(0, ::))
@@ -305,12 +307,12 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
     printf("PredictL=\n%s\n", predictL(0, 0 until 10))
 
     // Error per matrix element in predictions of in-core and distributed
-    val err = (predict - predictL).norm / m / n
+    val msr = (predict - predictL).norm / m / n
 
-    printf("mean square residual of in-core and distributed predictions: %f\n", err)
+    printf("mean square residual of in-core and distributed predictions: %f\n", msr)
 
     // Lots of stochasticity here still, so we will be conservative enough on error here.
-    err should be < 1e-3
+    msr should be < 1e-3
 
   }
 
