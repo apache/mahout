@@ -27,6 +27,7 @@ import scala.collection.JavaConversions._
 import org.apache.mahout.math.stats.LogLikelihood
 import collection._
 import org.apache.mahout.common.RandomUtils
+import org.apache.mahout.math.function.{VectorFunction, Functions}
 
 
 /**
@@ -40,28 +41,28 @@ import org.apache.mahout.common.RandomUtils
 object CooccurrenceAnalysis extends Serializable {
 
   /** Compares (Int,Double) pairs by the second value */
-  private val orderByScore = Ordering.fromLessThan[(Int, Double)] { case ((_, score1), (_, score2)) => score1 > score2 }
+  private val orderByScore = Ordering.fromLessThan[(Int, Double)] { case ((_, score1), (_, score2)) => score1 > score2}
 
   def cooccurrences(drmARaw: DrmLike[Int], randomSeed: Int = 0xdeadbeef, maxInterestingItemsPerThing: Int = 50,
                     maxNumInteractions: Int = 500, drmBs: Array[DrmLike[Int]] = Array()): List[DrmLike[Int]] = {
 
-    implicit val disributedContext = drmARaw.context
+    implicit val distributedContext = drmARaw.context
 
     // Apply selective downsampling, pin resulting matrix
-    val drmA = sampleDownAndBinarize(drmARaw, randomSeed, maxNumInteractions).checkpoint()
+    val drmA = sampleDownAndBinarize(drmARaw, randomSeed, maxNumInteractions)
 
     // num users, which equals the maximum number of interactions per item
     val numUsers = drmA.nrow.toInt
 
     // Compute & broadcast the number of interactions per thing in A
-    val bcastInteractionsPerItemA = drmBroadcast(drmA.colSums)
+    val bcastInteractionsPerItemA = drmBroadcast(drmA.numNonZeroElementsPerColumn)
 
     // Compute co-occurrence matrix A'A
     val drmAtA = drmA.t %*% drmA
 
     // Compute loglikelihood scores and sparsify the resulting matrix to get the indicator matrix
     val drmIndicatorsAtA = computeIndicators(drmAtA, numUsers, maxInterestingItemsPerThing, bcastInteractionsPerItemA,
-                                             bcastInteractionsPerItemA, crossCooccurrence = false)
+      bcastInteractionsPerItemA, crossCooccurrence = false)
 
     var indicatorMatrices = List(drmIndicatorsAtA)
 
@@ -71,13 +72,13 @@ object CooccurrenceAnalysis extends Serializable {
       val drmB = sampleDownAndBinarize(drmBRaw, randomSeed, maxNumInteractions).checkpoint()
 
       // Compute & broadcast the number of interactions per thing in B
-      val bcastInteractionsPerThingB = drmBroadcast(drmB.colSums)
+      val bcastInteractionsPerThingB = drmBroadcast(drmB.numNonZeroElementsPerColumn)
 
       // Compute cross-co-occurrence matrix B'A
       val drmBtA = drmB.t %*% drmA
-      
+
       val drmIndicatorsBtA = computeIndicators(drmBtA, numUsers, maxInterestingItemsPerThing,
-                                               bcastInteractionsPerThingB, bcastInteractionsPerItemA)
+        bcastInteractionsPerThingB, bcastInteractionsPerItemA)
 
       indicatorMatrices = indicatorMatrices :+ drmIndicatorsBtA
 
@@ -107,8 +108,8 @@ object CooccurrenceAnalysis extends Serializable {
   }
 
   def computeIndicators(drmBtA: DrmLike[Int], numUsers: Int, maxInterestingItemsPerThing: Int,
-      bcastNumInteractionsB: BCast[Vector], bcastNumInteractionsA: BCast[Vector],
-      crossCooccurrence: Boolean = true) = {
+                        bcastNumInteractionsB: BCast[Vector], bcastNumInteractionsA: BCast[Vector],
+                        crossCooccurrence: Boolean = true) = {
     drmBtA.mapBlock() {
       case (keys, block) =>
 
@@ -121,7 +122,7 @@ object CooccurrenceAnalysis extends Serializable {
           val thingB = keys(index)
 
           // PriorityQueue to select the top-k items
-          val topItemsPerThing = new mutable.PriorityQueue[(Int,Double)]()(orderByScore)
+          val topItemsPerThing = new mutable.PriorityQueue[(Int, Double)]()(orderByScore)
 
           block(index, ::).nonZeroes().foreach { elem =>
             val thingA = elem.index
@@ -131,7 +132,7 @@ object CooccurrenceAnalysis extends Serializable {
             if (crossCooccurrence || thingB != thingA) {
               // Compute loglikelihood ratio
               val llrRatio = loglikelihoodRatio(numInteractionsB(thingB).toLong, numInteractionsA(thingA).toLong,
-                                                cooccurrences.toLong, numUsers)
+                cooccurrences.toLong, numUsers)
               val candidate = thingA -> llrRatio
 
               // Enqueue item with score, if belonging to the top-k
@@ -145,7 +146,10 @@ object CooccurrenceAnalysis extends Serializable {
           }
 
           // Add top-k interesting items to the output matrix
-          topItemsPerThing.dequeueAll.foreach { case (otherThing, llrScore) => llrBlock(index, otherThing) = llrScore }
+          topItemsPerThing.dequeueAll.foreach {
+            case (otherThing, llrScore) =>
+              llrBlock(index, otherThing) = llrScore
+          }
         }
 
         keys -> llrBlock
@@ -153,7 +157,7 @@ object CooccurrenceAnalysis extends Serializable {
   }
 
   /**
-   * Selectively downsample users and things with an anormalous amount of interactions, inspired by
+   * Selectively downsample users and things with an anomalous amount of interactions, inspired by
    * https://github.com/tdunning/in-memory-cooccurrence/blob/master/src/main/java/com/tdunning/cooc/Analyze.java
    *
    * additionally binarizes input matrix, as we're only interesting in knowing whether interactions happened or not
@@ -166,7 +170,7 @@ object CooccurrenceAnalysis extends Serializable {
     val drmI = drmM.checkpoint()
 
     // Broadcast vector containing the number of interactions with each thing
-    val bcastNumInteractions = drmBroadcast(drmI.colSums)
+    val bcastNumInteractions = drmBroadcast(drmI.numNonZeroElementsPerColumn)
 
     val downSampledDrmI = drmI.mapBlock() {
       case (keys, block) =>
@@ -181,7 +185,8 @@ object CooccurrenceAnalysis extends Serializable {
         for (userIndex <- 0 until keys.size) {
 
           val interactionsOfUser = block(userIndex, ::)
-          val numInteractionsOfUser = interactionsOfUser.sum
+
+          val numInteractionsOfUser = interactionsOfUser.getNumNonZeroElements()
 
           val perUserSampleRate = math.min(maxNumInteractions, numInteractionsOfUser) / numInteractionsOfUser
 
@@ -195,9 +200,9 @@ object CooccurrenceAnalysis extends Serializable {
               downsampledBlock(userIndex, elem.index) = 1
             }
           }
-      }
+        }
 
-      keys -> downsampledBlock
+        keys -> downsampledBlock
     }
 
     // Unpin raw interaction matrix

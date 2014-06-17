@@ -40,16 +40,35 @@ object SparkEngine extends DistributedEngine {
     val n = drm.ncol
 
     drm.rdd
-        // Throw away keys
-        .map(_._2)
-        // Fold() doesn't work with kryo still. So work around it.
-        .mapPartitions(iter => {
+      // Throw away keys
+      .map(_._2)
+      // Fold() doesn't work with kryo still. So work around it.
+      .mapPartitions(iter => {
       val acc = ((new DenseVector(n): Vector) /: iter)((acc, v) => acc += v)
       Iterator(acc)
     })
-        // Since we preallocated new accumulator vector per partition, this must not cause any side
-        // effects now.
-        .reduce(_ += _)
+      // Since we preallocated new accumulator vector per partition, this must not cause any side
+      // effects now.
+      .reduce(_ += _)
+  }
+
+  def numNonZeroElementsPerColumn[K:ClassTag](drm: CheckpointedDrm[K]): Vector = {
+    val n = drm.ncol
+
+    drm.rdd
+      // Throw away keys
+      .map(_._2)
+      // Fold() doesn't work with kryo still. So work around it.
+      .mapPartitions(iter => {
+      val acc = ((new DenseVector(n): Vector) /: iter) { (acc, v) =>
+        v.nonZeroes().foreach { elem => acc(elem.index) += 1}
+        acc
+      }
+      Iterator(acc)
+    })
+      // Since we preallocated new accumulator vector per partition, this must not cause any side
+      // effects now.
+      .reduce(_ += _)
   }
 
   /** Engine-specific colMeans implementation based on a checkpoint. */

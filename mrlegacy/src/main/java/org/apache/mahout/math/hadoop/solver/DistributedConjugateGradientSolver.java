@@ -93,7 +93,7 @@ public class DistributedConjugateGradientSolver extends ConjugateGradientSolver 
     int numCols = Integer.parseInt(AbstractJob.getOption(parsedArgs, "--numCols"));
     int maxIterations = parsedArgs.containsKey("--maxIter")
         ? Integer.parseInt(AbstractJob.getOption(parsedArgs, "--maxIter"))
-        : numCols;
+        : numCols + 2;
     double maxError = parsedArgs.containsKey("--maxError") 
         ? Double.parseDouble(AbstractJob.getOption(parsedArgs, "--maxError"))
         : ConjugateGradientSolver.DEFAULT_MAX_ERROR;

@@ -74,42 +74,45 @@ public final class RunAdaptiveLogistic {
     CrossFoldLearner learner = best.getPayload().getLearner();
 
     BufferedReader in = TrainAdaptiveLogistic.open(inputFile);
+    int k = 0;
     BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), Charsets.UTF_8));
 
-    out.write(idColumn + ",target,score");
-    out.newLine();
+    try {
+      out.write(idColumn + ",target,score");
+      out.newLine();
 
-    String line = in.readLine();
-    csv.firstLine(line);
-    line = in.readLine();
-    Map<String, Double> results = new HashMap<String, Double>();
-    int k = 0;
-    while (line != null) {
-      Vector v = new SequentialAccessSparseVector(lmp.getNumFeatures());
-      csv.processLine(line, v, false);
-      Vector scores = learner.classifyFull(v);
-      results.clear();
-      if (maxScoreOnly) {
-        results.put(csv.getTargetLabel(scores.maxValueIndex()),
-            scores.maxValue());
-      } else {
-        for (int i = 0; i < scores.size(); i++) {
-          results.put(csv.getTargetLabel(i), scores.get(i));
-        }
-      }
-
-      for (Map.Entry<String,Double> entry : results.entrySet()) {
-        out.write(csv.getIdString(line) + ',' + entry.getKey() + ',' + entry.getValue());
-        out.newLine();
-      }
-      k++;
-      if (k % 100 == 0) {
-        output.println(k + " records processed");
-      }
+      String line = in.readLine();
+      csv.firstLine(line);
       line = in.readLine();
+      Map<String, Double> results = new HashMap<String, Double>();
+      while (line != null) {
+        Vector v = new SequentialAccessSparseVector(lmp.getNumFeatures());
+        csv.processLine(line, v, false);
+        Vector scores = learner.classifyFull(v);
+        results.clear();
+        if (maxScoreOnly) {
+          results.put(csv.getTargetLabel(scores.maxValueIndex()),
+            scores.maxValue());
+        } else {
+          for (int i = 0; i < scores.size(); i++) {
+            results.put(csv.getTargetLabel(i), scores.get(i));
+          }
+        }
+
+        for (Map.Entry<String, Double> entry : results.entrySet()) {
+          out.write(csv.getIdString(line) + ',' + entry.getKey() + ',' + entry.getValue());
+          out.newLine();
+        }
+        k++;
+        if (k % 100 == 0) {
+          output.println(k + " records processed");
+        }
+        line = in.readLine();
+      }
+      out.flush();
+    } finally {
+      out.close();
     }
-    out.flush();
-    out.close();
     output.println(k + " records processed totally.");
   }
 

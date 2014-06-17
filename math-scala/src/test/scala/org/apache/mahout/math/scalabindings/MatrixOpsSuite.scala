@@ -109,7 +109,7 @@ class MatrixOpsSuite extends FunSuite with MahoutSuite {
     println(a.toString)
   }
 
-  test("colSums, rowSums, colMeans, rowMeans") {
+  test("colSums, rowSums, colMeans, rowMeans, numNonZeroElementsPerColumn") {
     val a = dense(
       (2, 3, 4),
       (3, 4, 5)
@@ -119,6 +119,19 @@ class MatrixOpsSuite extends FunSuite with MahoutSuite {
     a.rowSums() should equal(dvec(9, 12))
     a.colMeans() should equal(dvec(2.5, 3.5, 4.5))
     a.rowMeans() should equal(dvec(3, 4))
+    a.numNonZeroElementsPerColumn() should equal(dvec(2,2,2))
+
+  }
+
+  test("numNonZeroElementsPerColumn") {
+    val a = dense(
+      (2, 3, 4),
+      (3, 4, 5),
+      (-5, 0, -1),
+      (0, 0, 1)
+    )
+
+    a.numNonZeroElementsPerColumn() should equal(dvec(3,2,4))
 
   }
 
