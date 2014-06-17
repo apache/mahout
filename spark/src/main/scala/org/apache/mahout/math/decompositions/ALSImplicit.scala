@@ -209,6 +209,9 @@ object ALSImplicit {
     new ALS.Result[Int](drmU = drmUA(::, 0 until k), drmV = drmVAt(::, 0 until k), iterationsRMSE = Iterable())
   }
 
+  // Returns (P,C) tuple out of encoded hybrid C/P value
+  private def decodePC(chybrid: Double) = if (chybrid > 0) 1.0 -> chybrid else 0.0 -> -chybrid
+
   /**
    * Compute distributed MSE for non-zero elements of A only, which are interpreted the same way as
    * in dalsImplicit()
@@ -218,10 +221,73 @@ object ALSImplicit {
    * @param drmU U matrix
    * @param drmV V matrix
    */
-  def computeDMSE(drmC: DrmLike[Int], drmU: DrmLike[Int], drmV: DrmLike[Int]) = {
+  def computeD_MSE(drmC: DrmLike[Int], drmU: DrmLike[Int], drmV: DrmLike[Int], c0: Double) = {
 
     // Not so subtle problem here is that U %*% V.t would create a matrix much larger than we need.
     // We don't want to compute data points for the entire U %*% V.t to be able to derive RMSE.
+    val k = drmU.ncol
+    val m = safeToNonNegInt(drmC.nrow)
+    val n = drmC.ncol
+
+    val drmUC = drmU cbind drmC
+    val drmVCt = drmV cbind drmC.t
+
+    // Sum squared residuals and count:
+    val (sse, cnt) = drmUC.rdd
+
+        // Prepare messages in the form of v-index -> (u-index -> uvec)
+        .flatMap {
+      case (key, vec) =>
+
+        // Clone V-vector as dense
+        val uvec = dvec(fromV = vec(0 until k))
+        // C-row
+        val crow = vec(k until n)
+
+        // Output flatmap iterator over messages. This should work well for sparse A input (which
+        // it is).
+        for (crowEl <- crow.nonZeroes().view) yield crowEl.index() -> (key -> uvec)
+    }
+
+        // Join messages with RHS that is cbind(V,C')
+        .cogroup(other = drmVCt.rdd)
+
+        // Compute (sumSquaredResiduals -> residualCount):
+        .map {
+      case (vkey, (msgs, vctSeq)) =>
+
+        if ( vctSeq.isEmpty) {
+          0.0 -> 0
+        } else {
+          val vvec = vctSeq.head(0 until k)
+          val ccol = vctSeq.head(k until m)
+
+          // Squared residuals
+          ((0.0, 0) /: msgs) {
+            case ((acc, cnt), (ukey, uvec)) =>
+
+              // Decode relevant p (preference) and c* (confidence over baseline) values:
+              val (p, cstar) = decodePC(ccol(ukey))
+
+              // We compute error as prediction minus p in the source, multiplied (weighed) by originally
+              // rated confidence, c0 + c*:
+              val err = ((uvec dot vvec) - p) * (cstar + c0)
+
+              // Accumulate squared error, increase residual count
+              (acc + err * err, cnt + 1)
+          }
+        }
+    }
+
+        // Sum (sse, cnt) up between partitions, tasks
+        .reduce {
+      case ((acc1, cnt1), (acc2, cnt2)) => (acc1 + acc2, cnt1 + cnt2)
+    }
+
+    assert(cnt > 0)
+
+    // This would be MSE
+    sse / cnt
   }
 
   private def updateUA(drmUA: DrmLike[Int], drmVAt: DrmLike[Int], k: Int, lambda: Double, c0: Double,
@@ -251,28 +317,27 @@ object ALSImplicit {
         var n_u = 0
         msgs.foreach {
           case (vKey, vrow) =>
-            val c_star = arow(vKey)
+            val (p, c_star) = decodePC(arow(vKey))
+
             assert(c_star != 0.0)
 
             // (1) if arow[vKey] > 0 means p == 1, in which case we update accumulator vsum.
-            if (c_star > 0) vsum += vrow * (c0 + c_star)
+            if (p > 0) vsum += vrow * (c0 + c_star)
 
             // (2) Update m: confidence value is absolute of c*.
             // We probably could do that more efficiently here?
-            m += vrow * abs(c_star) cross vrow
+            m += (vrow * c_star) cross vrow
             n_u += 1
         }
 
         if (n_u > 0) {
           // If we are asked not to use weighed regularization, don't.
-          if (!wr) n_u = 1.0
+          if (!wr) n_u = 1
           m += diag(n_u * lambda, k)
         }
 
         // Update u-vec
         urow := solve(a = m, b = vsum)
-
-
 
         uKey -> uavec
     }
@@ -287,7 +352,7 @@ object ALSImplicit {
     // Now we delve into Spark-specific processing.
     drmUA.rdd.flatMap {
       case (rowKey, row) =>
-        val uvec = new DenseVector(k) := row(0 until k)
+        val uvec = dvec(fromV = row(0 until k))
         val payload = rowKey -> uvec
         val cvec = row(k until n)
         cvec.nonZeroes().map(_.index() -> payload)
