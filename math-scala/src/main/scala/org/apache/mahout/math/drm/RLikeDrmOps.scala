@@ -60,6 +60,8 @@ class RLikeDrmOps[K: ClassTag](drm: DrmLike[K]) extends DrmLikeOps[K](drm) {
   def %*%(that: Vector): DrmLike[K] = :%*%(that)
 
   def t: DrmLike[Int] = OpAtAnyKey(A = drm)
+
+  def cbind(that: DrmLike[K]) = OpCbind(A = this.drm, B = that)
 }
 
 class RLikeDrmIntOps(drm: DrmLike[Int]) extends RLikeDrmOps[Int](drm) {
