@@ -1021,6 +1021,38 @@ public final class VectorTest extends MahoutTestCase {
     }
   }
 
+  @Test
+  public void testNumNonZerosDense() {
+    DenseVector vector = new DenseVector(10);
+    vector.assign(1);
+    vector.setQuick(3, 0);
+    vector.set(5, 0);
+
+    assertEquals(8, vector.getNumNonZeroElements());
+  }
+
+  @Test
+  public void testNumNonZerosRandomAccessSparse() {
+    RandomAccessSparseVector vector = new RandomAccessSparseVector(10);
+    vector.setQuick(3, 1);
+    vector.set(5, 1);
+    vector.setQuick(7, 0);
+    vector.set(9, 0);
+
+    assertEquals(2, vector.getNumNonZeroElements());
+  }
+
+  @Test
+  public void testNumNonZerosSequentialAccessSparse() {
+    SequentialAccessSparseVector vector = new SequentialAccessSparseVector(10);
+    vector.setQuick(3, 1);
+    vector.set(5, 1);
+    vector.setQuick(7, 0);
+    vector.set(9, 0);
+
+    assertEquals(2, vector.getNumNonZeroElements());
+  }
+
   // Test NonZeroIterator on an list with 1 elements
   private static void testSingleNonZeroIterator(Vector vector) {
     vector.set(1, 6);

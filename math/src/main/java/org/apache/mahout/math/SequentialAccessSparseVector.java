@@ -185,6 +185,19 @@ public class SequentialAccessSparseVector extends AbstractVector {
   }
 
   @Override
+  public int getNumNonZeroElements() {
+    double[] elementValues = values.getValues();
+    int numMappedElements = values.getNumMappings();
+    int numNonZeros = 0;
+    for (int index = 0; index < numMappedElements; index++) {
+      if (elementValues[index] != 0) {
+        numNonZeros++;
+      }
+    }
+    return numNonZeros;
+  }
+
+  @Override
   public double getLookupCost() {
     return Math.max(1, Math.round(Functions.LOG2.apply(getNumNondefaultElements())));
   }
