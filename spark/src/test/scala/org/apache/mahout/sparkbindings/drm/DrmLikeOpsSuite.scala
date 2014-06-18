@@ -92,23 +92,27 @@ class DrmLikeOpsSuite extends FunSuite with MahoutLocalContext {
 
   }
 
-  test( "exact & min ||") {
+  test("exact, min and auto ||") {
     val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5), (4, 5, 6))
     val A = drmParallelize(m = inCoreA, numPartitions = 2)
 
     A.rdd.partitions.size should equal(2)
 
-    (A + 1.0 exact_|| 4).rdd.partitions.size should equal(4)
-    (A exact_|| 2).rdd.partitions.size should equal(2)
-    (A exact_|| 1).rdd.partitions.size should equal(1)
-    (A exact_|| 0).rdd.partitions.size should equal(2) // No effect for par <= 0
-    (A min_|| 4).rdd.partitions.size should equal(4)
-    (A min_|| 2).rdd.partitions.size should equal(2)
-    (A min_|| 1).rdd.partitions.size should equal(2)
-    (A auto_||).rdd.partitions.size should equal(10)
-    (A exact_|| 10).auto_||.rdd.partitions.size should equal(10)
-    (A exact_|| 11).auto_||.rdd.partitions.size should equal(19)
-    (A exact_|| 20).auto_||.rdd.partitions.size should equal(20)
+    (A + 1.0).par(exact = 4).rdd.partitions.size should equal(4)
+    A.par(exact = 2).rdd.partitions.size should equal(2)
+    A.par(exact = 1).rdd.partitions.size should equal(1)
+    A.par(exact = 0).rdd.partitions.size should equal(2) // No effect for par <= 0
+    A.par(min = 4).rdd.partitions.size should equal(4)
+    A.par(min = 2).rdd.partitions.size should equal(2)
+    A.par(min = 1).rdd.partitions.size should equal(2)
+    A.par(auto = true).rdd.partitions.size should equal(10)
+    A.par(exact = 10).par(auto = true).rdd.partitions.size should equal(10)
+    A.par(exact = 11).par(auto = true).rdd.partitions.size should equal(19)
+    A.par(exact = 20).par(auto = true).rdd.partitions.size should equal(20)
+
+    intercept[AssertionError] {
+      A.par()
+    }
   }
 
 }

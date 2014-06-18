@@ -22,22 +22,36 @@ import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.drm.logical.{OpPar, OpMapBlock, OpRowRange}
 
 /** Common Drm ops */
-class DrmLikeOps[K : ClassTag](protected[drm] val drm: DrmLike[K]) {
-
-  /** Establishes minimum parallelism */
-  def min_||(minSplits: Int) = OpPar(drm, minSplits = minSplits)
-
-  /** Establishes exact parallelism */
-  def exact_||(numPartitions: Int) = OpPar(drm, exactSplits = numPartitions)
+class DrmLikeOps[K: ClassTag](protected[drm] val drm: DrmLike[K]) {
 
   /**
-   * Adjusted parallelism automatically to 0.95 or 1.9x default paralelism specific to a distributed
-   * engine.
+   * Parallelism adjustments. <P/>
+   *
+   * Change only one of parameters from default value to choose new parallelism adjustment strategy.
    * <P/>
    *
-   * @return repartitioned Matrix adjusted for default engine parallelism set.
+   * E.g. use
+   * <pre>
+   *   drmA.par(auto = true)
+   * </pre>
+   * to use automatic parallelism adjustment.
+   * <P/>
+   *
+   * Parallelism here in API is fairly abstract concept, and actual value interpretation is left for
+   * a particular backend strategy. However, it is usually equivalent to number of map tasks or data
+   * splits.
+   * <P/>
+   *
+   * @param min If changed from default, ensures the product has at least that much parallelism.
+   * @param exact if changed from default, ensures the pipeline product has exactly that much
+   *              parallelism.
+   * @param auto If changed from default, engine-specific automatic parallelism adjustment strategy
+   *             is applied.
    */
-  def auto_||() = OpPar(drm)
+  def par(min: Int = -1, exact: Int = -1, auto: Boolean = false) = {
+    assert(min >= 0 || exact >= 0 || auto, "Invalid argument")
+    OpPar(drm, minSplits = min, exactSplits = exact)
+  }
 
   /**
    * Map matrix block-wise vertically. Blocks of the new matrix can be modified original block
