@@ -39,7 +39,7 @@ object ALSImplicit {
    * <P/>
    */
   def alsImplicit(
-      inCoreC: Matrix,
+      inCoreA: Matrix,
       c0: Double = 1.0,
       k: Int = 50,
       lambda: Double = 0.0001,
@@ -49,19 +49,19 @@ object ALSImplicit {
       ): ALS.InCoreResult = {
 
     val rnd = RandomUtils.getRandom()
-    val m = inCoreC.nrow
-    val n = inCoreC.ncol
+    val m = inCoreA.nrow
+    val n = inCoreA.ncol
     var inCoreV = new DenseMatrix(n, k) := Matrices.symmetricUniformView(n, k, rnd.nextInt()) * 0.01
     var inCoreU = new DenseMatrix(m, k)
 
-    var inCoreD = (inCoreC cloned)
+    var inCoreD = (inCoreA cloned)
     inCoreD := ((r, c, v) => abs(v))
 
-    var inCoreP = (inCoreC cloned)
+    var inCoreP = (inCoreA cloned)
     inCoreP := ((r, c, v) => if (v > 0) 1.0 else 0.0)
 
     // Num non-base confidence entries
-    val numPoints = if (convergenceThreshold > 0) inCoreC.foldLeft(0)(_ + _.getNumNonZeroElements) else 0
+    val numPoints = if (convergenceThreshold > 0) inCoreA.foldLeft(0)(_ + _.getNumNonZeroElements) else 0
     var rmseList = List.empty[Double]
 
     var i = 0
@@ -154,7 +154,7 @@ object ALSImplicit {
    * entries that do have any observations.
    * <P/>
    *
-   * @param drmC confidence/preference encoded input C* as explained above
+   * @param drmA confidence/preference encoded input C* as explained above
    * @param c0 baseline confidence value.
    * @param k factorization rank (~50...100 is probably enough)
    * @param lambda regularization for this iteration
@@ -163,7 +163,7 @@ object ALSImplicit {
    * @param wr use/do not use weighed regularization
    */
   def dalsImplicit(
-      drmC: DrmLike[Int],
+      drmA: DrmLike[Int],
       c0: Double = 1.0,
       k: Int = 50,
       lambda: Double = 0.0001,
@@ -171,8 +171,8 @@ object ALSImplicit {
       convergenceThreshold: Double = 0.05,
       wr: Boolean = true
       ): ALS.Result[Int] = {
-    val drmA = drmC
-    val drmAt = drmC.t
+
+    val drmAt = drmA.t
 
     // cbind(U,A):
     var drmUA = drmA.mapBlock(ncol = k + drmA.ncol) {
