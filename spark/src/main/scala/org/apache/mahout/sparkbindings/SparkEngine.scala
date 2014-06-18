@@ -125,9 +125,9 @@ object SparkEngine extends DistributedEngine {
    *
    * @return DRM[Any] where Any is automatically translated to value type
    */
-  def drmFromHDFS (path: String, minSplits:Int = 0)(implicit sc: DistributedContext): CheckpointedDrm[_] = {
+  def drmFromHDFS (path: String, parMin:Int = 0)(implicit sc: DistributedContext): CheckpointedDrm[_] = {
 
-    val rdd = sc.sequenceFile(path, classOf[Writable], classOf[VectorWritable], minSplits = minSplits)
+    val rdd = sc.sequenceFile(path, classOf[Writable], classOf[VectorWritable], minSplits = parMin)
         // Get rid of VectorWritable
         .map(t => (t._1, t._2.get()))
 

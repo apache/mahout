@@ -61,8 +61,13 @@ trait DistributedEngine {
   /** Broadcast support */
   def drmBroadcast(m: Matrix)(implicit dc: DistributedContext): BCast[Matrix]
 
-  /** Load DRM from hdfs (as in Mahout DRM format) */
-  def drmFromHDFS(path: String, minSplits: Int = 0)(implicit sc: DistributedContext): CheckpointedDrm[_]
+  /**
+   * Load DRM from hdfs (as in Mahout DRM format).
+   * <P/>
+   * @param path The DFS path to load from
+   * @param parMin Minimum parallelism after load (equivalent to #par(min=...)).
+   */
+  def drmFromHDFS(path: String, parMin: Int = 0)(implicit sc: DistributedContext): CheckpointedDrm[_]
 
   /** Parallelize in-core matrix as spark distributed matrix, using row ordinal indices as data set keys. */
   def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int = 1)
