@@ -20,6 +20,21 @@ package org.apache.mahout.math.drm.logical
 import scala.reflect.ClassTag
 import org.apache.mahout.math.drm.{DistributedContext, DrmLike}
 
+/**
+ * Any logical binary operator (such as A + B).
+ * <P/>
+ *
+ * Any logical operator derived from this is also capabile of triggering optimizer checkpoint, hence,
+ * it also inherits CheckpointAction.
+ * <P/>
+ * 
+ * @param evidence$1 LHS key type tag
+ * @param evidence$2 RHS key type tag
+ * @param evidence$3 expression key type tag
+ * @tparam A LHS key type
+ * @tparam B RHS key type
+ * @tparam K result key type
+ */
 abstract class AbstractBinaryOp[A: ClassTag, B: ClassTag, K: ClassTag]
     extends CheckpointAction[K] with DrmLike[K] {
 
