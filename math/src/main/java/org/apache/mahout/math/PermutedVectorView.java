@@ -215,14 +215,17 @@ public class PermutedVectorView extends AbstractVector {
     vector.setQuick(pivot[index], value);
   }
 
-  /**
-   * Return the number of values in the recipient
-   *
-   * @return an int
-   */
+  /** Return the number of values in the recipient */
   @Override
   public int getNumNondefaultElements() {
     return vector.getNumNondefaultElements();
+  }
+
+  @Override
+  public int getNumNonZeroElements() {
+    // Return the number of nonzeros in the recipient,
+    // so potentially don't have to go through our iterator
+    return vector.getNumNonZeroElements();
   }
 
   @Override
