@@ -72,16 +72,16 @@ trait TDIndexedDatasetReader extends Reader[IndexedDataset]{
         throw new IllegalArgumentException
       })
 
-      var columns = mc textFile(source) map({ line => line.split(delimiter)})
+      var columns = mc.textFile(source).map({ line => line.split(delimiter)})
 
-      columns = columns filter({ tokens => tokens(filterPosition) == filterBy})
+      columns = columns.filter({ tokens => tokens(filterPosition) == filterBy})
 
-      val interactions = columns map({ tokens => tokens(rowIDPosition) -> tokens(columnIDPosition)})
+      val interactions = columns.map({ tokens => tokens(rowIDPosition) -> tokens(columnIDPosition)})
 
       interactions.cache()
 
-      val rowIDs = interactions map({ case (rowID, _) => rowID}) distinct() collect()
-      val columnIDs = interactions map({ case (_, columnID) => columnID}) distinct() collect()
+      val rowIDs = interactions.map({ case (rowID, _) => rowID}).distinct().collect()
+      val columnIDs = interactions.map({ case (_, columnID) => columnID}).distinct().collect()
 
       val numRows = rowIDs.size
       val numColumns = columnIDs.size
