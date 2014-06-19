@@ -46,7 +46,7 @@ case class IndexedDataset(matrix: CheckpointedDrm[Int], rowIDs: BiMap[String,Int
   * Companion object for the case class [[org.apache.mahout.drivers.IndexedDataset]] primarily used to get a secondary constructor for
   * making one [[org.apache.mahout.drivers.IndexedDataset]] from another. Used when you have a factory like [[org.apache.mahout.drivers.IndexedDatasetStore]]
   * {{{
-  * val indexedDataset = IndexedDataset(indexedDatasetStore.read)
+  *   val indexedDataset = IndexedDataset(indexedDatasetReader.readFrom(source))
   * }}}
   */
 
