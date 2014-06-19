@@ -17,10 +17,11 @@
 
 package org.apache.mahout.drivers
 
-import org.apache.spark.SparkContext
+import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.mahout.sparkbindings._
 
-/** Extend this class to create a Mahout CLI driver. Minimally you must override process and main. Also define a command line parser and default options or fill in the following template:
+/** Extend this class to create a Mahout CLI driver. Minimally you must override process and main.
+  * Also define a command line parser and default options or fill in the following template:
   * {{{
   *   object SomeDriver extends MahoutDriver {
   *     override def main(args: Array[String]): Unit = {
@@ -49,9 +50,12 @@ import org.apache.mahout.sparkbindings._
   * }}}
   */
 abstract class MahoutDriver {
-  protected var mc: SparkContext = _
+  implicit var mc: SparkContext = _
+  implicit val sparkConf = new SparkConf()
+
   /** Creates a Spark context to run the job inside.
-    * Creates a Spark context to run the job inside. Override to set the SparkConf values specific to the job, these must be set before the context is created.
+    * Creates a Spark context to run the job inside. Override to set the SparkConf values specific to the job,
+    * these must be set before the context is created.
     * @param masterUrl Spark master URL
     * @param appName  Name to display in Spark UI
     * @param customJars List of paths to custom jars
@@ -69,6 +73,6 @@ abstract class MahoutDriver {
   /** This is wher you do the work, call start first, then before exiting call stop */
   protected def process: Unit
 
-  /** Parse command line and call process*/
+  /** Parse command line and call process */
   def main(args: Array[String]): Unit
 }

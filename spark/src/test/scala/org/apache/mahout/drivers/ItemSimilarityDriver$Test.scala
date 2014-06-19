@@ -1,12 +1,3 @@
-package org.apache.mahout.drivers
-
-import org.scalatest.{BeforeAndAfter, FunSuite}
-
-import org.apache.mahout.sparkbindings._
-import java.io.{FileWriter, BufferedWriter}
-import com.google.common.io.Closeables
-import org.apache.spark.SparkContext
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,117 +15,82 @@ import org.apache.spark.SparkContext
  * limitations under the License.
  */
 
-class ItemSimilarityDriver$Test extends FunSuite {
-  private var sc: SparkContext = _
+package org.apache.mahout.drivers
 
+import org.scalatest.FunSuite
+
+class ItemSimilarityDriver$Test extends FunSuite {
 
   test ("Running some text delimited files through the import/cooccurrence/export"){
 
     val exampleCsvlogStatements = Array(
-      "12569537329,user1,item1,\"view\"",
-      "12569537329,user1,item2,\"view\"",
-      "12569537329,user1,item2,\"like\"",
-      "12569537329,user1,item3,\"like\"",
-      "12569537329,user2,item2,\"view\"",
-      "12569537329,user2,item2,\"like\"",
-      "12569537329,user3,item1,\"like\"",
-      "12569537329,user3,item3,\"view\"",
-      "12569537329,user3,item3,\"like\""
-    )
+        "12569537329,user1,item1,\"view\"",
+        "12569537329,user1,item2,\"view\"",
+        "12569537329,user1,item2,\"like\"",
+        "12569537329,user1,item3,\"like\"",
+        "12569537329,user2,item2,\"view\"",
+        "12569537329,user2,item2,\"like\"",
+        "12569537329,user3,item1,\"like\"",
+        "12569537329,user3,item3,\"view\"",
+        "12569537329,user3,item3,\"like\"")
 
     val exampleTsvLogStatements = Array(
-      "12569537329\tuser1\titem1\t\"view\"",
-      "12569537329\tuser1\titem2\t\"view\"",
-      "12569537329\tuser1\titem2\t\"like\"",
-      "12569537329\tuser1\titem3\t\"like\"",
-      "12569537329\tuser2\titem2\t\"view\"",
-      "12569537329\tuser2\titem2\t\"like\"",
-      "12569537329\tuser3\titem1\t\"like\"",
-      "12569537329\tuser3\titem3\t\"view\"",
-      "12569537329\tuser3\titem3\t\"like\""
-    )
+        "12569537329\tuser1\titem1\t\"view\"",
+        "12569537329\tuser1\titem2\t\"view\"",
+        "12569537329\tuser1\titem2\t\"like\"",
+        "12569537329\tuser1\titem3\t\"like\"",
+        "12569537329\tuser2\titem2\t\"view\"",
+        "12569537329\tuser2\titem2\t\"like\"",
+        "12569537329\tuser3\titem1\t\"like\"",
+        "12569537329\tuser3\titem3\t\"view\"",
+        "12569537329\tuser3\titem3\t\"like\"")
 
 
     val csvLogStatements = Array(
-      "u1,purchase,iphone",
-      "u1,purchase,ipad",
-      "u2,purchase,nexus",
-      "u2,purchase,galaxy",
-      "u3,purchase,surface",
-      "u4,purchase,iphone",
-      "u4,purchase,galaxy",
-      "u1,view,iphone",
-      "u1,view,ipad",
-      "u1,view,nexus",
-      "u1,view,galaxy",
-      "u2,view,iphone",
-      "u2,view,ipad",
-      "u2,view,nexus",
-      "u2,view,galaxy",
-      "u3,view,surface",
-      "u3,view,nexus",
-      "u4,view,iphone",
-      "u4,view,ipad",
-      "u4,view,galaxy"
-    )
+        "u1,purchase,iphone",
+        "u1,purchase,ipad",
+        "u2,purchase,nexus",
+        "u2,purchase,galaxy",
+        "u3,purchase,surface",
+        "u4,purchase,iphone",
+        "u4,purchase,galaxy",
+        "u1,view,iphone",
+        "u1,view,ipad",
+        "u1,view,nexus",
+        "u1,view,galaxy",
+        "u2,view,iphone",
+        "u2,view,ipad",
+        "u2,view,nexus",
+        "u2,view,galaxy",
+        "u3,view,surface",
+        "u3,view,nexus",
+        "u4,view,iphone",
+        "u4,view,ipad",
+        "u4,view,galaxy")
 
     val tsvLogStatements = Array(
-      "u1\tpurchase\tiphone",
-      "u1\tpurchase\tipad",
-      "u2\tpurchase\tnexus",
-      "u2\tpurchase\tgalaxy",
-      "u3\tpurchase\tsurface",
-      "u4\tpurchase\tiphone",
-      "u4\tpurchase\tgalaxy",
-      "u1\tview\tiphone",
-      "u1\tview\tipad",
-      "u1\tview\tnexus",
-      "u1\tview\tgalaxy",
-      "u2\tview\tiphone",
-      "u2\tview\tipad",
-      "u2\tview\tnexus",
-      "u2\tview\tgalaxy",
-      "u3\tview\tsurface",
-      "u3\tview\tnexus",
-      "u4\tview\tiphone",
-      "u4\tview\tipad",
-      "u4\tview\tgalaxy"
-    )
+        "u1\tpurchase\tiphone",
+        "u1\tpurchase\tipad",
+        "u2\tpurchase\tnexus",
+        "u2\tpurchase\tgalaxy",
+        "u3\tpurchase\tsurface",
+        "u4\tpurchase\tiphone",
+        "u4\tpurchase\tgalaxy",
+        "u1\tview\tiphone",
+        "u1\tview\tipad",
+        "u1\tview\tnexus",
+        "u1\tview\tgalaxy",
+        "u2\tview\tiphone",
+        "u2\tview\tipad",
+        "u2\tview\tnexus",
+        "u2\tview\tgalaxy",
+        "u3\tview\tsurface",
+        "u3\tview\tnexus",
+        "u4\tview\tiphone",
+        "u4\tview\tipad",
+        "u4\tview\tgalaxy")
 
-    var w: BufferedWriter = null
-    //try {
-      w = new BufferedWriter(new FileWriter("/tmp/cf-data.txt"))
-      w.write(csvLogStatements.mkString("\n"))
-    //} finally {
-      Closeables.close(w, false)
-    //}
-    /*
-        val indexedLikes = IndexedDatasetStore.readTuples(sc, "tmp/cf-data.txt", 2, ",", 0, 2, 1, "purchase")
-
-        val indexedViews = IndexedDatasetStore.readTuples(sc, "/tmp/cf-data.txt", 2, ",", 0, 2, 1, "view")
-
-        val drmLikes = indexedLikes.matrix
-        val drmViews = indexedViews.matrix
-
-        // Now we could run cooccurrence analysis using the DRMs, instead we'll just fetch and print the matrices
-        val drmXCooccurrences = cooccurrences(drmLikes, randomSeed = 0xdeadbeef,
-          maxInterestingItemsPerThing = 100, maxNumInteractions = 500, Array(drmViews))
-
-        val inCoreViews = drmViews.collect
-        val inCoreLikes = drmLikes.collect
-        val inCoreIndicator = drmXCooccurrences(0).collect
-        val inCoreXIndicator = drmXCooccurrences(1).collect
-        println("\nLIKES:")
-        println(inCoreLikes)
-        println("\nVIEWS:")
-        println(inCoreViews)
-        println("\nINDICATOR MATRIX")
-        println(inCoreIndicator)
-        println("\nCROSS INDICATOR MATRIX")
-        println(inCoreXIndicator)
-    */
-
-    /*
+     /*
         //Clustered Spark and HDFS
         ItemSimilarityDriver.main(Array(
           "--input", "hdfs://occam4:54310/user/pat/spark-itemsimilarity/cf-data.txt",
@@ -148,7 +104,9 @@ class ItemSimilarityDriver$Test extends FunSuite {
           "--filterPosition", "1"
         ))
     */
-    //local multi-threaded Spark with HDFS using large dataset
+    // local multi-threaded Spark with HDFS using large dataset
+    // todo: not sure how to handle build testing on HDFS maybe make into an integration test
+    // or example.
     /*    ItemSimilarityDriver.main(Array(
         "--input", "hdfs://occam4:54310/user/pat/xrsj/ratings_data.txt",
         "--output", "hdfs://occam4:54310/user/pat/xrsj/indicatorMatrices/",
@@ -162,10 +120,12 @@ class ItemSimilarityDriver$Test extends FunSuite {
       ))
     */
 
-    //local multi-threaded Spark with local FS
+    // local multi-threaded Spark with local FS, suitable for build tests but need better location for data
+    // todo: remove absolute path
+    // todo: check computed value or it's not much of a test.
     ItemSimilarityDriver.main(Array(
-      "--input", "/tmp/cf-data.txt",
-      "--output", "tmp/indicatorMatrices/",
+      "--input", "/Users/pat/big-data/tmp/cf-data.txt",
+      "--output", "/Users/pat/big-data/tmp/indicatorMatrices/",
       "--master", "local[4]",
       "--filter1", "purchase",
       "--filter2", "view",

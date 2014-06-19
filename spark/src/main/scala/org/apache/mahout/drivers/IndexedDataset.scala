@@ -35,6 +35,8 @@ import org.apache.mahout.math.drm.{CheckpointedDrm, DrmLike}
   *                  and from the ordinal Mahout Int ID. This one holds row labels
   * @param columnIDs BiMap[String, Int] storing a bidirectional mapping of external String
   *                  ID to and from the ordinal Mahout Int ID. This one holds column labels
+  * @todo Often no need for both or perhaps either dictionary, so save resources by allowing
+  *       to be not created when not needed.
   */
 
 case class IndexedDataset(matrix: CheckpointedDrm[Int], rowIDs: BiMap[String,Int], columnIDs: BiMap[String,Int]) {

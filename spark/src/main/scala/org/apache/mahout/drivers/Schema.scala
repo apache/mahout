@@ -1,4 +1,3 @@
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,6 +24,6 @@ import scala.collection.mutable.HashMap
   * @param params list of mappings for instantiation {{{val mySchema = new Schema("one" -> 1, "two" -> "2", ...)}}}
   */
 class Schema(params: Tuple2[String, Any]*) extends HashMap[String, Any] {
-  //todo: this require a mutable HashMap, do we care?
+  // todo: this require a mutable HashMap, do we care?
   this ++= params
 }
