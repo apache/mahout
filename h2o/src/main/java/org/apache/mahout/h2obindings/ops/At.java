@@ -17,12 +17,26 @@
 
 package org.apache.mahout.h2obindings.ops;
 
+import org.apache.mahout.h2obindings.H2OHelper;
+
 import water.*;
 import water.fvec.*;
 
 public class At {
   /* Calculate A' (transpose) */
-  public static Frame At(Frame A) {
-    return null;
+  public static Frame At(final Frame A) {
+    Frame At = H2OHelper.empty_frame (A.numCols(), (int)A.numRows(), 0);
+    class MRTaskAt extends MRTask<MRTaskAt> {
+      public void map(Chunk chks[]) {
+        long start = chks[0]._start;
+        for (int c = 0; c < chks.length; c++) {
+          for (int r = 0; r < chks[0]._len; r++) {
+            chks[c].set0(r, A.vecs()[(int)(start+r)].at(c));
+          }
+        }
+      }
+    }
+    new MRTaskAt().doAll(At);
+    return At;
   }
 }

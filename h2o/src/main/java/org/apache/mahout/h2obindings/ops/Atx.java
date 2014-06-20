@@ -18,6 +18,11 @@
 package org.apache.mahout.h2obindings.ops;
 
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.DenseMatrix;
+import org.apache.mahout.h2obindings.H2OHelper;
+import org.apache.mahout.h2obindings.drm.H2OBCast;
 
 import water.*;
 import water.fvec.*;
@@ -25,6 +30,28 @@ import water.fvec.*;
 public class Atx {
   /* Calculate A'x (where x is an in-core Vector) */
   public static Frame Atx(Frame A, Vector x) {
-    return null;
+    final H2OBCast<Vector> bx = new H2OBCast<Vector>(x);
+    class MRTaskAtx extends MRTask<MRTaskAtx> {
+      double _atx[];
+      public void map(Chunk chks[]) {
+        Vector x = bx.value();
+        long start = chks[0]._start;
+        _atx = new double[chks.length];
+        for (int r = 0; r < chks[0]._len; r++) {
+          double d = x.getQuick((int)start + r);
+          for (int c = 0; c < chks.length; c++) {
+            _atx[c] += (chks[c].at0(r) * d);
+          }
+        }
+      }
+      public void reduce(MRTaskAtx other) {
+        for (int i = 0; i < _atx.length; i++)
+          _atx[i] += other._atx[i];
+      }
+    }
+    Vector v = new DenseVector(new MRTaskAtx().doAll(A)._atx);
+    Matrix m = new DenseMatrix(A.numCols(), 1);
+    m.assignColumn(0, v);
+    return H2OHelper.frame_from_matrix(m, 0);
   }
 }

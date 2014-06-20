@@ -17,12 +17,37 @@
 
 package org.apache.mahout.h2obindings.ops;
 
+import org.apache.mahout.h2obindings.H2OHelper;
+
 import water.*;
 import water.fvec.*;
 
 public class AewB {
   /* Element-wise DRM-DRM operations */
-  public static Frame AewB(Frame A, Frame B, String op) {
-    return null;
+  public static Frame AewB(final Frame A, final Frame B, final String op) {
+    class MRTaskAewB extends MRTask<MRTaskAewB> {
+      private double opfn (String op, double a, double b) {
+        if (a == 0.0 && b == 0.0)
+          return 0.0;
+        if (op.equals("+"))
+          return a + b;
+        else if (op.equals("-"))
+          return a - b;
+        else if (op.equals("*"))
+          return a * b;
+        else if (op.equals("/"))
+          return a / b;
+        return 0.0;
+      }
+      public void map(Chunk chks[], NewChunk ncs[]) {
+        long start = chks[0]._start;
+        for (int c = 0; c < chks.length; c++) {
+          for (int r = 0; r < chks[0]._len; r++) {
+            ncs[c].addNum(opfn(op, chks[c].at0(r), B.vecs()[c].at(start+r)));
+          }
+        }
+      }
+    }
+    return new MRTaskAewB().doAll(A.numCols(), A).outputFrame(A.names(), A.domains());
   }
 }

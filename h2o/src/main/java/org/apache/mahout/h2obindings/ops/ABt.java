@@ -17,12 +17,32 @@
 
 package org.apache.mahout.h2obindings.ops;
 
+import org.apache.mahout.h2obindings.H2OHelper;
+
 import water.*;
 import water.fvec.*;
 
 public class ABt {
   /* Calculate AB' */
-  public static Frame ABt(Frame A, Frame B) {
-    return null;
+  public static Frame ABt(final Frame A, final Frame B) {
+    /* XXX - make ABt similar to A */
+    Frame ABt = H2OHelper.empty_frame (A.numRows(), (int)B.numRows(), 0);
+
+    class MRTaskABt extends MRTask<MRTaskABt> {
+      public void map(Chunk chks[]) {
+        long start = chks[0]._start;
+        for (int c = 0; c < chks.length; c++) {
+          for (int r = 0; r < chks[0]._len; r++) {
+            double v = 0;
+            for (int i = 0; i < A.vecs().length; i++) {
+              v += (A.vecs()[i].at(start+r) * B.vecs()[i].at(c));
+            }
+            chks[c].set0(r, v);
+          }
+        }
+      }
+    }
+    new MRTaskABt().doAll(ABt);
+    return ABt;
   }
 }

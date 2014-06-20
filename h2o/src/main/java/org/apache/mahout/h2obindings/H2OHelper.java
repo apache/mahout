@@ -179,6 +179,7 @@ public class H2OHelper {
     int chunk_sz;
 
     if (parts_hint < 1)
+      /* XXX: calculate based on cloud size and # of cpu */
       parts_hint = 1;
 
     chunk_sz = (int) (((nrow - 1) / parts_hint) + 1);

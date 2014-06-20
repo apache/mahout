@@ -18,6 +18,8 @@
 package org.apache.mahout.h2obindings.ops;
 
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.h2obindings.H2OHelper;
+import org.apache.mahout.h2obindings.drm.H2OBCast;
 
 import water.*;
 import water.fvec.*;
@@ -25,6 +27,19 @@ import water.fvec.*;
 public class Ax {
   /* Calculate Ax (where x is an in-core Vector) */
   public static Frame Ax(Frame A, Vector x) {
-    return null;
+    final H2OBCast<Vector> bx = new H2OBCast<Vector>(x);
+    class MRTaskAx extends MRTask<MRTaskAx> {
+      public void map(Chunk chks[], NewChunk nc) {
+        Vector x = bx.value();
+        for (int r = 0; r < chks[0]._len; r++) {
+          double v = 0;
+          for (int c = 0; c < chks.length; c++) {
+            v += (chks[c].at0(r) * x.getQuick(c));
+          }
+          nc.addNum(v);
+        }
+      }
+    }
+    return new MRTaskAx().doAll(1, A).outputFrame(A.names(), A.domains());
   }
 }
