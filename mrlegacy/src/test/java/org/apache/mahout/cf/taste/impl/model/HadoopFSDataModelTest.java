@@ -22,6 +22,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
@@ -29,8 +30,9 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.MiniDFSCluster;
+import org.apache.hadoop.fs.RawLocalFileSystem;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
@@ -88,34 +90,35 @@ public final class HadoopFSDataModelTest {
       "456  789  0.5",
       "456  654  0.0",
       "456  999  0.2",};
+  
+  private static final String TEST_ROOT_DIR
+    = System.getProperty("test.build.data","build/test/data") + "/work-dir/localfs";
 
-  private MiniDFSCluster cluster;
-  private FileSystem fileSys;
+  private final File base = new File(TEST_ROOT_DIR);
+
   private Path testFile;
+  private Configuration conf;
+  private RawLocalFileSystem fileSys;
 
   @Before
-  public void setUp() throws Exception {
-    Configuration conf = new Configuration();
-    cluster = new MiniDFSCluster(conf, 1, true, null);
-    fileSys = cluster.getFileSystem();
-    testFile = new Path("test.txt");
+  public void setup() throws Exception {
+    conf = new Configuration(false);
+    conf.set("fs.file.impl", RawLocalFileSystem.class.getName());
+    fileSys = (RawLocalFileSystem) FileSystem.get(conf);
+    fileSys.delete(new Path(TEST_ROOT_DIR), true);
+    testFile = new Path(TEST_ROOT_DIR, "test-file");
     writeLines(fileSys, testFile, DATA);
   }
   
   @After
-  public void tearDown() throws Exception {
-    cleanupFile(fileSys, testFile);
-    if (fileSys != null) {
-      fileSys.close();
-    }
-    if (cluster != null) {
-      cluster.shutdown();
-    }
+  public void after() throws IOException {
+    FileUtil.fullyDelete(base);
+    assertTrue(!base.exists());
   }
 
   @Test
   public void testReadRegexSplittedFile() throws Exception {
-    Path file = new Path("testRegex.txt");
+    Path file = new Path(TEST_ROOT_DIR, "testRegex.txt");
     writeLines(fileSys, file, DATA_SPLITTED_WITH_TWO_SPACES);
     DataModel model = new HadoopFSDataModel(fileSys, file, "\\s+");
     assertEquals(model.getItemIDsFromUser(123).size(), 3);
@@ -227,7 +230,7 @@ public final class HadoopFSDataModelTest {
 
   @Test
   public void testExplicitRefreshAfterCompleteFileUpdate() throws Exception {
-    Path file = new Path("refresh");
+    Path file = new Path(TEST_ROOT_DIR, "refresh");
     writeLines(fileSys, file, "123,456,3.0");
 
     /*
