@@ -160,8 +160,10 @@ object ItemSimilarityDriver extends MahoutDriver {
       help("help") abbr ("h") text ("prints this usage text\n")
 
       checkConfig { c =>
-        if (c.filterPosition == c.itemIDPosition || c.filterPosition == c.rowIDPosition || c.rowIDPosition == c.itemIDPosition) failure("The row, item, and filter positions must be" +
-          " unique.") else success
+        if (c.filterPosition == c.itemIDPosition
+            || c.filterPosition == c.rowIDPosition
+            || c.rowIDPosition == c.itemIDPosition)
+          failure("The row, item, and filter positions must be unique.") else success
       }
 
       //check for option consistency, probably driver specific
@@ -243,7 +245,14 @@ object ItemSimilarityDriver extends MahoutDriver {
 
     val indexedDatasets = readIndexedDatasets
 
-    val indicatorMatrices = CooccurrenceAnalysis.cooccurrences(indexedDatasets(0).matrix, options.randomSeed, options.maxSimilaritiesPerItem, options.maxPrefs, Array(indexedDatasets(1).matrix))
+    // todo: allow more than one cross-similarity matrix?
+    val indicatorMatrices = {
+      if (indexedDatasets.length > 1) {
+        CooccurrenceAnalysis.cooccurrences(indexedDatasets(0).matrix, options.randomSeed, options.maxSimilaritiesPerItem, options.maxPrefs, Array(indexedDatasets(1).matrix))
+      } else {
+        CooccurrenceAnalysis.cooccurrences(indexedDatasets(0).matrix, options.randomSeed, options.maxSimilaritiesPerItem, options.maxPrefs)
+      }
+    }
 
     // self similarity
     // the next two lines write the drm using a Writer class

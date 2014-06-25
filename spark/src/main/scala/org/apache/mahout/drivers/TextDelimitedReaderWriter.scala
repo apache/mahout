@@ -53,8 +53,11 @@ trait TDIndexedDatasetReader extends Reader[IndexedDataset]{
 
       var columns = mc.textFile(source).map({ line => line.split(delimiter)})
 
-      // get the rows that have a column matching the filter
-      columns = columns.filter({ tokens => tokens(filterPosition) == filterBy})
+      // -1 means no filter in the input text, take them all
+      if(filterPosition != -1) {
+        // get the rows that have a column matching the filter
+        columns = columns.filter({ tokens => tokens(filterPosition) == filterBy})
+      }
 
       // get row and column IDs
       val interactions = columns.map({ tokens => tokens(rowIDPosition) -> tokens(columnIDPosition)})
