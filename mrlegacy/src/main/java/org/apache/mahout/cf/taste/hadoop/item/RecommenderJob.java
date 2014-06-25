@@ -41,6 +41,7 @@ import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.hadoop.similarity.cooccurrence.RowSimilarityJob;
 import org.apache.mahout.math.hadoop.similarity.cooccurrence.measures.VectorSimilarityMeasures;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -103,6 +104,7 @@ public final class RecommenderJob extends AbstractJob {
   public int run(String[] args) throws Exception {
 
     addInputOption();
+    addMultiInputOption();
     addOutputOption();
     addOption("numRecommendations", "n", "Number of recommendations per user",
             String.valueOf(AggregateAndRecommendReducer.DEFAULT_NUM_RECOMMENDATIONS));
@@ -163,15 +165,24 @@ public final class RecommenderJob extends AbstractJob {
     AtomicInteger currentPhase = new AtomicInteger();
 
     int numberOfUsers = -1;
-
+    
+    List<String> argsList = new ArrayList<String>();
+    argsList.add("--multiInput");
+    for (Path p : inputPathList) {
+      argsList.add(p.toString());
+    }
+    argsList.add("--output");
+    argsList.add(prepPath.toString());
+    argsList.add("--minPrefsPerUser");
+    argsList.add(String.valueOf(minPrefsPerUser));
+    argsList.add("--booleanData");
+    argsList.add(String.valueOf(booleanData));
+    argsList.add("--tempDir");
+    argsList.add(getTempPath().toString());
+    
+    String[] argsString = (String[]) argsList.toArray(new String[argsList.size()]);
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
-      ToolRunner.run(getConf(), new PreparePreferenceMatrixJob(), new String[]{
-        "--input", getInputPath().toString(),
-        "--output", prepPath.toString(),
-        "--minPrefsPerUser", String.valueOf(minPrefsPerUser),
-        "--booleanData", String.valueOf(booleanData),
-        "--tempDir", getTempPath().toString(),
-      });
+      ToolRunner.run(getConf(), new PreparePreferenceMatrixJob(), argsString);
 
       numberOfUsers = HadoopUtil.readInt(new Path(prepPath, PreparePreferenceMatrixJob.NUM_USERS), getConf());
     }
