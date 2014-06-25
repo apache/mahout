@@ -40,8 +40,10 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
       "iphone\tnexus:0.6795961471815897,iphone:1.7260924347106847,ipad:0.6795961471815897,galaxy:1.7260924347106847",
       "galaxy\tnexus:0.6795961471815897,iphone:1.7260924347106847,ipad:0.6795961471815897,galaxy:1.7260924347106847")
 
+  final val TmpDir = "tmp/" // all IO going to whatever the default HDFS config is pointing to
+
   /*
-    //Clustered Spark and HDFS
+    //Clustered Spark and HDFS, not a good everyday build test
     ItemSimilarityDriver.main(Array(
       "--input", "hdfs://occam4:54310/user/pat/spark-itemsimilarity/cf-data.txt",
       "--output", "hdfs://occam4:54310/user/pat/spark-itemsimilarity/indicatorMatrices/",
@@ -55,8 +57,7 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
     ))
 */
   // local multi-threaded Spark with HDFS using large dataset
-  // todo: not sure how to handle build testing on HDFS maybe make into an integration test
-  // or example.
+  // not a good build test.
   /*    ItemSimilarityDriver.main(Array(
       "--input", "hdfs://occam4:54310/user/pat/xrsj/ratings_data.txt",
       "--output", "hdfs://occam4:54310/user/pat/xrsj/indicatorMatrices/",
@@ -72,8 +73,8 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
 
   test ("running simple, non-full-spec CSV through"){
 
-    val InFile = "tmp/in-file.csv"
-    val OutPath = "tmp/indicator-matrices"
+    val InFile = TmpDir + "in-file.csv"
+    val OutPath = TmpDir + "indicator-matrices"
 
     val lines = Array(
         "u1,purchase,iphone",
@@ -97,6 +98,8 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
         "u4,view,ipad",
         "u4,view,galaxy")
 
+    // this will create multiple part-xxxxx files in the InFile dir but other tests will
+    // take account of one actual file
     val linesRdd = mahoutCtx.parallelize(lines).saveAsTextFile(InFile)
 
     afterEach // clean up before running the driver, it should handle the Spark conf and context
@@ -124,8 +127,8 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
 
   test ("Running TSV files through"){
 
-    val InFile = "tmp/in-file.tsv"
-    val OutPath = "tmp/indicator-matrices"
+    val InFile = TmpDir + "in-file.tsv"
+    val OutPath = TmpDir + "indicator-matrices"
 
     val lines = Array(
       "u1\tpurchase\tiphone",
@@ -149,6 +152,8 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
       "u4\tview\tipad",
       "u4\tview\tgalaxy")
 
+    // this will create multiple part-xxxxx files in the InFile dir but other tests will
+    // take account of one actual file
     val linesRdd = mahoutCtx.parallelize(lines).saveAsTextFile(InFile)
 
     afterEach // clean up before running the driver, it should handle the Spark conf and context
@@ -175,8 +180,8 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
 
   test ("Running log files through"){
 
-    val InFile = "tmp/in-file.log"
-    val OutPath = "tmp/indicator-matrices"
+    val InFile = TmpDir + "in-file.log"
+    val OutPath = TmpDir + "indicator-matrices"
 
     val lines = Array(
       "2014-06-23 14:46:53.115\tu1\tpurchase\trandom text\tiphone",
@@ -200,6 +205,8 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
       "2014-06-23 14:46:53.115\tu4\tview\trandom text\tipad",
       "2014-06-23 14:46:53.115\tu4\tview\trandom text\tgalaxy")
 
+    // this will create multiple part-xxxxx files in the InFile dir but other tests will
+    // take account of one actual file
     val linesRdd = mahoutCtx.parallelize(lines).saveAsTextFile(InFile)
 
     afterEach // clean up before running the driver, it should handle the Spark conf and context
@@ -226,11 +233,11 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
 
   test ("Running legacy files through"){
 
-    val InDir = "tmp/in-dir/"
+    val InDir = TmpDir + "in-dir/"
     val InFilename = "in-file.tsv"
     val InPath = InDir + InFilename
 
-    val OutPath = "tmp/indicator-matrices"
+    val OutPath = TmpDir + "indicator-matrices"
 
     val lines = Array(
         "0,0,1",
@@ -252,8 +259,7 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
     mahoutCtx.parallelize(lines).coalesce(1, shuffle=true).saveAsTextFile(InDir)
 
     // to change from using part files to a single .tsv file we'll need to use HDFS
-    val conf = new Configuration();
-    val fs = FileSystem.get(conf);
+    val fs = FileSystem.get(new Configuration())
     //rename part-00000 to something.tsv
     fs.rename(new Path(InDir + "part-00000"), new Path(InPath))
 
@@ -300,21 +306,20 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
       "u4\tview\tgalaxy")
 
     val InFilenameM1 = "m1.tsv"
-    val InDirM1 = "tmp/data/"
+    val InDirM1 = TmpDir + "data/"
     val InPathM1 = InDirM1 + InFilenameM1
     val InFilenameM2 = "m2.tsv"
-    val InDirM2 = "tmp/data/more-data/another-dir/"
+    val InDirM2 = TmpDir + "data/more-data/another-dir/"
     val InPathM2 = InDirM2 + InFilenameM2
 
-    val InPathStart = "tmp/data/"
-    val OutPath = "tmp/indicator-matrices"
+    val InPathStart = TmpDir + "data/"
+    val OutPath = TmpDir + "indicator-matrices"
 
     // this creates one part-0000 file in the directory
     mahoutCtx.parallelize(M1Lines).coalesce(1, shuffle=true).saveAsTextFile(InDirM1)
 
     // to change from using part files to a single .tsv file we'll need to use HDFS
-    val conf = new Configuration();
-    val fs = FileSystem.get(conf);
+    val fs = FileSystem.get(new Configuration())
     //rename part-00000 to something.tsv
     fs.rename(new Path(InDirM1 + "part-00000"), new Path(InPathM1))
 
@@ -335,7 +340,7 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
       "--master", masterUrl,
       "--filter1", "purchase",
       "--filter2", "view",
-      "--inDelim", "[,\t]",
+      "--inDelim", "\t",
       "--itemIDPosition", "2",
       "--rowIDPosition", "0",
       "--filterPosition", "1",
@@ -347,7 +352,14 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
     assert(indicatorLines == SelfSimilairtyTSV)
     val crossIndicatorLines = mahoutCtx.textFile(OutPath + "/cross-indicator-matrix/").collect.toSet[String]
     assert (crossIndicatorLines == CrossSimilarityTSV)
+  }
 
+  override def afterAll = {
+    // remove TmpDir
+    val fs = FileSystem.get(new Configuration())
+    fs.delete(new Path(TmpDir), true) // delete recursively
+
+    super.afterAll
   }
 
 }

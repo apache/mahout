@@ -44,7 +44,7 @@ case class FileSysUtils(pathURI: String, filePattern: String = ".*", recursive: 
       for ( uri <- pathURIs ){
         files = findFiles(uri, filePattern, files)
       }
-      if (files.length > 0 && files.endsWith(",")) files.dropRight(1) // drop the last comma
+      if (files.length > 0 && files.endsWith(",")) files = files.dropRight(1) // drop the last comma
       files
     }else{
       pathURI
