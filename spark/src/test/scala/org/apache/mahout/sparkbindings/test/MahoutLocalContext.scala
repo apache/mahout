@@ -23,6 +23,7 @@ trait MahoutLocalContext extends MahoutSuite with LoggerConfiguration {
       sparkConf = new SparkConf()
           .set("spark.kryoserializer.buffer.mb", "15")
           .set("spark.akka.frameSize", "30")
+          .set("spark.default.parallelism", "10")
     )
   }
 

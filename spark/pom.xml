@@ -263,6 +263,13 @@
 
   <dependencies>
 
+    <!-- spark stuff - need to put this first to use spark's mahout dependencies in tests -->
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-core_${scala.major}</artifactId>
+      <version>${spark.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-math-scala</artifactId>
@@ -296,6 +303,7 @@
     </dependency>
 
     <!-- spark stuff -->
+    
     <dependency>
       <groupId>org.apache.spark</groupId>
       <artifactId>spark-core_${scala.major}</artifactId>
