@@ -47,43 +47,45 @@ object ItemSimilarityDriver extends MahoutDriver {
    * @param args  Command line args, if empty a help message is printed.
    */
   override def main(args: Array[String]): Unit = {
-    val parser = new MahoutOptionParser[Options]("ItemSimilarity") {
-      head("ItemSimilarity", "Spark")
+    val parser = new MahoutOptionParser[Options]("spark-itemsimilarity") {
+      head("spark-itemsimilarity", "Mahout 1.0-SNAPSHOT")
 
       //Input output options, non-driver specific
       note("Input, output options")
       opt[String]('i', "input") required() action { (x, options) =>
         options.copy(input = x)
-      } text ("Path for input. It may be a filename or directory name and can be a local file path or an HDFS URI (required).")
+      } text ("Input path, may be a filename, directory name, or comma delimited list of HDFS supported URIs (required)")
 
       opt[String]('o', "output") required() action { (x, options) =>
         if (x.endsWith("/")) // todo: check to see if HDFS allows MS-Windows backslashes locally?
           options.copy(output = x)
         else
           options.copy(output = x + "/")
-      } text ("Output will be in sub-directories stored here so this must be a directory path (required).")
+      } text ("Path for output, any local or HDFS supported URI (required).")
 
       //Algorithm control options--driver specific
       note("\nAlgorithm control options:")
-      opt[String]("master") abbr ("ma") text ("URL for the Spark Master. (optional). Default: 'local'") action { (x, options) =>
+      opt[String]("master") abbr ("ma") text ("Spark Master URL (optional). Default: \"local\". Note that you can specify the number of cores to get a performance improvement, for example \"local[4]\"") action { (x, options) =>
         options.copy(master = x)
       }
 
       opt[Int]("maxPrefs") abbr ("mppu") action { (x, options) =>
         options.copy(maxPrefs = x)
-      } text ("Max number of preferences to consider per user or item, users or items with more preferences will be sampled down (optional). Default: 500") validate { x =>
+      } text ("Max number of preferences to consider per user (optional). Default: 500") validate { x =>
         if (x > 0) success else failure("Option --maxPrefs must be > 0")
       }
 
+/** not implemented in CooccurrenceAnalysis.cooccurrence
       opt[Int]("minPrefs") abbr ("mp") action { (x, options) =>
         options.copy(minPrefs = x)
       } text ("Ignore users with less preferences than this (optional). Default: 1") validate { x =>
         if (x > 0) success else failure("Option --minPrefs must be > 0")
       }
+*/
 
       opt[Int]('m', "maxSimilaritiesPerItem") action { (x, options) =>
         options.copy(maxSimilaritiesPerItem = x)
-      } text ("Try to cap the number of similar items for each item to this number (optional). Default: 100") validate { x =>
+      } text ("Limit the number of similarities per item to this number (optional). Default: 100") validate { x =>
         if (x > 0) success else failure("Option --maxSimilaritiesPerItem must be > 0")
       }
 
@@ -96,17 +98,17 @@ object ItemSimilarityDriver extends MahoutDriver {
       //Input text file schema--not driver specific but input data specific, tuples input,
       // not drms
       note("\nInput text file schema options:")
-      opt[String]("inDelim") abbr ("d") text ("Input delimiter character (optional). Default: '\\t'") action { (x, options) =>
+      opt[String]("inDelim") abbr ("id") text ("Input delimiter character (optional). Default: \"[,\\t]\"") action { (x, options) =>
         options.copy(inDelim = x)
       }
 
       opt[String]("filter1") abbr ("f1") action { (x, options) =>
         options.copy(filter1 = x)
-      } text ("String whose presence indicates a datum for the primary item set, can be a regex (optional). Default: no filtered is applied, all is used")
+      } text ("String (or regex) whose presence indicates a datum for the primary item set (optional). Default: no filter, all data is used")
 
       opt[String]("filter2") abbr ("f2") action { (x, options) =>
         options.copy(filter2 = x)
-      } text ("String whose presence indicates a datum for the secondary item set, can be a regex (optional). Used in cross-cooccurrence. Default: no secondary filter is applied")
+      } text ("String (or regex) whose presence indicates a datum for the secondary item set (optional). If not present no secondary dataset is collected.")
 
       opt[Int]("rowIDPosition") abbr ("rc") action { (x, options) =>
         options.copy(rowIDPosition = x)
@@ -126,33 +128,33 @@ object ItemSimilarityDriver extends MahoutDriver {
         if (x >= -1) success else failure("Option --filterColNum must be >= -1")
       }
 
-      note("\nDefault input schema will accept: 'userID<tab>itemId' or 'userID<tab>itemID<tab>any-text...' and all rows will be used")
+      note("\nUsing all defaults the input is expected of the form: \"userID<tab>itemId\" or \"userID<tab>itemID<tab>any-text...\" and all rows will be used")
 
       //File finding strategy--not driver specific
       note("\nFile input options:")
       opt[Unit]('r', "recursive") action { (_, options) =>
         options.copy(recursive = true)
-      } text ("The input path should be searched recursively for files that match the filename pattern from -fp (optional), Default: false")
+      } text ("Searched the -i path recursively for files that match --filenamePattern (optional), Default: false")
 
       opt[String]("filenamePattern") abbr ("fp") action { (x, options) =>
         options.copy(filenamePattern = x)
-      } text ("Regex to match in determining input files (optional). Default: filename in the --input option or '^part-.*' if --input is a directory")
+      } text ("Regex to match in determining input files (optional). Default: filename in the --input option or \"^part-.*\" if --input is a directory")
 
       //Drm output schema--not driver specific, drm specific
       note("\nOutput text file schema options:")
       opt[String]("rowKeyDelim") abbr ("rd") action { (x, options) =>
         options.copy(rowKeyDelim = x)
-      } text ("Separates the rowID key from the vector values list (optional). Default: '\\t'")
+      } text ("Separates the rowID key from the vector values list (optional). Default: \"\\t\"")
 
       opt[String]("columnIdStrengthDelim") abbr ("cd") action { (x, options) =>
         options.copy(columnIdStrengthDelim = x)
-      } text ("Separates column IDs from their values in the vector values list (optional). Default: ':'")
+      } text ("Separates column IDs from their values in the vector values list (optional). Default: \":\"")
 
       opt[String]("tupleDelim") abbr ("td") action { (x, options) =>
         options.copy(tupleDelim = x)
-      } text ("Separates vector tuple values in the values list (optional). Default: ','")
+      } text ("Separates vector tuple values in the values list (optional). Default: \",\"")
 
-      note("\nDefault delimiters will produce output of the form: 'itemID1<tab>itemID2:value2,itemID10:value10...'")
+      note("\nDefault delimiters will produce output of the form: \"itemID1<tab>itemID2:value2,itemID10:value10...\"")
 
       //Driver notes--driver specific
       note("\nNote: Only the Log Likelihood Ratio (LLR) is supported as a similarity measure.\n")
@@ -275,7 +277,7 @@ object ItemSimilarityDriver extends MahoutDriver {
     stop
   }
 
-  // Default values go here, any '_' or null should be 'required' in the Parser or flags an unused option
+  // Default values go here, any "_" or null should be "required" in the Parser or flags an unused option
   // todo: support two input streams for cross-similarity, maybe assume one schema for all inputs
   case class Options(
       master: String = "local",
@@ -293,7 +295,7 @@ object ItemSimilarityDriver extends MahoutDriver {
       filterPosition: Int = -1,
       filter1: String = null,
       filter2: String = null,
-      inDelim: String = ",",
+      inDelim: String = "[,\t]",
       rowKeyDelim: String = "\t",
       columnIdStrengthDelim: String = ":",
       tupleDelim: String = ",")
