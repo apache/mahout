@@ -32,6 +32,10 @@ class DrmRddInput[K: ClassTag](
 
   private lazy val backingRdd = rowWiseSrc.map(_._2).getOrElse(blockifiedSrc.get)
 
+  def isBlockified:Boolean = blockifiedSrc.isDefined
+
+  def isRowWise:Boolean = rowWiseSrc.isDefined
+
   def toDrmRdd(): DrmRdd[K] = rowWiseSrc.map(_._2).getOrElse(deblockify(rdd = blockifiedSrc.get))
 
   def toBlockifiedDrmRdd() = blockifiedSrc.getOrElse(blockify(rdd = rowWiseSrc.get._2, blockncol = rowWiseSrc.get._1))

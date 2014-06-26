@@ -27,10 +27,10 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.function;
 
 
-import java.util.Date;
-
 import com.google.common.base.Preconditions;
 import org.apache.mahout.math.jet.random.engine.MersenneTwister;
+
+import java.util.Date;
 
 
 /**
@@ -1389,6 +1389,17 @@ public final class Functions {
       @Override
       public double apply(double a) {
         return a == b ? 1 : 0;
+      }
+    };
+  }
+
+  /** Constructs a function that returns <tt>a != b ? 1 : 0</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
+  public static DoubleFunction notEqual(final double b) {
+    return new DoubleFunction() {
+
+      @Override
+      public double apply(double a) {
+        return a != b ? 1 : 0;
       }
     };
   }

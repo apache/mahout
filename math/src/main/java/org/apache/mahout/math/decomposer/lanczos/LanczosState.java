@@ -47,7 +47,7 @@ public class LanczosState {
     iterationNumber = 1;
   }
 
-  protected void intitializeBasisAndSingularVectors() {
+  private void intitializeBasisAndSingularVectors() {
     basis = Maps.newHashMap();
     singularVectors = Maps.newHashMap();
   }

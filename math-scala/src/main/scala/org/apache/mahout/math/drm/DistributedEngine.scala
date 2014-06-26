@@ -24,6 +24,7 @@ import scalabindings._
 import RLikeOps._
 import DistributedEngine._
 import org.apache.mahout.math.scalabindings._
+import org.apache.log4j.Logger
 
 /** Abstraction of optimizer/distributed engine */
 trait DistributedEngine {
@@ -46,6 +47,9 @@ trait DistributedEngine {
   /** Engine-specific colSums implementation based on a checkpoint. */
   def colSums[K: ClassTag](drm: CheckpointedDrm[K]): Vector
 
+  /** Engine-specific numNonZeroElementsPerColumn implementation based on a checkpoint. */
+  def numNonZeroElementsPerColumn[K: ClassTag](drm: CheckpointedDrm[K]): Vector
+
   /** Engine-specific colMeans implementation based on a checkpoint. */
   def colMeans[K: ClassTag](drm: CheckpointedDrm[K]): Vector
 
@@ -57,8 +61,13 @@ trait DistributedEngine {
   /** Broadcast support */
   def drmBroadcast(m: Matrix)(implicit dc: DistributedContext): BCast[Matrix]
 
-  /** Load DRM from hdfs (as in Mahout DRM format) */
-  def drmFromHDFS (path: String)(implicit sc: DistributedContext): CheckpointedDrm[_]
+  /**
+   * Load DRM from hdfs (as in Mahout DRM format).
+   * <P/>
+   * @param path The DFS path to load from
+   * @param parMin Minimum parallelism after load (equivalent to #par(min=...)).
+   */
+  def drmFromHDFS(path: String, parMin: Int = 0)(implicit sc: DistributedContext): CheckpointedDrm[_]
 
   /** Parallelize in-core matrix as spark distributed matrix, using row ordinal indices as data set keys. */
   def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int = 1)
@@ -78,6 +87,8 @@ trait DistributedEngine {
 }
 
 object DistributedEngine {
+
+  private val log = Logger.getLogger(DistributedEngine.getClass)
 
   /** This is mostly multiplication operations rewrites */
   private def pass1[K: ClassTag](action: DrmLike[K]): DrmLike[K] = {
