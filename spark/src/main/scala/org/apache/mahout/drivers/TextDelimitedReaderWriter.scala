@@ -57,10 +57,15 @@ trait TDIndexedDatasetReader extends Reader[IndexedDataset]{
       if(filterPosition != -1) {
         // get the rows that have a column matching the filter
         columns = columns.filter({ tokens => tokens(filterPosition) == filterBy})
+      }else{
+        columns = columns.filter({ tokens => true})
       }
 
       // get row and column IDs
-      val interactions = columns.map({ tokens => tokens(rowIDPosition) -> tokens(columnIDPosition)})
+      //columns.collect
+      val interactions = columns.map{ tokens =>
+        tokens(rowIDPosition) -> tokens(columnIDPosition)
+      }
 
       interactions.cache()
 

@@ -190,8 +190,8 @@ object ItemSimilarityDriver extends MahoutDriver {
     Unit = {
 
     sparkConf.set("spark.kryo.referenceTracking", "false")
-      .set("spark.kryoserializer.buffer.mb", "100")
-      .set("spark.executor.memory", "2g")
+      .set("spark.kryoserializer.buffer.mb", "200")
+      .set("spark.executor.memory", "4g")
 
     super.start(masterUrl, appName)
 
@@ -295,7 +295,7 @@ object ItemSimilarityDriver extends MahoutDriver {
       filterPosition: Int = -1,
       filter1: String = null,
       filter2: String = null,
-      inDelim: String = "[,\t]",
+      inDelim: String = "[,\t, ]",
       rowKeyDelim: String = "\t",
       columnIdStrengthDelim: String = ":",
       tupleDelim: String = ",")
