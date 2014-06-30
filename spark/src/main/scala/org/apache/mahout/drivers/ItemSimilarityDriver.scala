@@ -153,6 +153,12 @@ object ItemSimilarityDriver extends MahoutDriver {
         options.copy(tupleDelim = x)
       } text ("Separates vector tuple values in the values list (optional). Default: \",\"")
 
+      //Spark config options--not driver specific
+      note("\nSpark config options:")
+      opt[String]("sparkExecutorMem") abbr ("sem") action { (x, options) =>
+        options.copy(sparkExecutorMem = x)
+      } text ("Max Java heap available as \"executor memory\" on each node (optional). Default: 4g")
+
       note("\nDefault delimiters will produce output of the form: \"itemID1<tab>itemID2:value2,itemID10:value10...\"")
 
       //Driver notes--driver specific
@@ -190,7 +196,7 @@ object ItemSimilarityDriver extends MahoutDriver {
 
     sparkConf.set("spark.kryo.referenceTracking", "false")
       .set("spark.kryoserializer.buffer.mb", "200")
-      .set("spark.executor.memory", "5g")
+      .set("spark.executor.memory", options.sparkExecutorMem)
 
     super.start(masterUrl, appName)
 
@@ -280,6 +286,7 @@ object ItemSimilarityDriver extends MahoutDriver {
   // todo: support two input streams for cross-similarity, maybe assume one schema for all inputs
   case class Options(
       master: String = "local",
+      sparkExecutorMem: String = "4g",
       appName: String = "ItemSimilarityJob",
       randomSeed: Int = System.currentTimeMillis().toInt,
       recursive: Boolean = false,
