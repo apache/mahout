@@ -63,12 +63,12 @@ abstract class MahoutDriver {
     * */
   protected def start(masterUrl: String, appName: String,
             customJars:Traversable[String] = Traversable.empty[String]) : Unit = {
-    mc = mahoutSparkContext(masterUrl, appName, customJars)
+    mc = mahoutSparkContext(masterUrl, appName, customJars, sparkConf)
   }
 
   /** Override (optionally) for special cleanup */
   protected def stop: Unit = {
-    mc.stop
+    mc.close
   }
 
   /** This is wher you do the work, call start first, then before exiting call stop */

@@ -190,7 +190,7 @@ object ItemSimilarityDriver extends MahoutDriver {
 
     sparkConf.set("spark.kryo.referenceTracking", "false")
       .set("spark.kryoserializer.buffer.mb", "200")
-      .set("spark.executor.memory", "6g")
+      .set("spark.executor.memory", "5g")
 
     super.start(masterUrl, appName)
 
