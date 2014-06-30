@@ -17,6 +17,7 @@
 
 package org.apache.mahout.drivers
 
+import scala.collection.mutable
 import scala.collection.mutable.HashMap
 
 /** Syntactic sugar for HashMap[String, Any]
@@ -24,6 +25,6 @@ import scala.collection.mutable.HashMap
   * @param params list of mappings for instantiation {{{val mySchema = new Schema("one" -> 1, "two" -> "2", ...)}}}
   */
 class Schema(params: Tuple2[String, Any]*) extends HashMap[String, Any] {
-  // todo: this require a mutable HashMap, do we care?
+  // note: this require a mutable HashMap, do we care?
   this ++= params
 }

@@ -34,7 +34,6 @@ import org.apache.mahout.cf.CooccurrenceAnalysis
  */
 object ItemSimilarityDriver extends MahoutDriver {
   //todo: Should also take two input streams and do cross similarity with no filter required.
-  //todo: Required: should work on the old Mahout TDF that allows values (but ignores them),
   // required for examples
 
   private var options: Options = _

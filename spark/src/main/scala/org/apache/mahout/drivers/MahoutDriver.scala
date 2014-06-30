@@ -17,7 +17,8 @@
 
 package org.apache.mahout.drivers
 
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.mahout.math.drm.DistributedContext
+import org.apache.spark.SparkConf
 import org.apache.mahout.sparkbindings._
 
 /** Extend this class to create a Mahout CLI driver. Minimally you must override process and main.
@@ -50,7 +51,7 @@ import org.apache.mahout.sparkbindings._
   * }}}
   */
 abstract class MahoutDriver {
-  implicit var mc: SparkContext = _
+  implicit var mc: DistributedContext = _
   implicit val sparkConf = new SparkConf()
 
   /** Creates a Spark context to run the job inside.

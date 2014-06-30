@@ -18,7 +18,7 @@
 package org.apache.mahout.drivers
 
 import com.google.common.collect.BiMap
-import org.apache.mahout.math.drm.{CheckpointedDrm, DrmLike}
+import org.apache.mahout.math.drm.CheckpointedDrm
 
 /**
   * Wraps a [[org.apache.mahout.sparkbindings.drm.DrmLike]] object with two [[com.google.common.collect.BiMap]]s to store ID/label translation dictionaries.
