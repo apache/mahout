@@ -177,13 +177,14 @@ package object sparkbindings {
   def drmWrap[K : ClassTag](
       rdd: DrmRdd[K],
       nrow: Int = -1,
-      ncol: Int = -1
+      ncol: Int = -1,
+      cacheHint:CacheHint.CacheHint = CacheHint.NONE
       ): CheckpointedDrm[K] =
     new CheckpointedDrmSpark[K](
       rdd = rdd,
       _nrow = nrow,
       _ncol = ncol,
-      _cacheStorageLevel = StorageLevel.NONE
+      _cacheStorageLevel = SparkEngine.cacheHint2Spark(cacheHint)
     )
 
 

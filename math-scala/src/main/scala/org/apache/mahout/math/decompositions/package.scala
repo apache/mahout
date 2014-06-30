@@ -122,6 +122,6 @@ package object decompositions {
       maxIterations: Int = 10,
       convergenceThreshold: Double = 0.10
       ): ALS.Result[K] =
-    ALS.als(drmInput, k, lambda, maxIterations, convergenceThreshold)
+    ALS.dals(drmInput, k, lambda, maxIterations, convergenceThreshold)
 
 }
