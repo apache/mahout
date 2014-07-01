@@ -17,7 +17,7 @@
 #
 
 #
-# Downloads a (partial) wikipedia dump, trains and tests a classifier.
+# Downloads a (partial) Wikipedia dump, trains and tests a classifier.
 #
 # To run:  change into the mahout directory and type:
 # examples/bin/classify-wiki.sh
