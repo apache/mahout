@@ -253,16 +253,7 @@ case "$1" in
 
     MAHOUT_OPTS="$MAHOUT_OPTS -Dhadoop.log.dir=$MAHOUT_LOG_DIR"
     MAHOUT_OPTS="$MAHOUT_OPTS -Dhadoop.log.file=$MAHOUT_LOGFILE"
-    MAHOUT_OPTS="$MAHOUT_OPTS -Dmapred.min.split.size=512MB"
-    MAHOUT_OPTS="$MAHOUT_OPTS -Dmapred.map.child.java.opts=-Xmx4096m"
-    MAHOUT_OPTS="$MAHOUT_OPTS -Dmapred.reduce.child.java.opts=-Xmx4096m"
-    MAHOUT_OPTS="$MAHOUT_OPTS -Dmapred.output.compress=true"
-    MAHOUT_OPTS="$MAHOUT_OPTS -Dmapred.compress.map.output=true"
-    MAHOUT_OPTS="$MAHOUT_OPTS -Dmapred.map.tasks=1"
-    MAHOUT_OPTS="$MAHOUT_OPTS -Dmapred.reduce.tasks=1"
-    MAHOUT_OPTS="$MAHOUT_OPTS -Dio.sort.factor=30"
-    MAHOUT_OPTS="$MAHOUT_OPTS -Dio.sort.mb=1024"
-    MAHOUT_OPTS="$MAHOUT_OPTS -Dio.file.buffer.size=32786"
+   
 
     if [ "x$JAVA_LIBRARY_PATH" != "x" ]; then
       MAHOUT_OPTS="$MAHOUT_OPTS -Djava.library.path=$JAVA_LIBRARY_PATH"
