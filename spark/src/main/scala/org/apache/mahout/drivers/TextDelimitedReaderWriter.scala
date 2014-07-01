@@ -50,27 +50,25 @@ trait TDIndexedDatasetReader extends Reader[IndexedDataset]{
         throw new IllegalArgumentException
       })
 
-      var columns = mc.textFile(source).map({ line => line.split(delimiter)})
+      var columns = mc.textFile(source).map { line => line.split(delimiter) }
 
       // -1 means no filter in the input text, take them all
       if(filterPosition != -1) {
         // get the rows that have a column matching the filter
-        columns = columns.filter({ tokens => tokens(filterPosition) == filterBy})
-      }else{
-        columns = columns.filter({ tokens => true})
+        columns = columns.filter { tokens => tokens(filterPosition) == filterBy }
       }
 
       // get row and column IDs
-      //columns.collect
-      val interactions = columns.map{ tokens =>
+      val m = columns.collect
+      val interactions = columns.map { tokens =>
         tokens(rowIDPosition) -> tokens(columnIDPosition)
       }
 
       interactions.cache()
 
       // create separate collections of rowID and columnID tokens
-      val rowIDs = interactions.map { case (rowID, _) => rowID}.distinct().collect()
-      val columnIDs = interactions.map { case (_, columnID) => columnID}.distinct().collect()
+      val rowIDs = interactions.map { case (rowID, _) => rowID }.distinct().collect()
+      val columnIDs = interactions.map { case (_, columnID) => columnID }.distinct().collect()
 
       val numRows = rowIDs.size
       val numColumns = columnIDs.size

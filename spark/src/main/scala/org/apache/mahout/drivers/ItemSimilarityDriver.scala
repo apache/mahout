@@ -286,7 +286,7 @@ object ItemSimilarityDriver extends MahoutDriver {
   // todo: support two input streams for cross-similarity, maybe assume one schema for all inputs
   case class Options(
       master: String = "local",
-      sparkExecutorMem: String = "4g",
+      sparkExecutorMem: String = "2g",
       appName: String = "ItemSimilarityJob",
       randomSeed: Int = System.currentTimeMillis().toInt,
       recursive: Boolean = false,
@@ -301,7 +301,7 @@ object ItemSimilarityDriver extends MahoutDriver {
       filterPosition: Int = -1,
       filter1: String = null,
       filter2: String = null,
-      inDelim: String = "[,\t, ]",
+      inDelim: String = "[,\t ]",
       rowKeyDelim: String = "\t",
       columnIdStrengthDelim: String = ":",
       tupleDelim: String = ",")

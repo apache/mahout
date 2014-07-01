@@ -71,10 +71,10 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
     ))
   */
 
-  test ("running simple, non-full-spec CSV through"){
+  test ("ItemSimilarityDriver, non-full-spec CSV"){
 
-    val InFile = TmpDir + "in-file.csv"
-    val OutPath = TmpDir + "indicator-matrices"
+    val InFile = TmpDir + "in-file.csv/" //using part files, not singel file
+    val OutPath = TmpDir + "indicator-matrices/"
 
     val lines = Array(
         "u1,purchase,iphone",
@@ -125,10 +125,10 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
 
 
 
-  test ("Running TSV files through"){
+  test ("ItemSimilarityDriver TSV "){
 
-    val InFile = TmpDir + "in-file.tsv"
-    val OutPath = TmpDir + "indicator-matrices"
+    val InFile = TmpDir + "in-file.tsv/"
+    val OutPath = TmpDir + "indicator-matrices/"
 
     val lines = Array(
       "u1\tpurchase\tiphone",
@@ -178,10 +178,10 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
 
   }
 
-  test ("Running log files through"){
+  test ("ItemSimilarityDriver log-ish files"){
 
-    val InFile = TmpDir + "in-file.log"
-    val OutPath = TmpDir + "indicator-matrices"
+    val InFile = TmpDir + "in-file.log/"
+    val OutPath = TmpDir + "indicator-matrices/"
 
     val lines = Array(
       "2014-06-23 14:46:53.115\tu1\tpurchase\trandom text\tiphone",
@@ -231,7 +231,7 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
 
   }
 
-  test ("Running legacy files through"){
+  test ("ItemSimilarityDriver legacy supported file format"){
 
     val InDir = TmpDir + "in-dir/"
     val InFilename = "in-file.tsv"
@@ -277,7 +277,7 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
 
   }
 
-  test("recursive file discovery using filename patterns"){
+  test("ItemSimilarityDriver recursive file discovery using filename patterns"){
     //directory structure using the following
     // tmp/data/m1.tsv
     // tmp/data/more-data/another-dir/m2.tsv
