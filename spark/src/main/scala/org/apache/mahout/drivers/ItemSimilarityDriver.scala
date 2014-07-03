@@ -21,8 +21,7 @@ import org.apache.mahout.cf.CooccurrenceAnalysis
 
 /**
  * Command line interface for [[org.apache.mahout.cf.CooccurrenceAnalysis.cooccurrences( )]].
- * Command line interface for [[org.apache.mahout.cf.CooccurrenceAnalysis.cooccurrences( )]].
- * It reads text lines
+ * Reads text lines
  * that contain (row id, column id, ...). The IDs are user specified strings which will be
  * preserved in the
  * output. The individual tuples will be accumulated into a matrix and [[org.apache.mahout.cf.CooccurrenceAnalysis.cooccurrences( )]]
@@ -31,6 +30,13 @@ import org.apache.mahout.cf.CooccurrenceAnalysis
  * similarity of the primary
  * to the secondary. Returns one or two directories of text files formatted as specified in
  * the options.
+ * The options allow flexible control of the input schema, file discovery, output schema, and control of
+ * algorithm parameters.
+ * To get help run {{{mahout spark-itemsimilarity}}} for a full explanation of options. To process simple
+ * tuples of text delimited values (userID,itemID) with or without a strengths and with a separator of tab, comma, or space,
+ * you can specify only the input and output file and directory--all else will default to the correct values.
+ * @note To use with a Spark cluster see the --masterUrl option, if you run out of heap space check
+ *       the --sparkExecutorMemory option.
  */
 object ItemSimilarityDriver extends MahoutDriver {
   //todo: Should also take two input streams and do cross similarity with no filter required.
@@ -190,8 +196,7 @@ object ItemSimilarityDriver extends MahoutDriver {
   }
 
   override def start(masterUrl: String = options.master,
-      appName: String = options.appName,
-      customJars:Traversable[String] = Traversable.empty[String]):
+      appName: String = options.appName):
     Unit = {
 
     sparkConf.set("spark.kryo.referenceTracking", "false")

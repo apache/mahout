@@ -26,19 +26,36 @@ import org.apache.mahout.test.MahoutSuite
 
 class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLocalContext  {
 
-  final val SelfSimilairtyTSV = Set(
-      "galaxy\tnexus:1.7260924347106847",
-      "ipad\tiphone:1.7260924347106847",
-      "nexus\tgalaxy:1.7260924347106847",
-      "iphone\tipad:1.7260924347106847",
-      "surface")
+/*
+  // correct self-cooccurrence with LLR
+  final val matrixLLRCoocAtAControl = dense(
+    (0.0,                0.6331745808516107, 0.0,                     0.0,                0.0),
+    (0.6331745808516107, 0.0,                0.0,                     0.0,                0.0),
+    (0.0,                0.0,                0.0,                     0.6331745808516107, 0.0),
+    (0.0,                0.0,                0.6331745808516107,      0.0,                0.0),
+    (0.0,                0.0,                0.0,                     0.0,                0.0))
 
-  final val CrossSimilarityTSV = Set("" +
-      "nexus\tnexus:0.6795961471815897,iphone:1.7260924347106847,ipad:0.6795961471815897,surface:0.6795961471815897,galaxy:1.7260924347106847",
-      "ipad\tnexus:0.6795961471815897,iphone:1.7260924347106847,ipad:0.6795961471815897,galaxy:1.7260924347106847",
-      "surface\tsurface:4.498681156950466",
-      "iphone\tnexus:0.6795961471815897,iphone:1.7260924347106847,ipad:0.6795961471815897,galaxy:1.7260924347106847",
-      "galaxy\tnexus:0.6795961471815897,iphone:1.7260924347106847,ipad:0.6795961471815897,galaxy:1.7260924347106847")
+  // correct cross-cooccurrence with LLR
+  final val matrixLLRCoocBtAControl = dense(
+    (0.6331745808516107, 0.4046187819149094, 0.4046187819149094, 0.6331745808516107, 0.0),
+    (0.6331745808516107, 0.4046187819149094, 0.4046187819149094, 0.6331745808516107, 0.0),
+    (0.6331745808516107, 0.4046187819149094, 0.4046187819149094, 0.6331745808516107, 0.40461878191490940),
+    (0.6331745808516107, 0.4046187819149094, 0.4046187819149094, 0.6331745808516107, 0.0),
+    (0.0,                0.0,                0.0,                0.0,                0.8181382096075936))
+*/
+
+  final val SelfSimilairtyTSV = Set(
+      "galaxy\tnexus:0.6331745808516107",
+      "ipad\tiphone:0.6331745808516107",
+      "nexus\tgalaxy:0.6331745808516107",
+      "iphone\tipad:0.6331745808516107",
+      "surface")
+  final val CrossSimilarityTSV = Set(
+      "galaxy\tnexus:0.4046187819149094,iphone:0.6331745808516107,ipad:0.4046187819149094,galaxy:0.6331745808516107",
+      "surface\tsurface:0.8181382096075936",
+      "nexus\tnexus:0.4046187819149094,iphone:0.6331745808516107,ipad:0.4046187819149094,surface:0.4046187819149094,galaxy:0.6331745808516107",
+      "ipad\tnexus:0.4046187819149094,iphone:0.6331745808516107,ipad:0.4046187819149094,galaxy:0.6331745808516107",
+      "iphone\tnexus:0.4046187819149094,iphone:0.6331745808516107,ipad:0.4046187819149094,galaxy:0.6331745808516107")
 
   final val TmpDir = "tmp/" // all IO going to whatever the default HDFS config is pointing to
 
@@ -249,11 +266,11 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
         "3,3,1")
 
     val Answer = Set(
-      "0\t1:1.7260924347106847",
-      "3\t2:1.7260924347106847",
-      "1\t0:1.7260924347106847",
+      "0\t1:0.6331745808516107",
+      "3\t2:0.6331745808516107",
+      "1\t0:0.6331745808516107",
       "4",
-      "2\t3:1.7260924347106847")
+      "2\t3:0.6331745808516107")
 
     // this creates one part-0000 file in the directory
     mahoutCtx.parallelize(lines).coalesce(1, shuffle=true).saveAsTextFile(InDir)

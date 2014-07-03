@@ -61,8 +61,12 @@ abstract class MahoutDriver {
     * @param appName  Name to display in Spark UI
     * @param customJars List of paths to custom jars
     * */
-  protected def start(masterUrl: String, appName: String,
-            customJars:Traversable[String] = Traversable.empty[String]) : Unit = {
+  protected def start(masterUrl: String, appName: String, customJars:Traversable[String]) : Unit = {
+    mc = mahoutSparkContext(masterUrl, appName, customJars, sparkConf)
+  }
+
+  protected def start(masterUrl: String, appName: String) : Unit = {
+    val customJars = Traversable.empty[String]
     mc = mahoutSparkContext(masterUrl, appName, customJars, sparkConf)
   }
 

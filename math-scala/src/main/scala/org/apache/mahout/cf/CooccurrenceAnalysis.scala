@@ -22,7 +22,7 @@ import scalabindings._
 import RLikeOps._
 import drm._
 import RLikeDrmOps._
-import org.apache.mahout.sparkbindings._
+//import org.apache.mahout.sparkbindings._
 import scala.collection.JavaConversions._
 import org.apache.mahout.math.stats.LogLikelihood
 import collection._
@@ -96,15 +96,29 @@ object CooccurrenceAnalysis extends Serializable {
    * Compute loglikelihood ratio
    * see http://tdunning.blogspot.de/2008/03/surprise-and-coincidence.html for details
    **/
-  def loglikelihoodRatio(numInteractionsWithA: Long, numInteractionsWithB: Long,
+  def logLikelihoodRatio(numInteractionsWithA: Long, numInteractionsWithB: Long,
                          numInteractionsWithAandB: Long, numInteractions: Long) = {
 
     val k11 = numInteractionsWithAandB
     val k12 = numInteractionsWithA - numInteractionsWithAandB
     val k21 = numInteractionsWithB - numInteractionsWithAandB
     val k22 = numInteractions - numInteractionsWithA - numInteractionsWithB + numInteractionsWithAandB
+/*
+                    long k11 = (long) element.get();
+                long k12 = (long) (rowSums.get(row.index()) - k11);
+                long k21 = (long) (colSums.get(element.index()) - k11);
+                long k22 = (long) (total - k11 - k12 - k21);
+                double score = LogLikelihood.rootLogLikelihoodRatio(k11, k12, k21, k22);
+*/
+/*
+    val k11 = numInteractionsWithAandB
+    val k12 = numInteractionsWithA - k11
+    val k21 = numInteractionsWithB - k11
+    val k22 = numInteractions - k11 - k12 - k21
+*/
 
     LogLikelihood.logLikelihoodRatio(k11, k12, k21, k22)
+
   }
 
   def computeIndicators(drmBtA: DrmLike[Int], numUsers: Int, maxInterestingItemsPerThing: Int,
@@ -131,9 +145,10 @@ object CooccurrenceAnalysis extends Serializable {
             // exclude co-occurrences of the item with itself
             if (crossCooccurrence || thingB != thingA) {
               // Compute loglikelihood ratio
-              val llrRatio = loglikelihoodRatio(numInteractionsB(thingB).toLong, numInteractionsA(thingA).toLong,
+              val llrRatio = logLikelihoodRatio(numInteractionsB(thingB).toLong, numInteractionsA(thingA).toLong,
                 cooccurrences.toLong, numUsers)
-              val candidate = thingA -> llrRatio
+              val tLLR = 1.0 - (1.0 / (1.0 + llrRatio))
+              val candidate = thingA -> tLLR
 
               // Enqueue item with score, if belonging to the top-k
               if (topItemsPerThing.size < maxInterestingItemsPerThing) {
