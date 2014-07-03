@@ -7,7 +7,7 @@
 #   MAHOUT_JAVA_HOME   The java implementation to use.  Overrides JAVA_HOME.
 #
 #   MAHOUT_HEAPSIZE    The maximum amount of heap to use, in MB.
-#                      Default is 1000.
+#                      Default is 4000.
 #
 #   HADOOP_CONF_DIR  The location of a hadoop config directory
 #
@@ -84,6 +84,9 @@ if [ "$1" == "spark-shell" ]; then
   SPARK=1
 fi
 
+if [ "$1" == "spark-itemsimilarity" ]; then
+  SPARK=1
+fi
 
 if [ "$MAHOUT_CORE" != "" ]; then
   IS_CORE=1
@@ -105,7 +108,7 @@ if [ "$JAVA_HOME" = "" ]; then
 fi
 
 JAVA=$JAVA_HOME/bin/java
-JAVA_HEAP_MAX=-Xmx3g
+JAVA_HEAP_MAX=-Xmx4g
 
 # check envvars which might override default args
 if [ "$MAHOUT_HEAPSIZE" != "" ]; then
@@ -156,14 +159,14 @@ then
       CLASSPATH=${CLASSPATH}:$f;
     done
   fi
-  
+
   # add scala dev target
-  for f in $MAHOUT_HOME/math-scala/target/mahout-math-scala-*.jar ; do 
+  for f in $MAHOUT_HOME/math-scala/target/mahout-math-scala-*.jar ; do
     CLASSPATH=${CLASSPATH}:$f;
   done
 
 
-  # add spark-shell -- if we requested shell
+  # add spark-shell -- if we requested shell or other spark CLI driver
   if [ "$SPARK" == "1" ]; then
 
     for f in $MAHOUT_HOME/mrlegacy/target/mahout-mrlegacy-*.jar ; do
@@ -183,7 +186,7 @@ then
        SPARK_CLASSPATH=$("${SPARK_CP_BIN}" 2>/dev/null)
        CLASSPATH="${CLASSPATH}:${SPARK_CLASSPATH}"
     else
-      echo "Cannot find Spark classpath."
+      echo "Cannot find Spark classpath. Is 'SPARK_HOME' set?"
       exit -1
     fi
 
@@ -227,6 +230,11 @@ case "$1" in
     save_stty=$(stty -g 2>/dev/null);
     "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.sparkbindings.shell.Main" $@
     stty sane; stty $save_stty
+    ;;
+  # Spark CLI drivers go here
+  (spark-itemsimilarity)
+    shift
+    "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.ItemSimilarityDriver" "$@"
     ;;
   (*)
 
