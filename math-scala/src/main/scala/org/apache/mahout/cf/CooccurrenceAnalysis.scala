@@ -19,15 +19,12 @@ package org.apache.mahout.cf
 
 import org.apache.mahout.math._
 import scalabindings._
-import RLikeOps._
 import drm._
 import RLikeDrmOps._
-//import org.apache.mahout.sparkbindings._
 import scala.collection.JavaConversions._
 import org.apache.mahout.math.stats.LogLikelihood
 import collection._
 import org.apache.mahout.common.RandomUtils
-import org.apache.mahout.math.function.{VectorFunction, Functions}
 
 
 /**
@@ -145,9 +142,12 @@ object CooccurrenceAnalysis extends Serializable {
             // exclude co-occurrences of the item with itself
             if (crossCooccurrence || thingB != thingA) {
               // Compute loglikelihood ratio
-              val llrRatio = logLikelihoodRatio(numInteractionsB(thingB).toLong, numInteractionsA(thingA).toLong,
+              val llr = logLikelihoodRatio(numInteractionsB(thingB).toLong, numInteractionsA(thingA).toLong,
                 cooccurrences.toLong, numUsers)
-              val tLLR = 1.0 - (1.0 / (1.0 + llrRatio))
+
+              //not sure why this is calculated but it matches code in the hadoop version
+              val tLLR = 1.0 - (1.0 / (1.0 + llr))
+              
               val candidate = thingA -> tLLR
 
               // Enqueue item with score, if belonging to the top-k
