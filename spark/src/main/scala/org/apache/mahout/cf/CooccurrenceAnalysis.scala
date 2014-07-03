@@ -19,12 +19,14 @@ package org.apache.mahout.cf
 
 import org.apache.mahout.math._
 import scalabindings._
+import RLikeOps._
 import drm._
 import RLikeDrmOps._
 import scala.collection.JavaConversions._
 import org.apache.mahout.math.stats.LogLikelihood
 import collection._
 import org.apache.mahout.common.RandomUtils
+import org.apache.mahout.math.function.{VectorFunction, Functions}
 
 
 /**
@@ -100,19 +102,6 @@ object CooccurrenceAnalysis extends Serializable {
     val k12 = numInteractionsWithA - numInteractionsWithAandB
     val k21 = numInteractionsWithB - numInteractionsWithAandB
     val k22 = numInteractions - numInteractionsWithA - numInteractionsWithB + numInteractionsWithAandB
-/*
-                    long k11 = (long) element.get();
-                long k12 = (long) (rowSums.get(row.index()) - k11);
-                long k21 = (long) (colSums.get(element.index()) - k11);
-                long k22 = (long) (total - k11 - k12 - k21);
-                double score = LogLikelihood.rootLogLikelihoodRatio(k11, k12, k21, k22);
-*/
-/*
-    val k11 = numInteractionsWithAandB
-    val k12 = numInteractionsWithA - k11
-    val k21 = numInteractionsWithB - k11
-    val k22 = numInteractions - k11 - k12 - k21
-*/
 
     LogLikelihood.logLikelihoodRatio(k11, k12, k21, k22)
 
@@ -145,9 +134,8 @@ object CooccurrenceAnalysis extends Serializable {
               val llr = logLikelihoodRatio(numInteractionsB(thingB).toLong, numInteractionsA(thingA).toLong,
                 cooccurrences.toLong, numUsers)
 
-              //not sure why this is calculated but it matches code in the hadoop version
+              // matches hadoop code and maps values to range (0..1)
               val tLLR = 1.0 - (1.0 / (1.0 + llr))
-
               val candidate = thingA -> tLLR
 
               // Enqueue item with score, if belonging to the top-k
