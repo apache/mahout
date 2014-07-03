@@ -147,7 +147,7 @@ object CooccurrenceAnalysis extends Serializable {
 
               //not sure why this is calculated but it matches code in the hadoop version
               val tLLR = 1.0 - (1.0 / (1.0 + llr))
-              
+
               val candidate = thingA -> tLLR
 
               // Enqueue item with score, if belonging to the top-k
