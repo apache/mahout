@@ -88,7 +88,7 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
     ))
   */
 
-  ignore ("ItemSimilarityDriver, non-full-spec CSV"){
+  test ("ItemSimilarityDriver, non-full-spec CSV"){
 
     val InFile = TmpDir + "in-file.csv/" //using part files, not singel file
     val OutPath = TmpDir + "indicator-matrices/"
@@ -131,7 +131,8 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
       "--inDelim", ",",
       "--itemIDPosition", "2",
       "--rowIDPosition", "0",
-      "--filterPosition", "1"))
+      "--filterPosition", "1",
+      "--dontAddMahoutJars"))
 
     beforeEach // restart the test context to read the output of the driver
     val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toSet[String]
@@ -142,7 +143,7 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
 
 
 
-  ignore ("ItemSimilarityDriver TSV "){
+  test ("ItemSimilarityDriver TSV "){
 
     val InFile = TmpDir + "in-file.tsv/"
     val OutPath = TmpDir + "indicator-matrices/"
@@ -185,7 +186,8 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
       "--inDelim", "[,\t]",
       "--itemIDPosition", "2",
       "--rowIDPosition", "0",
-      "--filterPosition", "1"))
+      "--filterPosition", "1",
+      "--dontAddMahoutJars"))
 
     beforeEach // restart the test context to read the output of the driver
     val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toSet[String]
@@ -195,7 +197,7 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
 
   }
 
-  ignore ("ItemSimilarityDriver log-ish files"){
+  test ("ItemSimilarityDriver log-ish files"){
 
     val InFile = TmpDir + "in-file.log/"
     val OutPath = TmpDir + "indicator-matrices/"
@@ -238,7 +240,8 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
       "--inDelim", "\t",
       "--itemIDPosition", "4",
       "--rowIDPosition", "1",
-      "--filterPosition", "2"))
+      "--filterPosition", "2",
+      "--dontAddMahoutJars"))
 
     beforeEach // restart the test context to read the output of the driver
     val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toSet[String]
@@ -248,7 +251,7 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
 
   }
 
-  ignore ("ItemSimilarityDriver legacy supported file format"){
+  test ("ItemSimilarityDriver legacy supported file format"){
 
     val InDir = TmpDir + "in-dir/"
     val InFilename = "in-file.tsv"
@@ -286,7 +289,8 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
     ItemSimilarityDriver.main(Array(
       "--input", InPath,
       "--output", OutPath,
-      "--master", masterUrl))
+      "--master", masterUrl,
+      "--dontAddMahoutJars"))
 
     beforeEach // restart the test context to read the output of the driver
     val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toSet[String]
@@ -294,7 +298,7 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
 
   }
 
-  ignore("ItemSimilarityDriver recursive file discovery using filename patterns"){
+  test("ItemSimilarityDriver recursive file discovery using filename patterns"){
     //directory structure using the following
     // tmp/data/m1.tsv
     // tmp/data/more-data/another-dir/m2.tsv
@@ -362,7 +366,8 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
       "--rowIDPosition", "0",
       "--filterPosition", "1",
       "--filenamePattern", "m..tsv",
-      "--recursive"))
+      "--recursive",
+      "--dontAddMahoutJars"))
 
     beforeEach()// restart the test context to read the output of the driver
     val indicatorLines = mahoutCtx.textFile(OutPath + "/indicator-matrix/").collect.toSet[String]

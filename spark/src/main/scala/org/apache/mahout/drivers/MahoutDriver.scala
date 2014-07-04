@@ -65,9 +65,9 @@ abstract class MahoutDriver {
     mc = mahoutSparkContext(masterUrl, appName, customJars, sparkConf)
   }
 
-  protected def start(masterUrl: String, appName: String) : Unit = {
+  protected def start(masterUrl: String, appName: String, dontAddMahoutJars: Boolean = false) : Unit = {
     val customJars = Traversable.empty[String]
-    mc = mahoutSparkContext(masterUrl, appName, customJars, sparkConf)
+    mc = mahoutSparkContext(masterUrl, appName, customJars, sparkConf, !dontAddMahoutJars)
   }
 
   /** Override (optionally) for special cleanup */

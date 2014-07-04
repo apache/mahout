@@ -167,6 +167,11 @@ object ItemSimilarityDriver extends MahoutDriver {
 
       note("\nDefault delimiters will produce output of the form: \"itemID1<tab>itemID2:value2,itemID10:value10...\"")
 
+      //Jar inclusion, this option can be set when executing the driver from compiled code
+      opt[Unit]("dontAddMahoutJars") action { (_, options) =>
+        options.copy(dontAddMahoutJars = true) //set the value MahoutDriver so the context will be created correctly
+      }//Hidden option, used when executing tests or calling from other code where classes are all loaded explicitly
+
       //Driver notes--driver specific
       note("\nNote: Only the Log Likelihood Ratio (LLR) is supported as a similarity measure.\n")
 
@@ -196,14 +201,14 @@ object ItemSimilarityDriver extends MahoutDriver {
   }
 
   override def start(masterUrl: String = options.master,
-      appName: String = options.appName):
+      appName: String = options.appName, dontAddMahoutJars: Boolean = options.dontAddMahoutJars):
     Unit = {
 
     sparkConf.set("spark.kryo.referenceTracking", "false")
       .set("spark.kryoserializer.buffer.mb", "200")
       .set("spark.executor.memory", options.sparkExecutorMem)
 
-    super.start(masterUrl, appName)
+    super.start(masterUrl, appName, dontAddMahoutJars)
 
     val readSchema1 = new Schema("delim" -> options.inDelim, "filter" -> options.filter1,
         "rowIDPosition" -> options.rowIDPosition,
@@ -309,6 +314,7 @@ object ItemSimilarityDriver extends MahoutDriver {
       inDelim: String = "[,\t ]",
       rowKeyDelim: String = "\t",
       columnIdStrengthDelim: String = ":",
-      tupleDelim: String = ",")
+      tupleDelim: String = ",",
+      dontAddMahoutJars: Boolean = false)
 
 }
