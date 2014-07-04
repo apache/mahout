@@ -168,7 +168,7 @@ object ItemSimilarityDriver extends MahoutDriver {
       note("\nDefault delimiters will produce output of the form: \"itemID1<tab>itemID2:value2,itemID10:value10...\"")
 
       //Jar inclusion, this option can be set when executing the driver from compiled code
-      opt[Unit]("dontAddMahoutJars") action { (_, options) =>
+      opt[Unit]("dontAddMahoutJars") hidden() action { (_, options) =>
         options.copy(dontAddMahoutJars = true) //set the value MahoutDriver so the context will be created correctly
       }//Hidden option, used when executing tests or calling from other code where classes are all loaded explicitly
 
