@@ -131,7 +131,8 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
       "--inDelim", ",",
       "--itemIDPosition", "2",
       "--rowIDPosition", "0",
-      "--filterPosition", "1"))
+      "--filterPosition", "1",
+      "--dontAddMahoutJars"))
 
     beforeEach // restart the test context to read the output of the driver
     val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toSet[String]
@@ -185,7 +186,8 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
       "--inDelim", "[,\t]",
       "--itemIDPosition", "2",
       "--rowIDPosition", "0",
-      "--filterPosition", "1"))
+      "--filterPosition", "1",
+      "--dontAddMahoutJars"))
 
     beforeEach // restart the test context to read the output of the driver
     val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toSet[String]
@@ -238,7 +240,8 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
       "--inDelim", "\t",
       "--itemIDPosition", "4",
       "--rowIDPosition", "1",
-      "--filterPosition", "2"))
+      "--filterPosition", "2",
+      "--dontAddMahoutJars"))
 
     beforeEach // restart the test context to read the output of the driver
     val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toSet[String]
@@ -286,7 +289,8 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
     ItemSimilarityDriver.main(Array(
       "--input", InPath,
       "--output", OutPath,
-      "--master", masterUrl))
+      "--master", masterUrl,
+      "--dontAddMahoutJars"))
 
     beforeEach // restart the test context to read the output of the driver
     val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toSet[String]
@@ -362,7 +366,8 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
       "--rowIDPosition", "0",
       "--filterPosition", "1",
       "--filenamePattern", "m..tsv",
-      "--recursive"))
+      "--recursive",
+      "--dontAddMahoutJars"))
 
     beforeEach()// restart the test context to read the output of the driver
     val indicatorLines = mahoutCtx.textFile(OutPath + "/indicator-matrix/").collect.toSet[String]
