@@ -88,7 +88,7 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
     ))
   */
 
-  test ("ItemSimilarityDriver, non-full-spec CSV"){
+  ignore ("ItemSimilarityDriver, non-full-spec CSV"){
 
     val InFile = TmpDir + "in-file.csv/" //using part files, not singel file
     val OutPath = TmpDir + "indicator-matrices/"
@@ -142,7 +142,7 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
 
 
 
-  test ("ItemSimilarityDriver TSV "){
+  ignore ("ItemSimilarityDriver TSV "){
 
     val InFile = TmpDir + "in-file.tsv/"
     val OutPath = TmpDir + "indicator-matrices/"
@@ -195,7 +195,7 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
 
   }
 
-  test ("ItemSimilarityDriver log-ish files"){
+  ignore ("ItemSimilarityDriver log-ish files"){
 
     val InFile = TmpDir + "in-file.log/"
     val OutPath = TmpDir + "indicator-matrices/"
@@ -248,7 +248,7 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
 
   }
 
-  test ("ItemSimilarityDriver legacy supported file format"){
+  ignore ("ItemSimilarityDriver legacy supported file format"){
 
     val InDir = TmpDir + "in-dir/"
     val InFilename = "in-file.tsv"
@@ -294,7 +294,7 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
 
   }
 
-  test("ItemSimilarityDriver recursive file discovery using filename patterns"){
+  ignore("ItemSimilarityDriver recursive file discovery using filename patterns"){
     //directory structure using the following
     // tmp/data/m1.tsv
     // tmp/data/more-data/another-dir/m2.tsv
