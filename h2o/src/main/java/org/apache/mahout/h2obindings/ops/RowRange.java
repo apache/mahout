@@ -21,10 +21,14 @@ import scala.collection.immutable.Range;
 
 import water.*;
 import water.fvec.*;
+import scala.Tuple2;
 
 public class RowRange {
   /* Filter operation */
-  public static Frame RowRange(Frame A, Range r) {
+  public static Tuple2<Frame,Vec> RowRange(Tuple2<Frame,Vec> TA, Range r) {
+    Frame A = TA._1();
+    Vec VA = TA._2();
+
     class MRTaskFilter extends MRTask<MRTaskFilter> {
       Range _r;
       MRTaskFilter(Range r) {
@@ -43,6 +47,29 @@ public class RowRange {
         }
       }
     }
-    return new MRTaskFilter(r).doAll(A.numCols(), A).outputFrame(A.names(), A.domains());
+    Frame Arr = new MRTaskFilter(r).doAll(A.numCols(), A).outputFrame(A.names(), A.domains());
+    Vec Vrr = null;
+    if (VA != null) {
+      class MRTaskStrFilter extends MRTask<MRTaskStrFilter> {
+        Range _r;
+        MRTaskStrFilter(Range r) {
+          _r = r;
+        }
+        public void map(Chunk chk, NewChunk nc) {
+          if (chk._start > _r.end() || (chk._start + chk._len) < _r.start())
+            return;
+
+          for (int r = 0; r < chk._len; r++) {
+            if (!_r.contains (chk._start + r))
+              continue;
+
+            nc.addStr(chk.atStr0(r));
+          }
+        }
+      }
+      Vrr = new MRTaskStrFilter(r).doAll(1, VA).outputFrame(null,null).vecs()[0];
+    }
+
+    return new Tuple2<Frame,Vec>(Arr,Vrr);
   }
 }

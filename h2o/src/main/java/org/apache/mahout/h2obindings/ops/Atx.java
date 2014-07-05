@@ -26,10 +26,12 @@ import org.apache.mahout.h2obindings.drm.H2OBCast;
 
 import water.*;
 import water.fvec.*;
+import scala.Tuple2;
 
 public class Atx {
   /* Calculate A'x (where x is an in-core Vector) */
-  public static Frame Atx(Frame A, Vector x) {
+  public static Tuple2<Frame,Vec> Atx(Tuple2<Frame,Vec> TA, Vector x) {
+    Frame A = TA._1();
     final H2OBCast<Vector> bx = new H2OBCast<Vector>(x);
     class MRTaskAtx extends MRTask<MRTaskAtx> {
       double _atx[];

@@ -23,14 +23,21 @@ import org.apache.mahout.h2obindings.H2OBlockMatrix;
 import water.*;
 import water.fvec.*;
 import java.io.Serializable;
+import java.util.Arrays;
 
 import scala.reflect.ClassTag;
+import scala.Tuple2;
 
 public class MapBlock {
-  public static <K,R> Frame exec(Frame A, int ncol, Object bmf, final ClassTag<K> k, final ClassTag<R> r) {
+  public static <K,R> Tuple2<Frame,Vec> exec(Tuple2<Frame,Vec> AT, int ncol, Object bmf, final boolean is_r_str,
+                                             final ClassTag<K> k, final ClassTag<R> r) {
+    Frame A = AT._1();
+    Vec VA = AT._2();
+
     class MRTaskBMF extends MRTask<MRTaskBMF> {
       Serializable _bmf;
-      MRTaskBMF(Object bmf) {
+      Vec _labels;
+      MRTaskBMF(Object bmf, Vec labels) {
         /* BlockMapFun does not implement Serializable,
            but Scala closures are _always_ Serializable.
 
@@ -40,6 +47,7 @@ public class MapBlock {
            closure functions with Serializable.
          */
         _bmf = (Serializable)bmf;
+        _labels = labels;
       }
 
       private Matrix blockify (Chunk chks[]) {
@@ -56,10 +64,20 @@ public class MapBlock {
       }
 
       public void map(Chunk chks[], NewChunk ncs[]) {
-        deblockify(MapBlockHelper.exec(_bmf, blockify(chks), chks[0]._start, k, r), ncs);
+        long start = chks[0]._start;
+        NewChunk nclabel = is_r_str ? ncs[ncs.length-1] : null;
+        deblockify(MapBlockHelper.exec(_bmf, blockify(chks), start, _labels, nclabel, k, r), ncs);
         // assert chks[i]._len == ncs[j]._len
       }
     }
-    return new MRTaskBMF(bmf).doAll(ncol, A).outputFrame(A.names(), A.domains());
+
+    int ncol_res = ncol + (is_r_str ? 1 : 0);
+    Frame fmap = new MRTaskBMF(bmf, VA).doAll(ncol_res, A).outputFrame(null, null);
+    Vec vmap = null;
+    if (is_r_str) {
+      vmap = fmap.vecs()[ncol];
+      fmap = new Frame(Arrays.copyOfRange(fmap.vecs(), 0, ncol));
+    }
+    return new Tuple2<Frame,Vec>(fmap,vmap);
   }
 }

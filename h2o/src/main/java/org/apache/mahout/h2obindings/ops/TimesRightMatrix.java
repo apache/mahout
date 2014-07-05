@@ -25,63 +25,57 @@ import org.apache.mahout.h2obindings.drm.H2OBCast;
 
 import water.*;
 import water.fvec.*;
+import scala.Tuple2;
 
 public class TimesRightMatrix {
 
   private static Frame AinCoreB_diagonal(final Frame A, Vector d) {
     final H2OBCast<Vector> bd = new H2OBCast<Vector>(d);
-    /* XXX: create AinCore like A */
-    Frame AinCoreB = H2OHelper.empty_frame (A.numRows(), d.size(), 0);
-
 
     class MRTaskAinCoreB extends MRTask<MRTaskAinCoreB> {
-      public void map(Chunk chks[]) {
+      public void map(Chunk chks[], NewChunk ncs[]) {
         Vector D = bd.value();
-        long start = chks[0]._start;
         for (int c = 0; c < ncs.length; c++) {
           for (int r = 0; r < chks[0]._len; r++) {
-            double v = (A.vecs()[c].at(start+r) * D.getQuick(c));
-            chks[c].set0(r, v);
+            double v = (chks[c].at0(r) * D.getQuick(c));
+            ncs[c].addNum(v);
           }
         }
       }
     }
-    new MRTaskAinCoreB().doAll(AinCoreB);
-    return AinCoreB;
+    return new MRTaskAinCoreB().doAll(d.size(), A).outputFrame(null,null);
   }
 
   private static Frame AinCoreB_common(final Frame A, Matrix b) {
     final H2OBCast<Matrix> bb = new H2OBCast<Matrix>(b);
-    /* XXX: create AinCore like A */
-    Frame AinCoreB = H2OHelper.empty_frame (A.numRows(), b.columnSize(), 0);
 
     class MRTaskAinCoreB extends MRTask<MRTaskAinCoreB> {
-      public void map(Chunk chks[]) {
+      public void map(Chunk chks[], NewChunk ncs[]) {
         Matrix B = bb.value();
-        long start = chks[0]._start;
         for (int c = 0; c < ncs.length; c++) {
           for (int r = 0; r < chks[0]._len; r++) {
             double v = 0;
             for (int i = 0; i < chks.length; i++) {
-              v += (A.vecs()[i].at(start+r) * B.getQuick(i, c));
+              v += (chks[i].at0(r) * B.getQuick(i, c));
             }
-            chks[c].set0(r, v);
+            ncs[c].addNum(v);
           }
         }
       }
     }
-    new MRTaskAinCoreB().doAll(AinCoreB);
-    return AinCoreB;
+    return new MRTaskAinCoreB().doAll(b.columnSize(), A).outputFrame(null,null);
   }
 
   /* Multiple with in-core Matrix */
-  public static Frame TimesRightMatrix(Frame A, Matrix B) {
+  public static Tuple2<Frame,Vec> TimesRightMatrix(Tuple2<Frame,Vec> TA, Matrix B) {
+    Frame A = TA._1();
+    Vec VA = TA._2();
     Frame AinCoreB;
     if (B instanceof DiagonalMatrix)
       AinCoreB = AinCoreB_diagonal(A, B.viewDiagonal());
     else
       AinCoreB = AinCoreB_common(A, B);
 
-    return AinCoreB;
+    return new Tuple2<Frame,Vec>(AinCoreB, VA);
   }
 }

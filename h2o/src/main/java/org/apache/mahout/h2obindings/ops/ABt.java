@@ -21,28 +21,29 @@ import org.apache.mahout.h2obindings.H2OHelper;
 
 import water.*;
 import water.fvec.*;
+import scala.Tuple2;
 
 public class ABt {
   /* Calculate AB' */
-  public static Frame ABt(final Frame A, final Frame B) {
-    /* XXX - make ABt similar to A */
-    Frame ABt = H2OHelper.empty_frame (A.numRows(), (int)B.numRows(), 0);
+  public static Tuple2<Frame,Vec> ABt(Tuple2<Frame,Vec> TA, Tuple2<Frame,Vec> TB) {
+    Frame A = TA._1();
+    Vec VA = TA._2();
+    final Frame B = TB._1();
 
     class MRTaskABt extends MRTask<MRTaskABt> {
-      public void map(Chunk chks[]) {
-        long start = chks[0]._start;
-        for (int c = 0; c < chks.length; c++) {
+      public void map(Chunk chks[], NewChunk ncs[]) {
+        for (int c = 0; c < ncs.length; c++) {
           for (int r = 0; r < chks[0]._len; r++) {
             double v = 0;
-            for (int i = 0; i < A.vecs().length; i++) {
-              v += (A.vecs()[i].at(start+r) * B.vecs()[i].at(c));
+            for (int i = 0; i < chks.length; i++) {
+              v += (chks[i].at0(r) * B.vecs()[i].at(c));
             }
-            chks[c].set0(r, v);
+            ncs[c].addNum(v);
           }
         }
       }
     }
-    new MRTaskABt().doAll(ABt);
-    return ABt;
+    Frame ABt = new MRTaskABt().doAll((int)B.numRows(),A).outputFrame(null,null);
+    return new Tuple2<Frame,Vec>(ABt, VA);
   }
 }

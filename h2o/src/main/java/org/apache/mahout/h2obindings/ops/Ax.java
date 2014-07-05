@@ -23,10 +23,13 @@ import org.apache.mahout.h2obindings.drm.H2OBCast;
 
 import water.*;
 import water.fvec.*;
+import scala.Tuple2;
 
 public class Ax {
   /* Calculate Ax (where x is an in-core Vector) */
-  public static Frame Ax(Frame A, Vector x) {
+  public static Tuple2<Frame,Vec> Ax(Tuple2<Frame,Vec> TA, Vector x) {
+    Frame A = TA._1();
+    Vec VA = TA._2();
     final H2OBCast<Vector> bx = new H2OBCast<Vector>(x);
     class MRTaskAx extends MRTask<MRTaskAx> {
       public void map(Chunk chks[], NewChunk nc) {
@@ -40,6 +43,7 @@ public class Ax {
         }
       }
     }
-    return new MRTaskAx().doAll(1, A).outputFrame(A.names(), A.domains());
+    Frame Ax = new MRTaskAx().doAll(1, A).outputFrame(A.names(), A.domains());
+    return new Tuple2<Frame,Vec>(Ax, VA);
   }
 }

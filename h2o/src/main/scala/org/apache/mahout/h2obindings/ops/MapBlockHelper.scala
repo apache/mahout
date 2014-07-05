@@ -21,8 +21,10 @@ import org.apache.mahout.math.Matrix
 import org.apache.mahout.math.drm.BlockMapFunc
 import scala.reflect.ClassTag
 
+import water.fvec.{Vec,NewChunk}
+
 object MapBlockHelper {
-  def exec[K: ClassTag, R: ClassTag](bmf: Object, in: Matrix, startlong: Long): Matrix = {
+  def exec[K: ClassTag, R: ClassTag](bmf: Object, in: Matrix, startlong: Long, labels: Vec, nclabel: NewChunk): Matrix = {
     val i = implicitly[ClassTag[Int]]
     val l = implicitly[ClassTag[Long]]
     val s = implicitly[ClassTag[String]]
@@ -31,11 +33,24 @@ object MapBlockHelper {
       case `i` => val startint: Int = startlong.asInstanceOf[Int]
         startint until (startint + in.rowSize) toArray
       case `l` => startlong until (startlong + in.rowSize) toArray
-      case `s` => new Array[String](in.rowSize)
+      case `s` => {
+        val arr = new Array[String](in.rowSize)
+        for (i <- 0 to in.rowSize) {
+          arr(i) = labels.atStr(i+startlong)
+        }
+        arr
+      }
     }
 
     val _bmf = bmf.asInstanceOf[BlockMapFunc[K,R]]
     val out = _bmf((inarray.asInstanceOf[Array[K]], in))
+
+    implicitly[ClassTag[R]] match {
+      case `s` => for (str <- out._1) {
+        nclabel.addStr(str.asInstanceOf[String])
+      }
+      case _ => Unit
+    }
     out._2
   }
 }

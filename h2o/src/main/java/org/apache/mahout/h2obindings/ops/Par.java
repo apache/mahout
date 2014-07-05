@@ -19,10 +19,11 @@ package org.apache.mahout.h2obindings.ops;
 
 import water.*;
 import water.fvec.*;
+import scala.Tuple2;
 
 public class Par {
-  public static Frame exec(Frame A, int min, int exact) {
+  public static Tuple2<Frame,Vec> exec(Tuple2<Frame,Vec> TA, int min, int exact) {
     /* XXX: re-org Frame */
-    return A;
+    return TA;
   }
 }

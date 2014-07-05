@@ -21,10 +21,14 @@ import org.apache.mahout.h2obindings.H2OHelper;
 
 import water.*;
 import water.fvec.*;
+import scala.Tuple2;
 
 public class AewScalar {
   /* Element-wise DRM-DRM operations */
-  public static Frame AewScalar(final Frame A, final double s, final String op) {
+  public static Tuple2<Frame,Vec> AewScalar(final Tuple2<Frame,Vec> TA, final double s, final String op) {
+    Frame A = TA._1();
+    Vec VA = TA._2();
+
     class MRTaskAewScalar extends MRTask<MRTaskAewScalar> {
       private double opfn (String op, double a, double b) {
         if (a == 0.0 && b == 0.0)
@@ -48,6 +52,7 @@ public class AewScalar {
         }
       }
     }
-    return new MRTaskAewScalar().doAll(A.numCols(), A).outputFrame(A.names(), A.domains());
+    Frame AewScalar = new MRTaskAewScalar().doAll(A.numCols(), A).outputFrame(A.names(), A.domains());
+    return new Tuple2<Frame,Vec>(AewScalar, VA);
   }
 }

@@ -14,11 +14,14 @@ import scala.reflect._
 /** H2O-specific optimizer-checkpointed DRM. */
 class CheckpointedDrmH2O[K: ClassTag](
   val frame: Frame,
+  val labels: Vec,
   protected[mahout] val context: DistributedContext
 ) extends CheckpointedDrm[K] {
 
-  /* XXX: Row index not supported. Numerical index generated on the fly (for mapBlock etc.) */
-  def collect: Matrix = H2OHelper.matrix_from_frame(frame)
+  def this(frame: Frame, context: DistributedContext) =
+    this(frame, null, context)
+
+  def collect: Matrix = H2OHelper.matrix_from_frame(frame, labels)
   /* XXX: call frame.remove */
   def uncache(): Unit = return
   /* XXX: H2O does not support seqfile format yet */
@@ -31,5 +34,5 @@ class CheckpointedDrmH2O[K: ClassTag](
 
   def nrow: Long = frame.numRows
 
-  protected[mahout] def partitioningTag: Long = frame.vecs()(0).group.hashCode
+  protected[mahout] def partitioningTag: Long = frame.anyVec.group.hashCode
 }

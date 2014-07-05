@@ -21,11 +21,16 @@ import org.apache.mahout.h2obindings.H2OHelper;
 
 import water.*;
 import water.fvec.*;
+import scala.Tuple2;
 
 public class AtB {
   /* Calculate A'B */
-  public static Frame AtB(final Frame A, final Frame B) {
+  public static Tuple2<Frame,Vec> AtB(Tuple2<Frame,Vec> TA, Tuple2<Frame,Vec> TB) {
+    final Frame A = TA._1();
+    final Frame B = TB._1();
+
     Frame AtB = H2OHelper.empty_frame (A.numCols(), B.numCols(), 0);
+
     class MRTaskAtB extends MRTask<MRTaskAtB> {
       public void map(Chunk chks[]) {
         long start = chks[0]._start;
@@ -40,7 +45,8 @@ public class AtB {
         }
       }
     }
+
     new MRTaskAtB().doAll(AtB);
-    return AtB;
+    return new Tuple2<Frame,Vec>(AtB,null);
   }
 }

@@ -56,18 +56,26 @@ object H2OEngine extends DistributedEngine {
   def drmParallelizeEmptyLong(nrow: Long, ncol: Int, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[Long] =
     new CheckpointedDrmH2O[Long] (H2OHelper.empty_frame (nrow, ncol, numPartitions), dc)
 
-  def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[Int] =
-    new CheckpointedDrmH2O[Int] (H2OHelper.frame_from_matrix (m, numPartitions), dc)
+  def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[Int] = {
+    val (frame, labels) = H2OHelper.frame_from_matrix (m, numPartitions)
+    // assert labels == null
+    new CheckpointedDrmH2O[Int] (frame, labels, dc)
+  }
 
-  def drmParallelizeWithRowLabels(m: Matrix, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[String] =
-    new CheckpointedDrmH2O[String] (H2OHelper.frame_from_matrix (m, numPartitions), dc)
+  def drmParallelizeWithRowLabels(m: Matrix, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[String] = {
+    val (frame, labels) = H2OHelper.frame_from_matrix (m, numPartitions)
+    // assert labels != null
+    new CheckpointedDrmH2O[String] (frame, labels, dc)
+  }
 
-  def toPhysical[K:ClassTag](plan: DrmLike[K], ch: CacheHint.CacheHint): CheckpointedDrm[K] =
-    new CheckpointedDrmH2O[K] (tr2phys (plan), plan.context)
+  def toPhysical[K:ClassTag](plan: DrmLike[K], ch: CacheHint.CacheHint): CheckpointedDrm[K] = {
+    val (frame, labels) = tr2phys (plan)
+    new CheckpointedDrmH2O[K] (frame, labels, plan.context)
+  }
 
   // H2O specific
 
-  private def tr2phys[K: ClassTag](oper: DrmLike[K]): Frame = {
+  private def tr2phys[K: ClassTag](oper: DrmLike[K]): (Frame, Vec) = {
     oper match {
       case OpAtAnyKey(_) =>
         throw new IllegalArgumentException("\"A\" must be Int-keyed in this A.t expression.")
@@ -82,9 +90,10 @@ object H2OEngine extends DistributedEngine {
       case op@OpRowRange(a, r) => RowRange.RowRange(tr2phys(a)(op.classTagA), r)
       case op@OpTimesRightMatrix(a, m) => TimesRightMatrix.TimesRightMatrix(tr2phys(a)(op.classTagA), m)
       // Custom operators, we just execute them
-      case blockOp: OpMapBlock[K, _] => MapBlock.exec(tr2phys(blockOp.A)(blockOp.classTagA), blockOp.ncol, blockOp.bmf, blockOp.classTagA, blockOp.classTagK)
+      case blockOp: OpMapBlock[K, _] => MapBlock.exec(tr2phys(blockOp.A)(blockOp.classTagA), blockOp.ncol, blockOp.bmf,
+        (blockOp.classTagK == implicitly[ClassTag[String]]), blockOp.classTagA, blockOp.classTagK)
       case op@OpPar(a, m, e) => Par.exec(tr2phys(a)(op.classTagA), m, e)
-      case cp: CheckpointedDrm[K] => cp.frame
+      case cp: CheckpointedDrm[K] => (cp.frame, cp.labels)
       case _ => throw new IllegalArgumentException("Internal:Optimizer has no exec policy for operator %s."
           .format(oper))
     }

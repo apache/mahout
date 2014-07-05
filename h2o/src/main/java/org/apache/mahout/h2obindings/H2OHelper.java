@@ -25,6 +25,11 @@ import water.util.FrameUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Arrays;
+
+import scala.Tuple2;
 
 public class H2OHelper {
 
@@ -59,7 +64,7 @@ public class H2OHelper {
     Dense Matrix depending on number of missing elements
     in Frame.
   */
-  public static Matrix matrix_from_frame (Frame frame) {
+  public static Matrix matrix_from_frame (Frame frame, Vec labels) {
     Matrix m;
 
     if (is_sparse (frame))
@@ -75,6 +80,14 @@ public class H2OHelper {
           m.setQuick(r, c, d);
       }
       c++;
+    }
+
+    if (labels != null) {
+      HashMap<String,Integer> map = new HashMap<String,Integer>();
+      for (long i = 0; i < labels.length(); i++) {
+        map.put(labels.atStr(i), (int)i);
+      }
+      m.setRowLabelBindings(map);
     }
     return m;
   }
@@ -174,6 +187,18 @@ public class H2OHelper {
     return FrameUtils.parseFrame(null, new File(path));
   }
 
+  private static Map<Integer,String> reverse_map(Map<String,Integer> map) {
+    if (map == null)
+      return null;
+
+    Map<Integer,String> rmap = new HashMap<Integer,String>();
+
+    for(Map.Entry<String,Integer> entry : map.entrySet()) {
+      rmap.put(entry.getValue(),entry.getKey());
+    }
+
+    return rmap;
+  }
 
   private static int chunk_size (long nrow, int ncol, int parts_hint) {
     int chunk_sz;
@@ -212,18 +237,21 @@ public class H2OHelper {
      - Create @cols number of Vec's.
      - Load data into Vecs by routing them through NewChunks
   */
-  public static Frame frame_from_matrix (Matrix m, int parts_hint) {
+  public static Tuple2<Frame,Vec> frame_from_matrix (Matrix m, int parts_hint) {
+    Map<String,Integer> map = m.getRowLabelBindings();
+    Map<Integer,String> rmap = reverse_map(map);
     int cols = m.columnSize();
+    int nvecs = cols + (map != null ? 1 : 0);
     Vec.VectorGroup vg = new Vec.VectorGroup();
-    Key keys[] = vg.addVecs(cols);
-    AppendableVec avs[] = new AppendableVec[cols];
-    Vec vecs[] = new Vec[cols];
-    NewChunk ncs[] = new NewChunk[cols];
+    Key keys[] = vg.addVecs(nvecs);
+    AppendableVec avs[] = new AppendableVec[nvecs];
+    Vec vecs[] = new Vec[nvecs];
+    NewChunk ncs[] = new NewChunk[nvecs];
     int chunk_sz = chunk_size (m.rowSize(), m.columnSize(), parts_hint);
     Futures fs = new Futures();
     int cidx = 0;
 
-    for (int c = 0; c < cols; c++)
+    for (int c = 0; c < nvecs; c++)
       avs[c] = new AppendableVec(keys[c]);
 
     long r = 0;
@@ -231,8 +259,10 @@ public class H2OHelper {
       cidx = next_chunks (ncs, cidx, r, chunk_sz, avs, fs);
       /* Detect entire sparse rows */
       while (r < row.index()) {
-        for (NewChunk nc : ncs)
-          nc.addNum(0.0);
+        for (int i = 0; i < cols; i++)
+          ncs[i].addNum(0.0);
+        if (nvecs != cols)
+          ncs[nvecs-1].addStr(null);
         r++;
         cidx = next_chunks (ncs, cidx, r, chunk_sz, avs, fs);
       }
@@ -243,16 +273,20 @@ public class H2OHelper {
           ncs[c++].addNum(0.0);
         ncs[c++].addNum(element.get());
       }
+      if (rmap != null)
+        ncs[nvecs-1].addStr(rmap.get(r));
       r++;
     }
 
-    for (int c = 0; c < cols; c++) {
+    for (int c = 0; c < nvecs; c++) {
       ncs[c].close(fs);
       vecs[c] = avs[c].close(fs);
     }
     fs.blockForPending();
 
-    return new Frame(vecs);
+    Frame fr = new Frame(Arrays.copyOfRange(vecs,0,cols));
+    Vec labels = (rmap != null) ? vecs[nvecs-1] : null;
+    return new Tuple2<Frame,Vec>(fr,labels);
   }
 
   public static Frame empty_frame (long nrow, int ncol, int parts_hint) {
