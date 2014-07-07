@@ -61,12 +61,16 @@ object ItemSimilarityDriver extends MahoutDriver {
         options.copy(input = x)
       } text ("Input path, may be a filename, directory name, or comma delimited list of HDFS supported URIs (required)")
 
+      opt[String]("input2") abbr ("i2")  action { (x, options) =>
+        options.copy(input2 = x)
+      } text ("Secondary input path for cross-similarity calculation, same restrictions as \"--input\" (optional). Default: empty. Note that the same input schema is applied to both \"--input\" and \"--input2\" files")
+
       opt[String]('o', "output") required() action { (x, options) =>
         if (x.endsWith("/")) // todo: check to see if HDFS allows MS-Windows backslashes locally?
           options.copy(output = x)
         else
           options.copy(output = x + "/")
-      } text ("Path for output, any local or HDFS supported URI (required).")
+      } text ("Path for output, any local or HDFS supported URI (required)")
 
       //Algorithm control options--driver specific
       note("\nAlgorithm control options:")
@@ -113,7 +117,7 @@ object ItemSimilarityDriver extends MahoutDriver {
 
       opt[String]("filter2") abbr ("f2") action { (x, options) =>
         options.copy(filter2 = x)
-      } text ("String (or regex) whose presence indicates a datum for the secondary item set (optional). If not present no secondary dataset is collected.")
+      } text ("String (or regex) whose presence indicates a datum for the secondary item set (optional). If not present no secondary dataset is collected")
 
       opt[Int]("rowIDPosition") abbr ("rc") action { (x, options) =>
         options.copy(rowIDPosition = x)
@@ -238,6 +242,7 @@ object ItemSimilarityDriver extends MahoutDriver {
   private def readIndexedDatasets: Array[IndexedDataset] = {
 
     val inFiles = FileSysUtils(options.input, options.filenamePattern, options.recursive).uris
+    val inFiles2 = if (options.input2 == null || options.input2.isEmpty) "" else FileSysUtils(options.input2, options.filenamePattern, options.recursive).uris
 
     if (inFiles.isEmpty) {
       Array()
@@ -245,11 +250,19 @@ object ItemSimilarityDriver extends MahoutDriver {
 
       val selfSimilarityDataset = IndexedDataset(reader1.readFrom(inFiles))
 
-      if (options.filterPosition != -1 && options.filter2 != null) {
-        // todo: needs to support more than one cross-similarity indicator
-        val crossSimilarityDataset1 = IndexedDataset(reader2.readFrom(inFiles))
-        Array(selfSimilarityDataset, crossSimilarityDataset1)
+      if (!inFiles2.isEmpty) {
+
+        // get cross-cooccurrence interactions from separate files
+        Array(selfSimilarityDataset, IndexedDataset(reader2.readFrom(inFiles2)))
+
+      } else if (options.filterPosition != -1 && options.filter2 != null) {
+
+        // get cross-cooccurrences interactions by filtering a single set of files
+        Array(selfSimilarityDataset, IndexedDataset(reader2.readFrom(inFiles)))
+
       } else {
+
+        // only return self-similarity A'A
         Array(selfSimilarityDataset)
       }
 
@@ -301,6 +314,7 @@ object ItemSimilarityDriver extends MahoutDriver {
       randomSeed: Int = System.currentTimeMillis().toInt,
       recursive: Boolean = false,
       input: String = null,
+      input2: String = null,
       output: String = null,
       filenamePattern: String = "^part-.*",
       maxSimilaritiesPerItem: Int = 100,
