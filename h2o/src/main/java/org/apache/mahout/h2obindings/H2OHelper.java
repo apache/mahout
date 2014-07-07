@@ -200,21 +200,26 @@ public class H2OHelper {
     return rmap;
   }
 
-  private static int chunk_size (long nrow, int ncol, int parts_hint) {
+  private static int chunk_size (long nrow, int ncol, int min, int exact) {
     int chunk_sz;
+    int parts_hint = Math.max(min, exact);
 
     if (parts_hint < 1)
       /* XXX: calculate based on cloud size and # of cpu */
-      parts_hint = 1;
+      parts_hint = 4;
 
     chunk_sz = (int) (((nrow - 1) / parts_hint) + 1);
-    if (parts_hint < 2) {
-      if (chunk_sz < 1e3)
-        chunk_sz = (int)1e3;
-    }
+    if (exact > 0)
+      return chunk_sz;
 
     if (chunk_sz > 1e6)
       chunk_sz = (int)1e6;
+
+    if (min > 0)
+      return chunk_sz;
+
+    if (chunk_sz < 1e3)
+      chunk_sz = (int)1e3;
 
     return chunk_sz;
   }
@@ -237,7 +242,7 @@ public class H2OHelper {
      - Create @cols number of Vec's.
      - Load data into Vecs by routing them through NewChunks
   */
-  public static Tuple2<Frame,Vec> frame_from_matrix (Matrix m, int parts_hint) {
+  public static Tuple2<Frame,Vec> frame_from_matrix (Matrix m, int min_hint, int exact_hint) {
     Map<String,Integer> map = m.getRowLabelBindings();
     Map<Integer,String> rmap = reverse_map(map);
     int cols = m.columnSize();
@@ -247,7 +252,7 @@ public class H2OHelper {
     AppendableVec avs[] = new AppendableVec[nvecs];
     Vec vecs[] = new Vec[nvecs];
     NewChunk ncs[] = new NewChunk[nvecs];
-    int chunk_sz = chunk_size (m.rowSize(), m.columnSize(), parts_hint);
+    int chunk_sz = chunk_size (m.rowSize(), m.columnSize(), min_hint, exact_hint);
     Futures fs = new Futures();
     int cidx = 0;
 
@@ -289,8 +294,8 @@ public class H2OHelper {
     return new Tuple2<Frame,Vec>(fr,labels);
   }
 
-  public static Frame empty_frame (long nrow, int ncol, int parts_hint) {
-    int chunk_sz = chunk_size (nrow, ncol, parts_hint);
+  public static Frame empty_frame (long nrow, int ncol, int min_hint, int exact_hint) {
+    int chunk_sz = chunk_size (nrow, ncol, min_hint, exact_hint);
     int nchunks = (int) ((nrow - 1) / chunk_sz) + 1; /* Final number of Chunks per Vec */
     Futures fs = new Futures();
     Vec.VectorGroup vg = new Vec.VectorGroup();

@@ -51,19 +51,19 @@ object H2OEngine extends DistributedEngine {
     new CheckpointedDrmH2O (H2OHelper.frame_from_file (path), dc)
 
   def drmParallelizeEmpty(nrow: Int, ncol: Int, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[Int] =
-    new CheckpointedDrmH2O[Int] (H2OHelper.empty_frame (nrow, ncol, numPartitions), dc)
+    new CheckpointedDrmH2O[Int] (H2OHelper.empty_frame (nrow, ncol, numPartitions, -1), dc)
 
   def drmParallelizeEmptyLong(nrow: Long, ncol: Int, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[Long] =
-    new CheckpointedDrmH2O[Long] (H2OHelper.empty_frame (nrow, ncol, numPartitions), dc)
+    new CheckpointedDrmH2O[Long] (H2OHelper.empty_frame (nrow, ncol, numPartitions, -1), dc)
 
   def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[Int] = {
-    val (frame, labels) = H2OHelper.frame_from_matrix (m, numPartitions)
+    val (frame, labels) = H2OHelper.frame_from_matrix (m, numPartitions, -1)
     // assert labels == null
     new CheckpointedDrmH2O[Int] (frame, labels, dc)
   }
 
   def drmParallelizeWithRowLabels(m: Matrix, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[String] = {
-    val (frame, labels) = H2OHelper.frame_from_matrix (m, numPartitions)
+    val (frame, labels) = H2OHelper.frame_from_matrix (m, numPartitions, -1)
     // assert labels != null
     new CheckpointedDrmH2O[String] (frame, labels, dc)
   }

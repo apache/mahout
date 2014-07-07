@@ -27,7 +27,7 @@ public class At {
   /* Calculate A' (transpose) */
   public static Tuple2<Frame,Vec> At(Tuple2<Frame,Vec> T) {
     final Frame A = T._1();
-    Frame At = H2OHelper.empty_frame (A.numCols(), (int)A.numRows(), 0);
+    Frame At = H2OHelper.empty_frame (A.numCols(), (int)A.numRows(), -1, -1);
     class MRTaskAt extends MRTask<MRTaskAt> {
       public void map(Chunk chks[]) {
         long start = chks[0]._start;

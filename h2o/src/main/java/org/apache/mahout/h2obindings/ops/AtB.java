@@ -29,7 +29,7 @@ public class AtB {
     final Frame A = TA._1();
     final Frame B = TB._1();
 
-    Frame AtB = H2OHelper.empty_frame (A.numCols(), B.numCols(), 0);
+    Frame AtB = H2OHelper.empty_frame (A.numCols(), B.numCols(), -1, -1);
 
     class MRTaskAtB extends MRTask<MRTaskAtB> {
       public void map(Chunk chks[]) {

@@ -20,10 +20,43 @@ package org.apache.mahout.h2obindings.ops;
 import water.*;
 import water.fvec.*;
 import scala.Tuple2;
+import org.apache.mahout.h2obindings.H2OHelper;
 
 public class Par {
   public static Tuple2<Frame,Vec> exec(Tuple2<Frame,Vec> TA, int min, int exact) {
-    /* XXX: re-org Frame */
-    return TA;
+    final Frame frin = TA._1();
+    final Vec vin = TA._2();
+    Frame frout = H2OHelper.empty_frame (frin.numRows(), frin.numCols(), min, exact);
+    Vec vout = null;
+
+    class MRParVecTask extends MRTask<MRParVecTask> {
+      public void map(Chunk chks[], NewChunk nc) {
+        Vec vins[] = frin.vecs();
+        for (int r = 0; r < chks[0]._len; r++) {
+          for (int c = 0; c < chks.length; c++) {
+            chks[c].set0(r, vins[c].at(chks[0]._start + r));
+          }
+          nc.addStr(vin.atStr(chks[0]._start + r));
+        }
+      }
+    }
+
+    class MRParTask extends MRTask<MRParTask> {
+      public void map(Chunk chks[]) {
+        Vec vins[] = frin.vecs();
+        for (int r = 0; r < chks[0]._len; r++) {
+          for (int c = 0; c < chks.length; c++) {
+            chks[c].set0(r, vins[c].at(chks[0]._start + r));
+          }
+        }
+      }
+    }
+
+    if (vout != null) {
+      vout = new MRParVecTask().doAll(1, frout).outputFrame(null, null).anyVec();
+    } else {
+      new MRParTask().doAll(frout);
+    }
+    return new Tuple2<Frame,Vec> (frout, vout);
   }
 }

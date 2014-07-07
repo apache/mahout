@@ -54,6 +54,6 @@ public class Atx {
     Vector v = new DenseVector(new MRTaskAtx().doAll(A)._atx);
     Matrix m = new DenseMatrix(A.numCols(), 1);
     m.assignColumn(0, v);
-    return H2OHelper.frame_from_matrix(m, 0);
+    return H2OHelper.frame_from_matrix(m, -1, -1);
   }
 }
