@@ -86,6 +86,8 @@ object H2OEngine extends DistributedEngine {
       case op@OpAx(a, v) => Ax.Ax(tr2phys(a)(op.classTagA), v)
       case op@OpAtx(a, v) => Atx.Atx(tr2phys(a)(op.classTagA), v)
       case op@OpAewB(a, b, opId) => AewB.AewB(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB), opId)
+      // Non arithmetic
+      case op@OpCbind(a, b) => Cbind.Cbind(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
       case op@OpAewScalar(a, s, opId) => AewScalar.AewScalar(tr2phys(a)(op.classTagA), s, opId)
       case op@OpRowRange(a, r) => RowRange.RowRange(tr2phys(a)(op.classTagA), r)
       case op@OpTimesRightMatrix(a, m) => TimesRightMatrix.TimesRightMatrix(tr2phys(a)(op.classTagA), m)
