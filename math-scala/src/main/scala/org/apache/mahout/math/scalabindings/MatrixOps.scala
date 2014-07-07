@@ -19,7 +19,7 @@ package org.apache.mahout.math.scalabindings
 
 import org.apache.mahout.math.{Matrices, QRDecomposition, Vector, Matrix}
 import scala.collection.JavaConversions._
-import org.apache.mahout.math.function.{VectorFunction, DoubleFunction, Functions}
+import org.apache.mahout.math.function.{DoubleDoubleFunction, VectorFunction, DoubleFunction, Functions}
 import scala.math._
 
 class MatrixOps(val m: Matrix) {
@@ -43,9 +43,10 @@ class MatrixOps(val m: Matrix) {
 
   def -=(that: Double) = +=(-that)
 
-  def -=:(that: Double) = m.assign(new DoubleFunction {
-    def apply(x: Double): Double = that - x
-  })
+  def -=:(that: Double) = m.assign(Functions.minus(that))
+
+  /** A := B - A which is -(A - B) */
+  def -=:(that: Matrix) = m.assign(that, Functions.chain(Functions.NEGATE, Functions.MINUS))
 
   def +(that: Matrix) = cloned += that
 

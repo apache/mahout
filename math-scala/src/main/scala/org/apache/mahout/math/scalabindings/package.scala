@@ -130,7 +130,16 @@ package object scalabindings {
         case t: Product => t.productIterator.map(_.asInstanceOf[Number].doubleValue()).toArray
         case t: Vector => Array.tabulate(t.length)(t(_))
         case t: Array[Double] => t
-        case t: Iterable[Double] => t.toArray
+        case t: Iterable[_] =>
+          t.head match {
+            case ss: Double => t.asInstanceOf[Iterable[Double]].toArray
+            case vv: Vector =>
+              val m = new DenseMatrix(t.size, t.head.asInstanceOf[Vector].length)
+              t.asInstanceOf[Iterable[Vector]].view.zipWithIndex.foreach {
+                case (v, idx) => m(idx, ::) := v
+              }
+              return m
+          }
         case t: Array[Array[Double]] => if (rows.size == 1)
           return new DenseMatrix(t)
         else
@@ -138,7 +147,9 @@ package object scalabindings {
             "double[][] data parameter can be the only argument for dense()")
         case t:Array[Vector] =>
           val m = new DenseMatrix(t.size,t.head.length)
-          t.view.zipWithIndex.foreach({case(v,idx) => m(idx,::) := v})
+          t.view.zipWithIndex.foreach{
+            case(v,idx) => m(idx,::) := v
+          }
           return m
         case _ => throw new IllegalArgumentException("unsupported type in the inline Matrix initializer")
       }

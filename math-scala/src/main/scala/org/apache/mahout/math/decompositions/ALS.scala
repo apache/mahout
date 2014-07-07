@@ -29,7 +29,7 @@ import math._
 import org.apache.mahout.common.RandomUtils
 
 /** Simple ALS factorization algotithm. To solve, use train() method. */
-object ALS {
+private[math] object ALS {
 
   private val log = Logger.getLogger(ALS.getClass)
 
@@ -46,8 +46,13 @@ object ALS {
     def toTuple = (drmU, drmV, iterationsRMSE)
   }
 
+  /** Result class for in-core results */
+  class InCoreResult(val inCoreU: Matrix, inCoreV: Matrix, val iterationsRMSE: Iterable[Double]) {
+    def toTuple = (inCoreU, inCoreV, iterationsRMSE)
+  }
+
   /**
-   * Run ALS.
+   * Run Distributed ALS.
    * <P>
    *
    * Example:
@@ -69,7 +74,7 @@ object ALS {
    * @tparam K row key type of the input (100 is probably more than enough)
    * @return { @link org.apache.mahout.math.drm.decompositions.ALS.Result}
    */
-  def als[K: ClassTag](
+  def dals[K: ClassTag](
       drmInput: DrmLike[K],
       k: Int = 50,
       lambda: Double = 0.0,
@@ -79,7 +84,6 @@ object ALS {
 
     assert(convergenceThreshold < 1.0, "convergenceThreshold")
     assert(maxIterations >= 1, "maxIterations")
-
 
     val drmA = drmInput
     val drmAt = drmInput.t
@@ -101,7 +105,7 @@ object ALS {
     while (!stop && i < maxIterations) {
 
       // Alternate. This is really what ALS is.
-      if ( drmV != null) drmV.uncache()
+      if (drmV != null) drmV.uncache()
       drmV = (drmAt %*% drmU %*% solve(drmU.t %*% drmU -: diag(lambda, k))).checkpoint()
 
       drmU.uncache()

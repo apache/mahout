@@ -92,6 +92,12 @@ package object decompositions {
   def dspca[K: ClassTag](A: DrmLike[K], k: Int, p: Int = 15, q: Int = 0):
   (DrmLike[K], DrmLike[Int], Vector) = DSPCA.dspca(A, k, p, q)
 
+  /** Result for distributed ALS-type two-component factorization algorithms */
+  type FactorizationResult[K] = ALS.Result[K]
+
+  /** Result for distributed ALS-type two-component factorization algorithms, in-core matrices */
+  type FactorizationResultInCore = ALS.InCoreResult
+  
   /**
    * Run ALS.
    * <P>
@@ -121,7 +127,7 @@ package object decompositions {
       lambda: Double = 0.0,
       maxIterations: Int = 10,
       convergenceThreshold: Double = 0.10
-      ): ALS.Result[K] =
-    ALS.als(drmInput, k, lambda, maxIterations, convergenceThreshold)
+      ): FactorizationResult[K] =
+    ALS.dals(drmInput, k, lambda, maxIterations, convergenceThreshold)
 
 }

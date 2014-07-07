@@ -20,7 +20,7 @@ package org.apache.mahout.sparkbindings
 import scala.reflect.ClassTag
 
 /**
- * This package contains distributed algorithms that distributed matrix expression optimizer picks
+ * This validation contains distributed algorithms that distributed matrix expression optimizer picks
  * from.
  */
 package object blas {
