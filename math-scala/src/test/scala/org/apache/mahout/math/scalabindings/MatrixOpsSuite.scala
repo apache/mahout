@@ -21,10 +21,11 @@ import org.scalatest.{Matchers, FunSuite}
 import MatrixOps._
 import scala._
 import org.apache.mahout.test.MahoutSuite
+import org.apache.mahout.math.{RandomAccessSparseVector, SequentialAccessSparseVector, Matrices}
+import org.apache.mahout.common.RandomUtils
 
 
 class MatrixOpsSuite extends FunSuite with MahoutSuite {
-
 
   test("equivalence") {
     val a = dense((1, 2, 3), (3, 4, 5))
@@ -32,8 +33,8 @@ class MatrixOpsSuite extends FunSuite with MahoutSuite {
     val c = dense((1, 4, 3), (3, 4, 5))
     assert(a === b)
     assert(a !== c)
-
   }
+
   test("elementwise plus, minus") {
     val a = dense((1, 2, 3), (3, 4, 5))
     val b = dense((1, 1, 2), (2, 1, 1))
@@ -42,7 +43,6 @@ class MatrixOpsSuite extends FunSuite with MahoutSuite {
     assert(c(0, 0) == 2)
     assert(c(1, 2) == 6)
     println(c.toString)
-
   }
 
   test("matrix, vector slicing") {
@@ -132,7 +132,52 @@ class MatrixOpsSuite extends FunSuite with MahoutSuite {
     )
 
     a.numNonZeroElementsPerColumn() should equal(dvec(3,2,4))
+  }
+
+  test("Vector Assignment performance") {
+
+    val n = 1000
+    val k = (n * 0.1).toInt
+    val nIters = 10000
+
+    val rnd = RandomUtils.getRandom
+
+    val src = new SequentialAccessSparseVector(n)
+    for (i <- 0 until k) src(rnd.nextInt(n)) = rnd.nextDouble()
+
+    val times = (0 until 50).map { i =>
+      val ms = System.currentTimeMillis()
+      var j = 0
+      while (j < nIters) {
+        new SequentialAccessSparseVector(n) := src
+        j += 1
+      }
+      System.currentTimeMillis() - ms
+    }
+
+        .tail
+
+    val avgTime = times.sum.toDouble / times.size
+
+    printf("Average assignment seqSparse2seqSparse time: %.3f ms\n", avgTime)
+
+    val times2 = (0 until 50).map { i =>
+      val ms = System.currentTimeMillis()
+      var j = 0
+      while (j < nIters) {
+        new SequentialAccessSparseVector(n) := (new RandomAccessSparseVector(n) := src)
+        j += 1
+      }
+      System.currentTimeMillis() - ms
+    }
+
+        .tail
+
+    val avgTime2 = times2.sum.toDouble / times2.size
+
+    printf("Average assignment seqSparse2seqSparse via Random Access Sparse time: %.3f ms\n", avgTime2)
 
   }
+
 
 }

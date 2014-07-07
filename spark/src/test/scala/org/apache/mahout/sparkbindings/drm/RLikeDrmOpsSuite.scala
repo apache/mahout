@@ -94,12 +94,12 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
     B.colSums()
 
 
-    val x = drmBroadcast(dvec(0,0))
-    val x2 = drmBroadcast(dvec(0,0))
+    val x = drmBroadcast(dvec(0, 0))
+    val x2 = drmBroadcast(dvec(0, 0))
     // Distributed operation
     val C = (B.t %*% A.t).t.mapBlock() {
       case (keys, block) =>
-        for (row <- 0 until block.nrow) block(row,::) += x.value + x2
+        for (row <- 0 until block.nrow) block(row, ::) += x.value + x2
         keys -> block
     }
 
@@ -133,7 +133,7 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
     val B = drmParallelize(inCoreB, numPartitions = 2)
         // Re-key B into DrmLike[String] instead of [Int]
         .mapBlock()({
-      case (keys,block) => keys.map(_.toString) -> block
+      case (keys, block) => keys.map(_.toString) -> block
     })
 
     val C = A %*% B
@@ -146,7 +146,7 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
 
   test("C = At %*% B , join") {
 
-    val inCoreA = dense((1, 2), (3, 4),(-3, -5))
+    val inCoreA = dense((1, 2), (3, 4), (-3, -5))
     val inCoreB = dense((3, 5), (4, 6), (0, 1))
 
     val A = drmParallelize(inCoreA, numPartitions = 2)
@@ -154,7 +154,7 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
 
     val C = A.t %*% B
 
-    SparkEngine.optimizerRewrite(C) should equal (OpAtB[Int](A,B))
+    SparkEngine.optimizerRewrite(C) should equal(OpAtB[Int](A, B))
 
     val inCoreC = C.collect
     val inCoreControlC = inCoreA.t %*% inCoreB
@@ -165,7 +165,7 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
 
   test("C = At %*% B , join, String-keyed") {
 
-    val inCoreA = dense((1, 2), (3, 4),(-3, -5))
+    val inCoreA = dense((1, 2), (3, 4), (-3, -5))
     val inCoreB = dense((3, 5), (4, 6), (0, 1))
 
     val A = drmParallelize(inCoreA, numPartitions = 2)
@@ -180,7 +180,7 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
 
     val C = A.t %*% B
 
-    SparkEngine.optimizerRewrite(C) should equal (OpAtB[String](A,B))
+    SparkEngine.optimizerRewrite(C) should equal(OpAtB[String](A, B))
 
     val inCoreC = C.collect
     val inCoreControlC = inCoreA.t %*% inCoreB
@@ -191,18 +191,18 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
 
   test("C = At %*% B , zippable, String-keyed") {
 
-    val inCoreA = dense((1, 2), (3, 4),(-3, -5))
+    val inCoreA = dense((1, 2), (3, 4), (-3, -5))
 
     val A = drmParallelize(inCoreA, numPartitions = 2)
         .mapBlock()({
       case (keys, block) => keys.map(_.toString) -> block
     })
 
-    val B =  A + 1.0
+    val B = A + 1.0
 
     val C = A.t %*% B
 
-    SparkEngine.optimizerRewrite(C) should equal (OpAtB[String](A,B))
+    SparkEngine.optimizerRewrite(C) should equal(OpAtB[String](A, B))
 
     val inCoreC = C.collect
     val inCoreControlC = inCoreA.t %*% (inCoreA + 1.0)
@@ -319,12 +319,12 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
 
     val A = drmParallelize(inCoreA, numPartitions = 2)
 
-    printf("A.nrow=%d.\n",A.rdd.count())
+    printf("A.nrow=%d.\n", A.rdd.count())
 
     // Create B which would be identically partitioned to A. mapBlock() by default will do the trick.
     val B = A.mapBlock() {
       case (keys, block) =>
-        val bBlock = block.like() := ((r,c,v) => util.Random.nextDouble())
+        val bBlock = block.like() := ((r, c, v) => util.Random.nextDouble())
         keys -> bBlock
     }
         // Prevent repeated computation non-determinism
@@ -394,7 +394,7 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
     val inCoreB = dense((3, 5), (4, 6))
 
     val B = drmParallelize(inCoreB, numPartitions = 2)
-//    val A = (drmParallelize(inCoreA, numPartitions = 2) + B).checkpoint(CacheHint.MEMORY_ONLY_SER)
+    //    val A = (drmParallelize(inCoreA, numPartitions = 2) + B).checkpoint(CacheHint.MEMORY_ONLY_SER)
     val A = (drmParallelize(inCoreA, numPartitions = 2) + B).checkpoint(CacheHint.MEMORY_ONLY)
 
     val C = A + B
@@ -403,17 +403,17 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
     val inCoreD = (A + B).collect
 
     // Actual
-    val inCoreCControl = inCoreA +  inCoreB * 2.0
+    val inCoreCControl = inCoreA + inCoreB * 2.0
 
     (inCoreC - inCoreCControl).norm should be < 1E-10
     (inCoreD - inCoreCControl).norm should be < 1E-10
   }
 
-  test ("general side")  {
+  test("general side") {
     val sc = implicitly[DistributedContext]
-    val k1 = sc.parallelize(Seq(ArrayBuffer(0,1,2,3)))
-//      .persist(StorageLevel.MEMORY_ONLY)   // -- this will demonstrate immutability side effect!
-      .persist(StorageLevel.MEMORY_ONLY_SER)
+    val k1 = sc.parallelize(Seq(ArrayBuffer(0, 1, 2, 3)))
+        //      .persist(StorageLevel.MEMORY_ONLY)   // -- this will demonstrate immutability side effect!
+        .persist(StorageLevel.MEMORY_ONLY_SER)
 
     println(k1.map(_ += 4).collect.head)
     println(k1.map(_ += 4).collect.head)
@@ -444,7 +444,7 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
 
     val drmA = drmParallelize(inCoreA, numPartitions = 2)
 
-    SparkEngine.optimizerRewrite(drmA.t %*% x) should equal (OpAtx(drmA, x))
+    SparkEngine.optimizerRewrite(drmA.t %*% x) should equal(OpAtx(drmA, x))
 
     val atx = (drmA.t %*% x).collect(::, 0)
 
@@ -459,8 +459,8 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
     )
     val drmA = drmParallelize(inCoreA, numPartitions = 2)
 
-    drmA.colSums() should equal (inCoreA.colSums())
-    drmA.colMeans() should equal (inCoreA.colMeans())
+    drmA.colSums() should equal(inCoreA.colSums())
+    drmA.colMeans() should equal(inCoreA.colMeans())
   }
 
   test("numNonZeroElementsPerColumn") {
@@ -472,7 +472,31 @@ class RLikeDrmOpsSuite extends FunSuite with Matchers with MahoutLocalContext {
     )
     val drmA = drmParallelize(inCoreA, numPartitions = 2)
 
-    drmA.numNonZeroElementsPerColumn() should equal (inCoreA.numNonZeroElementsPerColumn())
+    drmA.numNonZeroElementsPerColumn() should equal(inCoreA.numNonZeroElementsPerColumn())
+  }
+
+  test("C = A cbind B, cogroup") {
+
+    val inCoreA = dense((1, 2), (3, 4))
+    val inCoreB = dense((3, 5), (4, 6))
+    val controlC = dense((1, 2, 3, 5), (3, 4, 4, 6))
+
+    val A = drmParallelize(inCoreA, numPartitions = 2).checkpoint()
+    val B = drmParallelize(inCoreB, numPartitions = 2).checkpoint()
+
+    (A.cbind(B) -: controlC).norm should be < 1e-10
+
+  }
+
+  test("C = A cbind B, zip") {
+
+    val inCoreA = dense((1, 2), (3, 4))
+    val controlC = dense((1, 2, 2, 3), (3, 4, 4, 5))
+
+    val A = drmParallelize(inCoreA, numPartitions = 2).checkpoint()
+
+    (A.cbind(A + 1.0) -: controlC).norm should be < 1e-10
+
   }
 
 }
