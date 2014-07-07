@@ -261,13 +261,13 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
     val OutPath = TmpDir + "indicator-matrices"
 
     val lines = Array(
-        "0,0,1",
-        "0,1,1",
-        "1,2,1",
-        "1,3,1",
-        "2,4,1",
-        "3,0,1",
-        "3,3,1")
+      "0,0,1",
+      "0,1,1",
+      "1,2,1",
+      "1,3,1",
+      "2,4,1",
+      "3,0,1",
+      "3,3,1")
 
     val Answer = Set(
       "0\t1:1.7260924347106847",
@@ -292,6 +292,54 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
       "--output", OutPath,
       "--master", masterUrl,
       "--dontAddMahoutJars"))
+
+    beforeEach // restart the test context to read the output of the driver
+    val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toSet[String]
+    assert(indicatorLines == Answer)
+
+  }
+
+  test ("ItemSimilarityDriver write search engine output"){
+
+    val InDir = TmpDir + "in-dir/"
+    val InFilename = "in-file.tsv"
+    val InPath = InDir + InFilename
+
+    val OutPath = TmpDir + "indicator-matrices"
+
+    val lines = Array(
+      "0,0,1",
+      "0,1,1",
+      "1,2,1",
+      "1,3,1",
+      "2,4,1",
+      "3,0,1",
+      "3,3,1")
+
+    val Answer = Set(
+      "0\t1",
+      "3\t2",
+      "1\t0",
+      "4",
+      "2\t3")
+
+    // this creates one part-0000 file in the directory
+    mahoutCtx.parallelize(lines).coalesce(1, shuffle=true).saveAsTextFile(InDir)
+
+    // to change from using part files to a single .tsv file we'll need to use HDFS
+    val fs = FileSystem.get(new Configuration())
+    //rename part-00000 to something.tsv
+    fs.rename(new Path(InDir + "part-00000"), new Path(InPath))
+
+    afterEach // clean up before running the driver, it should handle the Spark conf and context
+
+    // local multi-threaded Spark with default HDFS
+    ItemSimilarityDriver.main(Array(
+      "--input", InPath,
+      "--output", OutPath,
+      "--master", masterUrl,
+      "--dontAddMahoutJars",
+      "--omitStrength"))
 
     beforeEach // restart the test context to read the output of the driver
     val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toSet[String]

@@ -136,10 +136,13 @@ trait TDIndexedDatasetWriter extends Writer[IndexedDataset]{
       val rowKeyDelim = writeSchema("rowKeyDelim").asInstanceOf[String]
       val columnIdStrengthDelim = writeSchema("columnIdStrengthDelim").asInstanceOf[String]
       val tupleDelim = writeSchema("tupleDelim").asInstanceOf[String]
+      val omitScore = writeSchema("omitScore").asInstanceOf[Boolean]
       //instance vars must be put into locally scoped vals when put into closures that are
       //executed but Spark
+
       assert (indexedDataset != null, {println(this.getClass.toString+": has no indexedDataset to write"); throw new IllegalArgumentException })
       assert (!dest.isEmpty, {println(this.getClass.toString+": has no destination or indextedDataset to write"); throw new IllegalArgumentException})
+
       val matrix = indexedDataset.matrix
       val rowIDDictionary = indexedDataset.rowIDs
       val columnIDDictionary = indexedDataset.columnIDs
@@ -152,7 +155,9 @@ trait TDIndexedDatasetWriter extends Writer[IndexedDataset]{
 
         // for the rest of the row, construct the vector contents of tuples (external column ID, strength value)
         for (item <- itemVector.nonZeroes()) {
-          line += columnIDDictionary.inverse.get(item.index) + columnIdStrengthDelim + item.get + tupleDelim
+          line += columnIDDictionary.inverse.get(item.index)
+          if (!omitScore) line += columnIdStrengthDelim + item.get
+          line += tupleDelim
         }
         // drop the last delimiter, not needed to end the line
         line.dropRight(1)

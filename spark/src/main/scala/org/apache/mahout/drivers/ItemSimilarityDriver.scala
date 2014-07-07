@@ -136,7 +136,7 @@ object ItemSimilarityDriver extends MahoutDriver {
       note("\nUsing all defaults the input is expected of the form: \"userID<tab>itemId\" or \"userID<tab>itemID<tab>any-text...\" and all rows will be used")
 
       //File finding strategy--not driver specific
-      note("\nFile input options:")
+      note("\nFile discovery options:")
       opt[Unit]('r', "recursive") action { (_, options) =>
         options.copy(recursive = true)
       } text ("Searched the -i path recursively for files that match --filenamePattern (optional), Default: false")
@@ -158,6 +158,11 @@ object ItemSimilarityDriver extends MahoutDriver {
       opt[String]("tupleDelim") abbr ("td") action { (x, options) =>
         options.copy(tupleDelim = x)
       } text ("Separates vector tuple values in the values list (optional). Default: \",\"")
+
+      opt[Unit]("omitStrength") abbr ("os") action { (_, options) =>
+        options.copy(omitStrength = true)
+      } text ("Do not write the strength to the output files (optional), Default: false.")
+      note("This option is used to output indexable data for creating a search engine recommender.")
 
       //Spark config options--not driver specific
       note("\nSpark config options:")
@@ -229,6 +234,7 @@ object ItemSimilarityDriver extends MahoutDriver {
     writeSchema = new Schema(
         "rowKeyDelim" -> options.rowKeyDelim,
         "columnIdStrengthDelim" -> options.columnIdStrengthDelim,
+        "omitScore" -> options.omitStrength,
         "tupleDelim" -> options.tupleDelim)
 
     writer = new TextDelimitedIndexedDatasetWriter(writeSchema)
@@ -315,6 +321,7 @@ object ItemSimilarityDriver extends MahoutDriver {
       rowKeyDelim: String = "\t",
       columnIdStrengthDelim: String = ":",
       tupleDelim: String = ",",
+      omitStrength: Boolean = false,
       dontAddMahoutJars: Boolean = false)
 
 }

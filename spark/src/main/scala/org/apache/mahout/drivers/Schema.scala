@@ -27,4 +27,60 @@ import scala.collection.mutable.HashMap
 class Schema(params: Tuple2[String, Any]*) extends HashMap[String, Any] {
   // note: this require a mutable HashMap, do we care?
   this ++= params
+  if (!this.contains("omitScore")) this += ("omitScore" -> false)
 }
+
+// These can be used to keep the text in and out fairly standard to Mahout, where an application specific format is not
+// required.
+
+/** Simple default Schema for typical text delimited tuple file input
+  * This tells the reader to input tuples of the default (rowID<comma, tab, or space>columnID<comma, tab, or space>etc...)
+  */
+class DefaultTupleReadSchema extends Schema(
+    "delim" -> "[,\t ]", //comma, tab or space
+    "filter" -> "",
+    "rowIDPosition" -> 0,
+    "columnIDPosition" -> 1,
+    "filterPosition" -> -1)
+
+/** Simple default Schema for typical text delimited drm file output
+  * This tells the writer to write a DRM of the default
+  * (rowID<tab>columnID1:score1,columnID2:score2,...)
+  */
+class DefaultDRMWriteSchema extends Schema(
+    "rowKeyDelim" -> "\t",
+    "columnIdStrengthDelim" -> ":",
+    "tupleDelim" -> ",")
+
+/** Simple default Schema for typical text delimited drm file output
+  * This tells the reader to input tuples of the default (rowID<comma, tab, or space>columnID<comma, tab, or space>etc...)
+  */
+class DefaultDRMReadSchema extends Schema(
+  "rowKeyDelim" -> "\t",
+  "columnIdStrengthDelim" -> ":",
+  "tupleDelim" -> ",")
+
+/** Simple default Schema for reading a text delimited drm file  where the score of any tuple is ignored,
+  * all non-zeros are replaced with 1.
+  * This tells the reader to input DRM lines of the form
+  * (rowID<tab>columnID1:score1,columnID2:score2,...) remember the score is ignored. Alternatively the format can be
+  * (rowID<tab>columnID1,columnID2,...) where presence indicates a score of 1. This is the default output format for
+  * [[org.apache.mahout.drivers.DRMWriteBooleanSchema]]
+  */
+class DRMReadBooleanSchema extends Schema(
+  "rowKeyDelim" -> "\t",
+  "columnIdStrengthDelim" -> ":",
+  "tupleDelim" -> ",",
+  "omitScore" -> true)
+
+/** Simple default Schema for typical text delimited drm file write where the score of a tuple is omitted.
+  * The presence of a tuple means the score = 1, the absence means a score of 0.
+  * This tells the reader to input DRM lines of the form
+  * (rowID<tab>columnID1,columnID2,...)
+  */
+class DRMWriteBooleanSchema extends Schema(
+  "rowKeyDelim" -> "\t",
+  "columnIdStrengthDelim" -> ":",
+  "tupleDelim" -> ",",
+  "omitScore" -> true)
+
