@@ -10,17 +10,20 @@ trait MahoutLocalContext extends MahoutSuite with LoggerConfiguration {
   this: Suite =>
 
   protected implicit var mahoutCtx: DistributedContext = _
+  protected var masterUrl = null.asInstanceOf[String]
 
   override protected def beforeEach() {
     super.beforeEach()
 
-    mahoutCtx = mahoutSparkContext(masterUrl = "local[2]",
+    masterUrl = "local[2]"
+    mahoutCtx = mahoutSparkContext(masterUrl = this.masterUrl,
       appName = "MahoutLocalContext",
       // Do not run MAHOUT_HOME jars in unit tests.
       addMahoutJars = false,
       sparkConf = new SparkConf()
           .set("spark.kryoserializer.buffer.mb", "15")
           .set("spark.akka.frameSize", "30")
+          .set("spark.default.parallelism", "10")
     )
   }
 

@@ -159,6 +159,17 @@ public class DenseVector extends AbstractVector {
     return values.length;
   }
 
+  @Override
+  public int getNumNonZeroElements() {
+    int numNonZeros = 0;
+    for (int index = 0; index < values.length; index++) {
+      if (values[index] != 0) {
+        numNonZeros++;
+      }
+    }
+    return numNonZeros;
+  }
+
   public Vector assign(DenseVector vector) {
     // make sure the data field has the correct length
     if (vector.values.length != this.values.length) {

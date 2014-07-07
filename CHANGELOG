@@ -2,6 +2,12 @@ Mahout Change Log
 
 Release 1.0 - unreleased
 
+  MAHOUT-1541, MAHOUT-1568, MAHOUT-1569: Created text-delimited file I/O traits and classes on spark, a MahoutDriver for a CLI and a ItemSimilairtyDriver using the CLI
+
+  MAHOUT-1573: More explicit parallelism adjustments in math-scala DRM apis; elements of automatic parallelism management (dlyubimov)
+
+  MAHOUT-1580: Optimize getNumNonZeroElements() (ssc)
+  
   MAHOUT-1464: Cooccurrence Analysis on Spark (pat)
 
   MAHOUT-1578: Optimizations in matrix serialization (ssc)
