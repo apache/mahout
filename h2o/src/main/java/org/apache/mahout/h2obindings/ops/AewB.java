@@ -45,9 +45,9 @@ public class AewB {
         return 0.0;
       }
       public void map(Chunk chks[], NewChunk ncs[]) {
-        long start = chks[0]._start;
+        long start = chks[0].start();
         for (int c = 0; c < chks.length; c++) {
-          for (int r = 0; r < chks[0]._len; r++) {
+          for (int r = 0; r < chks[0].len(); r++) {
             ncs[c].addNum(opfn(op, chks[c].at0(r), B.vecs()[c].at(start+r)));
           }
         }

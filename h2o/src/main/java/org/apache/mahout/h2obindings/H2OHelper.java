@@ -119,7 +119,7 @@ public class H2OHelper {
         _sums = new double[chks.length];
 
         for (int c = 0; c < chks.length; c++) {
-          for (int r = 0; r < chks[c]._len; r++) {
+          for (int r = 0; r < chks[c].len(); r++) {
             _sums[c] += chks[c].at0(r);
           }
         }
@@ -142,7 +142,7 @@ public class H2OHelper {
       public double _sumSqr;
       public void map(Chunk chks[]) {
         for (int c = 0; c < chks.length; c++) {
-          for (int r = 0; r < chks[c]._len; r++) {
+          for (int r = 0; r < chks[c].len(); r++) {
             _sumSqr += (chks[c].at0(r) * chks[c].at0(r));
           }
         }
@@ -168,7 +168,7 @@ public class H2OHelper {
         _sums = new double[chks.length];
 
         for (int c = 0; c < chks.length; c++) {
-          for (int r = 0; r < chks[c]._len; r++) {
+          for (int r = 0; r < chks[c].len(); r++) {
             if ((long)chks[c].at0(r) != 0)
               _sums[c] ++;
           }

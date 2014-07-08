@@ -36,7 +36,7 @@ public class TimesRightMatrix {
       public void map(Chunk chks[], NewChunk ncs[]) {
         Vector D = bd.value();
         for (int c = 0; c < ncs.length; c++) {
-          for (int r = 0; r < chks[0]._len; r++) {
+          for (int r = 0; r < chks[0].len(); r++) {
             double v = (chks[c].at0(r) * D.getQuick(c));
             ncs[c].addNum(v);
           }
@@ -53,7 +53,7 @@ public class TimesRightMatrix {
       public void map(Chunk chks[], NewChunk ncs[]) {
         Matrix B = bb.value();
         for (int c = 0; c < ncs.length; c++) {
-          for (int r = 0; r < chks[0]._len; r++) {
+          for (int r = 0; r < chks[0].len(); r++) {
             double v = 0;
             for (int i = 0; i < chks.length; i++) {
               v += (chks[i].at0(r) * B.getQuick(i, c));

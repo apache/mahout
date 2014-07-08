@@ -32,11 +32,11 @@ public class Par {
     class MRParVecTask extends MRTask<MRParVecTask> {
       public void map(Chunk chks[], NewChunk nc) {
         Vec vins[] = frin.vecs();
-        for (int r = 0; r < chks[0]._len; r++) {
+        for (int r = 0; r < chks[0].len(); r++) {
           for (int c = 0; c < chks.length; c++) {
-            chks[c].set0(r, vins[c].at(chks[0]._start + r));
+            chks[c].set0(r, vins[c].at(chks[0].start() + r));
           }
-          nc.addStr(vin.atStr(chks[0]._start + r));
+          nc.addStr(vin.atStr(chks[0].start() + r));
         }
       }
     }
@@ -44,9 +44,9 @@ public class Par {
     class MRParTask extends MRTask<MRParTask> {
       public void map(Chunk chks[]) {
         Vec vins[] = frin.vecs();
-        for (int r = 0; r < chks[0]._len; r++) {
+        for (int r = 0; r < chks[0].len(); r++) {
           for (int c = 0; c < chks.length; c++) {
-            chks[c].set0(r, vins[c].at(chks[0]._start + r));
+            chks[c].set0(r, vins[c].at(chks[0].start() + r));
           }
         }
       }

@@ -42,8 +42,8 @@ public class Cbind {
 
     new MRTask() {
       public void map(Chunk chks[]) {
-        long start = chks[0]._start;
-        for (int r = 0; r < chks[0]._len; r++) {
+        long start = chks[0].start();
+        for (int r = 0; r < chks[0].len(); r++) {
           for (int c = 0; c < chks.length; c++) {
             // assert va.atStr(start+r) == vb.atStr(start+r)
             chks[c].set0(r, frb.vecs()[c].at(start + r));

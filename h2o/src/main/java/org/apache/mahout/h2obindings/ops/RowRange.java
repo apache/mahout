@@ -35,11 +35,11 @@ public class RowRange {
         _r = r;
       }
       public void map(Chunk chks[], NewChunk ncs[]) {
-        if (chks[0]._start > _r.end() || (chks[0]._start + chks[0]._len) < _r.start())
+        if (chks[0].start() > _r.end() || (chks[0].start() + chks[0].len()) < _r.start())
           return;
 
-        for (int r = 0; r < chks[0]._len; r++) {
-          if (!_r.contains (chks[0]._start + r))
+        for (int r = 0; r < chks[0].len(); r++) {
+          if (!_r.contains (chks[0].start() + r))
             continue;
 
           for (int c = 0; c < chks.length; c++)
@@ -56,11 +56,11 @@ public class RowRange {
           _r = r;
         }
         public void map(Chunk chk, NewChunk nc) {
-          if (chk._start > _r.end() || (chk._start + chk._len) < _r.start())
+          if (chk.start() > _r.end() || (chk.start() + chk.len()) < _r.start())
             return;
 
-          for (int r = 0; r < chk._len; r++) {
-            if (!_r.contains (chk._start + r))
+          for (int r = 0; r < chk.len(); r++) {
+            if (!_r.contains (chk.start() + r))
               continue;
 
             nc.addStr(chk.atStr0(r));

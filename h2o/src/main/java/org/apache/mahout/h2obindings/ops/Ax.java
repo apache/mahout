@@ -34,7 +34,7 @@ public class Ax {
     class MRTaskAx extends MRTask<MRTaskAx> {
       public void map(Chunk chks[], NewChunk nc) {
         Vector x = bx.value();
-        for (int r = 0; r < chks[0]._len; r++) {
+        for (int r = 0; r < chks[0].len(); r++) {
           double v = 0;
           for (int c = 0; c < chks.length; c++) {
             v += (chks[c].at0(r) * x.getQuick(c));

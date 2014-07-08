@@ -30,9 +30,9 @@ public class At {
     Frame At = H2OHelper.empty_frame (A.numCols(), (int)A.numRows(), -1, -1);
     class MRTaskAt extends MRTask<MRTaskAt> {
       public void map(Chunk chks[]) {
-        long start = chks[0]._start;
+        long start = chks[0].start();
         for (int c = 0; c < chks.length; c++) {
-          for (int r = 0; r < chks[0]._len; r++) {
+          for (int r = 0; r < chks[0].len(); r++) {
             chks[c].set0(r, A.vecs()[(int)(start+r)].at(c));
           }
         }

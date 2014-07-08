@@ -33,9 +33,9 @@ public class AtB {
 
     class MRTaskAtB extends MRTask<MRTaskAtB> {
       public void map(Chunk chks[]) {
-        long start = chks[0]._start;
+        long start = chks[0].start();
         for (int c = 0; c < chks.length; c++) {
-          for (int r = 0; r < chks[0]._len; r++) {
+          for (int r = 0; r < chks[0].len(); r++) {
             double v = 0;
             for (int i = 0; i < A.numRows(); i++) {
               v += (A.vecs()[(int)(start+r)].at(i) * B.vecs()[c].at(i));

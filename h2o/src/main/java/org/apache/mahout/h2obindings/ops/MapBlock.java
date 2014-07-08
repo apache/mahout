@@ -64,7 +64,7 @@ public class MapBlock {
       }
 
       public void map(Chunk chks[], NewChunk ncs[]) {
-        long start = chks[0]._start;
+        long start = chks[0].start();
         NewChunk nclabel = is_r_str ? ncs[ncs.length-1] : null;
         deblockify(MapBlockHelper.exec(_bmf, blockify(chks), start, _labels, nclabel, k, r), ncs);
         // assert chks[i]._len == ncs[j]._len

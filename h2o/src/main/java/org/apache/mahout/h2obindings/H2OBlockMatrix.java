@@ -43,7 +43,7 @@ public class H2OBlockMatrix extends AbstractMatrix {
   Matrix cow; /* Copy on Write */
 
   public H2OBlockMatrix(Chunk chks[]) {
-    super(chks[0]._len, chks.length);
+    super(chks[0].len(), chks.length);
     _chks = chks;
   }
 
@@ -52,12 +52,12 @@ public class H2OBlockMatrix extends AbstractMatrix {
       return;
 
     if (_chks[0].isSparse())
-      cow = new SparseMatrix(_chks[0]._len, _chks.length);
+      cow = new SparseMatrix(_chks[0].len(), _chks.length);
     else
-      cow = new DenseMatrix(_chks[0]._len, _chks.length);
+      cow = new DenseMatrix(_chks[0].len(), _chks.length);
 
     for (int c = 0; c < _chks.length; c++) {
-      for (int r = 0; r < _chks[0]._len; r++) {
+      for (int r = 0; r < _chks[0].len(); r++) {
         cow.setQuick(r, c, _chks[c].at0(r));
       }
     }

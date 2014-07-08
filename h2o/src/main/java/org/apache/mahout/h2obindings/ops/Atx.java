@@ -37,9 +37,9 @@ public class Atx {
       double _atx[];
       public void map(Chunk chks[]) {
         Vector x = bx.value();
-        long start = chks[0]._start;
+        long start = chks[0].start();
         _atx = new double[chks.length];
-        for (int r = 0; r < chks[0]._len; r++) {
+        for (int r = 0; r < chks[0].len(); r++) {
           double d = x.getQuick((int)start + r);
           for (int c = 0; c < chks.length; c++) {
             _atx[c] += (chks[c].at0(r) * d);
