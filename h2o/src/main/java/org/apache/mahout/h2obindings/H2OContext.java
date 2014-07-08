@@ -25,7 +25,7 @@ public class H2OContext {
   public H2OContext(String _masterURL) {
     masterURL = _masterURL;
 
-    H2O.main(new String[]{"-name", _masterURL});
+    H2O.main(new String[]{"-md5skip", "-name", _masterURL});
     H2O.joinOthers();
   }
 }

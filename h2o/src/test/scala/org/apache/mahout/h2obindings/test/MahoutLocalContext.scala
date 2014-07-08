@@ -13,7 +13,7 @@ trait MahoutLocalContext extends MahoutSuite with LoggerConfiguration {
   override protected def beforeEach() {
     super.beforeEach()
 
-    mahoutCtx = mahoutH2OContext("local")
+    mahoutCtx = mahoutH2OContext("mah2out")
   }
 
   override protected def afterEach() {

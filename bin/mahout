@@ -92,6 +92,10 @@ if [ "$MAHOUT_CORE" != "" ]; then
   IS_CORE=1
 fi
 
+if [ "$1" == "h2o-node" ]; then
+  H2O=1
+fi
+
 # some directories
 THIS_DIR=`dirname "$THIS"`
 MAHOUT_HOME=`cd "$THIS_DIR/.." ; pwd`
@@ -165,6 +169,15 @@ then
     CLASSPATH=${CLASSPATH}:$f;
   done
 
+  if [ "$H2O" == "1" ]; then
+    for f in $MAHOUT_HOME/mrlegacy/target/mahout-mrlegacy-*.jar; do
+       CLASSPATH=${CLASSPATH}:$f;
+    done
+
+    for f in $MAHOUT_HOME/h2o/target/mahout-h2o-*.jar; do
+       CLASSPATH=${CLASSPATH}:$f;
+    done
+  fi
 
   # add spark-shell -- if we requested shell or other spark CLI driver
   if [ "$SPARK" == "1" ]; then
@@ -209,6 +222,7 @@ else
   #CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/mrlegacy/src/main/resources
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/spark/target/classes
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/spark-shell/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/h2o/target/classes
 fi
 
 # add development dependencies to CLASSPATH
@@ -239,6 +253,10 @@ case "$1" in
   (spark-itemsimilarity)
     shift
     "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.ItemSimilarityDriver" "$@"
+    ;;
+  (h2o-node)
+    shift
+    "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "water.H2O" -md5skip "$@" -name mah2out
     ;;
   (*)
 
