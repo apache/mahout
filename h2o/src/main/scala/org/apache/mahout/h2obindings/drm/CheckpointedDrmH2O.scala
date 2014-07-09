@@ -24,9 +24,8 @@ class CheckpointedDrmH2O[K: ClassTag](
   def collect: Matrix = H2OHelper.matrix_from_frame(frame, labels)
   /* XXX: call frame.remove */
   def uncache(): Unit = return
-  /* XXX: H2O does not support seqfile format yet */
-  def writeDRM(path: String): Unit = ???
 
+  def writeDRM(path: String): Unit = H2OHdfs.drm_to_file (path, frame, labels)
 
   def checkpoint(cacheHint: CacheHint.CacheHint): CheckpointedDrm[K] = this
 

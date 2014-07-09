@@ -21,7 +21,6 @@ import org.apache.mahout.math.*;
 
 import water.*;
 import water.fvec.*;
-import water.util.FrameUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +36,7 @@ public class H2OHelper {
     Is the matrix sparse? If the number of missing elements is
     32 x times the number of present elements, treat it as sparse
   */
-  private static boolean is_sparse (Frame frame) {
+  public static boolean is_sparse (Frame frame) {
     long rows = frame.numRows();
     long cols = frame.numCols();
 
@@ -180,11 +179,6 @@ public class H2OHelper {
       }
     }
     return new DenseVector(new MRTaskNonZero().doAll(frame)._sums);
-  }
-
-
-  public static Frame frame_from_file (String path) throws IOException {
-    return FrameUtils.parseFrame(null, new File(path));
   }
 
   private static Map<Integer,String> reverse_map(Map<String,Integer> map) {

@@ -46,9 +46,10 @@ object H2OEngine extends DistributedEngine {
   def drmBroadcast(v: Vector)(implicit dc: DistributedContext): BCast[Vector] =
     new H2OBCast(v)
 
-  /* XXX - H2O parser does not support seqfile */
-  def drmFromHDFS(path: String, parMin: Int = 0)(implicit dc: DistributedContext): CheckpointedDrm[_] =
-    new CheckpointedDrmH2O (H2OHelper.frame_from_file (path), dc)
+  def drmFromHDFS(path: String, parMin: Int = 0)(implicit dc: DistributedContext): CheckpointedDrm[_] = {
+    val (frame, labels) = H2OHdfs.drm_from_file (path, parMin)
+    new CheckpointedDrmH2O (frame, labels, dc)
+  }
 
   def drmParallelizeEmpty(nrow: Int, ncol: Int, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[Int] =
     new CheckpointedDrmH2O[Int] (H2OHelper.empty_frame (nrow, ncol, numPartitions, -1), dc)
