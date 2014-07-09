@@ -224,16 +224,6 @@ public class H2OHelper {
     return chunk_sz;
   }
 
-  private static int next_chunks(NewChunk ncs[], int cidx, long r, int chunk_sz, AppendableVec avs[], Futures fs) {
-    if ((r % chunk_sz) != 0)
-      return cidx;
-    for (int i = 0; i < ncs.length; i++) {
-      if (ncs[i] != null)
-        ncs[i].close(fs);
-      ncs[i] = new NewChunk (avs[i], cidx);
-    }
-    return cidx + 1;
-  }
   /* Ingest a Matrix into an H2O Frame. H2O Frame is the "backing"
      data structure behind CheckpointedDrm. Steps:
 
@@ -243,55 +233,36 @@ public class H2OHelper {
      - Load data into Vecs by routing them through NewChunks
   */
   public static Tuple2<Frame,Vec> frame_from_matrix (Matrix m, int min_hint, int exact_hint) {
+    Frame frame = empty_frame (m.rowSize(), m.columnSize(), min_hint, exact_hint);
+    Vec labels = null;
+    Vec.Writer writers[] = new Vec.Writer[m.columnSize()];
+    Futures closer = new Futures();
+
+    for (int i = 0; i < writers.length; i++)
+      writers[i] = frame.vecs()[i].open();
+
+    for (int r = 0; r < m.rowSize(); r++)
+      for (int c = 0; c < m.columnSize(); c++)
+        writers[c].set(r, m.getQuick(r, c));
+
+    for (int c = 0; c < m.columnSize(); c++)
+      writers[c].close(closer);
+
     Map<String,Integer> map = m.getRowLabelBindings();
-    Map<Integer,String> rmap = reverse_map(map);
-    int cols = m.columnSize();
-    int nvecs = cols + (map != null ? 1 : 0);
-    Vec.VectorGroup vg = new Vec.VectorGroup();
-    Key keys[] = vg.addVecs(nvecs);
-    AppendableVec avs[] = new AppendableVec[nvecs];
-    Vec vecs[] = new Vec[nvecs];
-    NewChunk ncs[] = new NewChunk[nvecs];
-    int chunk_sz = chunk_size (m.rowSize(), m.columnSize(), min_hint, exact_hint);
-    Futures fs = new Futures();
-    int cidx = 0;
+    if (map != null) {
+      labels = frame.anyVec().makeZero();
+      Vec.Writer writer = labels.open();
+      Map<Integer,String> rmap = reverse_map(map);
 
-    for (int c = 0; c < nvecs; c++)
-      avs[c] = new AppendableVec(keys[c]);
+      for (long r = 0; r < m.rowSize(); r++)
+        writer.set(r, rmap.get(r));
 
-    long r = 0;
-    for (MatrixSlice row : m) {
-      cidx = next_chunks (ncs, cidx, r, chunk_sz, avs, fs);
-      /* Detect entire sparse rows */
-      while (r < row.index()) {
-        for (int i = 0; i < cols; i++)
-          ncs[i].addNum(0.0);
-        if (nvecs != cols)
-          ncs[nvecs-1].addStr(null);
-        r++;
-        cidx = next_chunks (ncs, cidx, r, chunk_sz, avs, fs);
-      }
-      int c = 0;
-      for (Vector.Element element : row.nonZeroes()) {
-        while (c < element.index())
-          /* Detect sparse column elements within a row */
-          ncs[c++].addNum(0.0);
-        ncs[c++].addNum(element.get());
-      }
-      if (rmap != null)
-        ncs[nvecs-1].addStr(rmap.get(r));
-      r++;
+      writer.close(closer);
     }
 
-    for (int c = 0; c < nvecs; c++) {
-      ncs[c].close(fs);
-      vecs[c] = avs[c].close(fs);
-    }
-    fs.blockForPending();
+    closer.blockForPending();
 
-    Frame fr = new Frame(Arrays.copyOfRange(vecs,0,cols));
-    Vec labels = (rmap != null) ? vecs[nvecs-1] : null;
-    return new Tuple2<Frame,Vec>(fr,labels);
+    return new Tuple2<Frame,Vec>(frame,labels);
   }
 
   public static Frame empty_frame (long nrow, int ncol, int min_hint, int exact_hint) {
