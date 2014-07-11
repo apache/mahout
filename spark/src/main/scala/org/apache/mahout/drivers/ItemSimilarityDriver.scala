@@ -52,54 +52,61 @@ object ItemSimilarityDriver extends MahoutDriver {
    * @param args  Command line args, if empty a help message is printed.
    */
   override def main(args: Array[String]): Unit = {
+    options = new Options
     val parser = new MahoutOptionParser[Options]("spark-itemsimilarity") {
       head("spark-itemsimilarity", "Mahout 1.0-SNAPSHOT")
 
       //Input output options, non-driver specific
       note("Input, output options")
       opt[String]('i', "input") required() action { (x, options) =>
-        options.copy(input = x)
+        options.input = x
+        options
       } text ("Input path, may be a filename, directory name, or comma delimited list of HDFS supported URIs (required)")
 
       opt[String]("input2") abbr ("i2")  action { (x, options) =>
-        options.copy(input2 = x)
+        options.input2 = x
+        options
       } text ("Secondary input path for cross-similarity calculation, same restrictions as \"--input\" (optional). Default: empty. Note that the same input schema is applied to both \"--input\" and \"--input2\" files")
 
       opt[String]('o', "output") required() action { (x, options) =>
-        if (x.endsWith("/")) // todo: check to see if HDFS allows MS-Windows backslashes locally?
-          options.copy(output = x)
-        else
-          options.copy(output = x + "/")
+        // todo: check to see if HDFS allows MS-Windows backslashes locally?
+        if (x.endsWith("/")) options.output = x else options.output = x + "/"
+        options
       } text ("Path for output, any local or HDFS supported URI (required)")
 
       //Algorithm control options--driver specific
       note("\nAlgorithm control options:")
       opt[String]("master") abbr ("ma") text ("Spark Master URL (optional). Default: \"local\". Note that you can specify the number of cores to get a performance improvement, for example \"local[4]\"") action { (x, options) =>
-        options.copy(master = x)
+        options.master = x
+        options
       }
 
       opt[Int]("maxPrefs") abbr ("mppu") action { (x, options) =>
-        options.copy(maxPrefs = x)
+        options.maxPrefs = x
+        options
       } text ("Max number of preferences to consider per user (optional). Default: 500") validate { x =>
         if (x > 0) success else failure("Option --maxPrefs must be > 0")
       }
 
 /** not implemented in CooccurrenceAnalysis.cooccurrence
       opt[Int]("minPrefs") abbr ("mp") action { (x, options) =>
-        options.copy(minPrefs = x)
+        options.minPrefs = x
+        options
       } text ("Ignore users with less preferences than this (optional). Default: 1") validate { x =>
         if (x > 0) success else failure("Option --minPrefs must be > 0")
       }
 */
 
       opt[Int]('m', "maxSimilaritiesPerItem") action { (x, options) =>
-        options.copy(maxSimilaritiesPerItem = x)
+        options.maxSimilaritiesPerItem = x
+        options
       } text ("Limit the number of similarities per item to this number (optional). Default: 100") validate { x =>
         if (x > 0) success else failure("Option --maxSimilaritiesPerItem must be > 0")
       }
 
       opt[Int]("randomSeed") abbr ("rs") action { (x, options) =>
-        options.copy(randomSeed = x)
+        options.randomSeed = x
+        options
       } text ("Int to seed random number generator (optional). Default: Uses time to generate a seed") validate { x =>
         if (x > 0) success else failure("Option --randomSeed must be > 0")
       }
@@ -108,31 +115,37 @@ object ItemSimilarityDriver extends MahoutDriver {
       // not drms
       note("\nInput text file schema options:")
       opt[String]("inDelim") abbr ("id") text ("Input delimiter character (optional). Default: \"[,\\t]\"") action { (x, options) =>
-        options.copy(inDelim = x)
+        options.inDelim = x
+        options
       }
 
       opt[String]("filter1") abbr ("f1") action { (x, options) =>
-        options.copy(filter1 = x)
+        options.filter1 = x
+        options
       } text ("String (or regex) whose presence indicates a datum for the primary item set (optional). Default: no filter, all data is used")
 
       opt[String]("filter2") abbr ("f2") action { (x, options) =>
-        options.copy(filter2 = x)
+        options.filter2 = x
+        options
       } text ("String (or regex) whose presence indicates a datum for the secondary item set (optional). If not present no secondary dataset is collected")
 
       opt[Int]("rowIDPosition") abbr ("rc") action { (x, options) =>
-        options.copy(rowIDPosition = x)
+        options.rowIDPosition = x
+        options
       } text ("Column number (0 based Int) containing the row ID string (optional). Default: 0") validate { x =>
         if (x >= 0) success else failure("Option --rowIDColNum must be >= 0")
       }
 
       opt[Int]("itemIDPosition") abbr ("ic") action { (x, options) =>
-        options.copy(itemIDPosition = x)
+        options.itemIDPosition = x
+        options
       } text ("Column number (0 based Int) containing the item ID string (optional). Default: 1") validate { x =>
         if (x >= 0) success else failure("Option --itemIDColNum must be >= 0")
       }
 
       opt[Int]("filterPosition") abbr ("fc") action { (x, options) =>
-        options.copy(filterPosition = x)
+        options.filterPosition = x
+        options
       } text ("Column number (0 based Int) containing the filter string (optional). Default: -1 for no filter") validate { x =>
         if (x >= -1) success else failure("Option --filterColNum must be >= -1")
       }
@@ -140,41 +153,60 @@ object ItemSimilarityDriver extends MahoutDriver {
       note("\nUsing all defaults the input is expected of the form: \"userID<tab>itemId\" or \"userID<tab>itemID<tab>any-text...\" and all rows will be used")
 
       //File finding strategy--not driver specific
-      note("\nFile input options:")
+      note("\nFile discovery options:")
       opt[Unit]('r', "recursive") action { (_, options) =>
-        options.copy(recursive = true)
+        options.recursive = true
+        options
       } text ("Searched the -i path recursively for files that match --filenamePattern (optional), Default: false")
 
       opt[String]("filenamePattern") abbr ("fp") action { (x, options) =>
-        options.copy(filenamePattern = x)
+        options.filenamePattern = x
+        options
       } text ("Regex to match in determining input files (optional). Default: filename in the --input option or \"^part-.*\" if --input is a directory")
 
       //Drm output schema--not driver specific, drm specific
       note("\nOutput text file schema options:")
       opt[String]("rowKeyDelim") abbr ("rd") action { (x, options) =>
-        options.copy(rowKeyDelim = x)
+        options.rowKeyDelim = x
+        options
       } text ("Separates the rowID key from the vector values list (optional). Default: \"\\t\"")
 
       opt[String]("columnIdStrengthDelim") abbr ("cd") action { (x, options) =>
-        options.copy(columnIdStrengthDelim = x)
+        options.columnIdStrengthDelim = x
+        options
       } text ("Separates column IDs from their values in the vector values list (optional). Default: \":\"")
 
       opt[String]("tupleDelim") abbr ("td") action { (x, options) =>
-        options.copy(tupleDelim = x)
+        options.tupleDelim = x
+        options
       } text ("Separates vector tuple values in the values list (optional). Default: \",\"")
+
+      opt[Unit]("omitStrength") abbr ("os") action { (_, options) =>
+        options.omitStrength = true
+        options
+      } text ("Do not write the strength to the output files (optional), Default: false.")
+      note("This option is used to output indexable data for creating a search engine recommender.")
 
       //Spark config options--not driver specific
       note("\nSpark config options:")
       opt[String]("sparkExecutorMem") abbr ("sem") action { (x, options) =>
-        options.copy(sparkExecutorMem = x)
+        options.sparkExecutorMem = x
+        options
       } text ("Max Java heap available as \"executor memory\" on each node (optional). Default: 4g")
 
       note("\nDefault delimiters will produce output of the form: \"itemID1<tab>itemID2:value2,itemID10:value10...\"")
 
-      //Jar inclusion, this option can be set when executing the driver from compiled code
+      //Jar inclusion, this option can be set when executing the driver from compiled code, not when from CLI
       opt[Unit]("dontAddMahoutJars") hidden() action { (_, options) =>
-        options.copy(dontAddMahoutJars = true) //set the value MahoutDriver so the context will be created correctly
+        options.dontAddMahoutJars = true
+        options
       }//Hidden option, used when executing tests or calling from other code where classes are all loaded explicitly
+
+      //output both input DRMs
+      opt[Unit]("writeAllDatasets") hidden() action { (_, options) =>
+        options.writeAllDatasets = true
+        options
+      }//Hidden option, though a user might want this.
 
       //Driver notes--driver specific
       note("\nNote: Only the Log Likelihood Ratio (LLR) is supported as a similarity measure.\n")
@@ -197,7 +229,7 @@ object ItemSimilarityDriver extends MahoutDriver {
     }
 
     //repeated code, should this be put base MahoutDriver somehow?
-    parser.parse(args, Options()) map { opts =>
+    parser.parse(args, options) map { opts =>
       options = opts
       process
     }
@@ -221,7 +253,8 @@ object ItemSimilarityDriver extends MahoutDriver {
 
     reader1 = new TextDelimitedIndexedDatasetReader(readSchema1)
 
-    if (options.filterPosition != -1 && options.filter2 != null) {
+    if ((options.filterPosition != -1 && options.filter2 != null)
+        || (options.input2 != null && !options.input2.isEmpty )){
       val readSchema2 = new Schema("delim" -> options.inDelim, "filter" -> options.filter2,
           "rowIDPosition" -> options.rowIDPosition,
           "columnIDPosition" -> options.itemIDPosition,
@@ -233,6 +266,7 @@ object ItemSimilarityDriver extends MahoutDriver {
     writeSchema = new Schema(
         "rowKeyDelim" -> options.rowKeyDelim,
         "columnIdStrengthDelim" -> options.columnIdStrengthDelim,
+        "omitScore" -> options.omitStrength,
         "tupleDelim" -> options.tupleDelim)
 
     writer = new TextDelimitedIndexedDatasetWriter(writeSchema)
@@ -248,22 +282,38 @@ object ItemSimilarityDriver extends MahoutDriver {
       Array()
     } else {
 
-      val selfSimilarityDataset = IndexedDataset(reader1.readFrom(inFiles))
+      val selfSimilarityDataset = IndexedDataset(reader1.readTuplesFrom(inFiles))
+      if (options.writeAllDatasets) writer.writeDRMTo(selfSimilarityDataset, options.output + "../input-datasets/matrix1")
 
+
+      // The case of B'A can be a bit sticky when the exact same row IDs don't exist for each dataset
+      // Here we assume there is one row ID space for all interactions. To do this we pass in the
+      // rowIDs created when reading selfSimilarityDataset and add to them if there are new ones in
+      // the second dataset. We will then apply the row dimension of the combined dataset to both DRMs
       if (!inFiles2.isEmpty) {
 
         // get cross-cooccurrence interactions from separate files
-        Array(selfSimilarityDataset, IndexedDataset(reader2.readFrom(inFiles2)))
+        val crossSimilairtyDataset = IndexedDataset(reader2.readTuplesFrom(inFiles2, existingRowIDs = selfSimilarityDataset.rowIDs))
+        selfSimilarityDataset.nrow = crossSimilairtyDataset.nrow // these may be larger than the nrow calculated earlier
+
+        if (options.writeAllDatasets) writer.writeDRMTo(crossSimilairtyDataset, options.output + "../input-datasets/matrix2")
+
+        Array(selfSimilarityDataset, crossSimilairtyDataset)
 
       } else if (options.filterPosition != -1 && options.filter2 != null) {
 
         // get cross-cooccurrences interactions by filtering a single set of files
-        Array(selfSimilarityDataset, IndexedDataset(reader2.readFrom(inFiles)))
+        val crossSimilairtyDataset = IndexedDataset(reader2.readTuplesFrom(inFiles, existingRowIDs = selfSimilarityDataset.rowIDs))
+
+        if (options.writeAllDatasets) writer.writeDRMTo(crossSimilairtyDataset, options.output + "../input-datasets/matrix2")
+
+        Array(selfSimilarityDataset, crossSimilairtyDataset)
 
       } else {
 
         // only return self-similarity A'A
         Array(selfSimilarityDataset)
+
       }
 
     }
@@ -287,7 +337,7 @@ object ItemSimilarityDriver extends MahoutDriver {
     // self similarity
     // the next two lines write the drm using a Writer class
     // val selfIndicatorDataset = new IndexedDataset(indicatorMatrices(0), indexedDatasets(0).columnIDs, indexedDatasets(0).columnIDs)
-    // writeStore.writeTo(selfIndicatorDataset, options.output + "indicator-matrix")
+    // writeStore.writeDRMTo(selfIndicatorDataset, options.output + "indicator-matrix")
 
     // an alternative is to create a version of IndexedDataset that knows how to write itself
     val selfIndicatorDataset = new IndexedDatasetTextDelimitedWriteable(indicatorMatrices(0), indexedDatasets(0).columnIDs,
@@ -297,8 +347,8 @@ object ItemSimilarityDriver extends MahoutDriver {
     // todo: needs to support more than one cross-similarity indicator
     if (indexedDatasets.length > 1) {
 
-      val crossIndicatorDataset = new IndexedDataset(indicatorMatrices(1), indexedDatasets(0).columnIDs, indexedDatasets(1).columnIDs) // cross similarity
-      writer.writeTo(crossIndicatorDataset, options.output + "cross-indicator-matrix")
+      val crossIndicatorDataset = new IndexedDataset(indicatorMatrices(1), indexedDatasets(1).columnIDs, indexedDatasets(0).columnIDs) // cross similarity
+      writer.writeDRMTo(crossIndicatorDataset, options.output + "cross-indicator-matrix")
 
     }
 
@@ -307,28 +357,30 @@ object ItemSimilarityDriver extends MahoutDriver {
 
   // Default values go here, any "_" or null should be "required" in the Parser or flags an unused option
   // todo: support two input streams for cross-similarity, maybe assume one schema for all inputs
-  case class Options(
-      master: String = "local",
-      sparkExecutorMem: String = "2g",
-      appName: String = "ItemSimilarityJob",
-      randomSeed: Int = System.currentTimeMillis().toInt,
-      recursive: Boolean = false,
-      input: String = null,
-      input2: String = null,
-      output: String = null,
-      filenamePattern: String = "^part-.*",
-      maxSimilaritiesPerItem: Int = 100,
-      maxPrefs: Int = 500,
-      minPrefs: Int = 1,
-      rowIDPosition: Int = 0,
-      itemIDPosition: Int = 1,
-      filterPosition: Int = -1,
-      filter1: String = null,
-      filter2: String = null,
-      inDelim: String = "[,\t ]",
-      rowKeyDelim: String = "\t",
-      columnIdStrengthDelim: String = ":",
-      tupleDelim: String = ",",
-      dontAddMahoutJars: Boolean = false)
+  class Options(
+      var master: String = "local",
+      var sparkExecutorMem: String = "2g",
+      var appName: String = "ItemSimilarityJob",
+      var randomSeed: Int = System.currentTimeMillis().toInt,
+      var recursive: Boolean = false,
+      var input: String = null,
+      var input2: String = null,
+      var output: String = null,
+      var filenamePattern: String = "^part-.*",
+      var maxSimilaritiesPerItem: Int = 100,
+      var maxPrefs: Int = 500,
+      var minPrefs: Int = 1,
+      var rowIDPosition: Int = 0,
+      var itemIDPosition: Int = 1,
+      var filterPosition: Int = -1,
+      var filter1: String = null,
+      var filter2: String = null,
+      var inDelim: String = "[,\t ]",
+      var rowKeyDelim: String = "\t",
+      var columnIdStrengthDelim: String = ":",
+      var tupleDelim: String = ",",
+      var omitStrength: Boolean = false,
+      var dontAddMahoutJars: Boolean = false,
+      var writeAllDatasets: Boolean = false)
 
 }

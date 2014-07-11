@@ -41,19 +41,19 @@ class CooccurrenceAnalysisSuite extends FunSuite with MahoutSuite with MahoutLoc
 
   // correct cooccurrence with LLR
   final val matrixLLRCoocAtAControl = dense(
-    (0.0,                0.6331745808516107, 0.0,                     0.0,                0.0),
-    (0.6331745808516107, 0.0,                0.0,                     0.0,                0.0),
-    (0.0,                0.0,                0.0,                     0.6331745808516107, 0.0),
-    (0.0,                0.0,                0.6331745808516107,      0.0,                0.0),
+    (0.0,                1.7260924347106847, 0.0,                     0.0,                0.0),
+    (1.7260924347106847, 0.0,                0.0,                     0.0,                0.0),
+    (0.0,                0.0,                0.0,                     1.7260924347106847, 0.0),
+    (0.0,                0.0,                1.7260924347106847,      0.0,                0.0),
     (0.0,                0.0,                0.0,                     0.0,                0.0))
 
   // correct cross-cooccurrence with LLR
   final val matrixLLRCoocBtAControl = dense(
-    (0.6331745808516107, 0.4046187819149094, 0.4046187819149094, 0.6331745808516107, 0.0),
-    (0.6331745808516107, 0.4046187819149094, 0.4046187819149094, 0.6331745808516107, 0.0),
-    (0.6331745808516107, 0.4046187819149094, 0.4046187819149094, 0.6331745808516107, 0.40461878191490940),
-    (0.6331745808516107, 0.4046187819149094, 0.4046187819149094, 0.6331745808516107, 0.0),
-    (0.0,                0.0,                0.0,                0.0,                0.8181382096075936))
+    (1.7260924347106847, 0.6795961471815897, 0.6795961471815897, 1.7260924347106847, 0.0),
+    (1.7260924347106847, 0.6795961471815897, 0.6795961471815897, 1.7260924347106847, 0.0),
+    (1.7260924347106847, 0.6795961471815897, 0.6795961471815897, 1.7260924347106847, 0.6795961471815897),
+    (1.7260924347106847, 0.6795961471815897, 0.6795961471815897, 1.7260924347106847, 0.0),
+    (0.0,                0.0,                0.0,                0.0,                4.498681156950466))
 
 
 
@@ -90,16 +90,16 @@ class CooccurrenceAnalysisSuite extends FunSuite with MahoutSuite with MahoutLoc
 
   test("cooccurrence [A'A], [B'A] double data using LLR") {
     val a = dense(
-        (100000.0D, 1.0D, 0.0D,  0.0D,  0.0D),
-        (0.0D,      0.0D, 10.0D, 1.0D,  0.0D),
-        (0.0D,      0.0D, 0.0D,  0.0D,  1000.0D),
-        (1.0D,      0.0D, 0.0D,  10.0D, 0.0D))
+        (100000.0D, 1.0D,  0.0D,  0.0D,     0.0D),
+        (     0.0D, 0.0D, 10.0D,  1.0D,     0.0D),
+        (     0.0D, 0.0D,  0.0D,  0.0D,  1000.0D),
+        (     1.0D, 0.0D,  0.0D, 10.0D,     0.0D))
 
     val b = dense(
-        (10000.0D, 100.0D, 1000.0D,     1.0D,      0.0D),
-        (10.0D,    1.0D,   10000000.0D, 10.0D,     0.0D),
-        (0.0D,     0.0D,   1000.0D,     0.0D,      100.0D),
-        (100.0D,   1.0D,   0.0D,        100000.0D, 0.0D))
+        (10000.0D, 100.0D,     1000.0D,      1.0D,   0.0D),
+        (   10.0D,   1.0D, 10000000.0D,     10.0D,   0.0D),
+        (    0.0D,   0.0D,     1000.0D,      0.0D, 100.0D),
+        (  100.0D,   1.0D,        0.0D, 100000.0D,   0.0D))
 
     val drmA = drmParallelize(m = a, numPartitions = 2)
     val drmB = drmParallelize(m = b, numPartitions = 2)
@@ -120,16 +120,16 @@ class CooccurrenceAnalysisSuite extends FunSuite with MahoutSuite with MahoutLoc
 
   test("cooccurrence [A'A], [B'A] integer data using LLR") {
     val a = dense(
-        (1000,  10, 0,      0,    0),
-        (0,     0,  -10000, 10,   0),
-        (0,     0,  0,      0,    100),
-        (10000, 0,  0,      1000, 0))
+        ( 1000,  10,       0,    0,   0),
+        (    0,   0,  -10000,   10,   0),
+        (    0,   0,       0,    0, 100),
+        (10000,   0,       0, 1000,   0))
 
     val b = dense(
-        (100,   1000, -10000, 10000, 0),
-        (10000, 1000, 100,    10,    0),
-        (0,     0,    10,     0,     -100),
-        (10,    100,  0,      1000,  0))
+        (  100, 1000, -10000, 10000,    0),
+        (10000, 1000,    100,    10,    0),
+        (    0,    0,     10,     0, -100),
+        (   10,  100,      0,  1000,    0))
 
     val drmA = drmParallelize(m = a, numPartitions = 2)
     val drmB = drmParallelize(m = b, numPartitions = 2)
@@ -148,6 +148,44 @@ class CooccurrenceAnalysisSuite extends FunSuite with MahoutSuite with MahoutLoc
     val diff2Matrix = matrixCrossCooc.minus(matrixLLRCoocBtAControl)
     n = (new MatrixOps(m = diff2Matrix)).norm
     n should be < 1E-10
+  }
+
+  test("cooccurrence two matrices with different number of columns"){
+    val a = dense(
+      (1, 1, 0, 0, 0),
+      (0, 0, 1, 1, 0),
+      (0, 0, 0, 0, 1),
+      (1, 0, 0, 1, 0))
+
+    val b = dense(
+      (0, 1, 1, 0),
+      (1, 1, 1, 0),
+      (0, 0, 1, 0),
+      (1, 1, 0, 1))
+
+    val matrixLLRCoocBtANonSymmetric = dense(
+      (0.0,                0.0,                1.7260924347106847, 5.545177444479561,  0.0),
+      (1.7260924347106847, 0.6795961471815897, 0.6795961471815897, 1.7260924347106847, 0.0),
+      (1.7260924347106847, 0.6795961471815897, 0.6795961471815897, 1.7260924347106847, 0.6795961471815897),
+      (1.7260924347106847, 0.0,                0.0,                1.7260924347106847, 0.0))
+
+
+    val drmA = drmParallelize(m = a, numPartitions = 2)
+    val drmB = drmParallelize(m = b, numPartitions = 2)
+
+    //self similarity
+    val drmCooc = CooccurrenceAnalysis.cooccurrences(drmARaw = drmA, drmBs = Array(drmB))
+    //var cp = drmSelfCooc(0).checkpoint()
+    //cp.writeDRM("/tmp/cooc-spark/")//to get values written
+    val matrixSelfCooc = drmCooc(0).checkpoint().collect
+    val diffMatrix = matrixSelfCooc.minus(matrixLLRCoocAtAControl)
+    var n = (new MatrixOps(m = diffMatrix)).norm
+    n should be < 1E-10
+
+    //cross similarity
+    val matrixCrossCooc = drmCooc(1).checkpoint().collect
+    val diff2Matrix = matrixCrossCooc.minus(matrixLLRCoocBtANonSymmetric)
+    n = (new MatrixOps(m = diff2Matrix)).norm
   }
 
   test("LLR calc") {

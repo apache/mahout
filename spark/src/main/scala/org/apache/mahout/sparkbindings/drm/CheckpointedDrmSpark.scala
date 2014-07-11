@@ -43,6 +43,8 @@ class CheckpointedDrmSpark[K: ClassTag](
   lazy val nrow = if (_nrow >= 0) _nrow else computeNRow
   lazy val ncol = if (_ncol >= 0) _ncol else computeNCol
 
+  def nrow_= (value:Long): Unit = _nrow = value
+
   private var cached: Boolean = false
   override protected[mahout] val context: DistributedContext = rdd.context
 

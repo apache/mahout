@@ -74,6 +74,7 @@ object CooccurrenceAnalysis extends Serializable {
       val bcastInteractionsPerThingB = drmBroadcast(drmB.numNonZeroElementsPerColumn)
 
       // Compute cross-co-occurrence matrix B'A
+      // pferrel: yikes, this is the wrong order
       val drmBtA = drmB.t %*% drmA
 
       val drmIndicatorsBtA = computeIndicators(drmBtA, numUsers, maxInterestingItemsPerThing,
@@ -134,9 +135,11 @@ object CooccurrenceAnalysis extends Serializable {
               val llr = logLikelihoodRatio(numInteractionsB(thingB).toLong, numInteractionsA(thingA).toLong,
                 cooccurrences.toLong, numUsers)
 
-              // matches hadoop code and maps values to range (0..1)
-              val tLLR = 1.0 - (1.0 / (1.0 + llr))
-              val candidate = thingA -> tLLR
+              val candidate = thingA -> llr
+
+              // matches legacy hadoop code and maps values to range (0..1)
+              // val tLLR = 1.0 - (1.0 / (1.0 + llr))
+              //val candidate = thingA -> tLLR
 
               // Enqueue item with score, if belonging to the top-k
               if (topItemsPerThing.size < maxInterestingItemsPerThing) {
