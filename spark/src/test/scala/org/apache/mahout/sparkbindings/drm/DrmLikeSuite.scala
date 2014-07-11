@@ -26,7 +26,5 @@ import RLikeDrmOps._
 import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 
 
-/**
- * DRMLike tests -- just run common DRM tests in Spark.
- */
+/** DRMLike tests -- just run common DRM tests in Spark. */
 class DrmLikeSuite extends FunSuite with DistributedSparkSuite with DrmLikeSuiteBase
