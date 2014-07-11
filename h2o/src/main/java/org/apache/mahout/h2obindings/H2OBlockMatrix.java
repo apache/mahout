@@ -23,7 +23,7 @@ import org.apache.mahout.math.AbstractMatrix;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.SparseMatrix;
 
-import water.fvec.*;
+import water.fvec.Chunk;
 
 /*
  * A Matrix implementation to represent a vertical Block of DRM.

@@ -20,8 +20,12 @@ package org.apache.mahout.h2obindings.ops;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.h2obindings.H2OBlockMatrix;
 
-import water.*;
-import water.fvec.*;
+import water.MRTask;
+import water.fvec.Frame;
+import water.fvec.Vec;
+import water.fvec.Chunk;
+import water.fvec.NewChunk;
+
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -63,6 +67,20 @@ public class MapBlock {
         }
       }
 
+      /*
+        Input:
+        chks.length == A.numCols()
+
+        Output:
+        ncs.length == (A.numCols() + 1) if String keyed
+                      (A.numCols() + 0) if Int or Long keyed
+
+        First A.numCols() ncs[] elements are fed back the output
+        of bmf() output's _2 in deblockify()
+
+        If String keyed, then MapBlockHelper.exec() would have
+        filled in the Strings into ncs[ncol] already
+      */
       public void map(Chunk chks[], NewChunk ncs[]) {
         long start = chks[0].start();
         NewChunk nclabel = is_r_str ? ncs[ncs.length-1] : null;
@@ -75,6 +93,10 @@ public class MapBlock {
     Frame fmap = new MRTaskBMF(bmf, VA).doAll(ncol_res, A).outputFrame(null, null);
     Vec vmap = null;
     if (is_r_str) {
+      /* If output was String keyed, then the last Vec in fmap is the String vec.
+         If so, peel it out into a separate Vec (vmap) and set fmap to be the
+         Frame with just the first ncol Vecs
+      */
       vmap = fmap.vecs()[ncol];
       fmap = new Frame(Arrays.copyOfRange(fmap.vecs(), 0, ncol));
     }

@@ -24,8 +24,7 @@ import org.apache.mahout.math.drm.logical._
 import org.apache.mahout.h2obindings.ops._
 import org.apache.mahout.h2obindings.drm._
 
-import water._
-import water.fvec._
+import water.fvec.{Frame,Vec}
 
 object H2OEngine extends DistributedEngine {
   def colMeans[K:ClassTag](drm: CheckpointedDrm[K]): Vector =

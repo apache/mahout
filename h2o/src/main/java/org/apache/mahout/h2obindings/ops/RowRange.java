@@ -19,57 +19,62 @@ package org.apache.mahout.h2obindings.ops;
 
 import scala.collection.immutable.Range;
 
-import water.*;
-import water.fvec.*;
+import water.MRTask;
+import water.fvec.Frame;
+import water.fvec.Vec;
+import water.fvec.Chunk;
+import water.fvec.NewChunk;
 import scala.Tuple2;
 
 public class RowRange {
   /* Filter operation */
-  public static Tuple2<Frame,Vec> RowRange(Tuple2<Frame,Vec> TA, Range r) {
+  public static Tuple2<Frame,Vec> RowRange(Tuple2<Frame,Vec> TA, final Range R) {
     Frame A = TA._1();
     Vec VA = TA._2();
 
-    class MRTaskFilter extends MRTask<MRTaskFilter> {
-      Range _r;
-      MRTaskFilter(Range r) {
-        _r = r;
-      }
-      public void map(Chunk chks[], NewChunk ncs[]) {
-        if (chks[0].start() > _r.end() || (chks[0].start() + chks[0].len()) < _r.start())
-          return;
+    /* Run a filtering MRTask on A. If row number falls within R.start() and
+       R.end(), then the row makes it into the output
+    */
+    Frame Arr = new MRTask() {
+        public void map(Chunk chks[], NewChunk ncs[]) {
+          int chunk_size = chks[0].len();
+          long chunk_start = chks[0].start();
 
-        for (int r = 0; r < chks[0].len(); r++) {
-          if (!_r.contains (chks[0].start() + r))
-            continue;
-
-          for (int c = 0; c < chks.length; c++)
-            ncs[c].addNum(chks[c].at0(r));
-        }
-      }
-    }
-    Frame Arr = new MRTaskFilter(r).doAll(A.numCols(), A).outputFrame(A.names(), A.domains());
-    Vec Vrr = null;
-    if (VA != null) {
-      class MRTaskStrFilter extends MRTask<MRTaskStrFilter> {
-        Range _r;
-        MRTaskStrFilter(Range r) {
-          _r = r;
-        }
-        public void map(Chunk chk, NewChunk nc) {
-          if (chk.start() > _r.end() || (chk.start() + chk.len()) < _r.start())
+          /* First check if the entire chunk even overlaps with R */
+          if (chunk_start > R.end() || (chunk_start + chunk_size) < R.start())
             return;
 
-          for (int r = 0; r < chk.len(); r++) {
-            if (!_r.contains (chk.start() + r))
+          /* This chunk overlaps, filter out just the overlapping rows */
+          for (int r = 0; r < chunk_size; r++) {
+            if (!R.contains (chunk_start + r))
+              continue;
+
+            for (int c = 0; c < chks.length; c++)
+              ncs[c].addNum(chks[c].at0(r));
+          }
+        }
+      }.doAll(A.numCols(), A).outputFrame(null, null);
+
+    Vec Vrr = (VA == null) ? null : new MRTask() {
+        /* This is a String keyed DRM. Do the same thing as above,
+           but this time just one column of Strings.
+        */
+        public void map(Chunk chk, NewChunk nc) {
+          int chunk_size = chk.len();
+          long chunk_start = chk.start();
+
+          if (chunk_start > R.end() || (chunk_start + chunk_size) < R.start())
+            return;
+
+          for (int r = 0; r < chunk_size; r++) {
+            if (!R.contains (chunk_start + r))
               continue;
 
             nc.addStr(chk.atStr0(r));
           }
         }
-      }
-      Vrr = new MRTaskStrFilter(r).doAll(1, VA).outputFrame(null,null).vecs()[0];
-    }
+      }.doAll(1, VA).outputFrame(null, null).anyVec();
 
-    return new Tuple2<Frame,Vec>(Arr,Vrr);
+    return new Tuple2<Frame,Vec>(Arr, Vrr);
   }
 }

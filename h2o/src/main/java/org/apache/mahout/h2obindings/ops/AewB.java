@@ -19,8 +19,12 @@ package org.apache.mahout.h2obindings.ops;
 
 import org.apache.mahout.h2obindings.H2OHelper;
 
-import water.*;
-import water.fvec.*;
+import water.MRTask;
+import water.fvec.Frame;
+import water.fvec.Vec;
+import water.fvec.Chunk;
+import water.fvec.NewChunk;
+
 import scala.Tuple2;
 
 public class AewB {
@@ -29,32 +33,42 @@ public class AewB {
     final Frame A = AT._1();
     final Frame B = BT._1();
     Vec VA = AT._2();
+    int AewB_cols = A.numCols();
 
-    class MRTaskAewB extends MRTask<MRTaskAewB> {
-      private double opfn (String op, double a, double b) {
-        if (a == 0.0 && b == 0.0)
+    /* AewB is written into ncs[] with an MRTask on A, and therefore will
+       be similarly partitioned as A.
+
+       B may or may not be similarly partitioned as A, but must have the
+       same dimensions of A.
+    */
+    Frame AewB = new MRTask() {
+        private double opfn(String op, double a, double b) {
+          if (a == 0.0 && b == 0.0)
+            return 0.0;
+          if (op.equals("+"))
+            return a + b;
+          else if (op.equals("-"))
+            return a - b;
+          else if (op.equals("*"))
+            return a * b;
+          else if (op.equals("/"))
+            return a / b;
           return 0.0;
-        if (op.equals("+"))
-          return a + b;
-        else if (op.equals("-"))
-          return a - b;
-        else if (op.equals("*"))
-          return a * b;
-        else if (op.equals("/"))
-          return a / b;
-        return 0.0;
-      }
-      public void map(Chunk chks[], NewChunk ncs[]) {
-        long start = chks[0].start();
-        for (int c = 0; c < chks.length; c++) {
-          for (int r = 0; r < chks[0].len(); r++) {
-            ncs[c].addNum(opfn(op, chks[c].at0(r), B.vecs()[c].at(start+r)));
+        }
+        public void map(Chunk chks[], NewChunk ncs[]) {
+          int chunk_size = chks[0].len();
+          Vec B_vecs[] = B.vecs();
+          long start = chks[0].start();
+
+          for (int c = 0; c < chks.length; c++) {
+            for (int r = 0; r < chunk_size; r++) {
+              ncs[c].addNum(opfn(op, chks[c].at0(r), B_vecs[c].at(start + r)));
+            }
           }
         }
-      }
-    }
-    Frame AewB = new MRTaskAewB().doAll(A.numCols(), A).outputFrame(A.names(), A.domains());
+      }.doAll(AewB_cols, A).outputFrame(null, null);
 
+    /* Carry forward labels of A blindly into ABt */
     return new Tuple2<Frame,Vec>(AewB, VA);
   }
 }

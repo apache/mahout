@@ -17,10 +17,21 @@
 
 package org.apache.mahout.h2obindings;
 
-import org.apache.mahout.math.*;
+import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.DenseMatrix;
+import org.apache.mahout.math.SparseMatrix;
+import org.apache.mahout.math.DenseVector;
 
-import water.*;
-import water.fvec.*;
+import water.MRTask;
+import water.Futures;
+import water.Key;
+import water.DKV;
+import water.fvec.Frame;
+import water.fvec.Vec;
+import water.fvec.Chunk;
+import water.fvec.NewChunk;
+import water.fvec.C0LChunk;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,11 +47,11 @@ public class H2OHelper {
     Is the matrix sparse? If the number of missing elements is
     32 x times the number of present elements, treat it as sparse
   */
-  public static boolean is_sparse (Frame frame) {
+  public static boolean is_sparse(Frame frame) {
     long rows = frame.numRows();
     long cols = frame.numCols();
 
-
+    /* MRTask to aggregate precalculated per-chunk sparse lengths */
     class MRTaskNZ extends MRTask<MRTaskNZ> {
       long _sparselen;
       public void map(Chunk chks[]) {
@@ -63,7 +74,7 @@ public class H2OHelper {
     Dense Matrix depending on number of missing elements
     in Frame.
   */
-  public static Matrix matrix_from_frame (Frame frame, Vec labels) {
+  public static Matrix matrix_from_frame(Frame frame, Vec labels) {
     Matrix m;
 
     if (is_sparse (frame))
@@ -72,6 +83,7 @@ public class H2OHelper {
       m = new DenseMatrix ((int)frame.numRows(), frame.numCols());
 
     int c = 0;
+    /* Fill matrix, column at a time */
     for (Vec v : frame.vecs()) {
       for (int r = 0; r < frame.numRows(); r++) {
         double d = 0.0;
@@ -81,6 +93,7 @@ public class H2OHelper {
       c++;
     }
 
+    /* If string keyed, set the stings as rowlabels */
     if (labels != null) {
       HashMap<String,Integer> map = new HashMap<String,Integer>();
       for (long i = 0; i < labels.length(); i++) {
@@ -97,7 +110,7 @@ public class H2OHelper {
      H2O precalculates means in a Vec, and a Vec corresponds
      to a column.
   */
-  public static Vector colMeans (Frame frame) {
+  public static Vector colMeans(Frame frame) {
     double means[] = new double[frame.numCols()];
     for (int i = 0; i < frame.numCols(); i++)
       means[i] = frame.vecs()[i].mean();
@@ -111,7 +124,7 @@ public class H2OHelper {
 
      WARNING: Vulnerable to overflow. No way around it.
   */
-  public static Vector colSums (Frame frame) {
+  public static Vector colSums(Frame frame) {
     class MRTaskSum extends MRTask<MRTaskSum> {
       public double _sums[];
       public void map(Chunk chks[]) {
@@ -136,7 +149,7 @@ public class H2OHelper {
 
      WARNING: Vulnerable to overflow. No way around it.
   */
-  public static double sumSqr (Frame frame) {
+  public static double sumSqr(Frame frame) {
     class MRTaskSumSqr extends MRTask<MRTaskSumSqr> {
       public double _sumSqr;
       public void map(Chunk chks[]) {
@@ -160,7 +173,7 @@ public class H2OHelper {
 
      WARNING: Vulnerable to overflow. No way around it.
   */
-  public static Vector nonZeroCnt (Frame frame) {
+  public static Vector nonZeroCnt(Frame frame) {
     class MRTaskNonZero extends MRTask<MRTaskNonZero> {
       public double _sums[];
       public void map(Chunk chks[]) {
@@ -181,6 +194,7 @@ public class H2OHelper {
     return new DenseVector(new MRTaskNonZero().doAll(frame)._sums);
   }
 
+  /* Convert String->Integer map to Integer->String map */
   private static Map<Integer,String> reverse_map(Map<String,Integer> map) {
     if (map == null)
       return null;
@@ -194,7 +208,7 @@ public class H2OHelper {
     return rmap;
   }
 
-  private static int chunk_size (long nrow, int ncol, int min, int exact) {
+  private static int chunk_size(long nrow, int ncol, int min, int exact) {
     int chunk_sz;
     int parts_hint = Math.max(min, exact);
 
@@ -220,18 +234,15 @@ public class H2OHelper {
 
   /* Ingest a Matrix into an H2O Frame. H2O Frame is the "backing"
      data structure behind CheckpointedDrm. Steps:
-
-     - @cols is the number of columsn in the Matrix
-     - An H2O Vec represents an H2O Column.
-     - Create @cols number of Vec's.
-     - Load data into Vecs by routing them through NewChunks
   */
-  public static Tuple2<Frame,Vec> frame_from_matrix (Matrix m, int min_hint, int exact_hint) {
+  public static Tuple2<Frame,Vec> frame_from_matrix(Matrix m, int min_hint, int exact_hint) {
+    /* First create an empty (0-filled) frame of the required dimensions */
     Frame frame = empty_frame (m.rowSize(), m.columnSize(), min_hint, exact_hint);
     Vec labels = null;
     Vec.Writer writers[] = new Vec.Writer[m.columnSize()];
     Futures closer = new Futures();
 
+    /* "open" vectors for writing efficiently in bulk */
     for (int i = 0; i < writers.length; i++)
       writers[i] = frame.vecs()[i].open();
 
@@ -242,8 +253,10 @@ public class H2OHelper {
     for (int c = 0; c < m.columnSize(); c++)
       writers[c].close(closer);
 
+    /* If string labeled matrix, create aux Vec */
     Map<String,Integer> map = m.getRowLabelBindings();
     if (map != null) {
+      /* label vector must be similarly partitioned like the Frame */
       labels = frame.anyVec().makeZero();
       Vec.Writer writer = labels.open();
       Map<Integer,String> rmap = reverse_map(map);
@@ -259,7 +272,7 @@ public class H2OHelper {
     return new Tuple2<Frame,Vec>(frame,labels);
   }
 
-  public static Frame empty_frame (long nrow, int ncol, int min_hint, int exact_hint) {
+  public static Frame empty_frame(long nrow, int ncol, int min_hint, int exact_hint) {
     int chunk_sz = chunk_size (nrow, ncol, min_hint, exact_hint);
     int nchunks = (int) ((nrow - 1) / chunk_sz) + 1; /* Final number of Chunks per Vec */
     Futures fs = new Futures();

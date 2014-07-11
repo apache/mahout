@@ -19,8 +19,12 @@ package org.apache.mahout.h2obindings.ops;
 
 import org.apache.mahout.h2obindings.H2OHelper;
 
-import water.*;
-import water.fvec.*;
+import water.MRTask;
+import water.fvec.Frame;
+import water.fvec.Vec;
+import water.fvec.Chunk;
+import water.fvec.NewChunk;
+
 import scala.Tuple2;
 
 public class AtB {
@@ -29,24 +33,35 @@ public class AtB {
     final Frame A = TA._1();
     final Frame B = TB._1();
 
-    Frame AtB = H2OHelper.empty_frame (A.numCols(), B.numCols(), -1, -1);
+    /* First create an empty frame of the required dimensions */
+    Frame AtB = H2OHelper.empty_frame(A.numCols(), B.numCols(), -1, -1);
 
-    class MRTaskAtB extends MRTask<MRTaskAtB> {
+    /* Execute MRTask on the new Frame, and fill each cell (initially 0) by
+       computing appropriate values from A and B.
+
+       chks.length == B.numCols()
+    */
+    new MRTask() {
       public void map(Chunk chks[]) {
+        int chunk_size = chks[0].len();
         long start = chks[0].start();
+        long A_rows = A.numRows();
+        Vec A_vecs[] = A.vecs();
+        Vec B_vecs[] = B.vecs();
+
         for (int c = 0; c < chks.length; c++) {
-          for (int r = 0; r < chks[0].len(); r++) {
+          for (int r = 0; r < chunk_size; r++) {
             double v = 0;
-            for (int i = 0; i < A.numRows(); i++) {
-              v += (A.vecs()[(int)(start+r)].at(i) * B.vecs()[c].at(i));
+            for (long i = 0; i < A_rows; i++) {
+              v += (A_vecs[(int)(start+r)].at(i) * B_vecs[c].at(i));
             }
             chks[c].set0(r, v);
           }
         }
       }
-    }
+    }.doAll(AtB);
 
-    new MRTaskAtB().doAll(AtB);
-    return new Tuple2<Frame,Vec>(AtB,null);
+    /* AtB is NOT similarly partitioned as A, drop labels */
+    return new Tuple2<Frame,Vec>(AtB, null);
   }
 }

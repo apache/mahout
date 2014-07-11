@@ -22,6 +22,10 @@ import water.H2O;
 public class H2OContext {
   String masterURL;
 
+  /* @masterURL should actually be the cloud name (name of cluster) to which
+     all the H2O worker nodes "join into". This is not a hostname or IP address
+     of a server, but a string which all cluster members agree on.
+  */
   public H2OContext(String _masterURL) {
     masterURL = _masterURL;
 

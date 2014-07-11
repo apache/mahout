@@ -23,37 +23,66 @@ import org.apache.mahout.math.DiagonalMatrix;
 import org.apache.mahout.h2obindings.H2OHelper;
 import org.apache.mahout.h2obindings.drm.H2OBCast;
 
-import water.*;
-import water.fvec.*;
+import water.MRTask;
+import water.fvec.Frame;
+import water.fvec.Vec;
+import water.fvec.Chunk;
+import water.fvec.NewChunk;
 import scala.Tuple2;
 
 public class TimesRightMatrix {
+  /* Multiple with in-core Matrix */
+  public static Tuple2<Frame,Vec> TimesRightMatrix(Tuple2<Frame,Vec> TA, Matrix B) {
+    Frame A = TA._1();
+    Vec VA = TA._2();
+    Frame AinCoreB = null;
 
+    if (B instanceof DiagonalMatrix)
+      AinCoreB = AinCoreB_diagonal(A, B.viewDiagonal());
+    else
+      AinCoreB = AinCoreB_common(A, B);
+
+    return new Tuple2<Frame,Vec>(AinCoreB, VA);
+  }
+
+  /*
+    Multiply Frame A with in-core diagonal Matrix (whose diagonal Vector is d)
+
+    A.numCols() == d.size()
+  */
   private static Frame AinCoreB_diagonal(final Frame A, Vector d) {
     final H2OBCast<Vector> bd = new H2OBCast<Vector>(d);
 
-    class MRTaskAinCoreB extends MRTask<MRTaskAinCoreB> {
+    return new MRTask() {
       public void map(Chunk chks[], NewChunk ncs[]) {
         Vector D = bd.value();
+        int chunk_size = chks[0].len();
+
         for (int c = 0; c < ncs.length; c++) {
-          for (int r = 0; r < chks[0].len(); r++) {
+          for (int r = 0; r < chunk_size; r++) {
             double v = (chks[c].at0(r) * D.getQuick(c));
             ncs[c].addNum(v);
           }
         }
       }
-    }
-    return new MRTaskAinCoreB().doAll(d.size(), A).outputFrame(null,null);
+    }.doAll(d.size(), A).outputFrame(null, null);
   }
 
+  /*
+    Multiply Frame A with in-core Matrix b
+
+    A.numCols() == b.rowSize()
+  */
   private static Frame AinCoreB_common(final Frame A, Matrix b) {
     final H2OBCast<Matrix> bb = new H2OBCast<Matrix>(b);
 
-    class MRTaskAinCoreB extends MRTask<MRTaskAinCoreB> {
+    return new MRTask() {
       public void map(Chunk chks[], NewChunk ncs[]) {
         Matrix B = bb.value();
+        int chunk_size = chks[0].len();
+
         for (int c = 0; c < ncs.length; c++) {
-          for (int r = 0; r < chks[0].len(); r++) {
+          for (int r = 0; r < chunk_size; r++) {
             double v = 0;
             for (int i = 0; i < chks.length; i++) {
               v += (chks[i].at0(r) * B.getQuick(i, c));
@@ -62,20 +91,6 @@ public class TimesRightMatrix {
           }
         }
       }
-    }
-    return new MRTaskAinCoreB().doAll(b.columnSize(), A).outputFrame(null,null);
-  }
-
-  /* Multiple with in-core Matrix */
-  public static Tuple2<Frame,Vec> TimesRightMatrix(Tuple2<Frame,Vec> TA, Matrix B) {
-    Frame A = TA._1();
-    Vec VA = TA._2();
-    Frame AinCoreB;
-    if (B instanceof DiagonalMatrix)
-      AinCoreB = AinCoreB_diagonal(A, B.viewDiagonal());
-    else
-      AinCoreB = AinCoreB_common(A, B);
-
-    return new Tuple2<Frame,Vec>(AinCoreB, VA);
+    }.doAll(b.columnSize(), A).outputFrame(null, null);
   }
 }

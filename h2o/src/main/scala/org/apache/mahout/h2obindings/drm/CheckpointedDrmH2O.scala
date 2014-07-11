@@ -6,8 +6,7 @@ import RLikeOps._
 import org.apache.mahout.math.drm._
 import org.apache.mahout.h2obindings._
 
-import water._
-import water.fvec._
+import water.fvec.{Frame,Vec}
 
 import scala.reflect._
 

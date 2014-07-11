@@ -19,8 +19,12 @@ package org.apache.mahout.h2obindings.ops;
 
 import org.apache.mahout.h2obindings.H2OHelper;
 
-import water.*;
-import water.fvec.*;
+import water.MRTask;
+import water.fvec.Frame;
+import water.fvec.Vec;
+import water.fvec.Chunk;
+import water.fvec.NewChunk;
+
 import scala.Tuple2;
 
 public class ABt {
@@ -29,21 +33,32 @@ public class ABt {
     Frame A = TA._1();
     Vec VA = TA._2();
     final Frame B = TB._1();
+    int ABt_cols = (int)B.numRows();
 
-    class MRTaskABt extends MRTask<MRTaskABt> {
-      public void map(Chunk chks[], NewChunk ncs[]) {
-        for (int c = 0; c < ncs.length; c++) {
-          for (int r = 0; r < chks[0].len(); r++) {
-            double v = 0;
-            for (int i = 0; i < chks.length; i++) {
-              v += (chks[i].at0(r) * B.vecs()[i].at(c));
+    /* ABt is written into ncs[] with an MRTask on A, and therefore will
+       be similarly partitioned as A.
+
+       chks.length == A.numCols() (== B.numCols())
+       ncs.length == ABt_cols (B.numRows())
+    */
+    Frame ABt = new MRTask() {
+        public void map(Chunk chks[], NewChunk ncs[]) {
+          int chunk_size = chks[0].len();
+          Vec B_vecs[] = B.vecs();
+
+          for (int c = 0; c < ncs.length; c++) {
+            for (int r = 0; r < chunk_size; r++) {
+              double v = 0;
+              for (int i = 0; i < chks.length; i++) {
+                v += (chks[i].at0(r) * B_vecs[i].at(c));
+              }
+              ncs[c].addNum(v);
             }
-            ncs[c].addNum(v);
           }
         }
-      }
-    }
-    Frame ABt = new MRTaskABt().doAll((int)B.numRows(),A).outputFrame(null,null);
+      }.doAll(ABt_cols, A).outputFrame(null, null);
+
+    /* Carry forward labels of A blindly into ABt */
     return new Tuple2<Frame,Vec>(ABt, VA);
   }
 }

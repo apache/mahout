@@ -21,8 +21,12 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.h2obindings.H2OHelper;
 import org.apache.mahout.h2obindings.drm.H2OBCast;
 
-import water.*;
-import water.fvec.*;
+import water.MRTask;
+import water.fvec.Frame;
+import water.fvec.Vec;
+import water.fvec.Chunk;
+import water.fvec.NewChunk;
+
 import scala.Tuple2;
 
 public class Ax {
@@ -31,19 +35,28 @@ public class Ax {
     Frame A = TA._1();
     Vec VA = TA._2();
     final H2OBCast<Vector> bx = new H2OBCast<Vector>(x);
-    class MRTaskAx extends MRTask<MRTaskAx> {
-      public void map(Chunk chks[], NewChunk nc) {
-        Vector x = bx.value();
-        for (int r = 0; r < chks[0].len(); r++) {
-          double v = 0;
-          for (int c = 0; c < chks.length; c++) {
-            v += (chks[c].at0(r) * x.getQuick(c));
+
+    /* Ax is written into nc (single element, not array) with an MRTask on A,
+       and therefore will be similarly partitioned as A.
+
+       x.size() == A.numCols() == chks.length
+    */
+    Frame Ax = new MRTask() {
+        public void map(Chunk chks[], NewChunk nc) {
+          int chunk_size = chks[0].len();
+          Vector x = bx.value();
+
+          for (int r = 0; r < chunk_size; r++) {
+            double v = 0;
+            for (int c = 0; c < chks.length; c++) {
+              v += (chks[c].at0(r) * x.getQuick(c));
+            }
+            nc.addNum(v);
           }
-          nc.addNum(v);
         }
-      }
-    }
-    Frame Ax = new MRTaskAx().doAll(1, A).outputFrame(A.names(), A.domains());
+      }.doAll(1, A).outputFrame(null, null);
+
+    /* Carry forward labels of A blindly into ABt */
     return new Tuple2<Frame,Vec>(Ax, VA);
   }
 }

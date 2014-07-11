@@ -17,8 +17,11 @@
 
 package org.apache.mahout.h2obindings.ops;
 
-import water.*;
-import water.fvec.*;
+import water.MRTask;
+import water.fvec.Frame;
+import water.fvec.Vec;
+import water.fvec.Chunk;
+import water.fvec.NewChunk;
 import scala.Tuple2;
 import org.apache.mahout.h2obindings.H2OHelper;
 
@@ -26,37 +29,53 @@ public class Par {
   public static Tuple2<Frame,Vec> exec(Tuple2<Frame,Vec> TA, int min, int exact) {
     final Frame frin = TA._1();
     final Vec vin = TA._2();
-    Frame frout = H2OHelper.empty_frame (frin.numRows(), frin.numCols(), min, exact);
+
+    /* First create a new empty Frame with the required partitioning */
+    Frame frout = H2OHelper.empty_frame(frin.numRows(), frin.numCols(), min, exact);
     Vec vout = null;
 
-    class MRParVecTask extends MRTask<MRParVecTask> {
-      public void map(Chunk chks[], NewChunk nc) {
-        Vec vins[] = frin.vecs();
-        for (int r = 0; r < chks[0].len(); r++) {
-          for (int c = 0; c < chks.length; c++) {
-            chks[c].set0(r, vins[c].at(chks[0].start() + r));
-          }
-          nc.addStr(vin.atStr(chks[0].start() + r));
-        }
-      }
-    }
+    if (vin != null) {
+      /* If String keyed, then run an MRTask on the new frame, and also
+         creat yet another 1-column newer frame for the re-orged String keys.
+         The new String Vec will therefore be similarly partitioned as the
+         new Frame.
 
-    class MRParTask extends MRTask<MRParTask> {
-      public void map(Chunk chks[]) {
-        Vec vins[] = frin.vecs();
-        for (int r = 0; r < chks[0].len(); r++) {
-          for (int c = 0; c < chks.length; c++) {
-            chks[c].set0(r, vins[c].at(chks[0].start() + r));
-          }
-        }
-      }
-    }
+         vout is finally collected by calling anyVec() on outputFrame(),
+         as it is the only column in the output frame.
+      */
+      vout = new MRTask() {
+          public void map(Chunk chks[], NewChunk nc) {
+            int chunk_size = chks[0].len();
+            Vec vins[] = frin.vecs();
+            long start = chks[0].start();
 
-    if (vout != null) {
-      vout = new MRParVecTask().doAll(1, frout).outputFrame(null, null).anyVec();
+            for (int r = 0; r < chunk_size; r++) {
+              for (int c = 0; c < chks.length; c++) {
+                chks[c].set0(r, vins[c].at(start + r));
+              }
+              nc.addStr(vin.atStr(start + r));
+            }
+          }
+        }.doAll(1, frout).outputFrame(null, null).anyVec();
     } else {
-      new MRParTask().doAll(frout);
+      /* If not String keyed, then run and MRTask on the new frame, and
+         just pull in right elements from frin
+      */
+      new MRTask() {
+        public void map(Chunk chks[]) {
+          int chunk_size = chks[0].len();
+          Vec vins[] = frin.vecs();
+          long start = chks[0].start();
+
+          for (int r = 0; r < chunk_size; r++) {
+            for (int c = 0; c < chks.length; c++) {
+              chks[c].set0(r, vins[c].at(start + r));
+            }
+          }
+        }
+      }.doAll(frout);
     }
+
     return new Tuple2<Frame,Vec> (frout, vout);
   }
 }

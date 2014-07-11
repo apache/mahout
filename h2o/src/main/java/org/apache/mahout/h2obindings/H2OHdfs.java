@@ -22,8 +22,9 @@ import java.net.URI;
 
 import scala.Tuple2;
 
-import water.fvec.*;
-import water.*;
+import water.fvec.Frame;
+import water.fvec.Vec;
+import water.Futures;
 
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.DenseVector;
