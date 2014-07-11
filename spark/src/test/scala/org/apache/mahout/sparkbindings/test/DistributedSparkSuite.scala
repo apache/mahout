@@ -3,10 +3,10 @@ package org.apache.mahout.sparkbindings.test
 import org.scalatest.Suite
 import org.apache.spark.SparkConf
 import org.apache.mahout.sparkbindings._
-import org.apache.mahout.test.MahoutSuite
+import org.apache.mahout.test.{DistributedMahoutSuite, MahoutSuite}
 import org.apache.mahout.math.drm.DistributedContext
 
-trait MahoutLocalContext extends MahoutSuite with LoggerConfiguration {
+trait DistributedSparkSuite extends DistributedMahoutSuite with LoggerConfiguration {
   this: Suite =>
 
   protected implicit var mahoutCtx: DistributedContext = _

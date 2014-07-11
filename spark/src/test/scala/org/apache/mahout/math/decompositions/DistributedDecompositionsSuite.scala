@@ -15,18 +15,20 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.sparkbindings.drm
+package org.apache.mahout.math.decompositions
 
-import org.scalatest.FunSuite
 import org.apache.mahout.math._
-import scalabindings._
 import drm._
+import scalabindings._
 import RLikeOps._
 import RLikeDrmOps._
+import org.apache.mahout.sparkbindings._
+import org.apache.mahout.common.RandomUtils
+import scala.math._
+import org.scalatest.{Matchers, FunSuite}
 import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 
+class DistributedDecompositionsSuite extends FunSuite with DistributedSparkSuite with DistributedDecompositionsSuiteBase {
 
-/**
- * DRMLike tests -- just run common DRM tests in Spark.
- */
-class DrmLikeSuite extends FunSuite with DistributedSparkSuite with DrmLikeSuiteBase
+
+}

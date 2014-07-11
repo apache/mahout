@@ -17,7 +17,7 @@
 
 package org.apache.mahout.sparkbindings.blas
 
-import org.apache.mahout.sparkbindings.test.MahoutLocalContext
+import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 import org.scalatest.FunSuite
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.drm._
@@ -28,7 +28,7 @@ import org.apache.spark.SparkContext._
 import org.apache.mahout.math.drm.logical.OpABt
 
 /** Tests for AB' operator algorithms */
-class ABtSuite extends FunSuite with MahoutLocalContext {
+class ABtSuite extends FunSuite with DistributedSparkSuite {
 
   test("ABt") {
     val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5))
