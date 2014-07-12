@@ -347,7 +347,7 @@ object ItemSimilarityDriver extends MahoutDriver {
     // todo: needs to support more than one cross-similarity indicator
     if (indexedDatasets.length > 1) {
 
-      val crossIndicatorDataset = new IndexedDataset(indicatorMatrices(1), indexedDatasets(1).columnIDs, indexedDatasets(0).columnIDs) // cross similarity
+      val crossIndicatorDataset = new IndexedDataset(indicatorMatrices(1), indexedDatasets(0).columnIDs, indexedDatasets(1).columnIDs) // cross similarity
       writer.writeDRMTo(crossIndicatorDataset, options.output + "cross-indicator-matrix")
 
     }

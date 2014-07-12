@@ -44,14 +44,14 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
     (0.0,                0.0,                0.0,                0.0,                0.8181382096075936))
 */
 
-  final val SelfSimilairtyTSV = Set(
+  final val SelfSimilairtyTSV = Array(
     "galaxy\tnexus:1.7260924347106847",
     "ipad\tiphone:1.7260924347106847",
     "nexus\tgalaxy:1.7260924347106847",
     "iphone\tipad:1.7260924347106847",
     "surface")
 
-  final val CrossSimilarityTSV = Set(
+  final val CrossSimilarityTSV = Array(
     "nexus\tnexus:0.6795961471815897,iphone:1.7260924347106847,ipad:0.6795961471815897,surface:0.6795961471815897,galaxy:1.7260924347106847",
     "ipad\tnexus:0.6795961471815897,iphone:1.7260924347106847,ipad:0.6795961471815897,galaxy:1.7260924347106847",
     "surface\tsurface:4.498681156950466",
@@ -584,10 +584,11 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
       "u4,view,soap")
 
     val UnequalDimensionsCrossSimilarity = Set(
-        "galaxy\tsoap:0.6795961471815897,phones:1.7260924347106847,tablets:0.6795961471815897,null:0.6795961471815897,mobile_acc:1.7260924347106847",
-        "ipad\tmobile_acc:5.545177444479561,soap:1.7260924347106847",
-        "nexus\tmobile_acc:1.7260924347106847,phones:1.7260924347106847",
-        "iphone\tsoap:0.6795961471815897,phones:1.7260924347106847,tablets:0.6795961471815897,mobile_acc:1.7260924347106847")
+        "iphone\tmobile_acc:1.7260924347106847,soap:1.7260924347106847,phones:1.7260924347106847",
+        "surface\tmobil_acc:0.6795961471815897",
+        "nexus\tmobile_acc:0.6795961471815897,tablets:1.7260924347106847,phones:0.6795961471815897",
+        "galaxy\tsoap:1.7260924347106847,phones:1.7260924347106847,tablets:5.545177444479561,mobile_acc:1.7260924347106847",
+        "ipad\tmobile_acc:0.6795961471815897,phones:0.6795961471815897")
 
     // this will create multiple part-xxxxx files in the InFile dir but other tests will
     // take account of one actual file
@@ -612,10 +613,12 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLoc
       "--writeAllDatasets"))
 
     beforeEach // restart the test context to read the output of the driver
-    val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toSet[String]
-    assert(indicatorLines == SelfSimilairtyTSV)
-    val crossIndicatorLines = mahoutCtx.textFile(OutPath+"/cross-indicator-matrix/").collect.toSet[String]
-    assert (crossIndicatorLines == UnequalDimensionsCrossSimilarity)
+    val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect
+    val indicatorID = indicatorLines.hashCode
+    assert(indicatorID == SelfSimilairtyTSV.hashCode)
+    val crossIndicatorLines = mahoutCtx.textFile(OutPath+"/cross-indicator-matrix/").collect
+    val crossIndicatorID = crossIndicatorLines.hashCode
+    assert (crossIndicatorID == UnequalDimensionsCrossSimilarity.hashCode)
 
   }
 
