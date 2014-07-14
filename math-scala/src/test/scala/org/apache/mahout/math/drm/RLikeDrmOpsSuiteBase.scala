@@ -26,10 +26,7 @@ import RLikeDrmOps._
 import decompositions._
 import org.apache.mahout.math.drm.logical.{OpAtB, OpAtA, OpAtx}
 
-/**
- *
- * @author dmitriy
- */
+/** Common engine tests for distributed R-like DRM operations */
 trait RLikeDrmOpsSuiteBase extends DistributedMahoutSuite with Matchers {
   this: FunSuite =>
 
@@ -318,7 +315,7 @@ trait RLikeDrmOpsSuiteBase extends DistributedMahoutSuite with Matchers {
     // Create B which would be identically partitioned to A. mapBlock() by default will do the trick.
     val B = A.mapBlock() {
       case (keys, block) =>
-        val bBlock = block.like() := ((r, c, v) => util.Random.nextDouble())
+        val bBlock = block.like() := { (r, c, v) => util.Random.nextDouble()}
         keys -> bBlock
     }
         // Prevent repeated computation non-determinism
