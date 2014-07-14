@@ -15,35 +15,20 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.sparkbindings.blas
+package org.apache.mahout.math.decompositions
 
-import org.scalatest.FunSuite
-import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
-import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math._
+import drm._
+import scalabindings._
 import RLikeOps._
-import org.apache.mahout.math.drm._
+import RLikeDrmOps._
 import org.apache.mahout.sparkbindings._
-import org.apache.spark.SparkContext._
-import org.apache.mahout.math.drm.logical.OpAtA
+import org.apache.mahout.common.RandomUtils
+import scala.math._
+import org.scalatest.{Matchers, FunSuite}
+import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 
-/** Tests for {@link XtX} */
-class AtASuite extends FunSuite with DistributedSparkSuite {
-
-  test("AtA slim") {
-
-    val inCoreA = dense((1, 2), (2, 3))
-    val drmA = drmParallelize(inCoreA)
-
-    val operator = new OpAtA[Int](A = drmA)
-    val inCoreAtA = AtA.at_a_slim(operator = operator, srcRdd = drmA.rdd)
-    println(inCoreAtA)
-
-    val expectedAtA = inCoreA.t %*% inCoreA
-    println(expectedAtA)
-
-    assert(expectedAtA === inCoreAtA)
-
-  }
+class DistributedDecompositionsSuite extends FunSuite with DistributedSparkSuite with DistributedDecompositionsSuiteBase {
 
 
 }

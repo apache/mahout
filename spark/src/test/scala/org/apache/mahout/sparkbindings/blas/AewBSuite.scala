@@ -18,7 +18,7 @@
 package org.apache.mahout.sparkbindings.blas
 
 import org.scalatest.FunSuite
-import org.apache.mahout.sparkbindings.test.MahoutLocalContext
+import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.mahout.math.drm._
@@ -28,7 +28,7 @@ import org.apache.mahout.math.drm.logical.OpAewB
 import org.apache.mahout.sparkbindings.drm.CheckpointedDrmSpark
 
 /** Elementwise matrix operation tests */
-class AewBSuite extends FunSuite with MahoutLocalContext {
+class AewBSuite extends FunSuite with DistributedSparkSuite {
 
   test("A * B Hadamard") {
     val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5), (7, 8, 9))

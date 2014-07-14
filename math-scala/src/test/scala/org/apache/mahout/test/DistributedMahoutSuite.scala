@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.sparkbindings.drm
+package org.apache.mahout.test
 
-import org.scalatest.FunSuite
-import org.apache.mahout.math._
-import drm._
-import org.apache.mahout.sparkbindings._
-import test.DistributedSparkSuite
+import org.apache.mahout.math.drm.DistributedContext
+import org.scalatest.{Suite, FunSuite, Matchers}
 
-/** ==R-like DRM DSL operation tests -- Spark== */
-class RLikeDrmOpsSuite extends FunSuite with DistributedSparkSuite with RLikeDrmOpsSuiteBase
+/**
+ * Unit tests that use a distributed context to run
+ */
+trait DistributedMahoutSuite extends MahoutSuite  { this: Suite =>
+  protected implicit var mahoutCtx: DistributedContext
+}
