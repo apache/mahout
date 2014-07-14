@@ -15,15 +15,20 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.h2obindings.drm
+package org.apache.mahout.math.decompositions
 
-import org.scalatest.FunSuite
 import org.apache.mahout.math._
-import scalabindings._
 import drm._
+import scalabindings._
 import RLikeOps._
 import RLikeDrmOps._
+import org.apache.mahout.h2obindings._
+import org.apache.mahout.common.RandomUtils
+import scala.math._
+import org.scalatest.{Matchers, FunSuite}
 import org.apache.mahout.h2obindings.test.DistributedH2OSuite
 
+class DistributedDecompositionsSuite extends FunSuite with DistributedH2OSuite with DistributedDecompositionsSuiteBase {
 
-class DrmLikeSuite extends FunSuite with DistributedH2OSuite with DrmLikeSuiteBase
+
+}

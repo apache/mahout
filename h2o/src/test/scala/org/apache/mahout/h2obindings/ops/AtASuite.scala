@@ -18,7 +18,7 @@
 package org.apache.mahout.h2obindings.ops
 
 import org.scalatest.FunSuite
-import org.apache.mahout.h2obindings.test.MahoutLocalContext
+import org.apache.mahout.h2obindings.test.DistributedH2OSuite
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.drm._
 import org.apache.mahout.h2obindings._
@@ -28,7 +28,7 @@ import RLikeDrmOps._
 import org.apache.mahout.math.drm._
 
 /** Tests for {@link XtX} */
-class AtASuite extends FunSuite with MahoutLocalContext {
+class AtASuite extends FunSuite with DistributedH2OSuite {
 
   test("AtA slim") {
 

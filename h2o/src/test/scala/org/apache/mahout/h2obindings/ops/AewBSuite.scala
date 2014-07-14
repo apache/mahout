@@ -18,7 +18,7 @@
 package org.apache.mahout.h2obindings.ops
 
 import org.scalatest.FunSuite
-import org.apache.mahout.h2obindings.test.MahoutLocalContext
+import org.apache.mahout.h2obindings.test.DistributedH2OSuite
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.mahout.math.drm._
@@ -26,7 +26,7 @@ import RLikeDrmOps._
 import org.apache.mahout.math.drm.logical._
 
 /** Elementwise matrix operation tests */
-class AewBSuite extends FunSuite with MahoutLocalContext {
+class AewBSuite extends FunSuite with DistributedH2OSuite {
 
   test("A * B Hadamard") {
     val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5), (7, 8, 9))

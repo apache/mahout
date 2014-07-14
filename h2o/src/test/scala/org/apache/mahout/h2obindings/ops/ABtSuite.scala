@@ -17,7 +17,7 @@
 
 package org.apache.mahout.h2obindings.ops
 
-import org.apache.mahout.h2obindings.test.MahoutLocalContext
+import org.apache.mahout.h2obindings.test.DistributedH2OSuite
 import org.scalatest.FunSuite
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.math.drm._
@@ -28,7 +28,7 @@ import RLikeDrmOps._
 import org.apache.mahout.math.drm._
 
 /** Tests for AB' operator algorithms */
-class ABtSuite extends FunSuite with MahoutLocalContext {
+class ABtSuite extends FunSuite with DistributedH2OSuite {
 
   test("ABt") {
     val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5))
