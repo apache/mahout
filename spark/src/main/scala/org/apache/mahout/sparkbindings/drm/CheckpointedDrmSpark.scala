@@ -44,7 +44,7 @@ class CheckpointedDrmSpark[K: ClassTag](
   lazy val ncol = if (_ncol >= 0) _ncol else computeNCol
 
   private var cached: Boolean = false
-  override protected[mahout] val context: DistributedContext = rdd.context
+  override val context: DistributedContext = rdd.context
 
 
   /**
