@@ -283,39 +283,39 @@ object ItemSimilarityDriver extends MahoutDriver {
     } else {
 
       val selfSimilarityDataset = IndexedDataset(reader1.readTuplesFrom(inFiles))
-      if (options.writeAllDatasets) writer.writeDRMTo(selfSimilarityDataset, options.output + "../input-datasets/matrix1")
+      val rowCardinalityA = selfSimilarityDataset.rowIDs.size()
+      if (options.writeAllDatasets) writer.writeDRMTo(selfSimilarityDataset, options.output + "../input-datasets/primary-interactions")
 
-
-      // The case of B'A can be a bit sticky when the exact same row IDs don't exist for each dataset
+      // The case of A'B can be a bit sticky when the exact same row IDs don't exist for each dataset
       // Here we assume there is one row ID space for all interactions. To do this we pass in the
       // rowIDs created when reading selfSimilarityDataset and add to them if there are new ones in
-      // the second dataset. We will then apply the row dimension of the combined dataset to both DRMs
-      if (!inFiles2.isEmpty) {
-
+      // the second dataset. We will then apply the row cardinality of the combined dataset to both DRMs
+      val indexedDatasetAtB = if (!inFiles2.isEmpty) {
         // get cross-cooccurrence interactions from separate files
         val crossSimilairtyDataset = IndexedDataset(reader2.readTuplesFrom(inFiles2, existingRowIDs = selfSimilarityDataset.rowIDs))
-        selfSimilarityDataset.nrow = crossSimilairtyDataset.nrow // these may be larger than the nrow calculated earlier
 
-        if (options.writeAllDatasets) writer.writeDRMTo(crossSimilairtyDataset, options.output + "../input-datasets/matrix2")
-
-        Array(selfSimilarityDataset, crossSimilairtyDataset)
+        crossSimilairtyDataset
 
       } else if (options.filterPosition != -1 && options.filter2 != null) {
 
         // get cross-cooccurrences interactions by filtering a single set of files
         val crossSimilairtyDataset = IndexedDataset(reader2.readTuplesFrom(inFiles, existingRowIDs = selfSimilarityDataset.rowIDs))
 
-        if (options.writeAllDatasets) writer.writeDRMTo(crossSimilairtyDataset, options.output + "../input-datasets/matrix2")
-
-        Array(selfSimilarityDataset, crossSimilairtyDataset)
+        crossSimilairtyDataset
 
       } else {
-
-        // only return self-similarity A'A
-        Array(selfSimilarityDataset)
-
+        null.asInstanceOf[IndexedDataset]
       }
+      if (indexedDatasetAtB != null.asInstanceOf[IndexedDataset]) { // did AtB calc
+        if (indexedDatasetAtB.rowIDs.size() > rowCardinalityA) {
+          val newRowIDsFound = indexedDatasetAtB.rowIDs.size() - rowCardinalityA
+          selfSimilarityDataset.addToRowCardinality(newRowIDsFound) // this forces cardinality to match
+        }
 
+        if (options.writeAllDatasets) writer.writeDRMTo(indexedDatasetAtB, options.output + "../input-datasets/secondary-interactions")
+
+        Array(selfSimilarityDataset, indexedDatasetAtB)
+      } else Array(selfSimilarityDataset)
     }
 
   }

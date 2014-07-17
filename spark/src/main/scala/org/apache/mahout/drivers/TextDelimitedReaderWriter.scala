@@ -157,6 +157,9 @@ trait TDIndexedDatasetWriter extends Writer[IndexedDataset]{
 
       matrix.rdd.map { case (rowID, itemVector) =>
 
+        //often want the output rows sorted by element score
+        //if (sortVectors) { /* todo: sort the vectors by element score */ }
+
         // each line is created of non-zero values with schema specified delimiters and original row and column ID tokens
         // first get the external rowID token
         var line: String = rowIDDictionary.inverse.get(rowID) + rowKeyDelim

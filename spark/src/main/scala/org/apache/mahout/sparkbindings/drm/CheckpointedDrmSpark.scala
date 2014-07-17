@@ -40,14 +40,26 @@ class CheckpointedDrmSpark[K: ClassTag](
     override protected[mahout] val partitioningTag: Long = Random.nextLong()
     ) extends CheckpointedDrm[K] {
 
-  lazy val nrow = if (_nrow >= 0) _nrow else computeNRow
+  private var addedRowCardinality = 0 // increasing this has the effect of adding blank rows
+  lazy val nrow = if (_nrow >= 0) _nrow + addedRowCardinality else computeNRow + addedRowCardinality
   lazy val ncol = if (_ncol >= 0) _ncol else computeNCol
-
-  def nrow_= (value:Long): Unit = _nrow = value
 
   private var cached: Boolean = false
   override protected[mahout] val context: DistributedContext = rdd.context
 
+  /**
+   * Adds the equivalent of blank rows to the sparse CheckpointedDrm, which only changes the
+   * [[org.apache.mahout.sparkbindings.drm
+.CheckpointedDrmSpark#nrow]] value.
+   * No physical changes are made to the underlying rdd, now blank rows are added as would be done with rbind(blankRows)
+   * @param n number to increase row cardinality by
+   * @note should be done before any BLAS optimizer actions are performed on the matrix or you'll get unpredictable
+   *       results.
+   */
+  override def addToRowCardinality(n: Int): Unit = {
+    assert(n > -1)
+    addedRowCardinality = n
+  }
 
   /**
    * Action operator -- does not necessary means Spark action; but does mean running BLAS optimizer

@@ -45,9 +45,17 @@ case class IndexedDataset(var matrix: CheckpointedDrm[Int], var rowIDs: BiMap[St
   // we must allow the row dimension to be adjusted in the case where the data read in is incomplete and we
   // learn this afterwards
 
-  def nrow = matrix.nrow
-  def nrow_= (value: Long): Unit = matrix.asInstanceOf[CheckpointedDrmSpark[Int]].nrow = value
-
+  /**
+   * Adds the equivalent of blank rows to the sparse CheckpointedDrm, which only changes the row cardinality value.
+   * No physical changes are made to the underlying drm.
+   * @param n number to increase row carnindality by
+   * @note should be done before any BLAS optimizer actions are performed on the matrix or you'll get unpredictable
+   *       results.
+   */
+  def addToRowCardinality(n: Int): Unit = {
+    assert(n > -1)
+    matrix.asInstanceOf[CheckpointedDrmSpark[Int]].addToRowCardinality(n)
+  }
 }
 
 /**
