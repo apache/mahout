@@ -75,6 +75,7 @@ object CooccurrenceAnalysis extends Serializable {
 
       // Compute cross-co-occurrence matrix B'A
       // pferrel: yikes, this is the wrong order, a big change! so you know who to blame
+      // used to be val drmBtA = drmB.t %*% drmA, which is the wrong order
       val drmAtB = drmA.t %*% drmB
 
       val drmIndicatorsAtB = computeIndicators(drmAtB, numUsers, maxInterestingItemsPerThing,
