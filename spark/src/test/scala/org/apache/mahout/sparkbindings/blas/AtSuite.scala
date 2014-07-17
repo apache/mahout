@@ -18,7 +18,7 @@
 package org.apache.mahout.sparkbindings.blas
 
 import org.scalatest.FunSuite
-import org.apache.mahout.sparkbindings.test.MahoutLocalContext
+import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.mahout.math.drm._
@@ -26,7 +26,7 @@ import org.apache.mahout.math.drm.logical.OpAt
 import org.apache.mahout.sparkbindings.drm.CheckpointedDrmSpark
 
 /** Tests for A' algorithms */
-class AtSuite extends FunSuite with MahoutLocalContext {
+class AtSuite extends FunSuite with DistributedSparkSuite {
 
   test("At") {
     val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5))

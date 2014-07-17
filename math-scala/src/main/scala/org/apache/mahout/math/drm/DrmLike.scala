@@ -30,8 +30,11 @@ trait DrmLike[K] {
 
   protected[mahout] def partitioningTag: Long
 
-  protected[mahout] val context:DistributedContext
-
+  /**
+   * Distributed context, can be implicitly converted to operations on [[org.apache.mahout.math.drm.
+   * DistributedEngine]].
+   */
+  val context:DistributedContext
 
   /** R-like syntax for number of rows. */
   def nrow: Long

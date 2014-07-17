@@ -15,16 +15,20 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.sparkbindings
+package org.apache.mahout.math.decompositions
 
-import scala.reflect.ClassTag
+import org.apache.mahout.math._
+import drm._
+import scalabindings._
+import RLikeOps._
+import RLikeDrmOps._
+import org.apache.mahout.sparkbindings._
+import org.apache.mahout.common.RandomUtils
+import scala.math._
+import org.scalatest.{Matchers, FunSuite}
+import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 
-/**
- * This validation contains distributed algorithms that distributed matrix expression optimizer picks
- * from.
- */
-package object blas {
+class DistributedDecompositionsSuite extends FunSuite with DistributedSparkSuite with DistributedDecompositionsSuiteBase {
 
-  implicit def drmRdd2ops[K:ClassTag](rdd:DrmRdd[K]):DrmRddOps[K] = new DrmRddOps[K](rdd)
 
 }

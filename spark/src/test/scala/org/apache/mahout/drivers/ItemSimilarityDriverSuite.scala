@@ -21,10 +21,10 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{Path, FileSystem}
 import org.scalatest.FunSuite
 import org.apache.mahout.sparkbindings._
-import org.apache.mahout.sparkbindings.test.MahoutLocalContext
+import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 import org.apache.mahout.test.MahoutSuite
 
-class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with MahoutLocalContext  {
+class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with DistributedSparkSuite  {
 
 /*
   // correct self-cooccurrence with LLR

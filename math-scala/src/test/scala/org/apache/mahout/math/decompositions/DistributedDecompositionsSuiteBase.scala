@@ -17,18 +17,25 @@
 
 package org.apache.mahout.math.decompositions
 
-import org.scalatest.{Matchers, FunSuite}
-import org.apache.mahout.sparkbindings.test.MahoutLocalContext
+import org.apache.mahout.test.DistributedMahoutSuite
 import org.apache.mahout.math._
-import drm._
 import scalabindings._
 import RLikeOps._
+import drm._
 import RLikeDrmOps._
-import org.apache.mahout.sparkbindings._
+import org.scalatest.{FunSuite, Matchers}
 import org.apache.mahout.common.RandomUtils
-import scala.math._
+import math._
 
-class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
+/**
+ * ==Common distributed code to run against each distributed engine support.==
+ *
+ * Each distributed engine's decompositions package should have a suite that includes this feature
+ * as part of its distributed test suite.
+ *
+ */
+trait DistributedDecompositionsSuiteBase extends DistributedMahoutSuite with Matchers { this:FunSuite =>
+
 
   test("thin distributed qr") {
 
@@ -46,10 +53,10 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
     // Assert optimizer still knows Q and A are identically partitioned
     drmQ.partitioningTag should equal(A.partitioningTag)
 
-    drmQ.rdd.partitions.size should be(A.rdd.partitions.size)
-
-    // Should also be zippable
-    drmQ.rdd.zip(other = A.rdd)
+//    drmQ.rdd.partitions.size should be(A.rdd.partitions.size)
+//
+//    // Should also be zippable
+//    drmQ.rdd.zip(other = A.rdd)
 
     val inCoreQ = drmQ.collect
 
@@ -171,7 +178,7 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
 
   }
 
-  test("als") {
+  test("dals") {
 
     val rnd = RandomUtils.getRandom
 
@@ -202,8 +209,8 @@ class MathSuite extends FunSuite with Matchers with MahoutLocalContext {
     printf("ALS factorized approximation block:\n%s\n", predict(0 until 3, 0 until 3))
 
     val err = (inCoreA - predict).norm
-    printf ("norm of residuals %f\n",err)
-    printf ("train iteration rmses: %s\n", rmse)
+    printf("norm of residuals %f\n", err)
+    printf("train iteration rmses: %s\n", rmse)
 
     err should be < 1e-2
 

@@ -40,7 +40,7 @@ abstract class AbstractBinaryOp[A: ClassTag, B: ClassTag, K: ClassTag]
 
   protected[drm] var A: DrmLike[A]
   protected[drm] var B: DrmLike[B]
-  protected[mahout] lazy val context: DistributedContext = A.context
+  lazy val context: DistributedContext = A.context
 
   // These are explicit evidence export. Sometimes scala falls over to figure that on its own.
   def classTagA: ClassTag[A] = implicitly[ClassTag[A]]

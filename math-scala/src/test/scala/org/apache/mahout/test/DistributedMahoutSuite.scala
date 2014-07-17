@@ -15,16 +15,14 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.sparkbindings
+package org.apache.mahout.test
 
-import scala.reflect.ClassTag
+import org.apache.mahout.math.drm.DistributedContext
+import org.scalatest.{Suite, FunSuite, Matchers}
 
 /**
- * This validation contains distributed algorithms that distributed matrix expression optimizer picks
- * from.
+ * Unit tests that use a distributed context to run
  */
-package object blas {
-
-  implicit def drmRdd2ops[K:ClassTag](rdd:DrmRdd[K]):DrmRddOps[K] = new DrmRddOps[K](rdd)
-
+trait DistributedMahoutSuite extends MahoutSuite  { this: Suite =>
+  protected implicit var mahoutCtx: DistributedContext
 }

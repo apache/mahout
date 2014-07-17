@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf
+package org.apache.mahout.math.cf
 
 import org.apache.mahout.math._
 import scalabindings._

@@ -19,8 +19,7 @@ package org.apache.mahout.cf
 
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.scalabindings.{MatrixOps, _}
-import org.apache.mahout.sparkbindings._
-import org.apache.mahout.sparkbindings.test.MahoutLocalContext
+import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 import org.apache.mahout.test.MahoutSuite
 import org.scalatest.FunSuite
 
@@ -38,7 +37,7 @@ B =
 1	1	0	1	0
  */
 
-class CooccurrenceAnalysisSuite extends FunSuite with MahoutSuite with MahoutLocalContext {
+class CooccurrenceAnalysisSuite extends FunSuite with MahoutSuite with DistributedSparkSuite {
 
   // correct cooccurrence with LLR
   final val matrixLLRCoocAtAControl = dense(

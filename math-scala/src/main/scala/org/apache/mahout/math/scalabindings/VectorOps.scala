@@ -25,7 +25,7 @@ import org.apache.mahout.math.function.Functions
  * Syntactic sugar for mahout vectors
  * @param v Mahout vector
  */
-class VectorOps(val v: Vector) {
+class VectorOps(private[scalabindings] val v: Vector) {
 
   import RLikeOps._
 
@@ -118,5 +118,22 @@ class VectorOps(val v: Vector) {
 
 }
 
-object VectorOps {
+class ElementOps(private[scalabindings] val el: Vector.Element) {
+
+  def apply = el.get()
+
+  def update(v: Double) = el.set(v)
+
+  def :=(v: Double) = el.set(v)
+
+  def +(that: Double) = el.get() + that
+
+  def -(that: Double) = el.get() - that
+
+  def :-(that: Double) = that - el.get()
+
+  def /(that: Double) = el.get() / that
+
+  def :/(that: Double) = that / el.get()
+
 }
