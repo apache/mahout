@@ -22,6 +22,7 @@ import org.apache.mahout.math.scalabindings
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.classifier.naivebayes.NaiveBayesModel
 import org.apache.mahout.classifier.naivebayes.training.ComplementaryThetaTrainer
+
 import scala.reflect.ClassTag
 
 /**
@@ -41,7 +42,7 @@ object NaiveBayes {
    * @param alphaI smoothing parameter
    * @return trained naive bayes model
    */
-  def trainNB[K: ClassTag](observationsPerLabel: Array[DrmLike[K]],
+  def trainNB[K: ClassTag](observationsPerLabel: Array[DrmLike[K]], trainComplementary :Boolean = true,
                                    alphaI: Float = defaultAlphaI): NaiveBayesModel = {
 
     // distributed summation of all observations per label
@@ -51,14 +52,23 @@ object NaiveBayes {
     // local summation of all weights per label
     val weightsPerLabel = new MatrixOps(weightsPerLabelAndFeature).rowSums
 
-    // instantiate a trainer for the theta normalization
-    val thetaTrainer = new ComplementaryThetaTrainer(weightsPerFeature, weightsPerLabel, alphaI)
-    // local training of the theta normalization
-    for (labelIndex <- 0 until new MatrixOps(weightsPerLabelAndFeature).nrow) {
-      thetaTrainer.train(labelIndex, weightsPerLabelAndFeature.viewRow(labelIndex))
+    // perLabelThetaNormalizer Vector is expected by NaiveBayesModel. We can pass a null value
+    // in the case of a standard NB model
+    var thetaNormalizer: org.apache.mahout.math.Vector= null
+
+    // instantiate a trainer and retrieve the perLabelThetaNormalizer Vector from it in the case of
+    // a complementary NB model
+    if( trainComplementary ){
+      val thetaTrainer = new ComplementaryThetaTrainer(weightsPerFeature, weightsPerLabel, alphaI)
+      // local training of the theta normalization
+      for (labelIndex <- 0 until new MatrixOps(weightsPerLabelAndFeature).nrow) {
+        thetaTrainer.train(labelIndex, weightsPerLabelAndFeature.viewRow(labelIndex))
+      }
+      thetaNormalizer=thetaTrainer.retrievePerLabelThetaNormalizer()
     }
 
     new NaiveBayesModel(weightsPerLabelAndFeature, weightsPerFeature, weightsPerLabel,
-                        thetaTrainer.retrievePerLabelThetaNormalizer(), alphaI, true)
+                          thetaNormalizer, alphaI, trainComplementary)
+
   }
 }

@@ -121,7 +121,7 @@ package object drm {
    * @param alphaI smoothing parameter
    * @return trained naive bayes model
    */
-  def trainNB[K: ClassTag](observationsPerLabel: Array[DrmLike[K]],
-      alphaI: Float = NaiveBayes.defaultAlphaI) = NaiveBayes.trainNB(observationsPerLabel, alphaI)
+  def trainNB[K: ClassTag](observationsPerLabel: Array[DrmLike[K]], trainComplementary: Boolean = true,
+      alphaI: Float = NaiveBayes.defaultAlphaI) = NaiveBayes.trainNB(observationsPerLabel,trainComplementary, alphaI)
 
 }
