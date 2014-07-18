@@ -29,6 +29,7 @@ import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.spark.broadcast.Broadcast
 import org.apache.mahout.math.drm._
+import org.apache.mahout.sparkbindings.drm.classification.NaiveBayes
 import SparkContext._
 import org.apache.mahout.math
 
@@ -111,5 +112,16 @@ package object drm {
         }
     }
 
+  /**
+   * Distributed training of a Naive Bayes model. Follows the approach presented in Rennie et.al.: Tackling the poor
+   * assumptions of Naive Bayes Text classifiers, ICML 2003, http://people.csail.mit.edu/jrennie/papers/icml03-nb.pdf
+   *
+   * @param observationsPerLabel an array of matrices. Every matrix contains the observations for a particular label.
+   * @param trainComplementary whether to train a complementary Naive Bayes model
+   * @param alphaI smoothing parameter
+   * @return trained naive bayes model
+   */
+  def trainNB[K: ClassTag](observationsPerLabel: Array[DrmLike[K]],
+      alphaI: Float = NaiveBayes.defaultAlphaI) = NaiveBayes.trainNB(observationsPerLabel, alphaI)
 
 }
