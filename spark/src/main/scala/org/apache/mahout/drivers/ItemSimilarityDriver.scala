@@ -17,7 +17,7 @@
 
 package org.apache.mahout.drivers
 
-import org.apache.mahout.cf.CooccurrenceAnalysis
+import org.apache.mahout.math.cf.CooccurrenceAnalysis
 
 /**
  * Command line interface for [[org.apache.mahout.cf.CooccurrenceAnalysis.cooccurrences( )]].

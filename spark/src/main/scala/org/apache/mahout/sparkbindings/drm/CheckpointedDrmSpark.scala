@@ -40,8 +40,7 @@ class CheckpointedDrmSpark[K: ClassTag](
     override protected[mahout] val partitioningTag: Long = Random.nextLong()
     ) extends CheckpointedDrm[K] {
 
-  private var addedRowCardinality = 0 // increasing this has the effect of adding blank rows
-  lazy val nrow = if (_nrow >= 0) _nrow + addedRowCardinality else computeNRow + addedRowCardinality
+  lazy val nrow = if (_nrow >= 0) _nrow else computeNRow
   lazy val ncol = if (_ncol >= 0) _ncol else computeNCol
 
   private var cached: Boolean = false
@@ -56,9 +55,9 @@ class CheckpointedDrmSpark[K: ClassTag](
    * @note should be done before any BLAS optimizer actions are performed on the matrix or you'll get unpredictable
    *       results.
    */
-  override def addToRowCardinality(n: Int): Unit = {
+  override def addToRowCardinality(n: Int): CheckpointedDrm[K] = {
     assert(n > -1)
-    addedRowCardinality = n
+    new CheckpointedDrmSpark[K](rdd, nrow + n, ncol, _cacheStorageLevel )
   }
 
   /**

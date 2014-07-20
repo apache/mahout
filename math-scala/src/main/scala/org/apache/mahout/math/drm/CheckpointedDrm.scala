@@ -37,6 +37,6 @@ trait CheckpointedDrm[K] extends DrmLike[K] {
     * does not perform an optimizer triggering action.
     * @param n increase row cardinality by the number.
     */
-  def addToRowCardinality(n: Int): Unit
+  def addToRowCardinality(n: Int): CheckpointedDrm[K]
 
 }

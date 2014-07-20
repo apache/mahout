@@ -19,6 +19,8 @@ package org.apache.mahout.drivers
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{Path, FileSystem}
+import org.apache.mahout.math.drm._
+import org.apache.mahout.math.scalabindings._
 import org.scalatest.FunSuite
 import org.apache.mahout.sparkbindings._
 import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
@@ -536,10 +538,10 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
       "galaxy\tnexus:1.7260924347106847"))
 
     val UnequalDimensionsCrossSimilarity = tokenize(Iterable(
-    "galaxy\tnexus:1.7260924347106847,iphone:1.7260924347106847,ipad:1.7260924347106847,galaxy:1.7260924347106847",
-    "ipad\tnexus:0.6795961471815897,iphone:0.6795961471815897,ipad:0.6795961471815897,galaxy:0.6795961471815897",
-    "nexus\tnexus:0.6795961471815897,iphone:0.6795961471815897,ipad:0.6795961471815897,galaxy:0.6795961471815897",
-    "iphone\tnexus:1.7260924347106847,iphone:1.7260924347106847,ipad:1.7260924347106847,galaxy:1.7260924347106847"))
+      "galaxy\tnexus:1.7260924347106847,iphone:1.7260924347106847,ipad:1.7260924347106847,galaxy:1.7260924347106847",
+      "ipad\tnexus:0.6795961471815897,iphone:0.6795961471815897,ipad:0.6795961471815897,galaxy:0.6795961471815897",
+      "nexus\tnexus:0.6795961471815897,iphone:0.6795961471815897,ipad:0.6795961471815897,galaxy:0.6795961471815897",
+      "iphone\tnexus:1.7260924347106847,iphone:1.7260924347106847,ipad:1.7260924347106847,galaxy:1.7260924347106847"))
 
     // this will create multiple part-xxxxx files in the InFile dir but other tests will
     // take account of one actual file
@@ -568,7 +570,7 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
     tokenize(indicatorLines) should contain theSameElementsAs SelfSimilairtyTokens
     val crossIndicatorLines = mahoutCtx.textFile(OutPath+"/cross-indicator-matrix/").collect.toIterable
     tokenize(crossIndicatorLines).toIterable should contain theSameElementsAs CrossIndicatorTokens
- */
+*/
 
     val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
     tokenize(indicatorLines) should contain theSameElementsAs UnequalDimensionsSelfSimilarity
@@ -660,5 +662,53 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
 
     super.afterAll
   }
+
+  test("plus one"){
+    val a = dense(
+      (1, 1),
+      (0, 0))
+
+    val drmA1 = drmParallelize(m = a, numPartitions = 2)
+
+    // modified to return a new CheckpointedDrm so maintains immutability but still only increases the row cardinality
+    // by returning new CheckpointedDrmSpark[K](rdd, nrow + n, ncol, _cacheStorageLevel ) Hack for now.
+    val drmABigger1 = drmA1.addToRowCardinality(1)
+
+    val drmABiggerPlusOne1 = drmABigger1.plus(1.0)  // drmABigger has no row 2 in the rdd but an empty row 1
+    // drmABiggerPlusOne1 is a dense matrix
+    println(drmABiggerPlusOne1)
+
+    val drmA2 = drmParallelize(m = a, numPartitions = 2)
+    val drmABigger2 = drmA2.addToRowCardinality(1)
+    val drmABiggerPlusOne2 = drmABigger2 + 1.0
+    drmABiggerPlusOne2.writeDRM("tmp/plus-one/drma-bigger-plus-one-ops/")
+
+
+    val bp = 0
+  }
+
+  test("multiply after adding rows"){
+    val a = dense(
+        (1, 1),
+        (1, 1),
+        (1, 1))
+
+    val b = dense(
+        (1, 1))
+
+    val drmA = drmParallelize(m = a, numPartitions = 2)
+    val drmB = drmParallelize(m = b, numPartitions = 2)
+
+    // modified to return a new CheckpointedDrm so maintains immutability but still only increases the row cardinality
+    // by returning new CheckpointedDrmSpark[K](rdd, nrow + n, ncol, _cacheStorageLevel ) Hack for now.
+    val drmBBigger = drmB.addToRowCardinality(2)
+
+    val AtBBigger = drmA.t %*% drmBBigger
+    AtBBigger.        .writeDRM("tmp/plus-one/drma-bigger-plus-one-ops/")
+    val inCoreAtBBigger = AtBBigger.
+
+    val bp = 0
+  }
+
 
 }
