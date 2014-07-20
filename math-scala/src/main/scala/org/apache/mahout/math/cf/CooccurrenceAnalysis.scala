@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf
+package org.apache.mahout.math.cf
 
 import org.apache.mahout.math._
 import scalabindings._
@@ -74,12 +74,14 @@ object CooccurrenceAnalysis extends Serializable {
       val bcastInteractionsPerThingB = drmBroadcast(drmB.numNonZeroElementsPerColumn)
 
       // Compute cross-co-occurrence matrix B'A
-      val drmBtA = drmB.t %*% drmA
+      // pferrel: yikes, this is the wrong order, a big change! so you know who to blame
+      // used to be val drmBtA = drmB.t %*% drmA, which is the wrong order
+      val drmAtB = drmA.t %*% drmB
 
-      val drmIndicatorsBtA = computeIndicators(drmBtA, numUsers, maxInterestingItemsPerThing,
-        bcastInteractionsPerThingB, bcastInteractionsPerItemA)
+      val drmIndicatorsAtB = computeIndicators(drmAtB, numUsers, maxInterestingItemsPerThing,
+        bcastInteractionsPerItemA, bcastInteractionsPerThingB)
 
-      indicatorMatrices = indicatorMatrices :+ drmIndicatorsBtA
+      indicatorMatrices = indicatorMatrices :+ drmIndicatorsAtB
 
       drmB.uncache()
     }

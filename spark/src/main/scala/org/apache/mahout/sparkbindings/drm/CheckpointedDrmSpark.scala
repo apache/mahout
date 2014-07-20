@@ -46,6 +46,19 @@ class CheckpointedDrmSpark[K: ClassTag](
   private var cached: Boolean = false
   override val context: DistributedContext = rdd.context
 
+  /**
+   * Adds the equivalent of blank rows to the sparse CheckpointedDrm, which only changes the
+   * [[org.apache.mahout.sparkbindings.drm
+.CheckpointedDrmSpark#nrow]] value.
+   * No physical changes are made to the underlying rdd, now blank rows are added as would be done with rbind(blankRows)
+   * @param n number to increase row cardinality by
+   * @note should be done before any BLAS optimizer actions are performed on the matrix or you'll get unpredictable
+   *       results.
+   */
+  override def addToRowCardinality(n: Int): CheckpointedDrm[K] = {
+    assert(n > -1)
+    new CheckpointedDrmSpark[K](rdd, nrow + n, ncol, _cacheStorageLevel )
+  }
 
   /**
    * Action operator -- does not necessary means Spark action; but does mean running BLAS optimizer

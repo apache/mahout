@@ -36,7 +36,11 @@ trait TDIndexedDatasetReader extends Reader[IndexedDataset]{
     * @param source comma delimited URIs of text files to be read into the [[org.apache.mahout.drivers.IndexedDataset]]
     * @return
     */
-  protected def reader(mc: DistributedContext, readSchema: Schema, source: String): IndexedDataset = {
+  protected def tupleReader(
+      mc: DistributedContext,
+      readSchema: Schema,
+      source: String,
+      existingRowIDs: BiMap[String, Int] = HashBiMap.create()): IndexedDataset = {
     try {
       val delimiter = readSchema("delim").asInstanceOf[String]
       val rowIDPosition = readSchema("rowIDPosition").asInstanceOf[Int]
@@ -51,6 +55,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDataset]{
       })
 
       var columns = mc.textFile(source).map { line => line.split(delimiter) }
+      val m = columns.collect
 
       // -1 means no filter in the input text, take them all
       if(filterPosition != -1) {
@@ -59,7 +64,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDataset]{
       }
 
       // get row and column IDs
-      val m = columns.collect
+      //val m = columns.collect
       val interactions = columns.map { tokens =>
         tokens(rowIDPosition) -> tokens(columnIDPosition)
       }
@@ -75,10 +80,10 @@ trait TDIndexedDatasetReader extends Reader[IndexedDataset]{
 
       // create BiMaps for bi-directional lookup of ID by either Mahout ID or external ID
       // broadcast them for access in distributed processes, so they are not recalculated in every task.
-      val rowIDDictionary = asOrderedDictionary(rowIDs)
+      val rowIDDictionary = asOrderedDictionary(existingRowIDs, rowIDs)
       val rowIDDictionary_bcast = mc.broadcast(rowIDDictionary)
 
-      val columnIDDictionary = asOrderedDictionary(columnIDs)
+      val columnIDDictionary = asOrderedDictionary(entries = columnIDs)
       val columnIDDictionary_bcast = mc.broadcast(columnIDDictionary)
 
       val indexedInteractions =
@@ -113,11 +118,10 @@ trait TDIndexedDatasetReader extends Reader[IndexedDataset]{
   // this creates a BiMap from an ID collection. The ID points to an ordinal int
   // which is used internal to Mahout as the row or column ID
   // todo: this is a non-distributed process and the BiMap is a non-rdd based object--might be a scaling problem
-  private def asOrderedDictionary(entries: Array[String]): BiMap[String, Int] = {
-    var dictionary: BiMap[String, Int] = HashBiMap.create()
-    var index = 0
+  private def asOrderedDictionary(dictionary: BiMap[String, Int] = HashBiMap.create(), entries: Array[String]): BiMap[String, Int] = {
+    var index = dictionary.size() // if a dictionary is supplied then add to the end based on the Mahout id 'index'
     for (entry <- entries) {
-      dictionary.forcePut(entry, index)
+      if (!dictionary.contains(entry)) dictionary.put(entry, index)
       index += 1
     }
     dictionary
@@ -140,14 +144,21 @@ trait TDIndexedDatasetWriter extends Writer[IndexedDataset]{
       //instance vars must be put into locally scoped vals when put into closures that are
       //executed but Spark
 
-      assert (indexedDataset != null, {println(this.getClass.toString+": has no indexedDataset to write"); throw new IllegalArgumentException })
-      assert (!dest.isEmpty, {println(this.getClass.toString+": has no destination or indextedDataset to write"); throw new IllegalArgumentException})
+      assert(indexedDataset != null, {
+        println(this.getClass.toString + ": has no indexedDataset to write"); throw new IllegalArgumentException
+      })
+      assert(!dest.isEmpty, {
+        println(this.getClass.toString + ": has no destination or indextedDataset to write"); throw new IllegalArgumentException
+      })
 
       val matrix = indexedDataset.matrix
       val rowIDDictionary = indexedDataset.rowIDs
       val columnIDDictionary = indexedDataset.columnIDs
 
       matrix.rdd.map { case (rowID, itemVector) =>
+
+        //often want the output rows sorted by element score
+        //if (sortVectors) { /* todo: sort the vectors by element score */ }
 
         // each line is created of non-zero values with schema specified delimiters and original row and column ID tokens
         // first get the external rowID token
@@ -176,14 +187,14 @@ trait TDIndexedDatasetReaderWriter extends TDIndexedDatasetReader with TDIndexed
 /** Reads text delimited files into an IndexedDataset. Classes are needed to supply trait params in their constructor.
   * @param readSchema describes the delimiters and position of values in the text delimited file to be read.
   * @param mc Spark context for reading files
-  * @note The source is supplied by Reader#readFrom .
+  * @note The source is supplied by Reader#readTuplesFrom .
   * */
 class TextDelimitedIndexedDatasetReader(val readSchema: Schema)(implicit val mc: DistributedContext) extends TDIndexedDatasetReader
 
 /** Writes  text delimited files into an IndexedDataset. Classes are needed to supply trait params in their constructor.
   * @param writeSchema describes the delimiters and position of values in the text delimited file(s) written.
   * @param mc Spark context for reading files
-  * @note the destination is supplied by Writer#writeTo trait method
+  * @note the destination is supplied by Writer#writeDRMTo trait method
   * */
 class TextDelimitedIndexedDatasetWriter(val writeSchema: Schema)(implicit val mc: DistributedContext) extends TDIndexedDatasetWriter
 
@@ -194,7 +205,7 @@ class TextDelimitedIndexedDatasetWriter(val writeSchema: Schema)(implicit val mc
   * */
 class TextDelimitedIndexedDatasetReaderWriter(val readSchema: Schema, val writeSchema: Schema)(implicit val mc: DistributedContext) extends TDIndexedDatasetReaderWriter
 
-/** A version of IndexedDataset that has it's own writeTo method from a Writer trait. This is an alternative to creating
+/** A version of IndexedDataset that has it's own writeDRMTo method from a Writer trait. This is an alternative to creating
   * a Writer based stand-alone class for writing. Consider it experimental allowing similar semantics to drm.writeDrm().
   * Experimental because it's not clear that it is simpler or more intuitive and since IndexedDatasetTextDelimitedWriteables
   * are probably short lived in terms of lines of code so complexity may be moot.
@@ -209,7 +220,7 @@ class IndexedDatasetTextDelimitedWriteable(matrix: CheckpointedDrm[Int], rowIDs:
   extends IndexedDataset(matrix, rowIDs, columnIDs) with TDIndexedDatasetWriter {
 
   def writeTo(dest: String): Unit = {
-    writeTo(this, dest)
+    writeDRMTo(this, dest)
   }
 }
 
@@ -217,7 +228,7 @@ class IndexedDatasetTextDelimitedWriteable(matrix: CheckpointedDrm[Int], rowIDs:
  * Companion object for the case class [[org.apache.mahout.drivers.IndexedDatasetTextDelimitedWriteable]] primarily used to get a secondary constructor for
  * making one [[org.apache.mahout.drivers.IndexedDatasetTextDelimitedWriteable]] from another. Used when you have a factory like [[org.apache.mahout.drivers.TextDelimitedIndexedDatasetReader]]
  * {{{
- *   val id = IndexedDatasetTextDelimitedWriteable(indexedDatasetReader.readFrom(source))
+ *   val id = IndexedDatasetTextDelimitedWriteable(indexedDatasetReader.readTuplesFrom(source))
  * }}}
  */
 
