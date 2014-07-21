@@ -27,4 +27,33 @@ import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 
 
 /** DRMLike tests -- just run common DRM tests in Spark. */
-class DrmLikeSuite extends FunSuite with DistributedSparkSuite with DrmLikeSuiteBase
+class DrmLikeSuite extends FunSuite with DistributedSparkSuite with DrmLikeSuiteBase {
+  test("DRM blockify dense") {
+
+    val inCoreA = dense((1, 2, 3), (3, 4, 5))
+    val drmA = drmParallelize(inCoreA, numPartitions = 2)
+
+    (inCoreA - drmA.mapBlock() {
+      case (keys, block) =>
+        if (!block.isInstanceOf[DenseMatrix])
+          throw new AssertionError("Block must be dense.")
+        keys -> block
+    }).norm should be < 1e-4
+  }
+
+  test("DRM blockify sparse -> SRM") {
+
+    val inCoreA = sparse(
+      (1, 2, 3),
+      0 -> 3 :: 2 -> 5 :: Nil
+    )
+    val drmA = drmParallelize(inCoreA, numPartitions = 2)
+
+    (inCoreA - drmA.mapBlock() {
+      case (keys, block) =>
+        if (!block.isInstanceOf[SparseRowMatrix])
+          throw new AssertionError("Block must be dense.")
+        keys -> block
+    }).norm should be < 1e-4
+  }
+}

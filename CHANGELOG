@@ -2,7 +2,9 @@ Mahout Change Log
 
 Release 1.0 - unreleased
 
-  MAHOUT-1583: cbind() operator for Scala DRMs
+  MAHOUT-1529(e): Move dense/sparse matrix test in mapBlock into spark (Anand Avati via dlyubimov)
+
+  MAHOUT-1583: cbind() operator for Scala DRMs (dlyubimov)
 
   MAHOUT-1541, MAHOUT-1568, MAHOUT-1569: Created text-delimited file I/O traits and classes on spark, a MahoutDriver for a CLI and a ItemSimilairtyDriver using the CLI
 
