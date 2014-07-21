@@ -495,7 +495,7 @@ trait RLikeDrmOpsSuiteBase extends DistributedMahoutSuite with Matchers {
   test("C = A rbind B, with empty") {
 
     val inCoreA = dense((1, 2), (3, 5))
-    val emptyB = drmParallelizeEmpty(nrow=2, ncol=2, numPartitions=2)
+    val emptyB = drmParallelizeEmpty(nrow = 2, ncol = 2, numPartitions = 2)
     val controlC = dense((1, 2), (3, 5), (0, 0), (0, 0))
 
     val A = drmParallelize(inCoreA, numPartitions = 2).checkpoint()
