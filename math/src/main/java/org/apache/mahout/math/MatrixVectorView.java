@@ -126,7 +126,68 @@ public class MatrixVectorView extends AbstractVector {
    */
   @Override
   public Iterator<Element> iterateNonZero() {
-    return iterator();
+
+    return new Iterator<Element>() {
+      class NonZeroElement implements Element {
+        int index;
+
+        @Override
+        public double get() {
+          return getQuick(index);
+        }
+
+        @Override
+        public int index() {
+          return index;
+        }
+
+        @Override
+        public void set(double value) {
+          invalidateCachedLength();
+          setQuick(index, value);
+        }
+      }
+
+      private final NonZeroElement element = new NonZeroElement();
+      private int index = -1;
+      private int lookAheadIndex = -1;
+
+      @Override
+      public boolean hasNext() {
+        if (lookAheadIndex == index) {  // User calls hasNext() after a next()
+          lookAhead();
+        } // else user called hasNext() repeatedly.
+        return lookAheadIndex < size();
+      }
+
+      private void lookAhead() {
+        lookAheadIndex++;
+        while (lookAheadIndex < size() && getQuick(lookAheadIndex) == 0.0) {
+          lookAheadIndex++;
+        }
+      }
+
+      @Override
+      public Element next() {
+        if (lookAheadIndex == index) { // If user called next() without checking hasNext().
+          lookAhead();
+        }
+
+        index = lookAheadIndex;
+
+        if (index >= size()) { // If the end is reached.
+          throw new NoSuchElementException();
+        }
+
+        element.index = index;
+        return element;
+      }
+
+      @Override
+      public void remove() {
+        throw new UnsupportedOperationException();
+      }
+    };
   }
 
   /**
