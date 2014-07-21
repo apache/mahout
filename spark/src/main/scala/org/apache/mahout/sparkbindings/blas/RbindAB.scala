@@ -20,58 +20,30 @@ package org.apache.mahout.sparkbindings.blas
 import org.apache.log4j.Logger
 import scala.reflect.ClassTag
 import org.apache.mahout.sparkbindings.drm.DrmRddInput
-import org.apache.mahout.math._
-import scalabindings._
-import RLikeOps._
 import org.apache.mahout.math.drm.logical.OpRbind
-import org.apache.spark.SparkContext._
 
-/** Physical Rbind */
+/** Physical `rbind` */
 object RbindAB {
 
   private val log = Logger.getLogger(RbindAB.getClass)
 
-  def rbindAB_int[K:ClassTag](op: OpRbind[K], srcA: DrmRddInput[K], srcB: DrmRddInput[K]): DrmRddInput[K] = {
-
-    val a = srcA.asInstanceOf[DrmRddInput[Int]].toDrmRdd()
-    val b = srcB.asInstanceOf[DrmRddInput[Int]].toDrmRdd()
-    val n1 = op.A.nrow.asInstanceOf[Int]
-
-    val rdd = a union (b map({ case (key, vec) => ((key + n1), vec) }))
-
-    new DrmRddInput(rowWiseSrc = Some(op.ncol -> rdd)).asInstanceOf[DrmRddInput[K]]
-  }
-
-  def rbindAB_long[K:ClassTag](op: OpRbind[K], srcA: DrmRddInput[K], srcB: DrmRddInput[K]): DrmRddInput[K] = {
-
-    val a = srcA.asInstanceOf[DrmRddInput[Long]].toDrmRdd()
-    val b = srcB.asInstanceOf[DrmRddInput[Long]].toDrmRdd()
-    val n1 = op.A.nrow
-
-    val rdd = a union (b map({ case (key, vec) => ((key + n1), vec) }))
-
-    new DrmRddInput(rowWiseSrc = Some(op.ncol -> rdd)).asInstanceOf[DrmRddInput[K]]
-  }
-
-  def rbindAB_string[K:ClassTag](op: OpRbind[K], srcA: DrmRddInput[K], srcB: DrmRddInput[K]): DrmRddInput[K] = {
-
-    val a = srcA.asInstanceOf[DrmRddInput[String]].toDrmRdd()
-    val b = srcB.asInstanceOf[DrmRddInput[String]].toDrmRdd()
-    val n1 = op.A.nrow
-
-    val rdd = a union b
-
-    new DrmRddInput(rowWiseSrc = Some(op.ncol -> rdd)).asInstanceOf[DrmRddInput[K]]
-  }
-
   def rbindAB[K: ClassTag](op: OpRbind[K], srcA: DrmRddInput[K], srcB: DrmRddInput[K]): DrmRddInput[K] = {
-    if (implicitly[ClassTag[K]] == implicitly[ClassTag[Int]])
-      rbindAB_int(op, srcA, srcB)
-    else if (implicitly[ClassTag[K]] == implicitly[ClassTag[Long]])
-      rbindAB_long(op, srcA, srcB)
-    else if (implicitly[ClassTag[K]] == implicitly[ClassTag[String]])
-      rbindAB_string(op, srcA, srcB)
-    else
-      throw new IllegalArgumentException("Unsupported Key type.")
+
+    // If any of the inputs is blockified, use blockified inputs
+    if (srcA.isBlockified || srcB.isBlockified) {
+      val a = srcA.toBlockifiedDrmRdd()
+      val b = srcB.toBlockifiedDrmRdd()
+
+      // Union seems to be fine, it is indeed just do partition-level unionization, no shuffles
+      new DrmRddInput(blockifiedSrc = Some(a ++ b))
+
+    } else {
+
+      // Otherwise, use row-wise inputs -- no reason to blockify here.
+      val a = srcA.toDrmRdd()
+      val b = srcB.toDrmRdd()
+
+      new DrmRddInput(rowWiseSrc = Some(op.ncol -> (a ++ b)))
+    }
   }
 }
