@@ -14,7 +14,7 @@ import scala.reflect._
 class CheckpointedDrmH2O[K: ClassTag](
   val frame: Frame,
   val labels: Vec,
-  protected[mahout] val context: DistributedContext
+  public val context: DistributedContext
 ) extends CheckpointedDrm[K] {
 
   def this(frame: Frame, context: DistributedContext) =
