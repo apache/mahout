@@ -52,6 +52,31 @@ class RLikeDrmOpsSuite extends FunSuite with DistributedSparkSuite with RLikeDrm
 
   }
 
+  test("C = cbind(A, B) with missing rows") {
+    val sc = mahoutCtx.asInstanceOf[SparkDistributedContext].sc
+
+    // Concoct an rdd with missing rows
+    val aRdd: DrmRdd[Int] = sc.parallelize(
+      0 -> dvec(1, 2, 3) ::
+          3 -> dvec(4, 5, 6) :: Nil
+    ).map { case (key, vec) => key -> (vec: Vector)}
+
+    val bRdd: DrmRdd[Int] = sc.parallelize(
+      1 -> dvec(2, 3, 4) ::
+          2 -> dvec(3, 4, 5) :: Nil
+    ).map { case (key, vec) => key -> (vec: Vector)}
+
+    val drmA = drmWrap(rdd=aRdd)
+    val drmB = drmWrap(rdd = bRdd, nrow = 4, canHaveMissingRows = true)
+    val drmC = drmA.cbind(drmB)
+    val controlC = new DenseMatrix(safeToNonNegInt(drmA.nrow), drmA.ncol + drmB.ncol)
+    controlC(::, 0 until drmA.ncol) := drmA
+    controlC(::, drmA.ncol until drmA.ncol + drmB.ncol) := drmB
+
+    (drmC -: controlC).norm should be < 1e-10
+
+  }
+
   test("B = A + 1.0 missing rows") {
 
     val sc = mahoutCtx.asInstanceOf[SparkDistributedContext].sc
