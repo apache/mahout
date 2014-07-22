@@ -26,6 +26,8 @@ import org.apache.mahout.math.{Matrix, Vector}
 import org.apache.mahout.math.drm.logical.{OpAewScalar, OpAewB}
 import org.apache.log4j.Logger
 import org.apache.mahout.sparkbindings.blas.AewB.{ReduceFuncScalar, ReduceFunc}
+import org.apache.mahout.sparkbindings.{BlockifiedDrmRdd, DrmRdd, drm}
+import org.apache.mahout.math.drm._
 
 /** Elementwise drm-drm operators */
 object AewB {
@@ -109,11 +111,21 @@ object AewB {
       case "/:" => ewOps.scalarDiv
       case default => throw new IllegalArgumentException("Unsupported elementwise operator:%s.".format(opId))
     }
-    val a = srcA.toBlockifiedDrmRdd()
-    val rdd = a
+
+    // Before obtaining blockified rdd, see if we have to fix int row key consistency so that missing 
+    // rows can get lazily pre-populated with empty vectors before proceeding with elementwise scalar.
+    val aBlockRdd = if (implicitly[ClassTag[K]] == ClassTag.Int && op.canHaveMissingRows) {
+      val fixedRdd = fixIntConsistency(op.asInstanceOf[DrmLike[Int]], src = srcA.toDrmRdd().asInstanceOf[DrmRdd[Int]])
+      drm.blockify(fixedRdd, blockncol = op.A.ncol).asInstanceOf[BlockifiedDrmRdd[K]]
+    } else {
+      srcA.toBlockifiedDrmRdd()
+    }
+
+    val rdd = aBlockRdd
         .map({
       case (keys, block) => keys -> reduceFunc(block, scalar)
     })
+
     new DrmRddInput[K](blockifiedSrc = Some(rdd))
   }
 }

@@ -24,7 +24,7 @@ import org.apache.mahout.common.IOUtils
 import org.apache.log4j.Logger
 import org.apache.mahout.math.drm._
 import scala.reflect.ClassTag
-import org.apache.mahout.sparkbindings.drm.{SparkBCast, CheckpointedDrmSparkOps, CheckpointedDrmSpark}
+import org.apache.mahout.sparkbindings.drm.{DrmRddInput, SparkBCast, CheckpointedDrmSparkOps, CheckpointedDrmSpark}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.broadcast.Broadcast
 import org.apache.mahout.math.{VectorWritable, Vector, MatrixWritable, Matrix}
@@ -182,6 +182,7 @@ package object sparkbindings {
       ncol: Int = -1,
       cacheHint:CacheHint.CacheHint = CacheHint.NONE
       ): CheckpointedDrm[K] =
+
     new CheckpointedDrmSpark[K](
       rdd = rdd,
       _nrow = nrow,

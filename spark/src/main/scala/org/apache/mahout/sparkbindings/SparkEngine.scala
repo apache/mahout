@@ -161,10 +161,10 @@ object SparkEngine extends DistributedEngine {
 
     {
       implicit def getWritable(x: Any): Writable = val2keyFunc()
-      new CheckpointedDrmSpark(
-        rdd = rdd.map(t => (key2valFunc(t._1), t._2)),
-        _cacheStorageLevel = StorageLevel.MEMORY_ONLY
-      )(unwrappedKeyTag.asInstanceOf[ClassTag[Any]])
+
+      val drmRdd = rdd.map { t => (key2valFunc(t._1), t._2)}
+
+      drmWrap(rdd = drmRdd, cacheHint = CacheHint.MEMORY_ONLY)(unwrappedKeyTag.asInstanceOf[ClassTag[Any]])
     }
   }
 

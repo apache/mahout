@@ -31,19 +31,35 @@ import org.apache.mahout.math.drm._
 import org.apache.mahout.sparkbindings._
 import org.apache.spark.SparkContext._
 
-/** Spark-specific optimizer-checkpointed DRM. */
+/** ==Spark-specific optimizer-checkpointed DRM.==
+  *
+  * @param rdd underlying rdd to wrap over.
+  * @param _nrow number of rows; if unspecified, we will compute with an inexpensive traversal.
+  * @param _ncol number of columns; if unspecified, we will try to guess with an inexpensive traversal.
+  * @param _cacheStorageLevel storage level
+  * @param partitioningTag unique partitioning tag. Used to detect identically partitioned operands.
+  * @param _canHaveMissingRows true if the matrix is int-keyed, and if it also may have missing rows
+  *                            (will require a lazy fix for some physical operations.
+  * @param evidence$1 class tag context bound for K.
+  * @tparam K matrix key type (e.g. the keys of sequence files once persisted)
+  */
 class CheckpointedDrmSpark[K: ClassTag](
     val rdd: DrmRdd[K],
     private var _nrow: Long = -1L,
     private var _ncol: Int = -1,
     private val _cacheStorageLevel: StorageLevel = StorageLevel.MEMORY_ONLY,
-    override protected[mahout] val partitioningTag: Long = Random.nextLong()
+    override protected[mahout] val partitioningTag: Long = Random.nextLong(),
+    private var _canHaveMissingRows: Boolean = false
     ) extends CheckpointedDrm[K] {
 
   lazy val nrow = if (_nrow >= 0) _nrow else computeNRow
   lazy val ncol = if (_ncol >= 0) _ncol else computeNCol
+  lazy val canHaveMissingRows: Boolean = {
+    nrow
+    _canHaveMissingRows
+  }
 
-  private[mahout] var intFixRequired = false
+  //  private[mahout] var canHaveMissingRows = false
   private[mahout] var intFixExtra: Long = 0L
 
   private var cached: Boolean = false
@@ -163,7 +179,7 @@ class CheckpointedDrmSpark[K: ClassTag](
       // happens right after things like drmFromHDFS or drmWrap().
       val maxPlus1 = rdd.map(_._1.asInstanceOf[Int]).fold(-1)(max(_, _)) + 1L
       val rowCount = rdd.count()
-      intFixRequired = maxPlus1 != rowCount ||
+      _canHaveMissingRows = maxPlus1 != rowCount ||
         rdd.map(_._1).sum().toLong != ((rowCount -1.0 ) * (rowCount -2.0) /2.0).toLong
       intFixExtra = (maxPlus1 - rowCount) max 0L
       maxPlus1

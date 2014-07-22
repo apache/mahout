@@ -42,6 +42,8 @@ abstract class AbstractBinaryOp[A: ClassTag, B: ClassTag, K: ClassTag]
   protected[drm] var B: DrmLike[B]
   lazy val context: DistributedContext = A.context
 
+  protected[mahout] def canHaveMissingRows: Boolean = false
+
   // These are explicit evidence export. Sometimes scala falls over to figure that on its own.
   def classTagA: ClassTag[A] = implicitly[ClassTag[A]]
 

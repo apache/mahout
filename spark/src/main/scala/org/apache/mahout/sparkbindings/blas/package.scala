@@ -33,17 +33,19 @@ package object blas {
 
   implicit def drmRdd2ops[K:ClassTag](rdd:DrmRdd[K]):DrmRddOps[K] = new DrmRddOps[K](rdd)
 
-  private[mahout] def fixIntConsistency(op:DrmLike[Int], src:DrmRddInput[Int]):DrmRddInput[Int] = {
+  private[mahout] def fixIntConsistency(op:DrmLike[Int], src:DrmRdd[Int]):DrmRdd[Int] = {
 
     if (op.isInstanceOf[CheckpointedDrmSpark[Int]]) {
       val cp = op.asInstanceOf[CheckpointedDrmSpark[Int]]
-      if (cp.intFixRequired) {
+      if (cp.canHaveMissingRows) {
 
-        val rdd = src.toDrmRdd()
+        val rdd = src
         val sc = rdd.sparkContext
         val dueRows = safeToNonNegInt(cp.nrow)
         val dueCols = cp.ncol
-        val fixedRdd = sc
+
+        // Compute the fix.
+        sc
 
             // Bootstrap full key set
             .parallelize(0 until dueRows, numSlices = cp.rdd.partitions.size max 1)
@@ -62,8 +64,6 @@ package object blas {
           val acc = seqVec.headOption.getOrElse(new SequentialAccessSparseVector(dueCols))
           key -> ((acc /: seqVec.tail)(_ + _))
         }
-
-        new DrmRddInput[Int](rowWiseSrc = Some(dueCols -> fixedRdd))
 
       } else src
     } else src
