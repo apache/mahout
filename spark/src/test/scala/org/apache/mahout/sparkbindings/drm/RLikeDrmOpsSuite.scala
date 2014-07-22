@@ -57,7 +57,7 @@ class RLikeDrmOpsSuite extends FunSuite with DistributedSparkSuite with RLikeDrm
 
     // Concoct an rdd with missing rows
     val aRdd: DrmRdd[Int] = sc.parallelize(
-      0 -> dvec(1, 2, 3) ::
+      1 -> dvec(2, 2, 3) ::
           3 -> dvec(4, 5, 6) :: Nil
     ).map { case (key, vec) => key -> (vec: Vector)}
 
