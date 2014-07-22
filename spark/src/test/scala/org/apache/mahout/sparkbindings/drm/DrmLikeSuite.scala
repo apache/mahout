@@ -56,4 +56,5 @@ class DrmLikeSuite extends FunSuite with DistributedSparkSuite with DrmLikeSuite
         keys -> block
     }).norm should be < 1e-4
   }
+
 }

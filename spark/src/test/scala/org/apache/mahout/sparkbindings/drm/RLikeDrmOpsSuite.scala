@@ -19,9 +19,49 @@ package org.apache.mahout.sparkbindings.drm
 
 import org.scalatest.FunSuite
 import org.apache.mahout.math._
+import scalabindings._
+import RLikeOps._
 import drm._
 import org.apache.mahout.sparkbindings._
+import RLikeDrmOps._
 import test.DistributedSparkSuite
 
 /** ==R-like DRM DSL operation tests -- Spark== */
-class RLikeDrmOpsSuite extends FunSuite with DistributedSparkSuite with RLikeDrmOpsSuiteBase
+class RLikeDrmOpsSuite extends FunSuite with DistributedSparkSuite with RLikeDrmOpsSuiteBase {
+
+  test("B = A + 1.0 missing rows") {
+
+    val sc = mahoutCtx.asInstanceOf[SparkDistributedContext].sc
+
+    // Concoct an rdd with missing rows
+    val aRdd: DrmRdd[Int] = sc.parallelize(
+      0 -> dvec(1, 2, 3) ::
+          3 -> dvec(3, 4, 5) :: Nil
+    ).map { case (key, vec) => key -> (vec: Vector)}
+
+    val drmA = drmWrap(rdd = aRdd)
+
+    drmA.canHaveMissingRows should equal(true)
+
+    val inCoreA = drmA.collect
+
+    printf("collected A = \n%s\n", inCoreA)
+
+    val controlB = inCoreA + 1.0
+
+    val drmB = drmA + 1.0
+
+    printf ("collected B = \n%s\n", drmB.collect)
+
+    (drmB -: controlB).norm should be < 1e-10
+
+    // Test that unary operators don't obscure the fact that source had missing rows
+    val drmC = drmA.mapBlock() { case (keys, block) =>
+      keys -> block
+    } + 1.0
+
+    (drmC -: controlB).norm should be < 1e-10
+
+  }
+
+}

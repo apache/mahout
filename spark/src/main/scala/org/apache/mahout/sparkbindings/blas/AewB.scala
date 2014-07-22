@@ -114,8 +114,8 @@ object AewB {
 
     // Before obtaining blockified rdd, see if we have to fix int row key consistency so that missing 
     // rows can get lazily pre-populated with empty vectors before proceeding with elementwise scalar.
-    val aBlockRdd = if (implicitly[ClassTag[K]] == ClassTag.Int && op.canHaveMissingRows) {
-      val fixedRdd = fixIntConsistency(op.asInstanceOf[DrmLike[Int]], src = srcA.toDrmRdd().asInstanceOf[DrmRdd[Int]])
+    val aBlockRdd = if (implicitly[ClassTag[K]] == ClassTag.Int && op.A.canHaveMissingRows) {
+      val fixedRdd = fixIntConsistency(op.A.asInstanceOf[DrmLike[Int]], src = srcA.toDrmRdd().asInstanceOf[DrmRdd[Int]])
       drm.blockify(fixedRdd, blockncol = op.A.ncol).asInstanceOf[BlockifiedDrmRdd[K]]
     } else {
       srcA.toBlockifiedDrmRdd()
