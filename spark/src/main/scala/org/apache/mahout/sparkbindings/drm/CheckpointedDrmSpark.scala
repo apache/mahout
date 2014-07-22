@@ -72,7 +72,7 @@ class CheckpointedDrmSpark[K: ClassTag](
    * if matrix was previously persisted into cache,
    * delete cached representation
    */
-  def uncache() = {
+  def uncache(): this.type = {
     if (cached) {
       rdd.unpersist(blocking = false)
       cached = false
@@ -80,7 +80,7 @@ class CheckpointedDrmSpark[K: ClassTag](
     this
   }
 
-//  def mapRows(mapfun: (K, Vector) => Vector): CheckpointedDrmSpark[K] =
+  //  def mapRows(mapfun: (K, Vector) => Vector): CheckpointedDrmSpark[K] =
 //    new CheckpointedDrmSpark[K](rdd.map(t => (t._1, mapfun(t._1, t._2))))
 
 
@@ -155,7 +155,7 @@ class CheckpointedDrmSpark[K: ClassTag](
     val intRowIndex = classTag[K] == classTag[Int]
 
     if (intRowIndex) {
-      val rdd = cache().rdd
+      val rdd = cache().rdd.asInstanceOf[DrmRdd[Int]]
 
       // I guess it is a suitable place to compute int keys consistency test here because we know
       // that nrow can be computed lazily, which always happens when rdd is already available, cached,

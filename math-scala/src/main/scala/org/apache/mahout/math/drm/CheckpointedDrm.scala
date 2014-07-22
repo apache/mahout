@@ -31,6 +31,6 @@ trait CheckpointedDrm[K] extends DrmLike[K] {
   def writeDRM(path: String)
 
   /** If this checkpoint is already declared cached, uncache. */
-  def uncache()
+  def uncache(): this.type
 
 }

@@ -18,9 +18,12 @@
 package org.apache.mahout.sparkbindings
 
 import scala.reflect.ClassTag
-import org.apache.mahout.math.drm.DrmLike
 import org.apache.mahout.sparkbindings.drm.{CheckpointedDrmSpark, DrmRddInput}
 import org.apache.spark.SparkContext._
+import org.apache.mahout.math._
+import org.apache.mahout.math.drm._
+import scalabindings._
+import RLikeOps._
 
 /**
  * This validation contains distributed algorithms that distributed matrix expression optimizer picks
@@ -32,18 +35,39 @@ package object blas {
 
   private[mahout] def fixIntConsistency(op:DrmLike[Int], src:DrmRddInput[Int]):DrmRddInput[Int] = {
 
-    if ( op.isInstanceOf[CheckpointedDrmSpark[Int]]) {
+    if (op.isInstanceOf[CheckpointedDrmSpark[Int]]) {
       val cp = op.asInstanceOf[CheckpointedDrmSpark[Int]]
-      if ( cp.intFixRequired) {
+      if (cp.intFixRequired) {
 
-      val rdd = src.toDrmRdd()
-      val sc = rdd.sparkContext
+        val rdd = src.toDrmRdd()
+        val sc = rdd.sparkContext
+        val dueRows = safeToNonNegInt(cp.nrow)
+        val dueCols = cp.ncol
+        val fixedRdd = sc
 
-        // TODO TO BE CONTD.
-      sc.parallelize()
+            // Bootstrap full key set
+            .parallelize(0 until dueRows, numSlices = cp.rdd.partitions.size max 1)
+
+            // Enable PairedFunctions
+            .map(_ -> Unit)
+
+            // Cogroup with all rows
+            .cogroup(other = rdd)
+
+            // Filter out out-of-bounds
+            .filter { case (key, _) => key >= 0 && key < dueRows}
+
+            // Coalesce and output RHS
+            .map { case (key, (seqUnit, seqVec)) =>
+          val acc = seqVec.headOption.getOrElse(new SequentialAccessSparseVector(dueCols))
+          key -> ((acc /: seqVec.tail)(_ + _))
+        }
+
+        new DrmRddInput[Int](rowWiseSrc = Some(dueCols -> fixedRdd))
 
       } else src
-    } else src 
+    } else src
+
   }
 
 }
