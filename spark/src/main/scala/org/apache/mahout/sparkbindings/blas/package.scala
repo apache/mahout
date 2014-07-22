@@ -60,7 +60,7 @@ package object blas {
           // Coalesce and output RHS
           .map { case (key, (seqUnit, seqVec)) =>
         val acc = seqVec.headOption.getOrElse(new SequentialAccessSparseVector(dueCols))
-        val vec = if ( seqVec.size>0) (acc /: seqVec.tail)(_ + _) else acc
+        val vec = if (seqVec.size > 0) (acc /: seqVec.tail)(_ + _) else acc
         key -> vec
       }
 

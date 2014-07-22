@@ -32,5 +32,5 @@ case class OpAtA[K: ClassTag](
   def ncol: Int = A.ncol
 
   override protected[mahout] lazy val canHaveMissingRows: Boolean = false
-  
+
 }
