@@ -43,6 +43,9 @@ class CheckpointedDrmSpark[K: ClassTag](
   lazy val nrow = if (_nrow >= 0) _nrow else computeNRow
   lazy val ncol = if (_ncol >= 0) _ncol else computeNCol
 
+  private[mahout] var intFixRequired = false
+  private[mahout] var intFixExtra: Long = 0L
+
   private var cached: Boolean = false
   override val context: DistributedContext = rdd.context
 
@@ -151,11 +154,24 @@ class CheckpointedDrmSpark[K: ClassTag](
 
     val intRowIndex = classTag[K] == classTag[Int]
 
-    if (intRowIndex)
-      cache().rdd.map(_._1.asInstanceOf[Int]).fold(-1)(max(_, _)) + 1L
-    else
+    if (intRowIndex) {
+      val rdd = cache().rdd
+
+      // I guess it is a suitable place to compute int keys consistency test here because we know
+      // that nrow can be computed lazily, which always happens when rdd is already available, cached,
+      // and it's ok to compute small summaries without triggering huge pipelines. Which usually
+      // happens right after things like drmFromHDFS or drmWrap().
+      val maxPlus1 = rdd.map(_._1.asInstanceOf[Int]).fold(-1)(max(_, _)) + 1L
+      val rowCount = rdd.count()
+      intFixRequired = maxPlus1 != rowCount ||
+        rdd.map(_._1).sum().toLong != ((rowCount -1.0 ) * (rowCount -2.0) /2.0).toLong
+      intFixExtra = (maxPlus1 - rowCount) max 0L
+      maxPlus1
+    } else
       cache().rdd.count()
   }
+
+
 
   protected def computeNCol =
     cache().rdd.map(_._2.length).fold(-1)(max(_, _))

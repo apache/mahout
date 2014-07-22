@@ -18,6 +18,9 @@
 package org.apache.mahout.sparkbindings
 
 import scala.reflect.ClassTag
+import org.apache.mahout.math.drm.DrmLike
+import org.apache.mahout.sparkbindings.drm.{CheckpointedDrmSpark, DrmRddInput}
+import org.apache.spark.SparkContext._
 
 /**
  * This validation contains distributed algorithms that distributed matrix expression optimizer picks
@@ -26,5 +29,21 @@ import scala.reflect.ClassTag
 package object blas {
 
   implicit def drmRdd2ops[K:ClassTag](rdd:DrmRdd[K]):DrmRddOps[K] = new DrmRddOps[K](rdd)
+
+  private[mahout] def fixIntConsistency(op:DrmLike[Int], src:DrmRddInput[Int]):DrmRddInput[Int] = {
+
+    if ( op.isInstanceOf[CheckpointedDrmSpark[Int]]) {
+      val cp = op.asInstanceOf[CheckpointedDrmSpark[Int]]
+      if ( cp.intFixRequired) {
+
+      val rdd = src.toDrmRdd()
+      val sc = rdd.sparkContext
+
+        // TODO TO BE CONTD.
+      sc.parallelize()
+
+      } else src
+    } else src 
+  }
 
 }
