@@ -176,18 +176,36 @@ package object sparkbindings {
 
   private[sparkbindings] implicit def w2v(w:VectorWritable):Vector = w.get()
 
-  def drmWrap[K : ClassTag](
+  /**
+   * ==Wrap existing RDD into a matrix==
+   *
+   * @param rdd source rdd conforming to [[org.apache.mahout.sparkbindings.DrmRdd]]
+   * @param nrow optional, number of rows. If not specified, we'll try to figure out on our own.
+   * @param ncol optional, number of columns. If not specififed, we'll try to figure out on our own.
+   * @param cacheHint optional, desired cache policy for that rdd.
+   * @param canHaveMissingRows optional. For int-keyed rows, there might be implied but missing rows.
+   *                           If underlying rdd may have that condition, we need to know since some
+   *                           operators consider that a deficiency and we'll need to fix it lazily
+   *                           before proceeding with such operators. It only meaningful if `nrow` is
+   *                           also specified (otherwise, we'll run quick test to figure if rows may
+   *                           be missing, at the time we count the rows).
+   * @tparam K row key type
+   * @return wrapped DRM
+   */
+  def drmWrap[K: ClassTag](
       rdd: DrmRdd[K],
       nrow: Int = -1,
       ncol: Int = -1,
-      cacheHint:CacheHint.CacheHint = CacheHint.NONE
+      cacheHint: CacheHint.CacheHint = CacheHint.NONE,
+      canHaveMissingRows: Boolean = false
       ): CheckpointedDrm[K] =
 
     new CheckpointedDrmSpark[K](
       rdd = rdd,
       _nrow = nrow,
       _ncol = ncol,
-      _cacheStorageLevel = SparkEngine.cacheHint2Spark(cacheHint)
+      _cacheStorageLevel = SparkEngine.cacheHint2Spark(cacheHint),
+      _canHaveMissingRows = canHaveMissingRows
     )
 
 

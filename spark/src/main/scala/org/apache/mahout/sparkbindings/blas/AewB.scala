@@ -22,7 +22,7 @@ import scala.reflect.ClassTag
 import org.apache.spark.SparkContext._
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
-import org.apache.mahout.math.{Matrix, Vector}
+import org.apache.mahout.math.{SequentialAccessSparseVector, Matrix, Vector}
 import org.apache.mahout.math.drm.logical.{OpAewScalar, OpAewB}
 import org.apache.log4j.Logger
 import org.apache.mahout.sparkbindings.blas.AewB.{ReduceFuncScalar, ReduceFunc}
@@ -54,6 +54,7 @@ object AewB {
 
     val ewOps = getEWOps()
     val opId = op.op
+    val ncol = op.ncol
 
     val reduceFunc = opId match {
       case "+" => ewOps.plus
@@ -85,14 +86,24 @@ object AewB {
       log.debug("applying elementwise as join")
 
       a
+          // Full outer-join operands row-wise
           .cogroup(b, numPartitions = a.partitions.size max b.partitions.size)
+
+          // Reduce both sides. In case there are duplicate rows in RHS or LHS, they are summed up
+          // prior to reduction.
           .map({
         case (key, (vectorSeqA, vectorSeqB)) =>
-          key -> reduceFunc(vectorSeqA.reduce(reduceFunc), vectorSeqB.reduce(reduceFunc))
+          val lhsVec: Vector = if (vectorSeqA.isEmpty) new SequentialAccessSparseVector(ncol)
+          else
+            (vectorSeqA.head /: vectorSeqA.tail)(_ + _)
+          val rhsVec: Vector = if (vectorSeqB.isEmpty) new SequentialAccessSparseVector(ncol)
+          else
+            (vectorSeqB.head /: vectorSeqB.tail)(_ + _)
+          key -> reduceFunc(lhsVec, rhsVec)
       })
     }
 
-    new DrmRddInput(rowWiseSrc = Some(op.ncol -> rdd))
+    new DrmRddInput(rowWiseSrc = Some(ncol -> rdd))
   }
 
   /** Physical algorithm to handle matrix-scalar operators like A - s or s -: A */
