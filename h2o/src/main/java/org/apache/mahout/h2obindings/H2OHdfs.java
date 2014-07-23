@@ -42,6 +42,7 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.util.ReflectionUtils;
 
@@ -94,11 +95,14 @@ public class H2OHdfs {
       FileSystem fs = FileSystem.get(URI.create(uri), conf);
       Vec.Writer writers[];
       Vec.Writer labelwriter = null;
+      boolean is_int_key = false, is_long_key = false, is_string_key = false;
 
       reader = new SequenceFile.Reader(fs, path, conf);
 
       if (reader.getValueClass() != VectorWritable.class) {
-        System.out.println("ValueClass in file " + filename + "must be VectorWritable, but found " + reader.getValueClassName());
+        System.out.println("ValueClass in file " + filename +
+                           "must be VectorWritable, but found " +
+                           reader.getValueClassName());
         return null;
       }
 
@@ -108,12 +112,25 @@ public class H2OHdfs {
         ReflectionUtils.newInstance(reader.getValueClass(), conf);
 
       long start = reader.getPosition();
+
+      if (reader.getKeyClass() == Text.class)
+        is_string_key = true;
+      else if (reader.getKeyClass() == LongWritable.class)
+        is_long_key = true;
+      else
+        is_int_key = true;
+
       while (reader.next(key, value)) {
         if (cols == 0) {
           Vector v = value.get();
-          cols = v.size();
+          cols = Math.max(v.size(), cols);
         }
-        rows++;
+        if (is_long_key)
+          rows = Math.max(((LongWritable)(key)).get()+1, rows);
+        if (is_int_key)
+          rows = Math.max(((IntWritable)(key)).get()+1, rows);
+        if (is_string_key)
+          rows++;
       }
       reader.seek(start);
 
@@ -130,11 +147,16 @@ public class H2OHdfs {
       long r = 0;
       while (reader.next(key, value)) {
         Vector v = value.get();
+        if (is_long_key)
+          r = ((LongWritable)(key)).get();
+        if (is_int_key)
+          r = ((IntWritable)(key)).get();
         for (int c = 0; c < v.size(); c++)
           writers[c].set(r, v.getQuick(c));
         if (labels != null)
           labelwriter.set(r, ((Text)key).toString());
-        r++;
+        if (is_string_key)
+          r++;
       }
 
       Futures fus = new Futures();
