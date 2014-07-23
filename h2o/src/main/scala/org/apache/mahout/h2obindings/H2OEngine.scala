@@ -24,20 +24,18 @@ import org.apache.mahout.math.drm.logical._
 import org.apache.mahout.h2obindings.ops._
 import org.apache.mahout.h2obindings.drm._
 
-import water.fvec.{Frame,Vec}
-
 object H2OEngine extends DistributedEngine {
   def colMeans[K:ClassTag](drm: CheckpointedDrm[K]): Vector =
-    H2OHelper.colMeans (drm.frame)
+    H2OHelper.colMeans(drm.h2odrm.frame)
 
   def colSums[K:ClassTag](drm: CheckpointedDrm[K]): Vector =
-    H2OHelper.colSums (drm.frame)
+    H2OHelper.colSums(drm.h2odrm.frame)
 
   def norm[K: ClassTag](drm: CheckpointedDrm[K]): Double =
-    H2OHelper.sumSqr (drm.frame)
+    H2OHelper.sumSqr(drm.h2odrm.frame)
 
   def numNonZeroElementsPerColumn[K: ClassTag](drm: CheckpointedDrm[K]): Vector =
-    H2OHelper.nonZeroCnt (drm.frame)
+    H2OHelper.nonZeroCnt(drm.h2odrm.frame)
 
   def drmBroadcast(m: Matrix)(implicit dc: DistributedContext): BCast[Matrix] =
     new H2OBCast(m)
@@ -45,37 +43,27 @@ object H2OEngine extends DistributedEngine {
   def drmBroadcast(v: Vector)(implicit dc: DistributedContext): BCast[Vector] =
     new H2OBCast(v)
 
-  def drmFromHDFS(path: String, parMin: Int = 0)(implicit dc: DistributedContext): CheckpointedDrm[_] = {
-    val (frame, labels) = H2OHdfs.drm_from_file (path, parMin)
-    new CheckpointedDrmH2O (frame, labels, dc)
-  }
+  def drmFromHDFS(path: String, parMin: Int = 0)(implicit dc: DistributedContext): CheckpointedDrm[_] =
+    new CheckpointedDrmH2O(H2OHdfs.drm_from_file(path, parMin), dc)
 
   def drmParallelizeEmpty(nrow: Int, ncol: Int, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[Int] =
-    new CheckpointedDrmH2O[Int] (H2OHelper.empty_frame (nrow, ncol, numPartitions, -1), dc)
+    new CheckpointedDrmH2O[Int](H2OHelper.empty_drm(nrow, ncol, numPartitions, -1), dc)
 
   def drmParallelizeEmptyLong(nrow: Long, ncol: Int, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[Long] =
-    new CheckpointedDrmH2O[Long] (H2OHelper.empty_frame (nrow, ncol, numPartitions, -1), dc)
+    new CheckpointedDrmH2O[Long](H2OHelper.empty_drm(nrow, ncol, numPartitions, -1), dc)
 
-  def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[Int] = {
-    val (frame, labels) = H2OHelper.frame_from_matrix (m, numPartitions, -1)
-    // assert labels == null
-    new CheckpointedDrmH2O[Int] (frame, labels, dc)
-  }
+  def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[Int] =
+    new CheckpointedDrmH2O[Int](H2OHelper.drm_from_matrix(m, numPartitions, -1), dc)
 
-  def drmParallelizeWithRowLabels(m: Matrix, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[String] = {
-    val (frame, labels) = H2OHelper.frame_from_matrix (m, numPartitions, -1)
-    // assert labels != null
-    new CheckpointedDrmH2O[String] (frame, labels, dc)
-  }
+  def drmParallelizeWithRowLabels(m: Matrix, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[String] =
+    new CheckpointedDrmH2O[String](H2OHelper.drm_from_matrix(m, numPartitions, -1), dc)
 
-  def toPhysical[K:ClassTag](plan: DrmLike[K], ch: CacheHint.CacheHint): CheckpointedDrm[K] = {
-    val (frame, labels) = tr2phys (plan)
-    new CheckpointedDrmH2O[K] (frame, labels, plan.context)
-  }
+  def toPhysical[K:ClassTag](plan: DrmLike[K], ch: CacheHint.CacheHint): CheckpointedDrm[K] =
+    new CheckpointedDrmH2O[K](tr2phys(plan), plan.context)
 
   // H2O specific
 
-  private def tr2phys[K: ClassTag](oper: DrmLike[K]): (Frame, Vec) = {
+  private def tr2phys[K: ClassTag](oper: DrmLike[K]): H2ODrm = {
     oper match {
       case OpAtAnyKey(_) =>
         throw new IllegalArgumentException("\"A\" must be Int-keyed in this A.t expression.")
@@ -95,7 +83,7 @@ object H2OEngine extends DistributedEngine {
       case blockOp: OpMapBlock[K, _] => MapBlock.exec(tr2phys(blockOp.A)(blockOp.classTagA), blockOp.ncol, blockOp.bmf,
         (blockOp.classTagK == implicitly[ClassTag[String]]), blockOp.classTagA, blockOp.classTagK)
       case op@OpPar(a, m, e) => Par.exec(tr2phys(a)(op.classTagA), m, e)
-      case cp: CheckpointedDrm[K] => (cp.frame, cp.labels)
+      case cp: CheckpointedDrm[K] => cp.h2odrm
       case _ => throw new IllegalArgumentException("Internal:Optimizer has no exec policy for operator %s."
           .format(oper))
     }

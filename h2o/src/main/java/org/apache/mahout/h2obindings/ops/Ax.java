@@ -20,6 +20,7 @@ package org.apache.mahout.h2obindings.ops;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.h2obindings.H2OHelper;
 import org.apache.mahout.h2obindings.drm.H2OBCast;
+import org.apache.mahout.h2obindings.drm.H2ODrm;
 
 import water.MRTask;
 import water.fvec.Frame;
@@ -27,13 +28,11 @@ import water.fvec.Vec;
 import water.fvec.Chunk;
 import water.fvec.NewChunk;
 
-import scala.Tuple2;
-
 public class Ax {
   /* Calculate Ax (where x is an in-core Vector) */
-  public static Tuple2<Frame,Vec> Ax(Tuple2<Frame,Vec> TA, Vector x) {
-    Frame A = TA._1();
-    Vec VA = TA._2();
+  public static H2ODrm Ax(H2ODrm DrmA, Vector x) {
+    Frame A = DrmA.frame;
+    Vec keys = DrmA.keys;
     final H2OBCast<Vector> bx = new H2OBCast<Vector>(x);
 
     /* Ax is written into nc (single element, not array) with an MRTask on A,
@@ -57,6 +56,6 @@ public class Ax {
       }.doAll(1, A).outputFrame(null, null);
 
     /* Carry forward labels of A blindly into ABt */
-    return new Tuple2<Frame,Vec>(Ax, VA);
+    return new H2ODrm(Ax, keys);
   }
 }

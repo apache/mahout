@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Arrays;
 
-import scala.Tuple2;
+import org.apache.mahout.h2obindings.drm.H2ODrm;
 
 public class H2OHelper {
 
@@ -72,7 +72,9 @@ public class H2OHelper {
     Dense Matrix depending on number of missing elements
     in Frame.
   */
-  public static Matrix matrix_from_frame(Frame frame, Vec labels) {
+  public static Matrix matrix_from_drm(H2ODrm Drm) {
+    Frame frame = Drm.frame;
+    Vec labels = Drm.keys;
     Matrix m;
 
     if (is_sparse(frame))
@@ -232,7 +234,7 @@ public class H2OHelper {
   /* Ingest a Matrix into an H2O Frame. H2O Frame is the "backing"
      data structure behind CheckpointedDrm. Steps:
   */
-  public static Tuple2<Frame,Vec> frame_from_matrix(Matrix m, int min_hint, int exact_hint) {
+  public static H2ODrm drm_from_matrix(Matrix m, int min_hint, int exact_hint) {
     /* First create an empty (0-filled) frame of the required dimensions */
     Frame frame = empty_frame(m.rowSize(), m.columnSize(), min_hint, exact_hint);
     Vec labels = null;
@@ -266,7 +268,7 @@ public class H2OHelper {
 
     closer.blockForPending();
 
-    return new Tuple2<Frame,Vec>(frame,labels);
+    return new H2ODrm(frame, labels);
   }
 
   public static Frame empty_frame(long nrow, int ncol, int min_hint, int exact_hint) {
@@ -284,5 +286,9 @@ public class H2OHelper {
       vecs[i] = Vec.makeCon(0, null, vg, espc);
 
     return new Frame(vecs);
+  }
+
+  public static H2ODrm empty_drm(long nrow, int ncol, int min_hint, int exact_hint) {
+    return new H2ODrm(empty_frame(nrow, ncol, min_hint, exact_hint));
   }
 }

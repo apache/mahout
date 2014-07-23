@@ -18,6 +18,7 @@
 package org.apache.mahout.h2obindings.ops;
 
 import org.apache.mahout.h2obindings.H2OHelper;
+import org.apache.mahout.h2obindings.drm.H2ODrm;
 
 import water.MRTask;
 import water.fvec.Frame;
@@ -25,12 +26,10 @@ import water.fvec.Vec;
 import water.fvec.Chunk;
 import water.fvec.NewChunk;
 
-import scala.Tuple2;
-
 public class AtA {
   /* Calculate A'A */
-  public static Tuple2<Frame,Vec> AtA(Tuple2<Frame,Vec> TA) {
-    final Frame A = TA._1();
+  public static H2ODrm AtA(H2ODrm DrmA) {
+    final Frame A = DrmA.frame;
     /* First create an empty Frame of the required dimensions */
     Frame AtA = H2OHelper.empty_frame(A.numCols(), A.numCols(), -1, -1);
 
@@ -59,6 +58,6 @@ public class AtA {
     }.doAll(AtA);
 
     /* AtA is NOT similarly partitioned as A, drop labels */
-    return new Tuple2<Frame,Vec>(AtA, null);
+    return new H2ODrm(AtA);
   }
 }

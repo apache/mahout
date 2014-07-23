@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.io.File;
 import java.net.URI;
 
-import scala.Tuple2;
-
 import water.fvec.Frame;
 import water.fvec.Vec;
 import water.Futures;
@@ -33,6 +31,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.h2obindings.drm.H2ODrm;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -70,18 +69,18 @@ public class H2OHdfs {
     }
   }
 
-  public static Tuple2<Frame,Vec> drm_from_file(String filename, int parMin) {
+  public static H2ODrm drm_from_file(String filename, int parMin) {
     try {
       if (is_seqfile(filename))
         return drm_from_seqfile(filename, parMin);
       else
-        return new Tuple2<Frame,Vec>(FrameUtils.parseFrame(null,new File(filename)), null);
+        return new H2ODrm(FrameUtils.parseFrame(null,new File(filename)));
     } catch (java.io.IOException e) {
       return null;
     }
   }
 
-  public static Tuple2<Frame,Vec> drm_from_seqfile(String filename, int parMin) {
+  public static H2ODrm drm_from_seqfile(String filename, int parMin) {
     long rows = 0;
     int cols = 0;
     Frame frame = null;
@@ -170,10 +169,12 @@ public class H2OHdfs {
     } finally {
       IOUtils.closeStream(reader);
     }
-    return new Tuple2<Frame,Vec>(frame, labels);
+    return new H2ODrm(frame, labels);
   }
 
-  public static void drm_to_file(String filename, Frame frame, Vec labels) throws java.io.IOException {
+  public static void drm_to_file(String filename, H2ODrm Drm) throws java.io.IOException {
+    Frame frame = Drm.frame;
+    Vec labels = Drm.keys;
     String uri = filename;
     Configuration conf = new Configuration();
     Path path = new Path(uri);

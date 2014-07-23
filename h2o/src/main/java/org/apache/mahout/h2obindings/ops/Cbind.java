@@ -23,28 +23,28 @@ import water.fvec.Vec;
 import water.fvec.Chunk;
 import water.fvec.NewChunk;
 
-import scala.Tuple2;
 import org.apache.mahout.h2obindings.H2OHelper;
+import org.apache.mahout.h2obindings.drm.H2ODrm;
 
 public class Cbind {
-  /* R's cbind like operator, on TA and TB */
-  public static Tuple2<Frame,Vec> Cbind(Tuple2<Frame,Vec> TA, Tuple2<Frame,Vec> TB) {
-    Frame fra = TA._1();
-    Vec va = TA._2();
-    Frame frb = TB._1();
-    Vec vb = TB._2();
+  /* R's cbind like operator, on DrmA and DrmB */
+  public static H2ODrm Cbind(H2ODrm DrmA, H2ODrm DrmB) {
+    Frame fra = DrmA.frame;
+    Vec keysa = DrmA.keys;
+    Frame frb = DrmB.frame;
+    Vec keysb = DrmB.keys;
 
     /* If A and B are similarly partitioned, .. */
     if (fra.anyVec().group() == frb.anyVec().group())
       /* .. then, do a light weight zip() */
-      return zip(fra, va, frb, vb);
+      return zip(fra, keysa, frb, keysb);
     else
       /* .. else, do a heavy weight join() which involves moving data over the wire */
-      return join(fra, va, frb, vb);
+      return join(fra, keysa, frb, keysb);
   }
 
   /* Light weight zip(), no data movement */
-  private static Tuple2<Frame, Vec> zip(final Frame fra, final Vec va, final Frame frb, final Vec vb) {
+  private static H2ODrm zip(final Frame fra, final Vec keysa, final Frame frb, final Vec keysb) {
     /* Create a new Vec[] to hold the concatenated list of A and B's column vectors */
     Vec vecs[] = new Vec[fra.vecs().length + frb.vecs().length];
     int d = 0;
@@ -57,11 +57,11 @@ public class Cbind {
     /* and create a new Frame with the combined list of column Vecs */
     Frame fr = new Frame(vecs);
     /* Finally, inherit A's string labels into the result */
-    return new Tuple2<Frame,Vec> (fr, va);
+    return new H2ODrm(fr, keysa);
   }
 
   /* heavy weight join(), involves moving data */
-  private static Tuple2<Frame, Vec> join(final Frame fra, final Vec va, final Frame frb, final Vec vb) {
+  private static H2ODrm join(final Frame fra, final Vec keysa, final Frame frb, final Vec keysb) {
 
     /* The plan is to re-organize B to be "similarly partitioned as A", and then zip() */
     Vec bvecs[] = new Vec[frb.vecs().length];
@@ -89,6 +89,6 @@ public class Cbind {
     }.doAll(bvecs);
 
     /* now that bvecs[] is compatible, just zip'em'up */
-    return zip(fra, va, new Frame(bvecs), null);
+    return zip(fra, keysa, new Frame(bvecs), null);
   }
 }

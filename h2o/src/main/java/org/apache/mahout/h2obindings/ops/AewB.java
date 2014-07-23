@@ -18,6 +18,7 @@
 package org.apache.mahout.h2obindings.ops;
 
 import org.apache.mahout.h2obindings.H2OHelper;
+import org.apache.mahout.h2obindings.drm.H2ODrm;
 
 import water.MRTask;
 import water.fvec.Frame;
@@ -25,14 +26,12 @@ import water.fvec.Vec;
 import water.fvec.Chunk;
 import water.fvec.NewChunk;
 
-import scala.Tuple2;
-
 public class AewB {
   /* Element-wise DRM-DRM operations */
-  public static Tuple2<Frame,Vec> AewB(Tuple2<Frame,Vec> AT, Tuple2<Frame,Vec> BT, final String op) {
-    final Frame A = AT._1();
-    final Frame B = BT._1();
-    Vec VA = AT._2();
+  public static H2ODrm AewB(H2ODrm DrmA, H2ODrm DrmB, final String op) {
+    final Frame A = DrmA.frame;
+    final Frame B = DrmB.frame;
+    Vec keys = DrmA.keys;
     int AewB_cols = A.numCols();
 
     /* AewB is written into ncs[] with an MRTask on A, and therefore will
@@ -69,6 +68,6 @@ public class AewB {
       }.doAll(AewB_cols, A).outputFrame(null, null);
 
     /* Carry forward labels of A blindly into ABt */
-    return new Tuple2<Frame,Vec>(AewB, VA);
+    return new H2ODrm(AewB, keys);
   }
 }

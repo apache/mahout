@@ -22,19 +22,19 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.DiagonalMatrix;
 import org.apache.mahout.h2obindings.H2OHelper;
 import org.apache.mahout.h2obindings.drm.H2OBCast;
+import org.apache.mahout.h2obindings.drm.H2ODrm;
 
 import water.MRTask;
 import water.fvec.Frame;
 import water.fvec.Vec;
 import water.fvec.Chunk;
 import water.fvec.NewChunk;
-import scala.Tuple2;
 
 public class TimesRightMatrix {
   /* Multiple with in-core Matrix */
-  public static Tuple2<Frame,Vec> TimesRightMatrix(Tuple2<Frame,Vec> TA, Matrix B) {
-    Frame A = TA._1();
-    Vec VA = TA._2();
+  public static H2ODrm TimesRightMatrix(H2ODrm DrmA, Matrix B) {
+    Frame A = DrmA.frame;
+    Vec keys = DrmA.keys;
     Frame AinCoreB = null;
 
     if (B instanceof DiagonalMatrix)
@@ -42,7 +42,7 @@ public class TimesRightMatrix {
     else
       AinCoreB = AinCoreB_common(A, B);
 
-    return new Tuple2<Frame,Vec>(AinCoreB, VA);
+    return new H2ODrm(AinCoreB, keys);
   }
 
   /*

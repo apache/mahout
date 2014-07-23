@@ -24,13 +24,13 @@ import water.fvec.Chunk;
 import water.fvec.NewChunk;
 import water.parser.ValueString;
 
-import scala.Tuple2;
 import org.apache.mahout.h2obindings.H2OHelper;
+import org.apache.mahout.h2obindings.drm.H2ODrm;
 
 public class Par {
-  public static Tuple2<Frame,Vec> exec(Tuple2<Frame,Vec> TA, int min, int exact) {
-    final Frame frin = TA._1();
-    final Vec vin = TA._2();
+  public static H2ODrm exec(H2ODrm DrmA, int min, int exact) {
+    final Frame frin = DrmA.frame;
+    final Vec vin = DrmA.keys;
 
     /* First create a new empty Frame with the required partitioning */
     Frame frout = H2OHelper.empty_frame(frin.numRows(), frin.numCols(), min, exact);
@@ -79,6 +79,6 @@ public class Par {
       }.doAll(frout);
     }
 
-    return new Tuple2<Frame,Vec> (frout, vout);
+    return new H2ODrm(frout, vout);
   }
 }

@@ -19,6 +19,7 @@ package org.apache.mahout.h2obindings.ops;
 
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.h2obindings.H2OBlockMatrix;
+import org.apache.mahout.h2obindings.drm.H2ODrm;
 
 import water.MRTask;
 import water.fvec.Frame;
@@ -30,13 +31,12 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 import scala.reflect.ClassTag;
-import scala.Tuple2;
 
 public class MapBlock {
-  public static <K,R> Tuple2<Frame,Vec> exec(Tuple2<Frame,Vec> AT, int ncol, Object bmf, final boolean is_r_str,
-                                             final ClassTag<K> k, final ClassTag<R> r) {
-    Frame A = AT._1();
-    Vec VA = AT._2();
+  public static <K,R> H2ODrm exec(H2ODrm DrmA, int ncol, Object bmf, final boolean is_r_str,
+                                  final ClassTag<K> k, final ClassTag<R> r) {
+    Frame A = DrmA.frame;
+    Vec keys = DrmA.keys;
 
     class MRTaskBMF extends MRTask<MRTaskBMF> {
       Serializable _bmf;
@@ -90,7 +90,7 @@ public class MapBlock {
     }
 
     int ncol_res = ncol + (is_r_str ? 1 : 0);
-    Frame fmap = new MRTaskBMF(bmf, VA).doAll(ncol_res, A).outputFrame(null, null);
+    Frame fmap = new MRTaskBMF(bmf, keys).doAll(ncol_res, A).outputFrame(null, null);
     Vec vmap = null;
     if (is_r_str) {
       /* If output was String keyed, then the last Vec in fmap is the String vec.
@@ -100,6 +100,6 @@ public class MapBlock {
       vmap = fmap.vecs()[ncol];
       fmap = new Frame(Arrays.copyOfRange(fmap.vecs(), 0, ncol));
     }
-    return new Tuple2<Frame,Vec>(fmap,vmap);
+    return new H2ODrm(fmap, vmap);
   }
 }

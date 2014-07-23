@@ -18,6 +18,7 @@
 package org.apache.mahout.h2obindings.ops;
 
 import org.apache.mahout.h2obindings.H2OHelper;
+import org.apache.mahout.h2obindings.drm.H2ODrm;
 
 import water.MRTask;
 import water.fvec.Frame;
@@ -25,14 +26,12 @@ import water.fvec.Vec;
 import water.fvec.Chunk;
 import water.fvec.NewChunk;
 
-import scala.Tuple2;
-
 public class ABt {
   /* Calculate AB' */
-  public static Tuple2<Frame,Vec> ABt(Tuple2<Frame,Vec> TA, Tuple2<Frame,Vec> TB) {
-    Frame A = TA._1();
-    Vec VA = TA._2();
-    final Frame B = TB._1();
+  public static H2ODrm ABt(H2ODrm DrmA, H2ODrm DrmB) {
+    Frame A = DrmA.frame;
+    Vec keys = DrmA.keys;
+    final Frame B = DrmB.frame;
     int ABt_cols = (int)B.numRows();
 
     /* ABt is written into ncs[] with an MRTask on A, and therefore will
@@ -59,6 +58,6 @@ public class ABt {
       }.doAll(ABt_cols, A).outputFrame(null, null);
 
     /* Carry forward labels of A blindly into ABt */
-    return new Tuple2<Frame,Vec>(ABt, VA);
+    return new H2ODrm(ABt, keys);
   }
 }

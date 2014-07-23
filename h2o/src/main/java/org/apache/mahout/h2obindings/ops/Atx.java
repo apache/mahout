@@ -23,6 +23,7 @@ import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.h2obindings.H2OHelper;
 import org.apache.mahout.h2obindings.drm.H2OBCast;
+import org.apache.mahout.h2obindings.drm.H2ODrm;
 
 import water.MRTask;
 import water.fvec.Frame;
@@ -31,12 +32,10 @@ import water.fvec.Chunk;
 import water.fvec.NewChunk;
 import water.util.ArrayUtils;
 
-import scala.Tuple2;
-
 public class Atx {
   /* Calculate A'x (where x is an in-core Vector) */
-  public static Tuple2<Frame,Vec> Atx(Tuple2<Frame,Vec> TA, Vector x) {
-    Frame A = TA._1();
+  public static H2ODrm Atx(H2ODrm DrmA, Vector x) {
+    Frame A = DrmA.frame;
     final H2OBCast<Vector> bx = new H2OBCast<Vector>(x);
 
     /* A'x is computed into _atx[] with an MRTask on A (with
@@ -72,6 +71,6 @@ public class Atx {
     Vector v = new DenseVector(new MRTaskAtx().doAll(A)._atx);
     Matrix m = new DenseMatrix(A.numCols(), 1);
     m.assignColumn(0, v);
-    return H2OHelper.frame_from_matrix(m, -1, -1);
+    return H2OHelper.drm_from_matrix(m, -1, -1);
   }
 }

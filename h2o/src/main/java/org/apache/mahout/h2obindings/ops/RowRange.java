@@ -26,13 +26,13 @@ import water.fvec.Chunk;
 import water.fvec.NewChunk;
 import water.parser.ValueString;
 
-import scala.Tuple2;
+import org.apache.mahout.h2obindings.drm.H2ODrm;
 
 public class RowRange {
   /* Filter operation */
-  public static Tuple2<Frame,Vec> RowRange(Tuple2<Frame,Vec> TA, final Range R) {
-    Frame A = TA._1();
-    Vec VA = TA._2();
+  public static H2ODrm RowRange(H2ODrm DrmA, final Range R) {
+    Frame A = DrmA.frame;
+    Vec keys = DrmA.keys;
 
     /* Run a filtering MRTask on A. If row number falls within R.start() and
        R.end(), then the row makes it into the output
@@ -57,7 +57,7 @@ public class RowRange {
         }
       }.doAll(A.numCols(), A).outputFrame(null, null);
 
-    Vec Vrr = (VA == null) ? null : new MRTask() {
+    Vec Vrr = (keys == null) ? null : new MRTask() {
         /* This is a String keyed DRM. Do the same thing as above,
            but this time just one column of Strings.
         */
@@ -76,8 +76,8 @@ public class RowRange {
             nc.addStr(chk.atStr0(vstr, r).toString());
           }
         }
-      }.doAll(1, VA).outputFrame(null, null).anyVec();
+      }.doAll(1, keys).outputFrame(null, null).anyVec();
 
-    return new Tuple2<Frame,Vec>(Arr, Vrr);
+    return new H2ODrm(Arr, Vrr);
   }
 }
