@@ -29,6 +29,7 @@ import water.fvec.Frame;
 import water.fvec.Vec;
 import water.fvec.Chunk;
 import water.fvec.NewChunk;
+import water.util.ArrayUtils;
 
 import scala.Tuple2;
 
@@ -60,8 +61,7 @@ public class Atx {
         }
       }
       public void reduce(MRTaskAtx other) {
-        for (int i = 0; i < _atx.length; i++)
-          _atx[i] += other._atx[i];
+        ArrayUtils.add(_atx, other._atx);
       }
     }
 

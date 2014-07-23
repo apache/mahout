@@ -29,6 +29,7 @@ import water.fvec.Frame;
 import water.fvec.Vec;
 import water.fvec.Chunk;
 import water.parser.ValueString;
+import water.util.ArrayUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -135,8 +136,7 @@ public class H2OHelper {
         }
       }
       public void reduce(MRTaskSum other) {
-        for (int i = 0; i < _sums.length; i++)
-          _sums[i] += other._sums[i];
+        ArrayUtils.add(_sums, other._sums);
       }
     }
     return new DenseVector(new MRTaskSum().doAll(frame)._sums);
@@ -185,8 +185,7 @@ public class H2OHelper {
         }
       }
       public void reduce(MRTaskNonZero other) {
-        for (int i = 0; i < _sums.length; i++)
-          _sums[i] += other._sums[i];
+        ArrayUtils.add(_sums, other._sums);
       }
     }
     return new DenseVector(new MRTaskNonZero().doAll(frame)._sums);
