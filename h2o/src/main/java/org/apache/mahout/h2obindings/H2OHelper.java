@@ -75,10 +75,10 @@ public class H2OHelper {
   public static Matrix matrix_from_frame(Frame frame, Vec labels) {
     Matrix m;
 
-    if (is_sparse (frame))
-      m = new SparseMatrix ((int)frame.numRows(), frame.numCols());
+    if (is_sparse(frame))
+      m = new SparseMatrix((int)frame.numRows(), frame.numCols());
     else
-      m = new DenseMatrix ((int)frame.numRows(), frame.numCols());
+      m = new DenseMatrix((int)frame.numRows(), frame.numCols());
 
     int c = 0;
     /* Fill matrix, column at a time */
@@ -213,7 +213,7 @@ public class H2OHelper {
       /* XXX: calculate based on cloud size and # of cpu */
       parts_hint = 4;
 
-    chunk_sz = (int) (((nrow - 1) / parts_hint) + 1);
+    chunk_sz = (int)(((nrow - 1) / parts_hint) + 1);
     if (exact > 0)
       return chunk_sz;
 
@@ -234,7 +234,7 @@ public class H2OHelper {
   */
   public static Tuple2<Frame,Vec> frame_from_matrix(Matrix m, int min_hint, int exact_hint) {
     /* First create an empty (0-filled) frame of the required dimensions */
-    Frame frame = empty_frame (m.rowSize(), m.columnSize(), min_hint, exact_hint);
+    Frame frame = empty_frame(m.rowSize(), m.columnSize(), min_hint, exact_hint);
     Vec labels = null;
     Vec.Writer writers[] = new Vec.Writer[m.columnSize()];
     Futures closer = new Futures();
@@ -270,8 +270,8 @@ public class H2OHelper {
   }
 
   public static Frame empty_frame(long nrow, int ncol, int min_hint, int exact_hint) {
-    int chunk_sz = chunk_size (nrow, ncol, min_hint, exact_hint);
-    int nchunks = (int) ((nrow - 1) / chunk_sz) + 1; /* Final number of Chunks per Vec */
+    int chunk_sz = chunk_size(nrow, ncol, min_hint, exact_hint);
+    int nchunks = (int)((nrow - 1) / chunk_sz) + 1; /* Final number of Chunks per Vec */
     Vec.VectorGroup vg = new Vec.VectorGroup();
     long espc[] = new long[nchunks+1];
     final Vec[] vecs = new Vec[ncol];

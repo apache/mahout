@@ -45,7 +45,7 @@ import org.apache.hadoop.util.ReflectionUtils;
 
 
 public class H2OHdfs {
-  public static Tuple2<Frame,Vec> drm_from_file (String filename, int parMin) {
+  public static Tuple2<Frame,Vec> drm_from_file(String filename, int parMin) {
     long rows = 0;
     int cols = 0;
     Frame frame = null;
@@ -82,7 +82,7 @@ public class H2OHdfs {
       }
       reader.seek(start);
 
-      frame = H2OHelper.empty_frame (rows, cols, parMin, -1);
+      frame = H2OHelper.empty_frame(rows, cols, parMin, -1);
       writers = new Vec.Writer[cols];
       for (int i = 0; i < writers.length; i++)
         writers[i] = frame.vecs()[i].open();
@@ -116,7 +116,7 @@ public class H2OHdfs {
     return new Tuple2<Frame,Vec>(frame, labels);
   }
 
-  public static void drm_to_file (String filename, Frame frame, Vec labels) throws java.io.IOException {
+  public static void drm_to_file(String filename, Frame frame, Vec labels) throws java.io.IOException {
     String uri = filename;
     Configuration conf = new Configuration();
     Path path = new Path(uri);
