@@ -25,13 +25,9 @@ import org.apache.mahout.math.DenseVector;
 
 import water.MRTask;
 import water.Futures;
-import water.Key;
-import water.DKV;
 import water.fvec.Frame;
 import water.fvec.Vec;
 import water.fvec.Chunk;
-import water.fvec.NewChunk;
-import water.fvec.C0LChunk;
 import water.parser.ValueString;
 
 import java.io.File;
@@ -277,27 +273,17 @@ public class H2OHelper {
   public static Frame empty_frame(long nrow, int ncol, int min_hint, int exact_hint) {
     int chunk_sz = chunk_size (nrow, ncol, min_hint, exact_hint);
     int nchunks = (int) ((nrow - 1) / chunk_sz) + 1; /* Final number of Chunks per Vec */
-    Futures fs = new Futures();
     Vec.VectorGroup vg = new Vec.VectorGroup();
-    Key keys[] = vg.addVecs(ncol);
     long espc[] = new long[nchunks+1];
+    final Vec[] vecs = new Vec[ncol];
+
     for (int i = 0; i < nchunks; i++)
       espc[i] = i * chunk_sz;
     espc[nchunks] = nrow;
-    final Vec[] vecs = new Vec[ncol];
+
     for (int i = 0; i < vecs.length; i++)
-      vecs[i] = new Vec(keys[i], espc);
-    new MRTask() {
-      protected void setupLocal() {
-        for (Vec v : vecs) {
-          for (int i = 0; i < v.nChunks(); i++) {
-            Key k = v.chunkKey(i);
-            if (k.home()) DKV.put(k, new C0LChunk(0L, v.chunkLen(i)), _fs);
-          }
-        }
-        for(Vec v : vecs) if(v._key.home()) DKV.put(v._key, v, _fs);
-      }
-    }.doAllNodes();
+      vecs[i] = Vec.makeCon(0, null, vg, espc);
+
     return new Frame(vecs);
   }
 }
