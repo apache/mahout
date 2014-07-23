@@ -22,6 +22,8 @@ import water.fvec.Frame;
 import water.fvec.Vec;
 import water.fvec.Chunk;
 import water.fvec.NewChunk;
+import water.parser.ValueString;
+
 import scala.Tuple2;
 import org.apache.mahout.h2obindings.H2OHelper;
 
@@ -48,12 +50,13 @@ public class Par {
             int chunk_size = chks[0].len();
             Vec vins[] = frin.vecs();
             long start = chks[0].start();
+            ValueString vstr = new ValueString();
 
             for (int r = 0; r < chunk_size; r++) {
               for (int c = 0; c < chks.length; c++) {
                 chks[c].set0(r, vins[c].at(start + r));
               }
-              nc.addStr(vin.atStr(start + r));
+              nc.addStr(vin.atStr(vstr, start + r).toString());
             }
           }
         }.doAll(1, frout).outputFrame(null, null).anyVec();

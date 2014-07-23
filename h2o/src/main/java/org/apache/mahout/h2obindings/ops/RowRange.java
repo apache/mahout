@@ -24,6 +24,8 @@ import water.fvec.Frame;
 import water.fvec.Vec;
 import water.fvec.Chunk;
 import water.fvec.NewChunk;
+import water.parser.ValueString;
+
 import scala.Tuple2;
 
 public class RowRange {
@@ -62,15 +64,16 @@ public class RowRange {
         public void map(Chunk chk, NewChunk nc) {
           int chunk_size = chk.len();
           long chunk_start = chk.start();
+          ValueString vstr = new ValueString();
 
           if (chunk_start > R.end() || (chunk_start + chunk_size) < R.start())
             return;
 
           for (int r = 0; r < chunk_size; r++) {
-            if (!R.contains (chunk_start + r))
+            if (!R.contains(chunk_start + r))
               continue;
 
-            nc.addStr(chk.atStr0(r));
+            nc.addStr(chk.atStr0(vstr, r).toString());
           }
         }
       }.doAll(1, VA).outputFrame(null, null).anyVec();

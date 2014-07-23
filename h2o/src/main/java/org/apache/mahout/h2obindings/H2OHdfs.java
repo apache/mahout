@@ -25,6 +25,7 @@ import scala.Tuple2;
 import water.fvec.Frame;
 import water.fvec.Vec;
 import water.Futures;
+import water.parser.ValueString;
 
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.DenseVector;
@@ -122,6 +123,7 @@ public class H2OHdfs {
     FileSystem fs = FileSystem.get(URI.create(uri), conf);
     SequenceFile.Writer writer = null;
     boolean is_sparse = H2OHelper.is_sparse(frame);
+    ValueString vstr = new ValueString();
 
     if (labels != null)
       writer = SequenceFile.createWriter(fs, conf, path, Text.class, VectorWritable.class);
@@ -139,7 +141,7 @@ public class H2OHdfs {
         v.setQuick(c, frame.vecs()[c].at(r));
 
       if (labels != null)
-        writer.append(new Text(labels.atStr(r)), new VectorWritable(v));
+        writer.append(new Text(labels.atStr(vstr, r).toString()), new VectorWritable(v));
       else
         writer.append(new IntWritable((int)r), new VectorWritable(v));
     }

@@ -22,6 +22,7 @@ import org.apache.mahout.math.drm.BlockMapFunc
 import scala.reflect.ClassTag
 
 import water.fvec.{Vec,NewChunk}
+import water.parser.ValueString
 
 object MapBlockHelper {
   def exec[K: ClassTag, R: ClassTag](bmf: Object, in: Matrix, startlong: Long, labels: Vec, nclabel: NewChunk): Matrix = {
@@ -35,8 +36,9 @@ object MapBlockHelper {
       case `l` => startlong until (startlong + in.rowSize) toArray
       case `s` => {
         val arr = new Array[String](in.rowSize)
+        val vstr = new ValueString
         for (i <- 0 to in.rowSize) {
-          arr(i) = labels.atStr(i+startlong)
+          arr(i) = labels.atStr(vstr, i+startlong).toString
         }
         arr
       }

@@ -32,6 +32,7 @@ import water.fvec.Vec;
 import water.fvec.Chunk;
 import water.fvec.NewChunk;
 import water.fvec.C0LChunk;
+import water.parser.ValueString;
 
 import java.io.File;
 import java.io.IOException;
@@ -96,8 +97,9 @@ public class H2OHelper {
     /* If string keyed, set the stings as rowlabels */
     if (labels != null) {
       HashMap<String,Integer> map = new HashMap<String,Integer>();
+      ValueString vstr = new ValueString();
       for (long i = 0; i < labels.length(); i++) {
-        map.put(labels.atStr(i), (int)i);
+        map.put(labels.atStr(vstr, i).toString(), (int)i);
       }
       m.setRowLabelBindings(map);
     }
