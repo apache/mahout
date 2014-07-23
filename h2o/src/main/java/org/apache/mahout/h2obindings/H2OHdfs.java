@@ -18,6 +18,7 @@
 package org.apache.mahout.h2obindings;
 
 import java.io.IOException;
+import java.io.File;
 import java.net.URI;
 
 import scala.Tuple2;
@@ -26,6 +27,7 @@ import water.fvec.Frame;
 import water.fvec.Vec;
 import water.Futures;
 import water.parser.ValueString;
+import water.util.FrameUtils;
 
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.DenseVector;
@@ -35,6 +37,7 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
@@ -45,7 +48,39 @@ import org.apache.hadoop.util.ReflectionUtils;
 
 
 public class H2OHdfs {
+  public static boolean is_seqfile(String filename) {
+    try {
+      String uri = filename;
+      Configuration conf = new Configuration();
+      Path path = new Path(uri);
+      FileSystem fs = FileSystem.get(URI.create(uri), conf);
+      FSDataInputStream fin = fs.open(path);
+      byte seq[] = new byte[3];
+
+      fin.read(seq);
+      fin.close();
+
+      if (seq[0] == 'S' && seq[1] == 'E' && seq[2] == 'Q')
+        return true;
+      else
+        return false;
+    } catch (java.io.IOException e) {
+      return false;
+    }
+  }
+
   public static Tuple2<Frame,Vec> drm_from_file(String filename, int parMin) {
+    try {
+      if (is_seqfile(filename))
+        return drm_from_seqfile(filename, parMin);
+      else
+        return new Tuple2<Frame,Vec>(FrameUtils.parseFrame(null,new File(filename)), null);
+    } catch (java.io.IOException e) {
+      return null;
+    }
+  }
+
+  public static Tuple2<Frame,Vec> drm_from_seqfile(String filename, int parMin) {
     long rows = 0;
     int cols = 0;
     Frame frame = null;
