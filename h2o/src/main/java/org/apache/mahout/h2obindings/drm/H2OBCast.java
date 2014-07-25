@@ -22,6 +22,9 @@ import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.MatrixWritable;
 import org.apache.mahout.math.VectorWritable;
+
+import org.apache.hadoop.io.Writable;
+
 import java.io.Serializable;
 import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
@@ -30,11 +33,6 @@ import java.io.ObjectInputStream;
 
 /* Handle Matrix and Vector separately so that we can live with
    just importing MatrixWritable and VectorWritable.
-
-   We could collapse the two into a single method using Writable,
-   but then we would have to import org.apache.hadoop.Writable,
-   pick a hadoop distribution in pom.xml etc. Instead let
-   mahout-mrlegacy solve that transitively for us.
 */
 
 public class H2OBCast<T> implements BCast<T>, Serializable {
@@ -46,10 +44,10 @@ public class H2OBCast<T> implements BCast<T>, Serializable {
     obj = o;
 
     if (o instanceof Matrix) {
-      buf = serializeMatrix((Matrix)o);
+      buf = serialize(new MatrixWritable((Matrix)o));
       is_matrix = true;
     } else if (o instanceof Vector) {
-      buf = serializeVector((Vector)o);
+      buf = serialize(new VectorWritable((Vector)o));
     } else {
       throw new IllegalArgumentException("Only Matrix or Vector supported for now");
     }
@@ -61,21 +59,7 @@ public class H2OBCast<T> implements BCast<T>, Serializable {
     return obj;
   }
 
-  private byte[] serializeMatrix(Matrix m) {
-    MatrixWritable w = new MatrixWritable(m);
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    try {
-      ObjectOutputStream oos = new ObjectOutputStream(bos);
-      w.write(oos);
-      oos.close();
-    } catch (java.io.IOException e) {
-      return null;
-    }
-    return bos.toByteArray();
-  }
-
-  private byte[] serializeVector(Vector v) {
-    VectorWritable w = new VectorWritable(v);
+  private byte[] serialize(Writable w) {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     try {
       ObjectOutputStream oos = new ObjectOutputStream(bos);
