@@ -26,9 +26,11 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.recommender.AbstractRecommender;
+import org.apache.mahout.cf.taste.impl.recommender.AllUnknownItemsCandidateItemsStrategy;
 import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
+import org.apache.mahout.cf.taste.recommender.CandidateItemsStrategy;
 import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.math.Matrix;
@@ -38,7 +40,10 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 
 /**
- * The SLIM recommender implementation.
+ * The SLIM {@link org.apache.mahout.cf.taste.recommender.Recommender}
+ * implementation that learns item-item relationships to produce
+ * recommendations.
+ * 
  * http://glaros.dtc.umn.edu/gkhome/fetch/papers/SLIM2011icdm.pdf
  * 
  */
@@ -51,9 +56,32 @@ public final class SparseLinearMethodsRecommender extends AbstractRecommender {
   private static final Logger log = LoggerFactory
       .getLogger(SparseLinearMethodsRecommender.class);
 
+  /**
+   * Constructor takes a data model and an optimizer that constructs the SLIM
+   * solution.
+   * 
+   * @param dataModel
+   * @param optimizer
+   * @throws TasteException
+   */
+  public SparseLinearMethodsRecommender(DataModel dataModel, Optimizer optimizer)
+      throws TasteException {
+    this(dataModel, optimizer, new AllUnknownItemsCandidateItemsStrategy());
+  }
+
+  /**
+   * Constructor takes a data model, an optimizer that constructs the SLIM
+   * solution and a candidate items strategy object.
+   * 
+   * @param dataModel
+   * @param optimizer
+   * @param candidateItemsStrategy
+   * @throws TasteException
+   */
   public SparseLinearMethodsRecommender(DataModel dataModel,
-      Optimizer optimizer) throws TasteException {
-    super(dataModel);
+      Optimizer optimizer, CandidateItemsStrategy candidateItemsStrategy)
+      throws TasteException {
+    super(dataModel, candidateItemsStrategy);
     this.optimizer = Preconditions.checkNotNull(optimizer);
     train();
 
@@ -80,13 +108,14 @@ public final class SparseLinearMethodsRecommender extends AbstractRecommender {
 
     PreferenceArray preferencesFromUser = getDataModel()
         .getPreferencesFromUser(userID);
-    FastIDSet possibleItemIDs = getAllOtherItems(userID, preferencesFromUser, includeKnownItems);
+    FastIDSet possibleItemIDs = getAllOtherItems(userID, preferencesFromUser,
+        includeKnownItems);
 
     Estimator estimator = new Estimator(userID);
     List<RecommendedItem> topItems = TopItems.getTopItems(howMany,
         possibleItemIDs.iterator(), rescorer, estimator);
     log.debug("Recommendations are: {}", topItems);
-    
+
     return topItems;
   }
 
@@ -98,6 +127,10 @@ public final class SparseLinearMethodsRecommender extends AbstractRecommender {
     return slimSolution;
   }
 
+  /**
+   * Estimate userID's preference for itemID using userID's current item
+   * preferences and their relationship with itemID.
+   */
   @Override
   public float estimatePreference(long userID, long itemID)
       throws TasteException {
