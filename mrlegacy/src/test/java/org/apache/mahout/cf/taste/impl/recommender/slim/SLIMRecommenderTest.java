@@ -33,7 +33,6 @@ import org.junit.Test;
 
 public class SLIMRecommenderTest extends TasteTestCase {
 
-
   @Test
   public void estimatePreference() throws Exception {
     final long userID = 1L;
@@ -59,7 +58,6 @@ public class SLIMRecommenderTest extends TasteTestCase {
 
     EasyMock.verify(dataModel, optimizer, slimSolution);
   }
-
 
   @Test
   public void recommend() throws Exception {

@@ -1,3 +1,20 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.cf.taste.impl.recommender.slim;
 
 import java.util.Collection;
@@ -19,8 +36,6 @@ import org.apache.mahout.math.jet.random.Normal;
 
 /**
  * Common implementation for a SLIM optimizer.
- * 
- * @author Mihai Pitu
  *
  */
 public abstract class AbstractOptimizer implements Optimizer {
@@ -35,6 +50,7 @@ public abstract class AbstractOptimizer implements Optimizer {
   protected SlimSolution slim;
   private Normal normal;
   
+  public static final long BIASID = Long.MAX_VALUE - 1;
 
   protected AbstractOptimizer(DataModel dataModel, double mean, double stDev)
       throws TasteException {
@@ -62,10 +78,6 @@ public abstract class AbstractOptimizer implements Optimizer {
     
   protected void prepareTraining() throws TasteException {
     int numItems = dataModel.getNumItems();
-    // float[][] itemWeights = new float[numItems][numItems];
-    //
-    // // Initialize a double matrix with normal distributed Gaussian noise
-    // // with the diagonal equal to 0
     this.normal = new Normal(mean, stDev,
         org.apache.mahout.common.RandomUtils.getRandom());
 
@@ -95,7 +107,6 @@ public abstract class AbstractOptimizer implements Optimizer {
 
     double weight = itemWeights.getQuick(row, column);
     if (weight == 0) {
-      // weight = TestRandom.nextDouble();
       weight = normal.nextDouble();
       itemWeights.setQuick(row, column, weight);
     }
@@ -112,6 +123,9 @@ public abstract class AbstractOptimizer implements Optimizer {
     }
   }
 
+  /**
+   * Returns the item ID associated with the given index.
+   */
   public long IDIndex(int itemIndex) throws NoSuchItemException {
     Long itemID = IDitemMapping.get(itemIndex);
     if (itemID == null) {
@@ -120,6 +134,9 @@ public abstract class AbstractOptimizer implements Optimizer {
     return itemID;
   }
 
+  /**
+   * Returns the index associated with itemID.
+   */
   protected Integer itemIndex(long itemID) {
     Integer itemIndex = itemIDMapping.get(itemID);
     if (itemIndex == null) {
@@ -129,42 +146,44 @@ public abstract class AbstractOptimizer implements Optimizer {
     return itemIndex;
   }
 
-  protected long sampleUserID() throws TasteException {
-    // LongPrimitiveIterator userIDs =
-    // SamplingLongPrimitiveIterator.maybeWrapIterator(dataModel.getUserIDs(),
-    // 1);
 
+  /**
+   * Samples a user ID.
+   */
+  protected long sampleUserID() throws TasteException {
     LongPrimitiveIterator it = dataModel.getUserIDs();
     int skip;
-    do
-      // skip = TestRandom.nextInt(dataModel.getNumUsers() + 1);
+    do {
       skip = RandomUtils.nextInt(dataModel.getNumUsers() + 1);
-    while (skip == 0);
+    } while (skip == 0);
 
     it.skip(skip - 1);
     return it.next();
   }
 
+  
+  /**
+   * Samples an item from a user's preferences.
+   */
   protected int samplePosItemIndex(PreferenceArray userItems) {
-    //int index = TestRandom.nextInt(userItems.length());
     int index = RandomUtils.nextInt(userItems.length());
     return itemIndex(userItems.getItemID(index));
   }
 
+  /**
+   * Samples an item not included in user's preferences.
+   */
   protected int sampleNegItemIndex(PreferenceArray userItems)
       throws TasteException {
     int itemIndex;
     long itemID;
     do {
-      // itemIndex = TestRandom.nextInt(dataModel.getNumItems() + 1);
       itemIndex = RandomUtils.nextInt(dataModel.getNumItems() + 1);
       itemID = IDIndex(itemIndex);
     } while (userItems.hasPrefWithItemID(itemID));
 
     return itemIndex;
   }
-
-  public static final long BIASID = Long.MAX_VALUE - 1;
 
   private static FastByIDMap<Integer> createIDMapping(int size,
       LongPrimitiveIterator idIterator) {
