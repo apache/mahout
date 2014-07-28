@@ -480,4 +480,13 @@ trait RLikeDrmOpsSuiteBase extends DistributedMahoutSuite with Matchers {
 
   }
 
+  test("B = A + 1.0") {
+    val inCoreA = dense((1, 2), (2, 3), (3, 4))
+    val controlB = inCoreA + 1.0
+
+    val drmB = drmParallelize(m = inCoreA, numPartitions = 2) + 1.0
+
+    (drmB -: controlB).norm should be < 1e-10
+  }
+
 }

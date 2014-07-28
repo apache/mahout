@@ -30,6 +30,8 @@ trait DrmLike[K] {
 
   protected[mahout] def partitioningTag: Long
 
+  protected[mahout] def canHaveMissingRows: Boolean
+
   /**
    * Distributed context, can be implicitly converted to operations on [[org.apache.mahout.math.drm.
    * DistributedEngine]].
