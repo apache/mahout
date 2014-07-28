@@ -95,10 +95,10 @@ object AewB {
         case (key, (vectorSeqA, vectorSeqB)) =>
           val lhsVec: Vector = if (vectorSeqA.isEmpty) new SequentialAccessSparseVector(ncol)
           else
-            (vectorSeqA.head /: vectorSeqA.tail)(_ + _)
+            (vectorSeqA.head /: vectorSeqA.tail)(_ += _)
           val rhsVec: Vector = if (vectorSeqB.isEmpty) new SequentialAccessSparseVector(ncol)
           else
-            (vectorSeqB.head /: vectorSeqB.tail)(_ + _)
+            (vectorSeqB.head /: vectorSeqB.tail)(_ += _)
           key -> reduceFunc(lhsVec, rhsVec)
       })
     }

@@ -69,6 +69,7 @@ class RLikeDrmOpsSuite extends FunSuite with DistributedSparkSuite with RLikeDrm
     val drmA = drmWrap(rdd=aRdd)
     val drmB = drmWrap(rdd = bRdd, nrow = 4, canHaveMissingRows = true)
     val drmC = drmA.cbind(drmB)
+
     val controlC = new DenseMatrix(safeToNonNegInt(drmA.nrow), drmA.ncol + drmB.ncol)
     controlC(::, 0 until drmA.ncol) := drmA
     controlC(::, drmA.ncol until drmA.ncol + drmB.ncol) := drmB
