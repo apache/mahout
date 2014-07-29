@@ -272,9 +272,14 @@ public class H2OHelper {
   }
 
   public static Frame empty_frame(long nrow, int ncol, int min_hint, int exact_hint) {
+    Vec.VectorGroup vg = new Vec.VectorGroup();
+
+    return empty_frame(nrow, ncol, min_hint, exact_hint, vg);
+  }
+
+  public static Frame empty_frame(long nrow, int ncol, int min_hint, int exact_hint, Vec.VectrorGroup vg) {
     int chunk_sz = chunk_size(nrow, ncol, min_hint, exact_hint);
     int nchunks = (int)((nrow - 1) / chunk_sz) + 1; /* Final number of Chunks per Vec */
-    Vec.VectorGroup vg = new Vec.VectorGroup();
     long espc[] = new long[nchunks+1];
     final Vec[] vecs = new Vec[ncol];
 
