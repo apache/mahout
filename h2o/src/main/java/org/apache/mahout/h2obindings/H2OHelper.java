@@ -277,7 +277,7 @@ public class H2OHelper {
     return empty_frame(nrow, ncol, min_hint, exact_hint, vg);
   }
 
-  public static Frame empty_frame(long nrow, int ncol, int min_hint, int exact_hint, Vec.VectrorGroup vg) {
+  public static Frame empty_frame(long nrow, int ncol, int min_hint, int exact_hint, Vec.VectorGroup vg) {
     int chunk_sz = chunk_size(nrow, ncol, min_hint, exact_hint);
     int nchunks = (int)((nrow - 1) / chunk_sz) + 1; /* Final number of Chunks per Vec */
     long espc[] = new long[nchunks+1];
