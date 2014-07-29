@@ -16,7 +16,7 @@ class CheckpointedDrmH2O[K: ClassTag](
 
   def collect: Matrix = H2OHelper.matrix_from_drm(h2odrm)
   /* XXX: call frame.remove */
-  def uncache(): Unit = return
+  def uncache(): this.type = this
 
   def writeDRM(path: String): Unit = H2OHdfs.drm_to_file(path, h2odrm)
 
@@ -25,6 +25,8 @@ class CheckpointedDrmH2O[K: ClassTag](
   def ncol: Int = h2odrm.frame.numCols
 
   def nrow: Long = h2odrm.frame.numRows
+
+  def canHaveMissingRows: Boolean = false
 
   protected[mahout] def partitioningTag: Long = h2odrm.frame.anyVec.group.hashCode
 }
