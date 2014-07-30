@@ -199,7 +199,7 @@ trait DistributedDecompositionsSuiteBase extends DistributedMahoutSuite with Mat
     val drmA = drmParallelize(inCoreA, numPartitions = 2)
 
     // Decompose using ALS
-    val (drmU, drmV, rmse) = als(drmInput = drmA, k = 20).toTuple
+    val (drmU, drmV, rmse) = dals(drmInput = drmA, k = 20).toTuple
     val inCoreU = drmU.collect
     val inCoreV = drmV.collect
 
