@@ -21,10 +21,27 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{Path, FileSystem}
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.sparkbindings.drm.CheckpointedDrmSpark
 import org.scalatest.FunSuite
 import org.apache.mahout.sparkbindings._
 import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 import org.apache.mahout.test.MahoutSuite
+
+
+
+//todo: take out, only for temp tests
+import org.apache.mahout.math._
+import org.apache.mahout.math.scalabindings._
+import RLikeOps._
+import org.apache.mahout.math.drm._
+import RLikeDrmOps._
+import scala.collection.JavaConversions._
+import org.apache.mahout.math.stats.LogLikelihood
+import collection._
+import org.apache.mahout.common.RandomUtils
+import org.apache.mahout.math.function.{VectorFunction, Functions}
+
+
 
 class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with DistributedSparkSuite  {
 
@@ -46,20 +63,20 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
       (0.0,                0.0,                0.6795961471815897, 0.0,                4.498681156950466))
 */
 
-  final val SelfSimilairtyTokens = tokenize(Iterable(
+
+  final val SelfSimilairtyLines = Iterable(
       "galaxy\tnexus:1.7260924347106847",
       "ipad\tiphone:1.7260924347106847",
       "nexus\tgalaxy:1.7260924347106847",
       "iphone\tipad:1.7260924347106847",
-      "surface"))
+      "surface")
 
-  val CrossIndicatorTokens = Iterable("galaxy", "nexus:1.7260924347106847", "iphone:1.7260924347106847",
-    "ipad:1.7260924347106847", "galaxy:1.7260924347106847", "ipad", "nexus:0.6795961471815897",
-    "iphone:0.6795961471815897", "ipad:0.6795961471815897", "galaxy:0.6795961471815897", "nexus",
-    "nexus:0.6795961471815897", "iphone:0.6795961471815897", "ipad:0.6795961471815897", "galaxy:0.6795961471815897",
-    "iphone", "nexus:1.7260924347106847", "iphone:1.7260924347106847", "ipad:1.7260924347106847",
-    "galaxy:1.7260924347106847", "surface", "surface:4.498681156950466", "nexus:0.6795961471815897")
-
+  val CrossIndicatorLines = Iterable(
+      "iphone\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847",
+      "ipad\tnexus:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 galaxy:0.6795961471815897",
+      "nexus\tnexus:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 galaxy:0.6795961471815897",
+      "galaxy\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847",
+      "surface\tsurface:4.498681156950466 nexus:0.6795961471815897")
 
   final val TmpDir = "tmp/" // all IO going to whatever the default HDFS config is pointing to
 
@@ -94,7 +111,7 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
 
   test ("ItemSimilarityDriver, non-full-spec CSV"){
 
-    val InFile = TmpDir + "in-file.csv/" //using part files, not singel file
+    val InFile = TmpDir + "in-file.csv/" //using part files, not single file
     val OutPath = TmpDir + "indicator-matrices/"
 
     val lines = Array(
@@ -136,6 +153,7 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
       "--itemIDPosition", "2",
       "--rowIDPosition", "0",
       "--filterPosition", "1",
+      "--writeAllDatasets",
       "--dontAddMahoutJars"))
     
 
@@ -144,9 +162,9 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
     // todo: a better test would be to get sorted vectors and compare rows instead of tokens, this might miss
     // some error cases
     val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
-    tokenize(indicatorLines) should contain theSameElementsAs SelfSimilairtyTokens
+    indicatorLines should contain theSameElementsAs SelfSimilairtyLines
     val crossIndicatorLines = mahoutCtx.textFile(OutPath+"/cross-indicator-matrix/").collect.toIterable
-    tokenize(crossIndicatorLines).toIterable should contain theSameElementsAs CrossIndicatorTokens
+    crossIndicatorLines should contain theSameElementsAs CrossIndicatorLines
   }
 
 
@@ -201,9 +219,9 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
     // todo: a better test would be to get sorted vectors and compare rows instead of tokens, this might miss
     // some error cases
     val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
-    tokenize(indicatorLines) should contain theSameElementsAs SelfSimilairtyTokens
+    indicatorLines should contain theSameElementsAs SelfSimilairtyLines
     val crossIndicatorLines = mahoutCtx.textFile(OutPath+"/cross-indicator-matrix/").collect.toIterable
-    tokenize(crossIndicatorLines).toIterable should contain theSameElementsAs CrossIndicatorTokens
+    crossIndicatorLines should contain theSameElementsAs CrossIndicatorLines
 
   }
 
@@ -254,17 +272,11 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
       "--dontAddMahoutJars"))
 
     beforeEach // restart the test context to read the output of the driver
-/*    val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toSet[String]
-    assert(indicatorLines == SelfSimilairtyTokens)
-    val crossIndicatorLines = mahoutCtx.textFile(OutPath+"/cross-indicator-matrix/").collect.toSet[String]
-    assert (crossIndicatorLines == CrossSimilarityTSV)
-*/
-    // todo: a better test would be to get sorted vectors and compare rows instead of tokens, this might miss
-    // some error cases
+
     val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
-    tokenize(indicatorLines) should contain theSameElementsAs SelfSimilairtyTokens
+    indicatorLines should contain theSameElementsAs SelfSimilairtyLines
     val crossIndicatorLines = mahoutCtx.textFile(OutPath+"/cross-indicator-matrix/").collect.toIterable
-    tokenize(crossIndicatorLines).toIterable should contain theSameElementsAs CrossIndicatorTokens
+    crossIndicatorLines should contain theSameElementsAs CrossIndicatorLines
 
   }
 
@@ -285,12 +297,12 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
       "3,0,1",
       "3,3,1")
 
-    val Answer = tokenize(Iterable(
+    val Answer = Iterable(
       "0\t1:1.7260924347106847",
       "3\t2:1.7260924347106847",
       "1\t0:1.7260924347106847",
       "4",
-      "2\t3:1.7260924347106847"))
+      "2\t3:1.7260924347106847")
 
     // this creates one part-0000 file in the directory
     mahoutCtx.parallelize(lines).coalesce(1, shuffle=true).saveAsTextFile(InDir)
@@ -313,7 +325,7 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
     // todo: a better test would be to get sorted vectors and compare rows instead of tokens, this might miss
     // some error cases
     val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
-    tokenize(indicatorLines) should contain theSameElementsAs Answer
+    indicatorLines should contain theSameElementsAs Answer
 
   }
 
@@ -334,12 +346,12 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
       "3,0,1",
       "3,3,1")
 
-    val Answer = tokenize(Set(
+    val Answer = Iterable(
       "0\t1",
       "3\t2",
       "1\t0",
       "4",
-      "2\t3"))
+      "2\t3")
 
     // this creates one part-0000 file in the directory
     mahoutCtx.parallelize(lines).coalesce(1, shuffle=true).saveAsTextFile(InDir)
@@ -363,7 +375,7 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
     // todo: a better test would be to get sorted vectors and compare rows instead of tokens, this might miss
     // some error cases
     val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
-    tokenize(indicatorLines) should contain theSameElementsAs Answer
+    indicatorLines should contain theSameElementsAs Answer
 
   }
 
@@ -440,9 +452,10 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
 
     beforeEach()// restart the test context to read the output of the driver
     val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
-    tokenize(indicatorLines) should contain theSameElementsAs SelfSimilairtyTokens
+    indicatorLines should contain theSameElementsAs SelfSimilairtyLines
     val crossIndicatorLines = mahoutCtx.textFile(OutPath+"/cross-indicator-matrix/").collect.toIterable
-    tokenize(crossIndicatorLines).toIterable should contain theSameElementsAs CrossIndicatorTokens
+    crossIndicatorLines should contain theSameElementsAs CrossIndicatorLines
+
   }
 
   test ("ItemSimilarityDriver, two input paths"){
@@ -496,9 +509,10 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
 
     beforeEach // restart the test context to read the output of the driver
     val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
-    tokenize(indicatorLines) should contain theSameElementsAs SelfSimilairtyTokens
+    indicatorLines should contain theSameElementsAs SelfSimilairtyLines
     val crossIndicatorLines = mahoutCtx.textFile(OutPath+"/cross-indicator-matrix/").collect.toIterable
-    tokenize(crossIndicatorLines).toIterable should contain theSameElementsAs CrossIndicatorTokens
+    crossIndicatorLines should contain theSameElementsAs CrossIndicatorLines
+
   }
 
   test ("ItemSimilarityDriver, two inputs of different dimensions"){
@@ -531,17 +545,17 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
       "u4,view,ipad",
       "u4,view,galaxy")
 
-    val UnequalDimensionsSelfSimilarity = tokenize(Iterable(
+    val UnequalDimensionsSelfSimilarity = Iterable(
       "ipad\tiphone:1.7260924347106847",
       "iphone\tipad:1.7260924347106847",
       "nexus\tgalaxy:1.7260924347106847",
-      "galaxy\tnexus:1.7260924347106847"))
+      "galaxy\tnexus:1.7260924347106847")
 
-    val UnequalDimensionsCrossSimilarity = tokenize(Iterable(
-      "galaxy\tnexus:1.7260924347106847,iphone:1.7260924347106847,ipad:1.7260924347106847,galaxy:1.7260924347106847",
-      "ipad\tnexus:0.6795961471815897,iphone:0.6795961471815897,ipad:0.6795961471815897,galaxy:0.6795961471815897",
-      "nexus\tnexus:0.6795961471815897,iphone:0.6795961471815897,ipad:0.6795961471815897,galaxy:0.6795961471815897",
-      "iphone\tnexus:1.7260924347106847,iphone:1.7260924347106847,ipad:1.7260924347106847,galaxy:1.7260924347106847"))
+    val UnequalDimensionsCrossSimilarity = Iterable(
+      "galaxy\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847",
+      "ipad\tnexus:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 galaxy:0.6795961471815897",
+      "nexus\tnexus:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 galaxy:0.6795961471815897",
+      "iphone\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847")
 
     // this will create multiple part-xxxxx files in the InFile dir but other tests will
     // take account of one actual file
@@ -565,17 +579,12 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
       "--dontAddMahoutJars"))
 
     beforeEach // restart the test context to read the output of the driver
-/*
-    val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
-    tokenize(indicatorLines) should contain theSameElementsAs SelfSimilairtyTokens
-    val crossIndicatorLines = mahoutCtx.textFile(OutPath+"/cross-indicator-matrix/").collect.toIterable
-    tokenize(crossIndicatorLines).toIterable should contain theSameElementsAs CrossIndicatorTokens
-*/
 
     val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
-    tokenize(indicatorLines) should contain theSameElementsAs UnequalDimensionsSelfSimilarity
     val crossIndicatorLines = mahoutCtx.textFile(OutPath+"/cross-indicator-matrix/").collect.toIterable
-    tokenize(crossIndicatorLines) should contain theSameElementsAs UnequalDimensionsCrossSimilarity
+    indicatorLines should contain theSameElementsAs UnequalDimensionsSelfSimilarity
+    crossIndicatorLines should contain theSameElementsAs UnequalDimensionsCrossSimilarity
+
   }
 
   test("ItemSimilarityDriver cross similarity two separate items spaces"){
@@ -608,12 +617,12 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
       "u4,view,tablets",
       "u4,view,soap")
 
-    val UnequalDimensionsCrossSimilarity = tokenize(Iterable(
-        "iphone\tmobile_acc:1.7260924347106847,soap:1.7260924347106847,phones:1.7260924347106847",
+    val UnequalDimensionsCrossSimilarityLines = Iterable(
+        "iphone\tmobile_acc:1.7260924347106847 soap:1.7260924347106847 phones:1.7260924347106847",
         "surface\tmobile_acc:0.6795961471815897",
-        "nexus\tmobile_acc:0.6795961471815897,tablets:1.7260924347106847,phones:0.6795961471815897",
-        "galaxy\tsoap:1.7260924347106847,phones:1.7260924347106847,tablets:5.545177444479561,mobile_acc:1.7260924347106847",
-        "ipad\tmobile_acc:0.6795961471815897,phones:0.6795961471815897"))
+        "nexus\ttablets:1.7260924347106847 mobile_acc:0.6795961471815897 phones:0.6795961471815897",
+        "galaxy\ttablets:5.545177444479561 soap:1.7260924347106847 phones:1.7260924347106847 mobile_acc:1.7260924347106847",
+        "ipad\tmobile_acc:0.6795961471815897 phones:0.6795961471815897")
 
     // this will create multiple part-xxxxx files in the InFile dir but other tests will
     // take account of one actual file
@@ -639,9 +648,10 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
 
     beforeEach // restart the test context to read the output of the driver
     val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
-    tokenize(indicatorLines) should contain theSameElementsAs SelfSimilairtyTokens
     val crossIndicatorLines = mahoutCtx.textFile(OutPath+"/cross-indicator-matrix/").collect.toIterable
-    tokenize(crossIndicatorLines) should contain theSameElementsAs UnequalDimensionsCrossSimilarity
+    indicatorLines should contain theSameElementsAs SelfSimilairtyLines
+    crossIndicatorLines should contain theSameElementsAs UnequalDimensionsCrossSimilarityLines
+
   }
 
   // convert into an Iterable of tokens for 'should contain theSameElementsAs Iterable'
@@ -656,59 +666,111 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
   }
 
   override def afterAll = {
-    // remove TmpDir
-    val fs = FileSystem.get(new Configuration())
-    fs.delete(new Path(TmpDir), true) // delete recursively
-
+    removeTmpDir
     super.afterAll
   }
 
-  test("plus one"){
-    val a = dense(
-      (1, 1),
-      (0, 0))
-
-    val drmA1 = drmParallelize(m = a, numPartitions = 2)
-
-    // modified to return a new CheckpointedDrm so maintains immutability but still only increases the row cardinality
-    // by returning new CheckpointedDrmSpark[K](rdd, nrow + n, ncol, _cacheStorageLevel ) Hack for now.
-    val drmABigger1 = drmA1.addToRowCardinality(1)
-
-    val drmABiggerPlusOne1 = drmABigger1.plus(1.0)  // drmABigger has no row 2 in the rdd but an empty row 1
-    // drmABiggerPlusOne1 is a dense matrix
-    println(drmABiggerPlusOne1)
-
-    val drmA2 = drmParallelize(m = a, numPartitions = 2)
-    val drmABigger2 = drmA2.addToRowCardinality(1)
-    val drmABiggerPlusOne2 = drmABigger2 + 1.0
-    drmABiggerPlusOne2.writeDRM("tmp/plus-one/drma-bigger-plus-one-ops/")
-
-
-    val bp = 0
+  def removeTmpDir = {
+    // remove TmpDir
+    val fs = FileSystem.get(new Configuration())
+    fs.delete(new Path(TmpDir), true) // delete recursively
   }
 
-  test("multiply after adding rows"){
+  test("A.t %*% B after changing row cardinality of A"){
+    // todo: move to math tests but this is Spark specific
+
     val a = dense(
-        (1, 1),
-        (1, 1),
-        (1, 1))
+        (1.0, 1.0))
 
     val b = dense(
-        (1, 1))
+        (1.0, 1.0),
+        (1.0, 1.0),
+        (1.0, 1.0))
+
+    val inCoreABiggertBAnswer = dense(
+        (1.0, 1.0),
+        (1.0, 1.0))
 
     val drmA = drmParallelize(m = a, numPartitions = 2)
     val drmB = drmParallelize(m = b, numPartitions = 2)
 
     // modified to return a new CheckpointedDrm so maintains immutability but still only increases the row cardinality
     // by returning new CheckpointedDrmSpark[K](rdd, nrow + n, ncol, _cacheStorageLevel ) Hack for now.
-    val drmBBigger = drmB.addToRowCardinality(2)
+    val drmABigger = drmWrap[Int](drmA.rdd, 3, 2)
 
-    val AtBBigger = drmA.t %*% drmBBigger
-    AtBBigger.        .writeDRM("tmp/plus-one/drma-bigger-plus-one-ops/")
-    val inCoreAtBBigger = AtBBigger.
+
+    val ABiggertB = drmABigger.t %*% drmB
+    val inCoreABiggertB = ABiggertB.collect
+
+    assert(inCoreABiggertB === inCoreABiggertBAnswer)
 
     val bp = 0
   }
 
+  test("ItemSimilarityDriver cross similarity two separate items spaces, missing rows in B"){
+    /* cross-similarity with category views, same user space
+            	phones	tablets	mobile_acc	soap
+            u1	0	      1	      1	          0
+            u2	1	      1	      1	          0
+removed ==> u3	0	      0	      1	          0
+            u4	1	      1	      0	          1
+    */
+    val InFile1 = TmpDir + "in-file1.csv/" //using part files, not single file
+    val InFile2 = TmpDir + "in-file2.csv/" //using part files, not single file
+    val OutPath = TmpDir + "indicator-matrices/"
+
+    val lines = Array(
+      "u1,purchase,iphone",
+      "u1,purchase,ipad",
+      "u2,purchase,nexus",
+      "u2,purchase,galaxy",
+      "u3,purchase,surface",
+      "u4,purchase,iphone",
+      "u4,purchase,galaxy",
+      "u1,view,phones",
+      "u1,view,mobile_acc",
+      "u2,view,phones",
+      "u2,view,tablets",
+      "u2,view,mobile_acc",
+      //"u3,view,mobile_acc",// if this line is removed the cross-cooccurrence should work
+      "u4,view,phones",
+      "u4,view,tablets",
+      "u4,view,soap")
+
+    val UnequalDimensionsCrossSimilarityLines = Iterable(
+        "galaxy\ttablets:5.545177444479561 soap:1.7260924347106847 phones:1.7260924347106847",
+        "ipad\tmobile_acc:1.7260924347106847 phones:0.6795961471815897",
+        "surface",
+        "nexus\tmobile_acc:1.7260924347106847 tablets:1.7260924347106847 phones:0.6795961471815897",
+        "iphone\tsoap:1.7260924347106847 phones:1.7260924347106847")
+
+    // this will create multiple part-xxxxx files in the InFile dir but other tests will
+    // take account of one actual file
+    val linesRdd1 = mahoutCtx.parallelize(lines).saveAsTextFile(InFile1)
+    val linesRdd2 = mahoutCtx.parallelize(lines).saveAsTextFile(InFile2)
+
+    afterEach // clean up before running the driver, it should handle the Spark conf and context
+
+    // local multi-threaded Spark with default HDFS
+    ItemSimilarityDriver.main(Array(
+      "--input", InFile1,
+      "--input2", InFile2,
+      "--output", OutPath,
+      "--master", masterUrl,
+      "--filter1", "purchase",
+      "--filter2", "view",
+      "--inDelim", ",",
+      "--itemIDPosition", "2",
+      "--rowIDPosition", "0",
+      "--filterPosition", "1",
+      "--dontAddMahoutJars",
+      "--writeAllDatasets"))
+
+    beforeEach // restart the test context to read the output of the driver
+    val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
+    val crossIndicatorLines = mahoutCtx.textFile(OutPath+"/cross-indicator-matrix/").collect.toIterable
+    indicatorLines should contain theSameElementsAs SelfSimilairtyLines
+    crossIndicatorLines should contain theSameElementsAs UnequalDimensionsCrossSimilarityLines
+  }
 
 }

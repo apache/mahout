@@ -21,8 +21,7 @@ import com.google.common.collect.{HashBiMap, BiMap}
 import org.apache.mahout.math.drm.DistributedContext
 
 /** Reader trait is abstract in the sense that the tupleReader function must be defined by an extending trait, which also defines the type to be read.
-  * @tparam T type of object read, usually supplied by an extending trait.
-  * @todo the tupleReader need not create both dictionaries but does at present. There are cases where one or the other dictionary is never used so saving the memory for a very large dictionary may be worth the optimization to specify which dictionaries are created.
+  * @tparam T type of object read.
   */
 trait Reader[T]{
 
@@ -42,14 +41,15 @@ trait Reader[T]{
 }
 
 /** Writer trait is abstract in the sense that the writer method must be supplied by an extending trait, which also defines the type to be written.
-  * @tparam T
+  * @tparam T type of object to write.
   */
 trait Writer[T]{
 
   val mc: DistributedContext
+  val sort: Boolean
   val writeSchema: Schema
 
-  protected def writer(mc: DistributedContext, writeSchema: Schema, dest: String, collection: T): Unit
+  protected def writer(mc: DistributedContext, writeSchema: Schema, dest: String, collection: T, sort: Boolean): Unit
 
-  def writeDRMTo(collection: T, dest: String) = writer(mc, writeSchema, dest, collection)
+  def writeDRMTo(collection: T, dest: String) = writer(mc, writeSchema, dest, collection, sort)
 }

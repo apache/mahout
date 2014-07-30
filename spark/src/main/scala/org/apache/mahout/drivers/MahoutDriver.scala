@@ -21,17 +21,26 @@ import org.apache.mahout.math.drm.DistributedContext
 import org.apache.spark.SparkConf
 import org.apache.mahout.sparkbindings._
 
+import scala.collection.immutable
+
 /** Extend this class to create a Mahout CLI driver. Minimally you must override process and main.
-  * Also define a command line parser and default options or fill in the following template:
+  * Also define a Map of options for the command line parser. The following template may help:
   * {{{
   *   object SomeDriver extends MahoutDriver {
+  *     // build options from some stardard CLI param groups
+  *     // Note: always put the driver specific options at the last so the can override and previous options!
+  *     private var options = GenericOptions ++ SparkOptions ++ FileIOOptions ++ TextDelimitedTuplesOptions ++
+  *       TextDelimitedDRMOptions ++ ItemSimilarityOptions
+  *
   *     override def main(args: Array[String]): Unit = {
-  *       val parser = new MahoutOptionParser[Options]("Job Name") {
-  *         head("Job Name", "Spark")
-  *         note("Various CLI options")
-  *         //see https://github.com/scopt/scopt for a good Scala option parser, which MahoutOptionParser extends
+  *       val parser = new MahoutOptionParser(programName = "spark-itemsimilarity") {
+  *         head("spark-itemsimilarity", "Mahout 1.0-SNAPSHOT")
+  *
+  *         //Several standard option groups are usually non-driver specific so use the MahoutOptionParser methods
+  *         parseGenericOptions
+  *         ...
   *       }
-  *       parser.parse(args, Options()) map { opts =>
+  *       parser.parse(args, options) map { opts =>
   *         options = opts
   *         process
   *       }
@@ -42,15 +51,12 @@ import org.apache.mahout.sparkbindings._
   *       //don't just stand there do something
   *       stop
   *     }
-  *
-  *     //Default values go here, any '_' or null should be 'required' in the Parser or flags an unused option
-  *     case class Options(
-  *       appName: String = "Job Name", ...
-  *     )
   *   }
   * }}}
   */
 abstract class MahoutDriver {
+
+
   implicit var mc: DistributedContext = _
   implicit val sparkConf = new SparkConf()
 

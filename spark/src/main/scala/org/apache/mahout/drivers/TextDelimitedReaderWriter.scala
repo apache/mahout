@@ -17,14 +17,12 @@
 
 package org.apache.mahout.drivers
 
-import scala.collection.JavaConversions._
 import org.apache.spark.SparkContext._
 import org.apache.mahout.math.RandomAccessSparseVector
 import com.google.common.collect.{BiMap, HashBiMap}
-import scala.collection.JavaConversions._
 import org.apache.mahout.math.drm.{DistributedContext, CheckpointedDrm}
 import org.apache.mahout.sparkbindings._
-
+import scala.collection.JavaConversions._
 
 /** Extends Reader trait to supply the [[org.apache.mahout.drivers.IndexedDataset]] as the type read and a reader function for reading text delimited files as described in the [[org.apache.mahout.drivers.Schema]]
   */
@@ -55,7 +53,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDataset]{
       })
 
       var columns = mc.textFile(source).map { line => line.split(delimiter) }
-      val m = columns.collect
+      //val m = columns.collect
 
       // -1 means no filter in the input text, take them all
       if(filterPosition != -1) {
@@ -129,13 +127,21 @@ trait TDIndexedDatasetReader extends Reader[IndexedDataset]{
 }
 
 trait TDIndexedDatasetWriter extends Writer[IndexedDataset]{
+
+  private val orderByScore = Ordering.fromLessThan[(Int, Double)] { case ((_, score1), (_, score2)) => score1 > score2}
+
   /** Read in text delimited tuples from all URIs in this comma delimited source String.
     *
     * @param mc context for the Spark job
     * @param writeSchema describes the delimiters and positions of values in the output text delimited file.
     * @param dest directory to write text delimited version of [[org.apache.mahout.drivers.IndexedDataset]]
     */
-  protected def writer(mc: DistributedContext, writeSchema: Schema, dest: String, indexedDataset: IndexedDataset): Unit = {
+  protected def writer(
+      mc: DistributedContext,
+      writeSchema: Schema,
+      dest: String,
+      indexedDataset: IndexedDataset,
+      sort: Boolean = true): Unit = {
     try {
       val rowKeyDelim = writeSchema("rowKeyDelim").asInstanceOf[String]
       val columnIdStrengthDelim = writeSchema("columnIdStrengthDelim").asInstanceOf[String]
@@ -145,10 +151,12 @@ trait TDIndexedDatasetWriter extends Writer[IndexedDataset]{
       //executed but Spark
 
       assert(indexedDataset != null, {
-        println(this.getClass.toString + ": has no indexedDataset to write"); throw new IllegalArgumentException
+        println(this.getClass.toString + ": has no indexedDataset to write")
+        throw new IllegalArgumentException
       })
       assert(!dest.isEmpty, {
-        println(this.getClass.toString + ": has no destination or indextedDataset to write"); throw new IllegalArgumentException
+        println(this.getClass.toString + ": has no destination or indextedDataset to write")
+        throw new IllegalArgumentException
       })
 
       val matrix = indexedDataset.matrix
@@ -157,21 +165,29 @@ trait TDIndexedDatasetWriter extends Writer[IndexedDataset]{
 
       matrix.rdd.map { case (rowID, itemVector) =>
 
-        //often want the output rows sorted by element score
-        //if (sortVectors) { /* todo: sort the vectors by element score */ }
-
-        // each line is created of non-zero values with schema specified delimiters and original row and column ID tokens
-        // first get the external rowID token
-        var line: String = rowIDDictionary.inverse.get(rowID) + rowKeyDelim
-
-        // for the rest of the row, construct the vector contents of tuples (external column ID, strength value)
-        for (item <- itemVector.nonZeroes()) {
-          line += columnIDDictionary.inverse.get(item.index)
-          if (!omitScore) line += columnIdStrengthDelim + item.get
-          line += tupleDelim
+        // turn non-zeros into list for sorting
+        val itemList: collection.mutable.MutableList[org.apache.mahout.common.Pair[Integer, Double]] = new collection.mutable.MutableList[org.apache.mahout.common.Pair[Integer, Double]]
+        for (ve <- itemVector.nonZeroes) {
+          val item: org.apache.mahout.common.Pair[Integer, Double] = new org.apache.mahout.common.Pair[Integer, Double](ve.index, ve.get)
+          itemList += item
         }
-        // drop the last delimiter, not needed to end the line
-        line.dropRight(1)
+        //sort by highest value descending(-)
+        val vector = if (sort) itemList.sortBy(-_.getSecond) else itemList
+
+        // first get the external rowID token
+        if (!vector.isEmpty){
+          var line: String = rowIDDictionary.inverse.get(rowID) + rowKeyDelim
+          // for the rest of the row, construct the vector contents of tuples (external column ID, strength value)
+          for (item <- vector) {
+            line += columnIDDictionary.inverse.get(item.getFirst)
+            if (!omitScore) line += columnIdStrengthDelim + item.getSecond
+            line += tupleDelim
+          }
+          // drop the last delimiter, not needed to end the line
+          line.dropRight(1)
+        } else {//no items so write a line with id but no values, no delimiters
+          rowIDDictionary.inverse.get(rowID)
+        } // "if" returns a line of text so this must be last in the block
       }
       .saveAsTextFile(dest)
 
@@ -189,21 +205,24 @@ trait TDIndexedDatasetReaderWriter extends TDIndexedDatasetReader with TDIndexed
   * @param mc Spark context for reading files
   * @note The source is supplied by Reader#readTuplesFrom .
   * */
-class TextDelimitedIndexedDatasetReader(val readSchema: Schema)(implicit val mc: DistributedContext) extends TDIndexedDatasetReader
+class TextDelimitedIndexedDatasetReader(val readSchema: Schema)
+    (implicit val mc: DistributedContext) extends TDIndexedDatasetReader
 
 /** Writes  text delimited files into an IndexedDataset. Classes are needed to supply trait params in their constructor.
   * @param writeSchema describes the delimiters and position of values in the text delimited file(s) written.
   * @param mc Spark context for reading files
   * @note the destination is supplied by Writer#writeDRMTo trait method
   * */
-class TextDelimitedIndexedDatasetWriter(val writeSchema: Schema)(implicit val mc: DistributedContext) extends TDIndexedDatasetWriter
+class TextDelimitedIndexedDatasetWriter(val writeSchema: Schema, val sort: Boolean = true)(implicit val mc: DistributedContext) extends TDIndexedDatasetWriter
 
 /** Reads and writes text delimited files to/from an IndexedDataset. Classes are needed to supply trait params in their constructor.
   * @param readSchema describes the delimiters and position of values in the text delimited file(s) to be read.
   * @param writeSchema describes the delimiters and position of values in the text delimited file(s) written.
   * @param mc Spark context for reading the files, may be implicitly defined.
   * */
-class TextDelimitedIndexedDatasetReaderWriter(val readSchema: Schema, val writeSchema: Schema)(implicit val mc: DistributedContext) extends TDIndexedDatasetReaderWriter
+class TextDelimitedIndexedDatasetReaderWriter(val readSchema: Schema, val writeSchema: Schema, val sort: Boolean = true)
+    (implicit val mc: DistributedContext)
+  extends TDIndexedDatasetReaderWriter
 
 /** A version of IndexedDataset that has it's own writeDRMTo method from a Writer trait. This is an alternative to creating
   * a Writer based stand-alone class for writing. Consider it experimental allowing similar semantics to drm.writeDrm().
@@ -215,8 +234,13 @@ class TextDelimitedIndexedDatasetReaderWriter(val readSchema: Schema, val writeS
   * @param writeSchema contains params for the schema/format or the written text delimited file.
   * @param mc mahout distributed context (DistributedContext) may be implicitly defined.
   * */
-class IndexedDatasetTextDelimitedWriteable(matrix: CheckpointedDrm[Int], rowIDs: BiMap[String,Int], columnIDs: BiMap[String,Int],
-                                           val writeSchema: Schema)(implicit val mc: DistributedContext)
+class IndexedDatasetTextDelimitedWriteable(
+    matrix: CheckpointedDrm[Int],
+    rowIDs: BiMap[String,Int],
+    columnIDs: BiMap[String,Int],
+    val writeSchema: Schema,
+    val sort: Boolean = true)
+    (implicit val mc: DistributedContext)
   extends IndexedDataset(matrix, rowIDs, columnIDs) with TDIndexedDatasetWriter {
 
   def writeTo(dest: String): Unit = {
@@ -234,5 +258,5 @@ class IndexedDatasetTextDelimitedWriteable(matrix: CheckpointedDrm[Int], rowIDs:
 
 object IndexedDatasetTextDelimitedWriteable {
   /** Secondary constructor for [[org.apache.mahout.drivers.IndexedDataset]] */
-  def apply(id2: IndexedDatasetTextDelimitedWriteable) = new IndexedDatasetTextDelimitedWriteable(id2.matrix,  id2.rowIDs, id2.columnIDs, id2.writeSchema)(id2.mc)
+  def apply(id2: IndexedDatasetTextDelimitedWriteable, sort: Boolean = true) = new IndexedDatasetTextDelimitedWriteable(id2.matrix,  id2.rowIDs, id2.columnIDs, id2.writeSchema, id2.sort)(id2.mc)
 }

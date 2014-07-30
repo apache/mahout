@@ -33,10 +33,4 @@ trait CheckpointedDrm[K] extends DrmLike[K] {
   /** If this checkpoint is already declared cached, uncache. */
   def uncache()
 
-  /** Adds n to row cardinality without modifying the underlying DRM data.
-    * does not perform an optimizer triggering action.
-    * @param n increase row cardinality by the number.
-    */
-  def addToRowCardinality(n: Int): CheckpointedDrm[K]
-
 }

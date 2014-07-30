@@ -20,6 +20,7 @@ package org.apache.mahout.drivers
 import com.google.common.collect.BiMap
 import org.apache.mahout.math.drm.CheckpointedDrm
 import org.apache.mahout.sparkbindings.drm.CheckpointedDrmSpark
+import org.apache.mahout.sparkbindings._
 
 /**
   * Wraps a [[org.apache.mahout.sparkbindings.drm.DrmLike]] object with two [[com.google.common.collect.BiMap]]s to store ID/label translation dictionaries.
@@ -48,13 +49,17 @@ case class IndexedDataset(var matrix: CheckpointedDrm[Int], var rowIDs: BiMap[St
   /**
    * Adds the equivalent of blank rows to the sparse CheckpointedDrm, which only changes the row cardinality value.
    * No physical changes are made to the underlying drm.
-   * @param n number to increase row carnindality by
+   * @param n number to use for row carnindality, should be larger than current
    * @note should be done before any BLAS optimizer actions are performed on the matrix or you'll get unpredictable
    *       results.
    */
-  def addToRowCardinality(n: Int): Unit = {
+  def newRowCardinality(n: Int): IndexedDataset = {
     assert(n > -1)
-    matrix.asInstanceOf[CheckpointedDrmSpark[Int]].addToRowCardinality(n)
+    assert( n >= matrix.nrow)
+    val drmRdd = matrix.asInstanceOf[CheckpointedDrmSpark[Int]].rdd
+    val ncol = matrix.ncol
+    val newMatrix = drmWrap[Int](drmRdd, n, ncol)
+    new IndexedDataset(newMatrix, rowIDs, columnIDs)
   }
 }
 

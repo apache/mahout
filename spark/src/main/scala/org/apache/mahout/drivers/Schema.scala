@@ -20,21 +20,30 @@ package org.apache.mahout.drivers
 import scala.collection.mutable
 import scala.collection.mutable.HashMap
 
-/** Syntactic sugar for HashMap[String, Any]
+/** Syntactic sugar for mutable.HashMap[String, Any]
   *
   * @param params list of mappings for instantiation {{{val mySchema = new Schema("one" -> 1, "two" -> "2", ...)}}}
   */
 class Schema(params: Tuple2[String, Any]*) extends HashMap[String, Any] {
   // note: this require a mutable HashMap, do we care?
   this ++= params
-  if (!this.contains("omitScore")) this += ("omitScore" -> false)
+
+  /** Constructor for copying an existing Schema
+    *
+    * @param schemaToClone return a copy of this Schema
+    */
+  def this(schemaToClone: Schema){
+    this()
+    this ++= schemaToClone
+  }
 }
 
-// These can be used to keep the text in and out fairly standard to Mahout, where an application specific format is not
-// required.
+// These can be used to keep the text in and out fairly standard to Mahout, where an application specific
+// format is not required.
 
 /** Simple default Schema for typical text delimited tuple file input
-  * This tells the reader to input tuples of the default (rowID<comma, tab, or space>columnID<comma, tab, or space>etc...)
+  * This tells the reader to input tuples of the default (rowID<comma, tab, or space>columnID
+  * <comma, tab, or space>here may be other ignored text...)
   */
 class DefaultTupleReadSchema extends Schema(
     "delim" -> "[,\t ]", //comma, tab or space
@@ -43,44 +52,47 @@ class DefaultTupleReadSchema extends Schema(
     "columnIDPosition" -> 1,
     "filterPosition" -> -1)
 
-/** Simple default Schema for typical text delimited drm file output
-  * This tells the writer to write a DRM of the default
-  * (rowID<tab>columnID1:score1,columnID2:score2,...)
+/** Default Schema for text delimited drm file output
+  * This tells the writer to write a DRM of the default form:
+  * (rowID<tab>columnID1:score1<space>columnID2:score2...)
   */
 class DefaultDRMWriteSchema extends Schema(
     "rowKeyDelim" -> "\t",
     "columnIdStrengthDelim" -> ":",
-    "tupleDelim" -> ",")
+    "tupleDelim" -> " ",
+    "omitScore" -> false)
 
-/** Simple default Schema for typical text delimited drm file output
-  * This tells the reader to input tuples of the default (rowID<comma, tab, or space>columnID<comma, tab, or space>etc...)
+/** Default Schema for typical text delimited drm file input
+  * This tells the reader to input text lines of the form:
+  * (rowID<tab>columnID1:score1,columnID2:score2,...)
   */
 class DefaultDRMReadSchema extends Schema(
   "rowKeyDelim" -> "\t",
   "columnIdStrengthDelim" -> ":",
-  "tupleDelim" -> ",")
+  "tupleDelim" -> " ")
 
-/** Simple default Schema for reading a text delimited drm file  where the score of any tuple is ignored,
+/** Default Schema for reading a text delimited drm file  where the score of any tuple is ignored,
   * all non-zeros are replaced with 1.
   * This tells the reader to input DRM lines of the form
-  * (rowID<tab>columnID1:score1,columnID2:score2,...) remember the score is ignored. Alternatively the format can be
-  * (rowID<tab>columnID1,columnID2,...) where presence indicates a score of 1. This is the default output format for
-  * [[org.apache.mahout.drivers.DRMWriteBooleanSchema]]
+  * (rowID<tab>columnID1:score1<space>columnID2:score2...) remember the score is ignored.
+  * Alternatively the format can be
+  * (rowID<tab>columnID1<space>columnID2 ...) where presence indicates a score of 1. This is the default
+  * output format for [[org.apache.mahout.drivers.DRMWriteBooleanSchema]]
   */
 class DRMReadBooleanSchema extends Schema(
   "rowKeyDelim" -> "\t",
   "columnIdStrengthDelim" -> ":",
-  "tupleDelim" -> ",",
+  "tupleDelim" -> " ",
   "omitScore" -> true)
 
-/** Simple default Schema for typical text delimited drm file write where the score of a tuple is omitted.
+/** Default Schema for typical text delimited drm file write where the score of a tuple is omitted.
   * The presence of a tuple means the score = 1, the absence means a score of 0.
-  * This tells the reader to input DRM lines of the form
-  * (rowID<tab>columnID1,columnID2,...)
+  * This tells the writer to output DRM lines of the form
+  * (rowID<tab>columnID1<space>columnID2...)
   */
 class DRMWriteBooleanSchema extends Schema(
   "rowKeyDelim" -> "\t",
   "columnIdStrengthDelim" -> ":",
-  "tupleDelim" -> ",",
+  "tupleDelim" -> " ",
   "omitScore" -> true)
 
