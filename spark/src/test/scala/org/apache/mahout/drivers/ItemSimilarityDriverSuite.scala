@@ -159,8 +159,8 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
 
     beforeEach // restart the test context to read the output of the driver
 
-    // todo: a better test would be to get sorted vectors and compare rows instead of tokens, this might miss
-    // some error cases
+    // todo: these comparisons rely on a sort producing the same lines, which could possibly
+    // fail since the sort is on value and these can be the same for all items in a vector
     val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
     indicatorLines should contain theSameElementsAs SelfSimilairtyLines
     val crossIndicatorLines = mahoutCtx.textFile(OutPath+"/cross-indicator-matrix/").collect.toIterable
