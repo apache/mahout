@@ -41,7 +41,7 @@ import org.apache.mahout.sparkbindings._
   *       to be not created when not needed.
   */
 
-case class IndexedDataset(var matrix: CheckpointedDrm[Int], var rowIDs: BiMap[String,Int], columnIDs: BiMap[String,Int]) {
+case class IndexedDataset(var matrix: CheckpointedDrm[Int], rowIDs: BiMap[String,Int], columnIDs: BiMap[String,Int]) {
 
   // we must allow the row dimension to be adjusted in the case where the data read in is incomplete and we
   // learn this afterwards
