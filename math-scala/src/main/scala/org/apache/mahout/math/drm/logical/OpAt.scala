@@ -30,4 +30,6 @@ case class OpAt(
   /** R-like syntax for number of columns */
   def ncol: Int = safeToNonNegInt(A.nrow)
 
+  /** A' after simplifications cannot produce missing rows, ever. */
+  override protected[mahout] lazy val canHaveMissingRows: Boolean = false
 }

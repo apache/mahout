@@ -22,6 +22,7 @@ import logical._
 import org.apache.mahout.math._
 import scalabindings._
 import RLikeOps._
+import RLikeDrmOps._
 import DistributedEngine._
 import org.apache.mahout.math.scalabindings._
 import org.apache.log4j.Logger
@@ -102,6 +103,22 @@ object DistributedEngine {
       case op@OpTimesLeftMatrix(a, b) =>
         OpAt(OpTimesRightMatrix(A = OpAt(pass1(b)), right = a.t))
 
+      // Add vertical row index concatenation for rbind() on DrmLike[Int] fragments
+      case op@OpRbind(a, b) if (implicitly[ClassTag[K]] == ClassTag.Int) =>
+
+        // Make sure closure sees only local vals, not attributes. We need to do these ugly casts
+        // around because compiler could not infer that K is the same as Int, based on if() above.
+        val ma = safeToNonNegInt(a.nrow)
+        val bAdjusted = new OpMapBlock[Int, Int](
+          A = pass1(b.asInstanceOf[DrmLike[Int]]),
+          bmf = {
+            case (keys, block) => keys.map(_ + ma) -> block
+          },
+          identicallyPartitioned = false
+        )
+        val aAdjusted = a.asInstanceOf[DrmLike[Int]]
+        OpRbind(pass1(aAdjusted), bAdjusted).asInstanceOf[DrmLike[K]]
+
       // Stop at checkpoints
       case cd: CheckpointedDrm[_] => action
 
@@ -152,6 +169,7 @@ object DistributedEngine {
       case OpAB(OpAt(a), b) => OpAtB(pass3(a), pass3(b))
       //      case OpAB(OpAt(a), b) => OpAt(OpABt(OpAt(pass1(b)), pass1(a)))
       case OpAB(a, b) => OpABt(pass3(a), OpAt(pass3(b)))
+
       // Rewrite A'x
       case op@OpAx(op1@OpAt(a), x) => OpAtx(pass3(a)(op1.classTagA), x)
 

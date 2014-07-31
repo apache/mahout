@@ -15,22 +15,26 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math.drm
+package org.apache.mahout.math.drm.logical
 
-import org.apache.mahout.math.Matrix
+import scala.reflect.ClassTag
+import org.apache.mahout.math.drm.DrmLike
+import scala.util.Random
 
-/**
- * Checkpointed DRM API. This is a matrix that has optimized RDD lineage behind it and can be
- * therefore collected or saved.
- * @tparam K matrix key type (e.g. the keys of sequence files once persisted)
- */
-trait CheckpointedDrm[K] extends DrmLike[K] {
+/** rbind() logical operator */
+case class OpRbind[K: ClassTag](
+    override var A: DrmLike[K],
+    override var B: DrmLike[K]
+    ) extends AbstractBinaryOp[K, K, K] {
 
-  def collect: Matrix
+  assert(A.ncol == B.ncol, "arguments must have same number of columns")
 
-  def writeDRM(path: String)
+  override protected[mahout] lazy val partitioningTag: Long = Random.nextLong()
 
-  /** If this checkpoint is already declared cached, uncache. */
-  def uncache(): this.type
+  /** R-like syntax for number of rows. */
+  def nrow: Long = A.nrow + B.nrow
+
+  /** R-like syntax for number of columns */
+  def ncol: Int = A.ncol
 
 }

@@ -29,6 +29,9 @@ case class OpAewScalar[K: ClassTag](
 
   override protected[mahout] lazy val partitioningTag: Long = A.partitioningTag
 
+  /** Stuff like `A +1` is always supposed to fix this */
+  override protected[mahout] lazy val canHaveMissingRows: Boolean = false
+
   /** R-like syntax for number of rows. */
   def nrow: Long = A.nrow
 

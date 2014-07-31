@@ -480,4 +480,36 @@ trait RLikeDrmOpsSuiteBase extends DistributedMahoutSuite with Matchers {
 
   }
 
+  test("B = A + 1.0") {
+    val inCoreA = dense((1, 2), (2, 3), (3, 4))
+    val controlB = inCoreA + 1.0
+
+    val drmB = drmParallelize(m = inCoreA, numPartitions = 2) + 1.0
+
+    (drmB -: controlB).norm should be < 1e-10
+  }
+  
+  test("C = A rbind B") {
+
+    val inCoreA = dense((1, 2), (3, 5))
+    val inCoreB = dense((7, 11), (13, 17))
+    val controlC = dense((1, 2), (3, 5), (7, 11), (13, 17))
+
+    val A = drmParallelize(inCoreA, numPartitions = 2).checkpoint()
+    val B = drmParallelize(inCoreB, numPartitions = 2).checkpoint()
+    
+    (A.rbind(B) -: controlC).norm should be < 1e-10
+  }
+
+  test("C = A rbind B, with empty") {
+
+    val inCoreA = dense((1, 2), (3, 5))
+    val emptyB = drmParallelizeEmpty(nrow = 2, ncol = 2, numPartitions = 2)
+    val controlC = dense((1, 2), (3, 5), (0, 0), (0, 0))
+
+    val A = drmParallelize(inCoreA, numPartitions = 2).checkpoint()
+
+    (A.rbind(emptyB) -: controlC).norm should be < 1e-10
+  }
+  
 }

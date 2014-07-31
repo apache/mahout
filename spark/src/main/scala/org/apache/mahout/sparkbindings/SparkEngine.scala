@@ -161,10 +161,10 @@ object SparkEngine extends DistributedEngine {
 
     {
       implicit def getWritable(x: Any): Writable = val2keyFunc()
-      new CheckpointedDrmSpark(
-        rdd = rdd.map(t => (key2valFunc(t._1), t._2)),
-        _cacheStorageLevel = StorageLevel.MEMORY_ONLY
-      )(unwrappedKeyTag.asInstanceOf[ClassTag[Any]])
+
+      val drmRdd = rdd.map { t => (key2valFunc(t._1), t._2)}
+
+      drmWrap(rdd = drmRdd, cacheHint = CacheHint.MEMORY_ONLY)(unwrappedKeyTag.asInstanceOf[ClassTag[Any]])
     }
   }
 
@@ -253,6 +253,7 @@ object SparkEngine extends DistributedEngine {
       case op@OpAtx(a, x) => Ax.atx_with_broadcast(op, tr2phys(a)(op.classTagA))
       case op@OpAewB(a, b, opId) => AewB.a_ew_b(op, tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
       case op@OpCbind(a, b) => CbindAB.cbindAB_nograph(op, tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
+      case op@OpRbind(a, b) => RbindAB.rbindAB(op, tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
       case op@OpAewScalar(a, s, _) => AewB.a_ew_scalar(op, tr2phys(a)(op.classTagA), s)
       case op@OpRowRange(a, _) => Slicing.rowRange(op, tr2phys(a)(op.classTagA))
       case op@OpTimesRightMatrix(a, _) => AinCoreB.rightMultiply(op, tr2phys(a)(op.classTagA))

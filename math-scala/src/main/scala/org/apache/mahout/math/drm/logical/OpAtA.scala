@@ -31,6 +31,6 @@ case class OpAtA[K: ClassTag](
   /** R-like syntax for number of columns */
   def ncol: Int = A.ncol
 
-  /** Non-zero element count */
-  def nNonZero: Long = throw new UnsupportedOperationException
+  override protected[mahout] lazy val canHaveMissingRows: Boolean = false
+
 }
