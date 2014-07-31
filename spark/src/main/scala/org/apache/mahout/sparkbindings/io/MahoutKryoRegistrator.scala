@@ -24,10 +24,7 @@ import org.apache.mahout.math._
 import org.apache.spark.serializer.KryoRegistrator
 import org.apache.mahout.sparkbindings._
 
-
-/**
- *
- */
+/** Kryo serialization registrator for Mahout */
 class MahoutKryoRegistrator extends KryoRegistrator {
 
   override def registerClasses(kryo: Kryo) = {
@@ -37,7 +34,4 @@ class MahoutKryoRegistrator extends KryoRegistrator {
     kryo.addDefaultSerializer(classOf[Matrix], new WritableKryoSerializer[Matrix, MatrixWritable])
     kryo.register(classOf[com.google.common.collect.HashBiMap[String, Int]], new JavaSerializer());
   }
-}
-
-object MahoutKryoRegistrator {
 }

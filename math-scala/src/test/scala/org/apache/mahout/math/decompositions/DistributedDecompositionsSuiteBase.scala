@@ -47,11 +47,11 @@ trait DistributedDecompositionsSuiteBase extends DistributedMahoutSuite with Mat
       (8, 6, 7, 8)
     )
 
-    val A = drmParallelize(inCoreA, numPartitions = 2)
-    val (drmQ, inCoreR) = dqrThin(A, checkRankDeficiency = false)
+    val drmA = drmParallelize(inCoreA, numPartitions = 2)
+    val (drmQ, inCoreR) = dqrThin(drmA, checkRankDeficiency = false)
 
     // Assert optimizer still knows Q and A are identically partitioned
-    drmQ.partitioningTag should equal(A.partitioningTag)
+    drmQ.partitioningTag should equal(drmA.partitioningTag)
 
 //    drmQ.rdd.partitions.size should be(A.rdd.partitions.size)
 //

@@ -30,16 +30,15 @@ class AtSuite extends FunSuite with DistributedSparkSuite {
 
   test("At") {
     val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5))
-    val A = drmParallelize(m = inCoreA, numPartitions = 2)
+    val drmA = drmParallelize(m = inCoreA, numPartitions = 2)
 
-    val op = new OpAt(A)
-    val AtDrm = new CheckpointedDrmSpark(rdd = At.at(op, srcA = A), _nrow = op.nrow, _ncol = op.ncol)
-    val inCoreAt = AtDrm.collect
+    val op = new OpAt(drmA)
+    val drmAt = new CheckpointedDrmSpark(rdd = At.at(op, srcA = drmA), _nrow = op.nrow, _ncol = op.ncol)
+    val inCoreAt = drmAt.collect
     val inCoreControlAt = inCoreA.t
 
     println(inCoreAt)
     assert((inCoreAt - inCoreControlAt).norm < 1E-5)
-
 
   }
 }
