@@ -38,10 +38,10 @@
 
   <repositories>
     <repository>
-      <id>oss.sonatype.org-snapshot</id>
-      <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+      <id>oss.sonatype.org-releases</id>
+      <url>http://oss.sonatype.org/content/repositories/releases</url>
       <releases>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
       </releases>
       <snapshots>
         <enabled>true</enabled>
