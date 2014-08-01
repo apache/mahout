@@ -158,7 +158,7 @@ trait DistributedDecompositionsSuiteBase extends DistributedMahoutSuite with Mat
     val k = 10
 
     // Calculate just first 10 principal factors and reduce dimensionality.
-    var (drmPCA, _, s) = dspca(A = drmInput, k = 10, p = spectrumLen, q = 1)
+    var (drmPCA, _, s) = dspca(drmA = drmInput, k = 10, p = spectrumLen, q = 1)
     // Un-normalized pca data:
     drmPCA = drmPCA %*% diagv(s)
 
@@ -199,7 +199,7 @@ trait DistributedDecompositionsSuiteBase extends DistributedMahoutSuite with Mat
     val drmA = drmParallelize(inCoreA, numPartitions = 2)
 
     // Decompose using ALS
-    val (drmU, drmV, rmse) = dals(drmInput = drmA, k = 20).toTuple
+    val (drmU, drmV, rmse) = dals(drmA = drmA, k = 20).toTuple
     val inCoreU = drmU.collect
     val inCoreV = drmV.collect
 
