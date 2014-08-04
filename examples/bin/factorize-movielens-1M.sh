@@ -46,32 +46,40 @@ mkdir -p ${WORK_DIR}/movielens
 
 echo "Converting ratings..."
 cat $1 |sed -e s/::/,/g| cut -d, -f1,2,3 > ${WORK_DIR}/movielens/ratings.csv
+hadoop dfs -rm -r ${WORK_DIR}/movielens
+hadoop dfs -mkdir -p ${WORK_DIR}/movielens
+hadoop dfs -copyFromLocal ${WORK_DIR}/movielens/ratings.csv ${WORK_DIR}/movielens/ratings.csv
 
 # create a 90% percent training set and a 10% probe set
+hadoop dfs -rm -r ${WORK_DIR}/dataset
 $MAHOUT splitDataset --input ${WORK_DIR}/movielens/ratings.csv --output ${WORK_DIR}/dataset \
     --trainingPercentage 0.9 --probePercentage 0.1 --tempDir ${WORK_DIR}/dataset/tmp
 
 # run distributed ALS-WR to factorize the rating matrix defined by the training set
+hadoop dfs -rm -r ${WORK_DIR}/als
 $MAHOUT parallelALS --input ${WORK_DIR}/dataset/trainingSet/ --output ${WORK_DIR}/als/out \
     --tempDir ${WORK_DIR}/als/tmp --numFeatures 20 --numIterations 10 --lambda 0.065 --numThreadsPerSolver 2
 
 # compute predictions against the probe set, measure the error
+hadoop dfs -rm -r ${WORK_DIR}/als/rmse
 $MAHOUT evaluateFactorization --input ${WORK_DIR}/dataset/probeSet/ --output ${WORK_DIR}/als/rmse/ \
     --userFeatures ${WORK_DIR}/als/out/U/ --itemFeatures ${WORK_DIR}/als/out/M/ --tempDir ${WORK_DIR}/als/tmp
 
 # compute recommendations
+hadoop dfs -rm -r ${WORK_DIR}/recommendations 
 $MAHOUT recommendfactorized --input ${WORK_DIR}/als/out/userRatings/ --output ${WORK_DIR}/recommendations/ \
     --userFeatures ${WORK_DIR}/als/out/U/ --itemFeatures ${WORK_DIR}/als/out/M/ \
     --numRecommendations 6 --maxRating 5 --numThreads 2
 
 # print the error
 echo -e "\nRMSE is:\n"
-cat ${WORK_DIR}/als/rmse/rmse.txt
+hadoop dfs -cat ${WORK_DIR}/als/rmse/rmse.txt
 echo -e "\n"
 
 echo -e "\nSample recommendations:\n"
-shuf ${WORK_DIR}/recommendations/part-m-00000 |head
+hadoop dfs -cat ${WORK_DIR}/recommendations/part-m-00000 |shuf |head
 echo -e "\n\n"
 
 echo "removing work directory"
 rm -rf ${WORK_DIR}
+hadoop dfs -rm -r ${WORK_DIR}
