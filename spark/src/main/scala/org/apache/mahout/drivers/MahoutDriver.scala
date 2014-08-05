@@ -29,7 +29,7 @@ import scala.collection.immutable
   *   object SomeDriver extends MahoutDriver {
   *     // build options from some stardard CLI param groups
   *     // Note: always put the driver specific options at the last so the can override and previous options!
-  *     private var options = GenericOptions ++ SparkOptions ++ FileIOOptions ++ TextDelimitedTuplesOptions ++
+  *     private var options = GenericOptions ++ SparkOptions ++ FileIOOptions ++ TextDelimitedElementsOptions ++
   *       TextDelimitedDRMOptions ++ ItemSimilarityOptions
   *
   *     override def main(args: Array[String]): Unit = {

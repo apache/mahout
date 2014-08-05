@@ -39,7 +39,7 @@ object MahoutOptionParser {
     "output" -> null.asInstanceOf[String],
     "filenamePattern" -> "^part-.*")
 
-  final val TextDelimitedTuplesOptions = immutable.HashMap[String, Any](
+  final val TextDelimitedElementsOptions = immutable.HashMap[String, Any](
     "rowIDPosition" -> 0,
     "itemIDPosition" -> 1,
     "filterPosition" -> -1,
@@ -50,7 +50,7 @@ object MahoutOptionParser {
   final val TextDelimitedDRMOptions = immutable.HashMap[String, Any](
     "rowKeyDelim" -> "\t",
     "columnIdStrengthDelim" -> ":",
-    "tupleDelim" -> " ",
+    "elementDelim" -> " ",
     "omitStrength" -> false)
 }
 /** Defines oft-repeated options and their parsing. Provides the option groups and parsing helper methods to
@@ -113,7 +113,7 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
   }
 
   def parseInputSchemaOptions{
-    //Input text file schema--not driver specific but input data specific, tuples input,
+    //Input text file schema--not driver specific but input data specific, elements input,
     // not drms
     note("\nInput text file schema options:")
     opt[String]("inDelim") abbr ("id") text ("Input delimiter character (optional). Default: \"[,\\t]\"") action { (x, options) =>
@@ -188,9 +188,9 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
       options + ("columnIdStrengthDelim" -> x)
     } text ("Separates column IDs from their values in the vector values list (optional). Default: \":\"")
 
-    opt[String]("tupleDelim") abbr ("td") action { (x, options) =>
-      options + ("tupleDelim" -> x)
-    } text ("Separates vector tuple values in the values list (optional). Default: \" \"")
+    opt[String]("elementDelim") abbr ("td") action { (x, options) =>
+      options + ("elementDelim" -> x)
+    } text ("Separates vector element values in the values list (optional). Default: \" \"")
 
     opt[Unit]("omitStrength") abbr ("os") action { (_, options) =>
       options + ("omitStrength" -> true)

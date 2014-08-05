@@ -22,30 +22,28 @@ import scala.collection.immutable.HashMap
 
 /**
  * Command line interface for [[org.apache.mahout.cf.CooccurrenceAnalysis.cooccurrences( )]].
- * Reads text lines
- * that contain (row id, column id, ...). The IDs are user specified strings which will be
+ * Reads a text delimited file containing a Mahout DRM of the form
+ * (row id, column id: strength, ...). The IDs are user specified strings which will be
  * preserved in the
- * output. The individual elements will be accumulated into a matrix and [[org.apache.mahout.cf.CooccurrenceAnalysis.cooccurrences( )]]
- * will be used to calculate row-wise self-similarity, or when using filters or two inputs, will generate two
+ * output. The rows define a matrix and [[org.apache.mahout.cf.CooccurrenceAnalysis.cooccurrences( )]]
+ * will be used to calculate row-wise self-similarity, or when using two inputs, will generate two
  * matrices and calculate both the self similarity of the primary matrix and the row-wise
  * similarity of the primary
- * to the secondary. Returns one or two directories of text files formatted as specified in
- * the options.
+ * to the secondary. Returns one or two directories of text files formatted the same as the input.
  * The options allow flexible control of the input schema, file discovery, output schema, and control of
  * algorithm parameters.
- * To get help run {{{mahout spark-itemsimilarity}}} for a full explanation of options. To process simple
- * elements of text delimited values (userID,itemID) with or without a strengths and with a separator of tab, comma, or space,
- * you can specify only the input and output file and directory--all else will default to the correct values.
- * Each output line will contain the Item ID and similar items sorted by LLR strength descending.
+ * To get help run {{{mahout spark-rowsimilarity}}} for a full explanation of options. The default
+ * values for formatting will read and write (rowID<tab>columnID1:strength1<space>columnID2:strength2....)
+ * Each output line will contain a Column ID and similar columns sorted by LLR strength descending.
  * @note To use with a Spark cluster see the --master option, if you run out of heap space check
  *       the --sparkExecutorMemory option.
  */
-object ItemSimilarityDriver extends MahoutDriver {
-  // define only the options specific to ItemSimilarity
-  private final val ItemSimilarityOptions = HashMap[String, Any](
-    "maxPrefs" -> 500,
-    "maxSimilaritiesPerItem" -> 100,
-    "appName" -> "ItemSimilarityDriver")
+object RowSimilarityDriver extends MahoutDriver {
+  // define only the options specific to RowSimilarity
+  private final val RowSimilarityOptions = HashMap[String, Any](
+    "maxObservations" -> 500,
+    "maxSimilaritiesPerRow" -> 100,
+    "appName" -> "RowSimilarityDriver")
 
   // build options from some stardard CLI param groups
   // Note: always put the driver specific options at the last so the can override and previous options!
@@ -61,21 +59,20 @@ object ItemSimilarityDriver extends MahoutDriver {
    */
   override def main(args: Array[String]): Unit = {
     options = MahoutOptionParser.GenericOptions ++ MahoutOptionParser.SparkOptions ++
-      MahoutOptionParser.FileIOOptions ++ MahoutOptionParser.TextDelimitedElementsOptions ++
-      MahoutOptionParser.TextDelimitedDRMOptions ++ ItemSimilarityOptions
+      MahoutOptionParser.FileIOOptions ++  MahoutOptionParser.TextDelimitedDRMOptions ++ RowSimilarityOptions
 
-    val parser = new MahoutOptionParser(programName = "spark-itemsimilarity") {
-      head("spark-itemsimilarity", "Mahout 1.0-SNAPSHOT")
+    val parser = new MahoutOptionParser(programName = "spark-rowsimilarity") {
+      head("spark-rowsimilarity", "Mahout 1.0-SNAPSHOT")
 
       //Input output options, non-driver specific
       parseIOOptions
 
       //Algorithm control options--driver specific
       note("\nAlgorithm control options:")
-      opt[Int]("maxPrefs") abbr ("mppu") action { (x, options) =>
-        options + ("maxPrefs" -> x)
-      } text ("Max number of preferences to consider per user (optional). Default: " +
-        ItemSimilarityOptions("maxPrefs")) validate { x =>
+      opt[Int]("maxObservations") abbr ("mo") action { (x, options) =>
+        options + ("maxObservations" -> x)
+      } text ("Max number of observations to consider per row (optional). Default: 500" +
+        RowSimilarityOptions("maxPrefs")) validate { x =>
         if (x > 0) success else failure("Option --maxPrefs must be > 0")
       }
 
@@ -91,7 +88,7 @@ object ItemSimilarityDriver extends MahoutDriver {
       opt[Int]('m', "maxSimilaritiesPerItem") action { (x, options) =>
         options + ("maxSimilaritiesPerItem" -> x)
       } text ("Limit the number of similarities per item to this number (optional). Default: " +
-        ItemSimilarityOptions("maxSimilaritiesPerItem")) validate { x =>
+        RowSimilarityOptions("maxSimilaritiesPerItem")) validate { x =>
         if (x > 0) success else failure("Option --maxSimilaritiesPerItem must be > 0")
       }
 
