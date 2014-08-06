@@ -28,7 +28,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>mahout-spark-shell</artifactId>
+  <artifactId>mahout-spark-shell_2.10</artifactId>
   <name>Mahout Spark bindings shell</name>
   <description>
     Mahout Bindings for Apache Spark
@@ -165,12 +165,12 @@
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-spark</artifactId>
+      <artifactId>mahout-spark_${scala.major}</artifactId>
     </dependency>
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-math-scala</artifactId>
+      <artifactId>mahout-math-scala_${scala.major}</artifactId>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>

@@ -45,5 +45,4 @@ class AtASuite extends FunSuite with DistributedSparkSuite {
 
   }
 
-
 }

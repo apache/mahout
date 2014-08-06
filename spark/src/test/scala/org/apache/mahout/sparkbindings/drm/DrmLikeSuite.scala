@@ -28,6 +28,14 @@ import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 
 /** DRMLike tests -- just run common DRM tests in Spark. */
 class DrmLikeSuite extends FunSuite with DistributedSparkSuite with DrmLikeSuiteBase {
+
+  test("drmParallellize produces drm with no missing rows") {
+    val inCoreA = dense((1, 2, 3), (3, 4, 5))
+    val drmA = drmParallelize(inCoreA, numPartitions = 2)
+
+    drmA.canHaveMissingRows shouldBe false
+  }
+
   test("DRM blockify dense") {
 
     val inCoreA = dense((1, 2, 3), (3, 4, 5))

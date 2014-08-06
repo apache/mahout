@@ -65,7 +65,7 @@ private[math] object ALS {
    * whichever earlier.
    * <P>
    *
-   * @param drmInput The input matrix
+   * @param drmA The input matrix
    * @param k required rank of decomposition (number of cols in U and V results)
    * @param convergenceThreshold stop sooner if (rmse[i-1] - rmse[i])/rmse[i - 1] is less than this
    *                             value. If <=0 then we won't compute RMSE and use convergence test.
@@ -75,7 +75,7 @@ private[math] object ALS {
    * @return { @link org.apache.mahout.math.drm.decompositions.ALS.Result}
    */
   def dals[K: ClassTag](
-      drmInput: DrmLike[K],
+      drmA: DrmLike[K],
       k: Int = 50,
       lambda: Double = 0.0,
       maxIterations: Int = 10,
@@ -85,8 +85,7 @@ private[math] object ALS {
     assert(convergenceThreshold < 1.0, "convergenceThreshold")
     assert(maxIterations >= 1, "maxIterations")
 
-    val drmA = drmInput
-    val drmAt = drmInput.t
+    val drmAt = drmA.t
 
     // Initialize U and V so that they are identically distributed to A or A'
     var drmU = drmA.mapBlock(ncol = k) {

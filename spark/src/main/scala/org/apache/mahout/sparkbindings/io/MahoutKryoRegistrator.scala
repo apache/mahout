@@ -28,10 +28,7 @@ import org.apache.mahout.math.Vector.Element
 
 import scala.collection.immutable.List
 
-
-/**
- *
- */
+/** Kryo serialization registrator for Mahout */
 class MahoutKryoRegistrator extends KryoRegistrator {
 
   override def registerClasses(kryo: Kryo) = {
@@ -41,7 +38,4 @@ class MahoutKryoRegistrator extends KryoRegistrator {
     kryo.addDefaultSerializer(classOf[Matrix], new WritableKryoSerializer[Matrix, MatrixWritable])
     kryo.register(classOf[com.google.common.collect.HashBiMap[String, Int]], new JavaSerializer())
   }
-}
-
-object MahoutKryoRegistrator {
 }
