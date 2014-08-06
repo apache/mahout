@@ -99,7 +99,7 @@ object ItemSimilarityDriver extends MahoutDriver {
       note("\nNote: Only the Log Likelihood Ratio (LLR) is supported as a similarity measure.")
 
       //Input text format
-      parseInputSchemaOptions
+      parseInputElementsOptions
 
       //How to search for input
       parseFileDiscoveryOptions

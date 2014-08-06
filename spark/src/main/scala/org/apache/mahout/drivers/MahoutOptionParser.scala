@@ -112,7 +112,7 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
     }//Hidden option, though a user might want this.
   }
 
-  def parseInputSchemaOptions{
+  def parseInputElementsOptions{
     //Input text file schema--not driver specific but input data specific, elements input,
     // not drms
     note("\nInput text file schema options:")

@@ -85,24 +85,21 @@ object RowSimilarityDriver extends MahoutDriver {
       }
 */
 
-      opt[Int]('m', "maxSimilaritiesPerItem") action { (x, options) =>
-        options + ("maxSimilaritiesPerItem" -> x)
+      opt[Int]('m', "maxSimilaritiesPerRow") action { (x, options) =>
+        options + ("maxSimilaritiesPerRow" -> x)
       } text ("Limit the number of similarities per item to this number (optional). Default: " +
-        RowSimilarityOptions("maxSimilaritiesPerItem")) validate { x =>
-        if (x > 0) success else failure("Option --maxSimilaritiesPerItem must be > 0")
+        RowSimilarityOptions("maxSimilaritiesPerRow")) validate { x =>
+        if (x > 0) success else failure("Option --maxSimilaritiesPerRow must be > 0")
       }
 
       //Driver notes--driver specific
       note("\nNote: Only the Log Likelihood Ratio (LLR) is supported as a similarity measure.")
 
-      //Input text format
-      parseInputSchemaOptions
+      //Drm output schema--not driver specific, drm specific
+      parseDrmFormatOptions
 
       //How to search for input
       parseFileDiscoveryOptions
-
-      //Drm output schema--not driver specific, drm specific
-      parseDrmFormatOptions
 
       //Spark config options--not driver specific
       parseSparkOptions
@@ -133,29 +130,13 @@ object RowSimilarityDriver extends MahoutDriver {
 
     super.start(masterUrl, appName, dontAddMahoutJars)
 
-    val readSchema1 = new Schema("delim" -> options("inDelim").asInstanceOf[String],
-        "filter" -> options("filter1").asInstanceOf[String],
-        "rowIDPosition" -> options("rowIDPosition").asInstanceOf[Int],
-        "columnIDPosition" -> options("itemIDPosition").asInstanceOf[Int],
-        "filterPosition" -> options("filterPosition").asInstanceOf[Int])
-
-    reader1 = new TextDelimitedIndexedDatasetReader(readSchema1)
-
-    if ((options("filterPosition").asInstanceOf[Int] != -1 && options("filter2").asInstanceOf[String] != null)
-        || (options("input2").asInstanceOf[String] != null && !options("input2").asInstanceOf[String].isEmpty )){
-      // only need to change the filter used compared to readSchema1
-      val readSchema2 = new Schema(readSchema1) += ("filter" -> options("filter2").asInstanceOf[String])
-
-      reader2 = new TextDelimitedIndexedDatasetReader(readSchema2)
-    }
-
-    writeSchema = new Schema(
+    readWriteSchema = new Schema(
         "rowKeyDelim" -> options("rowKeyDelim").asInstanceOf[String],
         "columnIdStrengthDelim" -> options("columnIdStrengthDelim").asInstanceOf[String],
         "omitScore" -> options("omitStrength").asInstanceOf[Boolean],
         "elementDelim" -> options("elementDelim").asInstanceOf[String])
 
-    writer = new TextDelimitedIndexedDatasetWriter(writeSchema)
+    readerWriter = new TextDelimitedIndexedDatasetReaderWriter(readWriteSchema)
 
   }
 
@@ -184,14 +165,6 @@ object RowSimilarityDriver extends MahoutDriver {
       val datasetB = if (!inFiles2.isEmpty) {
         // get cross-cooccurrence interactions from separate files
         val datasetB = IndexedDataset(reader2.readElementsFrom(inFiles2, existingRowIDs = datasetA.rowIDs))
-
-        datasetB
-
-      } else if (options("filterPosition").asInstanceOf[Int] != -1
-          && options("filter2").asInstanceOf[String] != null) {
-
-        // get cross-cooccurrences interactions by using two filters on a single set of files
-        val datasetB = IndexedDataset(reader2.readElementsFrom(inFiles, existingRowIDs = datasetA.rowIDs))
 
         datasetB
 
