@@ -31,6 +31,7 @@ trait DrmLikeSuiteBase extends DistributedMahoutSuite with Matchers {
   test("DRM DFS i/o (local)") {
 
     val uploadPath = "UploadedDRM"
+    new java.io.File(uploadPath).deleteOnExit()
 
     val inCoreA = dense((1, 2, 3), (3, 4, 5))
     val drmA = drmParallelize(inCoreA)
