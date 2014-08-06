@@ -1,13 +1,13 @@
 package org.apache.mahout.test
 
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, BeforeAndAfter, Suite}
+import org.scalatest._
 import org.apache.log4j.{Level, Logger, BasicConfigurator}
 
-trait LoggerConfiguration extends BeforeAndAfterAll {
+trait LoggerConfiguration extends BeforeAndAfterAllConfigMap {
   this: Suite =>
 
-  override protected def beforeAll(): Unit = {
-    super.beforeAll()
+  override protected def beforeAll(configMap: ConfigMap): Unit = {
+    super.beforeAll(configMap)
     BasicConfigurator.resetConfiguration()
     BasicConfigurator.configure()
     Logger.getRootLogger.setLevel(Level.ERROR)

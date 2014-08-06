@@ -19,7 +19,7 @@ package org.apache.mahout.drivers
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{Path, FileSystem}
-import org.scalatest.FunSuite
+import org.scalatest.{ConfigMap, FunSuite}
 import org.apache.mahout.sparkbindings._
 import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 import org.apache.mahout.test.MahoutSuite
@@ -425,12 +425,13 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
     assert (crossIndicatorLines == CrossSimilarityTSV)
   }
 
-  override def afterAll = {
-    // remove TmpDir
+
+  override protected def afterAll(configMap: ConfigMap) {
+
     val fs = FileSystem.get(new Configuration())
     fs.delete(new Path(TmpDir), true) // delete recursively
 
-    super.afterAll
+    super.afterAll(configMap)
   }
 
 }
