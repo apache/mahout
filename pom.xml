@@ -183,19 +183,19 @@
       </dependency>
 
       <dependency>
-        <artifactId>mahout-math-scala</artifactId>
+        <artifactId>mahout-math-scala_${scala.major}</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
-        <artifactId>mahout-math-scala</artifactId>
+        <artifactId>mahout-math-scala_${scala.major}</artifactId>
         <classifier>tests</classifier>
       </dependency>
 
       <dependency>
-        <artifactId>mahout-spark</artifactId>
+        <artifactId>mahout-spark_${scala.major}</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
       </dependency>
