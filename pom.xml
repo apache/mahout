@@ -110,6 +110,7 @@
     <scala.major>2.10</scala.major>
     <scala.version>2.10.4</scala.version>
     <spark.version>1.0.1</spark.version>
+    <jblas.version>1.2.3</jblas.version>
   </properties>
   <issueManagement>
     <system>Jira</system>
@@ -697,6 +698,7 @@
     <module>integration</module>
     <module>examples</module>
     <module>distribution</module>
+    <module>jblas</module>
     <module>math-scala</module>
     <module>spark</module>
     <module>spark-shell</module>
