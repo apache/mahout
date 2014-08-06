@@ -180,7 +180,7 @@ class CheckpointedDrmSpark[K: ClassTag](
       val maxPlus1 = rdd.map(_._1.asInstanceOf[Int]).fold(-1)(max(_, _)) + 1L
       val rowCount = rdd.count()
       _canHaveMissingRows = maxPlus1 != rowCount ||
-        rdd.map(_._1).sum().toLong != ((rowCount -1.0 ) * (rowCount -2.0) /2.0).toLong
+          rdd.map(_._1).sum().toLong != (rowCount * (rowCount - 1.0) / 2.0).toLong
       intFixExtra = (maxPlus1 - rowCount) max 0L
       maxPlus1
     } else
