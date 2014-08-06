@@ -110,6 +110,7 @@
     <scala.major>2.10</scala.major>
     <scala.version>2.10.3</scala.version>
     <spark.version>0.9.1</spark.version>
+    <jblas.version>1.2.3</jblas.version>
   </properties>
   <issueManagement>
     <system>Jira</system>
