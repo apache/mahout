@@ -65,7 +65,6 @@ class CheckpointedDrmSpark[K: ClassTag](
   private var cached: Boolean = false
   override val context: DistributedContext = rdd.context
 
-
   /**
    * Action operator -- does not necessary means Spark action; but does mean running BLAS optimizer
    * and writing down Spark graph lineage since last checkpointed DRM.

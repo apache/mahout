@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf
 
+import org.apache.mahout.math.cf.CooccurrenceAnalysis
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.scalabindings.{MatrixOps, _}
 import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
@@ -48,13 +49,19 @@ class CooccurrenceAnalysisSuite extends FunSuite with MahoutSuite with Distribut
     (0.0,                0.0,                0.0,                     0.0,                0.0))
 
   // correct cross-cooccurrence with LLR
-  final val matrixLLRCoocBtAControl = dense(
+  final val m = dense(
     (1.7260924347106847, 0.6795961471815897, 0.6795961471815897, 1.7260924347106847, 0.0),
     (1.7260924347106847, 0.6795961471815897, 0.6795961471815897, 1.7260924347106847, 0.0),
     (1.7260924347106847, 0.6795961471815897, 0.6795961471815897, 1.7260924347106847, 0.6795961471815897),
     (1.7260924347106847, 0.6795961471815897, 0.6795961471815897, 1.7260924347106847, 0.0),
     (0.0,                0.0,                0.0,                0.0,                4.498681156950466))
 
+  final val matrixLLRCoocBtAControl = dense(
+      (1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 0.0),
+      (0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.0),
+      (0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.0),
+      (1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 0.0),
+      (0.0,                0.0,                0.6795961471815897, 0.0,                4.498681156950466))
 
 
   test("cooccurrence [A'A], [B'A] boolbean data using LLR") {
@@ -148,6 +155,46 @@ class CooccurrenceAnalysisSuite extends FunSuite with MahoutSuite with Distribut
     val diff2Matrix = matrixCrossCooc.minus(matrixLLRCoocBtAControl)
     n = (new MatrixOps(m = diff2Matrix)).norm
     n should be < 1E-10
+  }
+
+  test("cooccurrence two matrices with different number of columns"){
+    val a = dense(
+      (1, 1, 0, 0, 0),
+      (0, 0, 1, 1, 0),
+      (0, 0, 0, 0, 1),
+      (1, 0, 0, 1, 0))
+
+    val b = dense(
+      (0, 1, 1, 0),
+      (1, 1, 1, 0),
+      (0, 0, 1, 0),
+      (1, 1, 0, 1))
+
+    val matrixLLRCoocBtANonSymmetric = dense(
+      (0.0,                1.7260924347106847, 1.7260924347106847, 1.7260924347106847),
+      (0.0,                0.6795961471815897, 0.6795961471815897, 0.0),
+      (1.7260924347106847, 0.6795961471815897, 0.6795961471815897, 0.0),
+      (5.545177444479561,  1.7260924347106847, 1.7260924347106847, 1.7260924347106847),
+      (0.0,                0.0,                0.6795961471815897, 0.0))
+
+    val drmA = drmParallelize(m = a, numPartitions = 2)
+    val drmB = drmParallelize(m = b, numPartitions = 2)
+
+    //self similarity
+    val drmCooc = CooccurrenceAnalysis.cooccurrences(drmARaw = drmA, drmBs = Array(drmB))
+    val matrixSelfCooc = drmCooc(0).checkpoint().collect
+    val diffMatrix = matrixSelfCooc.minus(matrixLLRCoocAtAControl)
+    var n = (new MatrixOps(m = diffMatrix)).norm
+    n should be < 1E-10
+
+    //cross similarity
+    val matrixCrossCooc = drmCooc(1).checkpoint().collect
+    val diff2Matrix = matrixCrossCooc.minus(matrixLLRCoocBtANonSymmetric)
+    n = (new MatrixOps(m = diff2Matrix)).norm
+
+    //cooccurrence without LLR is just a A'B
+    //val inCoreAtB = a.transpose().times(b)
+    //val bp = 0
   }
 
   test("LLR calc") {

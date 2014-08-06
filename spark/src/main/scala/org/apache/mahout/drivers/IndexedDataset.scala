@@ -19,6 +19,8 @@ package org.apache.mahout.drivers
 
 import com.google.common.collect.BiMap
 import org.apache.mahout.math.drm.CheckpointedDrm
+import org.apache.mahout.sparkbindings.drm.CheckpointedDrmSpark
+import org.apache.mahout.sparkbindings._
 
 /**
   * Wraps a [[org.apache.mahout.sparkbindings.drm.DrmLike]] object with two [[com.google.common.collect.BiMap]]s to store ID/label translation dictionaries.
@@ -39,14 +41,33 @@ import org.apache.mahout.math.drm.CheckpointedDrm
   *       to be not created when not needed.
   */
 
-case class IndexedDataset(matrix: CheckpointedDrm[Int], rowIDs: BiMap[String,Int], columnIDs: BiMap[String,Int]) {
+case class IndexedDataset(var matrix: CheckpointedDrm[Int], rowIDs: BiMap[String,Int], columnIDs: BiMap[String,Int]) {
+
+  // we must allow the row dimension to be adjusted in the case where the data read in is incomplete and we
+  // learn this afterwards
+
+  /**
+   * Adds the equivalent of blank rows to the sparse CheckpointedDrm, which only changes the row cardinality value.
+   * No physical changes are made to the underlying drm.
+   * @param n number to use for row carnindality, should be larger than current
+   * @note should be done before any BLAS optimizer actions are performed on the matrix or you'll get unpredictable
+   *       results.
+   */
+  def newRowCardinality(n: Int): IndexedDataset = {
+    assert(n > -1)
+    assert( n >= matrix.nrow)
+    val drmRdd = matrix.asInstanceOf[CheckpointedDrmSpark[Int]].rdd
+    val ncol = matrix.ncol
+    val newMatrix = drmWrap[Int](drmRdd, n, ncol)
+    new IndexedDataset(newMatrix, rowIDs, columnIDs)
+  }
 }
 
 /**
   * Companion object for the case class [[org.apache.mahout.drivers.IndexedDataset]] primarily used to get a secondary constructor for
   * making one [[org.apache.mahout.drivers.IndexedDataset]] from another. Used when you have a factory like [[org.apache.mahout.drivers.IndexedDatasetStore]]
   * {{{
-  *   val indexedDataset = IndexedDataset(indexedDatasetReader.readFrom(source))
+  *   val indexedDataset = IndexedDataset(indexedDatasetReader.readTuplesFrom(source))
   * }}}
   */
 
