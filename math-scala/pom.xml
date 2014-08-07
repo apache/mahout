@@ -166,8 +166,13 @@
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-math</artifactId>
     </dependency>
+    <dependency>
+        <groupId>org.apache.mahout</groupId>
+        <artifactId>mahout-mrlegacy</artifactId>
+    </dependency>
 
-    <!--  3rd-party -->
+
+      <!--  3rd-party -->
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>

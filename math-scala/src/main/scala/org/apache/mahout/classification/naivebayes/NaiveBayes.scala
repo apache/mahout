@@ -1,15 +1,15 @@
 package org.apache.mahout.classification.naivebayes
 
 
-import org.apache.mahout.math._
-import scalabindings._
-import RLikeOps._
-import drm._
-import RLikeDrmOps._
+import org.apache.mahout.math.drm.RLikeDrmOps._
+import org.apache.mahout.math.drm._
+import org.apache.mahout.math.scalabindings.RLikeOps._
+import org.apache.mahout.math.scalabindings._
+
 import scala.reflect.ClassTag
 import org.apache.mahout.classifier.naivebayes.NaiveBayesModel
 import org.apache.mahout.classifier.naivebayes.training.ComplementaryThetaTrainer
-
+import org.apache.mahout.math._
 
 /**
  * Distributed training of a Naive Bayes model. Follows the approach presented in Rennie et.al.: Tackling the poor
@@ -29,8 +29,9 @@ object NaiveBayes {
    * @param alphaI smoothing parameter
    * @return trained naive bayes model
    */
-  def trainNB[K: ClassTag](observationsPerLabel: Array[DrmLike[K]], trainComplementary :Boolean = true,
-    alphaI: Double = defaultAlphaI): org.apache.mahout.classifier.naivebayes.NaiveBayesModel = {
+  def trainNB[K: ClassTag](observationsPerLabel: Array[DrmLike[K]], trainComplementary: Boolean = true,
+                           alphaI: Double = defaultAlphaI): NaiveBayesModel = {
+
 
     // distributed summation of all observations per label
     val weightsPerLabelAndFeature = dense(observationsPerLabel.map(_.colSums))
@@ -41,20 +42,21 @@ object NaiveBayes {
 
     // perLabelThetaNormalizer Vector is expected by NaiveBayesModel. We can pass a null value
     // in the case of a standard NB model
-    var thetaNormalizer: org.apache.mahout.math.Vector= null
+    var thetaNormalizer: Vector = null
+
 
     // instantiate a trainer and retrieve the perLabelThetaNormalizer Vector from it in the case of
     // a complementary NB model
-    if( trainComplementary ){
-      val thetaTrainer = new org.apache.mahout.classifier.naivebayes.training.ComplementaryThetaTrainer(weightsPerFeature, weightsPerLabel, alphaI)
+    if (trainComplementary) {
+      val thetaTrainer = new ComplementaryThetaTrainer(weightsPerFeature, weightsPerLabel, alphaI)
       // local training of the theta normalization
       for (labelIndex <- 0 until weightsPerLabelAndFeature.nrow) {
         thetaTrainer.train(labelIndex, weightsPerLabelAndFeature(labelIndex, ::))
       }
-      thetaNormalizer=thetaTrainer.retrievePerLabelThetaNormalizer()
+      thetaNormalizer = thetaTrainer.retrievePerLabelThetaNormalizer()
     }
 
-    new org.apache.mahout.classifier.naivebayes.NaiveBayesModel(weightsPerLabelAndFeature, weightsPerFeature,weightsPerLabel,
+    new org.apache.mahout.classifier.naivebayes.NaiveBayesModel(weightsPerLabelAndFeature, weightsPerFeature, weightsPerLabel,
       thetaNormalizer, alphaI, trainComplementary)
 
   }

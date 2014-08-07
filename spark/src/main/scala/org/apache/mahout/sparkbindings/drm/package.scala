@@ -31,7 +31,6 @@ import org.apache.spark.broadcast.Broadcast
 import org.apache.mahout.math.drm._
 import SparkContext._
 import org.apache.mahout.math
-import org.apache.mahout.classification.naivebayes.NaiveBayes
 
 
 package object drm {
