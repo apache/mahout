@@ -736,13 +736,4 @@ removed ==> u3	0	      0	      1	          0
     super.afterEach()
   }
 
-  override protected def afterAll(configMap: ConfigMap) {
-
-    val fs = FileSystem.get(new Configuration())
-    fs.delete(new Path(TmpDir), true) // delete recursively
-
-    super.afterAll(configMap)
-  }
-
-
 }
