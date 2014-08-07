@@ -1,11 +1,15 @@
 package org.apache.mahout.classification.naivebayes
 
-import scala.reflect.ClassTag
-import org.apache.mahout.math.drm.DrmLike
-import org.apache.mahout.math.scalabindings
-import org.apache.mahout.math.scalabindings.MatrixOps
 
-import org.apache.mahout.
+import org.apache.mahout.math._
+import scalabindings._
+import RLikeOps._
+import drm._
+import RLikeDrmOps._
+import scala.reflect.ClassTag
+import org.apache.mahout.classifier.naivebayes.NaiveBayesModel
+import org.apache.mahout.classifier.naivebayes.training.ComplementaryThetaTrainer
+
 
 /**
  * Distributed training of a Naive Bayes model. Follows the approach presented in Rennie et.al.: Tackling the poor
@@ -14,10 +18,11 @@ import org.apache.mahout.
 object NaiveBayes {
 
   /** default value for the smoothing parameter */
-  def defaultAlphaI = 1f
+  def defaultAlphaI = 1.0
 
   /**
-   * Distributed training of a Naive Bayes model.
+   * Distributed training of a Naive Bayes model. Follows the approach presented in Rennie et.al.: Tackling the poor
+   * assumptions of Naive Bayes Text classifiers, ICML 2003, http://people.csail.mit.edu/jrennie/papers/icml03-nb.pdf
    *
    * @param observationsPerLabel an array of matrices. Every matrix contains the observations for a particular label.
    * @param trainComplementary whether to train a complementary Naive Bayes model
@@ -25,14 +30,14 @@ object NaiveBayes {
    * @return trained naive bayes model
    */
   def trainNB[K: ClassTag](observationsPerLabel: Array[DrmLike[K]], trainComplementary :Boolean = true,
-                                   alphaI: Float = defaultAlphaI): NaiveBayesModel = {
+    alphaI: Double = defaultAlphaI): org.apache.mahout.classifier.naivebayes.NaiveBayesModel = {
 
     // distributed summation of all observations per label
-    val weightsPerLabelAndFeature = scalabindings.dense(observationsPerLabel.map(new MatrixOps(_).colSums))
+    val weightsPerLabelAndFeature = dense(observationsPerLabel.map(_.colSums))
     // local summation of all weights per feature
-    val weightsPerFeature = new MatrixOps(weightsPerLabelAndFeature).colSums
+    val weightsPerFeature = weightsPerLabelAndFeature.colSums
     // local summation of all weights per label
-    val weightsPerLabel = new MatrixOps(weightsPerLabelAndFeature).rowSums
+    val weightsPerLabel = weightsPerLabelAndFeature.rowSums
 
     // perLabelThetaNormalizer Vector is expected by NaiveBayesModel. We can pass a null value
     // in the case of a standard NB model
@@ -41,16 +46,18 @@ object NaiveBayes {
     // instantiate a trainer and retrieve the perLabelThetaNormalizer Vector from it in the case of
     // a complementary NB model
     if( trainComplementary ){
-      val thetaTrainer = new ComplementaryThetaTrainer(weightsPerFeature, weightsPerLabel, alphaI)
+      val thetaTrainer = new org.apache.mahout.classifier.naivebayes.training.ComplementaryThetaTrainer(weightsPerFeature, weightsPerLabel, alphaI)
       // local training of the theta normalization
-      for (labelIndex <- 0 until new MatrixOps(weightsPerLabelAndFeature).nrow) {
-        thetaTrainer.train(labelIndex, weightsPerLabelAndFeature.viewRow(labelIndex))
+      for (labelIndex <- 0 until weightsPerLabelAndFeature.nrow) {
+        thetaTrainer.train(labelIndex, weightsPerLabelAndFeature(labelIndex, ::))
       }
       thetaNormalizer=thetaTrainer.retrievePerLabelThetaNormalizer()
     }
 
-    new NaiveBayesModel(weightsPerLabelAndFeature, weightsPerFeature, weightsPerLabel,
-                          thetaNormalizer, alphaI, trainComplementary)
+    new org.apache.mahout.classifier.naivebayes.NaiveBayesModel(weightsPerLabelAndFeature, weightsPerFeature,weightsPerLabel,
+      thetaNormalizer, alphaI, trainComplementary)
 
   }
+
 }
+
