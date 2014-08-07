@@ -75,7 +75,7 @@ abstract class MahoutDriver {
 
   /** Override (optionally) for special cleanup */
   protected def stop: Unit = {
-    mc.close
+    if (!_useExistingContext) mc.close
   }
 
   /** This is where you do the work, call start first, then before exiting call stop */
