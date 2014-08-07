@@ -17,7 +17,7 @@
 
 package org.apache.mahout.sparkbindings.test
 
-import org.scalatest.Suite
+import org.scalatest.{ConfigMap, BeforeAndAfterAllConfigMap, Suite}
 import org.apache.spark.SparkConf
 import org.apache.mahout.sparkbindings._
 import org.apache.mahout.test.{DistributedMahoutSuite, MahoutSuite}
@@ -29,10 +29,8 @@ trait DistributedSparkSuite extends DistributedMahoutSuite with LoggerConfigurat
   protected implicit var mahoutCtx: DistributedContext = _
   protected var masterUrl = null.asInstanceOf[String]
 
-  override protected def beforeEach() {
-    super.beforeEach()
-
-    masterUrl = "local[2]"
+  protected def initContext() {
+    masterUrl = "local[3]"
     mahoutCtx = mahoutSparkContext(masterUrl = this.masterUrl,
       appName = "MahoutLocalContext",
       // Do not run MAHOUT_HOME jars in unit tests.
@@ -44,7 +42,7 @@ trait DistributedSparkSuite extends DistributedMahoutSuite with LoggerConfigurat
     )
   }
 
-  override protected def afterEach() {
+  protected def resetContext() {
     if (mahoutCtx != null) {
       try {
         mahoutCtx.close()
@@ -52,6 +50,21 @@ trait DistributedSparkSuite extends DistributedMahoutSuite with LoggerConfigurat
         mahoutCtx = null
       }
     }
+  }
+
+  override protected def beforeEach() {
+    super.beforeEach()
+//    initContext()
+  }
+
+
+  override protected def beforeAll(configMap: ConfigMap): Unit = {
+    super.beforeAll(configMap)
+    initContext()
+  }
+
+  override protected def afterEach() {
+//    resetContext()
     super.afterEach()
   }
 }

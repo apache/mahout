@@ -123,8 +123,7 @@ object ItemSimilarityDriver extends MahoutDriver {
   }
 
   override def start(masterUrl: String = options("master").asInstanceOf[String],
-      appName: String = options("appName").asInstanceOf[String],
-      dontAddMahoutJars: Boolean = options("dontAddMahoutJars").asInstanceOf[Boolean]):
+      appName: String = options("appName").asInstanceOf[String]):
     Unit = {
 
     // todo: the HashBiMap used in the TextDelimited Reader is hard coded into
@@ -134,7 +133,7 @@ object ItemSimilarityDriver extends MahoutDriver {
       .set("spark.kryoserializer.buffer.mb", "200")
       .set("spark.executor.memory", options("sparkExecutorMem").asInstanceOf[String])
 
-    super.start(masterUrl, appName, dontAddMahoutJars)
+    super.start(masterUrl, appName)
 
     val readSchema1 = new Schema("delim" -> options("inDelim").asInstanceOf[String],
         "filter" -> options("filter1").asInstanceOf[String],
