@@ -17,9 +17,7 @@
 
 package org.apache.mahout.classifier.df.tools;
 
-import java.util.List;
-import java.util.Random;
-
+import com.google.common.collect.Lists;
 import org.apache.mahout.classifier.df.DecisionForest;
 import org.apache.mahout.classifier.df.builder.DecisionTreeBuilder;
 import org.apache.mahout.classifier.df.data.Data;
@@ -36,9 +34,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.collect.Lists;
+import java.text.DecimalFormat;
+import java.util.List;
+import java.util.Random;
 
 public final class VisualizerTest extends MahoutTestCase {
+  
+  private static final char DECIMAL_SEPARATOR = ((DecimalFormat) DecimalFormat.getInstance()).getDecimalFormatSymbols().getDecimalSeparator();
   
   private static final String[] TRAIN_DATA = {"sunny,85,85,FALSE,no",
       "sunny,80,90,TRUE,no", "overcast,83,86,FALSE,yes",
@@ -82,9 +84,10 @@ public final class VisualizerTest extends MahoutTestCase {
     builder.setM(trainingData.getDataset().nbAttributes() - 1);
     Node tree = builder.build(randomNumberGenerator, trainingData);
 
-    assertEquals("\noutlook = rainy\n|   windy = FALSE : yes\n|   windy = TRUE : no\n"
-            + "outlook = sunny\n|   humidity < 77.5 : yes\n|   humidity >= 77.5 : no\n"
-            + "outlook = overcast : yes", TreeVisualizer.toString(tree, trainingData.getDataset(), ATTRIBUTE_NAMES));
+    assertEquals(String.format("\noutlook = rainy\n|   windy = FALSE : yes\n|   windy = TRUE : no\n"
+            + "outlook = sunny\n|   humidity < 77%s5 : yes\n|   humidity >= 77%s5 : no\n"
+            + "outlook = overcast : yes", DECIMAL_SEPARATOR, DECIMAL_SEPARATOR),
+        TreeVisualizer.toString(tree, trainingData.getDataset(), ATTRIBUTE_NAMES));
   }
   
   @Test
@@ -98,7 +101,7 @@ public final class VisualizerTest extends MahoutTestCase {
 			ATTRIBUTE_NAMES);
     Assert.assertArrayEquals(new String[] {
         "outlook = rainy -> windy = TRUE -> no", "outlook = overcast -> yes",
-        "outlook = sunny -> (humidity = 90) >= 77.5 -> no"}, prediction);
+        String.format("outlook = sunny -> (humidity = 90) >= 77%s5 -> no", DECIMAL_SEPARATOR)}, prediction);
   }
   
   @Test
@@ -119,7 +122,8 @@ public final class VisualizerTest extends MahoutTestCase {
 
     assertEquals("Tree[1]:\nhumidity < 90 : yes\nhumidity >= 90\n"
             + "|   outlook = rainy\n|   |   temperature < 71 : yes\n|   |   temperature >= 71 : no\n"
-            + "|   outlook = sunny : no\n" + "|   outlook = overcast : yes\n", ForestVisualizer.toString(forest, trainingData.getDataset(), ATTRIBUTE_NAMES));
+            + "|   outlook = sunny : no\n" + "|   outlook = overcast : yes\n",
+        ForestVisualizer.toString(forest, trainingData.getDataset(), ATTRIBUTE_NAMES));
   }
   
   @Test
@@ -139,7 +143,9 @@ public final class VisualizerTest extends MahoutTestCase {
     builder.setComplemented(false);
     Node tree = builder.build(randomNumberGenerator, lessData);
 
-    assertEquals("\noutlook = sunny\n|   humidity < 77.5 : yes\n|   humidity >= 77.5 : no\noutlook = overcast : yes", TreeVisualizer.toString(tree, trainingData.getDataset(), ATTRIBUTE_NAMES));
+    assertEquals(String.format("\noutlook = sunny\n|   humidity < 77%s5 : yes\n|"
+            + "   humidity >= 77%s5 : no\noutlook = overcast : yes", DECIMAL_SEPARATOR, DECIMAL_SEPARATOR),
+        TreeVisualizer.toString(tree, trainingData.getDataset(), ATTRIBUTE_NAMES));
   }
   
   @Test
