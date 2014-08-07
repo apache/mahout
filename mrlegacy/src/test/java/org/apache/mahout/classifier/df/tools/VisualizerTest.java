@@ -51,12 +51,12 @@ public final class VisualizerTest extends MahoutTestCase {
   private static final String[] TEST_DATA = {"rainy,70,96,TRUE,-",
       "overcast,64,65,TRUE,-", "sunny,75,90,TRUE,-",};
   
-  private static final String[] ATTR_NAMES = {"outlook", "temperature",
+  private static final String[] ATTRIBUTE_NAMES = {"outlook", "temperature",
       "humidity", "windy", "play"};
   
-  private Random rng;
+  private Random randomNumberGenerator;
   
-  private Data data;
+  private Data trainingData;
   
   private Data testData;
   
@@ -65,16 +65,13 @@ public final class VisualizerTest extends MahoutTestCase {
   public void setUp() throws Exception {
     super.setUp();
     
-    rng = RandomUtils.getRandom(1);
+    randomNumberGenerator = RandomUtils.getRandom(1);
     
-    // Dataset
     Dataset dataset = DataLoader
         .generateDataset("C N N C L", false, TRAIN_DATA);
     
-    // Training data
-    data = DataLoader.loadData(dataset, TRAIN_DATA);
+    trainingData = DataLoader.loadData(dataset, TRAIN_DATA);
     
-    // Test data
     testData = DataLoader.loadData(dataset, TEST_DATA);
   }
   
@@ -82,23 +79,23 @@ public final class VisualizerTest extends MahoutTestCase {
   public void testTreeVisualize() throws Exception {
     // build tree
     DecisionTreeBuilder builder = new DecisionTreeBuilder();
-    builder.setM(data.getDataset().nbAttributes() - 1);
-    Node tree = builder.build(rng, data);
-    
+    builder.setM(trainingData.getDataset().nbAttributes() - 1);
+    Node tree = builder.build(randomNumberGenerator, trainingData);
+
     assertEquals("\noutlook = rainy\n|   windy = FALSE : yes\n|   windy = TRUE : no\n"
             + "outlook = sunny\n|   humidity < 77.5 : yes\n|   humidity >= 77.5 : no\n"
-            + "outlook = overcast : yes", TreeVisualizer.toString(tree, data.getDataset(), ATTR_NAMES));
+            + "outlook = overcast : yes", TreeVisualizer.toString(tree, trainingData.getDataset(), ATTRIBUTE_NAMES));
   }
   
   @Test
   public void testPredictTrace() throws Exception {
     // build tree
     DecisionTreeBuilder builder = new DecisionTreeBuilder();
-    builder.setM(data.getDataset().nbAttributes() - 1);
-    Node tree = builder.build(rng, data);
+    builder.setM(trainingData.getDataset().nbAttributes() - 1);
+    Node tree = builder.build(randomNumberGenerator, trainingData);
     
     String[] prediction = TreeVisualizer.predictTrace(tree, testData,
-        ATTR_NAMES);
+			ATTRIBUTE_NAMES);
     Assert.assertArrayEquals(new String[] {
         "outlook = rainy -> windy = TRUE -> no", "outlook = overcast -> yes",
         "outlook = sunny -> (humidity = 90) >= 77.5 -> no"}, prediction);
@@ -118,41 +115,41 @@ public final class VisualizerTest extends MahoutTestCase {
     DecisionForest forest = new DecisionForest(trees);
     assertEquals("Tree[1]:\n2 < 90 : yes\n2 >= 90\n"
             + "|   0 = rainy\n|   |   1 < 71 : yes\n|   |   1 >= 71 : no\n"
-            + "|   0 = sunny : no\n" + "|   0 = overcast : yes\n", ForestVisualizer.toString(forest, data.getDataset(), null));
+            + "|   0 = sunny : no\n" + "|   0 = overcast : yes\n", ForestVisualizer.toString(forest, trainingData.getDataset(), null));
 
     assertEquals("Tree[1]:\nhumidity < 90 : yes\nhumidity >= 90\n"
             + "|   outlook = rainy\n|   |   temperature < 71 : yes\n|   |   temperature >= 71 : no\n"
-            + "|   outlook = sunny : no\n" + "|   outlook = overcast : yes\n", ForestVisualizer.toString(forest, data.getDataset(), ATTR_NAMES));
+            + "|   outlook = sunny : no\n" + "|   outlook = overcast : yes\n", ForestVisualizer.toString(forest, trainingData.getDataset(), ATTRIBUTE_NAMES));
   }
   
   @Test
   public void testLeafless() throws Exception {
     List<Instance> instances = Lists.newArrayList();
-    for (int i = 0; i < data.size(); i++) {
-      if (data.get(i).get(0) != 0.0d) {
-        instances.add(data.get(i));
+    for (int i = 0; i < trainingData.size(); i++) {
+      if (trainingData.get(i).get(0) != 0.0d) {
+        instances.add(trainingData.get(i));
       }
     }
-    Data lessData = new Data(data.getDataset(), instances);
+    Data lessData = new Data(trainingData.getDataset(), instances);
     
     // build tree
     DecisionTreeBuilder builder = new DecisionTreeBuilder();
-    builder.setM(data.getDataset().nbAttributes() - 1);
+    builder.setM(trainingData.getDataset().nbAttributes() - 1);
     builder.setMinSplitNum(0);
     builder.setComplemented(false);
-    Node tree = builder.build(rng, lessData);
+    Node tree = builder.build(randomNumberGenerator, lessData);
 
-    assertEquals("\noutlook = sunny\n|   humidity < 77.5 : yes\n|   humidity >= 77.5 : no\noutlook = overcast : yes", TreeVisualizer.toString(tree, data.getDataset(), ATTR_NAMES));
+    assertEquals("\noutlook = sunny\n|   humidity < 77.5 : yes\n|   humidity >= 77.5 : no\noutlook = overcast : yes", TreeVisualizer.toString(tree, trainingData.getDataset(), ATTRIBUTE_NAMES));
   }
   
   @Test
   public void testEmpty() throws Exception {
-    Data emptyData = new Data(data.getDataset());
+    Data emptyData = new Data(trainingData.getDataset());
     
     // build tree
     DecisionTreeBuilder builder = new DecisionTreeBuilder();
-    Node tree = builder.build(rng, emptyData);
+    Node tree = builder.build(randomNumberGenerator, emptyData);
 
-    assertEquals(" : unknown", TreeVisualizer.toString(tree, data.getDataset(), ATTR_NAMES));
+    assertEquals(" : unknown", TreeVisualizer.toString(tree, trainingData.getDataset(), ATTRIBUTE_NAMES));
   }
 }
