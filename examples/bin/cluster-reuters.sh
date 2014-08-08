@@ -118,7 +118,7 @@ if [ "x$clustertype" == "xkmeans" ]; then
     -x 10 -k 20 -ow --clustering \
   && \
   $MAHOUT clusterdump \
-    -i `hadoop dfs -ls -d ${WORK_DIR}/reuters-kmeans/clusters-*-final | awk'{print $8}'` \
+    -i `hadoop fs -ls -d ${WORK_DIR}/reuters-kmeans/clusters-*-final | awk'{print $8}'` \
     -o ${WORK_DIR}/reuters-kmeans/clusterdump \
     -d ${WORK_DIR}/reuters-out-seqdir-sparse-kmeans/dictionary.file-0 \
     -dt sequencefile -b 100 -n 20 --evaluate -dm org.apache.mahout.common.distance.CosineDistanceMeasure -sp 0 \
