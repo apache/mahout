@@ -1,13 +1,14 @@
 package org.apache.mahout.classifier.naivebayes
 
-import org.apache.mahout.classifier.naivebayes.training.ComplementaryThetaTrainer
-import org.apache.mahout.math._
-import org.apache.mahout.math.drm.RLikeDrmOps._
-import org.apache.mahout.math.drm._
-import org.apache.mahout.math.scalabindings.RLikeOps._
-import org.apache.mahout.math.scalabindings._
 
+import org.apache.mahout.math.scalabindings._
+import org.apache.mahout.math._
+import drm.RLikeDrmOps._
+import drm._
+import RLikeOps._
+import org.apache.mahout.math.scalabindings._
 import scala.reflect.ClassTag
+import org.apache.mahout.classifier.naivebayes.training.ComplementaryThetaTrainer
 
 /**
  * Distributed training of a Naive Bayes model. Follows the approach presented in Rennie et.al.: Tackling the poor
@@ -16,7 +17,7 @@ import scala.reflect.ClassTag
 object NaiveBayes {
 
   /** default value for the smoothing parameter */
-  def defaultAlphaI = 1.0
+  def defaultAlphaI = 1.0f
 
   /**
    * Distributed training of a Naive Bayes model. Follows the approach presented in Rennie et.al.: Tackling the poor
@@ -28,7 +29,7 @@ object NaiveBayes {
    * @return trained naive bayes model
    */
   def trainNB[K: ClassTag](observationsPerLabel: Array[DrmLike[K]], trainComplementary: Boolean = true,
-                           alphaI: Double = defaultAlphaI): NaiveBayesModel = {
+                           alphaI: Float = defaultAlphaI): NaiveBayesModel = {
 
 
     // distributed summation of all observations per label
@@ -39,8 +40,8 @@ object NaiveBayes {
     val weightsPerLabel = weightsPerLabelAndFeature.rowSums
 
     // perLabelThetaNormalizer Vector is expected by NaiveBayesModel. We can pass a null value
-    // in the case of a standard NB model
-    var thetaNormalizer: Vector = null
+    // or an empty Vector in the case of a standard NB model
+    var thetaNormalizer= weightsPerFeature.like()
 
 
     // instantiate a trainer and retrieve the perLabelThetaNormalizer Vector from it in the case of
