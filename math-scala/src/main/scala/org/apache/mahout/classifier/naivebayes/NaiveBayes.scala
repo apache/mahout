@@ -1,15 +1,13 @@
-package org.apache.mahout.classification.naivebayes
+package org.apache.mahout.classifier.naivebayes
 
-
+import org.apache.mahout.classifier.naivebayes.training.ComplementaryThetaTrainer
+import org.apache.mahout.math._
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
 
 import scala.reflect.ClassTag
-import org.apache.mahout.classifier.naivebayes.NaiveBayesModel
-import org.apache.mahout.classifier.naivebayes.training.ComplementaryThetaTrainer
-import org.apache.mahout.math._
 
 /**
  * Distributed training of a Naive Bayes model. Follows the approach presented in Rennie et.al.: Tackling the poor
