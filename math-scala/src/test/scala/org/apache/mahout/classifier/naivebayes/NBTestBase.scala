@@ -6,9 +6,6 @@ import org.apache.mahout.test.DistributedMahoutSuite
 import org.scalatest.{FunSuite, Matchers}
 
 
-/**
- * Created by andy on 8/8/14.
- */
 trait NBTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =>
 
   test("Simple Standard NB Model") {

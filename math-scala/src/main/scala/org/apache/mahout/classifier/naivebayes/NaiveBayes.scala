@@ -31,21 +31,23 @@ object NaiveBayes {
   def trainNB[K: ClassTag](observationsPerLabel: DrmLike[K], trainComplementary: Boolean = true,
                            alphaI: Float = defaultAlphaI): NaiveBayesModel = {
 
-    // local summation of all weights per feature
+    // Summation of all weights per feature
     val weightsPerFeature = observationsPerLabel.colSums()
 
     // local summation of all weights per label
     /** Since this is not distributed might as well wait until after collecting **/
-    /*val weightsPerLabel = observationsPerLabel.aggregateRows(vectorSumFunc)   **/
-
-    // perLabelThetaNormalizer Vector is expected by NaiveBayesModel. We can pass a null value
-    // or an empty Vector in the case of a standard NB model
-    var thetaNormalizer= weightsPerFeature.like()
+    /** val weightsPerLabel2 = observationsPerLabel.aggregateRows(vectorSumFunc)**/
+    /*****************************************************************************/
 
     // collect a matrix to pass to the NaiveBayesModel
     val inCoreTFIDF=observationsPerLabel.collect
+
     // local summation of all weights per label
     val weightsPerLabel = inCoreTFIDF.rowSums()
+
+    // perLabelThetaNormalizer Vector is expected by NaiveBayesModel. We can pass a null value
+    // or Vector of zeroes in the case of a standard NB model.
+    var thetaNormalizer= weightsPerFeature.like()
 
     // instantiate a trainer and retrieve the perLabelThetaNormalizer Vector from it in the case of
     // a complementary NB model
