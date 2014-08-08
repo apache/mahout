@@ -39,7 +39,6 @@ then
 fi
 
 MAHOUT="../../bin/mahout"
-MAHOUT_LOCAL=1
 WORK_DIR=/tmp/mahout-work-${USER}
 HDFS_WORK_DIR=/tmp/mahout-work-${USER}
 
@@ -49,10 +48,8 @@ mkdir -p ${WORK_DIR}/movielens
 echo "Converting ratings..."
 cat $1 |sed -e s/::/,/g| cut -d, -f1,2,3 > ${WORK_DIR}/movielens/ratings.csv
 
-if [ $MAHOUT_LOCAL -eq 1 ]
+if [ "$MAHOUT_LOCAL" == "" ]
 then
-    CAT='cat'
-else
     hadoop dfs -rm -r ${HDFS_WORK_DIR}
     echo "creating hdfs work directory at ${HDFS_WORK_DIR}"
     hadoop dfs -mkdir -p ${HDFS_WORK_DIR}/movielens
@@ -60,6 +57,8 @@ else
     rm -rf ${WORK_DIR}
     WORK_DIR=$HDFS_WORK_DIR
     CAT='hadoop dfs -cat'
+else
+    CAT='cat'
 fi
 
 
@@ -90,9 +89,9 @@ $CAT ${WORK_DIR}/recommendations/part-m-00000 |shuf |head
 echo -e "\n\n"
 
 echo "removing work directory"
-if [ $MAHOUT_LOCAL -eq 1 ]
+if [ "$MAHOUT_LOCAL" == "" ]
 then
-    rm -rf ${WORK_DIR}
-else
     hadoop dfs -rm -r ${WORK_DIR}
+else
+    rm -rf ${WORK_DIR}
 fi
