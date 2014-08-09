@@ -68,6 +68,7 @@ case class IndexedDataset(var matrix: CheckpointedDrm[Int], rowIDs: BiMap[String
   * making one [[org.apache.mahout.drivers.IndexedDataset]] from another. Used when you have a factory like [[org.apache.mahout.drivers.IndexedDatasetStore]]
   * {{{
   *   val indexedDataset = IndexedDataset(indexedDatasetReader.readElementsFrom(source))
+  *   val indexedDataset = IndexedDataset(indexedDatasetReader.readTuplesFrom(source))
   * }}}
   */
 

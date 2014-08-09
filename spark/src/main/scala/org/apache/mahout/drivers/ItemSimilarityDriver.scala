@@ -25,7 +25,7 @@ import scala.collection.immutable.HashMap
  * Reads text lines
  * that contain (row id, column id, ...). The IDs are user specified strings which will be
  * preserved in the
- * output. The individual elements will be accumulated into a matrix and [[org.apache.mahout.cf.CooccurrenceAnalysis.cooccurrences( )]]
+ * output. The individual tuples will be accumulated into a matrix and [[org.apache.mahout.cf.CooccurrenceAnalysis.cooccurrences( )]]
  * will be used to calculate row-wise self-similarity, or when using filters or two inputs, will generate two
  * matrices and calculate both the self similarity of the primary matrix and the row-wise
  * similarity of the primary
@@ -34,7 +34,7 @@ import scala.collection.immutable.HashMap
  * The options allow flexible control of the input schema, file discovery, output schema, and control of
  * algorithm parameters.
  * To get help run {{{mahout spark-itemsimilarity}}} for a full explanation of options. To process simple
- * elements of text delimited values (userID,itemID) with or without a strengths and with a separator of tab, comma, or space,
+ * tuples of text delimited values (userID,itemID) with or without a strengths and with a separator of tab, comma, or space,
  * you can specify only the input and output file and directory--all else will default to the correct values.
  * Each output line will contain the Item ID and similar items sorted by LLR strength descending.
  * @note To use with a Spark cluster see the --master option, if you run out of heap space check
@@ -61,7 +61,7 @@ object ItemSimilarityDriver extends MahoutDriver {
    */
   override def main(args: Array[String]): Unit = {
     options = MahoutOptionParser.GenericOptions ++ MahoutOptionParser.SparkOptions ++
-      MahoutOptionParser.FileIOOptions ++ MahoutOptionParser.TextDelimitedElementsOptions ++
+      MahoutOptionParser.FileIOOptions ++ MahoutOptionParser.TextDelimitedTuplesOptions ++
       MahoutOptionParser.TextDelimitedDRMOptions ++ ItemSimilarityOptions
 
     val parser = new MahoutOptionParser(programName = "spark-itemsimilarity") {
@@ -99,7 +99,7 @@ object ItemSimilarityDriver extends MahoutDriver {
       note("\nNote: Only the Log Likelihood Ratio (LLR) is supported as a similarity measure.")
 
       //Input text format
-      parseInputElementsOptions
+      parseInputSchemaOptions
 
       //How to search for input
       parseFileDiscoveryOptions
@@ -123,8 +123,7 @@ object ItemSimilarityDriver extends MahoutDriver {
   }
 
   override def start(masterUrl: String = options("master").asInstanceOf[String],
-      appName: String = options("appName").asInstanceOf[String],
-      dontAddMahoutJars: Boolean = options("dontAddMahoutJars").asInstanceOf[Boolean]):
+      appName: String = options("appName").asInstanceOf[String]):
     Unit = {
 
     // todo: the HashBiMap used in the TextDelimited Reader is hard coded into
@@ -134,7 +133,7 @@ object ItemSimilarityDriver extends MahoutDriver {
       .set("spark.kryoserializer.buffer.mb", "200")
       .set("spark.executor.memory", options("sparkExecutorMem").asInstanceOf[String])
 
-    super.start(masterUrl, appName, dontAddMahoutJars)
+    super.start(masterUrl, appName)
 
     val readSchema1 = new Schema("delim" -> options("inDelim").asInstanceOf[String],
         "filter" -> options("filter1").asInstanceOf[String],
@@ -156,7 +155,7 @@ object ItemSimilarityDriver extends MahoutDriver {
         "rowKeyDelim" -> options("rowKeyDelim").asInstanceOf[String],
         "columnIdStrengthDelim" -> options("columnIdStrengthDelim").asInstanceOf[String],
         "omitScore" -> options("omitStrength").asInstanceOf[Boolean],
-        "elementDelim" -> options("elementDelim").asInstanceOf[String])
+        "tupleDelim" -> options("tupleDelim").asInstanceOf[String])
 
     writer = new TextDelimitedIndexedDatasetWriter(writeSchema)
 
@@ -174,7 +173,7 @@ object ItemSimilarityDriver extends MahoutDriver {
       Array()
     } else {
 
-      val datasetA = IndexedDataset(reader1.readElementsFrom(inFiles))
+      val datasetA = IndexedDataset(reader1.readTuplesFrom(inFiles))
       if (options("writeAllDatasets").asInstanceOf[Boolean]) writer.writeDRMTo(datasetA,
           options("output").asInstanceOf[String] + "../input-datasets/primary-interactions")
 
@@ -186,7 +185,7 @@ object ItemSimilarityDriver extends MahoutDriver {
       // be supported (and are at least on Spark) or the row cardinality fix will not work.
       val datasetB = if (!inFiles2.isEmpty) {
         // get cross-cooccurrence interactions from separate files
-        val datasetB = IndexedDataset(reader2.readElementsFrom(inFiles2, existingRowIDs = datasetA.rowIDs))
+        val datasetB = IndexedDataset(reader2.readTuplesFrom(inFiles2, existingRowIDs = datasetA.rowIDs))
 
         datasetB
 
@@ -194,7 +193,7 @@ object ItemSimilarityDriver extends MahoutDriver {
           && options("filter2").asInstanceOf[String] != null) {
 
         // get cross-cooccurrences interactions by using two filters on a single set of files
-        val datasetB = IndexedDataset(reader2.readElementsFrom(inFiles, existingRowIDs = datasetA.rowIDs))
+        val datasetB = IndexedDataset(reader2.readTuplesFrom(inFiles, existingRowIDs = datasetA.rowIDs))
 
         datasetB
 

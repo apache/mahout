@@ -19,6 +19,7 @@ package org.apache.mahout.math.drm.logical
 
 import scala.reflect.ClassTag
 import org.apache.mahout.math.drm.DrmLike
+import scala.util.Random
 
 /** Operator denoting expressions like 5.0 - A or A * 5.6 */
 case class OpAewScalar[K: ClassTag](
@@ -27,7 +28,10 @@ case class OpAewScalar[K: ClassTag](
     val op: String
     ) extends AbstractUnaryOp[K,K] {
 
-  override protected[mahout] lazy val partitioningTag: Long = A.partitioningTag
+  override protected[mahout] lazy val partitioningTag: Long =
+    if (A.canHaveMissingRows)
+      Random.nextLong()
+    else A.partitioningTag
 
   /** Stuff like `A +1` is always supposed to fix this */
   override protected[mahout] lazy val canHaveMissingRows: Boolean = false

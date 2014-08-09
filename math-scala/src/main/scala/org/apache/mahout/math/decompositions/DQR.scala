@@ -38,14 +38,14 @@ object DQR {
    * It also guarantees that Q is partitioned exactly the same way (and in same key-order) as A, so
    * their RDD should be able to zip successfully.
    */
-  def dqrThin[K: ClassTag](A: DrmLike[K], checkRankDeficiency: Boolean = true): (DrmLike[K], Matrix) = {
+  def dqrThin[K: ClassTag](drmA: DrmLike[K], checkRankDeficiency: Boolean = true): (DrmLike[K], Matrix) = {
 
-    if (A.ncol > 5000)
+    if (drmA.ncol > 5000)
       log.warn("A is too fat. A'A must fit in memory and easily broadcasted.")
 
-    implicit val ctx = A.context
+    implicit val ctx = drmA.context
 
-    val AtA = (A.t %*% A).checkpoint()
+    val AtA = (drmA.t %*% drmA).checkpoint()
     val inCoreAtA = AtA.collect
 
     if (log.isDebugEnabled) log.debug("A'A=\n%s\n".format(inCoreAtA))
@@ -64,7 +64,7 @@ object DQR {
     // decompose A'A in the backend again.
 
     // Compute Q = A*inv(L') -- we can do it blockwise.
-    val Q = A.mapBlock() {
+    val Q = drmA.mapBlock() {
       case (keys, block) => keys -> chol(bcastAtA).solveRight(block)
     }
 

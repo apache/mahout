@@ -31,21 +31,21 @@ object DSPCA {
    * Distributed Stochastic PCA decomposition algorithm. A logical reflow of the "SSVD-PCA options.pdf"
    * document of the MAHOUT-817.
    *
-   * @param A input matrix A
+   * @param drmA input matrix A
    * @param k request SSVD rank
    * @param p oversampling parameter
    * @param q number of power iterations (hint: use either 0 or 1)
    * @return (U,V,s). Note that U, V are non-checkpointed matrices (i.e. one needs to actually use them
    *         e.g. save them to hdfs in order to trigger their computation.
    */
-  def dspca[K: ClassTag](A: DrmLike[K], k: Int, p: Int = 15, q: Int = 0):
+  def dspca[K: ClassTag](drmA: DrmLike[K], k: Int, p: Int = 15, q: Int = 0):
   (DrmLike[K], DrmLike[Int], Vector) = {
 
-    val drmA = A.checkpoint()
-    implicit val ctx = A.context
+    val drmAcp = drmA.checkpoint()
+    implicit val ctx = drmAcp.context
 
-    val m = drmA.nrow
-    val n = drmA.ncol
+    val m = drmAcp.nrow
+    val n = drmAcp.ncol
     assert(k <= (m min n), "k cannot be greater than smaller of m, n.")
     val pfxed = safeToNonNegInt((m min n) - k min p)
 
@@ -53,7 +53,7 @@ object DSPCA {
     val r = k + pfxed
 
     // Dataset mean
-    val xi = drmA.colMeans
+    val xi = drmAcp.colMeans
 
     // We represent Omega by its seed.
     val omegaSeed = RandomUtils.getRandom().nextInt()
@@ -67,7 +67,7 @@ object DSPCA {
     val bcastS_o = drmBroadcast(s_o)
     val bcastXi = drmBroadcast(xi)
 
-    var drmY = drmA.mapBlock(ncol = r) {
+    var drmY = drmAcp.mapBlock(ncol = r) {
       case (keys, blockA) =>
         val s_o:Vector = bcastS_o
         val blockY = blockA %*% Matrices.symmetricUniformView(n, r, omegaSeed)
@@ -84,7 +84,7 @@ object DSPCA {
 
     // This actually should be optimized as identically partitioned map-side A'B since A and Q should
     // still be identically partitioned.
-    var drmBt = (drmA.t %*% drmQ).checkpoint()
+    var drmBt = (drmAcp.t %*% drmQ).checkpoint()
 
     var s_b = (drmBt.t %*% xi).collect(::, 0)
     var bcastVarS_b = drmBroadcast(s_b)
@@ -112,7 +112,7 @@ object DSPCA {
       drmY.uncache()
       drmQ.uncache()
 
-      drmY = (drmA %*% drmBt)
+      drmY = (drmAcp %*% drmBt)
           // Fix Y by subtracting s_b from each row of the AB'
           .mapBlock() {
         case (keys, block) =>
@@ -130,7 +130,7 @@ object DSPCA {
 
       // This on the other hand should be inner-join-and-map A'B optimization since A and Q_i are not
       // identically partitioned anymore.
-      drmBt = (drmA.t %*% drmQ).checkpoint()
+      drmBt = (drmAcp.t %*% drmQ).checkpoint()
 
       s_b = (drmBt.t %*% xi).collect(::, 0)
       bcastVarS_b = drmBroadcast(s_b)

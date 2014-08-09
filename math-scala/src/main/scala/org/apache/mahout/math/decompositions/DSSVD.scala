@@ -13,20 +13,20 @@ object DSSVD {
   /**
    * Distributed Stochastic Singular Value decomposition algorithm.
    *
-   * @param A input matrix A
+   * @param drmA input matrix A
    * @param k request SSVD rank
    * @param p oversampling parameter
    * @param q number of power iterations
    * @return (U,V,s). Note that U, V are non-checkpointed matrices (i.e. one needs to actually use them
    *         e.g. save them to hdfs in order to trigger their computation.
    */
-  def dssvd[K: ClassTag](A: DrmLike[K], k: Int, p: Int = 15, q: Int = 0):
+  def dssvd[K: ClassTag](drmA: DrmLike[K], k: Int, p: Int = 15, q: Int = 0):
   (DrmLike[K], DrmLike[Int], Vector) = {
 
-    val drmA = A.checkpoint()
+    val drmAcp = drmA.checkpoint()
 
-    val m = drmA.nrow
-    val n = drmA.ncol
+    val m = drmAcp.nrow
+    val n = drmAcp.ncol
     assert(k <= (m min n), "k cannot be greater than smaller of m, n.")
     val pfxed = safeToNonNegInt((m min n) - k min p)
 
@@ -39,7 +39,7 @@ object DSSVD {
     // Compute Y = A*Omega. Instead of redistributing view, we redistribute the Omega seed only and
     // instantiate the Omega random matrix view in the backend instead. That way serialized closure
     // is much more compact.
-    var drmY = drmA.mapBlock(ncol = r) {
+    var drmY = drmAcp.mapBlock(ncol = r) {
       case (keys, blockA) =>
         val blockY = blockA %*% Matrices.symmetricUniformView(n, r, omegaSeed)
         keys -> blockY
@@ -51,19 +51,19 @@ object DSSVD {
 
     // This actually should be optimized as identically partitioned map-side A'B since A and Q should
     // still be identically partitioned.
-    var drmBt = drmA.t %*% drmQ
+    var drmBt = drmAcp.t %*% drmQ
     // Checkpoint B' if last iteration
     if (q == 0) drmBt = drmBt.checkpoint()
 
     for (i <- 0  until q) {
-      drmY = drmA %*% drmBt
+      drmY = drmAcp %*% drmBt
       drmQ = dqrThin(drmY.checkpoint())._1
       // Checkpoint Q if last iteration
       if (i == q - 1) drmQ = drmQ.checkpoint()
 
       // This on the other hand should be inner-join-and-map A'B optimization since A and Q_i are not
       // identically partitioned anymore.
-      drmBt = drmA.t %*% drmQ
+      drmBt = drmAcp.t %*% drmQ
       // Checkpoint B' if last iteration
       if (i == q - 1) drmBt = drmBt.checkpoint()
     }
