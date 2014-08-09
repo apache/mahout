@@ -712,7 +712,7 @@ removed ==> u3	0	      0	      1	          0
     var r: Iterable[String] = Iterable()
     a.foreach { l =>
       l.split("\t").foreach{ s =>
-        r = r ++ s.split("[\t ]")
+        r = r ++ s.split("[\t ]")d
       }
     }
     r
