@@ -444,6 +444,29 @@ trait RLikeDrmOpsSuiteBase extends DistributedMahoutSuite with Matchers {
     drmA.colMeans() should equal(inCoreA.colMeans())
   }
 
+  test("rowSums, rowMeans") {
+    val inCoreA = dense(
+      (1, 2),
+      (3, 4),
+      (20, 30)
+    )
+    val drmA = drmParallelize(inCoreA, numPartitions = 2)
+
+    drmA.rowSums() should equal(inCoreA.rowSums())
+    drmA.rowMeans() should equal(inCoreA.rowMeans())
+  }
+
+  test("A.diagv") {
+    val inCoreA = dense(
+      (1, 2, 3),
+      (3, 4, 5),
+      (20, 30, 7)
+    )
+    val drmA = drmParallelize(inCoreA, numPartitions = 2)
+
+    drmA.diagv should equal(inCoreA.diagv)
+  }
+
   test("numNonZeroElementsPerColumn") {
     val inCoreA = dense(
       (0, 2),
