@@ -17,7 +17,6 @@
 package org.apache.mahout.test
 
 import java.io.File
-
 import org.scalatest._
 import org.apache.mahout.common.RandomUtils
 
@@ -35,19 +34,30 @@ trait MahoutSuite extends BeforeAndAfterEach with LoggerConfiguration with Match
     super.beforeAll(configMap)
 
     // just in case there is an existing tmp dir clean it before every suite
-    //val fs = FileSystem.get(new Configuration())
-    //fs.delete(new Path(TmpDir), true) // delete recursively
-    FileUtils.deleteDirectory(new File(TmpDir))
+    quietDeleteDirectory(new File(TmpDir))
   }
 
   override protected def afterEach() {
 
     // clean the tmp dir after every test
-    //val fs = FileSystem.get(new Configuration())
-    //fs.delete(new Path(TmpDir), true) // delete recursively
-    FileUtils.deleteDirectory(new File(TmpDir))
+    quietDeleteDirectory(new File(TmpDir))
 
     super.afterEach()
   }
 
+  /** Quiet directory delete with no symlink checking and no exceptions */
+  private def quietDeleteDirectory(path: File): Unit = {
+    if (path != null.asInstanceOf[File] && path.isDirectory){
+      try{
+        val files = path.listFiles()
+        for (file <- files) {
+          if (file.isDirectory()) {
+            quietDeleteDirectory(file)
+          }
+          file.delete()
+        }
+        path.delete()
+      }// ignore various possible exceptions
+    }
+  }
 }
