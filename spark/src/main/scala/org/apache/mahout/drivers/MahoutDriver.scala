@@ -58,32 +58,35 @@ abstract class MahoutDriver {
 
 
   implicit var mc: DistributedContext = _
-  implicit val sparkConf = new SparkConf()
+  implicit var sparkConf = new SparkConf()
+  var _useExistingContext: Boolean = false
 
   /** Creates a Spark context to run the job inside.
     * Creates a Spark context to run the job inside. Override to set the SparkConf values specific to the job,
     * these must be set before the context is created.
     * @param masterUrl Spark master URL
     * @param appName  Name to display in Spark UI
-    * @param customJars List of paths to custom jars
     * */
-  protected def start(masterUrl: String, appName: String, customJars:Traversable[String]) : Unit = {
-    mc = mahoutSparkContext(masterUrl, appName, customJars, sparkConf)
-  }
-
-  protected def start(masterUrl: String, appName: String, dontAddMahoutJars: Boolean = false) : Unit = {
-    val customJars = Traversable.empty[String]
-    mc = mahoutSparkContext(masterUrl, appName, customJars, sparkConf, !dontAddMahoutJars)
+  protected def start(masterUrl: String, appName: String) : Unit = {
+    if (!_useExistingContext) {
+      mc = mahoutSparkContext(masterUrl, appName, sparkConf = sparkConf)
+    }
   }
 
   /** Override (optionally) for special cleanup */
   protected def stop: Unit = {
-    mc.close
+    if (!_useExistingContext) mc.close
   }
 
-  /** This is wher you do the work, call start first, then before exiting call stop */
+  /** This is where you do the work, call start first, then before exiting call stop */
   protected def process: Unit
 
   /** Parse command line and call process */
   def main(args: Array[String]): Unit
+
+  def useContext(context: DistributedContext): Unit = {
+    _useExistingContext = true
+    mc = context
+    sparkConf = mc.getConf
+  }
 }

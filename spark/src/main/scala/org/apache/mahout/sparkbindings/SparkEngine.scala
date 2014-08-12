@@ -127,7 +127,7 @@ object SparkEngine extends DistributedEngine {
    */
   def drmFromHDFS (path: String, parMin:Int = 0)(implicit sc: DistributedContext): CheckpointedDrm[_] = {
 
-    val rdd = sc.sequenceFile(path, classOf[Writable], classOf[VectorWritable], minSplits = parMin)
+    val rdd = sc.sequenceFile(path, classOf[Writable], classOf[VectorWritable], minPartitions = parMin)
         // Get rid of VectorWritable
         .map(t => (t._1, t._2.get()))
 

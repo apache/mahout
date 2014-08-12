@@ -21,8 +21,8 @@ import org.apache.hadoop.fs.{Path, FileSystem}
 import org.scalatest._
 import org.apache.mahout.common.RandomUtils
 
-trait MahoutSuite extends BeforeAndAfterEach with BeforeAndAfterAll with LoggerConfiguration with Matchers {
-  this:Suite =>
+trait MahoutSuite extends BeforeAndAfterEach with LoggerConfiguration with Matchers {
+  this: Suite =>
 
   final val TmpDir = "tmp/"
 
@@ -31,7 +31,7 @@ trait MahoutSuite extends BeforeAndAfterEach with BeforeAndAfterAll with LoggerC
     RandomUtils.useTestSeed()
   }
 
-  override def beforeAll(configMap: ConfigMap) {
+  override protected def beforeAll(configMap: ConfigMap) {
     super.beforeAll(configMap)
 
     // just in case there is an existing tmp dir clean it before every suite

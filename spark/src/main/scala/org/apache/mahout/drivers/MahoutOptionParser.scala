@@ -24,7 +24,6 @@ object MahoutOptionParser {
   // set up the various default option groups
   final val GenericOptions = immutable.HashMap[String, Any](
     "randomSeed" -> System.currentTimeMillis().toInt,
-    "dontAddMahoutJars" -> false,
     "writeAllDatasets" -> false)
 
   final val SparkOptions = immutable.HashMap[String, Any](
@@ -101,10 +100,6 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
     } validate { x =>
       if (x > 0) success else failure("Option --randomSeed must be > 0")
     }
-
-    opt[Unit]("dontAddMahoutJars") hidden() action { (_, options) =>
-      options + ("dontAddMahoutJars" -> true)
-    }//Hidden option, used when executing tests or calling from other code where classes are all loaded explicitly
 
     //output both input DRMs
     opt[Unit]("writeAllDatasets") hidden() action { (_, options) =>
