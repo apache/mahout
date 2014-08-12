@@ -78,7 +78,8 @@ class ItemSimilarityDriverSuite extends FunSuite with MahoutSuite with Distribut
       "galaxy\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847",
       "surface\tsurface:4.498681156950466 nexus:0.6795961471815897")
 
-  final val TmpDir = "tmp/" // all IO going to whatever the default HDFS config is pointing to
+  // now in MahoutSuite
+  // final val TmpDir = "tmp/" // all IO going to whatever the default HDFS config is pointing to
 
   /*
     //Clustered Spark and HDFS, not a good everyday build test
