@@ -16,8 +16,8 @@
  */
 package org.apache.mahout.test
 
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{Path, FileSystem}
+import java.io.File
+
 import org.scalatest._
 import org.apache.mahout.common.RandomUtils
 
@@ -35,15 +35,17 @@ trait MahoutSuite extends BeforeAndAfterEach with LoggerConfiguration with Match
     super.beforeAll(configMap)
 
     // just in case there is an existing tmp dir clean it before every suite
-    val fs = FileSystem.get(new Configuration())
-    fs.delete(new Path(TmpDir), true) // delete recursively
+    //val fs = FileSystem.get(new Configuration())
+    //fs.delete(new Path(TmpDir), true) // delete recursively
+    FileUtils.deleteDirectory(new File(TmpDir))
   }
 
   override protected def afterEach() {
 
     // clean the tmp dir after every test
-    val fs = FileSystem.get(new Configuration())
-    fs.delete(new Path(TmpDir), true) // delete recursively
+    //val fs = FileSystem.get(new Configuration())
+    //fs.delete(new Path(TmpDir), true) // delete recursively
+    FileUtils.deleteDirectory(new File(TmpDir))
 
     super.afterEach()
   }
