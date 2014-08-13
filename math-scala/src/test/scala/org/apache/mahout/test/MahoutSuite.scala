@@ -34,21 +34,21 @@ trait MahoutSuite extends BeforeAndAfterEach with LoggerConfiguration with Match
     super.beforeAll(configMap)
 
     // just in case there is an existing tmp dir clean it before every suite
-    quietDeleteDirectory(new File(TmpDir))
+    deleteDirectory(new File(TmpDir))
   }
 
   override protected def afterEach() {
 
     // clean the tmp dir after every test
-    quietDeleteDirectory(new File(TmpDir))
+    deleteDirectory(new File(TmpDir))
 
     super.afterEach()
   }
 
-  /** Quiet directory delete with no symlink checking and no exceptions */
-  private def quietDeleteDirectory(path: File): Unit = {
+  /** Delete directory no symlink checking and exceptions are not caught */
+  private def deleteDirectory(path: File): Unit = {
     if (path.isDirectory)
-      for (files <- path.listFiles) quietDeleteDirectory(files)
+      for (files <- path.listFiles) deleteDirectory(files)
     path.delete
   }
 }
