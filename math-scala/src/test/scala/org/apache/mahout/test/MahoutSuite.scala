@@ -47,17 +47,8 @@ trait MahoutSuite extends BeforeAndAfterEach with LoggerConfiguration with Match
 
   /** Quiet directory delete with no symlink checking and no exceptions */
   private def quietDeleteDirectory(path: File): Unit = {
-    if (path != null.asInstanceOf[File] && path.isDirectory){
-      try{
-        val files = path.listFiles()
-        for (file <- files) {
-          if (file.isDirectory()) {
-            quietDeleteDirectory(file)
-          }
-          file.delete()
-        }
-        path.delete()
-      }// ignore various possible exceptions
-    }
+    if (path.isDirectory)
+      for (files <- path.listFiles) quietDeleteDirectory(files)
+    path.delete
   }
 }
