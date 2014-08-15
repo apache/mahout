@@ -37,11 +37,11 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
 
 /*
   final val matrixLLRCoocAtAControl = dense(
-      (0.0,                1.7260924347106847, 0.0,                     0.0,                0.0),
-      (1.7260924347106847, 0.0,                0.0,                     0.0,                0.0),
-      (0.0,                0.0,                0.0,                     1.7260924347106847, 0.0),
-      (0.0,                0.0,                1.7260924347106847,      0.0,                0.0),
-      (0.0,                0.0,                0.0,                     0.0,                0.0))
+    (0.0,                0.6331745808516107, 0.0,                     0.0,                0.0),
+    (0.6331745808516107, 0.0,                0.0,                     0.0,                0.0),
+    (0.0,                0.0,                0.0,                     0.6331745808516107, 0.0),
+    (0.0,                0.0,                0.6331745808516107,      0.0,                0.0),
+    (0.0,                0.0,                0.0,                     0.0,                0.0))
 
   final val matrixLLRCoocBtAControl = dense(
       (1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 0.0),
@@ -81,7 +81,8 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
       "galaxy\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847",
       "surface\tsurface:4.498681156950466 nexus:0.6795961471815897"))
 
-  final val TmpDir = "tmp/" // all IO going to whatever the default HDFS config is pointing to
+  // now in MahoutSuite
+  // final val TmpDir = "tmp/" // all IO going to whatever the default HDFS config is pointing to
 
   /*
     //Clustered Spark and HDFS, not a good everyday build test
@@ -112,8 +113,7 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
     ))
   */
 
-  // TODO: failing, temporarily disabled
-  test("ItemSimilarityDriver, non-full-spec CSV") {
+  test ("ItemSimilarityDriver, non-full-spec CSV"){
 
     val InFile = TmpDir + "in-file.csv/" //using part files, not single file
     val OutPath = TmpDir + "indicator-matrices/"
@@ -720,20 +720,7 @@ removed ==> u3	0	      0	      1	          0
 
   override protected def beforeAll(configMap: ConfigMap) {
     super.beforeAll(configMap)
-
-    // just in case there is one left over
-    val fs = FileSystem.get(new Configuration())
-    fs.delete(new Path(TmpDir), true) // delete recursively
-
-    ItemSimilarityDriver.useContext(mahoutCtx) // for testing use the test context
+    ItemSimilarityDriver.useContext(mahoutCtx)
   }
-
-  override protected def afterEach() {
-
-    val fs = FileSystem.get(new Configuration())
-    fs.delete(new Path(TmpDir), true) // delete recursively
-
-    super.afterEach()
-  }
-
+  
 }
