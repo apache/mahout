@@ -15,6 +15,7 @@ class MahoutSparkILoop extends SparkILoop {
         "import drm._" ::
         "import RLikeDrmOps._" ::
         "import org.apache.mahout.sparkbindings._" ::
+        "import collection.JavaConversions._" ::
         Nil
 
   override protected def postInitialization() {
