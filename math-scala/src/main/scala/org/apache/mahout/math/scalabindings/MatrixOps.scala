@@ -177,6 +177,8 @@ class MatrixOps(val m: Matrix) {
 
   def rowMeans() = if (m.ncol == 0) rowSums() else rowSums() /= m.ncol
 
+  def diagv = m.viewDiagonal()
+
   def numNonZeroElementsPerColumn() = m.aggregateColumns(vectorCountNonZeroElementsFunc)
 }
 
