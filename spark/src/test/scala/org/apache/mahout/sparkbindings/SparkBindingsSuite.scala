@@ -14,7 +14,7 @@ class SparkBindingsSuite extends FunSuite with DistributedSparkSuite {
   // This test will succeed only when MAHOUT_HOME is set in the environment. So we keep it for
   // diagnorstic purposes around, but we probably don't want it to run in the Jenkins, so we'd
   // let it to be ignored.
-  test("context jars") {
+  ignore("context jars") {
     System.setProperty("mahout.home", new File("..").getAbsolutePath/*"/home/dmitriy/projects/github/mahout-commits"*/)
     val closeables = new util.ArrayDeque[Closeable]()
     try {
