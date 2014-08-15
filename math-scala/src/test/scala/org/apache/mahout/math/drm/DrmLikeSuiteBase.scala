@@ -48,6 +48,7 @@ trait DrmLikeSuiteBase extends DistributedMahoutSuite with Matchers {
     // Print out to see what it is we collected:
     println(inCoreB)
 
+    (inCoreA - inCoreB).norm should be < 1e-7
   }
 
   test("DRM parallelizeEmpty") {
@@ -57,13 +58,15 @@ trait DrmLikeSuiteBase extends DistributedMahoutSuite with Matchers {
     // collect back into in-core
     val inCoreEmpty = drmEmpty.collect
 
-    //print out to see what it is we collected:
-    println(inCoreEmpty)
-    printf("drm nrow:%d, ncol:%d\n", drmEmpty.nrow, drmEmpty.ncol)
-    printf("in core nrow:%d, ncol:%d\n", inCoreEmpty.nrow, inCoreEmpty.ncol)
+    inCoreEmpty.sum.abs should be < 1e-7
+    drmEmpty.nrow shouldBe 100
+    drmEmpty.ncol shouldBe 50
+    inCoreEmpty.nrow shouldBe 100
+    inCoreEmpty.ncol shouldBe 50
+
+
 
 
   }
-
 
 }

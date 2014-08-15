@@ -173,6 +173,10 @@ then
       CLASSPATH=${CLASSPATH}:$f;
     done
 
+    for f in $MAHOUT_HOME/math/target/mahout-math-*.jar ; do
+      CLASSPATH=${CLASSPATH}:$f;
+    done
+
     for f in $MAHOUT_HOME/spark/target/mahout-spark_*.jar ; do
       CLASSPATH=${CLASSPATH}:$f;
     done
