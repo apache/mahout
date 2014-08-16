@@ -154,17 +154,19 @@ package object sparkbindings {
       _canHaveMissingRows = canHaveMissingRows
     )
 
-  /** Acquire proper Mahout jars to be added to task context based on current MAHOUT_HOME. */
-  private[sparkbindings] def findMahoutContextJars(closeables:java.util.Deque[Closeable]) = {
+  private[sparkbindings] def getMahoutHome() = {
     var mhome = System.getenv("MAHOUT_HOME")
     if (mhome == null) mhome = System.getProperty("mahout.home")
+    require(mhome != null, "MAHOUT_HOME is required to spawn mahout-based spark jobs" )
+    mhome
+  }
 
-    if (mhome == null)
-      throw new IllegalArgumentException("MAHOUT_HOME is required to spawn mahout-based spark jobs.")
+  /** Acquire proper Mahout jars to be added to task context based on current MAHOUT_HOME. */
+  private[sparkbindings] def findMahoutContextJars(closeables:java.util.Deque[Closeable]) = {
 
     // Figure Mahout classpath using $MAHOUT_HOME/mahout classpath command.
 
-    val fmhome = new File(mhome)
+    val fmhome = new File(getMahoutHome())
     val bin = new File(fmhome, "bin")
     val exec = new File(bin, "mahout")
     if (!exec.canExecute)

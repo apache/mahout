@@ -8,6 +8,8 @@ import org.apache.mahout.sparkbindings._
 
 class MahoutSparkILoop extends SparkILoop {
 
+  log.info("Mahout spark shell waking up.")
+
   private val postInitScript =
     "import org.apache.mahout.math._" ::
         "import scalabindings._" ::

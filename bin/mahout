@@ -212,7 +212,7 @@ else
 fi
 
 # add development dependencies to CLASSPATH
-if [ "$SPARK" == "" ]; then
+if [ "$SPARK" != "1" ]; then
   for f in $MAHOUT_HOME/examples/target/dependency/*.jar; do
     CLASSPATH=${CLASSPATH}:$f;
   done
