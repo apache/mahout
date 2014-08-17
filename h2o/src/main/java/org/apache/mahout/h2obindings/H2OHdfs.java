@@ -60,10 +60,11 @@ public class H2OHdfs {
       fin.read(seq);
       fin.close();
 
-      if (seq[0] == 'S' && seq[1] == 'E' && seq[2] == 'Q')
+      if (seq[0] == 'S' && seq[1] == 'E' && seq[2] == 'Q') {
         return true;
-      else
+      } else {
         return false;
+      }
     } catch (java.io.IOException e) {
       return false;
     }
@@ -71,10 +72,11 @@ public class H2OHdfs {
 
   public static H2ODrm drm_from_file(String filename, int parMin) {
     try {
-      if (is_seqfile(filename))
+      if (is_seqfile(filename)) {
         return drm_from_seqfile(filename, parMin);
-      else
+      } else {
         return new H2ODrm(FrameUtils.parseFrame(null,new File(filename)));
+      }
     } catch (java.io.IOException e) {
       return null;
     }
@@ -112,31 +114,36 @@ public class H2OHdfs {
 
       long start = reader.getPosition();
 
-      if (reader.getKeyClass() == Text.class)
+      if (reader.getKeyClass() == Text.class) {
         is_string_key = true;
-      else if (reader.getKeyClass() == LongWritable.class)
+      } else if (reader.getKeyClass() == LongWritable.class) {
         is_long_key = true;
-      else
+      } else {
         is_int_key = true;
+      }
 
       while (reader.next(key, value)) {
         if (cols == 0) {
           Vector v = value.get();
           cols = Math.max(v.size(), cols);
         }
-        if (is_long_key)
+        if (is_long_key) {
           rows = Math.max(((LongWritable)(key)).get()+1, rows);
-        if (is_int_key)
+        }
+        if (is_int_key) {
           rows = Math.max(((IntWritable)(key)).get()+1, rows);
-        if (is_string_key)
+        }
+        if (is_string_key) {
           rows++;
+        }
       }
       reader.seek(start);
 
       frame = H2OHelper.empty_frame(rows, cols, parMin, -1);
       writers = new Vec.Writer[cols];
-      for (int i = 0; i < writers.length; i++)
+      for (int i = 0; i < writers.length; i++) {
         writers[i] = frame.vecs()[i].open();
+      }
 
       if (reader.getKeyClass() == Text.class) {
         labels = frame.anyVec().makeZero();
@@ -146,23 +153,30 @@ public class H2OHdfs {
       long r = 0;
       while (reader.next(key, value)) {
         Vector v = value.get();
-        if (is_long_key)
+        if (is_long_key) {
           r = ((LongWritable)(key)).get();
-        if (is_int_key)
+        }
+        if (is_int_key) {
           r = ((IntWritable)(key)).get();
-        for (int c = 0; c < v.size(); c++)
+        }
+        for (int c = 0; c < v.size(); c++) {
           writers[c].set(r, v.getQuick(c));
-        if (labels != null)
+        }
+        if (labels != null) {
           labelwriter.set(r, ((Text)key).toString());
-        if (is_string_key)
+        }
+        if (is_string_key) {
           r++;
+        }
       }
 
       Futures fus = new Futures();
-      for (Vec.Writer w : writers)
+      for (Vec.Writer w : writers) {
         w.close(fus);
-      if (labelwriter != null)
+      }
+      if (labelwriter != null) {
         labelwriter.close(fus);
+      }
       fus.blockForPending();
     } catch (java.io.IOException e) {
       return null;
@@ -183,25 +197,29 @@ public class H2OHdfs {
     boolean is_sparse = H2OHelper.is_sparse(frame);
     ValueString vstr = new ValueString();
 
-    if (labels != null)
+    if (labels != null) {
       writer = SequenceFile.createWriter(fs, conf, path, Text.class, VectorWritable.class);
-    else
+    } else {
       writer = SequenceFile.createWriter(fs, conf, path, IntWritable.class, VectorWritable.class);
+    }
 
     for (long r = 0; r < frame.anyVec().length(); r++) {
       Vector v = null;
-      if (is_sparse)
+      if (is_sparse) {
         v = new SequentialAccessSparseVector(frame.numCols());
-      else
+      } else {
         v = new DenseVector(frame.numCols());
+      }
 
-      for (int c = 0; c < frame.numCols(); c++)
+      for (int c = 0; c < frame.numCols(); c++) {
         v.setQuick(c, frame.vecs()[c].at(r));
+      }
 
-      if (labels != null)
+      if (labels != null) {
         writer.append(new Text(labels.atStr(vstr, r).toString()), new VectorWritable(v));
-      else
+      } else {
         writer.append(new IntWritable((int)r), new VectorWritable(v));
+      }
     }
 
     writer.close();

@@ -43,16 +43,19 @@ public class RowRange {
           long chunk_start = chks[0].start();
 
           /* First check if the entire chunk even overlaps with R */
-          if (chunk_start > R.end() || (chunk_start + chunk_size) < R.start())
+          if (chunk_start > R.end() || (chunk_start + chunk_size) < R.start()) {
             return;
+          }
 
           /* This chunk overlaps, filter out just the overlapping rows */
           for (int r = 0; r < chunk_size; r++) {
-            if (!R.contains (chunk_start + r))
+            if (!R.contains (chunk_start + r)) {
               continue;
+            }
 
-            for (int c = 0; c < chks.length; c++)
+            for (int c = 0; c < chks.length; c++) {
               ncs[c].addNum(chks[c].at0(r));
+            }
           }
         }
       }.doAll(A.numCols(), A).outputFrame(null, null);
@@ -66,12 +69,14 @@ public class RowRange {
           long chunk_start = chk.start();
           ValueString vstr = new ValueString();
 
-          if (chunk_start > R.end() || (chunk_start + chunk_size) < R.start())
+          if (chunk_start > R.end() || (chunk_start + chunk_size) < R.start()) {
             return;
+          }
 
           for (int r = 0; r < chunk_size; r++) {
-            if (!R.contains(chunk_start + r))
+            if (!R.contains(chunk_start + r)) {
               continue;
+            }
 
             nc.addStr(chk.atStr0(vstr, r).toString());
           }

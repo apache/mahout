@@ -37,10 +37,11 @@ public class TimesRightMatrix {
     Vec keys = DrmA.keys;
     Frame AinCoreB = null;
 
-    if (B instanceof DiagonalMatrix)
+    if (B instanceof DiagonalMatrix) {
       AinCoreB = AinCoreB_diagonal(A, B.viewDiagonal());
-    else
+    } else {
       AinCoreB = AinCoreB_common(A, B);
+    }
 
     return new H2ODrm(AinCoreB, keys);
   }

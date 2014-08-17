@@ -42,16 +42,18 @@ public class AewB {
     */
     Frame AewB = new MRTask() {
         private double opfn(String op, double a, double b) {
-          if (a == 0.0 && b == 0.0)
+          if (a == 0.0 && b == 0.0) {
             return 0.0;
-          if (op.equals("+"))
+          }
+          if (op.equals("+")) {
             return a + b;
-          else if (op.equals("-"))
+          } else if (op.equals("-")) {
             return a - b;
-          else if (op.equals("*"))
+          } else if (op.equals("*")) {
             return a * b;
-          else if (op.equals("/"))
+          } else if (op.equals("/")) {
             return a / b;
+          }
           return 0.0;
         }
         public void map(Chunk chks[], NewChunk ncs[]) {

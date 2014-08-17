@@ -77,18 +77,20 @@ public class H2OHelper {
     Vec labels = Drm.keys;
     Matrix m;
 
-    if (is_sparse(frame))
+    if (is_sparse(frame)) {
       m = new SparseMatrix((int)frame.numRows(), frame.numCols());
-    else
+    } else {
       m = new DenseMatrix((int)frame.numRows(), frame.numCols());
+    }
 
     int c = 0;
     /* Fill matrix, column at a time */
     for (Vec v : frame.vecs()) {
       for (int r = 0; r < frame.numRows(); r++) {
         double d = 0.0;
-        if (!v.isNA(r) && ((d = v.at(r)) != 0.0))
+        if (!v.isNA(r) && ((d = v.at(r)) != 0.0)) {
           m.setQuick(r, c, d);
+        }
       }
       c++;
     }
@@ -113,8 +115,9 @@ public class H2OHelper {
   */
   public static Vector colMeans(Frame frame) {
     double means[] = new double[frame.numCols()];
-    for (int i = 0; i < frame.numCols(); i++)
+    for (int i = 0; i < frame.numCols(); i++) {
       means[i] = frame.vecs()[i].mean();
+    }
     return new DenseVector(means);
   }
 
@@ -181,8 +184,9 @@ public class H2OHelper {
 
         for (int c = 0; c < chks.length; c++) {
           for (int r = 0; r < chks[c].len(); r++) {
-            if ((long)chks[c].at0(r) != 0)
+            if ((long)chks[c].at0(r) != 0) {
               _sums[c] ++;
+            }
           }
         }
       }
@@ -195,8 +199,9 @@ public class H2OHelper {
 
   /* Convert String->Integer map to Integer->String map */
   private static Map<Integer,String> reverse_map(Map<String,Integer> map) {
-    if (map == null)
+    if (map == null) {
       return null;
+    }
 
     Map<Integer,String> rmap = new HashMap<Integer,String>();
 
@@ -211,22 +216,27 @@ public class H2OHelper {
     int chunk_sz;
     int parts_hint = Math.max(min, exact);
 
-    if (parts_hint < 1)
+    if (parts_hint < 1) {
       /* XXX: calculate based on cloud size and # of cpu */
       parts_hint = 4;
+    }
 
     chunk_sz = (int)(((nrow - 1) / parts_hint) + 1);
-    if (exact > 0)
+    if (exact > 0) {
       return chunk_sz;
+    }
 
-    if (chunk_sz > 1e6)
+    if (chunk_sz > 1e6) {
       chunk_sz = (int)1e6;
+    }
 
-    if (min > 0)
+    if (min > 0) {
       return chunk_sz;
+    }
 
-    if (chunk_sz < 1e3)
+    if (chunk_sz < 1e3) {
       chunk_sz = (int)1e3;
+    }
 
     return chunk_sz;
   }
@@ -242,15 +252,19 @@ public class H2OHelper {
     Futures closer = new Futures();
 
     /* "open" vectors for writing efficiently in bulk */
-    for (int i = 0; i < writers.length; i++)
+    for (int i = 0; i < writers.length; i++) {
       writers[i] = frame.vecs()[i].open();
+    }
 
-    for (int r = 0; r < m.rowSize(); r++)
-      for (int c = 0; c < m.columnSize(); c++)
+    for (int r = 0; r < m.rowSize(); r++) {
+      for (int c = 0; c < m.columnSize(); c++) {
         writers[c].set(r, m.getQuick(r, c));
+      }
+    }
 
-    for (int c = 0; c < m.columnSize(); c++)
+    for (int c = 0; c < m.columnSize(); c++) {
       writers[c].close(closer);
+    }
 
     /* If string labeled matrix, create aux Vec */
     Map<String,Integer> map = m.getRowLabelBindings();
@@ -260,8 +274,9 @@ public class H2OHelper {
       Vec.Writer writer = labels.open();
       Map<Integer,String> rmap = reverse_map(map);
 
-      for (long r = 0; r < m.rowSize(); r++)
+      for (long r = 0; r < m.rowSize(); r++) {
         writer.set(r, rmap.get(r));
+      }
 
       writer.close(closer);
     }
@@ -283,12 +298,14 @@ public class H2OHelper {
     long espc[] = new long[nchunks+1];
     final Vec[] vecs = new Vec[ncol];
 
-    for (int i = 0; i < nchunks; i++)
+    for (int i = 0; i < nchunks; i++) {
       espc[i] = i * chunk_sz;
+    }
     espc[nchunks] = nrow;
 
-    for (int i = 0; i < vecs.length; i++)
+    for (int i = 0; i < vecs.length; i++) {
       vecs[i] = Vec.makeCon(0, null, vg, espc);
+    }
 
     return new Frame(vecs);
   }

@@ -48,13 +48,15 @@ public class H2OBlockMatrix extends AbstractMatrix {
   }
 
   private void cow() {
-    if (cow != null)
+    if (cow != null) {
       return;
+    }
 
-    if (_chks[0].isSparse())
+    if (_chks[0].isSparse()) {
       cow = new SparseMatrix(_chks[0].len(), _chks.length);
-    else
+    } else {
       cow = new DenseMatrix(_chks[0].len(), _chks.length);
+    }
 
     for (int c = 0; c < _chks.length; c++) {
       for (int r = 0; r < _chks[0].len(); r++) {
@@ -69,24 +71,27 @@ public class H2OBlockMatrix extends AbstractMatrix {
   }
 
   public Matrix like(int nrow, int ncol) {
-    if (_chks[0].isSparse())
+    if (_chks[0].isSparse()) {
       return new SparseMatrix(nrow, ncol);
-    else
+    } else {
       return new DenseMatrix(nrow, ncol);
+    }
   }
 
   public Matrix like() {
-    if (_chks[0].isSparse())
+    if (_chks[0].isSparse()) {
       return new SparseMatrix(rowSize(), columnSize());
-    else
+    } else {
       return new DenseMatrix(rowSize(), columnSize());
+    }
   }
 
   public double getQuick(int row, int col) {
-    if (cow != null)
+    if (cow != null) {
       return cow.getQuick(row, col);
-    else
+    } else {
       return _chks[col].at0(row);
+    }
   }
 
   public Matrix assignRow(int row, Vector v) {

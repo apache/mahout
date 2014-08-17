@@ -54,8 +54,9 @@ public class H2OBCast<T> implements BCast<T>, Serializable {
   }
 
   public T value() {
-    if (obj == null)
+    if (obj == null) {
       obj = deserialize(buf);
+    }
     return obj;
   }
 

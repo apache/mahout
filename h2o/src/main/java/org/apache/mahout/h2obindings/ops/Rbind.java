@@ -57,22 +57,25 @@ public class Rbind {
             for (int c = 0; c < chks.length; c++) {
               if (r + start < A_rows) {
                 chks[c].set0(r, A_vecs[c].at(r + start));
-                if (keysa != null)
+                if (keysa != null) {
                   nc.addStr(keysa.atStr(vstr, r + start).toString());
+                }
               } else {
                 chks[c].set0(r, B_vecs[c].at(r + start - A_rows));
-                if (keysb != null)
+                if (keysb != null) {
                   nc.addStr(keysb.atStr(vstr, r + start - A_rows).toString());
+                }
               }
             }
           }
         }
       };
 
-    if (keysa == null)
+    if (keysa == null) {
       keys = task.doAll(1, frbind).outputFrame(null, null).anyVec();
-    else
+    } else {
       task.doAll(frbind);
+    }
 
     return new H2ODrm(frbind, keys);
   }

@@ -35,12 +35,13 @@ public class Cbind {
     Vec keysb = DrmB.keys;
 
     /* If A and B are similarly partitioned, .. */
-    if (fra.anyVec().group() == frb.anyVec().group())
+    if (fra.anyVec().group() == frb.anyVec().group()) {
       /* .. then, do a light weight zip() */
       return zip(fra, keysa, frb, keysb);
-    else
+    } else {
       /* .. else, do a heavy weight join() which involves moving data over the wire */
       return join(fra, keysa, frb, keysb);
+    }
   }
 
   /* Light weight zip(), no data movement */
@@ -49,11 +50,13 @@ public class Cbind {
     Vec vecs[] = new Vec[fra.vecs().length + frb.vecs().length];
     int d = 0;
     /* fill A's column vectors */
-    for (Vec vfra : fra.vecs())
+    for (Vec vfra : fra.vecs()) {
       vecs[d++] = vfra;
+    }
     /* and B's */
-    for (Vec vfrb : frb.vecs())
+    for (Vec vfrb : frb.vecs()) {
       vecs[d++] = vfrb;
+    }
     /* and create a new Frame with the combined list of column Vecs */
     Frame fr = new Frame(vecs);
     /* Finally, inherit A's string labels into the result */
@@ -66,9 +69,10 @@ public class Cbind {
     /* The plan is to re-organize B to be "similarly partitioned as A", and then zip() */
     Vec bvecs[] = new Vec[frb.vecs().length];
 
-    for (int i = 0; i < bvecs.length; i++)
+    for (int i = 0; i < bvecs.length; i++) {
       /* First create column Vecs which are similarly partitioned as A */
       bvecs[i] = fra.anyVec().makeZero();
+    }
 
     /* Next run an MRTask on the new vectors, and fill each cell (initially 0)
        by pulling in appropriate values from B (frb)
