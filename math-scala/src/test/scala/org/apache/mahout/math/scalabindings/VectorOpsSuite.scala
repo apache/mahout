@@ -19,7 +19,7 @@ package org.apache.mahout.math.scalabindings
 
 import org.scalatest.FunSuite
 import org.apache.mahout.math.{RandomAccessSparseVector, Vector}
-import MatrixOps._
+import RLikeOps._
 import org.apache.mahout.test.MahoutSuite
 
 /** VectorOps Suite */

@@ -26,6 +26,9 @@ class MatrixOps(val m: Matrix) {
 
   import MatrixOps._
 
+  // We need this for some functions below (but it would screw some functions above)
+  import RLikeOps.v2vOps
+
   def nrow = m.rowSize()
 
   def ncol = m.columnSize()
@@ -166,9 +169,6 @@ class MatrixOps(val m: Matrix) {
   def isFullRank: Boolean =
     new QRDecomposition(if (nrow < ncol) m t else m cloned).hasFullRank
 
-  // We need this for some functions below (but it would screw some functions above)
-  import RLikeOps.v2vOps
-
   def colSums() = m.aggregateColumns(vectorSumFunc)
 
   def rowSums() = m.aggregateRows(vectorSumFunc)
@@ -177,15 +177,23 @@ class MatrixOps(val m: Matrix) {
 
   def rowMeans() = if (m.ncol == 0) rowSums() else rowSums() /= m.ncol
 
-  def diagv = m.viewDiagonal()
+  /* Diagonal */
+  def diagv: Vector = m.viewDiagonal()
+
+  /* Diagonal assignment */
+  def diagv_=(that: Vector) = diagv := that
+
+  /* Diagonal assignment */
+  def diagv_=(that: Double) = diagv := that
 
   def numNonZeroElementsPerColumn() = m.aggregateColumns(vectorCountNonZeroElementsFunc)
 }
 
 object MatrixOps {
-  implicit def m2ops(m: Matrix): MatrixOps = new MatrixOps(m)
 
-  implicit def v2ops(v: Vector): VectorOps = new VectorOps(v)
+  import RLikeOps.v2vOps
+
+  implicit def m2ops(m: Matrix): MatrixOps = new MatrixOps(m)
 
   private def vectorSumFunc = new VectorFunction {
     def apply(f: Vector): Double = f.sum

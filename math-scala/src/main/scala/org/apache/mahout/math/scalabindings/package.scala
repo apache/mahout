@@ -121,7 +121,7 @@ package object scalabindings {
    * @return
    */
   def dense[R](rows: R*): DenseMatrix = {
-    import MatrixOps._
+    import RLikeOps._
     val data = for (r <- rows) yield {
       r match {
         case n: Number => Array(n.doubleValue())
@@ -288,7 +288,7 @@ package object scalabindings {
    * @return (x)
    */
   def solve(a: Matrix, b: Vector): Vector = {
-    import MatrixOps._
+    import RLikeOps._
     val x = solve(a, b.toColMatrix)
     x(::, 0)
   }
