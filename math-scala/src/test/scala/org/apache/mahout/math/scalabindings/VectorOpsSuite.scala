@@ -69,4 +69,14 @@ class VectorOpsSuite extends FunSuite with MahoutSuite {
 
   }
 
+  test ("scalarOps") {
+    val a = dvec(1 to 5):Vector
+
+    10 * a shouldBe 10 *: a
+    10 + a shouldBe 10 +: a
+    10 - a shouldBe 10 -: a
+    10 / a shouldBe 10 /: a
+
+  }
+
 }

@@ -534,5 +534,17 @@ trait RLikeDrmOpsSuiteBase extends DistributedMahoutSuite with Matchers {
 
     (A.rbind(emptyB) -: controlC).norm should be < 1e-10
   }
-  
+
+  /** Test dsl overloads over scala operations over matrices */
+  test("scalarOps") {
+    val drmA = drmParallelize(m = dense(
+      (1, 2, 3),
+      (3, 4, 5),
+      (7, 8, 9)
+    ),
+      numPartitions = 2)
+
+    (10 * drmA - (10 *: drmA)).norm shouldBe 0
+
+  }
 }

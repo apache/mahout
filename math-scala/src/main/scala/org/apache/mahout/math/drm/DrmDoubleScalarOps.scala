@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,24 +15,19 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math.scalabindings
+package org.apache.mahout.math.drm
 
-import org.apache.mahout.math.{Vector, MatrixTimesOps, Matrix}
+import RLikeDrmOps._
+import scala.reflect.ClassTag
 
-/**
- * R-like operators. Declare <code>import RLikeOps._</code> to enable.
- */
-object RLikeOps {
+class DrmDoubleScalarOps(val x:Double) extends AnyVal{
 
-  implicit def double2Scalar(x:Double) = new DoubleScalarOps(x)
+  def +[K:ClassTag](that:DrmLike[K]) = that + x
 
-  implicit def v2vOps(v: Vector) = new RLikeVectorOps(v)
+  def *[K:ClassTag](that:DrmLike[K]) = that * x
 
-  implicit def el2elOps(el: Vector.Element) = new ElementOps(el)
+  def -[K:ClassTag](that:DrmLike[K]) = x -: that
 
-  implicit def times2timesOps(m: MatrixTimesOps) = new RLikeTimesOps(m)
-
-  implicit def m2mOps(m: Matrix) = new RLikeMatrixOps(m)
-
+  def /[K:ClassTag](that:DrmLike[K]) = x /: that
 
 }

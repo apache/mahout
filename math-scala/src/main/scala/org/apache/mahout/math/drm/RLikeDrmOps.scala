@@ -35,11 +35,15 @@ class RLikeDrmOps[K: ClassTag](drm: DrmLike[K]) extends DrmLikeOps[K](drm) {
 
   def +(that: Double): DrmLike[K] = OpAewScalar[K](A = this, scalar = that, op = "+")
 
+  def +:(that: Double): DrmLike[K] = OpAewScalar[K](A = this, scalar = that, op = "+")
+
   def -(that: Double): DrmLike[K] = OpAewScalar[K](A = this, scalar = that, op = "-")
 
   def -:(that: Double): DrmLike[K] = OpAewScalar[K](A = this, scalar = that, op = "-:")
 
   def *(that: Double): DrmLike[K] = OpAewScalar[K](A = this, scalar = that, op = "*")
+
+  def *:(that: Double): DrmLike[K] = OpAewScalar[K](A = this, scalar = that, op = "*")
 
   def /(that: Double): DrmLike[K] = OpAewScalar[K](A = this, scalar = that, op = "/")
 
@@ -110,6 +114,9 @@ class RLikeDrmIntOps(drm: DrmLike[Int]) extends RLikeDrmOps[Int](drm) {
 }
 
 object RLikeDrmOps {
+
+  implicit def double2ScalarOps(x:Double) = new DrmDoubleScalarOps(x)
+
   implicit def drmInt2RLikeOps(drm: DrmLike[Int]): RLikeDrmIntOps = new RLikeDrmIntOps(drm)
 
   implicit def drm2RLikeOps[K: ClassTag](drm: DrmLike[K]): RLikeDrmOps[K] = new RLikeDrmOps[K](drm)
