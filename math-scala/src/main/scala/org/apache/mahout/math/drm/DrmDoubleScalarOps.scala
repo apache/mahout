@@ -15,28 +15,19 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.sparkbindings.shell
+package org.apache.mahout.math.drm
 
-import org.apache.mahout.sparkbindings._
-import org.apache.log4j.PropertyConfigurator
+import RLikeDrmOps._
+import scala.reflect.ClassTag
 
+class DrmDoubleScalarOps(val x:Double) extends AnyVal{
 
-object Main {
+  def +[K:ClassTag](that:DrmLike[K]) = that + x
 
-  private var _interp: MahoutSparkILoop = _
+  def *[K:ClassTag](that:DrmLike[K]) = that * x
 
-  def main(args:Array[String]) {
+  def -[K:ClassTag](that:DrmLike[K]) = x -: that
 
-    // Hack: for some very unclear reason, log4j is not picking up log4j.properties in Spark conf/ even
-    // though the latter is added to the classpath. So we force it to pick it.
-    PropertyConfigurator.configure(getMahoutHome() + "/conf/log4j.properties")
-
-    System.setProperty("scala.usejavacp", "true")
-    _interp = new MahoutSparkILoop()
-    // It looks like we need to initialize this too, since some Spark shell initilaization code
-    // expects it
-    org.apache.spark.repl.Main.interp = _interp
-    _interp.process(args)
-  }
+  def /[K:ClassTag](that:DrmLike[K]) = x /: that
 
 }

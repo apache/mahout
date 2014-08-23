@@ -15,28 +15,28 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.sparkbindings.shell
+package org.apache.mahout.math.scalabindings
 
-import org.apache.mahout.sparkbindings._
-import org.apache.log4j.PropertyConfigurator
+import org.apache.mahout.math._
 
+class DoubleScalarOps(val x:Double) extends AnyVal{
 
-object Main {
+  import RLikeOps._
 
-  private var _interp: MahoutSparkILoop = _
+  def +(that:Matrix) = that + x
 
-  def main(args:Array[String]) {
+  def +(that:Vector) = that + x
 
-    // Hack: for some very unclear reason, log4j is not picking up log4j.properties in Spark conf/ even
-    // though the latter is added to the classpath. So we force it to pick it.
-    PropertyConfigurator.configure(getMahoutHome() + "/conf/log4j.properties")
+  def *(that:Matrix) = that * x
 
-    System.setProperty("scala.usejavacp", "true")
-    _interp = new MahoutSparkILoop()
-    // It looks like we need to initialize this too, since some Spark shell initilaization code
-    // expects it
-    org.apache.spark.repl.Main.interp = _interp
-    _interp.process(args)
-  }
+  def *(that:Vector) = that * x
+
+  def -(that:Matrix) = x -: that
+
+  def -(that:Vector) = x -: that
+
+  def /(that:Matrix) = x /: that
+
+  def /(that:Vector) = x /: that
 
 }

@@ -95,6 +95,8 @@ class VectorOps(private[scalabindings] val v: Vector) {
 
   def +(that: Double) = cloned += that
 
+  def +:(that: Double) = cloned += that
+
   def -(that: Double) = cloned -= that
 
   def -:(that: Double) = that -=: v.cloned

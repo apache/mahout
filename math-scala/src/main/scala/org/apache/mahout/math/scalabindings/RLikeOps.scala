@@ -24,6 +24,8 @@ import org.apache.mahout.math.{Vector, MatrixTimesOps, Matrix}
  */
 object RLikeOps {
 
+  implicit def double2Scalar(x:Double) = new DoubleScalarOps(x)
+
   implicit def v2vOps(v: Vector) = new RLikeVectorOps(v)
 
   implicit def el2elOps(el: Vector.Element) = new ElementOps(el)

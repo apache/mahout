@@ -18,7 +18,7 @@
 package org.apache.mahout.math.scalabindings
 
 import org.scalatest.{Matchers, FunSuite}
-import MatrixOps._
+import RLikeOps._
 import scala._
 import org.apache.mahout.test.MahoutSuite
 import org.apache.mahout.math.{RandomAccessSparseVector, SequentialAccessSparseVector, Matrices}

@@ -63,4 +63,18 @@ class RLikeMatrixOpsSuite extends FunSuite with MahoutSuite {
 
   }
 
+  /** Test dsl overloads over scala operations over matrices */
+  test ("scalarOps") {
+    val a = dense(
+      (1, 2, 3),
+      (3, 4, 5)
+    )
+
+    (10 * a - (10 *: a)).norm shouldBe 0
+    (10 + a - (10 +: a)).norm shouldBe 0
+    (10 - a - (10 -: a)).norm shouldBe 0
+    (10 / a - (10 /: a)).norm shouldBe 0
+
+  }
+
 }

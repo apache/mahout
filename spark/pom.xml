@@ -83,27 +83,6 @@
         </executions>
       </plugin>
 
-      <!-- create core job dependencies jar -->
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-          <executions>
-            <execution>
-              <id>job</id>
-              <phase>package</phase>
-              <goals>
-                <goal>single</goal>
-              </goals>
-              <configuration>
-                <descriptors>
-                  <descriptor>src/main/assembly/job.xml</descriptor>
-                </descriptors>
-              </configuration>
-            </execution>
-          </executions>
-      </plugin>
-
       <!-- create test jar so other modules can reuse the math test utility classes. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

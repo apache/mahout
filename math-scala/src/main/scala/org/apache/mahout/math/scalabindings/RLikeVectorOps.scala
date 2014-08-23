@@ -52,6 +52,9 @@ class RLikeVectorOps(_v: Vector) extends VectorOps(_v) {
   /** Elementwise * */
   def *(that: Double) = cloned *= that
 
+  /** Elementwise * */
+  def *:(that: Double) = cloned *= that
+
   /** Elementwise / */
   def /(that: Vector) = cloned /= that
 

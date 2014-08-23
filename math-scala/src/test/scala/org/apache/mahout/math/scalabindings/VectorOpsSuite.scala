@@ -19,7 +19,7 @@ package org.apache.mahout.math.scalabindings
 
 import org.scalatest.FunSuite
 import org.apache.mahout.math.{RandomAccessSparseVector, Vector}
-import MatrixOps._
+import RLikeOps._
 import org.apache.mahout.test.MahoutSuite
 
 /** VectorOps Suite */
@@ -66,6 +66,16 @@ class VectorOpsSuite extends FunSuite with MahoutSuite {
     val c = a dot b
     println(c)
     assert(c == 26)
+
+  }
+
+  test ("scalarOps") {
+    val a = dvec(1 to 5):Vector
+
+    10 * a shouldBe 10 *: a
+    10 + a shouldBe 10 +: a
+    10 - a shouldBe 10 -: a
+    10 / a shouldBe 10 /: a
 
   }
 
