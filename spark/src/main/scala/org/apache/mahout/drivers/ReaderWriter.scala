@@ -20,7 +20,7 @@ package org.apache.mahout.drivers
 import com.google.common.collect.{HashBiMap, BiMap}
 import org.apache.mahout.math.drm.DistributedContext
 
-/** Reader trait is abstract in the sense that the tupleReader function must be defined by an extending trait, which also defines the type to be read.
+/** Reader trait is abstract in the sense that the elementReader function must be defined by an extending trait, which also defines the type to be read.
   * @tparam T type of object read.
   */
 trait Reader[T]{
@@ -28,16 +28,27 @@ trait Reader[T]{
   val mc: DistributedContext
   val readSchema: Schema
 
-  protected def tupleReader(
+  protected def elementReader(
       mc: DistributedContext,
       readSchema: Schema,
       source: String,
       existingRowIDs: BiMap[String, Int]): T
 
-  def readTuplesFrom(
+  protected def drmReader(
+      mc: DistributedContext,
+      readSchema: Schema,
+      source: String,
+      existingRowIDs: BiMap[String, Int]): T
+
+  def readElementsFrom(
       source: String,
       existingRowIDs: BiMap[String, Int] = HashBiMap.create()): T =
-    tupleReader(mc, readSchema, source, existingRowIDs)
+    elementReader(mc, readSchema, source, existingRowIDs)
+
+  def readDRMFrom(
+      source: String,
+      existingRowIDs: BiMap[String, Int] = HashBiMap.create()): T =
+    drmReader(mc, readSchema, source, existingRowIDs)
 }
 
 /** Writer trait is abstract in the sense that the writer method must be supplied by an extending trait, which also defines the type to be written.

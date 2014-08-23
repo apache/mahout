@@ -161,7 +161,7 @@ then
   fi
 
   # add scala dev target
-  for f in $MAHOUT_HOME/math-scala/target/mahout-math-scala-*.jar ; do
+  for f in $MAHOUT_HOME/math-scala/target/mahout-math-scala_*.jar ; do
     CLASSPATH=${CLASSPATH}:$f;
   done
 
@@ -173,11 +173,11 @@ then
       CLASSPATH=${CLASSPATH}:$f;
     done
 
-    for f in $MAHOUT_HOME/spark/target/mahout-spark-*.jar ; do
+    for f in $MAHOUT_HOME/spark/target/mahout-spark_*.jar ; do
       CLASSPATH=${CLASSPATH}:$f;
     done
 
-    for f in $MAHOUT_HOME/spark-shell/target/mahout-spark-shell-*.jar ; do
+    for f in $MAHOUT_HOME/spark-shell/target/mahout-spark-shell_*.jar ; do
        CLASSPATH=${CLASSPATH}:$f;
     done
 
