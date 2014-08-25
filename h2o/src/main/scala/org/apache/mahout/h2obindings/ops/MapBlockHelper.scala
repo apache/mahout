@@ -48,8 +48,11 @@ object MapBlockHelper {
     val out = _bmf((inarray.asInstanceOf[Array[K]], in))
 
     implicitly[ClassTag[R]] match {
-      case `s` => for (str <- out._1) {
-        nclabel.addStr(str.asInstanceOf[String])
+      case `s` => {
+        val vstr = new ValueString
+        for (str <- out._1) {
+          nclabel.addStr(vstr.setTo(str.asInstanceOf[String]))
+        }
       }
       case _ => Unit
     }

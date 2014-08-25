@@ -78,7 +78,7 @@ public class RowRange {
               continue;
             }
 
-            nc.addStr(chk.atStr0(vstr, r).toString());
+            nc.addStr(chk.atStr0(vstr, r));
           }
         }
       }.doAll(1, keys).outputFrame(null, null).anyVec();

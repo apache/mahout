@@ -56,7 +56,7 @@ public class Par {
               for (int c = 0; c < chks.length; c++) {
                 chks[c].set0(r, vins[c].at(start + r));
               }
-              nc.addStr(vin.atStr(vstr, start + r).toString());
+              nc.addStr(vin.atStr(vstr, start + r));
             }
           }
         }.doAll(1, frout).outputFrame(null, null).anyVec();

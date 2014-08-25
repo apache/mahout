@@ -110,7 +110,7 @@
     <scala.major>2.10</scala.major>
     <scala.version>2.10.4</scala.version>
     <spark.version>1.0.1</spark.version>
-    <h2o.version>0.1.3</h2o.version>
+    <h2o.version>0.1.5</h2o.version>
   </properties>
   <issueManagement>
     <system>Jira</system>

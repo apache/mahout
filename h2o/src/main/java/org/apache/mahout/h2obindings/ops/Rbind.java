@@ -58,12 +58,12 @@ public class Rbind {
               if (r + start < A_rows) {
                 chks[c].set0(r, A_vecs[c].at(r + start));
                 if (keysa != null) {
-                  nc.addStr(keysa.atStr(vstr, r + start).toString());
+                  nc.addStr(keysa.atStr(vstr, r + start));
                 }
               } else {
                 chks[c].set0(r, B_vecs[c].at(r + start - A_rows));
                 if (keysb != null) {
-                  nc.addStr(keysb.atStr(vstr, r + start - A_rows).toString());
+                  nc.addStr(keysb.atStr(vstr, r + start - A_rows));
                 }
               }
             }
