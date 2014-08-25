@@ -30,63 +30,63 @@ import org.scalatest.{ConfigMap, FunSuite}
 
 class RowSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
 
-/*
-  final val matrixLLRCoocAtAControl = dense(
-    (0.0,                0.6331745808516107, 0.0,                     0.0,                0.0),
-    (0.6331745808516107, 0.0,                0.0,                     0.0,                0.0),
-    (0.0,                0.0,                0.0,                     0.6331745808516107, 0.0),
-    (0.0,                0.0,                0.6331745808516107,      0.0,                0.0),
-    (0.0,                0.0,                0.0,                     0.0,                0.0))
+  /*
+    final val matrixLLRCoocAtAControl = dense(
+      (0.0,                0.6331745808516107, 0.0,                     0.0,                0.0),
+      (0.6331745808516107, 0.0,                0.0,                     0.0,                0.0),
+      (0.0,                0.0,                0.0,                     0.6331745808516107, 0.0),
+      (0.0,                0.0,                0.6331745808516107,      0.0,                0.0),
+      (0.0,                0.0,                0.0,                     0.0,                0.0))
 
-  final val matrixLLRCoocBtAControl = dense(
-      (1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 0.0),
-      (0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.0),
-      (0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.0),
-      (1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 0.0),
-      (0.0,                0.0,                0.6795961471815897, 0.0,                4.498681156950466))
-*/
+    final val matrixLLRCoocBtAControl = dense(
+        (1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 0.0),
+        (0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.0),
+        (0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.0),
+        (1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 0.0),
+        (0.0,                0.0,                0.6795961471815897, 0.0,                4.498681156950466))
+  */
 
 
   final val SelfSimilairtyLines = Iterable(
-      "galaxy\tnexus:1.7260924347106847",
-      "ipad\tiphone:1.7260924347106847",
-      "nexus\tgalaxy:1.7260924347106847",
-      "iphone\tipad:1.7260924347106847",
-      "surface")
+    "galaxy\tnexus:1.7260924347106847",
+    "ipad\tiphone:1.7260924347106847",
+    "nexus\tgalaxy:1.7260924347106847",
+    "iphone\tipad:1.7260924347106847",
+    "surface")
 
   final val CrossIndicatorLines = Iterable(
-      "iphone\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847",
-      "ipad\tnexus:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 galaxy:0.6795961471815897",
-      "nexus\tnexus:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 galaxy:0.6795961471815897",
-      "galaxy\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847",
-      "surface\tsurface:4.498681156950466 nexus:0.6795961471815897")
+    "iphone\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847",
+    "ipad\tnexus:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 galaxy:0.6795961471815897",
+    "nexus\tnexus:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 galaxy:0.6795961471815897",
+    "galaxy\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847",
+    "surface\tsurface:4.498681156950466 nexus:0.6795961471815897")
 
   // todo: a better test would be to sort each vector by itemID and compare rows, tokens misses some error cases
   final val SelfSimilairtyTokens = tokenize(SelfSimilairtyLines)
 
   final val SelfSimilairtyTokensOmitStrengths = tokenize(Iterable(
-      "galaxy\tnexus",
-      "ipad\tiphone",
-      "nexus\tgalaxy",
-      "iphone\tipad",
-      "surface"))
+    "galaxy\tnexus",
+    "ipad\tiphone",
+    "nexus\tgalaxy",
+    "iphone\tipad",
+    "surface"))
 
   final val CrossIndicatorTokens = tokenize(CrossIndicatorLines)
 
   final val CrossIndicatorLinesWithoutStrengths = Array(
-      "iphone\tnexus iphone ipad galaxy",
-      "ipad\tnexus iphone ipad galaxy",
-      "nexus\tnexus iphone ipad galaxy",
-      "galaxy\tnexus iphone ipad galaxy",
-      "surface\tsurface nexus")
+    "iphone\tnexus iphone ipad galaxy",
+    "ipad\tnexus iphone ipad galaxy",
+    "nexus\tnexus iphone ipad galaxy",
+    "galaxy\tnexus iphone ipad galaxy",
+    "surface\tsurface nexus")
 
   final val CrossIndicatorTokensOmitStrengths = tokenize(CrossIndicatorLinesWithoutStrengths)
 
   final val DrmALines = Array(
-      "u1\tiphone:1 ipad:1",
-      "u2\tnexus:1 galaxy:1",
-      "u3\tsurface:1",
-      "u4\tiphone:1 galaxy:1")
+    "u1\tiphone:1 ipad:1",
+    "u2\tnexus:1 galaxy:1",
+    "u3\tsurface:1",
+    "u4\tiphone:1 galaxy:1")
 
   /* interactions
       "u1,purchase,iphone",
@@ -99,10 +99,10 @@ class RowSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
   */
 
   final val DrmBLines = Array(
-      "u1\tiphone:1 ipad:1 nexus:1 galaxy:1",
-      "u2\tiphone:1 ipad:1 nexus:1 galaxy:1",
-      "u3\tsurface:1 nexus:1",
-      "u4\tiphone:1 ipad:1 galaxy:1")
+    "u1\tiphone:1 ipad:1 nexus:1 galaxy:1",
+    "u2\tiphone:1 ipad:1 nexus:1 galaxy:1",
+    "u3\tsurface:1 nexus:1",
+    "u4\tiphone:1 ipad:1 galaxy:1")
 
   /* interactions
         "u1,view,iphone",
@@ -120,16 +120,16 @@ class RowSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
         "u4,view,galaxy")
   */
   final val DrmALinesWitoutStrengths = Array(
-      "u1\tiphone ipad",
-      "u2\tnexus galaxy",
-      "u3\tsurface",
-      "u4\tiphone galaxy")
+    "u1\tiphone ipad",
+    "u2\tnexus galaxy",
+    "u3\tsurface",
+    "u4\tiphone galaxy")
 
   final val DrmBLinesWitoutStrengths = Array(
-      "u1\tiphone ipad nexus galaxy",
-      "u2\tiphone ipad nexus galaxy",
-      "u3\tsurface nexus",
-      "u4\tiphone ipad galaxy")
+    "u1\tiphone ipad nexus galaxy",
+    "u2\tiphone ipad nexus galaxy",
+    "u3\tsurface nexus",
+    "u4\tiphone ipad galaxy")
 
   test("RowSimilarityDriver two matrices input") {
 
@@ -298,12 +298,12 @@ class RowSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
     // local multi-threaded Spark with default FS, suitable for build tests but need better location for data
 
     RowSimilarityDriver.main(Array(
-        "--input", inPathStart,
-        "--input2", inPath2,
-        "--output", outPath,
-        "--filenamePattern", "a.tsv",
-        "--master", masterUrl,
-        "--recursive"))
+      "--input", inPathStart,
+      "--input2", inPath2,
+      "--output", outPath,
+      "--filenamePattern", "a.tsv",
+      "--master", masterUrl,
+      "--recursive"))
 
     val indicatorLines = mahoutCtx.textFile(outPath + "/indicator-matrix/").collect.toIterable
     tokenize(indicatorLines) should contain theSameElementsAs SelfSimilairtyTokens
@@ -312,7 +312,7 @@ class RowSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
 
   }
 
- test("RowSimilarityDriver cross similarity two separate items spaces, missing rows in B"){
+  test("RowSimilarityDriver cross similarity two separate items spaces, missing rows in B"){
     /* cross-similarity with category views, same user space
             	phones	tablets	mobile_acc	soap
             u1	0	      1	      1	          0
@@ -325,10 +325,10 @@ removed ==> u3	0	      0	      1	          0
     val outPath = TmpDir + "indicator-matrices/"
 
     val drmBLinesSecondItemSet = Array(
-        "u1\tphones:1 mobile_acc:1",
-        "u2\tphones:1 tablets:1 mobile_acc:1",
-        "u4\tphones:1 tablets:1 soap:1")
-   
+      "u1\tphones:1 mobile_acc:1",
+      "u2\tphones:1 tablets:1 mobile_acc:1",
+      "u4\tphones:1 tablets:1 soap:1")
+
     /* interactions
         "u1,view,phones",
         "u1,view,mobile_acc",
@@ -342,11 +342,11 @@ removed ==> u3	0	      0	      1	          0
     */
 
     val UnequalDimensionsCrossSimilarityLines = tokenize(Iterable(
-        "galaxy\ttablets:5.545177444479561 soap:1.7260924347106847 phones:1.7260924347106847",
-        "ipad\tmobile_acc:1.7260924347106847 phones:0.6795961471815897",
-        "surface",
-        "nexus\tmobile_acc:1.7260924347106847 tablets:1.7260924347106847 phones:0.6795961471815897",
-        "iphone\tsoap:1.7260924347106847 phones:1.7260924347106847"))
+      "galaxy\ttablets:5.545177444479561 soap:1.7260924347106847 phones:1.7260924347106847",
+      "ipad\tmobile_acc:1.7260924347106847 phones:0.6795961471815897",
+      "surface",
+      "nexus\tmobile_acc:1.7260924347106847 tablets:1.7260924347106847 phones:0.6795961471815897",
+      "iphone\tsoap:1.7260924347106847 phones:1.7260924347106847"))
 
     // this will create multiple part-xxxxx files in the InFile dir but other tests will
     // take account of one actual file
@@ -355,11 +355,11 @@ removed ==> u3	0	      0	      1	          0
 
     // local multi-threaded Spark with default HDFS
     RowSimilarityDriver.main(Array(
-        "--input", inFile1,
-        "--input2", inFile2,
-        "--output", outPath,
-        "--master", masterUrl,
-        "--writeAllDatasets"))
+      "--input", inFile1,
+      "--input2", inFile2,
+      "--output", outPath,
+      "--master", masterUrl,
+      "--writeAllDatasets"))
 
     val indicatorLines = mahoutCtx.textFile(outPath + "/indicator-matrix/").collect.toIterable
     val crossIndicatorLines = mahoutCtx.textFile(outPath + "/cross-indicator-matrix/").collect.toIterable
@@ -378,5 +378,5 @@ removed ==> u3	0	      0	      1	          0
     super.beforeAll(configMap)
     RowSimilarityDriver.useContext(mahoutCtx)
   }
-  
+
 }

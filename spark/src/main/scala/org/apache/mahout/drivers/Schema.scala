@@ -46,21 +46,21 @@ class Schema(params: Tuple2[String, Any]*) extends HashMap[String, Any] {
   * <comma, tab, or space>here may be other ignored text...)
   */
 class DefaultElementReadSchema extends Schema(
-    "delim" -> "[,\t ]", //comma, tab or space
-    "filter" -> "",
-    "rowIDPosition" -> 0,
-    "columnIDPosition" -> 1,
-    "filterPosition" -> -1)
+  "delim" -> "[,\t ]", //comma, tab or space
+  "filter" -> "",
+  "rowIDPosition" -> 0,
+  "columnIDPosition" -> 1,
+  "filterPosition" -> -1)
 
 /** Default Schema for text delimited drm file output
   * This tells the writer to write a DRM of the default form:
   * (rowID<tab>columnID1:score1<space>columnID2:score2...)
   */
 class DefaultDRMWriteSchema extends Schema(
-    "rowKeyDelim" -> "\t",
-    "columnIdStrengthDelim" -> ":",
-    "elementDelim" -> " ",
-    "omitScore" -> false)
+  "rowKeyDelim" -> "\t",
+  "columnIdStrengthDelim" -> ":",
+  "elementDelim" -> " ",
+  "omitScore" -> false)
 
 /** Default Schema for typical text delimited drm file input
   * This tells the reader to input text lines of the form:

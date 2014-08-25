@@ -63,7 +63,7 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
   // build options from some stardard CLI param groups
   // Note: always put the driver specific options at the last so the can override and previous options!
   var opts = Map.empty[String, Any]
-  
+
   override def showUsageOnError = true
 
   def parseIOOptions = {

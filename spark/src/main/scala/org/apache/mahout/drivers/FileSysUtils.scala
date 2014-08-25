@@ -21,15 +21,15 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{Path, FileStatus, FileSystem}
 
 /**
-  * Returns a [[java.lang.String]]comma delimited list of URIs discovered based on parameters in the constructor.
-  * The String is formatted to be input into [[org.apache.spark.SparkContext.textFile()]]
-  *
-  * @param pathURI Where to start looking for inFiles, only HDFS is currently
-  *                supported. The pathURI may be a list of comma delimited URIs like those supported
-  *                by Spark
-  * @param filePattern regex that must match the entire filename to have the file returned
-  * @param recursive true traverses the filesystem recursively
-  */
+ * Returns a [[java.lang.String]]comma delimited list of URIs discovered based on parameters in the constructor.
+ * The String is formatted to be input into [[org.apache.spark.SparkContext.textFile()]]
+ *
+ * @param pathURI Where to start looking for inFiles, only HDFS is currently
+ *                supported. The pathURI may be a list of comma delimited URIs like those supported
+ *                by Spark
+ * @param filePattern regex that must match the entire filename to have the file returned
+ * @param recursive true traverses the filesystem recursively
+ */
 
 case class FileSysUtils(pathURI: String, filePattern: String = "", recursive: Boolean = false) {
 
@@ -40,7 +40,7 @@ case class FileSysUtils(pathURI: String, filePattern: String = "", recursive: Bo
     * When pattern matching dirs are never returned, only traversed. */
   def uris :String = {
     if (!filePattern.isEmpty){ // have file pattern so
-      val pathURIs = pathURI.split(",")
+    val pathURIs = pathURI.split(",")
       var files = ""
       for ( uri <- pathURIs ){
         files = findFiles(uri, filePattern, files)

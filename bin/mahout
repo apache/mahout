@@ -88,6 +88,10 @@ if [ "$1" == "spark-itemsimilarity" ]; then
   SPARK=1
 fi
 
+if [ "$1" == "spark-rowsimilarity" ]; then
+  SPARK=1
+fi
+
 if [ "$MAHOUT_CORE" != "" ]; then
   IS_CORE=1
 fi
@@ -239,6 +243,11 @@ case "$1" in
   (spark-itemsimilarity)
     shift
     "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.ItemSimilarityDriver" "$@"
+    ;;
+  (spark-rowsimilarity)
+    shift
+    echo $CLASSPATH
+    "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.RowSimilarityDriver" "$@"
     ;;
   (*)
 

@@ -73,9 +73,7 @@ object CooccurrenceAnalysis extends Serializable {
       // Compute & broadcast the number of interactions per thing in B
       val bcastInteractionsPerThingB = drmBroadcast(drmB.numNonZeroElementsPerColumn)
 
-      // Compute cross-co-occurrence matrix B'A
-      // pferrel: yikes, this is the wrong order, a big change! so you know who to blame
-      // used to be val drmBtA = drmB.t %*% drmA, which is the wrong order
+      // Compute cross-co-occurrence matrix A'B
       val drmAtB = drmA.t %*% drmB
 
       val drmIndicatorsAtB = computeIndicators(drmAtB, numUsers, maxInterestingItemsPerThing,
@@ -98,7 +96,7 @@ object CooccurrenceAnalysis extends Serializable {
    * see http://tdunning.blogspot.de/2008/03/surprise-and-coincidence.html for details
    **/
   def logLikelihoodRatio(numInteractionsWithA: Long, numInteractionsWithB: Long,
-                         numInteractionsWithAandB: Long, numInteractions: Long) = {
+    numInteractionsWithAandB: Long, numInteractions: Long) = {
 
     val k11 = numInteractionsWithAandB
     val k12 = numInteractionsWithA - numInteractionsWithAandB

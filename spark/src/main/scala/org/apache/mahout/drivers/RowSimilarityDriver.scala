@@ -17,7 +17,6 @@
 
 package org.apache.mahout.drivers
 
-import org.apache.mahout.drivers.RowSimilarityDriver._
 import org.apache.mahout.math.cf.CooccurrenceAnalysis
 import scala.collection.immutable.HashMap
 
@@ -42,9 +41,9 @@ import scala.collection.immutable.HashMap
 object RowSimilarityDriver extends MahoutDriver {
   // define only the options specific to RowSimilarity
   private final val RowSimilarityOptions = HashMap[String, Any](
-      "maxObservations" -> 500,
-      "maxSimilaritiesPerRow" -> 100,
-      "appName" -> "RowSimilarityDriver")
+    "maxObservations" -> 500,
+    "maxSimilaritiesPerRow" -> 100,
+    "appName" -> "RowSimilarityDriver")
 
   private var readerWriter: TextDelimitedIndexedDatasetReaderWriter = _
   private var readWriteSchema: Schema = _
@@ -103,8 +102,8 @@ object RowSimilarityDriver extends MahoutDriver {
   }
 
   override def start(masterUrl: String = parser.opts("master").asInstanceOf[String],
-      appName: String = parser.opts("appName").asInstanceOf[String]):
-    Unit = {
+                     appName: String = parser.opts("appName").asInstanceOf[String]):
+  Unit = {
 
     // todo: the HashBiMap used in the TextDelimited Reader is hard coded into
     // MahoutKryoRegistrator, it should be added to the register list here so it
@@ -116,10 +115,10 @@ object RowSimilarityDriver extends MahoutDriver {
     super.start(masterUrl, appName)
 
     readWriteSchema = new Schema(
-        "rowKeyDelim" -> parser.opts("rowKeyDelim").asInstanceOf[String],
-        "columnIdStrengthDelim" -> parser.opts("columnIdStrengthDelim").asInstanceOf[String],
-        "omitScore" -> parser.opts("omitStrength").asInstanceOf[Boolean],
-        "elementDelim" -> parser.opts("elementDelim").asInstanceOf[String])
+      "rowKeyDelim" -> parser.opts("rowKeyDelim").asInstanceOf[String],
+      "columnIdStrengthDelim" -> parser.opts("columnIdStrengthDelim").asInstanceOf[String],
+      "omitScore" -> parser.opts("omitStrength").asInstanceOf[Boolean],
+      "elementDelim" -> parser.opts("elementDelim").asInstanceOf[String])
 
     readerWriter = new TextDelimitedIndexedDatasetReaderWriter(readWriteSchema, readWriteSchema)
 
@@ -128,10 +127,10 @@ object RowSimilarityDriver extends MahoutDriver {
   private def readIndexedDatasets: Array[IndexedDataset] = {
 
     val inFiles = FileSysUtils(parser.opts("input").asInstanceOf[String], parser.opts("filenamePattern").asInstanceOf[String],
-        parser.opts("recursive").asInstanceOf[Boolean]).uris
+      parser.opts("recursive").asInstanceOf[Boolean]).uris
     val inFiles2 = if (parser.opts("input2") == null || parser.opts("input2").asInstanceOf[String].isEmpty) ""
-      else FileSysUtils(parser.opts("input2").asInstanceOf[String], parser.opts("filenamePattern").asInstanceOf[String],
-          parser.opts("recursive").asInstanceOf[Boolean]).uris
+    else FileSysUtils(parser.opts("input2").asInstanceOf[String], parser.opts("filenamePattern").asInstanceOf[String],
+      parser.opts("recursive").asInstanceOf[Boolean]).uris
 
     if (inFiles.isEmpty) {
       Array()
@@ -139,7 +138,7 @@ object RowSimilarityDriver extends MahoutDriver {
 
       val datasetA = IndexedDataset(readerWriter.readDRMFrom(inFiles))
       if (parser.opts("writeAllDatasets").asInstanceOf[Boolean]) readerWriter.writeDRMTo(datasetA,
-          parser.opts("output").asInstanceOf[String] + "../input-datasets/primary-interactions")
+        parser.opts("output").asInstanceOf[String] + "../input-datasets/primary-interactions")
 
       // The case of readng B can be a bit tricky when the exact same row IDs don't exist for A and B
       // Here we assume there is one row ID space for all interactions. To do this we calculate the
@@ -150,25 +149,25 @@ object RowSimilarityDriver extends MahoutDriver {
       val datasetB = if (!inFiles2.isEmpty) {
         // get cross-cooccurrence interactions from separate files
         val datasetB = IndexedDataset(readerWriter.readDRMFrom(inFiles2, existingRowIDs = datasetA.rowIDs))
-
         datasetB
-
       } else {
         null.asInstanceOf[IndexedDataset]
       }
+
       if (datasetB != null.asInstanceOf[IndexedDataset]) { // do AtB calc
-        // true row cardinality is the size of the row id index, which was calculated from all rows of A and B
-        val rowCardinality = datasetB.rowIDs.size() // the authoritative row cardinality
+      // true row cardinality is the size of the row id index, which was calculated from all rows of A and B
+      val rowCardinality = datasetB.rowIDs.size() // the authoritative row cardinality
 
         // todo: how expensive is nrow? We could make assumptions about .rowIds that don't rely on
         // its calculation
         val returnedA = if (rowCardinality != datasetA.matrix.nrow) datasetA.newRowCardinality(rowCardinality)
-          else datasetA // this guarantees matching cardinality
+        else datasetA // this guarantees matching cardinality
 
         val returnedB = if (rowCardinality != datasetB.matrix.nrow) datasetB.newRowCardinality(rowCardinality)
-          else datasetB // this guarantees matching cardinality
+        else datasetB // this guarantees matching cardinality
 
-        if (parser.opts("writeAllDatasets").asInstanceOf[Boolean]) readerWriter.writeDRMTo(datasetB, parser.opts("output") + "../input-datasets/secondary-interactions")
+        if (parser.opts("writeAllDatasets").asInstanceOf[Boolean]) readerWriter.writeDRMTo(datasetB,
+          parser.opts("output") + "../input-datasets/secondary-interactions")
 
         Array(returnedA, returnedB)
       } else Array(datasetA)
@@ -184,8 +183,8 @@ object RowSimilarityDriver extends MahoutDriver {
     val indicatorMatrices = {
       if (indexedDatasets.length > 1) {
         CooccurrenceAnalysis.cooccurrences(indexedDatasets(0).matrix, parser.opts("randomSeed").asInstanceOf[Int],
-            parser.opts("maxSimilaritiesPerRow").asInstanceOf[Int], parser.opts("maxObservations").asInstanceOf[Int],
-            Array(indexedDatasets(1).matrix))
+          parser.opts("maxSimilaritiesPerRow").asInstanceOf[Int], parser.opts("maxObservations").asInstanceOf[Int],
+          Array(indexedDatasets(1).matrix))
       } else {
         CooccurrenceAnalysis.cooccurrences(indexedDatasets(0).matrix, parser.opts("randomSeed").asInstanceOf[Int],
           parser.opts("maxSimilaritiesPerRow").asInstanceOf[Int], parser.opts("maxObservations").asInstanceOf[Int])
@@ -193,14 +192,15 @@ object RowSimilarityDriver extends MahoutDriver {
     }
 
     // an alternative is to create a version of IndexedDataset that knows how to write itself
-    val selfIndicatorDataset = new IndexedDatasetTextDelimitedWriteable(indicatorMatrices(0), indexedDatasets(0).columnIDs,
-      indexedDatasets(0).columnIDs, readWriteSchema)
+    val selfIndicatorDataset = new IndexedDatasetTextDelimitedWriteable(indicatorMatrices(0),
+      indexedDatasets(0).columnIDs, indexedDatasets(0).columnIDs, readWriteSchema)
     selfIndicatorDataset.writeTo(parser.opts("output").asInstanceOf[String] + "indicator-matrix")
 
     if (indexedDatasets.length > 1) {
 
       val crossIndicatorDataset = new IndexedDataset(indicatorMatrices(1), indexedDatasets(0).columnIDs, indexedDatasets(1).columnIDs) // cross similarity
-      readerWriter.writeDRMTo(crossIndicatorDataset, parser.opts("output").asInstanceOf[String] + "cross-indicator-matrix")
+      readerWriter.writeDRMTo(crossIndicatorDataset, parser.opts("output").asInstanceOf[String] +
+        "cross-indicator-matrix")
 
     }
 

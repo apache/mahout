@@ -43,9 +43,9 @@ import scala.collection.immutable.HashMap
 object ItemSimilarityDriver extends MahoutDriver {
   // define only the options specific to ItemSimilarity
   private final val ItemSimilarityOptions = HashMap[String, Any](
-      "maxPrefs" -> 500,
-      "maxSimilaritiesPerItem" -> 100,
-      "appName" -> "ItemSimilarityDriver")
+    "maxPrefs" -> 500,
+    "maxSimilaritiesPerItem" -> 100,
+    "appName" -> "ItemSimilarityDriver")
 
   private var reader1: TextDelimitedIndexedDatasetReader = _
   private var reader2: TextDelimitedIndexedDatasetReader = _
@@ -73,14 +73,14 @@ object ItemSimilarityDriver extends MahoutDriver {
         if (x > 0) success else failure("Option --maxPrefs must be > 0")
       }
 
-/** not implemented in CooccurrenceAnalysis.cooccurrence
+      /** not implemented in CooccurrenceAnalysis.cooccurrence
       opt[Int]("minPrefs") abbr ("mp") action { (x, options) =>
         options.put("minPrefs", x)
         options
       } text ("Ignore users with less preferences than this (optional). Default: 1") validate { x =>
         if (x > 0) success else failure("Option --minPrefs must be > 0")
       }
-*/
+        */
 
       opt[Int]('m', "maxSimilaritiesPerItem") action { (x, options) =>
         options + ("maxSimilaritiesPerItem" -> x)
@@ -117,8 +117,8 @@ object ItemSimilarityDriver extends MahoutDriver {
   }
 
   override def start(masterUrl: String = parser.opts("master").asInstanceOf[String],
-      appName: String = parser.opts("appName").asInstanceOf[String]):
-    Unit = {
+                     appName: String = parser.opts("appName").asInstanceOf[String]):
+  Unit = {
 
     // todo: the HashBiMap used in the TextDelimited Reader is hard coded into
     // MahoutKryoRegistrator, it should be added to the register list here so it
@@ -130,15 +130,15 @@ object ItemSimilarityDriver extends MahoutDriver {
     super.start(masterUrl, appName)
 
     val readSchema1 = new Schema("delim" -> parser.opts("inDelim").asInstanceOf[String],
-        "filter" -> parser.opts("filter1").asInstanceOf[String],
-        "rowIDPosition" -> parser.opts("rowIDPosition").asInstanceOf[Int],
-        "columnIDPosition" -> parser.opts("itemIDPosition").asInstanceOf[Int],
-        "filterPosition" -> parser.opts("filterPosition").asInstanceOf[Int])
+      "filter" -> parser.opts("filter1").asInstanceOf[String],
+      "rowIDPosition" -> parser.opts("rowIDPosition").asInstanceOf[Int],
+      "columnIDPosition" -> parser.opts("itemIDPosition").asInstanceOf[Int],
+      "filterPosition" -> parser.opts("filterPosition").asInstanceOf[Int])
 
     reader1 = new TextDelimitedIndexedDatasetReader(readSchema1)
 
     if ((parser.opts("filterPosition").asInstanceOf[Int] != -1 && parser.opts("filter2").asInstanceOf[String] != null)
-        || (parser.opts("input2").asInstanceOf[String] != null && !parser.opts("input2").asInstanceOf[String].isEmpty )){
+      || (parser.opts("input2").asInstanceOf[String] != null && !parser.opts("input2").asInstanceOf[String].isEmpty )){
       // only need to change the filter used compared to readSchema1
       val readSchema2 = new Schema(readSchema1) += ("filter" -> parser.opts("filter2").asInstanceOf[String])
 
@@ -146,10 +146,10 @@ object ItemSimilarityDriver extends MahoutDriver {
     }
 
     writeSchema = new Schema(
-        "rowKeyDelim" -> parser.opts("rowKeyDelim").asInstanceOf[String],
-        "columnIdStrengthDelim" -> parser.opts("columnIdStrengthDelim").asInstanceOf[String],
-        "omitScore" -> parser.opts("omitStrength").asInstanceOf[Boolean],
-        "elementDelim" -> parser.opts("elementDelim").asInstanceOf[String])
+      "rowKeyDelim" -> parser.opts("rowKeyDelim").asInstanceOf[String],
+      "columnIdStrengthDelim" -> parser.opts("columnIdStrengthDelim").asInstanceOf[String],
+      "omitScore" -> parser.opts("omitStrength").asInstanceOf[Boolean],
+      "elementDelim" -> parser.opts("elementDelim").asInstanceOf[String])
 
     writer = new TextDelimitedIndexedDatasetWriter(writeSchema)
 
@@ -158,10 +158,10 @@ object ItemSimilarityDriver extends MahoutDriver {
   private def readIndexedDatasets: Array[IndexedDataset] = {
 
     val inFiles = FileSysUtils(parser.opts("input").asInstanceOf[String], parser.opts("filenamePattern").asInstanceOf[String],
-        parser.opts("recursive").asInstanceOf[Boolean]).uris
+      parser.opts("recursive").asInstanceOf[Boolean]).uris
     val inFiles2 = if (parser.opts("input2") == null || parser.opts("input2").asInstanceOf[String].isEmpty) ""
-      else FileSysUtils(parser.opts("input2").asInstanceOf[String], parser.opts("filenamePattern").asInstanceOf[String],
-          parser.opts("recursive").asInstanceOf[Boolean]).uris
+    else FileSysUtils(parser.opts("input2").asInstanceOf[String], parser.opts("filenamePattern").asInstanceOf[String],
+      parser.opts("recursive").asInstanceOf[Boolean]).uris
 
     if (inFiles.isEmpty) {
       Array()
@@ -169,7 +169,7 @@ object ItemSimilarityDriver extends MahoutDriver {
 
       val datasetA = IndexedDataset(reader1.readElementsFrom(inFiles))
       if (parser.opts("writeAllDatasets").asInstanceOf[Boolean]) writer.writeDRMTo(datasetA,
-          parser.opts("output").asInstanceOf[String] + "../input-datasets/primary-interactions")
+        parser.opts("output").asInstanceOf[String] + "../input-datasets/primary-interactions")
 
       // The case of readng B can be a bit tricky when the exact same row IDs don't exist for A and B
       // Here we assume there is one row ID space for all interactions. To do this we calculate the
@@ -184,7 +184,7 @@ object ItemSimilarityDriver extends MahoutDriver {
         datasetB
 
       } else if (parser.opts("filterPosition").asInstanceOf[Int] != -1
-          && parser.opts("filter2").asInstanceOf[String] != null) {
+        && parser.opts("filter2").asInstanceOf[String] != null) {
 
         // get cross-cooccurrences interactions by using two filters on a single set of files
         val datasetB = IndexedDataset(reader2.readElementsFrom(inFiles, existingRowIDs = datasetA.rowIDs))
@@ -195,16 +195,16 @@ object ItemSimilarityDriver extends MahoutDriver {
         null.asInstanceOf[IndexedDataset]
       }
       if (datasetB != null.asInstanceOf[IndexedDataset]) { // do AtB calc
-        // true row cardinality is the size of the row id index, which was calculated from all rows of A and B
-        val rowCardinality = datasetB.rowIDs.size() // the authoritative row cardinality
+      // true row cardinality is the size of the row id index, which was calculated from all rows of A and B
+      val rowCardinality = datasetB.rowIDs.size() // the authoritative row cardinality
 
         // todo: how expensive is nrow? We could make assumptions about .rowIds that don't rely on
         // its calculation
         val returnedA = if (rowCardinality != datasetA.matrix.nrow) datasetA.newRowCardinality(rowCardinality)
-          else datasetA // this guarantees matching cardinality
+        else datasetA // this guarantees matching cardinality
 
         val returnedB = if (rowCardinality != datasetB.matrix.nrow) datasetB.newRowCardinality(rowCardinality)
-          else datasetB // this guarantees matching cardinality
+        else datasetB // this guarantees matching cardinality
 
         if (parser.opts("writeAllDatasets").asInstanceOf[Boolean]) writer.writeDRMTo(datasetB, parser.opts("output") + "../input-datasets/secondary-interactions")
 
@@ -222,8 +222,8 @@ object ItemSimilarityDriver extends MahoutDriver {
     val indicatorMatrices = {
       if (indexedDatasets.length > 1) {
         CooccurrenceAnalysis.cooccurrences(indexedDatasets(0).matrix, parser.opts("randomSeed").asInstanceOf[Int],
-            parser.opts("maxSimilaritiesPerItem").asInstanceOf[Int], parser.opts("maxPrefs").asInstanceOf[Int],
-            Array(indexedDatasets(1).matrix))
+          parser.opts("maxSimilaritiesPerItem").asInstanceOf[Int], parser.opts("maxPrefs").asInstanceOf[Int],
+          Array(indexedDatasets(1).matrix))
       } else {
         CooccurrenceAnalysis.cooccurrences(indexedDatasets(0).matrix, parser.opts("randomSeed").asInstanceOf[Int],
           parser.opts("maxSimilaritiesPerItem").asInstanceOf[Int], parser.opts("maxPrefs").asInstanceOf[Int])

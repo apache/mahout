@@ -227,21 +227,6 @@ class CooccurrenceAnalysisSuite extends FunSuite with MahoutSuite with Distribut
          (1, 0, 1, 0, 0),
          (0, 0, 0, 0, 0))
 
-        for (MatrixSlice row : cooccurrence) {
-            for (Vector.Element element : row.vector().nonZeroes()) {
-                long k11 = (long) element.get();// = 1
-                long k12 = (long) (rowSums.get(row.index()) - k11);// = 0
-                long k21 = (long) (colSums.get(element.index()) - k11);// = 1
-                long k22 = (long) (total - k11 - k12 - k21);// = 2
-                double score = LogLikelihood.rootLogLikelihoodRatio(k11, k12, k21, k22);
-                element.set(score);
-            }
-        }
-
-        for some reason the hadoop version returns the following
-        return 1.0 - 1.0 / (1.0 + logLikelihood);
-        so not a pure llr or root llr
-
     */
 
     //item (1,0)
