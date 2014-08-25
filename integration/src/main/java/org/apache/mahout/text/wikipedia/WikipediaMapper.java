@@ -78,16 +78,20 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
       return;
     }
 
+    String catMatch = findMatchingCategory(document);
     if (!all) {
-      String catMatch = findMatchingCategory(document);
       if ("Unknown".equals(catMatch)) {
         return;
       }
     }
-    String catMatch = findMatchingCategory(document);
+
     document = StringEscapeUtils.unescapeHtml4(document);    
-    if (removeLabels){
+    if (removeLabels) {
       document = removeCategoriesFromText(document);
+      // Reject documents with malformed tags
+      if (document == null) {
+        return;
+      }
     }
 
     // write out in Bayes input style: key: /Category/document_name
@@ -112,7 +116,7 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
     all = conf.getBoolean("all.files", false);
     removeLabels = conf.getBoolean("remove.labels",false);
     log.info("Configure: Input Categories size: {} All: {} Exact Match: {} Remove Labels from Text: {}",
-             inputCategories.size(), all, exactMatchOnly,removeLabels);
+            inputCategories.size(), all, exactMatchOnly, removeLabels);
   }
 
   private static String getDocument(String xml) {
@@ -154,13 +158,21 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
   private String removeCategoriesFromText(String document) {
     int startIndex = 0;
     int categoryIndex;
-    while ((categoryIndex = document.indexOf("[[Category:", startIndex)) != -1) {
-      int endIndex = document.indexOf("]]", categoryIndex) + 2 ;
-      if (endIndex >= document.length() || endIndex < 0) {
-        break;
+    try {
+      while ((categoryIndex = document.indexOf("[[Category:", startIndex)) != -1) {
+        int endIndex = document.indexOf("]]", categoryIndex);
+        if (endIndex >= document.length() || endIndex < 0) {
+          break;
+        }
+        document = document.replace(document.substring(categoryIndex, endIndex + 2), "");
+        if (categoryIndex < document.length()) {
+          startIndex = categoryIndex;
+        } else {
+          break;
+        }
       }
-      document = document.replace(document.substring(categoryIndex,endIndex),"");
-      startIndex = categoryIndex;
+    } catch(StringIndexOutOfBoundsException e){
+      return null;
     }
     return document;
   }
