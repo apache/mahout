@@ -73,7 +73,7 @@ class VectorOps(private[scalabindings] val v: Vector) {
 
   def nequiv(that: Vector) = !equiv(that)
 
-  def unary_- = v.assign(Functions.NEGATE)
+  def unary_- = cloned.assign(Functions.NEGATE)
 
   def +=(that: Vector) = v.assign(that, Functions.PLUS)
 

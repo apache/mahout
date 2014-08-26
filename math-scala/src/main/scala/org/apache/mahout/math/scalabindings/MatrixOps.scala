@@ -33,8 +33,11 @@ class MatrixOps(val m: Matrix) {
 
   def ncol = m.columnSize()
 
-
-  def unary_- = m.assign(Functions.NEGATE)
+  /**
+   * Warning: this creates a clone (as in mx * -1), in many applications inplace inversion `mx *= -1`
+   * might be an infinitely better choice.
+   */
+  def unary_- = cloned.assign(Functions.NEGATE)
 
   def +=(that: Matrix) = m.assign(that, Functions.PLUS)
 
