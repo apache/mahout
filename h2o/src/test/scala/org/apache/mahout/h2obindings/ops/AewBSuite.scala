@@ -27,7 +27,6 @@ import org.apache.mahout.math.drm.logical._
 
 /** Elementwise matrix operation tests */
 class AewBSuite extends FunSuite with DistributedH2OSuite {
-
   test("A * B Hadamard") {
     val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5), (7, 8, 9))
     val inCoreB = dense((3, 4, 5), (5, 6, 7), (0, 0, 0), (9, 8, 7))
@@ -40,7 +39,6 @@ class AewBSuite extends FunSuite with DistributedH2OSuite {
     val inCoreMControl = inCoreA * inCoreB
 
     assert((inCoreM - inCoreMControl).norm < 1E-10)
-
   }
 
   test("A + B Elementwise") {
@@ -55,7 +53,6 @@ class AewBSuite extends FunSuite with DistributedH2OSuite {
     val inCoreMControl = inCoreA + inCoreB
 
     assert((inCoreM - inCoreMControl).norm < 1E-10)
-
   }
 
   test("A - B Elementwise") {
@@ -70,7 +67,6 @@ class AewBSuite extends FunSuite with DistributedH2OSuite {
     val inCoreMControl = inCoreA - inCoreB
 
     assert((inCoreM - inCoreMControl).norm < 1E-10)
-
   }
 
   test("A / B Elementwise") {
@@ -85,7 +81,5 @@ class AewBSuite extends FunSuite with DistributedH2OSuite {
     val inCoreMControl = inCoreA / inCoreB
 
     assert((inCoreM - inCoreMControl).norm < 1E-10)
-
   }
-
 }

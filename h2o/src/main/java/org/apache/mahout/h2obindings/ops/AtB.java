@@ -52,7 +52,7 @@ public class AtB {
           for (int r = 0; r < chunk_size; r++) {
             double v = 0;
             for (long i = 0; i < A_rows; i++) {
-              v += (A_vecs[(int)(start+r)].at(i) * B_vecs[c].at(i));
+              v += (A_vecs[(int)(start + r)].at(i) * B_vecs[c].at(i));
             }
             chks[c].set0(r, v);
           }

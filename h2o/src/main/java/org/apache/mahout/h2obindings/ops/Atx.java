@@ -38,37 +38,37 @@ public class Atx {
     Frame A = DrmA.frame;
     final H2OBCast<Vector> bx = new H2OBCast<Vector>(x);
 
-    /* A'x is computed into _atx[] with an MRTask on A (with
+    /* A'x is computed into atx[] with an MRTask on A (with
        x available as a Broadcast
 
        x.size() == A.numRows()
-       _atx.length == chks.length == A.numCols()
+       atx.length == chks.length == A.numCols()
     */
     class MRTaskAtx extends MRTask<MRTaskAtx> {
-      double _atx[];
+      double atx[];
       public void map(Chunk chks[]) {
         int chunk_size = chks[0].len();
         Vector x = bx.value();
         long start = chks[0].start();
 
-        _atx = new double[chks.length];
+        atx = new double[chks.length];
         for (int r = 0; r < chunk_size; r++) {
           double d = x.getQuick((int)start + r);
           for (int c = 0; c < chks.length; c++) {
-            _atx[c] += (chks[c].at0(r) * d);
+            atx[c] += (chks[c].at0(r) * d);
           }
         }
       }
       public void reduce(MRTaskAtx other) {
-        ArrayUtils.add(_atx, other._atx);
+        ArrayUtils.add(atx, other.atx);
       }
     }
 
-    /* Take the result in ._atx[], and convert into a Frame
+    /* Take the result in .atx[], and convert into a Frame
        using existing helper functions (creating a Matrix
        along the way for the Helper)
     */
-    Vector v = new DenseVector(new MRTaskAtx().doAll(A)._atx);
+    Vector v = new DenseVector(new MRTaskAtx().doAll(A).atx);
     Matrix m = new DenseMatrix(A.numCols(), 1);
     m.assignColumn(0, v);
     return H2OHelper.drm_from_matrix(m, -1, -1);

@@ -29,9 +29,7 @@ import org.apache.mahout.math.drm._
 
 /** Tests for {@link XtX} */
 class AtASuite extends FunSuite with DistributedH2OSuite {
-
   test("AtA slim") {
-
     val inCoreA = dense((1, 2), (2, 3))
     val drmA = drmParallelize(inCoreA)
 
@@ -43,8 +41,5 @@ class AtASuite extends FunSuite with DistributedH2OSuite {
     println(expectedAtA)
 
     assert(expectedAtA === inCoreAtA)
-
   }
-
-
 }

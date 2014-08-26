@@ -67,7 +67,7 @@ public class H2OBlockMatrix extends AbstractMatrix {
 
   public void setQuick(int row, int col, double val) {
     cow();
-    cow.setQuick (row, col, val);
+    cow.setQuick(row, col, val);
   }
 
   public Matrix like(int nrow, int ncol) {

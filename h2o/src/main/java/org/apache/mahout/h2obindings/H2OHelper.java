@@ -51,18 +51,18 @@ public class H2OHelper {
 
     /* MRTask to aggregate precalculated per-chunk sparse lengths */
     class MRTaskNZ extends MRTask<MRTaskNZ> {
-      long _sparselen;
+      long sparselen;
       public void map(Chunk chks[]) {
         for (Chunk chk : chks) {
-          _sparselen += chk.sparseLen();
+          sparselen += chk.sparseLen();
         }
       }
       public void reduce(MRTaskNZ other) {
-        _sparselen += other._sparselen;
+        sparselen += other.sparselen;
       }
     }
 
-    long sparselen = new MRTaskNZ().doAll(frame)._sparselen;
+    long sparselen = new MRTaskNZ().doAll(frame).sparselen;
 
     return (((rows * cols) / (sparselen + 1)) > 32);
   }
@@ -130,21 +130,21 @@ public class H2OHelper {
   */
   public static Vector colSums(Frame frame) {
     class MRTaskSum extends MRTask<MRTaskSum> {
-      public double _sums[];
+      public double sums[];
       public void map(Chunk chks[]) {
-        _sums = new double[chks.length];
+        sums = new double[chks.length];
 
         for (int c = 0; c < chks.length; c++) {
           for (int r = 0; r < chks[c].len(); r++) {
-            _sums[c] += chks[c].at0(r);
+            sums[c] += chks[c].at0(r);
           }
         }
       }
       public void reduce(MRTaskSum other) {
-        ArrayUtils.add(_sums, other._sums);
+        ArrayUtils.add(sums, other.sums);
       }
     }
-    return new DenseVector(new MRTaskSum().doAll(frame)._sums);
+    return new DenseVector(new MRTaskSum().doAll(frame).sums);
   }
 
 
@@ -154,19 +154,19 @@ public class H2OHelper {
   */
   public static double sumSqr(Frame frame) {
     class MRTaskSumSqr extends MRTask<MRTaskSumSqr> {
-      public double _sumSqr;
+      public double sumSqr;
       public void map(Chunk chks[]) {
         for (int c = 0; c < chks.length; c++) {
           for (int r = 0; r < chks[c].len(); r++) {
-            _sumSqr += (chks[c].at0(r) * chks[c].at0(r));
+            sumSqr += (chks[c].at0(r) * chks[c].at0(r));
           }
         }
       }
       public void reduce(MRTaskSumSqr other) {
-        _sumSqr += other._sumSqr;
+        sumSqr += other.sumSqr;
       }
     }
-    return new MRTaskSumSqr().doAll(frame)._sumSqr;
+    return new MRTaskSumSqr().doAll(frame).sumSqr;
   }
 
   /* Calculate Sum of all elements in a column, and
@@ -178,23 +178,23 @@ public class H2OHelper {
   */
   public static Vector nonZeroCnt(Frame frame) {
     class MRTaskNonZero extends MRTask<MRTaskNonZero> {
-      public double _sums[];
+      public double sums[];
       public void map(Chunk chks[]) {
-        _sums = new double[chks.length];
+        sums = new double[chks.length];
 
         for (int c = 0; c < chks.length; c++) {
           for (int r = 0; r < chks[c].len(); r++) {
             if ((long)chks[c].at0(r) != 0) {
-              _sums[c] ++;
+              sums[c] ++;
             }
           }
         }
       }
       public void reduce(MRTaskNonZero other) {
-        ArrayUtils.add(_sums, other._sums);
+        ArrayUtils.add(sums, other.sums);
       }
     }
-    return new DenseVector(new MRTaskNonZero().doAll(frame)._sums);
+    return new DenseVector(new MRTaskNonZero().doAll(frame).sums);
   }
 
   /* Convert String->Integer map to Integer->String map */
@@ -295,7 +295,7 @@ public class H2OHelper {
   public static Frame empty_frame(long nrow, int ncol, int min_hint, int exact_hint, Vec.VectorGroup vg) {
     int chunk_sz = chunk_size(nrow, ncol, min_hint, exact_hint);
     int nchunks = (int)((nrow - 1) / chunk_sz) + 1; /* Final number of Chunks per Vec */
-    long espc[] = new long[nchunks+1];
+    long espc[] = new long[nchunks + 1];
     final Vec[] vecs = new Vec[ncol];
 
     for (int i = 0; i < nchunks; i++) {

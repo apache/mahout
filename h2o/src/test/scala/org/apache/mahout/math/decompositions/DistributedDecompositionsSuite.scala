@@ -28,7 +28,4 @@ import scala.math._
 import org.scalatest.{Matchers, FunSuite}
 import org.apache.mahout.h2obindings.test.DistributedH2OSuite
 
-class DistributedDecompositionsSuite extends FunSuite with DistributedH2OSuite with DistributedDecompositionsSuiteBase {
-
-
-}
+class DistributedDecompositionsSuite extends FunSuite with DistributedH2OSuite with DistributedDecompositionsSuiteBase

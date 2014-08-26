@@ -29,7 +29,6 @@ import org.apache.mahout.math.drm._
 
 /** Tests for A' algorithms */
 class AtSuite extends FunSuite with DistributedH2OSuite {
-
   test("At") {
     val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5))
     val A = drmParallelize(m = inCoreA, numPartitions = 2)
@@ -40,7 +39,5 @@ class AtSuite extends FunSuite with DistributedH2OSuite {
 
     println(inCoreAt)
     assert((inCoreAt - inCoreControlAt).norm < 1E-5)
-
-
   }
 }

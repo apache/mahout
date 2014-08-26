@@ -39,9 +39,9 @@ public class MapBlock {
     Vec keys = DrmA.keys;
 
     class MRTaskBMF extends MRTask<MRTaskBMF> {
-      Serializable _bmf;
-      Vec _labels;
-      MRTaskBMF(Object bmf, Vec labels) {
+      Serializable bmf;
+      Vec labels;
+      MRTaskBMF(Object _bmf, Vec _labels) {
         /* BlockMapFun does not implement Serializable,
            but Scala closures are _always_ Serializable.
 
@@ -50,15 +50,15 @@ public class MapBlock {
            that Scala always tags the actually generated
            closure functions with Serializable.
          */
-        _bmf = (Serializable)bmf;
-        _labels = labels;
+        bmf = (Serializable)_bmf;
+        labels = _labels;
       }
 
-      private Matrix blockify (Chunk chks[]) {
+      private Matrix blockify(Chunk chks[]) {
         return new H2OBlockMatrix(chks);
       }
 
-      private void deblockify (Matrix out, NewChunk ncs[]) {
+      private void deblockify(Matrix out, NewChunk ncs[]) {
         // assert (out.colSize() == ncs.length)
         for (int c = 0; c < out.columnSize(); c++) {
           for (int r = 0; r < out.rowSize(); r++) {
@@ -83,8 +83,8 @@ public class MapBlock {
       */
       public void map(Chunk chks[], NewChunk ncs[]) {
         long start = chks[0].start();
-        NewChunk nclabel = is_r_str ? ncs[ncs.length-1] : null;
-        deblockify(MapBlockHelper.exec(_bmf, blockify(chks), start, _labels, nclabel, k, r), ncs);
+        NewChunk nclabel = is_r_str ? ncs[ncs.length - 1] : null;
+        deblockify(MapBlockHelper.exec(bmf, blockify(chks), start, labels, nclabel, k, r), ncs);
         // assert chks[i]._len == ncs[j]._len
       }
     }

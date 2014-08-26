@@ -49,7 +49,7 @@ public class RowRange {
 
           /* This chunk overlaps, filter out just the overlapping rows */
           for (int r = 0; r < chunk_size; r++) {
-            if (!R.contains (chunk_start + r)) {
+            if (!R.contains(chunk_start + r)) {
               continue;
             }
 

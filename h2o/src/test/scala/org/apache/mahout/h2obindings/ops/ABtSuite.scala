@@ -29,7 +29,6 @@ import org.apache.mahout.math.drm._
 
 /** Tests for AB' operator algorithms */
 class ABtSuite extends FunSuite with DistributedH2OSuite {
-
   test("ABt") {
     val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5))
     val inCoreB = dense((3, 4, 5), (5, 6, 7))
@@ -44,7 +43,5 @@ class ABtSuite extends FunSuite with DistributedH2OSuite {
     assert((inCoreM - inCoreMControl).norm < 1E-5)
 
     println(inCoreM)
-
   }
-
 }

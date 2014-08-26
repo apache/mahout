@@ -27,5 +27,4 @@ import org.scalatest.FunSuite
 import org.apache.mahout.h2obindings.test.DistributedH2OSuite
 
 /** Tests for DrmLikeOps */
-class DrmLikeOpsSuite extends FunSuite with DistributedH2OSuite with DrmLikeOpsSuiteBase {
-}
+class DrmLikeOpsSuite extends FunSuite with DistributedH2OSuite with DrmLikeOpsSuiteBase
