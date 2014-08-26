@@ -28,11 +28,11 @@ import org.apache.mahout.h2obindings.drm.H2ODrm;
 
 public class Cbind {
   /* R's cbind like operator, on DrmA and DrmB */
-  public static H2ODrm Cbind(H2ODrm DrmA, H2ODrm DrmB) {
-    Frame fra = DrmA.frame;
-    Vec keysa = DrmA.keys;
-    Frame frb = DrmB.frame;
-    Vec keysb = DrmB.keys;
+  public static H2ODrm Cbind(H2ODrm drmA, H2ODrm drmB) {
+    Frame fra = drmA.frame;
+    Vec keysa = drmA.keys;
+    Frame frb = drmB.frame;
+    Vec keysb = drmB.keys;
 
     /* If A and B are similarly partitioned, .. */
     if (fra.anyVec().group() == frb.anyVec().group()) {

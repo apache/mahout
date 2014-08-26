@@ -28,9 +28,9 @@ import water.fvec.NewChunk;
 
 public class AtB {
   /* Calculate A'B */
-  public static H2ODrm AtB(H2ODrm DrmA, H2ODrm DrmB) {
-    final Frame A = DrmA.frame;
-    final Frame B = DrmB.frame;
+  public static H2ODrm AtB(H2ODrm drmA, H2ODrm drmB) {
+    final Frame A = drmA.frame;
+    final Frame B = drmB.frame;
 
     /* First create an empty frame of the required dimensions */
     Frame AtB = H2OHelper.empty_frame(A.numCols(), B.numCols(), -1, -1);

@@ -32,9 +32,9 @@ import water.fvec.NewChunk;
 
 public class TimesRightMatrix {
   /* Multiple with in-core Matrix */
-  public static H2ODrm TimesRightMatrix(H2ODrm DrmA, Matrix B) {
-    Frame A = DrmA.frame;
-    Vec keys = DrmA.keys;
+  public static H2ODrm TimesRightMatrix(H2ODrm drmA, Matrix B) {
+    Frame A = drmA.frame;
+    Vec keys = drmA.keys;
     Frame AinCoreB = null;
 
     if (B instanceof DiagonalMatrix) {

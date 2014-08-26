@@ -28,10 +28,10 @@ import water.fvec.NewChunk;
 
 public class ABt {
   /* Calculate AB' */
-  public static H2ODrm ABt(H2ODrm DrmA, H2ODrm DrmB) {
-    Frame A = DrmA.frame;
-    Vec keys = DrmA.keys;
-    final Frame B = DrmB.frame;
+  public static H2ODrm ABt(H2ODrm drmA, H2ODrm drmB) {
+    Frame A = drmA.frame;
+    Vec keys = drmA.keys;
+    final Frame B = drmB.frame;
     int ABt_cols = (int)B.numRows();
 
     /* ABt is written into ncs[] with an MRTask on A, and therefore will

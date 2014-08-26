@@ -72,9 +72,9 @@ public class H2OHelper {
     Dense Matrix depending on number of missing elements
     in Frame.
   */
-  public static Matrix matrix_from_drm(H2ODrm Drm) {
-    Frame frame = Drm.frame;
-    Vec labels = Drm.keys;
+  public static Matrix matrix_from_drm(H2ODrm drm) {
+    Frame frame = drm.frame;
+    Vec labels = drm.keys;
     Matrix m;
 
     if (is_sparse(frame)) {

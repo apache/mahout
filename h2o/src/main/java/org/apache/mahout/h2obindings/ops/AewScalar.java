@@ -28,9 +28,9 @@ import water.fvec.NewChunk;
 
 public class AewScalar {
   /* Element-wise DRM-DRM operations */
-  public static H2ODrm AewScalar(H2ODrm DrmA, final double s, final String op) {
-    Frame A = DrmA.frame;
-    Vec keys = DrmA.keys;
+  public static H2ODrm AewScalar(H2ODrm drmA, final double s, final String op) {
+    Frame A = drmA.frame;
+    Vec keys = drmA.keys;
     int AewScalar_cols = A.numCols();
 
     /* AewScalar is written into ncs[] with an MRTask on A, and therefore will

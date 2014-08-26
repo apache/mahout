@@ -28,8 +28,8 @@ import water.fvec.NewChunk;
 
 public class At {
   /* Calculate A' (transpose) */
-  public static H2ODrm At(H2ODrm DrmA) {
-    final Frame A = DrmA.frame;
+  public static H2ODrm At(H2ODrm drmA) {
+    final Frame A = drmA.frame;
     /* First create a new frame of the required dimensions, A.numCols() rows
        and A.numRows() columns.
     */

@@ -28,8 +28,8 @@ import water.fvec.NewChunk;
 
 public class AtA {
   /* Calculate A'A */
-  public static H2ODrm AtA(H2ODrm DrmA) {
-    final Frame A = DrmA.frame;
+  public static H2ODrm AtA(H2ODrm drmA) {
+    final Frame A = drmA.frame;
     /* First create an empty Frame of the required dimensions */
     Frame AtA = H2OHelper.empty_frame(A.numCols(), A.numCols(), -1, -1);
 

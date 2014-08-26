@@ -33,10 +33,10 @@ import java.util.Arrays;
 import scala.reflect.ClassTag;
 
 public class MapBlock {
-  public static <K,R> H2ODrm exec(H2ODrm DrmA, int ncol, Object bmf, final boolean is_r_str,
+  public static <K,R> H2ODrm exec(H2ODrm drmA, int ncol, Object bmf, final boolean is_r_str,
                                   final ClassTag<K> k, final ClassTag<R> r) {
-    Frame A = DrmA.frame;
-    Vec keys = DrmA.keys;
+    Frame A = drmA.frame;
+    Vec keys = drmA.keys;
 
     class MRTaskBMF extends MRTask<MRTaskBMF> {
       Serializable bmf;

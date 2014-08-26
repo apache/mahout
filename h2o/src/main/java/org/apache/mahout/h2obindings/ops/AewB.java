@@ -28,10 +28,10 @@ import water.fvec.NewChunk;
 
 public class AewB {
   /* Element-wise DRM-DRM operations */
-  public static H2ODrm AewB(H2ODrm DrmA, H2ODrm DrmB, final String op) {
-    final Frame A = DrmA.frame;
-    final Frame B = DrmB.frame;
-    Vec keys = DrmA.keys;
+  public static H2ODrm AewB(H2ODrm drmA, H2ODrm drmB, final String op) {
+    final Frame A = drmA.frame;
+    final Frame B = drmB.frame;
+    Vec keys = drmA.keys;
     int AewB_cols = A.numCols();
 
     /* AewB is written into ncs[] with an MRTask on A, and therefore will

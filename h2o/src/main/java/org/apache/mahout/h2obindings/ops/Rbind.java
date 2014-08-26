@@ -29,11 +29,11 @@ import org.apache.mahout.h2obindings.drm.H2ODrm;
 
 public class Rbind {
   /* R's rbind like operator, on DrmA and DrmB */
-  public static H2ODrm Rbind(H2ODrm DrmA, H2ODrm DrmB) {
-    final Frame fra = DrmA.frame;
-    final Vec keysa = DrmA.keys;
-    final Frame frb = DrmB.frame;
-    final Vec keysb = DrmB.keys;
+  public static H2ODrm Rbind(H2ODrm drmA, H2ODrm drmB) {
+    final Frame fra = drmA.frame;
+    final Vec keysa = drmA.keys;
+    final Frame frb = drmB.frame;
+    final Vec keysb = drmB.keys;
 
     /* Create new frame and copy A's data at the top, and B's data below.
        Create the frame in the same VectorGroup as A, so A's data does not

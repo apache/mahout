@@ -30,9 +30,9 @@ import org.apache.mahout.h2obindings.drm.H2ODrm;
 
 public class RowRange {
   /* Filter operation */
-  public static H2ODrm RowRange(H2ODrm DrmA, final Range R) {
-    Frame A = DrmA.frame;
-    Vec keys = DrmA.keys;
+  public static H2ODrm RowRange(H2ODrm drmA, final Range R) {
+    Frame A = drmA.frame;
+    Vec keys = drmA.keys;
 
     /* Run a filtering MRTask on A. If row number falls within R.start() and
        R.end(), then the row makes it into the output

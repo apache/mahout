@@ -28,9 +28,9 @@ import org.apache.mahout.h2obindings.H2OHelper;
 import org.apache.mahout.h2obindings.drm.H2ODrm;
 
 public class Par {
-  public static H2ODrm exec(H2ODrm DrmA, int min, int exact) {
-    final Frame frin = DrmA.frame;
-    final Vec vin = DrmA.keys;
+  public static H2ODrm exec(H2ODrm drmA, int min, int exact) {
+    final Frame frin = drmA.frame;
+    final Vec vin = drmA.keys;
 
     /* First create a new empty Frame with the required partitioning */
     Frame frout = H2OHelper.empty_frame(frin.numRows(), frin.numCols(), min, exact);
