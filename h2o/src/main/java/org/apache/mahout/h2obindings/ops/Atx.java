@@ -27,9 +27,7 @@ import org.apache.mahout.h2obindings.drm.H2ODrm;
 
 import water.MRTask;
 import water.fvec.Frame;
-import water.fvec.Vec;
 import water.fvec.Chunk;
-import water.fvec.NewChunk;
 import water.util.ArrayUtils;
 
 public class Atx {
@@ -71,6 +69,6 @@ public class Atx {
     Vector v = new DenseVector(new MRTaskAtx().doAll(A).atx);
     Matrix m = new DenseMatrix(A.numCols(), 1);
     m.assignColumn(0, v);
-    return H2OHelper.drm_from_matrix(m, -1, -1);
+    return H2OHelper.drmFromMatrix(m, -1, -1);
   }
 }

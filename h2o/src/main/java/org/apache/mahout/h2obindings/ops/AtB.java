@@ -24,7 +24,6 @@ import water.MRTask;
 import water.fvec.Frame;
 import water.fvec.Vec;
 import water.fvec.Chunk;
-import water.fvec.NewChunk;
 
 public class AtB {
   /* Calculate A'B */
@@ -33,7 +32,7 @@ public class AtB {
     final Frame B = drmB.frame;
 
     /* First create an empty frame of the required dimensions */
-    Frame AtB = H2OHelper.empty_frame(A.numCols(), B.numCols(), -1, -1);
+    Frame AtB = H2OHelper.emptyFrame(A.numCols(), B.numCols(), -1, -1);
 
     /* Execute MRTask on the new Frame, and fill each cell (initially 0) by
        computing appropriate values from A and B.

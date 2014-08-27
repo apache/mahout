@@ -24,7 +24,6 @@ import water.MRTask;
 import water.fvec.Frame;
 import water.fvec.Vec;
 import water.fvec.Chunk;
-import water.fvec.NewChunk;
 
 public class At {
   /* Calculate A' (transpose) */
@@ -33,7 +32,7 @@ public class At {
     /* First create a new frame of the required dimensions, A.numCols() rows
        and A.numRows() columns.
     */
-    Frame At = H2OHelper.empty_frame(A.numCols(), (int)A.numRows(), -1, -1);
+    Frame At = H2OHelper.emptyFrame(A.numCols(), (int) A.numRows(), -1, -1);
 
     /* Execute MRTask on the new frame, and fill each cell (initially 0) by
        pulling in the appropriate value from A.

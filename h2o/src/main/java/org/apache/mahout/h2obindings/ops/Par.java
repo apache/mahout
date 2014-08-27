@@ -33,7 +33,7 @@ public class Par {
     final Vec vin = drmA.keys;
 
     /* First create a new empty Frame with the required partitioning */
-    Frame frout = H2OHelper.empty_frame(frin.numRows(), frin.numCols(), min, exact);
+    Frame frout = H2OHelper.emptyFrame(frin.numRows(), frin.numCols(), min, exact);
     Vec vout = null;
 
     if (vin != null) {

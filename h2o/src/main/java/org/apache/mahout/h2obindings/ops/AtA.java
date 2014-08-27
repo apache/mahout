@@ -24,14 +24,13 @@ import water.MRTask;
 import water.fvec.Frame;
 import water.fvec.Vec;
 import water.fvec.Chunk;
-import water.fvec.NewChunk;
 
 public class AtA {
   /* Calculate A'A */
   public static H2ODrm AtA(H2ODrm drmA) {
     final Frame A = drmA.frame;
     /* First create an empty Frame of the required dimensions */
-    Frame AtA = H2OHelper.empty_frame(A.numCols(), A.numCols(), -1, -1);
+    Frame AtA = H2OHelper.emptyFrame(A.numCols(), A.numCols(), -1, -1);
 
     /* Execute MRTask on the new Frame, and fill each cell (initially 0) by
        computing appropriate values from A.

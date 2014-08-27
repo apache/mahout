@@ -39,8 +39,8 @@ public class Rbind {
        Create the frame in the same VectorGroup as A, so A's data does not
        cross the wire during copy. B's data could potentially cross the wire.
     */
-    Frame frbind = H2OHelper.empty_frame(fra.numRows() + frb.numRows(), fra.numCols(),
-                                         -1, -1, fra.anyVec().group());
+    Frame frbind = H2OHelper.emptyFrame(fra.numRows() + frb.numRows(), fra.numCols(),
+            -1, -1, fra.anyVec().group());
     Vec keys = null;
 
     MRTask task = new MRTask() {

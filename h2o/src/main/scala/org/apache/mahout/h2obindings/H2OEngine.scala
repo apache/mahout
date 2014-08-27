@@ -44,19 +44,19 @@ object H2OEngine extends DistributedEngine {
     new H2OBCast(v)
 
   def drmFromHDFS(path: String, parMin: Int = 0)(implicit dc: DistributedContext): CheckpointedDrm[_] =
-    new CheckpointedDrmH2O(H2OHdfs.drm_from_file(path, parMin), dc)
+    new CheckpointedDrmH2O(H2OHdfs.drmFromFile(path, parMin), dc)
 
   def drmParallelizeEmpty(nrow: Int, ncol: Int, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[Int] =
-    new CheckpointedDrmH2O[Int](H2OHelper.empty_drm(nrow, ncol, numPartitions, -1), dc)
+    new CheckpointedDrmH2O[Int](H2OHelper.emptyDrm(nrow, ncol, numPartitions, -1), dc)
 
   def drmParallelizeEmptyLong(nrow: Long, ncol: Int, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[Long] =
-    new CheckpointedDrmH2O[Long](H2OHelper.empty_drm(nrow, ncol, numPartitions, -1), dc)
+    new CheckpointedDrmH2O[Long](H2OHelper.emptyDrm(nrow, ncol, numPartitions, -1), dc)
 
   def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[Int] =
-    new CheckpointedDrmH2O[Int](H2OHelper.drm_from_matrix(m, numPartitions, -1), dc)
+    new CheckpointedDrmH2O[Int](H2OHelper.drmFromMatrix(m, numPartitions, -1), dc)
 
   def drmParallelizeWithRowLabels(m: Matrix, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[String] =
-    new CheckpointedDrmH2O[String](H2OHelper.drm_from_matrix(m, numPartitions, -1), dc)
+    new CheckpointedDrmH2O[String](H2OHelper.drmFromMatrix(m, numPartitions, -1), dc)
 
   def toPhysical[K:ClassTag](plan: DrmLike[K], ch: CacheHint.CacheHint): CheckpointedDrm[K] =
     new CheckpointedDrmH2O[K](tr2phys(plan), plan.context)

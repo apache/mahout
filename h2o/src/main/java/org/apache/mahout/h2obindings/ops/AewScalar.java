@@ -17,7 +17,6 @@
 
 package org.apache.mahout.h2obindings.ops;
 
-import org.apache.mahout.h2obindings.H2OHelper;
 import org.apache.mahout.h2obindings.drm.H2ODrm;
 
 import water.MRTask;

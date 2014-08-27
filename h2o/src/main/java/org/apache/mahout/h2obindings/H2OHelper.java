@@ -31,11 +31,8 @@ import water.fvec.Chunk;
 import water.parser.ValueString;
 import water.util.ArrayUtils;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Arrays;
 
 import org.apache.mahout.h2obindings.drm.H2ODrm;
 
@@ -45,7 +42,7 @@ public class H2OHelper {
     Is the matrix sparse? If the number of missing elements is
     32 x times the number of present elements, treat it as sparse
   */
-  public static boolean is_sparse(Frame frame) {
+  public static boolean isSparse(Frame frame) {
     long rows = frame.numRows();
     long cols = frame.numCols();
 
@@ -72,12 +69,12 @@ public class H2OHelper {
     Dense Matrix depending on number of missing elements
     in Frame.
   */
-  public static Matrix matrix_from_drm(H2ODrm drm) {
+  public static Matrix matrixFromDrm(H2ODrm drm) {
     Frame frame = drm.frame;
     Vec labels = drm.keys;
     Matrix m;
 
-    if (is_sparse(frame)) {
+    if (isSparse(frame)) {
       m = new SparseMatrix((int)frame.numRows(), frame.numCols());
     } else {
       m = new DenseMatrix((int)frame.numRows(), frame.numCols());
@@ -198,7 +195,7 @@ public class H2OHelper {
   }
 
   /* Convert String->Integer map to Integer->String map */
-  private static Map<Integer,String> reverse_map(Map<String,Integer> map) {
+  private static Map<Integer,String> reverseMap(Map<String, Integer> map) {
     if (map == null) {
       return null;
     }
@@ -212,7 +209,7 @@ public class H2OHelper {
     return rmap;
   }
 
-  private static int chunk_size(long nrow, int ncol, int min, int exact) {
+  private static int chunkSize(long nrow, int ncol, int min, int exact) {
     int chunk_sz;
     int parts_hint = Math.max(min, exact);
 
@@ -244,9 +241,9 @@ public class H2OHelper {
   /* Ingest a Matrix into an H2O Frame. H2O Frame is the "backing"
      data structure behind CheckpointedDrm. Steps:
   */
-  public static H2ODrm drm_from_matrix(Matrix m, int min_hint, int exact_hint) {
+  public static H2ODrm drmFromMatrix(Matrix m, int min_hint, int exact_hint) {
     /* First create an empty (0-filled) frame of the required dimensions */
-    Frame frame = empty_frame(m.rowSize(), m.columnSize(), min_hint, exact_hint);
+    Frame frame = emptyFrame(m.rowSize(), m.columnSize(), min_hint, exact_hint);
     Vec labels = null;
     Vec.Writer writers[] = new Vec.Writer[m.columnSize()];
     Futures closer = new Futures();
@@ -272,7 +269,7 @@ public class H2OHelper {
       /* label vector must be similarly partitioned like the Frame */
       labels = frame.anyVec().makeZero();
       Vec.Writer writer = labels.open();
-      Map<Integer,String> rmap = reverse_map(map);
+      Map<Integer,String> rmap = reverseMap(map);
 
       for (long r = 0; r < m.rowSize(); r++) {
         writer.set(r, rmap.get(r));
@@ -286,14 +283,14 @@ public class H2OHelper {
     return new H2ODrm(frame, labels);
   }
 
-  public static Frame empty_frame(long nrow, int ncol, int min_hint, int exact_hint) {
+  public static Frame emptyFrame(long nrow, int ncol, int min_hint, int exact_hint) {
     Vec.VectorGroup vg = new Vec.VectorGroup();
 
-    return empty_frame(nrow, ncol, min_hint, exact_hint, vg);
+    return emptyFrame(nrow, ncol, min_hint, exact_hint, vg);
   }
 
-  public static Frame empty_frame(long nrow, int ncol, int min_hint, int exact_hint, Vec.VectorGroup vg) {
-    int chunk_sz = chunk_size(nrow, ncol, min_hint, exact_hint);
+  public static Frame emptyFrame(long nrow, int ncol, int min_hint, int exact_hint, Vec.VectorGroup vg) {
+    int chunk_sz = chunkSize(nrow, ncol, min_hint, exact_hint);
     int nchunks = (int)((nrow - 1) / chunk_sz) + 1; /* Final number of Chunks per Vec */
     long espc[] = new long[nchunks + 1];
     final Vec[] vecs = new Vec[ncol];
@@ -310,7 +307,7 @@ public class H2OHelper {
     return new Frame(vecs);
   }
 
-  public static H2ODrm empty_drm(long nrow, int ncol, int min_hint, int exact_hint) {
-    return new H2ODrm(empty_frame(nrow, ncol, min_hint, exact_hint));
+  public static H2ODrm emptyDrm(long nrow, int ncol, int min_hint, int exact_hint) {
+    return new H2ODrm(emptyFrame(nrow, ncol, min_hint, exact_hint));
   }
 }

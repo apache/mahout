@@ -17,7 +17,6 @@
 
 package org.apache.mahout.h2obindings;
 
-import java.io.IOException;
 import java.io.File;
 import java.net.URI;
 
@@ -48,7 +47,7 @@ import org.apache.hadoop.util.ReflectionUtils;
 
 
 public class H2OHdfs {
-  public static boolean is_seqfile(String filename) {
+  public static boolean isSeqfile(String filename) {
     try {
       String uri = filename;
       Configuration conf = new Configuration();
@@ -70,10 +69,10 @@ public class H2OHdfs {
     }
   }
 
-  public static H2ODrm drm_from_file(String filename, int parMin) {
+  public static H2ODrm drmFromFile(String filename, int parMin) {
     try {
-      if (is_seqfile(filename)) {
-        return drm_from_seqfile(filename, parMin);
+      if (isSeqfile(filename)) {
+        return drmFromSeqfile(filename, parMin);
       } else {
         return new H2ODrm(FrameUtils.parseFrame(null,new File(filename)));
       }
@@ -82,7 +81,7 @@ public class H2OHdfs {
     }
   }
 
-  public static H2ODrm drm_from_seqfile(String filename, int parMin) {
+  public static H2ODrm drmFromSeqfile(String filename, int parMin) {
     long rows = 0;
     int cols = 0;
     Frame frame = null;
@@ -139,7 +138,7 @@ public class H2OHdfs {
       }
       reader.seek(start);
 
-      frame = H2OHelper.empty_frame(rows, cols, parMin, -1);
+      frame = H2OHelper.emptyFrame(rows, cols, parMin, -1);
       writers = new Vec.Writer[cols];
       for (int i = 0; i < writers.length; i++) {
         writers[i] = frame.vecs()[i].open();
@@ -186,7 +185,7 @@ public class H2OHdfs {
     return new H2ODrm(frame, labels);
   }
 
-  public static void drm_to_file(String filename, H2ODrm Drm) throws java.io.IOException {
+  public static void drmToFile(String filename, H2ODrm Drm) throws java.io.IOException {
     Frame frame = Drm.frame;
     Vec labels = Drm.keys;
     String uri = filename;
@@ -194,7 +193,7 @@ public class H2OHdfs {
     Path path = new Path(uri);
     FileSystem fs = FileSystem.get(URI.create(uri), conf);
     SequenceFile.Writer writer = null;
-    boolean is_sparse = H2OHelper.is_sparse(frame);
+    boolean is_sparse = H2OHelper.isSparse(frame);
     ValueString vstr = new ValueString();
 
     if (labels != null) {

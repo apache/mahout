@@ -14,11 +14,11 @@ class CheckpointedDrmH2O[K: ClassTag](
   val context: DistributedContext
 ) extends CheckpointedDrm[K] {
 
-  def collect: Matrix = H2OHelper.matrix_from_drm(h2odrm)
+  def collect: Matrix = H2OHelper.matrixFromDrm(h2odrm)
   /* XXX: call frame.remove */
   def uncache(): this.type = this
 
-  def writeDRM(path: String): Unit = H2OHdfs.drm_to_file(path, h2odrm)
+  def writeDRM(path: String): Unit = H2OHdfs.drmToFile(path, h2odrm)
 
   def checkpoint(cacheHint: CacheHint.CacheHint): CheckpointedDrm[K] = this
 

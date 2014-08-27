@@ -20,7 +20,6 @@ package org.apache.mahout.h2obindings.ops;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.DiagonalMatrix;
-import org.apache.mahout.h2obindings.H2OHelper;
 import org.apache.mahout.h2obindings.drm.H2OBCast;
 import org.apache.mahout.h2obindings.drm.H2ODrm;
 
