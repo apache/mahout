@@ -176,8 +176,8 @@ object SimilarityAnalysis extends Serializable {
               val candidate = thingA -> llr
 
               // matches legacy hadoop code and maps values to range (0..1)
-              // val tLLR = 1.0 - (1.0 / (1.0 + llr))
-              //val candidate = thingA -> tLLR
+              // val normailizedLLR = 1.0 - (1.0 / (1.0 + llr))
+              // val candidate = thingA -> normailizedLLR
 
               // Enqueue item with score, if belonging to the top-k
               if (topItemsPerThing.size < maxInterestingItemsPerThing) {

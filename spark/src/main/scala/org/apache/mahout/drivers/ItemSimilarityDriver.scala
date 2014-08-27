@@ -114,8 +114,8 @@ object ItemSimilarityDriver extends MahoutDriver {
   }
 
   override def start(masterUrl: String = parser.opts("master").asInstanceOf[String],
-                     appName: String = parser.opts("appName").asInstanceOf[String]):
-  Unit = {
+      appName: String = parser.opts("appName").asInstanceOf[String]):
+    Unit = {
 
     // todo: the HashBiMap used in the TextDelimited Reader is hard coded into
     // MahoutKryoRegistrator, it should be added to the register list here so it

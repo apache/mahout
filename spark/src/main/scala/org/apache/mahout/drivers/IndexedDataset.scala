@@ -23,23 +23,23 @@ import org.apache.mahout.sparkbindings.drm.CheckpointedDrmSpark
 import org.apache.mahout.sparkbindings._
 
 /**
- * Wraps a [[org.apache.mahout.sparkbindings.drm.DrmLike]] object with two [[com.google.common.collect.BiMap]]s to store ID/label translation dictionaries.
- * The purpose of this class is to wrap a DrmLike[C] with bidirectional ID mappings so
- * a user specified label or ID can be stored and mapped to and from the [[scala.Int]] ordinal ID
- * used internal to Mahout Core code.
- *
- * Example: For a transpose job the [[org.apache.mahout.drivers.IndexedDataset#matrix]]: [[org.apache.mahout.sparkbindings.drm.DrmLike]] is passed into the DSL code
- * that transposes the values, then a resulting [[org.apache.mahout.drivers.IndexedDataset]] is created from the transposed DrmLike object with swapped dictionaries (since the rows and columns are transposed). The new
- * [[org.apache.mahout.drivers.IndexedDataset]] is returned.
- *
- * @param matrix  DrmLike[Int], representing the distributed matrix storing the actual data.
- * @param rowIDs BiMap[String, Int] storing a bidirectional mapping of external String ID to
- *                  and from the ordinal Mahout Int ID. This one holds row labels
- * @param columnIDs BiMap[String, Int] storing a bidirectional mapping of external String
- *                  ID to and from the ordinal Mahout Int ID. This one holds column labels
- * @todo Often no need for both or perhaps either dictionary, so save resources by allowing
- *       to be not created when not needed.
- */
+  * Wraps a [[org.apache.mahout.sparkbindings.drm.DrmLike]] object with two [[com.google.common.collect.BiMap]]s to store ID/label translation dictionaries.
+  * The purpose of this class is to wrap a DrmLike[C] with bidirectional ID mappings so
+  * a user specified label or ID can be stored and mapped to and from the [[scala.Int]] ordinal ID
+  * used internal to Mahout Core code.
+  *
+  * Example: For a transpose job the [[org.apache.mahout.drivers.IndexedDataset#matrix]]: [[org.apache.mahout.sparkbindings.drm.DrmLike]] is passed into the DSL code
+  * that transposes the values, then a resulting [[org.apache.mahout.drivers.IndexedDataset]] is created from the transposed DrmLike object with swapped dictionaries (since the rows and columns are transposed). The new
+  * [[org.apache.mahout.drivers.IndexedDataset]] is returned.
+  *
+  * @param matrix  DrmLike[Int], representing the distributed matrix storing the actual data.
+  * @param rowIDs BiMap[String, Int] storing a bidirectional mapping of external String ID to
+  *                  and from the ordinal Mahout Int ID. This one holds row labels
+  * @param columnIDs BiMap[String, Int] storing a bidirectional mapping of external String
+  *                  ID to and from the ordinal Mahout Int ID. This one holds column labels
+  * @todo Often no need for both or perhaps either dictionary, so save resources by allowing
+  *       to be not created when not needed.
+  */
 
 case class IndexedDataset(var matrix: CheckpointedDrm[Int], rowIDs: BiMap[String,Int], columnIDs: BiMap[String,Int]) {
 
@@ -65,13 +65,14 @@ case class IndexedDataset(var matrix: CheckpointedDrm[Int], rowIDs: BiMap[String
 }
 
 /**
- * Companion object for the case class [[org.apache.mahout.drivers.IndexedDataset]] primarily used to get a secondary constructor for
- * making one [[org.apache.mahout.drivers.IndexedDataset]] from another. Used when you have a factory like [[org.apache.mahout.drivers.IndexedDatasetStore]]
- * {{{
- *   val indexedDataset = IndexedDataset(indexedDatasetReader.readElementsFrom(source))
- *   val indexedDataset = IndexedDataset(indexedDatasetReader.readElementsFrom(source))
- * }}}
- */
+  * Companion object for the case class [[org.apache.mahout.drivers.IndexedDataset]] primarily used to get a secondary
+  * constructor for
+  * making one [[org.apache.mahout.drivers.IndexedDataset]] from another. Used when you have a factory like
+  * [[org.apache.mahout.drivers.Reader]]
+  * {{{
+  *   val indexedDataset = IndexedDataset(indexedDatasetReader.readElementsFrom(source))
+  * }}}
+  */
 
 object IndexedDataset {
   /** Secondary constructor for [[org.apache.mahout.drivers.IndexedDataset]] */
