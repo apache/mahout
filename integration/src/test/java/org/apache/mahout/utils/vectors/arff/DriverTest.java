@@ -36,10 +36,9 @@ public class DriverTest extends MahoutTestCase {
     ARFFVectorIterableTest.getVectors("sample-dense.arff", model);
     StringWriter writer = new StringWriter();
     Driver.writeLabelBindings(writer, model, ",");
-
-    String expected = Resources.toString(Resources.getResource("expected-arff-dictionary.csv"), Charsets.UTF_8);
-
-    assertEquals(expected, writer.toString());
+    String expected1 = Resources.toString(Resources.getResource("expected-arff-dictionary.csv"), Charsets.UTF_8);
+    String expected2 = Resources.toString(Resources.getResource("expected-arff-dictionary-2.csv"), Charsets.UTF_8);
+    assertTrue(expected1.equals(writer.toString()) || expected2.equals(writer.toString()));
   }
 
 
@@ -49,6 +48,8 @@ public class DriverTest extends MahoutTestCase {
     ARFFVectorIterableTest.getVectors("sample-dense.arff", model);
     StringWriter writer = new StringWriter();
     Driver.writeLabelBindingsJSON(writer, model);
-    assertEquals(Resources.toString(Resources.getResource("expected-arff-schema.json"), Charsets.UTF_8), writer.toString());
+    String expected1 = Resources.toString(Resources.getResource("expected-arff-schema.json"), Charsets.UTF_8);
+    String expected2 = Resources.toString(Resources.getResource("expected-arff-schema-2.json"), Charsets.UTF_8);
+    assertTrue(expected1.equals(writer.toString()) || expected2.equals(writer.toString()));
   }
 }

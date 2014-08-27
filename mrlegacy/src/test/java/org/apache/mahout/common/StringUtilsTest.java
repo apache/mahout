@@ -17,9 +17,9 @@
 
 package org.apache.mahout.common;
 
+import com.google.common.collect.Lists;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.List;
 
 public final class StringUtilsTest extends MahoutTestCase {
@@ -53,7 +53,7 @@ public final class StringUtilsTest extends MahoutTestCase {
   @Test
   public void testStringConversion() throws Exception {
 
-    List<String> expected = Arrays.asList("A", "B", "C");
+    List<String> expected = Lists.newArrayList("A", "B", "C");
     assertEquals(expected, StringUtils.fromString(StringUtils
         .toString(expected)));
 
