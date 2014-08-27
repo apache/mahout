@@ -17,7 +17,7 @@
 
 package org.apache.mahout.drivers
 
-import org.apache.mahout.math.cf.CooccurrenceAnalysis
+import org.apache.mahout.math.cf.SimilarityAnalysis
 import scala.collection.immutable.HashMap
 
 /**
@@ -58,10 +58,10 @@ object ItemSimilarityDriver extends MahoutDriver {
   override def main(args: Array[String]): Unit = {
 
     parser = new MahoutOptionParser(programName = "spark-itemsimilarity") {
-      head("spark-itemsimilarity", "Mahout 1.0-SNAPSHOT")
+      head("spark-itemsimilarity", "Mahout 1.0")
 
       //Input output options, non-driver specific
-      parseIOOptions
+      parseIOOptions(numInputs = 2)
 
       //Algorithm control options--driver specific
       opts = opts ++ ItemSimilarityOptions
@@ -73,13 +73,10 @@ object ItemSimilarityDriver extends MahoutDriver {
         if (x > 0) success else failure("Option --maxPrefs must be > 0")
       }
 
-      /** not implemented in CooccurrenceAnalysis.cooccurrence
-      opt[Int]("minPrefs") abbr ("mp") action { (x, options) =>
-        options.put("minPrefs", x)
-        options
-      } text ("Ignore users with less preferences than this (optional). Default: 1") validate { x =>
-        if (x > 0) success else failure("Option --minPrefs must be > 0")
-      }
+      /** not implemented in SimilarityAnalysis.cooccurrence
+        * threshold, and minPrefs
+        * todo: replacing the threshold with some % of the best values and/or a
+        * confidence measure expressed in standard deviations would be nice.
         */
 
       opt[Int]('m', "maxSimilaritiesPerItem") action { (x, options) =>
@@ -168,7 +165,7 @@ object ItemSimilarityDriver extends MahoutDriver {
     } else {
 
       val datasetA = IndexedDataset(reader1.readElementsFrom(inFiles))
-      if (parser.opts("writeAllDatasets").asInstanceOf[Boolean]) writer.writeDRMTo(datasetA,
+      if (parser.opts("writeAllDatasets").asInstanceOf[Boolean]) writer.writeTo(datasetA,
         parser.opts("output").asInstanceOf[String] + "../input-datasets/primary-interactions")
 
       // The case of readng B can be a bit tricky when the exact same row IDs don't exist for A and B
@@ -206,7 +203,7 @@ object ItemSimilarityDriver extends MahoutDriver {
         val returnedB = if (rowCardinality != datasetB.matrix.nrow) datasetB.newRowCardinality(rowCardinality)
         else datasetB // this guarantees matching cardinality
 
-        if (parser.opts("writeAllDatasets").asInstanceOf[Boolean]) writer.writeDRMTo(datasetB, parser.opts("output") + "../input-datasets/secondary-interactions")
+        if (parser.opts("writeAllDatasets").asInstanceOf[Boolean]) writer.writeTo(datasetB, parser.opts("output") + "../input-datasets/secondary-interactions")
 
         Array(returnedA, returnedB)
       } else Array(datasetA)
@@ -221,11 +218,11 @@ object ItemSimilarityDriver extends MahoutDriver {
     // todo: allow more than one cross-similarity matrix?
     val indicatorMatrices = {
       if (indexedDatasets.length > 1) {
-        CooccurrenceAnalysis.cooccurrences(indexedDatasets(0).matrix, parser.opts("randomSeed").asInstanceOf[Int],
+        SimilarityAnalysis.cooccurrences(indexedDatasets(0).matrix, parser.opts("randomSeed").asInstanceOf[Int],
           parser.opts("maxSimilaritiesPerItem").asInstanceOf[Int], parser.opts("maxPrefs").asInstanceOf[Int],
           Array(indexedDatasets(1).matrix))
       } else {
-        CooccurrenceAnalysis.cooccurrences(indexedDatasets(0).matrix, parser.opts("randomSeed").asInstanceOf[Int],
+        SimilarityAnalysis.cooccurrences(indexedDatasets(0).matrix, parser.opts("randomSeed").asInstanceOf[Int],
           parser.opts("maxSimilaritiesPerItem").asInstanceOf[Int], parser.opts("maxPrefs").asInstanceOf[Int])
       }
     }
@@ -233,13 +230,13 @@ object ItemSimilarityDriver extends MahoutDriver {
     // an alternative is to create a version of IndexedDataset that knows how to write itself
     val selfIndicatorDataset = new IndexedDatasetTextDelimitedWriteable(indicatorMatrices(0), indexedDatasets(0).columnIDs,
       indexedDatasets(0).columnIDs, writeSchema)
-    selfIndicatorDataset.writeTo(parser.opts("output").asInstanceOf[String] + "indicator-matrix")
+    selfIndicatorDataset.writeTo(dest = parser.opts("output").asInstanceOf[String] + "indicator-matrix")
 
     // todo: would be nice to support more than one cross-similarity indicator
     if (indexedDatasets.length > 1) {
 
       val crossIndicatorDataset = new IndexedDataset(indicatorMatrices(1), indexedDatasets(0).columnIDs, indexedDatasets(1).columnIDs) // cross similarity
-      writer.writeDRMTo(crossIndicatorDataset, parser.opts("output").asInstanceOf[String] + "cross-indicator-matrix")
+      writer.writeTo(crossIndicatorDataset, parser.opts("output").asInstanceOf[String] + "cross-indicator-matrix")
 
     }
 

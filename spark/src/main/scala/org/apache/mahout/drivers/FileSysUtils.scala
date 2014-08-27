@@ -24,11 +24,9 @@ import org.apache.hadoop.fs.{Path, FileStatus, FileSystem}
  * Returns a [[java.lang.String]]comma delimited list of URIs discovered based on parameters in the constructor.
  * The String is formatted to be input into [[org.apache.spark.SparkContext.textFile()]]
  *
- * @param pathURI Where to start looking for inFiles, only HDFS is currently
- *                supported. The pathURI may be a list of comma delimited URIs like those supported
- *                by Spark
+ * @param pathURI Where to start looking for inFiles, may be a list of comma delimited URIs
  * @param filePattern regex that must match the entire filename to have the file returned
- * @param recursive true traverses the filesystem recursively
+ * @param recursive true traverses the filesystem recursively, default = false
  */
 
 case class FileSysUtils(pathURI: String, filePattern: String = "", recursive: Boolean = false) {
@@ -36,8 +34,8 @@ case class FileSysUtils(pathURI: String, filePattern: String = "", recursive: Bo
   val conf = new Configuration()
   val fs = FileSystem.get(conf)
 
-  /** Returns a string of comma delimited URIs matching the filePattern
-    * When pattern matching dirs are never returned, only traversed. */
+/** Returns a string of comma delimited URIs matching the filePattern
+  * When pattern matching dirs are never returned, only traversed. */
   def uris :String = {
     if (!filePattern.isEmpty){ // have file pattern so
     val pathURIs = pathURI.split(",")
@@ -52,9 +50,9 @@ case class FileSysUtils(pathURI: String, filePattern: String = "", recursive: Bo
     }
   }
 
-  /** Find matching files in the dir, recursively call self when another directory is found
-    * Only files are matched, directories are traversed but never return a match */
-  def findFiles(dir: String, filePattern :String = ".*", files : String = ""): String = {
+/** Find matching files in the dir, recursively call self when another directory is found
+  * Only files are matched, directories are traversed but never return a match */
+  private def findFiles(dir: String, filePattern :String = ".*", files : String = ""): String = {
     val seed = fs.getFileStatus(new Path(dir))
     var f :String = files
 

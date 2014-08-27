@@ -27,7 +27,9 @@ import scala.collection.JavaConversions._
 /** Extends Reader trait to supply the [[org.apache.mahout.drivers.IndexedDataset]] as the type read and a reader function for reading text delimited files as described in the [[org.apache.mahout.drivers.Schema]]
   */
 trait TDIndexedDatasetReader extends Reader[IndexedDataset]{
-  /** Read in text delimited elements from all URIs in this comma delimited source String.
+  /** Read in text delimited elements from all URIs in the comma delimited source String and return
+    * the DRM of all elements updating the dictionaries for row and column dictionaries. If there is
+    * no strength value in the element, assume it's presence means a strength of 1.
     *
     * @param mc context for the Spark job
     * @param readSchema describes the delimiters and positions of values in the text delimited file.
@@ -112,7 +114,9 @@ trait TDIndexedDatasetReader extends Reader[IndexedDataset]{
     }
   }
 
-  /** Read in text delimited rows from all URIs in this comma delimited source String.
+  /** Read in text delimited rows from all URIs in this comma delimited source String and return
+    * the DRM of all elements updating the dictionaries for row and column dictionaries. If there is
+    * no strength value in the element, assume it's presence means a strength of 1.
     *
     * @param mc context for the Spark job
     * @param readSchema describes the delimiters and positions of values in the text delimited file.
@@ -299,7 +303,7 @@ class TextDelimitedIndexedDatasetReader(val readSchema: Schema)
 /** Writes  text delimited files into an IndexedDataset. Classes are needed to supply trait params in their constructor.
   * @param writeSchema describes the delimiters and position of values in the text delimited file(s) written.
   * @param mc Spark context for reading files
-  * @note the destination is supplied by Writer#writeDRMTo trait method
+  * @note the destination is supplied by Writer#writeTo trait method
   * */
 class TextDelimitedIndexedDatasetWriter(val writeSchema: Schema, val sort: Boolean = true)(implicit val mc: DistributedContext) extends TDIndexedDatasetWriter
 
@@ -312,7 +316,7 @@ class TextDelimitedIndexedDatasetReaderWriter(val readSchema: Schema, val writeS
     (implicit val mc: DistributedContext)
   extends TDIndexedDatasetReaderWriter
 
-/** A version of IndexedDataset that has it's own writeDRMTo method from a Writer trait. This is an alternative to creating
+/** A version of IndexedDataset that has it's own writeTo method from a Writer trait. This is an alternative to creating
   * a Writer based stand-alone class for writing. Consider it experimental allowing similar semantics to drm.writeDrm().
   * Experimental because it's not clear that it is simpler or more intuitive and since IndexedDatasetTextDelimitedWriteables
   * are probably short lived in terms of lines of code so complexity may be moot.
@@ -331,18 +335,20 @@ class IndexedDatasetTextDelimitedWriteable(
     (implicit val mc: DistributedContext)
   extends IndexedDataset(matrix, rowIDs, columnIDs) with TDIndexedDatasetWriter {
 
-  def writeTo(dest: String): Unit = {
-    writeDRMTo(this, dest)
+  override def writeTo(collection: IndexedDataset = this, dest: String): Unit = {
+    super.writeTo(this, dest)
   }
 }
 
 /**
- * Companion object for the case class [[org.apache.mahout.drivers.IndexedDatasetTextDelimitedWriteable]] primarily used to get a secondary constructor for
- * making one [[org.apache.mahout.drivers.IndexedDatasetTextDelimitedWriteable]] from another. Used when you have a factory like [[org.apache.mahout.drivers.TextDelimitedIndexedDatasetReader]]
- * {{{
- *   val id = IndexedDatasetTextDelimitedWriteable(indexedDatasetReader.readElementsFrom(source))
- * }}}
- */
+  * Companion object for the case class [[org.apache.mahout.drivers.IndexedDatasetTextDelimitedWriteable]] primarily
+  * used to get a secondary constructor for
+  * making one [[org.apache.mahout.drivers.IndexedDatasetTextDelimitedWriteable]] from another. Used when you have a
+  * factory like [[org.apache.mahout.drivers.TextDelimitedIndexedDatasetReader]]
+  * {{{
+  *   val id = IndexedDatasetTextDelimitedWriteable(indexedDatasetReader.readElementsFrom(source))
+  * }}}
+  */
 
 object IndexedDatasetTextDelimitedWriteable {
   /** Secondary constructor for [[org.apache.mahout.drivers.IndexedDataset]] */

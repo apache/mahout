@@ -66,16 +66,18 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
 
   override def showUsageOnError = true
 
-  def parseIOOptions = {
+  def parseIOOptions(numInputs: Int = 1) = {
     opts = opts ++ MahoutOptionParser.FileIOOptions
     note("Input, output options")
     opt[String]('i', "input") required() action { (x, options) =>
       options + ("input" -> x)
     } text ("Input path, may be a filename, directory name, or comma delimited list of HDFS supported URIs (required)")
 
-    opt[String]("input2") abbr ("i2")  action { (x, options) =>
-      options + ("input2" -> x)
-    } text ("Secondary input path for cross-similarity calculation, same restrictions as \"--input\" (optional). Default: empty.")
+    if (numInputs == 2) {
+      opt[String]("input2") abbr ("i2") action { (x, options) =>
+        options + ("input2" -> x)
+      } text ("Secondary input path for cross-similarity calculation, same restrictions as \"--input\" (optional). Default: empty.")
+    }
 
     opt[String]('o', "output") required() action { (x, options) =>
       // todo: check to see if HDFS allows MS-Windows backslashes locally?

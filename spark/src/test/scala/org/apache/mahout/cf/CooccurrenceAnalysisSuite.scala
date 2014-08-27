@@ -17,7 +17,7 @@
 
 package org.apache.mahout.cf
 
-import org.apache.mahout.math.cf.CooccurrenceAnalysis
+import org.apache.mahout.math.cf.SimilarityAnalysis
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.scalabindings.{MatrixOps, _}
 import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
@@ -81,7 +81,7 @@ class CooccurrenceAnalysisSuite extends FunSuite with MahoutSuite with Distribut
     val drmB = drmParallelize(m = b, numPartitions = 2)
 
     //self similarity
-    val drmCooc = CooccurrenceAnalysis.cooccurrences(drmARaw = drmA, randomSeed = 1, drmBs = Array(drmB))
+    val drmCooc = SimilarityAnalysis.cooccurrences(drmARaw = drmA, randomSeed = 1, drmBs = Array(drmB))
     val matrixSelfCooc = drmCooc(0).checkpoint().collect
     val diffMatrix = matrixSelfCooc.minus(matrixLLRCoocAtAControl)
     var n = (new MatrixOps(m = diffMatrix)).norm
@@ -112,7 +112,7 @@ class CooccurrenceAnalysisSuite extends FunSuite with MahoutSuite with Distribut
     val drmB = drmParallelize(m = b, numPartitions = 2)
 
     //self similarity
-    val drmCooc = CooccurrenceAnalysis.cooccurrences(drmARaw = drmA, drmBs = Array(drmB))
+    val drmCooc = SimilarityAnalysis.cooccurrences(drmARaw = drmA, drmBs = Array(drmB))
     val matrixSelfCooc = drmCooc(0).checkpoint().collect
     val diffMatrix = matrixSelfCooc.minus(matrixLLRCoocAtAControl)
     var n = (new MatrixOps(m = diffMatrix)).norm
@@ -142,7 +142,7 @@ class CooccurrenceAnalysisSuite extends FunSuite with MahoutSuite with Distribut
     val drmB = drmParallelize(m = b, numPartitions = 2)
 
    //self similarity
-    val drmCooc = CooccurrenceAnalysis.cooccurrences(drmARaw = drmA, drmBs = Array(drmB))
+    val drmCooc = SimilarityAnalysis.cooccurrences(drmARaw = drmA, drmBs = Array(drmB))
     //var cp = drmSelfCooc(0).checkpoint()
     //cp.writeDRM("/tmp/cooc-spark/")//to get values written
     val matrixSelfCooc = drmCooc(0).checkpoint().collect
@@ -181,7 +181,7 @@ class CooccurrenceAnalysisSuite extends FunSuite with MahoutSuite with Distribut
     val drmB = drmParallelize(m = b, numPartitions = 2)
 
     //self similarity
-    val drmCooc = CooccurrenceAnalysis.cooccurrences(drmARaw = drmA, drmBs = Array(drmB))
+    val drmCooc = SimilarityAnalysis.cooccurrences(drmARaw = drmA, drmBs = Array(drmB))
     val matrixSelfCooc = drmCooc(0).checkpoint().collect
     val diffMatrix = matrixSelfCooc.minus(matrixLLRCoocAtAControl)
     var n = (new MatrixOps(m = diffMatrix)).norm
@@ -235,7 +235,7 @@ class CooccurrenceAnalysisSuite extends FunSuite with MahoutSuite with Distribut
     val numInteractionsWithB = 2L
     val numInteractions = 6l
 
-    val llr = CooccurrenceAnalysis.logLikelihoodRatio(numInteractionsWithA, numInteractionsWithB, numInteractionsWithAandB, numInteractions)
+    val llr = SimilarityAnalysis.logLikelihoodRatio(numInteractionsWithA, numInteractionsWithB, numInteractionsWithAandB, numInteractions)
 
     assert(llr == 2.6341457841558764) // value calculated by hadoop itemsimilairty
   }
@@ -248,7 +248,7 @@ class CooccurrenceAnalysisSuite extends FunSuite with MahoutSuite with Distribut
         (1, 1, 0, 1, 0))
     val drmA: DrmLike[Int] = drmParallelize(m = a, numPartitions = 2)
 
-    val downSampledDrm = CooccurrenceAnalysis.sampleDownAndBinarize(drmA, 0xdeadbeef, 4)
+    val downSampledDrm = SimilarityAnalysis.sampleDownAndBinarize(drmA, 0xdeadbeef, 4)
     //count non-zero values, should be == 7
     var numValues = 0
     val m = downSampledDrm.collect

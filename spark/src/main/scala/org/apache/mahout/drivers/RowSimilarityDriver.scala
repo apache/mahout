@@ -17,24 +17,22 @@
 
 package org.apache.mahout.drivers
 
-import org.apache.mahout.math.cf.CooccurrenceAnalysis
+import org.apache.mahout.math.cf.SimilarityAnalysis
 import scala.collection.immutable.HashMap
 
 /**
- * Command line interface for [[org.apache.mahout.cf.CooccurrenceAnalysis.cooccurrences( )]].
+ * Command line interface for [[org.apache.mahout.cf.SimilarityAnalysis.rowSimilarity( )]].
  * Reads a text delimited file containing a Mahout DRM of the form
  * (row id, column id: strength, ...). The IDs are user specified strings which will be
  * preserved in the
- * output. The rows define a matrix and [[org.apache.mahout.cf.CooccurrenceAnalysis.cooccurrences( )]]
- * will be used to calculate row-wise self-similarity, or when using two inputs, will
- * calculate cross-similarity between rows of the primary and
- * secondary inputs. Returns one or two directories of text files formatted the same as the input.
+ * output. The rows define a matrix and [[org.apache.mahout.cf.SimilarityAnalysis.rowSimilarity( )]]
+ * will be used to calculate row-wise similarity using log-likelihood
  * The options allow control of the input schema, file discovery, output schema, and control of
  * algorithm parameters.
  * To get help run {{{mahout spark-rowsimilarity}}} for a full explanation of options. The default
  * values for formatting will read (rowID<tab>columnID1:strength1<space>columnID2:strength2....)
- * and write (columnID<tab>columnID1:strength1<space>columnID2:strength2....)
- * Each output line will contain a Column ID and similar columns sorted by LLR strength descending.
+ * and write (rowID<tab>rowID1:strength1<space>rowID2:strength2....)
+ * Each output line will contain a row ID and similar columns sorted by LLR strength descending.
  * @note To use with a Spark cluster see the --master option, if you run out of heap space check
  *       the --sparkExecutorMemory option.
  */
@@ -54,10 +52,10 @@ object RowSimilarityDriver extends MahoutDriver {
   override def main(args: Array[String]): Unit = {
 
     parser = new MahoutOptionParser(programName = "spark-rowsimilarity") {
-      head("spark-rowsimilarity", "Mahout 1.0-SNAPSHOT")
+      head("spark-rowsimilarity", "Mahout 1.0")
 
       //Input output options, non-driver specific
-      parseIOOptions
+      parseIOOptions()
 
       //Algorithm control options--driver specific
       opts = opts ++ RowSimilarityOptions
@@ -76,6 +74,11 @@ object RowSimilarityDriver extends MahoutDriver {
         RowSimilarityOptions("maxSimilaritiesPerRow")) validate { x =>
         if (x > 0) success else failure("Option --maxSimilaritiesPerRow must be > 0")
       }
+
+      /** --threshold not implemented in SimilarityAnalysis.rowSimilarity
+        * todo: replacing the threshold with some % of the best values and/or a
+        * confidence measure expressed in standard deviations would be nice.
+        */
 
       //Driver notes--driver specific
       note("\nNote: Only the Log Likelihood Ratio (LLR) is supported as a similarity measure.")
@@ -124,85 +127,31 @@ object RowSimilarityDriver extends MahoutDriver {
 
   }
 
-  private def readIndexedDatasets: Array[IndexedDataset] = {
+  private def readIndexedDataset: IndexedDataset = {
 
     val inFiles = FileSysUtils(parser.opts("input").asInstanceOf[String], parser.opts("filenamePattern").asInstanceOf[String],
       parser.opts("recursive").asInstanceOf[Boolean]).uris
-    val inFiles2 = if (parser.opts("input2") == null || parser.opts("input2").asInstanceOf[String].isEmpty) ""
-    else FileSysUtils(parser.opts("input2").asInstanceOf[String], parser.opts("filenamePattern").asInstanceOf[String],
-      parser.opts("recursive").asInstanceOf[Boolean]).uris
 
     if (inFiles.isEmpty) {
-      Array()
+      null.asInstanceOf[IndexedDataset]
     } else {
 
       val datasetA = IndexedDataset(readerWriter.readDRMFrom(inFiles))
-      if (parser.opts("writeAllDatasets").asInstanceOf[Boolean]) readerWriter.writeDRMTo(datasetA,
-        parser.opts("output").asInstanceOf[String] + "../input-datasets/primary-interactions")
-
-      // The case of readng B can be a bit tricky when the exact same row IDs don't exist for A and B
-      // Here we assume there is one row ID space for all interactions. To do this we calculate the
-      // row cardinality only after reading in A and B (or potentially C...) We then adjust the
-      // cardinality so all match, which is required for the math to work.
-      // Note: this may leave blank rows with no representation in any DRM. Blank rows need to
-      // be supported (and are at least on Spark) or the row cardinality fix will not work.
-      val datasetB = if (!inFiles2.isEmpty) {
-        // get cross-cooccurrence interactions from separate files
-        val datasetB = IndexedDataset(readerWriter.readDRMFrom(inFiles2, existingRowIDs = datasetA.rowIDs))
-        datasetB
-      } else {
-        null.asInstanceOf[IndexedDataset]
-      }
-
-      if (datasetB != null.asInstanceOf[IndexedDataset]) { // do AtB calc
-      // true row cardinality is the size of the row id index, which was calculated from all rows of A and B
-      val rowCardinality = datasetB.rowIDs.size() // the authoritative row cardinality
-
-        // todo: how expensive is nrow? We could make assumptions about .rowIds that don't rely on
-        // its calculation
-        val returnedA = if (rowCardinality != datasetA.matrix.nrow) datasetA.newRowCardinality(rowCardinality)
-        else datasetA // this guarantees matching cardinality
-
-        val returnedB = if (rowCardinality != datasetB.matrix.nrow) datasetB.newRowCardinality(rowCardinality)
-        else datasetB // this guarantees matching cardinality
-
-        if (parser.opts("writeAllDatasets").asInstanceOf[Boolean]) readerWriter.writeDRMTo(datasetB,
-          parser.opts("output") + "../input-datasets/secondary-interactions")
-
-        Array(returnedA, returnedB)
-      } else Array(datasetA)
+      datasetA
     }
   }
 
   override def process: Unit = {
     start()
 
-    val indexedDatasets = readIndexedDatasets
+    val indexedDataset = readIndexedDataset
 
-    // todo: allow more than one cross-similarity matrix?
-    val indicatorMatrices = {
-      if (indexedDatasets.length > 1) {
-        CooccurrenceAnalysis.cooccurrences(indexedDatasets(0).matrix, parser.opts("randomSeed").asInstanceOf[Int],
-          parser.opts("maxSimilaritiesPerRow").asInstanceOf[Int], parser.opts("maxObservations").asInstanceOf[Int],
-          Array(indexedDatasets(1).matrix))
-      } else {
-        CooccurrenceAnalysis.cooccurrences(indexedDatasets(0).matrix, parser.opts("randomSeed").asInstanceOf[Int],
-          parser.opts("maxSimilaritiesPerRow").asInstanceOf[Int], parser.opts("maxObservations").asInstanceOf[Int])
-      }
-    }
+    val rowSimilarityDrm = SimilarityAnalysis.rowSimilarity(indexedDataset.matrix, parser.opts("randomSeed").asInstanceOf[Int],
+      parser.opts("maxSimilaritiesPerRow").asInstanceOf[Int], parser.opts("maxObservations").asInstanceOf[Int])
 
-    // an alternative is to create a version of IndexedDataset that knows how to write itself
-    val selfIndicatorDataset = new IndexedDatasetTextDelimitedWriteable(indicatorMatrices(0),
-      indexedDatasets(0).columnIDs, indexedDatasets(0).columnIDs, readWriteSchema)
-    selfIndicatorDataset.writeTo(parser.opts("output").asInstanceOf[String] + "indicator-matrix")
-
-    if (indexedDatasets.length > 1) {
-
-      val crossIndicatorDataset = new IndexedDataset(indicatorMatrices(1), indexedDatasets(0).columnIDs, indexedDatasets(1).columnIDs) // cross similarity
-      readerWriter.writeDRMTo(crossIndicatorDataset, parser.opts("output").asInstanceOf[String] +
-        "cross-indicator-matrix")
-
-    }
+    val rowSimilarityDataset = new IndexedDatasetTextDelimitedWriteable(rowSimilarityDrm,
+      indexedDataset.rowIDs, indexedDataset.rowIDs, readWriteSchema)
+    rowSimilarityDataset.writeTo(dest = parser.opts("output").asInstanceOf[String])
 
     stop
   }

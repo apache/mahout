@@ -62,5 +62,5 @@ trait Writer[T]{
 
   protected def writer(mc: DistributedContext, writeSchema: Schema, dest: String, collection: T, sort: Boolean): Unit
 
-  def writeDRMTo(collection: T, dest: String) = writer(mc, writeSchema, dest, collection, sort)
+  def writeTo(collection: T, dest: String) = writer(mc, writeSchema, dest, collection, sort)
 }

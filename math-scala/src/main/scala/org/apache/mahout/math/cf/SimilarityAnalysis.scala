@@ -37,11 +37,19 @@ import org.apache.mahout.math.function.{VectorFunction, Functions}
  * Scalable Similarity-Based Neighborhood Methods with MapReduce
  * ACM Conference on Recommender Systems 2012"
  */
-object CooccurrenceAnalysis extends Serializable {
+object SimilarityAnalysis extends Serializable {
 
   /** Compares (Int,Double) pairs by the second value */
   private val orderByScore = Ordering.fromLessThan[(Int, Double)] { case ((_, score1), (_, score2)) => score1 > score2}
 
+  /** Calculates item (column-wise) similarity using the log-likelihood ratio on A'A, A'B, A'C, ...
+    * and returns a list of indicator and cross-indicator matrices
+    * @param drmARaw Primary interaction matrix
+    * @param randomSeed when kept to a constant will make repeatable downsampling
+    * @param maxInterestingItemsPerThing number of similar items to return per item, default: 50
+    * @param maxNumInteractions max number of interactions after downsampling, default: 500
+    * @return
+    * */
   def cooccurrences(drmARaw: DrmLike[Int], randomSeed: Int = 0xdeadbeef, maxInterestingItemsPerThing: Int = 50,
                     maxNumInteractions: Int = 500, drmBs: Array[DrmLike[Int]] = Array()): List[DrmLike[Int]] = {
 
@@ -60,7 +68,7 @@ object CooccurrenceAnalysis extends Serializable {
     val drmAtA = drmA.t %*% drmA
 
     // Compute loglikelihood scores and sparsify the resulting matrix to get the indicator matrix
-    val drmIndicatorsAtA = computeIndicators(drmAtA, numUsers, maxInterestingItemsPerThing, bcastInteractionsPerItemA,
+    val drmIndicatorsAtA = computeSimilarities(drmAtA, numUsers, maxInterestingItemsPerThing, bcastInteractionsPerItemA,
       bcastInteractionsPerItemA, crossCooccurrence = false)
 
     var indicatorMatrices = List(drmIndicatorsAtA)
@@ -76,7 +84,7 @@ object CooccurrenceAnalysis extends Serializable {
       // Compute cross-co-occurrence matrix A'B
       val drmAtB = drmA.t %*% drmB
 
-      val drmIndicatorsAtB = computeIndicators(drmAtB, numUsers, maxInterestingItemsPerThing,
+      val drmIndicatorsAtB = computeSimilarities(drmAtB, numUsers, maxInterestingItemsPerThing,
         bcastInteractionsPerItemA, bcastInteractionsPerThingB)
 
       indicatorMatrices = indicatorMatrices :+ drmIndicatorsAtB
@@ -89,6 +97,37 @@ object CooccurrenceAnalysis extends Serializable {
 
     // Return list of indicator matrices
     indicatorMatrices
+  }
+
+  /** Calculates row-wise similarity using the log-likelihood ratio on AA' and returns a drm of rows and similar rows
+    * @param drmARaw Primary interaction matrix
+    * @param randomSeed when kept to a constant will make repeatable downsampling
+    * @param maxInterestingSimilaritiesPerRow number of similar items to return per item, default: 50
+    * @param maxNumInteractions max number of interactions after downsampling, default: 500
+    * @return
+    * */
+  def rowSimilarity(drmARaw: DrmLike[Int], randomSeed: Int = 0xdeadbeef, maxInterestingSimilaritiesPerRow: Int = 50,
+                    maxNumInteractions: Int = 500): DrmLike[Int] = {
+
+    implicit val distributedContext = drmARaw.context
+
+    // Apply selective downsampling, pin resulting matrix
+    val drmA = sampleDownAndBinarize(drmARaw, randomSeed, maxNumInteractions)
+
+    // num columns, which equals the maximum number of interactions per item
+    val numCols = drmA.ncol
+
+    // Compute & broadcast the number of interactions per row in A
+    val bcastInteractionsPerItemA = drmBroadcast(drmA.numNonZeroElementsPerRow)
+
+    // Compute row similarity cooccurrence matrix AA'
+    val drmAAt = drmA %*% drmA.t
+
+    // Compute loglikelihood scores and sparsify the resulting matrix to get the similarity matrix
+    val drmSimilaritiesAAt = computeSimilarities(drmAAt, numCols, maxInterestingSimilaritiesPerRow, bcastInteractionsPerItemA,
+      bcastInteractionsPerItemA, crossCooccurrence = false)
+
+    drmSimilaritiesAAt
   }
 
   /**
@@ -107,10 +146,10 @@ object CooccurrenceAnalysis extends Serializable {
 
   }
 
-  def computeIndicators(drmBtA: DrmLike[Int], numUsers: Int, maxInterestingItemsPerThing: Int,
+  def computeSimilarities(drm: DrmLike[Int], numUsers: Int, maxInterestingItemsPerThing: Int,
                         bcastNumInteractionsB: BCast[Vector], bcastNumInteractionsA: BCast[Vector],
                         crossCooccurrence: Boolean = true) = {
-    drmBtA.mapBlock() {
+    drm.mapBlock() {
       case (keys, block) =>
 
         val llrBlock = block.like()
@@ -162,10 +201,14 @@ object CooccurrenceAnalysis extends Serializable {
   }
 
   /**
-   * Selectively downsample users and things with an anomalous amount of interactions, inspired by
+   * Selectively downsample rows and items with an anomalous amount of interactions, inspired by
    * https://github.com/tdunning/in-memory-cooccurrence/blob/master/src/main/java/com/tdunning/cooc/Analyze.java
    *
    * additionally binarizes input matrix, as we're only interesting in knowing whether interactions happened or not
+   * @param drmM matrix to downsample
+   * @param seed random number generator seed, keep to a constant if repeatability is neccessary
+   * @param maxNumInteractions number of elements in a row of the returned matrix
+   * @return
    */
   def sampleDownAndBinarize(drmM: DrmLike[Int], seed: Int, maxNumInteractions: Int) = {
 
@@ -186,23 +229,23 @@ object CooccurrenceAnalysis extends Serializable {
 
         val downsampledBlock = block.like()
 
-        // Downsample the interaction vector of each user
-        for (userIndex <- 0 until keys.size) {
+        // Downsample the interaction vector of each row
+        for (rowIndex <- 0 until keys.size) {
 
-          val interactionsOfUser = block(userIndex, ::)
+          val interactionsInRow = block(rowIndex, ::)
 
-          val numInteractionsOfUser = interactionsOfUser.getNumNonZeroElements()
+          val numInteractionsPerRow = interactionsInRow.getNumNonZeroElements()
 
-          val perUserSampleRate = math.min(maxNumInteractions, numInteractionsOfUser) / numInteractionsOfUser
+          val perRowSampleRate = math.min(maxNumInteractions, numInteractionsPerRow) / numInteractionsPerRow
 
-          interactionsOfUser.nonZeroes().foreach { elem =>
+          interactionsInRow.nonZeroes().foreach { elem =>
             val numInteractionsWithThing = numInteractions(elem.index)
             val perThingSampleRate = math.min(maxNumInteractions, numInteractionsWithThing) / numInteractionsWithThing
 
-            if (random.nextDouble() <= math.min(perUserSampleRate, perThingSampleRate)) {
+            if (random.nextDouble() <= math.min(perRowSampleRate, perThingSampleRate)) {
               // We ignore the original interaction value and create a binary 0-1 matrix
               // as we only consider whether interactions happened or did not happen
-              downsampledBlock(userIndex, elem.index) = 1
+              downsampledBlock(rowIndex, elem.index) = 1
             }
           }
         }

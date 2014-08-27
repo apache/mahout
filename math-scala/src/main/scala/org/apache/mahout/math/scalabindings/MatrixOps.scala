@@ -188,7 +188,10 @@ class MatrixOps(val m: Matrix) {
   /* Diagonal assignment */
   def diagv_=(that: Double) = diagv := that
 
+  /* Row and Column non-zero element counts */
   def numNonZeroElementsPerColumn() = m.aggregateColumns(vectorCountNonZeroElementsFunc)
+
+  def numNonZeroElementsPerRow() = m.aggregateRows(vectorCountNonZeroElementsFunc)
 }
 
 object MatrixOps {
