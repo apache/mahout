@@ -37,9 +37,9 @@ public class TimesRightMatrix {
     Frame AinCoreB = null;
 
     if (B instanceof DiagonalMatrix) {
-      AinCoreB = exec_diagonal(A, B.viewDiagonal());
+      AinCoreB = execDiagonal(A, B.viewDiagonal());
     } else {
-      AinCoreB = exec_common(A, B);
+      AinCoreB = execCommon(A, B);
     }
 
     return new H2ODrm(AinCoreB, keys);
@@ -50,7 +50,7 @@ public class TimesRightMatrix {
 
     A.numCols() == d.size()
   */
-  private static Frame exec_diagonal(final Frame A, Vector d) {
+  private static Frame execDiagonal(final Frame A, Vector d) {
     final H2OBCast<Vector> bd = new H2OBCast<Vector>(d);
 
     return new MRTask() {
@@ -73,7 +73,7 @@ public class TimesRightMatrix {
 
     A.numCols() == b.rowSize()
   */
-  private static Frame exec_common(final Frame A, Matrix b) {
+  private static Frame execCommon(final Frame A, Matrix b) {
     final H2OBCast<Matrix> bb = new H2OBCast<Matrix>(b);
 
     return new MRTask() {
