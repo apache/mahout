@@ -170,7 +170,7 @@ then
   done
 
 
-  # add spark-shell -- if we requested shell or other spark CLI driver
+  # add jars for running from the command line if we requested shell or spark CLI driver
   if [ "$SPARK" == "1" ]; then
 
     for f in $MAHOUT_HOME/mrlegacy/target/mahout-mrlegacy-*.jar ; do
@@ -246,7 +246,6 @@ case "$1" in
     ;;
   (spark-rowsimilarity)
     shift
-    echo $CLASSPATH
     "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.RowSimilarityDriver" "$@"
     ;;
   (*)
