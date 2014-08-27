@@ -27,7 +27,7 @@ import water.fvec.NewChunk;
 
 public class ABt {
   /* Calculate AB' */
-  public static H2ODrm ABt(H2ODrm drmA, H2ODrm drmB) {
+  public static H2ODrm exec(H2ODrm drmA, H2ODrm drmB) {
     Frame A = drmA.frame;
     Vec keys = drmA.keys;
     final Frame B = drmB.frame;

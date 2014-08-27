@@ -27,7 +27,7 @@ import water.fvec.Chunk;
 
 public class AtB {
   /* Calculate A'B */
-  public static H2ODrm AtB(H2ODrm drmA, H2ODrm drmB) {
+  public static H2ODrm exec(H2ODrm drmA, H2ODrm drmB) {
     final Frame A = drmA.frame;
     final Frame B = drmB.frame;
 

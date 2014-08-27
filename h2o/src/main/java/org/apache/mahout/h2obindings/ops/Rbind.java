@@ -29,7 +29,7 @@ import org.apache.mahout.h2obindings.drm.H2ODrm;
 
 public class Rbind {
   /* R's rbind like operator, on DrmA and DrmB */
-  public static H2ODrm Rbind(H2ODrm drmA, H2ODrm drmB) {
+  public static H2ODrm exec(H2ODrm drmA, H2ODrm drmB) {
     final Frame fra = drmA.frame;
     final Vec keysa = drmA.keys;
     final Frame frb = drmB.frame;

@@ -26,7 +26,7 @@ import org.apache.mahout.h2obindings.drm.H2ODrm;
 
 public class Cbind {
   /* R's cbind like operator, on DrmA and DrmB */
-  public static H2ODrm Cbind(H2ODrm drmA, H2ODrm drmB) {
+  public static H2ODrm exec(H2ODrm drmA, H2ODrm drmB) {
     Frame fra = drmA.frame;
     Vec keysa = drmA.keys;
     Frame frb = drmB.frame;

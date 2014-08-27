@@ -30,7 +30,7 @@ import water.fvec.NewChunk;
 
 public class Ax {
   /* Calculate Ax (where x is an in-core Vector) */
-  public static H2ODrm Ax(H2ODrm drmA, Vector x) {
+  public static H2ODrm exec(H2ODrm drmA, Vector x) {
     Frame A = drmA.frame;
     Vec keys = drmA.keys;
     final H2OBCast<Vector> bx = new H2OBCast<Vector>(x);

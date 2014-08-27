@@ -30,7 +30,7 @@ import org.apache.mahout.h2obindings.drm.H2ODrm;
 
 public class RowRange {
   /* Filter operation */
-  public static H2ODrm RowRange(H2ODrm drmA, final Range R) {
+  public static H2ODrm exec(H2ODrm drmA, final Range R) {
     Frame A = drmA.frame;
     Vec keys = drmA.keys;
 
