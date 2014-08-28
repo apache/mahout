@@ -18,7 +18,7 @@
 package org.apache.mahout.drivers
 
 import com.google.common.collect.BiMap
-import org.apache.mahout.math.drm.CheckpointedDrm
+import org.apache.mahout.math.drm.{DrmLike, CheckpointedDrm}
 import org.apache.mahout.sparkbindings.drm.CheckpointedDrmSpark
 import org.apache.mahout.sparkbindings._
 
@@ -61,13 +61,16 @@ case class IndexedDataset(var matrix: CheckpointedDrm[Int], rowIDs: BiMap[String
     val newMatrix = drmWrap[Int](drmRdd, n, ncol)
     new IndexedDataset(newMatrix, rowIDs, columnIDs)
   }
+
 }
 
 /**
-  * Companion object for the case class [[org.apache.mahout.drivers.IndexedDataset]] primarily used to get a secondary constructor for
-  * making one [[org.apache.mahout.drivers.IndexedDataset]] from another. Used when you have a factory like [[org.apache.mahout.drivers.IndexedDatasetStore]]
+  * Companion object for the case class [[org.apache.mahout.drivers.IndexedDataset]] primarily used to get a secondary
+  * constructor for
+  * making one [[org.apache.mahout.drivers.IndexedDataset]] from another. Used when you have a factory like
+  * [[org.apache.mahout.drivers.Reader]]
   * {{{
-  *   val indexedDataset = IndexedDataset(indexedDatasetReader.readTuplesFrom(source))
+  *   val indexedDataset = IndexedDataset(indexedDatasetReader.readElementsFrom(source))
   * }}}
   */
 

@@ -90,7 +90,16 @@ class RLikeDrmIntOps(drm: DrmLike[Int]) extends RLikeDrmOps[Int](drm) {
       // Collect block-wise rowsums and output them as one-column matrix.
       keys -> dense(block.rowSums).t
     }
-        .collect(::, 0)
+      .collect(::, 0)
+  }
+
+  /** Counts the non-zeros elements in each row returning a vector of the counts */
+  def numNonZeroElementsPerRow(): Vector = {
+    drm.mapBlock(ncol = 1) { case (keys, block) =>
+      // Collect block-wise row non-zero counts and output them as a one-column matrix.
+      keys -> dense(block.numNonZeroElementsPerRow).t
+    }
+      .collect(::, 0)
   }
 
   /** Row means */
