@@ -59,6 +59,8 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
 
   private boolean all;
 
+  private boolean removeLabels;
+
   @Override
   protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
@@ -76,16 +78,23 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
       return;
     }
 
+    String catMatch = findMatchingCategory(document);
     if (!all) {
-      String catMatch = findMatchingCategory(document);
       if ("Unknown".equals(catMatch)) {
         return;
       }
     }
-    String catMatch = findMatchingCategory(document);
-    document = StringEscapeUtils.unescapeHtml4(document);    
-    // write out in Bayes input style: key: /Category/document_name
 
+    document = StringEscapeUtils.unescapeHtml4(document);    
+    if (removeLabels) {
+      document = removeCategoriesFromText(document);
+      // Reject documents with malformed tags
+      if (document == null) {
+        return;
+      }
+    }
+
+    // write out in Bayes input style: key: /Category/document_name
     String category = "/" + catMatch.toLowerCase(Locale.ENGLISH) + "/" +
         SPACE_NON_ALPHA_PATTERN.matcher(title).replaceAll("_");
 
@@ -104,9 +113,10 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
     String categoriesStr = conf.get("wikipedia.categories");
     inputCategories = setStringifier.fromString(categoriesStr);
     exactMatchOnly = conf.getBoolean("exact.match.only", false);
-    all = conf.getBoolean("all.files", true);
-    log.info("Configure: Input Categories size: {} All: {} Exact Match: {}",
-             inputCategories.size(), all, exactMatchOnly);
+    all = conf.getBoolean("all.files", false);
+    removeLabels = conf.getBoolean("remove.labels",false);
+    log.info("Configure: Input Categories size: {} All: {} Exact Match: {} Remove Labels from Text: {}",
+            inputCategories.size(), all, exactMatchOnly, removeLabels);
   }
 
   private static String getDocument(String xml) {
@@ -143,5 +153,27 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
       startIndex = endIndex;
     }
     return "Unknown";
+  }
+
+  private String removeCategoriesFromText(String document) {
+    int startIndex = 0;
+    int categoryIndex;
+    try {
+      while ((categoryIndex = document.indexOf("[[Category:", startIndex)) != -1) {
+        int endIndex = document.indexOf("]]", categoryIndex);
+        if (endIndex >= document.length() || endIndex < 0) {
+          break;
+        }
+        document = document.replace(document.substring(categoryIndex, endIndex + 2), "");
+        if (categoryIndex < document.length()) {
+          startIndex = categoryIndex;
+        } else {
+          break;
+        }
+      }
+    } catch(StringIndexOutOfBoundsException e){
+      return null;
+    }
+    return document;
   }
 }
