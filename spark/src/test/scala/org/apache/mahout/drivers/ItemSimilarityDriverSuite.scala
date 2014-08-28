@@ -26,6 +26,7 @@ import org.apache.mahout.math.drm._
 import org.apache.mahout.math.scalabindings._
 
 //todo: take out, only for temp tests
+
 import org.apache.mahout.math.scalabindings._
 import RLikeOps._
 import org.apache.mahout.math.drm._
@@ -33,53 +34,53 @@ import RLikeDrmOps._
 import scala.collection.JavaConversions._
 
 
-class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
+class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
 
-/*
-  final val matrixLLRCoocAtAControl = dense(
-    (0.0,                0.6331745808516107, 0.0,                     0.0,                0.0),
-    (0.6331745808516107, 0.0,                0.0,                     0.0,                0.0),
-    (0.0,                0.0,                0.0,                     0.6331745808516107, 0.0),
-    (0.0,                0.0,                0.6331745808516107,      0.0,                0.0),
-    (0.0,                0.0,                0.0,                     0.0,                0.0))
+  /*
+    final val matrixLLRCoocAtAControl = dense(
+      (0.0,                0.6331745808516107, 0.0,                     0.0,                0.0),
+      (0.6331745808516107, 0.0,                0.0,                     0.0,                0.0),
+      (0.0,                0.0,                0.0,                     0.6331745808516107, 0.0),
+      (0.0,                0.0,                0.6331745808516107,      0.0,                0.0),
+      (0.0,                0.0,                0.0,                     0.0,                0.0))
 
-  final val matrixLLRCoocBtAControl = dense(
-      (1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 0.0),
-      (0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.0),
-      (0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.0),
-      (1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 0.0),
-      (0.0,                0.0,                0.6795961471815897, 0.0,                4.498681156950466))
-*/
+    final val matrixLLRCoocBtAControl = dense(
+        (1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 0.0),
+        (0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.0),
+        (0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.6795961471815897, 0.0),
+        (1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 1.7260924347106847, 0.0),
+        (0.0,                0.0,                0.6795961471815897, 0.0,                4.498681156950466))
+  */
 
 
   final val SelfSimilairtyLines = Iterable(
-      "galaxy\tnexus:1.7260924347106847",
-      "ipad\tiphone:1.7260924347106847",
-      "nexus\tgalaxy:1.7260924347106847",
-      "iphone\tipad:1.7260924347106847",
-      "surface")
+    "galaxy\tnexus:1.7260924347106847",
+    "ipad\tiphone:1.7260924347106847",
+    "nexus\tgalaxy:1.7260924347106847",
+    "iphone\tipad:1.7260924347106847",
+    "surface")
 
   val CrossIndicatorLines = Iterable(
-      "iphone\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847",
-      "ipad\tnexus:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 galaxy:0.6795961471815897",
-      "nexus\tnexus:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 galaxy:0.6795961471815897",
-      "galaxy\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847",
-      "surface\tsurface:4.498681156950466 nexus:0.6795961471815897")
+    "iphone\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847",
+    "ipad\tnexus:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 galaxy:0.6795961471815897",
+    "nexus\tnexus:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 galaxy:0.6795961471815897",
+    "galaxy\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847",
+    "surface\tsurface:4.498681156950466 nexus:0.6795961471815897")
 
   // todo: a better test would be to sort each vector by itemID and compare rows, tokens misses some error cases
   final val SelfSimilairtyTokens = tokenize(Iterable(
-      "galaxy\tnexus:1.7260924347106847",
-      "ipad\tiphone:1.7260924347106847",
-      "nexus\tgalaxy:1.7260924347106847",
-      "iphone\tipad:1.7260924347106847",
-      "surface"))
+    "galaxy\tnexus:1.7260924347106847",
+    "ipad\tiphone:1.7260924347106847",
+    "nexus\tgalaxy:1.7260924347106847",
+    "iphone\tipad:1.7260924347106847",
+    "surface"))
 
   val CrossIndicatorTokens = tokenize(Iterable(
-      "iphone\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847",
-      "ipad\tnexus:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 galaxy:0.6795961471815897",
-      "nexus\tnexus:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 galaxy:0.6795961471815897",
-      "galaxy\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847",
-      "surface\tsurface:4.498681156950466 nexus:0.6795961471815897"))
+    "iphone\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847",
+    "ipad\tnexus:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 galaxy:0.6795961471815897",
+    "nexus\tnexus:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 galaxy:0.6795961471815897",
+    "galaxy\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847",
+    "surface\tsurface:4.498681156950466 nexus:0.6795961471815897"))
 
   // now in MahoutSuite
   // final val TmpDir = "tmp/" // all IO going to whatever the default HDFS config is pointing to
@@ -113,32 +114,32 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
     ))
   */
 
-  test ("ItemSimilarityDriver, non-full-spec CSV"){
+  test("ItemSimilarityDriver, non-full-spec CSV") {
 
     val InFile = TmpDir + "in-file.csv/" //using part files, not single file
     val OutPath = TmpDir + "indicator-matrices/"
 
     val lines = Array(
-        "u1,purchase,iphone",
-        "u1,purchase,ipad",
-        "u2,purchase,nexus",
-        "u2,purchase,galaxy",
-        "u3,purchase,surface",
-        "u4,purchase,iphone",
-        "u4,purchase,galaxy",
-        "u1,view,iphone",
-        "u1,view,ipad",
-        "u1,view,nexus",
-        "u1,view,galaxy",
-        "u2,view,iphone",
-        "u2,view,ipad",
-        "u2,view,nexus",
-        "u2,view,galaxy",
-        "u3,view,surface",
-        "u3,view,nexus",
-        "u4,view,iphone",
-        "u4,view,ipad",
-        "u4,view,galaxy")
+      "u1,purchase,iphone",
+      "u1,purchase,ipad",
+      "u2,purchase,nexus",
+      "u2,purchase,galaxy",
+      "u3,purchase,surface",
+      "u4,purchase,iphone",
+      "u4,purchase,galaxy",
+      "u1,view,iphone",
+      "u1,view,ipad",
+      "u1,view,nexus",
+      "u1,view,galaxy",
+      "u2,view,iphone",
+      "u2,view,ipad",
+      "u2,view,nexus",
+      "u2,view,galaxy",
+      "u3,view,surface",
+      "u3,view,nexus",
+      "u4,view,iphone",
+      "u4,view,ipad",
+      "u4,view,galaxy")
 
     // this will create multiple part-xxxxx files in the InFile dir but other tests will
     // take account of one actual file
@@ -146,22 +147,22 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
 
     // local multi-threaded Spark with default HDFS
     ItemSimilarityDriver.main(Array(
-        "--input", InFile,
-        "--output", OutPath,
-        "--master", masterUrl,
-        "--filter1", "purchase",
-        "--filter2", "view",
-        "--inDelim", ",",
-        "--itemIDPosition", "2",
-        "--rowIDPosition", "0",
-        "--filterPosition", "1",
-        "--writeAllDatasets"))
+      "--input", InFile,
+      "--output", OutPath,
+      "--master", masterUrl,
+      "--filter1", "purchase",
+      "--filter2", "view",
+      "--inDelim", ",",
+      "--itemIDPosition", "2",
+      "--rowIDPosition", "0",
+      "--filterPosition", "1",
+      "--writeAllDatasets"))
 
     // todo: these comparisons rely on a sort producing the same lines, which could possibly
     // fail since the sort is on value and these can be the same for all items in a vector
-    val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
+    val indicatorLines = mahoutCtx.textFile(OutPath + "/indicator-matrix/").collect.toIterable
     tokenize(indicatorLines) should contain theSameElementsAs SelfSimilairtyTokens
-    val crossIndicatorLines = mahoutCtx.textFile(OutPath+"/cross-indicator-matrix/").collect.toIterable
+    val crossIndicatorLines = mahoutCtx.textFile(OutPath + "/cross-indicator-matrix/").collect.toIterable
     tokenize(crossIndicatorLines) should contain theSameElementsAs CrossIndicatorTokens
   }
 
@@ -173,26 +174,26 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
     val OutPath = TmpDir + "indicator-matrices/"
 
     val lines = Array(
-        "u1\tpurchase\tiphone",
-        "u1\tpurchase\tipad",
-        "u2\tpurchase\tnexus",
-        "u2\tpurchase\tgalaxy",
-        "u3\tpurchase\tsurface",
-        "u4\tpurchase\tiphone",
-        "u4\tpurchase\tgalaxy",
-        "u1\tview\tiphone",
-        "u1\tview\tipad",
-        "u1\tview\tnexus",
-        "u1\tview\tgalaxy",
-        "u2\tview\tiphone",
-        "u2\tview\tipad",
-        "u2\tview\tnexus",
-        "u2\tview\tgalaxy",
-        "u3\tview\tsurface",
-        "u3\tview\tnexus",
-        "u4\tview\tiphone",
-        "u4\tview\tipad",
-        "u4\tview\tgalaxy")
+      "u1\tpurchase\tiphone",
+      "u1\tpurchase\tipad",
+      "u2\tpurchase\tnexus",
+      "u2\tpurchase\tgalaxy",
+      "u3\tpurchase\tsurface",
+      "u4\tpurchase\tiphone",
+      "u4\tpurchase\tgalaxy",
+      "u1\tview\tiphone",
+      "u1\tview\tipad",
+      "u1\tview\tnexus",
+      "u1\tview\tgalaxy",
+      "u2\tview\tiphone",
+      "u2\tview\tipad",
+      "u2\tview\tnexus",
+      "u2\tview\tgalaxy",
+      "u3\tview\tsurface",
+      "u3\tview\tnexus",
+      "u4\tview\tiphone",
+      "u4\tview\tipad",
+      "u4\tview\tgalaxy")
 
     // this will create multiple part-xxxxx files in the InFile dir but other tests will
     // take account of one actual file
@@ -200,21 +201,21 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
 
     // local multi-threaded Spark with default HDFS
     ItemSimilarityDriver.main(Array(
-        "--input", InFile,
-        "--output", OutPath,
-        "--master", masterUrl,
-        "--filter1", "purchase",
-        "--filter2", "view",
-        "--inDelim", "[,\t]",
-        "--itemIDPosition", "2",
-        "--rowIDPosition", "0",
-        "--filterPosition", "1"))
+      "--input", InFile,
+      "--output", OutPath,
+      "--master", masterUrl,
+      "--filter1", "purchase",
+      "--filter2", "view",
+      "--inDelim", "[,\t]",
+      "--itemIDPosition", "2",
+      "--rowIDPosition", "0",
+      "--filterPosition", "1"))
 
     // todo: a better test would be to get sorted vectors and compare rows instead of tokens, this might miss
     // some error cases
-    val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
+    val indicatorLines = mahoutCtx.textFile(OutPath + "/indicator-matrix/").collect.toIterable
     tokenize(indicatorLines) should contain theSameElementsAs SelfSimilairtyTokens
-    val crossIndicatorLines = mahoutCtx.textFile(OutPath+"/cross-indicator-matrix/").collect.toIterable
+    val crossIndicatorLines = mahoutCtx.textFile(OutPath + "/cross-indicator-matrix/").collect.toIterable
     tokenize(crossIndicatorLines) should contain theSameElementsAs CrossIndicatorTokens
 
   }
@@ -225,26 +226,26 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
     val OutPath = TmpDir + "indicator-matrices/"
 
     val lines = Array(
-        "2014-06-23 14:46:53.115\tu1\tpurchase\trandom text\tiphone",
-        "2014-06-23 14:46:53.115\tu1\tpurchase\trandom text\tipad",
-        "2014-06-23 14:46:53.115\tu2\tpurchase\trandom text\tnexus",
-        "2014-06-23 14:46:53.115\tu2\tpurchase\trandom text\tgalaxy",
-        "2014-06-23 14:46:53.115\tu3\tpurchase\trandom text\tsurface",
-        "2014-06-23 14:46:53.115\tu4\tpurchase\trandom text\tiphone",
-        "2014-06-23 14:46:53.115\tu4\tpurchase\trandom text\tgalaxy",
-        "2014-06-23 14:46:53.115\tu1\tview\trandom text\tiphone",
-        "2014-06-23 14:46:53.115\tu1\tview\trandom text\tipad",
-        "2014-06-23 14:46:53.115\tu1\tview\trandom text\tnexus",
-        "2014-06-23 14:46:53.115\tu1\tview\trandom text\tgalaxy",
-        "2014-06-23 14:46:53.115\tu2\tview\trandom text\tiphone",
-        "2014-06-23 14:46:53.115\tu2\tview\trandom text\tipad",
-        "2014-06-23 14:46:53.115\tu2\tview\trandom text\tnexus",
-        "2014-06-23 14:46:53.115\tu2\tview\trandom text\tgalaxy",
-        "2014-06-23 14:46:53.115\tu3\tview\trandom text\tsurface",
-        "2014-06-23 14:46:53.115\tu3\tview\trandom text\tnexus",
-        "2014-06-23 14:46:53.115\tu4\tview\trandom text\tiphone",
-        "2014-06-23 14:46:53.115\tu4\tview\trandom text\tipad",
-        "2014-06-23 14:46:53.115\tu4\tview\trandom text\tgalaxy")
+      "2014-06-23 14:46:53.115\tu1\tpurchase\trandom text\tiphone",
+      "2014-06-23 14:46:53.115\tu1\tpurchase\trandom text\tipad",
+      "2014-06-23 14:46:53.115\tu2\tpurchase\trandom text\tnexus",
+      "2014-06-23 14:46:53.115\tu2\tpurchase\trandom text\tgalaxy",
+      "2014-06-23 14:46:53.115\tu3\tpurchase\trandom text\tsurface",
+      "2014-06-23 14:46:53.115\tu4\tpurchase\trandom text\tiphone",
+      "2014-06-23 14:46:53.115\tu4\tpurchase\trandom text\tgalaxy",
+      "2014-06-23 14:46:53.115\tu1\tview\trandom text\tiphone",
+      "2014-06-23 14:46:53.115\tu1\tview\trandom text\tipad",
+      "2014-06-23 14:46:53.115\tu1\tview\trandom text\tnexus",
+      "2014-06-23 14:46:53.115\tu1\tview\trandom text\tgalaxy",
+      "2014-06-23 14:46:53.115\tu2\tview\trandom text\tiphone",
+      "2014-06-23 14:46:53.115\tu2\tview\trandom text\tipad",
+      "2014-06-23 14:46:53.115\tu2\tview\trandom text\tnexus",
+      "2014-06-23 14:46:53.115\tu2\tview\trandom text\tgalaxy",
+      "2014-06-23 14:46:53.115\tu3\tview\trandom text\tsurface",
+      "2014-06-23 14:46:53.115\tu3\tview\trandom text\tnexus",
+      "2014-06-23 14:46:53.115\tu4\tview\trandom text\tiphone",
+      "2014-06-23 14:46:53.115\tu4\tview\trandom text\tipad",
+      "2014-06-23 14:46:53.115\tu4\tview\trandom text\tgalaxy")
 
     // this will create multiple part-xxxxx files in the InFile dir but other tests will
     // take account of one actual file
@@ -252,20 +253,20 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
 
     // local multi-threaded Spark with default HDFS
     ItemSimilarityDriver.main(Array(
-        "--input", InFile,
-        "--output", OutPath,
-        "--master", masterUrl,
-        "--filter1", "purchase",
-        "--filter2", "view",
-        "--inDelim", "\t",
-        "--itemIDPosition", "4",
-        "--rowIDPosition", "1",
-        "--filterPosition", "2"))
+      "--input", InFile,
+      "--output", OutPath,
+      "--master", masterUrl,
+      "--filter1", "purchase",
+      "--filter2", "view",
+      "--inDelim", "\t",
+      "--itemIDPosition", "4",
+      "--rowIDPosition", "1",
+      "--filterPosition", "2"))
 
 
-    val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
+    val indicatorLines = mahoutCtx.textFile(OutPath + "/indicator-matrix/").collect.toIterable
     tokenize(indicatorLines) should contain theSameElementsAs SelfSimilairtyTokens
-    val crossIndicatorLines = mahoutCtx.textFile(OutPath+"/cross-indicator-matrix/").collect.toIterable
+    val crossIndicatorLines = mahoutCtx.textFile(OutPath + "/cross-indicator-matrix/").collect.toIterable
     tokenize(crossIndicatorLines) should contain theSameElementsAs CrossIndicatorTokens
 
   }
@@ -279,23 +280,23 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
     val OutPath = TmpDir + "indicator-matrices"
 
     val lines = Array(
-        "0,0,1",
-        "0,1,1",
-        "1,2,1",
-        "1,3,1",
-        "2,4,1",
-        "3,0,1",
-        "3,3,1")
+      "0,0,1",
+      "0,1,1",
+      "1,2,1",
+      "1,3,1",
+      "2,4,1",
+      "3,0,1",
+      "3,3,1")
 
     val Answer = tokenize(Iterable(
-        "0\t1:1.7260924347106847",
-        "3\t2:1.7260924347106847",
-        "1\t0:1.7260924347106847",
-        "4",
-        "2\t3:1.7260924347106847"))
+      "0\t1:1.7260924347106847",
+      "3\t2:1.7260924347106847",
+      "1\t0:1.7260924347106847",
+      "4",
+      "2\t3:1.7260924347106847"))
 
     // this creates one part-0000 file in the directory
-    mahoutCtx.parallelize(lines).coalesce(1, shuffle=true).saveAsTextFile(InDir)
+    mahoutCtx.parallelize(lines).coalesce(1, shuffle = true).saveAsTextFile(InDir)
 
     // to change from using part files to a single .tsv file we'll need to use HDFS
     val fs = FileSystem.get(new Configuration())
@@ -304,11 +305,11 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
 
     // local multi-threaded Spark with default HDFS
     ItemSimilarityDriver.main(Array(
-        "--input", InPath,
-        "--output", OutPath,
-        "--master", masterUrl))
+      "--input", InPath,
+      "--output", OutPath,
+      "--master", masterUrl))
 
-    val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
+    val indicatorLines = mahoutCtx.textFile(OutPath + "/indicator-matrix/").collect.toIterable
     tokenize(indicatorLines) should contain theSameElementsAs Answer
 
   }
@@ -322,23 +323,23 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
     val OutPath = TmpDir + "indicator-matrices"
 
     val lines = Array(
-        "0,0,1",
-        "0,1,1",
-        "1,2,1",
-        "1,3,1",
-        "2,4,1",
-        "3,0,1",
-        "3,3,1")
+      "0,0,1",
+      "0,1,1",
+      "1,2,1",
+      "1,3,1",
+      "2,4,1",
+      "3,0,1",
+      "3,3,1")
 
     val Answer = tokenize(Iterable(
-        "0\t1",
-        "3\t2",
-        "1\t0",
-        "4",
-        "2\t3"))
+      "0\t1",
+      "3\t2",
+      "1\t0",
+      "4",
+      "2\t3"))
 
     // this creates one part-0000 file in the directory
-    mahoutCtx.parallelize(lines).coalesce(1, shuffle=true).saveAsTextFile(InDir)
+    mahoutCtx.parallelize(lines).coalesce(1, shuffle = true).saveAsTextFile(InDir)
 
     // to change from using part files to a single .tsv file we'll need to use HDFS
     val fs = FileSystem.get(new Configuration())
@@ -347,12 +348,12 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
 
     // local multi-threaded Spark with default HDFS
     ItemSimilarityDriver.main(Array(
-        "--input", InPath,
-        "--output", OutPath,
-        "--master", masterUrl,
-        "--omitStrength"))
+      "--input", InPath,
+      "--output", OutPath,
+      "--master", masterUrl,
+      "--omitStrength"))
 
-    val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
+    val indicatorLines = mahoutCtx.textFile(OutPath + "/indicator-matrix/").collect.toIterable
     tokenize(indicatorLines) should contain theSameElementsAs Answer
 
   }
@@ -362,28 +363,28 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
     // tmp/data/m1.tsv
     // tmp/data/more-data/another-dir/m2.tsv
     val M1Lines = Array(
-        "u1\tpurchase\tiphone",
-        "u1\tpurchase\tipad",
-        "u2\tpurchase\tnexus",
-        "u2\tpurchase\tgalaxy",
-        "u3\tpurchase\tsurface",
-        "u4\tpurchase\tiphone",
-        "u4\tpurchase\tgalaxy",
-        "u1\tview\tiphone")
+      "u1\tpurchase\tiphone",
+      "u1\tpurchase\tipad",
+      "u2\tpurchase\tnexus",
+      "u2\tpurchase\tgalaxy",
+      "u3\tpurchase\tsurface",
+      "u4\tpurchase\tiphone",
+      "u4\tpurchase\tgalaxy",
+      "u1\tview\tiphone")
 
     val M2Lines = Array(
-        "u1\tview\tipad",
-        "u1\tview\tnexus",
-        "u1\tview\tgalaxy",
-        "u2\tview\tiphone",
-        "u2\tview\tipad",
-        "u2\tview\tnexus",
-        "u2\tview\tgalaxy",
-        "u3\tview\tsurface",
-        "u3\tview\tnexus",
-        "u4\tview\tiphone",
-        "u4\tview\tipad",
-        "u4\tview\tgalaxy")
+      "u1\tview\tipad",
+      "u1\tview\tnexus",
+      "u1\tview\tgalaxy",
+      "u2\tview\tiphone",
+      "u2\tview\tipad",
+      "u2\tview\tnexus",
+      "u2\tview\tgalaxy",
+      "u3\tview\tsurface",
+      "u3\tview\tnexus",
+      "u4\tview\tiphone",
+      "u4\tview\tipad",
+      "u4\tview\tgalaxy")
 
     val InFilenameM1 = "m1.tsv"
     val InDirM1 = TmpDir + "data/"
@@ -396,7 +397,7 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
     val OutPath = TmpDir + "indicator-matrices"
 
     // this creates one part-0000 file in the directory
-    mahoutCtx.parallelize(M1Lines).coalesce(1, shuffle=true).saveAsTextFile(InDirM1)
+    mahoutCtx.parallelize(M1Lines).coalesce(1, shuffle = true).saveAsTextFile(InDirM1)
 
     // to change from using part files to a single .tsv file we'll need to use HDFS
     val fs = FileSystem.get(new Configuration())
@@ -404,7 +405,7 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
     fs.rename(new Path(InDirM1 + "part-00000"), new Path(InPathM1))
 
     // this creates one part-0000 file in the directory
-    mahoutCtx.parallelize(M2Lines).coalesce(1, shuffle=true).saveAsTextFile(InDirM2)
+    mahoutCtx.parallelize(M2Lines).coalesce(1, shuffle = true).saveAsTextFile(InDirM2)
 
     // to change from using part files to a single .tsv file we'll need to use HDFS
     //rename part-00000 to tmp/some-location/something.tsv
@@ -413,52 +414,52 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
     // local multi-threaded Spark with default FS, suitable for build tests but need better location for data
 
     ItemSimilarityDriver.main(Array(
-        "--input", InPathStart,
-        "--output", OutPath,
-        "--master", masterUrl,
-        "--filter1", "purchase",
-        "--filter2", "view",
-        "--inDelim", "\t",
-        "--itemIDPosition", "2",
-        "--rowIDPosition", "0",
-        "--filterPosition", "1",
-        "--filenamePattern", "m..tsv",
-        "--recursive"))
+      "--input", InPathStart,
+      "--output", OutPath,
+      "--master", masterUrl,
+      "--filter1", "purchase",
+      "--filter2", "view",
+      "--inDelim", "\t",
+      "--itemIDPosition", "2",
+      "--rowIDPosition", "0",
+      "--filterPosition", "1",
+      "--filenamePattern", "m..tsv",
+      "--recursive"))
 
-    val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
+    val indicatorLines = mahoutCtx.textFile(OutPath + "/indicator-matrix/").collect.toIterable
     tokenize(indicatorLines) should contain theSameElementsAs SelfSimilairtyTokens
-    val crossIndicatorLines = mahoutCtx.textFile(OutPath+"/cross-indicator-matrix/").collect.toIterable
+    val crossIndicatorLines = mahoutCtx.textFile(OutPath + "/cross-indicator-matrix/").collect.toIterable
     tokenize(crossIndicatorLines) should contain theSameElementsAs CrossIndicatorTokens
 
   }
 
-  test ("ItemSimilarityDriver, two input paths"){
+  test("ItemSimilarityDriver, two input paths") {
 
     val InFile1 = TmpDir + "in-file1.csv/" //using part files, not single file
     val InFile2 = TmpDir + "in-file2.csv/" //using part files, not single file
     val OutPath = TmpDir + "indicator-matrices/"
 
     val lines = Array(
-        "u1,purchase,iphone",
-        "u1,purchase,ipad",
-        "u2,purchase,nexus",
-        "u2,purchase,galaxy",
-        "u3,purchase,surface",
-        "u4,purchase,iphone",
-        "u4,purchase,galaxy",
-        "u1,view,iphone",
-        "u1,view,ipad",
-        "u1,view,nexus",
-        "u1,view,galaxy",
-        "u2,view,iphone",
-        "u2,view,ipad",
-        "u2,view,nexus",
-        "u2,view,galaxy",
-        "u3,view,surface",
-        "u3,view,nexus",
-        "u4,view,iphone",
-        "u4,view,ipad",
-        "u4,view,galaxy")
+      "u1,purchase,iphone",
+      "u1,purchase,ipad",
+      "u2,purchase,nexus",
+      "u2,purchase,galaxy",
+      "u3,purchase,surface",
+      "u4,purchase,iphone",
+      "u4,purchase,galaxy",
+      "u1,view,iphone",
+      "u1,view,ipad",
+      "u1,view,nexus",
+      "u1,view,galaxy",
+      "u2,view,iphone",
+      "u2,view,ipad",
+      "u2,view,nexus",
+      "u2,view,galaxy",
+      "u3,view,surface",
+      "u3,view,nexus",
+      "u4,view,iphone",
+      "u4,view,ipad",
+      "u4,view,galaxy")
 
     // this will create multiple part-xxxxx files in the InFile dir but other tests will
     // take account of one actual file
@@ -467,65 +468,65 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
 
     // local multi-threaded Spark with default HDFS
     ItemSimilarityDriver.main(Array(
-        "--input", InFile1,
-        "--input2", InFile2,
-        "--output", OutPath,
-        "--master", masterUrl,
-        "--filter1", "purchase",
-        "--filter2", "view",
-        "--inDelim", ",",
-        "--itemIDPosition", "2",
-        "--rowIDPosition", "0",
-        "--filterPosition", "1"))
+      "--input", InFile1,
+      "--input2", InFile2,
+      "--output", OutPath,
+      "--master", masterUrl,
+      "--filter1", "purchase",
+      "--filter2", "view",
+      "--inDelim", ",",
+      "--itemIDPosition", "2",
+      "--rowIDPosition", "0",
+      "--filterPosition", "1"))
 
-    val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
+    val indicatorLines = mahoutCtx.textFile(OutPath + "/indicator-matrix/").collect.toIterable
     tokenize(indicatorLines) should contain theSameElementsAs SelfSimilairtyTokens
-    val crossIndicatorLines = mahoutCtx.textFile(OutPath+"/cross-indicator-matrix/").collect.toIterable
+    val crossIndicatorLines = mahoutCtx.textFile(OutPath + "/cross-indicator-matrix/").collect.toIterable
     tokenize(crossIndicatorLines) should contain theSameElementsAs CrossIndicatorTokens
 
   }
 
-  test ("ItemSimilarityDriver, two inputs of different dimensions"){
+  test("ItemSimilarityDriver, two inputs of different dimensions") {
 
     val InFile1 = TmpDir + "in-file1.csv/" //using part files, not single file
     val InFile2 = TmpDir + "in-file2.csv/" //using part files, not single file
     val OutPath = TmpDir + "indicator-matrices/"
 
     val lines = Array(
-        "u1,purchase,iphone",
-        "u1,purchase,ipad",
-        "u2,purchase,nexus",
-        "u2,purchase,galaxy",
-        // remove one user so A'B will be of different dimensions
-        // ItemSimilarityDriver should create one unified user dictionary and so account for this
-        // discrepancy as a blank row: "u3,purchase,surface",
-        "u4,purchase,iphone",
-        "u4,purchase,galaxy",
-        "u1,view,iphone",
-        "u1,view,ipad",
-        "u1,view,nexus",
-        "u1,view,galaxy",
-        "u2,view,iphone",
-        "u2,view,ipad",
-        "u2,view,nexus",
-        "u2,view,galaxy",
-        "u3,view,surface",
-        "u3,view,nexus",
-        "u4,view,iphone",
-        "u4,view,ipad",
-        "u4,view,galaxy")
+      "u1,purchase,iphone",
+      "u1,purchase,ipad",
+      "u2,purchase,nexus",
+      "u2,purchase,galaxy",
+      // remove one user so A'B will be of different dimensions
+      // ItemSimilarityDriver should create one unified user dictionary and so account for this
+      // discrepancy as a blank row: "u3,purchase,surface",
+      "u4,purchase,iphone",
+      "u4,purchase,galaxy",
+      "u1,view,iphone",
+      "u1,view,ipad",
+      "u1,view,nexus",
+      "u1,view,galaxy",
+      "u2,view,iphone",
+      "u2,view,ipad",
+      "u2,view,nexus",
+      "u2,view,galaxy",
+      "u3,view,surface",
+      "u3,view,nexus",
+      "u4,view,iphone",
+      "u4,view,ipad",
+      "u4,view,galaxy")
 
     val UnequalDimensionsSelfSimilarity = tokenize(Iterable(
-        "ipad\tiphone:1.7260924347106847",
-        "iphone\tipad:1.7260924347106847",
-        "nexus\tgalaxy:1.7260924347106847",
-        "galaxy\tnexus:1.7260924347106847"))
+      "ipad\tiphone:1.7260924347106847",
+      "iphone\tipad:1.7260924347106847",
+      "nexus\tgalaxy:1.7260924347106847",
+      "galaxy\tnexus:1.7260924347106847"))
 
     val UnequalDimensionsCrossSimilarity = tokenize(Iterable(
-        "galaxy\tgalaxy:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 nexus:1.7260924347106847",
-        "iphone\tgalaxy:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 surface:1.7260924347106847 nexus:1.7260924347106847",
-        "ipad\tgalaxy:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 nexus:0.6795961471815897",
-        "nexus\tiphone:0.6795961471815897 ipad:0.6795961471815897 nexus:0.6795961471815897 galaxy:0.6795961471815897"))
+      "galaxy\tgalaxy:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 nexus:1.7260924347106847",
+      "iphone\tgalaxy:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 surface:1.7260924347106847 nexus:1.7260924347106847",
+      "ipad\tgalaxy:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 nexus:0.6795961471815897",
+      "nexus\tiphone:0.6795961471815897 ipad:0.6795961471815897 nexus:0.6795961471815897 galaxy:0.6795961471815897"))
     // this will create multiple part-xxxxx files in the InFile dir but other tests will
     // take account of one actual file
     val linesRdd1 = mahoutCtx.parallelize(lines).saveAsTextFile(InFile1)
@@ -533,25 +534,25 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
 
     // local multi-threaded Spark with default HDFS
     ItemSimilarityDriver.main(Array(
-        "--input", InFile1,
-        "--input2", InFile2,
-        "--output", OutPath,
-        "--master", masterUrl,
-        "--filter1", "purchase",
-        "--filter2", "view",
-        "--inDelim", ",",
-        "--itemIDPosition", "2",
-        "--rowIDPosition", "0",
-        "--filterPosition", "1"))
+      "--input", InFile1,
+      "--input2", InFile2,
+      "--output", OutPath,
+      "--master", masterUrl,
+      "--filter1", "purchase",
+      "--filter2", "view",
+      "--inDelim", ",",
+      "--itemIDPosition", "2",
+      "--rowIDPosition", "0",
+      "--filterPosition", "1"))
 
-    val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
-    val crossIndicatorLines = mahoutCtx.textFile(OutPath+"/cross-indicator-matrix/").collect.toIterable
+    val indicatorLines = mahoutCtx.textFile(OutPath + "/indicator-matrix/").collect.toIterable
+    val crossIndicatorLines = mahoutCtx.textFile(OutPath + "/cross-indicator-matrix/").collect.toIterable
     tokenize(indicatorLines) should contain theSameElementsAs UnequalDimensionsSelfSimilarity
     tokenize(crossIndicatorLines) should contain theSameElementsAs UnequalDimensionsCrossSimilarity
 
   }
 
-  test("ItemSimilarityDriver cross similarity two separate items spaces"){
+  test("ItemSimilarityDriver cross similarity two separate items spaces") {
     /* cross-similarity with category views, same user space
             	phones	tablets	mobile_acc	soap
           u1	0	      1	      1	          0
@@ -564,29 +565,29 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
     val OutPath = TmpDir + "indicator-matrices/"
 
     val lines = Array(
-        "u1,purchase,iphone",
-        "u1,purchase,ipad",
-        "u2,purchase,nexus",
-        "u2,purchase,galaxy",
-        "u3,purchase,surface",
-        "u4,purchase,iphone",
-        "u4,purchase,galaxy",
-        "u1,view,phones",
-        "u1,view,mobile_acc",
-        "u2,view,phones",
-        "u2,view,tablets",
-        "u2,view,mobile_acc",
-        "u3,view,mobile_acc",
-        "u4,view,phones",
-        "u4,view,tablets",
-        "u4,view,soap")
+      "u1,purchase,iphone",
+      "u1,purchase,ipad",
+      "u2,purchase,nexus",
+      "u2,purchase,galaxy",
+      "u3,purchase,surface",
+      "u4,purchase,iphone",
+      "u4,purchase,galaxy",
+      "u1,view,phones",
+      "u1,view,mobile_acc",
+      "u2,view,phones",
+      "u2,view,tablets",
+      "u2,view,mobile_acc",
+      "u3,view,mobile_acc",
+      "u4,view,phones",
+      "u4,view,tablets",
+      "u4,view,soap")
 
     val UnequalDimensionsCrossSimilarityLines = tokenize(Iterable(
-        "iphone\tmobile_acc:1.7260924347106847 soap:1.7260924347106847 phones:1.7260924347106847",
-        "surface\tmobile_acc:0.6795961471815897",
-        "nexus\ttablets:1.7260924347106847 mobile_acc:0.6795961471815897 phones:0.6795961471815897",
-        "galaxy\ttablets:5.545177444479561 soap:1.7260924347106847 phones:1.7260924347106847 mobile_acc:1.7260924347106847",
-        "ipad\tmobile_acc:0.6795961471815897 phones:0.6795961471815897"))
+      "iphone\tmobile_acc:1.7260924347106847 soap:1.7260924347106847 phones:1.7260924347106847",
+      "surface\tmobile_acc:0.6795961471815897",
+      "nexus\ttablets:1.7260924347106847 mobile_acc:0.6795961471815897 phones:0.6795961471815897",
+      "galaxy\ttablets:5.545177444479561 soap:1.7260924347106847 phones:1.7260924347106847 mobile_acc:1.7260924347106847",
+      "ipad\tmobile_acc:0.6795961471815897 phones:0.6795961471815897"))
 
     // this will create multiple part-xxxxx files in the InFile dir but other tests will
     // take account of one actual file
@@ -595,39 +596,39 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
 
     // local multi-threaded Spark with default HDFS
     ItemSimilarityDriver.main(Array(
-        "--input", InFile1,
-        "--input2", InFile2,
-        "--output", OutPath,
-        "--master", masterUrl,
-        "--filter1", "purchase",
-        "--filter2", "view",
-        "--inDelim", ",",
-        "--itemIDPosition", "2",
-        "--rowIDPosition", "0",
-        "--filterPosition", "1",
-        "--writeAllDatasets"))
+      "--input", InFile1,
+      "--input2", InFile2,
+      "--output", OutPath,
+      "--master", masterUrl,
+      "--filter1", "purchase",
+      "--filter2", "view",
+      "--inDelim", ",",
+      "--itemIDPosition", "2",
+      "--rowIDPosition", "0",
+      "--filterPosition", "1",
+      "--writeAllDatasets"))
 
-    val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
-    val crossIndicatorLines = mahoutCtx.textFile(OutPath+"/cross-indicator-matrix/").collect.toIterable
+    val indicatorLines = mahoutCtx.textFile(OutPath + "/indicator-matrix/").collect.toIterable
+    val crossIndicatorLines = mahoutCtx.textFile(OutPath + "/cross-indicator-matrix/").collect.toIterable
     tokenize(indicatorLines) should contain theSameElementsAs SelfSimilairtyTokens
     tokenize(crossIndicatorLines) should contain theSameElementsAs UnequalDimensionsCrossSimilarityLines
 
   }
 
-  test("A.t %*% B after changing row cardinality of A"){
+  test("A.t %*% B after changing row cardinality of A") {
     // todo: move to math tests but this is Spark specific
 
     val a = dense(
-        (1.0, 1.0))
+      (1.0, 1.0))
 
     val b = dense(
-        (1.0, 1.0),
-        (1.0, 1.0),
-        (1.0, 1.0))
+      (1.0, 1.0),
+      (1.0, 1.0),
+      (1.0, 1.0))
 
     val inCoreABiggertBAnswer = dense(
-        (1.0, 1.0),
-        (1.0, 1.0))
+      (1.0, 1.0),
+      (1.0, 1.0))
 
     val drmA = drmParallelize(m = a, numPartitions = 2)
     val drmB = drmParallelize(m = b, numPartitions = 2)
@@ -645,7 +646,7 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite  {
     val bp = 0
   }
 
-  test("ItemSimilarityDriver cross similarity two separate items spaces, missing rows in B"){
+  test("ItemSimilarityDriver cross similarity two separate items spaces, missing rows in B") {
     /* cross-similarity with category views, same user space
             	phones	tablets	mobile_acc	soap
             u1	0	      1	      1	          0
@@ -658,29 +659,29 @@ removed ==> u3	0	      0	      1	          0
     val OutPath = TmpDir + "indicator-matrices/"
 
     val lines = Array(
-        "u1,purchase,iphone",
-        "u1,purchase,ipad",
-        "u2,purchase,nexus",
-        "u2,purchase,galaxy",
-        "u3,purchase,surface",
-        "u4,purchase,iphone",
-        "u4,purchase,galaxy",
-        "u1,view,phones",
-        "u1,view,mobile_acc",
-        "u2,view,phones",
-        "u2,view,tablets",
-        "u2,view,mobile_acc",
-        //"u3,view,mobile_acc",// if this line is removed the cross-cooccurrence should work
-        "u4,view,phones",
-        "u4,view,tablets",
-        "u4,view,soap")
+      "u1,purchase,iphone",
+      "u1,purchase,ipad",
+      "u2,purchase,nexus",
+      "u2,purchase,galaxy",
+      "u3,purchase,surface",
+      "u4,purchase,iphone",
+      "u4,purchase,galaxy",
+      "u1,view,phones",
+      "u1,view,mobile_acc",
+      "u2,view,phones",
+      "u2,view,tablets",
+      "u2,view,mobile_acc",
+      //"u3,view,mobile_acc",// if this line is removed the cross-cooccurrence should work
+      "u4,view,phones",
+      "u4,view,tablets",
+      "u4,view,soap")
 
     val UnequalDimensionsCrossSimilarityLines = tokenize(Iterable(
-        "galaxy\ttablets:5.545177444479561 soap:1.7260924347106847 phones:1.7260924347106847",
-        "ipad\tmobile_acc:1.7260924347106847 phones:0.6795961471815897",
-        "surface",
-        "nexus\tmobile_acc:1.7260924347106847 tablets:1.7260924347106847 phones:0.6795961471815897",
-        "iphone\tsoap:1.7260924347106847 phones:1.7260924347106847"))
+      "galaxy\ttablets:5.545177444479561 soap:1.7260924347106847 phones:1.7260924347106847",
+      "ipad\tmobile_acc:1.7260924347106847 phones:0.6795961471815897",
+      "surface",
+      "nexus\tmobile_acc:1.7260924347106847 tablets:1.7260924347106847 phones:0.6795961471815897",
+      "iphone\tsoap:1.7260924347106847 phones:1.7260924347106847"))
 
     // this will create multiple part-xxxxx files in the InFile dir but other tests will
     // take account of one actual file
@@ -689,20 +690,20 @@ removed ==> u3	0	      0	      1	          0
 
     // local multi-threaded Spark with default HDFS
     ItemSimilarityDriver.main(Array(
-        "--input", InFile1,
-        "--input2", InFile2,
-        "--output", OutPath,
-        "--master", masterUrl,
-        "--filter1", "purchase",
-        "--filter2", "view",
-        "--inDelim", ",",
-        "--itemIDPosition", "2",
-        "--rowIDPosition", "0",
-        "--filterPosition", "1",
-        "--writeAllDatasets"))
+      "--input", InFile1,
+      "--input2", InFile2,
+      "--output", OutPath,
+      "--master", masterUrl,
+      "--filter1", "purchase",
+      "--filter2", "view",
+      "--inDelim", ",",
+      "--itemIDPosition", "2",
+      "--rowIDPosition", "0",
+      "--filterPosition", "1",
+      "--writeAllDatasets"))
 
-    val indicatorLines = mahoutCtx.textFile(OutPath+"/indicator-matrix/").collect.toIterable
-    val crossIndicatorLines = mahoutCtx.textFile(OutPath+"/cross-indicator-matrix/").collect.toIterable
+    val indicatorLines = mahoutCtx.textFile(OutPath + "/indicator-matrix/").collect.toIterable
+    val crossIndicatorLines = mahoutCtx.textFile(OutPath + "/cross-indicator-matrix/").collect.toIterable
     tokenize(indicatorLines) should contain theSameElementsAs SelfSimilairtyTokens
     tokenize(crossIndicatorLines) should contain theSameElementsAs UnequalDimensionsCrossSimilarityLines
   }
@@ -711,7 +712,7 @@ removed ==> u3	0	      0	      1	          0
   def tokenize(a: Iterable[String]): Iterable[String] = {
     var r: Iterable[String] = Iterable()
     a.foreach { l =>
-      l.split("\t").foreach{ s =>
+      l.split("\t").foreach { s =>
         r = r ++ s.split("[\t ]")
       }
     }
@@ -722,5 +723,5 @@ removed ==> u3	0	      0	      1	          0
     super.beforeAll(configMap)
     ItemSimilarityDriver.useContext(mahoutCtx)
   }
-  
+
 }

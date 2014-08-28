@@ -88,6 +88,10 @@ if [ "$1" == "spark-itemsimilarity" ]; then
   SPARK=1
 fi
 
+if [ "$1" == "spark-rowsimilarity" ]; then
+  SPARK=1
+fi
+
 if [ "$MAHOUT_CORE" != "" ]; then
   IS_CORE=1
 fi
@@ -179,7 +183,7 @@ then
     done
   fi
 
-  # add spark-shell -- if we requested shell or other spark CLI driver
+  # add jars for running from the command line if we requested shell or spark CLI driver
   if [ "$SPARK" == "1" ]; then
 
     for f in $MAHOUT_HOME/mrlegacy/target/mahout-mrlegacy-*.jar ; do
@@ -253,6 +257,10 @@ case "$1" in
   (spark-itemsimilarity)
     shift
     "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.ItemSimilarityDriver" "$@"
+    ;;
+  (spark-rowsimilarity)
+    shift
+    "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.RowSimilarityDriver" "$@"
     ;;
   (h2o-node)
     shift

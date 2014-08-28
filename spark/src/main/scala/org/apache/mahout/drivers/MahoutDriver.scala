@@ -26,43 +26,55 @@ import scala.collection.immutable
 /** Extend this class to create a Mahout CLI driver. Minimally you must override process and main.
   * Also define a Map of options for the command line parser. The following template may help:
   * {{{
-  *   object SomeDriver extends MahoutDriver {
-  *     // build options from some stardard CLI param groups
-  *     // Note: always put the driver specific options at the last so the can override and previous options!
-  *     private var options = GenericOptions ++ SparkOptions ++ FileIOOptions ++ TextDelimitedTuplesOptions ++
-  *       TextDelimitedDRMOptions ++ ItemSimilarityOptions
+  * object SomeDriver extends MahoutDriver {
   *
-  *     override def main(args: Array[String]): Unit = {
-  *       val parser = new MahoutOptionParser(programName = "spark-itemsimilarity") {
-  *         head("spark-itemsimilarity", "Mahout 1.0-SNAPSHOT")
+  *   // define only the options specific to this driver, inherit the generic ones
+  *   private final val SomeOptions = HashMap[String, Any](
+  *       "maxThings" -> 500,
+  *       "minThings" -> 100,
+  *       "appName" -> "SomeDriver")
   *
-  *         //Several standard option groups are usually non-driver specific so use the MahoutOptionParser methods
-  *         parseGenericOptions
-  *         ...
-  *       }
-  *       parser.parse(args, options) map { opts =>
-  *         options = opts
-  *         process
-  *       }
+  *   override def main(args: Array[String]): Unit = {
+  *
+  *
+  *     val parser = new MahoutOptionParser(programName = "shortname") {
+  *       head("somedriver", "Mahout 1.0-SNAPSHOT")
+  *
+  *       // Input output options, non-driver specific
+  *       parseIOOptions
+  *
+  *       // Algorithm specific options
+  *       // Add in the new options
+  *       opts = opts ++ SomeOptions
+  *       note("\nAlgorithm control options:")
+  *       opt[Int]("maxThings") abbr ("mt") action { (x, options) =>
+  *         options + ("maxThings" -> x) ...
   *     }
-  *
-  *     override def process: Unit = {
-  *       start()
-  *       //don't just stand there do something
-  *       stop
+  *     parser.parse(args, parser.opts) map { opts =>
+  *       parser.opts = opts
+  *       process
   *     }
   *   }
+  *
+  *   override def process: Unit = {
+  *     start()
+  *     // do the work here
+  *     stop
+  *   }
+  *
   * }}}
   */
 abstract class MahoutDriver {
 
 
-  implicit var mc: DistributedContext = _
-  implicit var sparkConf = new SparkConf()
-  var _useExistingContext: Boolean = false
+  implicit protected var mc: DistributedContext = _
+  implicit protected var sparkConf = new SparkConf()
+  protected var parser: MahoutOptionParser = _
+
+  var _useExistingContext: Boolean = false // used in the test suite to reuse one context per suite
 
   /** Creates a Spark context to run the job inside.
-    * Creates a Spark context to run the job inside. Override to set the SparkConf values specific to the job,
+    * Override to set the SparkConf values specific to the job,
     * these must be set before the context is created.
     * @param masterUrl Spark master URL
     * @param appName  Name to display in Spark UI
