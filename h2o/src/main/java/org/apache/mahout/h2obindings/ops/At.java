@@ -27,7 +27,7 @@ import water.fvec.Chunk;
 
 public class At {
   /* Calculate A' (transpose) */
-  public static H2ODrm At(H2ODrm drmA) {
+  public static H2ODrm exec(H2ODrm drmA) {
     final Frame A = drmA.frame;
     /* First create a new frame of the required dimensions, A.numCols() rows
        and A.numRows() columns.

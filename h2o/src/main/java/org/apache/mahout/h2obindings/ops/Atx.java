@@ -32,7 +32,7 @@ import water.util.ArrayUtils;
 
 public class Atx {
   /* Calculate A'x (where x is an in-core Vector) */
-  public static H2ODrm Atx(H2ODrm drmA, Vector x) {
+  public static H2ODrm exec(H2ODrm drmA, Vector x) {
     Frame A = drmA.frame;
     final H2OBCast<Vector> bx = new H2OBCast<Vector>(x);
 

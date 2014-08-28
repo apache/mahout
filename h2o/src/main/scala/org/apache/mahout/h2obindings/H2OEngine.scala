@@ -67,19 +67,19 @@ object H2OEngine extends DistributedEngine {
     oper match {
       case OpAtAnyKey(_) =>
         throw new IllegalArgumentException("\"A\" must be Int-keyed in this A.t expression.")
-      case op@OpAt(a) => At.At(tr2phys(a)(op.classTagA))
-      case op@OpABt(a, b) => ABt.ABt(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
-      case op@OpAtB(a, b) => AtB.AtB(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
-      case op@OpAtA(a) => AtA.AtA(tr2phys(a)(op.classTagA))
-      case op@OpAx(a, v) => Ax.Ax(tr2phys(a)(op.classTagA), v)
-      case op@OpAtx(a, v) => Atx.Atx(tr2phys(a)(op.classTagA), v)
-      case op@OpAewB(a, b, opId) => AewB.AewB(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB), opId)
+      case op@OpAt(a) => At.exec(tr2phys(a)(op.classTagA))
+      case op@OpABt(a, b) => ABt.exec(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
+      case op@OpAtB(a, b) => AtB.exec(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
+      case op@OpAtA(a) => AtA.exec(tr2phys(a)(op.classTagA))
+      case op@OpAx(a, v) => Ax.exec(tr2phys(a)(op.classTagA), v)
+      case op@OpAtx(a, v) => Atx.exec(tr2phys(a)(op.classTagA), v)
+      case op@OpAewB(a, b, opId) => AewB.exec(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB), opId)
       // Non arithmetic
-      case op@OpCbind(a, b) => Cbind.Cbind(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
-      case op@OpRbind(a, b) => Rbind.Rbind(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
-      case op@OpAewScalar(a, s, opId) => AewScalar.AewScalar(tr2phys(a)(op.classTagA), s, opId)
-      case op@OpRowRange(a, r) => RowRange.RowRange(tr2phys(a)(op.classTagA), r)
-      case op@OpTimesRightMatrix(a, m) => TimesRightMatrix.TimesRightMatrix(tr2phys(a)(op.classTagA), m)
+      case op@OpCbind(a, b) => Cbind.exec(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
+      case op@OpRbind(a, b) => Rbind.exec(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
+      case op@OpAewScalar(a, s, opId) => AewScalar.exec(tr2phys(a)(op.classTagA), s, opId)
+      case op@OpRowRange(a, r) => RowRange.exec(tr2phys(a)(op.classTagA), r)
+      case op@OpTimesRightMatrix(a, m) => TimesRightMatrix.exec(tr2phys(a)(op.classTagA), m)
       // Custom operators, we just execute them
       case blockOp: OpMapBlock[K, _] => MapBlock.exec(tr2phys(blockOp.A)(blockOp.classTagA), blockOp.ncol, blockOp.bmf,
         (blockOp.classTagK == implicitly[ClassTag[String]]), blockOp.classTagA, blockOp.classTagK)

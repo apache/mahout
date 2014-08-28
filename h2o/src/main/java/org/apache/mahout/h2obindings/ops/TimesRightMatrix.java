@@ -31,15 +31,15 @@ import water.fvec.NewChunk;
 
 public class TimesRightMatrix {
   /* Multiple with in-core Matrix */
-  public static H2ODrm TimesRightMatrix(H2ODrm drmA, Matrix B) {
+  public static H2ODrm exec(H2ODrm drmA, Matrix B) {
     Frame A = drmA.frame;
     Vec keys = drmA.keys;
     Frame AinCoreB = null;
 
     if (B instanceof DiagonalMatrix) {
-      AinCoreB = AinCoreB_diagonal(A, B.viewDiagonal());
+      AinCoreB = execDiagonal(A, B.viewDiagonal());
     } else {
-      AinCoreB = AinCoreB_common(A, B);
+      AinCoreB = execCommon(A, B);
     }
 
     return new H2ODrm(AinCoreB, keys);
@@ -50,7 +50,7 @@ public class TimesRightMatrix {
 
     A.numCols() == d.size()
   */
-  private static Frame AinCoreB_diagonal(final Frame A, Vector d) {
+  private static Frame execDiagonal(final Frame A, Vector d) {
     final H2OBCast<Vector> bd = new H2OBCast<Vector>(d);
 
     return new MRTask() {
@@ -73,7 +73,7 @@ public class TimesRightMatrix {
 
     A.numCols() == b.rowSize()
   */
-  private static Frame AinCoreB_common(final Frame A, Matrix b) {
+  private static Frame execCommon(final Frame A, Matrix b) {
     final H2OBCast<Matrix> bb = new H2OBCast<Matrix>(b);
 
     return new MRTask() {

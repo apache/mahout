@@ -27,7 +27,7 @@ import water.fvec.NewChunk;
 
 public class AewB {
   /* Element-wise DRM-DRM operations */
-  public static H2ODrm AewB(H2ODrm drmA, H2ODrm drmB, final String op) {
+  public static H2ODrm exec(H2ODrm drmA, H2ODrm drmB, final String op) {
     final Frame A = drmA.frame;
     final Frame B = drmB.frame;
     Vec keys = drmA.keys;
