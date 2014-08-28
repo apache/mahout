@@ -122,8 +122,8 @@ public final class ClusteringUtils {
     return minDistance;
   }
 
-  public static double estimateDistanceCutoff(Iterable<? extends Vector> data, DistanceMeasure distanceMeasure,
-                                              int sampleLimit) {
+  public static <T extends Vector> double estimateDistanceCutoff(
+      Iterable<T> data, DistanceMeasure distanceMeasure, int sampleLimit) {
     return estimateDistanceCutoff(Lists.newArrayList(Iterables.limit(data, sampleLimit)), distanceMeasure);
   }
 
