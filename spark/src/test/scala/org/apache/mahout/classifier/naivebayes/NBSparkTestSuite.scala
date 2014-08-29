@@ -7,5 +7,4 @@ import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
 import org.apache.mahout.test.MahoutSuite
 import org.scalatest.FunSuite
 
-class NBSparkTestSuite extends FunSuite with MahoutSuite with DistributedSparkSuite with NBTestBase{
-}
+class NBSparkTestSuite extends FunSuite with MahoutSuite with DistributedSparkSuite with NBTestBase
