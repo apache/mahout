@@ -19,13 +19,21 @@ package org.apache.mahout.h2obindings;
 
 import water.H2O;
 
+/**
+ * Context to an H2O Cloud.
+ */
 public class H2OContext {
+  /** Stores the name of the H2O Cloud. Typically a free form string. */
   String masterURL;
 
-  /* @masterURL should actually be the cloud name (name of cluster) to which
-     all the H2O worker nodes "join into". This is not a hostname or IP address
-     of a server, but a string which all cluster members agree on.
-  */
+  /**
+   * Class constructor.
+   *
+   * @param masterURL The cloud name (name of cluster) to which all the H2O
+   *                   worker nodes "join into". This is not a hostname or IP
+   *                   address of a server, but a string which all cluster
+   *                   members agree on.
+   */
   public H2OContext(String _masterURL) {
     masterURL = _masterURL;
 

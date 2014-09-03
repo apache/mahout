@@ -45,8 +45,18 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.util.ReflectionUtils;
 
 
-
+/**
+ * SequenceFile I/O class (on HDFS)
+ */
 public class H2OHdfs {
+  /**
+   * Predicate to check if a given filename is a SequenceFile.
+   *
+   * Inspect the first three bytes to determine the format of the file.
+   *
+   * @param filename Name of the file to check.
+   * @return True if file is of SequenceFile format.
+   */
   public static boolean isSeqfile(String filename) {
     try {
       String uri = filename;
@@ -69,6 +79,15 @@ public class H2OHdfs {
     }
   }
 
+  /**
+   * Create DRM from SequenceFile.
+   *
+   * Create a Mahout DRM backed on H2O from the specified SequenceFile.
+   *
+   * @param filename Name of the sequence file.
+   * @param parMin Minimum number of data partitions in the DRM.
+   * @return DRM object created.
+   */
   public static H2ODrm drmFromFile(String filename, int parMin) {
     try {
       if (isSeqfile(filename)) {
@@ -81,6 +100,9 @@ public class H2OHdfs {
     }
   }
 
+  /**
+   * Internal method called from <code>drmFromFile</code> if format verified.
+   */
   public static H2ODrm drmFromSeqfile(String filename, int parMin) {
     long rows = 0;
     int cols = 0;
@@ -95,7 +117,7 @@ public class H2OHdfs {
       FileSystem fs = FileSystem.get(URI.create(uri), conf);
       Vec.Writer writers[];
       Vec.Writer labelwriter = null;
-      boolean is_int_key = false, is_long_key = false, is_string_key = false;
+      boolean isIntKey = false, isLongKey = false, isStringKey = false;
 
       reader = new SequenceFile.Reader(fs, path, conf);
 
@@ -114,11 +136,11 @@ public class H2OHdfs {
       long start = reader.getPosition();
 
       if (reader.getKeyClass() == Text.class) {
-        is_string_key = true;
+        isStringKey = true;
       } else if (reader.getKeyClass() == LongWritable.class) {
-        is_long_key = true;
+        isLongKey = true;
       } else {
-        is_int_key = true;
+        isIntKey = true;
       }
 
       while (reader.next(key, value)) {
@@ -126,13 +148,13 @@ public class H2OHdfs {
           Vector v = value.get();
           cols = Math.max(v.size(), cols);
         }
-        if (is_long_key) {
+        if (isLongKey) {
           rows = Math.max(((LongWritable)(key)).get()+1, rows);
         }
-        if (is_int_key) {
+        if (isIntKey) {
           rows = Math.max(((IntWritable)(key)).get()+1, rows);
         }
-        if (is_string_key) {
+        if (isStringKey) {
           rows++;
         }
       }
@@ -152,10 +174,10 @@ public class H2OHdfs {
       long r = 0;
       while (reader.next(key, value)) {
         Vector v = value.get();
-        if (is_long_key) {
+        if (isLongKey) {
           r = ((LongWritable)(key)).get();
         }
-        if (is_int_key) {
+        if (isIntKey) {
           r = ((IntWritable)(key)).get();
         }
         for (int c = 0; c < v.size(); c++) {
@@ -164,7 +186,7 @@ public class H2OHdfs {
         if (labels != null) {
           labelwriter.set(r, ((Text)key).toString());
         }
-        if (is_string_key) {
+        if (isStringKey) {
           r++;
         }
       }
@@ -185,15 +207,21 @@ public class H2OHdfs {
     return new H2ODrm(frame, labels);
   }
 
-  public static void drmToFile(String filename, H2ODrm Drm) throws java.io.IOException {
-    Frame frame = Drm.frame;
-    Vec labels = Drm.keys;
+  /**
+   * Create SequenceFile on HDFS from DRM object.
+   *
+   * @param filename Filename to create and store DRM data in.
+   * @param drm DRM object storing Matrix data in memory.
+   */
+  public static void drmToFile(String filename, H2ODrm drm) throws java.io.IOException {
+    Frame frame = drm.frame;
+    Vec labels = drm.keys;
     String uri = filename;
     Configuration conf = new Configuration();
     Path path = new Path(uri);
     FileSystem fs = FileSystem.get(URI.create(uri), conf);
     SequenceFile.Writer writer = null;
-    boolean is_sparse = H2OHelper.isSparse(frame);
+    boolean isSparse = H2OHelper.isSparse(frame);
     ValueString vstr = new ValueString();
 
     if (labels != null) {
@@ -204,7 +232,7 @@ public class H2OHdfs {
 
     for (long r = 0; r < frame.anyVec().length(); r++) {
       Vector v = null;
-      if (is_sparse) {
+      if (isSparse) {
         v = new SequentialAccessSparseVector(frame.numCols());
       } else {
         v = new DenseVector(frame.numCols());

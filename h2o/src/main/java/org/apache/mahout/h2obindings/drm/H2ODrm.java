@@ -20,15 +20,26 @@ package org.apache.mahout.h2obindings.drm;
 import water.fvec.Frame;
 import water.fvec.Vec;
 
+/**
+ * Class which represents a Mahout DRM in H2O.
+ */
 public class H2ODrm {
+  /** frame stores all the numerical data of a DRM. */
   public Frame frame;
+  /** keys stores the row key bindings (String or Long) */
   public Vec keys;
 
+  /**
+   * Class constructor. Null key represents Int keyed DRM.
+   */
   public H2ODrm(Frame m) {
     frame = m;
     keys = null;
   }
 
+  /**
+   * Class constructor. Both Numerical and row key bindings specified.
+   */
   public H2ODrm(Frame m, Vec k) {
     frame = m;
     keys = k;
