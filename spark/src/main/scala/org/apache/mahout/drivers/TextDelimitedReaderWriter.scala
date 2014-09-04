@@ -43,9 +43,9 @@ trait TDIndexedDatasetReader extends Reader[IndexedDataset]{
       existingRowIDs: BiMap[String, Int] = HashBiMap.create()): IndexedDataset = {
     try {
       val delimiter = readSchema("delim").asInstanceOf[String]
-      val rowIDPosition = readSchema("rowIDPosition").asInstanceOf[Int]
+      val rowIDColumn = readSchema("rowIDColumn").asInstanceOf[Int]
       val columnIDPosition = readSchema("columnIDPosition").asInstanceOf[Int]
-      val filterPosition = readSchema("filterPosition").asInstanceOf[Int]
+      val filterColumn = readSchema("filterColumn").asInstanceOf[Int]
       val filterBy = readSchema("filter").asInstanceOf[String]
       // instance vars must be put into locally scoped vals when used in closures that are executed but Spark
 
@@ -57,15 +57,15 @@ trait TDIndexedDatasetReader extends Reader[IndexedDataset]{
       var columns = mc.textFile(source).map { line => line.split(delimiter) }
 
       // -1 means no filter in the input text, take them all
-      if(filterPosition != -1) {
+      if(filterColumn != -1) {
         // get the rows that have a column matching the filter
-        columns = columns.filter { tokens => tokens(filterPosition) == filterBy }
+        columns = columns.filter { tokens => tokens(filterColumn) == filterBy }
       }
 
       // get row and column IDs
       //val m = columns.collect
       val interactions = columns.map { tokens =>
-        tokens(rowIDPosition) -> tokens(columnIDPosition)
+        tokens(rowIDColumn) -> tokens(columnIDPosition)
       }
 
       interactions.cache()

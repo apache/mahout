@@ -128,13 +128,13 @@ object ItemSimilarityDriver extends MahoutDriver {
 
     val readSchema1 = new Schema("delim" -> parser.opts("inDelim").asInstanceOf[String],
       "filter" -> parser.opts("filter1").asInstanceOf[String],
-      "rowIDPosition" -> parser.opts("rowIDPosition").asInstanceOf[Int],
-      "columnIDPosition" -> parser.opts("itemIDPosition").asInstanceOf[Int],
-      "filterPosition" -> parser.opts("filterPosition").asInstanceOf[Int])
+      "rowIDColumn" -> parser.opts("rowIDColumn").asInstanceOf[Int],
+      "columnIDPosition" -> parser.opts("itemIDColumn").asInstanceOf[Int],
+      "filterColumn" -> parser.opts("filterColumn").asInstanceOf[Int])
 
     reader1 = new TextDelimitedIndexedDatasetReader(readSchema1)
 
-    if ((parser.opts("filterPosition").asInstanceOf[Int] != -1 && parser.opts("filter2").asInstanceOf[String] != null)
+    if ((parser.opts("filterColumn").asInstanceOf[Int] != -1 && parser.opts("filter2").asInstanceOf[String] != null)
       || (parser.opts("input2").asInstanceOf[String] != null && !parser.opts("input2").asInstanceOf[String].isEmpty )){
       // only need to change the filter used compared to readSchema1
       val readSchema2 = new Schema(readSchema1) += ("filter" -> parser.opts("filter2").asInstanceOf[String])
@@ -180,7 +180,7 @@ object ItemSimilarityDriver extends MahoutDriver {
 
         datasetB
 
-      } else if (parser.opts("filterPosition").asInstanceOf[Int] != -1
+      } else if (parser.opts("filterColumn").asInstanceOf[Int] != -1
         && parser.opts("filter2").asInstanceOf[String] != null) {
 
         // get cross-cooccurrences interactions by using two filters on a single set of files

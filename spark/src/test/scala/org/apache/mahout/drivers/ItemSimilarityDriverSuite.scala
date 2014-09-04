@@ -94,9 +94,9 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
         "--filter1", "purchase",
         "--filter2", "view",
         "--inDelim", ",",
-        "--itemIDPosition", "2",
-        "--rowIDPosition", "0",
-        "--filterPosition", "1"
+        "--itemIDColumn", "2",
+        "--rowIDColumn", "0",
+        "--filterColumn", "1"
     ))
 */
   // local multi-threaded Spark with HDFS using large dataset
@@ -108,9 +108,9 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       "--filter1", "purchase",
       "--filter2", "view",
       "--inDelim", ",",
-      "--itemIDPosition", "2",
-      "--rowIDPosition", "0",
-      "--filterPosition", "1"
+      "--itemIDColumn", "2",
+      "--rowIDColumn", "0",
+      "--filterColumn", "1"
     ))
   */
 
@@ -153,9 +153,9 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       "--filter1", "purchase",
       "--filter2", "view",
       "--inDelim", ",",
-      "--itemIDPosition", "2",
-      "--rowIDPosition", "0",
-      "--filterPosition", "1",
+      "--itemIDColumn", "2",
+      "--rowIDColumn", "0",
+      "--filterColumn", "1",
       "--writeAllDatasets"))
 
     // todo: these comparisons rely on a sort producing the same lines, which could possibly
@@ -207,9 +207,9 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       "--filter1", "purchase",
       "--filter2", "view",
       "--inDelim", "[,\t]",
-      "--itemIDPosition", "2",
-      "--rowIDPosition", "0",
-      "--filterPosition", "1"))
+      "--itemIDColumn", "2",
+      "--rowIDColumn", "0",
+      "--filterColumn", "1"))
 
     // todo: a better test would be to get sorted vectors and compare rows instead of tokens, this might miss
     // some error cases
@@ -259,9 +259,9 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       "--filter1", "purchase",
       "--filter2", "view",
       "--inDelim", "\t",
-      "--itemIDPosition", "4",
-      "--rowIDPosition", "1",
-      "--filterPosition", "2"))
+      "--itemIDColumn", "4",
+      "--rowIDColumn", "1",
+      "--filterColumn", "2"))
 
 
     val indicatorLines = mahoutCtx.textFile(OutPath + "/indicator-matrix/").collect.toIterable
@@ -420,9 +420,9 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       "--filter1", "purchase",
       "--filter2", "view",
       "--inDelim", "\t",
-      "--itemIDPosition", "2",
-      "--rowIDPosition", "0",
-      "--filterPosition", "1",
+      "--itemIDColumn", "2",
+      "--rowIDColumn", "0",
+      "--filterColumn", "1",
       "--filenamePattern", "m..tsv",
       "--recursive"))
 
@@ -475,9 +475,9 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       "--filter1", "purchase",
       "--filter2", "view",
       "--inDelim", ",",
-      "--itemIDPosition", "2",
-      "--rowIDPosition", "0",
-      "--filterPosition", "1"))
+      "--itemIDColumn", "2",
+      "--rowIDColumn", "0",
+      "--filterColumn", "1"))
 
     val indicatorLines = mahoutCtx.textFile(OutPath + "/indicator-matrix/").collect.toIterable
     tokenize(indicatorLines) should contain theSameElementsAs SelfSimilairtyTokens
@@ -541,9 +541,9 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       "--filter1", "purchase",
       "--filter2", "view",
       "--inDelim", ",",
-      "--itemIDPosition", "2",
-      "--rowIDPosition", "0",
-      "--filterPosition", "1"))
+      "--itemIDColumn", "2",
+      "--rowIDColumn", "0",
+      "--filterColumn", "1"))
 
     val indicatorLines = mahoutCtx.textFile(OutPath + "/indicator-matrix/").collect.toIterable
     val crossIndicatorLines = mahoutCtx.textFile(OutPath + "/cross-indicator-matrix/").collect.toIterable
@@ -603,9 +603,9 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       "--filter1", "purchase",
       "--filter2", "view",
       "--inDelim", ",",
-      "--itemIDPosition", "2",
-      "--rowIDPosition", "0",
-      "--filterPosition", "1",
+      "--itemIDColumn", "2",
+      "--rowIDColumn", "0",
+      "--filterColumn", "1",
       "--writeAllDatasets"))
 
     val indicatorLines = mahoutCtx.textFile(OutPath + "/indicator-matrix/").collect.toIterable
@@ -697,9 +697,9 @@ removed ==> u3	0	      0	      1	          0
       "--filter1", "purchase",
       "--filter2", "view",
       "--inDelim", ",",
-      "--itemIDPosition", "2",
-      "--rowIDPosition", "0",
-      "--filterPosition", "1",
+      "--itemIDColumn", "2",
+      "--rowIDColumn", "0",
+      "--filterColumn", "1",
       "--writeAllDatasets"))
 
     val indicatorLines = mahoutCtx.textFile(OutPath + "/indicator-matrix/").collect.toIterable
