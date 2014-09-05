@@ -24,6 +24,7 @@ import org.apache.mahout.math.drm.logical._
 import org.apache.mahout.h2obindings.ops._
 import org.apache.mahout.h2obindings.drm._
 
+/** H2O specific non-DRM operations */
 object H2OEngine extends DistributedEngine {
   def colMeans[K:ClassTag](drm: CheckpointedDrm[K]): Vector =
     H2OHelper.colMeans(drm.h2odrm.frame)
@@ -37,36 +38,49 @@ object H2OEngine extends DistributedEngine {
   def numNonZeroElementsPerColumn[K: ClassTag](drm: CheckpointedDrm[K]): Vector =
     H2OHelper.nonZeroCnt(drm.h2odrm.frame)
 
+  /** Broadcast support */
   def drmBroadcast(m: Matrix)(implicit dc: DistributedContext): BCast[Matrix] =
     new H2OBCast(m)
 
+  /** Broadcast support */
   def drmBroadcast(v: Vector)(implicit dc: DistributedContext): BCast[Vector] =
     new H2OBCast(v)
 
+  /**
+    * Load DRM from hdfs (as in Mahout DRM format)
+    *
+    *  @param path Path to DRM file
+    *  @param parMin Hint of minimum number of partitions to split while distributing
+    *
+    *  @return DRM[Any] where Any is automatically translated to value type
+    */
   def drmFromHDFS(path: String, parMin: Int = 0)(implicit dc: DistributedContext): CheckpointedDrm[_] =
     new CheckpointedDrmH2O(H2OHdfs.drmFromFile(path, parMin), dc)
 
+  /** This creates an empty DRM with specified number of partitions and cardinality. */
   def drmParallelizeEmpty(nrow: Int, ncol: Int, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[Int] =
     new CheckpointedDrmH2O[Int](H2OHelper.emptyDrm(nrow, ncol, numPartitions, -1), dc)
 
   def drmParallelizeEmptyLong(nrow: Long, ncol: Int, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[Long] =
     new CheckpointedDrmH2O[Long](H2OHelper.emptyDrm(nrow, ncol, numPartitions, -1), dc)
 
+  /** Parallelize in-core matrix as H2O distributed matrix, using row ordinal indices as data set keys. */
   def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[Int] =
     new CheckpointedDrmH2O[Int](H2OHelper.drmFromMatrix(m, numPartitions, -1), dc)
 
+  /** Parallelize in-core matrix as H2O distributed matrix, using row labels as a data set keys. */
   def drmParallelizeWithRowLabels(m: Matrix, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[String] =
     new CheckpointedDrmH2O[String](H2OHelper.drmFromMatrix(m, numPartitions, -1), dc)
 
   def toPhysical[K:ClassTag](plan: DrmLike[K], ch: CacheHint.CacheHint): CheckpointedDrm[K] =
     new CheckpointedDrmH2O[K](tr2phys(plan), plan.context)
 
-  // H2O specific
-
+  /** Eagerly evaluate operator graph into an H2O DRM */
   private def tr2phys[K: ClassTag](oper: DrmLike[K]): H2ODrm = {
     oper match {
       case OpAtAnyKey(_) =>
         throw new IllegalArgumentException("\"A\" must be Int-keyed in this A.t expression.")
+      // Linear algebra operators
       case op@OpAt(a) => At.exec(tr2phys(a)(op.classTagA))
       case op@OpABt(a, b) => ABt.exec(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
       case op@OpAtB(a, b) => AtB.exec(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
@@ -74,13 +88,13 @@ object H2OEngine extends DistributedEngine {
       case op@OpAx(a, v) => Ax.exec(tr2phys(a)(op.classTagA), v)
       case op@OpAtx(a, v) => Atx.exec(tr2phys(a)(op.classTagA), v)
       case op@OpAewB(a, b, opId) => AewB.exec(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB), opId)
+      case op@OpAewScalar(a, s, opId) => AewScalar.exec(tr2phys(a)(op.classTagA), s, opId)
+      case op@OpTimesRightMatrix(a, m) => TimesRightMatrix.exec(tr2phys(a)(op.classTagA), m)
       // Non arithmetic
       case op@OpCbind(a, b) => Cbind.exec(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
       case op@OpRbind(a, b) => Rbind.exec(tr2phys(a)(op.classTagA), tr2phys(b)(op.classTagB))
-      case op@OpAewScalar(a, s, opId) => AewScalar.exec(tr2phys(a)(op.classTagA), s, opId)
       case op@OpRowRange(a, r) => RowRange.exec(tr2phys(a)(op.classTagA), r)
-      case op@OpTimesRightMatrix(a, m) => TimesRightMatrix.exec(tr2phys(a)(op.classTagA), m)
-      // Custom operators, we just execute them
+      // Custom operators
       case blockOp: OpMapBlock[K, _] => MapBlock.exec(tr2phys(blockOp.A)(blockOp.classTagA), blockOp.ncol, blockOp.bmf,
         (blockOp.classTagK == implicitly[ClassTag[String]]), blockOp.classTagA, blockOp.classTagK)
       case op@OpPar(a, m, e) => Par.exec(tr2phys(a)(op.classTagA), m, e)
