@@ -25,30 +25,38 @@ import water.fvec.Frame;
 import water.fvec.Vec;
 import water.fvec.Chunk;
 
+/**
+ * Calculate A'B
+ */
 public class AtB {
-  /* Calculate A'B */
+  /**
+   * Perform A'B operation on two DRMs to create a new DRM.
+   *
+   * @param drmA DRM representing matrix A.
+   * @param drmB DRM representing matrix B.
+   * @return new DRM containing A'B.
+   */
   public static H2ODrm exec(H2ODrm drmA, H2ODrm drmB) {
     final Frame A = drmA.frame;
     final Frame B = drmB.frame;
 
-    /* First create an empty frame of the required dimensions */
+    // First create an empty frame of the required dimensions
     Frame AtB = H2OHelper.emptyFrame(A.numCols(), B.numCols(), -1, -1);
 
-    /* Execute MRTask on the new Frame, and fill each cell (initially 0) by
-       computing appropriate values from A and B.
-
-       chks.length == B.numCols()
-    */
+    // Execute MRTask on the new Frame, and fill each cell (initially 0) by
+    // computing appropriate values from A and B.
+    //
+    // chks.length == B.numCols()
     new MRTask() {
       public void map(Chunk chks[]) {
-        int chunk_size = chks[0].len();
+        int chunkSize = chks[0].len();
         long start = chks[0].start();
         long A_rows = A.numRows();
         Vec A_vecs[] = A.vecs();
         Vec B_vecs[] = B.vecs();
 
         for (int c = 0; c < chks.length; c++) {
-          for (int r = 0; r < chunk_size; r++) {
+          for (int r = 0; r < chunkSize; r++) {
             double v = 0;
             for (long i = 0; i < A_rows; i++) {
               v += (A_vecs[(int)(start + r)].at(i) * B_vecs[c].at(i));
@@ -59,7 +67,7 @@ public class AtB {
       }
     }.doAll(AtB);
 
-    /* AtB is NOT similarly partitioned as A, drop labels */
+    // AtB is NOT similarly partitioned as A, drop labels
     return new H2ODrm(AtB);
   }
 }

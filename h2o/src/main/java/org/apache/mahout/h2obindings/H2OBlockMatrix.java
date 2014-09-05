@@ -25,7 +25,7 @@ import org.apache.mahout.math.SparseMatrix;
 
 import water.fvec.Chunk;
 
-/*
+/**
  * A Matrix implementation to represent a vertical Block of DRM.
  *
  * Creation of the matrix is an O(1) operation with negligible
@@ -39,67 +39,81 @@ import water.fvec.Chunk;
  * input matrix save on the copy overhead.
  */
 public class H2OBlockMatrix extends AbstractMatrix {
-  Chunk _chks[];
-  Matrix cow; /* Copy on Write */
+  /** Backing chunks which store the original matrix data */
+  private Chunk chks[];
+  /** Copy on write matrix created on demand when original matrix is modified */
+  private Matrix cow;
 
+  /** Class constructor. */
   public H2OBlockMatrix(Chunk chks[]) {
     super(chks[0].len(), chks.length);
-    _chks = chks;
+    this.chks = chks;
   }
 
+  /**
+   * Internal method to create the copy on write matrix.
+   *
+   * Once created, all further operations are performed on the CoW matrix
+   */
   private void cow() {
     if (cow != null) {
       return;
     }
 
-    if (_chks[0].isSparse()) {
-      cow = new SparseMatrix(_chks[0].len(), _chks.length);
+    if (chks[0].isSparse()) {
+      cow = new SparseMatrix(chks[0].len(), chks.length);
     } else {
-      cow = new DenseMatrix(_chks[0].len(), _chks.length);
+      cow = new DenseMatrix(chks[0].len(), chks.length);
     }
 
-    for (int c = 0; c < _chks.length; c++) {
-      for (int r = 0; r < _chks[0].len(); r++) {
-        cow.setQuick(r, c, _chks[c].at0(r));
+    for (int c = 0; c < chks.length; c++) {
+      for (int r = 0; r < chks[0].len(); r++) {
+        cow.setQuick(r, c, chks[c].at0(r));
       }
     }
   }
 
+  @Override
   public void setQuick(int row, int col, double val) {
     cow();
     cow.setQuick(row, col, val);
   }
 
+  @Override
   public Matrix like(int nrow, int ncol) {
-    if (_chks[0].isSparse()) {
+    if (chks[0].isSparse()) {
       return new SparseMatrix(nrow, ncol);
     } else {
       return new DenseMatrix(nrow, ncol);
     }
   }
 
+  @Override
   public Matrix like() {
-    if (_chks[0].isSparse()) {
+    if (chks[0].isSparse()) {
       return new SparseMatrix(rowSize(), columnSize());
     } else {
       return new DenseMatrix(rowSize(), columnSize());
     }
   }
 
+  @Override
   public double getQuick(int row, int col) {
     if (cow != null) {
       return cow.getQuick(row, col);
     } else {
-      return _chks[col].at0(row);
+      return chks[col].at0(row);
     }
   }
 
+  @Override
   public Matrix assignRow(int row, Vector v) {
     cow();
     cow.assignRow(row, v);
     return cow;
   }
 
+  @Override
   public Matrix assignColumn(int col, Vector v) {
     cow();
     cow.assignColumn(col, v);

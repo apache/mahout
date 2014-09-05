@@ -31,28 +31,44 @@ import java.io.ByteArrayInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 
-/* Handle Matrix and Vector separately so that we can live with
-   just importing MatrixWritable and VectorWritable.
-*/
-
+/**
+ * Broadcast class wrapper around Matrix and Vector.
+ *
+ * Use MatrixWritable and VectorWritable internally.
+ * Even though the class is generically typed, we do runtime
+ * enforcement to assert the type is either Matrix or Vector.
+ *
+ * H2OBCast object is created around a Matrix or Vector. Matrix or Vector
+ * objects cannot be freely referred in closures. Instead create and refer the
+ * corresponding H2OBCast object. The original Matrix or Vector can be
+ * obtained by calling the ->value() method on the H2OBCast object within a
+ * closure.
+ */
 public class H2OBCast<T> implements BCast<T>, Serializable {
-  transient T obj;
-  byte buf[];
-  boolean is_matrix;
+  private transient T obj;
+  private byte buf[];
+  private boolean isMatrix;
 
+  /**
+   * Class constructor.
+   */
   public H2OBCast(T o) {
     obj = o;
 
     if (o instanceof Matrix) {
       buf = serialize(new MatrixWritable((Matrix)o));
-      is_matrix = true;
+      isMatrix = true;
     } else if (o instanceof Vector) {
       buf = serialize(new VectorWritable((Vector)o));
+      isMatrix = false;
     } else {
       throw new IllegalArgumentException("Only Matrix or Vector supported for now");
     }
   }
 
+  /**
+   * Get the serialized object.
+   */
   public T value() {
     if (obj == null) {
       obj = deserialize(buf);
@@ -60,6 +76,13 @@ public class H2OBCast<T> implements BCast<T>, Serializable {
     return obj;
   }
 
+  /**
+   * Internal method to serialize the object.
+   *
+   * @param w Either MatrixWritable or VectorWritable corresponding to
+   *          either Matrix or Vector as the class is typed.
+   * @return serialized sequence of bytes.
+   */
   private byte[] serialize(Writable w) {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     try {
@@ -72,12 +95,18 @@ public class H2OBCast<T> implements BCast<T>, Serializable {
     return bos.toByteArray();
   }
 
+  /**
+   * Internal method to deserialize a sequence of bytes.
+   *
+   * @param buf Sequence of bytes previously serialized by serialize() method.
+   * @return The original Matrix or Vector object.
+   */
   private T deserialize(byte buf[]) {
     T ret = null;
     ByteArrayInputStream bis = new ByteArrayInputStream(buf);
     try {
       ObjectInputStream ois = new ObjectInputStream(bis);
-      if (is_matrix) {
+      if (isMatrix) {
         MatrixWritable w = new MatrixWritable();
         w.readFields(ois);
         ret = (T) w.get();

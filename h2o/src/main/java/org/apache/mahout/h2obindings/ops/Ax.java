@@ -28,24 +28,32 @@ import water.fvec.Vec;
 import water.fvec.Chunk;
 import water.fvec.NewChunk;
 
+/**
+ * Calculate Ax (where x is an in-core Vector)
+ */
 public class Ax {
-  /* Calculate Ax (where x is an in-core Vector) */
+  /**
+   * Perform Ax operation with a DRM and an in-core Vector to create a new DRM.
+   *
+   * @param drmA DRM representing matrix A.
+   * @param x in-core Mahout Vector.
+   * @return new DRM containing Ax.
+   */
   public static H2ODrm exec(H2ODrm drmA, Vector x) {
     Frame A = drmA.frame;
     Vec keys = drmA.keys;
     final H2OBCast<Vector> bx = new H2OBCast<Vector>(x);
 
-    /* Ax is written into nc (single element, not array) with an MRTask on A,
-       and therefore will be similarly partitioned as A.
-
-       x.size() == A.numCols() == chks.length
-    */
+    // Ax is written into nc (single element, not array) with an MRTask on A,
+    // and therefore will be similarly partitioned as A.
+    //
+    // x.size() == A.numCols() == chks.length
     Frame Ax = new MRTask() {
         public void map(Chunk chks[], NewChunk nc) {
-          int chunk_size = chks[0].len();
+          int chunkSize = chks[0].len();
           Vector x = bx.value();
 
-          for (int r = 0; r < chunk_size; r++) {
+          for (int r = 0; r < chunkSize; r++) {
             double v = 0;
             for (int c = 0; c < chks.length; c++) {
               v += (chks[c].at0(r) * x.getQuick(c));
@@ -55,7 +63,7 @@ public class Ax {
         }
       }.doAll(1, A).outputFrame(null, null);
 
-    /* Carry forward labels of A blindly into ABt */
+    // Carry forward labels of A blindly into ABt
     return new H2ODrm(Ax, keys);
   }
 }

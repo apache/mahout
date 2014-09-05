@@ -25,27 +25,35 @@ import water.fvec.Vec;
 import water.fvec.Chunk;
 import water.fvec.NewChunk;
 
+/**
+ * Calculate AB'
+ */
 public class ABt {
-  /* Calculate AB' */
+  /**
+   * Calculate AB' on two DRMs to create a new DRM holding the result.
+   *
+   * @param drmA DRM representing matrix A
+   * @param drmB DRM representing matrix B
+   * @return new DRM containing AB'
+   */
   public static H2ODrm exec(H2ODrm drmA, H2ODrm drmB) {
     Frame A = drmA.frame;
     Vec keys = drmA.keys;
     final Frame B = drmB.frame;
     int ABt_cols = (int)B.numRows();
 
-    /* ABt is written into ncs[] with an MRTask on A, and therefore will
-       be similarly partitioned as A.
-
-       chks.length == A.numCols() (== B.numCols())
-       ncs.length == ABt_cols (B.numRows())
-    */
+    // ABt is written into ncs[] with an MRTask on A, and therefore will
+    // be similarly partitioned as A.
+    //
+    // chks.length == A.numCols() (== B.numCols())
+    // ncs.length == ABt_cols (B.numRows())
     Frame ABt = new MRTask() {
         public void map(Chunk chks[], NewChunk ncs[]) {
-          int chunk_size = chks[0].len();
+          int chunkSize = chks[0].len();
           Vec B_vecs[] = B.vecs();
 
           for (int c = 0; c < ncs.length; c++) {
-            for (int r = 0; r < chunk_size; r++) {
+            for (int r = 0; r < chunkSize; r++) {
               double v = 0;
               for (int i = 0; i < chks.length; i++) {
                 v += (chks[i].at0(r) * B_vecs[i].at(c));
@@ -56,7 +64,7 @@ public class ABt {
         }
       }.doAll(ABt_cols, A).outputFrame(null, null);
 
-    /* Carry forward labels of A blindly into ABt */
+    // Carry forward labels of A blindly into ABt
     return new H2ODrm(ABt, keys);
   }
 }

@@ -27,18 +27,26 @@ import water.parser.ValueString;
 import org.apache.mahout.h2obindings.H2OHelper;
 import org.apache.mahout.h2obindings.drm.H2ODrm;
 
+/**
+ * R-like rbind like operator, on two DRMs
+ */
 public class Rbind {
-  /* R's rbind like operator, on DrmA and DrmB */
+  /**
+   * Combine the rows of two DRMs A and B to create a new DRM.
+   *
+   * @param drmA DRM representing matrix A.
+   * @param drmB DRM representing matrix B.
+   * @return new DRM containing rows of B below A.
+   */
   public static H2ODrm exec(H2ODrm drmA, H2ODrm drmB) {
     final Frame fra = drmA.frame;
     final Vec keysa = drmA.keys;
     final Frame frb = drmB.frame;
     final Vec keysb = drmB.keys;
 
-    /* Create new frame and copy A's data at the top, and B's data below.
-       Create the frame in the same VectorGroup as A, so A's data does not
-       cross the wire during copy. B's data could potentially cross the wire.
-    */
+    // Create new frame and copy A's data at the top, and B's data below.
+    // Create the frame in the same VectorGroup as A, so A's data does not
+    // cross the wire during copy. B's data could potentially cross the wire.
     Frame frbind = H2OHelper.emptyFrame(fra.numRows() + frb.numRows(), fra.numCols(),
             -1, -1, fra.anyVec().group());
     Vec keys = null;
@@ -50,10 +58,10 @@ public class Rbind {
           long A_rows = fra.numRows();
           long B_rows = frb.numRows();
           long start = chks[0].start();
-          int chunk_size = chks[0].len();
+          int chunkSize = chks[0].len();
           ValueString vstr = new ValueString();
 
-          for (int r = 0; r < chunk_size; r++) {
+          for (int r = 0; r < chunkSize; r++) {
             for (int c = 0; c < chks.length; c++) {
               if (r + start < A_rows) {
                 chks[c].set0(r, A_vecs[c].at(r + start));
