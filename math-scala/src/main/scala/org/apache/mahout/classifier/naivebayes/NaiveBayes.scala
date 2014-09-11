@@ -102,6 +102,8 @@ object NaiveBayes {
 
     // convert to an IntKeyed Drm
     // must be a better way to do this.
+    // XXX: at least use iterateNonZeroes or somethin similar
+    // if doing this iteratively
     val intKeyedObservations = drmParallelizeEmpty(
                             stringKeyedObservations.nrow.toInt,
                             stringKeyedObservations.ncol)
@@ -120,7 +122,7 @@ object NaiveBayes {
     val encodedCategoryByKey = new mutable.HashMap[String,Integer]
     val encodedCategoryByRowIndexVector = new DenseVector(labelVectorByRowIndex.size)
 
-    // encode rows as an integer so we can broadcast as a vector
+    // encode rows as an (Double)Integer so we can broadcast as a vector
     for (i <- 0 until labelVectorByRowIndex.size) {
       if (!encodedCategoryByKey.contains()) {
         encodedCategoryByRowIndexVector.set(i, categoryIndex)
@@ -151,7 +153,7 @@ object NaiveBayes {
         var category : Int = 0
 
         for (i <- 0 until keys.size) {
-          for (j <- 0 until ncategories) {
+          for (j <- 0 until blockA.ncol) {
             category = BCastEncodedCategoryByRowVector.get(j).toInt
             blockB.set(i, category, (blockB.get(i,category) + blockA.get(i,j)))
           }
@@ -164,7 +166,6 @@ object NaiveBayes {
 
     // Now return the labelMapByRowIndex HashMap and the the transpose of
     // aggregetedObservationDrm which can be used as input to trainNB
-
     (labelMapByRowIndex, aggregetedObservationByLabelDrm.t)
   }
 
