@@ -83,11 +83,10 @@ object NaiveBayes {
     *           aggregatedByLabelObservationDrm is a DrmLike[Int] of aggregated
     *             TF or TF-IDF counts per label
     */
-
-
-
   def extractLabelsAndAggregateObservations( stringKeyedObservations: DrmLike[String] ):
   (mutable.HashMap[Integer,String], DrmLike[Int]) = {
+
+    implicit val distributedContext = stringKeyedObservations.context
 
     // get the label row keys as
     val rowLabelBindings = stringKeyedObservations.getRowLabelBindings
@@ -106,8 +105,8 @@ object NaiveBayes {
     val intKeyedObservations = drmParallelizeEmpty(
                             stringKeyedObservations.nrow.toInt,
                             stringKeyedObservations.ncol)
-    for (i <- stringKeyedObservations.nrow.toInt) {
-      for ( j <-stringKeyedObservations.ncol) {
+    for (i <- 0 until stringKeyedObservations.nrow.toInt) {
+      for ( j <- 0 until stringKeyedObservations.ncol) {
         intKeyedObservations.set(i,
                                  j,
                                  stringKeyedObservations.get(i,j))
@@ -151,14 +150,17 @@ object NaiveBayes {
         //val blockB = blockA.zeroes(keys.size, ncategories)
         var category : Int = 0
 
-        for (i <- 0 until blockA.numRow) {
-          for (j <- 0 until ncol) {
-            category=BCastEncodedCategoryByRowVector.get(j)
+        for (i <- 0 until keys.size) {
+          for (j <- 0 until ncategories) {
+            category = BCastEncodedCategoryByRowVector.get(j).toInt
             blockB.set(i, category, (blockB.get(i,category) + blockA.get(i,j)))
           }
         }
         keys -> blockB
     }
+
+    // get rid of intKeyedObservations we dont need them any more
+    intKeyedObservations.uncache
 
     // Now return the labelMapByRowIndex HashMap and the the transpose of
     // aggregetedObservationDrm which can be used as input to trainNB
