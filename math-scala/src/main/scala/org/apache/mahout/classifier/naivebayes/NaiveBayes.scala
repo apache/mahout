@@ -57,16 +57,12 @@ object NaiveBayes {
     // Summation of all weights per feature
     val weightsPerFeature = observationsPerLabel.colSums
 
-    // local summation of all weights per label
-    /** Since this is not distributed might as well wait until after collecting **/
-    /** val weightsPerLabel2 = observationsPerLabel.aggregateRows(vectorSumFunc)**/
-    /*****************************************************************************/
+    // distributed summation of all weights per label
+    val weightsPerLabel = observationsPerLabel.rowSums
 
     // collect a matrix to pass to the NaiveBayesModel
+    // todo:see if there is anything keeping us from passing a DRM through the rest of the pipeline
     val inCoreTFIDF=observationsPerLabel.collect
-
-    // local summation of all weights per label
-    val weightsPerLabel = inCoreTFIDF.rowSums
 
     // perLabelThetaNormalizer Vector is expected by NaiveBayesModel. We can pass a null value
     // or Vector of zeroes in the case of a standard NB model.
@@ -157,22 +153,20 @@ object NaiveBayes {
     // a transposed IntKeyed Drm out so that all categories
     // will be present on all nodes as columns and can be referenced
     // by BCastEncodedCategoryByRowVector.  Iteratively sum all categories
-
     val ncategories = categoryIndex.toInt
 
     val BCastEncodedCategoryByRowVector= drmBroadcast(encodedCategoryByRowIndexVector)
 
     val aggregetedObservationByLabelDrm = intKeyedObservations.t.mapBlock(ncol = ncategories) {
       case (keys, blockA) =>
-        val blockB = new DenseMatrix(keys.size, ncategories)
-        //val blockB = blockA.zeroes(keys.size, ncategories)
+        val blockB = blockA.like(keys.size, ncategories)
+        //val blockB = new SparseRowMatrix((keys.size, ncategories)
         var category : Int = 0
-
         for (i <- 0 until keys.size) {
           // todo: Should probably use nonZeroes here as well
           for (j <- 0 until blockA.ncol) {
             category = BCastEncodedCategoryByRowVector.get(j).toInt
-            blockB.set(i, category, (blockB.get(i,category) + blockA.get(i,j)))
+            blockB.setQuick(i, category, (blockB.get(i,category) + blockA.get(i,j)))
           }
         }
         keys -> blockB
