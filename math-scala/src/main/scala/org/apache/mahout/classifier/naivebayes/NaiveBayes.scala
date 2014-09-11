@@ -79,6 +79,7 @@ object NaiveBayes {
       thetaNormalizer = thetaTrainer.retrievePerLabelThetaNormalizer()
     }
 
+    // todo: need a new NaiveBayesModel?
     new NaiveBayesModel(inCoreTFIDF, weightsPerFeature, weightsPerLabel,
       thetaNormalizer, alphaI, trainComplementary)
 
@@ -128,6 +129,7 @@ object NaiveBayes {
     }
 
     // get rid of stringKeyedObservations - we don't need them anymore
+    // is there a better way to free this?
     stringKeyedObservations.uncache
 
     var categoryIndex = 0.0d
@@ -173,6 +175,7 @@ object NaiveBayes {
     }
 
     // get rid of intKeyedObservations- we don't need them any more
+    // is there a better way to free this?
     intKeyedObservations.uncache
 
     // Now return the labelMapByRowIndex HashMap and the the transpose of
