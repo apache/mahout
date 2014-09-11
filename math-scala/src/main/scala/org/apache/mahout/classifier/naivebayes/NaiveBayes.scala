@@ -97,7 +97,7 @@ object NaiveBayes {
     *           aggregatedByLabelObservationDrm is a DrmLike[Int] of aggregated
     *             TF or TF-IDF counts per label
     */
-  def extractLabelsAndAggregateObservations( stringKeyedObservations: DrmLike[String] ):
+  def extractLabelsAndAggregateObservations[K:ClassTag]( stringKeyedObservations: DrmLike[K] ):
   (mutable.HashMap[Integer, String], DrmLike[Int]) = {
 
     implicit val distributedContext = stringKeyedObservations.context
@@ -116,7 +116,7 @@ object NaiveBayes {
 
     // convert to an IntKeyed Drm
     // must be a better way to do this.
-    // todo: at least use iterateNonZeroes or something similar
+    // todo: use slice to copy DRM over
     // if doing this iteratively
     val intKeyedObservations = drmParallelizeEmpty(
                             stringKeyedObservations.nrow.toInt,
@@ -129,7 +129,7 @@ object NaiveBayes {
     }
 
     // get rid of stringKeyedObservations - we don't need them anymore
-    // is there a better way to free this?
+    // is this the way to free them?
     stringKeyedObservations.uncache
 
     var categoryIndex = 0.0d
@@ -175,7 +175,7 @@ object NaiveBayes {
     }
 
     // get rid of intKeyedObservations- we don't need them any more
-    // is there a better way to free this?
+    // is this the way to free them?
     intKeyedObservations.uncache
 
     // Now return the labelMapByRowIndex HashMap and the the transpose of
