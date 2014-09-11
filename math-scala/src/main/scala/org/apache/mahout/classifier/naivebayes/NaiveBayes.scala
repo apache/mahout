@@ -46,12 +46,12 @@ object NaiveBayes {
    * Distributed training of a Naive Bayes model. Follows the approach presented in Rennie et.al.: Tackling the poor
    * assumptions of Naive Bayes Text classifiers, ICML 2003, http://people.csail.mit.edu/jrennie/papers/icml03-nb.pdf
    *
-   * @param observationsPerLabel a DrmLike matrix containing term frequency counts for each label.
+   * @param observationsPerLabel a DrmLike[Int] matrix containing term frequency counts for each label.
    * @param trainComplementary whether or not to train a complementary Naive Bayes model
    * @param alphaI smoothing parameter
    * @return trained naive bayes model
    */
-  def trainNB[K: ClassTag](observationsPerLabel: DrmLike[K], trainComplementary: Boolean = true,
+  def trainNB (observationsPerLabel: DrmLike[Int], trainComplementary: Boolean = true,
     alphaI: Float = defaultAlphaI): NaiveBayesModel = {
 
     // Summation of all weights per feature
@@ -97,7 +97,7 @@ object NaiveBayes {
     *             TF or TF-IDF counts per label
     */
   def extractLabelsAndAggregateObservations( stringKeyedObservations: DrmLike[String] ):
-  (mutable.HashMap[Integer,String], DrmLike[Int]) = {
+  (mutable.HashMap[Integer, String], DrmLike[Int]) = {
 
     implicit val distributedContext = stringKeyedObservations.context
 
