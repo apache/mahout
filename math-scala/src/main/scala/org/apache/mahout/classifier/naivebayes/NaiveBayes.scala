@@ -1,3 +1,20 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.classifier.naivebayes
 
 import java.util
@@ -77,8 +94,9 @@ object NaiveBayes {
     *                                in form K= /Category/document_title
     *                                        V= TF or TF-IDF values per term
     * @return (labelIndexMap,aggregatedByLabelObservationDrm)
-    *           labelIndexMap is an OpenObjectIntHashMap K= label index
-    *                                                  V= label
+    *
+    *           labelIndexMap is an HashMap  K= label index
+    *                                        V= label
     *           aggregatedByLabelObservationDrm is a DrmLike[Int] of aggregated
     *             TF or TF-IDF counts per label
     */
@@ -87,7 +105,7 @@ object NaiveBayes {
 
     implicit val distributedContext = stringKeyedObservations.context
 
-    // get the label row keys as
+    // get the label row keys
     val rowLabelBindings = stringKeyedObservations.getRowLabelBindings
 
     // extract categories from labels assigned by seq2sparse
@@ -96,20 +114,19 @@ object NaiveBayes {
     val labelMapByRowIndex = new mutable.HashMap[Integer,String]
     for ((key, value) <- rowLabelBindings) {
       labelVectorByRowIndex.set(value, key.split("/")(1))
-      labelMapByRowIndex.put(value, key.split("/")(1) )
+      labelMapByRowIndex.put(value, key.split("/")(1))
     }
 
     // convert to an IntKeyed Drm
     // must be a better way to do this.
-    // XXX: at least use iterateNonZeroes or something similar
+    // todo: at least use iterateNonZeroes or something similar
     // if doing this iteratively
     val intKeyedObservations = drmParallelizeEmpty(
                             stringKeyedObservations.nrow.toInt,
                             stringKeyedObservations.ncol)
     for (i <- 0 until stringKeyedObservations.nrow.toInt) {
       for ( j <- 0 until stringKeyedObservations.ncol) {
-        intKeyedObservations.set(i,
-                                 j,
+        intKeyedObservations.set(i, j,
                                  stringKeyedObservations.get(i,j))
       }
     }
@@ -152,7 +169,7 @@ object NaiveBayes {
         var category : Int = 0
 
         for (i <- 0 until keys.size) {
-          // Should probably use nonZeroes here as well
+          // todo: Should probably use nonZeroes here as well
           for (j <- 0 until blockA.ncol) {
             category = BCastEncodedCategoryByRowVector.get(j).toInt
             blockB.set(i, category, (blockB.get(i,category) + blockA.get(i,j)))
@@ -161,7 +178,7 @@ object NaiveBayes {
         keys -> blockB
     }
 
-    // get rid of intKeyedObservations we dont need them any more
+    // get rid of intKeyedObservations- we don't need them any more
     intKeyedObservations.uncache
 
     // Now return the labelMapByRowIndex HashMap and the the transpose of
