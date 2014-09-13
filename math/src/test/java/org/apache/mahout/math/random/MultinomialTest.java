@@ -140,7 +140,7 @@ public class MultinomialTest extends MahoutTestCase {
         // the actual values should be within about 2 of these, however, almost regardless of seed
         Map<String, Integer> ref = ImmutableMap.of("3", 35, "2", 18, "1", 9, "0", 16, "4", 72);
         for (String v : cnt.elementSet()) {
-            assertEquals(ref.get(v).intValue(), cnt.count(v));
+            assertTrue(Math.abs(ref.get(v) - cnt.count(v)) <= 2);
         }
 
         assertTrue(cnt.contains(s0.sample(1)));

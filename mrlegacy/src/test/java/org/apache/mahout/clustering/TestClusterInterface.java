@@ -35,7 +35,10 @@ public final class TestClusterInterface extends MahoutTestCase {
     Vector m = new DenseVector(d);
     Cluster cluster = new org.apache.mahout.clustering.kmeans.Kluster(m, 123, measure);
     String formatString = cluster.asFormatString(null);
-    assertEquals("{\"r\":[],\"c\":[1.1,2.2,3.3],\"n\":0,\"identifier\":\"CL-123\"}", formatString);
+    assertTrue(formatString.contains("\"r\":[]"));
+    assertTrue(formatString.contains("\"c\":[1.1,2.2,3.3]"));
+    assertTrue(formatString.contains("\"n\":0"));
+    assertTrue(formatString.contains("\"identifier\":\"CL-123\""));
   }
 
   @Test
@@ -45,7 +48,10 @@ public final class TestClusterInterface extends MahoutTestCase {
     m.assign(d);
     Cluster cluster = new org.apache.mahout.clustering.kmeans.Kluster(m, 123, measure);
     String formatString = cluster.asFormatString(null);
-    assertEquals("{\"r\":[],\"c\":[{\"0\":1.1},{\"2\":3.3}],\"n\":0,\"identifier\":\"CL-123\"}", formatString);
+    assertTrue(formatString.contains("\"r\":[]"));
+    assertTrue(formatString.contains("\"c\":[{\"0\":1.1},{\"2\":3.3}]"));
+    assertTrue(formatString.contains("\"n\":0"));
+    assertTrue(formatString.contains("\"identifier\":\"CL-123\""));
   }
 
   @Test
@@ -55,7 +61,10 @@ public final class TestClusterInterface extends MahoutTestCase {
     Cluster cluster = new org.apache.mahout.clustering.kmeans.Kluster(m, 123, measure);
     String[] bindings = { "fee", null, "foo" };
     String formatString = cluster.asFormatString(bindings);
-    assertEquals("{\"r\":[],\"c\":[{\"fee\":1.1},{\"1\":2.2},{\"foo\":3.3}],\"n\":0,\"identifier\":\"CL-123\"}", formatString);
+    assertTrue(formatString.contains("\"r\":[]"));
+    assertTrue(formatString.contains("\"c\":[{\"fee\":1.1},{\"1\":2.2},{\"foo\":3.3}]"));
+    assertTrue(formatString.contains("\"n\":0"));
+    assertTrue(formatString.contains("\"identifier\":\"CL-123\""));
   }
 
   @Test
@@ -65,7 +74,10 @@ public final class TestClusterInterface extends MahoutTestCase {
     m.assign(d);
     Cluster cluster = new org.apache.mahout.clustering.kmeans.Kluster(m, 123, measure);
     String formatString = cluster.asFormatString(null);
-    assertEquals("{\"r\":[],\"c\":[{\"0\":1.1},{\"2\":3.3}],\"n\":0,\"identifier\":\"CL-123\"}", formatString);
+    assertTrue(formatString.contains("\"r\":[]"));
+    assertTrue(formatString.contains("\"c\":[{\"0\":1.1},{\"2\":3.3}]"));
+    assertTrue(formatString.contains("\"n\":0"));
+    assertTrue(formatString.contains("\"identifier\":\"CL-123\""));
   }
 
 }

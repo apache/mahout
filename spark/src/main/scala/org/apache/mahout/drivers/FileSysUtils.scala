@@ -21,25 +21,24 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{Path, FileStatus, FileSystem}
 
 /**
-  * Returns a [[java.lang.String]]comma delimited list of URIs discovered based on parameters in the constructor.
-  * The String is formatted to be input into [[org.apache.spark.SparkContext.textFile()]]
-  *
-  * @param pathURI Where to start looking for inFiles, only HDFS is currently
-  *                supported. The pathURI may be a list of comma delimited URIs like those supported
-  *                by Spark
-  * @param filePattern regex that must match the entire filename to have the file returned
-  * @param recursive true traverses the filesystem recursively
-  */
+ * Returns a [[java.lang.String]]comma delimited list of URIs discovered based on parameters in the constructor.
+ * The String is formatted to be input into [[org.apache.spark.SparkContext.textFile()]]
+ *
+ * @param pathURI Where to start looking for inFiles, may be a list of comma delimited URIs
+ * @param filePattern regex that must match the entire filename to have the file returned
+ * @param recursive true traverses the filesystem recursively, default = false
+ */
 
-case class FileSysUtils(pathURI: String, filePattern: String = ".*", recursive: Boolean = false) {
+case class FileSysUtils(pathURI: String, filePattern: String = "", recursive: Boolean = false) {
 
   val conf = new Configuration()
   val fs = FileSystem.get(conf)
 
-  /** returns a string of comma delimited URIs matching the filePattern */
+/** Returns a string of comma delimited URIs matching the filePattern
+  * When pattern matching dirs are never returned, only traversed. */
   def uris :String = {
-    if(recursive){
-      val pathURIs = pathURI.split(",")
+    if (!filePattern.isEmpty){ // have file pattern so
+    val pathURIs = pathURI.split(",")
       var files = ""
       for ( uri <- pathURIs ){
         files = findFiles(uri, filePattern, files)
@@ -51,21 +50,27 @@ case class FileSysUtils(pathURI: String, filePattern: String = ".*", recursive: 
     }
   }
 
-  /** find matching files in the dir, recursively call self when another directory is found */
-  def findFiles(dir: String, filePattern :String = ".*", files : String = ""): String = {
-    val fileStatuses: Array[FileStatus] = fs.listStatus (new Path(dir))
+/** Find matching files in the dir, recursively call self when another directory is found
+  * Only files are matched, directories are traversed but never return a match */
+  private def findFiles(dir: String, filePattern :String = ".*", files : String = ""): String = {
+    val seed = fs.getFileStatus(new Path(dir))
     var f :String = files
-    for (fileStatus <- fileStatuses ){
-      if (fileStatus.getPath().getName().matches(filePattern)
-        && !fileStatus.isDir){// found a file
-        if (fileStatus.getLen() != 0) {
-          // file is not empty
-          f = f + fileStatus.getPath.toUri.toString + ","
+
+    if (seed.isDir) {
+      val fileStatuses: Array[FileStatus] = fs.listStatus(new Path(dir))
+      for (fileStatus <- fileStatuses) {
+        if (fileStatus.getPath().getName().matches(filePattern)
+          && !fileStatus.isDir) {
+          // found a file
+          if (fileStatus.getLen() != 0) {
+            // file is not empty
+            f = f + fileStatus.getPath.toUri.toString + ","
+          }
+        } else if (fileStatus.isDir && recursive) {
+          f = findFiles(fileStatus.getPath.toString, filePattern, f)
         }
-      }else if (fileStatus.isDir){
-        f = findFiles(fileStatus.getPath.toString, filePattern, f)
       }
-    }
+    }else{ f = dir }// was a filename not dir
     f
   }
 }

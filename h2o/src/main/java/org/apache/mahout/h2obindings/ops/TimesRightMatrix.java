@@ -29,37 +29,46 @@ import water.fvec.Vec;
 import water.fvec.Chunk;
 import water.fvec.NewChunk;
 
+/**
+ * Multiple DRM with in-core Matrix
+ */
 public class TimesRightMatrix {
-  /* Multiple with in-core Matrix */
-  public static H2ODrm TimesRightMatrix(H2ODrm drmA, Matrix B) {
+  /**
+   * Multiply a DRM with an in-core Matrix to create a new DRM.
+   *
+   * @param drmA DRM representing matrix A.
+   * @param B in-core Mahout Matrix.
+   * @return new DRM containing drmA times B.
+   */
+  public static H2ODrm exec(H2ODrm drmA, Matrix B) {
     Frame A = drmA.frame;
     Vec keys = drmA.keys;
     Frame AinCoreB = null;
 
     if (B instanceof DiagonalMatrix) {
-      AinCoreB = AinCoreB_diagonal(A, B.viewDiagonal());
+      AinCoreB = execDiagonal(A, B.viewDiagonal());
     } else {
-      AinCoreB = AinCoreB_common(A, B);
+      AinCoreB = execCommon(A, B);
     }
 
     return new H2ODrm(AinCoreB, keys);
   }
 
-  /*
-    Multiply Frame A with in-core diagonal Matrix (whose diagonal Vector is d)
-
-    A.numCols() == d.size()
-  */
-  private static Frame AinCoreB_diagonal(final Frame A, Vector d) {
+  /**
+   * Multiply Frame A with in-core diagonal Matrix (whose diagonal Vector is d)
+   *
+   * A.numCols() == d.size()
+   */
+  private static Frame execDiagonal(final Frame A, Vector d) {
     final H2OBCast<Vector> bd = new H2OBCast<Vector>(d);
 
     return new MRTask() {
       public void map(Chunk chks[], NewChunk ncs[]) {
         Vector D = bd.value();
-        int chunk_size = chks[0].len();
+        int chunkSize = chks[0].len();
 
         for (int c = 0; c < ncs.length; c++) {
-          for (int r = 0; r < chunk_size; r++) {
+          for (int r = 0; r < chunkSize; r++) {
             double v = (chks[c].at0(r) * D.getQuick(c));
             ncs[c].addNum(v);
           }
@@ -68,21 +77,21 @@ public class TimesRightMatrix {
     }.doAll(d.size(), A).outputFrame(null, null);
   }
 
-  /*
-    Multiply Frame A with in-core Matrix b
-
-    A.numCols() == b.rowSize()
-  */
-  private static Frame AinCoreB_common(final Frame A, Matrix b) {
+  /**
+   * Multiply Frame A with in-core Matrix b
+   *
+   * A.numCols() == b.rowSize()
+   */
+  private static Frame execCommon(final Frame A, Matrix b) {
     final H2OBCast<Matrix> bb = new H2OBCast<Matrix>(b);
 
     return new MRTask() {
       public void map(Chunk chks[], NewChunk ncs[]) {
         Matrix B = bb.value();
-        int chunk_size = chks[0].len();
+        int chunkSize = chks[0].len();
 
         for (int c = 0; c < ncs.length; c++) {
-          for (int r = 0; r < chunk_size; r++) {
+          for (int r = 0; r < chunkSize; r++) {
             double v = 0;
             for (int i = 0; i < chks.length; i++) {
               v += (chks[i].at0(r) * B.getQuick(i, c));

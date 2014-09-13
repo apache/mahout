@@ -32,16 +32,18 @@ object MahoutOptionParser {
     "appName" -> "Generic Spark App, Change this.")
 
   final val FileIOOptions = immutable.HashMap[String, Any](
-    "recursive" -> false,
     "input" -> null.asInstanceOf[String],
     "input2" -> null.asInstanceOf[String],
-    "output" -> null.asInstanceOf[String],
+    "output" -> null.asInstanceOf[String])
+
+  final val FileDiscoveryOptions = immutable.HashMap[String, Any](
+    "recursive" -> false,
     "filenamePattern" -> "^part-.*")
 
-  final val TextDelimitedTuplesOptions = immutable.HashMap[String, Any](
-    "rowIDPosition" -> 0,
-    "itemIDPosition" -> 1,
-    "filterPosition" -> -1,
+  final val TextDelimitedElementsOptions = immutable.HashMap[String, Any](
+    "rowIDColumn" -> 0,
+    "itemIDColumn" -> 1,
+    "filterColumn" -> -1,
     "filter1" -> null.asInstanceOf[String],
     "filter2" -> null.asInstanceOf[String],
     "inDelim" -> "[,\t ]")
@@ -49,7 +51,7 @@ object MahoutOptionParser {
   final val TextDelimitedDRMOptions = immutable.HashMap[String, Any](
     "rowKeyDelim" -> "\t",
     "columnIdStrengthDelim" -> ":",
-    "tupleDelim" -> " ",
+    "elementDelim" -> " ",
     "omitStrength" -> false)
 }
 /** Defines oft-repeated options and their parsing. Provides the option groups and parsing helper methods to
@@ -57,17 +59,25 @@ object MahoutOptionParser {
   * @param programName Name displayed in help message, the name by which the driver is invoked.
   * */
 class MahoutOptionParser(programName: String) extends OptionParser[Map[String, Any]](programName: String) {
+
+  // build options from some stardard CLI param groups
+  // Note: always put the driver specific options at the last so the can override and previous options!
+  var opts = Map.empty[String, Any]
+
   override def showUsageOnError = true
 
-  def parseIOOptions = {
+  def parseIOOptions(numInputs: Int = 1) = {
+    opts = opts ++ MahoutOptionParser.FileIOOptions
     note("Input, output options")
     opt[String]('i', "input") required() action { (x, options) =>
       options + ("input" -> x)
     } text ("Input path, may be a filename, directory name, or comma delimited list of HDFS supported URIs (required)")
 
-    opt[String]("input2") abbr ("i2")  action { (x, options) =>
-      options + ("input2" -> x)
-    } text ("Secondary input path for cross-similarity calculation, same restrictions as \"--input\" (optional). Default: empty.")
+    if (numInputs == 2) {
+      opt[String]("input2") abbr ("i2") action { (x, options) =>
+        options + ("input2" -> x)
+      } text ("Secondary input path for cross-similarity calculation, same restrictions as \"--input\" (optional). Default: empty.")
+    }
 
     opt[String]('o', "output") required() action { (x, options) =>
       // todo: check to see if HDFS allows MS-Windows backslashes locally?
@@ -81,6 +91,7 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
   }
 
   def parseSparkOptions = {
+    opts = opts ++ MahoutOptionParser.SparkOptions
     note("\nSpark config options:")
 
     opt[String]("master") abbr ("ma") text ("Spark Master URL (optional). Default: \"local\". Note that you can specify the number of cores to get a performance improvement, for example \"local[4]\"") action { (x, options) =>
@@ -94,7 +105,7 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
   }
 
   def parseGenericOptions = {
-    note("\nGeneral config options:")
+    opts = opts ++ MahoutOptionParser.GenericOptions
     opt[Int]("randomSeed") abbr ("rs") action { (x, options) =>
       options + ("randomSeed" -> x)
     } validate { x =>
@@ -107,9 +118,10 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
     }//Hidden option, though a user might want this.
   }
 
-  def parseInputSchemaOptions{
-    //Input text file schema--not driver specific but input data specific, tuples input,
+  def parseElementInputSchemaOptions{
+    //Input text file schema--not driver specific but input data specific, elements input,
     // not drms
+    opts = opts ++ MahoutOptionParser.TextDelimitedElementsOptions
     note("\nInput text file schema options:")
     opt[String]("inDelim") abbr ("id") text ("Input delimiter character (optional). Default: \"[,\\t]\"") action { (x, options) =>
       options + ("inDelim" -> x)
@@ -123,20 +135,20 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
       options + ("filter2" -> x)
     } text ("String (or regex) whose presence indicates a datum for the secondary item set (optional). If not present no secondary dataset is collected")
 
-    opt[Int]("rowIDPosition") abbr ("rc") action { (x, options) =>
-      options + ("rowIDPosition" -> x)
+    opt[Int]("rowIDColumn") abbr ("rc") action { (x, options) =>
+      options + ("rowIDColumn" -> x)
     } text ("Column number (0 based Int) containing the row ID string (optional). Default: 0") validate { x =>
       if (x >= 0) success else failure("Option --rowIDColNum must be >= 0")
     }
 
-    opt[Int]("itemIDPosition") abbr ("ic") action { (x, options) =>
-      options + ("itemIDPosition" -> x)
+    opt[Int]("itemIDColumn") abbr ("ic") action { (x, options) =>
+      options + ("itemIDColumn" -> x)
     } text ("Column number (0 based Int) containing the item ID string (optional). Default: 1") validate { x =>
       if (x >= 0) success else failure("Option --itemIDColNum must be >= 0")
     }
 
-    opt[Int]("filterPosition") abbr ("fc") action { (x, options) =>
-      options + ("filterPosition" -> x)
+    opt[Int]("filterColumn") abbr ("fc") action { (x, options) =>
+      options + ("filterColumn" -> x)
     } text ("Column number (0 based Int) containing the filter string (optional). Default: -1 for no filter") validate { x =>
       if (x >= -1) success else failure("Option --filterColNum must be >= -1")
     }
@@ -144,9 +156,9 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
     note("\nUsing all defaults the input is expected of the form: \"userID<tab>itemId\" or \"userID<tab>itemID<tab>any-text...\" and all rows will be used")
 
     checkConfig { options: Map[String, Any] =>
-      if (options("filterPosition").asInstanceOf[Int] == options("itemIDPosition").asInstanceOf[Int]
-        || options("filterPosition").asInstanceOf[Int] == options("rowIDPosition").asInstanceOf[Int]
-        || options("rowIDPosition").asInstanceOf[Int] == options("itemIDPosition").asInstanceOf[Int])
+      if (options("filterColumn").asInstanceOf[Int] == options("itemIDColumn").asInstanceOf[Int]
+        || options("filterColumn").asInstanceOf[Int] == options("rowIDColumn").asInstanceOf[Int]
+        || options("rowIDColumn").asInstanceOf[Int] == options("itemIDColumn").asInstanceOf[Int])
         failure("The row, item, and filter positions must be unique.") else success
     }
 
@@ -162,6 +174,7 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
 
   def parseFileDiscoveryOptions = {
     //File finding strategy--not driver specific
+    opts = opts ++ MahoutOptionParser.FileDiscoveryOptions
     note("\nFile discovery options:")
     opt[Unit]('r', "recursive") action { (_, options) =>
       options + ("recursive" -> true)
@@ -174,6 +187,7 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
   }
 
   def parseDrmFormatOptions = {
+    opts = opts ++ MahoutOptionParser.TextDelimitedDRMOptions
     note("\nOutput text file schema options:")
     opt[String]("rowKeyDelim") abbr ("rd") action { (x, options) =>
       options + ("rowKeyDelim" -> x)
@@ -183,9 +197,9 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
       options + ("columnIdStrengthDelim" -> x)
     } text ("Separates column IDs from their values in the vector values list (optional). Default: \":\"")
 
-    opt[String]("tupleDelim") abbr ("td") action { (x, options) =>
-      options + ("tupleDelim" -> x)
-    } text ("Separates vector tuple values in the values list (optional). Default: \" \"")
+    opt[String]("elementDelim") abbr ("td") action { (x, options) =>
+      options + ("elementDelim" -> x)
+    } text ("Separates vector element values in the values list (optional). Default: \" \"")
 
     opt[Unit]("omitStrength") abbr ("os") action { (_, options) =>
       options + ("omitStrength" -> true)
