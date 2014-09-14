@@ -127,9 +127,18 @@ object SparkEngine extends DistributedEngine {
    */
   def drmFromHDFS (path: String, parMin:Int = 0)(implicit sc: DistributedContext): CheckpointedDrm[_] = {
 
+   /** If file is Text-keyed create a copy of key and strip VectorWritable */
+    def copyIfTextKeyAndStripVectorWritable(x: Writable, y: VectorWritable): (Writable, Vector) = {
+      if (x.isInstanceOf[Text]) {
+        return (new Text(x.asInstanceOf[Text]), y.get())
+      } else {
+        return (x, y.get())
+      }
+    }
+
     val rdd = sc.sequenceFile(path, classOf[Writable], classOf[VectorWritable], minPartitions = parMin)
-        // Get rid of VectorWritable
-        .map(t => (t._1, t._2.get()))
+            // Get rid of VectorWritable
+            .map(t => copyIfTextKeyAndStripVectorWritable(t._1, t._2))
 
     def getKeyClassTag[K: ClassTag, V](rdd: RDD[(K, V)]) = implicitly[ClassTag[K]]
 
