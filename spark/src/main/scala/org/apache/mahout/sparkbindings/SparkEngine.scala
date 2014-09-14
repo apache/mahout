@@ -128,11 +128,11 @@ object SparkEngine extends DistributedEngine {
   def drmFromHDFS (path: String, parMin:Int = 0)(implicit sc: DistributedContext): CheckpointedDrm[_] = {
 
    /** If file is Text-keyed create a copy of key and strip VectorWritable */
-    def copyIfTextKeyAndStripVectorWritable(x: Writable, y: VectorWritable): (Writable, Vector) = {
+    def copyIfTextKeyAndStripVectorWritable(x: Writable, y: Writable): (Writable, Vector) = {
       if (x.isInstanceOf[Text]) {
-        return (new Text(x.asInstanceOf[Text]), y.get())
+        return (new Text(x.asInstanceOf[Text]), (y.asInstanceOf[VectorWritable]).get())
       } else {
-        return (x, y.get())
+        return (x, (y.asInstanceOf[VectorWritable]).get())
       }
     }
 
