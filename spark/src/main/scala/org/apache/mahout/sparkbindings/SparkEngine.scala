@@ -17,6 +17,8 @@
 
 package org.apache.mahout.sparkbindings
 
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.mahout.math._
 import scalabindings._
 import RLikeOps._
@@ -26,7 +28,7 @@ import org.apache.mahout.math._
 import scala.reflect.ClassTag
 import org.apache.spark.storage.StorageLevel
 import org.apache.mahout.sparkbindings.blas._
-import org.apache.hadoop.io.{LongWritable, Text, IntWritable, Writable}
+import org.apache.hadoop.io._
 import scala.Some
 import scala.collection.JavaConversions._
 import org.apache.spark.SparkContext
@@ -126,6 +128,16 @@ object SparkEngine extends DistributedEngine {
    * @return DRM[Any] where Any is automatically translated to value type
    */
   def drmFromHDFS (path: String, parMin:Int = 0)(implicit sc: DistributedContext): CheckpointedDrm[_] = {
+
+    // HDFS Paramaters
+    val conf= new Configuration()
+    val hPath= new Path(path)
+    val fs= FileSystem.get(conf)
+
+    /** Get the Key Class For the Sequence File */
+    def getKeyClassTag:ClassTag[_] = ClassTag(new SequenceFile.Reader(fs, hPath, conf).getKeyClass)
+    /** Get the Value Class For the Sequence File */
+    def getValueClassTag:ClassTag[_] = ClassTag(new SequenceFile.Reader(fs, hPath, conf).getValueClass)
 
     /** If file is Text-keyed create a copy of key and strip VectorWritable */
     def copyIfTextKeyAndStripVectorWritable(x: Writable, y: Writable): (Writable, Vector) = {
