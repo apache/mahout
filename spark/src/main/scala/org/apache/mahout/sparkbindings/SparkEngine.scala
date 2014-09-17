@@ -152,10 +152,8 @@ object SparkEngine extends DistributedEngine {
             // Get rid of VectorWritable and check for Text Key
             .map(t => copyIfTextKeyAndStripVectorWritable(t._1, t._2))
 
-    def getKeyClassTag[K: ClassTag, V](rdd: RDD[(K, V)]) = implicitly[ClassTag[K]]
-
-    // Spark should've loaded the type info from the header, right?
-    val keyTag = getKeyClassTag(rdd)
+    // Spark doesnt check the Sequence File Header so we have to.
+    val keyTag = getKeyClassTag
 
     val (key2valFunc, val2keyFunc, unwrappedKeyTag) = keyTag match {
 
