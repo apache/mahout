@@ -19,7 +19,9 @@ package org.apache.mahout.sparkbindings
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.hadoop.mapred.JobConf
 import org.apache.mahout.math._
+import org.apache.spark.deploy.SparkHadoopUtil
 import scalabindings._
 import RLikeOps._
 import org.apache.mahout.math.drm.logical._
@@ -130,14 +132,16 @@ object SparkEngine extends DistributedEngine {
   def drmFromHDFS (path: String, parMin:Int = 0)(implicit sc: DistributedContext): CheckpointedDrm[_] = {
 
     // HDFS Paramaters
-    val conf= new Configuration()
+    val hConf= SparkHadoopUtil.get.conf
+    // val hConf= sc.getConf.hadoopConfiguration
     val hPath= new Path(path)
-    val fs= FileSystem.get(conf)
+    //val fs= FileSystem.get(hPath.toUri, hConf)
+    val fs= FileSystem.get(hConf)
 
     /** Get the Key Class For the Sequence File */
-    def getKeyClassTag:ClassTag[_] = ClassTag(new SequenceFile.Reader(fs, hPath, conf).getKeyClass)
+    def getKeyClassTag:ClassTag[_] = ClassTag(new SequenceFile.Reader(fs, hPath, hConf).getKeyClass)
     /** Get the Value Class For the Sequence File */
-    def getValueClassTag:ClassTag[_] = ClassTag(new SequenceFile.Reader(fs, hPath, conf).getValueClass)
+    def getValueClassTag:ClassTag[_] = ClassTag(new SequenceFile.Reader(fs, hPath, hConf).getValueClass)
 
     /** If file is Text-keyed create a copy of key and strip VectorWritable */
     def copyIfTextKeyAndStripVectorWritable(x: Writable, y: Writable): (Writable, Vector) = {
