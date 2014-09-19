@@ -139,55 +139,62 @@ object SparkEngine extends DistributedEngine {
     val fs= FileSystem.get(hConf)
 
     /** Get the Key Class For the Sequence File */
-    def getKeyClassTag:ClassTag[_] = ClassTag(new SequenceFile.Reader(fs, hPath, hConf).getKeyClass)
+    def getKeyClassTag[K:ClassTag] = ClassTag(new SequenceFile.Reader(fs, hPath, hConf).getKeyClass)
     /** Get the Value Class For the Sequence File */
-    def getValueClassTag:ClassTag[_] = ClassTag(new SequenceFile.Reader(fs, hPath, hConf).getValueClass)
+//    def getValueClassTag[V:ClassTag] = ClassTag(new SequenceFile.Reader(fs, hPath, hConf).getValueClass)
+//
+//    /** If file is Text-keyed create a copy of key and strip VectorWritable */
+//    def copyIfTextKeyAndStripVectorWritable(x: Writable, y: Writable): (Writable, Vector) = {
+//      if (x.isInstanceOf[Text]) {
+//        (new Text(x.asInstanceOf[Text]), y.asInstanceOf[VectorWritable].get())
+//      } else {
+//        (x, y.asInstanceOf[VectorWritable].get())
+//      }
+// }
 
-    /** If file is Text-keyed create a copy of key and strip VectorWritable */
-    def copyIfTextKeyAndStripVectorWritable(x: Writable, y: Writable): (Writable, Vector) = {
-      if (x.isInstanceOf[Text]) {
-        (new Text(x.asInstanceOf[Text]), y.asInstanceOf[VectorWritable].get())
-      } else {
-        (x, y.asInstanceOf[VectorWritable].get())
-      }
-    }
 
-    val rdd = sc.sequenceFile(path, classOf[Writable], classOf[VectorWritable], minPartitions = parMin)
-            // Get rid of VectorWritable and check for Text Key
-            .map(t => copyIfTextKeyAndStripVectorWritable(t._1, t._2))
-
-    // Spark doesnt check the Sequence File Header so we have to.
+    // Spark doesn't check the Sequence File Header so we have to.
     val keyTag = getKeyClassTag
+
+//    val ct= ClassTag(keyTag.getClass)
+    // ClassTag to match on not lost by erasure
+    val ct= ClassTag(classOf[Writable])
 
     val (key2valFunc, val2keyFunc, unwrappedKeyTag) = keyTag match {
 
-      case xx: ClassTag[Writable] if (xx == implicitly[ClassTag[IntWritable]]) => (
+      case ct if (keyTag == implicitly[ClassTag[IntWritable]]) => (
           (v: AnyRef) => v.asInstanceOf[IntWritable].get,
-          (x: Any) => new IntWritable(x.asInstanceOf[Int]),
+          (x: AnyRef) => new IntWritable(x.asInstanceOf[Int]),
           implicitly[ClassTag[Int]])
 
-      case xx: ClassTag[Writable] if (xx == implicitly[ClassTag[Text]]) => (
+      case ct if (keyTag == implicitly[ClassTag[Text]]) => (
           (v: AnyRef) => v.asInstanceOf[Text].toString,
-          (x: Any) => new Text(x.toString),
+          (x: AnyRef) => new Text(x.toString),
           implicitly[ClassTag[String]])
 
-      case xx: ClassTag[Writable] if (xx == implicitly[ClassTag[LongWritable]]) => (
+      case ct if (keyTag == implicitly[ClassTag[LongWritable]]) => (
           (v: AnyRef) => v.asInstanceOf[LongWritable].get,
-          (x: Any) => new LongWritable(x.asInstanceOf[Int]),
+          (x: AnyRef) => new LongWritable(x.asInstanceOf[Int]),
           implicitly[ClassTag[Long]])
 
-      case xx: ClassTag[Writable] => (
+      case ct => (
           (v: AnyRef) => v,
-          (x: Any) => x.asInstanceOf[Writable],
+          (x: AnyRef) => x.asInstanceOf[Writable],
           ClassTag(classOf[Writable]))
     }
 
     {
       implicit def getWritable(x: Any): Writable = val2keyFunc()
 
-      val drmRdd = rdd.map { t => (key2valFunc(t._1), t._2)}
+      val rdd = sc.sequenceFile(path, classOf[Writable], classOf[VectorWritable], minPartitions = parMin)
+      // Get rid of VectorWritable and check for Text Key
+      //.map(t => copyIfTextKeyAndStripVectorWritable(t._1, t._2))
 
-      drmWrap(rdd = drmRdd, cacheHint = CacheHint.MEMORY_ONLY)(unwrappedKeyTag.asInstanceOf[ClassTag[Any]])
+      val drmRdd = rdd.map { t => val2keyFunc(t._1) -> t._2.get()}
+
+      drmWrap(rdd = drmRdd, cacheHint = CacheHint.MEMORY_ONLY)(unwrappedKeyTag.asInstanceOf[ClassTag[Writable]])
+      //drmWrap(rdd = drmRdd, cacheHint = CacheHint.MEMORY_ONLY)(unwrappedKeyTag.asInstanceOf[ClassTag[_ >: org.apache.hadoop.io.Writable]])
+      //drmWrap(rdd = drmRdd, cacheHint = CacheHint.MEMORY_ONLY)
     }
   }
 
