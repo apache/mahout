@@ -142,21 +142,11 @@ object SparkEngine extends DistributedEngine {
     def getKeyClassTag[K:ClassTag] = ClassTag(new SequenceFile.Reader(fs, hPath, hConf).getKeyClass)
     /** Get the Value Class For the Sequence File */
 //    def getValueClassTag[V:ClassTag] = ClassTag(new SequenceFile.Reader(fs, hPath, hConf).getValueClass)
-//
-//    /** If file is Text-keyed create a copy of key and strip VectorWritable */
-//    def copyIfTextKeyAndStripVectorWritable(x: Writable, y: Writable): (Writable, Vector) = {
-//      if (x.isInstanceOf[Text]) {
-//        (new Text(x.asInstanceOf[Text]), y.asInstanceOf[VectorWritable].get())
-//      } else {
-//        (x, y.asInstanceOf[VectorWritable].get())
-//      }
-// }
-
 
     // Spark doesn't check the Sequence File Header so we have to.
     val keyTag = getKeyClassTag
-
 //    val ct= ClassTag(keyTag.getClass)
+
     // ClassTag to match on not lost by erasure
     val ct= ClassTag(classOf[Writable])
 
@@ -187,14 +177,10 @@ object SparkEngine extends DistributedEngine {
       implicit def getWritable(x: Any): Writable = val2keyFunc()
 
       val rdd = sc.sequenceFile(path, classOf[Writable], classOf[VectorWritable], minPartitions = parMin)
-      // Get rid of VectorWritable and check for Text Key
-      //.map(t => copyIfTextKeyAndStripVectorWritable(t._1, t._2))
 
       val drmRdd = rdd.map { t => val2keyFunc(t._1) -> t._2.get()}
 
       drmWrap(rdd = drmRdd, cacheHint = CacheHint.MEMORY_ONLY)(unwrappedKeyTag.asInstanceOf[ClassTag[Writable]])
-      //drmWrap(rdd = drmRdd, cacheHint = CacheHint.MEMORY_ONLY)(unwrappedKeyTag.asInstanceOf[ClassTag[_ >: org.apache.hadoop.io.Writable]])
-      //drmWrap(rdd = drmRdd, cacheHint = CacheHint.MEMORY_ONLY)
     }
   }
 
