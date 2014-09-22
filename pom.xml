@@ -701,7 +701,7 @@
     <module>math-scala</module>
     <module>spark</module>
     <module>spark-shell</module>
-    <module>h2o</module>
+    <!-- module>h2o</module -->
   </modules>
   <profiles>
     <profile>
