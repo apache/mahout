@@ -23,6 +23,7 @@ import org.apache.mahout.math._
 import scalabindings._
 import RLikeOps._
 import RLikeDrmOps._
+import scala.reflect.ClassTag
 
 /** Common DRM tests to be run by all distributed engines. */
 trait DrmLikeSuiteBase extends DistributedMahoutSuite with Matchers {
@@ -41,6 +42,9 @@ trait DrmLikeSuiteBase extends DistributedMahoutSuite with Matchers {
 
     // Load back from hdfs
     val drmB = drmFromHDFS(path = uploadPath)
+
+    // Make sure keys are correctly identified as ints
+    drmB.checkpoint(CacheHint.NONE).keyClassTag shouldBe ClassTag.Int
 
     // Collect back into in-core
     val inCoreB = drmB.collect
