@@ -18,6 +18,7 @@
 package org.apache.mahout.math.drm
 
 import org.apache.mahout.math.Matrix
+import scala.reflect.ClassTag
 
 /**
  * Checkpointed DRM API. This is a matrix that has optimized RDD lineage behind it and can be
@@ -32,5 +33,12 @@ trait CheckpointedDrm[K] extends DrmLike[K] {
 
   /** If this checkpoint is already declared cached, uncache. */
   def uncache(): this.type
+
+  /**
+   * Explicit extraction of key class Tag since traits don't support context bound access; but actual
+   * implementation knows it
+   */
+  def keyClassTag: ClassTag[K]
+
 
 }
