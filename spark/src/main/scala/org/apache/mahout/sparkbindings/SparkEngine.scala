@@ -132,13 +132,8 @@ object SparkEngine extends DistributedEngine {
   def drmFromHDFS (path: String, parMin:Int = 0)(implicit sc: DistributedContext): CheckpointedDrm[_] = {
 
     // HDFS Paramaters
-//    val hConf= SparkHadoopUtil.get.conf
-//    val hConf= SparkHadoopUtil.get.newConfiguration()
     val hConf= new Configuration()
-    //val fs = FileSystem.get(new Configuration())
-    // val hConf= sc.getConf.hadoopConfiguration
     val hPath= new Path(path + "/part-00000")
-    //val fs= FileSystem.get(hPath.toUri, hConf)
     val fs= FileSystem.get(hConf)
 
     /** Get the Key Class For the Sequence File */
