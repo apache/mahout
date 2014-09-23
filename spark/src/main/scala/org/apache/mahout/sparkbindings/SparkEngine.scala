@@ -152,22 +152,22 @@ object SparkEngine extends DistributedEngine {
 
       case ct if (keyTag == implicitly[ClassTag[IntWritable]]) => (
           (v: AnyRef) => v.asInstanceOf[IntWritable].get,
-          (x: AnyRef) => new IntWritable(x.asInstanceOf[Int]),
+          (x: Any) => new Integer(x.asInstanceOf[IntWritable].get),
           implicitly[ClassTag[Int]])
 
       case ct if (keyTag == implicitly[ClassTag[Text]]) => (
           (v: AnyRef) => v.asInstanceOf[Text].toString,
-          (x: AnyRef) => new Text(x.toString),
+          (x: Any) => new Text(x.toString),
           implicitly[ClassTag[String]])
 
       case ct if (keyTag == implicitly[ClassTag[LongWritable]]) => (
           (v: AnyRef) => v.asInstanceOf[LongWritable].get,
-          (x: AnyRef) => new LongWritable(x.asInstanceOf[Int]),
+          (x: Any) => new LongWritable(x.asInstanceOf[LongWritable].get),
           implicitly[ClassTag[Long]])
 
       case ct => (
           (v: AnyRef) => v,
-          (x: AnyRef) => x.asInstanceOf[Writable],
+          (x: Any) => x.asInstanceOf[Writable],
           ClassTag(classOf[Writable]))
     }
 
@@ -178,7 +178,8 @@ object SparkEngine extends DistributedEngine {
 
       val drmRdd = rdd.map { t => val2keyFunc(t._1) -> t._2.get()}
 
-      drmWrap(rdd = drmRdd, cacheHint = CacheHint.MEMORY_ONLY)(unwrappedKeyTag.asInstanceOf[ClassTag[Writable]])
+//      drmWrap(rdd = drmRdd, cacheHint = CacheHint.MEMORY_ONLY)(unwrappedKeyTag.asInstanceOf[ClassTag[Writable]])
+      drmWrap(rdd = drmRdd, cacheHint = CacheHint.MEMORY_ONLY)(unwrappedKeyTag.asInstanceOf[ClassTag[Object]])
     }
   }
 
