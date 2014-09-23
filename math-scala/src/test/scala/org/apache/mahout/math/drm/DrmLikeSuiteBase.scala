@@ -41,7 +41,7 @@ trait DrmLikeSuiteBase extends DistributedMahoutSuite with Matchers {
     println(inCoreA)
 
     // Load back from hdfs
-    val drmB = drmFromHDFS(path = uploadPath)
+    val drmB = drmFromHDFS(path = uploadPath + "/part-00000")
 
     // Make sure keys are correctly identified as ints
     drmB.checkpoint(CacheHint.NONE).keyClassTag shouldBe ClassTag.Int

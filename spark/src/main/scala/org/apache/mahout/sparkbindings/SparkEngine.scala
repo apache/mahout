@@ -133,7 +133,7 @@ object SparkEngine extends DistributedEngine {
 
     // HDFS Paramaters
     val hConf= new Configuration()
-    val hPath= new Path(path + "/part-00000")
+    val hPath= new Path(path)
     val fs= FileSystem.get(hConf)
 
     /** Get the Key Class For the Sequence File */
