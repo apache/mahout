@@ -29,6 +29,8 @@ class CheckpointedDrmH2O[K: ClassTag](
     */
   def collect: Matrix = H2OHelper.matrixFromDrm(h2odrm)
 
+  /** Explicit extraction of key class Tag   */
+  def keyClassTag: ClassTag[K] = implicitly[ClassTag[K]]
 
   /* XXX: call frame.remove */
   def uncache(): this.type = this
