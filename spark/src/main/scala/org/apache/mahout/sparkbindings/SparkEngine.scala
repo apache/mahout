@@ -140,9 +140,7 @@ object SparkEngine extends DistributedEngine {
 
     /** Get the Key Class For the Sequence File */
     def getKeyClassTag[K:ClassTag] = ClassTag(new SequenceFile.Reader(fs, hPath, hConf).getKeyClass)
-    /** Get the Value Class For the Sequence File */
-//    def getValueClassTag[V:ClassTag] = ClassTag(new SequenceFile.Reader(fs, hPath, hConf).getValueClass)
-
+   
     // Spark doesn't check the Sequence File Header so we have to.
     val keyTag = getKeyClassTag
 
@@ -170,15 +168,12 @@ object SparkEngine extends DistributedEngine {
       }
     }
 
-    {
-     // implicit def getWritable(x: Any): Writable = key2valFunc()
+    val rdd = sc.sequenceFile(path, classOf[Writable], classOf[VectorWritable], minPartitions = parMin)
 
-      val rdd = sc.sequenceFile(path, classOf[Writable], classOf[VectorWritable], minPartitions = parMin)
+    val drmRdd = rdd.map { t => key2valFunc(t._1) -> t._2.get()}
 
-      val drmRdd = rdd.map { t => key2valFunc(t._1) -> t._2.get()}
+    drmWrap(rdd = drmRdd, cacheHint = CacheHint.NONE)(unwrappedKeyTag.asInstanceOf[ClassTag[Object]])
 
-      drmWrap(rdd = drmRdd, cacheHint = CacheHint.NONE)(unwrappedKeyTag.asInstanceOf[ClassTag[Object]])
-    }
   }
 
   /** Parallelize in-core matrix as spark distributed matrix, using row ordinal indices as data set keys. */
