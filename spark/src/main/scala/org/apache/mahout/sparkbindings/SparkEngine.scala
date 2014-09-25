@@ -163,9 +163,11 @@ object SparkEngine extends DistributedEngine {
           (x: Any) => new LongWritable(x.asInstanceOf[LongWritable].get),
           implicitly[ClassTag[Long]])
 
-      case ct => (
-          (x: Any) => x.asInstanceOf[Writable],
+      case ct => {
+          throw new IllegalArgumentException("SequenceFile uses an unsupported Writable Class as key")
+          ((x: Any) => x.asInstanceOf[Writable],
           ClassTag(classOf[Writable]))
+      }
     }
 
     {
