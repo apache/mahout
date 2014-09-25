@@ -17,6 +17,8 @@
 
 package org.apache.mahout.sparkbindings
 
+import java.io.IOException
+
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.hadoop.mapred.JobConf
@@ -143,43 +145,37 @@ object SparkEngine extends DistributedEngine {
 
     // Spark doesn't check the Sequence File Header so we have to.
     val keyTag = getKeyClassTag
-//    val ct= ClassTag(keyTag.getClass)
 
     // ClassTag to match on not lost by erasure
     val ct= ClassTag(classOf[Writable])
 
-    val (key2valFunc, val2keyFunc, unwrappedKeyTag) = keyTag match {
+    val (key2valFunc, unwrappedKeyTag) = keyTag match {
 
       case ct if (keyTag == implicitly[ClassTag[IntWritable]]) => (
-          (v: AnyRef) => v.asInstanceOf[IntWritable].get,
           (x: Any) => new Integer(x.asInstanceOf[IntWritable].get),
           implicitly[ClassTag[Int]])
 
       case ct if (keyTag == implicitly[ClassTag[Text]]) => (
-          (v: AnyRef) => v.asInstanceOf[Text].toString,
           (x: Any) => new Text(x.toString),
           implicitly[ClassTag[String]])
 
       case ct if (keyTag == implicitly[ClassTag[LongWritable]]) => (
-          (v: AnyRef) => v.asInstanceOf[LongWritable].get,
           (x: Any) => new LongWritable(x.asInstanceOf[LongWritable].get),
           implicitly[ClassTag[Long]])
 
       case ct => (
-          (v: AnyRef) => v,
           (x: Any) => x.asInstanceOf[Writable],
           ClassTag(classOf[Writable]))
     }
 
     {
-      implicit def getWritable(x: Any): Writable = val2keyFunc()
+     // implicit def getWritable(x: Any): Writable = key2valFunc()
 
       val rdd = sc.sequenceFile(path, classOf[Writable], classOf[VectorWritable], minPartitions = parMin)
 
-      val drmRdd = rdd.map { t => val2keyFunc(t._1) -> t._2.get()}
+      val drmRdd = rdd.map { t => key2valFunc(t._1) -> t._2.get()}
 
-//      drmWrap(rdd = drmRdd, cacheHint = CacheHint.MEMORY_ONLY)(unwrappedKeyTag.asInstanceOf[ClassTag[Writable]])
-      drmWrap(rdd = drmRdd, cacheHint = CacheHint.MEMORY_ONLY)(unwrappedKeyTag.asInstanceOf[ClassTag[Object]])
+      drmWrap(rdd = drmRdd, cacheHint = CacheHint.NONE)(unwrappedKeyTag.asInstanceOf[ClassTag[Object]])
     }
   }
 
