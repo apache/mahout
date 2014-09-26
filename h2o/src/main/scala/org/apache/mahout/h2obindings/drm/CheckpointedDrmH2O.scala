@@ -29,6 +29,8 @@ class CheckpointedDrmH2O[K: ClassTag](
     */
   def collect: Matrix = H2OHelper.matrixFromDrm(h2odrm)
 
+  /** Explicit extraction of key class Tag   */
+  def keyClassTag: ClassTag[K] = implicitly[ClassTag[K]]
 
   /* XXX: call frame.remove */
   def uncache(): this.type = this
@@ -36,7 +38,7 @@ class CheckpointedDrmH2O[K: ClassTag](
   /**
     * Persist DRM to on-disk over HDFS in Mahout DRM format.
     */
-  def writeDRM(path: String): Unit = H2OHdfs.drmToFile(path, h2odrm)
+  def dfsWrite(path: String): Unit = H2OHdfs.drmToFile(path, h2odrm)
 
   /**
     * Action operator - Eagerly evaluate the lazily built operator graph to create
