@@ -54,7 +54,7 @@ object H2OEngine extends DistributedEngine {
     *
     *  @return DRM[Any] where Any is automatically translated to value type
     */
-  def drmFromHDFS(path: String, parMin: Int = 0)(implicit dc: DistributedContext): CheckpointedDrm[_] =
+  def drmDfsRead(path: String, parMin: Int = 0)(implicit dc: DistributedContext): CheckpointedDrm[_] =
     new CheckpointedDrmH2O(H2OHdfs.drmFromFile(path, parMin), dc)
 
   /** This creates an empty DRM with specified number of partitions and cardinality. */

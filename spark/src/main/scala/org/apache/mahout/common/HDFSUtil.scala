@@ -15,30 +15,12 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math.drm
+package org.apache.mahout.common
 
-import org.apache.mahout.math.Matrix
-import scala.reflect.ClassTag
+/** High level Hadoop version-specific hdfs manipulations we need in context of our operations. */
+trait HDFSUtil {
 
-/**
- * Checkpointed DRM API. This is a matrix that has optimized RDD lineage behind it and can be
- * therefore collected or saved.
- * @tparam K matrix key type (e.g. the keys of sequence files once persisted)
- */
-trait CheckpointedDrm[K] extends DrmLike[K] {
-
-  def collect: Matrix
-
-  def dfsWrite(path: String)
-
-  /** If this checkpoint is already declared cached, uncache. */
-  def uncache(): this.type
-
-  /**
-   * Explicit extraction of key class Tag since traits don't support context bound access; but actual
-   * implementation knows it
-   */
-  def keyClassTag: ClassTag[K]
-
-
+  /** Read DRM header information off (H)DFS. */
+  def readDrmHeader(path:String):DrmMetadata
 }
+
