@@ -161,6 +161,23 @@ object SparkEngine extends DistributedEngine {
           (x: Any) => new LongWritable(x.asInstanceOf[LongWritable].get),
           implicitly[ClassTag[Long]])
 
+      case ct if (keyTag == implicitly[ClassTag[BooleanWritable]]) => (
+        (x: Any) => new BooleanWritable(x.asInstanceOf[BooleanWritable].get),
+        implicitly[ClassTag[Boolean]])
+
+      // is the ClassTag correct here? BytesWritable is backed by an Array of Bytes
+      case ct if (keyTag == implicitly[ClassTag[BytesWritable]]) => (
+        (x: Any) => new BytesWritable(x.asInstanceOf[BytesWritable].getBytes),
+        implicitly[ClassTag[Byte]]) // Correct ClassTag?
+
+      case ct if (keyTag == implicitly[ClassTag[DoubleWritable]]) => (
+        (x: Any) => new DoubleWritable(x.asInstanceOf[DoubleWritable].get),
+        implicitly[ClassTag[Double]])
+
+      case ct if (keyTag == implicitly[ClassTag[FloatWritable]]) => (
+        (x: Any) => new FloatWritable(x.asInstanceOf[FloatWritable].get),
+        implicitly[ClassTag[Float]])
+
       case ct => {
           throw new IllegalArgumentException("SequenceFile uses an unsupported Writable Class as key")
           ((x: Any) => x.asInstanceOf[Writable],
