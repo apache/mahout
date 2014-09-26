@@ -155,7 +155,7 @@ class CheckpointedDrmSpark[K: ClassTag](
    * Dump matrix as computed Mahout's DRM into specified (HD)FS path
    * @param path
    */
-  def writeDRM(path: String) = {
+  def dfsWrite(path: String) = {
     val ktag = implicitly[ClassTag[K]]
 
     implicit val k2wFunc: (K) => Writable =

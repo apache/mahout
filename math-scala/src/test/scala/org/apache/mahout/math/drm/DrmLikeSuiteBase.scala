@@ -36,12 +36,12 @@ trait DrmLikeSuiteBase extends DistributedMahoutSuite with Matchers {
     val inCoreA = dense((1, 2, 3), (3, 4, 5))
     val drmA = drmParallelize(inCoreA)
 
-    drmA.writeDRM(path = uploadPath)
+    drmA.dfsWrite(path = uploadPath)
 
     println(inCoreA)
 
     // Load back from hdfs
-    val drmB = drmFromHDFS(path = uploadPath + "/part-00000")
+    val drmB = drmDfsRead(path = uploadPath + "/part-00000")
 
     // Make sure keys are correctly identified as ints
     drmB.checkpoint(CacheHint.NONE).keyClassTag shouldBe ClassTag.Int

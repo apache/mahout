@@ -19,9 +19,6 @@ package org.apache.mahout.sparkbindings
 
 import java.io.IOException
 
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{FileSystem, Path}
-import org.apache.hadoop.mapred.JobConf
 import org.apache.mahout.math._
 import org.apache.spark.deploy.SparkHadoopUtil
 import scalabindings._
@@ -35,13 +32,16 @@ import org.apache.mahout.sparkbindings.blas._
 import org.apache.hadoop.io._
 import scala.Some
 import scala.collection.JavaConversions._
-import org.apache.spark.SparkContext
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.spark.rdd.RDD
+import org.apache.mahout.common.{Hadoop1HDFSUtil, HDFSUtil}
 
 /** Spark-specific non-drm-method operations */
 object SparkEngine extends DistributedEngine {
+
+  // By default, use Hadoop 1 utils
+  var hdfsUtils: HDFSUtil = Hadoop1HDFSUtil
 
   def colSums[K:ClassTag](drm: CheckpointedDrm[K]): Vector = {
     val n = drm.ncol
@@ -131,66 +131,20 @@ object SparkEngine extends DistributedEngine {
    *
    * @return DRM[Any] where Any is automatically translated to value type
    */
-  def drmFromHDFS (path: String, parMin:Int = 0)(implicit sc: DistributedContext): CheckpointedDrm[_] = {
+  def drmDfsRead (path: String, parMin:Int = 0)(implicit sc: DistributedContext): CheckpointedDrm[_] = {
 
-    // HDFS Paramaters
-    val hConf= new Configuration()
-    val hPath= new Path(path)
-    val fs= FileSystem.get(hConf)
+    val drmMetadata = hdfsUtils.readDrmHeader(path)
+    val k2vFunc = drmMetadata.keyW2ValFunc
 
-    /** Get the Key Class For the Sequence File */
-    def getKeyClassTag[K:ClassTag] = ClassTag(new SequenceFile.Reader(fs, hPath, hConf).getKeyClass)
-   
-    // Spark doesn't check the Sequence File Header so we have to.
-    val keyTag = getKeyClassTag
-
-    // ClassTag to match on not lost by erasure
-    val ct= ClassTag(classOf[Writable])
-
-    val (key2valFunc, unwrappedKeyTag) = keyTag match {
-
-      case ct if (keyTag == implicitly[ClassTag[IntWritable]]) => (
-          (x: Any) => new Integer(x.asInstanceOf[IntWritable].get),
-          implicitly[ClassTag[Int]])
-
-      case ct if (keyTag == implicitly[ClassTag[Text]]) => (
-          (x: Any) => new Text(x.toString),
-          implicitly[ClassTag[String]])
-
-      case ct if (keyTag == implicitly[ClassTag[LongWritable]]) => (
-          (x: Any) => new LongWritable(x.asInstanceOf[LongWritable].get),
-          implicitly[ClassTag[Long]])
-
-      case ct if (keyTag == implicitly[ClassTag[BooleanWritable]]) => (
-        (x: Any) => new BooleanWritable(x.asInstanceOf[BooleanWritable].get),
-        implicitly[ClassTag[Boolean]])
-
-      // is the ClassTag correct here? BytesWritable is backed by an Array of Bytes
-      case ct if (keyTag == implicitly[ClassTag[BytesWritable]]) => (
-        (x: Any) => new BytesWritable(x.asInstanceOf[BytesWritable].getBytes),
-        implicitly[ClassTag[Byte]]) // Correct ClassTag?
-
-      case ct if (keyTag == implicitly[ClassTag[DoubleWritable]]) => (
-        (x: Any) => new DoubleWritable(x.asInstanceOf[DoubleWritable].get),
-        implicitly[ClassTag[Double]])
-
-      case ct if (keyTag == implicitly[ClassTag[FloatWritable]]) => (
-        (x: Any) => new FloatWritable(x.asInstanceOf[FloatWritable].get),
-        implicitly[ClassTag[Float]])
-
-      case ct => {
-          throw new IllegalArgumentException("SequenceFile uses an unsupported Writable Class as key")
-          ((x: Any) => x.asInstanceOf[Writable],
-          ClassTag(classOf[Writable]))
-      }
-    }
-
+    // Load RDD and convert all Writables to value types right away (due to reuse of writables in
+    // Hadoop we must do it right after read operation).
     val rdd = sc.sequenceFile(path, classOf[Writable], classOf[VectorWritable], minPartitions = parMin)
 
-    val drmRdd = rdd.map { t => key2valFunc(t._1) -> t._2.get()}
+        // Immediately convert keys and value writables into value types.
+        .map { case (wKey, wVec) => k2vFunc(wKey) -> wVec.get()}
 
-    drmWrap(rdd = drmRdd, cacheHint = CacheHint.NONE)(unwrappedKeyTag.asInstanceOf[ClassTag[Object]])
-
+    // Wrap into a DRM type with correct matrix row key class tag evident.
+    drmWrap(rdd = rdd, cacheHint = CacheHint.NONE)(drmMetadata.keyClassTag.asInstanceOf[ClassTag[Any]])
   }
 
   /** Parallelize in-core matrix as spark distributed matrix, using row ordinal indices as data set keys. */
