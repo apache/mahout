@@ -34,10 +34,6 @@ class DrmMetadata(
     case _ => throw new IllegalArgumentException(s"Unsupported DRM key type:${keyTypeWritable.getName}")
   }
 
-  /** Actual drm key class tag once converted out of writable */
-//  val keyClassTag: ClassTag[_]
-//  val w2valFunc:(Writable)=>Any
-
 }
 
 object DrmMetadata {
