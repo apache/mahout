@@ -88,8 +88,16 @@ if [ "$1" == "spark-itemsimilarity" ]; then
   SPARK=1
 fi
 
+if [ "$1" == "spark-rowsimilarity" ]; then
+  SPARK=1
+fi
+
 if [ "$MAHOUT_CORE" != "" ]; then
   IS_CORE=1
+fi
+
+if [ "$1" == "h2o-node" ]; then
+  H2O=1
 fi
 
 # some directories
@@ -161,23 +169,36 @@ then
   fi
 
   # add scala dev target
-  for f in $MAHOUT_HOME/math-scala/target/mahout-math-scala-*.jar ; do
+  for f in $MAHOUT_HOME/math-scala/target/mahout-math-scala_*.jar ; do
     CLASSPATH=${CLASSPATH}:$f;
   done
 
+  if [ "$H2O" == "1" ]; then
+    for f in $MAHOUT_HOME/mrlegacy/target/mahout-mrlegacy-*.jar; do
+       CLASSPATH=${CLASSPATH}:$f;
+    done
 
-  # add spark-shell -- if we requested shell or other spark CLI driver
+    for f in $MAHOUT_HOME/h2o/target/mahout-h2o-*.jar; do
+       CLASSPATH=${CLASSPATH}:$f;
+    done
+  fi
+
+  # add jars for running from the command line if we requested shell or spark CLI driver
   if [ "$SPARK" == "1" ]; then
 
     for f in $MAHOUT_HOME/mrlegacy/target/mahout-mrlegacy-*.jar ; do
       CLASSPATH=${CLASSPATH}:$f;
     done
 
-    for f in $MAHOUT_HOME/spark/target/mahout-spark-*.jar ; do
+    for f in $MAHOUT_HOME/math/target/mahout-math-*.jar ; do
       CLASSPATH=${CLASSPATH}:$f;
     done
 
-    for f in $MAHOUT_HOME/spark-shell/target/mahout-spark-shell-*.jar ; do
+    for f in $MAHOUT_HOME/spark/target/mahout-spark_*.jar ; do
+      CLASSPATH=${CLASSPATH}:$f;
+    done
+
+    for f in $MAHOUT_HOME/spark-shell/target/mahout-spark-shell_*.jar ; do
        CLASSPATH=${CLASSPATH}:$f;
     done
 
@@ -205,10 +226,11 @@ else
   #CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/mrlegacy/src/main/resources
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/spark/target/classes
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/spark-shell/target/classes
+  CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/h2o/target/classes
 fi
 
 # add development dependencies to CLASSPATH
-if [ "$SPARK" == "" ]; then
+if [ "$SPARK" != "1" ]; then
   for f in $MAHOUT_HOME/examples/target/dependency/*.jar; do
     CLASSPATH=${CLASSPATH}:$f;
   done
@@ -235,6 +257,14 @@ case "$1" in
   (spark-itemsimilarity)
     shift
     "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.ItemSimilarityDriver" "$@"
+    ;;
+  (spark-rowsimilarity)
+    shift
+    "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.RowSimilarityDriver" "$@"
+    ;;
+  (h2o-node)
+    shift
+    "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "water.H2O" -md5skip "$@" -name mah2out
     ;;
   (*)
 

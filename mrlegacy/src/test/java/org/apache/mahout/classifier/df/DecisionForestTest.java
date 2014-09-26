@@ -139,12 +139,15 @@ public final class DecisionForestTest extends MahoutTestCase {
     // Build Forest
     DecisionForest forest = buildForest(datas);
     // Test data
-    Data testData = DataLoader.loadData(datas[0].getDataset(), TEST_DATA);
+    Dataset dataset = datas[0].getDataset();
+    Data testData = DataLoader.loadData(dataset, TEST_DATA);
 
-    assertEquals(1.0, forest.classify(testData.getDataset(), rng, testData.get(0)), EPSILON);
+    double noValue = dataset.valueOf(4, "no");
+    double yesValue = dataset.valueOf(4, "yes");
+    assertEquals(noValue, forest.classify(testData.getDataset(), rng, testData.get(0)), EPSILON);
     // This one is tie-broken -- 1 is OK too
-    assertEquals(0.0, forest.classify(testData.getDataset(), rng, testData.get(1)), EPSILON);
-    assertEquals(1.0, forest.classify(testData.getDataset(), rng, testData.get(2)), EPSILON);
+    //assertEquals(yesValue, forest.classify(testData.getDataset(), rng, testData.get(1)), EPSILON);
+    assertEquals(noValue, forest.classify(testData.getDataset(), rng, testData.get(2)), EPSILON);
   }
 
   @Test
@@ -154,12 +157,15 @@ public final class DecisionForestTest extends MahoutTestCase {
     // Build Forest
     DecisionForest forest = buildForest(datas);
     // Test data
-    Data testData = DataLoader.loadData(datas[0].getDataset(), TEST_DATA);
+    Dataset dataset = datas[0].getDataset();
+    Data testData = DataLoader.loadData(dataset, TEST_DATA);
 
     double[][] predictions = new double[testData.size()][];
     forest.classify(testData, predictions);
-    assertArrayEquals(new double[][]{{1.0, Double.NaN, Double.NaN},
-        {1.0, 0.0, Double.NaN}, {1.0, 1.0, Double.NaN}}, predictions);
+    double noValue = dataset.valueOf(4, "no");
+    double yesValue = dataset.valueOf(4, "yes");
+    assertArrayEquals(new double[][]{{noValue, Double.NaN, Double.NaN},
+        {noValue, yesValue, Double.NaN}, {noValue, noValue, Double.NaN}}, predictions);
   }
 
   @Test

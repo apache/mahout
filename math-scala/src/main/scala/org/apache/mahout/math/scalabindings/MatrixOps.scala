@@ -26,12 +26,18 @@ class MatrixOps(val m: Matrix) {
 
   import MatrixOps._
 
+  // We need this for some functions below (but it would screw some functions above)
+  import RLikeOps.v2vOps
+
   def nrow = m.rowSize()
 
   def ncol = m.columnSize()
 
-
-  def unary_- = m.assign(Functions.NEGATE)
+  /**
+   * Warning: this creates a clone (as in mx * -1), in many applications inplace inversion `mx *= -1`
+   * might be an infinitely better choice.
+   */
+  def unary_- = cloned.assign(Functions.NEGATE)
 
   def +=(that: Matrix) = m.assign(that, Functions.PLUS)
 
@@ -57,6 +63,8 @@ class MatrixOps(val m: Matrix) {
   // m.plus(that)?
 
   def +(that: Double) = cloned += that
+
+  def +:(that:Double) = cloned += that
 
   def -(that: Double) = cloned -= that
 
@@ -166,9 +174,6 @@ class MatrixOps(val m: Matrix) {
   def isFullRank: Boolean =
     new QRDecomposition(if (nrow < ncol) m t else m cloned).hasFullRank
 
-  // We need this for some functions below (but it would screw some functions above)
-  import RLikeOps.v2vOps
-
   def colSums() = m.aggregateColumns(vectorSumFunc)
 
   def rowSums() = m.aggregateRows(vectorSumFunc)
@@ -177,13 +182,26 @@ class MatrixOps(val m: Matrix) {
 
   def rowMeans() = if (m.ncol == 0) rowSums() else rowSums() /= m.ncol
 
+  /* Diagonal */
+  def diagv: Vector = m.viewDiagonal()
+
+  /* Diagonal assignment */
+  def diagv_=(that: Vector) = diagv := that
+
+  /* Diagonal assignment */
+  def diagv_=(that: Double) = diagv := that
+
+  /* Row and Column non-zero element counts */
   def numNonZeroElementsPerColumn() = m.aggregateColumns(vectorCountNonZeroElementsFunc)
+
+  def numNonZeroElementsPerRow() = m.aggregateRows(vectorCountNonZeroElementsFunc)
 }
 
 object MatrixOps {
-  implicit def m2ops(m: Matrix): MatrixOps = new MatrixOps(m)
 
-  implicit def v2ops(v: Vector): VectorOps = new VectorOps(v)
+  import RLikeOps.v2vOps
+
+  implicit def m2ops(m: Matrix): MatrixOps = new MatrixOps(m)
 
   private def vectorSumFunc = new VectorFunction {
     def apply(f: Vector): Double = f.sum

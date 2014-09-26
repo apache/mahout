@@ -18,7 +18,7 @@
 package org.apache.mahout.math.scalabindings
 
 import org.scalatest.{Matchers, FunSuite}
-import MatrixOps._
+import RLikeOps._
 import scala._
 import org.apache.mahout.test.MahoutSuite
 import org.apache.mahout.math.{RandomAccessSparseVector, SequentialAccessSparseVector, Matrices}
@@ -120,10 +120,11 @@ class MatrixOpsSuite extends FunSuite with MahoutSuite {
     a.colMeans() should equal(dvec(2.5, 3.5, 4.5))
     a.rowMeans() should equal(dvec(3, 4))
     a.numNonZeroElementsPerColumn() should equal(dvec(2,2,2))
+    a.numNonZeroElementsPerRow() should equal(dvec(3,3))
 
   }
 
-  test("numNonZeroElementsPerColumn") {
+  test("numNonZeroElementsPerColumn and Row") {
     val a = dense(
       (2, 3, 4),
       (3, 4, 5),
@@ -132,6 +133,7 @@ class MatrixOpsSuite extends FunSuite with MahoutSuite {
     )
 
     a.numNonZeroElementsPerColumn() should equal(dvec(3,2,4))
+    a.numNonZeroElementsPerRow() should equal(dvec(3,3,2,1))
   }
 
   test("Vector Assignment performance") {

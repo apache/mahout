@@ -88,12 +88,16 @@ public final class WikipediaToSequenceFile {
     
     Option allOpt = obuilder.withLongName("all")
         .withDescription("If set, Select all files. Default is false").withShortName("all").create();
-    
+
+    Option removeLabelOpt = obuilder.withLongName("removeLabels")
+        .withDescription("If set, remove [[Category:labels]] from document text after extracting label."
+          + "Default is false").withShortName("rl").create();
+
     Option helpOpt = DefaultOptionCreator.helpOption();
     
     Group group = gbuilder.withName("Options").withOption(categoriesOpt).withOption(dirInputPathOpt)
         .withOption(dirOutputPathOpt).withOption(exactMatchOpt).withOption(allOpt).withOption(helpOpt)
-        .create();
+        .withOption(removeLabelOpt).create();
     
     Parser parser = new Parser();
     parser.setGroup(group);
@@ -117,7 +121,13 @@ public final class WikipediaToSequenceFile {
       if (cmdLine.hasOption(allOpt)) {
         all = true;
       }
-      runJob(inputPath, outputPath, catFile, cmdLine.hasOption(exactMatchOpt), all);
+
+      boolean removeLabels = false;
+      if (cmdLine.hasOption(removeLabelOpt)) {
+          removeLabels = true;
+      }
+
+      runJob(inputPath, outputPath, catFile, cmdLine.hasOption(exactMatchOpt), all, removeLabels);
     } catch (OptionException e) {
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);
@@ -144,17 +154,22 @@ public final class WikipediaToSequenceFile {
    *          category string
    * @param all
    *          if true select all categories
+   * @param removeLabels
+   *          if true remove Category labels from document text after extracting.
+   *
    */
   public static void runJob(String input,
                             String output,
                             String catFile,
                             boolean exactMatchOnly,
-                            boolean all) throws IOException, InterruptedException, ClassNotFoundException {
+                            boolean all,
+                            boolean removeLabels) throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set("xmlinput.start", "<page>");
     conf.set("xmlinput.end", "</page>");
     conf.setBoolean("exact.match.only", exactMatchOnly);
     conf.setBoolean("all.files", all);
+    conf.setBoolean("remove.labels", removeLabels);
     conf.set("io.serializations",
              "org.apache.hadoop.io.serializer.JavaSerialization,"
              + "org.apache.hadoop.io.serializer.WritableSerialization");

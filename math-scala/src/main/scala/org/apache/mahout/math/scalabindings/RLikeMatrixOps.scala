@@ -47,6 +47,8 @@ class RLikeMatrixOps(m: Matrix) extends MatrixOps(m) {
 
   def *(that: Double) = cloned *= that
 
+  def *:(that:Double) = cloned *= that
+
   def /(that: Matrix) = cloned /= that
 
   def /:(that: Matrix) = that / m

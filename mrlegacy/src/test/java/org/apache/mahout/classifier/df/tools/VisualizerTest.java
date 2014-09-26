@@ -84,10 +84,26 @@ public final class VisualizerTest extends MahoutTestCase {
     DecisionTreeBuilder builder = new DecisionTreeBuilder();
     builder.setM(data.getDataset().nbAttributes() - 1);
     Node tree = builder.build(rng, data);
-    
-    assertEquals("\noutlook = rainy\n|   windy = FALSE : yes\n|   windy = TRUE : no\n"
-            + "outlook = sunny\n|   humidity < 77.5 : yes\n|   humidity >= 77.5 : no\n"
-            + "outlook = overcast : yes", TreeVisualizer.toString(tree, data.getDataset(), ATTR_NAMES));
+
+    String visualization = TreeVisualizer.toString(tree, data.getDataset(), ATTR_NAMES);
+
+    assertTrue(
+        ("\n" +
+            "outlook = rainy\n" +
+            "|   windy = FALSE : yes\n" +
+            "|   windy = TRUE : no\n" +
+            "outlook = sunny\n" +
+            "|   humidity < 77.5 : yes\n" +
+            "|   humidity >= 77.5 : no\n" +
+            "outlook = overcast : yes").equals(visualization) ||
+        ("\n" +
+            "outlook = rainy\n" +
+            "|   windy = TRUE : no\n" +
+            "|   windy = FALSE : yes\n" +
+            "outlook = overcast : yes\n" +
+            "outlook = sunny\n" +
+            "|   humidity < 77.5 : yes\n" +
+            "|   humidity >= 77.5 : no").equals(visualization));
   }
   
   @Test
@@ -113,16 +129,44 @@ public final class VisualizerTest extends MahoutTestCase {
             new Leaf(0)}));
     List<Node> trees = Lists.newArrayList();
     trees.add(root);
-    
+
     // Forest
     DecisionForest forest = new DecisionForest(trees);
-    assertEquals("Tree[1]:\n2 < 90 : yes\n2 >= 90\n"
-            + "|   0 = rainy\n|   |   1 < 71 : yes\n|   |   1 >= 71 : no\n"
-            + "|   0 = sunny : no\n" + "|   0 = overcast : yes\n", ForestVisualizer.toString(forest, data.getDataset(), null));
+    String visualization = ForestVisualizer.toString(forest, data.getDataset(), null);
+    assertTrue(
+        ("Tree[1]:\n2 < 90 : yes\n2 >= 90\n" +
+            "|   0 = rainy\n" +
+            "|   |   1 < 71 : yes\n" +
+            "|   |   1 >= 71 : no\n" +
+            "|   0 = sunny : no\n" +
+            "|   0 = overcast : yes\n").equals(visualization) ||
+        ("Tree[1]:\n" +
+            "2 < 90 : no\n" +
+            "2 >= 90\n" +
+            "|   0 = rainy\n" +
+            "|   |   1 < 71 : no\n" +
+            "|   |   1 >= 71 : yes\n" +
+            "|   0 = overcast : yes\n" +
+            "|   0 = sunny : no\n").equals(visualization));
 
-    assertEquals("Tree[1]:\nhumidity < 90 : yes\nhumidity >= 90\n"
-            + "|   outlook = rainy\n|   |   temperature < 71 : yes\n|   |   temperature >= 71 : no\n"
-            + "|   outlook = sunny : no\n" + "|   outlook = overcast : yes\n", ForestVisualizer.toString(forest, data.getDataset(), ATTR_NAMES));
+    visualization = ForestVisualizer.toString(forest, data.getDataset(), ATTR_NAMES);
+    assertTrue(
+        ("Tree[1]:\n" +
+            "humidity < 90 : yes\n" +
+            "humidity >= 90\n" +
+            "|   outlook = rainy\n" +
+            "|   |   temperature < 71 : yes\n" +
+            "|   |   temperature >= 71 : no\n" +
+            "|   outlook = sunny : no\n" +
+            "|   outlook = overcast : yes\n").equals(visualization) ||
+        ("Tree[1]:\n" +
+            "humidity < 90 : no\n" +
+            "humidity >= 90\n" +
+            "|   outlook = rainy\n" +
+            "|   |   temperature < 71 : no\n" +
+            "|   |   temperature >= 71 : yes\n" +
+            "|   outlook = overcast : yes\n" +
+            "|   outlook = sunny : no\n").equals(visualization));
   }
   
   @Test
@@ -142,7 +186,16 @@ public final class VisualizerTest extends MahoutTestCase {
     builder.setComplemented(false);
     Node tree = builder.build(rng, lessData);
 
-    assertEquals("\noutlook = sunny\n|   humidity < 77.5 : yes\n|   humidity >= 77.5 : no\noutlook = overcast : yes", TreeVisualizer.toString(tree, data.getDataset(), ATTR_NAMES));
+    String visualization = TreeVisualizer.toString(tree, data.getDataset(), ATTR_NAMES);
+    assertTrue(
+        ("\noutlook = sunny\n" +
+            "|   humidity < 77.5 : yes\n" +
+            "|   humidity >= 77.5 : no\n" +
+            "outlook = overcast : yes").equals(visualization) ||
+        ("\noutlook = overcast : yes\n" +
+            "outlook = sunny\n" +
+            "|   humidity < 77.5 : yes\n" +
+            "|   humidity >= 77.5 : no").equals(visualization));
   }
   
   @Test

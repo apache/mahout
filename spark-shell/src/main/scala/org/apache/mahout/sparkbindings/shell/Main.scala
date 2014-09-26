@@ -17,12 +17,20 @@
 
 package org.apache.mahout.sparkbindings.shell
 
+import org.apache.mahout.sparkbindings._
+import org.apache.log4j.PropertyConfigurator
+
 
 object Main {
 
   private var _interp: MahoutSparkILoop = _
 
   def main(args:Array[String]) {
+
+    // Hack: for some very unclear reason, log4j is not picking up log4j.properties in Spark conf/ even
+    // though the latter is added to the classpath. So we force it to pick it.
+    PropertyConfigurator.configure(getMahoutHome() + "/conf/log4j.properties")
+
     System.setProperty("scala.usejavacp", "true")
     _interp = new MahoutSparkILoop()
     // It looks like we need to initialize this too, since some Spark shell initilaization code

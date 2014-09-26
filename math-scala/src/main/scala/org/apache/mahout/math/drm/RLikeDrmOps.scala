@@ -35,11 +35,15 @@ class RLikeDrmOps[K: ClassTag](drm: DrmLike[K]) extends DrmLikeOps[K](drm) {
 
   def +(that: Double): DrmLike[K] = OpAewScalar[K](A = this, scalar = that, op = "+")
 
+  def +:(that: Double): DrmLike[K] = OpAewScalar[K](A = this, scalar = that, op = "+")
+
   def -(that: Double): DrmLike[K] = OpAewScalar[K](A = this, scalar = that, op = "-")
 
   def -:(that: Double): DrmLike[K] = OpAewScalar[K](A = this, scalar = that, op = "-:")
 
   def *(that: Double): DrmLike[K] = OpAewScalar[K](A = this, scalar = that, op = "*")
+
+  def *:(that: Double): DrmLike[K] = OpAewScalar[K](A = this, scalar = that, op = "*")
 
   def /(that: Double): DrmLike[K] = OpAewScalar[K](A = this, scalar = that, op = "/")
 
@@ -68,15 +72,60 @@ class RLikeDrmOps[K: ClassTag](drm: DrmLike[K]) extends DrmLikeOps[K](drm) {
 
 class RLikeDrmIntOps(drm: DrmLike[Int]) extends RLikeDrmOps[Int](drm) {
 
+  import org.apache.mahout.math._
+  import scalabindings._
+  import RLikeOps._
+  import RLikeDrmOps._
+  import scala.collection.JavaConversions._
+
   override def t: DrmLike[Int] = OpAt(A = drm)
 
   def %*%:[K: ClassTag](that: DrmLike[K]): DrmLike[K] = OpAB[K](A = that, B = this.drm)
 
   def %*%:(that: Matrix): DrmLike[Int] = OpTimesLeftMatrix(left = that, A = this.drm)
 
+  /** Row sums. This is of course applicable to Int-keyed distributed matrices only. */
+  def rowSums(): Vector = {
+    drm.mapBlock(ncol = 1) { case (keys, block) =>
+      // Collect block-wise rowsums and output them as one-column matrix.
+      keys -> dense(block.rowSums).t
+    }
+      .collect(::, 0)
+  }
+
+  /** Counts the non-zeros elements in each row returning a vector of the counts */
+  def numNonZeroElementsPerRow(): Vector = {
+    drm.mapBlock(ncol = 1) { case (keys, block) =>
+      // Collect block-wise row non-zero counts and output them as a one-column matrix.
+      keys -> dense(block.numNonZeroElementsPerRow).t
+    }
+      .collect(::, 0)
+  }
+
+  /** Row means */
+  def rowMeans(): Vector = {
+    drm.mapBlock(ncol = 1) { case (keys, block) =>
+      // Collect block-wise row means and output them as one-column matrix.
+      keys -> dense(block.rowMeans).t
+    }
+        .collect(::, 0)
+  }
+
+  /** Return diagonal vector */
+  def diagv: Vector = {
+    require(drm.ncol == drm.nrow, "Must be square to extract diagonal")
+    drm.mapBlock(ncol = 1) { case (keys, block) =>
+      keys -> dense(for (r <- block.view) yield r(keys(r.index))).t
+    }
+        .collect(::, 0)
+  }
+
 }
 
 object RLikeDrmOps {
+
+  implicit def double2ScalarOps(x:Double) = new DrmDoubleScalarOps(x)
+
   implicit def drmInt2RLikeOps(drm: DrmLike[Int]): RLikeDrmIntOps = new RLikeDrmIntOps(drm)
 
   implicit def drm2RLikeOps[K: ClassTag](drm: DrmLike[K]): RLikeDrmOps[K] = new RLikeDrmOps[K](drm)
