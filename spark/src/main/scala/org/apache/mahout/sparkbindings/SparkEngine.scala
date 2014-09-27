@@ -17,10 +17,7 @@
 
 package org.apache.mahout.sparkbindings
 
-import java.io.IOException
-
 import org.apache.mahout.math._
-import org.apache.spark.deploy.SparkHadoopUtil
 import scalabindings._
 import RLikeOps._
 import org.apache.mahout.math.drm.logical._
@@ -29,19 +26,16 @@ import org.apache.mahout.math._
 import scala.reflect.ClassTag
 import org.apache.spark.storage.StorageLevel
 import org.apache.mahout.sparkbindings.blas._
-import org.apache.hadoop.io._
+import org.apache.hadoop.io.{LongWritable, Text, IntWritable, Writable}
 import scala.Some
 import scala.collection.JavaConversions._
+import org.apache.spark.SparkContext
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.RLikeDrmOps._
 import org.apache.spark.rdd.RDD
-import org.apache.mahout.common.{Hadoop1HDFSUtil, HDFSUtil}
 
 /** Spark-specific non-drm-method operations */
 object SparkEngine extends DistributedEngine {
-
-  // By default, use Hadoop 1 utils
-  var hdfsUtils: HDFSUtil = Hadoop1HDFSUtil
 
   def colSums[K:ClassTag](drm: CheckpointedDrm[K]): Vector = {
     val n = drm.ncol
@@ -131,20 +125,47 @@ object SparkEngine extends DistributedEngine {
    *
    * @return DRM[Any] where Any is automatically translated to value type
    */
-  def drmDfsRead (path: String, parMin:Int = 0)(implicit sc: DistributedContext): CheckpointedDrm[_] = {
+  def drmFromHDFS (path: String, parMin:Int = 0)(implicit sc: DistributedContext): CheckpointedDrm[_] = {
 
-    val drmMetadata = hdfsUtils.readDrmHeader(path)
-    val k2vFunc = drmMetadata.keyW2ValFunc
-
-    // Load RDD and convert all Writables to value types right away (due to reuse of writables in
-    // Hadoop we must do it right after read operation).
     val rdd = sc.sequenceFile(path, classOf[Writable], classOf[VectorWritable], minPartitions = parMin)
+        // Get rid of VectorWritable
+        .map(t => (t._1, t._2.get()))
 
-        // Immediately convert keys and value writables into value types.
-        .map { case (wKey, wVec) => k2vFunc(wKey) -> wVec.get()}
+    def getKeyClassTag[K: ClassTag, V](rdd: RDD[(K, V)]) = implicitly[ClassTag[K]]
 
-    // Wrap into a DRM type with correct matrix row key class tag evident.
-    drmWrap(rdd = rdd, cacheHint = CacheHint.NONE)(drmMetadata.keyClassTag.asInstanceOf[ClassTag[Any]])
+    // Spark should've loaded the type info from the header, right?
+    val keyTag = getKeyClassTag(rdd)
+
+    val (key2valFunc, val2keyFunc, unwrappedKeyTag) = keyTag match {
+
+      case xx: ClassTag[Writable] if (xx == implicitly[ClassTag[IntWritable]]) => (
+          (v: AnyRef) => v.asInstanceOf[IntWritable].get,
+          (x: Any) => new IntWritable(x.asInstanceOf[Int]),
+          implicitly[ClassTag[Int]])
+
+      case xx: ClassTag[Writable] if (xx == implicitly[ClassTag[Text]]) => (
+          (v: AnyRef) => v.asInstanceOf[Text].toString,
+          (x: Any) => new Text(x.toString),
+          implicitly[ClassTag[String]])
+
+      case xx: ClassTag[Writable] if (xx == implicitly[ClassTag[LongWritable]]) => (
+          (v: AnyRef) => v.asInstanceOf[LongWritable].get,
+          (x: Any) => new LongWritable(x.asInstanceOf[Int]),
+          implicitly[ClassTag[Long]])
+
+      case xx: ClassTag[Writable] => (
+          (v: AnyRef) => v,
+          (x: Any) => x.asInstanceOf[Writable],
+          ClassTag(classOf[Writable]))
+    }
+
+    {
+      implicit def getWritable(x: Any): Writable = val2keyFunc()
+
+      val drmRdd = rdd.map { t => (key2valFunc(t._1), t._2)}
+
+      drmWrap(rdd = drmRdd, cacheHint = CacheHint.MEMORY_ONLY)(unwrappedKeyTag.asInstanceOf[ClassTag[Any]])
+    }
   }
 
   /** Parallelize in-core matrix as spark distributed matrix, using row ordinal indices as data set keys. */

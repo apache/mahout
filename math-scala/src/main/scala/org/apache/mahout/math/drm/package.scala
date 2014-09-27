@@ -49,7 +49,7 @@ package object drm {
   def drmBroadcast(v:Vector)(implicit ctx:DistributedContext):BCast[Vector] = ctx.drmBroadcast(v)
 
   /** Load DRM from hdfs (as in Mahout DRM format) */
-  def drmDfsRead (path: String)(implicit ctx: DistributedContext): CheckpointedDrm[_] = ctx.drmDfsRead(path)
+  def drmFromHDFS (path: String)(implicit ctx: DistributedContext): CheckpointedDrm[_] = ctx.drmFromHDFS(path)
 
   /** Shortcut to parallelizing matrices with indices, ignore row labels. */
   def drmParallelize(m: Matrix, numPartitions: Int = 1)

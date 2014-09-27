@@ -2,8 +2,6 @@ Mahout Change Log
 
 Release 1.0 - unreleased
 
-  MAHOUT-1615: SparkEngine drmFromHDFS returning the same Key for all Key,Vec Pairs for Text-Keyed SequenceFiles (dlyubimov & apalumbo)
-
   MAHOUT-1610: Update tests to pass in Java 8 (srowen)
 
   MAHOUT-1608: Add option in WikipediaToSequenceFile to remove category labels from documents (apalumbo)
