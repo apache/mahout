@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -70,20 +71,30 @@ public class JsonClusterWriter extends AbstractClusterWriter {
     Map<String, Object> res = Maps.newHashMap();
 
     // get top terms
-    List<Object> topTerms = getTopFeaturesList(clusterWritable.getValue()
+    if (dictionary != null) {
+      List<Object> topTerms = getTopFeaturesList(clusterWritable.getValue()
         .getCenter(), dictionary, numTopFeatures);
-    res.put("top_terms", topTerms);
-
+      res.put("top_terms", topTerms);
+    } else {
+      res.put("top_terms", Lists.newArrayList());
+    }
+    
     // get human-readable cluster representation
-    Cluster cluster = clusterWritable.getValue();
-    Map<String,Object> fmtStr = cluster.asJson(dictionary);
-    res.put("cluster_id", cluster.getId());
-    res.put("cluster", fmtStr);
-
-    // get points
-    List<Object> points = getPoints(cluster, dictionary);
-    res.put("points", points);
-
+    Cluster cluster = clusterWritable.getValue();    	
+    if (dictionary != null) {
+      Map<String,Object> fmtStr = cluster.asJson(dictionary);
+      res.put("cluster_id", cluster.getId());
+      res.put("cluster", fmtStr);
+	
+      // get points
+      List<Object> points = getPoints(cluster, dictionary);
+      res.put("points", points);
+    } else {
+      res.put("cluster_id", cluster.getId());
+      res.put("cluster", new HashMap<String,Object>());
+      res.put("points", Lists.newArrayList());
+    }
+    
     // write JSON
     Writer writer = getWriter();
     writer.write(jxn.writeValueAsString(res) + "\n");
