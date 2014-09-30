@@ -49,7 +49,16 @@
 
   <build>
     <defaultGoal>install</defaultGoal>
-
+    
+    <resources>
+      <resource>
+        <directory>src/main/scala</directory>
+      </resource>
+      <resource>
+        <directory>src/test/scala</directory>
+      </resource>    
+    </resources>
+    
     <plugins>
 
       <plugin>
