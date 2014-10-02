@@ -2,6 +2,7 @@ package org.apache.mahout.common
 
 import scala.reflect.ClassTag
 import org.apache.hadoop.io._
+import java.util.Arrays
 
 class DrmMetadata(
 
@@ -30,7 +31,7 @@ class DrmMetadata(
     case cz if (cz == classOf[FloatWritable]) => ClassTag.Float -> w2float _
     case cz if (cz == classOf[Text]) => ClassTag(classOf[String]) -> w2string _
     case cz if (cz == classOf[BooleanWritable]) => ClassTag(classOf[Boolean]) -> w2bool _
-    case cz if (cz == classOf[ArrayWritable]) => ClassTag(classOf[Array[Byte]]) -> w2bytes _
+    case cz if (cz == classOf[BytesWritable]) => ClassTag(classOf[Array[Byte]]) -> w2bytes _
     case _ => throw new IllegalArgumentException(s"Unsupported DRM key type:${keyTypeWritable.getName}")
   }
 
@@ -50,5 +51,6 @@ object DrmMetadata {
 
   private[common] def w2bool(w: Writable) = w.asInstanceOf[BooleanWritable].get()
 
-  private[common] def w2bytes(w: Writable) = w.asInstanceOf[BytesWritable].copyBytes()
+  private[common] def w2bytes(w: Writable) = Arrays.copyOf(w.asInstanceOf[BytesWritable].getBytes(),
+                                                           w.asInstanceOf[BytesWritable].getLength())
 }

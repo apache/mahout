@@ -37,7 +37,7 @@ object Hadoop1HDFSUtil extends HDFSUtil {
     val partFilePath:Path = fs.listStatus(dfsPath)
 
         // Filter out anything starting with .
-        .filter { s => !s.getPath.getName.startsWith("\\.") && s.isFile}
+        .filter { s => (!s.getPath.getName.startsWith("\\.") && !s.getPath.getName.startsWith("_") && !s.isDir)}
 
         // Take path
         .map(_.getPath)
