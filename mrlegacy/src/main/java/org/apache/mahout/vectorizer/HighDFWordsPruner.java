@@ -79,8 +79,7 @@ public final class HighDFWordsPruner {
                     + "org.apache.hadoop.io.serializer.WritableSerialization");
     conf.setLong(MAX_DF, maxDF);
     conf.setLong(MIN_DF, minDF);
-    DistributedCache.setCacheFiles(
-            new URI[]{dictionaryFilePath.toUri()}, conf);
+    DistributedCache.addCacheFile(dictionaryFilePath.toUri(), conf);
 
     Job job = HadoopUtil.prepareJob(input, output, SequenceFileInputFormat.class,
             Mapper.class, null, null, WordsPrunerReducer.class,
