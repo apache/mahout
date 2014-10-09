@@ -18,6 +18,7 @@
 package org.apache.mahout.math.cf
 
 import org.apache.mahout.math._
+import org.apache.mahout.math.indexeddataset.IndexedDataset
 import scalabindings._
 import RLikeOps._
 import drm._
@@ -49,7 +50,7 @@ object SimilarityAnalysis extends Serializable {
     * @param maxInterestingItemsPerThing number of similar items to return per item, default: 50
     * @param maxNumInteractions max number of interactions after downsampling, default: 500
     * @return
-    * */
+    */
   def cooccurrences(drmARaw: DrmLike[Int], randomSeed: Int = 0xdeadbeef, maxInterestingItemsPerThing: Int = 50,
                     maxNumInteractions: Int = 500, drmBs: Array[DrmLike[Int]] = Array()): List[DrmLike[Int]] = {
 
@@ -99,13 +100,39 @@ object SimilarityAnalysis extends Serializable {
     indicatorMatrices
   }
 
+  /** Calculates item (column-wise) similarity using the log-likelihood ratio on A'A, A'B, A'C, ...
+    * and returns a list of indicator and cross-indicator matrices
+    * Somewhat easier to use method, which handles the ID dictionaries correctly
+    * @param indexedDatasets first in array is primary/A matrix all others are treated as secondary
+    * @param randomSeed use default to make repeatable, otherwise pass in system time or some randomizing seed
+    * @param maxInterestingItemsPerThing max similarities per items
+    * @param maxNumInteractions max number of input items per item
+    * @return
+    */
+  def cooccurrencesIDSs(indexedDatasets: Array[IndexedDataset],
+      randomSeed: Int = 0xdeadbeef,
+      maxInterestingItemsPerThing: Int = 50,
+      maxNumInteractions: Int = 500):
+    List[IndexedDataset] = {
+    val drms = indexedDatasets.map(_.matrix.asInstanceOf[DrmLike[Int]])
+    val primaryDrm = drms(0)
+    val secondaryDrms = drms.drop(1)
+    val coocMatrices = cooccurrences(primaryDrm, randomSeed, maxInterestingItemsPerThing,
+      maxNumInteractions, secondaryDrms)
+    val retIDSs = coocMatrices.iterator.zipWithIndex.map {
+      case( drm, i ) =>
+        indexedDatasets(0).create(drm, indexedDatasets(0).columnIDs, indexedDatasets(i).columnIDs)
+    }
+    retIDSs.toList
+  }
+
   /** Calculates row-wise similarity using the log-likelihood ratio on AA' and returns a drm of rows and similar rows
     * @param drmARaw Primary interaction matrix
     * @param randomSeed when kept to a constant will make repeatable downsampling
     * @param maxInterestingSimilaritiesPerRow number of similar items to return per item, default: 50
     * @param maxNumInteractions max number of interactions after downsampling, default: 500
     * @return
-    * */
+    */
   def rowSimilarity(drmARaw: DrmLike[Int], randomSeed: Int = 0xdeadbeef, maxInterestingSimilaritiesPerRow: Int = 50,
                     maxNumInteractions: Int = 500): DrmLike[Int] = {
 
@@ -130,10 +157,27 @@ object SimilarityAnalysis extends Serializable {
     drmSimilaritiesAAt
   }
 
-  /**
-   * Compute loglikelihood ratio
-   * see http://tdunning.blogspot.de/2008/03/surprise-and-coincidence.html for details
-   **/
+  /** Calculates row-wise similarity using the log-likelihood ratio on AA' and returns a drm of rows and similar rows.
+    * Uses IndexedDatasets, which handle external ID dictionaries properly
+    * @param indexedDataset compare each row to every other
+    * @param randomSeed  use default to make repeatable, otherwise pass in system time or some randomizing seed
+    * @param maxInterestingSimilaritiesPerRow max elements returned in each row
+    * @param maxObservationsPerRow max number of input elements to use
+    * @return
+    */
+  def rowSimilarityIDS(indexedDataset: IndexedDataset, randomSeed: Int = 0xdeadbeef,
+      maxInterestingSimilaritiesPerRow: Int = 50,
+      maxObservationsPerRow: Int = 500):
+    IndexedDataset = {
+    val coocMatrix = rowSimilarity(indexedDataset.matrix, randomSeed, maxInterestingSimilaritiesPerRow,
+      maxObservationsPerRow)
+    indexedDataset.create(coocMatrix, indexedDataset.rowIDs, indexedDataset.rowIDs)
+  }
+
+   /**
+     * Compute loglikelihood ratio
+     * see http://tdunning.blogspot.de/2008/03/surprise-and-coincidence.html for details
+     */
   def logLikelihoodRatio(numInteractionsWithA: Long, numInteractionsWithB: Long,
     numInteractionsWithAandB: Long, numInteractions: Long) = {
 

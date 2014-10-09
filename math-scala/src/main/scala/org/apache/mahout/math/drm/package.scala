@@ -17,10 +17,13 @@
 
 package org.apache.mahout.math
 
-import scala.reflect.ClassTag
+import com.google.common.collect.{HashBiMap, BiMap}
+import org.apache.mahout.math.drm.DistributedContext
+import org.apache.mahout.math.indexeddataset.{IndexedDataset, DefaultIndexedDatasetReadSchema, Schema}
+import org.apache.mahout.math.scalabindings.RLikeOps._
 import org.apache.mahout.math.scalabindings._
-import RLikeOps._
-import org.apache.mahout.math.decompositions.{DSSVD, DSPCA, DQR}
+
+import scala.reflect.ClassTag
 
 package object drm {
 
@@ -43,33 +46,33 @@ package object drm {
   }
 
   /** Broadcast support API */
-  def drmBroadcast(m:Matrix)(implicit ctx:DistributedContext):BCast[Matrix] = ctx.drmBroadcast(m)
+  def drmBroadcast(m: Matrix)(implicit ctx: DistributedContext): BCast[Matrix] = ctx.drmBroadcast(m)
 
   /** Broadcast support API */
-  def drmBroadcast(v:Vector)(implicit ctx:DistributedContext):BCast[Vector] = ctx.drmBroadcast(v)
+  def drmBroadcast(v: Vector)(implicit ctx: DistributedContext): BCast[Vector] = ctx.drmBroadcast(v)
 
   /** Load DRM from hdfs (as in Mahout DRM format) */
-  def drmFromHDFS (path: String)(implicit ctx: DistributedContext): CheckpointedDrm[_] = ctx.drmFromHDFS(path)
+  def drmFromHDFS(path: String)(implicit ctx: DistributedContext): CheckpointedDrm[_] = ctx.drmFromHDFS(path)
 
   /** Shortcut to parallelizing matrices with indices, ignore row labels. */
   def drmParallelize(m: Matrix, numPartitions: Int = 1)
-      (implicit sc: DistributedContext): CheckpointedDrm[Int] = drmParallelizeWithRowIndices(m, numPartitions)(sc)
+                    (implicit sc: DistributedContext): CheckpointedDrm[Int] = drmParallelizeWithRowIndices(m, numPartitions)(sc)
 
   /** Parallelize in-core matrix as spark distributed matrix, using row ordinal indices as data set keys. */
   def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int = 1)
-      (implicit ctx: DistributedContext): CheckpointedDrm[Int] = ctx.drmParallelizeWithRowIndices(m, numPartitions)
+                                  (implicit ctx: DistributedContext): CheckpointedDrm[Int] = ctx.drmParallelizeWithRowIndices(m, numPartitions)
 
   /** Parallelize in-core matrix as spark distributed matrix, using row labels as a data set keys. */
   def drmParallelizeWithRowLabels(m: Matrix, numPartitions: Int = 1)
-      (implicit ctx: DistributedContext): CheckpointedDrm[String] = ctx.drmParallelizeWithRowLabels(m, numPartitions)
+                                 (implicit ctx: DistributedContext): CheckpointedDrm[String] = ctx.drmParallelizeWithRowLabels(m, numPartitions)
 
   /** This creates an empty DRM with specified number of partitions and cardinality. */
   def drmParallelizeEmpty(nrow: Int, ncol: Int, numPartitions: Int = 10)
-      (implicit ctx: DistributedContext): CheckpointedDrm[Int] = ctx.drmParallelizeEmpty(nrow, ncol, numPartitions)
+                         (implicit ctx: DistributedContext): CheckpointedDrm[Int] = ctx.drmParallelizeEmpty(nrow, ncol, numPartitions)
 
   /** Creates empty DRM with non-trivial height */
   def drmParallelizeEmptyLong(nrow: Long, ncol: Int, numPartitions: Int = 10)
-      (implicit ctx: DistributedContext): CheckpointedDrm[Long] = ctx.drmParallelizeEmptyLong(nrow, ncol, numPartitions)
+                             (implicit ctx: DistributedContext): CheckpointedDrm[Long] = ctx.drmParallelizeEmptyLong(nrow, ncol, numPartitions)
 
   /** Implicit broadcast -> value conversion. */
   implicit def bcast2val[T](bcast: BCast[T]): T = bcast.value
@@ -114,3 +117,20 @@ package object drm {
   }
 
 }
+
+package object indexeddataset {
+  /** Load IndexedDataset from text delimited files */
+  def indexedDatasetDFSRead(src: String,
+      schema: Schema = DefaultIndexedDatasetReadSchema,
+      existingRowIDs: BiMap[String, Int] = HashBiMap.create())
+      (implicit ctx: DistributedContext):
+    IndexedDataset = ctx.indexedDatasetDFSRead(src, schema, existingRowIDs)
+
+  def indexedDatasetDFSReadElements(src: String,
+      schema: Schema = DefaultIndexedDatasetReadSchema,
+      existingRowIDs: BiMap[String, Int] = HashBiMap.create())
+      (implicit ctx: DistributedContext):
+    IndexedDataset = ctx.indexedDatasetDFSReadElements(src, schema, existingRowIDs)
+
+}
+

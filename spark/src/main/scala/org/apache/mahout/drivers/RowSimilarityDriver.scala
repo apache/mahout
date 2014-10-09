@@ -18,6 +18,8 @@
 package org.apache.mahout.drivers
 
 import org.apache.mahout.math.cf.SimilarityAnalysis
+import org.apache.mahout.math.indexeddataset.{Schema, IndexedDataset, indexedDatasetDFSRead}
+import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
 import scala.collection.immutable.HashMap
 
 /**
@@ -36,14 +38,13 @@ import scala.collection.immutable.HashMap
  * @note To use with a Spark cluster see the --master option, if you run out of heap space check
  *       the --sparkExecutorMemory option.
  */
-object RowSimilarityDriver extends MahoutDriver {
+object RowSimilarityDriver extends MahoutSparkDriver {
   // define only the options specific to RowSimilarity
   private final val RowSimilarityOptions = HashMap[String, Any](
     "maxObservations" -> 500,
     "maxSimilaritiesPerRow" -> 100,
     "appName" -> "RowSimilarityDriver")
 
-  private var readerWriter: TextDelimitedIndexedDatasetReaderWriter = _
   private var readWriteSchema: Schema = _
 
   /**
@@ -123,8 +124,6 @@ object RowSimilarityDriver extends MahoutDriver {
       "omitScore" -> parser.opts("omitStrength").asInstanceOf[Boolean],
       "elementDelim" -> parser.opts("elementDelim").asInstanceOf[String])
 
-    readerWriter = new TextDelimitedIndexedDatasetReaderWriter(readWriteSchema, readWriteSchema)
-
   }
 
   private def readIndexedDataset: IndexedDataset = {
@@ -136,7 +135,7 @@ object RowSimilarityDriver extends MahoutDriver {
       null.asInstanceOf[IndexedDataset]
     } else {
 
-      val datasetA = IndexedDataset(readerWriter.readDRMFrom(inFiles))
+      val datasetA = indexedDatasetDFSRead(inFiles, readWriteSchema)
       datasetA
     }
   }
@@ -146,12 +145,12 @@ object RowSimilarityDriver extends MahoutDriver {
 
     val indexedDataset = readIndexedDataset
 
-    val rowSimilarityDrm = SimilarityAnalysis.rowSimilarity(indexedDataset.matrix, parser.opts("randomSeed").asInstanceOf[Int],
-      parser.opts("maxSimilaritiesPerRow").asInstanceOf[Int], parser.opts("maxObservations").asInstanceOf[Int])
+    val rowSimilarityIDS = SimilarityAnalysis.rowSimilarityIDS(indexedDataset,
+      parser.opts("randomSeed").asInstanceOf[Int],
+      parser.opts("maxSimilaritiesPerRow").asInstanceOf[Int],
+      parser.opts("maxObservations").asInstanceOf[Int])
 
-    val rowSimilarityDataset = new IndexedDatasetTextDelimitedWriteable(rowSimilarityDrm,
-      indexedDataset.rowIDs, indexedDataset.rowIDs, readWriteSchema)
-    rowSimilarityDataset.writeTo(dest = parser.opts("output").asInstanceOf[String])
+    rowSimilarityIDS.dfsWrite(parser.opts("output").asInstanceOf[String], readWriteSchema)
 
     stop
   }

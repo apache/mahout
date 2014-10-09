@@ -18,6 +18,8 @@
 package org.apache.mahout.drivers
 
 import org.apache.mahout.math.cf.SimilarityAnalysis
+import org.apache.mahout.math.indexeddataset.{Schema, IndexedDataset, indexedDatasetDFSReadElements}
+import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
 import scala.collection.immutable.HashMap
 
 /**
@@ -40,17 +42,16 @@ import scala.collection.immutable.HashMap
  * @note To use with a Spark cluster see the --master option, if you run out of heap space check
  *       the --sparkExecutorMemory option.
  */
-object ItemSimilarityDriver extends MahoutDriver {
+object ItemSimilarityDriver extends MahoutSparkDriver {
   // define only the options specific to ItemSimilarity
   private final val ItemSimilarityOptions = HashMap[String, Any](
     "maxPrefs" -> 500,
     "maxSimilaritiesPerItem" -> 100,
     "appName" -> "ItemSimilarityDriver")
 
-  private var reader1: TextDelimitedIndexedDatasetReader = _
-  private var reader2: TextDelimitedIndexedDatasetReader = _
-  private var writer: TextDelimitedIndexedDatasetWriter = _
   private var writeSchema: Schema = _
+  private var readSchema1: Schema = _
+  private var readSchema2: Schema = _
 
   /**
    * @param args  Command line args, if empty a help message is printed.
@@ -126,20 +127,17 @@ object ItemSimilarityDriver extends MahoutDriver {
 
     super.start(masterUrl, appName)
 
-    val readSchema1 = new Schema("delim" -> parser.opts("inDelim").asInstanceOf[String],
+    readSchema1 = new Schema("delim" -> parser.opts("inDelim").asInstanceOf[String],
       "filter" -> parser.opts("filter1").asInstanceOf[String],
       "rowIDColumn" -> parser.opts("rowIDColumn").asInstanceOf[Int],
       "columnIDPosition" -> parser.opts("itemIDColumn").asInstanceOf[Int],
       "filterColumn" -> parser.opts("filterColumn").asInstanceOf[Int])
 
-    reader1 = new TextDelimitedIndexedDatasetReader(readSchema1)
-
     if ((parser.opts("filterColumn").asInstanceOf[Int] != -1 && parser.opts("filter2").asInstanceOf[String] != null)
       || (parser.opts("input2").asInstanceOf[String] != null && !parser.opts("input2").asInstanceOf[String].isEmpty )){
       // only need to change the filter used compared to readSchema1
-      val readSchema2 = new Schema(readSchema1) += ("filter" -> parser.opts("filter2").asInstanceOf[String])
+      readSchema2 = new Schema(readSchema1) += ("filter" -> parser.opts("filter2").asInstanceOf[String])
 
-      reader2 = new TextDelimitedIndexedDatasetReader(readSchema2)
     }
 
     writeSchema = new Schema(
@@ -147,10 +145,7 @@ object ItemSimilarityDriver extends MahoutDriver {
       "columnIdStrengthDelim" -> parser.opts("columnIdStrengthDelim").asInstanceOf[String],
       "omitScore" -> parser.opts("omitStrength").asInstanceOf[Boolean],
       "elementDelim" -> parser.opts("elementDelim").asInstanceOf[String])
-
-    writer = new TextDelimitedIndexedDatasetWriter(writeSchema)
-
-  }
+    }
 
   private def readIndexedDatasets: Array[IndexedDataset] = {
 
@@ -164,19 +159,20 @@ object ItemSimilarityDriver extends MahoutDriver {
       Array()
     } else {
 
-      val datasetA = IndexedDataset(reader1.readElementsFrom(inFiles))
-      if (parser.opts("writeAllDatasets").asInstanceOf[Boolean]) writer.writeTo(datasetA,
-        parser.opts("output").asInstanceOf[String] + "../input-datasets/primary-interactions")
+      val datasetA = indexedDatasetDFSReadElements(inFiles,readSchema1)
+      if (parser.opts("writeAllDatasets").asInstanceOf[Boolean])
+        datasetA.dfsWrite(parser.opts("output").asInstanceOf[String] + "../input-datasets/primary-interactions",
+          schema = writeSchema)
 
-      // The case of readng B can be a bit tricky when the exact same row IDs don't exist for A and B
+      // The case of reading B can be a bit tricky when the exact same row IDs don't exist for A and B
       // Here we assume there is one row ID space for all interactions. To do this we calculate the
       // row cardinality only after reading in A and B (or potentially C...) We then adjust the
       // cardinality so all match, which is required for the math to work.
       // Note: this may leave blank rows with no representation in any DRM. Blank rows need to
-      // be supported (and are at least on Spark) or the row cardinality fix will not work.
+      // be supported (and are at least on Spark) or the row cardinality adjustment will not work.
       val datasetB = if (!inFiles2.isEmpty) {
         // get cross-cooccurrence interactions from separate files
-        val datasetB = IndexedDataset(reader2.readElementsFrom(inFiles2, existingRowIDs = datasetA.rowIDs))
+        val datasetB = indexedDatasetDFSReadElements(inFiles2, readSchema2, existingRowIDs = datasetA.rowIDs)
 
         datasetB
 
@@ -184,12 +180,12 @@ object ItemSimilarityDriver extends MahoutDriver {
         && parser.opts("filter2").asInstanceOf[String] != null) {
 
         // get cross-cooccurrences interactions by using two filters on a single set of files
-        val datasetB = IndexedDataset(reader2.readElementsFrom(inFiles, existingRowIDs = datasetA.rowIDs))
+        val datasetB = indexedDatasetDFSReadElements(inFiles, readSchema2, existingRowIDs = datasetA.rowIDs)
 
         datasetB
 
       } else {
-        null.asInstanceOf[IndexedDataset]
+        null.asInstanceOf[IndexedDatasetSpark]
       }
       if (datasetB != null.asInstanceOf[IndexedDataset]) { // do AtB calc
       // true row cardinality is the size of the row id index, which was calculated from all rows of A and B
@@ -203,8 +199,9 @@ object ItemSimilarityDriver extends MahoutDriver {
         val returnedB = if (rowCardinality != datasetB.matrix.nrow) datasetB.newRowCardinality(rowCardinality)
         else datasetB // this guarantees matching cardinality
 
-        if (parser.opts("writeAllDatasets").asInstanceOf[Boolean]) writer.writeTo(datasetB, parser.opts("output") + "../input-datasets/secondary-interactions")
-
+        if (parser.opts("writeAllDatasets").asInstanceOf[Boolean])
+          datasetB.dfsWrite(parser.opts("output").asInstanceOf[String] + "../input-datasets/secondary-interactions",
+            schema = writeSchema)
         Array(returnedA, returnedB)
       } else Array(datasetA)
     }
@@ -214,31 +211,13 @@ object ItemSimilarityDriver extends MahoutDriver {
     start()
 
     val indexedDatasets = readIndexedDatasets
+    val idss = SimilarityAnalysis.cooccurrencesIDSs(indexedDatasets, parser.opts("randomSeed").asInstanceOf[Int],
+      parser.opts("maxSimilaritiesPerItem").asInstanceOf[Int], parser.opts("maxPrefs").asInstanceOf[Int])
 
     // todo: allow more than one cross-similarity matrix?
-    val indicatorMatrices = {
-      if (indexedDatasets.length > 1) {
-        SimilarityAnalysis.cooccurrences(indexedDatasets(0).matrix, parser.opts("randomSeed").asInstanceOf[Int],
-          parser.opts("maxSimilaritiesPerItem").asInstanceOf[Int], parser.opts("maxPrefs").asInstanceOf[Int],
-          Array(indexedDatasets(1).matrix))
-      } else {
-        SimilarityAnalysis.cooccurrences(indexedDatasets(0).matrix, parser.opts("randomSeed").asInstanceOf[Int],
-          parser.opts("maxSimilaritiesPerItem").asInstanceOf[Int], parser.opts("maxPrefs").asInstanceOf[Int])
-      }
-    }
-
-    // an alternative is to create a version of IndexedDataset that knows how to write itself
-    val selfIndicatorDataset = new IndexedDatasetTextDelimitedWriteable(indicatorMatrices(0), indexedDatasets(0).columnIDs,
-      indexedDatasets(0).columnIDs, writeSchema)
-    selfIndicatorDataset.writeTo(dest = parser.opts("output").asInstanceOf[String] + "indicator-matrix")
-
-    // todo: would be nice to support more than one cross-similarity indicator
-    if (indexedDatasets.length > 1) {
-
-      val crossIndicatorDataset = new IndexedDataset(indicatorMatrices(1), indexedDatasets(0).columnIDs, indexedDatasets(1).columnIDs) // cross similarity
-      writer.writeTo(crossIndicatorDataset, parser.opts("output").asInstanceOf[String] + "cross-indicator-matrix")
-
-    }
+    idss(0).dfsWrite(parser.opts("output").asInstanceOf[String] + "indicator-matrix", schema = writeSchema)
+    if(idss.length > 1)
+      idss(1).dfsWrite(parser.opts("output").asInstanceOf[String] + "cross-indicator-matrix", schema = writeSchema)
 
     stop
   }

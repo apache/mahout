@@ -51,4 +51,17 @@ class CheckpointedDrmH2O[K: ClassTag](
   def canHaveMissingRows: Boolean = false
 
   protected[mahout] def partitioningTag: Long = h2odrm.frame.anyVec.group.hashCode
+
+  /** stub need to make IndexedDataset core but since drmWrap is not in H2O left for someone else */
+  override def newRowCardinality(n: Int): CheckpointedDrm[K] = {
+    throw new UnsupportedOperationException("CheckpointedDrmH2O#newRowCardinality is not implemented.")
+    /* this is the Spark impl
+    assert(n > -1)
+    assert( n >= nrow)
+    val newCheckpointedDrm = drmWrap[K](rdd, n, ncol)
+    newCheckpointedDrm
+    */
+    this
+  }
+
 }

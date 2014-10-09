@@ -15,9 +15,8 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.drivers
+package org.apache.mahout.math.indexeddataset
 
-import scala.collection.mutable
 import scala.collection.mutable.HashMap
 
 /** Syntactic sugar for mutable.HashMap[String, Any]
@@ -45,7 +44,7 @@ class Schema(params: Tuple2[String, Any]*) extends HashMap[String, Any] {
   * This tells the reader to input elements of the default (rowID<comma, tab, or space>columnID
   * <comma, tab, or space>here may be other ignored text...)
   */
-class DefaultElementReadSchema extends Schema(
+object DefaultIndexedDatasetElementReadSchema extends Schema(
   "delim" -> "[,\t ]", //comma, tab or space
   "filter" -> "",
   "rowIDColumn" -> 0,
@@ -56,7 +55,7 @@ class DefaultElementReadSchema extends Schema(
   * This tells the writer to write a DRM of the default form:
   * (rowID<tab>columnID1:score1<space>columnID2:score2...)
   */
-class DefaultDRMWriteSchema extends Schema(
+object DefaultIndexedDatasetWriteSchema extends Schema(
   "rowKeyDelim" -> "\t",
   "columnIdStrengthDelim" -> ":",
   "elementDelim" -> " ",
@@ -66,7 +65,7 @@ class DefaultDRMWriteSchema extends Schema(
   * This tells the reader to input text lines of the form:
   * (rowID<tab>columnID1:score1,columnID2:score2,...)
   */
-class DefaultDRMReadSchema extends Schema(
+object DefaultIndexedDatasetReadSchema extends Schema(
   "rowKeyDelim" -> "\t",
   "columnIdStrengthDelim" -> ":",
   "elementDelim" -> " ")
@@ -77,9 +76,9 @@ class DefaultDRMReadSchema extends Schema(
   * (rowID<tab>columnID1:score1<space>columnID2:score2...) remember the score is ignored.
   * Alternatively the format can be
   * (rowID<tab>columnID1<space>columnID2 ...) where presence indicates a score of 1. This is the default
-  * output format for [[org.apache.mahout.drivers.DRMWriteBooleanSchema]]
+  * output format for [[IndexedDatasetWriteBooleanSchema]]
   */
-class DRMReadBooleanSchema extends Schema(
+object IndexedDatasetReadBooleanSchema extends Schema(
   "rowKeyDelim" -> "\t",
   "columnIdStrengthDelim" -> ":",
   "elementDelim" -> " ",
@@ -90,7 +89,7 @@ class DRMReadBooleanSchema extends Schema(
   * This tells the writer to output DRM lines of the form
   * (rowID<tab>columnID1<space>columnID2...)
   */
-class DRMWriteBooleanSchema extends Schema(
+object IndexedDatasetWriteBooleanSchema extends Schema(
   "rowKeyDelim" -> "\t",
   "columnIdStrengthDelim" -> ":",
   "elementDelim" -> " ",
