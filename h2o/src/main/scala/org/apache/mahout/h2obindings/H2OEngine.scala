@@ -23,9 +23,13 @@ import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.logical._
 import org.apache.mahout.h2obindings.ops._
 import org.apache.mahout.h2obindings.drm._
+import org.apache.mahout.common.{Hadoop1HDFSUtil, HDFSUtil}
 
 /** H2O specific non-DRM operations */
 object H2OEngine extends DistributedEngine {
+  // By default, use Hadoop 1 utils
+  var hdfsUtils: HDFSUtil = Hadoop1HDFSUtil
+
   def colMeans[K:ClassTag](drm: CheckpointedDrm[K]): Vector =
     H2OHelper.colMeans(drm.h2odrm.frame)
 
@@ -54,8 +58,11 @@ object H2OEngine extends DistributedEngine {
     *
     *  @return DRM[Any] where Any is automatically translated to value type
     */
-  def drmDfsRead(path: String, parMin: Int = 0)(implicit dc: DistributedContext): CheckpointedDrm[_] =
-    new CheckpointedDrmH2O(H2OHdfs.drmFromFile(path, parMin), dc)
+  def drmDfsRead(path: String, parMin: Int = 0)(implicit dc: DistributedContext): CheckpointedDrm[_] = {
+    val drmMetadata = hdfsUtils.readDrmHeader(path)
+
+    new CheckpointedDrmH2O(H2OHdfs.drmFromFile(path, parMin), dc)(drmMetadata.keyClassTag.asInstanceOf[ClassTag[Any]])
+  }
 
   /** This creates an empty DRM with specified number of partitions and cardinality. */
   def drmParallelizeEmpty(nrow: Int, ncol: Int, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[Int] =
