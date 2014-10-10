@@ -17,6 +17,8 @@
 
 package org.apache.mahout.math.drm
 
+import scala.reflect.ClassTag
+
 
 /**
  *

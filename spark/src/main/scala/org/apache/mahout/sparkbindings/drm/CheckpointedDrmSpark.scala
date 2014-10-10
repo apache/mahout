@@ -65,6 +65,9 @@ class CheckpointedDrmSpark[K: ClassTag](
   private var cached: Boolean = false
   override val context: DistributedContext = rdd.context
 
+  /** Explicit extraction of key class Tag   */
+  def keyClassTag: ClassTag[K] = implicitly[ClassTag[K]]
+
   /**
    * Action operator -- does not necessary means Spark action; but does mean running BLAS optimizer
    * and writing down Spark graph lineage since last checkpointed DRM.
@@ -152,7 +155,7 @@ class CheckpointedDrmSpark[K: ClassTag](
    * Dump matrix as computed Mahout's DRM into specified (HD)FS path
    * @param path
    */
-  def writeDRM(path: String) = {
+  def dfsWrite(path: String) = {
     val ktag = implicitly[ClassTag[K]]
 
     implicit val k2wFunc: (K) => Writable =
