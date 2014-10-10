@@ -45,9 +45,6 @@ class MahoutSparkILoop extends SparkILoop {
       conf.set("spark.executor.uri", execUri)
     }
 
-    // TODO:XXX remove this beforre pushing to apache/master
-    conf.set("spark.kryoserializer.buffer.mb", "100")
-
     sparkContext = mahoutSparkContext(
       masterUrl = master,
       appName = "Mahout Spark Shell",
