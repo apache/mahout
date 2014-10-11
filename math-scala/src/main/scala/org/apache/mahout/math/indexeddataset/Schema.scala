@@ -44,7 +44,7 @@ class Schema(params: Tuple2[String, Any]*) extends HashMap[String, Any] {
   * This tells the reader to input elements of the default (rowID<comma, tab, or space>columnID
   * <comma, tab, or space>here may be other ignored text...)
   */
-object DefaultIndexedDatasetElementReadSchema extends Schema(
+final object DefaultIndexedDatasetElementReadSchema extends Schema(
   "delim" -> "[,\t ]", //comma, tab or space
   "filter" -> "",
   "rowIDColumn" -> 0,
@@ -55,7 +55,7 @@ object DefaultIndexedDatasetElementReadSchema extends Schema(
   * This tells the writer to write a DRM of the default form:
   * (rowID<tab>columnID1:score1<space>columnID2:score2...)
   */
-object DefaultIndexedDatasetWriteSchema extends Schema(
+final object DefaultIndexedDatasetWriteSchema extends Schema(
   "rowKeyDelim" -> "\t",
   "columnIdStrengthDelim" -> ":",
   "elementDelim" -> " ",
@@ -65,7 +65,7 @@ object DefaultIndexedDatasetWriteSchema extends Schema(
   * This tells the reader to input text lines of the form:
   * (rowID<tab>columnID1:score1,columnID2:score2,...)
   */
-object DefaultIndexedDatasetReadSchema extends Schema(
+final object DefaultIndexedDatasetReadSchema extends Schema(
   "rowKeyDelim" -> "\t",
   "columnIdStrengthDelim" -> ":",
   "elementDelim" -> " ")
@@ -78,7 +78,7 @@ object DefaultIndexedDatasetReadSchema extends Schema(
   * (rowID<tab>columnID1<space>columnID2 ...) where presence indicates a score of 1. This is the default
   * output format for [[IndexedDatasetWriteBooleanSchema]]
   */
-object IndexedDatasetReadBooleanSchema extends Schema(
+final object IndexedDatasetReadBooleanSchema extends Schema(
   "rowKeyDelim" -> "\t",
   "columnIdStrengthDelim" -> ":",
   "elementDelim" -> " ",
@@ -89,7 +89,7 @@ object IndexedDatasetReadBooleanSchema extends Schema(
   * This tells the writer to output DRM lines of the form
   * (rowID<tab>columnID1<space>columnID2...)
   */
-object IndexedDatasetWriteBooleanSchema extends Schema(
+final object IndexedDatasetWriteBooleanSchema extends Schema(
   "rowKeyDelim" -> "\t",
   "columnIdStrengthDelim" -> ":",
   "elementDelim" -> " ",

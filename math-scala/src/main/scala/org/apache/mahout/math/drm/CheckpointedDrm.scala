@@ -29,7 +29,7 @@ trait CheckpointedDrm[K] extends DrmLike[K] {
 
   def collect: Matrix
 
-  def writeDRM(path: String)
+  def dfsWrite(path: String)
 
   /** If this checkpoint is already declared cached, uncache. */
   def uncache(): this.type

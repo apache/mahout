@@ -17,6 +17,9 @@
 
 package org.apache.mahout.h2obindings
 
+import com.google.common.collect.{HashBiMap, BiMap}
+import org.apache.mahout.math.indexeddataset.{IndexedDataset, Schema, DefaultIndexedDatasetReadSchema}
+
 import scala.reflect._
 import org.apache.mahout.math._
 import org.apache.mahout.math.drm._
@@ -112,4 +115,45 @@ object H2OEngine extends DistributedEngine {
   }
 
   implicit def cp2cph2o[K:ClassTag](drm: CheckpointedDrm[K]): CheckpointedDrmH2O[K] = drm.asInstanceOf[CheckpointedDrmH2O[K]]
+
+  /** stub class not implemented in H2O */
+  abstract class IndexedDatasetH2O(val matrix: CheckpointedDrm[Int], val rowIDs: BiMap[String,Int], val columnIDs: BiMap[String,Int])
+    extends IndexedDataset {}
+
+    /**
+   * reads an IndexedDatasetH2O from default text delimited files
+   * @todo unimplemented
+   * @param src a comma separated list of URIs to read from
+   * @param schema how the text file is formatted
+   * @return
+   */
+  def indexedDatasetDFSRead(src: String,
+      schema: Schema = DefaultIndexedDatasetReadSchema,
+      existingRowIDs: BiMap[String, Int] = HashBiMap.create())
+      (implicit sc: DistributedContext):
+    IndexedDatasetH2O = {
+    // should log a warning when this is built but no logger here, can an H2O contributor help with this
+    println("Warning: unimplemented indexedDatasetDFSReadElements." )
+    throw new UnsupportedOperationException("IndexedDatasetH2O is not implemented so can't be read.")
+    null.asInstanceOf[IndexedDatasetH2O]
+  }
+
+  /**
+   * reads an IndexedDatasetH2O from default text delimited files
+   * @todo unimplemented
+   * @param src a comma separated list of URIs to read from
+   * @param schema how the text file is formatted
+   * @return
+   */
+  def indexedDatasetDFSReadElements(src: String,
+      schema: Schema = DefaultIndexedDatasetReadSchema,
+      existingRowIDs: BiMap[String, Int] = HashBiMap.create())
+      (implicit sc: DistributedContext):
+    IndexedDatasetH2O = {
+    // should log a warning when this is built but no logger here, can an H2O contributor help with this
+    println("Warning: unimplemented indexedDatasetDFSReadElements." )
+    throw new UnsupportedOperationException("IndexedDatasetH2O is not implemented so can't be read by elements.")
+    null.asInstanceOf[IndexedDatasetH2O]
+  }
+
 }
