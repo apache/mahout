@@ -205,7 +205,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
     }
   }
 
-      // this creates a BiMap from an ID collection. The ID points to an ordinal int
+  // this creates a BiMap from an ID collection. The ID points to an ordinal int
   // which is used internal to Mahout as the row or column ID
   // todo: this is a non-distributed process in an otherwise distributed reader and the BiMap is a
   // non-rdd based object--this will limit the size of the dataset to ones where the dictionaries fit

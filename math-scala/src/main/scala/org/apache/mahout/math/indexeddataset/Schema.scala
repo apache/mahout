@@ -37,8 +37,11 @@ class Schema(params: Tuple2[String, Any]*) extends HashMap[String, Any] {
   }
 }
 
-// These can be used to keep the text in and out fairly standard to Mahout, where an application specific
-// format is not required.
+/** These can be used to keep the text in and out fairly standard to Mahout, where an application specific
+  * format is not required. These apply to formatting of [[org.apache.mahout.math.indexeddataset.IndexedDataset]]
+  * , which can be used to create a Mahout DRM for DSL ops.
+  */
+
 
 /** Simple default Schema for typical text delimited element file input
   * This tells the reader to input elements of the default (rowID<comma, tab, or space>columnID
@@ -52,7 +55,7 @@ final object DefaultIndexedDatasetElementReadSchema extends Schema(
   "filterColumn" -> -1)
 
 /** Default Schema for text delimited drm file output
-  * This tells the writer to write a DRM of the default form:
+  * This tells the writer to write a [[org.apache.mahout.math.indexeddataset.IndexedDataset]] of the default form:
   * (rowID<tab>columnID1:score1<space>columnID2:score2...)
   */
 final object DefaultIndexedDatasetWriteSchema extends Schema(
@@ -61,7 +64,7 @@ final object DefaultIndexedDatasetWriteSchema extends Schema(
   "elementDelim" -> " ",
   "omitScore" -> false)
 
-/** Default Schema for typical text delimited drm file input
+/** Default Schema for typical text delimited [[org.apache.mahout.math.indexeddataset.IndexedDataset]] file input
   * This tells the reader to input text lines of the form:
   * (rowID<tab>columnID1:score1,columnID2:score2,...)
   */
@@ -70,7 +73,8 @@ final object DefaultIndexedDatasetReadSchema extends Schema(
   "columnIdStrengthDelim" -> ":",
   "elementDelim" -> " ")
 
-/** Default Schema for reading a text delimited drm file  where the score of any element is ignored,
+/** Default Schema for reading a text delimited [[org.apache.mahout.math.indexeddataset.IndexedDataset]] file  where
+  * the score of any element is ignored,
   * all non-zeros are replaced with 1.
   * This tells the reader to input DRM lines of the form
   * (rowID<tab>columnID1:score1<space>columnID2:score2...) remember the score is ignored.
@@ -84,9 +88,10 @@ final object IndexedDatasetReadBooleanSchema extends Schema(
   "elementDelim" -> " ",
   "omitScore" -> true)
 
-/** Default Schema for typical text delimited drm file write where the score of a element is omitted.
+/** Default Schema for typical text delimited [[org.apache.mahout.math.indexeddataset.IndexedDataset]] file write where
+  * the score of a element is omitted.
   * The presence of a element means the score = 1, the absence means a score of 0.
-  * This tells the writer to output DRM lines of the form
+  * This tells the writer to output [[org.apache.mahout.math.indexeddataset.IndexedDataset]] lines of the form
   * (rowID<tab>columnID1<space>columnID2...)
   */
 final object IndexedDatasetWriteBooleanSchema extends Schema(
