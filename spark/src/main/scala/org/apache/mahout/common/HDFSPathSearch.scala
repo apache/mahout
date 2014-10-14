@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.drivers
+package org.apache.mahout.common
 
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{Path, FileStatus, FileSystem}
+import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
 
 /**
- * Returns a [[java.lang.String]]comma delimited list of URIs discovered based on parameters in the constructor.
+ * Returns a [[java.lang.String]], which is comma delimited list of URIs discovered based on parameters
+ * in the constructor.
  * The String is formatted to be input into [[org.apache.spark.SparkContext.textFile()]]
  *
  * @param pathURI Where to start looking for inFiles, may be a list of comma delimited URIs
@@ -29,14 +30,14 @@ import org.apache.hadoop.fs.{Path, FileStatus, FileSystem}
  * @param recursive true traverses the filesystem recursively, default = false
  */
 
-case class FileSysUtils(pathURI: String, filePattern: String = "", recursive: Boolean = false) {
+case class HDFSPathSearch(pathURI: String, filePattern: String = "", recursive: Boolean = false) {
 
   val conf = new Configuration()
   val fs = FileSystem.get(conf)
 
-/** Returns a string of comma delimited URIs matching the filePattern
-  * When pattern matching dirs are never returned, only traversed. */
-  def uris :String = {
+  /** Returns a string of comma delimited URIs matching the filePattern
+    * When pattern matching dirs are never returned, only traversed. */
+  def uris: String = {
     if (!filePattern.isEmpty){ // have file pattern so
     val pathURIs = pathURI.split(",")
       var files = ""
@@ -50,11 +51,11 @@ case class FileSysUtils(pathURI: String, filePattern: String = "", recursive: Bo
     }
   }
 
-/** Find matching files in the dir, recursively call self when another directory is found
-  * Only files are matched, directories are traversed but never return a match */
-  private def findFiles(dir: String, filePattern :String = ".*", files : String = ""): String = {
+  /** Find matching files in the dir, recursively call self when another directory is found
+    * Only files are matched, directories are traversed but never return a match */
+  private def findFiles(dir: String, filePattern: String = ".*", files: String = ""): String = {
     val seed = fs.getFileStatus(new Path(dir))
-    var f :String = files
+    var f: String = files
 
     if (seed.isDir) {
       val fileStatuses: Array[FileStatus] = fs.listStatus(new Path(dir))
@@ -73,4 +74,5 @@ case class FileSysUtils(pathURI: String, filePattern: String = "", recursive: Bo
     }else{ f = dir }// was a filename not dir
     f
   }
+
 }

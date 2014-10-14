@@ -17,10 +17,11 @@
 
 package org.apache.mahout.sparkbindings
 
-import java.io.IOException
-
+import com.google.common.collect.{BiMap, HashBiMap}
+import org.apache.mahout.drivers.TextDelimitedIndexedDatasetReader
 import org.apache.mahout.math._
-import org.apache.spark.deploy.SparkHadoopUtil
+import org.apache.mahout.math.indexeddataset.{DefaultIndexedDatasetReadSchema, Schema, DefaultIndexedDatasetElementReadSchema}
+import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
 import scalabindings._
 import RLikeOps._
 import org.apache.mahout.math.drm.logical._
@@ -250,6 +251,37 @@ object SparkEngine extends DistributedEngine {
     }
   }
 
+  /**
+   * reads an IndexedDatasetSpark from default text delimited files
+   * @param src a comma separated list of URIs to read from
+   * @param schema how the text file is formatted
+   * @return
+   */
+  def indexedDatasetDFSRead(src: String,
+      schema: Schema = DefaultIndexedDatasetReadSchema,
+      existingRowIDs: BiMap[String, Int] = HashBiMap.create())
+      (implicit sc: DistributedContext):
+    IndexedDatasetSpark = {
+    val reader = new TextDelimitedIndexedDatasetReader(schema)(sc)
+    val ids = reader.readDRMFrom(src, existingRowIDs)
+    ids
+  }
+
+  /**
+   * reads an IndexedDatasetSpark from default text delimited files
+   * @param src a comma separated list of URIs to read from
+   * @param schema how the text file is formatted
+   * @return
+   */
+  def indexedDatasetDFSReadElements(src: String,
+      schema: Schema = DefaultIndexedDatasetElementReadSchema,
+      existingRowIDs: BiMap[String, Int] = HashBiMap.create())
+      (implicit sc: DistributedContext):
+    IndexedDatasetSpark = {
+    val reader = new TextDelimitedIndexedDatasetReader(schema)(sc)
+    val ids = reader.readElementsFrom(src, existingRowIDs)
+    ids
+  }
 
 }
 

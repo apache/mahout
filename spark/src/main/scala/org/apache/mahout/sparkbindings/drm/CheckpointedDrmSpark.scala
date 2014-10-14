@@ -197,4 +197,16 @@ class CheckpointedDrmSpark[K: ClassTag](
   protected def computeNNonZero =
     cache().rdd.map(_._2.getNumNonZeroElements.toLong).sum().toLong
 
+  /** Changes the number of rows in the DRM without actually touching the underlying data. Used to
+    * redimension a DRM after it has been created, which implies some blank, non-existent rows.
+    * @param n new row dimension
+    * @return
+    */
+  override def newRowCardinality(n: Int): CheckpointedDrm[K] = {
+    assert(n > -1)
+    assert( n >= nrow)
+    val newCheckpointedDrm = drmWrap[K](rdd, n, ncol)
+    newCheckpointedDrm
+  }
+
 }
