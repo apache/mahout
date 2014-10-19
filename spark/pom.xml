@@ -318,7 +318,12 @@
 
     <!--  3rd-party -->
 
-    <dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-math3</artifactId>
+      </dependency>
+
+      <dependency>
       <groupId>com.github.scopt</groupId>
       <artifactId>scopt_2.10</artifactId>
       <version>3.2.0</version>
