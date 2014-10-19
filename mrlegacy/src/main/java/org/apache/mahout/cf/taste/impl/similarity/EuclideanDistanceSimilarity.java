@@ -61,7 +61,7 @@ public final class EuclideanDistanceSimilarity extends AbstractSimilarity {
   
   @Override
   double computeResult(int n, double sumXY, double sumX2, double sumY2, double sumXYdiff2) {
-    return 1.0 / (1.0 + Math.sqrt(sumXYdiff2) / Math.sqrt(n));
+    return Math.sqrt(n)/( 1.0 + Math.sqrt(sumXYdiff2) );
   }
   
 }
