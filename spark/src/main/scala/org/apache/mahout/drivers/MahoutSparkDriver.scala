@@ -75,7 +75,8 @@ abstract class MahoutSparkDriver extends MahoutDriver {
     * */
   protected def start(masterUrl: String, appName: String) : Unit = {
     if (!_useExistingContext) {
-      mc = mahoutSparkContext(masterUrl, appName)
+      mc = mahoutSparkContext(masterUrl, appName, sparkConf = sparkConf)
+      val bp = 0
     }
   }
 
