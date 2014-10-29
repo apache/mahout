@@ -26,8 +26,9 @@ import RLikeDrmOps._
 import scala.collection.JavaConversions._
 import org.apache.mahout.math.stats.LogLikelihood
 import collection._
-import org.apache.mahout.common.RandomUtils
 import org.apache.mahout.math.function.{VectorFunction, Functions}
+
+import scala.util.Random
 
 
 /**
@@ -269,7 +270,9 @@ object SimilarityAnalysis extends Serializable {
         val numInteractions: Vector = bcastNumInteractions
 
         // Use a hash of the unique first key to seed the RNG, makes this computation repeatable in case of failures
-        val random = RandomUtils.getRandom(MurmurHash.hash(keys(0), seed))
+        // don't use commons since scala's is included anyway
+        // val random = RandomUtils.getRandom(MurmurHash.hash(keys(0), seed))
+        val random = new Random(MurmurHash.hash(keys(0), seed))
 
         val downsampledBlock = block.like()
 
