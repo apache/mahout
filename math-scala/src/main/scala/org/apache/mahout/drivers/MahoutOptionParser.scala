@@ -59,6 +59,7 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
 
   def parseSparkOptions = {
     opts = opts ++ MahoutOptionParser.SparkOptions
+    opts = opts + ("appName" -> programName)
     note("\nSpark config options:")
 
     opt[String]("master") abbr ("ma") text ("Spark Master URL (optional). Default: \"local\". Note that you can specify the number of cores to get a performance improvement, for example \"local[4]\"") action { (x, options) =>
