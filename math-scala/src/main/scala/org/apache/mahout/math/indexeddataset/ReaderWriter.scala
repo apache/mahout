@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.drivers
+package org.apache.mahout.math.indexeddataset
 
-import com.google.common.collect.{HashBiMap, BiMap}
+import com.google.common.collect.{BiMap, HashBiMap}
 import org.apache.mahout.math.drm.DistributedContext
 
-/** Reader trait is abstract in the sense that the elementReader function must be defined by an extending trait, which also defines the type to be read.
-  * @tparam T type of object read.
+/** Reader trait is abstract in the sense that the elementReader function must be defined by an extending trait,
+  * which also defines the type to be read.
+  * @tparam T type of object to read.
   */
 trait Reader[T]{
 
@@ -51,7 +52,8 @@ trait Reader[T]{
     drmReader(mc, readSchema, source, existingRowIDs)
 }
 
-/** Writer trait is abstract in the sense that the writer method must be supplied by an extending trait, which also defines the type to be written.
+/** Writer trait is abstract in the sense that the writer method must be supplied by an extending trait,
+  * which also defines the type to be written.
   * @tparam T type of object to write.
   */
 trait Writer[T]{

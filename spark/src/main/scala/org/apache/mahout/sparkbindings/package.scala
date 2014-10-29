@@ -17,6 +17,9 @@
 
 package org.apache.mahout
 
+import org.apache.mahout.drivers.TextDelimitedIndexedDatasetReader
+import org.apache.mahout.math.indexeddataset.Schema
+import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
 import org.apache.spark.{SparkConf, SparkContext}
 import java.io._
 import scala.collection.mutable.ArrayBuffer
@@ -223,6 +226,5 @@ package object sparkbindings {
 
     mcjars
   }
-
 
 }

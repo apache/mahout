@@ -17,6 +17,9 @@
 
 package org.apache.mahout.math.drm
 
+import com.google.common.collect.{HashBiMap, BiMap}
+import org.apache.mahout.math.indexeddataset.{DefaultIndexedDatasetElementReadSchema, DefaultIndexedDatasetReadSchema, Schema, IndexedDataset}
+
 import scala.reflect.ClassTag
 import logical._
 import org.apache.mahout.math._
@@ -68,7 +71,7 @@ trait DistributedEngine {
    * @param path The DFS path to load from
    * @param parMin Minimum parallelism after load (equivalent to #par(min=...)).
    */
-  def drmFromHDFS(path: String, parMin: Int = 0)(implicit sc: DistributedContext): CheckpointedDrm[_]
+  def drmDfsRead(path: String, parMin: Int = 0)(implicit sc: DistributedContext): CheckpointedDrm[_]
 
   /** Parallelize in-core matrix as spark distributed matrix, using row ordinal indices as data set keys. */
   def drmParallelizeWithRowIndices(m: Matrix, numPartitions: Int = 1)
@@ -85,6 +88,28 @@ trait DistributedEngine {
   /** Creates empty DRM with non-trivial height */
   def drmParallelizeEmptyLong(nrow: Long, ncol: Int, numPartitions: Int = 10)
       (implicit sc: DistributedContext): CheckpointedDrm[Long]
+  /**
+   * Load IndexedDataset from text delimited format.
+   * @param src comma delimited URIs to read from
+   * @param schema defines format of file(s)
+   */
+  def indexedDatasetDFSRead(src: String,
+      schema: Schema = DefaultIndexedDatasetReadSchema,
+      existingRowIDs: BiMap[String, Int] = HashBiMap.create())
+      (implicit sc: DistributedContext):
+    IndexedDataset
+
+  /**
+   * Load IndexedDataset from text delimited format, one element per line
+   * @param src comma delimited URIs to read from
+   * @param schema defines format of file(s)
+   */
+  def indexedDatasetDFSReadElements(src: String,
+      schema: Schema = DefaultIndexedDatasetElementReadSchema,
+      existingRowIDs: BiMap[String, Int] = HashBiMap.create())
+      (implicit sc: DistributedContext):
+    IndexedDataset
+
 }
 
 object DistributedEngine {

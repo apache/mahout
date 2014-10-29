@@ -17,46 +17,13 @@
 package org.apache.mahout.drivers
 
 import scopt.OptionParser
+
 import scala.collection.immutable
 
-/** Companion object defines default option groups for reference in any driver that needs them */
-object MahoutOptionParser {
-  // set up the various default option groups
-  final val GenericOptions = immutable.HashMap[String, Any](
-    "randomSeed" -> System.currentTimeMillis().toInt,
-    "writeAllDatasets" -> false)
-
-  final val SparkOptions = immutable.HashMap[String, Any](
-    "master" -> "local",
-    "sparkExecutorMem" -> "2g",
-    "appName" -> "Generic Spark App, Change this.")
-
-  final val FileIOOptions = immutable.HashMap[String, Any](
-    "input" -> null.asInstanceOf[String],
-    "input2" -> null.asInstanceOf[String],
-    "output" -> null.asInstanceOf[String])
-
-  final val FileDiscoveryOptions = immutable.HashMap[String, Any](
-    "recursive" -> false,
-    "filenamePattern" -> "^part-.*")
-
-  final val TextDelimitedElementsOptions = immutable.HashMap[String, Any](
-    "rowIDColumn" -> 0,
-    "itemIDColumn" -> 1,
-    "filterColumn" -> -1,
-    "filter1" -> null.asInstanceOf[String],
-    "filter2" -> null.asInstanceOf[String],
-    "inDelim" -> "[,\t ]")
-
-  final val TextDelimitedDRMOptions = immutable.HashMap[String, Any](
-    "rowKeyDelim" -> "\t",
-    "columnIdStrengthDelim" -> ":",
-    "elementDelim" -> " ",
-    "omitStrength" -> false)
-}
 /** Defines oft-repeated options and their parsing. Provides the option groups and parsing helper methods to
   * keep both standarized.
   * @param programName Name displayed in help message, the name by which the driver is invoked.
+  * @note not all options are platform neutral so other platforms can add option parsing here if desired.
   * */
 class MahoutOptionParser(programName: String) extends OptionParser[Map[String, Any]](programName: String) {
 
@@ -98,7 +65,7 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
       options + ("master" -> x)
     }
 
-    opt[String]("sparkExecutorMem") abbr ("sem") text ("Max Java heap available as \"executor memory\" on each node (optional). Default: 4g") action { (x, options) =>
+    opt[String]("sparkExecutorMem") abbr ("sem") text ("Max Java heap available as \"executor memory\" on each node (optional). Default: as Spark config specifies") action { (x, options) =>
       options + ("sparkExecutorMem" -> x)
     }
 
@@ -155,6 +122,7 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
 
     note("\nUsing all defaults the input is expected of the form: \"userID<tab>itemId\" or \"userID<tab>itemID<tab>any-text...\" and all rows will be used")
 
+    //check for column consistency
     checkConfig { options: Map[String, Any] =>
       if (options("filterColumn").asInstanceOf[Int] == options("itemIDColumn").asInstanceOf[Int]
         || options("filterColumn").asInstanceOf[Int] == options("rowIDColumn").asInstanceOf[Int]
@@ -162,7 +130,7 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
         failure("The row, item, and filter positions must be unique.") else success
     }
 
-    //check for option consistency, probably driver specific
+    //check for filter consistency
     checkConfig { options: Map[String, Any] =>
       if (options("filter1").asInstanceOf[String] != null.asInstanceOf[String]
         && options("filter2").asInstanceOf[String] != null.asInstanceOf[String]
@@ -209,6 +177,44 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
     note("\nDefault delimiters will produce output of the form: \"itemID1<tab>itemID2:value2<space>itemID10:value10...\"")
   }
 
+}
+
+/** Companion object defines default option groups for reference in any driver that needs them.
+  * @note not all options are platform neutral so other platforms can add default options here if desired */
+object MahoutOptionParser {
+
+  // set up the various default option groups
+  final val GenericOptions = immutable.HashMap[String, Any](
+    "randomSeed" -> System.currentTimeMillis().toInt,
+    "writeAllDatasets" -> false)
+
+  final val SparkOptions = immutable.HashMap[String, Any](
+    "master" -> "local",
+    "sparkExecutorMem" -> "",
+    "appName" -> "Generic Spark App, Change this.")
+
+  final val FileIOOptions = immutable.HashMap[String, Any](
+    "input" -> null.asInstanceOf[String],
+    "input2" -> null.asInstanceOf[String],
+    "output" -> null.asInstanceOf[String])
+
+  final val FileDiscoveryOptions = immutable.HashMap[String, Any](
+    "recursive" -> false,
+    "filenamePattern" -> "^part-.*")
+
+  final val TextDelimitedElementsOptions = immutable.HashMap[String, Any](
+    "rowIDColumn" -> 0,
+    "itemIDColumn" -> 1,
+    "filterColumn" -> -1,
+    "filter1" -> null.asInstanceOf[String],
+    "filter2" -> null.asInstanceOf[String],
+    "inDelim" -> "[,\t ]")
+
+  final val TextDelimitedDRMOptions = immutable.HashMap[String, Any](
+    "rowKeyDelim" -> "\t",
+    "columnIdStrengthDelim" -> ":",
+    "elementDelim" -> " ",
+    "omitStrength" -> false)
 }
 
 

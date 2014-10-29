@@ -65,6 +65,9 @@ class CheckpointedDrmSpark[K: ClassTag](
   private var cached: Boolean = false
   override val context: DistributedContext = rdd.context
 
+  /** Explicit extraction of key class Tag   */
+  def keyClassTag: ClassTag[K] = implicitly[ClassTag[K]]
+
   /**
    * Action operator -- does not necessary means Spark action; but does mean running BLAS optimizer
    * and writing down Spark graph lineage since last checkpointed DRM.
@@ -152,7 +155,7 @@ class CheckpointedDrmSpark[K: ClassTag](
    * Dump matrix as computed Mahout's DRM into specified (HD)FS path
    * @param path
    */
-  def writeDRM(path: String) = {
+  def dfsWrite(path: String) = {
     val ktag = implicitly[ClassTag[K]]
 
     implicit val k2wFunc: (K) => Writable =
@@ -193,5 +196,17 @@ class CheckpointedDrmSpark[K: ClassTag](
 
   protected def computeNNonZero =
     cache().rdd.map(_._2.getNumNonZeroElements.toLong).sum().toLong
+
+  /** Changes the number of rows in the DRM without actually touching the underlying data. Used to
+    * redimension a DRM after it has been created, which implies some blank, non-existent rows.
+    * @param n new row dimension
+    * @return
+    */
+  override def newRowCardinality(n: Int): CheckpointedDrm[K] = {
+    assert(n > -1)
+    assert( n >= nrow)
+    val newCheckpointedDrm = drmWrap[K](rdd, n, ncol)
+    newCheckpointedDrm
+  }
 
 }

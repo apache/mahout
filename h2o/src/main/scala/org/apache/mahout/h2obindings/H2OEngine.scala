@@ -17,15 +17,22 @@
 
 package org.apache.mahout.h2obindings
 
+import com.google.common.collect.{HashBiMap, BiMap}
+import org.apache.mahout.math.indexeddataset.{IndexedDataset, Schema, DefaultIndexedDatasetReadSchema}
+
 import scala.reflect._
 import org.apache.mahout.math._
 import org.apache.mahout.math.drm._
 import org.apache.mahout.math.drm.logical._
 import org.apache.mahout.h2obindings.ops._
 import org.apache.mahout.h2obindings.drm._
+import org.apache.mahout.common.{Hadoop1HDFSUtil, HDFSUtil}
 
 /** H2O specific non-DRM operations */
 object H2OEngine extends DistributedEngine {
+  // By default, use Hadoop 1 utils
+  var hdfsUtils: HDFSUtil = Hadoop1HDFSUtil
+
   def colMeans[K:ClassTag](drm: CheckpointedDrm[K]): Vector =
     H2OHelper.colMeans(drm.h2odrm.frame)
 
@@ -54,8 +61,11 @@ object H2OEngine extends DistributedEngine {
     *
     *  @return DRM[Any] where Any is automatically translated to value type
     */
-  def drmFromHDFS(path: String, parMin: Int = 0)(implicit dc: DistributedContext): CheckpointedDrm[_] =
-    new CheckpointedDrmH2O(H2OHdfs.drmFromFile(path, parMin), dc)
+  def drmDfsRead(path: String, parMin: Int = 0)(implicit dc: DistributedContext): CheckpointedDrm[_] = {
+    val drmMetadata = hdfsUtils.readDrmHeader(path)
+
+    new CheckpointedDrmH2O(H2OHdfs.drmFromFile(path, parMin), dc)(drmMetadata.keyClassTag.asInstanceOf[ClassTag[Any]])
+  }
 
   /** This creates an empty DRM with specified number of partitions and cardinality. */
   def drmParallelizeEmpty(nrow: Int, ncol: Int, numPartitions: Int)(implicit dc: DistributedContext): CheckpointedDrm[Int] =
@@ -105,4 +115,45 @@ object H2OEngine extends DistributedEngine {
   }
 
   implicit def cp2cph2o[K:ClassTag](drm: CheckpointedDrm[K]): CheckpointedDrmH2O[K] = drm.asInstanceOf[CheckpointedDrmH2O[K]]
+
+  /** stub class not implemented in H2O */
+  abstract class IndexedDatasetH2O(val matrix: CheckpointedDrm[Int], val rowIDs: BiMap[String,Int], val columnIDs: BiMap[String,Int])
+    extends IndexedDataset {}
+
+    /**
+   * reads an IndexedDatasetH2O from default text delimited files
+   * @todo unimplemented
+   * @param src a comma separated list of URIs to read from
+   * @param schema how the text file is formatted
+   * @return
+   */
+  def indexedDatasetDFSRead(src: String,
+      schema: Schema = DefaultIndexedDatasetReadSchema,
+      existingRowIDs: BiMap[String, Int] = HashBiMap.create())
+      (implicit sc: DistributedContext):
+    IndexedDatasetH2O = {
+    // should log a warning when this is built but no logger here, can an H2O contributor help with this
+    println("Warning: unimplemented indexedDatasetDFSReadElements." )
+    throw new UnsupportedOperationException("IndexedDatasetH2O is not implemented so can't be read.")
+    null.asInstanceOf[IndexedDatasetH2O]
+  }
+
+  /**
+   * reads an IndexedDatasetH2O from default text delimited files
+   * @todo unimplemented
+   * @param src a comma separated list of URIs to read from
+   * @param schema how the text file is formatted
+   * @return
+   */
+  def indexedDatasetDFSReadElements(src: String,
+      schema: Schema = DefaultIndexedDatasetReadSchema,
+      existingRowIDs: BiMap[String, Int] = HashBiMap.create())
+      (implicit sc: DistributedContext):
+    IndexedDatasetH2O = {
+    // should log a warning when this is built but no logger here, can an H2O contributor help with this
+    println("Warning: unimplemented indexedDatasetDFSReadElements." )
+    throw new UnsupportedOperationException("IndexedDatasetH2O is not implemented so can't be read by elements.")
+    null.asInstanceOf[IndexedDatasetH2O]
+  }
+
 }

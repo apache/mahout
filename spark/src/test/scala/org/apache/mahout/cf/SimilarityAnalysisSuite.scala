@@ -38,7 +38,9 @@ B =
 1	1	0	1	0
  */
 
-class CooccurrenceAnalysisSuite extends FunSuite with MahoutSuite with DistributedSparkSuite {
+// todo: add tests for the IndexedDataset coccurrence methods
+
+class SimilarityAnalysisSuite extends FunSuite with MahoutSuite with DistributedSparkSuite {
 
   // correct cooccurrence with LLR
   final val matrixLLRCoocAtAControl = dense(
