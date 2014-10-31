@@ -35,10 +35,6 @@
 
   <packaging>jar</packaging>
 
-  <properties>
-    <hbase.version>0.98.0-hadoop2</hbase.version>
-  </properties>
-
   <build>
     <plugins>
       <plugin>
@@ -195,19 +191,5 @@
     </dependency>
 
   </dependencies>
-
-  <profiles>
-    <profile>
-    <id>hadoop1</id>
-    <activation>
-      <property>
-        <name>!hadoop2.version</name>
-      </property>
-    </activation>
-    <properties>
-      <hbase.version>0.95.1-hadoop1</hbase.version>
-    </properties>
-    </profile>
-  </profiles>
 
 </project>

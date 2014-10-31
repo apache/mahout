@@ -238,6 +238,12 @@
       <groupId>ai.h2o</groupId>
       <artifactId>h2o-core</artifactId>
       <version>${h2o.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-common</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- scala stuff -->
