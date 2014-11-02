@@ -209,7 +209,7 @@
       <groupId>org.apache.mrunit</groupId>
       <artifactId>mrunit</artifactId>
       <version>1.0.0</version>
-      <classifier>${mrunit.classifier}</classifier>
+      <classifier>${hadoop.classifier}</classifier>
       <scope>test</scope>
     </dependency>
 

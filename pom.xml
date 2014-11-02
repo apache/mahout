@@ -105,8 +105,8 @@
     <mfindbugs.version>2.5.2</mfindbugs.version>
     <mjavadoc.version>2.9.1</mjavadoc.version>
     <hadoop.version>2.2.0</hadoop.version>
-    <mrunit.classifier>hadoop2</mrunit.classifier>
-    <hbase.version>0.98.0-hadoop2</hbase.version>
+    <hadoop.classifier>hadoop2</hadoop.classifier>
+    <hbase.version>0.98.0-${hadoop.classifier}</hbase.version>
     <lucene.version>4.6.1</lucene.version>
     <slf4j.version>1.7.5</slf4j.version>
     <scala.major>2.10</scala.major>
@@ -426,6 +426,23 @@
         <groupId>org.apache.mahout.commons</groupId>
         <artifactId>commons-cli</artifactId>
         <version>2.0-mahout</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.hbase</groupId>
+        <artifactId>hbase-client</artifactId>
+        <version>${hbase.version}</version>
+        <optional>true</optional>
+        <exclusions>
+          <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <dependency>
@@ -788,7 +805,14 @@
     <module>spark-shell</module>
     <module>h2o</module>
   </modules>
+
   <profiles>
+    <profile>
+      <id>hadoop1</id>
+      <properties>
+        <hadoop.classifier>hadoop1</hadoop.classifier>
+      </properties>
+    </profile>
     <profile>
       <id>fastinstall</id>
       <properties>
