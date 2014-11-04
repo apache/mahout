@@ -17,8 +17,11 @@
 
 package org.apache.mahout.drivers
 
+import com.google.common.collect.HashBiMap
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{Path, FileSystem}
+import org.apache.mahout.math.indexeddataset.IndexedDataset
+import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
 import org.scalatest.{ConfigMap, FunSuite}
 import org.apache.mahout.sparkbindings._
 import org.apache.mahout.sparkbindings.test.DistributedSparkSuite
@@ -94,9 +97,9 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
         "--filter1", "purchase",
         "--filter2", "view",
         "--inDelim", ",",
-        "--itemIDPosition", "2",
-        "--rowIDPosition", "0",
-        "--filterPosition", "1"
+        "--itemIDColumn", "2",
+        "--rowIDColumn", "0",
+        "--filterColumn", "1"
     ))
 */
   // local multi-threaded Spark with HDFS using large dataset
@@ -108,9 +111,9 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       "--filter1", "purchase",
       "--filter2", "view",
       "--inDelim", ",",
-      "--itemIDPosition", "2",
-      "--rowIDPosition", "0",
-      "--filterPosition", "1"
+      "--itemIDColumn", "2",
+      "--rowIDColumn", "0",
+      "--filterColumn", "1"
     ))
   */
 
@@ -153,9 +156,9 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       "--filter1", "purchase",
       "--filter2", "view",
       "--inDelim", ",",
-      "--itemIDPosition", "2",
-      "--rowIDPosition", "0",
-      "--filterPosition", "1",
+      "--itemIDColumn", "2",
+      "--rowIDColumn", "0",
+      "--filterColumn", "1",
       "--writeAllDatasets"))
 
     // todo: these comparisons rely on a sort producing the same lines, which could possibly
@@ -207,9 +210,9 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       "--filter1", "purchase",
       "--filter2", "view",
       "--inDelim", "[,\t]",
-      "--itemIDPosition", "2",
-      "--rowIDPosition", "0",
-      "--filterPosition", "1"))
+      "--itemIDColumn", "2",
+      "--rowIDColumn", "0",
+      "--filterColumn", "1"))
 
     // todo: a better test would be to get sorted vectors and compare rows instead of tokens, this might miss
     // some error cases
@@ -259,9 +262,9 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       "--filter1", "purchase",
       "--filter2", "view",
       "--inDelim", "\t",
-      "--itemIDPosition", "4",
-      "--rowIDPosition", "1",
-      "--filterPosition", "2"))
+      "--itemIDColumn", "4",
+      "--rowIDColumn", "1",
+      "--filterColumn", "2"))
 
 
     val indicatorLines = mahoutCtx.textFile(OutPath + "/indicator-matrix/").collect.toIterable
@@ -420,9 +423,9 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       "--filter1", "purchase",
       "--filter2", "view",
       "--inDelim", "\t",
-      "--itemIDPosition", "2",
-      "--rowIDPosition", "0",
-      "--filterPosition", "1",
+      "--itemIDColumn", "2",
+      "--rowIDColumn", "0",
+      "--filterColumn", "1",
       "--filenamePattern", "m..tsv",
       "--recursive"))
 
@@ -475,9 +478,9 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       "--filter1", "purchase",
       "--filter2", "view",
       "--inDelim", ",",
-      "--itemIDPosition", "2",
-      "--rowIDPosition", "0",
-      "--filterPosition", "1"))
+      "--itemIDColumn", "2",
+      "--rowIDColumn", "0",
+      "--filterColumn", "1"))
 
     val indicatorLines = mahoutCtx.textFile(OutPath + "/indicator-matrix/").collect.toIterable
     tokenize(indicatorLines) should contain theSameElementsAs SelfSimilairtyTokens
@@ -522,9 +525,10 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       "nexus\tgalaxy:1.7260924347106847",
       "galaxy\tnexus:1.7260924347106847"))
 
+    //only surface purchase was removed so no cross-similarity for surface
     val UnequalDimensionsCrossSimilarity = tokenize(Iterable(
       "galaxy\tgalaxy:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 nexus:1.7260924347106847",
-      "iphone\tgalaxy:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 surface:1.7260924347106847 nexus:1.7260924347106847",
+      "iphone\tgalaxy:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 nexus:1.7260924347106847",
       "ipad\tgalaxy:0.6795961471815897 iphone:0.6795961471815897 ipad:0.6795961471815897 nexus:0.6795961471815897",
       "nexus\tiphone:0.6795961471815897 ipad:0.6795961471815897 nexus:0.6795961471815897 galaxy:0.6795961471815897"))
     // this will create multiple part-xxxxx files in the InFile dir but other tests will
@@ -541,9 +545,9 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       "--filter1", "purchase",
       "--filter2", "view",
       "--inDelim", ",",
-      "--itemIDPosition", "2",
-      "--rowIDPosition", "0",
-      "--filterPosition", "1"))
+      "--itemIDColumn", "2",
+      "--rowIDColumn", "0",
+      "--filterColumn", "1"))
 
     val indicatorLines = mahoutCtx.textFile(OutPath + "/indicator-matrix/").collect.toIterable
     val crossIndicatorLines = mahoutCtx.textFile(OutPath + "/cross-indicator-matrix/").collect.toIterable
@@ -603,9 +607,9 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       "--filter1", "purchase",
       "--filter2", "view",
       "--inDelim", ",",
-      "--itemIDPosition", "2",
-      "--rowIDPosition", "0",
-      "--filterPosition", "1",
+      "--itemIDColumn", "2",
+      "--rowIDColumn", "0",
+      "--filterColumn", "1",
       "--writeAllDatasets"))
 
     val indicatorLines = mahoutCtx.textFile(OutPath + "/indicator-matrix/").collect.toIterable
@@ -634,7 +638,7 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
     val drmB = drmParallelize(m = b, numPartitions = 2)
 
     // modified to return a new CheckpointedDrm so maintains immutability but still only increases the row cardinality
-    // by returning new CheckpointedDrmSpark[K](rdd, nrow + n, ncol, _cacheStorageLevel ) Hack for now.
+    // by returning new CheckpointedDrmSpark[K](rdd, n, ncol, _cacheStorageLevel ) Hack for now.
     val drmABigger = drmWrap[Int](drmA.rdd, 3, 2)
 
 
@@ -642,6 +646,20 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
     val inCoreABiggertB = ABiggertB.collect
 
     assert(inCoreABiggertB === inCoreABiggertBAnswer)
+
+    val bp = 0
+  }
+
+  test("Changing row cardinality of an IndexedDataset") {
+
+    val a = dense(
+      (1.0, 1.0))
+
+    val drmA = drmParallelize(m = a, numPartitions = 2)
+    val indexedDatasetA = new IndexedDatasetSpark(drmA, HashBiMap.create(), HashBiMap.create())
+    val biggerIDSA = indexedDatasetA.newRowCardinality(5)
+
+    assert(biggerIDSA.matrix.nrow == 5)
 
     val bp = 0
   }
@@ -697,9 +715,9 @@ removed ==> u3	0	      0	      1	          0
       "--filter1", "purchase",
       "--filter2", "view",
       "--inDelim", ",",
-      "--itemIDPosition", "2",
-      "--rowIDPosition", "0",
-      "--filterPosition", "1",
+      "--itemIDColumn", "2",
+      "--rowIDColumn", "0",
+      "--filterColumn", "1",
       "--writeAllDatasets"))
 
     val indicatorLines = mahoutCtx.textFile(OutPath + "/indicator-matrix/").collect.toIterable

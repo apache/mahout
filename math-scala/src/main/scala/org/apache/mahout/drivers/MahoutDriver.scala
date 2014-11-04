@@ -15,33 +15,29 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math.drm
+package org.apache.mahout.drivers
 
-import org.apache.mahout.math.Matrix
-import scala.reflect.ClassTag
+import org.apache.mahout.math.drm.DistributedContext
 
-/**
- * Checkpointed DRM API. This is a matrix that has optimized RDD lineage behind it and can be
- * therefore collected or saved.
- * @tparam K matrix key type (e.g. the keys of sequence files once persisted)
+/** Extended by a platform specific version of this class to create a Mahout CLI driver.
  */
-trait CheckpointedDrm[K] extends DrmLike[K] {
-
-  def collect: Matrix
-
-  def dfsWrite(path: String)
-
-  /** If this checkpoint is already declared cached, uncache. */
-  def uncache(): this.type
-
-  /**
-   * Explicit extraction of key class Tag since traits don't support context bound access; but actual
-   * implementation knows it
-   */
-  def keyClassTag: ClassTag[K]
+abstract class MahoutDriver {
 
 
-  /** changes the number of rows without touching the underlying data */
-  def newRowCardinality(n: Int): CheckpointedDrm[K]
+  implicit protected var mc: DistributedContext = _
+  protected var parser: MahoutOptionParser = _
+
+  var _useExistingContext: Boolean = false // used in the test suite to reuse one context per suite
+
+  /** Override (optionally) for special cleanup */
+  protected def stop: Unit = {
+    if (!_useExistingContext) mc.close
+  }
+
+  /** This is where you do the work, call start first, then before exiting call stop */
+  protected def process: Unit
+
+  /** Parse command line and call process */
+  def main(args: Array[String]): Unit
 
 }

@@ -25,20 +25,29 @@ import water.fvec.Vec;
 import water.fvec.Chunk;
 import water.fvec.NewChunk;
 
+/**
+ * Element-wise DRM-DRM operations
+ */
 public class AewB {
-  /* Element-wise DRM-DRM operations */
+  /**
+   * Perform element-wise operation on two DRMs to create a new DRM.
+   *
+   * @param drmA DRM representing matrix A.
+   * @param drmB DRM representing matrix B.
+   * @param op Element-wise operator encoded as a String.
+   * @return new DRM containing A (element-wise) B.
+   */
   public static H2ODrm exec(H2ODrm drmA, H2ODrm drmB, final String op) {
     final Frame A = drmA.frame;
     final Frame B = drmB.frame;
     Vec keys = drmA.keys;
     int AewB_cols = A.numCols();
 
-    /* AewB is written into ncs[] with an MRTask on A, and therefore will
-       be similarly partitioned as A.
-
-       B may or may not be similarly partitioned as A, but must have the
-       same dimensions of A.
-    */
+    // AewB is written into ncs[] with an MRTask on A, and therefore will
+    // be similarly partitioned as A.
+    //
+    // B may or may not be similarly partitioned as A, but must have the
+    // same dimensions of A.
     Frame AewB = new MRTask() {
         private double opfn(String op, double a, double b) {
           if (a == 0.0 && b == 0.0) {
@@ -55,20 +64,21 @@ public class AewB {
           }
           return 0.0;
         }
+        @Override
         public void map(Chunk chks[], NewChunk ncs[]) {
-          int chunk_size = chks[0].len();
+          int chunkSize = chks[0].len();
           Vec B_vecs[] = B.vecs();
           long start = chks[0].start();
 
           for (int c = 0; c < chks.length; c++) {
-            for (int r = 0; r < chunk_size; r++) {
+            for (int r = 0; r < chunkSize; r++) {
               ncs[c].addNum(opfn(op, chks[c].at0(r), B_vecs[c].at(start + r)));
             }
           }
         }
       }.doAll(AewB_cols, A).outputFrame(null, null);
 
-    /* Carry forward labels of A blindly into ABt */
+    // Carry forward labels of A blindly into ABt
     return new H2ODrm(AewB, keys);
   }
 }

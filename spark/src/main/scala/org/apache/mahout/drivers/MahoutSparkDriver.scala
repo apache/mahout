@@ -21,8 +21,6 @@ import org.apache.mahout.math.drm.DistributedContext
 import org.apache.spark.SparkConf
 import org.apache.mahout.sparkbindings._
 
-import scala.collection.immutable
-
 /** Extend this class to create a Mahout CLI driver. Minimally you must override process and main.
   * Also define a Map of options for the command line parser. The following template may help:
   * {{{
@@ -64,14 +62,10 @@ import scala.collection.immutable
   *
   * }}}
   */
-abstract class MahoutDriver {
+abstract class MahoutSparkDriver extends MahoutDriver {
 
 
-  implicit protected var mc: DistributedContext = _
   implicit protected var sparkConf = new SparkConf()
-  protected var parser: MahoutOptionParser = _
-
-  var _useExistingContext: Boolean = false // used in the test suite to reuse one context per suite
 
   /** Creates a Spark context to run the job inside.
     * Override to set the SparkConf values specific to the job,
@@ -84,17 +78,6 @@ abstract class MahoutDriver {
       mc = mahoutSparkContext(masterUrl, appName, sparkConf = sparkConf)
     }
   }
-
-  /** Override (optionally) for special cleanup */
-  protected def stop: Unit = {
-    if (!_useExistingContext) mc.close
-  }
-
-  /** This is where you do the work, call start first, then before exiting call stop */
-  protected def process: Unit
-
-  /** Parse command line and call process */
-  def main(args: Array[String]): Unit
 
   def useContext(context: DistributedContext): Unit = {
     _useExistingContext = true

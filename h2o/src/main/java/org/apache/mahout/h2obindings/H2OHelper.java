@@ -36,24 +36,35 @@ import java.util.HashMap;
 
 import org.apache.mahout.h2obindings.drm.H2ODrm;
 
+/**
+ * Collection of helper methods for H2O backend.
+ */
 public class H2OHelper {
-
-  /*
-    Is the matrix sparse? If the number of missing elements is
-    32 x times the number of present elements, treat it as sparse
-  */
+  /**
+   * Predicate to check if data is sparse in Frame.
+   *
+   * If the number of missing elements is 32x times the number of present
+   * elements, consider it as sparse.
+   *
+   * @param frame Frame storing matrix data.
+   * @return True if data is sparse in Frame.
+   */
   public static boolean isSparse(Frame frame) {
     long rows = frame.numRows();
     long cols = frame.numCols();
 
-    /* MRTask to aggregate precalculated per-chunk sparse lengths */
+    /**
+     * MRTask to aggregate precalculated per-chunk sparse lengths
+     */
     class MRTaskNZ extends MRTask<MRTaskNZ> {
       long sparselen;
+      @Override
       public void map(Chunk chks[]) {
         for (Chunk chk : chks) {
           sparselen += chk.sparseLen();
         }
       }
+      @Override
       public void reduce(MRTaskNZ other) {
         sparselen += other.sparselen;
       }
@@ -64,11 +75,15 @@ public class H2OHelper {
     return (((rows * cols) / (sparselen + 1)) > 32);
   }
 
-  /*
-    Extract a Matrix from a Frame. Create either Sparse or
-    Dense Matrix depending on number of missing elements
-    in Frame.
-  */
+  /**
+   * Create a Mahout Matrix from a DRM.
+   *
+   * Create either Sparse or Dense Matrix depending on number of missing
+   * elements in DRM.
+   *
+   * @param drm DRM object to create Matrix from.
+   * @return created Matrix.
+   */
   public static Matrix matrixFromDrm(H2ODrm drm) {
     Frame frame = drm.frame;
     Vec labels = drm.keys;
@@ -81,7 +96,7 @@ public class H2OHelper {
     }
 
     int c = 0;
-    /* Fill matrix, column at a time */
+    // Fill matrix, column at a time.
     for (Vec v : frame.vecs()) {
       for (int r = 0; r < frame.numRows(); r++) {
         double d = 0.0;
@@ -92,7 +107,7 @@ public class H2OHelper {
       c++;
     }
 
-    /* If string keyed, set the stings as rowlabels */
+    // If string keyed, set the stings as rowlabels.
     if (labels != null) {
       HashMap<String,Integer> map = new HashMap<String,Integer>();
       ValueString vstr = new ValueString();
@@ -104,12 +119,14 @@ public class H2OHelper {
     return m;
   }
 
-  /* Calculate Means of elements in a column, and return
-     as a vector.
-
-     H2O precalculates means in a Vec, and a Vec corresponds
-     to a column.
-  */
+  /**
+   * Calculate Means of elements in a column, and return as a Vector.
+   *
+   * H2O precalculates means in a Vec, and a Vec corresponds to a column.
+   *
+   * @param frame Frame backing the H2O DRM.
+   * @return Vector of pre-calculated means.
+   */
   public static Vector colMeans(Frame frame) {
     double means[] = new double[frame.numCols()];
     for (int i = 0; i < frame.numCols(); i++) {
@@ -118,16 +135,22 @@ public class H2OHelper {
     return new DenseVector(means);
   }
 
-  /* Calculate Sum of all elements in a column, and
-     return as a Vector
-
-     Run an MRTask Job to add up sums in @_sums
-
-     WARNING: Vulnerable to overflow. No way around it.
-  */
+  /**
+   * Calculate Sums of elements in a column, and return as a Vector.
+   *
+   * Run an MRTask Job to add up sums.
+   * WARNING: Vulnerable to overflow. No way around it.
+   *
+   * @param frame Frame backing the H2O DRM.
+   * @return Vector of calculated sums.
+   */
   public static Vector colSums(Frame frame) {
+    /**
+     * MRTask to calculate sums of elements in all columns.
+     */
     class MRTaskSum extends MRTask<MRTaskSum> {
       public double sums[];
+      @Override
       public void map(Chunk chks[]) {
         sums = new double[chks.length];
 
@@ -137,6 +160,7 @@ public class H2OHelper {
           }
         }
       }
+      @Override
       public void reduce(MRTaskSum other) {
         ArrayUtils.add(sums, other.sums);
       }
@@ -144,14 +168,22 @@ public class H2OHelper {
     return new DenseVector(new MRTaskSum().doAll(frame).sums);
   }
 
-
-  /* Calculate Sum of squares of all elements in the Matrix
-
-     WARNING: Vulnerable to overflow. No way around it.
-  */
+  /**
+   * Calculate Sum of squares of all elements in the DRM.
+   *
+   * Run an MRTask Job to add up sums of squares.
+   * WARNING: Vulnerable to overflow. No way around it.
+   *
+   * @param frame Frame backing the H2O DRM.
+   * @return Sum of squares of all elements in the DRM.
+   */
   public static double sumSqr(Frame frame) {
+    /**
+     * MRTask to calculate sums of squares of all elements.
+     */
     class MRTaskSumSqr extends MRTask<MRTaskSumSqr> {
       public double sumSqr;
+      @Override
       public void map(Chunk chks[]) {
         for (int c = 0; c < chks.length; c++) {
           for (int r = 0; r < chks[c].len(); r++) {
@@ -159,6 +191,7 @@ public class H2OHelper {
           }
         }
       }
+      @Override
       public void reduce(MRTaskSumSqr other) {
         sumSqr += other.sumSqr;
       }
@@ -166,16 +199,21 @@ public class H2OHelper {
     return new MRTaskSumSqr().doAll(frame).sumSqr;
   }
 
-  /* Calculate Sum of all elements in a column, and
-     return as a Vector
-
-     Run an MRTask Job to add up sums in @_sums
-
-     WARNING: Vulnerable to overflow. No way around it.
-  */
+  /**
+   * Count non-zero elements in all columns, and return as a Vector.
+   *
+   * Run an MRTask Job to count non-zero elements per column.
+   *
+   * @param frame Frame backing the H2O DRM.
+   * @return Vector of counted non-zero elements.
+   */
   public static Vector nonZeroCnt(Frame frame) {
+    /**
+     * MRTask to count all non-zero elements.
+     */
     class MRTaskNonZero extends MRTask<MRTaskNonZero> {
       public double sums[];
+      @Override
       public void map(Chunk chks[]) {
         sums = new double[chks.length];
 
@@ -187,6 +225,7 @@ public class H2OHelper {
           }
         }
       }
+      @Override
       public void reduce(MRTaskNonZero other) {
         ArrayUtils.add(sums, other.sums);
       }
@@ -194,7 +233,7 @@ public class H2OHelper {
     return new DenseVector(new MRTaskNonZero().doAll(frame).sums);
   }
 
-  /* Convert String->Integer map to Integer->String map */
+  /** Convert String->Integer map to Integer->String map */
   private static Map<Integer,String> reverseMap(Map<String, Integer> map) {
     if (map == null) {
       return null;
@@ -209,46 +248,64 @@ public class H2OHelper {
     return rmap;
   }
 
-  private static int chunkSize(long nrow, int ncol, int min, int exact) {
-    int chunk_sz;
-    int parts_hint = Math.max(min, exact);
+  /**
+   * Calculate optimum chunk size for given parameters.
+   *
+   * Chunk size is the number of elements stored per partition per column.
+   *
+   * @param nrow Number of rows in the DRM.
+   * @param ncol Number of columns in the DRM.
+   * @param minHint Minimum number of partitions to create, if passed value is not -1.
+   * @param exactHint Exact number of partitions to create, if passed value is not -1.
+   * @return Calculated optimum chunk size.
+   */
+  private static int chunkSize(long nrow, int ncol, int minHint, int exactHint) {
+    int chunkSz;
+    int partsHint = Math.max(minHint, exactHint);
 
-    if (parts_hint < 1) {
+    if (partsHint < 1) {
       /* XXX: calculate based on cloud size and # of cpu */
-      parts_hint = 4;
+      partsHint = 4;
     }
 
-    chunk_sz = (int)(((nrow - 1) / parts_hint) + 1);
-    if (exact > 0) {
-      return chunk_sz;
+    chunkSz = (int)(((nrow - 1) / partsHint) + 1);
+    if (exactHint > 0) {
+      return chunkSz;
     }
 
-    if (chunk_sz > 1e6) {
-      chunk_sz = (int)1e6;
+    if (chunkSz > 1e6) {
+      chunkSz = (int)1e6;
     }
 
-    if (min > 0) {
-      return chunk_sz;
+    if (minHint > 0) {
+      return chunkSz;
     }
 
-    if (chunk_sz < 1e3) {
-      chunk_sz = (int)1e3;
+    if (chunkSz < 1e3) {
+      chunkSz = (int)1e3;
     }
 
-    return chunk_sz;
+    return chunkSz;
   }
 
-  /* Ingest a Matrix into an H2O Frame. H2O Frame is the "backing"
-     data structure behind CheckpointedDrm. Steps:
-  */
-  public static H2ODrm drmFromMatrix(Matrix m, int min_hint, int exact_hint) {
-    /* First create an empty (0-filled) frame of the required dimensions */
-    Frame frame = emptyFrame(m.rowSize(), m.columnSize(), min_hint, exact_hint);
+  /**
+   * Ingest a Mahout Matrix into an H2O DRM.
+   *
+   * Frame is the backing data structure behind CheckpointedDrm.
+   *
+   * @param m Mahout Matrix to ingest data from.
+   * @param minHint Hint for minimum number of partitions in created DRM.
+   * @param exactHint Hint for exact number of partitions in created DRM.
+   * @return Created H2O backed DRM.
+   */
+  public static H2ODrm drmFromMatrix(Matrix m, int minHint, int exactHint) {
+    // First create an empty (0-filled) frame of the required dimensions
+    Frame frame = emptyFrame(m.rowSize(), m.columnSize(), minHint, exactHint);
     Vec labels = null;
     Vec.Writer writers[] = new Vec.Writer[m.columnSize()];
     Futures closer = new Futures();
 
-    /* "open" vectors for writing efficiently in bulk */
+    // "open" vectors for writing efficiently in bulk
     for (int i = 0; i < writers.length; i++) {
       writers[i] = frame.vecs()[i].open();
     }
@@ -263,10 +320,10 @@ public class H2OHelper {
       writers[c].close(closer);
     }
 
-    /* If string labeled matrix, create aux Vec */
+    // If string labeled matrix, create aux Vec
     Map<String,Integer> map = m.getRowLabelBindings();
     if (map != null) {
-      /* label vector must be similarly partitioned like the Frame */
+      // label vector must be similarly partitioned like the Frame
       labels = frame.anyVec().makeZero();
       Vec.Writer writer = labels.open();
       Map<Integer,String> rmap = reverseMap(map);
@@ -283,20 +340,47 @@ public class H2OHelper {
     return new H2ODrm(frame, labels);
   }
 
-  public static Frame emptyFrame(long nrow, int ncol, int min_hint, int exact_hint) {
+  /**
+   * Create an empty (zero-filled) H2O Frame efficiently.
+   *
+   * Create a zero filled Frame with specified cardinality.
+   * Do not actually fill zeroes in each cell, create pre-compressed chunks.
+   * Time taken per column asymptotically at O(nChunks), not O(nrow).
+   *
+   * @param nrow Number of rows in the Frame.
+   * @param ncol Number of columns in the Frame.
+   * @param minHint Hint for minimum number of chunks per column in created Frame.
+   * @param exactHint Hint for exact number of chunks per column in created Frame.
+   * @return Created Frame.
+   */
+  public static Frame emptyFrame(long nrow, int ncol, int minHint, int exactHint) {
     Vec.VectorGroup vg = new Vec.VectorGroup();
 
-    return emptyFrame(nrow, ncol, min_hint, exact_hint, vg);
+    return emptyFrame(nrow, ncol, minHint, exactHint, vg);
   }
 
-  public static Frame emptyFrame(long nrow, int ncol, int min_hint, int exact_hint, Vec.VectorGroup vg) {
-    int chunk_sz = chunkSize(nrow, ncol, min_hint, exact_hint);
-    int nchunks = (int)((nrow - 1) / chunk_sz) + 1; /* Final number of Chunks per Vec */
+  /**
+   * Create an empty (zero-filled) H2O Frame efficiently.
+   *
+   * Create a zero filled Frame with specified cardinality.
+   * Do not actually fill zeroes in each cell, create pre-compressed chunks.
+   * Time taken per column asymptotically at O(nChunks), not O(nrow).
+   *
+   * @param nrow Number of rows in the Frame.
+   * @param ncol Number of columns in the Frame.
+   * @param minHint Hint for minimum number of chunks per column in created Frame.
+   * @param exactHint Hint for exact number of chunks per column in created Frame.
+   * @param vg Shared VectorGroup so that all columns are similarly partitioned.
+   * @return Created Frame.
+   */
+  public static Frame emptyFrame(long nrow, int ncol, int minHint, int exactHint, Vec.VectorGroup vg) {
+    int chunkSz = chunkSize(nrow, ncol, minHint, exactHint);
+    int nchunks = (int)((nrow - 1) / chunkSz) + 1; // Final number of Chunks per Vec
     long espc[] = new long[nchunks + 1];
     final Vec[] vecs = new Vec[ncol];
 
     for (int i = 0; i < nchunks; i++) {
-      espc[i] = i * chunk_sz;
+      espc[i] = i * chunkSz;
     }
     espc[nchunks] = nrow;
 
@@ -307,7 +391,19 @@ public class H2OHelper {
     return new Frame(vecs);
   }
 
-  public static H2ODrm emptyDrm(long nrow, int ncol, int min_hint, int exact_hint) {
-    return new H2ODrm(emptyFrame(nrow, ncol, min_hint, exact_hint));
+  /**
+   * Create an empty (zero-filled) H2O DRM.
+   *
+   * Create a zero filled DRM with specified cardinality.
+   * Use the efficient emptyFrame() method internally.
+   *
+   * @param nrow Number of rows in the Frame.
+   * @param ncol Number of columns in the Frame.
+   * @param minHint Hint for minimum number of chunks per column in created Frame.
+   * @param exactHint Hint for exact number of chunks per column in created Frame.
+   * @return Created DRM.
+   */
+  public static H2ODrm emptyDrm(long nrow, int ncol, int minHint, int exactHint) {
+    return new H2ODrm(emptyFrame(nrow, ncol, minHint, exactHint));
   }
 }

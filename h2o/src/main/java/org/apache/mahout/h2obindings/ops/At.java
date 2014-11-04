@@ -25,33 +25,39 @@ import water.fvec.Frame;
 import water.fvec.Vec;
 import water.fvec.Chunk;
 
+/**
+ * Calculate A' (transpose)
+ */
 public class At {
-  /* Calculate A' (transpose) */
+  /**
+   * Perform transpose operation on a DRM to create a new DRM.
+   *
+   * @param drmA DRM representing matrix A.
+   * @return new DRM containing A'.
+   */
   public static H2ODrm exec(H2ODrm drmA) {
     final Frame A = drmA.frame;
-    /* First create a new frame of the required dimensions, A.numCols() rows
-       and A.numRows() columns.
-    */
+    // First create a new frame of the required dimensions, A.numCols() rows
+    // and A.numRows() columns.
     Frame At = H2OHelper.emptyFrame(A.numCols(), (int) A.numRows(), -1, -1);
 
-    /* Execute MRTask on the new frame, and fill each cell (initially 0) by
-       pulling in the appropriate value from A.
-    */
+    // Execute MRTask on the new frame, and fill each cell (initially 0) by
+    // pulling in the appropriate value from A.
     new MRTask() {
       public void map(Chunk chks[]) {
-        int chunk_size = chks[0].len();
+        int chunkSize = chks[0].len();
         long start = chks[0].start();
         Vec A_vecs[] = A.vecs();
 
         for (int c = 0; c < chks.length; c++) {
-          for (int r = 0; r < chunk_size; r++) {
+          for (int r = 0; r < chunkSize; r++) {
             chks[c].set0(r, A_vecs[(int)(start + r)].at(c));
           }
         }
       }
     }.doAll(At);
 
-    /* At is NOT similarly partitioned as A, drop labels */
+    // At is NOT similarly partitioned as A, drop labels
     return new H2ODrm(At);
   }
 }
