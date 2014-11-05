@@ -103,18 +103,27 @@ object NaiveBayes {
 
     implicit val distributedContext = stringKeyedObservations.context
 
-    // get the label row keys
-    val rowLabelBindings:java.util.HashMap[String,Integer] =
-      new java.util.HashMap[String,Integer](stringKeyedObservations.getRowLabelBindings)
-
-    // extract categories from labels assigned by seq2sparse
+    // Extract categories from labels assigned by seq2sparse
     // Categories are Stored in Drm Keys as: /Category/document_id
-    val labelVectorByRowIndex = new util.Vector[String](rowLabelBindings.size())
-    val labelMapByRowIndex = new mutable.HashMap[Integer,String]
-    for ((key, value) <- rowLabelBindings) {
-      labelVectorByRowIndex.set(value, key.split("/")(1))
-      labelMapByRowIndex.put(value, key.split("/")(1))
+
+    // get a new DRM with a single column so that we don't have to collect the
+    // DRM into memory upfont
+    val strippedObeservations= stringKeyedObservations.mapBlock(ncol=1){
+      case(keys, block) =>
+        val blockB = block.like(keys.size, 1)
+        keys -> blockB
     }
+    val rowLabelBindings= strippedObeservations.getRowLabelBindings
+    // sort the bindings into a list
+    val labelListSorted = rowLabelBindings.toList.sortWith(_._2 < _._2)
+    // strip the document_id from the row keys keeping only the category
+    val labelMapByRowIndex = labelListSorted.toMap.map(x => x._2 -> x._1.split("/")(1))
+
+//    for ((key, value) <- rowLabelBindings) {
+//      println(value)
+//      labelVectorByRowIndex(value)= key.split("/")(1)
+//      labelMapByRowIndex.put(value, key.split("/")(1))
+//    }
 
     // convert to an IntKeyed Drm so that we can compute transpose
     // must be a better way to do this.
@@ -132,13 +141,13 @@ object NaiveBayes {
 
     // get rid of stringKeyedObservations - we don't need them anymore
     // how do we "free" them?- I know uncache is incorrect.
-    stringKeyedObservations.uncache
+   // stringKeyedObservations.uncache
 
     var categoryIndex = 0.0d
     val encodedCategoryByKey = new mutable.HashMap[String,Integer]
     val encodedCategoryByRowIndexVector = new DenseVector(labelVectorByRowIndex.size)
 
-    // encode Categorys as a (Double)Integer so we can broadcast as a vector
+    // encode Categories as a (Double)Integer so we can broadcast as a vector
     // where each element is an Int-encoded category whose index corresponds
     // to its row in the Drm
     for (i <- 0 until labelVectorByRowIndex.size) {
