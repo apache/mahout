@@ -212,7 +212,7 @@ trait DistributedDecompositionsSuiteBase extends DistributedMahoutSuite with Mat
     printf("norm of residuals %f\n", err)
     printf("train iteration rmses: %s\n", rmse)
 
-    err should be < 1e-2
+    err should be < 15e-2
 
   }
 
