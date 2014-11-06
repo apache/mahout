@@ -99,7 +99,7 @@ object NaiveBayes {
     *             TF or TF-IDF counts per label
     */
   def extractLabelsAndAggregateObservations[K:ClassTag]( stringKeyedObservations: DrmLike[K] ):
-  (mutable.HashMap[Integer, String], DrmLike[Int]) = {
+  (mutable.HashMap[String,Double],DrmLike[Int]) = {
 
     implicit val distributedContext = stringKeyedObservations.context
 
@@ -173,7 +173,6 @@ object NaiveBayes {
     }
 
 
-
     // "Combiner": Map and aggregate by Category. Do this by
     // broadcasting the encoded category vector and mapping
     // a transposed IntKeyed Drm out so that all categories
@@ -203,7 +202,7 @@ object NaiveBayes {
 
     // Now return the labelMapByRowIndex HashMap and the the transpose of
     // aggregetedObservationDrm which can be used as input to trainNB
-    (labelMapByRowIndex, aggregetedObservationByLabelDrm.t)
+    (encodedCategoryByKey, aggregetedObservationByLabelDrm.t)
   }
 
 }
