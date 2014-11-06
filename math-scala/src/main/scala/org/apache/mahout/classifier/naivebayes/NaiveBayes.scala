@@ -115,9 +115,10 @@ object NaiveBayes {
     }
     val rowLabelBindings= strippedObeservations.getRowLabelBindings
     // sort the bindings into a list
-    val labelListSorted = rowLabelBindings.toList.sortWith(_._2 < _._2)
+    //val labelListSorted = rowLabelBindings.toVector.sortWith(_._2 < _._2)
     // strip the document_id from the row keys keeping only the category
-    val labelMapByRowIndex = labelListSorted.toMap.map(x => x._2 -> x._1.split("/")(1))
+    val labelMapByRowIndex = rowLabelBindings.map(x => x._2 -> x._1.split("/")(1))
+    val labelVectorByRowIndex = labelMapByRowIndex.toVector.sortWith(_._1 < _._1)
 
 //    for ((key, value) <- rowLabelBindings) {
 //      println(value)
@@ -129,39 +130,49 @@ object NaiveBayes {
     // must be a better way to do this.
     // todo: use slice to copy DRM over
     // todo: if doing this iteratively
-    val intKeyedObservations = drmParallelizeEmpty(
+    // todo: is there a Distributed way of converting a String-keyed DRM to Int-Keyed?
+
+    // collect up front for now.
+    val inCoreStringKeyedObservations = stringKeyedObservations.collect
+    val inCoreintKeyedObservations = new SparseMatrix(
                             stringKeyedObservations.nrow.toInt,
                             stringKeyedObservations.ncol)
-    for (i <- 0 until stringKeyedObservations.nrow.toInt) {
-      for ( j <- 0 until stringKeyedObservations.ncol) {
-        intKeyedObservations.set(i, j,
-                                 stringKeyedObservations.get(i,j))
+    for (i <- 0 until inCoreStringKeyedObservations.nrow.toInt) {
+      for ( j <- 0 until inCoreStringKeyedObservations.ncol) {
+        inCoreintKeyedObservations.set(i, j,
+                                       inCoreStringKeyedObservations.get(i,j))
       }
     }
 
+    val intKeyedObservations= drmParallelize(inCoreintKeyedObservations)
+
     // get rid of stringKeyedObservations - we don't need them anymore
-    // how do we "free" them?- I know uncache is incorrect.
-   // stringKeyedObservations.uncache
+    // how do we "free" them?
 
     var categoryIndex = 0.0d
-    val encodedCategoryByKey = new mutable.HashMap[String,Integer]
+    val encodedCategoryByKey = new mutable.HashMap[String,Double]
     val encodedCategoryByRowIndexVector = new DenseVector(labelVectorByRowIndex.size)
 
     // encode Categories as a (Double)Integer so we can broadcast as a vector
     // where each element is an Int-encoded category whose index corresponds
     // to its row in the Drm
     for (i <- 0 until labelVectorByRowIndex.size) {
-      if (!encodedCategoryByKey.contains()) {
+      if (!(encodedCategoryByKey.contains(labelVectorByRowIndex(i)._2))) {
+        println(i+" map now contains: "+labelVectorByRowIndex(i)._2)
         encodedCategoryByRowIndexVector.set(i, categoryIndex)
-        encodedCategoryByKey.put(labelVectorByRowIndex.get(i), i)
+        encodedCategoryByKey.put(labelVectorByRowIndex(i)._2, categoryIndex)
         categoryIndex += 1.0
-      } else {
-        encodedCategoryByRowIndexVector.set(i ,
-                              encodedCategoryByKey
-                                .getOrElse(labelVectorByRowIndex.get(i), -1)
-                                .asInstanceOf[Double])
+        println("Category index is: "+categoryIndex)
       }
+      //println(i+" map does not contain: "+labelVectorByRowIndex(i)._2)
+      encodedCategoryByRowIndexVector.set(i ,
+                            encodedCategoryByKey
+                              .getOrElse(labelVectorByRowIndex(i)._2, -1)
+                              .asInstanceOf[Double])
+
     }
+
+
 
     // "Combiner": Map and aggregate by Category. Do this by
     // broadcasting the encoded category vector and mapping
@@ -188,8 +199,7 @@ object NaiveBayes {
     }
 
     // get rid of intKeyedObservations- we don't need them any more
-    // how do we "free" them?- I know uncache is incorrect.
-    intKeyedObservations.uncache
+    // how do we "free" them?
 
     // Now return the labelMapByRowIndex HashMap and the the transpose of
     // aggregetedObservationDrm which can be used as input to trainNB
