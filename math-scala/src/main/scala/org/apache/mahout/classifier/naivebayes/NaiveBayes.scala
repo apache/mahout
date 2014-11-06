@@ -158,11 +158,9 @@ object NaiveBayes {
     // to its row in the Drm
     for (i <- 0 until labelVectorByRowIndex.size) {
       if (!(encodedCategoryByKey.contains(labelVectorByRowIndex(i)._2))) {
-        println(i+" map now contains: "+labelVectorByRowIndex(i)._2)
         encodedCategoryByRowIndexVector.set(i, categoryIndex)
         encodedCategoryByKey.put(labelVectorByRowIndex(i)._2, categoryIndex)
         categoryIndex += 1.0
-        println("Category index is: "+categoryIndex)
       }
       //println(i+" map does not contain: "+labelVectorByRowIndex(i)._2)
       encodedCategoryByRowIndexVector.set(i ,
