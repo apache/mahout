@@ -108,12 +108,12 @@ public class ConcatenateVectorsJob extends AbstractJob {
     // this works for both part* and a directory/ with part*.
     Path pathPattern = new Path(path, "part*");
     FileStatus[] paths = fs.globStatus(pathPattern);
-    Preconditions.checkArgument(paths.length == 0, path.getName() + " is a file, should be a directory");
+    Preconditions.checkArgument(paths.length > 0, path.getName() + " is a file, should be a directory");
 
     Path file = paths[0].getPath();
     SequenceFile.Reader reader = null;
     try {
-      reader = new SequenceFile.Reader(fs, file, fs.getConf());
+      reader = new SequenceFile.Reader(fs.getConf(), SequenceFile.Reader.file(file));
       return reader.getKeyClass().asSubclass(Writable.class);
     } finally {
       Closeables.close(reader, true);
