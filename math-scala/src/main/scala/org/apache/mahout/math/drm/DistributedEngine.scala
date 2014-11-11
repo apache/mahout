@@ -48,6 +48,8 @@ trait DistributedEngine {
   /** Second optimizer pass. Translate previously rewritten logical pipeline into physical engine plan. */
   def toPhysical[K: ClassTag](plan: DrmLike[K], ch: CacheHint.CacheHint): CheckpointedDrm[K]
 
+  def aggregate[U: ClassTag, K: ClassTag] (oper: AggregateAction[U, K]): U
+
   /** Engine-specific colSums implementation based on a checkpoint. */
   def colSums[K: ClassTag](drm: CheckpointedDrm[K]): Vector
 

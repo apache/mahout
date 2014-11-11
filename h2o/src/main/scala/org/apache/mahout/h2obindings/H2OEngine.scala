@@ -85,6 +85,9 @@ object H2OEngine extends DistributedEngine {
   def toPhysical[K:ClassTag](plan: DrmLike[K], ch: CacheHint.CacheHint): CheckpointedDrm[K] =
     new CheckpointedDrmH2O[K](tr2phys(plan), plan.context)
 
+  def aggregate[U: ClassTag, K: ClassTag] (oper: AggregateAction[U,K]): U = {
+    throw new UnsupportedOperationException()
+  }
   /** Eagerly evaluate operator graph into an H2O DRM */
   private def tr2phys[K: ClassTag](oper: DrmLike[K]): H2ODrm = {
     oper match {

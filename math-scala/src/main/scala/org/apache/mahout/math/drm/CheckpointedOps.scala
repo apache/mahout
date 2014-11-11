@@ -17,6 +17,8 @@
 
 package org.apache.mahout.math.drm
 
+import org.apache.mahout.math.drm.logical.OpAggregateBlocks
+
 import scala.reflect.ClassTag
 import org.apache.mahout.math._
 

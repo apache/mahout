@@ -17,9 +17,11 @@
 
 package org.apache.mahout.math.drm
 
+import org.apache.mahout.math.Matrix
+
 import scala.reflect.ClassTag
 import org.apache.mahout.math.scalabindings._
-import org.apache.mahout.math.drm.logical.{OpPar, OpMapBlock, OpRowRange}
+import org.apache.mahout.math.drm.logical.{OpAggregateBlocks, OpPar, OpMapBlock, OpRowRange}
 
 /** Common Drm ops */
 class DrmLikeOps[K: ClassTag](protected[drm] val drm: DrmLike[K]) {
@@ -73,6 +75,15 @@ class DrmLikeOps[K: ClassTag](protected[drm] val drm: DrmLike[K]) {
       _ncol = ncol,
       identicallyPartitioned = identicallyParitioned
     )
+
+  def aggregateBlocks[U: ClassTag](zeroValue: U, seqOp: (U, (Array[K], _<:Matrix)) => U, combOp: (U, U) => U ): U =
+    drm.context.aggregate(new OpAggregateBlocks[U, K](
+      A = drm,
+      zeroValue = zeroValue,
+      seqOp = seqOp,
+      combOp = combOp)
+    )
+
 
 
   /**
