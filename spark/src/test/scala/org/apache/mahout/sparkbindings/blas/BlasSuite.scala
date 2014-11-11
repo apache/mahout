@@ -155,27 +155,30 @@ class BlasSuite extends FunSuite with DistributedSparkSuite {
     import RLikeDrmOps._
 
     val inCoreA = dense((1, 2, 3), (2, 3, 4), (3, 4, 5))
-    val accControl = inCoreA.sum
 
     val drmA = drmParallelize(m = inCoreA, numPartitions = 2)
 
+    val accControl = drmA.zSum
+
     val seqOp: (Double, (Array[Int], _<: Matrix)) => Double = (value, matrix) =>
-      value + matrix._2.sum
+      value + matrix._2.zSum
 
     val combOp: (Double, Double) => Double = (val1, val2) => val1 + val2
 
     //check if it accumulates correctly
     val acc1 = drmA.aggregateBlocks(0.0, seqOp, combOp)
 
-    //check if it can be the last element of a chain of matrix ops
-    val acc2 = ((drmA + 1) * 1 - 1).aggregateBlocks(0, seqOp, combOp)
+    //check if it can be the called after a series of matrix ops
+    val drmB = drmA + 1
+    val accControl2 = drmB.zSum()
+    val acc2 = drmB.aggregateBlocks(0.0, seqOp, combOp)
 
 
     println(acc1)
     println(acc2)
 
     assert(acc1 == accControl)
-    assert(acc2 == accControl)
+    assert(acc2 == accControl2)
   }
 
 }
