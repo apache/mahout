@@ -113,18 +113,13 @@ object NaiveBayes {
         val blockB = block.like(keys.size, 1)
         keys -> blockB
     }
-    val rowLabelBindings= strippedObeservations.getRowLabelBindings
-    // sort the bindings into a list
-    //val labelListSorted = rowLabelBindings.toVector.sortWith(_._2 < _._2)
+    // Extract the row label bindings from the slim Drm (the String keys)
     // strip the document_id from the row keys keeping only the category
-    val labelMapByRowIndex = rowLabelBindings.map(x => x._2 -> x._1.split("/")(1))
-    val labelVectorByRowIndex = labelMapByRowIndex.toVector.sortWith(_._1 < _._1)
+    // sort the bindings into a list
+    val labelVectorByRowIndex = strippedObeservations.getRowLabelBindings
+       .map(x => x._2 -> x._1.split("/")(1))
+       .toVector.sortWith(_._1 < _._1)
 
-//    for ((key, value) <- rowLabelBindings) {
-//      println(value)
-//      labelVectorByRowIndex(value)= key.split("/")(1)
-//      labelMapByRowIndex.put(value, key.split("/")(1))
-//    }
 
     // convert to an IntKeyed Drm so that we can compute transpose
     // must be a better way to do this.
@@ -139,15 +134,12 @@ object NaiveBayes {
                             stringKeyedObservations.ncol)
     for (i <- 0 until inCoreStringKeyedObservations.nrow.toInt) {
       for ( j <- 0 until inCoreStringKeyedObservations.ncol) {
-        inCoreintKeyedObservations.set(i, j,
-                                       inCoreStringKeyedObservations.get(i,j))
+        inCoreintKeyedObservations.setQuick(i, j,
+                                       inCoreStringKeyedObservations.getQuick(i,j))
       }
     }
 
     val intKeyedObservations= drmParallelize(inCoreintKeyedObservations)
-
-    // get rid of stringKeyedObservations - we don't need them anymore
-    // how do we "free" them?
 
     var categoryIndex = 0.0d
     val encodedCategoryByKey = new mutable.HashMap[String,Double]
@@ -193,15 +185,13 @@ object NaiveBayes {
           }
         }
         keys -> blockB
-    }
+    }.t
 
-    // get rid of intKeyedObservations- we don't need them any more
-    // how do we "free" them?
-
-    // Now return the labelMapByRowIndex HashMap and the the transpose of
+    // Now return the labelMapByRowIndex HashMap and the the
     // aggregetedObservationDrm which can be used as input to trainNB
-    (encodedCategoryByKey, aggregetedObservationByLabelDrm.t)
+    (encodedCategoryByKey, aggregetedObservationByLabelDrm)
   }
+
 
 }
 

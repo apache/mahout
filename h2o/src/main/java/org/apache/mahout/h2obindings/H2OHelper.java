@@ -319,7 +319,7 @@ public class H2OHelper {
     for (int c = 0; c < m.columnSize(); c++) {
       writers[c].close(closer);
     }
-
+    // TODO: fix BUG here...
     // If string labeled matrix, create aux Vec
     Map<String,Integer> map = m.getRowLabelBindings();
     if (map != null) {
@@ -327,8 +327,16 @@ public class H2OHelper {
       labels = frame.anyVec().makeZero();
       Vec.Writer writer = labels.open();
       Map<Integer,String> rmap = reverseMap(map);
+      System.out.println("mapSize: "+rmap.size());
 
-      for (long r = 0; r < m.rowSize(); r++) {
+      for(Map.Entry<Integer,String> entry : rmap.entrySet()) {
+        System.out.println("entry: "+entry.getValue()+": "+entry.getKey());
+      }
+
+      // TODO: fix BUG here... h20.water.fvec does not accept string values
+      // need a new methof of storing String keyes.
+      for (int r = 0; r < m.rowSize(); r++) {
+        System.out.println("setting: "+r+": "+rmap.get(r));
         writer.set(r, rmap.get(r));
       }
 
