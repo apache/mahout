@@ -83,6 +83,9 @@ package object drm {
   implicit def drm2drmCpOps[K: ClassTag](drm: CheckpointedDrm[K]): CheckpointedOps[K] =
     new CheckpointedOps[K](drm)
 
+  implicit def drm2DistributedOps[K: ClassTag](drm: DrmLike[K]): DistributedOps[K] =
+    new DistributedOps[K](drm)
+
   /**
    * We assume that whenever computational action is invoked without explicit checkpoint, the user
    * doesn't imply caching

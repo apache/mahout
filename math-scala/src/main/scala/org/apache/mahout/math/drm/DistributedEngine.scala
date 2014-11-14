@@ -32,7 +32,7 @@ import org.apache.log4j.Logger
 
 /** Abstraction of optimizer/distributed engine */
 trait DistributedEngine {
-
+  val operations: DistributedOperations
   /**
    * First optimization pass. Return physical plan that we can pass to exec(). This rewrite may
    * introduce logical constructs (including engine-specific ones) that user DSL cannot even produce
@@ -47,8 +47,6 @@ trait DistributedEngine {
 
   /** Second optimizer pass. Translate previously rewritten logical pipeline into physical engine plan. */
   def toPhysical[K: ClassTag](plan: DrmLike[K], ch: CacheHint.CacheHint): CheckpointedDrm[K]
-
-  def aggregate[U: ClassTag, K: ClassTag] (oper: AggregateAction[U, K]): U
 
   /** Engine-specific colSums implementation based on a checkpoint. */
   def colSums[K: ClassTag](drm: CheckpointedDrm[K]): Vector

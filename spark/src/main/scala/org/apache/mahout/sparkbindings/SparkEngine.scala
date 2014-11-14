@@ -43,6 +43,7 @@ object SparkEngine extends DistributedEngine {
 
   // By default, use Hadoop 1 utils
   var hdfsUtils: HDFSUtil = Hadoop1HDFSUtil
+  val operations: DistributedOperations = SparkDistributedOperations
 
   def colSums[K:ClassTag](drm: CheckpointedDrm[K]): Vector = {
     val n = drm.ncol
@@ -115,19 +116,6 @@ object SparkEngine extends DistributedEngine {
       partitioningTag = plan.partitioningTag
     )
     newcp.cache()
-  }
-
-  def aggregate[U: ClassTag, K: ClassTag] (oper: AggregateAction[U, K]): U = {
-    oper match {
-      case opAggregateBlocks: OpAggregateBlocks[U, K] => AggregateBlocks.exec(
-        src = tr2phys(opAggregateBlocks.A)(opAggregateBlocks.classTagK),
-        zeroValue = opAggregateBlocks.zeroValue,
-        seqOp = opAggregateBlocks.seqOp,
-        combOp = opAggregateBlocks.combOp
-      )
-      case _ => throw new IllegalArgumentException("Internal:Optimizer has no exec policy for operator %s."
-        .format(oper))
-    }
   }
 
   /** Broadcast support */
