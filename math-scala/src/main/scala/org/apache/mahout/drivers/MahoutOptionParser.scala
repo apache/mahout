@@ -23,12 +23,13 @@ import scala.collection.immutable
 /** Defines oft-repeated options and their parsing. Provides the option groups and parsing helper methods to
   * keep both standarized.
   * @param programName Name displayed in help message, the name by which the driver is invoked.
-  * @note not all options are platform neutral so other platforms can add option parsing here if desired.
+  * @note options are engine neutral by convention. See the engine specific extending class for
+  *       to add Spark or other engine options.
   * */
 class MahoutOptionParser(programName: String) extends OptionParser[Map[String, Any]](programName: String) {
 
   // build options from some stardard CLI param groups
-  // Note: always put the driver specific options at the last so the can override and previous options!
+  // Note: always put the driver specific options at the last so they can override and previous options!
   var opts = Map.empty[String, Any]
 
   override def showUsageOnError = true
@@ -47,28 +48,12 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
     }
 
     opt[String]('o', "output") required() action { (x, options) =>
-      // todo: check to see if HDFS allows MS-Windows backslashes locally?
       if (x.endsWith("/")) {
         options + ("output" -> x)
       } else {
         options + ("output" -> (x + "/"))
       }
     } text ("Path for output, any local or HDFS supported URI (required)")
-
-  }
-
-  def parseSparkOptions = {
-    opts = opts ++ MahoutOptionParser.SparkOptions
-    opts = opts + ("appName" -> programName)
-    note("\nSpark config options:")
-
-    opt[String]("master") abbr ("ma") text ("Spark Master URL (optional). Default: \"local\". Note that you can specify the number of cores to get a performance improvement, for example \"local[4]\"") action { (x, options) =>
-      options + ("master" -> x)
-    }
-
-    opt[String]("sparkExecutorMem") abbr ("sem") text ("Max Java heap available as \"executor memory\" on each node (optional). Default: as Spark config specifies") action { (x, options) =>
-      options + ("sparkExecutorMem" -> x)
-    }
 
   }
 

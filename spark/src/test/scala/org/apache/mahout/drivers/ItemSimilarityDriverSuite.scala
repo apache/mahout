@@ -661,7 +661,6 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
 
     assert(biggerIDSA.matrix.nrow == 5)
 
-    val bp = 0
   }
 
   test("ItemSimilarityDriver cross similarity two separate items spaces, missing rows in B") {

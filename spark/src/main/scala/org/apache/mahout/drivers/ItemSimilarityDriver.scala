@@ -24,12 +24,12 @@ import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
 import scala.collection.immutable.HashMap
 
 /**
- * Command line interface for [[org.apache.mahout.cf.SimilarityAnalysis#cooccurrencesIDSs]].
+ * Command line interface for [[org.apache.mahout.math.cf.SimilarityAnalysis#cooccurrencesIDSs]].
  * Reads text lines
  * that contain (row id, column id, ...). The IDs are user specified strings which will be
  * preserved in the
  * output. The individual elements will be accumulated into a matrix like [[org.apache.mahout.math.indexeddataset.IndexedDataset]]
- * and [[org.apache.mahout.cf.SimilarityAnalysis#cooccurrencesIDSs]]
+ * and [[org.apache.mahout.math.cf.SimilarityAnalysis#cooccurrencesIDSs]]
  * will be used to calculate row-wise self-similarity, or when using filters or two inputs, will generate two
  * matrices and calculate both the self similarity of the primary matrix and the row-wise
  * similarity of the primary
@@ -42,7 +42,8 @@ import scala.collection.immutable.HashMap
  * you can specify only the input and output file and directory--all else will default to the correct values.
  * Each output line will contain the Item ID and similar items sorted by LLR strength descending.
  * @note To use with a Spark cluster see the --master option, if you run out of heap space check
- *       the --sparkExecutorMemory option.
+ *       the --sparkExecutorMemory option. Other [[org.apache.spark.SparkConf]] key value pairs can be with the -D:k=v
+ *       option.
  */
 object ItemSimilarityDriver extends MahoutSparkDriver {
   // define only the options specific to ItemSimilarity
@@ -60,7 +61,7 @@ object ItemSimilarityDriver extends MahoutSparkDriver {
    */
   override def main(args: Array[String]): Unit = {
 
-    parser = new MahoutOptionParser(programName = "spark-itemsimilarity") {
+    parser = new MahoutSparkOptionParser(programName = "spark-itemsimilarity") {
       head("spark-itemsimilarity", "Mahout 1.0")
 
       //Input output options, non-driver specific
