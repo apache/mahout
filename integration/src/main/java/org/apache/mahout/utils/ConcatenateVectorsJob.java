@@ -113,7 +113,7 @@ public class ConcatenateVectorsJob extends AbstractJob {
     Path file = paths[0].getPath();
     SequenceFile.Reader reader = null;
     try {
-      reader = new SequenceFile.Reader(fs.getConf(), SequenceFile.Reader.file(file));
+      reader = new SequenceFile.Reader(fs, file, fs.getConf());
       return reader.getKeyClass().asSubclass(Writable.class);
     } finally {
       Closeables.close(reader, true);
