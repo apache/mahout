@@ -42,6 +42,14 @@ object NaiveBayes {
   /** default value for the smoothing parameter */
   def defaultAlphaI = 1.0f
 
+  // function to extract categories from string keys
+  type CategoryParser = String => String
+
+  // Default: seq2Sparse Categories are Stored in Drm Keys as: /Category/document_id
+  def seq2SparseCategoryParser: CategoryParser = x => x.split("/")(1)
+
+
+
   /**
    * Distributed training of a Naive Bayes model. Follows the approach presented in Rennie et.al.: Tackling the poor
    * assumptions of Naive Bayes Text classifiers, ICML 2003, http://people.csail.mit.edu/jrennie/papers/icml03-nb.pdf
@@ -89,8 +97,13 @@ object NaiveBayes {
     * Override this method in engine specific modules to optimize
     *
     * @param stringKeyedObservations DrmLike matrix; Output from seq2sparse
-    *                                in form K= /Category/document_title
+    *                                in form K= eg./Category/document_title
     *                                        V= TF or TF-IDF values per term
+    *
+    * @param cParser a String => String function used to extract categories from
+    *                Keys of the stringKeyedObservations DRM. The default
+    *                CategoryParser will extract "Category" from: '/Category/document_id'
+    *
     * @return (labelIndexMap,aggregatedByLabelObservationDrm)
     *
     *           labelIndexMap is an HashMap  K= label index
@@ -98,7 +111,8 @@ object NaiveBayes {
     *           aggregatedByLabelObservationDrm is a DrmLike[Int] of aggregated
     *             TF or TF-IDF counts per label
     */
-  def extractLabelsAndAggregateObservations[K:ClassTag]( stringKeyedObservations: DrmLike[K] ):
+  def extractLabelsAndAggregateObservations[K:ClassTag]( stringKeyedObservations: DrmLike[K],
+                                                         cParser: CategoryParser = seq2SparseCategoryParser):
   (mutable.HashMap[String,Double],DrmLike[Int]) = {
 
     implicit val distributedContext = stringKeyedObservations.context
@@ -113,12 +127,13 @@ object NaiveBayes {
         val blockB = block.like(keys.size, 1)
         keys -> blockB
     }
+
     // Extract the row label bindings from the slim Drm (the String keys)
     // strip the document_id from the row keys keeping only the category
     // sort the bindings into a list
     val labelVectorByRowIndex = strippedObeservations.getRowLabelBindings
-       .map(x => x._2 -> x._1.split("/")(1))
-       .toVector.sortWith(_._1 < _._1)
+      .map(x => x._2 -> cParser(x._1))
+      .toVector.sortWith(_._1 < _._1)
 
 
     // convert to an IntKeyed Drm so that we can compute transpose

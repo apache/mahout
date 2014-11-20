@@ -332,11 +332,9 @@ public class H2OHelper {
       for(Map.Entry<Integer,String> entry : rmap.entrySet()) {
         System.out.println("entry: "+entry.getValue()+": "+entry.getKey());
       }
-
-      // TODO: fix BUG here... h20.water.fvec does not accept string values
-      // need a new methof of storing String keyes.
+      // TODO: fix BUG here... h20.water.fvec.Vec does not accept string values
+      // TODO: need a new method of storing String keys.
       for (int r = 0; r < m.rowSize(); r++) {
-        System.out.println("setting: "+r+": "+rmap.get(r));
         writer.set(r, rmap.get(r));
       }
 
