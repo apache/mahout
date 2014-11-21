@@ -107,18 +107,8 @@ object RowSimilarityDriver extends MahoutSparkDriver {
   }
 
   override def start(masterUrl: String = parser.opts("master").asInstanceOf[String],
-                     appName: String = parser.opts("appName").asInstanceOf[String]):
-  Unit = {
-
-    // todo: the HashBiMap used in the TextDelimited Reader is hard coded into
-    // MahoutKryoRegistrator, it should be added to the register list here so it
-    // will be only specific to this job.
-    sparkConf.set("spark.kryo.referenceTracking", "false")
-      .set("spark.kryoserializer.buffer.mb", "200")// todo: should we take this out?
-
-    if (parser.opts("sparkExecutorMem").asInstanceOf[String] != "")
-      sparkConf.set("spark.executor.memory", parser.opts("sparkExecutorMem").asInstanceOf[String])
-    //else leave as set in Spark config
+      appName: String = parser.opts("appName").asInstanceOf[String]):
+    Unit = {
 
     super.start(masterUrl, appName)
 

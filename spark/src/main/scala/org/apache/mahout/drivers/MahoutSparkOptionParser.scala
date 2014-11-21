@@ -33,7 +33,7 @@ class MahoutSparkOptionParser(programName: String) extends MahoutOptionParser(pr
       options + ("sparkExecutorMem" -> x)
     }
 
-    opt[(String, String)]("define") abbr ("D") foreach { case (k, v) =>
+    opt[(String, String)]("define") abbr ("D") unbounded() foreach { case (k, v) =>
       sparkConf.set(k, v)
     } validate { x =>
       if (x._2 != "") success else failure("Value <sparkConfValue> must be non-blank")
