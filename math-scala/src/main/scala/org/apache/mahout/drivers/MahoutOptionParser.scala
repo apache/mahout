@@ -76,7 +76,7 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
     // not drms
     opts = opts ++ MahoutOptionParser.TextDelimitedElementsOptions
     note("\nInput text file schema options:")
-    opt[String]("inDelim") abbr ("id") text ("Input delimiter character (optional). Default: \"[,\\t]\"") action { (x, options) =>
+    opt[String]("inDelim") abbr ("id") text ("Input delimiter character (optional). Default: \"[ ,\\t]\"") action { (x, options) =>
       options + ("inDelim" -> x)
     }
 
