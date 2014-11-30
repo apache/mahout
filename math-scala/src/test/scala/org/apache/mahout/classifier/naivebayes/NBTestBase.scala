@@ -47,11 +47,11 @@ trait NBTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =>
     val epsilon = 1E-4 //keeping wide threshold for tonight
 
     val rowBindings = new java.util.HashMap[String,Integer]()
-    rowBindings.put("/Cat1/doc_1/", 0)
-    rowBindings.put("/Cat2/doc_1/", 1)
-    rowBindings.put("/Cat1/doc_2/", 2)
-    rowBindings.put("/Cat2/doc_2/", 3)
-    rowBindings.put("/Cat1/doc_3/", 4)
+    rowBindings.put("/Cat1/doc_a/", 0)
+    rowBindings.put("/Cat2/doc_b/", 1)
+    rowBindings.put("/Cat1/doc_c/", 2)
+    rowBindings.put("/Cat2/doc_d/", 3)
+    rowBindings.put("/Cat1/doc_e/", 4)
 
 
     val matrixSetup = sparse(
