@@ -3,15 +3,15 @@ package org.apache.mahout.classifier.naivebayes
 import org.apache.mahout.math._
 import org.apache.mahout.math.scalabindings._
 import org.apache.mahout.test.DistributedMahoutSuite
+import org.apache.mahout.test.MahoutSuite
 import org.scalatest.{FunSuite, Matchers}
 import collection._
 import JavaConversions._
 
 trait NBTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =>
+  val epsilon = 1E-6 //keeping wide threshold for tonight
 
   test("Simple Standard NB Model") {
-
-    val epsilon = 1E-4 //keeping wide threshold for tonight
 
     // test from simulated sparse TF-IDF data
     val inCoreTFIDF = sparse(
@@ -43,8 +43,6 @@ trait NBTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =>
   }
 
   test("NB Aggregator") {
-
-    val epsilon = 1E-4 //keeping wide threshold for tonight
 
     val rowBindings = new java.util.HashMap[String,Integer]()
     rowBindings.put("/Cat1/doc_a/", 0)
@@ -90,6 +88,48 @@ trait NBTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =>
     aggregatedTFIDFInCore.get(cat2, 2) - 0.0 should be < epsilon
     aggregatedTFIDFInCore.get(cat2, 3) - 0.2 should be < epsilon
 
+  }
+
+  test("Model DFS Serialization") {
+
+    // test from simulated sparse TF-IDF data
+    val inCoreTFIDF = sparse(
+      (0, 0.7) ::(1, 0.1) ::(2, 0.1) ::(3, 0.3) :: Nil,
+      (0, 0.4) ::(1, 0.4) ::(2, 0.1) ::(3, 0.1) :: Nil,
+      (0, 0.1) ::(1, 0.0) ::(2, 0.8) ::(3, 0.1) :: Nil,
+      (0, 0.1) ::(1, 0.1) ::(2, 0.1) ::(3, 0.7) :: Nil
+    )
+
+    val TFIDFDrm = drm.drmParallelize(m = inCoreTFIDF, numPartitions = 2)
+
+    // train a Standard NB Model
+    val model = NaiveBayes.trainNB(TFIDFDrm, false)
+
+    // validate the model- will throw an exception if model is invalid
+    model.validate()
+
+    // save the model
+    model.serialize(TmpDir)
+
+    // reload a new model which should be equal to the original
+    // this will automatically trigger a validate() call
+    val materializedModel= NBModel.materialize(TmpDir)
+
+
+    // check the labelWeights
+    model.labelWeight(0) - materializedModel.labelWeight(0) should be < epsilon //1.2
+    model.labelWeight(1) - materializedModel.labelWeight(1) should be < epsilon //1.0
+    model.labelWeight(2) - materializedModel.labelWeight(2) should be < epsilon //1.0
+    model.labelWeight(3) - materializedModel.labelWeight(3) should be < epsilon //1.0
+
+    // check the Feature weights
+    model.featureWeight(0) - materializedModel.featureWeight(0) should be < epsilon //1.3
+    model.featureWeight(1) - materializedModel.featureWeight(1) should be < epsilon //0.6
+    model.featureWeight(2) - materializedModel.featureWeight(2) should be < epsilon //1.1
+    model.featureWeight(3) - materializedModel.featureWeight(3) should be < epsilon //1.2
+
+    // check to se if the new model is complementary
+    materializedModel.isComplementary should be (model.isComplementary)
   }
 
 }
