@@ -61,7 +61,7 @@ object SparkNaiveBayes extends NaiveBayes{
   override def extractLabelsAndAggregateObservations[K: ClassTag]
     (stringKeyedObservations: DrmLike[K], cParser: CategoryParser = seq2SparseCategoryParser)
     (implicit ctx: DistributedContext):
-    (mutable.HashMap[String, Int], DrmLike[Int]) = {
+    (mutable.HashMap[String, Integer], DrmLike[Int]) = {
 
     //implicit val distributedContext = stringKeyedObservations.context
 
@@ -81,7 +81,7 @@ object SparkNaiveBayes extends NaiveBayes{
     stringKeyedObservations.uncache()
 
     var categoryIndex = 0
-    val labelIndexMap = new mutable.HashMap[String, Int]
+    val labelIndexMap = new mutable.HashMap[String, Integer]
 
     // has to be an better way of creating this map
     val categoryArray=aggregatedRdd.keys.takeOrdered(aggregatedRdd.count.toInt)
@@ -90,7 +90,7 @@ object SparkNaiveBayes extends NaiveBayes{
       categoryIndex += 1
     }
 
-    val intKeyedRdd = aggregatedRdd.map(x => (labelIndexMap(x._1), x._2))
+    val intKeyedRdd = aggregatedRdd.map(x => (labelIndexMap(x._1).toInt, x._2))
 
     val aggregetedObservationByLabelDrm = drmWrap(intKeyedRdd)
 

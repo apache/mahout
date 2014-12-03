@@ -40,8 +40,14 @@ trait NBTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =>
 
     val TFIDFDrm = drm.drmParallelize(m = inCoreTFIDF, numPartitions = 2)
 
+    val labelIndex = new java.util.HashMap[String,Integer]()
+    labelIndex.put("Cat1", 3)
+    labelIndex.put("Cat2", 2)
+    labelIndex.put("Cat3", 1)
+    labelIndex.put("Cat4", 0)
+
     // train a Standard NB Model
-    val model = NaiveBayes.trainNB(TFIDFDrm, false)
+    val model = NaiveBayes.trainNB(TFIDFDrm, labelIndex, false)
 
     // validate the model- will throw an exception if model is invalid
     model.validate()
@@ -86,8 +92,8 @@ trait NBTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =>
 
     labelIndex.size should be (2)
 
-    val cat1=labelIndex("Cat1").toInt
-    val cat2=labelIndex("Cat2").toInt
+    val cat1=labelIndex("Cat1")
+    val cat2=labelIndex("Cat2")
 
     cat1 should be (0)
     cat2 should be (1)
@@ -117,10 +123,16 @@ trait NBTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =>
       (0, 0.1) ::(1, 0.1) ::(2, 0.1) ::(3, 0.7) :: Nil
     )
 
+    val labelIndex = new java.util.HashMap[String,Integer]()
+    labelIndex.put("Cat1", 0)
+    labelIndex.put("Cat2", 1)
+    labelIndex.put("Cat3", 2)
+    labelIndex.put("Cat4", 3)
+
     val TFIDFDrm = drm.drmParallelize(m = inCoreTFIDF, numPartitions = 2)
 
-    // train a Standard NB Model
-    val model = NaiveBayes.trainNB(TFIDFDrm, false)
+    // train a Standard NB Model- no label index here
+    val model = NaiveBayes.trainNB(TFIDFDrm, labelIndex, false)
 
     // validate the model- will throw an exception if model is invalid
     model.validate()

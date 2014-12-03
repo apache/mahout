@@ -56,8 +56,10 @@ trait NaiveBayes {
    * @param alphaI smoothing parameter
    * @return trained naive bayes model
    */
-  def trainNB (observationsPerLabel: DrmLike[Int], trainComplementary: Boolean = true,
-    alphaI: Float = defaultAlphaI): NBModel = {
+  def trainNB (observationsPerLabel: DrmLike[Int],
+               labelIndex: Map[String, Integer],
+               trainComplementary: Boolean = true,
+               alphaI: Float = defaultAlphaI): NBModel = {
 
     // Summation of all weights per feature
     val weightsPerFeature = observationsPerLabel.colSums
@@ -83,9 +85,13 @@ trait NaiveBayes {
       thetaNormalizer = thetaTrainer.retrievePerLabelThetaNormalizer()
     }
 
-    new NBModel(inCoreTFIDF, weightsPerFeature, weightsPerLabel,
-      thetaNormalizer, alphaI, trainComplementary)
-
+    new NBModel(inCoreTFIDF,
+                weightsPerFeature,
+                weightsPerLabel,
+                thetaNormalizer,
+                labelIndex,
+                alphaI,
+                trainComplementary)
   }
 
   /**
@@ -100,15 +106,15 @@ trait NaiveBayes {
    *   Keys of the stringKeyedObservations DRM. The default
    *   CategoryParser will extract "Category" from: '/Category/document_id'
    * @return  (labelIndexMap,aggregatedByLabelObservationDrm)
-   *   labelIndexMap is a HashMap  K = label row index
-   *                               V = label
+   *   labelIndexMap is a HashMap [String, Integer] K = label row index
+   *                                                V = label
    *   aggregatedByLabelObservationDrm is a DrmLike[Int] of aggregated
    *   TF or TF-IDF counts per label
    */
   def extractLabelsAndAggregateObservations[K: ClassTag]
     (stringKeyedObservations: DrmLike[K], cParser: CategoryParser = seq2SparseCategoryParser)
     (implicit ctx: DistributedContext):
-    (mutable.HashMap[String, Int], DrmLike[Int]) = {
+    (mutable.HashMap[String, Integer], DrmLike[Int]) = {
 
     //implicit val distributedContext = stringKeyedObservations.context
 
@@ -166,7 +172,7 @@ trait NaiveBayes {
     stringKeyedObservations.uncache()
 
     var labelIndex = 0
-    var labelIndexMap = new mutable.HashMap[String, Int]
+    val labelIndexMap = new mutable.HashMap[String, Integer]
     val encodedLabelByRowIndexVector = new DenseVector(labelVectorByRowIndex.size)
     
     // Encode Categories as an Integer (Double) so we can broadcast as a vector
@@ -178,10 +184,10 @@ trait NaiveBayes {
         labelIndexMap.put(labelVectorByRowIndex(i)._2, labelIndex)
         labelIndex += 1
       }
-      //println(i+" map does not contain: "+labelVectorByRowIndex(i)._2)
+      // don't like this casting but need to use a java.lang.Integer when setting rowLabelBindings
       encodedLabelByRowIndexVector(i) = labelIndexMap
-                                             .getOrElse(labelVectorByRowIndex(i)._2, -1)
-                                             .toDouble
+                                          .getOrElse(labelVectorByRowIndex(i)._2, -1)
+                                          .asInstanceOf[Int].toDouble
     }
 
     // "Combiner": Map and aggregate by Category. Do this by broadcasting the encoded
@@ -210,7 +216,7 @@ trait NaiveBayes {
     (labelIndexMap, aggregetedObservationByLabelDrm)
   }
 
-  def testNB(model: NBModel, )
+  //def testNB(model: NBModel, )
 
 
 }

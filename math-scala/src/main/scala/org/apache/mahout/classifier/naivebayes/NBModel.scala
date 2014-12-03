@@ -39,7 +39,8 @@ class NBModel {
   var numFeatures: Double = 0.0
   var totalWeightSum: Double = 0.0
   var isComplementary: Boolean = false
-  var alphaVector: Vector= null
+  var alphaVector: Vector = null
+  var labelIndex: Map[String, Integer] = null
 
   // todo: is distributed context being set up correctly here?  Maybe it is a good
   // idea to move the serialize and materialize out of the model and into a helper
@@ -48,10 +49,11 @@ class NBModel {
 
   /**
    *
-   * @param weightMatrix Aggregated matrix of weights of features x labels
+   * @param weightMatrix Aggregated matrix of weights of labels x features
    * @param featureWeights Vector of summation of all feature weights.
    * @param labelWeights Vector of summation of all label weights.
    * @param weightNormalizers Vector of weight normalizers per label (used only for complemtary models)
+   * @param labelIndex HashMap of labels and their corresponding row in the weightMatrix
    * @param alphaI Laplacian smoothing factor.
    * @param isComplementary Whether or not this is a complementary model.
    */
@@ -59,6 +61,7 @@ class NBModel {
            featureWeights: Vector,
            labelWeights: Vector,
            weightNormalizers: Vector,
+           labelIndex: Map[String, Integer],
            alphaI: Float,
            isComplementary: Boolean) {
     this()
@@ -67,11 +70,15 @@ class NBModel {
     this.weightsPerLabelAndFeature = weightMatrix
     this.weightsPerFeature = featureWeights
     this.weightsPerLabel = labelWeights
+    this.labelIndex = labelIndex
     this.perlabelThetaNormalizer = weightNormalizers
     this.numFeatures = featureWeights.getNumNondefaultElements
     this.totalWeightSum = labelWeights.zSum
     this.alphaI = alphaI
     this.isComplementary = isComplementary
+
+
+    validate()
 
   }
   /** getter for summed label weights.  Used by legacy classifier */
@@ -115,8 +122,15 @@ class NBModel {
     }
     drmParallelize(isComplementaryDrm).dfsWrite(pathToModel + "/isComplementaryDrm.drm")
 
+    // write the label index as a String-Keyed DRM.
+  //  val numLabels= labelIndex.size
+    val labelIndexDummyDrm = dense(weightsPerLabel).t.like
+    labelIndexDummyDrm.setRowLabelBindings(labelIndex)
+    drmParallelizeWithRowLabels(labelIndexDummyDrm).dfsWrite(pathToModel + "/labelIndex.drm")
+
   }
 
+  /** Model Validation */
   def validate() {
     assert(alphaI > 0, "alphaI has to be greater than 0!")
     assert(numFeatures > 0, "the vocab count has to be greater than 0!")
@@ -129,8 +143,9 @@ class NBModel {
       assert(perlabelThetaNormalizer != null, "the theta normalizers have to be defined")
       assert(perlabelThetaNormalizer.getNumNondefaultElements > 0, "the number of theta normalizers has to be greater than 0!")
       assert(Math.signum(perlabelThetaNormalizer.minValue) == Math.signum(perlabelThetaNormalizer.maxValue), "Theta normalizers do not all have the same sign")
-      assert(perlabelThetaNormalizer.getNumNonZeroElements == perlabelThetaNormalizer.size, "Theta normalizers can not have zero value.")
+      assert(perlabelThetaNormalizer.getNumNonZeroElements == perlabelThetaNormalizer.size, "Weight normalizers can not have zero value.")
     }
+    assert(labelIndex.size == weightsPerLabel.getNumNondefaultElements, "label index must have entries for all labels")
   }
 
 }
@@ -139,37 +154,41 @@ object NBModel{
   /**
    * Read a trained model in from from the filesystem.
    * @param pathToModel directory from which to read individual model components
-   * @return
+   * @return a valid NBModel
    */
   def materialize(pathToModel: String)(implicit ctx: DistributedContext): NBModel = {
     val weightsPerLabelAndFeatureDrm = drmDfsRead(pathToModel + "/weightsPerLabelAndFeatureDrm.drm")
     val weightsPerFeatureDrm = drmDfsRead(pathToModel + "/weightsPerFeatureDrm.drm")
     val weightsPerLabelDrm = drmDfsRead(pathToModel + "/weightsPerLabelDrm.drm")
     val alphaIDrm = drmDfsRead(pathToModel + "/alphaIDrm.drm")
+    val dummyLabelDrm= drmDfsRead(pathToModel + "/labelIndex.drm")
 
     // isComplementry is true if isComplementaryDrm(0,0) == 1 else false
     val isComplementaryDrm = drmDfsRead(pathToModel + "/isComplementaryDrm.drm")
+    val isComplementary = isComplementaryDrm.collect(0, 0).toInt == 1
 
     val weightsPerLabelAndFeature = weightsPerLabelAndFeatureDrm.collect
     val weightsPerFeature = weightsPerFeatureDrm.collect(0, ::)
     val weightsPerLabel = weightsPerLabelDrm.collect(0, ::)
 
     val alphaI: Float = alphaIDrm.collect(0, 0).toFloat
-    val isComplementary = isComplementaryDrm.collect(0, 0).toInt == 1
+
 
     var perLabelThetaNormalizer= weightsPerFeature.like()
     if (isComplementary) {
       val perLabelThetaNormalizerDrm = drm.drmDfsRead(pathToModel + "/perlabelThetaNormalizerDrm.drm")
       perLabelThetaNormalizer = perLabelThetaNormalizerDrm.collect(0, ::)
     }
+    val labelIndex = dummyLabelDrm.getRowLabelBindings
 
+    // model validation is triggered in
     val model: NBModel = new NBModel(weightsPerLabelAndFeature,
       weightsPerFeature,
       weightsPerLabel,
       perLabelThetaNormalizer,
+      mapAsScalaMap(labelIndex),
       alphaI,
       isComplementary)
-    model.validate
 
     model
   }
