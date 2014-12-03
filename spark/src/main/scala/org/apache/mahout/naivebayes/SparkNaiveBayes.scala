@@ -19,8 +19,7 @@ package org.apache.mahout.naivebayes
 
 import org.apache.mahout.math._
 
-import org.apache.spark.rdd.RDD
-import org.apache.mahout.sparkbindings.drm.{CheckpointedDrmSpark, DrmRddInput}
+import org.apache.mahout.sparkbindings.drm.CheckpointedDrmSpark
 
 import scalabindings._
 import scalabindings.RLikeOps._
@@ -48,22 +47,23 @@ object SparkNaiveBayes extends NaiveBayes{
    * Optimized for spark
    *
    * @param stringKeyedObservations DrmLike matrix; Output from seq2sparse
-   *   in form K= eg./Category/document_title
-   *           V= TF or TF-IDF values per term
+   *   in form K = e.g./Category/document_title
+   *           V = TF or TF-IDF values per term
    * @param cParser a String => String function used to extract categories from
    *   Keys of the stringKeyedObservations DRM. The default
    *   CategoryParser will extract "Category" from: '/Category/document_id'
-   * @return  (labelIndexMap,aggregatedByLabelObservationDrm)
-   *   labelIndexMap is a HashMap  K= label row index
-   *                               V= label
+   * @return  (labelIndexMap, aggregatedByLabelObservationDrm)
+   *   labelIndexMap is a HashMap  K = label row index
+   *                               V = label
    *   aggregatedByLabelObservationDrm is a DrmLike[Int] of aggregated
    *   TF or TF-IDF counts per label
    */
   override def extractLabelsAndAggregateObservations[K: ClassTag]
-    (stringKeyedObservations: DrmLike[K], cParser: CategoryParser = seq2SparseCategoryParser):
-    (mutable.HashMap[String,Double], DrmLike[Int]) = {
+    (stringKeyedObservations: DrmLike[K], cParser: CategoryParser = seq2SparseCategoryParser)
+    (implicit ctx: DistributedContext):
+    (mutable.HashMap[String, Int], DrmLike[Int]) = {
 
-    implicit val distributedContext = stringKeyedObservations.context
+    //implicit val distributedContext = stringKeyedObservations.context
 
     val stringKeyedRdd = stringKeyedObservations
                            .checkpoint()
@@ -71,7 +71,8 @@ object SparkNaiveBayes extends NaiveBayes{
                            .rdd
 
     // is it necessary to sort this?
-    // how expensive is it for spark to sort (relatively small) tuples?
+    // how expensive is it for spark to sort (relatively few) tuples?
+    // does this cause repartitioning on the back end?
     val aggregatedRdd= stringKeyedRdd
                          .map(x => (cParser(x._1), x._2))
                          .reduceByKey(_ + _)
@@ -79,21 +80,21 @@ object SparkNaiveBayes extends NaiveBayes{
 
     stringKeyedObservations.uncache()
 
-    var categoryIndex = 0.0d
-    val categoryMap = new mutable.HashMap[String, Double]
+    var categoryIndex = 0
+    val labelIndexMap = new mutable.HashMap[String, Int]
 
     // has to be an better way of creating this map
     val categoryArray=aggregatedRdd.keys.takeOrdered(aggregatedRdd.count.toInt)
     for(i <- 0 until categoryArray.size){
-      categoryMap.put(categoryArray(i), categoryIndex)
-      categoryIndex = categoryIndex+ 1.0
+      labelIndexMap.put(categoryArray(i), categoryIndex)
+      categoryIndex += 1
     }
 
-    val intKeyedRdd = aggregatedRdd.map(x => (categoryMap(x._1).toInt, x._2))
+    val intKeyedRdd = aggregatedRdd.map(x => (labelIndexMap(x._1), x._2))
 
     val aggregetedObservationByLabelDrm = drmWrap(intKeyedRdd)
 
-    (categoryMap, aggregetedObservationByLabelDrm)
+    (labelIndexMap, aggregetedObservationByLabelDrm)
   }
 
 

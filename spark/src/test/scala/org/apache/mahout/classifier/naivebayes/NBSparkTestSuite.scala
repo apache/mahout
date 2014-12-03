@@ -55,11 +55,11 @@ class NBSparkTestSuite extends FunSuite with MahoutSuite with DistributedSparkSu
     dslLabelIndex.size should be (2)
     sparkLabelIndex.size should be (2)
 
-    val dslCat1=dslLabelIndex("Cat1").toInt
-    val dslCat2=dslLabelIndex("Cat2").toInt
+    val dslCat1=dslLabelIndex("Cat1")
+    val dslCat2=dslLabelIndex("Cat2")
 
-    val sparkCat1=sparkLabelIndex("Cat1").toInt
-    val sparkCat2=sparkLabelIndex("Cat2").toInt
+    val sparkCat1=sparkLabelIndex("Cat1")
+    val sparkCat2=sparkLabelIndex("Cat2")
 
 
     dslCat1 should be (0)
