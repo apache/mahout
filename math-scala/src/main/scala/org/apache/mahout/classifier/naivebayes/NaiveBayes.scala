@@ -213,7 +213,7 @@ trait NaiveBayes {
     (labelIndexMap, aggregetedObservationByLabelDrm)
   }
 
-  def testNB[K: ClassTag](model: NBModel, testSet: DrmLike[String]): Unit ={
+  def testNB[K: ClassTag](model: NBModel, testSet: DrmLike[K]): Unit ={
 
     val labelMap = model.labelIndex
 
