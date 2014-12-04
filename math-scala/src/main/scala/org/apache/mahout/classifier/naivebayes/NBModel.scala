@@ -101,6 +101,16 @@ class NBModel {
     weightsPerLabelAndFeature.getQuick(label, feature)
   }
 
+  /** getter for a single empty vector of weights */
+  def createScoringVector: Vector = {
+     weightsPerLabel.like
+  }
+
+  /** getter for a the number of labels to consider */
+  def numLabels: Int = {
+     weightsPerLabel.size
+  }
+
 
 
   /**

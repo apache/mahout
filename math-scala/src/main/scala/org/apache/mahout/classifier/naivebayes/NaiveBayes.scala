@@ -18,6 +18,7 @@
 package org.apache.mahout.classifier.naivebayes
 
 
+import org.apache.mahout.classifier.{ResultAnalyzer, ClassifierResult}
 import org.apache.mahout.math._
 import scalabindings._
 import scalabindings.RLikeOps._
@@ -27,7 +28,7 @@ import scala.reflect.ClassTag
 import scala.language.asInstanceOf
 import collection._
 import JavaConversions._
-
+import scala.collection.JavaConversions._
 
 import org.apache.mahout.classifier.naivebayes.training.ComplementaryThetaTrainer
 
@@ -154,10 +155,6 @@ trait NaiveBayes {
       val intKeyedObservations= drmParallelize(inCoreIntKeyedObservations)
     */
 
-    /* would this work without collecting??
-    var intKeyedObservations = drmParallelizeWithRowIndices(stringKeyedObservations(::,::))
-    */
-
     // Copy the Distributed Matrices. Iterate through and bind one column at a time.
     // Very inefficient, but keeps us from pulling the full dataset upfront.
     var singleColumnInCore= sparse(stringKeyedObservations.collect(::, 0)).t
@@ -196,7 +193,7 @@ trait NaiveBayes {
     // BCastEncodedCategoryByRowVector.  Iteratively sum all categories.
     val nLabels = labelIndex
 
-    val BCastEncodedCategoryByRowVector = drmBroadcast(encodedLabelByRowIndexVector)
+    val bcastEncodedCategoryByRowVector = drmBroadcast(encodedLabelByRowIndexVector)
 
     val aggregetedObservationByLabelDrm = intKeyedObservations.t.mapBlock(ncol = nLabels) {
       case (keys, blockA) =>
@@ -204,7 +201,7 @@ trait NaiveBayes {
         var label : Int = 0
         for (i <- 0 until keys.size) {
           blockA(i, ::).nonZeroes().foreach { elem =>
-            label = BCastEncodedCategoryByRowVector.get(elem.index).toInt
+            label = bcastEncodedCategoryByRowVector.get(elem.index).toInt
             blockB(i, label) = blockB(i, label) + blockA(i, elem.index)
           }
         }
@@ -216,10 +213,63 @@ trait NaiveBayes {
     (labelIndexMap, aggregetedObservationByLabelDrm)
   }
 
-  //def testNB(model: NBModel, )
+  def testNB[K: ClassTag](model: NBModel, testSet: DrmLike[String]): Unit ={
+
+    val labelMap = model.labelIndex
+
+    val numLabels = model.numLabels
+
+    val numTestInstances = testSet.nrow.toInt
+
+    val classifier = model match {
+      case xx if model.isComplementary => new ComplementaryNBClassifier(model)
+      case _ => new StandardNBClassifier(model)
+    }
+
+    val scoredTestSet = testSet.mapBlock(ncol = numLabels){
+      case (keys, block)=>
+        val numInstances = keys.size
+        val blockB= block.like(numInstances, numLabels)
+        for(i <- 0 until numInstances){
+          blockB(i, ::) := classifier.classifyFull(block(i, ::) )
+        }
+        keys -> blockB
+    }
+
+    // may want to strip this down if we think that numDocuments x numLabels wont fit into memory
+    val testSetLabelMap = scoredTestSet.getRowLabelBindings
+
+    // todo:XXX: reverse the labelMaps in training and through the model?
+    val reverseTestSetLabelMap = mapAsScalaMap(testSetLabelMap).map(x => x._2 -> x._1)
+
+    val reverseLabelMap = mapAsScalaMap(labelMap).map(x => x._2 -> x._1)
+
+    val analyzer: ResultAnalyzer = new ResultAnalyzer(labelMap.keys, "DEFAULT")
+
+    // need to do this with out collecting
+    val inCoreScoredTestSet = scoredTestSet.collect
+
+    for(i <- 0 until numTestInstances){
+      val (bestIdx, bestScore) = argmax(inCoreScoredTestSet(i,::))
+      val classifierResult = new ClassifierResult(reverseLabelMap(bestIdx), bestScore)
+      analyzer.addInstance(reverseTestSetLabelMap(i), classifierResult)
+    }
+  }
+
+  // argmax with values as well
+  def argmax(v: Vector): (Int, Double) = {
+    var bestIdx: Int = Integer.MIN_VALUE
+    var bestScore: Double = Integer.MIN_VALUE.asInstanceOf[Int].toDouble
+    for(i <-0 until v.length) {
+      if(v(i) > bestScore){
+        bestScore = v(i)
+        bestIdx = i
+      }
+    }
+    (bestIdx, bestScore)
+  }
 
 
 }
 
 object NaiveBayes extends NaiveBayes
-
