@@ -36,7 +36,7 @@ import org.apache.mahout.classifier.naivebayes.training.ComplementaryThetaTraine
  * Distributed training of a Naive Bayes model. Follows the approach presented in Rennie et.al.: Tackling the poor
  * assumptions of Naive Bayes Text classifiers, ICML 2003, http://people.csail.mit.edu/jrennie/papers/icml03-nb.pdf
  */
-trait NaiveBayes {
+trait NaiveBayes extends java.io.Serializable{
 
   /** default value for the Laplacian smoothing parameter */
   def defaultAlphaI = 1.0f
@@ -115,7 +115,7 @@ trait NaiveBayes {
   def extractLabelsAndAggregateObservations[K: ClassTag]
     (stringKeyedObservations: DrmLike[K], cParser: CategoryParser = seq2SparseCategoryParser)
     (implicit ctx: DistributedContext):
-    (mutable.HashMap[String, Integer], DrmLike[Int]) = {
+    (mutable.HashMap[String, Integer], DrmLike[Int])= {
 
     //implicit val distributedContext = stringKeyedObservations.context
 
@@ -144,7 +144,7 @@ trait NaiveBayes {
                                   .toVector.sortWith(_._1 < _._1)
 
     // Copy stringKeyedObservations to an Int-Keyed Drm so that we can compute transpose
-    /* Copy the Collected Matrices up front
+    // Copy the Collected Matrices up front for now until we hav a better way of converting
       val inCoreStringKeyedObservations = stringKeyedObservations.collect
       val inCoreIntKeyedObservations = new SparseMatrix(
                               stringKeyedObservations.nrow.toInt,
@@ -153,8 +153,8 @@ trait NaiveBayes {
         inCoreIntKeyedObservations(i, ::) = inCoreStringKeyedObservations(i, ::)
       }
       val intKeyedObservations= drmParallelize(inCoreIntKeyedObservations)
-    */
 
+    /* Too many collects- does not work.  maybe chunk this or just drop down into spark for now
     // Copy the Distributed Matrices. Iterate through and bind one column at a time.
     // Very inefficient, but keeps us from pulling the full dataset upfront.
     var singleColumnInCore= sparse(stringKeyedObservations.collect(::, 0)).t
@@ -165,7 +165,7 @@ trait NaiveBayes {
       singleColumnDrm = drmParallelize(singleColumnInCore)
       intKeyedObservations = intKeyedObservations cbind drmParallelize(singleColumnInCore)
     }
-
+    */
     stringKeyedObservations.uncache()
 
     var labelIndex = 0
@@ -213,21 +213,31 @@ trait NaiveBayes {
     (labelIndexMap, aggregetedObservationByLabelDrm)
   }
 
-  def testNB[K: ClassTag](model: NBModel, testSet: DrmLike[K]): Unit ={
+  def testNB[K: ClassTag](model: NBModel,
+                          testSet: DrmLike[K],
+                          cParser: CategoryParser = seq2SparseCategoryParser): ResultAnalyzer = {
 
     val labelMap = model.labelIndex
 
     val numLabels = model.numLabels
 
+    testSet.checkpoint()
+
     val numTestInstances = testSet.nrow.toInt
 
+
     val classifier = model match {
-      case xx if model.isComplementary => new ComplementaryNBClassifier(model)
-      case _ => new StandardNBClassifier(model)
+      case xx if model.isComplementary => new ComplementaryNBClassifier(model) with Serializable
+      case _ => new StandardNBClassifier(model) with Serializable
     }
 
+    /*  need to change the model around so that we can broadcast it
     val scoredTestSet = testSet.mapBlock(ncol = numLabels){
       case (keys, block)=>
+        val classifier = model match {
+          case xx if model.isComplementary => new ComplementaryNBClassifier(model) with Serializable
+          case _ => new StandardNBClassifier(model) with Serializable
+        }
         val numInstances = keys.size
         val blockB= block.like(numInstances, numLabels)
         for(i <- 0 until numInstances){
@@ -239,22 +249,42 @@ trait NaiveBayes {
     // may want to strip this down if we think that numDocuments x numLabels wont fit into memory
     val testSetLabelMap = scoredTestSet.getRowLabelBindings
 
+    */
+
+    // Since we cant broadcast the model as is do it sequentially up front for now
+    val inCoreTestSet = testSet.collect
+
+    // get the labels of the test set and extract the keys
+    val testSetLabelMap = testSet.getRowLabelBindings //.map(x => cParser(x._1) -> x._2)
+
+    val inCoreScoredTestSet = testSet.like(numTestInstances, numLabels)
+
+    testSet.uncache()
+    
+    for(i <- 0 until numTestInstances){
+      inCoreScoredTestSet(i, ::) := classifier.classifyFull(inCoreTestSet(i, ::) )
+    }
+
     // todo:XXX: reverse the labelMaps in training and through the model?
-    val reverseTestSetLabelMap = mapAsScalaMap(testSetLabelMap).map(x => x._2 -> x._1)
+    // reverse the label map and extract the labels
+    val reverseTestSetLabelMap = testSetLabelMap.map(x => x._2 -> cParser(x._1))
 
-    val reverseLabelMap = mapAsScalaMap(labelMap).map(x => x._2 -> x._1)
+    val reverseLabelMap = labelMap.map(x => x._2 -> x._1)
 
-    val analyzer: ResultAnalyzer = new ResultAnalyzer(labelMap.keys, "DEFAULT")
+    val analyzer = new ResultAnalyzer(labelMap.keys, "DEFAULT")
 
     // need to do this with out collecting
-    val inCoreScoredTestSet = scoredTestSet.collect
-
+    //val inCoreScoredTestSet = scoredTestSet.collect
     for(i <- 0 until numTestInstances){
       val (bestIdx, bestScore) = argmax(inCoreScoredTestSet(i,::))
       val classifierResult = new ClassifierResult(reverseLabelMap(bestIdx), bestScore)
       analyzer.addInstance(reverseTestSetLabelMap(i), classifierResult)
     }
+
+    analyzer
   }
+
+
 
   // argmax with values as well
   def argmax(v: Vector): (Int, Double) = {
@@ -272,4 +302,4 @@ trait NaiveBayes {
 
 }
 
-object NaiveBayes extends NaiveBayes
+object NaiveBayes extends NaiveBayes with java.io.Serializable

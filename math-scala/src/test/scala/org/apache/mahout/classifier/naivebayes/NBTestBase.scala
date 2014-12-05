@@ -138,11 +138,11 @@ trait NBTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =>
     model.validate()
 
     // save the model
-    model.serialize(TmpDir)
+    model.dfsWrite(TmpDir)
 
     // reload a new model which should be equal to the original
     // this will automatically trigger a validate() call
-    val materializedModel= NBModel.materialize(TmpDir)
+    val materializedModel= NBModel.dfsRead(TmpDir)
 
 
     // check the labelWeights

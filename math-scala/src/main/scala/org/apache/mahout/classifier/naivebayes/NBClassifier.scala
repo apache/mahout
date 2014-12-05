@@ -23,7 +23,7 @@ import scala.collection.JavaConversions._
  * Abstract Classifier base for Complentary and Standard Classifiers
  * @param nbModel a trained NBModel
  */
-abstract class AbstractNBClassifier(nbModel: NBModel) {
+abstract class AbstractNBClassifier(nbModel: NBModel) extends java.io.Serializable {
   val model = nbModel
 
   protected def getScoreForLabelFeature(label: Int, feature: Int): Double
@@ -61,14 +61,14 @@ abstract class AbstractNBClassifier(nbModel: NBModel) {
  * Standard Classifier
  * @param nbModel a trained NBModel
  */
-class StandardNBClassifier(nbModel: NBModel) extends AbstractNBClassifier(nbModel: NBModel) {
+class StandardNBClassifier(nbModel: NBModel) extends AbstractNBClassifier(nbModel: NBModel) with java.io.Serializable{
   def getScoreForLabelFeature(label: Int, feature: Int): Double = {
     val model: NBModel = getModel
     StandardNBClassifier.computeWeight(model.weight(label, feature), model.labelWeight(label), model.alphaI, model.numFeatures)
   }
 }
 
-object StandardNBClassifier  {
+object StandardNBClassifier extends java.io.Serializable {
   /**
    *
    * @param featureLabelWeight
@@ -88,7 +88,7 @@ object StandardNBClassifier  {
  * Complemtary Classifier
  * @param nbModel a trained NBModel
  */
-class ComplementaryNBClassifier(nbModel: NBModel) extends AbstractNBClassifier(nbModel: NBModel) {
+class ComplementaryNBClassifier(nbModel: NBModel) extends AbstractNBClassifier(nbModel: NBModel) with java.io.Serializable {
 
   def getScoreForLabelFeature(label: Int, feature: Int): Double = {
     val model: NBModel = getModel
@@ -97,7 +97,7 @@ class ComplementaryNBClassifier(nbModel: NBModel) extends AbstractNBClassifier(n
   }
 }
 
-object ComplementaryNBClassifier  {
+object ComplementaryNBClassifier extends java.io.Serializable {
   /**
    * Calculate weight normalized complementary score
    * @param featureWeight

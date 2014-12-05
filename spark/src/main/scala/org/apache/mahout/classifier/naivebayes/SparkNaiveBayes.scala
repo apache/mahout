@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.naivebayes
+package org.apache.mahout.classifier.naivebayes
 
 import org.apache.mahout.math._
 

@@ -18,7 +18,7 @@
 package org.apache.mahout.drivers
 
 import org.apache.mahout.classifier.naivebayes._
-import org.apache.mahout.naivebayes.SparkNaiveBayes
+import org.apache.mahout.classifier.naivebayes.SparkNaiveBayes
 import org.apache.mahout.common.HDFSPathSearch
 import org.apache.mahout.math.cf.SimilarityAnalysis
 import org.apache.mahout.math.drm
@@ -114,7 +114,7 @@ object TrainNBDriver extends MahoutSparkDriver {
     printf("Training model...")
     val model = NaiveBayes.trainNB(aggregatedObservations, labelIndex)
     printf("Saving model to "+outputPath+"...")
-    model.serialize(outputPath)
+    model.dfsWrite(outputPath)
 
     stop
   }

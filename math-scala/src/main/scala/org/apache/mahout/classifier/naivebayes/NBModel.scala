@@ -30,7 +30,7 @@ import JavaConversions._
 
 
 
-class NBModel {
+class NBModel extends java.io.Serializable {
   var weightsPerLabel: Vector = null
   var perlabelThetaNormalizer: Vector = null
   var weightsPerFeature: Vector = null
@@ -117,14 +117,14 @@ class NBModel {
    * Write a trained model to the filesystem as a set of DRMs
    * @param pathToModel Directory to which the model will be written
    */
-  def serialize(pathToModel: String)(implicit ctx: DistributedContext): Unit = {
+  def dfsWrite(pathToModel: String)(implicit ctx: DistributedContext): Unit = {
     drmParallelize(weightsPerLabelAndFeature).dfsWrite(pathToModel + "/weightsPerLabelAndFeatureDrm.drm")
-    drmParallelize(dense(weightsPerFeature)).dfsWrite(pathToModel + "/weightsPerFeatureDrm.drm")
-    drmParallelize(dense(weightsPerLabel)).dfsWrite(pathToModel + "/weightsPerLabelDrm.drm")
-    drmParallelize(dense(perlabelThetaNormalizer)).dfsWrite(pathToModel + "/perlabelThetaNormalizerDrm.drm")
-    drmParallelize(dense(dvec(alphaI))).dfsWrite(pathToModel + "/alphaIDrm.drm")
+    drmParallelize(sparse(weightsPerFeature)).dfsWrite(pathToModel + "/weightsPerFeatureDrm.drm")
+    drmParallelize(sparse(weightsPerLabel)).dfsWrite(pathToModel + "/weightsPerLabelDrm.drm")
+    drmParallelize(sparse(perlabelThetaNormalizer)).dfsWrite(pathToModel + "/perlabelThetaNormalizerDrm.drm")
+    drmParallelize(sparse(svec((0,alphaI)::Nil))).dfsWrite(pathToModel + "/alphaIDrm.drm")
     // isComplementry is true if isComplementaryDrm(0,0) == 1 else false
-    val isComplementaryDrm = dense(1,1)
+    val isComplementaryDrm = sparse(0 to 1, 0 to 1)
     if(isComplementary){
       isComplementaryDrm(0,0) = 1.0
     } else {
@@ -134,7 +134,7 @@ class NBModel {
 
     // write the label index as a String-Keyed DRM.
   //  val numLabels= labelIndex.size
-    val labelIndexDummyDrm = dense(weightsPerLabel).t.like
+    val labelIndexDummyDrm = sparse(weightsPerLabel).t.like
     labelIndexDummyDrm.setRowLabelBindings(labelIndex)
     drmParallelizeWithRowLabels(labelIndexDummyDrm).dfsWrite(pathToModel + "/labelIndex.drm")
 
@@ -160,43 +160,54 @@ class NBModel {
 
 }
 
-object NBModel{
+object NBModel extends java.io.Serializable {
   /**
    * Read a trained model in from from the filesystem.
    * @param pathToModel directory from which to read individual model components
    * @return a valid NBModel
    */
-  def materialize(pathToModel: String)(implicit ctx: DistributedContext): NBModel = {
-    val weightsPerLabelAndFeatureDrm = drmDfsRead(pathToModel + "/weightsPerLabelAndFeatureDrm.drm")
-    val weightsPerFeatureDrm = drmDfsRead(pathToModel + "/weightsPerFeatureDrm.drm")
-    val weightsPerLabelDrm = drmDfsRead(pathToModel + "/weightsPerLabelDrm.drm")
-    val alphaIDrm = drmDfsRead(pathToModel + "/alphaIDrm.drm")
-    val dummyLabelDrm= drmDfsRead(pathToModel + "/labelIndex.drm")
+  def dfsRead(pathToModel: String)(implicit ctx: DistributedContext): NBModel = {
+
+    val weightsPerFeatureDrm = drmDfsRead(pathToModel + "/weightsPerFeatureDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
+    val weightsPerFeature = weightsPerFeatureDrm.collect(0, ::)
+    weightsPerFeatureDrm.uncache()
+
+    val weightsPerLabelDrm = drmDfsRead(pathToModel + "/weightsPerLabelDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
+    val weightsPerLabel = weightsPerLabelDrm.collect(0, ::)
+    weightsPerLabelDrm.uncache()
+
+    val alphaIDrm = drmDfsRead(pathToModel + "/alphaIDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
+    val alphaI: Float = alphaIDrm.collect(0, 0).toFloat
+    alphaIDrm.uncache()
+
+    val dummyLabelDrm= drmDfsRead(pathToModel + "/labelIndex.drm").checkpoint(CacheHint.MEMORY_ONLY)
 
     // isComplementry is true if isComplementaryDrm(0,0) == 1 else false
-    val isComplementaryDrm = drmDfsRead(pathToModel + "/isComplementaryDrm.drm")
+    val isComplementaryDrm = drmDfsRead(pathToModel + "/isComplementaryDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
     val isComplementary = isComplementaryDrm.collect(0, 0).toInt == 1
-
-    val weightsPerLabelAndFeature = weightsPerLabelAndFeatureDrm.collect
-    val weightsPerFeature = weightsPerFeatureDrm.collect(0, ::)
-    val weightsPerLabel = weightsPerLabelDrm.collect(0, ::)
-
-    val alphaI: Float = alphaIDrm.collect(0, 0).toFloat
-
+    dummyLabelDrm.uncache()
 
     var perLabelThetaNormalizer= weightsPerFeature.like()
     if (isComplementary) {
-      val perLabelThetaNormalizerDrm = drm.drmDfsRead(pathToModel + "/perlabelThetaNormalizerDrm.drm")
+      val perLabelThetaNormalizerDrm = drm.drmDfsRead(pathToModel + "/perlabelThetaNormalizerDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
       perLabelThetaNormalizer = perLabelThetaNormalizerDrm.collect(0, ::)
     }
+
     val labelIndex = dummyLabelDrm.getRowLabelBindings
+    // mapAsScalaMap(..) is not serializable in scala 2.10.x or spark 1.1.0. map it to scala
+    val scalaLabelIndex: Map[String,Integer] = labelIndex.map(x => x._1 -> x._2)
+
+    val weightsPerLabelAndFeatureDrm = drmDfsRead(pathToModel + "/weightsPerLabelAndFeatureDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
+    val weightsPerLabelAndFeature = weightsPerLabelAndFeatureDrm.collect
+    weightsPerLabelAndFeatureDrm.uncache()
+
 
     // model validation is triggered in
     val model: NBModel = new NBModel(weightsPerLabelAndFeature,
       weightsPerFeature,
       weightsPerLabel,
       perLabelThetaNormalizer,
-      mapAsScalaMap(labelIndex),
+      scalaLabelIndex,
       alphaI,
       isComplementary)
 

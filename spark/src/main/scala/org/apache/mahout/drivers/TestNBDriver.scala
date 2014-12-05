@@ -18,12 +18,8 @@
 package org.apache.mahout.drivers
 
 import org.apache.mahout.classifier.naivebayes.{NBModel, NaiveBayes}
-import org.apache.mahout.common.HDFSPathSearch
-import org.apache.mahout.math.cf.SimilarityAnalysis
 import org.apache.mahout.math.drm
-import org.apache.mahout.math.drm.{DistributedContext, DrmLike}
-import org.apache.mahout.math.indexeddataset.{Schema, IndexedDataset, indexedDatasetDFSReadElements}
-import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
+import org.apache.mahout.math.drm. DrmLike
 import scala.collection.immutable.HashMap
 
 
@@ -82,14 +78,13 @@ object TestNBDriver extends MahoutSparkDriver {
 
     // will be only specific to this job.
     sparkConf.set("spark.kryo.referenceTracking", "false")
-      .set("spark.kryoserializer.buffer.mb", "200")// todo: should this be left to config or an option?
+      .set("spark.kryoserializer.buffer.mb", "50")// todo: should this be left to config or an option?
 
     if (parser.opts("sparkExecutorMem").asInstanceOf[String] != "")
       sparkConf.set("spark.executor.memory", parser.opts("sparkExecutorMem").asInstanceOf[String])
 
-    // set a large akka frame size
-    sparkConf.set("spark.akka.frameSize","100")
-    //else leave as set in Spark config
+//    // set a large akka frame size for bcast vectors
+//    sparkConf.set("spark.akka.frameSize","100")
 
     super.start(masterUrl, appName)
 
@@ -102,7 +97,7 @@ object TestNBDriver extends MahoutSparkDriver {
   }
   private def readModel: NBModel = {
     val inputPath = parser.opts("pathToModel").asInstanceOf[String]
-    val model= NBModel.materialize(inputPath)
+    val model= NBModel.dfsRead(inputPath)
     model
   }
 
@@ -112,15 +107,26 @@ object TestNBDriver extends MahoutSparkDriver {
     val trainComplementary = parser.opts("testComplementary").asInstanceOf[Boolean]
     val outputPath = parser.opts("output").asInstanceOf[String]
 
-    printf("Reading test set...")
+    println("Reading test set...")
     val testSet = readTestSet
-    printf("Training model...")
+    println("Training model...")
     val model = readModel
-    NaiveBayes.testNB(model, testSet)
-    printf("Saving model to "+outputPath+"...")
-    model.serialize(outputPath)
+    val analyzer= NaiveBayes.testNB(model, testSet)
+    println(analyzer)
 
     stop
   }
 
 }
+//import com.esotericsoftware.kryo.Kryo
+//import org.apache.spark.serializer.KryoRegistrator
+//import org.apache.mahout.classifier.naivebayes.NBModel
+//import org.apache.mahout.classifier.naivebayes.ComplementaryNBClassifier
+//import org.apache.mahout.classifier.naivebayes.StandardNBClassifier
+//class NBKryoRegistrator extends KryoRegistrator {
+//  override def registerClasses(kryo: Kryo) {
+//    kryo.register(classOf[NBModel])
+//    kryo.register(classOf[ComplementaryNBClassifier])
+//    kryo.register(classOf[StandardNBClassifier])
+//  }
+//}
