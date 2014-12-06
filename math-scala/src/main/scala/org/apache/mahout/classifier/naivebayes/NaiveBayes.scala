@@ -215,6 +215,7 @@ trait NaiveBayes extends java.io.Serializable{
 
   def testNB[K: ClassTag](model: NBModel,
                           testSet: DrmLike[K],
+                          testComplementary: Boolean = false,
                           cParser: CategoryParser = seq2SparseCategoryParser): ResultAnalyzer = {
 
     val labelMap = model.labelIndex
@@ -226,9 +227,14 @@ trait NaiveBayes extends java.io.Serializable{
     val numTestInstances = testSet.nrow.toInt
 
 
-    val classifier = model match {
-      case xx if model.isComplementary => new ComplementaryNBClassifier(model) with Serializable
+    val classifier = testComplementary match {
+      case true => new ComplementaryNBClassifier(model) with Serializable
       case _ => new StandardNBClassifier(model) with Serializable
+    }
+    
+    if (testComplementary) {
+      assert(testComplementary == model.isComplementary,
+        "Complementary Label Assignment requires Complementary Training")
     }
 
     /*  need to change the model around so that we can broadcast it
@@ -261,8 +267,8 @@ trait NaiveBayes extends java.io.Serializable{
 
     testSet.uncache()
     
-    for(i <- 0 until numTestInstances){
-      inCoreScoredTestSet(i, ::) := classifier.classifyFull(inCoreTestSet(i, ::) )
+    for (i <- 0 until numTestInstances) {
+      inCoreScoredTestSet(i, ::) := classifier.classifyFull(inCoreTestSet(i, ::))
     }
 
     // todo:XXX: reverse the labelMaps in training and through the model?
@@ -271,11 +277,11 @@ trait NaiveBayes extends java.io.Serializable{
 
     val reverseLabelMap = labelMap.map(x => x._2 -> x._1)
 
-    val analyzer = new ResultAnalyzer(labelMap.keys, "DEFAULT")
+    val analyzer = new ResultAnalyzer(labelMap.keys.toList.sorted, "DEFAULT")
 
     // need to do this with out collecting
     //val inCoreScoredTestSet = scoredTestSet.collect
-    for(i <- 0 until numTestInstances){
+    for (i <- 0 until numTestInstances) {
       val (bestIdx, bestScore) = argmax(inCoreScoredTestSet(i,::))
       val classifierResult = new ClassifierResult(reverseLabelMap(bestIdx), bestScore)
       analyzer.addInstance(reverseTestSetLabelMap(i), classifierResult)
@@ -290,7 +296,7 @@ trait NaiveBayes extends java.io.Serializable{
   def argmax(v: Vector): (Int, Double) = {
     var bestIdx: Int = Integer.MIN_VALUE
     var bestScore: Double = Integer.MIN_VALUE.asInstanceOf[Int].toDouble
-    for(i <-0 until v.length) {
+    for(i <- 0 until v.size) {
       if(v(i) > bestScore){
         bestScore = v(i)
         bestIdx = i

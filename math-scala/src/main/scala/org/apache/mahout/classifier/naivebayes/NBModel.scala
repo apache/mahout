@@ -24,6 +24,7 @@ import scalabindings._
 import scalabindings.RLikeOps._
 import drm.RLikeDrmOps._
 import drm._
+import scala.collection.JavaConverters._
 import scala.language.asInstanceOf
 import collection._
 import JavaConversions._
@@ -134,8 +135,12 @@ class NBModel extends java.io.Serializable {
 
     // write the label index as a String-Keyed DRM.
   //  val numLabels= labelIndex.size
-    val labelIndexDummyDrm = sparse(weightsPerLabel).t.like
+    val labelIndexDummyDrm = weightsPerLabelAndFeature.like()
     labelIndexDummyDrm.setRowLabelBindings(labelIndex)
+    val revMap=labelIndex.map( x=> x._2 -> x._1)
+    for(i <- 0 until labelIndexDummyDrm.numRows() ){
+      labelIndexDummyDrm.set(labelIndex(revMap(i)), 0, i.toDouble)
+    }
     drmParallelizeWithRowLabels(labelIndexDummyDrm).dfsWrite(pathToModel + "/labelIndex.drm")
 
   }
@@ -180,12 +185,11 @@ object NBModel extends java.io.Serializable {
     val alphaI: Float = alphaIDrm.collect(0, 0).toFloat
     alphaIDrm.uncache()
 
-    val dummyLabelDrm= drmDfsRead(pathToModel + "/labelIndex.drm").checkpoint(CacheHint.MEMORY_ONLY)
 
     // isComplementry is true if isComplementaryDrm(0,0) == 1 else false
     val isComplementaryDrm = drmDfsRead(pathToModel + "/isComplementaryDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
     val isComplementary = isComplementaryDrm.collect(0, 0).toInt == 1
-    dummyLabelDrm.uncache()
+    isComplementaryDrm.uncache()
 
     var perLabelThetaNormalizer= weightsPerFeature.like()
     if (isComplementary) {
@@ -193,10 +197,24 @@ object NBModel extends java.io.Serializable {
       perLabelThetaNormalizer = perLabelThetaNormalizerDrm.collect(0, ::)
     }
 
-    val labelIndex = dummyLabelDrm.getRowLabelBindings
-    // mapAsScalaMap(..) is not serializable in scala 2.10.x or spark 1.1.0. map it to scala
-    val scalaLabelIndex: Map[String,Integer] = labelIndex.map(x => x._1 -> x._2)
+    val dummyLabelDrm= drmDfsRead(pathToModel + "/labelIndex.drm").checkpoint(CacheHint.MEMORY_ONLY)
+    val labelIndexMap:java.util.Map[String, Integer] = dummyLabelDrm.getRowLabelBindings
 
+    println("java map "+labelIndexMap)
+    val scalaLabelIndexMap: mutable.HashMap[String, Integer]= new mutable.HashMap()
+    for(elem <- labelIndexMap.entrySet()){
+      scalaLabelIndexMap.put(elem.getKey,dummyLabelDrm.get(labelIndexMap(elem.getKey),0).toInt)
+      println("Key: "+elem.getKey+" value: "+elem.getValue)
+    }
+    println("scala map: "+scalaLabelIndexMap)
+    // mapAsScalaMap(..) is not serializable in scala 2.10.x or spark 1.1.0. map it to scala
+   //
+   // val scalaLabelIndex: Map[String, Integer] = labelIndex.map(x => x._1 -> x._2)
+    //val scalaLabelIndex= labelIndex
+
+    dummyLabelDrm.uncache()
+
+    //System.exit(0)
     val weightsPerLabelAndFeatureDrm = drmDfsRead(pathToModel + "/weightsPerLabelAndFeatureDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
     val weightsPerLabelAndFeature = weightsPerLabelAndFeatureDrm.collect
     weightsPerLabelAndFeatureDrm.uncache()
@@ -207,7 +225,7 @@ object NBModel extends java.io.Serializable {
       weightsPerFeature,
       weightsPerLabel,
       perLabelThetaNormalizer,
-      scalaLabelIndex,
+      scalaLabelIndexMap,
       alphaI,
       isComplementary)
 

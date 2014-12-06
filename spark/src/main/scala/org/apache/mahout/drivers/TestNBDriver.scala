@@ -43,6 +43,7 @@ object TestNBDriver extends MahoutSparkDriver {
       //Algorithm control options--driver specific
       opts = opts ++ testNBOptipns
       note("\nAlgorithm control options:")
+
       opt[Unit]('c',"testComplementary") hidden() action { (_, options) =>
         options + ("testComplementary" -> true) }
 
@@ -104,14 +105,14 @@ object TestNBDriver extends MahoutSparkDriver {
   override def process: Unit = {
     start()
 
-    val trainComplementary = parser.opts("testComplementary").asInstanceOf[Boolean]
+  //  val testComplementary = parser.opts("testComplementary").asInstanceOf[Boolean]
     val outputPath = parser.opts("output").asInstanceOf[String]
 
     println("Reading test set...")
     val testSet = readTestSet
     println("Training model...")
     val model = readModel
-    val analyzer= NaiveBayes.testNB(model, testSet)
+    val analyzer= NaiveBayes.testNB(model, testSet, false)
     println(analyzer)
 
     stop

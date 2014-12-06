@@ -28,7 +28,7 @@ import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
 import scala.collection.immutable.HashMap
 
 
-object TrainNBDriver extends MahoutSparkDriver {
+object TrainAndTestNBDriver extends MahoutSparkDriver {
   // define only the options specific to ItemSimilarity
   private final val trainNBOptipns = HashMap[String, Any](
     "appName" -> "TrainNBDriver")
@@ -113,21 +113,12 @@ object TrainNBDriver extends MahoutSparkDriver {
     val (labelIndex, aggregatedObservations) = SparkNaiveBayes.extractLabelsAndAggregateObservations(trainingSet)
     printf("Training model...")
     val model = NaiveBayes.trainNB(aggregatedObservations, labelIndex)
-    //val analyzer= NaiveBayes.testNB(model, trainingSet, false)
-    //println(analyzer)
     printf("Saving model to "+outputPath+"...")
     model.dfsWrite(outputPath)
 
-    val model2 = NBModel.dfsRead(outputPath)
-    val analyzer= NaiveBayes.testNB(model2, trainingSet, false)
-    println(analyzer)
 
-    println("\n\n model1: " +model.labelIndex )
-    println("\n\n model12: " +model2.labelIndex )
 
     stop
-
-
   }
 
 }

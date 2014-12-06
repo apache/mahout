@@ -73,10 +73,10 @@ object SparkNaiveBayes extends NaiveBayes{
     // is it necessary to sort this?
     // how expensive is it for spark to sort (relatively few) tuples?
     // does this cause repartitioning on the back end?
-    val aggregatedRdd= stringKeyedRdd
-                         .map(x => (cParser(x._1), x._2))
-                         .reduceByKey(_ + _)
-                         .sortByKey(true)
+    val aggregatedRdd = stringKeyedRdd
+                          .map(x => (cParser(x._1), x._2))
+                          .reduceByKey(_ + _)
+                        //  .sortByKey(true)
 
     stringKeyedObservations.uncache()
 
@@ -84,7 +84,7 @@ object SparkNaiveBayes extends NaiveBayes{
     val labelIndexMap = new mutable.HashMap[String, Integer]
 
     // has to be an better way of creating this map
-    val categoryArray=aggregatedRdd.keys.takeOrdered(aggregatedRdd.count.toInt)
+    val categoryArray = aggregatedRdd.keys.takeOrdered(aggregatedRdd.count.toInt)
     for(i <- 0 until categoryArray.size){
       labelIndexMap.put(categoryArray(i), categoryIndex)
       categoryIndex += 1
