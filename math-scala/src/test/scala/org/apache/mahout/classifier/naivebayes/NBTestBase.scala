@@ -24,6 +24,7 @@ import org.apache.mahout.test.MahoutSuite
 import org.scalatest.{FunSuite, Matchers}
 import collection._
 import JavaConversions._
+import collection.JavaConversions
 
 trait NBTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =>
   val epsilon = 1E-6 //keeping wide threshold for tonight
@@ -47,7 +48,7 @@ trait NBTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =>
     labelIndex.put("Cat4", 0)
 
     // train a Standard NB Model
-    val model = NaiveBayes.trainNB(TFIDFDrm, labelIndex, false)
+    val model = NaiveBayes.train(TFIDFDrm, labelIndex, false)
 
     // validate the model- will throw an exception if model is invalid
     model.validate()
@@ -132,7 +133,7 @@ trait NBTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =>
     val TFIDFDrm = drm.drmParallelize(m = inCoreTFIDF, numPartitions = 2)
 
     // train a Standard NB Model- no label index here
-    val model = NaiveBayes.trainNB(TFIDFDrm, labelIndex, false)
+    val model = NaiveBayes.train(TFIDFDrm, labelIndex, false)
 
     // validate the model- will throw an exception if model is invalid
     model.validate()
@@ -159,6 +160,11 @@ trait NBTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =>
 
     // check to se if the new model is complementary
     materializedModel.isComplementary should be (model.isComplementary)
+
+    // check the label indexMaps
+    for(elem <- model.labelIndex){
+      model.labelIndex(elem._1) == materializedModel.labelIndex(elem._1) should be (true)
+    }
   }
 
 }

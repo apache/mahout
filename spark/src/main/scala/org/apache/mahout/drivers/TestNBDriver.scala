@@ -24,7 +24,7 @@ import scala.collection.immutable.HashMap
 
 
 object TestNBDriver extends MahoutSparkDriver {
-  // define only the options specific to ItemSimilarity
+  // define only the options specific to TestNB
   private final val testNBOptipns = HashMap[String, Any](
     "appName" -> "TestNBDriver")
 
@@ -43,9 +43,13 @@ object TestNBDriver extends MahoutSparkDriver {
       //Algorithm control options--driver specific
       opts = opts ++ testNBOptipns
       note("\nAlgorithm control options:")
+      // todo:XXX : add default trainComplementary as a temp hack. getting java.util.NoSuchElementException: key not found: trainComplementary
+      opts = opts + ("testComplementary" -> false)
+      opt[Unit]("testComplementary") abbr ("c") action { (_, options) =>
+        options + ("testComplementary" -> true)
+      } text ("Test a complementary model, Default: false.")
 
-      opt[Unit]('c',"testComplementary") hidden() action { (_, options) =>
-        options + ("testComplementary" -> true) }
+
 
       opt[String]("pathToModel") abbr ("m") action { (x, options) =>
         options + ("pathToModel" -> x)
@@ -105,14 +109,12 @@ object TestNBDriver extends MahoutSparkDriver {
   override def process: Unit = {
     start()
 
-  //  val testComplementary = parser.opts("testComplementary").asInstanceOf[Boolean]
+    val testComplementary = parser.opts("testComplementary").asInstanceOf[Boolean]
     val outputPath = parser.opts("output").asInstanceOf[String]
 
-    println("Reading test set...")
     val testSet = readTestSet
-    println("Training model...")
     val model = readModel
-    val analyzer= NaiveBayes.testNB(model, testSet, false)
+    val analyzer= NaiveBayes.test(model, testSet, testComplementary)
     println(analyzer)
 
     stop

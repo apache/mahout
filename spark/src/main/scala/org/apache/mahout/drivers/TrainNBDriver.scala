@@ -19,23 +19,16 @@ package org.apache.mahout.drivers
 
 import org.apache.mahout.classifier.naivebayes._
 import org.apache.mahout.classifier.naivebayes.SparkNaiveBayes
-import org.apache.mahout.common.HDFSPathSearch
-import org.apache.mahout.math.cf.SimilarityAnalysis
 import org.apache.mahout.math.drm
-import org.apache.mahout.math.drm.{DistributedContext, DrmLike}
-import org.apache.mahout.math.indexeddataset.{Schema, IndexedDataset, indexedDatasetDFSReadElements}
-import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
+import org.apache.mahout.math.drm.DrmLike
 import scala.collection.immutable.HashMap
 
 
 object TrainNBDriver extends MahoutSparkDriver {
-  // define only the options specific to ItemSimilarity
+  // define only the options specific to TrainNB
   private final val trainNBOptipns = HashMap[String, Any](
     "appName" -> "TrainNBDriver")
 
-  private var writeSchema: Schema = _
-  private var readSchema1: Schema = _
-  private var readSchema2: Schema = _
 
   /**
    * @param args  Command line args, if empty a help message is printed.
@@ -51,9 +44,13 @@ object TrainNBDriver extends MahoutSparkDriver {
       //Algorithm control options--driver specific
       opts = opts ++ trainNBOptipns
       note("\nAlgorithm control options:")
-      opt[Unit]('c',"trainComplementary") hidden() action { (_, options) =>
-        options + ("trainComplementary" -> true) }
 
+      // todo:XXX : add default trainComplementary as a temp hack. getting java.util.NoSuchElementException: key not found: trainComplementary
+      opts = opts + ("trainComplementary" -> false)
+      opt[Unit]("trainComplementary") abbr ("c") action { (_, options) =>
+        options + ("trainComplementary" -> true)
+      } text ("Train a complementary model, Default: false.")
+      
 
       //How to search for input
       parseFileDiscoveryOptions
@@ -104,7 +101,7 @@ object TrainNBDriver extends MahoutSparkDriver {
   override def process: Unit = {
     start()
 
-    val trainComplementary = parser.opts("trainComplementary").asInstanceOf[Boolean]
+    val complementary = parser.opts("trainComplementary").asInstanceOf[Boolean]
     val outputPath = parser.opts("output").asInstanceOf[String]
 
     printf("Reading training set...")
@@ -112,14 +109,12 @@ object TrainNBDriver extends MahoutSparkDriver {
     printf("Aggregating training set and extracting labels...")
     val (labelIndex, aggregatedObservations) = SparkNaiveBayes.extractLabelsAndAggregateObservations(trainingSet)
     printf("Training model...")
-    val model = NaiveBayes.trainNB(aggregatedObservations, labelIndex)
-    //val analyzer= NaiveBayes.testNB(model, trainingSet, false)
-    //println(analyzer)
+    val model = NaiveBayes.train(aggregatedObservations, labelIndex)
     printf("Saving model to "+outputPath+"...")
     model.dfsWrite(outputPath)
 
     val model2 = NBModel.dfsRead(outputPath)
-    val analyzer= NaiveBayes.testNB(model2, trainingSet, false)
+    val analyzer= NaiveBayes.test(model2, trainingSet, complementary)
     println(analyzer)
 
     println("\n\n model1: " +model.labelIndex )
