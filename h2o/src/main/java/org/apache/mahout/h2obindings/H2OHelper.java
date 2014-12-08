@@ -330,7 +330,8 @@ public class H2OHelper {
       // TODO: fix BUG here... h20 water.fvec.Vec does not accept String values
       // TODO: need a new distributed data structure for storing String keys.
       for (int r = 0; r < m.rowSize(); r++) {
-        writer.set(r, rmap.get(r));
+        //writer.set(r, rmap.get(r));
+        labels.chunkForRow(r).set(r, rmap.get(r));
       }
 
       writer.close(closer);
