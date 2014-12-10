@@ -104,21 +104,18 @@ object TrainNBDriver extends MahoutSparkDriver {
     val complementary = parser.opts("trainComplementary").asInstanceOf[Boolean]
     val outputPath = parser.opts("output").asInstanceOf[String]
 
-    printf("Reading training set...")
     val trainingSet = readTrainingSet
-    printf("Aggregating training set and extracting labels...")
+
     val (labelIndex, aggregatedObservations) = SparkNaiveBayes.extractLabelsAndAggregateObservations(trainingSet)
-    printf("Training model...")
+
     val model = NaiveBayes.train(aggregatedObservations, labelIndex)
-    printf("Saving model to "+outputPath+"...")
+
     model.dfsWrite(outputPath)
 
+    // todo: remove this after cleanup
     val model2 = NBModel.dfsRead(outputPath)
     val analyzer= NaiveBayes.test(model2, trainingSet, complementary)
     println(analyzer)
-
-    println("\n\n model1: " +model.labelIndex )
-    println("\n\n model12: " +model2.labelIndex )
 
     stop
 

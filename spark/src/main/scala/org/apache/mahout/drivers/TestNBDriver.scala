@@ -43,7 +43,7 @@ object TestNBDriver extends MahoutSparkDriver {
       //Algorithm control options--driver specific
       opts = opts ++ testNBOptipns
       note("\nAlgorithm control options:")
-      // todo:XXX : add default trainComplementary as a temp hack. getting java.util.NoSuchElementException: key not found: trainComplementary
+      // todo:XXX : added default trainComplementary as a temp hack. getting java.util.NoSuchElementException: key not found: trainComplementary
       opts = opts + ("testComplementary" -> false)
       opt[Unit]("testComplementary") abbr ("c") action { (_, options) =>
         options + ("testComplementary" -> true)
@@ -128,8 +128,9 @@ object TestNBDriver extends MahoutSparkDriver {
 //import org.apache.mahout.classifier.naivebayes.StandardNBClassifier
 //class NBKryoRegistrator extends KryoRegistrator {
 //  override def registerClasses(kryo: Kryo) {
-//    kryo.register(classOf[NBModel])
-//    kryo.register(classOf[ComplementaryNBClassifier])
-//    kryo.register(classOf[StandardNBClassifier])
+//    kryo.register(classOf[NBModel], new JavaSerializer())
+//    kryo.register(classOf[ComplementaryNBClassifier], new JavaSerializer())
+//    kryo.register(classOf[StandardNBClassifier], new JavaSerializer())
+//    kryo.register(classOf[AbstractNBClassifier], new JavaSerializer())
 //  }
 //}
