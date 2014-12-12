@@ -24,11 +24,11 @@ import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
 import scala.collection.immutable.HashMap
 
 /**
- * Command line interface for [[org.apache.mahout.cf.SimilarityAnalysis.rowSimilarityIDSs( )]].
+ * Command line interface for [[org.apache.mahout.math.cf.SimilarityAnalysis#rowSimilarityIDSs( )]].
  * Reads a text delimited file containing rows of a [[org.apache.mahout.math.indexeddataset.IndexedDataset]]
  * with domain specific IDS of the form
  * (row id, column id: strength, ...). The IDs will be preserved in the
- * output. The rows define a matrix and [[org.apache.mahout.cf.SimilarityAnalysis.rowSimilarityIDSs( )]]
+ * output. The rows define a matrix and [[org.apache.mahout.math.cf.SimilarityAnalysis#rowSimilarityIDSs( )]]
  * will be used to calculate row-wise similarity using log-likelihood
  * The options allow control of the input schema, file discovery, output schema, and control of
  * algorithm parameters.
@@ -53,7 +53,7 @@ object RowSimilarityDriver extends MahoutSparkDriver {
    */
   override def main(args: Array[String]): Unit = {
 
-    parser = new MahoutOptionParser(programName = "spark-rowsimilarity") {
+    parser = new MahoutSparkOptionParser(programName = "spark-rowsimilarity") {
       head("spark-rowsimilarity", "Mahout 1.0")
 
       //Input output options, non-driver specific
@@ -107,18 +107,8 @@ object RowSimilarityDriver extends MahoutSparkDriver {
   }
 
   override def start(masterUrl: String = parser.opts("master").asInstanceOf[String],
-                     appName: String = parser.opts("appName").asInstanceOf[String]):
-  Unit = {
-
-    // todo: the HashBiMap used in the TextDelimited Reader is hard coded into
-    // MahoutKryoRegistrator, it should be added to the register list here so it
-    // will be only specific to this job.
-    sparkConf.set("spark.kryo.referenceTracking", "false")
-      .set("spark.kryoserializer.buffer.mb", "200")// todo: should we take this out?
-
-    if (parser.opts("sparkExecutorMem").asInstanceOf[String] != "")
-      sparkConf.set("spark.executor.memory", parser.opts("sparkExecutorMem").asInstanceOf[String])
-    //else leave as set in Spark config
+      appName: String = parser.opts("appName").asInstanceOf[String]):
+    Unit = {
 
     super.start(masterUrl, appName)
 
