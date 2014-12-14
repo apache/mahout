@@ -329,7 +329,7 @@ public class H2OHelper {
       Map<Integer,String> rmap = reverseMap(map);
 
       for (long r = 0; r < m.rowSize(); r++) {
-        writer.set(r, rmap.get(r));
+        labels.chunkForRow(r).set(r, rmap.get(r));
       }
 
       writer.close(closer);
