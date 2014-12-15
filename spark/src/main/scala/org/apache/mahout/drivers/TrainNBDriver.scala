@@ -35,7 +35,7 @@ object TrainNBDriver extends MahoutSparkDriver {
    */
   override def main(args: Array[String]): Unit = {
 
-    parser = new MahoutOptionParser(programName = "spark-trainnb") {
+    parser = new MahoutSparkOptionParser(programName = "spark-trainnb") {
       head("spark-trainnb", "Mahout 1.0")
 
       //Input output options, non-driver specific
@@ -45,8 +45,8 @@ object TrainNBDriver extends MahoutSparkDriver {
       opts = opts ++ trainNBOptipns
       note("\nAlgorithm control options:")
 
-      // todo:XXX : add default trainComplementary as a temp hack. getting java.util.NoSuchElementException: key not found: trainComplementary
-      opts = opts + ("trainComplementary" -> false)
+      //default trainComplementary is false
+      //      opts = opts + ("trainComplementary" -> false)
       opt[Unit]("trainComplementary") abbr ("c") action { (_, options) =>
         options + ("trainComplementary" -> true)
       } text ("Train a complementary model, Default: false.")
@@ -78,13 +78,12 @@ object TrainNBDriver extends MahoutSparkDriver {
     Unit = {
 
     // will be only specific to this job.
-    sparkConf.set("spark.kryo.referenceTracking", "false")
-      .set("spark.kryoserializer.buffer.mb", "50")// todo: should this be left to config or an option?
+    // Note: set a large spark.kryoserializer.buffer.mb if using DSL MapBlock else leave as default
 
     if (parser.opts("sparkExecutorMem").asInstanceOf[String] != "")
       sparkConf.set("spark.executor.memory", parser.opts("sparkExecutorMem").asInstanceOf[String])
 
-    // set a large akka frame size
+    // Note: set a large akka frame size for DSL NB (20)
     //sparkConf.set("spark.akka.frameSize","20") // don't need this for Spark optimized NaiveBayes..
     //else leave as set in Spark config
 

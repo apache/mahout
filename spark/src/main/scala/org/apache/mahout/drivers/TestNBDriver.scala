@@ -19,7 +19,7 @@ package org.apache.mahout.drivers
 
 import org.apache.mahout.classifier.naivebayes.{NBModel, NaiveBayes}
 import org.apache.mahout.math.drm
-import org.apache.mahout.math.drm. DrmLike
+import org.apache.mahout.math.drm.DrmLike
 import scala.collection.immutable.HashMap
 
 
@@ -34,7 +34,7 @@ object TestNBDriver extends MahoutSparkDriver {
    */
   override def main(args: Array[String]): Unit = {
 
-    parser = new MahoutOptionParser(programName = "spark-testnb") {
+    parser = new MahoutSparkOptionParser(programName = "spark-testnb") {
       head("spark-testnb", "Mahout 1.0")
 
       //Input output options, non-driver specific
@@ -43,7 +43,8 @@ object TestNBDriver extends MahoutSparkDriver {
       //Algorithm control options--driver specific
       opts = opts ++ testNBOptipns
       note("\nAlgorithm control options:")
-      // todo:XXX : added default trainComplementary as a temp hack. getting java.util.NoSuchElementException: key not found: trainComplementary
+
+      //default testComplementary is false
       opts = opts + ("testComplementary" -> false)
       opt[Unit]("testComplementary") abbr ("c") action { (_, options) =>
         options + ("testComplementary" -> true)
@@ -82,14 +83,14 @@ object TestNBDriver extends MahoutSparkDriver {
     Unit = {
 
     // will be only specific to this job.
-    sparkConf.set("spark.kryo.referenceTracking", "false")
-      .set("spark.kryoserializer.buffer.mb", "50")// todo: should this be left to config or an option?
+    // Note: set a large spark.kryoserializer.buffer.mb if using DSL MapBlock else leave as default
 
     if (parser.opts("sparkExecutorMem").asInstanceOf[String] != "")
       sparkConf.set("spark.executor.memory", parser.opts("sparkExecutorMem").asInstanceOf[String])
 
-//    // set a large akka frame size for bcast vectors
-//    sparkConf.set("spark.akka.frameSize","100")
+    // Note: set a large akka frame size for DSL NB (20)
+    //sparkConf.set("spark.akka.frameSize","20") // don't need this for Spark optimized NaiveBayes..
+    //else leave as set in Spark config
 
     super.start(masterUrl, appName)
 
