@@ -180,7 +180,7 @@
 
     </plugins>
   </build>
-
+<!--
   <profiles>
     <profile>
       <id>2.0-CDH</id>
@@ -282,6 +282,7 @@
       </dependencies>
     </profile>
   </profiles>
+-->
 
   <dependencies>
 

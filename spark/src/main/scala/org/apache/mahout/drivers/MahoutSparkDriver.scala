@@ -74,6 +74,9 @@ abstract class MahoutSparkDriver extends MahoutDriver {
     * @param appName  Name to display in Spark UI
     * */
   protected def start(masterUrl: String, appName: String) : Unit = {
+    sparkConf.set("spark.kryo.referenceTracking", "false")
+      .set("spark.kryoserializer.buffer.mb", "200")// this is default for Mahout optimizer, change it with -D option
+
     if (!_useExistingContext) {
       mc = mahoutSparkContext(masterUrl, appName, sparkConf = sparkConf)
     }

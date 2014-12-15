@@ -76,9 +76,6 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       val rowIDs = interactions.map { case (rowID, _) => rowID }.distinct().collect()
       val columnIDs = interactions.map { case (_, columnID) => columnID }.distinct().collect()
 
-      val numRows = rowIDs.size
-      val numColumns = columnIDs.size
-
       // create BiMaps for bi-directional lookup of ID by either Mahout ID or external ID
       // broadcast them for access in distributed processes, so they are not recalculated in every task.
       val rowIDDictionary = asOrderedDictionary(existingRowIDs, rowIDs)
@@ -86,6 +83,9 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
 
       val columnIDDictionary = asOrderedDictionary(entries = columnIDs)
       val columnIDDictionary_bcast = mc.broadcast(columnIDDictionary)
+
+      val ncol = columnIDDictionary.size()
+      val nrow = rowIDDictionary.size()
 
       val indexedInteractions =
         interactions.map { case (rowID, columnID) =>
@@ -96,7 +96,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
         }
         // group by IDs to form row vectors
         .groupByKey().map { case (rowIndex, columnIndexes) =>
-          val row = new RandomAccessSparseVector(numColumns)
+          val row = new RandomAccessSparseVector(ncol)
           for (columnIndex <- columnIndexes) {
             row.setQuick(columnIndex, 1.0)
           }
@@ -105,7 +105,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
         .asInstanceOf[DrmRdd[Int]]
 
       // wrap the DrmRdd and a CheckpointedDrm, which can be used anywhere a DrmLike[Int] is needed
-      val drmInteractions = drmWrap[Int](indexedInteractions, numRows, numColumns)
+      val drmInteractions = drmWrap[Int](indexedInteractions, nrow, ncol)
 
       new IndexedDatasetSpark(drmInteractions, rowIDDictionary, columnIDDictionary)
 
@@ -162,9 +162,6 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
         colIDs
       }.distinct().collect()
 
-      val numRows = rowIDs.size
-      val numColumns = columnIDs.size
-
       // create BiMaps for bi-directional lookup of ID by either Mahout ID or external ID
       // broadcast them for access in distributed processes, so they are not recalculated in every task.
       val rowIDDictionary = asOrderedDictionary(existingRowIDs, rowIDs)
@@ -173,12 +170,15 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
       val columnIDDictionary = asOrderedDictionary(entries = columnIDs)
       val columnIDDictionary_bcast = mc.broadcast(columnIDDictionary)
 
+      val ncol = columnIDDictionary.size()
+      val nrow = rowIDDictionary.size()
+
       val indexedInteractions =
         interactions.map { case (rowID, columns) =>
           val rowIndex = rowIDDictionary_bcast.value.get(rowID).get
 
           val elements = columns.split(elementDelim)
-          val row = new RandomAccessSparseVector(numColumns)
+          val row = new RandomAccessSparseVector(ncol)
           for (element <- elements) {
             val id = element.split(columnIdStrengthDelim)(0)
             val columnID = columnIDDictionary_bcast.value.get(id).get
@@ -193,7 +193,7 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
         .asInstanceOf[DrmRdd[Int]]
 
       // wrap the DrmRdd and a CheckpointedDrm, which can be used anywhere a DrmLike[Int] is needed
-      val drmInteractions = drmWrap[Int](indexedInteractions, numRows, numColumns)
+      val drmInteractions = drmWrap[Int](indexedInteractions, nrow, ncol)
 
       new IndexedDatasetSpark(drmInteractions, rowIDDictionary, columnIDDictionary)
 
@@ -213,8 +213,10 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
   private def asOrderedDictionary(dictionary: BiMap[String, Int] = HashBiMap.create(), entries: Array[String]): BiMap[String, Int] = {
     var index = dictionary.size() // if a dictionary is supplied then add to the end based on the Mahout id 'index'
     for (entry <- entries) {
-      if (!dictionary.contains(entry)) dictionary.put(entry, index)
-      index += 1
+      if (!dictionary.contains(entry)){
+        dictionary.put(entry, index)
+        index += 1
+      }// the dictionary should never contain an entry since they are supposed to be distinct but for some reason they do
     }
     dictionary
   }
