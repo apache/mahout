@@ -32,6 +32,12 @@ abstract class AbstractNBClassifier(nbModel: NBModel) extends java.io.Serializab
      model
   }
 
+  /**
+   * Comput the score for a Vector of weighted TF-IDF featured
+   * @param label
+   * @param instance
+   * @return
+   */
   protected def getScoreForLabelInstance(label: Int, instance: Vector): Double = {
     var result: Double = 0.0
     for (e <- instance.nonZeroes) {
@@ -49,9 +55,9 @@ abstract class AbstractNBClassifier(nbModel: NBModel) extends java.io.Serializab
   }
 
   def classifyFull(r: Vector, instance: Vector): Vector = {
-      var label: Int = 0
+    var label: Int = 0
     for (label <- 0 until model.numLabels) {
-      r.setQuick(label, getScoreForLabelInstance(label, instance))
+        r.setQuick(label, getScoreForLabelInstance(label, instance))
       }
     r
   }

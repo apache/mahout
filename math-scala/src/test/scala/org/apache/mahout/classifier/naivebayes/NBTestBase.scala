@@ -27,7 +27,8 @@ import JavaConversions._
 import collection.JavaConversions
 
 trait NBTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =>
-  val epsilon = 1E-6 //keeping wide threshold for tonight
+
+  val epsilon = 1E-6
 
   test("Simple Standard NB Model") {
 

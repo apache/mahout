@@ -46,7 +46,7 @@ object TrainNBDriver extends MahoutSparkDriver {
       note("\nAlgorithm control options:")
 
       //default trainComplementary is false
-      //      opts = opts + ("trainComplementary" -> false)
+      opts = opts + ("trainComplementary" -> false)
       opt[Unit]("trainComplementary") abbr ("c") action { (_, options) =>
         options + ("trainComplementary" -> true)
       } text ("Train a complementary model, Default: false.")

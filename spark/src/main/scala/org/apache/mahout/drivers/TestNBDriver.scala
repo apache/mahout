@@ -122,16 +122,4 @@ object TestNBDriver extends MahoutSparkDriver {
   }
 
 }
-//import com.esotericsoftware.kryo.Kryo
-//import org.apache.spark.serializer.KryoRegistrator
-//import org.apache.mahout.classifier.naivebayes.NBModel
-//import org.apache.mahout.classifier.naivebayes.ComplementaryNBClassifier
-//import org.apache.mahout.classifier.naivebayes.StandardNBClassifier
-//class NBKryoRegistrator extends KryoRegistrator {
-//  override def registerClasses(kryo: Kryo) {
-//    kryo.register(classOf[NBModel], new JavaSerializer())
-//    kryo.register(classOf[ComplementaryNBClassifier], new JavaSerializer())
-//    kryo.register(classOf[StandardNBClassifier], new JavaSerializer())
-//    kryo.register(classOf[AbstractNBClassifier], new JavaSerializer())
-//  }
-//}
+

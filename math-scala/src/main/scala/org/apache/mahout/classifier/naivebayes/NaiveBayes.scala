@@ -79,12 +79,15 @@ trait NaiveBayes extends java.io.Serializable{
     // Instantiate a trainer and retrieve the perLabelThetaNormalizer Vector from it in the case of
     // a complementary NB model
     if (trainComplementary) {
-      val thetaTrainer = new ComplementaryThetaTrainer(weightsPerFeature, weightsPerLabel, alphaI)
+//      val thetaTrainer = new ComplementaryThetaTrainer(weightsPerFeature, weightsPerLabel, alphaI)
+      val thetaTrainer = new ComplementaryNBThetaTrainer(weightsPerFeature,
+                                                         weightsPerLabel,
+                                                         alphaI)
       // local training of the theta normalization
       for (labelIndex <- 0 until inCoreTFIDF.nrow) {
         thetaTrainer.train(labelIndex, inCoreTFIDF(labelIndex, ::))
       }
-      thetaNormalizer = thetaTrainer.retrievePerLabelThetaNormalizer()
+      thetaNormalizer = thetaTrainer.retrievePerLabelThetaNormalizer
     }
 
     new NBModel(inCoreTFIDF,
@@ -337,7 +340,7 @@ trait NaiveBayes extends java.io.Serializable{
   }
 
   /**
-   * argmax values as well
+   * argmax with values as well
    * returns a tuple of index of the max score and the score itself.
    * @param v Vector of of scores
    * @return  (bestIndex, bestScore)
@@ -357,3 +360,82 @@ trait NaiveBayes extends java.io.Serializable{
 }
 
 object NaiveBayes extends NaiveBayes with java.io.Serializable
+
+
+/**
+ * Trainer for the weight normalization vector used by Transform Weight Normalized Complement
+ * Naive Bayes.  See: Rennie et.al.: Tackling the poor assumptions of Naive Bayes Text classifiers,
+ * ICML 2003, http://people.csail.mit.edu/jrennie/papers/icml03-nb.pdf.
+ * @param weightsPerFeature a Vector of summed TF or TF-IDF weights for each word in dictionary.
+ * @param weightsPerLabel a Vector of summed TF or TF-IDF weights for each label.
+ * @param alphaI Laplacian smoothing factor. Defaut value of 1.
+ */
+class ComplementaryNBThetaTrainer(private val weightsPerFeature: Vector,
+                                  private val weightsPerLabel: Vector,
+                                  private val alphaI: Double = 1.0) {
+                                   
+   private val perLabelThetaNormalizer: Vector = weightsPerLabel.like()
+   private val totalWeightSum: Double = weightsPerLabel.zSum
+   private var numFeatures: Double = weightsPerFeature.getNumNondefaultElements
+
+   assert(weightsPerFeature != null, "weightsPerFeature vector can not be null")
+   assert(weightsPerLabel != null, "weightsPerLabel vector can not be null")
+
+  /**
+   * Train the weight normalization vector for each label
+   * @param label
+   * @param featurePerLabelWeight
+   */
+  def train(label: Int, featurePerLabelWeight: Vector) {
+    val currentLabelWeight = labelWeight(label)
+    // sum weights for each label including those with zero word counts
+    for (i <- 0 until featurePerLabelWeight.size) {
+      val currentFeaturePerLabelWeight = featurePerLabelWeight(i)
+      updatePerLabelThetaNormalizer(label,
+        ComplementaryNBClassifier.computeWeight(featureWeight(i),
+                                                currentFeaturePerLabelWeight,
+                                                totalWeightSum,
+                                                currentLabelWeight,
+                                                alphaI,
+                                                numFeatures)
+                                   )
+    }
+  }
+
+  /**
+   * getter for summed TF or TF-IDF weights by label
+   * @param label index of label
+   * @return sum of word TF or TF-IDF weights for label
+   */
+  def labelWeight(label: Int): Double = {
+    weightsPerLabel(label)
+  }
+
+  /**
+   * Getter for summed TF or TF-IDF weights by word.
+   * @param feature index of word.
+   * @return sum of TF or TF-IDF weights for word.
+   */
+  def featureWeight(feature: Int): Double = {
+    weightsPerFeature(feature)
+  }
+
+  /**
+   * add the magnitude of the current the weight to the current
+   * label's corresponding Vector element.
+   * @param label index of label to update.
+   * @param weight weight to add.
+   */
+  def updatePerLabelThetaNormalizer(label: Int, weight: Double) {
+    perLabelThetaNormalizer(label) = perLabelThetaNormalizer(label) + Math.abs(weight)
+  }
+
+  /**
+   * Getter for the weight normalizer vector as indexed by label
+   * @return a copy of the weight normalizer vector.
+   */
+  def retrievePerLabelThetaNormalizer: Vector = {
+    perLabelThetaNormalizer.cloned
+  }
+
+}
