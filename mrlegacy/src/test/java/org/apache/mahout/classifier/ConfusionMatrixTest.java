@@ -115,5 +115,7 @@ public final class ConfusionMatrixTest extends MahoutTestCase {
     confusionMatrix.putCount("Label2", DEFAULT_LABEL, OTHER[1]);
     return confusionMatrix;
   }
+
+
   
 }

@@ -130,7 +130,7 @@ class ResultAnalyzer(private val labelSet: util.Collection[String], defaultLabel
     returnString.append("Statistics\n")
     returnString.append("-------------------------------------------------------\n")
     val normStats: RunningAverageAndStdDev = confusionMatrix.getNormalizedStats
-    returnString.append("Kappa")
+    returnString.append("Kappa: \t")
                 .append(decimalFormatter.format(confusionMatrix.getKappa))
                 .append('\n')
     returnString.append("Accuracy: \t")
