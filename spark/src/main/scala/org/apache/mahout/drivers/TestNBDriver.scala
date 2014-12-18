@@ -18,6 +18,7 @@
 package org.apache.mahout.drivers
 
 import org.apache.mahout.classifier.naivebayes.{NBModel, NaiveBayes}
+import org.apache.mahout.classifier.stats.ConfusionMatrix
 import org.apache.mahout.math.drm
 import org.apache.mahout.math.drm.DrmLike
 import scala.collection.immutable.HashMap

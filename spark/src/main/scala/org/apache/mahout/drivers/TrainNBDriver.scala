@@ -111,11 +111,6 @@ object TrainNBDriver extends MahoutSparkDriver {
 
     model.dfsWrite(outputPath)
 
-    // todo: remove this after cleanup
-    val model2 = NBModel.dfsRead(outputPath)
-    val analyzer= NaiveBayes.test(model2, trainingSet, complementary)
-    println(analyzer)
-
     stop
 
 

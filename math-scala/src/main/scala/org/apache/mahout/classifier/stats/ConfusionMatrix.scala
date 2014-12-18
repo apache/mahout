@@ -1,3 +1,20 @@
+/*
+ Licensed to the Apache Software Foundation (ASF) under one or more
+ contributor license agreements.  See the NOTICE file distributed with
+ this work for additional information regarding copyright ownership.
+ The ASF licenses this file to You under the Apache License, Version 2.0
+ (the "License"); you may not use this file except in compliance with
+ the License.  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+*/
+
 package org.apache.mahout.classifier.stats
 
 import java.util
@@ -5,6 +22,7 @@ import org.apache.commons.math3.stat.descriptive.moment.Mean // This is brought 
 import org.apache.mahout.math.{DenseMatrix, Matrix}
 import scala.collection.mutable
 import scala.collection.JavaConversions._
+
 /**
  *
  * Ported from org.apache.mahout.classifier.ConfusionMatrix.java
@@ -364,4 +382,73 @@ class ConfusionMatrix(private var labels: util.Collection[String],
     }
     return sorted
   }
+
+  /**
+   * This is overloaded. toString() is not a formatted report you print for a manager :)
+   * Assume that if there are no default assignments, the default feature was not used
+   */
+  override def toString: String = {
+
+    val returnString: StringBuilder = new StringBuilder(200)
+
+    returnString.append("=======================================================").append('\n')
+    returnString.append("Confusion Matrix\n")
+    returnString.append("-------------------------------------------------------").append('\n')
+
+    val unclassified: Int = getTotal(defaultLabel)
+
+    for (entry <- this.labelMap.entrySet) {
+      if (!((entry.getKey == defaultLabel) && unclassified == 0)) {
+        returnString.append(getSmallLabel(entry.getValue) + "     ").append('\t')
+      }
+    }
+
+    returnString.append("<--Classified as").append('\n')
+
+    for (entry <- this.labelMap.entrySet) {
+      if (!((entry.getKey == defaultLabel) && unclassified == 0)) {
+        val correctLabel: String = entry.getKey
+        var labelTotal: Int = 0
+
+        for (classifiedLabel <- this.labelMap.keySet) {
+          if (!((classifiedLabel == defaultLabel) && unclassified == 0)) {
+            returnString.append(Integer.toString(getCount(correctLabel, classifiedLabel)) + "     ")
+                        .append('\t')
+            labelTotal += getCount(correctLabel, classifiedLabel)
+          }
+        }
+        returnString.append(" |  ").append(String.valueOf(labelTotal) + "      ")
+                    .append('\t')
+                    .append(getSmallLabel(entry.getValue) + "     ")
+                    .append(" = ")
+                    .append(correctLabel)
+                    .append('\n')
+      }
+    }
+
+    if (unclassified > 0) {
+      returnString.append("Default Category: ")
+                  .append(defaultLabel)
+                  .append(": ")
+                  .append(unclassified)
+                  .append('\n')
+    }
+    returnString.append('\n')
+
+    returnString.toString
+  }
+
+
+  def getSmallLabel(i: Int): String = {
+    var value: Int = i
+    val returnString: StringBuilder = new StringBuilder
+    do {
+      val n: Int = value % 26
+      returnString.insert(0, ('a' + n).asInstanceOf[Char])
+      value /= 26
+    } while (value > 0)
+    return returnString.toString
+  }
+
+
 }

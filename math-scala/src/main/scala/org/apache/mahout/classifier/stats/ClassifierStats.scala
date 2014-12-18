@@ -1,8 +1,24 @@
+/*
+ Licensed to the Apache Software Foundation (ASF) under one or more
+ contributor license agreements.  See the NOTICE file distributed with
+ this work for additional information regarding copyright ownership.
+ The ASF licenses this file to You under the Apache License, Version 2.0
+ (the "License"); you may not use this file except in compliance with
+ the License.  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+*/
+
 package org.apache.mahout.classifier.stats
 
 import java.text.{DecimalFormat, NumberFormat}
 import java.util
-//import org.apache.commons.lang3.StringUtils
 import org.apache.mahout.math.stats.OnlineSummarizer
 
 
@@ -117,33 +133,33 @@ class ResultAnalyzer(private val labelSet: util.Collection[String], defaultLabel
     returnString.append("Kappa")
                 .append(decimalFormatter.format(confusionMatrix.getKappa))
                 .append('\n')
-    returnString.append("Accuracy")
+    returnString.append("Accuracy: \t")
                 .append(decimalFormatter.format(confusionMatrix.getAccuracy))
                 .append("%\n")
-    returnString.append("Reliability")
+    returnString.append("Reliability: \t")
                 .append(decimalFormatter.format(normStats.getAverage * 100.00000001))
                 .append("%\n")
-    returnString.append("Reliability (standard deviation)")
+    returnString.append("Reliability (standard deviation): \t")
                 .append(decimalFormatter.format(normStats.getStandardDeviation))
                 .append('\n')
-    returnString.append("Weighted precision")
+    returnString.append("Weighted precision: \t")
                 .append(decimalFormatter.format(confusionMatrix.getWeightedPrecision))
                 .append('\n')
-    returnString.append("Weighted recall")
+    returnString.append("Weighted recall: \t")
                 .append(decimalFormatter.format(confusionMatrix.getWeightedRecall))
                 .append('\n')
-    returnString.append("Weighted F1 score")
+    returnString.append("Weighted F1 score: \t")
                 .append(decimalFormatter.format(confusionMatrix.getWeightedF1score))
                 .append('\n')
     if (hasLL) {
-      returnString.append("Log-likelihood")
-                  .append("mean      : ")
+      returnString.append("Log-likelihood: \t")
+                  .append("mean      :  \t")
                   .append(decimalFormatter.format(summarizer.getMean))
                   .append('\n')
-      returnString.append("25%-ile   : ")
+      returnString.append("25%-ile   :  \t")
                   .append(decimalFormatter.format(summarizer.getQuartile(1)))
                   .append('\n')
-      returnString.append("75%-ile   : ")
+      returnString.append("75%-ile   :  \t")
                   .append(decimalFormatter.format(summarizer.getQuartile(3)))
                   .append('\n')
     }

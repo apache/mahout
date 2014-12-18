@@ -166,12 +166,6 @@
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-math</artifactId>
     </dependency>
-<!--
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-mrlegacy</artifactId>
-    </dependency>
--->
 
     <!--  3rd-party -->
     <dependency>
