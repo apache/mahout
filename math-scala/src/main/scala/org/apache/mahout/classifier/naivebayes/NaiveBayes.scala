@@ -18,7 +18,8 @@
 package org.apache.mahout.classifier.naivebayes
 
 
-import org.apache.mahout.classifier.{ResultAnalyzer, ClassifierResult}
+//import org.apache.mahout.classifier.{ResultAnalyzer, ClassifierResult}
+import org.apache.mahout.classifier.stats.{ResultAnalyzer, ClassifierResult} //scala port
 import org.apache.mahout.math._
 import scalabindings._
 import scalabindings.RLikeOps._
@@ -30,7 +31,7 @@ import collection._
 import JavaConversions._
 import scala.collection.JavaConversions._
 
-import org.apache.mahout.classifier.naivebayes.training.ComplementaryThetaTrainer
+//import org.apache.mahout.classifier.naivebayes.training.ComplementaryThetaTrainer
 
 /**
  * Distributed training of a Naive Bayes model. Follows the approach presented in Rennie et.al.: Tackling the poor
