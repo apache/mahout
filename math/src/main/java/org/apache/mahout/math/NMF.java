@@ -1,14 +1,11 @@
 package org.apache.mahout.math;
 
 /**
- * Created by lmq on 2014/12/19.
+ *
+ * * * Created by lmq on 2014/12/19.
+ * Non-negative Matrix Factorization using Multiplicative update rules
+ * @author: Liang Mingqiang(2281784755@qq.com)
  */
-
-/*
-* Non-negative Matrix Factorization using Multiplicative update rules
-* @author: Liang Mingqiang(2281784755@qq.com)
-* Hint: This is the fist time for me to involve in a open source project. And this code is not perfect, Is there anyone willing guide me?
-* */
 
 
 
@@ -17,18 +14,17 @@ import java.util.Random;
 import org.apache.mahout.math.function.DoubleFunction;
 
 public class NMF{
-
-    private final Matrix w;
-    private final Matrix h;
-
-    private static int maxInteracoes = 5000;
+    private Matrix w;
+    private Matrix h;
 
 
     /**
      * @param d Matrix original
      * @param r model order
+     * @param steps max steps before converge
+     * @param errMax threshold of object function
      */
-    public NMF(Matrix d, int r) {
+    public NMF(Matrix d, int r, int steps, double errMax) {
         double oldObj, obj;
         int n = d.rowSize();
         int m = d.columnSize();
@@ -36,7 +32,7 @@ public class NMF{
         w = new DenseMatrix(n, r).assign(RANDOMF);
         h = new DenseMatrix(r, m).assign(RANDOMF);
 
-        for (int i = 0; i < maxInteracoes; i++) {
+        for (int i = 0; i < steps; i++) {
 
             oldObj = calObjectFunction(d, w, h);
 
@@ -68,17 +64,18 @@ public class NMF{
 
             obj = calObjectFunction(d, w, h);
             double erro = oldObj - obj;
+            if(erro < errMax) break;
 
         }
 
     }
 
     /**
-     * Calcula o valor da função objetivo
-     * @param d Matriz original
-     * @param w Matriz fator
-     * @param h Matriz fator
-     * @return Valor da função objetivo
+     * Calculate Value of object function
+     * @param d Matrix original
+     * @param w Matrix factor
+     * @param h Matrix factor
+     * @return Value of object function
      */
     static double calObjectFunction(Matrix d, Matrix w, Matrix h){
         Matrix wh = w.times(h);
@@ -105,6 +102,19 @@ public class NMF{
 
     public Matrix getH() {
         return h;
+    }
+
+    //unit test
+    public static void main(String[] args) {
+        Matrix x = new DenseMatrix(3, 3);
+        x.viewRow(0).assign(new double[]{1, 2, 3});
+        x.viewRow(1).assign(new double[]{2, 4, 6});
+        x.viewRow(2).assign(new double[]{3, 6, 9});
+
+        NMF nmf = new NMF(x, 3, 5000, 0.0000002);
+        System.out.println(nmf.getH());
+        System.out.println(nmf.getW());
+        System.out.print(nmf.getH().times(nmf.getW()));
     }
 
 }
