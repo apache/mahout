@@ -17,9 +17,7 @@
 
 package org.apache.mahout.classifier.naivebayes
 
-
-//import org.apache.mahout.classifier.{ResultAnalyzer, ClassifierResult}
-import org.apache.mahout.classifier.stats.{ResultAnalyzer, ClassifierResult} //scala port
+import org.apache.mahout.classifier.stats.{ResultAnalyzer, ClassifierResult}
 import org.apache.mahout.math._
 import scalabindings._
 import scalabindings.RLikeOps._
@@ -28,10 +26,7 @@ import drm._
 import scala.reflect.ClassTag
 import scala.language.asInstanceOf
 import collection._
-import JavaConversions._
 import scala.collection.JavaConversions._
-
-//import org.apache.mahout.classifier.naivebayes.training.ComplementaryThetaTrainer
 
 /**
  * Distributed training of a Naive Bayes model. Follows the approach presented in Rennie et.al.: Tackling the poor
@@ -55,14 +50,13 @@ trait NaiveBayes extends java.io.Serializable{
    *
    * @param observationsPerLabel a DrmLike[Int] matrix containing term frequency counts for each label.
    * @param trainComplementary whether or not to train a complementary Naive Bayes model
-   * @param alphaI smoothing parameter
+   * @param alphaI Laplace smoothing parameter
    * @return trained naive bayes model
    */
-  def train(
-    observationsPerLabel: DrmLike[Int],
-    labelIndex: Map[String, Integer],
-    trainComplementary: Boolean = true,
-    alphaI: Float = defaultAlphaI): NBModel = {
+  def train(observationsPerLabel: DrmLike[Int],
+            labelIndex: Map[String, Integer],
+            trainComplementary: Boolean = true,
+            alphaI: Float = defaultAlphaI): NBModel = {
 
     // Summation of all weights per feature
     val weightsPerFeature = observationsPerLabel.colSums
@@ -117,10 +111,10 @@ trait NaiveBayes extends java.io.Serializable{
    *   aggregatedByLabelObservationDrm is a DrmLike[Int] of aggregated
    *   TF or TF-IDF counts per label
    */
-  def extractLabelsAndAggregateObservations[K: ClassTag]
-    (stringKeyedObservations: DrmLike[K], cParser: CategoryParser = seq2SparseCategoryParser)
-    (implicit ctx: DistributedContext):
-    (mutable.HashMap[String, Integer], DrmLike[Int])= {
+  def extractLabelsAndAggregateObservations[K: ClassTag](stringKeyedObservations: DrmLike[K],
+                                                         cParser: CategoryParser = seq2SparseCategoryParser)
+                                                        (implicit ctx: DistributedContext):
+                                                        (mutable.HashMap[String, Integer], DrmLike[Int])= {
 
     //implicit val distributedContext = stringKeyedObservations.context
 
@@ -142,13 +136,13 @@ trait NaiveBayes extends java.io.Serializable{
 
     // Extract the row label bindings (the String keys) from the slim Drm
     // strip the document_id from the row keys keeping only the category.
-    // Sort the bindings aplhabetically into a Vector
+    // Sort the bindings alphabetically into a Vector
     val labelVectorByRowIndex = strippedObeservations
                                   .getRowLabelBindings
                                   .map(x => x._2 -> cParser(x._1))
                                   .toVector.sortWith(_._1 < _._1)
 
-    //TODO: ad a .toIntKeyed(...) method to DrmLike?
+    //TODO: add a .toIntKeyed(...) method to DrmLike?
 
     // Copy stringKeyedObservations to an Int-Keyed Drm so that we can compute transpose
     // Copy the Collected Matrices up front for now until we hav a better way of converting
@@ -161,19 +155,6 @@ trait NaiveBayes extends java.io.Serializable{
       inCoreIntKeyedObservations(i, ::) = inCoreStringKeyedObservations(i, ::)
     }
     val intKeyedObservations= drmParallelize(inCoreIntKeyedObservations)
-
-    /* Too many collects- does not work.  maybe chunk this or just drop down into spark for now
-    // Copy the Distributed Matrices. Iterate through and bind one column at a time.
-    // Very inefficient, but keeps us from pulling the full dataset upfront.
-    var singleColumnInCore= sparse(stringKeyedObservations.collect(::, 0)).t
-    var singleColumnDrm=drmParallelize(singleColumnInCore)
-    var intKeyedObservations = drmParallelize(singleColumnInCore)
-    for (i <- 1 until numFeatures) {
-      singleColumnInCore= sparse(stringKeyedObservations.collect(::, i)).t
-      singleColumnDrm = drmParallelize(singleColumnInCore)
-      intKeyedObservations = intKeyedObservations cbind drmParallelize(singleColumnInCore)
-    }
-    */
 
     stringKeyedObservations.uncache()
 
@@ -217,8 +198,6 @@ trait NaiveBayes extends java.io.Serializable{
         keys -> blockB
     }.t
 
-    // Now return the label Index HashMap and the the
-    // aggregetedObservationDrm which can be used as input to trainNB
     (labelIndexMap, aggregetedObservationByLabelDrm)
   }
 
@@ -233,12 +212,11 @@ trait NaiveBayes extends java.io.Serializable{
    * @tparam K implicitly determined Key type of test set DRM: String
    * @return a result analyzer with confusion matrix and accuracy statistics
    */
-  def test[K: ClassTag]
-    (model: NBModel,
-     testSet: DrmLike[K],
-     testComplementary: Boolean = false,
-     cParser: CategoryParser = seq2SparseCategoryParser)
-    (implicit ctx: DistributedContext): ResultAnalyzer = {
+  def test[K: ClassTag](model: NBModel,
+                        testSet: DrmLike[K],
+                        testComplementary: Boolean = false,
+                        cParser: CategoryParser = seq2SparseCategoryParser)
+                        (implicit ctx: DistributedContext): ResultAnalyzer = {
 
     val labelMap = model.labelIndex
 
@@ -335,11 +313,6 @@ trait NaiveBayes extends java.io.Serializable{
     analyzer
   }
 
-  /** Vectorize and classify an unseen/unlabeled Text document. See MAHOUT-1564 */
-  def classifyNew(){
-    throw new UnsupportedOperationException("In development see MAHOUT-1564")
-  }
-
   /**
    * argmax with values as well
    * returns a tuple of index of the max score and the score itself.
@@ -362,14 +335,14 @@ trait NaiveBayes extends java.io.Serializable{
 
 object NaiveBayes extends NaiveBayes with java.io.Serializable
 
-
 /**
  * Trainer for the weight normalization vector used by Transform Weight Normalized Complement
  * Naive Bayes.  See: Rennie et.al.: Tackling the poor assumptions of Naive Bayes Text classifiers,
- * ICML 2003, http://people.csail.mit.edu/jrennie/papers/icml03-nb.pdf.
+ * ICML 2003, http://people.csail.mit.edu/jrennie/papers/icml03-nb.pdf Sec. 3.2.
+ *
  * @param weightsPerFeature a Vector of summed TF or TF-IDF weights for each word in dictionary.
  * @param weightsPerLabel a Vector of summed TF or TF-IDF weights for each label.
- * @param alphaI Laplacian smoothing factor. Defaut value of 1.
+ * @param alphaI Laplace smoothing factor. Defaut value of 1.
  */
 class ComplementaryNBThetaTrainer(private val weightsPerFeature: Vector,
                                   private val weightsPerLabel: Vector,
@@ -413,7 +386,7 @@ class ComplementaryNBThetaTrainer(private val weightsPerFeature: Vector,
   }
 
   /**
-   * Getter for summed TF or TF-IDF weights by word.
+   * getter for summed TF or TF-IDF weights by word.
    * @param feature index of word.
    * @return sum of TF or TF-IDF weights for word.
    */
@@ -422,7 +395,7 @@ class ComplementaryNBThetaTrainer(private val weightsPerFeature: Vector,
   }
 
   /**
-   * add the magnitude of the current the weight to the current
+   * add the magnitude of the current weight to the current
    * label's corresponding Vector element.
    * @param label index of label to update.
    * @param weight weight to add.

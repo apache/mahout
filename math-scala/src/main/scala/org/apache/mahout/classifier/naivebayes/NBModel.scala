@@ -29,59 +29,38 @@ import scala.language.asInstanceOf
 import scala.collection._
 import JavaConversions._
 
+/**
+ *
+ * @param weightsPerLabelAndFeature Aggregated matrix of weights of labels x features
+ * @param weightsPerFeature Vector of summation of all feature weights.
+ * @param weightsPerLabel Vector of summation of all label weights.
+ * @param perlabelThetaNormalizer Vector of weight normalizers per label (used only for complemtary models)
+ * @param labelIndex HashMap of labels and their corresponding row in the weightMatrix
+ * @param alphaI Laplace smoothing factor.
+ * @param isComplementary Whether or not this is a complementary model.
+ */
+class NBModel(val weightsPerLabelAndFeature: Matrix = null,
+              val weightsPerFeature: Vector = null,
+              val weightsPerLabel: Vector = null,
+              val perlabelThetaNormalizer: Vector = null,
+              val labelIndex: Map[String, Integer] = null,
+              val alphaI: Float = .0f,
+              val isComplementary: Boolean= false)  extends java.io.Serializable {
 
 
-class NBModel extends java.io.Serializable {
-  var weightsPerLabel: Vector = null
-  var perlabelThetaNormalizer: Vector = null
-  var weightsPerFeature: Vector = null
-  var weightsPerLabelAndFeature: Matrix = null
-  var alphaI: Float = .0f
-  var numFeatures: Double = 0.0
-  var totalWeightSum: Double = 0.0
-  var isComplementary: Boolean = false
-  var alphaVector: Vector = null
-  var labelIndex: Map[String, Integer] = null
+  val numFeatures: Double = weightsPerFeature.getNumNondefaultElements
+  val totalWeightSum: Double = weightsPerLabel.zSum
+  val alphaVector: Vector = null
 
-  // todo: is distributed context being set up correctly here?  Maybe it is a good
-  // idea to move the serialize and materialize out of the model and into a helper
+  validate()
 
-  //implicit var distributedContext: DistributedContext
+  // todo: Maybe it is a good idea to move the dfsWrite and dfsRead out
+  // todo: of the model and into a helper
 
-  /**
-   *
-   * @param weightMatrix Aggregated matrix of weights of labels x features
-   * @param featureWeights Vector of summation of all feature weights.
-   * @param labelWeights Vector of summation of all label weights.
-   * @param weightNormalizers Vector of weight normalizers per label (used only for complemtary models)
-   * @param labelIndex HashMap of labels and their corresponding row in the weightMatrix
-   * @param alphaI Laplacian smoothing factor.
-   * @param isComplementary Whether or not this is a complementary model.
-   */
-  def this(weightMatrix: Matrix,
-           featureWeights: Vector,
-           labelWeights: Vector,
-           weightNormalizers: Vector,
-           labelIndex: Map[String, Integer],
-           alphaI: Float,
-           isComplementary: Boolean) {
-    this()
-    // TODO: weightsPerLabelAndFeature, a sparse (numFeatures x numLabels) matrix should fit
-    // TODO: upfront in memory and should not require a DRM decide if we want this to scale out.
-    this.weightsPerLabelAndFeature = weightMatrix
-    this.weightsPerFeature = featureWeights
-    this.weightsPerLabel = labelWeights
-    this.labelIndex = labelIndex
-    this.perlabelThetaNormalizer = weightNormalizers
-    this.numFeatures = featureWeights.getNumNondefaultElements
-    this.totalWeightSum = labelWeights.zSum
-    this.alphaI = alphaI
-    this.isComplementary = isComplementary
+  // TODO: weightsPerLabelAndFeature, a sparse (numFeatures x numLabels) matrix should fit
+  // TODO: upfront in memory and should not require a DRM decide if we want this to scale out.
 
 
-    validate()
-
-  }
   /** getter for summed label weights.  Used by legacy classifier */
   def labelWeight(label: Int): Double = {
      weightsPerLabel.getQuick(label)
@@ -112,13 +91,13 @@ class NBModel extends java.io.Serializable {
      weightsPerLabel.size
   }
 
-
-
   /**
-   * Write a trained model to the filesystem as a set of DRMs
+   * Write a trained model to the filesystem as a series of DRMs
    * @param pathToModel Directory to which the model will be written
    */
   def dfsWrite(pathToModel: String)(implicit ctx: DistributedContext): Unit = {
+    //todo:  write out as smaller partitions or possibly use reader and writers to
+    //todo:  write something other than a DRM for label Index, is Complementary, alphaI.
     drmParallelize(weightsPerLabelAndFeature).dfsWrite(pathToModel + "/weightsPerLabelAndFeatureDrm.drm")
     drmParallelize(sparse(weightsPerFeature)).dfsWrite(pathToModel + "/weightsPerFeatureDrm.drm")
     drmParallelize(sparse(weightsPerLabel)).dfsWrite(pathToModel + "/weightsPerLabelDrm.drm")
@@ -136,7 +115,8 @@ class NBModel extends java.io.Serializable {
     // write the label index as a String-Keyed DRM.
     val labelIndexDummyDrm = weightsPerLabelAndFeature.like()
     labelIndexDummyDrm.setRowLabelBindings(labelIndex)
-    // get a reverse map of [Integer, String] and set the
+    // get a reverse map of [Integer, String] and set the value of firsr column of the drm
+    // to the corresponding row number for it's Label (the rows may not be read back in the same order)
     val revMap = labelIndex.map(x => x._2 -> x._1)
     for(i <- 0 until labelIndexDummyDrm.numRows() ){
       labelIndexDummyDrm.set(labelIndex(revMap(i)), 0, i.toDouble)
@@ -172,6 +152,7 @@ object NBModel extends java.io.Serializable {
    * @return a valid NBModel
    */
   def dfsRead(pathToModel: String)(implicit ctx: DistributedContext): NBModel = {
+    //todo:  Takes forever to read we need a more practical method of writing models. Readers/Writers?
 
     val weightsPerFeatureDrm = drmDfsRead(pathToModel + "/weightsPerFeatureDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
     val weightsPerFeature = weightsPerFeatureDrm.collect(0, ::)
@@ -214,7 +195,7 @@ object NBModel extends java.io.Serializable {
     weightsPerLabelAndFeatureDrm.uncache()
 
 
-    // model validation is triggered in
+    // model validation is triggered automatically by constructor
     val model: NBModel = new NBModel(weightsPerLabelAndFeature,
       weightsPerFeature,
       weightsPerLabel,

@@ -20,7 +20,6 @@ package org.apache.mahout.sparkbindings.io
 import com.esotericsoftware.kryo.Kryo
 import com.esotericsoftware.kryo.serializers.JavaSerializer
 import com.google.common.collect.HashBiMap
-import org.apache.mahout.classifier.naivebayes.{AbstractNBClassifier, StandardNBClassifier, ComplementaryNBClassifier, NBModel}
 import org.apache.mahout.math._
 import org.apache.spark.serializer.KryoRegistrator
 import org.apache.mahout.sparkbindings._

@@ -236,27 +236,27 @@ abstract trait RunningAverageAndStdDev extends RunningAverage {
 
 class InvertedRunningAverage(private val delegate: RunningAverage) extends RunningAverage {
 
-  def addDatum(datum: Double) {
+  override def addDatum(datum: Double) {
     throw new UnsupportedOperationException
   }
 
-  def removeDatum(datum: Double) {
+  override def removeDatum(datum: Double) {
     throw new UnsupportedOperationException
   }
 
-  def changeDatum(delta: Double) {
+  override def changeDatum(delta: Double) {
     throw new UnsupportedOperationException
   }
 
-  def getCount: Int = {
+  override def getCount: Int = {
      delegate.getCount
   }
 
-  def getAverage: Double = {
+  override def getAverage: Double = {
      -delegate.getAverage
   }
 
-  def inverse: RunningAverage = {
+  override def inverse: RunningAverage = {
      delegate
   }
 
@@ -271,13 +271,14 @@ class InvertedRunningAverage(private val delegate: RunningAverage) extends Runni
  *
  * Ported from org.apache.mahout.cf.taste.impl.common.FullRunningAverage.java
  */
-class FullRunningAverage(private var count: Int = 0, private var average: Double = Double.NaN ) extends RunningAverage {
+class FullRunningAverage(private var count: Int = 0,
+                         private var average: Double = Double.NaN ) extends RunningAverage {
 
   /**
    * @param datum
    * new item to add to the running average
    */
-  def addDatum(datum: Double) {
+  override def addDatum(datum: Double) {
     count += 1
     if (count == 1) {
       average = datum
@@ -293,7 +294,7 @@ class FullRunningAverage(private var count: Int = 0, private var average: Double
    * @throws IllegalStateException
    * if count is 0
    */
-  def removeDatum(datum: Double) {
+  override def removeDatum(datum: Double) {
     if (count == 0) {
       throw new IllegalStateException
     }
@@ -312,22 +313,22 @@ class FullRunningAverage(private var count: Int = 0, private var average: Double
    * @throws IllegalStateException
    * if count is 0
    */
-  def changeDatum(delta: Double) {
+  override def changeDatum(delta: Double) {
     if (count == 0) {
       throw new IllegalStateException
     }
     average += delta / count
   }
 
-  def getCount: Int = {
+  override def getCount: Int = {
     count
   }
 
-  def getAverage: Double = {
+  override def getAverage: Double = {
     average
   }
 
-  def inverse: RunningAverage = {
+  override def inverse: RunningAverage = {
     new InvertedRunningAverage(this)
   }
 
@@ -347,9 +348,9 @@ class FullRunningAverage(private var count: Int = 0, private var average: Double
  * Ported from org.apache.mahout.cf.taste.impl.common.FullRunningAverageAndStdDev.java
  */
 class FullRunningAverageAndStdDev(private var count: Int = 0,
-                                        private var average: Double = 0.0,
-                                        private var mk: Double = 0.0,
-                                        private var sk: Double = 0.0) extends FullRunningAverage with RunningAverageAndStdDev {
+                                  private var average: Double = 0.0,
+                                  private var mk: Double = 0.0,
+                                  private var sk: Double = 0.0) extends FullRunningAverage with RunningAverageAndStdDev {
 
   var stdDev: Double = 0.0
 
@@ -363,7 +364,7 @@ class FullRunningAverageAndStdDev(private var count: Int = 0,
     sk
   }
 
-  def getStandardDeviation: Double = {
+  override def getStandardDeviation: Double = {
     stdDev
   }
 
@@ -423,31 +424,31 @@ class FullRunningAverageAndStdDev(private var count: Int = 0,
  */
 class InvertedRunningAverageAndStdDev(private val delegate: RunningAverageAndStdDev) extends RunningAverageAndStdDev {
 
-  def addDatum(datum: Double) {
+  override def addDatum(datum: Double) {
     throw new UnsupportedOperationException
   }
 
-  def removeDatum(datum: Double) {
+  override def removeDatum(datum: Double) {
     throw new UnsupportedOperationException
   }
 
-  def changeDatum(delta: Double) {
+  override def changeDatum(delta: Double) {
     throw new UnsupportedOperationException
   }
 
-  def getCount: Int = {
+  override def getCount: Int = {
      delegate.getCount
   }
 
-  def getAverage: Double = {
+  override def getAverage: Double = {
      -delegate.getAverage
   }
 
-  def getStandardDeviation: Double = {
+  override def getStandardDeviation: Double = {
      delegate.getStandardDeviation
   }
 
-  def inverse: RunningAverageAndStdDev = {
+  override def inverse: RunningAverageAndStdDev = {
      delegate
   }
 

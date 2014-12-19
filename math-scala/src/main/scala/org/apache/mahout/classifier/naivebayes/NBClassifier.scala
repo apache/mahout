@@ -24,19 +24,23 @@ import scala.collection.JavaConversions._
  * @param nbModel a trained NBModel
  */
 abstract class AbstractNBClassifier(nbModel: NBModel) extends java.io.Serializable {
+
+  // Trained Naive Bayes Model
   val model = nbModel
 
+  /** scoring method for standard and complementary classifiers */
   protected def getScoreForLabelFeature(label: Int, feature: Int): Double
 
+  /** getter for model */
   protected def getModel: NBModel= {
      model
   }
 
   /**
-   * Comput the score for a Vector of weighted TF-IDF featured
-   * @param label
-   * @param instance
-   * @return
+   * Compute the score for a Vector of weighted TF-IDF featured
+   * @param label Label to be scored
+   * @param instance Vector of weights to be calculate score
+   * @return score for this Label
    */
   protected def getScoreForLabelInstance(label: Int, instance: Vector): Double = {
     var result: Double = 0.0
@@ -46,14 +50,21 @@ abstract class AbstractNBClassifier(nbModel: NBModel) extends java.io.Serializab
     result
   }
 
+  /** number of categories the model has been trained on */
   def numCategories: Int = {
      model.numLabels
   }
 
+  /**
+   * get a scoring vector for a vector of TF of TF-IDF weights
+   * @param instance vector of TF of TF-IDF weights to be classified
+   * @return a vector of scores.
+   */
   def classifyFull(instance: Vector): Vector = {
-    return classifyFull(model.createScoringVector, instance)
+    classifyFull(model.createScoringVector, instance)
   }
 
+  /** helper method for classifyFull(Vector) */
   def classifyFull(r: Vector, instance: Vector): Vector = {
     var label: Int = 0
     for (label <- 0 until model.numLabels) {
@@ -64,25 +75,19 @@ abstract class AbstractNBClassifier(nbModel: NBModel) extends java.io.Serializab
 }
 
 /**
- * Standard Classifier
+ * Standard Multinomial Naive Bayes Classifier
  * @param nbModel a trained NBModel
  */
 class StandardNBClassifier(nbModel: NBModel) extends AbstractNBClassifier(nbModel: NBModel) with java.io.Serializable{
-  def getScoreForLabelFeature(label: Int, feature: Int): Double = {
+  override def getScoreForLabelFeature(label: Int, feature: Int): Double = {
     val model: NBModel = getModel
     StandardNBClassifier.computeWeight(model.weight(label, feature), model.labelWeight(label), model.alphaI, model.numFeatures)
   }
 }
 
+/** helper object for StandardNBClassifier */
 object StandardNBClassifier extends java.io.Serializable {
-  /**
-   *
-   * @param featureLabelWeight
-   * @param labelWeight
-   * @param alphaI
-   * @param numFeatures
-   * @return
-   */
+  /** Compute Standard Multinomial Naive Bayes Weights See Rennie et. al. Section 2.1 */
   def computeWeight(featureLabelWeight: Double, labelWeight: Double, alphaI: Double, numFeatures: Double): Double = {
     val numerator: Double = featureLabelWeight + alphaI
     val denominator: Double = labelWeight + alphaI * numFeatures
@@ -91,29 +96,21 @@ object StandardNBClassifier extends java.io.Serializable {
 }
 
 /**
- * Complemtary Classifier
+ * Complementary Naive Bayes Classifier
  * @param nbModel a trained NBModel
  */
 class ComplementaryNBClassifier(nbModel: NBModel) extends AbstractNBClassifier(nbModel: NBModel) with java.io.Serializable {
-
-  def getScoreForLabelFeature(label: Int, feature: Int): Double = {
+  override def getScoreForLabelFeature(label: Int, feature: Int): Double = {
     val model: NBModel = getModel
     val weight: Double = ComplementaryNBClassifier.computeWeight(model.featureWeight(feature), model.weight(label, feature), model.totalWeightSum, model.labelWeight(label), model.alphaI, model.numFeatures)
     return weight / model.thetaNormalizer(label)
   }
 }
 
+/** helper object for ComplementaryNBClassifier */
 object ComplementaryNBClassifier extends java.io.Serializable {
-  /**
-   * Calculate weight normalized complementary score
-   * @param featureWeight
-   * @param featureLabelWeight
-   * @param totalWeight
-   * @param labelWeight
-   * @param alphaI
-   * @param numFeatures
-   * @return
-   */
+
+  /** Compute Complementary weights See Rennie et. al. Section 3.1 */
   def computeWeight(featureWeight: Double, featureLabelWeight: Double, totalWeight: Double, labelWeight: Double, alphaI: Double, numFeatures: Double): Double = {
     val numerator: Double = featureWeight - featureLabelWeight + alphaI
     val denominator: Double = totalWeight - labelWeight + alphaI * numFeatures

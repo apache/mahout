@@ -84,8 +84,8 @@ object TrainNBDriver extends MahoutSparkDriver {
       sparkConf.set("spark.executor.memory", parser.opts("sparkExecutorMem").asInstanceOf[String])
 
     // Note: set a large akka frame size for DSL NB (20)
-    //sparkConf.set("spark.akka.frameSize","20") // don't need this for Spark optimized NaiveBayes..
-    //else leave as set in Spark config
+    // sparkConf.set("spark.akka.frameSize","20") // don't need this for Spark optimized NaiveBayes..
+    // else leave as set in Spark config
 
     super.start(masterUrl, appName)
 
@@ -104,9 +104,7 @@ object TrainNBDriver extends MahoutSparkDriver {
     val outputPath = parser.opts("output").asInstanceOf[String]
 
     val trainingSet = readTrainingSet
-
     val (labelIndex, aggregatedObservations) = SparkNaiveBayes.extractLabelsAndAggregateObservations(trainingSet)
-
     val model = NaiveBayes.train(aggregatedObservations, labelIndex)
 
     model.dfsWrite(outputPath)

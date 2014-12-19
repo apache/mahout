@@ -114,9 +114,12 @@ object TestNBDriver extends MahoutSparkDriver {
     val testComplementary = parser.opts("testComplementary").asInstanceOf[Boolean]
     val outputPath = parser.opts("output").asInstanceOf[String]
 
+    // todo:  get the -ow option in to check for a model in the path and overwrite if flagged.
+
     val testSet = readTestSet
     val model = readModel
     val analyzer= NaiveBayes.test(model, testSet, testComplementary)
+
     println(analyzer)
 
     stop
