@@ -97,11 +97,14 @@ object TestNBDriver extends MahoutSparkDriver {
 
     }
 
+  /** Read the test set from inputPath/part-x-00000 sequence file of form <Text,VectorWritable> */
   private def readTestSet: DrmLike[_] = {
     val inputPath = parser.opts("input").asInstanceOf[String]
     val trainingSet= drm.drmDfsRead(inputPath)
     trainingSet
   }
+
+  /** read the model from pathToModel using NBModel.DfsRead(...) */
   private def readModel: NBModel = {
     val inputPath = parser.opts("pathToModel").asInstanceOf[String]
     val model= NBModel.dfsRead(inputPath)

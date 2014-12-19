@@ -103,6 +103,7 @@ class NBModel(val weightsPerLabelAndFeature: Matrix = null,
     drmParallelize(sparse(weightsPerLabel)).dfsWrite(pathToModel + "/weightsPerLabelDrm.drm")
     drmParallelize(sparse(perlabelThetaNormalizer)).dfsWrite(pathToModel + "/perlabelThetaNormalizerDrm.drm")
     drmParallelize(sparse(svec((0,alphaI)::Nil))).dfsWrite(pathToModel + "/alphaIDrm.drm")
+
     // isComplementry is true if isComplementaryDrm(0,0) == 1 else false
     val isComplementaryDrm = sparse(0 to 1, 0 to 1)
     if(isComplementary){
@@ -121,8 +122,8 @@ class NBModel(val weightsPerLabelAndFeature: Matrix = null,
     for(i <- 0 until labelIndexDummyDrm.numRows() ){
       labelIndexDummyDrm.set(labelIndex(revMap(i)), 0, i.toDouble)
     }
-    drmParallelizeWithRowLabels(labelIndexDummyDrm).dfsWrite(pathToModel + "/labelIndex.drm")
 
+    drmParallelizeWithRowLabels(labelIndexDummyDrm).dfsWrite(pathToModel + "/labelIndex.drm")
   }
 
   /** Model Validation */
@@ -142,7 +143,6 @@ class NBModel(val weightsPerLabelAndFeature: Matrix = null,
     }
     assert(labelIndex.size == weightsPerLabel.getNumNondefaultElements, "label index must have entries for all labels")
   }
-
 }
 
 object NBModel extends java.io.Serializable {
@@ -165,7 +165,6 @@ object NBModel extends java.io.Serializable {
     val alphaIDrm = drmDfsRead(pathToModel + "/alphaIDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
     val alphaI: Float = alphaIDrm.collect(0, 0).toFloat
     alphaIDrm.uncache()
-
 
     // isComplementry is true if isComplementaryDrm(0,0) == 1 else false
     val isComplementaryDrm = drmDfsRead(pathToModel + "/isComplementaryDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
@@ -193,7 +192,6 @@ object NBModel extends java.io.Serializable {
     val weightsPerLabelAndFeatureDrm = drmDfsRead(pathToModel + "/weightsPerLabelAndFeatureDrm.drm").checkpoint(CacheHint.MEMORY_ONLY)
     val weightsPerLabelAndFeature = weightsPerLabelAndFeatureDrm.collect
     weightsPerLabelAndFeatureDrm.uncache()
-
 
     // model validation is triggered automatically by constructor
     val model: NBModel = new NBModel(weightsPerLabelAndFeature,

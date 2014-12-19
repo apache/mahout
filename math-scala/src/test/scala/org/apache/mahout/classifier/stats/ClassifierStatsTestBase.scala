@@ -28,11 +28,11 @@ import org.scalatest.{FunSuite, Matchers}
 
 
 
-trait ClassifierStatsTestBase extends DistributedMahoutSuite with Matchers { this:FunSuite =>
+trait ClassifierStatsTestBase extends DistributedMahoutSuite with Matchers { this: FunSuite =>
 
   val epsilon = 1E-6
 
-  val SMALL_EPSILON = 1.0
+  val smallEpsilon = 1.0
 
   // FullRunningAverageAndStdDev tests
   test("testFullRunningAverageAndStdDev") {
@@ -71,8 +71,8 @@ trait ClassifierStatsTestBase extends DistributedMahoutSuite with Matchers { thi
       average.addDatum(r.nextDouble() * 1000.0)
     }
 
-    assert((500.0 - average.getAverage).abs < SMALL_EPSILON)
-    assert(((1000.0 / Math.sqrt(12.0)) - average.getStandardDeviation).abs < SMALL_EPSILON)
+    assert((500.0 - average.getAverage).abs < smallEpsilon)
+    assert(((1000.0 / Math.sqrt(12.0)) - average.getStandardDeviation).abs < smallEpsilon)
   }
 
   test("testStddevFullRunningAverageAndStdDev") {

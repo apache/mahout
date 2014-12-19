@@ -32,22 +32,26 @@ import scala.collection.JavaConversions._
  * The fact of whether there is a default is not stored. A row of zeros is the only indicator that there is no default.
  *
  * See http://en.wikipedia.org/wiki/Confusion_matrix for background
+ *
+ *
+ * @param labels The labels to consider for classification
+ * @param defaultLabel default unknown label
  */
-class ConfusionMatrix(private var labels: util.Collection[String],
+class ConfusionMatrix(private var labels: util.Collection[String] = null,
                       private var defaultLabel: String = "unknown")  {
   /**
    * Matrix Constructor
-   * @param m
+   * @param m a DenseMatrix with RowLabelBindings
    */
-   //  def this(m: Matrix) {
-   //    this()
-   //    confusionMatrix = new Array[Array[Int]](m.numRows, m.numRows)
-   //    setMatrix(m)
-   //  }
+//   def this(m: Matrix) {
+//     this()
+//     confusionMatrix = Array.ofDim[Int](m.numRows, m.numRows)
+//     setMatrix(m)
+//   }
 
    // val LOG: Logger = LoggerFactory.getLogger(classOf[ConfusionMatrix])
 
-  val confusionMatrix = Array.ofDim[Int](labels.size + 1, labels.size + 1)
+  var confusionMatrix = Array.ofDim[Int](labels.size + 1, labels.size + 1)
 
   val labelMap = new mutable.HashMap[String,Integer]()
 
@@ -113,14 +117,14 @@ class ConfusionMatrix(private var labels: util.Collection[String],
 
     for (i <- 0 until numLabels) {
       if (i != labelId) {
-        falsePositives += confusionMatrix(i)(labelId);
+        falsePositives += confusionMatrix(i)(labelId)
       }
     }
 
     if (truePositives + falsePositives == 0) {
-      return 0
+      0
     } else {
-      return (truePositives.asInstanceOf[Double]) / (truePositives + falsePositives)
+      (truePositives.asInstanceOf[Double]) / (truePositives + falsePositives)
     }
   }
 
@@ -148,9 +152,9 @@ class ConfusionMatrix(private var labels: util.Collection[String],
     }
 
     if (truePositives + falseNegatives == 0) {
-      return 0
+      0
     } else {
-      return (truePositives.asInstanceOf[Double]) / (truePositives + falseNegatives)
+      (truePositives.asInstanceOf[Double]) / (truePositives + falseNegatives)
     }
   }
 
@@ -170,9 +174,9 @@ class ConfusionMatrix(private var labels: util.Collection[String],
     val precision: Double = getPrecision(label)
     val recall: Double = getRecall(label)
     if (precision + recall == 0) {
-      return 0
+      0
     } else {
-      return 2 * precision * recall / (precision + recall)
+      2 * precision * recall / (precision + recall)
     }
   }
 
@@ -218,28 +222,28 @@ class ConfusionMatrix(private var labels: util.Collection[String],
       a += confusionMatrix(i)(i)
       var br: Int = 0
       for (j <- 0 until confusionMatrix.length) {
-        br += confusionMatrix(i)(j);
+        br += confusionMatrix(i)(j)
       }
       var bc: Int = 0
       //TODO: verify this as an iterator
       for (vec <- confusionMatrix) {
         bc += vec(i)
       }
-      b += br * bc;
+      b += br * bc
     }
     (samples * a - b) / (samples * samples - b)
   }
 
   def getCorrect(label: String): Int = {
     val labelId: Int = labelMap(label)
-    return confusionMatrix(labelId)(labelId)
+    confusionMatrix(labelId)(labelId)
   }
 
   def getTotal(label: String): Int = {
     val labelId: Int = labelMap(label)
     var labelTotal: Int = 0
     for (i <- 0 until numLabels) {
-      labelTotal += confusionMatrix(labelId)(i);
+      labelTotal += confusionMatrix(labelId)(i)
     }
     labelTotal
   }
@@ -256,7 +260,7 @@ class ConfusionMatrix(private var labels: util.Collection[String],
       for (j <- 0 until  confusionMatrix.length) {
         total += confusionMatrix(d)(j)
       }
-      summer.addDatum(confusionMatrix(d)(d) / (total + 0.000001));
+      summer.addDatum(confusionMatrix(d)(d) / (total + 0.000001))
     }
     summer
   }
@@ -326,7 +330,7 @@ class ConfusionMatrix(private var labels: util.Collection[String],
 
     for (r <- 0 until length) {
       for (c <- 0 until length) {
-        m.set(r, c, confusionMatrix(r)(c));
+        m.set(r, c, confusionMatrix(r)(c))
       }
     }
 
@@ -335,7 +339,8 @@ class ConfusionMatrix(private var labels: util.Collection[String],
     }
     m.setRowLabelBindings(labels)
     m.setColumnLabelBindings(labels)
-    return m
+
+    m
   }
 
   def setMatrix(m: Matrix) : Unit = {
@@ -346,7 +351,7 @@ class ConfusionMatrix(private var labels: util.Collection[String],
 
     for (r <- 0 until length) {
       for (c <- 0 until length) {
-        confusionMatrix(r)(c) = Math.round(m.get(r, c)).toInt;
+        confusionMatrix(r)(c) = Math.round(m.get(r, c)).toInt
       }
     }
 
@@ -355,13 +360,12 @@ class ConfusionMatrix(private var labels: util.Collection[String],
       labels = m.getColumnLabelBindings
     }
 
-
     if (labels != null) {
       val sorted: Array[String] = sortLabels(labels)
       verifyLabels(length, sorted)
       labelMap.clear
       for (i <- 0 until length) {
-        labelMap.put(sorted(i), i);
+        labelMap.put(sorted(i), i)
       }
     }
   }
@@ -370,7 +374,7 @@ class ConfusionMatrix(private var labels: util.Collection[String],
     assert(sorted.length == length, "One label, one row")
     for (i <- 0 until length) {
       if (sorted(i) == null) {
-        assert(false, "One label, one row");
+        assert(false, "One label, one row")
       }
     }
   }
@@ -380,7 +384,8 @@ class ConfusionMatrix(private var labels: util.Collection[String],
     for (entry <- labels.entrySet) {
       sorted(entry.getValue) = entry.getKey
     }
-    return sorted
+
+    sorted
   }
 
   /**
@@ -435,7 +440,7 @@ class ConfusionMatrix(private var labels: util.Collection[String],
     }
     returnString.append('\n')
 
-    returnString.toString
+    returnString.toString()
   }
 
 
@@ -447,7 +452,8 @@ class ConfusionMatrix(private var labels: util.Collection[String],
       returnString.insert(0, ('a' + n).asInstanceOf[Char])
       value /= 26
     } while (value > 0)
-    return returnString.toString
+
+    returnString.toString()
   }
 
 

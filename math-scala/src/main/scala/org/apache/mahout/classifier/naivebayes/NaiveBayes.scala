@@ -74,7 +74,6 @@ trait NaiveBayes extends java.io.Serializable{
     // Instantiate a trainer and retrieve the perLabelThetaNormalizer Vector from it in the case of
     // a complementary NB model
     if (trainComplementary) {
-//      val thetaTrainer = new ComplementaryThetaTrainer(weightsPerFeature, weightsPerLabel, alphaI)
       val thetaTrainer = new ComplementaryNBThetaTrainer(weightsPerFeature,
                                                          weightsPerLabel,
                                                          alphaI)
@@ -116,8 +115,6 @@ trait NaiveBayes extends java.io.Serializable{
                                                         (implicit ctx: DistributedContext):
                                                         (mutable.HashMap[String, Integer], DrmLike[Int])= {
 
-    //implicit val distributedContext = stringKeyedObservations.context
-
     stringKeyedObservations.checkpoint()
 
     val numDocs=stringKeyedObservations.nrow
@@ -145,8 +142,7 @@ trait NaiveBayes extends java.io.Serializable{
     //TODO: add a .toIntKeyed(...) method to DrmLike?
 
     // Copy stringKeyedObservations to an Int-Keyed Drm so that we can compute transpose
-    // Copy the Collected Matrices up front for now until we hav a better way of converting
-    // see next commented code block
+    // Copy the Collected Matrices up front for now until we hav a distributed way of converting
     val inCoreStringKeyedObservations = stringKeyedObservations.collect
     val inCoreIntKeyedObservations = new SparseMatrix(
                              stringKeyedObservations.nrow.toInt,
@@ -154,6 +150,7 @@ trait NaiveBayes extends java.io.Serializable{
     for (i <- 0 until inCoreStringKeyedObservations.nrow.toInt) {
       inCoreIntKeyedObservations(i, ::) = inCoreStringKeyedObservations(i, ::)
     }
+
     val intKeyedObservations= drmParallelize(inCoreIntKeyedObservations)
 
     stringKeyedObservations.uncache()
@@ -226,7 +223,7 @@ trait NaiveBayes extends java.io.Serializable{
 
     val numTestInstances = testSet.nrow.toInt
 
-
+    // instantiate the correct type of classifier
     val classifier = testComplementary match {
       case true => new ComplementaryNBClassifier(model) with Serializable
       case _ => new StandardNBClassifier(model) with Serializable
@@ -278,6 +275,7 @@ trait NaiveBayes extends java.io.Serializable{
     testSet.uncache()
     */
 
+
     /** Sequentially: */
 
     // Since we cant broadcast the model as is do it sequentially up front for now
@@ -286,6 +284,7 @@ trait NaiveBayes extends java.io.Serializable{
     // get the labels of the test set and extract the keys
     val testSetLabelMap = testSet.getRowLabelBindings //.map(x => cParser(x._1) -> x._2)
 
+    // empty Matrix in which we'll set the classification scores
     val inCoreScoredTestSet = testSet.like(numTestInstances, numLabels)
 
     testSet.uncache()
@@ -295,6 +294,7 @@ trait NaiveBayes extends java.io.Serializable{
     }
 
     // todo: reverse the labelMaps in training and through the model?
+
     // reverse the label map and extract the labels
     val reverseTestSetLabelMap = testSetLabelMap.map(x => x._2 -> cParser(x._1))
 

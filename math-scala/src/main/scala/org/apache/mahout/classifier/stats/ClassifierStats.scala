@@ -29,37 +29,35 @@ class ClassifierResult (private var label: String = null,
                         private var score: Double = 0.0,
                         private var logLikelihood: Double = Integer.MAX_VALUE.toDouble) {
 
-  def getLogLikelihood: Double = {
-    return logLikelihood
+  def getLogLikelihood: Double = logLikelihood
+
+  def setLogLikelihood(llh: Double) {
+    logLikelihood = llh
   }
 
-  def setLogLikelihood(logLikelihood: Double) {
-    this.logLikelihood = logLikelihood
+  def getLabel: String = label
+
+  def getScore: Double = score
+
+  def setLabel(lbl: String) {
+    label = lbl
   }
 
-  def getLabel: String = {
-     label
-  }
-
-  def getScore: Double = {
-    return score
-  }
-
-  def setLabel(label: String) {
-    this.label = label
-  }
-
-  def setScore(score: Double) {
-    this.score = score
+  def setScore(sc: Double) {
+    score = sc
   }
 
   override def toString: String = {
-    return "ClassifierResult{" + "category='" + label + '\'' + ", score=" + score + '}'
+     "ClassifierResult{" + "category='" + label + '\'' + ", score=" + score + '}'
   }
 
 }
 
-/** ResultAnalyzer captures the classification statistics and displays in a tabular manner */
+/**
+ * ResultAnalyzer captures the classification statistics and displays in a tabular manner
+ * @param labelSet Set of labels to be considered in classification
+ * @param defaultLabel  the default label for an unknown classification
+ */
 class ResultAnalyzer(private val labelSet: util.Collection[String], defaultLabel: String) {
 
   val confusionMatrix = new ConfusionMatrix(labelSet, defaultLabel)
@@ -70,9 +68,7 @@ class ResultAnalyzer(private val labelSet: util.Collection[String], defaultLabel
   private var incorrectlyClassified: Int = 0
 
 
-  def getConfusionMatrix: ConfusionMatrix = {
-    return this.confusionMatrix
-  }
+  def getConfusionMatrix: ConfusionMatrix = confusionMatrix
 
   /**
    *
@@ -95,9 +91,11 @@ class ResultAnalyzer(private val labelSet: util.Collection[String], defaultLabel
       summarizer.add(classifiedResult.getLogLikelihood)
       hasLL = true
     }
-    return result
+
+    result
   }
 
+  /** Dump the resulting statistics to a string */
   override def toString: String = {
     val returnString: StringBuilder = new StringBuilder
     returnString.append('\n')
@@ -139,7 +137,7 @@ class ResultAnalyzer(private val labelSet: util.Collection[String], defaultLabel
     returnString.append("Reliability: \t")
                 .append(decimalFormatter.format(normStats.getAverage * 100.00000001))
                 .append("%\n")
-    returnString.append("Reliability (standard deviation): \t")
+    returnString.append("Reliability (std dev): \t")
                 .append(decimalFormatter.format(normStats.getStandardDeviation))
                 .append('\n')
     returnString.append("Weighted precision: \t")
@@ -163,7 +161,8 @@ class ResultAnalyzer(private val labelSet: util.Collection[String], defaultLabel
                   .append(decimalFormatter.format(summarizer.getQuartile(3)))
                   .append('\n')
     }
-    return returnString.toString
+
+    returnString.toString()
   }
 
 
@@ -178,7 +177,7 @@ class ResultAnalyzer(private val labelSet: util.Collection[String], defaultLabel
  *
  * Ported from org.apache.mahout.cf.taste.impl.common.RunningAverage.java
  */
-abstract trait RunningAverage {
+trait RunningAverage {
   /**
    * @param datum
    * new item to add to the running average
@@ -223,7 +222,7 @@ abstract trait RunningAverage {
  *
  * Ported from org.apache.mahout.cf.taste.impl.common.RunningAverageAndStdDev.java
  */
-abstract trait RunningAverageAndStdDev extends RunningAverage {
+trait RunningAverageAndStdDev extends RunningAverage {
   /** @return standard deviation of data */
   def getStandardDeviation: Double
 
@@ -423,15 +422,21 @@ class FullRunningAverageAndStdDev(private var count: Int = 0,
  * Ported from org.apache.mahout.cf.taste.impl.common.InvertedRunningAverageAndStdDev.java
  */
 class InvertedRunningAverageAndStdDev(private val delegate: RunningAverageAndStdDev) extends RunningAverageAndStdDev {
-
+  /**
+   * @throws UnsupportedOperationException
+   */
   override def addDatum(datum: Double) {
     throw new UnsupportedOperationException
   }
-
+  /**
+   * @throws UnsupportedOperationException
+   */
   override def removeDatum(datum: Double) {
     throw new UnsupportedOperationException
   }
-
+  /**
+   * @throws UnsupportedOperationException
+   */
   override def changeDatum(delta: Double) {
     throw new UnsupportedOperationException
   }
