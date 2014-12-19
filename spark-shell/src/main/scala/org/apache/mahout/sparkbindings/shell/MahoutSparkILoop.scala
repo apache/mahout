@@ -45,6 +45,12 @@ class MahoutSparkILoop extends SparkILoop {
       conf.set("spark.executor.uri", execUri)
     }
 
+    // temporarily hard code spark.kryoserializer.buffer.mb
+    // to allow for seq2sparse data
+    //TODO: remove this before pushing to apache/master
+    conf.set("spark.kryoserializer.buffer.mb","100")
+    conf.set("spark.akka.frameSize","100")
+
     sparkContext = mahoutSparkContext(
       masterUrl = master,
       appName = "Mahout Spark Shell",

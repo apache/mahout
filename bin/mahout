@@ -92,6 +92,14 @@ if [ "$1" == "spark-rowsimilarity" ]; then
   SPARK=1
 fi
 
+if [ "$1" == "spark-trainnb" ]; then
+  SPARK=1
+fi
+
+if [ "$1" == "spark-testnb" ]; then
+  SPARK=1
+fi
+
 if [ "$MAHOUT_CORE" != "" ]; then
   IS_CORE=1
 fi
@@ -262,6 +270,15 @@ case "$1" in
     shift
     "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.RowSimilarityDriver" "$@"
     ;;
+  (spark-trainnb)
+    shift
+    "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.TrainNBDriver" "$@"
+    ;;
+  (spark-testnb)
+    shift
+    "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "org.apache.mahout.drivers.TestNBDriver" "$@"
+    ;;
+
   (h2o-node)
     shift
     "$JAVA" $JAVA_HEAP_MAX -classpath "$CLASSPATH" "water.H2O" -md5skip "$@" -name mah2out
