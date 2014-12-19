@@ -319,7 +319,6 @@ public class H2OHelper {
     for (int c = 0; c < m.columnSize(); c++) {
       writers[c].close(closer);
     }
-
     // If string labeled matrix, create aux Vec
     Map<String,Integer> map = m.getRowLabelBindings();
     if (map != null) {
@@ -327,8 +326,8 @@ public class H2OHelper {
       labels = frame.anyVec().makeZero();
       Vec.Writer writer = labels.open();
       Map<Integer,String> rmap = reverseMap(map);
-
-      for (long r = 0; r < m.rowSize(); r++) {
+      for (int r = 0; r < m.rowSize(); r++) {
+        // TODO: fix bug here... Exception is being thrown when setting Strings
         writer.set(r, rmap.get(r));
       }
 
