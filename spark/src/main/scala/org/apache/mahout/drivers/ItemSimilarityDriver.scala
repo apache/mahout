@@ -117,15 +117,9 @@ object ItemSimilarityDriver extends MahoutSparkDriver {
     }
   }
 
-  override def start(masterUrl: String = parser.opts("master").asInstanceOf[String],
-      appName: String = parser.opts("appName").asInstanceOf[String]):
-    Unit = {
+  override protected def start() : Unit = {
 
-    if (parser.opts("sparkExecutorMem").asInstanceOf[String] != "")
-      sparkConf.set("spark.executor.memory", parser.opts("sparkExecutorMem").asInstanceOf[String])
-    //else leave as set in Spark config
-
-    super.start(masterUrl, appName)
+    super.start
 
     readSchema1 = new Schema("delim" -> parser.opts("inDelim").asInstanceOf[String],
       "filter" -> parser.opts("filter1").asInstanceOf[String],
@@ -208,7 +202,7 @@ object ItemSimilarityDriver extends MahoutSparkDriver {
   }
 
   override def process: Unit = {
-    start()
+    start
 
     val indexedDatasets = readIndexedDatasets
     val idss = SimilarityAnalysis.cooccurrencesIDSs(indexedDatasets, parser.opts("randomSeed").asInstanceOf[Int],
