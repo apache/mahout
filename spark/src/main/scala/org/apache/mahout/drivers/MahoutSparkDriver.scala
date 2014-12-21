@@ -70,15 +70,16 @@ abstract class MahoutSparkDriver extends MahoutDriver {
   /** Creates a Spark context to run the job inside.
     * Override to set the SparkConf values specific to the job,
     * these must be set before the context is created.
-    * @param masterUrl Spark master URL
-    * @param appName  Name to display in Spark UI
     * */
-  protected def start(masterUrl: String, appName: String) : Unit = {
+  protected def start() : Unit = {
     sparkConf.set("spark.kryo.referenceTracking", "false")
       .set("spark.kryoserializer.buffer.mb", "200")// this is default for Mahout optimizer, change it with -D option
 
     if (!_useExistingContext) {
-      mc = mahoutSparkContext(masterUrl, appName, sparkConf = sparkConf)
+      //mc = mahoutSparkContext(masterUrl, appName,mc = mahoutSparkContext)
+      mc = mahoutSparkContext(masterUrl = parser.opts("master").asInstanceOf[String],
+        appName = parser.opts("appName").asInstanceOf[String],
+        sparkConf = sparkConf)
     }
   }
 

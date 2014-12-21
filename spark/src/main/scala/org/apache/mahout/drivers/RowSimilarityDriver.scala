@@ -106,11 +106,13 @@ object RowSimilarityDriver extends MahoutSparkDriver {
     }
   }
 
-  override def start(masterUrl: String = parser.opts("master").asInstanceOf[String],
-      appName: String = parser.opts("appName").asInstanceOf[String]):
-    Unit = {
+  override protected def start() : Unit = {
 
-    super.start(masterUrl, appName)
+    if (parser.opts("sparkExecutorMem").asInstanceOf[String] != "")
+      sparkConf.set("spark.executor.memory", parser.opts("sparkExecutorMem").asInstanceOf[String])
+    //else leave as set in Spark config
+
+    super.start
 
     readWriteSchema = new Schema(
       "rowKeyDelim" -> parser.opts("rowKeyDelim").asInstanceOf[String],
@@ -135,7 +137,7 @@ object RowSimilarityDriver extends MahoutSparkDriver {
   }
 
   override def process: Unit = {
-    start()
+    start
 
     val indexedDataset = readIndexedDataset
 
