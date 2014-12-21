@@ -108,10 +108,6 @@ object RowSimilarityDriver extends MahoutSparkDriver {
 
   override protected def start() : Unit = {
 
-    if (parser.opts("sparkExecutorMem").asInstanceOf[String] != "")
-      sparkConf.set("spark.executor.memory", parser.opts("sparkExecutorMem").asInstanceOf[String])
-    //else leave as set in Spark config
-
     super.start
 
     readWriteSchema = new Schema(

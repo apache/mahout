@@ -34,7 +34,6 @@ import org.apache.mahout.sparkbindings._
   *
   *   override def main(args: Array[String]): Unit = {
   *
-  *
   *     val parser = new MahoutOptionParser(programName = "shortname") {
   *       head("somedriver", "Mahout 1.0-SNAPSHOT")
   *
@@ -55,7 +54,7 @@ import org.apache.mahout.sparkbindings._
   *   }
   *
   *   override def process: Unit = {
-  *     start()
+  *     start // override to change the default Kryo or SparkConf before the distributed context is created
   *     // do the work here
   *     stop
   *   }
@@ -72,11 +71,13 @@ abstract class MahoutSparkDriver extends MahoutDriver {
     * these must be set before the context is created.
     * */
   protected def start() : Unit = {
-    sparkConf.set("spark.kryo.referenceTracking", "false")
-      .set("spark.kryoserializer.buffer.mb", "200")// this is default for Mahout optimizer, change it with -D option
-
     if (!_useExistingContext) {
-      //mc = mahoutSparkContext(masterUrl, appName,mc = mahoutSparkContext)
+      sparkConf.set("spark.kryo.referenceTracking", "false")
+        .set("spark.kryoserializer.buffer.mb", "200")// this is default for Mahout optimizer, change it with -D option
+
+      if (parser.opts("sparkExecutorMem").asInstanceOf[String] != "")
+        sparkConf.set("spark.executor.memory", parser.opts("sparkExecutorMem").asInstanceOf[String])
+      //else leave as set in Spark config
       mc = mahoutSparkContext(masterUrl = parser.opts("master").asInstanceOf[String],
         appName = parser.opts("appName").asInstanceOf[String],
         sparkConf = sparkConf)

@@ -78,6 +78,7 @@ object TestNBDriver extends MahoutSparkDriver {
     }
   }
 
+  /* No need to override start unless the default Kryo of SparkConf must be changed
   override def start(masterUrl: String = parser.opts("master").asInstanceOf[String],
       appName: String = parser.opts("appName").asInstanceOf[String]):
     Unit = {
@@ -94,38 +95,39 @@ object TestNBDriver extends MahoutSparkDriver {
 
     super.start(masterUrl, appName)
 
-    }
-
-  /** Read the test set from inputPath/part-x-00000 sequence file of form <Text,VectorWritable> */
-  private def readTestSet: DrmLike[_] = {
-    val inputPath = parser.opts("input").asInstanceOf[String]
-    val trainingSet= drm.drmDfsRead(inputPath)
-    trainingSet
   }
+  */
 
-  /** read the model from pathToModel using NBModel.DfsRead(...) */
-  private def readModel: NBModel = {
-    val inputPath = parser.opts("pathToModel").asInstanceOf[String]
-    val model= NBModel.dfsRead(inputPath)
-    model
-  }
+/** Read the test set from inputPath/part-x-00000 sequence file of form <Text,VectorWritable> */
+private def readTestSet: DrmLike[_] = {
+  val inputPath = parser.opts("input").asInstanceOf[String]
+  val trainingSet= drm.drmDfsRead(inputPath)
+  trainingSet
+}
 
-  override def process: Unit = {
-    start()
+/** read the model from pathToModel using NBModel.DfsRead(...) */
+private def readModel: NBModel = {
+  val inputPath = parser.opts("pathToModel").asInstanceOf[String]
+  val model= NBModel.dfsRead(inputPath)
+  model
+}
 
-    val testComplementary = parser.opts("testComplementary").asInstanceOf[Boolean]
-    val outputPath = parser.opts("output").asInstanceOf[String]
+override def process: Unit = {
+  start()
 
-    // todo:  get the -ow option in to check for a model in the path and overwrite if flagged.
+  val testComplementary = parser.opts("testComplementary").asInstanceOf[Boolean]
+  val outputPath = parser.opts("output").asInstanceOf[String]
 
-    val testSet = readTestSet
-    val model = readModel
-    val analyzer= NaiveBayes.test(model, testSet, testComplementary)
+  // todo:  get the -ow option in to check for a model in the path and overwrite if flagged.
 
-    println(analyzer)
+  val testSet = readTestSet
+  val model = readModel
+  val analyzer= NaiveBayes.test(model, testSet, testComplementary)
 
-    stop
-  }
+  println(analyzer)
+
+  stop
+}
 
 }
 

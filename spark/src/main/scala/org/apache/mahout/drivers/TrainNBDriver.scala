@@ -72,7 +72,9 @@ object TrainNBDriver extends MahoutSparkDriver {
     }
   }
 
+  /* No need to override start unless the default Kryo of SparkConf must be changed
   override def start(masterUrl: String = parser.opts("master").asInstanceOf[String],
+
       appName: String = parser.opts("appName").asInstanceOf[String]):
     Unit = {
 
@@ -89,6 +91,7 @@ object TrainNBDriver extends MahoutSparkDriver {
     super.start(masterUrl, appName)
 
     }
+  */
 
   /** Read the training set from inputPath/part-x-00000 sequence file of form <Text,VectorWritable> */
   private def readTrainingSet: DrmLike[_]= {
