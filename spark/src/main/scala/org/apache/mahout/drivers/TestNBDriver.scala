@@ -78,26 +78,6 @@ object TestNBDriver extends MahoutSparkDriver {
     }
   }
 
-  /* No need to override start unless the default Kryo of SparkConf must be changed
-  override def start(masterUrl: String = parser.opts("master").asInstanceOf[String],
-      appName: String = parser.opts("appName").asInstanceOf[String]):
-    Unit = {
-
-    // will be only specific to this job.
-    // Note: set a large spark.kryoserializer.buffer.mb if using DSL MapBlock else leave as default
-
-    if (parser.opts("sparkExecutorMem").asInstanceOf[String] != "")
-      sparkConf.set("spark.executor.memory", parser.opts("sparkExecutorMem").asInstanceOf[String])
-
-    // Note: set a large akka frame size for DSL NB (20)
-    //sparkConf.set("spark.akka.frameSize","20") // don't need this for Spark optimized NaiveBayes..
-    //else leave as set in Spark config
-
-    super.start(masterUrl, appName)
-
-  }
-  */
-
 /** Read the test set from inputPath/part-x-00000 sequence file of form <Text,VectorWritable> */
 private def readTestSet: DrmLike[_] = {
   val inputPath = parser.opts("input").asInstanceOf[String]
