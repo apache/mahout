@@ -25,7 +25,7 @@ abstract class MahoutDriver {
 
 
   implicit protected var mc: DistributedContext = _
-  protected var parser: MahoutOptionParser = _
+  implicit protected var parser: MahoutOptionParser = _
 
   var _useExistingContext: Boolean = false // used in the test suite to reuse one context per suite
 

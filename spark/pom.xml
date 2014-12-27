@@ -157,8 +157,8 @@
         </executions>
       </plugin>
 
-      <!-- create job jar to include CLI driver deps-->
-      <!-- leave this in even though there are no hadoop mapreduce jobs in this module -->
+      <!-- create an all dependencies job.jar -->
+      <!-- todo: before release we need a better way to do this MAHOUT-1636 -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -171,12 +171,13 @@
             </goals>
             <configuration>
               <descriptors>
-                <descriptor>src/main/assembly/job.xml</descriptor>
+                <descriptor>../spark/src/main/assembly/job.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>
         </executions>
       </plugin>
+
 
     </plugins>
   </build>
@@ -318,12 +319,6 @@
 
 
     <!--  3rd-party -->
-
-    <dependency>
-      <groupId>com.github.scopt</groupId>
-      <artifactId>scopt_2.10</artifactId>
-      <version>3.2.0</version>
-    </dependency>
 
     <!-- scala stuff -->
 
