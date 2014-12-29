@@ -20,7 +20,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0
     http://maven.apache.org/xsd/assembly-1.1.0.xsd">
-  <id>job</id>
+  <id>dependencies</id>
   <formats>
    <format>jar</format>
   </formats>
@@ -39,6 +39,9 @@
       <useTransitiveFiltering>true</useTransitiveFiltering>
       <excludes>
         <exclude>org.apache.hadoop:hadoop-core</exclude>
+        <!-- MAHOUT-1636 -->
+        <exclude>org.apache.spark:spark-core_${scala.major}</exclude>
+        <exclude>org.scala-lang:scala-library</exclude>
       </excludes>
     </dependencySet>
   </dependencySets>
