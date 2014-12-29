@@ -38,10 +38,17 @@
       <outputDirectory>/</outputDirectory>
       <useTransitiveFiltering>true</useTransitiveFiltering>
       <excludes>
-        <exclude>org.apache.hadoop:hadoop-core</exclude>
         <!-- MAHOUT-1636 -->
+        <!-- add any projects that are included in the spark environment or are in mrlegacy
+        but not used in spark drivers -->
+        <exclude>org.apache.hadoop:hadoop-core</exclude>
         <exclude>org.apache.spark:spark-core_${scala.major}</exclude>
         <exclude>org.scala-lang:scala-library</exclude>
+        <exclude>jackson-core-asl</exclude>
+        <exclude>jackson-mapper-asl</exclude>
+        <exclude>xstream</exclude>
+        <exclude>lucene-core</exclude>
+        <exclude>lucene-analyzers-common</exclude>
       </excludes>
     </dependencySet>
   </dependencySets>
