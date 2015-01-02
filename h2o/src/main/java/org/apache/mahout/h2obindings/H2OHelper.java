@@ -376,16 +376,15 @@ public class H2OHelper {
     int chunkSz = chunkSize(nrow, ncol, minHint, exactHint);
     int nchunks = (int)((nrow - 1) / chunkSz) + 1; // Final number of Chunks per Vec
     long espc[] = new long[nchunks + 1];
-    final Vec[] vecs = new Vec[ncol];
 
     for (int i = 0; i < nchunks; i++) {
       espc[i] = i * chunkSz;
     }
     espc[nchunks] = nrow;
-
-    for (int i = 0; i < vecs.length; i++) {
-      vecs[i] = Vec.makeCon(0, null, vg, espc);
-    }
+    // Create a vector template for new vectors
+    Vec vtemplate = new Vec(vg.addVec(), espc);
+    // Make ncol-numeric vectors
+    Vec[] vecs = vtemplate.makeCons(ncol, 0, null, null);
 
     return new Frame(vecs);
   }
