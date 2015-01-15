@@ -2,6 +2,16 @@ package org.apache.mahout.math.mf;
 
 /**
  * Created by lmq on 2014/12/23.
+ *
+ * Non-negative Matrix Factorization.
+ * NMF: Class for Non-negative Matrix Factorization
+ * [1] Lee, D. D. and Seung, H. S. (1999), Learning the Parts of Objects by Non-negative Matrix Factorization, Nature 401(6755), 788-799.
+ *
+ *
+ * Non-negative Matrix Factorization. Factorize a data matrix into two matrices
+ * s.t. F = | data - W*H | = | is minimal. H, and W are restricted to non-negative
+ * data. Uses the classicial multiplicative update rule.
+ *
  */
 
 import org.apache.mahout.math.DenseMatrix;
@@ -73,7 +83,7 @@ public class NMF_MU implements MF {
                 W.set(i, j, W.get(i, j) * (VHt.get(i, j) / (WHHt.get(i, j)+epsilon)));
 
             double newObject = calObject(V, W, H);
-            System.out.printf("%d %f %f\n", stepNum, newObject, Math.abs(object-newObject));
+
             if(Math.abs(object - newObject) < errMax) {
                 object = newObject;
                 break;
