@@ -11,7 +11,7 @@ import java.io.IOException;
 /**
  * Created by lmq on 2014/12/24.
  */
-public class MF_SGD implements MF{
+public class MF_BaseV implements MF{
 
     /** Arrays for internal storage of V, W and H. */
     private final Matrix V;
@@ -19,7 +19,6 @@ public class MF_SGD implements MF{
     private final Matrix H;
 
     private final double alpha;
-    private final double beta;
 
     /** Row and column dimensions. */
     private final int n;
@@ -43,7 +42,7 @@ public class MF_SGD implements MF{
     private final double errMax;
 
 
-    public MF_SGD(Matrix arg, int r, double alpha, double beta, int stepNum, double errMax) {
+    public MF_BaseV(Matrix arg, int r, double alpha, int stepNum, double errMax) {
         this.n = arg.numRows();
         this.m = arg.numCols();
         this.r = r;
@@ -51,7 +50,6 @@ public class MF_SGD implements MF{
         this.stepMax = stepNum;
         this.errMax = errMax;
         this.alpha = alpha;
-        this.beta = beta;
 
         this.W = new DenseMatrix(n, r).assign(Functions.random());
         this.H = new DenseMatrix(r, m).assign(Functions.random());
@@ -60,55 +58,55 @@ public class MF_SGD implements MF{
         this.object = calObject(V,  W, H);
     }
 
-    //@Override
+    @Override
     public void solve() {
 
-       /* String resFile = "E:\\Coding\\DataSet\\Result\\ConvergenceCurve\\MF_RT_ConvergenceCurve.txt";
+       /* String resFile = "E:\\Coding\\DataSet\\Result\\ConvergenceCurve\\MF_Base_ConvergenceCurve.txt";
         try {
             BufferedWriter out = new BufferedWriter(new FileWriter(resFile));*/
 
+        for (; stepNum < stepMax; stepNum++) {
 
-        for(; stepNum < stepMax; stepNum++) {
-            for(int i=0; i<n; i++) for(int j=0; j<m; j++)
-                if(V.get(i, j) != 0) {
-                    double eij = V.get(i, j)-W.viewRow(i).dot(H.viewColumn(j));
-                    for(int k=0; k<r; k++) {
-                        W.set(i, k, W.get(i, k)+alpha*(eij*H.get(k, j)-beta*W.get(i, k)));
-                        H.set(k, j, H.get(k, j)+alpha*(eij*W.get(i, k)-beta*H.get(k, j)));
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < m; j++)
+                    if (V.get(i, j) != 0) {
+                        double eij = V.get(i, j) - W.viewRow(i).dot(H.viewColumn(j));
+                        for (int k = 0; k < r; k++) {
+                            W.set(i, k, W.get(i, k) + alpha * (eij * H.get(k, j)));
+                            H.set(k, j, H.get(k, j) + alpha * (eij * W.get(i, k)));
+                        }
                     }
-                }
+
 
             double newObject = calObject(V, W, H);
-            System.out.printf("%d %f %f\n", stepNum, newObject, Math.abs(object-newObject));
+
+            System.out.printf("%d %f %f\n", stepNum, newObject, Math.abs(object - newObject));
 
            /* String str = String.format("%d\t %f\n", stepNum, newObject);
             out.write(str);
             out.flush();*/
 
-            if(Math.abs(object - newObject) < errMax) {
+            if (Math.abs(object - newObject) < errMax) {
                 object = newObject;
                 break;
             }
             object = newObject;
         }
 
-
        /* } catch (IOException e) {
             e.printStackTrace();
         }*/
 
-
     }
+
+
 
     //@Override
     private double calObject(Matrix V, Matrix W, Matrix H) {
-        Matrix WH = W.times(H);
+        Matrix WH = (W.times(H));
         double err = 0;
         for(int i=0; i<n; i++) for(int j=0; j<m; j++)
-            if (V.get(i, j) != 0) err += Math.pow(V.get(i, j) - WH.get(i, j), 2);
-        for(int i=0; i<W.rowSize(); i++) for(int j=0; j<W.columnSize(); j++)
-            err += (beta) * (Math.pow(W.get(i, j), 2) + Math.pow(H.get(j, i), 2));
-
+            if(V.get(i, j) != 0) err += Math.pow(V.get(i, j)-WH.get(i, j), 2);
         return err/2;
     }
 

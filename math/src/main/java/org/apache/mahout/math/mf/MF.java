@@ -19,7 +19,7 @@ public interface MF {
 
     int getStep();
 
-    double calObject(Matrix V, Matrix W, Matrix H);
+    //double calObject(Matrix V, Matrix W, Matrix H);
 
     double getObjectFunctionValue();
 }

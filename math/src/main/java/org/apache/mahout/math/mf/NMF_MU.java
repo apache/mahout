@@ -82,8 +82,8 @@ public class NMF_MU implements MF {
         }
     }
 
-    @Override
-    public double calObject(Matrix V, Matrix W, Matrix H) {
+    //@Override
+    private double calObject(Matrix V, Matrix W, Matrix H) {
         Matrix WH = (W.times(H));
         double err = 0;
         for(int i=0; i<n; i++) for(int j=0; j<m; j++)

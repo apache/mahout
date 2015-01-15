@@ -13,7 +13,22 @@ import java.io.IOException;
  */
 public final class MF_SGDTest {
 
-    @Test
+   /* @Test
+    public void Convergence_Curve() {
+        String trainSet;
+        Matrix R;
+
+        trainSet = String.format("E:\\Coding\\DataSet\\ml-100k\\u%d.base", 1);
+        R = MFTestCommon.createMatrix(trainSet, 943, 1682);
+
+        MF_SGD mf;
+        //mf = new MF_BaseV(R, 2, 0.0002, 500, 0.02);
+        mf = new MF_SGD(R, 2, 0.0002, 0.02, 201, 0.02);
+        mf.solve();
+
+    }*/
+
+   /* @Test
     public void MovielensTest() {
         String trainSet, testSet;
         Matrix R, W, H, RR;
@@ -28,7 +43,7 @@ public final class MF_SGDTest {
 
             MF_SGD mf;
             for(int k=1; k<6; k++) {
-                mf = new MF_SGD(R, k, 0.0002, 0.02, 5000, 0.3);
+                mf = new MF_SGD(R, k, 0.0002, 0.02, 5000, 0.02);
                 mf.solve();
                 W = mf.getW();
                 H = mf.getH();
@@ -55,6 +70,5 @@ public final class MF_SGDTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-    }
+    }*/
 }
