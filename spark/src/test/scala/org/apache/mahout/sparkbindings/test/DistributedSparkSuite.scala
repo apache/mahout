@@ -39,6 +39,7 @@ trait DistributedSparkSuite extends DistributedMahoutSuite with LoggerConfigurat
           .set("spark.kryoserializer.buffer.mb", "15")
           .set("spark.akka.frameSize", "30")
           .set("spark.default.parallelism", "10")
+          .set("spark.driver.allowMultipleContexts", "true")
     )
   }
 

@@ -111,7 +111,7 @@
     <slf4j.version>1.7.5</slf4j.version>
     <scala.major>2.10</scala.major>
     <scala.version>2.10.4</scala.version>
-    <spark.version>1.1.0</spark.version>
+    <spark.version>1.1.1</spark.version>
     <h2o.version>0.1.16</h2o.version>
   </properties>
   <issueManagement>
