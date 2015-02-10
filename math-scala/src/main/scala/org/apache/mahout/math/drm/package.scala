@@ -80,9 +80,6 @@ package object drm {
   /** Just throw all engine operations into context as well. */
   implicit def ctx2engine(ctx: DistributedContext): DistributedEngine = ctx.engine
 
-  implicit def drm2drmCpOps[K: ClassTag](drm: CheckpointedDrm[K]): CheckpointedOps[K] =
-    new CheckpointedOps[K](drm)
-
   /**
    * We assume that whenever computational action is invoked without explicit checkpoint, the user
    * doesn't imply caching
