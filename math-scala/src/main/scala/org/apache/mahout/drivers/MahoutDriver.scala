@@ -19,8 +19,7 @@ package org.apache.mahout.drivers
 
 import org.apache.mahout.math.drm.DistributedContext
 
-/** Extended by a platform specific version of this class to create a Mahout CLI driver.
- */
+/** Extended by a platform specific version of this class to create a Mahout CLI driver. */
 abstract class MahoutDriver {
 
 

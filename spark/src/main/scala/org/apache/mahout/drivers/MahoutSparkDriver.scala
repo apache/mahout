@@ -69,7 +69,7 @@ abstract class MahoutSparkDriver extends MahoutDriver {
   /** Creates a Spark context to run the job inside.
     * Override to set the SparkConf values specific to the job,
     * these must be set before the context is created.
-    * */
+    */
   protected def start() : Unit = {
     if (!_useExistingContext) {
       sparkConf.set("spark.kryo.referenceTracking", "false")
@@ -84,6 +84,9 @@ abstract class MahoutSparkDriver extends MahoutDriver {
     }
   }
 
+  /** Call this before start to use an existing context as when running multiple drivers from a scalatest suite.
+    * @param context An already set up context to run against
+    */
   def useContext(context: DistributedContext): Unit = {
     _useExistingContext = true
     mc = context

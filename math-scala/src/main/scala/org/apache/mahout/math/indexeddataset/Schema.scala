@@ -20,7 +20,6 @@ package org.apache.mahout.math.indexeddataset
 import scala.collection.mutable.HashMap
 
 /** Syntactic sugar for mutable.HashMap[String, Any]
-  *
   * @param params list of mappings for instantiation {{{val mySchema = new Schema("one" -> 1, "two" -> "2", ...)}}}
   */
 class Schema(params: Tuple2[String, Any]*) extends HashMap[String, Any] {
@@ -28,7 +27,6 @@ class Schema(params: Tuple2[String, Any]*) extends HashMap[String, Any] {
   this ++= params
 
   /** Constructor for copying an existing Schema
-    *
     * @param schemaToClone return a copy of this Schema
     */
   def this(schemaToClone: Schema){
@@ -74,8 +72,7 @@ final object DefaultIndexedDatasetReadSchema extends Schema(
   "elementDelim" -> " ")
 
 /** Default Schema for reading a text delimited [[org.apache.mahout.math.indexeddataset.IndexedDataset]] file  where
-  * the score of any element is ignored,
-  * all non-zeros are replaced with 1.
+  * the score of any element is ignored, all non-zeros are replaced with 1.
   * This tells the reader to input DRM lines of the form
   * (rowID<tab>columnID1:score1<space>columnID2:score2...) remember the score is ignored.
   * Alternatively the format can be
@@ -89,8 +86,7 @@ final object IndexedDatasetReadBooleanSchema extends Schema(
   "omitScore" -> true)
 
 /** Default Schema for typical text delimited [[org.apache.mahout.math.indexeddataset.IndexedDataset]] file write where
-  * the score of a element is omitted.
-  * The presence of a element means the score = 1, the absence means a score of 0.
+  * the score of a element is omitted. The presence of a element means the score = 1, the absence means a score of 0.
   * This tells the writer to output [[org.apache.mahout.math.indexeddataset.IndexedDataset]] lines of the form
   * (rowID<tab>columnID1<space>columnID2...)
   */

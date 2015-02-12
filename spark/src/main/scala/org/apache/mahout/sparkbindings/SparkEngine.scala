@@ -263,7 +263,7 @@ object SparkEngine extends DistributedEngine {
       (implicit sc: DistributedContext):
     IndexedDatasetSpark = {
     val reader = new TextDelimitedIndexedDatasetReader(schema)(sc)
-    val ids = reader.readDRMFrom(src, existingRowIDs)
+    val ids = reader.readRowsFrom(src, existingRowIDs)
     ids
   }
 

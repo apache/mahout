@@ -18,6 +18,7 @@ package org.apache.mahout.drivers
 
 import org.apache.spark.SparkConf
 
+/** Adds parsing of Spark specific options to the option parser */
 class MahoutSparkOptionParser(programName: String) extends MahoutOptionParser(programName: String){
 
   def parseSparkOptions(implicit sparkConf: SparkConf) = {
