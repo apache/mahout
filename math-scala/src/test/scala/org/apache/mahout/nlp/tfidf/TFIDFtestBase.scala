@@ -39,7 +39,7 @@ trait TFIDFtestBase extends DistributedMahoutSuite with Matchers {
 
   def createDictionaryAndDfMaps(documents: List[(Int, String)]): (Map[String, Int], Map[Int, Int]) = {
 
-    // get a tf count for entire dictionary
+    // get a tf count for the entire dictionary
     val dictMap = documents.unzip._2.mkString(" ").toLowerCase.split(" ").groupBy(identity).mapValues(_.length)
 
     // create a dictionary with an index for each term
@@ -79,7 +79,7 @@ trait TFIDFtestBase extends DistributedMahoutSuite with Matchers {
         val dictIndex = dictionaryMap(term)
         val docFreq = dfMap(dictIndex)
         val currentWeight = weight.calculate(termFreq, docFreq.toInt, docSize, totalDFSize.toInt)
-        vec.setQuick(dictIndex, currentWeight)
+        vec(dictIndex)= currentWeight
       }
     }
     vec

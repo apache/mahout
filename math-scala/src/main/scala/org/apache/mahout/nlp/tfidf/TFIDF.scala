@@ -1,8 +1,7 @@
 package org.apache.mahout.nlp.tfidf
 
-import org.apache.lucene.search.similarities.DefaultSimilarity
-
 trait Weight {
+
   /**
    * @param tf term freq
    * @param df doc freq
@@ -15,7 +14,6 @@ trait Weight {
 
 
 class TFIDF extends Weight {
-  private final val sim: DefaultSimilarity = new DefaultSimilarity
 
   /**
    * Calculate TF-IDF weight
@@ -39,8 +37,8 @@ class TFIDF extends Weight {
   def calculate(tf: Int, df: Int, length: Int, numDocs: Int): Double = {
 
     // Lucene DefaultSimilarity's TF-IDF is implemented as:
-    // sqrt(tf) * log(numDocs/(df+1)) + 1
-    sim.tf(tf) * sim.idf(df, numDocs)
+    // sqrt(tf) * (log(numDocs/(df+1)) + 1)
+    math.sqrt(tf) * (math.log(numDocs / (df + 1).toDouble) + 1.0)
   }
 }
 
