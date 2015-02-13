@@ -45,7 +45,7 @@ import org.apache.mahout.sparkbindings._
   *       opts = opts ++ SomeOptions
   *       note("\nAlgorithm control options:")
   *       opt[Int]("maxThings") abbr ("mt") action { (x, options) =>
-  *         options + ("maxThings" -> x) ...
+  *         options + ("maxThings" -  x) ...
   *     }
   *     parser.parse(args, parser.opts) map { opts =>
   *       parser.opts = opts
@@ -78,7 +78,8 @@ abstract class MahoutSparkDriver extends MahoutDriver {
       if (parser.opts("sparkExecutorMem").asInstanceOf[String] != "")
         sparkConf.set("spark.executor.memory", parser.opts("sparkExecutorMem").asInstanceOf[String])
       //else leave as set in Spark config
-      mc = mahoutSparkContext(masterUrl = parser.opts("master").asInstanceOf[String],
+      mc = mahoutSparkContext(
+        masterUrl = parser.opts("master").asInstanceOf[String],
         appName = parser.opts("appName").asInstanceOf[String],
         sparkConf = sparkConf)
     }

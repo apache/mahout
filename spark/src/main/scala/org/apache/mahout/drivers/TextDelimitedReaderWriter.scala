@@ -27,7 +27,7 @@ import org.apache.mahout.sparkbindings._
 import scala.collection.JavaConversions._
 
 /** Extends Reader trait to supply the [[org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark]] as
-  * the type read and a reader function for reading text delimited files as described in the
+  * the type read and a element and row reader functions for reading text delimited files as described in the
   * [[org.apache.mahout.math.indexeddataset.Schema]]
   */
 trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
@@ -205,18 +205,22 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
     }
   }
 
-  // this creates a BiMap from an ID collection. The ID points to an ordinal int
-  // which is used internal to Mahout as the row or column ID
-  // todo: this is a non-distributed process in an otherwise distributed reader and the BiMap is a
-  // non-rdd based object--this will limit the size of the dataset to ones where the dictionaries fit
-  // in-memory, the option is to put the dictionaries in rdds and do joins to translate IDs
-  private def asOrderedDictionary(dictionary: BiMap[String, Int] = HashBiMap.create(), entries: Array[String]): BiMap[String, Int] = {
+  /** Creates a BiMap from an ID collection. The ID points to an ordinal in which is used internal to Mahout
+    * as the row or column ID
+    * todo: this is a non-distributed process in an otherwise distributed reader and the BiMap is a
+    * non-rdd based object--this will limit the size of the dataset to ones where the dictionaries fit
+    * in-memory, the option is to put the dictionaries in rdds and do joins to translate IDs
+    */
+  private def asOrderedDictionary(dictionary: BiMap[String, Int] = HashBiMap.create(),
+      entries: Array[String]):
+    BiMap[String, Int] = {
     var index = dictionary.size() // if a dictionary is supplied then add to the end based on the Mahout id 'index'
     for (entry <- entries) {
       if (!dictionary.contains(entry)){
         dictionary.put(entry, index)
         index += 1
-      }// the dictionary should never contain an entry since they are supposed to be distinct but for some reason they do
+      }// the dictionary should never contain an entry since they are supposed to be distinct but for some reason
+      // they do
     }
     dictionary
   }
@@ -224,9 +228,6 @@ trait TDIndexedDatasetReader extends Reader[IndexedDatasetSpark]{
 
 /** Extends the Writer trait to supply the type being written and supplies the writer function */
 trait TDIndexedDatasetWriter extends Writer[IndexedDatasetSpark]{
-
-  private val orderByScore = Ordering.fromLessThan[(Int, Double)] { case ((_, score1), (_, score2)) => score1 > score2}
-
   /** Read in text delimited elements from all URIs in this comma delimited source String.
     * @param mc context for the Spark job
     * @param writeSchema describes the delimiters and positions of values in the output text delimited file.
@@ -267,7 +268,7 @@ trait TDIndexedDatasetWriter extends Writer[IndexedDatasetSpark]{
           itemList = itemList :+ (ve.index, ve.get)
         }
         //sort by highest value descending(-)
-        val vector = if (sort) itemList.sortBy { case ((_, score1), (_, score2)) => score1 > score2} else itemList
+        val vector = if (sort) itemList.sortBy { elem => -elem._2 } else itemList
 
         // first get the external rowID token
         if (!vector.isEmpty){
