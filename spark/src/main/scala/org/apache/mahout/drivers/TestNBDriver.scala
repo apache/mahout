@@ -61,7 +61,7 @@ object TestNBDriver extends MahoutSparkDriver {
       parseFileDiscoveryOptions
 
       //Drm output schema--not driver specific, drm specific
-      parseDrmFormatOptions
+      parseIndexedDatasetFormatOptions
 
       //Spark config options--not driver specific
       parseSparkOptions

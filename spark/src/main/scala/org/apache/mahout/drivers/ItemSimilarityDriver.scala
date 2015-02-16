@@ -96,7 +96,7 @@ object ItemSimilarityDriver extends MahoutSparkDriver {
       parseFileDiscoveryOptions
 
       //Drm output schema--not driver specific, drm specific
-      parseDrmFormatOptions
+      parseIndexedDatasetFormatOptions
 
       //Spark config options--not driver specific
       parseSparkOptions
@@ -206,9 +206,9 @@ object ItemSimilarityDriver extends MahoutSparkDriver {
       parser.opts("maxSimilaritiesPerItem").asInstanceOf[Int], parser.opts("maxPrefs").asInstanceOf[Int])
 
     // todo: allow more than one cross-similarity matrix?
-    idss(0).dfsWrite(parser.opts("output").asInstanceOf[String] + "indicator-matrix", schema = writeSchema)
+    idss(0).dfsWrite(parser.opts("output").asInstanceOf[String] + "similarity-matrix", schema = writeSchema)
     if(idss.length > 1)
-      idss(1).dfsWrite(parser.opts("output").asInstanceOf[String] + "cross-indicator-matrix", schema = writeSchema)
+      idss(1).dfsWrite(parser.opts("output").asInstanceOf[String] + "cross-similarity-matrix", schema = writeSchema)
 
     stop
   }

@@ -86,7 +86,7 @@ object RowSimilarityDriver extends MahoutSparkDriver {
       note("\nNote: Only the Log Likelihood Ratio (LLR) is supported as a similarity measure.")
 
       //Drm output schema--not driver specific, drm specific
-      parseDrmFormatOptions
+      parseIndexedDatasetFormatOptions
 
       //How to search for input
       parseFileDiscoveryOptions

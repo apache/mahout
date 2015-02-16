@@ -52,8 +52,9 @@ final object DefaultIndexedDatasetElementReadSchema extends Schema(
   "columnIDPosition" -> 1,
   "filterColumn" -> -1)
 
-/** Default Schema for text delimited drm file output
-  * This tells the writer to write a [[org.apache.mahout.math.indexeddataset.IndexedDataset]] of the default form:
+/** Default Schema for text delimited [[org.apache.mahout.math.indexeddataset.IndexedDataset]] file output with
+  * one row per line.
+  * The default form:
   * (rowID<tab>columnID1:score1<space>columnID2:score2...)
   */
 final object DefaultIndexedDatasetWriteSchema extends Schema(
@@ -62,8 +63,8 @@ final object DefaultIndexedDatasetWriteSchema extends Schema(
   "elementDelim" -> " ",
   "omitScore" -> false)
 
-/** Default Schema for typical text delimited [[org.apache.mahout.math.indexeddataset.IndexedDataset]] file input
-  * This tells the reader to input text lines of the form:
+/** Default Schema for typical text delimited [[org.apache.mahout.math.indexeddataset.IndexedDataset]] file
+  * row-wise input. This tells the reader to input text lines of the form:
   * (rowID<tab>columnID1:score1,columnID2:score2,...)
   */
 final object DefaultIndexedDatasetReadSchema extends Schema(
@@ -72,7 +73,7 @@ final object DefaultIndexedDatasetReadSchema extends Schema(
   "elementDelim" -> " ")
 
 /** Default Schema for reading a text delimited [[org.apache.mahout.math.indexeddataset.IndexedDataset]] file  where
-  * the score of any element is ignored, all non-zeros are replaced with 1.
+  * the score of any element is ignored.
   * This tells the reader to input DRM lines of the form
   * (rowID<tab>columnID1:score1<space>columnID2:score2...) remember the score is ignored.
   * Alternatively the format can be
@@ -85,9 +86,9 @@ final object IndexedDatasetReadBooleanSchema extends Schema(
   "elementDelim" -> " ",
   "omitScore" -> true)
 
-/** Default Schema for typical text delimited [[org.apache.mahout.math.indexeddataset.IndexedDataset]] file write where
-  * the score of a element is omitted. The presence of a element means the score = 1, the absence means a score of 0.
-  * This tells the writer to output [[org.apache.mahout.math.indexeddataset.IndexedDataset]] lines of the form
+/** Default Schema for typical text delimited [[org.apache.mahout.math.indexeddataset.IndexedDataset]] file output
+  * where the score of a element is omitted. This tells the writer to output
+  * [[org.apache.mahout.math.indexeddataset.IndexedDataset]] row of the form
   * (rowID<tab>columnID1<space>columnID2...)
   */
 final object IndexedDatasetWriteBooleanSchema extends Schema(

@@ -45,7 +45,7 @@ object SimilarityAnalysis extends Serializable {
   private val orderByScore = Ordering.fromLessThan[(Int, Double)] { case ((_, score1), (_, score2)) => score1 > score2}
 
   /** Calculates item (column-wise) similarity using the log-likelihood ratio on A'A, A'B, A'C, ...
-    * and returns a list of indicator and cross-indicator matrices
+    * and returns a list of similarity and cross-similarity matrices
     * @param drmARaw Primary interaction matrix
     * @param randomSeed when kept to a constant will make repeatable downsampling
     * @param maxInterestingItemsPerThing number of similar items to return per item, default: 50
@@ -70,11 +70,11 @@ object SimilarityAnalysis extends Serializable {
     // Compute co-occurrence matrix A'A
     val drmAtA = drmA.t %*% drmA
 
-    // Compute loglikelihood scores and sparsify the resulting matrix to get the indicator matrix
-    val drmIndicatorsAtA = computeSimilarities(drmAtA, numUsers, maxInterestingItemsPerThing,
+    // Compute loglikelihood scores and sparsify the resulting matrix to get the similarity matrix
+    val drmSimilarityAtA = computeSimilarities(drmAtA, numUsers, maxInterestingItemsPerThing,
       bcastInteractionsPerItemA, bcastInteractionsPerItemA, crossCooccurrence = false)
 
-    var indicatorMatrices = List(drmIndicatorsAtA)
+    var similarityMatrices = List(drmSimilarityAtA)
 
     // Now look at cross-co-occurrences
     for (drmBRaw <- drmBs) {
@@ -87,10 +87,10 @@ object SimilarityAnalysis extends Serializable {
       // Compute cross-co-occurrence matrix A'B
       val drmAtB = drmA.t %*% drmB
 
-      val drmIndicatorsAtB = computeSimilarities(drmAtB, numUsers, maxInterestingItemsPerThing,
+      val drmSimilarityAtB = computeSimilarities(drmAtB, numUsers, maxInterestingItemsPerThing,
         bcastInteractionsPerItemA, bcastInteractionsPerThingB)
 
-      indicatorMatrices = indicatorMatrices :+ drmIndicatorsAtB
+      similarityMatrices = similarityMatrices :+ drmSimilarityAtB
 
       drmB.uncache()
     }
@@ -98,12 +98,12 @@ object SimilarityAnalysis extends Serializable {
     // Unpin downsampled interaction matrix
     drmA.uncache()
 
-    // Return list of indicator matrices
-    indicatorMatrices
+    // Return list of similarity matrices
+    similarityMatrices
   }
 
   /** Calculates item (column-wise) similarity using the log-likelihood ratio on A'A, A'B, A'C, ... and returns
-    * a list of indicator and cross-indicator matrices. Somewhat easier to use method, which handles the ID
+    * a list of similarity and cross-similarity matrices. Somewhat easier to use method, which handles the ID
     * dictionaries correctly
     * @param indexedDatasets first in array is primary/A matrix all others are treated as secondary
     * @param randomSeed use default to make repeatable, otherwise pass in system time or some randomizing seed

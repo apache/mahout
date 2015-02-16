@@ -39,13 +39,14 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
     note("Input, output options")
     opt[String]('i', "input") required() action { (x, options) =>
       options + ("input" -> x)
-    } text ("Input path, may be a filename, directory name, or comma delimited list of HDFS supported URIs (required)")
+    } text ("Input path, may be a filename, directory name, or comma delimited list of HDFS supported URIs" +
+      " (required)")
 
     if (numInputs == 2) {
       opt[String]("input2") abbr ("i2") action { (x, options) =>
         options + ("input2" -> x)
-      } text ("Secondary input path for cross-similarity calculation, same restrictions as \"--input\" (optional). " +
-        "Default: empty.")
+      } text ("Secondary input path for cross-similarity calculation, same restrictions as \"--input\" " +
+        "(optional). Default: empty.")
     }
 
     opt[String]('o', "output") required() action { (x, options) =>
@@ -54,7 +55,7 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
       } else {
         options + ("output" -> (x + "/"))
       }
-    } text ("Path for output, any local or HDFS supported URI (required)")
+    } text ("Path for output directory, any HDFS supported URI (required)")
 
   }
 
@@ -66,7 +67,7 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
       if (x > 0) success else failure("Option --randomSeed must be > 0")
     }
 
-    //output both input DRMs
+    //output both input IndexedDatasets
     opt[Unit]("writeAllDatasets") hidden() action { (_, options) =>
       options + ("writeAllDatasets" -> true)
     }//Hidden option, though a user might want this.
@@ -74,7 +75,7 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
 
   def parseElementInputSchemaOptions{
     //Input text file schema--not driver specific but input data specific, elements input,
-    // not drms
+    // not rows of IndexedDatasets
     opts = opts ++ MahoutOptionParser.TextDelimitedElementsOptions
     note("\nInput text file schema options:")
     opt[String]("inDelim") abbr ("id") text ("Input delimiter character (optional). Default: \"[ ,\\t]\"") action {
@@ -146,8 +147,8 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
 
   }
 
-  def parseDrmFormatOptions = {
-    opts = opts ++ MahoutOptionParser.TextDelimitedDRMOptions
+  def parseIndexedDatasetFormatOptions = {
+    opts = opts ++ MahoutOptionParser.TextDelimitedIndexedDatasetOptions
     note("\nOutput text file schema options:")
     opt[String]("rowKeyDelim") abbr ("rd") action { (x, options) =>
       options + ("rowKeyDelim" -> x)
@@ -204,7 +205,7 @@ object MahoutOptionParser {
     "filter2" -> null.asInstanceOf[String],
     "inDelim" -> "[,\t ]")
 
-  final val TextDelimitedDRMOptions = immutable.HashMap[String, Any](
+  final val TextDelimitedIndexedDatasetOptions = immutable.HashMap[String, Any](
     "rowKeyDelim" -> "\t",
     "columnIdStrengthDelim" -> ":",
     "elementDelim" -> " ",
