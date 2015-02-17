@@ -23,8 +23,6 @@ import com.google.common.collect.HashBiMap
 import org.apache.mahout.math._
 import org.apache.spark.serializer.KryoRegistrator
 import org.apache.mahout.sparkbindings._
-import org.apache.mahout.common.Pair
-import org.apache.mahout.math.Vector.Element
 
 import scala.collection.immutable.List
 
