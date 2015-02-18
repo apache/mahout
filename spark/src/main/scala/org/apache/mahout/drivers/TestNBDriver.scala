@@ -78,36 +78,36 @@ object TestNBDriver extends MahoutSparkDriver {
     }
   }
 
-/** Read the test set from inputPath/part-x-00000 sequence file of form <Text,VectorWritable> */
-private def readTestSet: DrmLike[_] = {
-  val inputPath = parser.opts("input").asInstanceOf[String]
-  val trainingSet= drm.drmDfsRead(inputPath)
-  trainingSet
-}
+  /** Read the test set from inputPath/part-x-00000 sequence file of form <Text,VectorWritable> */
+  private def readTestSet: DrmLike[_] = {
+    val inputPath = parser.opts("input").asInstanceOf[String]
+    val trainingSet = drm.drmDfsRead(inputPath)
+    trainingSet
+  }
 
-/** read the model from pathToModel using NBModel.DfsRead(...) */
-private def readModel: NBModel = {
-  val inputPath = parser.opts("pathToModel").asInstanceOf[String]
-  val model= NBModel.dfsRead(inputPath)
-  model
-}
+  /** read the model from pathToModel using NBModel.DfsRead(...) */
+  private def readModel: NBModel = {
+    val inputPath = parser.opts("pathToModel").asInstanceOf[String]
+    val model = NBModel.dfsRead(inputPath)
+    model
+  }
 
-override def process: Unit = {
-  start()
+  override def process: Unit = {
+    start()
 
-  val testComplementary = parser.opts("testComplementary").asInstanceOf[Boolean]
-  val outputPath = parser.opts("output").asInstanceOf[String]
+    val testComplementary = parser.opts("testComplementary").asInstanceOf[Boolean]
+    val outputPath = parser.opts("output").asInstanceOf[String]
 
-  // todo:  get the -ow option in to check for a model in the path and overwrite if flagged.
+    // todo:  get the -ow option in to check for a model in the path and overwrite if flagged.
 
-  val testSet = readTestSet
-  val model = readModel
-  val analyzer= NaiveBayes.test(model, testSet, testComplementary)
+    val testSet = readTestSet
+    val model = readModel
+    val analyzer = NaiveBayes.test(model, testSet, testComplementary)
 
-  println(analyzer)
+    println(analyzer)
 
-  stop
-}
+    stop
+  }
 
 }
 
