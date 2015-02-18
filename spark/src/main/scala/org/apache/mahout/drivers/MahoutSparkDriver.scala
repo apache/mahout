@@ -45,7 +45,7 @@ import org.apache.mahout.sparkbindings._
   *       opts = opts ++ SomeOptions
   *       note("\nAlgorithm control options:")
   *       opt[Int]("maxThings") abbr ("mt") action { (x, options) =>
-  *         options + ("maxThings" -  x) ...
+  *         options + ("maxThings" ->  x) ...
   *     }
   *     parser.parse(args, parser.opts) map { opts =>
   *       parser.opts = opts
