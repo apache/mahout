@@ -36,8 +36,8 @@ trait IndexedDataset {
 
   /**
    * Write a text delimited file(s) with the row and column IDs from dictionaries.
-   * @param dest
-   * @param schema
+   * @param dest write location, usually a directory
+   * @param schema params to control writing
    * @param sc the [[org.apache.mahout.math.drm.DistributedContext]] used to do a distributed write
    */
   def dfsWrite(dest: String, schema: Schema)(implicit sc: DistributedContext): Unit
