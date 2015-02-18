@@ -252,10 +252,10 @@ object SparkEngine extends DistributedEngine {
   }
 
   /**
-   * reads an IndexedDatasetSpark from default text delimited files
+   * Returns an [[org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark]] from default text
+   * delimited files. Reads a vector per row.
    * @param src a comma separated list of URIs to read from
    * @param schema how the text file is formatted
-   * @return
    */
   def indexedDatasetDFSRead(src: String,
       schema: Schema = DefaultIndexedDatasetReadSchema,
@@ -268,10 +268,10 @@ object SparkEngine extends DistributedEngine {
   }
 
   /**
-   * reads an IndexedDatasetSpark from default text delimited files
+   * Returns an [[org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark]] from default text
+   * delimited files. Reads an element per row.
    * @param src a comma separated list of URIs to read from
    * @param schema how the text file is formatted
-   * @return
    */
   def indexedDatasetDFSReadElements(src: String,
       schema: Schema = DefaultIndexedDatasetElementReadSchema,
