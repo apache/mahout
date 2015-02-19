@@ -25,7 +25,7 @@ import scala.collection.immutable
   * @param programName Name displayed in help message, the name by which the driver is invoked.
   * @note options are engine neutral by convention. See the engine specific extending class for
   *       to add Spark or other engine options.
-  * */
+  */
 class MahoutOptionParser(programName: String) extends OptionParser[Map[String, Any]](programName: String) {
 
   // build options from some stardard CLI param groups
@@ -79,7 +79,8 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
     opts = opts ++ MahoutOptionParser.TextDelimitedElementsOptions
     note("\nInput text file schema options:")
     opt[String]("inDelim") abbr ("id") text ("Input delimiter character (optional). Default: \"[ ,\\t]\"") action {
-      (x, options) => options + ("inDelim" -> x)
+      (x, options) =>
+        options + ("inDelim" -> x)
     }
 
     opt[String]("filter1") abbr ("f1") action { (x, options) =>
@@ -95,13 +96,15 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
     opt[Int]("rowIDColumn") abbr ("rc") action { (x, options) =>
       options + ("rowIDColumn" -> x)
     } text ("Column number (0 based Int) containing the row ID string (optional). Default: 0") validate {
-      x => if (x >= 0) success else failure("Option --rowIDColNum must be >= 0")
+      x =>
+        if (x >= 0) success else failure("Option --rowIDColNum must be >= 0")
     }
 
     opt[Int]("itemIDColumn") abbr ("ic") action { (x, options) =>
       options + ("itemIDColumn" -> x)
     } text ("Column number (0 based Int) containing the item ID string (optional). Default: 1") validate {
-      x => if (x >= 0) success else failure("Option --itemIDColNum must be >= 0")
+      x =>
+        if (x >= 0) success else failure("Option --itemIDColNum must be >= 0")
     }
 
     opt[Int]("filterColumn") abbr ("fc") action { (x, options) =>

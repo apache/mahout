@@ -23,24 +23,23 @@ import org.apache.mahout.math.indexeddataset.{Schema, IndexedDataset, indexedDat
 import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
 import scala.collection.immutable.HashMap
 
-/**
- * Command line interface for [[org.apache.mahout.math.cf.SimilarityAnalysis#cooccurrencesIDSs]]. Reads text lines
- * that contain (row id, column id, ...). The IDs are user specified strings which will be preserved in the output.
- * The individual elements will be accumulated into a matrix like
- * [[org.apache.mahout.math.indexeddataset.IndexedDataset]] and
- * [[org.apache.mahout.math.cf.SimilarityAnalysis#cooccurrencesIDSs]] will be used to calculate row-wise
- * self-similarity, or when using filters or two inputs, will generate two matrices and calculate both the
- * self-similarity of the primary matrix and the row-wise similarity of the primary to the secondary. Returns one
- * or two directories of text files formatted as specified in the options. The options allow flexible control of the
- * input schema, file discovery, output schema, and control of algorithm parameters. To get help run
- * {{{mahout spark-itemsimilarity}}} for a full explanation of options. To process simple elements of text delimited
- * values (userID,itemID) with or without a strengths and with a separator of tab, comma, or space, you can specify
- * only the input and output file and directory--all else will default to the correct values. Each output line will
- * contain the Item ID and similar items sorted by LLR strength descending.
- * @note To use with a Spark cluster see the --master option, if you run out of heap space check
- *       the --sparkExecutorMemory option. Other [[org.apache.spark.SparkConf]] key value pairs can be with the -D:k=v
- *       option.
- */
+/** Command line interface for [[org.apache.mahout.math.cf.SimilarityAnalysis#cooccurrencesIDSs]]. Reads text lines
+  * that contain (row id, column id, ...). The IDs are user specified strings which will be preserved in the output.
+  * The individual elements will be accumulated into a matrix like
+  * [[org.apache.mahout.math.indexeddataset.IndexedDataset]] and
+  * [[org.apache.mahout.math.cf.SimilarityAnalysis#cooccurrencesIDSs]] will be used to calculate row-wise
+  * self-similarity, or when using filters or two inputs, will generate two matrices and calculate both the
+  * self-similarity of the primary matrix and the row-wise similarity of the primary to the secondary. Returns one
+  * or two directories of text files formatted as specified in the options. The options allow flexible control of the
+  * input schema, file discovery, output schema, and control of algorithm parameters. To get help run
+  * {{{mahout spark-itemsimilarity}}} for a full explanation of options. To process simple elements of text delimited
+  * values (userID,itemID) with or without a strengths and with a separator of tab, comma, or space, you can specify
+  * only the input and output file and directory--all else will default to the correct values. Each output line will
+  * contain the Item ID and similar items sorted by LLR strength descending.
+  * @note To use with a Spark cluster see the --master option, if you run out of heap space check
+  *       the --sparkExecutorMemory option. Other [[org.apache.spark.SparkConf]] key value pairs can be with the -D:k=v
+  *       option.
+  */
 object ItemSimilarityDriver extends MahoutSparkDriver {
   // define only the options specific to ItemSimilarity
   private final val ItemSimilarityOptions = HashMap[String, Any](
@@ -52,9 +51,9 @@ object ItemSimilarityDriver extends MahoutSparkDriver {
   private var readSchema1: Schema = _
   private var readSchema2: Schema = _
 
-  /**
-   * @param args  Command line args, if empty a help message is printed.
-   */
+  /** Entry point, not using Scala App trait
+    * @param args  Command line args, if empty a help message is printed.
+    */
   override def main(args: Array[String]): Unit = {
 
     parser = new MahoutSparkOptionParser(programName = "spark-itemsimilarity") {
@@ -70,20 +69,19 @@ object ItemSimilarityDriver extends MahoutSparkDriver {
         options + ("maxPrefs" -> x)
       } text ("Max number of preferences to consider per user (optional). Default: " +
         ItemSimilarityOptions("maxPrefs")) validate { x =>
-        if (x > 0) success else failure("Option --maxPrefs must be > 0")
+          if (x > 0) success else failure("Option --maxPrefs must be > 0")
       }
 
-      /** not implemented in SimilarityAnalysis.cooccurrence
-        * threshold, and minPrefs
-        * todo: replacing the threshold with some % of the best values and/or a
-        * confidence measure expressed in standard deviations would be nice.
-        */
+      // not implemented in SimilarityAnalysis.cooccurrence
+      // threshold, and minPrefs
+      // todo: replacing the threshold with some % of the best values and/or a
+      // confidence measure expressed in standard deviations would be nice.
 
       opt[Int]('m', "maxSimilaritiesPerItem") action { (x, options) =>
         options + ("maxSimilaritiesPerItem" -> x)
       } text ("Limit the number of similarities per item to this number (optional). Default: " +
         ItemSimilarityOptions("maxSimilaritiesPerItem")) validate { x =>
-        if (x > 0) success else failure("Option --maxSimilaritiesPerItem must be > 0")
+          if (x > 0) success else failure("Option --maxSimilaritiesPerItem must be > 0")
       }
 
       //Driver notes--driver specific
@@ -115,7 +113,7 @@ object ItemSimilarityDriver extends MahoutSparkDriver {
 
   override protected def start() : Unit = {
 
-    super.start
+    super.start()
 
     readSchema1 = new Schema("delim" -> parser.opts("inDelim").asInstanceOf[String],
       "filter" -> parser.opts("filter1").asInstanceOf[String],
@@ -154,13 +152,12 @@ object ItemSimilarityDriver extends MahoutSparkDriver {
         datasetA.dfsWrite(parser.opts("output").asInstanceOf[String] + "../input-datasets/primary-interactions",
           schema = writeSchema)
 
-      /** The case of reading B can be a bit tricky when the exact same row IDs don't exist for A and B
-        * Here we assume there is one row ID space for all interactions. To do this we calculate the
-        * row cardinality only after reading in A and B (or potentially C...) We then adjust the cardinality
-        * so all match, which is required for the math to work.
-        * Note: this may leave blank rows with no representation in any DRM. Blank rows need to
-        * be supported (and are at least on Spark) or the row cardinality adjustment will not work.
-        */
+      // The case of reading B can be a bit tricky when the exact same row IDs don't exist for A and B
+      // Here we assume there is one row ID space for all interactions. To do this we calculate the
+      // row cardinality only after reading in A and B (or potentially C...) We then adjust the cardinality
+      // so all match, which is required for the math to work.
+      // Note: this may leave blank rows with no representation in any DRM. Blank rows need to
+      // be supported (and are at least on Spark) or the row cardinality adjustment will not work.
       val datasetB = if (!inFiles2.isEmpty) {
         // get cross-cooccurrence interactions from separate files
         val datasetB = indexedDatasetDFSReadElements(inFiles2, readSchema2, existingRowIDs = datasetA.rowIDs)
@@ -199,7 +196,7 @@ object ItemSimilarityDriver extends MahoutSparkDriver {
   }
 
   override def process: Unit = {
-    start
+    start()
 
     val indexedDatasets = readIndexedDatasets
     val idss = SimilarityAnalysis.cooccurrencesIDSs(indexedDatasets, parser.opts("randomSeed").asInstanceOf[Int],
@@ -210,7 +207,7 @@ object ItemSimilarityDriver extends MahoutSparkDriver {
     if(idss.length > 1)
       idss(1).dfsWrite(parser.opts("output").asInstanceOf[String] + "cross-similarity-matrix", schema = writeSchema)
 
-    stop
+    stop()
   }
 
 }

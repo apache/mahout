@@ -23,8 +23,7 @@ import org.apache.mahout.math.drm.{DistributedContext, CheckpointedDrm}
 import org.apache.mahout.math.indexeddataset
 import org.apache.mahout.math.indexeddataset.{DefaultIndexedDatasetWriteSchema, Reader, Schema, IndexedDataset}
 
-/**
-  * Spark implementation of [[org.apache.mahout.math.indexeddataset.IndexedDataset]] providing the Spark specific
+/** Spark implementation of [[org.apache.mahout.math.indexeddataset.IndexedDataset]] providing the Spark specific
   * dfsWrite method
   * @param matrix a [[org.apache.mahout.sparkbindings.drm.CheckpointedDrmSpark]] to wrap
   * @param rowIDs a bidirectional map for Mahout Int IDs to/from application specific string IDs
@@ -47,8 +46,8 @@ class IndexedDatasetSpark(val matrix: CheckpointedDrm[Int], val rowIDs: BiMap[St
     new IndexedDatasetSpark(matrix, rowIDs, columnIDs)
   }
 
-  /** Implements the core method to write this type of object. Override and replace the writer to change how
-    * it is written
+  /** Implements the core method to write [[org.apache.mahout.math.indexeddataset.IndexedDataset]]. Override and
+    * replace the writer to change how it is written.
     */
   override def dfsWrite(dest: String, schema: Schema = DefaultIndexedDatasetWriteSchema)
       (implicit sc: DistributedContext):

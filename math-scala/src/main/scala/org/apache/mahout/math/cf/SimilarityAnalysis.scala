@@ -31,14 +31,13 @@ import org.apache.mahout.math.function.{VectorFunction, Functions}
 import scala.util.Random
 
 
-/**
- * based on "Ted Dunnning & Ellen Friedman: Practical Machine Learning, Innovations in Recommendation",
- * available at http://www.mapr.com/practical-machine-learning
- *
- * see also "Sebastian Schelter, Christoph Boden, Volker Markl:
- * Scalable Similarity-Based Neighborhood Methods with MapReduce
- * ACM Conference on Recommender Systems 2012"
- */
+/** Based on "Ted Dunnning & Ellen Friedman: Practical Machine Learning, Innovations in Recommendation",
+  * available at http://www.mapr.com/practical-machine-learning
+  *
+  * see also "Sebastian Schelter, Christoph Boden, Volker Markl:
+  * Scalable Similarity-Based Neighborhood Methods with MapReduce
+  * ACM Conference on Recommender Systems 2012"
+  */
 object SimilarityAnalysis extends Serializable {
 
   /** Compares (Int,Double) pairs by the second value */

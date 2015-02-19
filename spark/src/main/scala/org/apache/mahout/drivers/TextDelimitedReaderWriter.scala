@@ -300,7 +300,7 @@ trait TDIndexedDatasetReaderWriter extends TDIndexedDatasetReader with TDIndexed
   * @param readSchema describes the delimiters and position of values in the text delimited file to be read.
   * @param mc Spark context for reading files
   * @note The source is supplied to Reader#readElementsFrom .
-  * */
+  */
 class TextDelimitedIndexedDatasetReader(val readSchema: Schema)
     (implicit val mc: DistributedContext) extends TDIndexedDatasetReader
 
@@ -309,7 +309,7 @@ class TextDelimitedIndexedDatasetReader(val readSchema: Schema)
   * @param writeSchema describes the delimiters and position of values in the text delimited file(s) written.
   * @param mc Spark context for reading files
   * @note the destination is supplied to Writer#writeTo
-  * */
+  */
 class TextDelimitedIndexedDatasetWriter(val writeSchema: Schema, val sort: Boolean = true)
     (implicit val mc: DistributedContext)
   extends TDIndexedDatasetWriter
@@ -318,7 +318,7 @@ class TextDelimitedIndexedDatasetWriter(val writeSchema: Schema, val sort: Boole
   * @param readSchema describes the delimiters and position of values in the text delimited file(s) to be read.
   * @param writeSchema describes the delimiters and position of values in the text delimited file(s) written.
   * @param mc Spark context for reading the files, may be implicitly defined.
-  * */
+  */
 class TextDelimitedIndexedDatasetReaderWriter(val readSchema: Schema, val writeSchema: Schema, val sort: Boolean = true)
     (implicit val mc: DistributedContext)
   extends TDIndexedDatasetReaderWriter

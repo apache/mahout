@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The ConfusionMatrix Class stores the result of Classification of a Test Dataset.
  * 
- * The fact of whether there is a default is not stored. A row of zeros is the only similarity that there is no default.
+ * The fact of whether there is a default is not stored. A row of zeros is the only indicator that there is no default.
  * 
  * See http://en.wikipedia.org/wiki/Confusion_matrix for background
  */

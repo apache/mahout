@@ -20,15 +20,13 @@ package org.apache.mahout.common
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
 
-/**
- * Returns a [[java.lang.String]], which is comma delimited list of URIs discovered based on parameters
- * in the constructor.
- * The String is formatted to be input into [[org.apache.spark.SparkContext.textFile()]]
- *
- * @param pathURI Where to start looking for inFiles, may be a list of comma delimited URIs
- * @param filePattern regex that must match the entire filename to have the file returned
- * @param recursive true traverses the filesystem recursively, default = false
- */
+/** Returns a [[java.lang.String]], which is comma delimited list of URIs discovered based on parameters
+  * in the constructor.
+  * The String is formatted to be input into [[org.apache.spark.SparkContext#textFile()]]
+  * @param pathURI Where to start looking for inFiles, may be a list of comma delimited URIs
+  * @param filePattern regex that must match the entire filename to have the file returned
+  * @param recursive true traverses the filesystem recursively, default = false
+  */
 
 case class HDFSPathSearch(pathURI: String, filePattern: String = "", recursive: Boolean = false) {
 

@@ -85,9 +85,6 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
     "galaxy\tnexus:1.7260924347106847 iphone:1.7260924347106847 ipad:1.7260924347106847 galaxy:1.7260924347106847",
     "surface\tsurface:4.498681156950466 nexus:0.6795961471815897"))
 
-  // now in MahoutSuite
-  // final val TmpDir = "tmp/" // all IO going to whatever the default HDFS config is pointing to
-
   /*
     //Clustered Spark and HDFS, not a good everyday build test
     ItemSimilarityDriver.main(Array(
@@ -99,12 +96,12 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
         "--inDelim", ",",
         "--itemIDColumn", "2",
         "--rowIDColumn", "0",
-        "--filterColumn", "1"
-    ))
-*/
+        "--filterColumn", "1"))
+  */
   // local multi-threaded Spark with HDFS using large dataset
   // not a good build test.
-  /*    ItemSimilarityDriver.main(Array(
+  /*
+    ItemSimilarityDriver.main(Array(
       "--input", "hdfs://occam4:54310/user/pat/xrsj/ratings_data.txt",
       "--output", "hdfs://occam4:54310/user/pat/xrsj/similarityMatrices/",
       "--master", "local[4]",
@@ -113,8 +110,7 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       "--inDelim", ",",
       "--itemIDColumn", "2",
       "--rowIDColumn", "0",
-      "--filterColumn", "1"
-    ))
+      "--filterColumn", "1"))
   */
 
   test("ItemSimilarityDriver, non-full-spec CSV") {
@@ -590,7 +586,8 @@ class ItemSimilarityDriverSuite extends FunSuite with DistributedSparkSuite {
       "iphone\tmobile_acc:1.7260924347106847 soap:1.7260924347106847 phones:1.7260924347106847",
       "surface\tmobile_acc:0.6795961471815897",
       "nexus\ttablets:1.7260924347106847 mobile_acc:0.6795961471815897 phones:0.6795961471815897",
-      "galaxy\ttablets:5.545177444479561 soap:1.7260924347106847 phones:1.7260924347106847 mobile_acc:1.7260924347106847",
+      "galaxy\ttablets:5.545177444479561 soap:1.7260924347106847 phones:1.7260924347106847 " +
+        "mobile_acc:1.7260924347106847",
       "ipad\tmobile_acc:0.6795961471815897 phones:0.6795961471815897"))
 
     // this will create multiple part-xxxxx files in the InFile dir but other tests will

@@ -21,8 +21,7 @@ import com.google.common.collect.BiMap
 import org.apache.mahout.math.drm.{DistributedContext, CheckpointedDrm}
 import org.apache.mahout.math.indexeddataset
 
-/**
-  * Wrap an  [[org.apache.mahout.math.drm.DrmLike]] with bidirectional ID mappings [[com.google.common.collect.BiMap]]
+/** Wrap an  [[org.apache.mahout.math.drm.DrmLike]] with bidirectional ID mappings [[com.google.common.collect.BiMap]]
   * so a user specified labels/IDs can be stored and mapped to and from the Mahout Int ID used internal to Mahout
   * core code.
   * @todo Often no need for both or perhaps either dictionary, so save resources by allowing to be not created
@@ -34,26 +33,24 @@ trait IndexedDataset {
   val rowIDs: BiMap[String,Int]
   val columnIDs: BiMap[String,Int]
 
-  /**
-   * Write a text delimited file(s) with the row and column IDs from dictionaries.
-   * @param dest write location, usually a directory
-   * @param schema params to control writing
-   * @param sc the [[org.apache.mahout.math.drm.DistributedContext]] used to do a distributed write
-   */
+  /** Write a text delimited file(s) with the row and column IDs from dictionaries.
+    * @param dest write location, usually a directory
+    * @param schema params to control writing
+    * @param sc the [[org.apache.mahout.math.drm.DistributedContext]] used to do a distributed write
+    */
   def dfsWrite(dest: String, schema: Schema)(implicit sc: DistributedContext): Unit
 
   /** Factory method, creates the extending class  and returns a new instance */
   def create(matrix: CheckpointedDrm[Int], rowIDs: BiMap[String,Int], columnIDs: BiMap[String,Int]):
     IndexedDataset
 
-  /**
-   * Adds the equivalent of blank rows to the sparse CheckpointedDrm, which only changes the row cardinality value.
-   * No changes are made to the underlying drm.
-   * @param n number to use for new row cardinality, should be larger than current
-   * @return a new IndexedDataset or extending class with new cardinality
-   * @note should be done before any optimizer actions are performed on the matrix or you'll get unpredictable
-   *       results.
-   */
+  /** Adds the equivalent of blank rows to the sparse CheckpointedDrm, which only changes the row cardinality value.
+    * No changes are made to the underlying drm.
+    * @param n number to use for new row cardinality, should be larger than current
+    * @return a new IndexedDataset or extending class with new cardinality
+    * @note should be done before any optimizer actions are performed on the matrix or you'll get unpredictable
+    *       results.
+    */
   def newRowCardinality(n: Int): IndexedDataset = {
     // n is validated in matrix
     this.create(matrix.newRowCardinality(n), rowIDs, columnIDs)
