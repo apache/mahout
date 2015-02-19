@@ -31,27 +31,29 @@ import org.apache.mahout.math.function.{VectorFunction, Functions}
 import scala.util.Random
 
 
-/** Based on "Ted Dunnning & Ellen Friedman: Practical Machine Learning, Innovations in Recommendation",
-  * available at http://www.mapr.com/practical-machine-learning
-  *
-  * see also "Sebastian Schelter, Christoph Boden, Volker Markl:
-  * Scalable Similarity-Based Neighborhood Methods with MapReduce
-  * ACM Conference on Recommender Systems 2012"
-  */
+/**
+ * Based on "Ted Dunnning & Ellen Friedman: Practical Machine Learning, Innovations in Recommendation",
+ * available at http://www.mapr.com/practical-machine-learning
+ *
+ * see also "Sebastian Schelter, Christoph Boden, Volker Markl:
+ * Scalable Similarity-Based Neighborhood Methods with MapReduce
+ * ACM Conference on Recommender Systems 2012"
+ */
 object SimilarityAnalysis extends Serializable {
 
   /** Compares (Int,Double) pairs by the second value */
   private val orderByScore = Ordering.fromLessThan[(Int, Double)] { case ((_, score1), (_, score2)) => score1 > score2}
 
-  /** Calculates item (column-wise) similarity using the log-likelihood ratio on A'A, A'B, A'C, ...
-    * and returns a list of similarity and cross-similarity matrices
-    * @param drmARaw Primary interaction matrix
-    * @param randomSeed when kept to a constant will make repeatable downsampling
-    * @param maxInterestingItemsPerThing number of similar items to return per item, default: 50
-    * @param maxNumInteractions max number of interactions after downsampling, default: 500
-    * @return a list of [[org.apache.mahout.math.drm.DrmLike]] containing downsampled DRMs for cooccurrence and
-    *         cross-cooccurrence
-    */
+  /**
+   * Calculates item (column-wise) similarity using the log-likelihood ratio on A'A, A'B, A'C, ...
+   * and returns a list of similarity and cross-similarity matrices
+   * @param drmARaw Primary interaction matrix
+   * @param randomSeed when kept to a constant will make repeatable downsampling
+   * @param maxInterestingItemsPerThing number of similar items to return per item, default: 50
+   * @param maxNumInteractions max number of interactions after downsampling, default: 500
+   * @return a list of [[org.apache.mahout.math.drm.DrmLike]] containing downsampled DRMs for cooccurrence and
+   *         cross-cooccurrence
+   */
   def cooccurrences(drmARaw: DrmLike[Int], randomSeed: Int = 0xdeadbeef, maxInterestingItemsPerThing: Int = 50,
                     maxNumInteractions: Int = 500, drmBs: Array[DrmLike[Int]] = Array()): List[DrmLike[Int]] = {
 
@@ -101,16 +103,17 @@ object SimilarityAnalysis extends Serializable {
     similarityMatrices
   }
 
-  /** Calculates item (column-wise) similarity using the log-likelihood ratio on A'A, A'B, A'C, ... and returns
-    * a list of similarity and cross-similarity matrices. Somewhat easier to use method, which handles the ID
-    * dictionaries correctly
-    * @param indexedDatasets first in array is primary/A matrix all others are treated as secondary
-    * @param randomSeed use default to make repeatable, otherwise pass in system time or some randomizing seed
-    * @param maxInterestingItemsPerThing max similarities per items
-    * @param maxNumInteractions max number of input items per item
-    * @return a list of [[org.apache.mahout.math.indexeddataset.IndexedDataset]] containing downsampled
-    *         IndexedDatasets for cooccurrence and cross-cooccurrence
-    */
+  /**
+   * Calculates item (column-wise) similarity using the log-likelihood ratio on A'A, A'B, A'C, ... and returns
+   * a list of similarity and cross-similarity matrices. Somewhat easier to use method, which handles the ID
+   * dictionaries correctly
+   * @param indexedDatasets first in array is primary/A matrix all others are treated as secondary
+   * @param randomSeed use default to make repeatable, otherwise pass in system time or some randomizing seed
+   * @param maxInterestingItemsPerThing max similarities per items
+   * @param maxNumInteractions max number of input items per item
+   * @return a list of [[org.apache.mahout.math.indexeddataset.IndexedDataset]] containing downsampled
+   *         IndexedDatasets for cooccurrence and cross-cooccurrence
+   */
   def cooccurrencesIDSs(indexedDatasets: Array[IndexedDataset],
       randomSeed: Int = 0xdeadbeef,
       maxInterestingItemsPerThing: Int = 50,
@@ -128,12 +131,13 @@ object SimilarityAnalysis extends Serializable {
     retIDSs.toList
   }
 
-  /** Calculates row-wise similarity using the log-likelihood ratio on AA' and returns a DRM of rows and similar rows
-    * @param drmARaw Primary interaction matrix
-    * @param randomSeed when kept to a constant will make repeatable downsampling
-    * @param maxInterestingSimilaritiesPerRow number of similar items to return per item, default: 50
-    * @param maxNumInteractions max number of interactions after downsampling, default: 500
-    */
+  /**
+   * Calculates row-wise similarity using the log-likelihood ratio on AA' and returns a DRM of rows and similar rows
+   * @param drmARaw Primary interaction matrix
+   * @param randomSeed when kept to a constant will make repeatable downsampling
+   * @param maxInterestingSimilaritiesPerRow number of similar items to return per item, default: 50
+   * @param maxNumInteractions max number of interactions after downsampling, default: 500
+   */
   def rowSimilarity(drmARaw: DrmLike[Int], randomSeed: Int = 0xdeadbeef, maxInterestingSimilaritiesPerRow: Int = 50,
                     maxNumInteractions: Int = 500): DrmLike[Int] = {
 
@@ -158,13 +162,14 @@ object SimilarityAnalysis extends Serializable {
     drmSimilaritiesAAt
   }
 
-  /** Calculates row-wise similarity using the log-likelihood ratio on AA' and returns a drm of rows and similar rows.
-    * Uses IndexedDatasets, which handle external ID dictionaries properly
-    * @param indexedDataset compare each row to every other
-    * @param randomSeed  use default to make repeatable, otherwise pass in system time or some randomizing seed
-    * @param maxInterestingSimilaritiesPerRow max elements returned in each row
-    * @param maxObservationsPerRow max number of input elements to use
-    */
+  /**
+   * Calculates row-wise similarity using the log-likelihood ratio on AA' and returns a drm of rows and similar rows.
+   * Uses IndexedDatasets, which handle external ID dictionaries properly
+   * @param indexedDataset compare each row to every other
+   * @param randomSeed  use default to make repeatable, otherwise pass in system time or some randomizing seed
+   * @param maxInterestingSimilaritiesPerRow max elements returned in each row
+   * @param maxObservationsPerRow max number of input elements to use
+   */
   def rowSimilarityIDS(indexedDataset: IndexedDataset, randomSeed: Int = 0xdeadbeef,
       maxInterestingSimilaritiesPerRow: Int = 50,
       maxObservationsPerRow: Int = 500):
@@ -241,15 +246,16 @@ object SimilarityAnalysis extends Serializable {
     }
   }
 
-  /** Selectively downsample rows and items with an anomalous amount of interactions, inspired by
-    * https://github.com/tdunning/in-memory-cooccurrence/blob/master/src/main/java/com/tdunning/cooc/Analyze.java
-    *
-    * additionally binarizes input matrix, as we're only interesting in knowing whether interactions happened or not
-    * @param drmM matrix to downsample
-    * @param seed random number generator seed, keep to a constant if repeatability is neccessary
-    * @param maxNumInteractions number of elements in a row of the returned matrix
-    * @return the downsampled DRM
-    */
+  /**
+   * Selectively downsample rows and items with an anomalous amount of interactions, inspired by
+   * https://github.com/tdunning/in-memory-cooccurrence/blob/master/src/main/java/com/tdunning/cooc/Analyze.java
+   *
+   * additionally binarizes input matrix, as we're only interesting in knowing whether interactions happened or not
+   * @param drmM matrix to downsample
+   * @param seed random number generator seed, keep to a constant if repeatability is neccessary
+   * @param maxNumInteractions number of elements in a row of the returned matrix
+   * @return the downsampled DRM
+   */
   def sampleDownAndBinarize(drmM: DrmLike[Int], seed: Int, maxNumInteractions: Int) = {
 
     implicit val distributedContext = drmM.context

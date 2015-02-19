@@ -20,12 +20,13 @@ import scopt.OptionParser
 
 import scala.collection.immutable
 
-/** Defines oft-repeated options and their parsing. Provides the option groups and parsing helper methods to
-  * keep both standarized.
-  * @param programName Name displayed in help message, the name by which the driver is invoked.
-  * @note options are engine neutral by convention. See the engine specific extending class for
-  *       to add Spark or other engine options.
-  */
+/**
+ * Defines oft-repeated options and their parsing. Provides the option groups and parsing helper methods to
+ * keep both standarized.
+ * @param programName Name displayed in help message, the name by which the driver is invoked.
+ * @note options are engine neutral by convention. See the engine specific extending class for
+ *       to add Spark or other engine options.
+ */
 class MahoutOptionParser(programName: String) extends OptionParser[Map[String, Any]](programName: String) {
 
   // build options from some stardard CLI param groups
@@ -176,9 +177,10 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
 
 }
 
-/** Companion object defines default option groups for reference in any driver that needs them.
-  * @note not all options are platform neutral so other platforms can add default options here if desired
-  */
+/**
+ * Companion object defines default option groups for reference in any driver that needs them.
+ * @note not all options are platform neutral so other platforms can add default options here if desired
+ */
 object MahoutOptionParser {
 
   // set up the various default option groups

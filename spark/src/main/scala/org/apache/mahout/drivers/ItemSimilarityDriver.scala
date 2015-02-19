@@ -23,23 +23,24 @@ import org.apache.mahout.math.indexeddataset.{Schema, IndexedDataset, indexedDat
 import org.apache.mahout.sparkbindings.indexeddataset.IndexedDatasetSpark
 import scala.collection.immutable.HashMap
 
-/** Command line interface for [[org.apache.mahout.math.cf.SimilarityAnalysis#cooccurrencesIDSs]]. Reads text lines
-  * that contain (row id, column id, ...). The IDs are user specified strings which will be preserved in the output.
-  * The individual elements will be accumulated into a matrix like
-  * [[org.apache.mahout.math.indexeddataset.IndexedDataset]] and
-  * [[org.apache.mahout.math.cf.SimilarityAnalysis#cooccurrencesIDSs]] will be used to calculate row-wise
-  * self-similarity, or when using filters or two inputs, will generate two matrices and calculate both the
-  * self-similarity of the primary matrix and the row-wise similarity of the primary to the secondary. Returns one
-  * or two directories of text files formatted as specified in the options. The options allow flexible control of the
-  * input schema, file discovery, output schema, and control of algorithm parameters. To get help run
-  * {{{mahout spark-itemsimilarity}}} for a full explanation of options. To process simple elements of text delimited
-  * values (userID,itemID) with or without a strengths and with a separator of tab, comma, or space, you can specify
-  * only the input and output file and directory--all else will default to the correct values. Each output line will
-  * contain the Item ID and similar items sorted by LLR strength descending.
-  * @note To use with a Spark cluster see the --master option, if you run out of heap space check
-  *       the --sparkExecutorMemory option. Other [[org.apache.spark.SparkConf]] key value pairs can be with the -D:k=v
-  *       option.
-  */
+/**
+ * Command line interface for [[org.apache.mahout.math.cf.SimilarityAnalysis#cooccurrencesIDSs]]. Reads text lines
+ * that contain (row id, column id, ...). The IDs are user specified strings which will be preserved in the output.
+ * The individual elements will be accumulated into a matrix like
+ * [[org.apache.mahout.math.indexeddataset.IndexedDataset]] and
+ * [[org.apache.mahout.math.cf.SimilarityAnalysis#cooccurrencesIDSs]] will be used to calculate row-wise
+ * self-similarity, or when using filters or two inputs, will generate two matrices and calculate both the
+ * self-similarity of the primary matrix and the row-wise similarity of the primary to the secondary. Returns one
+ * or two directories of text files formatted as specified in the options. The options allow flexible control of the
+ * input schema, file discovery, output schema, and control of algorithm parameters. To get help run
+ * {{{mahout spark-itemsimilarity}}} for a full explanation of options. To process simple elements of text delimited
+ * values (userID,itemID) with or without a strengths and with a separator of tab, comma, or space, you can specify
+ * only the input and output file and directory--all else will default to the correct values. Each output line will
+ * contain the Item ID and similar items sorted by LLR strength descending.
+ * @note To use with a Spark cluster see the --master option, if you run out of heap space check
+ *       the --sparkExecutorMemory option. Other [[org.apache.spark.SparkConf]] key value pairs can be with the -D:k=v
+ *       option.
+ */
 object ItemSimilarityDriver extends MahoutSparkDriver {
   // define only the options specific to ItemSimilarity
   private final val ItemSimilarityOptions = HashMap[String, Any](
@@ -51,9 +52,10 @@ object ItemSimilarityDriver extends MahoutSparkDriver {
   private var readSchema1: Schema = _
   private var readSchema2: Schema = _
 
-  /** Entry point, not using Scala App trait
-    * @param args  Command line args, if empty a help message is printed.
-    */
+  /**
+   * Entry point, not using Scala App trait
+   * @param args  Command line args, if empty a help message is printed.
+   */
   override def main(args: Array[String]): Unit = {
 
     parser = new MahoutSparkOptionParser(programName = "spark-itemsimilarity") {
@@ -195,7 +197,7 @@ object ItemSimilarityDriver extends MahoutSparkDriver {
     }
   }
 
-  override def process: Unit = {
+  override def process(): Unit = {
     start()
 
     val indexedDatasets = readIndexedDatasets

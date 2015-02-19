@@ -23,12 +23,13 @@ import org.apache.mahout.math.drm.{DistributedContext, CheckpointedDrm}
 import org.apache.mahout.math.indexeddataset
 import org.apache.mahout.math.indexeddataset.{DefaultIndexedDatasetWriteSchema, Reader, Schema, IndexedDataset}
 
-/** Spark implementation of [[org.apache.mahout.math.indexeddataset.IndexedDataset]] providing the Spark specific
-  * dfsWrite method
-  * @param matrix a [[org.apache.mahout.sparkbindings.drm.CheckpointedDrmSpark]] to wrap
-  * @param rowIDs a bidirectional map for Mahout Int IDs to/from application specific string IDs
-  * @param columnIDs a bidirectional map for Mahout Int IDs to/from application specific string IDs
-  */
+/**
+ * Spark implementation of [[org.apache.mahout.math.indexeddataset.IndexedDataset]] providing the Spark specific
+ * dfsWrite method
+ * @param matrix a [[org.apache.mahout.sparkbindings.drm.CheckpointedDrmSpark]] to wrap
+ * @param rowIDs a bidirectional map for Mahout Int IDs to/from application specific string IDs
+ * @param columnIDs a bidirectional map for Mahout Int IDs to/from application specific string IDs
+ */
 class IndexedDatasetSpark(val matrix: CheckpointedDrm[Int], val rowIDs: BiMap[String,Int],
     val columnIDs: BiMap[String,Int])
   extends IndexedDataset {
@@ -38,17 +39,19 @@ class IndexedDatasetSpark(val matrix: CheckpointedDrm[Int], val rowIDs: BiMap[St
     this(id2.matrix, id2.rowIDs, id2.columnIDs)
   }
 
-  /** Factory method used to create this extending class when the interface of
-    * [[org.apache.mahout.math.indexeddataset.IndexedDataset]] is all that is known.
-    */
+  /**
+   * Factory method used to create this extending class when the interface of
+   * [[org.apache.mahout.math.indexeddataset.IndexedDataset]] is all that is known.
+   */
   override def create(matrix: CheckpointedDrm[Int], rowIDs: BiMap[String,Int], columnIDs: BiMap[String,Int]):
     IndexedDatasetSpark = {
     new IndexedDatasetSpark(matrix, rowIDs, columnIDs)
   }
 
-  /** Implements the core method to write [[org.apache.mahout.math.indexeddataset.IndexedDataset]]. Override and
-    * replace the writer to change how it is written.
-    */
+  /**
+   * Implements the core method to write [[org.apache.mahout.math.indexeddataset.IndexedDataset]]. Override and
+   * replace the writer to change how it is written.
+   */
   override def dfsWrite(dest: String, schema: Schema = DefaultIndexedDatasetWriteSchema)
       (implicit sc: DistributedContext):
     Unit = {
