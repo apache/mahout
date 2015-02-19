@@ -174,10 +174,7 @@ object SimilarityAnalysis extends Serializable {
     indexedDataset.create(coocMatrix, indexedDataset.rowIDs, indexedDataset.rowIDs)
   }
 
-   /**
-     * Compute loglikelihood ratio
-     * see http://tdunning.blogspot.de/2008/03/surprise-and-coincidence.html for details
-     */
+   /** Compute loglikelihood ratio see http://tdunning.blogspot.de/2008/03/surprise-and-coincidence.html for details */
   def logLikelihoodRatio(numInteractionsWithA: Long, numInteractionsWithB: Long,
     numInteractionsWithAandB: Long, numInteractions: Long) = {
 
@@ -244,16 +241,15 @@ object SimilarityAnalysis extends Serializable {
     }
   }
 
-  /**
-   * Selectively downsample rows and items with an anomalous amount of interactions, inspired by
-   * https://github.com/tdunning/in-memory-cooccurrence/blob/master/src/main/java/com/tdunning/cooc/Analyze.java
-   *
-   * additionally binarizes input matrix, as we're only interesting in knowing whether interactions happened or not
-   * @param drmM matrix to downsample
-   * @param seed random number generator seed, keep to a constant if repeatability is neccessary
-   * @param maxNumInteractions number of elements in a row of the returned matrix
-   * @return the downsampled DRM
-   */
+  /** Selectively downsample rows and items with an anomalous amount of interactions, inspired by
+    * https://github.com/tdunning/in-memory-cooccurrence/blob/master/src/main/java/com/tdunning/cooc/Analyze.java
+    *
+    * additionally binarizes input matrix, as we're only interesting in knowing whether interactions happened or not
+    * @param drmM matrix to downsample
+    * @param seed random number generator seed, keep to a constant if repeatability is neccessary
+    * @param maxNumInteractions number of elements in a row of the returned matrix
+    * @return the downsampled DRM
+    */
   def sampleDownAndBinarize(drmM: DrmLike[Int], seed: Int, maxNumInteractions: Int) = {
 
     implicit val distributedContext = drmM.context
@@ -268,9 +264,8 @@ object SimilarityAnalysis extends Serializable {
       case (keys, block) =>
         val numInteractions: Vector = bcastNumInteractions
 
-        /** Use a hash of the unique first key to seed the RNG, makes this computation repeatable in case of
-          * failures
-          */
+        // Use a hash of the unique first key to seed the RNG, makes this computation repeatable in case of
+        //failures
         val random = new Random(MurmurHash.hash(keys(0), seed))
 
         val downsampledBlock = block.like()
