@@ -77,8 +77,9 @@ public class SimilarItems {
       if (!hasNext()) {
         throw new NoSuchElementException();
       }
+      SimilarItem nextItem = new SimilarItem(similarItemIDs[index], similarities[index]);
       index++;
-      return new SimilarItem(similarItemIDs[index], similarities[index]);
+      return nextItem;
     }
   }
 }
