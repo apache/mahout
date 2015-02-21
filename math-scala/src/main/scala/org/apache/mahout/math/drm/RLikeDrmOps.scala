@@ -134,8 +134,6 @@ object RLikeDrmOps {
 
   implicit def ops2Drm[K: ClassTag](ops: DrmLikeOps[K]): DrmLike[K] = ops.drm
 
-  implicit def cp2cpops[K: ClassTag](cp: CheckpointedDrm[K]): CheckpointedOps[K] = new CheckpointedOps(cp)
-
   /**
    * This is probably dangerous since it triggers implicit checkpointing with default storage level
    * setting.

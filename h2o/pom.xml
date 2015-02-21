@@ -206,7 +206,7 @@
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-math-scala_2.10</artifactId>
+      <artifactId>mahout-math-scala_${scala.major}</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -219,7 +219,7 @@
 
    <dependency>
       <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-math-scala_2.10</artifactId>
+      <artifactId>mahout-math-scala_${scala.major}</artifactId>
       <classifier>tests</classifier>
       <scope>test</scope>
    </dependency>
@@ -249,8 +249,8 @@
     <!-- scala stuff -->
     <dependency>
       <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_2.10</artifactId>
-      <version>2.0</version>
+      <artifactId>scalatest_${scala.major}</artifactId>
+      <version>2.2.4</version>
       <scope>test</scope>
     </dependency>
 
