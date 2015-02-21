@@ -34,11 +34,12 @@ trait IndexedDataset {
   val rowIDs: BiMap[String,Int]
   val columnIDs: BiMap[String,Int]
 
-  /** Write a text delimited file(s) with the row and column IDs from dictionaries.
-    * @param dest write location, usually a directory
-    * @param schema params to control writing
-    * @param sc the [[org.apache.mahout.math.drm.DistributedContext]] used to do a distributed write
-    */
+  /**
+   * Write a text delimited file(s) with the row and column IDs from dictionaries.
+   * @param dest write location, usually a directory
+   * @param schema params to control writing
+   * @param sc the [[org.apache.mahout.math.drm.DistributedContext]] used to do a distributed write
+   */
   def dfsWrite(dest: String, schema: Schema)(implicit sc: DistributedContext): Unit
 
   /** Factory method, creates the extending class  and returns a new instance */
