@@ -182,7 +182,27 @@
     <!-- scala stuff -->
     <dependency>
       <groupId>org.scala-lang</groupId>
+      <artifactId>scala-compiler</artifactId>
+      <version>${scala.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-reflect</artifactId>
+      <version>${scala.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-lang</groupId>
       <artifactId>scala-library</artifactId>
+      <version>${scala.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-actors</artifactId>
+      <version>${scala.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scalap</artifactId>
       <version>${scala.version}</version>
     </dependency>
 
@@ -192,6 +212,8 @@
       <version>2.2.4</version>
       <scope>test</scope>
     </dependency>
+
+
 
   </dependencies>
 </project>
