@@ -6,9 +6,7 @@
  The ASF licenses this file to You under the Apache License, Version 2.0
  (the "License"); you may not use this file except in compliance with
  the License.  You may obtain a copy of the License at
-
      http://www.apache.org/licenses/LICENSE-2.0
-
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,27 +17,42 @@
   xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0
-    http://maven.apache.org/xsd/assembly-1.1.0.xsd">
-  <id>job</id>
+  http://maven.apache.org/xsd/assembly-1.1.0.xsd">
+  <id>dependency-reduced</id>
   <formats>
-   <format>jar</format>
+    <format>jar</format>
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
   <dependencySets>
     <dependencySet>
       <unpack>true</unpack>
       <unpackOptions>
-        <!-- MAHOUT-1126 -->
-        <excludes>
-          <exclude>META-INF/LICENSE</exclude>
-        </excludes>
+      <!-- MAHOUT-1126 -->
+      <excludes>
+         <exclude>META-INF/LICENSE</exclude>
+      </excludes>
       </unpackOptions>
       <scope>runtime</scope>
       <outputDirectory>/</outputDirectory>
       <useTransitiveFiltering>true</useTransitiveFiltering>
       <excludes>
-        <exclude>org.apache.hadoop:hadoop-core</exclude>
+        <!-- MAHOUT-1636 -->
+        <!-- add any projects that are included in the spark environment or are in mrlegacy
+        but not used in spark drivers -->
+        <!--exclude>org.apache.hadoop:hadoop-core</exclude>
+        <exclude>org.apache.spark:spark-core_${scala.major}</exclude>
+        <exclude>org.scala-lang:scala-library</exclude>
+        <exclude>jackson-core-asl</exclude>
+        <exclude>jackson-mapper-asl</exclude>
+        <exclude>xstream</exclude>
+        <exclude>lucene-core</exclude>
+        <exclude>lucene-analyzers-common</exclude-->
+        <exclude>org.apache.mahout.*</exclude>
       </excludes>
+      <includes>
+        <include>com.google.guava:guava</include>
+        <include>com.github.scopt</include>
+      </includes>
     </dependencySet>
   </dependencySets>
   <fileSets>
@@ -49,13 +62,6 @@
       <excludes>
         <exclude>*.jar</exclude>
       </excludes>
-    </fileSet>
-    <fileSet>
-      <directory>${basedir}/target/classes</directory>
-      <outputDirectory>/</outputDirectory>
-      <includes>
-        <include>driver.classes.default.props</include>
-      </includes>
     </fileSet>
   </fileSets>
 </assembly>

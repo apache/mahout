@@ -23,6 +23,8 @@ import com.google.common.collect.HashBiMap
 import org.apache.mahout.math._
 import org.apache.spark.serializer.KryoRegistrator
 import org.apache.mahout.sparkbindings._
+import org.apache.mahout.common.Pair
+import org.apache.mahout.math.Vector.Element
 
 import scala.collection.immutable.List
 
@@ -34,6 +36,9 @@ class MahoutKryoRegistrator extends KryoRegistrator {
     kryo.addDefaultSerializer(classOf[Vector], new WritableKryoSerializer[Vector, VectorWritable])
     kryo.addDefaultSerializer(classOf[DenseVector], new WritableKryoSerializer[Vector, VectorWritable])
     kryo.addDefaultSerializer(classOf[Matrix], new WritableKryoSerializer[Matrix, MatrixWritable])
+    val h: HashBiMap[String, Int] = HashBiMap.create[String, Int]()
+    //kryo.addDefaultSerializer(h.getClass, new JavaSerializer())
+    log.info("\n\n\nRegister Serializer for " + h.getClass.getCanonicalName + "\n\n\n")
     kryo.register(classOf[com.google.common.collect.HashBiMap[String, Int]], new JavaSerializer())
   }
 }

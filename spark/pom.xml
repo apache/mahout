@@ -171,7 +171,7 @@
             </goals>
             <configuration>
               <descriptors>
-                <descriptor>src/main/assembly/job.xml</descriptor>
+                <descriptor>src/main/assembly/dependency-reduced.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>
@@ -317,11 +317,9 @@
       <scope>test</scope>
     </dependency>
 
-
     <!--  3rd-party -->
 
     <!-- scala stuff -->
-
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_${scala.major}</artifactId>

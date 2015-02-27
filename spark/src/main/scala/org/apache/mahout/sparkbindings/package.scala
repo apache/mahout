@@ -223,7 +223,9 @@ package object sparkbindings {
           // During maven tests, the maven classpath also creeps in for some reason
           !n.matches(".*/.m2/.*")
         )
-
+    log.info("\n\n\n")
+    mcjars.foreach(j => log.info(j))
+    log.info("\n\n\n")
     mcjars
   }
 
