@@ -50,7 +50,7 @@ import org.apache.mahout.sparkbindings._
  *     }
  *     parser.parse(args, parser.opts) map { opts =>
  *       parser.opts = opts
- *       process
+ *       process()
  *     }
  *   }
  *

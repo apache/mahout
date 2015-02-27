@@ -35,33 +35,10 @@
       <scope>runtime</scope>
       <outputDirectory>/</outputDirectory>
       <useTransitiveFiltering>true</useTransitiveFiltering>
-      <excludes>
-        <!-- MAHOUT-1636 -->
-        <!-- add any projects that are included in the spark environment or are in mrlegacy
-        but not used in spark drivers -->
-        <!--exclude>org.apache.hadoop:hadoop-core</exclude>
-        <exclude>org.apache.spark:spark-core_${scala.major}</exclude>
-        <exclude>org.scala-lang:scala-library</exclude>
-        <exclude>jackson-core-asl</exclude>
-        <exclude>jackson-mapper-asl</exclude>
-        <exclude>xstream</exclude>
-        <exclude>lucene-core</exclude>
-        <exclude>lucene-analyzers-common</exclude-->
-        <exclude>org.apache.mahout.*</exclude>
-      </excludes>
       <includes>
         <include>com.google.guava:guava</include>
         <include>com.github.scopt</include>
       </includes>
     </dependencySet>
   </dependencySets>
-  <fileSets>
-    <fileSet>
-      <directory>${basedir}/target/classes</directory>
-      <outputDirectory>/</outputDirectory>
-      <excludes>
-        <exclude>*.jar</exclude>
-      </excludes>
-    </fileSet>
-  </fileSets>
 </assembly>
