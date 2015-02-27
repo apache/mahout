@@ -78,54 +78,36 @@ object TestNBDriver extends MahoutSparkDriver {
     }
   }
 
-  override def start(masterUrl: String = parser.opts("master").asInstanceOf[String],
-      appName: String = parser.opts("appName").asInstanceOf[String]):
-    Unit = {
+/** Read the test set from inputPath/part-x-00000 sequence file of form <Text,VectorWritable> */
+private def readTestSet: DrmLike[_] = {
+  val inputPath = parser.opts("input").asInstanceOf[String]
+  val trainingSet= drm.drmDfsRead(inputPath)
+  trainingSet
+}
 
-    // will be only specific to this job.
-    // Note: set a large spark.kryoserializer.buffer.mb if using DSL MapBlock else leave as default
+/** read the model from pathToModel using NBModel.DfsRead(...) */
+private def readModel: NBModel = {
+  val inputPath = parser.opts("pathToModel").asInstanceOf[String]
+  val model= NBModel.dfsRead(inputPath)
+  model
+}
 
-    if (parser.opts("sparkExecutorMem").asInstanceOf[String] != "")
-      sparkConf.set("spark.executor.memory", parser.opts("sparkExecutorMem").asInstanceOf[String])
+override def process: Unit = {
+  start()
 
-    // Note: set a large akka frame size for DSL NB (20)
-    //sparkConf.set("spark.akka.frameSize","20") // don't need this for Spark optimized NaiveBayes..
-    //else leave as set in Spark config
+  val testComplementary = parser.opts("testComplementary").asInstanceOf[Boolean]
+  val outputPath = parser.opts("output").asInstanceOf[String]
 
-    super.start(masterUrl, appName)
+  // todo:  get the -ow option in to check for a model in the path and overwrite if flagged.
 
-    }
+  val testSet = readTestSet
+  val model = readModel
+  val analyzer= NaiveBayes.test(model, testSet, testComplementary)
 
-  /** Read the test set from inputPath/part-x-00000 sequence file of form <Text,VectorWritable> */
-  private def readTestSet: DrmLike[_] = {
-    val inputPath = parser.opts("input").asInstanceOf[String]
-    val trainingSet= drm.drmDfsRead(inputPath)
-    trainingSet
-  }
+  println(analyzer)
 
-  /** read the model from pathToModel using NBModel.DfsRead(...) */
-  private def readModel: NBModel = {
-    val inputPath = parser.opts("pathToModel").asInstanceOf[String]
-    val model= NBModel.dfsRead(inputPath)
-    model
-  }
-
-  override def process: Unit = {
-    start()
-
-    val testComplementary = parser.opts("testComplementary").asInstanceOf[Boolean]
-    val outputPath = parser.opts("output").asInstanceOf[String]
-
-    // todo:  get the -ow option in to check for a model in the path and overwrite if flagged.
-
-    val testSet = readTestSet
-    val model = readModel
-    val analyzer= NaiveBayes.test(model, testSet, testComplementary)
-
-    println(analyzer)
-
-    stop
-  }
+  stop
+}
 
 }
 
