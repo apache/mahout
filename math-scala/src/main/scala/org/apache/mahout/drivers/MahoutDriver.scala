@@ -27,6 +27,9 @@ abstract class MahoutDriver {
 
   var _useExistingContext: Boolean = false // used in the test suite to reuse one context per suite
 
+  /** must be overriden to setup the DistributedContext mc*/
+  protected def start() : Unit
+
   /** Override (optionally) for special cleanup */
   protected def stop(): Unit = {
     if (!_useExistingContext) mc.close

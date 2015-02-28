@@ -60,7 +60,7 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
 
   }
 
-  def parseGenericOptions = {
+  def parseGenericOptions() = {
     opts = opts ++ MahoutOptionParser.GenericOptions
     opt[Int]("randomSeed") abbr ("rs") action { (x, options) =>
       options + ("randomSeed" -> x)
@@ -74,7 +74,7 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
     }//Hidden option, though a user might want this.
   }
 
-  def parseElementInputSchemaOptions{
+  def parseElementInputSchemaOptions() = {
     //Input text file schema--not driver specific but input data specific, elements input,
     // not rows of IndexedDatasets
     opts = opts ++ MahoutOptionParser.TextDelimitedElementsOptions
@@ -136,7 +136,7 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
 
   }
 
-  def parseFileDiscoveryOptions = {
+  def parseFileDiscoveryOptions() = {
     //File finding strategy--not driver specific
     opts = opts ++ MahoutOptionParser.FileDiscoveryOptions
     note("\nFile discovery options:")
@@ -151,7 +151,7 @@ class MahoutOptionParser(programName: String) extends OptionParser[Map[String, A
 
   }
 
-  def parseIndexedDatasetFormatOptions = {
+  def parseIndexedDatasetFormatOptions() = {
     opts = opts ++ MahoutOptionParser.TextDelimitedIndexedDatasetOptions
     note("\nOutput text file schema options:")
     opt[String]("rowKeyDelim") abbr ("rd") action { (x, options) =>

@@ -39,7 +39,7 @@ import org.apache.mahout.sparkbindings._
  *       head("somedriver", "Mahout 1.0-SNAPSHOT")
  *
  *       // Input output options, non-driver specific
- *       parseIOOptions
+ *       parseIOOptions()
  *
  *       // Algorithm specific options
  *       // Add in the new options
@@ -65,15 +65,20 @@ import org.apache.mahout.sparkbindings._
 abstract class MahoutSparkDriver extends MahoutDriver {
 
 
-  implicit protected var sparkConf = new SparkConf()
+  implicit var sparkConf = new SparkConf()
 
   /**
    * Creates a Spark context to run the job inside.
    * Override to set the SparkConf values specific to the job,
    * these must be set before the context is created.
    */
-  protected def start() : Unit = {
+  override protected def start() : Unit = {
     if (!_useExistingContext) {
+      /* hack around SPARK-6069 Spark 1.2.1 deserialization of HashBiMap throwing ClassNotFound--doesn't seem to work
+      sparkConf.set("spark.files.userClassPathFirst", "true")
+      sparkConf.set("spark.executor.userClassPathFirst", "true")
+      */
+
       sparkConf.set("spark.kryo.referenceTracking", "false")
         .set("spark.kryoserializer.buffer.mb", "200")// this is default for Mahout optimizer, change it with -D option
 

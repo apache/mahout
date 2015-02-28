@@ -21,7 +21,7 @@ import org.apache.spark.SparkConf
 /** Adds parsing of Spark specific options to the option parser */
 class MahoutSparkOptionParser(programName: String) extends MahoutOptionParser(programName: String){
 
-  def parseSparkOptions(implicit sparkConf: SparkConf) = {
+  def parseSparkOptions()(implicit sparkConf: SparkConf) = {
     opts = opts ++ MahoutOptionParser.SparkOptions
     opts = opts + ("appName" -> programName)
     note("\nSpark config options:")

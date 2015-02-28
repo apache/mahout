@@ -90,26 +90,26 @@ object ItemSimilarityDriver extends MahoutSparkDriver {
       note("\nNote: Only the Log Likelihood Ratio (LLR) is supported as a similarity measure.")
 
       //Input text format
-      parseElementInputSchemaOptions
+      parseElementInputSchemaOptions()
 
       //How to search for input
-      parseFileDiscoveryOptions
+      parseFileDiscoveryOptions()
 
       //Drm output schema--not driver specific, drm specific
-      parseIndexedDatasetFormatOptions
+      parseIndexedDatasetFormatOptions()
 
       //Spark config options--not driver specific
-      parseSparkOptions
+      parseSparkOptions()
 
       //Jar inclusion, this option can be set when executing the driver from compiled code, not when from CLI
-      parseGenericOptions
+      parseGenericOptions()
 
       help("help") abbr ("h") text ("prints this usage text\n")
 
     }
     parser.parse(args, parser.opts) map { opts =>
       parser.opts = opts
-      process
+      process()
     }
   }
 
@@ -135,7 +135,7 @@ object ItemSimilarityDriver extends MahoutSparkDriver {
       "columnIdStrengthDelim" -> parser.opts("columnIdStrengthDelim").asInstanceOf[String],
       "omitScore" -> parser.opts("omitStrength").asInstanceOf[Boolean],
       "elementDelim" -> parser.opts("elementDelim").asInstanceOf[String])
-    }
+  }
 
   private def readIndexedDatasets: Array[IndexedDataset] = {
 

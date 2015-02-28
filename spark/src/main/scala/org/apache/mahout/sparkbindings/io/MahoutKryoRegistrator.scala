@@ -36,9 +36,6 @@ class MahoutKryoRegistrator extends KryoRegistrator {
     kryo.addDefaultSerializer(classOf[Vector], new WritableKryoSerializer[Vector, VectorWritable])
     kryo.addDefaultSerializer(classOf[DenseVector], new WritableKryoSerializer[Vector, VectorWritable])
     kryo.addDefaultSerializer(classOf[Matrix], new WritableKryoSerializer[Matrix, MatrixWritable])
-    val h: HashBiMap[String, Int] = HashBiMap.create[String, Int]()
-    //kryo.addDefaultSerializer(h.getClass, new JavaSerializer())
-    log.info("\n\n\nRegister Serializer for " + h.getClass.getCanonicalName + "\n\n\n")
     kryo.register(classOf[com.google.common.collect.HashBiMap[String, Int]], new JavaSerializer())
   }
 }
