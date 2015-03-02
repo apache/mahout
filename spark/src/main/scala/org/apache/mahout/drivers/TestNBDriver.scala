@@ -58,56 +58,56 @@ object TestNBDriver extends MahoutSparkDriver {
 
 
       //How to search for input
-      parseFileDiscoveryOptions
+      parseFileDiscoveryOptions()
 
-      //Drm output schema--not driver specific, drm specific
-      parseDrmFormatOptions
+      //IndexedDataset output schema--not driver specific, IndexedDataset specific
+      parseIndexedDatasetFormatOptions()
 
       //Spark config options--not driver specific
-      parseSparkOptions
+      parseSparkOptions()
 
       //Jar inclusion, this option can be set when executing the driver from compiled code, not when from CLI
-      parseGenericOptions
+      parseGenericOptions()
 
       help("help") abbr ("h") text ("prints this usage text\n")
 
     }
     parser.parse(args, parser.opts) map { opts =>
       parser.opts = opts
-      process
+      process()
     }
   }
 
-/** Read the test set from inputPath/part-x-00000 sequence file of form <Text,VectorWritable> */
-private def readTestSet: DrmLike[_] = {
-  val inputPath = parser.opts("input").asInstanceOf[String]
-  val trainingSet= drm.drmDfsRead(inputPath)
-  trainingSet
-}
+  /** Read the test set from inputPath/part-x-00000 sequence file of form <Text,VectorWritable> */
+  private def readTestSet: DrmLike[_] = {
+    val inputPath = parser.opts("input").asInstanceOf[String]
+    val trainingSet = drm.drmDfsRead(inputPath)
+    trainingSet
+  }
 
-/** read the model from pathToModel using NBModel.DfsRead(...) */
-private def readModel: NBModel = {
-  val inputPath = parser.opts("pathToModel").asInstanceOf[String]
-  val model= NBModel.dfsRead(inputPath)
-  model
-}
+  /** read the model from pathToModel using NBModel.DfsRead(...) */
+  private def readModel: NBModel = {
+    val inputPath = parser.opts("pathToModel").asInstanceOf[String]
+    val model = NBModel.dfsRead(inputPath)
+    model
+  }
 
-override def process: Unit = {
-  start()
+  override def process(): Unit = {
+    start()
 
-  val testComplementary = parser.opts("testComplementary").asInstanceOf[Boolean]
-  val outputPath = parser.opts("output").asInstanceOf[String]
+    val testComplementary = parser.opts("testComplementary").asInstanceOf[Boolean]
+    val outputPath = parser.opts("output").asInstanceOf[String]
 
-  // todo:  get the -ow option in to check for a model in the path and overwrite if flagged.
+    // todo:  get the -ow option in to check for a model in the path and overwrite if flagged.
 
-  val testSet = readTestSet
-  val model = readModel
-  val analyzer= NaiveBayes.test(model, testSet, testComplementary)
+    val testSet = readTestSet
+    val model = readModel
+    val analyzer = NaiveBayes.test(model, testSet, testComplementary)
 
-  println(analyzer)
+    println(analyzer)
 
-  stop
-}
+    stop()
+  }
 
 }
 

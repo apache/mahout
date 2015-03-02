@@ -23,8 +23,7 @@ import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
 /**
  * Returns a [[java.lang.String]], which is comma delimited list of URIs discovered based on parameters
  * in the constructor.
- * The String is formatted to be input into [[org.apache.spark.SparkContext.textFile()]]
- *
+ * The String is formatted to be input into [[org.apache.spark.SparkContext#textFile()]]
  * @param pathURI Where to start looking for inFiles, may be a list of comma delimited URIs
  * @param filePattern regex that must match the entire filename to have the file returned
  * @param recursive true traverses the filesystem recursively, default = false
@@ -35,8 +34,10 @@ case class HDFSPathSearch(pathURI: String, filePattern: String = "", recursive: 
   val conf = new Configuration()
   val fs = FileSystem.get(conf)
 
-  /** Returns a string of comma delimited URIs matching the filePattern
-    * When pattern matching dirs are never returned, only traversed. */
+  /**
+   * Returns a string of comma delimited URIs matching the filePattern
+   * When pattern matching dirs are never returned, only traversed.
+   */
   def uris: String = {
     if (!filePattern.isEmpty){ // have file pattern so
     val pathURIs = pathURI.split(",")
@@ -51,8 +52,10 @@ case class HDFSPathSearch(pathURI: String, filePattern: String = "", recursive: 
     }
   }
 
-  /** Find matching files in the dir, recursively call self when another directory is found
-    * Only files are matched, directories are traversed but never return a match */
+  /**
+   * Find matching files in the dir, recursively call self when another directory is found
+   * Only files are matched, directories are traversed but never return a match
+   */
   private def findFiles(dir: String, filePattern: String = ".*", files: String = ""): String = {
     val seed = fs.getFileStatus(new Path(dir))
     var f: String = files
@@ -71,7 +74,7 @@ case class HDFSPathSearch(pathURI: String, filePattern: String = "", recursive: 
           f = findFiles(fileStatus.getPath.toString, filePattern, f)
         }
       }
-    }else{ f = dir }// was a filename not dir
+    } else { f = dir }// was a filename not dir
     f
   }
 

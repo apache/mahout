@@ -26,12 +26,11 @@ import scala.collection.immutable.HashMap
 /**
  * Command line interface for [[org.apache.mahout.math.cf.SimilarityAnalysis#rowSimilarityIDSs( )]].
  * Reads a text delimited file containing rows of a [[org.apache.mahout.math.indexeddataset.IndexedDataset]]
- * with domain specific IDS of the form
- * (row id, column id: strength, ...). The IDs will be preserved in the
+ * with domain specific IDS of the form (row id, column id: strength, ...). The IDs will be preserved in the
  * output. The rows define a matrix and [[org.apache.mahout.math.cf.SimilarityAnalysis#rowSimilarityIDSs( )]]
- * will be used to calculate row-wise similarity using log-likelihood
- * The options allow control of the input schema, file discovery, output schema, and control of
- * algorithm parameters.
+ * will be used to calculate row-wise similarity using log-likelihood. The options allow control of the input
+ * schema, file discovery, output schema, and control of algorithm parameters.
+ *
  * To get help run {{{mahout spark-rowsimilarity}}} for a full explanation of options. The default
  * values for formatting will read (rowID<tab>columnID1:strength1<space>columnID2:strength2....)
  * and write (rowID<tab>rowID1:strength1<space>rowID2:strength2....)
@@ -49,6 +48,7 @@ object RowSimilarityDriver extends MahoutSparkDriver {
   private var readWriteSchema: Schema = _
 
   /**
+   * Entry point, not using Scala App trait
    * @param args  Command line args, if empty a help message is printed.
    */
   override def main(args: Array[String]): Unit = {
@@ -67,35 +67,34 @@ object RowSimilarityDriver extends MahoutSparkDriver {
         options + ("maxObservations" -> x)
       } text ("Max number of observations to consider per row (optional). Default: " +
         RowSimilarityOptions("maxObservations")) validate { x =>
-        if (x > 0) success else failure("Option --maxObservations must be > 0")
+          if (x > 0) success else failure("Option --maxObservations must be > 0")
       }
 
       opt[Int]('m', "maxSimilaritiesPerRow") action { (x, options) =>
         options + ("maxSimilaritiesPerRow" -> x)
       } text ("Limit the number of similarities per item to this number (optional). Default: " +
         RowSimilarityOptions("maxSimilaritiesPerRow")) validate { x =>
-        if (x > 0) success else failure("Option --maxSimilaritiesPerRow must be > 0")
+          if (x > 0) success else failure("Option --maxSimilaritiesPerRow must be > 0")
       }
 
-      /** --threshold not implemented in SimilarityAnalysis.rowSimilarity
-        * todo: replacing the threshold with some % of the best values and/or a
-        * confidence measure expressed in standard deviations would be nice.
-        */
+      // --threshold not implemented in SimilarityAnalysis.rowSimilarity
+      // todo: replacing the threshold with some % of the best values and/or a
+      // confidence measure expressed in standard deviations would be nice.
 
       //Driver notes--driver specific
       note("\nNote: Only the Log Likelihood Ratio (LLR) is supported as a similarity measure.")
 
       //Drm output schema--not driver specific, drm specific
-      parseDrmFormatOptions
+      parseIndexedDatasetFormatOptions()
 
       //How to search for input
-      parseFileDiscoveryOptions
+      parseFileDiscoveryOptions()
 
       //Spark config options--not driver specific
-      parseSparkOptions
+      parseSparkOptions()
 
       //Jar inclusion, this option can be set when executing the driver from compiled code, not when from CLI
-      parseGenericOptions
+      parseGenericOptions()
 
       help("help") abbr ("h") text ("prints this usage text\n")
 
@@ -106,9 +105,9 @@ object RowSimilarityDriver extends MahoutSparkDriver {
     }
   }
 
-  override protected def start() : Unit = {
+  override protected def start(): Unit = {
 
-    super.start
+    super.start()
 
     readWriteSchema = new Schema(
       "rowKeyDelim" -> parser.opts("rowKeyDelim").asInstanceOf[String],
@@ -120,8 +119,8 @@ object RowSimilarityDriver extends MahoutSparkDriver {
 
   private def readIndexedDataset: IndexedDataset = {
 
-    val inFiles = HDFSPathSearch(parser.opts("input").asInstanceOf[String], parser.opts("filenamePattern").asInstanceOf[String],
-      parser.opts("recursive").asInstanceOf[Boolean]).uris
+    val inFiles = HDFSPathSearch(parser.opts("input").asInstanceOf[String],
+      parser.opts("filenamePattern").asInstanceOf[String], parser.opts("recursive").asInstanceOf[Boolean]).uris
 
     if (inFiles.isEmpty) {
       null.asInstanceOf[IndexedDataset]
@@ -132,8 +131,8 @@ object RowSimilarityDriver extends MahoutSparkDriver {
     }
   }
 
-  override def process: Unit = {
-    start
+  override def process(): Unit = {
+    start()
 
     val indexedDataset = readIndexedDataset
 
@@ -144,7 +143,7 @@ object RowSimilarityDriver extends MahoutSparkDriver {
 
     rowSimilarityIDS.dfsWrite(parser.opts("output").asInstanceOf[String], readWriteSchema)
 
-    stop
+    stop()
   }
 
 }

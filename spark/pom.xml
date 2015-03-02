@@ -164,14 +164,14 @@
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
           <execution>
-            <id>job</id>
+            <id>dependency-reduced</id>
             <phase>package</phase>
             <goals>
               <goal>single</goal>
             </goals>
             <configuration>
               <descriptors>
-                <descriptor>../spark/src/main/assembly/job.xml</descriptor>
+                <descriptor>src/main/assembly/dependency-reduced.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>
@@ -317,11 +317,9 @@
       <scope>test</scope>
     </dependency>
 
-
     <!--  3rd-party -->
 
     <!-- scala stuff -->
-
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_${scala.major}</artifactId>

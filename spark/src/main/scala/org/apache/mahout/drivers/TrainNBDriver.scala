@@ -52,23 +52,23 @@ object TrainNBDriver extends MahoutSparkDriver {
       
 
       //How to search for input
-      parseFileDiscoveryOptions
+      parseFileDiscoveryOptions()
 
-      //Drm output schema--not driver specific, drm specific
-      parseDrmFormatOptions
+      //IndexedDataset output schema--not driver specific, IndexedDataset specific
+      parseIndexedDatasetFormatOptions()
 
       //Spark config options--not driver specific
-      parseSparkOptions
+      parseSparkOptions()
 
       //Jar inclusion, this option can be set when executing the driver from compiled code, not when from CLI
-      parseGenericOptions
+      parseGenericOptions()
 
       help("help") abbr ("h") text ("prints this usage text\n")
 
     }
     parser.parse(args, parser.opts) map { opts =>
       parser.opts = opts
-      process
+      process()
     }
   }
 
@@ -79,7 +79,7 @@ object TrainNBDriver extends MahoutSparkDriver {
     trainingSet
   }
 
-  override def process: Unit = {
+  override def process(): Unit = {
     start()
 
     val complementary = parser.opts("trainComplementary").asInstanceOf[Boolean]
@@ -91,7 +91,7 @@ object TrainNBDriver extends MahoutSparkDriver {
 
     model.dfsWrite(outputPath)
 
-    stop
+    stop()
   }
 
 }
