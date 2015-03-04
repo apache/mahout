@@ -123,13 +123,13 @@ package object indexeddataset {
   def indexedDatasetDFSRead(src: String,
       schema: Schema = DefaultIndexedDatasetReadSchema,
       existingRowIDs: BiMap[String, Int] = HashBiMap.create())
-    (implicit ctx: DistributedContext):
+      (implicit ctx: DistributedContext):
     IndexedDataset = ctx.indexedDatasetDFSRead(src, schema, existingRowIDs)
 
   def indexedDatasetDFSReadElements(src: String,
       schema: Schema = DefaultIndexedDatasetReadSchema,
       existingRowIDs: BiMap[String, Int] = HashBiMap.create())
-    (implicit ctx: DistributedContext):
+      (implicit ctx: DistributedContext):
     IndexedDataset = ctx.indexedDatasetDFSReadElements(src, schema, existingRowIDs)
 
 }
