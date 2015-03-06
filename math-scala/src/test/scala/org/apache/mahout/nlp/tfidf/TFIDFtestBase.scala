@@ -63,7 +63,7 @@ trait TFIDFtestBase extends DistributedMahoutSuite with Matchers {
 
   def vectorizeDocument(document: String,
                         dictionaryMap: Map[String, Int],
-                        dfMap: Map[Int, Int], weight: Weight = new TFIDF): Vector = {
+                        dfMap: Map[Int, Int], weight: TermWeight = new TFIDF): Vector = {
 
     val wordCounts = document.toLowerCase.split(" ").groupBy(identity).mapValues(_.length)
 
@@ -89,7 +89,7 @@ trait TFIDFtestBase extends DistributedMahoutSuite with Matchers {
 
     val (dictionary, dfMap) = createDictionaryAndDfMaps(documents)
 
-    val tf: Weight = new TF()
+    val tf: TermWeight = new TF()
 
     val vectorizedDocuments: Matrix = new SparseMatrix(documents.size, dictionary.size)
 
@@ -122,7 +122,7 @@ trait TFIDFtestBase extends DistributedMahoutSuite with Matchers {
   test("TFIDF test") {
     val (dictionary, dfMap) = createDictionaryAndDfMaps(documents)
 
-    val tfidf: Weight = new TFIDF()
+    val tfidf: TermWeight = new TFIDF()
 
     val vectorizedDocuments: Matrix = new SparseMatrix(documents.size, dictionary.size)
 
@@ -148,6 +148,37 @@ trait TFIDFtestBase extends DistributedMahoutSuite with Matchers {
     math.abs(vectorizedDocuments(0, 13) - 2.540445) should be < epsilon
     math.abs(vectorizedDocuments(1, 3) - 2.870315) should be < epsilon
     math.abs(vectorizedDocuments(3, 3) - 3.515403) should be < epsilon
+  }
+
+  test("MLlib TFIDF test") {
+    val (dictionary, dfMap) = createDictionaryAndDfMaps(documents)
+
+    val tfidf: TermWeight = new MLlibTFIDF()
+
+    val vectorizedDocuments: Matrix = new SparseMatrix(documents.size, dictionary.size)
+
+    for (doc <- documents) {
+      vectorizedDocuments(doc._1 - 1, ::) := vectorizeDocument(doc._2, dictionary, dfMap, tfidf)
+    }
+
+    // corpus:
+    //  (1, "the first document contains 5 terms"),
+    //  (2, "document two document contains 4 terms"),
+    //  (3, "document three three terms"),
+    //  (4, "each document including this document contain the term document")
+
+    // dictonary:
+    //  (this -> 0, 4 -> 1, three -> 2, document -> 3, two -> 4, term -> 5, 5 -> 6, contain -> 7,
+    //   each -> 8, first -> 9, terms -> 10, contains -> 11, including -> 12, the -> 13)
+
+    // dfMap:
+    //  (0 -> 1, 5 -> 1, 10 -> 3, 1 -> 1, 6 -> 1, 9 -> 1, 13 -> 2, 2 -> 1, 12 -> 1, 7 -> 1, 3 -> 4,
+    //   11 -> 2, 8 -> 1, 4 -> 1)
+
+    math.abs(vectorizedDocuments(0, 0) -  0.0) should be < epsilon
+    math.abs(vectorizedDocuments(0, 13) - 2.609437) should be < epsilon
+    math.abs(vectorizedDocuments(1, 3) - 4.197224) should be < epsilon
+    math.abs(vectorizedDocuments(3, 3) - 6.295836) should be < epsilon
   }
 
 }
