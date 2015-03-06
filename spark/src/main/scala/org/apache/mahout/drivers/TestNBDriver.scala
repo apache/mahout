@@ -37,37 +37,26 @@ object TestNBDriver extends MahoutSparkDriver {
     parser = new MahoutSparkOptionParser(programName = "spark-testnb") {
       head("spark-testnb", "Mahout 1.0")
 
-      //Input output options, non-driver specific
+      // Input output options, non-driver specific
       parseIOOptions(numInputs = 1)
 
-      //Algorithm control options--driver specific
+      // Algorithm control options--driver specific
       opts = opts ++ testNBOptipns
       note("\nAlgorithm control options:")
 
-      //default testComplementary is false
+      // default testComplementary is false
       opts = opts + ("testComplementary" -> false)
       opt[Unit]("testComplementary") abbr ("c") action { (_, options) =>
         options + ("testComplementary" -> true)
       } text ("Test a complementary model, Default: false.")
 
 
-
       opt[String]("pathToModel") abbr ("m") action { (x, options) =>
         options + ("pathToModel" -> x)
       } text ("Path to the Trained Model")
 
-
-      //How to search for input
-      parseFileDiscoveryOptions()
-
-      //IndexedDataset output schema--not driver specific, IndexedDataset specific
-      parseIndexedDatasetFormatOptions()
-
-      //Spark config options--not driver specific
+      // Spark config options--not driver specific
       parseSparkOptions()
-
-      //Jar inclusion, this option can be set when executing the driver from compiled code, not when from CLI
-      parseGenericOptions()
 
       help("help") abbr ("h") text ("prints this usage text\n")
 

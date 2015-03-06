@@ -37,31 +37,21 @@ object TrainNBDriver extends MahoutSparkDriver {
     parser = new MahoutSparkOptionParser(programName = "spark-trainnb") {
       head("spark-trainnb", "Mahout 1.0")
 
-      //Input output options, non-driver specific
+      // Input output options, non-driver specific
       parseIOOptions(numInputs = 1)
 
-      //Algorithm control options--driver specific
+      // Algorithm control options--driver specific
       opts = opts ++ trainNBOptipns
       note("\nAlgorithm control options:")
 
-      //default trainComplementary is false
+      // default trainComplementary is false
       opts = opts + ("trainComplementary" -> false)
       opt[Unit]("trainComplementary") abbr ("c") action { (_, options) =>
         options + ("trainComplementary" -> true)
       } text ("Train a complementary model, Default: false.")
-      
 
-      //How to search for input
-      parseFileDiscoveryOptions()
-
-      //IndexedDataset output schema--not driver specific, IndexedDataset specific
-      parseIndexedDatasetFormatOptions()
-
-      //Spark config options--not driver specific
+      // Spark config options--not driver specific
       parseSparkOptions()
-
-      //Jar inclusion, this option can be set when executing the driver from compiled code, not when from CLI
-      parseGenericOptions()
 
       help("help") abbr ("h") text ("prints this usage text\n")
 
