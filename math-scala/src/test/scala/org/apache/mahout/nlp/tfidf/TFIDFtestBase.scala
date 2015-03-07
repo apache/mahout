@@ -23,7 +23,7 @@ import org.apache.mahout.test.DistributedMahoutSuite
 import org.scalatest.{FunSuite, Matchers}
 import scala.collection._
 import RLikeOps._
-
+import scala.math._
 
 
 trait TFIDFtestBase extends DistributedMahoutSuite with Matchers {
@@ -144,10 +144,10 @@ trait TFIDFtestBase extends DistributedMahoutSuite with Matchers {
     //  (0 -> 1, 5 -> 1, 10 -> 3, 1 -> 1, 6 -> 1, 9 -> 1, 13 -> 2, 2 -> 1, 12 -> 1, 7 -> 1, 3 -> 4,
     //   11 -> 2, 8 -> 1, 4 -> 1)
 
-    math.abs(vectorizedDocuments(0, 0) -  0.0) should be < epsilon
-    math.abs(vectorizedDocuments(0, 13) - 2.540445) should be < epsilon
-    math.abs(vectorizedDocuments(1, 3) - 2.870315) should be < epsilon
-    math.abs(vectorizedDocuments(3, 3) - 3.515403) should be < epsilon
+    abs(vectorizedDocuments(0, 0) -  0.0) should be < epsilon
+    abs(vectorizedDocuments(0, 13) - 2.540445) should be < epsilon
+    abs(vectorizedDocuments(1, 3) - 2.870315) should be < epsilon
+    abs(vectorizedDocuments(3, 3) - 3.515403) should be < epsilon
   }
 
   test("MLlib TFIDF test") {
@@ -175,10 +175,10 @@ trait TFIDFtestBase extends DistributedMahoutSuite with Matchers {
     //  (0 -> 1, 5 -> 1, 10 -> 3, 1 -> 1, 6 -> 1, 9 -> 1, 13 -> 2, 2 -> 1, 12 -> 1, 7 -> 1, 3 -> 4,
     //   11 -> 2, 8 -> 1, 4 -> 1)
 
-    math.abs(vectorizedDocuments(0, 0) -  0.0) should be < epsilon
-    math.abs(vectorizedDocuments(0, 13) - 2.609437) should be < epsilon
-    math.abs(vectorizedDocuments(1, 3) - 4.197224) should be < epsilon
-    math.abs(vectorizedDocuments(3, 3) - 6.295836) should be < epsilon
+    abs(vectorizedDocuments(0, 0) -  0.0) should be < epsilon
+    abs(vectorizedDocuments(0, 13) - 2.609437) should be < epsilon
+    abs(vectorizedDocuments(1, 3) - 4.197224) should be < epsilon
+    abs(vectorizedDocuments(3, 3) - 6.295836) should be < epsilon
   }
 
 }
