@@ -77,7 +77,7 @@ object TrainNBDriver extends MahoutSparkDriver {
 
     val trainingSet = readTrainingSet
     val (labelIndex, aggregatedObservations) = SparkNaiveBayes.extractLabelsAndAggregateObservations(trainingSet)
-    val model = NaiveBayes.train(aggregatedObservations, labelIndex)
+    val model = NaiveBayes.train(aggregatedObservations, labelIndex, complementary)
 
     model.dfsWrite(outputPath)
 

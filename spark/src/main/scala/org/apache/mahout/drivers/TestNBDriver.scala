@@ -18,7 +18,6 @@
 package org.apache.mahout.drivers
 
 import org.apache.mahout.classifier.naivebayes.{NBModel, NaiveBayes}
-import org.apache.mahout.classifier.stats.ConfusionMatrix
 import org.apache.mahout.math.drm
 import org.apache.mahout.math.drm.DrmLike
 import scala.collection.immutable.HashMap
@@ -85,7 +84,6 @@ object TestNBDriver extends MahoutSparkDriver {
     start()
 
     val testComplementary = parser.opts("testComplementary").asInstanceOf[Boolean]
-    val outputPath = parser.opts("output").asInstanceOf[String]
 
     // todo:  get the -ow option in to check for a model in the path and overwrite if flagged.
 
