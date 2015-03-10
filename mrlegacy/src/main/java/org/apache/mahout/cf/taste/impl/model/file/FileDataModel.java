@@ -122,19 +122,27 @@ public class FileDataModel extends AbstractDataModel {
   private static final Logger log = LoggerFactory.getLogger(FileDataModel.class);
 
   public static final long DEFAULT_MIN_RELOAD_INTERVAL_MS = 60 * 1000L; // 1 minute?
-  private static final char COMMENT_CHAR = '#';
-  private static final char[] DELIMIETERS = {',', '\t'};
+  protected static final char COMMENT_CHAR = '#';
+  protected static final char[] DELIMIETERS = {',', '\t'};
 
   private final File dataFile;
-  private long lastModified;
-  private long lastUpdateFileModified;
-  private final char delimiter;
-  private final Splitter delimiterPattern;
-  private final boolean hasPrefValues;
-  private DataModel delegate;
-  private final ReentrantLock reloadLock;
-  private final boolean transpose;
-  private final long minReloadIntervalMS;
+  protected long lastModified;
+  protected long lastUpdateFileModified;
+  protected char delimiter;
+  protected Splitter delimiterPattern;
+  protected boolean hasPrefValues;
+  protected DataModel delegate;
+  protected ReentrantLock reloadLock;
+  protected boolean transpose;
+  protected long minReloadIntervalMS;
+
+  /**
+   * Just for the subclass who extends FileDataModel,
+   * and not use dataFile
+   */
+  public FileDataModel() {
+    dataFile = null;
+  }
 
   /**
    * @param dataFile
@@ -190,6 +198,12 @@ public class FileDataModel extends AbstractDataModel {
     this.lastUpdateFileModified = readLastUpdateFileModified();
 
     FileLineIterator iterator = new FileLineIterator(dataFile, false);
+
+    initialize(iterator, transpose, minReloadIntervalMS, delimiterRegex);
+  }
+
+  protected void initialize(FileLineIterator iterator, boolean transpose,
+      long minReloadIntervalMS, String delimiterRegex) throws IOException {
     String firstLine = iterator.peek();
     while (firstLine.isEmpty() || firstLine.charAt(0) == COMMENT_CHAR) {
       iterator.next();
