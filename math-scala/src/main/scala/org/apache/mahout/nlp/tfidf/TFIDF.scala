@@ -36,7 +36,7 @@ class TFIDF extends TermWeight {
    *
    * Lucene 4.6's DefaultSimilarity TF-IDF calculation uses the formula:
    *
-   *   sqrt(termFreq) * log((numDocs / (docFreq + 1)) + 1.0)
+   *   sqrt(termFreq) * (log(numDocs / (docFreq + 1)) + 1.0)
    *
    * Note: this is consistent with the MapReduce seq2sparse implementation of TF-IDF weights
    * and is slightly different from Spark MLlib's TD-IDF calculation which is implemented as:
@@ -52,7 +52,7 @@ class TFIDF extends TermWeight {
   def calculate(tf: Int, df: Int, length: Int, numDocs: Int): Double = {
 
     // Lucene 4.6 DefaultSimilarity's TF-IDF is implemented as:
-    // sqrt(tf) * (log(numDocs / (df+1)) + 1)
+    // sqrt(tf) * (log(numDocs / (df + 1)) + 1)
     math.sqrt(tf) * (math.log(numDocs / (df + 1).toDouble) + 1.0)
   }
 }
@@ -69,7 +69,7 @@ class MLlibTFIDF extends TermWeight {
    * Note: this is not consistent with the MapReduce seq2sparse implementation of TF-IDF weights
    * which is implemented using Lucene DefaultSimilarity's TF-IDF calculation:
    *
-   *   sqrt(termFreq) * log((numDocs / (docFreq + 1)) + 1.0)
+   *   sqrt(termFreq) * (log(numDocs / (docFreq + 1)) + 1.0)
    *
    * @param tf term freq
    * @param df doc freq
@@ -81,7 +81,7 @@ class MLlibTFIDF extends TermWeight {
 
     // Spark MLLib's TF-IDF weight is implemented as:
     // termFreq * log((numDocs + 1.0) / (docFreq + 1.0))
-    tf * (math.log((numDocs + 1.0) / (df + 1).toDouble) + 1.0)
+    tf *  math.log((numDocs + 1.0) / (df + 1).toDouble)
   }
 }
 

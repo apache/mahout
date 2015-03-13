@@ -176,9 +176,9 @@ trait TFIDFtestBase extends DistributedMahoutSuite with Matchers {
     //   11 -> 2, 8 -> 1, 4 -> 1)
 
     abs(vectorizedDocuments(0, 0) -  0.0) should be < epsilon
-    abs(vectorizedDocuments(0, 13) - 2.609437) should be < epsilon
-    abs(vectorizedDocuments(1, 3) - 4.197224) should be < epsilon
-    abs(vectorizedDocuments(3, 3) - 6.295836) should be < epsilon
+    abs(vectorizedDocuments(0, 13) - 1.609437) should be < epsilon
+    abs(vectorizedDocuments(1, 3) - 2.197224) should be < epsilon
+    abs(vectorizedDocuments(3, 3) - 3.295836) should be < epsilon
   }
 
 }
