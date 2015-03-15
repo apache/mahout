@@ -2,6 +2,7 @@ output-asf-email-examples/
 .checkstyle
 .ruleset
 .pmd
+.cache
 .classpath
 .project
 .settings/
