@@ -46,6 +46,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterator;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
@@ -165,7 +166,30 @@ public final class HadoopUtil {
 
     return job;
   }
+  
+  /**
+   * Create a map and reduce Hadoop job.  Does not set the name on the job.
+   * @param inputPaths The multiple input {@link org.apache.hadoop.fs.Path}s
+   * 
+   */
+  public static Job prepareJob(Path[] inputPaths, 
+                           Path outputPath,
+                           Class<? extends InputFormat> inputFormat, 
+                           Class<? extends Mapper> mapper,
+                           Class<? extends Writable> mapperKey,
+                           Class<? extends Writable> mapperValue, 
+                           Class<? extends Reducer> reducer,
+                           Class<? extends Writable> reducerKey,
+                           Class<? extends Writable> reducerValue,
+                           Class<? extends OutputFormat> outputFormat, 
+                           Configuration conf) throws IOException {
 
+    Job job = prepareJob(inputPaths[0], outputPath, inputFormat, mapper, mapperKey,
+        mapperValue, reducer, reducerKey, reducerValue, outputFormat, conf);
+    FileInputFormat.setInputPaths(job, inputPaths);
+
+    return job;
+  }
 
   public static String getCustomJobName(String className, JobContext job,
                                   Class<? extends Mapper> mapper,

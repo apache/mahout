@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.hadoop.preparation;
 
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
@@ -55,6 +56,7 @@ public class PreparePreferenceMatrixJob extends AbstractJob {
   public int run(String[] args) throws Exception {
 
     addInputOption();
+    addMultiInputOption();
     addOutputOption();
     addOption("minPrefsPerUser", "mp", "ignore users with less preferences than this "
             + "(default: " + DEFAULT_MIN_PREFS_PER_USER + ')', String.valueOf(DEFAULT_MIN_PREFS_PER_USER));
@@ -69,8 +71,10 @@ public class PreparePreferenceMatrixJob extends AbstractJob {
     int minPrefsPerUser = Integer.parseInt(getOption("minPrefsPerUser"));
     boolean booleanData = Boolean.valueOf(getOption("booleanData"));
     float ratingShift = Float.parseFloat(getOption("ratingShift"));
+    Path[] inputPaths = getInputPathArray();
+    
     //convert items to an internal index
-    Job itemIDIndex = prepareJob(getInputPath(), getOutputPath(ITEMID_INDEX), TextInputFormat.class,
+    Job itemIDIndex = prepareJob(inputPaths, getOutputPath(ITEMID_INDEX), TextInputFormat.class,
             ItemIDIndexMapper.class, VarIntWritable.class, VarLongWritable.class, ItemIDIndexReducer.class,
             VarIntWritable.class, VarLongWritable.class, SequenceFileOutputFormat.class);
     itemIDIndex.setCombinerClass(ItemIDIndexReducer.class);
@@ -79,7 +83,7 @@ public class PreparePreferenceMatrixJob extends AbstractJob {
       return -1;
     }
     //convert user preferences into a vector per user
-    Job toUserVectors = prepareJob(getInputPath(),
+    Job toUserVectors = prepareJob(inputPaths,
                                    getOutputPath(USER_VECTORS),
                                    TextInputFormat.class,
                                    ToItemPrefsMapper.class,

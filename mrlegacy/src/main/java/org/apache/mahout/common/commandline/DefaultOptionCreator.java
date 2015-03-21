@@ -39,6 +39,8 @@ public final class DefaultOptionCreator {
   
   public static final String INPUT_OPTION = "input";
   
+  public static final String MULTIPLE_INPUT_OPTION = "multiInput";
+  
   public static final String MAX_ITERATIONS_OPTION = "maxIter";
   
   public static final String MAX_REDUCERS_OPTION = "maxRed";
@@ -99,6 +101,21 @@ public final class DefaultOptionCreator {
             new ArgumentBuilder().withName(INPUT_OPTION).withMinimum(1)
                 .withMaximum(1).create())
         .withDescription("Path to job input directory.");
+  }
+  
+  /**
+   * Returns a default command line option for multiple input paths.
+   * Used by all recommendation jobs plus others
+   */
+  public static DefaultOptionBuilder multiInputOption() {
+    return new DefaultOptionBuilder()
+        .withLongName(MULTIPLE_INPUT_OPTION)
+        .withRequired(false)
+        .withShortName("mi")
+        .withArgument(
+            new ArgumentBuilder().withName(MULTIPLE_INPUT_OPTION)
+                .withMinimum(1).create())
+        .withDescription("Multiple paths to job input directory.");
   }
   
   /**

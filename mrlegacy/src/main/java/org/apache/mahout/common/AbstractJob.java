@@ -19,6 +19,7 @@ package org.apache.mahout.common;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -91,6 +92,9 @@ public abstract class AbstractJob extends Configured implements Tool {
 
   /** option used to specify the input path */
   private Option inputOption;
+  
+  /** option used to specify the multiple input path */
+  private Option multiInputOption;
 
   /** option used to specify the output path */
   private Option outputOption;
@@ -98,6 +102,10 @@ public abstract class AbstractJob extends Configured implements Tool {
   /** input path, populated by {@link #parseArguments(String[])} */
   protected Path inputPath;
   protected File inputFile; //the input represented as a file
+  
+  /** multiple input paths, populated by {@link #parseArguments(String[])} */
+  protected List<Path> inputPathList;
+  protected List<File> inputFileList; //the input represented as a file list
 
   /** output path, populated by {@link #parseArguments(String[])} */
   protected Path outputPath;
@@ -145,8 +153,11 @@ public abstract class AbstractJob extends Configured implements Tool {
   protected File getOutputFile() {
     return outputFile;
   }
-
-
+  
+  protected Path[] getInputPathArray() {
+    return (Path[]) inputPathList.toArray(new Path[inputPathList.size()]);
+  }
+  
   protected Path getTempPath() {
     return tempPath;
   }
@@ -226,6 +237,15 @@ public abstract class AbstractJob extends Configured implements Tool {
    */
   protected void addInputOption() {
     this.inputOption = addOption(DefaultOptionCreator.inputOption().create());
+  }
+  
+  /** Add the default input directory option, '-mi' which takes several directories
+   *  name as an argument. When {@link #parseArguments(String[])} is 
+   *  called, the multiple inputPath will be set based upon the value for this option.
+   *  If this method is called, the input is required.
+   */
+  protected void addMultiInputOption() {
+    this.multiInputOption = addOption(DefaultOptionCreator.multiInputOption().create());
   }
 
   /** Add the default output directory option, '-o' which takes a directory
@@ -497,6 +517,25 @@ public abstract class AbstractJob extends Configured implements Tool {
     if (inputPath == null && conf.get("mapred.input.dir") != null) {
       this.inputPath = new Path(conf.get("mapred.input.dir"));
     }
+    
+    this.inputPathList = new ArrayList<Path>();
+    this.inputFileList = new ArrayList<File>();
+    if (multiInputOption != null && cmdLine.hasOption(multiInputOption)) {
+      List inputs = cmdLine.getValues(multiInputOption);
+      for (Object input : inputs) {
+        this.inputPathList.add(new Path(input.toString()));
+        this.inputFileList.add(new File(input.toString()));
+      }
+    }
+    if (inputPathList.isEmpty() && conf.get("mapred.input.dir") != null) {
+      this.inputPathList.add(new Path(conf.get("mapred.input.dir")));
+    }
+    
+    // put inputPath to inputPathList
+    if (inputPath != null && !inputPathList.contains(inputPath)) {
+      inputPathList.add(inputPath);
+      inputFileList.add(inputFile);
+    }
 
     if (outputOption != null && cmdLine.hasOption(outputOption)) {
       this.outputPath = new Path(cmdLine.getValue(outputOption).toString());
@@ -505,8 +544,11 @@ public abstract class AbstractJob extends Configured implements Tool {
     if (outputPath == null && conf.get("mapred.output.dir") != null) {
       this.outputPath = new Path(conf.get("mapred.output.dir"));
     }
-
-    Preconditions.checkArgument(inputOptional || inputOption == null || inputPath != null,
+    
+    boolean isInput = ((inputOption == null && multiInputOption == null) //-Dmapred.input.dir
+                        || inputFile != null
+                        || !inputPathList.isEmpty()); // multiInput
+    Preconditions.checkArgument(inputOptional || isInput,
         "No input specified or -Dmapred.input.dir must be provided to specify input directory");
     Preconditions.checkArgument(outputOptional || outputOption == null || outputPath != null,
         "No output specified:  or -Dmapred.output.dir must be provided to specify output directory");
@@ -610,6 +652,22 @@ public abstract class AbstractJob extends Configured implements Tool {
                            Class<? extends Writable> reducerValue,
                            Class<? extends OutputFormat> outputFormat) throws IOException {
     Job job = HadoopUtil.prepareJob(inputPath, outputPath,
+            inputFormat, mapper, mapperKey, mapperValue, reducer, reducerKey, reducerValue, outputFormat, getConf());
+    job.setJobName(HadoopUtil.getCustomJobName(getClass().getSimpleName(), job, mapper, Reducer.class));
+    return job;
+  }
+  
+  protected Job prepareJob(Path[] inputPaths,
+                           Path outputPath,
+                           Class<? extends InputFormat> inputFormat,
+                           Class<? extends Mapper> mapper,
+                           Class<? extends Writable> mapperKey,
+                           Class<? extends Writable> mapperValue,
+                           Class<? extends Reducer> reducer,
+                           Class<? extends Writable> reducerKey,
+                           Class<? extends Writable> reducerValue,
+                           Class<? extends OutputFormat> outputFormat) throws IOException {
+    Job job = HadoopUtil.prepareJob(inputPaths, outputPath,
             inputFormat, mapper, mapperKey, mapperValue, reducer, reducerKey, reducerValue, outputFormat, getConf());
     job.setJobName(HadoopUtil.getCustomJobName(getClass().getSimpleName(), job, mapper, Reducer.class));
     return job;
