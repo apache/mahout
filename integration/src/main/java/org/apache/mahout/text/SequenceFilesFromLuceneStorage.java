@@ -82,7 +82,6 @@ public class SequenceFilesFromLuceneStorage {
       processedDocs = writerCollector.processedDocs;
       Closeables.close(sequenceFileWriter, false);
       directory.close();
-      //searcher.close();
       reader.close();
     }
   }
