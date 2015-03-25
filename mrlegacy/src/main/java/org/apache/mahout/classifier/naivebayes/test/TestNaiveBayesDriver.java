@@ -100,7 +100,7 @@ public class TestNaiveBayesDriver extends AbstractJob {
 
     //loop over the results and create the confusion matrix
     SequenceFileDirIterable<Text, VectorWritable> dirIterable =
-        new SequenceFileDirIterable<Text, VectorWritable>(getOutputPath(), PathType.LIST, PathFilters.partFilter(), getConf());
+        new SequenceFileDirIterable<>(getOutputPath(), PathType.LIST, PathFilters.partFilter(), getConf());
     ResultAnalyzer analyzer = new ResultAnalyzer(labelMap.values(), "DEFAULT");
     analyzeResults(labelMap, dirIterable, analyzer);
 
@@ -117,7 +117,7 @@ public class TestNaiveBayesDriver extends AbstractJob {
     // trained complementary. a complementarty model will work for standard classification
     // a standard model will not work for complementary classification
     if (complementary){
-        Preconditions.checkArgument((model.isComplemtary() == complementary),
+        Preconditions.checkArgument((model.isComplemtary()),
             "Complementary mode in model is different from test mode");
     }
     
@@ -132,7 +132,7 @@ public class TestNaiveBayesDriver extends AbstractJob {
 
     try {
       SequenceFileDirIterable<Text, VectorWritable> dirIterable =
-          new SequenceFileDirIterable<Text, VectorWritable>(getInputPath(), PathType.LIST, PathFilters.partFilter(), getConf());
+          new SequenceFileDirIterable<>(getInputPath(), PathType.LIST, PathFilters.partFilter(), getConf());
       // loop through the part-r-* files in getInputPath() and get classification scores for all entries
       for (Pair<Text, VectorWritable> pair : dirIterable) {
         writer.append(new Text(SLASH.split(pair.getFirst().toString())[1]),

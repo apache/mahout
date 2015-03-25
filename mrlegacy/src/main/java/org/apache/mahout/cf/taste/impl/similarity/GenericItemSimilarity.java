@@ -50,8 +50,8 @@ public final class GenericItemSimilarity implements ItemSimilarity {
 
   private static final long[] NO_IDS = new long[0];
   
-  private final FastByIDMap<FastByIDMap<Double>> similarityMaps = new FastByIDMap<FastByIDMap<Double>>();
-  private final FastByIDMap<FastIDSet> similarItemIDsIndex = new FastByIDMap<FastIDSet>();
+  private final FastByIDMap<FastByIDMap<Double>> similarityMaps = new FastByIDMap<>();
+  private final FastByIDMap<FastIDSet> similarItemIDsIndex = new FastByIDMap<>();
 
   /**
    * <p>
@@ -166,7 +166,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
         }
         FastByIDMap<Double> map = similarityMaps.get(itemID1);
         if (map == null) {
-          map = new FastByIDMap<Double>();
+          map = new FastByIDMap<>();
           similarityMaps.put(itemID1, map);
         }
         map.put(itemID2, iic.getValue());

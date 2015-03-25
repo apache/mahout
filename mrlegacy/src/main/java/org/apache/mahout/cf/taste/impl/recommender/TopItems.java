@@ -53,7 +53,7 @@ public final class TopItems {
     Preconditions.checkArgument(possibleItemIDs != null, "possibleItemIDs is null");
     Preconditions.checkArgument(estimator != null, "estimator is null");
 
-    Queue<RecommendedItem> topItems = new PriorityQueue<RecommendedItem>(howMany + 1,
+    Queue<RecommendedItem> topItems = new PriorityQueue<>(howMany + 1,
       Collections.reverseOrder(ByValueRecommendedItemComparator.getInstance()));
     boolean full = false;
     double lowestTopValue = Double.NEGATIVE_INFINITY;
@@ -93,7 +93,7 @@ public final class TopItems {
                                    LongPrimitiveIterator allUserIDs,
                                    IDRescorer rescorer,
                                    Estimator<Long> estimator) throws TasteException {
-    Queue<SimilarUser> topUsers = new PriorityQueue<SimilarUser>(howMany + 1, Collections.reverseOrder());
+    Queue<SimilarUser> topUsers = new PriorityQueue<>(howMany + 1, Collections.reverseOrder());
     boolean full = false;
     double lowestTopValue = Double.NEGATIVE_INFINITY;
     while (allUserIDs.hasNext()) {
@@ -147,7 +147,7 @@ public final class TopItems {
     int howMany, Iterator<GenericItemSimilarity.ItemItemSimilarity> allSimilarities) {
     
     Queue<GenericItemSimilarity.ItemItemSimilarity> topSimilarities
-      = new PriorityQueue<GenericItemSimilarity.ItemItemSimilarity>(howMany + 1, Collections.reverseOrder());
+      = new PriorityQueue<>(howMany + 1, Collections.reverseOrder());
     boolean full = false;
     double lowestTopValue = Double.NEGATIVE_INFINITY;
     while (allSimilarities.hasNext()) {
@@ -178,7 +178,7 @@ public final class TopItems {
     int howMany, Iterator<GenericUserSimilarity.UserUserSimilarity> allSimilarities) {
     
     Queue<GenericUserSimilarity.UserUserSimilarity> topSimilarities
-      = new PriorityQueue<GenericUserSimilarity.UserUserSimilarity>(howMany + 1, Collections.reverseOrder());
+      = new PriorityQueue<>(howMany + 1, Collections.reverseOrder());
     boolean full = false;
     double lowestTopValue = Double.NEGATIVE_INFINITY;
     while (allSimilarities.hasNext()) {

@@ -73,7 +73,7 @@ public final class SequenceFileDirValueIterable<V extends Writable> implements I
   @Override
   public Iterator<V> iterator() {
     try {
-      return new SequenceFileDirValueIterator<V>(path, pathType, filter, ordering, reuseKeyValueInstances, conf);
+      return new SequenceFileDirValueIterator<>(path, pathType, filter, ordering, reuseKeyValueInstances, conf);
     } catch (IOException ioe) {
       throw new IllegalStateException(path.toString(), ioe);
     }

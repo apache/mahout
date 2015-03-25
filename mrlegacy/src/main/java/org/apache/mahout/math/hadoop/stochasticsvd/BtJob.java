@@ -95,8 +95,6 @@ public final class BtJob {
   public static final String PROP_XI_PATH = "ssvdpca.xi.path";
   public static final String PROP_NV = "ssvd.nv";
 
-  static final double SPARSE_ZEROS_PCT_THRESHOLD = 0.1;
-
   private BtJob() {
   }
 
@@ -104,7 +102,7 @@ public final class BtJob {
     Mapper<Writable, VectorWritable, LongWritable, SparseRowBlockWritable> {
 
     private QRLastStep qr;
-    private final Deque<Closeable> closeables = new ArrayDeque<Closeable>();
+    private final Deque<Closeable> closeables = new ArrayDeque<>();
 
     private int blockNum;
     private MultipleOutputs outputs;
@@ -190,7 +188,7 @@ public final class BtJob {
       blockNum = context.getTaskAttemptID().getTaskID().getId();
 
       SequenceFileValueIterator<DenseBlockWritable> qhatInput =
-        new SequenceFileValueIterator<DenseBlockWritable>(qInputPath,
+        new SequenceFileValueIterator<>(qInputPath,
                                                           true,
                                                           conf);
       closeables.addFirst(qhatInput);
@@ -217,7 +215,7 @@ public final class BtJob {
         lconf.set("fs.default.name", "file:///");
 
         rhatInput =
-          new SequenceFileDirValueIterator<VectorWritable>(rFiles,
+          new SequenceFileDirValueIterator<>(rFiles,
                                                            SSVDHelper.PARTITION_COMPARATOR,
                                                            true,
                                                            lconf);
@@ -225,7 +223,7 @@ public final class BtJob {
       } else {
         Path rPath = new Path(qJobPath, QJob.OUTPUT_RHAT + "-*");
         rhatInput =
-          new SequenceFileDirValueIterator<VectorWritable>(rPath,
+          new SequenceFileDirValueIterator<>(rPath,
                                                            PathType.GLOB,
                                                            null,
                                                            SSVDHelper.PARTITION_COMPARATOR,
@@ -312,7 +310,7 @@ public final class BtJob {
     Reducer<Writable, SparseRowBlockWritable, Writable, SparseRowBlockWritable> {
 
     protected final SparseRowBlockWritable accum = new SparseRowBlockWritable();
-    protected final Deque<Closeable> closeables = new ArrayDeque<Closeable>();
+    protected final Deque<Closeable> closeables = new ArrayDeque<>();
     protected int blockHeight;
 
     @Override
@@ -347,7 +345,7 @@ public final class BtJob {
     Reducer<LongWritable, SparseRowBlockWritable, IntWritable, VectorWritable> {
 
     protected final SparseRowBlockWritable accum = new SparseRowBlockWritable();
-    protected final Deque<Closeable> closeables = new ArrayDeque<Closeable>();
+    protected final Deque<Closeable> closeables = new ArrayDeque<>();
 
     protected int blockHeight;
     private boolean outputBBt;

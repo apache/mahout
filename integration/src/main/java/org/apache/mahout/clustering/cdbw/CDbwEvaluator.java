@@ -211,11 +211,11 @@ public final class CDbwEvaluator {
     if (interClusterDensities != null) {
       return interClusterDensities;
     }
-    interClusterDensities = new TreeMap<Integer,Map<Integer,Double>>();
+    interClusterDensities = new TreeMap<>();
     // find the closest representative points between the clusters
     for (int i = 0; i < clusters.size(); i++) {
       int cI = clusters.get(i).getId();
-      Map<Integer,Double> map = new TreeMap<Integer,Double>();
+      Map<Integer,Double> map = new TreeMap<>();
       interClusterDensities.put(cI, map);
       for (int j = i + 1; j < clusters.size(); j++) {
         int cJ = clusters.get(j).getId();
@@ -324,12 +324,12 @@ public final class CDbwEvaluator {
     if (minimumDistances != null) {
       return minimumDistances;
     }
-    minimumDistances = new TreeMap<Integer,Map<Integer,Double>>();
-    closestRepPointIndices = new TreeMap<Integer,Map<Integer,int[]>>();
+    minimumDistances = new TreeMap<>();
+    closestRepPointIndices = new TreeMap<>();
     for (int i = 0; i < clusters.size(); i++) {
       Integer cI = clusters.get(i).getId();
-      Map<Integer,Double> map = new TreeMap<Integer,Double>();
-      Map<Integer,int[]> treeMap = new TreeMap<Integer,int[]>();
+      Map<Integer,Double> map = new TreeMap<>();
+      Map<Integer,int[]> treeMap = new TreeMap<>();
       closestRepPointIndices.put(cI, treeMap);
       minimumDistances.put(cI, map);
       List<VectorWritable> closRepI = representativePoints.get(cI);

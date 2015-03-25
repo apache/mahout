@@ -102,8 +102,8 @@ public final class PlusAnonymousConcurrentUserDataModel extends PlusAnonymousUse
   public PlusAnonymousConcurrentUserDataModel(DataModel delegate, int maxConcurrentUsers) {
     super(delegate);
 
-    tempPrefs = new ConcurrentHashMap<Long, PreferenceArray>();
-    prefItemIDs = new ConcurrentHashMap<Long, FastIDSet>();
+    tempPrefs = new ConcurrentHashMap<>();
+    prefItemIDs = new ConcurrentHashMap<>();
 
     initializeUsersPools(maxConcurrentUsers);
   }
@@ -114,7 +114,7 @@ public final class PlusAnonymousConcurrentUserDataModel extends PlusAnonymousUse
    * @param usersPoolSize Maximum allowed number of concurrent anonymous user. Depends on the consumer system.
    */
   private void initializeUsersPools(int usersPoolSize) {
-    usersPool = new ConcurrentLinkedQueue<Long>();
+    usersPool = new ConcurrentLinkedQueue<>();
     for (int i = 0; i < usersPoolSize; i++) {
       usersPool.add(TEMP_USER_ID + i);
     }

@@ -141,12 +141,8 @@ public final class IOUtils {
         throw (IOException) lastThr;
       } else if (lastThr instanceof RuntimeException) {
         throw (RuntimeException) lastThr;
-      } else if (lastThr instanceof Error) {
-        throw (Error) lastThr;
       } else {
-        // should not happen
-        throw (IOException) new IOException("Unexpected exception during close")
-            .initCause(lastThr);
+        throw (Error) lastThr;
       }
     }
 

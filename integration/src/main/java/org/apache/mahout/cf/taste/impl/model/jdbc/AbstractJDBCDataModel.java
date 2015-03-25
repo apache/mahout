@@ -218,7 +218,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
 
     this.cachedNumUsers = -1;
     this.cachedNumItems = -1;
-    this.itemPrefCounts = new Cache<Long,Integer>(new ItemPrefCountRetriever(getNumPreferenceForItemSQL));
+    this.itemPrefCounts = new Cache<>(new ItemPrefCountRetriever(getNumPreferenceForItemSQL));
 
     this.maxPreference = Float.NaN;
     this.minPreference = Float.NaN;
@@ -311,7 +311,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     Statement stmt = null;
     ResultSet rs = null;
 
-    FastByIDMap<PreferenceArray> result = new FastByIDMap<PreferenceArray>();
+    FastByIDMap<PreferenceArray> result = new FastByIDMap<>();
 
     try {
       conn = dataSource.getConnection();
@@ -356,7 +356,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     Statement stmt = null;
     ResultSet rs = null;
 
-    FastByIDMap<FastIDSet> result = new FastByIDMap<FastIDSet>();
+    FastByIDMap<FastIDSet> result = new FastByIDMap<>();
 
     try {
       conn = dataSource.getConnection();

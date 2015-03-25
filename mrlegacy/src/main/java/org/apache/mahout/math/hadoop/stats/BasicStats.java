@@ -94,7 +94,7 @@ public final class BasicStats {
     double sumOfSquares = 0;
     double sum = 0;
     double totalCount = 0;
-    for (Pair<Writable, Writable> record : new SequenceFileDirIterable<Writable, Writable>(
+    for (Pair<Writable, Writable> record : new SequenceFileDirIterable<>(
             filesPattern, PathType.GLOB, null, null, true, conf)) {
 
       int key = ((IntWritable) record.getFirst()).get();

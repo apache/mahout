@@ -88,7 +88,7 @@ public final class MatrixUtils {
   }
 
   public static OpenObjectIntHashMap<String> readDictionary(Configuration conf, Path... dictPath) {
-    OpenObjectIntHashMap<String> dictionary = new OpenObjectIntHashMap<String>();
+    OpenObjectIntHashMap<String> dictionary = new OpenObjectIntHashMap<>();
     for (Path dictionaryFile : dictPath) {
       for (Pair<Writable, IntWritable> record
               : new SequenceFileIterable<Writable, IntWritable>(dictionaryFile, true, conf)) {

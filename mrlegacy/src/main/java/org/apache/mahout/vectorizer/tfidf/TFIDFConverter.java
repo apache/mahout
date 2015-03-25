@@ -245,7 +245,7 @@ public final class TFIDFConverter {
       }
       featureCount++;
       Long[] counts = {featureCount, vectorCount};
-      return new Pair<Long[], List<Path>>(counts, chunkPaths);
+      return new Pair<>(counts, chunkPaths);
     } finally {
       Closeables.close(freqWriter, false);
     }

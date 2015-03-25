@@ -250,7 +250,7 @@ public class BallKMeans implements Iterable<Centroid> {
     for (WeightedVector datapoint : datapoints) {
       totalWeight += datapoint.getWeight();
     }
-    Multinomial<Integer> seedSelector = new Multinomial<Integer>();
+    Multinomial<Integer> seedSelector = new Multinomial<>();
     for (int i = 0; i < numDatapoints; ++i) {
       seedSelector.add(i, datapoints.get(i).getWeight() / totalWeight);
     }
@@ -316,7 +316,7 @@ public class BallKMeans implements Iterable<Centroid> {
 
     // Multinomial distribution of vector indices for the selection seeds. These correspond to
     // the indices of the vectors in the original datapoints list.
-    Multinomial<Integer> seedSelector = new Multinomial<Integer>();
+    Multinomial<Integer> seedSelector = new Multinomial<>();
     for (int i = 0; i < datapoints.size(); ++i) {
       double selectionProbability =
           deltaX + datapoints.size() * distanceMeasure.distance(datapoints.get(i), center);

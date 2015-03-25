@@ -98,13 +98,10 @@ public final class BaumWelchTrainer {
       List<Integer> observations = Lists.newArrayList();
 
       //reading observations
-      Scanner scanner = new Scanner(new FileInputStream(input), "UTF-8");
-      try {
+      try (Scanner scanner = new Scanner(new FileInputStream(input), "UTF-8")) {
         while (scanner.hasNextInt()) {
           observations.add(scanner.nextInt());
         }
-      } finally {
-        scanner.close();
       }
 
       int[] observationsArray = new int[observations.size()];

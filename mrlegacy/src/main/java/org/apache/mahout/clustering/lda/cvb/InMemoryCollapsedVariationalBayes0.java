@@ -447,7 +447,7 @@ public class InMemoryCollapsedVariationalBayes0 extends AbstractJob {
      // key is word value is id
     for (Pair<Writable, IntWritable> record
             : new SequenceFileIterable<Writable, IntWritable>(dictionaryFile, true, conf)) {
-      termList.add(new Pair<Integer, String>(record.getSecond().get(),
+      termList.add(new Pair<>(record.getSecond().get(),
           record.getFirst().toString()));
       maxTermId = Math.max(maxTermId, record.getSecond().get());
     }

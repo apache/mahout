@@ -65,8 +65,8 @@ public final class CachingRecommender implements Recommender {
     // Use "num users" as an upper limit on cache size. Rough guess.
     int numUsers = recommender.getDataModel().getNumUsers();
     recommendationsRetriever = new RecommendationRetriever();
-    recommendationCache = new Cache<Long, Recommendations>(recommendationsRetriever, numUsers);
-    estimatedPrefCache = new Cache<LongPair, Float>(new EstimatedPrefRetriever(), numUsers);
+    recommendationCache = new Cache<>(recommendationsRetriever, numUsers);
+    estimatedPrefCache = new Cache<>(new EstimatedPrefRetriever(), numUsers);
     refreshHelper = new RefreshHelper(new Callable<Object>() {
       @Override
       public Object call() {

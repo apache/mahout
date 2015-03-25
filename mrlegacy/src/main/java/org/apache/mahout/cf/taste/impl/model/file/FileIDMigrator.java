@@ -61,7 +61,7 @@ public class FileIDMigrator extends AbstractIDMigrator {
   }
 
   public FileIDMigrator(File dataFile, long minReloadIntervalMS) throws FileNotFoundException {
-    longToString = new FastByIDMap<String>(100);
+    longToString = new FastByIDMap<>(100);
     this.dataFile = Preconditions.checkNotNull(dataFile);
     if (!dataFile.exists() || dataFile.isDirectory()) {
       throw new FileNotFoundException(dataFile.toString());
@@ -94,7 +94,7 @@ public class FileIDMigrator extends AbstractIDMigrator {
   }
 
   private FastByIDMap<String> buildMapping() throws IOException {
-    FastByIDMap<String> mapping = new FastByIDMap<String>();
+    FastByIDMap<String> mapping = new FastByIDMap<>();
     for (String line : new FileLineIterable(dataFile)) {
       mapping.put(toLongID(line), line);
     }

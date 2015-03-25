@@ -187,7 +187,7 @@ public class ClusterLabels {
      */
     Terms t = MultiFields.getTerms(reader, contentField);
     TermsEnum te = t.iterator(null);
-    Map<String, TermEntry> termEntryMap = new LinkedHashMap<String, TermEntry>();
+    Map<String, TermEntry> termEntryMap = new LinkedHashMap<>();
     Bits liveDocs = MultiFields.getLiveDocs(reader); //WARNING: returns null if there are no deletions
 
 
@@ -246,7 +246,7 @@ public class ClusterLabels {
     
     Set<String>  idFieldSelector = null;
     if (idField != null) {
-      idFieldSelector = new TreeSet<String>();
+      idFieldSelector = new TreeSet<>();
       idFieldSelector.add(idField);
     }
     

@@ -87,7 +87,7 @@ public final class SplitInputJob {
     FileSystem fs = FileSystem.get(initialConf);
 
     SequenceFileDirIterator<? extends WritableComparable, Writable> iterator =
-        new SequenceFileDirIterator<WritableComparable, Writable>(inputPath,
+        new SequenceFileDirIterator<>(inputPath,
             PathType.LIST, PathFilters.partFilter(), null, false, fs.getConf());
     Class<? extends WritableComparable> keyClass;
     Class<? extends Writable> valueClass;

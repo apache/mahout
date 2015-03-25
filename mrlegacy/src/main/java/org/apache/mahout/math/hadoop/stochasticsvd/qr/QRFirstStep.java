@@ -149,8 +149,7 @@ public class QRFirstStep implements Closeable, OutputCollector<Writable, Vector>
       value
         .setBlock(GivensThinSolver.computeQtHat(value.getBlock(),
                                                 qCnt,
-                                                new CopyConstructorIterator<UpperTriangular>(rSubseq
-                                                  .iterator())));
+                                                new CopyConstructorIterator<>(rSubseq.iterator())));
       if (qCnt == 1) {
         /*
          * just merge r[0] <- r[1] so it doesn't have to repeat in subsequent

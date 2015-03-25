@@ -43,7 +43,8 @@ public class LuceneSegmentRecordReaderTest extends AbstractLuceneStorageTest {
 
   @Before
   public void before() throws IOException, InterruptedException {
-    LuceneStorageConfiguration lucene2SeqConf = new LuceneStorageConfiguration(getConfiguration(), asList(getIndexPath1()), new Path("output"), ID_FIELD, asList(FIELD));
+    LuceneStorageConfiguration lucene2SeqConf = new LuceneStorageConfiguration(getConfiguration(),
+        asList(getIndexPath1()), new Path("output"), ID_FIELD, asList(FIELD));
     configuration = lucene2SeqConf.serialize();
     recordReader = new LuceneSegmentRecordReader();
     commitDocuments(getDirectory(getIndexPath1AsFile()), docs.subList(0, 500));
@@ -61,13 +62,17 @@ public class LuceneSegmentRecordReaderTest extends AbstractLuceneStorageTest {
   public void testKey() throws Exception {
     for (SegmentCommitInfo segmentInfo : segmentInfos) {
       int docId = 0;
-      LuceneSegmentInputSplit inputSplit = new LuceneSegmentInputSplit(getIndexPath1(), segmentInfo.info.name, segmentInfo.sizeInBytes());
+      LuceneSegmentInputSplit inputSplit = new LuceneSegmentInputSplit(getIndexPath1(),
+          segmentInfo.info.name, segmentInfo.sizeInBytes());
       TaskAttemptContext context = getTaskAttemptContext(configuration, new TaskAttemptID());
       recordReader.initialize(inputSplit, context);
       for (int i = 0; i < 500; i++){
         recordReader.nextKeyValue();
-        //we can't be sure of the order we are getting the segments, so we have to fudge here a bit on the id, but it is either id: i or i + 500
-        assertTrue("i = " + i + " docId= " + docId, String.valueOf(docId).equals(recordReader.getCurrentKey().toString()) || String.valueOf(docId+500).equals(recordReader.getCurrentKey().toString()));
+        //we can't be sure of the order we are getting the segments, so we have to fudge here a bit on the id,
+        // but it is either id: i or i + 500
+        assertTrue("i = " + i + " docId= " +
+            docId, String.valueOf(docId).equals(recordReader.getCurrentKey().toString()) ||
+            String.valueOf(docId+500).equals(recordReader.getCurrentKey().toString()));
         assertEquals(NullWritable.get(), recordReader.getCurrentValue());
         docId++;
       }
@@ -76,18 +81,22 @@ public class LuceneSegmentRecordReaderTest extends AbstractLuceneStorageTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testNonExistingIdField() throws Exception {
-    configuration = new LuceneStorageConfiguration(getConfiguration(), asList(getIndexPath1()), new Path("output"), "nonExistingId", asList(FIELD)).serialize();
+    configuration = new LuceneStorageConfiguration(getConfiguration(),
+        asList(getIndexPath1()), new Path("output"), "nonExistingId", asList(FIELD)).serialize();
     SegmentCommitInfo segmentInfo = segmentInfos.iterator().next();
-    LuceneSegmentInputSplit inputSplit = new LuceneSegmentInputSplit(getIndexPath1(), segmentInfo.info.name, segmentInfo.sizeInBytes());
+    LuceneSegmentInputSplit inputSplit = new LuceneSegmentInputSplit(getIndexPath1(),
+        segmentInfo.info.name, segmentInfo.sizeInBytes());
     TaskAttemptContext context = getTaskAttemptContext(configuration, new TaskAttemptID());
     recordReader.initialize(inputSplit, context);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testNonExistingField() throws Exception {
-    configuration = new LuceneStorageConfiguration(getConfiguration(), asList(getIndexPath1()), new Path("output"), ID_FIELD, asList("nonExistingField")).serialize();
+    configuration = new LuceneStorageConfiguration(getConfiguration(), asList(getIndexPath1()),
+        new Path("output"), ID_FIELD, asList("nonExistingField")).serialize();
     SegmentCommitInfo segmentInfo = segmentInfos.iterator().next();
-    LuceneSegmentInputSplit inputSplit = new LuceneSegmentInputSplit(getIndexPath1(), segmentInfo.info.name, segmentInfo.sizeInBytes());
+    LuceneSegmentInputSplit inputSplit = new LuceneSegmentInputSplit(getIndexPath1(),
+        segmentInfo.info.name, segmentInfo.sizeInBytes());
     TaskAttemptContext context = getTaskAttemptContext(configuration, new TaskAttemptID());
     recordReader.initialize(inputSplit, context);
   }

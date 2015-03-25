@@ -17,20 +17,18 @@
 
 package org.apache.mahout.utils;
 
-import java.io.File;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.util.List;
-
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
+import java.io.File;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
@@ -64,7 +62,7 @@ public final class SequenceFileDumper extends AbstractJob {
     Configuration conf = new Configuration();
     Path input = getInputPath();
     FileSystem fs = input.getFileSystem(conf);
-    if (fs.getFileStatus(input).isDir()) {
+    if (fs.getFileStatus(input).isDirectory()) {
       pathArr = FileUtil.stat2Paths(fs.listStatus(input, PathFilters.logsCRCFilter()));
     } else {
       pathArr = new Path[1];
@@ -92,14 +90,14 @@ public final class SequenceFileDumper extends AbstractJob {
           sub = Integer.parseInt(getOption("substring"));
         }
         boolean countOnly = hasOption("count");
-        SequenceFileIterator<?, ?> iterator = new SequenceFileIterator<Writable, Writable>(path, true, conf);
+        SequenceFileIterator<?, ?> iterator = new SequenceFileIterator<>(path, true, conf);
         if (!hasOption("quiet")) {
           writer.append("Key class: ").append(iterator.getKeyClass().toString());
           writer.append(" Value Class: ").append(iterator.getValueClass().toString()).append('\n');
         }
         OpenObjectIntHashMap<String> facets = null;
         if (hasOption("facets")) {
-          facets = new OpenObjectIntHashMap<String>();
+          facets = new OpenObjectIntHashMap<>();
         }
         long count = 0;
         if (countOnly) {

@@ -92,13 +92,10 @@ public final class ViterbiEvaluator {
 
       //reading observations
       List<Integer> observations = Lists.newArrayList();
-      Scanner scanner = new Scanner(new FileInputStream(input), "UTF-8");
-      try {
+      try (Scanner scanner = new Scanner(new FileInputStream(input), "UTF-8")) {
         while (scanner.hasNextInt()) {
           observations.add(scanner.nextInt());
         }
-      } finally {
-        scanner.close();
       }
 
       int[] observationsArray = new int[observations.size()];

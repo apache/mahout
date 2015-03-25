@@ -143,7 +143,7 @@ public final class TimesSquaredJob {
     throws IOException {
     Path outputFile = new Path(outputVectorTmpPath, OUTPUT_VECTOR_FILENAME + "/part-r-00000");
     SequenceFileValueIterator<VectorWritable> iterator =
-        new SequenceFileValueIterator<VectorWritable>(outputFile, true, conf);
+        new SequenceFileValueIterator<>(outputFile, true, conf);
     try {
       return iterator.next().get();
     } finally {
@@ -172,7 +172,7 @@ public final class TimesSquaredJob {
         Path inputVectorPath = HadoopUtil.getSingleCachedFile(conf);
 
         SequenceFileValueIterator<VectorWritable> iterator =
-            new SequenceFileValueIterator<VectorWritable>(inputVectorPath, true, conf);
+            new SequenceFileValueIterator<>(inputVectorPath, true, conf);
         try {
           inputVector = iterator.next().get();
         } finally {

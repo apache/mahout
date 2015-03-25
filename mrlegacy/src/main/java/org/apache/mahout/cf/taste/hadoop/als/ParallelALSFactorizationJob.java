@@ -102,10 +102,6 @@ public class ParallelALSFactorizationJob extends AbstractJob {
   private double lambda;
   private double alpha;
   private int numThreadsPerSolver;
-  private boolean usesLongIDs;
-
-  private int numItems;
-  private int numUsers;
 
   enum Stats { NUM_USERS }
 
@@ -138,7 +134,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
     implicitFeedback = Boolean.parseBoolean(getOption("implicitFeedback"));
 
     numThreadsPerSolver = Integer.parseInt(getOption("numThreadsPerSolver"));
-    usesLongIDs = Boolean.parseBoolean(getOption("usesLongIDs", String.valueOf(false)));
+    boolean usesLongIDs = Boolean.parseBoolean(getOption("usesLongIDs", String.valueOf(false)));
 
     /*
     * compute the factorization A = U M'
@@ -196,8 +192,8 @@ public class ParallelALSFactorizationJob extends AbstractJob {
 
     Vector averageRatings = ALS.readFirstRow(getTempPath("averageRatings"), getConf());
 
-    numItems = averageRatings.getNumNondefaultElements();
-    numUsers = (int) userRatings.getCounters().findCounter(Stats.NUM_USERS).getValue();
+    int numItems = averageRatings.getNumNondefaultElements();
+    int numUsers = (int) userRatings.getCounters().findCounter(Stats.NUM_USERS).getValue();
 
     log.info("Found {} users and {} items", numUsers, numItems);
 
@@ -208,11 +204,11 @@ public class ParallelALSFactorizationJob extends AbstractJob {
       /* broadcast M, read A row-wise, recompute U row-wise */
       log.info("Recomputing U (iteration {}/{})", currentIteration, numIterations);
       runSolver(pathToUserRatings(), pathToU(currentIteration), pathToM(currentIteration - 1), currentIteration, "U",
-                numItems);
+          numItems);
       /* broadcast U, read A' row-wise, recompute M row-wise */
       log.info("Recomputing M (iteration {}/{})", currentIteration, numIterations);
       runSolver(pathToItemRatings(), pathToM(currentIteration), pathToU(currentIteration), currentIteration, "M",
-                numUsers);
+          numUsers);
     }
 
     return 0;

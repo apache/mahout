@@ -54,7 +54,7 @@ final class Track2Callable implements Callable<UserResult> {
       throw new IllegalArgumentException("Expecting 6 items for user but got " + userTest);
     }
     long userID = userTest.get(0).getUserID();
-    TreeMap<Double,Long> estimateToItemID = new TreeMap<Double,Long>(Collections.reverseOrder());
+    TreeMap<Double,Long> estimateToItemID = new TreeMap<>(Collections.reverseOrder());
 
     for (int i = 0; i < testSize; i++) {
       long itemID = userTest.getItemID(i);

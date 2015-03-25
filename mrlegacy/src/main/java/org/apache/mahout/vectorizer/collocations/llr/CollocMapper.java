@@ -96,8 +96,8 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
       int count = 0; // ngram count
 
       OpenObjectIntHashMap<String> ngrams =
-              new OpenObjectIntHashMap<String>(value.getEntries().size() * (maxShingleSize - 1));
-      OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<String>(value.getEntries().size());
+              new OpenObjectIntHashMap<>(value.getEntries().size() * (maxShingleSize - 1));
+      OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<>(value.getEntries().size());
 
       do {
         String term = sf.getAttribute(CharTermAttribute.class).toString();
@@ -136,9 +136,7 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
               gramKey.set(tail, ngram.getBytes());
               context.write(gramKey, ngram);
 
-            } catch (IOException e) {
-              throw new IllegalStateException(e);
-            } catch (InterruptedException e) {
+            } catch (IOException | InterruptedException e) {
               throw new IllegalStateException(e);
             }
           }
@@ -153,9 +151,7 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
             Gram unigram = new Gram(term, frequency, Gram.Type.UNIGRAM);
             gramKey.set(unigram, EMPTY);
             context.write(gramKey, unigram);
-          } catch (IOException e) {
-            throw new IllegalStateException(e);
-          } catch (InterruptedException e) {
+          } catch (IOException | InterruptedException e) {
             throw new IllegalStateException(e);
           }
           return true;

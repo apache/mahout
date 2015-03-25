@@ -127,7 +127,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
         continue;
       }
 
-      FastByIDMap<PreferenceArray> trainingUsers = new FastByIDMap<PreferenceArray>(dataModel.getNumUsers());
+      FastByIDMap<PreferenceArray> trainingUsers = new FastByIDMap<>(dataModel.getNumUsers());
       LongPrimitiveIterator it2 = dataModel.getUserIDs();
       while (it2.hasNext()) {
         dataSplitter.processOtherUser(userID, relevantItemIDs, trainingUsers, it2.nextLong(), dataModel);

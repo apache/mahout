@@ -28,7 +28,7 @@ public final class MemoryIDMigrator extends AbstractIDMigrator implements Updata
   private final FastByIDMap<String> longToString;
   
   public MemoryIDMigrator() {
-    this.longToString = new FastByIDMap<String>(100);
+    this.longToString = new FastByIDMap<>(100);
   }
   
   @Override

@@ -69,7 +69,7 @@ public class Parameters {
     conf.set("io.serializations",
              "org.apache.hadoop.io.serializer.JavaSerialization,"
              + "org.apache.hadoop.io.serializer.WritableSerialization");
-    DefaultStringifier<Map<String,String>> mapStringifier = new DefaultStringifier<Map<String,String>>(conf,
+    DefaultStringifier<Map<String,String>> mapStringifier = new DefaultStringifier<>(conf,
         GenericsUtil.getClass(params));
     try {
       return mapStringifier.toString(params);
@@ -90,7 +90,7 @@ public class Parameters {
              "org.apache.hadoop.io.serializer.JavaSerialization,"
              + "org.apache.hadoop.io.serializer.WritableSerialization");
     Map<String,String> params = Maps.newHashMap();
-    DefaultStringifier<Map<String,String>> mapStringifier = new DefaultStringifier<Map<String,String>>(conf,
+    DefaultStringifier<Map<String,String>> mapStringifier = new DefaultStringifier<>(conf,
         GenericsUtil.getClass(params));
     return mapStringifier.fromString(serializedString);
   }

@@ -147,7 +147,7 @@ public final class LDAPrintTopics {
       q.poll();
     }
     if (q.size() < numWordsToPrint) {
-      q.add(new Pair<String,Double>(word, score));
+      q.add(new Pair<>(word, score));
     }
   }
   
@@ -218,10 +218,10 @@ public final class LDAPrintTopics {
     }
     for (int i = 0; i < queues.size(); i++) {
       Queue<Pair<String,Double>> queue = queues.get(i);
-      Queue<Pair<String,Double>> newQueue = new PriorityQueue<Pair<String, Double>>(queue.size());
+      Queue<Pair<String,Double>> newQueue = new PriorityQueue<>(queue.size());
       double norm = expSums.get(i);
       for (Pair<String,Double> pair : queue) {
-        newQueue.add(new Pair<String,Double>(pair.getFirst(), Math.exp(pair.getSecond()) / norm));
+        newQueue.add(new Pair<>(pair.getFirst(), Math.exp(pair.getSecond()) / norm));
       }
       queues.set(i, newQueue);
     }

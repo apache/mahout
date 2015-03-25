@@ -73,7 +73,7 @@ public class BruteSearch extends UpdatableSearcher {
     // A priority queue of the best @limit elements, ordered from worst to best so that the worst
     // element is always on top and can easily be removed.
     PriorityQueue<WeightedThing<Integer>> bestNeighbors =
-        new PriorityQueue<WeightedThing<Integer>>(limit, Ordering.natural().reverse());
+        new PriorityQueue<>(limit, Ordering.natural().reverse());
     // The resulting list of weighted WeightedVectors (the weight is the distance from the query).
     List<WeightedThing<Vector>> results =
         Lists.newArrayListWithCapacity(limit);
@@ -83,7 +83,7 @@ public class BruteSearch extends UpdatableSearcher {
       // Only add a new neighbor if the result is better than the worst element
       // in the queue or the queue isn't full.
       if (bestNeighbors.size() < limit || bestNeighbors.peek().getWeight() > distance) {
-        bestNeighbors.add(new WeightedThing<Integer>(rowNumber, distance));
+        bestNeighbors.add(new WeightedThing<>(rowNumber, distance));
         if (bestNeighbors.size() > limit) {
           bestNeighbors.poll();
         } else {
@@ -96,7 +96,7 @@ public class BruteSearch extends UpdatableSearcher {
     }
     for (int i = limit - 1; i >= 0; --i) {
       WeightedThing<Integer> neighbor = bestNeighbors.poll();
-      results.set(i, new WeightedThing<Vector>(
+      results.set(i, new WeightedThing<>(
           referenceVectors.get(neighbor.getValue()), neighbor.getWeight()));
     }
     return results;
@@ -124,7 +124,7 @@ public class BruteSearch extends UpdatableSearcher {
         bestVector = row;
       }
     }
-    return new WeightedThing<Vector>(bestVector, bestDistance);
+    return new WeightedThing<>(bestVector, bestDistance);
   }
 
   /**

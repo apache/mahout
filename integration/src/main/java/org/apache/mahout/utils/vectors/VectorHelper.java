@@ -91,7 +91,7 @@ public final class VectorHelper {
       maxEntries = sizeOfNonZeroElementsInVector;
     }
 
-    PriorityQueue<Pair<Integer, Double>> queue = new TDoublePQ<Integer>(-1, maxEntries);
+    PriorityQueue<Pair<Integer, Double>> queue = new TDoublePQ<>(-1, maxEntries);
     for (Element e : vector.nonZeroes()) {
       queue.insertWithOverflow(Pair.of(e.index(), e.get()));
     }
@@ -177,11 +177,8 @@ public final class VectorHelper {
    * </pre>
    */
   public static String[] loadTermDictionary(File dictFile) throws IOException {
-    InputStream in = new FileInputStream(dictFile);
-    try {
+    try (InputStream in = new FileInputStream(dictFile)) {
       return loadTermDictionary(in);
-    } finally {
-      in.close();
     }
   }
 
@@ -192,7 +189,7 @@ public final class VectorHelper {
    * @param filePattern <PATH TO DICTIONARY>/dictionary.file-*
    */
   public static String[] loadTermDictionary(Configuration conf, String filePattern) {
-    OpenObjectIntHashMap<String> dict = new OpenObjectIntHashMap<String>();
+    OpenObjectIntHashMap<String> dict = new OpenObjectIntHashMap<>();
     int maxIndexValue = 0;
     for (Pair<Text, IntWritable> record
         : new SequenceFileDirIterable<Text, IntWritable>(new Path(filePattern), PathType.GLOB, null, null, true,

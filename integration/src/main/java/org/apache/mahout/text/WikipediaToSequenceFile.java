@@ -128,13 +128,7 @@ public final class WikipediaToSequenceFile {
       }
 
       runJob(inputPath, outputPath, catFile, cmdLine.hasOption(exactMatchOpt), all, removeLabels);
-    } catch (OptionException e) {
-      log.error("Exception", e);
-      CommandLineUtil.printHelp(group);
-    } catch (InterruptedException e) {
-      log.error("Exception", e);
-      CommandLineUtil.printHelp(group);
-    } catch (ClassNotFoundException e) {
+    } catch (OptionException | InterruptedException | ClassNotFoundException e) {
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     }
@@ -182,7 +176,7 @@ public final class WikipediaToSequenceFile {
     }
     
     Stringifier<Set<String>> setStringifier =
-        new DefaultStringifier<Set<String>>(conf, GenericsUtil.getClass(categories));
+        new DefaultStringifier<>(conf, GenericsUtil.getClass(categories));
     
     String categoriesStr = setStringifier.toString(categories);    
     conf.set("wikipedia.categories", categoriesStr);

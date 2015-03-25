@@ -128,7 +128,6 @@ public class FileDataModel extends AbstractDataModel {
   private final File dataFile;
   private long lastModified;
   private long lastUpdateFileModified;
-  private final char delimiter;
   private final Splitter delimiterPattern;
   private final boolean hasPrefValues;
   private DataModel delegate;
@@ -197,6 +196,7 @@ public class FileDataModel extends AbstractDataModel {
     }
     Closeables.close(iterator, true);
 
+    char delimiter;
     if (delimiterRegex == null) {
       delimiter = determineDelimiter(firstLine);
       delimiterPattern = Splitter.on(delimiter);
@@ -248,13 +248,13 @@ public class FileDataModel extends AbstractDataModel {
     lastModified = newLastModified;
     lastUpdateFileModified = newLastUpdateFileModified;
 
-    FastByIDMap<FastByIDMap<Long>> timestamps = new FastByIDMap<FastByIDMap<Long>>();
+    FastByIDMap<FastByIDMap<Long>> timestamps = new FastByIDMap<>();
 
     if (hasPrefValues) {
 
       if (loadFreshData) {
 
-        FastByIDMap<Collection<Preference>> data = new FastByIDMap<Collection<Preference>>();
+        FastByIDMap<Collection<Preference>> data = new FastByIDMap<>();
         FileLineIterator iterator = new FileLineIterator(dataFile, false);
         processFile(iterator, data, timestamps, false);
 
@@ -280,7 +280,7 @@ public class FileDataModel extends AbstractDataModel {
 
       if (loadFreshData) {
 
-        FastByIDMap<FastIDSet> data = new FastByIDMap<FastIDSet>();
+        FastByIDMap<FastIDSet> data = new FastByIDMap<>();
         FileLineIterator iterator = new FileLineIterator(dataFile, false);
         processFileWithoutID(iterator, data, timestamps);
 
@@ -316,7 +316,7 @@ public class FileDataModel extends AbstractDataModel {
     int period = dataFileName.indexOf('.');
     String startName = period < 0 ? dataFileName : dataFileName.substring(0, period);
     File parentDir = dataFile.getParentFile();
-    Map<Long, File> modTimeToUpdateFile = new TreeMap<Long,File>();
+    Map<Long, File> modTimeToUpdateFile = new TreeMap<>();
     FileFilter onlyFiles = new FileFilter() {
       @Override
       public boolean accept(File file) {
@@ -612,7 +612,7 @@ public class FileDataModel extends AbstractDataModel {
     if (timestampString != null) {
       FastByIDMap<Long> itemTimestamps = timestamps.get(userID);
       if (itemTimestamps == null) {
-        itemTimestamps = new FastByIDMap<Long>();
+        itemTimestamps = new FastByIDMap<>();
         timestamps.put(userID, itemTimestamps);
       }
       long timestamp = readTimestampFromString(timestampString);

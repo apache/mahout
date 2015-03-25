@@ -105,9 +105,9 @@ public final class SequenceFilesFromMailArchives extends AbstractJob {
     private static final Comparator<File> FILE_COMPARATOR = new CompositeFileComparator(
         DirectoryFileComparator.DIRECTORY_REVERSE, PathFileComparator.PATH_COMPARATOR);
 
-    private final Deque<MailProcessor> processors = new ArrayDeque<MailProcessor>();
+    private final Deque<MailProcessor> processors = new ArrayDeque<>();
     private final ChunkedWriter writer;
-    private final Deque<Long> messageCounts = new ArrayDeque<Long>();
+    private final Deque<Long> messageCounts = new ArrayDeque<>();
 
     public PrefixAdditionDirectoryWalker(MailProcessor processor, ChunkedWriter writer) {
       processors.addFirst(processor);

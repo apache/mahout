@@ -97,7 +97,7 @@ public class ModelTrainer {
 
   public void start() {
     log.info("Starting training threadpool with {} threads", numTrainThreads);
-    workQueue = new ArrayBlockingQueue<Runnable>(numTrainThreads * 10);
+    workQueue = new ArrayBlockingQueue<>(numTrainThreads * 10);
     threadPool = new ThreadPoolExecutor(numTrainThreads, numTrainThreads, 0, TimeUnit.SECONDS,
         workQueue);
     threadPool.allowCoreThreadTimeOut(false);

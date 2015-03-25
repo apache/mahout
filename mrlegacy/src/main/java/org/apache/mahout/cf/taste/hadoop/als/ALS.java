@@ -35,7 +35,6 @@ import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterat
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.als.AlternatingLeastSquaresSolver;
-import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.map.OpenIntObjectHashMap;
 
 import java.io.IOException;
@@ -47,7 +46,7 @@ final class ALS {
   private ALS() {}
 
   static Vector readFirstRow(Path dir, Configuration conf) throws IOException {
-    Iterator<VectorWritable> iterator = new SequenceFileDirValueIterator<VectorWritable>(dir, PathType.LIST,
+    Iterator<VectorWritable> iterator = new SequenceFileDirValueIterator<>(dir, PathType.LIST,
         PathFilters.partFilter(), null, true, conf);
     return iterator.hasNext() ? iterator.next().get() : null;
   }
@@ -83,7 +82,7 @@ final class ALS {
   }
 
   public static OpenIntObjectHashMap<Vector> readMatrixByRows(Path dir, Configuration conf) {
-    OpenIntObjectHashMap<Vector> matrix = new OpenIntObjectHashMap<Vector>();
+    OpenIntObjectHashMap<Vector> matrix = new OpenIntObjectHashMap<>();
     for (Pair<IntWritable,VectorWritable> pair
         : new SequenceFileDirIterable<IntWritable,VectorWritable>(dir, PathType.LIST, PathFilters.partFilter(), conf)) {
       int rowIndex = pair.getFirst().get();

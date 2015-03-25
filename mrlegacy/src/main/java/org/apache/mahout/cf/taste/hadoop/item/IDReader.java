@@ -17,13 +17,12 @@
 
 package org.apache.mahout.cf.taste.hadoop.item;
 
+import com.google.common.collect.Maps;
+import com.google.common.io.Closeables;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
-
-import com.google.common.collect.Maps;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
@@ -31,8 +30,6 @@ import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.iterator.FileLineIterable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.io.Closeables;
 
 /**
  * Reads user ids and item ids from files specified in usersFile, itemsFile or userItemFile options in item-based
@@ -118,7 +115,7 @@ public class IDReader {
     } else if (isUserItemFileSpecified() && !isUsersFileSpecified()) {
       readUserItemFilterIfNeeded();
       userIds = extractAllUserIdsFromUserItemFilter(userItemFilter);
-    } else if (!isUsersFileSpecified() && !isUserItemFileSpecified()) {
+    } else if (!isUsersFileSpecified()) {
       throw new IllegalStateException("Neither usersFile nor userItemFile options are specified");
     } else {
       throw new IllegalStateException("usersFile and userItemFile options cannot be used simultaneously");
@@ -131,7 +128,7 @@ public class IDReader {
     } else if (isUserItemFileSpecified() && !isItemsFileSpecified()) {
       readUserItemFilterIfNeeded();
       itemIds = extractAllItemIdsFromUserItemFilter(userItemFilter);
-    } else if (!isItemsFileSpecified() && !isUserItemFileSpecified()) {
+    } else if (!isItemsFileSpecified()) {
       throw new IllegalStateException("Neither itemsFile nor userItemFile options are specified");
     } else {
       throw new IllegalStateException("itemsFile and userItemFile options cannot be specified simultaneously");
@@ -151,7 +148,7 @@ public class IDReader {
     try {
       for (String line : new FileLineIterable(in)) {
         try {
-          String[] tokens = SEPARATOR.split(line.toString());
+          String[] tokens = SEPARATOR.split(line);
           Long userId = Long.parseLong(tokens[0]);
           Long itemId = Long.parseLong(tokens[1]);
 

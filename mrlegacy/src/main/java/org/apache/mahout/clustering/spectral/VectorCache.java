@@ -113,7 +113,7 @@ public final class VectorCache {
   public static Vector load(Configuration conf, Path input) throws IOException {
     log.info("Loading vector from: {}", input);
     SequenceFileValueIterator<VectorWritable> iterator =
-            new SequenceFileValueIterator<VectorWritable>(input, true, conf);
+            new SequenceFileValueIterator<>(input, true, conf);
     try {
       return iterator.next().get();
     } finally {

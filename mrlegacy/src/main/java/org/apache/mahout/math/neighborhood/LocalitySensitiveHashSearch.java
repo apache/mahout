@@ -191,7 +191,7 @@ public class LocalitySensitiveHashSearch extends UpdatableSearcher {
     List<WeightedThing<Vector>> results = Lists.newArrayListWithExpectedSize(top.size());
     while (top.size() != 0) {
       WeightedThing<Vector> wv = top.pop();
-      results.add(new WeightedThing<Vector>(((HashedVector) wv.getValue()).getVector(), wv.getWeight()));
+      results.add(new WeightedThing<>(((HashedVector) wv.getValue()).getVector(), wv.getWeight()));
     }
     Collections.reverse(results);
     if (limit < results.size()) {
@@ -235,7 +235,7 @@ public class LocalitySensitiveHashSearch extends UpdatableSearcher {
   }
 
   protected static WeightedThing<Vector> removeHash(WeightedThing<Vector> input) {
-    return new WeightedThing<Vector>(((HashedVector) input.getValue()).getVector(), input.getWeight());
+    return new WeightedThing<>(((HashedVector) input.getValue()).getVector(), input.getWeight());
   }
 
   @Override

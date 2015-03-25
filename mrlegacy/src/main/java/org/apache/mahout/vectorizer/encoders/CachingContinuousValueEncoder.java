@@ -17,10 +17,10 @@
 
 package org.apache.mahout.vectorizer.encoders;
 
-import com.google.common.base.Charsets;
-import org.apache.mahout.math.map.OpenIntIntHashMap;
+import java.util.Arrays;
 
 import com.google.common.base.Preconditions;
+import org.apache.mahout.math.map.OpenIntIntHashMap;
 
 public class CachingContinuousValueEncoder extends ContinuousValueEncoder {
   private final int dataSize;
@@ -53,7 +53,7 @@ public class CachingContinuousValueEncoder extends ContinuousValueEncoder {
   protected int hashForProbe(byte[] originalForm, int dataSize, String name, int probe) {
     Preconditions.checkArgument(dataSize == this.dataSize,
         "dataSize argument [" + dataSize + "] does not match expected dataSize [" + this.dataSize + ']');
-    int originalHashcode = originalForm.hashCode();
+    int originalHashcode = Arrays.hashCode(originalForm);
     if (caches[probe].containsKey(originalHashcode)) {
       return caches[probe].get(originalHashcode);
     }

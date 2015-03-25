@@ -233,7 +233,7 @@ public final class HadoopUtil {
 
   public static InputStream openStream(Path path, Configuration conf) throws IOException {
     FileSystem fs = FileSystem.get(path.toUri(), conf);
-    return fs.open(path.makeQualified(fs));
+    return fs.open(path.makeQualified(path.toUri(), path));
   }
 
   public static FileStatus[] getFileStatus(Path path, PathType pathType, PathFilter filter,
@@ -355,7 +355,7 @@ public final class HadoopUtil {
     boolean containsFiles = false;
     List<String> directoriesList = Lists.newArrayList();
     for (FileStatus childFileStatus : fs.listStatus(fileStatus.getPath())) {
-      if (childFileStatus.isDir()) {
+      if (childFileStatus.isDirectory()) {
         String subDirectoryList = buildDirList(fs, childFileStatus);
         directoriesList.add(subDirectoryList);
       } else {
@@ -381,7 +381,7 @@ public final class HadoopUtil {
     boolean containsFiles = false;
     List<String> directoriesList = Lists.newArrayList();
     for (FileStatus childFileStatus : fs.listStatus(fileStatus.getPath(), pathFilter)) {
-      if (childFileStatus.isDir()) {
+      if (childFileStatus.isDirectory()) {
         String subDirectoryList = buildDirList(fs, childFileStatus);
         directoriesList.add(subDirectoryList);
       } else {

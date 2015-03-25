@@ -58,7 +58,7 @@ public final class ItemAverageRecommender extends AbstractRecommender {
   
   public ItemAverageRecommender(DataModel dataModel) throws TasteException {
     super(dataModel);
-    this.itemAverages = new FastByIDMap<RunningAverage>();
+    this.itemAverages = new FastByIDMap<>();
     this.buildAveragesLock = new ReentrantReadWriteLock();
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
       @Override

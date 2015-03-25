@@ -82,11 +82,7 @@ public class WholeFileRecordReader extends RecordReader<IntWritable, BytesWritab
     if (!StringUtils.isBlank(fileFilterClassName) && !PrefixAdditionFilter.class.getName().equals(fileFilterClassName)) {
       try {
         pathFilter = (PathFilter) Class.forName(fileFilterClassName).newInstance();
-      } catch (ClassNotFoundException e) {
-        throw new IllegalStateException(e);
-      } catch (InstantiationException e) {
-        throw new IllegalStateException(e);
-      } catch (IllegalAccessException e) {
+      } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
         throw new IllegalStateException(e);
       }
     }

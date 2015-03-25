@@ -137,7 +137,7 @@ public final class BayesUtils {
   }
 
   public static Map<Integer, String> readLabelIndex(Configuration conf, Path indexPath) {
-    Map<Integer, String> labelMap = new HashMap<Integer, String>();
+    Map<Integer, String> labelMap = new HashMap<>();
     for (Pair<Text, IntWritable> pair : new SequenceFileIterable<Text, IntWritable>(indexPath, true, conf)) {
       labelMap.put(pair.getSecond().get(), pair.getFirst().toString());
     }
@@ -145,7 +145,7 @@ public final class BayesUtils {
   }
 
   public static OpenObjectIntHashMap<String> readIndexFromCache(Configuration conf) throws IOException {
-    OpenObjectIntHashMap<String> index = new OpenObjectIntHashMap<String>();
+    OpenObjectIntHashMap<String> index = new OpenObjectIntHashMap<>();
     for (Pair<Writable,IntWritable> entry
         : new SequenceFileIterable<Writable,IntWritable>(HadoopUtil.getSingleCachedFile(conf), conf)) {
       index.put(entry.getFirst().toString(), entry.getSecond().get());

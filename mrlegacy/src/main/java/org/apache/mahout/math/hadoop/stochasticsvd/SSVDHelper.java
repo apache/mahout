@@ -17,15 +17,19 @@
 
 package org.apache.mahout.math.hadoop.stochasticsvd;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.*;
-import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
+import com.google.common.io.Closeables;
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -35,13 +39,18 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.common.Pair;
-import org.apache.mahout.common.iterator.sequencefile.*;
-import org.apache.mahout.math.*;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterator;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterator;
+import org.apache.mahout.math.DenseMatrix;
+import org.apache.mahout.math.DenseSymmetricMatrix;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.UpperTriangular;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.Functions;
-
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
 
 /**
  * set of small file manipulation helpers.
@@ -59,7 +68,7 @@ public final class SSVDHelper {
   static Vector loadVector(Path glob, Configuration conf) throws IOException {
 
     SequenceFileDirValueIterator<VectorWritable> iter =
-      new SequenceFileDirValueIterator<VectorWritable>(glob,
+      new SequenceFileDirValueIterator<>(glob,
                                                        PathType.GLOB,
                                                        null,
                                                        null,
@@ -93,21 +102,18 @@ public final class SSVDHelper {
                                 Configuration conf) throws IOException {
     VectorWritable vw = new VectorWritable(v);
     FileSystem fs = FileSystem.get(conf);
-    SequenceFile.Writer w =
-      new SequenceFile.Writer(fs,
-                              conf,
-                              vectorFilePath,
-                              IntWritable.class,
-                              VectorWritable.class);
-    try {
+    try (SequenceFile.Writer w = new SequenceFile.Writer(fs,
+        conf,
+        vectorFilePath,
+        IntWritable.class,
+        VectorWritable.class)) {
       w.append(new IntWritable(), vw);
-    } finally {
+    }
       /*
        * this is a writer, no quiet close please. we must bail out on incomplete
        * close.
        */
-      w.close();
-    }
+
   }
 
   /**
@@ -124,7 +130,7 @@ public final class SSVDHelper {
       }
 
       FileStatus firstSeqFile;
-      if (fstats[0].isDir()) {
+      if (fstats[0].isDirectory()) {
         firstSeqFile = fs.listStatus(fstats[0].getPath(), PathFilters.logsCRCFilter())[0];
       } else {
         firstSeqFile = fstats[0];
@@ -169,7 +175,7 @@ public final class SSVDHelper {
                                                              Deque<Closeable> closeables)
     throws IOException {
     SequenceFileDirIterator<Writable, VectorWritable> ret =
-      new SequenceFileDirIterator<Writable, VectorWritable>(glob,
+      new SequenceFileDirIterator<>(glob,
                                                             PathType.GLOB,
                                                             PathFilters.logsCRCFilter(),
                                                             PARTITION_COMPARATOR,
@@ -195,9 +201,9 @@ public final class SSVDHelper {
    */
   public static DenseMatrix drmLoadAsDense(FileSystem fs, Path glob, Configuration conf) throws IOException {
 
-    Deque<Closeable> closeables = new ArrayDeque<Closeable>();
+    Deque<Closeable> closeables = new ArrayDeque<>();
     try {
-      List<double[]> denseData = new ArrayList<double[]>();
+      List<double[]> denseData = new ArrayList<>();
       for (Iterator<Pair<Writable, Vector>> iter = drmIterator(fs, glob, conf, closeables);
            iter.hasNext(); ) {
         Pair<Writable, Vector> p = iter.next();
@@ -241,7 +247,7 @@ public final class SSVDHelper {
     throws IOException {
 
     SequenceFileDirValueIterator<VectorWritable> iter =
-      new SequenceFileDirValueIterator<VectorWritable>(glob,
+      new SequenceFileDirValueIterator<>(glob,
                                                        PathType.GLOB,
                                                        null,
                                                        PARTITION_COMPARATOR,
@@ -276,14 +282,12 @@ public final class SSVDHelper {
      * contain the matrix.
      */
 
-    SequenceFileDirValueIterator<VectorWritable> iter =
-      new SequenceFileDirValueIterator<VectorWritable>(glob,
-                                                       PathType.GLOB,
-                                                       null,
-                                                       null,
-                                                       true,
-                                                       conf);
-    try {
+    try (SequenceFileDirValueIterator<VectorWritable> iter = new SequenceFileDirValueIterator<>(glob,
+        PathType.GLOB,
+        null,
+        null,
+        true,
+        conf)) {
       if (!iter.hasNext()) {
         throw new IOException("No triangular matrices found");
       }
@@ -294,8 +298,6 @@ public final class SSVDHelper {
       }
       return result;
 
-    } finally {
-      iter.close();
     }
   }
 

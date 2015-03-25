@@ -62,6 +62,9 @@ public final class UserVectorSplitterMapper extends
                      VectorWritable value,
                      Context context) throws IOException, InterruptedException {
     long userID = key.get();
+
+    log.info("UserID = {}", userID);
+
     if (usersToRecommendFor != null && !usersToRecommendFor.contains(userID)) {
       return;
     }

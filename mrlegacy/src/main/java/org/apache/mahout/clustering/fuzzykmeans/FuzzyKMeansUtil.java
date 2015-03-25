@@ -45,7 +45,7 @@ final class FuzzyKMeansUtil {
    *          a List<Cluster> to put values into
    */
   public static void configureWithClusterInfo(Configuration conf, Path clusterPath, List<Cluster> clusters) {
-    for (Writable value : new SequenceFileDirValueIterable<Writable>(clusterPath, PathType.LIST,
+    for (Writable value : new SequenceFileDirValueIterable<>(clusterPath, PathType.LIST,
         PathFilters.partFilter(), conf)) {
       Class<? extends Writable> valueClass = value.getClass();
       

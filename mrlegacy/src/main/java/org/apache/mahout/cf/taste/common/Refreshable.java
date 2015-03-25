@@ -44,7 +44,7 @@ public interface Refreshable {
    * 
    * @param alreadyRefreshed
    *          {@link org.apache.mahout.cf.taste.common.Refreshable}s that are known to have already been
-   *          refreshed as a result of an initial call to a {@link #refresh(Collection)} method on some
+   *          refreshed as a result of an initial call to a {#refresh(Collection)} method on some
    *          object. This ensure that objects in a refresh dependency graph aren't refreshed twice
    *          needlessly.
    */

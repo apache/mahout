@@ -47,7 +47,7 @@ public final class Vectors {
     }
     Vector sample = new RandomAccessSparseVector(original.size(), sampleSize);
     Iterator<Element> sampledElements =
-        new FixedSizeSamplingIterator<Vector.Element>(sampleSize, original.nonZeroes().iterator());
+        new FixedSizeSamplingIterator<>(sampleSize, original.nonZeroes().iterator());
     while (sampledElements.hasNext()) {
       Element elem = sampledElements.next();
       sample.setQuick(elem.index(), elem.get());

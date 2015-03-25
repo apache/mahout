@@ -58,7 +58,6 @@ public class QRLastStep implements Closeable, Iterator<Vector> {
    *          all RHat outputs int the group in order of groups
    * @param blockNum
    *          our RHat number in the group
-   * @throws IOException
    */
   public QRLastStep(Iterator<DenseBlockWritable> qHatInput,
                     Iterator<VectorWritable> rHatInput,
@@ -92,8 +91,7 @@ public class QRLastStep implements Closeable, Iterator<Vector> {
       GivensThinSolver
         .computeQtHat(v.getBlock(),
                       blockNum == 0 ? 0 : 1,
-                      new CopyConstructorIterator<UpperTriangular>(mRs
-                        .iterator()));
+                      new CopyConstructorIterator<>(mRs.iterator()));
     r = mQt[0].length;
     kp = mQt.length;
     if (qRow == null) {

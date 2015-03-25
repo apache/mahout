@@ -204,7 +204,7 @@ public final class ClusterIterator {
    */
   private static boolean isConverged(Path filePath, Configuration conf, FileSystem fs) throws IOException {
     for (FileStatus part : fs.listStatus(filePath, PathFilters.partFilter())) {
-      SequenceFileValueIterator<ClusterWritable> iterator = new SequenceFileValueIterator<ClusterWritable>(
+      SequenceFileValueIterator<ClusterWritable> iterator = new SequenceFileValueIterator<>(
           part.getPath(), true, conf);
       while (iterator.hasNext()) {
         ClusterWritable value = iterator.next();

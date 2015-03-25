@@ -150,7 +150,7 @@ public class FastProjectionSearch extends UpdatableSearcher {
     List<WeightedThing<Vector>> top =
         Lists.newArrayListWithCapacity(candidates.size() + pendingAdditions.size());
     for (Vector candidate : Iterables.concat(candidates, pendingAdditions)) {
-      top.add(new WeightedThing<Vector>(candidate, distanceMeasure.distance(candidate, query)));
+      top.add(new WeightedThing<>(candidate, distanceMeasure.distance(candidate, query)));
     }
     Collections.sort(top);
 
@@ -205,7 +205,7 @@ public class FastProjectionSearch extends UpdatableSearcher {
       }
     }
 
-    return new WeightedThing<Vector>(bestVector, bestDistance);
+    return new WeightedThing<>(bestVector, bestDistance);
   }
 
   @Override
@@ -219,7 +219,7 @@ public class FastProjectionSearch extends UpdatableSearcher {
     Vector projection = basisMatrix.times(vector);
     for (int i = 0; i < basisMatrix.numRows(); ++i) {
       List<WeightedThing<Vector>> currProjections = scalarProjections.get(i);
-      WeightedThing<Vector> searchedThing = new WeightedThing<Vector>(projection.get(i));
+      WeightedThing<Vector> searchedThing = new WeightedThing<>(projection.get(i));
       int middle = Collections.binarySearch(currProjections, searchedThing);
       if (middle < 0) {
         isProjected = false;
@@ -264,7 +264,7 @@ public class FastProjectionSearch extends UpdatableSearcher {
       for (Vector pending : pendingAdditions) {
         Vector projection = basisMatrix.times(pending);
         for (int i = 0; i < numProjections; ++i) {
-          scalarProjections.get(i).add(new WeightedThing<Vector>(pending, projection.get(i)));
+          scalarProjections.get(i).add(new WeightedThing<>(pending, projection.get(i)));
         }
       }
       pendingAdditions.clear();

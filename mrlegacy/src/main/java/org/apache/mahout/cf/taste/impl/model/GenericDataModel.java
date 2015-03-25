@@ -81,7 +81,7 @@ public final class GenericDataModel extends AbstractDataModel {
     Preconditions.checkArgument(userData != null, "userData is null");
 
     this.preferenceFromUsers = userData;
-    FastByIDMap<Collection<Preference>> prefsForItems = new FastByIDMap<Collection<Preference>>();
+    FastByIDMap<Collection<Preference>> prefsForItems = new FastByIDMap<>();
     FastIDSet itemIDSet = new FastIDSet();
     int currentCount = 0;
     float maxPrefValue = Float.NEGATIVE_INFINITY;
@@ -174,7 +174,7 @@ public final class GenericDataModel extends AbstractDataModel {
    *  that user's preferences
    */
   public static FastByIDMap<PreferenceArray> toDataMap(DataModel dataModel) throws TasteException {
-    FastByIDMap<PreferenceArray> data = new FastByIDMap<PreferenceArray>(dataModel.getNumUsers());
+    FastByIDMap<PreferenceArray> data = new FastByIDMap<>(dataModel.getNumUsers());
     LongPrimitiveIterator it = dataModel.getUserIDs();
     while (it.hasNext()) {
       long userID = it.nextLong();

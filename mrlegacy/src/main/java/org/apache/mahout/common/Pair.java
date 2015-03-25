@@ -39,11 +39,11 @@ public final class Pair<A,B> implements Comparable<Pair<A,B>>, Serializable {
   }
   
   public Pair<B, A> swap() {
-    return new Pair<B, A>(second, first);
+    return new Pair<>(second, first);
   }
 
   public static <A,B> Pair<A,B> of(A a, B b) {
-    return new Pair<A, B>(a, b);
+    return new Pair<>(a, b);
   }
   
   @Override

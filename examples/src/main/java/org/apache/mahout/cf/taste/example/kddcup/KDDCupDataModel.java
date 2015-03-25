@@ -72,11 +72,11 @@ public final class KDDCupDataModel implements DataModel {
 
     Iterator<Pair<PreferenceArray,long[]>> dataIterator = new DataFileIterator(dataFile);
     if (samplingRate < 1.0) {
-      dataIterator = new SamplingIterator<Pair<PreferenceArray,long[]>>(dataIterator, samplingRate);
+      dataIterator = new SamplingIterator<>(dataIterator, samplingRate);
     }
 
-    FastByIDMap<PreferenceArray> userData = new FastByIDMap<PreferenceArray>();
-    FastByIDMap<FastByIDMap<Long>> timestamps = new FastByIDMap<FastByIDMap<Long>>();
+    FastByIDMap<PreferenceArray> userData = new FastByIDMap<>();
+    FastByIDMap<FastByIDMap<Long>> timestamps = new FastByIDMap<>();
 
     while (dataIterator.hasNext()) {
 
@@ -86,7 +86,7 @@ public final class KDDCupDataModel implements DataModel {
 
       userData.put(userPrefs.getUserID(0), userPrefs);
       if (storeDates) {
-        FastByIDMap<Long> itemTimestamps = new FastByIDMap<Long>();
+        FastByIDMap<Long> itemTimestamps = new FastByIDMap<>();
         for (int i = 0; i < timestampsForPrefs.length; i++) {
           long timestamp = timestampsForPrefs[i];
           if (timestamp > 0L) {

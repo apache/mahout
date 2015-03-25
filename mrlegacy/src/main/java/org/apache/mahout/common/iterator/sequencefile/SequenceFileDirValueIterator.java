@@ -121,7 +121,7 @@ public final class SequenceFileDirValueIterator<V extends Writable> extends
             @Override
             public Iterator<V> apply(FileStatus from) {
               try {
-                SequenceFileValueIterator<V> iterator = new SequenceFileValueIterator<V>(from.getPath(),
+                SequenceFileValueIterator<V> iterator = new SequenceFileValueIterator<>(from.getPath(),
                     reuseKeyValueInstances, conf);
                 iterators.add(iterator);
                 return iterator;

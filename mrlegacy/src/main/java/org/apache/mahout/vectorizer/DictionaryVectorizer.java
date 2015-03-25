@@ -235,7 +235,7 @@ public final class DictionaryVectorizer extends AbstractJob implements Vectorize
       Path filesPattern = new Path(wordCountPath, OUTPUT_FILES_PATTERN);
       int i = 0;
       for (Pair<Writable,Writable> record
-           : new SequenceFileDirIterable<Writable,Writable>(filesPattern, PathType.GLOB, null, null, true, conf)) {
+           : new SequenceFileDirIterable<>(filesPattern, PathType.GLOB, null, null, true, conf)) {
         if (currentChunkSize > chunkSizeLimit) {
           Closeables.close(dictWriter, false);
           chunkIndex++;

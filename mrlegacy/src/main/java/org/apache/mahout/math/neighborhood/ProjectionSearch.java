@@ -96,7 +96,7 @@ public class ProjectionSearch extends UpdatableSearcher {
     // Add the the new vector and the projected distance to each set separately.
     int i = 0;
     for (TreeMultiset<WeightedThing<Vector>> s : scalarProjections) {
-      s.add(new WeightedThing<Vector>(vector, projection.get(i++)));
+      s.add(new WeightedThing<>(vector, projection.get(i++)));
     }
     int numVectors = scalarProjections.get(0).size();
     for (TreeMultiset<WeightedThing<Vector>> s : scalarProjections) {
@@ -138,7 +138,7 @@ public class ProjectionSearch extends UpdatableSearcher {
     Iterator<? extends Vector> projections = basisMatrix.iterator();
     for (TreeMultiset<WeightedThing<Vector>> v : scalarProjections) {
       Vector basisVector = projections.next();
-      WeightedThing<Vector> projectedQuery = new WeightedThing<Vector>(query,
+      WeightedThing<Vector> projectedQuery = new WeightedThing<>(query,
           query.dot(basisVector));
       for (WeightedThing<Vector> candidate : Iterables.concat(
           Iterables.limit(v.tailMultiset(projectedQuery, BoundType.CLOSED), searchSize),
@@ -151,7 +151,7 @@ public class ProjectionSearch extends UpdatableSearcher {
     // this is probably just as fast as a priority queue here.
     List<WeightedThing<Vector>> top = Lists.newArrayList();
     for (Vector candidate : candidates) {
-      top.add(new WeightedThing<Vector>(candidate, distanceMeasure.distance(query, candidate)));
+      top.add(new WeightedThing<>(candidate, distanceMeasure.distance(query, candidate)));
     }
     Collections.sort(top);
     return top.subList(0, Math.min(limit, top.size()));
@@ -176,7 +176,7 @@ public class ProjectionSearch extends UpdatableSearcher {
     Iterator<? extends Vector> projections = basisMatrix.iterator();
     for (TreeMultiset<WeightedThing<Vector>> v : scalarProjections) {
       Vector basisVector = projections.next();
-      WeightedThing<Vector> projectedQuery = new WeightedThing<Vector>(query, query.dot(basisVector));
+      WeightedThing<Vector> projectedQuery = new WeightedThing<>(query, query.dot(basisVector));
       for (WeightedThing<Vector> candidate : Iterables.concat(
           Iterables.limit(v.tailMultiset(projectedQuery, BoundType.CLOSED), searchSize),
           Iterables.limit(v.headMultiset(projectedQuery, BoundType.OPEN).descendingMultiset(), searchSize))) {
@@ -188,7 +188,7 @@ public class ProjectionSearch extends UpdatableSearcher {
       }
     }
 
-    return new WeightedThing<Vector>(bestVector, bestDistance);
+    return new WeightedThing<>(bestVector, bestDistance);
   }
 
   @Override
@@ -211,7 +211,7 @@ public class ProjectionSearch extends UpdatableSearcher {
     if (toRemove.getWeight() < epsilon) {
       Iterator<? extends Vector> basisVectors = basisMatrix.iterator();
       for (TreeMultiset<WeightedThing<Vector>> projection : scalarProjections) {
-        if (!projection.remove(new WeightedThing<Vector>(vector, vector.dot(basisVectors.next())))) {
+        if (!projection.remove(new WeightedThing<>(vector, vector.dot(basisVectors.next())))) {
           throw new RuntimeException("Internal inconsistency in ProjectionSearch");
         }
       }

@@ -65,7 +65,7 @@ public final class EigenSeedGenerator {
     if (newFile) {
       Path inputPathPattern;
 
-      if (fs.getFileStatus(input).isDir()) {
+      if (fs.getFileStatus(input).isDirectory()) {
         inputPathPattern = new Path(input, "*");
       } else {
         inputPathPattern = input;
@@ -83,7 +83,7 @@ public final class EigenSeedGenerator {
       Map<Integer,ClusterWritable> chosenClusters = Maps.newHashMapWithExpectedSize(k);
 
       for (FileStatus fileStatus : inputFiles) {
-        if (!fileStatus.isDir()) {
+        if (!fileStatus.isDirectory()) {
           for (Pair<Writable,VectorWritable> record : new SequenceFileIterable<Writable,VectorWritable>(
               fileStatus.getPath(), true, conf)) {
             Writable key = record.getFirst();

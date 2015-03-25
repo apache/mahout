@@ -142,9 +142,7 @@ public class SequenceFilesFromDirectory extends AbstractJob {
     if (!StringUtils.isBlank(fileFilterClassName) && !PrefixAdditionFilter.class.getName().equals(fileFilterClassName)) {
       try {
         pathFilter = (PathFilter) Class.forName(fileFilterClassName).newInstance();
-      } catch (InstantiationException e) {
-        throw new IllegalStateException(e);
-      } catch (IllegalAccessException e) {
+      } catch (InstantiationException | IllegalAccessException e) {
         throw new IllegalStateException(e);
       }
     }

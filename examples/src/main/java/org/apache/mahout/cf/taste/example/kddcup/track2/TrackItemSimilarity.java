@@ -34,7 +34,7 @@ final class TrackItemSimilarity implements ItemSimilarity {
   private final FastByIDMap<TrackData> trackData;
 
   TrackItemSimilarity(File dataFileDirectory) throws IOException {
-    trackData = new FastByIDMap<TrackData>();
+    trackData = new FastByIDMap<>();
     for (String line : new FileLineIterable(KDDCupDataModel.getTrackFile(dataFileDirectory))) {
       TrackData trackDatum = new TrackData(line);
       trackData.put(trackDatum.getTrackID(), trackDatum);

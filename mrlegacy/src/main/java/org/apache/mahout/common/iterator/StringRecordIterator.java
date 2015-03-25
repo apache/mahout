@@ -42,7 +42,7 @@ public class StringRecordIterator extends ForwardingIterator<Pair<List<String>,L
           @Override
           public Pair<List<String>,Long> apply(String from) {
             String[] items = splitter.split(from);
-            return new Pair<List<String>,Long>(Arrays.asList(items), ONE);
+            return new Pair<>(Arrays.asList(items), ONE);
           }
         });
   }

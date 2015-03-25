@@ -134,7 +134,7 @@ public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrate
       int prefsLength = prefs.length();
       if (prefsLength > maxUsersPerItem) {
         Iterator<Preference> sampledPrefs =
-            new FixedSizeSamplingIterator<Preference>(maxUsersPerItem, prefs.iterator());
+            new FixedSizeSamplingIterator<>(maxUsersPerItem, prefs.iterator());
         while (sampledPrefs.hasNext()) {
           addSomeOf(possibleItemsIDs, dataModel.getItemIDsFromUser(sampledPrefs.next().getUserID()));
         }

@@ -104,7 +104,7 @@ public final class SequenceFileIterator<K extends Writable,V extends Writable>
         close();
         return null;
       }
-      return new Pair<K,V>(key, value);
+      return new Pair<>(key, value);
     } catch (IOException ioe) {
       try {
         close();

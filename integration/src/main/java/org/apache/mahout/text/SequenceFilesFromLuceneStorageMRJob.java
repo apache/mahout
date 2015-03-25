@@ -58,11 +58,7 @@ public class SequenceFilesFromLuceneStorageMRJob {
       job.setNumReduceTasks(0);
 
       job.waitForCompletion(true);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    } catch (ClassNotFoundException e) {
+    } catch (IOException | InterruptedException | ClassNotFoundException e) {
       throw new RuntimeException(e);
     }
   }

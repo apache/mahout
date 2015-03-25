@@ -68,7 +68,7 @@ public final class MatrixDumper extends AbstractJob {
   
   private static void exportCSV(Path inputPath, String outputFile, boolean doLabels) throws IOException {
     SequenceFileValueIterator<MatrixWritable> it =
-        new SequenceFileValueIterator<MatrixWritable>(inputPath, true, new Configuration());
+        new SequenceFileValueIterator<>(inputPath, true, new Configuration());
     Matrix m = it.next().get();
     it.close();
     PrintStream ps = getPrintStream(outputFile);

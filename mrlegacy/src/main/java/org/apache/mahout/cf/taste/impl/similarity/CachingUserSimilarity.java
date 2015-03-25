@@ -56,7 +56,7 @@ public final class CachingUserSimilarity implements UserSimilarity {
   public CachingUserSimilarity(UserSimilarity similarity, int maxCacheSize) {
     Preconditions.checkArgument(similarity != null, "similarity is null");
     this.similarity = similarity;
-    this.similarityCache = new Cache<LongPair,Double>(new SimilarityRetriever(similarity), maxCacheSize);
+    this.similarityCache = new Cache<>(new SimilarityRetriever(similarity), maxCacheSize);
     this.refreshHelper = new RefreshHelper(new Callable<Void>() {
       @Override
       public Void call() {

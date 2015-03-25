@@ -33,7 +33,7 @@ public class TermCountMapper extends Mapper<Text, StringTuple, Text, LongWritabl
 
   @Override
   protected void map(Text key, StringTuple value, final Context context) throws IOException, InterruptedException {
-    OpenObjectLongHashMap<String> wordCount = new OpenObjectLongHashMap<String>();
+    OpenObjectLongHashMap<String> wordCount = new OpenObjectLongHashMap<>();
     for (String word : value.getEntries()) {
       if (wordCount.containsKey(word)) {
         wordCount.put(word, wordCount.get(word) + 1);

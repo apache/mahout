@@ -63,7 +63,7 @@ public class PredictionMapper extends SharingMapper<IntWritable,VectorWritable,L
     OpenIntObjectHashMap<Vector> U = ALS.readMatrixByRows(pathToU, conf);
     OpenIntObjectHashMap<Vector> M = ALS.readMatrixByRows(pathToM, conf);
 
-    return new Pair<OpenIntObjectHashMap<Vector>, OpenIntObjectHashMap<Vector>>(U, M);
+    return new Pair<>(U, M);
   }
 
   @Override

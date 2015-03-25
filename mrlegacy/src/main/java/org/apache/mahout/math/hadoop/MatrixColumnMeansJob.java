@@ -107,7 +107,7 @@ public final class MatrixColumnMeansJob {
 
       Path tmpFile = new Path(outputVectorTmpPath, "part-r-00000");
       SequenceFileValueIterator<VectorWritable> iterator =
-        new SequenceFileValueIterator<VectorWritable>(tmpFile, true, initialConf);
+        new SequenceFileValueIterator<>(tmpFile, true, initialConf);
       try {
         if (iterator.hasNext()) {
           return iterator.next().get();

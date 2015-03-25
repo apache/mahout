@@ -56,7 +56,7 @@ public class BayesTestMapper extends Mapper<Text, VectorWritable, Text, VectorWr
     // trained complementary. a complementarty model will work for standard classification
     // a standard model will not work for complementary classification
     if (isComplementary) {
-      Preconditions.checkArgument((model.isComplemtary() == isComplementary),
+      Preconditions.checkArgument((model.isComplemtary()),
           "Complementary mode in model is different than test mode");
     }
     

@@ -95,8 +95,8 @@
   </mailingLists>
   <properties>
     <skipTests>false</skipTests>
-    <maven.compiler.source>1.6</maven.compiler.source>
-    <maven.compiler.target>1.6</maven.compiler.target>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
     <maven.clover.multiproject>true</maven.clover.multiproject>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <msurefire.version>2.16</msurefire.version>
@@ -104,11 +104,11 @@
     <mcheckstyle.version>2.10</mcheckstyle.version>
     <mfindbugs.version>2.5.2</mfindbugs.version>
     <mjavadoc.version>2.9.1</mjavadoc.version>
-    <hadoop.version>2.2.0</hadoop.version>
+    <hadoop.version>2.6.0</hadoop.version>
     <hadoop.classifier>hadoop2</hadoop.classifier>
     <hbase.version>0.98.0-${hadoop.classifier}</hbase.version>
     <lucene.version>4.6.1</lucene.version>
-    <slf4j.version>1.7.5</slf4j.version>
+    <slf4j.version>1.7.10</slf4j.version>
     <scala.major>2.10</scala.major>
     <scala.version>2.10.4</scala.version>
     <spark.version>1.1.1</spark.version>

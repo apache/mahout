@@ -56,7 +56,7 @@ public class WeightedPropertyVectorWritable extends WeightedVectorWritable {
     super.readFields(in);
     int size = in.readInt();
     if (size > 0) {
-      properties = new HashMap<Text, Text>();
+      properties = new HashMap<>();
       for (int i = 0; i < size; i++) {
         Text key = new Text(in.readUTF());
         Text val = new Text(in.readUTF());

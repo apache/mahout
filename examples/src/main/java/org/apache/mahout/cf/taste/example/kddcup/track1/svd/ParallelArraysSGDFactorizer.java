@@ -107,7 +107,7 @@ public class ParallelArraysSGDFactorizer implements Factorizer {
     int numPrefs = factorizablePreferences.numPreferences();
 
     log.info("Mapping {} users...", numUsers);
-    userIDMapping = new FastByIDMap<Integer>(numUsers);
+    userIDMapping = new FastByIDMap<>(numUsers);
     int index = 0;
     LongPrimitiveIterator userIterator = factorizablePreferences.getUserIDs();
     while (userIterator.hasNext()) {
@@ -115,7 +115,7 @@ public class ParallelArraysSGDFactorizer implements Factorizer {
     }
 
     log.info("Mapping {} items", numItems);
-    itemIDMapping = new FastByIDMap<Integer>(numItems);
+    itemIDMapping = new FastByIDMap<>(numItems);
     index = 0;
     LongPrimitiveIterator itemIterator = factorizablePreferences.getItemIDs();
     while (itemIterator.hasNext()) {

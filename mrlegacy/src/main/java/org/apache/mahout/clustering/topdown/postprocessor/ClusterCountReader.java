@@ -73,11 +73,11 @@ public final class ClusterCountReader {
    */
   public static Map<Integer, Integer> getClusterIDs(Path clusterOutputPath, Configuration conf, boolean keyIsClusterId)
     throws IOException {
-    Map<Integer, Integer> clusterIds = new HashMap<Integer, Integer>();
+    Map<Integer, Integer> clusterIds = new HashMap<>();
     FileSystem fileSystem = clusterOutputPath.getFileSystem(conf);
     FileStatus[] clusterFiles = fileSystem.listStatus(clusterOutputPath, PathFilters.finalPartFilter());
     //System.out.println("LOOK HERE: " + clusterOutputPath);
-    Iterator<ClusterWritable> it = new SequenceFileDirValueIterator<ClusterWritable>(clusterFiles[0].getPath(),
+    Iterator<ClusterWritable> it = new SequenceFileDirValueIterator<>(clusterFiles[0].getPath(),
             PathType.LIST,
             PathFilters.partFilter(),
             null,

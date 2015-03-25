@@ -112,26 +112,20 @@ public class DistributedConjugateGradientSolver extends ConjugateGradientSolver 
   
   private Vector loadInputVector(Path path) throws IOException {
     FileSystem fs = path.getFileSystem(conf);
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-    try {
+    try (SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf)) {
       VectorWritable value = new VectorWritable();
       if (!reader.next(new IntWritable(), value)) {
-        throw new IOException("Input vector file is empty.");      
+        throw new IOException("Input vector file is empty.");
       }
       return value.get();
-    } finally {
-      reader.close();
     }
   }
   
   private void saveOutputVector(Path path, Vector v) throws IOException {
     FileSystem fs = path.getFileSystem(conf);
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
-    
-    try {
+    try (SequenceFile.Writer writer =
+             new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class)) {
       writer.append(new IntWritable(0), new VectorWritable(v));
-    } finally {
-      writer.close();
     }
   }
   

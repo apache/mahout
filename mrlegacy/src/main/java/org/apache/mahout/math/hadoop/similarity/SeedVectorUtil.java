@@ -52,7 +52,7 @@ final class SeedVectorUtil {
     List<NamedVector> seedVectors = Lists.newArrayList();
     long item = 0;
     for (Writable value
-        : new SequenceFileDirValueIterable<Writable>(new Path(seedPathStr),
+        : new SequenceFileDirValueIterable<>(new Path(seedPathStr),
                                                     PathType.LIST,
                                                     PathFilters.partFilter(),
                                                     conf)) {

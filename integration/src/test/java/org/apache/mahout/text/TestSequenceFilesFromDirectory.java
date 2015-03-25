@@ -219,7 +219,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
 
     // read a chunk to check content
     SequenceFileIterator<Text, Text> iterator =
-      new SequenceFileIterator<Text, Text>(fileStatuses[0].getPath(), true, configuration);
+      new SequenceFileIterator<>(fileStatuses[0].getPath(), true, configuration);
     try {
       while (iterator.hasNext()) {
         Pair<Text, Text> record = iterator.next();
@@ -254,7 +254,8 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     }
 
     // read a chunk to check content
-    SequenceFileIterator<Text, Text> iterator = new SequenceFileIterator<Text, Text>(fileStatuses[0].getPath(), true, configuration);
+    SequenceFileIterator<Text, Text> iterator =
+        new SequenceFileIterator<>(fileStatuses[0].getPath(), true, configuration);
     try {
       while (iterator.hasNext()) {
         Pair<Text, Text> record = iterator.next();
@@ -285,7 +286,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     }
 
     // read a chunk to check content
-    SequenceFileIterator<Text, Text> iterator = new SequenceFileIterator<Text, Text>(
+    SequenceFileIterator<Text, Text> iterator = new SequenceFileIterator<>(
       fileStatuses[0].getPath(), true, conf);
     try {
       while (iterator.hasNext()) {
@@ -318,7 +319,7 @@ public final class TestSequenceFilesFromDirectory extends MahoutTestCase {
     }
 
     // read a chunk to check content
-    SequenceFileIterator<Text, Text> iterator = new SequenceFileIterator<Text, Text>(
+    SequenceFileIterator<Text, Text> iterator = new SequenceFileIterator<>(
       fileStatuses[0].getPath(), true, configuration);
     try {
       while (iterator.hasNext()) {

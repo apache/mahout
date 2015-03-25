@@ -85,7 +85,7 @@ public class State<T extends Payload<U>, U> implements Comparable<State<T, U>>, 
    * Deep copies a state, useful in mutation.
    */
   public State<T, U> copy() {
-    State<T, U> r = new State<T, U>();
+    State<T, U> r = new State<>();
     r.params = Arrays.copyOf(this.params, this.params.length);
     r.omni = this.omni;
     r.step = Arrays.copyOf(this.step, this.step.length);

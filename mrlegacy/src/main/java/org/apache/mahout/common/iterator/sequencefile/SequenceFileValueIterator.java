@@ -52,7 +52,7 @@ public final class SequenceFileValueIterator<V extends Writable> extends Abstrac
   public SequenceFileValueIterator(Path path, boolean reuseKeyValueInstances, Configuration conf) throws IOException {
     value = null;
     FileSystem fs = path.getFileSystem(conf);
-    path = path.makeQualified(fs);
+    path = path.makeQualified(path.toUri(), path);
     reader = new SequenceFile.Reader(fs, path, conf);
     this.conf = conf;
     Class<? extends Writable> keyClass = (Class<? extends Writable>) reader.getKeyClass();

@@ -236,8 +236,6 @@ public final class MahoutDriver {
     try {
       Class<?> clazz = Class.forName(classString);
       driver.addClass(shortName(descString), clazz, desc(descString));
-    } catch (ClassNotFoundException e) {
-      log.warn("Unable to add class: {}", classString, e);
     } catch (Throwable t) {
       log.warn("Unable to add class: {}", classString, t);
     }

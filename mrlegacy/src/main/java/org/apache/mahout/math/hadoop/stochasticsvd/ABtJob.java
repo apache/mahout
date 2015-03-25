@@ -90,7 +90,7 @@ public final class ABtJob {
       Mapper<Writable, VectorWritable, SplitPartitionedWritable, SparseRowBlockWritable> {
 
     private SplitPartitionedWritable outKey;
-    private final Deque<Closeable> closeables = new ArrayDeque<Closeable>();
+    private final Deque<Closeable> closeables = new ArrayDeque<>();
     private SequenceFileDirIterator<IntWritable, VectorWritable> btInput;
     private Vector[] aCols;
     // private Vector[] yiRows;
@@ -226,7 +226,7 @@ public final class ABtJob {
         }
 
         btInput =
-          new SequenceFileDirIterator<IntWritable, VectorWritable>(new Path(btLocalPath.toString()),
+          new SequenceFileDirIterator<>(new Path(btLocalPath.toString()),
                                                                    PathType.LIST,
                                                                    null,
                                                                    null,
@@ -236,12 +236,7 @@ public final class ABtJob {
       } else {
 
         btInput =
-          new SequenceFileDirIterator<IntWritable, VectorWritable>(btPath,
-                                                                   PathType.GLOB,
-                                                                   null,
-                                                                   null,
-                                                                   true,
-                                                                   context.getConfiguration());
+          new SequenceFileDirIterator<>(btPath, PathType.GLOB, null, null, true, context.getConfiguration());
       }
       // TODO: how do i release all that stuff??
       closeables.addFirst(btInput);
@@ -298,7 +293,6 @@ public final class ABtJob {
 
     protected int blockHeight;
 
-    protected int accumSize;
     protected int lastTaskId = -1;
 
     protected OutputCollector<Writable, DenseBlockWritable> qhatCollector;

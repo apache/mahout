@@ -45,14 +45,8 @@ public final class ClassUtils {
                                     Object[] args) {
     try {
       return clazz.asSubclass(asSubclassOfClass).getConstructor(params).newInstance(args);
-    } catch (InstantiationException ie) {
+    } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException ie) {
       throw new IllegalStateException(ie);
-    } catch (IllegalAccessException iae) {
-      throw new IllegalStateException(iae);
-    } catch (NoSuchMethodException nsme) {
-      throw new IllegalStateException(nsme);
-    } catch (InvocationTargetException ite) {
-      throw new IllegalStateException(ite);
     }
   }
 
@@ -60,14 +54,8 @@ public final class ClassUtils {
   public static <T> T instantiateAs(Class<? extends T> clazz, Class<T> asSubclassOfClass) {
     try {
       return clazz.asSubclass(asSubclassOfClass).getConstructor().newInstance();
-    } catch (InstantiationException ie) {
+    } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException ie) {
       throw new IllegalStateException(ie);
-    } catch (IllegalAccessException iae) {
-      throw new IllegalStateException(iae);
-    } catch (NoSuchMethodException nsme) {
-      throw new IllegalStateException(nsme);
-    } catch (InvocationTargetException ite) {
-      throw new IllegalStateException(ite);
     }
   }
 }

@@ -97,7 +97,7 @@ public final class VectorDumper extends AbstractJob {
     FileSystem fs = FileSystem.get(conf);
     Path input = getInputPath();
     FileStatus fileStatus = fs.getFileStatus(input);
-    if (fileStatus.isDir()) {
+    if (fileStatus.isDirectory()) {
       pathArr = FileUtil.stat2Paths(fs.listStatus(input, PathFilters.logsCRCFilter()));
     } else {
       FileStatus[] inputPaths = fs.globStatus(input);
@@ -186,8 +186,7 @@ public final class VectorDumper extends AbstractJob {
         if (quiet) {
           log.info("Processing file '{}' ({}/{})", path, ++fileCount, pathArr.length);
         }
-        SequenceFileIterable<Writable, Writable> iterable =
-                new SequenceFileIterable<Writable, Writable>(path, true, conf);
+        SequenceFileIterable<Writable, Writable> iterable = new SequenceFileIterable<>(path, true, conf);
         Iterator<Pair<Writable, Writable>> iterator = iterable.iterator();
         long i = 0;
         while (iterator.hasNext() && (numItems == null || itemCount < numItems)) {

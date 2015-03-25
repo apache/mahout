@@ -45,11 +45,11 @@ public class StableFixedSizeSamplingIterator<T> extends ForwardingIterator<T> {
       T v = source.next();
       sofar++;
       if (buf.size() < size) {
-        buf.add(new Pair<Integer,T>(sofar, v));
+        buf.add(new Pair<>(sofar, v));
       } else {
         int position = random.nextInt(sofar);
         if (position < buf.size()) {
-          buf.set(position, new Pair<Integer,T>(sofar, v));
+          buf.set(position, new Pair<>(sofar, v));
         }
       }
     }

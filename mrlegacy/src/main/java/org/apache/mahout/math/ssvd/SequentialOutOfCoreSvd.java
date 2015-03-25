@@ -122,11 +122,8 @@ public class SequentialOutOfCoreSvd {
     // step 1, compute R as in R'R = Y'Y where Y = A \Omega
     for (File file : partsOfA) {
       MatrixWritable m = new MatrixWritable();
-      DataInputStream in = new DataInputStream(new FileInputStream(file));
-      try {
+      try (DataInputStream in = new DataInputStream(new FileInputStream(file))) {
         m.readFields(in);
-      } finally {
-        in.close();
       }
 
       Matrix aI = m.get();
@@ -145,11 +142,8 @@ public class SequentialOutOfCoreSvd {
     int ncols = 0;
     for (File file : partsOfA) {
       MatrixWritable m = new MatrixWritable();
-      DataInputStream in = new DataInputStream(new FileInputStream(file));
-      try {
+      try (DataInputStream in = new DataInputStream(new FileInputStream(file))) {
         m.readFields(in);
-      } finally {
-        in.close();
       }
       Matrix aI = m.get();
       ncols = Math.max(ncols, aI.columnSize());
@@ -168,11 +162,8 @@ public class SequentialOutOfCoreSvd {
     MatrixWritable bTmp = new MatrixWritable();
     for (int j = 0; j < ncols; j += columnsPerSlice) {
       if (bFile(tmpDir, j).exists()) {
-        DataInputStream in = new DataInputStream(new FileInputStream(bFile(tmpDir, j)));
-        try {
+        try (DataInputStream in = new DataInputStream(new FileInputStream(bFile(tmpDir, j)))) {
           bTmp.readFields(in);
-        } finally {
-          in.close();
         }
 
         b2.assign(bTmp.get().times(bTmp.get().transpose()), Functions.PLUS);
@@ -188,19 +179,13 @@ public class SequentialOutOfCoreSvd {
       File bPath = bFile(tmpDir, j);
       if (bPath.exists()) {
         MatrixWritable m = new MatrixWritable();
-        DataInputStream in = new DataInputStream(new FileInputStream(bPath));
-        try {
+        try (DataInputStream in = new DataInputStream(new FileInputStream(bPath))) {
           m.readFields(in);
-        } finally {
-          in.close();
         }
         m.set(l2.solveRight(m.get().transpose()).times(svd.getV()));
-        DataOutputStream out = new DataOutputStream(new FileOutputStream(
-            new File(tmpDir, String.format("V-%s", bPath.getName().replaceAll(".*-", "")))));
-        try {
+        try (DataOutputStream out = new DataOutputStream(new FileOutputStream(
+            new File(tmpDir, String.format("V-%s", bPath.getName().replaceAll(".*-", "")))))) {
           m.write(out);
-        } finally {
-          out.close();
         }
       }
     }
@@ -216,12 +201,9 @@ public class SequentialOutOfCoreSvd {
       Matrix y = aI.times(new RandomTrinaryMatrix(seed, aI.numCols(), dim, false));
       Matrix uI = r2.solveRight(y).times(svd.getU());
       m.set(uI);
-      DataOutputStream out = new DataOutputStream(new FileOutputStream(
-          new File(tmpDir, String.format("U-%s", file.getName().replaceAll(".*-", "")))));
-      try {
+      try (DataOutputStream out = new DataOutputStream(new FileOutputStream(
+          new File(tmpDir, String.format("U-%s", file.getName().replaceAll(".*-", "")))))) {
         m.write(out);
-      } finally {
-        out.close();
       }
     }
   }
@@ -229,21 +211,15 @@ public class SequentialOutOfCoreSvd {
   private static void addToSavedCopy(File file, Matrix matrix) throws IOException {
     MatrixWritable mw = new MatrixWritable();
     if (file.exists()) {
-      DataInputStream in = new DataInputStream(new FileInputStream(file));
-      try {
+      try (DataInputStream in = new DataInputStream(new FileInputStream(file))) {
         mw.readFields(in);
-      } finally {
-        in.close();
       }
       mw.get().assign(matrix, Functions.PLUS);
     } else {
       mw.set(matrix);
     }
-    DataOutputStream out = new DataOutputStream(new FileOutputStream(file));
-    try {
+    try (DataOutputStream out = new DataOutputStream(new FileOutputStream(file))) {
       mw.write(out);
-    } finally {
-      out.close();
     }
   }
 

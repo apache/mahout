@@ -129,7 +129,7 @@ public class ClusterEvaluator {
    * @return a Map<Integer, Vector>
    */
   public Map<Integer,Vector> interClusterDistances() {
-    Map<Integer,Vector> distances = new TreeMap<Integer,Vector>();
+    Map<Integer,Vector> distances = new TreeMap<>();
     for (int i = 0; i < clusters.size(); i++) {
       Cluster clusterI = clusters.get(i);
       RandomAccessSparseVector row = new RandomAccessSparseVector(Integer.MAX_VALUE);

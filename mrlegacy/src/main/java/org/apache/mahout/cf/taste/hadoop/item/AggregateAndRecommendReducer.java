@@ -212,10 +212,8 @@ public final class AggregateAndRecommendReducer extends
       return true;
     } else if (itemsForUser != null) {
       return itemsForUser.contains(itemID);
-    } else if (allItemsToRecommendFor != null) {
-      return allItemsToRecommendFor.contains(itemID);
     } else {
-      return false;
+      return allItemsToRecommendFor.contains(itemID);
     }
   }
 

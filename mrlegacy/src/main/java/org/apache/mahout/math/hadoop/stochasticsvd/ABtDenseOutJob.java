@@ -94,7 +94,7 @@ public final class ABtDenseOutJob {
       Mapper<Writable, VectorWritable, SplitPartitionedWritable, DenseBlockWritable> {
 
     private SplitPartitionedWritable outKey;
-    private final Deque<Closeable> closeables = new ArrayDeque<Closeable>();
+    private final Deque<Closeable> closeables = new ArrayDeque<>();
     private SequenceFileDirIterator<IntWritable, VectorWritable> btInput;
     private Vector[] aCols;
     private double[][] yiCols;
@@ -190,19 +190,12 @@ public final class ABtDenseOutJob {
           if (distributedBt) {
 
             btInput =
-              new SequenceFileDirIterator<IntWritable, VectorWritable>(btLocalPath,
-                                                                       true,
-                                                                       localFsConfig);
+              new SequenceFileDirIterator<>(btLocalPath, true, localFsConfig);
 
           } else {
 
             btInput =
-              new SequenceFileDirIterator<IntWritable, VectorWritable>(btPath,
-                                                                       PathType.GLOB,
-                                                                       null,
-                                                                       null,
-                                                                       true,
-                                                                       context.getConfiguration());
+              new SequenceFileDirIterator<>(btPath, PathType.GLOB, null, null, true, context.getConfiguration());
           }
           closeables.addFirst(btInput);
           Validate.isTrue(btInput.hasNext(), "Empty B' input!");
@@ -368,7 +361,6 @@ public final class ABtDenseOutJob {
 
     protected int blockHeight;
 
-    protected int accumSize;
     protected int lastTaskId = -1;
 
     protected OutputCollector<Writable, DenseBlockWritable> qhatCollector;

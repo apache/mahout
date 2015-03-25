@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.io.CharStreams;
 import com.google.common.io.Resources;
 import org.apache.mahout.math.Matrix;
 import org.slf4j.Logger;
@@ -122,7 +121,7 @@ public final class PosTagger {
     List<Integer> observedSequence = Lists.newLinkedList();
     List<Integer> hiddenSequence = Lists.newLinkedList();
 
-    for (String line : CharStreams.readLines(Resources.newReaderSupplier(new URL(url), Charsets.UTF_8))) {
+    for (String line :Resources.readLines(new URL(url), Charsets.UTF_8)) {
       if (line.isEmpty()) {
         // new sentence starts
         int[] observedSequenceArray = new int[observedSequence.size()];

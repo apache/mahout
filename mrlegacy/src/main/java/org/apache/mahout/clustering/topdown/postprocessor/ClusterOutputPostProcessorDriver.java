@@ -159,7 +159,7 @@ public final class ClusterOutputPostProcessorDriver extends AbstractJob {
     FileSystem fileSystem = output.getFileSystem(conf);
     for (FileStatus fileStatus : fileSystem.listStatus(output, PathFilters.partFilter())) {
       SequenceFileIterator<Writable, Writable> it =
-              new SequenceFileIterator<Writable, Writable>(fileStatus.getPath(), true, conf);
+              new SequenceFileIterator<>(fileStatus.getPath(), true, conf);
       if (it.hasNext()) {
         renameFile(it.next().getFirst(), fileStatus, conf);
       }

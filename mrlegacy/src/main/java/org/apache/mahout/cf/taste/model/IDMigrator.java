@@ -50,8 +50,6 @@ public interface IDMigrator extends Refreshable {
   /**
    * @return the top 8 bytes of the MD5 hash of the bytes of the given {@link String}'s UTF-8 encoding as a
    *         long.
-   * @throws TasteException
-   *           if an error occurs while storing the mapping
    */
   long toLongID(String stringID);
   

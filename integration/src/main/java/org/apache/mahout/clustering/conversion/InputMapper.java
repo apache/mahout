@@ -59,11 +59,7 @@ public class InputMapper extends Mapper<LongWritable, Text, Text, VectorWritable
         VectorWritable vectorWritable = new VectorWritable(result);
         context.write(new Text(String.valueOf(index)), vectorWritable);
 
-      } catch (InstantiationException e) {
-        throw new IllegalStateException(e);
-      } catch (IllegalAccessException e) {
-        throw new IllegalStateException(e);
-      } catch (InvocationTargetException e) {
+      } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
         throw new IllegalStateException(e);
       }
     }
@@ -77,9 +73,7 @@ public class InputMapper extends Mapper<LongWritable, Text, Text, VectorWritable
     try {
       Class<? extends Vector> outputClass = conf.getClassByName(vectorImplClassName).asSubclass(Vector.class);
       constructor = outputClass.getConstructor(int.class);
-    } catch (NoSuchMethodException e) {
-      throw new IllegalStateException(e);
-    } catch (ClassNotFoundException e) {
+    } catch (NoSuchMethodException | ClassNotFoundException e) {
       throw new IllegalStateException(e);
     }
   }

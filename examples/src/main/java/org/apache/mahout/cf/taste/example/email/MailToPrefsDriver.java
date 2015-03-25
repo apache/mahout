@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Convert the Mail archives (see {@link org.apache.mahout.text.SequenceFilesFromMailArchives}) to a preference
- * file that can be consumed by the {@link org.apache.mahout.cf.taste.hadoop.pseudo.RecommenderJob}.
+ * file that can be consumed by the {@link org.apache.mahout.cf.taste.hadoop.item.RecommenderJob}.
  * <p/>
  * This assumes the input is a Sequence File, that the key is: filename/message id and the value is a list
  * (separated by the user's choosing) containing the from email and any references
@@ -246,7 +246,7 @@ public final class MailToPrefsDriver extends AbstractJob {
       Path filesPattern = new Path(inputPath, OUTPUT_FILES_PATTERN);
       int i = 1; //start at 1, since a miss in the OpenObjectIntHashMap returns a 0
       for (Pair<Writable, Writable> record
-              : new SequenceFileDirIterable<Writable, Writable>(filesPattern, PathType.GLOB, null, null, true, conf)) {
+              : new SequenceFileDirIterable<>(filesPattern, PathType.GLOB, null, null, true, conf)) {
         if (currentChunkSize > chunkSizeLimit) {
           Closeables.close(dictWriter, false);
           chunkIndex++;

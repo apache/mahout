@@ -129,7 +129,6 @@ public final class SSVDSolver {
    * @param k           desired rank
    * @param p           SSVD oversampling parameter
    * @param reduceTasks Number of reduce tasks (where applicable)
-   * @throws IOException when IO condition occurs.
    */
   public SSVDSolver(Configuration conf,
                     Path[] inputPath,

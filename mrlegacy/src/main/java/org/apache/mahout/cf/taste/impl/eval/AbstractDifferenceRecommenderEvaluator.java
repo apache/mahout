@@ -106,9 +106,9 @@ public abstract class AbstractDifferenceRecommenderEvaluator implements Recommen
     log.info("Beginning evaluation using {} of {}", trainingPercentage, dataModel);
     
     int numUsers = dataModel.getNumUsers();
-    FastByIDMap<PreferenceArray> trainingPrefs = new FastByIDMap<PreferenceArray>(
+    FastByIDMap<PreferenceArray> trainingPrefs = new FastByIDMap<>(
         1 + (int) (evaluationPercentage * numUsers));
-    FastByIDMap<PreferenceArray> testPrefs = new FastByIDMap<PreferenceArray>(
+    FastByIDMap<PreferenceArray> testPrefs = new FastByIDMap<>(
         1 + (int) (evaluationPercentage * numUsers));
     
     LongPrimitiveIterator it = dataModel.getUserIDs();

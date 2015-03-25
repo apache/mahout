@@ -454,7 +454,7 @@ public class TopicModel implements Configurable, Iterable<MatrixSlice> {
 
   private final class Updater implements Runnable {
     private final ArrayBlockingQueue<Pair<Integer, Vector>> queue =
-        new ArrayBlockingQueue<Pair<Integer, Vector>>(100);
+        new ArrayBlockingQueue<>(100);
     private boolean shutdown = false;
     private boolean shutdownComplete = false;
 

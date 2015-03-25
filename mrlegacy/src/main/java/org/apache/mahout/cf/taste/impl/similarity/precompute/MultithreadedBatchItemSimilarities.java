@@ -84,7 +84,7 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
       DataModel dataModel = getRecommender().getDataModel();
 
       BlockingQueue<long[]> itemsIDsInBatches = queueItemIDsInBatches(dataModel, batchSize, degreeOfParallelism);
-      BlockingQueue<List<SimilarItems>> results = new LinkedBlockingQueue<List<SimilarItems>>();
+      BlockingQueue<List<SimilarItems>> results = new LinkedBlockingQueue<>();
 
       AtomicInteger numActiveWorkers = new AtomicInteger(degreeOfParallelism);
       for (int n = 0; n < degreeOfParallelism; n++) {
@@ -118,7 +118,7 @@ public class MultithreadedBatchItemSimilarities extends BatchItemSimilarities {
     LongPrimitiveIterator itemIDs = dataModel.getItemIDs();
     int numItems = dataModel.getNumItems();
 
-    BlockingQueue<long[]> itemIDBatches = new LinkedBlockingQueue<long[]>((numItems / batchSize) + 1);
+    BlockingQueue<long[]> itemIDBatches = new LinkedBlockingQueue<>((numItems / batchSize) + 1);
 
     long[] batch = new long[batchSize];
     int pos = 0;

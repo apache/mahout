@@ -39,7 +39,7 @@ public final class CachingUserNeighborhood implements UserNeighborhood {
     Preconditions.checkArgument(neighborhood != null, "neighborhood is null");
     this.neighborhood = neighborhood;
     int maxCacheSize = dataModel.getNumUsers(); // just a dumb heuristic for sizing
-    this.neighborhoodCache = new Cache<Long,long[]>(new NeighborhoodRetriever(neighborhood), maxCacheSize);
+    this.neighborhoodCache = new Cache<>(new NeighborhoodRetriever(neighborhood), maxCacheSize);
   }
   
   @Override

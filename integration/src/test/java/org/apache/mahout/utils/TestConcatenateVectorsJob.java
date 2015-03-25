@@ -57,7 +57,7 @@ public class TestConcatenateVectorsJob extends MahoutTestCase {
     // Yes, all of this generic rigmarole is needed, and woe betide he who changes it
     ConcatenateVectorsReducer reducer = new ConcatenateVectorsReducer();
 
-    DummyRecordWriter<IntWritable, VectorWritable> recordWriter = new DummyRecordWriter<IntWritable, VectorWritable>();
+    DummyRecordWriter<IntWritable, VectorWritable> recordWriter = new DummyRecordWriter<>();
 
     Reducer<IntWritable, VectorWritable, IntWritable, VectorWritable>.Context reduceContext =
       DummyRecordWriter.build(reducer, configuration, recordWriter, IntWritable.class, VectorWritable.class);

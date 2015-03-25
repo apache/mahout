@@ -46,7 +46,7 @@ public final class AveragingPreferenceInferrer implements PreferenceInferrer {
   public AveragingPreferenceInferrer(DataModel dataModel) throws TasteException {
     this.dataModel = dataModel;
     Retriever<Long,Float> retriever = new PrefRetriever();
-    averagePreferenceValue = new Cache<Long,Float>(retriever, dataModel.getNumUsers());
+    averagePreferenceValue = new Cache<>(retriever, dataModel.getNumUsers());
     refresh(null);
   }
   

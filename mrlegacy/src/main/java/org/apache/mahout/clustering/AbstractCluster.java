@@ -301,7 +301,7 @@ public abstract class AbstractCluster implements Cluster {
   }
 
   public Map<String,Object> asJson(String[] bindings) {
-    Map<String,Object> dict = new HashMap<String,Object>();
+    Map<String,Object> dict = new HashMap<>();
     dict.put("identifier", getIdentifier());
     dict.put("n", getNumObservations());
     if (getCenter() != null) {

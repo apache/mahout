@@ -50,7 +50,7 @@ import java.util.Iterator;
  */
 public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, VectorWritable> {
 
-  private final OpenObjectIntHashMap<String> dictionary = new OpenObjectIntHashMap<String>();
+  private final OpenObjectIntHashMap<String> dictionary = new OpenObjectIntHashMap<>();
 
   private int dimension;
   private boolean sequentialAccess;
