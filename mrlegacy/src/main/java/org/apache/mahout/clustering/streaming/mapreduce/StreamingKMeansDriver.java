@@ -169,7 +169,7 @@ public final class StreamingKMeansDriver extends AbstractJob {
     addOption(ESTIMATED_NUM_MAP_CLUSTERS, "km", "The estimated number of clusters to use for the "
         + "Map phase of the job when running StreamingKMeans. This should be around k * log(n), "
         + "where k is the final number of clusters and n is the total number of data points to "
-        + "cluster.");
+        + "cluster.", String.valueOf(1));
 
     addOption(ESTIMATED_DISTANCE_CUTOFF, "e", "The initial estimated distance cutoff between two "
         + "points for forming new clusters. If no value is given, it's estimated from the data set",
