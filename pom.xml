@@ -602,7 +602,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.1</version>
+          <version>3.2</version>
           <configuration>
             <!-- encoding, source and target are explicitly defined until MNGECLIPSE-966 is fixed -->
             <encoding>${project.build.sourceEncoding}</encoding>
