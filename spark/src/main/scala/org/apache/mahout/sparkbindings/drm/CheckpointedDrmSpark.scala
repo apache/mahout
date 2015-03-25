@@ -167,7 +167,7 @@ class CheckpointedDrmSpark[K: ClassTag](
       else throw new IllegalArgumentException("Do not know how to convert class tag %s to Writable.".format(ktag))
 
     //rdd.saveAsSequenceFile(path)
-    SparkContext.rddToSequenceFileRDDFunctions(rdd.asInstanceOf[RDD[(K, VectorWritable)]]).saveAsSequenceFile(path)
+    SparkContext.rddToSequenceFileRDDFunctions(rdd.asInstanceOf[RDD[(K, Vector)]]).saveAsSequenceFile(path)
   }
 
   protected def computeNRow = {
