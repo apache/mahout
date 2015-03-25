@@ -62,7 +62,6 @@ trait DistributedSparkSuite extends DistributedMahoutSuite with LoggerConfigurat
     resetContext()
   }
 
-
   override protected def beforeAll(configMap: ConfigMap): Unit = {
     super.beforeAll(configMap)
     initContext()

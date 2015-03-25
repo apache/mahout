@@ -18,7 +18,6 @@
 package org.apache.mahout.sparkbindings.drm
 
 import org.apache.mahout.math._
-import org.apache.spark.rdd.RDD
 import math._
 import scalabindings._
 import RLikeOps._
@@ -32,6 +31,7 @@ import org.apache.mahout.math.drm._
 import org.apache.mahout.sparkbindings._
 import org.apache.spark.SparkContext._
 import org.apache.spark.SparkContext
+import org.apache.spark.rdd.RDD
 
 /** ==Spark-specific optimizer-checkpointed DRM.==
   *
@@ -167,7 +167,6 @@ class CheckpointedDrmSpark[K: ClassTag](
       else if (classOf[Writable].isAssignableFrom(ktag.runtimeClass)) (x: K) => x.asInstanceOf[Writable]
       else throw new IllegalArgumentException("Do not know how to convert class tag %s to Writable.".format(ktag))
 
-    //rdd.saveAsSequenceFile(path)
     SparkContext.rddToSequenceFileRDDFunctions(rdd.asInstanceOf[RDD[(K, Vector)]]).saveAsSequenceFile(path)
   }
 
