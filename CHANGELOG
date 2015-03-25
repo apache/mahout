@@ -2,7 +2,9 @@ Mahout Change Log
 
 Release 0.10.0 - unreleased
 
-  MAHOUT-1639: Streamingkmeans doesn't properly validate estimatedNumMapClusters -km (smarthi)
+  MAHOUT-1652: Java 7 update (smarthi)
+
+  MAHOUT-1639: Streaming kmeans doesn't properly validate estimatedNumMapClusters -km (smarthi)
 
   MAHOUT-1493: Port Naive Bayes to Scala DSL (apalumbo) 
 
