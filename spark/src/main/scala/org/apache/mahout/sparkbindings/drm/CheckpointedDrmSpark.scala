@@ -30,6 +30,7 @@ import scala.util.Random
 import org.apache.hadoop.io.{LongWritable, Text, IntWritable, Writable}
 import org.apache.mahout.math.drm._
 import org.apache.mahout.sparkbindings._
+import org.apache.spark.SparkContext._
 import org.apache.spark.SparkContext
 
 /** ==Spark-specific optimizer-checkpointed DRM.==
