@@ -69,7 +69,7 @@ public class TimesRightMatrix {
 
         for (int c = 0; c < ncs.length; c++) {
           for (int r = 0; r < chunkSize; r++) {
-            double v = (chks[c].at0(r) * D.getQuick(c));
+            double v = (chks[c].atd(r) * D.getQuick(c));
             ncs[c].addNum(v);
           }
         }
@@ -94,7 +94,7 @@ public class TimesRightMatrix {
           for (int r = 0; r < chunkSize; r++) {
             double v = 0;
             for (int i = 0; i < chks.length; i++) {
-              v += (chks[i].at0(r) * B.getQuick(i, c));
+              v += (chks[i].atd(r) * B.getQuick(i, c));
             }
             ncs[c].addNum(v);
           }

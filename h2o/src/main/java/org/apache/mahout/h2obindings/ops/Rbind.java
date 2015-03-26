@@ -64,12 +64,12 @@ public class Rbind {
           for (int r = 0; r < chunkSize; r++) {
             for (int c = 0; c < chks.length; c++) {
               if (r + start < A_rows) {
-                chks[c].set0(r, A_vecs[c].at(r + start));
+                chks[c].set(r, A_vecs[c].at(r + start));
                 if (keysa != null) {
                   nc.addStr(keysa.atStr(vstr, r + start));
                 }
               } else {
-                chks[c].set0(r, B_vecs[c].at(r + start - A_rows));
+                chks[c].set(r, B_vecs[c].at(r + start - A_rows));
                 if (keysb != null) {
                   nc.addStr(keysb.atStr(vstr, r + start - A_rows));
                 }

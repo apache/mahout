@@ -64,7 +64,7 @@ public class Par {
 
             for (int r = 0; r < chunkSize; r++) {
               for (int c = 0; c < chks.length; c++) {
-                chks[c].set0(r, vins[c].at(start + r));
+                chks[c].set(r, vins[c].at(start + r));
               }
               nc.addStr(vin.atStr(vstr, start + r));
             }
@@ -81,7 +81,7 @@ public class Par {
 
           for (int r = 0; r < chunkSize; r++) {
             for (int c = 0; c < chks.length; c++) {
-              chks[c].set0(r, vins[c].at(start + r));
+              chks[c].set(r, vins[c].at(start + r));
             }
           }
         }

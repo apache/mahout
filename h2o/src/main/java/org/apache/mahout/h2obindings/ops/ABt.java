@@ -56,7 +56,7 @@ public class ABt {
             for (int r = 0; r < chunkSize; r++) {
               double v = 0;
               for (int i = 0; i < chks.length; i++) {
-                v += (chks[i].at0(r) * B_vecs[i].at(c));
+                v += (chks[i].atd(r) * B_vecs[i].at(c));
               }
               ncs[c].addNum(v);
             }

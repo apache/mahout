@@ -61,7 +61,7 @@ public class Atx {
         for (int r = 0; r < chunkSize; r++) {
           double d = x.getQuick((int)start + r);
           for (int c = 0; c < chks.length; c++) {
-            atx[c] += (chks[c].at0(r) * d);
+            atx[c] += (chks[c].atd(r) * d);
           }
         }
       }
