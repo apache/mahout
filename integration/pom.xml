@@ -68,11 +68,21 @@
     <!-- own modules -->
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-mrlegacy</artifactId>
+      <artifactId>mahout-hdfs</artifactId>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>mahout-mrlegacy</artifactId>
+      <artifactId>mahout-mr</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>mahout-hdfs</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>mahout-mr</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
