@@ -66,7 +66,7 @@ public class AewScalar {
 
           for (int c = 0; c < chks.length; c++) {
             for (int r = 0; r < chunkSize; r++) {
-              ncs[c].addNum(opfn(op, chks[c].at0(r), s));
+              ncs[c].addNum(opfn(op, chks[c].atd(r), s));
             }
           }
         }

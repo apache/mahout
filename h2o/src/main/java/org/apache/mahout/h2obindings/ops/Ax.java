@@ -18,7 +18,6 @@
 package org.apache.mahout.h2obindings.ops;
 
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.h2obindings.H2OHelper;
 import org.apache.mahout.h2obindings.drm.H2OBCast;
 import org.apache.mahout.h2obindings.drm.H2ODrm;
 
@@ -56,7 +55,7 @@ public class Ax {
           for (int r = 0; r < chunkSize; r++) {
             double v = 0;
             for (int c = 0; c < chks.length; c++) {
-              v += (chks[c].at0(r) * x.getQuick(c));
+              v += (chks[c].atd(r) * x.getQuick(c));
             }
             nc.addNum(v);
           }

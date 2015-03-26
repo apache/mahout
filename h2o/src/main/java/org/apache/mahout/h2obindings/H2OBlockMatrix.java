@@ -68,7 +68,7 @@ public class H2OBlockMatrix extends AbstractMatrix {
 
     for (int c = 0; c < chks.length; c++) {
       for (int r = 0; r < chks[0].len(); r++) {
-        cow.setQuick(r, c, chks[c].at0(r));
+        cow.setQuick(r, c, chks[c].atd(r));
       }
     }
   }
@@ -102,7 +102,7 @@ public class H2OBlockMatrix extends AbstractMatrix {
     if (cow != null) {
       return cow.getQuick(row, col);
     } else {
-      return chks[col].at0(row);
+      return chks[col].atd(row);
     }
   }
 

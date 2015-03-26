@@ -72,7 +72,7 @@ public class AewB {
 
           for (int c = 0; c < chks.length; c++) {
             for (int r = 0; r < chunkSize; r++) {
-              ncs[c].addNum(opfn(op, chks[c].at0(r), B_vecs[c].at(start + r)));
+              ncs[c].addNum(opfn(op, chks[c].atd(r), B_vecs[c].at(start + r)));
             }
           }
         }

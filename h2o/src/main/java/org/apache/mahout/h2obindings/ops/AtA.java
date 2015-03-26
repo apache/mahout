@@ -57,7 +57,7 @@ public class AtA {
             for (long i = 0; i < A_rows; i++) {
               v += (A_vecs[(int)(start + r)].at(i) * A_vecs[c].at(i));
             }
-            chks[c].set0(r, v);
+            chks[c].set(r, v);
           }
         }
       }

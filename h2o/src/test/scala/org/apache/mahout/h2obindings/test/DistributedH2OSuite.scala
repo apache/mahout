@@ -19,7 +19,7 @@ package org.apache.mahout.h2obindings.test
 
 import org.scalatest.Suite
 import org.apache.mahout.h2obindings._
-import org.apache.mahout.test.{DistributedMahoutSuite,MahoutSuite}
+import org.apache.mahout.test.DistributedMahoutSuite
 import org.apache.mahout.math.drm.DistributedContext
 
 trait DistributedH2OSuite extends DistributedMahoutSuite with LoggerConfiguration {
