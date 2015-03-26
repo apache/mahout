@@ -419,7 +419,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>14.0</version>
+        <version>11.0.2</version>
       </dependency>
 
       <dependency>
