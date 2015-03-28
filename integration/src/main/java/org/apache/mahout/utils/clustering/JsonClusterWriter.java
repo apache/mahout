@@ -18,13 +18,14 @@ package org.apache.mahout.utils.clustering;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import com.google.common.collect.Maps;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.classify.WeightedPropertyVectorWritable;
@@ -36,8 +37,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-
 /**
  * Dump cluster info to JSON formatted lines. Heavily inspired by
  * ClusterDumperWriter.java and CSVClusterWriter.java
@@ -48,8 +47,7 @@ public class JsonClusterWriter extends AbstractClusterWriter {
   private final int numTopFeatures;
   private final ObjectMapper jxn;
 
-  private static final Logger log = LoggerFactory
-      .getLogger(JsonClusterWriter.class);
+  private static final Logger log = LoggerFactory.getLogger(JsonClusterWriter.class);
   private static final Pattern VEC_PATTERN = Pattern.compile("\\{|\\:|\\,|\\}");
 
   public JsonClusterWriter(Writer writer,
@@ -67,22 +65,32 @@ public class JsonClusterWriter extends AbstractClusterWriter {
    */
   @Override
   public void write(ClusterWritable clusterWritable) throws IOException {
-    Map<String, Object> res = Maps.newHashMap();
+    Map<String, Object> res = new HashMap<>();
 
     // get top terms
-    List<Object> topTerms = getTopFeaturesList(clusterWritable.getValue()
-        .getCenter(), dictionary, numTopFeatures);
-    res.put("top_terms", topTerms);
+    if (dictionary != null) {
+      List<Object> topTerms = getTopFeaturesList(clusterWritable.getValue()
+          .getCenter(), dictionary, numTopFeatures);
+      res.put("top_terms", topTerms);
+    } else {
+      res.put("top_terms", new ArrayList<>());
+    }
 
     // get human-readable cluster representation
     Cluster cluster = clusterWritable.getValue();
-    Map<String,Object> fmtStr = cluster.asJson(dictionary);
     res.put("cluster_id", cluster.getId());
-    res.put("cluster", fmtStr);
 
-    // get points
-    List<Object> points = getPoints(cluster, dictionary);
-    res.put("points", points);
+    if (dictionary != null) {
+      Map<String,Object> fmtStr = cluster.asJson(dictionary);
+      res.put("cluster", fmtStr);
+
+      // get points
+      List<Object> points = getPoints(cluster, dictionary);
+      res.put("points", points);
+    } else {
+      res.put("cluster", new HashMap<>());
+      res.put("points", new ArrayList<>());
+    }
 
     // write JSON
     Writer writer = getWriter();
@@ -97,7 +105,7 @@ public class JsonClusterWriter extends AbstractClusterWriter {
   public List<Object> getTopFeaturesList(Vector vector, String[] dictionary,
       int numTerms) {
 
-    List<TermIndexWeight> vectorTerms = Lists.newArrayList();
+    List<TermIndexWeight> vectorTerms = new ArrayList<>();
 
     for (Vector.Element elt : vector.nonZeroes()) {
       vectorTerms.add(new TermIndexWeight(elt.index(), elt.get()));
@@ -111,7 +119,7 @@ public class JsonClusterWriter extends AbstractClusterWriter {
       }
     });
 
-    List<Object> topTerms = Lists.newLinkedList();
+    List<Object> topTerms = new ArrayList<>();
 
     for (int i = 0; i < vectorTerms.size() && i < numTerms; i++) {
       int index = vectorTerms.get(i).index;
@@ -120,7 +128,7 @@ public class JsonClusterWriter extends AbstractClusterWriter {
         log.error("Dictionary entry missing for {}", index);
         continue;
       }
-      Map<String, Object> term_entry = Maps.newHashMap();
+      Map<String, Object> term_entry = new HashMap<>();
       term_entry.put(dictTerm, vectorTerms.get(i).weight);
       topTerms.add(term_entry);
     }
@@ -134,13 +142,13 @@ public class JsonClusterWriter extends AbstractClusterWriter {
    * @return List<Object>
    */
   public List<Object> getPoints(Cluster cluster, String[] dictionary) {
-    List<Object> vectorObjs = Lists.newLinkedList();
+    List<Object> vectorObjs = new ArrayList<>();
     List<WeightedPropertyVectorWritable> points = getClusterIdToPoints().get(
         cluster.getId());
 
     if (points != null) {
       for (WeightedPropertyVectorWritable point : points) {
-        Map<String, Object> entry = Maps.newHashMap();
+        Map<String, Object> entry = new HashMap<>();
         Vector theVec = point.getVector();
         if (theVec instanceof NamedVector) {
           entry.put("vector_name", ((NamedVector) theVec).getName());
