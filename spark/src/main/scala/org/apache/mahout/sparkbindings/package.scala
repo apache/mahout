@@ -211,10 +211,11 @@ package object sparkbindings {
     // context specific jars
     val mcjars = jars.filter(j =>
       j.matches(".*mahout-math-\\d.*\\.jar") ||
-          j.matches(".*mahout-math-scala_\\d.*\\.jar") ||
-          j.matches(".*mahout-hdfs-\\d.*\\.jar") ||
-          j.matches(".*mahout-mr-\\d.*\\.jar") ||
-          j.matches(".*mahout-spark_\\d.*\\.jar")
+      j.matches(".*mahout-math-scala_\\d.*\\.jar") ||
+      j.matches(".*mahout-hdfs-\\d.*\\.jar") ||
+      // no need for mapreduce jar in Spark
+      // j.matches(".*mahout-mr-\\d.*\\.jar") ||
+      j.matches(".*mahout-spark_\\d.*\\.jar")
     )
         // Tune out "bad" classifiers
         .filter(n =>
