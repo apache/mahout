@@ -199,14 +199,26 @@
         <version>${project.version}</version>
       </dependency>
       <dependency>
+        <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
-        <artifactId>mahout-math-scala_${scala.compat.version}</artifactId>
         <classifier>tests</classifier>
       </dependency>
 
       <dependency>
         <artifactId>mahout-spark_${scala.compat.version}</artifactId>
+        <groupId>${project.groupId}</groupId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <artifactId>mahout-spark-shell_${scala.compat.version}</artifactId>
+        <groupId>${project.groupId}</groupId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <artifactId>mahout-h2o_${scala.compat.version}</artifactId>
         <groupId>${project.groupId}</groupId>
         <version>${project.version}</version>
       </dependency>
