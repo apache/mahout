@@ -83,7 +83,6 @@ public class JsonClusterWriter extends AbstractClusterWriter {
     if (dictionary != null) {
       Map<String,Object> fmtStr = cluster.asJson(dictionary);
       res.put("cluster", fmtStr);
-
       // get points
       List<Object> points = getPoints(cluster, dictionary);
       res.put("points", points);
