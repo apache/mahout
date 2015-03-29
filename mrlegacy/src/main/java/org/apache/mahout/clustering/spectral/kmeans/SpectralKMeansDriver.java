@@ -43,10 +43,7 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.decomposer.lanczos.LanczosState;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix;
-import org.apache.mahout.math.hadoop.decomposer.DistributedLanczosSolver;
-import org.apache.mahout.math.hadoop.decomposer.EigenVerificationJob;
 import org.apache.mahout.math.hadoop.stochasticsvd.SSVDSolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +56,6 @@ import com.google.common.collect.Lists;
 public class SpectralKMeansDriver extends AbstractJob {
   private static final Logger log = LoggerFactory.getLogger(SpectralKMeansDriver.class);
 
-  public static final double OVERSHOOTMULTIPLIER = 2.0;
   public static final int REDUCERS = 10;
   public static final int BLOCKHEIGHT = 30000;
   public static final int OVERSAMPLING = 15;
@@ -81,7 +77,6 @@ public class SpectralKMeansDriver extends AbstractJob {
     addOption(DefaultOptionCreator.convergenceOption().create());
     addOption(DefaultOptionCreator.maxIterationsOption().create());
     addOption(DefaultOptionCreator.overwriteOption().create());
-    addFlag("usessvd", "ssvd", "Uses SSVD as the eigensolver. Default is the Lanczos solver.");
     addOption("reduceTasks", "t", "Number of reducers for SSVD", String.valueOf(REDUCERS));
     addOption("outerProdBlockHeight", "oh", "Block height of outer products for SSVD", String.valueOf(BLOCKHEIGHT));
     addOption("oversampling", "p", "Oversampling parameter for SSVD", String.valueOf(OVERSAMPLING));
@@ -106,25 +101,22 @@ public class SpectralKMeansDriver extends AbstractJob {
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
 
     Path tempdir = new Path(getOption("tempDir"));
-    boolean ssvd = parsedArgs.containsKey("--usessvd");
-    if (ssvd) {
-      int reducers = Integer.parseInt(getOption("reduceTasks"));
-      int blockheight = Integer.parseInt(getOption("outerProdBlockHeight"));
-      int oversampling = Integer.parseInt(getOption("oversampling"));
-      int poweriters = Integer.parseInt(getOption("powerIter"));
-      run(conf, input, output, numDims, clusters, measure, convergenceDelta, maxIterations, tempdir, true, reducers,
-          blockheight, oversampling, poweriters);
-    } else {
-      run(conf, input, output, numDims, clusters, measure, convergenceDelta, maxIterations, tempdir, false);
-    }
+
+    int reducers = Integer.parseInt(getOption("reduceTasks"));
+    int blockheight = Integer.parseInt(getOption("outerProdBlockHeight"));
+    int oversampling = Integer.parseInt(getOption("oversampling"));
+    int poweriters = Integer.parseInt(getOption("powerIter"));
+
+    run(conf, input, output, numDims, clusters, measure, convergenceDelta, maxIterations, tempdir, reducers,
+        blockheight, oversampling, poweriters);
 
     return 0;
   }
 
   public static void run(Configuration conf, Path input, Path output, int numDims, int clusters,
-      DistanceMeasure measure, double convergenceDelta, int maxIterations, Path tempDir, boolean ssvd)
+      DistanceMeasure measure, double convergenceDelta, int maxIterations, Path tempDir)
       throws IOException, InterruptedException, ClassNotFoundException {
-    run(conf, input, output, numDims, clusters, measure, convergenceDelta, maxIterations, tempDir, ssvd, REDUCERS,
+    run(conf, input, output, numDims, clusters, measure, convergenceDelta, maxIterations, tempDir, REDUCERS,
         BLOCKHEIGHT, OVERSAMPLING, POWERITERS);
   }
 
@@ -149,8 +141,6 @@ public class SpectralKMeansDriver extends AbstractJob {
    *          the int maximum number of iterations for the k-Means calculations
    * @param tempDir
    *          Temporary directory for intermediate calculations
-   * @param ssvd
-   *          Flag to indicate the eigensolver to use
    * @param numReducers
    *          Number of reducers
    * @param blockHeight
@@ -158,7 +148,7 @@ public class SpectralKMeansDriver extends AbstractJob {
    * @param poweriters
    */
   public static void run(Configuration conf, Path input, Path output, int numDims, int clusters,
-      DistanceMeasure measure, double convergenceDelta, int maxIterations, Path tempDir, boolean ssvd, int numReducers,
+      DistanceMeasure measure, double convergenceDelta, int maxIterations, Path tempDir, int numReducers,
       int blockHeight, int oversampling, int poweriters) throws IOException, InterruptedException,
       ClassNotFoundException {
 
@@ -188,46 +178,21 @@ public class SpectralKMeansDriver extends AbstractJob {
 
     Path data;
 
-    if (ssvd) {
-      // SSVD requires an array of Paths to function. So we pass in an array of length one
-      Path[] LPath = new Path[1];
-      LPath[0] = L.getRowPath();
+    // SSVD requires an array of Paths to function. So we pass in an array of length one
+    Path[] LPath = new Path[1];
+    LPath[0] = L.getRowPath();
 
-      Path SSVDout = new Path(outputCalc, "SSVD");
+    Path SSVDout = new Path(outputCalc, "SSVD");
 
-      SSVDSolver solveIt = new SSVDSolver(depConf, LPath, SSVDout, blockHeight, clusters, oversampling, numReducers);
+    SSVDSolver solveIt = new SSVDSolver(depConf, LPath, SSVDout, blockHeight, clusters, oversampling, numReducers);
 
-      solveIt.setComputeV(false);
-      solveIt.setComputeU(true);
-      solveIt.setOverwrite(true);
-      solveIt.setQ(poweriters);
-      // solveIt.setBroadcast(false);
-      solveIt.run();
-      data = new Path(solveIt.getUPath());
-    } else {
-      // Perform eigen-decomposition using LanczosSolver
-      // since some of the eigen-output is spurious and will be eliminated
-      // upon verification, we have to aim to overshoot and then discard
-      // unnecessary vectors later
-      int overshoot = Math.min((int) (clusters * OVERSHOOTMULTIPLIER), numDims);
-      DistributedLanczosSolver solver = new DistributedLanczosSolver();
-      LanczosState state = new LanczosState(L, overshoot, DistributedLanczosSolver.getInitialVector(L));
-      Path lanczosSeqFiles = new Path(outputCalc, "eigenvectors");
-
-      solver.runJob(conf, state, overshoot, true, lanczosSeqFiles.toString());
-
-      // perform a verification
-      EigenVerificationJob verifier = new EigenVerificationJob();
-      Path verifiedEigensPath = new Path(outputCalc, "eigenverifier");
-      verifier.runJob(conf, lanczosSeqFiles, L.getRowPath(), verifiedEigensPath, true, 1.0, clusters);
-
-      Path cleanedEigens = verifier.getCleanedEigensPath();
-      DistributedRowMatrix W = new DistributedRowMatrix(cleanedEigens, new Path(cleanedEigens, "tmp"), clusters,
-          numDims);
-      W.setConf(depConf);
-      DistributedRowMatrix Wtrans = W.transpose();
-      data = Wtrans.getRowPath();
-    }
+    solveIt.setComputeV(false);
+    solveIt.setComputeU(true);
+    solveIt.setOverwrite(true);
+    solveIt.setQ(poweriters);
+    // solveIt.setBroadcast(false);
+    solveIt.run();
+    data = new Path(solveIt.getUPath());
 
     // Normalize the rows of Wt to unit length
     // normalize is important because it reduces the occurrence of two unique clusters combining into one
