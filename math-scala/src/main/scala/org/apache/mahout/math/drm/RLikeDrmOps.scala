@@ -133,11 +133,7 @@ object RLikeDrmOps {
   implicit def rlikeOps2Drm[K: ClassTag](ops: RLikeDrmOps[K]): DrmLike[K] = ops.drm
 
   implicit def ops2Drm[K: ClassTag](ops: DrmLikeOps[K]): DrmLike[K] = ops.drm
-
-  // Removed in move to 1.2.1 PR #74 https://github.com/apache/mahout/pull/74/files
-  // Not sure why.
-  // implicit def cp2cpops[K: ClassTag](cp: CheckpointedDrm[K]): CheckpointedOps[K] = new CheckpointedOps(cp)
-
+  
   /**
    * This is probably dangerous since it triggers implicit checkpointing with default storage level
    * setting.
